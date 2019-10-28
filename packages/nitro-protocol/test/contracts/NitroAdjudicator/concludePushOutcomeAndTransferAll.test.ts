@@ -12,7 +12,7 @@ import AssetHolderArtifact2 from '../../../build/contracts/TESTAssetHolder2.json
 import NitroAdjudicatorArtifact from '../../../build/contracts/TESTNitroAdjudicator.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {hashChannelStorage} from '../../../src/contract/channel-storage';
-import {Allocation, AllocationAssetOutcome} from '../../../src/contract/outcome';
+import {AllocationAssetOutcome} from '../../../src/contract/outcome';
 import {State} from '../../../src/contract/state';
 import {concludePushOutcomeAndTransferAllArgs} from '../../../src/contract/transaction-creators/force-move';
 import {CHANNEL_FINALIZED} from '../../../src/contract/transaction-creators/revert-reasons';
@@ -27,6 +27,8 @@ import {
   setupContracts,
   signStates,
   resetMultipleHoldings,
+  computeOutcome,
+  assetTransferredEventsFromPayouts,
 } from '../../test-helpers';
 
 const provider = getTestProvider();
@@ -127,23 +129,8 @@ describe('concludePushOutcomeAndTransferAll', () => {
       // set holdings on multiple asset holders
       resetMultipleHoldings(heldBefore, [AssetHolder1, AssetHolder2]);
 
-      // TODO replace with computeOutcome(outcomeShortHand)
-      // compute the outcome. // TODO factor this into a helper function
-      const outcome: AllocationAssetOutcome[] = [];
-      Object.keys(outcomeShortHand).forEach(assetHolder => {
-        const allocation: Allocation = [];
-        Object.keys(outcomeShortHand[assetHolder]).forEach(destination =>
-          allocation.push({
-            destination,
-            amount: outcomeShortHand[assetHolder][destination],
-          })
-        );
-        const assetOutcome: AllocationAssetOutcome = {
-          assetHolderAddress: assetHolder,
-          allocation,
-        }; // TODO handle gurantee outcomes
-        outcome.push(assetOutcome);
-      });
+      // compute the outcome.
+      const outcome: AllocationAssetOutcome[] = computeOutcome(outcomeShortHand);
 
       // construct states
       const states: State[] = [];
@@ -219,7 +206,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
         });
 
         // compile event expectations
-        const expectedEvents = [];
+        let expectedEvents = [];
 
         // add Conclude event to expectations
         expectedEvents.push({
@@ -228,19 +215,11 @@ describe('concludePushOutcomeAndTransferAll', () => {
           values: {channelId},
         });
 
-        // TODO replace with assetTransferredEventsFromPayouts.each(event => expectedEvents.push(event));
         // add AssetTransferred events to expectations
         Object.keys(payouts).forEach(assetHolder => {
-          const singleAssetPayouts = payouts[assetHolder];
-          Object.keys(singleAssetPayouts).forEach(destination => {
-            if (singleAssetPayouts[destination] && singleAssetPayouts[destination].gt(0)) {
-              expectedEvents.push({
-                contract: assetHolder,
-                name: 'AssetTransferred',
-                values: {destination, amount: singleAssetPayouts[destination]},
-              });
-            }
-          });
+          expectedEvents = expectedEvents.concat(
+            assetTransferredEventsFromPayouts(payouts[assetHolder], assetHolder)
+          );
         });
 
         // check that each expectedEvent is contained as a subset of the properies of each *corresponding* event: i.e. the order matters!

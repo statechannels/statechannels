@@ -19,6 +19,7 @@ import {
   Guarantee,
   hashAssetOutcome,
   Outcome,
+  AllocationAssetOutcome,
 } from '../src/contract/outcome';
 import {hashState, State} from '../src/contract/state';
 
@@ -258,4 +259,38 @@ export function resetMultipleHoldings(multipleHoldings: object, contractsArray: 
       });
     });
   });
+}
+
+// computes an outcome from a shorthand description
+export function computeOutcome(outcomeShortHand: object): AllocationAssetOutcome[] {
+  const outcome: AllocationAssetOutcome[] = [];
+  Object.keys(outcomeShortHand).forEach(assetHolder => {
+    const allocation: Allocation = [];
+    Object.keys(outcomeShortHand[assetHolder]).forEach(destination =>
+      allocation.push({
+        destination,
+        amount: outcomeShortHand[assetHolder][destination],
+      })
+    );
+    const assetOutcome: AllocationAssetOutcome = {
+      assetHolderAddress: assetHolder,
+      allocation,
+    }; // TODO handle gurantee outcomes
+    outcome.push(assetOutcome);
+  });
+  return outcome;
+}
+
+export function assetTransferredEventsFromPayouts(singleAssetPayouts: object, assetHolder: string) {
+  const assetTransferredEvents = [];
+  Object.keys(singleAssetPayouts).forEach(destination => {
+    if (singleAssetPayouts[destination] && singleAssetPayouts[destination].gt(0)) {
+      assetTransferredEvents.push({
+        contract: assetHolder,
+        name: 'AssetTransferred',
+        values: {destination, amount: singleAssetPayouts[destination]},
+      });
+    }
+  });
+  return assetTransferredEvents;
 }
