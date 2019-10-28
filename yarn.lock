@@ -2715,6 +2715,14 @@
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.14.0.tgz#9fb3a3cf3132328151f353de4632e01e52102bea"
   integrity sha512-9NET910DNaIPngYnLLPeg+Ogzqsi9uM4mSboU5y6p8S5DzMTVEsJZrawi+BoDNUVBa2DhJqQYUFvMDfgU062LQ==
 
+"@statechannels/channel-provider@0.0.2-rc0":
+  version "0.0.2-rc0"
+  resolved "https://registry.yarnpkg.com/@statechannels/channel-provider/-/channel-provider-0.0.2-rc0.tgz#62665138b3a22266a04359b9514fdc09a056b28a"
+  integrity sha512-yHcbehhyIP0wbLHIjPmsUc8L5rVp50GjdtX/HE/U3jZHzLaJGaEVLpPhXLBZpr+Y4SS2jaG/KcmWi3PeZn3a5g==
+  dependencies:
+    debug "4.1.1"
+    eventemitter3 "4.0.0"
+
 "@storybook/addon-actions@5.2.1":
   version "5.2.1"
   resolved "https://registry.yarnpkg.com/@storybook/addon-actions/-/addon-actions-5.2.1.tgz#2096e7f938b289be48af6f0adfd620997e7a420c"
