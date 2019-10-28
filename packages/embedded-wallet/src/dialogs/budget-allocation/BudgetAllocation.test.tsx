@@ -77,7 +77,7 @@ describe('Dialogs - BudgetAllocation', () => {
     expect(sliderElement.prop('step')).toEqual(0.01);
     expect(sliderElement.prop('unit')).toEqual('ETH');
     expect(allowButton.exists()).toEqual(true);
-    expect(allowButton.prop('label')).toEqual('Allow');
+    expect(allowButton.prop('label')).toEqual('Allow 0.2 ETH');
     expect(rejectButton.exists()).toEqual(true);
     expect(rejectButton.prop('label')).toEqual('Reject');
   });
