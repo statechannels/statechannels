@@ -4,7 +4,8 @@
 @import "./styles/layout";
 @import "./styles/typography";
 @import "./styles/responsive";
-@import url("https://fonts.googleapis.com/css?family=Nunito+Sans&display=swap");
+@import url('https://fonts.googleapis.com/css?family=Nunito:400,700&display=swap');
+
 /*
   Global App CSS
   ----------------------
@@ -18,6 +19,7 @@
 
 html {
   font-family: "Nunito Sans", sans-serif;
+  font-weight: 400;
   font-size: 18px;
   box-sizing: border-box;
   -webkit-font-smoothing: antialiased;

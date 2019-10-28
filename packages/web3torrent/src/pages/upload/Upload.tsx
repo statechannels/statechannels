@@ -7,7 +7,9 @@ import './Upload.scss';
 const Upload: React.FC<RouteComponentProps> = ({history}) => {
   return (
     <section className="section fill">
-      <div className="jumbotron-upload"></div>
+      <div className="jumbotron-upload">
+        <h1>Upload a File</h1>
+      </div>
       <div className="upload-action-bar">
         <label htmlFor="file">Select file to upload</label>
         <input
