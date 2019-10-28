@@ -261,6 +261,21 @@ export function resetMultipleHoldings(multipleHoldings: object, contractsArray: 
   });
 }
 
+// Check the holdings defined in the multipleHoldings object. Requires an array of the relevant contracts to be passed in.
+export function checkMultipleHoldings(multipleHoldings: object, contractsArray: Contract[]) {
+  Object.keys(multipleHoldings).forEach(assetHolder => {
+    const holdings = multipleHoldings[assetHolder];
+    Object.keys(holdings).forEach(async destination => {
+      const amount = holdings[destination];
+      contractsArray.forEach(async contract => {
+        if (contract.address === assetHolder) {
+          expect((await contract.holdings(destination)).eq(amount)).toBe(true);
+        }
+      });
+    });
+  });
+}
+
 // computes an outcome from a shorthand description
 export function computeOutcome(outcomeShortHand: object): AllocationAssetOutcome[] {
   const outcome: AllocationAssetOutcome[] = [];

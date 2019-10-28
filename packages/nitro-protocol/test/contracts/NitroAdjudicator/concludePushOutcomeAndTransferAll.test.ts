@@ -30,6 +30,7 @@ import {
   computeOutcome,
   assetTransferredEventsFromPayouts,
   compileEventsFromLogs,
+  checkMultipleHoldings,
 } from '../../test-helpers';
 
 const provider = getTestProvider();
@@ -210,18 +211,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
         expect(events).toMatchObject(expectedEvents);
 
         // check new holdings on each AssetHolder
-        Object.keys(heldAfter).forEach(assetHolder => {
-          const heldAfterSingleAsset = heldAfter[assetHolder];
-          Object.keys(heldAfterSingleAsset).forEach(async destination => {
-            const amount = heldAfterSingleAsset[destination];
-            if (assetHolder === 'ETH') {
-              expect(await AssetHolder1.holdings(destination)).toEqual(amount);
-            }
-            if (assetHolder === 'TOK') {
-              expect(await AssetHolder2.holdings(destination)).toEqual(amount);
-            }
-          });
-        });
+        checkMultipleHoldings(heldAfter, [AssetHolder1, AssetHolder2]);
 
         // check new assetOutcomeHash on each AssetHolder
         Object.keys(newOutcome).forEach(async assetHolder => {
