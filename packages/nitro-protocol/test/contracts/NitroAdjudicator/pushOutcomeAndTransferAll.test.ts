@@ -12,7 +12,6 @@ import {Channel, getChannelId} from '../../../src/contract/channel';
 import {AllocationAssetOutcome, encodeOutcome} from '../../../src/contract/outcome';
 import {hashState, State} from '../../../src/contract/state';
 import {
-  allocationToParams,
   randomChannelId,
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
@@ -21,6 +20,7 @@ import {
   assetTransferredEventsFromPayouts,
   compileEventsFromLogs,
   checkMultipleHoldings,
+  checkMultipleAssetOutcomeHashes,
 } from '../../test-helpers';
 import {finalizedOutcomeHash, getTestProvider, setupContracts} from '../../test-helpers';
 
@@ -171,28 +171,8 @@ describe('pushOutcomeAndTransferAll', () => {
         checkMultipleHoldings(heldAfter, [AssetHolder1, AssetHolder2]);
 
         // check new assetOutcomeHash on each AssetHolder
-        Object.keys(newOutcome).forEach(async assetHolder => {
-          const newOutcomeSingleAsset = newOutcome[assetHolder];
-          const allocationAfter = [];
-          Object.keys(newOutcomeSingleAsset).forEach(destination => {
-            const amount = newOutcomeSingleAsset[destination];
-            allocationAfter.push({destination, amount});
-          });
-          const [, expectedNewOutcomeHash] = allocationToParams(allocationAfter);
-          if (assetHolder === AssetHolder1.address) {
-            expect(await AssetHolder1.assetOutcomeHashes(channelId)).toEqual(
-              expectedNewOutcomeHash
-            );
-          }
-          if (assetHolder === AssetHolder2.address) {
-            expect(await AssetHolder2.assetOutcomeHashes(channelId)).toEqual(
-              expectedNewOutcomeHash
-            );
-          }
-        });
+        checkMultipleAssetOutcomeHashes(channelId, newOutcome, [AssetHolder1, AssetHolder2]);
       }
     }
   );
 });
-
-// TODO also check for updates to the asset holders' holdings storage mapping

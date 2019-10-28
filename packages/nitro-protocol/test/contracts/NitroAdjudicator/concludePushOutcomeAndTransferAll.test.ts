@@ -17,7 +17,6 @@ import {State} from '../../../src/contract/state';
 import {concludePushOutcomeAndTransferAllArgs} from '../../../src/contract/transaction-creators/force-move';
 import {CHANNEL_FINALIZED} from '../../../src/contract/transaction-creators/revert-reasons';
 import {
-  allocationToParams,
   finalizedOutcomeHash,
   getNetworkMap,
   getTestProvider,
@@ -31,6 +30,7 @@ import {
   assetTransferredEventsFromPayouts,
   compileEventsFromLogs,
   checkMultipleHoldings,
+  checkMultipleAssetOutcomeHashes,
 } from '../../test-helpers';
 
 const provider = getTestProvider();
@@ -214,25 +214,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
         checkMultipleHoldings(heldAfter, [AssetHolder1, AssetHolder2]);
 
         // check new assetOutcomeHash on each AssetHolder
-        Object.keys(newOutcome).forEach(async assetHolder => {
-          const newOutcomeSingleAsset = newOutcome[assetHolder];
-          const allocationAfter = [];
-          Object.keys(newOutcomeSingleAsset).forEach(destination => {
-            const amount = newOutcomeSingleAsset[destination];
-            allocationAfter.push({destination, amount});
-          });
-          const [, expectedNewOutcomeHash] = allocationToParams(allocationAfter);
-          if (assetHolder === 'ETH') {
-            expect(await AssetHolder1.assetOutcomeHashes(channelId)).toEqual(
-              expectedNewOutcomeHash
-            );
-          }
-          if (assetHolder === 'TOK') {
-            expect(await AssetHolder2.assetOutcomeHashes(channelId)).toEqual(
-              expectedNewOutcomeHash
-            );
-          }
-        });
+        checkMultipleAssetOutcomeHashes(channelId, newOutcome, [AssetHolder1, AssetHolder2]);
       }
     }
   );

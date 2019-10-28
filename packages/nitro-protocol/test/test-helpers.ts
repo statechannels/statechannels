@@ -276,6 +276,28 @@ export function checkMultipleHoldings(multipleHoldings: object, contractsArray: 
   });
 }
 
+// Check the assetOutcomeHash on multiple asset Hoders defined in the multipleHoldings object. Requires an array of the relevant contracts to be passed in.
+export function checkMultipleAssetOutcomeHashes(
+  channelId: string,
+  outcome: object,
+  contractsArray: Contract[]
+) {
+  Object.keys(outcome).forEach(assetHolder => {
+    const assetOutcome = outcome[assetHolder];
+    const allocationAfter = [];
+    Object.keys(assetOutcome).forEach(destination => {
+      const amount = assetOutcome[destination];
+      allocationAfter.push({destination, amount});
+    });
+    const [, expectedNewAssetOutcomeHash] = allocationToParams(allocationAfter);
+    contractsArray.forEach(async contract => {
+      if (contract.address === assetHolder) {
+        expect((await contract.assetOutcomeHashes(channelId)).toEqual(expectedNewAssetOutcomeHash));
+      }
+    });
+  });
+}
+
 // computes an outcome from a shorthand description
 export function computeOutcome(outcomeShortHand: object): AllocationAssetOutcome[] {
   const outcome: AllocationAssetOutcome[] = [];
