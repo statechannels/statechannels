@@ -1,4 +1,4 @@
-import {SignedCommitment} from "../domain";
+import {SignedCommitment, signCommitment2} from "../domain";
 import {WalletAction} from "../redux/actions";
 import {FundingStrategy, ProtocolLocator, EmbeddedProtocol} from "./index";
 import {ProcessProtocol} from ".";
@@ -6,6 +6,7 @@ import {ActionConstructor} from "../redux/utils";
 import {Commitments} from "../redux/channel-store";
 import {CloseLedgerChannel} from "../redux/protocols/actions";
 import {SignedState} from "@statechannels/nitro-protocol/src";
+import {convertStateToCommitment} from "../utils/nitro-converter";
 
 export interface MultipleRelayableActions {
   type: "WALLET.MULTIPLE_RELAYABLE_ACTIONS";
@@ -95,6 +96,7 @@ export const commitmentReceived: ActionConstructor<CommitmentReceived> = p => ({
   type: "WALLET.COMMON.COMMITMENT_RECEIVED"
 });
 
+// TODO: This should be deleted once all protocols are updated to use SignedStates
 export const commitmentsReceived = (p: {
   protocolLocator: ProtocolLocator;
   signedCommitments: Commitments;
@@ -102,6 +104,16 @@ export const commitmentsReceived = (p: {
 }): CommitmentsReceived => ({
   ...p,
   signedStates: p.signedCommitments.map(sc => sc.signedState),
+  type: "WALLET.COMMON.COMMITMENTS_RECEIVED"
+});
+
+// TODO: This shouldn't require a private key once all protocols are updated to use signedStates
+export const signedStatesReceived = (
+  p: {protocolLocator: ProtocolLocator; signedStates: SignedState[]; processId: string},
+  privateKey: string
+): CommitmentsReceived => ({
+  ...p,
+  signedCommitments: p.signedStates.map(ss => signCommitment2(convertStateToCommitment(ss.state), privateKey)),
   type: "WALLET.COMMON.COMMITMENTS_RECEIVED"
 });
 
