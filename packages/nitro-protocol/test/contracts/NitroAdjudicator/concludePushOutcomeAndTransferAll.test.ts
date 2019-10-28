@@ -158,7 +158,8 @@ describe('concludePushOutcomeAndTransferAll', () => {
 
       // form transaction
       const tx = NitroAdjudicator.concludePushOutcomeAndTransferAll(
-        ...concludePushOutcomeAndTransferAllArgs(states, sigs, whoSignedWhat)
+        ...concludePushOutcomeAndTransferAllArgs(states, sigs, whoSignedWhat),
+        {gasLimit: 3000000}
       );
 
       // switch on overall test expectation
