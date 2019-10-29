@@ -1,6 +1,8 @@
-| Max       | Width                | Table          |              |
+| Max       | Width                | Table          | Width        |
 | --------- | -------------------- | -------------- | ------------ |
 | Open(n,S) | forceMove(m,t,s,p,S) | C(m,t+exp,s,p) | valid(s->s') |
+
+This is the maxiumum width of a nicely formatted table in a medium post.
 
 # Intro
 
@@ -130,16 +132,17 @@ In practice, this transition happens implicitly: when in a `Challenge` state, th
 We record the allowed state transitions from the original ForceMove protocol in the following table.
 By default, any (state, action) pair not listed below does not change the state.
 
-| State            | Action           | Next state       | Requiremeents   |
-| ---------------- | ---------------- | ---------------- | --------------- |
-| Open(n)          | forceMove(m,s,p) | Challenge(m,s,p) | m >= n          |
-| Challenge(n,s,p) | respond(s')      | Open(n+1)        | s -> s'         |
-| Challenge(n,s,p) | respondAlt(n+1)  | Open(n+1)        |                 |
-| Challenge(n,s,p) | refute(m,s')     | Open(n)          | m > n           |
-|                  |                  |                  | signer(p') == p |
-| Challenge(n,s,p) | timeout(S)       | Closed(s)        | matches(S)      |
+| State       | Action           | Next state  | Requiremeents   |
+| ----------- | ---------------- | ----------- | --------------- |
+| Open(n)     | forceMove(m,s,p) | Chal(m,s,p) | m >= n          |
+| Chal(n,s,p) | respond(s')      | Open(n+1)   | s -> s'         |
+| Chal(n,s,p) | respondAlt(n+1)  | Open(n+1)   |                 |
+| Chal(n,s,p) | refute(m,s')     | Open(n)     | m > n           |
+|             |                  |             | signer(p') == p |
+| Chal(n,s,p) | timeout(S)       | Closed(s)   | matches(S)      |
 
 Here, `matches(S)` indicates that the current on-chain channel state is `S`.
+`Chal` is used as a short-hand for `Challenge`.
 In other words, applying `timeout` to a `Challenge` state only has an effect if the state has not changed since the adjudicator timer has started.
 Applying `timeout` to an open state has no effect, as the transition is not listed in this table.
 
@@ -161,7 +164,8 @@ forceMove(n,s,Alice) >> Open(m) == Challenge(n,s,Alice)
 
 However, in the context of the Ethereum blockchain, this is not sufficient.
 Alice applies `forceMove` by calling a state-modifying function on an Ethereum smart contract in some transaction.
-The transaction is not recorded immediately, and once Bob sees her transaction, he might attempt to front-run her transaction with a different action.
+The transaction is not recorded immediately, and once Bob sees her transaction, he might attempt to front-run her transaction with a different action in his own transaction.
+If his transaction is recorded first, it might change the state in such a way that Alice's transaction reverts.
 
 # Gas-optimization
 
@@ -170,16 +174,38 @@ A hash of the entire channel state is stored in a single `bytes32` slot on-chain
 Therefore, when applying an action, the participant must provide the current state as a part of the calldata.
 If the hash of the provide state does not match the stored value, the action has no effect.
 
-| State            | Action             | NextState        | Requirements |
-| ---------------- | ------------------ | ---------------- | ------------ |
-| Open(n)          | forceMove(m,s,p,S) | Challenge(m,s,p) | matches(S)   |
-|                  |                    |                  | m >= n       |
-| Challenge(n,s,p) | refute(m,s',S)     | Open(n)          | matches(S)   |
-|                  |                    |                  | m > n        |
-|                  |                    |                  | p == sig(s') |
-| Challenge(n,s,p) | respond(s',S)      | Open(n+1)        | matches(S)   |
-|                  |                    |                  | s->s'        |
-| Open(n)          | respondAlt(S)      | Open(n+1)        | matches(S)   |
+| State       | Action             | NextState   | Requirements |
+| ----------- | ------------------ | ----------- | ------------ |
+| Open(n)     | forceMove(m,s,p,S) | Chal(m,s,p) | matches(S)   |
+|             |                    |             | m >= n       |
+| Chal(n,s,p) | refute(m,s',S)     | Open(n)     | matches(S)   |
+|             |                    |             | m > n        |
+|             |                    |             | p == sig(s') |
+| Chal(n,s,p) | respond(s',S)      | Open(n+1)   | matches(S)   |
+|             |                    |             | s->s'        |
+| Open(n)     | respondAlt(S)      | Open(n+1)   | matches(S)   |
+
+```
+╔═════════════╦════════════════════╦═════════════╦══════════════╗
+║ State       ║ Action             ║ NextState   ║ Requirements ║
+╠═════════════╬════════════════════╬═════════════╬══════════════╣
+║ Open(n)     ║ forceMove(m,s,p,S) ║ Chal(m,s,p) ║ matches(S)   ║
+║             ║                    ║             ╠══════════════╣
+║             ║                    ║             ║ m >= n       ║
+╠═════════════╬════════════════════╬═════════════╬══════════════╣
+║ Chal(n,s,p) ║ refute(m,s',S)     ║ Open(n)     ║ matches(S)   ║
+║             ║                    ║             ╠══════════════╣
+║             ║                    ║             ║ m > n        ║
+║             ║                    ║             ╠══════════════╣
+║             ║                    ║             ║ p == sig(s') ║
+╠═════════════╬════════════════════╬═════════════╬══════════════╣
+║ Chal(n,s,p) ║ respond(s',S)      ║ Open(n+1)   ║ matches(S)   ║
+║             ║                    ║             ╠══════════════╣
+║             ║                    ║             ║ s->s'        ║
+╠═════════════╬════════════════════╬═════════════╬══════════════╣
+║ Open(n)     ║ respondAlt(S)      ║ Open(n+1)   ║ matches(S)   ║
+╚═════════════╩════════════════════╩═════════════╩══════════════╝
+```
 
 ```
 function matches(S) {
@@ -223,19 +249,19 @@ Moreover, there's no reason why it can't be applied to an open state to increase
 Thus, we replaced it with the `checkpoint` action.
 This allows one to only care about the latest supported state, and it can be used to protect one's assets before going offline for a period of time.
 
-| State            | Action             | NextState        | Requirements |
-| ---------------- | ------------------ | ---------------- | ------------ |
-| Open(n)          | forceMove(m,s,p,S) | Challenge(m,s,p) | matches(S)   |
-|                  |                    |                  | m >= n       |
-| Open(n,S)        | checkpoint(m,S)    | Open(m))         | matches(S)   |
-|                  |                    |                  | m > n        |
-| Challenge(n,s,p) | checkpoint(m,S)    | Open(m)          | matches(S)   |
-|                  |                    |                  | m > n        |
-| Challenge(n,s,p) | refute(m,s',S)     | Open(n)          | matches(S)   |
-|                  |                    |                  | m > n        |
-|                  |                    |                  | p == sig(s') |
-| Challenge(n,s,p) | respond(s',S)      | Open(n+1)        | matches(S)   |
-|                  |                    |                  | s->s'        |
+| State       | Action             | NextState   | Requirements |
+| ----------- | ------------------ | ----------- | ------------ |
+| Open(n)     | forceMove(m,s,p,S) | Chal(m,s,p) | matches(S)   |
+|             |                    |             | m >= n       |
+| Open(n,S)   | checkpoint(m,S)    | Open(m))    | matches(S)   |
+|             |                    |             | m > n        |
+| Chal(n,s,p) | checkpoint(m,S)    | Open(m)     | matches(S)   |
+|             |                    |             | m > n        |
+| Chal(n,s,p) | refute(m,s',S)     | Open(n)     | matches(S)   |
+|             |                    |             | m > n        |
+|             |                    |             | p == sig(s') |
+| Chal(n,s,p) | respond(s',S)      | Open(n+1)   | matches(S)   |
+|             |                    |             | s->s'        |
 
 This offers Alice a new strategy, applying `checkpoint(n, t, S)`, regardless of the current state.
 
@@ -264,16 +290,16 @@ No matter how the challenge is cleared, Bob can repeat this, blocking the channe
 
 By exposing the `turnNumRecord` using a technique inspired from [here](https://medium.com/@novablitz/storing-structs-is-costing-you-gas-774da988895e), the participant no longer has to provide the current channel state for the `forceMove` or `checkpoint` actions.
 
-| State            | Action           | NextState        | Requirements |
-| ---------------- | ---------------- | ---------------- | ------------ |
-| Open(n)          | forceMove(m,s,p) | Challenge(m,s,p) | m >= n       |
-| Open(n,S)        | checkpoint(m)    | Open(m)          | m > n        |
-| Challenge(n,s,p) | checkpoint(m)    | Open(m)          | m > n        |
-| Challenge(n,s,p) | refute(m,s',S)   | Open(n)          | matches(S)   |
-|                  |                  |                  | m > n        |
-|                  |                  |                  | p == sig(s') |
-| Challenge(n,s,p) | respond(s',S)    | Open(n+1)        | matches(S)   |
-|                  |                  |                  | s->s'        |
+| State       | Action           | NextState   | Requirements |
+| ----------- | ---------------- | ----------- | ------------ |
+| Open(n)     | forceMove(m,s,p) | Chal(m,s,p) | m >= n       |
+| Open(n,S)   | checkpoint(m)    | Open(m)     | m > n        |
+| Chal(n,s,p) | checkpoint(m)    | Open(m)     | m > n        |
+| Chal(n,s,p) | refute(m,s',S)   | Open(n)     | matches(S)   |
+|             |                  |             | m > n        |
+|             |                  |             | p == sig(s') |
+| Chal(n,s,p) | respond(s',S)    | Open(n+1)   | matches(S)   |
+|             |                  |             | s->s'        |
 
 In this version of the protocol, the `matches` function is implemented in Solidity as follows.
 
@@ -332,13 +358,13 @@ Prior to writing specs in TLA+, we were more or less aware of the previous attac
 
 This leaves us with the current version of the protocol:
 
-| State            | Action           | NextState        | Requirements |
-| ---------------- | ---------------- | ---------------- | ------------ |
-| Open(n)          | forceMove(m,s,p) | Challenge(m,s,p) | m >= n       |
-| Open(n,S)        | checkpoint(m)    | Open(m))         | m > n        |
-| Challenge(n,s,p) | checkpoint(m)    | Open(m)          | m > n        |
-| Challenge(n,s,p) | respond(s',S)    | Open(n+1)        | matches(S)   |
-|                  |                  |                  | s->s'        |
+| State       | Action           | NextState   | Requirements |
+| ----------- | ---------------- | ----------- | ------------ |
+| Open(n)     | forceMove(m,s,p) | Chal(m,s,p) | m >= n       |
+| Open(n,S)   | checkpoint(m)    | Open(m))    | m > n        |
+| Chal(n,s,p) | checkpoint(m)    | Open(m)     | m > n        |
+| Chal(n,s,p) | respond(s',S)    | Open(n+1)   | matches(S)   |
+|             |                  |             | s->s'        |
 
 With this final protocol, when Alice has a state `s` of turn `n`, she has two strategies to protect her assets.
 
