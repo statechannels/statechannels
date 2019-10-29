@@ -1,28 +1,48 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {RouteComponentProps, useLocation} from 'react-router-dom';
 import {askForFunds} from '../../clients/embedded-wallet-client';
-import {download} from '../../clients/web3torrent-client';
+import {download, getTorrentPeers} from '../../clients/web3torrent-client';
 import {FormButton} from '../../components/form';
 import {TorrentInfo} from '../../components/torrent-info/TorrentInfo';
-import {Status} from '../../types';
+import {TorrentPeers} from '../../library/types';
+import {IdleStatuses, Status, Torrent} from '../../types';
 import {parseMagnetURL} from '../../utils/magnet';
 import torrentStatusChecker from '../../utils/torrent-status-checker';
 import {useInterval} from '../../utils/useInterval';
-import './Download.scss';
+import './File.scss';
 
-const Download: React.FC<RouteComponentProps> = () => {
+const getTorrentAndPeersData: (
+  setTorrent: React.Dispatch<React.SetStateAction<Torrent>>,
+  setPeers: React.Dispatch<React.SetStateAction<TorrentPeers>>
+) => (torrent: Torrent) => void = (setTorrent, setPeers) => torrent => {
+  const liveTorrent = torrentStatusChecker(torrent, torrent.infoHash);
+  const livePeers = getTorrentPeers(torrent.infoHash);
+  setTorrent(liveTorrent);
+  setPeers(livePeers);
+};
+
+const File: React.FC<RouteComponentProps> = () => {
   const [torrent, setTorrent] = useState(parseMagnetURL(useLocation().hash));
+  const [peers, setPeers] = useState({});
   const [loading, setLoading] = useState(false);
   const [buttonLabel, setButtonLabel] = useState('Start Download');
+  const getLiveData = getTorrentAndPeersData(setTorrent, setPeers);
+
+  useEffect(() => {
+    if (torrent.infoHash) {
+      getLiveData(torrent);
+    }
+    // eslint-disable-next-line
+  }, []);
 
   useInterval(
-    () => setTorrent(torrentStatusChecker(torrent, torrent.infoHash)),
-    torrent.status !== Status.Idle && !torrent.done && !torrent.destroyed ? 1000 : undefined
+    () => getLiveData(torrent),
+    (!IdleStatuses.includes(torrent.status) || !!torrent.createdBy) && 1000
   );
 
   return (
     <section className="section fill download">
-      <TorrentInfo torrent={torrent} />
+      <TorrentInfo torrent={torrent} peers={peers} />
       {torrent.status === Status.Idle ? (
         <>
           <FormButton
@@ -33,6 +53,8 @@ const Download: React.FC<RouteComponentProps> = () => {
               setButtonLabel('Preparing Download...');
               await askForFunds();
               setTorrent({...torrent, ...(await download(torrent.magnetURI))});
+              setLoading(false);
+              setButtonLabel('Start Download');
             }}
           >
             {buttonLabel}
@@ -51,4 +73,4 @@ const Download: React.FC<RouteComponentProps> = () => {
   );
 };
 
-export default Download;
+export default File;

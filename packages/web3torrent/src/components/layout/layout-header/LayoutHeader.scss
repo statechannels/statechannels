@@ -1,4 +1,4 @@
-@import "../../../styles/variables";
+@import '../../../styles/variables';
 
 .header {
   background-color: $c-white;
@@ -9,27 +9,35 @@
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  height: 100%;
-  padding: 50px 0px 10px;
+  height: 76px;
+  margin: 50px auto 0px auto;
+  padding-bottom: 30px;
   border-bottom: 1px solid $c-orange;
 }
 
 .header-logo {
-  background: url("/assets/logo.jpeg") no-repeat;
+  background: url('/assets/logo.svg') no-repeat;
   background-size: 100%;
   width: 196px;
   height: 29px;
+  margin-top: 17px;
 }
-.header-logo-hidden{
+
+.header-logo-hidden {
   height: 1px;
   width: 1px;
   position: absolute;
   overflow: hidden;
   top: -10px;
 }
-.actions-container button {
+
+.actions-container {
   margin-top: 0px;
   margin-bottom: 20px;
+  button {
+    margin-top: 0px;
+    margin-bottom: 0px;
+  }
 }
 
 .logo-container {

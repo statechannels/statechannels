@@ -2,34 +2,34 @@ import {JsonRPCRequest, JsonRPCResponse} from 'web3/providers';
 import {askForFunds, connectToWallet, makeWalletRequest} from './embedded-wallet-client';
 
 describe('Embedded Wallet Client', () => {
-  let request: jest.Mock;
+  let send: jest.Mock;
   let enable: jest.Mock;
 
   beforeEach(() => {
-    request = jest.fn();
+    send = jest.fn();
     enable = jest.fn();
 
-    window.EmbeddedWallet = {request, enable};
+    window.channelProvider = {send, enable};
   });
 
   describe('connectToWallet()', () => {
-    it('should enable the wallet', () => {
-      connectToWallet();
+    it('should enable the wallet', async () => {
+      await connectToWallet();
 
       expect(enable).toHaveBeenCalledWith(process.env.REACT_APP_EMBEDDED_WALLET_URL);
     });
 
-    it('should log an error if something goes wrong', () => {
+    it('should log an error if something goes wrong', async () => {
       const error = new Error(
         'If you are seeing this error in a test, do not worry; we are testing that the wallet client can report that something went wrong'
       );
-      window.EmbeddedWallet.enable = jest.fn(() => {
+      window.channelProvider.enable = jest.fn(async () => {
         throw error;
       });
 
       const logSpy = jest.spyOn(console, 'log');
 
-      connectToWallet();
+      await connectToWallet();
       expect(logSpy).toHaveBeenNthCalledWith(1, 'Error while connecting to wallet');
       expect(logSpy).toHaveBeenNthCalledWith(2, error.stack);
     });
@@ -50,13 +50,11 @@ describe('Embedded Wallet Client', () => {
         result: {foo: true}
       };
 
-      window.EmbeddedWallet.request = jest.fn(async () => mockResponse);
+      window.channelProvider.send = jest.fn(async () => mockResponse.result);
 
       try {
-        const result = await makeWalletRequest(mockRequest);
-        expect(result.id).toEqual(mockRequest.id);
-        expect(result.error).toBeUndefined();
-        expect(result.result).toEqual({foo: true});
+        const result = await makeWalletRequest(mockRequest.method, mockRequest.params);
+        expect(result).toEqual({foo: true});
       } catch {
         fail('This request should not fail');
       }
@@ -74,12 +72,12 @@ describe('Embedded Wallet Client', () => {
         params: ['bar', 'foo', false, 5]
       };
 
-      window.EmbeddedWallet.request = jest.fn(async () => {
+      window.channelProvider.send = jest.fn(async () => {
         throw error;
       });
 
       try {
-        await makeWalletRequest(mockRequest);
+        await makeWalletRequest(mockRequest.method, mockRequest.params);
         fail('This request should not pass');
       } catch (err) {
         expect(err).toEqual(error);
@@ -89,22 +87,20 @@ describe('Embedded Wallet Client', () => {
 
   describe('askForFunds()', () => {
     it('should enable the wallet and send a request', async () => {
-      window.EmbeddedWallet.request = jest.fn(async () => ({
-        jsonrpc: '2.0',
-        id: 123,
-        result: {done: true}
+      window.channelProvider.send = jest.fn(async () => ({
+        done: true
       }));
 
       const response = await askForFunds();
 
       expect(enable).toHaveBeenCalled();
-      expect(window.EmbeddedWallet.request).toHaveBeenCalled();
-      expect(response.result).toEqual({done: true});
+      expect(window.channelProvider.send).toHaveBeenCalled();
+      expect(response).toEqual({done: true});
     });
   });
 
   afterEach(() => {
-    request.mockReset();
+    send.mockReset();
     enable.mockReset();
   });
 });

@@ -55,7 +55,7 @@ describe('<ShareList />', () => {
       .at(0)
       .find('button')
       .simulate('click');
-    expect(props.history.location.pathname).toBe(`${RoutePath.Download}${props.torrents[0].name}`);
+    expect(props.history.location.pathname).toBe(`${RoutePath.File}${props.torrents[0].name}`);
   });
 });
 
