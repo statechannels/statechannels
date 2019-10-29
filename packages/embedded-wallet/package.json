@@ -13,7 +13,7 @@
   "scripts": {
     "precommit": "lint-staged --quiet",
     "start": "react-scripts start",
-    "build": "react-scripts build && cp node_modules/@statechannels/channel-provider/dist/* ./build/",
+    "build": "react-scripts build && cp ../../node_modules/@statechannels/channel-provider/dist/* ./build/",
     "test": "react-scripts test",
     "test:ci": "react-scripts test",
     "test:coverage": "react-scripts test --coverage --watchAll=false",
