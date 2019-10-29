@@ -36,6 +36,10 @@ export interface OutcomeShortHand {
   [assetHolder: string]: AssetOutcomeShortHand;
 }
 
+export interface AddressesLookup {
+  [shorthand: string]: string | undefined;
+}
+
 // functions
 export const getTestProvider = () => {
   if (!process.env.GANACHE_PORT) {
@@ -245,7 +249,10 @@ export async function signStates(
 
 // recursively replaces any key with the value of that key in the addresses object
 // bigNumberify all numbers
-export function replaceAddressesAndBigNumberify(object, addresses) {
+export function replaceAddressesAndBigNumberify(
+  object: AssetOutcomeShortHand | OutcomeShortHand | string,
+  addresses: AddressesLookup
+) {
   const newObject = {};
   Object.keys(object).forEach(key => {
     if (typeof object[key] === 'object') {
