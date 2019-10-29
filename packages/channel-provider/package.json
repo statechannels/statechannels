@@ -1,15 +1,17 @@
 {
   "name": "@statechannels/channel-provider",
   "license": "MIT",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "main": "dist/channel-provider.min.js",
+  "types": "dist/index.d.ts",
   "dependencies": {
     "debug": "4.1.1",
     "eventemitter3": "4.0.0"
   },
   "scripts": {
-    "prepublishOnly": "webpack",
+    "prepublish": "webpack",
     "build": "webpack",
+    "prepare": "yarn build",
     "test": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:ci": "CI=true jest",

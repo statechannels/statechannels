@@ -41,7 +41,7 @@
   },
   "main": "src/index.js",
   "dependencies": {
-    "@statechannels/channel-provider": "^0.0.2-rc0",
+    "@statechannels/channel-provider": "*",
     "bencode": "2.0.1",
     "debug": "4.1.1",
     "eventemitter3": "4.0.0",

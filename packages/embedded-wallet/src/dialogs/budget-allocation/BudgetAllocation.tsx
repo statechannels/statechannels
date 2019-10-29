@@ -4,6 +4,8 @@ import {Redirect, RouteComponentProps} from 'react-router';
 import {OnboardingFlowPaths, useOnboardingFlowContext} from '../../flows';
 import {closeWallet} from '../../message-dispatchers';
 import {Dialog, Slider} from '../../ui';
+import {Expandable} from '../../ui/expandable/Expandable';
+
 const log = debug('wallet:budget-allocation');
 
 const allow = (amountToAllocate: number, useRedirect: Dispatch<SetStateAction<boolean>>) => () => {
@@ -42,14 +44,16 @@ const BudgetAllocation: React.FC<RouteComponentProps> = () => {
       <div>
         Recommended amount: <strong>0.2 ETH</strong> of your send.
       </div>
-      <Slider
-        initialValue={0.2}
-        min={0}
-        max={2}
-        unit="ETH"
-        step={0.01}
-        onChange={setAmountToAllocate}
-      />
+      <Expandable title="Customize">
+        <Slider
+          initialValue={0.2}
+          min={0}
+          max={2}
+          unit="ETH"
+          step={0.01}
+          onChange={setAmountToAllocate}
+        />
+      </Expandable>
     </Dialog>
   );
 };

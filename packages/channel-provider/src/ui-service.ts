@@ -2,7 +2,13 @@ import debug from 'debug';
 
 const log = debug('channel-provider:ui');
 
-const cssStyles = `iframe#wallet {
+export enum UIElementNames {
+  Styles = 'channelProviderUiStyles',
+  Container = 'channelProviderUiContainer',
+  IFrame = 'channelProviderUi'
+}
+
+export const cssStyles = `iframe#${UIElementNames.IFrame} {
   border: 0;
   position: absolute;
   left: 0;
@@ -16,7 +22,7 @@ const cssStyles = `iframe#wallet {
   overflow: hidden;
   z-index: 1;
 }
-div#walletContainer {
+div#${UIElementNames.Container} {
   position: absolute;
   left: 0px;
   top: 0px;
@@ -29,15 +35,15 @@ div#walletContainer {
 
 export class UIService {
   protected get container(): HTMLDivElement | null {
-    return document.querySelector('#channelProviderUiContainer');
+    return document.querySelector(`#${UIElementNames.Container}`);
   }
 
   protected get iframe(): HTMLIFrameElement | null {
-    return document.querySelector('#channelProviderUi');
+    return document.querySelector(`#${UIElementNames.IFrame}`);
   }
 
   protected get styles(): HTMLStyleElement | null {
-    return document.querySelector('#channelProviderUiStyles');
+    return document.querySelector(`#${UIElementNames.Styles}`);
   }
 
   protected url: string = '';
@@ -57,12 +63,12 @@ export class UIService {
       const style = document.createElement('style');
       const container = document.createElement('div');
 
-      style.id = 'channelProviderUiStyles';
+      style.id = UIElementNames.Styles;
       style.innerHTML = cssStyles;
 
-      container.id = 'channelProviderUiContainer';
+      container.id = UIElementNames.Container;
 
-      iframe.id = 'channelProviderUi';
+      iframe.id = UIElementNames.IFrame;
       iframe.src = this.url;
       iframe.onload = () => {
         resolve();

@@ -20,6 +20,7 @@ export const MagnetLinkButton: React.FC<{}> = () => {
         {copied ? 'Great! Copied to your clipboard' : 'Copy to clipboard'}
       </span>
       Share Link
+      <img src="/assets/share-icon.svg" alt="Share Link icon" />
     </a>
   );
 };

@@ -12,7 +12,7 @@ section {
   width: 100%;
   * {
     text-align: center;
-    line-height: 24px
+    line-height: 24px;
   }
   .fileName {
     text-align: left;
@@ -52,15 +52,14 @@ section {
       width: 23%;
       text-align: right;
       color: $c-orange;
-      font-weight: 500;
       margin-top: 0px;
       font-size: 18px;
       position: relative;
-      outline:0;
+      outline: 0;
       max-height: 26px;
 
       .tooltiptext {
-        font-family: "Nunito Sans", sans-serif;
+        font-family: 'Nunito Sans', sans-serif;
         font-size: 14px;
         visibility: hidden;
         width: 140px;
@@ -78,6 +77,11 @@ section {
         opacity: 0;
         transition: opacity 0.3s;
       }
+      
+      img {
+        width: 18px;
+        margin-left: 5px;
+      }
 
       .tooltiptext::after {
         content: '';
@@ -90,7 +94,8 @@ section {
         border-color: transparent transparent $c-orange transparent;
       }
 
-      &:hover .tooltiptext, .tooltiptext.true {
+      &:hover .tooltiptext,
+      .tooltiptext.true {
         visibility: visible;
         opacity: 1;
       }
