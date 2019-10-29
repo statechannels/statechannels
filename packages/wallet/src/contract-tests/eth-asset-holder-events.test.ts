@@ -70,7 +70,7 @@ describe("ETHAssetHolder listener", () => {
     // constructing the commitments for the `conclude` call. Refactor this
     // to not be hardcoded
     const depositAmount = bigNumberify("0x05");
-    // deposit twice so that 0x05 can be transferred to each participant
+    // deposit double so that 0x05 can be transferred to each participant
     await depositContract(provider, channelId, depositAmount.mul(2).toHexString());
 
     await finalizeChannel(channelId, channelNonce, provider, participantA, participantB);
