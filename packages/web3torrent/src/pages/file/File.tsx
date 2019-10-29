@@ -5,7 +5,7 @@ import {download, getTorrentPeers} from '../../clients/web3torrent-client';
 import {FormButton} from '../../components/form';
 import {TorrentInfo} from '../../components/torrent-info/TorrentInfo';
 import {TorrentPeers} from '../../library/types';
-import {IdleStatuses, Status, Torrent} from '../../types';
+import {Status, Torrent} from '../../types';
 import {parseMagnetURL} from '../../utils/magnet';
 import torrentStatusChecker from '../../utils/torrent-status-checker';
 import {useInterval} from '../../utils/useInterval';
@@ -37,7 +37,7 @@ const File: React.FC<RouteComponentProps> = () => {
 
   useInterval(
     () => getLiveData(torrent),
-    (!IdleStatuses.includes(torrent.status) || !!torrent.createdBy) && 1000
+    (torrent.status !== Status.Idle || !!torrent.createdBy) && 1000
   );
 
   return (

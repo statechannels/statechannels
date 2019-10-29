@@ -3,7 +3,7 @@
   "license": "MIT",
   "version": "0.0.1",
   "dependencies": {
-    "@statechannels/channel-provider": "0.0.2-rc0",
+    "@statechannels/channel-provider": "*",
     "debug": "4.1.1",
     "react": "16.9.0",
     "react-dom": "16.9.0",
@@ -13,7 +13,7 @@
   "scripts": {
     "precommit": "lint-staged --quiet",
     "start": "cp node_modules/@statechannels/channel-provider/dist/* ./public/ && react-scripts start",
-    "build": "react-scripts build && cp node_modules/@statechannels/channel-provider/dist/* ./build/",
+    "build": "react-scripts build && cp ../../node_modules/@statechannels/channel-provider/dist/* ./build/",
     "test": "react-scripts test",
     "test:ci": "react-scripts test",
     "test:coverage": "react-scripts test --coverage --watchAll=false",

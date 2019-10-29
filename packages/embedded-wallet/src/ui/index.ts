@@ -1,5 +1,7 @@
 export * from './button/Button';
+export * from './chevron/Chevron';
 export * from './dialog/Dialog';
+export * from './expandable/Expandable';
 export * from './flow-process/FlowProcess';
 export * from './flow-process/FlowStep';
 export * from './icon/Icon';
