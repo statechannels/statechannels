@@ -3,7 +3,7 @@
   "license": "MIT",
   "version": "0.0.1",
   "dependencies": {
-    "@statechannels/channel-provider": "0.0.3",
+    "@statechannels/channel-provider": "*",
     "debug": "4.1.1",
     "react": "16.9.0",
     "react-dom": "16.9.0",
