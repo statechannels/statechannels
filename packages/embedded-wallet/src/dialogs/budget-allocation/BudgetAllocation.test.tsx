@@ -99,7 +99,7 @@ describe('Dialogs - BudgetAllocation', () => {
     expect(expandableElement.prop('title')).toEqual('Customize');
     expect(sliderElement.exists()).toEqual(false);
     expect(allowButton.exists()).toEqual(true);
-    expect(allowButton.prop('label')).toEqual('Allow');
+    expect(allowButton.prop('label')).toEqual('Allow 0.2 ETH');
     expect(rejectButton.exists()).toEqual(true);
     expect(rejectButton.prop('label')).toEqual('Reject');
   });
