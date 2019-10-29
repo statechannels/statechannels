@@ -6,9 +6,11 @@ import AssetHolderArtifact from '../../../build/contracts/TESTAssetHolder.json';
 import {claimAllArgs} from '../../../src/contract/transaction-creators/asset-holder';
 import {
   allocationToParams,
+  AssetOutcomeShortHand,
+  assetTransferredEventsFromPayouts,
+  compileEventsFromLogs,
   getTestProvider,
   guaranteeToParams,
-  newAssetTransferredEvent,
   randomChannelId,
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
@@ -64,6 +66,15 @@ describe('claimAll', () => {
       heldAfter,
       payouts,
       reason,
+    }: {
+      name;
+      heldBefore: AssetOutcomeShortHand;
+      guaranteeDestinations;
+      tOutcomeBefore: AssetOutcomeShortHand;
+      tOutcomeAfter: AssetOutcomeShortHand;
+      heldAfter: AssetOutcomeShortHand;
+      payouts: AssetOutcomeShortHand;
+      reason;
     }) => {
       // compute channelIds
       const tNonce = bigNumberify(id(name))
@@ -78,11 +89,13 @@ describe('claimAll', () => {
       addresses.g = guarantorId;
 
       // transform input data (unpack addresses and BigNumberify amounts)
-      heldBefore = replaceAddressesAndBigNumberify(heldBefore, addresses);
-      tOutcomeBefore = replaceAddressesAndBigNumberify(tOutcomeBefore, addresses);
-      tOutcomeAfter = replaceAddressesAndBigNumberify(tOutcomeAfter, addresses);
-      heldAfter = replaceAddressesAndBigNumberify(heldAfter, addresses);
-      payouts = replaceAddressesAndBigNumberify(payouts, addresses);
+      [heldBefore, tOutcomeBefore, tOutcomeAfter, heldAfter, payouts] = [
+        heldBefore,
+        tOutcomeBefore,
+        tOutcomeAfter,
+        heldAfter,
+        payouts,
+      ].map(object => replaceAddressesAndBigNumberify(object, addresses));
       guaranteeDestinations = guaranteeDestinations.map(x => addresses[x]);
 
       // set holdings (only works on test contract)
@@ -128,19 +141,22 @@ describe('claimAll', () => {
       if (reason) {
         await expectRevert(() => tx, reason);
       } else {
-        const {events}: {events: any[]} = await (await tx).wait();
-        const given = {};
-        events.map(({topics, args}) => (given[topics[1]] = args));
+        // compile event expectations
+        let expectedEvents = [];
 
-        const expected = {};
-        Object.keys(payouts).map(destination => {
-          const payout = payouts[destination];
-          if (payout.gt(0)) {
-            expected[destination] = newAssetTransferredEvent(destination, payout);
-          }
+        // add AssetTransferred events to expectations
+        Object.keys(payouts).forEach(assetHolder => {
+          expectedEvents = assetTransferredEventsFromPayouts(payouts, AssetHolder.address);
         });
 
-        expect(given).toMatchObject(expected);
+        // extract logs
+        const {logs} = await (await tx).wait();
+
+        // compile events from logs
+        const events = compileEventsFromLogs(logs, [AssetHolder]);
+
+        // check that each expectedEvent is contained as a subset of the properies of each *corresponding* event: i.e. the order matters!
+        expect(events).toMatchObject(expectedEvents);
 
         // check new holdings
         Object.keys(heldAfter).forEach(async key =>
