@@ -1,7 +1,7 @@
 import {eventChannel} from "redux-saga";
 import {call, put, select, take} from "redux-saga/effects";
 import {ethers} from "ethers";
-import {getDepositedEvent} from "@statechannels/nitro-protocol";
+import {getAssetTransferredEvent, getDepositedEvent} from "@statechannels/nitro-protocol";
 
 import * as actions from "../actions";
 import {getETHAssetHolderContract} from "../../utils/contract-utils";
@@ -40,7 +40,13 @@ export function* ETHAssetHolderWatcher(provider) {
 function* dispatchEventAction(event: ETHAssetHolderEvent) {
   switch (event.eventType) {
     case ETHAssetHolderEventType.AssetTransferred:
-      // TODO:
+      const assetTransferredEvent = getAssetTransferredEvent(event);
+      yield put(
+        actions.assetTransferredEvent({
+          destination: assetTransferredEvent.destination,
+          amount: assetTransferredEvent.amount
+        })
+      );
       break;
     case ETHAssetHolderEventType.Deposited:
       const depositedEvent = getDepositedEvent(event);
@@ -62,7 +68,13 @@ function* dispatchEventAction(event: ETHAssetHolderEvent) {
 function* dispatchProcessEventAction(event: ETHAssetHolderEvent, processId: string, protocolLocator: ProtocolLocator) {
   switch (event.eventType) {
     case ETHAssetHolderEventType.AssetTransferred:
-      // TODO:
+      const assetTransferredEvent = getAssetTransferredEvent(event);
+      yield put(
+        actions.assetTransferredEvent({
+          destination: assetTransferredEvent.destination,
+          amount: assetTransferredEvent.amount
+        })
+      );
       break;
     case ETHAssetHolderEventType.Deposited:
       const depositedEvent = getDepositedEvent(event);

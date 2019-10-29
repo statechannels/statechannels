@@ -232,7 +232,7 @@ describe("transactions", () => {
       appAttributes: "0x0",
       commitmentCount: 0,
     };
-  
+
     const toCommitment: Commitment = {
       channel,
       allocation: fiveFive,
@@ -242,7 +242,7 @@ describe("transactions", () => {
       appAttributes: "0x0",
       commitmentCount: 1,
     };
-  
+
     const signedFromCommitment = signCommitment2(fromCommitment, participantA.privateKey);
     const signedToCommitment = signCommitment2(toCommitment, participantB.privateKey);
 
