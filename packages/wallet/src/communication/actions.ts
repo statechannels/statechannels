@@ -6,6 +6,7 @@ import {ActionConstructor} from "../redux/utils";
 import {Commitments} from "../redux/channel-store";
 import {CloseLedgerChannel} from "../redux/protocols/actions";
 import {SignedState} from "@statechannels/nitro-protocol";
+
 import {convertStateToCommitment} from "../utils/nitro-converter";
 
 export interface MultipleRelayableActions {
