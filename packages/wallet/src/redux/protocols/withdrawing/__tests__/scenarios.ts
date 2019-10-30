@@ -38,17 +38,9 @@ const channelStatus: ChannelState = {
   channelNonce,
   turnNum: concludeCommitment2.turnNum,
   funded: true,
-  commitments: [
-    {
-      commitment: concludeCommitment1,
-      signature: "0x0",
-      signedState: convertCommitmentToSignedState(concludeCommitment1, privateKey)
-    },
-    {
-      commitment: concludeCommitment2,
-      signature: "0x0",
-      signedState: convertCommitmentToSignedState(concludeCommitment2, privateKey)
-    }
+  signedStates: [
+    convertCommitmentToSignedState(concludeCommitment1, privateKey),
+    convertCommitmentToSignedState(concludeCommitment2, privateKey)
   ]
 };
 
@@ -58,17 +50,9 @@ const channelStore: ChannelStore = {
 
 const notClosedChannelStatus: ChannelState = {
   ...channelStatus,
-  commitments: [
-    {
-      commitment: gameCommitment1,
-      signature: "0x0",
-      signedState: convertCommitmentToSignedState(gameCommitment1, privateKey)
-    },
-    {
-      commitment: gameCommitment2,
-      signature: "0x0",
-      signedState: convertCommitmentToSignedState(gameCommitment2, privateKey)
-    }
+  signedStates: [
+    convertCommitmentToSignedState(gameCommitment1, privateKey),
+    convertCommitmentToSignedState(gameCommitment2, privateKey)
   ],
   turnNum: gameCommitment2.turnNum
 };

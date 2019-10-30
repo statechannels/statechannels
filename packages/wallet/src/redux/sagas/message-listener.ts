@@ -6,7 +6,7 @@ import {eventChannel, buffers} from "redux-saga";
 import * as application from "../protocols/application/reducer";
 import {isRelayableAction} from "../../communication";
 import {responseProvided} from "../protocols/dispute/responder/actions";
-import {getChannelId, Commitment, SignedCommitment} from "../../domain";
+import {getCommitmentChannelId, Commitment, SignedCommitment} from "../../domain";
 import * as selectors from "../selectors";
 import * as contractUtils from "../../utils/contract-utils";
 import {concluded, challengeRequested} from "../protocols/application/actions";
@@ -57,7 +57,7 @@ export function* messageListener() {
         break;
       case incoming.SIGN_COMMITMENT_REQUEST:
         if (action.commitment.turnNum === 0) {
-          yield put(actions.protocol.initializeChannel({channelId: getChannelId(action.commitment)}));
+          yield put(actions.protocol.initializeChannel({channelId: getCommitmentChannelId(action.commitment)}));
         }
         yield validateAgainstLatestCommitment(action.commitment);
 
@@ -70,7 +70,7 @@ export function* messageListener() {
         break;
       case incoming.VALIDATE_COMMITMENT_REQUEST:
         if (action.commitment.turnNum === 0) {
-          yield put(actions.protocol.initializeChannel({channelId: getChannelId(action.commitment)}));
+          yield put(actions.protocol.initializeChannel({channelId: getCommitmentChannelId(action.commitment)}));
         }
         yield validateAgainstLatestCommitment(action.commitment);
 
@@ -105,7 +105,7 @@ export function* messageListener() {
 }
 
 function* validateTransitionForCommitments(signedCommitments: SignedCommitment[]) {
-  const channelId = getChannelId(signedCommitments[0].commitment);
+  const channelId = getCommitmentChannelId(signedCommitments[0].commitment);
 
   const storedCommitmentExists = yield select(selectors.doesACommitmentExistForChannel, channelId);
   if (storedCommitmentExists) {
@@ -129,7 +129,7 @@ function* validateTransitionForCommitments(signedCommitments: SignedCommitment[]
 function* validateAgainstLatestCommitment(incomingCommitment: Commitment) {
   // If we're receiving the first commitment there's nothing stored to validate against
   if (incomingCommitment.turnNum > 0) {
-    const channelId = getChannelId(incomingCommitment);
+    const channelId = getCommitmentChannelId(incomingCommitment);
     const fromCommitment: Commitment = yield select(selectors.getLastCommitmentForChannel, channelId);
     yield validateTransition(fromCommitment, incomingCommitment);
   }

@@ -1,8 +1,8 @@
 import {Commitment as C, CommitmentType as CT} from "fmg-core";
-import {validCommitmentSignature, signCommitment as signCommitmentUtil} from "../signing-utils";
+import {signCommitment as signCommitmentUtil} from "../signing-utils";
 import {channelID} from "fmg-core/lib/channel";
 import {convertCommitmentToSignedState} from "../../utils/nitro-converter";
-import {SignedState} from "@statechannels/nitro-protocol";
+import {SignedState, Signatures} from "@statechannels/nitro-protocol";
 
 export type Commitment = C;
 export const CommitmentType = CT;
@@ -25,12 +25,14 @@ export function signCommitment2(commitment: Commitment, privateKey: string): Sig
   return {commitment, signature: signCommitmentUtil(commitment, privateKey), signedState};
 }
 
-export function hasValidSignature(signedCommitment: SignedCommitment): boolean {
-  const {commitment, signature} = signedCommitment;
-  return validCommitmentSignature(commitment, signature);
+export function hasValidSignature(signedState: SignedState): boolean {
+  const signerAddress = Signatures.getStateSignerAddress(signedState);
+  const {state} = signedState;
+  const {participants} = state.channel;
+  return participants.indexOf(signerAddress) === state.turnNum % participants.length;
 }
 
-export function getChannelId(commitment: Commitment): string {
+export function getCommitmentChannelId(commitment: Commitment): string {
   return channelID(commitment.channel);
 }
 

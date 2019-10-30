@@ -2,7 +2,7 @@ import * as scenarios from "./scenarios";
 import {initialize, responderReducer} from "../reducer";
 
 import * as states from "../states";
-import {Commitment, SignedCommitment} from "../../../../../domain";
+import {Commitment} from "../../../../../domain";
 import * as TransactionGenerator from "../../../../../utils/transaction-generator";
 import {SHOW_WALLET, HIDE_WALLET, CHALLENGE_COMPLETE} from "../../../../../magmo-wallet-client";
 import {itSendsThisDisplayEventType, itSendsThisMessage} from "../../../../__tests__/helpers";
@@ -35,12 +35,6 @@ const itCallsRespondWithMoveWith = (responseCommitment: Commitment) => {
       responseCommitment,
       jasmine.any(String)
     );
-  });
-};
-
-const itCallsRefuteWith = (refuteCommitments: SignedCommitment[]) => {
-  it("calls refute with the correct commitment", () => {
-    expect(refuteMock).toHaveBeenCalledWith(refuteCommitments.map(x => x.signedState));
   });
 };
 
@@ -106,13 +100,11 @@ describe("REFUTE HAPPY-PATH ", () => {
 
   describeScenarioStep(scenario.waitForApproval, () => {
     const {state, action} = scenario.waitForApproval;
-
-    const signedCommitments = sharedData.channelStore[state.channelId]!.commitments;
-
     const result = responderReducer(state, sharedData, action);
 
     itTransitionsTo(result, "Responding.WaitForTransaction");
-    itCallsRefuteWith(signedCommitments);
+    // TODO: Once we are using SignedStates we can check refute has been called with them
+    expect(refuteMock).toHaveBeenCalled();
   });
 
   describeScenarioStep(scenario.waitForTransaction, () => {

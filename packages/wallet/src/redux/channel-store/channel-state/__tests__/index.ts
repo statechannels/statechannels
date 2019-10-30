@@ -1,5 +1,7 @@
-import {SignedCommitment, getChannelId} from "../../../../domain";
+// import {SignedCommitment} from "../../../../domain";
 import {ChannelState} from "../states";
+import {getCommitmentChannelId, SignedCommitment} from "../../../../domain/commitments";
+import {bigNumberify} from "ethers/utils";
 
 export function channelFromCommitments(
   commitments: SignedCommitment[],
@@ -21,15 +23,15 @@ export function channelFromCommitments(
   }
 
   return {
-    channelId: getChannelId(lastCommitment.commitment),
+    channelId: getCommitmentChannelId(lastCommitment.commitment),
     libraryAddress,
-    channelNonce: lastCommitment.commitment.channel.nonce,
+    channelNonce: bigNumberify(lastCommitment.commitment.channel.nonce).toHexString(),
     funded,
     participants,
     address: ourAddress,
     privateKey: ourPrivateKey,
     ourIndex,
     turnNum,
-    commitments
+    signedStates: commitments.map(c => c.signedState)
   };
 }

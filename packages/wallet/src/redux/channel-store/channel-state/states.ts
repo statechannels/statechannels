@@ -1,6 +1,7 @@
-import {SignedCommitment, getChannelId, Commitment} from "../../../domain";
-import {addHex} from "../../../utils/hex-utils";
+import {SignedCommitment, Commitment, signCommitment2, getCommitmentChannelId} from "../../../domain";
 import {Wallet} from "ethers";
+import {SignedState} from "@statechannels/nitro-protocol";
+import {convertStateToCommitment} from "../../../utils/nitro-converter";
 
 export type Commitments = SignedCommitment[];
 
@@ -11,66 +12,65 @@ export interface ChannelState {
   libraryAddress: string;
   ourIndex: number;
   participants: string[];
-  channelNonce: number;
+  channelNonce: string;
   turnNum: number;
-  commitments: Commitments;
+  signedStates: SignedState[];
   funded: boolean;
 }
 
 export type OpenChannelState = ChannelState;
 
 export function getLastCommitment(state: ChannelState): Commitment {
-  return state.commitments.slice(-1)[0].commitment;
+  return convertStateToCommitment(state.signedStates.slice(-1)[0].state);
 }
 
 export function getPenultimateCommitment(state: ChannelState): Commitment {
-  return state.commitments.slice(-2)[0].commitment;
+  return convertStateToCommitment(state.signedStates.slice(-2)[0].state);
 }
 
+export function getCommitments(state: ChannelState): Commitments {
+  return state.signedStates.map(ss => signCommitment2(convertStateToCommitment(ss.state), state.privateKey));
+}
 // -------
 // Helpers
 // -------
 
-export function initializeChannel(signedCommitment: SignedCommitment, privateKey: string): ChannelState {
-  const {commitment} = signedCommitment;
-  const {turnNum, channel} = commitment;
+export function initializeChannel(signedState: SignedState, privateKey: string): ChannelState {
+  const {state} = signedState;
+  const {turnNum, channel, appDefinition} = state;
+  const {participants, channelNonce} = channel;
   const address = new Wallet(privateKey).address;
-  const ourIndex = commitment.channel.participants.indexOf(address);
-  const channelId = getChannelId(commitment);
+  const ourIndex = state.channel.participants.indexOf(address);
+  // TODO: Temporary until everything is converted to use signedStates
+  // This allows commitment channelIds to be used for now in our protocols
+  const commitment = convertStateToCommitment(signedState.state);
+  const channelId = getCommitmentChannelId(commitment);
   return {
     address,
     privateKey,
     turnNum,
     ourIndex,
-    libraryAddress: channel.channelType,
-    participants: channel.participants as [string, string],
-    channelNonce: channel.nonce,
+    libraryAddress: appDefinition,
+    participants,
+    channelNonce,
     channelId,
     funded: false,
-    commitments: [signedCommitment]
+    signedStates: [signedState]
   };
 }
 
 // Pushes a commitment onto the state, updating penultimate/last commitments and the turn number
-export function pushCommitment(state: ChannelState, signedCommitment: SignedCommitment): ChannelState {
-  const commitments = [...state.commitments];
+export function pushState(state: ChannelState, signedState: SignedState): ChannelState {
+  const signedStates = [...state.signedStates];
   const numParticipants = state.participants.length;
-  if (commitments.length === numParticipants) {
+  if (signedStates.length === numParticipants) {
     // We've got a full round of commitments, and should therefore drop the first one
-    commitments.shift();
+    signedStates.shift();
   }
 
-  if (commitments.length > 0) {
-    const lastStoredCommitment = commitments[commitments.length - 1];
-    const previousAllocationTotal = lastStoredCommitment.commitment.allocation.reduce(addHex, "0x0");
-    const currentAllocationTotal = signedCommitment.commitment.allocation.reduce(addHex, "0x0");
-    if (previousAllocationTotal !== currentAllocationTotal) {
-      throw new Error(`The allocation total cannot change between commitments`);
-    }
-  }
-  commitments.push(signedCommitment);
-  const turnNum = signedCommitment.commitment.turnNum;
-  return {...state, commitments, turnNum};
+  signedStates.push(signedState);
+  const turnNum = signedState.state.turnNum;
+  return {...state, signedStates, turnNum};
 }
 
 export function ourTurn(state: ChannelState) {
@@ -81,7 +81,7 @@ export function ourTurn(state: ChannelState) {
 }
 
 export function isFullyOpen(state: ChannelState): state is OpenChannelState {
-  return state.participants.length === state.commitments.length;
+  return state.participants.length === state.signedStates.length;
 }
 
 export function theirAddress(state: ChannelState): string {

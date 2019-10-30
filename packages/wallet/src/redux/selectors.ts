@@ -4,6 +4,7 @@ import {SharedData, FundingState} from "./state";
 import {ProcessProtocol} from "../communication";
 import {CONSENSUS_LIBRARY_ADDRESS} from "../constants";
 import {Commitment} from "../domain";
+import {bigNumberify} from "ethers/utils";
 
 export const getOpenedChannelState = (state: SharedData, channelId: string): OpenChannelState => {
   const channelStatus = getChannelState(state, channelId);
@@ -14,7 +15,7 @@ export const getOpenedChannelState = (state: SharedData, channelId: string): Ope
 };
 
 export const doesACommitmentExistForChannel = (state: SharedData, channelId: string): boolean => {
-  return state.channelStore[channelId] !== undefined && state.channelStore[channelId].commitments.length > 0;
+  return state.channelStore[channelId] !== undefined && state.channelStore[channelId].signedStates.length > 0;
 };
 
 export const getChannelState = (state: SharedData, channelId: string): ChannelState => {
@@ -113,15 +114,17 @@ export const getNextNonce = (
   state: SharedData,
 
   libraryAddress: string
-): number => {
-  let highestNonce = -1;
+): string => {
+  let highestNonce = "-1";
   for (const channelId of Object.keys(state.channelStore)) {
     const channel = state.channelStore[channelId];
-    if (channel.libraryAddress === libraryAddress && channel.channelNonce > highestNonce) {
+    if (channel.libraryAddress === libraryAddress && bigNumberify(channel.channelNonce).gt(highestNonce)) {
       highestNonce = channel.channelNonce;
     }
   }
-  return highestNonce + 1;
+  return bigNumberify(highestNonce)
+    .add(1)
+    .toHexString();
 };
 
 export const getChannelIds = (state: SharedData): string[] => {

@@ -4,12 +4,13 @@ import * as actions from "./actions";
 import {ProtocolStateWithSharedData} from "..";
 import {unreachable} from "../../../utils/reducer-utils";
 import {validationSuccess, signatureSuccess, signatureFailure, validationFailure} from "../../../magmo-wallet-client";
-import {checkAndStore, checkAndInitialize, signAndInitialize, signAndStore} from "../../channel-store/reducer";
+import {checkAndInitialize, signAndInitialize, signAndStore} from "../../channel-store/reducer";
 import {Commitment} from "../../../domain";
 import {ProtocolAction} from "../../actions";
 import * as dispute from "../dispute";
 import {disputeReducer} from "../dispute/reducer";
-import {convertCommitmentToSignedState} from "../../../utils/nitro-converter";
+import {convertCommitmentToSignedState, convertCommitmentToState} from "../../../utils/nitro-converter";
+import {joinSignature} from "ethers/utils";
 
 // TODO: Right now we're using a fixed application ID
 // since we're not too concerned with handling multiple running app channels.
@@ -72,7 +73,7 @@ function ownCommitmentReceivedReducer(
   } else {
     const updatedSharedData = {...sharedData, channelStore: signResult.store};
     return {
-      sharedData: queueMessage(updatedSharedData, signatureSuccess(signResult.signedCommitment.signature)),
+      sharedData: queueMessage(updatedSharedData, signatureSuccess(joinSignature(signResult.signedState.signature))),
       protocolState: states.ongoing(protocolState)
     };
   }
@@ -176,19 +177,15 @@ const validateAndUpdate = (
   if (state.type === "Application.WaitForFirstCommitment") {
     return checkAndInitialize(
       sharedData.channelStore,
-      {
-        commitment,
-        signature,
-        signedState: convertCommitmentToSignedState(commitment, state.privateKey)
-      },
+      convertCommitmentToSignedState(commitment, state.privateKey),
+
       state.privateKey
     );
   } else if (state.type === "Application.Ongoing") {
-    return checkAndStore(sharedData.channelStore, {
-      commitment,
-      signature,
-      signedState: convertCommitmentToSignedState(commitment, state.privateKey)
-    });
+    // TODO: Since we are validating an opponent's commitment we cannot convert it to a SignedState since we need their privateKey
+    // This should be fixed when we switch this protocol to SignedStates
+    // return checkAndStore(sharedData.channelStore, convertCommitmentToSignedState(commitment, state.privateKey));
+    throw new Error("NOT IMPLEMENTED: ValidateAndUpdate needs to handle validating a SignedState");
   } else {
     return {isSuccess: false, store: sharedData.channelStore};
   }
@@ -196,8 +193,8 @@ const validateAndUpdate = (
 
 const signAndUpdate = (commitment: Commitment, state: states.ApplicationState, sharedData: SharedData) => {
   if (state.type === "Application.WaitForFirstCommitment") {
-    return signAndInitialize(sharedData.channelStore, commitment, state.privateKey);
+    return signAndInitialize(sharedData.channelStore, convertCommitmentToState(commitment), state.privateKey);
   } else {
-    return signAndStore(sharedData.channelStore, commitment);
+    return signAndStore(sharedData.channelStore, convertCommitmentToState(commitment));
   }
 };

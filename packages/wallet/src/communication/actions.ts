@@ -1,11 +1,11 @@
-import {signCommitment2} from "../domain";
+import {signCommitment2} from "../domain/commitments";
 import {WalletAction} from "../redux/actions";
 import {FundingStrategy, ProtocolLocator, EmbeddedProtocol} from "./index";
 import {ProcessProtocol} from ".";
 import {ActionConstructor} from "../redux/utils";
 import {Commitments} from "../redux/channel-store";
 import {CloseLedgerChannel} from "../redux/protocols/actions";
-import {SignedState} from "@statechannels/nitro-protocol/src";
+import {SignedState} from "@statechannels/nitro-protocol";
 import {convertStateToCommitment} from "../utils/nitro-converter";
 
 export interface MultipleRelayableActions {

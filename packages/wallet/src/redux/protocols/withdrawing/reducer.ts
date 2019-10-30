@@ -2,7 +2,6 @@ import {ProtocolStateWithSharedData} from "..";
 import * as states from "./states";
 import {WithdrawalAction} from "./actions";
 import * as selectors from "../../selectors";
-import {CommitmentType} from "../../../domain";
 import {createConcludeAndWithdrawTransaction, ConcludeAndWithdrawArgs} from "../../../utils/transaction-generator";
 import {signVerificationData} from "../../../domain";
 import {TransactionRequest} from "ethers/providers";
@@ -11,6 +10,7 @@ import {isTransactionAction} from "../transaction-submission/actions";
 import {isTerminal, TransactionSubmissionState, isSuccess} from "../transaction-submission/states";
 import {unreachable} from "../../../utils/reducer-utils";
 import {SharedData} from "../../state";
+import {convertStateToSignedCommitment} from "../../../utils/nitro-converter";
 
 export const initialize = (
   withdrawalAmount: string,
@@ -137,11 +137,8 @@ const handleTransactionSubmissionComplete = (
 
 const channelIsClosed = (channelId: string, sharedData: SharedData): boolean => {
   const channelState = selectors.getOpenedChannelState(sharedData, channelId);
-  const [lastCommitment, penultimateCommitment] = channelState.commitments;
-  return (
-    lastCommitment.commitment.commitmentType === CommitmentType.Conclude &&
-    penultimateCommitment.commitment.commitmentType === CommitmentType.Conclude
-  );
+  const [lastState, penultimateState] = channelState.signedStates;
+  return lastState.state.isFinal && penultimateState.state.isFinal;
   // TODO: Check if there is a finalized outcome on chain
 };
 
@@ -152,8 +149,8 @@ const createConcludeAndWithTransaction = (
   sharedData: SharedData
 ): TransactionRequest => {
   const channelState = selectors.getOpenedChannelState(sharedData, channelId);
-  const {commitments: lastRound, participants, ourIndex, privateKey} = channelState;
-  const [penultimateCommitment, lastCommitment] = lastRound;
+  const {signedStates: lastRound, participants, ourIndex, privateKey} = channelState;
+  const [penultimateState, lastState] = lastRound;
   const participant = participants[ourIndex];
   const verificationSignature = signVerificationData(
     participant,
@@ -162,11 +159,13 @@ const createConcludeAndWithTransaction = (
     withdrawalAddress,
     privateKey
   );
+  const fromSignedCommitment = convertStateToSignedCommitment(penultimateState.state, privateKey);
+  const toSignedCommitment = convertStateToSignedCommitment(lastState.state, privateKey);
   const args: ConcludeAndWithdrawArgs = {
-    fromCommitment: penultimateCommitment.commitment,
-    fromSignature: penultimateCommitment.signature,
-    toCommitment: lastCommitment.commitment,
-    toSignature: lastCommitment.signature,
+    fromCommitment: fromSignedCommitment.commitment,
+    fromSignature: fromSignedCommitment.signature,
+    toCommitment: toSignedCommitment.commitment,
+    toSignature: toSignedCommitment.signature,
     participant,
     amount: withdrawalAmount,
     destination: withdrawalAddress,

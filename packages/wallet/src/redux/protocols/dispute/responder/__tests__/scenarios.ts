@@ -37,7 +37,7 @@ const channelStatus: ChannelState = {
   participants,
   channelNonce,
   funded: true,
-  commitments: [gameSignedCommitment1, gameSignedCommitment2],
+  signedStates: [gameSignedCommitment1, gameSignedCommitment2].map(sc => sc.signedState),
   turnNum: gameCommitment2.turnNum
 };
 
@@ -47,7 +47,7 @@ const channelStore: ChannelStore = {
 
 const refuteChannelStatus: ChannelState = {
   ...channelStatus,
-  commitments: [gameSignedCommitment2, gameSignedCommitment3],
+  signedStates: [gameSignedCommitment2, gameSignedCommitment3].map(sc => sc.signedState),
   turnNum: gameCommitment2.turnNum
 };
 const refuteChannelState = {

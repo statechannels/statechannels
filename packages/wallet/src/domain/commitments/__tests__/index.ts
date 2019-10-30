@@ -17,8 +17,8 @@ export const threeParticipants: [string, string, string] = [asAddress, bsAddress
 export const participants: [string, string] = [asAddress, bsAddress];
 
 export const libraryAddress = "0x" + "1".repeat(40);
-export const channelNonce = 4;
-export const channel = {channelType: libraryAddress, nonce: channelNonce, participants};
+export const channelNonce = "0x04";
+export const channel = {channelType: libraryAddress, nonce: Number.parseInt(channelNonce, 16), participants};
 export const channelId = channelID(channel);
 
 function typeAndCount(

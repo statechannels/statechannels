@@ -2,13 +2,13 @@ import * as states from "./states";
 import {
   SharedData,
   registerChannelToMonitor,
-  signAndInitialize,
-  checkAndInitialize,
-  signAndStore,
+  signAndInitializeComm,
+  checkAndInitializeComm,
+  signAndStoreComm,
   getExistingChannel
 } from "../../state";
 import {ProtocolStateWithSharedData, ProtocolReducer} from "..";
-import {CommitmentType, Commitment, getChannelId, nextSetupCommitment} from "../../../domain";
+import {CommitmentType, Commitment, getCommitmentChannelId, nextSetupCommitment} from "../../../domain";
 import {getChannel, getLastCommitment, ChannelState, getPenultimateCommitment} from "../../channel-store";
 import {WalletAction} from "../../actions";
 import * as selectors from "../../selectors";
@@ -115,7 +115,7 @@ function initializeWithNewChannel(processId, sharedData: Storage, initializeChan
 
   if (helpers.isSafeToSend({sharedData, ourIndex, clearedToSend})) {
     // Initialize the channel in the store
-    const nonce = selectors.getNextNonce(sharedData, channelType);
+    const nonce = Number.parseInt(selectors.getNextNonce(sharedData, channelType), 10);
     const channel: Channel = {
       nonce,
       participants,
@@ -132,14 +132,14 @@ function initializeWithNewChannel(processId, sharedData: Storage, initializeChan
       channel
     };
     const {privateKey} = initializeChannelArgs;
-    const signResult = signAndInitialize(sharedData, ourCommitment, privateKey);
+    const signResult = signAndInitializeComm(sharedData, ourCommitment, privateKey);
     if (!signResult.isSuccess) {
       throw new Error("Could not store new ledger channel commitment.");
     }
     sharedData = signResult.store;
 
     // Register channel to monitor
-    const channelId = getChannelId(ourCommitment);
+    const channelId = getCommitmentChannelId(ourCommitment);
     sharedData = registerChannelToMonitor(sharedData, processId, channelId, protocolLocator);
 
     // Send commitments to next participant
@@ -169,7 +169,7 @@ function initializeWithExistingChannel(processId, sharedData: Storage, initializ
   if (helpers.isSafeToSend({sharedData, ourIndex, clearedToSend, channelId})) {
     const ourCommitment = nextCommitment(channel, initializeChannelArgs.commitmentType);
 
-    const signResult = signAndStore(sharedData, ourCommitment);
+    const signResult = signAndStoreComm(sharedData, ourCommitment);
     if (!signResult.isSuccess) {
       throw new Error("Could not store new ledger channel commitment.");
     }
@@ -203,7 +203,7 @@ function attemptToAdvanceChannel(
     // First, update the store with our response
     const ourCommitment = nextCommitment(channel, protocolState.commitmentType);
 
-    const signResult = signAndStore(sharedData, ourCommitment);
+    const signResult = signAndStoreComm(sharedData, ourCommitment);
     if (!signResult.isSuccess) {
       throw new Error(`Could not sign result: ${signResult.reason}`);
     }
@@ -226,8 +226,8 @@ function attemptToAdvanceChannel(
 
 const channelUnknownReducer = (protocolState: states.ChannelUnknown, sharedData, action: CommitmentsReceived) => {
   const {privateKey} = protocolState;
-  const channelId = getChannelId(action.signedCommitments[0].commitment);
-  const checkResult = checkAndInitialize(sharedData, action.signedCommitments[0], privateKey);
+  const channelId = getCommitmentChannelId(action.signedCommitments[0].commitment);
+  const checkResult = checkAndInitializeComm(sharedData, action.signedCommitments[0], privateKey);
   if (!checkResult.isSuccess) {
     throw new Error("Could not initialize channel");
   }
