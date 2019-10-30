@@ -11,7 +11,7 @@
   "scripts": {
     "prepublish": "webpack",
     "build": "webpack",
-    "prepare": "yarn build",
+    "prepare": "yarn build",	
     "test": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:ci": "CI=true jest",
