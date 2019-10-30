@@ -1,8 +1,8 @@
 import React, {createFactory} from 'react';
-import {JsonRPCRequest} from 'web3/providers';
+import {JsonRpcRequest} from '../types';
 import {JsonRpcRouterConsumer} from './JsonRpcRouter';
 
-export type JsonRpcComponentProps = {request: JsonRPCRequest};
+export type JsonRpcComponentProps = {request: JsonRpcRequest};
 export type JsonRpcRouteProps = {
   method: string;
   component:

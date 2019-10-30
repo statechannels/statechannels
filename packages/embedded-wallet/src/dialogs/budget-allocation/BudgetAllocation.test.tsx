@@ -5,6 +5,7 @@ import React from 'react';
 import {match as Match, Router} from 'react-router';
 import {OnboardingFlowPaths} from '../../flows';
 import {closeWallet} from '../../message-dispatchers';
+import {JsonRpcErrorCodes} from '../../message-dispatchers/error-codes';
 import {
   ButtonProps,
   Dialog,
@@ -146,6 +147,24 @@ describe('Dialogs - BudgetAllocation', () => {
 
     window.onmessage = (event: MessageEvent) => {
       if (event.data === 'ui:wallet:close') {
+        done();
+      }
+    };
+
+    rejectButton.simulate('click');
+  });
+
+  it('should send an error message via JSONRPC when clicking Reject', async done => {
+    const errorResponse = {
+      code: JsonRpcErrorCodes.BudgetAllocationRejected,
+      message: 'User has rejected budget allocation'
+    };
+
+    const {rejectButton} = budgetAllocation;
+
+    window.onmessage = (event: MessageEvent) => {
+      if ('error' in event.data) {
+        expect(event.data.error).toEqual(errorResponse);
         done();
       }
     };

@@ -3,16 +3,16 @@ import Adapter from 'enzyme-adapter-react-16';
 import {History} from 'history';
 import React from 'react';
 import {RouteComponentProps, Router} from 'react-router';
-import {JsonRPCRequest} from 'web3/providers';
 import {BudgetAllocation, ConnectToHub, NoHub} from '../../dialogs';
 import {FlowRouter, FlowRouterProps} from '../../flow-router/FlowRouter';
 import {JsonRpcComponentProps} from '../../json-rpc-router';
+import {JsonRpcRequest} from '../../types';
 import * as Onboarding from './Onboarding';
 import {OnboardingFlow, OnboardingFlowPaths} from './Onboarding';
 
 Enzyme.configure({adapter: new Adapter()});
 
-const mockRequest: JsonRPCRequest = {
+const mockRequest: JsonRpcRequest = {
   jsonrpc: '2.0',
   id: 123,
   method: 'chan_allocate',

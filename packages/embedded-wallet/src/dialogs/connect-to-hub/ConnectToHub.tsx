@@ -46,7 +46,7 @@ const ConnectToHub: React.FC<RouteComponentProps> = () => {
           newSteps[finishedStep + 1].status = FlowStepStatus.InProgress;
         } else {
           setTimeout(() => {
-            allocate(onboardingFlowContext.request.id, {
+            allocate(onboardingFlowContext.request.id as number, {
               done: true
             });
             closeWallet();
