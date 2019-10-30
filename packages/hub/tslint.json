@@ -22,14 +22,6 @@
     "ordered-imports": true,
     "jsx-no-lambda": false,
     "interface-name": false,
-    "trailing-comma": [
-      true,
-      {
-        "multiline": {
-          "objects": "always"
-        }
-      }
-    ],
     "max-classes-per-file": false,
     "variable-name": [
       true,

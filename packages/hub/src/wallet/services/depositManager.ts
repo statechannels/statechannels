@@ -1,9 +1,9 @@
-import { bigNumberify } from 'ethers/utils';
-import { Address, Uint256 } from 'fmg-core';
-import { addHex } from 'magmo-wallet';
-import { HUB_ADDRESS } from '../../constants';
+import {bigNumberify} from 'ethers/utils';
+import {Address, Uint256} from 'fmg-core';
+import {addHex} from '@statechannels/wallet';
+import {HUB_ADDRESS} from '../../constants';
 import Channel from '../models/channel';
-import { Blockchain } from './blockchain';
+import {Blockchain} from './blockchain';
 
 /* todo:
  * Current logic of the deposit manager:
@@ -17,14 +17,14 @@ import { Blockchain } from './blockchain';
 export async function onDepositEvent(
   channelId: Address,
   amountDeposited: Uint256,
-  destinationHoldings: Uint256,
+  destinationHoldings: Uint256
 ) {
   // todo: to avoid manual case conversions, we can switch to knexSnakeCaseMappers.
   // https://vincit.github.io/objection.js/recipes/snake-case-to-camel-case-conversion.html#snake-case-to-camel-case-conversion
   const channel_id = channelId;
   const channel = await Channel.query()
     .findOne({
-      channel_id,
+      channel_id
     })
     .eager('[commitments.[allocations], participants]');
 
@@ -37,7 +37,7 @@ export async function onDepositEvent(
 
   await Channel.query()
     .findById(channel.id)
-    .patch({ holdings });
+    .patch({holdings});
 
   const commitments = channel.commitments;
   const latestCommitment = commitments.reduce((prevCommitment, currentCommitment) => {

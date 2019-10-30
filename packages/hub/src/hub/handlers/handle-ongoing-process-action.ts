@@ -1,26 +1,30 @@
-import { ethers } from 'ethers';
-import { channelID, Signature } from 'fmg-core';
-import { SignedCommitment as ClientSignedCommitment, unreachable } from 'magmo-wallet';
+import {
+  signCommitment2,
+  SignedCommitment as ClientSignedCommitment,
+  unreachable
+} from '@statechannels/wallet';
+import {ethers} from 'ethers';
+import {channelID, Signature} from 'fmg-core';
 
 import {
   CommitmentReceived,
   CommitmentsReceived,
-  StrategyProposed,
-} from 'magmo-wallet/lib/src/communication';
-import * as communication from 'magmo-wallet/lib/src/communication';
-import { errors } from '../../wallet';
-import { getCurrentCommitment } from '../../wallet/db/queries/getCurrentCommitment';
+  StrategyProposed
+} from '@statechannels/wallet/lib/src/communication';
+import * as communication from '@statechannels/wallet/lib/src/communication';
+import {errors} from '../../wallet';
+import {getCurrentCommitment} from '../../wallet/db/queries/getCurrentCommitment';
 
-import { getProcess } from '../../wallet/db/queries/walletProcess';
-import { SignedCommitment, updateLedgerChannel } from '../../wallet/services';
-import { asConsensusCommitment } from '../../wallet/services/ledger-commitment';
+import {getProcess} from '../../wallet/db/queries/walletProcess';
+import {SignedCommitment, updateLedgerChannel} from '../../wallet/services';
+import {asConsensusCommitment} from '../../wallet/services/ledger-commitment';
 
-import { MessageRelayRequested } from 'magmo-wallet-client';
-import { HUB_ADDRESS } from '../../constants';
-import { updateRPSChannel } from '../services/rpsChannelManager';
+import {HUB_ADDRESS, HUB_PRIVATE_KEY} from '../../constants';
+import {MessageRelayRequested} from '../../wallet-client';
+import {updateRPSChannel} from '../services/rpsChannelManager';
 
 export async function handleOngoingProcessAction(
-  action: StrategyProposed | CommitmentReceived | CommitmentsReceived,
+  action: StrategyProposed | CommitmentReceived | CommitmentsReceived
 ): Promise<MessageRelayRequested[]> {
   switch (action.type) {
     case 'WALLET.COMMON.COMMITMENT_RECEIVED':
@@ -35,34 +39,34 @@ export async function handleOngoingProcessAction(
 }
 
 async function handleStrategyProposed(action: StrategyProposed) {
-  const { processId, strategy } = action;
+  const {processId, strategy} = action;
   const process = await getProcess(processId);
   if (!process) {
     throw errors.processMissing(processId);
   }
 
-  const { theirAddress } = process;
+  const {theirAddress} = process;
   return [communication.sendStrategyApproved(theirAddress, processId, strategy)];
 }
 
 async function handleCommitmentReceived(action: CommitmentReceived) {
   {
-    const { processId } = action;
+    const {processId} = action;
     const walletProcess = await getProcess(processId);
     if (!walletProcess) {
       throw errors.processMissing(processId);
     }
-    const { theirAddress } = walletProcess;
+    const {theirAddress} = walletProcess;
 
-    const { commitment: theirCommitment, signature: theirSignature } = action.signedCommitment;
+    const {commitment: theirCommitment, signature: theirSignature} = action.signedCommitment;
     const splitSignature = (ethers.utils.splitSignature(theirSignature) as unknown) as Signature;
 
     const channelId = channelID(theirCommitment.channel);
 
     if (channelId === walletProcess.appChannelId) {
-      const { commitment: ourCommitment, signature: ourSignature } = await updateRPSChannel(
+      const {commitment: ourCommitment, signature: ourSignature} = await updateRPSChannel(
         theirCommitment,
-        splitSignature,
+        splitSignature
       );
       return [
         communication.sendCommitmentReceived(
@@ -70,14 +74,15 @@ async function handleCommitmentReceived(action: CommitmentReceived) {
           processId,
           ourCommitment,
           (ourSignature as unknown) as string,
-        ),
+          HUB_PRIVATE_KEY
+        )
       ];
     }
 
     const currentCommitment = await getCurrentCommitment(theirCommitment);
-    const { commitment, signature } = await updateLedgerChannel(
-      [{ ledgerCommitment: asConsensusCommitment(theirCommitment), signature: splitSignature }],
-      currentCommitment && asConsensusCommitment(currentCommitment),
+    const {commitment, signature} = await updateLedgerChannel(
+      [{ledgerCommitment: asConsensusCommitment(theirCommitment), signature: splitSignature}],
+      currentCommitment && asConsensusCommitment(currentCommitment)
     );
     return [
       communication.sendCommitmentReceived(
@@ -85,14 +90,15 @@ async function handleCommitmentReceived(action: CommitmentReceived) {
         processId,
         commitment,
         (signature as unknown) as string,
-      ),
+        HUB_PRIVATE_KEY
+      )
     ];
   }
 }
 
 async function handleCommitmentsReceived(action: CommitmentsReceived) {
   {
-    const { processId } = action;
+    const {processId} = action;
     const walletProcess = await getProcess(processId);
     if (!walletProcess) {
       throw errors.processMissing(processId);
@@ -100,14 +106,13 @@ async function handleCommitmentsReceived(action: CommitmentsReceived) {
 
     const incomingCommitments = action.signedCommitments;
     const commitmentRound: SignedCommitment[] = incomingCommitments.map(
-      clientCommitmentToServerCommitment,
+      clientCommitmentToServerCommitment
     );
 
     // For the time being, just assume a two-party channel and proceed as normal.
-    const {
-      commitment: lastCommitment,
-      signature: lastCommitmentSignature,
-    } = commitmentRound.slice(-1)[0];
+    const {commitment: lastCommitment, signature: lastCommitmentSignature} = commitmentRound.slice(
+      -1
+    )[0];
 
     const channelId = channelID(lastCommitment.channel);
     const participants = lastCommitment.channel.participants;
@@ -115,9 +120,9 @@ async function handleCommitmentsReceived(action: CommitmentsReceived) {
     const nextParticipant = participants[(ourIndex + 1) % participants.length];
 
     if (channelId === walletProcess.appChannelId) {
-      const { commitment: ourCommitment, signature: ourSignature } = await updateRPSChannel(
+      const {commitment: ourCommitment, signature: ourSignature} = await updateRPSChannel(
         lastCommitment,
-        lastCommitmentSignature,
+        lastCommitmentSignature
       );
       return [
         communication.sendCommitmentReceived(
@@ -125,18 +130,19 @@ async function handleCommitmentsReceived(action: CommitmentsReceived) {
           processId,
           ourCommitment,
           (ourSignature as unknown) as string,
-        ),
+          HUB_PRIVATE_KEY
+        )
       ];
     }
 
     const ledgerCommitmentRound = commitmentRound.map(signedCommitment => ({
       ledgerCommitment: asConsensusCommitment(signedCommitment.commitment),
-      signature: signedCommitment.signature,
+      signature: signedCommitment.signature
     }));
     const currentCommitment = await getCurrentCommitment(lastCommitment);
-    const { commitment, signature } = await updateLedgerChannel(
+    const {commitment, signature} = await updateLedgerChannel(
       ledgerCommitmentRound,
-      currentCommitment && asConsensusCommitment(currentCommitment),
+      currentCommitment && asConsensusCommitment(currentCommitment)
     );
     return participants
       .filter((_, idx) => idx !== ourIndex)
@@ -144,15 +150,22 @@ async function handleCommitmentsReceived(action: CommitmentsReceived) {
         communication.sendCommitmentsReceived(
           p,
           processId,
-          [...incomingCommitments, { commitment, signature: (signature as unknown) as string }],
-          action.protocolLocator,
-        ),
+          [
+            ...incomingCommitments,
+            {
+              commitment,
+              signature: (signature as unknown) as string,
+              signedState: signCommitment2(commitment, HUB_PRIVATE_KEY).signedState
+            }
+          ],
+          action.protocolLocator
+        )
       );
   }
 }
 
 function clientCommitmentToServerCommitment(signedCommitment: ClientSignedCommitment) {
-  const { commitment, signature: stringSignature } = signedCommitment;
+  const {commitment, signature: stringSignature} = signedCommitment;
   const splitSignature = (ethers.utils.splitSignature(stringSignature) as unknown) as Signature;
-  return { commitment, signature: splitSignature };
+  return {commitment, signature: splitSignature};
 }

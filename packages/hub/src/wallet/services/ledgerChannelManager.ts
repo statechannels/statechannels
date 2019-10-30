@@ -1,27 +1,27 @@
-import { CommitmentType } from 'fmg-core';
+import {CommitmentType} from 'fmg-core';
 import {
   AppCommitment,
   finalVote,
   isConsensusReached,
   pass,
-  vote,
+  vote
 } from 'fmg-nitro-adjudicator/lib/consensus-app';
-import { unreachable } from 'magmo-wallet';
-import { SignedCommitment, SignedLedgerCommitment } from '.';
-import { HUB_ADDRESS } from '../../constants';
-import { queries } from '../db/queries/channels';
+import {unreachable} from '@statechannels/wallet';
+import {SignedCommitment, SignedLedgerCommitment} from '.';
+import {HUB_ADDRESS} from '../../constants';
+import {queries} from '../db/queries/channels';
 import errors from '../errors';
 import * as ChannelManagement from './channelManagement';
-import { asCoreCommitment, LedgerCommitment } from './ledger-commitment';
+import {asCoreCommitment, LedgerCommitment} from './ledger-commitment';
 
 export async function updateLedgerChannel(
   commitmentRound: SignedLedgerCommitment[],
-  lastStoredCommitment?: LedgerCommitment,
+  lastStoredCommitment?: LedgerCommitment
 ): Promise<SignedCommitment> {
   let commitmentsToApply = commitmentRound;
   if (lastStoredCommitment) {
     commitmentsToApply = commitmentRound.filter(
-      signedCommitment => signedCommitment.ledgerCommitment.turnNum > lastStoredCommitment.turnNum,
+      signedCommitment => signedCommitment.ledgerCommitment.turnNum > lastStoredCommitment.turnNum
     );
   }
   commitmentsToApply.sort((a, b) => {
@@ -38,7 +38,7 @@ export async function updateLedgerChannel(
 
   const ourCommitment = nextCommitment(commitmentsToApply);
   const commitmentToStore = commitmentsToApply.map(
-    signedCommitment => signedCommitment.ledgerCommitment,
+    signedCommitment => signedCommitment.ledgerCommitment
   );
   // todo: signatures need to be stored alongside commitments
   await queries.updateChannel(commitmentToStore, ourCommitment);
@@ -47,9 +47,9 @@ export async function updateLedgerChannel(
 
 function shouldAcceptCommitment(
   signedCommitment: SignedLedgerCommitment,
-  previousCommitment?: LedgerCommitment,
+  previousCommitment?: LedgerCommitment
 ) {
-  const { ledgerCommitment: commitment, signature } = signedCommitment;
+  const {ledgerCommitment: commitment, signature} = signedCommitment;
   if (!ChannelManagement.validSignature(asCoreCommitment(commitment), signature)) {
     throw errors.COMMITMENT_NOT_SIGNED;
   }
@@ -109,7 +109,7 @@ export function valuePreserved(currentCommitment: any, theirCommitment: any): bo
 
 export function validTransition(
   currentCommitment: LedgerCommitment,
-  theirCommitment: LedgerCommitment,
+  theirCommitment: LedgerCommitment
 ): boolean {
   return theirCommitment.turnNum === currentCommitment.turnNum + 1;
 }

@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-const commonDataPrefix = 'magmo-wallet-common/prebuilt-contracts';
+const commonDataPrefix = '@statechannels/wallet-common/prebuilt-contracts';
 const devPathPrefix = '../../build/contracts';
 
 const commitmentJson = 'Commitment.json';
@@ -11,7 +11,7 @@ const rpsGameJson = 'RockPaperScissorsGame.json';
 interface Artifact {
   abi: any;
   contractName: string;
-  networks: { [key: string]: { address: string } };
+  networks: {[key: string]: {address: string}};
 }
 
 let commitmentArtifact: Artifact = require(path.join(commonDataPrefix, commitmentJson));
@@ -25,4 +25,4 @@ if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development') {
   nitroAdjudicatorArtifact = require(path.join(devPathPrefix, nitroAdjudicatorJson));
 }
 
-export { commitmentArtifact, rulesArtifact, nitroAdjudicatorArtifact, rpsGameArtifact };
+export {commitmentArtifact, rulesArtifact, nitroAdjudicatorArtifact, rpsGameArtifact};

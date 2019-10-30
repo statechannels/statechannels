@@ -1,17 +1,17 @@
-import { MessageRelayRequested } from 'magmo-wallet-client';
 import {
   CommitmentReceived,
   CommitmentsReceived,
   ConcludeInstigated,
   RelayableAction,
-  StrategyProposed,
-} from 'magmo-wallet/lib/src/communication';
-import { getProcess } from '../../wallet/db/queries/walletProcess';
-import { handleNewProcessAction } from './handle-new-process-action';
-import { handleOngoingProcessAction } from './handle-ongoing-process-action';
+  StrategyProposed
+} from '@statechannels/wallet/lib/src/communication';
+import {MessageRelayRequested} from '../../wallet-client';
+import {getProcess} from '../../wallet/db/queries/walletProcess';
+import {handleNewProcessAction} from './handle-new-process-action';
+import {handleOngoingProcessAction} from './handle-ongoing-process-action';
 
 export async function handleWalletMessage(
-  message: RelayableAction,
+  message: RelayableAction
 ): Promise<MessageRelayRequested[]> {
   if (isNewProcessAction(message) && (await shouldHandleAsNewProcessAction(message))) {
     return handleNewProcessAction(message);
@@ -25,7 +25,7 @@ export async function handleWalletMessage(
 // TODO: We should define types for NewProcessAction and ProtocolAction
 
 async function shouldHandleAsNewProcessAction(
-  action: ConcludeInstigated | CommitmentsReceived,
+  action: ConcludeInstigated | CommitmentsReceived
 ): Promise<boolean> {
   if (action.type === 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED') {
     return true;
@@ -36,7 +36,7 @@ async function shouldHandleAsNewProcessAction(
 }
 
 function isNewProcessAction(
-  action: RelayableAction,
+  action: RelayableAction
 ): action is ConcludeInstigated | CommitmentsReceived {
   return (
     action.type === 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED' ||
@@ -45,7 +45,7 @@ function isNewProcessAction(
 }
 
 function isProtocolAction(
-  action: RelayableAction,
+  action: RelayableAction
 ): action is StrategyProposed | CommitmentReceived | CommitmentsReceived {
   return (
     action.type === 'WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_PROPOSED' ||

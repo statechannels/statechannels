@@ -1,8 +1,8 @@
 import * as firebase from 'firebase';
 
-import { MessageRelayRequested } from 'magmo-wallet-client';
 import '../../config/env';
-import { HUB_ADDRESS } from '../constants';
+import {HUB_ADDRESS} from '../constants';
+import {MessageRelayRequested} from '../wallet-client';
 
 const config = {
   apiKey: process.env.FIREBASE_API_KEY,
@@ -10,7 +10,7 @@ const config = {
   databaseURL: `https://${process.env.FIREBASE_PROJECT}.firebaseio.com`,
   projectId: process.env.FIREBASE_PROJECT,
   storageBucket: '',
-  messagingSenderId: '913007764573',
+  messagingSenderId: '913007764573'
 };
 
 let firebaseApp: firebase.app.App;
@@ -37,8 +37,8 @@ async function listen() {
     if (queue === 'GAME_ENGINE') {
       throw new Error(
         `The hub does not support handling application commitments. Received ${JSON.stringify(
-          value,
-        )}`,
+          value
+        )}`
       );
     } else if (queue === 'WALLET') {
       initializeCommitmentArraysFromFirebase(value.payload);
@@ -55,7 +55,7 @@ process.on('message', (message: MessageRelayRequested) => {
   const sanitizedPayload = JSON.parse(JSON.stringify(message.messagePayload));
   getMessagesRef()
     .child(message.to.toLowerCase())
-    .push({ payload: sanitizedPayload, queue: 'WALLET' });
+    .push({payload: sanitizedPayload, queue: 'WALLET'});
 });
 
 if (require.main === module) {
