@@ -28,8 +28,7 @@ div#${UIElementNames.Container} {
   top: 0px;
   width: 100%;
   height: 100%;
-  background: #000;
-  opacity: 0.32;
+  background: rgba(0, 0, 0, 0.32);
   z-index: 0;
 }`;
 
