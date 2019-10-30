@@ -1,13 +1,17 @@
 import debug from 'debug';
 import React, {useEffect, useState} from 'react';
-import {RouteComponentProps} from 'react-router';
-import {useOnboardingFlowContext} from '../../flows';
-import {allocate, closeWallet} from '../../message-dispatchers';
+import {Redirect, RouteComponentProps} from 'react-router';
+import {OnboardingFlowPaths, useOnboardingFlowContext} from '../../flows';
+import {closeWallet} from '../../message-dispatchers';
 import {Dialog, FlowProcess, FlowStep, FlowStepProps, FlowStepStatus} from '../../ui';
 
 const log = debug('wallet:connect-to-hub');
 
-export const FlowSteps = [
+export type ConnectToHubProps = RouteComponentProps & {
+  onStepsDone?: () => void;
+};
+
+export const FlowSteps: FlowStepProps[] = [
   {
     title: 'Deposit 5 ETH',
     status: FlowStepStatus.InProgress
@@ -26,7 +30,7 @@ export const FlowSteps = [
   }
 ];
 
-const ConnectToHub: React.FC<RouteComponentProps> = () => {
+const ConnectToHub: React.FC<ConnectToHubProps> = ({onStepsDone}) => {
   const [steps, setSteps] = useState<FlowStepProps[]>(FlowSteps);
 
   const onboardingFlowContext = useOnboardingFlowContext();
@@ -36,29 +40,33 @@ const ConnectToHub: React.FC<RouteComponentProps> = () => {
   }, [onboardingFlowContext.request]);
 
   useEffect(() => {
+    if (onStepsDone && steps.every(step => step.status === FlowStepStatus.Done)) {
+      onStepsDone();
+    }
+  }, [steps, onStepsDone]);
+
+  useEffect(() => {
     if (steps[steps.length - 1].status !== FlowStepStatus.Done) {
       setTimeout(() => {
         const newSteps = [...steps];
         const finishedStep = newSteps.findIndex(step => step.status === FlowStepStatus.InProgress);
-        newSteps[finishedStep].status = FlowStepStatus.Done;
-        log('step updated: %o', newSteps[finishedStep]);
-        if (newSteps[finishedStep + 1]) {
-          newSteps[finishedStep + 1].status = FlowStepStatus.InProgress;
-        } else {
-          setTimeout(() => {
-            allocate(onboardingFlowContext.request.id as number, {
-              done: true
-            });
-            closeWallet();
-          }, 1000);
+        if (finishedStep >= 0) {
+          newSteps[finishedStep].status = FlowStepStatus.Done;
+          log('step updated: %o', newSteps[finishedStep]);
+          if (newSteps[finishedStep + 1]) {
+            newSteps[finishedStep + 1].status = FlowStepStatus.InProgress;
+          }
+          setSteps(newSteps);
         }
-        setSteps(newSteps);
       }, 1000);
     }
   }, [steps, onboardingFlowContext.request.id]);
 
   return (
     <Dialog title="Connect to Hub" onClose={closeWallet}>
+      {steps.every(step => step.status === FlowStepStatus.Done) && (
+        <Redirect to={OnboardingFlowPaths.Finished} />
+      )}
       <FlowProcess>
         {steps.map((step, index) => (
           <FlowStep key={`step${index}`} {...step} />

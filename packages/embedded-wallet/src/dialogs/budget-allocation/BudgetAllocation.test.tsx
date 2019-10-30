@@ -4,8 +4,10 @@ import {createMemoryHistory, Location, MemoryHistory} from 'history';
 import React from 'react';
 import {match as Match, Router} from 'react-router';
 import {OnboardingFlowPaths} from '../../flows';
+import {JsonRpcComponentProps} from '../../json-rpc-router';
 import {closeWallet} from '../../message-dispatchers';
 import {JsonRpcErrorCodes} from '../../message-dispatchers/error-codes';
+import {mockOnboardingFlowContext} from '../../test-utils';
 import {
   ButtonProps,
   Dialog,
@@ -78,9 +80,11 @@ const refreshBudgetAllocationDialogFrom = dialogWrapper => {
 };
 
 describe('Dialogs - BudgetAllocation', () => {
+  let onboardingFlowContext: jest.SpyInstance<JsonRpcComponentProps, []>;
   let budgetAllocation: MockBudgetAllocationDialog;
 
   beforeEach(() => {
+    onboardingFlowContext = mockOnboardingFlowContext();
     budgetAllocation = mockBudgetAllocationDialog();
   });
 
@@ -170,5 +174,9 @@ describe('Dialogs - BudgetAllocation', () => {
     };
 
     rejectButton.simulate('click');
+  });
+
+  afterEach(() => {
+    onboardingFlowContext.mockReset();
   });
 });

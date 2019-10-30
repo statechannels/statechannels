@@ -2,26 +2,16 @@ import Enzyme, {mount, ReactWrapper} from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import {createMemoryHistory, Location, MemoryHistory} from 'history';
 import React from 'react';
+import {act} from 'react-dom/test-utils';
 import {match as Match, Router} from 'react-router';
 import {OnboardingFlowPaths} from '../../flows';
-import * as Onboarding from '../../flows/onboarding/Onboarding';
+import {JsonRpcComponentProps} from '../../json-rpc-router';
 import {closeWallet} from '../../message-dispatchers';
-import {JsonRpcRequest} from '../../types';
+import {mockOnboardingFlowContext} from '../../test-utils';
 import {Dialog, DialogProps, FlowStep, FlowStepProps} from '../../ui';
-import {ConnectToHub, FlowSteps} from './ConnectToHub';
+import {ConnectToHub, ConnectToHubProps, FlowSteps} from './ConnectToHub';
 
 Enzyme.configure({adapter: new Adapter()});
-
-const mockRequest: JsonRpcRequest = {
-  jsonrpc: '2.0',
-  id: 123,
-  method: 'chan_allocate',
-  params: ['foo', true, 3]
-};
-
-jest
-  .spyOn(Onboarding, 'useOnboardingFlowContext')
-  .mockImplementation(() => ({request: mockRequest}));
 
 type MockConnectToHubDialog = {
   dialogWrapper: ReactWrapper;
@@ -50,11 +40,11 @@ const mockRouteProps = (): MockRouteProps => {
   return {history, location, match};
 };
 
-const mockConnectToHubDialog = (): MockConnectToHubDialog => {
+const mockConnectToHubDialog = (props?: Partial<ConnectToHubProps>): MockConnectToHubDialog => {
   const routeProps = mockRouteProps();
   const dialogWrapper = mount(
     <Router history={routeProps.history}>
-      <ConnectToHub {...routeProps} />
+      <ConnectToHub {...routeProps} {...props} />
     </Router>
   );
 
@@ -74,9 +64,11 @@ const refreshConnectToHubDialog = (dialogWrapper: ReactWrapper, routeProps: Mock
 };
 
 describe('Dialogs - ConnectToHub', () => {
+  let onboardingFlowContext: jest.SpyInstance<JsonRpcComponentProps, []>;
   let connectToHub: MockConnectToHubDialog;
 
   beforeEach(() => {
+    onboardingFlowContext = mockOnboardingFlowContext();
     connectToHub = mockConnectToHubDialog();
   });
 
@@ -103,5 +95,25 @@ describe('Dialogs - ConnectToHub', () => {
     };
 
     closeButton.simulate('click');
+  });
+
+  /**
+   * @todo: This test passes but there's a weird act() error. We're not fixing it
+   * at the moment because the flow is still a mock (steps are completed with
+   * setTimeouts).
+   */
+  it('should redirect to OnboardingFinished when all steps are completed', async done => {
+    act(() => {
+      const {routeProps} = mockConnectToHubDialog({
+        onStepsDone: () => {
+          expect(routeProps.history.location.pathname).toMatch(OnboardingFlowPaths.Finished);
+          done();
+        }
+      });
+    });
+  });
+
+  afterEach(() => {
+    onboardingFlowContext.mockReset();
   });
 });

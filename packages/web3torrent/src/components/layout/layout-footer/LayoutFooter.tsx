@@ -5,8 +5,10 @@ import './LayoutFooter.scss';
 
 const LayoutFooter: React.FC<RouteComponentProps> = () => (
   <footer>
-    <img id="footer-logo" src="/assets/logo.svg" alt="Web3Torrent logo" />
-    Works in Chrome, Firefox, and Opera. Source code Available on GitHub. © 2019 Web3Torrent.
+    <img className="footer-logo" src="/assets/logo.svg" alt="Web3Torrent logo" />
+    <span className="footer-text">
+      Works in Chrome, Firefox, and Opera. Source code Available on GitHub. © 2019 Web3Torrent.
+    </span>
   </footer>
 );
 
