@@ -26,7 +26,7 @@ const OnboardingFinished: React.FC<RouteComponentProps> = () => {
 
   return (
     <Dialog
-      icon={Icons.Link}
+      icon={Icons.Check}
       title="All set!"
       closable={false}
       buttons={{
