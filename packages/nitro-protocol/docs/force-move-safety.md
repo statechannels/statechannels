@@ -80,8 +80,8 @@ In case 2, while the timer is running, any participant may attempt to clear the 
 
 The adjudicator keeps track of the turn number of the most recent supported state that it's seen, called the `turnNumRecord`.
 It ignores unsupported states as well as states with a turn number less than the `turnNumRecord`.
-Thus, later states always take priority over earlier states, with the intention of preventing one participant from grieving others through repeatedly launching the same challenge.
-The remainder of this blog post explores various grieving attacks that we found in various versions of the ForceMove protocol.
+Thus, later states always take priority over earlier states, with the intention of preventing one participant from griefing others through repeatedly launching the same challenge.
+The remainder of this blog post explores various griefing attacks that we found in various versions of the ForceMove protocol.
 
 # Modeling ForceMove
 
@@ -176,7 +176,7 @@ We use the notation `A >> S` to denote the state resulting in applying action `A
 Since the channel only closes from a `Challenge` state, and the channel only enters a challenge state when the adjudicator sees a supported state, Alice must have been, at some point in time, satisfied with any state that the channel closes with.
 However, it may not close with the latest state.
 
-Assume that Bob has become malicious, and he is willing to consume an exorbitant amount of resources to grieve Alice.
+Assume that Bob has become malicious, and he is willing to consume an exorbitant amount of resources to grief Alice.
 Suppose the state is currently `Open(m)`, and Alice holds a supported state `s` with turn `n >= m`.
 Can Alice guarantee that, in a constant number of actions, she can ensure the channel can only close with a state at turn at least `n`?
 She can trivially accomplish this if she can move the state's `turnNumRecord` to be at least `n`, since the `turnNumRecord` is non-decreasing:
