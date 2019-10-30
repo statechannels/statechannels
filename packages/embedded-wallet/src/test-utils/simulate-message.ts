@@ -1,5 +1,5 @@
+import {JsonRpcRequest} from '@statechannels/channel-provider';
 import {ReactWrapper} from 'enzyme';
-import {JsonRpcRequest} from '../types';
 
 export async function simulateMessage(component: ReactWrapper, message: Partial<JsonRpcRequest>) {
   await new Promise(resolve => {

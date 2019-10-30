@@ -1,6 +1,6 @@
+import {JsonRpcRequest} from '@statechannels/channel-provider';
 import debug from 'debug';
 import React, {createContext, useEffect, useState} from 'react';
-import {JsonRpcRequest} from '../types';
 
 const log = debug('wallet:jsonrpc-router');
 

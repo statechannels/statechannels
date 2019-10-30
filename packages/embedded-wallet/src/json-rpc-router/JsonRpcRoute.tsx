@@ -1,5 +1,5 @@
+import {JsonRpcRequest} from '@statechannels/channel-provider';
 import React, {createFactory} from 'react';
-import {JsonRpcRequest} from '../types';
 import {JsonRpcRouterConsumer} from './JsonRpcRouter';
 
 export type JsonRpcComponentProps = {request: JsonRpcRequest};

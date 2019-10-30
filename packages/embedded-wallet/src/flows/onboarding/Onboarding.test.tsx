@@ -1,3 +1,4 @@
+import {JsonRpcRequest} from '@statechannels/channel-provider';
 import Enzyme, {mount, ReactWrapper} from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import {History} from 'history';
@@ -6,7 +7,6 @@ import {RouteComponentProps, Router} from 'react-router';
 import {BudgetAllocation, ConnectToHub, NoHub, OnboardingFinished} from '../../dialogs';
 import {FlowRouter, FlowRouterProps} from '../../flow-router/FlowRouter';
 import {JsonRpcComponentProps} from '../../json-rpc-router';
-import {JsonRpcRequest} from '../../types';
 import * as Onboarding from './Onboarding';
 import {OnboardingFlow, OnboardingFlowPaths} from './Onboarding';
 

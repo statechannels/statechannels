@@ -1,6 +1,5 @@
+import {JsonRpcErrorResponse, JsonRpcResponse} from '@statechannels/channel-provider';
 import debug from 'debug';
-import {JsonRpcErrorResponse, JsonRpcResponse} from '../../types';
-import {JsonRpcErrorCodes} from '../error-codes';
 
 const log = debug('wallet:dispatch');
 
@@ -15,7 +14,7 @@ const rejectAllocation = (requestId: number) => {
     jsonrpc: '2.0',
     id: requestId,
     error: {
-      code: JsonRpcErrorCodes.BudgetAllocationRejected,
+      code: -32100,
       message: 'User has rejected budget allocation'
     }
   };

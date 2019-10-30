@@ -11,7 +11,7 @@ const log = debug('wallet:no-hub');
 const backToApp = (onboardingFlowContext: JsonRpcComponentProps) => () => {
   log('Clicked on Back to app');
   log('Handing off to app');
-  allocate(onboardingFlowContext.request.id, {
+  allocate(onboardingFlowContext.request.id as number, {
     done: true
   });
   closeWallet();
