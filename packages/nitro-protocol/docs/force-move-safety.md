@@ -29,36 +29,27 @@ Using tablegenerators.com, we can generate decent looking tables in a medium pos
 
 # Intro
 
+A state channel involves a small set of participants updating a state machine in private.
+The final state of the state channel ultimately dictates how the (public) blockchain state is updated: for example, how certain assets are allocated.
+The state may include additional data relating to the type of application the state channel is meant to support.
+
 ForceMove is a state-channel protocol, designed to be as simple as possible.
-A set of participants exchanging states in private, which determine some outcome of the state channel.
 An adjudicator, in the form of a smart contract, enforces the outcome on a blockchain, which would typically involve some financial transaction.
-As such, the participants wish for the system to protect against malicious actors that try to prevent the most fair outcome from being recorded on-chain.
+As such, the participants wish to be protected against malicious actors that try to prevent the most fair outcome from being recorded on-chain.
 
 At Magmo, we have spent some time specifying the ForceMove protocol in [ TLA+ ](https://en.wikipedia.org/wiki/TLA%2B), a formal specification language based on set theory.
 Engineers at Amazon Web Services [have used](https://lamport.azurewebsites.net/tla/formal-methods-amazon.pdf) TLA+ since 2011 when designing some of their critical systems\*.
 
 # ForceMove overview
 
-<!-- TODO: I'm not sure what to say in the general overview -->
-<!-- Currently:
-1. A ForceMove state channel is a state machine that determines the distribution of assets
-2. Valid transitions, turn numbers, ordered turns
-3. Adjudicator's role
-4. Supported states
--->
-
-In a ForceMove state channel, a small number of participants update a private state that is shared between them.
-The state's outcome ultimately dictates how the (public) blockchain state is updated: for example, how certain assets are allocated.
-The state may include additional data relating to the type of application the state channel is meant to support.
-
-In this blog post, we restrict to state channels with two participants, Alice and Bob.
-They update the ledger by exchanging signed copies of what they agree on as the _current state_ of the state channel.
+Participants of a ForceMove state channel exchange signed copies of what they agree on as the _current state_ of the state channel.
 They only sign updates to the ledger according to a pre-determined set of rules: they agree in advance to a function `validTransition(s, s')`, and a transition from `s` to `s'` is only allowed when `validTransition(s, s')` returns `true`.
 For example, in a state channel used to play a game of chess, `validTransition` would only return true if the transition represents a legal chess move.
 Each state includes a `turnNumber`, which must increase by one on each valid transition.
 This allows for newer states to take precedence over older states.
 
 Participants are ordered, and turns are taken in order.
+In this blog post, we restrict to state channels with two participants, Alice and Bob.
 In our case, for example, Alice decides what state to transition to on even turns, and Bob decides on odd turns.
 We say that a state `s'` is _supported_ if there is a pair of states `(s, s')` such that
 
@@ -68,13 +59,19 @@ We say that a state `s'` is _supported_ if there is a pair of states `(s, s')` s
 In this case, `(s, s')`is called _support_ for the state `s'`.
 This means that both participants have indicated their willingness to conclude the channel and distribute the assets according to `s'.outcome`.
 
-A smart contract called the _adjudicator_ is used to manage the assets, fairly dividing the assets at the conclusion of the state channel.
-A channel can conclude in two ways:
+While opening a state channel, the participants deposit assets into a smart contract called the _adjudicator_.
+The assets are frozen until the channel is concluded, which can occur in one of two ways:
 
-1. Both participants mutually agree on a final state, and call the `conclude` method on the adjudicator
+1. Both participants mutually agree on a final state, and call the `conclude` method on the adjudicator.
+   The adjudicator immediately marks the channel as closed, recording the outcome of the final state.
 2. One participant launches a challenge by calling `forceMove` on the adjudicator.
    The adjudicator starts a timer of a predetermined duration.
    The timer runs out before any valid response to the challenge is recorded.
+
+Case 1 is very straightforward.
+If Alice signs a final state, she knows that Bob can close the channel at any time by signing the same state.
+The only rational move from here is to not sign any other state, and conclude the channel on-chain.\*
+Therefore, we assume that Alice never signs a final state.
 
 In case 2, while the timer is running, any participant may attempt to clear the challenge.
 
@@ -82,6 +79,8 @@ The adjudicator keeps track of the turn number of the most recent supported stat
 It ignores unsupported states as well as states with a turn number less than the `turnNumRecord`.
 Thus, later states always take priority over earlier states, with the intention of preventing one participant from griefing others through repeatedly launching the same challenge.
 The remainder of this blog post explores various griefing attacks that we found in various versions of the ForceMove protocol.
+
+\* In practice, the channel might have been virtually funded, and Alice may instead virtually defund the channel, rather than concluding it on-chain.
 
 # Modeling ForceMove
 
