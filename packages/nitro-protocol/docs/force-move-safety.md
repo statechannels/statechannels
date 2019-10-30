@@ -94,7 +94,7 @@ The `Challenge` state has three parameters:
 
 The `Closed` state is terminal, and has one parameter, the `outcomeState`, denoted by `s`.
 
-The participants have four actions: `forceMove(n, s, p)`, `respond(s)`, `respondWithAlternativeMove(s)`, and `refute(n, s)`.
+The participants have four actions: `forceMove(n, s, p)`, `respond(s)`, `respondWithAlternativeMove(n)`, and `refute(n, s)`.
 We use `respondAlt` as a short-hand for `respondWithAlternativeMove.`
 
 The purpose of `forceMove` action is to move to a `Challenge` state.
@@ -184,6 +184,13 @@ She can trivially accomplish this if she can move the state's `turnNumRecord` to
 forceMove(n,s,Alice) >> Open(m) == Challenge(n,s,Alice)
 ```
 
+From this `Challenge` state, the only allowed transitions are to `Open(k)` for some `k >= n`.
+The monotonicity of the `turnNumRecord` then guarantees that the channel can only conclude.
+
+- The only valid actions from this point are
+  - `checkpoint(m,S') >> Open(n) == Open(m)` for some `m > n`
+  - `forceMove(m,s,p,S') >> Open(n) == Challenge(m,s,p)` for some `m > n`
+
 However, in the context of the Ethereum blockchain, this is not sufficient.
 Alice applies `forceMove` by calling a state-modifying function on an Ethereum smart contract in some transaction.
 The transaction is not recorded immediately, and once Bob sees her transaction, he might attempt to front-run her transaction with a different action in his own transaction.
@@ -238,8 +245,8 @@ function matches(S) {
 ## Attack
 
 - Suppose the channel is in `Open(k)`
-- Alice wishes to apply `forceMove(n,s,Alice)`
-- Bob front-runs with `forceMove(k,s',Bob)`
+- Alice wishes to apply `forceMove(n,s,Alice)`. She intends to effect the transition: `forceMove(n,s,Alice,S) >> Open(k) == Challenge(n,s,Alice)`.
+- Bob front-runs Alice's transaction with his own, where he applies `forceMove(k,s',Bob)` before Alice's action is applied. The resulting behaviour is
 
 ```
    forceMove(n,s,Alice,S) >> forceMove(k,s',Bob,S) >> Open(k)
@@ -249,8 +256,8 @@ function matches(S) {
 
 The problem is twofold:
 
-- The transition `forceMove >> Challenge` is not allowed in the current version of the protocol
-- Even if it were, `S` no longer matches the current state, and thus, no action would change the channel state
+- The action `forceMove` has no effect when in a `Challenge` adjudicator state in the current version of the protocol.
+- Even if `forceMove` were allowed in a `Challenge` state, `S` no longer matches the current adjudicator state, and thus, Alice's action would still fail.
 
 Bob can thus prevent the channel from progressing for time at least proportional to `n-k`.
 
@@ -287,18 +294,15 @@ This allows one to only care about the latest supported state, and it can be use
 
 This offers Alice a new strategy, applying `checkpoint(n, t, S)`, regardless of the current adjudicator state.
 
-- Alice can call `checkpoint(n,t,S)` at any time with her most recent state,which has turn `n`
-- If this transaction gets mined, it moves to `Open(n)`
-- The only valid actions from this point are
-  - `checkpoint(m,S') >> Open(n) == Open(m)` for some `m > n`
-  - `forceMove(m,s,p,S') >> Open(n) == Challenge(m,s,p)` for some `m > n`
-- Alice is happy
+- Alice can call `checkpoint(n,t,S)` at any time with her most recent state, which has turn `n`.
+- When her transaction gets mined, if the adjudicator state matches `S`, it moves to `Open(n)`, meeting her goal.
+- Alice's goal is met.
 
 ## Attack
 
-- Suppose we're in `Open(0)`
-- Alice wants to apply `checkpoint(n,S)`
-- Bob front-runs with `forceMove(0,s,p)`
+- Suppose we're in `Open(0)`.
+- Alice wants to apply `checkpoint(n,S)`.
+- Bob front-runs with `forceMove(0,s,p)`.
 
 ```
    checkpoint(n,Alice,S) >> forceMove(0,s',Bob,S) >> Open(0)
@@ -335,7 +339,7 @@ function matches(ChannelState memory S) public pure returns (bool) {
 ```
 
 Thus, the `forceMove` and `checkpoint` actions are always enabled, if the participant can provide a newer state than the current `turnNumRecord`.
-This counters the attacks found on the previous versions, thanks to the commutativity of the `forceMove` and `checkpoint` actions:
+This counters the attacks found on the previous versions, as the order that the `forceMove` and `checkpoint` actions are applied no longer matters:
 
 - Suppose we're in `Open(0)`
 - Alice wants to apply `checkpoint(n)`
@@ -344,6 +348,10 @@ This counters the attacks found on the previous versions, thanks to the commutat
 ```
    checkpoint(n) >> forceMove(0,s,Bob) >> Open(0)
 == checkpoint(n) >> Challenge(0,s,Bob)
+== Open(n)
+
+   forceMove(0,s,Bob) >> checkpoint(n) >> Open(0)
+== forceMove(0,s,Bob) >> Open(n)
 == Open(n)
 ```
 
