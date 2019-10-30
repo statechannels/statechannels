@@ -1,12 +1,15 @@
 import {Signature} from 'ethers/utils';
-import {getDepositedEvent} from './contract/asset-holder';
+import {getAssetTransferredEvent, getDepositedEvent} from './contract/asset-holder';
 import {getChallengeRegisteredEvent} from './contract/challenge';
 import {Channel, getChannelId} from './contract/channel';
 import {encodeConsensusData} from './contract/consensus-data';
-import {AllocationItem, Outcome} from './contract/outcome';
+import {AllocationItem, encodeAllocation, encodeOutcome, Outcome} from './contract/outcome';
 import {isAllocationOutcome, isGuaranteeOutcome} from './contract/outcome';
 import {State} from './contract/state';
-import {createDepositTransaction} from './contract/transaction-creators/eth-asset-holder';
+import {
+  createDepositTransaction,
+  createTransferAllTransaction,
+} from './contract/transaction-creators/eth-asset-holder';
 import * as Signatures from './signatures';
 import * as Transactions from './transactions';
 
@@ -31,12 +34,16 @@ export interface SignedState {
 // TODO: Export this with more thought to what is exposed by @statchannels/nitro-protocol
 export {
   createDepositTransaction,
+  createTransferAllTransaction,
   State,
   encodeConsensusData,
+  encodeAllocation,
+  encodeOutcome,
   Outcome,
   AllocationItem,
   getChannelId,
   Channel,
+  getAssetTransferredEvent,
   getChallengeRegisteredEvent,
   getDepositedEvent,
   isAllocationOutcome,

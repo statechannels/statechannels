@@ -4,10 +4,10 @@ This package allows you to use a State Channels-enabled dapp with wallets that d
 
 ## Usage
 
-1. Include the following script in your dapp's web front-end:
+1. Include the [Channel Provider](../channel-provider) script in your dapp's web front-end:
 
 ```html
-<script src="https://sc-embedded-wallet.netlify.com/wallet.js"></script>
+<script src="https://sc-embedded-wallet.netlify.com/channel-provider.min.js"></script>
 <script>
   // Enables the Channel Provider. This allows to intercept messages sent via postMessage.
   window.channelProvider.enable().then(() => {

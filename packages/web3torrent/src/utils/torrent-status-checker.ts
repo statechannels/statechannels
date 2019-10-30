@@ -3,11 +3,14 @@ import {ExtendedTorrent} from '../library/types';
 import {Status, Torrent} from '../types';
 
 export const getStatus = (torrent: ExtendedTorrent): Status => {
-  const {uploadSpeed, downloadSpeed, progress, done, createdBy} = torrent;
+  const {uploadSpeed, downloadSpeed, progress, uploaded, done, createdBy} = torrent;
   if (createdBy) {
     return Status.Seeding;
   }
   if (progress && done) {
+    if (uploaded) {
+      return Status.Seeding;
+    }
     return Status.Completed;
   }
   if (uploadSpeed - downloadSpeed === 0) {
@@ -59,7 +62,7 @@ export default (previousData: Torrent, infoHash): Torrent => {
     ...{
       name: live.name || previousData.name,
       length: live.length || previousData.length,
-      downloaded: (live && live.downloaded) || 0,
+      downloaded: live.downloaded || 0,
       status: getStatus(live),
       uploadSpeed: live.uploadSpeed,
       downloadSpeed: live.downloadSpeed,

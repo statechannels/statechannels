@@ -1,6 +1,6 @@
+import '@statechannels/channel-provider';
 import React from 'react';
 import ReactDOM from 'react-dom';
-
 import App from './App';
 import {web3torrent, WebTorrentContext} from './clients/web3torrent-client';
 
