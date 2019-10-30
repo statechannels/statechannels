@@ -3,6 +3,29 @@
 | Open(n,S) | forceMove(m,t,s,p,S) | C(m,t+exp,s,p) | valid(s->s') |
 
 This is the maxiumum width of a nicely formatted table in a medium post.
+Using tablegenerators.com, we can generate decent looking tables in a medium post like so
+
+```
+╔═════════════╦════════════════════╦═════════════╦══════════════╗
+║ State       ║ Action             ║ NextState   ║ Requirements ║
+╠═════════════╬════════════════════╬═════════════╬══════════════╣
+║ Open(n)     ║ forceMove(m,s,p,S) ║ Chal(m,s,p) ║ matches(S)   ║
+║             ║                    ║             ╠══════════════╣
+║             ║                    ║             ║ m >= n       ║
+╠═════════════╬════════════════════╬═════════════╬══════════════╣
+║ Chal(n,s,p) ║ refute(m,s',S)     ║ Open(n)     ║ matches(S)   ║
+║             ║                    ║             ╠══════════════╣
+║             ║                    ║             ║ m > n        ║
+║             ║                    ║             ╠══════════════╣
+║             ║                    ║             ║ p == sig(s') ║
+╠═════════════╬════════════════════╬═════════════╬══════════════╣
+║ Chal(n,s,p) ║ respond(s',S)      ║ Open(n+1)   ║ matches(S)   ║
+║             ║                    ║             ╠══════════════╣
+║             ║                    ║             ║ s->s'        ║
+╠═════════════╬════════════════════╬═════════════╬══════════════╣
+║ Open(n)     ║ respondAlt(S)      ║ Open(n+1)   ║ matches(S)   ║
+╚═════════════╩════════════════════╩═════════════╩══════════════╝
+```
 
 # Intro
 
