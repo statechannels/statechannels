@@ -19,34 +19,25 @@ beforeAll(async () => {
 });
 
 describe('validTransition', () => {
-  it.each`
-    randomNum                          | description
-    ${Math.floor(Math.random() * 100)} | ${'True'}
-  `('$description', async ({randomNum}: {randomNum: number}) => {
-    const salt = MaxUint256.toHexString();
-    const hash = computeRandomHash(salt, randomNum);
-
-    const variablePart: VariablePart = {
-      outcome: hash,
-      appData: hash,
-    };
-    const isValidFromCall = await trivialApp.validTransition(variablePart, variablePart, 0, 0);
-    expect(isValidFromCall).toBe(true);
-  });
-
   it('Random inputs always equal true', async () => {
     expect.assertions(5);
     for (let i = 0; i < 5; i++) {
-      const randomNum = Math.floor(Math.random() * 100);
-      const salt = MaxUint256.toHexString();
-      const hash = computeRandomHash(salt, randomNum);
-
-      const variablePart: VariablePart = {
-        outcome: hash,
-        appData: hash,
-      };
-      const isValidFromCall = await trivialApp.validTransition(variablePart, variablePart, 0, 0);
+      const from: VariablePart = getRandomVariablePart();
+      const to: VariablePart = getRandomVariablePart();
+      const isValidFromCall = await trivialApp.validTransition(from, to, 0, 0);
       expect(isValidFromCall).toBe(true);
     }
   });
 });
+
+function getRandomVariablePart(): VariablePart {
+  const randomNum = Math.floor(Math.random() * 100);
+  const salt = MaxUint256.toHexString();
+  const hash = computeRandomHash(salt, randomNum);
+
+  const variablePart: VariablePart = {
+    outcome: hash,
+    appData: hash,
+  };
+  return variablePart;
+}
