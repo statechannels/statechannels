@@ -29,7 +29,7 @@ Using tablegenerators.com, we can generate decent looking tables in a medium pos
 
 # Intro
 
-ForceMove is a state-channel protocol, designed to be a simple as possible.
+ForceMove is a state-channel protocol, designed to be as simple as possible.
 A set of participants exchanging states in private, which determine some outcome of the state channel.
 An adjudicator, in the form of a smart contract, enforces the outcome on a blockchain, which would typically involve some financial transaction.
 As such, the participants wish for the system to protect against malicious actors that try to prevent the most fair outcome from being recorded on-chain.
@@ -47,9 +47,9 @@ Engineers at Amazon Web Services [have used](https://lamport.azurewebsites.net/t
 4. Supported states
 -->
 
-In a ForceMove state channel, participants, privately update the state of some ledger.
-The state's outcome dictates how certain assets are allocated.
-The ledger may have additional state relative to the type of application the state channel is meant to support.
+In a ForceMove state channel, a small number of participants update a private state that is shared between them.
+The state's outcome ultimately dictates how the (public) blockchain state is updated: for example, how certain assets are allocated.
+The state may include additional data relating to the type of application the state channel is meant to support.
 
 In this blog post, we restrict to state channels with two participants, Alice and Bob.
 They update the ledger by exchanging signed copies of what they agree on as the _current state_ of the state channel.
@@ -65,8 +65,8 @@ We say that a state `s'` is _supported_ if there is a pair of states `(s, s')` s
 - `validTransition(s, s') == true`
 - `s` and `s'` are both signed by the correct participant
 
-In this case, `(s, s')`is called _support_ for the state`s'`.
-This means that both participants have indicated their willingness to conclude the channel and distribute the assets according to`s'.outcome`.
+In this case, `(s, s')`is called _support_ for the state `s'`.
+This means that both participants have indicated their willingness to conclude the channel and distribute the assets according to `s'.outcome`.
 
 A smart contract called the _adjudicator_ is used to manage the assets, fairly dividing the assets at the conclusion of the state channel.
 A channel can conclude in two ways:
@@ -122,7 +122,7 @@ This state should form a valid transition from the current `challengeState`.
 ## `respondAlt`
 
 This action allows participants to provide the adjudicator an alternative set of states that also increases the `turnNumRecord`.
-Participants may wish to sign multiple states with the same `turnNumRecord` for various practical purposes.
+Participants may wish to sign multiple states with the same `turnNumber` for various practical purposes.
 One such purpose is to allow Alice to send money to Bob while Bob is off-line, by sending multiple states at turn `n` with increasing amounts of money allocated to Bob.
 Bob may then reply to whatever state is most desirable to him.
 
@@ -174,7 +174,7 @@ We use the notation `A >> S` to denote the state resulting in applying action `A
 # Safety
 
 Since the channel only closes from a `Challenge` state, and the channel only enters a challenge state when the adjudicator sees a supported state, Alice must have been, at some point in time, satisfied with any state that the channel closes with.
-However, it may not close with the latest state.
+However, there may be a later state which should supersede the challenge state; if Alice (or some other party) does not act, the channel may close in the out-of-date challenge state.
 
 Assume that Bob has become malicious, and he is willing to consume an exorbitant amount of resources to grief Alice.
 Suppose the state is currently `Open(m)`, and Alice holds a supported state `s` with turn `n >= m`.
@@ -195,7 +195,7 @@ If his transaction is recorded first, it might change the state in such a way th
 The situation is worsened by an optimization we've done to save on gas fees.
 A hash of the entire channel state is stored in a single `bytes32` slot on-chain.
 Therefore, when applying an action, the participant must provide the current state as a part of the calldata.
-If the hash of the provide state does not match the stored value, the action has no effect.
+If the hash of the provided state does not match the stored value, the action has no effect.
 
 | State       | Action             | NextState   | Requirements |
 | ----------- | ------------------ | ----------- | ------------ |
@@ -276,7 +276,7 @@ This allows one to only care about the latest supported state, and it can be use
 | ----------- | ------------------ | ----------- | ------------ |
 | Open(n)     | forceMove(m,s,p,S) | Chal(m,s,p) | matches(S)   |
 |             |                    |             | m >= n       |
-| Open(n,S)   | checkpoint(m,S)    | Open(m))    | matches(S)   |
+| Open(n,S)   | checkpoint(m,S)    | Open(m)     | matches(S)   |
 |             |                    |             | m > n        |
 | Chal(n,s,p) | checkpoint(m,S)    | Open(m)     | matches(S)   |
 |             |                    |             | m > n        |
@@ -286,10 +286,10 @@ This allows one to only care about the latest supported state, and it can be use
 | Chal(n,s,p) | respond(s',S)      | Open(n+1)   | matches(S)   |
 |             |                    |             | s->s'        |
 
-This offers Alice a new strategy, applying `checkpoint(n, t, S)`, regardless of the current state.
+This offers Alice a new strategy, applying `checkpoint(n, t, S)`, regardless of the current adjudicator state.
 
 - Alice can call `checkpoint(n,t,S)` at any time with her most recent state,which has turn `n`
-- If this transaction gets recorded,it moves to `Open(n)`
+- If this transaction gets mined, it moves to `Open(n)`
 - The only valid actions from this point are
   - `checkpoint(m,S') >> Open(n) == Open(m)` for some `m > n`
   - `forceMove(m,s,p,S') >> Open(n) == Challenge(m,s,p)` for some `m > n`
@@ -369,7 +369,7 @@ However, TLA+ exposed a new attack, unknown to us at the time.
 refute(m,s',S) >> Challenge(n,s,Bob) == Open(n)
 ```
 
-- The state has returns to `Open(n)`.
+- The state has returned to `Open(n)`.
 
 By repeating this attack, Bob can prevent the channel from closing indefinitely.
 While there are techniques that can block this attack, such as storing who has challenged so far with the current `turnNumRecord`, we decided to forgo the `refute` action altogether until we have a clear application for it.
@@ -392,7 +392,7 @@ This leaves us with the current version of the protocol:
 With this final protocol, when Alice has a state `s` of turn `n`, she has two strategies to protect her assets.
 
 If she wishes to force Bob to move, she applies `forceMove(n, s, Alice)`.
-When her transaction is proccessed, we can partition the possible states into four cases:
+When her transaction is proccessed, we can partition the possible adjudicator states into four cases:
 
 1. `Open(m)`
    a. `m <= n`
@@ -405,7 +405,7 @@ In cases 1a & 2a, her transaction succeeds, and the state changes to `Challenge(
 In cases 1b & 2b, her transaction fails, but she has seen a supported state `s'` that trumps `s`, which was her goal.
 
 If she wishes to protect her assets before going offline, she applies `checkpoint(n)`.
-When her transaction is proccessed, we can partition the possible states into four cases:
+When her transaction is proccessed, once again we can partition the possible states into four cases:
 
 1. `Open(m)`
    a. `m < n`
