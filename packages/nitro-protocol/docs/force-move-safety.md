@@ -127,7 +127,7 @@ When the timer runs out, the adjudicator applies `timeout(S)`.
 
 In practice, this transition happens implicitly: when in a `Challenge` state, the challenge expiration time is recorded in a field `finalizesAt`, and once `finalizesAt <= now`, the channel is closed.
 
-## State Transitions, V1
+## State Transitions: Version 1
 
 We record the allowed state transitions from the original ForceMove protocol in the following table.
 By default, any (state, action) pair not listed below does not change the state.
@@ -167,7 +167,7 @@ Alice applies `forceMove` by calling a state-modifying function on an Ethereum s
 The transaction is not recorded immediately, and once Bob sees her transaction, he might attempt to front-run her transaction with a different action in his own transaction.
 If his transaction is recorded first, it might change the state in such a way that Alice's transaction reverts.
 
-# Gas-optimization
+# Version 2: Gas-optimization
 
 The situation is worsened by an optimization we've done to save on gas fees.
 A hash of the entire channel state is stored in a single `bytes32` slot on-chain.
@@ -217,18 +217,18 @@ function matches(S) {
 
 - Suppose the channel is in `Open(k)`
 - Alice wishes to apply `forceMove(n,s,Alice)`
-- Bob front-runs with `forceMove(k,s',Eve)`
+- Bob front-runs with `forceMove(k,s',Bob)`
 
 ```
-   forceMove(n,s,Alice,S) >> forceMove(k,s',Eve,S) >> Open(k)
-== forceMove(n,s,Alice,S) >> Challenge(k,s',Eve)
-== Challenge(k,s',Eve)
+   forceMove(n,s,Alice,S) >> forceMove(k,s',Bob,S) >> Open(k)
+== forceMove(n,s,Alice,S) >> Challenge(k,s',Bob)
+== Challenge(k,s',Bob)
 ```
 
 The problem is twofold:
 
 - The transition `forceMove >> Challenge` is not allowed in the current version of the protocol
-- Eve if it were, `S` no longer matches the current state, and thus, no action would change the channel state
+- Even if it were, `S` no longer matches the current state, and thus, no action would change the channel state
 
 Bob can thus prevent the channel from progressing for time at least proportional to `n-k`.
 
@@ -279,9 +279,9 @@ This offers Alice a new strategy, applying `checkpoint(n, t, S)`, regardless of 
 - Bob front-runs with `forceMove(0,s,p)`
 
 ```
-   checkpoint(n,Alice,S) >> forceMove(0,s',Eve,S) >> Open(0)
-== checkpoint(n,Alice,S) >> Challenge(0,s',Eve)
-== Challenge(0,s',Eve)
+   checkpoint(n,Alice,S) >> forceMove(0,s',Bob,S) >> Open(0)
+== checkpoint(n,Alice,S) >> Challenge(0,s',Bob)
+== Challenge(0,s',Bob)
 ```
 
 No matter how the challenge is cleared, Bob can repeat this, blocking the channel for time at least proportional to `n`.
@@ -320,8 +320,8 @@ This counters the attacks found on the previous versions, thanks to the commutat
 - Bob front-run with `forceMove(0,s,p)`
 
 ```
-   checkpoint(n) >> forceMove(0,s,Eve) >> Open(0)
-== checkpoint(n) >> Challenge(0,s,Eve)
+   checkpoint(n) >> forceMove(0,s,Bob) >> Open(0)
+== checkpoint(n) >> Challenge(0,s,Bob)
 == Open(n)
 ```
 
@@ -331,24 +331,24 @@ However, TLA+ exposed a new attack, unknown to us at the time.
 
 - Suppose we're in `Open(n)`, and alice's latest state is `s`, with turn `n`.
 - Alice wants to apply `forceMove(n,s,Alice)`
-- Bob front-runs with `forceMove(n,s,Eve)`
+- Bob front-runs with `forceMove(n,s,Bob)`
 
 ```
-   forceMove(n,s,Alice) >> forceMove(n,s,Eve) >> Open(n)
-== forceMove(n,s,Alice) >> Challenge(n,s,Eve)
-== Challenge(n,s,Eve)
+   forceMove(n,s,Alice) >> forceMove(n,s,Bob) >> Open(n)
+== forceMove(n,s,Alice) >> Challenge(n,s,Bob)
+== Challenge(n,s,Bob)
 ```
 
 - Alice has no signed state later than `n`, so she cannot perform any action.
 - Bob can sign any state `s'` with her turn number, and she calls `refute(m,s',S)`.
 
 ```
-refute(m,s',S) >> Challenge(n,s,Eve) == Open(n)
+refute(m,s',S) >> Challenge(n,s,Bob) == Open(n)
 ```
 
 - The state has returns to `Open(n)`.
 
-By repeating this attack, Eve can prevent the channel from closing indefinitely.
+By repeating this attack, Bob can prevent the channel from closing indefinitely.
 While there are techniques that can block this attack, such as storing who has challenged so far with the current `turnNumRecord`, we decided to forgo the `refute` action altogether until we have a clear application for it.
 
 Note that this attack was present in all of the above versions.
