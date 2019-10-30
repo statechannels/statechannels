@@ -7,17 +7,17 @@ import {OnboardingFlowPaths} from '../../flows';
 import {JsonRpcComponentProps} from '../../json-rpc-router';
 import {closeWallet} from '../../message-dispatchers';
 import {mockOnboardingFlowContext} from '../../test-utils';
-import {ButtonProps, Dialog, DialogProps, Icons} from '../../ui';
-import {NoHub} from './NoHub';
+import {ButtonProps, Dialog, DialogProps} from '../../ui';
+import {OnboardingFinished} from './OnboardingFinished';
 
 Enzyme.configure({adapter: new Adapter()});
 
-type MockNoHubDialog = {
+type MockOnboardingFinishedDialog = {
   dialogWrapper: ReactWrapper;
   routeProps: MockRouteProps;
   dialogElement: ReactWrapper<DialogProps>;
   closeButton: ReactWrapper;
-  connectToHubButton: ReactWrapper<ButtonProps>;
+  backToAppButton: ReactWrapper<ButtonProps>;
 };
 
 type MockRouteProps = {
@@ -32,18 +32,18 @@ const mockRouteProps = (): MockRouteProps => {
   const match = {
     isExact: true,
     params: {},
-    path: OnboardingFlowPaths.NoHub,
-    url: `http://localhost/${OnboardingFlowPaths.NoHub}`
+    path: OnboardingFlowPaths.Finished,
+    url: `http://localhost/${OnboardingFlowPaths.Finished}`
   };
 
   return {history, location, match};
 };
 
-const mockNoHubDialog = (): MockNoHubDialog => {
+const mockOnboardingFinishedDialog = (): MockOnboardingFinishedDialog => {
   const routeProps = mockRouteProps();
   const dialogWrapper = mount(
     <Router history={routeProps.history}>
-      <NoHub {...routeProps} />
+      <OnboardingFinished {...routeProps} />
     </Router>
   );
 
@@ -52,40 +52,30 @@ const mockNoHubDialog = (): MockNoHubDialog => {
     routeProps,
     dialogElement: dialogWrapper.find(Dialog),
     closeButton: dialogWrapper.find({onClick: closeWallet}),
-    connectToHubButton: dialogWrapper.find({type: 'primary'})
+    backToAppButton: dialogWrapper.find({type: 'primary'})
   };
 };
 
-describe('Dialogs - NoHub', () => {
+describe('Dialogs - OnboardingFinished', () => {
   let onboardingFlowContext: jest.SpyInstance<JsonRpcComponentProps, []>;
-  let noHub: MockNoHubDialog;
+  let onboardingFinishedDialog: MockOnboardingFinishedDialog;
 
   beforeEach(() => {
     onboardingFlowContext = mockOnboardingFlowContext();
-    noHub = mockNoHubDialog();
+    onboardingFinishedDialog = mockOnboardingFinishedDialog();
   });
 
   it('can be instantiated', () => {
-    const {dialogElement, closeButton, connectToHubButton} = noHub;
+    const {dialogElement, closeButton, backToAppButton} = onboardingFinishedDialog;
     expect(dialogElement.exists()).toEqual(true);
-    expect(dialogElement.prop('title')).toEqual(
-      "You aren't connected to any hubs, so connect to one."
-    );
-    expect(closeButton.exists()).toEqual(true);
-    expect(connectToHubButton.exists()).toEqual(true);
-    expect(connectToHubButton.prop('label')).toEqual('Connect to Hub');
-    expect(connectToHubButton.prop('icon')).toEqual(Icons.ExternalLink);
-    expect(connectToHubButton.prop('iconPosition')).toEqual('right');
+    expect(dialogElement.prop('title')).toEqual('All set!');
+    expect(closeButton.exists()).toEqual(false);
+    expect(backToAppButton.exists()).toEqual(true);
+    expect(backToAppButton.prop('label')).toEqual('Back to App');
   });
 
-  it('should redirect to ConnectToHub when clicking "Connect to Hub"', () => {
-    const {connectToHubButton, routeProps} = noHub;
-    connectToHubButton.simulate('click');
-    expect(routeProps.history.location.pathname).toMatch(OnboardingFlowPaths.ConnectToHub);
-  });
-
-  it('should close the wallet when clicking Close', async done => {
-    const {closeButton} = noHub;
+  it('should close the wallet when clicking the primary button', async done => {
+    const {backToAppButton} = onboardingFinishedDialog;
 
     window.onmessage = (event: MessageEvent) => {
       if (event.data === 'ui:wallet:close') {
@@ -93,7 +83,7 @@ describe('Dialogs - NoHub', () => {
       }
     };
 
-    closeButton.simulate('click');
+    backToAppButton.simulate('click');
   });
 
   afterEach(() => {
