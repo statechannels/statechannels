@@ -5,10 +5,12 @@ import {Commitment, SignedCommitment, signCommitment2} from "../domain";
 import {asEthersObject} from "fmg-core";
 import {
   createDepositTransaction as createNitroDepositTransaction,
+  createTransferAllTransaction as createNitroTransferAllTransaction,
   Transactions as nitroTrans,
   SignedState
 } from "@statechannels/nitro-protocol";
-import {convertCommitmentToState} from "./nitro-converter";
+import {convertAddressToBytes32, convertCommitmentToState} from "./nitro-converter";
+import {Allocation, AllocationItem} from "@statechannels/nitro-protocol/src/contract/outcome";
 
 export function createForceMoveTransaction(
   fromCommitment: SignedCommitment,
@@ -125,4 +127,18 @@ export function createDepositTransaction(destination: string, depositAmount: str
     destination = `0x${destination.substr(2).padStart(64, "1")}`; // note we do not pad with zeros, since that would imply an external destination (which we may not deposit to)
   }
   return createNitroDepositTransaction(destination, expectedHeld, depositAmount);
+}
+
+export function createTransferAllTransaction(source: string, destination: string, amount: string) {
+  const allocation: Allocation = [
+    {
+      destination: externalizeAddress(destination),
+      amount
+    } as AllocationItem
+  ];
+  return createNitroTransferAllTransaction(source, allocation);
+}
+
+function externalizeAddress(address: string): string {
+  return address.length !== 66 ? convertAddressToBytes32(address) : address;
 }

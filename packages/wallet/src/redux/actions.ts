@@ -52,11 +52,18 @@ export interface DisplayMessageSent {
   type: "WALLET.DISPLAY_MESSAGE_SENT";
 }
 
+export interface AssetTransferredEvent {
+  type: "WALLET.ASSET_HOLDER.ASSET_TRANSFERRED";
+
+  // This is either a `channelId` or an external destination (both bytes32).
+  destination: string;
+  amount: BigNumber;
+}
+
 export interface DepositedEvent {
   type: "WALLET.ASSET_HOLDER.DEPOSITED";
 
-  // This is either the `channelId` (bytes32) or (the left-padded bytes20)
-  // recipient address
+  // This is either a `channelId` or an external destination (both bytes32).
   destination: string;
   amountDeposited: BigNumber;
   destinationHoldings: BigNumber;
@@ -172,6 +179,11 @@ export const depositedEvent: ActionConstructor<DepositedEvent> = p => ({
   type: "WALLET.ASSET_HOLDER.DEPOSITED"
 });
 
+export const assetTransferredEvent: ActionConstructor<AssetTransferredEvent> = p => ({
+  ...p,
+  type: "WALLET.ASSET_HOLDER.ASSET_TRANSFERRED"
+});
+
 export const blockMined: ActionConstructor<BlockMined> = p => ({...p, type: "BLOCK_MINED"});
 
 export const metamaskLoadError: ActionConstructor<MetamaskLoadError> = p => ({
@@ -236,7 +248,7 @@ export type AdjudicatorEventAction =
   | ChallengeExpirySetEvent
   | ChannelUpdate;
 
-export type AssetHolderEventAction = DepositedEvent;
+export type AssetHolderEventAction = AssetTransferredEvent | DepositedEvent;
 
 export type ProtocolAction =
   // only list top level protocol actions
@@ -293,7 +305,7 @@ export function isAdjudicatorEventAction(action: WalletAction): action is Adjudi
 }
 
 export function isAssetHolderEventAction(action: WalletAction): action is AssetHolderEventAction {
-  return action.type === "WALLET.ASSET_HOLDER.DEPOSITED";
+  return action.type === "WALLET.ASSET_HOLDER.DEPOSITED" || action.type === "WALLET.ASSET_HOLDER.ASSET_TRANSFERRED";
 }
 
 // These are actions related to storage

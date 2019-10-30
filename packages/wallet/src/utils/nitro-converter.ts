@@ -110,7 +110,8 @@ export function convertAddressToBytes32(address: string): string {
   // We pad to 66 = (32*2) + 2('0x')
   return `0x${normalizedAddress.substr(2).padStart(64, "0")}`;
 }
-function convertAllocationToOutcome({ allocation, destination }: { allocation: string[]; destination: string[] }): Outcome {
+
+export function convertAllocationToOutcome({ allocation, destination }: { allocation: string[]; destination: string[] }): Outcome {
   if (allocation.length !== destination.length) {
     throw new Error("Allocation and destination must be the same length");
   }

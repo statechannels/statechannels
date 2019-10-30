@@ -1,4 +1,4 @@
-@import "../../styles/variables";
+@import '../../styles/variables';
 section.fill {
   display: flex;
   align-items: center;
@@ -6,12 +6,29 @@ section.fill {
   margin-bottom: 100px;
 }
 .jumbotron {
-  background-image: url("/assets/jumbotron.jpeg");
-  background-size: contain;
+  background-image: url('/assets/jumbotron.svg');
+  background-size: cover;
   background-repeat: no-repeat;
   height: auto;
   width: 100%;
   padding-top: 52.55%;
+  position: relative;
+  h1,
+  h2 {
+    font-size: 25px;
+    line-height: 34px;
+    width: 100%;
+    text-align: center;
+    margin-top: -200px;
+    color: $c-white;
+  }
+  h2 {
+    font-size: 15px;
+    line-height: 40px;
+    margin-top: 0px;
+    letter-spacing: 2.78px;
+    opacity: 94%;
+  }
 }
 
 .subtitle {
