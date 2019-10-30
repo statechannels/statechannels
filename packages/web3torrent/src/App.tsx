@@ -13,7 +13,7 @@ const App: React.FC = () => {
   const history = createBrowserHistory();
   return (
     <Router history={history}>
-      <main className="wrapper__content">
+      <main>
         <Route path={RoutePath.Root} component={LayoutHeader} />
         <Switch>
           <Route exact path={RoutePath.Root} component={Welcome} />

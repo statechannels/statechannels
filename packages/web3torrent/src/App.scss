@@ -39,6 +39,7 @@ a {
   color: $c-orange;
   font-weight: 600;
 }
+
 html,
 body {
   height: 100%;
@@ -46,25 +47,17 @@ body {
 
 #root {
   height: 99vh;
+  width: 670px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
-.wrapper__content {
-  width: 670px;
-  display: flex;
-  flex-direction: column;
-  margin: 0 auto;
-}
-
 @media only screen and (max-width: 670px) {
-  .wrapper__content {
+  #root {
     min-width: 300px;
     width: 95vw;
     max-width: 900px;
-    display: flex;
-    flex-direction: column;
-    margin: 0 auto;
   }
 }
