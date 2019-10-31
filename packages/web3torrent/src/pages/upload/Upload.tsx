@@ -37,7 +37,7 @@ const Upload: React.FC<RouteComponentProps> = ({history}) => {
           <strong>How do others download my file?</strong>
           <br />
           Use the "Share Link" button or copy this browser tab's URL, and send that address to
-          whoever you want to share the file with.
+          whomever you want to share the file with.
         </p>
       </div>
     </section>

@@ -20,7 +20,11 @@ const Welcome: React.FC<RouteComponentProps> = ({history}) => {
           <a href="https://statechannels.org" target="_blank" rel="noopener noreferrer">
             State Channels
           </a>{' '}
-          and the BitTorrent protocol.
+          and{' '}
+          <a href="https://webtorrent.io/" target="_blank" rel="noopener noreferrer">
+            WebTorrent
+          </a>
+          , a JavaScript implementation of the BitTorrent protocol.
         </p>
       </div>
       <h2>Download a sample file</h2>

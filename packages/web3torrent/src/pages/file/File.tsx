@@ -64,8 +64,8 @@ const File: React.FC<RouteComponentProps> = () => {
               <strong>How do I pay for the download?</strong>
               <br />
               When you click "Start Download", you'll be asked to allocate an amount of ETH so
-              Web3Torrent can collect payments on your behalf and transfer those funds to the file
-              owner. Unlike other systems, the payment is not upfront; instead, you pay as you
+              Web3Torrent can collect payments on your behalf and transfer those funds to the
+              seeder. Unlike other systems, the payment is not upfront; instead, you pay as you
               download.
             </p>
             <p>
@@ -77,10 +77,10 @@ const File: React.FC<RouteComponentProps> = () => {
               <a href="http://statechannels.org" target="_blank" rel="noopener noreferrer">
                 State Channels
               </a>
-              , a technique that reduces fees for blockchain users and allows users to transact
-              with each other with instant finality. Through counterfactually instantiated
-              contracts, this technology enables a private, efficient and secure environment for
-              safe transactions.
+              , a technique that reduces fees for blockchain users, allowing them to transact with
+              each other on faster-than-on-chain operating times. Through
+              counterfactually-instantiated contracts, this technology enables a private, efficient
+              and secure environment for transactions.
             </p>
           </div>
         </>
