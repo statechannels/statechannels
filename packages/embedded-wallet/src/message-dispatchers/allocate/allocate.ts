@@ -1,12 +1,25 @@
+import {JsonRpcErrorResponse, JsonRpcResponse} from '@statechannels/channel-provider';
 import debug from 'debug';
-import {JsonRPCResponse} from 'web3/providers';
 
 const log = debug('wallet:dispatch');
 
 const allocate = (requestId: number, result: {[key: string]: string | number | boolean}) => {
-  const message: JsonRPCResponse = {jsonrpc: '2.0', id: requestId, result};
+  const message: JsonRpcResponse = {jsonrpc: '2.0', id: requestId, result};
   log('Sending: %o', message);
   window.parent.postMessage(message, '*');
 };
 
-export {allocate};
+const rejectAllocation = (requestId: number) => {
+  const message: JsonRpcErrorResponse = {
+    jsonrpc: '2.0',
+    id: requestId,
+    error: {
+      code: -32100,
+      message: 'User has rejected budget allocation'
+    }
+  };
+  log('Sending: %o', message);
+  window.parent.postMessage(message, '*');
+};
+
+export {allocate, rejectAllocation};

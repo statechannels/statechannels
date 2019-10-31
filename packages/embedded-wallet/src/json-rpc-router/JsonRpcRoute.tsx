@@ -1,8 +1,8 @@
+import {JsonRpcRequest} from '@statechannels/channel-provider';
 import React, {createFactory} from 'react';
-import {JsonRPCRequest} from 'web3/providers';
 import {JsonRpcRouterConsumer} from './JsonRpcRouter';
 
-export type JsonRpcComponentProps = {request: JsonRPCRequest};
+export type JsonRpcComponentProps = {request: JsonRpcRequest};
 export type JsonRpcRouteProps = {
   method: string;
   component:
