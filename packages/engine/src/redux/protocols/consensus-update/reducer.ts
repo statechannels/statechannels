@@ -1,4 +1,4 @@
-import {SharedData, signAndStore, getExistingChannel} from "../../state";
+import {SharedData, signAndStoreComm, getExistingChannel} from "../../state";
 import * as states from "./states";
 import {ProtocolStateWithSharedData} from "..";
 import {ConsensusUpdateAction} from "./actions";
@@ -15,6 +15,7 @@ import {eqHexArray} from "../../../utils/hex-utils";
 import {CommitmentsReceived, ProtocolLocator} from "../../../communication";
 import {unreachable} from "../../../utils/reducer-utils";
 import {ChannelState} from "../../channel-store";
+import {convertStateToCommitment} from "../../../utils/nitro-converter";
 
 export {CONSENSUS_UPDATE_PROTOCOL_LOCATOR} from "../../../communication/protocol-locator";
 
@@ -166,9 +167,9 @@ function sendIfSafe(
 }
 
 function consensusReached(channel: ChannelState, expectedAllocation: string[], expectedDestination: string[]): boolean {
-  const {commitments} = channel;
-  return !!commitments.find(signedCommitment => {
-    const {commitment} = signedCommitment;
+  const {signedStates} = channel;
+  const commitments = signedStates.map(ss => convertStateToCommitment(ss.state));
+  return !!commitments.find(commitment => {
     return (
       consensusHasBeenReached(commitment) &&
       eqHexArray(commitment.allocation, expectedAllocation) &&
@@ -195,7 +196,7 @@ function sendAcceptConsensus(
   const {furtherVotesRequired} = appAttributesFromBytes(lastCommitment.appAttributes);
   const ourCommitment = furtherVotesRequired === 1 ? acceptConsensus(lastCommitment) : voteForConsensus(lastCommitment);
 
-  const signResult = signAndStore(sharedData, ourCommitment);
+  const signResult = signAndStoreComm(sharedData, ourCommitment);
   if (!signResult.isSuccess) {
     throw new Error("Signature Failure");
   }
@@ -214,7 +215,7 @@ function sendProposal(
 ): SharedData {
   const lastCommitment = helpers.getLatestCommitment(channelId, sharedData);
   const ourCommitment = proposeNewConsensus(lastCommitment, proposedAllocation, proposedDestination);
-  const signResult = signAndStore(sharedData, ourCommitment);
+  const signResult = signAndStoreComm(sharedData, ourCommitment);
   if (!signResult.isSuccess) {
     throw new Error("SignatureFailure");
   }

@@ -58,7 +58,8 @@ describe("signing an invalid commitment", () => {
   });
 });
 
-describe("validating a commitment", () => {
+// TODO: These should be re-enabled when this protocol is refactored to SignedStates
+describe.skip("validating a commitment", () => {
   const scenario = scenarios.receivingTheirCommitment;
 
   describe(whenIn("Application.Ongoing"), () => {
@@ -71,7 +72,7 @@ describe("validating a commitment", () => {
   });
 });
 
-describe("validating an invalid commitment", () => {
+describe.skip("validating an invalid commitment", () => {
   const scenario = scenarios.receivingTheirInvalidCommitment;
 
   describeScenarioStep(scenario.ongoing, () => {

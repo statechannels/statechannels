@@ -13,7 +13,7 @@ import {
   successClosed
 } from "./states";
 import {unreachable} from "../../../../utils/reducer-utils";
-import {SharedData, registerChannelToMonitor, checkAndStore, getPrivatekey} from "../../../state";
+import {SharedData, registerChannelToMonitor, checkAndStoreComm, getPrivatekey} from "../../../state";
 import * as actions from "./actions";
 import {TransactionAction} from "../../transaction-submission/actions";
 import {isTransactionAction, ProtocolAction} from "../../../actions";
@@ -30,7 +30,7 @@ import {
   sendConcludeSuccess
 } from "../../reducer-helpers";
 import {Commitment, SignedCommitment} from "../../../../domain";
-import {convertCommitmentToSignedState} from "../../../../utils/nitro-converter";
+import {convertCommitmentToSignedState, convertStateToSignedCommitment} from "../../../../utils/nitro-converter";
 import {channelID} from "fmg-core";
 
 const CHALLENGE_TIMEOUT = 5 * 60000;
@@ -176,8 +176,10 @@ function challengeApproved(state: NonTerminalCState, sharedData: SharedData): Re
 
   // else if we don't have the last two states
   // make challenge transaction
-  const [penultimateCommitment, lastCommitment] = channelState.commitments;
+  const [penultimateState, lastState] = channelState.signedStates.map(ss => ss.state);
   const privateKey = getPrivatekey(sharedData, state.channelId);
+  const lastCommitment = convertStateToSignedCommitment(lastState, privateKey);
+  const penultimateCommitment = convertStateToSignedCommitment(penultimateState, privateKey);
   const transactionRequest = createForceMoveTransaction(penultimateCommitment, lastCommitment, privateKey);
   // initialize transaction state machine
   const returnVal = initializeTransaction(transactionRequest, state.processId, state.channelId, sharedData);
@@ -225,7 +227,7 @@ function challengeResponseReceived(
     signature: challengeSignature,
     signedState: convertCommitmentToSignedState(challengeCommitment, privateKey)
   };
-  const checkResult = checkAndStore(sharedData, signedCommitment);
+  const checkResult = checkAndStoreComm(sharedData, signedCommitment);
   if (checkResult.isSuccess) {
     return {state, sharedData: checkResult.store};
   }

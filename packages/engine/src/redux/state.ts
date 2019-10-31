@@ -25,13 +25,14 @@ import {accumulateSideEffects} from "./outbox";
 import {EngineEvent} from "../magmo-engine-client";
 import {TransactionRequest} from "ethers/providers";
 import {AdjudicatorState} from "./adjudicator-state/state";
-import {SignedCommitment, Commitment} from "../domain";
+import {SignedCommitment, Commitment, getCommitmentChannelId} from "../domain";
 import {ProcessProtocol, ProtocolLocator} from "../communication";
 import {TerminalApplicationState, isTerminalApplicationState, isApplicationState} from "./protocols/application/states";
 import {TerminalFundingState, isFundingState, isTerminalFundingState} from "./protocols/funding/states";
 import {ProtocolState} from "./protocols";
 import {isDefundingState, isTerminalDefundingState, TerminalDefundingState} from "./protocols/defunding/states";
 import {TerminalConcludingState, isConcludingState, isTerminalConcludingState} from "./protocols/concluding/states";
+import {convertCommitmentToState, convertStateToSignedCommitment} from "../utils/nitro-converter";
 
 export type EngineState = WaitForLogin | MetaMaskError | Initialized;
 
@@ -230,21 +231,25 @@ export function getPrivatekey(state: SharedData, channelId: string): string {
   }
 }
 
-export function signAndInitialize(state: SharedData, commitment: Commitment, privateKey: string): SignResult {
-  const result = signAndInitializeChannelStore(state.channelStore, commitment, privateKey);
+export function signAndInitializeComm(state: SharedData, commitment: Commitment, privateKey: string): SignResult {
+  const result = signAndInitializeChannelStore(state.channelStore, convertCommitmentToState(commitment), privateKey);
   if (result.isSuccess) {
-    return {...result, store: setChannelStore(state, result.store)};
+    return {
+      isSuccess: result.isSuccess,
+      signedCommitment: convertStateToSignedCommitment(result.signedState.state, privateKey),
+      store: setChannelStore(state, result.store)
+    };
   } else {
     return result;
   }
 }
 
-export function checkAndInitialize(
+export function checkAndInitializeComm(
   state: SharedData,
   signedCommitment: SignedCommitment,
   privateKey: string
 ): CheckResult {
-  const result = checkAndInitializeChannelStore(state.channelStore, signedCommitment, privateKey);
+  const result = checkAndInitializeChannelStore(state.channelStore, signedCommitment.signedState, privateKey);
   if (result.isSuccess) {
     return {...result, store: setChannelStore(state, result.store)};
   } else {
@@ -252,8 +257,8 @@ export function checkAndInitialize(
   }
 }
 
-export function checkAndStore(state: SharedData, signedCommitment: SignedCommitment): CheckResult {
-  const result = checkAndStoreChannelStore(state.channelStore, signedCommitment);
+export function checkAndStoreComm(state: SharedData, signedCommitment: SignedCommitment): CheckResult {
+  const result = checkAndStoreChannelStore(state.channelStore, signedCommitment.signedState);
   if (result.isSuccess) {
     return {...result, store: setChannelStore(state, result.store)};
   } else {
@@ -269,10 +274,17 @@ interface CheckFailure {
   isSuccess: false;
 }
 
-export function signAndStore(state: SharedData, commitment: Commitment): SignResult {
-  const result = signAndStoreChannelStore(state.channelStore, commitment);
+export function signAndStoreComm(state: SharedData, commitment: Commitment): SignResult {
+  const result = signAndStoreChannelStore(state.channelStore, convertCommitmentToState(commitment));
   if (result.isSuccess) {
-    return {...result, store: setChannelStore(state, result.store)};
+    const channelId = getCommitmentChannelId(commitment);
+
+    const privateKey = getPrivatekey(state, channelId);
+    return {
+      isSuccess: result.isSuccess,
+      signedCommitment: convertStateToSignedCommitment(result.signedState.state, privateKey),
+      store: setChannelStore(state, result.store)
+    };
   } else {
     return result;
   }
@@ -300,7 +312,7 @@ export function getCommitments(store: SharedData, channelId: string): Commitment
   if (!channel) {
     throw new Error("Channel missing");
   }
-  return channel.commitments;
+  return channel.signedStates.map(ss => convertStateToSignedCommitment(ss.state, channel.privateKey));
 }
 
 export {NewLedgerChannel};

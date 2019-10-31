@@ -1,4 +1,4 @@
-import {Commitment, getChannelId, SignedCommitment} from "../../../../domain";
+import {Commitment, getCommitmentChannelId, SignedCommitment} from "../../../../domain";
 import {ProtocolStateWithSharedData} from "../..";
 import * as states from "./states";
 import * as actions from "./actions";
@@ -8,7 +8,7 @@ import * as TransactionGenerator from "../../../../utils/transaction-generator";
 import {TwoPartyPlayerIndex} from "../../../types";
 import {TransactionRequest} from "ethers/providers";
 import {initialize as initTransactionState, transactionReducer} from "../../transaction-submission/reducer";
-import {SharedData, signAndStore, registerChannelToMonitor, getPrivatekey} from "../../../state";
+import {SharedData, signAndStoreComm, registerChannelToMonitor, getPrivatekey} from "../../../state";
 import {isTransactionAction} from "../../transaction-submission/actions";
 import {isTerminal, TransactionSubmissionState, isSuccess} from "../../transaction-submission/states";
 import {channelID} from "fmg-core/lib/channel";
@@ -21,6 +21,7 @@ import {
 } from "../../reducer-helpers";
 import {ProtocolAction} from "../../../actions";
 import * as _ from "lodash";
+import {convertStateToCommitment, convertStateToSignedCommitment} from "../../../../utils/nitro-converter";
 export const initialize = (
   processId: string,
   channelId: string,
@@ -111,20 +112,20 @@ const waitForResponseReducer = (
   switch (action.type) {
     case "ENGINE.DISPUTE.RESPONDER.RESPONSE_PROVIDED":
       const {commitment} = action;
-      const signResult = signAndStore(sharedData, commitment);
+      const signResult = signAndStoreComm(sharedData, commitment);
       if (!signResult.isSuccess) {
         throw new Error(`Could not sign response commitment due to ${signResult.reason}`);
       }
       const privateKey = getPrivatekey(sharedData, protocolState.channelId);
 
       // TODO: There has got to be a better way of finding "the commitment I am responding to"
-      const {commitments} = sharedData.channelStore[getChannelId(commitment)];
-      const {commitment: challengeCommitment} = commitments.find(
-        c => c.commitment.turnNum === signResult.signedCommitment.commitment.turnNum - 1
+      const {signedStates} = sharedData.channelStore[getCommitmentChannelId(commitment)];
+      const {state: challengeState} = signedStates.find(
+        c => c.state.turnNum === signResult.signedCommitment.commitment.turnNum - 1
       )!;
 
       const transaction = TransactionGenerator.createRespondTransaction(
-        challengeCommitment,
+        convertStateToCommitment(challengeState),
         signResult.signedCommitment.commitment,
         privateKey
       );
@@ -259,7 +260,7 @@ const craftResponseTransactionWithExistingCommitment = (
 
   const {commitment: lastCommitment} = lastSignedCommitment;
 
-  const channelId = getChannelId(challengeCommitment);
+  const channelId = getCommitmentChannelId(challengeCommitment);
   const privateKey = getPrivatekey(sharedData, channelId);
 
   // TODO: Check to see if we need to pass in an array of n-states e.g., if the thing to refute
@@ -287,7 +288,9 @@ const getStoredCommitments = (
   const channelId = channelID(challengeCommitment.channel);
   const channelState = selectors.getOpenedChannelState(sharedData, channelId);
   // NOTE: Assumes 2-party
-  const [penultimateSignedCommitment, lastSignedCommitment] = channelState.commitments;
+  const [penultimateState, lastState] = channelState.signedStates.map(ss => ss.state);
+  const lastSignedCommitment = convertStateToSignedCommitment(lastState, channelState.privateKey);
+  const penultimateSignedCommitment = convertStateToSignedCommitment(penultimateState, channelState.privateKey);
   return {lastSignedCommitment, penultimateSignedCommitment};
 };
 

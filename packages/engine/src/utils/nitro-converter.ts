@@ -1,7 +1,7 @@
-import { Commitment, CommitmentType, Channel } from "fmg-core";
-import { CONSENSUS_LIBRARY_ADDRESS, NETWORK_ID, ETH_ASSET_HOLDER_ADDRESS } from "../constants";
-import { appAttributesFromBytes } from "fmg-nitro-adjudicator/lib/consensus-app";
-import { bigNumberify } from "ethers/utils";
+import {Commitment, CommitmentType, Channel} from "fmg-core";
+import {CONSENSUS_LIBRARY_ADDRESS, NETWORK_ID, ETH_ASSET_HOLDER_ADDRESS, CHALLENGE_DURATION} from "../constants";
+import {appAttributesFromBytes, bytesFromAppAttributes} from "fmg-nitro-adjudicator/lib/consensus-app";
+import {bigNumberify, getAddress} from "ethers/utils";
 import {
   SignedState,
   State,
@@ -12,25 +12,31 @@ import {
   Outcome,
   isAllocationOutcome
 } from "@statechannels/nitro-protocol";
+import {SignedCommitment, signCommitment2} from "../domain/commitments";
+import {decodeConsensusData} from "@statechannels/nitro-protocol/lib/src/contract/consensus-data";
 
-const CHALLENGE_DURATION = 0x12c; // 5 minutes
 // This temporarily handles converting fmg-core entities to nitro-protocol entities
 // Eventually once nitro-protocol is more properly embedded in the engine this will go away
 
+export function convertStateToSignedCommitment(state: State, privateKey: string): SignedCommitment {
+  const commitment = convertStateToCommitment(state);
+  return signCommitment2(commitment, privateKey);
+}
+
 export function convertStateToCommitment(state: State): Commitment {
-  const { channel: nitroChannel, turnNum } = state;
+  const {channel: nitroChannel, turnNum} = state;
   const convertedOutcome = convertOutcomeToAllocation(state.outcome);
   const fmgChannel: Channel = {
     participants: nitroChannel.participants,
     channelType: state.appDefinition,
-    nonce: bigNumberify(nitroChannel.channelNonce).toNumber(),
-    guaranteedChannel: convertedOutcome.guaranteedChannel,
+    nonce: bigNumberify(nitroChannel.channelNonce).toNumber()
   };
 
-   let commitmentType = CommitmentType.App;
-  // TODO: If this method is being for prefund/postfund states
-  // we'll need the correct commitmentCount
-  const commitmentCount = 0;
+  if (!!convertedOutcome.guaranteedChannel) {
+    fmgChannel.guaranteedChannel = convertedOutcome.guaranteedChannel;
+  }
+  let commitmentType = CommitmentType.App;
+
   if (state.isFinal) {
     commitmentType = CommitmentType.Conclude;
   } else if (state.turnNum < nitroChannel.participants.length) {
@@ -38,14 +44,38 @@ export function convertStateToCommitment(state: State): Commitment {
   } else if (state.turnNum < 2 * nitroChannel.participants.length) {
     commitmentType = CommitmentType.PostFundSetup;
   }
-  return {
+  // This doesn't work in all cases for concluding but it should be enough for the tests for now
+  const commitmentCount = commitmentType === CommitmentType.App ? 0 : state.turnNum % nitroChannel.participants.length;
+
+  let appAttributes = state.appData;
+  // Convert state appData to appAttributes
+  if (state.appDefinition === CONSENSUS_LIBRARY_ADDRESS) {
+    let proposedAllocation: string[] = [];
+    let proposedDestination: string[] = [];
+    const consensusAppData = decodeConsensusData(state.appData);
+    if (consensusAppData.proposedOutcome.length > 0) {
+      const convertedProposedOutcome = convertOutcomeToAllocation(consensusAppData.proposedOutcome);
+      proposedAllocation = convertedProposedOutcome.allocation;
+      proposedDestination = convertedProposedOutcome.destination;
+    }
+
+    appAttributes = bytesFromAppAttributes({
+      furtherVotesRequired: consensusAppData.furtherVotesRequired,
+      proposedAllocation,
+      proposedDestination
+    });
+  }
+
+  const commitment = {
     ...convertedOutcome,
     channel: fmgChannel,
     turnNum,
     commitmentType,
     commitmentCount,
-    appAttributes: state.appData,
+    appAttributes
   };
+  // Strips out undefined properties which was causing issues with some comparisons
+  return JSON.parse(JSON.stringify(commitment));
 }
 
 export function convertCommitmentToSignedState(commitment: Commitment, privateKey: string): SignedState {
@@ -54,26 +84,29 @@ export function convertCommitmentToSignedState(commitment: Commitment, privateKe
 }
 
 export function convertCommitmentToState(commitment: Commitment): State {
-  const { turnNum, commitmentType, channel, destination, allocation, appAttributes } = commitment;
+  const {turnNum, commitmentType, channel, destination, allocation, appAttributes} = commitment;
   const appDefinition = channel.channelType;
   let appData = appAttributes;
   // If its consensus app we know the engine authored it so we switch it over
   // to new consensus app here
   if (appDefinition === CONSENSUS_LIBRARY_ADDRESS) {
     const fmgConsensusData = appAttributesFromBytes(appAttributes);
-    const { proposedAllocation, proposedDestination, furtherVotesRequired } = fmgConsensusData;
-    const proposedOutcome = convertAllocationToOutcome({
-      allocation: proposedAllocation,
-      destination: proposedDestination,
-    });
-    appData = encodeConsensusData({ furtherVotesRequired, proposedOutcome });
+    const {proposedAllocation, proposedDestination, furtherVotesRequired} = fmgConsensusData;
+    const proposedOutcome =
+      proposedDestination.length > 0
+        ? convertAllocationToOutcome({
+            allocation: proposedAllocation,
+            destination: proposedDestination
+          })
+        : [];
+    appData = encodeConsensusData({furtherVotesRequired, proposedOutcome});
   }
   const isFinal = commitmentType === CommitmentType.Conclude;
-  const { guaranteedChannel } = channel;
+  const {guaranteedChannel} = channel;
   const outcome =
     guaranteedChannel && !bigNumberify(guaranteedChannel).eq(0)
-      ? convertGuaranteeToOutcome({ guaranteedChannel, destination })
-      : convertAllocationToOutcome({ allocation, destination });
+      ? convertGuaranteeToOutcome({guaranteedChannel, destination})
+      : convertAllocationToOutcome({allocation, destination});
 
   return {
     turnNum,
@@ -90,13 +123,13 @@ function convertToNitroChannel(channel: Channel): NitroChannel {
   return {
     channelNonce: bigNumberify(channel.nonce).toHexString(),
     participants: channel.participants,
-    chainId: bigNumberify(NETWORK_ID).toHexString(),
+    chainId: bigNumberify(NETWORK_ID).toHexString()
   };
 }
 
 export function convertBytes32ToAddress(bytes32: string): string {
   const normalized = bigNumberify(bytes32).toHexString();
-  return normalized.slice(-42);
+  return getAddress(`0x${normalized.slice(-40)}`);
 }
 
 // e.g.,
@@ -105,34 +138,49 @@ export function convertBytes32ToAddress(bytes32: string): string {
 export function convertAddressToBytes32(address: string): string {
   const normalizedAddress = bigNumberify(address).toHexString();
   if (normalizedAddress.length !== 42) {
-    throw new Error(`Address value is not right length. Expected length of 42 received length ${normalizedAddress.length} instead.`);
+    throw new Error(
+      `Address value is not right length. Expected length of 42 received length ${normalizedAddress.length} instead.`
+    );
   }
   // We pad to 66 = (32*2) + 2('0x')
   return `0x${normalizedAddress.substr(2).padStart(64, "0")}`;
 }
-
-export function convertAllocationToOutcome({ allocation, destination }: { allocation: string[]; destination: string[] }): Outcome {
+export function convertAllocationToOutcome({
+  allocation,
+  destination
+}: {
+  allocation: string[];
+  destination: string[];
+}): Outcome {
   if (allocation.length !== destination.length) {
     throw new Error("Allocation and destination must be the same length");
   }
   const nitroAllocation: AllocationItem[] = allocation.map((a, i) => {
     return {
       destination: convertAddressToBytes32(destination[i]).toLowerCase(),
-      amount: allocation[i],
+      amount: allocation[i]
     };
   });
-  return [{ assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS, allocation: nitroAllocation }];
+  return [{assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS, allocation: nitroAllocation}];
 }
 
-function convertGuaranteeToOutcome({ guaranteedChannel, destination }: { guaranteedChannel: string; destination: string[] }): Outcome {
+function convertGuaranteeToOutcome({
+  guaranteedChannel,
+  destination
+}: {
+  guaranteedChannel: string;
+  destination: string[];
+}): Outcome {
   const guarantee = {
     targetChannelId: convertAddressToBytes32(guaranteedChannel),
-    destinations: destination.map(convertAddressToBytes32).map(d => d.toLowerCase()),
+    destinations: destination.map(convertAddressToBytes32).map(d => d.toLowerCase())
   };
-  return [{ assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS, guarantee }];
+  return [{assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS, guarantee}];
 }
 
-function convertOutcomeToAllocation(outcome: Outcome): { allocation: string[]; destination: string[]; guaranteedChannel?: string } {
+function convertOutcomeToAllocation(
+  outcome: Outcome
+): {allocation: string[]; destination: string[]; guaranteedChannel?: string} {
   const allocation: string[] = [];
   let destination: string[] = [];
   let guaranteedChannel;
@@ -144,13 +192,13 @@ function convertOutcomeToAllocation(outcome: Outcome): { allocation: string[]; d
   if (isAllocationOutcome(assetOutcome)) {
     assetOutcome.allocation.forEach(a => {
       allocation.push(a.amount);
-      destination.push(convertBytes32ToAddress(a.destination).toLowerCase());
+      destination.push(convertBytes32ToAddress(a.destination));
     });
   } else {
-    const { guarantee } = assetOutcome;
-    destination = destination.concat(guarantee.destinations.map(convertBytes32ToAddress).map(d => d.toLowerCase()));
+    const {guarantee} = assetOutcome;
+    destination = destination.concat(guarantee.destinations.map(convertBytes32ToAddress));
     guaranteedChannel = convertBytes32ToAddress(guarantee.targetChannelId);
   }
 
-   return { allocation, destination, guaranteedChannel };
+  return {allocation, destination, guaranteedChannel};
 }

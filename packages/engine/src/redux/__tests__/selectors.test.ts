@@ -1,7 +1,6 @@
 import * as engineStates from "../state";
 import * as selectors from "../selectors";
 import {ChannelState} from "../channel-store";
-import {Commitment} from "../../domain";
 import {SignedState} from "@statechannels/nitro-protocol";
 
 describe("getAdjudicatorWatcherProcessesForChannel", () => {
@@ -62,14 +61,11 @@ describe("getNextNonce", () => {
     libraryAddress: "0x0",
     ourIndex: 0,
     participants: ["0x0", "0x0"],
-    channelNonce: 0,
+    channelNonce: "0x00",
     funded: false,
     address: "address",
     privateKey: "privateKey",
-    commitments: [
-      {commitment: {} as Commitment, signature: "signature", signedState: {} as SignedState},
-      {commitment: {} as Commitment, signature: "signature", signedState: {} as SignedState}
-    ],
+    signedStates: [{} as SignedState, {} as SignedState],
     turnNum: 0
   };
   const state = {
@@ -78,30 +74,30 @@ describe("getNextNonce", () => {
       ["0x1"]: {
         ...defaultChannelState,
         libraryAddress: "0x1",
-        channelNonce: 0
+        channelNonce: "0x00"
       },
       ["0x2"]: {
         ...defaultChannelState,
         libraryAddress: "0x1",
-        channelNonce: 1
+        channelNonce: "0x01"
       },
       ["0x3"]: {
         ...defaultChannelState,
         libraryAddress: "0x2",
-        channelNonce: 2
+        channelNonce: "0x02"
       }
     }
   };
 
   it("gets the next nonce when multiple matching channels exist", () => {
-    expect(selectors.getNextNonce(state, "0x1")).toEqual(2);
+    expect(selectors.getNextNonce(state, "0x1")).toEqual("0x02");
   });
 
   it("returns 0 when no matching channels exist", () => {
-    expect(selectors.getNextNonce(state, "0x3")).toEqual(0);
+    expect(selectors.getNextNonce(state, "0x3")).toEqual("0x00");
   });
 
   it("returns the next nonce when one matching channel exists", () => {
-    expect(selectors.getNextNonce(state, "0x2")).toEqual(3);
+    expect(selectors.getNextNonce(state, "0x2")).toEqual("0x03");
   });
 });

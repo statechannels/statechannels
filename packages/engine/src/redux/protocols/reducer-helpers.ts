@@ -1,9 +1,7 @@
-import {SIGNATURE_SUCCESS, VALIDATION_SUCCESS, fundingSuccess} from "../../magmo-engine-client";
-import * as actions from "../actions";
-import {channelStoreReducer} from "../channel-store/reducer";
+import {fundingSuccess} from "../../magmo-engine-client";
+
 import {accumulateSideEffects} from "../outbox";
-import {SideEffects} from "../outbox/state";
-import {SharedData, queueMessage, getExistingChannel, checkAndStore} from "../state";
+import {SharedData, queueMessage, getExistingChannel, checkAndStoreComm} from "../state";
 import * as selectors from "../selectors";
 import {TwoPartyPlayerIndex, ThreePartyPlayerIndex} from "../types";
 import {CommitmentType} from "fmg-core/lib/commitment";
@@ -15,37 +13,7 @@ import * as comms from "../../communication";
 import {ourTurn as ourTurnOnChannel} from "../channel-store";
 import _ from "lodash";
 import {bigNumberify} from "ethers/utils";
-
-export const updateChannelState = (
-  sharedData: SharedData,
-  channelAction: actions.channel.ChannelAction
-): SharedData => {
-  const newSharedData = {...sharedData};
-  const updatedChannelState = channelStoreReducer(newSharedData.channelStore, channelAction);
-  newSharedData.channelStore = updatedChannelState.state;
-  // TODO: Currently we need to filter out signature/validation messages that are meant to the app
-  // This might change based on whether protocol reducers or channel reducers craft commitments
-  const filteredSideEffects = filterOutSignatureMessages(updatedChannelState.sideEffects);
-  // App channel state may still generate side effects
-  newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, filteredSideEffects);
-  return newSharedData;
-};
-
-export const filterOutSignatureMessages = (sideEffects?: SideEffects): SideEffects | undefined => {
-  if (sideEffects && sideEffects.messageOutbox) {
-    let messageArray = Array.isArray(sideEffects.messageOutbox)
-      ? sideEffects.messageOutbox
-      : [sideEffects.messageOutbox];
-    messageArray = messageArray.filter(
-      engineEvent => engineEvent.type !== VALIDATION_SUCCESS && engineEvent.type !== SIGNATURE_SUCCESS
-    );
-    return {
-      ...sideEffects,
-      messageOutbox: messageArray
-    };
-  }
-  return sideEffects;
-};
+import {convertStateToSignedCommitment} from "../../utils/nitro-converter";
 
 export function sendFundingComplete(sharedData: SharedData, appChannelId: string) {
   const channelState = selectors.getOpenedChannelState(sharedData, appChannelId);
@@ -108,7 +76,7 @@ export function sendCommitments(
   const messageRelay = sendCommitmentsReceived(
     nextParticipant(participants, ourIndex),
     processId,
-    channel.commitments,
+    channel.signedStates.map(ss => convertStateToSignedCommitment(ss.state, channel.privateKey)),
     protocolLocator
   );
   return queueMessage(sharedData, messageRelay);
@@ -121,7 +89,7 @@ export function checkCommitments(sharedData: SharedData, turnNum: number, commit
   commitments
     .filter(signedCommitment => signedCommitment.commitment.turnNum > turnNum)
     .map(signedCommitment => {
-      const result = checkAndStore(sharedData, signedCommitment);
+      const result = checkAndStoreComm(sharedData, signedCommitment);
       if (result.isSuccess) {
         sharedData = result.store;
       } else {
@@ -176,11 +144,8 @@ export const channelFundsAnotherChannel = (channelId: string, sharedData: Shared
 
 export const channelHasConclusionProof = (channelId: string, sharedData: SharedData): boolean => {
   const channelState = selectors.getOpenedChannelState(sharedData, channelId);
-  const [penultimateCommitment, lastCommitment] = channelState.commitments;
-  return (
-    lastCommitment.commitment.commitmentType === CommitmentType.Conclude &&
-    penultimateCommitment.commitment.commitmentType === CommitmentType.Conclude
-  );
+  const [penultimateState, lastState] = channelState.signedStates.map(ss => ss.state);
+  return penultimateState.isFinal && lastState.isFinal;
 };
 
 export const channelFinalizedOnChain = (channelId: string, sharedData: SharedData): boolean => {

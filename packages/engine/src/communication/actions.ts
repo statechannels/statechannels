@@ -1,11 +1,11 @@
-import {signCommitment2, SignedCommitment} from "../domain";
+import {signCommitment2} from "../domain";
 import {EngineAction} from "../redux/actions";
 import {FundingStrategy, ProtocolLocator, EmbeddedProtocol} from "./index";
 import {ProcessProtocol} from ".";
 import {ActionConstructor} from "../redux/utils";
 import {Commitments} from "../redux/channel-store";
 import {CloseLedgerChannel} from "../redux/protocols/actions";
-import {SignedState} from "@statechannels/nitro-protocol/src";
+import {SignedState} from "@statechannels/nitro-protocol";
 import {convertStateToCommitment} from "../utils/nitro-converter";
 
 export interface MultipleRelayableActions {
@@ -73,12 +73,6 @@ export const concludeInstigated: ActionConstructor<ConcludeInstigated> = p => ({
 // Protocols should switch to CommitmentsReceived, as we will in general
 // need to support n-party channels, and that is easiest to manage by
 // sending a full round of commitments when possible ie. when not in PreFundSetup
-
-export interface CommitmentReceived extends BaseProcessAction {
-  type: "ENGINE.COMMON.COMMITMENT_RECEIVED";
-  signedCommitment: SignedCommitment;
-  protocolLocator: ProtocolLocator;
-}
 
 export interface CommitmentsReceived extends BaseProcessAction {
   type: "ENGINE.COMMON.COMMITMENTS_RECEIVED";

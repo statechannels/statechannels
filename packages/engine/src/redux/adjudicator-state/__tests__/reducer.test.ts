@@ -2,7 +2,7 @@ import * as actions from "../../actions";
 import * as testScenarios from "../../../domain/commitments/__tests__";
 const {channelId} = testScenarios;
 import {adjudicatorStateReducer} from "../reducer";
-import {SignedState} from "@statechannels/nitro-protocol/src";
+import {SignedState} from "@statechannels/nitro-protocol";
 import {Wallet} from "ethers";
 
 const challengeState: SignedState = {
