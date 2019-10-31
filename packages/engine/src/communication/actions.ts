@@ -1,5 +1,4 @@
-
-import {signCommitment2, SignedCommitment} from "../domain";
+import {signCommitment2} from "../domain";
 import {EngineAction} from "../redux/actions";
 import {FundingStrategy, ProtocolLocator, EmbeddedProtocol} from "./index";
 import {ProcessProtocol} from ".";
