@@ -18,6 +18,15 @@
   background-image: url(./svg/check.svg);
 }
 
+.checkAnimated {
+  background-image: url(./svg/check-green.svg);
+}
+
+.checkAnimated :global {
+  animation: 800ms checkmark-fade linear;
+  animation-fill-mode: forwards;
+}
+
 .link {
   background-image: url(./svg/link.svg);
 }

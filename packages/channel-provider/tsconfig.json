@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "declaration": true,
+    "declarationMap": true,
+    "declarationDir": "dist",
+    "strict": true,
+    "jsx": "preserve",
+    "target": "es5"
+  },
+  "include": ["src"]
+}

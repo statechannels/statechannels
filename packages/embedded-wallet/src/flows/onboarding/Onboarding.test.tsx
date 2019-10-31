@@ -1,10 +1,10 @@
+import {JsonRpcRequest} from '@statechannels/channel-provider';
 import Enzyme, {mount, ReactWrapper} from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import {History} from 'history';
 import React from 'react';
 import {RouteComponentProps, Router} from 'react-router';
-import {JsonRPCRequest} from 'web3/providers';
-import {BudgetAllocation, ConnectToHub, NoHub} from '../../dialogs';
+import {BudgetAllocation, ConnectToHub, NoHub, OnboardingFinished} from '../../dialogs';
 import {FlowRouter, FlowRouterProps} from '../../flow-router/FlowRouter';
 import {JsonRpcComponentProps} from '../../json-rpc-router';
 import * as Onboarding from './Onboarding';
@@ -12,7 +12,7 @@ import {OnboardingFlow, OnboardingFlowPaths} from './Onboarding';
 
 Enzyme.configure({adapter: new Adapter()});
 
-const mockRequest: JsonRPCRequest = {
+const mockRequest: JsonRpcRequest = {
   jsonrpc: '2.0',
   id: 123,
   method: 'chan_allocate',
@@ -26,6 +26,7 @@ type MockFlow = {
   budgetAllocationComponent: ReactWrapper<RouteComponentProps>;
   noHubComponent: ReactWrapper<RouteComponentProps>;
   connectToHubComponent: ReactWrapper<RouteComponentProps>;
+  onboardingFinished: ReactWrapper<RouteComponentProps>;
   history: History;
 };
 
@@ -49,6 +50,7 @@ const refreshFlowFrom = (flowWrapper: ReactWrapper): MockFlow => {
     budgetAllocationComponent: flowWrapper.find(BudgetAllocation),
     noHubComponent: flowWrapper.find(NoHub),
     connectToHubComponent: flowWrapper.find(ConnectToHub),
+    onboardingFinished: flowWrapper.find(OnboardingFinished),
     history: flowWrapper.find(Router).prop('history')
   };
 };
@@ -74,24 +76,35 @@ describe('Onboarding Flow', () => {
 
   describe('should mount each component on its proper route, and expose the JsonRpcRequest in the context', () => {
     const routeCases = [
-      [OnboardingFlowPaths.BudgetAllocation, true, false, false],
-      [OnboardingFlowPaths.NoHub, false, true, false],
-      [OnboardingFlowPaths.ConnectToHub, false, false, true]
+      [OnboardingFlowPaths.BudgetAllocation, true, false, false, false],
+      [OnboardingFlowPaths.NoHub, false, true, false, false],
+      [OnboardingFlowPaths.ConnectToHub, false, false, true, false],
+      [OnboardingFlowPaths.Finished, false, false, false, true]
     ];
 
-    it.each(routeCases)('%s', (path, showsBudgetAllocation, showsNoHub, showsConnectToHub) => {
-      const {history, flowWrapper} = flow;
+    it.each(routeCases)(
+      '%s',
+      (path, showsBudgetAllocation, showsNoHub, showsConnectToHub, showsOnboardingFinished) => {
+        const {history, flowWrapper} = flow;
 
-      history.push(path as OnboardingFlowPaths);
-      flow = refreshFlowFrom(flowWrapper);
+        history.push(path as OnboardingFlowPaths);
+        flow = refreshFlowFrom(flowWrapper);
 
-      const {budgetAllocationComponent, noHubComponent, connectToHubComponent, flowContext} = flow;
+        const {
+          budgetAllocationComponent,
+          noHubComponent,
+          connectToHubComponent,
+          onboardingFinished,
+          flowContext
+        } = flow;
 
-      expect(flowContext).toHaveBeenCalled();
+        expect(flowContext).toHaveBeenCalled();
 
-      expect(budgetAllocationComponent.exists()).toEqual(showsBudgetAllocation);
-      expect(noHubComponent.exists()).toEqual(showsNoHub);
-      expect(connectToHubComponent.exists()).toEqual(showsConnectToHub);
-    });
+        expect(budgetAllocationComponent.exists()).toEqual(showsBudgetAllocation);
+        expect(noHubComponent.exists()).toEqual(showsNoHub);
+        expect(connectToHubComponent.exists()).toEqual(showsConnectToHub);
+        expect(onboardingFinished.exists()).toEqual(showsOnboardingFinished);
+      }
+    );
   });
 });

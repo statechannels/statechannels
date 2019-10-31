@@ -24,7 +24,7 @@ const users = [
 const siteConfig = {
   title: 'Nitro protocol', // Title for your website.
   tagline: 'A smart-contract protocol for state channel networks',
-  url: 'https://quirky-panini-27752c.netlify.com/', // Your website URL
+  url: 'https://angry-villani-ad8c15.netlify.com/', // Your website URL
   baseUrl: '/', // Base URL for your project */
   // For github.io type URLs, you would set the url and baseUrl like:
   //   url: 'https://facebook.github.io',
@@ -38,7 +38,11 @@ const siteConfig = {
   //   organizationName: 'JoelMarcey'
 
   // For no header links in the top nav bar -> headerLinks: [],
-  headerLinks: [{doc: 'nitro-intro', label: 'Docs'}, {page: 'help', label: 'Help'}],
+  headerLinks: [
+    { doc: 'state-channels/overview', label: 'Docs' },
+    { doc: 'api/contract-inheritance', label: 'API' },
+    { page: 'help', label: 'Help' },
+  ],
 
   // If you have users set above, you add it here:
   users,
@@ -56,7 +60,7 @@ const siteConfig = {
 
   markdownPlugins: [
     // Highlight admonitions.
-    require('remarkable-admonitions')({icon: 'svg-inline'}),
+    require('remarkable-admonitions')({ icon: 'svg-inline' }),
   ],
 
   /* Custom fonts for website */
@@ -78,7 +82,7 @@ const siteConfig = {
 
   highlight: {
     // Highlight.js theme to use for syntax highlighting in code blocks.
-    theme: 'solarized-dark',
+    theme: 'foundation',
 
     hljs: function(hljs) {
       return hljsDefineSolidity(hljs);
@@ -88,7 +92,7 @@ const siteConfig = {
   // Add custom scripts here that would be placed in <script> tags.
   scripts: [
     'https://buttons.github.io/buttons.js',
-    'https://unpkg.com/mermaid@8.2.6/dist/mermaid.min.js',
+    'https://unpkg.com/mermaid@8.4.0/dist/mermaid.min.js',
   ],
 
   // On page navigation for the current documentation page.
@@ -108,7 +112,8 @@ const siteConfig = {
 
   // You may provide arbitrary config keys to be used as needed by your
   // template. For example, if you need your repo's URL...
-  repoUrl: 'https://github.com/statechannels/nitro-protocol',
+  repoUrl: 'https://github.com/statechannels/monorepo',
+  packageUrl: 'https://github.com/statechannels/monorepo/tree/master/packages/nitro-protocol',
 };
 
 module.exports = siteConfig;

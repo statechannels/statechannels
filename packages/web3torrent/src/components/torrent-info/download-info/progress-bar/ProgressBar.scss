@@ -19,33 +19,6 @@
   text-align: right;
 }
 
-.bar-cancelButton {
-  position: absolute;
-  top: 10px;
-  width: 30px;
-  left: 630px;
-  right: 10px;
-  text-align: right;
-  margin-top: 0px;
-  font-size: 26px;
-  font-weight: 100;
-  color: $c-orange;
-  background: none;
-  border: none;
-  svg {
-    cursor: pointer;
-    height: 20px;
-    width: 30px;
-  }
-  svg > path {
-    stroke: $c-orange;
-    stroke-width: 2px;
-  }
-
-  svg:hover > path {
-    stroke: red;
-  }
-}
 .positive {
   background: $c-orange;
   transition: width 0.2s ease-in;
@@ -53,7 +26,6 @@
   height: 100%;
   z-index: 1;
   overflow: hidden;
-  .bar-cancelButton svg path,
   .bar-status,
   .bar-progress {
     color: white;
@@ -80,7 +52,6 @@
   height: 100%;
   width: 100%;
   margin-top: -50px;
-  .bar-cancelButton,
   .bar-status,
   .bar-progress {
     color: $c-black;

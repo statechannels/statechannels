@@ -16,7 +16,7 @@ const ShareList: React.FC<ShareListProps> = ({torrents, history}) => {
               <ShareFile
                 file={file}
                 key={file.name}
-                goTo={hash => history.push(`${RoutePath.Download}${hash}`)}
+                goTo={hash => history.push(`${RoutePath.File}${hash}`)}
               />
             ))
           : false}

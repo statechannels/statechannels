@@ -19,7 +19,7 @@ export type IconOrSpinner = Icons | 'spinner';
 const FlowStepStatusIcons: {[key in FlowStepStatus]: IconOrSpinner} = {
   [FlowStepStatus.Pending]: Icons.Hourglass,
   [FlowStepStatus.InProgress]: 'spinner',
-  [FlowStepStatus.Done]: Icons.Check
+  [FlowStepStatus.Done]: Icons.CheckAnimated
 };
 
 const FlowStep: React.FC<FlowStepProps> = ({title, status = FlowStepStatus.Pending}) => {

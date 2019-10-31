@@ -20,7 +20,7 @@ describe('Torrent Status Checker', () => {
       } as Torrent);
     });
 
-    it('should return a torrent with a status of Idle and destroyed when the torrent is no longer live', () => {
+    it('should return a torrent with a status of Idle when the torrent is no longer live', () => {
       const getSpy = jest.spyOn(web3torrent, 'get').mockImplementation(_ => undefined);
 
       const result = checkTorrentStatus(torrent, mockInfoHash);
@@ -28,8 +28,7 @@ describe('Torrent Status Checker', () => {
       expect(getSpy).toHaveBeenCalledWith(mockInfoHash);
       expect(result).toEqual({
         ...torrent,
-        status: Status.Idle,
-        destroyed: true
+        status: Status.Idle
       } as Torrent);
 
       getSpy.mockRestore();
@@ -69,9 +68,8 @@ describe('Torrent Status Checker', () => {
         expect(getFormattedETA({done: true} as ExtendedTorrent)).toEqual('Done');
       });
 
-      // TODO: Correct behaviour should be ETA 0s.
-      it("should return 'ETA 0' if timeRemaining is empty", () => {
-        expect(getFormattedETA({done: false} as ExtendedTorrent)).toEqual('ETA 0');
+      it("should return 'ETA 0s' if timeRemaining is empty", () => {
+        expect(getFormattedETA({done: false} as ExtendedTorrent)).toEqual('ETA 0s');
       });
 
       it("should return 'ETA Unknown' if timeRemaining is Infinity", () => {
@@ -92,52 +90,56 @@ describe('Torrent Status Checker', () => {
         );
       });
 
-      it('should return time in hours, minutes and seconds', () => {
+      it('should return time in hours and minutes', () => {
         expect(getFormattedETA({done: false, timeRemaining: 25923813} as ExtendedTorrent)).toEqual(
-          'ETA 7h 12m 3s'
+          'ETA 7h 12m'
         );
       });
 
-      it('should return time in days, hours, minutes and seconds', () => {
+      it('should return time in days, hours and minutes', () => {
         expect(getFormattedETA({done: false, timeRemaining: 482949274} as ExtendedTorrent)).toEqual(
-          'ETA 5d 14h 9m 9s'
+          'ETA 5d 14h 9m'
         );
       });
     });
     describe('getStatus()', () => {
       it('should return Seeding if the torrent is now Seeding', () => {
         expect(
-          getStatus(
-            {uploadSpeed: 1000, downloadSpeed: 0, progress: 50, done: false} as ExtendedTorrent,
-            Status.Seeding
-          )
+          getStatus({
+            uploadSpeed: 1000,
+            createdBy: 'user',
+            downloadSpeed: 0,
+            progress: 50,
+            done: false
+          } as ExtendedTorrent)
         ).toEqual(Status.Seeding);
       });
 
       it('should return Completed if the torrent is done', () => {
         expect(
-          getStatus(
-            {uploadSpeed: 1000, downloadSpeed: 1000, progress: 100, done: true} as ExtendedTorrent,
-            Status.Downloading
-          )
+          getStatus({
+            uploadSpeed: 1000,
+            downloadSpeed: 1000,
+            progress: 100,
+            done: true
+          } as ExtendedTorrent)
         ).toEqual(Status.Completed);
       });
 
       it('should return Connecting if there is no traffic yet', () => {
         expect(
-          getStatus(
-            {uploadSpeed: 0, downloadSpeed: 0, progress: 0, done: false} as ExtendedTorrent,
-            Status.Idle
-          )
+          getStatus({uploadSpeed: 0, downloadSpeed: 0, progress: 0, done: false} as ExtendedTorrent)
         ).toEqual(Status.Connecting);
       });
 
       it('should return Downloading for any other cases', () => {
         expect(
-          getStatus(
-            {uploadSpeed: 0, downloadSpeed: 1000, progress: 10, done: false} as ExtendedTorrent,
-            Status.Downloading
-          )
+          getStatus({
+            uploadSpeed: 0,
+            downloadSpeed: 1000,
+            progress: 10,
+            done: false
+          } as ExtendedTorrent)
         ).toEqual(Status.Downloading);
       });
     });

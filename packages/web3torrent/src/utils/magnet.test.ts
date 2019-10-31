@@ -1,5 +1,6 @@
 import {defaultTrackers} from '../constants';
 
+import {RoutePath} from '../routes';
 import {generateMagnetURL, parseMagnetURL} from './magnet';
 
 const magnetConstants = {name: 'test.zip', xl: 1398978, cost: '0'};
@@ -64,7 +65,7 @@ describe('Magnet Generation', () => {
     const originalMagnet = mockMagnetGenerator(magnetConstants);
     const parsedTorrent = parseMagnetURL(mockMagnetGenerator(magnetConstants));
     const result = generateMagnetURL(parsedTorrent);
-    expect(result).toBe('http://localhost/download/magnet' + originalMagnet);
+    expect(result).toBe(RoutePath.File + originalMagnet);
   });
 
   it('does not break when the magnet is empty', () => {
@@ -77,8 +78,7 @@ describe('Magnet Generation', () => {
     const parsedTorrent = parseMagnetURL(instantIOMagnet);
     const result = generateMagnetURL(parsedTorrent);
     expect(result).toBe(
-      'http://localhost/download/magnet' +
-        mockMagnetGenerator({name: magnetConstants.name, xl: 0, cost: '0'})
+      RoutePath.File + mockMagnetGenerator({name: magnetConstants.name, xl: 0, cost: '0'})
     );
   });
 });

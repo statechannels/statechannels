@@ -1,28 +1,27 @@
 import prettier from 'prettier-bytes';
-import React, {useEffect, useState} from 'react';
+import React from 'react';
+import {remove} from '../../../clients/web3torrent-client';
 import {Torrent} from '../../../types';
-import {FormButton} from '../../form';
 import './DownloadInfo.scss';
 import {ProgressBar} from './progress-bar/ProgressBar';
 
 export type DownloadInfoProps = {torrent: Torrent};
 
 const DownloadInfo: React.FC<DownloadInfoProps> = ({torrent}: DownloadInfoProps) => {
-  const [fileURL, setURL] = useState('');
-  useEffect(() => {
-    if (torrent.done && torrent.files[0] && torrent.files[0].getBlobURL) {
-      torrent.files[0].getBlobURL((_, url) => setURL(url as string));
-    }
-  }, [torrent.done, torrent.files]);
-
   return (
     <section className="downloadingInfo">
       <ProgressBar
         downloaded={torrent.downloaded}
         length={torrent.length}
         status={torrent.status}
-        infoHash={torrent.infoHash}
       />
+      {!torrent.done ? (
+        <button type="button" className="button cancel" onClick={() => remove(torrent.infoHash)}>
+          Cancel Download
+        </button>
+      ) : (
+        false
+      )}
       <p>
         {torrent.parsedTimeRemaining}.{' '}
         {prettier(torrent.done || !torrent.downloadSpeed ? 0 : torrent.downloadSpeed)}
@@ -30,19 +29,6 @@ const DownloadInfo: React.FC<DownloadInfoProps> = ({torrent}: DownloadInfoProps)
         <br />
         Connected to <strong>{torrent.numPeers}</strong> peers.
       </p>
-      {torrent.downloaded !== torrent.length ? (
-        false
-      ) : (
-        /**
-         * @todo This should be a link with the button's styles,
-         * using FormButton seems a bit of an overkill
-         */
-        <a href={fileURL} download={torrent.name}>
-          <FormButton name="save-download" onClick={() => null}>
-            Save Download
-          </FormButton>
-        </a>
-      )}
     </section>
   );
 };

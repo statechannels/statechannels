@@ -6,12 +6,8 @@ import {TorrentPeers} from '../../library/types';
 import {Status, Torrent} from '../../types';
 import {createMockTorrent, createMockTorrentPeers} from '../../utils/test-utils';
 import {DownloadInfo, DownloadInfoProps} from './download-info/DownloadInfo';
-import {
-  MagnetLinkButton,
-  MagnetLinkButtonProps,
-  TorrentInfo,
-  TorrentInfoProps
-} from './TorrentInfo';
+import {MagnetLinkButton, MagnetLinkButtonProps} from './magnet-link-button/MagnetLinkButton';
+import {TorrentInfo, TorrentInfoProps} from './TorrentInfo';
 import {UploadInfo, UploadInfoProps} from './upload-info/UploadInfo';
 
 Enzyme.configure({adapter: new Adapter()});
@@ -73,16 +69,16 @@ describe('<TorrentInfo />', () => {
     expect(sectionElement.exists()).toEqual(true);
     expect(fileNameElement.exists()).toEqual(true);
     expect(fileSizeElement.exists()).toEqual(true);
-    expect(fileStatusElement.exists()).toEqual(false);
+    expect(fileStatusElement.exists()).toEqual(true);
     expect(fileCostElement.exists()).toEqual(true);
     expect(magnetLinkButtonElement.exists()).toEqual(true);
-    expect(downloadInfoElement.exists()).toEqual(true);
+    expect(downloadInfoElement.exists()).toEqual(false);
     expect(uploadInfoElement.exists()).toEqual(false);
 
     expect(sectionElement.hasClass('with-link')).toEqual(true);
     expect(fileNameElement.text()).toEqual(torrent.name);
     expect(fileSizeElement.text()).toEqual(prettier(torrent.length));
-    expect(fileCostElement.text()).toEqual(`Est. cost $1.34`);
+    expect(fileCostElement.text()).toEqual(`Cost $1.34`);
   });
 
   it('can hide the MagnetLinkButton and the with-link class when no magnet is provided', () => {
@@ -103,7 +99,7 @@ describe('<TorrentInfo />', () => {
 
   it('can show `Unknown` when the torrent cost is not available', () => {
     const {fileCostElement} = mockTorrentInfo({cost: undefined});
-    expect(fileCostElement.text()).toEqual('Est. cost Unknown');
+    expect(fileCostElement.text()).toEqual('Cost Unknown');
   });
 
   it('can show the DownloadInfo component when the status allows it', () => {
@@ -114,41 +110,9 @@ describe('<TorrentInfo />', () => {
 
   it("can show the UploadInfo component when the client is the torrent's author", () => {
     const {downloadInfoElement, uploadInfoElement} = mockTorrentInfo({
-      createdBy: 'Foo',
-      ready: false
+      status: Status.Seeding
     });
     expect(downloadInfoElement.exists()).toEqual(false);
     expect(uploadInfoElement.exists()).toEqual(true);
-  });
-
-  describe('<MagnetLinkButton />', () => {
-    let magnetLinkButtonElement: ReactWrapper<MagnetLinkButtonProps>;
-
-    beforeAll(() => {
-      document.execCommand = jest.fn(() => true);
-    });
-
-    beforeEach(() => {
-      magnetLinkButtonElement = torrentInfo.magnetLinkButtonElement;
-    });
-
-    it('should show a tooltip instruting to copy the link', () => {
-      const tooltip = magnetLinkButtonElement.find('.tooltiptext');
-      expect(tooltip.exists()).toEqual(true);
-      expect(tooltip.text()).toEqual('Copy to clipboard');
-    });
-
-    it('should copy the link to the clipboard when clicking', () => {
-      magnetLinkButtonElement.simulate('click');
-      expect(document.execCommand).toHaveBeenCalledWith('copy');
-
-      const tooltip = magnetLinkButtonElement.find('.tooltiptext');
-      expect(tooltip.exists()).toEqual(true);
-      expect(tooltip.text()).toEqual('Great! Copied to your clipboard');
-    });
-
-    afterAll(() => {
-      delete document.execCommand;
-    });
   });
 });

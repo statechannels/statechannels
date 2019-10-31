@@ -21,7 +21,7 @@ const FormButton: React.FC<FormButtonProps> = ({
       className={className + (block ? ' block' : '')}
       type={type}
     >
-      {spinner ? <Spinner visible={spinner} color="white" /> : false}
+      {spinner ? <Spinner visible={spinner} color="orange" /> : false}
       {children}
     </button>
   );

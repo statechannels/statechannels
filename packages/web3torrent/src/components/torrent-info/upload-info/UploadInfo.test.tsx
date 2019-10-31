@@ -28,12 +28,9 @@ type MockUploadInfo = {
   leechersInfo: ElementsByLeecher;
 };
 
-const mockUploadInfo = (torrentProps?: Partial<Torrent>): MockUploadInfo => {
-  const peers = createMockTorrentPeers();
-  const torrent = createMockTorrent({
-    numPeers: Object.keys(peers).length,
-    ...torrentProps
-  }) as Torrent;
+const mockUploadInfo = (noPeers = false): MockUploadInfo => {
+  const peers = noPeers ? {} : createMockTorrentPeers();
+  const torrent = createMockTorrent({numPeers: Object.keys(peers).length}) as Torrent;
 
   const uploadInfoWrapper = mount(<UploadInfo torrent={torrent} peers={peers} />);
 
@@ -68,14 +65,7 @@ describe('<UploadInfo />', () => {
   });
 
   it('can be instantiated', () => {
-    const {
-      leechersInfo,
-      leechersSectionElement,
-      numPeersElement,
-      torrent,
-      peers,
-      uploadingSectionElement
-    } = uploadInfo;
+    const {leechersSectionElement, numPeersElement, torrent, uploadingSectionElement} = uploadInfo;
 
     expect(uploadingSectionElement.exists()).toEqual(true);
     expect(numPeersElement.exists()).toEqual(true);
@@ -83,6 +73,14 @@ describe('<UploadInfo />', () => {
 
     expect(numPeersElement.text()).toEqual(`${torrent.numPeers}`);
     expect(leechersSectionElement.children().length).toEqual(torrent.numPeers);
+  });
+
+  it('shows no peer info when no peers exist', () => {
+    const {leechersSectionElement, uploadingSectionElement} = mockUploadInfo(true);
+
+    expect(uploadingSectionElement.exists()).toEqual(true);
+    expect(leechersSectionElement.exists()).toEqual(true);
+    expect(leechersSectionElement.children().length).toEqual(0);
   });
 
   it.each([Object.keys(createMockTorrentPeers())])(

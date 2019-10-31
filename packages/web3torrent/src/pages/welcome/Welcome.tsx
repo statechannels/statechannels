@@ -9,7 +9,10 @@ import './Welcome.scss';
 const Welcome: React.FC<RouteComponentProps> = ({history}) => {
   return (
     <section className="section fill">
-      <div className="jumbotron"></div>
+      <div className="jumbotron">
+        <h1>Streaming file transfer over WebTorrent</h1>
+        <h2>TORRENTS ON THE WEB</h2>
+      </div>
       <div className="subtitle">
         <p>
           Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
