@@ -61,7 +61,7 @@ describe("getNextNonce", () => {
     libraryAddress: "0x0",
     ourIndex: 0,
     participants: ["0x0", "0x0"],
-    channelNonce: "0",
+    channelNonce: "0x00",
     funded: false,
     address: "address",
     privateKey: "privateKey",
