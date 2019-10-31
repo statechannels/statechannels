@@ -74,7 +74,7 @@ const File: React.FC<RouteComponentProps> = () => {
               Web3Torrent operates with budgets; therefore, the app will <b>never</b> use any funds
               outside whatever amount you allocate when starting the download. Also, Web3Torrent is
               powered by{' '}
-              <a href="http://statechannels.org" target="_blank">
+              <a href="http://statechannels.org" target="_blank" rel="noopener noreferrer">
                 State Channels
               </a>
               , a technique that reducess fees for blockchain users and allows users to transact

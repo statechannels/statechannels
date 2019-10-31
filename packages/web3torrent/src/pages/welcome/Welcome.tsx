@@ -17,7 +17,7 @@ const Welcome: React.FC<RouteComponentProps> = ({history}) => {
         <p>
           Web3Torrent offers a new experience for sharing files in a decentralized way via paid
           streaming, bringing together{' '}
-          <a href="https://statechannels.org" target="_blank">
+          <a href="https://statechannels.org" target="_blank" rel="noopener noreferrer">
             State Channels
           </a>{' '}
           and the BitTorrent protocol.
