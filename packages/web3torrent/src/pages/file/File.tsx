@@ -77,7 +77,7 @@ const File: React.FC<RouteComponentProps> = () => {
               <a href="http://statechannels.org" target="_blank" rel="noopener noreferrer">
                 State Channels
               </a>
-              , a technique that reducess fees for blockchain users and allows users to transact
+              , a technique that reduces fees for blockchain users and allows users to transact
               with each other with instant finality. Through counterfactually instantiated
               contracts, this technology enables a private, efficient and secure environment for
               safe transactions.
