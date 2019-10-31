@@ -29,8 +29,9 @@ Using tablegenerators.com, we can generate decent looking tables in a medium pos
 
 # Intro
 
-A state channel involves a small set of participants updating a state machine in private.
+A state channel involves a small set of participants updating a state machine in private, addressing some blockchain scalability problems.
 The final state of the state channel ultimately dictates how the (public) blockchain state is updated: for example, how certain assets are allocated.
+Thus, many real-world transactions can be rolled up into a constant number of on-chain transactions.
 The state may include additional data relating to the type of application the state channel is meant to support.
 
 ForceMove is a state-channel protocol, designed to be as simple as possible.
