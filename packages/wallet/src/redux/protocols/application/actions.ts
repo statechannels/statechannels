@@ -1,27 +1,26 @@
-import {Commitment} from "../../../domain";
 import {WalletAction} from "../../actions";
 import {ActionConstructor} from "../../utils";
 import {DisputeAction, isDisputeAction} from "../dispute";
+import {State, SignedState} from "@statechannels/nitro-protocol";
 
 // -------
 // Actions
 // -------
-export interface OwnCommitmentReceived {
-  type: "WALLET.APPLICATION.OWN_COMMITMENT_RECEIVED";
+export interface OwnStateReceived {
+  type: "WALLET.APPLICATION.OWN_STATE_RECEIVED";
   processId: string;
-  commitment: Commitment;
+  state: State;
 }
 
-export interface OpponentCommitmentReceived {
-  type: "WALLET.APPLICATION.OPPONENT_COMMITMENT_RECEIVED";
+export interface OpponentStateReceived {
+  type: "WALLET.APPLICATION.OPPONENT_STATE_RECEIVED";
   processId: string;
-  commitment: Commitment;
-  signature: string;
+  signedState: SignedState;
 }
 
 export interface ChallengeRequested {
   type: "WALLET.APPLICATION.CHALLENGE_REQUESTED";
-  commitment: Commitment;
+  state: State;
   processId: string;
   channelId: string;
 }
@@ -31,7 +30,7 @@ export interface ChallengeDetected {
   processId: string;
   channelId: string;
   expiresAt: number;
-  commitment: Commitment;
+  state: State;
 }
 export interface Concluded {
   type: "WALLET.APPLICATION.CONCLUDED";
@@ -42,22 +41,17 @@ export interface Concluded {
 // Constructors
 // -------
 
-export const ownCommitmentReceived: ActionConstructor<OwnCommitmentReceived> = p => {
-  const {processId, commitment} = p;
+export const ownStateReceived: ActionConstructor<OwnStateReceived> = p => {
   return {
-    type: "WALLET.APPLICATION.OWN_COMMITMENT_RECEIVED",
-    processId,
-    commitment
+    ...p,
+    type: "WALLET.APPLICATION.OWN_STATE_RECEIVED"
   };
 };
 
-export const opponentCommitmentReceived: ActionConstructor<OpponentCommitmentReceived> = p => {
-  const {processId, commitment, signature} = p;
+export const opponentStateReceived: ActionConstructor<OpponentStateReceived> = p => {
   return {
-    type: "WALLET.APPLICATION.OPPONENT_COMMITMENT_RECEIVED",
-    processId,
-    commitment,
-    signature
+    ...p,
+    type: "WALLET.APPLICATION.OPPONENT_STATE_RECEIVED"
   };
 };
 
@@ -84,8 +78,8 @@ export const concluded: ActionConstructor<Concluded> = p => {
 // -------
 
 export type ApplicationAction =
-  | OpponentCommitmentReceived
-  | OwnCommitmentReceived
+  | OpponentStateReceived
+  | OwnStateReceived
   | ChallengeDetected
   | ChallengeRequested
   | Concluded
@@ -94,8 +88,8 @@ export type ApplicationAction =
 export function isApplicationAction(action: WalletAction): action is ApplicationAction {
   return (
     isDisputeAction(action) ||
-    action.type === "WALLET.APPLICATION.OPPONENT_COMMITMENT_RECEIVED" ||
-    action.type === "WALLET.APPLICATION.OWN_COMMITMENT_RECEIVED" ||
+    action.type === "WALLET.APPLICATION.OPPONENT_STATE_RECEIVED" ||
+    action.type === "WALLET.APPLICATION.OWN_STATE_RECEIVED" ||
     action.type === "WALLET.APPLICATION.CHALLENGE_DETECTED" ||
     action.type === "WALLET.APPLICATION.CHALLENGE_REQUESTED" ||
     action.type === "WALLET.APPLICATION.CONCLUDED"

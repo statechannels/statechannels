@@ -1,10 +1,13 @@
 import {SignedCommitment, signCommitment2, CommitmentType} from "..";
 import {bigNumberify} from "ethers/utils";
 import {channelID} from "fmg-core/lib/channel";
-import {CONSENSUS_LIBRARY_ADDRESS} from "../../../constants";
+import {CONSENSUS_LIBRARY_ADDRESS, ETH_ASSET_HOLDER_ADDRESS, NETWORK_ID} from "../../../constants";
 import {bytesFromAppAttributes} from "fmg-nitro-adjudicator/lib/consensus-app";
 import {ThreePartyPlayerIndex, TwoPartyPlayerIndex} from "../../../redux/types";
 import {unreachable} from "../../../utils/reducer-utils";
+import {ConsensusData, encodeConsensusData} from "@statechannels/nitro-protocol/lib/src/contract/consensus-data";
+import {Outcome, State, Channel, getChannelId, Signatures, SignedState} from "@statechannels/nitro-protocol";
+import {convertAddressToBytes32} from "../../../utils/nitro-converter";
 
 export const asPrivateKey = "0xf2f48ee19680706196e2e339e5da3491186e0c4c5030670656b0e0164837257d";
 export const asAddress = "0x5409ED021D9299bf6814279A6A1411A7e866A631";
@@ -20,6 +23,9 @@ export const libraryAddress = "0x" + "1".repeat(40);
 export const channelNonce = "0x04";
 export const channel = {channelType: libraryAddress, nonce: Number.parseInt(channelNonce, 16), participants};
 export const channelId = channelID(channel);
+
+export const nitroChannel: Channel = {channelNonce, participants, chainId: bigNumberify(NETWORK_ID).toHexString()};
+export const nitroChannelId = getChannelId(nitroChannel);
 
 function typeAndCount(
   turnNum: number,
@@ -106,6 +112,33 @@ export function appCommitment(params: AppCommitmentParams): SignedCommitment {
   return signCommitment2(commitment, privateKey);
 }
 
+export function appState(params: AppCommitmentParams): SignedState {
+  const turnNum = params.turnNum;
+  const balances = params.balances || twoThree;
+  const isFinal = params.isFinal || false;
+  const appData = params.appAttributes || EMPTY_APP_ATTRIBUTES;
+  const outcome = [
+    {
+      assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
+      allocation: balances.map(b => {
+        return {destination: convertAddressToBytes32(b.address), amount: b.wei};
+      })
+    }
+  ];
+  const state: State = {
+    channel: nitroChannel,
+    isFinal,
+    appData,
+    turnNum,
+    outcome,
+    challengeDuration: 300,
+    appDefinition: libraryAddress
+  };
+  const privateKey = turnNum % 2 === 0 ? asPrivateKey : bsPrivateKey;
+
+  return Signatures.signState(state, privateKey);
+}
+
 function ledgerAppAttributes(furtherVotesRequired, proposedBalances: Balance[]) {
   const proposedAllocation = proposedBalances.map(b => b.wei);
   const proposedDestination = proposedBalances.map(b => b.address);
@@ -134,6 +167,14 @@ export const ledgerChannel = {
   channelType: CONSENSUS_LIBRARY_ADDRESS,
   participants
 };
+
+export const ledgerNitroChannel: Channel = {
+  chainId: bigNumberify(NETWORK_ID).toHexString(),
+  channelNonce: "0x00",
+  participants
+};
+export const ledgerNitroChannelId = getChannelId(ledgerNitroChannel);
+
 export const ledgerId = channelID(ledgerChannel);
 
 export const threeWayLedgerChannel = {
@@ -182,6 +223,50 @@ export function threeWayLedgerCommitment(params: ThreeWayLedgerCommitmentParams)
     default:
       return unreachable(idx);
   }
+}
+export function ledgerState(params: LedgerCommitmentParams): SignedState {
+  const turnNum = params.turnNum;
+  const isFinal = params.isFinal || false;
+  const balances = params.balances || twoThree;
+  let proposedBalances = params.proposedBalances || blankBalance;
+  let furtherVotesRequired = 0;
+  if (params.proposedBalances) {
+    furtherVotesRequired = 1;
+    proposedBalances = params.proposedBalances;
+  }
+  const outcome = [
+    {
+      assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
+      allocation: balances.map(b => {
+        return {destination: convertAddressToBytes32(b.address), amount: b.wei};
+      })
+    }
+  ];
+  const proposedOutcome: Outcome = [
+    {
+      assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
+      allocation: proposedBalances.map(b => {
+        return {destination: convertAddressToBytes32(b.address), amount: b.wei};
+      })
+    }
+  ];
+  const consensusData: ConsensusData = {furtherVotesRequired, proposedOutcome};
+
+  const appData = encodeConsensusData(consensusData);
+
+  const state: State = {
+    channel: ledgerNitroChannel,
+    isFinal,
+    appData,
+    turnNum,
+    outcome,
+    challengeDuration: 300,
+    appDefinition: CONSENSUS_LIBRARY_ADDRESS
+  };
+
+  const privateKey = turnNum % 2 === 0 ? asPrivateKey : bsPrivateKey;
+
+  return Signatures.signState(state, privateKey);
 }
 
 export function ledgerCommitment(params: LedgerCommitmentParams): SignedCommitment {

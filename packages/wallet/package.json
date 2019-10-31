@@ -28,7 +28,7 @@
     "prettier:write": "npx prettier --write 'src/**/*.{ts,tsx}'",
     "start": "npm run clearContracts && node scripts/start.js",
     "storybook": "start-storybook -p 9001 -c .storybook",
-    "test:app": "npx jest --runInBand -c ./config/jest/jest.config.js",
+    "test:app": "npx jest -c ./config/jest/jest.config.js",
     "test:ci:app": "yarn test:app --all --ci",
     "test:ci:contracts": "yarn contracts:compile && yarn test:contracts --all --ci --detectOpenHandles --bail",
     "test:ci": "yarn test:ci:contracts && yarn test:ci:app",

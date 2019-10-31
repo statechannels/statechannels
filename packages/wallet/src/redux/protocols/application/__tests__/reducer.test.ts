@@ -17,7 +17,7 @@ function whenIn(state) {
 describe("when initializing", () => {
   const scenario = scenarios.initializingApplication;
   const result = initialize(scenario.initialize.sharedData, scenario.channelId, scenario.address, scenario.privateKey);
-  itTransitionsTo(result, "Application.WaitForFirstCommitment");
+  itTransitionsTo(result, "Application.WaitForFirstState");
 });
 
 describe("starting the application", () => {
@@ -33,8 +33,8 @@ describe("starting the application", () => {
   });
 });
 
-describe("signing a commitment", () => {
-  const scenario = scenarios.receivingOurCommitment;
+describe("signing a state", () => {
+  const scenario = scenarios.receivingOurState;
 
   describeScenarioStep(scenario.ongoing, () => {
     const {state, sharedData, action} = scenario.ongoing;
@@ -45,8 +45,8 @@ describe("signing a commitment", () => {
   });
 });
 
-describe("signing an invalid commitment", () => {
-  const scenario = scenarios.receivingOurInvalidCommitment;
+describe("signing an invalid state", () => {
+  const scenario = scenarios.receivingOurInvalidState;
 
   describeScenarioStep(scenario.ongoing, () => {
     const {state, sharedData, action} = scenario.ongoing;
@@ -58,9 +58,8 @@ describe("signing an invalid commitment", () => {
   });
 });
 
-// TODO: These should be re-enabled when this protocol is refactored to SignedStates
-describe.skip("validating a commitment", () => {
-  const scenario = scenarios.receivingTheirCommitment;
+describe("validating a state", () => {
+  const scenario = scenarios.receivingTheirState;
 
   describe(whenIn("Application.Ongoing"), () => {
     const {state, sharedData, action} = scenario.ongoing;
@@ -72,8 +71,8 @@ describe.skip("validating a commitment", () => {
   });
 });
 
-describe.skip("validating an invalid commitment", () => {
-  const scenario = scenarios.receivingTheirInvalidCommitment;
+describe("validating an invalid state", () => {
+  const scenario = scenarios.receivingTheirInvalidState;
 
   describeScenarioStep(scenario.ongoing, () => {
     const {state, sharedData, action} = scenario.ongoing;

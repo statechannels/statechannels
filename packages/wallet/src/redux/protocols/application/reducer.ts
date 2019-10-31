@@ -4,13 +4,13 @@ import * as actions from "./actions";
 import {ProtocolStateWithSharedData} from "..";
 import {unreachable} from "../../../utils/reducer-utils";
 import {validationSuccess, signatureSuccess, signatureFailure, validationFailure} from "../../../magmo-wallet-client";
-import {checkAndInitialize, signAndInitialize, signAndStore} from "../../channel-store/reducer";
-import {Commitment} from "../../../domain";
+import {checkAndInitialize, signAndInitialize, signAndStore, checkAndStore} from "../../channel-store/reducer";
 import {ProtocolAction} from "../../actions";
 import * as dispute from "../dispute";
 import {disputeReducer} from "../dispute/reducer";
-import {convertCommitmentToSignedState, convertCommitmentToState} from "../../../utils/nitro-converter";
+import {convertStateToCommitment} from "../../../utils/nitro-converter";
 import {joinSignature} from "ethers/utils";
+import {State, SignedState} from "@statechannels/nitro-protocol";
 
 // TODO: Right now we're using a fixed application ID
 // since we're not too concerned with handling multiple running app channels.
@@ -24,7 +24,7 @@ export function initialize(
   privateKey: string
 ): ProtocolStateWithSharedData<states.ApplicationState> {
   return {
-    protocolState: states.waitForFirstCommitment({channelId, privateKey, address}),
+    protocolState: states.waitForFirstState({channelId, privateKey, address}),
     sharedData: registerChannelToMonitor(sharedData, APPLICATION_PROCESS_ID, channelId, [])
   };
 }
@@ -44,10 +44,10 @@ export function applicationReducer(
     return handleDisputeAction(protocolState, sharedData, action);
   }
   switch (action.type) {
-    case "WALLET.APPLICATION.OPPONENT_COMMITMENT_RECEIVED":
-      return opponentCommitmentReceivedReducer(protocolState, sharedData, action);
-    case "WALLET.APPLICATION.OWN_COMMITMENT_RECEIVED":
-      return ownCommitmentReceivedReducer(protocolState, sharedData, action);
+    case "WALLET.APPLICATION.OPPONENT_STATE_RECEIVED":
+      return opponentStateReceivedReducer(protocolState, sharedData, action);
+    case "WALLET.APPLICATION.OWN_STATE_RECEIVED":
+      return ownStateReceivedReducer(protocolState, sharedData, action);
     case "WALLET.APPLICATION.CONCLUDED":
       return {sharedData, protocolState: states.success({})};
     case "WALLET.APPLICATION.CHALLENGE_DETECTED":
@@ -59,12 +59,12 @@ export function applicationReducer(
   }
 }
 
-function ownCommitmentReceivedReducer(
+function ownStateReceivedReducer(
   protocolState: states.NonTerminalApplicationState,
   sharedData: SharedData,
-  action: actions.OwnCommitmentReceived
+  action: actions.OwnStateReceived
 ): ProtocolStateWithSharedData<states.ApplicationState> {
-  const signResult = signAndUpdate(action.commitment, protocolState, sharedData);
+  const signResult = signAndUpdate(action.state, protocolState, sharedData);
   if (!signResult.isSuccess) {
     return {
       sharedData: queueMessage(sharedData, signatureFailure("Other", signResult.reason)),
@@ -79,13 +79,13 @@ function ownCommitmentReceivedReducer(
   }
 }
 
-function opponentCommitmentReceivedReducer(
+function opponentStateReceivedReducer(
   protocolState: states.NonTerminalApplicationState,
   sharedData: SharedData,
-  action: actions.OpponentCommitmentReceived
+  action: actions.OpponentStateReceived
 ): ProtocolStateWithSharedData<states.ApplicationState> {
-  const {commitment, signature} = action;
-  const validateResult = validateAndUpdate(commitment, signature, protocolState, sharedData);
+  const {signedState} = action;
+  const validateResult = validateAndUpdate(signedState, protocolState, sharedData);
   if (!validateResult.isSuccess) {
     // TODO: Currently checkAndStore doesn't contain any validation messages
     // We might want to return a more descriptive message to the app?
@@ -124,8 +124,14 @@ function challengeDetectedReducer(
   sharedData: SharedData,
   action: actions.ChallengeDetected
 ): ProtocolStateWithSharedData<states.ApplicationState> {
-  const {channelId, processId, expiresAt: expiryTime, commitment} = action;
-  const disputeState = dispute.initializeResponder(processId, channelId, expiryTime, sharedData, commitment);
+  const {channelId, processId, expiresAt: expiryTime, state} = action;
+  const disputeState = dispute.initializeResponder(
+    processId,
+    channelId,
+    expiryTime,
+    sharedData,
+    convertStateToCommitment(state)
+  );
   const newProtocolState = states.waitForDispute({
     ...protocolState,
     disputeState: disputeState.protocolState
@@ -169,32 +175,23 @@ function handleDisputeAction(
 }
 
 const validateAndUpdate = (
-  commitment: Commitment,
-  signature: string,
-  state: states.ApplicationState,
+  signedState: SignedState,
+  protocolState: states.ApplicationState,
   sharedData: SharedData
 ) => {
-  if (state.type === "Application.WaitForFirstCommitment") {
-    return checkAndInitialize(
-      sharedData.channelStore,
-      convertCommitmentToSignedState(commitment, state.privateKey),
-
-      state.privateKey
-    );
-  } else if (state.type === "Application.Ongoing") {
-    // TODO: Since we are validating an opponent's commitment we cannot convert it to a SignedState since we need their privateKey
-    // This should be fixed when we switch this protocol to SignedStates
-    // return checkAndStore(sharedData.channelStore, convertCommitmentToSignedState(commitment, state.privateKey));
-    throw new Error("NOT IMPLEMENTED: ValidateAndUpdate needs to handle validating a SignedState");
+  if (protocolState.type === "Application.WaitForFirstState") {
+    return checkAndInitialize(sharedData.channelStore, signedState, protocolState.privateKey);
+  } else if (protocolState.type === "Application.Ongoing") {
+    return checkAndStore(sharedData.channelStore, signedState);
   } else {
     return {isSuccess: false, store: sharedData.channelStore};
   }
 };
 
-const signAndUpdate = (commitment: Commitment, state: states.ApplicationState, sharedData: SharedData) => {
-  if (state.type === "Application.WaitForFirstCommitment") {
-    return signAndInitialize(sharedData.channelStore, convertCommitmentToState(commitment), state.privateKey);
+const signAndUpdate = (state: State, protocolState: states.ApplicationState, sharedData: SharedData) => {
+  if (protocolState.type === "Application.WaitForFirstState") {
+    return signAndInitialize(sharedData.channelStore, state, protocolState.privateKey);
   } else {
-    return signAndStore(sharedData.channelStore, convertCommitmentToState(commitment));
+    return signAndStore(sharedData.channelStore, state);
   }
 };

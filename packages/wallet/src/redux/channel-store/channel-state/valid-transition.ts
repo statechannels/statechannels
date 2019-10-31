@@ -2,17 +2,20 @@ import {ChannelState, Commitments} from "./states";
 import {Commitment, validCommitmentSignature} from "../../../domain";
 import {getCommitmentChannelId} from "../../../domain/commitments";
 import {bigNumberify} from "ethers/utils";
+import {convertCommitmentToState} from "../../../utils/nitro-converter";
+import {getChannelId} from "@statechannels/nitro-protocol";
 
 export function validTransition(state: ChannelState, commitment: Commitment): boolean {
   const commitmentNonce = bigNumberify(commitment.channel.nonce).toHexString();
-  const channelId = getCommitmentChannelId(commitment);
+  const commitmentChannelId = getCommitmentChannelId(commitment);
+  const channelId = getChannelId(convertCommitmentToState(commitment).channel);
   return (
     commitment.turnNum === state.turnNum + 1 &&
     commitmentNonce === state.channelNonce &&
     commitment.channel.participants[0] === state.participants[0] &&
     commitment.channel.participants[1] === state.participants[1] &&
     commitment.channel.channelType === state.libraryAddress &&
-    channelId === state.channelId
+    (commitmentChannelId === state.channelId || channelId === state.channelId)
   );
 }
 

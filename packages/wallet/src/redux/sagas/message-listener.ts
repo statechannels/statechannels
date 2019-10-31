@@ -13,6 +13,8 @@ import {concluded, challengeRequested} from "../protocols/application/actions";
 
 import {appAttributesFromBytes} from "fmg-nitro-adjudicator/lib/consensus-app";
 import {CONSENSUS_LIBRARY_ADDRESS} from "../../constants";
+import {convertCommitmentToState, convertCommitmentToSignedState} from "../../utils/nitro-converter";
+import {asPrivateKey} from "../../communication/__tests__/commitments";
 export function* messageListener() {
   const postMessageEventChannel = eventChannel(emitter => {
     window.addEventListener("message", (event: MessageEvent) => {
@@ -37,7 +39,7 @@ export function* messageListener() {
         yield put(
           challengeRequested({
             processId: application.APPLICATION_PROCESS_ID, // TODO allow for multiple application Ids
-            commitment: action.commitment,
+            state: convertCommitmentToState(action.commitment),
             channelId: action.channelId
           })
         );
@@ -62,9 +64,9 @@ export function* messageListener() {
         yield validateAgainstLatestCommitment(action.commitment);
 
         yield put(
-          actions.application.ownCommitmentReceived({
+          actions.application.ownStateReceived({
             processId: application.APPLICATION_PROCESS_ID,
-            commitment: action.commitment
+            state: convertCommitmentToState(action.commitment)
           })
         );
         break;
@@ -73,12 +75,10 @@ export function* messageListener() {
           yield put(actions.protocol.initializeChannel({channelId: getCommitmentChannelId(action.commitment)}));
         }
         yield validateAgainstLatestCommitment(action.commitment);
-
         yield put(
-          actions.application.opponentCommitmentReceived({
+          actions.application.opponentStateReceived({
             processId: application.APPLICATION_PROCESS_ID,
-            commitment: action.commitment,
-            signature: action.signature
+            signedState: convertCommitmentToSignedState(action.commitment, asPrivateKey) // TODO: Temporary until message listener can be switched to states
           })
         );
         break;

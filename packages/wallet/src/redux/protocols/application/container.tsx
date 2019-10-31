@@ -23,7 +23,7 @@ class ApplicationContainer extends PureComponent<Props> {
         return <div />;
       case "Application.Ongoing":
       case "Application.Success":
-      case "Application.WaitForFirstCommitment":
+      case "Application.WaitForFirstState":
         return <div />;
       default:
         return unreachable(state);
