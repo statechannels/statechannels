@@ -1,13 +1,15 @@
 ---
-id: payment-game
-title: Single Asset Payments
+id: single-asset-payments
+title: SingleAssetPayments.sol
 ---
 
 Although Nitro supports a mixture of ETH and ERC20 tokens to be escrowed into a channel, a simple payment application would most likely be restricted to a single asset type. There is no `appData` for such an application, as the state machine is encoded only by conditions on the default outcome of each state update. In short, when it is your move you may unilaterally transfer some of the assets that are currently allocated to you, to another participant. You may not decrease any other participants allocation.
 
+
+
 ## Implementation
 
-In [`examples/SingleAssetPayments.sol`](https://github.com/statechannels/nitro-protocol/blob/f0f487eb632ea3c1118a878f3c03d75c1f98837f/contracts/examples/SingleAssetPayments.sol):
+Please see the [API](../natspec/SingleAssetPayments).
 
 - Decode the information
 - Revert if (on either state):

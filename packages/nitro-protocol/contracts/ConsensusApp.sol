@@ -3,26 +3,43 @@ pragma experimental ABIEncoderV2;
 
 import './interfaces/ForceMoveApp.sol';
 
+/**
+  * @dev The ConsensusApp complies with the ForceMoveApp interface and allows a channel outcome to be updated if and only if all participants are in agreement.
+*/
 contract ConsensusApp is ForceMoveApp {
     struct ConsensusAppData {
         uint32 furtherVotesRequired;
         bytes proposedOutcome;
     }
 
+    /**
+    * @notice Deocdes the appData.
+    * @dev Deocdes the appData.
+    * @param appDataBytes The abi.encode of a ConsensusAppData struct describing the application-specific data.
+    * @return A ConsensusAppData struct containing the application-specific data.
+    */
     function appData(bytes memory appDataBytes) internal pure returns (ConsensusAppData memory) {
         return abi.decode(appDataBytes, (ConsensusAppData));
     }
 
+    /**
+    * @notice Encodes the ConsensusApp rules.
+    * @dev Encodes the ConsensusApp rules.
+    * @param a State being transitioned from.
+    * @param b State being transitioned to.
+    * @param nParticipants Number of participants in this state channel.
+    * @return true if the transition conforms to the ConsensusApp's rules, false otherwise.
+    */
     function validTransition(
         VariablePart memory a,
         VariablePart memory b,
-        uint256, // turnNumB
-        uint256 numParticipants
+        uint256, // turnNumB, unused
+        uint256 nParticipants
     ) public pure returns (bool) {
         ConsensusAppData memory appDataA = appData(a.appData);
         ConsensusAppData memory appDataB = appData(b.appData);
 
-        if (appDataB.furtherVotesRequired == numParticipants - 1) {
+        if (appDataB.furtherVotesRequired == nParticipants - 1) {
             // propose/veto/pass
             require(
                 identical(a.outcome, b.outcome),
@@ -58,6 +75,13 @@ contract ConsensusApp is ForceMoveApp {
 
     // Utilitiy helpers
 
+    /**
+    * @notice Check for equality of two byte strings
+    * @dev Check for equality of two byte strings
+    * @param a One bytes string
+    * @param b The other bytes string
+    * @return true if the bytes are identical, false otherwise.
+    */
     function identical(bytes memory a, bytes memory b) internal pure returns (bool) {
         return (keccak256(abi.encode(a)) == keccak256(abi.encode(b)));
     }
