@@ -157,6 +157,24 @@ describe('Dialogs - BudgetAllocation', () => {
     rejectButton.simulate('click');
   });
 
+  it('should send an error message via JSONRPC when clicking Reject', async done => {
+    const errorResponse = {
+      code: -32100,
+      message: 'User has rejected budget allocation'
+    };
+
+    const {rejectButton} = budgetAllocation;
+
+    window.onmessage = (event: MessageEvent) => {
+      if (typeof event.data === 'object' && 'error' in event.data) {
+        expect(event.data.error).toEqual(errorResponse);
+        done();
+      }
+    };
+
+    rejectButton.simulate('click');
+  });
+
   afterEach(() => {
     onboardingFlowContext.mockReset();
   });

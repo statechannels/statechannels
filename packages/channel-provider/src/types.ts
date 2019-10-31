@@ -13,6 +13,20 @@ export type JsonRpcResponse<ResultType = any> = {
   result: ResultType;
 };
 
+export type JsonRpcError = {
+  code: number;
+  message: string;
+  data?: {
+    [key: string]: any;
+  };
+};
+
+export type JsonRpcErrorResponse = {
+  id: number;
+  jsonrpc: '2.0';
+  error: JsonRpcError;
+};
+
 export interface IChannelProvider {
   enable(url?: string): Promise<void>;
   send<ResultType = any>(method: string, params?: any[]): Promise<ResultType>;
