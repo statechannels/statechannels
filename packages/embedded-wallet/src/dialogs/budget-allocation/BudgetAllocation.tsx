@@ -2,7 +2,8 @@ import debug from 'debug';
 import React, {Dispatch, SetStateAction, useEffect, useState} from 'react';
 import {Redirect, RouteComponentProps} from 'react-router';
 import {OnboardingFlowPaths, useOnboardingFlowContext} from '../../flows';
-import {closeWallet} from '../../message-dispatchers';
+import {JsonRpcComponentProps} from '../../json-rpc-router';
+import {closeWallet, rejectAllocation} from '../../message-dispatchers';
 import {Dialog, Slider} from '../../ui';
 import {Expandable} from '../../ui/expandable/Expandable';
 
@@ -14,8 +15,9 @@ const allow = (amountToAllocate: number, useRedirect: Dispatch<SetStateAction<bo
   useRedirect(true);
 };
 
-const reject = () => {
+const reject = (onboardingFlowContext: JsonRpcComponentProps) => () => {
   log('`Reject` clicked: You shall not pass.');
+  rejectAllocation(onboardingFlowContext.request.id as number);
   closeWallet();
 };
 
@@ -37,7 +39,7 @@ const BudgetAllocation: React.FC<RouteComponentProps> = () => {
           label: `Allow ${amountToAllocate} ETH`,
           onClick: allow(amountToAllocate, useRedirect)
         },
-        secondary: {label: 'Reject', onClick: reject}
+        secondary: {label: 'Reject', onClick: reject(onboardingFlowContext)}
       }}
     >
       {redirect ? <Redirect to={OnboardingFlowPaths.NoHub} /> : null}

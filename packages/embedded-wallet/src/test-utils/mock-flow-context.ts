@@ -1,9 +1,9 @@
-import {JsonRPCRequest} from 'web3/providers';
+import {JsonRpcRequest} from '@statechannels/channel-provider';
 import * as Onboarding from '../flows/onboarding/Onboarding';
 
 export type Flow = 'Onboarding';
 
-const MockRequests: {[key in Flow]: JsonRPCRequest} = {
+const MockRequests: {[key in Flow]: JsonRpcRequest} = {
   Onboarding: {
     jsonrpc: '2.0',
     id: 123,
