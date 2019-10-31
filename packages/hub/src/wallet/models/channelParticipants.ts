@@ -1,5 +1,5 @@
-import { Model } from 'objection';
-import { Address } from '../../types';
+import {Model} from 'objection';
+import {Address} from '../../types';
 
 export default class ChannelParticipant extends Model {
   static tableName = 'channel_participants';
@@ -10,9 +10,9 @@ export default class ChannelParticipant extends Model {
       modelClass: ChannelParticipant,
       join: {
         from: 'channel_participants.channel_id',
-        to: 'channels.id',
-      },
-    },
+        to: 'channels.id'
+      }
+    }
   };
   readonly id!: number;
   address!: Address;

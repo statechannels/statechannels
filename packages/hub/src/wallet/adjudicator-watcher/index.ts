@@ -1,6 +1,6 @@
-import { ethers } from 'ethers';
-import { Uint256 } from 'fmg-core';
-import { nitroAdjudicator } from '../utilities/blockchain';
+import {ethers} from 'ethers';
+import {Uint256} from 'fmg-core';
+import {nitroAdjudicator} from '../utilities/blockchain';
 
 /**
  * todos:
@@ -9,7 +9,7 @@ import { nitroAdjudicator } from '../utilities/blockchain';
 
 export enum AdjudicatorWatcherEventType {
   Deposited,
-  ChallengeCreated,
+  ChallengeCreated
 }
 
 export interface AdjudicatorWatcherEvent {
@@ -28,7 +28,7 @@ export async function listen() {
       eventType: AdjudicatorWatcherEventType.Deposited,
       channelId,
       amountDeposited: amountDeposited.toHexString(),
-      destinationHoldings: destinationHoldings.toHexString(),
+      destinationHoldings: destinationHoldings.toHexString()
     });
   });
   const challengeCreatedFilter = adjudicator.filters.ChallengeCreated();

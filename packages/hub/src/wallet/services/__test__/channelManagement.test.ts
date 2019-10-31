@@ -1,8 +1,8 @@
-import { Bytes, sign, Signature, toHex } from 'fmg-core';
-import { HUB_PRIVATE_KEY } from '../../../constants';
-import { constructors as testDataConstructors, funded_channel } from '../../../test/test_data';
+import {Bytes, sign, Signature, toHex} from 'fmg-core';
+import {HUB_PRIVATE_KEY} from '../../../constants';
+import {constructors as testDataConstructors, funded_channel} from '../../../test/test_data';
 import * as ChannelManagement from '../channelManagement';
-import { asCoreCommitment, LedgerCommitment } from '../ledger-commitment';
+import {asCoreCommitment, LedgerCommitment} from '../ledger-commitment';
 
 let pre_fund_setup_0: LedgerCommitment;
 let pre_fund_setup_1: LedgerCommitment;
@@ -29,14 +29,14 @@ function signAppCommitment(c: LedgerCommitment, k: Bytes): Signature {
 describe('validSignature', () => {
   it('returns true when the commitment was signed by the mover', async () => {
     expect(ChannelManagement.validSignature(asCoreCommitment(pre_fund_setup_1), hubSignature)).toBe(
-      true,
+      true
     );
   });
 
   it.skip('returns false when the commitment was not signed by the mover', async () => {
     // TODO: Unskip when validation is enabled
     expect(ChannelManagement.validSignature(asCoreCommitment(pre_fund_setup_0), hubSignature)).toBe(
-      false,
+      false
     );
   });
 
@@ -44,7 +44,7 @@ describe('validSignature', () => {
     // TODO: Unskip when validation is enabled
     const signature = signAppCommitment(pre_fund_setup_0, '0xf00');
     expect(ChannelManagement.validSignature(asCoreCommitment(pre_fund_setup_0), signature)).toBe(
-      false,
+      false
     );
   });
 });
@@ -57,7 +57,7 @@ describe('formResponse', () => {
 
     expect(await ChannelManagement.formResponse(asCoreCommitment(pre_fund_setup_1))).toMatchObject({
       commitment: asCoreCommitment(pre_fund_setup_1),
-      signature: hubSignature,
+      signature: hubSignature
     });
   });
 });

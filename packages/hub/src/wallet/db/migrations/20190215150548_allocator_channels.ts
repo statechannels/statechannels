@@ -1,5 +1,5 @@
 import * as Knex from 'knex';
-import { addBytesCheck } from '../utils';
+import {addBytesCheck} from '../utils';
 
 const TABLE_NAME = 'allocator_channels';
 

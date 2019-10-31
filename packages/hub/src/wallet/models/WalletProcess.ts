@@ -1,4 +1,4 @@
-import { Model, snakeCaseMappers } from 'objection';
+import {Model, snakeCaseMappers} from 'objection';
 
 export default class WalletProcess extends Model {
   static tableName = 'wallet_processes';

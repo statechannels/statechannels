@@ -1,14 +1,6 @@
-import {
-  BaseCommitment,
-  Bytes,
-  Bytes32,
-  Commitment,
-  CommitmentType,
-  Uint256,
-  Uint8,
-} from 'fmg-core';
+import {BaseCommitment, Bytes, Bytes32, Commitment, CommitmentType, Uint256, Uint8} from 'fmg-core';
 import * as abi from 'web3-eth-abi';
-import { soliditySha3 } from 'web3-utils';
+import {soliditySha3} from 'web3-utils';
 
 export interface RPSAppAttributes {
   positionType: Uint8;
@@ -26,20 +18,20 @@ const SolidityRPSCommitmentType = {
     preCommit: 'bytes32',
     bWeapon: 'uint8',
     aWeapon: 'uint8',
-    salt: 'bytes32',
-  },
+    salt: 'bytes32'
+  }
 };
 export enum PositionType {
   Resting,
   Proposed,
   Accepted,
-  Reveal,
+  Reveal
 }
 
 export enum Weapon {
   Rock,
   Paper,
-  Scissors,
+  Scissors
 }
 
 export interface RPSCommitment extends BaseCommitment {
@@ -48,7 +40,7 @@ export interface RPSCommitment extends BaseCommitment {
 }
 
 export function sanitize(appAttrs: RPSAppAttributes): Bytes {
-  const sanitizedAttrs = { ...appAttrs };
+  const sanitizedAttrs = {...appAttrs};
   if (appAttrs.positionType === PositionType.Proposed) {
     sanitizedAttrs.aWeapon = Weapon.Rock;
     sanitizedAttrs.salt = zeroBytes32;
@@ -58,14 +50,14 @@ export function sanitize(appAttrs: RPSAppAttributes): Bytes {
 }
 
 export function encodeAppAttributes(appAttrs: RPSAppAttributes): Bytes {
-  const { positionType, stake, preCommit, bWeapon, aWeapon, salt } = appAttrs;
+  const {positionType, stake, preCommit, bWeapon, aWeapon, salt} = appAttrs;
   return abi.encodeParameter(SolidityRPSCommitmentType, [
     positionType,
     stake,
     preCommit,
     bWeapon,
     aWeapon,
-    salt,
+    salt
   ]);
 }
 
@@ -77,21 +69,21 @@ export function decodeAppAttributes(appAttrs: string): RPSAppAttributes {
     preCommit: parameters[2],
     bWeapon: parseInt(parameters[3], 10),
     aWeapon: parseInt(parameters[4], 10),
-    salt: parameters[5],
+    salt: parameters[5]
   };
 }
 
 export function fromCoreCommitment(commitment: Commitment): RPSCommitment {
   return {
     ...commitment,
-    appAttributes: decodeAppAttributes(commitment.appAttributes),
+    appAttributes: decodeAppAttributes(commitment.appAttributes)
   };
 }
 
 export function asCoreCommitment(rpsCommitment: RPSCommitment): Commitment {
   return {
     ...rpsCommitment,
-    appAttributes: encodeAppAttributes(rpsCommitment.appAttributes),
+    appAttributes: encodeAppAttributes(rpsCommitment.appAttributes)
   };
 }
 
@@ -103,7 +95,7 @@ export function defaultAppAttrs(stake): RPSAppAttributes {
     preCommit: zeroBytes32,
     bWeapon: Weapon.Rock,
     aWeapon: Weapon.Rock,
-    salt: zeroBytes32,
+    salt: zeroBytes32
   };
 }
 
@@ -113,8 +105,5 @@ export function generateSalt(): Bytes32 {
 }
 
 export function hashCommitment(weapon: Weapon, salt: string) {
-  return soliditySha3(
-    { type: 'uint256', value: weapon.toString() },
-    { type: 'bytes32', value: salt },
-  );
+  return soliditySha3({type: 'uint256', value: weapon.toString()}, {type: 'bytes32', value: salt});
 }

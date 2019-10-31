@@ -1,6 +1,6 @@
-import { DUMMY_RULES_ADDRESS } from '../../test/test-constants';
-import { Blockchain } from '../../wallet/services/blockchain';
-import { nitroAdjudicator } from '../../wallet/utilities/blockchain';
+import {DUMMY_RULES_ADDRESS} from '../../test/test-constants';
+import {Blockchain} from '../../wallet/services/blockchain';
+import {nitroAdjudicator} from '../../wallet/utilities/blockchain';
 
 jest.setTimeout(30000);
 

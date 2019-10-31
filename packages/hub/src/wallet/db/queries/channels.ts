@@ -1,7 +1,7 @@
-import { ethers } from 'ethers';
-import { bigNumberify } from 'ethers/utils';
-import { Address, channelID, CommitmentType, Signature, Uint256, Uint32 } from 'fmg-core';
-import { AppCommitment, CommitmentString } from '../../../types';
+import {ethers} from 'ethers';
+import {bigNumberify} from 'ethers/utils';
+import {Address, channelID, CommitmentType, Signature, Uint256, Uint32} from 'fmg-core';
+import {AppCommitment, CommitmentString} from '../../../types';
 import errors from '../../errors';
 import Channel from '../../models/channel';
 
@@ -16,17 +16,17 @@ export interface IChannel {
 }
 
 export const queries = {
-  updateChannel,
+  updateChannel
 };
 
 async function updateChannel(commitmentRound: AppCommitment[], hubCommitment: AppCommitment) {
   const firstCommitment = commitmentRound[0];
-  const { channel } = firstCommitment;
-  const { channelType: rules_address, nonce, participants } = channel;
+  const {channel} = firstCommitment;
+  const {channelType: rules_address, nonce, participants} = channel;
   const channelId = channelID(channel);
 
   const storedChannel = await Channel.query()
-    .where({ channel_id: channelId })
+    .where({channel_id: channelId})
     .select('id')
     .first();
 
@@ -39,7 +39,7 @@ async function updateChannel(commitmentRound: AppCommitment[], hubCommitment: Ap
   const allocationByPriority = (priority: number, c: AppCommitment) => ({
     priority,
     destination: c.destination[priority],
-    amount: c.allocation[priority],
+    amount: c.allocation[priority]
   });
 
   const allocations = (c: AppCommitment) =>
@@ -50,7 +50,7 @@ async function updateChannel(commitmentRound: AppCommitment[], hubCommitment: Ap
     commitment_type: c.commitmentType,
     commitment_count: c.commitmentCount,
     allocations: allocations(c),
-    app_attrs: c.appAttributes,
+    app_attrs: c.appAttributes
   });
 
   const commitments = [...commitmentRound.map(c => commitment(c)), commitment(hubCommitment)];
@@ -71,7 +71,7 @@ async function updateChannel(commitmentRound: AppCommitment[], hubCommitment: Ap
     commitments,
     rules_address,
     nonce,
-    guaranteedChannel,
+    guaranteedChannel
   };
 
   // TODO: We are currently using the allocations to set the funding amount
@@ -84,19 +84,19 @@ async function updateChannel(commitmentRound: AppCommitment[], hubCommitment: Ap
         .bigNumberify(a)
         .add(ethers.utils.bigNumberify(b))
         .toHexString(),
-    bigNumberify(0).toHexString(),
+    bigNumberify(0).toHexString()
   );
 
   if (storedChannel) {
-    upserts = { ...upserts, id: storedChannel.id };
+    upserts = {...upserts, id: storedChannel.id};
   } else {
     upserts = {
       ...upserts,
       participants: participants.map((address, i) => ({
         address,
-        priority: i,
+        priority: i
       })),
-      holdings,
+      holdings
     };
   }
 
@@ -108,7 +108,7 @@ async function updateChannel(commitmentRound: AppCommitment[], hubCommitment: Ap
 export async function getWithCommitments(channel_id: string) {
   return await Channel.query()
     .where({
-      channel_id,
+      channel_id
     })
     .eager('[commitments.[channel.[participants],allocations]]')
     .first();

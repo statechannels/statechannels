@@ -1,11 +1,11 @@
 const CHANNEL_EXISTS = new Error(
-  'Attempting to open a channel that already exists -- use a different nonce',
+  'Attempting to open a channel that already exists -- use a different nonce'
 );
 const CHANNEL_MISSING = new Error('Channel does not exist');
 const COMMITMENT_NOT_SIGNED = new Error('Commitment not signed by mover');
 const INVALID_TRANSITION = new Error('Invalid transition');
 const INVALID_COMMITMENT_UNKNOWN_REASON = new Error(
-  'Commitment is not valid, but th reason is not known',
+  'Commitment is not valid, but th reason is not known'
 );
 const NOT_OUR_TURN = new Error('Not our turn to create a commitment');
 const VALUE_LOST = new Error('Value not preserved');
@@ -21,5 +21,5 @@ export default {
   NOT_OUR_TURN,
   VALUE_LOST,
   processMissing,
-  processRunning,
+  processRunning
 };

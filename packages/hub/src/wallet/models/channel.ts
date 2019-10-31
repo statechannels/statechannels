@@ -1,5 +1,5 @@
-import { Address, Channel as CoreChannel, Uint256, Uint32 } from 'fmg-core';
-import { Model, snakeCaseMappers } from 'objection';
+import {Address, Channel as CoreChannel, Uint256, Uint32} from 'fmg-core';
+import {Model, snakeCaseMappers} from 'objection';
 import ChannelParticipant from './channelParticipants';
 import LedgerCommitment from './channelCommitment';
 
@@ -8,7 +8,7 @@ export default class Channel extends Model {
     return {
       channelType: this.rulesAddress,
       nonce: this.nonce,
-      participants: this.participants.map(p => p.address),
+      participants: this.participants.map(p => p.address)
     };
   }
 
@@ -24,17 +24,17 @@ export default class Channel extends Model {
       modelClass: ChannelParticipant,
       join: {
         from: 'channels.id',
-        to: 'channel_participants.channel_id',
-      },
+        to: 'channel_participants.channel_id'
+      }
     },
     commitments: {
       relation: Model.HasManyRelation,
       modelClass: LedgerCommitment,
       join: {
         from: 'channels.id',
-        to: 'channel_commitments.channel_id',
-      },
-    },
+        to: 'channel_commitments.channel_id'
+      }
+    }
   };
 
   readonly id!: number;

@@ -1,8 +1,8 @@
 import * as contracts from '../../utilities/contracts';
 
-import { ContractFactory, ethers, providers } from 'ethers';
-import { linkedByteCode } from 'magmo-devtools';
-import { HUB_SIGNER_PRIVATE_KEY } from '../../constants';
+import {ContractFactory, ethers, providers} from 'ethers';
+import {linkedByteCode} from 'magmo-devtools';
+import {HUB_SIGNER_PRIVATE_KEY} from '../../constants';
 
 const neworkIdToRpcEndpoint = networkId => {
   if (networkId === process.env.ROPSTEN_NETWORK_ID) {
@@ -23,10 +23,10 @@ export async function nitroAdjudicator() {
 
 async function setupContract(artifact: any) {
   Object.defineProperty(artifact, 'bytecode', {
-    value: linkedByteCode(artifact, contracts.commitmentArtifact, process.env.CHAIN_NETWORK_ID),
+    value: linkedByteCode(artifact, contracts.commitmentArtifact, process.env.CHAIN_NETWORK_ID)
   });
   Object.defineProperty(artifact, 'bytecode', {
-    value: linkedByteCode(artifact, contracts.rulesArtifact, process.env.CHAIN_NETWORK_ID),
+    value: linkedByteCode(artifact, contracts.rulesArtifact, process.env.CHAIN_NETWORK_ID)
   });
 
   let nitroFactory;
@@ -40,7 +40,7 @@ async function setupContract(artifact: any) {
     throw err;
   }
   const contract = await nitroFactory.attach(
-    artifact.networks[process.env.CHAIN_NETWORK_ID].address,
+    artifact.networks[process.env.CHAIN_NETWORK_ID].address
   );
 
   return contract;

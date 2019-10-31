@@ -1,4 +1,4 @@
-import { Address, BaseCommitment, Bytes, Bytes32, CommitmentType, Uint32, Uint8 } from 'fmg-core';
+import {Address, BaseCommitment, Bytes, Bytes32, CommitmentType, Uint32, Uint8} from 'fmg-core';
 
 export type CommitmentString = string;
 
@@ -21,4 +21,4 @@ export interface AppCommitment extends BaseCommitment {
   commitmentType: CommitmentType;
 }
 
-export { Address, Bytes32, Bytes, Uint8, Uint32 };
+export {Address, Bytes32, Bytes, Uint8, Uint32};

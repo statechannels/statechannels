@@ -1,6 +1,6 @@
 import Wallet from '..';
-import { constructors as testDataConstructors } from '../../test/test_data';
-import { LedgerCommitment } from '../services/ledger-commitment';
+import {constructors as testDataConstructors} from '../../test/test_data';
+import {LedgerCommitment} from '../services/ledger-commitment';
 
 let pre_fund_setup_0: LedgerCommitment;
 

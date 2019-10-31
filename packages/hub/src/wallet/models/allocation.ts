@@ -1,5 +1,5 @@
-import { Address, Uint256, Uint32 } from 'fmg-core';
-import { Model } from 'objection';
+import {Address, Uint256, Uint32} from 'fmg-core';
+import {Model} from 'objection';
 import LedgerCommitment from './channelCommitment';
 
 export default class Allocation extends Model {
@@ -11,9 +11,9 @@ export default class Allocation extends Model {
       modelClass: LedgerCommitment,
       join: {
         from: 'allocations.allocator_channel_commitment_id',
-        to: 'channel_commitments.id',
-      },
-    },
+        to: 'channel_commitments.id'
+      }
+    }
   };
   readonly id!: number;
   commitment: LedgerCommitment;

@@ -1,5 +1,5 @@
 import * as Knex from 'knex';
-import { addAddressCheck } from '../utils';
+import {addAddressCheck} from '../utils';
 
 const TABLE_NAME = 'rules';
 

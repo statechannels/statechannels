@@ -1,8 +1,8 @@
-import { SignedCommitment } from '.';
-import { HUB_PRIVATE_KEY } from '../../constants';
+import {SignedCommitment} from '.';
+import {HUB_PRIVATE_KEY} from '../../constants';
 
-import { Commitment, CommitmentType, sign, Signature, toHex } from 'fmg-core';
-import { AppCommitment } from '../../types';
+import {Commitment, CommitmentType, sign, Signature, toHex} from 'fmg-core';
+import {AppCommitment} from '../../types';
 
 export function validSignature(commitment: Commitment, signature: Signature): boolean {
   console.warn('Signature not validated');
@@ -13,7 +13,7 @@ export function validSignature(commitment: Commitment, signature: Signature): bo
 export function formResponse(commitment: Commitment): SignedCommitment {
   const signature = sign(toHex(commitment), HUB_PRIVATE_KEY);
 
-  return { commitment, signature };
+  return {commitment, signature};
 }
 
 export function nextCommitment(theirCommitment: AppCommitment): AppCommitment {
@@ -29,7 +29,7 @@ export function nextCommitment(theirCommitment: AppCommitment): AppCommitment {
       ourCommitment = {
         ...theirCommitment,
         turnNum: theirCommitment.turnNum + 1,
-        commitmentCount: theirCommitment.commitmentCount + 1,
+        commitmentCount: theirCommitment.commitmentCount + 1
       };
 
       break;
@@ -37,7 +37,7 @@ export function nextCommitment(theirCommitment: AppCommitment): AppCommitment {
       ourCommitment = {
         ...theirCommitment,
         turnNum: theirCommitment.turnNum + 1,
-        commitmentCount: theirCommitment.commitmentCount + 1,
+        commitmentCount: theirCommitment.commitmentCount + 1
       };
       break;
 
@@ -45,14 +45,14 @@ export function nextCommitment(theirCommitment: AppCommitment): AppCommitment {
       ourCommitment = {
         ...theirCommitment,
         turnNum: theirCommitment.turnNum + 1,
-        commitmentCount: theirCommitment.commitmentCount + 1,
+        commitmentCount: theirCommitment.commitmentCount + 1
       };
   }
 
   if (typeof ourCommitment.appAttributes !== appAttrType) {
     // TODO: Does this actually enforce that the types match?
     throw new Error(
-      'Type error: typeof ourCommitment.appAttributes must match typeof theirCommitment.appAttributes',
+      'Type error: typeof ourCommitment.appAttributes must match typeof theirCommitment.appAttributes'
     );
   }
 

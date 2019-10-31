@@ -1,5 +1,5 @@
-import { Address } from 'fmg-core';
-import { Model } from 'objection';
+import {Address} from 'fmg-core';
+import {Model} from 'objection';
 import Channel from './channel';
 
 export default class Rule extends Model {
@@ -12,9 +12,9 @@ export default class Rule extends Model {
       modelClass: Channel,
       join: {
         to: 'channels.rule_id',
-        from: 'rules.id',
-      },
-    },
+        from: 'rules.id'
+      }
+    }
   };
   readonly id!: string;
   readonly address!: Address;

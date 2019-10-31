@@ -1,9 +1,9 @@
-import { fork } from 'child_process';
-import { bigNumberify } from 'ethers/utils';
-import { channelID } from 'fmg-core';
-import { AdjudicatorWatcherEvent } from '..';
-import { funded_channel } from '../../../test/test_data';
-import { Blockchain } from '../../services/blockchain';
+import {fork} from 'child_process';
+import {bigNumberify} from 'ethers/utils';
+import {channelID} from 'fmg-core';
+import {AdjudicatorWatcherEvent} from '..';
+import {funded_channel} from '../../../test/test_data';
+import {Blockchain} from '../../services/blockchain';
 
 jest.setTimeout(20000);
 const channelId = channelID(funded_channel);
@@ -15,7 +15,7 @@ describe('adjudicator listener', () => {
     // We have to reference the compiled JS file instead of the TS source file
     // https://github.com/facebook/jest/issues/5274
     // https://github.com/facebook/jest/issues/8236
-    const adjudicatorWatcher = fork('lib/wallet/adjudicator-watcher', [], { execArgv: [] });
+    const adjudicatorWatcher = fork('lib/wallet/adjudicator-watcher', [], {execArgv: []});
 
     killSubprocess = () => {
       adjudicatorWatcher.kill();

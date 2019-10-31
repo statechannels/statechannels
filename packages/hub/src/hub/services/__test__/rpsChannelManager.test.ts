@@ -1,10 +1,10 @@
-import { Commitment, CommitmentType, sign, Signature, toHex } from 'fmg-core';
+import {Commitment, CommitmentType, sign, Signature, toHex} from 'fmg-core';
 import {
   app_response,
   beginning_app_phase_rps_channel,
   constructors,
   funded_rps_channel,
-  pre_fund_setup_1_response,
+  pre_fund_setup_1_response
 } from '../../../test/rps_test_data';
 import {
   allocation,
@@ -13,17 +13,17 @@ import {
   FUNDED_CHANNEL_NONCE,
   PARTICIPANT_1_PRIVATE_KEY,
   PARTICIPANTS,
-  STAKE,
+  STAKE
 } from '../../../test/test-constants';
-import { default_channel } from '../../../test/test_data';
-import { errors } from '../../../wallet';
-import { validSignature } from '../../../wallet/services/channelManagement';
+import {default_channel} from '../../../test/test_data';
+import {errors} from '../../../wallet';
+import {validSignature} from '../../../wallet/services/channelManagement';
 import {
   asCoreCommitment,
   PositionType,
   RPSCommitment,
   Weapon,
-  zeroBytes32,
+  zeroBytes32
 } from '../rps-commitment';
 import * as RPSChannelManager from '../rpsChannelManager';
 
@@ -34,7 +34,7 @@ const base = {
   allocation: allocation(2),
   destination: DESTINATION,
   commitmentCount: 0,
-  commitmentType: CommitmentType.PreFundSetup,
+  commitmentType: CommitmentType.PreFundSetup
 };
 const APLAY = Weapon.Paper;
 const BPLAY = Weapon.Rock;
@@ -47,8 +47,8 @@ function sanitize(c: RPSCommitment): RPSCommitment {
         appAttributes: {
           ...c.appAttributes,
           aWeapon: Weapon.Rock,
-          salt: zeroBytes32,
-        },
+          salt: zeroBytes32
+        }
       };
     case PositionType.Resting:
     case PositionType.Accepted:
@@ -67,27 +67,27 @@ let resting: RPSCommitment;
 function withAgnosticChannel(c: RPSCommitment) {
   return {
     ...c,
-    channel: { ...c.channel, nonce: expect.any(Number) },
+    channel: {...c.channel, nonce: expect.any(Number)}
   };
 }
 
 beforeEach(() => {
   pre_fund_setup_0 = asCoreCommitment(constructors.preFundSetupA(base));
   post_fund_setup_0 = asCoreCommitment(
-    constructors.postFundSetupA({ ...base, channel: funded_rps_channel }),
+    constructors.postFundSetupA({...base, channel: funded_rps_channel})
   );
 
   propose = constructors.propose({
     ...base,
     aWeapon: APLAY,
-    channel: beginning_app_phase_rps_channel,
+    channel: beginning_app_phase_rps_channel
   });
-  const { stake } = propose.appAttributes;
+  const {stake} = propose.appAttributes;
   accept = constructors.accept({
     ...base,
     turnNum: propose.turnNum + 1,
     bWeapon: BPLAY,
-    preCommit: propose.appAttributes.preCommit,
+    preCommit: propose.appAttributes.preCommit
   });
   reveal = constructors.reveal({
     ...accept,
@@ -96,13 +96,13 @@ beforeEach(() => {
     salt: propose.appAttributes.salt,
     bWeapon: BPLAY,
     stake,
-    channel: beginning_app_phase_rps_channel,
+    channel: beginning_app_phase_rps_channel
   });
 
   resting = constructors.resting({
     ...accept,
     turnNum: reveal.turnNum + 1,
-    stake,
+    stake
   });
 });
 
@@ -111,8 +111,8 @@ describe('nextCommitment', () => {
     expect(
       // Our opponent would have sanitized their propose
       await RPSChannelManager.nextCommitment(sanitize(propose), {
-        ourWeapon: BPLAY,
-      }),
+        ourWeapon: BPLAY
+      })
     ).toMatchObject(withAgnosticChannel(accept));
   });
 
@@ -120,21 +120,21 @@ describe('nextCommitment', () => {
     expect(
       // Our opponent would have built accept off of our sanitized propose
       await RPSChannelManager.nextCommitment(sanitize(accept), {
-        ourLastPosition: propose.appAttributes,
-      }),
+        ourLastPosition: propose.appAttributes
+      })
     ).toMatchObject(withAgnosticChannel(reveal));
   });
 
   it('works on reveal commitments', async () => {
     expect(await RPSChannelManager.nextCommitment(reveal)).toMatchObject(
-      withAgnosticChannel(resting),
+      withAgnosticChannel(resting)
     );
   });
 
   it('works on resting commitments', async () => {
-    expect(await RPSChannelManager.nextCommitment(resting, { ourWeapon: APLAY })).toMatchObject({
+    expect(await RPSChannelManager.nextCommitment(resting, {ourWeapon: APLAY})).toMatchObject({
       ...withAgnosticChannel(propose),
-      turnNum: resting.turnNum + 1,
+      turnNum: resting.turnNum + 1
     });
   });
 });
@@ -147,9 +147,9 @@ describe('updateRPSChannel', () => {
 
   describe('opening a channel', () => {
     it('should return an RPS channel and a signed commitment', async () => {
-      const { commitment, signature } = await RPSChannelManager.updateRPSChannel(
+      const {commitment, signature} = await RPSChannelManager.updateRPSChannel(
         pre_fund_setup_0,
-        theirSignature,
+        theirSignature
       );
 
       expect(commitment).toMatchObject(pre_fund_setup_1_response);
@@ -164,7 +164,7 @@ describe('updateRPSChannel', () => {
       await RPSChannelManager.updateRPSChannel(pre_fund_setup_0, theirSignature).catch(
         (err: Error) => {
           expect(err).toMatchObject(errors.COMMITMENT_NOT_SIGNED);
-        },
+        }
       );
     });
 
@@ -174,14 +174,14 @@ describe('updateRPSChannel', () => {
       pre_fund_setup_0.channel = {
         channelType: DUMMY_RULES_ADDRESS,
         nonce: FUNDED_CHANNEL_NONCE,
-        participants: PARTICIPANTS,
+        participants: PARTICIPANTS
       };
       theirSignature = sign(toHex(pre_fund_setup_0), PARTICIPANT_1_PRIVATE_KEY);
 
       await RPSChannelManager.updateRPSChannel(pre_fund_setup_0, theirSignature).catch(
         (err: Error) => {
           expect(err).toMatchObject(errors.CHANNEL_EXISTS);
-        },
+        }
       );
     });
   });
@@ -192,9 +192,9 @@ describe('updateRPSChannel', () => {
     });
 
     it('should return an allocator channel and a signed commitment', async () => {
-      const { commitment, signature } = await RPSChannelManager.updateRPSChannel(
+      const {commitment, signature} = await RPSChannelManager.updateRPSChannel(
         post_fund_setup_0,
-        theirSignature,
+        theirSignature
       );
       // expect(commitment).toMatchObject(post_fund_setup_1_response);
 
@@ -208,7 +208,7 @@ describe('updateRPSChannel', () => {
       await RPSChannelManager.updateRPSChannel(post_fund_setup_0, theirSignature).catch(
         (err: Error) => {
           expect(err).toMatchObject(errors.COMMITMENT_NOT_SIGNED);
-        },
+        }
       );
     });
 
@@ -227,7 +227,7 @@ describe('updateRPSChannel', () => {
 
       post_fund_setup_0.channel = {
         ...post_fund_setup_0.channel,
-        nonce: 999,
+        nonce: 999
       };
       theirSignature = sign(toHex(post_fund_setup_0), PARTICIPANT_1_PRIVATE_KEY);
 
@@ -243,9 +243,9 @@ describe('updateRPSChannel', () => {
       {
         theirCommitment = asCoreCommitment(sanitize(propose));
         theirSignature = sign(toHex(theirCommitment), PARTICIPANT_1_PRIVATE_KEY);
-        const { commitment, signature } = await RPSChannelManager.updateRPSChannel(
+        const {commitment, signature} = await RPSChannelManager.updateRPSChannel(
           theirCommitment,
-          theirSignature,
+          theirSignature
         );
         expect(commitment).toMatchObject(app_response(accept.appAttributes));
         expect(validSignature(commitment, signature)).toBe(true);
@@ -254,9 +254,9 @@ describe('updateRPSChannel', () => {
         theirCommitment = asCoreCommitment(sanitize(reveal));
         theirSignature = sign(toHex(theirCommitment), PARTICIPANT_1_PRIVATE_KEY);
 
-        const { commitment, signature } = await RPSChannelManager.updateRPSChannel(
+        const {commitment, signature} = await RPSChannelManager.updateRPSChannel(
           theirCommitment,
-          theirSignature,
+          theirSignature
         );
         expect(commitment).toMatchObject(app_response(resting.appAttributes));
         expect(validSignature(commitment, signature)).toBe(true);

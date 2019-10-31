@@ -1,4 +1,4 @@
-import { Address } from 'fmg-core';
+import {Address} from 'fmg-core';
 import Rule from '../models/rule';
 
 interface Application {

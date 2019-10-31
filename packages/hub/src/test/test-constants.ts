@@ -1,6 +1,6 @@
-import { ethers } from 'ethers';
-import { Address, channelID, Uint256 } from 'fmg-core';
-import { HUB_ADDRESS } from '../constants';
+import {ethers} from 'ethers';
+import {Address, channelID, Uint256} from 'fmg-core';
+import {HUB_ADDRESS} from '../constants';
 
 export const PARTICIPANT_1_PRIVATE_KEY =
   '0xa205281c09d630f6639c3505b63d57013996ba037bdbe4d2979eb8bd5bed5b1b';
@@ -35,37 +35,37 @@ export const RPS_NONCE = 22222;
 export const DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID = channelID({
   channelType: DUMMY_RULES_ADDRESS,
   nonce: FUNDED_CHANNEL_NONCE,
-  participants: [PARTICIPANT_1_ADDRESS, HUB_ADDRESS],
+  participants: [PARTICIPANT_1_ADDRESS, HUB_ADDRESS]
 });
 
 export const DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID_3 = channelID({
   channelType: DUMMY_RULES_ADDRESS,
   nonce: FUNDED_CHANNEL_NONCE_3,
-  participants: [PARTICIPANT_1_ADDRESS, PARTICIPANT_2_ADDRESS, HUB_ADDRESS],
+  participants: [PARTICIPANT_1_ADDRESS, PARTICIPANT_2_ADDRESS, HUB_ADDRESS]
 });
 
 export const DUMMY_RULES_BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID = channelID({
   channelType: DUMMY_RULES_ADDRESS,
   nonce: BEGINNING_APP_CHANNEL_NONCE,
-  participants: [PARTICIPANT_1_ADDRESS, HUB_ADDRESS],
+  participants: [PARTICIPANT_1_ADDRESS, HUB_ADDRESS]
 });
 
 export const DUMMY_RULES_ONGOING_APP_CHANNEL_NONCE_CHANNEL_ID = channelID({
   channelType: DUMMY_RULES_ADDRESS,
   nonce: ONGOING_APP_CHANNEL_NONCE,
-  participants: [PARTICIPANT_1_ADDRESS, HUB_ADDRESS],
+  participants: [PARTICIPANT_1_ADDRESS, HUB_ADDRESS]
 });
 
 export const DUMMY_RULES_FUNDED_RPS_CHANNEL_NONCE_CHANNEL_ID = channelID({
   channelType: DUMMY_RULES_ADDRESS,
   nonce: FUNDED_RPS_CHANNEL_NONCE,
-  participants: [PARTICIPANT_1_ADDRESS, HUB_ADDRESS],
+  participants: [PARTICIPANT_1_ADDRESS, HUB_ADDRESS]
 });
 
 export const DUMMY_RULES_BEGINNING_RPS_APP_CHANNEL_NONCE_CHANNEL_ID = channelID({
   channelType: DUMMY_RULES_ADDRESS,
   nonce: BEGINNING_RPS_APP_CHANNEL_NONCE,
-  participants: [PARTICIPANT_1_ADDRESS, HUB_ADDRESS],
+  participants: [PARTICIPANT_1_ADDRESS, HUB_ADDRESS]
 });
 
 export const STAKE: Uint256 = ethers.utils.parseEther('0.01').toHexString();
@@ -76,7 +76,7 @@ export const DESTINATION_3: Address[] = [PARTICIPANT_1_ADDRESS, PARTICIPANT_2_AD
 export const PARTICIPANTS_3: Address[] = [
   PARTICIPANT_1_ADDRESS,
   PARTICIPANT_2_ADDRESS,
-  HUB_ADDRESS,
+  HUB_ADDRESS
 ];
 
 const ALLOCATION: Uint256[] = ['0x05', '0x05', '0x05'];

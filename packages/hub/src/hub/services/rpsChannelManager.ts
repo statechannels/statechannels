@@ -1,9 +1,9 @@
-import { channelID, Commitment, CommitmentType, Signature } from 'fmg-core';
-import { errors, SignedCommitment } from '../../wallet';
+import {channelID, Commitment, CommitmentType, Signature} from 'fmg-core';
+import {errors, SignedCommitment} from '../../wallet';
 import Wallet from '../../wallet';
 import Channel from '../../wallet/models/channel';
 
-import { delay } from 'bluebird';
+import {delay} from 'bluebird';
 import ChannelCommitment from '../../wallet/models/channelCommitment';
 import {
   asCoreCommitment,
@@ -15,14 +15,14 @@ import {
   RPSAppAttributes,
   RPSCommitment,
   sanitize,
-  Weapon,
+  Weapon
 } from './rps-commitment';
 
 const wallet = new Wallet(sanitize);
 
 export async function updateRPSChannel(
   theirCommitment: Commitment,
-  theirSignature: Signature,
+  theirSignature: Signature
 ): Promise<SignedCommitment> {
   if (!wallet.validSignature(theirCommitment, theirSignature)) {
     throw errors.COMMITMENT_NOT_SIGNED;
@@ -48,11 +48,11 @@ export async function updateRPSChannel(
     await delay(1000);
   }
 
-  const { channelType: rules_address, nonce } = theirCommitment.channel;
+  const {channelType: rules_address, nonce} = theirCommitment.channel;
   const existingChannel = await Channel.query()
     .where({
       rules_address,
-      nonce,
+      nonce
     })
     .eager('commitments')
     .first();
@@ -63,7 +63,7 @@ export async function updateRPSChannel(
 
   const ourCommitment = await nextCommitment(fromCoreCommitment(theirCommitment), {
     ourLastPosition,
-    ourWeapon,
+    ourWeapon
   });
 
   await wallet.updateChannel([fromCoreCommitment(theirCommitment)], ourCommitment);
@@ -93,7 +93,7 @@ export function nextCommitment(theirCommitment: RPSCommitment, opts?: Opts): RPS
     ...theirCommitment,
     turnNum: theirCommitment.turnNum + 1,
     commitmentCount: 0,
-    appAttributes: move(theirCommitment.appAttributes, opts),
+    appAttributes: move(theirCommitment.appAttributes, opts)
   };
 }
 
@@ -107,20 +107,20 @@ function move(theirPosition: RPSAppAttributes, opts?: Opts): RPSAppAttributes {
         salt,
         preCommit: hashCommitment(opts.ourWeapon, salt),
         aWeapon: opts.ourWeapon,
-        bWeapon: Weapon.Rock,
+        bWeapon: Weapon.Rock
       };
     case PositionType.Proposed:
       return {
         ...theirPosition,
         positionType: PositionType.Accepted,
-        bWeapon: opts.ourWeapon,
+        bWeapon: opts.ourWeapon
       };
     case PositionType.Accepted:
       return {
         ...theirPosition,
         positionType: PositionType.Reveal,
         aWeapon: opts.ourLastPosition.aWeapon,
-        salt: opts.ourLastPosition.salt,
+        salt: opts.ourLastPosition.salt
       };
     case PositionType.Reveal:
       return defaultAppAttrs(theirPosition.stake);
@@ -132,10 +132,10 @@ export async function valuePreserved(theirCommitment: any): Promise<boolean> {
 }
 
 export async function validTransition(theirCommitment: Commitment): Promise<boolean> {
-  const { channel: commitmentChannel } = theirCommitment;
+  const {channel: commitmentChannel} = theirCommitment;
   const channel_id = channelID(commitmentChannel);
   const channel = await Channel.query()
-    .where({ channel_id })
+    .where({channel_id})
     .select('id')
     .first();
 
@@ -144,7 +144,7 @@ export async function validTransition(theirCommitment: Commitment): Promise<bool
   }
 
   const currentCommitment = await ChannelCommitment.query()
-    .where({ channel_id: channel.id })
+    .where({channel_id: channel.id})
     .orderBy('id', 'desc')
     .select()
     .first();

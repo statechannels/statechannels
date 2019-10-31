@@ -1,7 +1,7 @@
-import { Address, Uint256 } from 'fmg-core';
+import {Address, Uint256} from 'fmg-core';
 
 import * as AsyncLock from 'async-lock';
-import { nitroAdjudicator } from '../utilities/blockchain';
+import {nitroAdjudicator} from '../utilities/blockchain';
 const lock = new AsyncLock();
 export class Blockchain {
   static nitro: any;
@@ -14,7 +14,7 @@ export class Blockchain {
       await Blockchain.attachNitro();
 
       const tx = await Blockchain.nitro.deposit(channelID, expectedHeld, {
-        value,
+        value
       });
       await tx.wait();
 
