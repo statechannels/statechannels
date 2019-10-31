@@ -15,8 +15,12 @@ const Welcome: React.FC<RouteComponentProps> = ({history}) => {
       </div>
       <div className="subtitle">
         <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
-          ut labore et dolore magna aliqua.
+          Web3Torrent offers a new experience for sharing files in a decentralized way via paid
+          streaming, bringing together{' '}
+          <a href="https://statechannels.org" target="_blank">
+            State Channels
+          </a>{' '}
+          and the BitTorrent protocol.
         </p>
       </div>
       <h2>Download a sample file</h2>

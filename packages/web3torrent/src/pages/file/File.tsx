@@ -61,8 +61,26 @@ const File: React.FC<RouteComponentProps> = () => {
           </FormButton>
           <div className="subtitle">
             <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-              incididunt ut labore et dolore magna aliqua.
+              <strong>How do I pay for the download?</strong>
+              <br />
+              When you click "Start Download", you'll be asked to allocate an amount of ETH so
+              Web3Torrent can collect payments on your behalf and transfer those funds to the file
+              owner. Unlike other systems, the payment is not upfront; instead, you pay as you
+              download.
+            </p>
+            <p>
+              <strong>Is it safe?</strong>
+              <br />
+              Web3Torrent operates with budgets; therefore, the app will <b>never</b> use any funds
+              outside whatever amount you allocate when starting the download. Also, Web3Torrent is
+              powered by{' '}
+              <a href="http://statechannels.org" target="_blank">
+                State Channels
+              </a>
+              , a technique that reducess fees for blockchain users and allows users to transact
+              with each other with instant finality. Through counterfactually instantiated
+              contracts, this technology enables a private, efficient and secure environment for
+              safe transactions.
             </p>
           </div>
         </>
