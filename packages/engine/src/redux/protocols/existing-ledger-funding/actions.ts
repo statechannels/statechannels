@@ -1,11 +1,12 @@
-import {CommitmentReceived, EngineAction} from "../../actions";
+import {EngineAction} from "../../actions";
 import {LedgerTopUpAction, isLedgerTopUpAction} from "../ledger-top-up/actions";
-import {isCommonAction, EmbeddedProtocol, routerFactory} from "../../../communication";
+import {EmbeddedProtocol, routerFactory} from "../../../communication";
+import {isConsensusUpdateAction, ConsensusUpdateAction} from "../consensus-update";
 
-export type ExistingLedgerFundingAction = CommitmentReceived | LedgerTopUpAction;
+export type ExistingLedgerFundingAction = ConsensusUpdateAction | LedgerTopUpAction;
 
 export function isExistingLedgerFundingAction(action: EngineAction): action is ExistingLedgerFundingAction {
-  return isCommonAction(action, EmbeddedProtocol.ExistingLedgerFunding) || isLedgerTopUpAction(action);
+  return isConsensusUpdateAction(action) || isLedgerTopUpAction(action);
 }
 
 export const routestoExistingLedgerFunding = routerFactory(

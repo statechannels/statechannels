@@ -89,9 +89,7 @@ export function* messageListener() {
         break;
       case incoming.RECEIVE_MESSAGE:
         const messageAction = handleIncomingMessage(action);
-        if (messageAction.type === "ENGINE.COMMON.COMMITMENT_RECEIVED") {
-          yield validateAgainstLatestCommitment(messageAction.signedCommitment.commitment);
-        }
+
         if (messageAction.type === "ENGINE.COMMON.COMMITMENTS_RECEIVED") {
           yield validateTransitionForCommitments(messageAction.signedCommitments);
         }

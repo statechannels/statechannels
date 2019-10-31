@@ -5,7 +5,7 @@ import * as application from "./protocols/application/actions";
 import * as protocol from "./protocols/actions";
 import * as advanceChannel from "./protocols/advance-channel";
 import {FundingAction, isFundingAction} from "./protocols/funding/actions";
-import {CommitmentReceived, commitmentReceived, RelayableAction, ProtocolLocator} from "../communication";
+import {RelayableAction, ProtocolLocator} from "../communication";
 import {TransactionAction as TA, isTransactionAction as isTA} from "./protocols/transaction-submission/actions";
 
 import {ConcludingAction, isConcludingAction} from "./protocols/concluding";
@@ -21,7 +21,6 @@ import {LOAD as LOAD_FROM_STORAGE} from "redux-storage";
 import {SignedState} from "@statechannels/nitro-protocol";
 import {BigNumber} from "ethers/utils";
 export * from "./protocols/transaction-submission/actions";
-export {CommitmentReceived, commitmentReceived};
 
 export type TransactionAction = TA;
 export const isTransactionAction = isTA;
