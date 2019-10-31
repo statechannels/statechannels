@@ -2,7 +2,7 @@ import {
   ConcludeInstigated,
   getProcessId,
   ProcessProtocol
-} from '@statechannels/wallet/lib/src/communication';
+} from '@statechannels/engine/lib/src/communication';
 import WalletProcess from '../../models/WalletProcess';
 
 export const queries = {

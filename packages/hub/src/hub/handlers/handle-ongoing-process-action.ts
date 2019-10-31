@@ -2,16 +2,12 @@ import {
   signCommitment2,
   SignedCommitment as ClientSignedCommitment,
   unreachable
-} from '@statechannels/wallet';
+} from '@statechannels/engine';
 import {ethers} from 'ethers';
 import {channelID, Signature} from 'fmg-core';
 
-import {
-  CommitmentReceived,
-  CommitmentsReceived,
-  StrategyProposed
-} from '@statechannels/wallet/lib/src/communication';
-import * as communication from '@statechannels/wallet/lib/src/communication';
+import {CommitmentsReceived, StrategyProposed} from '@statechannels/engine/lib/src/communication';
+import * as communication from '@statechannels/engine/lib/src/communication';
 import {errors} from '../../wallet';
 import {getCurrentCommitment} from '../../wallet/db/queries/getCurrentCommitment';
 
@@ -24,14 +20,12 @@ import {MessageRelayRequested} from '../../wallet-client';
 import {updateRPSChannel} from '../services/rpsChannelManager';
 
 export async function handleOngoingProcessAction(
-  action: StrategyProposed | CommitmentReceived | CommitmentsReceived
+  action: StrategyProposed | CommitmentsReceived
 ): Promise<MessageRelayRequested[]> {
   switch (action.type) {
-    case 'WALLET.COMMON.COMMITMENT_RECEIVED':
-      return handleCommitmentReceived(action);
-    case 'WALLET.COMMON.COMMITMENTS_RECEIVED':
+    case 'ENGINE.COMMON.COMMITMENTS_RECEIVED':
       return handleCommitmentsReceived(action);
-    case 'WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_PROPOSED':
+    case 'ENGINE.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_PROPOSED':
       return handleStrategyProposed(action);
     default:
       return unreachable(action);
@@ -47,53 +41,6 @@ async function handleStrategyProposed(action: StrategyProposed) {
 
   const {theirAddress} = process;
   return [communication.sendStrategyApproved(theirAddress, processId, strategy)];
-}
-
-async function handleCommitmentReceived(action: CommitmentReceived) {
-  {
-    const {processId} = action;
-    const walletProcess = await getProcess(processId);
-    if (!walletProcess) {
-      throw errors.processMissing(processId);
-    }
-    const {theirAddress} = walletProcess;
-
-    const {commitment: theirCommitment, signature: theirSignature} = action.signedCommitment;
-    const splitSignature = (ethers.utils.splitSignature(theirSignature) as unknown) as Signature;
-
-    const channelId = channelID(theirCommitment.channel);
-
-    if (channelId === walletProcess.appChannelId) {
-      const {commitment: ourCommitment, signature: ourSignature} = await updateRPSChannel(
-        theirCommitment,
-        splitSignature
-      );
-      return [
-        communication.sendCommitmentReceived(
-          theirAddress,
-          processId,
-          ourCommitment,
-          (ourSignature as unknown) as string,
-          HUB_PRIVATE_KEY
-        )
-      ];
-    }
-
-    const currentCommitment = await getCurrentCommitment(theirCommitment);
-    const {commitment, signature} = await updateLedgerChannel(
-      [{ledgerCommitment: asConsensusCommitment(theirCommitment), signature: splitSignature}],
-      currentCommitment && asConsensusCommitment(currentCommitment)
-    );
-    return [
-      communication.sendCommitmentReceived(
-        theirAddress,
-        processId,
-        commitment,
-        (signature as unknown) as string,
-        HUB_PRIVATE_KEY
-      )
-    ];
-  }
 }
 
 async function handleCommitmentsReceived(action: CommitmentsReceived) {
@@ -125,12 +72,17 @@ async function handleCommitmentsReceived(action: CommitmentsReceived) {
         lastCommitmentSignature
       );
       return [
-        communication.sendCommitmentReceived(
+        communication.sendCommitmentsReceived(
           nextParticipant,
           processId,
-          ourCommitment,
-          (ourSignature as unknown) as string,
-          HUB_PRIVATE_KEY
+          [
+            {
+              commitment: ourCommitment,
+              signature: (ourSignature as unknown) as string,
+              signedState: signCommitment2(ourCommitment, HUB_PRIVATE_KEY).signedState
+            }
+          ],
+          action.protocolLocator
         )
       ];
     }

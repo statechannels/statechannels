@@ -1,6 +1,6 @@
 import {bigNumberify} from 'ethers/utils';
 import {Address, Uint256} from 'fmg-core';
-import {addHex} from '@statechannels/wallet';
+import {addHex} from '@statechannels/engine';
 import {HUB_ADDRESS} from '../../constants';
 import Channel from '../models/channel';
 import {Blockchain} from './blockchain';

@@ -1,4 +1,4 @@
-import {ProcessProtocol} from '@statechannels/wallet/lib/src/communication';
+import {ProcessProtocol} from '@statechannels/engine/lib/src/communication';
 import {ethers} from 'ethers';
 import {channelID, Signature} from 'fmg-core';
 

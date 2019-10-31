@@ -1,5 +1,5 @@
-import {unreachable} from '@statechannels/wallet';
-import {CommitmentsReceived, ConcludeInstigated} from '@statechannels/wallet/lib/src/communication';
+import {unreachable} from '@statechannels/engine';
+import {CommitmentsReceived, ConcludeInstigated} from '@statechannels/engine/lib/src/communication';
 import {HUB_ADDRESS} from '../../constants';
 import {MessageRelayRequested} from '../../wallet-client';
 import {startFundingProcess} from '../../wallet/db/queries/walletProcess';
@@ -9,9 +9,9 @@ export async function handleNewProcessAction(
   action: ConcludeInstigated | CommitmentsReceived
 ): Promise<MessageRelayRequested[]> {
   switch (action.type) {
-    case 'WALLET.COMMON.COMMITMENTS_RECEIVED':
+    case 'ENGINE.COMMON.COMMITMENTS_RECEIVED':
       return handleCommitmentsReceived(action);
-    case 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED':
+    case 'ENGINE.NEW_PROCESS.CONCLUDE_INSTIGATED':
       throw new Error('The hub does not support the concluding application channels');
     default:
       return unreachable(action);

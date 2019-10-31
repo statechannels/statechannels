@@ -1,4 +1,4 @@
-export const MESSAGE_RELAY_REQUESTED = 'WALLET.MESSAGING.MESSAGE_RELAY_REQUESTED';
+export const MESSAGE_RELAY_REQUESTED = 'ENGINE.MESSAGING.MESSAGE_RELAY_REQUESTED';
 
 export const messageRelayRequested = (to: string, messagePayload: any) => ({
   type: MESSAGE_RELAY_REQUESTED as typeof MESSAGE_RELAY_REQUESTED,
