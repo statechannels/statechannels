@@ -1,5 +1,5 @@
 import {Commitment, CommitmentType, Channel} from "fmg-core";
-import {CONSENSUS_LIBRARY_ADDRESS, NETWORK_ID, ETH_ASSET_HOLDER_ADDRESS} from "../constants";
+import {CONSENSUS_LIBRARY_ADDRESS, NETWORK_ID, ETH_ASSET_HOLDER_ADDRESS, CHALLENGE_DURATION} from "../constants";
 import {appAttributesFromBytes, bytesFromAppAttributes} from "fmg-nitro-adjudicator/lib/consensus-app";
 import {bigNumberify, getAddress} from "ethers/utils";
 import {
@@ -15,7 +15,6 @@ import {
 import {SignedCommitment, signCommitment2} from "../domain/commitments";
 import {decodeConsensusData} from "@statechannels/nitro-protocol/lib/src/contract/consensus-data";
 
-const CHALLENGE_DURATION = 0x12c; // 5 minutes
 // This temporarily handles converting fmg-core entities to nitro-protocol entities
 // Eventually once nitro-protocol is more properly embedded in the engine this will go away
 
