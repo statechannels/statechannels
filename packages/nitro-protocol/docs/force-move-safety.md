@@ -104,7 +104,7 @@ The three remaining actions clear the challenge, moving to an `Open` state, by e
 - providing a later, supported state (`respond` & `respondWithAlternativeMove`), and thus progressing the channel; or
 - prove that the challenger acted in bad faith (`refute`)
 
-In addition, the adjudicator has one further action, `timeout(S)`, where `S` is is some on-chain channel state.
+In addition, the adjudicator has one further action, `timeout(S)`, where `S` is is some adjudicator state.
 The purpose of `timeout` is to close the channel by moving to the `Closed` state.
 In practice, this action is implicit, and occurs with the passage of time.
 
@@ -145,14 +145,14 @@ At this point, the adjudicator could penalize the challenger for malicious inten
 
 ## `timeout`
 
-Whenever the state of the channel is updated to `S`, the adjudicator makes a note of `S`, and starts a timer.
+Whenever the adjudicator state is updated to `S`, the adjudicator makes a note of `S`, and starts a timer.
 When the timer runs out, the adjudicator applies `timeout(S)`.
 
 In practice, this transition happens implicitly: when in a `Challenge` state, the challenge expiration time is recorded in a field `finalizesAt`, and once `finalizesAt <= now`, the channel is closed.
 
 ## State Transitions: Version 1
 
-We record the allowed state transitions from the original ForceMove protocol in the following table.
+We record the allowed adjudicator state transitions from the original ForceMove protocol in the following table.
 By default, any (state, action) pair not listed below does not change the state.
 
 | State       | Action           | Next state  | Requiremeents   |
@@ -164,12 +164,12 @@ By default, any (state, action) pair not listed below does not change the state.
 |             |                  |             | signer(p') == p |
 | Chal(n,s,p) | timeout(S)       | Closed(s)   | matches(S)      |
 
-Here, `matches(S)` indicates that the current on-chain channel state is `S`.
+Here, `matches(S)` indicates that the current adjudicator state is `S`.
 `Chal` is used as a short-hand for `Challenge`.
-In other words, applying `timeout` to a `Challenge` state only has an effect if the state has not changed since the adjudicator timer has started.
+In other words, applying `timeout` to a `Challenge` state only has an effect if the adjudicator state has not changed since the adjudicator timer has started.
 Applying `timeout` to an open state has no effect, as the transition is not listed in this table.
 
-We use the notation `A >> S` to denote the state resulting in applying action `A` to state `S`.
+We use the notation `A >> S` to denote the adjudicator state resulting in applying action `A` to adjudicator state `S`.
 
 # Safety
 
@@ -177,7 +177,7 @@ Since the channel only closes from a `Challenge` state, and the channel only ent
 However, there may be a later state which should supersede the challenge state; if Alice (or some other party) does not act, the channel may close in the out-of-date challenge state.
 
 Assume that Bob has become malicious, and he is willing to consume an exorbitant amount of resources to grief Alice.
-Suppose the state is currently `Open(m)`, and Alice holds a supported state `s` with turn `n >= m`.
+Suppose the adjudicator state is currently `Open(m)`, and Alice holds a supported state `s` with turn `n >= m`.
 Can Alice guarantee that, in a constant number of actions, she can ensure the channel can only close with a state at turn at least `n`?
 She can trivially accomplish this if she can move the state's `turnNumRecord` to be at least `n`, since the `turnNumRecord` is non-decreasing:
 
@@ -193,16 +193,16 @@ The monotonicity of the `turnNumRecord` then guarantees that the channel can onl
   - `forceMove(m,s,p,S') >> Open(n) == Challenge(m,s,p)` for some `m > n`
 
 However, in the context of the Ethereum blockchain, this is not sufficient.
-Alice applies `forceMove` by calling a state-modifying function on an Ethereum smart contract in some transaction.
+Alice applies `forceMove` by calling a adjudicator state-modifying function on an Ethereum smart contract in some transaction.
 The transaction is not recorded immediately, and once Bob sees her transaction, he might attempt to front-run her transaction with a different action in his own transaction.
-If his transaction is recorded first, it might change the state in such a way that Alice's transaction reverts.
+If his transaction is recorded first, it might change the adjudicator state in such a way that Alice's transaction reverts.
 
 # Version 2: Gas-optimization
 
 The situation is worsened by an optimization we've done to save on gas fees.
-A hash of the entire channel state is stored in a single `bytes32` slot on-chain.
-Therefore, when applying an action, the participant must provide the current state as a part of the calldata.
-If the hash of the provided state does not match the stored value, the action has no effect.
+A hash of the entire adjudicator state is stored in a single `bytes32` slot on-chain.
+Therefore, when applying an action, the participant must provide the current adjudicator state as a part of the calldata.
+If the hash of the provided adjudicator state does not match the stored value, the action has no effect.
 
 | State       | Action             | NextState   | Requirements |
 | ----------- | ------------------ | ----------- | ------------ |
@@ -274,8 +274,8 @@ Bob can thus prevent the channel from progressing for time at least proportional
 
 While trying to model the behaviour of `respondWithAlternativeMove` in TLA+, we realized that this action had an artificial limitation.
 There's no reason why it must advance the `turnNumRecord` by exactly one.
-This restriction complicates state management, since the user may need to store stale states in order to use them to `respondWithAlternativeMove`.
-Moreover, there's no reason why it can't be applied to an open state to increase the `turnNumRecord`.
+This restriction complicates state channel management, since the user may need to store stale states in order to use them to `respondWithAlternativeMove`.
+Moreover, there's no reason why it can't be applied to an `Open` state to increase the `turnNumRecord`.
 Thus, we replaced it with the `checkpoint` action.
 This allows one to only care about the latest supported state, and it can be used to protect one's assets before going offline for a period of time.
 
@@ -315,7 +315,7 @@ No matter how the challenge is cleared, Bob can repeat this, blocking the channe
 
 # Version 4
 
-By exposing the `turnNumRecord` using a technique inspired from [here](https://medium.com/@novablitz/storing-structs-is-costing-you-gas-774da988895e), the participant no longer has to provide the current channel state for the `forceMove` or `checkpoint` actions.
+By exposing the `turnNumRecord` using a technique inspired from [here](https://medium.com/@novablitz/storing-structs-is-costing-you-gas-774da988895e), the participant no longer has to provide the current adjudicator state for the `forceMove` or `checkpoint` actions.
 
 | State       | Action           | NextState   | Requirements |
 | ----------- | ---------------- | ----------- | ------------ |
@@ -360,7 +360,7 @@ However, TLA+ exposed a new attack, unknown to us at the time.
 
 ## Attack
 
-- Suppose we're in `Open(n)`, and alice's latest state is `s`, with turn `n`.
+- Suppose we're in `Open(n)`, and Alice's latest state is `s`, with turn `n`.
 - Alice wants to apply `forceMove(n,s,Alice)`
 - Bob front-runs with `forceMove(n,s,Bob)`
 
@@ -377,7 +377,7 @@ However, TLA+ exposed a new attack, unknown to us at the time.
 refute(m,s',S) >> Challenge(n,s,Bob) == Open(n)
 ```
 
-- The state has returned to `Open(n)`.
+- The adjudicator state has returned to `Open(n)`.
 
 By repeating this attack, Bob can prevent the channel from closing indefinitely.
 While there are techniques that can block this attack, such as storing who has challenged so far with the current `turnNumRecord`, we decided to forgo the `refute` action altogether until we have a clear application for it.
@@ -409,11 +409,11 @@ When her transaction is proccessed, we can partition the possible adjudicator st
    a. `m < n`
    b. `m >= n`
 
-In cases 1a & 2a, her transaction succeeds, and the state changes to `Challenge(n, s, Alice)`.
+In cases 1a & 2a, her transaction succeeds, and the adjudicator state changes to `Challenge(n, s, Alice)`.
 In cases 1b & 2b, her transaction fails, but she has seen a supported state `s'` that trumps `s`, which was her goal.
 
 If she wishes to protect her assets before going offline, she applies `checkpoint(n)`.
-When her transaction is proccessed, once again we can partition the possible states into four cases:
+When her transaction is proccessed, once again we can partition the possible adjudicator states into four cases:
 
 1. `Open(m)`
    a. `m < n`
@@ -422,7 +422,7 @@ When her transaction is proccessed, once again we can partition the possible sta
    a. `m < n`
    b. `m >= n`
 
-In cases 1a and 2a, her transaction succeeds, and the state changes to `Open(n)`.
+In cases 1a and 2a, her transaction succeeds, and the adjudicator state changes to `Open(n)`.
 In cases 1b and 2b, her transaction fails, but the `turnNumRecord` is already at least `n`.
 Therefore, all cases, Alice now knows that the channel can only close in an outcome state she supported, with turn number at least `n`.
 
