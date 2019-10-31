@@ -1,4 +1,3 @@
-// import {SignedCommitment} from "../../../../domain";
 import {ChannelState} from "../states";
 import {getCommitmentChannelId, SignedCommitment} from "../../../../domain/commitments";
 import {bigNumberify} from "ethers/utils";
