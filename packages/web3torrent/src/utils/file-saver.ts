@@ -1,7 +1,16 @@
 import jszip from 'jszip';
-import {getFileBlob, getFileBlobURL, web3torrent} from '../clients/web3torrent-client';
+import {web3torrent} from '../clients/web3torrent-client';
+import {TorrentFile} from 'webtorrent';
 
 export type SavingData = {name: string; content: string};
+
+export const getFileBlob: (file: TorrentFile) => Promise<Blob> = file => {
+  return new Promise(resolve => file.getBlob((_, blob) => resolve(blob as Blob)));
+};
+
+export const getFileBlobURL: (file: TorrentFile) => Promise<string> = file => {
+  return new Promise(resolve => file.getBlobURL((_, blob) => resolve(blob as string)));
+};
 
 export const getFileSavingData: (infoHash: string) => Promise<SavingData> = async infoHash => {
   const torrent = web3torrent.get(infoHash);
