@@ -20,7 +20,7 @@
 
 **statechannels** is a simple off-chain framework for building **state channel applications** on top of the Ethereum blockchain. It aims to make it simpler to build permissionless applications that have instant finality with zero-fee transactions.
 
-You can learn more about what state channels are by reading [our whitepaper](https://statechannels.com/statechannels) or a less technical written [description](https://medium.com/l4-media/making-sense-of-ethereums-layer-2-scaling-solutions-state-channels-plasma-and-truebit-22cb40dcc2f4#c353). Further, if you want to dive into the specifications of the statechannels protocol you can [read them here](https://statechannels.com/specs).
+You can learn more about what state channels are by reading [one](https://l4.ventures/papers/statechannels.pdf) or [other](https://magmo.com/force-move-games.pdf) of the whitepapers underpinning the project, or a less technical written [description](https://medium.com/blockchannel/state-channel-for-dummies-part-2-2ffef52220eb).
 
 - [Packages](#packages)
   - [Solidity Packages](#solidity-packages)
@@ -38,26 +38,26 @@ You can learn more about what state channels are by reading [our whitepaper](htt
 
 ### Solidity Packages
 
-| Package | Version | Description |
-| --- | --- | --- |
+| Package                                                                                   | Version                                                                                                                                                             | Description                                                    |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
 | [`@statechannels/cf-funding-protocol-contracts`](/packages/cf-funding-protocol-contracts) | [![npm](https://img.shields.io/npm/v/@statechannels/cf-funding-protocol-contracts.svg)](https://www.npmjs.com/package/@statechannels/cf-funding-protocol-contracts) | Contracts implementation of the statechannels funding protocol |
-| [`@statechannels/cf-adjudicator-contracts`](/packages/cf-adjudicator-contracts) | [![npm](https://img.shields.io/npm/v/@statechannels/cf-adjudicator-contracts.svg)](https://www.npmjs.com/package/@statechannels/cf-adjudicator-contracts) | Contracts implementation of an AppInstance Adjudicator |
+| [`@statechannels/cf-adjudicator-contracts`](/packages/cf-adjudicator-contracts)           | [![npm](https://img.shields.io/npm/v/@statechannels/cf-adjudicator-contracts.svg)](https://www.npmjs.com/package/@statechannels/cf-adjudicator-contracts)           | Contracts implementation of an AppInstance Adjudicator         |
 
 ### Typescript/Javascript Packages
 
 **statechannels-specific packages**
 
-| Package | Version | Description |
-| --- | --- | --- |
-| [`@statechannels/node`](/packages/node) | [![npm](https://img.shields.io/npm/v/@statechannels/node.svg)](https://www.npmjs.com/package/@statechannels/node) | The core state channels client that a user runs |
-| [`@statechannels/cf.js`](/packages/cf.js) | [![npm](https://img.shields.io/npm/v/@statechannels/cf.js.svg)](https://www.npmjs.com/package/@statechannels/cf.js) | A JS API for interacting with off-chain apps |
-| [`@statechannels/node-provider`](/packages/node-provider) | [![npm](https://img.shields.io/npm/v/@statechannels/node-provider.svg)](https://www.npmjs.com/package/@statechannels/node-provider) | Wrapper around API calls to a Node |
+| Package                                                   | Version                                                                                                                             | Description                                     |
+| --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| [`@statechannels/node`](/packages/node)                   | [![npm](https://img.shields.io/npm/v/@statechannels/node.svg)](https://www.npmjs.com/package/@statechannels/node)                   | The core state channels client that a user runs |
+| [`@statechannels/cf.js`](/packages/cf.js)                 | [![npm](https://img.shields.io/npm/v/@statechannels/cf.js.svg)](https://www.npmjs.com/package/@statechannels/cf.js)                 | A JS API for interacting with off-chain apps    |
+| [`@statechannels/node-provider`](/packages/node-provider) | [![npm](https://img.shields.io/npm/v/@statechannels/node-provider.svg)](https://www.npmjs.com/package/@statechannels/node-provider) | Wrapper around API calls to a Node              |
 
 **Utilities**
 
-| Package | Version | Description |
-| --- | --- | --- |
-| [`@statechannels/types`](/packages/types) | [![npm](https://img.shields.io/npm/v/@statechannels/types.svg)](https://www.npmjs.com/package/@statechannels/types) | Shared type declarations |
+| Package                                                             | Version                                                                                                                                       | Description                        |
+| ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| [`@statechannels/types`](/packages/types)                           | [![npm](https://img.shields.io/npm/v/@statechannels/types.svg)](https://www.npmjs.com/package/@statechannels/types)                           | Shared type declarations           |
 | [`@statechannels/typescript-typings`](/packages/typescript-typings) | [![npm](https://img.shields.io/npm/v/@statechannels/typescript-typings.svg)](https://www.npmjs.com/package/@statechannels/typescript-typings) | Shims for external library typings |
 
 ## Contributing
