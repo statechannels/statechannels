@@ -1,12 +1,12 @@
 import {fundingSuccess} from "../../magmo-engine-client";
 
 import {accumulateSideEffects} from "../outbox";
-import {SharedData, queueMessage, getExistingChannel, checkAndStoreComm} from "../state";
+import {SharedData, queueMessage, getExistingChannel, checkAndStoreComm, checkAndStore} from "../state";
 import * as selectors from "../selectors";
 import {TwoPartyPlayerIndex, ThreePartyPlayerIndex} from "../types";
 import {CommitmentType} from "fmg-core/lib/commitment";
 import * as magmoEngineClient from "../../magmo-engine-client";
-import {getLastCommitment, nextParticipant, Commitments} from "../channel-store";
+import {getLastCommitment, nextParticipant, Commitments, getLastState} from "../channel-store";
 import {Commitment} from "../../domain";
 import {sendCommitmentsReceived, ProtocolLocator} from "../../communication";
 import * as comms from "../../communication";
@@ -14,6 +14,7 @@ import {ourTurn as ourTurnOnChannel} from "../channel-store";
 import _ from "lodash";
 import {bigNumberify} from "ethers/utils";
 import {convertStateToSignedCommitment} from "../../utils/nitro-converter";
+import {SignedState} from "@statechannels/nitro-protocol";
 
 export function sendFundingComplete(sharedData: SharedData, appChannelId: string) {
   const channelState = selectors.getOpenedChannelState(sharedData, appChannelId);
@@ -65,6 +66,23 @@ export function sendOpponentConcluded(sharedData: SharedData): SharedData {
   return newSharedData;
 }
 
+export function sendStates(
+  sharedData: SharedData,
+  processId: string,
+  channelId: string,
+  protocolLocator: ProtocolLocator
+): SharedData {
+  const channel = getExistingChannel(sharedData, channelId);
+  const {participants, ourIndex} = channel;
+  const messageRelay = comms.sendStatesReceived(
+    nextParticipant(participants, ourIndex),
+    processId,
+    channel.signedStates,
+    protocolLocator
+  );
+  return queueMessage(sharedData, messageRelay);
+}
+
 export function sendCommitments(
   sharedData: SharedData,
   processId: string,
@@ -94,6 +112,24 @@ export function checkCommitments(sharedData: SharedData, turnNum: number, commit
         sharedData = result.store;
       } else {
         throw new Error("Unable to validate commitment");
+      }
+    });
+
+  return sharedData;
+}
+
+export function checkStates(sharedData: SharedData, turnNum: number, states: SignedState[]): SharedData {
+  // We don't bother checking "stale" states -- those whose turnNum does not
+  // exceed the current turnNum.
+
+  states
+    .filter(ss => ss.state.turnNum > turnNum)
+    .map(ss => {
+      const result = checkAndStore(sharedData, ss);
+      if (result.isSuccess) {
+        sharedData = result.store;
+      } else {
+        throw new Error("Unable to validate state");
       }
     });
 
@@ -228,6 +264,11 @@ export function getOpponentAddress(channelId: string, sharedData: SharedData) {
 export function getOurAddress(channelId: string, sharedData: SharedData) {
   const channel = getExistingChannel(sharedData, channelId);
   return channel.participants[channel.ourIndex];
+}
+
+export function getLatestState(channelId: string, sharedData: SharedData) {
+  const channel = getExistingChannel(sharedData, channelId);
+  return getLastState(channel);
 }
 
 export function getLatestCommitment(channelId: string, sharedData: SharedData) {

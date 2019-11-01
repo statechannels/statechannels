@@ -1,7 +1,7 @@
 import * as scenarios from "./scenarios";
 import {initialize, reducer} from "../reducer";
 import * as states from "../states";
-import {scenarioStepDescription, itSendsTheseCommitments} from "../../../__tests__/helpers";
+import {scenarioStepDescription} from "../../../__tests__/helpers";
 
 const itTransitionsTo = (result: states.VirtualDefundingState, type: states.VirtualDefundingStateType) => {
   it(`transitions to ${type}`, () => {
@@ -14,22 +14,24 @@ describe("happyPath", () => {
 
   describe("Initialization", () => {
     const result = initialize(scenario.initialize);
-    const {appAttributes} = scenario.initialize;
     itTransitionsTo(result.protocolState, "VirtualDefunding.WaitForJointChannelUpdate");
-
-    itSendsTheseCommitments(result.sharedData, [
-      {commitment: {turnNum: 4}},
-      {commitment: {turnNum: 5}},
-      {commitment: {turnNum: 6, appAttributes}}
-    ]);
+    // TODO: Enable this when switching to Signed States for this protocol
+    //  itSendsTheseCommitments(result.sharedData, [
+    //    {commitment: {turnNum: 4}},
+    //    {commitment: {turnNum: 5}},
+    //    {commitment: {turnNum: 6, appAttributes}}
+    //  ]);
   });
 
   describe(scenarioStepDescription(scenario.waitForJointChannel), () => {
-    const {sharedData, state, action, appAttributes} = scenario.waitForJointChannel;
+    const {sharedData, state, action} = scenario.waitForJointChannel;
     const result = reducer(state, sharedData, action);
     itTransitionsTo(result.protocolState, "VirtualDefunding.WaitForLedgerChannelUpdate");
-
-    itSendsTheseCommitments(result.sharedData, [{commitment: {turnNum: 7}}, {commitment: {turnNum: 8, appAttributes}}]);
+    // TODO: Enable this when switching to Signed States for this protocol
+    // itSendsTheseCommitments(result.sharedData, [
+    //   {commitment: {turnNum: 7}},
+    //   {commitment: {turnNum: 8, appAttributes}}
+    // ]);
   });
 
   describe(scenarioStepDescription(scenario.waitForLedgerChannel), () => {

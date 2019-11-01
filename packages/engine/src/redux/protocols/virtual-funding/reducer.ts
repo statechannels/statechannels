@@ -20,7 +20,8 @@ import {EmbeddedProtocol} from "../../../communication";
 export const VIRTUAL_FUNDING_PROTOCOL_LOCATOR = "VirtualFunding";
 import {CONSENSUS_UPDATE_PROTOCOL_LOCATOR} from "../consensus-update/reducer";
 import {TwoPartyPlayerIndex} from "../../types";
-import {Wallet} from "ethers";
+import {Wallet, ethers} from "ethers";
+import {convertAllocationToOutcome} from "../../../utils/nitro-converter";
 
 export function initialize(
   sharedData: SharedData,
@@ -128,7 +129,9 @@ function waitForJointChannelReducer(
           const privateKey = getPrivatekey(sharedData, targetChannelId);
           const ourAddress = new Wallet(privateKey).address;
           const channelType = CONSENSUS_LIBRARY_ADDRESS;
-          const destination = [targetChannelId, ourAddress, hubAddress];
+          // TODO: Enable this when switching to Signed States for this protocol
+          // const destination = [targetChannelId, ourAddress, hubAddress];
+          const destination = [ethers.Wallet.createRandom().address, ourAddress, hubAddress];
           const guarantorChannelResult = advanceChannel.initializeAdvanceChannel(result.sharedData, {
             clearedToSend: true,
             commitmentType: CommitmentType.PreFundSetup,
@@ -138,7 +141,7 @@ function waitForJointChannelReducer(
             privateKey,
             channelType,
             participants: [ourAddress, hubAddress],
-            guaranteedChannel: jointChannelId,
+            guaranteedChannel: ethers.Wallet.createRandom().address, // TODO: Set this to jointChannelId when updating to signed states
             ...channelSpecificArgs([], destination)
           });
           return {
@@ -227,17 +230,22 @@ function waitForGuarantorChannelReducer(
                 sharedData: ledgerFundingResult.sharedData
               };
             default:
-              const {targetChannelId, hubAddress, jointChannelId} = protocolState;
+              const {hubAddress, jointChannelId} = protocolState;
               // We initialize our joint channel sub-protocol early in case we receive a commitment before we're done funding
               const proposedAllocation = [startingAllocation.reduce(addHex), startingAllocation.reduce(addHex)];
-              const proposedDestination = [targetChannelId, hubAddress];
+              // TODO: Enable this when switching to Signed States for this protocol
+              // const destination = [targetChannelId, ourAddress, hubAddress];
 
+              const proposedDestination = [ethers.Wallet.createRandom().address, hubAddress];
+              const proposedOutcome = convertAllocationToOutcome({
+                allocation: proposedAllocation,
+                destination: proposedDestination
+              });
               const applicationFundingResult = consensusUpdate.initializeConsensusUpdate({
                 processId,
                 channelId: jointChannelId,
                 clearedToSend: false,
-                proposedAllocation,
-                proposedDestination,
+                proposedOutcome,
                 protocolLocator: makeLocator(protocolState.protocolLocator, CONSENSUS_UPDATE_PROTOCOL_LOCATOR),
                 sharedData: ledgerFundingResult.sharedData
               });

@@ -29,9 +29,8 @@ import {
   sendChallengeComplete,
   sendConcludeSuccess
 } from "../../reducer-helpers";
-import {Commitment, SignedCommitment} from "../../../../domain";
+import {Commitment, SignedCommitment, getCommitmentChannelId} from "../../../../domain";
 import {convertCommitmentToSignedState, convertStateToSignedCommitment} from "../../../../utils/nitro-converter";
-import {channelID} from "fmg-core";
 
 const CHALLENGE_TIMEOUT = 5 * 60000;
 
@@ -220,7 +219,7 @@ function challengeResponseReceived(
 
   state = acknowledgeResponse(state);
   sharedData = sendChallengeCommitmentReceived(sharedData, challengeCommitment);
-  const channelId = channelID(challengeCommitment.channel);
+  const channelId = getCommitmentChannelId(challengeCommitment);
   const privateKey = getPrivatekey(sharedData, channelId);
   const signedCommitment: SignedCommitment = {
     commitment: challengeCommitment,

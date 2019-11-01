@@ -7,6 +7,7 @@ import {ProtocolLocator, EmbeddedProtocol} from "../../../communication";
 import {ConsensusUpdateState, initializeConsensusUpdate, consensusUpdateReducer} from "../consensus-update";
 import {routesToConsensusUpdate} from "../consensus-update/actions";
 import * as consensusUpdateActions from "../consensus-update/actions";
+import {convertAllocationToOutcome} from "../../../utils/nitro-converter";
 
 export const initialize = ({
   processId,
@@ -28,10 +29,13 @@ export const initialize = ({
   protocolLocator: ProtocolLocator;
 }): ProtocolStateWithSharedData<states.LedgerDefundingState> => {
   let ledgerUpdate: ConsensusUpdateState;
+  const proposedOutcome = convertAllocationToOutcome({
+    allocation: proposedAllocation,
+    destination: proposedDestination
+  });
   ({protocolState: ledgerUpdate, sharedData} = initializeConsensusUpdate({
     processId,
-    proposedAllocation,
-    proposedDestination,
+    proposedOutcome,
     channelId: ledgerId,
     clearedToSend: clearedToProceed,
     protocolLocator,

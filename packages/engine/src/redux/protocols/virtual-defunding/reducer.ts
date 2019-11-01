@@ -10,6 +10,7 @@ import {addHex} from "../../../utils/hex-utils";
 import {VirtualDefundingAction} from "./actions";
 import {routesToConsensusUpdate} from "../consensus-update/actions";
 import {HUB_ADDRESS} from "../../../constants";
+import {convertAllocationToOutcome} from "../../../utils/nitro-converter";
 
 export function initialize({
   processId,
@@ -32,14 +33,17 @@ export function initialize({
   const hubAddress = HUB_ADDRESS;
   const proposedDestination = [...latestAppCommitment.destination, hubAddress];
   const proposedAllocation = [...latestAppCommitment.allocation, latestAppCommitment.allocation.reduce(addHex)];
+  const proposedOutcome = convertAllocationToOutcome({
+    allocation: proposedAllocation,
+    destination: proposedDestination
+  });
   let jointChannel: ConsensusUpdateState;
   ({protocolState: jointChannel, sharedData} = initializeConsensusUpdate({
     processId,
     protocolLocator: makeLocator(protocolLocator, CONSENSUS_UPDATE_PROTOCOL_LOCATOR),
     clearedToSend: true,
     channelId: jointChannelId,
-    proposedAllocation,
-    proposedDestination,
+    proposedOutcome,
     sharedData
   }));
   const ledgerChannelId = getFundingChannelId(targetChannelId, sharedData);
@@ -99,13 +103,18 @@ function waitForJointChannelUpdateReducer(
           latestAppCommitment.allocation[1 - ourIndex]
         ];
         const proposedDestination = [latestAppCommitment.destination[ourIndex], hubAddress];
+
+        const proposedOutcome = convertAllocationToOutcome({
+          allocation: proposedAllocation,
+          destination: proposedDestination
+        });
+
         let ledgerChannel: ConsensusUpdateState;
         ({protocolState: ledgerChannel, sharedData} = initializeConsensusUpdate({
           processId,
           protocolLocator: makeLocator(protocolState.protocolLocator, CONSENSUS_UPDATE_PROTOCOL_LOCATOR),
           channelId: ledgerChannelId,
-          proposedAllocation,
-          proposedDestination,
+          proposedOutcome,
           clearedToSend: true,
           sharedData
         }));

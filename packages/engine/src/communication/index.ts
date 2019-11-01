@@ -6,8 +6,11 @@ import {
   strategyApproved,
   concludeInstigated,
   ConcludeInstigated,
-  commitmentsReceived
+  commitmentsReceived,
+  signedStatesReceived
 } from "./actions";
+import {SignedState} from "@statechannels/nitro-protocol";
+
 export * from "./actions";
 
 // These protocols are precisely those that run at the top-level
@@ -59,6 +62,16 @@ export const sendCommitmentsReceived = (
   protocolLocator: ProtocolLocator
 ) => {
   const payload = commitmentsReceived({processId, signedCommitments, protocolLocator});
+  return messageRelayRequested(to, payload);
+};
+
+export const sendStatesReceived = (
+  to: string,
+  processId: string,
+  signedStates: SignedState[],
+  protocolLocator: ProtocolLocator
+) => {
+  const payload = signedStatesReceived({processId, signedStates, protocolLocator});
   return messageRelayRequested(to, payload);
 };
 

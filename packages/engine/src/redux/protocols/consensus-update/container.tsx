@@ -16,7 +16,7 @@ class ConsensusUpdateContainer extends PureComponent<Props> {
     const {state} = this.props;
     switch (state.type) {
       case "ConsensusUpdate.NotSafeToSend":
-      case "ConsensusUpdate.CommitmentSent":
+      case "ConsensusUpdate.StateSent":
         return <WaitForOtherPlayer actionDescriptor={"consensus update"} channelId={state.channelId} />;
       case "ConsensusUpdate.Failure":
         return <Failure name="consensus update" reason={state.reason} />;
