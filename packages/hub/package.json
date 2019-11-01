@@ -38,7 +38,7 @@
     "firebase": "^6.2.3",
     "fmg-core": "0.5.9",
     "fmg-nitro-adjudicator": "0.1.5",
-    "knex": "^0.13.0",
+    "knex": "^0.20.1",
     "koa": "^2.7.0",
     "koa-body": "^4.0.8",
     "koa-router": "^7.4.0",
