@@ -10,7 +10,7 @@ import {getTestProvider, setupContracts} from '../../test-helpers';
 const provider = getTestProvider();
 let trivialApp: Contract;
 
-function computeRandomHash(salt: string, num: number) {
+function computeSaltedHash(salt: string, num: number) {
   return solidityKeccak256(['bytes32', 'uint256'], [salt, num]);
 }
 
@@ -33,7 +33,7 @@ describe('validTransition', () => {
 function getRandomVariablePart(): VariablePart {
   const randomNum = Math.floor(Math.random() * 100);
   const salt = MaxUint256.toHexString();
-  const hash = computeRandomHash(salt, randomNum);
+  const hash = computeSaltedHash(salt, randomNum);
 
   const variablePart: VariablePart = {
     outcome: hash,
