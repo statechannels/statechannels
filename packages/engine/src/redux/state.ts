@@ -245,12 +245,34 @@ export function signAndInitializeComm(state: SharedData, commitment: Commitment,
   }
 }
 
+export function signAndInitialize(sharedDataState: SharedData, state: State, privateKey: string): SignResult {
+  const result = signAndInitializeChannelStore(sharedDataState.channelStore, state, privateKey);
+  if (result.isSuccess) {
+    return {
+      isSuccess: result.isSuccess,
+      signedCommitment: convertStateToSignedCommitment(result.signedState.state, privateKey),
+      store: setChannelStore(sharedDataState, result.store)
+    };
+  } else {
+    return result;
+  }
+}
+
 export function checkAndInitializeComm(
   state: SharedData,
   signedCommitment: SignedCommitment,
   privateKey: string
 ): CheckResult {
   const result = checkAndInitializeChannelStore(state.channelStore, signedCommitment.signedState, privateKey);
+  if (result.isSuccess) {
+    return {...result, store: setChannelStore(state, result.store)};
+  } else {
+    return result;
+  }
+}
+
+export function checkAndInitialize(state: SharedData, signedState: SignedState, privateKey: string): CheckResult {
+  const result = checkAndInitializeChannelStore(state.channelStore, signedState, privateKey);
   if (result.isSuccess) {
     return {...result, store: setChannelStore(state, result.store)};
   } else {

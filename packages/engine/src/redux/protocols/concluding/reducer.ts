@@ -14,7 +14,6 @@ import {
 } from "../reducer-helpers";
 import {initializeAdvanceChannel, AdvanceChannelState, advanceChannelReducer} from "../advance-channel";
 import {EmbeddedProtocol} from "../../../communication";
-import {CommitmentType} from "../../../domain";
 import * as states from "./states";
 import {routesToAdvanceChannel} from "../advance-channel/actions";
 import {DefundingState, initializeDefunding, defundingReducer} from "../defunding";
@@ -26,6 +25,7 @@ import {
   isCloseLedgerChannelAction,
   closeLedgerChannelReducer
 } from "../close-ledger-channel";
+import {StateType} from "../advance-channel/states";
 
 export function concludingReducer(
   protocolState: states.NonTerminalConcludingState,
@@ -214,7 +214,7 @@ export function initialize({
     processId,
     ourIndex: getTwoPlayerIndex(channelId, sharedData),
     protocolLocator: makeLocator(EMPTY_LOCATOR, EmbeddedProtocol.AdvanceChannel),
-    commitmentType: CommitmentType.Conclude
+    stateType: StateType.Conclude
   }));
   return {
     protocolState: states.waitForConclude({channelId, processId, ledgerId, concluding}),

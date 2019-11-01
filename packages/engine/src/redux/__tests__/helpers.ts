@@ -7,7 +7,7 @@ import {ProtocolStateWithSharedData} from "../protocols";
 import {ProtocolLocator, RelayableAction} from "src/communication";
 import _ from "lodash";
 import {convertStateToCommitment} from "../../utils/nitro-converter";
-import {State} from "@statechannels/nitro-protocol";
+import {State, SignedState, getChannelId} from "@statechannels/nitro-protocol";
 import {Signature} from "ethers/utils";
 
 type SideEffectState = StateWithSideEffects<any> | {outboxState: OutboxState} | {sharedData: SharedData};
@@ -340,6 +340,16 @@ export const itStoresThisCommitment = (state: {channelStore: ChannelStore}, sign
     // This should be addressed when all the protocols use SignedStates
     const lastCommitment = convertStateToCommitment(channelState.signedStates.slice(-1)[0].state);
     expect(lastCommitment).toMatchObject(signedCommitment.commitment);
+  });
+};
+
+export const itStoresThisState = (state: {channelStore: ChannelStore}, signedState: SignedState) => {
+  it("stores the state in the channel state", () => {
+    const channelId = getChannelId(signedState.state.channel);
+    const channelState = state.channelStore[channelId];
+
+    const lastSignedState = channelState.signedStates.slice(-1)[0];
+    expect(lastSignedState).toMatchObject(signedState);
   });
 };
 

@@ -11,9 +11,9 @@ import {EmbeddedProtocol} from "../../../communication";
 import {getLastCommitment} from "../../channel-store";
 import {ProtocolAction} from "../../actions";
 import {AdvanceChannelState, initializeAdvanceChannel, advanceChannelReducer} from "../advance-channel";
-import {CommitmentType} from "../../../domain";
 import {WithdrawalState} from "../withdrawing/states";
 import {routesToAdvanceChannel} from "../advance-channel/actions";
+import {StateType} from "../advance-channel/states";
 
 export const initialize = (
   processId: string,
@@ -34,7 +34,7 @@ export const initialize = (
     clearedToSend: true,
     processId,
     channelId,
-    commitmentType: CommitmentType.Conclude,
+    stateType: StateType.Conclude,
     protocolLocator: makeLocator(EMPTY_LOCATOR, EmbeddedProtocol.AdvanceChannel),
     ourIndex: helpers.getTwoPlayerIndex(channelId, sharedData)
   }));

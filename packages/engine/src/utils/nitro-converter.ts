@@ -187,6 +187,7 @@ export function convertOutcomeToAllocation(
   const allocation: string[] = [];
   let destination: string[] = [];
   let guaranteedChannel;
+
   // We will only be dealing with one outcome initially, since we're converting from a commitment
   if (outcome.length !== 1) {
     throw new Error(`Currently the engine only supports one outcome, however there were ${outcome.length} outcomes.`);

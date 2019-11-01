@@ -15,7 +15,6 @@ import * as virtualFunding from "../virtual-funding";
 import {AdvanceChannelAction, advanceChannelReducer, initializeAdvanceChannel} from "../advance-channel";
 import * as advanceChannelStates from "../advance-channel/states";
 import {clearedToSend, routesToAdvanceChannel} from "../advance-channel/actions";
-import {CommitmentType} from "../../../domain";
 import {ADVANCE_CHANNEL_PROTOCOL_LOCATOR} from "../advance-channel/reducer";
 import {routesToLedgerFunding} from "../ledger-funding/actions";
 import {routesToVirtualFunding} from "../virtual-funding/actions";
@@ -153,7 +152,7 @@ function handleFundingStrategyNegotiationComplete({
       channelId: targetChannelId,
       ourIndex: helpers.getTwoPlayerIndex(targetChannelId, sharedData),
       processId,
-      commitmentType: CommitmentType.PostFundSetup,
+      stateType: advanceChannelStates.StateType.PostFundSetup,
       clearedToSend: false,
       protocolLocator: ADVANCE_CHANNEL_PROTOCOL_LOCATOR
     }));

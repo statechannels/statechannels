@@ -2,7 +2,6 @@ import * as states from "../states";
 
 import {EMPTY_SHARED_DATA, setChannel} from "../../../state";
 import * as scenarios from "../../../../domain/commitments/__tests__";
-import {CommitmentType} from "../../../../domain";
 import {preFund, postFund} from "../../advance-channel/__tests__";
 import {preSuccess as ledgerFundingPreSuccess} from "../../ledger-funding/__tests__";
 import {
@@ -17,6 +16,7 @@ import {prependToLocator} from "../..";
 import {EmbeddedProtocol} from "../../../../communication";
 import {ADVANCE_CHANNEL_PROTOCOL_LOCATOR} from "../../advance-channel/reducer";
 import _ from "lodash";
+import {StateType} from "../../advance-channel/states";
 
 // ---------
 // Test data
@@ -50,7 +50,7 @@ const initializeArgs = {
   address: asAddress,
   privateKey: asPrivateKey,
   ourIndex: 0,
-  commitmentType: CommitmentType.PreFundSetup,
+  stateType: StateType.PreFundSetup,
   targetChannelId,
   hubAddress,
   protocolLocator: ADVANCE_CHANNEL_PROTOCOL_LOCATOR
@@ -81,7 +81,7 @@ const scenarioStates = {
     ...props,
     jointChannel: {
       ...preFund.preSuccess.state,
-      commitmentType: CommitmentType.PostFundSetup
+      stateType: StateType.PostFundSetup
     }
   }),
 
