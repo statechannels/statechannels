@@ -1,4 +1,5 @@
 import React from 'react';
+import {TorrentFile} from 'webtorrent';
 import {ClientEvents, WebTorrentAddInput, WebTorrentSeedInput} from '../library/types';
 import WebTorrentPaidStreamingClient from '../library/web3torrent-lib';
 import {Status, Torrent} from '../types';
@@ -6,6 +7,14 @@ export const web3torrent = new WebTorrentPaidStreamingClient();
 export const WebTorrentContext = React.createContext(web3torrent);
 
 export const getTorrentPeers = infoHash => web3torrent.allowedPeers[infoHash];
+
+export const getFileBlob: (file: TorrentFile) => Promise<Blob> = file => {
+  return new Promise(resolve => file.getBlob((_, blob) => resolve(blob as Blob)));
+};
+
+export const getFileBlobURL: (file: TorrentFile) => Promise<string> = file => {
+  return new Promise(resolve => file.getBlobURL((_, blob) => resolve(blob as string)));
+};
 
 export const download: (torrent: WebTorrentAddInput) => Promise<Torrent> = torrentData => {
   web3torrent.on(
