@@ -57,8 +57,6 @@
     "@counterfactual/cf-adjudicator-contracts": "^0.0.8",
     "@openzeppelin/contracts": "2.3.0",
     "ethers": "4.0.37",
-    "etherlime": "2.2.4",
-    "etherlime-lib": "1.1.5",
     "solc": "0.5.11",
     "solidoc": "https://github.com/statechannels/solidoc.git",
     "web3-eth-accounts": "1.2.1"
