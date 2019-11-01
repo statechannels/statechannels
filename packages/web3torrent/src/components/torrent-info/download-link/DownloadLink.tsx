@@ -14,7 +14,7 @@ export const DownloadLink: React.FC<DownloadLinkProps> = ({torrent}) => {
         setFile(data);
       });
     }
-  }, [torrent.done]);
+  }, [torrent.done, torrent.infoHash]);
 
   return (
     <>
