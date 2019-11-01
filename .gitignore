@@ -1,6 +1,8 @@
 # dependencies
 node_modules
 packages/**/yarn.lock
+# need this in order for netlify to use yarn
+!packages/nitro-protocol/yarn.lock 
 
 # production
 build/
