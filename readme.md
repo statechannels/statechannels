@@ -35,14 +35,14 @@ You can learn more about what state channels are by reading [one](https://l4.ven
 
 This repository is a monorepo, and contains the following packages maintained with [lerna](https://github.com/lerna/lerna) and [yarn workspaces](https://yarnpkg.com/lang/en/docs/workspaces/):
 
-- [channel-provider](.packages/channel-provider)
-- [devtools](./packages/devtools)
-- [embedded-wallet](./packages/embedded-wallet)
-- [engine](./packages/engine)
-- [hub](./packages/hub)
-- [jest-gas-reporter](./packages/jest-gas-reporter)
-- [nitro-protocol](./packages/nitro-protocol)
-- [web3torrent](./packages/web3torrent)
+- [channel-provider](.packages/channel-provider) : a browser-based loader for the Embedded Wallet.
+- [devtools](./packages/devtools) : developer tooling
+- [embedded-wallet](./packages/embedded-wallet): allows DApps to integrate with statechannels system
+- [engine](./packages/engine) : core wallet logic that follows ForceMove and Nitro protocols
+- [hub](./packages/hub) : server wallet for mediating virtual channels
+- [jest-gas-reporter](./packages/jest-gas-reporter) : reports the gas used by various calls to ethereum contracts
+- [nitro-protocol](./packages/nitro-protocol) : smart contracts and documentation website
+- [web3torrent](./packages/web3torrent) : DApp extension of webtorrent including micropayments
 
 ## Contributing
 
