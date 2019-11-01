@@ -62,30 +62,100 @@ contract RockPaperScissors is ForceMoveApp {
         // deduce action
         if (appDataA.positionType == PositionType.Start) {
             require(appDataB.positionType == PositionType.RoundProposed, 'Start may only transition to RoundProposed');
-            validPROPOSE();
+            requireValidPROPOSE(a,b, appDataA, appDataB);
             return true;
         }
         if (appDataA.positionType == PositionType.RoundProposed) {
             if (appDataB.positionType == PositionType.Start) {
-                validREJECT();
+                requireValidREJECT(a,b, appDataA, appDataB);
                 return true;
             }
             if (appDataB.positionType == PositionType.RoundAccepted) {
-                validACCEPT();
+                requireValidACCEPT(a,b, appDataA, appDataB);
                 return true;
             }
         revert('Proposed may only transition to Start or RoundAccepted');
         }
         if (appDataA.positionType == PositionType.Reveal) {
             require(appDataB.positionType == PositionType.Start, 'Reveal may only transition to Start');
-            validFINISH();
+            requireValidFINISH(a,b, appDataA, appDataB);
             return true;
         }
         revert('No valid transition found');
     }
 
-    function validPROPOSE() private pure returns (bool) {return true;}
-    function validREJECT() private pure returns (bool) {return true;}
-    function validACCEPT() private pure returns (bool) {return true;}
-    function validFINISH() private pure returns (bool) {return true;}
+    // action requirements
+
+    function requireValidPROPOSE(
+        VariablePart memory a,
+        VariablePart memory b,
+        RPSData memory appDataA,
+        RPSData memory appDataB
+        ) private pure
+        outcomeUnchanged(a,b)
+        stakeUnchanged(appDataA, appDataB)
+        allocationsNotLessThanStake(a, b, appDataA, appDataB)
+        {
+        }
+
+    function requireValidREJECT(
+        VariablePart memory a,
+        VariablePart memory b,
+        RPSData memory appDataA,
+        RPSData memory appDataB
+        ) private pure  {
+            // TODO
+        }
+
+    function requireValidACCEPT(
+        VariablePart memory a,
+        VariablePart memory b,
+        RPSData memory appDataA,
+        RPSData memory appDataB
+        ) private pure
+        {
+            // TODO
+        }
+
+    function requireValidFINISH(
+        VariablePart memory a,
+        VariablePart memory b,
+        RPSData memory appDataA,
+        RPSData memory appDataB
+        ) private pure 
+        {
+            // TODO
+        }
+
+    // modifiers
+
+    modifier outcomeUnchanged(
+        VariablePart memory a,
+        VariablePart memory b
+        ) {
+        require(
+            keccak256(b.outcome) == keccak256(a.outcome),
+            'RockPaperScissors: Outcome must not change'
+        );
+        _;
+    }
+
+    modifier stakeUnchanged(
+        RPSData memory appDataA,
+        RPSData memory appDataB
+        ) {
+        require(appDataA.stake == appDataB.stake, "The stake should be the same between commitments");
+        _;
+    }
+
+    modifier allocationsNotLessThanStake(
+        VariablePart memory a,
+        VariablePart memory b,
+        RPSData memory appDataA,
+        RPSData memory appDataB
+        ) {
+            // TODO need to compare the stake (currently uint256 and should probably indicate an asset type) to the outcome (bytes and needs to be decoded)
+        _;
+    }
+
 }
