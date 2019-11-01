@@ -2,7 +2,7 @@ import {ChannelStore, getChannel, setChannel} from "./state";
 
 import {hasValidSignature, getCommitmentChannelId} from "../../domain/commitments/index";
 import {pushState, initializeChannel} from "./channel-state/states";
-import {State, SignedState} from "@statechannels/nitro-protocol";
+import {State, SignedState, getChannelId} from "@statechannels/nitro-protocol";
 import {Signatures} from "@statechannels/nitro-protocol";
 import {convertStateToCommitment} from "../../utils/nitro-converter";
 import {validTransition} from "./channel-state/valid-transition";
@@ -56,10 +56,18 @@ export function checkAndInitialize(store: ChannelStore, signedState: SignedState
 // Doesn't work for the first state - the channel must already exist.
 export function signAndStore(store: ChannelStore, state: State): SignResult {
   // TODO: Temporary until everything is converted to use signedStates
-  // This allows commitment channelIds to be used for now in our protocols
+  // This is ugly but we attempt to find the channel by both the commitment's channel Id and the state's channel Id
+  // That way protocols that are using commitments should still work
+  let channel;
   const commitment = convertStateToCommitment(state);
-  const channelId = getCommitmentChannelId(commitment);
-  let channel = getChannel(store, channelId);
+  const commitmentChannelId = getCommitmentChannelId(commitment);
+  if (commitmentChannelId in store) {
+    channel = getChannel(store, commitmentChannelId);
+  } else {
+    const channelId = getChannelId(state.channel);
+    channel = getChannel(store, channelId);
+  }
+
   const signedState = Signatures.signState(state, channel.privateKey);
   if (!validTransition(channel, commitment)) {
     return {isSuccess: false, reason: "TransitionUnsafe"};
@@ -94,11 +102,18 @@ export function checkAndStore(store: ChannelStore, signedState: SignedState): Ch
   }
 
   // TODO: Temporary until everything is converted to use signedStates
-  // This allows commitment channelIds to be used for now in our protocols
+  // This is ugly but we attempt to find the channel by both the commitment's channel Id and the state's channel Id
+  // That way protocols that are using commitments should still work
+  let channel;
   const commitment = convertStateToCommitment(signedState.state);
-  const channelId = getCommitmentChannelId(commitment);
+  const commitmentChannelId = getCommitmentChannelId(commitment);
+  if (commitmentChannelId in store) {
+    channel = getChannel(store, commitmentChannelId);
+  } else {
+    const channelId = getChannelId(signedState.state.channel);
+    channel = getChannel(store, channelId);
+  }
 
-  let channel = getChannel(store, channelId);
   if (!validTransition(channel, commitment)) {
     return {isSuccess: false};
   }

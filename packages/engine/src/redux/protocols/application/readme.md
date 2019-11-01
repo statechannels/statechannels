@@ -2,10 +2,10 @@
 
 **[Home](../../../../notes/index.md)**
 
-The purpose of this protocol is to manage the application's commitments.
+The purpose of this protocol is to manage the application's states.
 
 It should be triggered by the `INITIALIZE_CHANNEL` event from the app.
-This prepares an address to be used to sign application commitments.
+This prepares an address to be used to sign application states.
 
 It should never fail.
 
@@ -17,8 +17,8 @@ The protocol is implemented with the following state machine.
 graph TD
 linkStyle default interpolate basis
   S((start)) --> AK(AddressKnown)
-  AK-->|COMMITMENT_RECEIVED|O(Ongoing)
-  O-->|COMMITMENT_RECEIVED|O(Ongoing)
+  AK-->|STATE_RECEIVED|O(Ongoing)
+  O-->|STATE_RECEIVED|O(Ongoing)
   AK-->|CONCLUDED|Su((success))
   O-->|CONCLUDED|Su((success))
   O-->|CHALLENGE_REQUESTED/DETECTED|WFD(WaitForDispute)
@@ -37,25 +37,25 @@ linkStyle default interpolate basis
 Notes:
 
 - All action typestrings have had the `ENGINE.APPLICATION` prefix suppressed in the above diagram
-- `COMMITMENT_RECEIVED` is shorthand for either `OWN_COMMITMENT_RECEIVED` or `OPPONENT_COMMITMENT_RECEIVED`
-- `CONCLUDED` should get triggered when a conclude is requested _and then sent from the engine_. This means that the application protocol no longer needs to listen for commitments from the app. In particular, if the conclude is requested and then cancelled, `CONCLUDED` will not be triggered.
+- `STATE_RECEIVED` is shorthand for either `OWN_STATE_RECEIVED` or `OPPONENT_STATE_RECEIVED`
+- `CONCLUDED` should get triggered when a conclude is requested _and then sent from the engine_. This means that the application protocol no longer needs to listen for states from the app. In particular, if the conclude is requested and then cancelled, `CONCLUDED` will not be triggered.
 - The application protocol is responsible for sending out signature and validation messages.
 
 ## Scenarios
 
 1. **Initializing Application**
-   - `.`--> `WaitForFirstCommitment`
+   - `.`--> `WaitForFirstState`
 2. **Starting Application**
-   - `WaitForFirstCommitment` --> `Ongoing`
+   - `WaitForFirstState` --> `Ongoing`
 3. **Receiving a close request**
    - `Ongoing` --> `Success`
-4. **Receiving our commitment**
+4. **Receiving our state**
    - `Ongoing` --> `Ongoing`
-5. **Receiving their commitment**
+5. **Receiving their state**
    - `Ongoing` --> `Ongoing`
-6. **Receiving their invalid commitment**
+6. **Receiving their invalid state**
    - `Ongoing` --> `Ongoing`
-7. **Receiving our invalid commitment**
+7. **Receiving our invalid state**
    - `Ongoing` --> `Ongoing`
 8. **Challenge was requested**
    - `Ongoing` --> `WaitForDispute`

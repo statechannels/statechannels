@@ -157,7 +157,7 @@ export function convertAllocationToOutcome({
   }
   const nitroAllocation: AllocationItem[] = allocation.map((a, i) => {
     return {
-      destination: convertAddressToBytes32(destination[i]).toLowerCase(),
+      destination: convertAddressToBytes32(destination[i]),
       amount: allocation[i]
     };
   });
