@@ -1,4 +1,4 @@
-import * as states from "../states";
+import * as acStates from "../states";
 import {initialize, reducer} from "../reducer";
 import * as scenarios from "./scenarios";
 import {
@@ -8,7 +8,7 @@ import {
   itSendsNoMessage
 } from "../../../__tests__/helpers";
 
-const itTransitionsTo = (result: states.AdvanceChannelState, type: states.AdvanceChannelStateType) => {
+const itTransitionsTo = (result: acStates.AdvanceChannelState, type: acStates.AdvanceChannelStateType) => {
   it(`transitions to ${type}`, () => {
     expect(result.type).toEqual(type);
   });
@@ -343,13 +343,13 @@ describe("when not cleared to send", () => {
   });
 });
 
-function itIsClearedToSend(protocolState: states.AdvanceChannelState) {
+function itIsClearedToSend(protocolState: acStates.AdvanceChannelState) {
   it("is cleared to send", () => {
     expect(protocolState).toMatchObject({clearedToSend: true});
   });
 }
 
-function itIsNotClearedToSend(protocolState: states.AdvanceChannelState) {
+function itIsNotClearedToSend(protocolState: acStates.AdvanceChannelState) {
   it("is cleared to send", () => {
     expect(protocolState).toMatchObject({clearedToSend: false});
   });
