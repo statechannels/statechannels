@@ -2,8 +2,13 @@
 <div><img src="website/static/img/favicon.ico"> </div>
 Nitro Protocol
 </h1>
+
+[![Netlify Status](https://api.netlify.com/api/v1/badges/8472e36f-72ee-4b18-8d1a-c2dfbc27667b/deploy-status)](https://app.netlify.com/sites/angry-villani-ad8c15/deploys)
+
 This repository contains the smart contracts that define a state channel framework capable of running 3rd-party
-'applications' that conform to a simple state-machine interface, and allow for large-scale state-channel networks. There is also a documentation website and helper functions written in TypeScript.
+'applications' that conform to a simple state-machine interface, and allow for large-scale state-channel networks. This repository also includes helper functions written in TypeScript, to allow clients to more easily interact with the contracts.
+
+There is an accompanying documentation [website](https://angry-villani-ad8c15.netlify.com/).
 
 # ForceMove
 
@@ -16,7 +21,7 @@ is determined through an oracle feed.
 
 A full description of the framework and it's capabilities can be found in the [whitepaper](https://magmo.com/force-move-games.pdf).
 
-# Nitro and the nitro-adjudicator
+# Nitro
 
 Nitro protocol subsumes and extends ForceMove by allowing for ledger channels (which can allocate funds to other state channels) and virtual channels (which allow intermediaries to help other state-channel-network users open and close channels off-chain).
 
@@ -24,7 +29,7 @@ A full description of the framework and it's capabilities can be found in a seco
 
 The nitro-adjudicator supports an arbitrary number of state channels, and introduces new on-chain functions to manage state channel networks.
 
-### Development
+## Development
 
 We use [etherlime](https://etherlime.gitbook.io/) for smart contract development.
 
@@ -37,7 +42,7 @@ To get started:
 
 ## Documentation website
 
-1. Run `yarn docgen` to auto-generate markdown files from Solidity source code (using [`solidity-docgen`](https://github.com/OpenZeppelin/solidity-docgen))
+1. Run `yarn docgen` to auto-generate markdown files from compiled Solidity code (using our fork of [`solidoc`](https://github.com/statechannels/solidoc)). If you change the source code you will need to recompile the contracts and re-run `solidoc` using `yarn contract:compile && yarn docgen`.
 2. Run `cd website`
 3. Run `yarn install`
 4. Run `yarn start`

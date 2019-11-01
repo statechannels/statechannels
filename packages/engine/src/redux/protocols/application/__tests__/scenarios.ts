@@ -6,7 +6,7 @@ import * as actions from "../actions";
 // -----------------
 // Channel Scenarios
 // -----------------
-const {channelId, asAddress: address, asPrivateKey: privateKey} = testScenarios;
+const {nitroChannelId: channelId, asAddress: address, asPrivateKey: privateKey} = testScenarios;
 import {ChannelState} from "../../../channel-store";
 import {setChannel, EMPTY_SHARED_DATA} from "../../../state";
 import {channelFromStates} from "../../../channel-store/channel-state/__tests__";
