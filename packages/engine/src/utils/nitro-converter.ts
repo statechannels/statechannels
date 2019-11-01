@@ -143,7 +143,10 @@ export function convertAddressToBytes32(address: string): string {
     );
   }
   // We pad to 66 = (32*2) + 2('0x')
-  return `0x${normalizedAddress.substr(2).padStart(64, "0")}`;
+  return `0x${normalizedAddress
+    .toLowerCase()
+    .substr(2)
+    .padStart(64, "0")}`;
 }
 export function convertAllocationToOutcome({
   allocation,
@@ -178,7 +181,7 @@ function convertGuaranteeToOutcome({
   return [{assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS, guarantee}];
 }
 
-function convertOutcomeToAllocation(
+export function convertOutcomeToAllocation(
   outcome: Outcome
 ): {allocation: string[]; destination: string[]; guaranteedChannel?: string} {
   const allocation: string[] = [];

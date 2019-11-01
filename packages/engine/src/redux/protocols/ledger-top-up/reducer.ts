@@ -19,6 +19,7 @@ import {ProtocolLocator, EmbeddedProtocol} from "../../../communication";
 import {CONSENSUS_UPDATE_PROTOCOL_LOCATOR} from "../consensus-update/reducer";
 import {DirectFundingState} from "../direct-funding/states";
 import {clearedToSend} from "../consensus-update/actions";
+import {convertAllocationToOutcome} from "../../../utils/nitro-converter";
 export {LEDGER_TOP_UP_PROTOCOL_LOCATOR} from "../../../communication/protocol-locator";
 export function initialize({
   processId,
@@ -363,12 +364,12 @@ function initializeConsensusState(
     newAllocation = [currentAllocationForA, newAllocationForB];
     newDestination = proposedDestination;
   }
+  const proposedOutcome = convertAllocationToOutcome({allocation: newAllocation, destination: newDestination});
   const {protocolState: consensusUpdateState, sharedData: newSharedData} = initializeConsensusUpdate({
     processId,
     channelId: ledgerId,
     clearedToSend: true,
-    proposedAllocation: newAllocation,
-    proposedDestination: newDestination,
+    proposedOutcome,
     protocolLocator: makeLocator(protocolLocator, CONSENSUS_UPDATE_PROTOCOL_LOCATOR),
     sharedData
   });

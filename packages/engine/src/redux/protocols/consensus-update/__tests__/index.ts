@@ -9,7 +9,7 @@ import {prependToScenarioLocator} from "../../__tests__";
 import {EmbeddedProtocol} from "../../../../communication";
 
 export const twoPlayerPreSuccessA = prependToScenarioLocator(
-  twoPlayerAHappyPath.commitmentSent,
+  twoPlayerAHappyPath.stateSent,
   EmbeddedProtocol.ConsensusUpdate
 );
 export const twoPlayerPreSuccessB = prependToScenarioLocator(
