@@ -22,7 +22,7 @@ beforeAll(async () => {
 });
 
 describe('validTransition', () => {
-  it('Random inputs always return true', async () => {
+  it('Transitions between random VariableParts are valid', async () => {
     expect.assertions(5);
     for (let i = 0; i < 5; i++) {
       const from: VariablePart = getRandomVariablePart();
@@ -32,7 +32,7 @@ describe('validTransition', () => {
     }
   });
 
-  it('Proper state transitions return true', async () => {
+  it('Transitions between States with mocked-up data are valid', async () => {
     const channel: Channel = {
       participants: [Wallet.createRandom().address, Wallet.createRandom().address],
       chainId: '0x1',
@@ -50,7 +50,7 @@ describe('validTransition', () => {
     const toState: State = {...fromState, turnNum: 2};
 
     expect(
-      // Passing valid transitions, as opposed to VariableParts, can properly validTransition
+      // Use the helper function, which accepts States instead of VariableParts
       await validTransition(fromState, toState, trivialApp.address, provider.getSigner(0))
     ).toBe(true);
   });
