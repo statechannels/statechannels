@@ -19,10 +19,11 @@ export const VIRTUAL_FUNDING_PROTOCOL_LOCATOR = "VirtualFunding";
 import {CONSENSUS_UPDATE_PROTOCOL_LOCATOR} from "../consensus-update/reducer";
 import {TwoPartyPlayerIndex} from "../../types";
 import {Wallet} from "ethers";
-import {convertAddressToBytes32, convertOutcomeToAllocation} from "../../../utils/nitro-converter";
+import {convertOutcomeToAllocation} from "../../../utils/nitro-converter";
 import {StateType} from "../advance-channel/states";
 import {encodeConsensusData, Outcome, isAllocationOutcome} from "@statechannels/nitro-protocol";
 import {AllocationAssetOutcome} from "@statechannels/nitro-protocol/src/contract/outcome";
+import {convertAddressToBytes32} from "../../../utils/data-type-utils";
 
 export function initialize(
   sharedData: SharedData,

@@ -6,7 +6,7 @@ import {preFund, postFund} from "../../advance-channel/__tests__";
 import {asAddress, hubAddress, bsAddress, convertBalanceToOutcome} from "../../../../domain/commitments/__tests__";
 import {bigNumberify} from "ethers/utils";
 import {ETH_ASSET_HOLDER_ADDRESS} from "../../../../constants";
-import {convertAddressToBytes32} from "../../../../utils/nitro-converter";
+import {convertAddressToBytes32} from "../../../../utils/data-type-utils";
 
 const itTransitionsTo = (result: states.VirtualFundingState, type: states.VirtualFundingStateType) => {
   it(`transitions to ${type}`, () => {
