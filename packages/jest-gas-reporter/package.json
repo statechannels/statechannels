@@ -19,17 +19,17 @@
   },
   "devDependencies": {
     "@types/easy-table": "0.0.32",
-    "@types/jest": "24.0.18",
-    "lint-staged": "9.4.0",
+    "@types/jest": "24.0.21",
+    "lint-staged": "9.4.2",
     "tslint": "5.20.0",
     "tslint-config-prettier": "1.18.0"
   },
   "dependencies": {
     "@statechannels/devtools": "0.1.21",
     "easy-table": "1.1.1",
-    "ethers": "4.0.37",
+    "ethers": "4.0.39",
     "path": "0.12.7",
-    "solc": "0.5.11",
-    "typescript": "3.6.3"
+    "solc": "0.5.12",
+    "typescript": "3.6.4"
   }
 }
