@@ -23,7 +23,7 @@ const itTransitionsSubstateTo = (result: any, substate: string, type: string) =>
 const twoThreeFive = [
   {address: asAddress, wei: bigNumberify(2).toHexString()},
   {address: bsAddress, wei: bigNumberify(3).toHexString()},
-  {address: asAddress, wei: bigNumberify(5).toHexString()}
+  {address: hubAddress, wei: bigNumberify(5).toHexString()}
 ];
 
 describe("happyPath", () => {
