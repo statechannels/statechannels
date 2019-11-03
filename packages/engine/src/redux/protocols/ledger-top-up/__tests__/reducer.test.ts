@@ -5,6 +5,7 @@ import {ProtocolStateWithSharedData} from "../..";
 import {describeScenarioStep} from "../../../__tests__/helpers";
 import {bsAddress, asAddress} from "../../../../domain/commitments/__tests__";
 import {isTerminal} from "../../consensus-update";
+import {convertOutcomeToAllocation} from "../../../../utils/nitro-converter";
 
 describe("player A happy path", () => {
   const scenario = scenarios.playerAHappyPath;
@@ -207,8 +208,11 @@ function getProposedConsensus(
   protocolState: LedgerTopUpState
 ): {proposedAllocation: string[]; proposedDestination: string[]} {
   if ("consensusUpdateState" in protocolState && !isTerminal(protocolState.consensusUpdateState)) {
-    const {proposedAllocation, proposedDestination} = protocolState.consensusUpdateState;
-    return {proposedDestination, proposedAllocation};
+    const {proposedOutcome} = protocolState.consensusUpdateState;
+    const {allocation: proposedAllocation, destination: proposedDestination} = convertOutcomeToAllocation(
+      proposedOutcome
+    );
+    return {proposedAllocation, proposedDestination};
   }
   return {proposedDestination: [], proposedAllocation: []};
 }

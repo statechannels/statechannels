@@ -5,8 +5,8 @@ import {ProtocolState} from "..";
 // -------
 // States
 // -------
-export interface WaitForFirstCommitment {
-  type: "Application.WaitForFirstCommitment";
+export interface WaitForFirstState {
+  type: "Application.WaitForFirstState";
   channelId: string;
   address: string;
   privateKey: string;
@@ -34,8 +34,8 @@ export interface Success {
 // -------
 // Constructors
 // -------
-export const waitForFirstCommitment: StateConstructor<WaitForFirstCommitment> = p => {
-  return {...p, type: "Application.WaitForFirstCommitment"};
+export const waitForFirstState: StateConstructor<WaitForFirstState> = p => {
+  return {...p, type: "Application.WaitForFirstState"};
 };
 
 export const ongoing: StateConstructor<Ongoing> = p => {
@@ -55,7 +55,7 @@ export const waitForDispute: StateConstructor<WaitForDispute> = p => {
 // -------
 
 export type ApplicationState = TerminalApplicationState | NonTerminalApplicationState;
-export type NonTerminalApplicationState = WaitForFirstCommitment | WaitForDispute | Ongoing;
+export type NonTerminalApplicationState = WaitForFirstState | WaitForDispute | Ongoing;
 export type TerminalApplicationState = Success;
 export type ApplicationStateType = ApplicationState["type"];
 
@@ -67,6 +67,6 @@ export function isApplicationState(state: ProtocolState): state is ApplicationSt
   return (
     state.type === "Application.WaitForDispute" ||
     state.type === "Application.Ongoing" ||
-    state.type === "Application.WaitForFirstCommitment"
+    state.type === "Application.WaitForFirstState"
   );
 }

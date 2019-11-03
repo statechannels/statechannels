@@ -11,7 +11,7 @@ import {initialize as initTransactionState, transactionReducer} from "../../tran
 import {SharedData, signAndStoreComm, registerChannelToMonitor, getPrivatekey} from "../../../state";
 import {isTransactionAction} from "../../transaction-submission/actions";
 import {isTerminal, TransactionSubmissionState, isSuccess} from "../../transaction-submission/states";
-import {channelID} from "fmg-core/lib/channel";
+
 import {
   showEngine,
   hideEngine,
@@ -285,7 +285,7 @@ const getStoredCommitments = (
   lastSignedCommitment: SignedCommitment;
   penultimateSignedCommitment: SignedCommitment;
 } => {
-  const channelId = channelID(challengeCommitment.channel);
+  const channelId = getCommitmentChannelId(challengeCommitment);
   const channelState = selectors.getOpenedChannelState(sharedData, channelId);
   // NOTE: Assumes 2-party
   const [penultimateState, lastState] = channelState.signedStates.map(ss => ss.state);

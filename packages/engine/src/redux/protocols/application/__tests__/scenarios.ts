@@ -9,7 +9,7 @@ import * as actions from "../actions";
 const {channelId, asAddress: address, asPrivateKey: privateKey} = testScenarios;
 import {ChannelState} from "../../../channel-store";
 import {setChannel, EMPTY_SHARED_DATA} from "../../../state";
-import {channelFromCommitments} from "../../../channel-store/channel-state/__tests__";
+import {channelFromStates} from "../../../channel-store/channel-state/__tests__";
 import {APPLICATION_PROCESS_ID} from "../reducer";
 import {
   challengerPreSuccessOpenState,
@@ -17,14 +17,14 @@ import {
   challengerPreSuccessClosedState
 } from "../../dispute/challenger";
 
-const signedCommitment19 = testScenarios.appCommitment({turnNum: 19});
-const signedCommitment20 = testScenarios.appCommitment({turnNum: 20});
-const signedCommitment21 = testScenarios.appCommitment({turnNum: 21});
-const signedCommitment22 = testScenarios.appCommitment({turnNum: 22});
-const preFundCommitment0 = testScenarios.appCommitment({turnNum: 0}).commitment;
+const signedState19 = testScenarios.appState({turnNum: 19});
+const signedState20 = testScenarios.appState({turnNum: 20});
+const signedState21 = testScenarios.appState({turnNum: 21});
+const signedState22 = testScenarios.appState({turnNum: 22});
+const preFundState0 = testScenarios.appState({turnNum: 0}).state;
 
-const theirTurn = channelFromCommitments([signedCommitment19, signedCommitment20], address, privateKey);
-const ourTurn = channelFromCommitments([signedCommitment20, signedCommitment21], address, privateKey);
+const theirTurn = channelFromStates([signedState19, signedState20], address, privateKey);
+const ourTurn = channelFromStates([signedState20, signedState21], address, privateKey);
 
 // --------
 // Defaults
@@ -37,7 +37,7 @@ const defaults = {processId, channelId, address, privateKey};
 // ------
 // States
 // ------
-const addressKnown = states.waitForFirstCommitment({channelId, address, privateKey});
+const addressKnown = states.waitForFirstState({channelId, address, privateKey});
 const ongoing = states.ongoing({channelId, address, privateKey});
 const waitForDispute1 = states.waitForDispute({
   channelId,
@@ -56,39 +56,37 @@ const waitForDispute2 = states.waitForDispute({
 // Actions
 // -------
 
-const receivePreFundSetup = actions.ownCommitmentReceived({
+const receivePreFundSetup = actions.ownStateReceived({
   processId,
-  commitment: preFundCommitment0
+  state: preFundState0
 });
-const receiveOurCommitment = actions.ownCommitmentReceived({
+const receiveOurState = actions.ownStateReceived({
   processId,
-  commitment: signedCommitment22.commitment
-});
-const {commitment, signature} = signedCommitment21;
-const receiveTheirCommitment = actions.opponentCommitmentReceived({
-  processId,
-  commitment,
-  signature
+  state: signedState22.state
 });
 
-const receiveTheirInvalidCommitment = actions.opponentCommitmentReceived({
+const receiveTheirState = actions.opponentStateReceived({
   processId,
-  commitment: signedCommitment19.commitment,
-  signature: signedCommitment19.signature
+  signedState: signedState21
 });
-const receiveOurInvalidCommitment = actions.ownCommitmentReceived({
+
+const receiveTheirInvalidState = actions.opponentStateReceived({
   processId,
-  commitment: signedCommitment20.commitment
+  signedState: signedState19
+});
+const receiveOurInvalidState = actions.ownStateReceived({
+  processId,
+  state: signedState20.state
 });
 
 const concluded = actions.concluded({processId: APPLICATION_PROCESS_ID});
 
-const challengeRequested = actions.challengeRequested({processId, channelId, commitment});
+const challengeRequested = actions.challengeRequested({processId, channelId, state: signedState21.state});
 
 const challengeDetected = actions.challengeDetected({
   processId,
   channelId,
-  commitment,
+  state: signedState21.state,
   expiresAt: 999
 });
 
@@ -127,39 +125,39 @@ export const receivingACloseRequest = {
   }
 };
 
-export const receivingOurCommitment = {
+export const receivingOurState = {
   ...defaults,
   ongoing: {
     sharedData: ourTurnSharedData,
     state: ongoing,
-    action: receiveOurCommitment
+    action: receiveOurState
   }
 };
 
-export const receivingTheirCommitment = {
+export const receivingTheirState = {
   ...defaults,
   ongoing: {
     state: ongoing,
     sharedData: theirTurnSharedData,
-    action: receiveTheirCommitment
+    action: receiveTheirState
   }
 };
 
-export const receivingTheirInvalidCommitment = {
+export const receivingTheirInvalidState = {
   ...defaults,
   ongoing: {
     state: ongoing,
     sharedData: theirTurnSharedData,
-    action: receiveTheirInvalidCommitment
+    action: receiveTheirInvalidState
   }
 };
 
-export const receivingOurInvalidCommitment = {
+export const receivingOurInvalidState = {
   ...defaults,
   ongoing: {
     state: ongoing,
     sharedData: ourTurnSharedData,
-    action: receiveOurInvalidCommitment
+    action: receiveOurInvalidState
   }
 };
 

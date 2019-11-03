@@ -31,9 +31,9 @@ describe("message listener", () => {
 
     expect(output).toEqual(
       put(
-        actions.application.ownCommitmentReceived({
+        actions.application.ownStateReceived({
           processId: APPLICATION_PROCESS_ID,
-          commitment: appCommitment({turnNum: 19}).commitment
+          state: expect.anything()
         })
       )
     );
@@ -42,16 +42,18 @@ describe("message listener", () => {
 
   it("converts VALIDATION_REQUEST into OPPONENT_POSITION_RECEIVED", () => {
     saga.next({
-      data: incoming.validateCommitmentRequest(appCommitment({turnNum: 19}).commitment, "signature")
+      data: incoming.validateCommitmentRequest(
+        appCommitment({turnNum: 19}).commitment,
+        appCommitment({turnNum: 19}).signature
+      )
     });
     const output = saga.next().value; // the take
 
     expect(output).toEqual(
       put(
-        actions.application.opponentCommitmentReceived({
+        actions.application.opponentStateReceived({
           processId: APPLICATION_PROCESS_ID,
-          commitment: appCommitment({turnNum: 19}).commitment,
-          signature: "signature"
+          signedState: expect.anything()
         })
       )
     );

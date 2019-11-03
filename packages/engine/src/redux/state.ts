@@ -33,6 +33,7 @@ import {ProtocolState} from "./protocols";
 import {isDefundingState, isTerminalDefundingState, TerminalDefundingState} from "./protocols/defunding/states";
 import {TerminalConcludingState, isConcludingState, isTerminalConcludingState} from "./protocols/concluding/states";
 import {convertCommitmentToState, convertStateToSignedCommitment} from "../utils/nitro-converter";
+import {SignedState, State, getChannelId} from "@statechannels/nitro-protocol";
 
 export type EngineState = WaitForLogin | MetaMaskError | Initialized;
 
@@ -257,6 +258,15 @@ export function checkAndInitializeComm(
   }
 }
 
+export function checkAndStore(state: SharedData, signedState: SignedState): CheckResult {
+  const result = checkAndStoreChannelStore(state.channelStore, signedState);
+  if (result.isSuccess) {
+    return {...result, store: setChannelStore(state, result.store)};
+  } else {
+    return result;
+  }
+}
+
 export function checkAndStoreComm(state: SharedData, signedCommitment: SignedCommitment): CheckResult {
   const result = checkAndStoreChannelStore(state.channelStore, signedCommitment.signedState);
   if (result.isSuccess) {
@@ -265,6 +275,7 @@ export function checkAndStoreComm(state: SharedData, signedCommitment: SignedCom
     return result;
   }
 }
+
 type CheckResult = CheckSuccess | CheckFailure;
 interface CheckSuccess {
   isSuccess: true;
@@ -272,6 +283,22 @@ interface CheckSuccess {
 }
 interface CheckFailure {
   isSuccess: false;
+}
+
+export function signAndStore(sharedDataState: SharedData, state: State): SignResult {
+  const result = signAndStoreChannelStore(sharedDataState.channelStore, state);
+  if (result.isSuccess) {
+    const channelId = getChannelId(state.channel);
+
+    const privateKey = getPrivatekey(sharedDataState, channelId);
+    return {
+      isSuccess: result.isSuccess,
+      signedCommitment: convertStateToSignedCommitment(result.signedState.state, privateKey),
+      store: setChannelStore(sharedDataState, result.store)
+    };
+  } else {
+    return result;
+  }
 }
 
 export function signAndStoreComm(state: SharedData, commitment: Commitment): SignResult {

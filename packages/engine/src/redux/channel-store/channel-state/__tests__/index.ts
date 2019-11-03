@@ -1,7 +1,38 @@
+// import {SignedCommitment} from "../../../../domain";
 import {ChannelState} from "../states";
-import {getCommitmentChannelId, SignedCommitment} from "../../../../domain/commitments";
+import {SignedCommitment} from "../../../../domain/commitments";
 import {bigNumberify} from "ethers/utils";
+import {SignedState, getChannelId} from "@statechannels/nitro-protocol";
+import {convertCommitmentToState} from "../../../../utils/nitro-converter";
 
+export function channelFromStates(states: SignedState[], ourAddress: string, ourPrivateKey: string) {
+  const numStates = states.length;
+  const lastState = states[numStates - 1];
+  const {turnNum, channel, appDefinition: libraryAddress} = lastState.state;
+
+  const participants: [string, string] = channel.participants as [string, string];
+  let funded = true;
+  if (turnNum <= 1) {
+    funded = false;
+  }
+  const ourIndex = participants.indexOf(ourAddress);
+  if (ourIndex === -1) {
+    throw new Error("Address provided is not a participant according to the lastCommitment.");
+  }
+
+  return {
+    channelId: getChannelId(channel),
+    libraryAddress,
+    channelNonce: channel.channelNonce,
+    funded,
+    participants,
+    address: ourAddress,
+    privateKey: ourPrivateKey,
+    ourIndex,
+    turnNum,
+    signedStates: states
+  };
+}
 export function channelFromCommitments(
   commitments: SignedCommitment[],
   ourAddress: string,
@@ -20,9 +51,10 @@ export function channelFromCommitments(
   if (ourIndex === -1) {
     throw new Error("Address provided is not a participant according to the lastCommitment.");
   }
-
+  // We'll always use the nitro protocol channel Id so everything is in the right place
+  const channelId = getChannelId(convertCommitmentToState(lastCommitment.commitment).channel);
   return {
-    channelId: getCommitmentChannelId(lastCommitment.commitment),
+    channelId,
     libraryAddress,
     channelNonce: bigNumberify(lastCommitment.commitment.channel.nonce).toHexString(),
     funded,

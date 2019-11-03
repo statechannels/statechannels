@@ -19,6 +19,7 @@ import * as _ from "lodash";
 import {NEW_LEDGER_FUNDING_PROTOCOL_LOCATOR} from "../reducer";
 import {prependToLocator} from "../..";
 import {TwoPartyPlayerIndex} from "../../../types";
+import {ethers} from "ethers";
 // -----------
 // Commitments
 // -----------
@@ -29,7 +30,9 @@ const twoThree = [
   {address: bsAddress, wei: bigNumberify(3).toHexString()}
 ];
 
-const fiveToApp = [{address: channelId, wei: bigNumberify(5).toHexString()}];
+// TODO: Implement this when switching to SignedStates
+// const fiveToApp = [{address: channelId, wei: bigNumberify(5).toHexString()}];
+const fiveToApp = [{address: ethers.Wallet.createRandom().address, wei: bigNumberify(5).toHexString()}];
 
 const app2 = appCommitment({turnNum: 2, balances: twoThree});
 const app3 = appCommitment({turnNum: 3, balances: twoThree});

@@ -1,4 +1,3 @@
-import {signCommitment2} from "../domain";
 import {EngineAction} from "../redux/actions";
 import {FundingStrategy, ProtocolLocator, EmbeddedProtocol} from "./index";
 import {ProcessProtocol} from ".";
@@ -6,7 +5,6 @@ import {ActionConstructor} from "../redux/utils";
 import {Commitments} from "../redux/channel-store";
 import {CloseLedgerChannel} from "../redux/protocols/actions";
 import {SignedState} from "@statechannels/nitro-protocol";
-import {convertStateToCommitment} from "../utils/nitro-converter";
 
 export interface MultipleRelayableActions {
   type: "ENGINE.MULTIPLE_RELAYABLE_ACTIONS";
@@ -97,12 +95,13 @@ export const commitmentsReceived = (p: {
 });
 
 // TODO: This shouldn't require a private key once all protocols are updated to use signedStates
-export const signedStatesReceived = (
-  p: {protocolLocator: ProtocolLocator; signedStates: SignedState[]; processId: string},
-  privateKey: string
-): CommitmentsReceived => ({
+export const signedStatesReceived = (p: {
+  protocolLocator: ProtocolLocator;
+  signedStates: SignedState[];
+  processId: string;
+}): CommitmentsReceived => ({
   ...p,
-  signedCommitments: p.signedStates.map(ss => signCommitment2(convertStateToCommitment(ss.state), privateKey)),
+  signedCommitments: [],
   type: "ENGINE.COMMON.COMMITMENTS_RECEIVED"
 });
 
