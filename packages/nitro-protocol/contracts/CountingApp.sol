@@ -12,8 +12,8 @@ contract CountingApp is ForceMoveApp {
     }
 
     /**
-    * @notice Deocdes the appData.
-    * @dev Deocdes the appData.
+    * @notice Decodes the appData.
+    * @dev Decodes the appData.
     * @param appDataBytes The abi.encode of a CountingAppData struct describing the application-specific data.
     * @return A CountingAppDatat struct containing the application-specific data.
     */
