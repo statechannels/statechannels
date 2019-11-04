@@ -80,8 +80,6 @@ describe('<TorrentInfo />', () => {
     expect(fileCostElement.text()).toEqual(`Cost $1.34`);
   });
 
-
-
   it('can show the `? Mb` label when the torrent size is unknown', () => {
     const {fileSizeElement} = mockTorrentInfo({length: 0});
     expect(fileSizeElement.text()).toEqual('? Mb');
