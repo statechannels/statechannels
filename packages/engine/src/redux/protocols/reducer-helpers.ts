@@ -15,6 +15,7 @@ import _ from "lodash";
 import {bigNumberify} from "ethers/utils";
 import {convertStateToSignedCommitment} from "../../utils/nitro-converter";
 import {SignedState} from "@statechannels/nitro-protocol";
+import {getAllocationOutcome} from "../../utils/outcome-utils";
 
 export function sendFundingComplete(sharedData: SharedData, appChannelId: string) {
   const channelState = selectors.getOpenedChannelState(sharedData, appChannelId);
@@ -174,8 +175,9 @@ export const channelIsClosed = (channelId: string, sharedData: SharedData): bool
 };
 
 export const channelFundsAnotherChannel = (channelId: string, sharedData: SharedData): boolean => {
-  const latestCommitment = getLatestCommitment(channelId, sharedData);
-  return _.intersection(selectors.getChannelIds(sharedData), latestCommitment.destination).length > 0;
+  const latestState = getLatestState(channelId, sharedData);
+  const {allocation} = getAllocationOutcome(latestState.outcome);
+  return _.intersection(selectors.getChannelIds(sharedData), allocation.map(a => a.destination)).length > 0;
 };
 
 export const channelHasConclusionProof = (channelId: string, sharedData: SharedData): boolean => {

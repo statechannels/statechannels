@@ -4,7 +4,7 @@ The purpose of the protocol is conclude the given channel and withdraw funds fro
 
 There are two main responsibilities of the protocol:
 
-- Given a ledger channel L exchange conclude commitments so the channel is finalized (using the AdvanceChannel protocol)
+- Given a ledger channel L exchange conclude states so the channel is finalized (using the AdvanceChannel protocol)
 - Call ConcludeAndWithdraw on chain to register the finalization proof and withdraw the funds (using the withdraw protocol)
 
 This protocol will typically be run when a user has decided they are done with a ledger channel.
