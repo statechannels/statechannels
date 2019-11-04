@@ -5,9 +5,10 @@ import {ProtocolStateWithSharedData} from "../..";
 import {describeScenarioStep} from "../../../__tests__/helpers";
 import {bsAddress, asAddress} from "../../../../domain/commitments/__tests__";
 import {isTerminal} from "../../consensus-update";
-import {convertAddressToBytes32} from "../../../../utils/nitro-converter";
 import {AllocationItem, Outcome, isAllocationOutcome} from "@statechannels/nitro-protocol";
 import _ from "lodash";
+import {convertAddressToBytes32} from "../../../../utils/data-type-utils";
+
 const asAddressPadded = convertAddressToBytes32(asAddress);
 const bsAddressPadded = convertAddressToBytes32(bsAddress);
 
