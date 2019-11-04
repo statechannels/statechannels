@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {RouteComponentProps, useLocation} from 'react-router-dom';
-import {askForFunds} from '../../clients/embedded-wallet-client';
+import {askForFunds, getUserFriendlyError} from '../../clients/embedded-wallet-client';
 import {download, getTorrentPeers} from '../../clients/web3torrent-client';
 import {FormButton} from '../../components/form';
 import {TorrentInfo} from '../../components/torrent-info/TorrentInfo';
@@ -26,6 +26,7 @@ const File: React.FC<RouteComponentProps> = () => {
   const [peers, setPeers] = useState({});
   const [loading, setLoading] = useState(false);
   const [buttonLabel, setButtonLabel] = useState('Start Download');
+  const [errorLabel, setErrorLabel] = useState('');
   const getLiveData = getTorrentAndPeersData(setTorrent, setPeers);
 
   useEffect(() => {
@@ -50,15 +51,21 @@ const File: React.FC<RouteComponentProps> = () => {
             spinner={loading}
             onClick={async () => {
               setLoading(true);
+              setErrorLabel('');
               setButtonLabel('Preparing Download...');
-              await askForFunds();
-              setTorrent({...torrent, ...(await download(torrent.magnetURI))});
+              try {
+                await askForFunds();
+                setTorrent({...torrent, ...(await download(torrent.magnetURI))});
+              } catch (error) {
+                setErrorLabel(getUserFriendlyError(error.code));
+              }
               setLoading(false);
               setButtonLabel('Start Download');
             }}
           >
             {buttonLabel}
           </FormButton>
+          {errorLabel && <p className="error">{errorLabel}</p>}
           <div className="subtitle">
             <p>
               <strong>How do I pay for the download?</strong>
