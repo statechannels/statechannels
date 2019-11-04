@@ -27,7 +27,7 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({torrent, peers}) => {
       ) : (
         UploadingStatuses.includes(torrent.status) && <UploadInfo torrent={torrent} peers={peers} />
       )}
-      {!torrent.createdBy && <DownloadLink torrent={torrent} />}
+      {!torrent.originalSeed && <DownloadLink torrent={torrent} />}
     </>
   );
 };
