@@ -10,7 +10,7 @@ export const DownloadLink: React.FC<DownloadLinkProps> = ({torrent}) => {
     if (torrent.done) {
       getFileSavingData(torrent.files).then(data => setFile(data));
     }
-  }, [torrent.done, torrent.infoHash]);
+  }, [torrent.done, torrent.files]);
 
   return (
     <>
