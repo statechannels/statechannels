@@ -8,12 +8,13 @@ import * as actions from "./actions";
 import {isWithdrawalAction} from "../withdrawing/actions";
 import {unreachable} from "../../../utils/reducer-utils";
 import {EmbeddedProtocol} from "../../../communication";
-import {getLastCommitment} from "../../channel-store";
+import {getLastState} from "../../channel-store";
 import {ProtocolAction} from "../../actions";
 import {AdvanceChannelState, initializeAdvanceChannel, advanceChannelReducer} from "../advance-channel";
 import {WithdrawalState} from "../withdrawing/states";
 import {routesToAdvanceChannel} from "../advance-channel/actions";
 import {StateType} from "../advance-channel/states";
+import {getAllocationAmountForIndex} from "../../../utils/outcome-utils";
 
 export const initialize = (
   processId: string,
@@ -134,5 +135,6 @@ const createWaitForWithdrawal = (sharedData: SharedData, processId: string, chan
 };
 const getWithdrawalAmount = (sharedData: SharedData, channelId: string) => {
   const channelState = selectors.getChannelState(sharedData, channelId);
-  return getLastCommitment(channelState).allocation[channelState.ourIndex];
+  const lastState = getLastState(channelState);
+  return getAllocationAmountForIndex(lastState.outcome, channelState.ourIndex);
 };

@@ -7,50 +7,48 @@ import {EmbeddedProtocol} from "../../../../communication";
 import * as advanceChannelScenarios from "../../advance-channel/__tests__";
 import {bigNumberify} from "ethers/utils";
 import {EMPTY_SHARED_DATA, setChannels} from "../../../state";
-import {channelFromCommitments} from "../../../channel-store/channel-state/__tests__";
+import {channelFromStates} from "../../../channel-store/channel-state/__tests__";
 import {mergeSharedData} from "../../../__tests__/helpers";
-import {ethers} from "ethers";
 const processId = "process-id.123";
 
-const {ledgerId: channelId} = testScenarios;
+const {ledgerId: channelId, channelId: appChannelId} = testScenarios;
 const twoThree = [
   {address: testScenarios.asAddress, wei: bigNumberify(2).toHexString()},
   {address: testScenarios.bsAddress, wei: bigNumberify(3).toHexString()}
 ];
-// TODO: Switch this to use appChannelId when updating protocol to SignedStates
-// const fundingAppChannel = [{address: appChannelId, wei: bigNumberify(5).toHexString()}];
-const fundingAppChannel = [{address: ethers.Wallet.createRandom().address, wei: bigNumberify(5).toHexString()}];
 
-const ledger4 = testScenarios.ledgerCommitment({turnNum: 4, balances: twoThree});
-const ledger5 = testScenarios.ledgerCommitment({turnNum: 5, balances: twoThree});
-const ledger6 = testScenarios.ledgerCommitment({turnNum: 6, balances: twoThree, isFinal: true});
-const ledger7 = testScenarios.ledgerCommitment({turnNum: 7, balances: twoThree, isFinal: true});
+const fundingAppChannel = [{address: appChannelId, wei: bigNumberify(5).toHexString()}];
 
-const ledgerFundingChannel0 = testScenarios.ledgerCommitment({
+const ledger4 = testScenarios.ledgerState({turnNum: 4, balances: twoThree});
+const ledger5 = testScenarios.ledgerState({turnNum: 5, balances: twoThree});
+const ledger6 = testScenarios.ledgerState({turnNum: 6, balances: twoThree, isFinal: true});
+const ledger7 = testScenarios.ledgerState({turnNum: 7, balances: twoThree, isFinal: true});
+
+const ledgerFundingChannel0 = testScenarios.ledgerState({
   turnNum: 4,
   balances: fundingAppChannel
 });
-const ledgerFundingChannel1 = testScenarios.ledgerCommitment({
+const ledgerFundingChannel1 = testScenarios.ledgerState({
   turnNum: 5,
   balances: fundingAppChannel
 });
 
-const app5 = testScenarios.appCommitment({turnNum: 5, balances: twoThree});
-const app6 = testScenarios.appCommitment({turnNum: 6, balances: twoThree});
+const app5 = testScenarios.appState({turnNum: 5, balances: twoThree});
+const app6 = testScenarios.appState({turnNum: 6, balances: twoThree});
 
 const ledgerOpenSharedData = setChannels(EMPTY_SHARED_DATA, [
-  channelFromCommitments([ledger4, ledger5], testScenarios.asAddress, testScenarios.asPrivateKey)
+  channelFromStates([ledger4, ledger5], testScenarios.asAddress, testScenarios.asPrivateKey)
 ]);
 const ledgerConcludedSharedData = setChannels(EMPTY_SHARED_DATA, [
-  channelFromCommitments([ledger6, ledger7], testScenarios.asAddress, testScenarios.asPrivateKey)
+  channelFromStates([ledger6, ledger7], testScenarios.asAddress, testScenarios.asPrivateKey)
 ]);
 const ledgerFundingSharedData = setChannels(EMPTY_SHARED_DATA, [
-  channelFromCommitments(
+  channelFromStates(
     [ledgerFundingChannel0, ledgerFundingChannel1],
     testScenarios.asAddress,
     testScenarios.asPrivateKey
   ),
-  channelFromCommitments([app5, app6], testScenarios.asAddress, testScenarios.asPrivateKey)
+  channelFromStates([app5, app6], testScenarios.asAddress, testScenarios.asPrivateKey)
 ]);
 
 const waitForWithdrawal = states.waitForWithdrawal({
