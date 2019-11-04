@@ -2,12 +2,8 @@ import {SharedData, ChannelFundingState, setFundingState} from "../../state";
 import * as states from "./states";
 import {ProtocolStateWithSharedData, makeLocator} from "..";
 import {ExistingLedgerFundingAction} from "./actions";
-import * as selectors from "../../selectors";
-import {getLastCommitment} from "../../channel-store";
-import {Commitment} from "../../../domain";
 import {bigNumberify} from "ethers/utils";
 import {ProtocolLocator} from "../../../communication";
-import {CommitmentType} from "fmg-core";
 import {
   initialize as initializeLedgerTopUp,
   ledgerTopUpReducer,
@@ -19,55 +15,50 @@ import {CONSENSUS_UPDATE_PROTOCOL_LOCATOR, consensusUpdateReducer} from "../cons
 import {clearedToSend, routesToConsensusUpdate, isConsensusUpdateAction} from "../consensus-update/actions";
 import {TerminalConsensusUpdateState, isTerminal, ConsensusUpdateState} from "../consensus-update/states";
 import {LedgerTopUpState} from "../ledger-top-up/states";
-import {convertAllocationToOutcome} from "../../../utils/nitro-converter";
+import {Outcome, State} from "@statechannels/nitro-protocol";
+import {getLatestState} from "../reducer-helpers";
+import {getAllocationOutcome, getAllocationAmount, outcomeContainsId} from "../../../utils/outcome-utils";
+import {addHex} from "../../../..";
+import {AllocationAssetOutcome} from "@statechannels/nitro-protocol/src/contract/outcome";
+import {ETH_ASSET_HOLDER_ADDRESS} from "../../../constants";
 export {EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR} from "../../../communication/protocol-locator";
 
 export const initialize = ({
   processId,
   channelId,
   ledgerId,
-  startingAllocation,
-  startingDestination,
+  startingOutcome,
   protocolLocator,
   sharedData
 }: {
   processId: string;
   channelId: string;
   ledgerId: string;
-  startingAllocation: string[];
-  startingDestination: string[];
+  startingOutcome: Outcome;
   protocolLocator: ProtocolLocator;
   sharedData: SharedData;
 }): ProtocolStateWithSharedData<states.NonTerminalExistingLedgerFundingState | states.Failure> => {
-  const ledgerChannel = selectors.getChannelState(sharedData, ledgerId);
-  const theirCommitment = getLastCommitment(ledgerChannel);
-  // TODO: Reimplement when updating to signed states
-  // const appFunding = craftAppFunding(channelId, ledgerId, startingAllocation, startingDestination, sharedData);
-  // const proposedOutcome = convertAllocationToOutcome({
-  //   allocation: appFunding.proposedAllocation,
-  //   destination: appFunding.proposedDestination
-  // });
+  const theirState = getLatestState(ledgerId, sharedData);
+  const proposedOutcome = craftAppFunding(channelId, ledgerId, startingOutcome, sharedData);
+
   let consensusUpdateState: ConsensusUpdateState;
   ({sharedData, protocolState: consensusUpdateState} = initializeConsensusUpdate({
     processId,
     channelId: ledgerId,
     clearedToSend: false,
-    proposedOutcome: [],
+    proposedOutcome,
     protocolLocator: makeLocator(protocolLocator, CONSENSUS_UPDATE_PROTOCOL_LOCATOR),
     sharedData
   }));
 
-  if (ledgerChannelNeedsTopUp(theirCommitment, startingAllocation, startingDestination)) {
+  if (ledgerChannelNeedsTopUp(theirState, startingOutcome)) {
     let ledgerTopUpState: LedgerTopUpState;
     ({protocolState: ledgerTopUpState, sharedData} = initializeLedgerTopUp({
       processId,
       channelId,
       ledgerId,
-      proposedOutcome: convertAllocationToOutcome({allocation: startingAllocation, destination: startingDestination}),
-      originalOutcome: convertAllocationToOutcome({
-        allocation: theirCommitment.allocation,
-        destination: theirCommitment.destination
-      }),
+      proposedOutcome: startingOutcome,
+      originalOutcome: theirState.outcome,
       protocolLocator: makeLocator(protocolLocator, LEDGER_TOP_UP_PROTOCOL_LOCATOR),
       sharedData
     }));
@@ -78,15 +69,14 @@ export const initialize = ({
         processId,
         channelId,
         ledgerId,
-        startingAllocation,
-        startingDestination,
+        startingOutcome,
         protocolLocator,
         consensusUpdateState
       }),
       sharedData
     };
   }
-  // If the ledger channel does not need a top up we can start exchanging consensus commitments
+  // If the ledger channel does not need a top up we can start exchanging consensus states
   ({sharedData, protocolState: consensusUpdateState} = consensusUpdateReducer(
     consensusUpdateState,
     sharedData,
@@ -100,8 +90,7 @@ export const initialize = ({
       processId,
       ledgerId,
       channelId,
-      startingAllocation,
-      startingDestination,
+      startingOutcome,
       consensusUpdateState,
       protocolLocator
     }),
@@ -231,62 +220,55 @@ const waitForLedgerUpdateReducer = (
   }
 };
 
-function ledgerChannelNeedsTopUp(
-  latestCommitment: Commitment,
-  proposedAllocation: string[],
-  proposedDestination: string[]
-) {
-  if (
-    latestCommitment.commitmentType !== CommitmentType.App &&
-    latestCommitment.commitmentType !== CommitmentType.PostFundSetup
-  ) {
-    throw new Error("Ledger channel is already closed.");
+function ledgerChannelNeedsTopUp(latestState: State, proposedOutcome: Outcome) {
+  const {participants} = latestState.channel;
+  if (latestState.isFinal || latestState.turnNum < 2 * participants.length - 1) {
+    throw new Error("Ledger channel not open or already closed.");
   }
-  // We assume that destination/allocation are the same length and destination contains the same addresses
-  // Otherwise we shouldn't be in this protocol at all
-  for (let i = 0; i < proposedDestination.length; i++) {
-    const address = proposedDestination[i];
-    const existingIndex = latestCommitment.destination.indexOf(address);
-    if (existingIndex > -1 && bigNumberify(latestCommitment.allocation[existingIndex]).lt(proposedAllocation[i])) {
-      return true;
+
+  const currentOutcome = latestState.outcome;
+  const proposedAllocation = getAllocationOutcome(proposedOutcome).allocation;
+
+  return proposedAllocation.some(p => {
+    if (!outcomeContainsId(currentOutcome, p.destination)) {
+      return false;
     }
-  }
-  return false;
+    const currentAmount = getAllocationAmount(currentOutcome, p.destination);
+    return bigNumberify(p.amount).gt(currentAmount);
+  });
 }
 
-// function craftAppFunding(
-//   appChannelId: string,
-//   ledgerChannelId: string,
-//   startingAllocation: string[],
-//   startingDestination: string[],
-//   sharedData: SharedData
-// ): {proposedAllocation: string[]; proposedDestination: string[]} {
-//   const {allocation: ledgerAllocation, destination: ledgerDestination} = getLatestCommitment(
-//     ledgerChannelId,
-//     sharedData
-//   );
+function craftAppFunding(
+  appChannelId: string,
+  ledgerChannelId: string,
+  startingOutcome: Outcome,
+  sharedData: SharedData
+): Outcome {
+  const {outcome: ledgerOutcome} = getLatestState(ledgerChannelId, sharedData);
+  const ledgerAllocation = getAllocationOutcome(ledgerOutcome);
+  const startingAllocation = getAllocationOutcome(startingOutcome);
+  const appTotal = startingAllocation.allocation.map(a => a.amount).reduce(addHex);
 
-//   const appTotal = startingAllocation.reduce(addHex);
+  // If the ledger allocation is greater than the startingAllocation requested
+  // we subtract the startingAllocation from the ledger allocation
 
-//   // If the ledger allocation is greater than the startingAllocation requested
-//   // we subtract the startingAllocation from the ledger allocation
-//   const updatedLedgerAllocation = ledgerAllocation.map((a, i) => {
-//     const address = ledgerDestination[i];
-//     const startingIndex = startingDestination.indexOf(address);
-//     const difference = startingIndex < 0 ? bigNumberify(0) : bigNumberify(a).sub(startingAllocation[startingIndex]);
-//     return difference.gt(0) ? difference.toHexString() : bigNumberify(0).toHexString();
-//   });
+  // TODO: Currently assuming ETH, this should be updated to handle any asset
+  const newAllocation: AllocationAssetOutcome = {assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS, allocation: []};
 
-//   const {allocation: proposedAllocation, destination: proposedDestination} = removeZeroFundsFromBalance(
-//     [appTotal, ...updatedLedgerAllocation],
-//     [appChannelId, ...ledgerDestination]
-//   );
+  newAllocation.allocation.push({destination: appChannelId, amount: appTotal});
 
-//   return {
-//     proposedAllocation,
-//     proposedDestination
-//   };
-// }
+  ledgerAllocation.allocation.forEach(a => {
+    const startingAllocationItem = startingAllocation.allocation.find(s => s.destination === a.destination);
+    const difference = !startingAllocationItem
+      ? bigNumberify(0)
+      : bigNumberify(a.amount).sub(startingAllocationItem.amount);
+    if (difference.gt(0)) {
+      newAllocation.allocation.push({destination: a.destination, amount: difference.toHexString()});
+    }
+  });
+
+  return [newAllocation];
+}
 
 function handleTerminalConsensusUpdate(
   channelId: string,

@@ -17,6 +17,7 @@ import {ProtocolLocator, EmbeddedProtocol} from "../../../communication";
 import * as newLedgerChannel from "../new-ledger-channel";
 import {EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR} from "../existing-ledger-funding/reducer";
 import {getTwoPlayerIndex} from "../reducer-helpers";
+import {convertAllocationToOutcome} from "../../../utils/nitro-converter";
 
 export const LEDGER_FUNDING_PROTOCOL_LOCATOR = makeLocator(EmbeddedProtocol.LedgerFunding);
 
@@ -208,8 +209,7 @@ function fundWithExistingLedgerChannel({
     processId,
     channelId,
     ledgerId,
-    startingAllocation,
-    startingDestination,
+    startingOutcome: convertAllocationToOutcome({allocation: startingAllocation, destination: startingDestination}),
     protocolLocator: makeLocator(protocolLocator, EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR),
     sharedData
   });

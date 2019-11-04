@@ -18,8 +18,8 @@ Currently we assume a Ledger Top-up protocol handles both the cases where a curr
   L{Does Existing channel has enough funds?}-->|Yes|SLU[SendLedgerUpdate]
   LT-->|LedgerChannelToppedUp|SLU
   SLU-->WC(WaitForLedgerUpdate)
-  WC-->|"CommitmentReceived(Reject)"|F((failure))
-  WC-->|"CommitmentReceived(Accept)"|Su((success))
+  WC-->|"StateReceived(Reject)"|F((failure))
+  WC-->|"StateReceived(Accept)"|Su((success))
   classDef logic fill:#efdd20;
   classDef Success fill:#58ef21;
   classDef Failure fill:#f45941;
@@ -36,8 +36,8 @@ Currently we assume a Ledger Top-up protocol handles both the cases where a curr
 
 1. **Player A has funds Happy Path** Start->WaitForLedgerUpdate->Success
 2. **Player B has funds Happy Path** Start->WaitForLedgerUpdate->Success
-3. **Player A receives invalid update commitment** WaitForLedgerUpdate->Failure
-4. **Player B receives invalid update commitment** WaitForLedgerUpdate->Failure
+3. **Player A receives invalid update state** WaitForLedgerUpdate->Failure
+4. **Player B receives invalid update state** WaitForLedgerUpdate->Failure
    These scenarios depend on Ledger Top-Up:
 5. **Player A requires top-up** Start->WaitForLedgerTopUp->WaitForLedgerUpdate->Success
 6. **Player requires top-up** Start->WaitForLedgerTopUp->WaitForLedgerUpdate->Success

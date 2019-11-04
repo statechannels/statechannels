@@ -19,8 +19,9 @@ import {ProtocolLocator, EmbeddedProtocol} from "../../../communication";
 import {CONSENSUS_UPDATE_PROTOCOL_LOCATOR} from "../consensus-update/reducer";
 import {DirectFundingState} from "../direct-funding/states";
 import {clearedToSend} from "../consensus-update/actions";
-import {Outcome, isAllocationOutcome, AllocationItem} from "@statechannels/nitro-protocol";
+import {Outcome} from "@statechannels/nitro-protocol";
 import {ETH_ASSET_HOLDER_ADDRESS} from "../../../constants";
+import {getAllocationAmountForIndex, getAllocationItemAtIndex} from "../../../utils/outcome-utils";
 export {LEDGER_TOP_UP_PROTOCOL_LOCATOR} from "../../../communication/protocol-locator";
 export function initialize({
   processId,
@@ -85,8 +86,8 @@ const restoreOrderAndAddBTopUpUpdateReducer: ProtocolReducer<states.LedgerTopUpS
     };
   } else if (consensusUpdateState.type === "ConsensusUpdate.Success") {
     // If player B already has enough funds then skip to success
-    const playerBHasEnoughFunds = bigNumberify(getAllocationAmount(originalOutcome, PlayerIndex.B)).gte(
-      getAllocationAmount(proposedOutcome, PlayerIndex.B)
+    const playerBHasEnoughFunds = bigNumberify(getAllocationAmountForIndex(originalOutcome, PlayerIndex.B)).gte(
+      getAllocationAmountForIndex(proposedOutcome, PlayerIndex.B)
     );
     if (playerBHasEnoughFunds) {
       return {protocolState: states.success({}), sharedData: consensusUpdateSharedData};
@@ -142,8 +143,8 @@ const switchOrderAndAddATopUpUpdateReducer: ProtocolReducer<states.LedgerTopUpSt
       sharedData
     };
   } else if (consensusUpdateState.type === "ConsensusUpdate.Success") {
-    const playerAFunded = bigNumberify(getAllocationAmount(originalOutcome, TwoPartyPlayerIndex.A)).gte(
-      getAllocationAmount(proposedOutcome, TwoPartyPlayerIndex.A)
+    const playerAFunded = bigNumberify(getAllocationAmountForIndex(originalOutcome, TwoPartyPlayerIndex.A)).gte(
+      getAllocationAmountForIndex(proposedOutcome, TwoPartyPlayerIndex.A)
     );
 
     ({consensusUpdateState, sharedData} = initializeConsensusState(
@@ -301,10 +302,10 @@ function initializeDirectFundingState(
   const isFirstPlayer = helpers.isFirstPlayer(ledgerId, sharedData);
 
   let requiredDeposit = "0x0";
-  const proposedAmountForA = getAllocationAmount(proposedOutcome, TwoPartyPlayerIndex.A);
-  const proposedAmountForB = getAllocationAmount(proposedOutcome, TwoPartyPlayerIndex.B);
-  const currentAmountForA = getAllocationAmount(currentOutcome, TwoPartyPlayerIndex.A);
-  const currentAmountForB = getAllocationAmount(currentOutcome, TwoPartyPlayerIndex.B);
+  const proposedAmountForA = getAllocationAmountForIndex(proposedOutcome, TwoPartyPlayerIndex.A);
+  const proposedAmountForB = getAllocationAmountForIndex(proposedOutcome, TwoPartyPlayerIndex.B);
+  const currentAmountForA = getAllocationAmountForIndex(currentOutcome, TwoPartyPlayerIndex.A);
+  const currentAmountForB = getAllocationAmountForIndex(currentOutcome, TwoPartyPlayerIndex.B);
   if (playerFor === TwoPartyPlayerIndex.A && isFirstPlayer) {
     requiredDeposit = subHex(proposedAmountForA, currentAmountForA);
   } else if (playerFor === TwoPartyPlayerIndex.B && !isFirstPlayer) {
@@ -331,26 +332,6 @@ function initializeDirectFundingState(
   return {directFundingState, sharedData: newSharedData};
 }
 
-function getAllocationAmount(outcome: Outcome, index: number): string {
-  return getAllocationItem(outcome, index).amount;
-}
-
-function getAllocationItem(outcome: Outcome, index: number): AllocationItem {
-  if (outcome.length !== 1) {
-    throw new Error(`The engine only works with 1 outcome. Received ${outcome.length}.`);
-  }
-  const assetOutcome = outcome[0];
-  if (!isAllocationOutcome(assetOutcome)) {
-    throw new Error(`Expected an allocation outcome. Received ${assetOutcome}`);
-  }
-  if (assetOutcome.allocation.length < index) {
-    throw new Error(
-      `Attempting to get the allocation item at ${index} but allocation is only ${assetOutcome.allocation.length} long.`
-    );
-  }
-  return assetOutcome.allocation[index];
-}
-
 function initializeConsensusState(
   playerFor: TwoPartyPlayerIndex,
   processId: string,
@@ -362,10 +343,10 @@ function initializeConsensusState(
 ) {
   let newAllocation;
 
-  const currentForA = getAllocationItem(currentOutcome, TwoPartyPlayerIndex.A);
-  const proposedForA = getAllocationItem(proposedOutcome, TwoPartyPlayerIndex.A);
-  const currentForB = getAllocationItem(currentOutcome, TwoPartyPlayerIndex.B);
-  const proposedForB = getAllocationItem(proposedOutcome, TwoPartyPlayerIndex.B);
+  const currentForA = getAllocationItemAtIndex(currentOutcome, TwoPartyPlayerIndex.A);
+  const proposedForA = getAllocationItemAtIndex(proposedOutcome, TwoPartyPlayerIndex.A);
+  const currentForB = getAllocationItemAtIndex(currentOutcome, TwoPartyPlayerIndex.B);
+  const proposedForB = getAllocationItemAtIndex(proposedOutcome, TwoPartyPlayerIndex.B);
   // For player A we want to move their top-upped deposit to the end and leave player B's as is
   if (playerFor === TwoPartyPlayerIndex.A) {
     const isCurrentAllocationLarger = bigNumberify(currentForA.amount).gte(proposedForA.amount);
