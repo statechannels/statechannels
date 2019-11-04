@@ -1,14 +1,14 @@
-import * as states from "../states";
+import * as acStates from "../states";
 import {initialize, reducer} from "../reducer";
 import * as scenarios from "./scenarios";
 import {
-  itSendsTheseCommitments,
-  itStoresThisCommitment,
+  itSendsTheseStates,
+  itStoresThisState,
   itRegistersThisChannel,
   itSendsNoMessage
 } from "../../../__tests__/helpers";
 
-const itTransitionsTo = (result: states.AdvanceChannelState, type: states.AdvanceChannelStateType) => {
+const itTransitionsTo = (result: acStates.AdvanceChannelState, type: acStates.AdvanceChannelStateType) => {
   it(`transitions to ${type}`, () => {
     expect(result.type).toEqual(type);
   });
@@ -19,31 +19,31 @@ describe("sending preFundSetup as A", () => {
   const {processId, channelId} = scenario;
 
   describe("when initializing", () => {
-    const {sharedData, commitments, args} = scenario.initialize;
+    const {sharedData, states, args} = scenario.initialize;
     const {protocolState, sharedData: result} = initialize(sharedData, args);
 
-    itTransitionsTo(protocolState, "AdvanceChannel.CommitmentSent");
-    itSendsTheseCommitments(result, commitments);
-    itStoresThisCommitment(result, commitments[0]);
+    itTransitionsTo(protocolState, "AdvanceChannel.StateSent");
+    itSendsTheseStates(result, states);
+    itStoresThisState(result, states[0]);
     itRegistersThisChannel(result, channelId, processId, args.protocolLocator);
   });
 
-  describe("when receiving prefund commitments from b", () => {
-    const {commitments, state, sharedData, action} = scenario.receiveFromB;
+  describe("when receiving prefund states from b", () => {
+    const {states, state, sharedData, action} = scenario.receiveFromB;
     const {protocolState, sharedData: result} = reducer(state, sharedData, action);
 
-    itTransitionsTo(protocolState, "AdvanceChannel.CommitmentSent");
+    itTransitionsTo(protocolState, "AdvanceChannel.StateSent");
     itSendsNoMessage(result);
-    itStoresThisCommitment(result, commitments[1]);
+    itStoresThisState(result, states[1]);
   });
 
-  describe("when receiving prefund commitments from the hub", () => {
-    const {state, sharedData, action, commitments} = scenario.receiveFromHub;
+  describe("when receiving prefund states from the hub", () => {
+    const {state, sharedData, action, states} = scenario.receiveFromHub;
 
     const {protocolState, sharedData: result} = reducer(state, sharedData, action);
 
     itTransitionsTo(protocolState, "AdvanceChannel.Success");
-    itStoresThisCommitment(result, commitments[2]);
+    itStoresThisState(result, states[2]);
     itSendsNoMessage(result);
   });
 });
@@ -52,30 +52,30 @@ describe("sending conclude as A", () => {
   const scenario = scenarios.concludingAsA;
 
   describe("when initializing", () => {
-    const {sharedData, commitments, args} = scenario.initialize;
+    const {sharedData, states, args} = scenario.initialize;
     const {protocolState, sharedData: result} = initialize(sharedData, args);
 
-    itTransitionsTo(protocolState, "AdvanceChannel.CommitmentSent");
-    itSendsTheseCommitments(result, commitments);
-    itStoresThisCommitment(result, commitments[2]);
+    itTransitionsTo(protocolState, "AdvanceChannel.StateSent");
+    itSendsTheseStates(result, states);
+    itStoresThisState(result, states[2]);
   });
 
-  describe("when receiving conclude commitments from b", () => {
-    const {commitments, state, sharedData, action} = scenario.receiveFromB;
+  describe("when receiving conclude states from b", () => {
+    const {states, state, sharedData, action} = scenario.receiveFromB;
     const {protocolState, sharedData: result} = reducer(state, sharedData, action);
 
-    itTransitionsTo(protocolState, "AdvanceChannel.CommitmentSent");
+    itTransitionsTo(protocolState, "AdvanceChannel.StateSent");
     itSendsNoMessage(result);
-    itStoresThisCommitment(result, commitments[2]);
+    itStoresThisState(result, states[2]);
   });
 
-  describe("when receiving conclude commitments from the hub", () => {
-    const {state, sharedData, action, commitments} = scenario.receiveFromHub;
+  describe("when receiving conclude states from the hub", () => {
+    const {state, sharedData, action, states} = scenario.receiveFromHub;
 
     const {protocolState, sharedData: result} = reducer(state, sharedData, action);
 
     itTransitionsTo(protocolState, "AdvanceChannel.Success");
-    itStoresThisCommitment(result, commitments[2]);
+    itStoresThisState(result, states[2]);
     itSendsNoMessage(result);
   });
 });
@@ -91,23 +91,23 @@ describe("sending conclude as B", () => {
     itSendsNoMessage(result);
   });
 
-  describe("when receiving conclude commitments from a", () => {
-    const {commitments, state, sharedData, action} = scenario.receiveFromA;
+  describe("when receiving conclude states from a", () => {
+    const {states, state, sharedData, action} = scenario.receiveFromA;
     const {protocolState, sharedData: result} = reducer(state, sharedData, action);
 
-    itTransitionsTo(protocolState, "AdvanceChannel.CommitmentSent");
+    itTransitionsTo(protocolState, "AdvanceChannel.StateSent");
 
-    itSendsTheseCommitments(result, commitments);
-    itStoresThisCommitment(result, commitments[2]);
+    itSendsTheseStates(result, states);
+    itStoresThisState(result, states[2]);
   });
 
-  describe("when receiving conclude commitments from the hub", () => {
-    const {state, sharedData, action, commitments} = scenario.receiveFromHub;
+  describe("when receiving conclude states from the hub", () => {
+    const {state, sharedData, action, states} = scenario.receiveFromHub;
 
     const {protocolState, sharedData: result} = reducer(state, sharedData, action);
 
     itTransitionsTo(protocolState, "AdvanceChannel.Success");
-    itStoresThisCommitment(result, commitments[2]);
+    itStoresThisState(result, states[2]);
     itSendsNoMessage(result);
   });
 });
@@ -123,23 +123,23 @@ describe("sending conclude as hub", () => {
     itSendsNoMessage(result);
   });
 
-  describe("when receiving conclude commitments from a", () => {
-    const {commitments, state, sharedData, action} = scenario.receiveFromA;
+  describe("when receiving conclude states from a", () => {
+    const {states, state, sharedData, action} = scenario.receiveFromA;
     const {protocolState, sharedData: result} = reducer(state, sharedData, action);
 
     itTransitionsTo(protocolState, "AdvanceChannel.NotSafeToSend");
     itSendsNoMessage(result);
-    itStoresThisCommitment(result, commitments[2]);
+    itStoresThisState(result, states[2]);
   });
 
-  describe("when receiving conclude commitments from b", () => {
-    const {state, sharedData, action, commitments} = scenario.receiveFromB;
+  describe("when receiving conclude states from b", () => {
+    const {state, sharedData, action, states} = scenario.receiveFromB;
 
     const {protocolState, sharedData: result} = reducer(state, sharedData, action);
 
     itTransitionsTo(protocolState, "AdvanceChannel.Success");
-    itStoresThisCommitment(result, commitments[2]);
-    itSendsTheseCommitments(result, commitments);
+    itStoresThisState(result, states[2]);
+    itSendsTheseStates(result, states);
   });
 });
 
@@ -155,22 +155,22 @@ describe("sending preFundSetup as B", () => {
     itSendsNoMessage(result);
   });
 
-  describe("when receiving prefund commitments from A", () => {
-    const {state, sharedData, action, commitments} = scenario.receiveFromA;
+  describe("when receiving prefund states from A", () => {
+    const {state, sharedData, action, states} = scenario.receiveFromA;
     const {protocolState, sharedData: result} = reducer(state, sharedData, action);
 
-    itTransitionsTo(protocolState, "AdvanceChannel.CommitmentSent");
-    itStoresThisCommitment(result, commitments[1]);
-    itSendsTheseCommitments(result, commitments);
+    itTransitionsTo(protocolState, "AdvanceChannel.StateSent");
+    itStoresThisState(result, states[1]);
+    itSendsTheseStates(result, states);
     itRegistersThisChannel(result, channelId, processId, scenario.protocolLocator);
   });
 
-  describe("when receiving prefund commitments from the hub", () => {
-    const {state, sharedData, action, commitments} = scenario.receiveFromHub;
+  describe("when receiving prefund states from the hub", () => {
+    const {state, sharedData, action, states} = scenario.receiveFromHub;
     const {protocolState, sharedData: result} = reducer(state, sharedData, action);
 
     itTransitionsTo(protocolState, "AdvanceChannel.Success");
-    itStoresThisCommitment(result, commitments[2]);
+    itStoresThisState(result, states[2]);
     itSendsNoMessage(result);
   });
 });
@@ -187,22 +187,22 @@ describe("sending preFundSetup as Hub", () => {
     itSendsNoMessage(result);
   });
 
-  describe("when receiving prefund commitments from A", () => {
-    const {state, sharedData, action, commitments} = scenario.receiveFromA;
+  describe("when receiving prefund states from A", () => {
+    const {state, sharedData, action, states} = scenario.receiveFromA;
     const {protocolState, sharedData: result} = reducer(state, sharedData, action);
 
     itTransitionsTo(protocolState, "AdvanceChannel.ChannelUnknown");
-    itStoresThisCommitment(result, commitments[0]);
+    itStoresThisState(result, states[0]);
     itSendsNoMessage(result);
   });
 
-  describe("when receiving prefund commitments from B", () => {
-    const {state, sharedData, action, commitments} = scenario.receiveFromB;
+  describe("when receiving prefund states from B", () => {
+    const {state, sharedData, action, states} = scenario.receiveFromB;
     const {protocolState, sharedData: result} = reducer(state, sharedData, action);
 
     itTransitionsTo(protocolState, "AdvanceChannel.Success");
-    itStoresThisCommitment(result, commitments[2]);
-    itSendsTheseCommitments(result, commitments);
+    itStoresThisState(result, states[2]);
+    itSendsTheseStates(result, states);
     itRegistersThisChannel(result, channelId, processId, scenario.protocolLocator);
   });
 });
@@ -211,29 +211,29 @@ describe("sending postFundSetup as A", () => {
   const scenario = scenarios.existingChannelAsA;
 
   describe("when initializing", () => {
-    const {sharedData, commitments, args} = scenario.initialize;
+    const {sharedData, states, args} = scenario.initialize;
     const {protocolState, sharedData: result} = initialize(sharedData, args);
 
-    itTransitionsTo(protocolState, "AdvanceChannel.CommitmentSent");
-    itSendsTheseCommitments(result, commitments);
-    itStoresThisCommitment(result, commitments[2]);
+    itTransitionsTo(protocolState, "AdvanceChannel.StateSent");
+    itSendsTheseStates(result, states);
+    itStoresThisState(result, states[2]);
   });
 
-  describe("when receiving postFund commitments from b", () => {
-    const {commitments, state, sharedData, action} = scenario.receiveFromB;
+  describe("when receiving postFund states from b", () => {
+    const {states, state, sharedData, action} = scenario.receiveFromB;
     const {protocolState, sharedData: result} = reducer(state, sharedData, action);
 
-    itTransitionsTo(protocolState, "AdvanceChannel.CommitmentSent");
+    itTransitionsTo(protocolState, "AdvanceChannel.StateSent");
     itSendsNoMessage(result);
-    itStoresThisCommitment(result, commitments[2]);
+    itStoresThisState(result, states[2]);
   });
 
-  describe("when receiving postfund commitments from the hub", () => {
-    const {state, sharedData, action, commitments} = scenario.receiveFromHub;
+  describe("when receiving postfund states from the hub", () => {
+    const {state, sharedData, action, states} = scenario.receiveFromHub;
     const {protocolState, sharedData: result} = reducer(state, sharedData, action);
 
     itTransitionsTo(protocolState, "AdvanceChannel.Success");
-    itStoresThisCommitment(result, commitments[2]);
+    itStoresThisState(result, states[2]);
     itSendsNoMessage(result);
   });
 });
@@ -242,30 +242,30 @@ describe("sending postFundSetup as B", () => {
   const scenario = scenarios.existingChannelAsB;
 
   describe("when initializing", () => {
-    const {sharedData, commitments, args} = scenario.initialize;
+    const {sharedData, states, args} = scenario.initialize;
     const {protocolState, sharedData: result} = initialize(sharedData, args);
 
     itTransitionsTo(protocolState, "AdvanceChannel.NotSafeToSend");
     itSendsNoMessage(result);
-    itStoresThisCommitment(result, commitments[2]);
+    itStoresThisState(result, states[2]);
   });
 
-  describe("when receiving a PostFund commitment from A", () => {
-    const {commitments, state, sharedData, action} = scenario.receiveFromA;
+  describe("when receiving a PostFund state from A", () => {
+    const {states, state, sharedData, action} = scenario.receiveFromA;
     const {protocolState, sharedData: result} = reducer(state, sharedData, action);
 
-    itTransitionsTo(protocolState, "AdvanceChannel.CommitmentSent");
-    itSendsTheseCommitments(result, commitments);
-    itStoresThisCommitment(result, commitments[2]);
+    itTransitionsTo(protocolState, "AdvanceChannel.StateSent");
+    itSendsTheseStates(result, states);
+    itStoresThisState(result, states[2]);
   });
 
-  describe("when receiving postfund commitments from the hub", () => {
-    const {state, sharedData, action, commitments} = scenario.receiveFromHub;
+  describe("when receiving postfund states from the hub", () => {
+    const {state, sharedData, action, states} = scenario.receiveFromHub;
 
     const {protocolState, sharedData: result} = reducer(state, sharedData, action);
 
     itTransitionsTo(protocolState, "AdvanceChannel.Success");
-    itStoresThisCommitment(result, commitments[2]);
+    itStoresThisState(result, states[2]);
     itSendsNoMessage(result);
   });
 });
@@ -274,22 +274,22 @@ describe("sending postFundSetup as Hub", () => {
   const scenario = scenarios.existingChannelAsHub;
 
   describe("when initializing", () => {
-    const {sharedData, commitments, args} = scenario.initialize;
+    const {sharedData, states, args} = scenario.initialize;
     const {protocolState, sharedData: result} = initialize(sharedData, args);
 
     itTransitionsTo(protocolState, "AdvanceChannel.NotSafeToSend");
     itSendsNoMessage(result);
-    itStoresThisCommitment(result, commitments[2]);
+    itStoresThisState(result, states[2]);
   });
 
-  describe("when receiving postfund commitments from the hub", () => {
-    const {state, sharedData, action, commitments} = scenario.receiveFromB;
+  describe("when receiving postfund states from the hub", () => {
+    const {state, sharedData, action, states} = scenario.receiveFromB;
 
     const {protocolState, sharedData: result} = reducer(state, sharedData, action);
 
     itTransitionsTo(protocolState, "AdvanceChannel.Success");
-    itStoresThisCommitment(result, commitments[2]);
-    itSendsTheseCommitments(result, commitments);
+    itStoresThisState(result, states[2]);
+    itSendsTheseStates(result, states);
   });
 });
 
@@ -297,30 +297,30 @@ describe("when not cleared to send", () => {
   const scenario = scenarios.notClearedToSend;
 
   describe("when initializing", () => {
-    const {sharedData, commitments, args} = scenario.initialize;
+    const {sharedData, states, args} = scenario.initialize;
     const {protocolState, sharedData: result} = initialize(sharedData, args);
 
     itTransitionsTo(protocolState, "AdvanceChannel.NotSafeToSend");
     itSendsNoMessage(result);
-    itStoresThisCommitment(result, commitments[2]);
+    itStoresThisState(result, states[2]);
     itIsNotClearedToSend(protocolState);
   });
 
   describe("when cleared to send, and it is safe to send", () => {
-    const {state, sharedData, action, commitments} = scenario.clearedToSend;
+    const {state, sharedData, action, states} = scenario.clearedToSend;
     const {protocolState, sharedData: result} = reducer(state, sharedData, action);
 
-    itTransitionsTo(protocolState, "AdvanceChannel.CommitmentSent");
-    itStoresThisCommitment(result, commitments[2]);
-    itSendsTheseCommitments(result, commitments);
+    itTransitionsTo(protocolState, "AdvanceChannel.StateSent");
+    itStoresThisState(result, states[2]);
+    itSendsTheseStates(result, states);
   });
 
   describe("when cleared to send, and it is unsafe to send", () => {
-    const {state, sharedData, action, commitments} = scenario.clearedToSendButUnsafe;
+    const {state, sharedData, action, states} = scenario.clearedToSendButUnsafe;
     const {protocolState, sharedData: result} = reducer(state, sharedData, action);
 
     itTransitionsTo(protocolState, "AdvanceChannel.NotSafeToSend");
-    itStoresThisCommitment(result, commitments[1]);
+    itStoresThisState(result, states[1]);
     itSendsNoMessage(result);
     itIsClearedToSend(protocolState);
   });
@@ -334,22 +334,22 @@ describe("when not cleared to send", () => {
     itIsClearedToSend(protocolState);
   });
 
-  describe("when cleared to send, but the commitment was already sent", () => {
+  describe("when cleared to send, but the state was already sent", () => {
     const {state, sharedData, action} = scenario.clearedToSendAndAlreadySent;
     const {protocolState, sharedData: result} = reducer(state, sharedData, action);
 
-    itTransitionsTo(protocolState, "AdvanceChannel.CommitmentSent");
+    itTransitionsTo(protocolState, "AdvanceChannel.StateSent");
     itSendsNoMessage(result);
   });
 });
 
-function itIsClearedToSend(protocolState: states.AdvanceChannelState) {
+function itIsClearedToSend(protocolState: acStates.AdvanceChannelState) {
   it("is cleared to send", () => {
     expect(protocolState).toMatchObject({clearedToSend: true});
   });
 }
 
-function itIsNotClearedToSend(protocolState: states.AdvanceChannelState) {
+function itIsNotClearedToSend(protocolState: acStates.AdvanceChannelState) {
   it("is cleared to send", () => {
     expect(protocolState).toMatchObject({clearedToSend: false});
   });
