@@ -5,7 +5,7 @@ import {SharedData, queueMessage} from "../../state";
 import {ProtocolStateWithSharedData, makeLocator, EMPTY_LOCATOR} from "..";
 import {unreachable} from "../../../utils/reducer-utils";
 
-import {showEngine, hideEngine, sendFundingComplete, getLatestCommitment} from "../reducer-helpers";
+import {showEngine, hideEngine, sendFundingComplete} from "../reducer-helpers";
 import {fundingFailure} from "../../../magmo-engine-client";
 import {EmbeddedProtocol} from "../../../communication";
 
@@ -30,7 +30,6 @@ import {
 } from "../funding-strategy-negotiation/actions";
 import * as fundingStrategyNegotiationStates from "../funding-strategy-negotiation/states";
 import {ProtocolAction} from "../../actions";
-import {convertAllocationToOutcome} from "../../../utils/nitro-converter";
 
 export function initialize(
   sharedData: SharedData,
@@ -160,17 +159,13 @@ function handleFundingStrategyNegotiationComplete({
 
     switch (fundingStrategyNegotiationState.selectedFundingStrategy) {
       case "IndirectFundingStrategy": {
-        const latestCommitment = getLatestCommitment(targetChannelId, sharedData);
+        const latestState = helpers.getLatestState(targetChannelId, sharedData);
         let fundingState: ledgerFundingStates.LedgerFundingState;
         ({protocolState: fundingState, sharedData} = initializeLedgerFunding({
           processId,
           channelId: targetChannelId,
-          startingOutcome: convertAllocationToOutcome({
-            allocation: latestCommitment.allocation,
-            destination: latestCommitment.destination
-          }),
-
-          participants: latestCommitment.channel.participants,
+          startingOutcome: latestState.outcome,
+          participants: latestState.channel.participants,
           sharedData,
           protocolLocator: makeLocator(EmbeddedProtocol.LedgerFunding)
         }));
@@ -193,7 +188,7 @@ function handleFundingStrategyNegotiationComplete({
         };
       }
       case "VirtualFundingStrategy": {
-        const {allocation, destination, channel} = helpers.getLatestCommitment(targetChannelId, sharedData);
+        const {outcome, channel} = helpers.getLatestState(targetChannelId, sharedData);
 
         const ourIndex = channel.participants.indexOf(ourAddress);
 
@@ -204,7 +199,7 @@ function handleFundingStrategyNegotiationComplete({
           ourIndex,
           // TODO: This should be an env variable
           hubAddress: "0x100063c326b27f78b2cBb7cd036B8ddE4d4FCa7C",
-          startingOutcome: convertAllocationToOutcome({allocation, destination}),
+          startingOutcome: outcome,
           participants: channel.participants,
           protocolLocator: makeLocator(EmbeddedProtocol.VirtualFunding)
         }));
