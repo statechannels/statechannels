@@ -16,7 +16,7 @@ const Upload: React.FC<RouteComponentProps> = ({history}) => {
           type="file"
           name="file"
           id="file"
-          multiple
+          multiple={true}
           className="inputfile"
           onChange={async event => {
             if (event.target.files && event.target.files[0]) {
