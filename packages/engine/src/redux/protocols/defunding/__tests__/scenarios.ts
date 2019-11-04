@@ -2,7 +2,7 @@ import * as states from "../states";
 import * as testScenarios from "../../../../domain/commitments/__tests__";
 import {setFundingState, setChannels} from "../../../state";
 import * as ledgerDefunding from "../../ledger-defunding/__tests__";
-import {channelFromCommitments} from "../../../channel-store/channel-state/__tests__";
+import {channelFromStates} from "../../../channel-store/channel-state/__tests__";
 import {bigNumberify} from "ethers/utils";
 import * as virtualDefunding from "../../virtual-defunding/__tests__";
 import _ from "lodash";
@@ -18,14 +18,14 @@ const twoThree = [
   {address: bsAddress, wei: bigNumberify(3).toHexString()}
 ];
 
-const concludeCommitment1 = testScenarios.appCommitment({turnNum: 51, isFinal: true});
-const concludeCommitment2 = testScenarios.appCommitment({turnNum: 52, isFinal: true});
-const ledger4 = testScenarios.ledgerCommitment({turnNum: 4, balances: twoThree});
-const ledger5 = testScenarios.ledgerCommitment({turnNum: 5, balances: twoThree});
+const concludeState1 = testScenarios.appState({turnNum: 51, isFinal: true});
+const concludeState2 = testScenarios.appState({turnNum: 52, isFinal: true});
+const ledger4 = testScenarios.ledgerState({turnNum: 4, balances: twoThree});
+const ledger5 = testScenarios.ledgerState({turnNum: 5, balances: twoThree});
 
-const channelStatus = channelFromCommitments([concludeCommitment1, concludeCommitment2], asAddress, asPrivateKey);
+const channelStatus = channelFromStates([concludeState1, concludeState2], asAddress, asPrivateKey);
 
-const ledgerChannelStatus = channelFromCommitments([ledger4, ledger5], asAddress, asPrivateKey);
+const ledgerChannelStatus = channelFromStates([ledger4, ledger5], asAddress, asPrivateKey);
 const {ledgerId} = testScenarios;
 
 const waitForLedgerDefunding = states.waitForLedgerDefunding({
