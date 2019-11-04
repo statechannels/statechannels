@@ -9,8 +9,9 @@ import {
   Transactions as nitroTrans,
   SignedState
 } from "@statechannels/nitro-protocol";
-import {convertAddressToBytes32, convertCommitmentToState} from "./nitro-converter";
+import {convertCommitmentToState} from "./nitro-converter";
 import {Allocation, AllocationItem} from "@statechannels/nitro-protocol/src/contract/outcome";
+import {convertAddressToBytes32} from "./data-type-utils";
 
 export function createForceMoveTransaction(
   fromCommitment: SignedCommitment,

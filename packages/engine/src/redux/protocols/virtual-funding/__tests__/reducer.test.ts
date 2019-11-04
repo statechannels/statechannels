@@ -1,8 +1,12 @@
 import * as states from "../states";
 import {initialize, reducer} from "../reducer";
 import * as scenarios from "./scenarios";
-import {scenarioStepDescription, itSendsNoMessage} from "../../../__tests__/helpers";
+import {scenarioStepDescription, itSendsNoMessage, itSendsTheseStates} from "../../../__tests__/helpers";
 import {preFund, postFund} from "../../advance-channel/__tests__";
+import {asAddress, hubAddress, bsAddress, convertBalanceToOutcome} from "../../../../domain/commitments/__tests__";
+import {bigNumberify} from "ethers/utils";
+import {ETH_ASSET_HOLDER_ADDRESS} from "../../../../constants";
+import {convertAddressToBytes32} from "../../../../utils/data-type-utils";
 
 const itTransitionsTo = (result: states.VirtualFundingState, type: states.VirtualFundingStateType) => {
   it(`transitions to ${type}`, () => {
@@ -16,22 +20,26 @@ const itTransitionsSubstateTo = (result: any, substate: string, type: string) =>
   });
 };
 
-// const allocation = [bigNumberify(2).toHexString(), bigNumberify(3).toHexString(), bigNumberify(5).toHexString()];
+const twoThreeFive = [
+  {address: asAddress, wei: bigNumberify(2).toHexString()},
+  {address: bsAddress, wei: bigNumberify(3).toHexString()},
+  {address: hubAddress, wei: bigNumberify(5).toHexString()}
+];
+
 describe("happyPath", () => {
   const scenario = scenarios.happyPath;
 
   describe("Initialization", () => {
     const {sharedData, args} = scenario.initialize;
-    const {protocolState} = initialize(sharedData, args);
+    const {protocolState, sharedData: result} = initialize(sharedData, args);
 
     itTransitionsTo(protocolState, "VirtualFunding.WaitForJointChannel");
-    // TODO: Enable this when switching to signed states
-    // itSendsTheseCommitments(result, [{commitment: {turnNum: 0, allocation}}]);
+    itSendsTheseStates(result, [{state: {turnNum: 0, outcome: convertBalanceToOutcome(twoThreeFive)}}]);
   });
 
   describe("openJ", () => {
     const {state, sharedData, action} = scenario.openJ;
-    const {protocolState} = reducer(state, sharedData, action);
+    const {protocolState, sharedData: result} = reducer(state, sharedData, action);
 
     itTransitionsTo(protocolState, "VirtualFunding.WaitForJointChannel");
     itTransitionsSubstateTo(protocolState, "jointChannel", preFund.preSuccess.state.type);
@@ -39,36 +47,42 @@ describe("happyPath", () => {
     // since we're using the preSuccess scenarios from advance-channel, which sets up a joint
     // 3-party channel, three get sent out.
     // TODO: Fix this by constructing appropriate test data
-    // TODO: Enable this when switching to signed states
-    // itSendsTheseCommitments(result, [
-    //   {commitment: {turnNum: 1}},
-    //   {commitment: {turnNum: 2}},
-    //   {commitment: {turnNum: 3}}
-    // ]);
+    itSendsTheseStates(result, [{state: {turnNum: 1}}, {state: {turnNum: 2}}, {state: {turnNum: 3}}]);
   });
 
   describe(scenarioStepDescription(scenario.prepareJ), () => {
-    //  const {targetChannelId, ourAddress} = scenario;
+    const {targetChannelId, ourAddress} = scenario;
     const {state, sharedData, action} = scenario.prepareJ;
-    const {protocolState} = reducer(state, sharedData, action);
+    const {protocolState, sharedData: result} = reducer(state, sharedData, action);
 
     itTransitionsTo(protocolState, "VirtualFunding.WaitForGuarantorChannel");
     itTransitionsSubstateTo(protocolState, "guarantorChannel", postFund.preSuccess.state.type);
-    // TODO: Enable this when switching to Signed States for this protocol
-    // itSendsTheseCommitments(result, [
-    //   {
-    //     commitment: {
-    //       turnNum: 0,
-    //       allocation: []
-    //         destination: [targetChannelId, ourAddress, hubAddress]
-    //     }
-    //   }
-    // ]);
+
+    itSendsTheseStates(result, [
+      {
+        state: {
+          turnNum: 0,
+          outcome: [
+            {
+              assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
+              guarantee: {
+                targetChannelId: expect.any(String),
+                destinations: [
+                  targetChannelId,
+                  convertAddressToBytes32(ourAddress),
+                  convertAddressToBytes32(hubAddress)
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]);
   });
 
   describe(scenarioStepDescription(scenario.openG), () => {
     const {state, sharedData, action} = scenario.openG;
-    const {protocolState} = reducer(state, sharedData, action);
+    const {protocolState, sharedData: result} = reducer(state, sharedData, action);
 
     itTransitionsTo(protocolState, "VirtualFunding.WaitForGuarantorChannel");
     itTransitionsSubstateTo(protocolState, "guarantorChannel", postFund.preSuccess.state.type);
@@ -76,33 +90,28 @@ describe("happyPath", () => {
     // since we're using the preSuccess scenarios from advance-channel, which sets up a joint
     // 3-party channel, three get sent out.
     // TODO: Fix this by constructing appropriate test data
-    // TODO: Enable this when switching to signed states
-    // itSendsTheseCommitments(result, [
-    //   {commitment: {turnNum: 1}},
-    //   {commitment: {turnNum: 2}},
-    //   {commitment: {turnNum: 3}}
-    // ]);
+    itSendsTheseStates(result, [{state: {turnNum: 1}}, {state: {turnNum: 2}}, {state: {turnNum: 3}}]);
   });
 
   describe(scenarioStepDescription(scenario.prepareG), () => {
     const {state, sharedData, action} = scenario.prepareG;
-    const {protocolState} = reducer(state, sharedData, action);
+    const {protocolState, sharedData: result} = reducer(state, sharedData, action);
 
     itTransitionsTo(protocolState, "VirtualFunding.WaitForGuarantorFunding");
     itTransitionsSubstateTo(protocolState, "indirectGuarantorFunding", "LedgerFunding.WaitForNewLedgerChannel");
-    // TODO: Enable this when switching to Signed States for this protocol
-    // itSendsTheseCommitments(result, [
-    //   {
-    //     commitment: {
-    //       turnNum: 0,
-    //       channel: {
-    //         participants: [asAddress, hubAddress],
-    //         nonce: expect.any(Number),
-    //         channelType: CONSENSUS_LIBRARY_ADDRESS
-    //       }
-    //     }
-    //   }
-    // ]);
+
+    itSendsTheseStates(result, [
+      {
+        state: {
+          turnNum: 0,
+          channel: {
+            participants: [asAddress, hubAddress],
+            channelNonce: expect.any(String),
+            chainId: expect.any(String)
+          }
+        }
+      }
+    ]);
   });
 
   describe(scenarioStepDescription(scenario.fundG), () => {
@@ -122,11 +131,11 @@ describe("happyPath", () => {
   });
 });
 
-describe("app funding commitment received early", () => {
-  const scenario = scenarios.appFundingCommitmentReceivedEarly;
+describe("app funding state received early", () => {
+  const scenario = scenarios.appFundingStateReceivedEarly;
 
-  describe(scenarioStepDescription(scenario.appFundingCommitmentReceivedEarly), () => {
-    const {state, sharedData, action} = scenario.appFundingCommitmentReceivedEarly;
+  describe(scenarioStepDescription(scenario.appFundingStateReceivedEarly), () => {
+    const {state, sharedData, action} = scenario.appFundingStateReceivedEarly;
     const {protocolState} = reducer(state, sharedData, action);
 
     itTransitionsTo(protocolState, "VirtualFunding.WaitForGuarantorFunding");

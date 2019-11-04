@@ -12,7 +12,7 @@ import {ETHAssetHolderWatcher} from "../redux/sagas/eth-asset-holder-watcher";
 import {depositContract, createWatcherState, concludeGame, fiveFive} from "./test-utils";
 import {getGanacheProvider} from "@statechannels/devtools";
 import {bigNumberify} from "ethers/utils";
-import {convertAllocationToOutcome, convertAddressToBytes32} from "../utils/nitro-converter";
+import {convertAllocationToOutcome} from "../utils/nitro-converter";
 import {HashZero, AddressZero} from "ethers/constants";
 import {
   getAdjudicatorInterface,
@@ -21,6 +21,7 @@ import {
   getETHAssetHolderAddress
 } from "../utils/contract-utils";
 import {JsonRpcProvider} from "ethers/providers";
+import {convertAddressToBytes32} from "../utils/data-type-utils";
 jest.setTimeout(60000);
 
 describe("ETHAssetHolder listener", () => {
