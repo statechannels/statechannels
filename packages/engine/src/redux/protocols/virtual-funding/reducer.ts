@@ -19,7 +19,6 @@ export const VIRTUAL_FUNDING_PROTOCOL_LOCATOR = "VirtualFunding";
 import {CONSENSUS_UPDATE_PROTOCOL_LOCATOR} from "../consensus-update/reducer";
 import {TwoPartyPlayerIndex} from "../../types";
 import {Wallet} from "ethers";
-import {convertOutcomeToAllocation} from "../../../utils/nitro-converter";
 import {StateType} from "../advance-channel/states";
 import {encodeConsensusData, Outcome, isAllocationOutcome} from "@statechannels/nitro-protocol";
 import {AllocationAssetOutcome} from "@statechannels/nitro-protocol/src/contract/outcome";
@@ -201,12 +200,11 @@ function waitForGuarantorChannelReducer(
 
         case StateType.PostFundSetup:
           const outcome = calculateLedgerOutcome(startingOutcome, participants[ourIndex], hubAddress);
-          const convertedOutcome = convertOutcomeToAllocation(outcome);
+
           const ledgerFundingResult = ledgerFunding.initializeLedgerFunding({
             processId,
             channelId: result.protocolState.channelId,
-            startingAllocation: convertedOutcome.allocation,
-            startingDestination: convertedOutcome.destination,
+            startingOutcome: outcome,
             participants: [participants[ourIndex], hubAddress],
             sharedData: result.sharedData,
             protocolLocator: makeLocator(protocolState.protocolLocator, EmbeddedProtocol.LedgerFunding)

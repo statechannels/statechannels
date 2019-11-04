@@ -165,8 +165,11 @@ function handleFundingStrategyNegotiationComplete({
         ({protocolState: fundingState, sharedData} = initializeLedgerFunding({
           processId,
           channelId: targetChannelId,
-          startingAllocation: latestCommitment.allocation,
-          startingDestination: latestCommitment.destination,
+          startingOutcome: convertAllocationToOutcome({
+            allocation: latestCommitment.allocation,
+            destination: latestCommitment.destination
+          }),
+
           participants: latestCommitment.channel.participants,
           sharedData,
           protocolLocator: makeLocator(EmbeddedProtocol.LedgerFunding)
