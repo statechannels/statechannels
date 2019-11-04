@@ -18,7 +18,7 @@ import {LedgerTopUpState} from "../ledger-top-up/states";
 import {Outcome, State} from "@statechannels/nitro-protocol";
 import {getLatestState} from "../reducer-helpers";
 import {getAllocationOutcome, getAllocationAmount, outcomeContainsId} from "../../../utils/outcome-utils";
-import {addHex} from "../../../..";
+import {addHex} from "../../../utils/hex-utils";
 import {AllocationAssetOutcome} from "@statechannels/nitro-protocol/src/contract/outcome";
 import {ETH_ASSET_HOLDER_ADDRESS} from "../../../constants";
 export {EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR} from "../../../communication/protocol-locator";
