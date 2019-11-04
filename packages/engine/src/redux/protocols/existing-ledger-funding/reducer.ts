@@ -19,6 +19,7 @@ import {CONSENSUS_UPDATE_PROTOCOL_LOCATOR, consensusUpdateReducer} from "../cons
 import {clearedToSend, routesToConsensusUpdate, isConsensusUpdateAction} from "../consensus-update/actions";
 import {TerminalConsensusUpdateState, isTerminal, ConsensusUpdateState} from "../consensus-update/states";
 import {LedgerTopUpState} from "../ledger-top-up/states";
+import {convertAllocationToOutcome} from "../../../utils/nitro-converter";
 export {EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR} from "../../../communication/protocol-locator";
 
 export const initialize = ({
@@ -62,9 +63,11 @@ export const initialize = ({
       processId,
       channelId,
       ledgerId,
-      proposedAllocation: startingAllocation,
-      proposedDestination: startingDestination,
-      originalAllocation: theirCommitment.allocation,
+      proposedOutcome: convertAllocationToOutcome({allocation: startingAllocation, destination: startingDestination}),
+      originalOutcome: convertAllocationToOutcome({
+        allocation: theirCommitment.allocation,
+        destination: theirCommitment.destination
+      }),
       protocolLocator: makeLocator(protocolLocator, LEDGER_TOP_UP_PROTOCOL_LOCATOR),
       sharedData
     }));
