@@ -58,7 +58,7 @@
     "@openzeppelin/contracts": "2.3.0",
     "ethers": "4.0.37",
     "solc": "0.5.11",
-    "solidoc": "https://github.com/statechannels/solidoc.git",
+    "solidoc": "https://github.com/statechannels/solidoc.git#master",
     "web3-eth-accounts": "1.2.1"
   },
   "devDependencies": {
