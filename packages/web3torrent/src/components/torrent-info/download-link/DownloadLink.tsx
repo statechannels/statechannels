@@ -1,21 +1,21 @@
 import React, {useEffect, useState} from 'react';
 import {Torrent} from '../../../types';
+import {getFileSavingData, SavingData} from '../../../utils/file-saver';
 
 export type DownloadLinkProps = {torrent: Torrent};
 
 export const DownloadLink: React.FC<DownloadLinkProps> = ({torrent}) => {
-  const [fileURL, setURL] = useState('');
-
+  const [file, setFile] = useState({} as SavingData);
   useEffect(() => {
-    if (torrent.done && torrent.files[0] && torrent.files[0].getBlobURL) {
-      torrent.files[0].getBlobURL((_, url) => setURL(url as string));
+    if (torrent.done) {
+      getFileSavingData(torrent.files).then(data => setFile(data));
     }
   }, [torrent.done, torrent.files]);
 
   return (
     <>
-      {fileURL && (
-        <a href={fileURL} className="button" download={torrent.name}>
+      {torrent.done && (
+        <a href={file.content} className="button" download={file.name || torrent.name}>
           Save Download
         </a>
       )}

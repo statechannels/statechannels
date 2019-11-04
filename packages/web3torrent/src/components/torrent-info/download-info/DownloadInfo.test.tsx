@@ -3,7 +3,6 @@ import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 import {TorrentFile} from 'webtorrent';
 import * as Web3TorrentClient from '../../../clients/web3torrent-client';
-import {ExtendedTorrent} from '../../../library/types';
 import {Torrent} from '../../../types';
 import {createMockTorrent} from '../../../utils/test-utils';
 import {getFormattedETA} from '../../../utils/torrent-status-checker';
@@ -23,7 +22,7 @@ type MockDownloadInfo = {
 
 const mockDownloadInfo = (torrentProps?: Partial<Torrent>): MockDownloadInfo => {
   const torrent = createMockTorrent(torrentProps);
-  torrent.parsedTimeRemaining = getFormattedETA(torrent as ExtendedTorrent);
+  torrent.parsedTimeRemaining = getFormattedETA(torrent as Torrent);
   const downloadInfoWrapper = mount(<DownloadInfo torrent={torrent as Torrent} />);
 
   return {

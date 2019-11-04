@@ -6,7 +6,7 @@ import {TorrentPeers} from '../../library/types';
 import {Status, Torrent} from '../../types';
 import {createMockTorrent, createMockTorrentPeers} from '../../utils/test-utils';
 import {DownloadInfo, DownloadInfoProps} from './download-info/DownloadInfo';
-import {MagnetLinkButton, MagnetLinkButtonProps} from './magnet-link-button/MagnetLinkButton';
+import {MagnetLinkButton} from './magnet-link-button/MagnetLinkButton';
 import {TorrentInfo, TorrentInfoProps} from './TorrentInfo';
 import {UploadInfo, UploadInfoProps} from './upload-info/UploadInfo';
 
@@ -21,7 +21,7 @@ type MockTorrentInfo = {
   fileSizeElement: ReactWrapper;
   fileStatusElement: ReactWrapper;
   fileCostElement: ReactWrapper;
-  magnetLinkButtonElement: ReactWrapper<MagnetLinkButtonProps>;
+  magnetLinkButtonElement: ReactWrapper<{}>;
   downloadInfoElement: ReactWrapper<DownloadInfoProps>;
   uploadInfoElement: ReactWrapper<UploadInfoProps>;
 };
