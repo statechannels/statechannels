@@ -17,8 +17,12 @@ import {TerminalConsensusUpdateState, isTerminal, ConsensusUpdateState} from "..
 import {LedgerTopUpState} from "../ledger-top-up/states";
 import {Outcome, State} from "@statechannels/nitro-protocol";
 import {getLatestState} from "../reducer-helpers";
-import {getAllocationOutcome, getAllocationAmount, outcomeContainsId} from "../../../utils/outcome-utils";
-import {addHex} from "../../../utils/hex-utils";
+import {
+  getAllocationOutcome,
+  getAllocationAmount,
+  outcomeContainsId,
+  getAllocationTotal
+} from "../../../utils/outcome-utils";
 import {AllocationAssetOutcome} from "@statechannels/nitro-protocol/src/contract/outcome";
 import {ETH_ASSET_HOLDER_ADDRESS} from "../../../constants";
 export {EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR} from "../../../communication/protocol-locator";
@@ -247,7 +251,7 @@ function craftAppFunding(
   const {outcome: ledgerOutcome} = getLatestState(ledgerChannelId, sharedData);
   const ledgerAllocation = getAllocationOutcome(ledgerOutcome);
   const startingAllocation = getAllocationOutcome(startingOutcome);
-  const appTotal = startingAllocation.allocation.map(a => a.amount).reduce(addHex);
+  const appTotal = getAllocationTotal(startingOutcome);
 
   // If the ledger allocation is greater than the startingAllocation requested
   // we subtract the startingAllocation from the ledger allocation

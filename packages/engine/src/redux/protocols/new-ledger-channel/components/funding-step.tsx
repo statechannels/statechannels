@@ -40,7 +40,7 @@ const messagesForStepList: MessagesForStep[] = [
     "Application channel funded"
   ),
   messagesForStep(
-    "Exchange opening commitments",
+    "Exchange opening states",
     "Waiting for opponent...",
     "Application ready" // UNUSED
   )

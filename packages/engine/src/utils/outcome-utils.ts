@@ -1,6 +1,7 @@
 import {Outcome, isAllocationOutcome, AllocationItem} from "@statechannels/nitro-protocol";
 import {AllocationAssetOutcome} from "@statechannels/nitro-protocol/src/contract/outcome";
 import {convertAddressToBytes32} from "./data-type-utils";
+import {addHex} from "../..";
 
 export function getAllocationAmountForIndex(outcome: Outcome, index: number): string {
   return getAllocationItemAtIndex(outcome, index).amount;
@@ -19,6 +20,12 @@ export function getAllocationOutcome(outcome: Outcome): AllocationAssetOutcome {
     throw new Error(`Expected an allocation outcome. Received ${assetOutcome}`);
   }
   return assetOutcome;
+}
+
+export function getAllocationTotal(outcome: Outcome): string {
+  const allocationOutcome = getAllocationOutcome(outcome);
+  const {allocation} = allocationOutcome;
+  return allocation.map(a => a.amount).reduce(addHex);
 }
 
 export function getAllocationItem(outcome: Outcome, addressOrChannelId: string): AllocationItem {

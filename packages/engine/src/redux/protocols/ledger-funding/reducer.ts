@@ -64,8 +64,7 @@ export function initialize({
     } = newLedgerChannel.initializeNewLedgerChannel({
       processId,
       privateKey,
-      startingAllocation,
-      startingDestination,
+      startingOutcome: convertAllocationToOutcome({allocation: startingAllocation, destination: startingDestination}),
       participants,
       ourIndex,
       sharedData,
