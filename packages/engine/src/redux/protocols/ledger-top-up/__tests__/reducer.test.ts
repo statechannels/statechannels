@@ -5,7 +5,11 @@ import {ProtocolStateWithSharedData} from "../..";
 import {describeScenarioStep} from "../../../__tests__/helpers";
 import {bsAddress, asAddress} from "../../../../domain/commitments/__tests__";
 import {isTerminal} from "../../consensus-update";
-import {convertOutcomeToAllocation} from "../../../../utils/nitro-converter";
+import {convertAddressToBytes32} from "../../../../utils/nitro-converter";
+import {AllocationItem, Outcome, isAllocationOutcome} from "@statechannels/nitro-protocol";
+import _ from "lodash";
+const asAddressPadded = convertAddressToBytes32(asAddress);
+const bsAddressPadded = convertAddressToBytes32(bsAddress);
 
 describe("player A happy path", () => {
   const scenario = scenarios.playerAHappyPath;
@@ -13,9 +17,12 @@ describe("player A happy path", () => {
   describe("when initializing", () => {
     const initialState = initialize(scenario.initialize);
     it("requests the correct allocation/destination updates", () => {
-      const consensusUpdate = getProposedConsensus(initialState.protocolState);
-      expect(consensusUpdate.proposedAllocation).toEqual(["0x03", "0x04"]);
-      expect(consensusUpdate.proposedDestination).toEqual([bsAddress, asAddress]);
+      const consensusOutcome = getProposedConsensus(initialState.protocolState);
+      const expectedAllocation = [
+        {destination: bsAddressPadded, amount: "0x03"},
+        {destination: asAddressPadded, amount: "0x04"}
+      ];
+      expectOutcomeToContain(consensusOutcome, expectedAllocation);
     });
     itTransitionsTo(initialState, "LedgerTopUp.SwitchOrderAndAddATopUpUpdate");
   });
@@ -61,9 +68,12 @@ describe("player B happy path", () => {
 
     itTransitionsTo(initialState, "LedgerTopUp.SwitchOrderAndAddATopUpUpdate");
     it("requests the correct allocation/destination updates", () => {
-      const consensusUpdate = getProposedConsensus(initialState.protocolState);
-      expect(consensusUpdate.proposedAllocation).toEqual(["0x03", "0x04"]);
-      expect(consensusUpdate.proposedDestination).toEqual([bsAddress, asAddress]);
+      const consensusOutcome = getProposedConsensus(initialState.protocolState);
+      const expectedAllocation = [
+        {destination: bsAddressPadded, amount: "0x03"},
+        {destination: asAddressPadded, amount: "0x04"}
+      ];
+      expectOutcomeToContain(consensusOutcome, expectedAllocation);
     });
   });
 
@@ -110,10 +120,13 @@ describe("player A one user needs top up", () => {
     const initialState = initialize(scenario.initialize);
 
     itTransitionsTo(initialState, "LedgerTopUp.SwitchOrderAndAddATopUpUpdate");
-    it("requests the correct allocation/destination updates", () => {
-      const consensusUpdate = getProposedConsensus(initialState.protocolState);
-      expect(consensusUpdate.proposedAllocation).toEqual(["0x03", "0x04"]);
-      expect(consensusUpdate.proposedDestination).toEqual([bsAddress, asAddress]);
+    it("requests the correct outcome", () => {
+      const consensusOutcome = getProposedConsensus(initialState.protocolState);
+      const expectedAllocation = [
+        {destination: bsAddressPadded, amount: "0x03"},
+        {destination: asAddressPadded, amount: "0x04"}
+      ];
+      expectOutcomeToContain(consensusOutcome, expectedAllocation);
     });
   });
 
@@ -150,9 +163,12 @@ describe("player B one user needs top up", () => {
 
     itTransitionsTo(initialState, "LedgerTopUp.SwitchOrderAndAddATopUpUpdate");
     it("requests the correct allocation/destination updates", () => {
-      const consensusUpdate = getProposedConsensus(initialState.protocolState);
-      expect(consensusUpdate.proposedAllocation).toEqual(["0x03", "0x04"]);
-      expect(consensusUpdate.proposedDestination).toEqual([bsAddress, asAddress]);
+      const consensusOutcome = getProposedConsensus(initialState.protocolState);
+      const expectedAllocation = [
+        {destination: bsAddressPadded, amount: "0x03"},
+        {destination: asAddressPadded, amount: "0x04"}
+      ];
+      expectOutcomeToContain(consensusOutcome, expectedAllocation);
     });
   });
 
@@ -204,15 +220,19 @@ function getTotalFundingRequired(protocolState: LedgerTopUpState): string {
   return "0x0";
 }
 
-function getProposedConsensus(
-  protocolState: LedgerTopUpState
-): {proposedAllocation: string[]; proposedDestination: string[]} {
+function getProposedConsensus(protocolState: LedgerTopUpState): Outcome {
   if ("consensusUpdateState" in protocolState && !isTerminal(protocolState.consensusUpdateState)) {
-    const {proposedOutcome} = protocolState.consensusUpdateState;
-    const {allocation: proposedAllocation, destination: proposedDestination} = convertOutcomeToAllocation(
-      proposedOutcome
-    );
-    return {proposedAllocation, proposedDestination};
+    return protocolState.consensusUpdateState.proposedOutcome;
   }
-  return {proposedDestination: [], proposedAllocation: []};
+  return [];
+}
+function expectOutcomeToContain(outcome: Outcome, items: AllocationItem[]) {
+  if (outcome.length !== 1) {
+    throw new Error("Engine currently only supports one outcome.");
+  }
+  const assetOutcome = outcome[0];
+  if (!isAllocationOutcome(assetOutcome)) {
+    throw new Error("Not an allocation outcome.");
+  }
+  expect(assetOutcome.allocation).toEqual(expect.arrayContaining(items));
 }

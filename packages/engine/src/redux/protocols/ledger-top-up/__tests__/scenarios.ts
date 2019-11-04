@@ -6,16 +6,17 @@ import {
   ledgerId,
   asAddress,
   bsAddress,
-  ledgerCommitment,
-  addressAndPrivateKeyLookup
+  addressAndPrivateKeyLookup,
+  convertBalanceToOutcome,
+  ledgerState
 } from "../../../../domain/commitments/__tests__";
 import {TwoPartyPlayerIndex} from "../../../types";
 import {twoPlayerPreSuccessA, twoPlayerPreSuccessB} from "../../consensus-update/__tests__";
 import {setChannels} from "../../../state";
-import {channelFromCommitments} from "../../../channel-store/channel-state/__tests__";
-import {SignedCommitment} from "../../../../domain";
+import {channelFromStates} from "../../../channel-store/channel-state/__tests__";
 import {makeLocator} from "../..";
 import {EmbeddedProtocol} from "../../../../communication";
+import {SignedState} from "@statechannels/nitro-protocol";
 
 const protocolLocator = makeLocator(EmbeddedProtocol.LedgerTopUp);
 // ---------
@@ -45,9 +46,8 @@ const defaultProps = {
   processId,
   channelId,
   ledgerId,
-  proposedAllocation: fourFive.map(a => a.wei),
-  originalAllocation: twoThree.map(a => a.wei),
-  proposedDestination: fourFive.map(a => a.address),
+  proposedOutcome: convertBalanceToOutcome(fourFive),
+  originalOutcome: convertBalanceToOutcome(twoThree),
   protocolLocator
 };
 
@@ -55,14 +55,13 @@ const oneOverFundedOneUnderFundedProps = {
   processId,
   channelId,
   ledgerId,
-  proposedAllocation: fourTwo.map(a => a.wei),
-  originalAllocation: twoThree.map(a => a.wei),
-  proposedDestination: fourTwo.map(a => a.address),
+  proposedOutcome: convertBalanceToOutcome(fourTwo),
+  originalOutcome: convertBalanceToOutcome(twoThree),
   protocolLocator
 };
 
-const ledgerTwoThree = ledgerCommitment({turnNum: 5, balances: twoThree});
-const ledgerThreeFourFlipped = ledgerCommitment({turnNum: 5, balances: threeFourFlipped});
+const ledgerTwoThree = ledgerState({turnNum: 5, balances: twoThree});
+const ledgerThreeFourFlipped = ledgerState({turnNum: 5, balances: threeFourFlipped});
 
 // ------
 // States
@@ -108,10 +107,10 @@ const playerBFundingSuccess = preSuccessB.action;
 const consensusSharedData = (ourIndex: TwoPartyPlayerIndex) => {
   return ourIndex === TwoPartyPlayerIndex.A ? twoPlayerPreSuccessA.sharedData : twoPlayerPreSuccessB.sharedData;
 };
-const fundingSharedData = (ourIndex: TwoPartyPlayerIndex, latestCommitment: SignedCommitment) => {
+const fundingSharedData = (ourIndex: TwoPartyPlayerIndex, latestState: SignedState) => {
   return setChannels(ourIndex === TwoPartyPlayerIndex.A ? preSuccessA.sharedData : preSuccessB.sharedData, [
-    channelFromCommitments(
-      [latestCommitment],
+    channelFromStates(
+      [latestState],
       addressAndPrivateKeyLookup[ourIndex].address,
       addressAndPrivateKeyLookup[ourIndex].privateKey
     )
