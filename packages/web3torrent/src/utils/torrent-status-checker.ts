@@ -1,10 +1,9 @@
 import {web3torrent} from '../clients/web3torrent-client';
-import {ExtendedTorrent} from '../library/types';
 import {Status, Torrent} from '../types';
 
-export const getStatus = (torrent: ExtendedTorrent): Status => {
+export const getStatus = (torrent: Torrent): Status => {
   const {uploadSpeed, downloadSpeed, progress, uploaded, done, createdBy} = torrent;
-  if (createdBy) {
+  if (createdBy && createdBy === web3torrent.pseAccount) {
     return Status.Seeding;
   }
   if (progress && done) {
@@ -19,7 +18,7 @@ export const getStatus = (torrent: ExtendedTorrent): Status => {
   return Status.Downloading;
 };
 
-export const getFormattedETA = (torrent: ExtendedTorrent) => {
+export const getFormattedETA = (torrent: Torrent) => {
   const {done, timeRemaining} = torrent;
   if (done) {
     return 'Done';
@@ -49,7 +48,7 @@ export default (previousData: Torrent, infoHash): Torrent => {
     return {...previousData, status: Status.Idle};
   }
 
-  const live = web3torrent.get(infoHash) as ExtendedTorrent;
+  const live = web3torrent.get(infoHash) as Torrent;
   if (!live) {
     // torrent after being destroyed
     return {...previousData, downloaded: 0, status: Status.Idle};
@@ -68,7 +67,8 @@ export default (previousData: Torrent, infoHash): Torrent => {
       downloadSpeed: live.downloadSpeed,
       numPeers: live.numPeers,
       parsedTimeRemaining: getFormattedETA(live),
-      ready: true
+      ready: true,
+      originalSeed: live.createdBy === web3torrent.pseAccount
     }
   };
 };

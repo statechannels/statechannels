@@ -16,12 +16,11 @@ const Upload: React.FC<RouteComponentProps> = ({history}) => {
           type="file"
           name="file"
           id="file"
+          multiple={true}
           className="inputfile"
           onChange={async event => {
             if (event.target.files && event.target.files[0]) {
-              const file = event.target.files[0];
-              const seedingTorrent = await upload(file);
-              history.push(generateMagnetURL(seedingTorrent));
+              history.push(generateMagnetURL(await upload(event.target.files)));
             }
           }}
         ></input>

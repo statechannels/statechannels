@@ -36,6 +36,10 @@ export function getPenultimateCommitment(state: ChannelState): Commitment {
   return convertStateToCommitment(state.signedStates.slice(-2)[0].state);
 }
 
+export function getStates(state: ChannelState): SignedState[] {
+  return state.signedStates;
+}
+
 export function getCommitments(state: ChannelState): Commitments {
   return state.signedStates.map(ss => signCommitment2(convertStateToCommitment(ss.state), state.privateKey));
 }

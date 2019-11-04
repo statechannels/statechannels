@@ -37,7 +37,7 @@ const File: React.FC<RouteComponentProps> = () => {
 
   useInterval(
     () => getLiveData(torrent),
-    (torrent.status !== Status.Idle || !!torrent.createdBy) && 1000
+    (torrent.status !== Status.Idle || !!torrent.originalSeed) && 1000
   );
 
   return (
