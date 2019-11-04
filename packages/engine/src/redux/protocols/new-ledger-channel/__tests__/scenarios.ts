@@ -1,27 +1,27 @@
 import {bigNumberify} from "ethers/utils";
 import * as states from "../states";
-import {channelFromCommitments} from "../../../channel-store/channel-state/__tests__";
+import {channelFromStates} from "../../../channel-store/channel-state/__tests__";
 import {EMPTY_SHARED_DATA, setChannels, SharedData} from "../../../state";
 
 import {preFailure as DFPreFailure, preSuccessA as DFPreSuccessA} from "../../direct-funding/__tests__";
 import {preSuccess as ACPreSuccess} from "../../advance-channel/__tests__/index";
 import {
-  appCommitment,
-  ledgerCommitment,
   asAddress,
   bsAddress,
   asPrivateKey,
   ledgerId,
-  channelId
+  channelId,
+  appState,
+  ledgerState,
+  convertBalanceToOutcome
 } from "../../../../domain/commitments/__tests__";
 import {success} from "../../ledger-defunding/states";
 import * as _ from "lodash";
 import {NEW_LEDGER_FUNDING_PROTOCOL_LOCATOR} from "../reducer";
 import {prependToLocator} from "../..";
 import {TwoPartyPlayerIndex} from "../../../types";
-import {ethers} from "ethers";
 // -----------
-// Commitments
+// States
 // -----------
 const processId = "processId";
 
@@ -30,15 +30,13 @@ const twoThree = [
   {address: bsAddress, wei: bigNumberify(3).toHexString()}
 ];
 
-// TODO: Implement this when switching to SignedStates
-// const fiveToApp = [{address: channelId, wei: bigNumberify(5).toHexString()}];
-const fiveToApp = [{address: ethers.Wallet.createRandom().address, wei: bigNumberify(5).toHexString()}];
+const fiveToApp = [{address: channelId, wei: bigNumberify(5).toHexString()}];
 
-const app2 = appCommitment({turnNum: 2, balances: twoThree});
-const app3 = appCommitment({turnNum: 3, balances: twoThree});
+const app2 = appState({turnNum: 2, balances: twoThree});
+const app3 = appState({turnNum: 3, balances: twoThree});
 
-const ledger4 = ledgerCommitment({turnNum: 4, balances: twoThree, proposedBalances: fiveToApp});
-const ledger5 = ledgerCommitment({turnNum: 5, balances: fiveToApp});
+const ledger4 = ledgerState({turnNum: 4, balances: twoThree, proposedBalances: fiveToApp});
+const ledger5 = ledgerState({turnNum: 5, balances: fiveToApp});
 
 const setFundingState = (sharedData: SharedData): SharedData => {
   return {
@@ -75,8 +73,8 @@ const waitForPostFund1 = states.waitForPostFundSetup({
 const waitForPreFundSetupSharedData = _.merge(
   ACPreSuccess.sharedData,
   setChannels(EMPTY_SHARED_DATA, [
-    channelFromCommitments([app2, app3], asAddress, asPrivateKey),
-    channelFromCommitments([ledger4, ledger5], asAddress, asPrivateKey)
+    channelFromStates([app2, app3], asAddress, asPrivateKey),
+    channelFromStates([ledger4, ledger5], asAddress, asPrivateKey)
   ])
 );
 const waitForPostFundSharedData = _.merge(ACPreSuccess.sharedData);
@@ -84,8 +82,8 @@ export const successState = {
   state: success({}),
   store: setFundingState(
     setChannels(EMPTY_SHARED_DATA, [
-      channelFromCommitments([app2, app3], asAddress, asPrivateKey),
-      channelFromCommitments([ledger4, ledger5], asAddress, asPrivateKey)
+      channelFromStates([app2, app3], asAddress, asPrivateKey),
+      channelFromStates([ledger4, ledger5], asAddress, asPrivateKey)
     ])
   )
 };
@@ -103,8 +101,7 @@ export const happyPath = {
     sharedData: ACPreSuccess.sharedData,
     processId: "processId",
     ledgerId,
-    startingAllocation: twoThree.map(t => t.wei),
-    startingDestination: twoThree.map(t => t.address),
+    startingOutcome: convertBalanceToOutcome(twoThree),
     privateKey: asPrivateKey,
     ourIndex: TwoPartyPlayerIndex.A,
     participants: twoThree.map(t => t.address),
