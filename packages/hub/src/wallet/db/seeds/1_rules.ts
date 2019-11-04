@@ -4,8 +4,6 @@ import Rule from '../../models/rule';
 import knex from '../connection';
 Model.knex(knex);
 
-import * as contracts from '../../../utilities/contracts';
-
 export function seed() {
   // Deletes ALL existing entries
   return knex('rules')
@@ -14,11 +12,11 @@ export function seed() {
       return Rule.query().insert([
         {
           address: DUMMY_RULES_ADDRESS,
-          name: "DUMMY GAME -- DON't PLAY"
+          name: "DUMMY GAME -- DON'T PLAY"
         },
         {
-          address: contracts.rpsGameArtifact.networks['3'].address,
-          name: contracts.rpsGameArtifact.contractName
+          address: '0x311596fD021E5B5fE759EA715AFd53EB0857F436',
+          name: 'ConsensusApp'
         }
       ]);
     });

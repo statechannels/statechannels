@@ -1,7 +1,6 @@
 import * as contracts from '../../utilities/contracts';
 
 import {ContractFactory, ethers, providers} from 'ethers';
-import {linkedByteCode} from 'magmo-devtools';
 import {HUB_SIGNER_PRIVATE_KEY} from '../../constants';
 
 const neworkIdToRpcEndpoint = networkId => {
@@ -22,13 +21,6 @@ export async function nitroAdjudicator() {
 }
 
 async function setupContract(artifact: any) {
-  Object.defineProperty(artifact, 'bytecode', {
-    value: linkedByteCode(artifact, contracts.commitmentArtifact, process.env.CHAIN_NETWORK_ID)
-  });
-  Object.defineProperty(artifact, 'bytecode', {
-    value: linkedByteCode(artifact, contracts.rulesArtifact, process.env.CHAIN_NETWORK_ID)
-  });
-
   let nitroFactory;
   try {
     nitroFactory = await ContractFactory.fromSolidity(artifact, walletWithProvider);

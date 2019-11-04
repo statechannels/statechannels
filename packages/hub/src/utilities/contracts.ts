@@ -1,12 +1,7 @@
 import * as path from 'path';
 
-const commonDataPrefix = '@statechannels/wallet-common/prebuilt-contracts';
-const devPathPrefix = '../../build/contracts';
-
-const commitmentJson = 'Commitment.json';
-const rulesJson = 'Rules.json';
-const nitroAdjudicatorJson = 'NitroAdjudicator.json';
-const rpsGameJson = 'RockPaperScissorsGame.json';
+const commonDataPrefix = '@statechannels/engine/contracts/pre-built-artifacts';
+const ethAssetHolderJson = 'ETHAssetHolder.json';
 
 interface Artifact {
   abi: any;
@@ -14,15 +9,6 @@ interface Artifact {
   networks: {[key: string]: {address: string}};
 }
 
-let commitmentArtifact: Artifact = require(path.join(commonDataPrefix, commitmentJson));
-let rulesArtifact: Artifact = require(path.join(commonDataPrefix, rulesJson));
-let nitroAdjudicatorArtifact: Artifact = require(path.join(commonDataPrefix, nitroAdjudicatorJson));
-const rpsGameArtifact: Artifact = require(path.join(commonDataPrefix, rpsGameJson));
+const nitroAdjudicatorArtifact: Artifact = require(path.join(commonDataPrefix, ethAssetHolderJson));
 
-if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development') {
-  commitmentArtifact = require(path.join(devPathPrefix, commitmentJson));
-  rulesArtifact = require(path.join(devPathPrefix, rulesJson));
-  nitroAdjudicatorArtifact = require(path.join(devPathPrefix, nitroAdjudicatorJson));
-}
-
-export {commitmentArtifact, rulesArtifact, nitroAdjudicatorArtifact, rpsGameArtifact};
+export {nitroAdjudicatorArtifact};
