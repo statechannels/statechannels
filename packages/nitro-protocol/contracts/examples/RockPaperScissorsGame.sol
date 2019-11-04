@@ -5,49 +5,61 @@ import '../interfaces/ForceMoveApp.sol';
 import '../Outcome.sol';
 import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 
+/**
+  * @dev The RockPaperScissors contract complies with the ForceMoveApp interface and implements a commit-reveal game of Rock Paper Scissors (henceforth RPS).
+  * The following transitions are allowed:
+  *
+  * Start -> RoundProposed  [ PROPOSE ]
+  * RoundProposed -> Start  [ REJECT ]
+  * RoundProposed -> RoundAccepted [ ACCEPT ]
+  * RoundAccepted -> Reveal [ REVEAL ]
+  * Reveal -> Start [ FINISH ]
+  *
+*/
 contract RockPaperScissorsGame is ForceMoveApp {
     using SafeMath for uint256;
-    // The following transitions are allowed:
-    //
-    // Start -> RoundProposed
-    // RoundProposed -> Start // reject game
-    // RoundProposed -> RoundAccepted
-    // RoundAccepted -> Reveal
-    // Reveal -> Start
-
+    
     enum PositionType {Start, RoundProposed, RoundAccepted, Reveal}
     enum Weapon {Rock, Paper, Scissors}
 
-    struct RockPaperScissorsGameData {
+    struct RPSData {
         PositionType positionType;
-        bytes32 salt;
+        uint256 stake;
+        bytes32 preCommit;
         Weapon playerSecondWeapon;
         Weapon playerFirstWeapon;
-        bytes32 preCommit;
+        bytes32 salt;
     }
 
     /**
     * @notice Decodes the appData.
     * @dev Decodes the appData.
-    * @param appDataBytes The abi.encode of a RockPaperScissorsGameData struct describing the application-specific data.
-    * @return A RockPaperScissorsGameData struct containing the application-specific data.
+    * @param appDataBytes The abi.encode of a RPSData struct describing the application-specific data.
+    * @return A RPSData struct containing the application-specific data.
     */
     function appData(bytes memory appDataBytes)
         internal
         pure
-        returns (RockPaperScissorsGameData memory)
+        returns (RPSData memory)
     {
-        return abi.decode(appDataBytes, (RockPaperScissorsGameData));
+        return abi.decode(appDataBytes, (RPSData));
     }
 
+    /**
+    * @notice Encodes the RPS update rules.
+    * @dev Encodes the RPS update rules.
+    * @param a State being transitioned from.
+    * @param b State being transitioned to.
+    * @return true if the transition conforms to the rules, false otherwise.
+    */
     function validTransition(
         VariablePart memory a,
         VariablePart memory b,
         uint256, // turnNumB, unused
         uint256 // nParticipants, unused
     ) public pure outcomeUnchanged(a,b) returns (bool) {
-        RockPaperScissorsGameData memory fromGameData = appData(a.appData);
-        RockPaperScissorsGameData memory toGameData = appData(b.appData);
+        RPSData memory fromGameData = appData(a.appData);
+        RPSData memory toGameData = appData(b.appData);
 
         if (fromGameData.positionType == PositionType.Start) {
             if (toGameData.positionType == PositionType.RoundProposed) {
@@ -86,8 +98,7 @@ contract RockPaperScissorsGame is ForceMoveApp {
     function winnings(
         Weapon playerFirstWeapon,
         Weapon playerSecondWeapon,
-        Outcome.AllocationItem[] allocationA,
-        Outcome.AllocationItem[] allocationB
+        uint256 stake
     ) private pure returns (uint256, uint256) {
 
         if (playerFirstWeapon == playerSecondWeapon) {
@@ -106,6 +117,7 @@ contract RockPaperScissorsGame is ForceMoveApp {
 
     modifier outcomeUnchanged(VariablePart memory a, VariablePart memory b) {
         require(keccak256(b.outcome) == keccak256(a.outcome), 'RockPaperScissorsGame: Outcome must not change');
+        _;
     }
 
     modifier allocationUnchanged(
@@ -161,7 +173,8 @@ contract RockPaperScissorsGame is ForceMoveApp {
 
     modifier allocationLengthIsCorrect(
         VariablePart memory a,
-        VariablePart memory b
+        VariablePart memory b,
+        uint256 nParticipants
     ) {
         Outcome.OutcomeItem[] memory outcomeA = abi.decode(a.outcome, (Outcome.OutcomeItem[]));
         Outcome.OutcomeItem[] memory outcomeB = abi.decode(b.outcome, (Outcome.OutcomeItem[]));
@@ -230,8 +243,8 @@ contract RockPaperScissorsGame is ForceMoveApp {
         uint256 aWinnings;
         uint256 bWinnings;
 
-        RockPaperScissorsGameData memory fromGameData = appData(a.appData);
-        RockPaperScissorsGameData memory toGameData = appData(b.appData);
+        RPSData memory fromGameData = appData(a.appData);
+        RPSData memory toGameData = appData(b.appData);
 
         Outcome.OutcomeItem[] memory outcomeA = abi.decode(a.outcome, (Outcome.OutcomeItem[]));
         Outcome.OutcomeItem[] memory outcomeB = abi.decode(b.outcome, (Outcome.OutcomeItem[]));
@@ -262,22 +275,21 @@ contract RockPaperScissorsGame is ForceMoveApp {
         (aWinnings, bWinnings) = winnings(
             toGameData.playerFirstWeapon,
             toGameData.playerSecondWeapon,
-            allocationA,
-            allocationB
+            toGameData.stake
         );
 
         require(
-            allocationB.amount[0] == allocationA.amount[0].add(aWinnings),
+            allocationB[0].amount == allocationA[0].amount.add(aWinnings),
             "Player A's allocation should be updated with the winnings."
         );
         require(
-            allocationB.amount[1] == allocationA.amount[1].add(bWinnings),
+            allocationB[1].amount == allocationA[1].amount.add(bWinnings),
             "Player B's allocation should be updated with the winnings."
         );
     }
 
     function validateRevealToStart(
-        RockPaperScissorsCommitment.RPSCommitmentStruct memory oldCommitment,
-        RockPaperScissorsCommitment.RPSCommitmentStruct memory newCommitment
-    ) private pure allocationUnchanged(oldCommitment, newCommitment) {}
+        VariablePart memory a,
+        VariablePart memory b
+    ) private pure allocationUnchanged(a, b) {}
 }
