@@ -51,7 +51,7 @@
     "test:prepare": "yarn deploy:test",
     "test:typescript": "npx jest --testPathIgnorePatterns='test/contracts' --reporters='default'",
     "test": "yarn test:prepare && npx jest",
-    "website:deploy": "npx etherlime compile --buildDirectory=./build/contracts && yarn docgen && cd website && yarn install && yarn build"
+    "website:deploy": "yarn contract:compile && yarn docgen && cd website && yarn install && yarn build"
   },
   "dependencies": {
     "@counterfactual/cf-adjudicator-contracts": "^0.0.8",
