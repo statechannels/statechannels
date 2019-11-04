@@ -3,6 +3,8 @@ import {boolean, optionsKnob, text, withKnobs} from '@storybook/addon-knobs';
 import {storiesOf} from '@storybook/react';
 import React from 'react';
 import {FormButton} from './FormButton';
+// @ts-ignore
+import markdown from './README.md';
 
 storiesOf('Web3Torrent', module)
   .addDecorator(withKnobs())
@@ -29,6 +31,6 @@ storiesOf('Web3Torrent', module)
       </FormButton>
     ),
     {
-      notes: 'A very simple example of addon notes'
+      notes: {markdown}
     }
   );
