@@ -1,5 +1,4 @@
 import jszip from 'jszip';
-import {web3torrent} from '../clients/web3torrent-client';
 import {TorrentFile} from 'webtorrent';
 
 export type SavingData = {name: string; content: string};
@@ -12,19 +11,15 @@ export const getFileBlobURL: (file: TorrentFile) => Promise<string> = file => {
   return new Promise(resolve => file.getBlobURL((_, blob) => resolve(blob as string)));
 };
 
-export const getFileSavingData: (infoHash: string) => Promise<SavingData> = async infoHash => {
-  const torrent = web3torrent.get(infoHash);
-  if (!torrent || !torrent.done || !torrent.files.length) {
+export const getFileSavingData: (files: TorrentFile[]) => Promise<SavingData> = async files => {
+  if (!files.length) {
     return Promise.reject();
   }
-  if (torrent.files.length === 1 && torrent.files[0].getBlobURL) {
-    return Promise.resolve({
-      content: await getFileBlobURL(torrent.files[0]),
-      name: torrent.name
-    });
+  if (files.length === 1 && files[0].getBlobURL) {
+    return Promise.resolve({name: files[0].name, content: await getFileBlobURL(files[0])});
   }
   const zip = new jszip();
-  for (const file of torrent.files) {
+  for (const file of files) {
     await zip.file(file.name, await getFileBlob(file));
   }
   return zip
