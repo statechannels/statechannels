@@ -29,10 +29,10 @@ export const getFileSavingData: (infoHash: string) => Promise<SavingData> = asyn
   }
   return zip
     .generateAsync({
-      type: 'base64'
+      type: 'blob'
     })
-    .then(dataURI => ({
-      content: 'data:application/zip;base64,' + dataURI,
+    .then(data => ({
+      content: URL.createObjectURL(data),
       name: 'torrent.zip'
     }));
 };
