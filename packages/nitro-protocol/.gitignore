@@ -19,4 +19,4 @@ built
 lib
 dist
 .outputParameter
-docs/interfaces/*.md
+docs/natspec/*.md

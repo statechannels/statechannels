@@ -35,29 +35,3 @@ export function getCommitmentChannelId(commitment: Commitment): string {
   // Return the nitro protocol channel Id to keep storage consistent
   return getChannelId(convertCommitmentToState(commitment).channel);
 }
-
-function incrementTurnNum(commitment: Commitment): Commitment {
-  return {...commitment, turnNum: commitment.turnNum + 1};
-}
-
-export function constructConclude(commitment: Commitment): Commitment {
-  return {...incrementTurnNum(commitment), commitmentType: CommitmentType.Conclude};
-}
-
-export function nextSetupCommitment(commitment: Commitment): Commitment | "NotASetupCommitment" {
-  const turnNum = commitment.turnNum + 1;
-  const numParticipants = commitment.channel.participants.length;
-  let commitmentType;
-  let commitmentCount;
-  if (turnNum <= numParticipants - 1) {
-    commitmentType = CommitmentType.PreFundSetup;
-    commitmentCount = turnNum;
-  } else if (turnNum <= 2 * numParticipants - 1) {
-    commitmentType = CommitmentType.PostFundSetup;
-    commitmentCount = turnNum - numParticipants;
-  } else {
-    return "NotASetupCommitment";
-  }
-
-  return {...commitment, turnNum, commitmentType, commitmentCount};
-}

@@ -1,37 +1,50 @@
 {
   "docs": {
-    "Nitro Protocol": ["nitro-intro", "quick-start"],
-
-    "Adjudicator": [
-      "adjudicator/force-move-intro",
-      "adjudicator/state-format",
-      "adjudicator/transition-rules",
-      "adjudicator/state-supported-by",
-      "adjudicator/valid-signatures",
-      "adjudicator/channel-storage",
-      "adjudicator/force-move",
-      "adjudicator/respond",
-      "adjudicator/respond-with-alternative",
-      "adjudicator/conclude",
-      "adjudicator/push-outcome",
-      "adjudicator/consensus-game"
+    "State Channels": [
+      "state-channels/overview",
+      "state-channels/quick-start"
     ],
-
-    "Asset Holder(s)": [
-      "asset-holder/outcomes",
-      "asset-holder/deposit",
-      "asset-holder/set-outcome",
-      "asset-holder/transfer",
-      "asset-holder/claim"
+    "ForceMove and Nitro": [
+      "forcemove-and-nitro/account-topology",
+      "forcemove-and-nitro/force-move",
+      "forcemove-and-nitro/consensus-app",
+      "forcemove-and-nitro/nitro-adjudicator",
+      "forcemove-and-nitro/asset-holder",
+      "forcemove-and-nitro/single-asset-payments"
     ],
-
-    "Advanced": ["auxiliary-protocols"],
-    "Examples": ["payment-game"],
-    "Interfaces": [
-      "interfaces/IForceMove",
-      "interfaces/Adjudicator",
-      "interfaces/IAssetHolder",
-      "interfaces/ForceMoveApp"
+    "Client specification": [
+      "client-specification/auxiliary-protocols"
+    ]
+  },
+  "API": {
+    "Overview": [
+      "api/contract-inheritance"
+    ],
+    "Base Contracts": [
+      "natspec/IForceMove",
+      "natspec/ForceMove",
+      "natspec/Adjudicator",
+      "natspec/ForceMoveApp",
+      "natspec/IAssetHolder",
+      "natspec/AssetHolder"
+    ],
+    "Deployed Contracts": [
+      "natspec/NitroAdjudicator",
+      "natspec/ConsensusApp",
+      "natspec/ERC20AssetHolder",
+      "natspec/ETHAssetHolder"
+    ],
+    "ForceMove Apps": [
+      "natspec/CounterfactualAdapterApp",
+      "natspec/CountingApp",
+      "natspec/SingleAssetPayments",
+      "natspec/TrivialApp"
+    ],
+    "Test Contracts": [
+      "natspec/TESTAssetHolder",
+      "natspec/TESTForceMove",
+      "natspec/TESTNitroAdjudicator",
+      "natspec/Token"
     ]
   }
 }

@@ -9,6 +9,7 @@
     "contracts/*"
   ],
   "engines": {
+    "yarn": "^1.17.3",
     "node": "10.16.3"
   },
   "directories": {
@@ -32,9 +33,9 @@
   "homepage": "https://github.com/statechannels/nitro-protocol/",
   "scripts": {
     "precommit": "lint-staged --quiet",
-    "build": "run-s docgen clearContracts clearLib contract:compile build:typescript",
+    "build": "run-s clearContracts clearLib contract:compile build:typescript docgen",
     "build:typescript": "tslint --project . && tsc -b",
-    "contract:compile": "./compile.sh",
+    "contract:compile": "node ./bin/compile.js",
     "clearContracts": "rm -rf build/contracts",
     "clearLib": "rm -rf lib",
     "deploy:test": "npx etherlime deploy --compile=false --file=./deployment/deploy-test.js",
@@ -42,20 +43,22 @@
     "lint:check": "npx tslint --config tslint.json --project .",
     "lint:write": "npx tslint --config tslint.json --project . --fix",
     "prepare": "yarn build",
-    "docgen": "node scripts/generate-docs.js",
+    "docgen": "npx solidoc",
     "prettier:check": "npx prettier --check '{contracts,src,test}/**/*.{ts,tsx,sol}'",
     "prettier:write": "npx prettier --write '{contracts,src,test}/**/*.{ts,tsx,sol}'",
     "startGanache": "node bin/start-ganache.js",
     "test:ci": "yarn contract:compile && yarn test:prepare && npx jest --ci --bail --runInBand",
     "test:prepare": "yarn deploy:test",
     "test:typescript": "npx jest --testPathIgnorePatterns='test/contracts' --reporters='default'",
-    "test": "yarn test:prepare && npx jest"
+    "test": "yarn test:prepare && npx jest",
+    "website:deploy": "npx etherlime compile --buildDirectory=./build/contracts && yarn docgen && cd website && yarn install && yarn build"
   },
   "dependencies": {
     "@counterfactual/cf-adjudicator-contracts": "^0.0.8",
     "@openzeppelin/contracts": "2.3.0",
     "ethers": "4.0.37",
-    "openzeppelin-solidity": "2.3.0",
+    "solc": "0.5.11",
+    "solidoc": "https://github.com/statechannels/solidoc.git#master",
     "web3-eth-accounts": "1.2.1"
   },
   "devDependencies": {
@@ -65,7 +68,7 @@
     "@types/node": "12.7.5",
     "@types/web3": "1.0.19",
     "dotenv": "8.1.0",
-    "etherlime": "2.2.3",
+    "etherlime": "2.2.4",
     "etherlime-lib": "1.1.5",
     "ganache-cli": "6.6.0",
     "jest": "24.9.0",
@@ -74,8 +77,6 @@
     "npm-run-all": "4.1.5",
     "prettier": "1.18.2",
     "prettier-plugin-solidity": "1.0.0-alpha.34",
-    "solc": "0.5.11",
-    "solidity-docgen": "https://github.com/OpenZeppelin/solidity-docgen.git#48fa167",
     "truffle": "5.0.37",
     "ts-jest": "24.1.0",
     "tslint": "5.20.0",

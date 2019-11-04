@@ -2,47 +2,44 @@ import * as states from "../states";
 
 import {EMPTY_SHARED_DATA, setChannel} from "../../../state";
 import * as scenarios from "../../../../domain/commitments/__tests__";
-import {CommitmentType} from "../../../../domain";
 import {preFund, postFund} from "../../advance-channel/__tests__";
 import {preSuccess as ledgerFundingPreSuccess} from "../../ledger-funding/__tests__";
 import {
   threePlayerPreSuccessA as consensusUpdatePreSuccess,
   threePlayerInProgressA as consensusUpdateInProgress
 } from "../../consensus-update/__tests__";
-import {channelFromCommitments} from "../../../channel-store/channel-state/__tests__";
-import {appCommitment, twoThree} from "../../../../domain/commitments/__tests__";
+import {channelFromStates} from "../../../channel-store/channel-state/__tests__";
+import {twoThree} from "../../../../domain/commitments/__tests__";
 import {CONSENSUS_LIBRARY_ADDRESS} from "../../../../constants";
 import {PlayerIndex} from "../../../../magmo-engine-client/engine-instructions";
 import {prependToLocator} from "../..";
 import {EmbeddedProtocol} from "../../../../communication";
 import {ADVANCE_CHANNEL_PROTOCOL_LOCATOR} from "../../advance-channel/reducer";
 import _ from "lodash";
+import {StateType} from "../../advance-channel/states";
+import {encodeConsensusData} from "@statechannels/nitro-protocol";
 
 // ---------
 // Test data
 // ---------
 const processId = "Process.123";
 const {asAddress, asPrivateKey, threeParticipants: destination} = scenarios;
-const channelType = CONSENSUS_LIBRARY_ADDRESS;
-const signedCommitment0 = scenarios.threeWayLedgerCommitment({turnNum: 0});
-const appAttributes = signedCommitment0.commitment.appAttributes;
+const appDefinition = CONSENSUS_LIBRARY_ADDRESS;
 
-const app0 = appCommitment({turnNum: 0, balances: twoThree});
-const app1 = appCommitment({turnNum: 1, balances: twoThree});
-const appChannel = channelFromCommitments([app0, app1], asAddress, asPrivateKey);
+const app0 = scenarios.appState({turnNum: 0, balances: twoThree});
+const app1 = scenarios.appState({turnNum: 1, balances: twoThree});
+const appChannel = channelFromStates([app0, app1], asAddress, asPrivateKey);
 const targetChannelId = appChannel.channelId;
 const hubAddress = destination[2];
 const jointChannelId = ledgerFundingPreSuccess.state.existingLedgerFundingState.ledgerId;
-
-const startingAllocation = app0.commitment.allocation;
-const startingDestination = app0.commitment.destination;
+const startingOutcome = app0.state.outcome;
+const {participants} = app0.state.channel;
 
 const initializeArgs = {
-  startingAllocation,
-  startingDestination,
-  participants: destination,
-  channelType,
-  appAttributes,
+  startingOutcome,
+  participants,
+  appDefinition,
+  appData: encodeConsensusData({furtherVotesRequired: 0, proposedOutcome: []}),
   processId,
   clearedToSend: true,
   // To properly test the embedded advanceChannel protocols, it's useful to be playerA
@@ -50,7 +47,7 @@ const initializeArgs = {
   address: asAddress,
   privateKey: asPrivateKey,
   ourIndex: 0,
-  commitmentType: CommitmentType.PreFundSetup,
+  stateType: StateType.PreFundSetup,
   targetChannelId,
   hubAddress,
   protocolLocator: ADVANCE_CHANNEL_PROTOCOL_LOCATOR
@@ -60,8 +57,8 @@ const props = {
   targetChannelId,
   processId,
   jointChannelId,
-  startingAllocation,
-  startingDestination,
+  startingOutcome,
+  participants,
   hubAddress,
   ourIndex: PlayerIndex.A,
   protocolLocator: [],
@@ -81,7 +78,7 @@ const scenarioStates = {
     ...props,
     jointChannel: {
       ...preFund.preSuccess.state,
-      commitmentType: CommitmentType.PostFundSetup
+      stateType: StateType.PostFundSetup
     }
   }),
 
@@ -119,8 +116,8 @@ const scenarioStates = {
 // Scenarios
 // ---------
 
-export const appFundingCommitmentReceivedEarly = {
-  appFundingCommitmentReceivedEarly: {
+export const appFundingStateReceivedEarly = {
+  appFundingStateReceivedEarly: {
     appChannelId: appChannel.channelId,
     state: scenarioStates.waitForGuarantorFunding,
     action: consensusUpdateInProgress.action,
