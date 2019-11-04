@@ -57,8 +57,6 @@
     "@counterfactual/cf-adjudicator-contracts": "^0.0.8",
     "@openzeppelin/contracts": "2.3.0",
     "ethers": "4.0.37",
-    "solc": "0.5.11",
-    "solidoc": "https://github.com/statechannels/solidoc.git#master",
     "web3-eth-accounts": "1.2.1"
   },
   "devDependencies": {
@@ -77,6 +75,8 @@
     "npm-run-all": "4.1.5",
     "prettier": "1.18.2",
     "prettier-plugin-solidity": "1.0.0-alpha.34",
+    "solc": "0.5.11",
+    "solidoc": "https://github.com/statechannels/solidoc.git",
     "truffle": "5.0.37",
     "ts-jest": "24.1.0",
     "tslint": "5.20.0",
