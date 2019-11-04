@@ -3,6 +3,7 @@ pragma experimental ABIEncoderV2;
 
 import '../interfaces/ForceMoveApp.sol';
 import '../Outcome.sol';
+import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 /**
   * @dev The RockPaperScissors contract complies with the ForceMoveApp interface and implements a commit-reveal game of Rock Paper Scissors (henceforth RPS).
@@ -16,69 +17,79 @@ import '../Outcome.sol';
   *
 */
 contract RockPaperScissors is ForceMoveApp {
+    using SafeMath for uint256;
 
-    enum PositionType { Start, RoundProposed, RoundAccepted, Reveal }
-    enum Weapon { Rock, Paper, Scissors }
+    enum PositionType {Start, RoundProposed, RoundAccepted, Reveal}
+    enum Weapon {Rock, Paper, Scissors}
 
-    struct RPSData{
+    struct RPSData {
         PositionType positionType;
         uint256 stake;
         bytes32 preCommit;
-        Weapon bWeapon;
-        Weapon aWeapon;
+        Weapon playerFirstWeapon;
+        Weapon playerSecondWeapon;
         bytes32 salt;
     }
 
     /**
-    * @notice Deocdes the appData.
-    * @dev Deocdes the appData.
-    * @param appDataBytes The abi.encode of a RPSData struct describing the application-specific data.
+    * @notice Decodes the appData.
+    * @dev Decodes the appData.
+    * @param toGameDataBytes The abi.encode of a RPSData struct describing the application-specific data.
     * @return An RPSData struct containing the application-specific data.
     */
-    function appData(bytes memory appDataBytes) internal pure returns (RPSData memory) {
-        return abi.decode(appDataBytes, (RPSData));
+    function appData(bytes memory toGameDataBytes) internal pure returns (RPSData memory) {
+        return abi.decode(toGameDataBytes, (RPSData));
     }
 
     /**
     * @notice Encodes the RPS update rules.
     * @dev Encodes the RPS update rules.
-    * @param a State being transitioned from.
-    * @param b State being transitioned to.
+    * @param fromPart State being transitioned from.
+    * @param toPart State being transitioned to.
     * @param turnNumB Turn number being transitioned to.
     * @param nParticipants Number of participants in this state channel.
     * @return true if the transition conforms to the rules, false otherwise.
     */
     function validTransition(
-        VariablePart memory a,
-        VariablePart memory b,
+        VariablePart memory fromPart,
+        VariablePart memory toPart,
         uint256 turnNumB,
         uint256 nParticipants
     ) public pure returns (bool) {
-
         // decode application-specific data
-        RPSData memory appDataA = appData(a.appData);
-        RPSData memory appDataB = appData(b.appData);
+        RPSData memory fromGameData = appData(fromPart.appData);
+        RPSData memory toGameData = appData(toPart.appData);
 
         // deduce action
-        if (appDataA.positionType == PositionType.Start) {
-            require(appDataB.positionType == PositionType.RoundProposed, 'Start may only transition to RoundProposed');
-            requireValidPROPOSE(a,b, appDataA, appDataB);
+        if (fromGameData.positionType == PositionType.Start) {
+            require(
+                toGameData.positionType == PositionType.RoundProposed,
+                'Start may only transition to RoundProposed'
+            );
+            requireValidPROPOSE(fromPart, toPart, fromGameData, toGameData);
             return true;
-        }
-        if (appDataA.positionType == PositionType.RoundProposed) {
-            if (appDataB.positionType == PositionType.Start) {
-                requireValidREJECT(a,b, appDataA, appDataB);
+        } else if (fromGameData.positionType == PositionType.RoundProposed) {
+            if (toGameData.positionType == PositionType.Start) {
+                requireValidREJECT(fromPart, toPart, fromGameData, toGameData);
+                return true;
+            } else if (toGameData.positionType == PositionType.RoundAccepted) {
+                requireValidACCEPT(fromPart, toPart, fromGameData, toGameData);
                 return true;
             }
-            if (appDataB.positionType == PositionType.RoundAccepted) {
-                requireValidACCEPT(a,b, appDataA, appDataB);
-                return true;
-            }
-        revert('Proposed may only transition to Start or RoundAccepted');
-        }
-        if (appDataA.positionType == PositionType.Reveal) {
-            require(appDataB.positionType == PositionType.Start, 'Reveal may only transition to Start');
-            requireValidFINISH(a,b, appDataA, appDataB);
+            revert('Proposed may only transition to Start or RoundAccepted');
+        } else if (fromGameData.positionType == PositionType.RoundAccepted) {
+            require(
+                toGameData.positionType == PositionType.Reveal,
+                'RoundAccepted may only transition to Reveal'
+            );
+            requireValidREVEAL(fromPart, toPart, fromGameData, toGameData);
+            return true;
+        } else if (fromGameData.positionType == PositionType.Reveal) {
+            require(
+                toGameData.positionType == PositionType.Start,
+                'Reveal may only transition to Start'
+            );
+            requireValidFINISH(fromPart, toPart, fromGameData, toGameData);
             return true;
         }
         revert('No valid transition found');
@@ -87,52 +98,123 @@ contract RockPaperScissors is ForceMoveApp {
     // action requirements
 
     function requireValidPROPOSE(
-        VariablePart memory a,
-        VariablePart memory b,
-        RPSData memory appDataA,
-        RPSData memory appDataB
-        ) private pure
-        outcomeUnchanged(a,b)
-        stakeUnchanged(appDataA, appDataB)
-        allocationsNotLessThanStake(a, b, appDataA, appDataB)
-        {
-        }
+        VariablePart memory fromPart,
+        VariablePart memory toPart,
+        RPSData memory fromGameData,
+        RPSData memory toGameData
+    )
+        private
+        pure
+        outcomeUnchanged(fromPart, toPart)
+        stakeUnchanged(fromGameData, toGameData)
+        allocationsNotLessThanStake(fromPart, toPart, fromGameData, toGameData)
+    {}
 
     function requireValidREJECT(
-        VariablePart memory a,
-        VariablePart memory b,
-        RPSData memory appDataA,
-        RPSData memory appDataB
-        ) private pure  {
-            // TODO
-        }
+        VariablePart memory fromPart,
+        VariablePart memory toPart,
+        RPSData memory fromGameData,
+        RPSData memory toGameData
+    ) private pure {
+        // TODO
+    }
 
     function requireValidACCEPT(
-        VariablePart memory a,
-        VariablePart memory b,
-        RPSData memory appDataA,
-        RPSData memory appDataB
-        ) private pure
-        {
-            // TODO
-        }
+        VariablePart memory fromPart,
+        VariablePart memory toPart,
+        RPSData memory fromGameData,
+        RPSData memory toGameData
+    ) private pure {
+        // TODO
+    }
+
+    function requireValidREVEAL(
+        VariablePart memory fromPart,
+        VariablePart memory toPart,
+        RPSData memory fromGameData,
+        RPSData memory toGameData
+    ) private pure {
+        uint256 playerFirstWinnings;
+        uint256 playerSecondWinnings;
+        require(
+            toGameData.playerSecondWeapon == fromGameData.playerSecondWeapon,
+            "Player Second's weapon should be the same between commitments."
+        );
+
+        // check hash matches
+        // need to convert Weapon -> uint256 to get hash to work
+        bytes32 hashed = keccak256(
+            abi.encodePacked(uint256(toGameData.playerFirstWeapon), toGameData.salt)
+        );
+        require(hashed == fromGameData.preCommit, 'The hash needs to match the precommit');
+
+        // calculate winnings
+        (playerFirstWinnings, playerSecondWinnings) = winnings(
+            toGameData.playerFirstWeapon,
+            toGameData.playerSecondWeapon,
+            toGameData.stake
+        );
+
+        Outcome.OutcomeItem[] memory outcomeFrom = abi.decode(fromPart.outcome, (Outcome.OutcomeItem[]));
+        Outcome.OutcomeItem[] memory outcomeTo = abi.decode(toPart.outcome, (Outcome.OutcomeItem[]));
+        Outcome.AssetOutcome memory assetOutcomeFrom = abi.decode(
+            outcomeFrom[0].assetOutcomeBytes,
+            (Outcome.AssetOutcome)
+        );
+        Outcome.AssetOutcome memory assetOutcomeTo = abi.decode(
+            outcomeTo[0].assetOutcomeBytes,
+            (Outcome.AssetOutcome)
+        );
+        Outcome.AllocationItem[] memory allocationFrom = abi.decode(
+            assetOutcomeFrom.allocationOrGuaranteeBytes,
+            (Outcome.AllocationItem[])
+        );
+        Outcome.AllocationItem[] memory allocationTo = abi.decode(
+            assetOutcomeTo.allocationOrGuaranteeBytes,
+            (Outcome.AllocationItem[])
+        );
+
+        require(
+            allocationTo[0].amount == allocationFrom[0].amount.add(playerFirstWinnings),
+            "Player First's allocation should be updated with the winnings."
+        );
+        require(
+            allocationTo[1].amount ==
+                allocationFrom[1].amount.sub(fromGameData.stake.mul(2)).add(playerSecondWinnings),
+            "Player Second's allocation should be updated with the winnings."
+        );
+    }
 
     function requireValidFINISH(
         VariablePart memory a,
         VariablePart memory b,
-        RPSData memory appDataA,
-        RPSData memory appDataB
-        ) private pure 
-        {
-            // TODO
+        RPSData memory fromGameData,
+        RPSData memory toGameData
+    ) private pure {
+        // TODO
+    }
+
+    function winnings(
+        Weapon playerFirstWeapon,
+        Weapon playerSecondWeapon,
+        uint256 stake
+    ) private pure returns (uint256, uint256) {
+        if (playerFirstWeapon == playerSecondWeapon) {
+            return (stake, stake);
+        } else if (
+            (playerFirstWeapon == Weapon.Rock && playerSecondWeapon == Weapon.Scissors) ||
+            (playerFirstWeapon > playerSecondWeapon)
+        ) {
+            // first player won
+            return (2 * stake, 0);
+        } else {
+            // second player won
+            return (0, 2 * stake);
         }
+    }
 
     // modifiers
-
-    modifier outcomeUnchanged(
-        VariablePart memory a,
-        VariablePart memory b
-        ) {
+    modifier outcomeUnchanged(VariablePart memory a, VariablePart memory b) {
         require(
             keccak256(b.outcome) == keccak256(a.outcome),
             'RockPaperScissors: Outcome must not change'
@@ -140,21 +222,21 @@ contract RockPaperScissors is ForceMoveApp {
         _;
     }
 
-    modifier stakeUnchanged(
-        RPSData memory appDataA,
-        RPSData memory appDataB
-        ) {
-        require(appDataA.stake == appDataB.stake, "The stake should be the same between commitments");
+    modifier stakeUnchanged(RPSData memory fromGameData, RPSData memory toGameData) {
+        require(
+            fromGameData.stake == toGameData.stake,
+            'The stake should be the same between commitments'
+        );
         _;
     }
 
     modifier allocationsNotLessThanStake(
         VariablePart memory a,
         VariablePart memory b,
-        RPSData memory appDataA,
-        RPSData memory appDataB
-        ) {
-            // TODO need to compare the stake (currently uint256 and should probably indicate an asset type) to the outcome (bytes and needs to be decoded)
+        RPSData memory fromGameData,
+        RPSData memory toGameData
+    ) {
+        // TODO need to compare the stake (currently uint256 and should probably indicate an asset type) to the outcome (bytes and needs to be decoded)
         _;
     }
 
