@@ -2,8 +2,6 @@ import * as states from "./states";
 import {NewLedgerChannelState, failure} from "./states";
 import {SharedData, ChannelFundingState, setFundingState} from "../../state";
 import {ProtocolStateWithSharedData, makeLocator} from "..";
-import {bytesFromAppAttributes} from "fmg-nitro-adjudicator/lib/consensus-app";
-import {CommitmentType} from "../../../domain";
 import {CONSENSUS_LIBRARY_ADDRESS} from "../../../constants";
 import {getChannel} from "../../channel-store";
 import {DirectFundingAction} from "../direct-funding";
@@ -19,6 +17,8 @@ import {initializeAdvanceChannel, isAdvanceChannelAction, advanceChannelReducer}
 import {getLatestCommitment, isFirstPlayer, getTwoPlayerIndex} from "../reducer-helpers";
 import {ADVANCE_CHANNEL_PROTOCOL_LOCATOR} from "../advance-channel/reducer";
 import {TwoPartyPlayerIndex} from "../../types";
+import {convertAllocationToOutcome} from "../../../utils/nitro-converter";
+import {encodeConsensusData} from "@statechannels/nitro-protocol";
 
 type ReturnVal = ProtocolStateWithSharedData<NewLedgerChannelState>;
 type IDFAction = NewLedgerChannelAction;
@@ -45,9 +45,9 @@ export function initialize({
 }): ProtocolStateWithSharedData<states.NonTerminalNewLedgerChannelState | states.Failure> {
   const initializationArgs = {
     privateKey,
-    channelType: CONSENSUS_LIBRARY_ADDRESS,
+    appDefinition: CONSENSUS_LIBRARY_ADDRESS,
     ourIndex,
-    commitmentType: CommitmentType.PreFundSetup,
+    stateType: advanceChannelState.StateType.PreFundSetup,
     clearedToSend: true,
     processId,
     protocolLocator: makeLocator(protocolLocator, ADVANCE_CHANNEL_PROTOCOL_LOCATOR),
@@ -170,7 +170,7 @@ function handleWaitForPreFundSetup(
         channelId: ledgerId,
         ourIndex,
         processId: protocolState.processId,
-        commitmentType: CommitmentType.PostFundSetup,
+        stateType: advanceChannelState.StateType.PostFundSetup,
         clearedToSend: false,
         protocolLocator: makeLocator(protocolState.protocolLocator, ADVANCE_CHANNEL_PROTOCOL_LOCATOR)
       });
@@ -258,18 +258,10 @@ function handleWaitForDirectFunding(
 }
 
 // TODO: This should be an advance channel helper
-function channelSpecificArgs(
-  allocation: string[],
-  destination: string[]
-): {allocation: string[]; destination: string[]; appAttributes: string} {
+function channelSpecificArgs(allocation: string[], destination: string[]) {
   return {
-    allocation,
-    destination,
-    appAttributes: bytesFromAppAttributes({
-      proposedAllocation: [],
-      proposedDestination: [],
-      furtherVotesRequired: 0
-    })
+    outcome: convertAllocationToOutcome({allocation, destination}),
+    appData: encodeConsensusData({furtherVotesRequired: 0, proposedOutcome: []})
   };
 }
 

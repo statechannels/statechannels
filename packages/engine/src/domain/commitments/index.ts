@@ -1,8 +1,7 @@
 import {Commitment as C, CommitmentType as CT} from "fmg-core";
 import {signCommitment as signCommitmentUtil} from "../signing-utils";
-import {channelID} from "fmg-core/lib/channel";
-import {convertCommitmentToSignedState} from "../../utils/nitro-converter";
-import {SignedState, Signatures} from "@statechannels/nitro-protocol";
+import {convertCommitmentToSignedState, convertCommitmentToState} from "../../utils/nitro-converter";
+import {SignedState, Signatures, getChannelId} from "@statechannels/nitro-protocol";
 
 export type Commitment = C;
 export const CommitmentType = CT;
@@ -33,31 +32,6 @@ export function hasValidSignature(signedState: SignedState): boolean {
 }
 
 export function getCommitmentChannelId(commitment: Commitment): string {
-  return channelID(commitment.channel);
-}
-
-function incrementTurnNum(commitment: Commitment): Commitment {
-  return {...commitment, turnNum: commitment.turnNum + 1};
-}
-
-export function constructConclude(commitment: Commitment): Commitment {
-  return {...incrementTurnNum(commitment), commitmentType: CommitmentType.Conclude};
-}
-
-export function nextSetupCommitment(commitment: Commitment): Commitment | "NotASetupCommitment" {
-  const turnNum = commitment.turnNum + 1;
-  const numParticipants = commitment.channel.participants.length;
-  let commitmentType;
-  let commitmentCount;
-  if (turnNum <= numParticipants - 1) {
-    commitmentType = CommitmentType.PreFundSetup;
-    commitmentCount = turnNum;
-  } else if (turnNum <= 2 * numParticipants - 1) {
-    commitmentType = CommitmentType.PostFundSetup;
-    commitmentCount = turnNum - numParticipants;
-  } else {
-    return "NotASetupCommitment";
-  }
-
-  return {...commitment, turnNum, commitmentType, commitmentCount};
+  // Return the nitro protocol channel Id to keep storage consistent
+  return getChannelId(convertCommitmentToState(commitment).channel);
 }

@@ -22,6 +22,8 @@ import {
 import {makeLocator, prependToLocator} from "../..";
 import {CONSENSUS_UPDATE_PROTOCOL_LOCATOR} from "../../consensus-update/reducer";
 import {commitmentsReceived} from "../../../../communication";
+import {convertStateToSignedCommitment} from "../../../../utils/nitro-converter";
+import {ethers} from "ethers";
 const processId = "processId";
 const oneThree = [
   {address: asAddress, wei: bigNumberify(1).toHexString()},
@@ -41,10 +43,11 @@ const oneOne = [
   {address: asAddress, wei: bigNumberify(1).toHexString()},
   {address: bsAddress, wei: bigNumberify(1).toHexString()}
 ];
-
-const fourToApp = [{address: channelId, wei: bigNumberify(4).toHexString()}];
+// TODO: Use real channel id after switching to signed states
+const fakeChannelId = ethers.Wallet.createRandom().address;
+const fourToApp = [{address: fakeChannelId, wei: bigNumberify(4).toHexString()}];
 const fourToAppAndLeftOver = [
-  {address: channelId, wei: bigNumberify(4).toHexString()},
+  {address: fakeChannelId, wei: bigNumberify(4).toHexString()},
   {address: asAddress, wei: bigNumberify(2).toHexString()},
   {address: bsAddress, wei: bigNumberify(2).toHexString()}
 ];
@@ -186,7 +189,7 @@ export const playerBFullyFundedHappyPath = {
     state: waitForLedgerUpdateForB,
     sharedData: consensusUpdatePreSuccessB.sharedData,
     action: prependToLocator(consensusUpdatePreSuccessB.action, EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR),
-    reply: consensusUpdatePreSuccessB.reply
+    reply: consensusUpdatePreSuccessB.reply.map(s => convertStateToSignedCommitment(s.state, asPrivateKey))
   }
 };
 

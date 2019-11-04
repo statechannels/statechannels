@@ -7,6 +7,8 @@ import {ProtocolStateWithSharedData} from "../protocols";
 import {ProtocolLocator, RelayableAction} from "src/communication";
 import _ from "lodash";
 import {convertStateToCommitment} from "../../utils/nitro-converter";
+import {State, SignedState, getChannelId} from "@statechannels/nitro-protocol";
+import {Signature} from "ethers/utils";
 
 type SideEffectState = StateWithSideEffects<any> | {outboxState: OutboxState} | {sharedData: SharedData};
 
@@ -87,6 +89,7 @@ export const expectThisMessage = (state: SideEffectState, messageType: string) =
 };
 
 type PartialCommitments = Array<{commitment: Partial<Commitment>; signature?: string}>;
+type PartialStates = Array<{state: Partial<State>; signature?: Partial<Signature>}>;
 
 function transformCommitmentToMatcher(sc: {commitment: Partial<Commitment>; signature?: string}) {
   if (sc.signature) {
@@ -96,6 +99,16 @@ function transformCommitmentToMatcher(sc: {commitment: Partial<Commitment>; sign
     });
   } else {
     return expect.objectContaining({commitment: expect.objectContaining(sc.commitment)});
+  }
+}
+
+function transformStateToMatcher(ss: {state: Partial<State>; signature?: Signature}) {
+  if (ss.signature) {
+    return expect.objectContaining({
+      state: expect.objectContaining(ss.state)
+    });
+  } else {
+    return expect.objectContaining({state: expect.objectContaining(ss.state)});
   }
 }
 
@@ -138,6 +151,59 @@ export const itSendsThisCommitment = (
           messagePayload: {
             type,
             signedCommitment: {commitment}
+          }
+        });
+      } else {
+        throw err;
+      }
+    }
+  });
+};
+
+export const itSendsTheseStates = (
+  state: SideEffectState,
+  states: PartialStates,
+  type = "ENGINE.COMMON.COMMITMENTS_RECEIVED",
+  idx = 0
+) => {
+  const messageOutbox = getOutboxState(state, "messageOutbox");
+  // TODO: Something in the conversion between nitro states and commitments is messing up the signature
+  // so we'll ignore them for now
+  states = states.map(s => {
+    return {
+      state: s.state
+    };
+  });
+  it("sends states", () => {
+    try {
+      // Passes when at least one message matches
+      // In the case of multiple messages queued, this approach does not care about
+      // their order, which is beneficial.
+      // However, the diffs produced by jest are unreadable, so when this expectation fails,
+      // we catch the error below
+      expect(messageOutbox).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            messagePayload: expect.objectContaining({
+              signedStates: states.map(transformStateToMatcher)
+            })
+          })
+        ])
+      );
+    } catch (err) {
+      if ("matcherResult" in err) {
+        // In this case, we've caught a jest expectation error.
+        // We try to help the developer by using expect(foo).toMatchObject(bar)
+        // The errors are much more useful in this case, but will be deceiving in the case when
+        // multiple messages are queued.
+
+        // To help with debugging, you can change the idx variable when running tests to 'search'
+        // for the correct commitment
+        console.warn(`Message not found: inspecting mismatched message in position ${idx}`);
+        expect(messageOutbox[idx]).toMatchObject({
+          messagePayload: {
+            type,
+            signedStates: states
           }
         });
       } else {
@@ -274,6 +340,16 @@ export const itStoresThisCommitment = (state: {channelStore: ChannelStore}, sign
     // This should be addressed when all the protocols use SignedStates
     const lastCommitment = convertStateToCommitment(channelState.signedStates.slice(-1)[0].state);
     expect(lastCommitment).toMatchObject(signedCommitment.commitment);
+  });
+};
+
+export const itStoresThisState = (state: {channelStore: ChannelStore}, signedState: SignedState) => {
+  it("stores the state in the channel state", () => {
+    const channelId = getChannelId(signedState.state.channel);
+    const channelState = state.channelStore[channelId];
+
+    const lastSignedState = channelState.signedStates.slice(-1)[0];
+    expect(lastSignedState).toMatchObject(signedState);
   });
 };
 

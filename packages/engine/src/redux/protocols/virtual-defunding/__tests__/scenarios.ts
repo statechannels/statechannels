@@ -12,6 +12,7 @@ import {makeLocator} from "../..";
 import * as consensusStates from "../../consensus-update/states";
 import {HUB_ADDRESS} from "../../../../constants";
 import {bytesFromAppAttributes} from "fmg-nitro-adjudicator/lib/consensus-app";
+import {ethers} from "ethers";
 
 // ---------
 // Test data
@@ -56,7 +57,7 @@ const ledgerChannelBeforeUpdate = channelFromCommitments([ledger6, ledger7], asA
 const ledgerChannelBeforeConsensus = channelFromCommitments([ledger7, ledger8], asAddress, asPrivateKey);
 
 const ledgerId = ledgerChannelBeforeUpdate.channelId;
-const fundingApp = [{address: appChannelId, wei: bigNumberify(6).toHexString()}];
+const fundingApp = [{address: ethers.Wallet.createRandom().address, wei: bigNumberify(6).toHexString()}];
 
 const joint4 = scenarios.threeWayLedgerCommitment({turnNum: 4, balances: fundingApp});
 const joint5 = scenarios.threeWayLedgerCommitment({turnNum: 5, balances: fundingApp});
@@ -98,21 +99,19 @@ const props = {
 // ------
 const waitForJointChannelUpdate = states.waitForJointChannelUpdate({
   ...props,
-  jointChannel: consensusStates.commitmentSent({
+  jointChannel: consensusStates.stateSent({
     processId,
     protocolLocator: makeLocator(EmbeddedProtocol.ConsensusUpdate),
-    proposedAllocation: oneThreeTwo.map(i => i.wei),
-    proposedDestination: oneThreeTwo.map(i => i.address),
+    proposedOutcome: scenarios.convertBalanceToOutcome(oneThreeTwo),
     channelId: jointChannelId
   })
 });
 const waitForLedgerChannelUpdate = states.waitForLedgerChannelUpdate({
   ...props,
-  ledgerChannel: consensusStates.commitmentSent({
+  ledgerChannel: consensusStates.stateSent({
     processId,
     protocolLocator: makeLocator(EmbeddedProtocol.ConsensusUpdate),
-    proposedAllocation: oneThreeHub.map(i => i.wei),
-    proposedDestination: oneThreeHub.map(i => i.address),
+    proposedOutcome: scenarios.convertBalanceToOutcome(oneThreeHub),
     channelId: ledgerId
   })
 });

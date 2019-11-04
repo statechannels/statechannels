@@ -1,6 +1,6 @@
-import {SignedCommitment, Commitment, signCommitment2, getCommitmentChannelId} from "../../../domain";
+import {SignedCommitment, Commitment, signCommitment2} from "../../../domain";
 import {Wallet} from "ethers";
-import {SignedState} from "@statechannels/nitro-protocol";
+import {SignedState, State, getChannelId} from "@statechannels/nitro-protocol";
 import {convertStateToCommitment} from "../../../utils/nitro-converter";
 
 export type Commitments = SignedCommitment[];
@@ -20,12 +20,24 @@ export interface ChannelState {
 
 export type OpenChannelState = ChannelState;
 
+export function getLastState(state: ChannelState): State {
+  return state.signedStates.slice(-1)[0].state;
+}
+
+export function getPenultimateState(state: ChannelState): State {
+  return state.signedStates.slice(-2)[0].state;
+}
+
 export function getLastCommitment(state: ChannelState): Commitment {
   return convertStateToCommitment(state.signedStates.slice(-1)[0].state);
 }
 
 export function getPenultimateCommitment(state: ChannelState): Commitment {
   return convertStateToCommitment(state.signedStates.slice(-2)[0].state);
+}
+
+export function getStates(state: ChannelState): SignedState[] {
+  return state.signedStates;
 }
 
 export function getCommitments(state: ChannelState): Commitments {
@@ -41,10 +53,8 @@ export function initializeChannel(signedState: SignedState, privateKey: string):
   const {participants, channelNonce} = channel;
   const address = new Wallet(privateKey).address;
   const ourIndex = state.channel.participants.indexOf(address);
-  // TODO: Temporary until everything is converted to use signedStates
-  // This allows commitment channelIds to be used for now in our protocols
-  const commitment = convertStateToCommitment(signedState.state);
-  const channelId = getCommitmentChannelId(commitment);
+
+  const channelId = getChannelId(state.channel);
   return {
     address,
     privateKey,

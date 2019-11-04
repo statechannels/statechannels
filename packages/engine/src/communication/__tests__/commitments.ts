@@ -1,9 +1,11 @@
 import {Channel, CommitmentType, Commitment} from "fmg-core";
-import {channelID} from "fmg-core/lib/channel";
 import {bigNumberify} from "ethers/utils";
 
 import {signCommitment2} from "../../domain";
 import {ledgerCommitment} from "../../domain/commitments/__tests__";
+import {getChannelId} from "@statechannels/nitro-protocol";
+import {NETWORK_ID} from "../../constants";
+import {ethers} from "ethers";
 
 export const libraryAddress = "0x" + "1".repeat(40);
 export const ledgerLibraryAddress = "0x" + "2".repeat(40);
@@ -14,7 +16,11 @@ export const bsPrivateKey = "0x5d862464fe9303452126c8bc94274b8c5f9874cbd219789b3
 export const bsAddress = "0x6Ecbe1DB9EF729CBe972C83Fb886247691Fb6beb";
 export const participants: [string, string] = [asAddress, bsAddress];
 export const channel: Channel = {channelType: libraryAddress, nonce: channelNonce, participants};
-export const channelId = channelID(channel);
+export const channelId = getChannelId({
+  channelNonce: "0x04",
+  participants,
+  chainId: bigNumberify(NETWORK_ID).toHexString()
+});
 
 export const twoThree = [bigNumberify(2).toHexString(), bigNumberify(3).toHexString()];
 
@@ -91,7 +97,9 @@ const twoThreeBalances = [
   {address: bsAddress, wei: bigNumberify(3).toHexString()}
 ];
 
-const fiveToAppBalances = [{address: channelId, wei: bigNumberify(5).toHexString()}];
+// TODO: Using a random address until the protocol is switched to signedState
+// Our test helper functions can't deal with a Bytes32 destination
+const fiveToAppBalances = [{address: ethers.Wallet.createRandom().address, wei: bigNumberify(5).toHexString()}];
 
 export const signedLedgerCommitments = {
   signedLedgerCommitment0: ledgerCommitment({

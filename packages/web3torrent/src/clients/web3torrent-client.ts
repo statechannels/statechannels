@@ -36,7 +36,12 @@ export const upload: (files: WebTorrentSeedInput) => Promise<Torrent> = files =>
 
   return new Promise(resolve =>
     web3torrent.seed(files as FileList, (torrent: any) => {
-      resolve({...torrent, status: Status.Seeding, cost: String(torrent.length * 0.000005)});
+      resolve({
+        ...torrent,
+        status: Status.Seeding,
+        cost: String(torrent.length * 0.000005),
+        originalSeed: true
+      });
     })
   );
 };

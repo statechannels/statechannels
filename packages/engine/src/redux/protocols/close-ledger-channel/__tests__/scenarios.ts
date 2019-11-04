@@ -9,14 +9,17 @@ import {bigNumberify} from "ethers/utils";
 import {EMPTY_SHARED_DATA, setChannels} from "../../../state";
 import {channelFromCommitments} from "../../../channel-store/channel-state/__tests__";
 import {mergeSharedData} from "../../../__tests__/helpers";
+import {ethers} from "ethers";
 const processId = "process-id.123";
 
-const {ledgerId: channelId, channelId: appChannelId} = testScenarios;
+const {ledgerId: channelId} = testScenarios;
 const twoThree = [
   {address: testScenarios.asAddress, wei: bigNumberify(2).toHexString()},
   {address: testScenarios.bsAddress, wei: bigNumberify(3).toHexString()}
 ];
-const fundingAppChannel = [{address: appChannelId, wei: bigNumberify(5).toHexString()}];
+// TODO: Switch this to use appChannelId when updating protocol to SignedStates
+// const fundingAppChannel = [{address: appChannelId, wei: bigNumberify(5).toHexString()}];
+const fundingAppChannel = [{address: ethers.Wallet.createRandom().address, wei: bigNumberify(5).toHexString()}];
 
 const ledger4 = testScenarios.ledgerCommitment({turnNum: 4, balances: twoThree});
 const ledger5 = testScenarios.ledgerCommitment({turnNum: 5, balances: twoThree});

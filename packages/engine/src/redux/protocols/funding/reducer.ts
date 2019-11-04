@@ -15,7 +15,6 @@ import * as virtualFunding from "../virtual-funding";
 import {AdvanceChannelAction, advanceChannelReducer, initializeAdvanceChannel} from "../advance-channel";
 import * as advanceChannelStates from "../advance-channel/states";
 import {clearedToSend, routesToAdvanceChannel} from "../advance-channel/actions";
-import {CommitmentType} from "../../../domain";
 import {ADVANCE_CHANNEL_PROTOCOL_LOCATOR} from "../advance-channel/reducer";
 import {routesToLedgerFunding} from "../ledger-funding/actions";
 import {routesToVirtualFunding} from "../virtual-funding/actions";
@@ -31,6 +30,7 @@ import {
 } from "../funding-strategy-negotiation/actions";
 import * as fundingStrategyNegotiationStates from "../funding-strategy-negotiation/states";
 import {ProtocolAction} from "../../actions";
+import {convertAllocationToOutcome} from "../../../utils/nitro-converter";
 
 export function initialize(
   sharedData: SharedData,
@@ -153,7 +153,7 @@ function handleFundingStrategyNegotiationComplete({
       channelId: targetChannelId,
       ourIndex: helpers.getTwoPlayerIndex(targetChannelId, sharedData),
       processId,
-      commitmentType: CommitmentType.PostFundSetup,
+      stateType: advanceChannelStates.StateType.PostFundSetup,
       clearedToSend: false,
       protocolLocator: ADVANCE_CHANNEL_PROTOCOL_LOCATOR
     }));
@@ -190,10 +190,7 @@ function handleFundingStrategyNegotiationComplete({
         };
       }
       case "VirtualFundingStrategy": {
-        const {allocation: startingAllocation, destination: startingDestination, channel} = helpers.getLatestCommitment(
-          targetChannelId,
-          sharedData
-        );
+        const {allocation, destination, channel} = helpers.getLatestCommitment(targetChannelId, sharedData);
 
         const ourIndex = channel.participants.indexOf(ourAddress);
 
@@ -204,8 +201,8 @@ function handleFundingStrategyNegotiationComplete({
           ourIndex,
           // TODO: This should be an env variable
           hubAddress: "0x100063c326b27f78b2cBb7cd036B8ddE4d4FCa7C",
-          startingAllocation,
-          startingDestination,
+          startingOutcome: convertAllocationToOutcome({allocation, destination}),
+          participants: channel.participants,
           protocolLocator: makeLocator(EmbeddedProtocol.VirtualFunding)
         }));
 

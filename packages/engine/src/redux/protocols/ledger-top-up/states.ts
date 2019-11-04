@@ -2,15 +2,15 @@ import {DirectFundingState} from "../direct-funding/states";
 import {StateConstructor} from "../../utils";
 import {ConsensusUpdateState} from "../consensus-update";
 import {ProtocolLocator} from "../../../communication";
+import {Outcome} from "@statechannels/nitro-protocol";
 
 export interface WaitForDirectFundingForA {
   type: "LedgerTopUp.WaitForDirectFundingForA";
   channelId: string;
   ledgerId: string;
   processId: string;
-  proposedAllocation: string[];
-  proposedDestination: string[];
-  originalAllocation: string[];
+  proposedOutcome: Outcome;
+  originalOutcome: Outcome;
   protocolLocator: ProtocolLocator;
   directFundingState: DirectFundingState;
   consensusUpdateState: ConsensusUpdateState;
@@ -21,9 +21,8 @@ export interface WaitForDirectFundingForB {
   channelId: string;
   ledgerId: string;
   processId: string;
-  proposedAllocation: string[];
-  proposedDestination: string[];
-  originalAllocation: string[];
+  proposedOutcome: Outcome;
+  originalOutcome: Outcome;
   protocolLocator: ProtocolLocator;
   directFundingState: DirectFundingState;
 }
@@ -32,9 +31,8 @@ export interface SwitchOrderAndAddATopUpUpdate {
   channelId: string;
   ledgerId: string;
   processId: string;
-  proposedAllocation: string[];
-  proposedDestination: string[];
-  originalAllocation: string[];
+  proposedOutcome: Outcome;
+  originalOutcome: Outcome;
   protocolLocator: ProtocolLocator;
   consensusUpdateState: ConsensusUpdateState;
 }
@@ -43,9 +41,8 @@ export interface RestoreOrderAndAddBTopUpUpdate {
   channelId: string;
   ledgerId: string;
   processId: string;
-  proposedAllocation: string[];
-  proposedDestination: string[];
-  originalAllocation: string[];
+  proposedOutcome: Outcome;
+  originalOutcome: Outcome;
   consensusUpdateState: ConsensusUpdateState;
   protocolLocator: ProtocolLocator;
 }
