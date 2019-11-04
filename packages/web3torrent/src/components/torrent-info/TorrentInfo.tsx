@@ -13,14 +13,20 @@ export type TorrentInfoProps = {torrent: Torrent; peers?: TorrentPeers};
 const TorrentInfo: React.FC<TorrentInfoProps> = ({torrent, peers}) => {
   return (
     <>
-      <section className={`torrentInfo ${torrent.magnetURI ? ' with-link' : ''}`}>
-        <span className="fileName">{torrent.name}</span>
-        <span className="fileSize">{torrent.length === 0 ? '? Mb' : prettier(torrent.length)}</span>
-        {torrent.status && <span className="fileStatus">{torrent.status}</span>}
-        <span className="fileCost">
-          Cost {!torrent.cost ? 'Unknown' : `$${Number(torrent.cost).toFixed(2)}`}
-        </span>
-        {torrent.magnetURI && <MagnetLinkButton />}
+      <section className="torrentInfo">
+        <div className="row">
+          <span className="fileName">{torrent.name}</span>
+        </div>
+        <div className="row">
+          <span className="fileSize">
+            {torrent.length === 0 ? '? Mb' : prettier(torrent.length)}
+          </span>
+          {torrent.status && <span className="fileStatus">{torrent.status}</span>}
+          <span className="fileCost">
+            Cost {!torrent.cost ? 'Unknown' : `$${Number(torrent.cost).toFixed(2)}`}
+          </span>
+          {torrent.magnetURI && <MagnetLinkButton />}
+        </div>
       </section>
       {DownloadingStatuses.includes(torrent.status) ? (
         <DownloadInfo torrent={torrent} />

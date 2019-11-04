@@ -75,16 +75,9 @@ describe('<TorrentInfo />', () => {
     expect(downloadInfoElement.exists()).toEqual(false);
     expect(uploadInfoElement.exists()).toEqual(false);
 
-    expect(sectionElement.hasClass('with-link')).toEqual(true);
     expect(fileNameElement.text()).toEqual(torrent.name);
     expect(fileSizeElement.text()).toEqual(prettier(torrent.length));
     expect(fileCostElement.text()).toEqual(`Cost $1.34`);
-  });
-
-  it('can hide the MagnetLinkButton and the with-link class when no magnet is provided', () => {
-    const {sectionElement, magnetLinkButtonElement} = mockTorrentInfo({magnetURI: undefined});
-    expect(sectionElement.hasClass('with-link')).toEqual(false);
-    expect(magnetLinkButtonElement.exists()).toEqual(false);
   });
 
   it('can show the `? Mb` label when the torrent size is unknown', () => {
