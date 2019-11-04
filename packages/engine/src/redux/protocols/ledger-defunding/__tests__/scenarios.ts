@@ -1,4 +1,4 @@
-import {asAddress, bsAddress, channelId} from "../../../../domain/commitments/__tests__";
+import {asAddress, bsAddress, channelId, convertBalanceToOutcome} from "../../../../domain/commitments/__tests__";
 import {bigNumberify} from "ethers/utils/bignumber";
 import {waitForLedgerUpdate} from "../states";
 import * as ledgerUpdateScenarios from "../../consensus-update/__tests__";
@@ -17,9 +17,7 @@ const props = {
   protocolLocator,
   channelId,
   ledgerId: ledgerUpdateScenarios.twoPlayerPreSuccessA.state.channelId,
-
-  proposedAllocation: twoThree.map(a => a.wei),
-  proposedDestination: twoThree.map(a => a.address)
+  proposedOutcome: convertBalanceToOutcome(twoThree)
 };
 
 const ledgerUpdate = ledgerUpdateScenarios.twoPlayerPreSuccessA.state;
