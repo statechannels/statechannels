@@ -19,8 +19,7 @@ import {ProtocolLocator, EmbeddedProtocol} from "../../../communication";
 import {CONSENSUS_UPDATE_PROTOCOL_LOCATOR} from "../consensus-update/reducer";
 import {DirectFundingState} from "../direct-funding/states";
 import {clearedToSend} from "../consensus-update/actions";
-import {Outcome} from "@statechannels/nitro-protocol";
-import {isAllocationOutcome, AllocationItem} from "@statechannels/nitro-protocol/src/contract/outcome";
+import {Outcome, isAllocationOutcome, AllocationItem} from "@statechannels/nitro-protocol";
 import {ETH_ASSET_HOLDER_ADDRESS} from "../../../constants";
 export {LEDGER_TOP_UP_PROTOCOL_LOCATOR} from "../../../communication/protocol-locator";
 export function initialize({
