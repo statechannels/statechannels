@@ -35,7 +35,7 @@
     "precommit": "lint-staged --quiet",
     "build": "run-s clearContracts clearLib contract:compile build:typescript docgen",
     "build:typescript": "tslint --project . && tsc -b",
-    "contract:compile": "./compile.sh",
+    "contract:compile": "node ./bin/compile.js",
     "clearContracts": "rm -rf build/contracts",
     "clearLib": "rm -rf lib",
     "deploy:test": "npx etherlime deploy --compile=false --file=./deployment/deploy-test.js",
@@ -50,13 +50,13 @@
     "test:ci": "yarn contract:compile && yarn test:prepare && npx jest --ci --bail --runInBand",
     "test:prepare": "yarn deploy:test",
     "test:typescript": "npx jest --testPathIgnorePatterns='test/contracts' --reporters='default'",
-    "test": "yarn test:prepare && npx jest"
+    "test": "yarn test:prepare && npx jest",
+    "website:deploy": "yarn contract:compile && yarn docgen && cd website && yarn install && yarn build"
   },
   "dependencies": {
     "@counterfactual/cf-adjudicator-contracts": "^0.0.8",
     "@openzeppelin/contracts": "2.3.0",
-    "ethers": "4.0.37",
-    "web3-eth-accounts": "1.2.1"
+    "ethers": "4.0.37"
   },
   "devDependencies": {
     "@statechannels/devtools": "0.1.21",

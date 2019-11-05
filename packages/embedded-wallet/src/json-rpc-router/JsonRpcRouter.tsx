@@ -1,10 +1,10 @@
+import {JsonRpcRequest} from '@statechannels/channel-provider';
 import debug from 'debug';
 import React, {createContext, useEffect, useState} from 'react';
-import {JsonRPCRequest} from 'web3/providers';
 
 const log = debug('wallet:jsonrpc-router');
 
-export type JsonRpcRouterState = {request?: JsonRPCRequest};
+export type JsonRpcRouterState = {request?: JsonRpcRequest};
 const JsonRpcRouterContext = createContext<JsonRpcRouterState>({
   request: undefined
 });
@@ -26,7 +26,7 @@ const JsonRpcRouter: React.FC = ({children}) => {
 
   useEffect(() => {
     window.addEventListener('message', (event: MessageEvent) => {
-      const receivedRequest = event.data as JsonRPCRequest;
+      const receivedRequest = event.data as JsonRpcRequest;
 
       if (!receivedRequest.jsonrpc) {
         return;

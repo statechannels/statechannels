@@ -1,6 +1,12 @@
 import {Wallet} from 'ethers';
-import {arrayify, Signature, splitSignature, verifyMessage} from 'ethers/utils';
-import Web3EthAccounts from 'web3-eth-accounts';
+import {
+  arrayify,
+  hashMessage,
+  Signature,
+  SigningKey,
+  splitSignature,
+  verifyMessage,
+} from 'ethers/utils';
 import {SignedState} from '.';
 import {hashChallengeMessage} from './contract/challenge';
 import {getChannelId} from './contract/channel';
@@ -49,7 +55,6 @@ export function signChallengeMessage(signedStates: SignedState[], privateKey: st
 }
 
 function signData(hashedData: string, privateKey: string): Signature {
-  // We use `web3.eth.accounts` to sign as all ethers.js signing methods are async
-  const flatSignature = new Web3EthAccounts('').sign(hashedData, privateKey);
-  return splitSignature(flatSignature);
+  const signingKey = new SigningKey(privateKey);
+  return splitSignature(signingKey.signDigest(hashMessage(arrayify(hashedData))));
 }

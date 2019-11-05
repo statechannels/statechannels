@@ -4,7 +4,9 @@ import {createMemoryHistory, Location, MemoryHistory} from 'history';
 import React from 'react';
 import {match as Match, Router} from 'react-router';
 import {OnboardingFlowPaths} from '../../flows';
+import {JsonRpcComponentProps} from '../../json-rpc-router';
 import {closeWallet} from '../../message-dispatchers';
+import {mockOnboardingFlowContext} from '../../test-utils';
 import {ButtonProps, Dialog, DialogProps, Icons} from '../../ui';
 import {NoHub} from './NoHub';
 
@@ -55,9 +57,11 @@ const mockNoHubDialog = (): MockNoHubDialog => {
 };
 
 describe('Dialogs - NoHub', () => {
+  let onboardingFlowContext: jest.SpyInstance<JsonRpcComponentProps, []>;
   let noHub: MockNoHubDialog;
 
   beforeEach(() => {
+    onboardingFlowContext = mockOnboardingFlowContext();
     noHub = mockNoHubDialog();
   });
 
@@ -90,5 +94,9 @@ describe('Dialogs - NoHub', () => {
     };
 
     closeButton.simulate('click');
+  });
+
+  afterEach(() => {
+    onboardingFlowContext.mockReset();
   });
 });

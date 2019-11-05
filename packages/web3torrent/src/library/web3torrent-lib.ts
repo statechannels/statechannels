@@ -43,7 +43,11 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     let torrent: PaidStreamingTorrent;
 
     if (typeof optionsOrCallback === 'function') {
-      torrent = super.seed(input, optionsOrCallback) as PaidStreamingTorrent;
+      torrent = super.seed(
+        input,
+        {createdBy: this.pseAccount} as TorrentOptions,
+        optionsOrCallback
+      ) as PaidStreamingTorrent;
     } else {
       torrent = super.seed(input, optionsOrCallback, callback) as PaidStreamingTorrent;
     }
@@ -96,9 +100,9 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   togglePeer(torrentInfoHash, peerAccount: string) {
     const {wire, allowed} = this.allowedPeers[torrentInfoHash][peerAccount];
     if (allowed) {
-      this.blockPeer(torrentInfoHash, wire, peerAccount);
+      this.blockPeer(torrentInfoHash, wire as PaidStreamingWire, peerAccount);
     } else {
-      this.unblockPeer(torrentInfoHash, wire, peerAccount);
+      this.unblockPeer(torrentInfoHash, wire as PaidStreamingWire, peerAccount);
     }
     log('SEEDER: > togglePeer', peerAccount);
   }

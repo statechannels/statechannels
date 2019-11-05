@@ -4,8 +4,18 @@ import {createMemoryHistory, Location, MemoryHistory} from 'history';
 import React from 'react';
 import {match as Match, Router} from 'react-router';
 import {OnboardingFlowPaths} from '../../flows';
+import {JsonRpcComponentProps} from '../../json-rpc-router';
 import {closeWallet} from '../../message-dispatchers';
-import {ButtonProps, Dialog, DialogProps, Slider, SliderProps} from '../../ui';
+import {mockOnboardingFlowContext} from '../../test-utils';
+import {
+  ButtonProps,
+  Dialog,
+  DialogProps,
+  Expandable,
+  ExpandableProps,
+  Slider,
+  SliderProps
+} from '../../ui';
 import {BudgetAllocation} from './BudgetAllocation';
 
 Enzyme.configure({adapter: new Adapter()});
@@ -13,6 +23,7 @@ Enzyme.configure({adapter: new Adapter()});
 type MockBudgetAllocationDialog = {
   dialogWrapper: ReactWrapper;
   routeProps: MockRouteProps;
+  expandableElement: ReactWrapper<ExpandableProps>;
   dialogElement: ReactWrapper<DialogProps>;
   closeButton: ReactWrapper;
   sliderElement: ReactWrapper<SliderProps>;
@@ -48,8 +59,17 @@ const mockBudgetAllocationDialog = (): MockBudgetAllocationDialog => {
   );
 
   return {
-    dialogWrapper,
     routeProps,
+    ...refreshBudgetAllocationDialogFrom(dialogWrapper)
+  };
+};
+
+const refreshBudgetAllocationDialogFrom = dialogWrapper => {
+  dialogWrapper.update();
+
+  return {
+    dialogWrapper,
+    expandableElement: dialogWrapper.find(Expandable),
     dialogElement: dialogWrapper.find(Dialog),
     closeButton: dialogWrapper.find({onClick: closeWallet}),
     sliderElement: dialogWrapper.find(Slider),
@@ -59,27 +79,52 @@ const mockBudgetAllocationDialog = (): MockBudgetAllocationDialog => {
 };
 
 describe('Dialogs - BudgetAllocation', () => {
+  let onboardingFlowContext: jest.SpyInstance<JsonRpcComponentProps, []>;
   let budgetAllocation: MockBudgetAllocationDialog;
 
   beforeEach(() => {
+    onboardingFlowContext = mockOnboardingFlowContext();
     budgetAllocation = mockBudgetAllocationDialog();
   });
 
   it('can be instantiated', () => {
-    const {dialogElement, closeButton, sliderElement, allowButton, rejectButton} = budgetAllocation;
+    const {
+      dialogElement,
+      expandableElement,
+      closeButton,
+      sliderElement,
+      allowButton,
+      rejectButton
+    } = budgetAllocation;
     expect(dialogElement.exists()).toEqual(true);
     expect(dialogElement.prop('title')).toEqual('statechannels.com want to allocate');
     expect(closeButton.exists()).toEqual(true);
+    expect(expandableElement.exists()).toEqual(true);
+    expect(expandableElement.prop('title')).toEqual('Customize');
+    expect(sliderElement.exists()).toEqual(false);
+    expect(allowButton.exists()).toEqual(true);
+    expect(allowButton.prop('label')).toEqual('Allow 0.2 ETH');
+    expect(rejectButton.exists()).toEqual(true);
+    expect(rejectButton.prop('label')).toEqual('Reject');
+  });
+
+  it("can expand and collapse the 'Customize' section", () => {
+    const {expandableElement, dialogWrapper} = budgetAllocation;
+
+    expandableElement.find("[data-test-selector='expandable-title']").simulate('click');
+
+    let {sliderElement} = refreshBudgetAllocationDialogFrom(dialogWrapper);
     expect(sliderElement.exists()).toEqual(true);
     expect(sliderElement.prop('initialValue')).toEqual(0.2);
     expect(sliderElement.prop('min')).toEqual(0);
     expect(sliderElement.prop('max')).toEqual(2);
     expect(sliderElement.prop('step')).toEqual(0.01);
     expect(sliderElement.prop('unit')).toEqual('ETH');
-    expect(allowButton.exists()).toEqual(true);
-    expect(allowButton.prop('label')).toEqual('Allow');
-    expect(rejectButton.exists()).toEqual(true);
-    expect(rejectButton.prop('label')).toEqual('Reject');
+
+    expandableElement.find("[data-test-selector='expandable-title']").simulate('click');
+    sliderElement = refreshBudgetAllocationDialogFrom(dialogWrapper).sliderElement;
+
+    expect(sliderElement.exists()).toEqual(false);
   });
 
   it('should redirect to NoHub when clicking Allow', () => {
@@ -110,5 +155,27 @@ describe('Dialogs - BudgetAllocation', () => {
     };
 
     rejectButton.simulate('click');
+  });
+
+  it('should send an error message via JSONRPC when clicking Reject', async done => {
+    const errorResponse = {
+      code: -32100,
+      message: 'User has rejected budget allocation'
+    };
+
+    const {rejectButton} = budgetAllocation;
+
+    window.onmessage = (event: MessageEvent) => {
+      if (typeof event.data === 'object' && 'error' in event.data) {
+        expect(event.data.error).toEqual(errorResponse);
+        done();
+      }
+    };
+
+    rejectButton.simulate('click');
+  });
+
+  afterEach(() => {
+    onboardingFlowContext.mockReset();
   });
 });

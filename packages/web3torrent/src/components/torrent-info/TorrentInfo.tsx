@@ -1,55 +1,39 @@
 import prettier from 'prettier-bytes';
-import React, {useState} from 'react';
+import React from 'react';
 import {TorrentPeers} from '../../library/types';
-import {Status, Torrent} from '../../types';
-import {clipboardCopy} from '../../utils/copy-to-clipboard';
-import {generateMagnetURL} from '../../utils/magnet';
+import {DownloadingStatuses, Torrent, UploadingStatuses} from '../../types';
 import {DownloadInfo} from './download-info/DownloadInfo';
+import {DownloadLink} from './download-link/DownloadLink';
+import {MagnetLinkButton} from './magnet-link-button/MagnetLinkButton';
 import './TorrentInfo.scss';
 import {UploadInfo} from './upload-info/UploadInfo';
 
-const MagnetLinkButton: React.FC<{torrent: Torrent}> = ({torrent}) => {
-  const [magnetInfo, setMagnetInfo] = useState({
-    copied: false,
-    magnet: generateMagnetURL(torrent)
-  });
-  return (
-    <button
-      className="fileLink"
-      type="button"
-      onClick={() => {
-        clipboardCopy(magnetInfo.magnet);
-        setMagnetInfo({...magnetInfo, copied: true});
-        setTimeout(() => setMagnetInfo({...magnetInfo, copied: false}), 3000);
-      }}
-    >
-      <span className={'tooltiptext ' + magnetInfo.copied} id="myTooltip">
-        {magnetInfo.copied ? 'Great! Copied to your clipboard' : 'Copy to clipboard'}
-      </span>
-      Share Link
-    </button>
-  );
-};
+export type TorrentInfoProps = {torrent: Torrent; peers?: TorrentPeers};
 
-const TorrentInfo: React.FC<{torrent: Torrent; peers?: TorrentPeers}> = ({torrent, peers}) => {
+const TorrentInfo: React.FC<TorrentInfoProps> = ({torrent, peers}) => {
   return (
     <>
-      <section className={`torrentInfo ${torrent.magnetURI ? ' with-link' : ''}`}>
-        <span className="fileName">{torrent.name}</span>
-        <span className="fileSize">{!torrent.length ? '? Mb' : prettier(torrent.length)}</span>
-        {torrent.status ? <span className="fileStatus">{torrent.status}</span> : false}
-        <span className="fileCost">
-          Est. cost {!torrent.cost ? 'Unknown' : `$${Number(torrent.cost).toFixed(2)}`}
-        </span>
-        {torrent.magnetURI ? <MagnetLinkButton torrent={torrent} /> : false}
+      <section className="torrentInfo">
+        <div className="row">
+          <span className="fileName">{torrent.name}</span>
+        </div>
+        <div className="row">
+          <span className="fileSize">
+            {torrent.length === 0 ? '? Mb' : prettier(torrent.length)}
+          </span>
+          {torrent.status && <span className="fileStatus">{torrent.status}</span>}
+          <span className="fileCost">
+            Cost {!torrent.cost ? 'Unknown' : `$${Number(torrent.cost).toFixed(2)}`}
+          </span>
+          {torrent.magnetURI && <MagnetLinkButton />}
+        </div>
       </section>
-      {torrent.status !== Status.Idle && torrent.status !== Status.Seeding && torrent.ready ? (
+      {DownloadingStatuses.includes(torrent.status) ? (
         <DownloadInfo torrent={torrent} />
-      ) : torrent.createdBy ? (
-        <UploadInfo torrent={torrent} peers={peers} />
       ) : (
-        false
+        UploadingStatuses.includes(torrent.status) && <UploadInfo torrent={torrent} peers={peers} />
       )}
+      {!torrent.originalSeed && <DownloadLink torrent={torrent} />}
     </>
   );
 };

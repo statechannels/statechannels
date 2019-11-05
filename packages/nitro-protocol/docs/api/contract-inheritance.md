@@ -8,8 +8,8 @@ The following diagram shows how the contracts inherit from one another. Click on
 <div class="mermaid" align="center">
 graph LR
 linkStyle default interpolate basis
-Adjudicator
 AssetHolder
+Adjudicator
 ConsensusApp
 CountingApp
 ERC20

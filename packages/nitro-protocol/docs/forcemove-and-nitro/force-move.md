@@ -3,11 +3,11 @@ id: force-move
 title: ForceMove.sol
 ---
 
-ForceMove is a state channel execution framework. It
+ForceMove is a state channel execution framework. It:
 
-1. Specifies a programmable state format and state transition rules
-2. Specifies a format for the data stored on chain against each channel
-3. Enables disputes to be raised and adjudicated.
+1. Specifies a programmable state format and state transition rules;
+2. Specifies a format for the data stored on chain against each channel;
+3. Enables disputes to be raised and adjudicated;
 4. Allows for a final **outcome** to be registered against a unique `channelId`.
 
 This page documents our reference implementation in `ForceMove.sol`: please also see the [API](../natspec/ForceMove).
@@ -55,7 +55,6 @@ Since states must ultimately be interpreted by the adjudicator, the encoding of 
 The id of a channel is the hash of the abi encoded `chainId`, `participants` and `channelNonce`.
 
 By choosing a new `channelNonce` each time the same participants execute a state channel supported by the same chain, they can avoid replay attacks.
-
 
 ### Fixed and Variable Parts
 
@@ -105,7 +104,7 @@ In ForceMove, every state has an associated 'mover' - the participant who had th
 moverAddress = participants[turnNum % participants.length]
 ```
 
-The implication of this formula is that participants take it in turn to update the state of the channel. Furthermore, there are strict rules about whether a state update is valid, based on the previous state that has been announced. Beyond conforming to the state format, there are certain relationships that must hold between the state in question, and the previously announced state.
+The implication of this formula is that participants take turns to update the state of the channel. Furthermore, there are strict rules about whether a state update is valid, based on the previous state that has been announced. Beyond conforming to the state format, there are certain relationships that must hold between the state in question, and the previously announced state.
 
 ### Core transition rules
 
@@ -184,10 +183,10 @@ contract CountingApp is ForceMoveApp {
 }
 ```
 
-but other examples exist: such as a[ payment channel](https://github.com/magmo/force-move-protocol/blob/master/packages/fmg-payments/contracts/PaymentApp.sol), or games of [Rock Paper Scissors](https://github.com/magmo/apps/blob/master/packages/rps/contracts/RockPaperScissorsGame.sol) and [Tic Tac Toe](https://github.com/magmo/apps/blob/master/packages/tictactoe/contracts/TicTacToeGame.sol). 
+but other examples exist: such as a[ payment channel](https://github.com/magmo/force-move-protocol/blob/master/packages/fmg-payments/contracts/PaymentApp.sol), or games of [Rock Paper Scissors](https://github.com/magmo/apps/blob/master/packages/rps/contracts/RockPaperScissorsGame.sol) and [Tic Tac Toe](https://github.com/magmo/apps/blob/master/packages/tictactoe/contracts/TicTacToeGame.sol).
 
 :::note
-The linked examples conform to a legacy ForceMoveApp interface. 
+The linked examples conform to a legacy ForceMoveApp interface.
 :::
 
 ### `_validTransitionChain`
@@ -272,10 +271,10 @@ Requirements:
 Implementation:
 
 1. is `whoSignedWhat` acceptable?
-    - see [below](#_acceptablewhosignedwhat)
+   - see [below](#_acceptablewhosignedwhat)
 2. Did who actually sign what?
-    - For each i from `0 .. (n - 1)`:
-        - Does `participants[i] == recoverSigner(stateHashes[whoSignedWhat[i]], sigs[i])`
+   - For each i from `0 .. (n - 1)`:
+     - Does `participants[i] == recoverSigner(stateHashes[whoSignedWhat[i]], sigs[i])`
 
 Some examples:
 
@@ -301,17 +300,10 @@ So the signatures are valid in this case
         uint256 largestTurnNum,
         uint256 nParticipants,
         uint256 nStates
-    ) internal pure returns (bool) 
+    ) internal pure returns (bool)
 ```
 
-Implementation: 
-    - Let `m` be the number of states passed in
-    - Let `n` be the number of participants
-    - Require `whoSignedWhat.length == n` (Namely, there must be precisely one signature for each participant).
-    - For each `participant[i]`:
-        - Calculate `offset = (largestTurnNum - i) % n`
-        - If `offset >= m - 1` then they can sign any state
-        - Else they should have signed state `m - 1 - offset` or highe      r
+Implementation: - Let `m` be the number of states passed in - Let `n` be the number of participants - Require `whoSignedWhat.length == n` (Namely, there must be precisely one signature for each participant). - For each `participant[i]`: - Calculate `offset = (largestTurnNum - i) % n` - If `offset >= m - 1` then they can sign any state - Else they should have signed state `m - 1 - offset` or highe r
 
 Example of whether `whoSignedWhat` is acceptable:
 
@@ -329,8 +321,8 @@ Example of whether `whoSignedWhat` is acceptable:
 
 ---
 
-
 ## Channel Storage
+
 The adjudicator contract stores
 
 - `uint48 turnNumRecord`
@@ -416,7 +408,9 @@ Although the `outcome` is included in the `state`, we include the `outcomeHash` 
 ---
 
 ## Methods
+
 ### `forceMove`
+
 The `forceMove` function allows anyone holding the appropriate off-chain state to register a challenge on chain, and gives the framework its name. It is designed to ensure that a state channel can progress or be finalized in the event of inactivity on behalf of a participant (e.g. the current mover).
 
 The off-chain state is submitted (in an optimized format), and once relevant checks have passed, an `outcome` is registered against the `channelId`, with a finalization time set at some delay after the transaction is processed. This delay allows the challenge to be cleared by a timely and well-formed [respond](./respond)or [checkpoint](./checkpoint) transaction. If no such transaction is forthcoming, the challenge will time out, allowing the `outcome` registered to be finalized. A finalized outcome can then be used to extract funds from the channel.
@@ -510,7 +504,6 @@ The conclude methods allow anyone with sufficient off-chain state to immediately
 
 The off-chain state is submitted (in an optimized format), and once relevant checks have passed, an expired challenge is stored against the `channelId`.
 
-
 ```solidity
     function conclude(States states, Signatures sigs)
 ```
@@ -532,7 +525,6 @@ Effects:
 The `checkpoint` method allows anyone with a supported off-chain state to establish a new and higher `turnNumRecord` and leave the resulting channel in the "Open" mode.
 
 The off-chain state is submitted (in an optimized format), and once relevant checks have passed, the `turnNumRecord` is updated, and a challenge, if exists is cleared.
-
 
 ```solidity
 

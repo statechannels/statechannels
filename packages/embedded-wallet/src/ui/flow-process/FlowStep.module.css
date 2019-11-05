@@ -5,6 +5,10 @@
   height: 32px;
 }
 
+.step:last-child span[role='img'] {
+  animation: none;
+}
+
 .stepStatus {
   width: 32px;
   display: flex;
@@ -13,7 +17,7 @@
 }
 
 .stepTitle {
-  font: 18px/28px "Karla", sans-serif;
+  font: 18px/28px 'Karla', sans-serif;
 }
 
 .inProgress .stepTitle {

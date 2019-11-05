@@ -114,9 +114,11 @@ export type WebTorrentSeedInput =
 
 export type WebTorrentAddInput = string | Buffer | ParseTorrent;
 
+export type PeerWire = Pick<PaidStreamingWire, 'uploaded'>;
+
 export type PeerByTorrent = {
   id: string;
-  wire: PaidStreamingWire;
+  wire: PaidStreamingWire | PeerWire;
   allowed: boolean;
 };
 
