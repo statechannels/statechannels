@@ -187,7 +187,7 @@ export async function respond(
 
   const respondWithMoveTransaction = createRespondTransaction(
     convertCommitmentToState(challenge),
-    convertCommitmentToSignedState(toCommitment, participantB.privateKey)
+    convertCommitmentToSignedState(toCommitment, participantA.privateKey)
   );
 
   const transactionReceipt = await sendTransaction(provider, respondWithMoveTransaction);
