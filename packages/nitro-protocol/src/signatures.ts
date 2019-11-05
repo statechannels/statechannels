@@ -1,5 +1,12 @@
 import {Wallet} from 'ethers';
-import {arrayify, Signature, SigningKey, verifyMessage, splitSignature} from 'ethers/utils';
+import {
+  arrayify,
+  hashMessage,
+  Signature,
+  SigningKey,
+  splitSignature,
+  verifyMessage,
+} from 'ethers/utils';
 import {SignedState} from '.';
 import {hashChallengeMessage} from './contract/challenge';
 import {getChannelId} from './contract/channel';
@@ -49,5 +56,5 @@ export function signChallengeMessage(signedStates: SignedState[], privateKey: st
 
 function signData(hashedData: string, privateKey: string): Signature {
   const signingKey = new SigningKey(privateKey);
-  return splitSignature(signingKey.signDigest(hashedData));
+  return splitSignature(signingKey.signDigest(hashMessage(arrayify(hashedData))));
 }
