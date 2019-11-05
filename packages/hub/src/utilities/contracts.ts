@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-const commonDataPrefix = '@statechannels/engine/contracts/pre-built-artifacts';
+const commonDataPrefix = '@statechannels/wallet/contracts/pre-built-artifacts';
 const ethAssetHolderJson = 'ETHAssetHolder.json';
 
 interface Artifact {

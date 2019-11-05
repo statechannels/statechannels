@@ -34,7 +34,7 @@ async function listen() {
     const key = snapshot.key;
     const value = snapshot.val();
     const queue = value.queue;
-    if (queue === 'GAME_ENGINE') {
+    if (queue === 'GAME_WALLET') {
       throw new Error(
         `The hub does not support handling application commitments. Received ${JSON.stringify(
           value
