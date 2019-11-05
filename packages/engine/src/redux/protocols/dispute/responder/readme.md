@@ -21,7 +21,7 @@ graph TD
 linkStyle default interpolate basis
   St((start)) --> WFAp(WaitForApproval)
   WFAp-->|CHALLENGE_EXPIRED| AT(AcknowledgeTimeOut)
-  WFAp--> |ENGINE.DISPUTE.RESPONDER.RESPOND_APPROVED| HC{Commitment<br/>exists?}
+  WFAp--> |ENGINE.DISPUTE.RESPONDER.RESPOND_APPROVED| HC{State<br/>exists?}
   HC --> |Yes| WFT(WaitForTransaction)
   HC --> |No| WFR(WaitForResponse)
   WFR -->|ChallengeExpirySetEvent| WFR
@@ -52,7 +52,7 @@ Notes:
 
 ## Test Scenarios
 
-1. **Respond With Existing Commitment Happy Path:**
+1. **Respond With Existing State Happy Path:**
    - `WaitForApproval`
    - `WaitForTransaction`
    - `WaitForAcknowledgement`

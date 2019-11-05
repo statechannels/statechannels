@@ -14,12 +14,11 @@ import {Allocation, AllocationItem} from "@statechannels/nitro-protocol/src/cont
 import {convertAddressToBytes32} from "./data-type-utils";
 
 export function createForceMoveTransaction(
-  fromCommitment: SignedCommitment,
-  toCommitment: SignedCommitment,
+  fromState: SignedState,
+  toState: SignedState,
   privateKey: string
 ): TransactionRequest {
-  const signedStates = [fromCommitment.signedState, toCommitment.signedState];
-  return nitroTrans.createForceMoveTransaction(signedStates, privateKey);
+  return nitroTrans.createForceMoveTransaction([fromState, toState], privateKey);
 }
 
 export function createRespondTransaction(challengeState: State, responseSignedState: SignedState): TransactionRequest {

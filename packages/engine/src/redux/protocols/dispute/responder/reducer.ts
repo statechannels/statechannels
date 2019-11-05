@@ -113,10 +113,10 @@ const waitForResponseReducer = (
       const {state} = action;
       const signResult = signAndStore(sharedData, state);
       if (!signResult.isSuccess) {
-        throw new Error(`Could not sign response commitment due to ${signResult.reason}`);
+        throw new Error(`Could not sign response state due to ${signResult.reason}`);
       }
 
-      // TODO: There has got to be a better way of finding "the commitment I am responding to"
+      // TODO: There has got to be a better way of finding "the state I am responding to"
       const {signedStates} = sharedData.channelStore[getChannelId(state.channel)];
       const {state: challengeState} = signedStates.find(
         c => c.state.turnNum === signResult.signedState.state.turnNum - 1
@@ -166,7 +166,7 @@ const waitForApprovalReducer = (
           sharedData: hideEngine(sharedData)
         };
       } else {
-        const transaction = craftResponseTransactionWithExistingCommitment(processId, challengeState, sharedData);
+        const transaction = craftResponseTransactionWithExistingState(processId, challengeState, sharedData);
 
         return transitionToWaitForTransaction(transaction, protocolState, sharedData);
       }
@@ -245,7 +245,7 @@ const transitionToWaitForTransaction = (
   };
 };
 
-const craftResponseTransactionWithExistingCommitment = (
+const craftResponseTransactionWithExistingState = (
   processId: string,
   challengeState: State,
   sharedData: SharedData
@@ -260,7 +260,7 @@ const craftResponseTransactionWithExistingCommitment = (
     return TransactionGenerator.createRespondTransaction(challengeState, lastSignedState);
   } else {
     // TODO: We should never actually hit this, currently a sanity check to help out debugging
-    throw new Error("Cannot refute or respond with existing commitment.");
+    throw new Error("Cannot refute or respond with existing state.");
   }
 };
 
@@ -294,12 +294,12 @@ const canRefute = (challengeState: State, sharedData: SharedData) => {
   const {penultimateSignedState, lastSignedState} = getStoredStates(challengeState, sharedData);
 
   return (
-    canRefuteWithCommitment(lastSignedState.state, challengeState) ||
-    canRefuteWithCommitment(penultimateSignedState.state, challengeState)
+    canRefuteWithState(lastSignedState.state, challengeState) ||
+    canRefuteWithState(penultimateSignedState.state, challengeState)
   );
 };
 
-const canRefuteWithCommitment = (state: State, challengeState: State) => {
+const canRefuteWithState = (state: State, challengeState: State) => {
   return state.turnNum > challengeState.turnNum && mover(state) === mover(challengeState);
 };
 

@@ -142,7 +142,7 @@ describe("CHANNEL NOT FULLY OPEN  ", () => {
   });
 });
 
-describe("ALREADY HAVE LATEST COMMITMENT", () => {
+describe("ALREADY HAVE LATEST STATE", () => {
   const scenario = scenarios.alreadyHaveLatest;
   const {channelId, processId, sharedData} = scenario;
 
@@ -182,8 +182,8 @@ describe("USER DECLINES CHALLENGE  ", () => {
   });
 });
 
-describe("RECEIVE COMMITMENT WHILE APPROVING  ", () => {
-  const scenario = scenarios.receiveCommitmentWhileApproving;
+describe("RECEIVE STATE WHILE APPROVING  ", () => {
+  const scenario = scenarios.receiveStateWhileApproving;
   const {sharedData} = scenario;
 
   describeScenarioStep(scenario.approveChallenge, () => {

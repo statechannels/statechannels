@@ -101,8 +101,8 @@ export async function createChallenge(
   };
 
   const challengeTransaction = createForceMoveTransaction(
-    signCommitment2(fromCommitment, participantA.privateKey),
-    signCommitment2(toCommitment, participantB.privateKey),
+    convertCommitmentToSignedState(fromCommitment, participantA.privateKey),
+    convertCommitmentToSignedState(toCommitment, participantB.privateKey),
     participantB.privateKey
   );
 

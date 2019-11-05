@@ -43,7 +43,7 @@ const itTransitionsTo = (result: {protocolState: states.ResponderState}, type: s
   });
 };
 
-const itSetsChallengeCommitment = (result: {protocolState: states.ResponderState}, state: State) => {
+const itSetsChallengeState = (result: {protocolState: states.ResponderState}, state: State) => {
   it("sets the correct challenge state", () => {
     expect((result.protocolState as states.WaitForApproval).challengeState).toMatchObject(state);
   });
@@ -59,7 +59,7 @@ describe("RESPOND WITH EXISTING MOVE HAPPY-PATH", () => {
 
     itTransitionsTo(result, "Responding.WaitForApproval");
     itSendsThisDisplayEventType(result.sharedData, SHOW_ENGINE);
-    itSetsChallengeCommitment(result, challengeState);
+    itSetsChallengeState(result, challengeState);
   });
 
   describeScenarioStep(scenario.waitForApproval, () => {
@@ -94,7 +94,7 @@ describe("REFUTE HAPPY-PATH ", () => {
     const result = initialize(processId, channelId, expiryTime, sharedData, challengeState);
 
     itTransitionsTo(result, "Responding.WaitForApproval");
-    itSetsChallengeCommitment(result, scenario.challengeState);
+    itSetsChallengeState(result, scenario.challengeState);
   });
 
   describeScenarioStep(scenario.waitForApproval, () => {
@@ -128,7 +128,7 @@ describe("REQUIRE RESPONSE HAPPY-PATH ", () => {
   describe("when initializing", () => {
     const result = initialize(processId, channelId, expiryTime, sharedData, scenario.challengeState);
     itTransitionsTo(result, "Responding.WaitForApproval");
-    itSetsChallengeCommitment(result, scenario.challengeState);
+    itSetsChallengeState(result, scenario.challengeState);
   });
 
   describeScenarioStep(scenario.waitForApprovalRequiresResponse, () => {

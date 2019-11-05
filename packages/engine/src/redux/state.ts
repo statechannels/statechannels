@@ -25,7 +25,6 @@ import {accumulateSideEffects} from "./outbox";
 import {EngineEvent} from "../magmo-engine-client";
 import {TransactionRequest} from "ethers/providers";
 import {AdjudicatorState} from "./adjudicator-state/state";
-import {SignedCommitment} from "../domain";
 import {ProcessProtocol, ProtocolLocator} from "../communication";
 import {TerminalApplicationState, isTerminalApplicationState, isApplicationState} from "./protocols/application/states";
 import {TerminalFundingState, isFundingState, isTerminalFundingState} from "./protocols/funding/states";
@@ -256,15 +255,6 @@ export function checkAndInitialize(state: SharedData, signedState: SignedState, 
 
 export function checkAndStore(state: SharedData, signedState: SignedState): CheckResult {
   const result = checkAndStoreChannelStore(state.channelStore, signedState);
-  if (result.isSuccess) {
-    return {...result, store: setChannelStore(state, result.store)};
-  } else {
-    return result;
-  }
-}
-
-export function checkAndStoreComm(state: SharedData, signedCommitment: SignedCommitment): CheckResult {
-  const result = checkAndStoreChannelStore(state.channelStore, signedCommitment.signedState);
   if (result.isSuccess) {
     return {...result, store: setChannelStore(state, result.store)};
   } else {
