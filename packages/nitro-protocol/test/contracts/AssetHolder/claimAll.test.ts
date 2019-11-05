@@ -6,12 +6,14 @@ import AssetHolderArtifact from '../../../build/contracts/TESTAssetHolder.json';
 import {claimAllArgs} from '../../../src/contract/transaction-creators/asset-holder';
 import {
   allocationToParams,
+  AssetOutcomeShortHand,
+  assetTransferredEventsFromPayouts,
+  compileEventsFromLogs,
   getTestProvider,
   guaranteeToParams,
-  newAssetTransferredEvent,
   randomChannelId,
   randomExternalDestination,
-  replaceAddresses,
+  replaceAddressesAndBigNumberify,
   setupContracts,
 } from '../../test-helpers';
 
@@ -32,9 +34,9 @@ beforeAll(async () => {
 });
 
 const reason5 =
-  'claimAll | submitted data does not match outcomeHash stored against targetChannelId';
+  'claimAll | submitted data does not match assetOutcomeHash stored against targetChannelId';
 const reason6 =
-  'claimAll | submitted data does not match outcomeHash stored against guarantorChannelId';
+  'claimAll | submitted data does not match assetOutcomeHash stored against guarantorChannelId';
 
 // 1. claim G1 (step 1 of figure 23 of nitro paper)
 // 2. claim G2 (step 2 of figure 23 of nitro paper)
@@ -64,6 +66,15 @@ describe('claimAll', () => {
       heldAfter,
       payouts,
       reason,
+    }: {
+      name;
+      heldBefore: AssetOutcomeShortHand;
+      guaranteeDestinations;
+      tOutcomeBefore: AssetOutcomeShortHand;
+      tOutcomeAfter: AssetOutcomeShortHand;
+      heldAfter: AssetOutcomeShortHand;
+      payouts: AssetOutcomeShortHand;
+      reason;
     }) => {
       // compute channelIds
       const tNonce = bigNumberify(id(name))
@@ -78,11 +89,13 @@ describe('claimAll', () => {
       addresses.g = guarantorId;
 
       // transform input data (unpack addresses and BigNumberify amounts)
-      heldBefore = replaceAddresses(heldBefore, addresses);
-      tOutcomeBefore = replaceAddresses(tOutcomeBefore, addresses);
-      tOutcomeAfter = replaceAddresses(tOutcomeAfter, addresses);
-      heldAfter = replaceAddresses(heldAfter, addresses);
-      payouts = replaceAddresses(payouts, addresses);
+      [heldBefore, tOutcomeBefore, tOutcomeAfter, heldAfter, payouts] = [
+        heldBefore,
+        tOutcomeBefore,
+        tOutcomeAfter,
+        heldAfter,
+        payouts,
+      ].map(object => replaceAddressesAndBigNumberify(object, addresses));
       guaranteeDestinations = guaranteeDestinations.map(x => addresses[x]);
 
       // set holdings (only works on test contract)
@@ -102,7 +115,7 @@ describe('claimAll', () => {
 
       // set outcomeHash for target
       await (await AssetHolder.setAssetOutcomeHashPermissionless(targetId, outcomeHash)).wait();
-      expect(await AssetHolder.outcomeHashes(targetId)).toBe(outcomeHash);
+      expect(await AssetHolder.assetOutcomeHashes(targetId)).toBe(outcomeHash);
 
       // compute an appropriate guarantee
 
@@ -119,7 +132,7 @@ describe('claimAll', () => {
           guarantorId,
           gOutcomeContentHash
         )).wait();
-        expect(await AssetHolder.outcomeHashes(guarantorId)).toBe(gOutcomeContentHash);
+        expect(await AssetHolder.assetOutcomeHashes(guarantorId)).toBe(gOutcomeContentHash);
       }
 
       const tx = AssetHolder.claimAll(...claimAllArgs(guarantorId, guarantee, allocation));
@@ -128,19 +141,22 @@ describe('claimAll', () => {
       if (reason) {
         await expectRevert(() => tx, reason);
       } else {
-        const {events}: {events: any[]} = await (await tx).wait();
-        const given = {};
-        events.map(({topics, args}) => (given[topics[1]] = args));
+        // compile event expectations
+        let expectedEvents = [];
 
-        const expected = {};
-        Object.keys(payouts).map(destination => {
-          const payout = payouts[destination];
-          if (payout.gt(0)) {
-            expected[destination] = newAssetTransferredEvent(destination, payout);
-          }
+        // add AssetTransferred events to expectations
+        Object.keys(payouts).forEach(assetHolder => {
+          expectedEvents = assetTransferredEventsFromPayouts(payouts, AssetHolder.address);
         });
 
-        expect(given).toMatchObject(expected);
+        // extract logs
+        const {logs} = await (await tx).wait();
+
+        // compile events from logs
+        const events = compileEventsFromLogs(logs, [AssetHolder]);
+
+        // check that each expectedEvent is contained as a subset of the properies of each *corresponding* event: i.e. the order matters!
+        expect(events).toMatchObject(expectedEvents);
 
         // check new holdings
         Object.keys(heldAfter).forEach(async key =>
@@ -153,7 +169,7 @@ describe('claimAll', () => {
           allocationAfter.push({destination: key, amount: tOutcomeAfter[key]});
         });
         const [, expectedNewOutcomeHash] = allocationToParams(allocationAfter);
-        expect(await AssetHolder.outcomeHashes(targetId)).toEqual(expectedNewOutcomeHash);
+        expect(await AssetHolder.assetOutcomeHashes(targetId)).toEqual(expectedNewOutcomeHash);
       }
     }
   );

@@ -3,7 +3,8 @@ const writeJsonFile = require('write-json-file');
 
 const testForceMoveArtifact = require('../build/contracts/TESTForceMove.json');
 const testNitroAdjudicatorArtifact = require('../build/contracts/TESTNitroAdjudicator.json');
-const testAssetHolderArtifact = require('../build/contracts/TESTAssetHolder.json');
+const testAssetHolderArtifact1 = require('../build/contracts/TESTAssetHolder.json');
+const testAssetHolderArtifact2 = require('../build/contracts/TESTAssetHolder2.json');
 const trivialAppArtifact = require('../build/contracts/TrivialApp.json');
 const countingAppArtifact = require('../build/contracts/CountingApp.json');
 const singleAssetPaymentsArtifact = require('../build/contracts/SingleAssetPayments.json');
@@ -26,7 +27,8 @@ async function deployTest(network, secret, etherscanApiKey) {
       currentMap[testNitroAdjudicatorArtifact.contractName],
       currentMap[tokenArtifact.contractName],
     ]),
-    migrationFactory(testAssetHolderArtifact),
+    migrationFactory(testAssetHolderArtifact1),
+    migrationFactory(testAssetHolderArtifact2),
     migrationFactory(trivialAppArtifact),
     migrationFactory(countingAppArtifact),
     migrationFactory(singleAssetPaymentsArtifact),

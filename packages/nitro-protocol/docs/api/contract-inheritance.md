@@ -80,7 +80,6 @@ click TrivialApp "../natspec/TrivialApp";
 </div>
 
 ---
-
 Key:
 
 <div class="mermaid" align="center">
