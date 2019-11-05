@@ -1,9 +1,11 @@
 process.env.NODE_ENV = process.env.NODE_ENV || 'test';
 
-const { configureEnvVariables } = require('@statechannels/devtools');
-const { spawn } = require('child_process');
+if (process.env.NODE_ENV !== 'production') {
+  const { configureEnvVariables } = require('@statechannels/devtools');
+  configureEnvVariables();
+}
 
-configureEnvVariables();
+const { spawn } = require('child_process');
 
 const cmd = 'yarn';
 const args = ['run', 'etherlime', 'compile', '--buildDirectory=./build/contracts'];
