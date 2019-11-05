@@ -1,4 +1,4 @@
-import {EngineAction} from "../redux/actions";
+import {WalletAction} from "../redux/actions";
 import {FundingStrategy, ProtocolLocator, EmbeddedProtocol} from "./index";
 import {ProcessProtocol} from ".";
 import {ActionConstructor} from "../redux/utils";
@@ -7,13 +7,13 @@ import {CloseLedgerChannel} from "../redux/protocols/actions";
 import {SignedState} from "@statechannels/nitro-protocol";
 
 export interface MultipleRelayableActions {
-  type: "ENGINE.MULTIPLE_RELAYABLE_ACTIONS";
+  type: "WALLET.MULTIPLE_RELAYABLE_ACTIONS";
   actions: RelayableAction[];
 }
 
 export const multipleRelayableActions: ActionConstructor<MultipleRelayableActions> = p => ({
   ...p,
-  type: "ENGINE.MULTIPLE_RELAYABLE_ACTIONS"
+  type: "WALLET.MULTIPLE_RELAYABLE_ACTIONS"
 });
 
 export interface BaseProcessAction {
@@ -28,16 +28,16 @@ export interface BaseProcessAction {
 // -------
 
 export interface StrategyProposed extends BaseProcessAction {
-  type: "ENGINE.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_PROPOSED";
+  type: "WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_PROPOSED";
   strategy: FundingStrategy;
 }
 
 export interface StrategyApproved extends BaseProcessAction {
-  type: "ENGINE.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_APPROVED";
+  type: "WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_APPROVED";
   strategy: FundingStrategy;
 }
 export interface ConcludeInstigated {
-  type: "ENGINE.NEW_PROCESS.CONCLUDE_INSTIGATED";
+  type: "WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED";
   protocol: ProcessProtocol.Concluding;
   channelId: string;
 }
@@ -48,17 +48,17 @@ export interface ConcludeInstigated {
 
 export const strategyProposed: ActionConstructor<StrategyProposed> = p => ({
   ...p,
-  type: "ENGINE.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_PROPOSED"
+  type: "WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_PROPOSED"
 });
 
 export const strategyApproved: ActionConstructor<StrategyApproved> = p => ({
   ...p,
-  type: "ENGINE.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_APPROVED"
+  type: "WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_APPROVED"
 });
 
 export const concludeInstigated: ActionConstructor<ConcludeInstigated> = p => ({
   ...p,
-  type: "ENGINE.NEW_PROCESS.CONCLUDE_INSTIGATED",
+  type: "WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED",
   protocol: ProcessProtocol.Concluding
 });
 
@@ -73,7 +73,7 @@ export const concludeInstigated: ActionConstructor<ConcludeInstigated> = p => ({
 // sending a full round of commitments when possible ie. when not in PreFundSetup
 
 export interface CommitmentsReceived extends BaseProcessAction {
-  type: "ENGINE.COMMON.COMMITMENTS_RECEIVED";
+  type: "WALLET.COMMON.COMMITMENTS_RECEIVED";
   protocolLocator: ProtocolLocator;
   signedCommitments: Commitments;
   signedStates: SignedState[];
@@ -91,7 +91,7 @@ export const commitmentsReceived = (p: {
 }): CommitmentsReceived => ({
   ...p,
   signedStates: p.signedCommitments.map(sc => sc.signedState),
-  type: "ENGINE.COMMON.COMMITMENTS_RECEIVED"
+  type: "WALLET.COMMON.COMMITMENTS_RECEIVED"
 });
 
 // TODO: This shouldn't require a private key once all protocols are updated to use signedStates
@@ -102,7 +102,7 @@ export const signedStatesReceived = (p: {
 }): CommitmentsReceived => ({
   ...p,
   signedCommitments: [],
-  type: "ENGINE.COMMON.COMMITMENTS_RECEIVED"
+  type: "WALLET.COMMON.COMMITMENTS_RECEIVED"
 });
 
 // -------
@@ -118,28 +118,28 @@ export type RelayableAction =
   | MultipleRelayableActions
   | ConcludeInstigated;
 
-export function isRelayableAction(action: EngineAction): action is RelayableAction {
+export function isRelayableAction(action: WalletAction): action is RelayableAction {
   return (
-    action.type === "ENGINE.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_PROPOSED" ||
-    action.type === "ENGINE.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_APPROVED" ||
-    action.type === "ENGINE.NEW_PROCESS.CONCLUDE_INSTIGATED" ||
-    action.type === "ENGINE.NEW_PROCESS.CLOSE_LEDGER_CHANNEL" ||
-    action.type === "ENGINE.COMMON.COMMITMENTS_RECEIVED" ||
-    action.type === "ENGINE.MULTIPLE_RELAYABLE_ACTIONS"
+    action.type === "WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_PROPOSED" ||
+    action.type === "WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_APPROVED" ||
+    action.type === "WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED" ||
+    action.type === "WALLET.NEW_PROCESS.CLOSE_LEDGER_CHANNEL" ||
+    action.type === "WALLET.COMMON.COMMITMENTS_RECEIVED" ||
+    action.type === "WALLET.MULTIPLE_RELAYABLE_ACTIONS"
   );
 }
 
 export type CommonAction = CommitmentsReceived;
-export function isCommonAction(action: EngineAction, protocol?: EmbeddedProtocol): action is CommonAction {
+export function isCommonAction(action: WalletAction, protocol?: EmbeddedProtocol): action is CommonAction {
   return (
-    action.type === "ENGINE.COMMON.COMMITMENTS_RECEIVED" &&
+    action.type === "WALLET.COMMON.COMMITMENTS_RECEIVED" &&
     // When passed a protocol, check that it's got the protocol in the protocol locator
     (!protocol || (action.protocolLocator && action.protocolLocator.indexOf(protocol) >= 0))
   );
 }
 
 export function routesToProtocol(
-  action: EngineAction,
+  action: WalletAction,
   protocolLocator: ProtocolLocator,
   descriptor: EmbeddedProtocol
 ): boolean {
@@ -150,11 +150,11 @@ export function routesToProtocol(
   }
 }
 
-export function routerFactory<T extends EngineAction>(
-  typeGuard: (action: EngineAction) => action is T,
+export function routerFactory<T extends WalletAction>(
+  typeGuard: (action: WalletAction) => action is T,
   protocol: EmbeddedProtocol
-): (action: EngineAction, protocolLocator: ProtocolLocator) => action is T {
-  function router(action: EngineAction, protocolLocator: ProtocolLocator): action is T {
+): (action: WalletAction, protocolLocator: ProtocolLocator) => action is T {
+  function router(action: WalletAction, protocolLocator: ProtocolLocator): action is T {
     return typeGuard(action) && routesToProtocol(action, protocolLocator, protocol);
   }
 

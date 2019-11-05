@@ -10,7 +10,7 @@ import {TransactionSubmission} from "../../transaction-submission/container";
 import {connect} from "react-redux";
 import {ActionDispatcher} from "../../../utils";
 import {closeLedgerChannel} from "../../actions";
-import {multipleEngineActions} from "../../../../redux/actions";
+import {multipleWalletActions} from "../../../../redux/actions";
 import ApproveX from "../../shared-components/approve-x";
 
 interface Props {
@@ -65,7 +65,7 @@ class ResponderContainer extends PureComponent<Props> {
 }
 
 function closeLedgerChannelAndExitChallenge(processId, channelId) {
-  return multipleEngineActions({
+  return multipleWalletActions({
     actions: [closeLedgerChannel({channelId}), actions.exitChallenge({processId})]
   });
 }

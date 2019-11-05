@@ -13,11 +13,11 @@ graph TD
 linkStyle default interpolate basis
   S((start)) --> WFSC(WaitForStrategyChoice)
 
-  WFSC --> |ENGINE.FUNDING_STRATEGY.PLAYER_A.STRATEGY_CHOSEN| WFSR("WaitForStrategyResponse(Strategy)")
-  WFSR --> |"ENGINE.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_APPROVED(IndirectFunding)"|SS((success))
-  WFSR --> |"ENGINE.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_APPROVED(VirtualFunding)"|SS((success))
+  WFSC --> |WALLET.FUNDING_STRATEGY.PLAYER_A.STRATEGY_CHOSEN| WFSR("WaitForStrategyResponse(Strategy)")
+  WFSR --> |"WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_APPROVED(IndirectFunding)"|SS((success))
+  WFSR --> |"WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_APPROVED(VirtualFunding)"|SS((success))
 
-  WFSR --> |ENGINE.FUNDING.PLAYER_A.STRATEGY_REJECTED| WFSC
+  WFSR --> |WALLET.FUNDING.PLAYER_A.STRATEGY_REJECTED| WFSC
 
   WFSC --> |Cancel| F((failure))
   WFSR --> |Cancel| F
@@ -42,13 +42,13 @@ linkStyle default interpolate basis
 
   WFSP --> |StrategyProposed| WFSA(WaitForStrategyApproved)
 
-  WFSA --> |ENGINE.FUNDING_STRATEGY.PLAYER_B.STRATEGY_APPROVED| SS((success))
+  WFSA --> |WALLET.FUNDING_STRATEGY.PLAYER_B.STRATEGY_APPROVED| SS((success))
 
 
   WFSA --> |StrategyRejected| WFSP
 
-  WFSP --> |ENGINE.FUNDING.PLAYER_B.CANCELLED| F
-  WFSA --> |ENGINE.FUNDING.PLAYER_B.CANCELLED| F
+  WFSP --> |WALLET.FUNDING.PLAYER_B.CANCELLED| F
+  WFSA --> |WALLET.FUNDING.PLAYER_B.CANCELLED| F
   WFSP --> |Cancel| F((failure))
   WFSA --> |Cancel| F
 

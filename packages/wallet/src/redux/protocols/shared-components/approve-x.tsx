@@ -1,5 +1,5 @@
 import React from "react";
-// import engineIcon from '../../images/engine-iconn.svg';
+// import walletIcon from '../../images/wallet-iconn.svg';
 import YesOrNo from "./yes-or-no";
 
 interface Props {

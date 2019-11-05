@@ -9,7 +9,7 @@ import {
 } from "../../state";
 import {ProtocolStateWithSharedData, ProtocolReducer} from "..";
 import {getChannel, ChannelState, getLastState, getPenultimateState, getStates} from "../../channel-store";
-import {EngineAction} from "../../actions";
+import {WalletAction} from "../../actions";
 import * as selectors from "../../selectors";
 import {CommitmentsReceived} from "../../../communication";
 import {isAdvanceChannelAction} from "./actions";
@@ -44,17 +44,17 @@ export function initialize(sharedData: Storage, args: OngoingChannelArgs | NewCh
 export const reducer: ProtocolReducer<states.AdvanceChannelState> = (
   protocolState: states.NonTerminalAdvanceChannelState,
   sharedData: SharedData,
-  action: EngineAction
+  action: WalletAction
 ) => {
   if (!isAdvanceChannelAction(action)) {
-    console.error("Invalid action: expected ENGINE.COMMON.COMMITMENTS_RECEIVED");
+    console.error("Invalid action: expected WALLET.COMMON.COMMITMENTS_RECEIVED");
     return {protocolState, sharedData};
   }
 
   switch (action.type) {
-    case "ENGINE.ADVANCE_CHANNEL.CLEARED_TO_SEND":
+    case "WALLET.ADVANCE_CHANNEL.CLEARED_TO_SEND":
       return clearedToSendReducer(protocolState, sharedData);
-    case "ENGINE.COMMON.COMMITMENTS_RECEIVED":
+    case "WALLET.COMMON.COMMITMENTS_RECEIVED":
       switch (protocolState.type) {
         case "AdvanceChannel.ChannelUnknown": {
           return channelUnknownReducer(protocolState, sharedData, action);

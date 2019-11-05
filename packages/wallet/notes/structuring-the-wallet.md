@@ -1,9 +1,9 @@
-# Engine Architecture
+# Wallet Architecture
 
 **[Home](./index.md)**
 
-The engine needs to be able to run many different protocols, potentially simultaneously.
-For example, the engine might need to be funding channel C1 with opponent A at the same time
+The wallet needs to be able to run many different protocols, potentially simultaneously.
+For example, the wallet might need to be funding channel C1 with opponent A at the same time
 as responding to a challenge on channel C2.
 As we introduce state channel networks, some protocols will need involve interactions between
 multiple channels. This means tha we must move beyond our approach to-date, where the
@@ -24,13 +24,13 @@ A **protocol** defines the series of interactions that must take place between p
 and the blockchain in order to accomplish a given outcome.
 Examples of protocols include "funding a channel", "launching a challenge" and "withdrawing
 funds".
-The purpose of a engine is to provide an _implementation_ for the protocols defined by the
+The purpose of a wallet is to provide an _implementation_ for the protocols defined by the
 framework.
-The engine provides this implementation by defining a state machine, where the states track
+The wallet provides this implementation by defining a state machine, where the states track
 the progress made in executing the protocol.
 
 As mentioned before, there is a lot of structure and overlap between the different protocols.
-In the engine, we represent this structure by embedding state machines inside each other.
+In the wallet, we represent this structure by embedding state machines inside each other.
 For example, the state machine for submitting a transaction to the blockchain is as follows:
 
 ```mermaid
@@ -124,8 +124,8 @@ Note that we are composing these processes at the code level rather than at the 
 
 Processes are responsible for running protocol. Each process has a single top-level protocol, which will then embed further protocols as above.
 
-Each process has an `processId`. The process id is used to route messages to the correct part of the engine.
-Two engines running e.g. a funding process will share process id and include it on all messages between them.
+Each process has an `processId`. The process id is used to route messages to the correct part of the wallet.
+Two wallets running e.g. a funding process will share process id and include it on all messages between them.
 
 The current state of the protocol's state machine will be stored against the `processId`.
 
@@ -138,14 +138,14 @@ interface ProcessState {
 }
 ```
 
-A engine can run multiple processes at once.
+A wallet can run multiple processes at once.
 
 ## Shared State
 
-I expect the engine state to look something like:
+I expect the wallet state to look something like:
 
 ```ts
-interface EngineState {
+interface WalletState {
   channelStore: {
     [channelId: string]: ChannelState;
   };
@@ -156,9 +156,9 @@ interface EngineState {
 }
 ```
 
-Processes have access to their own state and the engine's shared state (but _not_ the state of other processes).
+Processes have access to their own state and the wallet's shared state (but _not_ the state of other processes).
 
-Shared engine state currently includes the `channelStore` and the `outbox`.
+Shared wallet state currently includes the `channelStore` and the `outbox`.
 
 ## Triggering processes
 

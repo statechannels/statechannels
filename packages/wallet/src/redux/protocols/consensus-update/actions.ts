@@ -1,4 +1,4 @@
-import {EngineAction} from "../../actions";
+import {WalletAction} from "../../actions";
 import {
   CommitmentsReceived,
   BaseProcessAction,
@@ -10,23 +10,23 @@ import {
 import {ActionConstructor} from "../../utils";
 
 export interface ClearedToSend extends BaseProcessAction {
-  type: "ENGINE.CONSENSUS_UPDATE.CLEARED_TO_SEND";
+  type: "WALLET.CONSENSUS_UPDATE.CLEARED_TO_SEND";
   protocolLocator: ProtocolLocator;
 }
 
 export const clearedToSend: ActionConstructor<ClearedToSend> = p => {
   return {
     ...p,
-    type: "ENGINE.CONSENSUS_UPDATE.CLEARED_TO_SEND"
+    type: "WALLET.CONSENSUS_UPDATE.CLEARED_TO_SEND"
   };
 };
 
 export type ConsensusUpdateAction = CommitmentsReceived | ClearedToSend;
 
-export const isConsensusUpdateAction = (action: EngineAction): action is ConsensusUpdateAction => {
+export const isConsensusUpdateAction = (action: WalletAction): action is ConsensusUpdateAction => {
   return (
     isCommonAction(action, EmbeddedProtocol.ConsensusUpdate) ||
-    action.type === "ENGINE.CONSENSUS_UPDATE.CLEARED_TO_SEND"
+    action.type === "WALLET.CONSENSUS_UPDATE.CLEARED_TO_SEND"
   );
 };
 

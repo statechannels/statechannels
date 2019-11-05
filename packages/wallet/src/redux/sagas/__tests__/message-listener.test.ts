@@ -1,5 +1,5 @@
 import {put} from "redux-saga/effects";
-import * as incoming from "../../../magmo-engine-client/engine-instructions";
+import * as incoming from "../../../magmo-wallet-client/wallet-instructions";
 
 import {messageListener} from "../message-listener";
 import * as actions from "../../actions";
@@ -14,7 +14,7 @@ describe("message listener", () => {
   const mockActionChannel = channel();
   saga.next(mockActionChannel);
 
-  it("converts INITIALIZE_REQUEST into a ENGINE.LOGGED_IN", () => {
+  it("converts INITIALIZE_REQUEST into a WALLET.LOGGED_IN", () => {
     const output = saga.next({data: incoming.initializeRequest("abc123")}).value;
     saga.next(); // the take
 

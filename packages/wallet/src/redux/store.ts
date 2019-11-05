@@ -4,32 +4,32 @@ import createSagaMiddleware from "redux-saga";
 import * as storage from "redux-storage";
 const sagaMiddleware = createSagaMiddleware();
 
-import {engineReducer} from "./reducer";
+import {walletReducer} from "./reducer";
 import {sagaManager} from "./sagas/saga-manager";
 import filter from "redux-storage-decorator-filter";
-import createEngine from "redux-storage-engine-indexed-db";
+import createWallet from "redux-storage-engine-indexed-db";
 import {USE_STORAGE} from "../constants";
 
 const composeEnhancers = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 let store;
 if (USE_STORAGE) {
   // We currently whitelist the values that we store/load.
-  const storageEngine = filter(createEngine("magmo-engine"), [
+  const storageWallet = filter(createWallet("magmo-wallet"), [
     "whitelisted-key",
     ["address"],
     ["privateKey"],
     ["channelStore"],
     ["fundingState"]
   ]);
-  const storageMiddleware = storage.createMiddleware(storageEngine);
+  const storageMiddleware = storage.createMiddleware(storageWallet);
   const enhancers = composeEnhancers(applyMiddleware(sagaMiddleware, storageMiddleware));
-  store = createStore(storage.reducer(engineReducer), enhancers);
-  const load = storage.createLoader(storageEngine);
+  store = createStore(storage.reducer(walletReducer), enhancers);
+  const load = storage.createLoader(storageWallet);
 
   load(store).then(() => console.log("Successfully loaded state from indexedDB"));
 } else {
   const enhancers = composeEnhancers(applyMiddleware(sagaMiddleware));
-  store = createStore(engineReducer, enhancers);
+  store = createStore(walletReducer, enhancers);
 }
 
 function* rootSaga() {
@@ -39,5 +39,5 @@ function* rootSaga() {
 sagaMiddleware.run(rootSaga);
 
 export default store;
-export const getEngineState = (storeObj: any) => storeObj.getState();
+export const getWalletState = (storeObj: any) => storeObj.getState();
 export const getFundingState = (storeObj: any) => storeObj.getState().fundingState;

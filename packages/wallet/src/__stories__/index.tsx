@@ -2,17 +2,17 @@ import {storiesOf} from "@storybook/react";
 import React from "react";
 import {Provider} from "react-redux";
 import "../index.scss";
-import {dummyWaitForLogin, dummyWaitForMetaMask} from "./dummy-engine-states";
-import EngineContainer from "../containers/engine";
+import {dummyWaitForLogin, dummyWaitForMetaMask} from "./dummy-wallet-states";
+import WalletContainer from "../containers/wallet";
 import {ProtocolState} from "../redux/protocols";
 import Modal from "react-modal";
 import StatusBarLayout from "../components/status-bar-layout";
 
-const engineStateRender = state => () => {
+const walletStateRender = state => () => {
   console.log(state);
   return (
     <Provider store={fakeStore(state) as any}>
-      <EngineContainer position="center" />
+      <WalletContainer position="center" />
     </Provider>
   );
 };
@@ -23,8 +23,8 @@ const protocolStateRender = (protocolState: ProtocolState, Container) => () => {
     <Provider store={fakeStore(protocolState) as any}>
       <Modal
         isOpen={true}
-        className={"engine-content-center"}
-        overlayClassName={"engine-overlay-center"}
+        className={"wallet-content-center"}
+        overlayClassName={"wallet-overlay-center"}
         ariaHideApp={false}
       >
         <StatusBarLayout>
@@ -43,12 +43,12 @@ export function addStoriesFromScenario(scenario, chapter, container) {
   });
 }
 
-const EngineScreensNotInitialized = {
+const WalletScreensNotInitialized = {
   WaitForLogIn: dummyWaitForLogin,
   WaitForMetaMask: dummyWaitForMetaMask
 };
 
-addStoriesFromCollection(EngineScreensNotInitialized, "Not Initialized ");
+addStoriesFromCollection(WalletScreensNotInitialized, "Not Initialized ");
 
 const NetworkStatuses = {
   // TODO the UI currently inspects an environment variable (not the redux state) to infer networkId
@@ -61,7 +61,7 @@ const NetworkStatuses = {
 
 addStoriesFromCollection(NetworkStatuses, "Network Statuses");
 
-storiesOf("Landing Page", module).add("Landing Page", engineStateRender({}));
+storiesOf("Landing Page", module).add("Landing Page", walletStateRender({}));
 
 export const fakeStore = state => ({
   dispatch: action => {
@@ -77,7 +77,7 @@ export const fakeStore = state => ({
   }
 });
 
-export function addStoriesFromCollection(collection, chapter, renderer = engineStateRender) {
+export function addStoriesFromCollection(collection, chapter, renderer = walletStateRender) {
   Object.keys(collection).map(storyName => {
     storiesOf(chapter, module).add(storyName, renderer(collection[storyName]));
   });

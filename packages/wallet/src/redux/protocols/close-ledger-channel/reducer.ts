@@ -102,7 +102,7 @@ const waitForWithdrawalReducer = (
     case "Withdrawing.Success":
       return {
         protocolState: states.success({}),
-        sharedData: helpers.hideEngine(sharedData)
+        sharedData: helpers.hideWallet(sharedData)
       };
     case "Withdrawing.Failure":
       return {

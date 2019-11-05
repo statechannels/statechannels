@@ -6,12 +6,12 @@ import {transactionSender} from "./transaction-sender";
 import {adjudicatorWatcher} from "./adjudicator-watcher";
 import {challengeWatcher} from "./challenge-watcher";
 
-import {EngineState} from "../state";
+import {WalletState} from "../state";
 import {getProvider, isDevelopmentNetwork} from "../../utils/contract-utils";
 
 import {displaySender} from "./display-sender";
 import {ganacheMiner} from "./ganache-miner";
-import {ENGINE_INITIALIZED} from "../state";
+import {WALLET_INITIALIZED} from "../state";
 import {challengeResponseInitiator} from "./challenge-response-initiator";
 import {multipleActionDispatcher} from "./multiple-action-dispatcher";
 
@@ -31,7 +31,7 @@ export function* sagaManager(): IterableIterator<any> {
   // always want the message listenter to be running
   yield fork(messageListener);
 
-  // todo: restrict just to engine actions
+  // todo: restrict just to wallet actions
   const channel = yield actionChannel("*");
 
   while (true) {
@@ -42,10 +42,10 @@ export function* sagaManager(): IterableIterator<any> {
     }
 
     // @ts-ignore TODO: Why is redux-saga select think its returning undefined?
-    const state: EngineState = yield select((engineState: EngineState) => engineState);
+    const state: WalletState = yield select((walletState: WalletState) => walletState);
 
     const provider = yield getProvider();
-    if (state.type === ENGINE_INITIALIZED) {
+    if (state.type === WALLET_INITIALIZED) {
       if (!adjudicatorWatcherProcess) {
         adjudicatorWatcherProcess = yield fork(adjudicatorWatcher, provider);
       }

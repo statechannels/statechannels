@@ -1,6 +1,6 @@
 # Consensus App
 
-Our current implementation of the consensus app in the engine supports three transitions.
+Our current implementation of the consensus app in the wallet supports three transitions.
 
 1. Propose (Consensus->Proposal)
 2. Vote (Proposal->Proposal)

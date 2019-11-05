@@ -54,9 +54,9 @@ export const consensusUpdateReducer = (
   }
 
   switch (action.type) {
-    case "ENGINE.COMMON.COMMITMENTS_RECEIVED":
+    case "WALLET.COMMON.COMMITMENTS_RECEIVED":
       return handleStateReceived(protocolState, sharedData, action);
-    case "ENGINE.CONSENSUS_UPDATE.CLEARED_TO_SEND":
+    case "WALLET.CONSENSUS_UPDATE.CLEARED_TO_SEND":
       return handleClearedToSend(protocolState, sharedData);
     default:
       return unreachable(action);

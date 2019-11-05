@@ -13,8 +13,8 @@ import {isTransactionAction} from "../../transaction-submission/actions";
 import {isTerminal, TransactionSubmissionState, isSuccess} from "../../transaction-submission/states";
 
 import {
-  showEngine,
-  hideEngine,
+  showWallet,
+  hideWallet,
   sendChallengeResponseRequested,
   sendChallengeComplete,
   sendOpponentConcluded
@@ -36,7 +36,7 @@ export const initialize = (
       challengeCommitment,
       expiryTime
     }),
-    sharedData: showEngine(
+    sharedData: showWallet(
       registerChannelToMonitor(
         sendChallengeResponseRequested(sharedData, channelId),
         processId,
@@ -80,7 +80,7 @@ const waitForTransactionReducer = (
   sharedData: SharedData,
   action: actions.ResponderAction
 ): ProtocolStateWithSharedData<states.ResponderState> => {
-  if (action.type === "ENGINE.ADJUDICATOR.CHALLENGE_EXPIRED") {
+  if (action.type === "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED") {
     return {
       protocolState: states.acknowledgeTimeout({...protocolState}),
       sharedData: sendOpponentConcluded(sharedData)
@@ -110,7 +110,7 @@ const waitForResponseReducer = (
   action: actions.ResponderAction
 ): ProtocolStateWithSharedData<states.ResponderState> => {
   switch (action.type) {
-    case "ENGINE.DISPUTE.RESPONDER.RESPONSE_PROVIDED":
+    case "WALLET.DISPUTE.RESPONDER.RESPONSE_PROVIDED":
       const {commitment} = action;
       const signResult = signAndStoreComm(sharedData, commitment);
       if (!signResult.isSuccess) {
@@ -131,10 +131,10 @@ const waitForResponseReducer = (
       );
 
       return transitionToWaitForTransaction(transaction, protocolState, signResult.store);
-    case "ENGINE.ADJUDICATOR.CHALLENGE_EXPIRED":
+    case "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED":
       return {
         protocolState: states.acknowledgeTimeout({...protocolState}),
-        sharedData: showEngine(sendOpponentConcluded(sharedData))
+        sharedData: showWallet(sendOpponentConcluded(sharedData))
       };
 
     default:
@@ -148,10 +148,10 @@ const waitForAcknowledgementReducer = (
   action: actions.ResponderAction
 ): ProtocolStateWithSharedData<states.ResponderState> => {
   switch (action.type) {
-    case "ENGINE.DISPUTE.RESPONDER.ACKNOWLEDGED":
+    case "WALLET.DISPUTE.RESPONDER.ACKNOWLEDGED":
       return {
         protocolState: states.success({}),
-        sharedData: sendChallengeComplete(hideEngine(sharedData))
+        sharedData: sendChallengeComplete(hideWallet(sharedData))
       };
     default:
       return {protocolState, sharedData};
@@ -164,19 +164,19 @@ const waitForApprovalReducer = (
   action: actions.ResponderAction
 ): ProtocolStateWithSharedData<states.ResponderState> => {
   switch (action.type) {
-    case "ENGINE.DISPUTE.RESPONDER.RESPOND_APPROVED":
+    case "WALLET.DISPUTE.RESPONDER.RESPOND_APPROVED":
       const {challengeCommitment, processId} = protocolState;
       if (!canRespondWithExistingCommitment(protocolState.challengeCommitment, sharedData)) {
         return {
           protocolState: states.waitForResponse(protocolState),
-          sharedData: hideEngine(sharedData)
+          sharedData: hideWallet(sharedData)
         };
       } else {
         const transaction = craftResponseTransactionWithExistingCommitment(processId, challengeCommitment, sharedData);
 
         return transitionToWaitForTransaction(transaction, protocolState, sharedData);
       }
-    case "ENGINE.ADJUDICATOR.CHALLENGE_EXPIRED":
+    case "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED":
       return {
         protocolState: states.acknowledgeTimeout({...protocolState}),
         sharedData: sendOpponentConcluded(sharedData)
@@ -192,13 +192,13 @@ function acknowledgeTimeoutReducer(
   sharedData: SharedData,
   action: actions.ResponderAction
 ): ProtocolStateWithSharedData<states.ResponderState> {
-  if (action.type === "ENGINE.DISPUTE.RESPONDER.ACKNOWLEDGED") {
+  if (action.type === "WALLET.DISPUTE.RESPONDER.ACKNOWLEDGED") {
     return {
       protocolState: states.failure({reason: states.FailureReason.TimeOut}),
-      sharedData: hideEngine(sharedData)
+      sharedData: hideWallet(sharedData)
     };
   }
-  if (action.type === "ENGINE.DISPUTE.CHALLENGER.EXIT_CHALLENGE") {
+  if (action.type === "WALLET.DISPUTE.CHALLENGER.EXIT_CHALLENGE") {
     return {
       protocolState: states.failure({reason: states.FailureReason.TimeOut}),
       sharedData
@@ -247,7 +247,7 @@ const transitionToWaitForTransaction = (
   });
   return {
     protocolState: newProtocolState,
-    sharedData: showEngine(newSharedData)
+    sharedData: showWallet(newSharedData)
   };
 };
 

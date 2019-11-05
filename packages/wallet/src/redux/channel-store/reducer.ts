@@ -52,7 +52,7 @@ export function checkAndInitialize(store: ChannelStore, signedState: SignedState
   return {isSuccess: true, store};
 }
 
-// Signs and stores a commitment from our own app or engine.
+// Signs and stores a commitment from our own app or wallet.
 // Doesn't work for the first state - the channel must already exist.
 export function signAndStore(store: ChannelStore, state: State): SignResult {
   // TODO: Temporary until everything is converted to use signedStates

@@ -9,7 +9,7 @@ interface Props {
   state: states.Initialized;
 }
 
-class EngineInitializedContainer extends PureComponent<Props> {
+class WalletInitializedContainer extends PureComponent<Props> {
   render() {
     const {state} = this.props;
     if (!state.currentProcessId) {
@@ -22,4 +22,4 @@ class EngineInitializedContainer extends PureComponent<Props> {
   }
 }
 
-export default connect(() => ({}))(EngineInitializedContainer);
+export default connect(() => ({}))(WalletInitializedContainer);

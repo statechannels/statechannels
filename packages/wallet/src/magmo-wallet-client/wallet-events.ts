@@ -1,7 +1,7 @@
 import {Commitment} from "fmg-core";
 
-// TODO: We should limit EngineEvent/EngineEventTypes to the bare minimum of events we expect the app to handle. Some of these can be pruned.
-// Events that we handle for the user (HideEngine,ShowEngine, ValidateSuccess, etc..) should be removed from EngineEvent/EngineEventTypes
+// TODO: We should limit WalletEvent/WalletEventTypes to the bare minimum of events we expect the app to handle. Some of these can be pruned.
+// Events that we handle for the user (HideWallet,ShowWallet, ValidateSuccess, etc..) should be removed from WalletEvent/WalletEventTypes
 // We should also switch from ReturnType to declaring a fixed type/interface that the action creators implement.
 
 // FUNDING
@@ -9,12 +9,12 @@ import {Commitment} from "fmg-core";
 /**
  * The event type when funding succeeds.
  */
-export const FUNDING_SUCCESS = "ENGINE.FUNDING.SUCCESS";
+export const FUNDING_SUCCESS = "WALLET.FUNDING.SUCCESS";
 
 /**
  * The event type when funding fails.
  */
-export const FUNDING_FAILURE = "ENGINE.FUNDING.FAILURE";
+export const FUNDING_FAILURE = "WALLET.FUNDING.FAILURE";
 
 /**
  * @ignore
@@ -55,11 +55,11 @@ export type FundingResponse = FundingSuccess | FundingFailure;
 /**
  * @ignore
  */
-export const VALIDATION_SUCCESS = "ENGINE.VALIDATION.SUCCESS";
+export const VALIDATION_SUCCESS = "WALLET.VALIDATION.SUCCESS";
 /**
  * @ignore
  */
-export const VALIDATION_FAILURE = "ENGINE.VALIDATION.FAILURE";
+export const VALIDATION_FAILURE = "WALLET.VALIDATION.FAILURE";
 /**
  * @ignore
  */
@@ -69,7 +69,7 @@ export const validationSuccess = () => ({
 /**
  * @ignore
  */
-export const validationFailure = (reason: "EngineBusy" | "InvalidSignature" | "Other", error?: string) => ({
+export const validationFailure = (reason: "WalletBusy" | "InvalidSignature" | "Other", error?: string) => ({
   type: VALIDATION_FAILURE as typeof VALIDATION_FAILURE,
   reason,
   error
@@ -92,11 +92,11 @@ export type ValidationResponse = ValidationSuccess | ValidationFailure;
 /**
  * @ignore
  */
-export const SIGNATURE_SUCCESS = "ENGINE.SIGNATURE.SUCCESS";
+export const SIGNATURE_SUCCESS = "WALLET.SIGNATURE.SUCCESS";
 /**
  * @ignore
  */
-export const SIGNATURE_FAILURE = "ENGINE.SIGNATURE.FAILURE";
+export const SIGNATURE_FAILURE = "WALLET.SIGNATURE.FAILURE";
 /**
  * @ignore
  */
@@ -107,7 +107,7 @@ export const signatureSuccess = (signature: string) => ({
 /**
  * @ignore
  */
-export const signatureFailure = (reason: "EngineBusy" | "Other", error?: string) => ({
+export const signatureFailure = (reason: "WalletBusy" | "Other", error?: string) => ({
   type: SIGNATURE_FAILURE as typeof SIGNATURE_FAILURE,
   reason,
   error
@@ -130,11 +130,11 @@ export type SignatureResponse = SignatureSuccess | SignatureFailure;
 /**
  * @ignore
  */
-export const INITIALIZATION_SUCCESS = "ENGINE.INITIALIZATION.SUCCESS";
+export const INITIALIZATION_SUCCESS = "WALLET.INITIALIZATION.SUCCESS";
 /**
  * @ignore
  */
-export const INITIALIZATION_FAILURE = "ENGINE.INITIALIZATION.FAILURE";
+export const INITIALIZATION_FAILURE = "WALLET.INITIALIZATION.FAILURE";
 
 /**
  * @ignore
@@ -161,7 +161,7 @@ export type InitializationSuccess = ReturnType<typeof initializationSuccess>;
 /**
  * The event type when the opponent concludes the game.
  */
-export const OPPONENT_CONCLUDED = "ENGINE.CONCLUDE.OPPONENT";
+export const OPPONENT_CONCLUDED = "WALLET.CONCLUDE.OPPONENT";
 
 /**
  * @ignore
@@ -178,11 +178,11 @@ export type OpponentConcluded = ReturnType<typeof opponentConcluded>;
 /**
  * The event type when the game successfully concludes.
  */
-export const CONCLUDE_SUCCESS = "ENGINE.CONCLUDE.SUCCESS";
+export const CONCLUDE_SUCCESS = "WALLET.CONCLUDE.SUCCESS";
 /**
  * The event type when the game conclusion fails.
  */
-export const CONCLUDE_FAILURE = "ENGINE.CONCLUDE.FAILURE";
+export const CONCLUDE_FAILURE = "WALLET.CONCLUDE.FAILURE";
 /**
  * @ignore
  */
@@ -210,39 +210,39 @@ export type ConcludeFailure = ReturnType<typeof concludeFailure>;
 /**
  * @ignore
  */
-export const SHOW_ENGINE = "ENGINE.DISPLAY.SHOW_ENGINE";
+export const SHOW_WALLET = "WALLET.DISPLAY.SHOW_WALLET";
 /**
  * @ignore
  */
-export const showEngine = () => ({
-  type: SHOW_ENGINE as typeof SHOW_ENGINE
+export const showWallet = () => ({
+  type: SHOW_WALLET as typeof SHOW_WALLET
 });
 /**
  * @ignore
  */
-export type ShowEngine = ReturnType<typeof showEngine>;
+export type ShowWallet = ReturnType<typeof showWallet>;
 
 /**
  * @ignore
  */
-export const HIDE_ENGINE = "ENGINE.DISPLAY.HIDE_ENGINE";
+export const HIDE_WALLET = "WALLET.DISPLAY.HIDE_WALLET";
 /**
  * @ignore
  */
-export const hideEngine = () => ({
-  type: HIDE_ENGINE as typeof HIDE_ENGINE
+export const hideWallet = () => ({
+  type: HIDE_WALLET as typeof HIDE_WALLET
 });
 /**
  * @ignore
  */
-export type HideEngine = ReturnType<typeof hideEngine>;
+export type HideWallet = ReturnType<typeof hideWallet>;
 
-// ENGINE-TO-ENGINE COMMUNICATION
+// WALLET-TO-WALLET COMMUNICATION
 // =========
 /**
- * The type of event when a message relay to the opponent's engine is requested.
+ * The type of event when a message relay to the opponent's wallet is requested.
  */
-export const MESSAGE_RELAY_REQUESTED = "ENGINE.MESSAGING.MESSAGE_RELAY_REQUESTED";
+export const MESSAGE_RELAY_REQUESTED = "WALLET.MESSAGING.MESSAGE_RELAY_REQUESTED";
 /**
  * @ignore
  */
@@ -253,14 +253,14 @@ export const messageRelayRequested = (to: string, messagePayload: any) => ({
 });
 
 /**
- * The event emitted when the engine requests a message be relayed to the opponent's engine.
+ * The event emitted when the wallet requests a message be relayed to the opponent's wallet.
  */
 export type MessageRelayRequested = ReturnType<typeof messageRelayRequested>;
 
 /**
- * The type for events where a challenge position is received from the engine.
+ * The type for events where a challenge position is received from the wallet.
  */
-export const CHALLENGE_COMMITMENT_RECEIVED = "ENGINE.MESSAGING.CHALLENGE_COMMITMENT_RECEIVED";
+export const CHALLENGE_COMMITMENT_RECEIVED = "WALLET.MESSAGING.CHALLENGE_COMMITMENT_RECEIVED";
 /**
  * @ignore
  */
@@ -269,14 +269,14 @@ export const challengeCommitmentReceived = (commitment: Commitment) => ({
   commitment
 });
 /**
- * The event emitted when the engine has received a challenge position.
+ * The event emitted when the wallet has received a challenge position.
  */
 export type ChallengeCommitmentReceived = ReturnType<typeof challengeCommitmentReceived>;
 
 /**
  * The event type when a user rejects a challenge.
  */
-export const CHALLENGE_REJECTED = "ENGINE.CHALLENGING.CHALLENGE_REJECTED";
+export const CHALLENGE_REJECTED = "WALLET.CHALLENGING.CHALLENGE_REJECTED";
 /**
  * @ignore
  */
@@ -291,7 +291,7 @@ export type ChallengeRejected = ReturnType<typeof challengeRejected>;
 /**
  * The event type when a challenge response is requested from the application.
  */
-export const CHALLENGE_RESPONSE_REQUESTED = "ENGINE.CHALLENGING.CHALLENGE_RESPONSE_REQUESTED";
+export const CHALLENGE_RESPONSE_REQUESTED = "WALLET.CHALLENGING.CHALLENGE_RESPONSE_REQUESTED";
 /**
  * @ignore
  */
@@ -306,7 +306,7 @@ export type ChallengeResponseRequested = ReturnType<typeof challengeResponseRequ
 /**
  * The event type when a challenge is over.
  */
-export const CHALLENGE_COMPLETE = "ENGINE.CHALLENGING.CHALLENGE_COMPLETE";
+export const CHALLENGE_COMPLETE = "WALLET.CHALLENGING.CHALLENGE_COMPLETE";
 /**
  * @ignore
  */
@@ -319,9 +319,9 @@ export const challengeComplete = () => ({
 export type ChallengeComplete = ReturnType<typeof challengeComplete>;
 
 /**
- * The various types of engine events that can occur.
+ * The various types of wallet events that can occur.
  */
-export type EngineEventType =
+export type WalletEventType =
   | typeof CHALLENGE_COMMITMENT_RECEIVED
   | typeof CHALLENGE_COMPLETE
   | typeof CHALLENGE_REJECTED
@@ -331,9 +331,9 @@ export type EngineEventType =
   | typeof CONCLUDE_SUCCESS
   | typeof FUNDING_FAILURE
   | typeof FUNDING_SUCCESS
-  | typeof HIDE_ENGINE
+  | typeof HIDE_WALLET
   | typeof MESSAGE_RELAY_REQUESTED
-  | typeof SHOW_ENGINE
+  | typeof SHOW_WALLET
   | typeof SIGNATURE_FAILURE
   | typeof SIGNATURE_SUCCESS
   | typeof VALIDATION_FAILURE
@@ -342,10 +342,10 @@ export type EngineEventType =
 /**
  * @ignore
  */
-export type DisplayAction = ShowEngine | HideEngine;
+export type DisplayAction = ShowWallet | HideWallet;
 
-// TODO: This could live exclusively in the engine
-export type EngineEvent =
+// TODO: This could live exclusively in the wallet
+export type WalletEvent =
   | ChallengeCommitmentReceived
   | ChallengeComplete
   | ChallengeRejected

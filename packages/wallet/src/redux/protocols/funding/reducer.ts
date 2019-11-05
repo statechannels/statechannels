@@ -5,8 +5,8 @@ import {SharedData, queueMessage} from "../../state";
 import {ProtocolStateWithSharedData, makeLocator, EMPTY_LOCATOR} from "..";
 import {unreachable} from "../../../utils/reducer-utils";
 
-import {showEngine, hideEngine, sendFundingComplete} from "../reducer-helpers";
-import {fundingFailure} from "../../../magmo-engine-client";
+import {showWallet, hideWallet, sendFundingComplete} from "../reducer-helpers";
+import {fundingFailure} from "../../../magmo-wallet-client";
 import {EmbeddedProtocol} from "../../../communication";
 
 import * as ledgerFundingStates from "../ledger-funding/states";
@@ -68,7 +68,7 @@ export function initialize(
       ourAddress,
       fundingStrategyNegotiationState
     }),
-    sharedData: showEngine(sharedData)
+    sharedData: showWallet(sharedData)
   };
 }
 
@@ -318,7 +318,7 @@ function fundingSuccessAcknowledged(state: states.FundingState, sharedData: Shar
     return {protocolState: state, sharedData};
   }
   const updatedSharedData = sendFundingComplete(sharedData, state.targetChannelId);
-  return {protocolState: states.success({}), sharedData: hideEngine(updatedSharedData)};
+  return {protocolState: states.success({}), sharedData: hideWallet(updatedSharedData)};
 }
 
 function handleFundingComplete(

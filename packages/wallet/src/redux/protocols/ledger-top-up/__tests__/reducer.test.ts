@@ -229,7 +229,7 @@ function getProposedConsensus(protocolState: LedgerTopUpState): Outcome {
 }
 function expectOutcomeToContain(outcome: Outcome, items: AllocationItem[]) {
   if (outcome.length !== 1) {
-    throw new Error("Engine currently only supports one outcome.");
+    throw new Error("Wallet currently only supports one outcome.");
   }
   const assetOutcome = outcome[0];
   if (!isAllocationOutcome(assetOutcome)) {

@@ -7,7 +7,7 @@ import {
   createRespondTransaction,
 } from "../utils/transaction-generator";
 import { signCommitment } from "../domain";
-import * as engineStates from "../redux/state";
+import * as walletStates from "../redux/state";
 
 import { bigNumberify } from "ethers/utils";
 import { channelID, Channel } from "fmg-core/lib/channel";
@@ -21,15 +21,15 @@ export const fourSix = [bigNumberify(4).toHexString(), bigNumberify(6).toHexStri
 
 export const defaultDepositAmount = fiveFive[0];
 
-export const createWatcherState = (processId: string, ...channelIds: string[]): engineStates.Initialized => {
-  const channelSubscriptions: engineStates.ChannelSubscriptions = {};
+export const createWatcherState = (processId: string, ...channelIds: string[]): walletStates.Initialized => {
+  const channelSubscriptions: walletStates.ChannelSubscriptions = {};
   for (const channelId of channelIds) {
     channelSubscriptions[channelId] = channelSubscriptions[channelId] || [];
     channelSubscriptions[channelId].push({processId, protocolLocator: []});
   }
 
-  return engineStates.initialized({
-    ...engineStates.EMPTY_SHARED_DATA,
+  return walletStates.initialized({
+    ...walletStates.EMPTY_SHARED_DATA,
     uid: "",
     processStore: {},
     channelSubscriptions,

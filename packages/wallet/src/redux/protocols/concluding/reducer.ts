@@ -5,10 +5,10 @@ import {ProtocolStateWithSharedData, makeLocator, EMPTY_LOCATOR} from "..";
 import {
   sendConcludeInstigated,
   getTwoPlayerIndex,
-  showEngine,
+  showWallet,
   sendConcludeSuccess,
   sendConcludeFailure,
-  hideEngine,
+  hideWallet,
   getFundingChannelId,
   sendOpponentConcluded
 } from "../reducer-helpers";
@@ -69,7 +69,7 @@ function waitForLedgerCloseReducer(
       };
     case "CloseLedgerChannel.Success":
       sharedData = sendConcludeSuccess(sharedData);
-      sharedData = hideEngine(sharedData);
+      sharedData = hideWallet(sharedData);
       return {protocolState: states.success({}), sharedData};
     default:
       return {
@@ -83,17 +83,17 @@ function decideClosingReducer(
   sharedData: SharedData,
   action: ProtocolAction
 ): ProtocolStateWithSharedData<ConcludingState> {
-  if (action.type !== "ENGINE.CONCLUDING.KEEP_OPEN_SELECTED" && action.type !== "ENGINE.CONCLUDING.CLOSE_SELECTED") {
+  if (action.type !== "WALLET.CONCLUDING.KEEP_OPEN_SELECTED" && action.type !== "WALLET.CONCLUDING.CLOSE_SELECTED") {
     console.warn(`Expected decision action received ${action.type} instead`);
     return {protocolState, sharedData};
   }
 
   switch (action.type) {
-    case "ENGINE.CONCLUDING.KEEP_OPEN_SELECTED":
+    case "WALLET.CONCLUDING.KEEP_OPEN_SELECTED":
       sharedData = sendConcludeSuccess(sharedData);
-      sharedData = hideEngine(sharedData);
+      sharedData = hideWallet(sharedData);
       return {protocolState: states.success({}), sharedData};
-    case "ENGINE.CONCLUDING.CLOSE_SELECTED":
+    case "WALLET.CONCLUDING.CLOSE_SELECTED":
       let ledgerClosing: CloseLedgerChannelState;
 
       ({protocolState: ledgerClosing, sharedData} = initializeCloseLedgerChannel(
@@ -108,7 +108,7 @@ function decideClosingReducer(
             sharedData
           };
         case "CloseLedgerChannel.Success":
-          sharedData = hideEngine(sharedData);
+          sharedData = hideWallet(sharedData);
           sharedData = sendConcludeSuccess(sharedData);
           return {protocolState: states.success({}), sharedData};
 
@@ -203,7 +203,7 @@ export function initialize({
   } else {
     sharedData = sendOpponentConcluded(sharedData);
   }
-  sharedData = showEngine(sharedData);
+  sharedData = showWallet(sharedData);
 
   const ledgerId = getFundingChannelId(channelId, sharedData);
 

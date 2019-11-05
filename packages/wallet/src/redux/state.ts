@@ -22,7 +22,7 @@ import {
 import {Properties} from "./utils";
 import * as NewLedgerChannel from "./protocols/new-ledger-channel/states";
 import {accumulateSideEffects} from "./outbox";
-import {EngineEvent} from "../magmo-engine-client";
+import {WalletEvent} from "../magmo-wallet-client";
 import {TransactionRequest} from "ethers/providers";
 import {AdjudicatorState} from "./adjudicator-state/state";
 import {SignedCommitment, Commitment, getCommitmentChannelId} from "../domain";
@@ -35,14 +35,14 @@ import {TerminalConcludingState, isConcludingState, isTerminalConcludingState} f
 import {convertCommitmentToState, convertStateToSignedCommitment} from "../utils/nitro-converter";
 import {SignedState, State, getChannelId} from "@statechannels/nitro-protocol";
 
-export type EngineState = WaitForLogin | MetaMaskError | Initialized;
+export type WalletState = WaitForLogin | MetaMaskError | Initialized;
 
 // -----------
 // State types
 // -----------
 export const WAIT_FOR_LOGIN = "INITIALIZING.WAIT_FOR_LOGIN";
 export const METAMASK_ERROR = "INITIALIZING.METAMASK_ERROR";
-export const ENGINE_INITIALIZED = "ENGINE.INITIALIZED";
+export const WALLET_INITIALIZED = "WALLET.INITIALIZED";
 
 // ------
 // States
@@ -75,7 +75,7 @@ export interface MetaMaskError extends SharedData {
 }
 
 export interface Initialized extends SharedData {
-  type: typeof ENGINE_INITIALIZED;
+  type: typeof WALLET_INITIALIZED;
   uid: string;
   processStore: ProcessStore;
 
@@ -172,7 +172,7 @@ export function initialized(params: Properties<Initialized>): Initialized {
   return {
     ...params,
     ...sharedData(params),
-    type: ENGINE_INITIALIZED
+    type: WALLET_INITIALIZED
   };
 }
 
@@ -180,7 +180,7 @@ export function initialized(params: Properties<Initialized>): Initialized {
 // Getters and setters
 // -------------------
 
-export function getChannelStatus(state: EngineState, channelId: string): ChannelState {
+export function getChannelStatus(state: WalletState, channelId: string): ChannelState {
   return state.channelStore[channelId];
 }
 
@@ -207,7 +207,7 @@ export function getExistingChannel(state: SharedData, channelId: string) {
   return state.channelStore[channelId];
 }
 
-export function queueMessage(state: SharedData, message: EngineEvent): SharedData {
+export function queueMessage(state: SharedData, message: WalletEvent): SharedData {
   return {...state, outboxState: queueMessageOutbox(state.outboxState, message)};
 }
 
@@ -219,7 +219,7 @@ export function setFundingState(state: SharedData, channelId: string, fundingSta
   return {...state, fundingState: {...state.fundingState, [channelId]: fundingState}};
 }
 
-export function getLastMessage(state: SharedData): EngineEvent | undefined {
+export function getLastMessage(state: SharedData): WalletEvent | undefined {
   return getLastMessageFromOutbox(state.outboxState);
 }
 

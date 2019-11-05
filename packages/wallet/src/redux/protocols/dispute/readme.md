@@ -13,8 +13,8 @@ The two state machines interact through the following messages:
 
 ```mermaid
 sequenceDiagram
-  participant C as C's engine
-  participant R as R's engine
+  participant C as C's wallet
+  participant R as R's wallet
   participant A as Adjudicator
   Note over C: Launch challenge
   C->>A: forceMove tx

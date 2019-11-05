@@ -7,22 +7,22 @@ export const adjudicatorStateReducer = (
   action: actions.AdjudicatorEventAction | actions.ChallengeCreatedEvent
 ): AdjudicatorState => {
   switch (action.type) {
-    case "ENGINE.ADJUDICATOR.CHALLENGE_EXPIRED":
+    case "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED":
       return challengeExpiredReducer(state, action);
-    case "ENGINE.ADJUDICATOR.FUNDING_RECEIVED_EVENT":
+    case "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT":
       return fundingReceivedEventReducer(state, action);
-    case "ENGINE.ADJUDICATOR.CONCLUDED_EVENT":
+    case "WALLET.ADJUDICATOR.CONCLUDED_EVENT":
       return concludedEventReducer(state, action);
-    case "ENGINE.ADJUDICATOR.REFUTED_EVENT":
-    case "ENGINE.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT":
+    case "WALLET.ADJUDICATOR.REFUTED_EVENT":
+    case "WALLET.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT":
       return challengeRespondedReducer(state, action);
-    case "ENGINE.ADJUDICATOR.CHALLENGE_CREATED_EVENT":
+    case "WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT":
       return challengeCreatedEventReducer(state, action);
-    case "ENGINE.ADJUDICATOR.CHALLENGE_CLEARED_EVENT":
+    case "WALLET.ADJUDICATOR.CHALLENGE_CLEARED_EVENT":
       return challengeClearedEventReducer(state, action);
-    case "ENGINE.ADJUDICATOR.CHANNEL_UPDATE":
+    case "WALLET.ADJUDICATOR.CHANNEL_UPDATE":
       return channelUpdateReducer(state, action);
-    case "ENGINE.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET":
+    case "WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET":
       // We already handle this in the challenge created event
       return state;
     default:

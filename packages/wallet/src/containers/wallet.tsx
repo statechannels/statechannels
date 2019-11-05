@@ -4,17 +4,17 @@ import {connect} from "react-redux";
 
 import * as states from "../redux/state";
 import MetamaskErrorContainer from "./metamask-error";
-import EngineInitializedContainer from "./initialized";
+import WalletInitializedContainer from "./initialized";
 import LandingPage from "../components/landing-page";
 import Modal from "react-modal";
 import StatusBarLayout from "../components/status-bar-layout";
 
-interface EngineProps {
-  state: states.EngineState;
+interface WalletProps {
+  state: states.WalletState;
   position: "left" | "center" | "right";
 }
 
-class EngineContainer extends PureComponent<EngineProps> {
+class WalletContainer extends PureComponent<WalletProps> {
   render() {
     const {state} = this.props;
     switch (state.type) {
@@ -23,8 +23,8 @@ class EngineContainer extends PureComponent<EngineProps> {
         return (
           <Modal
             isOpen={true}
-            className={"engine-content-" + this.props.position}
-            overlayClassName={"engine-overlay-" + this.props.position}
+            className={"wallet-content-" + this.props.position}
+            overlayClassName={"wallet-overlay-" + this.props.position}
             ariaHideApp={false}
           >
             <StatusBarLayout>
@@ -32,16 +32,16 @@ class EngineContainer extends PureComponent<EngineProps> {
             </StatusBarLayout>
           </Modal>
         );
-      case states.ENGINE_INITIALIZED:
+      case states.WALLET_INITIALIZED:
         return (
           <Modal
             isOpen={true}
-            className={"engine-content-" + this.props.position}
-            overlayClassName={"engine-overlay-" + this.props.position}
+            className={"wallet-content-" + this.props.position}
+            overlayClassName={"wallet-overlay-" + this.props.position}
             ariaHideApp={false}
           >
             <StatusBarLayout>
-              <EngineInitializedContainer state={state} />
+              <WalletInitializedContainer state={state} />
             </StatusBarLayout>
           </Modal>
         );
@@ -51,9 +51,9 @@ class EngineContainer extends PureComponent<EngineProps> {
   }
 }
 
-const mapStateToProps = (state: states.EngineState, ownProps?): EngineProps => ({
+const mapStateToProps = (state: states.WalletState, ownProps?): WalletProps => ({
   state,
   position: ownProps.position
 });
 
-export default connect(mapStateToProps)(EngineContainer);
+export default connect(mapStateToProps)(WalletContainer);

@@ -2,7 +2,7 @@
 
 **[Home](./index.md)**
 
-In this engine client, a protocol is defined by a collection of files, in a named subdirectory of `/src/redux/protocols`:
+In this wallet client, a protocol is defined by a collection of files, in a named subdirectory of `/src/redux/protocols`:
 
 - [`readme.md`](#state-machine-diagram), including a state machine diagram
 - [`states.ts`](#states)
@@ -63,8 +63,8 @@ Often it is useful to split a protocol into two subprotocols, one for each playe
 
 ```mermaid
 sequenceDiagram
-  participant I as I's engine
-  participant R as R's engine
+  participant I as I's wallet
+  participant R as R's wallet
   Note  over I, R: Title for parent protocol
   I->>R: Message
   R->>I: Message
@@ -84,7 +84,7 @@ Constructor functions should be typed as `StateConstructor<InterfaceName>` by us
 
 <a name="actions"></a>
 
-Define an interface and constructor function for each action in the state machine diagram. For a protocol named `my-protocol`, the `type` property should be a string formatted as `ENGINE.MY_PROTOCOL.ACTION_TYPE`. Pre-existing actions (e.g. from the communication module), may be imported if required. Also define the exported `NonTerminalMyProtocolAction` and `MyProtocolAction` union types as well as an `isMyProtocolAction` type guard. If a top level protocol, add `MyProtocolAction` to the `ProtocolAction` union (and make a corresponding change to the type guard). Otherwise, add `MyProtocolAction` to the `ParentProtocolAction` union (and it will thereby be included as a `ProtocolAction`). See the [Protocol Hierachy Diagram](./index.md#hierarchy).
+Define an interface and constructor function for each action in the state machine diagram. For a protocol named `my-protocol`, the `type` property should be a string formatted as `WALLET.MY_PROTOCOL.ACTION_TYPE`. Pre-existing actions (e.g. from the communication module), may be imported if required. Also define the exported `NonTerminalMyProtocolAction` and `MyProtocolAction` union types as well as an `isMyProtocolAction` type guard. If a top level protocol, add `MyProtocolAction` to the `ProtocolAction` union (and make a corresponding change to the type guard). Otherwise, add `MyProtocolAction` to the `ParentProtocolAction` union (and it will thereby be included as a `ProtocolAction`). See the [Protocol Hierachy Diagram](./index.md#hierarchy).
 
 Actions should have a `processId` property.
 
@@ -172,6 +172,6 @@ Screens should be added from each scenario, using the helper function
 import { addStoriesFromScenario as addStories } from '../../../../../__stories__';
 ```
 
-which builds a full engine dummy state around each `protocolState` in the scenario, and renders that into the top level engine container. The function should automatically exclude terminal states (todo).
+which builds a full wallet dummy state around each `protocolState` in the scenario, and renders that into the top level wallet container. The function should automatically exclude terminal states (todo).
 
 <!-- TODO -->

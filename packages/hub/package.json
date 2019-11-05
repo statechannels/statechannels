@@ -43,7 +43,7 @@
     "koa-body": "4.1.1",
     "koa-router": "7.4.0",
     "magmo-devtools": "git+https://github.com/magmo/devtools.git#v0.1.20",
-    "@statechannels/engine": "^0.0.1",
+    "@statechannels/wallet": "^0.0.1",
     "magmo-wallet-common": "0.0.0",
     "objection": "1.6.11",
     "pg": "7.12.1"

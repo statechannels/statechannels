@@ -4,7 +4,7 @@ import {initialize, responderReducer} from "../reducer";
 import * as states from "../states";
 import {Commitment} from "../../../../../domain";
 import * as TransactionGenerator from "../../../../../utils/transaction-generator";
-import {SHOW_ENGINE, HIDE_ENGINE, CHALLENGE_COMPLETE} from "../../../../../magmo-engine-client";
+import {SHOW_WALLET, HIDE_WALLET, CHALLENGE_COMPLETE} from "../../../../../magmo-wallet-client";
 import {itSendsThisDisplayEventType, itSendsThisMessage} from "../../../../__tests__/helpers";
 import {describeScenarioStep} from "../../../../__tests__/helpers";
 
@@ -59,7 +59,7 @@ describe("RESPOND WITH EXISTING MOVE HAPPY-PATH", () => {
     const result = initialize(processId, channelId, expiryTime, sharedData, challengeCommitment);
 
     itTransitionsTo(result, "Responding.WaitForApproval");
-    itSendsThisDisplayEventType(result.sharedData, SHOW_ENGINE);
+    itSendsThisDisplayEventType(result.sharedData, SHOW_WALLET);
     itSetsChallengeCommitment(result, challengeCommitment);
   });
 
@@ -136,13 +136,13 @@ describe("REQUIRE RESPONSE HAPPY-PATH ", () => {
     const {state, action} = scenario.waitForApprovalRequiresResponse;
     const result = responderReducer(state, sharedData, action);
     itTransitionsTo(result, "Responding.WaitForResponse");
-    itSendsThisDisplayEventType(result.sharedData, HIDE_ENGINE);
+    itSendsThisDisplayEventType(result.sharedData, HIDE_WALLET);
   });
 
   describeScenarioStep(scenario.waitForResponse, () => {
     const {state, action, responseCommitment} = scenario.waitForResponse;
     const result = responderReducer(state, sharedData, action);
-    itSendsThisDisplayEventType(result.sharedData, SHOW_ENGINE);
+    itSendsThisDisplayEventType(result.sharedData, SHOW_WALLET);
     itTransitionsTo(result, "Responding.WaitForTransaction");
     itCallsRespondWithMoveWith(responseCommitment);
   });
@@ -156,7 +156,7 @@ describe("REQUIRE RESPONSE HAPPY-PATH ", () => {
   describeScenarioStep(scenario.waitForAcknowledgement, () => {
     const {state, action} = scenario.waitForAcknowledgement;
     const result = responderReducer(state, sharedData, action);
-    itSendsThisDisplayEventType(result.sharedData, HIDE_ENGINE);
+    itSendsThisDisplayEventType(result.sharedData, HIDE_WALLET);
     itSendsThisMessage(result.sharedData, CHALLENGE_COMPLETE);
     itTransitionsTo(result, "Responding.Success");
   });
@@ -181,15 +181,15 @@ describe("CHALLENGE EXPIRES AND CHANNEL not DEFUNDED", () => {
     const {state, action} = scenario.waitForResponse;
     const result = responderReducer(state, sharedData, action);
     itTransitionsTo(result, "Responding.AcknowledgeTimeout");
-    itSendsThisDisplayEventType(result.sharedData, SHOW_ENGINE);
-    itSendsThisMessage(result.sharedData, "ENGINE.CONCLUDE.OPPONENT");
+    itSendsThisDisplayEventType(result.sharedData, SHOW_WALLET);
+    itSendsThisMessage(result.sharedData, "WALLET.CONCLUDE.OPPONENT");
   });
 
   describeScenarioStep(scenario.acknowledgeTimeout, () => {
     const {state, action} = scenario.acknowledgeTimeout;
     const result = responderReducer(state, sharedData, action);
     itTransitionsTo(result, "Responding.Failure");
-    itSendsThisDisplayEventType(result.sharedData, HIDE_ENGINE);
+    itSendsThisDisplayEventType(result.sharedData, HIDE_WALLET);
   });
 });
 
@@ -212,7 +212,7 @@ describe("CHALLENGE EXPIRES when in WaitForTransaction", () => {
     const {state, action} = scenario.waitForTransaction;
     const result = responderReducer(state, sharedData, action);
     itTransitionsTo(result, "Responding.AcknowledgeTimeout");
-    itSendsThisMessage(result.sharedData, "ENGINE.CONCLUDE.OPPONENT");
+    itSendsThisMessage(result.sharedData, "WALLET.CONCLUDE.OPPONENT");
   });
 });
 
@@ -224,6 +224,6 @@ describe("CHALLENGE EXPIRES when in WaitForApproval", () => {
     const {state, action} = scenario.waitForApprovalRespond;
     const result = responderReducer(state, sharedData, action);
     itTransitionsTo(result, "Responding.AcknowledgeTimeout");
-    itSendsThisMessage(result.sharedData, "ENGINE.CONCLUDE.OPPONENT");
+    itSendsThisMessage(result.sharedData, "WALLET.CONCLUDE.OPPONENT");
   });
 });

@@ -2,7 +2,7 @@ import * as states from "../redux/state";
 import React, {PureComponent} from "react";
 import {connect} from "react-redux";
 interface Props {
-  state: states.EngineState;
+  state: states.WalletState;
 }
 
 class InitializingContainer extends PureComponent<Props> {

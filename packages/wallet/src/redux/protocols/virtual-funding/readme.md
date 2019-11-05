@@ -25,9 +25,9 @@ In the following overview diagram, some communication related to embedded protoc
 
 ```mermaid
 sequenceDiagram
-  participant 0 as 0's engine
+  participant 0 as 0's wallet
   participant H as Hub
-  participant 1 as 1's engine
+  participant 1 as 1's wallet
 
   Note over 0, 1: Prepare J, allocating to 0, 1 and H
   Note over 1, H: Prepare J, allocating to 0, 1 and H

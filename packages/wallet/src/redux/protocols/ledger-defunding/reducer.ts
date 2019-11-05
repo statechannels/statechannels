@@ -56,7 +56,7 @@ export const ledgerDefundingReducer = (
   sharedData: SharedData,
   action: LedgerDefundingAction
 ): ProtocolStateWithSharedData<states.LedgerDefundingState> => {
-  if (action.type === "ENGINE.LEDGER_DEFUNDING.CLEARED_TO_SEND") {
+  if (action.type === "WALLET.LEDGER_DEFUNDING.CLEARED_TO_SEND") {
     return handleClearedToSend(protocolState, sharedData);
   }
   switch (protocolState.type) {

@@ -6,10 +6,10 @@ import {Provider} from "react-redux";
 // import 'bootstrap/dist/css/bootstrap.min.css';
 import "./index.scss";
 import store from "./redux/store";
-import EngineContainer from "./containers/engine";
+import WalletContainer from "./containers/wallet";
 render(
   <Provider store={store}>
-    <EngineContainer position="center" />
+    <WalletContainer position="center" />
   </Provider>,
   document.getElementById("root")
 );

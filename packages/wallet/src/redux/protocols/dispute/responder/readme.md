@@ -3,7 +3,7 @@
 The purpose of this protocol is handle responding to a challenge.
 It covers:
 
-- Deciding if we can respond to a challenge with commitments that the engine already has.
+- Deciding if we can respond to a challenge with commitments that the wallet already has.
 - If the response needs a new commitment the response protocol accepting a response commitment.
 - Getting confirmation from the user to launch a response.
 - Submitting the response transaction to the blockchain.
@@ -21,16 +21,16 @@ graph TD
 linkStyle default interpolate basis
   St((start)) --> WFAp(WaitForApproval)
   WFAp-->|CHALLENGE_EXPIRED| AT(AcknowledgeTimeOut)
-  WFAp--> |ENGINE.DISPUTE.RESPONDER.RESPOND_APPROVED| HC{Commitment<br/>exists?}
+  WFAp--> |WALLET.DISPUTE.RESPONDER.RESPOND_APPROVED| HC{Commitment<br/>exists?}
   HC --> |Yes| WFT(WaitForTransaction)
   HC --> |No| WFR(WaitForResponse)
   WFR -->|ChallengeExpirySetEvent| WFR
-  WFR -->|ENGINE.DISPUTE.RESPONDER.RESPONSE_PROVIDED| WFT(WaitForTransaction)
+  WFR -->|WALLET.DISPUTE.RESPONDER.RESPONSE_PROVIDED| WFT(WaitForTransaction)
   WFR -->|CHALLENGE_EXPIRED| AT(AcknowledgeTimeOut)
-  AT -->|ENGINE.DISPUTE.RESPONDER.ACKNOWLEDGE| F
+  AT -->|WALLET.DISPUTE.RESPONDER.ACKNOWLEDGE| F
   WFT --> |TransactionSubmitted| WFAc(WaitForAcknowledgement)
   WFT-->|CHALLENGE_EXPIRED| AT(AcknowledgeTimeOut)
-  WFAc-->|ENGINE.DISPUTE.RESPONDER.ACKNOWLEDGED| S((success))
+  WFAc-->|WALLET.DISPUTE.RESPONDER.ACKNOWLEDGED| S((success))
   WFT --> |TransactionFailed| F((failure))
 
   classDef logic fill:#efdd20;

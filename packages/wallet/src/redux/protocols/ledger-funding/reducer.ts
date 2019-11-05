@@ -11,7 +11,7 @@ import {
 import * as states from "./states";
 import {isNewLedgerChannelAction, NewLedgerChannelReducer} from "../new-ledger-channel";
 import {unreachable} from "../../../utils/reducer-utils";
-import {EngineAction} from "../../actions";
+import {WalletAction} from "../../actions";
 import {ProtocolLocator, EmbeddedProtocol} from "../../../communication";
 import * as newLedgerChannel from "../new-ledger-channel";
 import {EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR} from "../existing-ledger-funding/reducer";
@@ -90,7 +90,7 @@ export function initialize({
 export function ledgerFundingReducer(
   protocolState: states.NonTerminalLedgerFundingState,
   sharedData: SharedData,
-  action: EngineAction
+  action: WalletAction
 ): ProtocolStateWithSharedData<states.LedgerFundingState> {
   switch (protocolState.type) {
     case "LedgerFunding.WaitForNewLedgerChannel":
@@ -105,7 +105,7 @@ export function ledgerFundingReducer(
 
 function waitForNewLedgerChannelReducer(
   protocolState: states.WaitForNewLedgerChannel,
-  action: EngineAction,
+  action: WalletAction,
   sharedData: SharedData
 ): ProtocolStateWithSharedData<states.LedgerFundingState> {
   if (!isNewLedgerChannelAction(action)) {
@@ -148,7 +148,7 @@ function waitForNewLedgerChannelReducer(
 
 function waitForExistingLedgerFundingReducer(
   protocolState: states.WaitForExistingLedgerFunding,
-  action: EngineAction,
+  action: WalletAction,
   sharedData: SharedData
 ) {
   if (!isExistingLedgerFundingAction(action)) {

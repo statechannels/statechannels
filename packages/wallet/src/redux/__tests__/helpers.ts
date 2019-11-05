@@ -115,7 +115,7 @@ function transformStateToMatcher(ss: {state: Partial<State>; signature?: Signatu
 export const itSendsThisCommitment = (
   state: SideEffectState,
   commitment: Partial<Commitment>,
-  type = "ENGINE.COMMON.COMMITMENT_RECEIVED",
+  type = "WALLET.COMMON.COMMITMENT_RECEIVED",
   idx = 0
 ) => {
   const messageOutbox = getOutboxState(state, "messageOutbox");
@@ -163,7 +163,7 @@ export const itSendsThisCommitment = (
 export const itSendsTheseStates = (
   state: SideEffectState,
   states: PartialStates,
-  type = "ENGINE.COMMON.COMMITMENTS_RECEIVED",
+  type = "WALLET.COMMON.COMMITMENTS_RECEIVED",
   idx = 0
 ) => {
   const messageOutbox = getOutboxState(state, "messageOutbox");
@@ -216,7 +216,7 @@ export const itSendsTheseStates = (
 export const itSendsTheseCommitments = (
   state: SideEffectState,
   commitments: PartialCommitments,
-  type = "ENGINE.COMMON.COMMITMENTS_RECEIVED",
+  type = "WALLET.COMMON.COMMITMENTS_RECEIVED",
   idx = 0
 ) => {
   // TODO: Something in the conversion between nitro states and commitments is messing up the signature

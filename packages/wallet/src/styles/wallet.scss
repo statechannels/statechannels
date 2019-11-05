@@ -1,4 +1,4 @@
-.engine-content {
+.wallet-content {
   position: relative;
   top: 50%;
   left: 40px;
@@ -16,7 +16,7 @@
   height: 450px;
 }
 
-.engine-overlay {
+.wallet-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -25,36 +25,36 @@
   background-color: rgba(0, 0, 0, 0.5);
 }
 
-.engine-content-left {
-  @extend .engine-content;
+.wallet-content-left {
+  @extend .wallet-content;
   left: 20%;
 }
 
-.engine-overlay-left {
-  @extend .engine-overlay;
+.wallet-overlay-left {
+  @extend .wallet-overlay;
   background-color: rgba(0, 0, 0, 0);
 }
 
-.engine-content-right {
-  @extend .engine-content;
+.wallet-content-right {
+  @extend .wallet-content;
   left: 70%;
 }
 
-.engine-overlay-right {
-  @extend .engine-overlay;
+.wallet-overlay-right {
+  @extend .wallet-overlay;
   background-color: rgba(0, 0, 0, 0);
 }
 
-.engine-content-center {
-  @extend .engine-content;
+.wallet-content-center {
+  @extend .wallet-content;
   left: 50%;
 }
 
-.engine-overlay-center {
-  @extend .engine-overlay;
+.wallet-overlay-center {
+  @extend .wallet-overlay;
 }
 
-.engine-body {
+.wallet-body {
   height: 440px;
   padding-top: 1em;
 }

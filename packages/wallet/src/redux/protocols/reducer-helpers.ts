@@ -1,11 +1,11 @@
-import {fundingSuccess} from "../../magmo-engine-client";
+import {fundingSuccess} from "../../magmo-wallet-client";
 
 import {accumulateSideEffects} from "../outbox";
 import {SharedData, queueMessage, getExistingChannel, checkAndStoreComm, checkAndStore} from "../state";
 import * as selectors from "../selectors";
 import {TwoPartyPlayerIndex, ThreePartyPlayerIndex} from "../types";
 import {CommitmentType} from "fmg-core/lib/commitment";
-import * as magmoEngineClient from "../../magmo-engine-client";
+import * as magmoWalletClient from "../../magmo-wallet-client";
 import {getLastCommitment, nextParticipant, Commitments, getLastState} from "../channel-store";
 import {Commitment} from "../../domain";
 import {sendCommitmentsReceived, ProtocolLocator} from "../../communication";
@@ -26,18 +26,18 @@ export function sendFundingComplete(sharedData: SharedData, appChannelId: string
   return queueMessage(sharedData, fundingSuccess(appChannelId, c));
 }
 
-export function showEngine(sharedData: SharedData): SharedData {
+export function showWallet(sharedData: SharedData): SharedData {
   const newSharedData = {...sharedData};
   newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
-    displayOutbox: magmoEngineClient.showEngine()
+    displayOutbox: magmoWalletClient.showWallet()
   });
   return newSharedData;
 }
 
-export function hideEngine(sharedData: SharedData): SharedData {
+export function hideWallet(sharedData: SharedData): SharedData {
   const newSharedData = {...sharedData};
   newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
-    displayOutbox: magmoEngineClient.hideEngine()
+    displayOutbox: magmoWalletClient.hideWallet()
   });
   return newSharedData;
 }
@@ -45,7 +45,7 @@ export function hideEngine(sharedData: SharedData): SharedData {
 export function sendConcludeSuccess(sharedData: SharedData): SharedData {
   const newSharedData = {...sharedData};
   newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
-    messageOutbox: magmoEngineClient.concludeSuccess()
+    messageOutbox: magmoWalletClient.concludeSuccess()
     // TODO could rename this helper function, as it covers both ways of finalizing a channel
   });
   return newSharedData;
@@ -61,7 +61,7 @@ export function sendConcludeInstigated(sharedData: SharedData, channelId: string
 export function sendOpponentConcluded(sharedData: SharedData): SharedData {
   const newSharedData = {...sharedData};
   newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
-    messageOutbox: magmoEngineClient.opponentConcluded()
+    messageOutbox: magmoWalletClient.opponentConcluded()
     // TODO could rename this helper function, as it covers both ways of finalizing a channel
   });
   return newSharedData;
@@ -140,7 +140,7 @@ export function checkStates(sharedData: SharedData, turnNum: number, states: Sig
 export function sendChallengeResponseRequested(sharedData: SharedData, channelId: string): SharedData {
   const newSharedData = {...sharedData};
   newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
-    messageOutbox: magmoEngineClient.challengeResponseRequested(channelId)
+    messageOutbox: magmoWalletClient.challengeResponseRequested(channelId)
   });
   return newSharedData;
 }
@@ -148,7 +148,7 @@ export function sendChallengeResponseRequested(sharedData: SharedData, channelId
 export function sendChallengeCommitmentReceived(sharedData: SharedData, commitment: Commitment) {
   const newSharedData = {...sharedData};
   newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
-    messageOutbox: magmoEngineClient.challengeCommitmentReceived(commitment)
+    messageOutbox: magmoWalletClient.challengeCommitmentReceived(commitment)
   });
   return newSharedData;
 }
@@ -157,7 +157,7 @@ export function sendChallengeCommitmentReceived(sharedData: SharedData, commitme
 export function sendChallengeComplete(sharedData: SharedData) {
   const newSharedData = {...sharedData};
   newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
-    messageOutbox: magmoEngineClient.challengeComplete()
+    messageOutbox: magmoWalletClient.challengeComplete()
   });
   return newSharedData;
 }
@@ -165,7 +165,7 @@ export function sendChallengeComplete(sharedData: SharedData) {
 export function sendConcludeFailure(sharedData: SharedData, reason: "Other" | "UserDeclined"): SharedData {
   const newSharedData = {...sharedData};
   newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
-    messageOutbox: magmoEngineClient.concludeFailure(reason)
+    messageOutbox: magmoWalletClient.concludeFailure(reason)
   });
   return newSharedData;
 }

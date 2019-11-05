@@ -1,5 +1,5 @@
 import {SignedCommitment} from "../domain";
-import {messageRelayRequested} from "../magmo-engine-client";
+import {messageRelayRequested} from "../magmo-wallet-client";
 import {
   RelayableAction,
   strategyProposed,
@@ -77,7 +77,7 @@ export const sendStatesReceived = (
 
 export type StartProcessAction = ConcludeInstigated;
 export function isStartProcessAction(a: {type: string}): a is StartProcessAction {
-  return a.type === "ENGINE.NEW_PROCESS.CONCLUDE_INSTIGATED";
+  return a.type === "WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED";
 }
 
 export function getProcessId(action: StartProcessAction) {

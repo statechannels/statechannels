@@ -1,5 +1,5 @@
 import {TransactionRequest} from "ethers/providers";
-import {EngineEvent, DisplayAction} from "../../magmo-engine-client";
+import {WalletEvent, DisplayAction} from "../../magmo-wallet-client";
 import {accumulateSideEffects} from ".";
 
 export function emptyDisplayOutboxState(): OutboxState {
@@ -11,7 +11,7 @@ export interface QueuedTransaction {
   processId: string;
 }
 export type DisplayOutbox = DisplayAction[];
-export type MessageOutbox = EngineEvent[];
+export type MessageOutbox = WalletEvent[];
 export type TransactionOutbox = QueuedTransaction[];
 
 export interface OutboxState {
@@ -28,7 +28,7 @@ export type SideEffects = {
 // Getters and setters
 // -------------------
 
-export function queueMessage(state: OutboxState, message: EngineEvent): OutboxState {
+export function queueMessage(state: OutboxState, message: WalletEvent): OutboxState {
   return accumulateSideEffects(state, {messageOutbox: [message]});
 }
 
@@ -38,7 +38,7 @@ export function queueTransaction(state: OutboxState, transaction: TransactionReq
   });
 }
 
-export function getLastMessage(state: OutboxState): EngineEvent | undefined {
+export function getLastMessage(state: OutboxState): WalletEvent | undefined {
   const messages = state.messageOutbox;
   return messages[messages.length - 1];
 }

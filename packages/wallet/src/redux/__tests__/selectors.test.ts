@@ -1,4 +1,4 @@
-import * as engineStates from "../state";
+import * as walletStates from "../state";
 import * as selectors from "../selectors";
 import {ChannelState} from "../channel-store";
 import {SignedState} from "@statechannels/nitro-protocol";
@@ -6,14 +6,14 @@ import {SignedState} from "@statechannels/nitro-protocol";
 describe("getAdjudicatorWatcherProcessesForChannel", () => {
   const createWatcherState = (
     channelId: string,
-    subscribers: engineStates.ChannelSubscriber[]
-  ): engineStates.Initialized => {
-    const channelSubscriptions: engineStates.ChannelSubscriptions = {};
+    subscribers: walletStates.ChannelSubscriber[]
+  ): walletStates.Initialized => {
+    const channelSubscriptions: walletStates.ChannelSubscriptions = {};
 
     channelSubscriptions[channelId] = subscribers;
 
-    return engineStates.initialized({
-      ...engineStates.EMPTY_SHARED_DATA,
+    return walletStates.initialized({
+      ...walletStates.EMPTY_SHARED_DATA,
       uid: "",
       processStore: {},
       channelSubscriptions,
@@ -23,8 +23,8 @@ describe("getAdjudicatorWatcherProcessesForChannel", () => {
   };
 
   it("should return an empty array when channelSubscriptions is empty", () => {
-    const state = engineStates.initialized({
-      ...engineStates.EMPTY_SHARED_DATA,
+    const state = walletStates.initialized({
+      ...walletStates.EMPTY_SHARED_DATA,
       uid: "",
       processStore: {},
       channelSubscriptions: {},
@@ -69,7 +69,7 @@ describe("getNextNonce", () => {
     turnNum: 0
   };
   const state = {
-    ...engineStates.EMPTY_SHARED_DATA,
+    ...walletStates.EMPTY_SHARED_DATA,
     channelStore: {
       ["0x1"]: {
         ...defaultChannelState,

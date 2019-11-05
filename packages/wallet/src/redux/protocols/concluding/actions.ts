@@ -1,18 +1,18 @@
 import {ActionConstructor} from "../../utils";
 import {AdvanceChannelAction, isAdvanceChannelAction} from "../advance-channel";
 import {DefundingAction, isDefundingAction} from "../defunding/actions";
-import {EngineAction} from "../../actions";
+import {WalletAction} from "../../actions";
 
 // -------
 // Actions
 // -------
 export interface CloseSelected {
-  type: "ENGINE.CONCLUDING.CLOSE_SELECTED";
+  type: "WALLET.CONCLUDING.CLOSE_SELECTED";
   processId: string;
 }
 
 export interface KeepOpenSelected {
-  type: "ENGINE.CONCLUDING.KEEP_OPEN_SELECTED";
+  type: "WALLET.CONCLUDING.KEEP_OPEN_SELECTED";
   processId: string;
 }
 
@@ -21,11 +21,11 @@ export interface KeepOpenSelected {
 // -------
 export const keepOpenSelected: ActionConstructor<KeepOpenSelected> = p => ({
   ...p,
-  type: "ENGINE.CONCLUDING.KEEP_OPEN_SELECTED"
+  type: "WALLET.CONCLUDING.KEEP_OPEN_SELECTED"
 });
 export const closeSelected: ActionConstructor<CloseSelected> = p => ({
   ...p,
-  type: "ENGINE.CONCLUDING.CLOSE_SELECTED"
+  type: "WALLET.CONCLUDING.CLOSE_SELECTED"
 });
 
 // -------
@@ -34,10 +34,10 @@ export const closeSelected: ActionConstructor<CloseSelected> = p => ({
 
 export type ConcludingAction = KeepOpenSelected | CloseSelected | AdvanceChannelAction | DefundingAction;
 
-export const isConcludingAction = (action: EngineAction): action is ConcludingAction => {
+export const isConcludingAction = (action: WalletAction): action is ConcludingAction => {
   return (
-    action.type === "ENGINE.CONCLUDING.CLOSE_SELECTED" ||
-    action.type === "ENGINE.CONCLUDING.KEEP_OPEN_SELECTED" ||
+    action.type === "WALLET.CONCLUDING.CLOSE_SELECTED" ||
+    action.type === "WALLET.CONCLUDING.KEEP_OPEN_SELECTED" ||
     isAdvanceChannelAction(action) ||
     isDefundingAction(action)
   );

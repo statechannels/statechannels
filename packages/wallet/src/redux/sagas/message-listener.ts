@@ -1,5 +1,5 @@
 import {take, put, select} from "redux-saga/effects";
-import * as incoming from "../../magmo-engine-client/engine-instructions";
+import * as incoming from "../../magmo-wallet-client/wallet-instructions";
 
 import * as actions from "../actions";
 import {eventChannel, buffers} from "redux-saga";
@@ -18,7 +18,7 @@ import {asPrivateKey} from "../../communication/__tests__/commitments";
 export function* messageListener() {
   const postMessageEventChannel = eventChannel(emitter => {
     window.addEventListener("message", (event: MessageEvent) => {
-      if (event.data && event.data.type && event.data.type.indexOf("ENGINE") > -1) {
+      if (event.data && event.data.type && event.data.type.indexOf("WALLET") > -1) {
         emitter(event);
       }
     });
@@ -90,12 +90,12 @@ export function* messageListener() {
       case incoming.RECEIVE_MESSAGE:
         const messageAction = handleIncomingMessage(action);
 
-        if (messageAction.type === "ENGINE.COMMON.COMMITMENTS_RECEIVED") {
+        if (messageAction.type === "WALLET.COMMON.COMMITMENTS_RECEIVED") {
           yield validateTransitionForCommitments(messageAction.signedCommitments);
         }
 
         yield put(messageAction);
-        if (messageAction.type === "ENGINE.NEW_PROCESS.CONCLUDE_INSTIGATED") {
+        if (messageAction.type === "WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED") {
           yield put(concluded({processId: application.APPLICATION_PROCESS_ID}));
         }
         break;

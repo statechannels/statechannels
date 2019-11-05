@@ -26,19 +26,19 @@ export function transactionReducer(
   action: TransactionAction
 ): ReturnVal {
   switch (action.type) {
-    case "ENGINE.TRANSACTION_SUBMISSION.TRANSACTION_SENT":
+    case "WALLET.TRANSACTION_SUBMISSION.TRANSACTION_SENT":
       return transactionSent(state, storage);
-    case "ENGINE.TRANSACTION_SUBMISSION.TRANSACTION_SUBMISSION_FAILED":
+    case "WALLET.TRANSACTION_SUBMISSION.TRANSACTION_SUBMISSION_FAILED":
       return transactionSubmissionFailed(state, storage);
-    case "ENGINE.TRANSACTION_SUBMISSION.TRANSACTION_SUBMITTED":
+    case "WALLET.TRANSACTION_SUBMISSION.TRANSACTION_SUBMITTED":
       return transactionSubmitted(state, storage, action.transactionHash);
-    case "ENGINE.TRANSACTION_SUBMISSION.TRANSACTION_CONFIRMED":
+    case "WALLET.TRANSACTION_SUBMISSION.TRANSACTION_CONFIRMED":
       return transactionConfirmed(state, storage);
-    case "ENGINE.TRANSACTION_SUBMISSION.TRANSACTION_RETRY_APPROVED":
+    case "WALLET.TRANSACTION_SUBMISSION.TRANSACTION_RETRY_APPROVED":
       return transactionRetryApproved(state, storage);
-    case "ENGINE.TRANSACTION_SUBMISSION.TRANSACTION_RETRY_DENIED":
+    case "WALLET.TRANSACTION_SUBMISSION.TRANSACTION_RETRY_DENIED":
       return transactionRetryDenied(state, storage);
-    case "ENGINE.TRANSACTION_SUBMISSION.TRANSACTION_FAILED":
+    case "WALLET.TRANSACTION_SUBMISSION.TRANSACTION_FAILED":
       return transactionFailed(state, storage);
     default:
       return unreachable(action);

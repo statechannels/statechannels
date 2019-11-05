@@ -3,7 +3,7 @@ import {
   RefutedEvent,
   RespondWithMoveEvent,
   ChallengeExpirySetEvent,
-  EngineAction
+  WalletAction
 } from "../../../actions";
 import {isTransactionAction, TransactionAction} from "../../transaction-submission/actions";
 import {ActionConstructor} from "../../../utils";
@@ -13,22 +13,22 @@ import {ActionConstructor} from "../../../utils";
 // -------
 
 export interface ChallengeApproved {
-  type: "ENGINE.DISPUTE.CHALLENGER.CHALLENGE_APPROVED";
+  type: "WALLET.DISPUTE.CHALLENGER.CHALLENGE_APPROVED";
   processId: string;
 }
 
 export interface ChallengeDenied {
-  type: "ENGINE.DISPUTE.CHALLENGER.CHALLENGE_DENIED";
+  type: "WALLET.DISPUTE.CHALLENGER.CHALLENGE_DENIED";
   processId: string;
 }
 
 export interface ExitChallenge {
-  type: "ENGINE.DISPUTE.CHALLENGER.EXIT_CHALLENGE";
+  type: "WALLET.DISPUTE.CHALLENGER.EXIT_CHALLENGE";
   processId: string;
 }
 
 export interface Acknowledged {
-  type: "ENGINE.DISPUTE.CHALLENGER.ACKNOWLEDGED";
+  type: "WALLET.DISPUTE.CHALLENGER.ACKNOWLEDGED";
   processId: string;
 }
 
@@ -38,22 +38,22 @@ export interface Acknowledged {
 
 export const challengeApproved: ActionConstructor<ChallengeApproved> = p => ({
   ...p,
-  type: "ENGINE.DISPUTE.CHALLENGER.CHALLENGE_APPROVED"
+  type: "WALLET.DISPUTE.CHALLENGER.CHALLENGE_APPROVED"
 });
 
 export const challengeDenied: ActionConstructor<ChallengeDenied> = p => ({
   ...p,
-  type: "ENGINE.DISPUTE.CHALLENGER.CHALLENGE_DENIED"
+  type: "WALLET.DISPUTE.CHALLENGER.CHALLENGE_DENIED"
 });
 
 export const exitChallenge: ActionConstructor<ExitChallenge> = p => ({
   ...p,
-  type: "ENGINE.DISPUTE.CHALLENGER.EXIT_CHALLENGE"
+  type: "WALLET.DISPUTE.CHALLENGER.EXIT_CHALLENGE"
 });
 
 export const acknowledged: ActionConstructor<Acknowledged> = p => ({
   ...p,
-  type: "ENGINE.DISPUTE.CHALLENGER.ACKNOWLEDGED"
+  type: "WALLET.DISPUTE.CHALLENGER.ACKNOWLEDGED"
 });
 
 // -------
@@ -71,16 +71,16 @@ export type ChallengerAction =
   | Acknowledged
   | ExitChallenge;
 
-export function isChallengerAction(action: EngineAction): action is ChallengerAction {
+export function isChallengerAction(action: WalletAction): action is ChallengerAction {
   return (
     isTransactionAction(action) ||
-    action.type === "ENGINE.DISPUTE.CHALLENGER.CHALLENGE_APPROVED" ||
-    action.type === "ENGINE.DISPUTE.CHALLENGER.CHALLENGE_DENIED" ||
-    action.type === "ENGINE.ADJUDICATOR.CHALLENGE_EXPIRED" ||
-    action.type === "ENGINE.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT" ||
-    action.type === "ENGINE.ADJUDICATOR.REFUTED_EVENT" ||
-    action.type === "ENGINE.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET" ||
-    action.type === "ENGINE.DISPUTE.CHALLENGER.ACKNOWLEDGED" ||
-    action.type === "ENGINE.DISPUTE.CHALLENGER.EXIT_CHALLENGE"
+    action.type === "WALLET.DISPUTE.CHALLENGER.CHALLENGE_APPROVED" ||
+    action.type === "WALLET.DISPUTE.CHALLENGER.CHALLENGE_DENIED" ||
+    action.type === "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED" ||
+    action.type === "WALLET.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT" ||
+    action.type === "WALLET.ADJUDICATOR.REFUTED_EVENT" ||
+    action.type === "WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET" ||
+    action.type === "WALLET.DISPUTE.CHALLENGER.ACKNOWLEDGED" ||
+    action.type === "WALLET.DISPUTE.CHALLENGER.EXIT_CHALLENGE"
   );
 }

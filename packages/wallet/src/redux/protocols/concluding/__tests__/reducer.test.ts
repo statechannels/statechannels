@@ -4,7 +4,7 @@ import {initialize} from "..";
 import {describeScenarioStep, itSendsThisDisplayEventType, itRelaysThisAction} from "../../../__tests__/helpers";
 import {concludingReducer} from "../reducer";
 import {concludeInstigated} from "../../../../communication";
-import {SHOW_ENGINE, HIDE_ENGINE} from "../../../../magmo-engine-client";
+import {SHOW_WALLET, HIDE_WALLET} from "../../../../magmo-wallet-client";
 
 describe("Opponent Concluded Happy Path", () => {
   const scenario = scenarios.opponentConcludedHappyPath;
@@ -30,7 +30,7 @@ describe("Opponent Concluded Happy Path", () => {
     const {action, state, sharedData} = scenario.decideClosing;
     const result = concludingReducer(state, sharedData, action);
     itTransitionsTo(result, "Concluding.Success");
-    itSendsThisDisplayEventType(result.sharedData, HIDE_ENGINE);
+    itSendsThisDisplayEventType(result.sharedData, HIDE_WALLET);
   });
 });
 
@@ -41,7 +41,7 @@ describe("Player Concluded Happy Path", () => {
     const result = initialize(scenario.initialize);
     itTransitionsTo(result, "Concluding.WaitForConclude");
     itRelaysThisAction(result.sharedData, concludeInstigated({channelId: scenario.initialize.channelId}));
-    itSendsThisDisplayEventType(result.sharedData, SHOW_ENGINE);
+    itSendsThisDisplayEventType(result.sharedData, SHOW_WALLET);
   });
 
   describeScenarioStep(scenario.waitForConclude, () => {
@@ -60,7 +60,7 @@ describe("Player Concluded Happy Path", () => {
     const {action, state, sharedData} = scenario.decideClosing;
     const result = concludingReducer(state, sharedData, action);
     itTransitionsTo(result, "Concluding.Success");
-    itSendsThisDisplayEventType(result.sharedData, HIDE_ENGINE);
+    itSendsThisDisplayEventType(result.sharedData, HIDE_WALLET);
   });
 });
 
@@ -71,7 +71,7 @@ describe("Player Closes Channel Happy Path", () => {
     const result = initialize(scenario.initialize);
     itTransitionsTo(result, "Concluding.WaitForConclude");
     itRelaysThisAction(result.sharedData, concludeInstigated({channelId: scenario.initialize.channelId}));
-    itSendsThisDisplayEventType(result.sharedData, SHOW_ENGINE);
+    itSendsThisDisplayEventType(result.sharedData, SHOW_WALLET);
   });
 
   describeScenarioStep(scenario.waitForConclude, () => {
@@ -96,7 +96,7 @@ describe("Player Closes Channel Happy Path", () => {
     const {action, state, sharedData} = scenario.waitForLedgerClosing;
     const result = concludingReducer(state, sharedData, action);
     itTransitionsTo(result, "Concluding.Success");
-    itSendsThisDisplayEventType(result.sharedData, HIDE_ENGINE);
+    itSendsThisDisplayEventType(result.sharedData, HIDE_WALLET);
   });
 });
 

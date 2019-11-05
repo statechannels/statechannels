@@ -18,7 +18,7 @@ import {AdvanceChannelState} from "./advance-channel";
 import {VirtualFundingState} from "./virtual-funding/states";
 import {LedgerFundingState} from "./ledger-funding/states";
 import {ProtocolLocator, EmbeddedProtocol} from "../../communication";
-import {EngineAction} from "../actions";
+import {WalletAction} from "../actions";
 import {FundingStrategyNegotiationState} from "./funding-strategy-negotiation/states";
 import {VirtualDefundingState} from "./virtual-defunding/states";
 import {CloseLedgerChannelState} from "./close-ledger-channel/states";
@@ -64,7 +64,7 @@ export const EMPTY_LOCATOR: ProtocolLocator = makeLocator();
 
 export function prependToLocator<
   State extends {protocolLocator: ProtocolLocator},
-  T extends (EngineAction | State) & {protocolLocator: ProtocolLocator}
+  T extends (WalletAction | State) & {protocolLocator: ProtocolLocator}
 >(actionOrState: T, protocol: ProtocolLocator | EmbeddedProtocol): T {
   // First we update any sub-protocol protocolLocators
   for (const prop of Object.keys(actionOrState)) {

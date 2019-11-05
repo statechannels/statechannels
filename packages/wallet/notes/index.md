@@ -1,6 +1,6 @@
-# Magmo engine developer docs
+# Magmo wallet developer docs
 
-- [Engine architecture](./structuring-the-engine.md)
+- [Wallet architecture](./structuring-the-wallet.md)
 - [Action routing](./action-routing.md)
 - [Protocol Conventions](./protocol-conventions.md)
 

@@ -5,7 +5,7 @@ import {SharedData, queueMessage} from "../../../state";
 import {ProtocolStateWithSharedData} from "../..";
 import {unreachable} from "../../../../utils/reducer-utils";
 import {TwoPartyPlayerIndex} from "../../../types";
-import {showEngine} from "../../reducer-helpers";
+import {showWallet} from "../../reducer-helpers";
 import {sendStrategyProposed, ProtocolLocator} from "../../../../communication";
 
 export function initialize({
@@ -31,7 +31,7 @@ export function initialize({
       ourAddress,
       protocolLocator
     }),
-    sharedData: showEngine(sharedData)
+    sharedData: showWallet(sharedData)
   };
 }
 
@@ -41,13 +41,13 @@ export function fundingStrategyNegotiationReducer(
   action: actions.FundingStrategyNegotiationAction
 ): ProtocolStateWithSharedData<states.FundingStrategyNegotiationState> {
   switch (action.type) {
-    case "ENGINE.FUNDING_STRATEGY_NEGOTIATION.PLAYER_A.STRATEGY_CHOSEN":
+    case "WALLET.FUNDING_STRATEGY_NEGOTIATION.PLAYER_A.STRATEGY_CHOSEN":
       return strategyChosen(state, sharedData, action);
-    case "ENGINE.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_APPROVED":
+    case "WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_APPROVED":
       return strategyApproved(state, sharedData, action);
-    case "ENGINE.FUNDING_STRATEGY_NEGOTIATION.PLAYER_A.STRATEGY_REJECTED":
+    case "WALLET.FUNDING_STRATEGY_NEGOTIATION.PLAYER_A.STRATEGY_REJECTED":
       return strategyRejected(state, sharedData);
-    case "ENGINE.FUNDING_STRATEGY_NEGOTIATION.PLAYER_A.CANCELLED":
+    case "WALLET.FUNDING_STRATEGY_NEGOTIATION.PLAYER_A.CANCELLED":
       return cancelled(state, sharedData, action);
     default:
       return unreachable(action);

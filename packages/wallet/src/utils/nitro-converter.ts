@@ -17,7 +17,7 @@ import {decodeConsensusData} from "@statechannels/nitro-protocol/lib/src/contrac
 import {convertAddressToBytes32, convertBytes32ToAddress} from "./data-type-utils";
 
 // This temporarily handles converting fmg-core entities to nitro-protocol entities
-// Eventually once nitro-protocol is more properly embedded in the engine this will go away
+// Eventually once nitro-protocol is more properly embedded in the wallet this will go away
 
 export function convertStateToSignedCommitment(state: State, privateKey: string): SignedCommitment {
   const commitment = convertStateToCommitment(state);
@@ -88,7 +88,7 @@ export function convertCommitmentToState(commitment: Commitment): State {
   const {turnNum, commitmentType, channel, destination, allocation, appAttributes} = commitment;
   const appDefinition = channel.channelType;
   let appData = appAttributes;
-  // If its consensus app we know the engine authored it so we switch it over
+  // If its consensus app we know the wallet authored it so we switch it over
   // to new consensus app here
   if (appDefinition === CONSENSUS_LIBRARY_ADDRESS) {
     const fmgConsensusData = appAttributesFromBytes(appAttributes);
@@ -169,7 +169,7 @@ export function convertOutcomeToAllocation(
   let guaranteedChannel;
   // We will only be dealing with one outcome initially, since we're converting from a commitment
   if (outcome.length !== 1) {
-    throw new Error(`Currently the engine only supports one outcome, however there were ${outcome.length} outcomes.`);
+    throw new Error(`Currently the wallet only supports one outcome, however there were ${outcome.length} outcomes.`);
   }
   const assetOutcome = outcome[0];
   if (isAllocationOutcome(assetOutcome)) {

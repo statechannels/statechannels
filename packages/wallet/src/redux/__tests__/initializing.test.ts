@@ -1,4 +1,4 @@
-import {engineReducer} from "../reducer";
+import {walletReducer} from "../reducer";
 
 import * as states from "../state";
 import * as actions from "../actions";
@@ -8,10 +8,10 @@ describe("when in WaitForLogin", () => {
 
   describe("when the player logs in", () => {
     const action = actions.loggedIn({uid: "uid"});
-    const updatedState = engineReducer(state, action);
+    const updatedState = walletReducer(state, action);
 
-    it("transitions to ENGINE_INITIALIZED", async () => {
-      expect(updatedState.type).toEqual(states.ENGINE_INITIALIZED);
+    it("transitions to WALLET_INITIALIZED", async () => {
+      expect(updatedState.type).toEqual(states.WALLET_INITIALIZED);
     });
   });
 });

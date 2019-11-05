@@ -1,23 +1,23 @@
 import {accumulateSideEffects} from "../redux/outbox";
 import {SideEffects} from "../redux/outbox/state";
-import {EngineAction} from "../redux/actions";
+import {WalletAction} from "../redux/actions";
 import {StateWithSideEffects} from "../redux/utils";
 
 export function unreachable(x: never) {
   return x;
 }
 
-export type ReducersMapObject<Tree = any, A extends EngineAction = EngineAction> = {
+export type ReducersMapObject<Tree = any, A extends WalletAction = WalletAction> = {
   [Branch in keyof Tree]: ReducerWithSideEffects<Tree[Branch], A>;
 };
 
-export type ReducerWithSideEffects<T, A extends EngineAction = EngineAction> = (
+export type ReducerWithSideEffects<T, A extends WalletAction = WalletAction> = (
   state: T,
   action: A,
   data?: any
 ) => StateWithSideEffects<T>;
 
-export function combineReducersWithSideEffects<Tree, A extends EngineAction>(
+export function combineReducersWithSideEffects<Tree, A extends WalletAction>(
   reducers: ReducersMapObject<Tree, A>
 ): ReducerWithSideEffects<Tree> {
   return (state: Tree, action: A, data?: {[Branch in keyof Tree]?: any}) => {

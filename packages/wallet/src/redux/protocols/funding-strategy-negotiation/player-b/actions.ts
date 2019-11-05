@@ -9,20 +9,20 @@ import {ActionConstructor} from "../../../utils";
 // -------
 
 export interface StrategyApproved extends BaseProcessAction {
-  type: "ENGINE.FUNDING_STRATEGY_NEGOTIATION.PLAYER_B.STRATEGY_APPROVED";
+  type: "WALLET.FUNDING_STRATEGY_NEGOTIATION.PLAYER_B.STRATEGY_APPROVED";
   strategy: FundingStrategy;
 }
 
 export interface FundingSuccessAcknowledged extends BaseProcessAction {
-  type: "ENGINE.FUNDING_STRATEGY_NEGOTIATION.PLAYER_B.FUNDING_SUCCESS_ACKNOWLEDGED";
+  type: "WALLET.FUNDING_STRATEGY_NEGOTIATION.PLAYER_B.FUNDING_SUCCESS_ACKNOWLEDGED";
 }
 
 export interface StrategyRejected extends BaseProcessAction {
-  type: "ENGINE.FUNDING_STRATEGY_NEGOTIATION.PLAYER_B.STRATEGY_REJECTED";
+  type: "WALLET.FUNDING_STRATEGY_NEGOTIATION.PLAYER_B.STRATEGY_REJECTED";
 }
 
 export interface Cancelled extends BaseProcessAction {
-  type: "ENGINE.FUNDING_STRATEGY_NEGOTIATION.PLAYER_B.CANCELLED";
+  type: "WALLET.FUNDING_STRATEGY_NEGOTIATION.PLAYER_B.CANCELLED";
   by: TwoPartyPlayerIndex;
 }
 
@@ -32,22 +32,22 @@ export interface Cancelled extends BaseProcessAction {
 
 export const strategyApproved: ActionConstructor<StrategyApproved> = p => ({
   ...p,
-  type: "ENGINE.FUNDING_STRATEGY_NEGOTIATION.PLAYER_B.STRATEGY_APPROVED"
+  type: "WALLET.FUNDING_STRATEGY_NEGOTIATION.PLAYER_B.STRATEGY_APPROVED"
 });
 
 export const fundingSuccessAcknowledged: ActionConstructor<FundingSuccessAcknowledged> = p => ({
   ...p,
-  type: "ENGINE.FUNDING_STRATEGY_NEGOTIATION.PLAYER_B.FUNDING_SUCCESS_ACKNOWLEDGED"
+  type: "WALLET.FUNDING_STRATEGY_NEGOTIATION.PLAYER_B.FUNDING_SUCCESS_ACKNOWLEDGED"
 });
 
 export const strategyRejected: ActionConstructor<StrategyRejected> = p => ({
   ...p,
-  type: "ENGINE.FUNDING_STRATEGY_NEGOTIATION.PLAYER_B.STRATEGY_REJECTED"
+  type: "WALLET.FUNDING_STRATEGY_NEGOTIATION.PLAYER_B.STRATEGY_REJECTED"
 });
 
 export const cancelled: ActionConstructor<Cancelled> = p => ({
   ...p,
-  type: "ENGINE.FUNDING_STRATEGY_NEGOTIATION.PLAYER_B.CANCELLED"
+  type: "WALLET.FUNDING_STRATEGY_NEGOTIATION.PLAYER_B.CANCELLED"
 });
 
 // -------

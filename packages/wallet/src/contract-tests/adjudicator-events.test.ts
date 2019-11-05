@@ -3,7 +3,7 @@ import {adjudicatorWatcher} from "../redux/sagas/adjudicator-watcher";
 import SagaTester from "redux-saga-tester";
 import * as actions from "../redux/actions";
 import {depositContract, createChallenge, createWatcherState, concludeGame, respond, getChannelId} from "./test-utils";
-import * as engineStates from "../redux/state";
+import * as walletStates from "../redux/state";
 import {getGanacheProvider} from "@statechannels/devtools";
 import {JsonRpcProvider} from "ethers/providers";
 import {Wallet} from "ethers";
@@ -29,8 +29,8 @@ describe("adjudicator listener", () => {
 
   it("should not handle an event when no process has registered", async () => {
     const channelId = await getChannelId(provider, getNextNonce(), participantA, participantB);
-    const initialState = engineStates.initialized({
-      ...engineStates.EMPTY_SHARED_DATA,
+    const initialState = walletStates.initialized({
+      ...walletStates.EMPTY_SHARED_DATA,
       uid: "",
       processStore: {},
       channelSubscriptions: {},
@@ -42,7 +42,7 @@ describe("adjudicator listener", () => {
     sagaTester.start(adjudicatorWatcher, provider);
     await depositContract(provider, channelId);
 
-    expect(sagaTester.numCalled("ENGINE.ADJUDICATOR.CHALLENGE_CREATED_EVENT")).toEqual(0);
+    expect(sagaTester.numCalled("WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT")).toEqual(0);
   });
 
   it("should ignore events for other channels", async () => {
@@ -54,7 +54,7 @@ describe("adjudicator listener", () => {
     sagaTester.start(adjudicatorWatcher, provider);
 
     await depositContract(provider, channelIdToIgnore);
-    expect(sagaTester.numCalled("ENGINE.ADJUDICATOR.CHALLENGE_CREATED_EVENT")).toEqual(0);
+    expect(sagaTester.numCalled("WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT")).toEqual(0);
   });
 
   it("should handle a challengeCreated event", async () => {
@@ -68,7 +68,7 @@ describe("adjudicator listener", () => {
 
     await createChallenge(provider, channelNonce, participantA, participantB);
 
-    await sagaTester.waitFor("ENGINE.ADJUDICATOR.CHALLENGE_CREATED_EVENT");
+    await sagaTester.waitFor("WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT");
 
     const action: actions.ChallengeCreatedEvent = sagaTester.getLatestCalledAction();
 
@@ -93,7 +93,7 @@ describe("adjudicator listener", () => {
 
     const response = await respond(provider, channelNonce, participantA, participantB, challenge);
 
-    await sagaTester.waitFor("ENGINE.ADJUDICATOR.CHALLENGE_CLEARED_EVENT");
+    await sagaTester.waitFor("WALLET.ADJUDICATOR.CHALLENGE_CLEARED_EVENT");
 
     const action: actions.ChallengeClearedEvent = sagaTester.getLatestCalledAction();
     expect(action.channelId).toEqual(channelId);
@@ -113,7 +113,7 @@ describe("adjudicator listener", () => {
 
     await concludeGame(provider, channelNonce, participantA, participantB);
 
-    await sagaTester.waitFor("ENGINE.ADJUDICATOR.CONCLUDED_EVENT");
+    await sagaTester.waitFor("WALLET.ADJUDICATOR.CONCLUDED_EVENT");
     const action: actions.ConcludedEvent = sagaTester.getLatestCalledAction();
 
     expect(action.channelId).toEqual(channelId);

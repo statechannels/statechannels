@@ -3,7 +3,7 @@ import * as states from "../states";
 import {fundingReducer as reducer} from "../reducer";
 import {ProtocolStateWithSharedData} from "../..";
 import {itSendsThisMessage, itSendsThisDisplayEventType, describeScenarioStep} from "../../../__tests__/helpers";
-import {FUNDING_SUCCESS, HIDE_ENGINE} from "../../../../magmo-engine-client";
+import {FUNDING_SUCCESS, HIDE_WALLET} from "../../../../magmo-wallet-client";
 
 describe("ledger funding", () => {
   const scenario = scenarios.ledgerFunding;
@@ -35,7 +35,7 @@ describe("ledger funding", () => {
 
     itTransitionsTo(result, "Funding.Success");
     itSendsThisMessage(result, FUNDING_SUCCESS);
-    itSendsThisDisplayEventType(result, HIDE_ENGINE);
+    itSendsThisDisplayEventType(result, HIDE_WALLET);
   });
 });
 

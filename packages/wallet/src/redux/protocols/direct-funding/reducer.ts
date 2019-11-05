@@ -110,9 +110,9 @@ export function initialize({
 export const directFundingStateReducer: DFReducer = (
   state: states.DirectFundingState,
   sharedData: SharedData,
-  action: actions.EngineAction
+  action: actions.WalletAction
 ): ProtocolStateWithSharedData<states.DirectFundingState> => {
-  if (action.type === "ENGINE.ADJUDICATOR.FUNDING_RECEIVED_EVENT" && action.channelId === state.channelId) {
+  if (action.type === "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT" && action.channelId === state.channelId) {
     if (bigNumberify(action.totalForDestination).gte(state.totalFundingRequired)) {
       return fundingConfirmedReducer(state, sharedData, action);
     }
@@ -152,10 +152,10 @@ const fundingConfirmedReducer: DFReducer = (
 const notSafeToDepositReducer: DFReducer = (
   state: states.NotSafeToDeposit,
   sharedData: SharedData,
-  action: actions.EngineAction
+  action: actions.WalletAction
 ): ProtocolStateWithSharedData<states.DirectFundingState> => {
   switch (action.type) {
-    case "ENGINE.ADJUDICATOR.FUNDING_RECEIVED_EVENT":
+    case "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT":
       if (
         action.channelId === state.channelId &&
         bigNumberify(action.totalForDestination).gte(state.safeToDepositLevel)
@@ -192,9 +192,9 @@ const notSafeToDepositReducer: DFReducer = (
 const waitForDepositTransactionReducer: DFReducer = (
   protocolState: states.WaitForDepositTransaction,
   sharedData: SharedData,
-  action: actions.EngineAction
+  action: actions.WalletAction
 ): ProtocolStateWithSharedData<states.DirectFundingState> => {
-  if (action.type === "ENGINE.ADJUDICATOR.FUNDING_RECEIVED_EVENT") {
+  if (action.type === "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT") {
     return {protocolState: {...protocolState, funded: true}, sharedData};
   }
   if (!isTransactionAction(action)) {
@@ -236,9 +236,9 @@ const waitForFundingReducer: DFReducer = (
 const channelFundedReducer: DFReducer = (
   state: states.FundingSuccess,
   sharedData: SharedData,
-  action: actions.EngineAction
+  action: actions.WalletAction
 ): ProtocolStateWithSharedData<states.DirectFundingState> => {
-  if (action.type === "ENGINE.ADJUDICATOR.FUNDING_RECEIVED_EVENT") {
+  if (action.type === "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT") {
     if (bigNumberify(action.totalForDestination).lt(state.totalFundingRequired)) {
       // TODO: Deal with chain re-orgs that de-fund the channel here
       return {protocolState: state, sharedData};

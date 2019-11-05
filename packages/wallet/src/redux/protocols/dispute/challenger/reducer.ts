@@ -23,8 +23,8 @@ import {getChannel} from "../../../state";
 import {createForceMoveTransaction} from "../../../../utils/transaction-generator";
 import {isFullyOpen, ourTurn} from "../../../channel-store";
 import {
-  showEngine,
-  hideEngine,
+  showWallet,
+  hideWallet,
   sendChallengeCommitmentReceived,
   sendChallengeComplete,
   sendConcludeSuccess
@@ -53,19 +53,19 @@ export function challengerReducer(state: NonTerminalCState, sharedData: SharedDa
   }
 
   switch (action.type) {
-    case "ENGINE.DISPUTE.CHALLENGER.CHALLENGE_APPROVED":
+    case "WALLET.DISPUTE.CHALLENGER.CHALLENGE_APPROVED":
       return challengeApproved(state, sharedData);
-    case "ENGINE.DISPUTE.CHALLENGER.CHALLENGE_DENIED":
+    case "WALLET.DISPUTE.CHALLENGER.CHALLENGE_DENIED":
       return challengeDenied(state, sharedData);
-    case "ENGINE.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT":
+    case "WALLET.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT":
       return challengeResponseReceived(state, sharedData, action.responseCommitment, action.responseSignature);
-    case "ENGINE.ADJUDICATOR.REFUTED_EVENT":
+    case "WALLET.ADJUDICATOR.REFUTED_EVENT":
       return refuteReceived(state, sharedData);
-    case "ENGINE.ADJUDICATOR.CHALLENGE_EXPIRED":
+    case "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED":
       return challengeTimedOut(state, sharedData);
-    case "ENGINE.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET":
+    case "WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET":
       return handleChallengeCreatedEvent(state, sharedData, action.expiryTime);
-    case "ENGINE.DISPUTE.CHALLENGER.ACKNOWLEDGED":
+    case "WALLET.DISPUTE.CHALLENGER.ACKNOWLEDGED":
       switch (state.type) {
         case "Challenging.AcknowledgeResponse":
           return challengeResponseAcknowledged(state, sharedData);
@@ -76,7 +76,7 @@ export function challengerReducer(state: NonTerminalCState, sharedData: SharedDa
         default:
           return {state, sharedData};
       }
-    case "ENGINE.DISPUTE.CHALLENGER.EXIT_CHALLENGE":
+    case "WALLET.DISPUTE.CHALLENGER.EXIT_CHALLENGE":
       return {
         state: successClosed({}),
         sharedData
@@ -93,19 +93,19 @@ export function initialize(channelId: string, processId: string, sharedData: Sha
   if (!channelState) {
     return {
       state: acknowledgeFailure(props, "ChannelDoesntExist"),
-      sharedData: showEngine(sharedData)
+      sharedData: showWallet(sharedData)
     };
   }
 
   if (!isFullyOpen(channelState)) {
-    return {state: acknowledgeFailure(props, "NotFullyOpen"), sharedData: showEngine(sharedData)};
+    return {state: acknowledgeFailure(props, "NotFullyOpen"), sharedData: showWallet(sharedData)};
   }
 
   if (ourTurn(channelState)) {
     // if it's our turn we don't need to challenge
     return {
       state: acknowledgeFailure(props, "AlreadyHaveLatest"),
-      sharedData: showEngine(sharedData)
+      sharedData: showWallet(sharedData)
     };
   }
   sharedData = registerChannelToMonitor(
@@ -114,7 +114,7 @@ export function initialize(channelId: string, processId: string, sharedData: Sha
     channelId,
     [] // TODO: Be passed a proper protocolLocator
   );
-  return {state: approveChallenge({channelId, processId}), sharedData: showEngine(sharedData)};
+  return {state: approveChallenge({channelId, processId}), sharedData: showWallet(sharedData)};
 }
 
 function handleChallengeCreatedEvent(state: NonTerminalCState, sharedData: SharedData, expiryTime: number): ReturnVal {
@@ -249,7 +249,7 @@ function challengeResponseAcknowledged(state: NonTerminalCState, sharedData: Sha
   if (state.type !== "Challenging.AcknowledgeResponse") {
     return {state, sharedData};
   }
-  sharedData = sendChallengeComplete(hideEngine(sharedData));
+  sharedData = sendChallengeComplete(hideWallet(sharedData));
   return {state: successOpen({}), sharedData};
 }
 
@@ -258,7 +258,7 @@ function challengeFailureAcknowledged(state: NonTerminalCState, sharedData: Shar
     return {state, sharedData};
   }
 
-  return {state: failure(state), sharedData: hideEngine(sharedData)};
+  return {state: failure(state), sharedData: hideWallet(sharedData)};
 }
 
 function timeoutAcknowledged(state: NonTerminalCState, sharedData: SharedData) {
@@ -267,7 +267,7 @@ function timeoutAcknowledged(state: NonTerminalCState, sharedData: SharedData) {
   }
   return {
     state: successClosed({}),
-    sharedData: hideEngine(sharedData)
+    sharedData: hideWallet(sharedData)
   };
 }
 // Helpers

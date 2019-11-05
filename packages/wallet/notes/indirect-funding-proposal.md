@@ -25,8 +25,8 @@ We start in a position where both parties are at the funding point and have appr
 The following interaction then occurs:
 ```mermaid
 sequenceDiagram
-    participant wltA as A's engine
-    participant wltB as B's engine
+    participant wltA as A's wallet
+    participant wltB as B's wallet
 
     Note over wltA, wltB: channels.X in DETERMINE_STRATEGY
 
@@ -36,7 +36,7 @@ sequenceDiagram
 
     Note over wltA, wltB: channels.X in WAIT_FOR_FUNDING
 ```
-After this the engine state updates as follows:
+After this the wallet state updates as follows:
 ```json
 {
   channels: { X: { channelId: X, state: WAIT_FOR_FUNDING, strategy: 'indirect', ... } },
@@ -62,8 +62,8 @@ Suppose the following interactions then occur:
 
 ```mermaid
 sequenceDiagram
-    participant wltA as A's engine
-    participant wltB as B's engine
+    participant wltA as A's wallet
+    participant wltB as B's wallet
 
     Note over wltA, wltB: IndirectFundings.X in WAIT_FOR_PRE_FS
 
@@ -73,7 +73,7 @@ sequenceDiagram
     Note over wltA, wltB: IndirectFundings.X in WAIT_FOR_FUNDING
 ```
 Note that the `PreFundSetup` commitments update the state of `L` so that it now allocates to `X`.
-When the `indirectFundings.X` is in the `WAIT_FOR_FUNDING` state, the engine state will look something like:
+When the `indirectFundings.X` is in the `WAIT_FOR_FUNDING` state, the wallet state will look something like:
 ```json
 {
   channels: {
@@ -95,8 +95,8 @@ The `directFunding` state tracks the direct funding state machine as found curre
 The interaction proceeds as follows:
 ```mermaid
 sequenceDiagram
-    participant wltA as A's engine
-    participant wltB as B's engine
+    participant wltA as A's wallet
+    participant wltB as B's wallet
     participant blk as blockchain
 
     Note over wltA, blk: IndirectFundings.X in WAIT_FOR_FUNDING
@@ -124,7 +124,7 @@ sequenceDiagram
 
 ```
 
-At this point, we've opened an `L` that funds `X`. The engine state might look something like:
+At this point, we've opened an `L` that funds `X`. The wallet state might look something like:
 ```json
 {
   channels: {

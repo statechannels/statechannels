@@ -1,11 +1,11 @@
-import {EngineAction} from "../../actions";
+import {WalletAction} from "../../actions";
 import {LedgerTopUpAction, isLedgerTopUpAction} from "../ledger-top-up/actions";
 import {EmbeddedProtocol, routerFactory} from "../../../communication";
 import {isConsensusUpdateAction, ConsensusUpdateAction} from "../consensus-update";
 
 export type ExistingLedgerFundingAction = ConsensusUpdateAction | LedgerTopUpAction;
 
-export function isExistingLedgerFundingAction(action: EngineAction): action is ExistingLedgerFundingAction {
+export function isExistingLedgerFundingAction(action: WalletAction): action is ExistingLedgerFundingAction {
   return isConsensusUpdateAction(action) || isLedgerTopUpAction(action);
 }
 

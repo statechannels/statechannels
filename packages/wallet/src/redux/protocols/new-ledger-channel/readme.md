@@ -8,12 +8,12 @@ Out of scope (for now):
 
 ## The Protocol
 
-The protocol interacts between client engines through the following messages:
+The protocol interacts between client wallets through the following messages:
 
 ```mermaid
 sequenceDiagram
-  participant A as A's engine
-  participant B as B's engine
+  participant A as A's wallet
+  participant B as B's wallet
 
   Note  over A, B: Open L (sub-protocol)
   Note  over A, B: Directly fund L (sub-protocol)

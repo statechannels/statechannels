@@ -10,16 +10,16 @@ import {ActionConstructor} from "../../../utils";
 // -------
 
 export interface StrategyChosen extends BaseProcessAction {
-  type: "ENGINE.FUNDING_STRATEGY_NEGOTIATION.PLAYER_A.STRATEGY_CHOSEN";
+  type: "WALLET.FUNDING_STRATEGY_NEGOTIATION.PLAYER_A.STRATEGY_CHOSEN";
   strategy: FundingStrategy;
 }
 
 export interface StrategyRejected extends BaseProcessAction {
-  type: "ENGINE.FUNDING_STRATEGY_NEGOTIATION.PLAYER_A.STRATEGY_REJECTED";
+  type: "WALLET.FUNDING_STRATEGY_NEGOTIATION.PLAYER_A.STRATEGY_REJECTED";
 }
 
 export interface Cancelled extends BaseProcessAction {
-  type: "ENGINE.FUNDING_STRATEGY_NEGOTIATION.PLAYER_A.CANCELLED";
+  type: "WALLET.FUNDING_STRATEGY_NEGOTIATION.PLAYER_A.CANCELLED";
   by: TwoPartyPlayerIndex;
 }
 
@@ -29,17 +29,17 @@ export interface Cancelled extends BaseProcessAction {
 
 export const strategyChosen: ActionConstructor<StrategyChosen> = p => ({
   ...p,
-  type: "ENGINE.FUNDING_STRATEGY_NEGOTIATION.PLAYER_A.STRATEGY_CHOSEN"
+  type: "WALLET.FUNDING_STRATEGY_NEGOTIATION.PLAYER_A.STRATEGY_CHOSEN"
 });
 
 export const strategyRejected: ActionConstructor<StrategyRejected> = p => ({
   ...p,
-  type: "ENGINE.FUNDING_STRATEGY_NEGOTIATION.PLAYER_A.STRATEGY_REJECTED"
+  type: "WALLET.FUNDING_STRATEGY_NEGOTIATION.PLAYER_A.STRATEGY_REJECTED"
 });
 
 export const cancelled: ActionConstructor<Cancelled> = p => ({
   ...p,
-  type: "ENGINE.FUNDING_STRATEGY_NEGOTIATION.PLAYER_A.CANCELLED"
+  type: "WALLET.FUNDING_STRATEGY_NEGOTIATION.PLAYER_A.CANCELLED"
 });
 
 // -------

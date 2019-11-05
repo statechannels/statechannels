@@ -3,11 +3,11 @@ import {challengerReducer, initialize, ReturnVal} from "../reducer";
 import {FailureReason, ChallengerStateType, WaitForTransaction, WaitForResponseOrTimeout} from "../states";
 import {itSendsThisMessage, itSendsThisDisplayEventType, describeScenarioStep} from "../../../../__tests__/helpers";
 import {
-  HIDE_ENGINE,
+  HIDE_WALLET,
   CHALLENGE_COMPLETE,
   CHALLENGE_COMMITMENT_RECEIVED,
-  SHOW_ENGINE
-} from "../../../../../magmo-engine-client";
+  SHOW_WALLET
+} from "../../../../../magmo-wallet-client";
 
 describe("OPPONENT RESPONDS", () => {
   const scenario = scenarios.opponentResponds;
@@ -15,7 +15,7 @@ describe("OPPONENT RESPONDS", () => {
 
   describe("when initializing", () => {
     const result = initialize(channelId, processId, sharedData);
-    itSendsThisDisplayEventType(result.sharedData, SHOW_ENGINE);
+    itSendsThisDisplayEventType(result.sharedData, SHOW_WALLET);
 
     itTransitionsTo(result, "Challenging.ApproveChallenge");
   });
@@ -67,7 +67,7 @@ describe("OPPONENT RESPONDS", () => {
 
     itTransitionsTo(result, "Challenging.SuccessOpen");
     itSendsThisMessage(result.sharedData, CHALLENGE_COMPLETE);
-    itSendsThisDisplayEventType(result.sharedData, HIDE_ENGINE);
+    itSendsThisDisplayEventType(result.sharedData, HIDE_WALLET);
   });
 });
 
@@ -98,7 +98,7 @@ describe("CHALLENGE TIMES OUT AND IS not DEFUNDED", () => {
     const result = challengerReducer(state, sharedData, action);
 
     itTransitionsTo(result, "Challenging.SuccessClosed");
-    itSendsThisDisplayEventType(result.sharedData, HIDE_ENGINE);
+    itSendsThisDisplayEventType(result.sharedData, HIDE_WALLET);
   });
 });
 

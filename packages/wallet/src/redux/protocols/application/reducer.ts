@@ -3,7 +3,7 @@ import * as states from "./states";
 import * as actions from "./actions";
 import {ProtocolStateWithSharedData} from "..";
 import {unreachable} from "../../../utils/reducer-utils";
-import {validationSuccess, signatureSuccess, signatureFailure, validationFailure} from "../../../magmo-engine-client";
+import {validationSuccess, signatureSuccess, signatureFailure, validationFailure} from "../../../magmo-wallet-client";
 import {checkAndInitialize, signAndInitialize, signAndStore, checkAndStore} from "../../channel-store/reducer";
 import {ProtocolAction} from "../../actions";
 import * as dispute from "../dispute";
@@ -44,15 +44,15 @@ export function applicationReducer(
     return handleDisputeAction(protocolState, sharedData, action);
   }
   switch (action.type) {
-    case "ENGINE.APPLICATION.OPPONENT_STATE_RECEIVED":
+    case "WALLET.APPLICATION.OPPONENT_STATE_RECEIVED":
       return opponentStateReceivedReducer(protocolState, sharedData, action);
-    case "ENGINE.APPLICATION.OWN_STATE_RECEIVED":
+    case "WALLET.APPLICATION.OWN_STATE_RECEIVED":
       return ownStateReceivedReducer(protocolState, sharedData, action);
-    case "ENGINE.APPLICATION.CONCLUDED":
+    case "WALLET.APPLICATION.CONCLUDED":
       return {sharedData, protocolState: states.success({})};
-    case "ENGINE.APPLICATION.CHALLENGE_DETECTED":
+    case "WALLET.APPLICATION.CHALLENGE_DETECTED":
       return challengeDetectedReducer(protocolState, sharedData, action);
-    case "ENGINE.APPLICATION.CHALLENGE_REQUESTED":
+    case "WALLET.APPLICATION.CHALLENGE_REQUESTED":
       return challengeRequestedReducer(protocolState, sharedData, action);
     default:
       return unreachable(action);

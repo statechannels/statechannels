@@ -1,5 +1,5 @@
 import {OpenChannelState, ChannelState, isFullyOpen, getLastCommitment} from "./channel-store";
-import * as engineStates from "./state";
+import * as walletStates from "./state";
 import {SharedData, FundingState} from "./state";
 import {ProcessProtocol} from "../communication";
 import {CONSENSUS_LIBRARY_ADDRESS} from "../constants";
@@ -49,9 +49,9 @@ export const getFundedLedgerChannelForParticipants = (
   });
 };
 export const getAdjudicatorWatcherSubscribersForChannel = (
-  state: engineStates.Initialized,
+  state: walletStates.Initialized,
   channelId: string
-): engineStates.ChannelSubscriber[] => {
+): walletStates.ChannelSubscriber[] => {
   if (state.channelSubscriptions[channelId]) {
     return state.channelSubscriptions[channelId];
   } else {
@@ -77,9 +77,9 @@ export const getAdjudicatorChannelBalance = (state: SharedData, channelId: strin
 };
 
 export const getETHAssetHolderWatcherSubscribersForChannel = (
-  state: engineStates.Initialized,
+  state: walletStates.Initialized,
   channelId: string
-): engineStates.ChannelSubscriber[] => {
+): walletStates.ChannelSubscriber[] => {
   if (state.channelSubscriptions[channelId]) {
     return state.channelSubscriptions[channelId];
   } else {
@@ -94,11 +94,11 @@ export const getFundingState = (state: SharedData): FundingState => {
 export const getChannelFundingState = (
   state: SharedData,
   channelId: string
-): engineStates.ChannelFundingState | undefined => {
+): walletStates.ChannelFundingState | undefined => {
   return getFundingState(state)[channelId];
 };
 
-export const getProtocolForProcessId = (state: engineStates.Initialized, processId: string): ProcessProtocol => {
+export const getProtocolForProcessId = (state: walletStates.Initialized, processId: string): ProcessProtocol => {
   if (state.processStore[processId]) {
     throw new Error(`No process state for process Id`);
   } else {
@@ -106,7 +106,7 @@ export const getProtocolForProcessId = (state: engineStates.Initialized, process
   }
 };
 
-export const getProtocolState = (state: engineStates.Initialized, processId: string) => {
+export const getProtocolState = (state: walletStates.Initialized, processId: string) => {
   return state.processStore[processId].protocolState;
 };
 

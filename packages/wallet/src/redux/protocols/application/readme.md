@@ -36,9 +36,9 @@ linkStyle default interpolate basis
 
 Notes:
 
-- All action typestrings have had the `ENGINE.APPLICATION` prefix suppressed in the above diagram
+- All action typestrings have had the `WALLET.APPLICATION` prefix suppressed in the above diagram
 - `STATE_RECEIVED` is shorthand for either `OWN_STATE_RECEIVED` or `OPPONENT_STATE_RECEIVED`
-- `CONCLUDED` should get triggered when a conclude is requested _and then sent from the engine_. This means that the application protocol no longer needs to listen for states from the app. In particular, if the conclude is requested and then cancelled, `CONCLUDED` will not be triggered.
+- `CONCLUDED` should get triggered when a conclude is requested _and then sent from the wallet_. This means that the application protocol no longer needs to listen for states from the app. In particular, if the conclude is requested and then cancelled, `CONCLUDED` will not be triggered.
 - The application protocol is responsible for sending out signature and validation messages.
 
 ## Scenarios

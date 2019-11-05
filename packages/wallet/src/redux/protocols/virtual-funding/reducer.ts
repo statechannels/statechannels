@@ -1,7 +1,7 @@
 import * as states from "./states";
 import {SharedData, getPrivatekey, setFundingState} from "../../state";
 import {ProtocolStateWithSharedData, ProtocolReducer, makeLocator} from "..";
-import {EngineAction, advanceChannel} from "../../actions";
+import {WalletAction, advanceChannel} from "../../actions";
 import {VirtualFundingAction} from "./actions";
 import {unreachable} from "../../../utils/reducer-utils";
 import {CONSENSUS_LIBRARY_ADDRESS, ETH_ASSET_HOLDER_ADDRESS} from "../../../constants";
@@ -87,7 +87,7 @@ export const reducer: ProtocolReducer<states.VirtualFundingState> = (
 function waitForJointChannelReducer(
   protocolState: states.WaitForJointChannel,
   sharedData: SharedData,
-  action: EngineAction
+  action: WalletAction
 ) {
   const {processId, hubAddress, ourIndex, protocolLocator} = protocolState;
   if (routesToAdvanceChannel(action, protocolState.protocolLocator)) {
@@ -167,7 +167,7 @@ function waitForJointChannelReducer(
 function waitForGuarantorChannelReducer(
   protocolState: states.WaitForGuarantorChannel,
   sharedData: SharedData,
-  action: EngineAction
+  action: WalletAction
 ) {
   const {processId, protocolLocator} = protocolState;
   if (routesToAdvanceChannel(action, protocolState.protocolLocator)) {
@@ -262,7 +262,7 @@ function waitForGuarantorChannelReducer(
 function waitForGuarantorFundingReducer(
   protocolState: states.WaitForGuarantorFunding,
   sharedData: SharedData,
-  action: EngineAction
+  action: WalletAction
 ) {
   const {processId, protocolLocator} = protocolState;
 
@@ -330,7 +330,7 @@ function waitForGuarantorFundingReducer(
 function waitForApplicationFundingReducer(
   protocolState: states.WaitForApplicationFunding,
   sharedData: SharedData,
-  action: EngineAction
+  action: WalletAction
 ) {
   if (routesToConsensusUpdate(action, protocolState.protocolLocator)) {
     const result = consensusUpdate.consensusUpdateReducer(protocolState.indirectApplicationFunding, sharedData, action);

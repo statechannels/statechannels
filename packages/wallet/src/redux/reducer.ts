@@ -1,4 +1,4 @@
-import {initializationSuccess} from "../magmo-engine-client/engine-events";
+import {initializationSuccess} from "../magmo-wallet-client/wallet-events";
 import {unreachable} from "../utils/reducer-utils";
 import * as actions from "./actions";
 import {accumulateSideEffects} from "./outbox";
@@ -18,10 +18,10 @@ import _ from "lodash";
 import {Wallet} from "ethers";
 const initialState = states.waitForLogin();
 
-export const engineReducer = (
-  state: states.EngineState = initialState,
-  action: actions.EngineAction
-): states.EngineState => {
+export const walletReducer = (
+  state: states.WalletState = initialState,
+  action: actions.WalletAction
+): states.WalletState => {
   const nextState = {...state, outboxState: clearOutbox(state.outboxState, action)};
 
   switch (nextState.type) {
@@ -31,14 +31,14 @@ export const engineReducer = (
       // We stay in the metamask error state until a change to
       // metamask settings forces a refresh
       return state;
-    case states.ENGINE_INITIALIZED:
+    case states.WALLET_INITIALIZED:
       return initializedReducer(nextState, action);
     default:
       return unreachable(nextState);
   }
 };
 
-export function initializedReducer(state: states.Initialized, action: actions.EngineAction): states.EngineState {
+export function initializedReducer(state: states.Initialized, action: actions.WalletAction): states.WalletState {
   let newState = {...state};
   if (actions.isSharedDataUpdateAction(action)) {
     newState = updateSharedData(newState, action);
@@ -134,7 +134,7 @@ function updatedState(
 export function getProcessId(action: NewProcessAction): string {
   if (isStartProcessAction(action)) {
     return communication.getProcessId(action);
-  } else if (action.type === "ENGINE.NEW_PROCESS.INITIALIZE_CHANNEL") {
+  } else if (action.type === "WALLET.NEW_PROCESS.INITIALIZE_CHANNEL") {
     return APPLICATION_PROCESS_ID;
   } else if ("channelId" in action) {
     return `${action.protocol}-${action.channelId}`;
@@ -150,11 +150,11 @@ function initializeNewProtocol(
   const incomingSharedData = states.sharedData(state);
   // TODO do not reinitialise an existing process
   switch (action.type) {
-    case "ENGINE.NEW_PROCESS.FUNDING_REQUESTED": {
+    case "WALLET.NEW_PROCESS.FUNDING_REQUESTED": {
       const {channelId} = action;
       return fundProtocol.initializeFunding(incomingSharedData, processId, channelId);
     }
-    case "ENGINE.NEW_PROCESS.CONCLUDE_REQUESTED": {
+    case "WALLET.NEW_PROCESS.CONCLUDE_REQUESTED": {
       const {channelId} = action;
       const {protocolState, sharedData} = concludingProtocol.initialize({
         channelId,
@@ -164,7 +164,7 @@ function initializeNewProtocol(
       });
       return {protocolState, sharedData};
     }
-    case "ENGINE.NEW_PROCESS.CONCLUDE_INSTIGATED": {
+    case "WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED": {
       const {channelId} = action;
       const {protocolState, sharedData} = concludingProtocol.initialize({
         channelId,
@@ -174,9 +174,9 @@ function initializeNewProtocol(
       });
       return {protocolState, sharedData};
     }
-    case "ENGINE.NEW_PROCESS.INITIALIZE_CHANNEL":
+    case "WALLET.NEW_PROCESS.INITIALIZE_CHANNEL":
       return applicationProtocol.initialize(incomingSharedData, action.channelId, state.address, state.privateKey);
-    case "ENGINE.NEW_PROCESS.CLOSE_LEDGER_CHANNEL":
+    case "WALLET.NEW_PROCESS.CLOSE_LEDGER_CHANNEL":
       return closeLedgerChannelProtocol.initializeCloseLedgerChannel(processId, action.channelId, incomingSharedData);
     default:
       return unreachable(action);
@@ -189,9 +189,9 @@ function routeToNewProcessInitializer(state: states.Initialized, action: NewProc
   return startProcess(state, sharedData, action, protocolState, processId);
 }
 
-const waitForLoginReducer = (state: states.WaitForLogin, action: actions.EngineAction): states.EngineState => {
+const waitForLoginReducer = (state: states.WaitForLogin, action: actions.WalletAction): states.WalletState => {
   switch (action.type) {
-    case "ENGINE.LOGGED_IN":
+    case "WALLET.LOGGED_IN":
       let {address, privateKey} = state;
       if (!address || !privateKey) {
         ({privateKey, address} = Wallet.createRandom());

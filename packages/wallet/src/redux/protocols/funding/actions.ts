@@ -3,7 +3,7 @@ import {strategyApproved, StrategyApproved} from "../../../communication";
 export {strategyApproved, StrategyApproved};
 import {ActionConstructor} from "../../utils";
 import {AdvanceChannelAction, isAdvanceChannelAction} from "../advance-channel";
-import {EngineAction} from "../../actions";
+import {WalletAction} from "../../actions";
 import {VirtualFundingAction, isVirtualFundingAction} from "../virtual-funding";
 import {LedgerFundingAction, isLedgerFundingAction} from "../ledger-funding";
 import {FundingStrategyNegotiationAction, isFundingStrategyNegotiationAction} from "../funding-strategy-negotiation";
@@ -13,7 +13,7 @@ import {FundingStrategyNegotiationAction, isFundingStrategyNegotiationAction} fr
 // -------
 
 export interface FundingSuccessAcknowledged extends BaseProcessAction {
-  type: "ENGINE.FUNDING.FUNDING_SUCCESS_ACKNOWLEDGED";
+  type: "WALLET.FUNDING.FUNDING_SUCCESS_ACKNOWLEDGED";
 }
 
 // --------
@@ -22,15 +22,15 @@ export interface FundingSuccessAcknowledged extends BaseProcessAction {
 
 export const fundingSuccessAcknowledged: ActionConstructor<FundingSuccessAcknowledged> = p => ({
   ...p,
-  type: "ENGINE.FUNDING.FUNDING_SUCCESS_ACKNOWLEDGED"
+  type: "WALLET.FUNDING.FUNDING_SUCCESS_ACKNOWLEDGED"
 });
 
 // -------
 // Unions and Guards
 // -------
-export function isFundingAction(action: EngineAction): action is FundingAction {
+export function isFundingAction(action: WalletAction): action is FundingAction {
   return (
-    action.type === "ENGINE.FUNDING.FUNDING_SUCCESS_ACKNOWLEDGED" ||
+    action.type === "WALLET.FUNDING.FUNDING_SUCCESS_ACKNOWLEDGED" ||
     isAdvanceChannelAction(action) ||
     isVirtualFundingAction(action) ||
     isLedgerFundingAction(action) ||

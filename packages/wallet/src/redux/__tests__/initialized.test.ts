@@ -1,4 +1,4 @@
-import {engineReducer, getProcessId} from "../reducer";
+import {walletReducer, getProcessId} from "../reducer";
 
 import * as states from "./../state";
 import * as actions from "./../actions";
@@ -29,7 +29,7 @@ describe("when a NewProcessAction arrives", () => {
   }));
   Object.defineProperty(fundProtocol, "initializeFunding", {value: initialize});
 
-  const updatedState = engineReducer(initializedState, action);
+  const updatedState = walletReducer(initializedState, action);
   it("calls initialize", () => {
     expect(initialize).toHaveBeenCalledWith(states.EMPTY_SHARED_DATA, processId, action.channelId);
   });
@@ -64,7 +64,7 @@ describe("when a ProcessAction arrives", () => {
     value: NewLedgerChannelReducer
   });
 
-  engineReducer(state, action);
+  walletReducer(state, action);
   it("calls the correct reducer", () => {
     expect(NewLedgerChannelReducer).toHaveBeenCalledWith(protocolState, states.EMPTY_SHARED_DATA, action);
   });
@@ -81,7 +81,7 @@ describe("when a updateSharedData action arrives", () => {
     timestamp: 1
   });
   const state = {...initializedState, adjudicatorState: {}};
-  engineReducer(initializedState, action);
+  walletReducer(initializedState, action);
 
   it("passes the action to the adjudicator state reducer", () => {
     expect(reducer).toHaveBeenCalledWith(state.adjudicatorState, action);
@@ -110,7 +110,7 @@ describe("when a process state is terminal", () => {
     value: reducer
   });
 
-  const result = engineReducer(state, action);
+  const result = walletReducer(state, action);
   it("removes the current process id", () => {
     expect(result.currentProcessId).toBeUndefined();
   });

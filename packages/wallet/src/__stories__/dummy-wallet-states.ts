@@ -1,4 +1,4 @@
-import * as engineStates from "../redux/state";
+import * as walletStates from "../redux/state";
 import * as scenarios from "../domain/commitments/__tests__";
 import * as states from "../redux/state";
 
@@ -25,17 +25,17 @@ export const defaultParams = {
 };
 
 ////////////////////////////
-// ENGINE NOT INITIALIZED //
+// WALLET NOT INITIALIZED //
 ////////////////////////////
 
-export const dummyWaitForLogin: engineStates.EngineState = engineStates.waitForLogin();
-export const dummyWaitForMetaMask: engineStates.EngineState = engineStates.metaMaskError({
+export const dummyWaitForLogin: walletStates.WalletState = walletStates.waitForLogin();
+export const dummyWaitForMetaMask: walletStates.WalletState = walletStates.metaMaskError({
   ...dummyWaitForLogin
 });
 //
 
 ////////////////////////////
-// ENGINE INITIALIZED //
+// WALLET INITIALIZED //
 ////////////////////////////
 
 const defaults = {

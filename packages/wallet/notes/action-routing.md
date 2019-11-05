@@ -4,7 +4,7 @@
 
 ## The Action Routing Problem
 
-If we have multiple protocols running in the engine simultaneously, we need a way of identifying
+If we have multiple protocols running in the wallet simultaneously, we need a way of identifying
 which protocol a given action should apply to. This applies to the majority of our actions,
 including messages from an opponent, transaction updates from the blockchain or UI interaction
 by the user.

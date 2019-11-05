@@ -5,11 +5,11 @@ import {challengeDetected} from "../protocols/application/actions";
 import {APPLICATION_PROCESS_ID} from "../protocols/application/reducer";
 
 /**
- * A simple saga that determines if a challenge created event requires the engine to initialize a respond protocol
+ * A simple saga that determines if a challenge created event requires the wallet to initialize a respond protocol
  */
 export function* challengeResponseInitiator() {
   while (true) {
-    const action: ChallengeCreatedEvent = yield take("ENGINE.ADJUDICATOR.CHALLENGE_CREATED_EVENT");
+    const action: ChallengeCreatedEvent = yield take("WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT");
     const {challengeStates, channelId, finalizedAt: expiresAt} = action;
 
     const channelState = yield select(selectors.getOpenedChannelState, channelId);

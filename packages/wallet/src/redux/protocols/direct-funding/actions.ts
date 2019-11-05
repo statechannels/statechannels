@@ -16,13 +16,13 @@ type EmbeddedAction = actions.advanceChannel.AdvanceChannelAction | actions.Tran
 
 export type DirectFundingAction = CommitmentsReceived | actions.FundingReceivedEvent | EmbeddedAction;
 
-function isEmbeddedAction(action: actions.EngineAction): action is EmbeddedAction {
+function isEmbeddedAction(action: actions.WalletAction): action is EmbeddedAction {
   return actions.advanceChannel.isAdvanceChannelAction(action) || actions.isTransactionAction(action);
 }
 
-export function isDirectFundingAction(action: actions.EngineAction): action is DirectFundingAction {
+export function isDirectFundingAction(action: actions.WalletAction): action is DirectFundingAction {
   return (
-    action.type === "ENGINE.ADJUDICATOR.FUNDING_RECEIVED_EVENT" ||
+    action.type === "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT" ||
     isCommonAction(action, EmbeddedProtocol.DirectFunding) ||
     isEmbeddedAction(action)
   );

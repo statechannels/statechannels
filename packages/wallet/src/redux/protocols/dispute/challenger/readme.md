@@ -22,20 +22,20 @@ linkStyle default interpolate basis
   S((start)) --> CE{Can<br/>challenge?}
   CE --> |Yes| WFA(ApproveChallenge)
   WFA --> |CommitmentArrives| AF
-  WFA --> |ENGINE.DISPUTE.CHALLENGER.CHALLENGE_APPROVED| WFT(WaitForTransaction)
+  WFA --> |WALLET.DISPUTE.CHALLENGER.CHALLENGE_APPROVED| WFT(WaitForTransaction)
   CE --> |No| AF
-  WFA --> |ENGINE.DISPUTE.CHALLENGER.CHALLENGE_DENIED| AF(AcknowledgeFailure)
-  AF --> |ENGINE.DISPUTE.CHALLENGER.ACKNOWLEDGED| F((Failure))
+  WFA --> |WALLET.DISPUTE.CHALLENGER.CHALLENGE_DENIED| AF(AcknowledgeFailure)
+  AF --> |WALLET.DISPUTE.CHALLENGER.ACKNOWLEDGED| F((Failure))
   WFT --> |TransactionSuccess| WFRT(WaitForResponseOrTimeout)
   WFT --> |TransactionFailure| AF
   WFRT --> |CHALLENGE_EXPIRED| AT(AcknowledgeTimeout)
 
 
   WFRT -->|ChallengeExpirySetEvent| WFRT
-  AT --> |ENGINE.DISPUTE.CHALLENGER.ACKNOWLEDGED| SD((Closed))
+  AT --> |WALLET.DISPUTE.CHALLENGER.ACKNOWLEDGED| SD((Closed))
 
   WFRT --> |ChallengeResponseReceived| AR(AcknowledgeResponse)
-  AR --> |ENGINE.DISPUTE.CHALLENGER.ACKNOWLEDGED| SP((Open))
+  AR --> |WALLET.DISPUTE.CHALLENGER.ACKNOWLEDGED| SP((Open))
   classDef logic fill:#efdd20;
   classDef Success fill:#58ef21;
   classDef Failure fill:#f45941;
@@ -75,7 +75,7 @@ To test all paths through the state machine we will the following scenarios:
    - `Closed`
 
 4. **Channel doesn't exist**:
-   (Challenge requested for `channelId` that doesn't exist in the engine.)
+   (Challenge requested for `channelId` that doesn't exist in the wallet.)
 
    - `AcknowledgeFailure`
    - `Failure`

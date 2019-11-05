@@ -50,7 +50,7 @@ describe("ETHAssetHolder listener", () => {
     const depositAmount = bigNumberify("0x05");
     await depositContract(provider, channelId, depositAmount.toHexString());
 
-    await sagaTester.waitFor("ENGINE.ASSET_HOLDER.DEPOSITED");
+    await sagaTester.waitFor("WALLET.ASSET_HOLDER.DEPOSITED");
 
     const action: DepositedEvent = sagaTester.getLatestCalledAction();
     expect(action.destination).toEqual(channelId);
@@ -115,7 +115,7 @@ describe("ETHAssetHolder listener", () => {
 
     await transferAll(channelId, encodeAllocation(allocation), provider);
 
-    await sagaTester.waitFor("ENGINE.ASSET_HOLDER.ASSET_TRANSFERRED");
+    await sagaTester.waitFor("WALLET.ASSET_HOLDER.ASSET_TRANSFERRED");
   });
 });
 
@@ -131,7 +131,7 @@ async function finalizeChannel(
   sagaTester.start(adjudicatorWatcher, provider);
 
   await concludeGame(provider, channelNonce, participantA, participantB);
-  await sagaTester.waitFor("ENGINE.ADJUDICATOR.CONCLUDED_EVENT");
+  await sagaTester.waitFor("WALLET.ADJUDICATOR.CONCLUDED_EVENT");
 }
 
 async function getOnChainChannelStorage(

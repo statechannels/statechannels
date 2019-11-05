@@ -1,7 +1,7 @@
 import {BaseProcessAction} from "../../actions";
 import {Commitment} from "../../../../domain";
 import {TransactionAction} from "../../transaction-submission/actions";
-import {isTransactionAction, ChallengeExpiredEvent, ChallengeExpirySetEvent, EngineAction} from "../../../actions";
+import {isTransactionAction, ChallengeExpiredEvent, ChallengeExpirySetEvent, WalletAction} from "../../../actions";
 import {ActionConstructor} from "../../../utils";
 
 // -------
@@ -9,22 +9,22 @@ import {ActionConstructor} from "../../../utils";
 // -------
 
 export interface RespondApproved extends BaseProcessAction {
-  type: "ENGINE.DISPUTE.RESPONDER.RESPOND_APPROVED";
+  type: "WALLET.DISPUTE.RESPONDER.RESPOND_APPROVED";
   processId: string;
 }
 
 export interface ResponseProvided extends BaseProcessAction {
-  type: "ENGINE.DISPUTE.RESPONDER.RESPONSE_PROVIDED";
+  type: "WALLET.DISPUTE.RESPONDER.RESPONSE_PROVIDED";
   processId: string;
   commitment: Commitment;
 }
 
 export interface ExitChallenge {
-  type: "ENGINE.DISPUTE.CHALLENGER.EXIT_CHALLENGE";
+  type: "WALLET.DISPUTE.CHALLENGER.EXIT_CHALLENGE";
   processId: string;
 }
 export interface Acknowledged extends BaseProcessAction {
-  type: "ENGINE.DISPUTE.RESPONDER.ACKNOWLEDGED";
+  type: "WALLET.DISPUTE.RESPONDER.ACKNOWLEDGED";
   processId: string;
 }
 
@@ -34,22 +34,22 @@ export interface Acknowledged extends BaseProcessAction {
 
 export const respondApproved: ActionConstructor<RespondApproved> = p => ({
   ...p,
-  type: "ENGINE.DISPUTE.RESPONDER.RESPOND_APPROVED"
+  type: "WALLET.DISPUTE.RESPONDER.RESPOND_APPROVED"
 });
 
 export const responseProvided: ActionConstructor<ResponseProvided> = p => ({
   ...p,
-  type: "ENGINE.DISPUTE.RESPONDER.RESPONSE_PROVIDED"
+  type: "WALLET.DISPUTE.RESPONDER.RESPONSE_PROVIDED"
 });
 
 export const exitChallenge: ActionConstructor<ExitChallenge> = p => ({
   ...p,
-  type: "ENGINE.DISPUTE.CHALLENGER.EXIT_CHALLENGE"
+  type: "WALLET.DISPUTE.CHALLENGER.EXIT_CHALLENGE"
 });
 
 export const acknowledged: ActionConstructor<Acknowledged> = p => ({
   ...p,
-  type: "ENGINE.DISPUTE.RESPONDER.ACKNOWLEDGED"
+  type: "WALLET.DISPUTE.RESPONDER.ACKNOWLEDGED"
 });
 
 // -------
@@ -65,14 +65,14 @@ export type ResponderAction =
   | Acknowledged
   | ExitChallenge;
 
-export function isResponderAction(action: EngineAction): action is ResponderAction {
+export function isResponderAction(action: WalletAction): action is ResponderAction {
   return (
     isTransactionAction(action) ||
-    action.type === "ENGINE.DISPUTE.RESPONDER.RESPOND_APPROVED" ||
-    action.type === "ENGINE.DISPUTE.RESPONDER.RESPONSE_PROVIDED" ||
-    action.type === "ENGINE.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET" ||
-    action.type === "ENGINE.ADJUDICATOR.CHALLENGE_EXPIRED" ||
-    action.type === "ENGINE.DISPUTE.RESPONDER.ACKNOWLEDGED" ||
-    action.type === "ENGINE.DISPUTE.CHALLENGER.EXIT_CHALLENGE"
+    action.type === "WALLET.DISPUTE.RESPONDER.RESPOND_APPROVED" ||
+    action.type === "WALLET.DISPUTE.RESPONDER.RESPONSE_PROVIDED" ||
+    action.type === "WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET" ||
+    action.type === "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED" ||
+    action.type === "WALLET.DISPUTE.RESPONDER.ACKNOWLEDGED" ||
+    action.type === "WALLET.DISPUTE.CHALLENGER.EXIT_CHALLENGE"
   );
 }

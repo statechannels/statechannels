@@ -11,7 +11,7 @@ import {
 import {channelFromStates} from "../../../channel-store/channel-state/__tests__";
 import {twoThree} from "../../../../domain/commitments/__tests__";
 import {CONSENSUS_LIBRARY_ADDRESS} from "../../../../constants";
-import {PlayerIndex} from "../../../../magmo-engine-client/engine-instructions";
+import {PlayerIndex} from "../../../../magmo-wallet-client/wallet-instructions";
 import {prependToLocator} from "../..";
 import {EmbeddedProtocol} from "../../../../communication";
 import {ADVANCE_CHANNEL_PROTOCOL_LOCATOR} from "../../advance-channel/reducer";
