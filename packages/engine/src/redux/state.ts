@@ -25,15 +25,15 @@ import {accumulateSideEffects} from "./outbox";
 import {EngineEvent} from "../magmo-engine-client";
 import {TransactionRequest} from "ethers/providers";
 import {AdjudicatorState} from "./adjudicator-state/state";
-import {SignedCommitment, Commitment, getCommitmentChannelId} from "../domain";
+import {SignedCommitment} from "../domain";
 import {ProcessProtocol, ProtocolLocator} from "../communication";
 import {TerminalApplicationState, isTerminalApplicationState, isApplicationState} from "./protocols/application/states";
 import {TerminalFundingState, isFundingState, isTerminalFundingState} from "./protocols/funding/states";
 import {ProtocolState} from "./protocols";
 import {isDefundingState, isTerminalDefundingState, TerminalDefundingState} from "./protocols/defunding/states";
 import {TerminalConcludingState, isConcludingState, isTerminalConcludingState} from "./protocols/concluding/states";
-import {convertCommitmentToState, convertStateToSignedCommitment} from "../utils/nitro-converter";
-import {SignedState, State, getChannelId} from "@statechannels/nitro-protocol";
+import {convertStateToSignedCommitment} from "../utils/nitro-converter";
+import {SignedState, State} from "@statechannels/nitro-protocol";
 
 export type EngineState = WaitForLogin | MetaMaskError | Initialized;
 
@@ -232,40 +232,14 @@ export function getPrivatekey(state: SharedData, channelId: string): string {
   }
 }
 
-export function signAndInitializeComm(state: SharedData, commitment: Commitment, privateKey: string): SignResult {
-  const result = signAndInitializeChannelStore(state.channelStore, convertCommitmentToState(commitment), privateKey);
-  if (result.isSuccess) {
-    return {
-      isSuccess: result.isSuccess,
-      signedCommitment: convertStateToSignedCommitment(result.signedState.state, privateKey),
-      store: setChannelStore(state, result.store)
-    };
-  } else {
-    return result;
-  }
-}
-
 export function signAndInitialize(sharedDataState: SharedData, state: State, privateKey: string): SignResult {
   const result = signAndInitializeChannelStore(sharedDataState.channelStore, state, privateKey);
   if (result.isSuccess) {
     return {
       isSuccess: result.isSuccess,
-      signedCommitment: convertStateToSignedCommitment(result.signedState.state, privateKey),
+      signedState: result.signedState,
       store: setChannelStore(sharedDataState, result.store)
     };
-  } else {
-    return result;
-  }
-}
-
-export function checkAndInitializeComm(
-  state: SharedData,
-  signedCommitment: SignedCommitment,
-  privateKey: string
-): CheckResult {
-  const result = checkAndInitializeChannelStore(state.channelStore, signedCommitment.signedState, privateKey);
-  if (result.isSuccess) {
-    return {...result, store: setChannelStore(state, result.store)};
   } else {
     return result;
   }
@@ -310,12 +284,9 @@ interface CheckFailure {
 export function signAndStore(sharedDataState: SharedData, state: State): SignResult {
   const result = signAndStoreChannelStore(sharedDataState.channelStore, state);
   if (result.isSuccess) {
-    const channelId = getChannelId(state.channel);
-
-    const privateKey = getPrivatekey(sharedDataState, channelId);
     return {
       isSuccess: result.isSuccess,
-      signedCommitment: convertStateToSignedCommitment(result.signedState.state, privateKey),
+      signedState: result.signedState,
       store: setChannelStore(sharedDataState, result.store)
     };
   } else {
@@ -323,25 +294,10 @@ export function signAndStore(sharedDataState: SharedData, state: State): SignRes
   }
 }
 
-export function signAndStoreComm(state: SharedData, commitment: Commitment): SignResult {
-  const result = signAndStoreChannelStore(state.channelStore, convertCommitmentToState(commitment));
-  if (result.isSuccess) {
-    const channelId = getCommitmentChannelId(commitment);
-
-    const privateKey = getPrivatekey(state, channelId);
-    return {
-      isSuccess: result.isSuccess,
-      signedCommitment: convertStateToSignedCommitment(result.signedState.state, privateKey),
-      store: setChannelStore(state, result.store)
-    };
-  } else {
-    return result;
-  }
-}
 type SignResult = SignSuccess | SignFailure;
 interface SignSuccess {
   isSuccess: true;
-  signedCommitment: SignedCommitment;
+  signedState: SignedState;
   store: SharedData;
 }
 interface SignFailure {

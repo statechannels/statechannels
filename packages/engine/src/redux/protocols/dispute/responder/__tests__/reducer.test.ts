@@ -2,11 +2,11 @@ import * as scenarios from "./scenarios";
 import {initialize, responderReducer} from "../reducer";
 
 import * as states from "../states";
-import {Commitment} from "../../../../../domain";
 import * as TransactionGenerator from "../../../../../utils/transaction-generator";
 import {SHOW_ENGINE, HIDE_ENGINE, CHALLENGE_COMPLETE} from "../../../../../magmo-engine-client";
 import {itSendsThisDisplayEventType, itSendsThisMessage} from "../../../../__tests__/helpers";
 import {describeScenarioStep} from "../../../../__tests__/helpers";
+import {State} from "@statechannels/nitro-protocol";
 
 // Mocks
 const mockTransaction = {to: "0xabc"};
@@ -27,13 +27,12 @@ const itTransitionsToFailure = (result: {protocolState: states.ResponderState}, 
   });
 };
 
-// TODO: Also check that is submits the previous commitment too
-const itCallsRespondWithMoveWith = (responseCommitment: Commitment) => {
-  it("calls respond with move with the correct commitment", () => {
+// TODO: Also check that is submits the previous state too
+const itCallsRespondWithMoveWith = (responseState: State) => {
+  it("calls respond with move with the correct state", () => {
     expect(createRespondWithMoveMock).toHaveBeenCalledWith(
       jasmine.any(Object),
-      responseCommitment,
-      jasmine.any(String)
+      jasmine.objectContaining({state: responseState})
     );
   });
 };
@@ -44,31 +43,31 @@ const itTransitionsTo = (result: {protocolState: states.ResponderState}, type: s
   });
 };
 
-const itSetsChallengeCommitment = (result: {protocolState: states.ResponderState}, commitment: Commitment) => {
-  it("sets the correct challenge commitment", () => {
-    expect((result.protocolState as states.WaitForApproval).challengeCommitment).toMatchObject(commitment);
+const itSetsChallengeCommitment = (result: {protocolState: states.ResponderState}, state: State) => {
+  it("sets the correct challenge state", () => {
+    expect((result.protocolState as states.WaitForApproval).challengeState).toMatchObject(state);
   });
 };
 
 describe("RESPOND WITH EXISTING MOVE HAPPY-PATH", () => {
-  const scenario = scenarios.respondWithExistingCommitmentHappyPath;
+  const scenario = scenarios.respondWithExistingStateHappyPath;
   const {sharedData, processId, channelId} = scenario;
 
   describe("when initializing", () => {
-    const {challengeCommitment, expiryTime} = scenario;
-    const result = initialize(processId, channelId, expiryTime, sharedData, challengeCommitment);
+    const {challengeState, expiryTime} = scenario;
+    const result = initialize(processId, channelId, expiryTime, sharedData, challengeState);
 
     itTransitionsTo(result, "Responding.WaitForApproval");
     itSendsThisDisplayEventType(result.sharedData, SHOW_ENGINE);
-    itSetsChallengeCommitment(result, challengeCommitment);
+    itSetsChallengeCommitment(result, challengeState);
   });
 
   describeScenarioStep(scenario.waitForApproval, () => {
-    const {state, action, responseCommitment} = scenario.waitForApproval;
+    const {state, action, responseState} = scenario.waitForApproval;
     const result = responderReducer(state, sharedData, action);
 
     itTransitionsTo(result, "Responding.WaitForTransaction");
-    itCallsRespondWithMoveWith(responseCommitment);
+    itCallsRespondWithMoveWith(responseState);
   });
 
   describeScenarioStep(scenario.waitForTransaction, () => {
@@ -91,11 +90,11 @@ describe("REFUTE HAPPY-PATH ", () => {
   const {sharedData, processId, channelId} = scenario;
 
   describe("when initializing", () => {
-    const {challengeCommitment, expiryTime} = scenario;
-    const result = initialize(processId, channelId, expiryTime, sharedData, challengeCommitment);
+    const {challengeState, expiryTime} = scenario;
+    const result = initialize(processId, channelId, expiryTime, sharedData, challengeState);
 
     itTransitionsTo(result, "Responding.WaitForApproval");
-    itSetsChallengeCommitment(result, scenario.challengeCommitment);
+    itSetsChallengeCommitment(result, scenario.challengeState);
   });
 
   describeScenarioStep(scenario.waitForApproval, () => {
@@ -127,9 +126,9 @@ describe("REQUIRE RESPONSE HAPPY-PATH ", () => {
   const {sharedData, processId, channelId, expiryTime} = scenario;
 
   describe("when initializing", () => {
-    const result = initialize(processId, channelId, expiryTime, sharedData, scenario.challengeCommitment);
+    const result = initialize(processId, channelId, expiryTime, sharedData, scenario.challengeState);
     itTransitionsTo(result, "Responding.WaitForApproval");
-    itSetsChallengeCommitment(result, scenario.challengeCommitment);
+    itSetsChallengeCommitment(result, scenario.challengeState);
   });
 
   describeScenarioStep(scenario.waitForApprovalRequiresResponse, () => {
@@ -140,11 +139,11 @@ describe("REQUIRE RESPONSE HAPPY-PATH ", () => {
   });
 
   describeScenarioStep(scenario.waitForResponse, () => {
-    const {state, action, responseCommitment} = scenario.waitForResponse;
+    const {state, action, responseState} = scenario.waitForResponse;
     const result = responderReducer(state, sharedData, action);
     itSendsThisDisplayEventType(result.sharedData, SHOW_ENGINE);
     itTransitionsTo(result, "Responding.WaitForTransaction");
-    itCallsRespondWithMoveWith(responseCommitment);
+    itCallsRespondWithMoveWith(responseState);
   });
 
   describeScenarioStep(scenario.waitForTransaction, () => {

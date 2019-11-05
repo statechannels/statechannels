@@ -85,7 +85,7 @@ export function* messageListener() {
       case incoming.RESPOND_TO_CHALLENGE:
         // TODO: This probably should be in a function
         const processId = application.APPLICATION_PROCESS_ID;
-        yield put(responseProvided({processId, commitment: action.commitment}));
+        yield put(responseProvided({processId, state: convertCommitmentToState(action.commitment)}));
         break;
       case incoming.RECEIVE_MESSAGE:
         const messageAction = handleIncomingMessage(action);

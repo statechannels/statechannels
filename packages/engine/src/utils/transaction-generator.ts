@@ -1,15 +1,15 @@
 import {TransactionRequest} from "ethers/providers";
 import {getAdjudicatorInterface} from "./contract-utils";
 import {splitSignature} from "ethers/utils";
-import {Commitment, SignedCommitment, signCommitment2} from "../domain";
+import {Commitment, SignedCommitment} from "../domain";
 import {asEthersObject} from "fmg-core";
 import {
   createDepositTransaction as createNitroDepositTransaction,
   createTransferAllTransaction as createNitroTransferAllTransaction,
   Transactions as nitroTrans,
-  SignedState
+  SignedState,
+  State
 } from "@statechannels/nitro-protocol";
-import {convertCommitmentToState} from "./nitro-converter";
 import {Allocation, AllocationItem} from "@statechannels/nitro-protocol/src/contract/outcome";
 import {convertAddressToBytes32} from "./data-type-utils";
 
@@ -22,13 +22,8 @@ export function createForceMoveTransaction(
   return nitroTrans.createForceMoveTransaction(signedStates, privateKey);
 }
 
-export function createRespondTransaction(
-  challengeCommitment: Commitment,
-  responseCommitment: Commitment,
-  privateKey: string
-): TransactionRequest {
-  const signedState = signCommitment2(responseCommitment, privateKey).signedState;
-  return nitroTrans.createRespondTransaction(convertCommitmentToState(challengeCommitment), signedState);
+export function createRespondTransaction(challengeState: State, responseSignedState: SignedState): TransactionRequest {
+  return nitroTrans.createRespondTransaction(challengeState, responseSignedState);
 }
 
 export function createRefuteTransaction(seriesOfSupportiveStates: SignedState[]): TransactionRequest {

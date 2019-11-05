@@ -3,15 +3,15 @@
 The purpose of this protocol is handle responding to a challenge.
 It covers:
 
-- Deciding if we can respond to a challenge with commitments that the engine already has.
-- If the response needs a new commitment the response protocol accepting a response commitment.
+- Deciding if we can respond to a challenge with states that the engine already has.
+- If the response needs a new state the response protocol accepting a response state.
 - Getting confirmation from the user to launch a response.
 - Submitting the response transaction to the blockchain.
 - Getting acknowledgement from the user before returning to app.
 
 Out of scope (for the time being):
 
-- Handling where the response commitment comes from.
+- Handling where the response state comes from.
 - The respond with alternative move option.
 
 ## State machine
@@ -45,7 +45,7 @@ linkStyle default interpolate basis
 
 Notes:
 
-- On the `Approve` action we determine if we can refute/respond with an existing commitment.
+- On the `Approve` action we determine if we can refute/respond with an existing state.
   - If we can we craft and send the transaction. (Transition to `WaitForTransaction`)
   - If we can't we wait for a response to be provided to us.(Transition to `WaitForResponse`)
 - Actions will be prefaced by Respond, (ie: `RespondApproved`)
