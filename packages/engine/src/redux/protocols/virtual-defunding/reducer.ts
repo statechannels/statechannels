@@ -5,12 +5,19 @@ import {ProtocolLocator} from "../../../communication";
 import {ConsensusUpdateState, initializeConsensusUpdate} from "../consensus-update";
 import {CONSENSUS_UPDATE_PROTOCOL_LOCATOR, consensusUpdateReducer} from "../consensus-update/reducer";
 import {getChannelFundingState} from "../../selectors";
-import {getLatestCommitment, getTwoPlayerIndex, getFundingChannelId} from "../reducer-helpers";
-import {addHex} from "../../../utils/hex-utils";
+import {getTwoPlayerIndex, getFundingChannelId, getLatestState} from "../reducer-helpers";
 import {VirtualDefundingAction} from "./actions";
 import {routesToConsensusUpdate} from "../consensus-update/actions";
 import {HUB_ADDRESS} from "../../../constants";
-import {convertAllocationToOutcome} from "../../../utils/nitro-converter";
+import {Outcome} from "@statechannels/nitro-protocol";
+import {
+  getAllocationOutcome,
+  getAllocationTotal,
+  getAllocationItemAtIndex,
+  getAllocationAmountForIndex
+} from "../../../utils/outcome-utils";
+import {convertAddressToBytes32} from "../../../utils/data-type-utils";
+import {TwoPartyPlayerIndex} from "../../types";
 
 export function initialize({
   processId,
@@ -28,15 +35,11 @@ export function initialize({
     throw new Error(`Attempting to virtually defund a directly funded channel ${targetChannelId}`);
   }
   const jointChannelId = fundingState.fundingChannel;
-  const latestAppCommitment = getLatestCommitment(targetChannelId, sharedData);
+  const latestAppState = getLatestState(targetChannelId, sharedData);
   const ourIndex = getTwoPlayerIndex(targetChannelId, sharedData);
   const hubAddress = HUB_ADDRESS;
-  const proposedDestination = [...latestAppCommitment.destination, hubAddress];
-  const proposedAllocation = [...latestAppCommitment.allocation, latestAppCommitment.allocation.reduce(addHex)];
-  const proposedOutcome = convertAllocationToOutcome({
-    allocation: proposedAllocation,
-    destination: proposedDestination
-  });
+  const proposedOutcome = createJointChannelProposedOutcome(latestAppState.outcome, hubAddress);
+
   let jointChannel: ConsensusUpdateState;
   ({protocolState: jointChannel, sharedData} = initializeConsensusUpdate({
     processId,
@@ -94,21 +97,11 @@ function waitForJointChannelUpdateReducer(
         return {protocolState: states.failure({}), sharedData};
       case "ConsensusUpdate.Success":
         const {hubAddress, ledgerChannelId, targetChannelId: appChannelId, ourIndex, processId} = protocolState;
-        // TODO: We probably need to start this earlier to deal with commitments coming in early
+        // TODO: We probably need to start this earlier to deal with states coming in early
 
-        const latestAppCommitment = getLatestCommitment(appChannelId, sharedData);
+        const latestAppState = getLatestState(appChannelId, sharedData);
 
-        const proposedAllocation = [
-          latestAppCommitment.allocation[ourIndex],
-          latestAppCommitment.allocation[1 - ourIndex]
-        ];
-        const proposedDestination = [latestAppCommitment.destination[ourIndex], hubAddress];
-
-        const proposedOutcome = convertAllocationToOutcome({
-          allocation: proposedAllocation,
-          destination: proposedDestination
-        });
-
+        const proposedOutcome = createLedgerChannelProposedOutcome(latestAppState.outcome, hubAddress, ourIndex);
         let ledgerChannel: ConsensusUpdateState;
         ({protocolState: ledgerChannel, sharedData} = initializeConsensusUpdate({
           processId,
@@ -158,4 +151,31 @@ function waitForLedgerChannelUpdateReducer(
     }
   }
   return {protocolState, sharedData};
+}
+
+function createJointChannelProposedOutcome(appOutcome: Outcome, hubAddress: string): Outcome {
+  const allocationOutcome = getAllocationOutcome(appOutcome);
+  const newAllocation = [...allocationOutcome.allocation];
+  newAllocation.push({
+    destination: convertAddressToBytes32(hubAddress),
+    amount: getAllocationTotal(appOutcome)
+  });
+  return [{assetHolderAddress: allocationOutcome.assetHolderAddress, allocation: newAllocation}];
+}
+function createLedgerChannelProposedOutcome(
+  appOutcome: Outcome,
+  hubAddress: string,
+  ourIndex: TwoPartyPlayerIndex
+): Outcome {
+  const allocationOutcome = getAllocationOutcome(appOutcome);
+  const ourAllocation = getAllocationItemAtIndex(appOutcome, ourIndex);
+  const theirAmount = getAllocationAmountForIndex(appOutcome, 1 - ourIndex);
+  const newAllocation = [
+    {...ourAllocation},
+    {
+      destination: convertAddressToBytes32(hubAddress),
+      amount: theirAmount
+    }
+  ];
+  return [{assetHolderAddress: allocationOutcome.assetHolderAddress, allocation: newAllocation}];
 }

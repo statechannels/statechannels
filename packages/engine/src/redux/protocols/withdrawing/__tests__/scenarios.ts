@@ -8,7 +8,6 @@ import {Wallet} from "ethers";
 import {EMPTY_SHARED_DATA, SharedData} from "../../../state";
 import * as web3Utils from "web3-utils";
 import * as testScenarios from "../../../../domain/commitments/__tests__";
-import {convertCommitmentToSignedState} from "../../../../utils/nitro-converter";
 
 // ---------
 // Test data
@@ -23,10 +22,10 @@ const {
   channelNonce
 } = testScenarios;
 
-const gameCommitment1 = testScenarios.appCommitment({turnNum: 19}).commitment;
-const gameCommitment2 = testScenarios.appCommitment({turnNum: 20}).commitment;
-const concludeCommitment1 = testScenarios.appCommitment({turnNum: 51, isFinal: true}).commitment;
-const concludeCommitment2 = testScenarios.appCommitment({turnNum: 52, isFinal: true}).commitment;
+const gameState1 = testScenarios.appState({turnNum: 19});
+const gameState2 = testScenarios.appState({turnNum: 20});
+const concludeState1 = testScenarios.appState({turnNum: 51, isFinal: true});
+const concludeState2 = testScenarios.appState({turnNum: 52, isFinal: true});
 
 const channelStatus: ChannelState = {
   address,
@@ -36,12 +35,9 @@ const channelStatus: ChannelState = {
   ourIndex: 0,
   participants,
   channelNonce,
-  turnNum: concludeCommitment2.turnNum,
+  turnNum: concludeState2.state.turnNum,
   funded: true,
-  signedStates: [
-    convertCommitmentToSignedState(concludeCommitment1, privateKey),
-    convertCommitmentToSignedState(concludeCommitment2, privateKey)
-  ]
+  signedStates: [concludeState1, concludeState2]
 };
 
 const channelStore: ChannelStore = {
@@ -50,11 +46,8 @@ const channelStore: ChannelStore = {
 
 const notClosedChannelStatus: ChannelState = {
   ...channelStatus,
-  signedStates: [
-    convertCommitmentToSignedState(gameCommitment1, privateKey),
-    convertCommitmentToSignedState(gameCommitment2, privateKey)
-  ],
-  turnNum: gameCommitment2.turnNum
+  signedStates: [gameState1, gameState2],
+  turnNum: gameState2.state.turnNum
 };
 
 const notClosedChannelState = {

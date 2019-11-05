@@ -7,18 +7,17 @@ import {getChannel} from "../../channel-store";
 import {DirectFundingAction} from "../direct-funding";
 import {isSuccess, isFailure, isTerminal} from "../direct-funding/states";
 import {directFundingStateReducer, initialize as initializeDirectFunding} from "../direct-funding/reducer";
-import {addHex} from "../../../utils/hex-utils";
 import {unreachable} from "../../../utils/reducer-utils";
 import {NewLedgerChannelAction} from "./actions";
 import {EmbeddedProtocol, ProtocolLocator} from "../../../communication";
 import * as advanceChannelState from "../advance-channel/states";
 import {clearedToSend as advanceChannelClearedToSend, routesToAdvanceChannel} from "../advance-channel/actions";
 import {initializeAdvanceChannel, isAdvanceChannelAction, advanceChannelReducer} from "../advance-channel";
-import {getLatestCommitment, isFirstPlayer, getTwoPlayerIndex} from "../reducer-helpers";
+import {isFirstPlayer, getTwoPlayerIndex, getLatestState} from "../reducer-helpers";
 import {ADVANCE_CHANNEL_PROTOCOL_LOCATOR} from "../advance-channel/reducer";
 import {TwoPartyPlayerIndex} from "../../types";
-import {convertAllocationToOutcome} from "../../../utils/nitro-converter";
-import {encodeConsensusData} from "@statechannels/nitro-protocol";
+import {encodeConsensusData, Outcome} from "@statechannels/nitro-protocol";
+import {getAllocationTotal, getAllocationAmountForIndex} from "../../../utils/outcome-utils";
 
 type ReturnVal = ProtocolStateWithSharedData<NewLedgerChannelState>;
 type IDFAction = NewLedgerChannelAction;
@@ -26,8 +25,7 @@ export const NEW_LEDGER_FUNDING_PROTOCOL_LOCATOR = makeLocator(EmbeddedProtocol.
 
 export function initialize({
   processId,
-  startingAllocation,
-  startingDestination,
+  startingOutcome,
   ourIndex,
   participants,
   privateKey,
@@ -35,8 +33,7 @@ export function initialize({
   protocolLocator
 }: {
   processId: string;
-  startingAllocation: string[];
-  startingDestination: string[];
+  startingOutcome: Outcome;
   ourIndex: TwoPartyPlayerIndex;
   participants: string[];
   privateKey: string;
@@ -51,13 +48,12 @@ export function initialize({
     clearedToSend: true,
     processId,
     protocolLocator: makeLocator(protocolLocator, ADVANCE_CHANNEL_PROTOCOL_LOCATOR),
-    participants
+    participants,
+    outcome: startingOutcome,
+    appData: getInitialAppData()
   };
 
-  const advanceChannelResult = initializeAdvanceChannel(sharedData, {
-    ...initializationArgs,
-    ...channelSpecificArgs(startingAllocation, startingDestination)
-  });
+  const advanceChannelResult = initializeAdvanceChannel(sharedData, initializationArgs);
   sharedData = advanceChannelResult.sharedData;
 
   const protocolState = states.waitForPreFundSetup({
@@ -144,14 +140,16 @@ function handleWaitForPreFundSetup(
       return {protocolState: states.failure({}), sharedData};
     } else {
       const ledgerId = preFundResult.protocolState.channelId;
-      const latestCommitment = getLatestCommitment(ledgerId, sharedData);
+      const latestState = getLatestState(ledgerId, sharedData);
 
-      const total = latestCommitment.allocation.reduce(addHex);
+      const total = getAllocationTotal(latestState.outcome);
       const requiredDeposit = isFirstPlayer(ledgerId, sharedData)
-        ? latestCommitment.allocation[0]
-        : latestCommitment.allocation[1];
+        ? getAllocationAmountForIndex(latestState.outcome, 0)
+        : getAllocationAmountForIndex(latestState.outcome, 1);
 
-      const safeToDepositLevel = isFirstPlayer(ledgerId, sharedData) ? "0x0" : latestCommitment.allocation[1];
+      const safeToDepositLevel = isFirstPlayer(ledgerId, sharedData)
+        ? "0x0"
+        : getAllocationAmountForIndex(latestState.outcome, 1);
       const ourIndex = getTwoPlayerIndex(ledgerId, sharedData);
       // update the state
       const directFundingState = initializeDirectFunding({
@@ -257,18 +255,14 @@ function handleWaitForDirectFunding(
   return {protocolState, sharedData};
 }
 
-// TODO: This should be an advance channel helper
-function channelSpecificArgs(allocation: string[], destination: string[]) {
-  return {
-    outcome: convertAllocationToOutcome({allocation, destination}),
-    appData: encodeConsensusData({furtherVotesRequired: 0, proposedOutcome: []})
-  };
-}
-
 function updateFundingState(sharedData: SharedData, ledgerId: string) {
   const ledgerFundingState: ChannelFundingState = {
     directlyFunded: true
   };
   sharedData = setFundingState(sharedData, ledgerId, ledgerFundingState);
   return sharedData;
+}
+
+function getInitialAppData() {
+  return encodeConsensusData({furtherVotesRequired: 0, proposedOutcome: []});
 }

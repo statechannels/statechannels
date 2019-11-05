@@ -8,7 +8,6 @@ import {ledgerDefundingReducer, initialize as ledgerDefundingInitialize} from ".
 import {isLedgerDefundingAction} from "../ledger-defunding/actions";
 import * as ledgerDefundingStates from "../ledger-defunding/states";
 import {EmbeddedProtocol, ProtocolLocator} from "../../../communication";
-import {getLastCommitment} from "../../channel-store";
 import {ProtocolAction} from "../../../redux/actions";
 import {VirtualDefundingState} from "../virtual-defunding/states";
 import {initializeVirtualDefunding, virtualDefundingReducer} from "../virtual-defunding";
@@ -177,14 +176,12 @@ const createLedgerDefundingState = (
   if (!channel) {
     throw new Error(`Channel does not exist with id ${channelId}`);
   }
-  const proposedAllocation = getLastCommitment(channel).allocation;
-  const proposedDestination = getLastCommitment(channel).destination;
+  const proposedOutcome = helpers.getLatestState(channelId, sharedData).outcome;
   const ledgerDefundingState = ledgerDefundingInitialize({
     processId,
     channelId,
     ledgerId,
-    proposedAllocation,
-    proposedDestination,
+    proposedOutcome,
     sharedData,
     clearedToProceed,
     protocolLocator: makeLocator(protocolLocator, EmbeddedProtocol.LedgerDefunding)

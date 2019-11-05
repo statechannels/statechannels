@@ -1,16 +1,17 @@
 import {
-  ledgerCommitment,
   asAddress,
   bsAddress,
   asPrivateKey,
   ledgerId,
   channelId,
   bsPrivateKey,
-  appCommitment
+  appState,
+  ledgerState,
+  convertBalanceToOutcome
 } from "../../../../domain/commitments/__tests__";
 import {bigNumberify} from "ethers/utils/bignumber";
 import {SharedData, EMPTY_SHARED_DATA, setChannels} from "../../../state";
-import {channelFromCommitments} from "../../../channel-store/channel-state/__tests__";
+import {channelFromStates} from "../../../channel-store/channel-state/__tests__";
 import * as states from "../states";
 
 import {EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR} from "../reducer";
@@ -21,9 +22,8 @@ import {
 } from "../../consensus-update/__tests__/";
 import {makeLocator, prependToLocator} from "../..";
 import {CONSENSUS_UPDATE_PROTOCOL_LOCATOR} from "../../consensus-update/reducer";
-import {commitmentsReceived} from "../../../../communication";
-import {convertStateToSignedCommitment} from "../../../../utils/nitro-converter";
-import {ethers} from "ethers";
+import {signedStatesReceived} from "../../../../communication";
+
 const processId = "processId";
 const oneThree = [
   {address: asAddress, wei: bigNumberify(1).toHexString()},
@@ -43,11 +43,10 @@ const oneOne = [
   {address: asAddress, wei: bigNumberify(1).toHexString()},
   {address: bsAddress, wei: bigNumberify(1).toHexString()}
 ];
-// TODO: Use real channel id after switching to signed states
-const fakeChannelId = ethers.Wallet.createRandom().address;
-const fourToApp = [{address: fakeChannelId, wei: bigNumberify(4).toHexString()}];
+
+const fourToApp = [{address: channelId, wei: bigNumberify(4).toHexString()}];
 const fourToAppAndLeftOver = [
-  {address: fakeChannelId, wei: bigNumberify(4).toHexString()},
+  {address: channelId, wei: bigNumberify(4).toHexString()},
   {address: asAddress, wei: bigNumberify(2).toHexString()},
   {address: bsAddress, wei: bigNumberify(2).toHexString()}
 ];
@@ -55,8 +54,7 @@ const props = {
   channelId,
   ledgerId,
   processId,
-  startingAllocation: oneThree.map(o => o.wei),
-  startingDestination: oneThree.map(o => o.address),
+  startingOutcome: convertBalanceToOutcome(oneThree),
   protocolLocator: EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR
 };
 
@@ -81,67 +79,67 @@ const setFundingState = (sharedData: SharedData): SharedData => {
 };
 
 // -----------
-// Commitments
+// States
 // -----------
-const ledger4 = ledgerCommitment({turnNum: 4, balances: oneThree});
-const ledger5 = ledgerCommitment({turnNum: 5, balances: oneThree});
-const ledger6 = ledgerCommitment({turnNum: 6, balances: oneThree, proposedBalances: fourToApp});
+const ledger4 = ledgerState({turnNum: 4, balances: oneThree});
+const ledger5 = ledgerState({turnNum: 5, balances: oneThree});
+const ledger6 = ledgerState({turnNum: 6, balances: oneThree, proposedBalances: fourToApp});
 
-const ledger4Partial = ledgerCommitment({turnNum: 4, balances: fourFour});
-const ledger5Partial = ledgerCommitment({turnNum: 5, balances: fourFour});
-const ledger6Partial = ledgerCommitment({
+const ledger4Partial = ledgerState({turnNum: 4, balances: fourFour});
+const ledger5Partial = ledgerState({turnNum: 5, balances: fourFour});
+const ledger6Partial = ledgerState({
   turnNum: 6,
   balances: fourFour,
   proposedBalances: fourToAppAndLeftOver
 });
-const topUpLedger4 = ledgerCommitment({turnNum: 4, balances: oneOne});
-const topUpLedger5 = ledgerCommitment({turnNum: 5, balances: oneOne});
+const topUpLedger4 = ledgerState({turnNum: 4, balances: oneOne});
+const topUpLedger5 = ledgerState({turnNum: 5, balances: oneOne});
 
-const app0 = appCommitment({turnNum: 0, balances: oneThree});
-const app1 = appCommitment({turnNum: 1, balances: oneThree});
+const app0 = appState({turnNum: 0, balances: oneThree});
+const app1 = appState({turnNum: 1, balances: oneThree});
 // -----------
 // Shared Data
 // -----------
 
 const initialPlayerALedgerSharedData = setFundingState(
   setChannels(EMPTY_SHARED_DATA, [
-    channelFromCommitments([ledger4, ledger5], asAddress, asPrivateKey),
-    channelFromCommitments([app0, app1], asAddress, asPrivateKey)
+    channelFromStates([ledger4, ledger5], asAddress, asPrivateKey),
+    channelFromStates([app0, app1], asAddress, asPrivateKey)
   ])
 );
 
 const initialPlayerAPartialSharedData = setFundingState(
   setChannels(EMPTY_SHARED_DATA, [
-    channelFromCommitments([ledger4Partial, ledger5Partial], asAddress, asPrivateKey),
-    channelFromCommitments([app0, app1], asAddress, asPrivateKey)
+    channelFromStates([ledger4Partial, ledger5Partial], asAddress, asPrivateKey),
+    channelFromStates([app0, app1], asAddress, asPrivateKey)
   ])
 );
 
 const initialPlayerATopUpNeededSharedData = setFundingState(
   setChannels(EMPTY_SHARED_DATA, [
-    channelFromCommitments([topUpLedger4, topUpLedger5], asAddress, asPrivateKey),
-    channelFromCommitments([app0, app1], asAddress, asPrivateKey)
+    channelFromStates([topUpLedger4, topUpLedger5], asAddress, asPrivateKey),
+    channelFromStates([app0, app1], asAddress, asPrivateKey)
   ])
 );
 
-const playerAFirstCommitmentReceived = setFundingState(
+const playerAFirstStateReceived = setFundingState(
   setChannels(EMPTY_SHARED_DATA, [
-    channelFromCommitments([ledger5, ledger6], asAddress, asPrivateKey),
-    channelFromCommitments([app0, app1], asAddress, asPrivateKey)
+    channelFromStates([ledger5, ledger6], asAddress, asPrivateKey),
+    channelFromStates([app0, app1], asAddress, asPrivateKey)
   ])
 );
 
 const initialPlayerBLedgerSharedData = setFundingState(
   setChannels(EMPTY_SHARED_DATA, [
-    channelFromCommitments([ledger4, ledger5], bsAddress, bsPrivateKey),
-    channelFromCommitments([app0, app1], bsAddress, bsPrivateKey)
+    channelFromStates([ledger4, ledger5], bsAddress, bsPrivateKey),
+    channelFromStates([app0, app1], bsAddress, bsPrivateKey)
   ])
 );
 
 const initialPlayerBTopUpNeededSharedData = setFundingState(
   setChannels(EMPTY_SHARED_DATA, [
-    channelFromCommitments([topUpLedger4, topUpLedger5], bsAddress, bsPrivateKey),
-    channelFromCommitments([app0, app1], bsAddress, bsPrivateKey)
+    channelFromStates([topUpLedger4, topUpLedger5], bsAddress, bsPrivateKey),
+    channelFromStates([app0, app1], bsAddress, bsPrivateKey)
   ])
 );
 
@@ -151,9 +149,9 @@ const initialPlayerBTopUpNeededSharedData = setFundingState(
 const waitForLedgerUpdateForA = states.waitForLedgerUpdate(propsA);
 const waitForLedgerUpdateForB = states.waitForLedgerUpdate(propsB);
 
-const invalidLedgerUpdateReceived = commitmentsReceived({
+const invalidLedgerUpdateReceived = signedStatesReceived({
   processId,
-  signedCommitments: [ledger5],
+  signedStates: [ledger5],
   protocolLocator: makeLocator(EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR, CONSENSUS_UPDATE_PROTOCOL_LOCATOR)
 });
 
@@ -174,8 +172,7 @@ export const partialLedgerChannelUse = {
   initialize: {
     sharedData: initialPlayerAPartialSharedData,
     ...props,
-    startingAllocation: twoTwo.map(o => o.wei),
-    startingDestination: twoTwo.map(o => o.address),
+    startingOutcome: convertBalanceToOutcome(twoTwo),
     reply: [ledger5Partial, ledger6Partial]
   }
 };
@@ -189,19 +186,19 @@ export const playerBFullyFundedHappyPath = {
     state: waitForLedgerUpdateForB,
     sharedData: consensusUpdatePreSuccessB.sharedData,
     action: prependToLocator(consensusUpdatePreSuccessB.action, EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR),
-    reply: consensusUpdatePreSuccessB.reply.map(s => convertStateToSignedCommitment(s.state, asPrivateKey))
+    reply: consensusUpdatePreSuccessB.reply
   }
 };
 
-export const playerAInvalidUpdateCommitment = {
+export const playerAInvalidUpdateState = {
   waitForLedgerUpdate: {
     state: waitForLedgerUpdateForA,
-    sharedData: playerAFirstCommitmentReceived,
+    sharedData: playerAFirstStateReceived,
     action: invalidLedgerUpdateReceived
   }
 };
 
-export const playerBInvalidUpdateCommitment = {
+export const playerBInvalidUpdateState = {
   waitForLedgerUpdate: {
     state: waitForLedgerUpdateForB,
     sharedData: initialPlayerBLedgerSharedData,
