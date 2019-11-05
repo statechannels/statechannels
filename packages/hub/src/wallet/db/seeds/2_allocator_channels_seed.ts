@@ -1,31 +1,20 @@
-import {CommitmentType, toUint256} from 'fmg-core';
+import {CommitmentType} from 'fmg-core';
 import {Model} from 'objection';
 import {HUB_ADDRESS} from '../../../constants';
-import {
-  PositionType,
-  RPSAppAttributes,
-  Weapon,
-  zeroBytes32
-} from '../../../hub/services/rps-commitment';
 import {
   allocation,
   BEGINNING_APP_CHANNEL_HOLDINGS,
   BEGINNING_APP_CHANNEL_NONCE,
-  BEGINNING_RPS_APP_CHANNEL_NONCE,
   DESTINATION,
   DESTINATION_3,
   DUMMY_RULES_ADDRESS,
   DUMMY_RULES_BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID,
-  DUMMY_RULES_BEGINNING_RPS_APP_CHANNEL_NONCE_CHANNEL_ID,
   DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID,
   DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID_3,
-  DUMMY_RULES_FUNDED_RPS_CHANNEL_NONCE_CHANNEL_ID,
   DUMMY_RULES_ONGOING_APP_CHANNEL_NONCE_CHANNEL_ID,
   FUNDED_CHANNEL_HOLDINGS,
   FUNDED_CHANNEL_NONCE,
   FUNDED_CHANNEL_NONCE_3,
-  FUNDED_RPS_CHANNEL_HOLDINGS,
-  FUNDED_RPS_CHANNEL_NONCE,
   ONGOING_APP_CHANNEL_HOLDINGS,
   ONGOING_APP_CHANNEL_NONCE,
   PARTICIPANT_1_ADDRESS,
@@ -150,65 +139,10 @@ const ongoing_app_phase_channel = {
   participants
 };
 
-// ************
-// RPS channels
-// ************
-
-function rps_appAttrs(n: number): RPSAppAttributes {
-  return {
-    stake: toUint256(10),
-    positionType: PositionType.Resting,
-    aWeapon: Weapon.Rock,
-    bWeapon: Weapon.Rock,
-    preCommit: zeroBytes32,
-    salt: zeroBytes32
-  };
-}
-
-function rps_pre_fund_setup(turnNumber: number) {
-  return {
-    turnNumber,
-    commitmentType: CommitmentType.PreFundSetup,
-    commitmentCount: turnNumber,
-    allocations: allocations(),
-    appAttrs: rps_appAttrs(0)
-  };
-}
-
-const funded_rps_channel = {
-  channelId: DUMMY_RULES_FUNDED_RPS_CHANNEL_NONCE_CHANNEL_ID,
-  rulesAddress: DUMMY_RULES_ADDRESS,
-  nonce: FUNDED_RPS_CHANNEL_NONCE,
-  holdings: FUNDED_RPS_CHANNEL_HOLDINGS,
-  commitments: [rps_pre_fund_setup(0), rps_pre_fund_setup(1)],
-  participants
-};
-
-function rps_post_fund_setup(turnNumber: number) {
-  return {
-    turnNumber,
-    commitmentType: CommitmentType.PostFundSetup,
-    commitmentCount: turnNumber % funded_channel.participants.length,
-    allocations: allocations(),
-    appAttrs: rps_appAttrs(0)
-  };
-}
-
-const beginning_app_phase_rps_channel = {
-  channel_id: DUMMY_RULES_BEGINNING_RPS_APP_CHANNEL_NONCE_CHANNEL_ID,
-  rules_address: DUMMY_RULES_ADDRESS,
-  nonce: BEGINNING_RPS_APP_CHANNEL_NONCE,
-  holdings: BEGINNING_APP_CHANNEL_HOLDINGS,
-  commitments: [rps_post_fund_setup(2), rps_post_fund_setup(3)],
-  participants
-};
-
 const two_participant_channel_seeds = {
   funded_channel,
   beginning_app_phase_channel,
-  ongoing_app_phase_channel,
-  funded_rps_channel,
-  beginning_app_phase_rps_channel
+  ongoing_app_phase_channel
 };
 
 const three_participant_channel_seeds = {funded_channel_3};

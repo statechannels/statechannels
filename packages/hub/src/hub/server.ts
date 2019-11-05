@@ -1,6 +1,6 @@
-import {fork} from 'child_process';
 import {unreachable} from '@statechannels/wallet';
 import {RelayableAction} from '@statechannels/wallet/lib/src/communication';
+import {fork} from 'child_process';
 import {Model} from 'objection';
 import {AdjudicatorWatcherEvent, AdjudicatorWatcherEventType} from '../wallet/adjudicator-watcher';
 import knex from '../wallet/db/connection';

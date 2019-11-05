@@ -1,6 +1,6 @@
 import {ethers} from 'ethers';
 import {Uint256} from 'fmg-core';
-import {nitroAdjudicator} from '../utilities/blockchain';
+import {ethAssetHolder} from '../utilities/blockchain';
 
 /**
  * todos:
@@ -21,7 +21,7 @@ export interface AdjudicatorWatcherEvent {
 
 export async function listen() {
   console.log('adjudicator-watcher: listen');
-  const adjudicator: ethers.Contract = await nitroAdjudicator();
+  const adjudicator: ethers.Contract = await ethAssetHolder();
   const depositedFilter = adjudicator.filters.Deposited();
   adjudicator.on(depositedFilter, async (channelId, amountDeposited, destinationHoldings) => {
     process.send({
