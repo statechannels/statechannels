@@ -1,15 +1,23 @@
-import {expectRevert} from 'magmo-devtools';
 import * as scenarios from '../core/test-scenarios';
-
 import * as ethers from 'ethers';
-
-import RPSGameArtifact from '../../build/contracts/RockPaperScissorsGame.json';
+import RockPaperScissorsArtifact from '../../build/contracts/RockPaperScissors.json';
 import {asEthersObject} from 'fmg-core';
 import {RPSCommitment, asCoreCommitment} from '../core/rps-commitment';
 import {bigNumberify} from 'ethers/utils';
 jest.setTimeout(20000);
+import {expectRevert} from '@statechannels/devtools';
+import {Contract} from 'ethers';
+import {AddressZero, HashZero} from 'ethers/constants';
+import {Allocation, encodeOutcome} from '@statechannels/nitro-protocol/src/contract/outcome';
+import {VariablePart} from '@statechannels/nitro-protocol/src/contract/state.js';
+import {
+  getTestProvider,
+  randomExternalDestination,
+  replaceAddresses,
+  setupContracts,
+} from '@statechannels/nitro-protocol/test/test-helpers';
 
-describe('Rock paper Scissors', () => {
+describe.skip('Rock Paper Scissors', () => {
   let networkId;
   const provider = new ethers.providers.JsonRpcProvider(
     `http://localhost:${process.env.GANACHE_PORT}`
@@ -28,9 +36,11 @@ describe('Rock paper Scissors', () => {
 
   beforeAll(async () => {
     networkId = (await provider.getNetwork()).chainId;
-    const libraryAddress = RPSGameArtifact.networks[networkId].address;
+    const libraryAddress = RockPaperScissorsArtifact
+  .networks[networkId].address;
 
-    rpsContract = new ethers.Contract(libraryAddress, RPSGameArtifact.abi, provider);
+    rpsContract = new ethers.Contract(libraryAddress, RockPaperScissorsArtifact
+    .abi, provider);
 
     const account1 = ethers.Wallet.createRandom();
     const account2 = ethers.Wallet.createRandom();
@@ -158,4 +168,113 @@ describe('Rock paper Scissors', () => {
       'revert'
     ); // Note that SafeMath does not have revert messages
   });
+});
+
+
+const provider = getTestProvider();
+let RockPaperScissors: Contract;  
+
+const numParticipants = 3;
+const addresses = {
+  // participants
+  A: randomExternalDestination(),
+  B: randomExternalDestination(),
+  C: randomExternalDestination(),
+};
+const guarantee = {
+  targetChannelId: HashZero,
+  destinations: [addresses.A],
+};
+
+beforeAll(async () => {
+  RockPaperScissors = await setupContracts(provider, RockPaperScissorsArtifact);
+});
+
+describe('validTransition', () => {
+  it.each`
+    isValid  | numAssets | isAllocation      | balancesA             | turnNumB | balancesB             | description
+    ${true}  | ${[1, 1]} | ${[true, true]}   | ${{A: 1, B: 1, C: 1}} | ${3}     | ${{A: 0, B: 2, C: 1}} | ${'A pays B 1 wei'}
+  `(
+    '$description',
+    async ({
+      isValid,
+      isAllocation,
+      numAssets,
+      balancesA,
+      turnNumB,
+      balancesB,
+    }: {
+      isValid: boolean;
+      isAllocation: boolean[];
+      numAssets: number[];
+      balancesA: any;
+      turnNumB: number;
+      balancesB: any;
+    }) => {
+      balancesA = replaceAddresses(balancesA, addresses);
+      const allocationA: Allocation = [];
+      Object.keys(balancesA).forEach(key =>
+        allocationA.push({destination: key, amount: balancesA[key]})
+      );
+      let outcomeA;
+      if (isAllocation[0]) {
+        outcomeA = [{assetHolderAddress: AddressZero, allocation: allocationA}];
+      } else {
+        outcomeA = [
+          {
+            assetHolderAddress: AddressZero,
+            guarantee,
+          },
+        ];
+      }
+
+      if (numAssets[0] === 2) {
+        outcomeA.push(outcomeA[0]);
+      }
+      const variablePartA: VariablePart = {
+        outcome: encodeOutcome(outcomeA),
+        appData: HashZero,
+      };
+
+      balancesB = replaceAddresses(balancesB, addresses);
+      const allocationB: Allocation = [];
+
+      Object.keys(balancesB).forEach(key =>
+        allocationB.push({destination: key, amount: balancesB[key]})
+      );
+
+      let outcomeB;
+      if (isAllocation[1]) {
+        outcomeB = [{assetHolderAddress: AddressZero, allocation: allocationB}];
+      } else {
+        outcomeB = [{assetHolderAddress: AddressZero, guarantee}];
+      }
+      if (numAssets[1] === 2) {
+        outcomeB.push(outcomeB[0]);
+      }
+      const variablePartB: VariablePart = {
+        outcome: encodeOutcome(outcomeB),
+        appData: HashZero,
+      };
+
+      if (isValid) {
+        const isValidFromCall = await RockPaperScissors.validTransition(
+          variablePartA,
+          variablePartB,
+          turnNumB,
+          numParticipants
+        );
+        expect(isValidFromCall).toBe(true);
+      } else {
+        await expectRevert(() =>
+          RockPaperScissors.validTransition(
+            variablePartA,
+            variablePartB,
+            turnNumB,
+            numParticipants
+          )
+        );
+      }
+    }
+  );
 });
