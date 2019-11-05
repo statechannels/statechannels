@@ -288,40 +288,6 @@ contract AssetHolder is IAssetHolder {
 
     }
 
-    struct FunctionCall {
-        bool isClaimAll; // otherwise transferAll implied
-        bytes args; // abi.encode of either transferAllArgs or claimAllArgs
-    }
-
-    struct TransferAllArgs {
-        bytes32 channelId;
-        bytes allocationBytes;
-    }
-
-    struct ClaimAllArgs {
-        bytes32 guarantorChannelId;
-        bytes guaranteeBytes;
-        bytes allocationBytes;
-    }
-
-    /**
-    * @notice Executes a batch of function calls in order.
-    * @dev Executes a batch of function calls in order.
-    * @param functionCalls Array of abi.encoded FunctionCall structs.
-    */
-    function batch(bytes[] memory functionCalls) public {
-        for (uint256 j = 0; j < functionCalls.length; j++) {
-            FunctionCall memory functionCall = abi.decode(functionCalls[j],(FunctionCall));
-            if (functionCall.isClaimAll) {
-                ClaimAllArgs memory claimAllArgs = abi.decode(functionCall.args,(ClaimAllArgs));
-                claimAll(claimAllArgs.guarantorChannelId, claimAllArgs.guaranteeBytes, claimAllArgs.allocationBytes);
-            } else {
-                TransferAllArgs memory transferAllArgs = abi.decode(functionCall.args,(TransferAllArgs));
-                transferAll(transferAllArgs.channelId, transferAllArgs.allocationBytes);
-            }
-        }
-    }
-
     // **************
     // Permissioned methods
     // **************
