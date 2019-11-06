@@ -26,19 +26,19 @@ contract RockPaperScissors is ForceMoveApp {
         PositionType positionType;
         uint256 stake;
         bytes32 preCommit;
-        Weapon playerFirstWeapon;
-        Weapon playerSecondWeapon;
+        Weapon aWeapon; // playerOneWeapon
+        Weapon bWeapon; // playerTwoWeapon
         bytes32 salt;
     }
 
     /**
     * @notice Decodes the appData.
     * @dev Decodes the appData.
-    * @param toGameDataBytes The abi.encode of a RPSData struct describing the application-specific data.
+    * @param appDataBytes The abi.encode of a RPSData struct describing the application-specific data.
     * @return An RPSData struct containing the application-specific data.
     */
-    function appData(bytes memory toGameDataBytes) internal pure returns (RPSData memory) {
-        return abi.decode(toGameDataBytes, (RPSData));
+    function appData(bytes memory appDataBytes) internal pure returns (RPSData memory) {
+        return abi.decode(appDataBytes, (RPSData));
     }
 
     /**
@@ -134,53 +134,53 @@ contract RockPaperScissors is ForceMoveApp {
         RPSData memory fromGameData,
         RPSData memory toGameData
     ) private pure {
-        uint256 playerFirstWinnings;
-        uint256 playerSecondWinnings;
+        uint256 playerAWinnings; // playerOneWinnings
+        uint256 playerBWinnings; // playerTwoWinnings
         require(
-            toGameData.playerSecondWeapon == fromGameData.playerSecondWeapon,
+            toGameData.bWeapon == fromGameData.bWeapon,
             "Player Second's weapon should be the same between commitments."
         );
 
         // check hash matches
         // need to convert Weapon -> uint256 to get hash to work
         bytes32 hashed = keccak256(
-            abi.encodePacked(uint256(toGameData.playerFirstWeapon), toGameData.salt)
+            abi.encodePacked(uint256(toGameData.aWeapon), toGameData.salt)
         );
         require(hashed == fromGameData.preCommit, 'The hash needs to match the precommit');
 
         // calculate winnings
-        (playerFirstWinnings, playerSecondWinnings) = winnings(
-            toGameData.playerFirstWeapon,
-            toGameData.playerSecondWeapon,
+        (playerAWinnings, playerBWinnings) = winnings(
+            toGameData.aWeapon,
+            toGameData.bWeapon,
             toGameData.stake
         );
 
-        Outcome.OutcomeItem[] memory outcomeFrom = abi.decode(fromPart.outcome, (Outcome.OutcomeItem[]));
-        Outcome.OutcomeItem[] memory outcomeTo = abi.decode(toPart.outcome, (Outcome.OutcomeItem[]));
-        Outcome.AssetOutcome memory assetOutcomeFrom = abi.decode(
-            outcomeFrom[0].assetOutcomeBytes,
+        Outcome.OutcomeItem[] memory fromOutcome = abi.decode(fromPart.outcome, (Outcome.OutcomeItem[]));
+        Outcome.OutcomeItem[] memory toOutcome = abi.decode(toPart.outcome, (Outcome.OutcomeItem[]));
+        Outcome.AssetOutcome memory fromAssetOutcome = abi.decode(
+            fromOutcome[0].assetOutcomeBytes,
             (Outcome.AssetOutcome)
         );
-        Outcome.AssetOutcome memory assetOutcomeTo = abi.decode(
-            outcomeTo[0].assetOutcomeBytes,
+        Outcome.AssetOutcome memory toAssetOutcome = abi.decode(
+            toOutcome[0].assetOutcomeBytes,
             (Outcome.AssetOutcome)
         );
-        Outcome.AllocationItem[] memory allocationFrom = abi.decode(
-            assetOutcomeFrom.allocationOrGuaranteeBytes,
+        Outcome.AllocationItem[] memory fromAllocation = abi.decode(
+            fromAssetOutcome.allocationOrGuaranteeBytes,
             (Outcome.AllocationItem[])
         );
-        Outcome.AllocationItem[] memory allocationTo = abi.decode(
-            assetOutcomeTo.allocationOrGuaranteeBytes,
+        Outcome.AllocationItem[] memory toAllocation = abi.decode(
+            toAssetOutcome.allocationOrGuaranteeBytes,
             (Outcome.AllocationItem[])
         );
 
         require(
-            allocationTo[0].amount == allocationFrom[0].amount.add(playerFirstWinnings),
+            toAllocation[0].amount == fromAllocation[0].amount.add(playerAWinnings),
             "Player First's allocation should be updated with the winnings."
         );
         require(
-            allocationTo[1].amount ==
-                allocationFrom[1].amount.sub(fromGameData.stake.mul(2)).add(playerSecondWinnings),
+            toAllocation[1].amount ==
+                fromAllocation[1].amount.sub(fromGameData.stake.mul(2)).add(playerBWinnings),
             "Player Second's allocation should be updated with the winnings."
         );
     }
@@ -195,15 +195,15 @@ contract RockPaperScissors is ForceMoveApp {
     }
 
     function winnings(
-        Weapon playerFirstWeapon,
-        Weapon playerSecondWeapon,
+        Weapon aWeapon,
+        Weapon bWeapon,
         uint256 stake
     ) private pure returns (uint256, uint256) {
-        if (playerFirstWeapon == playerSecondWeapon) {
+        if (aWeapon == bWeapon) {
             return (stake, stake);
         } else if (
-            (playerFirstWeapon == Weapon.Rock && playerSecondWeapon == Weapon.Scissors) ||
-            (playerFirstWeapon > playerSecondWeapon)
+            (aWeapon == Weapon.Rock && bWeapon == Weapon.Scissors) ||
+            (aWeapon > bWeapon)
         ) {
             // first player won
             return (2 * stake, 0);
@@ -240,4 +240,78 @@ contract RockPaperScissors is ForceMoveApp {
         _;
     }
 
+    modifier allocationUnchanged(
+        VariablePart memory a,
+        VariablePart memory b
+    ) {
+        Outcome.OutcomeItem[] memory outcomeA = abi.decode(a.outcome, (Outcome.OutcomeItem[]));
+        Outcome.OutcomeItem[] memory outcomeB = abi.decode(b.outcome, (Outcome.OutcomeItem[]));
+        Outcome.AssetOutcome memory assetOutcomeA = abi.decode(outcomeA[0].assetOutcomeBytes, (Outcome.AssetOutcome));
+        Outcome.AssetOutcome memory assetOutcomeB = abi.decode(outcomeB[0].assetOutcomeBytes, (Outcome.AssetOutcome));
+        Outcome.AllocationItem[] memory allocationA = abi.decode(
+            assetOutcomeA.allocationOrGuaranteeBytes,
+            (Outcome.AllocationItem[])
+        );
+        Outcome.AllocationItem[] memory allocationB = abi.decode(
+            assetOutcomeB.allocationOrGuaranteeBytes,
+            (Outcome.AllocationItem[])
+        );
+        require(allocationB[0].destination == allocationA[0].destination,'RockPaperScissors: Destimation playerA may not change');
+        require(allocationB[1].destination == allocationA[1].destination,'RockPaperScissors: Destimation playerB may not change');
+        require(allocationB[0].amount == allocationA[0].amount,'RockPaperScissors: Amount playerA may not change');
+        require(allocationB[1].amount == allocationA[1].amount,'RockPaperScissors: Amount playerB may not change');
+        _;
+    }
+
+    modifier oneAssetType(
+        VariablePart memory a,
+        VariablePart memory b
+    ) {
+        Outcome.OutcomeItem[] memory outcomeA = abi.decode(a.outcome, (Outcome.OutcomeItem[]));
+        Outcome.OutcomeItem[] memory outcomeB = abi.decode(b.outcome, (Outcome.OutcomeItem[]));
+
+        // Throws if more than one asset
+        require(outcomeA.length == 1, 'RockPaperScissors: outcomeA: Only one asset allowed');
+        require(outcomeB.length == 1, 'RockPaperScissors: outcomeB: Only one asset allowed');
+        _;
+    }
+
+    modifier assetOutcomeIsAllocation(
+        VariablePart memory a,
+        VariablePart memory b
+    ) {
+        Outcome.OutcomeItem[] memory outcomeA = abi.decode(a.outcome, (Outcome.OutcomeItem[]));
+        Outcome.OutcomeItem[] memory outcomeB = abi.decode(b.outcome, (Outcome.OutcomeItem[]));
+
+        // Throws unless the assetOutcome is an allocation
+        Outcome.AssetOutcome memory assetOutcomeA = abi.decode(outcomeA[0].assetOutcomeBytes, (Outcome.AssetOutcome));
+        Outcome.AssetOutcome memory assetOutcomeB = abi.decode(outcomeB[0].assetOutcomeBytes, (Outcome.AssetOutcome));
+        require(assetOutcomeA.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation),'RockPaperScissors: outcomeA: AssetOutcomeType must be Allocation');
+        require(assetOutcomeB.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation),'RockPaperScissors: outcomeB: AssetOutcomeType must be Allocation');
+        _;
+    }
+
+    modifier allocationLengthIsCorrect(
+        VariablePart memory a,
+        VariablePart memory b,
+        uint256 nParticipants
+    ) {
+        Outcome.OutcomeItem[] memory outcomeA = abi.decode(a.outcome, (Outcome.OutcomeItem[]));
+        Outcome.OutcomeItem[] memory outcomeB = abi.decode(b.outcome, (Outcome.OutcomeItem[]));
+        Outcome.AssetOutcome memory assetOutcomeA = abi.decode(outcomeA[0].assetOutcomeBytes, (Outcome.AssetOutcome));
+        Outcome.AssetOutcome memory assetOutcomeB = abi.decode(outcomeB[0].assetOutcomeBytes, (Outcome.AssetOutcome));
+
+        // Throws unless that allocation has exactly n outcomes
+        Outcome.AllocationItem[] memory allocationA = abi.decode(
+            assetOutcomeA.allocationOrGuaranteeBytes,
+            (Outcome.AllocationItem[])
+        );
+        Outcome.AllocationItem[] memory allocationB = abi.decode(
+            assetOutcomeB.allocationOrGuaranteeBytes,
+            (Outcome.AllocationItem[])
+        );
+        require(allocationA.length == nParticipants,'RockPaperScissors: outcomeA: Allocation length must equal number of participants');
+        require(allocationB.length == nParticipants,'RockPaperScissors: outcomeB: Allocation length must equal number of participants');
+        _;
+    }
 }
