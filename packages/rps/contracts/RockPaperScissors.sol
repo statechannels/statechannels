@@ -8,8 +8,6 @@ import '@statechannels/nitro-protocol/contracts/Outcome.sol';
   * @dev The RockPaperScissors contract complies with the ForceMoveApp interface and implements a commit-reveal game of Rock Paper Scissors (henceforth RPS).
 */
 contract RockPaperScissors is ForceMoveApp {
-
-
     enum PositionType {Start, RoundProposed, RoundAccepted, Reveal}
     enum Weapon {Rock, Paper, Scissors}
 
@@ -17,8 +15,8 @@ contract RockPaperScissors is ForceMoveApp {
         PositionType positionType;
         uint256 stake;
         bytes32 preCommit;
-        Weapon playerFirstWeapon;
-        Weapon playerSecondWeapon;
+        Weapon playerAWeapon;
+        Weapon playerBWeapon;
         bytes32 salt;
     }
 
@@ -31,7 +29,7 @@ contract RockPaperScissors is ForceMoveApp {
     function appData(bytes memory toGameDataBytes) internal pure returns (RPSData memory) {
         return abi.decode(toGameDataBytes, (RPSData));
     }
-    
+
     /**
     * @notice Encodes the RPS update rules.
     * @dev Encodes the RPS update rules.

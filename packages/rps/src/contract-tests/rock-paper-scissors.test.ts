@@ -1,27 +1,46 @@
-// import * as scenarios from '../core/test-scenarios';
 import * as ethers from 'ethers';
 import RockPaperScissorsArtifact from '../../build/contracts/RockPaperScissors.json';
-// import {asEthersObject} from 'fmg-core';
-// import {RPSCommitment, asCoreCommitment} from '../core/rps-commitment';
-// import {bigNumberify} from 'ethers/utils';
 jest.setTimeout(20000);
 import {expectRevert} from '@statechannels/devtools';
 import path from 'path';
 import {Contract} from 'ethers';
 import {AddressZero, HashZero} from 'ethers/constants';
-import {Allocation, encodeOutcome} from '@statechannels/nitro-protocol';
+import {
+  Allocation,
+  encodeOutcome,
+  AssetOutcomeShortHand,
+  replaceAddressesAndBigNumberify,
+  randomExternalDestination
+} from '@statechannels/nitro-protocol';
 import {VariablePart} from '@statechannels/nitro-protocol/';
 import loadJsonFile from 'load-json-file';
-import {
-  randomExternalDestination,
-  replaceAddresses,
-} from '@statechannels/nitro-protocol/';
 
+import {defaultAbiCoder, bigNumberify, BigNumber} from 'ethers/utils';
 
 const provider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.GANACHE_PORT}`
 );
 
+enum PositionType {
+  Start,
+  RoundProposed,
+  RoundAccepted,
+  Reveal
+}
+
+enum Weapon {
+  Rock,
+  Paper,
+  Scissors
+}
+interface RPSData {
+  positionType: PositionType;
+  stake: BigNumber; // uint256
+  preCommit: string; // bytes32
+  playerAWeapon: Weapon;
+  playerBWeapon: Weapon;
+  salt: string; // bytes32
+}
 
 beforeAll(async () => {
   console.log((await provider.getNetwork()).chainId);
@@ -45,11 +64,9 @@ beforeAll(async () => {
 
 //   beforeAll(async () => {
 //     networkId = (await provider.getNetwork()).chainId;
-//     const libraryAddress = RockPaperScissorsArtifact
-//   .networks[networkId].address;
+//     const libraryAddress = RockPaperScissorsArtifact.networks[networkId].address;
 
-//     rpsContract = new ethers.Contract(libraryAddress, RockPaperScissorsArtifact
-//     .abi, provider);
+//     rpsContract = new ethers.Contract(libraryAddress, RockPaperScissorsArtifact.abi, provider);
 
 //     const account1 = ethers.Wallet.createRandom();
 //     const account2 = ethers.Wallet.createRandom();
@@ -126,7 +143,7 @@ beforeAll(async () => {
 //     const coreCommitment1 = asCoreCommitment({...propose});
 //     const coreCommitment2 = asCoreCommitment({
 //       ...accept,
-//       destination: ['0x6Ecbe1DB9EF729CBe972C83Fb886247691Fb6beb'],
+//       destination: ['0x6Ecbe1DB9EF729CBe972C83Fb886247691Fb6beb']
 //     });
 //     expect.assertions(1);
 //     await expectRevert(
@@ -179,18 +196,13 @@ beforeAll(async () => {
 //   });
 // });
 
-let RockPaperScissors: Contract;  
+let RockPaperScissors: Contract;
 
 const numParticipants = 3;
 const addresses = {
   // participants
   A: randomExternalDestination(),
-  B: randomExternalDestination(),
-  C: randomExternalDestination(),
-};
-const guarantee = {
-  targetChannelId: HashZero,
-  destinations: [addresses.A],
+  B: randomExternalDestination()
 };
 
 beforeAll(async () => {
@@ -199,85 +211,96 @@ beforeAll(async () => {
 
 describe('validTransition', () => {
   it.each`
-    isValid  | numAssets | isAllocation      | balancesA             | turnNumB | balancesB             | description
-    ${true}  | ${[1, 1]} | ${[true, true]}   | ${{A: 1, B: 1, C: 1}} | ${3}     | ${{A: 0, B: 2, C: 1}} | ${'A pays B 1 wei'}
+    isValid | positionType                                        | stake               | AWeapon                       | BWeapon                       | fromBalances    | toBalances      | description
+    ${true} | ${[PositionType.Start, PositionType.RoundAccepted]} | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]} | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${'validTransition'}
   `(
     '$description',
     async ({
       isValid,
-      isAllocation,
-      numAssets,
-      balancesA,
-      turnNumB,
-      balancesB,
+      positionType,
+      stake,
+      AWeapon,
+      BWeapon,
+      fromBalances,
+      toBalances
     }: {
       isValid: boolean;
-      isAllocation: boolean[];
-      numAssets: number[];
-      balancesA: any;
-      turnNumB: number;
-      balancesB: any;
+      positionType: PositionType[];
+      stake;
+      AWeapon: Weapon[];
+      BWeapon: Weapon[];
+      fromBalances: AssetOutcomeShortHand;
+      toBalances: AssetOutcomeShortHand;
     }) => {
-      balancesA = replaceAddresses(balancesA, addresses);
-      const allocationA: Allocation = [];
-      Object.keys(balancesA).forEach(key =>
-        allocationA.push({destination: key, amount: balancesA[key]})
-      );
-      let outcomeA;
-      if (isAllocation[0]) {
-        outcomeA = [{assetHolderAddress: AddressZero, allocation: allocationA}];
-      } else {
-        outcomeA = [
-          {
-            assetHolderAddress: AddressZero,
-            guarantee,
-          },
-        ];
-      }
+      fromBalances = replaceAddressesAndBigNumberify(fromBalances, addresses);
+      toBalances = replaceAddressesAndBigNumberify(toBalances, addresses);
 
-      if (numAssets[0] === 2) {
-        outcomeA.push(outcomeA[0]);
-      }
-      const variablePartA: VariablePart = {
-        outcome: encodeOutcome(outcomeA),
-        appData: HashZero,
+      const fromAllocation: Allocation = [];
+      const toAllocation: Allocation = [];
+
+      Object.keys(fromBalances).forEach(key =>
+        fromAllocation.push({destination: key, amount: fromBalances[key] as string})
+      );
+      Object.keys(toBalances).forEach(key =>
+        toAllocation.push({destination: key, amount: toBalances[key] as string})
+      );
+
+      const fromOutcome = [{assetHolderAddress: AddressZero, allocation: fromAllocation}];
+      const toOutcome = [{assetHolderAddress: AddressZero, allocation: toAllocation}];
+
+      const fromAppData: RPSData = {
+        positionType: positionType[0],
+        stake: bigNumberify(stake.from),
+        preCommit: HashZero,
+        playerAWeapon: AWeapon[0],
+        playerBWeapon: BWeapon[0],
+        salt: HashZero
+      };
+      const toAppData: RPSData = {
+        positionType: positionType[1],
+        stake: bigNumberify(stake.to),
+        preCommit: HashZero,
+        playerAWeapon: AWeapon[1],
+        playerBWeapon: BWeapon[1],
+        salt: HashZero
       };
 
-      balancesB = replaceAddresses(balancesB, addresses);
-      const allocationB: Allocation = [];
-
-      Object.keys(balancesB).forEach(key =>
-        allocationB.push({destination: key, amount: balancesB[key]})
+      const fromAppDataBytes = defaultAbiCoder.encode(
+        [
+          'tuple(uint8 positionType, uint256 stake, bytes32 preCommit, uint8 playerAWeapon, uint8 playerBWeapon, bytes32 salt)'
+        ],
+        [fromAppData]
+      );
+      const toAppDataBytes = defaultAbiCoder.encode(
+        [
+          'tuple(uint8 positionType, uint256 stake, bytes32 preCommit, uint8 playerAWeapon, uint8 playerBWeapon, bytes32 salt)'
+        ],
+        [toAppData]
       );
 
-      let outcomeB;
-      if (isAllocation[1]) {
-        outcomeB = [{assetHolderAddress: AddressZero, allocation: allocationB}];
-      } else {
-        outcomeB = [{assetHolderAddress: AddressZero, guarantee}];
-      }
-      if (numAssets[1] === 2) {
-        outcomeB.push(outcomeB[0]);
-      }
-      const variablePartB: VariablePart = {
-        outcome: encodeOutcome(outcomeB),
-        appData: HashZero,
+      const fromVariablePart: VariablePart = {
+        outcome: encodeOutcome(fromOutcome),
+        appData: fromAppDataBytes
+      };
+      const toVariablePart: VariablePart = {
+        outcome: encodeOutcome(toOutcome),
+        appData: toAppDataBytes
       };
 
       if (isValid) {
         const isValidFromCall = await RockPaperScissors.validTransition(
-          variablePartA,
-          variablePartB,
-          turnNumB,
+          toVariablePart,
+          fromVariablePart,
+          1, // unused
           numParticipants
         );
         expect(isValidFromCall).toBe(true);
       } else {
         await expectRevert(() =>
           RockPaperScissors.validTransition(
-            variablePartA,
-            variablePartB,
-            turnNumB,
+            toVariablePart,
+            fromVariablePart,
+            1, // unused
             numParticipants
           )
         );
@@ -285,7 +308,6 @@ describe('validTransition', () => {
     }
   );
 });
-
 
 export const getNetworkMap = async () => {
   try {

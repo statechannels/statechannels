@@ -1,8 +1,10 @@
 import {Signature} from 'ethers/utils';
 import {
+  AssetOutcomeShortHand,
   getTestProvider,
+  OutcomeShortHand,
   randomExternalDestination,
-  replaceAddresses,
+  replaceAddressesAndBigNumberify,
   setupContracts,
 } from '../test/test-helpers';
 import {getAssetTransferredEvent, getDepositedEvent} from './contract/asset-holder';
@@ -56,9 +58,11 @@ export {
   isAllocationOutcome,
   isGuaranteeOutcome,
   VariablePart,
-  // test helperts -- TODO move these to devtools package
+  // test helpers -- TODO move these to devtools package
+  AssetOutcomeShortHand,
+  OutcomeShortHand,
   getTestProvider,
   randomExternalDestination,
-  replaceAddresses,
+  replaceAddressesAndBigNumberify,
   setupContracts,
 };
