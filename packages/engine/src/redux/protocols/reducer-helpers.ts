@@ -5,7 +5,7 @@ import {SharedData, queueMessage, getExistingChannel, checkAndStore} from "../st
 import * as selectors from "../selectors";
 import {TwoPartyPlayerIndex, ThreePartyPlayerIndex} from "../types";
 import * as magmoEngineClient from "../../magmo-engine-client";
-import {getLastCommitment, nextParticipant, getLastState} from "../channel-store";
+import {nextParticipant, getLastState} from "../channel-store";
 
 import {ProtocolLocator} from "../../communication";
 import * as comms from "../../communication";
@@ -235,11 +235,6 @@ export function getOurAddress(channelId: string, sharedData: SharedData) {
 export function getLatestState(channelId: string, sharedData: SharedData) {
   const channel = getExistingChannel(sharedData, channelId);
   return getLastState(channel);
-}
-
-export function getLatestCommitment(channelId: string, sharedData: SharedData) {
-  const channel = getExistingChannel(sharedData, channelId);
-  return getLastCommitment(channel);
 }
 
 export function ourTurn(sharedData: SharedData, channelId: string) {

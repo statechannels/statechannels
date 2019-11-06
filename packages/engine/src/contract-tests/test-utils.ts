@@ -14,7 +14,7 @@ import {getLibraryAddress} from "../utils/contract-utils";
 
 import {State, getChannelId as getNitroChannelId, Channel} from "@statechannels/nitro-protocol";
 import {signState} from "@statechannels/nitro-protocol/lib/src/signatures";
-import {convertBalanceToOutcome} from "__tests__/state-helpers";
+import {convertBalanceToOutcome} from "../redux/__tests__/state-helpers";
 
 export const fiveFive = (asAddress, bsAddress) => [
   {address: asAddress, wei: bigNumberify(5).toHexString()},

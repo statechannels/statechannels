@@ -62,8 +62,6 @@ export const addressAndPrivateKeyLookup: {
   [ThreePartyPlayerIndex.Hub]: {address: hubAddress, privateKey: hubPrivateKey}
 };
 
-const blankBalance: Balance[] = [];
-
 interface AppCommitmentParams {
   turnNum: number;
   isFinal?: boolean;
