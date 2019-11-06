@@ -18,13 +18,13 @@ const {
   accept,
   reveal,
   resting,
-  conclude
+  conclude,
 } = scenarios.aResignsAfterOneRound;
 
 const {
   propose: proposeInsufficientFunds,
   accept: acceptInsufficientFunds,
-  reveal: revealInsufficientFunds
+  reveal: revealInsufficientFunds,
 } = scenarios.insufficientFunds;
 
 const {
@@ -33,7 +33,7 @@ const {
   roundBuyIn,
   myName,
   opponentName,
-  asAddress: myAddress
+  asAddress: myAddress,
 } = scenarios.standard;
 const base = {
   libraryAddress: channel.channelType,
@@ -42,7 +42,7 @@ const base = {
   roundBuyIn,
   myName,
   opponentName,
-  myAddress
+  myAddress,
 };
 
 const messageState = {};
@@ -56,7 +56,7 @@ describe("player A's app", () => {
     theirWeapon: bWeapon,
     result: aResult,
     twitterHandle: 'tweet',
-    destination
+    destination,
   };
 
   describe('when in waitForGameConfirmationA', () => {
@@ -131,7 +131,7 @@ describe("player A's app", () => {
         const gameState2 = {
           ...gameState,
           balances: proposeInsufficientFunds.allocation,
-          latestPosition: proposeInsufficientFunds
+          latestPosition: proposeInsufficientFunds,
         };
         const updatedState = gameReducer({messageState, gameState: gameState2}, action);
 

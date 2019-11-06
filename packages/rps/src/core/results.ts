@@ -5,7 +5,7 @@ import {Weapon} from './rps-commitment';
 export enum Result {
   Tie,
   YouWin,
-  YouLose
+  YouLose,
 }
 
 export function calculateResult(yourWeapon: Weapon, theirWeapon: Weapon): Result {
@@ -35,7 +35,7 @@ export function calculateAbsoluteResult(asWeapon: Weapon, bsWeapon: Weapon): Abs
 export enum AbsoluteResult {
   Tie,
   AWins,
-  BWins
+  BWins,
 }
 
 export function convertToAbsoluteResult(relativeResult: Result, youAre: Player) {

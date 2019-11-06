@@ -125,7 +125,7 @@ function RenderGame(props: GameProps) {
 }
 
 const mapStateToProps = (state: SiteState) => ({
-  state: state.game.gameState
+  state: state.game.gameState,
 });
 
 const mapDispatchToProps = {
@@ -135,7 +135,7 @@ const mapDispatchToProps = {
   declineGame: gameActions.declineGame,
   createOpenGame: gameActions.createOpenGame,
   cancelOpenGame: gameActions.cancelOpenGame,
-  conclude: gameActions.resign
+  conclude: gameActions.resign,
 };
 
 // why does it think that mapStateToProps can return undefined??

@@ -25,7 +25,7 @@ export enum StateName {
   GameOver = 'GAME_OVER',
   WaitForWithdrawal = 'WAIT_FOR_WITHDRAWAL',
   PickChallengeWeapon = 'PICK_CHALLENGE_WEAPON',
-  ChallengePlayAgain = 'CHALLENGE_PLAY_AGAIN'
+  ChallengePlayAgain = 'CHALLENGE_PLAY_AGAIN',
 }
 
 export interface NoName {
@@ -103,7 +103,7 @@ export function waitingRoom(obj: WaitingRoomParams): WaitingRoom {
     roundBuyIn,
     libraryAddress,
     myAddress,
-    twitterHandle
+    twitterHandle,
   };
 }
 
@@ -141,7 +141,7 @@ export function base(state: IncludesBase) {
     player,
     myAddress,
     channel,
-    libraryAddress
+    libraryAddress,
   } = state;
 
   return {
@@ -156,7 +156,7 @@ export function base(state: IncludesBase) {
     opponentName,
     player,
     myAddress,
-    libraryAddress
+    libraryAddress,
   };
 }
 
@@ -232,7 +232,7 @@ export function waitForOpponentToPickWeaponA(
     ...base(state),
     name: StateName.WaitForOpponentToPickWeaponA,
     myWeapon: state.myWeapon,
-    salt: state.salt
+    salt: state.salt,
   };
 }
 
@@ -245,7 +245,7 @@ export function waitForOpponentToPickWeaponB(state: IncludesWeapon): WaitForOppo
   return {
     ...base(state),
     name: StateName.WaitForOpponentToPickWeaponB,
-    myWeapon: state.myWeapon
+    myWeapon: state.myWeapon,
   };
 }
 

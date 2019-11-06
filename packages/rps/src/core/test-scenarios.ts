@@ -29,12 +29,12 @@ const channel: Channel = {channelType: libraryAddress, nonce: channelNonce, part
 const base = {
   channel,
   destination: participants,
-  commitmentCount: 0
+  commitmentCount: 0,
 };
 
 const baseWithBuyIn = {
   ...base,
-  roundBuyIn
+  roundBuyIn,
 };
 
 export const shared = {
@@ -45,7 +45,7 @@ export const shared = {
   myName: 'Tom',
   opponentName: 'Alex',
   asPrivateKey,
-  bsPrivateKey
+  bsPrivateKey,
 };
 
 export const standard = {
@@ -54,25 +54,25 @@ export const standard = {
     ...baseWithBuyIn,
     turnNum: 0,
     allocation: fiveFive,
-    commitmentCount: 0
+    commitmentCount: 0,
   }),
   preFundSetupB: commitmentHelper.preFundSetupB({
     ...baseWithBuyIn,
     turnNum: 1,
     allocation: fiveFive,
-    commitmentCount: 1
+    commitmentCount: 1,
   }),
   postFundSetupA: commitmentHelper.postFundSetupA({
     ...baseWithBuyIn,
     turnNum: 2,
     allocation: fiveFive,
-    commitmentCount: 0
+    commitmentCount: 0,
   }),
   postFundSetupB: commitmentHelper.postFundSetupB({
     ...baseWithBuyIn,
     turnNum: 3,
     allocation: fiveFive,
-    commitmentCount: 1
+    commitmentCount: 1,
   }),
   aWeapon,
   salt,
@@ -85,14 +85,14 @@ export const standard = {
     turnNum: 4,
     allocation: fiveFive,
     aWeapon,
-    salt
+    salt,
   }),
   accept: commitmentHelper.accept({
     ...baseWithBuyIn,
     turnNum: 5,
     allocation: fourSix,
     preCommit,
-    bWeapon
+    bWeapon,
   }),
   reveal: commitmentHelper.reveal({
     ...baseWithBuyIn,
@@ -100,7 +100,7 @@ export const standard = {
     allocation: sixFour,
     bWeapon,
     aWeapon,
-    salt
+    salt,
   }),
 
   preFundSetupAHex:
@@ -130,7 +130,7 @@ export const standard = {
   revealHex:
     '0x0000000000000000000000001111111111111111111111111111111111111111000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000020000000000000000000000005409ED021D9299bf6814279A6A1411A7e866A6310000000000000000000000006Ecbe1DB9EF729CBe972C83Fb886247691Fb6beb00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000300000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000004444444444444444444444444444444444444444444444444444444444444444',
   revealSig:
-    '0xf6eb5279c1f3afdcd210e94b61af721bbad7dac7fd5d5cb40debe0aa40fb92d12af781e958e4b87355c724ab94286db8fe8fb0b25227ac42654ba3a8933bddb61b'
+    '0xf6eb5279c1f3afdcd210e94b61af721bbad7dac7fd5d5cb40debe0aa40fb92d12af781e958e4b87355c724ab94286db8fe8fb0b25227ac42654ba3a8933bddb61b',
 };
 
 export const aResignsAfterOneRound = {
@@ -147,7 +147,7 @@ export const aResignsAfterOneRound = {
   conclude2Hex:
     '0x0000000000000000000000001111111111111111111111111111111111111111000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000020000000000000000000000005409ED021D9299bf6814279A6A1411A7e866A6310000000000000000000000006Ecbe1DB9EF729CBe972C83Fb886247691Fb6beb00000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000009000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000004',
   conclude2Sig:
-    '0xc7734c1cf0d2988fb7ea2caff803d403e5fc7148f792e184fea521e600fa8e4a1f857a626298949d2ffb10111672e1e283bb3a45a6c77c9e388dc7784be94ceb1c'
+    '0xc7734c1cf0d2988fb7ea2caff803d403e5fc7148f792e184fea521e600fa8e4a1f857a626298949d2ffb10111672e1e283bb3a45a6c77c9e388dc7784be94ceb1c',
 };
 
 export const bResignsAfterOneRound = {
@@ -157,7 +157,7 @@ export const bResignsAfterOneRound = {
     '0x0000000000000000000000001111111111111111111111111111111111111111000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000020000000000000000000000005409ED021D9299bf6814279A6A1411A7e866A6310000000000000000000000006Ecbe1DB9EF729CBe972C83Fb886247691Fb6beb00000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000007000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000004',
   concludeSig:
     '0xee40164052e7f409acd840ac099eee45ec233e068fb5b883e6871ea6d1e3b1516c7b4f7b587844b87ec20191daf2f891b81758db23481b2777bae653748efbf61b',
-  conclude2: commitmentHelper.conclude({...base, turnNum: 8, allocation: sixFour})
+  conclude2: commitmentHelper.conclude({...base, turnNum: 8, allocation: sixFour}),
 };
 
 export const insufficientFunds = {
@@ -165,25 +165,25 @@ export const insufficientFunds = {
     ...baseWithBuyIn,
     turnNum: 0,
     allocation: nineOne,
-    commitmentCount: 0
+    commitmentCount: 0,
   }),
   preFundSetupB: commitmentHelper.preFundSetupB({
     ...baseWithBuyIn,
     turnNum: 1,
     allocation: nineOne,
-    commitmentCount: 1
+    commitmentCount: 1,
   }),
   postFundSetupA: commitmentHelper.postFundSetupA({
     ...baseWithBuyIn,
     turnNum: 2,
     allocation: nineOne,
-    commitmentCount: 0
+    commitmentCount: 0,
   }),
   postFundSetupB: commitmentHelper.postFundSetupB({
     ...baseWithBuyIn,
     turnNum: 3,
     allocation: nineOne,
-    commitmentCount: 1
+    commitmentCount: 1,
   }),
   aWeapon,
   bWeapon,
@@ -192,14 +192,14 @@ export const insufficientFunds = {
     turnNum: 4,
     allocation: nineOne,
     aWeapon,
-    salt
+    salt,
   }),
   accept: commitmentHelper.accept({
     ...baseWithBuyIn,
     turnNum: 5,
     allocation: eightTwo,
     preCommit,
-    bWeapon
+    bWeapon,
   }),
   reveal: commitmentHelper.reveal({
     ...baseWithBuyIn,
@@ -207,10 +207,10 @@ export const insufficientFunds = {
     allocation: tenZero,
     bWeapon,
     aWeapon,
-    salt
+    salt,
   }),
   conclude: commitmentHelper.conclude({...base, turnNum: 7, allocation: tenZero}),
-  conclude2: commitmentHelper.conclude({...base, turnNum: 8, allocation: tenZero})
+  conclude2: commitmentHelper.conclude({...base, turnNum: 8, allocation: tenZero}),
 };
 
 export function build(
@@ -223,7 +223,7 @@ export function build(
     libraryAddress: customLibraryAddress,
     channelNonce,
     participants: customParticipants,
-    roundBuyIn
+    roundBuyIn,
   };
 
   const customShared = {
@@ -231,7 +231,7 @@ export function build(
     asAddress: customAsAddress,
     bsAddress: customBsAddress,
     myName: 'Tom',
-    opponentName: 'Alex'
+    opponentName: 'Alex',
   };
 
   return {
@@ -240,32 +240,32 @@ export function build(
       ...baseWithBuyIn,
       turnNum: 0,
       allocation: fiveFive,
-      commitmentCount: 0
+      commitmentCount: 0,
     }),
     preFundSetupB: commitmentHelper.preFundSetupB({
       ...baseWithBuyIn,
       turnNum: 1,
       allocation: fiveFive,
-      commitmentCount: 1
+      commitmentCount: 1,
     }),
     postFundSetupA: commitmentHelper.postFundSetupA({
       ...baseWithBuyIn,
       turnNum: 2,
       allocation: fiveFive,
-      commitmentCount: 0
+      commitmentCount: 0,
     }),
     postFundSetupB: commitmentHelper.postFundSetupB({
       ...baseWithBuyIn,
       turnNum: 3,
       allocation: fiveFive,
-      commitmentCount: 1
+      commitmentCount: 1,
     }),
     postFundSetupB2: commitmentHelper.postFundSetupB({
       ...baseWithBuyIn,
       turnNum: 3,
       allocation: fiveFive,
       commitmentCount: 1,
-      roundBuyIn: bigNumberify(100).toHexString()
+      roundBuyIn: bigNumberify(100).toHexString(),
     }),
     aWeapon,
     salt,
@@ -278,14 +278,14 @@ export function build(
       turnNum: 4,
       allocation: fiveFive,
       aWeapon,
-      salt
+      salt,
     }),
     propose2: commitmentHelper.proposeFromSalt({
       ...baseWithBuyIn,
       turnNum: 4,
       allocation: fourSix,
       aWeapon,
-      salt
+      salt,
     }),
     propose3: commitmentHelper.proposeFromSalt({
       ...baseWithBuyIn,
@@ -293,14 +293,14 @@ export function build(
       allocation: fiveFive,
       aWeapon,
       salt,
-      roundBuyIn: bigNumberify(100).toHexString()
+      roundBuyIn: bigNumberify(100).toHexString(),
     }),
     accept: commitmentHelper.accept({
       ...baseWithBuyIn,
       turnNum: 5,
       allocation: fourSix,
       preCommit,
-      bWeapon
+      bWeapon,
     }),
     reveal: commitmentHelper.reveal({
       ...baseWithBuyIn,
@@ -308,8 +308,8 @@ export function build(
       allocation: sixFour,
       bWeapon,
       aWeapon,
-      salt
+      salt,
     }),
-    resting: commitmentHelper.resting({...baseWithBuyIn, turnNum: 7, allocation: sixFour})
+    resting: commitmentHelper.resting({...baseWithBuyIn, turnNum: 7, allocation: sixFour}),
   };
 }

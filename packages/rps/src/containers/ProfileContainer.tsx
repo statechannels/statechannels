@@ -12,7 +12,7 @@ function mapStateToProps(state: SiteState) {
 
 const mapDispatchToProps = {
   updateProfile: gameActions.updateProfile,
-  logout: loginActions.logoutRequest
+  logout: loginActions.logoutRequest,
 };
 
 export default connect(

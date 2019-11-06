@@ -5,7 +5,7 @@ import {OverlayState} from './state';
 
 const initialState: OverlayState = {
   rulesVisible: false,
-  walletVisible: false
+  walletVisible: false,
 };
 
 export const overlayReducer: Reducer<OverlayState> = (state = initialState, action: any) => {

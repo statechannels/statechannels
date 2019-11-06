@@ -25,6 +25,6 @@ export default class ConcludeStep extends React.PureComponent<IProps> {
 const styles = StyleSheet.create({
   subtitle: {
     width: '100%',
-    paddingBottom: 16
-  }
+    paddingBottom: 16,
+  },
 });

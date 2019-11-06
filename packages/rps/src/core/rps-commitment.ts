@@ -17,19 +17,19 @@ const SolidityRPSCommitmentType = {
     preCommit: 'bytes32',
     bWeapon: 'uint8',
     aWeapon: 'uint8',
-    salt: 'bytes32'
-  }
+    salt: 'bytes32',
+  },
 };
 export enum PositionType {
   Resting,
   Proposed,
   Accepted,
-  Reveal
+  Reveal,
 }
 export enum Weapon {
   Rock,
   Paper,
-  Scissors
+  Scissors,
 }
 export interface RPSBaseCommitment extends BaseCommitment {
   positionType: PositionType;
@@ -65,7 +65,7 @@ function decodeAppAttributes(appAttrs: string): AppAttributes {
     preCommit: parameters[2],
     bWeapon: Number.parseInt(parameters[3], 10),
     aWeapon: Number.parseInt(parameters[4], 10),
-    salt: parameters[5]
+    salt: parameters[5],
   };
 }
 
@@ -79,7 +79,7 @@ export function fromCoreCommitment(commitment: Commitment): RPSCommitment {
     destination,
     commitmentCount,
     commitmentName: getCommitmentName(commitment),
-    ...decodeAppAttributes(commitment.appAttributes)
+    ...decodeAppAttributes(commitment.appAttributes),
   };
 }
 
@@ -96,7 +96,7 @@ export function asCoreCommitment(rpsCommitment: RPSCommitment): Commitment {
     preCommit,
     bWeapon,
     aWeapon,
-    salt
+    salt,
   } = rpsCommitment;
 
   return {
@@ -106,7 +106,7 @@ export function asCoreCommitment(rpsCommitment: RPSCommitment): Commitment {
     allocation,
     destination,
     commitmentCount,
-    appAttributes: encodeAppAttributes({positionType, stake, preCommit, bWeapon, aWeapon, salt})
+    appAttributes: encodeAppAttributes({positionType, stake, preCommit, bWeapon, aWeapon, salt}),
   };
 }
 

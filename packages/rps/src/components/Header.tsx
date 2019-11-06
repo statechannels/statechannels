@@ -18,31 +18,31 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     color: '#fff',
     height: 45,
-    width: '100%'
+    width: '100%',
   },
 
   leftNav: {
     position: 'absolute',
-    left: 20
+    left: 20,
   },
 
   centerNav: {
     left: '50%',
     position: 'absolute',
-    transform: 'translateX(-50%)'
+    transform: 'translateX(-50%)',
   },
 
   rightNav: {
     position: 'absolute',
     right: 20,
-    top: 0
+    top: 0,
   },
 
   inlineBlock: {
-    display: 'inline-block'
+    display: 'inline-block',
   },
 
   rightSpacing: {
-    marginRight: 16
-  }
+    marginRight: 16,
+  },
 });
