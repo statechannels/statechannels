@@ -14,10 +14,33 @@ As the client is a custom, extended version of [Webtorrent](https://github.com/w
   this list is used by each peer Client, to control which peer is trying to leech files, and see who is allowed to do so.
 * `togglePeer (affectedTorrent, peerAccount)` is a method that allows a user to choke/unchoke a peer
 
-#### Demo
-The demo is the UI made for this. It's done in react, and it assumes that only one torrent is being shared or downloaded, and that torrent only has one file.
-You can see it working [here](https://cf-webtorrent-mvp.herokuapp.com/)
+### Demo
 
-#### Installing and using
+You can see it working [here](https://sc-web3torrent.netlify.com/)
+
+### Installing and using
 
 Just clone this repo and start tinkering. :-)
+
+```shell
+git clone git@github.com:statechannels/monorepo
+cd monorepo
+yarn
+cd packages/web3torrent
+yarn start
+```
+
+### Storybook
+
+If you want to take a look at the UI components we built for this app, we have a [Storybook](https://storybook.js.org). To use it:
+
+```shell
+yarn storybook
+```
+
+You'll see a screen like this in your browser:
+
+![image](https://user-images.githubusercontent.com/118913/68314770-7e75d500-0095-11ea-9f5a-b571e7a0654b.png)
+
+- On the left-side panel, you'll see each a page for each component. Click through those links to navigate.
+- The **Knobs** tab, displayed on the bottom panel, allows you to play with the component's properties. Use the different options to see how the component changes.
