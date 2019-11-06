@@ -3,7 +3,7 @@
 // import {AdjudicatorState} from "../../adjudicator-state/state";
 // import * as actions from "../../actions";
 // import {put} from "redux-saga/effects";
-// import {channelId, appCommitment} from "../../__tests__/state-helpers";
+// import {channelId, appState} from "../../__tests__/state-helpers";
 
 describe("challenge-watcher", () => {
   // TODO: Implment this
@@ -29,7 +29,7 @@ describe("challenge-watcher", () => {
     //     finalized: false,
     //     channelId,
     //     balance: "0x0",
-    //     challenge: {expiresAt: 1, challengeCommitment: appCommitment({turnNum: 20}).commitment}
+    //     challenge: {expiresAt: 1, challengeState: appState({turnNum: 20}).state}
     //   }
     // };
     // // Select adjudicator state

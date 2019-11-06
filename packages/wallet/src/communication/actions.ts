@@ -67,12 +67,8 @@ export const concludeInstigated: ActionConstructor<ConcludeInstigated> = p => ({
 // Actions
 // -------
 
-// Protocols should switch to CommitmentsReceived, as we will in general
-// need to support n-party channels, and that is easiest to manage by
-// sending a full round of commitments when possible ie. when not in PreFundSetup
-
-export interface CommitmentsReceived extends BaseProcessAction {
-  type: "WALLET.COMMON.COMMITMENTS_RECEIVED";
+export interface SignedStatesReceived extends BaseProcessAction {
+  type: "WALLET.COMMON.SIGNED_STATES_RECEIVED";
   protocolLocator: ProtocolLocator;
   signedStates: SignedState[];
 }
@@ -85,9 +81,9 @@ export const signedStatesReceived = (p: {
   protocolLocator: ProtocolLocator;
   signedStates: SignedState[];
   processId: string;
-}): CommitmentsReceived => ({
+}): SignedStatesReceived => ({
   ...p,
-  type: "WALLET.COMMON.COMMITMENTS_RECEIVED"
+  type: "WALLET.COMMON.SIGNED_STATES_RECEIVED"
 });
 
 // -------
@@ -98,7 +94,7 @@ export type RelayableAction =
   | StrategyProposed
   | StrategyApproved
   | ConcludeInstigated
-  | CommitmentsReceived
+  | SignedStatesReceived
   | CloseLedgerChannel
   | MultipleRelayableActions
   | ConcludeInstigated;
@@ -109,15 +105,15 @@ export function isRelayableAction(action: WalletAction): action is RelayableActi
     action.type === "WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_APPROVED" ||
     action.type === "WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED" ||
     action.type === "WALLET.NEW_PROCESS.CLOSE_LEDGER_CHANNEL" ||
-    action.type === "WALLET.COMMON.COMMITMENTS_RECEIVED" ||
+    action.type === "WALLET.COMMON.SIGNED_STATES_RECEIVED" ||
     action.type === "WALLET.MULTIPLE_RELAYABLE_ACTIONS"
   );
 }
 
-export type CommonAction = CommitmentsReceived;
+export type CommonAction = SignedStatesReceived;
 export function isCommonAction(action: WalletAction, protocol?: EmbeddedProtocol): action is CommonAction {
   return (
-    action.type === "WALLET.COMMON.COMMITMENTS_RECEIVED" &&
+    action.type === "WALLET.COMMON.SIGNED_STATES_RECEIVED" &&
     // When passed a protocol, check that it's got the protocol in the protocol locator
     (!protocol || (action.protocolLocator && action.protocolLocator.indexOf(protocol) >= 0))
   );

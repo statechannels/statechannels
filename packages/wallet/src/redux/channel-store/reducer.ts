@@ -82,10 +82,10 @@ interface CheckFailure {
 
 type CheckResult = CheckSuccess | CheckFailure;
 
-// For use with a signed commitment received from an opponent.
+// For use with a signed state received from an opponent.
 export function checkAndStore(store: ChannelStore, signedState: SignedState): CheckResult {
   if (!hasValidSignature(signedState)) {
-    console.log("Failed to validate commitment signature");
+    console.log("Failed to validate state signature");
     return {isSuccess: false};
   }
   const channelId = getChannelId(signedState.state.channel);

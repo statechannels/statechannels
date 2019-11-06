@@ -69,7 +69,7 @@ describe("ETHAssetHolder listener", () => {
     });
 
     // TODO: this 0x05 is hardcoded as it's the same value being used for
-    // constructing the commitments for the `conclude` call. Refactor this
+    // constructing the states for the `conclude` call. Refactor this
     // to not be hardcoded
     const depositAmount = bigNumberify("0x05");
     // deposit double so that 0x05 can be transferred to each participant
@@ -79,7 +79,7 @@ describe("ETHAssetHolder listener", () => {
 
     const {turnNumRecord, finalizesAt} = await getOnChainChannelStorage(provider, channelId);
     // This is the outcome that gets used to set the outcomeHash on the adjudicator
-    // and is copied from the state that gets used from the commitment
+    // and is copied from the state that gets used from the state
     // construction referred to above. This will also be refactored as part of the
     // TODO above.
 

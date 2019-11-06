@@ -62,14 +62,14 @@ export const addressAndPrivateKeyLookup: {
   [ThreePartyPlayerIndex.Hub]: {address: hubAddress, privateKey: hubPrivateKey}
 };
 
-interface AppCommitmentParams {
+interface AppStateParams {
   turnNum: number;
   isFinal?: boolean;
   balances?: Balance[];
   appAttributes?: string;
 }
 
-export function appState(params: AppCommitmentParams): SignedState {
+export function appState(params: AppStateParams): SignedState {
   const turnNum = params.turnNum;
   const balances = params.balances || twoThree;
   const isFinal = params.isFinal || false;
@@ -95,16 +95,15 @@ export function appState(params: AppCommitmentParams): SignedState {
 
   return Signatures.signState(state, privateKey);
 }
-interface LedgerCommitmentParams {
+interface LedgerStateParams {
   turnNum: number;
   isFinal?: boolean;
   balances?: Balance[];
   proposedBalances?: Balance[];
 }
 
-interface ThreeWayLedgerCommitmentParams extends LedgerCommitmentParams {
+interface ThreeWayLedgerStateParams extends LedgerStateParams {
   isVote?: boolean;
-  commitmentCount?: number;
 }
 
 const LEDGER_CHANNEL_NONCE = 0;
@@ -136,7 +135,7 @@ export const threeWayLedgerChannel = {
   participants: threeParticipants
 };
 
-export function threeWayLedgerState(params: ThreeWayLedgerCommitmentParams): SignedState {
+export function threeWayLedgerState(params: ThreeWayLedgerStateParams): SignedState {
   const turnNum = params.turnNum;
   const isFinal = params.isFinal || false;
   const balances = params.balances || twoThreeTwo;
@@ -174,7 +173,7 @@ export function threeWayLedgerState(params: ThreeWayLedgerCommitmentParams): Sig
   }
 }
 
-export function ledgerState(params: LedgerCommitmentParams): SignedState {
+export function ledgerState(params: LedgerStateParams): SignedState {
   const turnNum = params.turnNum;
   const isFinal = params.isFinal || false;
   const balances = params.balances || twoThree;

@@ -44,8 +44,8 @@ export function createConcludeAndWithdrawTransaction(args: ConcludeAndWithdrawAr
   // const splitFromSignature = splitSignature(args.fromSignature);
   // const splitToSignature = splitSignature(args.toSignature);
   // const conclusionProof = {
-  //   penultimateCommitment: asEthersObject(args.fromCommitment),
-  //   ultimateCommitment: asEthersObject(args.toCommitment),
+  //   penultimateState: asEthersObject(args.fromState),
+  //   ultimateState: asEthersObject(args.toState),
   //   penultimateSignature: splitFromSignature,
   //   ultimateSignature: splitToSignature
   // };
