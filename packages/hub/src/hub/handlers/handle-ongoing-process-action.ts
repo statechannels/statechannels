@@ -2,12 +2,12 @@ import {
   signCommitment2,
   SignedCommitment as ClientSignedCommitment,
   unreachable
-} from '@statechannels/engine';
+} from '@statechannels/wallet';
 import {ethers} from 'ethers';
 import {channelID, Signature} from 'fmg-core';
 
-import {CommitmentsReceived, StrategyProposed} from '@statechannels/engine/lib/src/communication';
-import * as communication from '@statechannels/engine/lib/src/communication';
+import {CommitmentsReceived, StrategyProposed} from '@statechannels/wallet/lib/src/communication';
+import * as communication from '@statechannels/wallet/lib/src/communication';
 import {errors} from '../../wallet';
 import {getCurrentCommitment} from '../../wallet/db/queries/getCurrentCommitment';
 
@@ -23,9 +23,9 @@ export async function handleOngoingProcessAction(
   action: StrategyProposed | CommitmentsReceived
 ): Promise<MessageRelayRequested[]> {
   switch (action.type) {
-    case 'ENGINE.COMMON.COMMITMENTS_RECEIVED':
+    case 'WALLET.COMMON.COMMITMENTS_RECEIVED':
       return handleCommitmentsReceived(action);
-    case 'ENGINE.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_PROPOSED':
+    case 'WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_PROPOSED':
       return handleStrategyProposed(action);
     default:
       return unreachable(action);

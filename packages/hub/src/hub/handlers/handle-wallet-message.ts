@@ -3,7 +3,7 @@ import {
   ConcludeInstigated,
   RelayableAction,
   StrategyProposed
-} from '@statechannels/engine/lib/src/communication';
+} from '@statechannels/wallet/lib/src/communication';
 import {MessageRelayRequested} from '../../wallet-client';
 import {getProcess} from '../../wallet/db/queries/walletProcess';
 import {handleNewProcessAction} from './handle-new-process-action';
@@ -26,10 +26,10 @@ export async function handleWalletMessage(
 async function shouldHandleAsNewProcessAction(
   action: ConcludeInstigated | CommitmentsReceived
 ): Promise<boolean> {
-  if (action.type === 'ENGINE.NEW_PROCESS.CONCLUDE_INSTIGATED') {
+  if (action.type === 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED') {
     return true;
   }
-  if (action.type === 'ENGINE.COMMON.COMMITMENTS_RECEIVED') {
+  if (action.type === 'WALLET.COMMON.COMMITMENTS_RECEIVED') {
     return !(await getProcess(action.processId));
   }
 }
@@ -38,8 +38,8 @@ function isNewProcessAction(
   action: RelayableAction
 ): action is ConcludeInstigated | CommitmentsReceived {
   return (
-    action.type === 'ENGINE.NEW_PROCESS.CONCLUDE_INSTIGATED' ||
-    action.type === 'ENGINE.COMMON.COMMITMENTS_RECEIVED'
+    action.type === 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED' ||
+    action.type === 'WALLET.COMMON.COMMITMENTS_RECEIVED'
   );
 }
 
@@ -47,7 +47,7 @@ function isProtocolAction(
   action: RelayableAction
 ): action is StrategyProposed | CommitmentsReceived {
   return (
-    action.type === 'ENGINE.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_PROPOSED' ||
-    action.type === 'ENGINE.COMMON.COMMITMENTS_RECEIVED'
+    action.type === 'WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_PROPOSED' ||
+    action.type === 'WALLET.COMMON.COMMITMENTS_RECEIVED'
   );
 }
