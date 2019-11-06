@@ -1,8 +1,7 @@
 import * as metamaskActions from './actions';
-import {put, cps} from 'redux-saga/effects';
+import {put, cps, delay} from 'redux-saga/effects';
 import * as truffle from './../../../truffle';
 import {MetamaskErrorType} from './actions';
-import {delay} from 'redux-saga';
 
 export default function* checkMetamask() {
   if (typeof web3 !== 'object' || web3 === null) {
@@ -52,4 +51,5 @@ export default function* checkMetamask() {
   } catch {
     yield put(metamaskActions.metamaskErrorOccurred({errorType: MetamaskErrorType.UnknownError}));
   }
+  return false;
 }

@@ -17,11 +17,12 @@ import {
   setupContracts,
 } from '@statechannels/nitro-protocol/test/test-helpers';
 
+
+const provider = getTestProvider();
+
 describe.skip('Rock Paper Scissors', () => {
   let networkId;
-  const provider = new ethers.providers.JsonRpcProvider(
-    `http://localhost:${process.env.GANACHE_PORT}`
-  );
+
   let rpsContract;
 
   let postFundSetupB: RPSCommitment;
@@ -170,8 +171,6 @@ describe.skip('Rock Paper Scissors', () => {
   });
 });
 
-
-const provider = getTestProvider();
 let RockPaperScissors: Contract;  
 
 const numParticipants = 3;
