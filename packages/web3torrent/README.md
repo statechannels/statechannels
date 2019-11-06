@@ -1,4 +1,7 @@
 ## Web3Torrent
+
+![Web3Torrent App Screenshot](https://user-images.githubusercontent.com/118913/68315088-05c34880-0096-11ea-94ab-bc86337f15d2.png)
+
 Web3Torrent is a streaming torrent implementation, based of [Webtorrent](https://github.com/webtorrent/webtorrent) and including a custom BitTorrent protocol extension, that allows seeders to block/choke and unblock other peers by user request.
 
 ### The BitTorrent Wire extension
@@ -40,7 +43,7 @@ yarn storybook
 
 You'll see a screen like this in your browser:
 
-![image](https://user-images.githubusercontent.com/118913/68314770-7e75d500-0095-11ea-9f5a-b571e7a0654b.png)
+![Screenshot of Storybook](https://user-images.githubusercontent.com/118913/68314770-7e75d500-0095-11ea-9f5a-b571e7a0654b.png)
 
 - On the left-side panel, you'll see each a page for each component. Click through those links to navigate.
 - The **Knobs** tab, displayed on the bottom panel, allows you to play with the component's properties. Use the different options to see how the component changes.
