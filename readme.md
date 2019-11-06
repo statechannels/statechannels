@@ -10,7 +10,7 @@
 <h4 align="center">Simple off-chain applications framework for Ethereum.</h4>
 
 <p align="center">
-  <a href="https://circleci.com/gh/statechannels/monorepo"><img src="https://circleci.com/gh/statechannels/monorepo.svg?style=shield&circle-token=adc9e1576b770585a350141b2a90fc3d68bc048c" alt="circleci"></a>
+  <a href="https://circleci.com/gh/statechannels/monorepo"><img src="https://circleci.com/gh/statechannels/monorepo.svg?style=shield" alt="circleci"></a>
   <a href="https://lernajs.io/"><img src="https://img.shields.io/badge/maintained%20with-lerna-cc00ff.svg"/></a>
   <a href="https://statechannels.com/chat"><img src="https://img.shields.io/discord/500370633901735947.svg"/></a>
   <a href="https://github.com/renovatebot/renovate"><img src="https://badges.renovateapi.com/github/statechannels/monorepo"/></a>
