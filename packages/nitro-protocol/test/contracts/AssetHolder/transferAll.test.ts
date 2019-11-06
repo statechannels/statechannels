@@ -6,7 +6,7 @@ import {
   getTestProvider,
   randomChannelId,
   randomExternalDestination,
-  replaceAddresses,
+  replaceAddressesAndBigNumberify,
   setupContracts,
 } from '../../test-helpers';
 
@@ -32,7 +32,7 @@ beforeAll(async () => {
   AssetHolder = await setupContracts(provider, AssetHolderArtifact);
 });
 
-const reason0 = 'transferAll | submitted data does not match stored outcomeHash';
+const reason0 = 'transferAll | submitted data does not match stored assetOutcomeHash';
 
 // c is the channel we are transferring from.
 describe('transferAll', () => {
@@ -62,11 +62,11 @@ describe('transferAll', () => {
       addresses.c = channelId;
 
       // transform input data (unpack addresses and BigNumberify amounts)
-      heldBefore = replaceAddresses(heldBefore, addresses);
-      setOutcome = replaceAddresses(setOutcome, addresses);
-      newOutcome = replaceAddresses(newOutcome, addresses);
-      heldAfter = replaceAddresses(heldAfter, addresses);
-      payouts = replaceAddresses(payouts, addresses);
+      heldBefore = replaceAddressesAndBigNumberify(heldBefore, addresses);
+      setOutcome = replaceAddressesAndBigNumberify(setOutcome, addresses);
+      newOutcome = replaceAddressesAndBigNumberify(newOutcome, addresses);
+      heldAfter = replaceAddressesAndBigNumberify(heldAfter, addresses);
+      payouts = replaceAddressesAndBigNumberify(payouts, addresses);
 
       // reset the holdings (only works on test contract)
       new Set([...Object.keys(heldAfter), ...Object.keys(heldBefore)]).forEach(async key => {
@@ -81,11 +81,14 @@ describe('transferAll', () => {
       Object.keys(setOutcome).forEach(key =>
         allocation.push({destination: key, amount: setOutcome[key]})
       );
-      const [, outcomeHash] = allocationToParams(allocation);
+      const [, assetOutcomeHash] = allocationToParams(allocation);
 
-      // set outcomeHash
-      await (await AssetHolder.setAssetOutcomeHashPermissionless(channelId, outcomeHash)).wait();
-      expect(await AssetHolder.outcomeHashes(channelId)).toBe(outcomeHash);
+      // set assetOutcomeHash
+      await (await AssetHolder.setAssetOutcomeHashPermissionless(
+        channelId,
+        assetOutcomeHash
+      )).wait();
+      expect(await AssetHolder.assetOutcomeHashes(channelId)).toBe(assetOutcomeHash);
 
       const tx = AssetHolder.transferAll(channelId, encodeAllocation(allocation));
 
@@ -94,27 +97,28 @@ describe('transferAll', () => {
         await expectRevert(() => tx, reason);
       } else {
         const {events} = await (await tx).wait();
-
-        events.forEach(async ({event, args}) => {
-          const {destination} = args;
-          expect(event).toEqual('AssetTransferred');
+        const expectedEvents = [];
+        Object.keys(payouts).forEach(destination => {
           if (payouts[destination] && payouts[destination].gt(0)) {
-            expect(args).toMatchObject({destination, amount: payouts[destination]});
+            expectedEvents.push({
+              event: 'AssetTransferred',
+              args: {destination, amount: payouts[destination]},
+            });
           }
         });
-
+        expect(events).toMatchObject(expectedEvents);
         // check new holdings
         Object.keys(heldAfter).forEach(async key =>
           expect(await AssetHolder.holdings(key)).toEqual(heldAfter[key])
         );
 
-        // check new outcomeHash
+        // check new assetOutcomeHash
         const allocationAfter = [];
         Object.keys(newOutcome).forEach(key => {
           allocationAfter.push({destination: key, amount: newOutcome[key]});
         });
         const [, expectedNewOutcomeHash] = allocationToParams(allocationAfter);
-        expect(await AssetHolder.outcomeHashes(channelId)).toEqual(expectedNewOutcomeHash);
+        expect(await AssetHolder.assetOutcomeHashes(channelId)).toEqual(expectedNewOutcomeHash);
       }
     }
   );

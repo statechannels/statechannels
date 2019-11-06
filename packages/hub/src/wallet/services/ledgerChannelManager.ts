@@ -6,7 +6,7 @@ import {
   pass,
   vote
 } from 'fmg-nitro-adjudicator/lib/consensus-app';
-import {unreachable} from '@statechannels/engine';
+import {unreachable} from '@statechannels/wallet';
 import {SignedCommitment, SignedLedgerCommitment} from '.';
 import {HUB_ADDRESS} from '../../constants';
 import {queries} from '../db/queries/channels';

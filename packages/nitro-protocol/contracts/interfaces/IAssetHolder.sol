@@ -40,7 +40,7 @@ interface IAssetHolder {
 
     /**
     * @dev Indicates that `amount` assets have been transferred to the external destination denoted by `destination`.
-    * @param destination An external destination, right-padded with zeros.
+    * @param destination An external destination, left-padded with zeros.
     * @param amount Number of assets transferred (wei or tokens).
     */
     event AssetTransferred(bytes32 indexed destination, uint256 amount);

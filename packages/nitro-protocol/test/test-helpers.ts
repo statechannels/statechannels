@@ -1,9 +1,10 @@
-import {ethers, Wallet} from 'ethers';
+import {Contract, ethers, Wallet} from 'ethers';
 import {AddressZero, HashZero} from 'ethers/constants';
 import {TransactionReceipt, TransactionRequest} from 'ethers/providers';
 import {
   arrayify,
   bigNumberify,
+  BigNumberish,
   defaultAbiCoder,
   keccak256,
   Signature,
@@ -14,6 +15,7 @@ import path from 'path';
 import {hashChannelStorage} from '../src/contract/channel-storage';
 import {
   Allocation,
+  AllocationAssetOutcome,
   encodeAllocation,
   encodeGuarantee,
   Guarantee,
@@ -22,6 +24,23 @@ import {
 } from '../src/contract/outcome';
 import {hashState, State} from '../src/contract/state';
 
+// interfaces
+
+// e.g. {ALICE:2, BOB:3}
+export interface AssetOutcomeShortHand {
+  [destination: string]: BigNumberish;
+}
+
+// e.g. {ETH: {ALICE:2, BOB:3}, DAI: {ALICE:1, BOB:4}}
+export interface OutcomeShortHand {
+  [assetHolder: string]: AssetOutcomeShortHand;
+}
+
+export interface AddressesLookup {
+  [shorthand: string]: string | undefined;
+}
+
+// functions
 export const getTestProvider = () => {
   if (!process.env.GANACHE_PORT) {
     throw new Error('Missing environment variable GANACHE_PORT required');
@@ -228,10 +247,129 @@ export async function signStates(
   return Promise.all(promises);
 }
 
-export function replaceAddresses(object, addresses) {
+// recursively replaces any key with the value of that key in the addresses object
+// bigNumberify all numbers
+export function replaceAddressesAndBigNumberify(
+  object: AssetOutcomeShortHand | OutcomeShortHand | string,
+  addresses: AddressesLookup
+) {
   const newObject = {};
   Object.keys(object).forEach(key => {
-    newObject[addresses[key]] = bigNumberify(object[key]);
+    if (typeof object[key] === 'object') {
+      // recurse
+      newObject[addresses[key]] = replaceAddressesAndBigNumberify(object[key], addresses);
+    }
+    if (typeof object[key] === 'number') {
+      newObject[addresses[key]] = bigNumberify(object[key]);
+    }
   });
   return newObject;
+}
+
+// Sets the holdings defined in the multipleHoldings object. Requires an array of the relevant contracts to be passed in.
+export function resetMultipleHoldings(
+  multipleHoldings: OutcomeShortHand,
+  contractsArray: Contract[]
+) {
+  Object.keys(multipleHoldings).forEach(assetHolder => {
+    const holdings = multipleHoldings[assetHolder];
+    Object.keys(holdings).forEach(async destination => {
+      const amount = holdings[destination];
+      contractsArray.forEach(async contract => {
+        if (contract.address === assetHolder) {
+          await (await contract.setHoldings(destination, amount)).wait();
+          expect((await contract.holdings(destination)).eq(amount)).toBe(true);
+        }
+      });
+    });
+  });
+}
+
+// Check the holdings defined in the multipleHoldings object. Requires an array of the relevant contracts to be passed in.
+export function checkMultipleHoldings(
+  multipleHoldings: OutcomeShortHand,
+  contractsArray: Contract[]
+) {
+  Object.keys(multipleHoldings).forEach(assetHolder => {
+    const holdings = multipleHoldings[assetHolder];
+    Object.keys(holdings).forEach(async destination => {
+      const amount = holdings[destination];
+      contractsArray.forEach(async contract => {
+        if (contract.address === assetHolder) {
+          expect((await contract.holdings(destination)).eq(amount)).toBe(true);
+        }
+      });
+    });
+  });
+}
+
+// Check the assetOutcomeHash on multiple asset Hoders defined in the multipleHoldings object. Requires an array of the relevant contracts to be passed in.
+export function checkMultipleAssetOutcomeHashes(
+  channelId: string,
+  outcome: OutcomeShortHand,
+  contractsArray: Contract[]
+) {
+  Object.keys(outcome).forEach(assetHolder => {
+    const assetOutcome = outcome[assetHolder];
+    const allocationAfter = [];
+    Object.keys(assetOutcome).forEach(destination => {
+      const amount = assetOutcome[destination];
+      allocationAfter.push({destination, amount});
+    });
+    const [, expectedNewAssetOutcomeHash] = allocationToParams(allocationAfter);
+    contractsArray.forEach(async contract => {
+      if (contract.address === assetHolder) {
+        expect((await contract.assetOutcomeHashes(channelId)).toEqual(expectedNewAssetOutcomeHash));
+      }
+    });
+  });
+}
+
+// computes an outcome from a shorthand description
+export function computeOutcome(outcomeShortHand: OutcomeShortHand): AllocationAssetOutcome[] {
+  const outcome: AllocationAssetOutcome[] = [];
+  Object.keys(outcomeShortHand).forEach(assetHolder => {
+    const allocation: Allocation = [];
+    Object.keys(outcomeShortHand[assetHolder]).forEach(destination =>
+      allocation.push({
+        destination,
+        amount: bigNumberify(outcomeShortHand[assetHolder][destination]).toHexString(),
+      })
+    );
+    const assetOutcome: AllocationAssetOutcome = {
+      assetHolderAddress: assetHolder,
+      allocation,
+    }; // TODO handle gurantee outcomes
+    outcome.push(assetOutcome);
+  });
+  return outcome;
+}
+
+export function assetTransferredEventsFromPayouts(
+  singleAssetPayouts: AssetOutcomeShortHand,
+  assetHolder: string
+) {
+  const assetTransferredEvents = [];
+  Object.keys(singleAssetPayouts).forEach(destination => {
+    if (singleAssetPayouts[destination] && bigNumberify(singleAssetPayouts[destination]).gt(0)) {
+      assetTransferredEvents.push({
+        contract: assetHolder,
+        name: 'AssetTransferred',
+        values: {destination, amount: singleAssetPayouts[destination]},
+      });
+    }
+  });
+  return assetTransferredEvents;
+}
+
+export function compileEventsFromLogs(logs: any[], contractsArray: Contract[]) {
+  const events = [];
+  logs.forEach(log => {
+    contractsArray.forEach(contract => {
+      if (log.address === contract.address) {
+        events.push({...contract.interface.parseLog(log), contract: log.address});
+      }
+    });
+  });
+  return events;
 }

@@ -70,15 +70,15 @@ const reverts3 = 'It reverts when the outcome is already finalized';
 
 const threeStates = {
   whoSignedWhat: [0, 1, 2],
-  appData: [0, 1, 2],
+  appData: [HashZero, HashZero, HashZero],
 };
 const oneState = {
   whoSignedWhat: [0, 0, 0],
-  appData: [0],
+  appData: [HashZero],
 };
 const unsupported = {
   whoSignedWhat: [0, 0, 0],
-  appData: [0, 1, 2],
+  appData: [HashZero, HashZero, HashZero],
 };
 const turnNumRecord = 5;
 const channelOpen = clearedChallengeHash(turnNumRecord);
@@ -116,7 +116,8 @@ describe('conclude', () => {
           channel,
           outcome,
           appDefinition,
-          appData,
+          appData: appData[i - 1], // because isFinal = true...
+          // ... this field is irrelevant as long as the signatures are correct
           challengeDuration,
           turnNum: largestTurnNum + i - numStates,
         });

@@ -16,8 +16,8 @@ const rpcEndpoint = neworkIdToRpcEndpoint(process.env.CHAIN_NETWORK_ID);
 const provider = new providers.JsonRpcProvider(rpcEndpoint);
 const walletWithProvider = new ethers.Wallet(HUB_SIGNER_PRIVATE_KEY, provider);
 
-export async function nitroAdjudicator() {
-  return setupContract(contracts.nitroAdjudicatorArtifact);
+export async function ethAssetHolder() {
+  return setupContract(contracts.ethAssetHolderArtifact);
 }
 
 async function setupContract(artifact: any) {
