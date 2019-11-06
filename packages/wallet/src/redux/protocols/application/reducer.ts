@@ -8,7 +8,6 @@ import {checkAndInitialize, signAndInitialize, signAndStore, checkAndStore} from
 import {ProtocolAction} from "../../actions";
 import * as dispute from "../dispute";
 import {disputeReducer} from "../dispute/reducer";
-import {convertStateToCommitment} from "../../../utils/nitro-converter";
 import {joinSignature} from "ethers/utils";
 import {State, SignedState} from "@statechannels/nitro-protocol";
 
@@ -125,13 +124,7 @@ function challengeDetectedReducer(
   action: actions.ChallengeDetected
 ): ProtocolStateWithSharedData<states.ApplicationState> {
   const {channelId, processId, expiresAt: expiryTime, state} = action;
-  const disputeState = dispute.initializeResponder(
-    processId,
-    channelId,
-    expiryTime,
-    sharedData,
-    convertStateToCommitment(state)
-  );
+  const disputeState = dispute.initializeResponder(processId, channelId, expiryTime, sharedData, state);
   const newProtocolState = states.waitForDispute({
     ...protocolState,
     disputeState: disputeState.protocolState

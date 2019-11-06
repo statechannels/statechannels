@@ -1,20 +1,20 @@
 import {fundingSuccess} from "../../magmo-wallet-client";
 
 import {accumulateSideEffects} from "../outbox";
-import {SharedData, queueMessage, getExistingChannel, checkAndStoreComm, checkAndStore} from "../state";
+import {SharedData, queueMessage, getExistingChannel, checkAndStore} from "../state";
 import * as selectors from "../selectors";
 import {TwoPartyPlayerIndex, ThreePartyPlayerIndex} from "../types";
 import {CommitmentType} from "fmg-core/lib/commitment";
 import * as magmoWalletClient from "../../magmo-wallet-client";
-import {getLastCommitment, nextParticipant, Commitments, getLastState} from "../channel-store";
+import {getLastCommitment, nextParticipant, getLastState} from "../channel-store";
 import {Commitment} from "../../domain";
 import {sendCommitmentsReceived, ProtocolLocator} from "../../communication";
 import * as comms from "../../communication";
 import {ourTurn as ourTurnOnChannel} from "../channel-store";
 import _ from "lodash";
 import {bigNumberify} from "ethers/utils";
-import {convertStateToSignedCommitment} from "../../utils/nitro-converter";
-import {SignedState} from "@statechannels/nitro-protocol";
+import {convertStateToSignedCommitment, convertStateToCommitment} from "../../utils/nitro-converter";
+import {SignedState, State} from "@statechannels/nitro-protocol";
 import {getAllocationOutcome} from "../../utils/outcome-utils";
 
 export function sendFundingComplete(sharedData: SharedData, appChannelId: string) {
@@ -101,24 +101,6 @@ export function sendCommitments(
   return queueMessage(sharedData, messageRelay);
 }
 
-export function checkCommitments(sharedData: SharedData, turnNum: number, commitments: Commitments): SharedData {
-  // We don't bother checking "stale" commitments -- those whose turnNum does not
-  // exceed the current turnNum.
-
-  commitments
-    .filter(signedCommitment => signedCommitment.commitment.turnNum > turnNum)
-    .map(signedCommitment => {
-      const result = checkAndStoreComm(sharedData, signedCommitment);
-      if (result.isSuccess) {
-        sharedData = result.store;
-      } else {
-        throw new Error("Unable to validate commitment");
-      }
-    });
-
-  return sharedData;
-}
-
 export function checkStates(sharedData: SharedData, turnNum: number, states: SignedState[]): SharedData {
   // We don't bother checking "stale" states -- those whose turnNum does not
   // exceed the current turnNum.
@@ -145,10 +127,10 @@ export function sendChallengeResponseRequested(sharedData: SharedData, channelId
   return newSharedData;
 }
 
-export function sendChallengeCommitmentReceived(sharedData: SharedData, commitment: Commitment) {
+export function sendChallengeStateReceived(sharedData: SharedData, state: State) {
   const newSharedData = {...sharedData};
   newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
-    messageOutbox: magmoWalletClient.challengeCommitmentReceived(commitment)
+    messageOutbox: magmoWalletClient.challengeCommitmentReceived(convertStateToCommitment(state))
   });
   return newSharedData;
 }

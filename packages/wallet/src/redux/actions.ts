@@ -11,14 +11,13 @@ import {TransactionAction as TA, isTransactionAction as isTA} from "./protocols/
 import {ConcludingAction, isConcludingAction} from "./protocols/concluding";
 import {ApplicationAction} from "./protocols/application/actions";
 import {ActionConstructor} from "./utils";
-import {Commitment} from "../domain";
 import {isDefundingAction, DefundingAction} from "./protocols/defunding/actions";
 import {AdvanceChannelAction} from "./protocols/advance-channel/actions";
 import {FundingStrategyNegotiationAction} from "./protocols/funding-strategy-negotiation/actions";
 import {LedgerFundingAction} from "./protocols/ledger-funding";
 
 import {LOAD as LOAD_FROM_STORAGE} from "redux-storage";
-import {SignedState} from "@statechannels/nitro-protocol";
+import {SignedState, State} from "@statechannels/nitro-protocol";
 import {BigNumber} from "ethers/utils";
 export * from "./protocols/transaction-submission/actions";
 
@@ -113,15 +112,14 @@ export interface RefutedEvent {
   processId: string;
   protocolLocator: ProtocolLocator;
   channelId: string;
-  refuteCommitment: Commitment;
+  refuteState: State;
 }
 
 export interface RespondWithMoveEvent {
   processId: string;
   protocolLocator: ProtocolLocator;
   channelId: string;
-  responseCommitment: Commitment;
-  responseSignature: string;
+  signedResponseState: SignedState;
   type: "WALLET.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT";
 }
 

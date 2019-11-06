@@ -10,7 +10,6 @@ import {isTransactionAction} from "../transaction-submission/actions";
 import {isTerminal, TransactionSubmissionState, isSuccess} from "../transaction-submission/states";
 import {unreachable} from "../../../utils/reducer-utils";
 import {SharedData} from "../../state";
-import {convertStateToSignedCommitment} from "../../../utils/nitro-converter";
 
 export const initialize = (
   withdrawalAmount: string,
@@ -159,13 +158,10 @@ const createConcludeAndWithTransaction = (
     withdrawalAddress,
     privateKey
   );
-  const fromSignedCommitment = convertStateToSignedCommitment(penultimateState.state, privateKey);
-  const toSignedCommitment = convertStateToSignedCommitment(lastState.state, privateKey);
+
   const args: ConcludeAndWithdrawArgs = {
-    fromCommitment: fromSignedCommitment.commitment,
-    fromSignature: fromSignedCommitment.signature,
-    toCommitment: toSignedCommitment.commitment,
-    toSignature: toSignedCommitment.signature,
+    fromSignedState: penultimateState,
+    toSignedState: lastState,
     participant,
     amount: withdrawalAmount,
     destination: withdrawalAddress,

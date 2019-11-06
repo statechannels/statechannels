@@ -13,7 +13,7 @@ import {
   successClosed
 } from "./states";
 import {unreachable} from "../../../../utils/reducer-utils";
-import {SharedData, registerChannelToMonitor, checkAndStoreComm, getPrivatekey} from "../../../state";
+import {SharedData, registerChannelToMonitor, getPrivatekey, checkAndStore} from "../../../state";
 import * as actions from "./actions";
 import {TransactionAction} from "../../transaction-submission/actions";
 import {isTransactionAction, ProtocolAction} from "../../../actions";
@@ -25,12 +25,11 @@ import {isFullyOpen, ourTurn} from "../../../channel-store";
 import {
   showWallet,
   hideWallet,
-  sendChallengeCommitmentReceived,
+  sendChallengeStateReceived,
   sendChallengeComplete,
   sendConcludeSuccess
 } from "../../reducer-helpers";
-import {Commitment, SignedCommitment, getCommitmentChannelId} from "../../../../domain";
-import {convertCommitmentToSignedState, convertStateToSignedCommitment} from "../../../../utils/nitro-converter";
+import {SignedState} from "@statechannels/nitro-protocol";
 
 const CHALLENGE_TIMEOUT = 5 * 60000;
 
@@ -58,7 +57,7 @@ export function challengerReducer(state: NonTerminalCState, sharedData: SharedDa
     case "WALLET.DISPUTE.CHALLENGER.CHALLENGE_DENIED":
       return challengeDenied(state, sharedData);
     case "WALLET.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT":
-      return challengeResponseReceived(state, sharedData, action.responseCommitment, action.responseSignature);
+      return challengeResponseReceived(state, sharedData, action.signedResponseState);
     case "WALLET.ADJUDICATOR.REFUTED_EVENT":
       return refuteReceived(state, sharedData);
     case "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED":
@@ -169,17 +168,15 @@ function challengeApproved(state: NonTerminalCState, sharedData: SharedData): Re
   }
 
   if (ourTurn(channelState)) {
-    // if it's our turn now, a commitment must have arrived while we were approving
+    // if it's our turn now, a state must have arrived while we were approving
     return {state: acknowledgeFailure(state, "LatestWhileApproving"), sharedData};
   }
 
   // else if we don't have the last two states
   // make challenge transaction
-  const [penultimateState, lastState] = channelState.signedStates.map(ss => ss.state);
+  const [penultimateState, lastState] = channelState.signedStates;
   const privateKey = getPrivatekey(sharedData, state.channelId);
-  const lastCommitment = convertStateToSignedCommitment(lastState, privateKey);
-  const penultimateCommitment = convertStateToSignedCommitment(penultimateState, privateKey);
-  const transactionRequest = createForceMoveTransaction(penultimateCommitment, lastCommitment, privateKey);
+  const transactionRequest = createForceMoveTransaction(penultimateState, lastState, privateKey);
   // initialize transaction state machine
   const returnVal = initializeTransaction(transactionRequest, state.processId, state.channelId, sharedData);
   const transactionSubmission = returnVal.state;
@@ -210,23 +207,16 @@ function refuteReceived(state: NonTerminalCState, sharedData: SharedData): Retur
 function challengeResponseReceived(
   state: NonTerminalCState,
   sharedData: SharedData,
-  challengeCommitment: Commitment,
-  challengeSignature: string
+  signedChallengeState: SignedState
 ): ReturnVal {
   if (state.type !== "Challenging.WaitForResponseOrTimeout") {
     return {state, sharedData};
   }
 
   state = acknowledgeResponse(state);
-  sharedData = sendChallengeCommitmentReceived(sharedData, challengeCommitment);
-  const channelId = getCommitmentChannelId(challengeCommitment);
-  const privateKey = getPrivatekey(sharedData, channelId);
-  const signedCommitment: SignedCommitment = {
-    commitment: challengeCommitment,
-    signature: challengeSignature,
-    signedState: convertCommitmentToSignedState(challengeCommitment, privateKey)
-  };
-  const checkResult = checkAndStoreComm(sharedData, signedCommitment);
+  sharedData = sendChallengeStateReceived(sharedData, signedChallengeState.state);
+
+  const checkResult = checkAndStore(sharedData, signedChallengeState);
   if (checkResult.isSuccess) {
     return {state, sharedData: checkResult.store};
   }

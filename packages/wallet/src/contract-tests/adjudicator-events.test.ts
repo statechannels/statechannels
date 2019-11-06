@@ -23,12 +23,12 @@ describe("adjudicator listener", () => {
     // This is a work around for https://github.com/ethers-io/ethers.js/issues/393
     // We manually create a transaction to force a block to be mined in ganache so that events get properly caught
     // otherwise the first event is always missed since ethers won't listen for events until a block has been mined
-    const channelId = await getChannelId(provider, getNextNonce(), participantA, participantB);
+    const channelId = await getChannelId(getNextNonce(), participantA, participantB);
     await depositContract(provider, channelId);
   });
 
   it("should not handle an event when no process has registered", async () => {
-    const channelId = await getChannelId(provider, getNextNonce(), participantA, participantB);
+    const channelId = await getChannelId(getNextNonce(), participantA, participantB);
     const initialState = walletStates.initialized({
       ...walletStates.EMPTY_SHARED_DATA,
       uid: "",
@@ -46,8 +46,8 @@ describe("adjudicator listener", () => {
   });
 
   it("should ignore events for other channels", async () => {
-    const channelId = await getChannelId(provider, getNextNonce(), participantA, participantB);
-    const channelIdToIgnore = await getChannelId(provider, getNextNonce(), participantA, participantB);
+    const channelId = await getChannelId(getNextNonce(), participantA, participantB);
+    const channelIdToIgnore = await getChannelId(getNextNonce(), participantA, participantB);
     const processId = Wallet.createRandom().address;
     const sagaTester = new SagaTester({initialState: createWatcherState(processId, channelId)});
 
@@ -97,7 +97,7 @@ describe("adjudicator listener", () => {
 
     const action: actions.ChallengeClearedEvent = sagaTester.getLatestCalledAction();
     expect(action.channelId).toEqual(channelId);
-    expect(action.newTurnNumRecord).toEqual(response.toCommitment.turnNum);
+    expect(action.newTurnNumRecord).toEqual(response.state.turnNum);
   });
 
   it("should handle a concluded event when registered for that channel", async () => {

@@ -1,7 +1,7 @@
 import {NonTerminalTransactionSubmissionState as NonTerminalTSState} from "../../transaction-submission/states";
-import {Commitment} from "../../../../domain";
 import {ProtocolState} from "../..";
 import {StateConstructor} from "../../../utils";
+import {State} from "@statechannels/nitro-protocol";
 
 // -------
 // States
@@ -16,7 +16,7 @@ export interface WaitForApproval {
   type: "Responding.WaitForApproval";
   processId: string;
   channelId: string;
-  challengeCommitment: Commitment;
+  challengeState: State;
   expiryTime: number;
 }
 

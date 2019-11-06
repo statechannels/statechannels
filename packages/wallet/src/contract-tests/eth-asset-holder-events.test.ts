@@ -12,7 +12,6 @@ import {ETHAssetHolderWatcher} from "../redux/sagas/eth-asset-holder-watcher";
 import {depositContract, createWatcherState, concludeGame, fiveFive} from "./test-utils";
 import {getGanacheProvider} from "@statechannels/devtools";
 import {bigNumberify} from "ethers/utils";
-import {convertAllocationToOutcome} from "../utils/nitro-converter";
 import {HashZero, AddressZero} from "ethers/constants";
 import {
   getAdjudicatorInterface,
@@ -21,7 +20,8 @@ import {
   getETHAssetHolderAddress
 } from "../utils/contract-utils";
 import {JsonRpcProvider} from "ethers/providers";
-import {convertAddressToBytes32} from "../utils/data-type-utils";
+import {convertBalanceToOutcome} from "../domain/commitments/__tests__";
+import {getAllocationOutcome} from "../utils/outcome-utils";
 jest.setTimeout(60000);
 
 describe("ETHAssetHolder listener", () => {
@@ -82,10 +82,7 @@ describe("ETHAssetHolder listener", () => {
     // construction referred to above. This will also be refactored as part of the
     // TODO above.
 
-    const outcome = convertAllocationToOutcome({
-      allocation: fiveFive,
-      destination: [participantA.address, participantB.address]
-    });
+    const outcome = convertBalanceToOutcome(fiveFive(participantA.address, participantB.address));
 
     // For transferring assets, the channel needs to be finalized and the channel
     // storage hash is compared with the `transferAll` arguments. The channel
@@ -98,17 +95,7 @@ describe("ETHAssetHolder listener", () => {
 
     await pushOutcome(channelId, turnNumRecord, finalizesAt, stateHash, challengerAddress, outcomeBytes, provider);
 
-    const allocation = [
-      {
-        destination: convertAddressToBytes32(participantA.address),
-        amount: fiveFive[0]
-      },
-      {
-        destination: convertAddressToBytes32(participantB.address),
-        amount: fiveFive[1]
-      }
-    ];
-
+    const allocation = getAllocationOutcome(outcome).allocation;
     const processId = ethers.Wallet.createRandom().address;
     const sagaTester = new SagaTester({initialState: createWatcherState(processId, channelId)});
     sagaTester.start(ETHAssetHolderWatcher, provider);
