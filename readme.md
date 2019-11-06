@@ -29,7 +29,7 @@ You can learn more about what state channels are by reading [one](https://l4.ven
   - [Clean](#clean)
   - [Lint](#lint)
   - [Tests](#tests)
-  - [Patches](#patches)
+- [Community](#community)
 
 ## Packages
 
@@ -101,8 +101,6 @@ To run all tests:
 yarn test
 ```
 
-### Patches
+## Community
 
-We generate patches using the [`patch-package`](https://github.com/ds300/patch-package) tool with a workaround described in [this issue](https://github.com/ds300/patch-package/issues/42#issuecomment-435992316) for `yarn` workspaces.
-
-[statechannels-discord-url]: https://statechannels.com/chat
+State Channels Forums: https://research.statechannels.org/
