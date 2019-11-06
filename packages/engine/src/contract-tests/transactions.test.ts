@@ -23,7 +23,7 @@ import {ADJUDICATOR_ADDRESS, ETH_ASSET_HOLDER_ADDRESS, NETWORK_ID, CHALLENGE_DUR
 import {State, Channel, getChannelId} from "@statechannels/nitro-protocol";
 import {bigNumberify} from "ethers/utils";
 import {convertBalanceToOutcome} from "../redux/__tests__/state-helpers";
-import {signState} from "@statechannels/nitro-protocol/lib/src/signatures";
+import {Signatures} from "@statechannels/nitro-protocol";
 
 jest.setTimeout(90000);
 
@@ -127,8 +127,8 @@ describe("transactions", () => {
     };
 
     const forceMoveTransaction = createForceMoveTransaction(
-      signState(fromState, participantA.privateKey),
-      signState(toState, participantB.privateKey),
+      Signatures.signState(fromState, participantA.privateKey),
+      Signatures.signState(toState, participantB.privateKey),
       participantB.privateKey
     );
 
@@ -166,7 +166,10 @@ describe("transactions", () => {
       appData: "0x00"
     };
 
-    const respondWithMoveTransaction = createRespondTransaction(fromState, signState(toState, participantA.privateKey));
+    const respondWithMoveTransaction = createRespondTransaction(
+      fromState,
+      Signatures.signState(toState, participantA.privateKey)
+    );
 
     await testTransactionSender(respondWithMoveTransaction);
   });
@@ -200,8 +203,8 @@ describe("transactions", () => {
       appData: "0x00"
     };
 
-    const fromSignedState = signState(fromState, participantA.privateKey);
-    const toSignedState = signState(toState, participantB.privateKey);
+    const fromSignedState = Signatures.signState(fromState, participantA.privateKey);
+    const toSignedState = Signatures.signState(toState, participantB.privateKey);
 
     const refuteTransaction = createRefuteTransaction([fromSignedState, toSignedState]);
 
@@ -236,8 +239,8 @@ describe("transactions", () => {
       appData: "0x00"
     };
 
-    const signedFromState = signState(fromState, participantA.privateKey);
-    const signedToState = signState(toState, participantB.privateKey);
+    const signedFromState = Signatures.signState(fromState, participantA.privateKey);
+    const signedToState = Signatures.signState(toState, participantB.privateKey);
 
     const concludeTransaction = createConcludeTransaction(signedFromState, signedToState);
     await testTransactionSender(concludeTransaction);
@@ -311,8 +314,8 @@ describe("transactions", () => {
       appData: "0x00"
     };
 
-    const fromSignedState = signState(fromState, participantA.privateKey);
-    const toSignedState = signState(toState, participantB.privateKey);
+    const fromSignedState = Signatures.signState(fromState, participantA.privateKey);
+    const toSignedState = Signatures.signState(toState, participantB.privateKey);
 
     const args: ConcludeAndWithdrawArgs = {
       fromSignedState,

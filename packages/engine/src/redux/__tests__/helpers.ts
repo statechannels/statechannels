@@ -3,7 +3,7 @@ import {StateWithSideEffects} from "../utils";
 import {QueuedTransaction, OutboxState, MessageOutbox} from "../outbox/state";
 import {SharedData} from "../state";
 import {ProtocolStateWithSharedData} from "../protocols";
-import {ProtocolLocator, RelayableAction} from "src/communication";
+import {ProtocolLocator, RelayableAction} from "../../communication";
 import _ from "lodash";
 import {State, SignedState, getChannelId} from "@statechannels/nitro-protocol";
 import {Signature} from "ethers/utils";
