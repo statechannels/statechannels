@@ -1,26 +1,26 @@
 import {ethers} from "ethers";
-import {CommitmentType, Commitment, signCommitment2} from "../domain";
 import {
   createDepositTransaction,
   createForceMoveTransaction,
   createConcludeTransaction,
   createRespondTransaction
 } from "../utils/transaction-generator";
-import {signCommitment} from "../domain";
 import * as engineStates from "../redux/state";
 
 import {bigNumberify} from "ethers/utils";
-import {channelID, Channel} from "fmg-core/lib/channel";
-import {ADJUDICATOR_ADDRESS, ETH_ASSET_HOLDER_ADDRESS} from "../constants";
-import {ADDRESS_ZERO} from "fmg-core";
+import {ADJUDICATOR_ADDRESS, ETH_ASSET_HOLDER_ADDRESS, NETWORK_ID, CHALLENGE_DURATION} from "../constants";
 import {JsonRpcProvider, TransactionRequest, TransactionResponse} from "ethers/providers";
 import {getLibraryAddress} from "../utils/contract-utils";
-import {convertCommitmentToState, convertCommitmentToSignedState} from "../utils/nitro-converter";
+import {convertBalanceToOutcome} from "../domain/commitments/__tests__";
+import {State, getChannelId as getNitroChannelId, Channel} from "@statechannels/nitro-protocol";
+import {signState} from "@statechannels/nitro-protocol/lib/src/signatures";
 
-export const fiveFive = [bigNumberify(5).toHexString(), bigNumberify(5).toHexString()] as [string, string];
-export const fourSix = [bigNumberify(4).toHexString(), bigNumberify(6).toHexString()] as [string, string];
+export const fiveFive = (asAddress, bsAddress) => [
+  {address: asAddress, wei: bigNumberify(5).toHexString()},
+  {address: bsAddress, wei: bigNumberify(5).toHexString()}
+];
 
-export const defaultDepositAmount = fiveFive[0];
+export const defaultDepositAmount = bigNumberify(5).toHexString();
 
 export const createWatcherState = (processId: string, ...channelIds: string[]): engineStates.Initialized => {
   const channelSubscriptions: engineStates.ChannelSubscriptions = {};
@@ -39,13 +39,10 @@ export const createWatcherState = (processId: string, ...channelIds: string[]): 
   });
 };
 
-export async function getChannelId(provider, channelNonce, participantA, participantB) {
-  const network = await provider.getNetwork();
-  const networkId = network.chainId;
-  const libraryAddress = await getLibraryAddress(networkId, "TrivialApp");
-  return channelID({
-    channelType: libraryAddress,
-    nonce: channelNonce,
+export async function getChannelId(channelNonce, participantA, participantB) {
+  return getNitroChannelId({
+    channelNonce,
+    chainId: bigNumberify(NETWORK_ID).toHexString(),
     participants: [participantA.address, participantB.address]
   });
 }
@@ -75,40 +72,40 @@ export async function createChallenge(
   const libraryAddress = await getLibraryAddress(networkId, "TrivialApp");
 
   const channel: Channel = {
-    channelType: libraryAddress,
-    nonce: channelNonce,
+    channelNonce,
+    chainId: bigNumberify(NETWORK_ID).toHexString(),
     participants: [participantA.address, participantB.address]
   };
 
-  const fromCommitment: Commitment = {
+  const fromState: State = {
     channel,
-    allocation: fiveFive,
-    destination: [participantA.address, participantB.address],
+    appDefinition: libraryAddress,
     turnNum: 6,
-    commitmentType: CommitmentType.App,
-    appAttributes: "0x00",
-    commitmentCount: 0
+    outcome: convertBalanceToOutcome(fiveFive(participantA.address, participantB.address)),
+    isFinal: false,
+    challengeDuration: CHALLENGE_DURATION,
+    appData: "0x00"
   };
 
-  const toCommitment: Commitment = {
+  const toState: State = {
     channel,
-    allocation: fiveFive,
-    destination: [participantA.address, participantB.address],
+    appDefinition: libraryAddress,
     turnNum: 7,
-    commitmentType: CommitmentType.App,
-    appAttributes: "0x00",
-    commitmentCount: 1
+    outcome: convertBalanceToOutcome(fiveFive(participantA.address, participantB.address)),
+    isFinal: false,
+    challengeDuration: CHALLENGE_DURATION,
+    appData: "0x00"
   };
 
   const challengeTransaction = createForceMoveTransaction(
-    convertCommitmentToSignedState(fromCommitment, participantA.privateKey),
-    convertCommitmentToSignedState(toCommitment, participantB.privateKey),
+    signState(fromState, participantA.privateKey),
+    signState(toState, participantB.privateKey),
     participantB.privateKey
   );
 
   const transactionReceipt = await sendTransaction(provider, challengeTransaction);
   await transactionReceipt.wait();
-  return toCommitment;
+  return toState;
 }
 
 export async function concludeGame(
@@ -121,36 +118,35 @@ export async function concludeGame(
   const networkId = network.chainId;
   const libraryAddress = await getLibraryAddress(networkId, "TrivialApp");
   const channel: Channel = {
-    channelType: libraryAddress,
-    nonce: channelNonce,
-    participants: [participantA.address, participantB.address],
-    guaranteedChannel: ADDRESS_ZERO
+    channelNonce,
+    chainId: bigNumberify(NETWORK_ID).toHexString(),
+    participants: [participantA.address, participantB.address]
   };
 
-  const fromCommitment: Commitment = {
+  const fromState: State = {
     channel,
-    allocation: fiveFive,
-    destination: [participantA.address, participantB.address],
+    appDefinition: libraryAddress,
     turnNum: 6,
-    commitmentType: CommitmentType.Conclude,
-    appAttributes: "0x0",
-    commitmentCount: 0
+    outcome: convertBalanceToOutcome(fiveFive(participantA.address, participantB.address)),
+    isFinal: true,
+    challengeDuration: CHALLENGE_DURATION,
+    appData: "0x00"
   };
 
-  const toCommitment: Commitment = {
+  const toState: State = {
     channel,
-    allocation: fiveFive,
-    destination: [participantA.address, participantB.address],
+    appDefinition: libraryAddress,
     turnNum: 7,
-    commitmentType: CommitmentType.Conclude,
-    appAttributes: "0x0",
-    commitmentCount: 1
+    outcome: convertBalanceToOutcome(fiveFive(participantA.address, participantB.address)),
+    isFinal: true,
+    challengeDuration: CHALLENGE_DURATION,
+    appData: "0x00"
   };
 
-  const signedFromCommitment = signCommitment2(fromCommitment, participantA.privateKey);
-  const signedToCommitment = signCommitment2(toCommitment, participantB.privateKey);
+  const signedFromState = signState(fromState, participantA.privateKey);
+  const signedToState = signState(toState, participantB.privateKey);
 
-  const concludeTransaction = createConcludeTransaction(signedFromCommitment, signedToCommitment);
+  const concludeTransaction = createConcludeTransaction(signedFromState, signedToState);
   const transactionReceipt = await sendTransaction(provider, concludeTransaction);
   await transactionReceipt.wait();
 }
@@ -160,39 +156,34 @@ export async function respond(
   channelNonce,
   participantA,
   participantB,
-  challenge: Commitment
+  challenge: State
 ) {
   const network = await provider.getNetwork();
   const networkId = network.chainId;
   const libraryAddress = await getLibraryAddress(networkId, "TrivialApp");
   const channel: Channel = {
-    channelType: libraryAddress,
-    nonce: channelNonce,
-    participants: [participantA.address, participantB.address],
-    guaranteedChannel: ADDRESS_ZERO
+    channelNonce,
+    chainId: bigNumberify(NETWORK_ID).toHexString(),
+    participants: [participantA.address, participantB.address]
   };
 
-  // TODO: refactor to DRY challenge handling
-  const toCommitment: Commitment = {
+  const toState: State = {
     channel,
-    allocation: fiveFive,
-    destination: [participantA.address, participantB.address],
+    appDefinition: libraryAddress,
     turnNum: 8,
-    commitmentType: CommitmentType.App,
-    appAttributes: "0x00",
-    commitmentCount: 2
+    outcome: convertBalanceToOutcome(fiveFive(participantA.address, participantB.address)),
+    isFinal: false,
+    challengeDuration: CHALLENGE_DURATION,
+    appData: "0x00"
   };
 
-  const toSig = signCommitment(toCommitment, participantB.privateKey);
+  const toSignedState = signState(toState, participantA.privateKey);
 
-  const respondWithMoveTransaction = createRespondTransaction(
-    convertCommitmentToState(challenge),
-    convertCommitmentToSignedState(toCommitment, participantA.privateKey)
-  );
+  const respondWithMoveTransaction = createRespondTransaction(challenge, toSignedState);
 
   const transactionReceipt = await sendTransaction(provider, respondWithMoveTransaction);
   await transactionReceipt.wait();
-  return {toCommitment, toSig};
+  return toSignedState;
 }
 
 async function sendTransaction(provider: JsonRpcProvider, tx: TransactionRequest): Promise<TransactionResponse> {
