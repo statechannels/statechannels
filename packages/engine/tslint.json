@@ -1,15 +1,16 @@
 {
-  "extends": "../../tslint.json",
-  "rules": {
-    "ordered-imports": false
-  },
-  "linterOptions": {
-    "exclude": [
-      "src/utils/contract-utils.ts",
-      "src/utils/nitro-converter.ts",
-      "src/contract-tests/transactions.test.ts",
-      "src/contract-tests/test-utils.ts",
-      "**/*.json"
-    ]
-  }
+	"extends": "../../tslint.json",
+	"rules": {
+		"ordered-imports": false,
+		"no-implicit-dependencies": [true, "dev"]
+	},
+	"linterOptions": {
+		"exclude": [
+			"src/utils/contract-utils.ts",
+			"src/utils/nitro-converter.ts",
+			"src/contract-tests/transactions.test.ts",
+			"src/contract-tests/test-utils.ts",
+			"**/*.json"
+		]
+	}
 }
