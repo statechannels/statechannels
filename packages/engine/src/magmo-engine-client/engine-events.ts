@@ -1,4 +1,4 @@
-import {Commitment} from "fmg-core";
+import {State} from "@statechannels/nitro-protocol";
 
 // TODO: We should limit EngineEvent/EngineEventTypes to the bare minimum of events we expect the app to handle. Some of these can be pruned.
 // Events that we handle for the user (HideEngine,ShowEngine, ValidateSuccess, etc..) should be removed from EngineEvent/EngineEventTypes
@@ -19,10 +19,10 @@ export const FUNDING_FAILURE = "ENGINE.FUNDING.FAILURE";
 /**
  * @ignore
  */
-export const fundingSuccess = (channelId, commitment: Commitment) => ({
+export const fundingSuccess = (channelId, state: State) => ({
   type: FUNDING_SUCCESS as typeof FUNDING_SUCCESS,
   channelId,
-  commitment
+  state
 });
 
 /**
@@ -260,18 +260,18 @@ export type MessageRelayRequested = ReturnType<typeof messageRelayRequested>;
 /**
  * The type for events where a challenge position is received from the engine.
  */
-export const CHALLENGE_COMMITMENT_RECEIVED = "ENGINE.MESSAGING.CHALLENGE_COMMITMENT_RECEIVED";
+export const CHALLENGE_STATE_RECEIVED = "ENGINE.MESSAGING.CHALLENGE_STATE_RECEIVED";
 /**
  * @ignore
  */
-export const challengeCommitmentReceived = (commitment: Commitment) => ({
-  type: CHALLENGE_COMMITMENT_RECEIVED as typeof CHALLENGE_COMMITMENT_RECEIVED,
-  commitment
+export const challengeStateReceived = (state: State) => ({
+  type: CHALLENGE_STATE_RECEIVED as typeof CHALLENGE_STATE_RECEIVED,
+  state
 });
 /**
  * The event emitted when the engine has received a challenge position.
  */
-export type ChallengeCommitmentReceived = ReturnType<typeof challengeCommitmentReceived>;
+export type ChallengeStateReceived = ReturnType<typeof challengeStateReceived>;
 
 /**
  * The event type when a user rejects a challenge.
@@ -322,7 +322,7 @@ export type ChallengeComplete = ReturnType<typeof challengeComplete>;
  * The various types of engine events that can occur.
  */
 export type EngineEventType =
-  | typeof CHALLENGE_COMMITMENT_RECEIVED
+  | typeof CHALLENGE_STATE_RECEIVED
   | typeof CHALLENGE_COMPLETE
   | typeof CHALLENGE_REJECTED
   | typeof CHALLENGE_RESPONSE_REQUESTED
@@ -346,7 +346,7 @@ export type DisplayAction = ShowEngine | HideEngine;
 
 // TODO: This could live exclusively in the engine
 export type EngineEvent =
-  | ChallengeCommitmentReceived
+  | ChallengeStateReceived
   | ChallengeComplete
   | ChallengeRejected
   | ChallengeResponseRequested

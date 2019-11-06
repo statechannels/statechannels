@@ -1,4 +1,5 @@
-import {Commitment} from "fmg-core";
+import {State} from "@statechannels/nitro-protocol";
+import {Signature} from "ethers/utils";
 
 export enum PlayerIndex {
   "A" = 0,
@@ -40,32 +41,32 @@ export type FundingRequest = ReturnType<typeof fundingRequest>;
 // ==========
 
 // Called when a signed position is received from an opponent.
-export const VALIDATE_COMMITMENT_REQUEST = "ENGINE.VALIDATION.REQUEST";
-export const validateCommitmentRequest = (commitment: Commitment, signature: string) => ({
-  type: VALIDATE_COMMITMENT_REQUEST as typeof VALIDATE_COMMITMENT_REQUEST,
-  commitment,
+export const VALIDATE_STATE_REQUEST = "ENGINE.VALIDATION.REQUEST";
+export const validateStateRequest = (state: State, signature: Signature) => ({
+  type: VALIDATE_STATE_REQUEST as typeof VALIDATE_STATE_REQUEST,
+  state,
   signature
 });
-export type ValidateCommitmentRequest = ReturnType<typeof validateCommitmentRequest>;
+export type ValidateStateRequest = ReturnType<typeof validateStateRequest>;
 
 // SIGNATURE
 // =========
 
 // Called to obtain a signature on a state before sending to an opponent.
-export const SIGN_COMMITMENT_REQUEST = "ENGINE.SIGNATURE.REQUEST";
-export const signCommitmentRequest = (commitment: any) => ({
-  type: SIGN_COMMITMENT_REQUEST as typeof SIGN_COMMITMENT_REQUEST,
-  commitment
+export const SIGN_STATE_REQUEST = "ENGINE.SIGNATURE.REQUEST";
+export const signStateRequest = (state: any) => ({
+  type: SIGN_STATE_REQUEST as typeof SIGN_STATE_REQUEST,
+  state
 });
-export type SignCommitmentRequest = ReturnType<typeof signCommitmentRequest>;
+export type SignStateRequest = ReturnType<typeof signStateRequest>;
 
 // WITHDRAWAL
 // ==========
 
 export const WITHDRAWAL_REQUEST = "ENGINE.WITHDRAWAL.REQUEST";
-export const withdrawalRequest = (commitment: Commitment) => ({
+export const withdrawalRequest = (state: State) => ({
   type: WITHDRAWAL_REQUEST as typeof WITHDRAWAL_REQUEST,
-  commitment
+  state
 });
 export type WithdrawalRequest = ReturnType<typeof withdrawalRequest>;
 
@@ -80,8 +81,8 @@ export const createChallenge = (channelId: string) => ({
 export type CreateChallengeRequest = ReturnType<typeof createChallenge>;
 
 export const RESPOND_TO_CHALLENGE = "ENGINE.RESPOND_TO_CHALLENGE";
-export const respondToChallenge = (commitment: Commitment) => ({
-  commitment,
+export const respondToChallenge = (state: State) => ({
+  state,
   type: RESPOND_TO_CHALLENGE as typeof RESPOND_TO_CHALLENGE
 });
 export type RespondToChallenge = ReturnType<typeof respondToChallenge>;
@@ -112,7 +113,7 @@ export type ReceiveMessage = ReturnType<typeof receiveMessage>;
 export type RequestAction =
   | ConcludeChannelRequest
   | FundingRequest
-  | SignCommitmentRequest
-  | ValidateCommitmentRequest
+  | SignStateRequest
+  | ValidateStateRequest
   | WithdrawalRequest
   | CreateChallengeRequest;
