@@ -1,3 +1,14 @@
+const UserFriendlyErrors = {
+  '-32100': 'You need to approve a budget allocation in order to proceed with the download'
+};
+
+export const getUserFriendlyError = (code: number) => {
+  if (UserFriendlyErrors[code]) {
+    return UserFriendlyErrors[code];
+  }
+  return `Unhandled Error - Code ${code}`;
+};
+
 export const connectToWallet = async () => {
   const wallet = window.channelProvider;
 

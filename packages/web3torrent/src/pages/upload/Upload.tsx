@@ -16,20 +16,27 @@ const Upload: React.FC<RouteComponentProps> = ({history}) => {
           type="file"
           name="file"
           id="file"
+          multiple={true}
           className="inputfile"
           onChange={async event => {
             if (event.target.files && event.target.files[0]) {
-              const file = event.target.files[0];
-              const seedingTorrent = await upload(file);
-              history.push(generateMagnetURL(seedingTorrent));
+              history.push(generateMagnetURL(await upload(event.target.files)));
             }
           }}
         ></input>
       </div>
       <div className="subtitle">
         <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
-          ut labore et dolore magna aliqua.
+          <strong>What kind of files can I share?</strong>
+          <br />
+          Any kind! Just make sure you're not sharing copyrighted material, or if you do, that
+          you're legally allowed to do so.
+        </p>
+        <p>
+          <strong>How do others download my file?</strong>
+          <br />
+          Use the "Share Link" button or copy this browser tab's URL, and send that address to
+          whomever you want to share the file with.
         </p>
       </div>
     </section>

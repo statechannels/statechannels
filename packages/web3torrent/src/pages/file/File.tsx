@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {RouteComponentProps, useLocation} from 'react-router-dom';
-import {askForFunds} from '../../clients/embedded-wallet-client';
+import {askForFunds, getUserFriendlyError} from '../../clients/embedded-wallet-client';
 import {download, getTorrentPeers} from '../../clients/web3torrent-client';
 import {FormButton} from '../../components/form';
 import {TorrentInfo} from '../../components/torrent-info/TorrentInfo';
@@ -26,6 +26,7 @@ const File: React.FC<RouteComponentProps> = () => {
   const [peers, setPeers] = useState({});
   const [loading, setLoading] = useState(false);
   const [buttonLabel, setButtonLabel] = useState('Start Download');
+  const [errorLabel, setErrorLabel] = useState('');
   const getLiveData = getTorrentAndPeersData(setTorrent, setPeers);
 
   useEffect(() => {
@@ -37,7 +38,7 @@ const File: React.FC<RouteComponentProps> = () => {
 
   useInterval(
     () => getLiveData(torrent),
-    (torrent.status !== Status.Idle || !!torrent.createdBy) && 1000
+    (torrent.status !== Status.Idle || !!torrent.originalSeed) && 1000
   );
 
   return (
@@ -50,19 +51,43 @@ const File: React.FC<RouteComponentProps> = () => {
             spinner={loading}
             onClick={async () => {
               setLoading(true);
+              setErrorLabel('');
               setButtonLabel('Preparing Download...');
-              await askForFunds();
-              setTorrent({...torrent, ...(await download(torrent.magnetURI))});
+              try {
+                await askForFunds();
+                setTorrent({...torrent, ...(await download(torrent.magnetURI))});
+              } catch (error) {
+                setErrorLabel(getUserFriendlyError(error.code));
+              }
               setLoading(false);
               setButtonLabel('Start Download');
             }}
           >
             {buttonLabel}
           </FormButton>
+          {errorLabel && <p className="error">{errorLabel}</p>}
           <div className="subtitle">
             <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-              incididunt ut labore et dolore magna aliqua.
+              <strong>How do I pay for the download?</strong>
+              <br />
+              When you click "Start Download", you'll be asked to allocate an amount of ETH so
+              Web3Torrent can collect payments on your behalf and transfer those funds to the
+              seeder. Unlike other systems, the payment is not upfront; instead, you pay as you
+              download.
+            </p>
+            <p>
+              <strong>Is it safe?</strong>
+              <br />
+              Web3Torrent operates with budgets; therefore, the app will <b>never</b> use any funds
+              outside whatever amount you allocate when starting the download. Also, Web3Torrent is
+              powered by{' '}
+              <a href="http://statechannels.org" target="_blank" rel="noopener noreferrer">
+                State Channels
+              </a>
+              , a technique that reduces fees for blockchain users, allowing them to transact with
+              each other on faster-than-on-chain operating times. Through
+              counterfactually-instantiated contracts, this technology enables a private, efficient
+              and secure environment for transactions.
             </p>
           </div>
         </>

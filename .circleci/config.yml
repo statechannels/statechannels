@@ -5,6 +5,11 @@ defaults: &defaults
   resource_class: large
   docker:
     - image: circleci/node:10.16.3
+    - image: circleci/postgres:12.0-alpine-postgis
+      environment:
+        POSTGRES_USER: root
+        POSTGRES_DB: server_wallet_test
+        POSTGRES_PASSWORD: ''
 
 save_code: &save_code
   save_cache:
@@ -29,7 +34,7 @@ restore_dep: &restore_dep
 
 commands:
   log_stats:
-    description: "Log stats "
+    description: 'Log stats '
     parameters:
       file:
         type: string
@@ -39,7 +44,7 @@ commands:
           command: bash bin/log_memory.sh <<parameters.file>>
           background: true
   upload_logs:
-    description: "Upload logs "
+    description: 'Upload logs '
     parameters:
       file:
         type: string

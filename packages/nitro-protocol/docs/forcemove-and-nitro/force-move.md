@@ -13,7 +13,6 @@ ForceMove is a state channel execution framework. It:
 This page documents our reference implementation in `ForceMove.sol`: please also see the [API](../natspec/ForceMove).
 
 ---
-
 ## State Format
 
 A specified format of _state_ is vital, since it constitutes much of the interface between the on- and off- chain behavior of the state channel network.
@@ -216,7 +215,6 @@ ForceMove also allows an optimization where a state can be supported by `n` sign
 In the extreme, this allows a single state signed by all `n` parties to be accepted by the chain.
 
 ### `_stateSupportedBy`
-
 ```solidity
     function _stateSupportedBy(
         uint256 largestTurnNum,
@@ -236,7 +234,6 @@ Implementation:
 - If checks pass, returns the final element in the `stateHashes` array.
 
 ### `_validSignatures`
-
 Given an array of state hashes, checks the validity of the supplied signatures.
 
 :::warning
@@ -297,7 +294,6 @@ In order for signatures to be valid, we need that:
 So the signatures are valid in this case
 
 ### `_acceptableWhoSignedWhat`
-
 ```solidity
     function _acceptableWhoSignedWhat(
         uint8[] memory whoSignedWhat,
@@ -458,7 +454,6 @@ in order to form `challengerSig`. This signals their intent to forceMove this ch
 :::
 
 ### `respond`
-
 The respond method allows anyone with the appropriate, single off-chain state (usually the current mover) to clear an existing challenge stored against a `channelId`.
 
 The off-chain state is submitted (in an optimized format), and once relevant checks have passed, the existing challenge is cleared and the `turnNumRecord` is incremented by one.
@@ -499,7 +494,6 @@ Implementation:
   - Other fields set to their null values (see [Channel Storage](./channel-storage)).
 
 ### `conclude`
-
 If a participant signs a state with `isFinal = true`, then in a cooperative channel-closing procedure the other players can countersign that state and broadcast it. Once a full set of `n` such signatures exists \(this set is known as a **finalization proof**\) anyone in possession may use it to finalize the channel on-chain. They would do this by calling `conclude` on the adjudicator.
 
 :::tip
@@ -528,7 +522,6 @@ Effects:
 - Clears `challengerAddress`
 
 ### `checkpoint`
-
 The `checkpoint` method allows anyone with a supported off-chain state to establish a new and higher `turnNumRecord` and leave the resulting channel in the "Open" mode.
 
 The off-chain state is submitted (in an optimized format), and once relevant checks have passed, the `turnNumRecord` is updated, and a challenge, if exists is cleared.

@@ -1,7 +1,6 @@
 import Enzyme, {mount} from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
-import {createMockTorrent} from '../../../utils/test-utils';
 import {MagnetLinkButton} from './MagnetLinkButton';
 
 Enzyme.configure({adapter: new Adapter()});
@@ -11,7 +10,7 @@ describe('<MagnetLinkButton />', () => {
 
   beforeAll(() => {
     document.execCommand = jest.fn(() => true);
-    component = mount(<MagnetLinkButton torrent={createMockTorrent()} />);
+    component = mount(<MagnetLinkButton />);
   });
 
   it('renders without crashing', () => {

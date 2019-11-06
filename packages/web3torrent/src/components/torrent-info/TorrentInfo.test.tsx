@@ -6,7 +6,7 @@ import {TorrentPeers} from '../../library/types';
 import {Status, Torrent} from '../../types';
 import {createMockTorrent, createMockTorrentPeers} from '../../utils/test-utils';
 import {DownloadInfo, DownloadInfoProps} from './download-info/DownloadInfo';
-import {MagnetLinkButton, MagnetLinkButtonProps} from './magnet-link-button/MagnetLinkButton';
+import {MagnetLinkButton} from './magnet-link-button/MagnetLinkButton';
 import {TorrentInfo, TorrentInfoProps} from './TorrentInfo';
 import {UploadInfo, UploadInfoProps} from './upload-info/UploadInfo';
 
@@ -21,7 +21,7 @@ type MockTorrentInfo = {
   fileSizeElement: ReactWrapper;
   fileStatusElement: ReactWrapper;
   fileCostElement: ReactWrapper;
-  magnetLinkButtonElement: ReactWrapper<MagnetLinkButtonProps>;
+  magnetLinkButtonElement: ReactWrapper<{}>;
   downloadInfoElement: ReactWrapper<DownloadInfoProps>;
   uploadInfoElement: ReactWrapper<UploadInfoProps>;
 };
@@ -75,16 +75,9 @@ describe('<TorrentInfo />', () => {
     expect(downloadInfoElement.exists()).toEqual(false);
     expect(uploadInfoElement.exists()).toEqual(false);
 
-    expect(sectionElement.hasClass('with-link')).toEqual(true);
     expect(fileNameElement.text()).toEqual(torrent.name);
     expect(fileSizeElement.text()).toEqual(prettier(torrent.length));
     expect(fileCostElement.text()).toEqual(`Cost $1.34`);
-  });
-
-  it('can hide the MagnetLinkButton and the with-link class when no magnet is provided', () => {
-    const {sectionElement, magnetLinkButtonElement} = mockTorrentInfo({magnetURI: undefined});
-    expect(sectionElement.hasClass('with-link')).toEqual(false);
-    expect(magnetLinkButtonElement.exists()).toEqual(false);
   });
 
   it('can show the `? Mb` label when the torrent size is unknown', () => {

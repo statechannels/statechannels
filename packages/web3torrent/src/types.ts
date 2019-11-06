@@ -17,6 +17,7 @@ export type Torrent = ExtendedTorrent & {
   cost?: string;
   numSeeds?: number;
   status: Status;
+  originalSeed?: boolean;
 };
 
 declare global {
