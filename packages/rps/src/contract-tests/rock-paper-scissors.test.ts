@@ -17,7 +17,7 @@ import loadJsonFile from 'load-json-file';
 
 import {defaultAbiCoder, bigNumberify, BigNumber} from 'ethers/utils';
 
-const provider = new ethers.providers.JsonRpcProvider(
+const testProvider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.GANACHE_PORT}`
 );
 
@@ -25,13 +25,13 @@ enum PositionType {
   Start,
   RoundProposed,
   RoundAccepted,
-  Reveal
+  Reveal,
 }
 
 enum Weapon {
   Rock,
   Paper,
-  Scissors
+  Scissors,
 }
 interface RPSData {
   positionType: PositionType;
@@ -41,11 +41,6 @@ interface RPSData {
   playerBWeapon: Weapon;
   salt: string; // bytes32
 }
-
-beforeAll(async () => {
-  console.log((await provider.getNetwork()).chainId);
-  RockPaperScissors = await setupContracts(provider, RockPaperScissorsArtifact);
-});
 
 // describe.skip('Rock Paper Scissors', () => {
 //   let networkId;
@@ -202,11 +197,11 @@ const numParticipants = 3;
 const addresses = {
   // participants
   A: randomExternalDestination(),
-  B: randomExternalDestination()
+  B: randomExternalDestination(),
 };
 
 beforeAll(async () => {
-  RockPaperScissors = await setupContracts(provider, RockPaperScissorsArtifact);
+  RockPaperScissors = await setupContracts(testProvider, RockPaperScissorsArtifact);
 });
 
 describe('validTransition', () => {
@@ -222,7 +217,7 @@ describe('validTransition', () => {
       AWeapon,
       BWeapon,
       fromBalances,
-      toBalances
+      toBalances,
     }: {
       isValid: boolean;
       positionType: PositionType[];
@@ -254,7 +249,7 @@ describe('validTransition', () => {
         preCommit: HashZero,
         playerAWeapon: AWeapon[0],
         playerBWeapon: BWeapon[0],
-        salt: HashZero
+        salt: HashZero,
       };
       const toAppData: RPSData = {
         positionType: positionType[1],
@@ -262,7 +257,7 @@ describe('validTransition', () => {
         preCommit: HashZero,
         playerAWeapon: AWeapon[1],
         playerBWeapon: BWeapon[1],
-        salt: HashZero
+        salt: HashZero,
       };
 
       const fromAppDataBytes = defaultAbiCoder.encode(
@@ -280,11 +275,11 @@ describe('validTransition', () => {
 
       const fromVariablePart: VariablePart = {
         outcome: encodeOutcome(fromOutcome),
-        appData: fromAppDataBytes
+        appData: fromAppDataBytes,
       };
       const toVariablePart: VariablePart = {
         outcome: encodeOutcome(toOutcome),
-        appData: toAppDataBytes
+        appData: toAppDataBytes,
       };
 
       if (isValid) {
