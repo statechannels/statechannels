@@ -5,7 +5,7 @@ import {Outcome, State, Channel, getChannelId, Signatures, SignedState} from "@s
 import {NETWORK_ID, ETH_ASSET_HOLDER_ADDRESS, CONSENSUS_LIBRARY_ADDRESS} from "../../constants";
 import {convertAddressToBytes32} from "../../utils/data-type-utils";
 import {TwoPartyPlayerIndex, ThreePartyPlayerIndex} from "../types";
-import {unreachable} from "../../..";
+import {unreachable} from "../../utils/reducer-utils";
 
 export const asPrivateKey = "0xf2f48ee19680706196e2e339e5da3491186e0c4c5030670656b0e0164837257d";
 export const asAddress = "0x5409ED021D9299bf6814279A6A1411A7e866A631";
