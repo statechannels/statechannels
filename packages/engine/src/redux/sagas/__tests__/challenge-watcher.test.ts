@@ -3,7 +3,7 @@
 // import {AdjudicatorState} from "../../adjudicator-state/state";
 // import * as actions from "../../actions";
 // import {put} from "redux-saga/effects";
-// import {channelId, appCommitment} from "../../../domain/commitments/__tests__";
+// import {channelId, appCommitment} from "../../__tests__/state-helpers";
 
 describe("challenge-watcher", () => {
   // TODO: Implment this

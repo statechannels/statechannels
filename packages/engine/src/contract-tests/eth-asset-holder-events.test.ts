@@ -20,8 +20,9 @@ import {
   getETHAssetHolderAddress
 } from "../utils/contract-utils";
 import {JsonRpcProvider} from "ethers/providers";
-import {convertBalanceToOutcome} from "../domain/commitments/__tests__";
+
 import {getAllocationOutcome} from "../utils/outcome-utils";
+import {convertBalanceToOutcome} from "../redux/__tests__/state-helpers";
 jest.setTimeout(60000);
 
 describe("ETHAssetHolder listener", () => {

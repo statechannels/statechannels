@@ -3,9 +3,9 @@ import * as actions from "../actions";
 import {TwoPartyPlayerIndex} from "../../../../types";
 
 import {EMPTY_SHARED_DATA} from "../../../../state";
-import {channelId, bsAddress, asAddress} from "../../../../../domain/commitments/__tests__";
 
 import {FundingStrategy} from "../../../../../communication";
+import {channelId, bsAddress, asAddress} from "../../../../__tests__/state-helpers";
 
 // ---------
 // Test data

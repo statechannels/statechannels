@@ -9,7 +9,7 @@ import {
   addressAndPrivateKeyLookup,
   convertBalanceToOutcome,
   ledgerState
-} from "../../../../domain/commitments/__tests__";
+} from "../../../__tests__/state-helpers";
 import {TwoPartyPlayerIndex} from "../../../types";
 import {twoPlayerPreSuccessA, twoPlayerPreSuccessB} from "../../consensus-update/__tests__";
 import {setChannels} from "../../../state";

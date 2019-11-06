@@ -3,7 +3,7 @@ import {ThreePartyPlayerIndex as PlayerIndex} from "../../../types";
 
 import {EMPTY_SHARED_DATA, setChannels, SharedData} from "../../../state";
 import {channelFromStates} from "../../../channel-store/channel-state/__tests__";
-import * as scenarios from "../../../../domain/commitments/__tests__";
+import * as scenarios from "../../../__tests__/state-helpers";
 import {EmbeddedProtocol, signedStatesReceived} from "../../../../communication";
 import {StateType} from "../states";
 import {clearedToSend} from "../actions";

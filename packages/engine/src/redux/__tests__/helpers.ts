@@ -1,12 +1,10 @@
 import {ChannelState, ChannelStore} from "../channel-store";
 import {StateWithSideEffects} from "../utils";
-import {Commitment, SignedCommitment, getCommitmentChannelId} from "../../domain";
 import {QueuedTransaction, OutboxState, MessageOutbox} from "../outbox/state";
 import {SharedData} from "../state";
 import {ProtocolStateWithSharedData} from "../protocols";
 import {ProtocolLocator, RelayableAction} from "src/communication";
 import _ from "lodash";
-import {convertStateToCommitment} from "../../utils/nitro-converter";
 import {State, SignedState, getChannelId} from "@statechannels/nitro-protocol";
 import {Signature} from "ethers/utils";
 
@@ -88,19 +86,7 @@ export const expectThisMessage = (state: SideEffectState, messageType: string) =
   });
 };
 
-type PartialCommitments = Array<{commitment: Partial<Commitment>; signature?: string}>;
 type PartialStates = Array<{state: Partial<State>; signature?: Partial<Signature>}>;
-
-function transformCommitmentToMatcher(sc: {commitment: Partial<Commitment>; signature?: string}) {
-  if (sc.signature) {
-    return expect.objectContaining({
-      commitment: expect.objectContaining(sc.commitment),
-      signature: sc.signature
-    });
-  } else {
-    return expect.objectContaining({commitment: expect.objectContaining(sc.commitment)});
-  }
-}
 
 function transformStateToMatcher(ss: {state: Partial<State>; signature?: Signature}) {
   if (ss.signature) {
@@ -111,55 +97,6 @@ function transformStateToMatcher(ss: {state: Partial<State>; signature?: Signatu
     return expect.objectContaining({state: expect.objectContaining(ss.state)});
   }
 }
-
-export const itSendsThisCommitment = (
-  state: SideEffectState,
-  commitment: Partial<Commitment>,
-  type = "ENGINE.COMMON.COMMITMENT_RECEIVED",
-  idx = 0
-) => {
-  const messageOutbox = getOutboxState(state, "messageOutbox");
-
-  it("sends a commitment", () => {
-    try {
-      // Passes when at least one message matches
-      // In the case of multiple messages queued, this approach does not care about
-      // their order, which is beneficial.
-      // However, the diffs produced by jest are unreadable, so when this expectation fails,
-      // we catch the error below
-      expect(messageOutbox).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            messagePayload: expect.objectContaining({
-              signedCommitment: transformCommitmentToMatcher({commitment})
-            })
-          })
-        ])
-      );
-    } catch (err) {
-      if ("matcherResult" in err) {
-        // In this case, we've caught a jest expectation error.
-        // We try to help the developer by using expect(foo).toMatchObject(bar)
-        // The errors are much more useful in this case, but will be deceiving in the case when
-        // multiple messages are queued.
-
-        // To help with debugging, you can change the idx variable when running tests to 'search'
-        // for the correct commitment
-
-        console.warn(`Message not found: inspecting mismatched message in position ${idx}`);
-        expect(messageOutbox[idx]).toMatchObject({
-          messagePayload: {
-            type,
-            signedCommitment: {commitment}
-          }
-        });
-      } else {
-        throw err;
-      }
-    }
-  });
-};
-
 export const itSendsTheseStates = (
   state: SideEffectState,
   states: PartialStates,
@@ -204,60 +141,6 @@ export const itSendsTheseStates = (
           messagePayload: {
             type,
             signedStates: states
-          }
-        });
-      } else {
-        throw err;
-      }
-    }
-  });
-};
-
-export const itSendsTheseCommitments = (
-  state: SideEffectState,
-  commitments: PartialCommitments,
-  type = "ENGINE.COMMON.COMMITMENTS_RECEIVED",
-  idx = 0
-) => {
-  // TODO: Something in the conversion between nitro states and commitments is messing up the signature
-  // so we'll ignore them for now
-  commitments = commitments.map(c => {
-    return {
-      commitment: c.commitment
-    };
-  });
-  const messageOutbox = getOutboxState(state, "messageOutbox");
-
-  it("sends commitments", () => {
-    try {
-      // Passes when at least one message matches
-      // In the case of multiple messages queued, this approach does not care about
-      // their order, which is beneficial.
-      // However, the diffs produced by jest are unreadable, so when this expectation fails,
-      // we catch the error below
-      expect(messageOutbox).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            messagePayload: expect.objectContaining({
-              signedCommitments: commitments.map(transformCommitmentToMatcher)
-            })
-          })
-        ])
-      );
-    } catch (err) {
-      if ("matcherResult" in err) {
-        // In this case, we've caught a jest expectation error.
-        // We try to help the developer by using expect(foo).toMatchObject(bar)
-        // The errors are much more useful in this case, but will be deceiving in the case when
-        // multiple messages are queued.
-
-        // To help with debugging, you can change the idx variable when running tests to 'search'
-        // for the correct commitment
-        console.warn(`Message not found: inspecting mismatched message in position ${idx}`);
-        expect(messageOutbox[idx]).toMatchObject({
-          messagePayload: {
-            type,
-            signedCommitments: commitments
           }
         });
       } else {
@@ -329,17 +212,6 @@ export const itIncreasesTurnNumBy = (
     } else {
       expect(newState.state.turnNum).toEqual(oldState.turnNum + increase);
     }
-  });
-};
-
-export const itStoresThisCommitment = (state: {channelStore: ChannelStore}, signedCommitment: SignedCommitment) => {
-  it("stores the commitment in the channel state", () => {
-    const channelId = getCommitmentChannelId(signedCommitment.commitment);
-    const channelState = state.channelStore[channelId];
-    // TODO: Due to conversion limitations the state might have been signed with the wrong key
-    // This should be addressed when all the protocols use SignedStates
-    const lastCommitment = convertStateToCommitment(channelState.signedStates.slice(-1)[0].state);
-    expect(lastCommitment).toMatchObject(signedCommitment.commitment);
   });
 };
 

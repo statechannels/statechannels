@@ -1,5 +1,5 @@
 import * as actions from "../../actions";
-import * as testScenarios from "../../../domain/commitments/__tests__";
+import * as testScenarios from "../../__tests__/state-helpers";
 const {channelId} = testScenarios;
 import {adjudicatorStateReducer} from "../reducer";
 import {SignedState} from "@statechannels/nitro-protocol";

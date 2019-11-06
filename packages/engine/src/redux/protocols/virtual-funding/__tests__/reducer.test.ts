@@ -3,7 +3,7 @@ import {initialize, reducer} from "../reducer";
 import * as scenarios from "./scenarios";
 import {scenarioStepDescription, itSendsNoMessage, itSendsTheseStates} from "../../../__tests__/helpers";
 import {preFund, postFund} from "../../advance-channel/__tests__";
-import {asAddress, hubAddress, bsAddress, convertBalanceToOutcome} from "../../../../domain/commitments/__tests__";
+import {asAddress, hubAddress, bsAddress, convertBalanceToOutcome} from "../../../__tests__/state-helpers";
 import {bigNumberify} from "ethers/utils";
 import {ETH_ASSET_HOLDER_ADDRESS} from "../../../../constants";
 import {convertAddressToBytes32} from "../../../../utils/data-type-utils";

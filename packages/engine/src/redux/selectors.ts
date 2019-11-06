@@ -1,10 +1,10 @@
-import {OpenChannelState, ChannelState, isFullyOpen, getLastCommitment} from "./channel-store";
+import {OpenChannelState, ChannelState, isFullyOpen, getLastState} from "./channel-store";
 import * as engineStates from "./state";
 import {SharedData, FundingState} from "./state";
 import {ProcessProtocol} from "../communication";
 import {CONSENSUS_LIBRARY_ADDRESS} from "../constants";
-import {Commitment} from "../domain";
 import {bigNumberify} from "ethers/utils";
+import {State} from "@statechannels/nitro-protocol";
 
 export const getOpenedChannelState = (state: SharedData, channelId: string): OpenChannelState => {
   const channelStatus = getChannelState(state, channelId);
@@ -14,7 +14,7 @@ export const getOpenedChannelState = (state: SharedData, channelId: string): Ope
   return channelStatus;
 };
 
-export const doesACommitmentExistForChannel = (state: SharedData, channelId: string): boolean => {
+export const doesAStateExistForChannel = (state: SharedData, channelId: string): boolean => {
   return state.channelStore[channelId] !== undefined && state.channelStore[channelId].signedStates.length > 0;
 };
 
@@ -26,9 +26,9 @@ export const getChannelState = (state: SharedData, channelId: string): ChannelSt
   return channelStatus;
 };
 
-export const getLastCommitmentForChannel = (state: SharedData, channelId: string): Commitment => {
+export const getLastStateForChannel = (state: SharedData, channelId: string): State => {
   const channelState = getChannelState(state, channelId);
-  return getLastCommitment(channelState);
+  return getLastState(channelState);
 };
 
 export const getFundedLedgerChannelForParticipants = (
@@ -57,6 +57,10 @@ export const getAdjudicatorWatcherSubscribersForChannel = (
   } else {
     return [];
   }
+};
+
+export const getPrivateKey = (state: engineStates.Initialized) => {
+  return state.privateKey;
 };
 
 export const getAdjudicatorState = (state: SharedData) => {

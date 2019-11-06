@@ -8,7 +8,7 @@ import * as fundProtocol from "../protocols/funding";
 import {fundingRequested} from "../protocols/actions";
 import * as adjudicatorState from "../adjudicator-state/reducer";
 import {ProcessProtocol, strategyApproved} from "../../communication";
-import {channelId} from "../../domain/commitments/__tests__";
+import {channelId} from "../__tests__/state-helpers";
 const defaults = {
   ...states.EMPTY_SHARED_DATA,
   uid: "uid",

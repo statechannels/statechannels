@@ -3,7 +3,6 @@ import * as states from "./states";
 import {WithdrawalAction} from "./actions";
 import * as selectors from "../../selectors";
 import {createConcludeAndWithdrawTransaction, ConcludeAndWithdrawArgs} from "../../../utils/transaction-generator";
-import {signVerificationData} from "../../../domain";
 import {TransactionRequest} from "ethers/providers";
 import {initialize as initTransactionState, transactionReducer} from "../transaction-submission/reducer";
 import {isTransactionAction} from "../transaction-submission/actions";
@@ -148,16 +147,10 @@ const createConcludeAndWithTransaction = (
   sharedData: SharedData
 ): TransactionRequest => {
   const channelState = selectors.getOpenedChannelState(sharedData, channelId);
-  const {signedStates: lastRound, participants, ourIndex, privateKey} = channelState;
+  const {signedStates: lastRound, participants, ourIndex} = channelState;
   const [penultimateState, lastState] = lastRound;
   const participant = participants[ourIndex];
-  const verificationSignature = signVerificationData(
-    participant,
-    withdrawalAddress,
-    withdrawalAmount,
-    withdrawalAddress,
-    privateKey
-  );
+  const verificationSignature = "0x00";
 
   const args: ConcludeAndWithdrawArgs = {
     fromSignedState: penultimateState,

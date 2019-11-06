@@ -11,9 +11,10 @@ import {bigNumberify} from "ethers/utils";
 import {ADJUDICATOR_ADDRESS, ETH_ASSET_HOLDER_ADDRESS, NETWORK_ID, CHALLENGE_DURATION} from "../constants";
 import {JsonRpcProvider, TransactionRequest, TransactionResponse} from "ethers/providers";
 import {getLibraryAddress} from "../utils/contract-utils";
-import {convertBalanceToOutcome} from "../domain/commitments/__tests__";
+
 import {State, getChannelId as getNitroChannelId, Channel} from "@statechannels/nitro-protocol";
 import {signState} from "@statechannels/nitro-protocol/lib/src/signatures";
+import {convertBalanceToOutcome} from "__tests__/state-helpers";
 
 export const fiveFive = (asAddress, bsAddress) => [
   {address: asAddress, wei: bigNumberify(5).toHexString()},

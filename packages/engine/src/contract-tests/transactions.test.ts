@@ -23,7 +23,7 @@ import {transactionSent, transactionSubmitted, transactionConfirmed} from "../re
 import {ADJUDICATOR_ADDRESS, ETH_ASSET_HOLDER_ADDRESS, NETWORK_ID, CHALLENGE_DURATION} from "../constants";
 import {State, Channel, getChannelId} from "@statechannels/nitro-protocol";
 import {bigNumberify} from "ethers/utils";
-import {convertBalanceToOutcome} from "../domain/commitments/__tests__";
+import {convertBalanceToOutcome} from "__tests__/state-helpers";
 import {signState} from "@statechannels/nitro-protocol/lib/src/signatures";
 
 jest.setTimeout(90000);

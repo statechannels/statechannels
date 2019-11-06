@@ -1,7 +1,7 @@
 import {addHex} from "../../../../utils/hex-utils";
 import * as globalActions from "../../../actions";
 
-import * as scenarios from "../../../../domain/commitments/__tests__";
+import * as scenarios from "../../../__tests__/state-helpers";
 import * as transactionSubmissionScenarios from "../../transaction-submission/__tests__";
 import * as advanceChannelScenarios from "../../advance-channel/__tests__";
 import * as states from "../states";

@@ -1,10 +1,10 @@
 import * as engineStates from "../redux/state";
-import * as scenarios from "../domain/commitments/__tests__";
+import * as scenarios from "../redux/__tests__/state-helpers";
 import * as states from "../redux/state";
 
 const {channelId, channelNonce, libraryAddress, participants} = scenarios;
-const preFundCommitment1 = scenarios.appCommitment({turnNum: 0}).commitment;
-const preFundCommitment2 = scenarios.appCommitment({turnNum: 1}).commitment;
+const preFundState1 = scenarios.appState({turnNum: 0}).state;
+const preFundState2 = scenarios.appState({turnNum: 1}).state;
 export const defaultParams = {
   adjudicator: "adj-address",
   channelId,
@@ -12,11 +12,8 @@ export const defaultParams = {
   libraryAddress,
   participants,
   uid: "uid",
-  commitments: [
-    {commitment: preFundCommitment1, signature: "fake-sig"},
-    {commitment: preFundCommitment2, signature: "fake-sig"}
-  ],
-  turnNum: preFundCommitment2.turnNum,
+  states: [{state: preFundState1, signature: "fake-sig"}, {state: preFundState2, signature: "fake-sig"}],
+  turnNum: preFundState2.turnNum,
   networkId: 3,
   challengeExpiry: 0,
   transactionHash: "0x0",
