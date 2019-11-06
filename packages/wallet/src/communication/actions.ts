@@ -2,7 +2,6 @@ import {WalletAction} from "../redux/actions";
 import {FundingStrategy, ProtocolLocator, EmbeddedProtocol} from "./index";
 import {ProcessProtocol} from ".";
 import {ActionConstructor} from "../redux/utils";
-import {Commitments} from "../redux/channel-store";
 import {CloseLedgerChannel} from "../redux/protocols/actions";
 import {SignedState} from "@statechannels/nitro-protocol";
 
@@ -75,7 +74,6 @@ export const concludeInstigated: ActionConstructor<ConcludeInstigated> = p => ({
 export interface CommitmentsReceived extends BaseProcessAction {
   type: "WALLET.COMMON.COMMITMENTS_RECEIVED";
   protocolLocator: ProtocolLocator;
-  signedCommitments: Commitments;
   signedStates: SignedState[];
 }
 
@@ -83,25 +81,12 @@ export interface CommitmentsReceived extends BaseProcessAction {
 // Constructors
 // -------
 
-// TODO: This should be deleted once all protocols are updated to use SignedStates
-export const commitmentsReceived = (p: {
-  protocolLocator: ProtocolLocator;
-  signedCommitments: Commitments;
-  processId: string;
-}): CommitmentsReceived => ({
-  ...p,
-  signedStates: p.signedCommitments.map(sc => sc.signedState),
-  type: "WALLET.COMMON.COMMITMENTS_RECEIVED"
-});
-
-// TODO: This shouldn't require a private key once all protocols are updated to use signedStates
 export const signedStatesReceived = (p: {
   protocolLocator: ProtocolLocator;
   signedStates: SignedState[];
   processId: string;
 }): CommitmentsReceived => ({
   ...p,
-  signedCommitments: [],
   type: "WALLET.COMMON.COMMITMENTS_RECEIVED"
 });
 

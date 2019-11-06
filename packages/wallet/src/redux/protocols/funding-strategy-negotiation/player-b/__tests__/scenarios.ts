@@ -4,8 +4,7 @@ import {TwoPartyPlayerIndex} from "../../../../types";
 
 import {EMPTY_SHARED_DATA} from "../../../../state";
 import {FundingStrategy} from "../../../../../communication";
-import {channelId, asAddress} from "../../../../../domain/commitments/__tests__";
-import {bsAddress} from "../../../../../communication/__tests__/commitments";
+import {channelId, asAddress, bsAddress} from "../../../../__tests__/state-helpers";
 
 // ---------
 // Test data

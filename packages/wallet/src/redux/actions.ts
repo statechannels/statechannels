@@ -1,4 +1,3 @@
-import * as channel from "./channel-store/actions";
 import * as directFunding from "./protocols/direct-funding/actions";
 import * as NewLedgerChannel from "./protocols/new-ledger-channel/actions";
 import * as application from "./protocols/application/actions";
@@ -273,13 +272,12 @@ export type WalletAction =
   | MetamaskLoadError
   | ProtocolAction
   | protocol.NewProcessAction
-  | channel.ChannelAction
   | RelayableAction
   | FundingStrategyNegotiationAction
   | FundingAction
   | LedgerFundingAction;
 
-export {channel, directFunding as funding, NewLedgerChannel, protocol, application, advanceChannel};
+export {directFunding as funding, NewLedgerChannel, protocol, application, advanceChannel};
 
 // These are any actions that update shared data directly without any protocol
 export type SharedDataUpdateAction = AdjudicatorEventAction | AssetHolderEventAction;

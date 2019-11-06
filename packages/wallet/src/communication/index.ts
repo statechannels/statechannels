@@ -1,4 +1,3 @@
-import {SignedCommitment} from "../domain";
 import {messageRelayRequested} from "../magmo-wallet-client";
 import {
   RelayableAction,
@@ -6,7 +5,6 @@ import {
   strategyApproved,
   concludeInstigated,
   ConcludeInstigated,
-  commitmentsReceived,
   signedStatesReceived
 } from "./actions";
 import {SignedState} from "@statechannels/nitro-protocol";
@@ -54,16 +52,6 @@ export function sendStrategyApproved(to: string, processId: string, strategy: Fu
 export function sendConcludeInstigated(to: string, channelId) {
   return sendMessage(to, concludeInstigated({channelId}));
 }
-
-export const sendCommitmentsReceived = (
-  to: string,
-  processId: string,
-  signedCommitments: SignedCommitment[],
-  protocolLocator: ProtocolLocator
-) => {
-  const payload = commitmentsReceived({processId, signedCommitments, protocolLocator});
-  return messageRelayRequested(to, payload);
-};
 
 export const sendStatesReceived = (
   to: string,

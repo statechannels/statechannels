@@ -4,26 +4,25 @@ import {accumulateSideEffects} from "../outbox";
 import {SharedData, queueMessage, getExistingChannel, checkAndStore} from "../state";
 import * as selectors from "../selectors";
 import {TwoPartyPlayerIndex, ThreePartyPlayerIndex} from "../types";
-import {CommitmentType} from "fmg-core/lib/commitment";
 import * as magmoWalletClient from "../../magmo-wallet-client";
-import {getLastCommitment, nextParticipant, getLastState} from "../channel-store";
-import {Commitment} from "../../domain";
-import {sendCommitmentsReceived, ProtocolLocator} from "../../communication";
+import {nextParticipant, getLastState} from "../channel-store";
+
+import {ProtocolLocator} from "../../communication";
 import * as comms from "../../communication";
 import {ourTurn as ourTurnOnChannel} from "../channel-store";
 import _ from "lodash";
 import {bigNumberify} from "ethers/utils";
-import {convertStateToSignedCommitment, convertStateToCommitment} from "../../utils/nitro-converter";
+
 import {SignedState, State} from "@statechannels/nitro-protocol";
 import {getAllocationOutcome} from "../../utils/outcome-utils";
 
 export function sendFundingComplete(sharedData: SharedData, appChannelId: string) {
   const channelState = selectors.getOpenedChannelState(sharedData, appChannelId);
-  const c = getLastCommitment(channelState);
-  if (c.commitmentType !== CommitmentType.PostFundSetup || c.turnNum !== 3) {
-    throw new Error(`Expected a post fund setup B commitment. Instead received ${JSON.stringify(c)}.`);
+  const s = getLastState(channelState);
+  if (s.turnNum !== 3) {
+    throw new Error(`Expected a post fund setup B commitment. Instead received ${JSON.stringify(s)}.`);
   }
-  return queueMessage(sharedData, fundingSuccess(appChannelId, c));
+  return queueMessage(sharedData, fundingSuccess(appChannelId, s));
 }
 
 export function showWallet(sharedData: SharedData): SharedData {
@@ -84,23 +83,6 @@ export function sendStates(
   return queueMessage(sharedData, messageRelay);
 }
 
-export function sendCommitments(
-  sharedData: SharedData,
-  processId: string,
-  channelId: string,
-  protocolLocator: ProtocolLocator
-): SharedData {
-  const channel = getExistingChannel(sharedData, channelId);
-  const {participants, ourIndex} = channel;
-  const messageRelay = sendCommitmentsReceived(
-    nextParticipant(participants, ourIndex),
-    processId,
-    channel.signedStates.map(ss => convertStateToSignedCommitment(ss.state, channel.privateKey)),
-    protocolLocator
-  );
-  return queueMessage(sharedData, messageRelay);
-}
-
 export function checkStates(sharedData: SharedData, turnNum: number, states: SignedState[]): SharedData {
   // We don't bother checking "stale" states -- those whose turnNum does not
   // exceed the current turnNum.
@@ -130,7 +112,7 @@ export function sendChallengeResponseRequested(sharedData: SharedData, channelId
 export function sendChallengeStateReceived(sharedData: SharedData, state: State) {
   const newSharedData = {...sharedData};
   newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
-    messageOutbox: magmoWalletClient.challengeCommitmentReceived(convertStateToCommitment(state))
+    messageOutbox: magmoWalletClient.challengeStateReceived(state)
   });
   return newSharedData;
 }
@@ -253,15 +235,6 @@ export function getOurAddress(channelId: string, sharedData: SharedData) {
 export function getLatestState(channelId: string, sharedData: SharedData) {
   const channel = getExistingChannel(sharedData, channelId);
   return getLastState(channel);
-}
-
-export function getLatestCommitment(channelId: string, sharedData: SharedData) {
-  const channel = getExistingChannel(sharedData, channelId);
-  return getLastCommitment(channel);
-}
-
-export function getNumberOfParticipants(commitment: Commitment): number {
-  return commitment.channel.participants.length;
 }
 
 export function ourTurn(sharedData: SharedData, channelId: string) {

@@ -1,5 +1,5 @@
 import * as states from "../states";
-import * as testScenarios from "../../../../domain/commitments/__tests__";
+import * as testScenarios from "../../../__tests__/state-helpers";
 
 import * as actions from "../actions";
 

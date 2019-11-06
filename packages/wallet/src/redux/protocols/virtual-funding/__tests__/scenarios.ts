@@ -1,7 +1,7 @@
 import * as states from "../states";
 
 import {EMPTY_SHARED_DATA, setChannel} from "../../../state";
-import * as scenarios from "../../../../domain/commitments/__tests__";
+import * as scenarios from "../../../__tests__/state-helpers";
 import {preFund, postFund} from "../../advance-channel/__tests__";
 import {preSuccess as ledgerFundingPreSuccess} from "../../ledger-funding/__tests__";
 import {
@@ -9,7 +9,7 @@ import {
   threePlayerInProgressA as consensusUpdateInProgress
 } from "../../consensus-update/__tests__";
 import {channelFromStates} from "../../../channel-store/channel-state/__tests__";
-import {twoThree} from "../../../../domain/commitments/__tests__";
+import {twoThree} from "../../../__tests__/state-helpers";
 import {CONSENSUS_LIBRARY_ADDRESS} from "../../../../constants";
 import {PlayerIndex} from "../../../../magmo-wallet-client/wallet-instructions";
 import {prependToLocator} from "../..";

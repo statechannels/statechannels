@@ -16,8 +16,7 @@ import {
   signAndStore as signAndStoreChannelStore,
   signAndInitialize as signAndInitializeChannelStore,
   emptyChannelStore,
-  SignFailureReason,
-  Commitments
+  SignFailureReason
 } from "./channel-store";
 import {Properties} from "./utils";
 import * as NewLedgerChannel from "./protocols/new-ledger-channel/states";
@@ -31,7 +30,6 @@ import {TerminalFundingState, isFundingState, isTerminalFundingState} from "./pr
 import {ProtocolState} from "./protocols";
 import {isDefundingState, isTerminalDefundingState, TerminalDefundingState} from "./protocols/defunding/states";
 import {TerminalConcludingState, isConcludingState, isTerminalConcludingState} from "./protocols/concluding/states";
-import {convertStateToSignedCommitment} from "../utils/nitro-converter";
 import {SignedState, State} from "@statechannels/nitro-protocol";
 
 export type WalletState = WaitForLogin | MetaMaskError | Initialized;
@@ -300,14 +298,6 @@ export function queueTransaction(state: SharedData, transaction: TransactionRequ
     ...state,
     outboxState: queueTransactionOutbox(state.outboxState, transaction, processId)
   };
-}
-
-export function getCommitments(store: SharedData, channelId: string): Commitments {
-  const channel = getChannel(store, channelId);
-  if (!channel) {
-    throw new Error("Channel missing");
-  }
-  return channel.signedStates.map(ss => convertStateToSignedCommitment(ss.state, channel.privateKey));
 }
 
 export {NewLedgerChannel};

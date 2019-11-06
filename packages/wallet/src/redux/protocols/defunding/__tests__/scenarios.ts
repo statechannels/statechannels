@@ -1,5 +1,5 @@
 import * as states from "../states";
-import * as testScenarios from "../../../../domain/commitments/__tests__";
+import * as testScenarios from "../../../__tests__/state-helpers";
 import {setFundingState, setChannels} from "../../../state";
 import * as ledgerDefunding from "../../ledger-defunding/__tests__";
 import {channelFromStates} from "../../../channel-store/channel-state/__tests__";

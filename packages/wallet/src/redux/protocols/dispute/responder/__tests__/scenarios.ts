@@ -7,7 +7,7 @@ import {EMPTY_SHARED_DATA, SharedData} from "../../../../state";
 import {ChannelState, ChannelStore} from "../../../../channel-store";
 import * as transactionActions from "../../../transaction-submission/actions";
 import {challengeExpiredEvent} from "../../../../actions";
-import * as testScenarios from "../../../../../domain/commitments/__tests__";
+import * as testScenarios from "../../../../__tests__/state-helpers";
 
 // ---------
 // Test data

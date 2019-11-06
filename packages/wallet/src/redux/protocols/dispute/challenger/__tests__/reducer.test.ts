@@ -5,7 +5,7 @@ import {itSendsThisMessage, itSendsThisDisplayEventType, describeScenarioStep} f
 import {
   HIDE_WALLET,
   CHALLENGE_COMPLETE,
-  CHALLENGE_COMMITMENT_RECEIVED,
+  CHALLENGE_STATE_RECEIVED,
   SHOW_WALLET
 } from "../../../../../magmo-wallet-client";
 
@@ -55,7 +55,7 @@ describe("OPPONENT RESPONDS", () => {
     const {state, action} = scenario.waitForResponseOrTimeoutReceiveResponse;
     const result = challengerReducer(state, sharedData, action);
 
-    itSendsThisMessage(result.sharedData, CHALLENGE_COMMITMENT_RECEIVED);
+    itSendsThisMessage(result.sharedData, CHALLENGE_STATE_RECEIVED);
     // TODO: Get this passing
     // itStoresThisCommitment(result.sharedData, commitment);
     itTransitionsTo(result, "Challenging.AcknowledgeResponse");

@@ -11,9 +11,9 @@ import {bigNumberify} from "ethers/utils";
 import {ADJUDICATOR_ADDRESS, ETH_ASSET_HOLDER_ADDRESS, NETWORK_ID, CHALLENGE_DURATION} from "../constants";
 import {JsonRpcProvider, TransactionRequest, TransactionResponse} from "ethers/providers";
 import {getLibraryAddress} from "../utils/contract-utils";
-import {convertBalanceToOutcome} from "../domain/commitments/__tests__";
 import {State, getChannelId as getNitroChannelId, Channel} from "@statechannels/nitro-protocol";
-import {signState} from "@statechannels/nitro-protocol/lib/src/signatures";
+import {Signatures} from "@statechannels/nitro-protocol";
+import {convertBalanceToOutcome} from "../redux/__tests__/state-helpers";
 
 export const fiveFive = (asAddress, bsAddress) => [
   {address: asAddress, wei: bigNumberify(5).toHexString()},
@@ -98,8 +98,8 @@ export async function createChallenge(
   };
 
   const challengeTransaction = createForceMoveTransaction(
-    signState(fromState, participantA.privateKey),
-    signState(toState, participantB.privateKey),
+    Signatures.signState(fromState, participantA.privateKey),
+    Signatures.signState(toState, participantB.privateKey),
     participantB.privateKey
   );
 
@@ -143,8 +143,8 @@ export async function concludeGame(
     appData: "0x00"
   };
 
-  const signedFromState = signState(fromState, participantA.privateKey);
-  const signedToState = signState(toState, participantB.privateKey);
+  const signedFromState = Signatures.signState(fromState, participantA.privateKey);
+  const signedToState = Signatures.signState(toState, participantB.privateKey);
 
   const concludeTransaction = createConcludeTransaction(signedFromState, signedToState);
   const transactionReceipt = await sendTransaction(provider, concludeTransaction);
@@ -177,7 +177,7 @@ export async function respond(
     appData: "0x00"
   };
 
-  const toSignedState = signState(toState, participantA.privateKey);
+  const toSignedState = Signatures.signState(toState, participantA.privateKey);
 
   const respondWithMoveTransaction = createRespondTransaction(challenge, toSignedState);
 

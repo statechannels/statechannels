@@ -2,7 +2,7 @@ import {ProtocolLocator, EmbeddedProtocol} from "../../../communication";
 import {WalletAction} from "../../actions";
 import {SharedData} from "../../state";
 import {prependToLocator} from "..";
-import {SignedCommitment} from "../../../domain";
+import {SignedState} from "@statechannels/nitro-protocol";
 
 interface BaseScenario<T, S> {
   action: T;
@@ -10,7 +10,7 @@ interface BaseScenario<T, S> {
   sharedData: SharedData;
 }
 interface ScenarioWithReply<T, S> extends BaseScenario<T, S> {
-  reply: SignedCommitment[];
+  reply: SignedState[];
 }
 export function prependToScenarioLocator<
   T extends WalletAction & {protocolLocator: ProtocolLocator},

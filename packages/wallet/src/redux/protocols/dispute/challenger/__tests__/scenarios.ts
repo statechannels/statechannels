@@ -5,7 +5,7 @@ import {setChannel, EMPTY_SHARED_DATA} from "../../../../state";
 import {ChannelState} from "../../../../channel-store";
 import {channelFromStates} from "../../../../channel-store/channel-state/__tests__";
 import {challengeExpiredEvent, respondWithMoveEvent, challengeExpirySetEvent} from "../../../../actions";
-import * as testScenarios from "../../../../../domain/commitments/__tests__";
+import * as testScenarios from "../../../../__tests__/state-helpers";
 type Reason = states.FailureReason;
 
 // -----------------

@@ -1,6 +1,5 @@
 import {ethers} from "ethers";
 
-import {signVerificationData} from "../domain";
 import {createChallenge, concludeGame, fiveFive} from "./test-utils";
 import {
   createForceMoveTransaction,
@@ -23,8 +22,8 @@ import {transactionSent, transactionSubmitted, transactionConfirmed} from "../re
 import {ADJUDICATOR_ADDRESS, ETH_ASSET_HOLDER_ADDRESS, NETWORK_ID, CHALLENGE_DURATION} from "../constants";
 import {State, Channel, getChannelId} from "@statechannels/nitro-protocol";
 import {bigNumberify} from "ethers/utils";
-import {convertBalanceToOutcome} from "../domain/commitments/__tests__";
-import {signState} from "@statechannels/nitro-protocol/lib/src/signatures";
+import {convertBalanceToOutcome} from "../redux/__tests__/state-helpers";
+import {Signatures} from "@statechannels/nitro-protocol";
 
 jest.setTimeout(90000);
 
@@ -128,8 +127,8 @@ describe("transactions", () => {
     };
 
     const forceMoveTransaction = createForceMoveTransaction(
-      signState(fromState, participantA.privateKey),
-      signState(toState, participantB.privateKey),
+      Signatures.signState(fromState, participantA.privateKey),
+      Signatures.signState(toState, participantB.privateKey),
       participantB.privateKey
     );
 
@@ -167,7 +166,10 @@ describe("transactions", () => {
       appData: "0x00"
     };
 
-    const respondWithMoveTransaction = createRespondTransaction(fromState, signState(toState, participantA.privateKey));
+    const respondWithMoveTransaction = createRespondTransaction(
+      fromState,
+      Signatures.signState(toState, participantA.privateKey)
+    );
 
     await testTransactionSender(respondWithMoveTransaction);
   });
@@ -201,8 +203,8 @@ describe("transactions", () => {
       appData: "0x00"
     };
 
-    const fromSignedState = signState(fromState, participantA.privateKey);
-    const toSignedState = signState(toState, participantB.privateKey);
+    const fromSignedState = Signatures.signState(fromState, participantA.privateKey);
+    const toSignedState = Signatures.signState(toState, participantB.privateKey);
 
     const refuteTransaction = createRefuteTransaction([fromSignedState, toSignedState]);
 
@@ -237,8 +239,8 @@ describe("transactions", () => {
       appData: "0x00"
     };
 
-    const signedFromState = signState(fromState, participantA.privateKey);
-    const signedToState = signState(toState, participantB.privateKey);
+    const signedFromState = Signatures.signState(fromState, participantA.privateKey);
+    const signedToState = Signatures.signState(toState, participantB.privateKey);
 
     const concludeTransaction = createConcludeTransaction(signedFromState, signedToState);
     await testTransactionSender(concludeTransaction);
@@ -256,14 +258,8 @@ describe("transactions", () => {
     await depositContract(provider, channelId);
     await depositContract(provider, channelId);
     await concludeGame(provider, channel.channelNonce, participantA, participantB);
-    const senderAddress = await provider.getSigner().getAddress();
-    const verificationSignature = signVerificationData(
-      participantA.address,
-      participantA.address,
-      "0x01",
-      senderAddress,
-      participantA.privateKey
-    );
+
+    const verificationSignature = "0x0";
     const transferAndWithdraw = createTransferAndWithdrawTransaction(
       channelId,
       participantA.address,
@@ -276,14 +272,8 @@ describe("transactions", () => {
 
   it.skip("should send a withdraw transaction", async () => {
     await depositContract(provider, participantA.address);
-    const senderAddress = await provider.getSigner().getAddress();
-    const verificationSignature = signVerificationData(
-      participantA.address,
-      participantA.address,
-      "0x01",
-      senderAddress,
-      participantA.privateKey
-    );
+
+    const verificationSignature = "0x0";
     const withdrawTransaction = createWithdrawTransaction(
       "0x01",
       participantA.address,
@@ -302,14 +292,8 @@ describe("transactions", () => {
     };
     const channelId = getChannelId(channel);
     await depositContract(provider, channelId);
-    const senderAddress = await provider.getSigner().getAddress();
-    const verificationSignature = signVerificationData(
-      participantA.address,
-      participantA.address,
-      "0x05",
-      senderAddress,
-      participantA.privateKey
-    );
+
+    const verificationSignature = "0x0";
     const fromState: State = {
       channel,
       appDefinition: libraryAddress,
@@ -330,8 +314,8 @@ describe("transactions", () => {
       appData: "0x00"
     };
 
-    const fromSignedState = signState(fromState, participantA.privateKey);
-    const toSignedState = signState(toState, participantB.privateKey);
+    const fromSignedState = Signatures.signState(fromState, participantA.privateKey);
+    const toSignedState = Signatures.signState(toState, participantB.privateKey);
 
     const args: ConcludeAndWithdrawArgs = {
       fromSignedState,

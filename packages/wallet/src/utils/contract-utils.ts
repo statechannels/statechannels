@@ -1,9 +1,10 @@
-import { ethers } from "ethers";
+import {ethers} from "ethers";
 
-import { asEthersObject, Commitment } from "fmg-core";
-import { AddressZero } from "ethers/constants";
+import {AddressZero} from "ethers/constants";
 import loadJsonFile = require("load-json-file");
 import path from "path";
+import {State, validTransition} from "@statechannels/nitro-protocol";
+
 let networkMap;
 
 export function getLibraryAddress(networkId, contractName) {
@@ -122,15 +123,11 @@ export async function getAdjudicatorOutcome(provider, channelId) {
   return outcomeForChannel;
 }
 
-export async function validateTransition(fromCommitment: Commitment, toCommitment: Commitment): Promise<boolean> {
-  const provider = await getProvider();
-  const contract = await getAdjudicatorContract(provider);
+export async function validateTransition(fromState: State, toState: State, privateKey: string): Promise<boolean> {
+  const contractAddress = getAdjudicatorContractAddress();
+  const wallet = new ethers.Wallet(privateKey);
   try {
-    return await contract.validTransition(
-      asEthersObject(fromCommitment),
-      asEthersObject(toCommitment),
-      [] // unused argument -- see nitro contract
-    );
+    return await validTransition(fromState, toState, contractAddress, wallet);
   } catch (error) {
     if (error.message === "Internal JSON-RPC error.") {
       // Require statements cause a generic JSON-RPC error, so we just catch anything and return false
