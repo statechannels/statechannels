@@ -21,5 +21,5 @@ export default combineReducers<SiteState>({
   metamask: metamaskReducer,
   openGames: openGamesReducer,
   game: gameReducer,
-  overlay: overlayReducer
+  overlay: overlayReducer,
 });

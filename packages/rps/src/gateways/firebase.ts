@@ -10,7 +10,7 @@ const config = {
   databaseURL: `https://${process.env.FIREBASE_PROJECT}.firebaseio.com`,
   projectId: process.env.FIREBASE_PROJECT,
   storageBucket: '',
-  messagingSenderId: '913007764573'
+  messagingSenderId: '913007764573',
 };
 
 const fire = firebase.initializeApp(config);

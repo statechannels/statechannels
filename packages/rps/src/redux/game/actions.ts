@@ -24,15 +24,15 @@ export const CHALLENGE_COMPLETED = 'GAME.CHALLENGE_COMPLETED';
 export const updateProfile = (name: string, twitterHandle: string) => ({
   type: UPDATE_PROFILE as typeof UPDATE_PROFILE,
   name,
-  twitterHandle
+  twitterHandle,
 });
 
 export const newOpenGame = () => ({
-  type: NEW_OPEN_GAME as typeof NEW_OPEN_GAME
+  type: NEW_OPEN_GAME as typeof NEW_OPEN_GAME,
 });
 
 export const cancelOpenGame = () => ({
-  type: CANCEL_OPEN_GAME as typeof CANCEL_OPEN_GAME
+  type: CANCEL_OPEN_GAME as typeof CANCEL_OPEN_GAME,
 });
 
 export const joinOpenGame = (
@@ -45,73 +45,73 @@ export const joinOpenGame = (
   opponentName,
   opponentAddress,
   channelNonce,
-  roundBuyIn
+  roundBuyIn,
 });
 
 export const initialCommitmentReceived = (commitment: RPSCommitment, opponentName: string) => ({
   type: INITIAL_COMMITMENT_RECEIVED as typeof INITIAL_COMMITMENT_RECEIVED,
   commitment,
-  opponentName
+  opponentName,
 });
 
 export const confirmGame = () => ({
-  type: CONFIRM_GAME as typeof CONFIRM_GAME
+  type: CONFIRM_GAME as typeof CONFIRM_GAME,
 });
 export const declineGame = () => ({
-  type: DECLINE_GAME as typeof DECLINE_GAME
+  type: DECLINE_GAME as typeof DECLINE_GAME,
 });
 
 export const chooseWeapon = (weapon: Weapon) => ({
   type: CHOOSE_WEAPON as typeof CHOOSE_WEAPON,
-  weapon
+  weapon,
 });
 
 export const playAgain = () => ({
-  type: PLAY_AGAIN as typeof PLAY_AGAIN
+  type: PLAY_AGAIN as typeof PLAY_AGAIN,
 });
 
 export const resign = () => ({
-  type: RESIGN as typeof RESIGN
+  type: RESIGN as typeof RESIGN,
 });
 
 export const createChallenge = () => ({
-  type: CREATE_CHALLENGE as typeof CREATE_CHALLENGE
+  type: CREATE_CHALLENGE as typeof CREATE_CHALLENGE,
 });
 
 export const challengeResponseRequested = () => ({
-  type: CHALLENGE_RESPONSE_REQUESTED as typeof CHALLENGE_RESPONSE_REQUESTED
+  type: CHALLENGE_RESPONSE_REQUESTED as typeof CHALLENGE_RESPONSE_REQUESTED,
 });
 
 export const challengeCompleted = () => ({
-  type: CHALLENGE_COMPLETED as typeof CHALLENGE_COMPLETED
+  type: CHALLENGE_COMPLETED as typeof CHALLENGE_COMPLETED,
 });
 
 export const commitmentReceived = (commitment: RPSCommitment) => ({
   type: COMMITMENT_RECEIVED as typeof COMMITMENT_RECEIVED,
-  commitment
+  commitment,
 });
 
 export const fundingSuccess = (commitment: RPSCommitment) => ({
   type: FUNDING_SUCCESS as typeof FUNDING_SUCCESS,
-  commitment
+  commitment,
 });
 
 export const fundingFailure = () => ({
-  type: FUNDING_FAILURE as typeof FUNDING_FAILURE
+  type: FUNDING_FAILURE as typeof FUNDING_FAILURE,
 });
 
 export const createOpenGame = (roundBuyIn: string) => ({
   type: CREATE_OPEN_GAME as typeof CREATE_OPEN_GAME,
-  roundBuyIn
+  roundBuyIn,
 });
 
 export const exitToLobby = () => ({
-  type: EXIT_TO_LOBBY as typeof EXIT_TO_LOBBY
+  type: EXIT_TO_LOBBY as typeof EXIT_TO_LOBBY,
 });
 
 // TODO: Should this be moved?
 export const messageSent = () => ({
-  type: MESSAGE_SENT as typeof MESSAGE_SENT
+  type: MESSAGE_SENT as typeof MESSAGE_SENT,
 });
 
 export type InitialCommitmentReceived = ReturnType<typeof initialCommitmentReceived>;

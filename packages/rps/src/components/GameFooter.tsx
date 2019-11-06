@@ -17,7 +17,7 @@ export default class GameFooter extends React.PureComponent<Props> {
       createBlockchainChallenge,
       isNotOurTurn,
       canChallenge,
-      challengeOngoing
+      challengeOngoing,
     } = this.props;
 
     return (

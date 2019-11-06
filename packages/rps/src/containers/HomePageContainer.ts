@@ -6,7 +6,7 @@ import * as loginActions from '../redux/login/actions';
 const mapStateToProps = state => ({});
 
 const mapDispatchToProps = {
-  login: loginActions.loginRequest
+  login: loginActions.loginRequest,
 };
 
 export default connect(

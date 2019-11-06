@@ -75,11 +75,11 @@ const mapStateToProps = (state: SiteState) => {
     loading: state.metamask.loading,
     metamaskError: state.metamask.error,
     walletVisible: state.overlay.walletVisible,
-    loginError: state.login.error
+    loginError: state.login.error,
   };
 };
 const mapDispatchToProps = {
-  walletIFrameLoaded: actions.walletIframeLoaded
+  walletIFrameLoaded: actions.walletIframeLoaded,
 };
 export default connect(
   mapStateToProps,

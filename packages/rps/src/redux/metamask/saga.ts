@@ -8,7 +8,7 @@ export default function* checkMetamask() {
   if (typeof web3 !== 'object' || web3 === null) {
     yield put(
       metamaskActions.metamaskErrorOccurred({
-        errorType: MetamaskErrorType.NoWeb3
+        errorType: MetamaskErrorType.NoWeb3,
       })
     );
     return false;
@@ -28,7 +28,7 @@ export default function* checkMetamask() {
       yield put(
         metamaskActions.metamaskErrorOccurred({
           errorType: MetamaskErrorType.WrongNetwork,
-          networkName: process.env.TARGET_NETWORK
+          networkName: process.env.TARGET_NETWORK,
         })
       );
       return false;
@@ -40,7 +40,7 @@ export default function* checkMetamask() {
       if (!accountUnlocked) {
         yield put(
           metamaskActions.metamaskErrorOccurred({
-            errorType: MetamaskErrorType.MetamaskLocked
+            errorType: MetamaskErrorType.MetamaskLocked,
           })
         );
       } else {

@@ -4,7 +4,7 @@ export const enum MetamaskErrorType {
   WrongNetwork = 'WrongNetwork',
   NoWeb3 = 'NoWeb3',
   MetamaskLocked = 'MetamaskLocked',
-  UnknownError = 'UnknownError'
+  UnknownError = 'UnknownError',
 }
 
 export interface MetamaskError {
@@ -14,11 +14,11 @@ export interface MetamaskError {
 
 export const metamaskErrorOccurred = (error: MetamaskError) => ({
   type: METAMASK_ERROR as typeof METAMASK_ERROR,
-  error
+  error,
 });
 
 export const metamaskSuccess = () => ({
-  type: METAMASK_SUCCESS as typeof METAMASK_SUCCESS
+  type: METAMASK_SUCCESS as typeof METAMASK_SUCCESS,
 });
 
 export type MetamaskErrorOccurred = ReturnType<typeof metamaskErrorOccurred>;

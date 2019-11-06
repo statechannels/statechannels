@@ -10,7 +10,7 @@ export interface MetamaskState {
 const initialState: MetamaskState = {
   loading: true,
   error: null,
-  success: false
+  success: false,
 };
 
 export const metamaskReducer: Reducer<MetamaskState> = (
@@ -22,14 +22,14 @@ export const metamaskReducer: Reducer<MetamaskState> = (
       return {
         success: true,
         loading: false,
-        error: null
+        error: null,
       };
     }
     case metamaskActions.METAMASK_ERROR: {
       return {
         success: false,
         loading: false,
-        error: action.error
+        error: action.error,
       };
     }
     default:

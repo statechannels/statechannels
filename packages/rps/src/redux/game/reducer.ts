@@ -24,7 +24,7 @@ export interface JointState {
 
 const emptyJointState: JointState = {
   messageState: {},
-  gameState: states.noName({myAddress: '', libraryAddress: ''})
+  gameState: states.noName({myAddress: '', libraryAddress: ''}),
 };
 
 export const gameReducer: Reducer<JointState> = (
@@ -70,13 +70,13 @@ export const gameReducer: Reducer<JointState> = (
       const {messageState, gameState} = state;
       return {
         gameState: states.pickChallengeWeapon(gameState),
-        messageState
+        messageState,
       };
     } else if (state.gameState.name === states.StateName.PlayAgain) {
       const {messageState, gameState} = state;
       return {
         gameState: states.challengePlayAgain(gameState),
-        messageState
+        messageState,
       };
     } else {
       return state;
@@ -159,7 +159,7 @@ function noNameReducer(
         myName: name,
         myAddress,
         libraryAddress,
-        twitterHandle
+        twitterHandle,
       });
       return {gameState: lobby, messageState};
     default:
@@ -203,7 +203,7 @@ function lobbyReducer(
         commitmentCount,
         libraryAddress,
         twitterHandle,
-        myAddress
+        myAddress,
       });
       messageState = sendMessage(
         rpsCommitmentHelper.preFundSetupA(waitForConfirmationState),
@@ -225,7 +225,7 @@ function creatingOpenGameReducer(
     case actions.CREATE_OPEN_GAME:
       const newGameState = states.waitingRoom({
         ...gameState,
-        roundBuyIn: action.roundBuyIn
+        roundBuyIn: action.roundBuyIn,
       });
       return {gameState: newGameState, messageState};
     case actions.CANCEL_OPEN_GAME:
@@ -260,7 +260,7 @@ function waitingRoomReducer(
         opponentName,
         twitterHandle,
         myAddress,
-        libraryAddress
+        libraryAddress,
       });
       return {gameState: newGameState, messageState};
     case actions.CANCEL_OPEN_GAME:
@@ -283,7 +283,7 @@ function resignationReducer(
   if (itsMyTurn(gameState)) {
     messageState = {
       ...messageState,
-      walletOutbox: {type: 'CONCLUDE_REQUESTED'}
+      walletOutbox: {type: 'CONCLUDE_REQUESTED'},
     };
   }
 
@@ -321,13 +321,13 @@ function waitForGameConfirmationAReducer(
   // request funding
   messageState = {
     ...messageState,
-    walletOutbox: {type: 'FUNDING_REQUESTED'}
+    walletOutbox: {type: 'FUNDING_REQUESTED'},
   };
 
   // transition to Wait for Funding
   const newGameState = states.waitForFunding({
     ...gameState,
-    turnNum: gameState.turnNum + 1
+    turnNum: gameState.turnNum + 1,
   });
 
   return {messageState, gameState: newGameState};
@@ -353,7 +353,7 @@ function confirmGameBReducer(
 
     const newGameState = states.waitForFunding({
       ...gameState,
-      turnNum: turnNum + 1
+      turnNum: turnNum + 1,
     });
     const newCommitment = rpsCommitmentHelper.preFundSetupB(newGameState);
 
@@ -361,7 +361,7 @@ function confirmGameBReducer(
     messageState = sendMessage(newCommitment, opponentAddress, messageState);
     messageState = {
       ...messageState,
-      walletOutbox: {type: 'FUNDING_REQUESTED'}
+      walletOutbox: {type: 'FUNDING_REQUESTED'},
     };
 
     return {gameState: newGameState, messageState};
@@ -372,7 +372,7 @@ function confirmGameBReducer(
       myName,
       myAddress: participants[player],
       libraryAddress: channel.channelType,
-      twitterHandle
+      twitterHandle,
     });
     // TODO: Send a message to the other player that the game has been declined
     return {gameState: newGameState, messageState};
@@ -389,7 +389,7 @@ function waitForFundingReducer(
     const lobbyGameState = states.lobby({
       ...gameState,
       myAddress: participants[player],
-      libraryAddress: gameState.channel.channelType
+      libraryAddress: gameState.channel.channelType,
     });
     return {gameState: lobbyGameState, messageState: {}};
   }
@@ -415,7 +415,7 @@ function waitForFundingReducer(
       ...gameState,
       turnNum,
       allocation,
-      commitmentCount
+      commitmentCount,
     });
     return {gameState: newGameState, messageState};
   }
@@ -443,21 +443,21 @@ function pickChallengeWeaponReducer(
       ...gameState,
       aWeapon: asWeapon,
       salt,
-      turnNum: turnNum + 1
+      turnNum: turnNum + 1,
     });
 
     const newGameStateA = states.waitForOpponentToPickWeaponA({
       ...gameState,
       ...propose,
       salt,
-      myWeapon: asWeapon
+      myWeapon: asWeapon,
     });
 
     return {
       gameState: newGameStateA,
       messageState: {
-        walletOutbox: {type: 'RESPOND_TO_CHALLENGE', data: propose}
-      }
+        walletOutbox: {type: 'RESPOND_TO_CHALLENGE', data: propose},
+      },
     };
   } else {
     // We received a challenge so we need to take the commitment that the opponent sent us
@@ -482,19 +482,19 @@ function pickChallengeWeaponReducer(
         ...gameState,
         preCommit,
         myWeapon: action.weapon,
-        player: Player.PlayerB
+        player: Player.PlayerB,
       });
       const challengeCommitment = rpsCommitmentHelper.accept({
         ...gameState,
         preCommit,
         allocation: newAllocation,
         bWeapon: newGameStateB.myWeapon,
-        turnNum: turnNum + 2
+        turnNum: turnNum + 2,
       });
 
       return {
         gameState: newGameStateB,
-        messageState: {walletOutbox: {type: 'RESPOND_TO_CHALLENGE', data: challengeCommitment}}
+        messageState: {walletOutbox: {type: 'RESPOND_TO_CHALLENGE', data: challengeCommitment}},
       };
     }
   }
@@ -526,13 +526,13 @@ function pickWeaponReducer(
       aWeapon: asWeapon,
       salt,
       commitmentCount: 0, // we are transitioning from a consensus game, so need to reset this
-      turnNum: turnNum + 1
+      turnNum: turnNum + 1,
     });
     const newGameStateA = states.waitForOpponentToPickWeaponA({
       ...gameState,
       ...propose,
       salt,
-      myWeapon: asWeapon
+      myWeapon: asWeapon,
     });
 
     const opponentAddress = states.getOpponentAddress(gameState);
@@ -549,7 +549,7 @@ function pickWeaponReducer(
     } else if (action.type === actions.CHOOSE_WEAPON) {
       const newGameStateB = states.waitForOpponentToPickWeaponB({
         ...gameState,
-        myWeapon: action.weapon
+        myWeapon: action.weapon,
       });
 
       return {gameState: newGameStateB, messageState};
@@ -603,7 +603,7 @@ function waitForOpponentToPickWeaponAReducer(
     theirWeapon,
     result,
     allocation: newAllocation,
-    turnNum: turnNum + 1
+    turnNum: turnNum + 1,
   };
 
   let newGameState;
@@ -611,7 +611,7 @@ function waitForOpponentToPickWeaponAReducer(
     newGameState = states.gameOver({
       ...gameState,
       ...newProperties,
-      messageState: {walletOutbox: {}}
+      messageState: {walletOutbox: {}},
     });
   } else {
     newGameState = states.playAgain({...gameState, ...newProperties});
@@ -621,7 +621,7 @@ function waitForOpponentToPickWeaponAReducer(
     ...newGameState,
     aWeapon: myWeapon,
     bWeapon: theirWeapon,
-    salt
+    salt,
   });
   const opponentAddress = states.getOpponentAddress(gameState);
   messageState = sendMessage(reveal, opponentAddress, messageState);
@@ -663,13 +663,13 @@ function waitForOpponentToPickWeaponBReducer(
     ...gameState,
     allocation: newAllocation,
     preCommit,
-    turnNum: turnNum + 2
+    turnNum: turnNum + 2,
   });
 
   const newCommitment = rpsCommitmentHelper.accept({
     ...newGameState,
     bWeapon: newGameState.myWeapon,
-    commitmentCount: 0 // we are transitioning from a consensus game, so need to reset this
+    commitmentCount: 0, // we are transitioning from a consensus game, so need to reset this
   });
 
   const opponentAddress = states.getOpponentAddress(gameState);
@@ -710,7 +710,7 @@ function waitForRevealBReducer(
     const newGameState1 = states.gameOver({
       ...gameState,
       ...newProperties,
-      turnNum
+      turnNum,
     });
 
     return {gameState: newGameState1, messageState};
@@ -740,7 +740,7 @@ function challengePlayAgainReducer(
         const {turnNum} = gameState;
         const newGameState1 = states.pickWeapon({
           ...gameState,
-          turnNum: turnNum + 1
+          turnNum: turnNum + 1,
         });
 
         const resting = rpsCommitmentHelper.resting(newGameState1);
@@ -779,7 +779,7 @@ function playAgainReducer(
         const {turnNum} = gameState;
         const newGameState1 = states.pickWeapon({
           ...gameState,
-          turnNum: turnNum + 1
+          turnNum: turnNum + 1,
         });
 
         const resting = rpsCommitmentHelper.resting(newGameState1);
@@ -861,7 +861,7 @@ function waitForWithdrawalReducer(
     myName,
     myAddress,
     libraryAddress: channel.channelType,
-    twitterHandle
+    twitterHandle,
   });
   return {gameState: newGameState, messageState: {}};
 }
