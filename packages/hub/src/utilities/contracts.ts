@@ -9,6 +9,6 @@ interface Artifact {
   networks: {[key: string]: {address: string}};
 }
 
-const nitroAdjudicatorArtifact: Artifact = require(path.join(commonDataPrefix, ethAssetHolderJson));
+const ethAssetHolderArtifact: Artifact = require(path.join(commonDataPrefix, ethAssetHolderJson));
 
-export {nitroAdjudicatorArtifact};
+export {ethAssetHolderArtifact};

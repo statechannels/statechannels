@@ -1,13 +1,13 @@
 import {DUMMY_RULES_ADDRESS} from '../../test/test-constants';
 import {Blockchain} from '../../wallet/services/blockchain';
-import {nitroAdjudicator} from '../../wallet/utilities/blockchain';
+import {ethAssetHolder} from '../../wallet/utilities/blockchain';
 
 jest.setTimeout(30000);
 
 let nitro: any;
 
 beforeAll(async () => {
-  nitro = await nitroAdjudicator();
+  nitro = await ethAssetHolder();
 });
 
 describe.skip('fund', () => {
