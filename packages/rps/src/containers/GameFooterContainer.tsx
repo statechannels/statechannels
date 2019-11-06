@@ -19,12 +19,12 @@ function mapStateToProps(state: SiteState) {
   return {
     isNotOurTurn,
     canChallenge,
-    challengeOngoing
+    challengeOngoing,
   };
 }
 const mapDispatchToProps = {
   resign: gameActions.resign,
-  createBlockchainChallenge: gameActions.createChallenge
+  createBlockchainChallenge: gameActions.createChallenge,
 };
 
 export default connect(

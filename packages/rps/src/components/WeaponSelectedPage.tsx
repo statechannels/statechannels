@@ -11,7 +11,7 @@ interface Props {
 
 export default class WeaponSelectedPage extends React.PureComponent<Props> {
   static defaultProps = {
-    selectedMoveId: null
+    selectedMoveId: null,
   };
 
   render() {

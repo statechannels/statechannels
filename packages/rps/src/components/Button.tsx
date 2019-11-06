@@ -17,9 +17,9 @@ export const buttonStyles: ButtonStyles = {
     boxShadow: '0px 0px 1px',
 
     ':hover': {
-      backgroundColor: '#aaa'
-    }
-  }
+      backgroundColor: '#aaa',
+    },
+  },
 };
 
 interface IProps {

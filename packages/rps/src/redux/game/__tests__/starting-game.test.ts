@@ -13,7 +13,7 @@ const params = {
   myAddress: asAddress,
   channelNonce: channel.nonce,
   libraryAddress: channel.channelType,
-  twitterHandle: 'Tweet'
+  twitterHandle: 'Tweet',
 };
 const messageState = {};
 

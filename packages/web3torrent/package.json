@@ -88,7 +88,7 @@
     "precommit": "lint-staged --quiet",
     "start": "react-scripts start",
     "start:alt": "PORT=3333 react-scripts start",
-    "storybook": "start-storybook",
+    "storybook": "start-storybook -s ./public -p 4568",
     "build": "react-scripts build",
     "build:ci": "react-scripts build",
     "eject": "react-scripts eject",

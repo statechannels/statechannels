@@ -28,6 +28,6 @@ export function sendMessage(
 ): MessageState {
   return {
     ...state,
-    opponentOutbox: {opponentAddress, commitment: asCoreCommitment(commitment)}
+    opponentOutbox: {opponentAddress, commitment: asCoreCommitment(commitment)},
   };
 }

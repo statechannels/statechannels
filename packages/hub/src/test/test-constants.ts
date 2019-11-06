@@ -17,20 +17,14 @@ export const FUNDED_CHANNEL_NONCE = 3;
 export const FUNDED_CHANNEL_NONCE_3 = 33;
 export const FUNDED_CHANNEL_HOLDINGS = '0x00';
 
-export const FUNDED_RPS_CHANNEL_NONCE = 33;
-export const FUNDED_RPS_CHANNEL_HOLDINGS = '0x03';
-
 export const BEGINNING_APP_CHANNEL_NONCE = 44;
-export const BEGINNING_RPS_APP_CHANNEL_NONCE = 4;
 export const BEGINNING_APP_CHANNEL_HOLDINGS = '0x05';
 
 export const ONGOING_APP_CHANNEL_NONCE = 5;
-export const ONGOING_RPS_APP_CHANNEL_NONCE = 55;
 export const ONGOING_APP_CHANNEL_HOLDINGS = '0x08';
 
 // just choose big numbers that won't be hit in seeding
 export const NONCE = 1000;
-export const RPS_NONCE = 22222;
 
 export const DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID = channelID({
   channelType: DUMMY_RULES_ADDRESS,
@@ -53,18 +47,6 @@ export const DUMMY_RULES_BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID = channelID({
 export const DUMMY_RULES_ONGOING_APP_CHANNEL_NONCE_CHANNEL_ID = channelID({
   channelType: DUMMY_RULES_ADDRESS,
   nonce: ONGOING_APP_CHANNEL_NONCE,
-  participants: [PARTICIPANT_1_ADDRESS, HUB_ADDRESS]
-});
-
-export const DUMMY_RULES_FUNDED_RPS_CHANNEL_NONCE_CHANNEL_ID = channelID({
-  channelType: DUMMY_RULES_ADDRESS,
-  nonce: FUNDED_RPS_CHANNEL_NONCE,
-  participants: [PARTICIPANT_1_ADDRESS, HUB_ADDRESS]
-});
-
-export const DUMMY_RULES_BEGINNING_RPS_APP_CHANNEL_NONCE_CHANNEL_ID = channelID({
-  channelType: DUMMY_RULES_ADDRESS,
-  nonce: BEGINNING_RPS_APP_CHANNEL_NONCE,
   participants: [PARTICIPANT_1_ADDRESS, HUB_ADDRESS]
 });
 
