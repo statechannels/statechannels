@@ -1,11 +1,17 @@
 import {Signature} from 'ethers/utils';
+import {
+  getTestProvider,
+  randomExternalDestination,
+  replaceAddresses,
+  setupContracts,
+} from '../test/test-helpers';
 import {getAssetTransferredEvent, getDepositedEvent} from './contract/asset-holder';
 import {getChallengeRegisteredEvent} from './contract/challenge';
 import {Channel, getChannelId} from './contract/channel';
 import {encodeConsensusData} from './contract/consensus-data';
 import {AllocationItem, encodeAllocation, encodeOutcome, Outcome} from './contract/outcome';
-import {isAllocationOutcome, isGuaranteeOutcome} from './contract/outcome';
-import {State} from './contract/state';
+import {Allocation, isAllocationOutcome, isGuaranteeOutcome} from './contract/outcome';
+import {State, VariablePart} from './contract/state';
 import {
   createDepositTransaction,
   createTransferAllTransaction,
@@ -33,6 +39,7 @@ export interface SignedState {
 
 // TODO: Export this with more thought to what is exposed by @statchannels/nitro-protocol
 export {
+  Allocation,
   createDepositTransaction,
   createTransferAllTransaction,
   State,
@@ -48,4 +55,10 @@ export {
   getDepositedEvent,
   isAllocationOutcome,
   isGuaranteeOutcome,
+  VariablePart,
+  // test helperts -- TODO move these to devtools package
+  getTestProvider,
+  randomExternalDestination,
+  replaceAddresses,
+  setupContracts,
 };

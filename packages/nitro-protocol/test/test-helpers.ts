@@ -66,7 +66,7 @@ export async function setupContracts(provider: ethers.providers.JsonRpcProvider,
   const networkMap = await getNetworkMap();
 
   const contractName = artifact.contractName;
-  const contractAddress = networkMap? networkMap[networkId][contractName] : undefined ;
+  const contractAddress = networkMap ? networkMap[networkId][contractName] : undefined;
   const contract = new ethers.Contract(contractAddress, artifact.abi, signer);
   return contract;
 }

@@ -12,7 +12,7 @@
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
     "contract:compile": "node ./bin/compile.js",
-    "deploy": "npx etherlime deploy --compile=false",
+    "deploy": "npx etherlime deploy --compile=false --file=./deployment/deploy.js",
     "test": "run-s prettier:check test:contracts 'test:app --all'",
     "startGanache": "node bin/start-ganache.js",
     "test:ci": "",
