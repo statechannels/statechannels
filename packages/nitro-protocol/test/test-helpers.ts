@@ -66,7 +66,7 @@ export async function setupContracts(provider: ethers.providers.JsonRpcProvider,
   const networkMap = await getNetworkMap();
 
   const contractName = artifact.contractName;
-  const contractAddress = networkMap[networkId][contractName];
+  const contractAddress = networkMap ? networkMap[networkId][contractName] : undefined;
   const contract = new ethers.Contract(contractAddress, artifact.abi, signer);
   return contract;
 }
@@ -191,7 +191,7 @@ export const newAssetTransferredEvent = (destination: string, payout: number) =>
 
 export function randomChannelId(channelNonce = 0) {
   // populate participants array (every test run targets a unique channel)
-  const participants = [];
+  const participants = [''];
   for (let i = 0; i < 3; i++) {
     participants[i] = ethers.Wallet.createRandom().address;
   }

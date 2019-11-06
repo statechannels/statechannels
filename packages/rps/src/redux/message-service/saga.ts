@@ -135,7 +135,7 @@ function* receiveFromFirebaseSaga(address) {
   address = address.toLowerCase();
 
   const channel = yield call(
-    reduxSagaFirebase.database.channel,
+    reduxSagaFirebase.database.channel as any,
     `/messages/${address}`,
     'child_added',
     buffers.fixed(10)
