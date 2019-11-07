@@ -1,13 +1,14 @@
-import {Address, Channel as CoreChannel, Uint256, Uint32} from 'fmg-core';
+import {Channel as CoreChannel} from '@statechannels/nitro-protocol';
+import {Uint256} from 'fmg-core';
 import {Model, snakeCaseMappers} from 'objection';
-import ChannelParticipant from './channelParticipants';
 import LedgerCommitment from './channelCommitment';
+import ChannelParticipant from './channelParticipants';
 
 export default class Channel extends Model {
   get asCoreChannel(): CoreChannel {
     return {
-      channelType: this.rulesAddress,
-      nonce: this.nonce,
+      chainId: this.chainId,
+      channelNonce: this.channelNonce,
       participants: this.participants.map(p => p.address)
     };
   }
@@ -39,10 +40,10 @@ export default class Channel extends Model {
 
   readonly id!: number;
   channelId: string;
+  chainId: Uint256;
   holdings!: Uint256;
-  nonce: Uint32;
+  channelNonce: Uint256;
   participants: ChannelParticipant[];
   commitments: LedgerCommitment[];
-  rulesAddress: Address;
   guaranteedChannel: string;
 }

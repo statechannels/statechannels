@@ -1,5 +1,5 @@
 import * as Knex from 'knex';
-import {addAddressCheck} from '../utils';
+import {addBytesCheck} from '../utils';
 
 const TABLE_NAME = 'allocations';
 
@@ -25,7 +25,7 @@ exports.up = (knex: Knex) => {
       table.unique(['allocator_channel_commitment_id', 'priority']);
     })
     .then(() => {
-      return addAddressCheck(knex, TABLE_NAME, 'destination');
+      return addBytesCheck(knex, TABLE_NAME, 'destination');
     });
 };
 

@@ -1,12 +1,10 @@
-import {CommitmentType} from 'fmg-core';
+import {encodeConsensusData} from '@statechannels/nitro-protocol';
 import {Model} from 'objection';
 import {HUB_ADDRESS} from '../../../constants';
 import {
   allocation,
   BEGINNING_APP_CHANNEL_HOLDINGS,
   BEGINNING_APP_CHANNEL_NONCE,
-  DESTINATION,
-  DESTINATION_3,
   DUMMY_RULES_ADDRESS,
   DUMMY_RULES_BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID,
   DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID,
@@ -20,8 +18,10 @@ import {
   PARTICIPANT_1_ADDRESS,
   PARTICIPANT_2_ADDRESS
 } from '../../../test/test-constants';
+import {consensus_app_attrs2, consensus_app_attrs3} from '../../../test/test_data';
 import Channel from '../../models/channel';
 import knex from '../connection';
+
 Model.knex(knex);
 
 const participants = [
@@ -37,49 +37,35 @@ const participants_3 = [
 
 const allocationByPriority = (priority: number) => ({
   priority,
-  destination: DESTINATION[priority],
-  amount: allocation(2)[priority]
+  destination: allocation[priority].destination,
+  amount: allocation[priority].amount
 });
 
-const allocationByPriority_3 = (priority: number) => ({
-  priority,
-  destination: DESTINATION_3[priority],
-  amount: allocation(3)[priority]
-});
-
-const allocations = () => [allocationByPriority(0), allocationByPriority(1)];
 const allocations_3 = () => [
-  allocationByPriority_3(0),
-  allocationByPriority_3(1),
-  allocationByPriority_3(2)
+  allocationByPriority(0),
+  allocationByPriority(1),
+  allocationByPriority(2)
 ];
+
+const allocations = () => allocations_3().slice(0, 2);
+
 // ***************
 // Ledger channels
 // ***************
 
-const ledger_appAttrs = (n: number) => ({
-  furtherVotesRequired: n,
-  proposedAllocation: [],
-  proposedDestination: []
-});
-
 function pre_fund_setup(turnNumber: number) {
   return {
     turnNumber,
-    commitmentType: CommitmentType.PreFundSetup,
-    commitmentCount: turnNumber,
     allocations: allocations(),
-    appAttrs: ledger_appAttrs(2)
+    appData: encodeConsensusData(consensus_app_attrs2(2))
   };
 }
 
 function pre_fund_setup_3(turnNumber: number) {
   return {
     turnNumber,
-    commitmentType: CommitmentType.PreFundSetup,
-    commitmentCount: turnNumber,
     allocations: allocations_3(),
-    appAttrs: ledger_appAttrs(3)
+    appData: encodeConsensusData(consensus_app_attrs3(3))
   };
 }
 
@@ -104,10 +90,8 @@ const funded_channel_3 = {
 function post_fund_setup(turnNumber: number) {
   return {
     turnNumber,
-    commitmentType: CommitmentType.PostFundSetup,
-    commitmentCount: turnNumber % funded_channel.participants.length,
     allocations: allocations(),
-    appAttrs: ledger_appAttrs(0)
+    appData: encodeConsensusData(consensus_app_attrs2(0))
   };
 }
 
@@ -123,10 +107,8 @@ const beginning_app_phase_channel = {
 function app(turnNumber: number) {
   return {
     turnNumber,
-    commitmentType: CommitmentType.PostFundSetup,
-    commitmentCount: turnNumber % funded_channel.participants.length,
     allocations: allocations(),
-    appAttrs: ledger_appAttrs(turnNumber % participants.length)
+    appData: encodeConsensusData(consensus_app_attrs2(turnNumber % participants.length))
   };
 }
 

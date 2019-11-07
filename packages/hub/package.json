@@ -32,6 +32,7 @@
   },
   "dependencies": {
     "@koa/cors": "2.2.3",
+    "@statechannels/nitro-protocol": "0.0.1",
     "async-lock": "1.2.2",
     "dotenv": "6.2.0",
     "dotenv-expand": "4.2.0",

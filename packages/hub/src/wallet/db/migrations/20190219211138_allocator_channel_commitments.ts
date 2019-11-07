@@ -16,15 +16,7 @@ exports.up = (knex: Knex) => {
       .integer('turn_number')
       .unsigned()
       .notNullable();
-    table
-      .integer('commitment_type')
-      .unsigned()
-      .notNullable();
-    table
-      .integer('commitment_count')
-      .unsigned()
-      .notNullable();
-    table.json('app_attrs').notNullable();
+    table.string('app_data', 2000).notNullable();
 
     table.unique(['allocator_channel_id', 'turn_number']);
   });

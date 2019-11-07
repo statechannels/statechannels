@@ -1,4 +1,5 @@
-import {Address, Bytes, Commitment, CommitmentType, toHex, Uint256, Uint32} from 'fmg-core';
+import {AllocationItem, State} from '@statechannels/nitro-protocol';
+import {Address, Uint256, Uint32} from 'fmg-core';
 import {Model, snakeCaseMappers} from 'objection';
 import {AppAttrSanitizer} from '../../types';
 import Allocation from './allocation';
@@ -34,24 +35,29 @@ export default class ChannelCommitment extends Model {
   channel!: Channel;
   channelId!: number;
   turnNumber!: Uint32;
-  commitmentType!: CommitmentType;
+  isFinal!: boolean;
   commitmentCount!: Uint32;
   allocations: Allocation[];
   appAttrs!: any;
+  challengeDuration: number;
+  appDefinition: string;
 
-  toHex(sanitize: AppAttrSanitizer): Bytes {
-    return toHex(this.asCoreCommitment(sanitize));
-  }
+  asCoreState(sanitize: AppAttrSanitizer): State {
+    const destinations = this.allocations.sort(priority).map(destination);
+    const allocations = this.allocations.sort(priority).map(amount);
+    const allocationItems: AllocationItem[] = destinations.map((dest, destIndex) => ({
+      destination: dest,
+      amount: allocations[destIndex]
+    }));
 
-  asCoreCommitment(sanitize: AppAttrSanitizer): Commitment {
     return {
-      commitmentType: this.commitmentType,
-      commitmentCount: this.commitmentCount,
+      isFinal: this.isFinal,
       turnNum: this.turnNumber,
       channel: this.channel.asCoreChannel,
-      allocation: this.allocations.sort(priority).map(amount),
-      destination: this.allocations.sort(priority).map(destination),
-      appAttributes: sanitize(this.appAttrs)
+      outcome: [{assetHolderAddress: 'dummyEtheAssetHolderAddress', allocation: allocationItems}],
+      appData: sanitize(this.appAttrs),
+      challengeDuration: this.challengeDuration,
+      appDefinition: this.appDefinition
     };
   }
 }

@@ -1,115 +1,100 @@
-import {CommitmentType} from 'fmg-core';
-import {
-  AppCommitment,
-  finalVote,
-  isConsensusReached,
-  pass,
-  vote
-} from 'fmg-nitro-adjudicator/lib/consensus-app';
-import {unreachable} from '@statechannels/wallet';
-import {SignedCommitment, SignedLedgerCommitment} from '.';
+import {SignedState, State} from '@statechannels/nitro-protocol';
 import {HUB_ADDRESS} from '../../constants';
 import {queries} from '../db/queries/channels';
 import errors from '../errors';
 import * as ChannelManagement from './channelManagement';
-import {asCoreCommitment, LedgerCommitment} from './ledger-commitment';
 
 export async function updateLedgerChannel(
-  commitmentRound: SignedLedgerCommitment[],
-  lastStoredCommitment?: LedgerCommitment
-): Promise<SignedCommitment> {
-  let commitmentsToApply = commitmentRound;
-  if (lastStoredCommitment) {
-    commitmentsToApply = commitmentRound.filter(
-      signedCommitment => signedCommitment.ledgerCommitment.turnNum > lastStoredCommitment.turnNum
+  stateRound: SignedState[],
+  lastStoredState?: State
+): Promise<SignedState> {
+  let statesToApply = stateRound;
+  if (lastStoredState) {
+    statesToApply = stateRound.filter(
+      signedState => signedState.state.turnNum > lastStoredState.turnNum
     );
   }
-  commitmentsToApply.sort((a, b) => {
-    return a.ledgerCommitment.turnNum - b.ledgerCommitment.turnNum;
+  statesToApply.sort((a, b) => {
+    return a.state.turnNum - b.state.turnNum;
   });
 
-  let lastValidCommitment = lastStoredCommitment;
-  for (const commitmentToApply of commitmentsToApply) {
-    if (!shouldAcceptCommitment(commitmentToApply, lastValidCommitment)) {
+  let lastValidState = lastStoredState;
+  for (const stateToApply of statesToApply) {
+    if (!shouldAcceptState(stateToApply, lastValidState)) {
       throw errors.INVALID_COMMITMENT_UNKNOWN_REASON;
     }
-    lastValidCommitment = commitmentToApply.ledgerCommitment;
+    lastValidState = stateToApply.state;
   }
 
-  const ourCommitment = nextCommitment(commitmentsToApply);
-  const commitmentToStore = commitmentsToApply.map(
-    signedCommitment => signedCommitment.ledgerCommitment
-  );
-  // todo: signatures need to be stored alongside commitments
-  await queries.updateChannel(commitmentToStore, ourCommitment);
-  return ChannelManagement.formResponse(asCoreCommitment(ourCommitment));
+  const ourState = nextState(statesToApply);
+  const stateToStore = statesToApply.map(signedState => signedState.state);
+  // todo: signatures need to be stored alongside states
+  await queries.updateChannel(stateToStore, ourState);
+  return ChannelManagement.formResponse(ourState);
 }
 
-function shouldAcceptCommitment(
-  signedCommitment: SignedLedgerCommitment,
-  previousCommitment?: LedgerCommitment
-) {
-  const {ledgerCommitment: commitment, signature} = signedCommitment;
-  if (!ChannelManagement.validSignature(asCoreCommitment(commitment), signature)) {
+function shouldAcceptState(signedState: SignedState, previousState?: State) {
+  const {state: state, signature} = signedState;
+  if (!ChannelManagement.validSignature(state, signature)) {
     throw errors.COMMITMENT_NOT_SIGNED;
   }
 
-  if (commitment.turnNum > 0) {
-    if (!valuePreserved(previousCommitment, commitment)) {
+  if (state.turnNum > 0) {
+    if (!valuePreserved(previousState, state)) {
       throw errors.VALUE_LOST;
     }
 
-    if (
-      commitment.commitmentType !== CommitmentType.PreFundSetup &&
-      !validTransition(previousCommitment, commitment)
-    ) {
+    if (!validTransition(previousState, state)) {
       throw errors.INVALID_TRANSITION;
     }
   }
   return true;
 }
 
-export function nextCommitment(commitmentRound: SignedLedgerCommitment[]): LedgerCommitment {
+export function nextState(stateRound: SignedState[]): State {
   // Check that it is our turn
-  const lastCommitmnent = commitmentRound.slice(-1)[0].ledgerCommitment;
-  const participants = lastCommitmnent.channel.participants;
+  const lastState = stateRound.slice(-1)[0].state;
+  const participants = lastState.channel.participants;
   const ourIndex = participants.indexOf(HUB_ADDRESS);
-  const lastTurn = lastCommitmnent.turnNum;
+  const lastTurn = lastState.turnNum;
   const numParticipants = participants.length;
   if ((lastTurn + 1) % numParticipants !== ourIndex) {
     throw errors.NOT_OUR_TURN;
   }
 
-  if (lastCommitmnent.commitmentType !== CommitmentType.App) {
-    return ChannelManagement.nextCommitment(lastCommitmnent) as LedgerCommitment;
-  }
+  return ChannelManagement.nextState(lastState);
+  // todo: form response during funding
+  /*if (lastCommitmnent.commitmentType !== CommitmentType.App) {
+    return ChannelManagement.nextState(lastCommitmnent) as State;
+  }*/
 
-  if (finalVoteRequired(lastCommitmnent)) {
-    return finalVote(lastCommitmnent);
-  } else if (voteRequired(lastCommitmnent)) {
-    return vote(lastCommitmnent);
-  } else if (isConsensusReached(lastCommitmnent)) {
-    return pass(lastCommitmnent);
+  // todo: refactor consensus app logic
+  /*
+  if (finalVoteRequired(lastState)) {
+    return finalVote(lastState);
+  } else if (voteRequired(lastState)) {
+    return vote(lastState);
+  } else if (isConsensusReached(lastState)) {
+    return pass(lastState);
   } else {
-    return unreachable(lastCommitmnent);
-  }
+    return unreachable(lastState);
+  }*/
 }
 
-function finalVoteRequired(c: LedgerCommitment): c is AppCommitment {
-  return c.appAttributes.furtherVotesRequired === 1;
+// todo: a better check is a typeguard
+/*function finalVoteRequired(s: State): boolean {
+  return decodeConsensusData(s.appData).furtherVotesRequired === 1;
+}*/
+
+// todo: a better check is a typeguard
+/*function voteRequired(s: State): boolean {
+  return decodeConsensusData(s.appData).furtherVotesRequired > 1;
+}*/
+
+export function valuePreserved(currentState: any, theirState: any): boolean {
+  return currentState || (theirState && true);
 }
 
-function voteRequired(c: LedgerCommitment): c is AppCommitment {
-  return c.appAttributes.furtherVotesRequired > 1;
-}
-
-export function valuePreserved(currentCommitment: any, theirCommitment: any): boolean {
-  return currentCommitment || (theirCommitment && true);
-}
-
-export function validTransition(
-  currentCommitment: LedgerCommitment,
-  theirCommitment: LedgerCommitment
-): boolean {
-  return theirCommitment.turnNum === currentCommitment.turnNum + 1;
+export function validTransition(currentState: State, theirState: State): boolean {
+  return theirState.turnNum === currentState.turnNum + 1;
 }

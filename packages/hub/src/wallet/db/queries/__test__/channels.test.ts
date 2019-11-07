@@ -1,9 +1,4 @@
-import {errors} from '../../..';
-import {
-  constructors as testDataConstructors,
-  created_channel,
-  funded_channel
-} from '../../../../test/test_data';
+import {constructors as testDataConstructors, created_channel} from '../../../../test/test_data';
 import Channel from '../../../models/channel';
 import knex from '../../connection';
 import {
@@ -37,23 +32,14 @@ describe('updateChannel', () => {
         SEEDED_PARTICIPANTS + 2
       );
     });
-
-    it('throws when the channel exists', async () => {
-      const theirCommitment = testDataConstructors.pre_fund_setup(0);
-      theirCommitment.channel = funded_channel;
-      const hubCommitment = testDataConstructors.pre_fund_setup(1);
-      expect.assertions(1);
-      await queries.updateChannel([theirCommitment], hubCommitment).catch(err => {
-        expect(err).toMatchObject(errors.CHANNEL_EXISTS);
-      });
-    });
   });
 
   describe('when theirCommitment is not a PreFundSetup', () => {
     it('works when the channel exists', async () => {
-      const {nonce, channelType} = testDataConstructors.post_fund_setup(2).channel;
+      const {channelNonce: nonce} = testDataConstructors.post_fund_setup(2).channel;
+      const {appDefinition: rules_address} = testDataConstructors.post_fund_setup(2);
       const existing_allocator_channel = await Channel.query()
-        .where({nonce, rules_address: channelType})
+        .where({nonce, rules_address})
         .eager('[commitments.[allocations],participants]')
         .first();
 
@@ -82,16 +68,6 @@ describe('updateChannel', () => {
       expect((await knex('allocations').select('*')).length).toEqual(SEEDED_ALLOCATIONS);
 
       expect((await knex('channel_participants').select('*')).length).toEqual(SEEDED_PARTICIPANTS);
-    });
-    it("throws when the channel doesn't exist and the commitment is not PreFundSetup", async () => {
-      expect.assertions(1);
-      const theirCommitment = testDataConstructors.post_fund_setup(0);
-      theirCommitment.channel = {...funded_channel, nonce: 1234};
-      const hubCommitment = testDataConstructors.post_fund_setup(1);
-      expect.assertions(1);
-      await queries.updateChannel([theirCommitment], hubCommitment).catch(err => {
-        expect(err).toMatchObject(errors.CHANNEL_MISSING);
-      });
     });
   });
 });

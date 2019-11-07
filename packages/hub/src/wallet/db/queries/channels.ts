@@ -1,66 +1,54 @@
+import {getChannelId, isAllocationOutcome, State} from '@statechannels/nitro-protocol';
+import {AllocationAssetOutcome} from '@statechannels/nitro-protocol/src/contract/outcome';
 import {ethers} from 'ethers';
 import {bigNumberify} from 'ethers/utils';
-import {Address, channelID, CommitmentType, Signature, Uint256, Uint32} from 'fmg-core';
-import {AppCommitment, CommitmentString} from '../../../types';
-import errors from '../../errors';
+import {Address, Signature, Uint256} from 'fmg-core';
+import {CommitmentString} from '../../../types';
 import Channel from '../../models/channel';
 
 export interface CreateChannelParams {
   commitment: CommitmentString;
   signature: Signature;
 }
-export interface IChannel {
-  channelId: Address;
-  channelType: Address;
-  nonce_id: number;
-}
 
 export const queries = {
   updateChannel
 };
 
-async function updateChannel(commitmentRound: AppCommitment[], hubCommitment: AppCommitment) {
-  const firstCommitment = commitmentRound[0];
-  const {channel} = firstCommitment;
-  const {channelType: rules_address, nonce, participants} = channel;
-  const channelId = channelID(channel);
+async function updateChannel(stateRound: State[], hubState: State) {
+  const firstState = stateRound[0];
+  const {channel, appDefinition: rules_address} = firstState;
+  const {channelNonce: nonce, participants} = channel;
+  const channelId = getChannelId(channel);
 
   const storedChannel = await Channel.query()
     .where({channel_id: channelId})
     .select('id')
     .first();
 
-  if (storedChannel && firstCommitment.commitmentType === CommitmentType.PreFundSetup) {
-    throw errors.CHANNEL_EXISTS;
-  } else if (!storedChannel && firstCommitment.commitmentType !== CommitmentType.PreFundSetup) {
-    throw errors.CHANNEL_MISSING;
-  }
+  const allocations = (s: State) =>
+    isAllocationOutcome(s.outcome[0])
+      ? (s.outcome[0] as AllocationAssetOutcome).allocation.map((allocationItem, priority) => ({
+          ...allocationItem,
+          priority
+        }))
+      : [];
 
-  const allocationByPriority = (priority: number, c: AppCommitment) => ({
-    priority,
-    destination: c.destination[priority],
-    amount: c.allocation[priority]
+  const state = (s: State) => ({
+    turn_number: s.turnNum,
+    allocations: allocations(s),
+    app_data: s.appData
   });
 
-  const allocations = (c: AppCommitment) =>
-    !c.channel.guaranteedChannel ? c.allocation.map((_, i) => allocationByPriority(i, c)) : [];
-
-  const commitment = (c: AppCommitment) => ({
-    turn_number: c.turnNum,
-    commitment_type: c.commitmentType,
-    commitment_count: c.commitmentCount,
-    allocations: allocations(c),
-    app_attrs: c.appAttributes
-  });
-
-  const commitments = [...commitmentRound.map(c => commitment(c)), commitment(hubCommitment)];
-  const guaranteedChannel = commitmentRound.map(c => c.channel.guaranteedChannel)[0];
+  const commitments = [...stateRound.map(c => state(c)), state(hubState)];
+  // todo: refactor guarantees later
+  // const guaranteedChannel = stateRound.map(c => c.channel.guaranteedChannel)[0];
 
   interface Upsert {
     channel_id: string;
     commitments: any[];
     rules_address: Address;
-    nonce: Uint32;
+    nonce: Uint256;
     holdings?: Uint256;
     id?: number;
     participants?: any[];
@@ -71,12 +59,13 @@ async function updateChannel(commitmentRound: AppCommitment[], hubCommitment: Ap
     commitments,
     rules_address,
     nonce,
-    guaranteedChannel
+    // todo: deal with guarantee channels
+    guaranteedChannel: '0x0000000000000000000000000000000000000000'
   };
 
   // TODO: We are currently using the allocations to set the funding amount
   // This assumes that the channel is funded and DOES NOT work for guarantor channels
-  const hubAllocationAmounts = allocations(hubCommitment).map(x => x.amount);
+  const hubAllocationAmounts = allocations(hubState).map(x => x.amount);
 
   const holdings = hubAllocationAmounts.reduce(
     (a, b) =>
