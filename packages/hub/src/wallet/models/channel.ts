@@ -1,18 +1,9 @@
-import {Channel as CoreChannel} from '@statechannels/nitro-protocol';
 import {Uint256} from 'fmg-core';
 import {Model, snakeCaseMappers} from 'objection';
 import LedgerCommitment from './channelCommitment';
 import ChannelParticipant from './channelParticipants';
 
 export default class Channel extends Model {
-  get asCoreChannel(): CoreChannel {
-    return {
-      chainId: this.chainId,
-      channelNonce: this.channelNonce,
-      participants: this.participants.map(p => p.address)
-    };
-  }
-
   static tableName = 'channels';
 
   static get columnNameMappers() {

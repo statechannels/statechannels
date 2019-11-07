@@ -1,24 +1,24 @@
 import * as Knex from 'knex';
-const TABLE_NAME = 'allocator_channel_commitments';
+const TABLE_NAME = 'channel_commitments';
 
 exports.up = (knex: Knex) => {
   return knex.schema.createTable(TABLE_NAME, table => {
     table.increments();
     table
-      .integer('allocator_channel_id')
+      .integer('channel_id')
       .unsigned()
       .notNullable();
     table
-      .foreign('allocator_channel_id')
-      .references('allocator_channels.id')
+      .foreign('channel_id')
+      .references('channels.id')
       .onDelete('CASCADE');
     table
       .integer('turn_number')
       .unsigned()
       .notNullable();
-    table.string('app_data', 2000).notNullable();
+    table.text('app_data').notNullable();
 
-    table.unique(['allocator_channel_id', 'turn_number']);
+    table.unique(['channel_id', 'turn_number']);
   });
 };
 

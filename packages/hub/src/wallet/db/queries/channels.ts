@@ -26,10 +26,12 @@ async function updateChannel(stateRound: State[], hubState: State) {
     .select('id')
     .first();
 
+  // todo: remove hardcoding of only inspecting the first outcome in the outcomes list
   const allocations = (s: State) =>
     isAllocationOutcome(s.outcome[0])
       ? (s.outcome[0] as AllocationAssetOutcome).allocation.map((allocationItem, priority) => ({
           ...allocationItem,
+          assetHolderAddress: s.outcome[0].assetHolderAddress,
           priority
         }))
       : [];

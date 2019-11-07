@@ -1,5 +1,5 @@
 import * as Knex from 'knex';
-import {addBytesCheck} from '../utils';
+import {addAddressCheck, addBytesCheck} from '../utils';
 
 const TABLE_NAME = 'allocations';
 
@@ -8,12 +8,12 @@ exports.up = (knex: Knex) => {
     .createTable(TABLE_NAME, table => {
       table.increments();
       table
-        .integer('allocator_channel_commitment_id')
+        .integer('channel_commitment_id')
         .unsigned()
         .notNullable();
       table
-        .foreign('allocator_channel_commitment_id')
-        .references('allocator_channel_commitments.id')
+        .foreign('channel_commitment_id')
+        .references('channel_commitments.id')
         .onDelete('CASCADE');
       table
         .integer('priority')
@@ -21,11 +21,15 @@ exports.up = (knex: Knex) => {
         .notNullable();
       table.string('destination').notNullable();
       table.string('amount').notNullable();
+      table.string('asset_holder_address').notNullable();
 
-      table.unique(['allocator_channel_commitment_id', 'priority']);
+      table.unique(['channel_commitment_id', 'priority']);
     })
     .then(() => {
       return addBytesCheck(knex, TABLE_NAME, 'destination');
+    })
+    .then(() => {
+      return addAddressCheck(knex, TABLE_NAME, 'asset_holder_address');
     });
 };
 
