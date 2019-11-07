@@ -15,7 +15,7 @@
     "deploy": "npx etherlime deploy --compile=false --file=./deployment/deploy.js",
     "test": "run-s prettier:check test:contracts 'test:app --all'",
     "startGanache": "node bin/start-ganache.js",
-    "test:ci": "",
+    "test:ci": "npx tsc",
     "test:ci:contracts": "yarn test:contracts --all --ci",
     "test:ci:app": "yarn test:app --all --ci --runInBand",
     "prettier:check": "npx prettier --check 'src/**/*.{ts,tsx}'",
