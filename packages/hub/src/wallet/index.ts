@@ -1,5 +1,4 @@
 import {Bytes} from 'fmg-core';
-export {SignedCommitment} from './services';
 import {queries} from './db/queries/channels';
 import {formResponse, nextState, validSignature} from './services/channelManagement';
 

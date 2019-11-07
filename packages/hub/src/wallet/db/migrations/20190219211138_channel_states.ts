@@ -1,5 +1,5 @@
 import * as Knex from 'knex';
-const TABLE_NAME = 'channel_commitments';
+const TABLE_NAME = 'channel_states';
 
 exports.up = (knex: Knex) => {
   return knex.schema.createTable(TABLE_NAME, table => {

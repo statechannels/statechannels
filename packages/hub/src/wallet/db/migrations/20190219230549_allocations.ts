@@ -8,12 +8,12 @@ exports.up = (knex: Knex) => {
     .createTable(TABLE_NAME, table => {
       table.increments();
       table
-        .integer('channel_commitment_id')
+        .integer('channel_state_id')
         .unsigned()
         .notNullable();
       table
-        .foreign('channel_commitment_id')
-        .references('channel_commitments.id')
+        .foreign('channel_state_id')
+        .references('channel_states.id')
         .onDelete('CASCADE');
       table
         .integer('priority')
@@ -23,7 +23,7 @@ exports.up = (knex: Knex) => {
       table.string('amount').notNullable();
       table.string('asset_holder_address').notNullable();
 
-      table.unique(['channel_commitment_id', 'priority']);
+      table.unique(['channel_state_id', 'priority']);
     })
     .then(() => {
       return addBytesCheck(knex, TABLE_NAME, 'destination');

@@ -1,7 +1,7 @@
 import {Uint256} from 'fmg-core';
 import {Model, snakeCaseMappers} from 'objection';
-import LedgerCommitment from './channelCommitment';
 import ChannelParticipant from './channelParticipants';
+import LedgerCommitment from './channelState';
 
 export default class Channel extends Model {
   static tableName = 'channels';
@@ -19,12 +19,12 @@ export default class Channel extends Model {
         to: 'channel_participants.channel_id'
       }
     },
-    commitments: {
+    states: {
       relation: Model.HasManyRelation,
       modelClass: LedgerCommitment,
       join: {
         from: 'channels.id',
-        to: 'channel_commitments.channel_id'
+        to: 'channel_states.channel_id'
       }
     }
   };
@@ -35,6 +35,6 @@ export default class Channel extends Model {
   holdings!: Uint256;
   channelNonce: Uint256;
   participants: ChannelParticipant[];
-  commitments: LedgerCommitment[];
+  states: LedgerCommitment[];
   guaranteedChannel: string;
 }
