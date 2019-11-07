@@ -1,6 +1,6 @@
 import {Address, Uint256, Uint32} from 'fmg-core';
 import {Model, snakeCaseMappers} from 'objection';
-import LedgerCommitment from './channelState';
+import ChannelState from './channelState';
 
 export default class Allocation extends Model {
   static tableName = 'allocations';
@@ -12,7 +12,7 @@ export default class Allocation extends Model {
   static relationMappings = {
     state: {
       relation: Model.BelongsToOneRelation,
-      modelClass: LedgerCommitment,
+      modelClass: ChannelState,
       join: {
         from: 'allocations.channel_state_id',
         to: 'channel_states.id'
@@ -20,7 +20,7 @@ export default class Allocation extends Model {
     }
   };
   readonly id!: number;
-  state: LedgerCommitment;
+  state: ChannelState;
   destination: Address;
   amount: Uint256;
   priority: Uint32;
