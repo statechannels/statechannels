@@ -65,7 +65,7 @@ export const PARTICIPANTS_3: Address[] = [
 ];
 
 const hex5 = bigNumberify(5).toHexString();
-const dummyEthAssetHolderAddress = '0x0000000000000000000000000000000000000001';
+export const dummyEthAssetHolderAddress = '0x0000000000000000000000000000000000000001';
 
 export const allocation: AllocationItem[] = [
   {destination: convertAddressToBytes32(PARTICIPANT_1_ADDRESS), amount: hex5},

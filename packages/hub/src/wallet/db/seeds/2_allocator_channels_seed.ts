@@ -10,6 +10,7 @@ import {
   DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID,
   DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID_3,
   DUMMY_RULES_ONGOING_APP_CHANNEL_NONCE_CHANNEL_ID,
+  dummyEthAssetHolderAddress,
   FUNDED_CHANNEL_HOLDINGS,
   FUNDED_CHANNEL_NONCE,
   FUNDED_CHANNEL_NONCE_3,
@@ -38,7 +39,8 @@ const participants_3 = [
 const allocationByPriority = (priority: number) => ({
   priority,
   destination: allocation[priority].destination,
-  amount: allocation[priority].amount
+  amount: allocation[priority].amount,
+  assetHolderAddress: dummyEthAssetHolderAddress
 });
 
 const allocations_3 = () => [

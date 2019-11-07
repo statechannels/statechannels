@@ -1,7 +1,7 @@
 import * as Knex from 'knex';
 import {addBytesCheck} from '../utils';
 
-const TABLE_NAME = 'allocator_channels';
+const TABLE_NAME = 'channels';
 
 exports.up = (knex: Knex) => {
   return knex.schema
