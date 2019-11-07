@@ -174,30 +174,46 @@ export class ChannelClient {
 
   createChannel(parameters: CreateChannelParameters) {
     this.send(MethodName.CreateChannel, parameters);
+
+    // TODO: This notification payload is incomplete, since it doesn't have the result
+    // of the channel creation. Where should this go?
+    this.notifyChannelProposed(parameters as CreateChannelResult);
   }
 
   joinChannel(parameters: JoinChannelParameters) {
     this.send(MethodName.JoinChannel, parameters);
+
+    // TODO: This notification payload is incomplete, since it doesn't have the result
+    // of the channel creation. Where should this go?
+    this.notifyChannelUpdated(parameters as UpdateChannelResult);
   }
 
   updateChannel(parameters: UpdateChannelParameters) {
     this.send(MethodName.UpdateChannel, parameters);
   }
 
-  protected async send(methodOrNotificationName: ActionName, parameters: ActionParameters) {
+  protected async send(methodName: MethodName, parameters: ActionParameters) {
     this.events.emit('message', {
       jsonrpc: '2.0',
       id: Date.now(),
-      method: methodOrNotificationName,
+      method: methodName,
+      params: parameters,
+    });
+  }
+
+  protected async notify(notificationName: NotificationName, parameters: ActionParameters) {
+    this.events.emit('message', {
+      jsonrpc: '2.0',
+      method: notificationName,
       params: parameters,
     });
   }
 
   protected async notifyChannelUpdated(parameters: UpdateChannelResult) {
-    await this.send(NotificationName.ChannelUpdated, parameters);
+    await this.notify(NotificationName.ChannelUpdated, parameters);
   }
 
   protected async notifyChannelProposed(parameters: CreateChannelResult) {
-    await this.send(NotificationName.ChannelProposed, parameters);
+    await this.notify(NotificationName.ChannelProposed, parameters);
   }
 }
