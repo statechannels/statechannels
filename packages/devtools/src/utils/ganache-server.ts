@@ -1,8 +1,7 @@
-import {spawn} from "child_process";
 import {ethers} from "ethers";
 import {JsonRpcProvider} from "ethers/providers";
+import ganache from "ganache-core";
 import {waitUntilFree, waitUntilUsed} from "tcp-port-used";
-import kill from "tree-kill";
 
 import {configureEnvVariables} from "../config/env";
 configureEnvVariables();
@@ -31,10 +30,16 @@ export class GanacheServer {
   private port: number;
   private timeout: number;
 
-  constructor(accounts: Account[] = ETHERLIME_ACCOUNTS, timeout = 5000) {
+  constructor(
+    accounts: Account[] = ETHERLIME_ACCOUNTS,
+    timeout: number = 5000,
+    gasLimit: number = 17592186044415,
+    gasPrice: string = "0x01"
+  ) {
     if (!process.env.GANACHE_PORT) {
       throw new Error("No GANACHE_PORT found. Aborting!");
     }
+
     this.port = Number(process.env.GANACHE_PORT);
     this.timeout = timeout;
 
@@ -48,18 +53,15 @@ export class GanacheServer {
 
     const oneMillion = ethers.utils.parseEther("1000000");
 
-    const opts = [`--networkId ${process.env.GANACHE_NETWORK_ID}`, `--port ${this.port}`].concat(
-      accounts.map(a => `--account ${a.privateKey},${a.amount || oneMillion}`)
-    );
-    const cmd = `ganache-cli ${opts.join(" ")}`;
-
-    this.server = spawn("npx", ["-c", cmd], {stdio: "pipe"});
-    this.server.stderr.on("data", data => {
-      console.error(`Server threw error ${data}`);
-
-      throw new Error("Ganache server failed to start");
+    this.server = ganache.server({
+      accounts: accounts.map(a => {
+        return {balance: a.amount || oneMillion, secretKey: a.privateKey};
+      }),
+      gasLimit,
+      gasPrice
     });
 
+    this.server.listen(this.port);
     this.provider = new JsonRpcProvider(`http://localhost:${this.port}`);
   }
 
@@ -68,7 +70,7 @@ export class GanacheServer {
   }
 
   async close() {
-    kill(this.server.pid);
+    this.server.close();
 
     try {
       await waitUntilFree(this.port, 500, this.timeout);
