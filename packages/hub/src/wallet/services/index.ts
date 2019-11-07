@@ -4,7 +4,7 @@ import {Blockchain} from './blockchain';
 import * as LedgerChannelManager from './ledgerChannelManager';
 
 export const updateLedgerChannel: (
-  ledgerCommitmentRound: SignedState[],
+  ledgerStateRound: SignedState[],
   currentC?: State
 ) => Promise<SignedState> = LedgerChannelManager.updateLedgerChannel;
 
