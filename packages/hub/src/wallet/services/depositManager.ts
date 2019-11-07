@@ -1,6 +1,6 @@
+import {addHex} from '@statechannels/wallet';
 import {bigNumberify} from 'ethers/utils';
 import {Address, Uint256} from 'fmg-core';
-import {addHex} from '@statechannels/wallet';
 import {HUB_ADDRESS} from '../../constants';
 import Channel from '../models/channel';
 import {Blockchain} from './blockchain';
@@ -26,7 +26,7 @@ export async function onDepositEvent(
     .findOne({
       channel_id
     })
-    .eager('[commitments.[allocations], participants]');
+    .eager('[states.[allocations], participants]');
 
   const holdings = destinationHoldings;
 
@@ -39,25 +39,23 @@ export async function onDepositEvent(
     .findById(channel.id)
     .patch({holdings});
 
-  const commitments = channel.commitments;
-  const latestCommitment = commitments.reduce((prevCommitment, currentCommitment) => {
-    return prevCommitment.turnNumber > currentCommitment.turnNumber
-      ? prevCommitment
-      : currentCommitment;
+  const states = channel.states;
+  const latestState = states.reduce((prevState, currentState) => {
+    return prevState.turnNumber > currentState.turnNumber ? prevState : currentState;
   });
 
   const hubParticipatIndex = channel.participants
     .map(participant => participant.address)
     .indexOf(HUB_ADDRESS);
 
-  const totalNeededInAdjudicator = latestCommitment.allocations
+  const totalNeededInAdjudicator = latestState.allocations
     .map(allocation => allocation.amount)
     .reduce(addHex);
 
   const channelNeedsMoreFunds = bigNumberify(totalNeededInAdjudicator).gt(bigNumberify(holdings));
 
   if (channelNeedsMoreFunds) {
-    const allocationNeededFromHub = latestCommitment.allocations[hubParticipatIndex];
+    const allocationNeededFromHub = latestState.allocations[hubParticipatIndex];
     await Blockchain.fund(channelId, holdings, allocationNeededFromHub.amount);
   } else {
     console.log('Channel is fully funded');

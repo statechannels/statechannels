@@ -2,14 +2,8 @@ import {getChannelId, isAllocationOutcome, State} from '@statechannels/nitro-pro
 import {AllocationAssetOutcome} from '@statechannels/nitro-protocol/src/contract/outcome';
 import {ethers} from 'ethers';
 import {bigNumberify} from 'ethers/utils';
-import {Address, Signature, Uint256} from 'fmg-core';
-import {CommitmentString} from '../../../types';
+import {Address, Uint256} from 'fmg-core';
 import Channel from '../../models/channel';
-
-export interface CreateChannelParams {
-  commitment: CommitmentString;
-  signature: Signature;
-}
 
 export const queries = {
   updateChannel
@@ -42,13 +36,13 @@ async function updateChannel(stateRound: State[], hubState: State) {
     app_data: s.appData
   });
 
-  const commitments = [...stateRound.map(c => state(c)), state(hubState)];
+  const states = [...stateRound.map(c => state(c)), state(hubState)];
   // todo: refactor guarantees later
   // const guaranteedChannel = stateRound.map(c => c.channel.guaranteedChannel)[0];
 
   interface Upsert {
     channel_id: string;
-    commitments: any[];
+    states: any[];
     rules_address: Address;
     nonce: Uint256;
     holdings?: Uint256;
@@ -58,7 +52,7 @@ async function updateChannel(stateRound: State[], hubState: State) {
   }
   let upserts: Upsert = {
     channel_id: channelId,
-    commitments,
+    states,
     rules_address,
     nonce,
     // todo: deal with guarantee channels
@@ -92,15 +86,6 @@ async function updateChannel(stateRound: State[], hubState: State) {
   }
 
   return Channel.query()
-    .eager('[commitments.[allocations,channel.[participants]],participants]')
+    .eager('[states.[allocations,channel.[participants]],participants]')
     .upsertGraphAndFetch(upserts);
-}
-
-export async function getWithCommitments(channel_id: string) {
-  return await Channel.query()
-    .where({
-      channel_id
-    })
-    .eager('[commitments.[channel.[participants],allocations]]')
-    .first();
 }

@@ -21,7 +21,7 @@ export async function updateLedgerChannel(
   let lastValidState = lastStoredState;
   for (const stateToApply of statesToApply) {
     if (!shouldAcceptState(stateToApply, lastValidState)) {
-      throw errors.INVALID_COMMITMENT_UNKNOWN_REASON;
+      throw errors.INVALID_STATE_UNKNOWN_REASON;
     }
     lastValidState = stateToApply.state;
   }
@@ -36,7 +36,7 @@ export async function updateLedgerChannel(
 function shouldAcceptState(signedState: SignedState, previousState?: State) {
   const {state: state, signature} = signedState;
   if (!ChannelManagement.validSignature(state, signature)) {
-    throw errors.COMMITMENT_NOT_SIGNED;
+    throw errors.STATE_NOT_SIGNED;
   }
 
   if (state.turnNum > 0) {

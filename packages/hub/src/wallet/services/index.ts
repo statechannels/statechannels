@@ -1,28 +1,7 @@
 import {SignedState, State} from '@statechannels/nitro-protocol';
-import {Address, Channel, Commitment, Signature, Uint256, Uint32} from 'fmg-core';
+import {Address, Uint256} from 'fmg-core';
 import {Blockchain} from './blockchain';
-import {LedgerCommitment} from './ledger-commitment';
 import * as LedgerChannelManager from './ledgerChannelManager';
-
-export interface IStoredChannel extends Channel {
-  id: number;
-  holdings: Uint32;
-}
-
-export interface IChannelCommitment extends Commitment {
-  id: number;
-  channel_id: number;
-}
-
-export interface SignedCommitment {
-  commitment: Commitment;
-  signature: Signature;
-}
-
-export interface SignedLedgerCommitment {
-  ledgerCommitment: LedgerCommitment;
-  signature: Signature;
-}
 
 export const updateLedgerChannel: (
   ledgerCommitmentRound: SignedState[],

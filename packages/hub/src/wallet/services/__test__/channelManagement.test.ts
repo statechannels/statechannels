@@ -22,16 +22,16 @@ beforeEach(() => {
 });
 
 describe('validSignature', () => {
-  it('returns true when the commitment was signed by the mover', async () => {
+  it('returns true when the state was signed by the mover', async () => {
     expect(ChannelManagement.validSignature(pre_fund_setup_1, hubSignature)).toBe(true);
   });
 
-  it.skip('returns false when the commitment was not signed by the mover', async () => {
+  it.skip('returns false when the state was not signed by the mover', async () => {
     // TODO: Unskip when validation is enabled
     expect(ChannelManagement.validSignature(pre_fund_setup_0, hubSignature)).toBe(false);
   });
 
-  it.skip('returns false when the commitment was not signed by the mover', async () => {
+  it.skip('returns false when the state was not signed by the mover', async () => {
     // TODO: Unskip when validation is enabled
     const signature = signState(pre_fund_setup_0, '0xf00').signature;
     expect(ChannelManagement.validSignature(pre_fund_setup_0, signature)).toBe(false);
@@ -39,7 +39,7 @@ describe('validSignature', () => {
 });
 
 describe('formResponse', () => {
-  it('returns a signed core commitment', async () => {
+  it('returns a signed core state', async () => {
     pre_fund_setup_1.channel = funded_channel;
 
     hubSignature = signState(pre_fund_setup_1, HUB_PRIVATE_KEY).signature;
@@ -51,12 +51,12 @@ describe('formResponse', () => {
   });
 });
 
-describe('nextCommitment', () => {
-  it('works on preFundSetup commitments', () => {
+describe('nextState', () => {
+  it('works on preFundSetup states', () => {
     expect(ChannelManagement.nextState(pre_fund_setup_0)).toMatchObject(pre_fund_setup_1);
   });
 
-  it('works on postFundSetup commitments', () => {
+  it('works on postFundSetup states', () => {
     expect(ChannelManagement.nextState(post_fund_setup_0)).toMatchObject(post_fund_setup_1);
   });
 });
