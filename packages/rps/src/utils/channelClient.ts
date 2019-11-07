@@ -162,7 +162,14 @@ export class ChannelClient {
     notificationName: NotificationName,
     callback: (parameters: ActionParameters) => void
   ) {
-    this.events.on(notificationName, callback);
+    this.events.on(
+      'message',
+      (message: JsonRPCNotification<ActionParameters> | JsonRPCRequest<ActionParameters>) => {
+        if (message.method === notificationName) {
+          callback(message.params);
+        }
+      }
+    );
   }
 
   createChannel(parameters: CreateChannelParameters) {
@@ -178,7 +185,12 @@ export class ChannelClient {
   }
 
   protected async send(methodOrNotificationName: ActionName, parameters: ActionParameters) {
-    this.events.emit(methodOrNotificationName, parameters);
+    this.events.emit('message', {
+      jsonrpc: '2.0',
+      id: Date.now(),
+      method: methodOrNotificationName,
+      params: parameters,
+    });
   }
 
   protected async notifyChannelUpdated(parameters: UpdateChannelResult) {
