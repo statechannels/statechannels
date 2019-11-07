@@ -118,7 +118,7 @@ Try and reuse components in `/src/redux/protocols/shared-components` as far as p
 ## Scenarios
 
 <a name="scenarios"></a>
-Objects containing the states, actions and commitments necessary to simulate each scenario described in the readme. May import triggers from child reducers. The format should be:
+Objects containing the states, actions and states necessary to simulate each scenario described in the readme. May import triggers from child reducers. The format should be:
 
 ```typescript
 // -------
@@ -136,7 +136,7 @@ export const scenarioName = {
     state: secondProtocolState,
     sharedData: sharedDataAtTimeOfSecondProtocolState,
     action: actionTriggeredWhenInSecondState,
-    commitment: optional
+    state: optional
   },
   andSoOn...
 };
@@ -152,13 +152,13 @@ Jest tests for each scenario. Helper functions should be imported and not replic
 
 - State transitions
 - Display side effects
-- Commitment side effects
+- SignedState side effects
   <!-- TODO -->
 
 Use
 
 ```typescript
-import { describeScenarioStep } from '../../../../__tests__/helpers';
+import {describeScenarioStep} from "../../../../__tests__/helpers";
 ```
 
 This will print out the state and action in a unified format.
@@ -169,7 +169,7 @@ This will print out the state and action in a unified format.
 Screens should be added from each scenario, using the helper function
 
 ```typescript
-import { addStoriesFromScenario as addStories } from '../../../../../__stories__';
+import {addStoriesFromScenario as addStories} from "../../../../../__stories__";
 ```
 
 which builds a full wallet dummy state around each `protocolState` in the scenario, and renders that into the top level wallet container. The function should automatically exclude terminal states (todo).

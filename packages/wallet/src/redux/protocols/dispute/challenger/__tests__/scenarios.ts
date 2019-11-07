@@ -92,12 +92,12 @@ export const opponentResponds = {
   waitForResponseOrTimeoutReceiveResponse: {
     state: waitForResponseOrTimeout,
     action: responseReceived,
-    commitment: signedState21
+    signedState: signedState21
   },
   waitForResponseOrTimeoutExpirySet: {
     state: waitForResponseOrTimeout,
     action: challengeExpirySet,
-    commitment: signedState21
+    signedState: signedState21
   },
   acknowledgeResponse: {
     state: acknowledgeResponse,

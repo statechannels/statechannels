@@ -43,7 +43,7 @@ const initializeArgs = {
   processId,
   clearedToSend: true,
   // To properly test the embedded advanceChannel protocols, it's useful to be playerA
-  // to make sure that the commitments get sent.
+  // to make sure that the states get sent.
   address: asAddress,
   privateKey: asPrivateKey,
   ourIndex: 0,

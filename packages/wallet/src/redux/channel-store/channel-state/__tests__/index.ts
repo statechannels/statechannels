@@ -1,4 +1,3 @@
-// import {SignedCommitment} from "../../../../domain";
 import {SignedState, getChannelId} from "@statechannels/nitro-protocol";
 
 export function channelFromStates(states: SignedState[], ourAddress: string, ourPrivateKey: string) {
@@ -13,7 +12,7 @@ export function channelFromStates(states: SignedState[], ourAddress: string, our
   }
   const ourIndex = participants.indexOf(ourAddress);
   if (ourIndex === -1) {
-    throw new Error("Address provided is not a participant according to the lastCommitment.");
+    throw new Error("Address provided is not a participant according to the lastState.");
   }
 
   return {

@@ -54,12 +54,12 @@ export function initializeChannel(signedState: SignedState, privateKey: string):
   };
 }
 
-// Pushes a commitment onto the state, updating penultimate/last commitments and the turn number
+// Pushes a state onto the state, updating penultimate/last states and the turn number
 export function pushState(state: ChannelState, signedState: SignedState): ChannelState {
   const signedStates = [...state.signedStates];
   const numParticipants = state.participants.length;
   if (signedStates.length === numParticipants) {
-    // We've got a full round of commitments, and should therefore drop the first one
+    // We've got a full round of states, and should therefore drop the first one
     signedStates.shift();
   }
 

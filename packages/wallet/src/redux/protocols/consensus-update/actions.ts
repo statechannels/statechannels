@@ -1,6 +1,6 @@
 import {WalletAction} from "../../actions";
 import {
-  CommitmentsReceived,
+  SignedStatesReceived,
   BaseProcessAction,
   isCommonAction,
   ProtocolLocator,
@@ -21,7 +21,7 @@ export const clearedToSend: ActionConstructor<ClearedToSend> = p => {
   };
 };
 
-export type ConsensusUpdateAction = CommitmentsReceived | ClearedToSend;
+export type ConsensusUpdateAction = SignedStatesReceived | ClearedToSend;
 
 export const isConsensusUpdateAction = (action: WalletAction): action is ConsensusUpdateAction => {
   return (

@@ -100,17 +100,11 @@ function transformStateToMatcher(ss: {state: Partial<State>; signature?: Signatu
 export const itSendsTheseStates = (
   state: SideEffectState,
   states: PartialStates,
-  type = "WALLET.COMMON.COMMITMENTS_RECEIVED",
+  type = "WALLET.COMMON.SIGNED_STATES_RECEIVED",
   idx = 0
 ) => {
   const messageOutbox = getOutboxState(state, "messageOutbox");
-  // TODO: Something in the conversion between nitro states and commitments is messing up the signature
-  // so we'll ignore them for now
-  states = states.map(s => {
-    return {
-      state: s.state
-    };
-  });
+
   it("sends states", () => {
     try {
       // Passes when at least one message matches
@@ -135,7 +129,7 @@ export const itSendsTheseStates = (
         // multiple messages are queued.
 
         // To help with debugging, you can change the idx variable when running tests to 'search'
-        // for the correct commitment
+        // for the correct state
         console.warn(`Message not found: inspecting mismatched message in position ${idx}`);
         expect(messageOutbox[idx]).toMatchObject({
           messagePayload: {

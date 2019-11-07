@@ -1,7 +1,12 @@
 import * as scenarios from "./scenarios";
 import {challengerReducer, initialize, ReturnVal} from "../reducer";
 import {FailureReason, ChallengerStateType, WaitForTransaction, WaitForResponseOrTimeout} from "../states";
-import {itSendsThisMessage, itSendsThisDisplayEventType, describeScenarioStep} from "../../../../__tests__/helpers";
+import {
+  itSendsThisMessage,
+  itSendsThisDisplayEventType,
+  describeScenarioStep,
+  itStoresThisState
+} from "../../../../__tests__/helpers";
 import {
   HIDE_WALLET,
   CHALLENGE_COMPLETE,
@@ -52,12 +57,12 @@ describe("OPPONENT RESPONDS", () => {
     });
   });
   describeScenarioStep(scenario.waitForResponseOrTimeoutReceiveResponse, () => {
-    const {state, action} = scenario.waitForResponseOrTimeoutReceiveResponse;
+    const {state, action, signedState} = scenario.waitForResponseOrTimeoutReceiveResponse;
     const result = challengerReducer(state, sharedData, action);
 
     itSendsThisMessage(result.sharedData, CHALLENGE_STATE_RECEIVED);
-    // TODO: Get this passing
-    // itStoresThisCommitment(result.sharedData, commitment);
+
+    itStoresThisState(result.sharedData, signedState);
     itTransitionsTo(result, "Challenging.AcknowledgeResponse");
   });
 

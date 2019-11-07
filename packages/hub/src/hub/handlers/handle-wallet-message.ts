@@ -1,5 +1,5 @@
 import {
-  CommitmentsReceived,
+  SignedStatesReceived,
   ConcludeInstigated,
   RelayableAction,
   StrategyProposed
@@ -24,30 +24,30 @@ export async function handleWalletMessage(
 // TODO: We should define types for NewProcessAction and ProtocolAction
 
 async function shouldHandleAsNewProcessAction(
-  action: ConcludeInstigated | CommitmentsReceived
+  action: ConcludeInstigated | SignedStatesReceived
 ): Promise<boolean> {
   if (action.type === 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED') {
     return true;
   }
-  if (action.type === 'WALLET.COMMON.COMMITMENTS_RECEIVED') {
+  if (action.type === 'WALLET.COMMON.SIGNED_STATES_RECEIVED') {
     return !(await getProcess(action.processId));
   }
 }
 
 function isNewProcessAction(
   action: RelayableAction
-): action is ConcludeInstigated | CommitmentsReceived {
+): action is ConcludeInstigated | SignedStatesReceived {
   return (
     action.type === 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED' ||
-    action.type === 'WALLET.COMMON.COMMITMENTS_RECEIVED'
+    action.type === 'WALLET.COMMON.SIGNED_STATES_RECEIVED'
   );
 }
 
 function isProtocolAction(
   action: RelayableAction
-): action is StrategyProposed | CommitmentsReceived {
+): action is StrategyProposed | SignedStatesReceived {
   return (
     action.type === 'WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_PROPOSED' ||
-    action.type === 'WALLET.COMMON.COMMITMENTS_RECEIVED'
+    action.type === 'WALLET.COMMON.SIGNED_STATES_RECEIVED'
   );
 }
