@@ -46,7 +46,7 @@ describe('updateLedgerChannel', () => {
       theirSignature = signState(pre_fund_setup_0, PARTICIPANT_1_PRIVATE_KEY).signature;
     });
 
-    it('should return an allocator channel and a signed commitment', async () => {
+    it('should return an allocator channel and a signed state', async () => {
       const {state, signature} = await LedgerChannelManager.updateLedgerChannel([
         {state: pre_fund_setup_0, signature: theirSignature}
       ]);
@@ -54,7 +54,7 @@ describe('updateLedgerChannel', () => {
       expect(ChannelManagement.validSignature(state, signature)).toBe(true);
     });
 
-    it('on valid round received -- should return an allocator channel and a signed commitment', async () => {
+    it('on valid round received -- should return an allocator channel and a signed state', async () => {
       const {state, signature} = await LedgerChannelManager.updateLedgerChannel([
         {
           state: pre_fund_setup_3_0,
@@ -69,7 +69,7 @@ describe('updateLedgerChannel', () => {
       expect(ChannelManagement.validSignature(state, signature)).toBe(true);
     });
 
-    it.skip('throws when the commitment is incorrectly signed', async () => {
+    it.skip('throws when the state is incorrectly signed', async () => {
       // TODO: Unskip when signatures are validated
       expect.assertions(1);
       theirSignature = signState(pre_fund_setup_0, '0xf00').signature;
@@ -80,17 +80,17 @@ describe('updateLedgerChannel', () => {
           signature: theirSignature
         }
       ]).catch((err: Error) => {
-        expect(err).toMatchObject(errors.COMMITMENT_NOT_SIGNED);
+        expect(err).toMatchObject(errors.STATE_NOT_SIGNED);
       });
     });
   });
 
-  describe('transitioning to a postFundSetup commitment', () => {
+  describe('transitioning to a postFundSetup state', () => {
     beforeEach(() => {
       theirSignature = signState(post_fund_setup_0, PARTICIPANT_1_PRIVATE_KEY).signature;
     });
 
-    it('should return an allocator channel and a signed commitment', async () => {
+    it('should return an allocator channel and a signed state', async () => {
       const {state, signature} = await LedgerChannelManager.updateLedgerChannel(
         [
           {
@@ -104,8 +104,8 @@ describe('updateLedgerChannel', () => {
       expect(ChannelManagement.validSignature(state, signature)).toBe(true);
     });
 
-    describe('round of commitments', () => {
-      it('on valid round received -- should return an allocator channel and a signed commitment', async () => {
+    describe('round of states', () => {
+      it('on valid round received -- should return an allocator channel and a signed state', async () => {
         const {state, signature} = await LedgerChannelManager.updateLedgerChannel(
           [
             {
@@ -138,7 +138,7 @@ describe('updateLedgerChannel', () => {
       });
     });
 
-    it.skip('throws when the commitment is incorrectly signed', async () => {
+    it.skip('throws when the state is incorrectly signed', async () => {
       // TODO: Unskip when signatures are validated
       expect.assertions(1);
       theirSignature = signState(post_fund_setup_0, '0xf00').signature;
@@ -148,7 +148,7 @@ describe('updateLedgerChannel', () => {
           signature: theirSignature
         }
       ]).catch((err: Error) => {
-        expect(err).toMatchObject(errors.COMMITMENT_NOT_SIGNED);
+        expect(err).toMatchObject(errors.STATE_NOT_SIGNED);
       });
     });
 
@@ -186,12 +186,12 @@ describe('updateLedgerChannel', () => {
     });
   });
 
-  describe('transitioning to an app commitment', () => {
+  describe('transitioning to an app state', () => {
     beforeEach(() => {
       theirSignature = signState(app_0, PARTICIPANT_1_PRIVATE_KEY).signature;
     });
 
-    it('should return an allocator channel and a signed commitment', async () => {
+    it('should return an allocator channel and a signed state', async () => {
       const {state, signature} = await LedgerChannelManager.updateLedgerChannel(
         [
           {
@@ -207,7 +207,7 @@ describe('updateLedgerChannel', () => {
     });
   });
 
-  describe.skip('transitioning to a conclude commitment', () => {
+  describe.skip('transitioning to a conclude state', () => {
     it('works', () => {
       expect.assertions(1);
     });

@@ -36,12 +36,10 @@ async function listen() {
     const queue = value.queue;
     if (queue === 'GAME_WALLET') {
       throw new Error(
-        `The hub does not support handling application commitments. Received ${JSON.stringify(
-          value
-        )}`
+        `The hub does not support handling application states. Received ${JSON.stringify(value)}`
       );
     } else if (queue === 'WALLET') {
-      initializeCommitmentArraysFromFirebase(value.payload);
+      initializeStateArraysFromFirebase(value.payload);
       process.send(value.payload);
     } else {
       throw new Error('Unknown queue');
@@ -63,7 +61,8 @@ if (require.main === module) {
   listen();
 }
 
-function initializeCommitmentArraysFromFirebase(payload) {
+// todo: refactor to comply with new wallet messaging
+function initializeStateArraysFromFirebase(payload) {
   const arraysToInitialize = ['allocation'];
   for (const arrayToInitialize of arraysToInitialize) {
     if ('commitment' in payload && !payload.commitment[arrayToInitialize]) {
@@ -73,7 +72,7 @@ function initializeCommitmentArraysFromFirebase(payload) {
 
   for (const property of Object.keys(payload)) {
     if (typeof payload[property] === 'object') {
-      initializeCommitmentArraysFromFirebase(payload[property]);
+      initializeStateArraysFromFirebase(payload[property]);
     }
   }
 }

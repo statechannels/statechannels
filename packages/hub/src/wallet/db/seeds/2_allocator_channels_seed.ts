@@ -76,7 +76,7 @@ const funded_channel = {
   rulesAddress: DUMMY_RULES_ADDRESS,
   nonce: FUNDED_CHANNEL_NONCE,
   holdings: FUNDED_CHANNEL_HOLDINGS,
-  commitments: [pre_fund_setup(0), pre_fund_setup(1)],
+  states: [pre_fund_setup(0), pre_fund_setup(1)],
   participants
 };
 
@@ -85,7 +85,7 @@ const funded_channel_3 = {
   rulesAddress: DUMMY_RULES_ADDRESS,
   nonce: FUNDED_CHANNEL_NONCE_3,
   holdings: FUNDED_CHANNEL_HOLDINGS,
-  commitments: [pre_fund_setup_3(0), pre_fund_setup_3(1), pre_fund_setup_3(2)],
+  states: [pre_fund_setup_3(0), pre_fund_setup_3(1), pre_fund_setup_3(2)],
   participants: participants_3
 };
 
@@ -102,7 +102,7 @@ const beginning_app_phase_channel = {
   rules_address: DUMMY_RULES_ADDRESS,
   nonce: BEGINNING_APP_CHANNEL_NONCE,
   holdings: BEGINNING_APP_CHANNEL_HOLDINGS,
-  commitments: [post_fund_setup(2), post_fund_setup(3)],
+  states: [post_fund_setup(2), post_fund_setup(3)],
   participants
 };
 
@@ -119,7 +119,7 @@ const ongoing_app_phase_channel = {
   rules_address: DUMMY_RULES_ADDRESS,
   nonce: ONGOING_APP_CHANNEL_NONCE,
   holdings: ONGOING_APP_CHANNEL_HOLDINGS,
-  commitments: [app(4), app(5)],
+  states: [app(4), app(5)],
   participants
 };
 
@@ -134,11 +134,11 @@ const three_participant_channel_seeds = {funded_channel_3};
 const SEEDED_CHANNELS_2 = Object.keys(two_participant_channel_seeds).length;
 const SEEDED_CHANNELS_3 = Object.keys(three_participant_channel_seeds).length;
 
-const SEEDED_COMMITMENTS_2 = SEEDED_CHANNELS_2 * 2;
-const SEEDED_COMMITMENTS_3 = SEEDED_CHANNELS_3 * 3;
+const SEEDED_STATES_2 = SEEDED_CHANNELS_2 * 2;
+const SEEDED_STATES_3 = SEEDED_CHANNELS_3 * 3;
 
-const SEEDED_ALLOCATIONS_2 = SEEDED_COMMITMENTS_2 * 2;
-const SEEDED_ALLOCATIONS_3 = SEEDED_COMMITMENTS_3 * 3;
+const SEEDED_ALLOCATIONS_2 = SEEDED_STATES_2 * 2;
+const SEEDED_ALLOCATIONS_3 = SEEDED_STATES_3 * 3;
 
 const SEEDED_PARTICIPANTS_2 = SEEDED_CHANNELS_2 * 2;
 const SEEDED_PARTICIPANTS_3 = SEEDED_CHANNELS_3 * 3;
@@ -147,7 +147,7 @@ const SEEDED_PARTICIPANTS_3 = SEEDED_CHANNELS_3 * 3;
 // Exports
 // *******
 export const SEEDED_CHANNELS = SEEDED_CHANNELS_2 + SEEDED_CHANNELS_3;
-export const SEEDED_COMMITMENTS = SEEDED_COMMITMENTS_2 + SEEDED_COMMITMENTS_3;
+export const SEEDED_STATES = SEEDED_STATES_2 + SEEDED_STATES_3;
 export const SEEDED_ALLOCATIONS = SEEDED_ALLOCATIONS_2 + SEEDED_ALLOCATIONS_3;
 export const SEEDED_PARTICIPANTS = SEEDED_PARTICIPANTS_2 + SEEDED_PARTICIPANTS_3;
 

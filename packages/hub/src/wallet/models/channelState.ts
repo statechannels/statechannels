@@ -3,15 +3,15 @@ import {Model, snakeCaseMappers} from 'objection';
 import Allocation from './allocation';
 import Channel from './channel';
 
-export default class ChannelCommitment extends Model {
-  static tableName = 'channel_commitments';
+export default class ChannelState extends Model {
+  static tableName = 'channel_states';
 
   static relationMappings = {
     channel: {
       relation: Model.BelongsToOneRelation,
       modelClass: `${__dirname}/channel`,
       join: {
-        from: 'channel_commitments.channel_id',
+        from: 'channel_states.channel_id',
         to: 'channels.id'
       }
     },
@@ -19,8 +19,8 @@ export default class ChannelCommitment extends Model {
       relation: Model.HasManyRelation,
       modelClass: `${__dirname}/allocation`,
       join: {
-        from: 'channel_commitments.id',
-        to: 'allocations.channel_commitment_id'
+        from: 'channel_states.id',
+        to: 'allocations.channel_state_id'
       }
     }
   };
@@ -34,7 +34,6 @@ export default class ChannelCommitment extends Model {
   channelId!: number;
   turnNumber!: Uint32;
   isFinal!: boolean;
-  commitmentCount!: Uint32;
   allocations: Allocation[];
   appAttrs!: any;
   challengeDuration: number;
