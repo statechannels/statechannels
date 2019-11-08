@@ -26,6 +26,8 @@ case $TARGET_PACKAGE in
         status=$?
         ;;
 
+    *)
+        echo "TARGET_PACKAGE environment variable not set to valid value"
 
 esac
 
