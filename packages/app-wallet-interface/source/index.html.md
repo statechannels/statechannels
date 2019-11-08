@@ -223,7 +223,7 @@ Possible response to a `Channel Proposed` event.
   "result": {
     "channelId": "0xabc123...",
     "status": "running",
-    "funding": [{ "token": "0x0", "amount": "24"}],
+    "funding": [{"token": "0x0", "amount": "24"}],
     "participants": [
       {"participantId": "user123", "signingAddress": "0x...", "destination": "0xa..."},
       {"participantId": "user456", "signingAddress": "0x...", "destination": "0xb..."}
@@ -237,7 +237,7 @@ Possible response to a `Channel Proposed` event.
           {"destination": "0xb...", "amount": "6"}
         ]
       }
-    ],,
+    ],
     "appData": "0x...."
   }
 }
@@ -314,7 +314,7 @@ Triggered when a channel update occurs by any means, including:
           {"destination": "0xb...", "amount": "6"}
         ]
       }
-    ],,
+    ],
     "appData": "0x....""
   }
 }
