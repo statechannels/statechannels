@@ -19,7 +19,7 @@
     "noUnusedLocals": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
-    "esModuleInterop": true,
+    "esModuleInterop": true
   },
   "exclude": [
     "node_modules",
@@ -32,6 +32,6 @@
     "truffle.ts",
     "migrations/*",
     "test/**/*",
-    "src/contract-tests/*",
-  ],
+    "src/contract-tests/*"
+  ]
 }

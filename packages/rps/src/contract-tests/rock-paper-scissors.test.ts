@@ -1,4 +1,5 @@
 import * as ethers from 'ethers';
+// @ts-ignore
 import RockPaperScissorsArtifact from '../../build/contracts/RockPaperScissors.json';
 jest.setTimeout(20000);
 import {expectRevert} from '@statechannels/devtools';
@@ -12,7 +13,8 @@ import {
   replaceAddressesAndBigNumberify,
   randomExternalDestination
 } from '@statechannels/nitro-protocol';
-import {VariablePart} from '@statechannels/nitro-protocol/';
+import {VariablePart} from '@statechannels/nitro-protocol';
+
 import loadJsonFile from 'load-json-file';
 
 import {defaultAbiCoder, bigNumberify, BigNumber} from 'ethers/utils';
