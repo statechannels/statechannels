@@ -65,10 +65,6 @@ export interface Funds {
   amount: string;
 }
 
-export interface ParameterHash {
-  [key: string]: any;
-}
-
 export interface JsonRPCNotification<ParametersType> {
   jsonrpc: '2.0';
   method: NotificationName;
@@ -156,23 +152,31 @@ export class ChannelClient {
   }
 
   async createChannel(parameters: CreateChannelParameters) {
-    this.sendToWallet('CreateChannel', parameters);
+    await this.sendToWallet('CreateChannel', parameters);
 
-    // TODO: This notification payload is incomplete, since it doesn't have the result
-    // of the channel creation. Where should this go?
-    this.notifyChannelProposed(parameters as ChannelResult);
+    await this.notifyChannelProposed({
+      ...parameters,
+      channelId: '0x0',
+      turnNum: 0,
+      status: 'opening',
+    } as ChannelResult);
   }
 
   async joinChannel(parameters: JoinChannelParameters) {
-    this.sendToWallet('JoinChannel', parameters);
+    await this.sendToWallet('JoinChannel', parameters);
 
-    // TODO: This notification payload is incomplete, since it doesn't have the result
-    // of the channel creation. Where should this go?
-    this.notifyChannelUpdated(parameters as ChannelResult);
+    await this.notifyChannelUpdated({
+      ...parameters,
+      channelId: '0x0',
+      status: 'running',
+      turnNum: 1,
+    } as ChannelResult);
   }
 
   async updateChannel(parameters: UpdateChannelParameters) {
-    this.sendToWallet('UpdateChannel', parameters);
+    await this.sendToWallet('UpdateChannel', parameters);
+
+    await this.notifyChannelUpdated(parameters as ChannelResult);
   }
 
   protected async sendToWallet(methodName: MethodName, parameters: ActionParameters) {
