@@ -56,29 +56,75 @@ like `https://myserver.com/state_channel_callback`.
 Format of message sent from the wallet to the app, so that the app can then relay it
 to another participant.
 
-```javascript
-const participantId = 'abc123'; // allocated by app
-const data = '0x456';
-const message = new Message(participantId, data);
-```
-
 ```json
 {
-  "participantId": "abc123",
+  "recipient": "user123",
+  "sender": "user456",
   "data": "0x456"
 }
 ```
 
-| Parameter     | Type   | Description                                                  |
-| ------------- | ------ | ------------------------------------------------------------ |
-| participantId | String | Identifier or user that the message should be relayed to     |
-| data          | String | Message payload. Format defined by wallet and opaque to app. |
+| Parameter | Type   | Description                                                  |
+| --------- | ------ | ------------------------------------------------------------ |
+| recipient | String | Identifier of user that the message should be relayed to     |
+| sender    | String | Identifier of user that the message is from                  |
+| data      | String | Message payload. Format defined by wallet and opaque to app. |
 
 # Initial API
 
 Still a WIP! Adding methods as we need them.
 
-## List identities
+## Push Message
+
+Used to push messages received from other participants into the wallet.
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "PushMessage",
+  "id": 1,
+  "params": {
+    "recipient": "user123",
+    "sender": "user456",
+    "data": "0x123.."
+  }
+}
+```
+
+> Example response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": "acknowledged"
+}
+```
+
+Note: we don't return the state of the channel, as messages are not necessarily 1-to-1 with channels.
+
+## Get addresses
+
+Returns the signing address(es) for the current domain.
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "GetAddress",
+  "id": 1,
+  "params": {}
+}
+```
+
+> Example response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": ["0x123..."]
+}
+```
 
 ## Create Channel
 
@@ -295,13 +341,82 @@ Possible response to a `Channel Proposed` event.
 
 ## Close Channel
 
-```javascript
-await channelProvider.closeChannel(channelId);
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "CloseChannel",
+  "id": 0,
+  "params": {
+    "channelId": "0xabc123"
+  }
+}
 ```
+
+> Example response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "channelId": "0xabc123...",
+    "status": "closing",
+    "funding": [],
+    "participants": [
+      {
+        "participantId": "user123",
+        "signingAddress": "0x...",
+        "destination": "0xa..."
+      },
+      {
+        "participantId": "user456",
+        "signingAddress": "0x...",
+        "destination": "0xb..."
+      }
+    ],
+    "turnNum": 10,
+    "allocations": [
+      {
+        "token": "0x...", // 0x0 for ETH
+        "allocationItems": [
+          {"destination": "0xa...", "amount": "12"},
+          {"destination": "0xb...", "amount": "12"}
+        ]
+      }
+    ],
+    "appDefinition": "0x...",
+    "appData": "0x...."
+  }
+}
+```
+
+### Errors
+
+| Code | Message           | Meaning                                                          |
+| ---- | ----------------- | ---------------------------------------------------------------- |
+|      | Channel not found | The wallet can't find the channel corresponding to the channelId |
 
 # Events
 
 Sent from the wallet to the app.
+
+## Message Queued
+
+The application is responsible for relaying messages from the wallet to the other participant(s)
+in the channel.
+When the wallet wishes to send a message it will emit a `MessageQueued` event.
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "MessageQueued",
+  "params": {
+    "recipient": "user123",
+    "sender": "user456",
+    "data": "0x1111..."
+  }
+}
+```
 
 ## Channel Proposed
 
@@ -358,10 +473,18 @@ Triggered when a channel update occurs by any means, including:
   "params": {
     "channelId": "0xabc123...",
     "status": "running",
-    "funding": [{ "token": "0x0", "amount": "24"}],
+    "funding": [{"token": "0x0", "amount": "24"}],
     "participants": [
-      {"participantId": "user123", "signingAddress": "0x...", "destination": "0xa..."},
-      {"participantId": "user456", "signingAddress": "0x...", "destination": "0xb..."}
+      {
+        "participantId": "user123",
+        "signingAddress": "0x...",
+        "destination": "0xa..."
+      },
+      {
+        "participantId": "user456",
+        "signingAddress": "0x...",
+        "destination": "0xb..."
+      }
     ],
     "turnNum": 7,
     "allocations": [
@@ -373,24 +496,7 @@ Triggered when a channel update occurs by any means, including:
         ]
       }
     ],
-    "appData": "0x....""
-  }
-}
-```
-
-## Message Queued
-
-The application is responsible for relaying messages from the wallet to the other participant(s)
-in the channel.
-When the wallet wishes to send a message it will emit a `MessageQueued` event.
-
-```json
-{
-  "jsonrpc": "2.0",
-  "method": "MessageQueued",
-  "params": {
-    "participantId": "user123",
-    "data": "0x1111..."
+    "appData": "0x...."
   }
 }
 ```
