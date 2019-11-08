@@ -89,8 +89,16 @@ Still a WIP! Adding methods as we need them.
   "id": 1,
   "params": {
     "participants": [
-      {"participantId": "user123", "signingAddress": "0x...", "destination": "0xa..."},
-      {"participantId": "user456", "signingAddress": "0x...", "destination": "0xb..."}
+      {
+        "participantId": "user123",
+        "signingAddress": "0x...",
+        "destination": "0xa..."
+      },
+      {
+        "participantId": "user456",
+        "signingAddress": "0x...",
+        "destination": "0xb..."
+      }
     ],
     "allocations": [
       {
@@ -118,8 +126,16 @@ Still a WIP! Adding methods as we need them.
     "status": "opening",
     "funding": [],
     "participants": [
-      {"participantId": "user123", "signingAddress": "0x...", "destination": "0xa..."},
-      {"participantId": "user456", "signingAddress": "0x...", "destination": "0xb..."}
+      {
+        "participantId": "user123",
+        "signingAddress": "0x...",
+        "destination": "0xa..."
+      },
+      {
+        "participantId": "user456",
+        "signingAddress": "0x...",
+        "destination": "0xb..."
+      }
     ],
     "turnNum": 0,
     "allocations": [
@@ -145,6 +161,18 @@ Still a WIP! Adding methods as we need them.
 | allocation    | Allocation    | Starting balances                                                 |
 | appDefinition | Address       | Address of deployed contract that defines the app                 |
 | appData       | String        | Initial app state, encoded as bytes as per appDefinition contract |
+
+### Errors
+
+Errors conform to the [JSON-RPC 2.0 error spec](https://www.jsonrpc.org/specification#error_object).
+Beyond the standard errors from that spec, the following domain-specific errors are possible:
+
+| Code | Message                   | Meaning                                                                                                     |
+| ---- | ------------------------- | ----------------------------------------------------------------------------------------------------------- |
+|      | Signing address not found | The wallet can't find the signing key corresponding to the first signing address in the participants array. |
+|      | Invalid app definition    | There isn't a force-move compatible app contract deployed at the app definition address                     |
+|      | Invalid app data          | The app data isn't a valid state for the force-move app defined by the app definition                       |
+|      | Unsupported token         | The wallet doesn't support one or more of the tokens appearing in the allocation.                           |
 
 ## Join Channel
 
@@ -172,8 +200,16 @@ Possible response to a `Channel Proposed` event.
     "status": "open",
     "funding": [],
     "participants": [
-      {"participantId": "user123", "signingAddress": "0x...", "destination": "0xa..."},
-      {"participantId": "user456", "signingAddress": "0x...", "destination": "0xb..."}
+      {
+        "participantId": "user123",
+        "signingAddress": "0x...",
+        "destination": "0xa..."
+      },
+      {
+        "participantId": "user456",
+        "signingAddress": "0x...",
+        "destination": "0xb..."
+      }
     ],
     "turnNum": 1,
     "allocations": [
@@ -190,6 +226,12 @@ Possible response to a `Channel Proposed` event.
   }
 }
 ```
+
+### Errors
+
+| Code | Message           | Meaning                                                          |
+| ---- | ----------------- | ---------------------------------------------------------------- |
+|      | Channel not found | The wallet can't find the channel corresponding to the channelId |
 
 ## Update State
 
@@ -225,8 +267,16 @@ Possible response to a `Channel Proposed` event.
     "status": "running",
     "funding": [{"token": "0x0", "amount": "24"}],
     "participants": [
-      {"participantId": "user123", "signingAddress": "0x...", "destination": "0xa..."},
-      {"participantId": "user456", "signingAddress": "0x...", "destination": "0xb..."}
+      {
+        "participantId": "user123",
+        "signingAddress": "0x...",
+        "destination": "0xa..."
+      },
+      {
+        "participantId": "user456",
+        "signingAddress": "0x...",
+        "destination": "0xb..."
+      }
     ],
     "turnNum": 7,
     "allocations": [
@@ -267,8 +317,16 @@ App should respond by either calling `JoinChannel`, or TODO.
     "status": "opening",
     "funding": [],
     "participants": [
-      {"participantId": "user123", "signingAddress": "0x...", "destination": "0xa..."},
-      {"participantId": "user456", "signingAddress": "0x...", "destination": "0xb..."}
+      {
+        "participantId": "user123",
+        "signingAddress": "0x...",
+        "destination": "0xa..."
+      },
+      {
+        "participantId": "user456",
+        "signingAddress": "0x...",
+        "destination": "0xb..."
+      }
     ],
     "turnNum": 0,
     "allocations": [
@@ -316,6 +374,23 @@ Triggered when a channel update occurs by any means, including:
       }
     ],
     "appData": "0x....""
+  }
+}
+```
+
+## Message Queued
+
+The application is responsible for relaying messages from the wallet to the other participant(s)
+in the channel.
+When the wallet wishes to send a message it will emit a `MessageQueued` event.
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "MessageQueued",
+  "params": {
+    "participantId": "user123",
+    "data": "0x1111..."
   }
 }
 ```
