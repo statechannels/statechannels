@@ -38,11 +38,11 @@ const fakeStore = state => ({
   },
   replaceReducer: () => {
     /* empty */
-  },
+  }
 });
 
 const testState = state => () => (
-  <Provider store={fakeStore(state)}>
+  <Provider store={fakeStore(state) as any}>
     <SiteContainer />
   </Provider>
 );
@@ -61,12 +61,12 @@ const channel: Channel = {channelType: libraryAddress, nonce: channelNonce, part
 const base = {
   channel,
   destination: participants,
-  commitmentCount: 0,
+  commitmentCount: 0
 };
 
 const baseWithBuyIn = {
   ...base,
-  roundBuyIn,
+  roundBuyIn
 };
 
 export const shared = {
@@ -79,7 +79,7 @@ export const shared = {
   asPrivateKey,
   bsPrivateKey,
   myAddress: '',
-  libraryAddress,
+  libraryAddress
 };
 
 const lobbyState: SiteState = {
@@ -87,24 +87,24 @@ const lobbyState: SiteState = {
     loading: false,
     loggedIn: true,
     user: null,
-    error: undefined,
+    error: undefined
   },
   metamask: {
     loading: false,
     error: null,
-    success: true,
+    success: true
   },
   openGames: [],
   overlay: {
     rulesVisible: false,
-    walletVisible: false,
+    walletVisible: false
   },
   game: {
     messageState: {},
     gameState: states.lobby({
-      ...shared,
-    }),
-  },
+      ...shared
+    })
+  }
 };
 
 const initialState: SiteState = {
@@ -115,27 +115,27 @@ const initialState: SiteState = {
       ...shared,
       player: Player.PlayerA,
       turnNum: 5,
-      allocation: finneyFiveFive,
-    }),
-  },
+      allocation: finneyFiveFive
+    })
+  }
 };
 
 export function siteStateFromGameState<T extends states.GameState>(gamestate: T): SiteState {
   return {
     ...initialState,
-    game: {messageState: {}, gameState: gamestate},
+    game: {messageState: {}, gameState: gamestate}
   };
 }
 
 const noName = siteStateFromGameState(
   states.noName({
-    ...shared,
+    ...shared
   })
 );
 
 const waitingRoom = siteStateFromGameState(
   states.waitingRoom({
-    ...shared,
+    ...shared
   })
 );
 
@@ -146,7 +146,7 @@ const gameProposed = siteStateFromGameState(
     onScreenBalances: finneyFiveFive,
     turnNum: 6,
     allocation: finneySixFour,
-    stateCount: 0,
+    stateCount: 0
   })
 );
 
@@ -157,7 +157,7 @@ const confirmGame = siteStateFromGameState(
     onScreenBalances: finneyFiveFive,
     turnNum: 6,
     allocation: finneySixFour,
-    stateCount: 0,
+    stateCount: 0
   })
 );
 
