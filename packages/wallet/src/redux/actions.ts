@@ -328,14 +328,14 @@ export const addressRequest: ActionConstructor<AddressRequest> = p => ({
   type: "WALLET.ADDRESS_REQUEST"
 });
 
-export interface AddressCreated extends JsonRpcAction {
-  type: "WALLET.ADDRESS_CREATED";
+export interface AddressResponse extends JsonRpcAction {
+  type: "WALLET.ADDRESS_RESPONSE";
   address: string;
 }
-export const addressCreated: ActionConstructor<AddressCreated> = p => ({
+export const addressResponse: ActionConstructor<AddressResponse> = p => ({
   ...p,
-  type: "WALLET.ADDRESS_CREATED"
+  type: "WALLET.ADDRESS_RESPONSE"
 });
 
 export type JsonRpcRequestAction = AddressRequest;
-export type JsonRpcResponseAction = AddressCreated;
+export type JsonRpcResponseAction = AddressResponse;

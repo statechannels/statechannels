@@ -49,7 +49,7 @@ export function initializedReducer(
     return states.initialized({
       ...state,
       outboxState: accumulateSideEffects(state.outboxState, {
-        messageOutbox: [actions.addressCreated({id: action.id, address})]
+        messageOutbox: [actions.addressResponse({id: action.id, address})]
       })
     });
   }
@@ -247,7 +247,7 @@ const waitForLoginReducer = (
         ...state,
 
         outboxState: accumulateSideEffects(state.outboxState, {
-          messageOutbox: [actions.addressCreated({id: action.id, address})]
+          messageOutbox: [actions.addressResponse({id: action.id, address})]
         }),
         processStore: {},
         privateKey,

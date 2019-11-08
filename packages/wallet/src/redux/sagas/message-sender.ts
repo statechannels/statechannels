@@ -10,7 +10,7 @@ export function* messageSender(action: JsonRpcResponseAction) {
 // This is exported so we can easily test it
 export function createResponseMessage(action: JsonRpcResponseAction) {
   switch (action.type) {
-    case "WALLET.ADDRESS_CREATED":
+    case "WALLET.ADDRESS_RESPONSE":
       return jrs.success(action.id, action.address);
     default:
       return jrs.error(action.id, new jrs.err.MethodNotFoundError());
