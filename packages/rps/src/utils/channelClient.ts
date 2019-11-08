@@ -167,7 +167,7 @@ export class ChannelClient {
     );
   }
 
-  createChannel(parameters: CreateChannelParameters) {
+  async createChannel(parameters: CreateChannelParameters) {
     this.sendToWallet(MethodName.CreateChannel, parameters);
 
     // TODO: This notification payload is incomplete, since it doesn't have the result
@@ -175,7 +175,7 @@ export class ChannelClient {
     this.notifyChannelProposed(parameters as ChannelResult);
   }
 
-  joinChannel(parameters: JoinChannelParameters) {
+  async joinChannel(parameters: JoinChannelParameters) {
     this.sendToWallet(MethodName.JoinChannel, parameters);
 
     // TODO: This notification payload is incomplete, since it doesn't have the result
@@ -183,7 +183,7 @@ export class ChannelClient {
     this.notifyChannelUpdated(parameters as ChannelResult);
   }
 
-  updateChannel(parameters: UpdateChannelParameters) {
+  async updateChannel(parameters: UpdateChannelParameters) {
     this.sendToWallet(MethodName.UpdateChannel, parameters);
   }
 
