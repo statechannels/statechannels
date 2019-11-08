@@ -16,7 +16,12 @@ class LedgerDefundingContainer extends PureComponent<Props> {
     const {state} = this.props;
     switch (state.type) {
       case "LedgerDefunding.WaitForLedgerUpdate":
-        return <WaitForOtherPlayer actionDescriptor={"ledger channel update"} channelId={state.ledgerId} />;
+        return (
+          <WaitForOtherPlayer
+            actionDescriptor={"ledger channel update"}
+            channelId={state.ledgerId}
+          />
+        );
       case "LedgerDefunding.Failure":
         return <Failure name="ledger-de-funding" reason={state.reason} />;
       case "LedgerDefunding.Success":

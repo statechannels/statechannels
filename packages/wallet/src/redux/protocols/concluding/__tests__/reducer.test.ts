@@ -1,7 +1,11 @@
 import {ConcludingStateType} from "../states";
 import * as scenarios from "./scenarios";
 import {initialize} from "..";
-import {describeScenarioStep, itSendsThisDisplayEventType, itRelaysThisAction} from "../../../__tests__/helpers";
+import {
+  describeScenarioStep,
+  itSendsThisDisplayEventType,
+  itRelaysThisAction
+} from "../../../__tests__/helpers";
 import {concludingReducer} from "../reducer";
 import {concludeInstigated} from "../../../../communication";
 import {SHOW_WALLET, HIDE_WALLET} from "../../../../magmo-wallet-client";
@@ -40,7 +44,10 @@ describe("Player Concluded Happy Path", () => {
   describe("when initializing", () => {
     const result = initialize(scenario.initialize);
     itTransitionsTo(result, "Concluding.WaitForConclude");
-    itRelaysThisAction(result.sharedData, concludeInstigated({channelId: scenario.initialize.channelId}));
+    itRelaysThisAction(
+      result.sharedData,
+      concludeInstigated({channelId: scenario.initialize.channelId})
+    );
     itSendsThisDisplayEventType(result.sharedData, SHOW_WALLET);
   });
 
@@ -70,7 +77,10 @@ describe("Player Closes Channel Happy Path", () => {
   describe("when initializing", () => {
     const result = initialize(scenario.initialize);
     itTransitionsTo(result, "Concluding.WaitForConclude");
-    itRelaysThisAction(result.sharedData, concludeInstigated({channelId: scenario.initialize.channelId}));
+    itRelaysThisAction(
+      result.sharedData,
+      concludeInstigated({channelId: scenario.initialize.channelId})
+    );
     itSendsThisDisplayEventType(result.sharedData, SHOW_WALLET);
   });
 

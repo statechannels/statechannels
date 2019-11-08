@@ -11,9 +11,20 @@ import {
 } from "../ledger-top-up/reducer";
 import {routesToLedgerTopUp} from "../ledger-top-up/actions";
 import {initializeConsensusUpdate} from "../consensus-update";
-import {CONSENSUS_UPDATE_PROTOCOL_LOCATOR, consensusUpdateReducer} from "../consensus-update/reducer";
-import {clearedToSend, routesToConsensusUpdate, isConsensusUpdateAction} from "../consensus-update/actions";
-import {TerminalConsensusUpdateState, isTerminal, ConsensusUpdateState} from "../consensus-update/states";
+import {
+  CONSENSUS_UPDATE_PROTOCOL_LOCATOR,
+  consensusUpdateReducer
+} from "../consensus-update/reducer";
+import {
+  clearedToSend,
+  routesToConsensusUpdate,
+  isConsensusUpdateAction
+} from "../consensus-update/actions";
+import {
+  TerminalConsensusUpdateState,
+  isTerminal,
+  ConsensusUpdateState
+} from "../consensus-update/states";
 import {LedgerTopUpState} from "../ledger-top-up/states";
 import {Outcome, State} from "@statechannels/nitro-protocol";
 import {getLatestState} from "../reducer-helpers";
@@ -257,12 +268,17 @@ function craftAppFunding(
   // we subtract the startingAllocation from the ledger allocation
 
   // TODO: Currently assuming ETH, this should be updated to handle any asset
-  const newAllocation: AllocationAssetOutcome = {assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS, allocation: []};
+  const newAllocation: AllocationAssetOutcome = {
+    assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
+    allocation: []
+  };
 
   newAllocation.allocation.push({destination: appChannelId, amount: appTotal});
 
   ledgerAllocation.allocation.forEach(a => {
-    const startingAllocationItem = startingAllocation.allocation.find(s => s.destination === a.destination);
+    const startingAllocationItem = startingAllocation.allocation.find(
+      s => s.destination === a.destination
+    );
     const difference = !startingAllocationItem
       ? bigNumberify(0)
       : bigNumberify(a.amount).sub(startingAllocationItem.amount);

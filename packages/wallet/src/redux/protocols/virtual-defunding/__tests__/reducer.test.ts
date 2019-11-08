@@ -3,7 +3,10 @@ import {initialize, reducer} from "../reducer";
 import * as states from "../states";
 import {scenarioStepDescription, itSendsTheseStates} from "../../../__tests__/helpers";
 
-const itTransitionsTo = (result: states.VirtualDefundingState, type: states.VirtualDefundingStateType) => {
+const itTransitionsTo = (
+  result: states.VirtualDefundingState,
+  type: states.VirtualDefundingStateType
+) => {
   it(`transitions to ${type}`, () => {
     expect(result.type).toEqual(type);
   });

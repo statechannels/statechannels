@@ -30,4 +30,7 @@ export const isConsensusUpdateAction = (action: WalletAction): action is Consens
   );
 };
 
-export const routesToConsensusUpdate = routerFactory(isConsensusUpdateAction, EmbeddedProtocol.ConsensusUpdate);
+export const routesToConsensusUpdate = routerFactory(
+  isConsensusUpdateAction,
+  EmbeddedProtocol.ConsensusUpdate
+);

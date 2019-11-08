@@ -94,7 +94,15 @@ describe("ETHAssetHolder listener", () => {
     const outcomeBytes = encodeOutcome(outcome);
     const challengerAddress = AddressZero;
 
-    await pushOutcome(channelId, turnNumRecord, finalizesAt, stateHash, challengerAddress, outcomeBytes, provider);
+    await pushOutcome(
+      channelId,
+      turnNumRecord,
+      finalizesAt,
+      stateHash,
+      challengerAddress,
+      outcomeBytes,
+      provider
+    );
 
     const allocation = getAllocationOutcome(outcome).allocation;
     const processId = ethers.Wallet.createRandom().address;
@@ -126,7 +134,11 @@ async function getOnChainChannelStorage(
   provider,
   channelId: string
 ): Promise<{turnNumRecord: number; finalizesAt: number}> {
-  const {turnNumRecord, finalizesAt} = await nitroTrans.getData(provider, getAdjudicatorContractAddress(), channelId);
+  const {turnNumRecord, finalizesAt} = await nitroTrans.getData(
+    provider,
+    getAdjudicatorContractAddress(),
+    channelId
+  );
   return {turnNumRecord, finalizesAt};
 }
 
@@ -141,7 +153,11 @@ async function pushOutcome(
 ): Promise<void> {
   const adjudicatorInterface = getAdjudicatorInterface();
   const adjudicatorAddress = getAdjudicatorContractAddress();
-  const nitroAdjudicator = new Contract(adjudicatorAddress, adjudicatorInterface, await provider.getSigner());
+  const nitroAdjudicator = new Contract(
+    adjudicatorAddress,
+    adjudicatorInterface,
+    await provider.getSigner()
+  );
 
   await nitroAdjudicator.functions.pushOutcome(
     channelId,
@@ -156,7 +172,11 @@ async function pushOutcome(
 async function transferAll(channelId: string, allocation: string, provider: JsonRpcProvider) {
   const assetHolderInterface = getETHAssetHolderInterface();
   const assetHolderAddress = getETHAssetHolderAddress();
-  const assetHolder = new Contract(assetHolderAddress, assetHolderInterface, await provider.getSigner());
+  const assetHolder = new Contract(
+    assetHolderAddress,
+    assetHolderInterface,
+    await provider.getSigner()
+  );
 
   assetHolder.functions.transferAll(channelId, allocation);
 }

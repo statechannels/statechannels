@@ -4,7 +4,10 @@ import * as states from "./states";
 import * as helpers from "../reducer-helpers";
 import * as actions from "./actions";
 import {unreachable} from "../../../utils/reducer-utils";
-import {ledgerDefundingReducer, initialize as ledgerDefundingInitialize} from "../ledger-defunding/reducer";
+import {
+  ledgerDefundingReducer,
+  initialize as ledgerDefundingInitialize
+} from "../ledger-defunding/reducer";
 import {isLedgerDefundingAction} from "../ledger-defunding/actions";
 import * as ledgerDefundingStates from "../ledger-defunding/states";
 import {EmbeddedProtocol, ProtocolLocator} from "../../../communication";

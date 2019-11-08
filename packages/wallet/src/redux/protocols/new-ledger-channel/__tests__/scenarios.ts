@@ -3,7 +3,10 @@ import * as states from "../states";
 import {channelFromStates} from "../../../channel-store/channel-state/__tests__";
 import {EMPTY_SHARED_DATA, setChannels, SharedData} from "../../../state";
 
-import {preFailure as DFPreFailure, preSuccessA as DFPreSuccessA} from "../../direct-funding/__tests__";
+import {
+  preFailure as DFPreFailure,
+  preSuccessA as DFPreSuccessA
+} from "../../direct-funding/__tests__";
 import {preSuccess as ACPreSuccess} from "../../advance-channel/__tests__/index";
 import {
   asAddress,

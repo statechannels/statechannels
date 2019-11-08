@@ -11,8 +11,8 @@ class InitializingContainer extends PureComponent<Props> {
       <div>
         <h2>A metamask error has occurred.</h2>
         <p>
-          Something went wrong loading metamask. Please make sure metamask is installed and has permission to access{" "}
-          {window.location.hostname}:{window.location.port}.
+          Something went wrong loading metamask. Please make sure metamask is installed and has
+          permission to access {window.location.hostname}:{window.location.port}.
         </p>
       </div>
     );

@@ -46,4 +46,8 @@ export const cancelled: ActionConstructor<Cancelled> = p => ({
 // Unions and Guards
 // -------
 
-export type FundingStrategyNegotiationAction = StrategyChosen | StrategyApproved | StrategyRejected | Cancelled;
+export type FundingStrategyNegotiationAction =
+  | StrategyChosen
+  | StrategyApproved
+  | StrategyRejected
+  | Cancelled;

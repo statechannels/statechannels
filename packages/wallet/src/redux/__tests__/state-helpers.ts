@@ -1,7 +1,17 @@
 import {bigNumberify} from "ethers/utils";
 
-import {ConsensusData, encodeConsensusData} from "@statechannels/nitro-protocol/lib/src/contract/consensus-data";
-import {Outcome, State, Channel, getChannelId, Signatures, SignedState} from "@statechannels/nitro-protocol";
+import {
+  ConsensusData,
+  encodeConsensusData
+} from "@statechannels/nitro-protocol/lib/src/contract/consensus-data";
+import {
+  Outcome,
+  State,
+  Channel,
+  getChannelId,
+  Signatures,
+  SignedState
+} from "@statechannels/nitro-protocol";
 import {NETWORK_ID, ETH_ASSET_HOLDER_ADDRESS, CONSENSUS_LIBRARY_ADDRESS} from "../../constants";
 import {convertAddressToBytes32} from "../../utils/data-type-utils";
 import {TwoPartyPlayerIndex, ThreePartyPlayerIndex} from "../types";
@@ -19,9 +29,17 @@ export const participants: [string, string] = [asAddress, bsAddress];
 
 export const libraryAddress = "0x" + "1".repeat(40);
 export const channelNonce = "0x04";
-export const channel = {channelType: libraryAddress, nonce: Number.parseInt(channelNonce, 16), participants};
+export const channel = {
+  channelType: libraryAddress,
+  nonce: Number.parseInt(channelNonce, 16),
+  participants
+};
 
-export const nitroChannel: Channel = {channelNonce, participants, chainId: bigNumberify(NETWORK_ID).toHexString()};
+export const nitroChannel: Channel = {
+  channelNonce,
+  participants,
+  chainId: bigNumberify(NETWORK_ID).toHexString()
+};
 // Use Nitro protocol channel id so we're always using the same channel Id
 export const channelId = getChannelId(nitroChannel);
 
@@ -30,7 +48,8 @@ export function convertBalanceToOutcome(balances): Outcome {
     {
       assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
       allocation: balances.map(b => {
-        const destination = b.address.length === 66 ? b.address : convertAddressToBytes32(b.address);
+        const destination =
+          b.address.length === 66 ? b.address : convertAddressToBytes32(b.address);
         return {destination, amount: b.wei};
       })
     }
@@ -146,7 +165,9 @@ export function threeWayLedgerState(params: ThreeWayLedgerStateParams): SignedSt
   }
 
   const outcome = convertBalanceToOutcome(balances);
-  const proposedOutcome = !!params.proposedBalances ? convertBalanceToOutcome(params.proposedBalances) : [];
+  const proposedOutcome = !!params.proposedBalances
+    ? convertBalanceToOutcome(params.proposedBalances)
+    : [];
   const consensusData: ConsensusData = {furtherVotesRequired, proposedOutcome};
   const appData = encodeConsensusData(consensusData);
 
@@ -183,7 +204,9 @@ export function ledgerState(params: LedgerStateParams): SignedState {
     furtherVotesRequired = 1;
   }
   const outcome = convertBalanceToOutcome(balances);
-  const proposedOutcome = !!params.proposedBalances ? convertBalanceToOutcome(params.proposedBalances) : [];
+  const proposedOutcome = !!params.proposedBalances
+    ? convertBalanceToOutcome(params.proposedBalances)
+    : [];
   const consensusData: ConsensusData = {furtherVotesRequired, proposedOutcome};
 
   const appData = encodeConsensusData(consensusData);

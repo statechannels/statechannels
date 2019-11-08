@@ -1,5 +1,8 @@
 import {NewLedgerChannelAction, isNewLedgerChannelAction} from "../new-ledger-channel/actions";
-import {ExistingLedgerFundingAction, isExistingLedgerFundingAction} from "../existing-ledger-funding";
+import {
+  ExistingLedgerFundingAction,
+  isExistingLedgerFundingAction
+} from "../existing-ledger-funding";
 import {WalletAction} from "../../actions";
 import {EmbeddedProtocol, routerFactory} from "../../../communication";
 
@@ -9,4 +12,7 @@ export const isLedgerFundingAction = (action: WalletAction): action is LedgerFun
   return isNewLedgerChannelAction(action) || isExistingLedgerFundingAction(action);
 };
 
-export const routesToLedgerFunding = routerFactory(isLedgerFundingAction, EmbeddedProtocol.LedgerFunding);
+export const routesToLedgerFunding = routerFactory(
+  isLedgerFundingAction,
+  EmbeddedProtocol.LedgerFunding
+);

@@ -3,7 +3,10 @@ import * as states from "./states";
 import {ProtocolStateWithSharedData, ProtocolReducer, makeLocator} from "..";
 import * as helpers from "../reducer-helpers";
 import {TwoPartyPlayerIndex} from "../../types";
-import {initialize as initializeDirectFunding, directFundingStateReducer} from "../direct-funding/reducer";
+import {
+  initialize as initializeDirectFunding,
+  directFundingStateReducer
+} from "../direct-funding/reducer";
 import {LedgerTopUpAction} from "./actions";
 import {isDirectFundingAction} from "../direct-funding/actions";
 import {addHex, subHex} from "../../../utils/hex-utils";
@@ -71,11 +74,10 @@ const restoreOrderAndAddBTopUpUpdateReducer: ProtocolReducer<states.LedgerTopUpS
     console.warn(`Received non consensus update action in ${protocolState.type} state.`);
     return {protocolState, sharedData};
   }
-  const {protocolState: consensusUpdateState, sharedData: consensusUpdateSharedData} = consensusUpdateReducer(
-    protocolState.consensusUpdateState,
-    sharedData,
-    action
-  );
+  const {
+    protocolState: consensusUpdateState,
+    sharedData: consensusUpdateSharedData
+  } = consensusUpdateReducer(protocolState.consensusUpdateState, sharedData, action);
   sharedData = consensusUpdateSharedData;
   const {processId, proposedOutcome, ledgerId, originalOutcome} = protocolState;
 
@@ -86,9 +88,9 @@ const restoreOrderAndAddBTopUpUpdateReducer: ProtocolReducer<states.LedgerTopUpS
     };
   } else if (consensusUpdateState.type === "ConsensusUpdate.Success") {
     // If player B already has enough funds then skip to success
-    const playerBHasEnoughFunds = bigNumberify(getAllocationAmountForIndex(originalOutcome, PlayerIndex.B)).gte(
-      getAllocationAmountForIndex(proposedOutcome, PlayerIndex.B)
-    );
+    const playerBHasEnoughFunds = bigNumberify(
+      getAllocationAmountForIndex(originalOutcome, PlayerIndex.B)
+    ).gte(getAllocationAmountForIndex(proposedOutcome, PlayerIndex.B));
     if (playerBHasEnoughFunds) {
       return {protocolState: states.success({}), sharedData: consensusUpdateSharedData};
     }
@@ -143,9 +145,9 @@ const switchOrderAndAddATopUpUpdateReducer: ProtocolReducer<states.LedgerTopUpSt
       sharedData
     };
   } else if (consensusUpdateState.type === "ConsensusUpdate.Success") {
-    const playerAFunded = bigNumberify(getAllocationAmountForIndex(originalOutcome, TwoPartyPlayerIndex.A)).gte(
-      getAllocationAmountForIndex(proposedOutcome, TwoPartyPlayerIndex.A)
-    );
+    const playerAFunded = bigNumberify(
+      getAllocationAmountForIndex(originalOutcome, TwoPartyPlayerIndex.A)
+    ).gte(getAllocationAmountForIndex(proposedOutcome, TwoPartyPlayerIndex.A));
 
     ({consensusUpdateState, sharedData} = initializeConsensusState(
       TwoPartyPlayerIndex.B,
@@ -254,11 +256,10 @@ const waitForDirectFundingForBReducer: ProtocolReducer<states.LedgerTopUpState> 
     return {protocolState, sharedData};
   }
 
-  const {protocolState: directFundingState, sharedData: directFundingSharedData} = directFundingStateReducer(
-    protocolState.directFundingState,
-    sharedData,
-    action
-  );
+  const {
+    protocolState: directFundingState,
+    sharedData: directFundingSharedData
+  } = directFundingStateReducer(protocolState.directFundingState, sharedData, action);
 
   sharedData = directFundingSharedData;
 
@@ -351,14 +352,23 @@ function initializeConsensusState(
   if (playerFor === TwoPartyPlayerIndex.A) {
     const isCurrentAllocationLarger = bigNumberify(currentForA.amount).gte(proposedForA.amount);
 
-    newAllocation = [{...currentForB}, isCurrentAllocationLarger ? {...currentForA} : {...proposedForA}];
+    newAllocation = [
+      {...currentForB},
+      isCurrentAllocationLarger ? {...currentForA} : {...proposedForA}
+    ];
   } else {
     // When we're handling this for player B the allocation has already been flipped, so our current value is first in the allocation
     const isCurrentAllocationLarger = bigNumberify(currentForB.amount).gte(proposedForB.amount);
     // For Player B we're restoring the original order of [A,B]
-    newAllocation = [{...currentForA}, isCurrentAllocationLarger ? {...currentForB} : {...proposedForB}];
+    newAllocation = [
+      {...currentForA},
+      isCurrentAllocationLarger ? {...currentForB} : {...proposedForB}
+    ];
   }
-  const {protocolState: consensusUpdateState, sharedData: newSharedData} = initializeConsensusUpdate({
+  const {
+    protocolState: consensusUpdateState,
+    sharedData: newSharedData
+  } = initializeConsensusUpdate({
     processId,
     channelId: ledgerId,
     clearedToSend: true,

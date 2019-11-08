@@ -51,7 +51,9 @@ export interface Success {
 // -------
 
 export function isTerminal(state: TransactionSubmissionState): state is Failure | Success {
-  return state.type === "TransactionSubmission.Failure" || state.type === "TransactionSubmission.Success";
+  return (
+    state.type === "TransactionSubmission.Failure" || state.type === "TransactionSubmission.Success"
+  );
 }
 
 export function isSuccess(state: TransactionSubmissionState): state is Success {
@@ -106,7 +108,9 @@ export type NonTerminalTransactionSubmissionState =
   | WaitForConfirmation
   | ApproveRetry;
 
-export function isTransactionSubmissionState(state: ProtocolState): state is TransactionSubmissionState {
+export function isTransactionSubmissionState(
+  state: ProtocolState
+): state is TransactionSubmissionState {
   return (
     state.type === "TransactionSubmission.WaitForSend" ||
     state.type === "TransactionSubmission.WaitForSubmission" ||

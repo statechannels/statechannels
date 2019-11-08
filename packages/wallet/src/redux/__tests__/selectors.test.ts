@@ -35,14 +35,20 @@ describe("getAdjudicatorWatcherProcessesForChannel", () => {
   });
 
   it("should return an array of channel subscribes that are registered for a channel", () => {
-    const subscribers = [{processId: "p1", protocolLocator: []}, {processId: "p2", protocolLocator: []}];
+    const subscribers = [
+      {processId: "p1", protocolLocator: []},
+      {processId: "p2", protocolLocator: []}
+    ];
     const channelId = "0x0";
     const state = createWatcherState(channelId, subscribers);
     expect(selectors.getAdjudicatorWatcherSubscribersForChannel(state, "0x0")).toEqual(subscribers);
   });
 
   it("should return an empty array when no processes are registered for the channel", () => {
-    const subscribers = [{processId: "p1", protocolLocator: []}, {processId: "p2", protocolLocator: []}];
+    const subscribers = [
+      {processId: "p1", protocolLocator: []},
+      {processId: "p2", protocolLocator: []}
+    ];
     const channelId = "0x0";
     const state = createWatcherState(channelId, subscribers);
     expect(selectors.getAdjudicatorWatcherSubscribersForChannel(state, "0x1")).toEqual([]);

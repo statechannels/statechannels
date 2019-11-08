@@ -68,7 +68,14 @@ const base: StateConstructor<BaseState> = params => {
 };
 
 export const channelUnknown: StateConstructor<ChannelUnknown> = params => {
-  const {privateKey, outcome, participants, appDefinition: channelType, appData: appAttributes, clearedToSend} = params;
+  const {
+    privateKey,
+    outcome,
+    participants,
+    appDefinition: channelType,
+    appData: appAttributes,
+    clearedToSend
+  } = params;
   return {
     ...base(params),
     type: "AdvanceChannel.ChannelUnknown",

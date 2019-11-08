@@ -1,5 +1,10 @@
 import * as actions from "../../actions";
-import {isCommonAction, EmbeddedProtocol, routerFactory, SignedStatesReceived} from "../../../communication";
+import {
+  isCommonAction,
+  EmbeddedProtocol,
+  routerFactory,
+  SignedStatesReceived
+} from "../../../communication";
 
 // -------
 // Actions
@@ -14,10 +19,15 @@ import {isCommonAction, EmbeddedProtocol, routerFactory, SignedStatesReceived} f
 
 type EmbeddedAction = actions.advanceChannel.AdvanceChannelAction | actions.TransactionAction;
 
-export type DirectFundingAction = SignedStatesReceived | actions.FundingReceivedEvent | EmbeddedAction;
+export type DirectFundingAction =
+  | SignedStatesReceived
+  | actions.FundingReceivedEvent
+  | EmbeddedAction;
 
 function isEmbeddedAction(action: actions.WalletAction): action is EmbeddedAction {
-  return actions.advanceChannel.isAdvanceChannelAction(action) || actions.isTransactionAction(action);
+  return (
+    actions.advanceChannel.isAdvanceChannelAction(action) || actions.isTransactionAction(action)
+  );
 }
 
 export function isDirectFundingAction(action: actions.WalletAction): action is DirectFundingAction {
@@ -28,4 +38,7 @@ export function isDirectFundingAction(action: actions.WalletAction): action is D
   );
 }
 
-export const routesToDirectFunding = routerFactory(isDirectFundingAction, EmbeddedProtocol.DirectFunding);
+export const routesToDirectFunding = routerFactory(
+  isDirectFundingAction,
+  EmbeddedProtocol.DirectFunding
+);

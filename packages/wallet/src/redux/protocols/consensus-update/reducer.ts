@@ -118,10 +118,21 @@ function sendIfSafe(
         return {protocolState, sharedData};
       }
       try {
-        if (proposalStateHasExpectedValues(helpers.getLatestState(channelId, sharedData), proposedOutcome)) {
+        if (
+          proposalStateHasExpectedValues(
+            helpers.getLatestState(channelId, sharedData),
+            proposedOutcome
+          )
+        ) {
           sharedData = sendAcceptConsensus(processId, channelId, protocolLocator, sharedData);
         } else {
-          sharedData = sendProposal(processId, channelId, proposedOutcome, protocolLocator, sharedData);
+          sharedData = sendProposal(
+            processId,
+            channelId,
+            proposedOutcome,
+            protocolLocator,
+            sharedData
+          );
         }
       } catch (error) {
         return {
@@ -153,7 +164,8 @@ function consensusReached(channel: ChannelState, expectedOutcome: Outcome): bool
   return !!signedStates.find(ss => {
     const consensusData = decodeConsensusData(ss.state.appData);
     return (
-      consensusData.furtherVotesRequired === 0 && encodeOutcome(ss.state.outcome) === encodeOutcome(expectedOutcome)
+      consensusData.furtherVotesRequired === 0 &&
+      encodeOutcome(ss.state.outcome) === encodeOutcome(expectedOutcome)
     );
   });
 }
@@ -225,7 +237,10 @@ function acceptConsensus(state: State): State {
     return {
       ...state,
       turnNum: state.turnNum + 1,
-      appData: encodeConsensusData({...consensusData, furtherVotesRequired: consensusData.furtherVotesRequired - 1})
+      appData: encodeConsensusData({
+        ...consensusData,
+        furtherVotesRequired: consensusData.furtherVotesRequired - 1
+      })
     };
   }
 }

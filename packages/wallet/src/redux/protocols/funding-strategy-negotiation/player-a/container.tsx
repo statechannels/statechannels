@@ -53,7 +53,12 @@ class FundingStrategyNegotiationContainer extends PureComponent<Props> {
           </ApproveX>
         );
       case "FundingStrategyNegotiation.PlayerA.WaitForStrategyResponse":
-        return <WaitForOtherPlayer actionDescriptor={"strategy response"} channelId={state.targetChannelId} />;
+        return (
+          <WaitForOtherPlayer
+            actionDescriptor={"strategy response"}
+            channelId={state.targetChannelId}
+          />
+        );
       default:
         return unreachable(state);
     }

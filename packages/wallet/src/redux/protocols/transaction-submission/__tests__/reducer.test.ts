@@ -99,7 +99,11 @@ function itTransitionsTo(result: ReturnVal, type: states.TransactionSubmissionSt
   });
 }
 
-function itQueuesATransaction(result: ReturnVal, transactionRequest: TransactionRequest, processId: string) {
+function itQueuesATransaction(
+  result: ReturnVal,
+  transactionRequest: TransactionRequest,
+  processId: string
+) {
   it("queues a transaction", () => {
     const queuedTransaction = result.storage.outboxState.transactionOutbox[0];
     expect(queuedTransaction).toEqual({transactionRequest, processId});

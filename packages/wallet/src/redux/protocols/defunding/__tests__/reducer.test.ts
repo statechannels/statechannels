@@ -3,7 +3,10 @@ import {initialize, defundingReducer} from "../reducer";
 import * as scenarios from "./scenarios";
 import {describeScenarioStep} from "../../../__tests__/helpers";
 
-const itTransitionsTo = (result: {protocolState: states.DefundingState}, type: states.DefundingStateType) => {
+const itTransitionsTo = (
+  result: {protocolState: states.DefundingState},
+  type: states.DefundingStateType
+) => {
   it(`transitions to ${type}`, () => {
     expect(result.protocolState.type).toEqual(type);
   });

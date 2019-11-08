@@ -70,7 +70,11 @@ export const decideClosing: StateConstructor<DecideClosing> = p => {
 // Unions and Guards
 // -------
 
-export type NonTerminalConcludingState = WaitForConclude | WaitForDefund | DecideClosing | WaitForLedgerClose;
+export type NonTerminalConcludingState =
+  | WaitForConclude
+  | WaitForDefund
+  | DecideClosing
+  | WaitForLedgerClose;
 export type TerminalConcludingState = Success | Failure;
 export type ConcludingState = TerminalConcludingState | NonTerminalConcludingState;
 export type ConcludingStateType = ConcludingState["type"];
@@ -82,6 +86,8 @@ export function isConcludingState(state: ProtocolState): state is ConcludingStat
 export function isTerminalConcludingState(state: ProtocolState): state is TerminalConcludingState {
   return state.type === "Concluding.Failure" || state.type === "Concluding.Success";
 }
-export function isNonTerminalConcludingState(state: ProtocolState): state is NonTerminalConcludingState {
+export function isNonTerminalConcludingState(
+  state: ProtocolState
+): state is NonTerminalConcludingState {
   return isConcludingState(state) && !isTerminalConcludingState(state);
 }

@@ -10,9 +10,17 @@ import {fundingFailure} from "../../../magmo-wallet-client";
 import {EmbeddedProtocol} from "../../../communication";
 
 import * as ledgerFundingStates from "../ledger-funding/states";
-import {ledgerFundingReducer, initializeLedgerFunding, LedgerFundingAction} from "../ledger-funding";
+import {
+  ledgerFundingReducer,
+  initializeLedgerFunding,
+  LedgerFundingAction
+} from "../ledger-funding";
 import * as virtualFunding from "../virtual-funding";
-import {AdvanceChannelAction, advanceChannelReducer, initializeAdvanceChannel} from "../advance-channel";
+import {
+  AdvanceChannelAction,
+  advanceChannelReducer,
+  initializeAdvanceChannel
+} from "../advance-channel";
 import * as advanceChannelStates from "../advance-channel/states";
 import {clearedToSend, routesToAdvanceChannel} from "../advance-channel/actions";
 import {ADVANCE_CHANNEL_PROTOCOL_LOCATOR} from "../advance-channel/reducer";
@@ -22,7 +30,10 @@ import {
   FundingStrategyNegotiationState,
   TerminalFundingStrategyNegotiationState
 } from "../funding-strategy-negotiation/states";
-import {initializeFundingStrategyNegotiation, fundingStrategyNegotiationReducer} from "../funding-strategy-negotiation";
+import {
+  initializeFundingStrategyNegotiation,
+  fundingStrategyNegotiationReducer
+} from "../funding-strategy-negotiation";
 import {FUNDING_STRATEGY_NEGOTIATION_PROTOCOL_LOCATOR} from "../../../communication/protocol-locator";
 import {
   routesToFundingStrategyNegotiation,
@@ -40,7 +51,10 @@ export function initialize(
   const ourAddress = helpers.getOurAddress(channelId, sharedData);
 
   let fundingStrategyNegotiationState: FundingStrategyNegotiationState;
-  ({sharedData, protocolState: fundingStrategyNegotiationState} = initializeFundingStrategyNegotiation({
+  ({
+    sharedData,
+    protocolState: fundingStrategyNegotiationState
+  } = initializeFundingStrategyNegotiation({
     sharedData,
     channelId,
     processId,
@@ -193,16 +207,19 @@ function handleFundingStrategyNegotiationComplete({
         const ourIndex = channel.participants.indexOf(ourAddress);
 
         let fundingState: virtualFunding.VirtualFundingState;
-        ({protocolState: fundingState, sharedData} = virtualFunding.initializeVirtualFunding(sharedData, {
-          processId,
-          targetChannelId,
-          ourIndex,
-          // TODO: This should be an env variable
-          hubAddress: "0x100063c326b27f78b2cBb7cd036B8ddE4d4FCa7C",
-          startingOutcome: outcome,
-          participants: channel.participants,
-          protocolLocator: makeLocator(EmbeddedProtocol.VirtualFunding)
-        }));
+        ({protocolState: fundingState, sharedData} = virtualFunding.initializeVirtualFunding(
+          sharedData,
+          {
+            processId,
+            targetChannelId,
+            ourIndex,
+            // TODO: This should be an env variable
+            hubAddress: "0x100063c326b27f78b2cBb7cd036B8ddE4d4FCa7C",
+            startingOutcome: outcome,
+            participants: channel.participants,
+            protocolLocator: makeLocator(EmbeddedProtocol.VirtualFunding)
+          }
+        ));
 
         return {
           protocolState: states.waitForVirtualFunding({
@@ -226,7 +243,10 @@ function handleAdvanceChannelAction(
   sharedData: SharedData,
   action: AdvanceChannelAction
 ): ProtocolStateWithSharedData<states.FundingState> {
-  if (protocolState.type !== "Funding.WaitForPostFundSetup" && protocolState.type !== "Funding.WaitForLedgerFunding") {
+  if (
+    protocolState.type !== "Funding.WaitForPostFundSetup" &&
+    protocolState.type !== "Funding.WaitForLedgerFunding"
+  ) {
     console.warn(
       `Funding reducer received advance channel action ${action.type} but is currently in state ${protocolState.type}`
     );
@@ -294,11 +314,10 @@ function handleVirtualFundingAction(
     return {protocolState, sharedData};
   }
 
-  const {protocolState: updatedFundingState, sharedData: updatedSharedData} = virtualFunding.virtualFundingReducer(
-    protocolState.fundingState,
-    sharedData,
-    action
-  );
+  const {
+    protocolState: updatedFundingState,
+    sharedData: updatedSharedData
+  } = virtualFunding.virtualFundingReducer(protocolState.fundingState, sharedData, action);
 
   if (!virtualFunding.isTerminal(updatedFundingState)) {
     return {

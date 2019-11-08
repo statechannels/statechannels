@@ -57,7 +57,9 @@ const ledgerChannelBeforeUpdate = channelFromStates([ledger6, ledger7], asAddres
 const ledgerChannelBeforeConsensus = channelFromStates([ledger7, ledger8], asAddress, asPrivateKey);
 
 const ledgerId = ledgerChannelBeforeUpdate.channelId;
-const fundingApp = [{address: ethers.Wallet.createRandom().address, wei: bigNumberify(6).toHexString()}];
+const fundingApp = [
+  {address: ethers.Wallet.createRandom().address, wei: bigNumberify(6).toHexString()}
+];
 
 const joint4 = scenarios.threeWayLedgerState({turnNum: 4, balances: fundingApp});
 const joint5 = scenarios.threeWayLedgerState({turnNum: 5, balances: fundingApp});
@@ -141,7 +143,10 @@ const initialSharedData = createFundingState(
 
 const waitForJointSharedData = createFundingState(
   setChannel(
-    setChannel(setChannel(EMPTY_SHARED_DATA, jointChannelBeforeConsensus), ledgerChannelBeforeUpdate),
+    setChannel(
+      setChannel(EMPTY_SHARED_DATA, jointChannelBeforeConsensus),
+      ledgerChannelBeforeUpdate
+    ),
     appChannel
   )
 );

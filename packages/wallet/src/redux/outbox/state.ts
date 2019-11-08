@@ -32,7 +32,11 @@ export function queueMessage(state: OutboxState, message: WalletEvent): OutboxSt
   return accumulateSideEffects(state, {messageOutbox: [message]});
 }
 
-export function queueTransaction(state: OutboxState, transaction: TransactionRequest, processId: string): OutboxState {
+export function queueTransaction(
+  state: OutboxState,
+  transaction: TransactionRequest,
+  processId: string
+): OutboxState {
   return accumulateSideEffects(state, {
     transactionOutbox: {transactionRequest: transaction, processId}
   });

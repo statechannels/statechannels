@@ -15,7 +15,10 @@ export const getOpenedChannelState = (state: SharedData, channelId: string): Ope
 };
 
 export const doesAStateExistForChannel = (state: SharedData, channelId: string): boolean => {
-  return state.channelStore[channelId] !== undefined && state.channelStore[channelId].signedStates.length > 0;
+  return (
+    state.channelStore[channelId] !== undefined &&
+    state.channelStore[channelId].signedStates.length > 0
+  );
 };
 
 export const getChannelState = (state: SharedData, channelId: string): ChannelState => {
@@ -43,7 +46,8 @@ export const getFundedLedgerChannelForParticipants = (
     return (
       channel.libraryAddress === CONSENSUS_LIBRARY_ADDRESS &&
       // We call concat() on participants in order to not sort it in place
-      JSON.stringify(channel.participants.concat().sort()) === JSON.stringify([playerA, playerB].sort()) &&
+      JSON.stringify(channel.participants.concat().sort()) ===
+        JSON.stringify([playerA, playerB].sort()) &&
       directlyFunded
     );
   });
@@ -102,7 +106,10 @@ export const getChannelFundingState = (
   return getFundingState(state)[channelId];
 };
 
-export const getProtocolForProcessId = (state: walletStates.Initialized, processId: string): ProcessProtocol => {
+export const getProtocolForProcessId = (
+  state: walletStates.Initialized,
+  processId: string
+): ProcessProtocol => {
   if (state.processStore[processId]) {
     throw new Error(`No process state for process Id`);
   } else {
@@ -122,7 +129,10 @@ export const getNextNonce = (
   let highestNonce = "-1";
   for (const channelId of Object.keys(state.channelStore)) {
     const channel = state.channelStore[channelId];
-    if (channel.libraryAddress === libraryAddress && bigNumberify(channel.channelNonce).gt(highestNonce)) {
+    if (
+      channel.libraryAddress === libraryAddress &&
+      bigNumberify(channel.channelNonce).gt(highestNonce)
+    ) {
       highestNonce = channel.channelNonce;
     }
   }

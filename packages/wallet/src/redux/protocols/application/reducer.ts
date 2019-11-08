@@ -3,8 +3,18 @@ import * as states from "./states";
 import * as actions from "./actions";
 import {ProtocolStateWithSharedData} from "..";
 import {unreachable} from "../../../utils/reducer-utils";
-import {validationSuccess, signatureSuccess, signatureFailure, validationFailure} from "../../../magmo-wallet-client";
-import {checkAndInitialize, signAndInitialize, signAndStore, checkAndStore} from "../../channel-store/reducer";
+import {
+  validationSuccess,
+  signatureSuccess,
+  signatureFailure,
+  validationFailure
+} from "../../../magmo-wallet-client";
+import {
+  checkAndInitialize,
+  signAndInitialize,
+  signAndStore,
+  checkAndStore
+} from "../../channel-store/reducer";
 import {ProtocolAction} from "../../actions";
 import * as dispute from "../dispute";
 import {disputeReducer} from "../dispute/reducer";
@@ -72,7 +82,10 @@ function ownStateReceivedReducer(
   } else {
     const updatedSharedData = {...sharedData, channelStore: signResult.store};
     return {
-      sharedData: queueMessage(updatedSharedData, signatureSuccess(joinSignature(signResult.signedState.signature))),
+      sharedData: queueMessage(
+        updatedSharedData,
+        signatureSuccess(joinSignature(signResult.signedState.signature))
+      ),
       protocolState: states.ongoing(protocolState)
     };
   }
@@ -124,7 +137,13 @@ function challengeDetectedReducer(
   action: actions.ChallengeDetected
 ): ProtocolStateWithSharedData<states.ApplicationState> {
   const {channelId, processId, expiresAt: expiryTime, state} = action;
-  const disputeState = dispute.initializeResponder(processId, channelId, expiryTime, sharedData, state);
+  const disputeState = dispute.initializeResponder(
+    processId,
+    channelId,
+    expiryTime,
+    sharedData,
+    state
+  );
   const newProtocolState = states.waitForDispute({
     ...protocolState,
     disputeState: disputeState.protocolState
@@ -181,7 +200,11 @@ const validateAndUpdate = (
   }
 };
 
-const signAndUpdate = (state: State, protocolState: states.ApplicationState, sharedData: SharedData) => {
+const signAndUpdate = (
+  state: State,
+  protocolState: states.ApplicationState,
+  sharedData: SharedData
+) => {
   if (protocolState.type === "Application.WaitForFirstState") {
     return signAndInitialize(sharedData.channelStore, state, protocolState.privateKey);
   } else {

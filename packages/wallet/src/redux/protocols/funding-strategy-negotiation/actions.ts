@@ -40,8 +40,13 @@ export function isPlayerBFundingStrategyNegotiationAction(
   );
 }
 
-export function isFundingStrategyNegotiationAction(action: WalletAction): action is FundingStrategyNegotiationAction {
-  return isPlayerAFundingStrategyNegotiationAction(action) || isPlayerBFundingStrategyNegotiationAction(action);
+export function isFundingStrategyNegotiationAction(
+  action: WalletAction
+): action is FundingStrategyNegotiationAction {
+  return (
+    isPlayerAFundingStrategyNegotiationAction(action) ||
+    isPlayerBFundingStrategyNegotiationAction(action)
+  );
 }
 
 export const routesToFundingStrategyNegotiation = routerFactory(

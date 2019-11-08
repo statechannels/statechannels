@@ -63,7 +63,9 @@ export const stateSent: StateConstructor<StateSent> = p => {
 
 export function isConsensusUpdateState(state: ProtocolState): state is ConsensusUpdateState {
   return (
-    state.type === "ConsensusUpdate.NotSafeToSend" || state.type === "ConsensusUpdate.StateSent" || isTerminal(state)
+    state.type === "ConsensusUpdate.NotSafeToSend" ||
+    state.type === "ConsensusUpdate.StateSent" ||
+    isTerminal(state)
   );
 }
 

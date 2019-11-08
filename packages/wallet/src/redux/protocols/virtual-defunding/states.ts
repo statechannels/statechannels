@@ -45,10 +45,14 @@ export const failure: StateConstructor<Failure> = _ => {
   return {type: "VirtualDefunding.Failure"};
 };
 
-export type NonTerminalVirtualDefundingState = WaitForJointChannelUpdate | WaitForLedgerChannelUpdate;
+export type NonTerminalVirtualDefundingState =
+  | WaitForJointChannelUpdate
+  | WaitForLedgerChannelUpdate;
 
 export type TerminalVirtualDefundingState = Success | Failure;
-export type VirtualDefundingState = TerminalVirtualDefundingState | NonTerminalVirtualDefundingState;
+export type VirtualDefundingState =
+  | TerminalVirtualDefundingState
+  | NonTerminalVirtualDefundingState;
 export type VirtualDefundingStateType = VirtualDefundingState["type"];
 
 export function isVirtualDefundingState(state: ProtocolState): state is VirtualDefundingState {

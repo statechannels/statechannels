@@ -24,4 +24,7 @@ export function isNewLedgerChannelAction(action: WalletAction): action is NewLed
   );
 }
 
-export const routesToNewLedgerChannel = routerFactory(isNewLedgerChannelAction, EmbeddedProtocol.NewLedgerChannel);
+export const routesToNewLedgerChannel = routerFactory(
+  isNewLedgerChannelAction,
+  EmbeddedProtocol.NewLedgerChannel
+);

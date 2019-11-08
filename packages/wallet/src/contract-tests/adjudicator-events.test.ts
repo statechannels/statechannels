@@ -2,7 +2,14 @@ import {getChannelId as nitroGetChannelId} from "@statechannels/nitro-protocol";
 import {adjudicatorWatcher} from "../redux/sagas/adjudicator-watcher";
 import SagaTester from "redux-saga-tester";
 import * as actions from "../redux/actions";
-import {depositContract, createChallenge, createWatcherState, concludeGame, respond, getChannelId} from "./test-utils";
+import {
+  depositContract,
+  createChallenge,
+  createWatcherState,
+  concludeGame,
+  respond,
+  getChannelId
+} from "./test-utils";
 import * as walletStates from "../redux/state";
 import {getGanacheProvider} from "@statechannels/devtools";
 import {JsonRpcProvider} from "ethers/providers";

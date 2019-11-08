@@ -109,7 +109,11 @@ export function isDevelopmentNetwork(): boolean {
 //   return outcomeForChannel;
 // }
 
-export async function validateTransition(fromState: State, toState: State, privateKey: string): Promise<boolean> {
+export async function validateTransition(
+  fromState: State,
+  toState: State,
+  privateKey: string
+): Promise<boolean> {
   const contractAddress = getAdjudicatorContractAddress();
   const wallet = new ethers.Wallet(privateKey);
   try {

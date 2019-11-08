@@ -27,8 +27,12 @@ export const clearedToSend: ActionConstructor<ClearedToSend> = p => {
 
 export function isAdvanceChannelAction(action: WalletAction): action is AdvanceChannelAction {
   return (
-    isCommonAction(action, EmbeddedProtocol.AdvanceChannel) || action.type === "WALLET.ADVANCE_CHANNEL.CLEARED_TO_SEND"
+    isCommonAction(action, EmbeddedProtocol.AdvanceChannel) ||
+    action.type === "WALLET.ADVANCE_CHANNEL.CLEARED_TO_SEND"
   );
 }
 
-export const routesToAdvanceChannel = routerFactory(isAdvanceChannelAction, EmbeddedProtocol.AdvanceChannel);
+export const routesToAdvanceChannel = routerFactory(
+  isAdvanceChannelAction,
+  EmbeddedProtocol.AdvanceChannel
+);

@@ -22,7 +22,11 @@ export const disputeReducer = (
   if (isNonTerminalResponderState(protocolState)) {
     return responderReducer(protocolState, sharedData, action);
   } else {
-    const {state, sharedData: updatedSharedData} = challengerReducer(protocolState, sharedData, action);
+    const {state, sharedData: updatedSharedData} = challengerReducer(
+      protocolState,
+      sharedData,
+      action
+    );
     return {protocolState: state, sharedData: updatedSharedData};
   }
 };

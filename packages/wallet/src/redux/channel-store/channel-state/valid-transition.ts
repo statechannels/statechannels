@@ -16,7 +16,10 @@ export function validTransition(channelState: ChannelState, state: State): boole
 }
 
 export function validStateTransition(first: State, second: State): boolean {
-  return second.turnNum === first.turnNum + 1 && getChannelId(first.channel) === getChannelId(second.channel);
+  return (
+    second.turnNum === first.turnNum + 1 &&
+    getChannelId(first.channel) === getChannelId(second.channel)
+  );
 }
 
 export function validTransitions(states: SignedState[]): boolean {

@@ -57,7 +57,9 @@ export function* messageListener() {
         break;
       case incoming.SIGN_STATE_REQUEST:
         if (action.state.turnNum === 0) {
-          yield put(actions.protocol.initializeChannel({channelId: getChannelId(action.state.channel)}));
+          yield put(
+            actions.protocol.initializeChannel({channelId: getChannelId(action.state.channel)})
+          );
         }
         yield validateAgainstLatestState(action.state);
 
@@ -70,7 +72,9 @@ export function* messageListener() {
         break;
       case incoming.VALIDATE_STATE_REQUEST:
         if (action.state.turnNum === 0) {
-          yield put(actions.protocol.initializeChannel({channelId: getChannelId(action.state.channel)}));
+          yield put(
+            actions.protocol.initializeChannel({channelId: getChannelId(action.state.channel)})
+          );
         }
         yield validateAgainstLatestState(action.state);
         yield put(
@@ -108,7 +112,9 @@ function* validateTransitionForSignedStates(signedStates: SignedState[]) {
   const storedStateExists = yield select(selectors.doesAStateExistForChannel, channelId);
   if (storedStateExists) {
     const latestStoredState: State = yield select(selectors.getLastStateForChannel, channelId);
-    const newStates = signedStates.filter(signedState => signedState.state.turnNum > latestStoredState.turnNum);
+    const newStates = signedStates.filter(
+      signedState => signedState.state.turnNum > latestStoredState.turnNum
+    );
     if (newStates.length > 0) {
       let fromState = latestStoredState;
       let toState = newStates[0].state;
@@ -136,7 +142,9 @@ function* validateTransition(fromState: State, toState: State) {
   const validTransition = yield contractUtils.validateTransition(fromState, toState, privateKey);
   if (!validTransition) {
     const isConsensusChannel = toState.appDefinition === CONSENSUS_LIBRARY_ADDRESS;
-    const fromAppData = isConsensusChannel ? decodeConsensusData(fromState.appData) : fromState.appData;
+    const fromAppData = isConsensusChannel
+      ? decodeConsensusData(fromState.appData)
+      : fromState.appData;
     const toAppData = isConsensusChannel ? decodeConsensusData(toState.appData) : toState.appData;
     throw new Error(
       `Invalid transition. From State: ${JSON.stringify(

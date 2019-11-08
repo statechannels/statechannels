@@ -41,7 +41,12 @@ class FundingContainer extends PureComponent<Props> {
           />
         );
       case "Funding.WaitForPostFundSetup":
-        return <WaitForOtherPlayer actionDescriptor={"post funding confirmation"} channelId={state.targetChannelId} />;
+        return (
+          <WaitForOtherPlayer
+            actionDescriptor={"post funding confirmation"}
+            channelId={state.targetChannelId}
+          />
+        );
       default:
         return unreachable(state);
     }

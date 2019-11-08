@@ -3,7 +3,10 @@ import {ProtocolStateWithSharedData, makeLocator, ProtocolReducer} from "..";
 import {SharedData} from "../../state";
 import {ProtocolLocator} from "../../../communication";
 import {ConsensusUpdateState, initializeConsensusUpdate} from "../consensus-update";
-import {CONSENSUS_UPDATE_PROTOCOL_LOCATOR, consensusUpdateReducer} from "../consensus-update/reducer";
+import {
+  CONSENSUS_UPDATE_PROTOCOL_LOCATOR,
+  consensusUpdateReducer
+} from "../consensus-update/reducer";
 import {getChannelFundingState} from "../../selectors";
 import {getTwoPlayerIndex, getFundingChannelId, getLatestState} from "../reducer-helpers";
 import {VirtualDefundingAction} from "./actions";
@@ -96,16 +99,29 @@ function waitForJointChannelUpdateReducer(
       case "ConsensusUpdate.Failure":
         return {protocolState: states.failure({}), sharedData};
       case "ConsensusUpdate.Success":
-        const {hubAddress, ledgerChannelId, targetChannelId: appChannelId, ourIndex, processId} = protocolState;
+        const {
+          hubAddress,
+          ledgerChannelId,
+          targetChannelId: appChannelId,
+          ourIndex,
+          processId
+        } = protocolState;
         // TODO: We probably need to start this earlier to deal with states coming in early
 
         const latestAppState = getLatestState(appChannelId, sharedData);
 
-        const proposedOutcome = createLedgerChannelProposedOutcome(latestAppState.outcome, hubAddress, ourIndex);
+        const proposedOutcome = createLedgerChannelProposedOutcome(
+          latestAppState.outcome,
+          hubAddress,
+          ourIndex
+        );
         let ledgerChannel: ConsensusUpdateState;
         ({protocolState: ledgerChannel, sharedData} = initializeConsensusUpdate({
           processId,
-          protocolLocator: makeLocator(protocolState.protocolLocator, CONSENSUS_UPDATE_PROTOCOL_LOCATOR),
+          protocolLocator: makeLocator(
+            protocolState.protocolLocator,
+            CONSENSUS_UPDATE_PROTOCOL_LOCATOR
+          ),
           channelId: ledgerChannelId,
           proposedOutcome,
           clearedToSend: true,

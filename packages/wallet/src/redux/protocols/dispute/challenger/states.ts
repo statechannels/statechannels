@@ -120,7 +120,9 @@ export const acknowledgeFailure: StateConstructor<AcknowledgeFailure> = p => {
   return {...base(p), reason: p.reason, type: "Challenging.AcknowledgeFailure"};
 };
 
-export const acknowledgeClosedButNotDefunded: StateConstructor<AcknowledgeClosedButNotDefunded> = p => {
+export const acknowledgeClosedButNotDefunded: StateConstructor<
+  AcknowledgeClosedButNotDefunded
+> = p => {
   return {...base(p), type: "Challenging.AcknowledgeClosedButNotDefunded"};
 };
 
@@ -157,7 +159,9 @@ export type NonTerminalChallengerState =
 
 export type TerminalChallengerState = SuccessOpen | SuccessClosed | Failure;
 
-export function isNonTerminalChallengerState(state: ProtocolState): state is NonTerminalChallengerState {
+export function isNonTerminalChallengerState(
+  state: ProtocolState
+): state is NonTerminalChallengerState {
   return isChallengerState(state) && isNonTerminal(state);
 }
 

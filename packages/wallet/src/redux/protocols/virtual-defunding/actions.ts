@@ -9,4 +9,7 @@ export function isVirtualDefundingAction(action: WalletAction): action is Virtua
   return isAdvanceChannelAction(action) || isConsensusUpdateAction(action);
 }
 
-export const routesToVirtualDefunding = routerFactory(isVirtualDefundingAction, EmbeddedProtocol.VirtualDefunding);
+export const routesToVirtualDefunding = routerFactory(
+  isVirtualDefundingAction,
+  EmbeddedProtocol.VirtualDefunding
+);

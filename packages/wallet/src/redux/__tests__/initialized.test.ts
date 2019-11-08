@@ -66,7 +66,11 @@ describe("when a ProcessAction arrives", () => {
 
   walletReducer(state, action);
   it("calls the correct reducer", () => {
-    expect(NewLedgerChannelReducer).toHaveBeenCalledWith(protocolState, states.EMPTY_SHARED_DATA, action);
+    expect(NewLedgerChannelReducer).toHaveBeenCalledWith(
+      protocolState,
+      states.EMPTY_SHARED_DATA,
+      action
+    );
   });
 });
 
