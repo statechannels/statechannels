@@ -98,7 +98,7 @@ jobs:
       - attach_workspace:
           at: /home/circleci/project
       - run:
-          command: yarn startGanache
+          command: yarn start:ganache
           background: true
       - run: yarn test:ci
       - upload_logs:
