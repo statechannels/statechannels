@@ -338,4 +338,4 @@ export const addressCreated: ActionConstructor<AddressCreated> = p => ({
 });
 
 export type JsonRpcRequestAction = AddressRequest;
-export type JsonResponseAction = AddressCreated;
+export type JsonRpcResponseAction = AddressCreated;

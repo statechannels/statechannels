@@ -1,14 +1,14 @@
-import {JsonResponseAction} from "../actions";
+import {JsonRpcResponseAction} from "../actions";
 import jrs from "jsonrpc-serializer";
 import {call} from "redux-saga/effects";
 
-export function* messageSender(action: JsonResponseAction) {
+export function* messageSender(action: JsonRpcResponseAction) {
   const message = createResponseMessage(action);
   yield call(window.parent.postMessage, message, "*");
 }
 
 // This is exported so we can easily test it
-export function createResponseMessage(action: JsonResponseAction) {
+export function createResponseMessage(action: JsonRpcResponseAction) {
   switch (action.type) {
     case "WALLET.ADDRESS_CREATED":
       return jrs.success(action.id, action.address);
