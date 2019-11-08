@@ -2,7 +2,7 @@
 
 module.exports = {
     ...require('../../.prettierrc.js'),
-    "printWidth": 120,
+    "printWidth": 100,
     "singleQuote": false,
     "bracketSpacing": false,
 };
