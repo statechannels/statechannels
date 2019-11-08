@@ -24,7 +24,7 @@ const users = [
 const siteConfig = {
   title: 'Nitro protocol', // Title for your website.
   tagline: 'A smart-contract protocol for state channel networks',
-  url: 'https://angry-villani-ad8c15.netlify.com/', // Your website URL
+  url: 'https://nitro-protocol.netlify.com', // Your website URL
   baseUrl: '/', // Base URL for your project */
   // For github.io type URLs, you would set the url and baseUrl like:
   //   url: 'https://facebook.github.io',
@@ -39,9 +39,9 @@ const siteConfig = {
 
   // For no header links in the top nav bar -> headerLinks: [],
   headerLinks: [
-    { doc: 'state-channels/overview', label: 'Docs' },
-    { doc: 'api/contract-inheritance', label: 'API' },
-    { page: 'help', label: 'Help' },
+    {doc: 'state-channels/overview', label: 'Docs'},
+    {doc: 'api/contract-inheritance', label: 'API'},
+    {page: 'help', label: 'Help'},
   ],
 
   // If you have users set above, you add it here:
@@ -60,7 +60,7 @@ const siteConfig = {
 
   markdownPlugins: [
     // Highlight admonitions.
-    require('remarkable-admonitions')({ icon: 'svg-inline' }),
+    require('remarkable-admonitions')({icon: 'svg-inline'}),
   ],
 
   /* Custom fonts for website */
