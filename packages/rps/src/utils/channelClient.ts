@@ -1,23 +1,11 @@
 import {BigNumberish} from 'ethers/utils';
 import {EventEmitter} from 'events';
 
-export enum ChannelStatus {
-  Opening = 'opening',
-  Funding = 'funding',
-  Running = 'running',
-  Closing = 'closing',
-}
+export type ChannelStatus = 'opening' | 'funding' | 'running' | 'closing';
 
-export enum MethodName {
-  CreateChannel = 'CreateChannel',
-  JoinChannel = 'JoinChannel',
-  UpdateChannel = 'UpdateChannel',
-}
+export type MethodName = 'CreateChannel' | 'JoinChannel' | 'UpdateChannel';
 
-export enum NotificationName {
-  ChannelProposed = 'ChannelProposed',
-  ChannelUpdated = 'ChannelUpdated',
-}
+export type NotificationName = 'ChannelProposed' | 'ChannelUpdated';
 
 export interface Participant {
   /**
@@ -81,14 +69,16 @@ export interface ParameterHash {
   [key: string]: any;
 }
 
-export interface JsonRPCNotification<ParametersType = ParameterHash, MethodType = string> {
+export interface JsonRPCNotification<ParametersType> {
   jsonrpc: '2.0';
-  method: MethodType;
+  method: NotificationName;
   params: ParametersType;
 }
 
-export interface JsonRPCRequest<ParametersType = ParameterHash, MethodType = string>
-  extends JsonRPCNotification<ParametersType, MethodType> {
+export interface JsonRPCRequest<ParametersType> {
+  jsonrpc: '2.0';
+  method: MethodName;
+  params: ParametersType;
   id: string;
 }
 
@@ -109,8 +99,9 @@ export interface ChannelResult extends CreateChannelParameters {
   turnNum: BigNumberish;
 }
 
-export interface CreateChannelRequest
-  extends JsonRPCRequest<CreateChannelParameters, MethodName.CreateChannel> {}
+export interface CreateChannelRequest extends JsonRPCRequest<CreateChannelParameters> {
+  method: 'CreateChannel';
+}
 
 export interface CreateChannelResponse extends JsonRPCResponse<ChannelResult> {}
 
@@ -118,8 +109,9 @@ export interface JoinChannelParameters {
   channelId: string;
 }
 
-export interface JoinChannelRequest
-  extends JsonRPCRequest<JoinChannelParameters, MethodName.JoinChannel> {}
+export interface JoinChannelRequest extends JsonRPCRequest<JoinChannelParameters> {
+  method: 'JoinChannel';
+}
 
 export interface JoinChannelResponse extends JsonRPCResponse<ChannelResult> {}
 
@@ -129,46 +121,42 @@ export interface UpdateChannelParameters {
   appData: string;
 }
 
-export interface UpdateChannelRequest
-  extends JsonRPCRequest<UpdateChannelParameters, MethodName.UpdateChannel> {}
+export interface UpdateChannelRequest extends JsonRPCRequest<UpdateChannelParameters> {
+  method: 'UpdateChannel';
+}
 
-export interface ChannelProposedNotification
-  extends JsonRPCNotification<ChannelResult, 'ChannelProposed'> {}
+export interface ChannelProposedNotification extends JsonRPCNotification<ChannelResult> {
+  method: 'ChannelProposed';
+}
 
-export interface ChannelUpdatedNotification
-  extends JsonRPCNotification<ChannelResult, 'ChannelUpdated'> {}
+export interface ChannelUpdatedNotification extends JsonRPCNotification<ChannelResult> {
+  method: 'ChannelUpdated';
+}
 
 export type ActionParameters =
   | CreateChannelParameters
   | JoinChannelParameters
   | UpdateChannelParameters;
 
-export interface ParametersByMessageListener {
-  [NotificationName.ChannelProposed]: ChannelResult;
-  [NotificationName.ChannelUpdated]: ChannelResult;
-}
-
-export type MessageListenerParameters<T extends NotificationName> = ParametersByMessageListener[T];
-
 export class ChannelClient {
   protected events = new EventEmitter();
 
-  onMessageReceived<T extends NotificationName>(
-    notificationName: T,
-    callback: (parameters: MessageListenerParameters<T>) => void
+  onMessageReceived(
+    notificationName: NotificationName,
+    callback: (parameters: ChannelResult) => void
   ): void {
     this.events.on(
       'message',
       (message: JsonRPCNotification<ActionParameters> | JsonRPCRequest<ActionParameters>) => {
         if (message.method === notificationName) {
-          callback(message.params as MessageListenerParameters<T>);
+          callback(message.params as ChannelResult);
         }
       }
     );
   }
 
   async createChannel(parameters: CreateChannelParameters) {
-    this.sendToWallet(MethodName.CreateChannel, parameters);
+    this.sendToWallet('CreateChannel', parameters);
 
     // TODO: This notification payload is incomplete, since it doesn't have the result
     // of the channel creation. Where should this go?
@@ -176,7 +164,7 @@ export class ChannelClient {
   }
 
   async joinChannel(parameters: JoinChannelParameters) {
-    this.sendToWallet(MethodName.JoinChannel, parameters);
+    this.sendToWallet('JoinChannel', parameters);
 
     // TODO: This notification payload is incomplete, since it doesn't have the result
     // of the channel creation. Where should this go?
@@ -184,7 +172,7 @@ export class ChannelClient {
   }
 
   async updateChannel(parameters: UpdateChannelParameters) {
-    this.sendToWallet(MethodName.UpdateChannel, parameters);
+    this.sendToWallet('UpdateChannel', parameters);
   }
 
   protected async sendToWallet(methodName: MethodName, parameters: ActionParameters) {
@@ -196,7 +184,7 @@ export class ChannelClient {
     });
   }
 
-  protected async notifyApp(notificationName: NotificationName, parameters: ActionParameters) {
+  protected async notifyApp(notificationName: NotificationName, parameters: ChannelResult) {
     this.events.emit('message', {
       jsonrpc: '2.0',
       method: notificationName,
@@ -205,10 +193,10 @@ export class ChannelClient {
   }
 
   protected async notifyChannelUpdated(parameters: ChannelResult) {
-    await this.notifyApp(NotificationName.ChannelUpdated, parameters);
+    await this.notifyApp('ChannelUpdated', parameters);
   }
 
   protected async notifyChannelProposed(parameters: ChannelResult) {
-    await this.notifyApp(NotificationName.ChannelProposed, parameters);
+    await this.notifyApp('ChannelProposed', parameters);
   }
 }
