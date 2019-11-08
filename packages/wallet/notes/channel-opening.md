@@ -9,11 +9,11 @@ sequenceDiagram
     participant F2 as Funding Reducer2
     participant R2 as RPS2
 
-    R1->>C1: W.FUNDING_REQUESTED, prefund commitment: prefund1 A1
+    R1->>C1: W.FUNDING_REQUESTED, prefund state: prefund1 A1
 
     Note right of C1: Fund application <br> channel A1
     C1->>R2: prefund1 A1
-    R2->>C2: W.FUNDING_REQUESTED, prefund commitment: prefund2 A1
+    R2->>C2: W.FUNDING_REQUESTED, prefund state: prefund2 A1
     C2->>C1: prefund2 A1
     C1->>F1: W.I.FUND_CHANNEL A1
     C2->>F2: W.I.FUND_CHANNEL A1

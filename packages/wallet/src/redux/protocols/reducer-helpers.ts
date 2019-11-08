@@ -20,7 +20,7 @@ export function sendFundingComplete(sharedData: SharedData, appChannelId: string
   const channelState = selectors.getOpenedChannelState(sharedData, appChannelId);
   const s = getLastState(channelState);
   if (s.turnNum !== 3) {
-    throw new Error(`Expected a post fund setup B commitment. Instead received ${JSON.stringify(s)}.`);
+    throw new Error(`Expected a post fund setup B state. Instead received ${JSON.stringify(s)}.`);
   }
   return queueMessage(sharedData, fundingSuccess(appChannelId, s));
 }

@@ -8,8 +8,8 @@ This protocol handles launching a challenge on the blockchain. It includes:
 
 Out of scope (for now)
 
-- Halting the challenge in the case where the opponent's commitment arrives between approval and transaction submission.
-- Interrupting the "ApproveChallenge" screen if the opponent's commitment arrives during approval. (Instead, the user will be informed after they approve the challenge.)
+- Halting the challenge in the case where the opponent's state arrives between approval and transaction submission.
+- Interrupting the "ApproveChallenge" screen if the opponent's state arrives during approval. (Instead, the user will be informed after they approve the challenge.)
 - Chain reorgs (e.g. timeout on one fork vs. response on another)
 
 ## State machine
@@ -21,7 +21,7 @@ graph TD
 linkStyle default interpolate basis
   S((start)) --> CE{Can<br/>challenge?}
   CE --> |Yes| WFA(ApproveChallenge)
-  WFA --> |CommitmentArrives| AF
+  WFA --> |StateArrives| AF
   WFA --> |WALLET.DISPUTE.CHALLENGER.CHALLENGE_APPROVED| WFT(WaitForTransaction)
   CE --> |No| AF
   WFA --> |WALLET.DISPUTE.CHALLENGER.CHALLENGE_DENIED| AF(AcknowledgeFailure)
@@ -48,7 +48,7 @@ linkStyle default interpolate basis
 
 Note:
 
-- "Can challenge?" = "channel exists" && "has two commitments" && "not our turn"
+- "Can challenge?" = "channel exists" && "has two states" && "not our turn"
 - We don't currently give the option to retry in the case that the transaction fails.
 - The `MyTurn` check is performed after approval, just in case the opponent's move has arrived in the meantime.
 
@@ -86,15 +86,15 @@ To test all paths through the state machine we will the following scenarios:
    - `AcknowledgeFailure`
    - `Failure`
 
-6. **Already have latest commitment**:
+6. **Already have latest state**:
    - `AcknowledgeFailure`
    - `Failure`
 7. **User declines challenge**:
    - `ApproveChallenge`
    - `AcknowledgeFailure`
    - `Failure`
-8. **Receive commitment while approving**:
-   The opponent's commitment arrives while the user is approving the challenge - `ApproveChallenge` - `AcknowledgeFailure`
+8. **Receive state while approving**:
+   The opponent's state arrives while the user is approving the challenge - `ApproveChallenge` - `AcknowledgeFailure`
 9. **Transaction fails**:
    - `WaitForTransaction`
    - `AcknowledgeFailure`

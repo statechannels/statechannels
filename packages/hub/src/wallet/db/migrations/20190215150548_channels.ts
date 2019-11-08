@@ -1,7 +1,7 @@
 import * as Knex from 'knex';
 import {addBytesCheck} from '../utils';
 
-const TABLE_NAME = 'allocator_channels';
+const TABLE_NAME = 'channels';
 
 exports.up = (knex: Knex) => {
   return knex.schema
@@ -9,7 +9,7 @@ exports.up = (knex: Knex) => {
       table.increments();
       table.string('rules_address').notNullable(); // TODO: This should reference the rules table
       table
-        .integer('nonce')
+        .string('nonce')
         .unsigned()
         .notNullable();
       table.text('holdings').notNullable(); // has to store a uint256

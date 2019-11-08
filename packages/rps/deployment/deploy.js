@@ -4,9 +4,7 @@ const path = require("path");
 const writeJsonFile = require("write-json-file");
 const loadJsonFile = require("load-json-file");
 
-const ethAssetHolderArtifact = require("../build/contracts/ETHAssetHolder");
-const nitroAdjudicatorArtifact = require("../build/contracts/NitroAdjudicator");
-const consensusAppArtifact = require("../build/contracts/ConsensusApp");
+const RockPaperScissorsArtifact = require("../build/contracts/RockPaperScissors");
 
 const {configureEnvVariables} = require("@statechannels/devtools");
 configureEnvVariables();
@@ -57,9 +55,7 @@ const deploy = async (network, secret, etherscanApiKey) => {
 
   const startingMap = networkMap[networkId] || [];
   const contractsToAddresses = await migrate(deployer, startingMap, [
-    migrationFactory(nitroAdjudicatorArtifact),
-    migrationFactory(ethAssetHolderArtifact, networkMap => [networkMap[nitroAdjudicatorArtifact.contractName]]),
-    migrationFactory(consensusAppArtifact)
+    migrationFactory(RockPaperScissorsArtifact)
   ]);
 
   updatedNetworkMap = {...networkMap, [networkId]: contractsToAddresses};

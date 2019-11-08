@@ -43,7 +43,7 @@ describe("happyPath", () => {
 
     itTransitionsTo(protocolState, "VirtualFunding.WaitForJointChannel");
     itTransitionsSubstateTo(protocolState, "jointChannel", preFund.preSuccess.state.type);
-    // Even though there should only be two commitments in the guarantor channel round,
+    // Even though there should only be two states in the guarantor channel round,
     // since we're using the preSuccess scenarios from advance-channel, which sets up a joint
     // 3-party channel, three get sent out.
     // TODO: Fix this by constructing appropriate test data
@@ -86,7 +86,7 @@ describe("happyPath", () => {
 
     itTransitionsTo(protocolState, "VirtualFunding.WaitForGuarantorChannel");
     itTransitionsSubstateTo(protocolState, "guarantorChannel", postFund.preSuccess.state.type);
-    // Even though there should only be two commitments in the guarantor channel round,
+    // Even though there should only be two states in the guarantor channel round,
     // since we're using the preSuccess scenarios from advance-channel, which sets up a joint
     // 3-party channel, three get sent out.
     // TODO: Fix this by constructing appropriate test data

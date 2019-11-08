@@ -88,7 +88,7 @@ export function* messageListener() {
       case incoming.RECEIVE_MESSAGE:
         const messageAction = handleIncomingMessage(action);
 
-        if (messageAction.type === "WALLET.COMMON.COMMITMENTS_RECEIVED") {
+        if (messageAction.type === "WALLET.COMMON.SIGNED_STATES_RECEIVED") {
           yield validateTransitionForSignedStates(messageAction.signedStates);
         }
 
@@ -107,10 +107,10 @@ function* validateTransitionForSignedStates(signedStates: SignedState[]) {
 
   const storedStateExists = yield select(selectors.doesAStateExistForChannel, channelId);
   if (storedStateExists) {
-    const latestStoredCommitment: State = yield select(selectors.getLastStateForChannel, channelId);
-    const newStates = signedStates.filter(signedState => signedState.state.turnNum > latestStoredCommitment.turnNum);
+    const latestStoredState: State = yield select(selectors.getLastStateForChannel, channelId);
+    const newStates = signedStates.filter(signedState => signedState.state.turnNum > latestStoredState.turnNum);
     if (newStates.length > 0) {
-      let fromState = latestStoredCommitment;
+      let fromState = latestStoredState;
       let toState = newStates[0].state;
       yield validateTransition(fromState, toState);
 

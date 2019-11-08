@@ -14,11 +14,11 @@ linkStyle default interpolate basis
     ST-->WFDT
     WFDT-->|TransactionSubmission succeeded|WFFCPF(WaitForFundingConfirmationAndPostFund)
     WFDT-->|FUNDING_RECEIVED|WFFCPF
-    WFDT-->|COMMITMENT_RECEIVED|WFFCPF
+    WFDT-->|SIGNED_STATES_RECEIVED|WFFCPF
     WFDT-->|TransactionSubmission failed|F((Failure))
     WFFCPF-->|FUNDING_RECEIVED|WFFCPF
-    WFFCPF-->|COMMITMENT_RECEIVED|WFFCPF
-    WFFCPF-->|FUNDING_RECEIVED + COMMITMENT_RECEIVED|CF((ChannelFunded))
+    WFFCPF-->|SIGNED_STATES_RECEIVED|WFFCPF
+    WFFCPF-->|FUNDING_RECEIVED + SIGNED_STATES_RECEIVED|CF((ChannelFunded))
     ST-->WFFCPF
 
   classDef logic fill:#efdd20;

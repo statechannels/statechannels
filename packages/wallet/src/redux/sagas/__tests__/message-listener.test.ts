@@ -21,7 +21,7 @@ describe("message listener", () => {
     expect(output).toEqual(put(actions.loggedIn({uid: "abc123"})));
   });
 
-  // TODO: these tests need to be updated once message listening is updated with commitments
+  // TODO: these tests need to be updated once message listening is updated with states
 
   // todo: is OWN_POSITION_RECEIVED actually easier to think about than SIGNATURE_REQUEST?
   it("converts SIGNATURE_REQUEST into OWN_POSITION_RECEIVED", () => {
