@@ -3,9 +3,9 @@ module.exports = {
   "singleQuote": true,
   "overrides": [
     {
-    "files": "*.sol",
+      "files": "*.sol",
       "options": {
-         "tabWidth": 4
+        "tabWidth": 4
       }
     }
   ]

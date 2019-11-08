@@ -1,7 +1,7 @@
-import {configureEnvVariables, GanacheServer} from '@statechannels/devtools';
-import Koa = require("koa");
+import {GanacheServer} from '@statechannels/devtools';
+import Koa = require('koa');
 import Router = require('koa-router');
-import {deploy} from '../deployment/deploy-test';
+import {deploy} from './deployer';
 import {logger} from './logger';
 // configureEnvVariables();
 const port = process.env.DEV_SERVER_PORT || 3000;
@@ -9,7 +9,7 @@ const port = process.env.DEV_SERVER_PORT || 3000;
 const router = new Router();
 const body = {
   ganachePort: process.env.GANACHE_PORT,
-  addresses: 'undefined',
+  addresses: {}
 };
 router.get('/', async ctx => (ctx.body = JSON.stringify(body, null, 2)));
 
@@ -28,9 +28,7 @@ async function startGanache() {
   // Kill the ganache server when jest exits
   process.on('exit', async () => await chain.close());
 
-  const network = await chain.provider.getNetwork();
-
-  body.addresses = await deploy(network.chainId);
+  body.addresses = await deploy(chain);
 
   console.log(`Contracts deployed: ${JSON.stringify(body.addresses, null, 2)}`);
 }
