@@ -7,6 +7,7 @@ import {ProtocolLocator, RelayableAction} from "../../communication";
 import _ from "lodash";
 import {State, SignedState, getChannelId} from "@statechannels/nitro-protocol";
 import {Signature} from "ethers/utils";
+import {JsonRpcResponseAction} from "../actions";
 
 type SideEffectState =
   | StateWithSideEffects<any>
@@ -36,6 +37,22 @@ export const itSendsAMessage = (state: SideEffectState) => {
 export const itSendsNoMessage = (state: SideEffectState) => {
   it(`sends no message`, () => {
     expectSideEffect("messageOutbox", state, item => expect(item).toBeUndefined());
+  });
+};
+
+export const itSendsThisJsonRpcResponse = (
+  state: SideEffectState,
+  message: JsonRpcResponseAction,
+  idx = 0
+) => {
+  if (Array.isArray(message)) {
+    message.map((m, i) => itSendsThisJsonRpcResponse(state, m, i));
+    return;
+  }
+
+  // We've received the entire action
+  it(`sends a message`, () => {
+    expectSideEffect("messageOutbox", state, item => expect(item).toMatchObject(message), idx);
   });
 };
 

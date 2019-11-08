@@ -9,18 +9,25 @@ import {fundingRequested} from "../protocols/actions";
 import * as adjudicatorState from "../adjudicator-state/reducer";
 import {ProcessProtocol, strategyApproved} from "../../communication";
 import {channelId} from "../__tests__/state-helpers";
+import {Wallet} from "ethers";
+import {itSendsThisJsonRpcResponse} from "./helpers";
+const wallet = Wallet.createRandom();
 const defaults = {
   ...states.EMPTY_SHARED_DATA,
-  uid: "uid",
   processStore: {},
   adjudicatorStore: {},
-  address: "address",
-  privateKey: "privateKey"
+  address: wallet.address,
+  privateKey: wallet.privateKey
 };
 
 const initializedState = states.initialized({...defaults});
 
-// TODO: Test for ADDRESS_REQUEST
+describe("when a GetAddressRequest arrives", () => {
+  const action = actions.addressRequest({domain: "test", id: 1});
+  const result = walletReducer(initializedState, action);
+
+  itSendsThisJsonRpcResponse(result, actions.addressResponse({id: 1, address: wallet.address}));
+});
 
 describe("when a NewProcessAction arrives", () => {
   const action = fundingRequested({channelId, playerIndex: TwoPartyPlayerIndex.A});

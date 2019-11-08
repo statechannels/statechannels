@@ -2,16 +2,20 @@ import {walletReducer} from "../reducer";
 
 import * as states from "../state";
 import * as actions from "../actions";
+import {itSendsThisJsonRpcResponse} from "./helpers";
 
 describe("when in WaitForLogin", () => {
   const state = states.waitForLogin();
 
-  describe("when the player logs in", () => {
-    const action = actions.addressRequest({id: 5, domain: "localhost"});
-    const updatedState = walletReducer(state, action);
-    // TODO: Test it puts message in outbox
+  describe("when a GetAddressRequest arrives", () => {
+    const action = actions.addressRequest({domain: "test", id: 1});
+    const result = walletReducer(state, action);
+
     it("transitions to WALLET_INITIALIZED", async () => {
-      expect(updatedState.type).toEqual(states.WALLET_INITIALIZED);
+      expect(result.type).toEqual(states.WALLET_INITIALIZED);
     });
+    const address = (result as states.Initialized).address;
+
+    itSendsThisJsonRpcResponse(result, actions.addressResponse({id: 1, address}));
   });
 });
