@@ -5,7 +5,7 @@ import {messageListener} from "../message-listener";
 import * as actions from "../../actions";
 import {channel} from "redux-saga";
 import {APPLICATION_PROCESS_ID} from "../../../redux/protocols/application/reducer";
-import {appCommitment} from "../../../domain/commitments/__tests__";
+import {appState} from "../../__tests__/state-helpers";
 
 describe("message listener", () => {
   const saga = messageListener();
@@ -21,11 +21,11 @@ describe("message listener", () => {
     expect(output).toEqual(put(actions.loggedIn({uid: "abc123"})));
   });
 
-  // TODO: these tests need to be updated once message listening is updated with commitments
+  // TODO: these tests need to be updated once message listening is updated with states
 
   // todo: is OWN_POSITION_RECEIVED actually easier to think about than SIGNATURE_REQUEST?
   it("converts SIGNATURE_REQUEST into OWN_POSITION_RECEIVED", () => {
-    saga.next({data: incoming.signCommitmentRequest(appCommitment({turnNum: 19}).commitment)});
+    saga.next({data: incoming.signStateRequest(appState({turnNum: 19}).state)});
 
     const output = saga.next().value; // the take
 
@@ -42,10 +42,7 @@ describe("message listener", () => {
 
   it("converts VALIDATION_REQUEST into OPPONENT_POSITION_RECEIVED", () => {
     saga.next({
-      data: incoming.validateCommitmentRequest(
-        appCommitment({turnNum: 19}).commitment,
-        appCommitment({turnNum: 19}).signature
-      )
+      data: incoming.validateStateRequest(appState({turnNum: 19}).state, appState({turnNum: 19}).signature)
     });
     const output = saga.next().value; // the take
 

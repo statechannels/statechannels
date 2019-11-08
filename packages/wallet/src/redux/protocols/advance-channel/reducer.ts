@@ -11,7 +11,7 @@ import {ProtocolStateWithSharedData, ProtocolReducer} from "..";
 import {getChannel, ChannelState, getLastState, getPenultimateState, getStates} from "../../channel-store";
 import {WalletAction} from "../../actions";
 import * as selectors from "../../selectors";
-import {CommitmentsReceived} from "../../../communication";
+import {SignedStatesReceived} from "../../../communication";
 import {isAdvanceChannelAction} from "./actions";
 import {unreachable} from "../../../utils/reducer-utils";
 import {Properties} from "../../utils";
@@ -47,14 +47,14 @@ export const reducer: ProtocolReducer<states.AdvanceChannelState> = (
   action: WalletAction
 ) => {
   if (!isAdvanceChannelAction(action)) {
-    console.error("Invalid action: expected WALLET.COMMON.COMMITMENTS_RECEIVED");
+    console.error("Invalid action: expected WALLET.COMMON.SIGNED_STATES_RECEIVED");
     return {protocolState, sharedData};
   }
 
   switch (action.type) {
     case "WALLET.ADVANCE_CHANNEL.CLEARED_TO_SEND":
       return clearedToSendReducer(protocolState, sharedData);
-    case "WALLET.COMMON.COMMITMENTS_RECEIVED":
+    case "WALLET.COMMON.SIGNED_STATES_RECEIVED":
       switch (protocolState.type) {
         case "AdvanceChannel.ChannelUnknown": {
           return channelUnknownReducer(protocolState, sharedData, action);
@@ -223,7 +223,7 @@ function attemptToAdvanceChannel(
   }
 }
 
-const channelUnknownReducer = (protocolState: states.ChannelUnknown, sharedData, action: CommitmentsReceived) => {
+const channelUnknownReducer = (protocolState: states.ChannelUnknown, sharedData, action: SignedStatesReceived) => {
   const {privateKey} = protocolState;
   const channelId = getChannelId(action.signedStates[0].state.channel);
   const checkResult = checkAndInitialize(sharedData, action.signedStates[0], privateKey);
@@ -248,7 +248,7 @@ const channelUnknownReducer = (protocolState: states.ChannelUnknown, sharedData,
   return {protocolState: nextProtocolState, sharedData};
 };
 
-const notSafeToSendReducer = (protocolState: states.NotSafeToSend, sharedData, action: CommitmentsReceived) => {
+const notSafeToSendReducer = (protocolState: states.NotSafeToSend, sharedData, action: SignedStatesReceived) => {
   const {channelId} = protocolState;
 
   const channel = getChannel(sharedData.channelStore, channelId);
@@ -257,7 +257,7 @@ const notSafeToSendReducer = (protocolState: states.NotSafeToSend, sharedData, a
   return attemptToAdvanceChannel(sharedData, protocolState, channelId);
 };
 
-const stateSentReducer = (protocolState: states.StateSent, sharedData, action: CommitmentsReceived) => {
+const stateSentReducer = (protocolState: states.StateSent, sharedData, action: SignedStatesReceived) => {
   const {channelId, stateType} = protocolState;
 
   let channel = getChannel(sharedData.channelStore, channelId);

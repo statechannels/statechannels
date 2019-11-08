@@ -48,7 +48,7 @@ export default function* openGameSaga() {
             name: gameState.myName,
             stake: gameState.roundBuyIn.toString(),
             createdAt: new Date().getTime(),
-            isPublic: true
+            isPublic: true,
           };
 
           const disconnect = firebase
@@ -91,7 +91,7 @@ function* openGameSyncer() {
     'challenges',
     {
       successActionCreator: actions.syncOpenGames,
-      transform: openGameTransformer
+      transform: openGameTransformer,
     },
     'value'
   );

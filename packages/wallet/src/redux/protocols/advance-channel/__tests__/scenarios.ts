@@ -3,7 +3,7 @@ import {ThreePartyPlayerIndex as PlayerIndex} from "../../../types";
 
 import {EMPTY_SHARED_DATA, setChannels, SharedData} from "../../../state";
 import {channelFromStates} from "../../../channel-store/channel-state/__tests__";
-import * as scenarios from "../../../../domain/commitments/__tests__";
+import * as scenarios from "../../../__tests__/state-helpers";
 import {EmbeddedProtocol, signedStatesReceived} from "../../../../communication";
 import {StateType} from "../states";
 import {clearedToSend} from "../actions";
@@ -33,18 +33,15 @@ const signedState4 = scenarios.threeWayLedgerState({turnNum: 4});
 const signedState5 = scenarios.threeWayLedgerState({turnNum: 5});
 const signedState6 = scenarios.threeWayLedgerState({
   turnNum: 6,
-  isFinal: true,
-  commitmentCount: 0
+  isFinal: true
 });
 const signedState7 = scenarios.threeWayLedgerState({
   turnNum: 7,
-  isFinal: true,
-  commitmentCount: 1
+  isFinal: true
 });
 const signedState8 = scenarios.threeWayLedgerState({
   turnNum: 8,
-  isFinal: true,
-  commitmentCount: 2
+  isFinal: true
 });
 const appData = signedState0.state.appData;
 const participants = signedState0.state.channel.participants;

@@ -7,7 +7,7 @@ import {EMPTY_SHARED_DATA, SharedData} from "../../../../state";
 import {ChannelState, ChannelStore} from "../../../../channel-store";
 import * as transactionActions from "../../../transaction-submission/actions";
 import {challengeExpiredEvent} from "../../../../actions";
-import * as testScenarios from "../../../../../domain/commitments/__tests__";
+import * as testScenarios from "../../../../__tests__/state-helpers";
 
 // ---------
 // Test data
@@ -21,12 +21,12 @@ const {
   participants,
   channelNonce
 } = testScenarios;
-const gameSignedCommitment1 = testScenarios.appCommitment({turnNum: 19});
-const gameSignedCommitment2 = testScenarios.appCommitment({turnNum: 20});
-const gameSignedCommitment3 = testScenarios.appCommitment({turnNum: 21});
-const gameCommitment1 = gameSignedCommitment1.commitment;
-const gameCommitment2 = gameSignedCommitment2.commitment;
-const gameCommitment3 = gameSignedCommitment3.commitment;
+const gameSignedState1 = testScenarios.appState({turnNum: 19});
+const gameSignedState2 = testScenarios.appState({turnNum: 20});
+const gameSignedState3 = testScenarios.appState({turnNum: 21});
+const gameState1 = gameSignedState1.state;
+const gameState2 = gameSignedState2.state;
+const gameState3 = gameSignedState3.state;
 
 const channelStatus: ChannelState = {
   address,
@@ -37,8 +37,8 @@ const channelStatus: ChannelState = {
   participants,
   channelNonce,
   funded: true,
-  signedStates: [gameSignedCommitment1, gameSignedCommitment2].map(sc => sc.signedState),
-  turnNum: gameCommitment2.turnNum
+  signedStates: [gameSignedState1, gameSignedState2],
+  turnNum: gameState2.turnNum
 };
 
 const channelStore: ChannelStore = {
@@ -47,8 +47,8 @@ const channelStore: ChannelStore = {
 
 const refuteChannelStatus: ChannelState = {
   ...channelStatus,
-  signedStates: [gameSignedCommitment2, gameSignedCommitment3].map(sc => sc.signedState),
-  turnNum: gameCommitment2.turnNum
+  signedStates: [gameSignedState2, gameSignedState3],
+  turnNum: gameState2.turnNum
 };
 const refuteChannelState = {
   [channelId]: refuteChannelStatus
@@ -63,15 +63,15 @@ const defaults = {processId, transactionSubmissionState, sharedData, channelId, 
 // ------
 const waitForApprovalRefute = states.waitForApproval({
   ...defaults,
-  challengeCommitment: gameCommitment1
+  challengeState: gameState1
 });
 const waitForApprovalRespond = states.waitForApproval({
   ...defaults,
-  challengeCommitment: gameCommitment1
+  challengeState: gameState1
 });
 const waitForApprovalRequiresResponse = states.waitForApproval({
   ...defaults,
-  challengeCommitment: gameCommitment3
+  challengeState: gameState3
 });
 const waitForTransaction = states.waitForTransaction(defaults);
 const waitForAcknowledgement = states.waitForAcknowledgement(defaults);
@@ -89,7 +89,7 @@ const acknowledgeTimeout = states.acknowledgeTimeout(defaults);
 const approve = actions.respondApproved({processId});
 const responseProvided = actions.responseProvided({
   processId,
-  commitment: gameCommitment3
+  state: gameState3
 });
 const acknowledged = actions.acknowledged({processId});
 const challengeTimedOut = challengeExpiredEvent({
@@ -102,13 +102,13 @@ const challengeTimedOut = challengeExpiredEvent({
 // ---------
 // Scenarios
 // ---------
-export const respondWithExistingCommitmentHappyPath = {
+export const respondWithExistingStateHappyPath = {
   ...defaults,
-  challengeCommitment: gameCommitment1,
+  challengeState: gameState1,
   waitForApproval: {
     state: waitForApprovalRespond,
     action: approve,
-    responseCommitment: gameCommitment2
+    responseState: gameState2
   },
   waitForTransaction: {
     state: waitForTransaction,
@@ -123,11 +123,11 @@ export const respondWithExistingCommitmentHappyPath = {
 export const refuteHappyPath = {
   ...defaults,
   sharedData: {...defaults.sharedData, channelStore: refuteChannelState},
-  challengeCommitment: gameCommitment1,
+  challengeState: gameState1,
   waitForApproval: {
     state: waitForApprovalRefute,
     action: approve,
-    refuteCommitment: gameCommitment3
+    refuteState: gameState3
   },
   waitForTransaction: {
     state: waitForTransaction,
@@ -141,7 +141,7 @@ export const refuteHappyPath = {
 
 export const requireResponseHappyPath = {
   ...defaults,
-  challengeCommitment: gameCommitment2,
+  challengeState: gameState2,
   waitForApprovalRequiresResponse: {
     state: waitForApprovalRequiresResponse,
     action: approve
@@ -149,7 +149,7 @@ export const requireResponseHappyPath = {
   waitForResponse: {
     state: waitForResponse,
     action: responseProvided,
-    responseCommitment: gameCommitment3
+    responseState: gameState3
   },
   waitForTransaction: {
     state: waitForTransaction,

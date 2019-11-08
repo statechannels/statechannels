@@ -3,7 +3,7 @@ import {initialize, reducer} from "../reducer";
 import * as scenarios from "./scenarios";
 import {scenarioStepDescription, itSendsNoMessage, itSendsTheseStates} from "../../../__tests__/helpers";
 import {preFund, postFund} from "../../advance-channel/__tests__";
-import {asAddress, hubAddress, bsAddress, convertBalanceToOutcome} from "../../../../domain/commitments/__tests__";
+import {asAddress, hubAddress, bsAddress, convertBalanceToOutcome} from "../../../__tests__/state-helpers";
 import {bigNumberify} from "ethers/utils";
 import {ETH_ASSET_HOLDER_ADDRESS} from "../../../../constants";
 import {convertAddressToBytes32} from "../../../../utils/data-type-utils";
@@ -43,7 +43,7 @@ describe("happyPath", () => {
 
     itTransitionsTo(protocolState, "VirtualFunding.WaitForJointChannel");
     itTransitionsSubstateTo(protocolState, "jointChannel", preFund.preSuccess.state.type);
-    // Even though there should only be two commitments in the guarantor channel round,
+    // Even though there should only be two states in the guarantor channel round,
     // since we're using the preSuccess scenarios from advance-channel, which sets up a joint
     // 3-party channel, three get sent out.
     // TODO: Fix this by constructing appropriate test data
@@ -86,7 +86,7 @@ describe("happyPath", () => {
 
     itTransitionsTo(protocolState, "VirtualFunding.WaitForGuarantorChannel");
     itTransitionsSubstateTo(protocolState, "guarantorChannel", postFund.preSuccess.state.type);
-    // Even though there should only be two commitments in the guarantor channel round,
+    // Even though there should only be two states in the guarantor channel round,
     // since we're using the preSuccess scenarios from advance-channel, which sets up a joint
     // 3-party channel, three get sent out.
     // TODO: Fix this by constructing appropriate test data

@@ -3,7 +3,7 @@ import {initialize, ledgerTopUpReducer} from "../reducer";
 import {LedgerTopUpState, LedgerTopUpStateType} from "../states";
 import {ProtocolStateWithSharedData} from "../..";
 import {describeScenarioStep} from "../../../__tests__/helpers";
-import {bsAddress, asAddress} from "../../../../domain/commitments/__tests__";
+import {bsAddress, asAddress} from "../../../__tests__/state-helpers";
 import {isTerminal} from "../../consensus-update";
 import {AllocationItem, Outcome, isAllocationOutcome} from "@statechannels/nitro-protocol";
 import _ from "lodash";

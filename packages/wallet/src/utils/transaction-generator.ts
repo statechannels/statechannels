@@ -1,34 +1,26 @@
 import {TransactionRequest} from "ethers/providers";
 import {getAdjudicatorInterface} from "./contract-utils";
 import {splitSignature} from "ethers/utils";
-import {Commitment, SignedCommitment, signCommitment2} from "../domain";
-import {asEthersObject} from "fmg-core";
 import {
   createDepositTransaction as createNitroDepositTransaction,
   createTransferAllTransaction as createNitroTransferAllTransaction,
   Transactions as nitroTrans,
-  SignedState
+  SignedState,
+  State
 } from "@statechannels/nitro-protocol";
-import {convertCommitmentToState} from "./nitro-converter";
 import {Allocation, AllocationItem} from "@statechannels/nitro-protocol/src/contract/outcome";
 import {convertAddressToBytes32} from "./data-type-utils";
 
 export function createForceMoveTransaction(
-  fromCommitment: SignedCommitment,
-  toCommitment: SignedCommitment,
+  fromState: SignedState,
+  toState: SignedState,
   privateKey: string
 ): TransactionRequest {
-  const signedStates = [fromCommitment.signedState, toCommitment.signedState];
-  return nitroTrans.createForceMoveTransaction(signedStates, privateKey);
+  return nitroTrans.createForceMoveTransaction([fromState, toState], privateKey);
 }
 
-export function createRespondTransaction(
-  challengeCommitment: Commitment,
-  responseCommitment: Commitment,
-  privateKey: string
-): TransactionRequest {
-  const signedState = signCommitment2(responseCommitment, privateKey).signedState;
-  return nitroTrans.createRespondTransaction(convertCommitmentToState(challengeCommitment), signedState);
+export function createRespondTransaction(challengeState: State, responseSignedState: SignedState): TransactionRequest {
+  return nitroTrans.createRespondTransaction(challengeState, responseSignedState);
 }
 
 export function createRefuteTransaction(seriesOfSupportiveStates: SignedState[]): TransactionRequest {
@@ -36,49 +28,50 @@ export function createRefuteTransaction(seriesOfSupportiveStates: SignedState[])
 }
 
 export interface ConcludeAndWithdrawArgs {
-  fromCommitment: Commitment;
-  toCommitment: Commitment;
-  fromSignature: string;
-  toSignature: string;
+  fromSignedState: SignedState;
+  toSignedState: SignedState;
   participant: string;
   destination: string;
   amount: string;
   verificationSignature: string;
 }
 export function createConcludeAndWithdrawTransaction(args: ConcludeAndWithdrawArgs): TransactionRequest {
-  const adjudicatorInterface = getAdjudicatorInterface();
-  const splitFromSignature = splitSignature(args.fromSignature);
-  const splitToSignature = splitSignature(args.toSignature);
-  const conclusionProof = {
-    penultimateCommitment: asEthersObject(args.fromCommitment),
-    ultimateCommitment: asEthersObject(args.toCommitment),
-    penultimateSignature: splitFromSignature,
-    ultimateSignature: splitToSignature
-  };
-  const {v, r, s} = splitSignature(args.verificationSignature);
-  const {participant, destination, amount} = args;
-  const data = adjudicatorInterface.functions.concludeAndWithdraw.encode([
-    conclusionProof,
-    participant,
-    destination,
-    amount,
-    v,
-    r,
-    s
-  ]);
+  if (!args) {
+    throw new Error();
+  }
+  // TODO: Implmement using Nitro
+  // const adjudicatorInterface = getAdjudicatorInterface();
+  // const splitFromSignature = splitSignature(args.fromSignature);
+  // const splitToSignature = splitSignature(args.toSignature);
+  // const conclusionProof = {
+  //   penultimateState: asEthersObject(args.fromState),
+  //   ultimateState: asEthersObject(args.toState),
+  //   penultimateSignature: splitFromSignature,
+  //   ultimateSignature: splitToSignature
+  // };
+  // const {v, r, s} = splitSignature(args.verificationSignature);
+  // const {participant, destination, amount} = args;
+  // const data = adjudicatorInterface.functions.concludeAndWithdraw.encode([
+  //   conclusionProof,
+  //   participant,
+  //   destination,
+  //   amount,
+  //   v,
+  //   r,
+  //   s
+  // ]);
 
   return {
-    data,
+    data: "0x0",
     gasLimit: 3000000
   };
 }
 
 export function createConcludeTransaction(
-  signedFromCommitment: SignedCommitment,
-  signedToCommitment: SignedCommitment
+  fromSignedState: SignedState,
+  toSignedState: SignedState
 ): TransactionRequest {
-  const signedStates: SignedState[] = [signedFromCommitment.signedState, signedToCommitment.signedState];
-  return nitroTrans.createConcludeTransaction(signedStates);
+  return nitroTrans.createConcludeTransaction([fromSignedState, toSignedState]);
 }
 
 export function createWithdrawTransaction(
@@ -87,6 +80,7 @@ export function createWithdrawTransaction(
   destination: string,
   verificationSignature: string
 ) {
+  // TODO: Implement in Nitro
   const adjudicatorInterface = getAdjudicatorInterface();
   const {v, r, s} = splitSignature(verificationSignature);
   const data = adjudicatorInterface.functions.withdraw.encode([participant, destination, amount, v, r, s]);
@@ -104,20 +98,21 @@ export function createTransferAndWithdrawTransaction(
   amount: string,
   verificationSignature: string
 ) {
-  const adjudicatorInterface = getAdjudicatorInterface();
-  const {v, r, s} = splitSignature(verificationSignature);
-  const data = adjudicatorInterface.functions.transferAndWithdraw.encode([
-    channelId,
-    participant,
-    destination,
-    amount,
-    v,
-    r,
-    s
-  ]);
+  // TODO: Implement using Nitro
+  // const adjudicatorInterface = getAdjudicatorInterface();
+  // const {v, r, s} = splitSignature(verificationSignature);
+  // const data = adjudicatorInterface.functions.transferAndWithdraw.encode([
+  //   channelId,
+  //   participant,
+  //   destination,
+  //   amount,
+  //   v,
+  //   r,
+  //   s
+  // ]);
 
   return {
-    data,
+    data: "0x0",
     gasLimit: 3000000
   };
 }

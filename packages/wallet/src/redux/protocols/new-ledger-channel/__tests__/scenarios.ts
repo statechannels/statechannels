@@ -14,7 +14,7 @@ import {
   appState,
   ledgerState,
   convertBalanceToOutcome
-} from "../../../../domain/commitments/__tests__";
+} from "../../../__tests__/state-helpers";
 import {success} from "../../ledger-defunding/states";
 import * as _ from "lodash";
 import {NEW_LEDGER_FUNDING_PROTOCOL_LOCATOR} from "../reducer";

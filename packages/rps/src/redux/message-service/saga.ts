@@ -17,7 +17,7 @@ import {MessageRelayRequested} from 'magmo-wallet-client';
 
 export enum Queue {
   WALLET = 'WALLET',
-  GAME_ENGINE = 'GAME_ENGINE'
+  GAME_ENGINE = 'GAME_ENGINE',
 }
 
 // export const getWalletAddress = (storeObj: any) => storeObj.wallet.address;

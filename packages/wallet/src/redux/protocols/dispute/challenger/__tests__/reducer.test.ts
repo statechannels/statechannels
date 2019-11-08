@@ -1,11 +1,16 @@
 import * as scenarios from "./scenarios";
 import {challengerReducer, initialize, ReturnVal} from "../reducer";
 import {FailureReason, ChallengerStateType, WaitForTransaction, WaitForResponseOrTimeout} from "../states";
-import {itSendsThisMessage, itSendsThisDisplayEventType, describeScenarioStep} from "../../../../__tests__/helpers";
+import {
+  itSendsThisMessage,
+  itSendsThisDisplayEventType,
+  describeScenarioStep,
+  itStoresThisState
+} from "../../../../__tests__/helpers";
 import {
   HIDE_WALLET,
   CHALLENGE_COMPLETE,
-  CHALLENGE_COMMITMENT_RECEIVED,
+  CHALLENGE_STATE_RECEIVED,
   SHOW_WALLET
 } from "../../../../../magmo-wallet-client";
 
@@ -52,12 +57,12 @@ describe("OPPONENT RESPONDS", () => {
     });
   });
   describeScenarioStep(scenario.waitForResponseOrTimeoutReceiveResponse, () => {
-    const {state, action} = scenario.waitForResponseOrTimeoutReceiveResponse;
+    const {state, action, signedState} = scenario.waitForResponseOrTimeoutReceiveResponse;
     const result = challengerReducer(state, sharedData, action);
 
-    itSendsThisMessage(result.sharedData, CHALLENGE_COMMITMENT_RECEIVED);
-    // TODO: Get this passing
-    // itStoresThisCommitment(result.sharedData, commitment);
+    itSendsThisMessage(result.sharedData, CHALLENGE_STATE_RECEIVED);
+
+    itStoresThisState(result.sharedData, signedState);
     itTransitionsTo(result, "Challenging.AcknowledgeResponse");
   });
 
@@ -142,7 +147,7 @@ describe("CHANNEL NOT FULLY OPEN  ", () => {
   });
 });
 
-describe("ALREADY HAVE LATEST COMMITMENT", () => {
+describe("ALREADY HAVE LATEST STATE", () => {
   const scenario = scenarios.alreadyHaveLatest;
   const {channelId, processId, sharedData} = scenario;
 
@@ -182,8 +187,8 @@ describe("USER DECLINES CHALLENGE  ", () => {
   });
 });
 
-describe("RECEIVE COMMITMENT WHILE APPROVING  ", () => {
-  const scenario = scenarios.receiveCommitmentWhileApproving;
+describe("RECEIVE STATE WHILE APPROVING  ", () => {
+  const scenario = scenarios.receiveStateWhileApproving;
   const {sharedData} = scenario;
 
   describeScenarioStep(scenario.approveChallenge, () => {

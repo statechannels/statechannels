@@ -31,40 +31,40 @@ export default HomePage;
 const styles = StyleSheet.create({
   container: {
     maxWidth: '90%',
-    margin: 'auto'
+    margin: 'auto',
   },
 
   image: {
     display: 'inline-block',
-    maxWidth: '33%'
+    maxWidth: '33%',
   },
 
   title: {
     marginBottom: 0,
-    color: 'white'
+    color: 'white',
   },
 
   centeredGroup: {
     left: '50%',
-    transform: 'translateX(-50%)'
+    transform: 'translateX(-50%)',
   },
 
   icons: {
     position: 'relative',
-    width: 'max-content'
+    width: 'max-content',
   },
 
   rightPadding: {
-    paddingRight: 12
+    paddingRight: 12,
   },
 
   headerText: {
     textAlign: 'center',
-    paddingBottom: 32
+    paddingBottom: 32,
   },
 
   buttons: {
     position: 'absolute',
-    bottom: 40
-  }
+    bottom: 40,
+  },
 });

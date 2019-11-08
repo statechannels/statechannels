@@ -16,7 +16,7 @@ function mapStateToProps(state: SiteState) {
     opponentName,
     myBalance,
     opponentBalance,
-    roundBuyIn
+    roundBuyIn,
   };
 }
 

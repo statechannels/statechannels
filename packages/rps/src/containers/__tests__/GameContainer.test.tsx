@@ -13,7 +13,7 @@ const {
   myName,
   opponentName,
   twitterHandle,
-  asAddress: myAddress
+  asAddress: myAddress,
 } = scenarios.standard;
 const {libraryAddress} = scenarios;
 const base = {
@@ -24,7 +24,7 @@ const base = {
   opponentName,
   twitterHandle,
   myAddress,
-  libraryAddress
+  libraryAddress,
 };
 const mockStore = configureStore();
 
@@ -42,13 +42,13 @@ describe('GameContainer', () => {
       wallet: {
         display: {
           showWallet: false,
-          showWalletHeader: false
-        }
+          showWalletHeader: false,
+        },
       },
       overlay: {
         rulesVisible: false,
-        walletVisible: false
-      }
+        walletVisible: false,
+      },
     };
     const store = mockStore(initialState);
     const component = mount(<GameContainer />, {context: {store}});

@@ -1,31 +1,27 @@
-import {ChannelState, Commitments} from "./states";
-import {Commitment, validCommitmentSignature} from "../../../domain";
-import {getCommitmentChannelId} from "../../../domain/commitments";
-import {bigNumberify} from "ethers/utils";
-import {convertCommitmentToState} from "../../../utils/nitro-converter";
-import {getChannelId} from "@statechannels/nitro-protocol";
+import {ChannelState} from "./states";
+import {getChannelId, State, SignedState} from "@statechannels/nitro-protocol";
+import {hasValidSignature} from "../../../utils/signing-utils";
 
-export function validTransition(state: ChannelState, commitment: Commitment): boolean {
-  const commitmentNonce = bigNumberify(commitment.channel.nonce).toHexString();
-  const commitmentChannelId = getCommitmentChannelId(commitment);
-  const channelId = getChannelId(convertCommitmentToState(commitment).channel);
+export function validTransition(channelState: ChannelState, state: State): boolean {
+  const channelNonce = state.channel.channelNonce;
+  const channelId = getChannelId(state.channel);
+
   return (
-    commitment.turnNum === state.turnNum + 1 &&
-    commitmentNonce === state.channelNonce &&
-    commitment.channel.participants[0] === state.participants[0] &&
-    commitment.channel.participants[1] === state.participants[1] &&
-    commitment.channel.channelType === state.libraryAddress &&
-    (commitmentChannelId === state.channelId || channelId === state.channelId)
+    state.turnNum === channelState.turnNum + 1 &&
+    channelNonce === channelState.channelNonce &&
+    state.channel.participants[0] === channelState.participants[0] &&
+    state.channel.participants[1] === channelState.participants[1] &&
+    channelId === channelState.channelId
   );
 }
 
-export function validCommitmentTransition(first: Commitment, second: Commitment): boolean {
-  return second.turnNum === first.turnNum + 1 && getCommitmentChannelId(first) === getCommitmentChannelId(second);
+export function validStateTransition(first: State, second: State): boolean {
+  return second.turnNum === first.turnNum + 1 && getChannelId(first.channel) === getChannelId(second.channel);
 }
 
-export function validTransitions(commitments: Commitments): boolean {
-  const validSignatures = commitments.reduce((_, c) => {
-    if (!validCommitmentSignature(c.commitment, c.signature)) {
+export function validTransitions(states: SignedState[]): boolean {
+  const validSignatures = states.reduce((_, s) => {
+    if (!hasValidSignature(s)) {
       return false;
     }
     return true;
@@ -34,10 +30,10 @@ export function validTransitions(commitments: Commitments): boolean {
     return false;
   }
 
-  for (let i = 0; i < commitments.length - 1; i += 1) {
-    const first = commitments[i];
-    const second = commitments[i + 1];
-    if (!validCommitmentTransition(first.commitment, second.commitment)) {
+  for (let i = 0; i < states.length - 1; i += 1) {
+    const first = states[i];
+    const second = states[i + 1];
+    if (!validStateTransition(first.state, second.state)) {
       return false;
     }
   }

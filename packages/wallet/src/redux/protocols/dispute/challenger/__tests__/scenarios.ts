@@ -3,23 +3,23 @@ import * as actions from "../actions";
 import * as tsScenarios from "../../../transaction-submission/__tests__";
 import {setChannel, EMPTY_SHARED_DATA} from "../../../../state";
 import {ChannelState} from "../../../../channel-store";
-import {channelFromCommitments} from "../../../../channel-store/channel-state/__tests__";
+import {channelFromStates} from "../../../../channel-store/channel-state/__tests__";
 import {challengeExpiredEvent, respondWithMoveEvent, challengeExpirySetEvent} from "../../../../actions";
-import * as testScenarios from "../../../../../domain/commitments/__tests__";
+import * as testScenarios from "../../../../__tests__/state-helpers";
 type Reason = states.FailureReason;
 
 // -----------------
 // Channel Scenarios
 // -----------------
 const {channelId, asAddress: address, asPrivateKey: privateKey} = testScenarios;
-const signedCommitment0 = testScenarios.appCommitment({turnNum: 0});
-const signedCommitment19 = testScenarios.appCommitment({turnNum: 19});
-const signedCommitment20 = testScenarios.appCommitment({turnNum: 20});
-const signedCommitment21 = testScenarios.appCommitment({turnNum: 21});
+const signedState0 = testScenarios.appState({turnNum: 0});
+const signedState19 = testScenarios.appState({turnNum: 19});
+const signedState20 = testScenarios.appState({turnNum: 20});
+const signedState21 = testScenarios.appState({turnNum: 21});
 
-const partiallyOpen = channelFromCommitments([signedCommitment0], address, privateKey);
-const theirTurn = channelFromCommitments([signedCommitment19, signedCommitment20], address, privateKey);
-const ourTurn = channelFromCommitments([signedCommitment20, signedCommitment21], address, privateKey);
+const partiallyOpen = channelFromStates([signedState0], address, privateKey);
+const theirTurn = channelFromStates([signedState19, signedState20], address, privateKey);
+const ourTurn = channelFromStates([signedState20, signedState21], address, privateKey);
 
 // --------
 // Defaults
@@ -65,8 +65,7 @@ const responseReceived = respondWithMoveEvent({
   processId,
   protocolLocator: [],
   channelId,
-  responseCommitment: signedCommitment21.commitment,
-  responseSignature: signedCommitment21.signature
+  signedResponseState: signedState21
 });
 const challengeExpirySet = challengeExpirySetEvent({
   processId,
@@ -93,12 +92,12 @@ export const opponentResponds = {
   waitForResponseOrTimeoutReceiveResponse: {
     state: waitForResponseOrTimeout,
     action: responseReceived,
-    commitment: signedCommitment21
+    signedState: signedState21
   },
   waitForResponseOrTimeoutExpirySet: {
     state: waitForResponseOrTimeout,
     action: challengeExpirySet,
-    commitment: signedCommitment21
+    signedState: signedState21
   },
   acknowledgeResponse: {
     state: acknowledgeResponse,
@@ -165,7 +164,7 @@ export const userDeclinesChallenge = {
   }
 };
 
-export const receiveCommitmentWhileApproving = {
+export const receiveStateWhileApproving = {
   ...defaults,
   sharedData: sharedData(ourTurn),
   approveChallenge: {

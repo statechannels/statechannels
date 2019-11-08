@@ -3,6 +3,7 @@ import {getAssetTransferredEvent, getDepositedEvent} from './contract/asset-hold
 import {getChallengeRegisteredEvent} from './contract/challenge';
 import {Channel, getChannelId} from './contract/channel';
 import {encodeConsensusData} from './contract/consensus-data';
+import {validTransition} from './contract/force-move-app';
 import {AllocationItem, encodeAllocation, encodeOutcome, Outcome} from './contract/outcome';
 import {isAllocationOutcome, isGuaranteeOutcome} from './contract/outcome';
 import {State} from './contract/state';
@@ -48,4 +49,5 @@ export {
   getDepositedEvent,
   isAllocationOutcome,
   isGuaranteeOutcome,
+  validTransition,
 };

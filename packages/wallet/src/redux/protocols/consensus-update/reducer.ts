@@ -4,7 +4,7 @@ import {ProtocolStateWithSharedData} from "..";
 import {ConsensusUpdateAction} from "./actions";
 import * as helpers from "../reducer-helpers";
 
-import {CommitmentsReceived, ProtocolLocator} from "../../../communication";
+import {SignedStatesReceived, ProtocolLocator} from "../../../communication";
 import {unreachable} from "../../../utils/reducer-utils";
 import {ChannelState} from "../../channel-store";
 import {Outcome, State, encodeOutcome} from "@statechannels/nitro-protocol";
@@ -54,7 +54,7 @@ export const consensusUpdateReducer = (
   }
 
   switch (action.type) {
-    case "WALLET.COMMON.COMMITMENTS_RECEIVED":
+    case "WALLET.COMMON.SIGNED_STATES_RECEIVED":
       return handleStateReceived(protocolState, sharedData, action);
     case "WALLET.CONSENSUS_UPDATE.CLEARED_TO_SEND":
       return handleClearedToSend(protocolState, sharedData);
@@ -79,7 +79,7 @@ const handleClearedToSend = (
 const handleStateReceived = (
   protocolState: states.NonTerminalConsensusUpdateState,
   sharedData: SharedData,
-  action: CommitmentsReceived
+  action: SignedStatesReceived
 ): ProtocolStateWithSharedData<states.ConsensusUpdateState> => {
   const {channelId} = protocolState;
 

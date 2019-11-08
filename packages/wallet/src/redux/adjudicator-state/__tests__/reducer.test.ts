@@ -1,5 +1,5 @@
 import * as actions from "../../actions";
-import * as testScenarios from "../../../domain/commitments/__tests__";
+import * as testScenarios from "../../__tests__/state-helpers";
 const {channelId} = testScenarios;
 import {adjudicatorStateReducer} from "../reducer";
 import {SignedState} from "@statechannels/nitro-protocol";
@@ -21,7 +21,7 @@ const challengeState: SignedState = {
   },
   signature: {v: 0, r: "", s: ""}
 };
-const gameCommitment1 = testScenarios.appCommitment({turnNum: 19}).commitment;
+const gameState1 = testScenarios.appState({turnNum: 19});
 // tslint:disable-next-line: no-shadowed-variable
 const createChallengeState = (channelId: string, expiryTime) => {
   return {
@@ -102,7 +102,7 @@ describe("adjudicator state reducer", () => {
       processId: "0x0",
       protocolLocator: [],
       channelId,
-      refuteCommitment: gameCommitment1
+      refuteState: gameState1.state
     });
     const updatedState = adjudicatorStateReducer(state, action);
 
@@ -120,8 +120,7 @@ describe("adjudicator state reducer", () => {
       processId: "0x0",
       protocolLocator: [],
       channelId,
-      responseCommitment: gameCommitment1,
-      responseSignature: "0xSignature"
+      signedResponseState: gameState1
     });
     const updatedState = adjudicatorStateReducer(state, action);
 

@@ -12,7 +12,6 @@ import {ETHAssetHolderWatcher} from "../redux/sagas/eth-asset-holder-watcher";
 import {depositContract, createWatcherState, concludeGame, fiveFive} from "./test-utils";
 import {getGanacheProvider} from "@statechannels/devtools";
 import {bigNumberify} from "ethers/utils";
-import {convertAllocationToOutcome} from "../utils/nitro-converter";
 import {HashZero, AddressZero} from "ethers/constants";
 import {
   getAdjudicatorInterface,
@@ -21,7 +20,9 @@ import {
   getETHAssetHolderAddress
 } from "../utils/contract-utils";
 import {JsonRpcProvider} from "ethers/providers";
-import {convertAddressToBytes32} from "../utils/data-type-utils";
+
+import {getAllocationOutcome} from "../utils/outcome-utils";
+import {convertBalanceToOutcome} from "../redux/__tests__/state-helpers";
 jest.setTimeout(60000);
 
 describe("ETHAssetHolder listener", () => {
@@ -68,7 +69,7 @@ describe("ETHAssetHolder listener", () => {
     });
 
     // TODO: this 0x05 is hardcoded as it's the same value being used for
-    // constructing the commitments for the `conclude` call. Refactor this
+    // constructing the states for the `conclude` call. Refactor this
     // to not be hardcoded
     const depositAmount = bigNumberify("0x05");
     // deposit double so that 0x05 can be transferred to each participant
@@ -78,14 +79,11 @@ describe("ETHAssetHolder listener", () => {
 
     const {turnNumRecord, finalizesAt} = await getOnChainChannelStorage(provider, channelId);
     // This is the outcome that gets used to set the outcomeHash on the adjudicator
-    // and is copied from the state that gets used from the commitment
+    // and is copied from the state that gets used from the state
     // construction referred to above. This will also be refactored as part of the
     // TODO above.
 
-    const outcome = convertAllocationToOutcome({
-      allocation: fiveFive,
-      destination: [participantA.address, participantB.address]
-    });
+    const outcome = convertBalanceToOutcome(fiveFive(participantA.address, participantB.address));
 
     // For transferring assets, the channel needs to be finalized and the channel
     // storage hash is compared with the `transferAll` arguments. The channel
@@ -98,17 +96,7 @@ describe("ETHAssetHolder listener", () => {
 
     await pushOutcome(channelId, turnNumRecord, finalizesAt, stateHash, challengerAddress, outcomeBytes, provider);
 
-    const allocation = [
-      {
-        destination: convertAddressToBytes32(participantA.address),
-        amount: fiveFive[0]
-      },
-      {
-        destination: convertAddressToBytes32(participantB.address),
-        amount: fiveFive[1]
-      }
-    ];
-
+    const allocation = getAllocationOutcome(outcome).allocation;
     const processId = ethers.Wallet.createRandom().address;
     const sagaTester = new SagaTester({initialState: createWatcherState(processId, channelId)});
     sagaTester.start(ETHAssetHolderWatcher, provider);

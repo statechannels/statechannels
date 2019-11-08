@@ -22,7 +22,7 @@ function Application(props: ApplicationProps) {
 }
 
 const mapStateToProps = (state: SiteState): ApplicationProps => ({
-  gameState: state.game.gameState
+  gameState: state.game.gameState,
 });
 
 export default connect(mapStateToProps)(Application);

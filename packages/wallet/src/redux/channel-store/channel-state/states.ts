@@ -1,9 +1,5 @@
-import {SignedCommitment, Commitment, signCommitment2} from "../../../domain";
 import {Wallet} from "ethers";
 import {SignedState, State, getChannelId} from "@statechannels/nitro-protocol";
-import {convertStateToCommitment} from "../../../utils/nitro-converter";
-
-export type Commitments = SignedCommitment[];
 
 export interface ChannelState {
   address: string;
@@ -28,21 +24,10 @@ export function getPenultimateState(state: ChannelState): State {
   return state.signedStates.slice(-2)[0].state;
 }
 
-export function getLastCommitment(state: ChannelState): Commitment {
-  return convertStateToCommitment(state.signedStates.slice(-1)[0].state);
-}
-
-export function getPenultimateCommitment(state: ChannelState): Commitment {
-  return convertStateToCommitment(state.signedStates.slice(-2)[0].state);
-}
-
 export function getStates(state: ChannelState): SignedState[] {
   return state.signedStates;
 }
 
-export function getCommitments(state: ChannelState): Commitments {
-  return state.signedStates.map(ss => signCommitment2(convertStateToCommitment(ss.state), state.privateKey));
-}
 // -------
 // Helpers
 // -------
@@ -69,12 +54,12 @@ export function initializeChannel(signedState: SignedState, privateKey: string):
   };
 }
 
-// Pushes a commitment onto the state, updating penultimate/last commitments and the turn number
+// Pushes a state onto the state, updating penultimate/last states and the turn number
 export function pushState(state: ChannelState, signedState: SignedState): ChannelState {
   const signedStates = [...state.signedStates];
   const numParticipants = state.participants.length;
   if (signedStates.length === numParticipants) {
-    // We've got a full round of commitments, and should therefore drop the first one
+    // We've got a full round of states, and should therefore drop the first one
     signedStates.shift();
   }
 

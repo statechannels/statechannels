@@ -2,7 +2,7 @@ import * as states from "../states";
 import * as actions from "../actions";
 
 import {EMPTY_SHARED_DATA, setChannels} from "../../../state";
-import {channelId, bsAddress, asAddress, appState, asPrivateKey} from "../../../../domain/commitments/__tests__";
+import {channelId, bsAddress, asAddress, appState, asPrivateKey} from "../../../__tests__/state-helpers";
 import {preSuccess as ledgerFundingPreSuccess} from "../../ledger-funding/__tests__";
 import {preSuccess as virtualFundingPreSuccess} from "../../virtual-funding/__tests__";
 import {preSuccess as advanceChannelPreSuccess} from "../../advance-channel/__tests__";

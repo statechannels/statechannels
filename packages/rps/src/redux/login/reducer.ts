@@ -12,7 +12,7 @@ const initialState: LoginState = {
   loading: false,
   loggedIn: false,
   user: null,
-  error: undefined
+  error: undefined,
 };
 
 export const loginReducer: Reducer<LoginState> = (
@@ -24,20 +24,20 @@ export const loginReducer: Reducer<LoginState> = (
     case loginActions.LOGOUT_REQUEST:
       return {
         ...state,
-        loading: true
+        loading: true,
       };
     case loginActions.LOGIN_SUCCESS:
       return {
         ...state,
         loading: false,
         loggedIn: true,
-        user: action.user
+        user: action.user,
       };
     case loginActions.LOGIN_FAILURE:
       return {
         ...state,
         loading: false,
-        error: action.error
+        error: action.error,
       };
     case loginActions.LOGOUT_SUCCESS:
       return initialState;
@@ -45,7 +45,7 @@ export const loginReducer: Reducer<LoginState> = (
       return {
         ...state,
         loading: false,
-        error: action.error
+        error: action.error,
       };
     default:
       return state;

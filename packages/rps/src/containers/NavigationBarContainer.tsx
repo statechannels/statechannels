@@ -10,13 +10,13 @@ const mapStateToProps = (state: SiteState) => {
   const name = 'myName' in state.game.gameState ? state.game.gameState.myName : '';
   return {
     showRules: state.overlay.rulesVisible,
-    loginDisplayName: name
+    loginDisplayName: name,
   };
 };
 
 const mapDispatchToProps = {
   logoutRequest: loginActions.logoutRequest,
-  rulesRequest: globalActions.toggleRulesVisibility
+  rulesRequest: globalActions.toggleRulesVisibility,
 };
 
 export default connect(

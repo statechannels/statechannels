@@ -52,21 +52,19 @@ NewProcessAction --> WALLET.NEW_PROCESS.CREATE_CHALLENGE_REQUESTED
 NewProcessAction --> WALLET.NEW_PROCESS.CHALLENGE_CREATED
 end
 
-subgraph ChannelAction
-ChannelAction --> WALLET.CHANNEL.OPPONENT_COMMITMENT_RECEIVED
-ChannelAction --> WALLET.CHANNEL.OWN_COMMITMENT_RECEIVED
+
 end
 
 subgraph RelayableAction
 RelayableAction --> WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_PROPOSED
 RelayableAction --> WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_APPROVED
 RelayableAction --> WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED
-RelayableAction --> WALLET.COMMON.COMMITMENT_RECEIVED
+RelayableAction --> WALLET.COMMON.SIGNED_STATES_RECEIVED
 end
 
 subgraph CommonAction
-CommonAction --> WALLET.COMMON.COMMITMENT_RECEIVED
-CommonAction --> WALLET.COMMON.COMMITMENTS_RECEIVED
+CommonAction --> WALLET.COMMON.SIGNED_STATES_RECEIVED
+CommonAction --> WALLET.COMMON.SIGNED_STATES_RECEIVED
 end
 
 subgraph FundingAction
@@ -123,7 +121,7 @@ end
 subgraph DirectFundingAction
 DirectFundingAction --> WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT
 DirectFundingAction --> WALLET.DIRECT_FUNDING.DIRECT_FUNDING_REQUESTED
-DirectFundingAction --> WALLET.COMMON.COMMITMENT_RECEIVED
+DirectFundingAction --> WALLET.COMMON.SIGNED_STATES_RECEIVED
 DirectFundingAction --> TransactionAction
 end
 
@@ -142,8 +140,8 @@ WithdrawalAction --> WALLET.WITHDRAWING.WITHDRAWAL_REJECTED
 end
 
 subgraph ApplicationAction
-ApplicationAction --> WALLET.APPLICATION.OPPONENT_COMMITMENT_RECEIVED
-ApplicationAction --> WALLET.APPLICATION.OWN_COMMITMENT_RECEIVED
+ApplicationAction --> WALLET.APPLICATION.OPPONENT_SIGNED_STATES_RECEIVED
+ApplicationAction --> WALLET.APPLICATION.OWN_SIGNED_STATES_RECEIVED
 ApplicationAction --> WALLET.APPLICATION.CONCLUDE_REQUESTED
 end
 
@@ -178,7 +176,7 @@ class DisputeAction,FundingAction,ApplicationAction,ConcludingAction TopLevelPro
 
 Hopefully `ProtocolAction` is self explanatory: it is the union of top level protocol actions, each consumed by their respective protocol reducer.
 
-`CommonAction` is the union of `MessageReceived` and `CommitmentReceived` action. These actions are used in several protocols, although mostly the CommitmentReceived action, which is often included in the `MyProtocolAction` union on its own, while the `isMyProtocolAction` guard (somewhat inconsistently) uses `isCommonAction`.
+`CommonAction` is the union of `MessageReceived` and `SignedStateReceived` action. These actions are used in several protocols, although mostly the SignedStateReceived action, which is often included in the `MyProtocolAction` union on its own, while the `isMyProtocolAction` guard (somewhat inconsistently) uses `isCommonAction`.
 
 `RelayableAction` is the union of those actions that are whitelisted for communication to the opponent, who will dispatch that action.
 

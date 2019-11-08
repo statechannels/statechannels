@@ -7,7 +7,7 @@ import {
   ledgerState,
   threeWayLedgerState,
   convertBalanceToOutcome
-} from "../../../../domain/commitments/__tests__";
+} from "../../../__tests__/state-helpers";
 import {bigNumberify} from "ethers/utils";
 import {setChannels, EMPTY_SHARED_DATA} from "../../../state";
 import {channelFromStates} from "../../../channel-store/channel-state/__tests__";
