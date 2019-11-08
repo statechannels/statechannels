@@ -1,7 +1,7 @@
-const NitroAdjudicator = artifacts.require('NitroAdjudicator');
-const ConsensusApp = artifacts.require('ConsensusApp');
-const TrivialApp = artifacts.require('TrivialApp');
-const ETHAssetHolder = artifacts.require('ETHAssetHolder');
+const NitroAdjudicator = artifacts.require("NitroAdjudicator");
+const ConsensusApp = artifacts.require("ConsensusApp");
+const TrivialApp = artifacts.require("TrivialApp");
+const ETHAssetHolder = artifacts.require("ETHAssetHolder");
 
 module.exports = async function(deployer) {
   deployer.then(async () => {
