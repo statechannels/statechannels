@@ -1,8 +1,8 @@
-import {Bytes, Commitment} from 'fmg-core';
-export {SignedCommitment} from './services';
+import {Bytes} from 'fmg-core';
 import {queries} from './db/queries/channels';
-import {formResponse, nextCommitment, validSignature} from './services/channelManagement';
+import {formResponse, nextState, validSignature} from './services/channelManagement';
 
+import {State} from '@statechannels/nitro-protocol';
 import errors from './errors';
 import {getApplications} from './services/applicationManager';
 import {updateLedgerChannel} from './services/ledgerChannelManager';
@@ -13,12 +13,12 @@ export default class Wallet {
   validSignature = validSignature;
   updateChannel = queries.updateChannel;
   updateLedgerChannel = updateLedgerChannel;
-  nextCommitment = nextCommitment;
+  nextState = nextState;
   getApplications = getApplications;
 
   constructor(sanitizeAppAttrs) {
     this.sanitize = sanitizeAppAttrs;
   }
 
-  formResponse = (commitment: Commitment) => formResponse(commitment);
+  formResponse = (state: State) => formResponse(state);
 }
