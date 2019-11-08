@@ -19,6 +19,13 @@ case $TARGET_PACKAGE in
         git diff --quiet HEAD^ HEAD ./packages/nitro-protocol
         status=$?
         ;;
+    
+    app-wallet-interface)
+        echo "Checking for changes in nitro-protocol package..."
+        git diff --quiet HEAD^ HEAD ./packages/app-wallet-interface
+        status=$?
+        ;;
+
 
 esac
 
