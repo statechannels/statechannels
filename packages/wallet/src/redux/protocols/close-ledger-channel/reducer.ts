@@ -10,7 +10,11 @@ import {unreachable} from "../../../utils/reducer-utils";
 import {EmbeddedProtocol} from "../../../communication";
 import {getLastState} from "../../channel-store";
 import {ProtocolAction} from "../../actions";
-import {AdvanceChannelState, initializeAdvanceChannel, advanceChannelReducer} from "../advance-channel";
+import {
+  AdvanceChannelState,
+  initializeAdvanceChannel,
+  advanceChannelReducer
+} from "../advance-channel";
 import {WithdrawalState} from "../withdrawing/states";
 import {routesToAdvanceChannel} from "../advance-channel/actions";
 import {StateType} from "../advance-channel/states";
@@ -74,7 +78,11 @@ const waitForConcludeReducer = (
     return {protocolState, sharedData};
   }
   let concluding: AdvanceChannelState;
-  ({protocolState: concluding, sharedData} = advanceChannelReducer(protocolState.concluding, sharedData, action));
+  ({protocolState: concluding, sharedData} = advanceChannelReducer(
+    protocolState.concluding,
+    sharedData,
+    action
+  ));
   switch (concluding.type) {
     case "AdvanceChannel.Success":
       return createWaitForWithdrawal(sharedData, protocolState.processId, protocolState.channelId);
@@ -97,7 +105,11 @@ const waitForWithdrawalReducer = (
     return {protocolState, sharedData};
   }
   let withdrawal: WithdrawalState;
-  ({protocolState: withdrawal, sharedData} = withdrawalReducer(protocolState.withdrawal, sharedData, action));
+  ({protocolState: withdrawal, sharedData} = withdrawalReducer(
+    protocolState.withdrawal,
+    sharedData,
+    action
+  ));
   switch (withdrawal.type) {
     case "Withdrawing.Success":
       return {
@@ -123,7 +135,12 @@ const waitForWithdrawalReducer = (
 const createWaitForWithdrawal = (sharedData: SharedData, processId: string, channelId: string) => {
   const withdrawalAmount = getWithdrawalAmount(sharedData, channelId);
   let withdrawal: WithdrawalState;
-  ({protocolState: withdrawal, sharedData} = withdrawalInitialize(withdrawalAmount, channelId, processId, sharedData));
+  ({protocolState: withdrawal, sharedData} = withdrawalInitialize(
+    withdrawalAmount,
+    channelId,
+    processId,
+    sharedData
+  ));
 
   const protocolState = states.waitForWithdrawal({
     processId,

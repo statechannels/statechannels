@@ -5,7 +5,11 @@ import {ConsensusUpdateState} from "../consensus-update";
 import {LedgerTopUpState} from "../ledger-top-up/states";
 import {Outcome} from "@statechannels/nitro-protocol";
 
-export type FailureReason = "ReceivedInvalidState" | "SignatureFailure" | "LedgerTopUpFailure" | "PostFundSetupFailure";
+export type FailureReason =
+  | "ReceivedInvalidState"
+  | "SignatureFailure"
+  | "LedgerTopUpFailure"
+  | "PostFundSetupFailure";
 
 export interface WaitForLedgerTopUp {
   type: "ExistingLedgerFunding.WaitForLedgerTopUp";
@@ -62,10 +66,14 @@ export type NonTerminalExistingLedgerFundingState = WaitForLedgerTopUp | WaitFor
 
 export type ExistingLedgerFundingState = NonTerminalExistingLedgerFundingState | Success | Failure;
 
-export function isExistingLedgerFundingState(state: ProtocolState): state is ExistingLedgerFundingState {
+export function isExistingLedgerFundingState(
+  state: ProtocolState
+): state is ExistingLedgerFundingState {
   return state.type.indexOf("ExistingLedgerFunding") === 0;
 }
 
 export function isTerminal(state: ExistingLedgerFundingState): state is Success | Failure {
-  return state.type === "ExistingLedgerFunding.Failure" || state.type === "ExistingLedgerFunding.Success";
+  return (
+    state.type === "ExistingLedgerFunding.Failure" || state.type === "ExistingLedgerFunding.Success"
+  );
 }

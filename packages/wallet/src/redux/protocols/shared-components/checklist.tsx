@@ -35,7 +35,11 @@ export interface MessagesForStep {
   postStep: string;
 }
 
-export const messagesForStep = (preStep: string, step: string, postStep: string): MessagesForStep => {
+export const messagesForStep = (
+  preStep: string,
+  step: string,
+  postStep: string
+): MessagesForStep => {
   return {preStep, step, postStep};
 };
 

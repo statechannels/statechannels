@@ -5,7 +5,9 @@ import {isConsensusUpdateAction, ConsensusUpdateAction} from "../consensus-updat
 
 export type ExistingLedgerFundingAction = ConsensusUpdateAction | LedgerTopUpAction;
 
-export function isExistingLedgerFundingAction(action: WalletAction): action is ExistingLedgerFundingAction {
+export function isExistingLedgerFundingAction(
+  action: WalletAction
+): action is ExistingLedgerFundingAction {
   return isConsensusUpdateAction(action) || isLedgerTopUpAction(action);
 }
 

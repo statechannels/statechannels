@@ -63,18 +63,24 @@ export const failure: StateConstructor<Failure> = p => {
 // Unions and Guards
 // -------
 
-export type OngoingFundingStrategyNegotiationState = WaitForStrategyChoice | WaitForStrategyResponse;
+export type OngoingFundingStrategyNegotiationState =
+  | WaitForStrategyChoice
+  | WaitForStrategyResponse;
 
 export type TerminalFundingStrategyNegotiationState = Success | Failure;
 export type FundingStrategyNegotiationState =
   | OngoingFundingStrategyNegotiationState
   | TerminalFundingStrategyNegotiationState;
 
-export function isFundingStrategyNegotiationState(state: ProtocolState): state is FundingStrategyNegotiationState {
+export function isFundingStrategyNegotiationState(
+  state: ProtocolState
+): state is FundingStrategyNegotiationState {
   return state.type.indexOf("FundingStrategyNegotiation.PlayerA") === 0;
 }
 
-export function isTerminal(state: FundingStrategyNegotiationState): state is TerminalFundingStrategyNegotiationState {
+export function isTerminal(
+  state: FundingStrategyNegotiationState
+): state is TerminalFundingStrategyNegotiationState {
   return (
     state.type === "FundingStrategyNegotiation.PlayerA.Failure" ||
     state.type === "FundingStrategyNegotiation.PlayerA.Success"

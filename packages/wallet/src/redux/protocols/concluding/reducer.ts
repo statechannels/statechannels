@@ -12,7 +12,11 @@ import {
   getFundingChannelId,
   sendOpponentConcluded
 } from "../reducer-helpers";
-import {initializeAdvanceChannel, AdvanceChannelState, advanceChannelReducer} from "../advance-channel";
+import {
+  initializeAdvanceChannel,
+  AdvanceChannelState,
+  advanceChannelReducer
+} from "../advance-channel";
 import {EmbeddedProtocol} from "../../../communication";
 import * as states from "./states";
 import {routesToAdvanceChannel} from "../advance-channel/actions";
@@ -83,7 +87,10 @@ function decideClosingReducer(
   sharedData: SharedData,
   action: ProtocolAction
 ): ProtocolStateWithSharedData<ConcludingState> {
-  if (action.type !== "WALLET.CONCLUDING.KEEP_OPEN_SELECTED" && action.type !== "WALLET.CONCLUDING.CLOSE_SELECTED") {
+  if (
+    action.type !== "WALLET.CONCLUDING.KEEP_OPEN_SELECTED" &&
+    action.type !== "WALLET.CONCLUDING.CLOSE_SELECTED"
+  ) {
     console.warn(`Expected decision action received ${action.type} instead`);
     return {protocolState, sharedData};
   }
@@ -132,7 +139,11 @@ function waitForDefundReducer(
   }
 
   let defunding: DefundingState;
-  ({protocolState: defunding, sharedData} = defundingReducer(protocolState.defunding, sharedData, action));
+  ({protocolState: defunding, sharedData} = defundingReducer(
+    protocolState.defunding,
+    sharedData,
+    action
+  ));
 
   switch (defunding.type) {
     case "Defunding.Failure":
@@ -159,7 +170,11 @@ function waitForConcludeReducer(
     return {protocolState, sharedData};
   }
   let concluding: AdvanceChannelState;
-  ({protocolState: concluding, sharedData} = advanceChannelReducer(protocolState.concluding, sharedData, action));
+  ({protocolState: concluding, sharedData} = advanceChannelReducer(
+    protocolState.concluding,
+    sharedData,
+    action
+  ));
   switch (concluding.type) {
     case "AdvanceChannel.Failure":
       sharedData = sendConcludeFailure(sharedData, "Other");

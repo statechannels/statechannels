@@ -8,7 +8,10 @@ import {
   itSendsNoMessage
 } from "../../../__tests__/helpers";
 
-const itTransitionsTo = (result: acStates.AdvanceChannelState, type: acStates.AdvanceChannelStateType) => {
+const itTransitionsTo = (
+  result: acStates.AdvanceChannelState,
+  type: acStates.AdvanceChannelStateType
+) => {
   it(`transitions to ${type}`, () => {
     expect(result.type).toEqual(type);
   });

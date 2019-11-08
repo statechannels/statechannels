@@ -23,7 +23,12 @@ class FundingStrategyNegotiationContainer extends PureComponent<Props> {
 
     switch (state.type) {
       case "FundingStrategyNegotiation.PlayerB.WaitForStrategyProposal":
-        return <WaitForOtherPlayer actionDescriptor={"strategy choice"} channelId={state.targetChannelId} />;
+        return (
+          <WaitForOtherPlayer
+            actionDescriptor={"strategy choice"}
+            channelId={state.targetChannelId}
+          />
+        );
       case "FundingStrategyNegotiation.PlayerB.WaitForStrategyApproval":
         return (
           <ApproveX

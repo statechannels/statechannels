@@ -19,11 +19,16 @@ export function createForceMoveTransaction(
   return nitroTrans.createForceMoveTransaction([fromState, toState], privateKey);
 }
 
-export function createRespondTransaction(challengeState: State, responseSignedState: SignedState): TransactionRequest {
+export function createRespondTransaction(
+  challengeState: State,
+  responseSignedState: SignedState
+): TransactionRequest {
   return nitroTrans.createRespondTransaction(challengeState, responseSignedState);
 }
 
-export function createRefuteTransaction(seriesOfSupportiveStates: SignedState[]): TransactionRequest {
+export function createRefuteTransaction(
+  seriesOfSupportiveStates: SignedState[]
+): TransactionRequest {
   return nitroTrans.createCheckpointTransaction(seriesOfSupportiveStates);
 }
 
@@ -35,7 +40,9 @@ export interface ConcludeAndWithdrawArgs {
   amount: string;
   verificationSignature: string;
 }
-export function createConcludeAndWithdrawTransaction(args: ConcludeAndWithdrawArgs): TransactionRequest {
+export function createConcludeAndWithdrawTransaction(
+  args: ConcludeAndWithdrawArgs
+): TransactionRequest {
   if (!args) {
     throw new Error();
   }
@@ -83,7 +90,14 @@ export function createWithdrawTransaction(
   // TODO: Implement in Nitro
   const adjudicatorInterface = getAdjudicatorInterface();
   const {v, r, s} = splitSignature(verificationSignature);
-  const data = adjudicatorInterface.functions.withdraw.encode([participant, destination, amount, v, r, s]);
+  const data = adjudicatorInterface.functions.withdraw.encode([
+    participant,
+    destination,
+    amount,
+    v,
+    r,
+    s
+  ]);
 
   return {
     data,
@@ -117,7 +131,11 @@ export function createTransferAndWithdrawTransaction(
   };
 }
 
-export function createDepositTransaction(destination: string, depositAmount: string, expectedHeld: string) {
+export function createDepositTransaction(
+  destination: string,
+  depositAmount: string,
+  expectedHeld: string
+) {
   // If a legacy fmg-core channelId
   if (destination.length === 42) {
     destination = `0x${destination.substr(2).padStart(64, "1")}`; // note we do not pad with zeros, since that would imply an external destination (which we may not deposit to)

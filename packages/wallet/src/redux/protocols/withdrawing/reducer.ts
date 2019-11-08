@@ -2,9 +2,15 @@ import {ProtocolStateWithSharedData} from "..";
 import * as states from "./states";
 import {WithdrawalAction} from "./actions";
 import * as selectors from "../../selectors";
-import {createConcludeAndWithdrawTransaction, ConcludeAndWithdrawArgs} from "../../../utils/transaction-generator";
+import {
+  createConcludeAndWithdrawTransaction,
+  ConcludeAndWithdrawArgs
+} from "../../../utils/transaction-generator";
 import {TransactionRequest} from "ethers/providers";
-import {initialize as initTransactionState, transactionReducer} from "../transaction-submission/reducer";
+import {
+  initialize as initTransactionState,
+  transactionReducer
+} from "../transaction-submission/reducer";
 import {isTransactionAction} from "../transaction-submission/actions";
 import {isTerminal, TransactionSubmissionState, isSuccess} from "../transaction-submission/states";
 import {unreachable} from "../../../utils/reducer-utils";
@@ -89,7 +95,12 @@ const waitForApprovalReducer = (
     case "WALLET.WITHDRAWING.WITHDRAWAL_APPROVED":
       const {channelId, withdrawalAmount, processId} = protocolState;
       const {withdrawalAddress} = action;
-      const transaction = createConcludeAndWithTransaction(channelId, withdrawalAmount, withdrawalAddress, sharedData);
+      const transaction = createConcludeAndWithTransaction(
+        channelId,
+        withdrawalAmount,
+        withdrawalAddress,
+        sharedData
+      );
       const {storage: newSharedData, state: transactionSubmissionState} = initTransactionState(
         transaction,
         processId,

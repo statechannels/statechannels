@@ -69,7 +69,11 @@ function transactionSubmissionFailed(state: TSState, storage: Storage): ReturnVa
   return {state: approveRetry(state), storage};
 }
 
-function transactionSubmitted(state: NonTerminalTSState, storage: Storage, transactionHash: string): ReturnVal {
+function transactionSubmitted(
+  state: NonTerminalTSState,
+  storage: Storage,
+  transactionHash: string
+): ReturnVal {
   switch (state.type) {
     case "TransactionSubmission.WaitForSubmission":
     case "TransactionSubmission.WaitForSend": // just in case we didn't hear the TRANSACTION_SENT

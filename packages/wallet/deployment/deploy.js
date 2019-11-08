@@ -52,13 +52,15 @@ const deploy = async (network, secret, etherscanApiKey) => {
   if (!process.env.GANACHE_PORT) {
     throw new Error(`Environment variable GANACHE_PORT undefined`);
   }
-  const provider = new ethers.providers.JsonRpcProvider(`http://localhost:${process.env.GANACHE_PORT}`);
+  const provider = new ethers.providers.JsonRpcProvider(
+    `http://localhost:${process.env.GANACHE_PORT}`
+  );
   const networkId = (await provider.getNetwork()).chainId;
 
   const startingMap = networkMap[networkId] || [];
   const contractsToAddresses = await migrate(deployer, startingMap, [
     migrationFactory(nitroAdjudicatorArtifact),
-    migrationFactory(ethAssetHolderArtifact, networkMap => [networkMap[nitroAdjudicatorArtifact.contractName]]),
+    migrationFactory(ethAssetHolderArtifact, nm => [nm[nitroAdjudicatorArtifact.contractName]]),
     migrationFactory(consensusAppArtifact)
   ]);
 

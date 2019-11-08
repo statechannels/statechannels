@@ -149,18 +149,32 @@ const notSafeToSendHub = states.notSafeToSend({
 
 const emptySharedData = {...EMPTY_SHARED_DATA};
 // const channelCreated = { ...EMPTY_SHARED_DATA };
-const aSentPreFundState = setChannels(EMPTY_SHARED_DATA, [channelFromStates(states0, asAddress, asPrivateKey)]);
+const aSentPreFundState = setChannels(EMPTY_SHARED_DATA, [
+  channelFromStates(states0, asAddress, asPrivateKey)
+]);
 
-const bSentPreFundState = setChannels(EMPTY_SHARED_DATA, [channelFromStates(states1, bsAddress, bsPrivateKey)]);
+const bSentPreFundState = setChannels(EMPTY_SHARED_DATA, [
+  channelFromStates(states1, bsAddress, bsPrivateKey)
+]);
 
-const bReceivedPreFundSetup = setChannels(EMPTY_SHARED_DATA, [channelFromStates(states2, bsAddress, bsPrivateKey)]);
+const bReceivedPreFundSetup = setChannels(EMPTY_SHARED_DATA, [
+  channelFromStates(states2, bsAddress, bsPrivateKey)
+]);
 
-const hubSentPreFundState = setChannels(EMPTY_SHARED_DATA, [channelFromStates(states2, hubAddress, hubPrivateKey)]);
+const hubSentPreFundState = setChannels(EMPTY_SHARED_DATA, [
+  channelFromStates(states2, hubAddress, hubPrivateKey)
+]);
 
-const aReceivedPrefundSetup = setChannels(EMPTY_SHARED_DATA, [channelFromStates(states2, asAddress, asPrivateKey)]);
-const aSentPostFundState = setChannels(EMPTY_SHARED_DATA, [channelFromStates(states3, asAddress, asPrivateKey)]);
+const aReceivedPrefundSetup = setChannels(EMPTY_SHARED_DATA, [
+  channelFromStates(states2, asAddress, asPrivateKey)
+]);
+const aSentPostFundState = setChannels(EMPTY_SHARED_DATA, [
+  channelFromStates(states3, asAddress, asPrivateKey)
+]);
 
-const bSentPostFundSetupState = setChannels(EMPTY_SHARED_DATA, [channelFromStates(states4, bsAddress, bsPrivateKey)]);
+const bSentPostFundSetupState = setChannels(EMPTY_SHARED_DATA, [
+  channelFromStates(states4, bsAddress, bsPrivateKey)
+]);
 
 const allPostFundSetupsReceived = (playerIndex: PlayerIndex): SharedData => {
   const {address, privateKey} = scenarios.addressAndPrivateKeyLookup[playerIndex];

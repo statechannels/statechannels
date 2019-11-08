@@ -50,14 +50,18 @@ export const failure: StateConstructor<Failure> = p => {
 // -------
 export type TerminalCloseLedgerChannelState = Failure | Success;
 export type NonTerminalCloseLedgerChannelState = WaitForConclude | WaitForWithdrawal;
-export type CloseLedgerChannelState = TerminalCloseLedgerChannelState | NonTerminalCloseLedgerChannelState;
+export type CloseLedgerChannelState =
+  | TerminalCloseLedgerChannelState
+  | NonTerminalCloseLedgerChannelState;
 export type CloseLedgerChannelStateType = CloseLedgerChannelState["type"];
 
 export function isCloseLedgerChannelState(state: ProtocolState): state is CloseLedgerChannelState {
   return state.type.indexOf("CloseLedgerChannel") === 0;
 }
 
-export function isTerminalCloseLedgerChannelState(state: ProtocolState): state is TerminalCloseLedgerChannelState {
+export function isTerminalCloseLedgerChannelState(
+  state: ProtocolState
+): state is TerminalCloseLedgerChannelState {
   return state.type === "CloseLedgerChannel.Failure" || state.type === "CloseLedgerChannel.Success";
 }
 export function isNonTerminalCloseLedgerChannelState(

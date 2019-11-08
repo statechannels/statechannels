@@ -111,7 +111,10 @@ export function isRelayableAction(action: WalletAction): action is RelayableActi
 }
 
 export type CommonAction = SignedStatesReceived;
-export function isCommonAction(action: WalletAction, protocol?: EmbeddedProtocol): action is CommonAction {
+export function isCommonAction(
+  action: WalletAction,
+  protocol?: EmbeddedProtocol
+): action is CommonAction {
   return (
     action.type === "WALLET.COMMON.SIGNED_STATES_RECEIVED" &&
     // When passed a protocol, check that it's got the protocol in the protocol locator

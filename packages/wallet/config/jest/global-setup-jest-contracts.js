@@ -15,7 +15,13 @@ async function globalSetup() {
   await chain.ready();
 
   await deploy();
-  console.log(`Test contracts deployed: ${JSON.stringify(require("../../deployment/network-map.json"), null, 2)}`);
+  console.log(
+    `Test contracts deployed: ${JSON.stringify(
+      require("../../deployment/network-map.json"),
+      null,
+      2
+    )}`
+  );
 }
 
 module.exports = globalSetup;

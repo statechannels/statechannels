@@ -1,6 +1,10 @@
 import {SignedState, getChannelId} from "@statechannels/nitro-protocol";
 
-export function channelFromStates(states: SignedState[], ourAddress: string, ourPrivateKey: string) {
+export function channelFromStates(
+  states: SignedState[],
+  ourAddress: string,
+  ourPrivateKey: string
+) {
   const numStates = states.length;
   const lastState = states[numStates - 1];
   const {turnNum, channel, appDefinition: libraryAddress} = lastState.state;

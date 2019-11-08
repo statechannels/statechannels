@@ -16,9 +16,12 @@ import {ProtocolState} from "..";
 
 export type DisputeState = ResponderState | ChallengerState;
 
-export function isTerminal(state: DisputeState): state is TerminalChallengerState | TerminalResponderState {
+export function isTerminal(
+  state: DisputeState
+): state is TerminalChallengerState | TerminalResponderState {
   return (
-    (isChallengerState(state) && isChallengerTerminal(state)) || (isResponderState(state) && isResponderTerminal(state))
+    (isChallengerState(state) && isChallengerTerminal(state)) ||
+    (isResponderState(state) && isResponderTerminal(state))
   );
 }
 

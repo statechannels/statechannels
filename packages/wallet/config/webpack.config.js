@@ -148,7 +148,9 @@ module.exports = function(webpackEnv) {
       pathinfo: isEnvDevelopment,
       // There will be one main bundle, and one file per asynchronous chunk.
       // In development, it does not produce real files.
-      filename: isEnvProduction ? "static/js/[name].[chunkhash:8].js" : isEnvDevelopment && "static/js/bundle.js",
+      filename: isEnvProduction
+        ? "static/js/[name].[chunkhash:8].js"
+        : isEnvDevelopment && "static/js/bundle.js",
       // There are also additional JS chunk files if you use code splitting.
       chunkFilename: isEnvProduction
         ? "static/js/[name].[chunkhash:8].chunk.js"
@@ -250,7 +252,9 @@ module.exports = function(webpackEnv) {
       // https://github.com/facebook/create-react-app/issues/290
       // `web` extension prefixes have been added for better support
       // for React Native Web.
-      extensions: paths.moduleFileExtensions.map(ext => `.${ext}`).filter(ext => useTypeScript || !ext.includes("ts")),
+      extensions: paths.moduleFileExtensions
+        .map(ext => `.${ext}`)
+        .filter(ext => useTypeScript || !ext.includes("ts")),
       alias: {
         // Support React Native Web
         // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
@@ -404,9 +408,14 @@ module.exports = function(webpackEnv) {
       ]
     },
     plugins: [
-      new webpack.NormalModuleReplacementPlugin(/.*\/build\/contracts\/.*\.json/, function(resource) {
+      new webpack.NormalModuleReplacementPlugin(/.*\/build\/contracts\/.*\.json/, function(
+        resource
+      ) {
         if (process.env.TARGET_NETWORK !== "development") {
-          resource.request = resource.request.replace(/.*\/build\/contracts/, paths.appPreBuiltContractArtifacts);
+          resource.request = resource.request.replace(
+            /.*\/build\/contracts/,
+            paths.appPreBuiltContractArtifacts
+          );
         }
       }),
       // Generates an `index.html` file with the <script> injected.
@@ -437,7 +446,9 @@ module.exports = function(webpackEnv) {
       ),
       // Inlines the webpack runtime script. This script is too small to warrant
       // a network request.
-      isEnvProduction && shouldInlineRuntimeChunk && new InlineChunkHtmlPlugin(HtmlWebpackPlugin, [/runtime~.+[.]js/]),
+      isEnvProduction &&
+        shouldInlineRuntimeChunk &&
+        new InlineChunkHtmlPlugin(HtmlWebpackPlugin, [/runtime~.+[.]js/]),
       // Makes some environment variables available in index.html.
       // The public URL is available as %PUBLIC_URL% in index.html, e.g.:
       // <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">

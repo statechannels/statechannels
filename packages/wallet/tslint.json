@@ -6,6 +6,8 @@
 	},
 	"linterOptions": {
 		"exclude": [
+			"node_modules/**",
+			"lib/**",
 			"src/utils/contract-utils.ts",
 			"src/utils/nitro-converter.ts",
 			"src/contract-tests/transactions.test.ts",

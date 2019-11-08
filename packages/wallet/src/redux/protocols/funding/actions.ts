@@ -6,7 +6,10 @@ import {AdvanceChannelAction, isAdvanceChannelAction} from "../advance-channel";
 import {WalletAction} from "../../actions";
 import {VirtualFundingAction, isVirtualFundingAction} from "../virtual-funding";
 import {LedgerFundingAction, isLedgerFundingAction} from "../ledger-funding";
-import {FundingStrategyNegotiationAction, isFundingStrategyNegotiationAction} from "../funding-strategy-negotiation";
+import {
+  FundingStrategyNegotiationAction,
+  isFundingStrategyNegotiationAction
+} from "../funding-strategy-negotiation";
 
 // -------
 // Actions

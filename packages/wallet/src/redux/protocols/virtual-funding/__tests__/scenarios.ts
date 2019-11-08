@@ -155,7 +155,10 @@ export const happyPath = {
   prepareG: {
     state: scenarioStates.waitForGuarantorChannel2,
     action: postFund.preSuccess.trigger,
-    sharedData: _.merge(ledgerFundingPreSuccess.sharedData, setChannel(postFund.preSuccess.sharedData, appChannel))
+    sharedData: _.merge(
+      ledgerFundingPreSuccess.sharedData,
+      setChannel(postFund.preSuccess.sharedData, appChannel)
+    )
   },
   fundG: {
     appChannelId: appChannel.channelId,

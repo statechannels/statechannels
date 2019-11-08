@@ -8,7 +8,12 @@ import {
 import * as walletStates from "../redux/state";
 
 import {bigNumberify} from "ethers/utils";
-import {ADJUDICATOR_ADDRESS, ETH_ASSET_HOLDER_ADDRESS, NETWORK_ID, CHALLENGE_DURATION} from "../constants";
+import {
+  ADJUDICATOR_ADDRESS,
+  ETH_ASSET_HOLDER_ADDRESS,
+  NETWORK_ID,
+  CHALLENGE_DURATION
+} from "../constants";
 import {JsonRpcProvider, TransactionRequest, TransactionResponse} from "ethers/providers";
 import {getLibraryAddress} from "../utils/contract-utils";
 import {State, getChannelId as getNitroChannelId, Channel} from "@statechannels/nitro-protocol";
@@ -22,7 +27,10 @@ export const fiveFive = (asAddress, bsAddress) => [
 
 export const defaultDepositAmount = bigNumberify(5).toHexString();
 
-export const createWatcherState = (processId: string, ...channelIds: string[]): walletStates.Initialized => {
+export const createWatcherState = (
+  processId: string,
+  ...channelIds: string[]
+): walletStates.Initialized => {
   const channelSubscriptions: walletStates.ChannelSubscriptions = {};
   for (const channelId of channelIds) {
     channelSubscriptions[channelId] = channelSubscriptions[channelId] || [];
@@ -186,7 +194,10 @@ export async function respond(
   return toSignedState;
 }
 
-async function sendTransaction(provider: JsonRpcProvider, tx: TransactionRequest): Promise<TransactionResponse> {
+async function sendTransaction(
+  provider: JsonRpcProvider,
+  tx: TransactionRequest
+): Promise<TransactionResponse> {
   const signer = await provider.getSigner();
   return await signer.sendTransaction({to: ADJUDICATOR_ADDRESS, ...tx});
 }

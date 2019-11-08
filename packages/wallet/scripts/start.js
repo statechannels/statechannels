@@ -39,9 +39,15 @@ void (async () => {
 
   if (process.env.HOST) {
     console.log(
-      chalk.cyan(`Attempting to bind to HOST environment variable: ${chalk.yellow(chalk.bold(process.env.HOST))}`)
+      chalk.cyan(
+        `Attempting to bind to HOST environment variable: ${chalk.yellow(
+          chalk.bold(process.env.HOST)
+        )}`
+      )
     );
-    console.log(`If this was unintentional, check that you haven't mistakenly set it in your shell.`);
+    console.log(
+      `If this was unintentional, check that you haven't mistakenly set it in your shell.`
+    );
     console.log(`Learn more here: ${chalk.yellow("http://bit.ly/2mwWSwH")}`);
     console.log();
   }
@@ -60,9 +66,14 @@ void (async () => {
   const argv = require("yargs").argv;
 
   if (!process.env.CHAIN_NETWORK_ID) {
-    console.error("CHAIN_NETWORK_ID is not defined. Please update your .env file and specify a CHAIN_NETWORK_ID");
+    console.error(
+      "CHAIN_NETWORK_ID is not defined. Please update your .env file and specify a CHAIN_NETWORK_ID"
+    );
     process.exit(1);
-  } else if (process.env.CHAIN_NETWORK_ID.length === 0 || isNaN(Number.parseInt(process.env.CHAIN_NETWORK_ID, 10))) {
+  } else if (
+    process.env.CHAIN_NETWORK_ID.length === 0 ||
+    isNaN(Number.parseInt(process.env.CHAIN_NETWORK_ID, 10))
+  ) {
     console.error(
       "CHAIN_NETWORK_ID is not a number. Please update your .env file and specify a number for CHAIN_NETWORK_ID"
     );
@@ -83,7 +94,11 @@ void (async () => {
   console.log(chalk.cyan("Deploying contracts...\n"));
   await execCommand(`${etherlimePath} deploy`);
 
-  const devServer = new WebpackDevServer(webpack(config), {hot: true, contentBase: paths.appPublic, compress: true});
+  const devServer = new WebpackDevServer(webpack(config), {
+    hot: true,
+    contentBase: paths.appPublic,
+    compress: true
+  });
   // Launch WebpackDevServer.
   devServer.listen(port, HOST, err => {
     if (err) {
