@@ -36,7 +36,7 @@ API between the state channel wallet and application.
 | destination    | String | Address of EOA to receive channel proceeds                      |
 
 Note: in the future we might replace the `appId` with a `contactAddress`, which would allow
-apps to get the wallet to relay messages itself. An example `contractAddress` would be something
+apps to get the wallet to relay messages itself. An example `contactAddress` would be something
 like `https://myserver.com/state_channel_callback`.
 
 ## Allocation
