@@ -34,11 +34,6 @@ export interface MultipleWalletActions {
   type: "WALLET.MULTIPLE_ACTIONS";
   actions: WalletAction[];
 }
-export interface LoggedIn {
-  type: "WALLET.LOGGED_IN";
-  uid: string;
-}
-
 export interface AdjudicatorKnown {
   type: "WALLET.ADJUDICATOR_KNOWN";
   networkId: string;
@@ -157,8 +152,6 @@ export const multipleWalletActions: ActionConstructor<MultipleWalletActions> = p
   type: "WALLET.MULTIPLE_ACTIONS"
 });
 
-export const loggedIn: ActionConstructor<LoggedIn> = p => ({...p, type: "WALLET.LOGGED_IN"});
-
 export const adjudicatorKnown: ActionConstructor<AdjudicatorKnown> = p => ({
   ...p,
   type: "WALLET.ADJUDICATOR_KNOWN"
@@ -270,7 +263,7 @@ export type WalletAction =
   | AssetHolderEventAction
   | BlockMined
   | DisplayMessageSent
-  | LoggedIn
+  | AddressRequest
   | MessageSent
   | MetamaskLoadError
   | ProtocolAction
@@ -319,3 +312,30 @@ export interface LoadAction {
 export function isLoadAction(action: any): action is LoadAction {
   return action.type && action.type === LOAD_FROM_STORAGE;
 }
+
+export interface JsonRpcAction {
+  id: number;
+  type: string;
+}
+
+export interface AddressRequest extends JsonRpcAction {
+  domain: string; // Un-used for now
+  type: "WALLET.ADDRESS_REQUEST";
+}
+
+export const addressRequest: ActionConstructor<AddressRequest> = p => ({
+  ...p,
+  type: "WALLET.ADDRESS_REQUEST"
+});
+
+export interface AddressCreated extends JsonRpcAction {
+  type: "WALLET.ADDRESS_CREATED";
+  address: string;
+}
+export const addressCreated: ActionConstructor<AddressCreated> = p => ({
+  ...p,
+  type: "WALLET.ADDRESS_CREATED"
+});
+
+export type JsonRpcRequestAction = AddressRequest;
+export type JsonResponseAction = AddressCreated;

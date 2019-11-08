@@ -7,9 +7,9 @@ describe("when in WaitForLogin", () => {
   const state = states.waitForLogin();
 
   describe("when the player logs in", () => {
-    const action = actions.loggedIn({uid: "uid"});
+    const action = actions.addressRequest({id: 5, domain: "localhost"});
     const updatedState = walletReducer(state, action);
-
+    // TODO: Test it puts message in outbox
     it("transitions to WALLET_INITIALIZED", async () => {
       expect(updatedState.type).toEqual(states.WALLET_INITIALIZED);
     });

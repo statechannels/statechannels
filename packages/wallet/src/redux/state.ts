@@ -89,7 +89,7 @@ export interface MetaMaskError extends SharedData {
 
 export interface Initialized extends SharedData {
   type: typeof WALLET_INITIALIZED;
-  uid: string;
+
   processStore: ProcessStore;
 
   address: string;
@@ -245,7 +245,8 @@ export function setFundingState(
 }
 
 export function getLastMessage(state: SharedData): WalletEvent | undefined {
-  return getLastMessageFromOutbox(state.outboxState);
+  // TODO: Hack for now
+  return getLastMessageFromOutbox(state.outboxState) as WalletEvent;
 }
 
 export function getPrivatekey(state: SharedData, channelId: string): string {

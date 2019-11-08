@@ -14,7 +14,7 @@ describe("getAdjudicatorWatcherProcessesForChannel", () => {
 
     return walletStates.initialized({
       ...walletStates.EMPTY_SHARED_DATA,
-      uid: "",
+
       processStore: {},
       channelSubscriptions,
       address: "address",
@@ -25,7 +25,7 @@ describe("getAdjudicatorWatcherProcessesForChannel", () => {
   it("should return an empty array when channelSubscriptions is empty", () => {
     const state = walletStates.initialized({
       ...walletStates.EMPTY_SHARED_DATA,
-      uid: "",
+
       processStore: {},
       channelSubscriptions: {},
       address: "address",

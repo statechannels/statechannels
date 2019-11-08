@@ -1,4 +1,3 @@
-import {initializationSuccess} from "../magmo-wallet-client/wallet-events";
 import {unreachable} from "../utils/reducer-utils";
 import * as actions from "./actions";
 import {accumulateSideEffects} from "./outbox";
@@ -43,6 +42,17 @@ export function initializedReducer(
   action: actions.WalletAction
 ): states.WalletState {
   let newState = {...state};
+  // Handles when the user issues another request
+  if (action.type === "WALLET.ADDRESS_REQUEST") {
+    const {address} = state;
+
+    return states.initialized({
+      ...state,
+      outboxState: accumulateSideEffects(state.outboxState, {
+        messageOutbox: [actions.addressCreated({id: action.id, address})]
+      })
+    });
+  }
   if (actions.isSharedDataUpdateAction(action)) {
     newState = updateSharedData(newState, action);
   }
@@ -228,16 +238,16 @@ const waitForLoginReducer = (
   action: actions.WalletAction
 ): states.WalletState => {
   switch (action.type) {
-    case "WALLET.LOGGED_IN":
+    case "WALLET.ADDRESS_REQUEST":
       let {address, privateKey} = state;
       if (!address || !privateKey) {
         ({privateKey, address} = Wallet.createRandom());
       }
       return states.initialized({
         ...state,
-        uid: action.uid,
+
         outboxState: accumulateSideEffects(state.outboxState, {
-          messageOutbox: [initializationSuccess(address)]
+          messageOutbox: [actions.addressCreated({id: action.id, address})]
         }),
         processStore: {},
         privateKey,

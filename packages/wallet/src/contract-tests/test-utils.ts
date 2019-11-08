@@ -39,7 +39,7 @@ export const createWatcherState = (
 
   return walletStates.initialized({
     ...walletStates.EMPTY_SHARED_DATA,
-    uid: "",
+
     processStore: {},
     channelSubscriptions,
     address: "",

@@ -20,6 +20,8 @@ const defaults = {
 
 const initializedState = states.initialized({...defaults});
 
+// TODO: Test for ADDRESS_REQUEST
+
 describe("when a NewProcessAction arrives", () => {
   const action = fundingRequested({channelId, playerIndex: TwoPartyPlayerIndex.A});
   const processId = getProcessId(action);
