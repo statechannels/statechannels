@@ -27,7 +27,7 @@
     "test:app": "npx run-jest -c ./config/jest/jest.config.js",
     "test:contracts": "yarn test:prepare && npx jest --testPathPattern='contract-tests'",
     "deployContracts": "npx deploy-contracts",
-    "ganache:start": "npx start-ganache",
+    "startGanache": "node bin/start-ganache.js",
     "postinstall": "rm -f node_modules/web3/index.d.ts",
     "storybook": "start-storybook -p 9001 -c .storybook",
     "lint:check": "",
