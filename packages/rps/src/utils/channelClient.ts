@@ -155,18 +155,25 @@ export type ActionParameters =
   | JoinChannelParameters
   | UpdateChannelParameters;
 
+export interface ParametersByMessageListener {
+  [NotificationName.ChannelProposed]: CreateChannelResult;
+  [NotificationName.ChannelUpdated]: UpdateChannelResult;
+}
+
+export type MessageListenerParameters<T extends NotificationName> = ParametersByMessageListener[T];
+
 export class ChannelClient {
   protected events = new EventEmitter();
 
-  onMessageReceived(
-    notificationName: NotificationName,
-    callback: (parameters: ActionParameters) => void
-  ) {
+  onMessageReceived<T extends NotificationName>(
+    notificationName: T,
+    callback: (parameters: MessageListenerParameters<T>) => void
+  ): void {
     this.events.on(
       'message',
       (message: JsonRPCNotification<ActionParameters> | JsonRPCRequest<ActionParameters>) => {
         if (message.method === notificationName) {
-          callback(message.params);
+          callback(message.params as MessageListenerParameters<T>);
         }
       }
     );
