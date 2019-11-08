@@ -17,7 +17,7 @@
     "contract:compile": "node ./bin/compile.js",
     "deploy:contracts": "NODE_ENV=development npx etherlime deploy --compile=false",
     "test": "run-s prettier:check test:contracts 'test:app --all'",
-    "test:ci": "test:ci:contracts",
+    "test:ci": "yarn test:ci:contracts",
     "test:ci:contracts": "yarn test:contracts --all --ci",
     "test:ci:app": "yarn test:app --all --ci --runInBand",
     "prettier:check": "npx prettier --check 'src/**/*.{ts,tsx}'",
