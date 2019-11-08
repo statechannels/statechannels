@@ -11,11 +11,12 @@
   "scripts": {
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
+    "build:ci": "npx tsc",
     "contract:compile": "node ./bin/compile.js",
     "deploy": "npx etherlime deploy --compile=false --file=./deployment/deploy.js",
     "test": "run-s prettier:check test:contracts 'test:app --all'",
     "startGanache": "node bin/start-ganache.js",
-    "test:ci": "npx tsc",
+    "test:ci": "yarn test:ci:contracts",
     "test:ci:contracts": "yarn test:contracts --all --ci",
     "test:ci:app": "yarn test:app --all --ci --runInBand",
     "prettier:check": "npx prettier --check 'src/**/*.{ts,tsx}'",
