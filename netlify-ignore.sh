@@ -21,7 +21,7 @@ case $TARGET_PACKAGE in
         ;;
     
     app-wallet-interface)
-        echo "Checking for changes in nitro-protocol package..."
+        echo "Checking for changes in app-wallet-interface package..."
         git diff --quiet HEAD^ HEAD ./packages/app-wallet-interface
         status=$?
         ;;
