@@ -8,6 +8,7 @@ const testAssetHolderArtifact2 = require('../build/contracts/TESTAssetHolder2.js
 const trivialAppArtifact = require('../build/contracts/TrivialApp.json');
 const countingAppArtifact = require('../build/contracts/CountingApp.json');
 const singleAssetPaymentsArtifact = require('../build/contracts/SingleAssetPayments.json');
+const rockPaperScissorsArtifact = require('../build/contracts/RockPaperScissors.json');
 
 const erc20AssetHolderArtifact = require('../build/contracts/ERC20AssetHolder.json');
 const ethAssetHolderArtifact = require('../build/contracts/ETHAssetHolder.json');
@@ -33,6 +34,7 @@ async function deployTest(network, secret, etherscanApiKey) {
     migrationFactory(countingAppArtifact),
     migrationFactory(singleAssetPaymentsArtifact),
     migrationFactory(testForceMoveArtifact),
+    migrationFactory(rockPaperScissorsArtifact),
   ]);
 
   networkMap = {
