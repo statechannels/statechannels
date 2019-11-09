@@ -3,8 +3,7 @@ import {
   emptyDisplayOutboxState,
   SideEffects,
   queueMessage as queueMessageOutbox,
-  queueTransaction as queueTransactionOutbox,
-  getLastMessage as getLastMessageFromOutbox
+  queueTransaction as queueTransactionOutbox
 } from "./outbox/state";
 import {
   ChannelStore,
@@ -242,11 +241,6 @@ export function setFundingState(
   fundingState: ChannelFundingState
 ) {
   return {...state, fundingState: {...state.fundingState, [channelId]: fundingState}};
-}
-
-export function getLastMessage(state: SharedData): WalletEvent | undefined {
-  // TODO: Hack for now
-  return getLastMessageFromOutbox(state.outboxState) as WalletEvent;
 }
 
 export function getPrivatekey(state: SharedData, channelId: string): string {
