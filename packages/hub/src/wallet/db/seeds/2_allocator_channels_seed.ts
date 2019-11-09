@@ -1,17 +1,16 @@
-import {CommitmentType} from 'fmg-core';
+import {encodeConsensusData} from '@statechannels/nitro-protocol';
 import {Model} from 'objection';
 import {HUB_ADDRESS} from '../../../constants';
 import {
   allocation,
   BEGINNING_APP_CHANNEL_HOLDINGS,
   BEGINNING_APP_CHANNEL_NONCE,
-  DESTINATION,
-  DESTINATION_3,
   DUMMY_RULES_ADDRESS,
   DUMMY_RULES_BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID,
   DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID,
   DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID_3,
   DUMMY_RULES_ONGOING_APP_CHANNEL_NONCE_CHANNEL_ID,
+  dummyEthAssetHolderAddress,
   FUNDED_CHANNEL_HOLDINGS,
   FUNDED_CHANNEL_NONCE,
   FUNDED_CHANNEL_NONCE_3,
@@ -20,8 +19,10 @@ import {
   PARTICIPANT_1_ADDRESS,
   PARTICIPANT_2_ADDRESS
 } from '../../../test/test-constants';
+import {consensus_app_attrs2, consensus_app_attrs3} from '../../../test/test_data';
 import Channel from '../../models/channel';
 import knex from '../connection';
+
 Model.knex(knex);
 
 const participants = [
@@ -37,49 +38,36 @@ const participants_3 = [
 
 const allocationByPriority = (priority: number) => ({
   priority,
-  destination: DESTINATION[priority],
-  amount: allocation(2)[priority]
+  destination: allocation[priority].destination,
+  amount: allocation[priority].amount,
+  assetHolderAddress: dummyEthAssetHolderAddress
 });
 
-const allocationByPriority_3 = (priority: number) => ({
-  priority,
-  destination: DESTINATION_3[priority],
-  amount: allocation(3)[priority]
-});
-
-const allocations = () => [allocationByPriority(0), allocationByPriority(1)];
 const allocations_3 = () => [
-  allocationByPriority_3(0),
-  allocationByPriority_3(1),
-  allocationByPriority_3(2)
+  allocationByPriority(0),
+  allocationByPriority(1),
+  allocationByPriority(2)
 ];
+
+const allocations = () => allocations_3().slice(0, 2);
+
 // ***************
 // Ledger channels
 // ***************
 
-const ledger_appAttrs = (n: number) => ({
-  furtherVotesRequired: n,
-  proposedAllocation: [],
-  proposedDestination: []
-});
-
 function pre_fund_setup(turnNumber: number) {
   return {
     turnNumber,
-    commitmentType: CommitmentType.PreFundSetup,
-    commitmentCount: turnNumber,
     allocations: allocations(),
-    appAttrs: ledger_appAttrs(2)
+    appData: encodeConsensusData(consensus_app_attrs2(2))
   };
 }
 
 function pre_fund_setup_3(turnNumber: number) {
   return {
     turnNumber,
-    commitmentType: CommitmentType.PreFundSetup,
-    commitmentCount: turnNumber,
     allocations: allocations_3(),
-    appAttrs: ledger_appAttrs(3)
+    appData: encodeConsensusData(consensus_app_attrs3(3))
   };
 }
 
@@ -88,7 +76,7 @@ const funded_channel = {
   rulesAddress: DUMMY_RULES_ADDRESS,
   nonce: FUNDED_CHANNEL_NONCE,
   holdings: FUNDED_CHANNEL_HOLDINGS,
-  commitments: [pre_fund_setup(0), pre_fund_setup(1)],
+  states: [pre_fund_setup(0), pre_fund_setup(1)],
   participants
 };
 
@@ -97,17 +85,15 @@ const funded_channel_3 = {
   rulesAddress: DUMMY_RULES_ADDRESS,
   nonce: FUNDED_CHANNEL_NONCE_3,
   holdings: FUNDED_CHANNEL_HOLDINGS,
-  commitments: [pre_fund_setup_3(0), pre_fund_setup_3(1), pre_fund_setup_3(2)],
+  states: [pre_fund_setup_3(0), pre_fund_setup_3(1), pre_fund_setup_3(2)],
   participants: participants_3
 };
 
 function post_fund_setup(turnNumber: number) {
   return {
     turnNumber,
-    commitmentType: CommitmentType.PostFundSetup,
-    commitmentCount: turnNumber % funded_channel.participants.length,
     allocations: allocations(),
-    appAttrs: ledger_appAttrs(0)
+    appData: encodeConsensusData(consensus_app_attrs2(0))
   };
 }
 
@@ -116,17 +102,15 @@ const beginning_app_phase_channel = {
   rules_address: DUMMY_RULES_ADDRESS,
   nonce: BEGINNING_APP_CHANNEL_NONCE,
   holdings: BEGINNING_APP_CHANNEL_HOLDINGS,
-  commitments: [post_fund_setup(2), post_fund_setup(3)],
+  states: [post_fund_setup(2), post_fund_setup(3)],
   participants
 };
 
 function app(turnNumber: number) {
   return {
     turnNumber,
-    commitmentType: CommitmentType.PostFundSetup,
-    commitmentCount: turnNumber % funded_channel.participants.length,
     allocations: allocations(),
-    appAttrs: ledger_appAttrs(turnNumber % participants.length)
+    appData: encodeConsensusData(consensus_app_attrs2(turnNumber % participants.length))
   };
 }
 
@@ -135,7 +119,7 @@ const ongoing_app_phase_channel = {
   rules_address: DUMMY_RULES_ADDRESS,
   nonce: ONGOING_APP_CHANNEL_NONCE,
   holdings: ONGOING_APP_CHANNEL_HOLDINGS,
-  commitments: [app(4), app(5)],
+  states: [app(4), app(5)],
   participants
 };
 
@@ -150,11 +134,11 @@ const three_participant_channel_seeds = {funded_channel_3};
 const SEEDED_CHANNELS_2 = Object.keys(two_participant_channel_seeds).length;
 const SEEDED_CHANNELS_3 = Object.keys(three_participant_channel_seeds).length;
 
-const SEEDED_COMMITMENTS_2 = SEEDED_CHANNELS_2 * 2;
-const SEEDED_COMMITMENTS_3 = SEEDED_CHANNELS_3 * 3;
+const SEEDED_STATES_2 = SEEDED_CHANNELS_2 * 2;
+const SEEDED_STATES_3 = SEEDED_CHANNELS_3 * 3;
 
-const SEEDED_ALLOCATIONS_2 = SEEDED_COMMITMENTS_2 * 2;
-const SEEDED_ALLOCATIONS_3 = SEEDED_COMMITMENTS_3 * 3;
+const SEEDED_ALLOCATIONS_2 = SEEDED_STATES_2 * 2;
+const SEEDED_ALLOCATIONS_3 = SEEDED_STATES_3 * 3;
 
 const SEEDED_PARTICIPANTS_2 = SEEDED_CHANNELS_2 * 2;
 const SEEDED_PARTICIPANTS_3 = SEEDED_CHANNELS_3 * 3;
@@ -163,7 +147,7 @@ const SEEDED_PARTICIPANTS_3 = SEEDED_CHANNELS_3 * 3;
 // Exports
 // *******
 export const SEEDED_CHANNELS = SEEDED_CHANNELS_2 + SEEDED_CHANNELS_3;
-export const SEEDED_COMMITMENTS = SEEDED_COMMITMENTS_2 + SEEDED_COMMITMENTS_3;
+export const SEEDED_STATES = SEEDED_STATES_2 + SEEDED_STATES_3;
 export const SEEDED_ALLOCATIONS = SEEDED_ALLOCATIONS_2 + SEEDED_ALLOCATIONS_3;
 export const SEEDED_PARTICIPANTS = SEEDED_PARTICIPANTS_2 + SEEDED_PARTICIPANTS_3;
 

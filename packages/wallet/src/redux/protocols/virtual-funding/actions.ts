@@ -4,10 +4,20 @@ import {EmbeddedProtocol, routerFactory} from "../../../communication";
 import {ConsensusUpdateAction, isConsensusUpdateAction} from "../consensus-update";
 import {isLedgerFundingAction, LedgerFundingAction} from "../ledger-funding";
 
-export type VirtualFundingAction = AdvanceChannelAction | LedgerFundingAction | ConsensusUpdateAction;
+export type VirtualFundingAction =
+  | AdvanceChannelAction
+  | LedgerFundingAction
+  | ConsensusUpdateAction;
 
 export function isVirtualFundingAction(action: WalletAction): action is VirtualFundingAction {
-  return isAdvanceChannelAction(action) || isLedgerFundingAction(action) || isConsensusUpdateAction(action);
+  return (
+    isAdvanceChannelAction(action) ||
+    isLedgerFundingAction(action) ||
+    isConsensusUpdateAction(action)
+  );
 }
 
-export const routesToVirtualFunding = routerFactory(isVirtualFundingAction, EmbeddedProtocol.VirtualFunding);
+export const routesToVirtualFunding = routerFactory(
+  isVirtualFundingAction,
+  EmbeddedProtocol.VirtualFunding
+);

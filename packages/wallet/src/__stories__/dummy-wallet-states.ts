@@ -12,7 +12,10 @@ export const defaultParams = {
   libraryAddress,
   participants,
   uid: "uid",
-  states: [{state: preFundState1, signature: "fake-sig"}, {state: preFundState2, signature: "fake-sig"}],
+  states: [
+    {state: preFundState1, signature: "fake-sig"},
+    {state: preFundState2, signature: "fake-sig"}
+  ],
   turnNum: preFundState2.turnNum,
   networkId: 3,
   challengeExpiry: 0,

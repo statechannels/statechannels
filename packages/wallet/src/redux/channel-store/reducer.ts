@@ -24,7 +24,11 @@ type SignResult = SignSuccess | SignFailure;
 // TODO: These methods could probably be part of signAndStore/checkAndStore but that means
 // that the address/privateKey would be required when calling them.
 // That would make them difficult to use from other protocols.
-export function signAndInitialize(store: ChannelStore, state: State, privateKey: string): SignResult {
+export function signAndInitialize(
+  store: ChannelStore,
+  state: State,
+  privateKey: string
+): SignResult {
   const signedState = Signatures.signState(state, privateKey);
 
   if (signedState.state.turnNum !== 0) {
@@ -36,7 +40,11 @@ export function signAndInitialize(store: ChannelStore, state: State, privateKey:
   return {isSuccess: true, signedState, store};
 }
 
-export function checkAndInitialize(store: ChannelStore, signedState: SignedState, privateKey: string): CheckResult {
+export function checkAndInitialize(
+  store: ChannelStore,
+  signedState: SignedState,
+  privateKey: string
+): CheckResult {
   if (signedState.state.turnNum !== 0) {
     return {isSuccess: false};
   }

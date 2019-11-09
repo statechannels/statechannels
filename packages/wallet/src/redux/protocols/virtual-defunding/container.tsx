@@ -15,9 +15,19 @@ class VirtualDefundingContainer extends PureComponent<Props> {
     const {state} = this.props;
     switch (state.type) {
       case "VirtualDefunding.WaitForJointChannelUpdate":
-        return <WaitForOtherPlayer actionDescriptor={"joint channel update"} channelId={state.jointChannelId} />;
+        return (
+          <WaitForOtherPlayer
+            actionDescriptor={"joint channel update"}
+            channelId={state.jointChannelId}
+          />
+        );
       case "VirtualDefunding.WaitForLedgerChannelUpdate":
-        return <WaitForOtherPlayer actionDescriptor={"ledger channel update"} channelId={state.ledgerChannelId} />;
+        return (
+          <WaitForOtherPlayer
+            actionDescriptor={"ledger channel update"}
+            channelId={state.ledgerChannelId}
+          />
+        );
 
       default:
         return unreachable(state);

@@ -156,11 +156,10 @@ function waitForExistingLedgerFundingReducer(
     return {protocolState, sharedData};
   }
 
-  const {protocolState: existingLedgerFundingState, sharedData: newSharedData} = existingLedgerFundingReducer(
-    protocolState.existingLedgerFundingState,
-    sharedData,
-    action
-  );
+  const {
+    protocolState: existingLedgerFundingState,
+    sharedData: newSharedData
+  } = existingLedgerFundingReducer(protocolState.existingLedgerFundingState, sharedData, action);
   if (existingLedgerFundingState.type === "ExistingLedgerFunding.Success") {
     return {protocolState: states.success({}), sharedData: newSharedData};
   } else if (existingLedgerFundingState.type === "ExistingLedgerFunding.Failure") {
@@ -197,7 +196,10 @@ function fundWithExistingLedgerChannel({
   protocolLocator: ProtocolLocator;
 }): ProtocolStateWithSharedData<states.NonTerminalLedgerFundingState | states.Failure> {
   const ledgerId = existingLedgerChannel.channelId;
-  const {protocolState: existingLedgerFundingState, sharedData: newSharedData} = initializeExistingLedgerFunding({
+  const {
+    protocolState: existingLedgerFundingState,
+    sharedData: newSharedData
+  } = initializeExistingLedgerFunding({
     processId,
     channelId,
     ledgerId,
@@ -230,11 +232,15 @@ function fundWithExistingLedgerChannel({
   }
 }
 
-function ledgerChannelIsReady(existingLedgerChannel: ChannelState | undefined): existingLedgerChannel is ChannelState {
+function ledgerChannelIsReady(
+  existingLedgerChannel: ChannelState | undefined
+): existingLedgerChannel is ChannelState {
   if (!existingLedgerChannel) {
     return false;
   }
   const lastState = getLastState(existingLedgerChannel);
   const {participants} = lastState.channel;
-  return !lastState.isFinal && getLastState(existingLedgerChannel).turnNum >= 2 * participants.length - 1;
+  return (
+    !lastState.isFinal && getLastState(existingLedgerChannel).turnNum >= 2 * participants.length - 1
+  );
 }

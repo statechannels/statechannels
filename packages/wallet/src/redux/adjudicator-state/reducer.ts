@@ -30,12 +30,18 @@ export const adjudicatorStateReducer = (
   }
 };
 
-const challengeCreatedEventReducer = (state: AdjudicatorState, action: actions.ChallengeCreatedEvent) => {
+const challengeCreatedEventReducer = (
+  state: AdjudicatorState,
+  action: actions.ChallengeCreatedEvent
+) => {
   const challenge = {expiresAt: action.finalizedAt, challengeStates: action.challengeStates};
   return setChallenge(state, action.channelId, challenge);
 };
 
-const challengeClearedEventReducer = (state: AdjudicatorState, action: actions.ChallengeClearedEvent) => {
+const challengeClearedEventReducer = (
+  state: AdjudicatorState,
+  action: actions.ChallengeClearedEvent
+) => {
   const {channelId} = action;
   return clearChallenge(state, channelId);
 };
@@ -53,7 +59,10 @@ const concludedEventReducer = (state: AdjudicatorState, action: actions.Conclude
   const {channelId} = action;
   return markAsFinalized(state, channelId);
 };
-const fundingReceivedEventReducer = (state: AdjudicatorState, action: actions.FundingReceivedEvent) => {
+const fundingReceivedEventReducer = (
+  state: AdjudicatorState,
+  action: actions.FundingReceivedEvent
+) => {
   const {channelId} = action;
   return setBalance(state, channelId, action.totalForDestination);
 };
@@ -66,7 +75,10 @@ const channelUpdateReducer = (state: AdjudicatorState, action: actions.ChannelUp
   return updatedState;
 };
 
-const challengeExpiredReducer = (state: AdjudicatorState, action: actions.ChallengeExpiredEvent) => {
+const challengeExpiredReducer = (
+  state: AdjudicatorState,
+  action: actions.ChallengeExpiredEvent
+) => {
   let newState = {...state};
   const {channelId} = action;
   newState = clearChallenge(newState, channelId);

@@ -105,16 +105,21 @@ const playerBFundingSuccess = preSuccessB.action;
 // Shared Data
 // ------
 const consensusSharedData = (ourIndex: TwoPartyPlayerIndex) => {
-  return ourIndex === TwoPartyPlayerIndex.A ? twoPlayerPreSuccessA.sharedData : twoPlayerPreSuccessB.sharedData;
+  return ourIndex === TwoPartyPlayerIndex.A
+    ? twoPlayerPreSuccessA.sharedData
+    : twoPlayerPreSuccessB.sharedData;
 };
 const fundingSharedData = (ourIndex: TwoPartyPlayerIndex, latestState: SignedState) => {
-  return setChannels(ourIndex === TwoPartyPlayerIndex.A ? preSuccessA.sharedData : preSuccessB.sharedData, [
-    channelFromStates(
-      [latestState],
-      addressAndPrivateKeyLookup[ourIndex].address,
-      addressAndPrivateKeyLookup[ourIndex].privateKey
-    )
-  ]);
+  return setChannels(
+    ourIndex === TwoPartyPlayerIndex.A ? preSuccessA.sharedData : preSuccessB.sharedData,
+    [
+      channelFromStates(
+        [latestState],
+        addressAndPrivateKeyLookup[ourIndex].address,
+        addressAndPrivateKeyLookup[ourIndex].privateKey
+      )
+    ]
+  );
 };
 
 // ------

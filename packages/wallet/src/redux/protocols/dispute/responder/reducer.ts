@@ -6,10 +6,17 @@ import * as selectors from "../../../selectors";
 import * as TransactionGenerator from "../../../../utils/transaction-generator";
 import {TwoPartyPlayerIndex} from "../../../types";
 import {TransactionRequest} from "ethers/providers";
-import {initialize as initTransactionState, transactionReducer} from "../../transaction-submission/reducer";
+import {
+  initialize as initTransactionState,
+  transactionReducer
+} from "../../transaction-submission/reducer";
 import {SharedData, registerChannelToMonitor, signAndStore} from "../../../state";
 import {isTransactionAction} from "../../transaction-submission/actions";
-import {isTerminal, TransactionSubmissionState, isSuccess} from "../../transaction-submission/states";
+import {
+  isTerminal,
+  TransactionSubmissionState,
+  isSuccess
+} from "../../transaction-submission/states";
 
 import {
   showWallet,
@@ -122,7 +129,10 @@ const waitForResponseReducer = (
         c => c.state.turnNum === signResult.signedState.state.turnNum - 1
       )!;
 
-      const transaction = TransactionGenerator.createRespondTransaction(challengeState, signResult.signedState);
+      const transaction = TransactionGenerator.createRespondTransaction(
+        challengeState,
+        signResult.signedState
+      );
 
       return transitionToWaitForTransaction(transaction, protocolState, signResult.store);
     case "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED":
@@ -166,7 +176,11 @@ const waitForApprovalReducer = (
           sharedData: hideWallet(sharedData)
         };
       } else {
-        const transaction = craftResponseTransactionWithExistingState(processId, challengeState, sharedData);
+        const transaction = craftResponseTransactionWithExistingState(
+          processId,
+          challengeState,
+          sharedData
+        );
 
         return transitionToWaitForTransaction(transaction, protocolState, sharedData);
       }
@@ -280,13 +294,16 @@ const getStoredStates = (
 };
 
 const canRespondWithExistingState = (challengeState: State, sharedData: SharedData) => {
-  return canRespondWithExistingMove(challengeState, sharedData) || canRefute(challengeState, sharedData);
+  return (
+    canRespondWithExistingMove(challengeState, sharedData) || canRefute(challengeState, sharedData)
+  );
 };
 const canRespondWithExistingMove = (challengeState: State, sharedData: SharedData): boolean => {
   const {penultimateSignedState, lastSignedState} = getStoredStates(challengeState, sharedData);
 
   return (
-    _.isEqual(penultimateSignedState.state, challengeState) && mover(lastSignedState.state) !== mover(challengeState)
+    _.isEqual(penultimateSignedState.state, challengeState) &&
+    mover(lastSignedState.state) !== mover(challengeState)
   );
 };
 

@@ -23,7 +23,10 @@ describe("indirect funding strategy chosen", () => {
 
     itTransitionsTo(result, "FundingStrategyNegotiation.PlayerB.Success");
 
-    itSendsThisMessage(result, sendStrategyApproved(opponentAddress, processId, "IndirectFundingStrategy"));
+    itSendsThisMessage(
+      result,
+      sendStrategyApproved(opponentAddress, processId, "IndirectFundingStrategy")
+    );
   });
 });
 
@@ -44,7 +47,10 @@ describe("virtual funding strategy chosen", () => {
 
     itTransitionsTo(result, "FundingStrategyNegotiation.PlayerB.Success");
 
-    itSendsThisMessage(result, sendStrategyApproved(opponentAddress, processId, "VirtualFundingStrategy"));
+    itSendsThisMessage(
+      result,
+      sendStrategyApproved(opponentAddress, processId, "VirtualFundingStrategy")
+    );
   });
 });
 

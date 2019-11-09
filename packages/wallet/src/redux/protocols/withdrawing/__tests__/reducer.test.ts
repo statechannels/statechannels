@@ -13,12 +13,18 @@ Object.defineProperty(TransactionGenerator, "createConcludeAndWithdrawTransactio
 });
 
 // Helpers
-const itTransitionsToFailure = (result: {protocolState: states.WithdrawalState}, failure: states.Failure) => {
+const itTransitionsToFailure = (
+  result: {protocolState: states.WithdrawalState},
+  failure: states.Failure
+) => {
   it(`transitions to failure with reason ${failure.reason}`, () => {
     expect(result.protocolState).toMatchObject(failure);
   });
 };
-const itTransitionsTo = (result: {protocolState: states.WithdrawalState}, type: states.WithdrawalStateType) => {
+const itTransitionsTo = (
+  result: {protocolState: states.WithdrawalState},
+  type: states.WithdrawalStateType
+) => {
   it(`transitions to ${type}`, () => {
     expect(result.protocolState.type).toEqual(type);
   });

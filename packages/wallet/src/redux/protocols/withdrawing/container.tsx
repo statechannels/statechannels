@@ -20,18 +20,30 @@ interface Props {
 
 class WithdrawalContainer extends PureComponent<Props> {
   render() {
-    const {state, withdrawalApproved, withdrawalRejected, withdrawalSuccessAcknowledged} = this.props;
+    const {
+      state,
+      withdrawalApproved,
+      withdrawalRejected,
+      withdrawalSuccessAcknowledged
+    } = this.props;
     switch (state.type) {
       case "Withdrawing.WaitforApproval":
         return (
           <WaitForApproval
             withdrawalAmount={state.withdrawalAmount}
-            approve={withdrawalAddress => withdrawalApproved({processId: state.processId, withdrawalAddress})}
+            approve={withdrawalAddress =>
+              withdrawalApproved({processId: state.processId, withdrawalAddress})
+            }
             deny={() => withdrawalRejected({processId: state.processId})}
           />
         );
       case "Withdrawing.WaitForTransaction":
-        return <TransactionSubmission state={state.transactionSubmissionState} transactionName="Withdraw" />;
+        return (
+          <TransactionSubmission
+            state={state.transactionSubmissionState}
+            transactionName="Withdraw"
+          />
+        );
       case "Withdrawing.WaitForAcknowledgement":
         return (
           <Acknowledge

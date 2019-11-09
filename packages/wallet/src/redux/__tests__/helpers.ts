@@ -8,7 +8,10 @@ import _ from "lodash";
 import {State, SignedState, getChannelId} from "@statechannels/nitro-protocol";
 import {Signature} from "ethers/utils";
 
-type SideEffectState = StateWithSideEffects<any> | {outboxState: OutboxState} | {sharedData: SharedData};
+type SideEffectState =
+  | StateWithSideEffects<any>
+  | {outboxState: OutboxState}
+  | {sharedData: SharedData};
 
 const describeScenarioStep = (scenarioStep, fn) => {
   return describe(scenarioStepDescription(scenarioStep), fn);
@@ -158,7 +161,12 @@ function getOutboxState(state: SideEffectState, outboxBranch: "messageOutbox"): 
 
 export const itRelaysThisAction = (state: SideEffectState, action: RelayableAction, idx = 0) => {
   it(`relays the correct action`, () => {
-    expectSideEffect("messageOutbox", state, item => expect(item.messagePayload).toMatchObject(action), idx);
+    expectSideEffect(
+      "messageOutbox",
+      state,
+      item => expect(item.messagePayload).toMatchObject(action),
+      idx
+    );
   });
 };
 
@@ -209,7 +217,10 @@ export const itIncreasesTurnNumBy = (
   });
 };
 
-export const itStoresThisState = (state: {channelStore: ChannelStore}, signedState: SignedState) => {
+export const itStoresThisState = (
+  state: {channelStore: ChannelStore},
+  signedState: SignedState
+) => {
   it("stores the state in the channel state", () => {
     const channelId = getChannelId(signedState.state.channel);
     const channelState = state.channelStore[channelId];
@@ -231,6 +242,9 @@ export const itRegistersThisChannel = (
   });
 };
 
-export const mergeSharedData = (firstSharedData: SharedData, secondSharedData: SharedData): SharedData => {
+export const mergeSharedData = (
+  firstSharedData: SharedData,
+  secondSharedData: SharedData
+): SharedData => {
   return _.merge({}, firstSharedData, secondSharedData);
 };

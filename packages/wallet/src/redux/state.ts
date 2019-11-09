@@ -25,11 +25,27 @@ import {WalletEvent} from "../magmo-wallet-client";
 import {TransactionRequest} from "ethers/providers";
 import {AdjudicatorState} from "./adjudicator-state/state";
 import {ProcessProtocol, ProtocolLocator} from "../communication";
-import {TerminalApplicationState, isTerminalApplicationState, isApplicationState} from "./protocols/application/states";
-import {TerminalFundingState, isFundingState, isTerminalFundingState} from "./protocols/funding/states";
+import {
+  TerminalApplicationState,
+  isTerminalApplicationState,
+  isApplicationState
+} from "./protocols/application/states";
+import {
+  TerminalFundingState,
+  isFundingState,
+  isTerminalFundingState
+} from "./protocols/funding/states";
 import {ProtocolState} from "./protocols";
-import {isDefundingState, isTerminalDefundingState, TerminalDefundingState} from "./protocols/defunding/states";
-import {TerminalConcludingState, isConcludingState, isTerminalConcludingState} from "./protocols/concluding/states";
+import {
+  isDefundingState,
+  isTerminalDefundingState,
+  TerminalDefundingState
+} from "./protocols/defunding/states";
+import {
+  TerminalConcludingState,
+  isConcludingState,
+  isTerminalConcludingState
+} from "./protocols/concluding/states";
 import {SignedState, State} from "@statechannels/nitro-protocol";
 
 export type WalletState = WaitForLogin | MetaMaskError | Initialized;
@@ -87,7 +103,9 @@ export function registerChannelToMonitor(
   channelId: string,
   protocolLocator: ProtocolLocator
 ): SharedData {
-  const subscribers = data.channelSubscriptions[channelId] ? [...data.channelSubscriptions[channelId]] : [];
+  const subscribers = data.channelSubscriptions[channelId]
+    ? [...data.channelSubscriptions[channelId]]
+    : [];
   subscribers.push({processId, protocolLocator});
   return {
     ...data,
@@ -148,7 +166,13 @@ export const EMPTY_SHARED_DATA: SharedData = {
 };
 
 export function sharedData(params: SharedData): SharedData {
-  const {outboxState, channelStore: channelState, adjudicatorState, fundingState, channelSubscriptions} = params;
+  const {
+    outboxState,
+    channelStore: channelState,
+    adjudicatorState,
+    fundingState,
+    channelSubscriptions
+  } = params;
   return {
     outboxState,
     channelStore: channelState,
@@ -212,7 +236,11 @@ export function setChannelStore(state: SharedData, channelStore: ChannelStore): 
   return {...state, channelStore};
 }
 
-export function setFundingState(state: SharedData, channelId: string, fundingState: ChannelFundingState) {
+export function setFundingState(
+  state: SharedData,
+  channelId: string,
+  fundingState: ChannelFundingState
+) {
   return {...state, fundingState: {...state.fundingState, [channelId]: fundingState}};
 }
 
@@ -229,7 +257,11 @@ export function getPrivatekey(state: SharedData, channelId: string): string {
   }
 }
 
-export function signAndInitialize(sharedDataState: SharedData, state: State, privateKey: string): SignResult {
+export function signAndInitialize(
+  sharedDataState: SharedData,
+  state: State,
+  privateKey: string
+): SignResult {
   const result = signAndInitializeChannelStore(sharedDataState.channelStore, state, privateKey);
   if (result.isSuccess) {
     return {
@@ -242,7 +274,11 @@ export function signAndInitialize(sharedDataState: SharedData, state: State, pri
   }
 }
 
-export function checkAndInitialize(state: SharedData, signedState: SignedState, privateKey: string): CheckResult {
+export function checkAndInitialize(
+  state: SharedData,
+  signedState: SignedState,
+  privateKey: string
+): CheckResult {
   const result = checkAndInitializeChannelStore(state.channelStore, signedState, privateKey);
   if (result.isSuccess) {
     return {...result, store: setChannelStore(state, result.store)};
@@ -293,7 +329,11 @@ interface SignFailure {
   reason: SignFailureReason;
 }
 
-export function queueTransaction(state: SharedData, transaction: TransactionRequest, processId: string): SharedData {
+export function queueTransaction(
+  state: SharedData,
+  transaction: TransactionRequest,
+  processId: string
+): SharedData {
   return {
     ...state,
     outboxState: queueTransactionOutbox(state.outboxState, transaction, processId)
@@ -304,7 +344,11 @@ export {NewLedgerChannel};
 
 export function isTerminalProtocolState(
   protocolState: ProtocolState
-): protocolState is TerminalApplicationState | TerminalFundingState | TerminalDefundingState | TerminalConcludingState {
+): protocolState is
+  | TerminalApplicationState
+  | TerminalFundingState
+  | TerminalDefundingState
+  | TerminalConcludingState {
   return (
     (isApplicationState(protocolState) && isTerminalApplicationState(protocolState)) ||
     (isFundingState(protocolState) && isTerminalFundingState(protocolState)) ||

@@ -1,4 +1,9 @@
-import {asAddress, bsAddress, channelId, convertBalanceToOutcome} from "../../../__tests__/state-helpers";
+import {
+  asAddress,
+  bsAddress,
+  channelId,
+  convertBalanceToOutcome
+} from "../../../__tests__/state-helpers";
 import {bigNumberify} from "ethers/utils/bignumber";
 import {waitForLedgerUpdate} from "../states";
 import * as ledgerUpdateScenarios from "../../consensus-update/__tests__";

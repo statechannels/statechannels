@@ -21,7 +21,10 @@ Object.defineProperty(TransactionGenerator, "createRefuteTransaction", {
 
 // helpers
 
-const itTransitionsToFailure = (result: {protocolState: states.ResponderState}, failure: states.Failure) => {
+const itTransitionsToFailure = (
+  result: {protocolState: states.ResponderState},
+  failure: states.Failure
+) => {
   it(`transitions to failure with reason ${failure.reason}`, () => {
     expect(result.protocolState).toMatchObject(failure);
   });
@@ -37,7 +40,10 @@ const itCallsRespondWithMoveWith = (responseState: State) => {
   });
 };
 
-const itTransitionsTo = (result: {protocolState: states.ResponderState}, type: states.ResponderStateType) => {
+const itTransitionsTo = (
+  result: {protocolState: states.ResponderState},
+  type: states.ResponderStateType
+) => {
   it(`transitions to ${type}`, () => {
     expect(result.protocolState.type).toEqual(type);
   });
@@ -126,7 +132,13 @@ describe("REQUIRE RESPONSE HAPPY-PATH ", () => {
   const {sharedData, processId, channelId, expiryTime} = scenario;
 
   describe("when initializing", () => {
-    const result = initialize(processId, channelId, expiryTime, sharedData, scenario.challengeState);
+    const result = initialize(
+      processId,
+      channelId,
+      expiryTime,
+      sharedData,
+      scenario.challengeState
+    );
     itTransitionsTo(result, "Responding.WaitForApproval");
     itSetsChallengeState(result, scenario.challengeState);
   });

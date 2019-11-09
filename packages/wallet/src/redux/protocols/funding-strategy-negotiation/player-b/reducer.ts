@@ -96,7 +96,11 @@ function strategyRejected(state: states.FundingStrategyNegotiationState, sharedD
   };
 }
 
-function cancelled(state: states.FundingStrategyNegotiationState, sharedData: SharedData, action: actions.Cancelled) {
+function cancelled(
+  state: states.FundingStrategyNegotiationState,
+  sharedData: SharedData,
+  action: actions.Cancelled
+) {
   if (
     state.type !== "FundingStrategyNegotiation.PlayerB.WaitForStrategyProposal" &&
     state.type !== "FundingStrategyNegotiation.PlayerB.WaitForStrategyApproval"

@@ -1,6 +1,11 @@
 import {BaseProcessAction} from "../../actions";
 import {TransactionAction} from "../../transaction-submission/actions";
-import {isTransactionAction, ChallengeExpiredEvent, ChallengeExpirySetEvent, WalletAction} from "../../../actions";
+import {
+  isTransactionAction,
+  ChallengeExpiredEvent,
+  ChallengeExpirySetEvent,
+  WalletAction
+} from "../../../actions";
 import {ActionConstructor} from "../../../utils";
 import {State} from "@statechannels/nitro-protocol";
 

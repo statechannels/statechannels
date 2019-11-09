@@ -17,7 +17,10 @@ import {SharedData, registerChannelToMonitor, getPrivatekey, checkAndStore} from
 import * as actions from "./actions";
 import {TransactionAction} from "../../transaction-submission/actions";
 import {isTransactionAction, ProtocolAction} from "../../../actions";
-import {transactionReducer, initialize as initializeTransaction} from "../../transaction-submission";
+import {
+  transactionReducer,
+  initialize as initializeTransaction
+} from "../../transaction-submission";
 import {isSuccess, isFailure} from "../../transaction-submission/states";
 import {getChannel} from "../../../state";
 import {createForceMoveTransaction} from "../../../../utils/transaction-generator";
@@ -38,7 +41,11 @@ export interface ReturnVal {
   sharedData: SharedData;
 }
 
-export function challengerReducer(state: NonTerminalCState, sharedData: SharedData, action: ProtocolAction): ReturnVal {
+export function challengerReducer(
+  state: NonTerminalCState,
+  sharedData: SharedData,
+  action: ProtocolAction
+): ReturnVal {
   if (!actions.isChallengerAction(action)) {
     console.warn(`Challenging reducer received non-challenging action ${action.type}.`);
     return {state, sharedData};
@@ -85,7 +92,11 @@ export function challengerReducer(state: NonTerminalCState, sharedData: SharedDa
   }
 }
 
-export function initialize(channelId: string, processId: string, sharedData: SharedData): ReturnVal {
+export function initialize(
+  channelId: string,
+  processId: string,
+  sharedData: SharedData
+): ReturnVal {
   const channelState = getChannel(sharedData, channelId);
   const props = {processId, channelId};
 
@@ -116,8 +127,15 @@ export function initialize(channelId: string, processId: string, sharedData: Sha
   return {state: approveChallenge({channelId, processId}), sharedData: showWallet(sharedData)};
 }
 
-function handleChallengeCreatedEvent(state: NonTerminalCState, sharedData: SharedData, expiryTime: number): ReturnVal {
-  if (state.type !== "Challenging.WaitForResponseOrTimeout" && state.type !== "Challenging.WaitForTransaction") {
+function handleChallengeCreatedEvent(
+  state: NonTerminalCState,
+  sharedData: SharedData,
+  expiryTime: number
+): ReturnVal {
+  if (
+    state.type !== "Challenging.WaitForResponseOrTimeout" &&
+    state.type !== "Challenging.WaitForTransaction"
+  ) {
     return {state, sharedData};
   } else {
     const updatedState = {...state, expiryTime};
@@ -178,7 +196,12 @@ function challengeApproved(state: NonTerminalCState, sharedData: SharedData): Re
   const privateKey = getPrivatekey(sharedData, state.channelId);
   const transactionRequest = createForceMoveTransaction(penultimateState, lastState, privateKey);
   // initialize transaction state machine
-  const returnVal = initializeTransaction(transactionRequest, state.processId, state.channelId, sharedData);
+  const returnVal = initializeTransaction(
+    transactionRequest,
+    state.processId,
+    state.channelId,
+    sharedData
+  );
   const transactionSubmission = returnVal.state;
 
   // transition to wait for transaction
@@ -235,7 +258,10 @@ function challengeTimedOut(state: NonTerminalCState, sharedData: SharedData): Re
   // From the point of view of the app, it is as if we have concluded
 }
 
-function challengeResponseAcknowledged(state: NonTerminalCState, sharedData: SharedData): ReturnVal {
+function challengeResponseAcknowledged(
+  state: NonTerminalCState,
+  sharedData: SharedData
+): ReturnVal {
   if (state.type !== "Challenging.AcknowledgeResponse") {
     return {state, sharedData};
   }

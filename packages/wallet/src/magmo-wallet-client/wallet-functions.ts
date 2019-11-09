@@ -86,7 +86,11 @@ export async function initializeWallet(iFrameId: string, userId: string): Promis
  * @param signature The signature to validate.
  * @returns {Promise<Boolean>} A promise that resolves to whether the signature is valid for the data or not.
  */
-export async function validateStateSignature(iFrameId: string, state: State, signature: string): Promise<boolean> {
+export async function validateStateSignature(
+  iFrameId: string,
+  state: State,
+  signature: string
+): Promise<boolean> {
   const iFrame = document.getElementById(iFrameId) as HTMLIFrameElement;
   const message = validateStateRequest(state, ethers.utils.splitSignature(signature));
 
@@ -190,7 +194,14 @@ export function startFunding(
   playerIndex: number
 ): void {
   const iFrame = document.getElementById(iFrameId) as HTMLIFrameElement;
-  const message = fundingRequest(channelId, myAddress, opponentAddress, myBalance, opponentBalance, playerIndex);
+  const message = fundingRequest(
+    channelId,
+    myAddress,
+    opponentAddress,
+    myBalance,
+    opponentBalance,
+    playerIndex
+  );
   (iFrame as any).contentWindow.postMessage(message, "*");
 }
 

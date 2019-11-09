@@ -48,7 +48,10 @@ const waitForConcluding = states.waitForConclude({
   processId,
   channelId,
   ledgerId,
-  concluding: prependToLocator(advanceChannelScenarios.conclude.preSuccess.state, EmbeddedProtocol.AdvanceChannel)
+  concluding: prependToLocator(
+    advanceChannelScenarios.conclude.preSuccess.state,
+    EmbeddedProtocol.AdvanceChannel
+  )
 });
 
 const keepOpenSelectedAction = actions.keepOpenSelected({processId});
@@ -76,9 +79,15 @@ export const opponentConcludedHappyPath = {
   },
   waitForConclude: {
     state: waitForConcluding,
-    action: prependToLocator(advanceChannelScenarios.conclude.preSuccess.trigger, EmbeddedProtocol.AdvanceChannel),
+    action: prependToLocator(
+      advanceChannelScenarios.conclude.preSuccess.trigger,
+      EmbeddedProtocol.AdvanceChannel
+    ),
 
-    sharedData: mergeSharedData(initialSharedData, advanceChannelScenarios.conclude.preSuccess.sharedData)
+    sharedData: mergeSharedData(
+      initialSharedData,
+      advanceChannelScenarios.conclude.preSuccess.sharedData
+    )
   },
   waitForDefund: {
     state: waitForDefund,
@@ -101,8 +110,14 @@ export const playerConcludedHappyPath = {
   },
   waitForConclude: {
     state: waitForConcluding,
-    action: prependToLocator(advanceChannelScenarios.conclude.preSuccess.trigger, EmbeddedProtocol.AdvanceChannel),
-    sharedData: mergeSharedData(initialSharedData, advanceChannelScenarios.conclude.preSuccess.sharedData)
+    action: prependToLocator(
+      advanceChannelScenarios.conclude.preSuccess.trigger,
+      EmbeddedProtocol.AdvanceChannel
+    ),
+    sharedData: mergeSharedData(
+      initialSharedData,
+      advanceChannelScenarios.conclude.preSuccess.sharedData
+    )
   },
   waitForDefund: {
     state: waitForDefund,
@@ -125,8 +140,14 @@ export const channelClosingHappyPath = {
   },
   waitForConclude: {
     state: waitForConcluding,
-    action: prependToLocator(advanceChannelScenarios.conclude.preSuccess.trigger, EmbeddedProtocol.AdvanceChannel),
-    sharedData: mergeSharedData(initialSharedData, advanceChannelScenarios.conclude.preSuccess.sharedData)
+    action: prependToLocator(
+      advanceChannelScenarios.conclude.preSuccess.trigger,
+      EmbeddedProtocol.AdvanceChannel
+    ),
+    sharedData: mergeSharedData(
+      initialSharedData,
+      advanceChannelScenarios.conclude.preSuccess.sharedData
+    )
   },
   waitForDefund: {
     state: waitForDefund,

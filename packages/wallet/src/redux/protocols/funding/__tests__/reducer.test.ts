@@ -2,7 +2,11 @@ import * as scenarios from "./scenarios";
 import * as states from "../states";
 import {fundingReducer as reducer} from "../reducer";
 import {ProtocolStateWithSharedData} from "../..";
-import {itSendsThisMessage, itSendsThisDisplayEventType, describeScenarioStep} from "../../../__tests__/helpers";
+import {
+  itSendsThisMessage,
+  itSendsThisDisplayEventType,
+  describeScenarioStep
+} from "../../../__tests__/helpers";
 import {FUNDING_SUCCESS, HIDE_WALLET} from "../../../../magmo-wallet-client";
 
 describe("ledger funding", () => {
@@ -57,7 +61,10 @@ describe("virtual funding", () => {
   });
 });
 
-function itTransitionsTo(result: ProtocolStateWithSharedData<states.FundingState>, type: states.FundingStateType) {
+function itTransitionsTo(
+  result: ProtocolStateWithSharedData<states.FundingState>,
+  type: states.FundingStateType
+) {
   it(`transitions to ${type}`, () => {
     expect(result.protocolState.type).toEqual(type);
   });

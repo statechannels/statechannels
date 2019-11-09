@@ -81,7 +81,11 @@ const receiveOurInvalidState = actions.ownStateReceived({
 
 const concluded = actions.concluded({processId: APPLICATION_PROCESS_ID});
 
-const challengeRequested = actions.challengeRequested({processId, channelId, state: signedState21.state});
+const challengeRequested = actions.challengeRequested({
+  processId,
+  channelId,
+  state: signedState21.state
+});
 
 const challengeDetected = actions.challengeDetected({
   processId,

@@ -80,7 +80,9 @@ function acceptConsensusOnBalancesLedgers(turnNum: AcceptConsensusOnBalancesTurn
 }
 
 type AcceptConsensusOnProposedBalancesTurnNum = 6 | 7 | 8 | 20;
-function acceptConsensusOnProposedBalancesLedgers(turnNum: AcceptConsensusOnProposedBalancesTurnNum) {
+function acceptConsensusOnProposedBalancesLedgers(
+  turnNum: AcceptConsensusOnProposedBalancesTurnNum
+) {
   switch (turnNum) {
     case 6:
       return [ledger5Propose, ledger6ConsensusOnProposed];
@@ -247,7 +249,9 @@ function twoPlayerWrongProposalStatesReceived(turnNum: ProposeTurnNum) {
     protocolLocator
   });
 }
-function twoPlayerAcceptConsensusOnProposedBalancesStatesReceived(turnNum: AcceptConsensusOnProposedBalancesTurnNum) {
+function twoPlayerAcceptConsensusOnProposedBalancesStatesReceived(
+  turnNum: AcceptConsensusOnProposedBalancesTurnNum
+) {
   return signedStatesReceived({
     processId,
     signedStates: acceptConsensusOnProposedBalancesLedgers(turnNum),

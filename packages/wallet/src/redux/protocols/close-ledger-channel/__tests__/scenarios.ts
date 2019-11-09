@@ -60,7 +60,10 @@ const waitForWithdrawal = states.waitForWithdrawal({
 const waitForConclude = states.waitForConclude({
   processId,
   channelId,
-  concluding: prependToLocator(advanceChannelScenarios.conclude.preSuccess.state, EmbeddedProtocol.AdvanceChannel)
+  concluding: prependToLocator(
+    advanceChannelScenarios.conclude.preSuccess.state,
+    EmbeddedProtocol.AdvanceChannel
+  )
 });
 
 export const happyPath = {
@@ -72,8 +75,14 @@ export const happyPath = {
   // States
   waitForConclude: {
     state: waitForConclude,
-    action: prependToLocator(advanceChannelScenarios.conclude.preSuccess.trigger, EmbeddedProtocol.AdvanceChannel),
-    sharedData: mergeSharedData(advanceChannelScenarios.conclude.preSuccess.sharedData, ledgerOpenSharedData)
+    action: prependToLocator(
+      advanceChannelScenarios.conclude.preSuccess.trigger,
+      EmbeddedProtocol.AdvanceChannel
+    ),
+    sharedData: mergeSharedData(
+      advanceChannelScenarios.conclude.preSuccess.sharedData,
+      ledgerOpenSharedData
+    )
   },
 
   waitForWithdrawal: {

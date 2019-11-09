@@ -53,7 +53,10 @@ export function sendConcludeSuccess(sharedData: SharedData): SharedData {
 export function sendConcludeInstigated(sharedData: SharedData, channelId: string): SharedData {
   const channel = getExistingChannel(sharedData, channelId);
   const {participants, ourIndex} = channel;
-  const messageRelay = comms.sendConcludeInstigated(nextParticipant(participants, ourIndex), channelId);
+  const messageRelay = comms.sendConcludeInstigated(
+    nextParticipant(participants, ourIndex),
+    channelId
+  );
   return queueMessage(sharedData, messageRelay);
 }
 
@@ -83,7 +86,11 @@ export function sendStates(
   return queueMessage(sharedData, messageRelay);
 }
 
-export function checkStates(sharedData: SharedData, turnNum: number, states: SignedState[]): SharedData {
+export function checkStates(
+  sharedData: SharedData,
+  turnNum: number,
+  states: SignedState[]
+): SharedData {
   // We don't bother checking "stale" states -- those whose turnNum does not
   // exceed the current turnNum.
 
@@ -101,7 +108,10 @@ export function checkStates(sharedData: SharedData, turnNum: number, states: Sig
   return sharedData;
 }
 
-export function sendChallengeResponseRequested(sharedData: SharedData, channelId: string): SharedData {
+export function sendChallengeResponseRequested(
+  sharedData: SharedData,
+  channelId: string
+): SharedData {
   const newSharedData = {...sharedData};
   newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
     messageOutbox: magmoWalletClient.challengeResponseRequested(channelId)
@@ -126,7 +136,10 @@ export function sendChallengeComplete(sharedData: SharedData) {
   return newSharedData;
 }
 
-export function sendConcludeFailure(sharedData: SharedData, reason: "Other" | "UserDeclined"): SharedData {
+export function sendConcludeFailure(
+  sharedData: SharedData,
+  reason: "Other" | "UserDeclined"
+): SharedData {
   const newSharedData = {...sharedData};
   newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
     messageOutbox: magmoWalletClient.concludeFailure(reason)
@@ -135,13 +148,19 @@ export function sendConcludeFailure(sharedData: SharedData, reason: "Other" | "U
 }
 
 export const channelIsClosed = (channelId: string, sharedData: SharedData): boolean => {
-  return channelHasConclusionProof(channelId, sharedData) || channelFinalizedOnChain(channelId, sharedData);
+  return (
+    channelHasConclusionProof(channelId, sharedData) ||
+    channelFinalizedOnChain(channelId, sharedData)
+  );
 };
 
 export const channelFundsAnotherChannel = (channelId: string, sharedData: SharedData): boolean => {
   const latestState = getLatestState(channelId, sharedData);
   const {allocation} = getAllocationOutcome(latestState.outcome);
-  return _.intersection(selectors.getChannelIds(sharedData), allocation.map(a => a.destination)).length > 0;
+  return (
+    _.intersection(selectors.getChannelIds(sharedData), allocation.map(a => a.destination)).length >
+    0
+  );
 };
 
 export const channelHasConclusionProof = (channelId: string, sharedData: SharedData): boolean => {
@@ -175,7 +194,10 @@ export const getChannelFundingType = (channelId: string, sharedData: SharedData)
   return channelState.participants.length === 3 ? FundingType.Virtual : FundingType.Ledger;
 };
 
-export const getTwoPlayerIndex = (channelId: string, sharedData: SharedData): TwoPartyPlayerIndex => {
+export const getTwoPlayerIndex = (
+  channelId: string,
+  sharedData: SharedData
+): TwoPartyPlayerIndex => {
   const channelState = selectors.getChannelState(sharedData, channelId);
   return channelState.participants.indexOf(channelState.address);
 };

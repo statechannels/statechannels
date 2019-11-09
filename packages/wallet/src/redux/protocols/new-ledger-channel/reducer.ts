@@ -6,13 +6,23 @@ import {CONSENSUS_LIBRARY_ADDRESS} from "../../../constants";
 import {getChannel} from "../../channel-store";
 import {DirectFundingAction} from "../direct-funding";
 import {isSuccess, isFailure, isTerminal} from "../direct-funding/states";
-import {directFundingStateReducer, initialize as initializeDirectFunding} from "../direct-funding/reducer";
+import {
+  directFundingStateReducer,
+  initialize as initializeDirectFunding
+} from "../direct-funding/reducer";
 import {unreachable} from "../../../utils/reducer-utils";
 import {NewLedgerChannelAction} from "./actions";
 import {EmbeddedProtocol, ProtocolLocator} from "../../../communication";
 import * as advanceChannelState from "../advance-channel/states";
-import {clearedToSend as advanceChannelClearedToSend, routesToAdvanceChannel} from "../advance-channel/actions";
-import {initializeAdvanceChannel, isAdvanceChannelAction, advanceChannelReducer} from "../advance-channel";
+import {
+  clearedToSend as advanceChannelClearedToSend,
+  routesToAdvanceChannel
+} from "../advance-channel/actions";
+import {
+  initializeAdvanceChannel,
+  isAdvanceChannelAction,
+  advanceChannelReducer
+} from "../advance-channel";
 import {isFirstPlayer, getTwoPlayerIndex, getLatestState} from "../reducer-helpers";
 import {ADVANCE_CHANNEL_PROTOCOL_LOCATOR} from "../advance-channel/reducer";
 import {TwoPartyPlayerIndex} from "../../types";
@@ -91,7 +101,11 @@ function handleWaitForPostFundSetup(
     return {protocolState, sharedData};
   }
 
-  const advanceChannelResult = advanceChannelReducer(protocolState.postFundSetupState, sharedData, action);
+  const advanceChannelResult = advanceChannelReducer(
+    protocolState.postFundSetupState,
+    sharedData,
+    action
+  );
   sharedData = advanceChannelResult.sharedData;
   if (advanceChannelState.isTerminal(advanceChannelResult.protocolState)) {
     switch (advanceChannelResult.protocolState.type) {
@@ -170,7 +184,10 @@ function handleWaitForPreFundSetup(
         processId: protocolState.processId,
         stateType: advanceChannelState.StateType.PostFundSetup,
         clearedToSend: false,
-        protocolLocator: makeLocator(protocolState.protocolLocator, ADVANCE_CHANNEL_PROTOCOL_LOCATOR)
+        protocolLocator: makeLocator(
+          protocolState.protocolLocator,
+          ADVANCE_CHANNEL_PROTOCOL_LOCATOR
+        )
       });
       sharedData = advanceChannelResult.sharedData;
       const newProtocolState = states.waitForDirectFunding({
@@ -191,7 +208,11 @@ function handleWaitForDirectFunding(
   action: IDFAction | DirectFundingAction
 ): ReturnVal {
   if (routesToAdvanceChannel(action, protocolState.protocolLocator)) {
-    const advanceChannelResult = advanceChannelReducer(protocolState.postFundSetupState, sharedData, action);
+    const advanceChannelResult = advanceChannelReducer(
+      protocolState.postFundSetupState,
+      sharedData,
+      action
+    );
     sharedData = advanceChannelResult.sharedData;
     return {
       protocolState: {
@@ -202,7 +223,11 @@ function handleWaitForDirectFunding(
     };
   }
   const existingDirectFundingState = protocolState.directFundingState;
-  const protocolStateWithSharedData = directFundingStateReducer(existingDirectFundingState, sharedData, action);
+  const protocolStateWithSharedData = directFundingStateReducer(
+    existingDirectFundingState,
+    sharedData,
+    action
+  );
   const newDirectFundingState = protocolStateWithSharedData.protocolState;
   const newProtocolState = {...protocolState, directFundingState: newDirectFundingState};
   sharedData = protocolStateWithSharedData.sharedData;
@@ -224,7 +249,10 @@ function handleWaitForDirectFunding(
       sharedData,
       advanceChannelClearedToSend({
         processId,
-        protocolLocator: makeLocator(protocolState.protocolLocator, ADVANCE_CHANNEL_PROTOCOL_LOCATOR)
+        protocolLocator: makeLocator(
+          protocolState.protocolLocator,
+          ADVANCE_CHANNEL_PROTOCOL_LOCATOR
+        )
       })
     );
 

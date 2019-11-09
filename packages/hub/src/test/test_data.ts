@@ -1,18 +1,16 @@
-import {Channel, channelID, Commitment, CommitmentType, sign, toHex} from 'fmg-core';
-import {bytesFromAppAttributes} from 'fmg-nitro-adjudicator/lib/consensus-app';
-import {AppCommitment} from 'fmg-nitro-adjudicator/lib/consensus-app';
+import {Channel, encodeConsensusData, getChannelId, State} from '@statechannels/nitro-protocol';
+import {ConsensusData} from '@statechannels/nitro-protocol/lib/src/contract/consensus-data';
+import {signState} from '@statechannels/nitro-protocol/lib/src/signatures';
 import {HUB_ADDRESS} from '../constants';
-import {asCoreCommitment, LedgerCommitment} from '../wallet/services/ledger-commitment';
 import {
-  allocation,
   BEGINNING_APP_CHANNEL_NONCE,
-  DESTINATION,
-  DESTINATION_3,
   DUMMY_RULES_ADDRESS,
   FUNDED_CHANNEL_NONCE,
   FUNDED_CHANNEL_NONCE_3,
   NONCE,
   ONGOING_APP_CHANNEL_NONCE,
+  outcome2,
+  outcome3,
   PARTICIPANT_1_ADDRESS,
   PARTICIPANT_1_PRIVATE_KEY,
   PARTICIPANTS,
@@ -20,111 +18,105 @@ import {
 } from './test-constants';
 
 export const default_channel: Channel = {
-  channelType: DUMMY_RULES_ADDRESS,
   participants: PARTICIPANTS,
-  nonce: NONCE
+  channelNonce: NONCE,
+  chainId: '8888'
 };
 
 const default_channel_3: Channel = {
-  channelType: DUMMY_RULES_ADDRESS,
   participants: PARTICIPANTS_3,
-  nonce: NONCE
+  channelNonce: NONCE,
+  chainId: '8888'
 };
 
 export const funded_channel: Channel = {
-  channelType: DUMMY_RULES_ADDRESS,
   participants: PARTICIPANTS,
-  nonce: FUNDED_CHANNEL_NONCE
+  channelNonce: FUNDED_CHANNEL_NONCE,
+  chainId: '8888'
 };
-export const funded_channel_id = channelID(funded_channel);
+export const funded_channel_id = getChannelId(funded_channel);
 
 export const funded_channel_3: Channel = {
-  channelType: DUMMY_RULES_ADDRESS,
   participants: PARTICIPANTS_3,
-  nonce: FUNDED_CHANNEL_NONCE_3
+  channelNonce: FUNDED_CHANNEL_NONCE_3,
+  chainId: '8888'
 };
-export const funded_channel_id_3 = channelID(funded_channel_3);
+export const funded_channel_id_3 = getChannelId(funded_channel_3);
 
 export const beginning_app_phase_channel: Channel = {
-  channelType: DUMMY_RULES_ADDRESS,
   participants: PARTICIPANTS,
-  nonce: BEGINNING_APP_CHANNEL_NONCE
+  channelNonce: BEGINNING_APP_CHANNEL_NONCE,
+  chainId: '8888'
 };
 
 export const ongoing_app_phase_channel: Channel = {
-  channelType: DUMMY_RULES_ADDRESS,
   participants: PARTICIPANTS,
-  nonce: ONGOING_APP_CHANNEL_NONCE
+  channelNonce: ONGOING_APP_CHANNEL_NONCE,
+  chainId: '8888'
 };
 
-const consensus_app_attrs = (n: number) => ({
+export const consensus_app_attrs2 = (n: number): ConsensusData => ({
   furtherVotesRequired: n,
-  proposedAllocation: [],
-  proposedDestination: []
+  proposedOutcome: outcome2
+});
+
+export const consensus_app_attrs3 = (n: number): ConsensusData => ({
+  furtherVotesRequired: n,
+  proposedOutcome: outcome3
 });
 
 const base = {
-  allocation: allocation(2),
-  destination: DESTINATION
+  isFinal: false,
+  challengeDuration: 1000,
+  outcome: outcome2,
+  appDefinition: DUMMY_RULES_ADDRESS,
+  appData: encodeConsensusData(consensus_app_attrs2(0))
 };
 
 const base_3 = {
-  allocation: allocation(3),
-  destination: DESTINATION_3
+  ...base,
+  outcome: outcome3,
+  appData: encodeConsensusData(consensus_app_attrs3(0))
 };
 
-function pre_fund_setup(turnNum: number): LedgerCommitment {
+function pre_fund_setup(turnNum: number): State {
   return {
     ...base,
     channel: {...default_channel},
-    turnNum,
-    appAttributes: consensus_app_attrs(0),
-    commitmentCount: turnNum,
-    commitmentType: CommitmentType.PreFundSetup
+    turnNum
   };
 }
 
-export function pre_fund_setup_3(turnNum: number): LedgerCommitment {
+export function pre_fund_setup_3(turnNum: number): State {
   return {
     ...base_3,
     channel: {...default_channel_3},
-    turnNum,
-    appAttributes: consensus_app_attrs(0),
-    commitmentCount: turnNum,
-    commitmentType: CommitmentType.PreFundSetup
+    turnNum
   };
 }
 
-function post_fund_setup(turnNum: number): LedgerCommitment {
+function post_fund_setup(turnNum: number): State {
   return {
     ...base,
     channel: {...funded_channel},
-    turnNum,
-    appAttributes: consensus_app_attrs(0),
-    commitmentCount: turnNum % funded_channel.participants.length,
-    commitmentType: CommitmentType.PostFundSetup
+    turnNum
   };
 }
 
-export function post_fund_setup_3(turnNum: number): LedgerCommitment {
+export function post_fund_setup_3(turnNum: number): State {
   return {
     ...base_3,
     channel: {...funded_channel_3},
-    turnNum,
-    appAttributes: consensus_app_attrs(0),
-    commitmentCount: turnNum,
-    commitmentType: CommitmentType.PostFundSetup
+    turnNum
   };
 }
 
-function app(turnNum: number, channel: Channel): AppCommitment {
+function app(turnNum: number, channel: Channel): State {
   return {
     ...base,
     channel,
     turnNum,
-    appAttributes: consensus_app_attrs(turnNum % channel.participants.length) as any,
-    commitmentCount: 0,
-    commitmentType: CommitmentType.App
+    appData: encodeConsensusData(consensus_app_attrs2(turnNum % channel.participants.length))
   };
 }
 
@@ -138,98 +130,92 @@ export const constructors = {
 
 const base_response = {
   channel: {
-    nonce: expect.any(Number),
-    channelType: DUMMY_RULES_ADDRESS,
-    participants: PARTICIPANTS
+    channelNonce: expect.any(String),
+    participants: PARTICIPANTS,
+    chainId: '8888'
   },
-  allocation: allocation(2),
-  destination: DESTINATION
+  outcome: outcome2,
+  challengeDuration: 1000,
+  appDefinition: DUMMY_RULES_ADDRESS,
+  isFinal: false
 };
 
 const base_response_3 = {
   channel: {
-    nonce: expect.any(Number),
-    channelType: DUMMY_RULES_ADDRESS,
-    participants: PARTICIPANTS_3
+    channelNonce: expect.any(String),
+    participants: PARTICIPANTS_3,
+    chainId: '8888'
   },
-  allocation: allocation(3),
-  destination: DESTINATION_3
+  outcome: outcome3,
+  challengeDuration: 1000,
+  appDefinition: DUMMY_RULES_ADDRESS,
+  isFinal: false
 };
 
-export const pre_fund_setup_1_response: Commitment = {
+export const pre_fund_setup_1_response: State = {
   ...base_response,
   turnNum: 1,
-  appAttributes: bytesFromAppAttributes(consensus_app_attrs(0)),
-  commitmentCount: 1,
-  commitmentType: CommitmentType.PreFundSetup
+  appData: encodeConsensusData(consensus_app_attrs2(0))
 };
 
-export const pre_fund_setup_3_2_response: Commitment = {
+export const pre_fund_setup_3_2_response: State = {
   ...base_response_3,
   turnNum: 2,
-  appAttributes: bytesFromAppAttributes(consensus_app_attrs(0)),
-  commitmentCount: 2,
-  commitmentType: CommitmentType.PreFundSetup
+  appData: encodeConsensusData(consensus_app_attrs3(0))
 };
 
-export const post_fund_setup_1_response: Commitment = {
+export const post_fund_setup_1_response: State = {
   ...base_response,
   turnNum: 3,
-  appAttributes: bytesFromAppAttributes(consensus_app_attrs(0)),
-  commitmentCount: 1,
-  channel: funded_channel,
-  commitmentType: CommitmentType.PostFundSetup
+  appData: encodeConsensusData(consensus_app_attrs2(0)),
+  channel: funded_channel
 };
 
-export const post_fund_setup_3_2_response: Commitment = {
+export const post_fund_setup_3_2_response: State = {
   ...base_response_3,
   turnNum: 5,
-  appAttributes: bytesFromAppAttributes(consensus_app_attrs(0)),
-  commitmentCount: 5,
-  channel: funded_channel_3,
-  commitmentType: CommitmentType.PostFundSetup
+  appData: encodeConsensusData(consensus_app_attrs3(0)),
+  channel: funded_channel_3
 };
 
-export const app_1_response: Commitment = {
+export const app_1_response: State = {
   ...base_response,
   turnNum: 5,
-  appAttributes: bytesFromAppAttributes(consensus_app_attrs(0)),
-  commitmentCount: 0,
-  channel: beginning_app_phase_channel,
-  commitmentType: CommitmentType.App
+  appData: encodeConsensusData(consensus_app_attrs2(0)),
+  channel: beginning_app_phase_channel
 };
 
-const commitment = asCoreCommitment(pre_fund_setup(0));
+const state = pre_fund_setup(0);
 export const open_channel_params = {
   from: PARTICIPANT_1_ADDRESS,
-  commitment,
-  signature: sign(toHex(commitment), PARTICIPANT_1_PRIVATE_KEY)
+  state,
+  signature: signState(state, PARTICIPANT_1_PRIVATE_KEY)
 };
 
 export const invalid_open_channel_params = {
   from: PARTICIPANT_1_ADDRESS,
-  commitment,
-  signature: sign(toHex(commitment), '0xf00')
+  state,
+  signature: {r: 'wrongR', s: 'wrongS'}
 };
 
-export const created_pre_fund_setup_1: LedgerCommitment = {
+export const created_pre_fund_setup_1: State = {
   channel: default_channel,
   turnNum: 1,
-  commitmentCount: 1,
-  commitmentType: CommitmentType.PreFundSetup,
-  allocation: allocation(2),
-  destination: DESTINATION,
-  appAttributes: consensus_app_attrs(1)
+  outcome: outcome2,
+  appData: encodeConsensusData(consensus_app_attrs2(1)),
+  isFinal: false,
+  challengeDuration: 1000,
+  appDefinition: DUMMY_RULES_ADDRESS
 };
 
-export const created_pre_fund_setup_3_2: LedgerCommitment = {
+export const created_pre_fund_setup_3_2: State = {
   channel: default_channel_3,
   turnNum: 2,
-  commitmentCount: 2,
-  commitmentType: CommitmentType.PreFundSetup,
-  allocation: allocation(3),
-  destination: DESTINATION_3,
-  appAttributes: consensus_app_attrs(2)
+  outcome: outcome3,
+  appData: encodeConsensusData(consensus_app_attrs3(1)),
+  isFinal: false,
+  challengeDuration: 1000,
+  appDefinition: DUMMY_RULES_ADDRESS
 };
 
 export const participants = [{address: PARTICIPANT_1_ADDRESS}, {address: HUB_ADDRESS}];
