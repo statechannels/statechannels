@@ -19,8 +19,7 @@ export function* messageHandler(jsonRpcMessage: string, fromDomain: string) {
 }
 
 function* handleMessage(payload: jrs.RequestPayloadObject, domain: string) {
-  // TODO: I think the type definition for RequestPayload is wrong and id is a number
-  const id = parseInt(payload.id, 10);
+  const {id} = payload;
   switch (payload.method) {
     case "GetAddress":
       yield put(actions.addressRequest({id, domain}));

@@ -314,7 +314,7 @@ export function isLoadAction(action: any): action is LoadAction {
 }
 
 export interface JsonRpcAction {
-  id: number;
+  id: number | string; // Either a string or number is technically valid
   type: string;
 }
 
