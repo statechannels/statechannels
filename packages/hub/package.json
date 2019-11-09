@@ -33,6 +33,7 @@
   "dependencies": {
     "@koa/cors": "2.2.3",
     "@statechannels/nitro-protocol": "0.0.1",
+    "@statechannels/wallet": "^0.0.1",
     "async-lock": "1.2.2",
     "dotenv": "6.2.0",
     "dotenv-expand": "4.2.0",
@@ -43,8 +44,8 @@
     "koa": "2.11.0",
     "koa-body": "4.1.1",
     "koa-router": "7.4.0",
+    "lodash": "^4.17.15",
     "magmo-devtools": "git+https://github.com/magmo/devtools.git#v0.1.20",
-    "@statechannels/wallet": "^0.0.1",
     "magmo-wallet-common": "0.0.0",
     "objection": "1.6.11",
     "pg": "7.12.1"
@@ -57,6 +58,7 @@
     "@types/knex": "0.15.2",
     "@types/koa": "2.0.51",
     "@types/koa-router": "7.0.42",
+    "@types/lodash": "^4.14.146",
     "@types/node": "11.15.2",
     "@types/supertest": "2.0.8",
     "babel-register": "6.26.0",

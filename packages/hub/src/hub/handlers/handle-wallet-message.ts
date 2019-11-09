@@ -1,7 +1,7 @@
 import {
-  SignedStatesReceived,
   ConcludeInstigated,
   RelayableAction,
+  SignedStatesReceived,
   StrategyProposed
 } from '@statechannels/wallet/lib/src/communication';
 import {MessageRelayRequested} from '../../wallet-client';
