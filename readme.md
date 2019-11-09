@@ -12,7 +12,7 @@
 <p align="center">
   <a href="https://circleci.com/gh/statechannels/monorepo"><img src="https://circleci.com/gh/statechannels/monorepo.svg?style=shield" alt="circleci"></a>
   <a href="https://lernajs.io/"><img src="https://img.shields.io/badge/maintained%20with-lerna-cc00ff.svg"/></a>
-  <a href="https://statechannels.com/chat"><img src="https://img.shields.io/discord/500370633901735947.svg"/></a>
+  <a href="https://research.statechannels.org/"><img src="https://img.shields.io/badge/Forums-Chat-blue"/></a>
   <a href="https://github.com/renovatebot/renovate"><img src="https://badges.renovateapi.com/github/statechannels/monorepo"/></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="license"></a>
 </p>
