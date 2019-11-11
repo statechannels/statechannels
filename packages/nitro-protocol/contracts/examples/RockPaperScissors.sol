@@ -336,6 +336,8 @@ contract RockPaperScissors is ForceMoveApp {
         _;
     }
 
+    // TODO modifiers below here are currently unused and possibly belong in a Library
+
     modifier oneAssetType(
         VariablePart memory a,
         VariablePart memory b
