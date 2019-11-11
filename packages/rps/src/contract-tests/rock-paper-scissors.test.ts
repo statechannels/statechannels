@@ -144,8 +144,8 @@ describe('validTransition', () => {
 
       if (isValid) {
         const isValidFromCall = await RockPaperScissors.validTransition(
-          toVariablePart,
           fromVariablePart,
+          toVariablePart,
           1, // unused
           numParticipants
         );
@@ -153,8 +153,8 @@ describe('validTransition', () => {
       } else {
         await expectRevert(() =>
           RockPaperScissors.validTransition(
-            toVariablePart,
             fromVariablePart,
+            toVariablePart,
             1, // unused
             numParticipants
           )
