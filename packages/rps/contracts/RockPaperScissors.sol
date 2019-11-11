@@ -1,8 +1,8 @@
 pragma solidity ^0.5.11;
 pragma experimental ABIEncoderV2;
 
-import '../interfaces/ForceMoveApp.sol';
-import '../Outcome.sol';
+import '@statechannels/nitro-protocol/contracts/interfaces/ForceMoveApp.sol';
+import '@statechannels/nitro-protocol/contracts/Outcome.sol';
 import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 /**
