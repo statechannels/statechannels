@@ -127,7 +127,12 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       const knownPeerAccount = this.allowedPeers[torrent.infoHash][peerAccount];
 
       if (!knownPeerAccount) {
-        this.allowedPeers[torrent.infoHash][peerAccount] = {id: peerAccount, wire, funds: "0", allowed: false};
+        this.allowedPeers[torrent.infoHash][peerAccount] = {
+          id: peerAccount,
+          wire,
+          funds: '0',
+          allowed: false
+        };
         this.blockPeer(torrent.infoHash, wire, peerAccount);
         this.emit(ClientEvents.PEER_STATUS_CHANGED, {
           torrentPeers: this.allowedPeers[torrent.infoHash],
@@ -156,12 +161,12 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       torrent.emit(PaidStreamingExtensionEvents.NOTICE, wire, notice)
     );
   }
-  
-  protected loadFunds(infoHash:string, peerId:string, paymentHash:string){
+
+  protected loadFunds(infoHash: string, peerId: string, paymentHash: string) {
     const {funds} = this.allowedPeers[infoHash][peerId];
     this.allowedPeers[infoHash][peerId].funds = (Number(funds) + Number(paymentHash)).toString();
   }
-  
+
   protected transferFunds(wire: PaidStreamingWire) {
     // INFO: Assumed payment. This could emit an event on the UI to ask for more funds, or be automatic. Dunno.
     setTimeout(() => {

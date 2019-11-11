@@ -1,6 +1,6 @@
-import { EmptyTorrent } from '../constants';
-import { TorrentPeers } from '../library/types';
-import { Torrent } from '../types';
+import {EmptyTorrent} from '../constants';
+import {TorrentPeers} from '../library/types';
+import {Torrent} from '../types';
 
 export function testSelector(name: string): string {
   return `[data-test-selector='${name}']`;
