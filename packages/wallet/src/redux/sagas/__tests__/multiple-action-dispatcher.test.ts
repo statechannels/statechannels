@@ -8,11 +8,16 @@ import {exitChallenge} from "../../protocols/dispute/challenger/actions";
 describe("multiple action dispatcher", () => {
   const saga = multipleActionDispatcher();
   const mockMultipleActions = actions.multipleWalletActions({
-    actions: [closeLedgerChannel({channelId: "0xchannelId"}), exitChallenge({processId: "Process-0x"})]
+    actions: [
+      closeLedgerChannel({channelId: "0xchannelId"}),
+      exitChallenge({processId: "Process-0x"})
+    ]
   });
 
   it("waits for multiple actions to arrive", () => {
-    expect(saga.next().value).toEqual(take(["WALLET.MULTIPLE_ACTIONS", "WALLET.MULTIPLE_RELAYABLE_ACTIONS"]));
+    expect(saga.next().value).toEqual(
+      take(["WALLET.MULTIPLE_ACTIONS", "WALLET.MULTIPLE_RELAYABLE_ACTIONS"])
+    );
   });
 
   it("puts the actions in order", () => {

@@ -5,7 +5,10 @@ import {APPLICATION_PROCESS_ID} from "../protocols/application/reducer";
 
 export function* messageSender(message) {
   window.parent.postMessage(message, "*");
-  if (message.messagePayload && message.messagePayload.type === "WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED") {
+  if (
+    message.messagePayload &&
+    message.messagePayload.type === "WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED"
+  ) {
     const processId = APPLICATION_PROCESS_ID;
     yield put(concluded({processId}));
   }

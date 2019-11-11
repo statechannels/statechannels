@@ -7,4 +7,8 @@ addStories(
   "Existing Ledger Funding / Player A Fully Funded Happy Path",
   ExistingLedgerFunding
 );
-addStories(scenarios.playerATopUpNeeded, "Existing Ledger Funding / Player A Top-up needed", ExistingLedgerFunding);
+addStories(
+  scenarios.playerATopUpNeeded,
+  "Existing Ledger Funding / Player A Top-up needed",
+  ExistingLedgerFunding
+);

@@ -42,7 +42,10 @@ describe("message listener", () => {
 
   it("converts VALIDATION_REQUEST into OPPONENT_POSITION_RECEIVED", () => {
     saga.next({
-      data: incoming.validateStateRequest(appState({turnNum: 19}).state, appState({turnNum: 19}).signature)
+      data: incoming.validateStateRequest(
+        appState({turnNum: 19}).state,
+        appState({turnNum: 19}).signature
+      )
     });
     const output = saga.next().value; // the take
 

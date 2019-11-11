@@ -5,7 +5,10 @@ import * as protocol from "./protocols/actions";
 import * as advanceChannel from "./protocols/advance-channel";
 import {FundingAction, isFundingAction} from "./protocols/funding/actions";
 import {RelayableAction, ProtocolLocator} from "../communication";
-import {TransactionAction as TA, isTransactionAction as isTA} from "./protocols/transaction-submission/actions";
+import {
+  TransactionAction as TA,
+  isTransactionAction as isTA
+} from "./protocols/transaction-submission/actions";
 
 import {ConcludingAction, isConcludingAction} from "./protocols/concluding";
 import {ApplicationAction} from "./protocols/application/actions";
@@ -301,7 +304,10 @@ export function isAdjudicatorEventAction(action: WalletAction): action is Adjudi
 }
 
 export function isAssetHolderEventAction(action: WalletAction): action is AssetHolderEventAction {
-  return action.type === "WALLET.ASSET_HOLDER.DEPOSITED" || action.type === "WALLET.ASSET_HOLDER.ASSET_TRANSFERRED";
+  return (
+    action.type === "WALLET.ASSET_HOLDER.DEPOSITED" ||
+    action.type === "WALLET.ASSET_HOLDER.ASSET_TRANSFERRED"
+  );
 }
 
 // These are actions related to storage

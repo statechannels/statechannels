@@ -5,7 +5,10 @@ import * as actions from "../../actions";
 import {ProtocolReducer, ProtocolStateWithSharedData} from "../../protocols";
 import {SharedData, registerChannelToMonitor} from "../../state";
 import {isTransactionAction} from "../transaction-submission/actions";
-import {initialize as initTransactionState, transactionReducer} from "../transaction-submission/reducer";
+import {
+  initialize as initTransactionState,
+  transactionReducer
+} from "../transaction-submission/reducer";
 import {isTerminal, isSuccess} from "../transaction-submission/states";
 import * as states from "./states";
 import * as selectors from "../../selectors";
@@ -69,7 +72,11 @@ export function initialize({
   }
 
   if (alreadySafeToDeposit) {
-    const depositTransaction = createDepositTransaction(channelId, requiredDeposit, existingChannelFunding);
+    const depositTransaction = createDepositTransaction(
+      channelId,
+      requiredDeposit,
+      existingChannelFunding
+    );
     const {storage: newStorage, state: transactionSubmissionState} = initTransactionState(
       depositTransaction,
       processId,
@@ -112,7 +119,10 @@ export const directFundingStateReducer: DFReducer = (
   sharedData: SharedData,
   action: actions.WalletAction
 ): ProtocolStateWithSharedData<states.DirectFundingState> => {
-  if (action.type === "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT" && action.channelId === state.channelId) {
+  if (
+    action.type === "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT" &&
+    action.channelId === state.channelId
+  ) {
     if (bigNumberify(action.totalForDestination).gte(state.totalFundingRequired)) {
       return fundingConfirmedReducer(state, sharedData, action);
     }
@@ -160,19 +170,20 @@ const notSafeToDepositReducer: DFReducer = (
         action.channelId === state.channelId &&
         bigNumberify(action.totalForDestination).gte(state.safeToDepositLevel)
       ) {
-        const existingChannelFunding = selectors.getAdjudicatorChannelBalance(sharedData, state.channelId);
+        const existingChannelFunding = selectors.getAdjudicatorChannelBalance(
+          sharedData,
+          state.channelId
+        );
         const depositTransaction = createDepositTransaction(
           state.channelId,
           state.requiredDeposit,
           existingChannelFunding
         );
 
-        const {storage: sharedDataWithTransactionState, state: transactionSubmissionState} = initTransactionState(
-          depositTransaction,
-          state.processId,
-          state.channelId,
-          sharedData
-        );
+        const {
+          storage: sharedDataWithTransactionState,
+          state: transactionSubmissionState
+        } = initTransactionState(depositTransaction, state.processId, state.channelId, sharedData);
         return {
           protocolState: states.waitForDepositTransaction({
             ...state,

@@ -2,7 +2,11 @@ import * as scenarios from "./scenarios";
 import {initialize, consensusUpdateReducer} from "../reducer";
 import * as states from "../states";
 import {ProtocolStateWithSharedData} from "../..";
-import {describeScenarioStep, itSendsNoMessage, itSendsTheseStates} from "../../../__tests__/helpers";
+import {
+  describeScenarioStep,
+  itSendsNoMessage,
+  itSendsTheseStates
+} from "../../../__tests__/helpers";
 
 describe("Two Players", () => {
   describe("Player A Happy Path", () => {
@@ -259,7 +263,10 @@ describe("Three Players", () => {
   });
 });
 
-function itSetsClearedToSend(result: ProtocolStateWithSharedData<states.ConsensusUpdateState>, clearedToSend: boolean) {
+function itSetsClearedToSend(
+  result: ProtocolStateWithSharedData<states.ConsensusUpdateState>,
+  clearedToSend: boolean
+) {
   it("sets clearedToSend correctly", () => {
     expect((result.protocolState as states.NotSafeToSend).clearedToSend).toBe(clearedToSend);
   });

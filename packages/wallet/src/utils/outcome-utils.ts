@@ -29,7 +29,10 @@ export function getAllocationTotal(outcome: Outcome): string {
 }
 
 export function getAllocationItem(outcome: Outcome, addressOrChannelId: string): AllocationItem {
-  const paddedId = addressOrChannelId.length !== 66 ? convertAddressToBytes32(addressOrChannelId) : addressOrChannelId;
+  const paddedId =
+    addressOrChannelId.length !== 66
+      ? convertAddressToBytes32(addressOrChannelId)
+      : addressOrChannelId;
   const allocationOutcome = getAllocationOutcome(outcome);
   const {allocation} = allocationOutcome;
   const allocationItem = allocation.find(a => a.destination === paddedId);
@@ -51,7 +54,10 @@ export function getAllocationItemAtIndex(outcome: Outcome, index: number): Alloc
 }
 
 export function outcomeContainsId(outcome: Outcome, addressOrChannelId: string): boolean {
-  const paddedId = addressOrChannelId.length !== 66 ? convertAddressToBytes32(addressOrChannelId) : addressOrChannelId;
+  const paddedId =
+    addressOrChannelId.length !== 66
+      ? convertAddressToBytes32(addressOrChannelId)
+      : addressOrChannelId;
   const allocationOutcome = getAllocationOutcome(outcome);
   const {allocation} = allocationOutcome;
   return allocation.some(a => a.destination === paddedId);

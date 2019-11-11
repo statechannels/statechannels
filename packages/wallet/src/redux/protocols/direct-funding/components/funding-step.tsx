@@ -34,9 +34,17 @@ const fundingStepByState = (state: directFundingState.DirectFundingState): Step 
 };
 
 const messagesForStepList: MessagesForStep[] = [
-  messagesForStep("It's not safe to deposit yet", "Waiting for opponent's deposit...", "It's safe to deposit"),
+  messagesForStep(
+    "It's not safe to deposit yet",
+    "Waiting for opponent's deposit...",
+    "It's safe to deposit"
+  ),
   messagesForStep("Not ready to submit transaction", "UNUSED", "Transaction submission success"),
-  messagesForStep("Not listening for fund confirmation", "Listening for fund confirmation", "Adjudicator funded"),
+  messagesForStep(
+    "Not listening for fund confirmation",
+    "Listening for fund confirmation",
+    "Adjudicator funded"
+  ),
   messagesForStep("Channel not yet funded", "Channel is funded", "UNUSED")
 ];
 
@@ -45,6 +53,12 @@ export class FundingStep extends React.PureComponent<Props> {
     const fundingState = this.props.directFundingState;
     const currentStep = fundingStepByState(fundingState);
 
-    return <Checklist step={currentStep} stepMessages={messagesForStepList} title="Directly funding a channel" />;
+    return (
+      <Checklist
+        step={currentStep}
+        stepMessages={messagesForStepList}
+        title="Directly funding a channel"
+      />
+    );
   }
 }

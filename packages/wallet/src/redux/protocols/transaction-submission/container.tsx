@@ -27,7 +27,11 @@ class TransactionSubmissionContainer extends PureComponent<Props> {
         return <SubmitX name={transactionName} />;
       case "TransactionSubmission.WaitForConfirmation":
         return (
-          <WaitForXConfirmation name={transactionName} transactionID={state.transactionHash} networkId={NETWORK_ID} />
+          <WaitForXConfirmation
+            name={transactionName}
+            transactionID={state.transactionHash}
+            networkId={NETWORK_ID}
+          />
         );
       case "TransactionSubmission.ApproveRetry":
         const {processId} = state;
@@ -35,7 +39,9 @@ class TransactionSubmissionContainer extends PureComponent<Props> {
           <ApproveX
             title={"Transaction Failed"}
             description={
-              "The " + transactionName + " transaction was not submitted to the network. Hit retry to try again."
+              "The " +
+              transactionName +
+              " transaction was not submitted to the network. Hit retry to try again."
             }
             approvalAction={() => transactionRetryApproved({processId})}
             yesMessage={"Retry"}

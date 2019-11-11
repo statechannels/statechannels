@@ -115,7 +115,9 @@ export function isResponderState(state: ProtocolState): state is ResponderState 
   );
 }
 
-export function isNonTerminalResponderState(state: ProtocolState): state is NonTerminalResponderState {
+export function isNonTerminalResponderState(
+  state: ProtocolState
+): state is NonTerminalResponderState {
   return isResponderState(state) && !isTerminal(state);
 }
 

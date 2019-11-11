@@ -2,8 +2,14 @@ import * as actions from "./actions";
 import {SharedData} from "../../state";
 import {ProtocolStateWithSharedData, ProtocolReducer} from "..";
 import * as states from "./states";
-import {initialize as initializeA, fundingStrategyNegotiationReducer as playerAReducer} from "./player-a/reducer";
-import {initialize as initializeB, fundingStrategyNegotiationReducer as playerBReducer} from "./player-b/reducer";
+import {
+  initialize as initializeA,
+  fundingStrategyNegotiationReducer as playerAReducer
+} from "./player-a/reducer";
+import {
+  initialize as initializeB,
+  fundingStrategyNegotiationReducer as playerBReducer
+} from "./player-b/reducer";
 import * as playerAStates from "./player-a/states";
 import {isFirstPlayer} from "../reducer-helpers";
 import {ProtocolLocator} from "../../../communication";
@@ -44,7 +50,9 @@ export function initialize({
   }
 }
 
-export const fundingStrategyNegotiationReducer: ProtocolReducer<states.FundingStrategyNegotiationState> = (
+export const fundingStrategyNegotiationReducer: ProtocolReducer<
+  states.FundingStrategyNegotiationState
+> = (
   protocolState: states.FundingStrategyNegotiationState,
   sharedData: SharedData,
   action: actions.FundingStrategyNegotiationAction

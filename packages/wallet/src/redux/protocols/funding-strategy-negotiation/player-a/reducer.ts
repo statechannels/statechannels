@@ -93,7 +93,11 @@ function strategyRejected(state: states.FundingStrategyNegotiationState, sharedD
   return {protocolState: states.waitForStrategyChoice(state), sharedData};
 }
 
-function cancelled(state: states.FundingStrategyNegotiationState, sharedData: SharedData, action: actions.Cancelled) {
+function cancelled(
+  state: states.FundingStrategyNegotiationState,
+  sharedData: SharedData,
+  action: actions.Cancelled
+) {
   if (
     state.type !== "FundingStrategyNegotiation.PlayerA.WaitForStrategyChoice" &&
     state.type !== "FundingStrategyNegotiation.PlayerA.WaitForStrategyResponse"

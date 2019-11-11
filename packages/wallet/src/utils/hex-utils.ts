@@ -16,5 +16,8 @@ export function eqHex(a: string, b: string) {
 }
 
 export function eqHexArray(a: string[], b: string[]): boolean {
-  return a.length === b.length && a.reduce((equalsSoFar, aVal, idx) => equalsSoFar && eqHex(aVal, b[idx]), true);
+  return (
+    a.length === b.length &&
+    a.reduce((equalsSoFar, aVal, idx) => equalsSoFar && eqHex(aVal, b[idx]), true)
+  );
 }

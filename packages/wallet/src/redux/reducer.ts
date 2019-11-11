@@ -38,7 +38,10 @@ export const walletReducer = (
   }
 };
 
-export function initializedReducer(state: states.Initialized, action: actions.WalletAction): states.WalletState {
+export function initializedReducer(
+  state: states.Initialized,
+  action: actions.WalletAction
+): states.WalletState {
   let newState = {...state};
   if (actions.isSharedDataUpdateAction(action)) {
     newState = updateSharedData(newState, action);
@@ -53,7 +56,10 @@ export function initializedReducer(state: states.Initialized, action: actions.Wa
   return newState;
 }
 
-function updateSharedData(state: states.Initialized, action: actions.SharedDataUpdateAction): states.Initialized {
+function updateSharedData(
+  state: states.Initialized,
+  action: actions.SharedDataUpdateAction
+): states.Initialized {
   if (actions.isAdjudicatorEventAction(action)) {
     return {...state, adjudicatorState: adjudicatorStateReducer(state.adjudicatorState, action)};
   } else {
@@ -61,7 +67,10 @@ function updateSharedData(state: states.Initialized, action: actions.SharedDataU
   }
 }
 
-function routeToProtocolReducer(state: states.Initialized, action: actions.ProtocolAction): states.Initialized {
+function routeToProtocolReducer(
+  state: states.Initialized,
+  action: actions.ProtocolAction
+): states.Initialized {
   const processState = state.processStore[action.processId];
   if (!processState) {
     console.warn("No process");
@@ -76,7 +85,10 @@ function routeToProtocolReducer(state: states.Initialized, action: actions.Proto
         );
         return updatedState(state, sharedData, processState, protocolState, action.processId);
       case ProcessProtocol.Application:
-        const {protocolState: appProtocolState, sharedData: appSharedData} = applicationProtocol.reducer(
+        const {
+          protocolState: appProtocolState,
+          sharedData: appSharedData
+        } = applicationProtocol.reducer(
           processState.protocolState,
           states.sharedData(state),
           action
@@ -86,8 +98,18 @@ function routeToProtocolReducer(state: states.Initialized, action: actions.Proto
         const {
           protocolState: concludingProtocolState,
           sharedData: concludingSharedData
-        } = concludingProtocol.concludingReducer(processState.protocolState, states.sharedData(state), action);
-        return updatedState(state, concludingSharedData, processState, concludingProtocolState, action.processId);
+        } = concludingProtocol.concludingReducer(
+          processState.protocolState,
+          states.sharedData(state),
+          action
+        );
+        return updatedState(
+          state,
+          concludingSharedData,
+          processState,
+          concludingProtocolState,
+          action.processId
+        );
 
       case ProcessProtocol.CloseLedgerChannel:
         const {
@@ -175,21 +197,36 @@ function initializeNewProtocol(
       return {protocolState, sharedData};
     }
     case "WALLET.NEW_PROCESS.INITIALIZE_CHANNEL":
-      return applicationProtocol.initialize(incomingSharedData, action.channelId, state.address, state.privateKey);
+      return applicationProtocol.initialize(
+        incomingSharedData,
+        action.channelId,
+        state.address,
+        state.privateKey
+      );
     case "WALLET.NEW_PROCESS.CLOSE_LEDGER_CHANNEL":
-      return closeLedgerChannelProtocol.initializeCloseLedgerChannel(processId, action.channelId, incomingSharedData);
+      return closeLedgerChannelProtocol.initializeCloseLedgerChannel(
+        processId,
+        action.channelId,
+        incomingSharedData
+      );
     default:
       return unreachable(action);
   }
 }
 
-function routeToNewProcessInitializer(state: states.Initialized, action: NewProcessAction): states.Initialized {
+function routeToNewProcessInitializer(
+  state: states.Initialized,
+  action: NewProcessAction
+): states.Initialized {
   const processId = getProcessId(action);
   const {protocolState, sharedData} = initializeNewProtocol(state, action);
   return startProcess(state, sharedData, action, protocolState, processId);
 }
 
-const waitForLoginReducer = (state: states.WaitForLogin, action: actions.WalletAction): states.WalletState => {
+const waitForLoginReducer = (
+  state: states.WaitForLogin,
+  action: actions.WalletAction
+): states.WalletState => {
   switch (action.type) {
     case "WALLET.LOGGED_IN":
       let {address, privateKey} = state;
@@ -210,7 +247,11 @@ const waitForLoginReducer = (state: states.WaitForLogin, action: actions.WalletA
       return state;
   }
 };
-function endProcess(state: states.Initialized, sharedData: states.SharedData, processId: string): states.Initialized {
+function endProcess(
+  state: states.Initialized,
+  sharedData: states.SharedData,
+  processId: string
+): states.Initialized {
   const newState = _.cloneDeep({...state, ...sharedData});
   delete newState.processStore[processId];
   newState.currentProcessId = undefined;

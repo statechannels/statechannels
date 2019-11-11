@@ -2,7 +2,13 @@ import * as states from "../states";
 import * as actions from "../actions";
 
 import {EMPTY_SHARED_DATA, setChannels} from "../../../state";
-import {channelId, bsAddress, asAddress, appState, asPrivateKey} from "../../../__tests__/state-helpers";
+import {
+  channelId,
+  bsAddress,
+  asAddress,
+  appState,
+  asPrivateKey
+} from "../../../__tests__/state-helpers";
 import {preSuccess as ledgerFundingPreSuccess} from "../../ledger-funding/__tests__";
 import {preSuccess as virtualFundingPreSuccess} from "../../virtual-funding/__tests__";
 import {preSuccess as advanceChannelPreSuccess} from "../../advance-channel/__tests__";
@@ -37,7 +43,9 @@ const app1 = appState({turnNum: 1, balances: oneThree});
 const app2 = appState({turnNum: 2, balances: oneThree});
 const app3 = appState({turnNum: 3, balances: oneThree});
 const appChannelWaitingForFunding = channelFromStates([app0, app1], asAddress, asPrivateKey);
-const successSharedData = setChannels(EMPTY_SHARED_DATA, [channelFromStates([app2, app3], asAddress, asPrivateKey)]);
+const successSharedData = setChannels(EMPTY_SHARED_DATA, [
+  channelFromStates([app2, app3], asAddress, asPrivateKey)
+]);
 // ----
 // States
 // ------
@@ -71,7 +79,10 @@ const waitForSuccessConfirmation = states.waitForSuccessConfirmation(props);
 // -------
 
 const successConfirmed = actions.fundingSuccessAcknowledged({processId});
-const ledgerFundingSuccess = prependToLocator(ledgerFundingPreSuccess.action, EmbeddedProtocol.LedgerFunding);
+const ledgerFundingSuccess = prependToLocator(
+  ledgerFundingPreSuccess.action,
+  EmbeddedProtocol.LedgerFunding
+);
 
 // ---------
 // Scenarios

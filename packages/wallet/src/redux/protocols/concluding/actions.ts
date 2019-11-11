@@ -32,7 +32,11 @@ export const closeSelected: ActionConstructor<CloseSelected> = p => ({
 // Unions and Guards
 // -------
 
-export type ConcludingAction = KeepOpenSelected | CloseSelected | AdvanceChannelAction | DefundingAction;
+export type ConcludingAction =
+  | KeepOpenSelected
+  | CloseSelected
+  | AdvanceChannelAction
+  | DefundingAction;
 
 export const isConcludingAction = (action: WalletAction): action is ConcludingAction => {
   return (

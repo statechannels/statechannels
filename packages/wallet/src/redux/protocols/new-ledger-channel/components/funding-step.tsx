@@ -33,7 +33,11 @@ const messagesForStepList: MessagesForStep[] = [
     "Waiting for opponent confirmation...",
     "Ledger channel opened"
   ),
-  messagesForStep("Fund the ledger channel", "Waiting for direct funding....", "Ledger channel funded"),
+  messagesForStep(
+    "Fund the ledger channel",
+    "Waiting for direct funding....",
+    "Ledger channel funded"
+  ),
   messagesForStep(
     "Fund application from ledger channel",
     "Waiting for opponent to confirm...",
@@ -51,6 +55,12 @@ export class FundingStep extends React.PureComponent<Props> {
     const fundingState = this.props.NewLedgerChannelState;
     const currentStep = fundingStepByState(fundingState);
 
-    return <Checklist step={currentStep} stepMessages={messagesForStepList} title="Indirectly funding a channel" />;
+    return (
+      <Checklist
+        step={currentStep}
+        stepMessages={messagesForStepList}
+        title="Indirectly funding a channel"
+      />
+    );
   }
 }

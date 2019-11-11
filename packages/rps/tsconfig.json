@@ -4,7 +4,10 @@
     "outDir": "build/dist",
     "module": "commonjs",
     "target": "es2015",
-    "lib": ["es6", "dom"],
+    "lib": [
+      "es6",
+      "dom"
+    ],
     "sourceMap": true,
     "jsx": "react",
     "moduleResolution": "node",
@@ -16,7 +19,7 @@
     "noUnusedLocals": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
-    "esModuleInterop": true,
+    "esModuleInterop": true
   },
   "exclude": [
     "node_modules",
@@ -28,6 +31,7 @@
     "src/setupTests.ts",
     "truffle.ts",
     "migrations/*",
-    "test/**/*"
+    "test/**/*",
+    "src/contract-tests/*"
   ]
 }

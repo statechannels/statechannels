@@ -33,7 +33,10 @@ const waitForLedgerDefunding = states.waitForLedgerDefunding({
   channelId,
   ledgerId,
   protocolLocator: EMPTY_LOCATOR,
-  ledgerDefundingState: prependToLocator(ledgerDefunding.preSuccessState.state, EmbeddedProtocol.LedgerDefunding)
+  ledgerDefundingState: prependToLocator(
+    ledgerDefunding.preSuccessState.state,
+    EmbeddedProtocol.LedgerDefunding
+  )
 });
 
 const waitForVirtualDefunding = states.waitForVirtualDefunding({
@@ -41,7 +44,10 @@ const waitForVirtualDefunding = states.waitForVirtualDefunding({
   channelId,
   ledgerId,
   protocolLocator: EMPTY_LOCATOR,
-  virtualDefunding: prependToLocator(virtualDefunding.preSuccess.state, makeLocator(EmbeddedProtocol.VirtualDefunding))
+  virtualDefunding: prependToLocator(
+    virtualDefunding.preSuccess.state,
+    makeLocator(EmbeddedProtocol.VirtualDefunding)
+  )
 });
 
 export const indirectlyFundingChannelHappyPath = {
@@ -84,7 +90,10 @@ export const virtualFundingChannelHappyPath = {
     processId,
     protocolLocator: EMPTY_LOCATOR,
     channelId: virtualDefunding.initial.targetChannelId,
-    sharedData: mergeSharedData(virtualDefunding.preSuccess.sharedData, ledgerDefunding.preSuccessState.sharedData)
+    sharedData: mergeSharedData(
+      virtualDefunding.preSuccess.sharedData,
+      ledgerDefunding.preSuccessState.sharedData
+    )
   },
   // States
   waitForVirtualDefunding: {

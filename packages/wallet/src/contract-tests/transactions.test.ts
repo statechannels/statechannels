@@ -19,7 +19,12 @@ import {transactionSender} from "../redux/sagas/transaction-sender";
 import {testSaga} from "redux-saga-test-plan";
 import {getProvider, getLibraryAddress} from "../utils/contract-utils";
 import {transactionSent, transactionSubmitted, transactionConfirmed} from "../redux/actions";
-import {ADJUDICATOR_ADDRESS, ETH_ASSET_HOLDER_ADDRESS, NETWORK_ID, CHALLENGE_DURATION} from "../constants";
+import {
+  ADJUDICATOR_ADDRESS,
+  ETH_ASSET_HOLDER_ADDRESS,
+  NETWORK_ID,
+  CHALLENGE_DURATION
+} from "../constants";
 import {State, Channel, getChannelId} from "@statechannels/nitro-protocol";
 import {bigNumberify} from "ethers/utils";
 import {convertBalanceToOutcome} from "../redux/__tests__/state-helpers";

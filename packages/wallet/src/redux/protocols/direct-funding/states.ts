@@ -65,7 +65,9 @@ export const notSafeToDeposit: StateConstructor<NotSafeToDeposit> = params => {
   };
 };
 
-export function waitForDepositTransaction(params: Properties<WaitForDepositTransaction>): WaitForDepositTransaction {
+export function waitForDepositTransaction(
+  params: Properties<WaitForDepositTransaction>
+): WaitForDepositTransaction {
   return {
     ...baseDirectFundingState(params),
     ...params,
@@ -97,14 +99,19 @@ export const fundingFailure: StateConstructor<FundingFailure> = params => {
 // Unions and Guards
 // -------
 
-export type NonTerminalDirectFundingState = NotSafeToDeposit | WaitForDepositTransaction | WaitForFunding;
+export type NonTerminalDirectFundingState =
+  | NotSafeToDeposit
+  | WaitForDepositTransaction
+  | WaitForFunding;
 
 export type DirectFundingState = NonTerminalDirectFundingState | FundingSuccess | FundingFailure;
 
 export type DirectFundingStateType = DirectFundingState["type"];
 
 export function isTerminal(state: DirectFundingState): state is FundingFailure | FundingSuccess {
-  return state.type === "DirectFunding.FundingFailure" || state.type === "DirectFunding.FundingSuccess";
+  return (
+    state.type === "DirectFunding.FundingFailure" || state.type === "DirectFunding.FundingSuccess"
+  );
 }
 
 export function isDirectFundingState(state: ProtocolState): state is DirectFundingState {

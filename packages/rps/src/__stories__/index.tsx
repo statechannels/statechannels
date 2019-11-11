@@ -42,7 +42,7 @@ const fakeStore = state => ({
 });
 
 const testState = state => () => (
-  <Provider store={fakeStore(state)}>
+  <Provider store={fakeStore(state) as any}>
     <SiteContainer />
   </Provider>
 );

@@ -1,14 +1,12 @@
 import {ethers} from "ethers";
 
 import {AddressZero} from "ethers/constants";
-import loadJsonFile = require("load-json-file");
-import path from "path";
 import {State, validTransition} from "@statechannels/nitro-protocol";
 
 let networkMap;
 
 export function getLibraryAddress(networkId, contractName) {
-  networkMap = networkMap || getNetworkMap();
+  networkMap = networkMap || require("../../deployment/network-map.json");
   if (networkMap[networkId] && networkMap[networkId][contractName]) {
     return networkMap[networkId][contractName];
   }
@@ -16,18 +14,6 @@ export function getLibraryAddress(networkId, contractName) {
 
   throw new Error(`Could not find ${contractName} in network map with network id ${networkId}`);
 }
-
-export const getNetworkMap = () => {
-  try {
-    return loadJsonFile.sync(path.join(__dirname, "../../deployment/network-map.json"));
-  } catch (err) {
-    if (!!err.message.match("ENOENT: no such file or directory")) {
-      return {};
-    } else {
-      throw err;
-    }
-  }
-};
 
 export async function getProvider(): Promise<ethers.providers.Web3Provider> {
   return await new ethers.providers.Web3Provider(web3.currentProvider);
@@ -110,20 +96,24 @@ export function isDevelopmentNetwork(): boolean {
     networkId !== 61717561 // aquachain
   );
 }
+// TODO: Update to work with nitro protocol
+// export async function getAdjudicatorHoldings(provider, channelId) {
+//   const contract = await getAdjudicatorContract(provider);
+//   const holdingForChannel = await contract.holdings(channelId);
+//   return holdingForChannel;
+// }
 
-export async function getAdjudicatorHoldings(provider, channelId) {
-  const contract = await getAdjudicatorContract(provider);
-  const holdingForChannel = await contract.holdings(channelId);
-  return holdingForChannel;
-}
+// export async function getAdjudicatorOutcome(provider, channelId) {
+//   const contract = await getAdjudicatorContract(provider);
+//   const outcomeForChannel = await contract.outcomes(channelId);
+//   return outcomeForChannel;
+// }
 
-export async function getAdjudicatorOutcome(provider, channelId) {
-  const contract = await getAdjudicatorContract(provider);
-  const outcomeForChannel = await contract.outcomes(channelId);
-  return outcomeForChannel;
-}
-
-export async function validateTransition(fromState: State, toState: State, privateKey: string): Promise<boolean> {
+export async function validateTransition(
+  fromState: State,
+  toState: State,
+  privateKey: string
+): Promise<boolean> {
   const contractAddress = getAdjudicatorContractAddress();
   const wallet = new ethers.Wallet(privateKey);
   try {

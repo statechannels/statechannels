@@ -68,7 +68,9 @@ export const switchOrderAndAddATopUpUpdate: StateConstructor<SwitchOrderAndAddAT
   return {...p, type: "LedgerTopUp.SwitchOrderAndAddATopUpUpdate"};
 };
 
-export const restoreOrderAndAddBTopUpUpdate: StateConstructor<RestoreOrderAndAddBTopUpUpdate> = p => {
+export const restoreOrderAndAddBTopUpUpdate: StateConstructor<
+  RestoreOrderAndAddBTopUpUpdate
+> = p => {
   return {...p, type: "LedgerTopUp.RestoreOrderAndAddBTopUpUpdate"};
 };
 export const success: StateConstructor<Success> = p => {

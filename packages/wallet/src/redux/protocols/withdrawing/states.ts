@@ -69,7 +69,10 @@ export const failure: StateConstructor<Failure> = p => {
 // Unions and Guards
 // -------
 
-export type NonTerminalWithdrawalState = WaitForApproval | WaitForTransaction | WaitForAcknowledgement;
+export type NonTerminalWithdrawalState =
+  | WaitForApproval
+  | WaitForTransaction
+  | WaitForAcknowledgement;
 
 export type WithdrawalState = NonTerminalWithdrawalState | Failure | Success;
 

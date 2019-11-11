@@ -1,6 +1,11 @@
 import * as scenarios from "./scenarios";
 import {challengerReducer, initialize, ReturnVal} from "../reducer";
-import {FailureReason, ChallengerStateType, WaitForTransaction, WaitForResponseOrTimeout} from "../states";
+import {
+  FailureReason,
+  ChallengerStateType,
+  WaitForTransaction,
+  WaitForResponseOrTimeout
+} from "../states";
 import {
   itSendsThisMessage,
   itSendsThisDisplayEventType,

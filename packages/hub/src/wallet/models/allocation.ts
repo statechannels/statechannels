@@ -1,23 +1,28 @@
 import {Address, Uint256, Uint32} from 'fmg-core';
-import {Model} from 'objection';
-import LedgerCommitment from './channelCommitment';
+import {Model, snakeCaseMappers} from 'objection';
+import ChannelState from './channelState';
 
 export default class Allocation extends Model {
   static tableName = 'allocations';
 
+  static get columnNameMappers() {
+    return snakeCaseMappers();
+  }
+
   static relationMappings = {
-    commitment: {
+    state: {
       relation: Model.BelongsToOneRelation,
-      modelClass: LedgerCommitment,
+      modelClass: ChannelState,
       join: {
-        from: 'allocations.allocator_channel_commitment_id',
-        to: 'channel_commitments.id'
+        from: 'allocations.channel_state_id',
+        to: 'channel_states.id'
       }
     }
   };
   readonly id!: number;
-  commitment: LedgerCommitment;
+  state: ChannelState;
   destination: Address;
   amount: Uint256;
   priority: Uint32;
+  assetHolderAddress: Address;
 }

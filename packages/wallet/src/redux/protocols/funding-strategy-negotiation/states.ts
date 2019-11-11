@@ -20,21 +20,32 @@ export type FundingStrategyNegotiationStateType = FundingStrategyNegotiationStat
 
 export {playerA, playerB};
 
-export function isFundingStrategyNegotiationState(state: ProtocolState): state is FundingStrategyNegotiationState {
-  return playerA.isFundingStrategyNegotiationState(state) || playerB.isFundingStrategyNegotiationState(state);
+export function isFundingStrategyNegotiationState(
+  state: ProtocolState
+): state is FundingStrategyNegotiationState {
+  return (
+    playerA.isFundingStrategyNegotiationState(state) ||
+    playerB.isFundingStrategyNegotiationState(state)
+  );
 }
 
-export function isTerminal(state: FundingStrategyNegotiationState): state is TerminalFundingStrategyNegotiationState {
+export function isTerminal(
+  state: FundingStrategyNegotiationState
+): state is TerminalFundingStrategyNegotiationState {
   return isSuccess(state) || isFailure(state);
 }
 
-export function isSuccess(state: FundingStrategyNegotiationState): state is playerA.Success | playerB.Success {
+export function isSuccess(
+  state: FundingStrategyNegotiationState
+): state is playerA.Success | playerB.Success {
   return (
     state.type === "FundingStrategyNegotiation.PlayerA.Success" ||
     state.type === "FundingStrategyNegotiation.PlayerB.Success"
   );
 }
-export function isFailure(state: FundingStrategyNegotiationState): state is playerA.Failure | playerB.Failure {
+export function isFailure(
+  state: FundingStrategyNegotiationState
+): state is playerA.Failure | playerB.Failure {
   return (
     state.type === "FundingStrategyNegotiation.PlayerA.Failure" ||
     state.type === "FundingStrategyNegotiation.PlayerB.Failure"

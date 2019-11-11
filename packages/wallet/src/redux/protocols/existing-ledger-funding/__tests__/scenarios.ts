@@ -152,7 +152,10 @@ const waitForLedgerUpdateForB = states.waitForLedgerUpdate(propsB);
 const invalidLedgerUpdateReceived = signedStatesReceived({
   processId,
   signedStates: [ledger5],
-  protocolLocator: makeLocator(EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR, CONSENSUS_UPDATE_PROTOCOL_LOCATOR)
+  protocolLocator: makeLocator(
+    EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR,
+    CONSENSUS_UPDATE_PROTOCOL_LOCATOR
+  )
 });
 
 export const playerAFullyFundedHappyPath = {
@@ -164,7 +167,10 @@ export const playerAFullyFundedHappyPath = {
   waitForLedgerUpdate: {
     state: waitForLedgerUpdateForA,
     sharedData: consensusUpdatePreSuccessA.sharedData,
-    action: prependToLocator(consensusUpdatePreSuccessA.action, EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR)
+    action: prependToLocator(
+      consensusUpdatePreSuccessA.action,
+      EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR
+    )
   }
 };
 
@@ -185,7 +191,10 @@ export const playerBFullyFundedHappyPath = {
   waitForLedgerUpdate: {
     state: waitForLedgerUpdateForB,
     sharedData: consensusUpdatePreSuccessB.sharedData,
-    action: prependToLocator(consensusUpdatePreSuccessB.action, EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR),
+    action: prependToLocator(
+      consensusUpdatePreSuccessB.action,
+      EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR
+    ),
     reply: consensusUpdatePreSuccessB.reply
   }
 };

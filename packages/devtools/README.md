@@ -1,6 +1,6 @@
 # devtools
 
-Devtoolsd used in magmo projects
+Developer tooling, used by statechannels packages.
 
 ## Usage
 

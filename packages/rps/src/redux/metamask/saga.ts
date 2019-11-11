@@ -52,4 +52,5 @@ export default function* checkMetamask() {
   } catch {
     yield put(metamaskActions.metamaskErrorOccurred({errorType: MetamaskErrorType.UnknownError}));
   }
+  return false;
 }

@@ -60,12 +60,18 @@ function* dispatchEventAction(event: ETHAssetHolderEvent) {
       break;
     default:
       throw new Error(
-        `Event is not a known ETHAssetHolderEvent. Cannot dispatch event action: ${JSON.stringify(event)}`
+        `Event is not a known ETHAssetHolderEvent. Cannot dispatch event action: ${JSON.stringify(
+          event
+        )}`
       );
   }
 }
 
-function* dispatchProcessEventAction(event: ETHAssetHolderEvent, processId: string, protocolLocator: ProtocolLocator) {
+function* dispatchProcessEventAction(
+  event: ETHAssetHolderEvent,
+  processId: string,
+  protocolLocator: ProtocolLocator
+) {
   switch (event.eventType) {
     case ETHAssetHolderEventType.AssetTransferred:
       const assetTransferredEvent = getAssetTransferredEvent(event);
@@ -88,7 +94,9 @@ function* dispatchProcessEventAction(event: ETHAssetHolderEvent, processId: stri
       break;
     default:
       throw new Error(
-        `Event is not a known ETHAssetHolderEvent. Cannot dispatch process event action: ${JSON.stringify(event)}`
+        `Event is not a known ETHAssetHolderEvent. Cannot dispatch process event action: ${JSON.stringify(
+          event
+        )}`
       );
   }
 }

@@ -15,7 +15,10 @@ describe("indirect strategy chosen", () => {
 
     itTransitionsTo(result, "FundingStrategyNegotiation.PlayerA.WaitForStrategyResponse");
     const {processId, opponentAddress} = scenario;
-    itSendsThisMessage(result, sendStrategyProposed(opponentAddress, processId, "IndirectFundingStrategy"));
+    itSendsThisMessage(
+      result,
+      sendStrategyProposed(opponentAddress, processId, "IndirectFundingStrategy")
+    );
   });
 
   describeScenarioStep(scenario.waitForStrategyResponse, () => {
@@ -35,7 +38,10 @@ describe("virtual strategy chosen", () => {
 
     itTransitionsTo(result, "FundingStrategyNegotiation.PlayerA.WaitForStrategyResponse");
     const {processId, opponentAddress} = scenario;
-    itSendsThisMessage(result, sendStrategyProposed(opponentAddress, processId, "VirtualFundingStrategy"));
+    itSendsThisMessage(
+      result,
+      sendStrategyProposed(opponentAddress, processId, "VirtualFundingStrategy")
+    );
   });
 
   describeScenarioStep(scenario.waitForStrategyResponse, () => {

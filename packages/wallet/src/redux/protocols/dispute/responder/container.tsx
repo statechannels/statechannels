@@ -34,12 +34,22 @@ class ResponderContainer extends PureComponent<Props> {
           />
         );
       case "Responding.WaitForApproval":
-        return <WaitForApproval expirationTime={state.expiryTime} approve={() => respondApproved({processId})} />;
+        return (
+          <WaitForApproval
+            expirationTime={state.expiryTime}
+            approve={() => respondApproved({processId})}
+          />
+        );
       case "Responding.WaitForResponse":
         // TODO: Should this ever been seen? We expect protocol above this to figure out getting the response
         return <div>Waiting for response</div>;
       case "Responding.WaitForTransaction":
-        return <TransactionSubmission state={state.transactionSubmissionState} transactionName="Respond" />;
+        return (
+          <TransactionSubmission
+            state={state.transactionSubmissionState}
+            transactionName="Respond"
+          />
+        );
       case "Responding.AcknowledgeTimeout":
         return (
           <ApproveX

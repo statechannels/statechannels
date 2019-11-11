@@ -68,11 +68,19 @@ function* dispatchEventAction(event: AdjudicatorEvent) {
       yield put(actions.concludedEvent({channelId}));
       break;
     default:
-      throw new Error(`Event is not a known adjudicator event. Cannot dispatch event action: ${JSON.stringify(event)}`);
+      throw new Error(
+        `Event is not a known adjudicator event. Cannot dispatch event action: ${JSON.stringify(
+          event
+        )}`
+      );
   }
 }
 
-function* dispatchProcessEventAction(event: AdjudicatorEvent, processId: string, protocolLocator: ProtocolLocator) {
+function* dispatchProcessEventAction(
+  event: AdjudicatorEvent,
+  processId: string,
+  protocolLocator: ProtocolLocator
+) {
   const {channelId} = event;
   switch (event.eventType) {
     case AdjudicatorEventType.ChallengeRegistered:
@@ -100,7 +108,9 @@ function* dispatchProcessEventAction(event: AdjudicatorEvent, processId: string,
       break;
     default:
       throw new Error(
-        `Event is not a known adjudicator event. Cannot dispatch process event action: ${JSON.stringify(event)}`
+        `Event is not a known adjudicator event. Cannot dispatch process event action: ${JSON.stringify(
+          event
+        )}`
       );
   }
 }
@@ -122,10 +132,16 @@ function* createAdjudicatorEventChannel(provider) {
     );
 
     adjudicator.on(challengeClearedFilter, (...eventArgs) =>
-      emitter({eventType: AdjudicatorEventType.ChallengeCleared, channelId: eventArgs[0], eventArgs})
+      emitter({
+        eventType: AdjudicatorEventType.ChallengeCleared,
+        channelId: eventArgs[0],
+        eventArgs
+      })
     );
 
-    adjudicator.on(gameConcludedFilter, channelId => emitter({eventType: AdjudicatorEventType.Concluded, channelId}));
+    adjudicator.on(gameConcludedFilter, channelId =>
+      emitter({eventType: AdjudicatorEventType.Concluded, channelId})
+    );
 
     return () =>
       // This function is called when the channel gets closed

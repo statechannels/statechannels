@@ -19,7 +19,11 @@ import {EmbeddedProtocol, routerFactory} from "../../../communication";
 export type DefundingAction = WithdrawalAction | LedgerDefundingAction | VirtualDefundingAction;
 
 export const isDefundingAction = (action: WalletAction): action is DefundingAction => {
-  return isWithdrawalAction(action) || isLedgerDefundingAction(action) || isVirtualDefundingAction(action);
+  return (
+    isWithdrawalAction(action) ||
+    isLedgerDefundingAction(action) ||
+    isVirtualDefundingAction(action)
+  );
 };
 
 export const routesToDefunding = routerFactory(isDefundingAction, EmbeddedProtocol.Defunding);

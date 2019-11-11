@@ -28,7 +28,11 @@ export const fundingSuccess = (channelId, state: State) => ({
 /**
  * @ignore
  */
-export const fundingFailure = (channelId: any, reason: "FundingDeclined" | "Other", error?: string) => ({
+export const fundingFailure = (
+  channelId: any,
+  reason: "FundingDeclined" | "Other",
+  error?: string
+) => ({
   type: FUNDING_FAILURE as typeof FUNDING_FAILURE,
   channelId,
   reason,
@@ -69,7 +73,10 @@ export const validationSuccess = () => ({
 /**
  * @ignore
  */
-export const validationFailure = (reason: "WalletBusy" | "InvalidSignature" | "Other", error?: string) => ({
+export const validationFailure = (
+  reason: "WalletBusy" | "InvalidSignature" | "Other",
+  error?: string
+) => ({
   type: VALIDATION_FAILURE as typeof VALIDATION_FAILURE,
   reason,
   error

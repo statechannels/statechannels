@@ -69,7 +69,10 @@ export const waitForPostFundSetup: StateConstructor<WaitForPostFundSetup> = p =>
 // Unions and Guards
 // -------
 
-export type NonTerminalNewLedgerChannelState = WaitForPreFundSetup | WaitForDirectFunding | WaitForPostFundSetup;
+export type NonTerminalNewLedgerChannelState =
+  | WaitForPreFundSetup
+  | WaitForDirectFunding
+  | WaitForPostFundSetup;
 
 export type NewLedgerChannelState = NonTerminalNewLedgerChannelState | Success | Failure;
 export type NewLedgerChannelStateType = NewLedgerChannelState["type"];

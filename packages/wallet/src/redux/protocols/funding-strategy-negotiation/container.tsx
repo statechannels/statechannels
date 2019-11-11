@@ -6,7 +6,9 @@ import {FundingStrategyNegotiation as PlayerB} from "./player-b";
 import {connect} from "react-redux";
 
 interface Props {
-  state: states.playerA.OngoingFundingStrategyNegotiationState | states.playerB.OngoingFundingStrategyNegotiationState;
+  state:
+    | states.playerA.OngoingFundingStrategyNegotiationState
+    | states.playerB.OngoingFundingStrategyNegotiationState;
 }
 
 class FundingStrategyNegotiationContainer extends PureComponent<Props> {

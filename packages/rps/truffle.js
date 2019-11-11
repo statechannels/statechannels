@@ -1,4 +1,4 @@
-var HDWalletProvider = require('truffle-hdwallet-provider');
+// var HDWalletProvider = require('truffle-hdwallet-provider');
 require('dotenv').config();
 
 // We only want this loaded in a test environment
@@ -6,6 +6,10 @@ require('dotenv').config();
 if (process.env.NODE_ENV === 'test') {
   require('ts-node/register');
 }
+
+// TODO: Re-import HDWalletProvider, and uncomment provider props definitions. 
+// Truffle HDWallet Provider as it was previously imported, 
+// is now deprecated (now it's on a monorepo)
 
 require('babel-register'); // To handle es6 syntax in the tests
 
@@ -19,41 +23,41 @@ module.exports = {
       gasPrice: process.env.DEFAULT_GAS_PRICE,
     },
     main: {
-      provider: () =>
-        new HDWalletProvider(
-          process.env.ETH_ACCOUNT_MNENOMIC,
-          'https://infura.io/v3/' + process.env.INFURA_API_KEY,
-        ),
+      // provider: () =>
+      //   new HDWalletProvider(
+      //     process.env.ETH_ACCOUNT_MNENOMIC,
+      //     'https://infura.io/v3/' + process.env.INFURA_API_KEY,
+      //   ),
       network_id: 1,
       gas: process.env.DEFAULT_GAS,
       gasPrice: process.env.DEFAULT_GAS_PRICE,
     },
     ropsten: {
-      provider: () =>
-        new HDWalletProvider(
-          process.env.ETH_ACCOUNT_MNENOMIC,
-          'https://ropsten.infura.io/v3/' + process.env.INFURA_API_KEY,
-        ),
+      // provider: () =>
+      //   new HDWalletProvider(
+      //     process.env.ETH_ACCOUNT_MNENOMIC,
+      //     'https://ropsten.infura.io/v3/' + process.env.INFURA_API_KEY,
+      //   ),
       network_id: 3,
       gas: process.env.DEFAULT_GAS,
       gasPrice: process.env.DEFAULT_GAS_PRICE,
     },
     rinkeby: {
-      provider: () =>
-        new HDWalletProvider(
-          process.env.ETH_ACCOUNT_MNENOMIC,
-          'https://rinkeby.infura.io/v3/' + process.env.INFURA_API_KEY,
-        ),
+      // provider: () =>
+      //   new HDWalletProvider(
+      //     process.env.ETH_ACCOUNT_MNENOMIC,
+      //     'https://rinkeby.infura.io/v3/' + process.env.INFURA_API_KEY,
+      //   ),
       network_id: 4,
       gas: process.env.DEFAULT_GAS,
       gasPrice: process.env.DEFAULT_GAS_PRICE,
     },
     kovan: {
-      provider: () =>
-        new HDWalletProvider(
-          process.env.ETH_ACCOUNT_MNENOMIC,
-          'https://kovan.infura.io/v3/' + process.env.INFURA_API_KEY,
-        ),
+      // provider: () =>
+      //   new HDWalletProvider(
+      //     process.env.ETH_ACCOUNT_MNENOMIC,
+      //     'https://kovan.infura.io/v3/' + process.env.INFURA_API_KEY,
+      //   ),
       network_id: 42,
       gas: process.env.DEFAULT_GAS,
       gasPrice: process.env.DEFAULT_GAS_PRICE,

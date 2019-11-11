@@ -4,7 +4,11 @@ import * as states from "./states";
 import {LedgerDefundingAction} from "./actions";
 import {unreachable} from "../../../utils/reducer-utils";
 import {ProtocolLocator, EmbeddedProtocol} from "../../../communication";
-import {ConsensusUpdateState, initializeConsensusUpdate, consensusUpdateReducer} from "../consensus-update";
+import {
+  ConsensusUpdateState,
+  initializeConsensusUpdate,
+  consensusUpdateReducer
+} from "../consensus-update";
 import {routesToConsensusUpdate} from "../consensus-update/actions";
 import * as consensusUpdateActions from "../consensus-update/actions";
 import {Outcome} from "@statechannels/nitro-protocol";
@@ -113,7 +117,11 @@ function handleConsensusUpdateAction(
   action: consensusUpdateActions.ConsensusUpdateAction
 ) {
   let ledgerUpdate: ConsensusUpdateState;
-  ({protocolState: ledgerUpdate, sharedData} = consensusUpdateReducer(protocolState.ledgerUpdate, sharedData, action));
+  ({protocolState: ledgerUpdate, sharedData} = consensusUpdateReducer(
+    protocolState.ledgerUpdate,
+    sharedData,
+    action
+  ));
   switch (ledgerUpdate.type) {
     case "ConsensusUpdate.Failure":
       return {

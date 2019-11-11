@@ -1,7 +1,12 @@
 import {WalletAction} from "../../actions";
 import {ConsensusUpdateAction, isConsensusUpdateAction} from "../consensus-update";
 import {AdvanceChannelAction, isAdvanceChannelAction} from "../advance-channel";
-import {routerFactory, EmbeddedProtocol, BaseProcessAction, ProtocolLocator} from "../../../communication";
+import {
+  routerFactory,
+  EmbeddedProtocol,
+  BaseProcessAction,
+  ProtocolLocator
+} from "../../../communication";
 import {ActionConstructor} from "../../utils";
 // -------
 // Actions
@@ -34,4 +39,7 @@ export function isLedgerDefundingAction(action: WalletAction): action is LedgerD
     isAdvanceChannelAction(action)
   );
 }
-export const routesToLedgerDefunding = routerFactory(isLedgerDefundingAction, EmbeddedProtocol.LedgerDefunding);
+export const routesToLedgerDefunding = routerFactory(
+  isLedgerDefundingAction,
+  EmbeddedProtocol.LedgerDefunding
+);

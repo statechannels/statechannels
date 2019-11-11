@@ -19,6 +19,15 @@ case $TARGET_PACKAGE in
         git diff --quiet HEAD^ HEAD ./packages/nitro-protocol
         status=$?
         ;;
+    
+    app-wallet-interface)
+        echo "Checking for changes in app-wallet-interface package..."
+        git diff --quiet HEAD^ HEAD ./packages/app-wallet-interface
+        status=$?
+        ;;
+
+    *)
+        echo "TARGET_PACKAGE environment variable not set to valid value"
 
 esac
 

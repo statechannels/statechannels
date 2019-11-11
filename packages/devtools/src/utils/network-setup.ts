@@ -5,7 +5,9 @@ const privateKeyWithEth = "0xf2f48ee19680706196e2e339e5da3491186e0c4c5030670656b
 
 export function getGanacheProvider() {
   const ethers = require("ethers");
-  return new ethers.providers.JsonRpcProvider(`http://${process.env.GANACHE_HOST}:${process.env.GANACHE_PORT}`);
+  return new ethers.providers.JsonRpcProvider(
+    `http://${process.env.GANACHE_HOST}:${process.env.GANACHE_PORT}`
+  );
 }
 
 export function getPrivateKeyWithEth() {

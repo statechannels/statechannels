@@ -4,9 +4,9 @@ declare var artifacts: any;
 declare var contract: any;
 declare var before: any;
 declare var assert: any;
-declare module '*.png';
-declare module '*.svg';
+declare module "*.png";
+declare module "*.svg";
 declare module "*.json" {
-    const value: any;
-    export default value;
+  const value: any;
+  export default value;
 }

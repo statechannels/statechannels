@@ -16,7 +16,12 @@ function whenIn(state) {
 
 describe("when initializing", () => {
   const scenario = scenarios.initializingApplication;
-  const result = initialize(scenario.initialize.sharedData, scenario.channelId, scenario.address, scenario.privateKey);
+  const result = initialize(
+    scenario.initialize.sharedData,
+    scenario.channelId,
+    scenario.address,
+    scenario.privateKey
+  );
   itTransitionsTo(result, "Application.WaitForFirstState");
 });
 
