@@ -11,7 +11,7 @@ import {
   encodeOutcome,
   AssetOutcomeShortHand,
   replaceAddressesAndBigNumberify,
-  randomExternalDestination
+  randomExternalDestination,
 } from '@statechannels/nitro-protocol';
 import {VariablePart} from '@statechannels/nitro-protocol';
 
@@ -90,22 +90,6 @@ interface RPSData {
 
 //   // Transition function tests
 //   // ========================
-
-//   it('allows START -> ROUNDPROPOSED', async () => {
-//     expect(await validTransition(postFundSetupB, propose)).toBe(true);
-//   });
-
-//   it('allows ROUNDPROPOSED -> ROUNDACCEPTED', async () => {
-//     expect(await validTransition(propose, accept)).toBe(true);
-//   });
-
-//   it('allows ROUNDACCEPTED -> REVEAL', async () => {
-//     expect(await validTransition(accept, reveal)).toBe(true);
-//   });
-
-//   it('allows REVEAL -> (updated) START', async () => {
-//     expect(await validTransition(reveal, resting)).toBe(true);
-//   });
 
 //   it('disallows transitions where the stake changes', async () => {
 //     reveal.stake = bigNumberify(88).toHexString();
@@ -208,8 +192,11 @@ beforeAll(async () => {
 
 describe('validTransition', () => {
   it.each`
-    isValid | positionType                                        | stake               | AWeapon                       | BWeapon                       | fromBalances    | toBalances      | description
-    ${true} | ${[PositionType.Start, PositionType.RoundProposed]} | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]} | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${'Allows Start -> RoundProposed '}
+    isValid | positionType                                                | stake               | AWeapon                       | BWeapon                       | fromBalances    | toBalances      | description
+    ${true} | ${[PositionType.Start, PositionType.RoundProposed]}         | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]} | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${'Allows Start -> RoundProposed'}
+    ${true} | ${[PositionType.RoundProposed, PositionType.RoundAccepted]} | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]} | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${'Allows RoundProposed -> RoundAccepted'}
+    ${true} | ${[PositionType.RoundAccepted, PositionType.Reveal]}        | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]} | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${'Allows RoundAccepted -> Reveal'}
+    ${true} | ${[PositionType.Reveal, PositionType.Start]}                | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]} | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${'Allows RoundAccepted -> Reveal'}
   `(
     '$description',
     async ({
@@ -264,13 +251,13 @@ describe('validTransition', () => {
 
       const fromAppDataBytes = defaultAbiCoder.encode(
         [
-          'tuple(uint8 positionType, uint256 stake, bytes32 preCommit, uint8 playerAWeapon, uint8 playerBWeapon, bytes32 salt)'
+          'tuple(uint8 positionType, uint256 stake, bytes32 preCommit, uint8 playerAWeapon, uint8 playerBWeapon, bytes32 salt)',
         ],
         [fromAppData]
       );
       const toAppDataBytes = defaultAbiCoder.encode(
         [
-          'tuple(uint8 positionType, uint256 stake, bytes32 preCommit, uint8 playerAWeapon, uint8 playerBWeapon, bytes32 salt)'
+          'tuple(uint8 positionType, uint256 stake, bytes32 preCommit, uint8 playerAWeapon, uint8 playerBWeapon, bytes32 salt)',
         ],
         [toAppData]
       );
