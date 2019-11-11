@@ -1,4 +1,4 @@
-import * as Knex from 'knex';
+import Knex from 'knex';
 
 const environment = process.env.NODE_ENV || 'development';
 // tslint:disable-next-line:no-var-requires
