@@ -24,10 +24,10 @@ const testProvider = new ethers.providers.JsonRpcProvider(
 );
 
 enum PositionType {
-  Start,
-  RoundProposed,
-  RoundAccepted,
-  Reveal,
+  Start, // 0
+  RoundProposed, // 1
+  RoundAccepted, // 2
+  Reveal, // 3
 }
 
 enum Weapon {
@@ -60,16 +60,16 @@ beforeAll(async () => {
 describe('validTransition', () => {
   it.each`
     isValid  | positionType                                                | stake               | AWeapon                       | BWeapon                       | fromBalances    | toBalances      | description
-    ${true}  | ${[PositionType.Start, PositionType.RoundProposed]}         | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]} | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${'Allows Start -> Proposed'}
-    ${true}  | ${[PositionType.RoundProposed, PositionType.RoundAccepted]} | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]} | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${'Allows Proposed -> Accepted'}
-    ${true}  | ${[PositionType.RoundAccepted, PositionType.Reveal]}        | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]} | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${'Allows Accepted -> Reveal'}
-    ${true}  | ${[PositionType.Reveal, PositionType.Start]}                | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]} | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${'Allows Accepted -> Reveal'}
-    ${false} | ${[PositionType.Reveal, PositionType.Start]}                | ${{from: 1, to: 2}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]} | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${'Disallows stake change on Reveal -> Start'}
-    ${false} | ${[PositionType.Start, PositionType.RoundProposed]}         | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]} | ${{A: 5, B: 5}} | ${{A: 6, B: 4}} | ${'Disallows allocations change on Start -> Propose'}
-    ${false} | ${[PositionType.RoundProposed, PositionType.RoundAccepted]} | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]} | ${{A: 6, B: 4}} | ${{B: 6, A: 4}} | ${'Disallows destination swap on Propose -> Accept'}
+    ${true}  | ${[PositionType.Start, PositionType.RoundProposed]}         | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]} | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${''}
+    ${true}  | ${[PositionType.RoundProposed, PositionType.RoundAccepted]} | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]} | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${''}
+    ${true}  | ${[PositionType.RoundAccepted, PositionType.Reveal]}        | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]} | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${''}
+    ${true}  | ${[PositionType.Reveal, PositionType.Start]}                | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]} | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${''}
+    ${false} | ${[PositionType.Reveal, PositionType.Start]}                | ${{from: 1, to: 2}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]} | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${'Disallows stake change'}
+    ${false} | ${[PositionType.Start, PositionType.RoundProposed]}         | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]} | ${{A: 5, B: 5}} | ${{A: 6, B: 4}} | ${'Disallows allocations change '}
+    ${false} | ${[PositionType.RoundProposed, PositionType.RoundAccepted]} | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]} | ${{A: 6, B: 4}} | ${{B: 6, A: 4}} | ${'Disallows destination swap'}
     ${false} | ${[PositionType.Start, PositionType.RoundProposed]}         | ${{from: 1, to: 6}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]} | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${'Disallows a stake that is too large'}
   `(
-    '$description', // TODO print positionTypes automatically, avoid writing out manually
+    `Returns $isValid on [from, to] = PositionType$positionType ; $description`,
     async ({
       isValid,
       positionType,
