@@ -209,7 +209,7 @@ beforeAll(async () => {
 describe('validTransition', () => {
   it.each`
     isValid | positionType                                        | stake               | AWeapon                       | BWeapon                       | fromBalances    | toBalances      | description
-    ${true} | ${[PositionType.Start, PositionType.RoundAccepted]} | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]} | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${'validTransition'}
+    ${true} | ${[PositionType.Start, PositionType.RoundProposed]} | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]} | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${'Allows Start -> RoundProposed '}
   `(
     '$description',
     async ({
