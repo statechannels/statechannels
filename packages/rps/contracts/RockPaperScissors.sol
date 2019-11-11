@@ -153,8 +153,8 @@ contract RockPaperScissors is ForceMoveApp {
         );
 
         // a will have to reveal, so remove the stake beforehand
-        require(fromAllocation[0].amount == toAllocation[0].amount.sub(toGameData.stake), "Allocation for player A should be decremented by 1x stake");
-        require(fromAllocation[1].amount == toAllocation[1].amount.sub(toGameData.stake), "Allocation for player B should be incremented by 1x stake.");
+        require(toAllocation[0].amount == fromAllocation[0].amount.sub(toGameData.stake), "Allocation for player A should be decremented by 1x stake");
+        require(toAllocation[1].amount == fromAllocation[1].amount.add(toGameData.stake), "Allocation for player B should be incremented by 1x stake.");
 
     }
 
