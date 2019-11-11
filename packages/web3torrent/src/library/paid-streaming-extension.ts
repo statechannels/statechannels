@@ -85,6 +85,10 @@ export abstract class PaidStreamingExtension implements Extension {
     this.executeExtensionCommand(PaidStreamingExtensionNotices.ACK);
   }
 
+  payment(hash: string) {
+    this.executeExtensionCommand(PaidStreamingExtensionNotices.PAYMENT, {hash});
+  }
+
   onMessage(buffer: Buffer) {
     try {
       const jsonData = bencode.decode(buffer, undefined, undefined, 'utf8');

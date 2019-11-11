@@ -1,6 +1,6 @@
-import {EmptyTorrent} from '../constants';
-import {TorrentPeers} from '../library/types';
-import {Torrent} from '../types';
+import { EmptyTorrent } from '../constants';
+import { TorrentPeers } from '../library/types';
+import { Torrent } from '../types';
 
 export function testSelector(name: string): string {
   return `[data-test-selector='${name}']`;
@@ -26,11 +26,13 @@ export function createMockTorrentPeers(): TorrentPeers {
       allowed: true,
       wire: {
         uploaded: 4225
-      }
+      },
+      funds: '50'
     },
     '5589113806923374': {
       id: '5589113806923374',
       allowed: true,
+      funds: '50',
       wire: {
         uploaded: 52923
       }
