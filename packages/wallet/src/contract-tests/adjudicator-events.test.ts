@@ -3,7 +3,7 @@ import {adjudicatorWatcher} from "../redux/sagas/adjudicator-watcher";
 import SagaTester from "redux-saga-tester";
 import * as actions from "../redux/actions";
 import {
-  depositFunds,
+  depositIntoETHAssetHolder,
   createChallenge,
   createWatcherState,
   concludeGame,
@@ -31,7 +31,7 @@ describe("adjudicator listener", () => {
     // We manually create a transaction to force a block to be mined in ganache so that events get properly caught
     // otherwise the first event is always missed since ethers won't listen for events until a block has been mined
     const channelId = await getChannelId(getNextNonce(), participantA, participantB);
-    await depositFunds(provider, channelId);
+    await depositIntoETHAssetHolder(provider, channelId);
   });
 
   it("should not handle an event when no process has registered", async () => {
@@ -47,7 +47,7 @@ describe("adjudicator listener", () => {
     const sagaTester = new SagaTester({initialState});
 
     sagaTester.start(adjudicatorWatcher, provider);
-    await depositFunds(provider, channelId);
+    await depositIntoETHAssetHolder(provider, channelId);
 
     expect(sagaTester.numCalled("WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT")).toEqual(0);
   });
@@ -60,7 +60,7 @@ describe("adjudicator listener", () => {
 
     sagaTester.start(adjudicatorWatcher, provider);
 
-    await depositFunds(provider, channelIdToIgnore);
+    await depositIntoETHAssetHolder(provider, channelIdToIgnore);
     expect(sagaTester.numCalled("WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT")).toEqual(0);
   });
 

@@ -55,7 +55,7 @@ export async function getChannelId(channelNonce, participantA, participantB) {
   });
 }
 
-export async function depositFunds(
+export async function depositIntoETHAssetHolder(
   provider: ethers.providers.JsonRpcProvider,
   participant: string,
   amount = defaultDepositAmount
