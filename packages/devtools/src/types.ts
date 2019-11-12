@@ -14,8 +14,5 @@ export interface DeployedArtifact {
 }
 
 export interface DeployedArtifacts {
-  [artifactName: string]: {
-    address: string;
-    abi: string;
-  };
+  [artifactName: string]: DeployedArtifact;
 }

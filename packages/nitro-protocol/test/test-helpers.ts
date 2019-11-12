@@ -50,6 +50,10 @@ export const getTestProvider = () => {
 
 export const getNetworkMap = async () => {
   try {
+    // TODO: update this to fetch from local server and interpret the structure differently
+    // as it's currently a map of network ID to (a map of contract names to addresses)
+    // whereas the new network context is just a map of contract names to (address, abi) of
+    // the corresponding contract
     return await loadJsonFile(path.join(__dirname, '../deployment/network-map.json'));
   } catch (err) {
     if (!!err.message.match('ENOENT: no such file or directory')) {
