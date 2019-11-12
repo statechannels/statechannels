@@ -4,6 +4,7 @@ import {signState} from '@statechannels/nitro-protocol/lib/src/signatures';
 import {HUB_ADDRESS} from '../constants';
 import {
   BEGINNING_APP_CHANNEL_NONCE,
+  DUMMY_CHAIN_ID,
   DUMMY_RULES_ADDRESS,
   FUNDED_CHANNEL_NONCE,
   FUNDED_CHANNEL_NONCE_3,
@@ -223,5 +224,5 @@ export const participants = [{address: PARTICIPANT_1_ADDRESS}, {address: HUB_ADD
 export const created_channel = {
   id: expect.any(Number),
   participants,
-  rulesAddress: DUMMY_RULES_ADDRESS
+  chainId: DUMMY_CHAIN_ID
 };
