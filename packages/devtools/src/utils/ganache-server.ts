@@ -1,7 +1,8 @@
+import {spawn} from "child_process";
 import {ethers} from "ethers";
 import {JsonRpcProvider} from "ethers/providers";
-import ganache from "ganache-core";
 import {waitUntilFree, waitUntilUsed} from "tcp-port-used";
+import kill from "tree-kill";
 
 import {configureEnvVariables} from "../config/env";
 configureEnvVariables();
@@ -73,15 +74,17 @@ export class GanacheServer {
 
     const oneMillion = ethers.utils.parseEther("1000000");
 
-    this.server = ganache.server({
-      accounts: accounts.map(a => {
-        return {balance: a.amount || oneMillion, secretKey: a.privateKey};
-      }),
-      gasLimit,
-      gasPrice
-    });
+    const opts = [`--networkId ${process.env.GANACHE_NETWORK_ID}`, `--port ${this.port}`].concat(
+      accounts.map(account => `--account ${account.privateKey},${account.amount || oneMillion}`)
+    );
 
-    this.server.listen(this.port);
+    const cmd = `ganache-cli ${opts.join(" ")}`;
+
+    this.server = spawn("npx", ["-c", cmd], {stdio: "pipe"});
+    this.server.stderr.on("data", data => {
+      console.error(`Server threw error ${data}`);
+      throw new Error("Ganache server failed to start");
+    });
     this.provider = new JsonRpcProvider(`http://localhost:${this.port}`);
   }
 
@@ -90,7 +93,7 @@ export class GanacheServer {
   }
 
   async close() {
-    this.server.close();
+    kill(this.server.pid);
 
     try {
       await waitUntilFree(this.port, 500, this.timeout);
