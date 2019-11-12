@@ -25,7 +25,8 @@
     "start": "node scripts/start.js",
     "test:prepare": "yarn contract:compile && yarn deploy:contracts",
     "test:app": "npx run-jest -c ./config/jest/jest.config.js",
-    "test:contracts": "yarn test:prepare && npx jest --testPathPattern='contract-tests'",
+    "test:contracts": "yarn test:prepare && npx run-jest -c ./config/jest/jest.contracts.config.js",
+    "deployContracts": "npx deploy-contracts",
     "startGanache": "node bin/start-ganache.js",
     "postinstall": "rm -f node_modules/web3/index.d.ts",
     "storybook": "start-storybook -p 9001 -c .storybook",
@@ -83,7 +84,6 @@
     "redux-saga": "^0.16.0",
     "redux-saga-firebase": "^0.14.0",
     "resolve": "1.6.0",
-    "sha3": "^1.2.2",
     "web3": "1.0.0-beta.37",
     "web3-detect-network": "^0.0.17",
     "webpack": "4.28.1",
@@ -93,6 +93,8 @@
   },
   "devDependencies": {
     "@babel/runtime": "^7.0.0-beta.53",
+    "@statechannels/devtools": "0.1.21",
+    "@statechannels/jest-gas-reporter": "0.0.2",
     "@storybook/react": "4.1.18",
     "@types/jest": "24.0.18",
     "@types/node": "^10.5.4",
@@ -149,53 +151,6 @@
     "url-loader": "^1.1.2",
     "workbox-webpack-plugin": "3.6.3",
     "yargs": "12.0.5"
-  },
-  "jest": {
-    "collectCoverageFrom": [
-      "src/**/*.{js,jsx,ts,tsx}"
-    ],
-    "setupFiles": [
-      "<rootDir>/config/polyfills.js"
-    ],
-    "setupFilesAfterEnv": [
-      "<rootDir>/src/setupTests.ts"
-    ],
-    "testMatch": [
-      "<rootDir>/src/**/?(*.)(spec|test).(j|t)s?(x)"
-    ],
-    "testEnvironment": "jsdom",
-    "testURL": "http://localhost",
-    "transform": {
-      "^.+\\.(js|jsx|mjs)$": "<rootDir>/../../node_modules/babel-jest",
-      "^.+\\.tsx?$": "ts-jest",
-      "^.+\\.css$": "<rootDir>/config/jest/cssTransform.js",
-      "^(?!.*\\.(js|jsx|mjs|css|json)$)": "<rootDir>/config/jest/fileTransform.js"
-    },
-    "transformIgnorePatterns": [
-      "[/\\\\]node_modules[/\\\\].+\\.(js|jsx|mjs|ts|tsx)$"
-    ],
-    "moduleNameMapper": {
-      "^react-native$": "react-native-web"
-    },
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "jsx",
-      "mjs",
-      "node",
-      "ts",
-      "tsx",
-      "web.js",
-      "web.jsx",
-      "web.ts",
-      "web.tsx"
-    ],
-    "globals": {
-      "ts-jest": {
-        "tsConfig": "./tsconfig.json"
-      }
-    },
-    "preset": "ts-jest/presets/js-with-babel"
   },
   "babel": {
     "presets": [
