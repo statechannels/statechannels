@@ -67,6 +67,10 @@ export const getPrivateKey = (state: walletStates.Initialized) => {
   return state.privateKey;
 };
 
+export const getAddress = (state: walletStates.Initialized) => {
+  return state.address;
+};
+
 export const getAdjudicatorState = (state: SharedData) => {
   return state.adjudicatorState;
 };

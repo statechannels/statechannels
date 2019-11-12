@@ -1,15 +1,20 @@
 import {messageHandler} from "../message-handler";
 import * as walletStates from "../../state";
-import SagaTester from "redux-saga-tester";
-import {addressRequest} from "../../actions";
+
+import {addressResponse} from "../../actions";
+import {expectSaga} from "redux-saga-test-plan";
+import {Wallet} from "ethers";
+
+import {messageSender} from "../message-sender";
 describe("message listener", () => {
+  const wallet = Wallet.createRandom();
   const initialState = walletStates.initialized({
     ...walletStates.EMPTY_SHARED_DATA,
 
     processStore: {},
     channelSubscriptions: {},
-    privateKey: "",
-    address: ""
+    privateKey: wallet.privateKey,
+    address: wallet.address
   });
 
   it("handles an address request", async () => {
@@ -19,14 +24,9 @@ describe("message listener", () => {
       id: 1,
       params: {}
     });
-    const domain = "localhost";
 
-    const sagaTester = new SagaTester({initialState});
-    sagaTester.start(messageHandler, requestMessage, domain);
-
-    await sagaTester.waitFor("WALLET.ADDRESS_REQUEST");
-
-    const actions = sagaTester.getCalledActions();
-    expect(actions).toContainEqual(addressRequest({domain, id: 1}));
+    expectSaga(messageHandler, requestMessage)
+      .withState(initialState)
+      .fork(messageSender, addressResponse({id: 1, address: wallet.address}));
   });
 });

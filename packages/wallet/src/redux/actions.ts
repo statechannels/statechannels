@@ -70,10 +70,6 @@ export interface BlockMined {
   block: {timestamp: number; number: number};
 }
 
-export interface MetamaskLoadError {
-  type: "METAMASK_LOAD_ERROR";
-}
-
 export type Message = "FundingDeclined";
 
 export interface ChallengeExpirySetEvent {
@@ -179,11 +175,6 @@ export const assetTransferredEvent: ActionConstructor<AssetTransferredEvent> = p
 
 export const blockMined: ActionConstructor<BlockMined> = p => ({...p, type: "BLOCK_MINED"});
 
-export const metamaskLoadError: ActionConstructor<MetamaskLoadError> = p => ({
-  ...p,
-  type: "METAMASK_LOAD_ERROR"
-});
-
 export const challengeExpirySetEvent: ActionConstructor<ChallengeExpirySetEvent> = p => ({
   ...p,
   type: "WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_TIME_SET"
@@ -263,9 +254,7 @@ export type WalletAction =
   | AssetHolderEventAction
   | BlockMined
   | DisplayMessageSent
-  | AddressRequest
   | MessageSent
-  | MetamaskLoadError
   | ProtocolAction
   | protocol.NewProcessAction
   | RelayableAction
@@ -318,16 +307,6 @@ export interface JsonRpcAction {
   type: string;
 }
 
-export interface AddressRequest extends JsonRpcAction {
-  domain: string; // Un-used for now
-  type: "WALLET.ADDRESS_REQUEST";
-}
-
-export const addressRequest: ActionConstructor<AddressRequest> = p => ({
-  ...p,
-  type: "WALLET.ADDRESS_REQUEST"
-});
-
 export interface AddressResponse extends JsonRpcAction {
   type: "WALLET.ADDRESS_RESPONSE";
   address: string;
@@ -337,5 +316,4 @@ export const addressResponse: ActionConstructor<AddressResponse> = p => ({
   type: "WALLET.ADDRESS_RESPONSE"
 });
 
-export type JsonRpcRequestAction = AddressRequest;
 export type JsonRpcResponseAction = AddressResponse;

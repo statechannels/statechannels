@@ -1,6 +1,6 @@
 import {unreachable} from "../utils/reducer-utils";
 import * as actions from "./actions";
-import {accumulateSideEffects} from "./outbox";
+
 import {clearOutbox} from "./outbox/reducer";
 import {ProtocolState} from "./protocols";
 import {isNewProcessAction, NewProcessAction} from "./protocols/actions";
@@ -15,26 +15,23 @@ import * as communication from "../communication";
 import * as closeLedgerChannelProtocol from "./protocols/close-ledger-channel";
 import _ from "lodash";
 import {Wallet} from "ethers";
-const initialState = states.waitForLogin();
+
+// If we're generating the initial state then we need to create a new key for the user
+const {address, privateKey} = Wallet.createRandom();
+
+const initialState: states.Initialized = states.initialized({
+  ...states.EMPTY_SHARED_DATA,
+  address,
+  privateKey,
+  processStore: {}
+});
 
 export const walletReducer = (
   state: states.WalletState = initialState,
   action: actions.WalletAction
 ): states.WalletState => {
   const nextState = {...state, outboxState: clearOutbox(state.outboxState, action)};
-
-  switch (nextState.type) {
-    case states.WAIT_FOR_LOGIN:
-      return waitForLoginReducer(nextState, action);
-    case states.METAMASK_ERROR:
-      // We stay in the metamask error state until a change to
-      // metamask settings forces a refresh
-      return state;
-    case states.WALLET_INITIALIZED:
-      return initializedReducer(nextState, action);
-    default:
-      return unreachable(nextState);
-  }
+  return initializedReducer(nextState, action);
 };
 
 export function initializedReducer(
@@ -42,17 +39,7 @@ export function initializedReducer(
   action: actions.WalletAction
 ): states.WalletState {
   let newState = {...state};
-  // Handles when the user issues another request
-  if (action.type === "WALLET.ADDRESS_REQUEST") {
-    const {address} = state;
 
-    return states.initialized({
-      ...state,
-      outboxState: accumulateSideEffects(state.outboxState, {
-        messageOutbox: [actions.addressResponse({id: action.id, address})]
-      })
-    });
-  }
   if (actions.isSharedDataUpdateAction(action)) {
     newState = updateSharedData(newState, action);
   }
@@ -233,30 +220,6 @@ function routeToNewProcessInitializer(
   return startProcess(state, sharedData, action, protocolState, processId);
 }
 
-const waitForLoginReducer = (
-  state: states.WaitForLogin,
-  action: actions.WalletAction
-): states.WalletState => {
-  switch (action.type) {
-    case "WALLET.ADDRESS_REQUEST":
-      let {address, privateKey} = state;
-      if (!address || !privateKey) {
-        ({privateKey, address} = Wallet.createRandom());
-      }
-      return states.initialized({
-        ...state,
-
-        outboxState: accumulateSideEffects(state.outboxState, {
-          messageOutbox: [actions.addressResponse({id: action.id, address})]
-        }),
-        processStore: {},
-        privateKey,
-        address
-      });
-    default:
-      return state;
-  }
-};
 function endProcess(
   state: states.Initialized,
   sharedData: states.SharedData,

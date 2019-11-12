@@ -10,7 +10,7 @@ import * as adjudicatorState from "../adjudicator-state/reducer";
 import {ProcessProtocol, strategyApproved} from "../../communication";
 import {channelId} from "../__tests__/state-helpers";
 import {Wallet} from "ethers";
-import {itSendsThisJsonRpcResponse} from "./helpers";
+
 const wallet = Wallet.createRandom();
 const defaults = {
   ...states.EMPTY_SHARED_DATA,
@@ -21,13 +21,6 @@ const defaults = {
 };
 
 const initializedState = states.initialized({...defaults});
-
-describe("when a GetAddressRequest arrives", () => {
-  const action = actions.addressRequest({domain: "test", id: 1});
-  const result = walletReducer(initializedState, action);
-
-  itSendsThisJsonRpcResponse(result, actions.addressResponse({id: 1, address: wallet.address}));
-});
 
 describe("when a NewProcessAction arrives", () => {
   const action = fundingRequested({channelId, playerIndex: TwoPartyPlayerIndex.A});
