@@ -17,11 +17,11 @@ export type MessageNotificationName = 'MessageQueued';
 export type NotificationName = ChannelNotificationName | MessageNotificationName;
 
 export enum ErrorCodes {
-  SIGNING_ADDRESS_NOT_FOUND = -32100,
-  INVALID_APP_DEFINITION = -32101,
-  INVALID_APP_DATA = -32102,
-  UNSUPPORTED_TOKEN = -32103,
-  CHANNEL_NOT_FOUND = -32104,
+  SIGNING_ADDRESS_NOT_FOUND = 1000,
+  INVALID_APP_DEFINITION = 1001,
+  INVALID_APP_DATA = 1002,
+  UNSUPPORTED_TOKEN = 1003,
+  CHANNEL_NOT_FOUND = 1004,
 }
 
 export interface Participant {
