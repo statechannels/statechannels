@@ -15,6 +15,7 @@ import {validTransition} from './contract/force-move-app';
 import {AllocationItem, encodeAllocation, encodeOutcome, Outcome} from './contract/outcome';
 import {Allocation, isAllocationOutcome, isGuaranteeOutcome} from './contract/outcome';
 import {State, VariablePart} from './contract/state';
+import {createERC20DepositTransaction} from './contract/transaction-creators/erc20-asset-holder';
 import {
   createETHDepositTransaction,
   createTransferAllTransaction,
@@ -44,6 +45,7 @@ export interface SignedState {
 export {
   Allocation,
   createETHDepositTransaction,
+  createERC20DepositTransaction,
   createTransferAllTransaction,
   State,
   encodeConsensusData,
