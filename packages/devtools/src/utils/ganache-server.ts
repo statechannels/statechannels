@@ -6,10 +6,8 @@ import log from "loglevel";
 import {waitUntilFree, waitUntilUsed} from "tcp-port-used";
 import kill from "tree-kill";
 
-import {configureEnvVariables} from "../config/env";
 import {ETHERLIME_ACCOUNTS} from "../constants";
 import {Account, DeployedArtifacts, Deployment} from "../types";
-configureEnvVariables();
 
 log.setDefaultLevel(log.levels.INFO);
 
@@ -28,9 +26,6 @@ export class GanacheServer {
     if (!port) {
       throw new Error("No port was specified. Aborting!");
     }
-
-    this.port = port;
-    this.timeout = timeout;
 
     if (!process.env.GANACHE_NETWORK_ID) {
       log.warn("No GANACHE_NETWORK_ID found.");

@@ -10,8 +10,8 @@ import {
   Signature,
   splitSignature,
 } from 'ethers/utils';
-import loadJsonFile from 'load-json-file';
-import path from 'path';
+import requestPromise from 'request-promise-native';
+
 import {hashChannelStorage} from '../src/contract/channel-storage';
 import {
   Allocation,
@@ -50,27 +50,25 @@ export const getTestProvider = () => {
 
 export const getNetworkMap = async () => {
   try {
-    // TODO: update this to fetch from local server and interpret the structure differently
-    // as it's currently a map of network ID to (a map of contract names to addresses)
-    // whereas the new network context is just a map of contract names to (address, abi) of
-    // the corresponding contract
-    return await loadJsonFile(path.join(__dirname, '../deployment/network-map.json'));
+    // TODO: validate deployments against a whitelist
+    // TODO: share type info for what's expected from this end point
+    const networkContext = JSON.parse(
+      await requestPromise(`http://localhost:${process.env.DEV_SERVER_PORT}`)
+    );
+    const contracts = networkContext['contracts'];
+    return contracts;
+    // return await loadJsonFile(path.join(__dirname, '../deployment/network-map.json'));
   } catch (err) {
-    if (!!err.message.match('ENOENT: no such file or directory')) {
-      return {};
-    } else {
-      throw err;
-    }
+    throw Error(err);
   }
 };
 
 export async function setupContracts(provider: ethers.providers.JsonRpcProvider, artifact) {
   const signer = provider.getSigner(0);
-  const networkId = (await provider.getNetwork()).chainId;
   const networkMap = await getNetworkMap();
 
   const contractName = artifact.contractName;
-  const contractAddress = networkMap[networkId][contractName];
+  const contractAddress = networkMap[contractName]['address'];
   const contract = new ethers.Contract(contractAddress, artifact.abi, signer);
   return contract;
 }

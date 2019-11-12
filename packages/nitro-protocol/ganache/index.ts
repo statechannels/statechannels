@@ -13,7 +13,7 @@ const serverPort = process.env.DEV_SERVER_PORT || 3000;
 const router = new Router();
 const body = {
   ganachePort: process.env.GANACHE_PORT,
-  addresses: {},
+  contracts: {},
 };
 router.get('/', async ctx => (ctx.body = JSON.stringify(body, null, 2)));
 
@@ -41,7 +41,7 @@ async function startGanache() {
 
   process.on('exit', async () => await chain.close());
 
-  body.addresses = await deployContracts(chain);
+  body.contracts = await deployContracts(chain);
 
-  log.info(`Contracts deployed: ${JSON.stringify(body.addresses, null, 2)}`);
+  log.info(`Contracts deployed: ${JSON.stringify(body.contracts, null, 2)}`);
 }
