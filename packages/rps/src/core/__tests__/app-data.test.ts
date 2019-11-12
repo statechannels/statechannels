@@ -1,6 +1,6 @@
 import {bigNumberify} from 'ethers/utils';
 import {randomHex} from '../../utils/randomHex';
-import {decodeAppData, encodeAppData, RPSData, PositionType} from '../app-data';
+import {decodeAppData, encodeAppData, RPSData, PositionType, Reveal, toRPSData} from '../app-data';
 import {HashZero} from 'ethers/constants';
 import {Weapon} from '../weapons';
 
@@ -13,6 +13,28 @@ const testAppData: RPSData = {
   salt: randomHex(64),
 };
 
-test('decode is the inverse of encode', () => {
-  expect(decodeAppData(encodeAppData(testAppData))).toStrictEqual(testAppData);
+const testReveal: Reveal = {
+  type: 'reveal',
+  playerAWeapon: Weapon.Paper,
+  playerBWeapon: Weapon.Rock,
+};
+
+const testRevealWithDefaults: RPSData = {
+  playerAWeapon: Weapon.Paper,
+  playerBWeapon: Weapon.Rock,
+  positionType: PositionType.Start,
+  stake: bigNumberify(0),
+  preCommit: HashZero,
+  salt: randomHex(64),
+};
+
+describe('app-data.ts', () => {
+  test('decode is the inverse of encode', () => {
+    expect(decodeAppData(encodeAppData(testAppData))).toStrictEqual(testAppData);
+  });
+  test('can encode a Reveal by padding with defaults', () => {
+    expect(decodeAppData(encodeAppData(toRPSData(testReveal)))).toStrictEqual(
+      testRevealWithDefaults
+    );
+  });
 });
