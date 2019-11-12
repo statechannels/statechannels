@@ -14,12 +14,12 @@ import {
   randomExternalDestination,
 } from '@statechannels/nitro-protocol';
 import {VariablePart} from '@statechannels/nitro-protocol';
-import {RPSData, PositionType, encodeAppData} from '../core/app-data';
+import {RPSData, PositionType, encodeAppData, hashPreCommit} from '../core/app-data';
 import {Weapon} from '../core/weapons';
 
 import loadJsonFile from 'load-json-file';
 
-import {defaultAbiCoder, bigNumberify, keccak256} from 'ethers/utils';
+import {bigNumberify} from 'ethers/utils';
 import {randomHex} from '../utils/randomHex';
 
 const testProvider = new ethers.providers.JsonRpcProvider(
@@ -175,8 +175,4 @@ export async function setupContracts(provider: ethers.providers.JsonRpcProvider,
   const contractAddress = networkMap ? networkMap[networkId][contractName] : undefined;
   const contract = new ethers.Contract(contractAddress, artifact.abi, signer);
   return contract;
-}
-
-export function hashPreCommit(weapon: Weapon, _salt: string) {
-  return keccak256(defaultAbiCoder.encode(['uint256', 'bytes32'], [weapon, _salt]));
 }
