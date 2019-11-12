@@ -68,7 +68,7 @@ beforeAll(async () => {
   AssetHolder2 = await setupContracts(provider, AssetHolderArtifact2);
   addresses.ETH = AssetHolder1.address;
   addresses.TOK = AssetHolder2.address;
-  appDefinition = networkMap[countingAppArtifact.contractName]['address']; // use a fixed appDefinition in all tests
+  appDefinition = networkMap[countingAppArtifact.contractName].address; // use a fixed appDefinition in all tests
 });
 
 const accepts1 = '1 Asset Types';

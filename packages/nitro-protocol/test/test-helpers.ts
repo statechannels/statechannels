@@ -55,9 +55,7 @@ export const getNetworkMap = async () => {
     const networkContext = JSON.parse(
       await requestPromise(`http://localhost:${process.env.DEV_SERVER_PORT}`)
     );
-    const contracts = networkContext['contracts'];
-    return contracts;
-    // return await loadJsonFile(path.join(__dirname, '../deployment/network-map.json'));
+    return networkContext.contracts;
   } catch (err) {
     throw Error(err);
   }
@@ -68,7 +66,7 @@ export async function setupContracts(provider: ethers.providers.JsonRpcProvider,
   const networkMap = await getNetworkMap();
 
   const contractName = artifact.contractName;
-  const contractAddress = networkMap[contractName]['address'];
+  const contractAddress = networkMap[contractName].address;
   const contract = new ethers.Contract(contractAddress, artifact.abi, signer);
   return contract;
 }
