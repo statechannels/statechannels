@@ -1,3 +1,4 @@
+import {Channel as ChannelObject} from '@statechannels/nitro-protocol';
 import {Uint256} from 'fmg-core';
 import {Model, snakeCaseMappers} from 'objection';
 import ChannelParticipant from './channelParticipants';
@@ -29,6 +30,14 @@ export default class Channel extends Model {
     }
   };
 
+  get asChannelObject(): ChannelObject {
+    return {
+      channelNonce: this.channelNonce,
+      participants: this.participants.map(p => p.address),
+      chainId: this.chainId
+    };
+  }
+
   readonly id!: number;
   channelId: string;
   chainId: Uint256;
@@ -36,5 +45,4 @@ export default class Channel extends Model {
   channelNonce: Uint256;
   participants: ChannelParticipant[];
   states: ChannelState[];
-  guaranteedChannel: string;
 }

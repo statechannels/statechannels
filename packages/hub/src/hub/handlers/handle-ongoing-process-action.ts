@@ -6,6 +6,10 @@ import {errors} from '../../wallet';
 
 import {getProcess} from '../../wallet/db/queries/walletProcess';
 
+/* import {getChannelId, SignedState} from '@statechannels/nitro-protocol';
+import {HUB_ADDRESS} from 'src/constants';
+import {getCurrentState} from 'src/wallet/db/queries/getCurrentState';
+import {updateLedgerChannel} from 'src/wallet/services'; */
 import {MessageRelayRequested} from '../../wallet-client';
 
 export async function handleOngoingProcessAction(
@@ -13,23 +17,13 @@ export async function handleOngoingProcessAction(
 ): Promise<MessageRelayRequested[]> {
   switch (action.type) {
     case 'WALLET.COMMON.SIGNED_STATES_RECEIVED':
+      // return handleSignedStatesReceived(action);
       return [];
-    // return handleCommitmentsReceived(action);
     case 'WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_PROPOSED':
       return handleStrategyProposed(action);
     default:
       return unreachable(action);
   }
-  return [];
-  // TODO: Update to states
-  // switch (action.type) {
-  //   case 'ENGINE.COMMON.COMMITMENTS_RECEIVED':
-  //     return handleCommitmentsReceived(action);
-  //   case 'ENGINE.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_PROPOSED':
-  //     return handleStrategyProposed(action);
-  //   default:
-  //     retreachable(action);
-  // }
 }
 
 async function handleStrategyProposed(action: StrategyProposed) {
@@ -43,9 +37,7 @@ async function handleStrategyProposed(action: StrategyProposed) {
   return [communication.sendStrategyApproved(theirAddress, processId, strategy)];
 }
 
-// todo: this is untested and needs to be refactored
-/*
-async function handleCommitmentsReceived(action: CommitmentsReceived) {
+/*async function handleSignedStatesReceived(action: SignedStatesReceived) {
   {
     const {processId} = action;
     const walletProcess = await getProcess(processId);
@@ -53,30 +45,17 @@ async function handleCommitmentsReceived(action: CommitmentsReceived) {
       throw errors.processMissing(processId);
     }
 
-    const incomingCommitments =[]; //action.signedCommitments;
-    const commitmentRound: SignedCommitment[] = incomingCommitments.map(
-      clientCommitmentToServerCommitment
-    );
+    const stateRound = action.signedStates;
 
     // For the time being, just assume a two-party channel and proceed as normal.
-    const {commitment: lastCommitment, signature: lastCommitmentSignature} = commitmentRound.slice(
-      -1
-    )[0];
+    const {state: lastState} = stateRound.slice(-1)[0];
 
-    const channelId = channelID(lastCommitment.channel);
-    const participants = lastCommitment.channel.participants;
+    const participants = lastState.channel.participants;
     const ourIndex = participants.indexOf(HUB_ADDRESS);
-    const nextParticipant = participants[(ourIndex + 1) % participants.length];
 
-    const ledgerCommitmentRound = commitmentRound.map(signedCommitment => ({
-      ledgerCommitment: signedCommitment.commitment,
-      signature: signedCommitment.signature
-    }));
-    const currentCommitment = await getCurrentCommitment(lastCommitment);
-    const {commitment, signature} = await updateLedgerChannel(
-      ledgerCommitmentRound,
-      currentCommitment && currentCommitment
-    );
+    const currentState = await getCurrentState(lastState);
+    const {commitment, signature} = await updateLedgerChannel(stateRound, currentState);
+
     return participants
       .filter((_, idx) => idx !== ourIndex)
       .map(p =>
@@ -84,7 +63,7 @@ async function handleCommitmentsReceived(action: CommitmentsReceived) {
           p,
           processId,
           [
-            ...incomingCommitments,
+            ...incomingStates,
             {
               commitment,
               signature: (signature as unknown) as string,
@@ -95,11 +74,4 @@ async function handleCommitmentsReceived(action: CommitmentsReceived) {
         )
       );
   }
-}
-
-function clientCommitmentToServerCommitment(signedCommitment: ClientSignedCommitment) {
-  const {commitment, signature: stringSignature} = signedCommitment;
-  const splitSignature = (ethers.utils.splitSignature(stringSignature) as unknown) as Signature;
-  return {commitment, signature: splitSignature};
-}
-*/
+}*/
