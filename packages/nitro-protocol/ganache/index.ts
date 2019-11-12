@@ -35,7 +35,7 @@ async function startGanache() {
 
   process.on('exit', async () => await chain.close());
 
-  body.addresses = await deploy(chain);
+  body.addresses = await chain.deployContracts([]);
 
   console.log(`Contracts deployed: ${JSON.stringify(body.addresses, null, 2)}`);
 }
