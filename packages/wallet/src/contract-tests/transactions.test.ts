@@ -3,7 +3,7 @@ import {ethers} from "ethers";
 import {createChallenge, concludeGame, fiveFive} from "./test-utils";
 import {
   createForceMoveTransaction,
-  createDepositTransaction,
+  createETHDepositTransaction,
   createRespondTransaction,
   createRefuteTransaction,
   createConcludeTransaction,
@@ -96,7 +96,7 @@ describe("transactions", () => {
 
   it("should deposit into the contract", async () => {
     const someChannelId = ethers.utils.hexlify(ethers.utils.randomBytes(32));
-    const depositTransactionData = createDepositTransaction(someChannelId, "0x5", "0x0");
+    const depositTransactionData = createETHDepositTransaction(someChannelId, "0x5", "0x0");
     await testTransactionSender({
       ...depositTransactionData,
       to: ETH_ASSET_HOLDER_ADDRESS,

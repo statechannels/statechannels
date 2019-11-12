@@ -2,7 +2,7 @@ import {TransactionRequest} from "ethers/providers";
 import {getAdjudicatorInterface} from "./contract-utils";
 import {splitSignature} from "ethers/utils";
 import {
-  createDepositTransaction as createNitroDepositTransaction,
+  createETHDepositTransaction as createNitroDepositTransaction,
   createTransferAllTransaction as createNitroTransferAllTransaction,
   Transactions as nitroTrans,
   SignedState,
@@ -131,7 +131,7 @@ export function createTransferAndWithdrawTransaction(
   };
 }
 
-export function createDepositTransaction(
+export function createETHDepositTransaction(
   destination: string,
   depositAmount: string,
   expectedHeld: string

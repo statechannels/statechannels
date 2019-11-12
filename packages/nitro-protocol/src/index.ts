@@ -16,7 +16,7 @@ import {AllocationItem, encodeAllocation, encodeOutcome, Outcome} from './contra
 import {Allocation, isAllocationOutcome, isGuaranteeOutcome} from './contract/outcome';
 import {State, VariablePart} from './contract/state';
 import {
-  createDepositTransaction,
+  createETHDepositTransaction,
   createTransferAllTransaction,
 } from './contract/transaction-creators/eth-asset-holder';
 import * as Signatures from './signatures';
@@ -43,7 +43,7 @@ export interface SignedState {
 // TODO: Export this with more thought to what is exposed by @statchannels/nitro-protocol
 export {
   Allocation,
-  createDepositTransaction,
+  createETHDepositTransaction,
   createTransferAllTransaction,
   State,
   encodeConsensusData,

@@ -1,6 +1,6 @@
 import {ethers} from "ethers";
 import {
-  createDepositTransaction,
+  createETHDepositTransaction,
   createForceMoveTransaction,
   createConcludeTransaction,
   createRespondTransaction
@@ -60,7 +60,7 @@ export async function depositFunds(
   participant: string,
   amount = defaultDepositAmount
 ) {
-  const depositTransactionData = createDepositTransaction(participant, amount, "0x0");
+  const depositTransactionData = createETHDepositTransaction(participant, amount, "0x0");
   const transactionReceipt = await sendTransaction(provider, {
     ...depositTransactionData,
     to: ETH_ASSET_HOLDER_ADDRESS,
