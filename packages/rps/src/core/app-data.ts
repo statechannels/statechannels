@@ -1,5 +1,7 @@
 import {Weapon} from './weapons';
-import {BigNumber, defaultAbiCoder} from 'ethers/utils';
+import {BigNumber, defaultAbiCoder, bigNumberify} from 'ethers/utils';
+import {HashZero} from 'ethers/constants';
+import {randomHex} from '../utils/randomHex';
 
 export enum PositionType {
   Start, // 0
@@ -19,13 +21,26 @@ export interface Start {
   type: 'start';
 }
 
-export type RoundProposed = Pick<RPSData, 'stake' & 'preCommit'> & {type: 'roundProposed'};
+export type RoundProposed = Pick<RPSData, 'stake' | 'preCommit'> & {type: 'roundProposed'};
 
-export type RoundAccepted = Pick<RPSData, 'stake' & 'preCommit'> & {type: 'roundAccepted'};
+export type RoundAccepted = Pick<RPSData, 'stake' | 'preCommit'> & {type: 'roundAccepted'};
 
-export type Reveal = Pick<RPSData, 'playerAWeapon' & 'playerBWeapon'> & {type: 'reveal'};
+export type Reveal = Pick<RPSData, 'playerAWeapon' | 'playerBWeapon'> & {type: 'reveal'};
 
 export type AppData = Start | RoundProposed | RoundAccepted | Reveal;
+
+export function toRPSData(appData: AppData): RPSData {
+  const defaults: RPSData = {
+    positionType: PositionType.Start,
+    stake: bigNumberify(0),
+    preCommit: HashZero,
+    playerAWeapon: Weapon.Rock,
+    playerBWeapon: Weapon.Rock,
+    salt: randomHex(64),
+  };
+
+  return {...defaults, ...appData};
+}
 
 export function encodeAppData(appData: RPSData): string {
   return defaultAbiCoder.encode(
