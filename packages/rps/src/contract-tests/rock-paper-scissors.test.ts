@@ -14,6 +14,8 @@ import {
   randomExternalDestination,
 } from '@statechannels/nitro-protocol';
 import {VariablePart} from '@statechannels/nitro-protocol';
+import {RPSData, PositionType} from '../core/app-data';
+import {Weapon} from '../core/weapons';
 
 import loadJsonFile from 'load-json-file';
 
@@ -24,38 +26,18 @@ const testProvider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.GANACHE_PORT}`
 );
 
-enum PositionType {
-  Start, // 0
-  RoundProposed, // 1
-  RoundAccepted, // 2
-  Reveal, // 3
-}
-
 const PositionIndex = {
   Start: PositionType.Start,
   RoundProposed: PositionType.RoundProposed,
   RoundAccepted: PositionType.RoundAccepted,
   Reveal: PositionType.Reveal,
 };
-enum Weapon {
-  Rock,
-  Paper,
-  Scissors,
-}
+
 const WeaponIndex = {
   Rock: Weapon.Rock,
   Paper: Weapon.Paper,
   Scissors: Weapon.Scissors,
 };
-
-interface RPSData {
-  positionType: PositionType;
-  stake: BigNumber; // uint256
-  preCommit: string; // bytes32
-  playerAWeapon: Weapon;
-  playerBWeapon: Weapon;
-  salt: string; // bytes32
-}
 
 let RockPaperScissors: Contract;
 

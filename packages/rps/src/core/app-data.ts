@@ -1,26 +1,28 @@
 import {Weapon} from './weapons';
+import {BigNumber} from 'ethers/utils';
 
-export interface Resting {
-  type: 'resting';
+export enum PositionType {
+  Start, // 0
+  RoundProposed, // 1
+  RoundAccepted, // 2
+  Reveal, // 3
+}
+export interface RPSData {
+  positionType: PositionType;
+  stake: BigNumber; // uint256
+  preCommit: string; // bytes32
+  playerAWeapon: Weapon;
+  playerBWeapon: Weapon;
+  salt: string; // bytes32
+}
+export interface Start {
+  type: 'start';
 }
 
-export interface Propose {
-  type: 'propose';
-  stake: number;
-  preCommit: string;
-}
+export type RoundProposed = Pick<RPSData, 'stake' & 'preCommit'> & {type: 'roundProposed'};
 
-export interface Accept {
-  type: 'accept';
-  stake: number;
-  preCommit: string;
-  bWeapon: Weapon;
-}
+export type RoundAccepted = Pick<RPSData, 'stake' & 'preCommit'> & {type: 'roundAccepted'};
 
-export interface Reveal {
-  type: 'reveal';
-  aWeapon: Weapon;
-  bWeapon: Weapon;
-}
+export type Reveal = Pick<RPSData, 'playerAWeapon' & 'playerBWeapon'> & {type: 'reveal'};
 
-export type AppData = Resting | Propose | Accept | Reveal;
+export type AppData = Start | RoundProposed | RoundAccepted | Reveal;
