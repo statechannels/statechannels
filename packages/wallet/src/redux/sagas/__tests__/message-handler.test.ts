@@ -25,7 +25,7 @@ describe("message listener", () => {
       params: {}
     });
 
-    expectSaga(messageHandler, requestMessage)
+    expectSaga(messageHandler, requestMessage, "localhost")
       .withState(initialState)
       .fork(messageSender, addressResponse({id: 1, address: wallet.address}));
   });
