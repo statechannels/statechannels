@@ -1,8 +1,5 @@
-import {
-  AssetOutcome,
-  isAllocationOutcome,
-  Outcome
-} from '@statechannels/nitro-protocol/src/contract/outcome';
+import {isAllocationOutcome, Outcome} from '@statechannels/nitro-protocol';
+import {AssetOutcome} from '@statechannels/nitro-protocol/lib/src/contract/outcome';
 import * as Knex from 'knex';
 
 export function addAddressCheck(knex: Knex, table: string, column: string) {
