@@ -5,7 +5,7 @@ jest.setTimeout(20000);
 import {expectRevert} from '@statechannels/devtools';
 import path from 'path';
 import {Contract} from 'ethers';
-import {AddressZero, HashZero} from 'ethers/constants';
+import {AddressZero} from 'ethers/constants';
 import {
   Allocation,
   encodeOutcome,
@@ -17,7 +17,8 @@ import {VariablePart} from '@statechannels/nitro-protocol';
 
 import loadJsonFile from 'load-json-file';
 
-import {defaultAbiCoder, bigNumberify, BigNumber} from 'ethers/utils';
+import {defaultAbiCoder, bigNumberify, BigNumber, keccak256} from 'ethers/utils';
+import {randomHex} from '../utils/randomHex';
 
 const testProvider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.GANACHE_PORT}`
@@ -57,17 +58,21 @@ beforeAll(async () => {
   RockPaperScissors = await setupContracts(testProvider, RockPaperScissorsArtifact);
 });
 
+const salt = randomHex(64);
+const preCommit = hashPreCommit(Weapon.Rock, salt);
 describe('validTransition', () => {
   it.each`
-    isValid  | positionType                                                | stake               | AWeapon                       | BWeapon                       | fromBalances    | toBalances      | description
-    ${true}  | ${[PositionType.Start, PositionType.RoundProposed]}         | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]} | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${''}
-    ${true}  | ${[PositionType.RoundProposed, PositionType.RoundAccepted]} | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]} | ${{A: 5, B: 5}} | ${{A: 4, B: 6}} | ${''}
-    ${true}  | ${[PositionType.RoundAccepted, PositionType.Reveal]}        | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]} | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${''}
-    ${true}  | ${[PositionType.Reveal, PositionType.Start]}                | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]} | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${''}
-    ${false} | ${[PositionType.Reveal, PositionType.Start]}                | ${{from: 1, to: 2}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]} | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${'Disallows stake change'}
-    ${false} | ${[PositionType.Start, PositionType.RoundProposed]}         | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]} | ${{A: 5, B: 5}} | ${{A: 6, B: 4}} | ${'Disallows allocations change '}
-    ${false} | ${[PositionType.RoundProposed, PositionType.RoundAccepted]} | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]} | ${{A: 6, B: 4}} | ${{B: 6, A: 4}} | ${'Disallows destination swap'}
-    ${false} | ${[PositionType.Start, PositionType.RoundProposed]}         | ${{from: 1, to: 6}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]} | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${'Disallows a stake that is too large'}
+    isValid  | positionType                                                | stake               | AWeapon                       | BWeapon                               | fromBalances    | toBalances      | description
+    ${true}  | ${[PositionType.Start, PositionType.RoundProposed]}         | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]}         | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${''}
+    ${true}  | ${[PositionType.RoundProposed, PositionType.RoundAccepted]} | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]}         | ${{A: 5, B: 5}} | ${{A: 4, B: 6}} | ${''}
+    ${true}  | ${[PositionType.RoundAccepted, PositionType.Reveal]}        | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Paper, Weapon.Paper]}       | ${{A: 4, B: 6}} | ${{A: 4, B: 6}} | ${'B won'}
+    ${true}  | ${[PositionType.RoundAccepted, PositionType.Reveal]}        | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Scissors, Weapon.Scissors]} | ${{A: 4, B: 6}} | ${{A: 6, B: 4}} | ${'A won'}
+    ${true}  | ${[PositionType.RoundAccepted, PositionType.Reveal]}        | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]}         | ${{A: 4, B: 6}} | ${{A: 5, B: 5}} | ${'Draw'}
+    ${true}  | ${[PositionType.Reveal, PositionType.Start]}                | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]}         | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${''}
+    ${false} | ${[PositionType.Reveal, PositionType.Start]}                | ${{from: 1, to: 2}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]}         | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${'Disallows stake change'}
+    ${false} | ${[PositionType.Start, PositionType.RoundProposed]}         | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]}         | ${{A: 5, B: 5}} | ${{A: 6, B: 4}} | ${'Disallows allocations change '}
+    ${false} | ${[PositionType.RoundProposed, PositionType.RoundAccepted]} | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]}         | ${{A: 6, B: 4}} | ${{B: 6, A: 4}} | ${'Disallows destination swap'}
+    ${false} | ${[PositionType.Start, PositionType.RoundProposed]}         | ${{from: 1, to: 6}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]}         | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${'Disallows a stake that is too large'}
   `(
     `Returns $isValid on [from, to] = PositionType$positionType ; $description`,
     async ({
@@ -106,18 +111,18 @@ describe('validTransition', () => {
       const fromAppData: RPSData = {
         positionType: positionType[0],
         stake: bigNumberify(stake.from),
-        preCommit: HashZero,
+        preCommit,
         playerAWeapon: AWeapon[0],
         playerBWeapon: BWeapon[0],
-        salt: HashZero,
+        salt,
       };
       const toAppData: RPSData = {
         positionType: positionType[1],
         stake: bigNumberify(stake.to),
-        preCommit: HashZero,
+        preCommit,
         playerAWeapon: AWeapon[1],
         playerBWeapon: BWeapon[1],
-        salt: HashZero,
+        salt,
       };
 
       const fromAppDataBytes = defaultAbiCoder.encode(
@@ -185,4 +190,8 @@ export async function setupContracts(provider: ethers.providers.JsonRpcProvider,
   const contractAddress = networkMap ? networkMap[networkId][contractName] : undefined;
   const contract = new ethers.Contract(contractAddress, artifact.abi, signer);
   return contract;
+}
+
+export function hashPreCommit(weapon: Weapon, salt: string) {
+  return keccak256(defaultAbiCoder.encode(['uint256', 'bytes32'], [weapon, salt]));
 }
