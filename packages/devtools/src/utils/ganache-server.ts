@@ -17,16 +17,12 @@ export class GanacheServer {
   server: any;
 
   constructor(
-    public readonly port: number,
+    public readonly port: number = 8545,
     accounts: Account[] = ETHERLIME_ACCOUNTS,
     public readonly timeout: number = 5000,
     gasLimit: number = 1000000000,
     gasPrice: string = "0x01"
   ) {
-    if (!port) {
-      throw new Error("No port was specified. Aborting!");
-    }
-
     if (!process.env.GANACHE_NETWORK_ID) {
       log.warn("No GANACHE_NETWORK_ID found.");
     }
