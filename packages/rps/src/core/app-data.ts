@@ -1,5 +1,5 @@
 import {Weapon} from './weapons';
-import {BigNumber, defaultAbiCoder, bigNumberify} from 'ethers/utils';
+import {BigNumber, defaultAbiCoder, bigNumberify, keccak256} from 'ethers/utils';
 import {HashZero} from 'ethers/constants';
 import {randomHex} from '../utils/randomHex';
 
@@ -66,4 +66,8 @@ export function decodeAppData(appDataBytes: string): RPSData {
     playerBWeapon: parameters[4],
     salt: parameters[5],
   };
+}
+
+export function hashPreCommit(weapon: Weapon, salt: string) {
+  return keccak256(defaultAbiCoder.encode(['uint256', 'bytes32'], [weapon, salt]));
 }
