@@ -1,9 +1,9 @@
-import {getChannelId, isAllocationOutcome, State} from '@statechannels/nitro-protocol';
-import {AllocationAssetOutcome} from '@statechannels/nitro-protocol/src/contract/outcome';
+import {getChannelId, State} from '@statechannels/nitro-protocol';
 import {ethers} from 'ethers';
 import {bigNumberify} from 'ethers/utils';
 import {Address, Uint256} from 'fmg-core';
 import Channel from '../../models/channel';
+import {outcomeAddPriorities} from '../utils';
 
 export const queries = {
   updateChannel
@@ -20,23 +20,15 @@ async function updateChannel(stateRound: State[], hubState: State) {
     .select('id')
     .first();
 
-  // todo: remove hardcoding of only inspecting the first outcome in the outcomes list
-  const allocations = (s: State) =>
-    isAllocationOutcome(s.outcome[0])
-      ? (s.outcome[0] as AllocationAssetOutcome).allocation.map((allocationItem, priority) => ({
-          ...allocationItem,
-          assetHolderAddress: s.outcome[0].assetHolderAddress,
-          priority
-        }))
-      : [];
-
+  const outcome = (s: State) => outcomeAddPriorities(s.outcome);
   const state = (s: State) => ({
     turn_number: s.turnNum,
-    allocations: allocations(s),
+    outcome: outcome(s),
     app_data: s.appData
   });
 
-  const states = [...stateRound.map(c => state(c)), state(hubState)];
+  const states = [...stateRound.map(s => state(s)), state(hubState)];
+
   // todo: refactor guarantees later
   // const guaranteedChannel = stateRound.map(c => c.channel.guaranteedChannel)[0];
 
@@ -48,20 +40,18 @@ async function updateChannel(stateRound: State[], hubState: State) {
     holdings?: Uint256;
     id?: number;
     participants?: any[];
-    guaranteedChannel: string;
   }
   let upserts: Upsert = {
     channel_id: channelId,
     states,
     rules_address,
-    nonce,
-    // todo: deal with guarantee channels
-    guaranteedChannel: '0x0000000000000000000000000000000000000000'
+    nonce
   };
 
   // TODO: We are currently using the allocations to set the funding amount
   // This assumes that the channel is funded and DOES NOT work for guarantor channels
-  const hubAllocationAmounts = allocations(hubState).map(x => x.amount);
+  // todo: asset holder address needs to be considered
+  const hubAllocationAmounts = outcome(hubState)[0].allocation.map(x => x.amount);
 
   const holdings = hubAllocationAmounts.reduce(
     (a, b) =>
@@ -86,6 +76,6 @@ async function updateChannel(stateRound: State[], hubState: State) {
   }
 
   return Channel.query()
-    .eager('[states.[allocations,channel.[participants]],participants]')
+    .eager('[participants, states.[outcome.[allocation], channel.[participants]]]')
     .upsertGraphAndFetch(upserts);
 }

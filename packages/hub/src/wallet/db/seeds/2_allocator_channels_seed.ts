@@ -2,7 +2,6 @@ import {encodeConsensusData} from '@statechannels/nitro-protocol';
 import {Model} from 'objection';
 import {HUB_ADDRESS} from '../../../constants';
 import {
-  allocation,
   BEGINNING_APP_CHANNEL_HOLDINGS,
   BEGINNING_APP_CHANNEL_NONCE,
   DUMMY_RULES_ADDRESS,
@@ -10,18 +9,20 @@ import {
   DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID,
   DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID_3,
   DUMMY_RULES_ONGOING_APP_CHANNEL_NONCE_CHANNEL_ID,
-  dummyEthAssetHolderAddress,
   FUNDED_CHANNEL_HOLDINGS,
   FUNDED_CHANNEL_NONCE,
   FUNDED_CHANNEL_NONCE_3,
   ONGOING_APP_CHANNEL_HOLDINGS,
   ONGOING_APP_CHANNEL_NONCE,
+  outcome2,
+  outcome3,
   PARTICIPANT_1_ADDRESS,
   PARTICIPANT_2_ADDRESS
 } from '../../../test/test-constants';
 import {consensus_app_attrs2, consensus_app_attrs3} from '../../../test/test_data';
 import Channel from '../../models/channel';
 import knex from '../connection';
+import {outcomeAddPriorities} from '../utils';
 
 Model.knex(knex);
 
@@ -36,21 +37,6 @@ const participants_3 = [
   {address: HUB_ADDRESS, priority: 2}
 ];
 
-const allocationByPriority = (priority: number) => ({
-  priority,
-  destination: allocation[priority].destination,
-  amount: allocation[priority].amount,
-  assetHolderAddress: dummyEthAssetHolderAddress
-});
-
-const allocations_3 = () => [
-  allocationByPriority(0),
-  allocationByPriority(1),
-  allocationByPriority(2)
-];
-
-const allocations = () => allocations_3().slice(0, 2);
-
 // ***************
 // Ledger channels
 // ***************
@@ -58,7 +44,7 @@ const allocations = () => allocations_3().slice(0, 2);
 function pre_fund_setup(turnNumber: number) {
   return {
     turnNumber,
-    allocations: allocations(),
+    outcome: outcomeAddPriorities(outcome2),
     appData: encodeConsensusData(consensus_app_attrs2(2))
   };
 }
@@ -66,7 +52,7 @@ function pre_fund_setup(turnNumber: number) {
 function pre_fund_setup_3(turnNumber: number) {
   return {
     turnNumber,
-    allocations: allocations_3(),
+    outcome: outcomeAddPriorities(outcome3),
     appData: encodeConsensusData(consensus_app_attrs3(3))
   };
 }
@@ -92,7 +78,7 @@ const funded_channel_3 = {
 function post_fund_setup(turnNumber: number) {
   return {
     turnNumber,
-    allocations: allocations(),
+    outcome: outcomeAddPriorities(outcome2),
     appData: encodeConsensusData(consensus_app_attrs2(0))
   };
 }
@@ -109,7 +95,7 @@ const beginning_app_phase_channel = {
 function app(turnNumber: number) {
   return {
     turnNumber,
-    allocations: allocations(),
+    outcome: outcomeAddPriorities(outcome2),
     appData: encodeConsensusData(consensus_app_attrs2(turnNumber % participants.length))
   };
 }

@@ -38,7 +38,7 @@ describe('updateChannel', () => {
       const {appDefinition: rules_address} = testDataConstructors.post_fund_setup(2);
       const existing_allocator_channel = await Channel.query()
         .where({nonce, rules_address})
-        .eager('[states.[allocations],participants]')
+        .eager('[states.[outcome.[allocation]], participants]')
         .first();
 
       expect(existing_allocator_channel).toMatchObject(seeds.funded_channel);

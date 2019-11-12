@@ -26,7 +26,7 @@ export async function onDepositEvent(
     .findOne({
       channel_id
     })
-    .eager('[states.[allocations], participants]');
+    .eager('[states.[outcome.[allocation]], participants]');
 
   const holdings = destinationHoldings;
 
@@ -48,14 +48,16 @@ export async function onDepositEvent(
     .map(participant => participant.address)
     .indexOf(HUB_ADDRESS);
 
-  const totalNeededInAdjudicator = latestState.allocations
+  // todo: need to consider the asset holder address
+  const totalNeededInAdjudicator = latestState.outcome[0].allocation
     .map(allocation => allocation.amount)
     .reduce(addHex);
 
   const channelNeedsMoreFunds = bigNumberify(totalNeededInAdjudicator).gt(bigNumberify(holdings));
 
   if (channelNeedsMoreFunds) {
-    const allocationNeededFromHub = latestState.allocations[hubParticipatIndex];
+    // todo: need to consider the asset holder address
+    const allocationNeededFromHub = latestState.outcome[0].allocation[hubParticipatIndex];
     await Blockchain.fund(channelId, holdings, allocationNeededFromHub.amount);
   } else {
     console.log('Channel is fully funded');

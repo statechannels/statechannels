@@ -1,7 +1,7 @@
 import {Uint32} from 'fmg-core';
 import {Model, snakeCaseMappers} from 'objection';
-import Allocation from './allocation';
 import Channel from './channel';
+import Outcome from './outcome';
 
 export default class ChannelState extends Model {
   static tableName = 'channel_states';
@@ -15,12 +15,12 @@ export default class ChannelState extends Model {
         to: 'channels.id'
       }
     },
-    allocations: {
+    outcome: {
       relation: Model.HasManyRelation,
-      modelClass: `${__dirname}/allocation`,
+      modelClass: `${__dirname}/outcome`,
       join: {
         from: 'channel_states.id',
-        to: 'allocations.channel_state_id'
+        to: 'outcomes.channel_state_id'
       }
     }
   };
@@ -34,8 +34,8 @@ export default class ChannelState extends Model {
   channelId!: number;
   turnNumber!: Uint32;
   isFinal!: boolean;
-  allocations: Allocation[];
-  appAttrs!: any;
+  outcome: Outcome[];
+  appData!: any;
   challengeDuration: number;
   appDefinition: string;
 }
