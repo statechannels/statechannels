@@ -182,23 +182,24 @@
       "^react-native$": "react-native-web"
     },
     "moduleFileExtensions": [
-      "web.ts",
+      "js",
+      "json",
+      "jsx",
+      "mjs",
+      "node",
       "ts",
-      "web.tsx",
       "tsx",
       "web.js",
-      "js",
       "web.jsx",
-      "jsx",
-      "json",
-      "node",
-      "mjs"
+      "web.ts",
+      "web.tsx"
     ],
     "globals": {
       "ts-jest": {
-        "tsConfigFile": "./tsconfig.json"
+        "tsConfig": "./tsconfig.json"
       }
-    }
+    },
+    "preset": "ts-jest/presets/js-with-babel"
   },
   "babel": {
     "presets": [
