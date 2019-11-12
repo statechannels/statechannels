@@ -9,6 +9,7 @@ let pre_fund_setup_0: State;
 let pre_fund_setup_1: State;
 let post_fund_setup_0: State;
 let post_fund_setup_1: State;
+let app_0: State;
 let hubSignature: Signature;
 
 beforeEach(() => {
@@ -17,6 +18,7 @@ beforeEach(() => {
 
   post_fund_setup_0 = testDataConstructors.post_fund_setup(2);
   post_fund_setup_1 = testDataConstructors.post_fund_setup(3);
+  app_0 = testDataConstructors.app(4, funded_channel);
 
   hubSignature = signState(pre_fund_setup_1, HUB_PRIVATE_KEY).signature;
 });
@@ -58,5 +60,9 @@ describe('nextState', () => {
 
   it('works on postFundSetup states', () => {
     expect(ChannelManager.nextState(post_fund_setup_0)).toMatchObject(post_fund_setup_1);
+  });
+
+  it('throws on app commitments', () => {
+    expect(() => ChannelManager.nextState(app_0)).toThrowError();
   });
 });

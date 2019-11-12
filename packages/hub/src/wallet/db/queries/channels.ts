@@ -2,6 +2,7 @@ import {getChannelId, State} from '@statechannels/nitro-protocol';
 import {ethers} from 'ethers';
 import {bigNumberify} from 'ethers/utils';
 import {Address, Uint256} from 'fmg-core';
+import errors from '../../errors';
 import Channel from '../../models/channel';
 import {outcomeAddPriorities} from '../utils';
 
@@ -19,6 +20,12 @@ async function updateChannel(stateRound: State[], hubState: State) {
     .where({channel_id: channelId})
     .select('id')
     .first();
+
+  if (storedChannel && firstState.turnNum < firstState.channel.participants.length) {
+    throw errors.CHANNEL_EXISTS;
+  } else if (!storedChannel && firstState.turnNum >= firstState.channel.participants.length) {
+    throw errors.CHANNEL_MISSING;
+  }
 
   const outcome = (s: State) => outcomeAddPriorities(s.outcome);
   const state = (s: State) => ({

@@ -1,7 +1,13 @@
 import {State} from '@statechannels/nitro-protocol';
 import {signState} from '@statechannels/nitro-protocol/lib/src/signatures';
 import {Signature} from 'ethers/utils';
-import {PARTICIPANT_1_PRIVATE_KEY, PARTICIPANT_2_PRIVATE_KEY} from '../../../test/test-constants';
+import {
+  DUMMY_CHAIN_ID,
+  FUNDED_CHANNEL_NONCE,
+  PARTICIPANT_1_PRIVATE_KEY,
+  PARTICIPANT_2_PRIVATE_KEY,
+  PARTICIPANTS
+} from '../../../test/test-constants';
 import {
   app_1_response,
   beginning_app_phase_channel,
@@ -81,6 +87,26 @@ describe('updateLedgerChannel', () => {
         }
       ]).catch((err: Error) => {
         expect(err).toMatchObject(errors.STATE_NOT_SIGNED);
+      });
+    });
+
+    it('throws when the channel exists', async () => {
+      expect.assertions(1);
+
+      pre_fund_setup_0.channel = {
+        channelNonce: FUNDED_CHANNEL_NONCE,
+        participants: PARTICIPANTS,
+        chainId: DUMMY_CHAIN_ID
+      };
+      theirSignature = signState(pre_fund_setup_0, PARTICIPANT_1_PRIVATE_KEY).signature;
+
+      await LedgerChannelManager.updateLedgerChannel([
+        {
+          state: pre_fund_setup_0,
+          signature: theirSignature
+        }
+      ]).catch((err: Error) => {
+        expect(err).toMatchObject(errors.CHANNEL_EXISTS);
       });
     });
   });
@@ -169,6 +195,28 @@ describe('updateLedgerChannel', () => {
         }
       ).catch(err => {
         expect(err).toMatchObject(errors.INVALID_TRANSITION);
+      });
+    });
+
+    it("throws when the channel doesn't exist", async () => {
+      expect.assertions(1);
+
+      post_fund_setup_0.channel = {
+        ...post_fund_setup_0.channel,
+        channelNonce: '999'
+      };
+      theirSignature = signState(post_fund_setup_0, PARTICIPANT_1_PRIVATE_KEY).signature;
+
+      await LedgerChannelManager.updateLedgerChannel(
+        [
+          {
+            state: post_fund_setup_0,
+            signature: theirSignature
+          }
+        ],
+        created_pre_fund_setup_1
+      ).catch(err => {
+        expect(err).toMatchObject(errors.CHANNEL_MISSING);
       });
     });
 

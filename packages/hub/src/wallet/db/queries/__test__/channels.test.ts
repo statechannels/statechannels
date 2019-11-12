@@ -1,4 +1,9 @@
-import {constructors as testDataConstructors, created_channel} from '../../../../test/test_data';
+import {errors} from '../../..';
+import {
+  constructors as testDataConstructors,
+  created_channel,
+  funded_channel
+} from '../../../../test/test_data';
 import Channel from '../../../models/channel';
 import knex from '../../connection';
 import {
@@ -29,6 +34,16 @@ describe('updateChannel', () => {
       expect((await knex('channel_participants').select('*')).length).toEqual(
         SEEDED_PARTICIPANTS + 2
       );
+    });
+
+    it('throws when the channel exists', async () => {
+      const theirState = testDataConstructors.pre_fund_setup(0);
+      theirState.channel = funded_channel;
+      const hubState = testDataConstructors.pre_fund_setup(1);
+      expect.assertions(1);
+      await queries.updateChannel([theirState], hubState).catch(err => {
+        expect(err).toMatchObject(errors.CHANNEL_EXISTS);
+      });
     });
   });
 
@@ -63,6 +78,17 @@ describe('updateChannel', () => {
       expect((await knex('allocations').select('*')).length).toEqual(SEEDED_ALLOCATIONS);
 
       expect((await knex('channel_participants').select('*')).length).toEqual(SEEDED_PARTICIPANTS);
+    });
+
+    it("throws when the channel doesn't exist and the commitment is not PreFundSetup", async () => {
+      expect.assertions(1);
+      const theirState = testDataConstructors.post_fund_setup(2);
+      theirState.channel = {...funded_channel, channelNonce: '1234'};
+      const hubState = testDataConstructors.post_fund_setup(1);
+      expect.assertions(1);
+      await queries.updateChannel([theirState], hubState).catch(err => {
+        expect(err).toMatchObject(errors.CHANNEL_MISSING);
+      });
     });
   });
 });
