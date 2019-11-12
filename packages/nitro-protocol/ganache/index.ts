@@ -1,10 +1,13 @@
 import {GanacheServer} from '@statechannels/devtools';
 import Koa = require('koa');
 import Router = require('koa-router');
+import dotEnvExtended from 'dotenv-extended';
 import log from 'loglevel';
 
 import {deployContracts} from './deployer';
 import {logger as serverLogger} from './logger';
+
+dotEnvExtended.load();
 
 log.setDefaultLevel(log.levels.INFO);
 
