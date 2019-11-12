@@ -14,12 +14,12 @@ import {
   randomExternalDestination,
 } from '@statechannels/nitro-protocol';
 import {VariablePart} from '@statechannels/nitro-protocol';
-import {RPSData, PositionType} from '../core/app-data';
+import {RPSData, PositionType, encodeAppData} from '../core/app-data';
 import {Weapon} from '../core/weapons';
 
 import loadJsonFile from 'load-json-file';
 
-import {defaultAbiCoder, bigNumberify, BigNumber, keccak256} from 'ethers/utils';
+import {defaultAbiCoder, bigNumberify, keccak256} from 'ethers/utils';
 import {randomHex} from '../utils/randomHex';
 
 const testProvider = new ethers.providers.JsonRpcProvider(
@@ -121,18 +121,7 @@ describe('validTransition', () => {
         salt,
       };
 
-      const fromAppDataBytes = defaultAbiCoder.encode(
-        [
-          'tuple(uint8 positionType, uint256 stake, bytes32 preCommit, uint8 playerAWeapon, uint8 playerBWeapon, bytes32 salt)',
-        ],
-        [fromAppData]
-      );
-      const toAppDataBytes = defaultAbiCoder.encode(
-        [
-          'tuple(uint8 positionType, uint256 stake, bytes32 preCommit, uint8 playerAWeapon, uint8 playerBWeapon, bytes32 salt)',
-        ],
-        [toAppData]
-      );
+      const [fromAppDataBytes, toAppDataBytes] = [fromAppData, toAppData].map(encodeAppData);
 
       const fromVariablePart: VariablePart = {
         outcome: encodeOutcome(fromOutcome),
@@ -188,6 +177,6 @@ export async function setupContracts(provider: ethers.providers.JsonRpcProvider,
   return contract;
 }
 
-export function hashPreCommit(weapon: Weapon, salt: string) {
-  return keccak256(defaultAbiCoder.encode(['uint256', 'bytes32'], [weapon, salt]));
+export function hashPreCommit(weapon: Weapon, _salt: string) {
+  return keccak256(defaultAbiCoder.encode(['uint256', 'bytes32'], [weapon, _salt]));
 }
