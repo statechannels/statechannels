@@ -54,7 +54,7 @@ export class GanacheServer {
   constructor(
     accounts: Account[] = ETHERLIME_ACCOUNTS,
     timeout: number = 5000,
-    gasLimit: number = 17592186044415,
+    gasLimit: number = 1000000000,
     gasPrice: string = "0x01"
   ) {
     if (!process.env.GANACHE_PORT) {
@@ -74,9 +74,11 @@ export class GanacheServer {
 
     const oneMillion = ethers.utils.parseEther("1000000");
 
-    const opts = [`--networkId ${process.env.GANACHE_NETWORK_ID}`, `--port ${this.port}`].concat(
-      accounts.map(account => `--account ${account.privateKey},${account.amount || oneMillion}`)
-    );
+    const opts = [`--networkId ${process.env.GANACHE_NETWORK_ID}`, `--port ${this.port}`]
+      .concat(
+        accounts.map(account => `--account ${account.privateKey},${account.amount || oneMillion}`)
+      )
+      .concat([`--gasLimit ${gasLimit}`, `--gasPrice ${gasPrice}`]);
 
     const cmd = `ganache-cli ${opts.join(" ")}`;
 
