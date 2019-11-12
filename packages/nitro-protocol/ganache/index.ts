@@ -1,8 +1,12 @@
 import {GanacheServer} from '@statechannels/devtools';
 import Koa = require('koa');
 import Router = require('koa-router');
-import {deploy} from './deployer';
-import {logger} from './logger';
+import log from 'loglevel';
+
+import {deployContracts} from './deployer';
+import {logger as serverLogger} from './logger';
+
+log.setDefaultLevel(log.levels.INFO);
 
 const serverPort = process.env.DEV_SERVER_PORT || 3000;
 
@@ -14,7 +18,7 @@ const body = {
 router.get('/', async ctx => (ctx.body = JSON.stringify(body, null, 2)));
 
 const server = new Koa();
-server.use(logger);
+server.use(serverLogger);
 server.use(router.routes());
 server
   .listen(serverPort)
@@ -22,6 +26,8 @@ server
   .on('listening', async () => await startGanache());
 
 async function startGanache() {
+  log.info(`Starting contract deployment server on port ${serverPort}`);
+
   if (!process.env.GANACHE_PORT) {
     throw Error(
       'Cannot start ganache server without a specified port. Set port via the GANACHE_PORT env var'
@@ -35,7 +41,7 @@ async function startGanache() {
 
   process.on('exit', async () => await chain.close());
 
-  body.addresses = await chain.deployContracts([]);
+  body.addresses = await deployContracts(chain);
 
-  console.log(`Contracts deployed: ${JSON.stringify(body.addresses, null, 2)}`);
+  log.info(`Contracts deployed: ${JSON.stringify(body.addresses, null, 2)}`);
 }

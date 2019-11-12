@@ -1,14 +1,17 @@
 import {spawn} from "child_process";
+import {EtherlimeGanacheDeployer} from "etherlime-lib";
 import {ethers} from "ethers";
 import {JsonRpcProvider} from "ethers/providers";
 import log from "loglevel";
 import {waitUntilFree, waitUntilUsed} from "tcp-port-used";
 import kill from "tree-kill";
 
-import {ETHERLIME_ACCOUNTS} from "src/constants";
-import {Account} from "src/types";
 import {configureEnvVariables} from "../config/env";
+import {ETHERLIME_ACCOUNTS} from "../constants";
+import {Account, DeployedArtifacts, Deployment} from "../types";
 configureEnvVariables();
+
+log.setDefaultLevel(log.levels.INFO);
 
 export class GanacheServer {
   provider: JsonRpcProvider;
@@ -69,7 +72,43 @@ export class GanacheServer {
     }
   }
 
-  async deployContracts(artifacts: any[]) {
-    log.info("Deploying artifacts");
+  async deployContracts(deployments: Array<Deployment | any>): Promise<DeployedArtifacts> {
+    const deployer = new EtherlimeGanacheDeployer(
+      // The privateKey is optional, but we have to provide it in order to provide a port.
+      new EtherlimeGanacheDeployer().signer.privateKey,
+      Number(process.env.GANACHE_PORT)
+    );
+
+    const deployedArtifacts: DeployedArtifacts = {};
+    for (const deployment of deployments) {
+      const artifact = deployment.artifact ? deployment.artifact : deployment;
+
+      const args: string[] = [];
+      if (deployment.arguments) {
+        for (const arg of deployment.arguments) {
+          if (arg in deployedArtifacts) {
+            args.push(deployedArtifacts[arg].address);
+          }
+        }
+
+        if (args.length !== deployment.arguments.length) {
+          log.warn(
+            `Can't deploy ${artifact.contractName}: its dependent contracts ${JSON.stringify(
+              deployment.arguments
+            )} have not been deployed yet.`
+          );
+          continue;
+        }
+      }
+
+      const deployedArtifact = await deployer.deploy(artifact, undefined, ...args);
+
+      deployedArtifacts[artifact.contractName] = {
+        address: deployedArtifact.contractAddress,
+        abi: JSON.stringify(artifact.abi)
+      };
+    }
+
+    return deployedArtifacts;
   }
 }

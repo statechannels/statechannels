@@ -11,7 +11,7 @@ const nitroAdjudicatorArtifact = require('../build/contracts/NitroAdjudicator');
 const consensusAppArtifact = require('../build/contracts/ConsensusApp');
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'test';
-const {configureEnvVariables} = require('@statechannels/devtools');
+const { configureEnvVariables } = require('@statechannels/devtools');
 configureEnvVariables();
 
 const migrationFactory = (artifact, argsConstructor = () => []) => {
@@ -34,18 +34,7 @@ const migrate = async (deployer, startingMap, migrations) => {
   }, startingMap);
 };
 
-const deploy = async (network, secret, etherscanApiKey) => {
-  // todo: use network parameter to pick deployer.
-  let networkMap;
-  try {
-    networkMap = await loadJsonFile(path.join(__dirname, '/network-map.json'));
-  } catch (err) {
-    if (!!err.message.match('ENOENT: no such file or directory')) {
-      networkMap = {};
-    } else {
-      throw err;
-    }
-  }
+const deploy = async () => {
   const deployer = new etherlime.EtherlimeGanacheDeployer(
     // The privateKey is optional, but we have to provide it in order to provide a port.
     new etherlime.EtherlimeGanacheDeployer().signer.privateKey,
@@ -73,10 +62,10 @@ const deploy = async (network, secret, etherscanApiKey) => {
     migrationFactory(consensusAppArtifact),
   ]);
 
-  updatedNetworkMap = {...networkMap, [networkId]: contractsToAddresses};
+  updatedNetworkMap = { ...networkMap, [networkId]: contractsToAddresses };
   await writeJsonFile(path.join(__dirname, 'network-map.json'), updatedNetworkMap);
 
-  return {networkMap: updatedNetworkMap, deployer, networkId};
+  return { networkMap: updatedNetworkMap, deployer, networkId };
 };
 
 module.exports = {
