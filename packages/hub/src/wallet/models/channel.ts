@@ -45,5 +45,4 @@ export default class Channel extends Model {
   channelNonce: Uint256;
   participants: ChannelParticipant[];
   states: ChannelState[];
-  guaranteedChannel: string;
 }
