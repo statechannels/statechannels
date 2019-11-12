@@ -345,7 +345,7 @@ Possible response to a `Channel Proposed` event.
 {
   "jsonrpc": "2.0",
   "method": "CloseChannel",
-  "id": 0,
+  "id": 3,
   "params": {
     "channelId": "0xabc123"
   }
@@ -357,7 +357,7 @@ Possible response to a `Channel Proposed` event.
 ```json
 {
   "jsonrpc": "2.0",
-  "id": 1,
+  "id": 3,
   "result": {
     "channelId": "0xabc123...",
     "status": "closing",
