@@ -34,11 +34,6 @@ export interface MultipleWalletActions {
   type: "WALLET.MULTIPLE_ACTIONS";
   actions: WalletAction[];
 }
-export interface LoggedIn {
-  type: "WALLET.LOGGED_IN";
-  uid: string;
-}
-
 export interface AdjudicatorKnown {
   type: "WALLET.ADJUDICATOR_KNOWN";
   networkId: string;
@@ -73,10 +68,6 @@ export interface DepositedEvent {
 export interface BlockMined {
   type: "BLOCK_MINED";
   block: {timestamp: number; number: number};
-}
-
-export interface MetamaskLoadError {
-  type: "METAMASK_LOAD_ERROR";
 }
 
 export type Message = "FundingDeclined";
@@ -157,8 +148,6 @@ export const multipleWalletActions: ActionConstructor<MultipleWalletActions> = p
   type: "WALLET.MULTIPLE_ACTIONS"
 });
 
-export const loggedIn: ActionConstructor<LoggedIn> = p => ({...p, type: "WALLET.LOGGED_IN"});
-
 export const adjudicatorKnown: ActionConstructor<AdjudicatorKnown> = p => ({
   ...p,
   type: "WALLET.ADJUDICATOR_KNOWN"
@@ -185,11 +174,6 @@ export const assetTransferredEvent: ActionConstructor<AssetTransferredEvent> = p
 });
 
 export const blockMined: ActionConstructor<BlockMined> = p => ({...p, type: "BLOCK_MINED"});
-
-export const metamaskLoadError: ActionConstructor<MetamaskLoadError> = p => ({
-  ...p,
-  type: "METAMASK_LOAD_ERROR"
-});
 
 export const challengeExpirySetEvent: ActionConstructor<ChallengeExpirySetEvent> = p => ({
   ...p,
@@ -270,9 +254,7 @@ export type WalletAction =
   | AssetHolderEventAction
   | BlockMined
   | DisplayMessageSent
-  | LoggedIn
   | MessageSent
-  | MetamaskLoadError
   | ProtocolAction
   | protocol.NewProcessAction
   | RelayableAction
@@ -319,3 +301,19 @@ export interface LoadAction {
 export function isLoadAction(action: any): action is LoadAction {
   return action.type && action.type === LOAD_FROM_STORAGE;
 }
+
+export interface JsonRpcAction {
+  id: number | string; // Either a string or number is technically valid
+  type: string;
+}
+
+export interface AddressResponse extends JsonRpcAction {
+  type: "WALLET.ADDRESS_RESPONSE";
+  address: string;
+}
+export const addressResponse: ActionConstructor<AddressResponse> = p => ({
+  ...p,
+  type: "WALLET.ADDRESS_RESPONSE"
+});
+
+export type JsonRpcResponseAction = AddressResponse;

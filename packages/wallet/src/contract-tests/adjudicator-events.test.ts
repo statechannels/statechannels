@@ -38,7 +38,7 @@ describe("adjudicator listener", () => {
     const channelId = await getChannelId(getNextNonce(), participantA, participantB);
     const initialState = walletStates.initialized({
       ...walletStates.EMPTY_SHARED_DATA,
-      uid: "",
+
       processStore: {},
       channelSubscriptions: {},
       privateKey: "",

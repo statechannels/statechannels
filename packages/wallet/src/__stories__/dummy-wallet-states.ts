@@ -1,4 +1,3 @@
-import * as walletStates from "../redux/state";
 import * as scenarios from "../redux/__tests__/state-helpers";
 import * as states from "../redux/state";
 
@@ -23,16 +22,6 @@ export const defaultParams = {
   userAddress: "0x0",
   funded: false
 };
-
-////////////////////////////
-// WALLET NOT INITIALIZED //
-////////////////////////////
-
-export const dummyWaitForLogin: walletStates.WalletState = walletStates.waitForLogin();
-export const dummyWaitForMetaMask: walletStates.WalletState = walletStates.metaMaskError({
-  ...dummyWaitForLogin
-});
-//
 
 ////////////////////////////
 // WALLET INITIALIZED //

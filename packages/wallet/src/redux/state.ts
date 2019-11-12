@@ -3,8 +3,7 @@ import {
   emptyDisplayOutboxState,
   SideEffects,
   queueMessage as queueMessageOutbox,
-  queueTransaction as queueTransactionOutbox,
-  getLastMessage as getLastMessageFromOutbox
+  queueTransaction as queueTransactionOutbox
 } from "./outbox/state";
 import {
   ChannelStore,
@@ -48,13 +47,11 @@ import {
 } from "./protocols/concluding/states";
 import {SignedState, State} from "@statechannels/nitro-protocol";
 
-export type WalletState = WaitForLogin | MetaMaskError | Initialized;
+export type WalletState = Initialized;
 
 // -----------
 // State types
 // -----------
-export const WAIT_FOR_LOGIN = "INITIALIZING.WAIT_FOR_LOGIN";
-export const METAMASK_ERROR = "INITIALIZING.METAMASK_ERROR";
 export const WALLET_INITIALIZED = "WALLET.INITIALIZED";
 
 // ------
@@ -77,19 +74,10 @@ export interface ChannelSubscriber {
   protocolLocator: ProtocolLocator;
   processId: string;
 }
-export interface WaitForLogin extends SharedData {
-  type: typeof WAIT_FOR_LOGIN;
-  address?: string;
-  privateKey?: string;
-}
-
-export interface MetaMaskError extends SharedData {
-  type: typeof METAMASK_ERROR;
-}
 
 export interface Initialized extends SharedData {
   type: typeof WALLET_INITIALIZED;
-  uid: string;
+
   processStore: ProcessStore;
 
   address: string;
@@ -182,13 +170,6 @@ export function sharedData(params: SharedData): SharedData {
   };
 }
 
-export function waitForLogin(): WaitForLogin {
-  return {type: WAIT_FOR_LOGIN, ...EMPTY_SHARED_DATA};
-}
-
-export function metaMaskError(params: Properties<MetaMaskError>): MetaMaskError {
-  return {...sharedData(params), type: METAMASK_ERROR};
-}
 export function initialized(params: Properties<Initialized>): Initialized {
   return {
     ...params,
@@ -242,10 +223,6 @@ export function setFundingState(
   fundingState: ChannelFundingState
 ) {
   return {...state, fundingState: {...state.fundingState, [channelId]: fundingState}};
-}
-
-export function getLastMessage(state: SharedData): WalletEvent | undefined {
-  return getLastMessageFromOutbox(state.outboxState);
 }
 
 export function getPrivatekey(state: SharedData, channelId: string): string {
