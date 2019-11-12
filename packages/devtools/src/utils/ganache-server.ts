@@ -1,6 +1,7 @@
 import {spawn} from "child_process";
 import {ethers} from "ethers";
 import {JsonRpcProvider} from "ethers/providers";
+import log from "loglevel";
 import {waitUntilFree, waitUntilUsed} from "tcp-port-used";
 import kill from "tree-kill";
 
@@ -48,27 +49,26 @@ export class GanacheServer {
   provider: JsonRpcProvider;
   fundedPrivateKey: string;
   server: any;
-  private port: number;
-  private timeout: number;
 
   constructor(
+    public readonly port: number,
     accounts: Account[] = ETHERLIME_ACCOUNTS,
-    timeout: number = 5000,
+    public readonly timeout: number = 5000,
     gasLimit: number = 1000000000,
     gasPrice: string = "0x01"
   ) {
-    if (!process.env.GANACHE_PORT) {
-      throw new Error("No GANACHE_PORT found. Aborting!");
+    if (!port) {
+      throw new Error("No port was specified. Aborting!");
     }
 
-    this.port = Number(process.env.GANACHE_PORT);
+    this.port = port;
     this.timeout = timeout;
 
     if (!process.env.GANACHE_NETWORK_ID) {
-      console.warn("No GANACHE_NETWORK_ID found.");
+      log.warn("No GANACHE_NETWORK_ID found.");
     }
 
-    console.log(`Starting ganache on port ${this.port}`);
+    log.info(`Starting ganache on port ${this.port}`);
 
     this.fundedPrivateKey = accounts[0].privateKey;
 
@@ -84,7 +84,7 @@ export class GanacheServer {
 
     this.server = spawn("npx", ["-c", cmd], {stdio: "pipe"});
     this.server.stderr.on("data", data => {
-      console.error(`Server threw error ${data}`);
+      log.error(`Server threw error ${data}`);
       throw new Error("Ganache server failed to start");
     });
     this.provider = new JsonRpcProvider(`http://localhost:${this.port}`);
