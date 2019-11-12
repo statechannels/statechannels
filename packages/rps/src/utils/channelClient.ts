@@ -1,6 +1,8 @@
 import {BigNumberish} from 'ethers/utils';
 import {EventEmitter} from 'eventemitter3';
 
+export type JsonRPCVersion = '2.0';
+
 export type ChannelStatus = 'opening' | 'funding' | 'running' | 'closing';
 
 export type ChannelMethodName = 'CreateChannel' | 'JoinChannel' | 'UpdateChannel' | 'CloseChannel';
@@ -13,6 +15,14 @@ export type ChannelNotificationName = 'ChannelProposed' | 'ChannelUpdated' | 'Ch
 export type MessageNotificationName = 'MessageQueued';
 
 export type NotificationName = ChannelNotificationName | MessageNotificationName;
+
+export enum ErrorCodes {
+  SIGNING_ADDRESS_NOT_FOUND = -32100,
+  INVALID_APP_DEFINITION = -32101,
+  INVALID_APP_DATA = -32102,
+  UNSUPPORTED_TOKEN = -32103,
+  CHANNEL_NOT_FOUND = -32104,
+}
 
 export interface Participant {
   /**
@@ -80,22 +90,34 @@ export interface Funds {
 }
 
 export interface JsonRPCNotification<ParametersType> {
-  jsonrpc: '2.0';
+  jsonrpc: JsonRPCVersion;
   method: NotificationName;
   params: ParametersType;
 }
 
 export interface JsonRPCRequest<ParametersType> {
-  jsonrpc: '2.0';
+  jsonrpc: JsonRPCVersion;
   method: MethodName;
   params: ParametersType;
   id: string;
 }
 
 export interface JsonRPCResponse<ResultType = {[key: string]: any}> {
-  jsonrpc: '2.0';
+  jsonrpc: JsonRPCVersion;
   id: string;
   result: ResultType;
+}
+
+export interface JsonRPCError {
+  code: number;
+  message: string;
+  data?: {[key: string]: any};
+}
+
+export interface JsonRPCErrorResponse<ErrorType extends JsonRPCError = JsonRPCError> {
+  jsonrpc: JsonRPCVersion;
+  id: string;
+  error: ErrorType;
 }
 
 export interface CreateChannelParameters extends UpdateChannelParameters {
@@ -173,6 +195,68 @@ export type ActionParameters =
   | PushMessageParameters;
 
 export type NotificationParameters = ChannelResult | Message;
+
+export class ChannelClientError implements JsonRPCErrorResponse {
+  jsonrpc: JsonRPCVersion = '2.0';
+
+  error: JsonRPCError = {
+    code: ErrorCodes.SIGNING_ADDRESS_NOT_FOUND,
+    message: 'Something went wrong',
+  };
+
+  constructor(public readonly id: string) {}
+
+  toJSON() {
+    return {
+      jsonrpc: this.jsonrpc,
+      id: this.id,
+      error: this.error,
+    };
+  }
+}
+
+export class SigningAddressNotFoundError extends ChannelClientError {
+  error: JsonRPCError = {
+    code: ErrorCodes.SIGNING_ADDRESS_NOT_FOUND,
+    message: 'Signing address not found',
+  };
+}
+
+export class InvalidAppDefinitionError extends ChannelClientError {
+  error: JsonRPCError = {
+    code: ErrorCodes.INVALID_APP_DEFINITION,
+    message: 'Invalid app definition',
+  };
+}
+
+export class InvalidAppDataError extends ChannelClientError {
+  error: JsonRPCError = {
+    code: ErrorCodes.INVALID_APP_DATA,
+    message: 'Invalid app data',
+  };
+}
+
+export class UnsupportedTokenError extends ChannelClientError {
+  error: JsonRPCError = {
+    code: ErrorCodes.UNSUPPORTED_TOKEN,
+    message: 'Unsupported token',
+  };
+}
+
+export class ChannelNotFoundError extends ChannelClientError {
+  error: JsonRPCError = {
+    code: ErrorCodes.CHANNEL_NOT_FOUND,
+    message: 'Channel not found',
+  };
+}
+
+export const ErrorCodesToObjectsMap: {[key in ErrorCodes]: typeof ChannelClientError} = {
+  [ErrorCodes.CHANNEL_NOT_FOUND]: ChannelNotFoundError,
+  [ErrorCodes.INVALID_APP_DATA]: InvalidAppDataError,
+  [ErrorCodes.INVALID_APP_DEFINITION]: InvalidAppDefinitionError,
+  [ErrorCodes.SIGNING_ADDRESS_NOT_FOUND]: SigningAddressNotFoundError,
+  [ErrorCodes.UNSUPPORTED_TOKEN]: UnsupportedTokenError,
+};
 
 export class ChannelClient {
   protected events = new EventEmitter();
@@ -255,6 +339,10 @@ export class ChannelClient {
       method: notificationName,
       params: parameters,
     });
+  }
+
+  protected async reportErrorToApp(errorCode: ErrorCodes, id?: string) {
+    this.events.emit('message', new ErrorCodesToObjectsMap[errorCode](id || ''));
   }
 
   protected async notifyChannelUpdated(parameters: NotificationParameters) {
