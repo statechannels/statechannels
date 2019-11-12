@@ -97,7 +97,7 @@ Used to push messages received from other participants into the wallet.
 {
   "jsonrpc": "2.0",
   "id": 1,
-  "result": "acknowledged"
+  "result": {"success": true}
 }
 ```
 
