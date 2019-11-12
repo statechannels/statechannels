@@ -14,7 +14,7 @@ import {
   randomExternalDestination,
 } from '@statechannels/nitro-protocol';
 import {VariablePart} from '@statechannels/nitro-protocol';
-import {RPSData, PositionType, encodeAppData, hashPreCommit} from '../core/app-data';
+import {RPSData, PositionType, encodeRPSData, hashPreCommit} from '../core/app-data';
 import {Weapon} from '../core/weapons';
 
 import loadJsonFile from 'load-json-file';
@@ -121,7 +121,7 @@ describe('validTransition', () => {
         salt,
       };
 
-      const [fromAppDataBytes, toAppDataBytes] = [fromAppData, toAppData].map(encodeAppData);
+      const [fromAppDataBytes, toAppDataBytes] = [fromAppData, toAppData].map(encodeRPSData);
 
       const fromVariablePart: VariablePart = {
         outcome: encodeOutcome(fromOutcome),

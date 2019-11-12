@@ -70,11 +70,15 @@ function toRPSData(appData: AppData): RPSData {
 }
 
 export function encodeAppData(appData: AppData): string {
+  return encodeRPSData(toRPSData(appData));
+}
+
+export function encodeRPSData(rpsData: RPSData): string {
   return defaultAbiCoder.encode(
     [
       'tuple(uint8 positionType, uint256 stake, bytes32 preCommit, uint8 playerAWeapon, uint8 playerBWeapon, bytes32 salt)',
     ],
-    [toRPSData(appData)]
+    [rpsData]
   );
 }
 
