@@ -153,8 +153,8 @@ contract RockPaperScissors is ForceMoveApp {
         );
 
         // a will have to reveal, so remove the stake beforehand
-        require(fromAllocation[0].amount == toAllocation[0].amount.sub(toGameData.stake), "Allocation for player A should be decremented by 1x stake");
-        require(fromAllocation[1].amount == toAllocation[1].amount.sub(toGameData.stake), "Allocation for player B should be incremented by 1x stake.");
+        require(toAllocation[0].amount == fromAllocation[0].amount.sub(toGameData.stake), "Allocation for player A should be decremented by 1x stake");
+        require(toAllocation[1].amount == fromAllocation[1].amount.add(toGameData.stake), "Allocation for player B should be incremented by 1x stake.");
 
     }
 
@@ -174,7 +174,7 @@ contract RockPaperScissors is ForceMoveApp {
         // check hash matches
         // need to convert Weapon -> uint256 to get hash to work
         bytes32 hashed = keccak256(
-            abi.encodePacked(uint256(toGameData.aWeapon), toGameData.salt)
+            abi.encode(uint256(toGameData.aWeapon), toGameData.salt)
         );
         require(hashed == fromGameData.preCommit, 'The hash needs to match the precommit');
 
@@ -206,12 +206,12 @@ contract RockPaperScissors is ForceMoveApp {
 
         require(
             toAllocation[0].amount == fromAllocation[0].amount.add(playerAWinnings),
-            "Player First's allocation should be updated with the winnings."
+            "Player A's allocation should be updated with the winnings."
         );
         require(
             toAllocation[1].amount ==
                 fromAllocation[1].amount.sub(fromGameData.stake.mul(2)).add(playerBWinnings),
-            "Player Second's allocation should be updated with the winnings."
+            "Player B's allocation should be updated with the winnings."
         );
     }
 
