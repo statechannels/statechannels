@@ -11,11 +11,13 @@ import testForceMoveArtifact from '../build/contracts/TESTForceMove.json';
 import testNitroAdjudicatorArtifact from '../build/contracts/TESTNitroAdjudicator.json';
 import tokenArtifact from '../build/contracts/Token.json';
 import trivialAppArtifact from '../build/contracts/TrivialApp.json';
+import consensusAppArtifact from '../build/contracts/ConsensusApp.json';
 
 export async function deployContracts(chain: GanacheServer): Promise<object> {
   log.info(`Deploying built contracts to chain at: ${chain.provider.connection.url}`);
 
   return chain.deployContracts([
+    consensusAppArtifact,
     testForceMoveArtifact,
     testAssetHolderArtifact1,
     testAssetHolderArtifact2,

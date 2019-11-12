@@ -21,7 +21,6 @@ import {getNetworkMap, getTestProvider, setupContracts, signStates} from '../../
 
 const provider = getTestProvider();
 let ForceMove: Contract;
-let networkId;
 let networkMap;
 const chainId = '0x1234';
 const participants = ['', '', ''];
@@ -39,8 +38,7 @@ for (let i = 0; i < 3; i++) {
 beforeAll(async () => {
   networkMap = await getNetworkMap();
   ForceMove = await setupContracts(provider, ForceMoveArtifact);
-  networkId = (await provider.getNetwork()).chainId;
-  appDefinition = networkMap[networkId][countingAppArtifact.contractName]; // use a fixed appDefinition in all tests
+  appDefinition = networkMap[countingAppArtifact.contractName]['address']; // use a fixed appDefinition in all tests
 });
 
 const valid = {

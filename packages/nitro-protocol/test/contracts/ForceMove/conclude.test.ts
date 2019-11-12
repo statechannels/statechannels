@@ -28,7 +28,6 @@ import {
 const provider = getTestProvider();
 let ForceMove: Contract;
 let networkMap;
-let networkId;
 const chainId = '0x1234';
 const participants = ['', '', ''];
 const wallets = new Array(3);
@@ -45,8 +44,7 @@ for (let i = 0; i < 3; i++) {
 beforeAll(async () => {
   networkMap = await getNetworkMap();
   ForceMove = await setupContracts(provider, ForceMoveArtifact);
-  networkId = (await provider.getNetwork()).chainId;
-  appDefinition = networkMap[networkId][countingAppArtifact.contractName]; // use a fixed appDefinition in all tests
+  appDefinition = networkMap[countingAppArtifact.contractName]['address']; // use a fixed appDefinition in all tests
 });
 
 const acceptsWhenOpenIf =

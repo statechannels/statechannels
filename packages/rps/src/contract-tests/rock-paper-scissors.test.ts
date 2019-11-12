@@ -11,7 +11,7 @@ import {
   encodeOutcome,
   AssetOutcomeShortHand,
   replaceAddressesAndBigNumberify,
-  randomExternalDestination
+  randomExternalDestination,
 } from '@statechannels/nitro-protocol';
 import {VariablePart} from '@statechannels/nitro-protocol';
 
@@ -264,13 +264,13 @@ describe('validTransition', () => {
 
       const fromAppDataBytes = defaultAbiCoder.encode(
         [
-          'tuple(uint8 positionType, uint256 stake, bytes32 preCommit, uint8 playerAWeapon, uint8 playerBWeapon, bytes32 salt)'
+          'tuple(uint8 positionType, uint256 stake, bytes32 preCommit, uint8 playerAWeapon, uint8 playerBWeapon, bytes32 salt)',
         ],
         [fromAppData]
       );
       const toAppDataBytes = defaultAbiCoder.encode(
         [
-          'tuple(uint8 positionType, uint256 stake, bytes32 preCommit, uint8 playerAWeapon, uint8 playerBWeapon, bytes32 salt)'
+          'tuple(uint8 positionType, uint256 stake, bytes32 preCommit, uint8 playerAWeapon, uint8 playerBWeapon, bytes32 salt)',
         ],
         [toAppData]
       );
@@ -320,11 +320,10 @@ export const getNetworkMap = async () => {
 
 export async function setupContracts(provider: ethers.providers.JsonRpcProvider, artifact) {
   const signer = provider.getSigner(0);
-  const networkId = (await provider.getNetwork()).chainId;
   const networkMap = await getNetworkMap();
 
   const contractName = artifact.contractName;
-  const contractAddress = networkMap ? networkMap[networkId][contractName] : undefined;
+  const contractAddress = networkMap ? networkMap[contractName]['address'] : undefined;
   const contract = new ethers.Contract(contractAddress, artifact.abi, signer);
   return contract;
 }

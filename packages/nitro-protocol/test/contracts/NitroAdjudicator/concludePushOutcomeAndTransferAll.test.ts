@@ -37,7 +37,6 @@ let NitroAdjudicator: Contract;
 let AssetHolder1: Contract;
 let AssetHolder2: Contract;
 let networkMap;
-let networkId;
 const chainId = '0x1234';
 const participants = ['', '', ''];
 const wallets = new Array(3);
@@ -69,8 +68,7 @@ beforeAll(async () => {
   AssetHolder2 = await setupContracts(provider, AssetHolderArtifact2);
   addresses.ETH = AssetHolder1.address;
   addresses.TOK = AssetHolder2.address;
-  networkId = (await provider.getNetwork()).chainId;
-  appDefinition = networkMap[networkId][countingAppArtifact.contractName]; // use a fixed appDefinition in all tests
+  appDefinition = networkMap[countingAppArtifact.contractName]['address']; // use a fixed appDefinition in all tests
 });
 
 const accepts1 = '1 Asset Types';
