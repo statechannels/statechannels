@@ -94,7 +94,7 @@ describe("transactions", () => {
     participantB = ethers.Wallet.createRandom();
   });
 
-  it("should deposit into the contract", async () => {
+  it("should deposit ETH into the ETH asset holder", async () => {
     const someChannelId = ethers.utils.hexlify(ethers.utils.randomBytes(32));
     const depositTransactionData = createETHDepositTransaction(someChannelId, "0x5", "0x0");
     await testTransactionSender({
