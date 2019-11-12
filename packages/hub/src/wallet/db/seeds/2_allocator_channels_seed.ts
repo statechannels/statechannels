@@ -4,7 +4,7 @@ import {HUB_ADDRESS} from '../../../constants';
 import {
   BEGINNING_APP_CHANNEL_HOLDINGS,
   BEGINNING_APP_CHANNEL_NONCE,
-  DUMMY_RULES_ADDRESS,
+  DUMMY_CHAIN_ID,
   DUMMY_RULES_BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID,
   DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID,
   DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID_3,
@@ -59,20 +59,20 @@ function pre_fund_setup_3(turnNum: number) {
 
 const funded_channel = {
   channelId: DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID,
-  rulesAddress: DUMMY_RULES_ADDRESS,
   nonce: FUNDED_CHANNEL_NONCE,
   holdings: FUNDED_CHANNEL_HOLDINGS,
   states: [pre_fund_setup(0), pre_fund_setup(1)],
-  participants
+  participants,
+  chainId: DUMMY_CHAIN_ID
 };
 
 const funded_channel_3 = {
   channelId: DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID_3,
-  rulesAddress: DUMMY_RULES_ADDRESS,
   nonce: FUNDED_CHANNEL_NONCE_3,
   holdings: FUNDED_CHANNEL_HOLDINGS,
   states: [pre_fund_setup_3(0), pre_fund_setup_3(1), pre_fund_setup_3(2)],
-  participants: participants_3
+  participants: participants_3,
+  chainId: DUMMY_CHAIN_ID
 };
 
 function post_fund_setup(turnNum: number) {
@@ -85,11 +85,11 @@ function post_fund_setup(turnNum: number) {
 
 const beginning_app_phase_channel = {
   channel_id: DUMMY_RULES_BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID,
-  rules_address: DUMMY_RULES_ADDRESS,
   nonce: BEGINNING_APP_CHANNEL_NONCE,
   holdings: BEGINNING_APP_CHANNEL_HOLDINGS,
   states: [post_fund_setup(2), post_fund_setup(3)],
-  participants
+  participants,
+  chainId: DUMMY_CHAIN_ID
 };
 
 function app(turnNum: number) {
@@ -102,11 +102,11 @@ function app(turnNum: number) {
 
 const ongoing_app_phase_channel = {
   channel_id: DUMMY_RULES_ONGOING_APP_CHANNEL_NONCE_CHANNEL_ID,
-  rules_address: DUMMY_RULES_ADDRESS,
   nonce: ONGOING_APP_CHANNEL_NONCE,
   holdings: ONGOING_APP_CHANNEL_HOLDINGS,
   states: [app(4), app(5)],
-  participants
+  participants,
+  chainId: DUMMY_CHAIN_ID
 };
 
 const two_participant_channel_seeds = {
