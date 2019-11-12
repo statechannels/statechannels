@@ -55,10 +55,14 @@ contract RockPaperScissors is ForceMoveApp {
         VariablePart memory toPart,
         uint256 turnNumB,
         uint256 nParticipants
-    ) public pure destinationsUnchanged(fromPart, toPart) returns (bool) {
+    ) public pure returns (bool) {
+        Outcome.AllocationItem[] memory fromAllocation = extractAllocation(fromPart);
+        Outcome.AllocationItem[] memory toAllocation = extractAllocation(toPart);
+        _requireDestinationsUnchanged(fromAllocation, toAllocation);
         // decode application-specific data
         RPSData memory fromGameData = appData(fromPart.appData);
         RPSData memory toGameData = appData(toPart.appData);
+
 
         // deduce action
         if (fromGameData.positionType == PositionType.Start) {
@@ -66,14 +70,14 @@ contract RockPaperScissors is ForceMoveApp {
                 toGameData.positionType == PositionType.RoundProposed,
                 'Start may only transition to RoundProposed'
             );
-            requireValidPROPOSE(fromPart, toPart, fromGameData, toGameData);
+            requireValidPROPOSE(fromPart, toPart, fromAllocation, toAllocation, fromGameData, toGameData);
             return true;
         } else if (fromGameData.positionType == PositionType.RoundProposed) {
             if (toGameData.positionType == PositionType.Start) {
-                requireValidREJECT(fromPart, toPart, fromGameData, toGameData);
+                requireValidREJECT(fromAllocation, toAllocation, fromGameData, toGameData);
                 return true;
             } else if (toGameData.positionType == PositionType.RoundAccepted) {
-                requireValidACCEPT(fromPart, toPart, fromGameData, toGameData);
+                requireValidACCEPT(fromAllocation, toAllocation, fromGameData, toGameData);
                 return true;
             }
             revert('Proposed may only transition to Start or RoundAccepted');
@@ -82,14 +86,14 @@ contract RockPaperScissors is ForceMoveApp {
                 toGameData.positionType == PositionType.Reveal,
                 'RoundAccepted may only transition to Reveal'
             );
-            requireValidREVEAL(fromPart, toPart, fromGameData, toGameData);
+            requireValidREVEAL(fromAllocation, toAllocation, fromGameData, toGameData);
             return true;
         } else if (fromGameData.positionType == PositionType.Reveal) {
             require(
                 toGameData.positionType == PositionType.Start,
                 'Reveal may only transition to Start'
             );
-            requireValidFINISH(fromPart, toPart, fromGameData, toGameData);
+            requireValidFINISH(fromAllocation, toAllocation, fromGameData, toGameData);
             return true;
         }
         revert('No valid transition found');
@@ -100,6 +104,8 @@ contract RockPaperScissors is ForceMoveApp {
     function requireValidPROPOSE(
         VariablePart memory fromPart,
         VariablePart memory toPart,
+        Outcome.AllocationItem[] memory fromAllocation,
+        Outcome.AllocationItem[] memory toAllocation,
         RPSData memory fromGameData,
         RPSData memory toGameData
     )
@@ -107,51 +113,30 @@ contract RockPaperScissors is ForceMoveApp {
         pure
         outcomeUnchanged(fromPart, toPart)
         stakeUnchanged(fromGameData, toGameData)
-        allocationsNotLessThanStake(fromPart, toPart, fromGameData, toGameData)
+        allocationsNotLessThanStake(fromAllocation, toAllocation, fromGameData, toGameData)
     {}
 
     function requireValidREJECT(
-        VariablePart memory fromPart,
-        VariablePart memory toPart,
+        Outcome.AllocationItem[] memory fromAllocation,
+        Outcome.AllocationItem[] memory toAllocation,
         RPSData memory fromGameData,
         RPSData memory toGameData
     ) private pure 
-    allocationUnchanged(fromPart, toPart)
+    allocationUnchanged(fromAllocation, toAllocation)
     stakeUnchanged(fromGameData, toGameData)
     { }
 
     function requireValidACCEPT(
-        VariablePart memory fromPart,
-        VariablePart memory toPart,
+        Outcome.AllocationItem[] memory fromAllocation,
+        Outcome.AllocationItem[] memory toAllocation,
         RPSData memory fromGameData,
         RPSData memory toGameData
     ) private pure 
     stakeUnchanged(fromGameData, toGameData)
     {
 
-    require(fromGameData.preCommit == toGameData.preCommit,"Precommit should be the same.");
+        require(fromGameData.preCommit == toGameData.preCommit,"Precommit should be the same.");
         
-    // TODO DRY: this code is used multiple times
-
-        Outcome.OutcomeItem[] memory fromOutcome = abi.decode(fromPart.outcome, (Outcome.OutcomeItem[]));
-        Outcome.OutcomeItem[] memory toOutcome = abi.decode(toPart.outcome, (Outcome.OutcomeItem[]));
-        Outcome.AssetOutcome memory fromAssetOutcome = abi.decode(
-            fromOutcome[0].assetOutcomeBytes,
-            (Outcome.AssetOutcome)
-        );
-        Outcome.AssetOutcome memory toAssetOutcome = abi.decode(
-            toOutcome[0].assetOutcomeBytes,
-            (Outcome.AssetOutcome)
-        );
-        Outcome.AllocationItem[] memory fromAllocation = abi.decode(
-            fromAssetOutcome.allocationOrGuaranteeBytes,
-            (Outcome.AllocationItem[])
-        );
-        Outcome.AllocationItem[] memory toAllocation = abi.decode(
-            toAssetOutcome.allocationOrGuaranteeBytes,
-            (Outcome.AllocationItem[])
-        );
-
         // a will have to reveal, so remove the stake beforehand
         require(toAllocation[0].amount == fromAllocation[0].amount.sub(toGameData.stake), "Allocation for player A should be decremented by 1x stake");
         require(toAllocation[1].amount == fromAllocation[1].amount.add(toGameData.stake), "Allocation for player B should be incremented by 1x stake.");
@@ -159,8 +144,8 @@ contract RockPaperScissors is ForceMoveApp {
     }
 
     function requireValidREVEAL(
-        VariablePart memory fromPart,
-        VariablePart memory toPart,
+        Outcome.AllocationItem[] memory fromAllocation,
+        Outcome.AllocationItem[] memory toAllocation,
         RPSData memory fromGameData,
         RPSData memory toGameData
     ) private pure {
@@ -185,25 +170,6 @@ contract RockPaperScissors is ForceMoveApp {
             toGameData.stake
         );
 
-        Outcome.OutcomeItem[] memory fromOutcome = abi.decode(fromPart.outcome, (Outcome.OutcomeItem[]));
-        Outcome.OutcomeItem[] memory toOutcome = abi.decode(toPart.outcome, (Outcome.OutcomeItem[]));
-        Outcome.AssetOutcome memory fromAssetOutcome = abi.decode(
-            fromOutcome[0].assetOutcomeBytes,
-            (Outcome.AssetOutcome)
-        );
-        Outcome.AssetOutcome memory toAssetOutcome = abi.decode(
-            toOutcome[0].assetOutcomeBytes,
-            (Outcome.AssetOutcome)
-        );
-        Outcome.AllocationItem[] memory fromAllocation = abi.decode(
-            fromAssetOutcome.allocationOrGuaranteeBytes,
-            (Outcome.AllocationItem[])
-        );
-        Outcome.AllocationItem[] memory toAllocation = abi.decode(
-            toAssetOutcome.allocationOrGuaranteeBytes,
-            (Outcome.AllocationItem[])
-        );
-
         require(
             toAllocation[0].amount == fromAllocation[0].amount.add(playerAWinnings),
             "Player A's allocation should be updated with the winnings."
@@ -216,14 +182,30 @@ contract RockPaperScissors is ForceMoveApp {
     }
 
     function requireValidFINISH(
-        VariablePart memory fromPart,
-        VariablePart memory toPart,
+        Outcome.AllocationItem[] memory fromAllocation,
+        Outcome.AllocationItem[] memory toAllocation,
         RPSData memory fromGameData,
         RPSData memory toGameData
     ) private pure
-    allocationUnchanged(fromPart, toPart)
+    allocationUnchanged(fromAllocation, toAllocation)
     stakeUnchanged(fromGameData, toGameData)
     {  }
+
+    function extractAllocation(VariablePart memory variablePart) private pure returns (Outcome.AllocationItem[] memory) {
+        Outcome.OutcomeItem[] memory outcome = abi.decode(variablePart.outcome, (Outcome.OutcomeItem[]));
+
+        Outcome.AssetOutcome memory assetOutcome = abi.decode(
+            outcome[0].assetOutcomeBytes,
+            (Outcome.AssetOutcome)
+        );
+
+        Outcome.AllocationItem[] memory allocation = abi.decode(
+            assetOutcome.allocationOrGuaranteeBytes,
+            (Outcome.AllocationItem[])
+        );
+
+        return allocation;
+    }
 
     function winnings(
         Weapon aWeapon,
@@ -244,6 +226,14 @@ contract RockPaperScissors is ForceMoveApp {
         }
     }
 
+    function _requireDestinationsUnchanged (
+        Outcome.AllocationItem[] memory fromAllocation,
+        Outcome.AllocationItem[] memory toAllocation
+    ) private pure {
+        require(toAllocation[0].destination == fromAllocation[0].destination,'RockPaperScissors: Destimation playerA may not change');
+        require(toAllocation[1].destination == fromAllocation[1].destination,'RockPaperScissors: Destimation playerB may not change');
+    }
+
     // modifiers
     modifier outcomeUnchanged(VariablePart memory a, VariablePart memory b) {
         require(
@@ -262,77 +252,24 @@ contract RockPaperScissors is ForceMoveApp {
     }
 
     modifier allocationsNotLessThanStake(
-        VariablePart memory fromPart,
-        VariablePart memory toPart,
+        Outcome.AllocationItem[] memory fromAllocation,
+        Outcome.AllocationItem[] memory toAllocation,
         RPSData memory fromGameData,
         RPSData memory toGameData
     ) {
-        // TODO should the stake (currently uint256) indicate an asset type? 
-
-        Outcome.OutcomeItem[] memory fromOutcome = abi.decode(fromPart.outcome, (Outcome.OutcomeItem[]));
-        Outcome.OutcomeItem[] memory toOutcome = abi.decode(toPart.outcome, (Outcome.OutcomeItem[]));
-        Outcome.AssetOutcome memory fromAssetOutcome = abi.decode(
-            fromOutcome[0].assetOutcomeBytes,
-            (Outcome.AssetOutcome)
-        );
-        Outcome.AssetOutcome memory toAssetOutcome = abi.decode(
-            toOutcome[0].assetOutcomeBytes,
-            (Outcome.AssetOutcome)
-        );
-        Outcome.AllocationItem[] memory fromAllocation = abi.decode(
-            fromAssetOutcome.allocationOrGuaranteeBytes,
-            (Outcome.AllocationItem[])
-        );
-        Outcome.AllocationItem[] memory toAllocation = abi.decode(
-            toAssetOutcome.allocationOrGuaranteeBytes,
-            (Outcome.AllocationItem[])
-        );
         require(fromAllocation[0].amount >= toGameData.stake,"The allocation for player A must not fall below the stake.");
         require(fromAllocation[1].amount >= toGameData.stake ,"The allocation for player B must not fall below the stake.");
         _;
     }
 
     modifier allocationUnchanged(
-        VariablePart memory fromPart,
-        VariablePart memory toPart
+        Outcome.AllocationItem[] memory fromAllocation,
+        Outcome.AllocationItem[] memory toAllocation
     ) {
-        Outcome.OutcomeItem[] memory fromOutcome = abi.decode(fromPart.outcome, (Outcome.OutcomeItem[]));
-        Outcome.OutcomeItem[] memory toOutcome = abi.decode(toPart.outcome, (Outcome.OutcomeItem[]));
-        Outcome.AssetOutcome memory fromAssetOutcome = abi.decode(fromOutcome[0].assetOutcomeBytes, (Outcome.AssetOutcome));
-        Outcome.AssetOutcome memory toAssetOutcome = abi.decode(toOutcome[0].assetOutcomeBytes, (Outcome.AssetOutcome));
-        Outcome.AllocationItem[] memory fromAllocation = abi.decode(
-            fromAssetOutcome.allocationOrGuaranteeBytes,
-            (Outcome.AllocationItem[])
-        );
-        Outcome.AllocationItem[] memory toAllocation = abi.decode(
-            toAssetOutcome.allocationOrGuaranteeBytes,
-            (Outcome.AllocationItem[])
-        );
         require(toAllocation[0].destination == fromAllocation[0].destination,'RockPaperScissors: Destimation playerA may not change');
         require(toAllocation[1].destination == fromAllocation[1].destination,'RockPaperScissors: Destimation playerB may not change');
         require(toAllocation[0].amount == fromAllocation[0].amount,'RockPaperScissors: Amount playerA may not change');
         require(toAllocation[1].amount == fromAllocation[1].amount,'RockPaperScissors: Amount playerB may not change');
-        _;
-    }
-
-        modifier destinationsUnchanged(
-        VariablePart memory fromPart,
-        VariablePart memory toPart
-    ) {
-        Outcome.OutcomeItem[] memory fromOutcome = abi.decode(fromPart.outcome, (Outcome.OutcomeItem[]));
-        Outcome.OutcomeItem[] memory toOutcome = abi.decode(toPart.outcome, (Outcome.OutcomeItem[]));
-        Outcome.AssetOutcome memory fromAssetOutcome = abi.decode(fromOutcome[0].assetOutcomeBytes, (Outcome.AssetOutcome));
-        Outcome.AssetOutcome memory toAssetOutcome = abi.decode(toOutcome[0].assetOutcomeBytes, (Outcome.AssetOutcome));
-        Outcome.AllocationItem[] memory fromAllocation = abi.decode(
-            fromAssetOutcome.allocationOrGuaranteeBytes,
-            (Outcome.AllocationItem[])
-        );
-        Outcome.AllocationItem[] memory toAllocation = abi.decode(
-            toAssetOutcome.allocationOrGuaranteeBytes,
-            (Outcome.AllocationItem[])
-        );
-        require(toAllocation[0].destination == fromAllocation[0].destination,'RockPaperScissors: Destimation playerA may not change');
-        require(toAllocation[1].destination == fromAllocation[1].destination,'RockPaperScissors: Destimation playerB may not change');
         _;
     }
 
