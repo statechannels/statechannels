@@ -31,11 +31,23 @@ enum PositionType {
   Reveal, // 3
 }
 
+const PositionIndex = {
+  Start: PositionType.Start,
+  RoundProposed: PositionType.RoundProposed,
+  RoundAccepted: PositionType.RoundAccepted,
+  Reveal: PositionType.Reveal,
+};
 enum Weapon {
   Rock,
   Paper,
   Scissors,
 }
+const WeaponIndex = {
+  Rock: Weapon.Rock,
+  Paper: Weapon.Paper,
+  Scissors: Weapon.Scissors,
+};
+
 interface RPSData {
   positionType: PositionType;
   stake: BigNumber; // uint256
@@ -62,22 +74,23 @@ const salt = randomHex(64);
 const preCommit = hashPreCommit(Weapon.Rock, salt);
 describe('validTransition', () => {
   it.each`
-    isValid  | positionType                                                | stake               | AWeapon                       | BWeapon                               | fromBalances    | toBalances      | description
-    ${true}  | ${[PositionType.Start, PositionType.RoundProposed]}         | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]}         | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${''}
-    ${true}  | ${[PositionType.RoundProposed, PositionType.RoundAccepted]} | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]}         | ${{A: 5, B: 5}} | ${{A: 4, B: 6}} | ${''}
-    ${true}  | ${[PositionType.RoundAccepted, PositionType.Reveal]}        | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Paper, Weapon.Paper]}       | ${{A: 4, B: 6}} | ${{A: 4, B: 6}} | ${'B won'}
-    ${true}  | ${[PositionType.RoundAccepted, PositionType.Reveal]}        | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Scissors, Weapon.Scissors]} | ${{A: 4, B: 6}} | ${{A: 6, B: 4}} | ${'A won'}
-    ${true}  | ${[PositionType.RoundAccepted, PositionType.Reveal]}        | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]}         | ${{A: 4, B: 6}} | ${{A: 5, B: 5}} | ${'Draw'}
-    ${true}  | ${[PositionType.Reveal, PositionType.Start]}                | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]}         | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${''}
-    ${false} | ${[PositionType.Reveal, PositionType.Start]}                | ${{from: 1, to: 2}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]}         | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${'Disallows stake change'}
-    ${false} | ${[PositionType.Start, PositionType.RoundProposed]}         | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]}         | ${{A: 5, B: 5}} | ${{A: 6, B: 4}} | ${'Disallows allocations change '}
-    ${false} | ${[PositionType.RoundProposed, PositionType.RoundAccepted]} | ${{from: 1, to: 1}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]}         | ${{A: 6, B: 4}} | ${{B: 6, A: 4}} | ${'Disallows destination swap'}
-    ${false} | ${[PositionType.Start, PositionType.RoundProposed]}         | ${{from: 1, to: 6}} | ${[Weapon.Rock, Weapon.Rock]} | ${[Weapon.Rock, Weapon.Rock]}         | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${'Disallows a stake that is too large'}
+    isValid  | fromPositionType   | toPositionType     | stake               | AWeapon   | BWeapon       | fromBalances    | toBalances      | description
+    ${true}  | ${'Start'}         | ${'RoundProposed'} | ${{from: 1, to: 1}} | ${'Rock'} | ${'Rock'}     | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${''}
+    ${true}  | ${'RoundProposed'} | ${'RoundAccepted'} | ${{from: 1, to: 1}} | ${'Rock'} | ${'Rock'}     | ${{A: 5, B: 5}} | ${{A: 4, B: 6}} | ${''}
+    ${true}  | ${'RoundAccepted'} | ${'Reveal'}        | ${{from: 1, to: 1}} | ${'Rock'} | ${'Paper'}    | ${{A: 4, B: 6}} | ${{A: 4, B: 6}} | ${'B won'}
+    ${true}  | ${'RoundAccepted'} | ${'Reveal'}        | ${{from: 1, to: 1}} | ${'Rock'} | ${'Scissors'} | ${{A: 4, B: 6}} | ${{A: 6, B: 4}} | ${'A won'}
+    ${true}  | ${'RoundAccepted'} | ${'Reveal'}        | ${{from: 1, to: 1}} | ${'Rock'} | ${'Rock'}     | ${{A: 4, B: 6}} | ${{A: 5, B: 5}} | ${'Draw'}
+    ${true}  | ${'Reveal'}        | ${'Start'}         | ${{from: 1, to: 1}} | ${'Rock'} | ${'Rock'}     | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${''}
+    ${false} | ${'Reveal'}        | ${'Start'}         | ${{from: 1, to: 2}} | ${'Rock'} | ${'Rock'}     | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${'Disallows stake change'}
+    ${false} | ${'Start'}         | ${'RoundProposed'} | ${{from: 1, to: 1}} | ${'Rock'} | ${'Rock'}     | ${{A: 5, B: 5}} | ${{A: 6, B: 4}} | ${'Disallows allocations change '}
+    ${false} | ${'RoundProposed'} | ${'RoundAccepted'} | ${{from: 1, to: 1}} | ${'Rock'} | ${'Rock'}     | ${{A: 6, B: 4}} | ${{B: 6, A: 4}} | ${'Disallows destination swap'}
+    ${false} | ${'Start'}         | ${'RoundProposed'} | ${{from: 1, to: 6}} | ${'Rock'} | ${'Rock'}     | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${'Disallows a stake that is too large'}
   `(
-    `Returns $isValid on [from, to] = PositionType$positionType ; $description`,
+    `Returns $isValid on $fromPositionType -> $toPositionType; $description`,
     async ({
       isValid,
-      positionType,
+      fromPositionType,
+      toPositionType,
       stake,
       AWeapon,
       BWeapon,
@@ -85,10 +98,11 @@ describe('validTransition', () => {
       toBalances,
     }: {
       isValid: boolean;
-      positionType: PositionType[];
+      fromPositionType: string;
+      toPositionType: string;
       stake;
-      AWeapon: Weapon[];
-      BWeapon: Weapon[];
+      AWeapon: string;
+      BWeapon: string;
       fromBalances: AssetOutcomeShortHand;
       toBalances: AssetOutcomeShortHand;
     }) => {
@@ -109,19 +123,19 @@ describe('validTransition', () => {
       const toOutcome = [{assetHolderAddress: AddressZero, allocation: toAllocation}];
 
       const fromAppData: RPSData = {
-        positionType: positionType[0],
+        positionType: PositionIndex[fromPositionType],
         stake: bigNumberify(stake.from),
         preCommit,
-        playerAWeapon: AWeapon[0],
-        playerBWeapon: BWeapon[0],
+        playerAWeapon: WeaponIndex[AWeapon],
+        playerBWeapon: WeaponIndex[BWeapon],
         salt,
       };
       const toAppData: RPSData = {
-        positionType: positionType[1],
+        positionType: PositionIndex[toPositionType],
         stake: bigNumberify(stake.to),
         preCommit,
-        playerAWeapon: AWeapon[1],
-        playerBWeapon: BWeapon[1],
+        playerAWeapon: WeaponIndex[AWeapon],
+        playerBWeapon: WeaponIndex[BWeapon],
         salt,
       };
 
