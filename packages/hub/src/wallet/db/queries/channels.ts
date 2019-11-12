@@ -22,7 +22,7 @@ async function updateChannel(stateRound: State[], hubState: State) {
 
   const outcome = (s: State) => outcomeAddPriorities(s.outcome);
   const state = (s: State) => ({
-    turn_number: s.turnNum,
+    turn_num: s.turnNum,
     outcome: outcome(s),
     app_data: s.appData
   });
@@ -76,6 +76,6 @@ async function updateChannel(stateRound: State[], hubState: State) {
   }
 
   return Channel.query()
-    .eager('[participants, states.[outcome.[allocation], channel.[participants]]]')
-    .upsertGraphAndFetch(upserts);
+    .upsertGraphAndFetch(upserts)
+    .eager('[participants, states.[outcome.[allocation]]]');
 }

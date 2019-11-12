@@ -14,7 +14,7 @@ import {
   pre_fund_setup_3_2_response
 } from '../../../test/test_data';
 import errors from '../../errors';
-import * as ChannelManagement from '../channelManagement';
+import * as ChannelManager from '../channelManager';
 import * as LedgerChannelManager from '../ledgerChannelManager';
 
 // 2 participant channel
@@ -51,7 +51,7 @@ describe('updateLedgerChannel', () => {
         {state: pre_fund_setup_0, signature: theirSignature}
       ]);
       expect(state).toMatchObject(pre_fund_setup_1_response);
-      expect(ChannelManagement.validSignature(state, signature)).toBe(true);
+      expect(ChannelManager.validSignature(state, signature)).toBe(true);
     });
 
     it('on valid round received -- should return an allocator channel and a signed state', async () => {
@@ -66,7 +66,7 @@ describe('updateLedgerChannel', () => {
         }
       ]);
       expect(state).toMatchObject(pre_fund_setup_3_2_response);
-      expect(ChannelManagement.validSignature(state, signature)).toBe(true);
+      expect(ChannelManager.validSignature(state, signature)).toBe(true);
     });
 
     it.skip('throws when the state is incorrectly signed', async () => {
@@ -101,7 +101,7 @@ describe('updateLedgerChannel', () => {
         created_pre_fund_setup_1
       );
       expect(state).toMatchObject(post_fund_setup_1_response);
-      expect(ChannelManagement.validSignature(state, signature)).toBe(true);
+      expect(ChannelManager.validSignature(state, signature)).toBe(true);
     });
 
     describe('round of states', () => {
@@ -120,7 +120,7 @@ describe('updateLedgerChannel', () => {
           created_pre_fund_setup_3_2
         );
         expect(state).toMatchObject(post_fund_setup_3_2_response);
-        expect(ChannelManagement.validSignature(state, signature)).toBe(true);
+        expect(ChannelManager.validSignature(state, signature)).toBe(true);
       });
 
       it('on valid round received -- not our turn', async () => {
@@ -203,7 +203,7 @@ describe('updateLedgerChannel', () => {
       );
       expect(state).toMatchObject(app_1_response);
 
-      expect(ChannelManagement.validSignature(state, signature)).toBe(true);
+      expect(ChannelManager.validSignature(state, signature)).toBe(true);
     });
   });
 

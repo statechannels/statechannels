@@ -3,7 +3,7 @@ import {signState} from '@statechannels/nitro-protocol/lib/src/signatures';
 import {Signature} from 'ethers/utils';
 import {HUB_PRIVATE_KEY} from '../../../constants';
 import {constructors as testDataConstructors, funded_channel} from '../../../test/test_data';
-import * as ChannelManagement from '../channelManagement';
+import * as ChannelManager from '../channelManager';
 
 let pre_fund_setup_0: State;
 let pre_fund_setup_1: State;
@@ -23,18 +23,18 @@ beforeEach(() => {
 
 describe('validSignature', () => {
   it('returns true when the state was signed by the mover', async () => {
-    expect(ChannelManagement.validSignature(pre_fund_setup_1, hubSignature)).toBe(true);
+    expect(ChannelManager.validSignature(pre_fund_setup_1, hubSignature)).toBe(true);
   });
 
   it.skip('returns false when the state was not signed by the mover', async () => {
     // TODO: Unskip when validation is enabled
-    expect(ChannelManagement.validSignature(pre_fund_setup_0, hubSignature)).toBe(false);
+    expect(ChannelManager.validSignature(pre_fund_setup_0, hubSignature)).toBe(false);
   });
 
   it.skip('returns false when the state was not signed by the mover', async () => {
     // TODO: Unskip when validation is enabled
     const signature = signState(pre_fund_setup_0, '0xf00').signature;
-    expect(ChannelManagement.validSignature(pre_fund_setup_0, signature)).toBe(false);
+    expect(ChannelManager.validSignature(pre_fund_setup_0, signature)).toBe(false);
   });
 });
 
@@ -44,7 +44,7 @@ describe('formResponse', () => {
 
     hubSignature = signState(pre_fund_setup_1, HUB_PRIVATE_KEY).signature;
 
-    expect(await ChannelManagement.formResponse(pre_fund_setup_1)).toMatchObject({
+    expect(await ChannelManager.formResponse(pre_fund_setup_1)).toMatchObject({
       state: pre_fund_setup_1,
       signature: hubSignature
     });
@@ -53,10 +53,10 @@ describe('formResponse', () => {
 
 describe('nextState', () => {
   it('works on preFundSetup states', () => {
-    expect(ChannelManagement.nextState(pre_fund_setup_0)).toMatchObject(pre_fund_setup_1);
+    expect(ChannelManager.nextState(pre_fund_setup_0)).toMatchObject(pre_fund_setup_1);
   });
 
   it('works on postFundSetup states', () => {
-    expect(ChannelManagement.nextState(post_fund_setup_0)).toMatchObject(post_fund_setup_1);
+    expect(ChannelManager.nextState(post_fund_setup_0)).toMatchObject(post_fund_setup_1);
   });
 });

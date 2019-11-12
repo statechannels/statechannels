@@ -13,12 +13,12 @@ exports.up = (knex: Knex) => {
       .references('channels.id')
       .onDelete('CASCADE');
     table
-      .integer('turn_number')
+      .integer('turn_num')
       .unsigned()
       .notNullable();
     table.text('app_data').notNullable();
 
-    table.unique(['channel_id', 'turn_number']);
+    table.unique(['channel_id', 'turn_num']);
   });
 };
 

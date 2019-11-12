@@ -19,7 +19,7 @@ import {
   PARTICIPANT_1_ADDRESS,
   PARTICIPANT_2_ADDRESS
 } from '../../../test/test-constants';
-import {consensus_app_attrs2, consensus_app_attrs3} from '../../../test/test_data';
+import {consensus_app_data2, consensus_app_data3} from '../../../test/test_data';
 import Channel from '../../models/channel';
 import knex from '../connection';
 import {outcomeAddPriorities} from '../utils';
@@ -41,19 +41,19 @@ const participants_3 = [
 // Ledger channels
 // ***************
 
-function pre_fund_setup(turnNumber: number) {
+function pre_fund_setup(turnNum: number) {
   return {
-    turnNumber,
+    turnNum,
     outcome: outcomeAddPriorities(outcome2),
-    appData: encodeConsensusData(consensus_app_attrs2(2))
+    appData: encodeConsensusData(consensus_app_data2(2))
   };
 }
 
-function pre_fund_setup_3(turnNumber: number) {
+function pre_fund_setup_3(turnNum: number) {
   return {
-    turnNumber,
+    turnNum,
     outcome: outcomeAddPriorities(outcome3),
-    appData: encodeConsensusData(consensus_app_attrs3(3))
+    appData: encodeConsensusData(consensus_app_data3(3))
   };
 }
 
@@ -75,11 +75,11 @@ const funded_channel_3 = {
   participants: participants_3
 };
 
-function post_fund_setup(turnNumber: number) {
+function post_fund_setup(turnNum: number) {
   return {
-    turnNumber,
+    turnNum,
     outcome: outcomeAddPriorities(outcome2),
-    appData: encodeConsensusData(consensus_app_attrs2(0))
+    appData: encodeConsensusData(consensus_app_data2(0))
   };
 }
 
@@ -92,11 +92,11 @@ const beginning_app_phase_channel = {
   participants
 };
 
-function app(turnNumber: number) {
+function app(turnNum: number) {
   return {
-    turnNumber,
+    turnNum,
     outcome: outcomeAddPriorities(outcome2),
-    appData: encodeConsensusData(consensus_app_attrs2(turnNumber % participants.length))
+    appData: encodeConsensusData(consensus_app_data2(turnNum % participants.length))
   };
 }
 
