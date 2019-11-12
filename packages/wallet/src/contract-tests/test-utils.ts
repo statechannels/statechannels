@@ -55,7 +55,7 @@ export async function getChannelId(channelNonce, participantA, participantB) {
   });
 }
 
-export async function depositContract(
+export async function depositFunds(
   provider: ethers.providers.JsonRpcProvider,
   participant: string,
   amount = defaultDepositAmount

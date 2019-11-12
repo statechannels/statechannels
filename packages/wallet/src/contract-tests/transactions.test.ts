@@ -13,7 +13,7 @@ import {
   createTransferAndWithdrawTransaction
 } from "../utils/transaction-generator";
 
-import {depositContract} from "./test-utils";
+import {depositFunds} from "./test-utils";
 import {getGanacheProvider} from "@statechannels/devtools";
 import {transactionSender} from "../redux/sagas/transaction-sender";
 import {testSaga} from "redux-saga-test-plan";
@@ -260,8 +260,8 @@ describe("transactions", () => {
     };
     const channelId = getChannelId(channel);
 
-    await depositContract(provider, channelId);
-    await depositContract(provider, channelId);
+    await depositFunds(provider, channelId);
+    await depositFunds(provider, channelId);
     await concludeGame(provider, channel.channelNonce, participantA, participantB);
 
     const verificationSignature = "0x0";
@@ -276,7 +276,7 @@ describe("transactions", () => {
   });
 
   it.skip("should send a withdraw transaction", async () => {
-    await depositContract(provider, participantA.address);
+    await depositFunds(provider, participantA.address);
 
     const verificationSignature = "0x0";
     const withdrawTransaction = createWithdrawTransaction(
@@ -296,7 +296,7 @@ describe("transactions", () => {
       participants: [participantA.address, participantB.address]
     };
     const channelId = getChannelId(channel);
-    await depositContract(provider, channelId);
+    await depositFunds(provider, channelId);
 
     const verificationSignature = "0x0";
     const fromState: State = {
