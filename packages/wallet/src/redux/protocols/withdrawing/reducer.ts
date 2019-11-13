@@ -3,7 +3,7 @@ import * as states from "./states";
 import {WithdrawalAction} from "./actions";
 import * as selectors from "../../selectors";
 import {
-  createConcludeAndWithdrawTransaction,
+  createConcludePushOutcomeAndTransferAllTransaction,
   ConcludeAndWithdrawArgs
 } from "../../../utils/transaction-generator";
 import {TransactionRequest} from "ethers/providers";
@@ -171,5 +171,5 @@ const createConcludeAndWithTransaction = (
     destination: withdrawalAddress,
     verificationSignature
   };
-  return createConcludeAndWithdrawTransaction(args);
+  return createConcludePushOutcomeAndTransferAllTransaction(args);
 };

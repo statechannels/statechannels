@@ -9,7 +9,6 @@ import {
   State
 } from "@statechannels/nitro-protocol";
 import {Allocation, AllocationItem} from "@statechannels/nitro-protocol/src/contract/outcome";
-import {createConcludePushOutcomeAndTransferAllTransaction} from "@statechannels/nitro-protocol/src/transactions";
 import {convertAddressToBytes32} from "./data-type-utils";
 
 export function createForceMoveTransaction(
@@ -41,14 +40,14 @@ export interface ConcludeAndWithdrawArgs {
   amount: string;
   verificationSignature: string;
 }
-export function createConcludeAndWithdrawTransaction(
+export function createConcludePushOutcomeAndTransferAllTransaction(
   args: ConcludeAndWithdrawArgs
 ): TransactionRequest {
   if (!args) {
     throw new Error();
   }
 
-  return createConcludePushOutcomeAndTransferAllTransaction([
+  return nitroTrans.createConcludePushOutcomeAndTransferAllTransaction([
     args.fromSignedState,
     args.toSignedState
   ]);

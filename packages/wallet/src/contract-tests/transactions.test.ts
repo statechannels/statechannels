@@ -8,7 +8,7 @@ import {
   createRefuteTransaction,
   createConcludeTransaction,
   ConcludeAndWithdrawArgs,
-  createConcludeAndWithdrawTransaction,
+  createConcludePushOutcomeAndTransferAllTransaction,
   createTransferAndWithdrawTransaction
 } from "../utils/transaction-generator";
 
@@ -274,7 +274,7 @@ describe("transactions", () => {
     await testTransactionSender(transferAndWithdraw);
   });
 
-  it.only("should send a conclude, push outcome, and transfer all transaction", async () => {
+  it("should send a conclude, push outcome, and transfer all transaction", async () => {
     const channelNonce = getNextNonce();
     const channel: Channel = {
       channelNonce,
@@ -316,7 +316,7 @@ describe("transactions", () => {
       destination: participantA.address,
       amount: "0x05"
     };
-    const concludeAndWithdrawTransaction = createConcludeAndWithdrawTransaction(args);
+    const concludeAndWithdrawTransaction = createConcludePushOutcomeAndTransferAllTransaction(args);
     await testTransactionSender(concludeAndWithdrawTransaction);
   });
 });
