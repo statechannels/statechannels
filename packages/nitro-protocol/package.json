@@ -41,6 +41,7 @@
     "deploy:test": "npx etherlime deploy --compile=false --file=./deployment/deploy-test.js",
     "deploy": "npx etherlime deploy --compile=false",
     "lint:check": "npx tslint --config tslint.json --project .",
+    "lint:js": "eslint \"*/**/*.{js,ts}\" --cache",
     "lint:write": "npx tslint --config tslint.json --project . --fix",
     "prepare": "yarn build",
     "docgen": "npx solidoc",
@@ -59,6 +60,8 @@
     "ethers": "4.0.39"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin-tslint": "^2.7.0",
+    "eslint-plugin-import": "^2.18.2",
     "@statechannels/devtools": "0.1.21",
     "@statechannels/jest-gas-reporter": "0.0.2",
     "@types/jest": "24.0.18",
@@ -79,7 +82,8 @@
     "truffle": "5.0.37",
     "ts-jest": "24.1.0",
     "tslint": "5.20.0",
-    "tslint-config-prettier": "1.18.0",
+    "eslint-config-prettier": "^6.0.0",
+    "eslint-plugin-prettier": "^3.1.0",
     "typescript": "3.6.3",
     "write-json-file": "4.2.0"
   },

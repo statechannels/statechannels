@@ -1,0 +1,6 @@
+config/**/*.js
+node_modules/**/*.ts
+truffle.ts
+migrations/*
+**/*.json
+website
