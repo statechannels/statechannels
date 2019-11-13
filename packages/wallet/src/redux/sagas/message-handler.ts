@@ -32,7 +32,7 @@ function* handleMessage(payload: jrs.RequestPayloadObject) {
 
       break;
     case "CreateChannel":
-      const {allocations, participants} = payload.params;
+      const {participants} = payload.params;
       const state = createStateFromCreateChannelParams(payload.params);
 
       yield put(
@@ -46,18 +46,10 @@ function* handleMessage(payload: jrs.RequestPayloadObject) {
       );
       // TODO: Need to handle the case where something goes wrong
 
-      // TODO: Do we want this saga to be responsible for issuing the response?
       yield fork(
         messageSender,
         actions.createChannelResponse({
           id,
-          participants,
-          allocations,
-          turnNum: 0,
-          funding: [],
-          status: "Opening",
-          appDefinition: state.appDefinition,
-          appData: state.appData,
           channelId: getChannelId(state.channel)
         })
       );

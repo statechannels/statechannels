@@ -3,6 +3,9 @@ import {Wallet} from "ethers";
 import {expectSaga} from "redux-saga-test-plan";
 import * as matchers from "redux-saga-test-plan/matchers";
 import {messageSender} from "../message-sender";
+import {channelFromStates} from "../../channel-store/channel-state/__tests__";
+import * as stateHelpers from "../../__tests__/state-helpers";
+import {setChannel, EMPTY_SHARED_DATA} from "../../state";
 
 describe("create message", () => {
   it("creates a correct response message for WALLET.ADDRESS_RESPONSE", () => {
@@ -22,43 +25,16 @@ describe("create message", () => {
       .run();
   });
   it("creates a correct response message for WALLET.CREATE_CHANNEL_RESPONSE", async () => {
-    const destinationA = Wallet.createRandom().address;
-    const signingAddressA = Wallet.createRandom().address;
-    const signingAddressB = Wallet.createRandom().address;
-    const destinationB = Wallet.createRandom().address;
-    const appDefinition = Wallet.createRandom().address;
-    const appData = "0x0";
-    const participants = [
-      {
-        participantId: "user-a",
-        signingAddress: signingAddressA,
-        destination: destinationA
-      },
-      {
-        participantId: "user-b",
-        signingAddress: signingAddressB,
-        destination: destinationB
-      }
-    ];
-    const allocations = [
-      {
-        token: "0x0",
-        allocationItems: [
-          {destination: destinationA, amount: "12"},
-          {destination: destinationB, amount: "12"}
-        ]
-      }
-    ];
-    const channelId = Wallet.createRandom().address;
+    const state = stateHelpers.appState({turnNum: 0});
+
+    const initialState = setChannel(
+      EMPTY_SHARED_DATA,
+      channelFromStates([state], stateHelpers.asAddress, stateHelpers.asPrivateKey)
+    );
+    const channelId = stateHelpers.channelId;
     const message = createChannelResponse({
       id: 1,
-      participants,
-      allocations,
-      appData,
-      appDefinition,
-      funding: [],
-      turnNum: 0,
-      status: "Opening",
+
       channelId
     });
     const response = {
@@ -66,10 +42,6 @@ describe("create message", () => {
 
       id: 1,
       result: {
-        participants,
-        allocations,
-        appData,
-        appDefinition,
         funding: [],
         turnNum: 0,
         status: "Opening",
@@ -77,9 +49,10 @@ describe("create message", () => {
       }
     };
     const {effects} = await expectSaga(messageSender, message)
+      .withState(initialState)
       .provide([[matchers.call.fn(window.parent.postMessage), 0]])
       .run();
 
-    expect(JSON.parse(effects.call[0].payload.args[0])).toEqual(response);
+    expect(JSON.parse(effects.call[0].payload.args[0])).toMatchObject(response);
   });
 });

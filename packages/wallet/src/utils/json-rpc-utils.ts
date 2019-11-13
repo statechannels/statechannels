@@ -1,4 +1,4 @@
-import {Outcome, State, Channel} from "@statechannels/nitro-protocol";
+import {Outcome, State, Channel, isAllocationOutcome} from "@statechannels/nitro-protocol";
 import {bigNumberify, randomBytes} from "ethers/utils";
 import {NETWORK_ID, CHALLENGE_DURATION} from "../constants";
 
@@ -29,6 +29,18 @@ export interface JsonRpcCreateChannelParams {
 function createAllocationOutcomeFromParams(params: JsonRpcAllocations): Outcome {
   return params.map(p => {
     return {assetHolderAddress: p.token, allocation: p.allocationItems};
+  });
+}
+
+export function createJsonRpcAllocationsFromOutcome(outcome: Outcome): JsonRpcAllocations {
+  return outcome.map(o => {
+    if (!isAllocationOutcome(o)) {
+      throw new Error("Attempted to convert non allocation outcome to an allocation");
+    }
+    return {
+      token: o.assetHolderAddress,
+      allocationItems: o.allocation
+    };
   });
 }
 

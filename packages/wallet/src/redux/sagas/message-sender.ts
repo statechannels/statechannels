@@ -1,7 +1,10 @@
 import {JsonRpcResponseAction} from "../actions";
 import jrs from "jsonrpc-serializer";
-import {call} from "redux-saga/effects";
+import {call, select} from "redux-saga/effects";
 import {unreachable} from "../../utils/reducer-utils";
+import {getChannelStatus} from "../state";
+import {ChannelState, getLastState} from "../channel-store";
+import {createJsonRpcAllocationsFromOutcome} from "../../utils/json-rpc-utils";
 
 export function* messageSender(action: JsonRpcResponseAction) {
   const message = yield createResponseMessage(action);
@@ -10,22 +13,19 @@ export function* messageSender(action: JsonRpcResponseAction) {
 
 function* createResponseMessage(action: JsonRpcResponseAction) {
   switch (action.type) {
-    // TODO: If we switch this to a saga the action could just have a channelId
-    // We could look up the rest using a selector
     case "WALLET.CREATE_CHANNEL_RESPONSE":
-      const {
-        participants,
-        allocations,
-        appDefinition,
-        appData,
-        status,
-        funding,
-        turnNum,
-        channelId
-      } = action;
+      const {channelId} = action;
+      const channelStatus: ChannelState = yield select(getChannelStatus, channelId);
+      const state = getLastState(channelStatus);
+
+      const {participants} = channelStatus;
+      const {appData, appDefinition, turnNum} = state;
+      const funding = [];
+      const status = "Opening";
+
       return jrs.success(action.id, {
         participants,
-        allocations,
+        allocations: createJsonRpcAllocationsFromOutcome(state.outcome),
         appDefinition,
         appData,
         status,

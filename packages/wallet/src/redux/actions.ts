@@ -21,7 +21,6 @@ import {LedgerFundingAction} from "./protocols/ledger-funding";
 import {LOAD as LOAD_FROM_STORAGE} from "redux-storage";
 import {SignedState, State} from "@statechannels/nitro-protocol";
 import {BigNumber} from "ethers/utils";
-import {JsonRpcParticipant, JsonRpcAllocations} from "../utils/json-rpc-utils";
 export * from "./protocols/transaction-submission/actions";
 
 export type TransactionAction = TA;
@@ -309,13 +308,6 @@ export interface JsonRpcAction {
 }
 export interface CreateChannelResponse extends JsonRpcAction {
   type: "WALLET.CREATE_CHANNEL_RESPONSE";
-  participants: JsonRpcParticipant[];
-  allocations: JsonRpcAllocations;
-  appDefinition: string;
-  appData: string;
-  status: "Opening";
-  funding: [];
-  turnNum: 0;
   channelId: string;
 }
 export const createChannelResponse: ActionConstructor<CreateChannelResponse> = p => ({
