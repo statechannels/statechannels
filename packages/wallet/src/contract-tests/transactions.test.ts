@@ -275,19 +275,6 @@ describe("transactions", () => {
     await testTransactionSender(transferAndWithdraw);
   });
 
-  it.skip("should send a withdraw transaction", async () => {
-    await depositContract(provider, participantA.address);
-
-    const verificationSignature = "0x0";
-    const withdrawTransaction = createWithdrawTransaction(
-      "0x01",
-      participantA.address,
-      participantA.address,
-      verificationSignature
-    );
-    await testTransactionSender(withdrawTransaction);
-  });
-
   it.skip("should send a conclude and withdraw transaction", async () => {
     const channelNonce = getNextNonce();
     const channel: Channel = {
