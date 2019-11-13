@@ -9,6 +9,7 @@ import {
   State
 } from "@statechannels/nitro-protocol";
 import {Allocation, AllocationItem} from "@statechannels/nitro-protocol/src/contract/outcome";
+import {createConcludePushOutcomeAndTransferAllTransaction} from "@statechannels/nitro-protocol/src/transactions";
 import {convertAddressToBytes32} from "./data-type-utils";
 
 export function createForceMoveTransaction(
@@ -46,32 +47,11 @@ export function createConcludeAndWithdrawTransaction(
   if (!args) {
     throw new Error();
   }
-  // TODO: Implmement using Nitro
-  // const adjudicatorInterface = getAdjudicatorInterface();
-  // const splitFromSignature = splitSignature(args.fromSignature);
-  // const splitToSignature = splitSignature(args.toSignature);
-  // const conclusionProof = {
-  //   penultimateState: asEthersObject(args.fromState),
-  //   ultimateState: asEthersObject(args.toState),
-  //   penultimateSignature: splitFromSignature,
-  //   ultimateSignature: splitToSignature
-  // };
-  // const {v, r, s} = splitSignature(args.verificationSignature);
-  // const {participant, destination, amount} = args;
-  // const data = adjudicatorInterface.functions.concludeAndWithdraw.encode([
-  //   conclusionProof,
-  //   participant,
-  //   destination,
-  //   amount,
-  //   v,
-  //   r,
-  //   s
-  // ]);
 
-  return {
-    data: "0x0",
-    gasLimit: 3000000
-  };
+  return createConcludePushOutcomeAndTransferAllTransaction([
+    args.fromSignedState,
+    args.toSignedState
+  ]);
 }
 
 export function createConcludeTransaction(

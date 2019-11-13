@@ -4,6 +4,7 @@ import {Signature} from 'ethers/utils';
 import {SignedState} from '.';
 import {State} from './contract/state';
 import * as forceMoveTrans from './contract/transaction-creators/force-move';
+import * as nitroAdjudicatorTrans from './contract/transaction-creators/nitro-adjudicator';
 import {getStateSignerAddress} from './signatures';
 
 export async function getData(provider, contractAddress: string, channelId: string) {
@@ -50,6 +51,17 @@ export function createCheckpointTransaction(signedStates: SignedState[]): Transa
     signatures,
     whoSignedWhat,
   });
+}
+
+export function createConcludePushOutcomeAndTransferAllTransaction(
+  signedStates: SignedState[]
+): TransactionRequest {
+  const {states, signatures, whoSignedWhat} = createSignatureArguments(signedStates);
+  return nitroAdjudicatorTrans.createConcludePushOutcomeAndTransferAllTransaction(
+    states,
+    signatures,
+    whoSignedWhat
+  );
 }
 
 export function createConcludeTransaction(conclusionProof: SignedState[]): TransactionRequest {

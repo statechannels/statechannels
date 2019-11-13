@@ -7,7 +7,6 @@ import {
   createRespondTransaction,
   createRefuteTransaction,
   createConcludeTransaction,
-  createWithdrawTransaction,
   ConcludeAndWithdrawArgs,
   createConcludeAndWithdrawTransaction,
   createTransferAndWithdrawTransaction
@@ -275,7 +274,7 @@ describe("transactions", () => {
     await testTransactionSender(transferAndWithdraw);
   });
 
-  it.skip("should send a conclude and withdraw transaction", async () => {
+  it.only("should send a conclude, push outcome, and transfer all transaction", async () => {
     const channelNonce = getNextNonce();
     const channel: Channel = {
       channelNonce,
@@ -289,7 +288,7 @@ describe("transactions", () => {
     const fromState: State = {
       channel,
       appDefinition: libraryAddress,
-      turnNum: 5,
+      turnNum: 4,
       outcome: convertBalanceToOutcome(fiveFive(participantA.address, participantB.address)),
       isFinal: true,
       challengeDuration: CHALLENGE_DURATION,
@@ -299,7 +298,7 @@ describe("transactions", () => {
     const toState: State = {
       channel,
       appDefinition: libraryAddress,
-      turnNum: 6,
+      turnNum: 5,
       outcome: convertBalanceToOutcome(fiveFive(participantA.address, participantB.address)),
       isFinal: true,
       challengeDuration: CHALLENGE_DURATION,
