@@ -34,12 +34,16 @@ describe("create message", () => {
     const channelId = stateHelpers.channelId;
     const message = createChannelResponse({
       id: 1,
-
       channelId
     });
-    const response = {
-      jsonrpc: "2.0",
 
+    const {effects} = await expectSaga(messageSender, message)
+      .withState(initialState)
+      .provide([[matchers.call.fn(window.parent.postMessage), 0]])
+      .run();
+
+    expect(JSON.parse(effects.call[0].payload.args[0])).toMatchObject({
+      jsonrpc: "2.0",
       id: 1,
       result: {
         funding: [],
@@ -47,12 +51,6 @@ describe("create message", () => {
         status: "Opening",
         channelId
       }
-    };
-    const {effects} = await expectSaga(messageSender, message)
-      .withState(initialState)
-      .provide([[matchers.call.fn(window.parent.postMessage), 0]])
-      .run();
-
-    expect(JSON.parse(effects.call[0].payload.args[0])).toMatchObject(response);
+    });
   });
 });

@@ -97,10 +97,7 @@ describe("message listener", () => {
 
     expect(effects.fork[0].payload.args[0]).toMatchObject({
       type: "WALLET.CREATE_CHANNEL_RESPONSE",
-      participants,
-      allocations,
-      status: "Opening",
-      funding: [],
+      id: 1,
       channelId: expect.any(String)
     });
   });
