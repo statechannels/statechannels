@@ -15845,12 +15845,10 @@ jsonparse@^1.2.0:
   resolved "https://registry.yarnpkg.com/jsonparse/-/jsonparse-1.3.1.tgz#3f4dae4a91fac315f71062f8521cc239f1366280"
   integrity sha1-P02uSpH6wxX3EGL4UhzCOfE2YoA=
 
-jsonrpc-serializer@0.2.1:
-  version "0.2.1"
-  resolved "https://registry.npmjs.org/jsonrpc-serializer/-/jsonrpc-serializer-0.2.1.tgz#0edf529cd8714eed87cbeb55a9bcfab7635b4c39"
-  integrity sha1-Dt9SnNhxTu2Hy+tVqbz6t2NbTDk=
-  dependencies:
-    inherits "^2.0.3"
+jsonrpc-lite@2.1.0:
+  version "2.1.0"
+  resolved "https://registry.npmjs.org/jsonrpc-lite/-/jsonrpc-lite-2.1.0.tgz#65171c521ce037c761a6e3dc3b22ec99cceb2d18"
+  integrity sha512-gjGlngwEERed9VKmBALN7vLYQf6S0ggEqGnzYAMdoH+cSLGqVUCpU62sioa2/ts+xKYOOLye0CDu7/w/HAJ53w==
 
 jsonschema@^1.2.0:
   version "1.2.4"

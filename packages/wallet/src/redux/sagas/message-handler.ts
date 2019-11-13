@@ -1,7 +1,7 @@
 import {select, fork, put, call} from "redux-saga/effects";
 
 import * as actions from "../actions";
-import jrs, {RequestPayloadObject} from "jsonrpc-serializer";
+import jrs, {RequestObject} from "jsonrpc-lite";
 import {getAddress} from "../selectors";
 import {messageSender} from "./message-sender";
 import {getChannelId} from "@statechannels/nitro-protocol";
@@ -10,7 +10,7 @@ import {createStateFromCreateChannelParams} from "../../utils/json-rpc-utils";
 import {getProvider} from "../../utils/contract-utils";
 
 export function* messageHandler(jsonRpcMessage: string, fromDomain: string) {
-  const parsedMessage = jrs.deserialize(jsonRpcMessage);
+  const parsedMessage = jrs.parseObject(JSON.parse(jsonRpcMessage));
   switch (parsedMessage.type) {
     case "notification":
     case "success":
@@ -19,13 +19,14 @@ export function* messageHandler(jsonRpcMessage: string, fromDomain: string) {
     case "error":
       throw new Error("TODO: Respond with error message");
     case "request":
-      yield handleMessage(parsedMessage.payload as RequestPayloadObject);
+      yield handleMessage(parsedMessage.payload as RequestObject);
       break;
   }
 }
 
-function* handleMessage(payload: jrs.RequestPayloadObject) {
+function* handleMessage(payload: RequestObject) {
   const {id} = payload;
+
   switch (payload.method) {
     case "GetAddress":
       const address = yield select(getAddress);
@@ -37,8 +38,9 @@ function* handleMessage(payload: jrs.RequestPayloadObject) {
   }
 }
 
-function* handleCreateChannelMessage(payload: jrs.RequestPayloadObject) {
-  const {participants, appDefinition} = payload.params;
+function* handleCreateChannelMessage(payload: RequestObject) {
+  // TODO: We should verify the params we expect are there
+  const {participants, appDefinition} = payload.params as any;
   const {id} = payload;
 
   const address = select(getAddress);
@@ -56,7 +58,7 @@ function* handleCreateChannelMessage(payload: jrs.RequestPayloadObject) {
   } else if (!contractAtAddress) {
     yield fork(messageSender, actions.noContractError({id, address: appDefinition}));
   } else {
-    const state = createStateFromCreateChannelParams(payload.params);
+    const state = createStateFromCreateChannelParams(payload.params as any);
     yield put(
       actions.protocol.initializeChannel({channelId: getChannelId(state.channel), participants})
     );
