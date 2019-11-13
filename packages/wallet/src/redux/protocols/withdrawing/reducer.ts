@@ -3,8 +3,8 @@ import * as states from "./states";
 import {WithdrawalAction} from "./actions";
 import * as selectors from "../../selectors";
 import {
-  createConcludeAndWithdrawTransaction,
-  ConcludeAndWithdrawArgs
+  createConcludePushOutcomeAndTransferAllTransaction as nitroCreateConcludePushOutcomeAndTransferAllTransaction,
+  ConcludePushOutcomeAndTransferAllArgs
 } from "../../../utils/transaction-generator";
 import {TransactionRequest} from "ethers/providers";
 import {
@@ -93,14 +93,15 @@ const waitForApprovalReducer = (
 ): ProtocolStateWithSharedData<states.WithdrawalState> => {
   switch (action.type) {
     case "WALLET.WITHDRAWING.WITHDRAWAL_APPROVED":
-      const {channelId, withdrawalAmount, processId} = protocolState;
-      const {withdrawalAddress} = action;
-      const transaction = createConcludeAndWithTransaction(
+      const {
         channelId,
+        // @ts-ignore
         withdrawalAmount,
-        withdrawalAddress,
-        sharedData
-      );
+        processId
+      } = protocolState;
+      const {withdrawalAddress} = action;
+      console.warn("The withdrawalAmount parameter is currently ignored");
+      const transaction = createConcludePushOutcomeAndTransferAllTransaction(channelId, sharedData);
       const {storage: newSharedData, state: transactionSubmissionState} = initTransactionState(
         transaction,
         processId,
@@ -151,25 +152,17 @@ const channelIsClosed = (channelId: string, sharedData: SharedData): boolean => 
   // TODO: Check if there is a finalized outcome on chain
 };
 
-const createConcludeAndWithTransaction = (
+const createConcludePushOutcomeAndTransferAllTransaction = (
   channelId: string,
-  withdrawalAmount: string,
-  withdrawalAddress: string,
   sharedData: SharedData
 ): TransactionRequest => {
   const channelState = selectors.getOpenedChannelState(sharedData, channelId);
-  const {signedStates: lastRound, participants, ourIndex} = channelState;
+  const {signedStates: lastRound} = channelState;
   const [penultimateState, lastState] = lastRound;
-  const participant = participants[ourIndex];
-  const verificationSignature = "0x00";
 
-  const args: ConcludeAndWithdrawArgs = {
+  const args: ConcludePushOutcomeAndTransferAllArgs = {
     fromSignedState: penultimateState,
-    toSignedState: lastState,
-    participant,
-    amount: withdrawalAmount,
-    destination: withdrawalAddress,
-    verificationSignature
+    toSignedState: lastState
   };
-  return createConcludeAndWithdrawTransaction(args);
+  return nitroCreateConcludePushOutcomeAndTransferAllTransaction(args);
 };

@@ -32,46 +32,21 @@ export function createRefuteTransaction(
   return nitroTrans.createCheckpointTransaction(seriesOfSupportiveStates);
 }
 
-export interface ConcludeAndWithdrawArgs {
+export interface ConcludePushOutcomeAndTransferAllArgs {
   fromSignedState: SignedState;
   toSignedState: SignedState;
-  participant: string;
-  destination: string;
-  amount: string;
-  verificationSignature: string;
 }
-export function createConcludeAndWithdrawTransaction(
-  args: ConcludeAndWithdrawArgs
+export function createConcludePushOutcomeAndTransferAllTransaction(
+  args: ConcludePushOutcomeAndTransferAllArgs
 ): TransactionRequest {
   if (!args) {
     throw new Error();
   }
-  // TODO: Implmement using Nitro
-  // const adjudicatorInterface = getAdjudicatorInterface();
-  // const splitFromSignature = splitSignature(args.fromSignature);
-  // const splitToSignature = splitSignature(args.toSignature);
-  // const conclusionProof = {
-  //   penultimateState: asEthersObject(args.fromState),
-  //   ultimateState: asEthersObject(args.toState),
-  //   penultimateSignature: splitFromSignature,
-  //   ultimateSignature: splitToSignature
-  // };
-  // const {v, r, s} = splitSignature(args.verificationSignature);
-  // const {participant, destination, amount} = args;
-  // const data = adjudicatorInterface.functions.concludeAndWithdraw.encode([
-  //   conclusionProof,
-  //   participant,
-  //   destination,
-  //   amount,
-  //   v,
-  //   r,
-  //   s
-  // ]);
 
-  return {
-    data: "0x0",
-    gasLimit: 3000000
-  };
+  return nitroTrans.createConcludePushOutcomeAndTransferAllTransaction([
+    args.fromSignedState,
+    args.toSignedState
+  ]);
 }
 
 export function createConcludeTransaction(

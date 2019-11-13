@@ -7,9 +7,8 @@ import {
   createRespondTransaction,
   createRefuteTransaction,
   createConcludeTransaction,
-  createWithdrawTransaction,
-  ConcludeAndWithdrawArgs,
-  createConcludeAndWithdrawTransaction,
+  ConcludePushOutcomeAndTransferAllArgs,
+  createConcludePushOutcomeAndTransferAllTransaction,
   createTransferAndWithdrawTransaction
 } from "../utils/transaction-generator";
 
@@ -275,20 +274,7 @@ describe("transactions", () => {
     await testTransactionSender(transferAndWithdraw);
   });
 
-  it.skip("should send a withdraw transaction", async () => {
-    await depositContract(provider, participantA.address);
-
-    const verificationSignature = "0x0";
-    const withdrawTransaction = createWithdrawTransaction(
-      "0x01",
-      participantA.address,
-      participantA.address,
-      verificationSignature
-    );
-    await testTransactionSender(withdrawTransaction);
-  });
-
-  it.skip("should send a conclude and withdraw transaction", async () => {
+  it("should send a conclude, push outcome, and transfer all transaction", async () => {
     const channelNonce = getNextNonce();
     const channel: Channel = {
       channelNonce,
@@ -298,11 +284,10 @@ describe("transactions", () => {
     const channelId = getChannelId(channel);
     await depositContract(provider, channelId);
 
-    const verificationSignature = "0x0";
     const fromState: State = {
       channel,
       appDefinition: libraryAddress,
-      turnNum: 5,
+      turnNum: 4,
       outcome: convertBalanceToOutcome(fiveFive(participantA.address, participantB.address)),
       isFinal: true,
       challengeDuration: CHALLENGE_DURATION,
@@ -312,7 +297,7 @@ describe("transactions", () => {
     const toState: State = {
       channel,
       appDefinition: libraryAddress,
-      turnNum: 6,
+      turnNum: 5,
       outcome: convertBalanceToOutcome(fiveFive(participantA.address, participantB.address)),
       isFinal: true,
       challengeDuration: CHALLENGE_DURATION,
@@ -322,15 +307,11 @@ describe("transactions", () => {
     const fromSignedState = Signatures.signState(fromState, participantA.privateKey);
     const toSignedState = Signatures.signState(toState, participantB.privateKey);
 
-    const args: ConcludeAndWithdrawArgs = {
+    const args: ConcludePushOutcomeAndTransferAllArgs = {
       fromSignedState,
-      toSignedState,
-      verificationSignature,
-      participant: participantA.address,
-      destination: participantA.address,
-      amount: "0x05"
+      toSignedState
     };
-    const concludeAndWithdrawTransaction = createConcludeAndWithdrawTransaction(args);
-    await testTransactionSender(concludeAndWithdrawTransaction);
+    const tx = createConcludePushOutcomeAndTransferAllTransaction(args);
+    await testTransactionSender(tx);
   });
 });

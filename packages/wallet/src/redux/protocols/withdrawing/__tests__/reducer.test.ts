@@ -7,9 +7,9 @@ import {describeScenarioStep} from "../../../__tests__/helpers";
 
 // Mocks
 const mockTransaction = {to: "0xabc"};
-const createConcludeAndWithdrawMock = jest.fn().mockReturnValue(mockTransaction);
-Object.defineProperty(TransactionGenerator, "createConcludeAndWithdrawTransaction", {
-  value: createConcludeAndWithdrawMock
+const createConcludePushOutcomeAndTransferAllMock = jest.fn().mockReturnValue(mockTransaction);
+Object.defineProperty(TransactionGenerator, "createConcludePushOutcomeAndTransferAllTransaction", {
+  value: createConcludePushOutcomeAndTransferAllMock
 });
 
 // Helpers
@@ -30,7 +30,7 @@ const itTransitionsTo = (
   });
 };
 
-const itSendsConcludeAndWithdrawTransaction = (result: {sharedData: SharedData}) => {
+const itSendsConcludePushOutcomeAndTransferAllTransaction = (result: {sharedData: SharedData}) => {
   it("sends the conclude and withdraw transaction", () => {
     // TODO: This is painful :()
     expect(result.sharedData.outboxState.transactionOutbox[0]).toMatchObject({
@@ -56,7 +56,7 @@ describe("HAPPY PATH", () => {
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, "Withdrawing.WaitForTransaction");
-    itSendsConcludeAndWithdrawTransaction(result);
+    itSendsConcludePushOutcomeAndTransferAllTransaction(result);
   });
 
   describeScenarioStep(scenario.waitForTransaction, () => {
