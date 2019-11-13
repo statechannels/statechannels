@@ -246,7 +246,6 @@ describe("message listener", () => {
     const signingAddressB = Wallet.createRandom().address;
     const destinationB = Wallet.createRandom().address;
 
-    // PUT  THIS INSIDE THE SHAREDDATA
     const appDefinition = Wallet.createRandom().address;
     const appData = "0x0";
     const participants = [
