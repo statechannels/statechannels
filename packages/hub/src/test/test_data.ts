@@ -4,6 +4,7 @@ import {signState} from '@statechannels/nitro-protocol/lib/src/signatures';
 import {HUB_ADDRESS} from '../constants';
 import {
   BEGINNING_APP_CHANNEL_NONCE,
+  DUMMY_CHAIN_ID,
   DUMMY_RULES_ADDRESS,
   FUNDED_CHANNEL_NONCE,
   FUNDED_CHANNEL_NONCE_3,
@@ -55,12 +56,12 @@ export const ongoing_app_phase_channel: Channel = {
   chainId: '8888'
 };
 
-export const consensus_app_attrs2 = (n: number): ConsensusData => ({
+export const consensus_app_data2 = (n: number): ConsensusData => ({
   furtherVotesRequired: n,
   proposedOutcome: outcome2
 });
 
-export const consensus_app_attrs3 = (n: number): ConsensusData => ({
+export const consensus_app_data3 = (n: number): ConsensusData => ({
   furtherVotesRequired: n,
   proposedOutcome: outcome3
 });
@@ -70,13 +71,13 @@ const base = {
   challengeDuration: 1000,
   outcome: outcome2,
   appDefinition: DUMMY_RULES_ADDRESS,
-  appData: encodeConsensusData(consensus_app_attrs2(0))
+  appData: encodeConsensusData(consensus_app_data2(0))
 };
 
 const base_3 = {
   ...base,
   outcome: outcome3,
-  appData: encodeConsensusData(consensus_app_attrs3(0))
+  appData: encodeConsensusData(consensus_app_data3(0))
 };
 
 function pre_fund_setup(turnNum: number): State {
@@ -116,7 +117,7 @@ function app(turnNum: number, channel: Channel): State {
     ...base,
     channel,
     turnNum,
-    appData: encodeConsensusData(consensus_app_attrs2(turnNum % channel.participants.length))
+    appData: encodeConsensusData(consensus_app_data2((turnNum + 1) % channel.participants.length))
   };
 }
 
@@ -155,33 +156,33 @@ const base_response_3 = {
 export const pre_fund_setup_1_response: State = {
   ...base_response,
   turnNum: 1,
-  appData: encodeConsensusData(consensus_app_attrs2(0))
+  appData: encodeConsensusData(consensus_app_data2(0))
 };
 
 export const pre_fund_setup_3_2_response: State = {
   ...base_response_3,
   turnNum: 2,
-  appData: encodeConsensusData(consensus_app_attrs3(0))
+  appData: encodeConsensusData(consensus_app_data3(0))
 };
 
 export const post_fund_setup_1_response: State = {
   ...base_response,
   turnNum: 3,
-  appData: encodeConsensusData(consensus_app_attrs2(0)),
+  appData: encodeConsensusData(consensus_app_data2(0)),
   channel: funded_channel
 };
 
 export const post_fund_setup_3_2_response: State = {
   ...base_response_3,
   turnNum: 5,
-  appData: encodeConsensusData(consensus_app_attrs3(0)),
+  appData: encodeConsensusData(consensus_app_data3(0)),
   channel: funded_channel_3
 };
 
 export const app_1_response: State = {
   ...base_response,
   turnNum: 5,
-  appData: encodeConsensusData(consensus_app_attrs2(0)),
+  appData: encodeConsensusData({proposedOutcome: [], furtherVotesRequired: 0}),
   channel: beginning_app_phase_channel
 };
 
@@ -202,7 +203,7 @@ export const created_pre_fund_setup_1: State = {
   channel: default_channel,
   turnNum: 1,
   outcome: outcome2,
-  appData: encodeConsensusData(consensus_app_attrs2(1)),
+  appData: encodeConsensusData(consensus_app_data2(1)),
   isFinal: false,
   challengeDuration: 1000,
   appDefinition: DUMMY_RULES_ADDRESS
@@ -212,7 +213,7 @@ export const created_pre_fund_setup_3_2: State = {
   channel: default_channel_3,
   turnNum: 2,
   outcome: outcome3,
-  appData: encodeConsensusData(consensus_app_attrs3(1)),
+  appData: encodeConsensusData(consensus_app_data3(1)),
   isFinal: false,
   challengeDuration: 1000,
   appDefinition: DUMMY_RULES_ADDRESS
@@ -223,5 +224,5 @@ export const participants = [{address: PARTICIPANT_1_ADDRESS}, {address: HUB_ADD
 export const created_channel = {
   id: expect.any(Number),
   participants,
-  rulesAddress: DUMMY_RULES_ADDRESS
+  chainId: DUMMY_CHAIN_ID
 };

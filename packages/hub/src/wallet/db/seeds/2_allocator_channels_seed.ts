@@ -4,7 +4,7 @@ import {HUB_ADDRESS} from '../../../constants';
 import {
   BEGINNING_APP_CHANNEL_HOLDINGS,
   BEGINNING_APP_CHANNEL_NONCE,
-  DUMMY_RULES_ADDRESS,
+  DUMMY_CHAIN_ID,
   DUMMY_RULES_BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID,
   DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID,
   DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID_3,
@@ -19,7 +19,7 @@ import {
   PARTICIPANT_1_ADDRESS,
   PARTICIPANT_2_ADDRESS
 } from '../../../test/test-constants';
-import {consensus_app_attrs2, consensus_app_attrs3} from '../../../test/test_data';
+import {consensus_app_data2, consensus_app_data3} from '../../../test/test_data';
 import Channel from '../../models/channel';
 import knex from '../connection';
 import {outcomeAddPriorities} from '../utils';
@@ -41,72 +41,72 @@ const participants_3 = [
 // Ledger channels
 // ***************
 
-function pre_fund_setup(turnNumber: number) {
+function pre_fund_setup(turnNum: number) {
   return {
-    turnNumber,
+    turnNum,
     outcome: outcomeAddPriorities(outcome2),
-    appData: encodeConsensusData(consensus_app_attrs2(2))
+    appData: encodeConsensusData(consensus_app_data2(2))
   };
 }
 
-function pre_fund_setup_3(turnNumber: number) {
+function pre_fund_setup_3(turnNum: number) {
   return {
-    turnNumber,
+    turnNum,
     outcome: outcomeAddPriorities(outcome3),
-    appData: encodeConsensusData(consensus_app_attrs3(3))
+    appData: encodeConsensusData(consensus_app_data3(3))
   };
 }
 
 const funded_channel = {
   channelId: DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID,
-  rulesAddress: DUMMY_RULES_ADDRESS,
   nonce: FUNDED_CHANNEL_NONCE,
   holdings: FUNDED_CHANNEL_HOLDINGS,
   states: [pre_fund_setup(0), pre_fund_setup(1)],
-  participants
+  participants,
+  chainId: DUMMY_CHAIN_ID
 };
 
 const funded_channel_3 = {
   channelId: DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID_3,
-  rulesAddress: DUMMY_RULES_ADDRESS,
   nonce: FUNDED_CHANNEL_NONCE_3,
   holdings: FUNDED_CHANNEL_HOLDINGS,
   states: [pre_fund_setup_3(0), pre_fund_setup_3(1), pre_fund_setup_3(2)],
-  participants: participants_3
+  participants: participants_3,
+  chainId: DUMMY_CHAIN_ID
 };
 
-function post_fund_setup(turnNumber: number) {
+function post_fund_setup(turnNum: number) {
   return {
-    turnNumber,
+    turnNum,
     outcome: outcomeAddPriorities(outcome2),
-    appData: encodeConsensusData(consensus_app_attrs2(0))
+    appData: encodeConsensusData(consensus_app_data2(0))
   };
 }
 
 const beginning_app_phase_channel = {
   channel_id: DUMMY_RULES_BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID,
-  rules_address: DUMMY_RULES_ADDRESS,
   nonce: BEGINNING_APP_CHANNEL_NONCE,
   holdings: BEGINNING_APP_CHANNEL_HOLDINGS,
   states: [post_fund_setup(2), post_fund_setup(3)],
-  participants
+  participants,
+  chainId: DUMMY_CHAIN_ID
 };
 
-function app(turnNumber: number) {
+function app(turnNum: number) {
   return {
-    turnNumber,
+    turnNum,
     outcome: outcomeAddPriorities(outcome2),
-    appData: encodeConsensusData(consensus_app_attrs2(turnNumber % participants.length))
+    appData: encodeConsensusData(consensus_app_data2(turnNum % participants.length))
   };
 }
 
 const ongoing_app_phase_channel = {
   channel_id: DUMMY_RULES_ONGOING_APP_CHANNEL_NONCE_CHANNEL_ID,
-  rules_address: DUMMY_RULES_ADDRESS,
   nonce: ONGOING_APP_CHANNEL_NONCE,
   holdings: ONGOING_APP_CHANNEL_HOLDINGS,
   states: [app(4), app(5)],
-  participants
+  participants,
+  chainId: DUMMY_CHAIN_ID
 };
 
 const two_participant_channel_seeds = {

@@ -1,9 +1,13 @@
+import {State} from '@statechannels/nitro-protocol';
 import {Uint32} from 'fmg-core';
 import {Model, snakeCaseMappers} from 'objection';
 import Channel from './channel';
 import Outcome from './outcome';
 
 export default class ChannelState extends Model {
+  static get columnNameMappers() {
+    return snakeCaseMappers();
+  }
   static tableName = 'channel_states';
 
   static relationMappings = {
@@ -25,17 +29,26 @@ export default class ChannelState extends Model {
     }
   };
 
-  static get columnNameMappers() {
-    return snakeCaseMappers();
-  }
-
   readonly id!: number;
   channel!: Channel;
   channelId!: number;
-  turnNumber!: Uint32;
+  turnNum!: Uint32;
   isFinal!: boolean;
   outcome: Outcome[];
   appData!: any;
   challengeDuration: number;
   appDefinition: string;
+
+  asStateObject(): State {
+    return {
+      channel: this.channel.asChannelObject,
+      turnNum: this.turnNum,
+      isFinal: this.isFinal,
+      // todo: is this the correct way to populate the outcome field?
+      outcome: this.outcome,
+      appData: this.appData,
+      challengeDuration: this.challengeDuration,
+      appDefinition: this.appDefinition
+    };
+  }
 }
