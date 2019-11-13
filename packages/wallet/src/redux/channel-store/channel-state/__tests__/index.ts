@@ -9,12 +9,14 @@ export function channelFromStates(
   const lastState = states[numStates - 1];
   const {turnNum, channel, appDefinition: libraryAddress} = lastState.state;
 
-  const participants: [string, string] = channel.participants as [string, string];
+  const participants = channel.participants.map(p => {
+    return {signingAddress: p, destination: p, participantId: p};
+  });
   let funded = true;
   if (turnNum <= 1) {
     funded = false;
   }
-  const ourIndex = participants.indexOf(ourAddress);
+  const ourIndex = participants.map(p => p.signingAddress).indexOf(ourAddress);
   if (ourIndex === -1) {
     throw new Error("Address provided is not a participant according to the lastState.");
   }

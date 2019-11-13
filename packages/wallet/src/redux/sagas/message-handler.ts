@@ -35,7 +35,9 @@ function* handleMessage(payload: jrs.RequestPayloadObject) {
       const {allocations, participants} = payload.params;
       const state = createStateFromCreateChannelParams(payload.params);
 
-      yield put(actions.protocol.initializeChannel({channelId: getChannelId(state.channel)}));
+      yield put(
+        actions.protocol.initializeChannel({channelId: getChannelId(state.channel), participants})
+      );
       yield put(
         actions.application.ownStateReceived({
           processId: APPLICATION_PROCESS_ID,

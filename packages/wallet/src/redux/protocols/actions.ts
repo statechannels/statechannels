@@ -2,6 +2,7 @@ import {TwoPartyPlayerIndex} from "../types";
 import {ActionConstructor} from "../utils";
 import {ConcludeInstigated, ProcessProtocol} from "../../communication";
 import {WalletAction} from "../actions";
+import {ChannelParticipant} from "../channel-store";
 export {BaseProcessAction} from "../../communication";
 
 // -------
@@ -11,6 +12,7 @@ export interface InitializeChannel {
   type: "WALLET.NEW_PROCESS.INITIALIZE_CHANNEL";
   protocol: ProcessProtocol.Application;
   channelId: string;
+  participants: ChannelParticipant[];
 }
 export interface FundingRequested {
   type: "WALLET.NEW_PROCESS.FUNDING_REQUESTED";
