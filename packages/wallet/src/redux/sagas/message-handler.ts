@@ -1,9 +1,12 @@
-import {select, fork} from "redux-saga/effects";
+import {select, fork, put} from "redux-saga/effects";
 
 import * as actions from "../actions";
 import jrs, {RequestPayloadObject} from "jsonrpc-serializer";
 import {getAddress} from "../selectors";
 import {messageSender} from "./message-sender";
+import {getChannelId} from "@statechannels/nitro-protocol";
+import {APPLICATION_PROCESS_ID} from "../protocols/application/reducer";
+import {createStateFromCreateChannelParams} from "../../utils/json-rpc-utils";
 
 export function* messageHandler(jsonRpcMessage: string, fromDomain: string) {
   const parsedMessage = jrs.deserialize(jsonRpcMessage);
@@ -15,12 +18,12 @@ export function* messageHandler(jsonRpcMessage: string, fromDomain: string) {
     case "error":
       throw new Error("TODO: Respond with error message");
     case "request":
-      yield handleMessage(parsedMessage.payload as RequestPayloadObject, fromDomain);
+      yield handleMessage(parsedMessage.payload as RequestPayloadObject);
       break;
   }
 }
 
-function* handleMessage(payload: jrs.RequestPayloadObject, domain: string) {
+function* handleMessage(payload: jrs.RequestPayloadObject) {
   const {id} = payload;
   switch (payload.method) {
     case "GetAddress":
@@ -28,5 +31,33 @@ function* handleMessage(payload: jrs.RequestPayloadObject, domain: string) {
       yield fork(messageSender, actions.addressResponse({id, address}));
 
       break;
+    case "CreateChannel":
+      const {allocations, participants} = payload.params;
+      const state = createStateFromCreateChannelParams(payload.params);
+
+      yield put(actions.protocol.initializeChannel({channelId: getChannelId(state.channel)}));
+      yield put(
+        actions.application.ownStateReceived({
+          processId: APPLICATION_PROCESS_ID,
+          state
+        })
+      );
+      // TODO: Need to handle the case where something goes wrong
+
+      // TODO: Do we want this saga to be responsible for issuing the response?
+      yield fork(
+        messageSender,
+        actions.createChannelResponse({
+          id,
+          participants,
+          allocations,
+          turnNum: 0,
+          funding: [],
+          status: "Opening",
+          appDefinition: state.appDefinition,
+          appData: state.appData,
+          channelId: getChannelId(state.channel)
+        })
+      );
   }
 }
