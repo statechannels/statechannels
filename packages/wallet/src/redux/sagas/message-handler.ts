@@ -1,10 +1,10 @@
 import {select, fork, put, call} from "redux-saga/effects";
+import {getChannelId} from "@statechannels/nitro-protocol";
+import jrs, {RequestObject} from "jsonrpc-lite";
 
 import * as actions from "../actions";
-import jrs, {RequestObject} from "jsonrpc-lite";
 import {getAddress} from "../selectors";
 import {messageSender} from "./message-sender";
-import {getChannelId} from "@statechannels/nitro-protocol";
 import {APPLICATION_PROCESS_ID} from "../protocols/application/reducer";
 import {createStateFromCreateChannelParams} from "../../utils/json-rpc-utils";
 import {getProvider} from "../../utils/contract-utils";
