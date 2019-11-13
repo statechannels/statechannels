@@ -215,10 +215,10 @@ Beyond the standard errors from that spec, the following domain-specific errors 
 
 | Code | Message                   | Meaning                                                                                                     |
 | ---- | ------------------------- | ----------------------------------------------------------------------------------------------------------- |
-|      | Signing address not found | The wallet can't find the signing key corresponding to the first signing address in the participants array. |
-|      | Invalid app definition    | There isn't a force-move compatible app contract deployed at the app definition address                     |
-|      | Invalid app data          | The app data isn't a valid state for the force-move app defined by the app definition                       |
-|      | Unsupported token         | The wallet doesn't support one or more of the tokens appearing in the allocation.                           |
+| 1000 | Signing address not found | The wallet can't find the signing key corresponding to the first signing address in the participants array. |
+| 1001 | Invalid app definition    | There isn't a force-move compatible app contract deployed at the app definition address                     |
+| 1002 | Invalid app data          | The app data isn't a valid state for the force-move app defined by the app definition                       |
+| 1003 | Unsupported token         | The wallet doesn't support one or more of the tokens appearing in the allocation.                           |
 
 ## Join Channel
 
@@ -277,7 +277,7 @@ Possible response to a `Channel Proposed` event.
 
 | Code | Message           | Meaning                                                          |
 | ---- | ----------------- | ---------------------------------------------------------------- |
-|      | Channel not found | The wallet can't find the channel corresponding to the channelId |
+| 1004 | Channel not found | The wallet can't find the channel corresponding to the channelId |
 
 ## Update State
 
