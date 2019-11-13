@@ -3,10 +3,13 @@ import {getChannelId} from "@statechannels/nitro-protocol";
 import jrs, {RequestObject} from "jsonrpc-lite";
 
 import * as actions from "../actions";
-import {getAddress} from "../selectors";
+import {getAddress, getLastStateForChannel} from "../selectors";
 import {messageSender} from "./message-sender";
 import {APPLICATION_PROCESS_ID} from "../protocols/application/reducer";
-import {createStateFromCreateChannelParams} from "../../utils/json-rpc-utils";
+import {
+  createStateFromCreateChannelParams,
+  createStateFromUpdateChannelParams
+} from "../../utils/json-rpc-utils";
 import {getProvider} from "../../utils/contract-utils";
 
 export function* messageHandler(jsonRpcMessage: string, fromDomain: string) {
@@ -35,6 +38,23 @@ function* handleMessage(payload: RequestObject) {
       break;
     case "CreateChannel":
       yield handleCreateChannelMessage(payload);
+    case "UpdateChannel":
+      const {channelId} = payload.params as any;
+
+      // TODO: Error handling, what if the channel does not exist?
+      const mostRecentState = yield select(getLastStateForChannel, channelId);
+
+      const newState = createStateFromUpdateChannelParams(mostRecentState, payload.params as any);
+
+      // QUESTION: Should we do transition validation here?
+      // Comment (liam): I think it would be better done inside the protocol
+
+      yield put(
+        actions.application.ownStateReceived({
+          state: newState,
+          processId: APPLICATION_PROCESS_ID
+        })
+      );
   }
 }
 

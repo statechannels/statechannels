@@ -26,6 +26,12 @@ export interface JsonRpcCreateChannelParams {
   appData: string;
 }
 
+export interface JsonRpcUpdateChannelParams {
+  allocations: JsonRpcAllocations;
+  appData: string;
+  channelId: string;
+}
+
 function createAllocationOutcomeFromParams(params: JsonRpcAllocations): Outcome {
   return params.map(p => {
     return {assetHolderAddress: p.token, allocation: p.allocationItems};
@@ -63,5 +69,24 @@ export function createStateFromCreateChannelParams(params: JsonRpcCreateChannelP
     outcome: createAllocationOutcomeFromParams(params.allocations),
     turnNum: 0,
     isFinal: false
+  };
+}
+
+// TODO: Error handling
+export function createStateFromUpdateChannelParams(
+  state: State,
+  params: JsonRpcUpdateChannelParams
+): State {
+  const {appData, allocations} = params;
+
+  // TODO: check for valid transition using EVM library
+
+  // TODO: Check if this is a final state... I guess it couldn't be
+
+  return {
+    ...state,
+    turnNum: state.turnNum + 1,
+    outcome: createAllocationOutcomeFromParams(allocations),
+    appData
   };
 }
