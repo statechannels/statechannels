@@ -4,7 +4,7 @@ import * as loginActions from './actions';
 import {reduxSagaFirebase} from '../../gateways/firebase';
 import metamaskSaga from '../metamask/saga';
 import {initializeWallet} from 'magmo-wallet-client';
-import RPSGameArtifact from '../../../build/contracts/RockPaperScissorsGame.json';
+import RPSGameArtifact from '../../../build/contracts/RockPaperScissors.json';
 import {WALLET_IFRAME_ID} from '../../constants';
 
 function* loginSaga() {
@@ -64,7 +64,7 @@ export default function* loginRootSaga() {
   yield fork(loginStatusWatcherSaga);
   yield all([
     takeEvery(loginActions.LOGIN_REQUEST, loginSaga),
-    takeEvery(loginActions.LOGOUT_REQUEST, logoutSaga)
+    takeEvery(loginActions.LOGOUT_REQUEST, logoutSaga),
   ]);
 }
 
