@@ -18,7 +18,7 @@ Note that this state machine is transitioned alternately by the two players (cyc
     PositionType --> |validTransition| AnotherPositionType
 ```
 # validTransition
-[`/contracts/RockPaperScissorsGame.sol`](..contracts/RockPaperScissorsGame.sol)
+[`/contracts/RockPaperScissors.sol`](..contracts/RockPaperScissorsGame.sol)
 ```mermaid
   graph LR
   linkStyle default interpolate basis
