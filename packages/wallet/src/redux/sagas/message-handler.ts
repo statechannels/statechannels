@@ -1,4 +1,4 @@
-import {select, fork, put} from "redux-saga/effects";
+import {select, fork, put, call} from "redux-saga/effects";
 
 import * as actions from "../actions";
 import jrs, {RequestPayloadObject} from "jsonrpc-serializer";
@@ -7,6 +7,7 @@ import {messageSender} from "./message-sender";
 import {getChannelId} from "@statechannels/nitro-protocol";
 import {APPLICATION_PROCESS_ID} from "../protocols/application/reducer";
 import {createStateFromCreateChannelParams} from "../../utils/json-rpc-utils";
+import {getProvider} from "../../utils/contract-utils";
 
 export function* messageHandler(jsonRpcMessage: string, fromDomain: string) {
   const parsedMessage = jrs.deserialize(jsonRpcMessage);
@@ -32,26 +33,46 @@ function* handleMessage(payload: jrs.RequestPayloadObject) {
 
       break;
     case "CreateChannel":
-      const {participants} = payload.params;
-      const state = createStateFromCreateChannelParams(payload.params);
+      yield handleCreateChannelMessage(payload);
+  }
+}
 
-      yield put(
-        actions.protocol.initializeChannel({channelId: getChannelId(state.channel), participants})
-      );
-      yield put(
-        actions.application.ownStateReceived({
-          processId: APPLICATION_PROCESS_ID,
-          state
-        })
-      );
-      // TODO: Need to handle the case where something goes wrong
+function* handleCreateChannelMessage(payload: jrs.RequestPayloadObject) {
+  const {participants, appDefinition} = payload.params;
+  const {id} = payload;
 
-      yield fork(
-        messageSender,
-        actions.createChannelResponse({
-          id,
-          channelId: getChannelId(state.channel)
-        })
-      );
+  const address = select(getAddress);
+  const addressMatches = participants[0].signingAddress !== address;
+
+  const provider = yield call(getProvider);
+  const code = yield call(provider.getCode, appDefinition);
+  const contractAtAddress = code.length > 2;
+
+  if (!addressMatches) {
+    yield fork(
+      messageSender,
+      actions.unknownSigningAddress({id, signingAddress: participants[0].signingAddress})
+    );
+  } else if (!contractAtAddress) {
+    yield fork(messageSender, actions.noContractError({id, address: appDefinition}));
+  } else {
+    const state = createStateFromCreateChannelParams(payload.params);
+    yield put(
+      actions.protocol.initializeChannel({channelId: getChannelId(state.channel), participants})
+    );
+    yield put(
+      actions.application.ownStateReceived({
+        processId: APPLICATION_PROCESS_ID,
+        state
+      })
+    );
+
+    yield fork(
+      messageSender,
+      actions.createChannelResponse({
+        id,
+        channelId: getChannelId(state.channel)
+      })
+    );
   }
 }
