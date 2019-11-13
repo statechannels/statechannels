@@ -3,19 +3,18 @@ import {HUB_ADDRESS} from '../../../constants';
 import {
   DUMMY_CHAIN_ID,
   DUMMY_RULES_ADDRESS,
-  DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID,
   FUNDED_CHANNEL_NONCE,
   outcome2,
   PARTICIPANT_1_ADDRESS
 } from '../../../test/test-constants';
-import {consensus_app_data2} from '../../../test/test_data';
+import {consensus_app_data2, FUNDED_NONCE_CHANNEL_ID} from '../../../test/test_data';
 import Channel from '../channel';
 import ChannelState from '../channelState';
 
 describe('asStateObject', () => {
   it('channelState relation to object conversion', async () => {
     const channel = await Channel.query()
-      .where({channel_id: DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID})
+      .where({channel_id: FUNDED_NONCE_CHANNEL_ID})
       .select('id')
       .first();
     expect(channel).toBeTruthy();

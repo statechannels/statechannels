@@ -39,9 +39,6 @@ async function updateChannel(stateRound: State[], hubState: State) {
 
   const states = [...stateRound.map(s => state(s)), state(hubState)];
 
-  // todo: refactor guarantees later
-  // const guaranteedChannel = stateRound.map(c => c.channel.guaranteedChannel)[0];
-
   interface Upsert {
     channel_id: string;
     states: any[];

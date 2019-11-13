@@ -18,43 +18,56 @@ import {
   PARTICIPANTS_3
 } from './test-constants';
 
+export function channelObjectToModel(channel: Channel) {
+  return {
+    ...channel,
+    participants: channel.participants.map((participant, index) => ({
+      address: participant,
+      priority: index
+    }))
+  };
+}
+
 export const default_channel: Channel = {
   participants: PARTICIPANTS,
   channelNonce: NONCE,
-  chainId: '8888'
+  chainId: DUMMY_CHAIN_ID
 };
 
 const default_channel_3: Channel = {
   participants: PARTICIPANTS_3,
   channelNonce: NONCE,
-  chainId: '8888'
+  chainId: DUMMY_CHAIN_ID
 };
 
 export const funded_channel: Channel = {
   participants: PARTICIPANTS,
   channelNonce: FUNDED_CHANNEL_NONCE,
-  chainId: '8888'
+  chainId: DUMMY_CHAIN_ID
 };
-export const funded_channel_id = getChannelId(funded_channel);
 
 export const funded_channel_3: Channel = {
   participants: PARTICIPANTS_3,
   channelNonce: FUNDED_CHANNEL_NONCE_3,
-  chainId: '8888'
+  chainId: DUMMY_CHAIN_ID
 };
-export const funded_channel_id_3 = getChannelId(funded_channel_3);
 
 export const beginning_app_phase_channel: Channel = {
   participants: PARTICIPANTS,
   channelNonce: BEGINNING_APP_CHANNEL_NONCE,
-  chainId: '8888'
+  chainId: DUMMY_CHAIN_ID
 };
 
 export const ongoing_app_phase_channel: Channel = {
   participants: PARTICIPANTS,
   channelNonce: ONGOING_APP_CHANNEL_NONCE,
-  chainId: '8888'
+  chainId: DUMMY_CHAIN_ID
 };
+
+export const FUNDED_NONCE_CHANNEL_ID = getChannelId(funded_channel);
+export const FUNDED_NONCE_CHANNEL_ID_3 = getChannelId(funded_channel_3);
+export const BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID = getChannelId(beginning_app_phase_channel);
+export const ONGOING_APP_CHANNEL_NONCE_CHANNEL_ID = getChannelId(ongoing_app_phase_channel);
 
 export const consensus_app_data2 = (n: number): ConsensusData => ({
   furtherVotesRequired: n,
@@ -133,7 +146,7 @@ const base_response = {
   channel: {
     channelNonce: expect.any(String),
     participants: PARTICIPANTS,
-    chainId: '8888'
+    chainId: DUMMY_CHAIN_ID
   },
   outcome: outcome2,
   challengeDuration: 1000,
@@ -145,7 +158,7 @@ const base_response_3 = {
   channel: {
     channelNonce: expect.any(String),
     participants: PARTICIPANTS_3,
-    chainId: '8888'
+    chainId: DUMMY_CHAIN_ID
   },
   outcome: outcome3,
   challengeDuration: 1000,

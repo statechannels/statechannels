@@ -55,7 +55,7 @@ describe('updateChannel', () => {
         .eager('[states.[outcome.[allocation]], participants]')
         .first();
 
-      expect(existing_allocator_channel).toMatchObject(seeds.funded_channel);
+      expect(existing_allocator_channel).toMatchObject(seeds.fundedChannelWithStates);
 
       const updated_allocator_channel = await queries.updateChannel(
         [testDataConstructors.post_fund_setup(2)],
@@ -63,7 +63,7 @@ describe('updateChannel', () => {
       );
 
       expect(updated_allocator_channel).toMatchObject({
-        ...seeds.funded_channel,
+        ...seeds.fundedChannelWithStates,
         states: [seedDataConstructors.post_fund_setup(2), seedDataConstructors.post_fund_setup(3)]
       });
 

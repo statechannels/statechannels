@@ -16,4 +16,5 @@ export default class ChannelParticipant extends Model {
   };
   readonly id!: number;
   address!: Address;
+  priority!: number;
 }
