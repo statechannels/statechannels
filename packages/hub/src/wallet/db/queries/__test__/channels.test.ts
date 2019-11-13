@@ -49,9 +49,9 @@ describe('updateChannel', () => {
 
   describe('when theirState is not a PreFundSetup', () => {
     it('works when the channel exists', async () => {
-      const {channelNonce: nonce} = testDataConstructors.post_fund_setup(2).channel;
+      const {channelNonce} = testDataConstructors.post_fund_setup(2).channel;
       const existing_allocator_channel = await Channel.query()
-        .where({nonce})
+        .where({channel_nonce: channelNonce})
         .eager('[states.[outcome.[allocation]], participants]')
         .first();
 

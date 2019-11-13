@@ -12,6 +12,7 @@ export const queries = {
 export async function getProcess(processId: string) {
   return WalletProcess.query()
     .where({process_id: processId})
+    .select()
     .first();
 }
 

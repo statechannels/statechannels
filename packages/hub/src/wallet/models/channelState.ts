@@ -34,10 +34,10 @@ export default class ChannelState extends Model {
   channelId!: number;
   turnNum!: Uint32;
   isFinal!: boolean;
-  outcome: Outcome[];
+  outcome!: Outcome[];
   appData!: any;
-  challengeDuration: number;
-  appDefinition: string;
+  challengeDuration!: number;
+  appDefinition!: string;
 
   asStateObject(): State {
     return {

@@ -5,6 +5,7 @@ import {
   BEGINNING_APP_CHANNEL_HOLDINGS,
   BEGINNING_APP_CHANNEL_NONCE,
   DUMMY_CHAIN_ID,
+  DUMMY_RULES_ADDRESS,
   DUMMY_RULES_BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID,
   DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID,
   DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID_3,
@@ -37,12 +38,19 @@ const participants_3 = [
   {address: HUB_ADDRESS, priority: 2}
 ];
 
+const baseStateProperties = {
+  appDefinition: DUMMY_RULES_ADDRESS,
+  isFinal: false,
+  challengeDuration: 1000
+};
+
 // ***************
 // Ledger channels
 // ***************
 
 function pre_fund_setup(turnNum: number) {
   return {
+    ...baseStateProperties,
     turnNum,
     outcome: outcomeAddPriorities(outcome2),
     appData: encodeConsensusData(consensus_app_data2(2))
@@ -51,6 +59,7 @@ function pre_fund_setup(turnNum: number) {
 
 function pre_fund_setup_3(turnNum: number) {
   return {
+    ...baseStateProperties,
     turnNum,
     outcome: outcomeAddPriorities(outcome3),
     appData: encodeConsensusData(consensus_app_data3(3))
@@ -59,7 +68,7 @@ function pre_fund_setup_3(turnNum: number) {
 
 const funded_channel = {
   channelId: DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID,
-  nonce: FUNDED_CHANNEL_NONCE,
+  channelNonce: FUNDED_CHANNEL_NONCE,
   holdings: FUNDED_CHANNEL_HOLDINGS,
   states: [pre_fund_setup(0), pre_fund_setup(1)],
   participants,
@@ -68,7 +77,7 @@ const funded_channel = {
 
 const funded_channel_3 = {
   channelId: DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID_3,
-  nonce: FUNDED_CHANNEL_NONCE_3,
+  channelNonce: FUNDED_CHANNEL_NONCE_3,
   holdings: FUNDED_CHANNEL_HOLDINGS,
   states: [pre_fund_setup_3(0), pre_fund_setup_3(1), pre_fund_setup_3(2)],
   participants: participants_3,
@@ -77,6 +86,7 @@ const funded_channel_3 = {
 
 function post_fund_setup(turnNum: number) {
   return {
+    ...baseStateProperties,
     turnNum,
     outcome: outcomeAddPriorities(outcome2),
     appData: encodeConsensusData(consensus_app_data2(0))
@@ -85,7 +95,7 @@ function post_fund_setup(turnNum: number) {
 
 const beginning_app_phase_channel = {
   channel_id: DUMMY_RULES_BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID,
-  nonce: BEGINNING_APP_CHANNEL_NONCE,
+  channelNonce: BEGINNING_APP_CHANNEL_NONCE,
   holdings: BEGINNING_APP_CHANNEL_HOLDINGS,
   states: [post_fund_setup(2), post_fund_setup(3)],
   participants,
@@ -94,6 +104,7 @@ const beginning_app_phase_channel = {
 
 function app(turnNum: number) {
   return {
+    ...baseStateProperties,
     turnNum,
     outcome: outcomeAddPriorities(outcome2),
     appData: encodeConsensusData(consensus_app_data2(turnNum % participants.length))
@@ -102,7 +113,7 @@ function app(turnNum: number) {
 
 const ongoing_app_phase_channel = {
   channel_id: DUMMY_RULES_ONGOING_APP_CHANNEL_NONCE_CHANNEL_ID,
-  nonce: ONGOING_APP_CHANNEL_NONCE,
+  channelNonce: ONGOING_APP_CHANNEL_NONCE,
   holdings: ONGOING_APP_CHANNEL_HOLDINGS,
   states: [app(4), app(5)],
   participants,

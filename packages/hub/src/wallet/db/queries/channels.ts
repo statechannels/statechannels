@@ -13,7 +13,7 @@ export const queries = {
 async function updateChannel(stateRound: State[], hubState: State) {
   const firstState = stateRound[0];
   const {channel} = firstState;
-  const {channelNonce: nonce, participants, chainId} = channel;
+  const {channelNonce, participants, chainId} = channel;
   const channelId = getChannelId(channel);
 
   const storedChannel = await Channel.query()
@@ -30,7 +30,10 @@ async function updateChannel(stateRound: State[], hubState: State) {
   const outcome = (s: State) => outcomeAddPriorities(s.outcome);
   const state = (s: State) => ({
     turn_num: s.turnNum,
+    is_final: s.isFinal,
+    challenge_duration: s.challengeDuration,
     outcome: outcome(s),
+    appDefinition: s.appDefinition,
     app_data: s.appData
   });
 
@@ -42,7 +45,7 @@ async function updateChannel(stateRound: State[], hubState: State) {
   interface Upsert {
     channel_id: string;
     states: any[];
-    nonce: Uint256;
+    channel_nonce: Uint256;
     holdings?: Uint256;
     id?: number;
     participants?: any[];
@@ -51,7 +54,7 @@ async function updateChannel(stateRound: State[], hubState: State) {
   let upserts: Upsert = {
     channel_id: channelId,
     states,
-    nonce,
+    channel_nonce: channelNonce,
     chain_id: chainId
   };
 
