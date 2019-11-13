@@ -12,7 +12,7 @@ export function getVariablePart(consensusData: ConsensusData, outcome: Outcome):
   return {appData, outcome: encodeOutcome(outcome)};
 }
 
-// validTransition is a pure function so using this method will not use gas
+// ValidTransition is a pure function so using this method will not use gas
 // This should be used over createValidTransitionTransaction
 export async function validTransition(
   fromConsensusData: ConsensusData,

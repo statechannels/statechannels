@@ -30,7 +30,7 @@ const assetHolderAddress = Wallet.createRandom().address;
 const outcome: Outcome = [{assetHolderAddress, allocation: []}];
 let appDefinition;
 
-// populate wallets and participants array
+// Populate wallets and participants array
 for (let i = 0; i < 3; i++) {
   wallets[i] = Wallet.createRandom();
   participants[i] = wallets[i].address;
@@ -41,7 +41,7 @@ beforeAll(async () => {
   networkMap = await getNetworkMap();
   ForceMove = await setupContracts(provider, ForceMoveArtifact);
   networkId = (await provider.getNetwork()).chainId;
-  appDefinition = networkMap[networkId][countingAppArtifact.contractName]; // use a fixed appDefinition in all tests
+  appDefinition = networkMap[networkId][countingAppArtifact.contractName]; // Use a fixed appDefinition in all tests
 });
 
 // Scenarios are synonymous with channelNonce:
@@ -67,7 +67,7 @@ describe('respond', () => {
     ${description4} | ${future}   | ${false}  | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${nonParticipant} | ${RESPONSE_UNAUTHORIZED}
     ${description5} | ${future}   | ${false}  | ${[false, false]} | ${[0, 0]} | ${wallets[2]} | ${wallets[0]}     | ${'CountingApp: Counter must be incremented'}
   `(
-    '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
+    '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({isFinalAB, appDatas, challenger, responder, finalizesAt, slotEmpty, reasonString}) => {
       const channel: Channel = {chainId, channelNonce: hexlify(channelNonce), participants};
       const channelId = getChannelId(channel);
@@ -103,11 +103,11 @@ describe('respond', () => {
             outcome,
           });
 
-      // call public wrapper to set state (only works on test contract)
+      // Call public wrapper to set state (only works on test contract)
       await (await ForceMove.setChannelStorageHash(channelId, challengeExistsHash)).wait();
       expect(await ForceMove.channelStorageHashes(channelId)).toEqual(challengeExistsHash);
 
-      // sign the state
+      // Sign the state
       const responseSignature = await sign(responder, responseStateHash);
 
       const tx = ForceMove.respond(
@@ -125,7 +125,7 @@ describe('respond', () => {
           newTurnNumRecord: bigNumberify(turnNumRecord + 1),
         });
 
-        // compute and check new expected ChannelStorageHash
+        // Compute and check new expected ChannelStorageHash
 
         const expectedChannelStorageHash = hashChannelStorage({
           turnNumRecord: turnNumRecord + 1,

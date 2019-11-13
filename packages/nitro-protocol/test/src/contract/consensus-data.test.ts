@@ -22,18 +22,14 @@ describe('consensus-data', () => {
     const proposedOutcome: Outcome = [
       {
         assetHolderAddress,
-        allocation: destinations.map((d, i) => {
-          return {amount: '0x1', destination: d};
-        }),
+        allocation: destinations.map((d, i) => ({amount: '0x1', destination: d})),
       },
     ];
 
     const currentOutcome: Outcome = [
       {
         assetHolderAddress,
-        allocation: destinations.map((d, i) => {
-          return {amount: '0x0', destination: d};
-        }),
+        allocation: destinations.map((d, i) => ({amount: '0x0', destination: d})),
       },
     ];
 

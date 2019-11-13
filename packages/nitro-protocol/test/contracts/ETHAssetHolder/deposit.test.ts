@@ -11,7 +11,7 @@ let ETHAssetHolder: Contract;
 const chainId = '0x1234';
 const participants = [];
 
-// populate destinations array
+// Populate destinations array
 for (let i = 0; i < 3; i++) {
   participants[i] = Wallet.createRandom().address;
 }
@@ -26,7 +26,7 @@ const description2 = 'Deposits ETH (msg.value = amount, expectedHeld + amount < 
 const description3 =
   'Deposits ETH (msg.value = amount,  amount < holdings < amount + expectedHeld)';
 
-// amounts are valueString represenationa of wei
+// Amounts are valueString represenationa of wei
 describe('deposit', () => {
   it.each`
     description     | channelNonce | held   | expectedHeld | amount | msgValue | heldAfterString | reasonString
@@ -47,7 +47,7 @@ describe('deposit', () => {
       const destination = getChannelId(destinationChannel);
 
       if (held > 0) {
-        // set holdings by depositing in the 'safest' way
+        // Set holdings by depositing in the 'safest' way
         const tx0 = ETHAssetHolder.deposit(destination, '0x0', held, {
           value: held,
         });

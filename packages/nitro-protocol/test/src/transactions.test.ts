@@ -28,12 +28,12 @@ const challengeState = {
   outcome: [],
   challengeDuration: 0x0,
 };
-// const challengeChannelStorage: ChannelStorage = {
-//   turnNumRecord: 0,
-//   finalizesAt: 1e12,
-//   stateHash: HashZero,
-//   challengerAddress: AddressZero,
-//   outcomeHash: HashZero,
+// Const challengeChannelStorage: ChannelStorage = {
+//   TurnNumRecord: 0,
+//   FinalizesAt: 1e12,
+//   StateHash: HashZero,
+//   ChallengerAddress: AddressZero,
+//   OutcomeHash: HashZero,
 // };
 
 let signedState: SignedState;

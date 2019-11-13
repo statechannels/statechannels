@@ -1,10 +1,10 @@
 import {Contract} from 'ethers';
 import {TransactionRequest} from 'ethers/providers';
 import {Signature} from 'ethers/utils';
-import {SignedState} from '.';
 import {State} from './contract/state';
 import * as forceMoveTrans from './contract/transaction-creators/force-move';
 import {getStateSignerAddress} from './signatures';
+import {SignedState} from '.';
 
 export async function getData(provider, contractAddress: string, channelId: string) {
   const forceMove = new Contract(

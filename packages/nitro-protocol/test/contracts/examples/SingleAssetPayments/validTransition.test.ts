@@ -17,7 +17,7 @@ let singleAssetPayments: Contract;
 
 const numParticipants = 3;
 const addresses = {
-  // participants
+  // Participants
   A: randomExternalDestination(),
   B: randomExternalDestination(),
   C: randomExternalDestination(),

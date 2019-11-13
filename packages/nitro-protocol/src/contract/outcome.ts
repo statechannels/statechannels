@@ -51,9 +51,7 @@ export function decodeAllocation(encodedAllocation: Bytes): Allocation {
     encodedAllocation
   )[0];
 
-  return allocationItems.map(a => {
-    return {destination: a.destination, amount: a.amount.toHexString()};
-  });
+  return allocationItems.map(a => ({destination: a.destination, amount: a.amount.toHexString()}));
 }
 
 export function isAllocation(
@@ -134,7 +132,7 @@ export function encodeAssetOutcome(allocationOrGuarantee: Allocation | Guarantee
 export type AssetOutcome = AllocationAssetOutcome | GuaranteeAssetOutcome;
 export type Outcome = AssetOutcome[];
 // ^ Note this is not the same structure
-// as the Outcome struct defined in Outcome.sol
+// As the Outcome struct defined in Outcome.sol
 
 export function hashOutcome(outcome: Outcome): Bytes32 {
   const encodedOutcome = encodeOutcome(outcome);

@@ -11,7 +11,9 @@ module.exports = {
   extends: [
     'plugin:@typescript-eslint/recommended',
     'eslint:recommended',
-    'plugin:import/recommended',
+    'plugin:import/errors',
+    'plugin:import/warnings',
+    'plugin:import/typescript',
     'prettier',
     'prettier/@typescript-eslint',
   ],
@@ -160,6 +162,7 @@ module.exports = {
     'use-isnan': 'error',
     'valid-typeof': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',
+    '@typescript-eslint/no-unused-vars': 'off',
     'prettier/prettier': [
       'error',
       {
@@ -175,7 +178,9 @@ module.exports = {
         files: ["test/**/*.ts"],
         globals: {
             Promise: 'readonly',
-            expect: 'readonly'
+            expect: 'readonly',
+            it: 'readonly',
+            describe: 'readonly',
         }
     }
   ]
