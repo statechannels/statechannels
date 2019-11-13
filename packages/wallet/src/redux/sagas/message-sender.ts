@@ -5,6 +5,7 @@ import {getChannelStatus} from "../state";
 import {ChannelState, getLastState} from "../channel-store";
 import {createJsonRpcAllocationsFromOutcome} from "../../utils/json-rpc-utils";
 import jrs from "jsonrpc-lite";
+import {unreachable} from "../../utils/reducer-utils";
 
 export function* messageSender(action: JsonRpcResponseAction) {
   const message = yield createResponseMessage(action);
@@ -35,7 +36,14 @@ function* createResponseMessage(action: JsonRpcResponseAction) {
       });
     case "WALLET.ADDRESS_RESPONSE":
       return jrs.success(action.id, action.address);
+    case "WALLET.NO_CONTRACT_ERROR":
+      return jrs.error(action.id, new jrs.JsonRpcError("Invalid app definition", 1001));
+    case "WALLET.UNKNOWN_SIGNING_ADDRESS_ERROR":
+      return jrs.error(
+        action.id,
+        new jrs.JsonRpcError("Signing address not found in the participants array", 1000)
+      );
     default:
-      return jrs.error(action.id, new jrs.JsonRpcError("some error", 99));
+      return unreachable(action);
   }
 }

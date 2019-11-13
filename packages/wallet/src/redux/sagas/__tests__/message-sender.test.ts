@@ -1,4 +1,9 @@
-import {addressResponse, createChannelResponse} from "../../actions";
+import {
+  addressResponse,
+  createChannelResponse,
+  noContractError,
+  unknownSigningAddress
+} from "../../actions";
 import {Wallet} from "ethers";
 import {expectSaga} from "redux-saga-test-plan";
 import * as matchers from "redux-saga-test-plan/matchers";
@@ -51,6 +56,56 @@ describe("create message", () => {
         status: "Opening",
         channelId
       }
+    });
+  });
+
+  it("creates a error response for WALLET.NO_CONTRACT_ERROR", async () => {
+    const state = stateHelpers.appState({turnNum: 0});
+
+    const initialState = setChannel(
+      EMPTY_SHARED_DATA,
+      channelFromStates([state], stateHelpers.asAddress, stateHelpers.asPrivateKey)
+    );
+
+    const message = noContractError({
+      id: 1,
+      address: Wallet.createRandom().address
+    });
+
+    const {effects} = await expectSaga(messageSender, message)
+      .withState(initialState)
+      .provide([[matchers.call.fn(window.parent.postMessage), 0]])
+      .run();
+
+    expect(JSON.parse(effects.call[0].payload.args[0])).toMatchObject({
+      jsonrpc: "2.0",
+      id: 1,
+      error: {code: 1001, message: "Invalid app definition"}
+    });
+  });
+
+  it("creates a error response for WALLET.UNKNOWN_SIGNING_ADDRESS", async () => {
+    const state = stateHelpers.appState({turnNum: 0});
+
+    const initialState = setChannel(
+      EMPTY_SHARED_DATA,
+      channelFromStates([state], stateHelpers.asAddress, stateHelpers.asPrivateKey)
+    );
+
+    const message = unknownSigningAddress({
+      id: 1,
+      signingAddress: Wallet.createRandom().address
+    });
+
+    const {effects} = await expectSaga(messageSender, message)
+      .withState(initialState)
+      .provide([[matchers.call.fn(window.parent.postMessage), 0]])
+      .run();
+
+    expect(JSON.parse(effects.call[0].payload.args[0])).toMatchObject({
+      jsonrpc: "2.0",
+      id: 1,
+      error: {code: 1000, message: "Signing address not found in the participants array"}
     });
   });
 });
