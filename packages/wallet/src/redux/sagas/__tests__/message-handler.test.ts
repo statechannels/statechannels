@@ -6,6 +6,7 @@ import {expectSaga} from "redux-saga-test-plan";
 import {Wallet} from "ethers";
 
 import {messageSender} from "../message-sender";
+import {fork} from "redux-saga/effects";
 describe("message listener", () => {
   const wallet = Wallet.createRandom();
   const initialState = walletStates.initialized({
@@ -17,7 +18,7 @@ describe("message listener", () => {
     address: wallet.address
   });
 
-  it("handles an address request", async () => {
+  it("handles an address request", () => {
     const requestMessage = JSON.stringify({
       jsonrpc: "2.0",
       method: "GetAddress",
@@ -25,8 +26,13 @@ describe("message listener", () => {
       params: {}
     });
 
-    expectSaga(messageHandler, requestMessage, "localhost")
-      .withState(initialState)
-      .fork(messageSender, addressResponse({id: 1, address: wallet.address}));
+    return (
+      expectSaga(messageHandler, requestMessage, "localhost")
+        .withState(initialState)
+        // Mock out the fork call so we don't actually try to post the message
+        .provide([[fork(messageSender, addressResponse({id: 1, address: wallet.address})), 0]])
+        .fork(messageSender, addressResponse({id: 1, address: wallet.address}))
+        .run()
+    );
   });
 });
