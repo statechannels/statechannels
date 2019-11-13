@@ -1,20 +1,27 @@
-import {createResponseMessage} from "../message-sender";
 import {addressResponse, createChannelResponse} from "../../actions";
 import {Wallet} from "ethers";
+import {expectSaga} from "redux-saga-test-plan";
+import * as matchers from "redux-saga-test-plan/matchers";
+import {messageSender} from "../message-sender";
 
 describe("create message", () => {
   it("creates a correct response message for WALLET.ADDRESS_RESPONSE", () => {
     const address = Wallet.createRandom().address;
-    const result = createResponseMessage(addressResponse({id: 5, address}));
-    expect(result).toEqual(
-      JSON.stringify({
-        jsonrpc: "2.0",
-        id: 5,
-        result: address
-      })
-    );
+    const message = addressResponse({id: 5, address});
+    return expectSaga(messageSender, message)
+      .provide([[matchers.call.fn(window.parent.postMessage), 0]])
+      .call(
+        window.parent.postMessage,
+        JSON.stringify({
+          jsonrpc: "2.0",
+          id: 5,
+          result: address
+        }),
+        "*"
+      )
+      .run();
   });
-  it("creates a correct response message for WALLET.CREATE_CHANNEL_RESPONSE", () => {
+  it("creates a correct response message for WALLET.CREATE_CHANNEL_RESPONSE", async () => {
     const destinationA = Wallet.createRandom().address;
     const signingAddressA = Wallet.createRandom().address;
     const signingAddressB = Wallet.createRandom().address;
@@ -69,7 +76,10 @@ describe("create message", () => {
         channelId
       }
     };
-    const result = createResponseMessage(message);
-    expect(JSON.parse(result)).toEqual(response);
+    const {effects} = await expectSaga(messageSender, message)
+      .provide([[matchers.call.fn(window.parent.postMessage), 0]])
+      .run();
+
+    expect(JSON.parse(effects.call[0].payload.args[0])).toEqual(response);
   });
 });
