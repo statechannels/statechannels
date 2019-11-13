@@ -45,8 +45,8 @@ like `https://myserver.com/state_channel_callback`.
 {
   "token": "0x...", // 0x0 for ETH
   "allocationItems": [
-    {"destination": "0xa...", "amount": "12"},
-    {"destination": "0xb...", "amount": "12"}
+    {"destination": "0xa...", "amount": "0x1a"},
+    {"destination": "0xb...", "amount": "0x1a"}
   ]
 }
 ```
@@ -150,8 +150,8 @@ Returns the signing address(es) for the current domain.
       {
         "token": "0x...", // 0x0 for ETH
         "allocationItems": [
-          {"destination": "0xa...", "amount": "12"},
-          {"destination": "0xb...", "amount": "12"}
+          {"destination": "0xa...", "amount": "0x1a"},
+          {"destination": "0xb...", "amount": "0x1a"}
         ]
       }
     ],
@@ -188,8 +188,8 @@ Returns the signing address(es) for the current domain.
       {
         "token": "0x...", // 0x0 for ETH
         "allocationItems": [
-          {"destination": "0xa...", "amount": "12"},
-          {"destination": "0xb...", "amount": "12"}
+          {"destination": "0xa...", "amount": "0x1a"},
+          {"destination": "0xb...", "amount": "0x1a"}
         ]
       }
     ],
@@ -262,8 +262,8 @@ Possible response to a `Channel Proposed` event.
       {
         "token": "0x...", // 0x0 for ETH
         "allocationItems": [
-          {"destination": "0xa...", "amount": "12"},
-          {"destination": "0xb...", "amount": "12"}
+          {"destination": "0xa...", "amount": "0x1a"},
+          {"destination": "0xb...", "amount": "0x1a"}
         ]
       }
     ],
@@ -379,8 +379,8 @@ Possible response to a `Channel Proposed` event.
       {
         "token": "0x...", // 0x0 for ETH
         "allocationItems": [
-          {"destination": "0xa...", "amount": "12"},
-          {"destination": "0xb...", "amount": "12"}
+          {"destination": "0xa...", "amount": "0x1a"},
+          {"destination": "0xb...", "amount": "0x1a"}
         ]
       }
     ],
