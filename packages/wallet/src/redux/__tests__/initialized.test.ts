@@ -9,13 +9,15 @@ import {fundingRequested} from "../protocols/actions";
 import * as adjudicatorState from "../adjudicator-state/reducer";
 import {ProcessProtocol, strategyApproved} from "../../communication";
 import {channelId} from "../__tests__/state-helpers";
+import {Wallet} from "ethers";
+
+const wallet = Wallet.createRandom();
 const defaults = {
   ...states.EMPTY_SHARED_DATA,
-  uid: "uid",
   processStore: {},
   adjudicatorStore: {},
-  address: "address",
-  privateKey: "privateKey"
+  address: wallet.address,
+  privateKey: wallet.privateKey
 };
 
 const initializedState = states.initialized({...defaults});

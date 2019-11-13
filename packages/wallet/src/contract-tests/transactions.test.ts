@@ -58,8 +58,8 @@ describe("transactions", () => {
     // but we could probably do that in nitro-protocol package instead
     const transactionResult = await signer.sendTransaction(transactionPayload);
     const confirmedTransaction = await transactionResult.wait();
-
-    testSaga(transactionSender, queuedTransaction)
+    // TODO: Redux saga test plan is complaining about the typing on transactionSender
+    testSaga(transactionSender as any, queuedTransaction)
       .next()
       .call(getProvider)
       .next(provider)

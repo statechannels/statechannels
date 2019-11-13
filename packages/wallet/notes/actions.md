@@ -11,7 +11,6 @@ WalletAction --> BLOCK_MINED
 WalletAction --> WALLET.DISPLAY_MESSAGE_SENT
 WalletAction --> WALLET.LOGGED_IN
 WalletAction --> WALLET.MESSAGE_SENT
-WalletAction --> METAMASK_LOAD_ERROR
 WalletAction --> ProtocolAction
 WalletAction --> NewProcessAction
 WalletAction --> ChannelAction

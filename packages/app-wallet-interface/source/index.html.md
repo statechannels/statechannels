@@ -36,7 +36,7 @@ API between the state channel wallet and application.
 | destination    | String | Address of EOA to receive channel proceeds                      |
 
 Note: in the future we might replace the `appId` with a `contactAddress`, which would allow
-apps to get the wallet to relay messages itself. An example `contractAddress` would be something
+apps to get the wallet to relay messages itself. An example `contactAddress` would be something
 like `https://myserver.com/state_channel_callback`.
 
 ## Allocation
@@ -56,29 +56,75 @@ like `https://myserver.com/state_channel_callback`.
 Format of message sent from the wallet to the app, so that the app can then relay it
 to another participant.
 
-```javascript
-const participantId = 'abc123'; // allocated by app
-const data = '0x456';
-const message = new Message(participantId, data);
-```
-
 ```json
 {
-  "participantId": "abc123",
+  "recipient": "user123",
+  "sender": "user456",
   "data": "0x456"
 }
 ```
 
-| Parameter     | Type   | Description                                                  |
-| ------------- | ------ | ------------------------------------------------------------ |
-| participantId | String | Identifier or user that the message should be relayed to     |
-| data          | String | Message payload. Format defined by wallet and opaque to app. |
+| Parameter | Type   | Description                                                  |
+| --------- | ------ | ------------------------------------------------------------ |
+| recipient | String | Identifier of user that the message should be relayed to     |
+| sender    | String | Identifier of user that the message is from                  |
+| data      | String | Message payload. Format defined by wallet and opaque to app. |
 
 # Initial API
 
 Still a WIP! Adding methods as we need them.
 
-## List identities
+## Push Message
+
+Used to push messages received from other participants into the wallet.
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "PushMessage",
+  "id": 1,
+  "params": {
+    "recipient": "user123",
+    "sender": "user456",
+    "data": "0x123.."
+  }
+}
+```
+
+> Example response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {"success": true}
+}
+```
+
+Note: we don't return the state of the channel, as messages are not necessarily 1-to-1 with channels.
+
+## Get addresses
+
+Returns the signing address(es) for the current domain.
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "GetAddress",
+  "id": 1,
+  "params": {}
+}
+```
+
+> Example response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": ["0x123..."]
+}
+```
 
 ## Create Channel
 
@@ -89,8 +135,16 @@ Still a WIP! Adding methods as we need them.
   "id": 1,
   "params": {
     "participants": [
-      {"participantId": "user123", "signingAddress": "0x...", "destination": "0xa..."},
-      {"participantId": "user456", "signingAddress": "0x...", "destination": "0xb..."}
+      {
+        "participantId": "user123",
+        "signingAddress": "0x...",
+        "destination": "0xa..."
+      },
+      {
+        "participantId": "user456",
+        "signingAddress": "0x...",
+        "destination": "0xb..."
+      }
     ],
     "allocations": [
       {
@@ -118,8 +172,16 @@ Still a WIP! Adding methods as we need them.
     "status": "opening",
     "funding": [],
     "participants": [
-      {"participantId": "user123", "signingAddress": "0x...", "destination": "0xa..."},
-      {"participantId": "user456", "signingAddress": "0x...", "destination": "0xb..."}
+      {
+        "participantId": "user123",
+        "signingAddress": "0x...",
+        "destination": "0xa..."
+      },
+      {
+        "participantId": "user456",
+        "signingAddress": "0x...",
+        "destination": "0xb..."
+      }
     ],
     "turnNum": 0,
     "allocations": [
@@ -145,6 +207,18 @@ Still a WIP! Adding methods as we need them.
 | allocation    | Allocation    | Starting balances                                                 |
 | appDefinition | Address       | Address of deployed contract that defines the app                 |
 | appData       | String        | Initial app state, encoded as bytes as per appDefinition contract |
+
+### Errors
+
+Errors conform to the [JSON-RPC 2.0 error spec](https://www.jsonrpc.org/specification#error_object).
+Beyond the standard errors from that spec, the following domain-specific errors are possible:
+
+| Code | Message                   | Meaning                                                                                                     |
+| ---- | ------------------------- | ----------------------------------------------------------------------------------------------------------- |
+|      | Signing address not found | The wallet can't find the signing key corresponding to the first signing address in the participants array. |
+|      | Invalid app definition    | There isn't a force-move compatible app contract deployed at the app definition address                     |
+|      | Invalid app data          | The app data isn't a valid state for the force-move app defined by the app definition                       |
+|      | Unsupported token         | The wallet doesn't support one or more of the tokens appearing in the allocation.                           |
 
 ## Join Channel
 
@@ -172,8 +246,16 @@ Possible response to a `Channel Proposed` event.
     "status": "open",
     "funding": [],
     "participants": [
-      {"participantId": "user123", "signingAddress": "0x...", "destination": "0xa..."},
-      {"participantId": "user456", "signingAddress": "0x...", "destination": "0xb..."}
+      {
+        "participantId": "user123",
+        "signingAddress": "0x...",
+        "destination": "0xa..."
+      },
+      {
+        "participantId": "user456",
+        "signingAddress": "0x...",
+        "destination": "0xb..."
+      }
     ],
     "turnNum": 1,
     "allocations": [
@@ -190,6 +272,12 @@ Possible response to a `Channel Proposed` event.
   }
 }
 ```
+
+### Errors
+
+| Code | Message           | Meaning                                                          |
+| ---- | ----------------- | ---------------------------------------------------------------- |
+|      | Channel not found | The wallet can't find the channel corresponding to the channelId |
 
 ## Update State
 
@@ -225,8 +313,16 @@ Possible response to a `Channel Proposed` event.
     "status": "running",
     "funding": [{"token": "0x0", "amount": "24"}],
     "participants": [
-      {"participantId": "user123", "signingAddress": "0x...", "destination": "0xa..."},
-      {"participantId": "user456", "signingAddress": "0x...", "destination": "0xb..."}
+      {
+        "participantId": "user123",
+        "signingAddress": "0x...",
+        "destination": "0xa..."
+      },
+      {
+        "participantId": "user456",
+        "signingAddress": "0x...",
+        "destination": "0xb..."
+      }
     ],
     "turnNum": 7,
     "allocations": [
@@ -245,13 +341,82 @@ Possible response to a `Channel Proposed` event.
 
 ## Close Channel
 
-```javascript
-await channelProvider.closeChannel(channelId);
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "CloseChannel",
+  "id": 3,
+  "params": {
+    "channelId": "0xabc123"
+  }
+}
 ```
+
+> Example response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "result": {
+    "channelId": "0xabc123...",
+    "status": "closing",
+    "funding": [],
+    "participants": [
+      {
+        "participantId": "user123",
+        "signingAddress": "0x...",
+        "destination": "0xa..."
+      },
+      {
+        "participantId": "user456",
+        "signingAddress": "0x...",
+        "destination": "0xb..."
+      }
+    ],
+    "turnNum": 10,
+    "allocations": [
+      {
+        "token": "0x...", // 0x0 for ETH
+        "allocationItems": [
+          {"destination": "0xa...", "amount": "12"},
+          {"destination": "0xb...", "amount": "12"}
+        ]
+      }
+    ],
+    "appDefinition": "0x...",
+    "appData": "0x...."
+  }
+}
+```
+
+### Errors
+
+| Code | Message           | Meaning                                                          |
+| ---- | ----------------- | ---------------------------------------------------------------- |
+|      | Channel not found | The wallet can't find the channel corresponding to the channelId |
 
 # Events
 
 Sent from the wallet to the app.
+
+## Message Queued
+
+The application is responsible for relaying messages from the wallet to the other participant(s)
+in the channel.
+When the wallet wishes to send a message it will emit a `MessageQueued` event.
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "MessageQueued",
+  "params": {
+    "recipient": "user123",
+    "sender": "user456",
+    "data": "0x1111..."
+  }
+}
+```
 
 ## Channel Proposed
 
@@ -267,8 +432,16 @@ App should respond by either calling `JoinChannel`, or TODO.
     "status": "opening",
     "funding": [],
     "participants": [
-      {"participantId": "user123", "signingAddress": "0x...", "destination": "0xa..."},
-      {"participantId": "user456", "signingAddress": "0x...", "destination": "0xb..."}
+      {
+        "participantId": "user123",
+        "signingAddress": "0x...",
+        "destination": "0xa..."
+      },
+      {
+        "participantId": "user456",
+        "signingAddress": "0x...",
+        "destination": "0xb..."
+      }
     ],
     "turnNum": 0,
     "allocations": [
@@ -300,10 +473,18 @@ Triggered when a channel update occurs by any means, including:
   "params": {
     "channelId": "0xabc123...",
     "status": "running",
-    "funding": [{ "token": "0x0", "amount": "24"}],
+    "funding": [{"token": "0x0", "amount": "24"}],
     "participants": [
-      {"participantId": "user123", "signingAddress": "0x...", "destination": "0xa..."},
-      {"participantId": "user456", "signingAddress": "0x...", "destination": "0xb..."}
+      {
+        "participantId": "user123",
+        "signingAddress": "0x...",
+        "destination": "0xa..."
+      },
+      {
+        "participantId": "user456",
+        "signingAddress": "0x...",
+        "destination": "0xb..."
+      }
     ],
     "turnNum": 7,
     "allocations": [
@@ -315,7 +496,7 @@ Triggered when a channel update occurs by any means, including:
         ]
       }
     ],
-    "appData": "0x....""
+    "appData": "0x...."
   }
 }
 ```

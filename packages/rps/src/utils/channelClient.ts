@@ -1,11 +1,18 @@
 import {BigNumberish} from 'ethers/utils';
-import {EventEmitter} from 'events';
+import {EventEmitter} from 'eventemitter3';
 
 export type ChannelStatus = 'opening' | 'funding' | 'running' | 'closing';
 
-export type MethodName = 'CreateChannel' | 'JoinChannel' | 'UpdateChannel';
+export type ChannelMethodName = 'CreateChannel' | 'JoinChannel' | 'UpdateChannel' | 'CloseChannel';
+export type AddressMethodName = 'GetAddress';
+export type MessageMethodName = 'PushMessage';
 
-export type NotificationName = 'ChannelProposed' | 'ChannelUpdated';
+export type MethodName = ChannelMethodName | AddressMethodName | MessageMethodName;
+
+export type ChannelNotificationName = 'ChannelProposed' | 'ChannelUpdated' | 'ChannelClosed';
+export type MessageNotificationName = 'MessageQueued';
+
+export type NotificationName = ChannelNotificationName | MessageNotificationName;
 
 export interface Participant {
   /**
@@ -50,15 +57,22 @@ export interface Allocation {
 
 export interface Message {
   /**
-   * Identifier or user that the message should be relayed to
+   * Identifier of user that the message should be relayed to
    */
-  participantId: string;
+  recipient: string;
+
+  /**
+   * Identifier of user that the message is from
+   */
+  sender: string;
 
   /**
    * Message payload. Format defined by wallet and opaque to app.
    */
   data: string;
 }
+
+export type PushMessageParameters = Message;
 
 export interface Funds {
   token: string;
@@ -121,6 +135,24 @@ export interface UpdateChannelRequest extends JsonRPCRequest<UpdateChannelParame
   method: 'UpdateChannel';
 }
 
+export interface PushMessageRequest extends JsonRPCRequest<Message> {
+  method: 'PushMessage';
+}
+
+export interface PushMessageResult {
+  success: boolean;
+}
+
+export interface PushMessageResponse extends JsonRPCResponse<PushMessageResult> {}
+
+export interface CloseChannelParameters {
+  channelId: string;
+}
+
+export interface CloseChannelRequest extends JsonRPCRequest<CloseChannelRequest> {}
+
+export interface CloseChannelResponse extends JsonRPCResponse<ChannelResult> {}
+
 export interface ChannelProposedNotification extends JsonRPCNotification<ChannelResult> {
   method: 'ChannelProposed';
 }
@@ -129,23 +161,31 @@ export interface ChannelUpdatedNotification extends JsonRPCNotification<ChannelR
   method: 'ChannelUpdated';
 }
 
+export interface ChannelClosingNotification extends JsonRPCNotification<ChannelResult> {
+  method: 'ChannelClosed';
+}
+
 export type ActionParameters =
   | CreateChannelParameters
   | JoinChannelParameters
-  | UpdateChannelParameters;
+  | UpdateChannelParameters
+  | CloseChannelParameters
+  | PushMessageParameters;
+
+export type NotificationParameters = ChannelResult | Message;
 
 export class ChannelClient {
   protected events = new EventEmitter();
 
   onMessageReceived(
     notificationName: NotificationName,
-    callback: (parameters: ChannelResult) => void
+    callback: (message: JsonRPCNotification<ActionParameters>) => void
   ): void {
     this.events.on(
       'message',
       (message: JsonRPCNotification<ActionParameters> | JsonRPCRequest<ActionParameters>) => {
         if (message.method === notificationName) {
-          callback(message.params as ChannelResult);
+          callback(message);
         }
       }
     );
@@ -179,7 +219,25 @@ export class ChannelClient {
     await this.notifyChannelUpdated(parameters as ChannelResult);
   }
 
-  protected async sendToWallet(methodName: MethodName, parameters: ActionParameters) {
+  async pushMessage(parameters: Message) {
+    await this.sendToWallet('PushMessage', parameters);
+  }
+
+  async getAddress() {
+    await this.sendToWallet('GetAddress', {});
+  }
+
+  async closeChannel(parameters: CloseChannelParameters) {
+    await this.sendToWallet('CloseChannel', parameters);
+
+    await this.notifyChannelClosed({
+      ...parameters,
+      status: 'closing',
+      turnNum: 2,
+    } as ChannelResult);
+  }
+
+  protected async sendToWallet(methodName: MethodName, parameters: ActionParameters | {}) {
     this.events.emit('message', {
       jsonrpc: '2.0',
       id: Date.now(),
@@ -188,7 +246,10 @@ export class ChannelClient {
     });
   }
 
-  protected async notifyApp(notificationName: NotificationName, parameters: ChannelResult) {
+  protected async notifyApp(
+    notificationName: NotificationName,
+    parameters: NotificationParameters
+  ) {
     this.events.emit('message', {
       jsonrpc: '2.0',
       method: notificationName,
@@ -196,11 +257,19 @@ export class ChannelClient {
     });
   }
 
-  protected async notifyChannelUpdated(parameters: ChannelResult) {
+  protected async notifyChannelUpdated(parameters: NotificationParameters) {
     await this.notifyApp('ChannelUpdated', parameters);
   }
 
-  protected async notifyChannelProposed(parameters: ChannelResult) {
+  protected async notifyChannelProposed(parameters: NotificationParameters) {
     await this.notifyApp('ChannelProposed', parameters);
+  }
+
+  protected async notifyChannelClosed(parameters: NotificationParameters) {
+    await this.notifyApp('ChannelClosed', parameters);
+  }
+
+  protected async notifyMessageQueued(parameters: NotificationParameters) {
+    await this.notifyApp('MessageQueued', parameters);
   }
 }
