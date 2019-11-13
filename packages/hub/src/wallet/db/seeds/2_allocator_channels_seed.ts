@@ -21,8 +21,8 @@ import {
 } from '../../../test/test-constants';
 import {consensus_app_data2, consensus_app_data3} from '../../../test/test_data';
 import Channel from '../../models/channel';
+import {outcomeAddPriorities} from '../../utilities/outcome';
 import knex from '../connection';
-import {outcomeAddPriorities} from '../utils';
 
 Model.knex(knex);
 

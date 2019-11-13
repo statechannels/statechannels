@@ -4,7 +4,7 @@ import {bigNumberify} from 'ethers/utils';
 import {Uint256} from 'fmg-core';
 import errors from '../../errors';
 import Channel from '../../models/channel';
-import {outcomeAddPriorities} from '../utils';
+import {outcomeAddPriorities} from '../../utilities/outcome';
 
 export const queries = {
   updateChannel
