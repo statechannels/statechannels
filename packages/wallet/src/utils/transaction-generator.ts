@@ -32,16 +32,12 @@ export function createRefuteTransaction(
   return nitroTrans.createCheckpointTransaction(seriesOfSupportiveStates);
 }
 
-export interface ConcludeAndWithdrawArgs {
+export interface ConcludePushOutcomeAndTransferAllArgs {
   fromSignedState: SignedState;
   toSignedState: SignedState;
-  participant: string;
-  destination: string;
-  amount: string;
-  verificationSignature: string;
 }
 export function createConcludePushOutcomeAndTransferAllTransaction(
-  args: ConcludeAndWithdrawArgs
+  args: ConcludePushOutcomeAndTransferAllArgs
 ): TransactionRequest {
   if (!args) {
     throw new Error();

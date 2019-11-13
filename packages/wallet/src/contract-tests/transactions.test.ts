@@ -7,7 +7,7 @@ import {
   createRespondTransaction,
   createRefuteTransaction,
   createConcludeTransaction,
-  ConcludeAndWithdrawArgs,
+  ConcludePushOutcomeAndTransferAllArgs,
   createConcludePushOutcomeAndTransferAllTransaction,
   createTransferAndWithdrawTransaction
 } from "../utils/transaction-generator";
@@ -284,7 +284,6 @@ describe("transactions", () => {
     const channelId = getChannelId(channel);
     await depositContract(provider, channelId);
 
-    const verificationSignature = "0x0";
     const fromState: State = {
       channel,
       appDefinition: libraryAddress,
@@ -308,15 +307,11 @@ describe("transactions", () => {
     const fromSignedState = Signatures.signState(fromState, participantA.privateKey);
     const toSignedState = Signatures.signState(toState, participantB.privateKey);
 
-    const args: ConcludeAndWithdrawArgs = {
+    const args: ConcludePushOutcomeAndTransferAllArgs = {
       fromSignedState,
-      toSignedState,
-      verificationSignature,
-      participant: participantA.address,
-      destination: participantA.address,
-      amount: "0x05"
+      toSignedState
     };
-    const concludeAndWithdrawTransaction = createConcludePushOutcomeAndTransferAllTransaction(args);
-    await testTransactionSender(concludeAndWithdrawTransaction);
+    const tx = createConcludePushOutcomeAndTransferAllTransaction(args);
+    await testTransactionSender(tx);
   });
 });
