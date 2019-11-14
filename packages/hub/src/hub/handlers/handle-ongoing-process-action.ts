@@ -1,14 +1,12 @@
 import {unreachable} from '@statechannels/wallet';
-
 import {SignedStatesReceived, StrategyProposed} from '@statechannels/wallet/lib/src/communication';
 import * as communication from '@statechannels/wallet/lib/src/communication';
+import {HUB_ADDRESS} from '../../constants';
 import {errors} from '../../wallet';
-
-import {HUB_ADDRESS} from 'src/constants';
-import {getCurrentState} from 'src/wallet/db/queries/getCurrentState';
-import {updateLedgerChannel} from 'src/wallet/services';
 import {MessageRelayRequested} from '../../wallet-client';
+import {getCurrentState} from '../../wallet/db/queries/getCurrentState';
 import {getProcess} from '../../wallet/db/queries/walletProcess';
+import {updateLedgerChannel} from '../../wallet/services';
 
 export async function handleOngoingProcessAction(
   action: StrategyProposed | SignedStatesReceived
