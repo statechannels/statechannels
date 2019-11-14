@@ -1,8 +1,8 @@
 import {errors} from '../../..';
 import {
-  constructors as testDataConstructors,
   created_channel,
-  funded_channel
+  funded_channel,
+  stateConstructors as testDataConstructors
 } from '../../../../test/test_data';
 import Channel from '../../../models/channel';
 import knex from '../../connection';
