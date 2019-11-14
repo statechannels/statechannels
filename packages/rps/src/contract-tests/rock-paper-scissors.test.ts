@@ -20,7 +20,7 @@ import { Weapon } from '../core/weapons';
 
 import loadJsonFile from 'load-json-file';
 
-import { defaultAbiCoder, bigNumberify, BigNumber, keccak256, Interface } from 'ethers/utils';
+import { defaultAbiCoder, bigNumberify, keccak256, Interface } from 'ethers/utils';
 import { randomHex } from '../utils/randomHex';
 
 const testProvider = new ethers.providers.JsonRpcProvider(

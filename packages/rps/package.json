@@ -23,7 +23,7 @@
     "prettier:check": "npx prettier --check 'src/**/*.{ts,tsx}'",
     "prettier:write": "npx prettier --write 'src/**/*.{ts,tsx}'",
     "start": "npm run clearContracts && node scripts/start.js",
-    "test:prepare": "yarn contracts:compile && yarn contracts:deploy",
+    "test:prepare": "yarn clearContracts && yarn contracts:compile && yarn contracts:deploy",
     "test:app": "npx run-jest -c ./config/jest/jest.config.js",
     "test:contracts": "yarn test:prepare && npx run-jest -c ./config/jest/jest.contracts.config.js",
     "startGanache": "node bin/start-ganache.js",

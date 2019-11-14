@@ -208,15 +208,26 @@ contract RockPaperScissors is ForceMoveApp {
         returns (Outcome.AllocationItem[] memory)
     {
         Outcome.OutcomeItem[] memory outcome = abi.decode(variablePart.outcome, (Outcome.OutcomeItem[]));
+        require(outcome.length == 1, 'RockPaperScissors: Only one asset allowed');
 
         Outcome.AssetOutcome memory assetOutcome = abi.decode(
             outcome[0].assetOutcomeBytes,
             (Outcome.AssetOutcome)
         );
 
+        require(
+            assetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation),
+            'RockPaperScissors: AssetOutcomeType must be Allocation'
+        );
+
         Outcome.AllocationItem[] memory allocation = abi.decode(
             assetOutcome.allocationOrGuaranteeBytes,
             (Outcome.AllocationItem[])
+        );
+
+        require(
+            allocation.length == 2,
+            'RockPaperScissors: Allocation length must equal number of participants (i.e. 2)'
         );
 
         return allocation;
@@ -305,78 +316,6 @@ contract RockPaperScissors is ForceMoveApp {
         require(
             toAllocation[1].amount == fromAllocation[1].amount,
             'RockPaperScissors: Amount playerB may not change'
-        );
-        _;
-    }
-
-    // TODO modifiers below here are currently unused and possibly belong in a Library
-
-    modifier oneAssetType(VariablePart memory a, VariablePart memory b) {
-        Outcome.OutcomeItem[] memory outcomeA = abi.decode(a.outcome, (Outcome.OutcomeItem[]));
-        Outcome.OutcomeItem[] memory outcomeB = abi.decode(b.outcome, (Outcome.OutcomeItem[]));
-
-        // Throws if more than one asset
-        require(outcomeA.length == 1, 'RockPaperScissors: outcomeA: Only one asset allowed');
-        require(outcomeB.length == 1, 'RockPaperScissors: outcomeB: Only one asset allowed');
-        _;
-    }
-
-    modifier assetOutcomeIsAllocation(VariablePart memory a, VariablePart memory b) {
-        Outcome.OutcomeItem[] memory outcomeA = abi.decode(a.outcome, (Outcome.OutcomeItem[]));
-        Outcome.OutcomeItem[] memory outcomeB = abi.decode(b.outcome, (Outcome.OutcomeItem[]));
-
-        // Throws unless the assetOutcome is an allocation
-        Outcome.AssetOutcome memory assetOutcomeA = abi.decode(
-            outcomeA[0].assetOutcomeBytes,
-            (Outcome.AssetOutcome)
-        );
-        Outcome.AssetOutcome memory assetOutcomeB = abi.decode(
-            outcomeB[0].assetOutcomeBytes,
-            (Outcome.AssetOutcome)
-        );
-        require(
-            assetOutcomeA.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation),
-            'RockPaperScissors: outcomeA: AssetOutcomeType must be Allocation'
-        );
-        require(
-            assetOutcomeB.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation),
-            'RockPaperScissors: outcomeB: AssetOutcomeType must be Allocation'
-        );
-        _;
-    }
-
-    modifier allocationLengthIsCorrect(
-        VariablePart memory a,
-        VariablePart memory b,
-        uint256 nParticipants
-    ) {
-        Outcome.OutcomeItem[] memory outcomeA = abi.decode(a.outcome, (Outcome.OutcomeItem[]));
-        Outcome.OutcomeItem[] memory outcomeB = abi.decode(b.outcome, (Outcome.OutcomeItem[]));
-        Outcome.AssetOutcome memory assetOutcomeA = abi.decode(
-            outcomeA[0].assetOutcomeBytes,
-            (Outcome.AssetOutcome)
-        );
-        Outcome.AssetOutcome memory assetOutcomeB = abi.decode(
-            outcomeB[0].assetOutcomeBytes,
-            (Outcome.AssetOutcome)
-        );
-
-        // Throws unless that allocation has exactly n outcomes
-        Outcome.AllocationItem[] memory allocationA = abi.decode(
-            assetOutcomeA.allocationOrGuaranteeBytes,
-            (Outcome.AllocationItem[])
-        );
-        Outcome.AllocationItem[] memory allocationB = abi.decode(
-            assetOutcomeB.allocationOrGuaranteeBytes,
-            (Outcome.AllocationItem[])
-        );
-        require(
-            allocationA.length == nParticipants,
-            'RockPaperScissors: outcomeA: Allocation length must equal number of participants'
-        );
-        require(
-            allocationB.length == nParticipants,
-            'RockPaperScissors: outcomeB: Allocation length must equal number of participants'
         );
         _;
     }
