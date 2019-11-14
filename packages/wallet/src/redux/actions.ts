@@ -306,7 +306,14 @@ export interface JsonRpcAction {
   id: number | string; // Either a string or number is technically valid
   type: string;
 }
-
+export interface CreateChannelResponse extends JsonRpcAction {
+  type: "WALLET.CREATE_CHANNEL_RESPONSE";
+  channelId: string;
+}
+export const createChannelResponse: ActionConstructor<CreateChannelResponse> = p => ({
+  ...p,
+  type: "WALLET.CREATE_CHANNEL_RESPONSE"
+});
 export interface AddressResponse extends JsonRpcAction {
   type: "WALLET.ADDRESS_RESPONSE";
   address: string;
@@ -316,4 +323,26 @@ export const addressResponse: ActionConstructor<AddressResponse> = p => ({
   type: "WALLET.ADDRESS_RESPONSE"
 });
 
-export type JsonRpcResponseAction = AddressResponse;
+export interface UnknownSigningAddress extends JsonRpcAction {
+  type: "WALLET.UNKNOWN_SIGNING_ADDRESS_ERROR";
+  signingAddress: string;
+}
+
+export const unknownSigningAddress: ActionConstructor<UnknownSigningAddress> = p => ({
+  ...p,
+  type: "WALLET.UNKNOWN_SIGNING_ADDRESS_ERROR"
+});
+
+export interface NoContractError extends JsonRpcAction {
+  address: string;
+  type: "WALLET.NO_CONTRACT_ERROR";
+}
+export const noContractError: ActionConstructor<NoContractError> = p => ({
+  ...p,
+  type: "WALLET.NO_CONTRACT_ERROR"
+});
+export type JsonRpcResponseAction =
+  | AddressResponse
+  | CreateChannelResponse
+  | UnknownSigningAddress
+  | NoContractError;

@@ -1,4 +1,10 @@
-import {OpenChannelState, ChannelState, isFullyOpen, getLastState} from "./channel-store";
+import {
+  OpenChannelState,
+  ChannelState,
+  isFullyOpen,
+  getLastState,
+  ChannelParticipant
+} from "./channel-store";
 import * as walletStates from "./state";
 import {SharedData, FundingState} from "./state";
 import {ProcessProtocol} from "../communication";
@@ -46,8 +52,12 @@ export const getFundedLedgerChannelForParticipants = (
     return (
       channel.libraryAddress === CONSENSUS_LIBRARY_ADDRESS &&
       // We call concat() on participants in order to not sort it in place
-      JSON.stringify(channel.participants.concat().sort()) ===
-        JSON.stringify([playerA, playerB].sort()) &&
+      JSON.stringify(
+        channel.participants
+          .map(p => p.signingAddress)
+          .concat()
+          .sort()
+      ) === JSON.stringify([playerA, playerB].sort()) &&
       directlyFunded
     );
   });
@@ -147,4 +157,9 @@ export const getNextNonce = (
 
 export const getChannelIds = (state: SharedData): string[] => {
   return Object.keys(state.channelStore);
+};
+
+export const getParticipants = (state: SharedData, channelId: string): ChannelParticipant[] => {
+  const status = walletStates.getChannelStatus(state, channelId);
+  return status.participants;
 };

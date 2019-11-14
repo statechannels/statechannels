@@ -9,8 +9,8 @@ export function validTransition(channelState: ChannelState, state: State): boole
   return (
     state.turnNum === channelState.turnNum + 1 &&
     channelNonce === channelState.channelNonce &&
-    state.channel.participants[0] === channelState.participants[0] &&
-    state.channel.participants[1] === channelState.participants[1] &&
+    state.channel.participants[0] === channelState.participants[0].signingAddress &&
+    state.channel.participants[1] === channelState.participants[1].signingAddress &&
     channelId === channelState.channelId
   );
 }

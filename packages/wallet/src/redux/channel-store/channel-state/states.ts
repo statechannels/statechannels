@@ -1,13 +1,19 @@
 import {Wallet} from "ethers";
 import {SignedState, State, getChannelId} from "@statechannels/nitro-protocol";
 
+export interface ChannelParticipant {
+  participantId?: string;
+  signingAddress: string;
+  destination?: string;
+}
+
 export interface ChannelState {
   address: string;
   privateKey: string;
   channelId: string;
   libraryAddress: string;
   ourIndex: number;
-  participants: string[];
+  participants: ChannelParticipant[];
   channelNonce: string;
   turnNum: number;
   signedStates: SignedState[];
@@ -32,10 +38,14 @@ export function getStates(state: ChannelState): SignedState[] {
 // Helpers
 // -------
 
-export function initializeChannel(signedState: SignedState, privateKey: string): ChannelState {
+export function initializeChannel(
+  signedState: SignedState,
+  privateKey: string,
+  participants: ChannelParticipant[]
+): ChannelState {
   const {state} = signedState;
   const {turnNum, channel, appDefinition} = state;
-  const {participants, channelNonce} = channel;
+  const {channelNonce} = channel;
   const address = new Wallet(privateKey).address;
   const ourIndex = state.channel.participants.indexOf(address);
 
@@ -82,7 +92,7 @@ export function isFullyOpen(state: ChannelState): state is OpenChannelState {
 export function theirAddress(state: ChannelState): string {
   const {participants, ourIndex} = state;
   const theirIndex = 1 - ourIndex; // todo: only two player channels
-  return participants[theirIndex];
+  return participants[theirIndex].signingAddress;
 }
 
 export function nextParticipant(participants, ourIndex: number): string {
