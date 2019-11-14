@@ -1,19 +1,19 @@
-import {fork, take, call, put, select, actionChannel, takeEvery} from 'redux-saga/effects';
-import {buffers, eventChannel} from 'redux-saga';
-import {reduxSagaFirebase} from '../../gateways/firebase';
+import { fork, take, call, put, select, actionChannel, takeEvery } from 'redux-saga/effects';
+import { buffers, eventChannel } from 'redux-saga';
+import { reduxSagaFirebase } from '../../gateways/firebase';
 
-import {Player} from '../../core';
+import { Player } from '../../core';
 import * as gameActions from '../game/actions';
 import * as appActions from '../global/actions';
-import {MessageState, WalletRequest} from './state';
+import { MessageState, WalletRequest } from './state';
 import * as gameStates from '../game/state';
-import {getMessageState, getGameState} from '../store';
+import { getMessageState, getGameState } from '../store';
 import * as Wallet from 'magmo-wallet-client';
-import {WALLET_IFRAME_ID} from '../../constants';
-import {channelID} from 'fmg-core/lib/channel';
-import {asCoreCommitment, fromCoreCommitment} from '../../core/rps-commitment';
-import {Commitment} from 'fmg-core';
-import {MessageRelayRequested} from 'magmo-wallet-client';
+import { WALLET_IFRAME_ID } from '../../constants';
+import { channelID } from 'fmg-core/lib/channel';
+import { asCoreCommitment, fromCoreCommitment } from '../../core/rps-commitment';
+import { Commitment } from 'fmg-core';
+import { MessageRelayRequested } from 'magmo-wallet-client';
 
 export enum Queue {
   WALLET = 'WALLET',
@@ -52,8 +52,8 @@ export function* sendWalletMessageSaga() {
   yield takeEvery(sendMessageChannel, handleSendingWalletMessage);
 }
 function* handleSendingWalletMessage(messageRelayRequest: MessageRelayRequested) {
-  const {messagePayload, to} = messageRelayRequest;
-  const messageToSend: WalletMessage = {payload: messagePayload, queue: Queue.WALLET};
+  const { messagePayload, to } = messageRelayRequest;
+  const messageToSend: WalletMessage = { payload: messagePayload, queue: Queue.WALLET };
 
   yield fork(
     reduxSagaFirebase.database.create,
@@ -82,7 +82,7 @@ export function* sendMessagesSaga() {
     gameActions.FUNDING_SUCCESS,
     gameActions.JOIN_OPEN_GAME,
     gameActions.RESIGN,
-    gameActions.CREATE_CHALLENGE
+    gameActions.CREATE_CHALLENGE,
   ]);
   while (true) {
     // We take any action that might trigger the outbox to be updated
@@ -94,8 +94,8 @@ export function* sendMessagesSaga() {
       const commitment = messageState.opponentOutbox.commitment;
       const signature = yield signMessage(commitment);
       const userName = gameState.name !== gameStates.StateName.NoName ? gameState.myName : '';
-      const toSend: AppMessage = {commitment, queue, signature, userName};
-      const {opponentAddress} = messageState.opponentOutbox;
+      const toSend: AppMessage = { commitment, queue, signature, userName };
+      const { opponentAddress } = messageState.opponentOutbox;
 
       yield call(
         reduxSagaFirebase.database.create,
@@ -146,7 +146,7 @@ function* receiveFromFirebaseSaga(address) {
     const value: Message = message.value;
     initializeCommitmentArraysFromFirebase(value);
     const key = message.snapshot.key;
-    const {queue} = value;
+    const { queue } = value;
     if (queue === Queue.GAME_ENGINE) {
       if ('signature' in value) {
         yield receiveCommitmentSaga(value);
@@ -198,7 +198,7 @@ function createWalletEventChannel(walletEventTypes: Wallet.WalletEventType[]) {
 }
 
 function* handleWalletMessage(walletMessage: WalletRequest, state: gameStates.PlayingState) {
-  const {channel, player, allocation: balances, destination: participants} = state;
+  const { channel, player, allocation: balances, destination: participants } = state;
   const channelId = channelID(channel);
 
   switch (walletMessage.type) {
@@ -222,7 +222,7 @@ function* handleWalletMessage(walletMessage: WalletRequest, state: gameStates.Pl
       const myAddress = participants[myIndex];
       const fundingChannel = createWalletEventChannel([
         Wallet.FUNDING_SUCCESS,
-        Wallet.FUNDING_FAILURE
+        Wallet.FUNDING_FAILURE,
       ]);
 
       Wallet.startFunding(
@@ -250,7 +250,7 @@ function* handleWalletMessage(walletMessage: WalletRequest, state: gameStates.Pl
     case 'CONCLUDE_REQUESTED':
       const conclusionChannel = createWalletEventChannel([
         Wallet.CONCLUDE_SUCCESS,
-        Wallet.CONCLUDE_FAILURE
+        Wallet.CONCLUDE_FAILURE,
       ]);
       Wallet.startConcludingGame(WALLET_IFRAME_ID, channelId);
       const concludeResponse = yield take(conclusionChannel);
@@ -267,7 +267,7 @@ function* handleWalletMessage(walletMessage: WalletRequest, state: gameStates.Pl
     case 'CHALLENGE_REQUESTED':
       const challengeChannel = createWalletEventChannel([
         Wallet.CHALLENGE_COMPLETE,
-        Wallet.CONCLUDE_SUCCESS
+        Wallet.CONCLUDE_SUCCESS,
       ]);
       Wallet.startChallenge(WALLET_IFRAME_ID, channelId);
       yield put(gameActions.messageSent());
@@ -322,7 +322,7 @@ function* receiveChallengePositionFromWalletSaga() {
 }
 
 function* receiveCommitmentSaga(message: AppMessage) {
-  const {commitment: data, signature, userName} = message;
+  const { commitment: data, signature, userName } = message;
   const validMessage = yield validateMessage(data, signature);
   if (!validMessage) {
     // TODO: Handle this
