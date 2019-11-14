@@ -34,6 +34,8 @@ function* createResponseMessage(action: JsonRpcResponseAction) {
         turnNum,
         channelId
       });
+    case "WALLET.UPDATE_CHANNEL_RESPONSE":
+      return jrs.success(action.id, action.state);
     case "WALLET.ADDRESS_RESPONSE":
       return jrs.success(action.id, action.address);
     case "WALLET.NO_CONTRACT_ERROR":
@@ -42,6 +44,14 @@ function* createResponseMessage(action: JsonRpcResponseAction) {
       return jrs.error(
         action.id,
         new jrs.JsonRpcError("Signing address not found in the participants array", 1000)
+      );
+    case "WALLET.UNKNOWN_CHANNEL_ID_ERROR":
+      return jrs.error(
+        action.id,
+        new jrs.JsonRpcError(
+          "The wallet can't find the channel corresponding to the channelId",
+          1000
+        )
       );
     default:
       return unreachable(action);
