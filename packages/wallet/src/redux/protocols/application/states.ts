@@ -1,6 +1,7 @@
 import {StateConstructor} from "../../utils";
 import {DisputeState} from "../dispute/state";
 import {ProtocolState} from "..";
+import {ChannelParticipant} from "../../channel-store";
 
 // -------
 // States
@@ -10,6 +11,7 @@ export interface WaitForFirstState {
   channelId: string;
   address: string;
   privateKey: string;
+  participants: ChannelParticipant[];
 }
 
 export interface Ongoing {

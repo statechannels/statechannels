@@ -9,7 +9,7 @@ import SagaTester from "redux-saga-tester";
 import {DepositedEvent} from "../redux/actions";
 import {adjudicatorWatcher} from "../redux/sagas/adjudicator-watcher";
 import {ETHAssetHolderWatcher} from "../redux/sagas/eth-asset-holder-watcher";
-import {depositContract, createWatcherState, concludeGame, fiveFive} from "./test-utils";
+import {depositIntoETHAssetHolder, createWatcherState, concludeGame, fiveFive} from "./test-utils";
 import {getGanacheProvider} from "@statechannels/devtools";
 import {bigNumberify} from "ethers/utils";
 import {HashZero, AddressZero} from "ethers/constants";
@@ -49,7 +49,7 @@ describe("ETHAssetHolder listener", () => {
     sagaTester.start(ETHAssetHolderWatcher, provider);
 
     const depositAmount = bigNumberify("0x05");
-    await depositContract(provider, channelId, depositAmount.toHexString());
+    await depositIntoETHAssetHolder(provider, channelId, depositAmount.toHexString());
 
     await sagaTester.waitFor("WALLET.ASSET_HOLDER.DEPOSITED");
 
@@ -73,7 +73,7 @@ describe("ETHAssetHolder listener", () => {
     // to not be hardcoded
     const depositAmount = bigNumberify("0x05");
     // deposit double so that 0x05 can be transferred to each participant
-    await depositContract(provider, channelId, depositAmount.mul(2).toHexString());
+    await depositIntoETHAssetHolder(provider, channelId, depositAmount.mul(2).toHexString());
 
     await finalizeChannel(channelId, channelNonce, provider, participantA, participantB);
 

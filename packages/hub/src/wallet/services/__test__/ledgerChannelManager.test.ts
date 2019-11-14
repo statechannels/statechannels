@@ -1,20 +1,26 @@
 import {State} from '@statechannels/nitro-protocol';
 import {signState} from '@statechannels/nitro-protocol/lib/src/signatures';
 import {Signature} from 'ethers/utils';
-import {PARTICIPANT_1_PRIVATE_KEY, PARTICIPANT_2_PRIVATE_KEY} from '../../../test/test-constants';
+import {
+  DUMMY_CHAIN_ID,
+  FUNDED_CHANNEL_NONCE,
+  PARTICIPANT_1_PRIVATE_KEY,
+  PARTICIPANT_2_PRIVATE_KEY,
+  PARTICIPANTS
+} from '../../../test/test-constants';
 import {
   app_1_response,
   beginning_app_phase_channel,
-  constructors as testDataConstructors,
   created_pre_fund_setup_1,
   created_pre_fund_setup_3_2,
   post_fund_setup_1_response,
   post_fund_setup_3_2_response,
   pre_fund_setup_1_response,
-  pre_fund_setup_3_2_response
+  pre_fund_setup_3_2_response,
+  stateConstructors as testDataConstructors
 } from '../../../test/test_data';
 import errors from '../../errors';
-import * as ChannelManagement from '../channelManagement';
+import * as ChannelManager from '../channelManager';
 import * as LedgerChannelManager from '../ledgerChannelManager';
 
 // 2 participant channel
@@ -51,7 +57,7 @@ describe('updateLedgerChannel', () => {
         {state: pre_fund_setup_0, signature: theirSignature}
       ]);
       expect(state).toMatchObject(pre_fund_setup_1_response);
-      expect(ChannelManagement.validSignature(state, signature)).toBe(true);
+      expect(ChannelManager.validSignature(state, signature)).toBe(true);
     });
 
     it('on valid round received -- should return an allocator channel and a signed state', async () => {
@@ -66,7 +72,7 @@ describe('updateLedgerChannel', () => {
         }
       ]);
       expect(state).toMatchObject(pre_fund_setup_3_2_response);
-      expect(ChannelManagement.validSignature(state, signature)).toBe(true);
+      expect(ChannelManager.validSignature(state, signature)).toBe(true);
     });
 
     it.skip('throws when the state is incorrectly signed', async () => {
@@ -81,6 +87,26 @@ describe('updateLedgerChannel', () => {
         }
       ]).catch((err: Error) => {
         expect(err).toMatchObject(errors.STATE_NOT_SIGNED);
+      });
+    });
+
+    it('throws when the channel exists', async () => {
+      expect.assertions(1);
+
+      pre_fund_setup_0.channel = {
+        channelNonce: FUNDED_CHANNEL_NONCE,
+        participants: PARTICIPANTS,
+        chainId: DUMMY_CHAIN_ID
+      };
+      theirSignature = signState(pre_fund_setup_0, PARTICIPANT_1_PRIVATE_KEY).signature;
+
+      await LedgerChannelManager.updateLedgerChannel([
+        {
+          state: pre_fund_setup_0,
+          signature: theirSignature
+        }
+      ]).catch((err: Error) => {
+        expect(err).toMatchObject(errors.CHANNEL_EXISTS);
       });
     });
   });
@@ -101,7 +127,7 @@ describe('updateLedgerChannel', () => {
         created_pre_fund_setup_1
       );
       expect(state).toMatchObject(post_fund_setup_1_response);
-      expect(ChannelManagement.validSignature(state, signature)).toBe(true);
+      expect(ChannelManager.validSignature(state, signature)).toBe(true);
     });
 
     describe('round of states', () => {
@@ -120,7 +146,7 @@ describe('updateLedgerChannel', () => {
           created_pre_fund_setup_3_2
         );
         expect(state).toMatchObject(post_fund_setup_3_2_response);
-        expect(ChannelManagement.validSignature(state, signature)).toBe(true);
+        expect(ChannelManager.validSignature(state, signature)).toBe(true);
       });
 
       it('on valid round received -- not our turn', async () => {
@@ -172,6 +198,28 @@ describe('updateLedgerChannel', () => {
       });
     });
 
+    it("throws when the channel doesn't exist", async () => {
+      expect.assertions(1);
+
+      post_fund_setup_0.channel = {
+        ...post_fund_setup_0.channel,
+        channelNonce: '999'
+      };
+      theirSignature = signState(post_fund_setup_0, PARTICIPANT_1_PRIVATE_KEY).signature;
+
+      await LedgerChannelManager.updateLedgerChannel(
+        [
+          {
+            state: post_fund_setup_0,
+            signature: theirSignature
+          }
+        ],
+        created_pre_fund_setup_1
+      ).catch(err => {
+        expect(err).toMatchObject(errors.CHANNEL_MISSING);
+      });
+    });
+
     it.skip('throws when the update is not value preserving', async () => {
       expect.assertions(1);
 
@@ -203,7 +251,7 @@ describe('updateLedgerChannel', () => {
       );
       expect(state).toMatchObject(app_1_response);
 
-      expect(ChannelManagement.validSignature(state, signature)).toBe(true);
+      expect(ChannelManager.validSignature(state, signature)).toBe(true);
     });
   });
 

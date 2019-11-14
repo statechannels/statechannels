@@ -14,7 +14,7 @@ import {Channel, getChannelId} from '../../../src/contract/channel';
 import {hashChannelStorage} from '../../../src/contract/channel-storage';
 import {AllocationAssetOutcome} from '../../../src/contract/outcome';
 import {State} from '../../../src/contract/state';
-import {concludePushOutcomeAndTransferAllArgs} from '../../../src/contract/transaction-creators/force-move';
+import {concludePushOutcomeAndTransferAllArgs} from '../../../src/contract/transaction-creators/nitro-adjudicator';
 import {
   assetTransferredEventsFromPayouts,
   checkMultipleAssetOutcomeHashes,

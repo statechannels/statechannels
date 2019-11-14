@@ -1,8 +1,13 @@
 import {SignedState, State} from '@statechannels/nitro-protocol';
+import {
+  ConsensusData,
+  decodeConsensusData,
+  encodeConsensusData
+} from '@statechannels/nitro-protocol/lib/src/contract/consensus-data';
 import {HUB_ADDRESS} from '../../constants';
 import {queries} from '../db/queries/channels';
 import errors from '../errors';
-import * as ChannelManagement from './channelManagement';
+import * as ChannelManager from './channelManager';
 
 export async function updateLedgerChannel(
   stateRound: SignedState[],
@@ -30,12 +35,12 @@ export async function updateLedgerChannel(
   const stateToStore = statesToApply.map(signedState => signedState.state);
   // todo: signatures need to be stored alongside states
   await queries.updateChannel(stateToStore, ourState);
-  return ChannelManagement.formResponse(ourState);
+  return ChannelManager.formResponse(ourState);
 }
 
 function shouldAcceptState(signedState: SignedState, previousState?: State) {
   const {state: state, signature} = signedState;
-  if (!ChannelManagement.validSignature(state, signature)) {
+  if (!ChannelManager.validSignature(state, signature)) {
     throw errors.STATE_NOT_SIGNED;
   }
 
@@ -62,34 +67,67 @@ export function nextState(stateRound: SignedState[]): State {
     throw errors.NOT_OUR_TURN;
   }
 
-  return ChannelManagement.nextState(lastState);
-  // todo: form response during funding
-  /*if (lastCommitmnent.commitmentType !== CommitmentType.App) {
-    return ChannelManagement.nextState(lastCommitmnent) as State;
-  }*/
+  if (!ChannelManager.isApplicationState(lastState)) {
+    return ChannelManager.nextState(lastState);
+  }
 
-  // todo: refactor consensus app logic
-  /*
-  if (finalVoteRequired(lastState)) {
+  const consensusData = decodeConsensusData(lastState.appData);
+  if (finalVoteRequired(consensusData)) {
     return finalVote(lastState);
-  } else if (voteRequired(lastState)) {
+  } else if (voteRequired(consensusData)) {
     return vote(lastState);
-  } else if (isConsensusReached(lastState)) {
+  } else if (isConsensusReached(consensusData)) {
     return pass(lastState);
   } else {
-    return unreachable(lastState);
-  }*/
+    throw new Error('Unknown consensus state');
+  }
 }
 
-// todo: a better check is a typeguard
-/*function finalVoteRequired(s: State): boolean {
-  return decodeConsensusData(s.appData).furtherVotesRequired === 1;
-}*/
+function finalVoteRequired(cd: ConsensusData): boolean {
+  return cd.furtherVotesRequired === 1;
+}
 
-// todo: a better check is a typeguard
-/*function voteRequired(s: State): boolean {
-  return decodeConsensusData(s.appData).furtherVotesRequired > 1;
-}*/
+function voteRequired(cd: ConsensusData): boolean {
+  return cd.furtherVotesRequired > 1;
+}
+
+function isConsensusReached(cd: ConsensusData): boolean {
+  return cd.furtherVotesRequired === 0;
+}
+
+function nextAppState(s: State): State {
+  return {
+    ...s,
+    turnNum: s.turnNum + 1
+  };
+}
+
+function finalVote(state: State): State {
+  const consensusData: ConsensusData = decodeConsensusData(state.appData);
+  return {
+    ...nextAppState(state),
+    outcome: consensusData.proposedOutcome,
+    appData: encodeConsensusData({proposedOutcome: [], furtherVotesRequired: 0})
+  };
+}
+
+function vote(state: State): State {
+  const consensusData: ConsensusData = decodeConsensusData(state.appData);
+  return {
+    ...nextAppState(state),
+    appData: encodeConsensusData({
+      ...consensusData,
+      furtherVotesRequired: consensusData.furtherVotesRequired - 1
+    })
+  };
+}
+
+function pass(state: State): State {
+  return {
+    ...nextAppState(state),
+    appData: encodeConsensusData({proposedOutcome: [], furtherVotesRequired: 0})
+  };
+}
 
 export function valuePreserved(currentState: any, theirState: any): boolean {
   return currentState || (theirState && true);

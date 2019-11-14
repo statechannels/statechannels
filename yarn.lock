@@ -15193,7 +15193,7 @@ is-number@^3.0.0:
 
 is-number@^4.0.0:
   version "4.0.0"
-  resolved "https://registry.yarnpkg.com/is-number/-/is-number-4.0.0.tgz#0026e37f5454d73e356dfe6564699867c6a7f0ff"
+  resolved "https://registry.npmjs.org/is-number/-/is-number-4.0.0.tgz#0026e37f5454d73e356dfe6564699867c6a7f0ff"
   integrity sha512-rSklcAIlf1OmFdyAqbnWTLVelsQ58uvZ66S/ZyawjWqIviTWCjg2PzVGw8WUA+nNuPTqb4wgA+NszrJ+08LlgQ==
 
 is-number@^7.0.0:
@@ -16255,12 +16255,10 @@ jsonparse@^1.2.0:
   resolved "https://registry.yarnpkg.com/jsonparse/-/jsonparse-1.3.1.tgz#3f4dae4a91fac315f71062f8521cc239f1366280"
   integrity sha1-P02uSpH6wxX3EGL4UhzCOfE2YoA=
 
-jsonrpc-serializer@0.2.1:
-  version "0.2.1"
-  resolved "https://registry.npmjs.org/jsonrpc-serializer/-/jsonrpc-serializer-0.2.1.tgz#0edf529cd8714eed87cbeb55a9bcfab7635b4c39"
-  integrity sha1-Dt9SnNhxTu2Hy+tVqbz6t2NbTDk=
-  dependencies:
-    inherits "^2.0.3"
+jsonrpc-lite@2.1.0:
+  version "2.1.0"
+  resolved "https://registry.npmjs.org/jsonrpc-lite/-/jsonrpc-lite-2.1.0.tgz#65171c521ce037c761a6e3dc3b22ec99cceb2d18"
+  integrity sha512-gjGlngwEERed9VKmBALN7vLYQf6S0ggEqGnzYAMdoH+cSLGqVUCpU62sioa2/ts+xKYOOLye0CDu7/w/HAJ53w==
 
 jsonschema@^1.2.0:
   version "1.2.4"
@@ -21168,7 +21166,7 @@ prettier-bytes@^1.0.4:
   resolved "https://registry.yarnpkg.com/prettier-bytes/-/prettier-bytes-1.0.4.tgz#994b02aa46f699c50b6257b5faaa7fe2557e62d6"
   integrity sha1-mUsCqkb2mcULYle1+qp/4lV+YtY=
 
-prettier-plugin-solidity@1.0.0-alpha.34:
+prettier-plugin-solidity@1.0.0-alpha.34, prettier-plugin-solidity@^1.0.0-alpha.34:
   version "1.0.0-alpha.34"
   resolved "https://registry.yarnpkg.com/prettier-plugin-solidity/-/prettier-plugin-solidity-1.0.0-alpha.34.tgz#9a2584fb1773569e2b22c0edba36cd4b80aa3905"
   integrity sha512-cg/HrnS4P6m7rdnazZt3QdN7TwuW+TO5quLpTLzvN2BTsbyNFjBjTBUFIJwlFVhjUjw8mQ2uxKfk3b7pSvXJyw==
@@ -25812,7 +25810,7 @@ truffle-decoder@2.0.1:
     truffle-decode-utils "^1.0.4"
     web3 "1.0.0-beta.37"
 
-truffle-hdwallet-provider@1.0.17, truffle-hdwallet-provider@^1.0.0-web3one.0:
+truffle-hdwallet-provider@1.0.17:
   version "1.0.17"
   resolved "https://registry.yarnpkg.com/truffle-hdwallet-provider/-/truffle-hdwallet-provider-1.0.17.tgz#fe8edd0d6974eeb31af9959e41525fb19abd74ca"
   integrity sha512-s6DvSP83jiIAc6TUcpr7Uqnja1+sLGJ8og3X7n41vfyC4OCaKmBtXL5HOHf+SsU3iblOvnbFDgmN6Y1VBL/fsg==
@@ -25840,15 +25838,6 @@ truffle@5.0.42:
   version "5.0.42"
   resolved "https://registry.yarnpkg.com/truffle/-/truffle-5.0.42.tgz#2de4f73af7b40f2d3a5620dade6dded74e928321"
   integrity sha512-WbXGdHElluVbQP9FQljpvBLWjSEiKHaUx27TZ+RK7yEyrYDb8ATjpX0Owkc72bIy3AjKcbrlrptnqYswY1mtsg==
-  dependencies:
-    app-module-path "^2.2.0"
-    mocha "5.2.0"
-    original-require "1.0.1"
-
-truffle@^5.0.5:
-  version "5.0.43"
-  resolved "https://registry.yarnpkg.com/truffle/-/truffle-5.0.43.tgz#b5508807ec59789b90749daefb16f8b6fef8ce96"
-  integrity sha512-PbqOjgtYlkNAbJqzHeiMGvgBCLSuPVAWbM4+TNIGsRyqVCRIvXdLeQXUmdCRcGMWMteCvQ9Knhu4zNzT2Eo53A==
   dependencies:
     app-module-path "^2.2.0"
     mocha "5.2.0"

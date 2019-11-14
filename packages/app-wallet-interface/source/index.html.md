@@ -45,8 +45,8 @@ like `https://myserver.com/state_channel_callback`.
 {
   "token": "0x...", // 0x0 for ETH
   "allocationItems": [
-    {"destination": "0xa...", "amount": "12"},
-    {"destination": "0xb...", "amount": "12"}
+    { "destination": "0xa...", "amount": "0x1a" },
+    { "destination": "0xb...", "amount": "0x1a" }
   ]
 }
 ```
@@ -97,7 +97,7 @@ Used to push messages received from other participants into the wallet.
 {
   "jsonrpc": "2.0",
   "id": 1,
-  "result": {"success": true}
+  "result": { "success": true }
 }
 ```
 
@@ -150,8 +150,8 @@ Returns the signing address(es) for the current domain.
       {
         "token": "0x...", // 0x0 for ETH
         "allocationItems": [
-          {"destination": "0xa...", "amount": "12"},
-          {"destination": "0xb...", "amount": "12"}
+          { "destination": "0xa...", "amount": "0x1a" },
+          { "destination": "0xb...", "amount": "0x1a" }
         ]
       }
     ],
@@ -188,8 +188,8 @@ Returns the signing address(es) for the current domain.
       {
         "token": "0x...", // 0x0 for ETH
         "allocationItems": [
-          {"destination": "0xa...", "amount": "12"},
-          {"destination": "0xb...", "amount": "12"}
+          { "destination": "0xa...", "amount": "0x1a" },
+          { "destination": "0xb...", "amount": "0x1a" }
         ]
       }
     ],
@@ -215,10 +215,9 @@ Beyond the standard errors from that spec, the following domain-specific errors 
 
 | Code | Message                   | Meaning                                                                                                     |
 | ---- | ------------------------- | ----------------------------------------------------------------------------------------------------------- |
-|      | Signing address not found | The wallet can't find the signing key corresponding to the first signing address in the participants array. |
-|      | Invalid app definition    | There isn't a force-move compatible app contract deployed at the app definition address                     |
-|      | Invalid app data          | The app data isn't a valid state for the force-move app defined by the app definition                       |
-|      | Unsupported token         | The wallet doesn't support one or more of the tokens appearing in the allocation.                           |
+| 1000 | Signing address not found | The wallet can't find the signing key corresponding to the first signing address in the participants array. |
+| 1001 | Invalid app definition    | There isn't a contract deployed at the app definition address.                                              |
+| 1002 | Unsupported token         | The wallet doesn't support one or more of the tokens appearing in the allocation.                           |
 
 ## Join Channel
 
@@ -262,8 +261,8 @@ Possible response to a `Channel Proposed` event.
       {
         "token": "0x...", // 0x0 for ETH
         "allocationItems": [
-          {"destination": "0xa...", "amount": "12"},
-          {"destination": "0xb...", "amount": "12"}
+          { "destination": "0xa...", "amount": "0x1a" },
+          { "destination": "0xb...", "amount": "0x1a" }
         ]
       }
     ],
@@ -275,9 +274,10 @@ Possible response to a `Channel Proposed` event.
 
 ### Errors
 
-| Code | Message           | Meaning                                                          |
-| ---- | ----------------- | ---------------------------------------------------------------- |
-|      | Channel not found | The wallet can't find the channel corresponding to the channelId |
+| Code | Message                  | Meaning                                                          |
+| ---- | ------------------------ | ---------------------------------------------------------------- |
+| 1100 | Channel not found        | The wallet can't find the channel corresponding to the channelId |
+| 1101 | Invalid State Transition | The wallet contains invalid state data                           |
 
 ## Update State
 
@@ -292,8 +292,8 @@ Possible response to a `Channel Proposed` event.
       {
         "token": "0x...", // 0x0 for ETH
         "allocationItems": [
-          {"destination": "0xa...", "amount": "18"},
-          {"destination": "0xb...", "amount": "6"}
+          { "destination": "0xa...", "amount": "18" },
+          { "destination": "0xb...", "amount": "6" }
         ]
       }
     ],
@@ -311,7 +311,7 @@ Possible response to a `Channel Proposed` event.
   "result": {
     "channelId": "0xabc123...",
     "status": "running",
-    "funding": [{"token": "0x0", "amount": "24"}],
+    "funding": [{ "token": "0x0", "amount": "24" }],
     "participants": [
       {
         "participantId": "user123",
@@ -329,8 +329,8 @@ Possible response to a `Channel Proposed` event.
       {
         "token": "0x...", // 0x0 for ETH
         "allocationItems": [
-          {"destination": "0xa...", "amount": "18"},
-          {"destination": "0xb...", "amount": "6"}
+          { "destination": "0xa...", "amount": "18" },
+          { "destination": "0xb...", "amount": "6" }
         ]
       }
     ],
@@ -338,6 +338,14 @@ Possible response to a `Channel Proposed` event.
   }
 }
 ```
+
+### Errors
+
+| Code | Message            | Meaning                                                                               |
+|------|--------------------|---------------------------------------------------------------------------------------|
+|      | Channel not found  | The wallet can't find the channel corresponding to the channelId                      |
+|      | Invalid app data   | The app data isn't a valid state for the force-move app defined by the app definition |
+|      | Invalid transition | The state transition implied by this state is invalid                                 |
 
 ## Close Channel
 
@@ -379,8 +387,8 @@ Possible response to a `Channel Proposed` event.
       {
         "token": "0x...", // 0x0 for ETH
         "allocationItems": [
-          {"destination": "0xa...", "amount": "12"},
-          {"destination": "0xb...", "amount": "12"}
+          { "destination": "0xa...", "amount": "0x1a" },
+          { "destination": "0xb...", "amount": "0x1a" }
         ]
       }
     ],
@@ -448,8 +456,8 @@ App should respond by either calling `JoinChannel`, or TODO.
       {
         "token": "0x...", // 0x0 for ETH
         "allocationItems": [
-          {"destination": "0xa...", "amount": "18"},
-          {"destination": "0xb...", "amount": "6"}
+          { "destination": "0xa...", "amount": "18" },
+          { "destination": "0xb...", "amount": "6" }
         ]
       }
     ],
@@ -473,7 +481,7 @@ Triggered when a channel update occurs by any means, including:
   "params": {
     "channelId": "0xabc123...",
     "status": "running",
-    "funding": [{"token": "0x0", "amount": "24"}],
+    "funding": [{ "token": "0x0", "amount": "24" }],
     "participants": [
       {
         "participantId": "user123",
@@ -491,8 +499,8 @@ Triggered when a channel update occurs by any means, including:
       {
         "token": "0x...", // 0x0 for ETH
         "allocationItems": [
-          {"destination": "0xa...", "amount": "18"},
-          {"destination": "0xb...", "amount": "6"}
+          { "destination": "0xa...", "amount": "18" },
+          { "destination": "0xb...", "amount": "6" }
         ]
       }
     ],

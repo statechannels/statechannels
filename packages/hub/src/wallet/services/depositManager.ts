@@ -41,7 +41,7 @@ export async function onDepositEvent(
 
   const states = channel.states;
   const latestState = states.reduce((prevState, currentState) => {
-    return prevState.turnNumber > currentState.turnNumber ? prevState : currentState;
+    return prevState.turnNum > currentState.turnNum ? prevState : currentState;
   });
 
   const hubParticipatIndex = channel.participants

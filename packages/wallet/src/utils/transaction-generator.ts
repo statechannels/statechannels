@@ -2,7 +2,8 @@ import {TransactionRequest} from "ethers/providers";
 import {getAdjudicatorInterface} from "./contract-utils";
 import {splitSignature} from "ethers/utils";
 import {
-  createDepositTransaction as createNitroDepositTransaction,
+  createETHDepositTransaction as createNitroETHDepositTransaction,
+  createERC20DepositTransaction as createNitroERC20DepositTransaction,
   createTransferAllTransaction as createNitroTransferAllTransaction,
   Transactions as nitroTrans,
   SignedState,
@@ -32,46 +33,21 @@ export function createRefuteTransaction(
   return nitroTrans.createCheckpointTransaction(seriesOfSupportiveStates);
 }
 
-export interface ConcludeAndWithdrawArgs {
+export interface ConcludePushOutcomeAndTransferAllArgs {
   fromSignedState: SignedState;
   toSignedState: SignedState;
-  participant: string;
-  destination: string;
-  amount: string;
-  verificationSignature: string;
 }
-export function createConcludeAndWithdrawTransaction(
-  args: ConcludeAndWithdrawArgs
+export function createConcludePushOutcomeAndTransferAllTransaction(
+  args: ConcludePushOutcomeAndTransferAllArgs
 ): TransactionRequest {
   if (!args) {
     throw new Error();
   }
-  // TODO: Implmement using Nitro
-  // const adjudicatorInterface = getAdjudicatorInterface();
-  // const splitFromSignature = splitSignature(args.fromSignature);
-  // const splitToSignature = splitSignature(args.toSignature);
-  // const conclusionProof = {
-  //   penultimateState: asEthersObject(args.fromState),
-  //   ultimateState: asEthersObject(args.toState),
-  //   penultimateSignature: splitFromSignature,
-  //   ultimateSignature: splitToSignature
-  // };
-  // const {v, r, s} = splitSignature(args.verificationSignature);
-  // const {participant, destination, amount} = args;
-  // const data = adjudicatorInterface.functions.concludeAndWithdraw.encode([
-  //   conclusionProof,
-  //   participant,
-  //   destination,
-  //   amount,
-  //   v,
-  //   r,
-  //   s
-  // ]);
 
-  return {
-    data: "0x0",
-    gasLimit: 3000000
-  };
+  return nitroTrans.createConcludePushOutcomeAndTransferAllTransaction([
+    args.fromSignedState,
+    args.toSignedState
+  ]);
 }
 
 export function createConcludeTransaction(
@@ -131,7 +107,7 @@ export function createTransferAndWithdrawTransaction(
   };
 }
 
-export function createDepositTransaction(
+export function createETHDepositTransaction(
   destination: string,
   depositAmount: string,
   expectedHeld: string
@@ -140,7 +116,19 @@ export function createDepositTransaction(
   if (destination.length === 42) {
     destination = `0x${destination.substr(2).padStart(64, "1")}`; // note we do not pad with zeros, since that would imply an external destination (which we may not deposit to)
   }
-  return createNitroDepositTransaction(destination, expectedHeld, depositAmount);
+  return createNitroETHDepositTransaction(destination, expectedHeld, depositAmount);
+}
+
+export function createERC20DepositTransaction(
+  destination: string,
+  depositAmount: string,
+  expectedHeld: string
+) {
+  // If a legacy fmg-core channelId
+  if (destination.length === 42) {
+    destination = `0x${destination.substr(2).padStart(64, "1")}`; // note we do not pad with zeros, since that would imply an external destination (which we may not deposit to)
+  }
+  return createNitroERC20DepositTransaction(destination, expectedHeld, depositAmount);
 }
 
 export function createTransferAllTransaction(source: string, destination: string, amount: string) {

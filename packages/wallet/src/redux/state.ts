@@ -15,7 +15,8 @@ import {
   signAndStore as signAndStoreChannelStore,
   signAndInitialize as signAndInitializeChannelStore,
   emptyChannelStore,
-  SignFailureReason
+  SignFailureReason,
+  ChannelParticipant
 } from "./channel-store";
 import {Properties} from "./utils";
 import * as NewLedgerChannel from "./protocols/new-ledger-channel/states";
@@ -182,7 +183,7 @@ export function initialized(params: Properties<Initialized>): Initialized {
 // Getters and setters
 // -------------------
 
-export function getChannelStatus(state: WalletState, channelId: string): ChannelState {
+export function getChannelStatus(state: SharedData, channelId: string): ChannelState {
   return state.channelStore[channelId];
 }
 
@@ -237,9 +238,15 @@ export function getPrivatekey(state: SharedData, channelId: string): string {
 export function signAndInitialize(
   sharedDataState: SharedData,
   state: State,
-  privateKey: string
+  privateKey: string,
+  participants: ChannelParticipant[]
 ): SignResult {
-  const result = signAndInitializeChannelStore(sharedDataState.channelStore, state, privateKey);
+  const result = signAndInitializeChannelStore(
+    sharedDataState.channelStore,
+    state,
+    privateKey,
+    participants
+  );
   if (result.isSuccess) {
     return {
       isSuccess: result.isSuccess,
@@ -254,9 +261,15 @@ export function signAndInitialize(
 export function checkAndInitialize(
   state: SharedData,
   signedState: SignedState,
-  privateKey: string
+  privateKey: string,
+  participants: ChannelParticipant[]
 ): CheckResult {
-  const result = checkAndInitializeChannelStore(state.channelStore, signedState, privateKey);
+  const result = checkAndInitializeChannelStore(
+    state.channelStore,
+    signedState,
+    privateKey,
+    participants
+  );
   if (result.isSuccess) {
     return {...result, store: setChannelStore(state, result.store)};
   } else {

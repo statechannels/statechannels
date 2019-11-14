@@ -4,25 +4,25 @@ case $TARGET_PACKAGE in
 
     web3torrent)
         echo "Checking for changes across web3torrent, embedded-wallet and channel-provider packages..."
-        git diff --quiet HEAD^ HEAD ./packages/web3torrent ./packages/embedded-wallet ./packages/channel-provider
+        git diff --quiet origin/master HEAD ./packages/web3torrent ./packages/embedded-wallet ./packages/channel-provider
         status=$?
         ;;
 
     embedded-wallet)
         echo "Checking for changes across web3torrent, embedded-wallet and channel-provider packages..."
-        git diff --quiet HEAD^ HEAD ./packages/web3torrent ./packages/embedded-wallet ./packages/channel-provider
+        git diff --quiet origin/master HEAD ./packages/web3torrent ./packages/embedded-wallet ./packages/channel-provider
         status=$?
         ;;
 
     nitro-protocol)
         echo "Checking for changes in nitro-protocol package..."
-        git diff --quiet HEAD^ HEAD ./packages/nitro-protocol
+        git diff --quiet origin/master HEAD ./packages/nitro-protocol
         status=$?
         ;;
     
     app-wallet-interface)
         echo "Checking for changes in app-wallet-interface package..."
-        git diff --quiet HEAD^ HEAD ./packages/app-wallet-interface
+        git diff --quiet origin/master HEAD ./packages/app-wallet-interface
         status=$?
         ;;
 

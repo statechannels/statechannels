@@ -1,12 +1,12 @@
-const ethers = require("ethers");
-const etherlime = require("etherlime-lib");
-const path = require("path");
-const writeJsonFile = require("write-json-file");
-const loadJsonFile = require("load-json-file");
+const ethers = require('ethers');
+const etherlime = require('etherlime-lib');
+const path = require('path');
+const writeJsonFile = require('write-json-file');
+const loadJsonFile = require('load-json-file');
 
-const RockPaperScissorsArtifact = require("../build/contracts/RockPaperScissors");
+const RockPaperScissorsArtifact = require('../build/contracts/RockPaperScissors');
 
-const {configureEnvVariables} = require("@statechannels/devtools");
+const {configureEnvVariables} = require('@statechannels/devtools');
 configureEnvVariables();
 
 const migrationFactory = (artifact, argsConstructor = () => []) => {
@@ -17,7 +17,7 @@ const migrationFactory = (artifact, argsConstructor = () => []) => {
     // as there can be many version of a contract
     return {
       ...contractsToAddresses,
-      [artifact.contractName]: contract.contractAddress
+      [artifact.contractName]: contract.contractAddress,
     };
   };
 };
@@ -34,9 +34,9 @@ const deploy = async (network, secret, etherscanApiKey) => {
 
   let networkMap;
   try {
-    networkMap = await loadJsonFile(path.join(__dirname, "/network-map.json"));
+    networkMap = await loadJsonFile(path.join(__dirname, '/network-map.json'));
   } catch (err) {
-    if (!!err.message.match("ENOENT: no such file or directory")) {
+    if (!!err.message.match('ENOENT: no such file or directory')) {
       networkMap = {};
     } else {
       throw err;
@@ -50,16 +50,28 @@ const deploy = async (network, secret, etherscanApiKey) => {
   if (!process.env.GANACHE_PORT) {
     throw new Error(`Environment variable GANACHE_PORT undefined`);
   }
-  const provider = new ethers.providers.JsonRpcProvider(`http://localhost:${process.env.GANACHE_PORT}`);
+  const provider = new ethers.providers.JsonRpcProvider(
+    `http://localhost:${process.env.GANACHE_PORT}`
+  );
   const networkId = (await provider.getNetwork()).chainId;
 
   const startingMap = networkMap[networkId] || [];
   const contractsToAddresses = await migrate(deployer, startingMap, [
-    migrationFactory(RockPaperScissorsArtifact)
+    migrationFactory(RockPaperScissorsArtifact),
   ]);
 
   updatedNetworkMap = {...networkMap, [networkId]: contractsToAddresses};
-  await writeJsonFile(path.join(__dirname, "network-map.json"), updatedNetworkMap);
+  await writeJsonFile(path.join(__dirname, 'network-map.json'), updatedNetworkMap);
+
+  // simulate truffle's behavour by storing deployment information in artifact
+  const updatedArtifact = {...RockPaperScissorsArtifact};
+  updatedArtifact.networks = {
+    [networkId]: {address: contractsToAddresses[RockPaperScissorsArtifact.contractName]},
+  };
+  await writeJsonFile(
+    path.join(__dirname, '../build/contracts/RockPaperScissors.json'),
+    updatedArtifact
+  );
 
   return {networkMap: updatedNetworkMap, deployer, networkId};
 };
@@ -67,5 +79,5 @@ const deploy = async (network, secret, etherscanApiKey) => {
 module.exports = {
   deploy,
   migrate,
-  migrationFactory
+  migrationFactory,
 };

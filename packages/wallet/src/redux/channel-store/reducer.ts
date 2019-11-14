@@ -1,9 +1,10 @@
 import {ChannelStore, getChannel, setChannel} from "./state";
-import {pushState, initializeChannel} from "./channel-state/states";
+import {pushState, initializeChannel, ChannelParticipant} from "./channel-state/states";
 import {State, SignedState, getChannelId} from "@statechannels/nitro-protocol";
 import {Signatures} from "@statechannels/nitro-protocol";
 import {validTransition} from "./channel-state/valid-transition";
 import {hasValidSignature} from "../../utils/signing-utils";
+
 // -----------------
 // NEW FUNCTIONALITY
 // -----------------
@@ -19,7 +20,7 @@ interface SignFailure {
   reason: SignFailureReason;
 }
 
-export type SignFailureReason = "ChannelDoesntExist" | "TransitionUnsafe" | "NotOurTurn";
+export type SignFailureReason = "ChannelDoesNotExist" | "TransitionUnsafe" | "NotOurTurn";
 type SignResult = SignSuccess | SignFailure;
 // TODO: These methods could probably be part of signAndStore/checkAndStore but that means
 // that the address/privateKey would be required when calling them.
@@ -27,14 +28,15 @@ type SignResult = SignSuccess | SignFailure;
 export function signAndInitialize(
   store: ChannelStore,
   state: State,
-  privateKey: string
+  privateKey: string,
+  participants: ChannelParticipant[]
 ): SignResult {
   const signedState = Signatures.signState(state, privateKey);
 
   if (signedState.state.turnNum !== 0) {
-    return {isSuccess: false, reason: "ChannelDoesntExist"};
+    return {isSuccess: false, reason: "ChannelDoesNotExist"};
   }
-  const channel = initializeChannel(signedState, privateKey);
+  const channel = initializeChannel(signedState, privateKey, participants);
   store = setChannel(store, channel);
 
   return {isSuccess: true, signedState, store};
@@ -43,7 +45,8 @@ export function signAndInitialize(
 export function checkAndInitialize(
   store: ChannelStore,
   signedState: SignedState,
-  privateKey: string
+  privateKey: string,
+  participants: ChannelParticipant[]
 ): CheckResult {
   if (signedState.state.turnNum !== 0) {
     return {isSuccess: false};
@@ -51,7 +54,7 @@ export function checkAndInitialize(
   if (!hasValidSignature(signedState)) {
     return {isSuccess: false};
   }
-  const channel = initializeChannel(signedState, privateKey);
+  const channel = initializeChannel(signedState, privateKey, participants);
 
   store = setChannel(store, channel);
 

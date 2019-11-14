@@ -3,17 +3,16 @@ import {ethers} from "ethers";
 import {createChallenge, concludeGame, fiveFive} from "./test-utils";
 import {
   createForceMoveTransaction,
-  createDepositTransaction,
+  createETHDepositTransaction,
   createRespondTransaction,
   createRefuteTransaction,
   createConcludeTransaction,
-  createWithdrawTransaction,
-  ConcludeAndWithdrawArgs,
-  createConcludeAndWithdrawTransaction,
+  ConcludePushOutcomeAndTransferAllArgs,
+  createConcludePushOutcomeAndTransferAllTransaction,
   createTransferAndWithdrawTransaction
 } from "../utils/transaction-generator";
 
-import {depositContract} from "./test-utils";
+import {depositIntoETHAssetHolder} from "./test-utils";
 import {getGanacheProvider} from "@statechannels/devtools";
 import {transactionSender} from "../redux/sagas/transaction-sender";
 import {testSaga} from "redux-saga-test-plan";
@@ -94,9 +93,9 @@ describe("transactions", () => {
     participantB = ethers.Wallet.createRandom();
   });
 
-  it("should deposit into the contract", async () => {
+  it("should deposit ETH into the ETH asset holder", async () => {
     const someChannelId = ethers.utils.hexlify(ethers.utils.randomBytes(32));
-    const depositTransactionData = createDepositTransaction(someChannelId, "0x5", "0x0");
+    const depositTransactionData = createETHDepositTransaction(someChannelId, "0x5", "0x0");
     await testTransactionSender({
       ...depositTransactionData,
       to: ETH_ASSET_HOLDER_ADDRESS,
@@ -260,8 +259,8 @@ describe("transactions", () => {
     };
     const channelId = getChannelId(channel);
 
-    await depositContract(provider, channelId);
-    await depositContract(provider, channelId);
+    await depositIntoETHAssetHolder(provider, channelId);
+    await depositIntoETHAssetHolder(provider, channelId);
     await concludeGame(provider, channel.channelNonce, participantA, participantB);
 
     const verificationSignature = "0x0";
@@ -275,20 +274,7 @@ describe("transactions", () => {
     await testTransactionSender(transferAndWithdraw);
   });
 
-  it.skip("should send a withdraw transaction", async () => {
-    await depositContract(provider, participantA.address);
-
-    const verificationSignature = "0x0";
-    const withdrawTransaction = createWithdrawTransaction(
-      "0x01",
-      participantA.address,
-      participantA.address,
-      verificationSignature
-    );
-    await testTransactionSender(withdrawTransaction);
-  });
-
-  it.skip("should send a conclude and withdraw transaction", async () => {
+  it("should send a conclude, push outcome, and transfer all transaction", async () => {
     const channelNonce = getNextNonce();
     const channel: Channel = {
       channelNonce,
@@ -296,13 +282,12 @@ describe("transactions", () => {
       participants: [participantA.address, participantB.address]
     };
     const channelId = getChannelId(channel);
-    await depositContract(provider, channelId);
+    await depositIntoETHAssetHolder(provider, channelId);
 
-    const verificationSignature = "0x0";
     const fromState: State = {
       channel,
       appDefinition: libraryAddress,
-      turnNum: 5,
+      turnNum: 4,
       outcome: convertBalanceToOutcome(fiveFive(participantA.address, participantB.address)),
       isFinal: true,
       challengeDuration: CHALLENGE_DURATION,
@@ -312,7 +297,7 @@ describe("transactions", () => {
     const toState: State = {
       channel,
       appDefinition: libraryAddress,
-      turnNum: 6,
+      turnNum: 5,
       outcome: convertBalanceToOutcome(fiveFive(participantA.address, participantB.address)),
       isFinal: true,
       challengeDuration: CHALLENGE_DURATION,
@@ -322,15 +307,11 @@ describe("transactions", () => {
     const fromSignedState = Signatures.signState(fromState, participantA.privateKey);
     const toSignedState = Signatures.signState(toState, participantB.privateKey);
 
-    const args: ConcludeAndWithdrawArgs = {
+    const args: ConcludePushOutcomeAndTransferAllArgs = {
       fromSignedState,
-      toSignedState,
-      verificationSignature,
-      participant: participantA.address,
-      destination: participantA.address,
-      amount: "0x05"
+      toSignedState
     };
-    const concludeAndWithdrawTransaction = createConcludeAndWithdrawTransaction(args);
-    await testTransactionSender(concludeAndWithdrawTransaction);
+    const tx = createConcludePushOutcomeAndTransferAllTransaction(args);
+    await testTransactionSender(tx);
   });
 });

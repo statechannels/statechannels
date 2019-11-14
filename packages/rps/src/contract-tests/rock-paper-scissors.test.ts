@@ -2,10 +2,11 @@ import * as ethers from 'ethers';
 // @ts-ignore
 import RockPaperScissorsArtifact from '../../build/contracts/RockPaperScissors.json';
 jest.setTimeout(20000);
-import {expectRevert} from '@statechannels/devtools';
+import { expectRevert } from '@statechannels/devtools';
 import path from 'path';
-import {Contract} from 'ethers';
-import {AddressZero} from 'ethers/constants';
+import { Contract } from 'ethers';
+import { AddressZero } from 'ethers/constants';
+import { TransactionRequest } from 'ethers/providers';
 import {
   Allocation,
   encodeOutcome,
@@ -13,23 +14,18 @@ import {
   replaceAddressesAndBigNumberify,
   randomExternalDestination,
 } from '@statechannels/nitro-protocol';
-import {VariablePart} from '@statechannels/nitro-protocol';
+import { VariablePart } from '@statechannels/nitro-protocol';
+import { RPSData, PositionType, encodeRPSData } from '../core/app-data';
+import { Weapon } from '../core/weapons';
 
 import loadJsonFile from 'load-json-file';
 
-import {defaultAbiCoder, bigNumberify, BigNumber, keccak256} from 'ethers/utils';
-import {randomHex} from '../utils/randomHex';
+import { defaultAbiCoder, bigNumberify, keccak256, Interface } from 'ethers/utils';
+import { randomHex } from '../utils/randomHex';
 
 const testProvider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.GANACHE_PORT}`
 );
-
-enum PositionType {
-  Start, // 0
-  RoundProposed, // 1
-  RoundAccepted, // 2
-  Reveal, // 3
-}
 
 const PositionIndex = {
   Start: PositionType.Start,
@@ -37,25 +33,12 @@ const PositionIndex = {
   RoundAccepted: PositionType.RoundAccepted,
   Reveal: PositionType.Reveal,
 };
-enum Weapon {
-  Rock,
-  Paper,
-  Scissors,
-}
+
 const WeaponIndex = {
   Rock: Weapon.Rock,
   Paper: Weapon.Paper,
   Scissors: Weapon.Scissors,
 };
-
-interface RPSData {
-  positionType: PositionType;
-  stake: BigNumber; // uint256
-  preCommit: string; // bytes32
-  playerAWeapon: Weapon;
-  playerBWeapon: Weapon;
-  salt: string; // bytes32
-}
 
 let RockPaperScissors: Contract;
 
@@ -74,17 +57,17 @@ const salt = randomHex(64);
 const preCommit = hashPreCommit(Weapon.Rock, salt);
 describe('validTransition', () => {
   it.each`
-    isValid  | fromPositionType   | toPositionType     | stake               | AWeapon   | BWeapon       | fromBalances    | toBalances      | description
-    ${true}  | ${'Start'}         | ${'RoundProposed'} | ${{from: 1, to: 1}} | ${'Rock'} | ${'Rock'}     | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${''}
-    ${true}  | ${'RoundProposed'} | ${'RoundAccepted'} | ${{from: 1, to: 1}} | ${'Rock'} | ${'Rock'}     | ${{A: 5, B: 5}} | ${{A: 4, B: 6}} | ${''}
-    ${true}  | ${'RoundAccepted'} | ${'Reveal'}        | ${{from: 1, to: 1}} | ${'Rock'} | ${'Paper'}    | ${{A: 4, B: 6}} | ${{A: 4, B: 6}} | ${'B won'}
-    ${true}  | ${'RoundAccepted'} | ${'Reveal'}        | ${{from: 1, to: 1}} | ${'Rock'} | ${'Scissors'} | ${{A: 4, B: 6}} | ${{A: 6, B: 4}} | ${'A won'}
-    ${true}  | ${'RoundAccepted'} | ${'Reveal'}        | ${{from: 1, to: 1}} | ${'Rock'} | ${'Rock'}     | ${{A: 4, B: 6}} | ${{A: 5, B: 5}} | ${'Draw'}
-    ${true}  | ${'Reveal'}        | ${'Start'}         | ${{from: 1, to: 1}} | ${'Rock'} | ${'Rock'}     | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${''}
-    ${false} | ${'Reveal'}        | ${'Start'}         | ${{from: 1, to: 2}} | ${'Rock'} | ${'Rock'}     | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${'Disallows stake change'}
-    ${false} | ${'Start'}         | ${'RoundProposed'} | ${{from: 1, to: 1}} | ${'Rock'} | ${'Rock'}     | ${{A: 5, B: 5}} | ${{A: 6, B: 4}} | ${'Disallows allocations change '}
-    ${false} | ${'RoundProposed'} | ${'RoundAccepted'} | ${{from: 1, to: 1}} | ${'Rock'} | ${'Rock'}     | ${{A: 6, B: 4}} | ${{B: 6, A: 4}} | ${'Disallows destination swap'}
-    ${false} | ${'Start'}         | ${'RoundProposed'} | ${{from: 1, to: 6}} | ${'Rock'} | ${'Rock'}     | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${'Disallows a stake that is too large'}
+    isValid  | fromPositionType   | toPositionType     | stake                 | AWeapon   | BWeapon       | fromBalances      | toBalances        | description
+    ${true}  | ${'Start'}         | ${'RoundProposed'} | ${{ from: 1, to: 1 }} | ${'Rock'} | ${'Rock'}     | ${{ A: 5, B: 5 }} | ${{ A: 5, B: 5 }} | ${''}
+    ${true}  | ${'RoundProposed'} | ${'RoundAccepted'} | ${{ from: 1, to: 1 }} | ${'Rock'} | ${'Rock'}     | ${{ A: 5, B: 5 }} | ${{ A: 4, B: 6 }} | ${''}
+    ${true}  | ${'RoundAccepted'} | ${'Reveal'}        | ${{ from: 1, to: 1 }} | ${'Rock'} | ${'Paper'}    | ${{ A: 4, B: 6 }} | ${{ A: 4, B: 6 }} | ${'B won'}
+    ${true}  | ${'RoundAccepted'} | ${'Reveal'}        | ${{ from: 1, to: 1 }} | ${'Rock'} | ${'Scissors'} | ${{ A: 4, B: 6 }} | ${{ A: 6, B: 4 }} | ${'A won'}
+    ${true}  | ${'RoundAccepted'} | ${'Reveal'}        | ${{ from: 1, to: 1 }} | ${'Rock'} | ${'Rock'}     | ${{ A: 4, B: 6 }} | ${{ A: 5, B: 5 }} | ${'Draw'}
+    ${true}  | ${'Reveal'}        | ${'Start'}         | ${{ from: 1, to: 1 }} | ${'Rock'} | ${'Rock'}     | ${{ A: 5, B: 5 }} | ${{ A: 5, B: 5 }} | ${''}
+    ${false} | ${'Reveal'}        | ${'Start'}         | ${{ from: 1, to: 2 }} | ${'Rock'} | ${'Rock'}     | ${{ A: 5, B: 5 }} | ${{ A: 5, B: 5 }} | ${'Disallows stake change'}
+    ${false} | ${'Start'}         | ${'RoundProposed'} | ${{ from: 1, to: 1 }} | ${'Rock'} | ${'Rock'}     | ${{ A: 5, B: 5 }} | ${{ A: 6, B: 4 }} | ${'Disallows allocations change '}
+    ${false} | ${'RoundProposed'} | ${'RoundAccepted'} | ${{ from: 1, to: 1 }} | ${'Rock'} | ${'Rock'}     | ${{ A: 6, B: 4 }} | ${{ B: 6, A: 4 }} | ${'Disallows destination swap'}
+    ${false} | ${'Start'}         | ${'RoundProposed'} | ${{ from: 1, to: 6 }} | ${'Rock'} | ${'Rock'}     | ${{ A: 5, B: 5 }} | ${{ A: 5, B: 5 }} | ${'Disallows a stake that is too large'}
   `(
     `Returns $isValid on $fromPositionType -> $toPositionType; $description`,
     async ({
@@ -113,14 +96,14 @@ describe('validTransition', () => {
       const toAllocation: Allocation = [];
 
       Object.keys(fromBalances).forEach(key =>
-        fromAllocation.push({destination: key, amount: fromBalances[key] as string})
+        fromAllocation.push({ destination: key, amount: fromBalances[key] as string })
       );
       Object.keys(toBalances).forEach(key =>
-        toAllocation.push({destination: key, amount: toBalances[key] as string})
+        toAllocation.push({ destination: key, amount: toBalances[key] as string })
       );
 
-      const fromOutcome = [{assetHolderAddress: AddressZero, allocation: fromAllocation}];
-      const toOutcome = [{assetHolderAddress: AddressZero, allocation: toAllocation}];
+      const fromOutcome = [{ assetHolderAddress: AddressZero, allocation: fromAllocation }];
+      const toOutcome = [{ assetHolderAddress: AddressZero, allocation: toAllocation }];
 
       const fromAppData: RPSData = {
         positionType: PositionIndex[fromPositionType],
@@ -139,18 +122,7 @@ describe('validTransition', () => {
         salt,
       };
 
-      const fromAppDataBytes = defaultAbiCoder.encode(
-        [
-          'tuple(uint8 positionType, uint256 stake, bytes32 preCommit, uint8 playerAWeapon, uint8 playerBWeapon, bytes32 salt)',
-        ],
-        [fromAppData]
-      );
-      const toAppDataBytes = defaultAbiCoder.encode(
-        [
-          'tuple(uint8 positionType, uint256 stake, bytes32 preCommit, uint8 playerAWeapon, uint8 playerBWeapon, bytes32 salt)',
-        ],
-        [toAppData]
-      );
+      const [fromAppDataBytes, toAppDataBytes] = [fromAppData, toAppData].map(encodeRPSData);
 
       const fromVariablePart: VariablePart = {
         outcome: encodeOutcome(fromOutcome),
@@ -162,6 +134,16 @@ describe('validTransition', () => {
       };
 
       if (isValid) {
+        const RockPaperScissorsContractInterface = new Interface(RockPaperScissorsArtifact.abi);
+        const data = RockPaperScissorsContractInterface.functions.validTransition.encode([
+          fromVariablePart,
+          toVariablePart,
+          1,
+          numParticipants,
+        ]);
+
+        await sendTransaction(RockPaperScissors.address, { data, gasLimit: 3000000 });
+
         const isValidFromCall = await RockPaperScissors.validTransition(
           fromVariablePart,
           toVariablePart,
@@ -207,4 +189,11 @@ export async function setupContracts(provider: ethers.providers.JsonRpcProvider,
 
 export function hashPreCommit(weapon: Weapon, salt: string) {
   return keccak256(defaultAbiCoder.encode(['uint256', 'bytes32'], [weapon, salt]));
+}
+
+async function sendTransaction(contractAddress: string, transaction: TransactionRequest) {
+  // move to devtools
+  const signer = testProvider.getSigner();
+  const response = await signer.sendTransaction({ to: contractAddress, ...transaction });
+  await response.wait();
 }

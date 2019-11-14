@@ -14,7 +14,7 @@ export async function getCurrentState(theirState: State) {
   }
   const currentState = await ChannelState.query()
     .where({channel_id: channel.id})
-    .orderBy('turn_number', 'desc')
+    .orderBy('turn_num', 'desc')
     .eager('[channel.[participants], outcome.[allocation]]')
     .select()
     .first();

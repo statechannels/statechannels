@@ -1,4 +1,4 @@
-import {AllocationItem, getChannelId, Outcome} from '@statechannels/nitro-protocol';
+import {AllocationItem, Outcome} from '@statechannels/nitro-protocol';
 import {convertAddressToBytes32} from '@statechannels/wallet';
 import {ethers} from 'ethers';
 import {bigNumberify} from 'ethers/utils';
@@ -30,30 +30,6 @@ export const ONGOING_APP_CHANNEL_HOLDINGS = '0x08';
 export const NONCE = '1000';
 
 export const DUMMY_CHAIN_ID = '8888';
-
-export const DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID = getChannelId({
-  channelNonce: FUNDED_CHANNEL_NONCE,
-  participants: [PARTICIPANT_1_ADDRESS, HUB_ADDRESS],
-  chainId: DUMMY_CHAIN_ID
-});
-
-export const DUMMY_RULES_FUNDED_NONCE_CHANNEL_ID_3 = getChannelId({
-  channelNonce: FUNDED_CHANNEL_NONCE_3,
-  participants: [PARTICIPANT_1_ADDRESS, PARTICIPANT_2_ADDRESS, HUB_ADDRESS],
-  chainId: DUMMY_CHAIN_ID
-});
-
-export const DUMMY_RULES_BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID = getChannelId({
-  channelNonce: BEGINNING_APP_CHANNEL_NONCE,
-  participants: [PARTICIPANT_1_ADDRESS, HUB_ADDRESS],
-  chainId: DUMMY_CHAIN_ID
-});
-
-export const DUMMY_RULES_ONGOING_APP_CHANNEL_NONCE_CHANNEL_ID = getChannelId({
-  channelNonce: ONGOING_APP_CHANNEL_NONCE,
-  participants: [PARTICIPANT_1_ADDRESS, HUB_ADDRESS],
-  chainId: DUMMY_CHAIN_ID
-});
 
 export const STAKE: Uint256 = ethers.utils.parseEther('0.01').toHexString();
 export const PARTICIPANTS: Address[] = [PARTICIPANT_1_ADDRESS, HUB_ADDRESS];
