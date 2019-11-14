@@ -9,7 +9,6 @@ import * as gameStates from '../game/state';
 import { getMessageState, getGameState } from '../store';
 import * as Wallet from 'magmo-wallet-client';
 import { WALLET_IFRAME_ID } from '../../constants';
-import { channelID } from 'fmg-core/lib/channel';
 import { asCoreCommitment, fromCoreCommitment } from '../../core/rps-commitment';
 import { Commitment } from 'fmg-core';
 import { MessageRelayRequested } from 'magmo-wallet-client';
@@ -207,8 +206,8 @@ function createWalletEventChannel(walletEventTypes: Wallet.WalletEventType[]) {
 function* handleWalletMessage(walletMessage: WalletRequest, state: gameStates.PlayingState) {
   // TODO:WALLET_SCRUBBED_OUT
   // const { channel, player, allocation: balances, destination: participants } = state;
-  const { player, destination: participants, channel } = state;
-  const channelId = channelID(channel);
+  const { player, destination: participants } = state;
+  // const channelId = channelID(channel);
   const myIndex = player === Player.PlayerA ? 0 : 1;
   const opponentAddress = participants[1 - myIndex];
 
