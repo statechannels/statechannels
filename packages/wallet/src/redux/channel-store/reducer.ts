@@ -20,7 +20,7 @@ interface SignFailure {
   reason: SignFailureReason;
 }
 
-export type SignFailureReason = "ChannelDoesntExist" | "TransitionUnsafe" | "NotOurTurn";
+export type SignFailureReason = "ChannelDoesNotExist" | "TransitionUnsafe" | "NotOurTurn";
 type SignResult = SignSuccess | SignFailure;
 // TODO: These methods could probably be part of signAndStore/checkAndStore but that means
 // that the address/privateKey would be required when calling them.
@@ -34,7 +34,7 @@ export function signAndInitialize(
   const signedState = Signatures.signState(state, privateKey);
 
   if (signedState.state.turnNum !== 0) {
-    return {isSuccess: false, reason: "ChannelDoesntExist"};
+    return {isSuccess: false, reason: "ChannelDoesNotExist"};
   }
   const channel = initializeChannel(signedState, privateKey, participants);
   store = setChannel(store, channel);
