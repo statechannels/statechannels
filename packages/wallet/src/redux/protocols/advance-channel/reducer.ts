@@ -144,7 +144,14 @@ function initializeWithNewChannel(
       challengeDuration: CHALLENGE_DURATION
     };
 
-    const signResult = signAndInitialize(sharedData, ourState, privateKey);
+    const signResult = signAndInitialize(
+      sharedData,
+      ourState,
+      privateKey,
+      participants.map(p => {
+        return {signingAddress: p};
+      })
+    );
     if (!signResult.isSuccess) {
       throw new Error("Could not store new ledger channel state.");
     }
@@ -245,9 +252,17 @@ const channelUnknownReducer = (
   sharedData,
   action: SignedStatesReceived
 ) => {
-  const {privateKey} = protocolState;
+  const {privateKey, participants} = protocolState;
   const channelId = getChannelId(action.signedStates[0].state.channel);
-  const checkResult = checkAndInitialize(sharedData, action.signedStates[0], privateKey);
+
+  const checkResult = checkAndInitialize(
+    sharedData,
+    action.signedStates[0],
+    privateKey,
+    participants.map(p => {
+      return {signingAddress: p};
+    })
+  );
   if (!checkResult.isSuccess) {
     throw new Error("Could not initialize channel");
   }

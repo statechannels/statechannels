@@ -13,12 +13,14 @@ exports.up = (knex: Knex) => {
       .references('channels.id')
       .onDelete('CASCADE');
     table
-      .integer('turn_number')
+      .integer('turn_num')
       .unsigned()
       .notNullable();
+    table.boolean('is_final').notNullable();
     table.text('app_data').notNullable();
-
-    table.unique(['channel_id', 'turn_number']);
+    table.integer('challenge_duration').notNullable();
+    table.string('app_definition').notNullable();
+    table.unique(['channel_id', 'turn_num']);
   });
 };
 

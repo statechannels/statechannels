@@ -1,3 +1,8 @@
+import {AllocationAssetOutcome} from '@statechannels/nitro-protocol/lib/src/contract/outcome';
+import {
+  AssetOutcome,
+  GuaranteeAssetOutcome
+} from '@statechannels/nitro-protocol/src/contract/outcome';
 import {Address} from 'fmg-core';
 import {Model, snakeCaseMappers} from 'objection';
 import Allocation from './allocation';
@@ -34,4 +39,26 @@ export default class Outcome extends Model {
   assetHolderAddress!: Address;
   allocation!: Allocation[];
   tagetChannelId: string;
+
+  get asOutcomeObject(): AssetOutcome {
+    if (this.tagetChannelId) {
+      const guaranteeAssetOutcome: GuaranteeAssetOutcome = {
+        assetHolderAddress: this.assetHolderAddress,
+        guarantee: {
+          targetChannelId: this.tagetChannelId,
+          destinations: this.allocation.map(allocation => allocation.destination)
+        }
+      };
+      return guaranteeAssetOutcome;
+    } else {
+      const allocationAssetOutcome: AllocationAssetOutcome = {
+        assetHolderAddress: this.assetHolderAddress,
+        allocation: this.allocation.map(allocation => ({
+          destination: allocation.destination,
+          amount: allocation.amount
+        }))
+      };
+      return allocationAssetOutcome;
+    }
+  }
 }

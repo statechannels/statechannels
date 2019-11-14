@@ -1,9 +1,10 @@
 import {getChannelId, State} from '@statechannels/nitro-protocol';
 import {ethers} from 'ethers';
 import {bigNumberify} from 'ethers/utils';
-import {Address, Uint256} from 'fmg-core';
+import {Uint256} from 'fmg-core';
+import errors from '../../errors';
 import Channel from '../../models/channel';
-import {outcomeAddPriorities} from '../utils';
+import {outcomeAddPriorities} from '../../utilities/outcome';
 
 export const queries = {
   updateChannel
@@ -11,8 +12,8 @@ export const queries = {
 
 async function updateChannel(stateRound: State[], hubState: State) {
   const firstState = stateRound[0];
-  const {channel, appDefinition: rules_address} = firstState;
-  const {channelNonce: nonce, participants} = channel;
+  const {channel} = firstState;
+  const {channelNonce, participants, chainId} = channel;
   const channelId = getChannelId(channel);
 
   const storedChannel = await Channel.query()
@@ -20,32 +21,38 @@ async function updateChannel(stateRound: State[], hubState: State) {
     .select('id')
     .first();
 
+  if (storedChannel && firstState.turnNum < firstState.channel.participants.length) {
+    throw errors.CHANNEL_EXISTS;
+  } else if (!storedChannel && firstState.turnNum >= firstState.channel.participants.length) {
+    throw errors.CHANNEL_MISSING;
+  }
+
   const outcome = (s: State) => outcomeAddPriorities(s.outcome);
   const state = (s: State) => ({
-    turn_number: s.turnNum,
+    turn_num: s.turnNum,
+    is_final: s.isFinal,
+    challenge_duration: s.challengeDuration,
     outcome: outcome(s),
+    appDefinition: s.appDefinition,
     app_data: s.appData
   });
 
   const states = [...stateRound.map(s => state(s)), state(hubState)];
 
-  // todo: refactor guarantees later
-  // const guaranteedChannel = stateRound.map(c => c.channel.guaranteedChannel)[0];
-
   interface Upsert {
     channel_id: string;
     states: any[];
-    rules_address: Address;
-    nonce: Uint256;
+    channel_nonce: Uint256;
     holdings?: Uint256;
     id?: number;
     participants?: any[];
+    chain_id: Uint256;
   }
   let upserts: Upsert = {
     channel_id: channelId,
     states,
-    rules_address,
-    nonce
+    channel_nonce: channelNonce,
+    chain_id: chainId
   };
 
   // TODO: We are currently using the allocations to set the funding amount
@@ -76,6 +83,6 @@ async function updateChannel(stateRound: State[], hubState: State) {
   }
 
   return Channel.query()
-    .eager('[participants, states.[outcome.[allocation], channel.[participants]]]')
-    .upsertGraphAndFetch(upserts);
+    .upsertGraphAndFetch(upserts)
+    .eager('[participants, states.[outcome.[allocation]]]');
 }

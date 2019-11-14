@@ -1,6 +1,5 @@
 import * as metamaskActions from './actions';
 import {put, cps} from 'redux-saga/effects';
-import * as truffle from './../../../truffle';
 import {MetamaskErrorType} from './actions';
 import {delay} from 'redux-saga';
 
@@ -14,14 +13,34 @@ export default function* checkMetamask() {
     return false;
   }
 
+  const networks = {
+    development: {
+      network_id: '*', // match any network
+    },
+    main: {
+      network_id: 1,
+    },
+    ropsten: {
+      network_id: 3,
+    },
+    rinkeby: {
+      network_id: 4,
+    },
+    kovan: {
+      network_id: 42,
+    },
+  };
+
   try {
     const targetNetworkName = process.env.TARGET_NETWORK;
     ethereum.enable();
+
+    // Find the network name that matches the currently selected network id
     const selectedNetworkId = parseInt(yield cps(web3.version.getNetwork), 10);
     // Find the network name that matches the currently selected network id
     const selectedNetworkName =
-      Object.keys(truffle.networks).find(
-        networkName => truffle.networks[networkName].network_id === selectedNetworkId
+      Object.keys(networks).find(
+        networkName => networks[networkName].network_id === selectedNetworkId
       ) || 'development';
 
     if (targetNetworkName !== selectedNetworkName) {

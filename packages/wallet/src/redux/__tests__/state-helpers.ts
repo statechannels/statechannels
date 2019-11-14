@@ -16,6 +16,7 @@ import {NETWORK_ID, ETH_ASSET_HOLDER_ADDRESS, CONSENSUS_LIBRARY_ADDRESS} from ".
 import {convertAddressToBytes32} from "../../utils/data-type-utils";
 import {TwoPartyPlayerIndex, ThreePartyPlayerIndex} from "../types";
 import {unreachable} from "../../utils/reducer-utils";
+import {ChannelParticipant} from "../channel-store";
 
 export const asPrivateKey = "0xf2f48ee19680706196e2e339e5da3491186e0c4c5030670656b0e0164837257d";
 export const asAddress = "0x5409ED021D9299bf6814279A6A1411A7e866A631";
@@ -25,7 +26,10 @@ export const hubPrivateKey = "0xce442e75dd539bd632aca84efa0b7de5c5b48aa4bbf028c8
 export const hubAddress = "0xAbcdE1140bA6aE8e702b78f63A4eA1D1553144a1";
 
 export const threeParticipants: [string, string, string] = [asAddress, bsAddress, hubAddress];
-export const participants: [string, string] = [asAddress, bsAddress];
+export const participants: ChannelParticipant[] = [
+  {signingAddress: asAddress},
+  {signingAddress: bsAddress}
+];
 
 export const libraryAddress = "0x" + "1".repeat(40);
 export const channelNonce = "0x04";
@@ -37,7 +41,7 @@ export const channel = {
 
 export const nitroChannel: Channel = {
   channelNonce,
-  participants,
+  participants: participants.map(p => p.signingAddress),
   chainId: bigNumberify(NETWORK_ID).toHexString()
 };
 // Use Nitro protocol channel id so we're always using the same channel Id
@@ -135,7 +139,7 @@ export const ledgerChannel = {
 export const ledgerNitroChannel: Channel = {
   chainId: bigNumberify(NETWORK_ID).toHexString(),
   channelNonce: "0x00",
-  participants
+  participants: participants.map(p => p.signingAddress)
 };
 // Use Nitro protocol channel id so we're always using the same channel Id
 export const ledgerId = getChannelId(ledgerNitroChannel);

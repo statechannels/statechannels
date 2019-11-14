@@ -1,9 +1,10 @@
 import {ChannelStore, getChannel, setChannel} from "./state";
-import {pushState, initializeChannel} from "./channel-state/states";
+import {pushState, initializeChannel, ChannelParticipant} from "./channel-state/states";
 import {State, SignedState, getChannelId} from "@statechannels/nitro-protocol";
 import {Signatures} from "@statechannels/nitro-protocol";
 import {validTransition} from "./channel-state/valid-transition";
 import {hasValidSignature} from "../../utils/signing-utils";
+
 // -----------------
 // NEW FUNCTIONALITY
 // -----------------
@@ -27,14 +28,15 @@ type SignResult = SignSuccess | SignFailure;
 export function signAndInitialize(
   store: ChannelStore,
   state: State,
-  privateKey: string
+  privateKey: string,
+  participants: ChannelParticipant[]
 ): SignResult {
   const signedState = Signatures.signState(state, privateKey);
 
   if (signedState.state.turnNum !== 0) {
     return {isSuccess: false, reason: "ChannelDoesntExist"};
   }
-  const channel = initializeChannel(signedState, privateKey);
+  const channel = initializeChannel(signedState, privateKey, participants);
   store = setChannel(store, channel);
 
   return {isSuccess: true, signedState, store};
@@ -43,7 +45,8 @@ export function signAndInitialize(
 export function checkAndInitialize(
   store: ChannelStore,
   signedState: SignedState,
-  privateKey: string
+  privateKey: string,
+  participants: ChannelParticipant[]
 ): CheckResult {
   if (signedState.state.turnNum !== 0) {
     return {isSuccess: false};
@@ -51,7 +54,7 @@ export function checkAndInitialize(
   if (!hasValidSignature(signedState)) {
     return {isSuccess: false};
   }
-  const channel = initializeChannel(signedState, privateKey);
+  const channel = initializeChannel(signedState, privateKey, participants);
 
   store = setChannel(store, channel);
 

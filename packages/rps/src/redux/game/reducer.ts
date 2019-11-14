@@ -3,14 +3,20 @@ import {Reducer} from 'redux';
 import * as actions from './actions';
 import * as states from './state';
 import {randomHex} from '../../utils/randomHex';
-import {calculateResult, allocationAfterResult, calculateAbsoluteResult, Player} from '../../core';
+import {
+  calculateResult,
+  allocationAfterResult,
+  calculateAbsoluteResult,
+  Player,
+  ChannelState,
+} from '../../core';
 
 import {MessageState, sendMessage} from '../message-service/state';
 import {
   LoginSuccess,
   LOGIN_SUCCESS,
   InitializeWalletSuccess,
-  INITIALIZE_WALLET_SUCCESS
+  INITIALIZE_WALLET_SUCCESS,
 } from '../login/actions';
 import * as rpsCommitmentHelper from '../../core/rps-commitment-helper';
 import {PositionType} from '../../core/rps-commitment';
@@ -20,6 +26,7 @@ import {bigNumberify} from 'ethers/utils';
 export interface JointState {
   gameState: states.GameState;
   messageState: MessageState;
+  channelState?: ChannelState;
 }
 
 const emptyJointState: JointState = {
@@ -31,6 +38,7 @@ export const gameReducer: Reducer<JointState> = (
   state = emptyJointState,
   action: actions.GameAction | LoginSuccess | InitializeWalletSuccess
 ) => {
+  const channelState = state.channelState;
   // Filter out any actions except for game actions, and specific login/wallet actions
   // TODO: We should find a better way of handling this
   if (
@@ -47,23 +55,23 @@ export const gameReducer: Reducer<JointState> = (
     const libraryAddress =
       'libraryAddress' in state.gameState ? state.gameState.libraryAddress : '';
     const newGameState = states.lobby({...state.gameState, libraryAddress, myAddress, myName});
-    return {gameState: newGameState, messageState: {}};
+    return {gameState: newGameState, messageState: {}, channelState};
   }
 
   if (action.type === actions.MESSAGE_SENT) {
     const {messageState, gameState} = state;
     const {actionToRetry} = messageState;
-    return {gameState, messageState: {actionToRetry}};
+    return {gameState, messageState: {actionToRetry}, channelState};
   }
   if (action.type === LOGIN_SUCCESS) {
     const {messageState, gameState} = state;
     const {libraryAddress} = action;
-    return {gameState: {...gameState, libraryAddress}, messageState};
+    return {gameState: {...gameState, libraryAddress}, messageState, channelState};
   }
   if (action.type === INITIALIZE_WALLET_SUCCESS) {
     const {messageState, gameState} = state;
     const {address: myAddress} = action;
-    return {gameState: {...gameState, myAddress}, messageState};
+    return {gameState: {...gameState, myAddress}, messageState, channelState};
   }
   if (action.type === actions.CHALLENGE_RESPONSE_REQUESTED) {
     if (state.gameState.name === states.StateName.PickWeapon) {
@@ -71,12 +79,14 @@ export const gameReducer: Reducer<JointState> = (
       return {
         gameState: states.pickChallengeWeapon(gameState),
         messageState,
+        channelState,
       };
     } else if (state.gameState.name === states.StateName.PlayAgain) {
       const {messageState, gameState} = state;
       return {
         gameState: states.challengePlayAgain(gameState),
         messageState,
+        channelState,
       };
     } else {
       return state;
@@ -91,54 +101,60 @@ export const gameReducer: Reducer<JointState> = (
 };
 
 function attemptRetry(state: JointState): JointState {
-  const {gameState} = state;
+  const {gameState, channelState} = state;
   let {messageState} = state;
 
   const actionToRetry = messageState.actionToRetry;
   if (actionToRetry) {
     messageState = {...messageState, actionToRetry: undefined};
-    state = singleActionReducer({messageState, gameState}, actionToRetry);
+    state = singleActionReducer({messageState, gameState, channelState}, actionToRetry);
   }
   return state;
 }
 
 function singleActionReducer(state: JointState, action: actions.GameAction) {
-  const {messageState, gameState} = state;
+  const {messageState, gameState, channelState} = state;
   switch (gameState.name) {
     case states.StateName.NoName:
-      return noNameReducer(gameState, messageState, action);
+      return {channelState, ...noNameReducer(gameState, messageState, action)};
     case states.StateName.Lobby:
-      return lobbyReducer(gameState, messageState, action);
+      return {channelState, ...lobbyReducer(gameState, messageState, action)};
     case states.StateName.CreatingOpenGame:
-      return creatingOpenGameReducer(gameState, messageState, action);
+      return {channelState, ...creatingOpenGameReducer(gameState, messageState, action)};
     case states.StateName.WaitingRoom:
-      return waitingRoomReducer(gameState, messageState, action);
+      return {channelState, ...waitingRoomReducer(gameState, messageState, action)};
     case states.StateName.WaitForGameConfirmationA:
-      return waitForGameConfirmationAReducer(gameState, messageState, action);
+      return {channelState, ...waitForGameConfirmationAReducer(gameState, messageState, action)};
     case states.StateName.ConfirmGameB:
-      return confirmGameBReducer(gameState, messageState, action);
+      return {channelState, ...confirmGameBReducer(gameState, messageState, action)};
     case states.StateName.WaitForFunding:
-      return waitForFundingReducer(gameState, messageState, action);
+      return {channelState, ...waitForFundingReducer(gameState, messageState, action)};
     case states.StateName.PickWeapon:
-      return pickWeaponReducer(gameState, messageState, action);
+      return {channelState, ...pickWeaponReducer(gameState, messageState, action)};
     case states.StateName.WaitForOpponentToPickWeaponA:
-      return waitForOpponentToPickWeaponAReducer(gameState, messageState, action);
+      return {
+        channelState,
+        ...waitForOpponentToPickWeaponAReducer(gameState, messageState, action),
+      };
     case states.StateName.WaitForOpponentToPickWeaponB:
-      return waitForOpponentToPickWeaponBReducer(gameState, messageState, action);
+      return {
+        channelState,
+        ...waitForOpponentToPickWeaponBReducer(gameState, messageState, action),
+      };
     case states.StateName.WaitForRevealB:
-      return waitForRevealBReducer(gameState, messageState, action);
+      return {channelState, ...waitForRevealBReducer(gameState, messageState, action)};
     case states.StateName.PlayAgain:
-      return playAgainReducer(gameState, messageState, action);
+      return {channelState, ...playAgainReducer(gameState, messageState, action)};
     case states.StateName.WaitForRestingA:
-      return waitForRestingAReducer(gameState, messageState, action);
+      return {channelState, ...waitForRestingAReducer(gameState, messageState, action)};
     case states.StateName.GameOver:
-      return gameOverReducer(gameState, messageState, action);
+      return {channelState, ...gameOverReducer(gameState, messageState, action)};
     case states.StateName.WaitForWithdrawal:
-      return waitForWithdrawalReducer(gameState, messageState, action);
+      return {channelState, ...waitForWithdrawalReducer(gameState, messageState, action)};
     case states.StateName.PickChallengeWeapon:
-      return pickChallengeWeaponReducer(gameState, messageState, action);
+      return {channelState, ...pickChallengeWeaponReducer(gameState, messageState, action)};
     case states.StateName.ChallengePlayAgain:
-      return challengePlayAgainReducer(gameState, messageState, action);
+      return {channelState, ...challengePlayAgainReducer(gameState, messageState, action)};
     default:
       throw new Error('Unreachable code');
   }
@@ -185,7 +201,7 @@ function lobbyReducer(
           .toHexString(),
         bigNumberify(roundBuyIn)
           .mul(5)
-          .toHexString()
+          .toHexString(),
       ] as [string, string];
 
       const participants: [string, string] = [myAddress, opponentAddress];

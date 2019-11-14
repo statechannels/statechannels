@@ -1,2 +1,3 @@
-[build]
+[context.deploy-preview]
  ignore = "bash ./netlify-ignore.sh"
+ 

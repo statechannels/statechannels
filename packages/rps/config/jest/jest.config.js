@@ -1,12 +1,22 @@
+const { configureEnvVariables } = require('@statechannels/devtools');
+configureEnvVariables();
 const { resolve } = require('path');
 const root = resolve(__dirname, '../../');
+
 module.exports = {
+  globals: {
+    'ts-jest': {
+      tsConfig: './tsconfig.json',
+    },
+  },
   rootDir: root,
   collectCoverageFrom: ['src/**/*.{js,jsx,ts,tsx}'],
+  reporters: ['default', '@statechannels/jest-gas-reporter'],
   setupFiles: ['<rootDir>/config/polyfills.js'],
-  setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
+  setupFilesAfterEnv: ['<rootDir>/config/jest/jest.setup.js', '<rootDir>/src/setupTests.ts'],
   testMatch: ['<rootDir>/src/**/__tests__/?(*.)test.ts?(x)'],
   testEnvironment: 'jsdom',
+  testPathIgnorePatterns: ['/node_modules/'],
   testURL: 'http://localhost',
   transform: {
     '^.+\\.(js|jsx|mjs)$': '<rootDir>/../../node_modules/babel-jest',
@@ -18,6 +28,7 @@ module.exports = {
   moduleNameMapper: {
     '^react-native$': 'react-native-web',
   },
+  preset: 'ts-jest',
   moduleFileExtensions: [
     'web.ts',
     'ts',

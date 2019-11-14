@@ -199,7 +199,7 @@ export const getTwoPlayerIndex = (
   sharedData: SharedData
 ): TwoPartyPlayerIndex => {
   const channelState = selectors.getChannelState(sharedData, channelId);
-  return channelState.participants.indexOf(channelState.address);
+  return channelState.participants.map(p => p.signingAddress).indexOf(channelState.address);
 };
 export const isFirstPlayer = (channelId: string, sharedData: SharedData) => {
   const channelState = selectors.getChannelState(sharedData, channelId);
@@ -246,12 +246,12 @@ export function getOpponentAddress(channelId: string, sharedData: SharedData) {
 
   const {participants} = channel;
   const opponentAddress = participants[(channel.ourIndex + 1) % participants.length];
-  return opponentAddress;
+  return opponentAddress.signingAddress;
 }
 
 export function getOurAddress(channelId: string, sharedData: SharedData) {
   const channel = getExistingChannel(sharedData, channelId);
-  return channel.participants[channel.ourIndex];
+  return channel.participants[channel.ourIndex].signingAddress;
 }
 
 export function getLatestState(channelId: string, sharedData: SharedData) {
