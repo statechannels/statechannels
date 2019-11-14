@@ -280,67 +280,50 @@ describe("message listener", () => {
         .provide([[matchers.fork.fn(messageSender), 0]])
         .run();
 
+      const state = {
+        appData,
+        turnNum: 1,
+        outcome: [
+          {allocation: allocations[0].allocationItems, assetHolderAddress: allocations[0].token}
+        ]
+      };
+
       expect(effects.put[0].payload.action).toMatchObject({
         type: "WALLET.APPLICATION.OWN_STATE_RECEIVED",
-        state: {
-          appData,
-          turnNum: 1,
-          outcome: [
-            {allocation: allocations[0].allocationItems, assetHolderAddress: allocations[0].token}
-          ]
-        }
+        state
+      });
+
+      expect(effects.fork[0].payload.args[0]).toMatchObject({
+        type: "WALLET.UPDATE_CHANNEL_RESPONSE",
+        id: 1,
+        state
       });
     });
 
-    it.skip("returns an error when the channelId is not known", async () => {
-      // Data being submitted to UpdateChannel
-      const destinationA = Wallet.createRandom().address;
-      const destinationB = Wallet.createRandom().address;
-      const appData = "0x01010101";
-      const allocations = [
-        {
-          token: "0x0",
-          allocationItems: [
-            {destination: destinationA, amount: "12"},
-            {destination: destinationB, amount: "12"}
-          ]
-        }
-      ];
-
-      // Existing data in the store
-      const testChannel = channelFromStates([appState({turnNum: 0})], asAddress, asPrivateKey);
+    it("returns an error when the channelId is not known", async () => {
+      const unknownChannelId = "0xsomefakeid";
 
       const requestMessage = JSON.stringify({
         jsonrpc: "2.0",
         method: "UpdateChannel",
         id: 1,
         params: {
-          channelId: testChannel.channelId,
-          allocations,
-          appData
+          channelId: unknownChannelId, // <----- important part of the test
+          allocations: [],
+          appData: "0x"
         }
       });
 
       const {effects} = await expectSaga(messageHandler, requestMessage, "localhost")
-        .withState({...initialState, channelStore: setChannel({}, testChannel)})
+        .withState(initialState)
         // Mock out the fork call so we don't actually try to post the message
-        .provide([
-          [matchers.fork.fn(messageSender), 0],
-          [matchers.select.selector(getAddress), asAddress],
-          [
-            matchers.call.fn(getProvider),
-            {
-              getCode: address => {
-                return "0x";
-              }
-            }
-          ]
-        ])
+        .provide([[matchers.fork.fn(messageSender), 0]])
         .run();
 
       expect(effects.fork[0].payload.args[0]).toMatchObject({
-        type: "WALLET.NO_CONTRACT_ERROR",
-        id: 1
+        type: "WALLET.UNKNOWN_CHANNEL_ID_ERROR",
+        id: 1,
+        channelId: unknownChannelId
       });
     });
   });

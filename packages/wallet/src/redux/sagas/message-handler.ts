@@ -3,7 +3,7 @@ import {getChannelId, State} from "@statechannels/nitro-protocol";
 import jrs, {RequestObject} from "jsonrpc-lite";
 
 import * as actions from "../actions";
-import {getAddress, getLastStateForChannel} from "../selectors";
+import {getAddress, getLastStateForChannel, doesAStateExistForChannel} from "../selectors";
 import {messageSender} from "./message-sender";
 import {APPLICATION_PROCESS_ID} from "../protocols/application/reducer";
 import {
@@ -46,9 +46,12 @@ function* handleMessage(payload: RequestObject) {
 }
 
 function* handleUpdateChannelMessage(payload: RequestObject) {
-  const {channelId} = payload.params as any;
+  const {id, params} = payload;
+  const {channelId} = params as any;
 
-  try {
+  const channelExists = yield select(doesAStateExistForChannel, channelId);
+
+  if (channelExists) {
     const mostRecentState: State = yield select(getLastStateForChannel, channelId);
 
     // TODO: Handle state validation errors inside protocol
@@ -61,13 +64,16 @@ function* handleUpdateChannelMessage(payload: RequestObject) {
         processId: APPLICATION_PROCESS_ID
       })
     );
-  } catch (e) {
-    // TODO: Add an "exceptions" type to this package to be checked against
-    if (e.toString() === `Could not find any initialized channel state for channel ${channelId}.`) {
-      // TODO: Handle error case 1
-    }
 
-    throw e;
+    yield fork(
+      messageSender,
+      actions.updateChannelResponse({
+        id,
+        state: newState
+      })
+    );
+  } else {
+    yield fork(messageSender, actions.unknownChannelId({id, channelId}));
   }
 }
 
