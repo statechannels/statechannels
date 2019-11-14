@@ -1,11 +1,10 @@
 import { call, fork, put, take, takeEvery, cps, all } from 'redux-saga/effects';
-
+import { ethers } from 'ethers';
 import * as loginActions from './actions';
 import { reduxSagaFirebase } from '../../gateways/firebase';
 import metamaskSaga from '../metamask/saga';
 // import {initializeWallet} from 'magmo-wallet-client'; TODO:WALLET_SCRUBBED_OUT eventually connect to the channelClient
 import RPSGameArtifact from '../../../build/contracts/RockPaperScissors.json';
-import { randomHex } from '../../utils/randomHex';
 // import {WALLET_IFRAME_ID} from '../../constants'; TODO:WALLET_SCRUBBED_OUT
 
 function* loginSaga() {
@@ -43,7 +42,7 @@ function* loginStatusWatcherSaga() {
           )
         );
       } else {
-        const walletAddress = randomHex(64); // TODO:WALLET_SCRUBBED_OUT hook into channelClient
+        const walletAddress = ethers.Wallet.createRandom().address; // TODO:WALLET_SCRUBBED_OUT hook into channelClient
         yield put(loginActions.initializeWalletSuccess(walletAddress));
         yield put(loginActions.loginSuccess(user, libraryAddress));
       }
