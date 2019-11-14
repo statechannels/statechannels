@@ -41,7 +41,7 @@ This repository is a monorepo, and contains the following packages maintained wi
 - [hub](./packages/hub) : Server wallet for mediating virtual channels
 - [jest-gas-reporter](./packages/jest-gas-reporter) : Reports the gas used by various calls to ethereum contracts
 - [nitro-protocol](./packages/nitro-protocol) : Smart contracts and documentation website
-- [provider-api](./packages/provider-api) : Provider API docs
+- [app-wallet-interface](./packages/app-wallet-interface) : API docs for the interface betwen a state channel Dapp and the wallet
 - [rps](./packages/rps) : Rock paper scissors DApp
 - [wallet](./packages/wallet) : Core wallet logic that follows ForceMove and Nitro protocols
 - [web3torrent](./packages/web3torrent) : DApp extension of webtorrent including micropayments
