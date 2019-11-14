@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { configureEnvVariables } = require('magmo-devtools');
+const {configureEnvVariables} = require('@statechannels/devtools');
 
 const NODE_ENV = process.env.NODE_ENV;
 if (!NODE_ENV) {
@@ -59,7 +59,7 @@ function getClientEnvironment(publicUrl) {
         PUBLIC_URL: publicUrl,
 
         BUILD_VERSION: new Date(Date.now()).toISOString(),
-      },
+      }
     );
   // Stringify all values so we can feed into Webpack DefinePlugin
   const stringified = {
