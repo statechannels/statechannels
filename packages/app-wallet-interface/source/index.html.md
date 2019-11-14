@@ -339,6 +339,14 @@ Possible response to a `Channel Proposed` event.
 }
 ```
 
+### Errors
+
+| Code | Message            | Meaning                                                                               |
+|------|--------------------|---------------------------------------------------------------------------------------|
+|      | Channel not found  | The wallet can't find the channel corresponding to the channelId                      |
+|      | Invalid app data   | The app data isn't a valid state for the force-move app defined by the app definition |
+|      | Invalid transition | The state transition implied by this state is invalid                                 |
+
 ## Close Channel
 
 ```json
