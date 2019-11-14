@@ -2,15 +2,16 @@ import {Channel, encodeConsensusData, getChannelId, State} from '@statechannels/
 import {ConsensusData} from '@statechannels/nitro-protocol/lib/src/contract/consensus-data';
 import {HUB_ADDRESS} from '../constants';
 import {
+  allocationOutcome2,
+  allocationOutcome3,
   BEGINNING_APP_CHANNEL_NONCE,
   DUMMY_CHAIN_ID,
   DUMMY_RULES_ADDRESS,
   FUNDED_CHANNEL_NONCE,
   FUNDED_CHANNEL_NONCE_3,
+  FUNDED_GUARANTOR_CHANNEL_NONCE,
   NONCE,
   ONGOING_APP_CHANNEL_NONCE,
-  outcome2,
-  outcome3,
   PARTICIPANT_1_ADDRESS,
   PARTICIPANTS,
   PARTICIPANTS_3
@@ -26,97 +27,104 @@ export function channelObjectToModel(channel: Channel) {
   };
 }
 
-export const default_channel: Channel = {
+export const defaultChannel: Channel = {
   participants: PARTICIPANTS,
   channelNonce: NONCE,
   chainId: DUMMY_CHAIN_ID
 };
 
-const default_channel_3: Channel = {
+const defaultChannel3: Channel = {
   participants: PARTICIPANTS_3,
   channelNonce: NONCE,
   chainId: DUMMY_CHAIN_ID
 };
 
-export const funded_channel: Channel = {
+export const fundedChannel: Channel = {
   participants: PARTICIPANTS,
   channelNonce: FUNDED_CHANNEL_NONCE,
   chainId: DUMMY_CHAIN_ID
 };
 
-export const funded_channel_3: Channel = {
+export const fundedChannel3: Channel = {
   participants: PARTICIPANTS_3,
   channelNonce: FUNDED_CHANNEL_NONCE_3,
   chainId: DUMMY_CHAIN_ID
 };
 
-export const beginning_app_phase_channel: Channel = {
+export const fundedGuarantorChannel: Channel = {
+  participants: PARTICIPANTS,
+  channelNonce: FUNDED_GUARANTOR_CHANNEL_NONCE,
+  chainId: DUMMY_CHAIN_ID
+};
+
+export const beginningAppPhaseChannel: Channel = {
   participants: PARTICIPANTS,
   channelNonce: BEGINNING_APP_CHANNEL_NONCE,
   chainId: DUMMY_CHAIN_ID
 };
 
-export const ongoing_app_phase_channel: Channel = {
+export const ongoingAppPhaseChannel: Channel = {
   participants: PARTICIPANTS,
   channelNonce: ONGOING_APP_CHANNEL_NONCE,
   chainId: DUMMY_CHAIN_ID
 };
 
-export const FUNDED_NONCE_CHANNEL_ID = getChannelId(funded_channel);
-export const FUNDED_NONCE_CHANNEL_ID_3 = getChannelId(funded_channel_3);
-export const BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID = getChannelId(beginning_app_phase_channel);
-export const ONGOING_APP_CHANNEL_NONCE_CHANNEL_ID = getChannelId(ongoing_app_phase_channel);
+export const FUNDED_NONCE_CHANNEL_ID = getChannelId(fundedChannel);
+export const FUNDED_NONCE_CHANNEL_ID_3 = getChannelId(fundedChannel3);
+export const FUNDED_NONCE_GUARANTOR_CHANNEL_ID = getChannelId(fundedGuarantorChannel);
+export const BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID = getChannelId(beginningAppPhaseChannel);
+export const ONGOING_APP_CHANNEL_NONCE_CHANNEL_ID = getChannelId(ongoingAppPhaseChannel);
 
 export const consensus_app_data2 = (n: number): ConsensusData => ({
   furtherVotesRequired: n,
-  proposedOutcome: outcome2
+  proposedOutcome: allocationOutcome2
 });
 
 export const consensus_app_data3 = (n: number): ConsensusData => ({
   furtherVotesRequired: n,
-  proposedOutcome: outcome3
+  proposedOutcome: allocationOutcome3
 });
 
 const baseState = (turnNum: number) => ({
   turnNum,
   isFinal: false,
   challengeDuration: 1000,
-  outcome: outcome2,
+  outcome: allocationOutcome2,
   appDefinition: DUMMY_RULES_ADDRESS,
   appData: encodeConsensusData(consensus_app_data2(0))
 });
 
 const baseState3 = (turnNum: number) => ({
   ...baseState(turnNum),
-  outcome: outcome3,
+  outcome: allocationOutcome3,
   appData: encodeConsensusData(consensus_app_data3(0))
 });
 
 function pre_fund_setup(turnNum: number): State {
   return {
     ...baseState(turnNum),
-    channel: {...default_channel}
+    channel: {...defaultChannel}
   };
 }
 
 export function pre_fund_setup_3(turnNum: number): State {
   return {
     ...baseState3(turnNum),
-    channel: {...default_channel_3}
+    channel: {...defaultChannel3}
   };
 }
 
 function post_fund_setup(turnNum: number): State {
   return {
     ...baseState(turnNum),
-    channel: {...funded_channel}
+    channel: {...fundedChannel}
   };
 }
 
 export function post_fund_setup_3(turnNum: number): State {
   return {
     ...baseState3(turnNum),
-    channel: {...funded_channel_3}
+    channel: {...fundedChannel3}
   };
 }
 
@@ -142,7 +150,7 @@ const base_response = {
     participants: PARTICIPANTS,
     chainId: DUMMY_CHAIN_ID
   },
-  outcome: outcome2,
+  outcome: allocationOutcome2,
   challengeDuration: 1000,
   appDefinition: DUMMY_RULES_ADDRESS,
   isFinal: false
@@ -154,7 +162,7 @@ const base_response_3 = {
     participants: PARTICIPANTS_3,
     chainId: DUMMY_CHAIN_ID
   },
-  outcome: outcome3,
+  outcome: allocationOutcome3,
   challengeDuration: 1000,
   appDefinition: DUMMY_RULES_ADDRESS,
   isFinal: false
@@ -177,28 +185,28 @@ export const post_fund_setup_1_response: State = {
   ...base_response,
   turnNum: 3,
   appData: encodeConsensusData(consensus_app_data2(0)),
-  channel: funded_channel
+  channel: fundedChannel
 };
 
 export const post_fund_setup_3_2_response: State = {
   ...base_response_3,
   turnNum: 5,
   appData: encodeConsensusData(consensus_app_data3(0)),
-  channel: funded_channel_3
+  channel: fundedChannel3
 };
 
 export const app_1_response: State = {
   ...base_response,
   turnNum: 5,
   appData: encodeConsensusData({proposedOutcome: [], furtherVotesRequired: 0}),
-  channel: beginning_app_phase_channel
+  channel: beginningAppPhaseChannel
 };
 
 // Ledger Channel Manager input states
 export const created_pre_fund_setup_1: State = {
-  channel: default_channel,
+  channel: defaultChannel,
   turnNum: 1,
-  outcome: outcome2,
+  outcome: allocationOutcome2,
   appData: encodeConsensusData(consensus_app_data2(1)),
   isFinal: false,
   challengeDuration: 1000,
@@ -206,9 +214,9 @@ export const created_pre_fund_setup_1: State = {
 };
 
 export const created_pre_fund_setup_3_2: State = {
-  channel: default_channel_3,
+  channel: defaultChannel3,
   turnNum: 2,
-  outcome: outcome3,
+  outcome: allocationOutcome3,
   appData: encodeConsensusData(consensus_app_data3(1)),
   isFinal: false,
   challengeDuration: 1000,

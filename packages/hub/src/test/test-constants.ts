@@ -1,4 +1,5 @@
 import {AllocationItem, Outcome} from '@statechannels/nitro-protocol';
+import {GuaranteeAssetOutcome} from '@statechannels/nitro-protocol/lib/src/contract/outcome';
 import {convertAddressToBytes32} from '@statechannels/wallet';
 import {ethers} from 'ethers';
 import {bigNumberify} from 'ethers/utils';
@@ -19,6 +20,8 @@ export const UNKNOWN_RULES_ADDRESS = '0x92b5b042047731FF882423cB555554F11F632Bd6
 export const FUNDED_CHANNEL_NONCE = '3';
 export const FUNDED_CHANNEL_NONCE_3 = '33';
 export const FUNDED_CHANNEL_HOLDINGS = '0x00';
+
+export const FUNDED_GUARANTOR_CHANNEL_NONCE = '31';
 
 export const BEGINNING_APP_CHANNEL_NONCE = '44';
 export const BEGINNING_APP_CHANNEL_HOLDINGS = '0x05';
@@ -48,15 +51,23 @@ export const allocation: AllocationItem[] = [
   {destination: convertAddressToBytes32(PARTICIPANT_2_ADDRESS), amount: hex5},
   {destination: convertAddressToBytes32(HUB_ADDRESS), amount: hex5}
 ];
-export const outcome2: Outcome = [
+export const allocationOutcome2: Outcome = [
   {
     assetHolderAddress: dummyEthAssetHolderAddress,
     allocation: allocation.slice(0, 2)
   }
 ];
-export const outcome3: Outcome = [
+
+export const allocationOutcome3: Outcome = [
   {
     assetHolderAddress: dummyEthAssetHolderAddress,
     allocation: allocation.slice(0, 3)
+  }
+];
+
+export const guaranteeOutcome2: GuaranteeAssetOutcome[] = [
+  {
+    assetHolderAddress: dummyEthAssetHolderAddress,
+    guarantee: {targetChannelId: '1234', destinations: PARTICIPANTS}
   }
 ];

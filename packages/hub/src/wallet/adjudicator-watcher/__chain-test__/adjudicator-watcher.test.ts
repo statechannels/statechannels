@@ -2,11 +2,11 @@ import {getChannelId} from '@statechannels/nitro-protocol';
 import {fork} from 'child_process';
 import {bigNumberify} from 'ethers/utils';
 import {AdjudicatorWatcherEvent} from '..';
-import {funded_channel} from '../../../test/test_data';
+import {fundedChannel} from '../../../test/test_data';
 import {Blockchain} from '../../services/blockchain';
 
 jest.setTimeout(20000);
-const channelId = getChannelId(funded_channel);
+const channelId = getChannelId(fundedChannel);
 let killSubprocess = null;
 const five = bigNumberify(5).toHexString();
 

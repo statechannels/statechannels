@@ -2,7 +2,7 @@ import {State} from '@statechannels/nitro-protocol';
 import {signState} from '@statechannels/nitro-protocol/lib/src/signatures';
 import {Signature} from 'ethers/utils';
 import {HUB_PRIVATE_KEY} from '../../../constants';
-import {funded_channel, stateConstructors as testDataConstructors} from '../../../test/test_data';
+import {fundedChannel, stateConstructors as testDataConstructors} from '../../../test/test_data';
 import * as ChannelManager from '../channelManager';
 
 let pre_fund_setup_0: State;
@@ -18,7 +18,7 @@ beforeEach(() => {
 
   post_fund_setup_0 = testDataConstructors.post_fund_setup(2);
   post_fund_setup_1 = testDataConstructors.post_fund_setup(3);
-  app_0 = testDataConstructors.app(4, funded_channel);
+  app_0 = testDataConstructors.app(4, fundedChannel);
 
   hubSignature = signState(pre_fund_setup_1, HUB_PRIVATE_KEY).signature;
 });
@@ -42,7 +42,7 @@ describe('validSignature', () => {
 
 describe('formResponse', () => {
   it('returns a signed core state', async () => {
-    pre_fund_setup_1.channel = funded_channel;
+    pre_fund_setup_1.channel = fundedChannel;
 
     hubSignature = signState(pre_fund_setup_1, HUB_PRIVATE_KEY).signature;
 

@@ -1,18 +1,18 @@
 import {errors} from '../../..';
 import {
   created_channel,
-  funded_channel,
+  fundedChannel,
   stateConstructors as testDataConstructors
 } from '../../../../test/test_data';
 import Channel from '../../../models/channel';
 import knex from '../../connection';
 import {
-  constructors as seedDataConstructors,
   SEEDED_ALLOCATIONS,
   SEEDED_CHANNELS,
   SEEDED_PARTICIPANTS,
   SEEDED_STATES,
-  seeds
+  seeds,
+  stateConstructors as seedDataConstructors
 } from '../../seeds/2_allocator_channels_seed';
 import {queries} from '../channels';
 
@@ -38,7 +38,7 @@ describe('updateChannel', () => {
 
     it('throws when the channel exists', async () => {
       const theirState = testDataConstructors.pre_fund_setup(0);
-      theirState.channel = funded_channel;
+      theirState.channel = fundedChannel;
       const hubState = testDataConstructors.pre_fund_setup(1);
       expect.assertions(1);
       await queries.updateChannel([theirState], hubState).catch(err => {
@@ -64,7 +64,10 @@ describe('updateChannel', () => {
 
       expect(updated_allocator_channel).toMatchObject({
         ...seeds.fundedChannelWithStates,
-        states: [seedDataConstructors.post_fund_setup(2), seedDataConstructors.post_fund_setup(3)]
+        states: [
+          seedDataConstructors.postFundSetupState(2),
+          seedDataConstructors.postFundSetupState(3)
+        ]
       });
 
       expect((await knex('channels').select('*')).length).toEqual(SEEDED_CHANNELS);
@@ -82,7 +85,7 @@ describe('updateChannel', () => {
     it("throws when the channel doesn't exist and the commitment is not PreFundSetup", async () => {
       expect.assertions(1);
       const theirState = testDataConstructors.post_fund_setup(2);
-      theirState.channel = {...funded_channel, channelNonce: '1234'};
+      theirState.channel = {...fundedChannel, channelNonce: '1234'};
       const hubState = testDataConstructors.post_fund_setup(1);
       expect.assertions(1);
       await queries.updateChannel([theirState], hubState).catch(err => {
