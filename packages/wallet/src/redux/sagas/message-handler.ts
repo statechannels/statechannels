@@ -51,7 +51,9 @@ function* handleUpdateChannelMessage(payload: RequestObject) {
 
   const channelExists = yield select(doesAStateExistForChannel, channelId);
 
-  if (channelExists) {
+  if (!channelExists) {
+    yield fork(messageSender, actions.unknownChannelId({id, channelId}));
+  } else {
     const mostRecentState: State = yield select(getLastStateForChannel, channelId);
 
     const newState = createStateFromUpdateChannelParams(mostRecentState, payload.params as any);
@@ -63,15 +65,7 @@ function* handleUpdateChannelMessage(payload: RequestObject) {
       })
     );
 
-    yield fork(
-      messageSender,
-      actions.updateChannelResponse({
-        id,
-        state: newState
-      })
-    );
-  } else {
-    yield fork(messageSender, actions.unknownChannelId({id, channelId}));
+    yield fork(messageSender, actions.updateChannelResponse({id, state: newState}));
   }
 }
 
