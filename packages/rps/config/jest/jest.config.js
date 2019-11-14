@@ -1,6 +1,6 @@
-const {configureEnvVariables} = require('@statechannels/devtools');
+const { configureEnvVariables } = require('@statechannels/devtools');
 configureEnvVariables();
-const {resolve} = require('path');
+const { resolve } = require('path');
 const root = resolve(__dirname, '../../');
 
 module.exports = {
@@ -17,7 +17,6 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
   testMatch: ['<rootDir>/src/**/__tests__/?(*.)test.ts?(x)'],
   testEnvironment: 'jsdom',
-  testMatch: ['<rootDir>/test/**/?(*.)(spec|test).(t)s?(x)'],
   testPathIgnorePatterns: ['/node_modules/'],
   testEnvironment: 'node',
   testURL: 'http://localhost',
