@@ -1,5 +1,5 @@
 import {select, fork, put, call} from "redux-saga/effects";
-import {getChannelId} from "@statechannels/nitro-protocol";
+import {getChannelId, State} from "@statechannels/nitro-protocol";
 import jrs, {RequestObject} from "jsonrpc-lite";
 
 import * as actions from "../actions";
@@ -48,20 +48,27 @@ function* handleMessage(payload: RequestObject) {
 function* handleUpdateChannelMessage(payload: RequestObject) {
   const {channelId} = payload.params as any;
 
-  // TODO: Error handling, what if the channel does not exist?
-  const mostRecentState = yield select(getLastStateForChannel, channelId);
+  try {
+    const mostRecentState: State = yield select(getLastStateForChannel, channelId);
 
-  const newState = createStateFromUpdateChannelParams(mostRecentState, payload.params as any);
+    // TODO: Handle state validation errors inside protocol
 
-  // QUESTION: Should we do transition validation here?
-  // Comment (liam): I think it would be better done inside the protocol
+    const newState = createStateFromUpdateChannelParams(mostRecentState, payload.params as any);
 
-  yield put(
-    actions.application.ownStateReceived({
-      state: newState,
-      processId: APPLICATION_PROCESS_ID
-    })
-  );
+    yield put(
+      actions.application.ownStateReceived({
+        state: newState,
+        processId: APPLICATION_PROCESS_ID
+      })
+    );
+  } catch (e) {
+    // TODO: Add an "exceptions" type to this package to be checked against
+    if (e.toString() === `Could not find any initialized channel state for channel ${channelId}.`) {
+      // TODO: Handle error case 1
+    }
+
+    throw e;
+  }
 }
 
 function* handleCreateChannelMessage(payload: RequestObject) {

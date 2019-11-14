@@ -291,5 +291,57 @@ describe("message listener", () => {
         }
       });
     });
+
+    it.skip("returns an error when the channelId is not known", async () => {
+      // Data being submitted to UpdateChannel
+      const destinationA = Wallet.createRandom().address;
+      const destinationB = Wallet.createRandom().address;
+      const appData = "0x01010101";
+      const allocations = [
+        {
+          token: "0x0",
+          allocationItems: [
+            {destination: destinationA, amount: "12"},
+            {destination: destinationB, amount: "12"}
+          ]
+        }
+      ];
+
+      // Existing data in the store
+      const testChannel = channelFromStates([appState({turnNum: 0})], asAddress, asPrivateKey);
+
+      const requestMessage = JSON.stringify({
+        jsonrpc: "2.0",
+        method: "UpdateChannel",
+        id: 1,
+        params: {
+          channelId: testChannel.channelId,
+          allocations,
+          appData
+        }
+      });
+
+      const {effects} = await expectSaga(messageHandler, requestMessage, "localhost")
+        .withState({...initialState, channelStore: setChannel({}, testChannel)})
+        // Mock out the fork call so we don't actually try to post the message
+        .provide([
+          [matchers.fork.fn(messageSender), 0],
+          [matchers.select.selector(getAddress), asAddress],
+          [
+            matchers.call.fn(getProvider),
+            {
+              getCode: address => {
+                return "0x";
+              }
+            }
+          ]
+        ])
+        .run();
+
+      expect(effects.fork[0].payload.args[0]).toMatchObject({
+        type: "WALLET.NO_CONTRACT_ERROR",
+        id: 1
+      });
+    });
   });
 });
