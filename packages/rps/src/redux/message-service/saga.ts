@@ -146,7 +146,6 @@ function* receiveFromFirebaseSaga(address) {
   while (true) {
     const message = yield take(channel);
     // TODO:WALLET_SCRUBBED_OUT BEGIN-SHORTCUT
-    console.log(message);
     const key = message.snapshot.key;
     if (message.value === 'TRIGGER_OPPONENT_RESIGNED') {
       yield put(gameActions.exitToLobby());
