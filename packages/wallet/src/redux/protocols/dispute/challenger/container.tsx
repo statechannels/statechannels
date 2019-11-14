@@ -91,7 +91,7 @@ function describeFailure(reason: FailureReason): string {
   switch (reason) {
     case "AlreadyHaveLatest":
       return "Your opponent has already sent you their latest state.";
-    case "ChannelDoesntExist":
+    case "ChannelDoesNotExist":
       return "The channel doesn't exist.";
     case "DeclinedByUser":
       return "The challenge failed because you cancelled it.";
