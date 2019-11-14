@@ -283,22 +283,23 @@ function* handleWalletMessage(walletMessage: WalletRequest, state: gameStates.Pl
       // }
       break;
     case 'CHALLENGE_REQUESTED':
-      const challengeChannel = createWalletEventChannel([
-        Wallet.CHALLENGE_COMPLETE,
-        Wallet.CONCLUDE_SUCCESS,
-      ]);
-      Wallet.startChallenge(WALLET_IFRAME_ID, channelId);
-      yield put(gameActions.messageSent());
-      const challengeResponse = yield take(challengeChannel);
-      if (challengeResponse.type === Wallet.CHALLENGE_COMPLETE) {
-        yield put(gameActions.challengeCompleted());
-      }
-      if (challengeResponse.type === Wallet.CONCLUDE_SUCCESS) {
-        yield put(gameActions.messageSent());
-        yield put(gameActions.exitToLobby());
-      }
+    // TODO:WALLET_SCRUBBED_OUT
+    // const challengeChannel = createWalletEventChannel([
+    //   Wallet.CHALLENGE_COMPLETE,
+    //   Wallet.CONCLUDE_SUCCESS,
+    // ]);
+    // Wallet.startChallenge(WALLET_IFRAME_ID, channelId);
+    // yield put(gameActions.messageSent());
+    // const challengeResponse = yield take(challengeChannel);
+    // if (challengeResponse.type === Wallet.CHALLENGE_COMPLETE) {
+    //   yield put(gameActions.challengeCompleted());
+    // }
+    // if (challengeResponse.type === Wallet.CONCLUDE_SUCCESS) {
+    //   yield put(gameActions.messageSent());
+    //   yield put(gameActions.exitToLobby());
+    // }
 
-      break;
+    // break;
   }
 }
 
