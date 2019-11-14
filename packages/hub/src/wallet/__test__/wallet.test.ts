@@ -1,6 +1,6 @@
 import {State} from '@statechannels/nitro-protocol';
 import Wallet from '..';
-import {constructors as testDataConstructors} from '../../test/test_data';
+import {stateConstructors as testDataConstructors} from '../../test/test_data';
 
 let pre_fund_setup_0: State;
 

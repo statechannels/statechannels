@@ -8,7 +8,7 @@ exports.up = (knex: Knex) => {
     .createTable(TABLE_NAME, table => {
       table.increments();
       table
-        .string('nonce')
+        .string('channel_nonce')
         .unsigned()
         .notNullable();
       table.text('holdings').notNullable(); // has to store a uint256
