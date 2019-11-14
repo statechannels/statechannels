@@ -38,24 +38,30 @@ function* handleMessage(payload: RequestObject) {
       break;
     case "CreateChannel":
       yield handleCreateChannelMessage(payload);
+
+      break;
     case "UpdateChannel":
-      const {channelId} = payload.params as any;
-
-      // TODO: Error handling, what if the channel does not exist?
-      const mostRecentState = yield select(getLastStateForChannel, channelId);
-
-      const newState = createStateFromUpdateChannelParams(mostRecentState, payload.params as any);
-
-      // QUESTION: Should we do transition validation here?
-      // Comment (liam): I think it would be better done inside the protocol
-
-      yield put(
-        actions.application.ownStateReceived({
-          state: newState,
-          processId: APPLICATION_PROCESS_ID
-        })
-      );
+      yield handleUpdateChannelMessage(payload);
   }
+}
+
+function* handleUpdateChannelMessage(payload: RequestObject) {
+  const {channelId} = payload.params as any;
+
+  // TODO: Error handling, what if the channel does not exist?
+  const mostRecentState = yield select(getLastStateForChannel, channelId);
+
+  const newState = createStateFromUpdateChannelParams(mostRecentState, payload.params as any);
+
+  // QUESTION: Should we do transition validation here?
+  // Comment (liam): I think it would be better done inside the protocol
+
+  yield put(
+    actions.application.ownStateReceived({
+      state: newState,
+      processId: APPLICATION_PROCESS_ID
+    })
+  );
 }
 
 function* handleCreateChannelMessage(payload: RequestObject) {
