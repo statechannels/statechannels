@@ -3,9 +3,9 @@ import {
   ConcludeInstigated,
   SignedStatesReceived
 } from '@statechannels/wallet/lib/src/communication';
-import {HUB_ADDRESS} from 'src/constants';
-import {startFundingProcess} from 'src/wallet/db/queries/walletProcess';
+import {HUB_ADDRESS} from '../../constants';
 import {MessageRelayRequested} from '../../wallet-client';
+import {startFundingProcess} from '../../wallet/db/queries/walletProcess';
 import * as ongoing from './handle-ongoing-process-action';
 
 export async function handleNewProcessAction(
