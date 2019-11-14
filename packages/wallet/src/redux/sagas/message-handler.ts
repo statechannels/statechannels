@@ -76,5 +76,14 @@ function* handleCreateChannelMessage(payload: RequestObject) {
         channelId: getChannelId(state.channel)
       })
     );
+
+    yield fork(
+      messageSender,
+      actions.sendChannelProposedMessage({
+        toParticipantId: participants[0].participantId,
+        fromParticipantId: participants[1].participantId,
+        channelId: getChannelId(state.channel)
+      })
+    );
   }
 }

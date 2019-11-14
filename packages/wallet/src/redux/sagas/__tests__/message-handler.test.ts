@@ -114,6 +114,10 @@ describe("message listener", () => {
         id: 1,
         channelId: expect.any(String)
       });
+      expect(effects.fork[1].payload.args[0]).toMatchObject({
+        type: "WALLET.SEND_CHANNEL_PROPOSED_MESSAGE",
+        channelId: expect.any(String)
+      });
     });
 
     it("returns an error when the contract is not deployed", async () => {
