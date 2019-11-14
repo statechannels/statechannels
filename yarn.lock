@@ -13533,6 +13533,18 @@ grpc@1.23.3:
     node-pre-gyp "^0.13.0"
     protobufjs "^5.0.3"
 
+grpc@^1.16.1:
+  version "1.24.2"
+  resolved "https://registry.npmjs.org/grpc/-/grpc-1.24.2.tgz#76d047bfa7b05b607cbbe3abb99065dcefe0c099"
+  integrity sha512-EG3WH6AWMVvAiV15d+lr+K77HJ/KV/3FvMpjKjulXHbTwgDZkhkcWbwhxFAoTdxTkQvy0WFcO3Nog50QBbHZWw==
+  dependencies:
+    "@types/bytebuffer" "^5.0.40"
+    lodash.camelcase "^4.3.0"
+    lodash.clone "^4.5.0"
+    nan "^2.13.2"
+    node-pre-gyp "^0.14.0"
+    protobufjs "^5.0.3"
+
 gud@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/gud/-/gud-1.0.0.tgz#a489581b17e6a70beca9abe3ae57de7a499852c0"
@@ -17947,6 +17959,22 @@ node-pre-gyp@^0.13.0:
     semver "^5.3.0"
     tar "^4"
 
+node-pre-gyp@^0.14.0:
+  version "0.14.0"
+  resolved "https://registry.npmjs.org/node-pre-gyp/-/node-pre-gyp-0.14.0.tgz#9a0596533b877289bcad4e143982ca3d904ddc83"
+  integrity sha512-+CvDC7ZttU/sSt9rFjix/P05iS43qHCOOGzcr3Ry99bXG7VX953+vFyEuph/tfqoYu8dttBkE86JSKBO2OzcxA==
+  dependencies:
+    detect-libc "^1.0.2"
+    mkdirp "^0.5.1"
+    needle "^2.2.1"
+    nopt "^4.0.1"
+    npm-packlist "^1.1.6"
+    npmlog "^4.0.2"
+    rc "^1.2.7"
+    rimraf "^2.6.1"
+    semver "^5.3.0"
+    tar "^4.4.2"
+
 node-releases@^1.0.0-alpha.11, node-releases@^1.1.38:
   version "1.1.39"
   resolved "https://registry.yarnpkg.com/node-releases/-/node-releases-1.1.39.tgz#c1011f30343aff5b633153b10ff691d278d08e8d"
@@ -20682,6 +20710,20 @@ prettier-bytes@^1.0.4:
 prettier-plugin-solidity@1.0.0-alpha.34:
   version "1.0.0-alpha.34"
   resolved "https://registry.yarnpkg.com/prettier-plugin-solidity/-/prettier-plugin-solidity-1.0.0-alpha.34.tgz#9a2584fb1773569e2b22c0edba36cd4b80aa3905"
+  integrity sha512-cg/HrnS4P6m7rdnazZt3QdN7TwuW+TO5quLpTLzvN2BTsbyNFjBjTBUFIJwlFVhjUjw8mQ2uxKfk3b7pSvXJyw==
+  dependencies:
+    dir-to-object "^2.0.0"
+    emoji-regex "^8.0.0"
+    escape-string-regexp "^2.0.0"
+    extract-comments "^1.1.0"
+    prettier "^1.15.3"
+    semver "^6.3.0"
+    solidity-parser-antlr "^0.4.11"
+    string-width "^4.1.0"
+
+prettier-plugin-solidity@^1.0.0-alpha.34:
+  version "1.0.0-alpha.34"
+  resolved "https://registry.npmjs.org/prettier-plugin-solidity/-/prettier-plugin-solidity-1.0.0-alpha.34.tgz#9a2584fb1773569e2b22c0edba36cd4b80aa3905"
   integrity sha512-cg/HrnS4P6m7rdnazZt3QdN7TwuW+TO5quLpTLzvN2BTsbyNFjBjTBUFIJwlFVhjUjw8mQ2uxKfk3b7pSvXJyw==
   dependencies:
     dir-to-object "^2.0.0"
@@ -24774,7 +24816,7 @@ tar@^4, tar@^4.4.10, tar@^4.4.8:
     safe-buffer "^5.1.2"
     yallist "^3.0.3"
 
-tar@^4.0.2:
+tar@^4.0.2, tar@^4.4.2:
   version "4.4.13"
   resolved "https://registry.npmjs.org/tar/-/tar-4.4.13.tgz#43b364bc52888d555298637b10d60790254ab525"
   integrity sha512-w2VwSrBoHa5BsSyH+KxEqeQBAllHhccyMFVHtGtdMpF4W7IRWfZjFiQceJPChOeTsSDVUpER2T8FA93pr0L+QA==
@@ -25227,6 +25269,15 @@ truffle@5.0.42:
   version "5.0.42"
   resolved "https://registry.yarnpkg.com/truffle/-/truffle-5.0.42.tgz#2de4f73af7b40f2d3a5620dade6dded74e928321"
   integrity sha512-WbXGdHElluVbQP9FQljpvBLWjSEiKHaUx27TZ+RK7yEyrYDb8ATjpX0Owkc72bIy3AjKcbrlrptnqYswY1mtsg==
+  dependencies:
+    app-module-path "^2.2.0"
+    mocha "5.2.0"
+    original-require "1.0.1"
+
+truffle@^5.0.5:
+  version "5.0.43"
+  resolved "https://registry.yarnpkg.com/truffle/-/truffle-5.0.43.tgz#b5508807ec59789b90749daefb16f8b6fef8ce96"
+  integrity sha512-PbqOjgtYlkNAbJqzHeiMGvgBCLSuPVAWbM4+TNIGsRyqVCRIvXdLeQXUmdCRcGMWMteCvQ9Knhu4zNzT2Eo53A==
   dependencies:
     app-module-path "^2.2.0"
     mocha "5.2.0"
