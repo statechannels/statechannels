@@ -302,11 +302,12 @@ export function isLoadAction(action: any): action is LoadAction {
   return action.type && action.type === LOAD_FROM_STORAGE;
 }
 
-export interface JsonRpcAction {
+export interface JsonRpcRequestResponseAction {
   id: number | string; // Either a string or number is technically valid
   type: string;
 }
-export interface CreateChannelResponse extends JsonRpcAction {
+
+export interface CreateChannelResponse extends JsonRpcRequestResponseAction {
   type: "WALLET.CREATE_CHANNEL_RESPONSE";
   channelId: string;
 }
@@ -314,7 +315,7 @@ export const createChannelResponse: ActionConstructor<CreateChannelResponse> = p
   ...p,
   type: "WALLET.CREATE_CHANNEL_RESPONSE"
 });
-export interface AddressResponse extends JsonRpcAction {
+export interface AddressResponse extends JsonRpcRequestResponseAction {
   type: "WALLET.ADDRESS_RESPONSE";
   address: string;
 }
@@ -323,7 +324,7 @@ export const addressResponse: ActionConstructor<AddressResponse> = p => ({
   type: "WALLET.ADDRESS_RESPONSE"
 });
 
-export interface UnknownSigningAddress extends JsonRpcAction {
+export interface UnknownSigningAddress extends JsonRpcRequestResponseAction {
   type: "WALLET.UNKNOWN_SIGNING_ADDRESS_ERROR";
   signingAddress: string;
 }
@@ -333,7 +334,7 @@ export const unknownSigningAddress: ActionConstructor<UnknownSigningAddress> = p
   type: "WALLET.UNKNOWN_SIGNING_ADDRESS_ERROR"
 });
 
-export interface NoContractError extends JsonRpcAction {
+export interface NoContractError extends JsonRpcRequestResponseAction {
   address: string;
   type: "WALLET.NO_CONTRACT_ERROR";
 }
@@ -341,8 +342,22 @@ export const noContractError: ActionConstructor<NoContractError> = p => ({
   ...p,
   type: "WALLET.NO_CONTRACT_ERROR"
 });
-export type JsonRpcResponseAction =
+
+export interface SendChannelProposedMessage {
+  type: "WALLET.SEND_CHANNEL_PROPOSED_MESSAGE";
+  channelId: string;
+  toParticipantId: string;
+  fromParticipantId: string;
+}
+
+export const sendChannelProposedMessage: ActionConstructor<SendChannelProposedMessage> = p => ({
+  ...p,
+  type: "WALLET.SEND_CHANNEL_PROPOSED_MESSAGE"
+});
+
+export type OutgoingJsonRpcAction =
   | AddressResponse
   | CreateChannelResponse
   | UnknownSigningAddress
-  | NoContractError;
+  | NoContractError
+  | SendChannelProposedMessage;
