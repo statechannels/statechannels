@@ -92,7 +92,10 @@ export function* sendMessagesSaga() {
     if (messageState.opponentOutbox) {
       const queue = Queue.GAME_ENGINE;
       const commitment = messageState.opponentOutbox.commitment;
-      const signature = yield signMessage(commitment);
+      // TODO:WALLET_SCRUBBED_OUT
+      // const signature = yield signMessage(commitment);
+      const signature = 'fake-signature';
+
       const userName = gameState.name !== gameStates.StateName.NoName ? gameState.myName : '';
       const toSend: AppMessage = { commitment, queue, signature, userName };
       const { opponentAddress } = messageState.opponentOutbox;
@@ -322,8 +325,13 @@ function* receiveChallengePositionFromWalletSaga() {
 }
 
 function* receiveCommitmentSaga(message: AppMessage) {
-  const { commitment: data, signature, userName } = message;
-  const validMessage = yield validateMessage(data, signature);
+  // TODO:WALLET_SCRUBBED_OUT
+  // const { commitment: data, signature, userName } = message;
+  const { commitment: data, userName } = message;
+
+  // TODO:WALLET_SCRUBBED_OUT
+  // const validMessage = yield validateMessage(data, signature);
+  const validMessage = true;
   if (!validMessage) {
     // TODO: Handle this
   }
@@ -340,33 +348,35 @@ function* receiveCommitmentSaga(message: AppMessage) {
   }
 }
 
-function* validateMessage(commitment: Commitment, signature) {
-  try {
-    return yield Wallet.validateCommitmentSignature(WALLET_IFRAME_ID, commitment, signature);
-  } catch (err) {
-    if (err.reason === 'WalletBusy') {
-      const challengeChannel = createWalletEventChannel([Wallet.CHALLENGE_COMPLETE]);
-      yield take(challengeChannel);
-      return yield Wallet.validateCommitmentSignature(WALLET_IFRAME_ID, commitment, signature);
-    } else {
-      throw new Error(err.error);
-    }
-  }
-}
+// TODO:WALLET_SCRUBBED_OUT
+// function* validateMessage(commitment: Commitment, signature) {
+//   try {
+//     return yield Wallet.validateCommitmentSignature(WALLET_IFRAME_ID, commitment, signature);
+//   } catch (err) {
+//     if (err.reason === 'WalletBusy') {
+//       const challengeChannel = createWalletEventChannel([Wallet.CHALLENGE_COMPLETE]);
+//       yield take(challengeChannel);
+//       return yield Wallet.validateCommitmentSignature(WALLET_IFRAME_ID, commitment, signature);
+//     } else {
+//       throw new Error(err.error);
+//     }
+//   }
+// }
 
-function* signMessage(commitment: Commitment) {
-  try {
-    return yield Wallet.signCommitment(WALLET_IFRAME_ID, commitment);
-  } catch (err) {
-    if (err.reason === 'WalletBusy') {
-      const challengeChannel = createWalletEventChannel([Wallet.CHALLENGE_COMPLETE]);
-      yield take(challengeChannel);
-      return yield Wallet.signCommitment(WALLET_IFRAME_ID, commitment);
-    } else {
-      throw new Error(err.error);
-    }
-  }
-}
+// TODO:WALLET_SCRUBBED_OUT
+// function* signMessage(commitment: Commitment) {
+//   try {
+//     return yield Wallet.signCommitment(WALLET_IFRAME_ID, commitment);
+//   } catch (err) {
+//     if (err.reason === 'WalletBusy') {
+//       const challengeChannel = createWalletEventChannel([Wallet.CHALLENGE_COMPLETE]);
+//       yield take(challengeChannel);
+//       return yield Wallet.signCommitment(WALLET_IFRAME_ID, commitment);
+//     } else {
+//       throw new Error(err.error);
+//     }
+//   }
+// }
 
 function sanitizeMessageForFirebase(message) {
   return JSON.parse(JSON.stringify(message));
