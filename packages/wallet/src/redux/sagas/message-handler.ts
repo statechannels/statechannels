@@ -54,8 +54,6 @@ function* handleUpdateChannelMessage(payload: RequestObject) {
   if (channelExists) {
     const mostRecentState: State = yield select(getLastStateForChannel, channelId);
 
-    // TODO: Handle state validation errors inside protocol
-
     const newState = createStateFromUpdateChannelParams(mostRecentState, payload.params as any);
 
     yield put(
