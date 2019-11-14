@@ -1,8 +1,7 @@
 import { fork, take, call, put, select, actionChannel, takeEvery } from 'redux-saga/effects';
 import { buffers, eventChannel } from 'redux-saga';
 import { reduxSagaFirebase } from '../../gateways/firebase';
-
-import { Player } from '../../core';
+// import { Player } from '../../core';
 import * as gameActions from '../game/actions';
 import * as appActions from '../global/actions';
 import { MessageState, WalletRequest } from './state';
@@ -14,6 +13,7 @@ import { channelID } from 'fmg-core/lib/channel';
 import { asCoreCommitment, fromCoreCommitment } from '../../core/rps-commitment';
 import { Commitment } from 'fmg-core';
 import { MessageRelayRequested } from 'magmo-wallet-client';
+import { postFundSetupB } from '../../core/rps-commitment-helper';
 
 export enum Queue {
   WALLET = 'WALLET',
@@ -201,7 +201,9 @@ function createWalletEventChannel(walletEventTypes: Wallet.WalletEventType[]) {
 }
 
 function* handleWalletMessage(walletMessage: WalletRequest, state: gameStates.PlayingState) {
-  const { channel, player, allocation: balances, destination: participants } = state;
+  // TODO:WALLET_SCRUBBED_OUT
+  // const { channel, player, allocation: balances, destination: participants } = state;
+  const { channel } = state;
   const channelId = channelID(channel);
 
   switch (walletMessage.type) {
@@ -219,36 +221,37 @@ function* handleWalletMessage(walletMessage: WalletRequest, state: gameStates.Pl
       }
       break;
     case 'FUNDING_REQUESTED':
-      const myIndex = player === Player.PlayerA ? 0 : 1;
+      // TODO:WALLET_SCRUBBED_OUT
+      // const myIndex = player === Player.PlayerA ? 0 : 1;
 
-      const opponentAddress = participants[1 - myIndex];
-      const myAddress = participants[myIndex];
-      const fundingChannel = createWalletEventChannel([
-        Wallet.FUNDING_SUCCESS,
-        Wallet.FUNDING_FAILURE,
-      ]);
+      // const opponentAddress = participants[1 - myIndex];
+      // const myAddress = participants[myIndex];
+      // const fundingChannel = createWalletEventChannel([
+      //   Wallet.FUNDING_SUCCESS,
+      //   Wallet.FUNDING_FAILURE,
+      // ]);
 
-      Wallet.startFunding(
-        WALLET_IFRAME_ID,
-        channelId,
-        myAddress,
-        opponentAddress,
-        balances[myIndex],
-        balances[1 - myIndex],
-        myIndex
-      );
-      const fundingResponse: Wallet.FundingResponse = yield take(fundingChannel);
-      if (fundingResponse.type === Wallet.FUNDING_FAILURE) {
-        if (fundingResponse.reason === 'FundingDeclined') {
-          yield put(gameActions.exitToLobby());
-        } else {
-          throw new Error(fundingResponse.error);
-        }
-      } else {
-        yield put(gameActions.messageSent());
-        const commitment = fromCoreCommitment(fundingResponse.commitment);
-        yield put(gameActions.fundingSuccess(commitment));
-      }
+      // Wallet.startFunding(
+      //   WALLET_IFRAME_ID,
+      //   channelId,
+      //   myAddress,
+      //   opponentAddress,
+      //   balances[myIndex],
+      //   balances[1 - myIndex],
+      //   myIndex
+      // );
+      // const fundingResponse: Wallet.FundingResponse = yield take(fundingChannel);
+      // if (fundingResponse.type === Wallet.FUNDING_FAILURE) {
+      //   if (fundingResponse.reason === 'FundingDeclined') {
+      //     yield put(gameActions.exitToLobby());
+      //   } else {
+      //     throw new Error(fundingResponse.error);
+      //   }
+      // } else {
+      yield put(gameActions.messageSent());
+      const commitment = postFundSetupB({ ...state });
+      yield put(gameActions.fundingSuccess(commitment));
+      // }
       break;
     case 'CONCLUDE_REQUESTED':
       const conclusionChannel = createWalletEventChannel([
