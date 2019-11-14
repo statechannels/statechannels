@@ -45,7 +45,7 @@ export function createSetOutcomeTransaction(
     outcome
   );
 }
-export function createERC20DepositTransaction(
+export function createDepositTransaction(
   destination: string,
   expectedHeld: string,
   amount: string

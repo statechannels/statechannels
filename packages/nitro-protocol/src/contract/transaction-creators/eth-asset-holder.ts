@@ -46,7 +46,7 @@ export function createSetOutcomeTransaction(
   );
 }
 
-export function createETHDepositTransaction(
+export function createDepositTransaction(
   destination: string,
   expectedHeld: string,
   amount: string
