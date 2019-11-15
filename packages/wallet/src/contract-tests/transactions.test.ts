@@ -1,7 +1,4 @@
-import {getGanacheProvider} from "@statechannels/devtools";
-import {Channel, getChannelId, Signatures, State} from "@statechannels/nitro-protocol";
 import {ethers} from "ethers";
-import {bigNumberify} from "ethers/utils";
 
 import {createChallenge, concludeGame, fiveFive} from "./test-utils";
 import {
@@ -16,18 +13,21 @@ import {
 } from "../utils/transaction-generator";
 
 import {depositIntoETHAssetHolder} from "./test-utils";
+import {getGanacheProvider} from "@statechannels/devtools";
 import {transactionSender} from "../redux/sagas/transaction-sender";
 import {testSaga} from "redux-saga-test-plan";
-import {getProvider} from "../utils/contract-utils";
+import {getProvider, getContractAddress} from "../utils/contract-utils";
 import {transactionSent, transactionSubmitted, transactionConfirmed} from "../redux/actions";
 import {
-  NETWORK_ID,
-  CHALLENGE_DURATION,
   ADJUDICATOR_ADDRESS,
   ETH_ASSET_HOLDER_ADDRESS,
-  TRIVIAL_APP_ADDRESS
+  NETWORK_ID,
+  CHALLENGE_DURATION
 } from "../constants";
+import {State, Channel, getChannelId} from "@statechannels/nitro-protocol";
+import {bigNumberify} from "ethers/utils";
 import {convertBalanceToOutcome} from "../redux/__tests__/state-helpers";
+import {Signatures} from "@statechannels/nitro-protocol";
 
 jest.setTimeout(90000);
 
@@ -82,8 +82,7 @@ describe("transactions", () => {
   }
 
   beforeAll(async () => {
-    // TODO: rename this? why is it called a library address?
-    libraryAddress = TRIVIAL_APP_ADDRESS;
+    libraryAddress = getContractAddress("TrivialApp");
   });
 
   beforeEach(() => {
@@ -272,8 +271,7 @@ describe("transactions", () => {
     await testTransactionSender(transferAndWithdraw);
   });
 
-  it.only("should send a conclude, push outcome, and transfer all transaction", async () => {
-    console.log("chain idddd");
+  it.skip("should send a conclude, push outcome, and transfer all transaction", async () => {
     const channelNonce = getNextNonce();
     const channel: Channel = {
       channelNonce,

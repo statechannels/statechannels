@@ -23,7 +23,9 @@ export class GanacheServer {
     gasLimit: number = 1000000000,
     gasPrice: string = "0x01"
   ) {
-    log.info(`Starting ganache on port ${this.port}`);
+    log.info(
+      `Starting ganache on port ${this.port} with network ID ${process.env.GANACHE_NETWORK_ID}`
+    );
 
     this.fundedPrivateKey = accounts[0].privateKey;
 

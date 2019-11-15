@@ -75,7 +75,7 @@ export async function createChallenge(
   participantA,
   participantB
 ) {
-  const libraryAddress = await getContractAddress("TrivialApp", global["contracts"]);
+  const libraryAddress = getContractAddress("TrivialApp");
 
   const channel: Channel = {
     channelNonce,
@@ -120,7 +120,7 @@ export async function concludeGame(
   participantA,
   participantB
 ) {
-  const libraryAddress = await getContractAddress("TrivialApp", global["contracts"]);
+  const libraryAddress = getContractAddress("TrivialApp");
   const channel: Channel = {
     channelNonce,
     chainId: bigNumberify(NETWORK_ID).toHexString(),
@@ -162,7 +162,7 @@ export async function respond(
   participantB,
   challenge: State
 ) {
-  const libraryAddress = await getContractAddress("TrivialApp", global["contracts"]);
+  const libraryAddress = getContractAddress("TrivialApp");
   const channel: Channel = {
     channelNonce,
     chainId: bigNumberify(NETWORK_ID).toHexString(),

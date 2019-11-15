@@ -34,8 +34,9 @@ log.info(`Writing network context into file: ${GANACHE_CONTRACTS_PATH}\n`);
     process.on('SIGUSR1', exitHandler.bind(null, chain));
     process.on('SIGUSR2', exitHandler.bind(null, chain));
 
-    const contracts = await deployContracts(chain);
-    await writeJsonFile(GANACHE_CONTRACTS_PATH, contracts);
+    const networkContext = await deployContracts(chain);
+    networkContext['NetworkID'] = process.env.GANACHE_NETWORK_ID;
+    await writeJsonFile(GANACHE_CONTRACTS_PATH, networkContext);
 
     log.info(`Network context written to ${GANACHE_CONTRACTS_FILE}`);
   } catch (e) {

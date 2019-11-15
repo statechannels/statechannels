@@ -6,20 +6,15 @@ import log from "loglevel";
 
 log.setDefaultLevel(log.levels.DEBUG);
 
-let networkMap;
-
-export function getContractAddress(contractName) {
-  console.info(`Getting contract ${contractName}`);
-  networkMap = networkMap || NetworkContext;
-  // log.info(`Getting contract address: ${contractName}`);
-  // log.info(`with network map`);
-  // log.info(networkMap[contractName].address);
-  if (networkMap && networkMap[contractName]) {
-    return networkMap[contractName].address;
+export function getContractAddress(contractName: string): string {
+  if (NetworkContext[contractName]) {
+    return NetworkContext[contractName].address;
   }
-  console.error(contractName, networkMap);
+  console.error(contractName, NetworkContext);
 
-  throw new Error(`Could not find ${contractName} in network map ${JSON.stringify(networkMap)}}`);
+  throw new Error(
+    `Could not find ${contractName} in network map ${JSON.stringify(NetworkContext)}}`
+  );
 }
 
 export async function getProvider(): Promise<ethers.providers.Web3Provider> {
@@ -90,9 +85,8 @@ export function getConsensusContractAddress(): string {
 }
 
 export function getNetworkId(): number {
-  log.info(`Getting chain network ID: ${process.env.CHAIN_NETWORK_ID}`);
-  if (!!process.env.CHAIN_NETWORK_ID) {
-    return parseInt(process.env.CHAIN_NETWORK_ID, 10);
+  if (NetworkContext["NetworkID"]) {
+    return parseInt(NetworkContext["NetworkID"], 10);
   } else {
     throw new Error("There is no target network ID specified.");
   }
