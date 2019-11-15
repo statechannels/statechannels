@@ -9,7 +9,7 @@
     "firebase/**/grpc": "^1.16.1"
   },
   "scripts": {
-    "build:ci": "run-s clearContracts build:typescript",
+    "build:ci": "run-s clearContracts build:typescript contracts:compile",
     "build:typescript": "npx tsc -b",
     "build:webpack": "CI=false node scripts/build.js",
     "build": "run-s clearContracts build:typescript build:webpack",
