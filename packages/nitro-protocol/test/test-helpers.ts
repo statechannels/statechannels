@@ -10,6 +10,7 @@ import {
   Signature,
   splitSignature,
 } from 'ethers/utils';
+// @ts-ignore this is not supposed to exist at the prepare step
 import NetworkContext from '../ganache/ganache-network-context.json';
 
 import {hashChannelStorage} from '../src/contract/channel-storage';

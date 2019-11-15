@@ -1,4 +1,5 @@
 import { expectRevert } from '@statechannels/devtools';
+// @ts-ignore this is not supposed to exist at the prepare step
 import NetworkContext from '@statechannels/nitro-protocol/ganache/ganache-network-context.json';
 import RockPaperScissorsArtifact from '../../build/contracts/RockPaperScissors.json';
 import * as ethers from 'ethers';
