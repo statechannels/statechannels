@@ -48,6 +48,7 @@ function* handleMessage(payload: RequestObject) {
       break;
   }
 }
+
 function* handlePushMessage(payload: RequestObject) {
   // TODO: We need to handle the case where we receive an invalid wallet message
   const {id} = payload;
@@ -103,7 +104,7 @@ function* handleUpdateChannelMessage(payload: RequestObject) {
       })
     );
 
-    yield fork(messageSender, actions.updateChannelResponse({id, state: newState}));
+    yield fork(messageSender, actions.updateChannelResponse({id, channelId}));
   }
 }
 
@@ -131,6 +132,7 @@ function* handleCreateChannelMessage(payload: RequestObject) {
     yield put(
       actions.protocol.initializeChannel({channelId: getChannelId(state.channel), participants})
     );
+
     yield put(
       actions.application.ownStateReceived({
         processId: APPLICATION_PROCESS_ID,

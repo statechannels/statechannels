@@ -139,16 +139,16 @@ describe("message sender", () => {
   });
 
   it("creates a correct response message for WALLET.UPDATE_CHANNEL_RESPONSE", async () => {
-    const {state, signature} = stateHelpers.appState({turnNum: 0});
+    const {state, signature} = stateHelpers.appState({turnNum: 1});
 
     const initialState = setChannel(
       EMPTY_SHARED_DATA,
       channelFromStates([{state, signature}], stateHelpers.asAddress, stateHelpers.asPrivateKey)
     );
-
+    const channelId = stateHelpers.channelId;
     const message = updateChannelResponse({
       id: 1,
-      state
+      channelId
     });
 
     const {effects} = await expectSaga(messageSender, message)
@@ -159,7 +159,12 @@ describe("message sender", () => {
     expect(JSON.parse(effects.call[0].payload.args[0])).toMatchObject({
       jsonrpc: "2.0",
       id: 1,
-      result: {...state}
+      result: {
+        funding: [],
+        turnNum: 1,
+        status: "Running",
+        channelId
+      }
     });
   });
 

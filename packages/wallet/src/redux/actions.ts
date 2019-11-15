@@ -318,7 +318,7 @@ export const createChannelResponse: ActionConstructor<CreateChannelResponse> = p
 
 export interface UpdateChannelResponse extends ApiAction {
   type: "WALLET.UPDATE_CHANNEL_RESPONSE";
-  state: State;
+  channelId: string;
 }
 export const updateChannelResponse: ActionConstructor<UpdateChannelResponse> = p => ({
   ...p,

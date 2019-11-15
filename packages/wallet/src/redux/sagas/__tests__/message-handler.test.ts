@@ -10,6 +10,7 @@ import {asAddress, bsAddress, appState, asPrivateKey} from "../../__tests__/stat
 import {getProvider} from "../../../utils/contract-utils";
 import {setChannel} from "../../../../src/redux/channel-store";
 import {channelFromStates} from "../../channel-store/channel-state/__tests__";
+import * as stateHelpers from "../../__tests__/state-helpers";
 
 describe("message listener", () => {
   const wallet = Wallet.createRandom();
@@ -365,7 +366,7 @@ describe("message listener", () => {
       expect(effects.fork[0].payload.args[0]).toMatchObject({
         type: "WALLET.UPDATE_CHANNEL_RESPONSE",
         id: 1,
-        state
+        channelId: stateHelpers.channelId
       });
     });
 
