@@ -1,4 +1,4 @@
-import { take, put} from 'redux-saga/effects';
+import { take, put } from 'redux-saga/effects';
 import { buffers, eventChannel } from 'redux-saga';
 import {
   ChannelClient,
@@ -6,7 +6,7 @@ import {
   Message,
   NotificationName,
 } from '../../utils/channelClient';
-import {updateChannelState} from '../game/actions';
+import { updateChannelState } from '../game/actions';
 
 // TODO this is copied from message-queued-listener.ts so can be factored into a helper
 function createSubscribeFunction(channelClient: ChannelClient, notificationName: NotificationName) {
@@ -30,4 +30,5 @@ export function* channelUpdatedListener() {
   while (true) {
     const message: JsonRPCNotification<Message> = yield take(channel);
     yield put(updateChannelState(message.params.data));
+  }
 }
