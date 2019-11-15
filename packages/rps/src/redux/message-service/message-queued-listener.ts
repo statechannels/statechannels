@@ -1,5 +1,5 @@
 import { take, fork } from 'redux-saga/effects';
-import { buffers, eventChannel, Channel } from 'redux-saga';
+import { buffers, eventChannel } from 'redux-saga';
 import { reduxSagaFirebase } from '../../gateways/firebase';
 import {
   ChannelClient,
@@ -15,7 +15,7 @@ function createSubscribeFunction(channelClient: ChannelClient, notificationName:
     });
 
     return () => {
-      //   channelClient.unSubscribe(); // TODO
+      channelClient.unSubscribe(notificationName); // TODO
     };
   };
   return subscribe;
