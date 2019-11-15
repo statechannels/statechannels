@@ -21,6 +21,7 @@
     "prettier:check": "npx prettier --check 'src/**/*.{ts,tsx}'",
     "prettier:write": "npx prettier --write 'src/**/*.{ts,tsx}'",
     "start": "npm run clearContracts && node scripts/start.js",
+    "prepare": "yarn build:ci",
     "test:prepare": "yarn clearContracts && yarn contracts:compile",
     "test:app": "npx run-jest -c ./config/jest/jest.config.js",
     "test:contracts": "yarn test:prepare && npx run-jest -c ./config/jest/jest.contracts.config.js",

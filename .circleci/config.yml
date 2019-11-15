@@ -120,5 +120,4 @@ workflows:
 
       - test:
           requires:
-            - build
             - prepare
