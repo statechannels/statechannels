@@ -23,11 +23,7 @@ log.info(`Writing network context into file: ${GANACHE_CONTRACTS_PATH}\n`);
 */
 
 const router = new Router();
-const body = {
-  ganachePort: process.env.GANACHE_PORT,
-  addresses: 'undefined',
-};
-router.get('/', async ctx => (ctx.body = JSON.stringify(body, null, 2)));
+router.get('/', async ctx => (ctx.body = {}));
 
 if (!process.env.GANACHE_PORT) {
   throw Error(
