@@ -1,10 +1,11 @@
 import {getChannelId, State} from '@statechannels/nitro-protocol';
+import {AllocationAssetOutcome} from '@statechannels/nitro-protocol/lib/src/contract/outcome';
 import {ethers} from 'ethers';
 import {bigNumberify} from 'ethers/utils';
 import {Uint256} from 'fmg-core';
 import errors from '../../errors';
 import Channel from '../../models/channel';
-import {outcomeAddPriorities} from '../../utilities/outcome';
+import {outcomeObjectToModel} from '../../utilities/outcome';
 
 export const queries = {
   updateChannel
@@ -27,8 +28,8 @@ async function updateChannel(stateRound: State[], hubState: State) {
     throw errors.CHANNEL_MISSING;
   }
 
-  const outcome = (s: State) => outcomeAddPriorities(s.outcome);
-  const state = (s: State) => ({
+  const outcome = (s: State) => outcomeObjectToModel(s.outcome);
+  const stateModel = (s: State) => ({
     turn_num: s.turnNum,
     is_final: s.isFinal,
     challenge_duration: s.challengeDuration,
@@ -37,7 +38,7 @@ async function updateChannel(stateRound: State[], hubState: State) {
     app_data: s.appData
   });
 
-  const states = [...stateRound.map(s => state(s)), state(hubState)];
+  const states = [...stateRound.map(s => stateModel(s)), stateModel(hubState)];
 
   interface Upsert {
     channel_id: string;
@@ -58,7 +59,9 @@ async function updateChannel(stateRound: State[], hubState: State) {
   // TODO: We are currently using the allocations to set the funding amount
   // This assumes that the channel is funded and DOES NOT work for guarantor channels
   // todo: asset holder address needs to be considered
-  const hubAllocationAmounts = outcome(hubState)[0].allocation.map(x => x.amount);
+  const hubAllocationAmounts = (hubState.outcome[0] as AllocationAssetOutcome).allocation.map(
+    x => x.amount
+  );
 
   const holdings = hubAllocationAmounts.reduce(
     (a, b) =>
