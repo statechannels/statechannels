@@ -394,6 +394,15 @@ export const postMessageResponse: ActionConstructor<PostMessageResponse> = p => 
   type: "WALLET.POST_MESSAGE_RESPONSE"
 });
 
+export interface JoinChannelResponse extends ApiAction {
+  type: "WALLET.JOIN_CHANNEL_RESPONSE";
+  channelId: string;
+}
+export const joinChannelResponse: ActionConstructor<JoinChannelResponse> = p => ({
+  ...p,
+  type: "WALLET.JOIN_CHANNEL_RESPONSE"
+});
+
 export type OutgoingApiAction =
   | AddressResponse
   | CreateChannelResponse
@@ -404,4 +413,5 @@ export type OutgoingApiAction =
   | ChannelProposedEvent
   | PostMessageResponse
   | UnknownChannelId
-  | NoContractError;
+  | NoContractError
+  | JoinChannelResponse;

@@ -251,6 +251,7 @@ describe("message listener", () => {
         id: 1
       });
     });
+
     it("returns an error the first participant does not have our address", async () => {
       const destinationA = Wallet.createRandom().address;
       const signingAddressA = Wallet.createRandom().address;
@@ -381,6 +382,69 @@ describe("message listener", () => {
           channelId: unknownChannelId, // <----- important part of the test
           allocations: [],
           appData: "0x"
+        }
+      });
+
+      const {effects} = await expectSaga(messageHandler, requestMessage, "localhost")
+        .withState(initialState)
+        // Mock out the fork call so we don't actually try to post the message
+        .provide([[matchers.fork.fn(messageSender), 0]])
+        .run();
+
+      expect(effects.fork[0].payload.args[0]).toMatchObject({
+        type: "WALLET.UNKNOWN_CHANNEL_ID_ERROR",
+        id: 1,
+        channelId: unknownChannelId
+      });
+    });
+  });
+
+  describe("JoinChannel", () => {
+    it("handles an join channel request", async () => {
+      const existingState = appState({turnNum: 0});
+      const testChannel = channelFromStates([existingState], asAddress, asPrivateKey);
+
+      const requestMessage = JSON.stringify({
+        jsonrpc: "2.0",
+        method: "JoinChannel",
+        id: 1,
+        params: {
+          channelId: testChannel.channelId
+        }
+      });
+
+      const {effects} = await expectSaga(messageHandler, requestMessage, "localhost")
+        .withState({...initialState, channelStore: setChannel({}, testChannel)})
+        // Mock out the fork call so we don't actually try to post the message
+        .provide([[matchers.fork.fn(messageSender), 0]])
+        .run();
+
+      const nextState = {
+        ...existingState.state,
+        turnNum: 1
+      };
+
+      expect(effects.put[0].payload.action).toMatchObject({
+        type: "WALLET.APPLICATION.OWN_STATE_RECEIVED",
+        state: nextState
+      });
+
+      expect(effects.fork[0].payload.args[0]).toMatchObject({
+        type: "WALLET.JOIN_CHANNEL_RESPONSE",
+        id: 1,
+        channelId: testChannel.channelId
+      });
+    });
+
+    it("returns an error when the channelId is not known", async () => {
+      const unknownChannelId = "0xsomefakeid";
+
+      const requestMessage = JSON.stringify({
+        jsonrpc: "2.0",
+        method: "JoinChannel",
+        id: 1,
+        params: {
+          channelId: unknownChannelId
         }
       });
 

@@ -46,6 +46,34 @@ function* handleMessage(payload: RequestObject) {
     case "UpdateChannel":
       yield handleUpdateChannelMessage(payload);
       break;
+    case "JoinChannel":
+      yield handleJoinChannelMessage(payload);
+      break;
+  }
+}
+
+function* handleJoinChannelMessage(payload: RequestObject) {
+  const {id} = payload;
+  const {channelId} = payload.params as any;
+
+  const channelExists = yield select(doesAStateExistForChannel, channelId);
+
+  if (!channelExists) {
+    yield fork(messageSender, actions.unknownChannelId({id, channelId}));
+  } else {
+    const lastState: State = yield select(getLastStateForChannel, channelId);
+
+    const newState = {...lastState, turnNum: lastState.turnNum + 1};
+    // We've already initialized the channel when we received the channel proposed message
+    // So we can just sign our state
+    yield put(
+      actions.application.ownStateReceived({
+        state: newState,
+        processId: APPLICATION_PROCESS_ID
+      })
+    );
+
+    yield fork(messageSender, actions.joinChannelResponse({channelId, id}));
   }
 }
 
