@@ -4,7 +4,7 @@ import { reduxSagaFirebase } from '../../gateways/firebase';
 import {
   ChannelClient,
   JsonRPCNotification,
-  PushMessageParameters,
+  Message,
   NotificationName,
 } from '../../utils/channelClient';
 
@@ -27,7 +27,7 @@ export function* messageQueuedListener() {
   const channel = eventChannel(subscribe, buffers.fixed(10));
 
   while (true) {
-    const message: JsonRPCNotification<PushMessageParameters> = yield take(channel);
+    const message: JsonRPCNotification<Message> = yield take(channel);
     const to = message.params.recipient;
     yield fork(
       reduxSagaFirebase.database.create,
