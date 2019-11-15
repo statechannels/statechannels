@@ -75,9 +75,7 @@ export async function createChallenge(
   participantA,
   participantB
 ) {
-  const network = await provider.getNetwork();
-  const networkId = network.chainId;
-  const libraryAddress = await getLibraryAddress(networkId, "TrivialApp");
+  const libraryAddress = await getLibraryAddress("TrivialApp", global["contracts"]);
 
   const channel: Channel = {
     channelNonce,
@@ -122,9 +120,7 @@ export async function concludeGame(
   participantA,
   participantB
 ) {
-  const network = await provider.getNetwork();
-  const networkId = network.chainId;
-  const libraryAddress = await getLibraryAddress(networkId, "TrivialApp");
+  const libraryAddress = await getLibraryAddress("TrivialApp", global["contracts"]);
   const channel: Channel = {
     channelNonce,
     chainId: bigNumberify(NETWORK_ID).toHexString(),
@@ -166,9 +162,7 @@ export async function respond(
   participantB,
   challenge: State
 ) {
-  const network = await provider.getNetwork();
-  const networkId = network.chainId;
-  const libraryAddress = await getLibraryAddress(networkId, "TrivialApp");
+  const libraryAddress = await getLibraryAddress("TrivialApp", global["contracts"]);
   const channel: Channel = {
     channelNonce,
     chainId: bigNumberify(NETWORK_ID).toHexString(),

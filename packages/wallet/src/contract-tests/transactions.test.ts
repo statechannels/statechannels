@@ -1,4 +1,7 @@
+import {getGanacheProvider} from "@statechannels/devtools";
+import {Channel, getChannelId, Signatures, State} from "@statechannels/nitro-protocol";
 import {ethers} from "ethers";
+import {bigNumberify} from "ethers/utils";
 
 import {createChallenge, concludeGame, fiveFive} from "./test-utils";
 import {
@@ -13,7 +16,6 @@ import {
 } from "../utils/transaction-generator";
 
 import {depositIntoETHAssetHolder} from "./test-utils";
-import {getGanacheProvider} from "@statechannels/devtools";
 import {transactionSender} from "../redux/sagas/transaction-sender";
 import {testSaga} from "redux-saga-test-plan";
 import {getProvider, getLibraryAddress} from "../utils/contract-utils";
@@ -24,15 +26,11 @@ import {
   NETWORK_ID,
   CHALLENGE_DURATION
 } from "../constants";
-import {State, Channel, getChannelId} from "@statechannels/nitro-protocol";
-import {bigNumberify} from "ethers/utils";
 import {convertBalanceToOutcome} from "../redux/__tests__/state-helpers";
-import {Signatures} from "@statechannels/nitro-protocol";
 
 jest.setTimeout(90000);
 
 describe("transactions", () => {
-  let networkId;
   let libraryAddress;
   let nonce = 5;
   let participantA = ethers.Wallet.createRandom();
@@ -83,9 +81,7 @@ describe("transactions", () => {
   }
 
   beforeAll(async () => {
-    const network = await provider.getNetwork();
-    networkId = network.chainId;
-    libraryAddress = await getLibraryAddress(networkId, "TrivialApp");
+    libraryAddress = await getLibraryAddress("TrivialApp", global["contracts"]);
   });
 
   beforeEach(() => {

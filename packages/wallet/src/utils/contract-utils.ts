@@ -1,18 +1,20 @@
-import {ethers} from "ethers";
-
-import {AddressZero} from "ethers/constants";
 import {State, validTransition} from "@statechannels/nitro-protocol";
+import {ethers} from "ethers";
+import {AddressZero} from "ethers/constants";
+import log from "loglevel";
+
+log.setDefaultLevel(log.levels.DEBUG);
 
 let networkMap;
 
-export function getLibraryAddress(networkId, contractName) {
-  networkMap = networkMap || require("../../deployment/network-map.json");
-  if (networkMap[networkId] && networkMap[networkId][contractName]) {
-    return networkMap[networkId][contractName];
+export function getLibraryAddress(contractName, networkContext?) {
+  networkMap = networkMap || networkContext;
+  if (networkMap && networkMap[contractName]) {
+    return networkMap[contractName];
   }
-  console.error(contractName, networkId, networkMap);
+  console.error(contractName, networkMap);
 
-  throw new Error(`Could not find ${contractName} in network map with network id ${networkId}`);
+  throw new Error(`Could not find ${contractName} in network map ${networkMap}}`);
 }
 
 export async function getProvider(): Promise<ethers.providers.Web3Provider> {
@@ -22,14 +24,14 @@ export async function getProvider(): Promise<ethers.providers.Web3Provider> {
 export async function getAdjudicatorContract(provider) {
   await provider.ready;
 
-  const contractAddress = getLibraryAddress(getNetworkId(), "NitroAdjudicator");
+  const contractAddress = getLibraryAddress("NitroAdjudicator");
   return new ethers.Contract(contractAddress, getAdjudicatorInterface(), provider);
 }
 
 export async function getETHAssetHolderContract(provider) {
   await provider.ready;
 
-  const contractAddress = getLibraryAddress(getNetworkId(), "ETHAssetHolder");
+  const contractAddress = getLibraryAddress("ETHAssetHolder");
   return new ethers.Contract(contractAddress, getETHAssetHolderInterface(), provider);
 }
 
@@ -50,7 +52,7 @@ export function getETHAssetHolderInterface(): ethers.utils.Interface {
 
 export function getETHAssetHolderAddress(): string {
   try {
-    return getLibraryAddress(getNetworkId(), "ETHAssetHolder");
+    return getLibraryAddress("ETHAssetHolder");
   } catch (e) {
     return AddressZero;
   }
@@ -58,7 +60,7 @@ export function getETHAssetHolderAddress(): string {
 
 export function getAdjudicatorContractAddress(): string {
   try {
-    return getLibraryAddress(getNetworkId(), "NitroAdjudicator");
+    return getLibraryAddress("NitroAdjudicator");
   } catch (e) {
     return AddressZero;
   }
@@ -66,7 +68,7 @@ export function getAdjudicatorContractAddress(): string {
 
 export function getConsensusContractAddress(): string {
   try {
-    return getLibraryAddress(getNetworkId(), "ConsensusApp");
+    return getLibraryAddress("ConsensusApp");
   } catch (e) {
     return AddressZero;
   }
