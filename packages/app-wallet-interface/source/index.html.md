@@ -103,6 +103,13 @@ Used to push messages received from other participants into the wallet.
 
 Note: we don't return the state of the channel, as messages are not necessarily 1-to-1 with channels.
 
+### Errors
+
+| Code | Message           | Meaning                                      |
+| ---- | ----------------- | -------------------------------------------- |
+| 900  | Wrong Participant | The message is not addressed to this wallet. |
+| 901  | Invalid Data      | The data is not a valid message.             |
+
 ## Get addresses
 
 Returns the signing address(es) for the current domain.
@@ -342,7 +349,7 @@ Possible response to a `Channel Proposed` event.
 ### Errors
 
 | Code | Message            | Meaning                                                                               |
-|------|--------------------|---------------------------------------------------------------------------------------|
+| ---- | ------------------ | ------------------------------------------------------------------------------------- |
 |      | Channel not found  | The wallet can't find the channel corresponding to the channelId                      |
 |      | Invalid app data   | The app data isn't a valid state for the force-move app defined by the app definition |
 |      | Invalid transition | The state transition implied by this state is invalid                                 |
