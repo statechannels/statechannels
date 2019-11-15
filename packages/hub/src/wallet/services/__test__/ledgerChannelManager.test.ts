@@ -11,13 +11,13 @@ import {
 import {
   app_1_response,
   beginning_app_phase_channel,
-  constructors as testDataConstructors,
   created_pre_fund_setup_1,
   created_pre_fund_setup_3_2,
   post_fund_setup_1_response,
   post_fund_setup_3_2_response,
   pre_fund_setup_1_response,
-  pre_fund_setup_3_2_response
+  pre_fund_setup_3_2_response,
+  stateConstructors as testDataConstructors
 } from '../../../test/test_data';
 import errors from '../../errors';
 import * as ChannelManager from '../channelManager';

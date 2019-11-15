@@ -120,7 +120,7 @@ describe("CHANNEL DOESNT EXIST  ", () => {
     const result = initialize(channelId, processId, sharedData);
 
     itTransitionsTo(result, "Challenging.AcknowledgeFailure");
-    itHasFailureReason(result, "ChannelDoesntExist");
+    itHasFailureReason(result, "ChannelDoesNotExist");
   });
 
   describeScenarioStep(scenario.acknowledgeFailure, () => {
@@ -128,7 +128,7 @@ describe("CHANNEL DOESNT EXIST  ", () => {
     const result = challengerReducer(state, sharedData, action);
 
     itTransitionsTo(result, "Challenging.Failure");
-    itHasFailureReason(result, "ChannelDoesntExist");
+    itHasFailureReason(result, "ChannelDoesNotExist");
   });
 });
 

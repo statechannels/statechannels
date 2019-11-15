@@ -20,7 +20,8 @@ describe("when initializing", () => {
     scenario.initialize.sharedData,
     scenario.channelId,
     scenario.address,
-    scenario.privateKey
+    scenario.privateKey,
+    scenario.participants
   );
   itTransitionsTo(result, "Application.WaitForFirstState");
 });

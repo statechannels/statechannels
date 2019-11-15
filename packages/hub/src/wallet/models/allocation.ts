@@ -1,4 +1,5 @@
-import {Address, Uint256, Uint32} from 'fmg-core';
+import {Bytes32} from '@statechannels/nitro-protocol/lib/src/contract/types';
+import {Uint256, Uint32} from 'fmg-core';
 import {Model, snakeCaseMappers} from 'objection';
 import Outcome from './outcome';
 
@@ -20,8 +21,7 @@ export default class Allocation extends Model {
     }
   };
   readonly id!: number;
-  outcome: Outcome;
-  destination: Address;
+  destination!: Bytes32;
   amount: Uint256;
-  priority: Uint32;
+  priority!: Uint32;
 }

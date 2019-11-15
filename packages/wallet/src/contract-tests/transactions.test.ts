@@ -3,7 +3,7 @@ import {ethers} from "ethers";
 import {createChallenge, concludeGame, fiveFive} from "./test-utils";
 import {
   createForceMoveTransaction,
-  createDepositTransaction,
+  createETHDepositTransaction,
   createRespondTransaction,
   createRefuteTransaction,
   createConcludeTransaction,
@@ -12,7 +12,7 @@ import {
   createTransferAndWithdrawTransaction
 } from "../utils/transaction-generator";
 
-import {depositContract} from "./test-utils";
+import {depositIntoETHAssetHolder} from "./test-utils";
 import {getGanacheProvider} from "@statechannels/devtools";
 import {transactionSender} from "../redux/sagas/transaction-sender";
 import {testSaga} from "redux-saga-test-plan";
@@ -93,9 +93,9 @@ describe("transactions", () => {
     participantB = ethers.Wallet.createRandom();
   });
 
-  it("should deposit into the contract", async () => {
+  it("should deposit ETH into the ETH asset holder", async () => {
     const someChannelId = ethers.utils.hexlify(ethers.utils.randomBytes(32));
-    const depositTransactionData = createDepositTransaction(someChannelId, "0x5", "0x0");
+    const depositTransactionData = createETHDepositTransaction(someChannelId, "0x5", "0x0");
     await testTransactionSender({
       ...depositTransactionData,
       to: ETH_ASSET_HOLDER_ADDRESS,
@@ -259,8 +259,8 @@ describe("transactions", () => {
     };
     const channelId = getChannelId(channel);
 
-    await depositContract(provider, channelId);
-    await depositContract(provider, channelId);
+    await depositIntoETHAssetHolder(provider, channelId);
+    await depositIntoETHAssetHolder(provider, channelId);
     await concludeGame(provider, channel.channelNonce, participantA, participantB);
 
     const verificationSignature = "0x0";
@@ -282,7 +282,7 @@ describe("transactions", () => {
       participants: [participantA.address, participantB.address]
     };
     const channelId = getChannelId(channel);
-    await depositContract(provider, channelId);
+    await depositIntoETHAssetHolder(provider, channelId);
 
     const fromState: State = {
       channel,

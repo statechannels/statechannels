@@ -23,8 +23,9 @@ import {
 } from './contract/outcome';
 
 import {State, VariablePart} from './contract/state';
+import {createDepositTransaction as createERC20DepositTransaction} from './contract/transaction-creators/erc20-asset-holder';
 import {
-  createDepositTransaction,
+  createDepositTransaction as createETHDepositTransaction,
   createTransferAllTransaction,
 } from './contract/transaction-creators/eth-asset-holder';
 import * as Signatures from './signatures';
@@ -51,7 +52,8 @@ export interface SignedState {
 // TODO: Export this with more thought to what is exposed by @statchannels/nitro-protocol
 export {
   Allocation,
-  createDepositTransaction,
+  createERC20DepositTransaction,
+  createETHDepositTransaction,
   createTransferAllTransaction,
   State,
   encodeConsensusData,

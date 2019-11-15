@@ -66,7 +66,7 @@ describe("getNextNonce", () => {
     channelId: "0x0",
     libraryAddress: "0x0",
     ourIndex: 0,
-    participants: ["0x0", "0x0"],
+    participants: [{signingAddress: "0x0"}, {signingAddress: "0x0"}],
     channelNonce: "0x00",
     funded: false,
     address: "address",

@@ -34,18 +34,17 @@ export default class ChannelState extends Model {
   channelId!: number;
   turnNum!: Uint32;
   isFinal!: boolean;
-  outcome: Outcome[];
+  outcome!: Outcome[];
   appData!: any;
-  challengeDuration: number;
-  appDefinition: string;
+  challengeDuration!: number;
+  appDefinition!: string;
 
   asStateObject(): State {
     return {
       channel: this.channel.asChannelObject,
       turnNum: this.turnNum,
       isFinal: this.isFinal,
-      // todo: is this the correct way to populate the outcome field?
-      outcome: this.outcome,
+      outcome: this.outcome.map(outcome => outcome.asOutcomeObject),
       appData: this.appData,
       challengeDuration: this.challengeDuration,
       appDefinition: this.appDefinition

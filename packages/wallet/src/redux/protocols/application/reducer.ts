@@ -20,6 +20,7 @@ import * as dispute from "../dispute";
 import {disputeReducer} from "../dispute/reducer";
 import {joinSignature} from "ethers/utils";
 import {State, SignedState} from "@statechannels/nitro-protocol";
+import {ChannelParticipant} from "../../channel-store";
 
 // TODO: Right now we're using a fixed application ID
 // since we're not too concerned with handling multiple running app channels.
@@ -30,10 +31,11 @@ export function initialize(
   sharedData: SharedData,
   channelId: string,
   address: string,
-  privateKey: string
+  privateKey: string,
+  participants: ChannelParticipant[]
 ): ProtocolStateWithSharedData<states.ApplicationState> {
   return {
-    protocolState: states.waitForFirstState({channelId, privateKey, address}),
+    protocolState: states.waitForFirstState({channelId, privateKey, address, participants}),
     sharedData: registerChannelToMonitor(sharedData, APPLICATION_PROCESS_ID, channelId, [])
   };
 }
@@ -192,7 +194,12 @@ const validateAndUpdate = (
   sharedData: SharedData
 ) => {
   if (protocolState.type === "Application.WaitForFirstState") {
-    return checkAndInitialize(sharedData.channelStore, signedState, protocolState.privateKey);
+    return checkAndInitialize(
+      sharedData.channelStore,
+      signedState,
+      protocolState.privateKey,
+      protocolState.participants
+    );
   } else if (protocolState.type === "Application.Ongoing") {
     return checkAndStore(sharedData.channelStore, signedState);
   } else {
@@ -206,7 +213,12 @@ const signAndUpdate = (
   sharedData: SharedData
 ) => {
   if (protocolState.type === "Application.WaitForFirstState") {
-    return signAndInitialize(sharedData.channelStore, state, protocolState.privateKey);
+    return signAndInitialize(
+      sharedData.channelStore,
+      state,
+      protocolState.privateKey,
+      protocolState.participants
+    );
   } else {
     return signAndStore(sharedData.channelStore, state);
   }

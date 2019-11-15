@@ -102,7 +102,7 @@ export function initialize(
 
   if (!channelState) {
     return {
-      state: acknowledgeFailure(props, "ChannelDoesntExist"),
+      state: acknowledgeFailure(props, "ChannelDoesNotExist"),
       sharedData: showWallet(sharedData)
     };
   }
@@ -179,7 +179,7 @@ function challengeApproved(state: NonTerminalCState, sharedData: SharedData): Re
   // These shouldn't have changed but the type system doesn't know that. In any case, we
   // might as well be safe. And type-safe...
   if (!channelState) {
-    return {state: acknowledgeFailure(state, "ChannelDoesntExist"), sharedData};
+    return {state: acknowledgeFailure(state, "ChannelDoesNotExist"), sharedData};
   }
   if (!isFullyOpen(channelState)) {
     return {state: acknowledgeFailure(state, "NotFullyOpen"), sharedData};

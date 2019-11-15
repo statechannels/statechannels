@@ -2,7 +2,7 @@ import {State} from '@statechannels/nitro-protocol';
 import {signState} from '@statechannels/nitro-protocol/lib/src/signatures';
 import {Signature} from 'ethers/utils';
 import {HUB_PRIVATE_KEY} from '../../../constants';
-import {constructors as testDataConstructors, funded_channel} from '../../../test/test_data';
+import {funded_channel, stateConstructors as testDataConstructors} from '../../../test/test_data';
 import * as ChannelManager from '../channelManager';
 
 let pre_fund_setup_0: State;

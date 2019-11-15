@@ -133,7 +133,7 @@ export const channelDoesntExist = {
   ...defaults,
   sharedData: EMPTY_SHARED_DATA,
   acknowledgeFailure: {
-    state: acknowledgeFailure("ChannelDoesntExist"),
+    state: acknowledgeFailure("ChannelDoesNotExist"),
     action: acknowledged
   }
 };
