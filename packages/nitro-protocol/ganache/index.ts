@@ -1,5 +1,7 @@
 import { GanacheServer } from '@statechannels/devtools';
 import dotEnvExtended from 'dotenv-extended';
+import Koa from 'koa';
+import Router from 'koa-router';
 import fs from 'fs';
 import log from 'loglevel';
 import path from 'path';
@@ -18,6 +20,14 @@ log.info(`Writing network context into file: ${GANACHE_CONTRACTS_PATH}\n`);
 /*
   TODO: Move this file to the devtools package.
 */
+
+// This server is only used in CI to detect when the chain is ready and has
+// contracts deployed to it.
+const router = new Router();
+router.get('/', async () => {});
+
+const server = new Koa();
+server.use(router.routes());
 
 (async () => {
   try {
@@ -43,6 +53,9 @@ log.info(`Writing network context into file: ${GANACHE_CONTRACTS_PATH}\n`);
     await writeJsonFile(GANACHE_CONTRACTS_PATH, networkContext);
 
     log.info(`Network context written to ${GANACHE_CONTRACTS_FILE}`);
+
+    // start listening after chain is ready
+    server.listen(3000);
   } catch (e) {
     throw Error(e);
   }

@@ -17,12 +17,7 @@
     "noUnusedLocals": true,
     "types": ["node", "jest"]
   },
-  "include": [
-    "src/**/*",
-    "test/**/*",
-    "build/contracts/*.json"
-  ],
-  "references": [
-    { "path": "../jest-gas-reporter" }
-  ]
+  "include": ["src/**/*", "test/**/*", "build/contracts/*.json"],
+  "exclude": ["ganache/ganache-network-context.json"],
+  "references": [{ "path": "../jest-gas-reporter" }]
 }
