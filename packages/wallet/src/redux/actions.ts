@@ -302,12 +302,12 @@ export function isLoadAction(action: any): action is LoadAction {
   return action.type && action.type === LOAD_FROM_STORAGE;
 }
 
-export interface JsonRpcRequestResponseAction {
+export interface ApiAction {
   id: number | string; // Either a string or number is technically valid
   type: string;
 }
 
-export interface CreateChannelResponse extends JsonRpcRequestResponseAction {
+export interface CreateChannelResponse extends ApiAction {
   type: "WALLET.CREATE_CHANNEL_RESPONSE";
   channelId: string;
 }
@@ -316,7 +316,7 @@ export const createChannelResponse: ActionConstructor<CreateChannelResponse> = p
   type: "WALLET.CREATE_CHANNEL_RESPONSE"
 });
 
-export interface UpdateChannelResponse extends JsonRpcRequestResponseAction {
+export interface UpdateChannelResponse extends ApiAction {
   type: "WALLET.UPDATE_CHANNEL_RESPONSE";
   state: State;
 }
@@ -325,7 +325,7 @@ export const updateChannelResponse: ActionConstructor<UpdateChannelResponse> = p
   type: "WALLET.UPDATE_CHANNEL_RESPONSE"
 });
 
-export interface AddressResponse extends JsonRpcRequestResponseAction {
+export interface AddressResponse extends ApiAction {
   type: "WALLET.ADDRESS_RESPONSE";
   address: string;
 }
@@ -334,7 +334,7 @@ export const addressResponse: ActionConstructor<AddressResponse> = p => ({
   type: "WALLET.ADDRESS_RESPONSE"
 });
 
-export interface UnknownSigningAddress extends JsonRpcRequestResponseAction {
+export interface UnknownSigningAddress extends ApiAction {
   type: "WALLET.UNKNOWN_SIGNING_ADDRESS_ERROR";
   signingAddress: string;
 }
@@ -344,7 +344,7 @@ export const unknownSigningAddress: ActionConstructor<UnknownSigningAddress> = p
   type: "WALLET.UNKNOWN_SIGNING_ADDRESS_ERROR"
 });
 
-export interface UnknownChannelId extends JsonRpcRequestResponseAction {
+export interface UnknownChannelId extends ApiAction {
   type: "WALLET.UNKNOWN_CHANNEL_ID_ERROR";
   channelId: string;
 }
@@ -354,7 +354,7 @@ export const unknownChannelId: ActionConstructor<UnknownChannelId> = p => ({
   type: "WALLET.UNKNOWN_CHANNEL_ID_ERROR"
 });
 
-export interface NoContractError extends JsonRpcRequestResponseAction {
+export interface NoContractError extends ApiAction {
   address: string;
   type: "WALLET.NO_CONTRACT_ERROR";
 }
@@ -385,7 +385,7 @@ export const channelProposedEvent: ActionConstructor<ChannelProposedEvent> = p =
   type: "WALLET.CHANNEL_PROPOSED_EVENT"
 });
 
-export interface PostMessageResponse extends JsonRpcRequestResponseAction {
+export interface PostMessageResponse extends ApiAction {
   type: "WALLET.POST_MESSAGE_RESPONSE";
 }
 
@@ -394,7 +394,7 @@ export const postMessageResponse: ActionConstructor<PostMessageResponse> = p => 
   type: "WALLET.POST_MESSAGE_RESPONSE"
 });
 
-export type OutgoingJsonRpcAction =
+export type OutgoingApiAction =
   | AddressResponse
   | CreateChannelResponse
   | UpdateChannelResponse

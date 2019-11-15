@@ -1,4 +1,4 @@
-import {OutgoingJsonRpcAction} from "../actions";
+import {OutgoingApiAction} from "../actions";
 
 import {call, select} from "redux-saga/effects";
 import {getChannelStatus} from "../state";
@@ -7,12 +7,12 @@ import {createJsonRpcAllocationsFromOutcome} from "../../utils/json-rpc-utils";
 import jrs from "jsonrpc-lite";
 import {unreachable} from "../../utils/reducer-utils";
 
-export function* messageSender(action: OutgoingJsonRpcAction) {
+export function* messageSender(action: OutgoingApiAction) {
   const message = yield createResponseMessage(action);
   yield call(window.parent.postMessage, JSON.stringify(message), "*");
 }
 
-function* createResponseMessage(action: OutgoingJsonRpcAction) {
+function* createResponseMessage(action: OutgoingApiAction) {
   switch (action.type) {
     case "WALLET.CREATE_CHANNEL_RESPONSE":
       const channelInfo = yield getChannelInfo(action.channelId);
