@@ -85,7 +85,7 @@ module.exports = {
       'Boolean',
       'boolean',
       'Undefined',
-      'undefined',
+      // 'undefined',
     ],
     'id-match': 'error',
     'import/order': 'error',
@@ -172,16 +172,21 @@ module.exports = {
         trailingComma: 'es5',
       },
     ],
+    'no-unused-vars': 'off',
+    'import/default': 'off',
+    '@typescript-eslint/ban-ts-ignore': 'off'
   },
   overrides: [
     {
-        files: ["test/**/*.ts"],
-        globals: {
-            Promise: 'readonly',
-            expect: 'readonly',
-            it: 'readonly',
-            describe: 'readonly',
-        }
-    }
-  ]
+      files: ['test/**/*.ts'],
+      globals: {
+        Promise: 'readonly',
+        expect: 'readonly',
+        it: 'readonly',
+        describe: 'readonly',
+        beforeAll: 'readonly',
+        beforeEach: 'readonly',
+      },
+    },
+  ],
 };

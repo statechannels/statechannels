@@ -17,13 +17,13 @@ import {
   checkMultipleHoldings,
   compileEventsFromLogs,
   computeOutcome,
+  finalizedOutcomeHash,
+  getTestProvider,
   OutcomeShortHand,
   randomChannelId,
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
   resetMultipleHoldings,
-  finalizedOutcomeHash,
-  getTestProvider,
   setupContracts,
 } from '../../test-helpers';
 

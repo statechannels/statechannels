@@ -81,7 +81,6 @@
     "solidoc": "https://github.com/statechannels/solidoc.git",
     "truffle": "5.0.37",
     "ts-jest": "24.1.0",
-    "tslint": "5.20.0",
     "eslint-config-prettier": "^6.0.0",
     "eslint-plugin-prettier": "^3.1.0",
     "typescript": "3.6.3",
