@@ -15,6 +15,10 @@ const GANACHE_CONTRACTS_FILE = 'ganache-network-context.json';
 const GANACHE_CONTRACTS_PATH = path.join(__dirname, GANACHE_CONTRACTS_FILE);
 log.info(`Writing network context into file: ${GANACHE_CONTRACTS_PATH}\n`);
 
+/*
+  TODO: Move this file to the devtools package.
+*/
+
 (async () => {
   try {
     if (!process.env.GANACHE_PORT) {

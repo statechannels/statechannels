@@ -16,6 +16,16 @@ export class GanacheServer {
   fundedPrivateKey: string;
   server: any;
 
+  static async connect(port: number): Promise<GanacheServer> {
+    const provider = new JsonRpcProvider(`http://localhost:${port}`);
+    try {
+      await provider.getBlockNumber();
+      return new GanacheServer(port);
+    } catch (e) {
+      return Promise.reject(`No ganache server to connect to locally on port ${port}`);
+    }
+  }
+
   constructor(
     public readonly port: number = 8545,
     accounts: Account[] = ETHERLIME_ACCOUNTS,

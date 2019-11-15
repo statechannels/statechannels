@@ -1,10 +1,11 @@
-import * as ethers from 'ethers';
-// @ts-ignore
-import RockPaperScissorsArtifact from '../../build/contracts/RockPaperScissors.json';
-jest.setTimeout(20000);
 import { expectRevert } from '@statechannels/devtools';
-import path from 'path';
+import NetworkContext from '@statechannels/nitro-protocol/ganache/ganache-network-context.json';
+import RockPaperScissorsArtifact from '../../build/contracts/RockPaperScissors.json';
+import * as ethers from 'ethers';
 import { Contract } from 'ethers';
+import { defaultAbiCoder, bigNumberify, keccak256, Interface } from 'ethers/utils';
+import dotEnvExtended from 'dotenv-extended';
+import path from 'path';
 import { AddressZero } from 'ethers/constants';
 import { TransactionRequest } from 'ethers/providers';
 import {
@@ -20,8 +21,11 @@ import { Weapon } from '../core/weapons';
 
 import loadJsonFile from 'load-json-file';
 
-import { defaultAbiCoder, bigNumberify, keccak256, Interface } from 'ethers/utils';
 import { randomHex } from '../utils/randomHex';
+
+dotEnvExtended.load();
+
+jest.setTimeout(20000);
 
 const testProvider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.GANACHE_PORT}`
@@ -179,10 +183,9 @@ export const getNetworkMap = async () => {
 
 export async function setupContracts(provider: ethers.providers.JsonRpcProvider, artifact) {
   const signer = provider.getSigner(0);
-  const networkMap = await getNetworkMap();
 
   const contractName = artifact.contractName;
-  const contractAddress = networkMap ? networkMap[contractName]['address'] : undefined;
+  const contractAddress = NetworkContext[contractName]['address'];
   const contract = new ethers.Contract(contractAddress, artifact.abi, signer);
   return contract;
 }

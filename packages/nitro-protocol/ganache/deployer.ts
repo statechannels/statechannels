@@ -13,11 +13,15 @@ import testNitroAdjudicatorArtifact from '../build/contracts/TESTNitroAdjudicato
 import tokenArtifact from '../build/contracts/Token.json';
 import trivialAppArtifact from '../build/contracts/TrivialApp.json';
 import consensusAppArtifact from '../build/contracts/ConsensusApp.json';
+import rpsArtifact from '@statechannels/rps/build/contracts/RockPaperScissors.json';
+import forceMoveAppArtifact from '@statechannels/rps/build/contracts/ForceMoveApp.json';
 
 export async function deployContracts(chain: GanacheServer): Promise<object> {
   log.info(`Deploying built contracts to chain at: ${chain.provider.connection.url}`);
 
   return chain.deployContracts([
+    rpsArtifact,
+    forceMoveAppArtifact,
     consensusAppArtifact,
     testForceMoveArtifact,
     testAssetHolderArtifact1,
