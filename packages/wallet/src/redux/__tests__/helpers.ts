@@ -7,7 +7,7 @@ import {ProtocolLocator, RelayableAction} from "../../communication";
 import _ from "lodash";
 import {State, SignedState, getChannelId} from "@statechannels/nitro-protocol";
 import {Signature} from "ethers/utils";
-import {JsonRpcResponseAction} from "../actions";
+import {OutgoingApiAction} from "../actions";
 
 type SideEffectState =
   | StateWithSideEffects<any>
@@ -42,7 +42,7 @@ export const itSendsNoMessage = (state: SideEffectState) => {
 
 export const itSendsThisJsonRpcResponse = (
   state: SideEffectState,
-  message: JsonRpcResponseAction,
+  message: OutgoingApiAction,
   idx = 0
 ) => {
   if (Array.isArray(message)) {

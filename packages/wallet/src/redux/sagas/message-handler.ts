@@ -8,8 +8,10 @@ import {messageSender} from "./message-sender";
 import {APPLICATION_PROCESS_ID} from "../protocols/application/reducer";
 import {
   createStateFromCreateChannelParams,
-  createStateFromUpdateChannelParams
+  createStateFromUpdateChannelParams,
+  JsonRpcMessage
 } from "../../utils/json-rpc-utils";
+
 import {getProvider} from "../../utils/contract-utils";
 
 export function* messageHandler(jsonRpcMessage: string, fromDomain: string) {
@@ -34,14 +36,79 @@ function* handleMessage(payload: RequestObject) {
     case "GetAddress":
       const address = yield select(getAddress);
       yield fork(messageSender, actions.addressResponse({id, address}));
-
       break;
     case "CreateChannel":
       yield handleCreateChannelMessage(payload);
-
+      break;
+    case "PushMessage":
+      yield handlePushMessage(payload);
       break;
     case "UpdateChannel":
       yield handleUpdateChannelMessage(payload);
+      break;
+    case "JoinChannel":
+      yield handleJoinChannelMessage(payload);
+      break;
+  }
+}
+
+function* handleJoinChannelMessage(payload: RequestObject) {
+  const {id} = payload;
+  const {channelId} = payload.params as any;
+
+  const channelExists = yield select(doesAStateExistForChannel, channelId);
+
+  if (!channelExists) {
+    yield fork(messageSender, actions.unknownChannelId({id, channelId}));
+  } else {
+    const lastState: State = yield select(getLastStateForChannel, channelId);
+
+    const newState = {...lastState, turnNum: lastState.turnNum + 1};
+    // We've already initialized the channel when we received the channel proposed message
+    // So we can just sign our state
+    yield put(
+      actions.application.ownStateReceived({
+        state: newState,
+        processId: APPLICATION_PROCESS_ID
+      })
+    );
+
+    yield fork(messageSender, actions.joinChannelResponse({channelId, id}));
+  }
+}
+
+function* handlePushMessage(payload: RequestObject) {
+  // TODO: We need to handle the case where we receive an invalid wallet message
+  const {id} = payload;
+  const message = payload.params as JsonRpcMessage;
+  switch (message.data.type) {
+    case "Channel.Open":
+      const {signedState, participants} = message.data;
+      // The channel gets initialized and the state will be pushed into the app protocol
+      // If the client doesn't want to join the channel then we dispose of these on that API call
+      // Since only our wallet can progress the app protocol from this point by signing the next state
+      // we're safe to initialize the channel before the client has called JoinChannel
+      // The only limitation is that our client cannot propose a new channel with the same channelId
+      // before they decline the opponent's proposed channel
+
+      yield put(
+        actions.protocol.initializeChannel({
+          channelId: getChannelId(signedState.state.channel),
+          participants
+        })
+      );
+      yield put(
+        actions.application.opponentStateReceived({
+          processId: APPLICATION_PROCESS_ID,
+          signedState
+        })
+      );
+
+      yield fork(messageSender, actions.postMessageResponse({id}));
+
+      const channelId = getChannelId(signedState.state.channel);
+      yield fork(messageSender, actions.channelProposedEvent({channelId}));
+      break;
   }
 }
 
@@ -65,7 +132,7 @@ function* handleUpdateChannelMessage(payload: RequestObject) {
       })
     );
 
-    yield fork(messageSender, actions.updateChannelResponse({id, state: newState}));
+    yield fork(messageSender, actions.updateChannelResponse({id, channelId}));
   }
 }
 
@@ -93,6 +160,7 @@ function* handleCreateChannelMessage(payload: RequestObject) {
     yield put(
       actions.protocol.initializeChannel({channelId: getChannelId(state.channel), participants})
     );
+
     yield put(
       actions.application.ownStateReceived({
         processId: APPLICATION_PROCESS_ID,
@@ -104,6 +172,15 @@ function* handleCreateChannelMessage(payload: RequestObject) {
       messageSender,
       actions.createChannelResponse({
         id,
+        channelId: getChannelId(state.channel)
+      })
+    );
+
+    yield fork(
+      messageSender,
+      actions.sendChannelProposedMessage({
+        toParticipantId: participants[0].participantId,
+        fromParticipantId: participants[1].participantId,
         channelId: getChannelId(state.channel)
       })
     );

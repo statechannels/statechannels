@@ -1,7 +1,7 @@
 import {TransactionRequest} from "ethers/providers";
 import {WalletEvent, DisplayAction} from "../../magmo-wallet-client";
 import {accumulateSideEffects} from ".";
-import {JsonRpcResponseAction} from "../actions";
+import {OutgoingApiAction} from "../actions";
 
 export function emptyDisplayOutboxState(): OutboxState {
   return {displayOutbox: [], messageOutbox: [], transactionOutbox: []};
@@ -12,7 +12,7 @@ export interface QueuedTransaction {
   processId: string;
 }
 export type DisplayOutbox = DisplayAction[];
-export type MessageOutbox = Array<WalletEvent | JsonRpcResponseAction>;
+export type MessageOutbox = Array<WalletEvent | OutgoingApiAction>;
 export type TransactionOutbox = QueuedTransaction[];
 
 export interface OutboxState {
@@ -43,9 +43,7 @@ export function queueTransaction(
   });
 }
 
-export function getLastMessage(
-  state: OutboxState
-): WalletEvent | JsonRpcResponseAction | undefined {
+export function getLastMessage(state: OutboxState): WalletEvent | OutgoingApiAction | undefined {
   const messages = state.messageOutbox;
   return messages[messages.length - 1];
 }
