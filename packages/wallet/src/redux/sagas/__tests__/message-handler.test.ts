@@ -102,9 +102,6 @@ describe("message listener", () => {
         channelId: expect.any(String)
       });
     });
-
-    // tslint:disable-next-line: no-empty
-    it.skip("rejects an invalid message", () => {});
   });
 
   describe("CreateChannel", () => {
