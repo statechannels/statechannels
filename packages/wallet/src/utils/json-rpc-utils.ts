@@ -1,6 +1,13 @@
-import {Outcome, State, Channel, isAllocationOutcome} from "@statechannels/nitro-protocol";
+import {
+  Outcome,
+  State,
+  Channel,
+  isAllocationOutcome,
+  SignedState
+} from "@statechannels/nitro-protocol";
 import {bigNumberify, randomBytes} from "ethers/utils";
 import {NETWORK_ID, CHALLENGE_DURATION} from "../constants";
+import {ChannelParticipant} from "../redux/channel-store";
 
 export interface JsonRpcParticipant {
   participantId: string;
@@ -25,6 +32,19 @@ export interface JsonRpcCreateChannelParams {
   appDefinition: string;
   appData: string;
 }
+
+export interface JsonRpcMessage {
+  recipient: string;
+  sender: string;
+  data: WalletMessage;
+}
+
+interface OpenChannel {
+  type: "Channel.Open";
+  participants: ChannelParticipant[];
+  signedState: SignedState;
+}
+type WalletMessage = OpenChannel;
 
 function createAllocationOutcomeFromParams(params: JsonRpcAllocations): Outcome {
   return params.map(p => {

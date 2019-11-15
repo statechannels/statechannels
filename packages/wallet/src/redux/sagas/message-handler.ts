@@ -6,7 +6,7 @@ import {getAddress} from "../selectors";
 import {messageSender} from "./message-sender";
 import {getChannelId} from "@statechannels/nitro-protocol";
 import {APPLICATION_PROCESS_ID} from "../protocols/application/reducer";
-import {createStateFromCreateChannelParams} from "../../utils/json-rpc-utils";
+import {createStateFromCreateChannelParams, JsonRpcMessage} from "../../utils/json-rpc-utils";
 import {getProvider} from "../../utils/contract-utils";
 
 export function* messageHandler(jsonRpcMessage: string, fromDomain: string) {
@@ -31,10 +31,47 @@ function* handleMessage(payload: RequestObject) {
     case "GetAddress":
       const address = yield select(getAddress);
       yield fork(messageSender, actions.addressResponse({id, address}));
-
       break;
     case "CreateChannel":
       yield handleCreateChannelMessage(payload);
+      break;
+    case "PushMessage":
+      yield handlePushMessage(payload);
+      break;
+  }
+}
+function* handlePushMessage(payload: RequestObject) {
+  // TODO: We need to handle the case where we receive an invalid wallet message
+  const {id} = payload;
+  const message = payload.params as JsonRpcMessage;
+  switch (message.data.type) {
+    case "Channel.Open":
+      const {signedState, participants} = message.data;
+      // The channel gets initialized and the state will be pushed into the app protocol
+      // If the client doesn't want to join the channel then we dispose of these on that API call
+      // Since only our wallet can progress the app protocol from this point by signing the next state
+      // we're safe to initialize the channel before the client has called JoinChannel
+      // The only limitation is that our client cannot propose a new channel with the same channelId
+      // before they decline the opponent's proposed channel
+
+      yield put(
+        actions.protocol.initializeChannel({
+          channelId: getChannelId(signedState.state.channel),
+          participants
+        })
+      );
+      yield put(
+        actions.application.opponentStateReceived({
+          processId: APPLICATION_PROCESS_ID,
+          signedState
+        })
+      );
+
+      yield fork(messageSender, actions.postMessageResponse({id}));
+
+      const channelId = getChannelId(signedState.state.channel);
+      yield fork(messageSender, actions.channelProposedEvent({channelId}));
+      break;
   }
 }
 

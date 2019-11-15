@@ -355,9 +355,30 @@ export const sendChannelProposedMessage: ActionConstructor<SendChannelProposedMe
   type: "WALLET.SEND_CHANNEL_PROPOSED_MESSAGE"
 });
 
+export interface ChannelProposedEvent {
+  type: "WALLET.CHANNEL_PROPOSED_EVENT";
+  channelId: string;
+}
+
+export const channelProposedEvent: ActionConstructor<ChannelProposedEvent> = p => ({
+  ...p,
+  type: "WALLET.CHANNEL_PROPOSED_EVENT"
+});
+
+export interface PostMessageResponse extends JsonRpcRequestResponseAction {
+  type: "WALLET.POST_MESSAGE_RESPONSE";
+}
+
+export const postMessageResponse: ActionConstructor<PostMessageResponse> = p => ({
+  ...p,
+  type: "WALLET.POST_MESSAGE_RESPONSE"
+});
+
 export type OutgoingJsonRpcAction =
   | AddressResponse
   | CreateChannelResponse
   | UnknownSigningAddress
   | NoContractError
-  | SendChannelProposedMessage;
+  | SendChannelProposedMessage
+  | ChannelProposedEvent
+  | PostMessageResponse;

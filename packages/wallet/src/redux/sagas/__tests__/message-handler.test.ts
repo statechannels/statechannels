@@ -6,8 +6,9 @@ import {Wallet} from "ethers";
 import {messageSender} from "../message-sender";
 import * as matchers from "redux-saga-test-plan/matchers";
 import {getAddress} from "../../selectors";
-import {asAddress, bsAddress} from "../../__tests__/state-helpers";
+import {asAddress, bsAddress, appState} from "../../__tests__/state-helpers";
 import {getProvider} from "../../../utils/contract-utils";
+
 describe("message listener", () => {
   const wallet = Wallet.createRandom();
   const initialState = walletStates.initialized({
@@ -35,6 +36,72 @@ describe("message listener", () => {
         .fork(messageSender, addressResponse({id: 1, address: wallet.address}))
         .run()
     );
+  });
+
+  describe("PushMessage", () => {
+    it("handles a pushMessage", async () => {
+      const signedState = appState({turnNum: 0});
+      const destinationA = Wallet.createRandom().address;
+      const signingAddressA = asAddress;
+      const signingAddressB = bsAddress;
+      const destinationB = Wallet.createRandom().address;
+      const participants = [
+        {
+          participantId: "user-a",
+          signingAddress: signingAddressA,
+          destination: destinationA
+        },
+        {
+          participantId: "user-b",
+          signingAddress: signingAddressB,
+          destination: destinationB
+        }
+      ];
+      const pushMessage = JSON.stringify({
+        jsonrpc: "2.0",
+        method: "PushMessage",
+        id: 1,
+        params: {
+          recipient: "user-a",
+          sender: "user-b",
+          data: {type: "Channel.Open", participants, signedState}
+        }
+      });
+
+      const {effects} = await expectSaga(messageHandler, pushMessage, "localhost")
+        .withState(initialState)
+        // Mock out the fork call so we don't actually try to post the message
+        .provide([
+          [matchers.fork.fn(messageSender), 0],
+          [matchers.select.selector(getAddress), asAddress],
+          [
+            matchers.call.fn(getProvider),
+            {
+              getCode: address => {
+                return "0x12345";
+              }
+            }
+          ]
+        ])
+        .run();
+
+      expect(effects.put[1].payload.action).toMatchObject({
+        type: "WALLET.APPLICATION.OPPONENT_STATE_RECEIVED",
+        signedState
+      });
+
+      expect(effects.fork[0].payload.args[0]).toMatchObject({
+        type: "WALLET.POST_MESSAGE_RESPONSE",
+        id: 1
+      });
+
+      expect(effects.fork[1].payload.args[0]).toMatchObject({
+        type: "WALLET.CHANNEL_PROPOSED_EVENT",
+        channelId: expect.any(String)
+      });
+    });
+
+    it.skip("rejects an invalid message", () => {});
   });
   describe("CreateChannel", () => {
     it("handles a create channel request", async () => {
@@ -76,6 +143,7 @@ describe("message listener", () => {
           appData
         }
       });
+
       const {effects} = await expectSaga(messageHandler, requestMessage, "localhost")
         .withState(initialState)
         // Mock out the fork call so we don't actually try to post the message

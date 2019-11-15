@@ -7,8 +7,6 @@ import {createJsonRpcAllocationsFromOutcome} from "../../utils/json-rpc-utils";
 import jrs from "jsonrpc-lite";
 import {unreachable} from "../../utils/reducer-utils";
 
-import {Outcome} from "@statechannels/nitro-protocol";
-
 export function* messageSender(action: OutgoingJsonRpcAction) {
   const message = yield createResponseMessage(action);
   yield call(window.parent.postMessage, JSON.stringify(message), "*");
@@ -31,22 +29,20 @@ function* createResponseMessage(action: OutgoingJsonRpcAction) {
     case "WALLET.SEND_CHANNEL_PROPOSED_MESSAGE":
       const channelStatus: ChannelState = yield select(getChannelStatus, action.channelId);
 
-      const state = getLastState(channelStatus);
-      // TODO: We'll need to store and manage request ids
-      const request: Request = {
+      const request = {
         type: "Channel.Open",
-        requestID: "TODO",
-        appData: state.appData,
-        appDefinition: state.appDefinition,
-        outcome: state.outcome,
-        participants: state.channel.participants
+        signedState: channelStatus.signedStates.slice(-1)[0],
+        participants: channelStatus.participants
       };
       return jrs.notification("MessageQueued", {
         recipient: action.fromParticipantId,
         sender: action.toParticipantId,
-        data: request,
-        signedStates: channelStatus.signedStates
+        data: request
       });
+    case "WALLET.CHANNEL_PROPOSED_EVENT":
+      return jrs.notification("ChannelProposed", yield getChannelInfo(action.channelId));
+    case "WALLET.POST_MESSAGE_RESPONSE":
+      return jrs.success(action.id, {success: true});
     default:
       return unreachable(action);
   }
@@ -71,14 +67,3 @@ function* getChannelInfo(channelId: string) {
     channelId
   };
 }
-
-// TODO: Move this to a better location once we've finalized the messages
-
-interface OpenChannel {
-  type: "Channel.Open";
-  appDefinition: string;
-  appData: string;
-  outcome: Outcome;
-  participants: string[];
-}
-type Request = {requestID: string} & OpenChannel;

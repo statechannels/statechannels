@@ -3,7 +3,9 @@ import {
   createChannelResponse,
   noContractError,
   unknownSigningAddress,
-  sendChannelProposedMessage
+  sendChannelProposedMessage,
+  postMessageResponse,
+  channelProposedEvent
 } from "../../actions";
 import {Wallet} from "ethers";
 import {expectSaga} from "redux-saga-test-plan";
@@ -39,9 +41,52 @@ describe("message sender", () => {
       params: {
         recipient: "A",
         sender: "B",
-        data: {type: "Channel.Open"}
+        data: {type: "Channel.Open", signedState: state}
       }
     });
+  });
+  it("creates a notification for WALLET.CHANNEL_PROPOSED_EVENT", async () => {
+    const state = stateHelpers.appState({turnNum: 0});
+
+    const initialState = setChannel(
+      EMPTY_SHARED_DATA,
+      channelFromStates([state], stateHelpers.asAddress, stateHelpers.asPrivateKey)
+    );
+    const channelId = stateHelpers.channelId;
+    const message = channelProposedEvent({
+      channelId
+    });
+
+    const {effects} = await expectSaga(messageSender, message)
+      .withState(initialState)
+      .provide([[matchers.call.fn(window.parent.postMessage), 0]])
+      .run();
+
+    expect(JSON.parse(effects.call[0].payload.args[0])).toMatchObject({
+      jsonrpc: "2.0",
+      method: "ChannelProposed",
+      params: {
+        funding: [],
+        turnNum: 0,
+        status: "Opening",
+        channelId
+      }
+    });
+  });
+  it("sends a correct response message for WALLET.POST_MESSAGE", () => {
+    const message = postMessageResponse({id: 5});
+    return expectSaga(messageSender, message)
+      .provide([[matchers.call.fn(window.parent.postMessage), 0]])
+      .call(
+        window.parent.postMessage,
+        JSON.stringify({
+          jsonrpc: "2.0",
+          id: 5,
+          result: {success: true}
+        }),
+        "*"
+      )
+      .run();
   });
 
   it("sends a correct response message for WALLET.ADDRESS_RESPONSE", () => {
@@ -60,6 +105,7 @@ describe("message sender", () => {
       )
       .run();
   });
+
   it("sends a correct response message for WALLET.CREATE_CHANNEL_RESPONSE", async () => {
     const state = stateHelpers.appState({turnNum: 0});
 
