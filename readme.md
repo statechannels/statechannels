@@ -104,7 +104,7 @@ yarn test
 
 The tests for the `rps`, `nitro-protocol`, `wallet` and `hub` packages need to interact with a local blockchain.
 
-The following script starts a ganache server and creates a common `NetworkContext` object that holds the relevant contract information for the various packages that need the corresponding contracts.
+Run the following script _from the root of the repo_ to start a ganache server and create a common `NetworkContext` object that holds the relevant contract information for the various packages that need the corresponding contracts.
 
 ```shell
 yarn start:ganache
