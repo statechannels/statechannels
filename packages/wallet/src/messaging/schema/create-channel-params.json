@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://statechannels.org//schemas/create-channel-params.json",
+  "title": "CreateChannelParams",
+  "type": "object",
+  "properties": {
+    "participants": {
+      "type": "array",
+      "items": {
+        "$ref": "definitions.json#/definitions/Participant"
+      },
+      "title": "participants"
+    },
+    "allocations": {
+      "type": "array",
+      "items": {
+        "$ref": "definitions.json#/definitions/Allocation"
+      },
+      "title": "allocations"
+    },
+    "appDefinition": {
+      "$ref": "definitions.json#/definitions/Address",
+      "title": "appDefinition"
+    },
+    "appData": {
+      "type": "string",
+      "title": "appData"
+    }
+  },
+  "required": [
+    "allocations",
+    "appData",
+    "appDefinition",
+    "participants"
+  ]
+}
