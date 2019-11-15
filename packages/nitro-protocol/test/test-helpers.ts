@@ -1,6 +1,7 @@
-import {Contract, ethers, Wallet} from 'ethers';
-import {AddressZero, HashZero} from 'ethers/constants';
-import {TransactionReceipt, TransactionRequest} from 'ethers/providers';
+import NetworkContext from '../ganache/ganache-network-context.json';
+import { Contract, ethers, Wallet } from 'ethers';
+import { AddressZero, HashZero } from 'ethers/constants';
+import { TransactionReceipt, TransactionRequest } from 'ethers/providers';
 import {
   arrayify,
   bigNumberify,
@@ -10,9 +11,8 @@ import {
   Signature,
   splitSignature,
 } from 'ethers/utils';
-import requestPromise from 'request-promise-native';
 
-import {hashChannelStorage} from '../src/contract/channel-storage';
+import { hashChannelStorage } from '../src/contract/channel-storage';
 import {
   Allocation,
   AllocationAssetOutcome,
@@ -22,7 +22,7 @@ import {
   hashAssetOutcome,
   Outcome,
 } from '../src/contract/outcome';
-import {hashState, State} from '../src/contract/state';
+import { hashState, State } from '../src/contract/state';
 
 // interfaces
 
@@ -48,18 +48,14 @@ export const getTestProvider = () => {
   return new ethers.providers.JsonRpcProvider(`http://localhost:${process.env.GANACHE_PORT}`);
 };
 
-export const getNetworkMap = async () => {
-  try {
-    // TODO: validate deployments against a whitelist
-    // TODO: share type info for what's expected from this end point
-    const networkContext = JSON.parse(
-      await requestPromise(`http://localhost:${process.env.DEV_SERVER_PORT}`)
-    );
-    return networkContext.contracts;
-  } catch (err) {
-    throw Error(err);
+export function getNetworkMap() {
+  // TODO: validate deployments against a whitelist
+  // TODO: share type info for what's expected from this end point
+  if (Object.keys(NetworkContext).length > 0) {
+    return NetworkContext;
   }
-};
+  throw Error(`Empty Network Context option. Make sure the Ganache server has been deployed.`);
+}
 
 export async function setupContracts(provider: ethers.providers.JsonRpcProvider, artifact) {
   const signer = provider.getSigner(0);
@@ -186,7 +182,7 @@ export const newTransferEvent = (contract: ethers.Contract, to: string) => {
 };
 
 export const newAssetTransferredEvent = (destination: string, payout: number) => {
-  return {destination: destination.toLowerCase(), amount: payout};
+  return { destination: destination.toLowerCase(), amount: payout };
 };
 
 export function randomChannelId(channelNonce = 0) {
@@ -215,7 +211,7 @@ export async function sendTransaction(
   transaction: TransactionRequest
 ): Promise<TransactionReceipt> {
   const signer = provider.getSigner();
-  const response = await signer.sendTransaction({to: contractAddress, ...transaction});
+  const response = await signer.sendTransaction({ to: contractAddress, ...transaction });
   return await response.wait();
 }
 
@@ -314,7 +310,7 @@ export function checkMultipleAssetOutcomeHashes(
     const allocationAfter = [];
     Object.keys(assetOutcome).forEach(destination => {
       const amount = assetOutcome[destination];
-      allocationAfter.push({destination, amount});
+      allocationAfter.push({ destination, amount });
     });
     const [, expectedNewAssetOutcomeHash] = allocationToParams(allocationAfter);
     contractsArray.forEach(async contract => {
@@ -355,7 +351,7 @@ export function assetTransferredEventsFromPayouts(
       assetTransferredEvents.push({
         contract: assetHolder,
         name: 'AssetTransferred',
-        values: {destination, amount: singleAssetPayouts[destination]},
+        values: { destination, amount: singleAssetPayouts[destination] },
       });
     }
   });
@@ -367,7 +363,7 @@ export function compileEventsFromLogs(logs: any[], contractsArray: Contract[]) {
   logs.forEach(log => {
     contractsArray.forEach(contract => {
       if (log.address === contract.address) {
-        events.push({...contract.interface.parseLog(log), contract: log.address});
+        events.push({ ...contract.interface.parseLog(log), contract: log.address });
       }
     });
   });
