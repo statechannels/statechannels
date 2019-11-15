@@ -1,4 +1,4 @@
-import {GanacheServer} from '@statechannels/devtools';
+import { GanacheServer } from '@statechannels/devtools';
 import log from 'loglevel';
 
 import countingAppArtifact from '../build/contracts/CountingApp.json';
@@ -8,6 +8,7 @@ import singleAssetPaymentsArtifact from '../build/contracts/SingleAssetPayments.
 import testAssetHolderArtifact1 from '../build/contracts/TESTAssetHolder.json';
 import testAssetHolderArtifact2 from '../build/contracts/TESTAssetHolder2.json';
 import testForceMoveArtifact from '../build/contracts/TESTForceMove.json';
+import nitroAdjudicatorArtifact from '../build/contracts/NitroAdjudicator.json';
 import testNitroAdjudicatorArtifact from '../build/contracts/TESTNitroAdjudicator.json';
 import tokenArtifact from '../build/contracts/Token.json';
 import trivialAppArtifact from '../build/contracts/TrivialApp.json';
@@ -24,6 +25,7 @@ export async function deployContracts(chain: GanacheServer): Promise<object> {
     trivialAppArtifact,
     countingAppArtifact,
     singleAssetPaymentsArtifact,
+    nitroAdjudicatorArtifact,
     testNitroAdjudicatorArtifact,
     tokenArtifact,
     {

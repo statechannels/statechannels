@@ -23,10 +23,6 @@ export class GanacheServer {
     gasLimit: number = 1000000000,
     gasPrice: string = "0x01"
   ) {
-    if (!process.env.GANACHE_NETWORK_ID) {
-      log.warn("No GANACHE_NETWORK_ID found.");
-    }
-
     log.info(`Starting ganache on port ${this.port}`);
 
     this.fundedPrivateKey = accounts[0].privateKey;
@@ -99,7 +95,7 @@ export class GanacheServer {
         abi: JSON.stringify(artifact.abi)
       };
     }
-
+    log.info(`Contracts deployed to chain`);
     return deployedArtifacts;
   }
 }

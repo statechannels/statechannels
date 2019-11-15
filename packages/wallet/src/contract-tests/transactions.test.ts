@@ -18,14 +18,14 @@ import {
 import {depositIntoETHAssetHolder} from "./test-utils";
 import {transactionSender} from "../redux/sagas/transaction-sender";
 import {testSaga} from "redux-saga-test-plan";
-import {getProvider, getContractAddress} from "../utils/contract-utils";
+import {getProvider} from "../utils/contract-utils";
 import {transactionSent, transactionSubmitted, transactionConfirmed} from "../redux/actions";
 import {
   NETWORK_ID,
   CHALLENGE_DURATION,
-  TRIVIAL_APP,
-  ETH_ASSET_HOLDER,
-  TEST_NITRO_ADJUDICATOR
+  ADJUDICATOR_ADDRESS,
+  ETH_ASSET_HOLDER_ADDRESS,
+  TRIVIAL_APP_ADDRESS
 } from "../constants";
 import {convertBalanceToOutcome} from "../redux/__tests__/state-helpers";
 
@@ -33,11 +33,9 @@ jest.setTimeout(90000);
 
 describe("transactions", () => {
   let libraryAddress;
-  let ethAssetHolderAddress;
   let nonce = 5;
   let participantA = ethers.Wallet.createRandom();
   let participantB = ethers.Wallet.createRandom();
-  const contracts = global["contracts"];
 
   const provider: ethers.providers.JsonRpcProvider = getGanacheProvider();
   const signer = provider.getSigner();
@@ -50,7 +48,7 @@ describe("transactions", () => {
     const processId = "processId";
     const queuedTransaction = {transactionRequest: transactionToSend, processId};
     const transactionPayload = {
-      to: getContractAddress(TEST_NITRO_ADJUDICATOR, contracts),
+      to: ADJUDICATOR_ADDRESS,
       ...queuedTransaction.transactionRequest
     };
 
@@ -84,8 +82,8 @@ describe("transactions", () => {
   }
 
   beforeAll(async () => {
-    libraryAddress = getContractAddress(TRIVIAL_APP, contracts);
-    ethAssetHolderAddress = getContractAddress(ETH_ASSET_HOLDER, contracts);
+    // TODO: rename this? why is it called a library address?
+    libraryAddress = TRIVIAL_APP_ADDRESS;
   });
 
   beforeEach(() => {
@@ -98,7 +96,7 @@ describe("transactions", () => {
     const depositTransactionData = createETHDepositTransaction(someChannelId, "0x5", "0x0");
     await testTransactionSender({
       ...depositTransactionData,
-      to: ethAssetHolderAddress,
+      to: ETH_ASSET_HOLDER_ADDRESS,
       value: 5
     });
   });
@@ -274,7 +272,8 @@ describe("transactions", () => {
     await testTransactionSender(transferAndWithdraw);
   });
 
-  it("should send a conclude, push outcome, and transfer all transaction", async () => {
+  it.only("should send a conclude, push outcome, and transfer all transaction", async () => {
+    console.log("chain idddd");
     const channelNonce = getNextNonce();
     const channel: Channel = {
       channelNonce,

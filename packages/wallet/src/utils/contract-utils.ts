@@ -1,4 +1,5 @@
 import {State, validTransition} from "@statechannels/nitro-protocol";
+import NetworkContext from "@statechannels/nitro-protocol/ganache/ganache-network-context.json";
 import {ethers} from "ethers";
 import {AddressZero} from "ethers/constants";
 import log from "loglevel";
@@ -7,12 +8,16 @@ log.setDefaultLevel(log.levels.DEBUG);
 
 let networkMap;
 
-export function getContractAddress(contractName, networkContext?) {
-  networkMap = networkMap || networkContext;
+export function getContractAddress(contractName) {
+  console.info(`Getting contract ${contractName}`);
+  networkMap = networkMap || NetworkContext;
+  // log.info(`Getting contract address: ${contractName}`);
+  // log.info(`with network map`);
+  // log.info(networkMap[contractName].address);
   if (networkMap && networkMap[contractName]) {
     return networkMap[contractName].address;
   }
-  // console.error(contractName, networkMap);
+  console.error(contractName, networkMap);
 
   throw new Error(`Could not find ${contractName} in network map ${JSON.stringify(networkMap)}}`);
 }
@@ -36,11 +41,13 @@ export async function getETHAssetHolderContract(provider) {
 }
 
 export function getAdjudicatorInterface(): ethers.utils.Interface {
+  // TODO: update these to use the ABI from the network context
   const NitroAdjudicatorArtifact = require("../../build/contracts/NitroAdjudicator.json");
   return new ethers.utils.Interface(NitroAdjudicatorArtifact.abi);
 }
 
 export function getETHAssetHolderInterface(): ethers.utils.Interface {
+  // TODO: update these to use the ABI from the network context
   const ETHAssetHolderArtifact = require("../../build/contracts/ETHAssetHolder.json");
   return new ethers.utils.Interface(ETHAssetHolderArtifact.abi);
 }
@@ -49,6 +56,14 @@ export function getETHAssetHolderInterface(): ethers.utils.Interface {
 // is why this try {} catch {} logic is here, but returning AddressZero is only a way of
 // avoiding errors being thrown. The situation is that all tests which actually interact
 // with the blockchain are currently skipped, and so the AddressZero value is never used.
+
+export function getTrivialAppAddress(): string {
+  try {
+    return getContractAddress("TrivialApp");
+  } catch (e) {
+    return AddressZero;
+  }
+}
 
 export function getETHAssetHolderAddress(): string {
   try {
@@ -75,6 +90,7 @@ export function getConsensusContractAddress(): string {
 }
 
 export function getNetworkId(): number {
+  log.info(`Getting chain network ID: ${process.env.CHAIN_NETWORK_ID}`);
   if (!!process.env.CHAIN_NETWORK_ID) {
     return parseInt(process.env.CHAIN_NETWORK_ID, 10);
   } else {

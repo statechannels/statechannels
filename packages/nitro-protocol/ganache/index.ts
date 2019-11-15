@@ -1,50 +1,51 @@
-import {GanacheServer} from '@statechannels/devtools';
-import Koa = require('koa');
-import Router = require('koa-router');
+import { GanacheServer } from '@statechannels/devtools';
 import dotEnvExtended from 'dotenv-extended';
+import fs from 'fs';
 import log from 'loglevel';
+import path from 'path';
+import writeJsonFile from 'write-json-file';
 
-import {deployContracts} from './deployer';
-import {logger as serverLogger} from './logger';
+import { deployContracts } from './deployer';
 
 dotEnvExtended.load();
 
 log.setDefaultLevel(log.levels.INFO);
 
-const serverPort = process.env.DEV_SERVER_PORT || 3000;
+const GANACHE_CONTRACTS_FILE = 'ganache-network-context.json';
+const GANACHE_CONTRACTS_PATH = path.join(__dirname, GANACHE_CONTRACTS_FILE);
+log.info(`Writing network context into file: ${GANACHE_CONTRACTS_PATH}\n`);
 
-const router = new Router();
-const body = {
-  ganachePort: process.env.GANACHE_PORT,
-  contracts: {},
-};
-router.get('/', async ctx => (ctx.body = JSON.stringify(body, null, 2)));
+(async () => {
+  try {
+    if (!process.env.GANACHE_PORT) {
+      throw Error(
+        'Cannot start ganache server without a specified port. Set port via the GANACHE_PORT env var'
+      );
+    }
 
-const server = new Koa();
-server.use(serverLogger);
-server.use(router.routes());
-server
-  .listen(serverPort)
-  .on('error', err => console.error(err))
-  .on('listening', async () => await startGanache());
+    const port = Number(process.env.GANACHE_PORT);
 
-async function startGanache() {
-  log.info(`Starting contract deployment server on port ${serverPort}`);
+    const chain = new GanacheServer(port);
+    await chain.ready();
 
-  if (!process.env.GANACHE_PORT) {
-    throw Error(
-      'Cannot start ganache server without a specified port. Set port via the GANACHE_PORT env var'
-    );
+    // catch various ways to ensure network context file is deleted
+    process.on('exit', exitHandler.bind(null, chain));
+    process.on('SIGINT', exitHandler.bind(null, chain));
+    process.on('SIGUSR1', exitHandler.bind(null, chain));
+    process.on('SIGUSR2', exitHandler.bind(null, chain));
+
+    const contracts = await deployContracts(chain);
+    await writeJsonFile(GANACHE_CONTRACTS_PATH, contracts);
+
+    log.info(`Network context written to ${GANACHE_CONTRACTS_FILE}`);
+  } catch (e) {
+    throw Error(e);
   }
+})();
 
-  const port = Number(process.env.GANACHE_PORT);
-
-  const chain = new GanacheServer(port);
-  await chain.ready();
-
-  process.on('exit', async () => await chain.close());
-
-  body.contracts = await deployContracts(chain);
-
-  log.info(`Contracts deployed: ${JSON.stringify(body.contracts, null, 2)}`);
+async function exitHandler(chain: GanacheServer) {
+  await chain.close();
+  fs.unlink(GANACHE_CONTRACTS_PATH, () => {
+    log.info(`Deleted locally deployed network context: ${GANACHE_CONTRACTS_FILE}`);
+  });
 }
