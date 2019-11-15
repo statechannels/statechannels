@@ -7,14 +7,14 @@ log.setDefaultLevel(log.levels.DEBUG);
 
 let networkMap;
 
-export function getLibraryAddress(contractName, networkContext?) {
+export function getContractAddress(contractName, networkContext?) {
   networkMap = networkMap || networkContext;
   if (networkMap && networkMap[contractName]) {
-    return networkMap[contractName];
+    return networkMap[contractName].address;
   }
-  console.error(contractName, networkMap);
+  // console.error(contractName, networkMap);
 
-  throw new Error(`Could not find ${contractName} in network map ${networkMap}}`);
+  throw new Error(`Could not find ${contractName} in network map ${JSON.stringify(networkMap)}}`);
 }
 
 export async function getProvider(): Promise<ethers.providers.Web3Provider> {
@@ -24,14 +24,14 @@ export async function getProvider(): Promise<ethers.providers.Web3Provider> {
 export async function getAdjudicatorContract(provider) {
   await provider.ready;
 
-  const contractAddress = getLibraryAddress("NitroAdjudicator");
+  const contractAddress = getContractAddress("NitroAdjudicator");
   return new ethers.Contract(contractAddress, getAdjudicatorInterface(), provider);
 }
 
 export async function getETHAssetHolderContract(provider) {
   await provider.ready;
 
-  const contractAddress = getLibraryAddress("ETHAssetHolder");
+  const contractAddress = getContractAddress("ETHAssetHolder");
   return new ethers.Contract(contractAddress, getETHAssetHolderInterface(), provider);
 }
 
@@ -52,7 +52,7 @@ export function getETHAssetHolderInterface(): ethers.utils.Interface {
 
 export function getETHAssetHolderAddress(): string {
   try {
-    return getLibraryAddress("ETHAssetHolder");
+    return getContractAddress("ETHAssetHolder");
   } catch (e) {
     return AddressZero;
   }
@@ -60,7 +60,7 @@ export function getETHAssetHolderAddress(): string {
 
 export function getAdjudicatorContractAddress(): string {
   try {
-    return getLibraryAddress("NitroAdjudicator");
+    return getContractAddress("NitroAdjudicator");
   } catch (e) {
     return AddressZero;
   }
@@ -68,7 +68,7 @@ export function getAdjudicatorContractAddress(): string {
 
 export function getConsensusContractAddress(): string {
   try {
-    return getLibraryAddress("ConsensusApp");
+    return getContractAddress("ConsensusApp");
   } catch (e) {
     return AddressZero;
   }
