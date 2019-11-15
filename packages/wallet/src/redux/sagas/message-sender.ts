@@ -14,9 +14,10 @@ export function* messageSender(action: OutgoingApiAction) {
 
 function* createResponseMessage(action: OutgoingApiAction) {
   switch (action.type) {
+    case "WALLET.JOIN_CHANNEL_RESPONSE":
+      return jrs.success(action.id, yield getChannelInfo(action.channelId));
     case "WALLET.CREATE_CHANNEL_RESPONSE":
-      const channelInfo = yield getChannelInfo(action.channelId);
-      return jrs.success(action.id, {...channelInfo});
+      return jrs.success(action.id, yield getChannelInfo(action.channelId));
     case "WALLET.UPDATE_CHANNEL_RESPONSE":
       return jrs.success(action.id, action.state);
     case "WALLET.ADDRESS_RESPONSE":
