@@ -103,8 +103,10 @@ describe("message listener", () => {
       });
     });
 
+    // tslint:disable-next-line: no-empty
     it.skip("rejects an invalid message", () => {});
   });
+
   describe("CreateChannel", () => {
     it("handles a create channel request", async () => {
       const destinationA = Wallet.createRandom().address;
