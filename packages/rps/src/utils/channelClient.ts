@@ -275,6 +275,10 @@ export class ChannelClient {
     );
   }
 
+  unSubscribe(notificationName: NotificationName): void {
+    this.events.removeAllListeners('message');
+  }
+
   async createChannel(parameters: CreateChannelParameters) {
     await this.sendToWallet('CreateChannel', parameters);
 
