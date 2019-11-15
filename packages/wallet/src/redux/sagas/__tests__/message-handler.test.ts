@@ -6,8 +6,10 @@ import {Wallet} from "ethers";
 import {messageSender} from "../message-sender";
 import * as matchers from "redux-saga-test-plan/matchers";
 import {getAddress} from "../../selectors";
-import {asAddress, bsAddress, appState} from "../../__tests__/state-helpers";
+import {asAddress, bsAddress, appState, asPrivateKey} from "../../__tests__/state-helpers";
 import {getProvider} from "../../../utils/contract-utils";
+import {setChannel} from "../../../../src/redux/channel-store";
+import {channelFromStates} from "../../channel-store/channel-state/__tests__";
 
 describe("message listener", () => {
   const wallet = Wallet.createRandom();
@@ -308,6 +310,90 @@ describe("message listener", () => {
       expect(effects.fork[0].payload.args[0]).toMatchObject({
         type: "WALLET.NO_CONTRACT_ERROR",
         id: 1
+      });
+    });
+  });
+
+  describe("UpdateChannel", () => {
+    it("handles an update channel request", async () => {
+      // Data being submitted to UpdateChannel
+      const destinationA = Wallet.createRandom().address;
+      const destinationB = Wallet.createRandom().address;
+      const appData = "0x01010101";
+      const allocations = [
+        {
+          token: "0x0",
+          allocationItems: [
+            {destination: destinationA, amount: "12"},
+            {destination: destinationB, amount: "12"}
+          ]
+        }
+      ];
+
+      // Existing data in the store
+      const testChannel = channelFromStates([appState({turnNum: 0})], asAddress, asPrivateKey);
+
+      const requestMessage = JSON.stringify({
+        jsonrpc: "2.0",
+        method: "UpdateChannel",
+        id: 1,
+        params: {
+          channelId: testChannel.channelId,
+          allocations,
+          appData
+        }
+      });
+
+      const {effects} = await expectSaga(messageHandler, requestMessage, "localhost")
+        .withState({...initialState, channelStore: setChannel({}, testChannel)})
+        // Mock out the fork call so we don't actually try to post the message
+        .provide([[matchers.fork.fn(messageSender), 0]])
+        .run();
+
+      const state = {
+        appData,
+        turnNum: 1,
+        outcome: [
+          {allocation: allocations[0].allocationItems, assetHolderAddress: allocations[0].token}
+        ]
+      };
+
+      expect(effects.put[0].payload.action).toMatchObject({
+        type: "WALLET.APPLICATION.OWN_STATE_RECEIVED",
+        state
+      });
+
+      expect(effects.fork[0].payload.args[0]).toMatchObject({
+        type: "WALLET.UPDATE_CHANNEL_RESPONSE",
+        id: 1,
+        state
+      });
+    });
+
+    it("returns an error when the channelId is not known", async () => {
+      const unknownChannelId = "0xsomefakeid";
+
+      const requestMessage = JSON.stringify({
+        jsonrpc: "2.0",
+        method: "UpdateChannel",
+        id: 1,
+        params: {
+          channelId: unknownChannelId, // <----- important part of the test
+          allocations: [],
+          appData: "0x"
+        }
+      });
+
+      const {effects} = await expectSaga(messageHandler, requestMessage, "localhost")
+        .withState(initialState)
+        // Mock out the fork call so we don't actually try to post the message
+        .provide([[matchers.fork.fn(messageSender), 0]])
+        .run();
+
+      expect(effects.fork[0].payload.args[0]).toMatchObject({
+        type: "WALLET.UNKNOWN_CHANNEL_ID_ERROR",
+        id: 1,
+        channelId: unknownChannelId
       });
     });
   });

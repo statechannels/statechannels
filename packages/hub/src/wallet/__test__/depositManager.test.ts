@@ -1,11 +1,11 @@
 import {bigNumberify} from 'ethers/utils';
 import {Address, Uint256} from 'fmg-core';
-import {DUMMY_RULES_BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID} from '../../test/test-constants';
+import {BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID} from '../../test/test_data';
 import Channel from '../models/channel';
 import {Blockchain} from '../services/blockchain';
 import {onDepositEvent} from '../services/depositManager';
 
-const channelId = DUMMY_RULES_BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID;
+const channelId = BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID;
 
 async function getHoldings() {
   return (await Channel.query()

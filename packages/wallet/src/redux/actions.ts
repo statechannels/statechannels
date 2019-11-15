@@ -315,6 +315,16 @@ export const createChannelResponse: ActionConstructor<CreateChannelResponse> = p
   ...p,
   type: "WALLET.CREATE_CHANNEL_RESPONSE"
 });
+
+export interface UpdateChannelResponse extends JsonRpcRequestResponseAction {
+  type: "WALLET.UPDATE_CHANNEL_RESPONSE";
+  state: State;
+}
+export const updateChannelResponse: ActionConstructor<UpdateChannelResponse> = p => ({
+  ...p,
+  type: "WALLET.UPDATE_CHANNEL_RESPONSE"
+});
+
 export interface AddressResponse extends JsonRpcRequestResponseAction {
   type: "WALLET.ADDRESS_RESPONSE";
   address: string;
@@ -332,6 +342,16 @@ export interface UnknownSigningAddress extends JsonRpcRequestResponseAction {
 export const unknownSigningAddress: ActionConstructor<UnknownSigningAddress> = p => ({
   ...p,
   type: "WALLET.UNKNOWN_SIGNING_ADDRESS_ERROR"
+});
+
+export interface UnknownChannelId extends JsonRpcRequestResponseAction {
+  type: "WALLET.UNKNOWN_CHANNEL_ID_ERROR";
+  channelId: string;
+}
+
+export const unknownChannelId: ActionConstructor<UnknownChannelId> = p => ({
+  ...p,
+  type: "WALLET.UNKNOWN_CHANNEL_ID_ERROR"
 });
 
 export interface NoContractError extends JsonRpcRequestResponseAction {
@@ -377,8 +397,11 @@ export const postMessageResponse: ActionConstructor<PostMessageResponse> = p => 
 export type OutgoingJsonRpcAction =
   | AddressResponse
   | CreateChannelResponse
+  | UpdateChannelResponse
   | UnknownSigningAddress
   | NoContractError
   | SendChannelProposedMessage
   | ChannelProposedEvent
-  | PostMessageResponse;
+  | PostMessageResponse
+  | UnknownChannelId
+  | NoContractError;

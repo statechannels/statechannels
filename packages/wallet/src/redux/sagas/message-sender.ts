@@ -17,6 +17,8 @@ function* createResponseMessage(action: OutgoingJsonRpcAction) {
     case "WALLET.CREATE_CHANNEL_RESPONSE":
       const channelInfo = yield getChannelInfo(action.channelId);
       return jrs.success(action.id, {...channelInfo});
+    case "WALLET.UPDATE_CHANNEL_RESPONSE":
+      return jrs.success(action.id, action.state);
     case "WALLET.ADDRESS_RESPONSE":
       return jrs.success(action.id, action.address);
     case "WALLET.NO_CONTRACT_ERROR":
@@ -43,6 +45,14 @@ function* createResponseMessage(action: OutgoingJsonRpcAction) {
       return jrs.notification("ChannelProposed", yield getChannelInfo(action.channelId));
     case "WALLET.POST_MESSAGE_RESPONSE":
       return jrs.success(action.id, {success: true});
+    case "WALLET.UNKNOWN_CHANNEL_ID_ERROR":
+      return jrs.error(
+        action.id,
+        new jrs.JsonRpcError(
+          "The wallet can't find the channel corresponding to the channelId",
+          1000
+        )
+      );
     default:
       return unreachable(action);
   }

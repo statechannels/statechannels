@@ -1,6 +1,6 @@
 import {bigNumberify} from "ethers/utils";
 import {unreachable} from "../../../utils/reducer-utils";
-import {createDepositTransaction} from "../../../utils/transaction-generator";
+import {createETHDepositTransaction} from "../../../utils/transaction-generator";
 import * as actions from "../../actions";
 import {ProtocolReducer, ProtocolStateWithSharedData} from "../../protocols";
 import {SharedData, registerChannelToMonitor} from "../../state";
@@ -72,7 +72,7 @@ export function initialize({
   }
 
   if (alreadySafeToDeposit) {
-    const depositTransaction = createDepositTransaction(
+    const depositTransaction = createETHDepositTransaction(
       channelId,
       requiredDeposit,
       existingChannelFunding
@@ -174,7 +174,7 @@ const notSafeToDepositReducer: DFReducer = (
           sharedData,
           state.channelId
         );
-        const depositTransaction = createDepositTransaction(
+        const depositTransaction = createETHDepositTransaction(
           state.channelId,
           state.requiredDeposit,
           existingChannelFunding

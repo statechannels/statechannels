@@ -1,12 +1,17 @@
 import {select, fork, put, call} from "redux-saga/effects";
+import {getChannelId, State} from "@statechannels/nitro-protocol";
+import jrs, {RequestObject} from "jsonrpc-lite";
 
 import * as actions from "../actions";
-import jrs, {RequestObject} from "jsonrpc-lite";
-import {getAddress} from "../selectors";
+import {getAddress, getLastStateForChannel, doesAStateExistForChannel} from "../selectors";
 import {messageSender} from "./message-sender";
-import {getChannelId} from "@statechannels/nitro-protocol";
 import {APPLICATION_PROCESS_ID} from "../protocols/application/reducer";
-import {createStateFromCreateChannelParams, JsonRpcMessage} from "../../utils/json-rpc-utils";
+import {
+  createStateFromCreateChannelParams,
+  createStateFromUpdateChannelParams,
+  JsonRpcMessage
+} from "../../utils/json-rpc-utils";
+
 import {getProvider} from "../../utils/contract-utils";
 
 export function* messageHandler(jsonRpcMessage: string, fromDomain: string) {
@@ -37,6 +42,9 @@ function* handleMessage(payload: RequestObject) {
       break;
     case "PushMessage":
       yield handlePushMessage(payload);
+      break;
+    case "UpdateChannel":
+      yield handleUpdateChannelMessage(payload);
       break;
   }
 }
@@ -72,6 +80,30 @@ function* handlePushMessage(payload: RequestObject) {
       const channelId = getChannelId(signedState.state.channel);
       yield fork(messageSender, actions.channelProposedEvent({channelId}));
       break;
+  }
+}
+
+function* handleUpdateChannelMessage(payload: RequestObject) {
+  const {id, params} = payload;
+  const {channelId} = params as any;
+
+  const channelExists = yield select(doesAStateExistForChannel, channelId);
+
+  if (!channelExists) {
+    yield fork(messageSender, actions.unknownChannelId({id, channelId}));
+  } else {
+    const mostRecentState: State = yield select(getLastStateForChannel, channelId);
+
+    const newState = createStateFromUpdateChannelParams(mostRecentState, payload.params as any);
+
+    yield put(
+      actions.application.ownStateReceived({
+        state: newState,
+        processId: APPLICATION_PROCESS_ID
+      })
+    );
+
+    yield fork(messageSender, actions.updateChannelResponse({id, state: newState}));
   }
 }
 

@@ -7,7 +7,7 @@ import {StateConstructor} from "../../../utils";
 // -------
 
 export type FailureReason =
-  | "ChannelDoesntExist"
+  | "ChannelDoesNotExist"
   | "NotFullyOpen"
   | "DeclinedByUser"
   | "AlreadyHaveLatest"

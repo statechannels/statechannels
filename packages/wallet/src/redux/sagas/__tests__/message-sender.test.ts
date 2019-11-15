@@ -5,7 +5,9 @@ import {
   unknownSigningAddress,
   sendChannelProposedMessage,
   postMessageResponse,
-  channelProposedEvent
+  channelProposedEvent,
+  updateChannelResponse,
+  unknownChannelId
 } from "../../actions";
 import {Wallet} from "ethers";
 import {expectSaga} from "redux-saga-test-plan";
@@ -106,7 +108,7 @@ describe("message sender", () => {
       .run();
   });
 
-  it("sends a correct response message for WALLET.CREATE_CHANNEL_RESPONSE", async () => {
+  it("creates a correct response message for WALLET.CREATE_CHANNEL_RESPONSE", async () => {
     const state = stateHelpers.appState({turnNum: 0});
 
     const initialState = setChannel(
@@ -136,7 +138,32 @@ describe("message sender", () => {
     });
   });
 
-  it("sends an error response for WALLET.NO_CONTRACT_ERROR", async () => {
+  it("creates a correct response message for WALLET.UPDATE_CHANNEL_RESPONSE", async () => {
+    const {state, signature} = stateHelpers.appState({turnNum: 0});
+
+    const initialState = setChannel(
+      EMPTY_SHARED_DATA,
+      channelFromStates([{state, signature}], stateHelpers.asAddress, stateHelpers.asPrivateKey)
+    );
+
+    const message = updateChannelResponse({
+      id: 1,
+      state
+    });
+
+    const {effects} = await expectSaga(messageSender, message)
+      .withState(initialState)
+      .provide([[matchers.call.fn(window.parent.postMessage), 0]])
+      .run();
+
+    expect(JSON.parse(effects.call[0].payload.args[0])).toMatchObject({
+      jsonrpc: "2.0",
+      id: 1,
+      result: {...state}
+    });
+  });
+
+  it("creates a error response for WALLET.NO_CONTRACT_ERROR", async () => {
     const state = stateHelpers.appState({turnNum: 0});
 
     const initialState = setChannel(
@@ -183,6 +210,27 @@ describe("message sender", () => {
       jsonrpc: "2.0",
       id: 1,
       error: {code: 1000, message: "Signing address not found in the participants array"}
+    });
+  });
+
+  it("creates a error response for WALLET.UNKNOWN_CHANNEL_ID", async () => {
+    const message = unknownChannelId({
+      id: 1,
+      channelId: "0xbadchannelid"
+    });
+
+    const {effects} = await expectSaga(messageSender, message)
+      .withState(EMPTY_SHARED_DATA)
+      .provide([[matchers.call.fn(window.parent.postMessage), 0]])
+      .run();
+
+    expect(JSON.parse(effects.call[0].payload.args[0])).toMatchObject({
+      jsonrpc: "2.0",
+      id: 1,
+      error: {
+        code: 1000,
+        message: "The wallet can't find the channel corresponding to the channelId"
+      }
     });
   });
 });

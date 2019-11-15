@@ -1,8 +1,8 @@
 import {errors} from '../../..';
 import {
-  constructors as testDataConstructors,
   created_channel,
-  funded_channel
+  funded_channel,
+  stateConstructors as testDataConstructors
 } from '../../../../test/test_data';
 import Channel from '../../../models/channel';
 import knex from '../../connection';
@@ -49,13 +49,13 @@ describe('updateChannel', () => {
 
   describe('when theirState is not a PreFundSetup', () => {
     it('works when the channel exists', async () => {
-      const {channelNonce: nonce} = testDataConstructors.post_fund_setup(2).channel;
+      const {channelNonce} = testDataConstructors.post_fund_setup(2).channel;
       const existing_allocator_channel = await Channel.query()
-        .where({nonce})
+        .where({channel_nonce: channelNonce})
         .eager('[states.[outcome.[allocation]], participants]')
         .first();
 
-      expect(existing_allocator_channel).toMatchObject(seeds.funded_channel);
+      expect(existing_allocator_channel).toMatchObject(seeds.fundedChannelWithStates);
 
       const updated_allocator_channel = await queries.updateChannel(
         [testDataConstructors.post_fund_setup(2)],
@@ -63,7 +63,7 @@ describe('updateChannel', () => {
       );
 
       expect(updated_allocator_channel).toMatchObject({
-        ...seeds.funded_channel,
+        ...seeds.fundedChannelWithStates,
         states: [seedDataConstructors.post_fund_setup(2), seedDataConstructors.post_fund_setup(3)]
       });
 
