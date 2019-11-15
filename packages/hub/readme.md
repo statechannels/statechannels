@@ -10,9 +10,13 @@ https://devcenter.heroku.com/articles/heroku-cli
 
 ### .env
 
-Copy `.env.example` to `.env`, and make it your own.
+Copy `.env.development` to `.env`, and make it your own.
 
-## Setup
+### Local Ganache
+
+Make sure a local ganache instance is running by following [the instructions at the root of the repo](../../readme.md#Development-Flow)
+
+### Setup
 
 ```
 $ npm i -g yarn

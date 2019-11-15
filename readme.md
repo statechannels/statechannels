@@ -100,6 +100,38 @@ To run all tests:
 yarn test
 ```
 
+### Development Flow
+
+The tests for the `rps`, `nitro-protocol`, `wallet` and `hub` packages need to interact with a local blockchain.
+
+The following script starts a ganache server and creates a common `NetworkContext` object that holds the relevant contract information for the various packages that need the corresponding contracts.
+
+```shell
+yarn start:ganache
+```
+
+The `NetworkContext` object is held at a specific path of the `nitro-protocol` package that can be referenced in other packages via `import NetworkContext from "@statechannels/nitro-protocol/ganache-ganache-network-context.json"`.
+
+Running the above script should produce an output similar to this:
+
+```shell
+Writing network context into file: ~/monorepo/packages/nitro-protocol/ganache/ganache-network-context.json
+
+HTTP server listening on port 3000
+Starting ganache on port 8547 with network ID 9001
+Deploying built contracts to chain at: http://localhost:8547
+Contracts deployed to chain
+Network context written to ganache-network-context.json
+```
+
+The configuration used for this chain can be updated via the `.env` file in the `nitro-protocol` package.
+
+Once this server is shut down, it'll remove the `NetworkContext` object that was created for that instance of the ganache and it should display something similar to:
+
+```shell
+Deleted locally deployed network context: ganache-network-context.json
+```
+
 ## Community
 
 State Channels Forums: https://research.statechannels.org/
