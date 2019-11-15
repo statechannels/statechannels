@@ -62,9 +62,8 @@ export class GanacheServer {
   }
 
   async close() {
-    kill(this.server.pid);
-
     try {
+      kill(this.server.pid);
       await waitUntilFree(this.port, 500, this.timeout);
     } catch (err) {
       throw err;

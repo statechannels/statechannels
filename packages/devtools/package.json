@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "@types/loglevel": "1.6.3",
+    "@types/tcp-port-used": "1.0.0",
     "ganache-cli": "6.6.0",
     "lint-staged": "9.4.1",
     "tcp-port-used": "1.0.1",

@@ -5002,6 +5002,13 @@
     "@types/express-serve-static-core" "*"
     "@types/mime" "*"
 
+"@types/server-destroy@1.0.0":
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/@types/server-destroy/-/server-destroy-1.0.0.tgz#d206a16e8761054ee38be6bfb83c267ddd291072"
+  integrity sha512-/rF2pouf4RWySNTrQa7BMqViBg52B4Ld+5QCNgwxmw8EhuHqmv3MkyR2WiYfSdq1sHX2EAsY4zeVZfZvvZomoA==
+  dependencies:
+    "@types/node" "*"
+
 "@types/simple-peer@*":
   version "6.1.6"
   resolved "https://registry.yarnpkg.com/@types/simple-peer/-/simple-peer-6.1.6.tgz#a1a1f4793f6a3f7ec17df2056fe3a036a1bc2313"
@@ -5048,6 +5055,11 @@
   integrity sha512-ltfyuY5BIkYlGuQfwqzTDT8f0q8Z5DGppvUnWGs39oqDmMd6/UWhNpX3ZMh/VYvfxs3rFGHMrLC/eGRdLiDGuw==
   dependencies:
     "@types/node" "*"
+
+"@types/tcp-port-used@1.0.0":
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/@types/tcp-port-used/-/tcp-port-used-1.0.0.tgz#2a7b674fe81580d7c205297e26594ee12d07100f"
+  integrity sha512-UbspV5WZNhfM55HyvLEFyVc5n6K6OKuKep0mzvsgoUXQU1FS42GbePjreBnTCoKXfNzK/3/RJVCRlUDTuszFPg==
 
 "@types/underscore@*":
   version "1.9.3"
@@ -23832,6 +23844,11 @@ serve-static@1.14.1:
     escape-html "~1.0.3"
     parseurl "~1.3.3"
     send "0.17.1"
+
+server-destroy@1.0.1:
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/server-destroy/-/server-destroy-1.0.1.tgz#f13bf928e42b9c3e79383e61cc3998b5d14e6cdd"
+  integrity sha1-8Tv5KOQrnD55OD5hzDmYtdFObN0=
 
 serviceworker-cache-polyfill@^4.0.0:
   version "4.0.0"

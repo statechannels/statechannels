@@ -1,4 +1,5 @@
 import { GanacheServer } from '@statechannels/devtools';
+import destroyable from 'server-destroy';
 import dotEnvExtended from 'dotenv-extended';
 import Koa from 'koa';
 import Router from 'koa-router';
@@ -21,49 +22,63 @@ log.info(`Writing network context into file: ${GANACHE_CONTRACTS_PATH}\n`);
   TODO: Move this file to the devtools package.
 */
 
-// This server is only used in CI to detect when the chain is ready and has
-// contracts deployed to it.
 const router = new Router();
-router.get('/', async () => {});
+const body = {
+  ganachePort: process.env.GANACHE_PORT,
+  addresses: 'undefined',
+};
+router.get('/', async ctx => (ctx.body = JSON.stringify(body, null, 2)));
 
-const server = new Koa();
-server.use(router.routes());
+if (!process.env.GANACHE_PORT) {
+  throw Error(
+    'Cannot start ganache server without a specified port. Set port via the GANACHE_PORT env var'
+  );
+}
 
-(async () => {
+// This server is exclusively used for detecting chain readiness in CI.
+// In a local environment, it's effectively a no-op.
+const port = Number(process.env.DEV_HTTP_SERVER_PORT);
+const app = new Koa();
+app.use(router.routes());
+const server = app
+  .listen(port)
+  .on('error', err => console.error(err))
+  .on('listening', async () => {
+    log.info(`HTTP server listening on port ${port}`);
+    await deploy();
+  });
+destroyable(server);
+
+// This server is only used in CI to detect when the chain is ready and has
+// catch various ways to ensure network context file is deleted
+process.on('exit', exitHandler.bind(null, server));
+process.on('SIGINT', exitHandler.bind(null, server));
+process.on('SIGUSR1', exitHandler.bind(null, server));
+process.on('SIGUSR2', exitHandler.bind(null, server));
+
+async function deploy() {
   try {
-    if (!process.env.GANACHE_PORT) {
-      throw Error(
-        'Cannot start ganache server without a specified port. Set port via the GANACHE_PORT env var'
-      );
-    }
-
-    const port = Number(process.env.GANACHE_PORT);
-
-    const chain = new GanacheServer(port);
+    const chain = new GanacheServer(Number(process.env.GANACHE_PORT));
     await chain.ready();
-
-    // catch various ways to ensure network context file is deleted
-    process.on('exit', exitHandler.bind(null, chain));
-    process.on('SIGINT', exitHandler.bind(null, chain));
-    process.on('SIGUSR1', exitHandler.bind(null, chain));
-    process.on('SIGUSR2', exitHandler.bind(null, chain));
 
     const networkContext = await deployContracts(chain);
     networkContext['NetworkID'] = process.env.GANACHE_NETWORK_ID;
     await writeJsonFile(GANACHE_CONTRACTS_PATH, networkContext);
 
     log.info(`Network context written to ${GANACHE_CONTRACTS_FILE}`);
-
-    // start listening after chain is ready
-    server.listen(3000);
   } catch (e) {
     throw Error(e);
   }
-})();
+}
 
-async function exitHandler(chain: GanacheServer) {
-  await chain.close();
-  fs.unlink(GANACHE_CONTRACTS_PATH, () => {
-    log.info(`Deleted locally deployed network context: ${GANACHE_CONTRACTS_FILE}`);
-  });
+async function exitHandler(server) {
+  try {
+    fs.unlink(GANACHE_CONTRACTS_PATH, () => {
+      log.info(`Deleted locally deployed network context: ${GANACHE_CONTRACTS_FILE}`);
+    });
+    server.destroy();
+  } catch (e) {
+    log.warn(`Failed to properly clean up`);
+    log.error(e);
+  }
 }
