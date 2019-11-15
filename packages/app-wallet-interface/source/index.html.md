@@ -108,7 +108,6 @@ Note: we don't return the state of the channel, as messages are not necessarily 
 | Code | Message           | Meaning                                      |
 | ---- | ----------------- | -------------------------------------------- |
 | 900  | Wrong Participant | The message is not addressed to this wallet. |
-| 901  | Invalid Data      | The data is not a valid message.             |
 
 ## Get addresses
 
