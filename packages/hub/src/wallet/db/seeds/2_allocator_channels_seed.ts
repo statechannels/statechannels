@@ -1,28 +1,31 @@
 import {encodeConsensusData} from '@statechannels/nitro-protocol';
 import {Model} from 'objection';
 import {
+  allocationOutcome2,
+  allocationOutcome3,
   BEGINNING_APP_CHANNEL_HOLDINGS,
   DUMMY_RULES_ADDRESS,
   FUNDED_CHANNEL_HOLDINGS,
-  ONGOING_APP_CHANNEL_HOLDINGS,
-  outcome2,
-  outcome3
+  guaranteeOutcome2,
+  ONGOING_APP_CHANNEL_HOLDINGS
 } from '../../../test/test-constants';
 import {
   BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID,
-  beginning_app_phase_channel,
+  beginningAppPhaseChannel,
   channelObjectToModel,
   consensus_app_data2,
   consensus_app_data3,
-  funded_channel,
-  funded_channel_3,
   FUNDED_NONCE_CHANNEL_ID,
   FUNDED_NONCE_CHANNEL_ID_3,
+  FUNDED_NONCE_GUARANTOR_CHANNEL_ID,
+  fundedChannel,
+  fundedChannel3,
+  fundedGuarantorChannel,
   ONGOING_APP_CHANNEL_NONCE_CHANNEL_ID,
-  ongoing_app_phase_channel
+  ongoingAppPhaseChannel
 } from '../../../test/test_data';
 import Channel from '../../models/channel';
-import {outcomeAddPriorities} from '../../utilities/outcome';
+import {outcomeObjectToModel} from '../../utilities/outcome';
 import knex from '../connection';
 
 Model.knex(knex);
@@ -37,74 +40,92 @@ const baseStateProperties = {
 // Ledger channels
 // ***************
 
-function pre_fund_setup(turnNum: number) {
+function prefundSetupState(turnNum: number) {
   return {
     ...baseStateProperties,
     turnNum,
-    outcome: outcomeAddPriorities(outcome2),
+    outcome: outcomeObjectToModel(allocationOutcome2),
     appData: encodeConsensusData(consensus_app_data2(2))
   };
 }
 
-function pre_fund_setup_3(turnNum: number) {
+function prefundSetupGuarantorState(turnNum: number) {
   return {
     ...baseStateProperties,
     turnNum,
-    outcome: outcomeAddPriorities(outcome3),
+    outcome: outcomeObjectToModel(guaranteeOutcome2),
+    // todo: appData does not reflect the outcome above
+    appData: encodeConsensusData(consensus_app_data2(2))
+  };
+}
+
+function prefundSetupState3(turnNum: number) {
+  return {
+    ...baseStateProperties,
+    turnNum,
+    outcome: outcomeObjectToModel(allocationOutcome3),
     appData: encodeConsensusData(consensus_app_data3(3))
   };
 }
 
-function post_fund_setup(turnNum: number) {
+function postFundSetupState(turnNum: number) {
   return {
     ...baseStateProperties,
     turnNum,
-    outcome: outcomeAddPriorities(outcome2),
+    outcome: outcomeObjectToModel(allocationOutcome2),
     appData: encodeConsensusData(consensus_app_data2(0))
   };
 }
 
-function app(turnNum: number) {
+function appState(turnNum: number) {
   return {
     ...baseStateProperties,
     turnNum,
-    outcome: outcomeAddPriorities(outcome2),
+    outcome: outcomeObjectToModel(allocationOutcome2),
     appData: encodeConsensusData(consensus_app_data2(turnNum % 2))
   };
 }
 
 const fundedChannelWithStates = {
-  ...channelObjectToModel(funded_channel),
+  ...channelObjectToModel(fundedChannel),
   channelId: FUNDED_NONCE_CHANNEL_ID,
   holdings: FUNDED_CHANNEL_HOLDINGS,
-  states: [pre_fund_setup(0), pre_fund_setup(1)]
+  states: [prefundSetupState(0), prefundSetupState(1)]
+};
+
+const fundedGuarantorChannelWithStates = {
+  ...channelObjectToModel(fundedGuarantorChannel),
+  channelId: FUNDED_NONCE_GUARANTOR_CHANNEL_ID,
+  holdings: FUNDED_CHANNEL_HOLDINGS,
+  states: [prefundSetupGuarantorState(0), prefundSetupGuarantorState(1)]
 };
 
 const fundedChannel3WithStates = {
-  ...channelObjectToModel(funded_channel_3),
+  ...channelObjectToModel(fundedChannel3),
   channelId: FUNDED_NONCE_CHANNEL_ID_3,
   holdings: FUNDED_CHANNEL_HOLDINGS,
-  states: [pre_fund_setup_3(0), pre_fund_setup_3(1), pre_fund_setup_3(2)]
+  states: [prefundSetupState3(0), prefundSetupState3(1), prefundSetupState3(2)]
 };
 
 const beginningAppPhaseChannelWithStates = {
-  ...channelObjectToModel(beginning_app_phase_channel),
+  ...channelObjectToModel(beginningAppPhaseChannel),
   channel_id: BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID,
   holdings: BEGINNING_APP_CHANNEL_HOLDINGS,
-  states: [post_fund_setup(2), post_fund_setup(3)]
+  states: [postFundSetupState(2), postFundSetupState(3)]
 };
 
-const ongoingAppPhaseChannel = {
-  ...channelObjectToModel(ongoing_app_phase_channel),
+const ongoingAppPhaseChannelWithStates = {
+  ...channelObjectToModel(ongoingAppPhaseChannel),
   channel_id: ONGOING_APP_CHANNEL_NONCE_CHANNEL_ID,
   holdings: ONGOING_APP_CHANNEL_HOLDINGS,
-  states: [app(4), app(5)]
+  states: [appState(4), appState(5)]
 };
 
 const two_participant_channel_seeds = {
   fundedChannelWithStates,
+  fundedGuarantorChannelWithStates,
   beginningAppPhaseChannelWithStates,
-  ongoingAppPhaseChannel
+  ongoingAppPhaseChannelWithStates
 };
 
 const three_participant_channel_seeds = {fundedChannel3WithStates};
@@ -142,8 +163,6 @@ export function seed() {
     });
 }
 
-export const constructors = {
-  pre_fund_setup,
-  post_fund_setup,
-  app
+export const stateConstructors = {
+  postFundSetupState
 };

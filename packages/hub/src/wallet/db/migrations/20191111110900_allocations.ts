@@ -20,7 +20,7 @@ exports.up = (knex: Knex) => {
         .unsigned()
         .notNullable();
       table.string('destination').notNullable();
-      table.string('amount').notNullable();
+      table.string('amount');
 
       table.unique(['outcome_id', 'priority']);
     })

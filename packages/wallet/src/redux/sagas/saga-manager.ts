@@ -14,7 +14,7 @@ import {challengeResponseInitiator} from "./challenge-response-initiator";
 import {multipleActionDispatcher} from "./multiple-action-dispatcher";
 
 import {adjudicatorStateUpdater} from "./adjudicator-state-updater";
-import {isLoadAction, JsonRpcResponseAction} from "../actions";
+import {isLoadAction, OutgoingApiAction} from "../actions";
 import {ETHAssetHolderWatcher} from "./eth-asset-holder-watcher";
 import {postMessageListener} from "./post-message-listener";
 import {messageSender} from "./message-sender";
@@ -87,7 +87,7 @@ export function* sagaManager(): IterableIterator<any> {
 
     const {outboxState} = state;
     if (outboxState.messageOutbox.length) {
-      const messageToSend = outboxState.messageOutbox[0] as JsonRpcResponseAction;
+      const messageToSend = outboxState.messageOutbox[0] as OutgoingApiAction;
       yield messageSender(messageToSend);
     }
     if (outboxState.displayOutbox.length) {

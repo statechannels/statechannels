@@ -10,7 +10,7 @@ import {
 } from '../../../test/test-constants';
 import {
   app_1_response,
-  beginning_app_phase_channel,
+  beginningAppPhaseChannel,
   created_pre_fund_setup_1,
   created_pre_fund_setup_3_2,
   post_fund_setup_1_response,
@@ -38,7 +38,7 @@ let post_fund_setup_3_1: State;
 beforeEach(() => {
   pre_fund_setup_0 = testDataConstructors.pre_fund_setup(0);
   post_fund_setup_0 = testDataConstructors.post_fund_setup(2);
-  app_0 = testDataConstructors.app(4, beginning_app_phase_channel);
+  app_0 = testDataConstructors.app(4, beginningAppPhaseChannel);
 
   pre_fund_setup_3_0 = testDataConstructors.pre_fund_setup_3(0);
   pre_fund_setup_3_1 = testDataConstructors.pre_fund_setup_3(1);
