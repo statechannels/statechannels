@@ -41,13 +41,16 @@ export class GanacheServer {
 
     const oneMillion = ethers.utils.parseEther("1000000");
 
-    const opts = [`--networkId ${process.env.GANACHE_NETWORK_ID}`, `--port ${this.port}`]
-      .concat(
-        accounts.map(account => `--account ${account.privateKey},${account.amount || oneMillion}`)
-      )
-      .concat([`--gasLimit ${gasLimit}`, `--gasPrice ${gasPrice}`]);
+    const concat = (a, b) => a.concat(b);
+    const opts = [
+      [`--networkId ${process.env.GANACHE_NETWORK_ID}`, `--port ${this.port}`],
+      accounts.map(a => `--account ${a.privateKey},${a.amount || oneMillion}`),
+      [`--gasLimit ${gasLimit}`, `--gasPrice ${gasPrice}`]
+    ]
+      .reduce(concat)
+      .join(" ");
 
-    const cmd = `ganache-cli ${opts.join(" ")}`;
+    const cmd = `ganache-cli ${opts}`;
 
     this.server = spawn("npx", ["-c", cmd], {stdio: "pipe"});
     this.server.stderr.on("data", data => {
@@ -79,7 +82,7 @@ export class GanacheServer {
 
     const deployedArtifacts: DeployedArtifacts = {};
     for (const deployment of deployments) {
-      const artifact = deployment.artifact ? deployment.artifact : deployment;
+      const artifact = deployment.artifact || deployment;
 
       const args: string[] = [];
       if (deployment.arguments) {

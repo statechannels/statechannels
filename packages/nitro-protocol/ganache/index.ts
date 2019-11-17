@@ -45,8 +45,8 @@ const server = app
   });
 destroyable(server);
 
-// This server is only used in CI to detect when the chain is ready and has
-// catch various ways to ensure network context file is deleted
+// This server is only used in CI to detect when the chain is ready and listens
+// for various signals to ensure network context file is deleted
 process.on('exit', exitHandler.bind(null, server));
 process.on('SIGINT', exitHandler.bind(null, server));
 process.on('SIGUSR1', exitHandler.bind(null, server));
