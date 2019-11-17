@@ -26,7 +26,7 @@ export default class Outcome extends Model {
     },
     allocation: {
       relation: Model.HasManyRelation,
-      modelClass: `${__dirname}/allocation`,
+      modelClass: Allocation,
       join: {
         from: 'outcomes.id',
         to: 'allocations.outcome_id'
@@ -38,14 +38,14 @@ export default class Outcome extends Model {
   state!: ChannelState;
   assetHolderAddress!: Address;
   allocation!: Allocation[];
-  tagetChannelId: string;
+  targetChannelId: string;
 
   get asOutcomeObject(): AssetOutcome {
-    if (this.tagetChannelId) {
+    if (this.targetChannelId) {
       const guaranteeAssetOutcome: GuaranteeAssetOutcome = {
         assetHolderAddress: this.assetHolderAddress,
         guarantee: {
-          targetChannelId: this.tagetChannelId,
+          targetChannelId: this.targetChannelId,
           destinations: this.allocation.map(allocation => allocation.destination)
         }
       };

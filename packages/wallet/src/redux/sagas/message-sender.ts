@@ -1,4 +1,4 @@
-import {JsonRpcResponseAction} from "../actions";
+import {OutgoingApiAction} from "../actions";
 
 import {call, select} from "redux-saga/effects";
 import {getChannelStatus} from "../state";
@@ -7,35 +7,19 @@ import {createJsonRpcAllocationsFromOutcome} from "../../utils/json-rpc-utils";
 import jrs from "jsonrpc-lite";
 import {unreachable} from "../../utils/reducer-utils";
 
-export function* messageSender(action: JsonRpcResponseAction) {
+export function* messageSender(action: OutgoingApiAction) {
   const message = yield createResponseMessage(action);
   yield call(window.parent.postMessage, JSON.stringify(message), "*");
 }
 
-function* createResponseMessage(action: JsonRpcResponseAction) {
+function* createResponseMessage(action: OutgoingApiAction) {
   switch (action.type) {
+    case "WALLET.JOIN_CHANNEL_RESPONSE":
+      return jrs.success(action.id, yield getChannelInfo(action.channelId));
     case "WALLET.CREATE_CHANNEL_RESPONSE":
-      const {channelId} = action;
-      const channelStatus: ChannelState = yield select(getChannelStatus, channelId);
-      const state = getLastState(channelStatus);
-
-      const {participants} = channelStatus;
-      const {appData, appDefinition, turnNum} = state;
-      const funding = [];
-      const status = "Opening";
-
-      return jrs.success(action.id, {
-        participants,
-        allocations: createJsonRpcAllocationsFromOutcome(state.outcome),
-        appDefinition,
-        appData,
-        status,
-        funding,
-        turnNum,
-        channelId
-      });
+      return jrs.success(action.id, yield getChannelInfo(action.channelId));
     case "WALLET.UPDATE_CHANNEL_RESPONSE":
-      return jrs.success(action.id, action.state);
+      return jrs.success(action.id, yield getChannelInfo(action.channelId));
     case "WALLET.ADDRESS_RESPONSE":
       return jrs.success(action.id, action.address);
     case "WALLET.NO_CONTRACT_ERROR":
@@ -45,6 +29,23 @@ function* createResponseMessage(action: JsonRpcResponseAction) {
         action.id,
         new jrs.JsonRpcError("Signing address not found in the participants array", 1000)
       );
+    case "WALLET.SEND_CHANNEL_PROPOSED_MESSAGE":
+      const channelStatus: ChannelState = yield select(getChannelStatus, action.channelId);
+
+      const request = {
+        type: "Channel.Open",
+        signedState: channelStatus.signedStates.slice(-1)[0],
+        participants: channelStatus.participants
+      };
+      return jrs.notification("MessageQueued", {
+        recipient: action.fromParticipantId,
+        sender: action.toParticipantId,
+        data: request
+      });
+    case "WALLET.CHANNEL_PROPOSED_EVENT":
+      return jrs.notification("ChannelProposed", yield getChannelInfo(action.channelId));
+    case "WALLET.POST_MESSAGE_RESPONSE":
+      return jrs.success(action.id, {success: true});
     case "WALLET.UNKNOWN_CHANNEL_ID_ERROR":
       return jrs.error(
         action.id,
@@ -56,4 +57,24 @@ function* createResponseMessage(action: JsonRpcResponseAction) {
     default:
       return unreachable(action);
   }
+}
+
+function* getChannelInfo(channelId: string) {
+  const channelStatus: ChannelState = yield select(getChannelStatus, channelId);
+  const state = getLastState(channelStatus);
+
+  const {participants} = channelStatus;
+  const {appData, appDefinition, turnNum} = state;
+  const funding = [];
+  const status = channelStatus.turnNum < participants.length - 1 ? "Opening" : "Running";
+  return {
+    participants,
+    allocations: createJsonRpcAllocationsFromOutcome(state.outcome),
+    appDefinition,
+    appData,
+    status,
+    funding,
+    turnNum,
+    channelId
+  };
 }

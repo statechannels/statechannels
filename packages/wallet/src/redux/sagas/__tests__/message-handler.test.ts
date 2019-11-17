@@ -7,9 +7,10 @@ import {messageSender} from "../message-sender";
 import * as matchers from "redux-saga-test-plan/matchers";
 import {getAddress} from "../../selectors";
 import {asAddress, bsAddress, appState, asPrivateKey} from "../../__tests__/state-helpers";
-import {channelFromStates} from "../../channel-store/channel-state/__tests__";
 import {getProvider} from "../../../utils/contract-utils";
 import {setChannel} from "../../../../src/redux/channel-store";
+import {channelFromStates} from "../../channel-store/channel-state/__tests__";
+import * as stateHelpers from "../../__tests__/state-helpers";
 
 describe("message listener", () => {
   const wallet = Wallet.createRandom();
@@ -38,6 +39,70 @@ describe("message listener", () => {
         .fork(messageSender, addressResponse({id: 1, address: wallet.address}))
         .run()
     );
+  });
+
+  describe("PushMessage", () => {
+    it("handles a pushMessage", async () => {
+      const signedState = appState({turnNum: 0});
+      const destinationA = Wallet.createRandom().address;
+      const signingAddressA = asAddress;
+      const signingAddressB = bsAddress;
+      const destinationB = Wallet.createRandom().address;
+      const participants = [
+        {
+          participantId: "user-a",
+          signingAddress: signingAddressA,
+          destination: destinationA
+        },
+        {
+          participantId: "user-b",
+          signingAddress: signingAddressB,
+          destination: destinationB
+        }
+      ];
+      const pushMessage = JSON.stringify({
+        jsonrpc: "2.0",
+        method: "PushMessage",
+        id: 1,
+        params: {
+          recipient: "user-a",
+          sender: "user-b",
+          data: {type: "Channel.Open", participants, signedState}
+        }
+      });
+
+      const {effects} = await expectSaga(messageHandler, pushMessage, "localhost")
+        .withState(initialState)
+        // Mock out the fork call so we don't actually try to post the message
+        .provide([
+          [matchers.fork.fn(messageSender), 0],
+          [matchers.select.selector(getAddress), asAddress],
+          [
+            matchers.call.fn(getProvider),
+            {
+              getCode: address => {
+                return "0x12345";
+              }
+            }
+          ]
+        ])
+        .run();
+
+      expect(effects.put[1].payload.action).toMatchObject({
+        type: "WALLET.APPLICATION.OPPONENT_STATE_RECEIVED",
+        signedState
+      });
+
+      expect(effects.fork[0].payload.args[0]).toMatchObject({
+        type: "WALLET.POST_MESSAGE_RESPONSE",
+        id: 1
+      });
+
+      expect(effects.fork[1].payload.args[0]).toMatchObject({
+        type: "WALLET.CHANNEL_PROPOSED_EVENT",
+        channelId: expect.any(String)
+      });
+    });
   });
 
   describe("CreateChannel", () => {
@@ -80,6 +145,7 @@ describe("message listener", () => {
           appData
         }
       });
+
       const {effects} = await expectSaga(messageHandler, requestMessage, "localhost")
         .withState(initialState)
         // Mock out the fork call so we don't actually try to post the message
@@ -116,6 +182,10 @@ describe("message listener", () => {
       expect(effects.fork[0].payload.args[0]).toMatchObject({
         type: "WALLET.CREATE_CHANNEL_RESPONSE",
         id: 1,
+        channelId: expect.any(String)
+      });
+      expect(effects.fork[1].payload.args[0]).toMatchObject({
+        type: "WALLET.SEND_CHANNEL_PROPOSED_MESSAGE",
         channelId: expect.any(String)
       });
     });
@@ -181,6 +251,7 @@ describe("message listener", () => {
         id: 1
       });
     });
+
     it("returns an error the first participant does not have our address", async () => {
       const destinationA = Wallet.createRandom().address;
       const signingAddressA = Wallet.createRandom().address;
@@ -296,7 +367,7 @@ describe("message listener", () => {
       expect(effects.fork[0].payload.args[0]).toMatchObject({
         type: "WALLET.UPDATE_CHANNEL_RESPONSE",
         id: 1,
-        state
+        channelId: stateHelpers.channelId
       });
     });
 
@@ -311,6 +382,69 @@ describe("message listener", () => {
           channelId: unknownChannelId, // <----- important part of the test
           allocations: [],
           appData: "0x"
+        }
+      });
+
+      const {effects} = await expectSaga(messageHandler, requestMessage, "localhost")
+        .withState(initialState)
+        // Mock out the fork call so we don't actually try to post the message
+        .provide([[matchers.fork.fn(messageSender), 0]])
+        .run();
+
+      expect(effects.fork[0].payload.args[0]).toMatchObject({
+        type: "WALLET.UNKNOWN_CHANNEL_ID_ERROR",
+        id: 1,
+        channelId: unknownChannelId
+      });
+    });
+  });
+
+  describe("JoinChannel", () => {
+    it("handles an join channel request", async () => {
+      const existingState = appState({turnNum: 0});
+      const testChannel = channelFromStates([existingState], asAddress, asPrivateKey);
+
+      const requestMessage = JSON.stringify({
+        jsonrpc: "2.0",
+        method: "JoinChannel",
+        id: 1,
+        params: {
+          channelId: testChannel.channelId
+        }
+      });
+
+      const {effects} = await expectSaga(messageHandler, requestMessage, "localhost")
+        .withState({...initialState, channelStore: setChannel({}, testChannel)})
+        // Mock out the fork call so we don't actually try to post the message
+        .provide([[matchers.fork.fn(messageSender), 0]])
+        .run();
+
+      const nextState = {
+        ...existingState.state,
+        turnNum: 1
+      };
+
+      expect(effects.put[0].payload.action).toMatchObject({
+        type: "WALLET.APPLICATION.OWN_STATE_RECEIVED",
+        state: nextState
+      });
+
+      expect(effects.fork[0].payload.args[0]).toMatchObject({
+        type: "WALLET.JOIN_CHANNEL_RESPONSE",
+        id: 1,
+        channelId: testChannel.channelId
+      });
+    });
+
+    it("returns an error when the channelId is not known", async () => {
+      const unknownChannelId = "0xsomefakeid";
+
+      const requestMessage = JSON.stringify({
+        jsonrpc: "2.0",
+        method: "JoinChannel",
+        id: 1,
+        params: {
+          channelId: unknownChannelId
         }
       });
 

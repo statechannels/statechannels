@@ -1,14 +1,15 @@
-import {call, fork, put, take, takeEvery, cps, all} from 'redux-saga/effects';
-
+import { call, fork, put, take, takeEvery, cps, all } from 'redux-saga/effects';
+import { ethers } from 'ethers';
 import * as loginActions from './actions';
-import {reduxSagaFirebase} from '../../gateways/firebase';
+import { reduxSagaFirebase } from '../../gateways/firebase';
 import metamaskSaga from '../metamask/saga';
-import {initializeWallet} from 'magmo-wallet-client';
+// import {initializeWallet} from 'magmo-wallet-client'; TODO:WALLET_SCRUBBED_OUT eventually connect to the channelClient
 import RPSGameArtifact from '../../../build/contracts/RockPaperScissors.json';
-import {WALLET_IFRAME_ID} from '../../constants';
+// import {WALLET_IFRAME_ID} from '../../constants'; TODO:WALLET_SCRUBBED_OUT
 
 function* loginSaga() {
   try {
+    console.log(reduxSagaFirebase);
     yield call(reduxSagaFirebase.auth.signInAnonymously);
     // successful login will trigger the loginStatusWatcher, which will update the state
   } catch (error) {
@@ -31,8 +32,7 @@ function* loginStatusWatcherSaga() {
   // let playerHeartbeatThread;
 
   while (true) {
-    const {user} = yield take(channel);
-
+    const { user } = yield take(channel);
     if (user) {
       const libraryAddress = yield getLibraryAddress();
       if (!libraryAddress) {
@@ -42,7 +42,7 @@ function* loginStatusWatcherSaga() {
           )
         );
       } else {
-        const walletAddress = yield initializeWallet(WALLET_IFRAME_ID, user.uid);
+        const walletAddress = ethers.Wallet.createRandom().address; // TODO:WALLET_SCRUBBED_OUT hook into channelClient
         yield put(loginActions.initializeWalletSuccess(walletAddress));
         yield put(loginActions.loginSuccess(user, libraryAddress));
       }

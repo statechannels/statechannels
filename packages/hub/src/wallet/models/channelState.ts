@@ -21,7 +21,7 @@ export default class ChannelState extends Model {
     },
     outcome: {
       relation: Model.HasManyRelation,
-      modelClass: `${__dirname}/outcome`,
+      modelClass: Outcome,
       join: {
         from: 'channel_states.id',
         to: 'outcomes.channel_state_id'
