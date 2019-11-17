@@ -1,6 +1,9 @@
-config/**/*.js
-node_modules/**/*.ts
-truffle.ts
-migrations/*
+/node_modules/
+/coverage/
+!.*
+/.vscode/
+/typings
+/migrations/
 **/*.json
-website
+/website/
+/.etherlime-store/
