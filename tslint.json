@@ -36,7 +36,7 @@
       "truffle.ts",
       "migrations/*",
       "**/*.json",
-      "packages/nitro-protocol/**/*.json"
+      "packages/nitro-protocol/**/*"
     ]
   },
   "jsRules": {
