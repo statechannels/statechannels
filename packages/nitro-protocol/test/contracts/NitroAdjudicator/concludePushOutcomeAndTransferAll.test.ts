@@ -3,8 +3,6 @@ import {Contract, Wallet} from 'ethers';
 import {HashZero} from 'ethers/constants';
 import {hexlify} from 'ethers/utils';
 // @ts-ignore
-import countingAppArtifact from '../../../build/contracts/CountingApp.json';
-// @ts-ignore
 import AssetHolderArtifact1 from '../../../build/contracts/TESTAssetHolder.json';
 // @ts-ignore
 import AssetHolderArtifact2 from '../../../build/contracts/TESTAssetHolder2.json';
@@ -21,7 +19,7 @@ import {
   checkMultipleHoldings,
   compileEventsFromLogs,
   computeOutcome,
-  getNetworkMap,
+  getPlaceHolderContractAddress,
   getTestProvider,
   OutcomeShortHand,
   randomChannelId,
@@ -36,8 +34,6 @@ const provider = getTestProvider();
 let NitroAdjudicator: Contract;
 let AssetHolder1: Contract;
 let AssetHolder2: Contract;
-let networkMap;
-let networkId;
 const chainId = '0x1234';
 const participants = ['', '', ''];
 const wallets = new Array(3);
@@ -63,14 +59,12 @@ for (let i = 0; i < 3; i++) {
   participants[i] = wallets[i].address;
 }
 beforeAll(async () => {
-  networkMap = await getNetworkMap();
   NitroAdjudicator = await setupContracts(provider, NitroAdjudicatorArtifact);
   AssetHolder1 = await setupContracts(provider, AssetHolderArtifact1);
   AssetHolder2 = await setupContracts(provider, AssetHolderArtifact2);
   addresses.ETH = AssetHolder1.address;
   addresses.TOK = AssetHolder2.address;
-  networkId = (await provider.getNetwork()).chainId;
-  appDefinition = networkMap[networkId][countingAppArtifact.contractName]; // use a fixed appDefinition in all tests
+  appDefinition = getPlaceHolderContractAddress();
 });
 
 const accepts1 = '1 Asset Types';

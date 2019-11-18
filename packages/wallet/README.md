@@ -14,6 +14,8 @@ TBD
 
 ## Developer information
 
+First make sure a local ganache instance is running by following [the instructions at the root of the repo](../../readme.md#Development-Flow)
+
 ```
 // run all tests
 yarn test

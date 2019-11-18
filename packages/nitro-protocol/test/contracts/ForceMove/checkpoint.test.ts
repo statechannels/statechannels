@@ -3,8 +3,6 @@ import {Contract, Wallet} from 'ethers';
 import {HashZero} from 'ethers/constants';
 import {bigNumberify, defaultAbiCoder, hexlify} from 'ethers/utils';
 // @ts-ignore
-import countingAppArtifact from '../../../build/contracts/CountingApp.json';
-// @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {hashChannelStorage} from '../../../src/contract/channel-storage';
@@ -17,12 +15,15 @@ import {
   UNACCEPTABLE_WHO_SIGNED_WHAT,
 } from '../../../src/contract/transaction-creators/revert-reasons';
 import {COUNTING_APP_INVALID_TRANSITION} from '../../revert-reasons';
-import {getNetworkMap, getTestProvider, setupContracts, signStates} from '../../test-helpers';
+import {
+  getPlaceHolderContractAddress,
+  getTestProvider,
+  setupContracts,
+  signStates,
+} from '../../test-helpers';
 
 const provider = getTestProvider();
 let ForceMove: Contract;
-let networkId;
-let networkMap;
 const chainId = '0x1234';
 const participants = ['', '', ''];
 const wallets = new Array(3);
@@ -37,10 +38,8 @@ for (let i = 0; i < 3; i++) {
   participants[i] = wallets[i].address;
 }
 beforeAll(async () => {
-  networkMap = await getNetworkMap();
   ForceMove = await setupContracts(provider, ForceMoveArtifact);
-  networkId = (await provider.getNetwork()).chainId;
-  appDefinition = networkMap[networkId][countingAppArtifact.contractName]; // use a fixed appDefinition in all tests
+  appDefinition = getPlaceHolderContractAddress();
 });
 
 const valid = {
@@ -147,7 +146,10 @@ describe('checkpoint', () => {
     } else {
       const receipt = await (await tx).wait();
       const event = receipt.events.pop();
-      expect(event.args).toMatchObject({channelId, newTurnNumRecord: bigNumberify(largestTurnNum)});
+      expect(event.args).toMatchObject({
+        channelId,
+        newTurnNumRecord: bigNumberify(largestTurnNum),
+      });
 
       const expectedChannelStorageHash = hashChannelStorage({
         turnNumRecord: largestTurnNum,

@@ -31,7 +31,7 @@
     "test:ci:app": "yarn test:app --all --ci --runInBand",
     "test:ci:contracts": "yarn contracts:compile && yarn test:contracts --all --ci --detectOpenHandles --bail",
     "test:ci": "yarn test:ci:contracts && yarn test:ci:app",
-    "test:contracts": "npx jest --runInBand -c ./config/jest/jest.contracts.config.js",
+    "test:contracts": "npx jest --runInBand -c ./config/jest/jest.contracts.config.js --detectOpenHandles --bail",
     "test": "run-s 'test:app --all' 'test:contracts --all'"
   },
   "dependencies": {
@@ -52,8 +52,6 @@
     "case-sensitive-paths-webpack-plugin": "2.1.1",
     "chalk": "2.4.2",
     "css-loader": "3.2.0",
-    "dotenv": "^8.0.0",
-    "dotenv-expand": "^5.1.0",
     "enum": "^2.5.0",
     "ethers": "4.0.39",
     "eventemitter2": "5.0.1",
@@ -62,6 +60,7 @@
     "jsonrpc-lite": "2.1.0",
     "key-mirror": "^1.0.1",
     "lodash": "^4.17.10",
+    "loglevel": "1.6.6",
     "mini-css-extract-plugin": "^0.8.0",
     "nanoid": "^2.0.0",
     "npm-run-all": "4.1.5",
@@ -91,7 +90,7 @@
     "webpack": "4.28.1",
     "webpack-dev-server": "3.1.14",
     "webpack-manifest-plugin": "2.0.4",
-    "whatwg-fetch": "3.0.0"
+    "whatwg-fetch": "^2.0.4"
   },
   "devDependencies": {
     "@babel/runtime": "7.6.2",
@@ -99,6 +98,7 @@
     "@types/jest": "24.0.18",
     "@types/jsonrpc-serializer": "0.2.1",
     "@types/lodash": "4.14.129",
+    "@types/loglevel": "1.6.3",
     "@types/node": "^10.5.4",
     "@types/prop-types": "^15.5.4",
     "@types/react": "16.9.2",
@@ -116,6 +116,7 @@
     "concurrently": "5.0.0",
     "copyfiles": "2.1.1",
     "detect-port": "1.3.0",
+    "dotenv-extended": "2.5.0",
     "enzyme": "3.10.0",
     "enzyme-adapter-react-16": "1.14.0",
     "etherlime": "2.2.4",

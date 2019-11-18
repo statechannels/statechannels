@@ -9,3 +9,4 @@ export {
 } from "./utils/network-setup";
 export {configureEnvVariables} from "./config/env";
 export {GanacheServer} from "./utils/ganache-server";
+export * from "./types";

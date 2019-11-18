@@ -59,7 +59,7 @@ describe("ETHAssetHolder listener", () => {
     expect(action.destinationHoldings).toEqual(depositAmount);
   });
 
-  it("should handle an AssetTransferred event", async () => {
+  it.skip("should handle an AssetTransferred event", async () => {
     const channelNonce = getNextNonce();
     const chainId = (await provider.getNetwork()).chainId.toString();
     const channelId = nitroGetChannelId({

@@ -4,8 +4,6 @@
     "trailing-comma": [true, {"multiline": {"objects": "always"}}]
   },
   "linterOptions": {
-    "exclude": [
-      "**/*.json"
-    ]
+    "exclude": ["**/*.json"]
   }
 }

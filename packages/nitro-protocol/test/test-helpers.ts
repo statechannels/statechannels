@@ -1,3 +1,5 @@
+// @ts-ignore
+import NetworkContext from '@statechannels/nitro-protocol/ganache/ganache-network-context.json';
 import {Contract, ethers, Wallet} from 'ethers';
 import {AddressZero, HashZero} from 'ethers/constants';
 import {TransactionReceipt, TransactionRequest} from 'ethers/providers';
@@ -10,8 +12,8 @@ import {
   Signature,
   splitSignature,
 } from 'ethers/utils';
-import loadJsonFile from 'load-json-file';
-import path from 'path';
+import countingAppArtifact from '../build/contracts/CountingApp.json';
+
 import {hashChannelStorage} from '../src/contract/channel-storage';
 import {
   Allocation,
@@ -48,27 +50,28 @@ export const getTestProvider = () => {
   return new ethers.providers.JsonRpcProvider(`http://localhost:${process.env.GANACHE_PORT}`);
 };
 
-export const getNetworkMap = async () => {
-  try {
-    return await loadJsonFile(path.join(__dirname, '../deployment/network-map.json'));
-  } catch (err) {
-    if (!!err.message.match('ENOENT: no such file or directory')) {
-      return {};
-    } else {
-      throw err;
-    }
+export function getNetworkMap() {
+  // TODO: validate deployments against a whitelist
+  // TODO: share type info for what's expected from this end point
+  if (Object.keys(NetworkContext).length > 0) {
+    return NetworkContext;
   }
-};
+  throw Error(`Empty Network Context option. Make sure the Ganache server has been deployed.`);
+}
 
 export async function setupContracts(provider: ethers.providers.JsonRpcProvider, artifact) {
   const signer = provider.getSigner(0);
-  const networkId = (await provider.getNetwork()).chainId;
-  const networkMap = await getNetworkMap();
+  const networkMap = getNetworkMap();
 
   const contractName = artifact.contractName;
-  const contractAddress = networkMap[networkId][contractName];
+  const contractAddress = networkMap[contractName].address;
   const contract = new ethers.Contract(contractAddress, artifact.abi, signer);
   return contract;
+}
+
+export function getPlaceHolderContractAddress(): string {
+  const networkContext = getNetworkMap();
+  return networkContext[countingAppArtifact.contractName].address;
 }
 
 export async function sign(wallet: ethers.Wallet, msgHash: string | Uint8Array) {
