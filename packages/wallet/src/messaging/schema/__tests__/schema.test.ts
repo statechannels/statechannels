@@ -1,6 +1,7 @@
 import * as ethers from "ethers";
 import Ajv from "ajv";
-import * as createChannelParamsSchema from "../create-channel-params.json";
+import * as requestSchema from "../request.json";
+import * as createChannelSchema from "../create-channel.json";
 import * as definitionsSchema from "../definitions.json";
 const validAddress = ethers.Wallet.createRandom().address;
 const appData = "0x0";
@@ -33,17 +34,29 @@ it("validates a valid object", () => {
     appDefinition: validAddress,
     appData
   };
+  const request = {
+    jsonrpc: "2.0",
+    method: "CreateChannel",
+    id: 1,
+    params: createChannelParams
+  };
+
   const ajv = new Ajv();
-  const validate = ajv.addSchema(definitionsSchema).compile(createChannelParamsSchema);
-  expect(validate(createChannelParams)).toBe(true);
+  const validate = ajv
+    .addSchema(definitionsSchema)
+    .addSchema(createChannelSchema)
+    .compile(requestSchema);
+  const isValid = validate(request);
+
+  expect(isValid).toBe(true);
 });
 
 it("fails when an address is invalid", () => {
   const participants = [
     {
       participantId: "user-a",
-      signingAddress: validAddress,
-      destination: "0x0"
+      signingAddress: "0x0",
+      destination: validAddress
     },
     {
       participantId: "user-b",
@@ -66,15 +79,24 @@ it("fails when an address is invalid", () => {
     appDefinition: validAddress,
     appData
   };
-  const ajv = new Ajv();
-  const validate = ajv.addSchema(definitionsSchema).compile(createChannelParamsSchema);
+  const request = {
+    jsonrpc: "2.0",
+    method: "CreateChannel",
+    id: 1,
+    params: createChannelParams
+  };
 
-  const isValid = validate(createChannelParams);
-  console.log(validate.errors);
+  const ajv = new Ajv();
+  const validate = ajv
+    .addSchema(definitionsSchema)
+    .addSchema(createChannelSchema)
+    .compile(requestSchema);
+  const isValid = validate(request);
+
   expect(isValid).toBe(false);
 });
 
-it("fails when the object is incomplete", () => {
+it("fails when data is missing", () => {
   const participants = [
     {
       participantId: "user-a",
@@ -90,14 +112,23 @@ it("fails when the object is incomplete", () => {
 
   const createChannelParams = {
     participants,
-    // Missing allocations
+    // allocation is missing
     appDefinition: validAddress,
     appData
   };
-  const ajv = new Ajv();
-  const validate = ajv.addSchema(definitionsSchema).compile(createChannelParamsSchema);
+  const request = {
+    jsonrpc: "2.0",
+    method: "CreateChannel",
+    id: 1,
+    params: createChannelParams
+  };
 
-  const isValid = validate(createChannelParams);
-  console.log(validate.errors);
+  const ajv = new Ajv();
+  const validate = ajv
+    .addSchema(definitionsSchema)
+    .addSchema(createChannelSchema)
+    .compile(requestSchema);
+  const isValid = validate(request);
+
   expect(isValid).toBe(false);
 });

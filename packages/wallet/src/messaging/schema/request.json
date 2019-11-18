@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://statechannels.org/schemas/request.json",
+  "description": "A State Channel JSON RPC 2.0 request",
+  "oneOf": [
+    {
+      "description": "An individual request",
+      "$ref": "#/definitions/request"
+    },
+    {
+      "description": "An array of requests",
+      "type": "array",
+      "items": {"$ref": "#/definitions/request"}
+    }
+  ],
+  "definitions": {
+    "request": {
+      "type": "object",
+      "required": ["jsonrpc", "method"],
+      "properties": {
+        "jsonrpc": {"enum": ["2.0"]},
+        "method": {
+          "enum": ["CreateChannel", "JoinChannel"]
+        },
+        "id": {
+          "type": ["string", "number"]
+        }
+      },
+
+      "allOf": [
+        {
+          "if": {
+            "properties": {"method": {"const": "CreateChannel"}}
+          },
+          "then": {
+            "properties": {
+              "params": {"$ref": "create-channel.json#/definitions/CreateChannelParams"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {"method": {"const": "JoinChannel"}}
+          },
+          "then": {
+            "properties": {"params": {"type": "string"}}
+          }
+        }
+      ]
+    }
+  }
+}
