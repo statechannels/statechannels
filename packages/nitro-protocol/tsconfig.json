@@ -17,6 +17,6 @@
     "noUnusedLocals": true,
     "types": ["node", "jest"]
   },
-  "include": ["src/**/*", "test/**/*", "build/contracts/*.json", "ganache/*.json"],
+  "include": ["src/**/*", "test/**/*", "build/contracts/*.json", "ganache/**/*"],
   "references": [{ "path": "../jest-gas-reporter" }]
 }
