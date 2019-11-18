@@ -2,7 +2,9 @@ import {GanacheServer, DeployedArtifacts} from '@statechannels/devtools';
 import log from 'loglevel';
 
 /* eslint-disable import/no-unresolved */
+// @ts-ignore
 import rpsArtifact from '@statechannels/rps/build/contracts/RockPaperScissors.json';
+// @ts-ignore
 import forceMoveAppArtifact from '@statechannels/rps/build/contracts/ForceMoveApp.json';
 /* eslint-enable import/no-unresolved */
 import countingAppArtifact from '../build/contracts/CountingApp.json';
