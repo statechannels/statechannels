@@ -23,7 +23,8 @@
   },
   "files": [
     "src/messaging/schema/definitions.json",
-    "src/messaging/schema/create-channel-params.json"
+    "src/messaging/schema/create-channel.json",
+    "src/messaging/schema/request.json"
   ],
   "include": ["src/**/*", "src/**/*,", "types/globals.d.ts", "contracts/**/*.json", "index.ts"],
   "references": [{"path": "../nitro-protocol"}],
