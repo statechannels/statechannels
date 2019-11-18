@@ -1,14 +1,14 @@
-import { expectRevert } from '@statechannels/devtools';
-import { Contract, Wallet } from 'ethers';
-import { HashZero } from 'ethers/constants';
-import { hexlify } from 'ethers/utils';
+import {expectRevert} from '@statechannels/devtools';
+import {Contract, Wallet} from 'ethers';
+import {HashZero} from 'ethers/constants';
+import {hexlify} from 'ethers/utils';
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
-import { Channel, getChannelId } from '../../../src/contract/channel';
-import { hashChannelStorage } from '../../../src/contract/channel-storage';
-import { Outcome } from '../../../src/contract/outcome';
-import { State } from '../../../src/contract/state';
-import { concludeArgs } from '../../../src/contract/transaction-creators/force-move';
+import {Channel, getChannelId} from '../../../src/contract/channel';
+import {hashChannelStorage} from '../../../src/contract/channel-storage';
+import {Outcome} from '../../../src/contract/outcome';
+import {State} from '../../../src/contract/state';
+import {concludeArgs} from '../../../src/contract/transaction-creators/force-move';
 import {
   CHANNEL_FINALIZED,
   UNACCEPTABLE_WHO_SIGNED_WHAT,
@@ -16,11 +16,11 @@ import {
 import {
   clearedChallengeHash,
   finalizedOutcomeHash,
+  getPlaceHolderContractAddress,
   getTestProvider,
   ongoingChallengeHash,
   setupContracts,
   signStates,
-  getPlaceHolderContractAddress,
 } from '../../test-helpers';
 
 const provider = getTestProvider();
@@ -30,7 +30,7 @@ const participants = ['', '', ''];
 const wallets = new Array(3);
 const challengeDuration = 0x1000;
 const assetHolderAddress = Wallet.createRandom().address;
-const outcome: Outcome = [{ assetHolderAddress, allocation: [] }];
+const outcome: Outcome = [{assetHolderAddress, allocation: []}];
 let appDefinition;
 
 // populate wallets and participants array
@@ -97,10 +97,10 @@ describe('conclude', () => {
     ${reverts3} | ${finalized}              | ${turnNumRecord + 1}             | ${oneState}    | ${CHANNEL_FINALIZED}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
-    async ({ initialChannelStorageHash, largestTurnNum, support, reasonString }) => {
-      const channel: Channel = { chainId, participants, channelNonce: hexlify(channelNonce) };
+    async ({initialChannelStorageHash, largestTurnNum, support, reasonString}) => {
+      const channel: Channel = {chainId, participants, channelNonce: hexlify(channelNonce)};
       const channelId = getChannelId(channel);
-      const { appData, whoSignedWhat } = support;
+      const {appData, whoSignedWhat} = support;
       const numStates = appData.length;
 
       const states: State[] = [];
@@ -129,7 +129,7 @@ describe('conclude', () => {
       } else {
         const receipt = await (await tx).wait();
         const event = receipt.events.pop();
-        expect(event.args).toMatchObject({ channelId });
+        expect(event.args).toMatchObject({channelId});
 
         // compute expected ChannelStorageHash
         const blockTimestamp = (await provider.getBlock(receipt.blockNumber)).timestamp;
