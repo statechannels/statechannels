@@ -10,7 +10,7 @@ https://devcenter.heroku.com/articles/heroku-cli
 
 ### .env
 
-Copy `.env.development` to `.env`, and make it your own.
+The default `.env` should work as is but you can modify it to make it your own if any customizations are needed.
 
 ### Local Ganache
 
