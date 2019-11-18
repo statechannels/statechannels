@@ -1,14 +1,14 @@
-import { GanacheServer } from '@statechannels/devtools';
+import fs from 'fs';
+import path from 'path';
+import {GanacheServer} from '@statechannels/devtools';
 import destroyable from 'server-destroy';
 import dotEnvExtended from 'dotenv-extended';
 import Koa from 'koa';
 import Router from 'koa-router';
-import fs from 'fs';
 import log from 'loglevel';
-import path from 'path';
 import writeJsonFile from 'write-json-file';
 
-import { deployContracts } from './deployer';
+import {deployContracts} from './deployer';
 
 dotEnvExtended.load();
 
@@ -46,7 +46,7 @@ const server = app
 destroyable(server);
 
 // This server is only used in CI to detect when the chain is ready and listens
-// for various signals to ensure network context file is deleted
+// For various signals to ensure network context file is deleted
 process.on('exit', exitHandler.bind(null, server));
 process.on('SIGINT', exitHandler.bind(null, server));
 process.on('SIGUSR1', exitHandler.bind(null, server));
@@ -57,8 +57,8 @@ async function deploy() {
     const chain = new GanacheServer(Number(process.env.GANACHE_PORT));
     await chain.ready();
 
-    const networkContext = await deployContracts(chain);
-    networkContext['NetworkID'] = process.env.GANACHE_NETWORK_ID;
+    const networkContext = (await deployContracts(chain)) as {NetworkID: string};
+    networkContext.NetworkID = process.env.GANACHE_NETWORK_ID;
     await writeJsonFile(GANACHE_CONTRACTS_PATH, networkContext);
 
     log.info(`Network context written to ${GANACHE_CONTRACTS_FILE}`);
@@ -67,12 +67,12 @@ async function deploy() {
   }
 }
 
-async function exitHandler(server) {
+async function exitHandler(exitServer) {
   try {
     fs.unlink(GANACHE_CONTRACTS_PATH, () => {
       log.info(`Deleted locally deployed network context: ${GANACHE_CONTRACTS_FILE}`);
     });
-    server.destroy();
+    exitServer.destroy();
   } catch (e) {
     log.warn(`Failed to properly clean up`);
     log.error(e);

@@ -1,6 +1,8 @@
-import { GanacheServer, DeployedArtifacts } from '@statechannels/devtools';
+import {GanacheServer, DeployedArtifacts} from '@statechannels/devtools';
 import log from 'loglevel';
 
+import rpsArtifact from '@statechannels/rps/build/contracts/RockPaperScissors.json';
+import forceMoveAppArtifact from '@statechannels/rps/build/contracts/ForceMoveApp.json';
 import countingAppArtifact from '../build/contracts/CountingApp.json';
 import erc20AssetHolderArtifact from '../build/contracts/ERC20AssetHolder.json';
 import ethAssetHolderArtifact from '../build/contracts/ETHAssetHolder.json';
@@ -13,8 +15,6 @@ import testNitroAdjudicatorArtifact from '../build/contracts/TESTNitroAdjudicato
 import tokenArtifact from '../build/contracts/Token.json';
 import trivialAppArtifact from '../build/contracts/TrivialApp.json';
 import consensusAppArtifact from '../build/contracts/ConsensusApp.json';
-import rpsArtifact from '@statechannels/rps/build/contracts/RockPaperScissors.json';
-import forceMoveAppArtifact from '@statechannels/rps/build/contracts/ForceMoveApp.json';
 
 export async function deployContracts(chain: GanacheServer): Promise<object> {
   log.info(`Deploying built contracts to chain at: ${chain.provider.connection.url}`);

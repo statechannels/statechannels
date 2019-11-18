@@ -1,5 +1,7 @@
+/* eslint-disable import/no-unresolved */
 // @ts-ignore
 import NetworkContext from '@statechannels/nitro-protocol/ganache/ganache-network-context.json';
+/* eslint-enable import/no-unresolved */
 import {Contract, ethers, Wallet} from 'ethers';
 import {AddressZero, HashZero} from 'ethers/constants';
 import {TransactionReceipt, TransactionRequest} from 'ethers/providers';
