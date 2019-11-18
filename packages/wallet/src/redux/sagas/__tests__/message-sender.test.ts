@@ -37,7 +37,7 @@ describe("message sender", () => {
       .provide([[matchers.call.fn(window.parent.postMessage), 0]])
       .run();
 
-    expect(JSON.parse(effects.call[0].payload.args[0])).toMatchObject({
+    expect(effects.call[0].payload.args[0]).toMatchObject({
       jsonrpc: "2.0",
       method: "MessageQueued",
       params: {
@@ -64,7 +64,7 @@ describe("message sender", () => {
       .provide([[matchers.call.fn(window.parent.postMessage), 0]])
       .run();
 
-    expect(JSON.parse(effects.call[0].payload.args[0])).toMatchObject({
+    expect(effects.call[0].payload.args[0]).toMatchObject({
       jsonrpc: "2.0",
       method: "ChannelProposed",
       params: {
@@ -81,11 +81,11 @@ describe("message sender", () => {
       .provide([[matchers.call.fn(window.parent.postMessage), 0]])
       .call(
         window.parent.postMessage,
-        JSON.stringify({
+        {
           jsonrpc: "2.0",
           id: 5,
           result: {success: true}
-        }),
+        },
         "*"
       )
       .run();
@@ -98,11 +98,11 @@ describe("message sender", () => {
       .provide([[matchers.call.fn(window.parent.postMessage), 0]])
       .call(
         window.parent.postMessage,
-        JSON.stringify({
+        {
           jsonrpc: "2.0",
           id: 5,
           result: address
-        }),
+        },
         "*"
       )
       .run();
@@ -126,7 +126,7 @@ describe("message sender", () => {
       .provide([[matchers.call.fn(window.parent.postMessage), 0]])
       .run();
 
-    expect(JSON.parse(effects.call[0].payload.args[0])).toMatchObject({
+    expect(effects.call[0].payload.args[0]).toMatchObject({
       jsonrpc: "2.0",
       id: 1,
       result: {
@@ -156,7 +156,7 @@ describe("message sender", () => {
       .provide([[matchers.call.fn(window.parent.postMessage), 0]])
       .run();
 
-    expect(JSON.parse(effects.call[0].payload.args[0])).toMatchObject({
+    expect(effects.call[0].payload.args[0]).toMatchObject({
       jsonrpc: "2.0",
       id: 1,
       result: {
@@ -186,7 +186,7 @@ describe("message sender", () => {
       .provide([[matchers.call.fn(window.parent.postMessage), 0]])
       .run();
 
-    expect(JSON.parse(effects.call[0].payload.args[0])).toMatchObject({
+    expect(effects.call[0].payload.args[0]).toMatchObject({
       jsonrpc: "2.0",
       id: 1,
       error: {code: 1001, message: "Invalid app definition"}
@@ -211,7 +211,7 @@ describe("message sender", () => {
       .provide([[matchers.call.fn(window.parent.postMessage), 0]])
       .run();
 
-    expect(JSON.parse(effects.call[0].payload.args[0])).toMatchObject({
+    expect(effects.call[0].payload.args[0]).toMatchObject({
       jsonrpc: "2.0",
       id: 1,
       error: {code: 1000, message: "Signing address not found in the participants array"}
@@ -229,7 +229,7 @@ describe("message sender", () => {
       .provide([[matchers.call.fn(window.parent.postMessage), 0]])
       .run();
 
-    expect(JSON.parse(effects.call[0].payload.args[0])).toMatchObject({
+    expect(effects.call[0].payload.args[0]).toMatchObject({
       jsonrpc: "2.0",
       id: 1,
       error: {

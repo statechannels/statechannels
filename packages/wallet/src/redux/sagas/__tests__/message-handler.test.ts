@@ -24,12 +24,12 @@ describe("message listener", () => {
   });
 
   it("handles an address request", () => {
-    const requestMessage = JSON.stringify({
+    const requestMessage = {
       jsonrpc: "2.0",
       method: "GetAddress",
       id: 1,
       params: {}
-    });
+    };
 
     return (
       expectSaga(messageHandler, requestMessage, "localhost")
@@ -60,7 +60,7 @@ describe("message listener", () => {
           destination: destinationB
         }
       ];
-      const pushMessage = JSON.stringify({
+      const pushMessage = {
         jsonrpc: "2.0",
         method: "PushMessage",
         id: 1,
@@ -69,7 +69,7 @@ describe("message listener", () => {
           sender: "user-b",
           data: {type: "Channel.Open", participants, signedState}
         }
-      });
+      };
 
       const {effects} = await expectSaga(messageHandler, pushMessage, "localhost")
         .withState(initialState)
@@ -134,7 +134,7 @@ describe("message listener", () => {
           ]
         }
       ];
-      const requestMessage = JSON.stringify({
+      const requestMessage = {
         jsonrpc: "2.0",
         method: "CreateChannel",
         id: 1,
@@ -144,7 +144,7 @@ describe("message listener", () => {
           appDefinition,
           appData
         }
-      });
+      };
 
       const {effects} = await expectSaga(messageHandler, requestMessage, "localhost")
         .withState(initialState)
@@ -218,7 +218,7 @@ describe("message listener", () => {
           ]
         }
       ];
-      const requestMessage = JSON.stringify({
+      const requestMessage = {
         jsonrpc: "2.0",
         method: "CreateChannel",
         id: 1,
@@ -228,7 +228,7 @@ describe("message listener", () => {
           appDefinition,
           appData
         }
-      });
+      };
       const {effects} = await expectSaga(messageHandler, requestMessage, "localhost")
         .withState(initialState)
         // Mock out the fork call so we don't actually try to post the message
@@ -280,7 +280,7 @@ describe("message listener", () => {
           ]
         }
       ];
-      const requestMessage = JSON.stringify({
+      const requestMessage = {
         jsonrpc: "2.0",
         method: "CreateChannel",
         id: 1,
@@ -290,7 +290,8 @@ describe("message listener", () => {
           appDefinition,
           appData
         }
-      });
+      };
+
       const {effects} = await expectSaga(messageHandler, requestMessage, "localhost")
         .withState(initialState)
         // Mock out the fork call so we don't actually try to post the message
@@ -334,7 +335,7 @@ describe("message listener", () => {
       // Existing data in the store
       const testChannel = channelFromStates([appState({turnNum: 0})], asAddress, asPrivateKey);
 
-      const requestMessage = JSON.stringify({
+      const requestMessage = {
         jsonrpc: "2.0",
         method: "UpdateChannel",
         id: 1,
@@ -343,7 +344,7 @@ describe("message listener", () => {
           allocations,
           appData
         }
-      });
+      };
 
       const {effects} = await expectSaga(messageHandler, requestMessage, "localhost")
         .withState({...initialState, channelStore: setChannel({}, testChannel)})
@@ -374,7 +375,7 @@ describe("message listener", () => {
     it("returns an error when the channelId is not known", async () => {
       const unknownChannelId = "0xsomefakeid";
 
-      const requestMessage = JSON.stringify({
+      const requestMessage = {
         jsonrpc: "2.0",
         method: "UpdateChannel",
         id: 1,
@@ -383,7 +384,7 @@ describe("message listener", () => {
           allocations: [],
           appData: "0x"
         }
-      });
+      };
 
       const {effects} = await expectSaga(messageHandler, requestMessage, "localhost")
         .withState(initialState)
@@ -404,14 +405,14 @@ describe("message listener", () => {
       const existingState = appState({turnNum: 0});
       const testChannel = channelFromStates([existingState], asAddress, asPrivateKey);
 
-      const requestMessage = JSON.stringify({
+      const requestMessage = {
         jsonrpc: "2.0",
         method: "JoinChannel",
         id: 1,
         params: {
           channelId: testChannel.channelId
         }
-      });
+      };
 
       const {effects} = await expectSaga(messageHandler, requestMessage, "localhost")
         .withState({...initialState, channelStore: setChannel({}, testChannel)})
@@ -439,14 +440,14 @@ describe("message listener", () => {
     it("returns an error when the channelId is not known", async () => {
       const unknownChannelId = "0xsomefakeid";
 
-      const requestMessage = JSON.stringify({
+      const requestMessage = {
         jsonrpc: "2.0",
         method: "JoinChannel",
         id: 1,
         params: {
           channelId: unknownChannelId
         }
-      });
+      };
 
       const {effects} = await expectSaga(messageHandler, requestMessage, "localhost")
         .withState(initialState)
