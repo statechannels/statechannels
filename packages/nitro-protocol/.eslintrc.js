@@ -187,6 +187,9 @@ module.exports = {
   overrides: [
     {
       files: ['test/**/*.ts'],
+      env: {
+        node: true
+      },
       globals: {
         Promise: 'readonly',
         expect: 'readonly',
@@ -194,9 +197,13 @@ module.exports = {
         describe: 'readonly',
         beforeAll: 'readonly',
         beforeEach: 'readonly',
-        process: 'readonly',
-        '__dirname': 'readonly'
       },
+    },
+    {
+      files: ['ganache/**/*.ts'],
+      env: {
+        node: true
+      }
     }
   ],
 };
