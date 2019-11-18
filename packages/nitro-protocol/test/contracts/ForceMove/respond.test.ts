@@ -1,32 +1,34 @@
-import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet} from 'ethers';
-import {HashZero} from 'ethers/constants';
-import {bigNumberify, defaultAbiCoder, hexlify} from 'ethers/utils';
-// @ts-ignore
-import countingAppArtifact from '../../../build/contracts/CountingApp.json';
+import { expectRevert } from '@statechannels/devtools';
+import { Contract, Wallet } from 'ethers';
+import { HashZero } from 'ethers/constants';
+import { bigNumberify, defaultAbiCoder, hexlify } from 'ethers/utils';
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
-import {Channel, getChannelId} from '../../../src/contract/channel';
-import {hashChannelStorage} from '../../../src/contract/channel-storage';
-import {Outcome} from '../../../src/contract/outcome';
-import {hashState, State} from '../../../src/contract/state';
-import {respondArgs} from '../../../src/contract/transaction-creators/force-move';
+import { Channel, getChannelId } from '../../../src/contract/channel';
+import { hashChannelStorage } from '../../../src/contract/channel-storage';
+import { Outcome } from '../../../src/contract/outcome';
+import { hashState, State } from '../../../src/contract/state';
+import { respondArgs } from '../../../src/contract/transaction-creators/force-move';
 import {
   NO_ONGOING_CHALLENGE,
   RESPONSE_UNAUTHORIZED,
   WRONG_CHANNEL_STORAGE,
 } from '../../../src/contract/transaction-creators/revert-reasons';
-import {getNetworkMap, getTestProvider, setupContracts, sign} from '../../test-helpers';
+import {
+  getTestProvider,
+  setupContracts,
+  sign,
+  getPlaceHolderContractAddress,
+} from '../../test-helpers';
 
 const provider = getTestProvider();
 let ForceMove: Contract;
-let networkMap;
 const chainId = '0x1234';
 const participants = ['', '', ''];
 const wallets = new Array(3);
 const challengeDuration = 0x1000;
 const assetHolderAddress = Wallet.createRandom().address;
-const outcome: Outcome = [{assetHolderAddress, allocation: []}];
+const outcome: Outcome = [{ assetHolderAddress, allocation: [] }];
 let appDefinition;
 
 // populate wallets and participants array
@@ -37,9 +39,8 @@ for (let i = 0; i < 3; i++) {
 const nonParticipant = Wallet.createRandom();
 
 beforeAll(async () => {
-  networkMap = await getNetworkMap();
   ForceMove = await setupContracts(provider, ForceMoveArtifact);
-  appDefinition = networkMap[countingAppArtifact.contractName].address; // use a fixed appDefinition in all tests
+  appDefinition = getPlaceHolderContractAddress();
 });
 
 // Scenarios are synonymous with channelNonce:
@@ -66,8 +67,16 @@ describe('respond', () => {
     ${description5} | ${future}   | ${false}  | ${[false, false]} | ${[0, 0]} | ${wallets[2]} | ${wallets[0]}     | ${'CountingApp: Counter must be incremented'}
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
-    async ({isFinalAB, appDatas, challenger, responder, finalizesAt, slotEmpty, reasonString}) => {
-      const channel: Channel = {chainId, channelNonce: hexlify(channelNonce), participants};
+    async ({
+      isFinalAB,
+      appDatas,
+      challenger,
+      responder,
+      finalizesAt,
+      slotEmpty,
+      reasonString,
+    }) => {
+      const channel: Channel = { chainId, channelNonce: hexlify(channelNonce), participants };
       const channelId = getChannelId(channel);
 
       const challengeState: State = {
@@ -109,7 +118,7 @@ describe('respond', () => {
       const responseSignature = await sign(responder, responseStateHash);
 
       const tx = ForceMove.respond(
-        ...respondArgs({challengeState, responseSignature, responseState})
+        ...respondArgs({ challengeState, responseSignature, responseState })
       );
 
       if (reasonString) {

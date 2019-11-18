@@ -1,33 +1,35 @@
-import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet} from 'ethers';
-import {HashZero} from 'ethers/constants';
-import {bigNumberify, defaultAbiCoder, hexlify} from 'ethers/utils';
-// @ts-ignore
-import countingAppArtifact from '../../../build/contracts/CountingApp.json';
+import { expectRevert } from '@statechannels/devtools';
+import { Contract, Wallet } from 'ethers';
+import { HashZero } from 'ethers/constants';
+import { bigNumberify, defaultAbiCoder, hexlify } from 'ethers/utils';
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
-import {Channel, getChannelId} from '../../../src/contract/channel';
-import {hashChannelStorage} from '../../../src/contract/channel-storage';
-import {Outcome} from '../../../src/contract/outcome';
-import {State} from '../../../src/contract/state';
-import {checkpointArgs} from '../../../src/contract/transaction-creators/force-move';
+import { Channel, getChannelId } from '../../../src/contract/channel';
+import { hashChannelStorage } from '../../../src/contract/channel-storage';
+import { Outcome } from '../../../src/contract/outcome';
+import { State } from '../../../src/contract/state';
+import { checkpointArgs } from '../../../src/contract/transaction-creators/force-move';
 import {
   CHANNEL_FINALIZED,
   TURN_NUM_RECORD_NOT_INCREASED,
   UNACCEPTABLE_WHO_SIGNED_WHAT,
 } from '../../../src/contract/transaction-creators/revert-reasons';
-import {COUNTING_APP_INVALID_TRANSITION} from '../../revert-reasons';
-import {getNetworkMap, getTestProvider, setupContracts, signStates} from '../../test-helpers';
+import { COUNTING_APP_INVALID_TRANSITION } from '../../revert-reasons';
+import {
+  getTestProvider,
+  setupContracts,
+  signStates,
+  getPlaceHolderContractAddress,
+} from '../../test-helpers';
 
 const provider = getTestProvider();
 let ForceMove: Contract;
-let networkMap;
 const chainId = '0x1234';
 const participants = ['', '', ''];
 const wallets = new Array(3);
 const challengeDuration = 0x1000;
 const assetHolderAddress = Wallet.createRandom().address;
-const defaultOutcome: Outcome = [{assetHolderAddress, allocation: []}];
+const defaultOutcome: Outcome = [{ assetHolderAddress, allocation: [] }];
 let appDefinition;
 
 // populate wallets and participants array
@@ -36,9 +38,8 @@ for (let i = 0; i < 3; i++) {
   participants[i] = wallets[i].address;
 }
 beforeAll(async () => {
-  networkMap = await getNetworkMap();
   ForceMove = await setupContracts(provider, ForceMoveArtifact);
-  appDefinition = networkMap[countingAppArtifact.contractName].address; // use a fixed appDefinition in all tests
+  appDefinition = getPlaceHolderContractAddress();
 });
 
 const valid = {
@@ -93,9 +94,9 @@ describe('checkpoint', () => {
     ${reverts5} | ${turnNumRecord + 1} | ${invalidTransition} | ${wallets[1]} | ${future}    | ${COUNTING_APP_INVALID_TRANSITION}
     ${reverts6} | ${turnNumRecord + 1} | ${unsupported}       | ${wallets[1]} | ${future}    | ${UNACCEPTABLE_WHO_SIGNED_WHAT}
     ${reverts7} | ${turnNumRecord + 1} | ${valid}             | ${wallets[1]} | ${past}      | ${CHANNEL_FINALIZED}
-  `('$description', async ({largestTurnNum, support, challenger, finalizesAt, reason}) => {
-    const {appDatas, whoSignedWhat} = support;
-    const channel: Channel = {chainId, channelNonce: hexlify(channelNonce), participants};
+  `('$description', async ({ largestTurnNum, support, challenger, finalizesAt, reason }) => {
+    const { appDatas, whoSignedWhat } = support;
+    const channel: Channel = { chainId, channelNonce: hexlify(channelNonce), participants };
     const channelId = getChannelId(channel);
 
     const states = appDatas.map((data, idx) => ({
@@ -139,13 +140,16 @@ describe('checkpoint', () => {
 
     const signatures = await signStates(states, wallets, whoSignedWhat);
 
-    const tx = ForceMove.checkpoint(...checkpointArgs({states, signatures, whoSignedWhat}));
+    const tx = ForceMove.checkpoint(...checkpointArgs({ states, signatures, whoSignedWhat }));
     if (reason) {
       await expectRevert(() => tx, reason);
     } else {
       const receipt = await (await tx).wait();
       const event = receipt.events.pop();
-      expect(event.args).toMatchObject({channelId, newTurnNumRecord: bigNumberify(largestTurnNum)});
+      expect(event.args).toMatchObject({
+        channelId,
+        newTurnNumRecord: bigNumberify(largestTurnNum),
+      });
 
       const expectedChannelStorageHash = hashChannelStorage({
         turnNumRecord: largestTurnNum,

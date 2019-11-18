@@ -1,43 +1,40 @@
-import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet} from 'ethers';
-import {HashZero} from 'ethers/constants';
-import {defaultAbiCoder, hexlify} from 'ethers/utils';
-// @ts-ignore
-import countingAppArtifact from '../../../build/contracts/CountingApp.json';
+import { expectRevert } from '@statechannels/devtools';
+import { Contract, Wallet } from 'ethers';
+import { HashZero } from 'ethers/constants';
+import { defaultAbiCoder, hexlify } from 'ethers/utils';
 // @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
-import {Channel, getChannelId} from '../../../src/contract/channel';
-import {ChannelStorage, hashChannelStorage} from '../../../src/contract/channel-storage';
-import {getFixedPart, getVariablePart, State} from '../../../src/contract/state';
+import { Channel, getChannelId } from '../../../src/contract/channel';
+import { ChannelStorage, hashChannelStorage } from '../../../src/contract/channel-storage';
+import { getFixedPart, getVariablePart, State } from '../../../src/contract/state';
 import {
   CHALLENGER_NON_PARTICIPANT,
   CHANNEL_FINALIZED,
   TURN_NUM_RECORD_DECREASED,
   TURN_NUM_RECORD_NOT_INCREASED,
 } from '../../../src/contract/transaction-creators/revert-reasons';
-import {SignedState} from '../../../src/index';
-import {signChallengeMessage} from '../../../src/signatures';
-import {COUNTING_APP_INVALID_TRANSITION} from '../../revert-reasons';
+import { SignedState } from '../../../src/index';
+import { signChallengeMessage } from '../../../src/signatures';
+import { COUNTING_APP_INVALID_TRANSITION } from '../../revert-reasons';
 import {
   clearedChallengeHash,
   finalizedOutcomeHash,
-  getNetworkMap,
   getTestProvider,
   ongoingChallengeHash,
   setupContracts,
   signStates,
+  getPlaceHolderContractAddress,
 } from '../../test-helpers';
 
 const provider = getTestProvider();
 
 let ForceMove: Contract;
-let networkMap;
 
 const chainId = '0x1234';
 const participants = ['', '', ''];
 const wallets = new Array(3);
 const challengeDuration = 0x1;
-const outcome = [{allocation: [], assetHolderAddress: Wallet.createRandom().address}];
+const outcome = [{ allocation: [], assetHolderAddress: Wallet.createRandom().address }];
 
 let appDefinition;
 
@@ -48,9 +45,8 @@ for (let i = 0; i < 3; i++) {
 }
 
 beforeAll(async () => {
-  networkMap = await getNetworkMap();
   ForceMove = await setupContracts(provider, ForceMoveArtifact);
-  appDefinition = networkMap[countingAppArtifact.contractName].address; // use a fixed appDefinition in all tests
+  appDefinition = getPlaceHolderContractAddress();
 });
 
 // Scenarios are synonymous with channelNonce:
@@ -75,13 +71,13 @@ const reverts4 = 'It reverts when a challenge is present if the turnNumRecord do
 const reverts5 = 'It reverts when the channel is finalized';
 
 describe('forceMove', () => {
-  const threeStates = {appDatas: [0, 1, 2], whoSignedWhat: [0, 1, 2]};
-  const oneState = {appDatas: [2], whoSignedWhat: [0, 0, 0]};
-  const invalid = {appDatas: [0, 2, 1], whoSignedWhat: [0, 1, 2]};
+  const threeStates = { appDatas: [0, 1, 2], whoSignedWhat: [0, 1, 2] };
+  const oneState = { appDatas: [2], whoSignedWhat: [0, 0, 0] };
+  const invalid = { appDatas: [0, 2, 1], whoSignedWhat: [0, 1, 2] };
   const largestTurnNum = 8;
   const isFinalCount = 0;
   const challenger = wallets[2];
-  const wrongSig = {v: 1, s: HashZero, r: HashZero};
+  const wrongSig = { v: 1, s: HashZero, r: HashZero };
 
   const empty = HashZero; // equivalent to openAtZero
   const openAtFive = clearedChallengeHash(5);
@@ -112,8 +108,8 @@ describe('forceMove', () => {
   `(
     '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
 
-    async ({initialChannelStorageHash, stateData, challengeSignature, reasonString}) => {
-      const {appDatas, whoSignedWhat} = stateData;
+    async ({ initialChannelStorageHash, stateData, challengeSignature, reasonString }) => {
+      const { appDatas, whoSignedWhat } = stateData;
       const channel: Channel = {
         chainId,
         participants,
@@ -137,7 +133,7 @@ describe('forceMove', () => {
       const signatures = await signStates(states, wallets, whoSignedWhat);
       const challengeState: SignedState = {
         state: states[states.length - 1],
-        signature: {v: 0, r: '', s: ''},
+        signature: { v: 0, r: '', s: '' },
       };
       challengeSignature =
         challengeSignature || signChallengeMessage([challengeState], challenger.privateKey);

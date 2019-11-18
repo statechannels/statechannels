@@ -1,7 +1,9 @@
+// @ts-ignore
+import countingAppArtifact from '../build/contracts/CountingApp.json';
 import NetworkContext from '@statechannels/nitro-protocol/ganache/ganache-network-context.json';
-import {Contract, ethers, Wallet} from 'ethers';
-import {AddressZero, HashZero} from 'ethers/constants';
-import {TransactionReceipt, TransactionRequest} from 'ethers/providers';
+import { Contract, ethers, Wallet } from 'ethers';
+import { AddressZero, HashZero } from 'ethers/constants';
+import { TransactionReceipt, TransactionRequest } from 'ethers/providers';
 import {
   arrayify,
   bigNumberify,
@@ -12,7 +14,7 @@ import {
   splitSignature,
 } from 'ethers/utils';
 
-import {hashChannelStorage} from '../src/contract/channel-storage';
+import { hashChannelStorage } from '../src/contract/channel-storage';
 import {
   Allocation,
   AllocationAssetOutcome,
@@ -22,7 +24,7 @@ import {
   hashAssetOutcome,
   Outcome,
 } from '../src/contract/outcome';
-import {hashState, State} from '../src/contract/state';
+import { hashState, State } from '../src/contract/state';
 
 // interfaces
 
@@ -59,12 +61,17 @@ export function getNetworkMap() {
 
 export async function setupContracts(provider: ethers.providers.JsonRpcProvider, artifact) {
   const signer = provider.getSigner(0);
-  const networkMap = await getNetworkMap();
+  const networkMap = getNetworkMap();
 
   const contractName = artifact.contractName;
   const contractAddress = networkMap[contractName].address;
   const contract = new ethers.Contract(contractAddress, artifact.abi, signer);
   return contract;
+}
+
+export function getPlaceHolderContractAddress(): string {
+  const networkContext = getNetworkMap();
+  return networkContext[countingAppArtifact.contractName].address;
 }
 
 export async function sign(wallet: ethers.Wallet, msgHash: string | Uint8Array) {
@@ -182,7 +189,7 @@ export const newTransferEvent = (contract: ethers.Contract, to: string) => {
 };
 
 export const newAssetTransferredEvent = (destination: string, payout: number) => {
-  return {destination: destination.toLowerCase(), amount: payout};
+  return { destination: destination.toLowerCase(), amount: payout };
 };
 
 export function randomChannelId(channelNonce = 0) {
@@ -211,7 +218,7 @@ export async function sendTransaction(
   transaction: TransactionRequest
 ): Promise<TransactionReceipt> {
   const signer = provider.getSigner();
-  const response = await signer.sendTransaction({to: contractAddress, ...transaction});
+  const response = await signer.sendTransaction({ to: contractAddress, ...transaction });
   return await response.wait();
 }
 
@@ -310,7 +317,7 @@ export function checkMultipleAssetOutcomeHashes(
     const allocationAfter = [];
     Object.keys(assetOutcome).forEach(destination => {
       const amount = assetOutcome[destination];
-      allocationAfter.push({destination, amount});
+      allocationAfter.push({ destination, amount });
     });
     const [, expectedNewAssetOutcomeHash] = allocationToParams(allocationAfter);
     contractsArray.forEach(async contract => {
@@ -351,7 +358,7 @@ export function assetTransferredEventsFromPayouts(
       assetTransferredEvents.push({
         contract: assetHolder,
         name: 'AssetTransferred',
-        values: {destination, amount: singleAssetPayouts[destination]},
+        values: { destination, amount: singleAssetPayouts[destination] },
       });
     }
   });
@@ -363,7 +370,7 @@ export function compileEventsFromLogs(logs: any[], contractsArray: Contract[]) {
   logs.forEach(log => {
     contractsArray.forEach(contract => {
       if (log.address === contract.address) {
-        events.push({...contract.interface.parseLog(log), contract: log.address});
+        events.push({ ...contract.interface.parseLog(log), contract: log.address });
       }
     });
   });
