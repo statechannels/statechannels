@@ -1,4 +1,4 @@
-import { GanacheServer } from '@statechannels/devtools';
+import { GanacheServer, DeployedArtifacts } from '@statechannels/devtools';
 import log from 'loglevel';
 
 import countingAppArtifact from '../build/contracts/CountingApp.json';
@@ -34,11 +34,29 @@ export async function deployContracts(chain: GanacheServer): Promise<object> {
     tokenArtifact,
     {
       artifact: erc20AssetHolderArtifact,
-      arguments: [testNitroAdjudicatorArtifact.contractName, tokenArtifact.contractName],
+      arguments: (deployedArtifacts: DeployedArtifacts) => {
+        if (testNitroAdjudicatorArtifact.contractName in deployedArtifacts) {
+          return [
+            deployedArtifacts[testNitroAdjudicatorArtifact.contractName].address,
+            deployedArtifacts[tokenArtifact.contractName].address,
+          ];
+        }
+        throw Error(`${erc20AssetHolderArtifact.contractName} requires that the following contracts are deployed:
+          - ${testNitroAdjudicatorArtifact.contractName}
+          - ${tokenArtifact.contractName}
+        `);
+      },
     },
     {
       artifact: ethAssetHolderArtifact,
-      arguments: [testNitroAdjudicatorArtifact.contractName],
+      arguments: (deployedArtifacts: DeployedArtifacts) => {
+        if (testNitroAdjudicatorArtifact.contractName in deployedArtifacts) {
+          return [deployedArtifacts[testNitroAdjudicatorArtifact.contractName].address];
+        }
+        throw Error(`${ethAssetHolderArtifact.contractName} requires that the following contracts are deployed:
+          - ${testNitroAdjudicatorArtifact.contractName}
+        `);
+      },
     },
   ]);
 }

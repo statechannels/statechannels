@@ -84,22 +84,9 @@ export class GanacheServer {
     for (const deployment of deployments) {
       const artifact = deployment.artifact || deployment;
 
-      const args: string[] = [];
+      let args: string[] = [];
       if (deployment.arguments) {
-        for (const arg of deployment.arguments) {
-          if (arg in deployedArtifacts) {
-            args.push(deployedArtifacts[arg].address);
-          }
-        }
-
-        if (args.length !== deployment.arguments.length) {
-          throw Error(
-            `Can't deploy ${artifact.contractName}: its dependent contracts ${JSON.stringify(
-              deployment.arguments
-            )} have not been deployed yet.`
-          );
-          continue;
-        }
+        args = deployment.arguments(deployedArtifacts);
       }
 
       const deployedArtifact = await deployer.deploy(artifact, undefined, ...args);

@@ -5,7 +5,7 @@ export interface Account {
 
 export interface Deployment {
   artifact: any;
-  arguments?: any[];
+  arguments?: (deployedArtifacts: DeployedArtifacts, opts: any[]) => any[];
 }
 
 export interface DeployedArtifact {
