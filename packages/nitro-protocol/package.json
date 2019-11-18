@@ -40,7 +40,7 @@
     "clearLib": "rm -rf lib",
     "deploy:test": "npx etherlime deploy --compile=false --file=./deployment/deploy-test.js",
     "deploy": "npx etherlime deploy --compile=false",
-    "lint:check": "npx eslint \"*/**/*.ts\"",
+    "lint:check": "npx eslint \"*/**/*.ts\" --cache",
     "lint:write": "npx eslint \"*/**/*.ts\" --fix",
     "prepare": "yarn build",
     "docgen": "npx solidoc",
