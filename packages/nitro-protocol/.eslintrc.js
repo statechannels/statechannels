@@ -170,6 +170,7 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
     project: 'tsconfig.json',
+    ecmaVersion:  2018,
     sourceType: 'module',
   },
   plugins: ['@typescript-eslint', '@typescript-eslint/tslint', 'prettier'],
@@ -179,8 +180,8 @@ module.exports = {
     'plugin:import/errors',
     'plugin:import/warnings',
     'plugin:import/typescript',
-    'prettier',
     'prettier/@typescript-eslint',
+    'plugin:prettier/recommended'
   ],
   rules: Object.assign(rules, TSRules),
   overrides: [
