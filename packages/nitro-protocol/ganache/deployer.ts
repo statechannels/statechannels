@@ -1,8 +1,10 @@
 import {GanacheServer, DeployedArtifacts} from '@statechannels/devtools';
 import log from 'loglevel';
 
+/* eslint-disable import/no-unresolved */
 import rpsArtifact from '@statechannels/rps/build/contracts/RockPaperScissors.json';
 import forceMoveAppArtifact from '@statechannels/rps/build/contracts/ForceMoveApp.json';
+/* eslint-enable import/no-unresolved */
 import countingAppArtifact from '../build/contracts/CountingApp.json';
 import erc20AssetHolderArtifact from '../build/contracts/ERC20AssetHolder.json';
 import ethAssetHolderArtifact from '../build/contracts/ETHAssetHolder.json';
