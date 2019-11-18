@@ -1,5 +1,4 @@
 import {State, validTransition} from "@statechannels/nitro-protocol";
-// @ts-ignore this is not supposed to exist at the prepare step
 import NetworkContext from "@statechannels/nitro-protocol/ganache/ganache-network-context.json";
 import {ethers} from "ethers";
 import {AddressZero} from "ethers/constants";

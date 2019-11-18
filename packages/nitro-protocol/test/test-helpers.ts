@@ -1,4 +1,3 @@
-// @ts-ignore this is not supposed to exist at the prepare step
 import NetworkContext from '@statechannels/nitro-protocol/ganache/ganache-network-context.json';
 import {Contract, ethers, Wallet} from 'ethers';
 import {AddressZero, HashZero} from 'ethers/constants';

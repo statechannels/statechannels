@@ -93,7 +93,7 @@ export class GanacheServer {
         }
 
         if (args.length !== deployment.arguments.length) {
-          log.warn(
+          throw Error(
             `Can't deploy ${artifact.contractName}: its dependent contracts ${JSON.stringify(
               deployment.arguments
             )} have not been deployed yet.`
