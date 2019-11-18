@@ -3,8 +3,6 @@ import {Contract, Wallet} from 'ethers';
 import {HashZero} from 'ethers/constants';
 import {hexlify} from 'ethers/utils';
 // @ts-ignore
-import countingAppArtifact from '../../../build/contracts/CountingApp.json';
-// @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {hashChannelStorage} from '../../../src/contract/channel-storage';
@@ -18,7 +16,7 @@ import {
 import {
   clearedChallengeHash,
   finalizedOutcomeHash,
-  getNetworkMap,
+  getPlaceHolderContractAddress,
   getTestProvider,
   ongoingChallengeHash,
   setupContracts,
@@ -27,8 +25,6 @@ import {
 
 const provider = getTestProvider();
 let ForceMove: Contract;
-let networkMap;
-let networkId;
 const chainId = '0x1234';
 const participants = ['', '', ''];
 const wallets = new Array(3);
@@ -43,10 +39,8 @@ for (let i = 0; i < 3; i++) {
   participants[i] = wallets[i].address;
 }
 beforeAll(async () => {
-  networkMap = await getNetworkMap();
   ForceMove = await setupContracts(provider, ForceMoveArtifact);
-  networkId = (await provider.getNetwork()).chainId;
-  appDefinition = networkMap[networkId][countingAppArtifact.contractName]; // Use a fixed appDefinition in all tests
+  appDefinition = getPlaceHolderContractAddress();
 });
 
 const acceptsWhenOpenIf =

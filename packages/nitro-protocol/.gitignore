@@ -20,4 +20,5 @@ lib
 dist
 .outputParameter
 docs/natspec/*.md
+ganache/*[.js,.json]
 .eslintcache

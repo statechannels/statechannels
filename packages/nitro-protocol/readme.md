@@ -37,7 +37,7 @@ To get started:
 
 1. Download the repo and `cd` into the directory.
 2. Run `yarn install`.
-3. Run `yarn startGanache`.
+3. Make sure a local ganache instance is running by following [the instructions at the root of the repo](../../readme.md#Development-Flow)
 4. Run `yarn test`.
 
 ## Documentation website

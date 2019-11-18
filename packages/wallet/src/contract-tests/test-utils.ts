@@ -15,7 +15,7 @@ import {
   CHALLENGE_DURATION
 } from "../constants";
 import {JsonRpcProvider, TransactionRequest, TransactionResponse} from "ethers/providers";
-import {getLibraryAddress} from "../utils/contract-utils";
+import {getContractAddress} from "../utils/contract-utils";
 import {State, getChannelId as getNitroChannelId, Channel} from "@statechannels/nitro-protocol";
 import {Signatures} from "@statechannels/nitro-protocol";
 import {convertBalanceToOutcome} from "../redux/__tests__/state-helpers";
@@ -75,9 +75,7 @@ export async function createChallenge(
   participantA,
   participantB
 ) {
-  const network = await provider.getNetwork();
-  const networkId = network.chainId;
-  const libraryAddress = await getLibraryAddress(networkId, "TrivialApp");
+  const libraryAddress = getContractAddress("TrivialApp");
 
   const channel: Channel = {
     channelNonce,
@@ -122,9 +120,7 @@ export async function concludeGame(
   participantA,
   participantB
 ) {
-  const network = await provider.getNetwork();
-  const networkId = network.chainId;
-  const libraryAddress = await getLibraryAddress(networkId, "TrivialApp");
+  const libraryAddress = getContractAddress("TrivialApp");
   const channel: Channel = {
     channelNonce,
     chainId: bigNumberify(NETWORK_ID).toHexString(),
@@ -166,9 +162,7 @@ export async function respond(
   participantB,
   challenge: State
 ) {
-  const network = await provider.getNetwork();
-  const networkId = network.chainId;
-  const libraryAddress = await getLibraryAddress(networkId, "TrivialApp");
+  const libraryAddress = getContractAddress("TrivialApp");
   const channel: Channel = {
     channelNonce,
     chainId: bigNumberify(NETWORK_ID).toHexString(),

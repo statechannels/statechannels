@@ -3,8 +3,6 @@ import {Contract, Wallet} from 'ethers';
 import {HashZero} from 'ethers/constants';
 import {defaultAbiCoder, hexlify} from 'ethers/utils';
 // @ts-ignore
-import countingAppArtifact from '../../../build/contracts/CountingApp.json';
-// @ts-ignore
 import ForceMoveArtifact from '../../../build/contracts/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {ChannelStorage, hashChannelStorage} from '../../../src/contract/channel-storage';
@@ -21,7 +19,7 @@ import {COUNTING_APP_INVALID_TRANSITION} from '../../revert-reasons';
 import {
   clearedChallengeHash,
   finalizedOutcomeHash,
-  getNetworkMap,
+  getPlaceHolderContractAddress,
   getTestProvider,
   ongoingChallengeHash,
   setupContracts,
@@ -31,8 +29,6 @@ import {
 const provider = getTestProvider();
 
 let ForceMove: Contract;
-let networkId;
-let networkMap;
 
 const chainId = '0x1234';
 const participants = ['', '', ''];
@@ -49,10 +45,8 @@ for (let i = 0; i < 3; i++) {
 }
 
 beforeAll(async () => {
-  networkMap = await getNetworkMap();
   ForceMove = await setupContracts(provider, ForceMoveArtifact);
-  networkId = (await provider.getNetwork()).chainId;
-  appDefinition = networkMap[networkId][countingAppArtifact.contractName]; // Use a fixed appDefinition in all tests
+  appDefinition = getPlaceHolderContractAddress();
 });
 
 // Scenarios are synonymous with channelNonce:

@@ -1,18 +1,20 @@
-import {ethers} from "ethers";
-
-import {AddressZero} from "ethers/constants";
 import {State, validTransition} from "@statechannels/nitro-protocol";
+import NetworkContext from "@statechannels/nitro-protocol/ganache/ganache-network-context.json";
+import {ethers} from "ethers";
+import {AddressZero} from "ethers/constants";
+import log from "loglevel";
 
-let networkMap;
+log.setDefaultLevel(log.levels.DEBUG);
 
-export function getLibraryAddress(networkId, contractName) {
-  networkMap = networkMap || require("../../deployment/network-map.json");
-  if (networkMap[networkId] && networkMap[networkId][contractName]) {
-    return networkMap[networkId][contractName];
+export function getContractAddress(contractName: string): string {
+  if (NetworkContext[contractName]) {
+    return NetworkContext[contractName].address;
   }
-  console.error(contractName, networkId, networkMap);
+  console.error(contractName, NetworkContext);
 
-  throw new Error(`Could not find ${contractName} in network map with network id ${networkId}`);
+  throw new Error(
+    `Could not find ${contractName} in network map ${JSON.stringify(NetworkContext)}}`
+  );
 }
 
 export async function getProvider(): Promise<ethers.providers.Web3Provider> {
@@ -22,23 +24,25 @@ export async function getProvider(): Promise<ethers.providers.Web3Provider> {
 export async function getAdjudicatorContract(provider) {
   await provider.ready;
 
-  const contractAddress = getLibraryAddress(getNetworkId(), "NitroAdjudicator");
+  const contractAddress = getContractAddress("NitroAdjudicator");
   return new ethers.Contract(contractAddress, getAdjudicatorInterface(), provider);
 }
 
 export async function getETHAssetHolderContract(provider) {
   await provider.ready;
 
-  const contractAddress = getLibraryAddress(getNetworkId(), "ETHAssetHolder");
+  const contractAddress = getContractAddress("ETHAssetHolder");
   return new ethers.Contract(contractAddress, getETHAssetHolderInterface(), provider);
 }
 
 export function getAdjudicatorInterface(): ethers.utils.Interface {
+  // TODO: update these to use the ABI from the network context
   const NitroAdjudicatorArtifact = require("../../build/contracts/NitroAdjudicator.json");
   return new ethers.utils.Interface(NitroAdjudicatorArtifact.abi);
 }
 
 export function getETHAssetHolderInterface(): ethers.utils.Interface {
+  // TODO: update these to use the ABI from the network context
   const ETHAssetHolderArtifact = require("../../build/contracts/ETHAssetHolder.json");
   return new ethers.utils.Interface(ETHAssetHolderArtifact.abi);
 }
@@ -48,9 +52,17 @@ export function getETHAssetHolderInterface(): ethers.utils.Interface {
 // avoiding errors being thrown. The situation is that all tests which actually interact
 // with the blockchain are currently skipped, and so the AddressZero value is never used.
 
+export function getTrivialAppAddress(): string {
+  try {
+    return getContractAddress("TrivialApp");
+  } catch (e) {
+    return AddressZero;
+  }
+}
+
 export function getETHAssetHolderAddress(): string {
   try {
-    return getLibraryAddress(getNetworkId(), "ETHAssetHolder");
+    return getContractAddress("ETHAssetHolder");
   } catch (e) {
     return AddressZero;
   }
@@ -58,7 +70,7 @@ export function getETHAssetHolderAddress(): string {
 
 export function getAdjudicatorContractAddress(): string {
   try {
-    return getLibraryAddress(getNetworkId(), "NitroAdjudicator");
+    return getContractAddress("NitroAdjudicator");
   } catch (e) {
     return AddressZero;
   }
@@ -66,15 +78,15 @@ export function getAdjudicatorContractAddress(): string {
 
 export function getConsensusContractAddress(): string {
   try {
-    return getLibraryAddress(getNetworkId(), "ConsensusApp");
+    return getContractAddress("ConsensusApp");
   } catch (e) {
     return AddressZero;
   }
 }
 
 export function getNetworkId(): number {
-  if (!!process.env.CHAIN_NETWORK_ID) {
-    return parseInt(process.env.CHAIN_NETWORK_ID, 10);
+  if (NetworkContext["NetworkID"]) {
+    return parseInt(NetworkContext["NetworkID"], 10);
   } else {
     throw new Error("There is no target network ID specified.");
   }
