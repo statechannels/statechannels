@@ -15,7 +15,7 @@ export function* firebaseInboxListener() {
   while (true) {
     const message = yield take(channel);
     const key = message.snapshot.key;
-    yield channelClient.pushMessage(message);
+    yield call(channelClient.pushMessage, message);
     yield call(reduxSagaFirebase.database.delete, `/messages/${address}/${key}`);
   }
 }
