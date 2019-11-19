@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-import destroyable from 'server-destroy';
 import dotEnvExtended from 'dotenv-extended';
 import Koa from 'koa';
 import Router from 'koa-router';
 import log from 'loglevel';
+import destroyable from 'server-destroy';
 
-import {startGanacheAndDeploy} from '.';
 import {GanacheServer} from '@statechannels/devtools';
+import {startGanacheAndDeploy} from '.';
 
 dotEnvExtended.load();
 

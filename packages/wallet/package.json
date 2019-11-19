@@ -159,7 +159,8 @@
     "uglifyjs-webpack-plugin": "2.2.0",
     "url-loader": "2.2.0",
     "workbox-webpack-plugin": "4.3.1",
-    "yargs": "14.0.0"
+    "yargs": "14.0.0",
+    "@statechannels/ganache-deployer": "^0.0.1"
   },
   "lint-staged": {
     "{src,test}/**/*.ts": "yarn lint:check"

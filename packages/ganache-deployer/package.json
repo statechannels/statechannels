@@ -20,7 +20,7 @@
     "url": "git+https://github.com/statechannels/monorepo.git"
   },
   "scripts": {
-    "start:ganache": "npx ts-node /src/start-script.ts",
+    "start:ganache": "npx ts-node src/start-script.ts",
     "build": "npx tsc",
     "prettier:check": "npx prettier --check 'src/**/*.ts'",
     "prettier:write": "npx prettier --write 'src/**/*.ts'",
