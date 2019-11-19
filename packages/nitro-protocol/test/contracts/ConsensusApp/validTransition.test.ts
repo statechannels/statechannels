@@ -1,10 +1,10 @@
 // @ts-ignore
-import ConsensusAppArtifact from '../../../build/contracts/ConsensusApp.json';
 
 import {expectRevert} from '@statechannels/devtools';
 import {Contract} from 'ethers';
 import {AddressZero, HashZero} from 'ethers/constants';
 import {TransactionRequest} from 'ethers/providers';
+import ConsensusAppArtifact from '../../../build/contracts/ConsensusApp.json';
 import {validTransition} from '../../../src/contract/consensus-app';
 import {ConsensusData} from '../../../src/contract/consensus-data';
 import {Outcome} from '../../../src/contract/outcome';
@@ -64,10 +64,10 @@ describe('validTransition', () => {
         numParticipants
       );
       if (isValid) {
-        // send a transaction, so we can measure gas consumption
+        // Send a transaction, so we can measure gas consumption
         await sendTransaction(consensusApp.address, transactionRequest);
 
-        // just call the function, so we can check the return value easily
+        // Just call the function, so we can check the return value easily
         const isValidFromCall = await validTransition(
           fromConsensusData,
           fromOutcome,

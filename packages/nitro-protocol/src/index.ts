@@ -12,8 +12,16 @@ import {getChallengeRegisteredEvent} from './contract/challenge';
 import {Channel, getChannelId} from './contract/channel';
 import {encodeConsensusData} from './contract/consensus-data';
 import {validTransition} from './contract/force-move-app';
-import {AllocationItem, encodeAllocation, encodeOutcome, Outcome} from './contract/outcome';
-import {Allocation, isAllocationOutcome, isGuaranteeOutcome} from './contract/outcome';
+import {
+  AllocationItem,
+  encodeAllocation,
+  encodeOutcome,
+  Outcome,
+  Allocation,
+  isAllocationOutcome,
+  isGuaranteeOutcome,
+} from './contract/outcome';
+
 import {State, VariablePart} from './contract/state';
 import {createDepositTransaction as createERC20DepositTransaction} from './contract/transaction-creators/erc20-asset-holder';
 import {
@@ -33,12 +41,12 @@ export interface SignedState {
 
 // TODO: Find a use case for this or remove.
 // @nsario I don't think we need this here -- it should be in the adjudicator state of the wallet
-// export interface ChannelStorage {
-//   turnNumRecord: BigNumberish;
-//   finalizesAt: BigNumberish;
-//   stateHash: string;
-//   challengerAddress: string;
-//   outcomeHash: string;
+// Export interface ChannelStorage {
+//   TurnNumRecord: BigNumberish;
+//   FinalizesAt: BigNumberish;
+//   StateHash: string;
+//   ChallengerAddress: string;
+//   OutcomeHash: string;
 // }
 
 // TODO: Export this with more thought to what is exposed by @statchannels/nitro-protocol
@@ -62,7 +70,7 @@ export {
   isGuaranteeOutcome,
   validTransition,
   VariablePart,
-  // test helpers -- TODO move these to devtools package
+  // Test helpers -- TODO move these to devtools package
   AssetOutcomeShortHand,
   OutcomeShortHand,
   getTestProvider,

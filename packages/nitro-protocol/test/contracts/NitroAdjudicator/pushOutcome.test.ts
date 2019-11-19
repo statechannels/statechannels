@@ -1,13 +1,13 @@
 // @ts-ignore
 // @ts-ignore
+import {expectRevert} from '@statechannels/devtools';
+import {Contract, Wallet} from 'ethers';
+import {AddressZero} from 'ethers/constants';
 import ERC20AssetHolderArtifact from '../../../build/contracts/ERC20AssetHolder.json';
 // @ts-ignore
 import ETHAssetHolderArtifact from '../../../build/contracts/ETHAssetHolder.json';
 import NitroAdjudicatorArtifact from '../../../build/contracts/TESTNitroAdjudicator.json';
 
-import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet} from 'ethers';
-import {AddressZero} from 'ethers/constants';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {AllocationAssetOutcome, hashAssetOutcome} from '../../../src/contract/outcome';
 import {State} from '../../../src/contract/state';
@@ -29,13 +29,13 @@ let NitroAdjudicator: Contract;
 let ETHAssetHolder: Contract;
 let ERC20AssetHolder: Contract;
 
-// constants for this test suite
+// Constants for this test suite
 
 const chainId = '0x1234';
 const participants = ['', '', ''];
 const wallets = new Array(3);
 
-// populate wallets and participants array
+// Populate wallets and participants array
 for (let i = 0; i < 3; i++) {
   wallets[i] = Wallet.createRandom();
   participants[i] = wallets[i].address;
@@ -63,7 +63,7 @@ describe('pushOutcome', () => {
     ${description3} | ${1103}      | ${4}                | ${5}                  | ${true}   | ${false}         | ${WRONG_CHANNEL_STORAGE}
     ${description4} | ${1104}      | ${5}                | ${5}                  | ${true}   | ${true}          | ${'Outcome hash already exists'}
   `(
-    '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
+    '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
       channelNonce,
       storedTurnNumRecord,
@@ -74,7 +74,7 @@ describe('pushOutcome', () => {
     }) => {
       const channel: Channel = {chainId, channelNonce, participants};
       const channelId = getChannelId(channel);
-      const finalizesAt = finalized ? 1 : 1e12; // either 1 second after unix epoch, or ~ 31000 years after
+      const finalizesAt = finalized ? 1 : 1e12; // Either 1 second after unix epoch, or ~ 31000 years after
 
       const A = randomExternalDestination();
       const B = randomExternalDestination();
@@ -113,7 +113,7 @@ describe('pushOutcome', () => {
         challengerAddress
       );
 
-      // call public wrapper to set state (only works on test contract)
+      // Call public wrapper to set state (only works on test contract)
       const tx = await NitroAdjudicator.setChannelStorageHash(channelId, initialChannelStorageHash);
       await tx.wait();
       expect(await NitroAdjudicator.channelStorageHashes(channelId)).toEqual(
@@ -130,7 +130,7 @@ describe('pushOutcome', () => {
         await sendTransaction(provider, NitroAdjudicator.address, transactionRequest);
       }
 
-      // call method in a slightly different way if expecting a revert
+      // Call method in a slightly different way if expecting a revert
       if (reasonString) {
         const regex = new RegExp(
           '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$'
@@ -141,7 +141,7 @@ describe('pushOutcome', () => {
         );
       } else {
         await sendTransaction(provider, NitroAdjudicator.address, transactionRequest);
-        // check 2x AssetHolder storage against the expected value
+        // Check 2x AssetHolder storage against the expected value
         expect(await ETHAssetHolder.assetOutcomeHashes(channelId)).toEqual(
           hashAssetOutcome(outcome[0].allocation)
         );

@@ -1,5 +1,7 @@
+/* eslint-disable import/no-unresolved */
 // @ts-ignore
 import NetworkContext from '@statechannels/nitro-protocol/ganache/ganache-network-context.json';
+/* eslint-enable import/no-unresolved */
 import {Contract, ethers, Wallet} from 'ethers';
 import {AddressZero, HashZero} from 'ethers/constants';
 import {TransactionReceipt, TransactionRequest} from 'ethers/providers';
@@ -26,14 +28,14 @@ import {
 } from '../src/contract/outcome';
 import {hashState, State} from '../src/contract/state';
 
-// interfaces
+// Interfaces
 
-// e.g. {ALICE:2, BOB:3}
+// E.g. {ALICE:2, BOB:3}
 export interface AssetOutcomeShortHand {
   [destination: string]: BigNumberish;
 }
 
-// e.g. {ETH: {ALICE:2, BOB:3}, DAI: {ALICE:1, BOB:4}}
+// E.g. {ETH: {ALICE:2, BOB:3}, DAI: {ALICE:1, BOB:4}}
 export interface OutcomeShortHand {
   [assetHolder: string]: AssetOutcomeShortHand;
 }
@@ -42,7 +44,7 @@ export interface AddressesLookup {
   [shorthand: string]: string | undefined;
 }
 
-// functions
+// Functions
 export const getTestProvider = () => {
   if (!process.env.GANACHE_PORT) {
     throw new Error('Missing environment variable GANACHE_PORT required');
@@ -75,44 +77,41 @@ export function getPlaceHolderContractAddress(): string {
 }
 
 export async function sign(wallet: ethers.Wallet, msgHash: string | Uint8Array) {
-  // msgHash is a hex string
-  // returns an object with v, r, and s properties.
+  // MsgHash is a hex string
+  // Returns an object with v, r, and s properties.
   return splitSignature(await wallet.signMessage(arrayify(msgHash)));
 }
 
 export const nonParticipant = ethers.Wallet.createRandom();
 
-export const clearedChallengeHash = (turnNumRecord: number = 5) => {
-  return hashChannelStorage({
+export const clearedChallengeHash = (turnNumRecord = 5) =>
+  hashChannelStorage({
     turnNumRecord,
     finalizesAt: 0,
   });
-};
 
-export const ongoingChallengeHash = (turnNumRecord: number = 5) => {
-  return hashChannelStorage({
+export const ongoingChallengeHash = (turnNumRecord = 5) =>
+  hashChannelStorage({
     turnNumRecord,
     finalizesAt: 1e12,
     challengerAddress: AddressZero,
     outcome: [],
   });
-};
 
 export const finalizedOutcomeHash = (
-  turnNumRecord: number = 5,
-  finalizesAt: number = 1,
+  turnNumRecord = 5,
+  finalizesAt = 1,
   outcome: Outcome = [],
   state = undefined,
   challengerAddress = undefined
-) => {
-  return hashChannelStorage({
+) =>
+  hashChannelStorage({
     turnNumRecord,
     finalizesAt,
     outcome,
     state,
     challengerAddress,
   });
-};
 
 export const newChallengeRegisteredEvent = (contract: ethers.Contract, channelId: string) => {
   const filter = contract.filters.ChallengeRegistered(channelId);
@@ -148,7 +147,7 @@ export const newChallengeClearedEvent = (contract: ethers.Contract, channelId: s
   const filter = contract.filters.ChallengeCleared(channelId);
   return new Promise((resolve, reject) => {
     contract.on(filter, (eventChannelId, eventTurnNumRecord, event) => {
-      // match event for this channel only
+      // Match event for this channel only
       contract.removeAllListeners(filter);
       resolve([eventChannelId, eventTurnNumRecord]);
     });
@@ -159,7 +158,7 @@ export const newConcludedEvent = (contract: ethers.Contract, channelId: string) 
   const filter = contract.filters.Concluded(channelId);
   return new Promise((resolve, reject) => {
     contract.on(filter, (eventChannelId, event) => {
-      // match event for this channel only
+      // Match event for this channel only
       contract.removeAllListeners(filter);
       resolve([channelId]);
     });
@@ -170,7 +169,7 @@ export const newDepositedEvent = (contract: ethers.Contract, destination: string
   const filter = contract.filters.Deposited(destination);
   return new Promise((resolve, reject) => {
     contract.on(filter, (eventDestination, amountDeposited, amountHeld, event) => {
-      // match event for this destination only
+      // Match event for this destination only
       contract.removeAllListeners(filter);
       resolve([eventDestination, amountDeposited, amountHeld]);
     });
@@ -181,24 +180,25 @@ export const newTransferEvent = (contract: ethers.Contract, to: string) => {
   const filter = contract.filters.Transfer(null, to);
   return new Promise((resolve, reject) => {
     contract.on(filter, (eventFrom, eventTo, amountTransferred, event) => {
-      // match event for this destination only
+      // Match event for this destination only
       contract.removeAllListeners(filter);
       resolve(amountTransferred);
     });
   });
 };
 
-export const newAssetTransferredEvent = (destination: string, payout: number) => {
-  return {destination: destination.toLowerCase(), amount: payout};
-};
+export const newAssetTransferredEvent = (destination: string, payout: number) => ({
+  destination: destination.toLowerCase(),
+  amount: payout,
+});
 
 export function randomChannelId(channelNonce = 0) {
-  // populate participants array (every test run targets a unique channel)
+  // Populate participants array (every test run targets a unique channel)
   const participants = [];
   for (let i = 0; i < 3; i++) {
     participants[i] = ethers.Wallet.createRandom().address;
   }
-  // compute channelId
+  // Compute channelId
   const channelId = keccak256(
     defaultAbiCoder.encode(['uint256', 'address[]', 'uint256'], [1234, participants, channelNonce])
   );
@@ -250,8 +250,8 @@ export async function signStates(
   return Promise.all(promises);
 }
 
-// recursively replaces any key with the value of that key in the addresses object
-// bigNumberify all numbers
+// Recursively replaces any key with the value of that key in the addresses object
+// BigNumberify all numbers
 export function replaceAddressesAndBigNumberify(
   object: AssetOutcomeShortHand | OutcomeShortHand | string,
   addresses: AddressesLookup
@@ -259,7 +259,7 @@ export function replaceAddressesAndBigNumberify(
   const newObject = {};
   Object.keys(object).forEach(key => {
     if (typeof object[key] === 'object') {
-      // recurse
+      // Recurse
       newObject[addresses[key]] = replaceAddressesAndBigNumberify(object[key], addresses);
     }
     if (typeof object[key] === 'number') {
@@ -328,7 +328,7 @@ export function checkMultipleAssetOutcomeHashes(
   });
 }
 
-// computes an outcome from a shorthand description
+// Computes an outcome from a shorthand description
 export function computeOutcome(outcomeShortHand: OutcomeShortHand): AllocationAssetOutcome[] {
   const outcome: AllocationAssetOutcome[] = [];
   Object.keys(outcomeShortHand).forEach(assetHolder => {

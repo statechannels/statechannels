@@ -8,7 +8,7 @@ import {hashOutcome} from '../outcome';
 import {getFixedPart, getVariablePart, hashAppPart, State} from '../state';
 
 // TODO: Currently we are setting some arbitrary gas limit
-// to avoid issues with Ganache sendTransaction and parsing BN.js
+// To avoid issues with Ganache sendTransaction and parsing BN.js
 // If we don't set a gas limit some transactions will fail
 const GAS_LIMIT = 3000000;
 
@@ -51,7 +51,7 @@ export function createForceMoveTransaction(
   const largestTurnNum = Math.max(...states.map(s => s.turnNum));
   const isFinalCount = states.filter(s => s.isFinal === true).length;
   // TODO: Is there a reason why createForceMoveTransaction accepts a State[] and a Signature[]
-  // argument rather than a SignedState[] argument?
+  // Argument rather than a SignedState[] argument?
   const signedStates = states.map(s => ({state: s, signature: {v: 0, r: '', s: ''}}));
   const challengerSignature = signChallengeMessage(signedStates, challengerPrivateKey);
 

@@ -1,5 +1,7 @@
 import {expectRevert} from '@statechannels/devtools';
 // @ts-ignore
+import {Contract} from 'ethers';
+import {bigNumberify, id} from 'ethers/utils';
 import AssetHolderArtifact from '../../../build/contracts/TESTAssetHolder.json';
 import {
   allocationToParams,
@@ -10,8 +12,6 @@ import {
   setupContracts,
 } from '../../test-helpers';
 
-import {Contract} from 'ethers';
-import {bigNumberify, id} from 'ethers/utils';
 import {encodeAllocation} from '../../../src/contract/outcome';
 
 const provider = getTestProvider();
@@ -19,11 +19,11 @@ const provider = getTestProvider();
 let AssetHolder: Contract;
 
 const addresses = {
-  // channels
+  // Channels
   c: undefined,
   C: randomChannelId(),
   X: randomChannelId(),
-  // externals
+  // Externals
   A: randomExternalDestination(),
   B: randomExternalDestination(),
 };
@@ -34,7 +34,7 @@ beforeAll(async () => {
 
 const reason0 = 'transferAll | submitted data does not match stored assetOutcomeHash';
 
-// c is the channel we are transferring from.
+// C is the channel we are transferring from.
 describe('transferAll', () => {
   it.each`
     name                              | heldBefore | setOutcome      | newOutcome | heldAfter             | payouts         | reason
@@ -54,36 +54,36 @@ describe('transferAll', () => {
   `(
     `$name: heldBefore: $heldBefore, setOutcome: $setOutcome, newOutcome: $newOutcome, heldAfter: $heldAfter, payouts: $payouts`,
     async ({name, heldBefore, setOutcome, newOutcome, heldAfter, payouts, reason}) => {
-      // compute channelId
+      // Compute channelId
       const nonce = bigNumberify(id(name))
         .maskn(30)
         .toNumber();
       const channelId = randomChannelId(nonce);
       addresses.c = channelId;
 
-      // transform input data (unpack addresses and BigNumberify amounts)
+      // Transform input data (unpack addresses and BigNumberify amounts)
       heldBefore = replaceAddressesAndBigNumberify(heldBefore, addresses);
       setOutcome = replaceAddressesAndBigNumberify(setOutcome, addresses);
       newOutcome = replaceAddressesAndBigNumberify(newOutcome, addresses);
       heldAfter = replaceAddressesAndBigNumberify(heldAfter, addresses);
       payouts = replaceAddressesAndBigNumberify(payouts, addresses);
 
-      // reset the holdings (only works on test contract)
+      // Reset the holdings (only works on test contract)
       new Set([...Object.keys(heldAfter), ...Object.keys(heldBefore)]).forEach(async key => {
-        // key must be either in heldBefore or heldAfter or both
+        // Key must be either in heldBefore or heldAfter or both
         const amount = heldBefore[key] ? heldBefore[key] : bigNumberify(0);
         await (await AssetHolder.setHoldings(key, amount)).wait();
         expect((await AssetHolder.holdings(key)).eq(amount)).toBe(true);
       });
 
-      // compute an appropriate allocation.
+      // Compute an appropriate allocation.
       const allocation = [];
       Object.keys(setOutcome).forEach(key =>
         allocation.push({destination: key, amount: setOutcome[key]})
       );
       const [, assetOutcomeHash] = allocationToParams(allocation);
 
-      // set assetOutcomeHash
+      // Set assetOutcomeHash
       await (await AssetHolder.setAssetOutcomeHashPermissionless(
         channelId,
         assetOutcomeHash
@@ -92,7 +92,7 @@ describe('transferAll', () => {
 
       const tx = AssetHolder.transferAll(channelId, encodeAllocation(allocation));
 
-      // call method in a slightly different way if expecting a revert
+      // Call method in a slightly different way if expecting a revert
       if (reason) {
         await expectRevert(() => tx, reason);
       } else {
@@ -107,12 +107,12 @@ describe('transferAll', () => {
           }
         });
         expect(events).toMatchObject(expectedEvents);
-        // check new holdings
+        // Check new holdings
         Object.keys(heldAfter).forEach(async key =>
           expect(await AssetHolder.holdings(key)).toEqual(heldAfter[key])
         );
 
-        // check new assetOutcomeHash
+        // Check new assetOutcomeHash
         const allocationAfter = [];
         Object.keys(newOutcome).forEach(key => {
           allocationAfter.push({destination: key, amount: newOutcome[key]});

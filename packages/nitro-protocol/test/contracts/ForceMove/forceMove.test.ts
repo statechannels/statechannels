@@ -38,7 +38,7 @@ const outcome = [{allocation: [], assetHolderAddress: Wallet.createRandom().addr
 
 let appDefinition;
 
-// populate wallets and participants array
+// Populate wallets and participants array
 for (let i = 0; i < 3; i++) {
   wallets[i] = Wallet.createRandom();
   participants[i] = wallets[i].address;
@@ -79,7 +79,7 @@ describe('forceMove', () => {
   const challenger = wallets[2];
   const wrongSig = {v: 1, s: HashZero, r: HashZero};
 
-  const empty = HashZero; // equivalent to openAtZero
+  const empty = HashZero; // Equivalent to openAtZero
   const openAtFive = clearedChallengeHash(5);
   const openAtLargestTurnNum = clearedChallengeHash(largestTurnNum);
   const openAtTwenty = clearedChallengeHash(20);
@@ -106,7 +106,7 @@ describe('forceMove', () => {
     ${reverts4} | ${challengeAtLargestTurnNum} | ${oneState}    | ${undefined}       | ${TURN_NUM_RECORD_NOT_INCREASED}
     ${reverts5} | ${finalizedAtFive}           | ${oneState}    | ${undefined}       | ${CHANNEL_FINALIZED}
   `(
-    '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
+    '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
 
     async ({initialChannelStorageHash, stateData, challengeSignature, reasonString}) => {
       const {appDatas, whoSignedWhat} = stateData;
@@ -129,7 +129,7 @@ describe('forceMove', () => {
       const variableParts = states.map(state => getVariablePart(state));
       const fixedPart = getFixedPart(states[0]);
 
-      // sign the states
+      // Sign the states
       const signatures = await signStates(states, wallets, whoSignedWhat);
       const challengeState: SignedState = {
         state: states[states.length - 1],
@@ -138,7 +138,7 @@ describe('forceMove', () => {
       challengeSignature =
         challengeSignature || signChallengeMessage([challengeState], challenger.privateKey);
 
-      // set current channelStorageHashes value
+      // Set current channelStorageHashes value
       await (await ForceMove.setChannelStorageHash(channelId, initialChannelStorageHash)).wait();
 
       const tx = ForceMove.forceMove(
@@ -156,7 +156,7 @@ describe('forceMove', () => {
         const receipt = await (await tx).wait();
         const event = receipt.events.pop();
 
-        // catch ForceMove event
+        // Catch ForceMove event
         const {
           channelId: eventChannelId,
           turnNumRecord: eventTurnNumRecord,
@@ -167,7 +167,7 @@ describe('forceMove', () => {
           variableParts: eventVariableParts,
         } = event.args;
 
-        // check this information is enough to respond
+        // Check this information is enough to respond
         expect(eventChannelId).toEqual(channelId);
         expect(eventTurnNumRecord._hex).toEqual(hexlify(largestTurnNum));
         expect(eventChallenger).toEqual(challenger.address);
@@ -193,7 +193,7 @@ describe('forceMove', () => {
         };
         const expectedChannelStorageHash = hashChannelStorage(expectedChannelStorage);
 
-        // check channelStorageHash against the expected value
+        // Check channelStorageHash against the expected value
         expect(await ForceMove.channelStorageHashes(channelId)).toEqual(expectedChannelStorageHash);
       }
     }

@@ -17,13 +17,15 @@ import {
   checkMultipleHoldings,
   compileEventsFromLogs,
   computeOutcome,
+  finalizedOutcomeHash,
+  getTestProvider,
   OutcomeShortHand,
   randomChannelId,
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
   resetMultipleHoldings,
+  setupContracts,
 } from '../../test-helpers';
-import {finalizedOutcomeHash, getTestProvider, setupContracts} from '../../test-helpers';
 
 const provider = getTestProvider();
 let NitroAdjudicator: Contract;
@@ -31,24 +33,24 @@ let AssetHolder1: Contract;
 let AssetHolder2: Contract;
 
 const addresses = {
-  // channels
+  // Channels
   c: undefined,
   C: randomChannelId(),
   X: randomChannelId(),
-  // externals
+  // Externals
   A: randomExternalDestination(),
   B: randomExternalDestination(),
   ETH: undefined,
   TOK: undefined,
 };
 
-// constants for this test suite
+// Constants for this test suite
 
 const chainId = '0x1234';
 const participants = ['', '', ''];
 const wallets = new Array(3);
 
-// populate wallets and participants array
+// Populate wallets and participants array
 for (let i = 0; i < 3; i++) {
   wallets[i] = Wallet.createRandom();
   participants[i] = wallets[i].address;
@@ -63,7 +65,7 @@ beforeAll(async () => {
 
 // Scenarios are synonymous with channelNonce:
 
-// const description1 =
+// Const description1 =
 //   'NitroAdjudicator accepts a pushOutcomeAndTransferAll tx for a finalized channel, and 1x Asset types transferred';
 const description2 =
   'NitroAdjudicator accepts a pushOutcomeAndTransferAll tx for a finalized channel, and 2x Asset types transferred';
@@ -77,7 +79,7 @@ describe('pushOutcomeAndTransferAll', () => {
     description     | setOutcome                    | heldBefore                    | newOutcome | heldAfter                     | payouts                       | reasonString
     ${description2} | ${{ETH: {A: 1}, TOK: {A: 2}}} | ${{ETH: {c: 1}, TOK: {c: 2}}} | ${{}}      | ${{ETH: {c: 0}, TOK: {c: 0}}} | ${{ETH: {A: 1}, TOK: {A: 2}}} | ${undefined}
   `(
-    '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
+    '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
       setOutcome,
       heldBefore,
@@ -96,9 +98,9 @@ describe('pushOutcomeAndTransferAll', () => {
       const channel: Channel = {chainId, channelNonce, participants};
       const channelId = getChannelId(channel);
       addresses.c = channelId;
-      const finalizesAt = finalized ? 1 : 1e12; // either 1 second after unix epoch, or ~ 31000 years after
+      const finalizesAt = finalized ? 1 : 1e12; // Either 1 second after unix epoch, or ~ 31000 years after
 
-      // transform input data (unpack addresses and BigNumberify amounts)
+      // Transform input data (unpack addresses and BigNumberify amounts)
       [heldBefore, setOutcome, newOutcome, heldAfter, payouts] = [
         heldBefore,
         setOutcome,
@@ -107,10 +109,10 @@ describe('pushOutcomeAndTransferAll', () => {
         payouts,
       ].map(object => replaceAddressesAndBigNumberify(object, addresses));
 
-      // set holdings on multiple asset holders
+      // Set holdings on multiple asset holders
       resetMultipleHoldings(heldBefore, [AssetHolder1, AssetHolder2]);
 
-      // compute the outcome.
+      // Compute the outcome.
       const outcome: AllocationAssetOutcome[] = computeOutcome(setOutcome);
 
       // We don't care about the actual values in the state
@@ -134,7 +136,7 @@ describe('pushOutcomeAndTransferAll', () => {
         challengerAddress
       );
 
-      // call public wrapper to set state (only works on test contract)
+      // Call public wrapper to set state (only works on test contract)
       const tx0 = await NitroAdjudicator.setChannelStorageHash(
         channelId,
         initialChannelStorageHash
@@ -157,7 +159,7 @@ describe('pushOutcomeAndTransferAll', () => {
         {gasLimit: 300000}
       );
 
-      // call method in a slightly different way if expecting a revert
+      // Call method in a slightly different way if expecting a revert
       if (reasonString) {
         const regex = new RegExp(
           '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$'
@@ -166,26 +168,26 @@ describe('pushOutcomeAndTransferAll', () => {
       } else {
         const {logs} = await (await tx1).wait();
 
-        // compile events from logs
+        // Compile events from logs
         const events = compileEventsFromLogs(logs, [AssetHolder1, AssetHolder2, NitroAdjudicator]);
 
-        // build up event expectations
+        // Build up event expectations
         let expectedEvents = [];
 
-        // add AssetTransferred events to expectations
+        // Add AssetTransferred events to expectations
         Object.keys(payouts).forEach(assetHolder => {
           expectedEvents = expectedEvents.concat(
             assetTransferredEventsFromPayouts(payouts[assetHolder], assetHolder)
           );
         });
 
-        // check that each expectedEvent is contained as a subset of the properies of each *corresponding* event: i.e. the order matters!
+        // Check that each expectedEvent is contained as a subset of the properies of each *corresponding* event: i.e. the order matters!
         expect(events).toMatchObject(expectedEvents);
 
-        // check new holdings on each AssetHolder
+        // Check new holdings on each AssetHolder
         checkMultipleHoldings(heldAfter, [AssetHolder1, AssetHolder2]);
 
-        // check new assetOutcomeHash on each AssetHolder
+        // Check new assetOutcomeHash on each AssetHolder
         checkMultipleAssetOutcomeHashes(channelId, newOutcome, [AssetHolder1, AssetHolder2]);
       }
     }

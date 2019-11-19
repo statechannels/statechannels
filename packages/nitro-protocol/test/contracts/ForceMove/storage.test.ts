@@ -69,6 +69,7 @@ describe('_requireChannelOpen', () => {
       );
 
       const tx = ForceMove.requireChannelOpen(channelId);
+      // eslint-disable-next-line no-unused-expressions
       result === 'reverts' ? await expectRevert(() => tx, 'Channel not open.') : await tx;
     }
   );

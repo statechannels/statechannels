@@ -10,14 +10,14 @@ import {Channel, getChannelId} from '../../../src/contract/channel';
 import {getTestProvider, setupContracts} from '../../test-helpers';
 
 const provider = getTestProvider();
-const signer0 = provider.getSigner(0); // convention matches setupContracts function
+const signer0 = provider.getSigner(0); // Convention matches setupContracts function
 let signer0Address;
 let ERC20AssetHolder: Contract;
 let Token: Contract;
 const chainId = '0x1234';
 const participants = [];
 
-// populate destinations array
+// Populate destinations array
 for (let i = 0; i < 3; i++) {
   participants[i] = Wallet.createRandom().address;
 }
@@ -49,14 +49,14 @@ describe('deposit', () => {
     const destinationChannel: Channel = {chainId, channelNonce, participants};
     const destination = getChannelId(destinationChannel);
 
-    // check msg.sender has enough tokens
+    // Check msg.sender has enough tokens
     const balance = await Token.balanceOf(signer0Address);
     await expect(balance.gte(held.add(amount))).toBe(true);
 
     // Increase allowance
-    await (await Token.increaseAllowance(ERC20AssetHolder.address, held.add(amount))).wait(); // approve enough for setup and main test
+    await (await Token.increaseAllowance(ERC20AssetHolder.address, held.add(amount))).wait(); // Approve enough for setup and main test
 
-    // check allowance updated
+    // Check allowance updated
     const allowance = await Token.allowance(signer0Address, ERC20AssetHolder.address);
     expect(
       allowance
@@ -66,7 +66,7 @@ describe('deposit', () => {
     ).toBe(true);
 
     if (held > 0) {
-      // set holdings by depositing in the 'safest' way
+      // Set holdings by depositing in the 'safest' way
       const {events} = await (await ERC20AssetHolder.deposit(destination, 0, held)).wait();
       expect(await ERC20AssetHolder.holdings(destination)).toEqual(held);
       const {data: amountTransferred} = getTransferEvent(events);
@@ -93,7 +93,7 @@ describe('deposit', () => {
       const allocatedAmount = await ERC20AssetHolder.holdings(destination);
       await expect(allocatedAmount).toEqual(heldAfter);
 
-      // check for any partial refund of tokens
+      // Check for any partial refund of tokens
       await expect(await Token.balanceOf(signer0Address)).toEqual(
         balanceBefore.sub(depositedEvent.amountDeposited)
       );

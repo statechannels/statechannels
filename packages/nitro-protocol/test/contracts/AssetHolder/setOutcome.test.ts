@@ -16,7 +16,7 @@ const chainId = '0x1234';
 const channelNonce = '0x9999';
 const outcomeContent = id('some outcome data');
 
-// populate wallets and participants array
+// Populate wallets and participants array
 for (let i = 0; i < 3; i++) {
   wallets[i] = Wallet.createRandom();
   participants[i] = wallets[i].address;
