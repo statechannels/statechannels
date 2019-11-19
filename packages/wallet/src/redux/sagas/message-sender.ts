@@ -9,7 +9,8 @@ import {unreachable} from "../../utils/reducer-utils";
 
 export function* messageSender(action: OutgoingApiAction) {
   const message = yield createResponseMessage(action);
-  yield call(window.parent.postMessage, JSON.stringify(message), "*");
+
+  yield call(window.parent.postMessage, message, "*");
 }
 
 function* createResponseMessage(action: OutgoingApiAction) {

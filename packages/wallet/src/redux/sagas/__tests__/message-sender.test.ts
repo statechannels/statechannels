@@ -37,7 +37,7 @@ describe("message sender", () => {
       .provide([[matchers.call.fn(window.parent.postMessage), 0]])
       .run();
 
-    expect(JSON.parse(effects.call[0].payload.args[0])).toMatchObject({
+    expect(effects.call[0].payload.args[0]).toMatchObject({
       jsonrpc: "2.0",
       method: "MessageQueued",
       params: {
@@ -64,7 +64,7 @@ describe("message sender", () => {
       .provide([[matchers.call.fn(window.parent.postMessage), 0]])
       .run();
 
-    expect(JSON.parse(effects.call[0].payload.args[0])).toMatchObject({
+    expect(effects.call[0].payload.args[0]).toMatchObject({
       jsonrpc: "2.0",
       method: "ChannelProposed",
       params: {
@@ -75,37 +75,32 @@ describe("message sender", () => {
       }
     });
   });
-  it("sends a correct response message for WALLET.POST_MESSAGE", () => {
+  it("sends a correct response message for WALLET.POST_MESSAGE", async () => {
     const message = postMessageResponse({id: 5});
-    return expectSaga(messageSender, message)
+    const {effects} = await expectSaga(messageSender, message)
       .provide([[matchers.call.fn(window.parent.postMessage), 0]])
-      .call(
-        window.parent.postMessage,
-        JSON.stringify({
-          jsonrpc: "2.0",
-          id: 5,
-          result: {success: true}
-        }),
-        "*"
-      )
+
       .run();
+
+    expect(effects.call[0].payload.args[0]).toMatchObject({
+      jsonrpc: "2.0",
+      id: 5,
+      result: {success: true}
+    });
   });
 
-  it("sends a correct response message for WALLET.ADDRESS_RESPONSE", () => {
+  it("sends a correct response message for WALLET.ADDRESS_RESPONSE", async () => {
     const address = Wallet.createRandom().address;
     const message = addressResponse({id: 5, address});
-    return expectSaga(messageSender, message)
+    const {effects} = await expectSaga(messageSender, message)
       .provide([[matchers.call.fn(window.parent.postMessage), 0]])
-      .call(
-        window.parent.postMessage,
-        JSON.stringify({
-          jsonrpc: "2.0",
-          id: 5,
-          result: address
-        }),
-        "*"
-      )
+
       .run();
+    expect(effects.call[0].payload.args[0]).toMatchObject({
+      jsonrpc: "2.0",
+      id: 5,
+      result: address
+    });
   });
 
   it("creates a correct response message for WALLET.CREATE_CHANNEL_RESPONSE", async () => {
@@ -126,7 +121,7 @@ describe("message sender", () => {
       .provide([[matchers.call.fn(window.parent.postMessage), 0]])
       .run();
 
-    expect(JSON.parse(effects.call[0].payload.args[0])).toMatchObject({
+    expect(effects.call[0].payload.args[0]).toMatchObject({
       jsonrpc: "2.0",
       id: 1,
       result: {
@@ -156,7 +151,7 @@ describe("message sender", () => {
       .provide([[matchers.call.fn(window.parent.postMessage), 0]])
       .run();
 
-    expect(JSON.parse(effects.call[0].payload.args[0])).toMatchObject({
+    expect(effects.call[0].payload.args[0]).toMatchObject({
       jsonrpc: "2.0",
       id: 1,
       result: {
@@ -186,7 +181,7 @@ describe("message sender", () => {
       .provide([[matchers.call.fn(window.parent.postMessage), 0]])
       .run();
 
-    expect(JSON.parse(effects.call[0].payload.args[0])).toMatchObject({
+    expect(effects.call[0].payload.args[0]).toMatchObject({
       jsonrpc: "2.0",
       id: 1,
       error: {code: 1001, message: "Invalid app definition"}
@@ -211,7 +206,7 @@ describe("message sender", () => {
       .provide([[matchers.call.fn(window.parent.postMessage), 0]])
       .run();
 
-    expect(JSON.parse(effects.call[0].payload.args[0])).toMatchObject({
+    expect(effects.call[0].payload.args[0]).toMatchObject({
       jsonrpc: "2.0",
       id: 1,
       error: {code: 1000, message: "Signing address not found in the participants array"}
@@ -229,7 +224,7 @@ describe("message sender", () => {
       .provide([[matchers.call.fn(window.parent.postMessage), 0]])
       .run();
 
-    expect(JSON.parse(effects.call[0].payload.args[0])).toMatchObject({
+    expect(effects.call[0].payload.args[0]).toMatchObject({
       jsonrpc: "2.0",
       id: 1,
       error: {

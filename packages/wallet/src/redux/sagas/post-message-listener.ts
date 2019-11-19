@@ -5,7 +5,7 @@ import {messageHandler} from "./message-handler";
 export function* postMessageListener() {
   const postMessageEventChannel = eventChannel(emitter => {
     const eventListener = (event: MessageEvent) => {
-      if (event.data && typeof event.data === "string" && event.data.indexOf("jsonrpc") > -1) {
+      if (event.data && event.data.jsonrpc && event.data.jsonrpc === "2.0") {
         emitter(event);
       }
     };

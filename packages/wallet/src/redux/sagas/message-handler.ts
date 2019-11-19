@@ -14,8 +14,8 @@ import {
 
 import {getProvider} from "../../utils/contract-utils";
 
-export function* messageHandler(jsonRpcMessage: string, fromDomain: string) {
-  const parsedMessage = jrs.parseObject(JSON.parse(jsonRpcMessage));
+export function* messageHandler(jsonRpcMessage: object, fromDomain: string) {
+  const parsedMessage = jrs.parseObject(jsonRpcMessage);
   switch (parsedMessage.type) {
     case "notification":
     case "success":
