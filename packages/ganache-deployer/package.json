@@ -24,8 +24,8 @@
     "build": "npx tsc",
     "prettier:check": "npx prettier --check 'src/**/*.ts'",
     "prettier:write": "npx prettier --write 'src/**/*.ts'",
-    "lint:check": "yarn run tslint --config tslint.json  './**/*.ts'",
-    "lint:write": "yarn run tslint --config tslint.json  './**/*.ts' --fix ",
+    "lint:check": "yarn run tslint --config tslint.json  'src/**/*.ts'",
+    "lint:write": "yarn run tslint --config tslint.json  'src/**/*.ts' --fix ",
     "prepare": "yarn run build"
   },
   "bugs": {
