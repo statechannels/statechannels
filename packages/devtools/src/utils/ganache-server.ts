@@ -1,4 +1,4 @@
-import {spawn} from "child_process";
+import {ChildProcessWithoutNullStreams, spawn} from "child_process";
 import {EtherlimeGanacheDeployer} from "etherlime-lib";
 import {ethers} from "ethers";
 import {JsonRpcProvider} from "ethers/providers";
@@ -14,7 +14,7 @@ log.setDefaultLevel(log.levels.INFO);
 export class GanacheServer {
   provider: JsonRpcProvider;
   fundedPrivateKey: string;
-  server: any;
+  server: ChildProcessWithoutNullStreams;
 
   static async connect(port: number): Promise<GanacheServer> {
     const provider = new JsonRpcProvider(`http://localhost:${port}`);
@@ -71,6 +71,10 @@ export class GanacheServer {
     } catch (err) {
       throw err;
     }
+  }
+
+  onClose(listener: () => void) {
+    this.server.on("close", listener);
   }
 
   async deployContracts(deployments: Array<Deployment | any>): Promise<DeployedArtifacts> {

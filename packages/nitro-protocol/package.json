@@ -46,7 +46,7 @@
     "docgen": "npx solidoc",
     "prettier:check": "npx prettier --check '{contracts,src,test}/**/*.{ts,tsx,sol}'",
     "prettier:write": "npx prettier --write '{contracts,src,test}/**/*.{ts,tsx,sol}'",
-    "start:ganache": "npx ts-node ganache/index.ts",
+    "start:ganache": "node_modules/.bin/start-and-deploy",
     "test:ci": "yarn contract:compile && npx jest --ci --bail --runInBand",
     "test:prepare": "yarn deploy:test",
     "test:typescript": "npx jest --testPathIgnorePatterns='test/contracts' --reporters='default'",
@@ -56,6 +56,7 @@
   "dependencies": {
     "@counterfactual/cf-adjudicator-contracts": "^0.0.8",
     "@openzeppelin/contracts": "2.3.0",
+    "@statechannels/ganache-deployer": "^0.0.1",
     "ethers": "4.0.39"
   },
   "devDependencies": {
@@ -70,11 +71,11 @@
     "@typescript-eslint/eslint-plugin": "^2.7.0",
     "@typescript-eslint/eslint-plugin-tslint": "^2.7.0",
     "dotenv": "8.1.0",
+    "dotenv-extended": "2.5.0",
     "eslint": "^6.6.0",
     "eslint-config-prettier": "^6.0.0",
     "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-prettier": "^3.1.0",
-    "dotenv-extended": "2.5.0",
     "etherlime": "2.2.4",
     "etherlime-lib": "1.1.5",
     "ganache-cli": "6.6.0",
