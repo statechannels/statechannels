@@ -13,7 +13,7 @@
     "lib/*"
   ],
   "bin": {
-    "start-and-deploy": "./lib/start-script.js"
+    "start-ganache-and-deploy": "./lib/start-script.js"
   },
   "repository": {
     "type": "git",
