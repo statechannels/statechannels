@@ -4,7 +4,7 @@ import {Contract} from 'ethers';
 import {AddressZero, HashZero} from 'ethers/constants';
 import SingleAssetPaymentsArtifact from '../../../../build/contracts/SingleAssetPayments.json';
 import {Allocation, encodeOutcome} from '../../../../src/contract/outcome';
-import {VariablePart} from '../../../../src/contract/state.js';
+import {VariablePart} from '../../../../src/contract/state';
 import {
   getTestProvider,
   randomExternalDestination,
@@ -17,7 +17,7 @@ let singleAssetPayments: Contract;
 
 const numParticipants = 3;
 const addresses = {
-  // participants
+  // Participants
   A: randomExternalDestination(),
   B: randomExternalDestination(),
   C: randomExternalDestination(),

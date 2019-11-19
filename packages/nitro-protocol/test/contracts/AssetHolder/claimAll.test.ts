@@ -19,10 +19,10 @@ import {
 
 const provider = getTestProvider();
 const addresses = {
-  // channels
-  t: undefined, // target
-  g: undefined, // guarantor
-  // externals
+  // Channels
+  t: undefined, // Target
+  g: undefined, // Guarantor
+  // Externals
   I: randomExternalDestination(),
   A: randomExternalDestination(),
   B: randomExternalDestination(),
@@ -43,7 +43,7 @@ const reason6 =
 // 3. claim G1 (step 1 of alternative in figure 23 of nitro paper)
 // 4. claim G2 (step 2 of alternative of figure 23 of nitro paper)
 
-// amounts are valueString representations of wei
+// Amounts are valueString representations of wei
 describe('claimAll', () => {
   it.each`
     name                                               | heldBefore | guaranteeDestinations | tOutcomeBefore        | tOutcomeAfter   | heldAfter | payouts         | reason
@@ -76,7 +76,7 @@ describe('claimAll', () => {
       payouts: AssetOutcomeShortHand;
       reason;
     }) => {
-      // compute channelIds
+      // Compute channelIds
       const tNonce = bigNumberify(id(name))
         .maskn(30)
         .toNumber();
@@ -88,7 +88,7 @@ describe('claimAll', () => {
       addresses.t = targetId;
       addresses.g = guarantorId;
 
-      // transform input data (unpack addresses and BigNumberify amounts)
+      // Transform input data (unpack addresses and BigNumberify amounts)
       [heldBefore, tOutcomeBefore, tOutcomeAfter, heldAfter, payouts] = [
         heldBefore,
         tOutcomeBefore,
@@ -98,26 +98,26 @@ describe('claimAll', () => {
       ].map(object => replaceAddressesAndBigNumberify(object, addresses));
       guaranteeDestinations = guaranteeDestinations.map(x => addresses[x]);
 
-      // set holdings (only works on test contract)
+      // Set holdings (only works on test contract)
       new Set([...Object.keys(heldAfter), ...Object.keys(heldBefore)]).forEach(async key => {
-        // key must be either in heldBefore or heldAfter or both
+        // Key must be either in heldBefore or heldAfter or both
         const amount = heldBefore[key] ? heldBefore[key] : bigNumberify(0);
         await (await AssetHolder.setHoldings(key, amount)).wait();
         expect((await AssetHolder.holdings(key)).eq(amount)).toBe(true);
       });
 
-      // compute an appropriate allocation.
+      // Compute an appropriate allocation.
       const allocation = [];
       Object.keys(tOutcomeBefore).forEach(key =>
         allocation.push({destination: key, amount: tOutcomeBefore[key]})
       );
       const [, outcomeHash] = allocationToParams(allocation);
 
-      // set outcomeHash for target
+      // Set outcomeHash for target
       await (await AssetHolder.setAssetOutcomeHashPermissionless(targetId, outcomeHash)).wait();
       expect(await AssetHolder.assetOutcomeHashes(targetId)).toBe(outcomeHash);
 
-      // compute an appropriate guarantee
+      // Compute an appropriate guarantee
 
       const guarantee = {
         destinations: guaranteeDestinations,
@@ -127,7 +127,7 @@ describe('claimAll', () => {
       if (guaranteeDestinations.length > 0) {
         const [, gOutcomeContentHash] = guaranteeToParams(guarantee);
 
-        // set outcomeHash for guarantor
+        // Set outcomeHash for guarantor
         await (await AssetHolder.setAssetOutcomeHashPermissionless(
           guarantorId,
           gOutcomeContentHash
@@ -137,33 +137,33 @@ describe('claimAll', () => {
 
       const tx = AssetHolder.claimAll(...claimAllArgs(guarantorId, guarantee, allocation));
 
-      // call method in a slightly different way if expecting a revert
+      // Call method in a slightly different way if expecting a revert
       if (reason) {
         await expectRevert(() => tx, reason);
       } else {
-        // compile event expectations
+        // Compile event expectations
         let expectedEvents = [];
 
-        // add AssetTransferred events to expectations
+        // Add AssetTransferred events to expectations
         Object.keys(payouts).forEach(assetHolder => {
           expectedEvents = assetTransferredEventsFromPayouts(payouts, AssetHolder.address);
         });
 
-        // extract logs
+        // Extract logs
         const {logs} = await (await tx).wait();
 
-        // compile events from logs
+        // Compile events from logs
         const events = compileEventsFromLogs(logs, [AssetHolder]);
 
-        // check that each expectedEvent is contained as a subset of the properies of each *corresponding* event: i.e. the order matters!
+        // Check that each expectedEvent is contained as a subset of the properies of each *corresponding* event: i.e. the order matters!
         expect(events).toMatchObject(expectedEvents);
 
-        // check new holdings
+        // Check new holdings
         Object.keys(heldAfter).forEach(async key =>
           expect(await AssetHolder.holdings(key)).toEqual(heldAfter[key])
         );
 
-        // check new outcomeHash
+        // Check new outcomeHash
         const allocationAfter = [];
         Object.keys(tOutcomeAfter).forEach(key => {
           allocationAfter.push({destination: key, amount: tOutcomeAfter[key]});

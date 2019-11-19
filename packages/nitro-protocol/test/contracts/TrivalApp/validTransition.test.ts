@@ -6,8 +6,7 @@ import {solidityKeccak256} from 'ethers/utils';
 import TrivialAppArtifact from '../../../build/contracts/TrivialApp.json';
 import {Channel} from '../../../src/contract/channel';
 import {validTransition} from '../../../src/contract/force-move-app';
-import {State} from '../../../src/contract/state';
-import {VariablePart} from '../../../src/contract/state.js';
+import {State, VariablePart} from '../../../src/contract/state';
 import {getTestProvider, setupContracts} from '../../test-helpers';
 
 const provider = getTestProvider();
@@ -15,6 +14,18 @@ let trivialApp: Contract;
 
 function computeSaltedHash(salt: string, num: number) {
   return solidityKeccak256(['bytes32', 'uint256'], [salt, num]);
+}
+
+function getRandomVariablePart(): VariablePart {
+  const randomNum = Math.floor(Math.random() * 100);
+  const salt = MaxUint256.toHexString();
+  const hash = computeSaltedHash(salt, randomNum);
+
+  const variablePart: VariablePart = {
+    outcome: hash,
+    appData: hash,
+  };
+  return variablePart;
 }
 
 beforeAll(async () => {
@@ -55,15 +66,3 @@ describe('validTransition', () => {
     ).toBe(true);
   });
 });
-
-function getRandomVariablePart(): VariablePart {
-  const randomNum = Math.floor(Math.random() * 100);
-  const salt = MaxUint256.toHexString();
-  const hash = computeSaltedHash(salt, randomNum);
-
-  const variablePart: VariablePart = {
-    outcome: hash,
-    appData: hash,
-  };
-  return variablePart;
-}

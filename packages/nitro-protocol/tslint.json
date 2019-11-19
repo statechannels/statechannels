@@ -1,9 +1,0 @@
-{
-  "extends": "../../tslint.json",
-  "rules": {
-    "trailing-comma": [true, {"multiline": {"objects": "always"}}]
-  },
-  "linterOptions": {
-    "exclude": ["**/*.json"]
-  }
-}

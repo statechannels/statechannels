@@ -1,8 +1,8 @@
 import {bigNumberify, defaultAbiCoder, keccak256, Signature} from 'ethers/utils';
-import {Channel, SignedState} from '..';
 import {decodeOutcome} from './outcome';
 import {FixedPart, hashState, State, VariablePart} from './state';
 import {Address, Bytes32, Uint256, Uint8} from './types';
+import {Channel, SignedState} from '..';
 
 export function hashChallengeMessage(challengeState: State): Bytes32 {
   return keccak256(

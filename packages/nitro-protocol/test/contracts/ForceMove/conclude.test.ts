@@ -33,7 +33,7 @@ const assetHolderAddress = Wallet.createRandom().address;
 const outcome: Outcome = [{assetHolderAddress, allocation: []}];
 let appDefinition;
 
-// populate wallets and participants array
+// Populate wallets and participants array
 for (let i = 0; i < 3; i++) {
   wallets[i] = Wallet.createRandom();
   participants[i] = wallets[i].address;
@@ -96,7 +96,7 @@ describe('conclude', () => {
     ${reverts2} | ${challengeOngoing}       | ${turnNumRecord + nParticipants} | ${unsupported} | ${UNACCEPTABLE_WHO_SIGNED_WHAT}
     ${reverts3} | ${finalized}              | ${turnNumRecord + 1}             | ${oneState}    | ${CHANNEL_FINALIZED}
   `(
-    '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
+    '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({initialChannelStorageHash, largestTurnNum, support, reasonString}) => {
       const channel: Channel = {chainId, participants, channelNonce: hexlify(channelNonce)};
       const channelId = getChannelId(channel);
@@ -110,17 +110,17 @@ describe('conclude', () => {
           channel,
           outcome,
           appDefinition,
-          appData: appData[i - 1], // because isFinal = true...
+          appData: appData[i - 1], // Because isFinal = true...
           // ... this field is irrelevant as long as the signatures are correct
           challengeDuration,
           turnNum: largestTurnNum + i - numStates,
         });
       }
-      // call public wrapper to set state (only works on test contract)
+      // Call public wrapper to set state (only works on test contract)
       await (await ForceMove.setChannelStorageHash(channelId, initialChannelStorageHash)).wait();
       expect(await ForceMove.channelStorageHashes(channelId)).toEqual(initialChannelStorageHash);
 
-      // sign the states
+      // Sign the states
       const sigs = await signStates(states, wallets, whoSignedWhat);
 
       const tx = ForceMove.conclude(...concludeArgs(states, sigs, whoSignedWhat));
@@ -131,7 +131,7 @@ describe('conclude', () => {
         const event = receipt.events.pop();
         expect(event.args).toMatchObject({channelId});
 
-        // compute expected ChannelStorageHash
+        // Compute expected ChannelStorageHash
         const blockTimestamp = (await provider.getBlock(receipt.blockNumber)).timestamp;
         const expectedChannelStorageHash = hashChannelStorage({
           turnNumRecord: 0,
@@ -139,7 +139,7 @@ describe('conclude', () => {
           outcome,
         });
 
-        // check channelStorageHash against the expected value
+        // Check channelStorageHash against the expected value
         expect(await ForceMove.channelStorageHashes(channelId)).toEqual(expectedChannelStorageHash);
       }
     }

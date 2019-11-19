@@ -32,7 +32,7 @@ const assetHolderAddress = Wallet.createRandom().address;
 const defaultOutcome: Outcome = [{assetHolderAddress, allocation: []}];
 let appDefinition;
 
-// populate wallets and participants array
+// Populate wallets and participants array
 for (let i = 0; i < 3; i++) {
   wallets[i] = Wallet.createRandom();
   participants[i] = wallets[i].address;
@@ -134,7 +134,7 @@ describe('checkpoint', () => {
         })
       : HashZero;
 
-    // call public wrapper to set state (only works on test contract)
+    // Call public wrapper to set state (only works on test contract)
     await (await ForceMove.setChannelStorageHash(channelId, channelStorage)).wait();
     expect(await ForceMove.channelStorageHashes(channelId)).toEqual(channelStorage);
 
@@ -156,7 +156,7 @@ describe('checkpoint', () => {
         finalizesAt: 0x0,
       });
 
-      // check channelStorageHash against the expected value
+      // Check channelStorageHash against the expected value
       expect(await ForceMove.channelStorageHashes(channelId)).toEqual(expectedChannelStorageHash);
     }
   });

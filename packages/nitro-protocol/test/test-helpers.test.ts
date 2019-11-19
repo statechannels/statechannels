@@ -2,10 +2,10 @@ import {bigNumberify} from 'ethers/utils';
 import {replaceAddressesAndBigNumberify} from './test-helpers';
 
 const addresses = {
-  // channels
+  // Channels
   C: '0xCHANNEL',
   X: '0xANOTHERCHANNEL',
-  // externals
+  // Externals
   A: '0x000EXTERNAL',
   B: '0x000ANOTHEREXTERNAL',
   ETH: '0xETH',

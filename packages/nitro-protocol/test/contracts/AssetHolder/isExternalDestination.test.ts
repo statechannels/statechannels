@@ -10,7 +10,7 @@ let AssetHolder: Contract;
 const participants = ['', '', ''];
 const wallets = new Array(3);
 
-// populate wallets and participants array
+// Populate wallets and participants array
 for (let i = 0; i < 3; i++) {
   wallets[i] = Wallet.createRandom();
   participants[i] = wallets[i].address;

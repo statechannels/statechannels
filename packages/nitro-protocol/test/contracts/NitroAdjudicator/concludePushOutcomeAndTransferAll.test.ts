@@ -42,18 +42,18 @@ const challengeDuration = 0x1000;
 let appDefinition;
 
 const addresses = {
-  // channels
+  // Channels
   c: undefined,
   C: randomChannelId(),
   X: randomChannelId(),
-  // externals
+  // Externals
   A: randomExternalDestination(),
   B: randomExternalDestination(),
   ETH: undefined,
   TOK: undefined,
 };
 
-// populate wallets and participants array
+// Populate wallets and participants array
 for (let i = 0; i < 3; i++) {
   wallets[i] = Wallet.createRandom();
   participants[i] = wallets[i].address;
@@ -83,7 +83,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
     ${accepts1} | ${{ETH: {A: 1}}}              | ${{ETH: {c: 1}}}              | ${{ETH: {c: 0}}}              | ${{}}      | ${{ETH: {A: 1}}}              | ${undefined}
     ${accepts2} | ${{ETH: {A: 1}, TOK: {A: 2}}} | ${{ETH: {c: 1}, TOK: {c: 2}}} | ${{ETH: {c: 0}, TOK: {c: 0}}} | ${{}}      | ${{ETH: {A: 1}, TOK: {A: 2}}} | ${undefined}
   `(
-    '$description', // for the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
+    '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
       outcomeShortHand,
       heldBefore,
@@ -109,7 +109,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
       const largestTurnNum = turnNumRecord + 1;
       const initialChannelStorageHash = HashZero;
 
-      // transform input data (unpack addresses and BigNumberify amounts)
+      // Transform input data (unpack addresses and BigNumberify amounts)
       [heldBefore, outcomeShortHand, newOutcome, heldAfter, payouts] = [
         heldBefore,
         outcomeShortHand,
@@ -118,13 +118,13 @@ describe('concludePushOutcomeAndTransferAll', () => {
         payouts,
       ].map(object => replaceAddressesAndBigNumberify(object, addresses));
 
-      // set holdings on multiple asset holders
+      // Set holdings on multiple asset holders
       resetMultipleHoldings(heldBefore, [AssetHolder1, AssetHolder2]);
 
-      // compute the outcome.
+      // Compute the outcome.
       const outcome: AllocationAssetOutcome[] = computeOutcome(outcomeShortHand);
 
-      // construct states
+      // Construct states
       const states: State[] = [];
       for (let i = 1; i <= numStates; i++) {
         states.push({
@@ -138,7 +138,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
         });
       }
 
-      // call public wrapper to set state (only works on test contract)
+      // Call public wrapper to set state (only works on test contract)
       await (await NitroAdjudicator.setChannelStorageHash(
         channelId,
         initialChannelStorageHash
@@ -147,22 +147,22 @@ describe('concludePushOutcomeAndTransferAll', () => {
         initialChannelStorageHash
       );
 
-      // sign the states
+      // Sign the states
       const sigs = await signStates(states, wallets, whoSignedWhat);
 
-      // form transaction
+      // Form transaction
       const tx = NitroAdjudicator.concludePushOutcomeAndTransferAll(
         ...concludePushOutcomeAndTransferAllArgs(states, sigs, whoSignedWhat),
         {gasLimit: 3000000}
       );
 
-      // switch on overall test expectation
+      // Switch on overall test expectation
       if (reasonString) {
         await expectRevert(() => tx, reasonString);
       } else {
         const receipt = await (await tx).wait();
 
-        // compute expected ChannelStorageHash
+        // Compute expected ChannelStorageHash
         const blockTimestamp = (await provider.getBlock(receipt.blockNumber)).timestamp;
         const expectedChannelStorageHash = hashChannelStorage({
           turnNumRecord: 0,
@@ -170,41 +170,41 @@ describe('concludePushOutcomeAndTransferAll', () => {
           outcome,
         });
 
-        // check channelStorageHash against the expected value
+        // Check channelStorageHash against the expected value
         expect(await NitroAdjudicator.channelStorageHashes(channelId)).toEqual(
           expectedChannelStorageHash
         );
 
-        // extract logs
+        // Extract logs
         const {logs} = await (await tx).wait();
 
-        // compile events from logs
+        // Compile events from logs
         const events = compileEventsFromLogs(logs, [AssetHolder1, AssetHolder2, NitroAdjudicator]);
 
-        // compile event expectations
+        // Compile event expectations
         let expectedEvents = [];
 
-        // add Conclude event to expectations
+        // Add Conclude event to expectations
         expectedEvents.push({
           contract: NitroAdjudicator.address,
           name: 'Concluded',
           values: {channelId},
         });
 
-        // add AssetTransferred events to expectations
+        // Add AssetTransferred events to expectations
         Object.keys(payouts).forEach(assetHolder => {
           expectedEvents = expectedEvents.concat(
             assetTransferredEventsFromPayouts(payouts[assetHolder], assetHolder)
           );
         });
 
-        // check that each expectedEvent is contained as a subset of the properies of each *corresponding* event: i.e. the order matters!
+        // Check that each expectedEvent is contained as a subset of the properies of each *corresponding* event: i.e. the order matters!
         expect(events).toMatchObject(expectedEvents);
 
-        // check new holdings on each AssetHolder
+        // Check new holdings on each AssetHolder
         checkMultipleHoldings(heldAfter, [AssetHolder1, AssetHolder2]);
 
-        // check new assetOutcomeHash on each AssetHolder
+        // Check new assetOutcomeHash on each AssetHolder
         checkMultipleAssetOutcomeHashes(channelId, newOutcome, [AssetHolder1, AssetHolder2]);
       }
     }

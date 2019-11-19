@@ -7,10 +7,10 @@ import {
   splitSignature,
   verifyMessage,
 } from 'ethers/utils';
-import {SignedState} from '.';
 import {hashChallengeMessage} from './contract/challenge';
 import {getChannelId} from './contract/channel';
 import {hashState, State} from './contract/state';
+import {SignedState} from '.';
 
 export function getStateSignerAddress(signedState: SignedState): string {
   const stateHash = hashState(signedState.state);

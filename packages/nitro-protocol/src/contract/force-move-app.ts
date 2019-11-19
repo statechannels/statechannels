@@ -1,8 +1,7 @@
 import {Contract, Signer} from 'ethers';
 import {Interface} from 'ethers/utils';
 import ForceMoveAppArtifact from '../../build/contracts/ForceMoveApp.json';
-import {getVariablePart} from '../contract/state';
-import {State} from './state';
+import {getVariablePart, State} from '../contract/state';
 
 const ForceMoveAppContractInterface = new Interface(ForceMoveAppArtifact.abi);
 
