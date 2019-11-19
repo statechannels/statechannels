@@ -115,7 +115,7 @@ The `NetworkContext` object is held at a specific path of the `nitro-protocol` p
 Running the above script should produce an output similar to this:
 
 ```shell
-Writing network context into file: ~/monorepo/packages/nitro-protocol/ganache/ganache-network-context.json
+Writing network context into file: ~/monorepo/packages/ganache-deployer/ganache-network-context.json
 
 HTTP server listening on port 3000
 Starting ganache on port 8547 with network ID 9001
