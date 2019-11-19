@@ -55,7 +55,6 @@
   "dependencies": {
     "@counterfactual/cf-adjudicator-contracts": "^0.0.8",
     "@openzeppelin/contracts": "2.3.0",
-    "@statechannels/ganache-deployer": "^0.0.1",
     "ethers": "4.0.39"
   },
   "devDependencies": {
