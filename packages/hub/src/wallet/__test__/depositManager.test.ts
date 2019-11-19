@@ -9,8 +9,7 @@ const channelId = BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID;
 
 async function getHoldings() {
   return (await Channel.query()
-    .where('channel_id', channelId)
-    .first()
+    .findOne('channel_id', channelId)
     .select('holdings')).holdings;
 }
 

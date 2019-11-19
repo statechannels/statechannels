@@ -6,9 +6,8 @@ export async function getCurrentState(theirState: State) {
   const {channel: stateChannel} = theirState;
   const channel_id = getChannelId(stateChannel);
   const channel = await Channel.query()
-    .where({channel_id})
-    .select('id')
-    .first();
+    .findOne({channel_id})
+    .select('id');
   if (!channel) {
     return;
   }

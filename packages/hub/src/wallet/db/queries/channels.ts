@@ -18,9 +18,8 @@ async function updateChannel(stateRound: State[], hubState: State) {
   const channelId = getChannelId(channel);
 
   const storedChannel = await Channel.query()
-    .where({channel_id: channelId})
-    .select('id')
-    .first();
+    .findOne({channel_id: channelId})
+    .select('id');
 
   if (storedChannel && firstState.turnNum < firstState.channel.participants.length) {
     throw errors.CHANNEL_EXISTS;
