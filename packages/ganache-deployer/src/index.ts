@@ -26,6 +26,9 @@ export async function startGanacheAndDeploy(): Promise<GanacheServer> {
     log.info(`Network context written to ${GANACHE_CONTRACTS_FILE}`);
     return chain;
   } catch (e) {
+    if (!fs.existsSync(GANACHE_CONTRACTS_PATH)) {
+      fs.renameSync(GANACHE_CONTRACTS_BACKUP_PATH, GANACHE_CONTRACTS_PATH);
+    }
     throw Error(e);
   }
 }
