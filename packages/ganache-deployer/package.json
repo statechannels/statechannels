@@ -25,7 +25,8 @@
     "prettier:check": "npx prettier --check 'src/**/*.ts'",
     "prettier:write": "npx prettier --write 'src/**/*.ts'",
     "lint:check": "yarn run tslint --config tslint.json  './**/*.ts'",
-    "lint:write": "yarn run tslint --config tslint.json  './**/*.ts' --fix "
+    "lint:write": "yarn run tslint --config tslint.json  './**/*.ts' --fix ",
+    "prepare":"yarn run build"
   },
   "bugs": {
     "url": "https://github.com/statechannels/monorepo/issues"
