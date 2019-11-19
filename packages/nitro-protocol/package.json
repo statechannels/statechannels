@@ -46,7 +46,6 @@
     "docgen": "npx solidoc",
     "prettier:check": "npx prettier --check '{contracts,src,test}/**/*.{ts,tsx,sol}'",
     "prettier:write": "npx prettier --write '{contracts,src,test}/**/*.{ts,tsx,sol}'",
-    "start:ganache": "node_modules/.bin/start-and-deploy",
     "test:ci": "yarn contract:compile && npx jest --ci --bail --runInBand",
     "test:prepare": "yarn deploy:test",
     "test:typescript": "npx jest --testPathIgnorePatterns='test/contracts' --reporters='default'",
