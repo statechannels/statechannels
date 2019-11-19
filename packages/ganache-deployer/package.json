@@ -5,7 +5,7 @@
   "author": "Alex Gap <alex.gap@consensys.net>",
   "homepage": "https://github.com/statechannels/monorepo#readme",
   "license": "MIT",
-  "main": "/lib/index.js",
+  "main": "lib/index.js",
   "directories": {
     "lib": "lib"
   },
@@ -26,7 +26,7 @@
     "prettier:write": "npx prettier --write 'src/**/*.ts'",
     "lint:check": "yarn run tslint --config tslint.json  './**/*.ts'",
     "lint:write": "yarn run tslint --config tslint.json  './**/*.ts' --fix ",
-    "prepare":"yarn run build"
+    "prepare": "yarn run build"
   },
   "bugs": {
     "url": "https://github.com/statechannels/monorepo/issues"
