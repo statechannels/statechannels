@@ -11,7 +11,7 @@ module.exports = {
   },
   rootDir: root,
   collectCoverageFrom: ['src/**/*.{js,jsx,ts,tsx}'],
-  reporters: ['default', '@statechannels/jest-gas-reporter'],
+  reporters: ['default'],
   setupFiles: ['<rootDir>/config/polyfills.js'],
   setupFilesAfterEnv: ['<rootDir>/config/jest/jest.setup.js', '<rootDir>/src/setupTests.ts'],
   testMatch: ['<rootDir>/src/**/__tests__/?(*.)test.ts?(x)'],
