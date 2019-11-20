@@ -30,11 +30,11 @@
     "test:app": "npx jest -c ./config/jest/jest.config.js",
     "test:ci:app": "yarn test:app --all --ci --runInBand",
     "test:ci:contracts": "yarn contracts:compile && yarn test:contracts --all --ci --detectOpenHandles --bail",
-    "test:ci": "yarn test:ci:contracts && yarn test:ci:app && yarn:test:ci:integration",
+    "test:ci:integration": "yarn start & wait-on http-get://localhost:3055/ && npx cypress run",
+    "test:ci": "yarn test:ci:contracts && yarn test:ci:app && yarn test:ci:integration",
     "test:contracts": "npx jest --runInBand -c ./config/jest/jest.contracts.config.js --detectOpenHandles --bail",
     "test": "run-s 'test:app --all' 'test:contracts --all'",
-    "test:integration": "npx cypress open",
-    "test:ci:integration": "yarn start & wait-on http-get://localhost:3055/ && npx cypress run"
+    "test:integration": "npx cypress open"
   },
   "dependencies": {
     "@firebase/app-types": "^0.3.2",
