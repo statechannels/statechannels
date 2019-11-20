@@ -68,6 +68,7 @@
     "object-hash": "^2.0.0",
     "promise": "8.0.1",
     "prop-types": "^15.6.2",
+    "pure-evm": "^0.1.2",
     "raf": "3.4.0",
     "react": "^16.3.2",
     "react-burger-menu": "2.5.4",
@@ -95,6 +96,7 @@
   "devDependencies": {
     "@babel/runtime": "7.6.2",
     "@statechannels/devtools": "0.1.21",
+    "@statechannels/ganache-deployer": "^0.0.1",
     "@types/jest": "24.0.18",
     "@types/jsonrpc-serializer": "0.2.1",
     "@types/lodash": "4.14.129",
@@ -159,8 +161,7 @@
     "uglifyjs-webpack-plugin": "2.2.0",
     "url-loader": "2.2.0",
     "workbox-webpack-plugin": "4.3.1",
-    "yargs": "14.0.0",
-    "@statechannels/ganache-deployer": "^0.0.1"
+    "yargs": "14.0.0"
   },
   "lint-staged": {
     "{src,test}/**/*.ts": "yarn lint:check"
