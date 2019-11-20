@@ -36,7 +36,8 @@ This repository is a monorepo, and contains the following packages maintained wi
 
 - [channel-provider](.packages/channel-provider) : A browser-based loader for the Embedded Wallet.
 - [devtools](./packages/devtools) : Developer tooling
-- [embedded-wallet](./packages/embedded-wallet): Allows DApps to integrate with statechannels system
+- [embedded-wallet](./packages/embedded-wallet) : Allows DApps to integrate with statechannels system
+- [ganache-deployer](./packages/ganache-deployer) : Manages cross-package contract deployment and a consistent network context
 - [hub](./packages/hub) : Server wallet for mediating virtual channels
 - [jest-gas-reporter](./packages/jest-gas-reporter) : Reports the gas used by various calls to ethereum contracts
 - [nitro-protocol](./packages/nitro-protocol) : Smart contracts and documentation website
@@ -104,13 +105,13 @@ yarn test
 
 The tests for the `rps`, `nitro-protocol`, `wallet` and `hub` packages need to interact with a local blockchain.
 
-Run the following script _from the root of the repo_ to start a ganache server and create a common `NetworkContext` object that holds the relevant contract information for the various packages that need the corresponding contracts.
+Run the following script _from the root of the repo_ to start a ganache server, deploy the contracts listed [here](./packages/ganache-deployer/src/deployer.ts), and create a common `NetworkContext` object that holds the relevant contract information for the various packages that need to interface with the corresponding deployed contracts.
 
 ```shell
 yarn start:ganache
 ```
 
-The `NetworkContext` object is held at a specific path of the `nitro-protocol` package that can be referenced in other packages via `import NetworkContext from "@statechannels/nitro-protocol/ganache/ganache-network-context.json"`.
+The `NetworkContext` object is held at a specific path of the `ganache-deployer` package that can be referenced in other packages via `import NetworkContext from '@statechannels/ganache-deployer/ganache-network-context.json';`.
 
 Running the above script should produce an output similar to this:
 
@@ -124,7 +125,7 @@ Contracts deployed to chain
 Network context written to ganache-network-context.json
 ```
 
-The configuration used for this chain can be updated via the `.env` file in the `nitro-protocol` package.
+The configuration used for this chain can be updated via the `.env` file in the `ganache-deployer` package.
 
 Once this server is shut down, it'll remove the `NetworkContext` object that was created for that instance of the ganache and it should display something similar to:
 
