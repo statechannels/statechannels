@@ -27,13 +27,14 @@ export function validTransition(
   const toVariablePart = getVariablePart(toConsensusData, toOutcome);
   const turnNumB = 0; // This isn't actually used by the contract so any value works
 
+  
   const iface = new Interface(ConsensusAppContractInterface.abi);
 
   const txData = iface.functions.validTransition.encode([
     fromVariablePart,
     toVariablePart,
     turnNumB,
-    numberOfParticipants,
+    numberOfParticipants
   ]);
 
   const result = PureEVM.exec(
