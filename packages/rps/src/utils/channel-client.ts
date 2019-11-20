@@ -268,6 +268,7 @@ export class ChannelClient {
 
   async getAddress() {
     await this.sendToWallet('GetAddress', {});
+    return '0xdummy';
   }
 
   async closeChannel(parameters: CloseChannelParameters) {
