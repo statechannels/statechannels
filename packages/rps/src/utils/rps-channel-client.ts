@@ -64,6 +64,10 @@ export class RPSChannelClient {
     await this.channelClient.onMessageQueued(callback);
   }
 
+  async onChannelUpdated(callback: (message: JsonRPCNotification<Message>) => void) {
+    await this.channelClient.onChannelUpdated(callback);
+  }
+
   async unSubscribe(notificationName: NotificationName) {
     await this.channelClient.unSubscribe(notificationName);
   }
