@@ -45,8 +45,7 @@ const deploy = async (network, secret, etherscanApiKey) => {
     }
   }
   const deployer = new etherlime.EtherlimeGanacheDeployer(
-    // The privateKey is optional, but we have to provide it in order to provide a port.
-    new etherlime.EtherlimeGanacheDeployer().signer.privateKey,
+    undefined,
     Number(process.env.GANACHE_PORT)
   );
   if (!process.env.GANACHE_PORT) {

@@ -36,15 +36,14 @@ const migrate = async (deployer, startingMap, migrations) => {
 
 const deploy = async () => {
   const deployer = new etherlime.EtherlimeGanacheDeployer(
-    // The privateKey is optional, but we have to provide it in order to provide a port.
-    new etherlime.EtherlimeGanacheDeployer().signer.privateKey,
-    Number(process.env.GANACHE_PORT),
+    undefined,
+    Number(process.env.GANACHE_PORT)
   );
   if (!process.env.GANACHE_PORT) {
     throw new Error(`Environment variable GANACHE_PORT undefined`);
   }
   const provider = new ethers.providers.JsonRpcProvider(
-    `http://localhost:${process.env.GANACHE_PORT}`,
+    `http://localhost:${process.env.GANACHE_PORT}`
   );
   const networkId = (await provider.getNetwork()).chainId;
 

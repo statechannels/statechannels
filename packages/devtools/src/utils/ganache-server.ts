@@ -78,11 +78,7 @@ export class GanacheServer {
   }
 
   async deployContracts(deployments: Array<Deployment | any>): Promise<DeployedArtifacts> {
-    const deployer = new EtherlimeGanacheDeployer(
-      // The privateKey is optional, but we have to provide it in order to provide a port.
-      new EtherlimeGanacheDeployer().signer.privateKey,
-      Number(process.env.GANACHE_PORT)
-    );
+    const deployer = new EtherlimeGanacheDeployer(undefined, Number(process.env.GANACHE_PORT));
 
     const deployedArtifacts: DeployedArtifacts = {};
     for (const deployment of deployments) {
