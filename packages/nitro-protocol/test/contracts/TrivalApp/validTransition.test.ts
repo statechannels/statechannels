@@ -62,7 +62,7 @@ describe('validTransition', () => {
 
     expect(
       // Use the helper function, which accepts States instead of VariableParts
-      await validTransition(fromState, toState, trivialApp.address, provider.getSigner(0))
+      validTransition(fromState, toState, TrivialAppArtifact.bytecode)
     ).toBe(true);
   });
 });
