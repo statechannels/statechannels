@@ -1,4 +1,4 @@
-import {defaultAbiCoder, keccak256} from 'ethers/utils';
+import {utils} from 'ethers';
 import {Channel, getChannelId} from './channel';
 import {encodeOutcome, hashOutcome, Outcome} from './outcome';
 import {Address, Bytes32, Uint256, Uint48} from './types';
@@ -36,8 +36,8 @@ export function getVariablePart(state: State): VariablePart {
 
 export function hashAppPart(state: State): Bytes32 {
   const {challengeDuration, appDefinition, appData} = state;
-  return keccak256(
-    defaultAbiCoder.encode(
+  return utils.keccak256(
+    utils.defaultAbiCoder.encode(
       ['uint256', 'address', 'bytes'],
       [challengeDuration, appDefinition, appData]
     )
@@ -50,8 +50,8 @@ export function hashState(state: State): Bytes32 {
   const appPartHash = hashAppPart(state);
   const outcomeHash = hashOutcome(state.outcome);
 
-  return keccak256(
-    defaultAbiCoder.encode(
+  return utils.keccak256(
+    utils.defaultAbiCoder.encode(
       [
         'tuple(uint256 turnNum, bool isFinal, bytes32 channelId, bytes32 appPartHash, bytes32 outcomeHash)',
       ],
