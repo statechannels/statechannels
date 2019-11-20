@@ -2,7 +2,7 @@ import {
   SharedData,
   queueMessage,
   registerChannelToMonitor,
-  storeBytecodeForChannel
+  registerBytecodeForChannel
 } from "../../state";
 import * as states from "./states";
 import * as actions from "./actions";
@@ -41,8 +41,14 @@ export function initialize(
   bytecode: string
 ): ProtocolStateWithSharedData<states.ApplicationState> {
   return {
-    protocolState: states.waitForFirstState({channelId, privateKey, address, participants}),
-    sharedData: storeBytecodeForChannel(
+    protocolState: states.waitForFirstState({
+      channelId,
+      privateKey,
+      address,
+      participants,
+      bytecode
+    }),
+    sharedData: registerBytecodeForChannel(
       registerChannelToMonitor(sharedData, APPLICATION_PROCESS_ID, channelId, []),
       channelId,
       bytecode
@@ -208,7 +214,8 @@ const validateAndUpdate = (
       sharedData.channelStore,
       signedState,
       protocolState.privateKey,
-      protocolState.participants
+      protocolState.participants,
+      protocolState.bytecode
     );
   } else if (protocolState.type === "Application.Ongoing") {
     return checkAndStore(sharedData.channelStore, signedState);
@@ -227,7 +234,8 @@ const signAndUpdate = (
       sharedData.channelStore,
       state,
       protocolState.privateKey,
-      protocolState.participants
+      protocolState.participants,
+      protocolState.bytecode
     );
   } else {
     return signAndStore(sharedData.channelStore, state);

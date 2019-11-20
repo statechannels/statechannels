@@ -5,7 +5,7 @@ import PureEVM from 'pure-evm';
 import ForceMoveAppArtifact from '../../build/contracts/ForceMoveApp.json';
 import {getVariablePart, State} from '../contract/state';
 
-const ForceMoveAppContractInterface = new Interface(ForceMoveAppArtifact.abi);
+export const ForceMoveAppContractInterface = new Interface(ForceMoveAppArtifact.abi);
 
 export function validTransition(fromState: State, toState: State, appBytecode: string): boolean {
   const numberOfParticipants = toState.channel.participants.length;

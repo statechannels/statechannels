@@ -12,6 +12,7 @@ export interface WaitForFirstState {
   address: string;
   privateKey: string;
   participants: ChannelParticipant[];
+  bytecode: string;
 }
 
 export interface Ongoing {

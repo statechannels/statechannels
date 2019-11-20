@@ -11,7 +11,7 @@ const {
   asAddress: address,
   asPrivateKey: privateKey,
   participants,
-  bytecode
+  trivialAppBytecode: bytecode
 } = testScenarios;
 import {ChannelState} from "../../../channel-store";
 import {setChannel, EMPTY_SHARED_DATA} from "../../../state";
@@ -43,7 +43,13 @@ const defaults = {processId, channelId, address, privateKey, participants, bytec
 // ------
 // States
 // ------
-const addressKnown = states.waitForFirstState({channelId, address, privateKey, participants});
+const addressKnown = states.waitForFirstState({
+  channelId,
+  address,
+  privateKey,
+  participants,
+  bytecode
+});
 const ongoing = states.ongoing({channelId, address, privateKey});
 const waitForDispute1 = states.waitForDispute({
   channelId,

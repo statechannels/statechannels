@@ -2,7 +2,7 @@ import {ChannelStore, getChannel, setChannel} from "./state";
 import {pushState, initializeChannel, ChannelParticipant} from "./channel-state/states";
 import {State, SignedState, getChannelId} from "@statechannels/nitro-protocol";
 import {Signatures} from "@statechannels/nitro-protocol";
-import {validTransition} from "./channel-state/valid-transition";
+import {validTransition, validAppTransition} from "./channel-state/valid-transition";
 import {hasValidSignature} from "../../utils/signing-utils";
 
 // -----------------
@@ -29,14 +29,15 @@ export function signAndInitialize(
   store: ChannelStore,
   state: State,
   privateKey: string,
-  participants: ChannelParticipant[]
+  participants: ChannelParticipant[],
+  bytecode: string
 ): SignResult {
   const signedState = Signatures.signState(state, privateKey);
 
   if (signedState.state.turnNum !== 0) {
     return {isSuccess: false, reason: "ChannelDoesNotExist"};
   }
-  const channel = initializeChannel(signedState, privateKey, participants);
+  const channel = initializeChannel(signedState, privateKey, participants, bytecode);
   store = setChannel(store, channel);
 
   return {isSuccess: true, signedState, store};
@@ -46,7 +47,8 @@ export function checkAndInitialize(
   store: ChannelStore,
   signedState: SignedState,
   privateKey: string,
-  participants: ChannelParticipant[]
+  participants: ChannelParticipant[],
+  bytecode: string
 ): CheckResult {
   if (signedState.state.turnNum !== 0) {
     return {isSuccess: false};
@@ -54,7 +56,7 @@ export function checkAndInitialize(
   if (!hasValidSignature(signedState)) {
     return {isSuccess: false};
   }
-  const channel = initializeChannel(signedState, privateKey, participants);
+  const channel = initializeChannel(signedState, privateKey, participants, bytecode);
 
   store = setChannel(store, channel);
 
@@ -104,6 +106,11 @@ export function checkAndStore(store: ChannelStore, signedState: SignedState): Ch
   if (!validTransition(channel, signedState.state)) {
     return {isSuccess: false};
   }
+
+  if (!validAppTransition(channel, signedState.state)) {
+    return {isSuccess: false};
+  }
+
   channel = pushState(channel, signedState);
   store = setChannel(store, channel);
 

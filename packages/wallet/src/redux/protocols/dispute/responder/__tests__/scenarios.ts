@@ -17,6 +17,7 @@ const {
   bsAddress: address,
   bsPrivateKey: privateKey,
   channelId,
+  trivialAppBytecode,
   libraryAddress,
   participants,
   channelNonce
@@ -30,6 +31,7 @@ const gameState3 = gameSignedState3.state;
 
 const channelStatus: ChannelState = {
   address,
+  bytecode: trivialAppBytecode,
   privateKey,
   channelId,
   libraryAddress,

@@ -123,7 +123,8 @@ function initializeWithNewChannel(
     clearedToSend,
     protocolLocator,
     participants,
-    privateKey
+    privateKey,
+    bytecode
   } = initializeChannelArgs;
 
   if (helpers.isSafeToSend({sharedData, ourIndex, clearedToSend})) {
@@ -150,7 +151,8 @@ function initializeWithNewChannel(
       privateKey,
       participants.map(p => {
         return {signingAddress: p};
-      })
+      }),
+      bytecode
     );
     if (!signResult.isSuccess) {
       throw new Error("Could not store new ledger channel state.");
@@ -252,7 +254,7 @@ const channelUnknownReducer = (
   sharedData,
   action: SignedStatesReceived
 ) => {
-  const {privateKey, participants} = protocolState;
+  const {privateKey, participants, bytecode} = protocolState;
   const channelId = getChannelId(action.signedStates[0].state.channel);
 
   const checkResult = checkAndInitialize(
@@ -261,7 +263,8 @@ const channelUnknownReducer = (
     privateKey,
     participants.map(p => {
       return {signingAddress: p};
-    })
+    }),
+    bytecode
   );
   if (!checkResult.isSuccess) {
     throw new Error("Could not initialize channel");

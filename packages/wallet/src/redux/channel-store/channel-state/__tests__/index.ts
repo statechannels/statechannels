@@ -1,4 +1,6 @@
 import {SignedState, getChannelId} from "@statechannels/nitro-protocol";
+import {trivialAppBytecode, consensusAppBytecode} from "../../../__tests__/state-helpers";
+import {CONSENSUS_LIBRARY_ADDRESS} from "../../../../constants";
 
 export function channelFromStates(
   states: SignedState[],
@@ -31,6 +33,10 @@ export function channelFromStates(
     privateKey: ourPrivateKey,
     ourIndex,
     turnNum,
-    signedStates: states
+    signedStates: states,
+    bytecode:
+      lastState.state.appDefinition === CONSENSUS_LIBRARY_ADDRESS
+        ? consensusAppBytecode
+        : trivialAppBytecode
   };
 }

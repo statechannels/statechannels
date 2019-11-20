@@ -105,7 +105,7 @@ export function registerChannelToMonitor(
   };
 }
 
-export function storeBytecodeForChannel(
+export function registerBytecodeForChannel(
   data: SharedData,
   channelId: string,
   bytecode: string
@@ -256,13 +256,15 @@ export function signAndInitialize(
   sharedDataState: SharedData,
   state: State,
   privateKey: string,
-  participants: ChannelParticipant[]
+  participants: ChannelParticipant[],
+  bytecode: string
 ): SignResult {
   const result = signAndInitializeChannelStore(
     sharedDataState.channelStore,
     state,
     privateKey,
-    participants
+    participants,
+    bytecode
   );
   if (result.isSuccess) {
     return {
@@ -279,13 +281,15 @@ export function checkAndInitialize(
   state: SharedData,
   signedState: SignedState,
   privateKey: string,
-  participants: ChannelParticipant[]
+  participants: ChannelParticipant[],
+  bytecode: string
 ): CheckResult {
   const result = checkAndInitializeChannelStore(
     state.channelStore,
     signedState,
     privateKey,
-    participants
+    participants,
+    bytecode
   );
   if (result.isSuccess) {
     return {...result, store: setChannelStore(state, result.store)};

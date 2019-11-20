@@ -48,6 +48,7 @@ const participants = signedState0.state.channel.participants;
 
 const initializeArgs = {
   outcome: scenarios.convertBalanceToOutcome(twoThreeTwo),
+  bytecode: scenarios.consensusAppBytecode,
   participants,
   appDefinition,
   appData,

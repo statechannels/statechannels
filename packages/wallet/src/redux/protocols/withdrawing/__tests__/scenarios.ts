@@ -16,6 +16,7 @@ import * as testScenarios from "../../../__tests__/state-helpers";
 const {
   asAddress: address,
   asPrivateKey: privateKey,
+  trivialAppBytecode,
   channelId,
   libraryAddress,
   participants,
@@ -29,6 +30,7 @@ const concludeState2 = testScenarios.appState({turnNum: 52, isFinal: true});
 
 const channelStatus: ChannelState = {
   address,
+  bytecode: trivialAppBytecode,
   privateKey,
   channelId,
   libraryAddress,
