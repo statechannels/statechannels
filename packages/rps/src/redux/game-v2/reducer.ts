@@ -1,32 +1,33 @@
 import {
-  GameState,
   GameChosen,
   WeaponChosen,
   weaponChosen,
   weaponAndSaltChosen,
   resultPlayAgain,
+  LocalState,
 } from './state';
-import { Reducer } from 'redux';
-import {
-  GameAction,
-  JoinOpenGame,
-  ChooseWeapon,
-  UpdateChannelState,
-  ChooseSalt,
-  ResultArrived,
-} from './actions';
+import { Reducer, combineReducers } from 'redux';
+import { GameAction, JoinOpenGame, ChooseWeapon, ChooseSalt, ResultArrived } from './actions';
+import { ChannelState } from '../../core';
 
-const emptyGameState = {
-  localState: { type: 'Empty' },
-} as GameState;
+const emptyLocalState: LocalState = { type: 'Empty' };
 
-export const gameReducer: Reducer<GameState> = (
-  state: GameState = emptyGameState,
+const channelReducer: Reducer<ChannelState | null> = (
+  state: ChannelState | null = null,
+  action: GameAction
+) => {
+  if (action.type === 'UpdateChannelState') {
+    return action.channelState;
+  } else {
+    return state;
+  }
+};
+
+const localReducer: Reducer<LocalState> = (
+  state: LocalState = emptyLocalState,
   action: GameAction
 ) => {
   switch (action.type) {
-    case 'UpdateChannelState':
-      return handleUpdateChannelState(state, action);
     case 'JoinOpenGame':
       return handleJoinOpenGame(state, action);
     case 'ChooseWeapon':
@@ -40,20 +41,20 @@ export const gameReducer: Reducer<GameState> = (
   }
 };
 
-const handleUpdateChannelState = (state: GameState, action: UpdateChannelState): GameState => {
-  const { channelState } = action;
-  return { ...state, channelState };
-};
+export const gameReducer = combineReducers({
+  localState: localReducer,
+  channelState: channelReducer,
+});
 
-const handleJoinOpenGame = (state: GameState, action: JoinOpenGame): GameState => {
-  if (state.localState.type === 'Empty') {
+const handleJoinOpenGame = (state: LocalState, action: JoinOpenGame): LocalState => {
+  if (state.type === 'Empty') {
     return state;
   }
 
   const { opponentName, opponentAddress, roundBuyIn } = action;
-  const { name, address } = state.localState;
+  const { name, address } = state;
 
-  const localState: GameChosen = {
+  const newState: GameChosen = {
     type: 'GameChosen',
     player: 'A',
     name,
@@ -63,39 +64,39 @@ const handleJoinOpenGame = (state: GameState, action: JoinOpenGame): GameState =
     roundBuyIn,
   };
 
-  return { ...state, localState };
+  return newState;
 };
 
-const handleChooseWeapon = (state: GameState, action: ChooseWeapon): GameState => {
-  if (state.localState.type !== 'ChooseWeapon') {
+const handleChooseWeapon = (state: LocalState, action: ChooseWeapon): LocalState => {
+  if (state.type !== 'ChooseWeapon') {
     return state;
   }
 
   const { weapon } = action;
-  const localState = weaponChosen(state.localState, weapon);
+  const newState = weaponChosen(state, weapon);
 
-  return { ...state, localState };
+  return newState;
 };
 
-const handleChooseSalt = (state: GameState, action: ChooseSalt): GameState => {
-  if (state.localState.type !== 'WeaponChosen' || state.localState.player !== 'A') {
+const handleChooseSalt = (state: LocalState, action: ChooseSalt): LocalState => {
+  if (state.type !== 'WeaponChosen' || state.player !== 'A') {
     return state;
   }
   // not sure why typsecript can't see that player === 'A' here ...
-  const oldLocalState = state.localState as (WeaponChosen & { player: 'A' });
+  const oldLocalState = state as (WeaponChosen & { player: 'A' });
 
   const { salt } = action;
-  const localState = weaponAndSaltChosen(oldLocalState, salt);
+  const newState = weaponAndSaltChosen(oldLocalState, salt);
 
-  return { ...state, localState };
+  return newState;
 };
 
-const handleResultArrived = (state: GameState, action: ResultArrived): GameState => {
-  if (state.localState.type !== 'WeaponChosen' && state.localState.type !== 'WeaponAndSaltChosen') {
+const handleResultArrived = (state: LocalState, action: ResultArrived): LocalState => {
+  if (state.type !== 'WeaponChosen' && state.type !== 'WeaponAndSaltChosen') {
     return state;
   }
   const { theirWeapon, result } = action;
-  const localState = resultPlayAgain(state.localState, theirWeapon, result);
+  const newState = resultPlayAgain(state, theirWeapon, result);
 
-  return { ...state, localState };
+  return newState;
 };
