@@ -68,7 +68,6 @@
     "object-hash": "^2.0.0",
     "promise": "8.0.1",
     "prop-types": "^15.6.2",
-    "pure-evm": "^0.1.2",
     "raf": "3.4.0",
     "react": "^16.3.2",
     "react-burger-menu": "2.5.4",
