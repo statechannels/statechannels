@@ -2,7 +2,7 @@ import { take, select, call, put } from 'redux-saga/effects';
 // import { take } from 'redux-saga/effects';
 import { RPSChannelClient } from '../../utils/rps-channel-client';
 import { AppData, hashPreCommit, calculateResult, updateAllocation, Player } from '../../core';
-import { updateChannelState, chooseSalt, resultArrived } from './actions';
+import { updateChannelState, chooseSalt, resultArrived, restart } from './actions';
 import { GameState } from './state';
 import { randomHex } from '../../utils/randomHex';
 
@@ -75,6 +75,12 @@ export function* gameSaga(channelClient: RPSChannelClient) {
         );
         yield put(updateChannelState(updatedChannelState));
         yield put(resultArrived(theirWeapon, result));
+      } else if (
+        localState.type === 'WaitForRestart' &&
+        channelState &&
+        channelState.appData.type === 'start'
+      ) {
+        yield put(restart());
       }
     }
   }

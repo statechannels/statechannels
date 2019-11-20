@@ -15,6 +15,7 @@ export type LocalState =
   | WeaponChosen
   | WeaponAndSaltChosen
   | ResultPlayAgain
+  | WaitForRestart
   | GameOver;
 
 export interface Empty {
@@ -75,6 +76,10 @@ export interface ResultPlayAgain extends Playing {
   result: Result;
 }
 
+export interface WaitForRestart extends Playing {
+  type: 'WaitForRestart';
+}
+
 export interface GameOver extends Playing {
   type: 'GameOver';
 }
@@ -82,33 +87,44 @@ export interface GameOver extends Playing {
 // Helpers
 // =======
 
-export const weaponChosen = <T extends Playing>(state: T, myWeapon: Weapon): WeaponChosen => {
+const playing = <T extends Playing>(state: T): Playing => {
   const { player, name, address, opponentName, roundBuyIn } = state;
-  return { type: 'WeaponChosen', player, name, address, opponentName, roundBuyIn, myWeapon };
+  return { player, name, address, opponentName, roundBuyIn };
 };
+
+export const chooseWeapon = <T extends Playing>(state: T): ChooseWeapon => ({
+  type: 'ChooseWeapon',
+  ...playing(state),
+});
+
+export const weaponChosen = <T extends Playing>(state: T, myWeapon: Weapon): WeaponChosen => ({
+  type: 'WeaponChosen',
+  ...playing(state),
+  myWeapon,
+});
 
 export const weaponAndSaltChosen = (
   state: WeaponChosen & { player: 'A' },
   salt: string
-): WeaponAndSaltChosen => {
-  return { ...state, type: 'WeaponAndSaltChosen', salt };
-};
+): WeaponAndSaltChosen => ({
+  ...state,
+  type: 'WeaponAndSaltChosen',
+  salt,
+});
 
 export const resultPlayAgain = (
   state: WeaponChosen | WeaponAndSaltChosen,
   theirWeapon: Weapon,
   result: Result
-): ResultPlayAgain => {
-  const { player, name, address, opponentName, roundBuyIn, myWeapon } = state;
-  return {
-    type: 'ResultPlayAgain',
-    player,
-    name,
-    address,
-    opponentName,
-    roundBuyIn,
-    myWeapon,
-    theirWeapon,
-    result,
-  };
-};
+): ResultPlayAgain => ({
+  type: 'ResultPlayAgain',
+  ...playing(state),
+  myWeapon: state.myWeapon,
+  theirWeapon,
+  result,
+});
+
+export const waitForRestart = <T extends Playing>(state: T): WaitForRestart => ({
+  type: 'WaitForRestart',
+  ...playing(state),
+});
