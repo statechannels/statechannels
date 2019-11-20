@@ -10,6 +10,7 @@ import {
   ResultPlayAgain,
 } from '../state';
 
+export const channelId = '0xabc234';
 const aName = 'Alice';
 export const bName = 'Bob';
 const aUserId = 'userA';
@@ -22,10 +23,12 @@ export const stake = bigNumberify(1);
 const fiveFive = [5, 5];
 const sixFour = [6, 4];
 const fourSix = [4, 6];
-const playerAWeapon = Weapon.Rock;
-const salt = '0x' + '4'.repeat(64);
-const preCommit = hashPreCommit(playerAWeapon, salt);
-const playerBWeapon = Weapon.Scissors;
+export const aWeapon = Weapon.Rock;
+const playerAWeapon = aWeapon;
+export const salt = '0x' + '4'.repeat(64);
+const preCommit = hashPreCommit(aWeapon, salt);
+export const bWeapon = Weapon.Scissors;
+const playerBWeapon = bWeapon;
 
 const appData = {
   start: { type: 'start' } as Start,
@@ -41,6 +44,7 @@ function channelState(
   status = 'running'
 ): ChannelState {
   return {
+    channelId,
     turnNum: bigNumberify(turnNum),
     status,
     aUserId,

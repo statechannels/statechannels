@@ -1,21 +1,52 @@
 import { BigNumber } from 'ethers/utils';
-import { ChannelState } from '../../core';
+import { ChannelState, Weapon, Result } from '../../core';
 
-interface UpdateChannelState {
+export type GameAction =
+  | JoinOpenGame
+  | UpdateChannelState
+  | ChooseWeapon
+  | ChooseSalt
+  | ResultArrived;
+
+export interface UpdateChannelState {
   type: 'UpdateChannelState';
   channelState: ChannelState;
 }
-export const updateChannelState = (channelState: ChannelState): UpdateChannelState => ({
-  type: 'UpdateChannelState',
-  channelState,
-});
 
-interface JoinOpenGame {
+export interface JoinOpenGame {
   type: 'JoinOpenGame';
   opponentName: string;
   opponentAddress: string;
   roundBuyIn: BigNumber;
 }
+
+export interface ChooseWeapon {
+  type: 'ChooseWeapon';
+  weapon: Weapon;
+}
+
+export interface ChooseSalt {
+  type: 'ChooseSalt';
+  salt: string;
+}
+
+export interface ResultArrived {
+  type: 'ResultArrived';
+  theirWeapon: Weapon;
+  result: Result;
+}
+
+// Constructors
+// ============
+
+export const updateChannelState = (channelState: ChannelState): UpdateChannelState => ({
+  type: 'UpdateChannelState',
+  channelState,
+});
+
+export const chooseWeapon = (weapon: Weapon): ChooseWeapon => ({ type: 'ChooseWeapon', weapon });
+
+export const chooseSalt = (salt: string): ChooseSalt => ({ type: 'ChooseSalt', salt });
 
 export const joinOpenGame = (
   opponentName: string,
@@ -28,4 +59,8 @@ export const joinOpenGame = (
   roundBuyIn,
 });
 
-export type GameAction = JoinOpenGame | UpdateChannelState;
+export const resultArrived = (theirWeapon: Weapon, result: Result): ResultArrived => ({
+  type: 'ResultArrived',
+  theirWeapon,
+  result,
+});

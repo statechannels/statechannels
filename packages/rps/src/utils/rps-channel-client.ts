@@ -43,6 +43,7 @@ export class RPSChannelClient {
     await this.channelClient.createChannel({ participants, allocations, appDefinition, appData });
 
     return await {
+      channelId: '0xsome-channel-id',
       turnNum: bigNumberify(0),
       status: 'open',
       aUserId: aAddress,
