@@ -31,7 +31,9 @@ e2e.log
 
 # local env vars
 .env.local
+.env.*.local
 packages/**/.env.local
+packages/**/.env.*.local
 
 # licenses
 packages/**/LICENSE
