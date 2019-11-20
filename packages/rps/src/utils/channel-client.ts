@@ -267,6 +267,12 @@ export class ChannelClient {
     });
   }
 
+  onChannelUpdated(callback: (message: JsonRPCNotification<Message>) => void) {
+    this.events.on('ChannelUpdated', (message: JsonRPCNotification<Message>) => {
+      callback(message);
+    });
+  }
+
   unSubscribe(notificationName: NotificationName): void {
     this.events.removeAllListeners(notificationName);
   }
