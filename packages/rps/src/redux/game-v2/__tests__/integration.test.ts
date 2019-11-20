@@ -61,22 +61,45 @@ describe('when chosing a weapon', () => {
 });
 
 describe("when the opponent's move arrives", () => {
-  it('calls updateState and transitions to ResultPlayAgain', async () => {
-    const initialState = gameState(localStatesA.weaponAndSaltChosen, channelStates.roundProposed);
-    const client = new RPSChannelClient();
-    const action = updateChannelState(channelStates.roundAccepted); // triggered by ChannelUpdatedListener
+  describe('and there are sufficient funds to continue', () => {
+    it('calls updateState and transitions to ResultPlayAgain', async () => {
+      const initialState = gameState(localStatesA.weaponAndSaltChosen, channelStates.roundProposed);
+      const client = new RPSChannelClient();
+      const action = updateChannelState(channelStates.roundAccepted); // triggered by ChannelUpdatedListener
 
-    const { storeState } = await expectSaga(gameSaga as any, client)
-      .withReducer(reducer, initialState)
-      .dispatch(action)
-      .provide([[match.call.fn(client.updateChannel), Promise.resolve(channelStates.reveal)]])
-      .run({ silenceTimeout: true });
+      const { storeState } = await expectSaga(gameSaga as any, client)
+        .withReducer(reducer, initialState)
+        .dispatch(action)
+        .provide([[match.call.fn(client.updateChannel), Promise.resolve(channelStates.reveal)]])
+        .run({ silenceTimeout: true });
 
-    expect(storeState).toEqual(gameState(localStatesA.resultPlayAgain, channelStates.reveal));
+      expect(storeState).toEqual(gameState(localStatesA.resultPlayAgain, channelStates.reveal));
+    });
+  });
+
+  describe('and player A is out of funds', () => {
+    it('calls updateState and transitions to ShuttingDown', async () => {
+      const initialState = gameState(localStatesA.weaponAndSaltChosen, channelStates.roundProposed);
+      const client = new RPSChannelClient();
+      const action = updateChannelState(channelStates.roundAcceptedInsufficientFundsB); // triggered by ChannelUpdatedListener
+
+      const { storeState } = await expectSaga(gameSaga as any, client)
+        .withReducer(reducer, initialState)
+        .dispatch(action)
+        .provide([
+          [
+            match.call.fn(client.updateChannel),
+            Promise.resolve(channelStates.revealInsufficientFundsB),
+          ],
+        ])
+        .run({ silenceTimeout: true });
+
+      expect(storeState).toEqual(
+        gameState(localStatesA.shuttingDown, channelStates.revealInsufficientFundsB)
+      );
+    });
   });
 });
-
-// when we select to play again
 
 describe('when player decides to play again', () => {
   describe('and the opponent has already decided to play again', () => {
@@ -122,3 +145,18 @@ describe('when player decides to play again', () => {
     });
   });
 });
+
+describe.skip('when a player resigns (which includes deciding not to play again)', () => {
+  describe("and it's their turn", () => {
+    it('transitions to ShuttingDown and calls closeChannel', () => {});
+  });
+  describe("and it isn't their turn", () => {
+    it('transitions to ShuttingDown', () => {});
+
+    it('later calls closeChannel, when another state arrives', () => {});
+  });
+});
+// resign whenever takes you to a "closing game"
+// then to a game closed
+
+// receiving a resign => your opponent decided not to play again or your opponent abandoned

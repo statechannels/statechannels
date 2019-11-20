@@ -16,6 +16,7 @@ export type LocalState =
   | WeaponAndSaltChosen
   | ResultPlayAgain
   | WaitForRestart
+  | ShuttingDown
   | GameOver;
 
 export interface Empty {
@@ -78,6 +79,12 @@ export interface ResultPlayAgain extends Playing {
 
 export interface WaitForRestart extends Playing {
   type: 'WaitForRestart';
+}
+
+type ShutDownReason = 'InsufficientFundsYou' | 'InsufficientFundsOpponent' | 'YouResigned';
+export interface ShuttingDown extends Playing {
+  type: 'ShuttingDown';
+  reason: ShutDownReason;
 }
 
 export interface GameOver extends Playing {
