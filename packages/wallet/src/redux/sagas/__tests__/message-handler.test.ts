@@ -11,6 +11,8 @@ import {getProvider} from "../../../utils/contract-utils";
 import {setChannel} from "../../../../src/redux/channel-store";
 import {channelFromStates} from "../../channel-store/channel-state/__tests__";
 import * as stateHelpers from "../../__tests__/state-helpers";
+import {AddressZero} from "ethers/constants";
+import {convertAddressToBytes32} from "../../../utils/data-type-utils";
 
 describe("message listener", () => {
   const wallet = Wallet.createRandom();
@@ -169,10 +171,10 @@ describe("message listener", () => {
           channel: {participants: [signingAddressA, signingAddressB]},
           outcome: [
             {
-              assetHolderAddress: "0x0",
+              assetHolderAddress: AddressZero,
               allocation: [
-                {destination: destinationA, amount: "12"},
-                {destination: destinationB, amount: "12"}
+                {destination: convertAddressToBytes32(destinationA), amount: "12"},
+                {destination: convertAddressToBytes32(destinationB), amount: "12"}
               ]
             }
           ]
@@ -356,7 +358,15 @@ describe("message listener", () => {
         appData,
         turnNum: 1,
         outcome: [
-          {allocation: allocations[0].allocationItems, assetHolderAddress: allocations[0].token}
+          {
+            allocation: allocations[0].allocationItems.map(a => {
+              return {
+                amount: a.amount,
+                destination: convertAddressToBytes32(a.destination)
+              };
+            }),
+            assetHolderAddress: AddressZero
+          }
         ]
       };
 
