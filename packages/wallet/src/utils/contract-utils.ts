@@ -1,5 +1,5 @@
 import {State, validTransition} from "@statechannels/nitro-protocol";
-import NetworkContext from "@statechannels/nitro-protocol/ganache/ganache-network-context.json";
+import NetworkContext from "@statechannels/ganache-deployer/ganache-network-context.json";
 import {ethers} from "ethers";
 import {AddressZero} from "ethers/constants";
 import log from "loglevel";
@@ -9,6 +9,17 @@ log.setDefaultLevel(log.levels.DEBUG);
 export function getContractAddress(contractName: string): string {
   if (NetworkContext[contractName]) {
     return NetworkContext[contractName].address;
+  }
+  console.error(contractName, NetworkContext);
+
+  throw new Error(
+    `Could not find ${contractName} in network map ${JSON.stringify(NetworkContext)}}`
+  );
+}
+
+export function getContractABI(contractName: string): string {
+  if (NetworkContext[contractName]) {
+    return NetworkContext[contractName].abi;
   }
   console.error(contractName, NetworkContext);
 
@@ -36,15 +47,11 @@ export async function getETHAssetHolderContract(provider) {
 }
 
 export function getAdjudicatorInterface(): ethers.utils.Interface {
-  // TODO: update these to use the ABI from the network context
-  const NitroAdjudicatorArtifact = require("../../build/contracts/NitroAdjudicator.json");
-  return new ethers.utils.Interface(NitroAdjudicatorArtifact.abi);
+  return new ethers.utils.Interface(getContractABI("NitroAdjudicator"));
 }
 
 export function getETHAssetHolderInterface(): ethers.utils.Interface {
-  // TODO: update these to use the ABI from the network context
-  const ETHAssetHolderArtifact = require("../../build/contracts/ETHAssetHolder.json");
-  return new ethers.utils.Interface(ETHAssetHolderArtifact.abi);
+  return new ethers.utils.Interface(getContractABI("ETHAssetHolder"));
 }
 
 // FIXME: The tests ought to be able to run even without contracts having been built which

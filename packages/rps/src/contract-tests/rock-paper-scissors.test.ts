@@ -1,5 +1,5 @@
 import { expectRevert } from '@statechannels/devtools';
-import NetworkContext from '@statechannels/nitro-protocol/ganache/ganache-network-context.json';
+import NetworkContext from '@statechannels/ganache-deployer/ganache-network-context.json';
 import RockPaperScissorsArtifact from '../../build/contracts/RockPaperScissors.json';
 import * as ethers from 'ethers';
 import { Contract } from 'ethers';

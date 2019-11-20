@@ -98,7 +98,7 @@ jobs:
       - attach_workspace:
           at: /home/circleci/project
       - run:
-          command: yarn start:ganache
+          command: npx lerna run start:ganache --scope=@statechannels/ganache-deployer
           background: true
       # Wait for Ganache to come up and for contract migrations to take place
       - run:

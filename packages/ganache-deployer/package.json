@@ -1,0 +1,48 @@
+{
+  "name": "@statechannels/ganache-deployer",
+  "version": "0.0.1",
+  "description": "Starts ganache and deploys contracts",
+  "author": "Alex Gap <alex.gap@consensys.net>",
+  "homepage": "https://github.com/statechannels/monorepo#readme",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "files": [
+    "lib/*"
+  ],
+  "bin": {
+    "start-ganache-and-deploy": "./lib/start-script.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/statechannels/monorepo.git"
+  },
+  "scripts": {
+    "start:ganache": "npx ts-node src/start-script.ts",
+    "build": "npx tsc",
+    "prettier:check": "npx prettier --check 'src/**/*.ts'",
+    "prettier:write": "npx prettier --write 'src/**/*.ts'",
+    "lint:check": "yarn run tslint --config tslint.json  'src/**/*.ts'",
+    "lint:write": "yarn run tslint --config tslint.json  'src/**/*.ts' --fix ",
+    "prepare": "yarn run build"
+  },
+  "bugs": {
+    "url": "https://github.com/statechannels/monorepo/issues"
+  },
+  "devDependencies": {
+    "prettier": "1.18.2",
+    "tslint": "5.20.0",
+    "tslint-config-prettier": "1.18.0",
+    "typescript": "3.7.2"
+  },
+  "dependencies": {
+    "@statechannels/devtools": "^0.1.21",
+    "@statechannels/nitro-protocol": "^0.0.1",
+    "@statechannels/rps": "^0.0.1",
+    "koa": "2.11.0",
+    "ts-node": "8.5.2",
+    "write-json-file": "4.2.0"
+  }
+}

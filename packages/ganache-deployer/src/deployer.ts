@@ -1,24 +1,24 @@
-import {GanacheServer, DeployedArtifacts} from '@statechannels/devtools';
+import {DeployedArtifacts, GanacheServer} from '@statechannels/devtools';
 import log from 'loglevel';
 
 /* eslint-disable import/no-unresolved */
 // @ts-ignore
-import rpsArtifact from '@statechannels/rps/build/contracts/RockPaperScissors.json';
+import consensusAppArtifact from '@statechannels/nitro-protocol/build/contracts/ConsensusApp.json';
+/* eslint-enable import/no-unresolved */
+import countingAppArtifact from '@statechannels/nitro-protocol/build/contracts/CountingApp.json';
+import erc20AssetHolderArtifact from '@statechannels/nitro-protocol/build/contracts/ERC20AssetHolder.json';
+import ethAssetHolderArtifact from '@statechannels/nitro-protocol/build/contracts/ETHAssetHolder.json';
+import nitroAdjudicatorArtifact from '@statechannels/nitro-protocol/build/contracts/NitroAdjudicator.json';
+import singleAssetPaymentsArtifact from '@statechannels/nitro-protocol/build/contracts/SingleAssetPayments.json';
+import testAssetHolderArtifact1 from '@statechannels/nitro-protocol/build/contracts/TESTAssetHolder.json';
+import testAssetHolderArtifact2 from '@statechannels/nitro-protocol/build/contracts/TESTAssetHolder2.json';
+import testForceMoveArtifact from '@statechannels/nitro-protocol/build/contracts/TESTForceMove.json';
+import testNitroAdjudicatorArtifact from '@statechannels/nitro-protocol/build/contracts/TESTNitroAdjudicator.json';
+import tokenArtifact from '@statechannels/nitro-protocol/build/contracts/Token.json';
+import trivialAppArtifact from '@statechannels/nitro-protocol/build/contracts/TrivialApp.json';
 // @ts-ignore
 import forceMoveAppArtifact from '@statechannels/rps/build/contracts/ForceMoveApp.json';
-/* eslint-enable import/no-unresolved */
-import countingAppArtifact from '../build/contracts/CountingApp.json';
-import erc20AssetHolderArtifact from '../build/contracts/ERC20AssetHolder.json';
-import ethAssetHolderArtifact from '../build/contracts/ETHAssetHolder.json';
-import singleAssetPaymentsArtifact from '../build/contracts/SingleAssetPayments.json';
-import testAssetHolderArtifact1 from '../build/contracts/TESTAssetHolder.json';
-import testAssetHolderArtifact2 from '../build/contracts/TESTAssetHolder2.json';
-import testForceMoveArtifact from '../build/contracts/TESTForceMove.json';
-import nitroAdjudicatorArtifact from '../build/contracts/NitroAdjudicator.json';
-import testNitroAdjudicatorArtifact from '../build/contracts/TESTNitroAdjudicator.json';
-import tokenArtifact from '../build/contracts/Token.json';
-import trivialAppArtifact from '../build/contracts/TrivialApp.json';
-import consensusAppArtifact from '../build/contracts/ConsensusApp.json';
+import rpsArtifact from '@statechannels/rps/build/contracts/RockPaperScissors.json';
 
 export async function deployContracts(chain: GanacheServer): Promise<object> {
   log.info(`Deploying built contracts to chain at: ${chain.provider.connection.url}`);

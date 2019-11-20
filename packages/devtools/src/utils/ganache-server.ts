@@ -73,6 +73,10 @@ export class GanacheServer {
     }
   }
 
+  onClose(listener: () => void) {
+    this.server.on("close", listener);
+  }
+
   async deployContracts(deployments: Array<Deployment | any>): Promise<DeployedArtifacts> {
     const deployer = new EtherlimeGanacheDeployer(
       // The privateKey is optional, but we have to provide it in order to provide a port.
