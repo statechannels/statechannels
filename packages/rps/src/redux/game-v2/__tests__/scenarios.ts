@@ -8,6 +8,7 @@ import {
   WeaponChosen,
   WeaponAndSaltChosen,
   ResultPlayAgain,
+  WaitForRestart,
 } from '../state';
 
 export const channelId = '0xabc234';
@@ -66,6 +67,7 @@ export const channelStates = {
   roundProposed: channelState(appData.roundProposed, 5, fiveFive),
   roundAccepted: channelState(appData.roundAccepted, 6, fourSix),
   reveal: channelState(appData.roundProposed, 7, sixFour),
+  start2: channelState(appData.start, 8, sixFour),
 };
 
 const asDetails = { name: aName, address: aAddress };
@@ -100,6 +102,8 @@ export const localStatesA = {
     theirWeapon: playerBWeapon,
     result: Result.YouWin,
   } as ResultPlayAgain,
+  chooseWeapon2: { type: 'ChooseWeapon', ...playing } as ChooseWeapon,
+  waitForRestart: { type: 'WaitForRestart', ...playing } as WaitForRestart,
 };
 
 // player A

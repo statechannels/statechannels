@@ -5,9 +5,19 @@ import {
   weaponAndSaltChosen,
   resultPlayAgain,
   LocalState,
+  waitForRestart,
+  chooseWeapon,
 } from './state';
 import { Reducer, combineReducers } from 'redux';
-import { GameAction, JoinOpenGame, ChooseWeapon, ChooseSalt, ResultArrived } from './actions';
+import {
+  GameAction,
+  JoinOpenGame,
+  ChooseWeapon,
+  ChooseSalt,
+  ResultArrived,
+  PlayAgain,
+  Restart,
+} from './actions';
 import { ChannelState } from '../../core';
 
 const emptyLocalState: LocalState = { type: 'Empty' };
@@ -36,6 +46,10 @@ const localReducer: Reducer<LocalState> = (
       return handleChooseSalt(state, action);
     case 'ResultArrived':
       return handleResultArrived(state, action);
+    case 'PlayAgain':
+      return handlePlayAgain(state, action);
+    case 'Restart':
+      return handleRestart(state, action);
     default:
       return state;
   }
@@ -97,6 +111,25 @@ const handleResultArrived = (state: LocalState, action: ResultArrived): LocalSta
   }
   const { theirWeapon, result } = action;
   const newState = resultPlayAgain(state, theirWeapon, result);
+
+  return newState;
+};
+
+const handlePlayAgain = (state: LocalState, action: PlayAgain): LocalState => {
+  if (state.type !== 'ResultPlayAgain') {
+    return state;
+  }
+  const newState = waitForRestart(state);
+
+  return newState;
+};
+
+const handleRestart = (state: LocalState, action: Restart): LocalState => {
+  if (state.type !== 'WaitForRestart') {
+    return state;
+  }
+
+  const newState = chooseWeapon(state);
 
   return newState;
 };

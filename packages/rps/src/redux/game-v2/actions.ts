@@ -6,7 +6,9 @@ export type GameAction =
   | UpdateChannelState
   | ChooseWeapon
   | ChooseSalt
-  | ResultArrived;
+  | ResultArrived
+  | PlayAgain
+  | Restart;
 
 export interface UpdateChannelState {
   type: 'UpdateChannelState';
@@ -34,6 +36,14 @@ export interface ResultArrived {
   type: 'ResultArrived';
   theirWeapon: Weapon;
   result: Result;
+}
+
+export interface PlayAgain {
+  type: 'PlayAgain';
+}
+
+export interface Restart {
+  type: 'Restart';
 }
 
 // Constructors
@@ -64,3 +74,6 @@ export const resultArrived = (theirWeapon: Weapon, result: Result): ResultArrive
   theirWeapon,
   result,
 });
+
+export const playAgain = (): PlayAgain => ({ type: 'PlayAgain' });
+export const restart = (): Restart => ({ type: 'Restart' });

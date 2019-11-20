@@ -3,7 +3,7 @@ import { combineReducers } from 'redux';
 import { gameReducer } from '../reducer';
 import { gameSaga } from '../saga';
 import { localStatesA, bName, bAddress, stake, channelStates, aWeapon, salt } from './scenarios';
-import { joinOpenGame, chooseWeapon, updateChannelState } from '../actions';
+import { joinOpenGame, chooseWeapon, updateChannelState, playAgain } from '../actions';
 import { ChannelState } from '../../../core';
 import { RPSChannelClient } from '../../../utils/rps-channel-client';
 import * as match from 'redux-saga-test-plan/matchers';
@@ -17,7 +17,7 @@ const reducer = combineReducers({
 const gameState = (localState, channelState?: ChannelState) => ({
   game: {
     localState,
-    channelState,
+    channelState: channelState || null,
   },
 });
 
@@ -77,3 +77,48 @@ describe("when the opponent's move arrives", () => {
 });
 
 // when we select to play again
+
+describe('when player decides to play again', () => {
+  describe('and the opponent has already decided to play again', () => {
+    it('transitions to ChooseWeapon', async () => {
+      // being in start2 === we know the opponent has decided to play again
+      const initialState = gameState(localStatesA.resultPlayAgain, channelStates.start2);
+      const client = new RPSChannelClient();
+      const action = playAgain();
+
+      const { storeState } = await expectSaga(gameSaga as any, client)
+        .withReducer(reducer, initialState)
+        .dispatch(action)
+        .run({ silenceTimeout: true });
+
+      expect(storeState).toEqual(gameState(localStatesA.chooseWeapon2, channelStates.start2));
+    });
+  });
+  describe("and the opponent hasn't decided whether to play again yet", () => {
+    it('transitions to WaitForRestart', async () => {
+      // if the channel is still in the reveal state, the opponent hasn't decided whether to play again yet
+      const initialState = gameState(localStatesA.resultPlayAgain, channelStates.reveal);
+      const client = new RPSChannelClient();
+      const action = playAgain();
+
+      const { storeState } = await expectSaga(gameSaga as any, client)
+        .withReducer(reducer, initialState)
+        .dispatch(action)
+        .run({ silenceTimeout: true });
+
+      expect(storeState).toEqual(gameState(localStatesA.waitForRestart, channelStates.reveal));
+    });
+    it('then transitions to ChooseWeapon, when the opponent decides', async () => {
+      const initialState = gameState(localStatesA.waitForRestart, channelStates.reveal);
+      const client = new RPSChannelClient();
+      const action = updateChannelState(channelStates.start2); // triggered by ChannelUpdatedListener
+
+      const { storeState } = await expectSaga(gameSaga as any, client)
+        .withReducer(reducer, initialState)
+        .dispatch(action)
+        .run({ silenceTimeout: true });
+
+      expect(storeState).toEqual(gameState(localStatesA.chooseWeapon2, channelStates.start2));
+    });
+  });
+});
