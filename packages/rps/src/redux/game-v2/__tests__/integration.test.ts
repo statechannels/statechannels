@@ -60,7 +60,6 @@ describe('when chosing a weapon', () => {
   });
 });
 
-// when they accept, we reveal, and move the result
 describe("when the opponent's move arrives", () => {
   it('calls updateState and transitions to ResultPlayAgain', async () => {
     const initialState = gameState(localStatesA.weaponAndSaltChosen, channelStates.roundProposed);
@@ -76,3 +75,5 @@ describe("when the opponent's move arrives", () => {
     expect(storeState).toEqual(gameState(localStatesA.resultPlayAgain, channelStates.reveal));
   });
 });
+
+// when we select to play again
