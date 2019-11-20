@@ -1,7 +1,8 @@
-import {AppData} from './app-data';
-import {BigNumber} from 'ethers/utils';
+import { AppData } from './app-data';
+import { BigNumber } from 'ethers/utils';
 
 export interface ChannelState {
+  channelId: string;
   turnNum: BigNumber;
   status: string;
   aUserId: string;

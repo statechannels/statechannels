@@ -63,9 +63,9 @@ export interface WeaponChosen extends Playing {
 
 export interface WeaponAndSaltChosen extends Playing {
   type: 'WeaponAndSaltChosen';
-  player: 'A';
   myWeapon: Weapon;
   salt: string;
+  player: 'A';
 }
 
 export interface ResultPlayAgain extends Playing {
@@ -78,3 +78,37 @@ export interface ResultPlayAgain extends Playing {
 export interface GameOver extends Playing {
   type: 'GameOver';
 }
+
+// Helpers
+// =======
+
+export const weaponChosen = <T extends Playing>(state: T, myWeapon: Weapon): WeaponChosen => {
+  const { player, name, address, opponentName, roundBuyIn } = state;
+  return { type: 'WeaponChosen', player, name, address, opponentName, roundBuyIn, myWeapon };
+};
+
+export const weaponAndSaltChosen = (
+  state: WeaponChosen & { player: 'A' },
+  salt: string
+): WeaponAndSaltChosen => {
+  return { ...state, type: 'WeaponAndSaltChosen', salt };
+};
+
+export const resultPlayAgain = (
+  state: WeaponChosen | WeaponAndSaltChosen,
+  theirWeapon: Weapon,
+  result: Result
+): ResultPlayAgain => {
+  const { player, name, address, opponentName, roundBuyIn, myWeapon } = state;
+  return {
+    type: 'ResultPlayAgain',
+    player,
+    name,
+    address,
+    opponentName,
+    roundBuyIn,
+    myWeapon,
+    theirWeapon,
+    result,
+  };
+};

@@ -1,9 +1,10 @@
 import { take, select, call, put } from 'redux-saga/effects';
 // import { take } from 'redux-saga/effects';
 import { RPSChannelClient } from '../../utils/rps-channel-client';
-import { AppData } from '../../core';
-import { updateChannelState } from './actions';
+import { AppData, hashPreCommit, calculateResult, updateAllocation, Player } from '../../core';
+import { updateChannelState, chooseSalt, resultArrived } from './actions';
 import { GameState } from './state';
+import { randomHex } from '../../utils/randomHex';
 
 const getGameState = (state: any): GameState => state.game;
 
@@ -14,18 +15,67 @@ export function* gameSaga(channelClient: RPSChannelClient) {
 
     const { localState, channelState }: GameState = yield select(getGameState);
 
-    if (localState.type === 'GameChosen' && !channelState) {
-      const openingBalance = localState.roundBuyIn.mul(5);
-      const startState: AppData = { type: 'start' };
-      const newChannelState = yield call(
-        channelClient.createChannel,
-        localState.address,
-        localState.opponentAddress,
-        openingBalance,
-        openingBalance,
-        startState
-      );
-      yield put(updateChannelState(newChannelState));
+    if ('player' in localState && localState.player === 'A') {
+      if (localState.type === 'GameChosen' && !channelState) {
+        const openingBalance = localState.roundBuyIn.mul(5);
+        const startState: AppData = { type: 'start' };
+        const newChannelState = yield call(
+          channelClient.createChannel,
+          localState.address,
+          localState.opponentAddress,
+          openingBalance,
+          openingBalance,
+          startState
+        );
+        yield put(updateChannelState(newChannelState));
+      } else if (localState.type === 'WeaponChosen' && channelState) {
+        // if we're player A, we first generate a salt
+        const salt = yield call(randomHex, 64);
+        yield put(chooseSalt(salt)); // transitions us to WeaponAndSaltChosen
+
+        const { myWeapon, roundBuyIn: stake } = localState;
+        const { channelId, aBal, bBal } = channelState;
+
+        const preCommit = hashPreCommit(myWeapon, salt);
+
+        const roundProposed: AppData = { type: 'roundProposed', preCommit, stake };
+
+        const updatedChannelState = yield call(
+          channelClient.updateChannel,
+          channelId,
+          aBal,
+          bBal,
+          roundProposed
+        );
+        yield put(updateChannelState(updatedChannelState));
+      } else if (
+        localState.type === 'WeaponAndSaltChosen' &&
+        channelState &&
+        channelState.appData.type === 'roundAccepted'
+      ) {
+        const { myWeapon, salt } = localState;
+        const { aBal, bBal, channelId } = channelState;
+        const { playerBWeapon: theirWeapon, stake } = channelState.appData;
+        const result = calculateResult(myWeapon, theirWeapon);
+        const [aBal2, bBal2] = updateAllocation(result, Player.PlayerA, stake, aBal, bBal);
+
+        const reveal: AppData = {
+          type: 'reveal',
+          salt,
+          playerAWeapon: myWeapon,
+          playerBWeapon: theirWeapon,
+        };
+
+        const updatedChannelState = yield call(
+          channelClient.updateChannel,
+          channelId,
+          aBal2,
+          bBal2,
+          reveal
+        );
+        yield put(updateChannelState(updatedChannelState));
+        yield put(resultArrived(theirWeapon, result));
+      }
     }
   }
 
