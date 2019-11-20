@@ -5,7 +5,7 @@
   ],
   "engines": {
     "yarn": "^1.17.3",
-    "node": "10.16.3"
+    "node": "^10.16.3"
   },
   "scripts": {
     "prepare": "lerna run --concurrency 1 --stream prepare",
