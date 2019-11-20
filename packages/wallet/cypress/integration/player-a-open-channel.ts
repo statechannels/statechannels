@@ -4,35 +4,13 @@ import * as ethers from "ethers";
 import {SignedState} from "@statechannels/nitro-protocol";
 import _ from "lodash";
 import {signState} from "@statechannels/nitro-protocol/lib/src/signatures";
-import {AddressZero} from "ethers/constants";
+import {createParentPostMessagePromise} from "../helpers";
 const playerA = ethers.Wallet.createRandom();
 const playerB = ethers.Wallet.createRandom();
 const playerBFakeWallet = ethers.Wallet.createRandom();
+
 // TODO: Probably a better way of referencing this
 let walletWindow;
-
-// Creates a promise that resolves when window.parent.postMessage is called with the expected message.
-// Returns all messages sent to window.parent.postMessage since the promise was created
-function createParentPostMessagePromise(
-  window: any,
-  messageToWaitFor: {id: number} | {method: string}
-) {
-  // Reset the stub to if it's already defined
-  if (typeof window.parent.postMessage.restore === "function") {
-    window.parent.postMessage.restore();
-  }
-
-  const messages = [];
-
-  return new Cypress.Promise(resolve => {
-    cy.stub(window.parent, "postMessage").callsFake(postMessage => {
-      messages.push(postMessage);
-      if (_.isMatch(postMessage, messageToWaitFor)) {
-        resolve(messages);
-      }
-    });
-  });
-}
 
 describe("Opening channel", () => {
   it(" should open a channel", () => {
