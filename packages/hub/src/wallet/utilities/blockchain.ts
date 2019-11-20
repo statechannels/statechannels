@@ -32,7 +32,7 @@ async function setupContract(artifact: any) {
     throw err;
   }
 
-  const networkContext = require('@statechannels/nitro-protocol/ganache/ganache-network-context.json');
+  const networkContext = require('@statechannels/ganache-deployer/ganache-network-context.json');
   const contract = await ethAssetHolderFactory.attach(networkContext.ETHAssetHolder.address);
 
   return contract;
