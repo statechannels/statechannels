@@ -41,7 +41,7 @@ firebaseRelay.on('message', (message: RelayableAction) => {
 console.log('Firebase relay sub-process started');
 
 const assetHolderEventHandler: AssetHolderEventHandler = (message: AssetHolderWatcherEvent) => {
-  console.log(`Received adjudicator watcher message: ${JSON.stringify(message, null, 1)}`);
+  console.log(`Received asset holder watcher message: ${JSON.stringify(message, null, 1)}`);
   switch (message.eventType) {
     case AssetHolderWatcherEventType.Deposited:
       onDepositEvent(message.channelId, message.amountDeposited, message.destinationHoldings);

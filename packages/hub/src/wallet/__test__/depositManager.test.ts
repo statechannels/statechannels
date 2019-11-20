@@ -30,7 +30,7 @@ beforeEach(() => {
 });
 
 describe('deposit manager', () => {
-  it('should not deposit, adjudicator fully funded', async () => {
+  it('should not deposit, asset holder fully funded', async () => {
     const destinationHoldings = bigNumberify(10).toHexString();
     await onDepositEvent(channelId, amountDeposited, destinationHoldings);
 
@@ -39,7 +39,7 @@ describe('deposit manager', () => {
     expect(mockBlockchainFund).toBeCalledTimes(0);
   });
 
-  it('should deposit, adjudicator not fully funded', async () => {
+  it('should deposit, asset holder not fully funded', async () => {
     const destinationHoldings = bigNumberify(5).toHexString();
     await onDepositEvent(channelId, amountDeposited, destinationHoldings);
 

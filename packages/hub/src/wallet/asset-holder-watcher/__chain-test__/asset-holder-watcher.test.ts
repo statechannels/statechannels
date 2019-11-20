@@ -6,7 +6,7 @@ import {Blockchain} from '../../services/blockchain';
 jest.setTimeout(20000);
 const five = bigNumberify(5).toHexString();
 
-describe('adjudicator listener', () => {
+describe('asset holder listener', () => {
   it('should handle a funds received event when channel is in the database', async done => {
     let removeListeners = null;
     const eventHandler: AssetHolderEventHandler = (message: AssetHolderWatcherEvent) => {
