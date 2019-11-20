@@ -6,7 +6,13 @@ import * as actions from "../actions";
 // -----------------
 // Channel Scenarios
 // -----------------
-const {channelId, asAddress: address, asPrivateKey: privateKey, participants} = testScenarios;
+const {
+  channelId,
+  asAddress: address,
+  asPrivateKey: privateKey,
+  participants,
+  bytecode
+} = testScenarios;
 import {ChannelState} from "../../../channel-store";
 import {setChannel, EMPTY_SHARED_DATA} from "../../../state";
 import {channelFromStates} from "../../../channel-store/channel-state/__tests__";
@@ -32,7 +38,7 @@ const ourTurn = channelFromStates([signedState20, signedState21], address, priva
 const processId = "processId";
 const storage = (channelState: ChannelState) => setChannel(EMPTY_SHARED_DATA, channelState);
 
-const defaults = {processId, channelId, address, privateKey, participants};
+const defaults = {processId, channelId, address, privateKey, participants, bytecode};
 
 // ------
 // States

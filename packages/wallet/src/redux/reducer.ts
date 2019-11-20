@@ -199,7 +199,8 @@ function initializeNewProtocol(
         action.channelId,
         state.address,
         state.privateKey,
-        action.participants
+        action.participants,
+        action.bytecode
       );
     case "WALLET.NEW_PROCESS.CLOSE_LEDGER_CHANNEL":
       return closeLedgerChannelProtocol.initializeCloseLedgerChannel(

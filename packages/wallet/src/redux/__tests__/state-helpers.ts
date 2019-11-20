@@ -31,6 +31,8 @@ export const participants: ChannelParticipant[] = [
   {signingAddress: bsAddress}
 ];
 
+export const bytecode = "0x00";
+
 export const libraryAddress = "0x" + "1".repeat(40);
 export const channelNonce = "0x04";
 export const channel = {

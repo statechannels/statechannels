@@ -105,6 +105,23 @@ export function registerChannelToMonitor(
   };
 }
 
+export function storeBytecodeForChannel(
+  data: SharedData,
+  channelId: string,
+  bytecode: string
+): SharedData {
+  return {
+    ...data,
+    channelStore: {
+      ...data.channelStore,
+      [channelId]: {
+        ...data.channelStore[channelId],
+        bytecode
+      }
+    }
+  };
+}
+
 export function unregisterAllChannelToMonitor(
   data: SharedData,
   processId: string,

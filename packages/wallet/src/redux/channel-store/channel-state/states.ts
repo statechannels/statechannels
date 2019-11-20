@@ -9,6 +9,7 @@ export interface ChannelParticipant {
 
 export interface ChannelState {
   address: string;
+  bytecode?: string; // TODO: Update all tests etc and make not-optional
   privateKey: string;
   channelId: string;
   libraryAddress: string;

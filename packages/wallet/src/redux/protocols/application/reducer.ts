@@ -1,4 +1,9 @@
-import {SharedData, queueMessage, registerChannelToMonitor} from "../../state";
+import {
+  SharedData,
+  queueMessage,
+  registerChannelToMonitor,
+  storeBytecodeForChannel
+} from "../../state";
 import * as states from "./states";
 import * as actions from "./actions";
 import {ProtocolStateWithSharedData} from "..";
@@ -32,11 +37,16 @@ export function initialize(
   channelId: string,
   address: string,
   privateKey: string,
-  participants: ChannelParticipant[]
+  participants: ChannelParticipant[],
+  bytecode: string
 ): ProtocolStateWithSharedData<states.ApplicationState> {
   return {
     protocolState: states.waitForFirstState({channelId, privateKey, address, participants}),
-    sharedData: registerChannelToMonitor(sharedData, APPLICATION_PROCESS_ID, channelId, [])
+    sharedData: storeBytecodeForChannel(
+      registerChannelToMonitor(sharedData, APPLICATION_PROCESS_ID, channelId, []),
+      channelId,
+      bytecode
+    )
   };
 }
 
