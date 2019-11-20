@@ -1,28 +1,22 @@
 import {take, fork} from 'redux-saga/effects';
 import {buffers, eventChannel} from 'redux-saga';
 import {reduxSagaFirebase} from '../../gateways/firebase';
-import {JsonRPCNotification, Message, NotificationName} from '../../utils/channel-client';
+import {JsonRPCNotification, Message} from '../../utils/channel-client';
 import {RPSChannelClient} from '../../utils/rps-channel-client';
 
-function createSubscribeFunction(
-  rpsChannelClient: RPSChannelClient,
-  notificationName: NotificationName
-) {
+export function* messageQueuedListener() {
+  const rpsChannelClient = new RPSChannelClient();
+
   const subscribe = emit => {
-    rpsChannelClient.onMessageReceived(notificationName, event => {
+    rpsChannelClient.onMessageQueued(event => {
       emit(event);
     });
 
     return () => {
-      rpsChannelClient.unSubscribe(notificationName); // TODO
+      rpsChannelClient.unSubscribe('MessageQueued');
     };
   };
-  return subscribe;
-}
 
-export function* messageQueuedListener() {
-  const rpsChannelClient = new RPSChannelClient();
-  const subscribe = createSubscribeFunction(rpsChannelClient, 'MessageQueued');
   const channel = eventChannel(subscribe, buffers.fixed(10));
 
   while (true) {
