@@ -49,6 +49,7 @@ import {
 } from "./protocols/concluding/states";
 import {SignedState, State} from "@statechannels/nitro-protocol";
 import {CONSENSUS_LIBRARY_ADDRESS, CONSENSUS_LIBRARY_BYTECODE} from "../constants";
+import {getAppDefinitionBytecode} from "./selectors";
 
 export type WalletState = Initialized;
 
@@ -254,7 +255,7 @@ export function signAndInitialize(
     state,
     privateKey,
     participants,
-    sharedDataState.bytecodeStorage[state.appDefinition]
+    getAppDefinitionBytecode(sharedDataState, state.appDefinition)
   );
   if (result.isSuccess) {
     return {
@@ -278,7 +279,7 @@ export function checkAndInitialize(
     signedState,
     privateKey,
     participants,
-    state.bytecodeStorage[signedState.state.appDefinition]
+    getAppDefinitionBytecode(state, signedState.state.appDefinition)
   );
   if (result.isSuccess) {
     return {...result, store: setChannelStore(state, result.store)};
@@ -313,7 +314,7 @@ export function signAndStore(sharedDataState: SharedData, state: State): SignRes
   const result = signAndStoreChannelStore(
     sharedDataState.channelStore,
     state,
-    sharedDataState.bytecodeStorage[state.appDefinition]
+    getAppDefinitionBytecode(sharedDataState, state.appDefinition)
   );
   if (result.isSuccess) {
     return {

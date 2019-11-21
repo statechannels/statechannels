@@ -100,7 +100,7 @@ export function checkStates(
       const result = checkAndStore(
         sharedData,
         ss,
-        sharedData.bytecodeStorage[ss.state.appDefinition]
+        selectors.getAppDefinitionBytecode(sharedData, ss.state.appDefinition)
       );
       if (result.isSuccess) {
         sharedData = result.store;

@@ -27,6 +27,10 @@ export const doesAStateExistForChannel = (state: SharedData, channelId: string):
   );
 };
 
+export const getAppDefinitionBytecode = (state: SharedData, appDefinition: string): string => {
+  return state.bytecodeStorage[appDefinition];
+};
+
 export const getChannelState = (state: SharedData, channelId: string): ChannelState => {
   const channelStatus = state.channelStore[channelId];
   if (!channelStatus) {

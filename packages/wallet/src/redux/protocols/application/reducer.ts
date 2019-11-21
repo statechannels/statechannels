@@ -21,6 +21,7 @@ import {disputeReducer} from "../dispute/reducer";
 import {joinSignature} from "ethers/utils";
 import {State, SignedState} from "@statechannels/nitro-protocol";
 import {ChannelParticipant} from "../../channel-store";
+import {getAppDefinitionBytecode} from "src/redux/selectors";
 
 // TODO: Right now we're using a fixed application ID
 // since we're not too concerned with handling multiple running app channels.
@@ -204,13 +205,13 @@ const validateAndUpdate = (
       signedState,
       protocolState.privateKey,
       protocolState.participants,
-      sharedData.bytecodeStorage[signedState.state.appDefinition]
+      getAppDefinitionBytecode(sharedData, signedState.state.appDefinition)
     );
   } else if (protocolState.type === "Application.Ongoing") {
     return checkAndStore(
       sharedData.channelStore,
       signedState,
-      sharedData.bytecodeStorage[signedState.state.appDefinition]
+      getAppDefinitionBytecode(sharedData, signedState.state.appDefinition)
     );
   } else {
     return {isSuccess: false, store: sharedData.channelStore};
@@ -228,13 +229,13 @@ const signAndUpdate = (
       state,
       protocolState.privateKey,
       protocolState.participants,
-      sharedData.bytecodeStorage[state.appDefinition]
+      getAppDefinitionBytecode(sharedData, state.appDefinition)
     );
   } else {
     return signAndStore(
       sharedData.channelStore,
       state,
-      sharedData.bytecodeStorage[state.appDefinition]
+      getAppDefinitionBytecode(sharedData, state.appDefinition)
     );
   }
 };
