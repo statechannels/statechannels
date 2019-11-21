@@ -1,6 +1,10 @@
-import {AppData, ChannelState, encodeAppData, decodeAppData} from '../core';
+import {AppData,ChannelState,encodeAppData,decodeAppData} from '../core';
 import {bigNumberify} from 'ethers/utils';
-import {ChannelClient, ChannelUpdatedNotification} from './channel-client';
+import {
+  ChannelClient,
+  ChannelUpdatedNotification,
+  Notification,
+} from './channel-client';
 import {RPS_ADDRESS} from '../constants';
 
 // This class wraps the channel client converting the request/response formats to those used in the app
@@ -10,7 +14,7 @@ export class RPSChannelClient {
 
   constructor() {
     // might want to pass this in later
-    this.channelClient = new ChannelClient();
+    this.channelClient=new ChannelClient();
   }
 
   async createChannel(
@@ -20,27 +24,27 @@ export class RPSChannelClient {
     bBal: string,
     appAttrs: AppData
   ): Promise<ChannelState> {
-    const participants = [
-      {participantId: aAddress, signingAddress: aAddress, destination: aAddress},
-      {participantId: bAddress, signingAddress: bAddress, destination: bAddress},
+    const participants=[
+      {participantId: aAddress,signingAddress: aAddress,destination: aAddress},
+      {participantId: bAddress,signingAddress: bAddress,destination: bAddress},
     ];
 
-    const allocations = [
+    const allocations=[
       {
         token: '0x0',
         allocationItems: [
-          {destination: aAddress, amount: aBal},
-          {destination: bAddress, amount: bBal},
+          {destination: aAddress,amount: aBal},
+          {destination: bAddress,amount: bBal},
         ],
       },
     ];
 
-    const appDefinition = RPS_ADDRESS;
+    const appDefinition=RPS_ADDRESS;
 
-    const appData = encodeAppData(appAttrs);
+    const appData=encodeAppData(appAttrs);
 
     // ignore return val for now and stub out response
-    await this.channelClient.createChannel({participants, allocations, appDefinition, appData});
+    await this.channelClient.createChannel({participants,allocations,appDefinition,appData});
 
     return await {
       channelId: '0xsome-channel-id',
@@ -60,14 +64,14 @@ export class RPSChannelClient {
     await this.channelClient.getAddress();
   }
 
-  async onMessageQueued(callback: (notification) => any) {
+  async onMessageQueued(callback: (notification: Notification) => void) {
     await this.channelClient.onMessageQueued(callback);
   }
 
   // Accepts an rps-friendly callback, performs the necessary encoding, and subscribes to the channelClient with an appropriate, API-compliant callback
   async onChannelUpdated(rpsCallback: (channelState: ChannelState) => any) {
     function callback(notification: ChannelUpdatedNotification): any {
-      const channelState: ChannelState = {
+      const channelState: ChannelState={
         ...notification.params,
         turnNum: notification.params.turnNum.toString(),
         appData: decodeAppData(notification.params.appData),
@@ -96,7 +100,7 @@ export class RPSChannelClient {
     return {} as any;
   }
 
-  async updateChannel(channelId, aBal, bBal, appData: AppData) {
+  async updateChannel(channelId,aBal,bBal,appData: AppData) {
     /* TODO */
   }
 

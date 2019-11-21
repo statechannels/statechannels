@@ -139,7 +139,7 @@ export type Notification =
   | ChannelClosingNotification
   | MessageQueuedNotification;
 
-type NotificationName = Notification['method'];
+export type NotificationName = Notification['method'];
 type NotificationParameters = Notification['params'];
 
 export type Request =
@@ -218,7 +218,7 @@ export const ErrorCodesToObjectsMap: {[key in ErrorCodes]: typeof ChannelClientE
 export class ChannelClient {
   protected events = new EventEmitter();
 
-  onMessageQueued(callback: (notification: Notification) => void) {
+  onMessageQueued(callback: (notification: MessageQueuedNotification) => void) {
     this.events.on('MessageQueued', notification => {
       callback(notification);
     });
