@@ -85,7 +85,7 @@ export const localStatesA: Record<string, LocalState> = {
   resultPlayAgain: s.resultPlayAgain(propsA, playerBWeapon, Result.YouWin),
   chooseWeapon2: s.chooseWeapon(propsA),
   waitForRestart: s.waitForRestart(propsA),
-  shuttingDown: s.shuttingDown(propsA, 'InsufficientFundsYou'),
+  shuttingDown: s.shuttingDown(propsA, 'InsufficientFundsOpponent'),
   shuttingDownResign: s.shuttingDown(propsA, 'YouResigned'),
 };
 
@@ -100,6 +100,7 @@ const propsB = {
 };
 
 export const localStatesB: Record<string, LocalState> = {
+  lobby: s.lobby(propsB),
   waitingRoom: s.waitingRoom(propsB),
   opponentJoined: s.opponentJoined(propsB),
   chooseWeapon: s.chooseWeapon(propsB),
@@ -107,19 +108,3 @@ export const localStatesB: Record<string, LocalState> = {
   resultPlayAgain: s.resultPlayAgain(propsB, playerAWeapon, Result.YouLose),
   chooseWeapon2: s.chooseWeapon(propsB),
 };
-
-// player A
-// lobby
-// -> chooseGame
-// gameChosen
-// -> channelUpdated
-// -> channelUpdated
-// -> ...
-// ChooseWeapon
-// -> weaponChosen
-// WeaponChosen
-// -> saltChosen
-// WeaponAndSaltChosen
-// -> channelUpdated, updateState, etc
-// ResultAndPlayAgain
-// -> playAgain

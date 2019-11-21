@@ -8,6 +8,7 @@ import {
   chooseWeapon,
   shuttingDown,
   gameChosen,
+  waitingRoom,
 } from './state';
 import {Reducer, combineReducers} from 'redux';
 import {
@@ -19,14 +20,17 @@ import {
   PlayAgain,
   Restart,
   Resign,
+  UpdateChannelState,
+  CreateGame,
 } from './actions';
 import {ChannelState} from '../../core';
+import {unreachable} from '../../utils/unreachable';
 
 const emptyLocalState: LocalState = {type: 'Empty'};
 
 const channelReducer: Reducer<ChannelState | null> = (
   state: ChannelState | null = null,
-  action: GameAction
+  action: UpdateChannelState
 ) => {
   if (action.type === 'UpdateChannelState') {
     return action.channelState;
@@ -42,6 +46,8 @@ const localReducer: Reducer<LocalState> = (
   switch (action.type) {
     case 'JoinOpenGame':
       return handleJoinOpenGame(state, action);
+    case 'CreateGame':
+      return handleCreateGame(state, action);
     case 'ChooseWeapon':
       return handleChooseWeapon(state, action);
     case 'ChooseSalt':
@@ -55,7 +61,7 @@ const localReducer: Reducer<LocalState> = (
     case 'Resign':
       return handleResign(state, action);
     default:
-      return state;
+      return unreachable(action, state);
   }
 };
 
@@ -73,6 +79,17 @@ const handleJoinOpenGame = (state: LocalState, action: JoinOpenGame): LocalState
   const {name, address} = state;
 
   return gameChosen({name, address, opponentName, roundBuyIn}, opponentAddress);
+};
+
+const handleCreateGame = (state: LocalState, action: CreateGame): LocalState => {
+  if (state.type === 'Empty') {
+    return state;
+  }
+
+  const {roundBuyIn} = action;
+  const {name, address} = state;
+
+  return waitingRoom({name, address, roundBuyIn});
 };
 
 const handleChooseWeapon = (state: LocalState, action: ChooseWeapon): LocalState => {

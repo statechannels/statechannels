@@ -1,12 +1,6 @@
 import {AppData, ChannelState, encodeAppData, decodeAppData} from '../core';
 import {bigNumberify} from 'ethers/utils';
-import {
-  ChannelClient,
-  NotificationName,
-  JsonRPCNotification,
-  Message,
-  ChannelUpdatedNotification,
-} from './channel-client';
+import {ChannelClient, ChannelUpdatedNotification} from './channel-client';
 import {RPS_ADDRESS} from '../constants';
 
 // This class wraps the channel client converting the request/response formats to those used in the app
@@ -66,7 +60,7 @@ export class RPSChannelClient {
     await this.channelClient.getAddress();
   }
 
-  async onMessageQueued(callback: (notification: JsonRPCNotification<Message>) => any) {
+  async onMessageQueued(callback: (notification) => any) {
     await this.channelClient.onMessageQueued(callback);
   }
 
@@ -89,7 +83,7 @@ export class RPSChannelClient {
     await this.channelClient.onChannelUpdated(callback);
   }
 
-  async unSubscribe(notificationName: NotificationName) {
+  async unSubscribe(notificationName) {
     await this.channelClient.unSubscribe(notificationName);
   }
 

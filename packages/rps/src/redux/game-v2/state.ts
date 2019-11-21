@@ -142,8 +142,10 @@ export const weaponAndSaltChosen = <T extends Playing & {myWeapon: Weapon; playe
   state: T,
   salt: string
 ): WeaponAndSaltChosen => ({
-  ...state,
   type: 'WeaponAndSaltChosen',
+  ...playing(state),
+  myWeapon: state.myWeapon,
+  player: 'A',
   salt,
 });
 
