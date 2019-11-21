@@ -1,7 +1,7 @@
-import { bigNumberify } from 'ethers/utils';
-import { AppData, RoundProposed, Start, RoundAccepted, Reveal, hashPreCommit } from '../../../core';
-import { ChannelState, Result, Weapon } from '../../../core';
-import { LocalState } from '../state';
+import {bigNumberify} from 'ethers/utils';
+import {AppData, RoundProposed, Start, RoundAccepted, Reveal, hashPreCommit} from '../../../core';
+import {ChannelState, Result, Weapon} from '../../../core';
+import {LocalState} from '../state';
 
 export const channelId = '0xabc234';
 const aName = 'Alice';
@@ -21,10 +21,10 @@ export const bWeapon = Weapon.Scissors;
 const playerBWeapon = bWeapon;
 
 const appData = {
-  start: { type: 'start' } as Start,
-  roundProposed: { type: 'roundProposed', stake, preCommit } as RoundProposed,
-  roundAccepted: { type: 'roundAccepted', stake, preCommit, playerBWeapon } as RoundAccepted,
-  reveal: { type: 'reveal', playerAWeapon, playerBWeapon, salt } as Reveal,
+  start: {type: 'start'} as Start,
+  roundProposed: {type: 'roundProposed', stake, preCommit} as RoundProposed,
+  roundAccepted: {type: 'roundAccepted', stake, preCommit, playerBWeapon} as RoundAccepted,
+  reveal: {type: 'reveal', playerAWeapon, playerBWeapon, salt} as Reveal,
 };
 
 function channelState(
@@ -35,14 +35,14 @@ function channelState(
 ): ChannelState {
   return {
     channelId,
-    turnNum: bigNumberify(turnNum),
+    turnNum: bigNumberify(turnNum).toString(),
     status,
     aUserId,
     bUserId,
     aDestination,
     bDestination,
-    aBal: bigNumberify(balances[0]),
-    bBal: bigNumberify(balances[1]),
+    aBal: bigNumberify(balances[0]).toString(),
+    bBal: bigNumberify(balances[1]).toString(),
     appData: appDataParam,
   };
 }
@@ -63,7 +63,7 @@ export const channelStates = {
   revealInsufficientFundsB: channelState(appData.reveal, 7, [10, 0]),
 };
 
-const asDetails = { name: aName, address: aAddress };
+const asDetails = {name: aName, address: aAddress};
 
 const playing = {
   ...asDetails,
@@ -73,14 +73,14 @@ const playing = {
 };
 
 export const localStatesA: Record<string, LocalState> = {
-  lobby: { type: 'Lobby', ...asDetails },
+  lobby: {type: 'Lobby', ...asDetails},
   gameChosen: {
     type: 'GameChosen',
     ...playing,
     opponentAddress: bAddress,
   },
-  chooseWeapon: { type: 'ChooseWeapon', ...playing },
-  weaponChosen: { type: 'WeaponChosen', ...playing, myWeapon: playerAWeapon },
+  chooseWeapon: {type: 'ChooseWeapon', ...playing},
+  weaponChosen: {type: 'WeaponChosen', ...playing, myWeapon: playerAWeapon},
   weaponAndSaltChosen: {
     type: 'WeaponAndSaltChosen',
     ...playing,
@@ -94,9 +94,9 @@ export const localStatesA: Record<string, LocalState> = {
     theirWeapon: playerBWeapon,
     result: Result.YouWin,
   },
-  chooseWeapon2: { type: 'ChooseWeapon', ...playing },
-  waitForRestart: { type: 'WaitForRestart', ...playing },
-  shuttingDown: { type: 'ShuttingDown', reason: 'InsufficientFundsOpponent', ...playing },
+  chooseWeapon2: {type: 'ChooseWeapon', ...playing},
+  waitForRestart: {type: 'WaitForRestart', ...playing},
+  shuttingDown: {type: 'ShuttingDown', reason: 'InsufficientFundsOpponent', ...playing},
 };
 
 // player A
