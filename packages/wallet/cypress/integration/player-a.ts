@@ -12,7 +12,7 @@ const playerBFakeWallet = ethers.Wallet.createRandom();
 // TODO: Probably a better way of referencing this
 let walletWindow;
 
-describe("Opening channel", () => {
+describe("Player A", () => {
   it(" should open a channel", () => {
     cy.visit("");
 
