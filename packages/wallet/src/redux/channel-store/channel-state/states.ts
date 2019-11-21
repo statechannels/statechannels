@@ -9,7 +9,6 @@ export interface ChannelParticipant {
 
 export interface ChannelState {
   address: string;
-  bytecode: string;
   privateKey: string;
   channelId: string;
   libraryAddress: string;
@@ -42,8 +41,7 @@ export function getStates(state: ChannelState): SignedState[] {
 export function initializeChannel(
   signedState: SignedState,
   privateKey: string,
-  participants: ChannelParticipant[],
-  bytecode: string
+  participants: ChannelParticipant[]
 ): ChannelState {
   const {state} = signedState;
   const {turnNum, channel, appDefinition} = state;
@@ -54,7 +52,6 @@ export function initializeChannel(
   const channelId = getChannelId(state.channel);
   return {
     address,
-    bytecode,
     privateKey,
     turnNum,
     ourIndex,

@@ -13,7 +13,6 @@ export interface InitializeChannel {
   protocol: ProcessProtocol.Application;
   channelId: string;
   participants: ChannelParticipant[];
-  bytecode: string;
 }
 export interface FundingRequested {
   type: "WALLET.NEW_PROCESS.FUNDING_REQUESTED";

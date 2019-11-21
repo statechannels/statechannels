@@ -97,7 +97,11 @@ export function checkStates(
   states
     .filter(ss => ss.state.turnNum > turnNum)
     .map(ss => {
-      const result = checkAndStore(sharedData, ss);
+      const result = checkAndStore(
+        sharedData,
+        ss,
+        sharedData.bytecodeStorage[ss.state.appDefinition]
+      );
       if (result.isSuccess) {
         sharedData = result.store;
       } else {

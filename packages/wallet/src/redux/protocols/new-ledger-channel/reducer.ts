@@ -28,7 +28,6 @@ import {ADVANCE_CHANNEL_PROTOCOL_LOCATOR} from "../advance-channel/reducer";
 import {TwoPartyPlayerIndex} from "../../types";
 import {encodeConsensusData, Outcome} from "@statechannels/nitro-protocol";
 import {getAllocationTotal, getAllocationAmountForIndex} from "../../../utils/outcome-utils";
-import {consensusAppBytecode} from "../../__tests__/state-helpers";
 
 type ReturnVal = ProtocolStateWithSharedData<NewLedgerChannelState>;
 type IDFAction = NewLedgerChannelAction;
@@ -53,7 +52,6 @@ export function initialize({
 }): ProtocolStateWithSharedData<states.NonTerminalNewLedgerChannelState | states.Failure> {
   const initializationArgs = {
     privateKey,
-    bytecode: consensusAppBytecode,
     appDefinition: CONSENSUS_LIBRARY_ADDRESS,
     ourIndex,
     stateType: advanceChannelState.StateType.PreFundSetup,

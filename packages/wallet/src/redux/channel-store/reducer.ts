@@ -37,7 +37,7 @@ export function signAndInitialize(
   if (signedState.state.turnNum !== 0) {
     return {isSuccess: false, reason: "ChannelDoesNotExist"};
   }
-  const channel = initializeChannel(signedState, privateKey, participants, bytecode);
+  const channel = initializeChannel(signedState, privateKey, participants);
   store = setChannel(store, channel);
 
   return {isSuccess: true, signedState, store};
@@ -53,10 +53,16 @@ export function checkAndInitialize(
   if (signedState.state.turnNum !== 0) {
     return {isSuccess: false};
   }
+
   if (!hasValidSignature(signedState)) {
     return {isSuccess: false};
   }
-  const channel = initializeChannel(signedState, privateKey, participants, bytecode);
+
+  const channel = initializeChannel(signedState, privateKey, participants);
+
+  if (!validAppTransition(channel, signedState.state, bytecode)) {
+    return {isSuccess: false};
+  }
 
   store = setChannel(store, channel);
 
@@ -70,9 +76,14 @@ export function signAndStore(store: ChannelStore, state: State): SignResult {
   let channel = getChannel(store, channelId);
 
   const signedState = Signatures.signState(state, channel.privateKey);
+
   if (!validTransition(channel, state)) {
     return {isSuccess: false, reason: "TransitionUnsafe"};
   }
+
+  // if (!validAppTransition(channel, signedState.state, bytecode)) {
+  //   return {isSuccess: false, reason: "TransitionUnsafe"};
+  // }
 
   channel = pushState(channel, signedState);
   store = setChannel(store, channel);
@@ -96,7 +107,11 @@ interface CheckFailure {
 type CheckResult = CheckSuccess | CheckFailure;
 
 // For use with a signed state received from an opponent.
-export function checkAndStore(store: ChannelStore, signedState: SignedState): CheckResult {
+export function checkAndStore(
+  store: ChannelStore,
+  signedState: SignedState,
+  bytecode: string
+): CheckResult {
   if (!hasValidSignature(signedState)) {
     console.log("Failed to validate state signature");
     return {isSuccess: false};
@@ -107,7 +122,7 @@ export function checkAndStore(store: ChannelStore, signedState: SignedState): Ch
     return {isSuccess: false};
   }
 
-  if (!validAppTransition(channel, signedState.state)) {
+  if (!validAppTransition(channel, signedState.state, bytecode)) {
     return {isSuccess: false};
   }
 

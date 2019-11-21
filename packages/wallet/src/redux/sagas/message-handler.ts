@@ -95,10 +95,16 @@ function* handlePushMessage(payload: RequestObject) {
       const bytecode = yield call(provider.getCode, signedState.state.appDefinition);
 
       yield put(
+        actions.appDefinitionBytecodeReceived({
+          appDefinition: signedState.state.appDefinition,
+          bytecode
+        })
+      );
+
+      yield put(
         actions.protocol.initializeChannel({
           channelId: getChannelId(signedState.state.channel),
-          participants,
-          bytecode
+          participants
         })
       );
 
@@ -162,11 +168,18 @@ function* handleCreateChannelMessage(payload: RequestObject) {
     yield fork(messageSender, actions.noContractError({id, address: appDefinition}));
   } else {
     const state = createStateFromCreateChannelParams(payload.params as any);
+
+    yield put(
+      actions.appDefinitionBytecodeReceived({
+        appDefinition,
+        bytecode
+      })
+    );
+
     yield put(
       actions.protocol.initializeChannel({
         channelId: getChannelId(state.channel),
-        participants,
-        bytecode
+        participants
       })
     );
 

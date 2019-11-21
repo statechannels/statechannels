@@ -30,13 +30,12 @@ export function validStateTransition(first: State, second: State): boolean {
   );
 }
 
-export function validAppTransition(channelState: ChannelState, toState: State): boolean {
-  const fromState = channelState.signedStates[channelState.signedStates.length - 1].state;
-  const bytecode = channelState.bytecode;
-
-  if (!bytecode) {
-    console.error(channelState)
-  }
+export function validAppTransition(
+  channelState: ChannelState,
+  toState: State,
+  bytecode: string
+): boolean {
+  const fromState = channelState.signedStates[channelState.signedStates.length - 1].state; 
 
   const numberOfParticipants = toState.channel.participants.length;
   const fromVariablePart = getVariablePart(fromState);

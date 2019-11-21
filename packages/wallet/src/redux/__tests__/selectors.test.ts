@@ -63,7 +63,6 @@ describe("getAdjudicatorWatcherProcessesForChannel", () => {
 
 describe("getNextNonce", () => {
   const defaultChannelState: ChannelState = {
-    bytecode: "0x0",
     channelId: "0x0",
     libraryAddress: "0x0",
     ourIndex: 0,

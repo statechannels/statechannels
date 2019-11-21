@@ -30,7 +30,6 @@ const concludeState2 = testScenarios.appState({turnNum: 52, isFinal: true});
 
 const channelStatus: ChannelState = {
   address,
-  bytecode: trivialAppBytecode,
   privateKey,
   channelId,
   libraryAddress,
@@ -46,6 +45,10 @@ const channelStore: ChannelStore = {
   [channelId]: channelStatus
 };
 
+const bytecodeStorage = {
+  [libraryAddress]: trivialAppBytecode
+};
+
 const notClosedChannelStatus: ChannelState = {
   ...channelStatus,
   signedStates: [gameState1, gameState2],
@@ -59,7 +62,7 @@ const notClosedChannelState = {
 const transaction = {};
 const withdrawalAddress = Wallet.createRandom().address;
 const processId = "process-id.123";
-const sharedData: SharedData = {...EMPTY_SHARED_DATA, channelStore};
+const sharedData: SharedData = {...EMPTY_SHARED_DATA, channelStore, bytecodeStorage};
 const withdrawalAmount = web3Utils.toWei("5");
 const transactionSubmissionState = transactionScenarios.preSuccessState;
 const props = {

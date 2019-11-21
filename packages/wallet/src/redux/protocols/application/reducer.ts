@@ -1,9 +1,4 @@
-import {
-  SharedData,
-  queueMessage,
-  registerChannelToMonitor,
-  registerBytecodeForChannel
-} from "../../state";
+import {SharedData, queueMessage, registerChannelToMonitor} from "../../state";
 import * as states from "./states";
 import * as actions from "./actions";
 import {ProtocolStateWithSharedData} from "..";
@@ -37,22 +32,16 @@ export function initialize(
   channelId: string,
   address: string,
   privateKey: string,
-  participants: ChannelParticipant[],
-  bytecode: string
+  participants: ChannelParticipant[]
 ): ProtocolStateWithSharedData<states.ApplicationState> {
   return {
     protocolState: states.waitForFirstState({
       channelId,
       privateKey,
       address,
-      participants,
-      bytecode
+      participants
     }),
-    sharedData: registerBytecodeForChannel(
-      registerChannelToMonitor(sharedData, APPLICATION_PROCESS_ID, channelId, []),
-      channelId,
-      bytecode
-    )
+    sharedData: registerChannelToMonitor(sharedData, APPLICATION_PROCESS_ID, channelId, [])
   };
 }
 
@@ -215,10 +204,14 @@ const validateAndUpdate = (
       signedState,
       protocolState.privateKey,
       protocolState.participants,
-      protocolState.bytecode
+      sharedData.bytecodeStorage[signedState.state.appDefinition]
     );
   } else if (protocolState.type === "Application.Ongoing") {
-    return checkAndStore(sharedData.channelStore, signedState);
+    return checkAndStore(
+      sharedData.channelStore,
+      signedState,
+      sharedData.bytecodeStorage[signedState.state.appDefinition]
+    );
   } else {
     return {isSuccess: false, store: sharedData.channelStore};
   }
@@ -235,7 +228,7 @@ const signAndUpdate = (
       state,
       protocolState.privateKey,
       protocolState.participants,
-      protocolState.bytecode
+      sharedData.bytecodeStorage[state.appDefinition]
     );
   } else {
     return signAndStore(sharedData.channelStore, state);

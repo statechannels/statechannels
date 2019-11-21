@@ -59,6 +59,11 @@ function updateSharedData(
 ): states.Initialized {
   if (actions.isAdjudicatorEventAction(action)) {
     return {...state, adjudicatorState: adjudicatorStateReducer(state.adjudicatorState, action)};
+  } else if (action.type === "WALLET.APP_DEFINITION_BYTECODE_RECEIVED") {
+    return {
+      ...state,
+      bytecodeStorage: {...state.bytecodeStorage, [action.appDefinition]: action.bytecode}
+    };
   } else {
     return state;
   }
@@ -199,8 +204,7 @@ function initializeNewProtocol(
         action.channelId,
         state.address,
         state.privateKey,
-        action.participants,
-        action.bytecode
+        action.participants
       );
     case "WALLET.NEW_PROCESS.CLOSE_LEDGER_CHANNEL":
       return closeLedgerChannelProtocol.initializeCloseLedgerChannel(

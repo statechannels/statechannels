@@ -21,8 +21,7 @@ describe("when initializing", () => {
     scenario.channelId,
     scenario.address,
     scenario.privateKey,
-    scenario.participants,
-    scenario.bytecode
+    scenario.participants
   );
   itTransitionsTo(result, "Application.WaitForFirstState");
 });

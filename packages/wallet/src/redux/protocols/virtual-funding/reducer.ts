@@ -23,7 +23,6 @@ import {StateType} from "../advance-channel/states";
 import {encodeConsensusData, Outcome, isAllocationOutcome} from "@statechannels/nitro-protocol";
 import {AllocationAssetOutcome} from "@statechannels/nitro-protocol/src/contract/outcome";
 import {convertAddressToBytes32} from "../../../utils/data-type-utils";
-import {consensusAppBytecode} from "../../__tests__/state-helpers";
 
 export function initialize(
   sharedData: SharedData,
@@ -40,13 +39,11 @@ export function initialize(
   } = args;
   const privateKey = getPrivatekey(sharedData, targetChannelId);
   const appDefinition = CONSENSUS_LIBRARY_ADDRESS;
-  const bytecode = consensusAppBytecode;
   const outcome = calculateInitialJointOutcome(startingOutcome, hubAddress);
 
   const jointChannelInitialized = advanceChannel.initializeAdvanceChannel(sharedData, {
     privateKey,
     appDefinition,
-    bytecode,
     ourIndex,
     stateType: StateType.PreFundSetup,
     clearedToSend: true,
@@ -136,7 +133,6 @@ function waitForJointChannelReducer(
           const guarantorChannelResult = advanceChannel.initializeAdvanceChannel(
             result.sharedData,
             {
-              bytecode: consensusAppBytecode,
               clearedToSend: true,
               stateType: StateType.PreFundSetup,
               processId,

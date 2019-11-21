@@ -239,7 +239,11 @@ function challengeResponseReceived(
   state = acknowledgeResponse(state);
   sharedData = sendChallengeStateReceived(sharedData, signedChallengeState.state);
 
-  const checkResult = checkAndStore(sharedData, signedChallengeState);
+  const checkResult = checkAndStore(
+    sharedData,
+    signedChallengeState,
+    sharedData.bytecodeStorage[signedChallengeState.state.appDefinition]
+  );
   if (checkResult.isSuccess) {
     return {state, sharedData: checkResult.store};
   }

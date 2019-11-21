@@ -16,7 +16,8 @@ import {
   signAndInitialize as signAndInitializeChannelStore,
   emptyChannelStore,
   SignFailureReason,
-  ChannelParticipant
+  ChannelParticipant,
+  BytecodeStorage
 } from "./channel-store";
 import {Properties} from "./utils";
 import * as NewLedgerChannel from "./protocols/new-ledger-channel/states";
@@ -47,6 +48,8 @@ import {
   isTerminalConcludingState
 } from "./protocols/concluding/states";
 import {SignedState, State} from "@statechannels/nitro-protocol";
+import {CONSENSUS_LIBRARY_ADDRESS} from "../constants";
+import {consensusAppBytecode} from "./__tests__/state-helpers";
 
 export type WalletState = Initialized;
 
@@ -61,6 +64,7 @@ export const WALLET_INITIALIZED = "WALLET.INITIALIZED";
 
 export interface SharedData {
   channelStore: ChannelStore;
+  bytecodeStorage: BytecodeStorage;
   outboxState: OutboxState;
   channelSubscriptions: ChannelSubscriptions;
   adjudicatorState: AdjudicatorState;
@@ -101,23 +105,6 @@ export function registerChannelToMonitor(
     channelSubscriptions: {
       ...data.channelSubscriptions,
       [channelId]: subscribers
-    }
-  };
-}
-
-export function registerBytecodeForChannel(
-  data: SharedData,
-  channelId: string,
-  bytecode: string
-): SharedData {
-  return {
-    ...data,
-    channelStore: {
-      ...data.channelStore,
-      [channelId]: {
-        ...data.channelStore[channelId],
-        bytecode
-      }
     }
   };
 }
@@ -168,7 +155,10 @@ export const EMPTY_SHARED_DATA: SharedData = {
   channelStore: emptyChannelStore(),
   channelSubscriptions: {},
   adjudicatorState: {},
-  fundingState: {}
+  fundingState: {},
+  bytecodeStorage: {
+    [CONSENSUS_LIBRARY_ADDRESS]: consensusAppBytecode
+  }
 };
 
 export function sharedData(params: SharedData): SharedData {
@@ -177,14 +167,16 @@ export function sharedData(params: SharedData): SharedData {
     channelStore: channelState,
     adjudicatorState,
     fundingState,
-    channelSubscriptions
+    channelSubscriptions,
+    bytecodeStorage
   } = params;
   return {
     outboxState,
     channelStore: channelState,
     adjudicatorState,
     fundingState,
-    channelSubscriptions
+    channelSubscriptions,
+    bytecodeStorage
   };
 }
 
@@ -256,15 +248,14 @@ export function signAndInitialize(
   sharedDataState: SharedData,
   state: State,
   privateKey: string,
-  participants: ChannelParticipant[],
-  bytecode: string
+  participants: ChannelParticipant[]
 ): SignResult {
   const result = signAndInitializeChannelStore(
     sharedDataState.channelStore,
     state,
     privateKey,
     participants,
-    bytecode
+    sharedDataState.bytecodeStorage[state.appDefinition]
   );
   if (result.isSuccess) {
     return {
@@ -281,15 +272,14 @@ export function checkAndInitialize(
   state: SharedData,
   signedState: SignedState,
   privateKey: string,
-  participants: ChannelParticipant[],
-  bytecode: string
+  participants: ChannelParticipant[]
 ): CheckResult {
   const result = checkAndInitializeChannelStore(
     state.channelStore,
     signedState,
     privateKey,
     participants,
-    bytecode
+    state.bytecodeStorage[signedState.state.appDefinition]
   );
   if (result.isSuccess) {
     return {...result, store: setChannelStore(state, result.store)};
@@ -298,8 +288,12 @@ export function checkAndInitialize(
   }
 }
 
-export function checkAndStore(state: SharedData, signedState: SignedState): CheckResult {
-  const result = checkAndStoreChannelStore(state.channelStore, signedState);
+export function checkAndStore(
+  state: SharedData,
+  signedState: SignedState,
+  bytecode: string
+): CheckResult {
+  const result = checkAndStoreChannelStore(state.channelStore, signedState, bytecode);
   if (result.isSuccess) {
     return {...result, store: setChannelStore(state, result.store)};
   } else {

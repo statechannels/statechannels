@@ -30,7 +30,6 @@ export interface ChannelUnknown extends BaseState {
   appData: string;
   privateKey: string;
   clearedToSend: boolean;
-  bytecode: string;
 }
 
 export interface NotSafeToSend extends BaseState {
@@ -75,8 +74,7 @@ export const channelUnknown: StateConstructor<ChannelUnknown> = params => {
     participants,
     appDefinition: channelType,
     appData: appAttributes,
-    clearedToSend,
-    bytecode
+    clearedToSend
   } = params;
   return {
     ...base(params),
@@ -86,8 +84,7 @@ export const channelUnknown: StateConstructor<ChannelUnknown> = params => {
     participants,
     appDefinition: channelType,
     appData: appAttributes,
-    clearedToSend,
-    bytecode
+    clearedToSend
   };
 };
 

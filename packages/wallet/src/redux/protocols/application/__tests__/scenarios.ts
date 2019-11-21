@@ -47,8 +47,7 @@ const addressKnown = states.waitForFirstState({
   channelId,
   address,
   privateKey,
-  participants,
-  bytecode
+  participants
 });
 const ongoing = states.ongoing({channelId, address, privateKey});
 const waitForDispute1 = states.waitForDispute({

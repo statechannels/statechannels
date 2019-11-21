@@ -48,7 +48,6 @@ const participants = signedState0.state.channel.participants;
 
 const initializeArgs = {
   outcome: scenarios.convertBalanceToOutcome(twoThreeTwo),
-  bytecode: scenarios.consensusAppBytecode,
   participants,
   appDefinition,
   appData,
@@ -148,7 +147,10 @@ const notSafeToSendHub = states.notSafeToSend({
 // Shared Data
 // -------
 
-const emptySharedData = {...EMPTY_SHARED_DATA};
+const emptySharedData = {
+  ...EMPTY_SHARED_DATA,
+  bytecodeStorage: {[CONSENSUS_LIBRARY_ADDRESS]: scenarios.consensusAppBytecode}
+};
 // const channelCreated = { ...EMPTY_SHARED_DATA };
 const aSentPreFundState = setChannels(EMPTY_SHARED_DATA, [
   channelFromStates(states0, asAddress, asPrivateKey)
