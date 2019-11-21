@@ -33,7 +33,6 @@ import {
   sendConcludeSuccess
 } from "../../reducer-helpers";
 import {SignedState} from "@statechannels/nitro-protocol";
-import {getAppDefinitionBytecode} from "src/redux/selectors";
 
 const CHALLENGE_TIMEOUT = 5 * 60000;
 
@@ -240,11 +239,7 @@ function challengeResponseReceived(
   state = acknowledgeResponse(state);
   sharedData = sendChallengeStateReceived(sharedData, signedChallengeState.state);
 
-  const checkResult = checkAndStore(
-    sharedData,
-    signedChallengeState,
-    getAppDefinitionBytecode(sharedData, signedChallengeState.state.appDefinition)
-  );
+  const checkResult = checkAndStore(sharedData, signedChallengeState);
   if (checkResult.isSuccess) {
     return {state, sharedData: checkResult.store};
   }

@@ -288,12 +288,12 @@ export function checkAndInitialize(
   }
 }
 
-export function checkAndStore(
-  state: SharedData,
-  signedState: SignedState,
-  bytecode: string
-): CheckResult {
-  const result = checkAndStoreChannelStore(state.channelStore, signedState, bytecode);
+export function checkAndStore(state: SharedData, signedState: SignedState): CheckResult {
+  const result = checkAndStoreChannelStore(
+    state.channelStore,
+    signedState,
+    getAppDefinitionBytecode(state, signedState.state.appDefinition)
+  );
   if (result.isSuccess) {
     return {...result, store: setChannelStore(state, result.store)};
   } else {
