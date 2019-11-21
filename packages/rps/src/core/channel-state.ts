@@ -9,7 +9,7 @@ export interface ChannelState {
   bUserId: string;
   aDestination: string;
   bDestination: string;
-  aBal: BigNumber;
-  bBal: BigNumber;
+  aBal: string;
+  bBal: string;
   appData: AppData;
 }
