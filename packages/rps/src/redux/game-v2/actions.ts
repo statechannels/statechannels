@@ -33,10 +33,12 @@ export interface ChooseSalt {
   salt: string;
 }
 
+export type FundingSituation = 'Ok' | 'MyFundsTooLow' | 'OpponentsFundsTooLow';
 export interface ResultArrived {
   type: 'ResultArrived';
   theirWeapon: Weapon;
   result: Result;
+  fundingSituation: FundingSituation;
 }
 
 export interface PlayAgain {
@@ -74,10 +76,15 @@ export const joinOpenGame = (
   roundBuyIn,
 });
 
-export const resultArrived = (theirWeapon: Weapon, result: Result): ResultArrived => ({
+export const resultArrived = (
+  theirWeapon: Weapon,
+  result: Result,
+  fundingSituation: FundingSituation
+): ResultArrived => ({
   type: 'ResultArrived',
   theirWeapon,
   result,
+  fundingSituation,
 });
 
 export const playAgain = (): PlayAgain => ({ type: 'PlayAgain' });

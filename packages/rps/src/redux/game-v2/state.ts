@@ -135,3 +135,12 @@ export const waitForRestart = <T extends Playing>(state: T): WaitForRestart => (
   type: 'WaitForRestart',
   ...playing(state),
 });
+
+export const shuttingDown = <T extends Playing>(
+  state: T,
+  reason: ShutDownReason
+): ShuttingDown => ({
+  type: 'ShuttingDown',
+  ...playing(state),
+  reason,
+});

@@ -7,6 +7,7 @@ import {
   LocalState,
   waitForRestart,
   chooseWeapon,
+  shuttingDown,
 } from './state';
 import { Reducer, combineReducers } from 'redux';
 import {
@@ -109,10 +110,17 @@ const handleResultArrived = (state: LocalState, action: ResultArrived): LocalSta
   if (state.type !== 'WeaponChosen' && state.type !== 'WeaponAndSaltChosen') {
     return state;
   }
-  const { theirWeapon, result } = action;
-  const newState = resultPlayAgain(state, theirWeapon, result);
-
-  return newState;
+  const { theirWeapon, result, fundingSituation } = action;
+  switch (fundingSituation) {
+    case 'Ok':
+      return resultPlayAgain(state, theirWeapon, result);
+    case 'MyFundsTooLow':
+      return shuttingDown(state, 'InsufficientFundsYou');
+    case 'OpponentsFundsTooLow':
+      return shuttingDown(state, 'InsufficientFundsOpponent');
+    default:
+      return state;
+  }
 };
 
 const handlePlayAgain = (state: LocalState, action: PlayAgain): LocalState => {
