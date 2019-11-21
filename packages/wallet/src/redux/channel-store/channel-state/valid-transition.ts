@@ -35,7 +35,7 @@ export function validAppTransition(
   toState: State,
   bytecode: string
 ): boolean {
-  const fromState = channelState.signedStates[channelState.signedStates.length - 1].state; 
+  const fromState = channelState.signedStates[channelState.signedStates.length - 1].state;
 
   const numberOfParticipants = toState.channel.participants.length;
   const fromVariablePart = getVariablePart(fromState);
