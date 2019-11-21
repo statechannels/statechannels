@@ -48,8 +48,7 @@ import {
   isTerminalConcludingState
 } from "./protocols/concluding/states";
 import {SignedState, State} from "@statechannels/nitro-protocol";
-import {CONSENSUS_LIBRARY_ADDRESS} from "../constants";
-import {consensusAppBytecode} from "./__tests__/state-helpers";
+import {CONSENSUS_LIBRARY_ADDRESS, CONSENSUS_LIBRARY_BYTECODE} from "../constants";
 
 export type WalletState = Initialized;
 
@@ -157,7 +156,7 @@ export const EMPTY_SHARED_DATA: SharedData = {
   adjudicatorState: {},
   fundingState: {},
   bytecodeStorage: {
-    [CONSENSUS_LIBRARY_ADDRESS]: consensusAppBytecode
+    [CONSENSUS_LIBRARY_ADDRESS]: CONSENSUS_LIBRARY_BYTECODE
   }
 };
 

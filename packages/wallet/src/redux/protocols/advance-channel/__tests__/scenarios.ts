@@ -8,7 +8,7 @@ import {EmbeddedProtocol, signedStatesReceived} from "../../../../communication"
 import {StateType} from "../states";
 import {clearedToSend} from "../actions";
 import {bigNumberify} from "ethers/utils";
-import {CONSENSUS_LIBRARY_ADDRESS} from "../../../../constants";
+import {CONSENSUS_LIBRARY_ADDRESS, CONSENSUS_LIBRARY_BYTECODE} from "../../../../constants";
 import {makeLocator} from "../..";
 
 // ---------
@@ -149,7 +149,7 @@ const notSafeToSendHub = states.notSafeToSend({
 
 const emptySharedData = {
   ...EMPTY_SHARED_DATA,
-  bytecodeStorage: {[CONSENSUS_LIBRARY_ADDRESS]: scenarios.consensusAppBytecode}
+  bytecodeStorage: {[CONSENSUS_LIBRARY_ADDRESS]: CONSENSUS_LIBRARY_BYTECODE}
 };
 // const channelCreated = { ...EMPTY_SHARED_DATA };
 const aSentPreFundState = setChannels(EMPTY_SHARED_DATA, [
