@@ -97,6 +97,11 @@ export class RPSChannelClient {
     /* TODO */
   }
 
+  async closeChannel(channelId: string): Promise<ChannelState> {
+    /* TODO */
+    return {} as any;
+  }
+
   async updateChannel(channelId, aBal, bBal, appData: AppData) {
     /* TODO */
   }

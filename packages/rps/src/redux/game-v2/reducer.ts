@@ -9,7 +9,7 @@ import {
   chooseWeapon,
   shuttingDown,
 } from './state';
-import { Reducer, combineReducers } from 'redux';
+import {Reducer, combineReducers} from 'redux';
 import {
   GameAction,
   JoinOpenGame,
@@ -18,10 +18,11 @@ import {
   ResultArrived,
   PlayAgain,
   Restart,
+  Resign,
 } from './actions';
-import { ChannelState } from '../../core';
+import {ChannelState} from '../../core';
 
-const emptyLocalState: LocalState = { type: 'Empty' };
+const emptyLocalState: LocalState = {type: 'Empty'};
 
 const channelReducer: Reducer<ChannelState | null> = (
   state: ChannelState | null = null,
@@ -51,6 +52,8 @@ const localReducer: Reducer<LocalState> = (
       return handlePlayAgain(state, action);
     case 'Restart':
       return handleRestart(state, action);
+    case 'Resign':
+      return handleResign(state, action);
     default:
       return state;
   }
@@ -66,8 +69,8 @@ const handleJoinOpenGame = (state: LocalState, action: JoinOpenGame): LocalState
     return state;
   }
 
-  const { opponentName, opponentAddress, roundBuyIn } = action;
-  const { name, address } = state;
+  const {opponentName, opponentAddress, roundBuyIn} = action;
+  const {name, address} = state;
 
   const newState: GameChosen = {
     type: 'GameChosen',
@@ -87,10 +90,8 @@ const handleChooseWeapon = (state: LocalState, action: ChooseWeapon): LocalState
     return state;
   }
 
-  const { weapon } = action;
-  const newState = weaponChosen(state, weapon);
-
-  return newState;
+  const {weapon} = action;
+  return weaponChosen(state, weapon);
 };
 
 const handleChooseSalt = (state: LocalState, action: ChooseSalt): LocalState => {
@@ -98,19 +99,17 @@ const handleChooseSalt = (state: LocalState, action: ChooseSalt): LocalState => 
     return state;
   }
   // not sure why typsecript can't see that player === 'A' here ...
-  const oldLocalState = state as (WeaponChosen & { player: 'A' });
+  const oldLocalState = state as (WeaponChosen & {player: 'A'});
 
-  const { salt } = action;
-  const newState = weaponAndSaltChosen(oldLocalState, salt);
-
-  return newState;
+  const {salt} = action;
+  return weaponAndSaltChosen(oldLocalState, salt);
 };
 
 const handleResultArrived = (state: LocalState, action: ResultArrived): LocalState => {
   if (state.type !== 'WeaponChosen' && state.type !== 'WeaponAndSaltChosen') {
     return state;
   }
-  const { theirWeapon, result, fundingSituation } = action;
+  const {theirWeapon, result, fundingSituation} = action;
   switch (fundingSituation) {
     case 'Ok':
       return resultPlayAgain(state, theirWeapon, result);
@@ -127,9 +126,7 @@ const handlePlayAgain = (state: LocalState, action: PlayAgain): LocalState => {
   if (state.type !== 'ResultPlayAgain') {
     return state;
   }
-  const newState = waitForRestart(state);
-
-  return newState;
+  return waitForRestart(state);
 };
 
 const handleRestart = (state: LocalState, action: Restart): LocalState => {
@@ -137,7 +134,13 @@ const handleRestart = (state: LocalState, action: Restart): LocalState => {
     return state;
   }
 
-  const newState = chooseWeapon(state);
+  return chooseWeapon(state);
+};
 
-  return newState;
+const handleResign = (state: LocalState, action: Resign): LocalState => {
+  if (state.type === 'Empty' || state.type === 'Lobby' || state.type === 'WaitingRoom') {
+    return state;
+  }
+
+  return shuttingDown(state, 'YouResigned');
 };
