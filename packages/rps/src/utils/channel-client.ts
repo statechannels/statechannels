@@ -5,17 +5,6 @@ export type JsonRPCVersion = '2.0';
 
 export type ChannelStatus = 'opening' | 'funding' | 'running' | 'closing';
 
-export type ChannelMethodName = 'CreateChannel' | 'JoinChannel' | 'UpdateChannel' | 'CloseChannel';
-export type AddressMethodName = 'GetAddress';
-export type MessageMethodName = 'PushMessage';
-
-export type MethodName = ChannelMethodName | AddressMethodName | MessageMethodName;
-
-export type ChannelNotificationName = 'ChannelProposed' | 'ChannelUpdated' | 'ChannelClosed';
-export type MessageNotificationName = 'MessageQueued';
-
-export type NotificationName = ChannelNotificationName | MessageNotificationName;
-
 export enum ErrorCodes {
   SIGNING_ADDRESS_NOT_FOUND = 1000,
   INVALID_APP_DEFINITION = 1001,
@@ -89,20 +78,20 @@ export interface Funds {
   amount: string;
 }
 
-export interface JsonRPCNotification<ParametersType> {
+export interface JsonRPCNotification<Name, ParametersType> {
   jsonrpc: JsonRPCVersion;
-  method: NotificationName;
+  method: Name;
   params: ParametersType;
 }
 
-export interface JsonRPCRequest<ParametersType> {
+export interface JsonRPCRequest<Name, ParametersType> {
   jsonrpc: JsonRPCVersion;
-  method: MethodName;
+  method: Name;
   params: ParametersType;
   id: string;
 }
 
-export interface JsonRPCResponse<ResultType = {[key: string]: any}> {
+export interface JsonRPCResponse<ResultType> {
   jsonrpc: JsonRPCVersion;
   id: string;
   result: ResultType;
@@ -131,9 +120,12 @@ export interface ChannelResult extends CreateChannelParameters {
   turnNum: BigNumberish;
 }
 
-export interface CreateChannelRequest extends JsonRPCRequest<CreateChannelParameters> {
-  method: 'CreateChannel';
-}
+// Requests and Responses
+// ======================
+
+export type GetAddressRequest = JsonRPCRequest<'GetAddress', {}>; // todo: what are params
+
+export type CreateChannelRequest = JsonRPCRequest<'CreateChannel', CreateChannelParameters>;
 
 export interface CreateChannelResponse extends JsonRPCResponse<ChannelResult> {}
 
@@ -141,9 +133,7 @@ export interface JoinChannelParameters {
   channelId: string;
 }
 
-export interface JoinChannelRequest extends JsonRPCRequest<JoinChannelParameters> {
-  method: 'JoinChannel';
-}
+export type JoinChannelRequest = JsonRPCRequest<'JoinChannel', JoinChannelParameters>;
 
 export interface JoinChannelResponse extends JsonRPCResponse<ChannelResult> {}
 
@@ -153,48 +143,47 @@ export interface UpdateChannelParameters {
   appData: string;
 }
 
-export interface UpdateChannelRequest extends JsonRPCRequest<UpdateChannelParameters> {
-  method: 'UpdateChannel';
-}
+export type UpdateChannelRequest = JsonRPCRequest<'UpdateChannel', UpdateChannelParameters>;
 
-export interface PushMessageRequest extends JsonRPCRequest<Message> {
-  method: 'PushMessage';
-}
+export type PushMessageRequest = JsonRPCRequest<'PushMessage', Message>;
 
 export interface PushMessageResult {
   success: boolean;
 }
 
-export interface PushMessageResponse extends JsonRPCResponse<PushMessageResult> {}
+export type PushMessageResponse = JsonRPCResponse<PushMessageResult>;
 
 export interface CloseChannelParameters {
   channelId: string;
 }
 
-export interface CloseChannelRequest extends JsonRPCRequest<CloseChannelRequest> {}
+export type CloseChannelRequest = JsonRPCRequest<'CloseChannel', CloseChannelParameters>;
+export type CloseChannelResponse = JsonRPCResponse<ChannelResult>;
 
-export interface CloseChannelResponse extends JsonRPCResponse<ChannelResult> {}
+export type ChannelProposedNotification = JsonRPCNotification<'ChannelProposed', ChannelResult>;
+export type ChannelUpdatedNotification = JsonRPCNotification<'ChannelUpdated', ChannelResult>;
+export type ChannelClosingNotification = JsonRPCNotification<'ChannelClosed', ChannelResult>;
+export type MessageQueuedNotification = JsonRPCNotification<'MessageQueued', Message>;
 
-export interface ChannelProposedNotification extends JsonRPCNotification<ChannelResult> {
-  method: 'ChannelProposed';
-}
+export type Notification =
+  | ChannelProposedNotification
+  | ChannelUpdatedNotification
+  | ChannelClosingNotification
+  | MessageQueuedNotification;
 
-export interface ChannelUpdatedNotification extends JsonRPCNotification<ChannelResult> {
-  method: 'ChannelUpdated';
-}
+type NotificationName = Notification['method'];
+type NotificationParameters = Notification['params'];
 
-export interface ChannelClosingNotification extends JsonRPCNotification<ChannelResult> {
-  method: 'ChannelClosed';
-}
+export type Request =
+  | GetAddressRequest
+  | CreateChannelRequest
+  | JoinChannelRequest
+  | UpdateChannelRequest
+  | PushMessageRequest
+  | CloseChannelRequest;
 
-export type ActionParameters =
-  | CreateChannelParameters
-  | JoinChannelParameters
-  | UpdateChannelParameters
-  | CloseChannelParameters
-  | PushMessageParameters;
-
-export type NotificationParameters = ChannelResult | Message;
+type MethodName = Request['method'];
+type ActionParameters = Request['params'];
 
 export class ChannelClientError implements JsonRPCErrorResponse {
   jsonrpc: JsonRPCVersion = '2.0';
@@ -261,7 +250,7 @@ export const ErrorCodesToObjectsMap: {[key in ErrorCodes]: typeof ChannelClientE
 export class ChannelClient {
   protected events = new EventEmitter();
 
-  onMessageQueued(callback: (notification: JsonRPCNotification<Message>) => void) {
+  onMessageQueued(callback: (notification: Notification) => void) {
     this.events.on('MessageQueued', notification => {
       callback(notification);
     });
