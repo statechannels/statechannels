@@ -2,7 +2,12 @@ import {unreachable} from '@statechannels/wallet';
 import {RelayableAction} from '@statechannels/wallet/lib/src/communication';
 import {fork} from 'child_process';
 import {Model} from 'objection';
-import {AdjudicatorWatcherEvent, AdjudicatorWatcherEventType} from '../wallet/adjudicator-watcher';
+import {
+  AssetHolderEventHandler,
+  assetHolderListen,
+  AssetHolderWatcherEvent,
+  AssetHolderWatcherEventType
+} from '../wallet/asset-holder-watcher';
 import knex from '../wallet/db/connection';
 import {onDepositEvent} from '../wallet/services/depositManager';
 import {handleWalletMessage} from './handlers/handle-wallet-message';
@@ -35,22 +40,14 @@ firebaseRelay.on('message', (message: RelayableAction) => {
 });
 console.log('Firebase relay sub-process started');
 
-const adjudicatorWatcher = fork(`${__dirname}/../wallet/adjudicator-watcher`, [], {
-  execArgv: forkExecArgv
-});
-
-adjudicatorWatcher.on('message', (message: AdjudicatorWatcherEvent) => {
-  console.log(
-    `Parent process received adjudicator watcher message: ${JSON.stringify(message, null, 1)}`
-  );
+const assetHolderEventHandler: AssetHolderEventHandler = (message: AssetHolderWatcherEvent) => {
+  console.log(`Received asset holder watcher message: ${JSON.stringify(message, null, 1)}`);
   switch (message.eventType) {
-    case AdjudicatorWatcherEventType.Deposited:
+    case AssetHolderWatcherEventType.Deposited:
       onDepositEvent(message.channelId, message.amountDeposited, message.destinationHoldings);
       break;
-    case AdjudicatorWatcherEventType.ChallengeCreated:
-      return;
     default:
       unreachable(message.eventType);
   }
-});
-console.log('Adjudicator watcher sub-process started');
+};
+assetHolderListen(assetHolderEventHandler);

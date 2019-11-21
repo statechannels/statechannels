@@ -51,9 +51,8 @@ describe('updateChannel', () => {
     it('works when the channel exists', async () => {
       const {channelNonce} = testDataConstructors.post_fund_setup(2).channel;
       const existing_allocator_channel = await Channel.query()
-        .where({channel_nonce: channelNonce})
-        .eager('[states.[outcome.[allocation]], participants]')
-        .first();
+        .findOne({channel_nonce: channelNonce})
+        .eager('[states.[outcome.[allocation]], participants]');
 
       expect(existing_allocator_channel).toMatchObject(seeds.fundedChannelWithStates);
 

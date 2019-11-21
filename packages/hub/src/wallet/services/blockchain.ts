@@ -1,7 +1,7 @@
-import {Address, Uint256} from 'fmg-core';
-
 import AsyncLock from 'async-lock';
+import {Address, Uint256} from 'fmg-core';
 import {ethAssetHolder} from '../utilities/blockchain';
+
 const lock = new AsyncLock();
 export class Blockchain {
   static ethAssetHolder: any;
@@ -11,9 +11,8 @@ export class Blockchain {
     // due to the nonce getting out of sync.
     // To avoid this we only allow deposit transactions to happen serially.
     return lock.acquire('depositing', async () => {
-      await Blockchain.attachNitro();
-
-      const tx = await Blockchain.ethAssetHolder.deposit(channelID, expectedHeld, {
+      await Blockchain.attachEthAssetHolder();
+      const tx = await Blockchain.ethAssetHolder.deposit(channelID, expectedHeld, value, {
         value
       });
       await tx.wait();
@@ -23,12 +22,12 @@ export class Blockchain {
   }
 
   static async holdings(channelID: Address): Promise<Uint256> {
-    await Blockchain.attachNitro();
+    await Blockchain.attachEthAssetHolder();
 
     return await Blockchain.ethAssetHolder.holdings(channelID).toHexString();
   }
 
-  private static async attachNitro() {
+  private static async attachEthAssetHolder() {
     Blockchain.ethAssetHolder = Blockchain.ethAssetHolder || (await ethAssetHolder());
   }
 }

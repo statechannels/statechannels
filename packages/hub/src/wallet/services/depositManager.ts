@@ -7,10 +7,10 @@ import {Blockchain} from './blockchain';
 
 /* todo:
  * Current logic of the deposit manager:
- * When a deposit even arrives, if the adjudicator requires additional funding, fully fund the adjudicator.
+ * When a deposit even arrives, if the asset holder requires additional funding, fully fund the asset holder.
  *
  * Correct logic:
- * When a deposit event arrives, check to see if the adjudicator has sufficient funds for the hub to safely deposit.
+ * When a deposit event arrives, check to see if the asset holder has sufficient funds for the hub to safely deposit.
  * If so, only deposit hub's share.
  */
 
@@ -49,11 +49,11 @@ export async function onDepositEvent(
     .indexOf(HUB_ADDRESS);
 
   // todo: need to consider the asset holder address
-  const totalNeededInAdjudicator = latestState.outcome[0].allocation
+  const totalNeededInChannel = latestState.outcome[0].allocation
     .map(allocation => allocation.amount)
     .reduce(addHex);
 
-  const channelNeedsMoreFunds = bigNumberify(totalNeededInAdjudicator).gt(bigNumberify(holdings));
+  const channelNeedsMoreFunds = bigNumberify(totalNeededInChannel).gt(bigNumberify(holdings));
 
   if (channelNeedsMoreFunds) {
     // todo: need to consider the asset holder address
