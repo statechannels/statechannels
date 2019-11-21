@@ -1,5 +1,5 @@
-import {AppData, ChannelState, encodeAppData} from '../core';
-import {BigNumber, bigNumberify} from 'ethers/utils';
+import {AppData, ChannelState, encodeAppData, decodeAppData} from '../core';
+import {bigNumberify} from 'ethers/utils';
 import {
   ChannelClient,
   NotificationName,
@@ -50,7 +50,7 @@ export class RPSChannelClient {
 
     return await {
       channelId: '0xsome-channel-id',
-      turnNum: bigNumberify(0),
+      turnNum: bigNumberify(0).toString(),
       status: 'open',
       aUserId: aAddress,
       bUserId: bAddress,
@@ -75,12 +75,14 @@ export class RPSChannelClient {
     function callback(notification: ChannelUpdatedNotification): any {
       const channelState: ChannelState = {
         ...notification.params,
+        turnNum: notification.params.turnNum.toString(),
+        appData: decodeAppData(notification.params.appData),
         aUserId: notification.params.participants[0].participantId,
         bUserId: notification.params.participants[1].participantId,
         aDestination: notification.params.participants[0].destination,
         bDestination: notification.params.participants[1].destination,
-        aBal: notification.params.allocations[0].allocationItems[0].amount,
-        bBal: notification.params.allocations[0].allocationItems[1].amount,
+        aBal: notification.params.allocations[0].allocationItems[0].amount.toString(),
+        bBal: notification.params.allocations[0].allocationItems[1].amount.toString(),
       };
       rpsCallback(channelState);
     }
@@ -91,9 +93,15 @@ export class RPSChannelClient {
     await this.channelClient.unSubscribe(notificationName);
   }
 
-  async joinChannel() {}
+  async joinChannel() {
+    /* TODO */
+  }
 
-  async updateChannel(channelId, aBal, bBal, appData: AppData) {}
+  async updateChannel(channelId, aBal, bBal, appData: AppData) {
+    /* TODO */
+  }
 
-  async pushMessage() {}
+  async pushMessage() {
+    /* TODO */
+  }
 }
