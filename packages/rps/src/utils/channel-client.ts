@@ -71,11 +71,32 @@ export interface Message {
   data: string;
 }
 
-export type PushMessageParameters = Message;
-
 export interface Funds {
   token: string;
   amount: string;
+}
+
+export interface CreateChannelParameters {
+  participants: Participant[];
+  allocations: Allocation[];
+  appData: string;
+  appDefinition: string;
+}
+export interface ChannelResult {
+  participants: Participant[];
+  allocations: Allocation[];
+  appData: string;
+  appDefinition: string;
+  channelId: string;
+  status: ChannelStatus;
+  funding: Funds[];
+  turnNum: BigNumberish;
+}
+
+export interface UpdateChannelParameters {
+  participants: Participant[];
+  allocations: Allocation[];
+  appData: string;
 }
 
 export interface JsonRPCNotification<Name, ParametersType> {
@@ -109,17 +130,6 @@ export interface JsonRPCErrorResponse<ErrorType extends JsonRPCError = JsonRPCEr
   error: ErrorType;
 }
 
-export interface CreateChannelParameters extends UpdateChannelParameters {
-  appDefinition: string;
-}
-
-export interface ChannelResult extends CreateChannelParameters {
-  channelId: string;
-  status: ChannelStatus;
-  funding: Funds[];
-  turnNum: BigNumberish;
-}
-
 // Requests and Responses
 // ======================
 
@@ -136,12 +146,6 @@ export interface JoinChannelParameters {
 export type JoinChannelRequest = JsonRPCRequest<'JoinChannel', JoinChannelParameters>;
 
 export interface JoinChannelResponse extends JsonRPCResponse<ChannelResult> {}
-
-export interface UpdateChannelParameters {
-  participants: Participant[];
-  allocations: Allocation[];
-  appData: string;
-}
 
 export type UpdateChannelRequest = JsonRPCRequest<'UpdateChannel', UpdateChannelParameters>;
 
