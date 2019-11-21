@@ -68,14 +68,12 @@ describe('validTransition', () => {
         await sendTransaction(consensusApp.address, transactionRequest);
 
         // Just call the function, so we can check the return value easily
-        const isValidFromCall = await validTransition(
+        const isValidFromCall = validTransition(
           fromConsensusData,
           fromOutcome,
           toConsensusData,
           toOutcome,
-          numParticipants,
-          provider.getSigner(0),
-          consensusApp.address
+          numParticipants
         );
         expect(isValidFromCall).toBe(true);
       } else {

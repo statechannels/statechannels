@@ -95,6 +95,7 @@
   "devDependencies": {
     "@babel/runtime": "7.6.2",
     "@statechannels/devtools": "0.1.21",
+    "@statechannels/ganache-deployer": "^0.0.1",
     "@types/jest": "24.0.18",
     "@types/jsonrpc-serializer": "0.2.1",
     "@types/lodash": "4.14.129",
@@ -159,8 +160,7 @@
     "uglifyjs-webpack-plugin": "2.2.0",
     "url-loader": "2.2.0",
     "workbox-webpack-plugin": "4.3.1",
-    "yargs": "14.0.0",
-    "@statechannels/ganache-deployer": "^0.0.1"
+    "yargs": "14.0.0"
   },
   "lint-staged": {
     "{src,test}/**/*.ts": "yarn lint:check"

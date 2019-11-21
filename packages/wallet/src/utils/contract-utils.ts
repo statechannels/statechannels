@@ -1,4 +1,3 @@
-import {State, validTransition} from "@statechannels/nitro-protocol";
 import NetworkContext from "@statechannels/ganache-deployer/ganache-network-context.json";
 import {ethers} from "ethers";
 import {AddressZero} from "ethers/constants";
@@ -127,22 +126,3 @@ export function isDevelopmentNetwork(): boolean {
 //   const outcomeForChannel = await contract.outcomes(channelId);
 //   return outcomeForChannel;
 // }
-
-export async function validateTransition(
-  fromState: State,
-  toState: State,
-  privateKey: string
-): Promise<boolean> {
-  const contractAddress = getAdjudicatorContractAddress();
-  const wallet = new ethers.Wallet(privateKey);
-  try {
-    return await validTransition(fromState, toState, contractAddress, wallet);
-  } catch (error) {
-    if (error.message === "Internal JSON-RPC error.") {
-      // Require statements cause a generic JSON-RPC error, so we just catch anything and return false
-      return Promise.resolve(false);
-    } else {
-      throw error;
-    }
-  }
-}

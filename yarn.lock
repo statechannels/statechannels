@@ -21303,6 +21303,11 @@ punycode@^1.2.4, punycode@^1.4.1:
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-1.4.1.tgz#c0d5a63b2718800ad8e1eb0fa5269c84dd41845e"
   integrity sha1-wNWmOycYgArY4esPpSachN1BhF4=
 
+pure-evm@^0.1.2:
+  version "0.1.2"
+  resolved "https://registry.npmjs.org/pure-evm/-/pure-evm-0.1.2.tgz#6dbeaa6fa6f42abf81070ddba32bdf26eb86eb9c"
+  integrity sha512-0dAONF4yBV69r0NQFp0ak7hUs7tqIYn1dMYVaztkmClLnKpo/XmaKNSOo9BATd4nod2WDlLNxdF0T+HIAcCESQ==
+
 q@^1.1.2, q@^1.5.1:
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/q/-/q-1.5.1.tgz#7e32f75b41381291d04611f1bf14109ac00651d7"
