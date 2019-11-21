@@ -88,7 +88,12 @@ describe("message listener", () => {
         ])
         .run();
 
-      expect(effects.put[1].payload.action).toMatchObject({
+      expect(effects.put[0].payload.action).toMatchObject({
+        type: "WALLET.APP_DEFINITION_BYTECODE_RECEIVED",
+        appDefinition: signedState.state.appDefinition
+      });
+
+      expect(effects.put[2].payload.action).toMatchObject({
         type: "WALLET.APPLICATION.OPPONENT_STATE_RECEIVED",
         signedState
       });
@@ -163,7 +168,7 @@ describe("message listener", () => {
         ])
         .run();
 
-      expect(effects.put[1].payload.action).toMatchObject({
+      expect(effects.put[2].payload.action).toMatchObject({
         type: "WALLET.APPLICATION.OWN_STATE_RECEIVED",
         state: {
           channel: {participants: [signingAddressA, signingAddressB]},

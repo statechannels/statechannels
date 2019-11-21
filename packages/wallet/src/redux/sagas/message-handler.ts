@@ -91,12 +91,23 @@ function* handlePushMessage(payload: RequestObject) {
       // The only limitation is that our client cannot propose a new channel with the same channelId
       // before they decline the opponent's proposed channel
 
+      const provider = yield call(getProvider);
+      const bytecode = yield call(provider.getCode, signedState.state.appDefinition);
+
+      yield put(
+        actions.appDefinitionBytecodeReceived({
+          appDefinition: signedState.state.appDefinition,
+          bytecode
+        })
+      );
+
       yield put(
         actions.protocol.initializeChannel({
           channelId: getChannelId(signedState.state.channel),
           participants
         })
       );
+
       yield put(
         actions.application.opponentStateReceived({
           processId: APPLICATION_PROCESS_ID,
@@ -145,8 +156,8 @@ function* handleCreateChannelMessage(payload: RequestObject) {
   const addressMatches = participants[0].signingAddress !== address;
 
   const provider = yield call(getProvider);
-  const code = yield call(provider.getCode, appDefinition);
-  const contractAtAddress = code.length > 2;
+  const bytecode = yield call(provider.getCode, appDefinition);
+  const contractAtAddress = bytecode.length > 2;
 
   if (!addressMatches) {
     yield fork(
@@ -157,8 +168,19 @@ function* handleCreateChannelMessage(payload: RequestObject) {
     yield fork(messageSender, actions.noContractError({id, address: appDefinition}));
   } else {
     const state = createStateFromCreateChannelParams(payload.params as any);
+
     yield put(
-      actions.protocol.initializeChannel({channelId: getChannelId(state.channel), participants})
+      actions.appDefinitionBytecodeReceived({
+        appDefinition,
+        bytecode
+      })
+    );
+
+    yield put(
+      actions.protocol.initializeChannel({
+        channelId: getChannelId(state.channel),
+        participants
+      })
     );
 
     yield put(
