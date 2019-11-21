@@ -2,6 +2,7 @@ import {bigNumberify} from 'ethers/utils';
 import {AppData, RoundProposed, Start, RoundAccepted, Reveal, hashPreCommit} from '../../../core';
 import {ChannelState, Result, Weapon} from '../../../core';
 import {LocalState} from '../state';
+import * as s from '../state';
 
 export const channelId = '0xabc234';
 const aName = 'Alice';
@@ -13,6 +14,7 @@ const bDestination = 'destinationB';
 const aAddress = '0x5409ED021D9299bf6814279A6A1411A7e866A631';
 export const bAddress = '0x6Ecbe1DB9EF729CBe972C83Fb886247691Fb6beb';
 export const stake = bigNumberify(1);
+const roundBuyIn = stake;
 export const aWeapon = Weapon.Rock;
 const playerAWeapon = aWeapon;
 export const salt = '0x' + '4'.repeat(64);
@@ -64,41 +66,46 @@ export const channelStates = {
   revealInsufficientFundsB: channelState(appData.reveal, 6, [10, 0]),
 };
 
-const asDetails = {name: aName, address: aAddress};
-
-const playing = {
-  ...asDetails,
+const propsA = {
+  name: aName,
+  address: aAddress,
   player: 'A' as 'A', // yuk
   opponentName: bName,
-  roundBuyIn: bigNumberify(1),
+  roundBuyIn,
+  myWeapon: playerAWeapon,
+  theirWeapon: playerBWeapon,
 };
 
 export const localStatesA: Record<string, LocalState> = {
-  lobby: {type: 'Lobby', ...asDetails},
-  gameChosen: {
-    type: 'GameChosen',
-    ...playing,
-    opponentAddress: bAddress,
-  },
-  chooseWeapon: {type: 'ChooseWeapon', ...playing},
-  weaponChosen: {type: 'WeaponChosen', ...playing, myWeapon: playerAWeapon},
-  weaponAndSaltChosen: {
-    type: 'WeaponAndSaltChosen',
-    ...playing,
-    myWeapon: playerAWeapon,
-    salt,
-  },
-  resultPlayAgain: {
-    type: 'ResultPlayAgain',
-    ...playing,
-    myWeapon: playerAWeapon,
-    theirWeapon: playerBWeapon,
-    result: Result.YouWin,
-  },
-  chooseWeapon2: {type: 'ChooseWeapon', ...playing},
-  waitForRestart: {type: 'WaitForRestart', ...playing},
-  shuttingDown: {type: 'ShuttingDown', reason: 'InsufficientFundsOpponent', ...playing},
-  shuttingDownResign: {type: 'ShuttingDown', reason: 'YouResigned', ...playing},
+  lobby: s.lobby(propsA),
+  gameChosen: s.gameChosen(propsA, bAddress),
+  chooseWeapon: s.chooseWeapon(propsA),
+  weaponChosen: s.weaponChosen(propsA, playerAWeapon),
+  weaponAndSaltChosen: s.weaponAndSaltChosen(propsA, salt),
+  resultPlayAgain: s.resultPlayAgain(propsA, playerBWeapon, Result.YouWin),
+  chooseWeapon2: s.chooseWeapon(propsA),
+  waitForRestart: s.waitForRestart(propsA),
+  shuttingDown: s.shuttingDown(propsA, 'InsufficientFundsYou'),
+  shuttingDownResign: s.shuttingDown(propsA, 'YouResigned'),
+};
+
+const propsB = {
+  name: bName,
+  address: bAddress,
+  player: 'B' as 'B', // yuk
+  opponentName: aName,
+  roundBuyIn,
+  myWeapon: playerBWeapon,
+  theirWeapon: playerAWeapon,
+};
+
+export const localStatesB: Record<string, LocalState> = {
+  waitingRoom: s.waitingRoom(propsB),
+  opponentJoined: s.opponentJoined(propsB),
+  chooseWeapon: s.chooseWeapon(propsB),
+  weaponChosen: s.weaponChosen(propsB, propsB.myWeapon),
+  resultPlayAgain: s.resultPlayAgain(propsB, playerAWeapon, Result.YouLose),
+  chooseWeapon2: s.chooseWeapon(propsB),
 };
 
 // player A
