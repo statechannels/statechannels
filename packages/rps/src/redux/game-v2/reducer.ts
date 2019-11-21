@@ -1,5 +1,4 @@
 import {
-  GameChosen,
   WeaponChosen,
   weaponChosen,
   weaponAndSaltChosen,
@@ -8,6 +7,7 @@ import {
   waitForRestart,
   chooseWeapon,
   shuttingDown,
+  gameChosen,
 } from './state';
 import {Reducer, combineReducers} from 'redux';
 import {
@@ -72,17 +72,7 @@ const handleJoinOpenGame = (state: LocalState, action: JoinOpenGame): LocalState
   const {opponentName, opponentAddress, roundBuyIn} = action;
   const {name, address} = state;
 
-  const newState: GameChosen = {
-    type: 'GameChosen',
-    player: 'A',
-    name,
-    address,
-    opponentName,
-    opponentAddress,
-    roundBuyIn,
-  };
-
-  return newState;
+  return gameChosen({name, address, opponentName, roundBuyIn}, opponentAddress);
 };
 
 const handleChooseWeapon = (state: LocalState, action: ChooseWeapon): LocalState => {

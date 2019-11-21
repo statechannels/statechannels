@@ -1,5 +1,5 @@
-import { ChannelState, Result, Weapon } from '../../core';
-import { BigNumber } from 'ethers/utils';
+import {ChannelState, Result, Weapon} from '../../core';
+import {BigNumber} from 'ethers/utils';
 
 export interface GameState {
   localState: LocalState;
@@ -11,6 +11,7 @@ export type LocalState =
   | Lobby
   | WaitingRoom
   | GameChosen
+  | OpponentJoined
   | ChooseWeapon
   | WeaponChosen
   | WeaponAndSaltChosen
@@ -36,22 +37,23 @@ export interface WaitingRoom {
   roundBuyIn: BigNumber;
 }
 
-export interface GameChosen {
-  type: 'GameChosen';
-  player: 'A';
-  name: string;
-  address: string;
-  opponentName: string;
-  opponentAddress: string;
-  roundBuyIn: BigNumber;
-}
-
 export interface Playing {
   player: 'A' | 'B';
   name: string;
   address: string;
   opponentName: string;
   roundBuyIn: BigNumber;
+}
+
+export interface GameChosen extends Playing {
+  type: 'GameChosen';
+  player: 'A';
+  opponentAddress: string; // need to keep opponentAddress until we have opened the channel
+}
+
+export interface OpponentJoined extends Playing {
+  type: 'OpponentJoined';
+  player: 'B';
 }
 
 export interface ChooseWeapon extends Playing {
@@ -94,10 +96,36 @@ export interface GameOver extends Playing {
 // Helpers
 // =======
 
-const playing = <T extends Playing>(state: T): Playing => {
-  const { player, name, address, opponentName, roundBuyIn } = state;
-  return { player, name, address, opponentName, roundBuyIn };
+export const lobby = <T extends Omit<Lobby, 'type'>>(state: T): Lobby => {
+  const {name, address} = state;
+  return {type: 'Lobby', name, address};
 };
+
+export const waitingRoom = <T extends Omit<WaitingRoom, 'type'>>(state: T): WaitingRoom => {
+  const {name, address, roundBuyIn} = state;
+  return {type: 'WaitingRoom', name, address, roundBuyIn};
+};
+
+const playing = <T extends Playing>(state: T): Playing => {
+  const {player, name, address, opponentName, roundBuyIn} = state;
+  return {player, name, address, opponentName, roundBuyIn};
+};
+
+export const gameChosen = <T extends Omit<Playing, 'player'>>(
+  state: T,
+  opponentAddress: string
+): GameChosen => ({
+  type: 'GameChosen',
+  ...playing({...state, player: 'A'}),
+  opponentAddress,
+  player: 'A', // otherwise typescript can't tell that player is A
+});
+
+export const opponentJoined = <T extends Omit<Playing, 'player'>>(state: T): OpponentJoined => ({
+  type: 'OpponentJoined',
+  ...playing({...state, player: 'B'}),
+  player: 'B', // otherwise typescript can't tell that player is B
+});
 
 export const chooseWeapon = <T extends Playing>(state: T): ChooseWeapon => ({
   type: 'ChooseWeapon',
@@ -110,8 +138,8 @@ export const weaponChosen = <T extends Playing>(state: T, myWeapon: Weapon): Wea
   myWeapon,
 });
 
-export const weaponAndSaltChosen = (
-  state: WeaponChosen & { player: 'A' },
+export const weaponAndSaltChosen = <T extends Playing & {myWeapon: Weapon; player: 'A'}>(
+  state: T,
   salt: string
 ): WeaponAndSaltChosen => ({
   ...state,
@@ -119,8 +147,8 @@ export const weaponAndSaltChosen = (
   salt,
 });
 
-export const resultPlayAgain = (
-  state: WeaponChosen | WeaponAndSaltChosen,
+export const resultPlayAgain = <T extends Playing & {myWeapon: Weapon}>(
+  state: T,
   theirWeapon: Weapon,
   result: Result
 ): ResultPlayAgain => ({
