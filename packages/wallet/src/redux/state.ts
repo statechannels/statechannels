@@ -289,11 +289,16 @@ export function checkAndInitialize(
 }
 
 export function checkAndStore(state: SharedData, signedState: SignedState): CheckResult {
-  const result = checkAndStoreChannelStore(
-    state.channelStore,
-    signedState,
-    getAppDefinitionBytecode(state, signedState.state.appDefinition)
-  );
+  const bytecode = getAppDefinitionBytecode(state, signedState.state.appDefinition);
+
+  if (!bytecode) {
+    throw new Error(
+      "Wallet tried to checkAndStore a channel using an appDefinition with no bytecode recorded"
+    );
+  }
+
+  const result = checkAndStoreChannelStore(state.channelStore, signedState, bytecode);
+
   if (result.isSuccess) {
     return {...result, store: setChannelStore(state, result.store)};
   } else {
