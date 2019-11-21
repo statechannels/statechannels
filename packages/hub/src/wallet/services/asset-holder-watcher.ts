@@ -1,6 +1,7 @@
 import {ethers} from 'ethers';
-import {Uint256} from 'fmg-core';
+import {Address, Uint256} from 'fmg-core';
 import {ethAssetHolder as ethAssetHolderConstrutor} from '../utilities/blockchain';
+import {onDepositEvent} from './depositManager';
 
 /**
  * todos:
@@ -12,6 +13,7 @@ export enum AssetHolderWatcherEventType {
 }
 
 export interface AssetHolderWatcherEvent {
+  assetHolderAddress: Address;
   eventType: AssetHolderWatcherEventType;
   channelId: string;
   amountDeposited: Uint256;
@@ -20,12 +22,13 @@ export interface AssetHolderWatcherEvent {
 
 export type AssetHolderEventHandler = (assetHolderEvent: AssetHolderWatcherEvent) => any;
 
-export async function assetHolderListen(eventHandler: AssetHolderEventHandler) {
+export async function assetHolderListen(eventHandler: AssetHolderEventHandler = onDepositEvent) {
   console.log('asset-holder-watcher: listen');
   const ethAssetHolder: ethers.Contract = await ethAssetHolderConstrutor();
   const depositedFilter = ethAssetHolder.filters.Deposited();
   ethAssetHolder.on(depositedFilter, (channelId, amountDeposited, destinationHoldings) => {
     eventHandler({
+      assetHolderAddress: ethAssetHolder.address,
       eventType: AssetHolderWatcherEventType.Deposited,
       channelId,
       amountDeposited: amountDeposited.toHexString(),

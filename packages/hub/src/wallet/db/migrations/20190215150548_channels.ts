@@ -1,25 +1,19 @@
 import * as Knex from 'knex';
-import {addBytesCheck} from '../utils';
 
 const TABLE_NAME = 'channels';
 
 exports.up = (knex: Knex) => {
-  return knex.schema
-    .createTable(TABLE_NAME, table => {
-      table.increments();
-      table
-        .string('channel_nonce')
-        .unsigned()
-        .notNullable();
-      table.text('holdings').notNullable(); // has to store a uint256
-      table.string('channel_id').notNullable();
-      table.string('chain_id').notNullable();
-      // TODO: Store participants on this table as an array, and add
-      // uniqueness on [nonce, participants]
-    })
-    .then(() => {
-      return addBytesCheck(knex, TABLE_NAME, 'holdings');
-    });
+  return knex.schema.createTable(TABLE_NAME, table => {
+    table.increments();
+    table
+      .string('channel_nonce')
+      .unsigned()
+      .notNullable();
+    table.string('channel_id').notNullable();
+    table.string('chain_id').notNullable();
+    // TODO: Store participants on this table as an array, and add
+    // uniqueness on [nonce, participants]
+  });
 };
 
 exports.down = (knex: Knex) => knex.schema.dropTable(TABLE_NAME);

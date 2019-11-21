@@ -1,7 +1,4 @@
 import {getChannelId, State} from '@statechannels/nitro-protocol';
-import {AllocationAssetOutcome} from '@statechannels/nitro-protocol/lib/src/contract/outcome';
-import {ethers} from 'ethers';
-import {bigNumberify} from 'ethers/utils';
 import {Uint256} from 'fmg-core';
 import errors from '../../errors';
 import Channel from '../../models/channel';
@@ -40,36 +37,20 @@ async function updateChannel(stateRound: State[], hubState: State) {
   const states = [...stateRound.map(s => stateModel(s)), stateModel(hubState)];
 
   interface Upsert {
-    channel_id: string;
+    channelId: string;
     states: any[];
-    channel_nonce: Uint256;
-    holdings?: Uint256;
+    channelNonce: Uint256;
+    holdings?: any[];
     id?: number;
     participants?: any[];
-    chain_id: Uint256;
+    chainId: Uint256;
   }
   let upserts: Upsert = {
-    channel_id: channelId,
+    channelId,
     states,
-    channel_nonce: channelNonce,
-    chain_id: chainId
+    channelNonce,
+    chainId
   };
-
-  // TODO: We are currently using the allocations to set the funding amount
-  // This assumes that the channel is funded and DOES NOT work for guarantor channels
-  // todo: asset holder address needs to be considered
-  const hubAllocationAmounts = (hubState.outcome[0] as AllocationAssetOutcome).allocation.map(
-    x => x.amount
-  );
-
-  const holdings = hubAllocationAmounts.reduce(
-    (a, b) =>
-      ethers.utils
-        .bigNumberify(a)
-        .add(ethers.utils.bigNumberify(b))
-        .toHexString(),
-    bigNumberify(0).toHexString()
-  );
 
   if (storedChannel) {
     upserts = {...upserts, id: storedChannel.id};
@@ -79,8 +60,7 @@ async function updateChannel(stateRound: State[], hubState: State) {
       participants: participants.map((address, i) => ({
         address,
         priority: i
-      })),
-      holdings
+      }))
     };
   }
 

@@ -1,15 +1,8 @@
-import {unreachable} from '@statechannels/wallet';
 import {RelayableAction} from '@statechannels/wallet/lib/src/communication';
 import {fork} from 'child_process';
 import {Model} from 'objection';
-import {
-  AssetHolderEventHandler,
-  assetHolderListen,
-  AssetHolderWatcherEvent,
-  AssetHolderWatcherEventType
-} from '../wallet/asset-holder-watcher';
 import knex from '../wallet/db/connection';
-import {onDepositEvent} from '../wallet/services/depositManager';
+import {assetHolderListen} from '../wallet/services/asset-holder-watcher';
 import {handleWalletMessage} from './handlers/handle-wallet-message';
 
 Model.knex(knex);
@@ -39,15 +32,4 @@ firebaseRelay.on('message', (message: RelayableAction) => {
     .catch(reason => console.error(reason));
 });
 console.log('Firebase relay sub-process started');
-
-const assetHolderEventHandler: AssetHolderEventHandler = (message: AssetHolderWatcherEvent) => {
-  console.log(`Received asset holder watcher message: ${JSON.stringify(message, null, 1)}`);
-  switch (message.eventType) {
-    case AssetHolderWatcherEventType.Deposited:
-      onDepositEvent(message.channelId, message.amountDeposited, message.destinationHoldings);
-      break;
-    default:
-      unreachable(message.eventType);
-  }
-};
-assetHolderListen(assetHolderEventHandler);
+assetHolderListen();
