@@ -1,13 +1,13 @@
-import { expectSaga } from 'redux-saga-test-plan';
-import { combineReducers } from 'redux';
-import { gameReducer } from '../reducer';
-import { gameSaga } from '../saga';
-import { localStatesA, bName, bAddress, stake, channelStates, aWeapon, salt } from './scenarios';
-import { joinOpenGame, chooseWeapon, updateChannelState, playAgain } from '../actions';
-import { ChannelState } from '../../../core';
-import { RPSChannelClient } from '../../../utils/rps-channel-client';
+import {expectSaga} from 'redux-saga-test-plan';
+import {combineReducers} from 'redux';
+import {gameReducer} from '../reducer';
+import {gameSaga} from '../saga';
+import {localStatesA, bName, bAddress, stake, channelStates, aWeapon, salt} from './scenarios';
+import {joinOpenGame, chooseWeapon, updateChannelState, playAgain, resign} from '../actions';
+import {ChannelState} from '../../../core';
+import {RPSChannelClient} from '../../../utils/rps-channel-client';
 import * as match from 'redux-saga-test-plan/matchers';
-import { randomHex } from '../../../utils/randomHex';
+import {randomHex} from '../../../utils/randomHex';
 
 // need to get the same shape, so that selecting state in the saga works
 const reducer = combineReducers({
@@ -27,11 +27,11 @@ describe('when joining an open game', () => {
     const client = new RPSChannelClient();
     const action = joinOpenGame(bName, bAddress, stake);
 
-    const { storeState } = await expectSaga(gameSaga as any, client)
+    const {storeState} = await expectSaga(gameSaga as any, client)
       .withReducer(reducer, initialState)
       .dispatch(action)
       .provide([[match.call.fn(client.createChannel), Promise.resolve(channelStates.preFund0)]])
-      .run({ silenceTimeout: true });
+      .run({silenceTimeout: true});
 
     expect(storeState).toEqual(gameState(localStatesA.gameChosen, channelStates.preFund0));
   });
@@ -41,18 +41,18 @@ describe('when joining an open game', () => {
 
 describe('when chosing a weapon', () => {
   it('generates a salt, calls updateState, and finishes in WeaponAndSaltChosen', async () => {
-    const initialState = gameState(localStatesA.chooseWeapon, channelStates.start);
+    const initialState = gameState(localStatesA.chooseWeapon, channelStates.postFund1);
     const client = new RPSChannelClient();
     const action = chooseWeapon(aWeapon);
 
-    const { storeState } = await expectSaga(gameSaga as any, client)
+    const {storeState} = await expectSaga(gameSaga as any, client)
       .withReducer(reducer, initialState)
       .dispatch(action)
       .provide([
         [match.call.fn(randomHex), salt],
         [match.call.fn(client.updateChannel), Promise.resolve(channelStates.roundProposed)],
       ])
-      .run({ silenceTimeout: true });
+      .run({silenceTimeout: true});
 
     expect(storeState).toEqual(
       gameState(localStatesA.weaponAndSaltChosen, channelStates.roundProposed)
@@ -67,11 +67,11 @@ describe("when the opponent's move arrives", () => {
       const client = new RPSChannelClient();
       const action = updateChannelState(channelStates.roundAccepted); // triggered by ChannelUpdatedListener
 
-      const { storeState } = await expectSaga(gameSaga as any, client)
+      const {storeState} = await expectSaga(gameSaga as any, client)
         .withReducer(reducer, initialState)
         .dispatch(action)
         .provide([[match.call.fn(client.updateChannel), Promise.resolve(channelStates.reveal)]])
-        .run({ silenceTimeout: true });
+        .run({silenceTimeout: true});
 
       expect(storeState).toEqual(gameState(localStatesA.resultPlayAgain, channelStates.reveal));
     });
@@ -83,7 +83,7 @@ describe("when the opponent's move arrives", () => {
       const client = new RPSChannelClient();
       const action = updateChannelState(channelStates.roundAcceptedInsufficientFundsB); // triggered by ChannelUpdatedListener
 
-      const { storeState } = await expectSaga(gameSaga as any, client)
+      const {storeState} = await expectSaga(gameSaga as any, client)
         .withReducer(reducer, initialState)
         .dispatch(action)
         .provide([
@@ -92,7 +92,7 @@ describe("when the opponent's move arrives", () => {
             Promise.resolve(channelStates.revealInsufficientFundsB),
           ],
         ])
-        .run({ silenceTimeout: true });
+        .run({silenceTimeout: true});
 
       expect(storeState).toEqual(
         gameState(localStatesA.shuttingDown, channelStates.revealInsufficientFundsB)
@@ -109,10 +109,10 @@ describe('when player decides to play again', () => {
       const client = new RPSChannelClient();
       const action = playAgain();
 
-      const { storeState } = await expectSaga(gameSaga as any, client)
+      const {storeState} = await expectSaga(gameSaga as any, client)
         .withReducer(reducer, initialState)
         .dispatch(action)
-        .run({ silenceTimeout: true });
+        .run({silenceTimeout: true});
 
       expect(storeState).toEqual(gameState(localStatesA.chooseWeapon2, channelStates.start2));
     });
@@ -124,10 +124,10 @@ describe('when player decides to play again', () => {
       const client = new RPSChannelClient();
       const action = playAgain();
 
-      const { storeState } = await expectSaga(gameSaga as any, client)
+      const {storeState} = await expectSaga(gameSaga as any, client)
         .withReducer(reducer, initialState)
         .dispatch(action)
-        .run({ silenceTimeout: true });
+        .run({silenceTimeout: true});
 
       expect(storeState).toEqual(gameState(localStatesA.waitForRestart, channelStates.reveal));
     });
@@ -136,24 +136,71 @@ describe('when player decides to play again', () => {
       const client = new RPSChannelClient();
       const action = updateChannelState(channelStates.start2); // triggered by ChannelUpdatedListener
 
-      const { storeState } = await expectSaga(gameSaga as any, client)
+      const {storeState} = await expectSaga(gameSaga as any, client)
         .withReducer(reducer, initialState)
         .dispatch(action)
-        .run({ silenceTimeout: true });
+        .run({silenceTimeout: true});
 
       expect(storeState).toEqual(gameState(localStatesA.chooseWeapon2, channelStates.start2));
     });
   });
 });
 
-describe.skip('when a player resigns (which includes deciding not to play again)', () => {
+describe('when a player resigns (which includes deciding not to play again)', () => {
   describe("and it's their turn", () => {
-    it('transitions to ShuttingDown and calls closeChannel', () => {});
+    it('transitions to ShuttingDown and calls closeChannel', async () => {
+      // if we're in postFund1, it's A's turn
+      const initialState = gameState(localStatesA.chooseWeapon, channelStates.postFund1);
+      const client = new RPSChannelClient();
+      const action = resign();
+
+      const {storeState} = await expectSaga(gameSaga as any, client)
+        .withReducer(reducer, initialState)
+        .dispatch(action)
+        .provide([
+          [match.call.fn(client.closeChannel), Promise.resolve(channelStates.concludeFromStart)],
+        ])
+        .run({silenceTimeout: true});
+
+      expect(storeState).toEqual(
+        gameState(localStatesA.shuttingDownResign, channelStates.concludeFromStart)
+      );
+    });
   });
   describe("and it isn't their turn", () => {
-    it('transitions to ShuttingDown', () => {});
+    it('transitions to ShuttingDown', async () => {
+      // if we're in roundProposed, it's B's turn
+      const initialState = gameState(localStatesA.chooseWeapon, channelStates.roundProposed);
+      const client = new RPSChannelClient();
+      const action = resign();
 
-    it('later calls closeChannel, when another state arrives', () => {});
+      const {storeState} = await expectSaga(gameSaga as any, client)
+        .withReducer(reducer, initialState)
+        .dispatch(action)
+        .run({silenceTimeout: true});
+
+      expect(storeState).toEqual(
+        gameState(localStatesA.shuttingDownResign, channelStates.roundProposed)
+      );
+    });
+
+    it('later calls closeChannel, when another state arrives', async () => {
+      const initialState = gameState(localStatesA.shuttingDownResign, channelStates.roundProposed);
+      const client = new RPSChannelClient();
+      const action = updateChannelState(channelStates.roundAccepted); // triggered by ChannelUpdatedListener
+
+      const {storeState} = await expectSaga(gameSaga as any, client)
+        .withReducer(reducer, initialState)
+        .dispatch(action)
+        .provide([
+          [match.call.fn(client.closeChannel), Promise.resolve(channelStates.concludeFromAccepted)],
+        ])
+        .run({silenceTimeout: true});
+
+      expect(storeState).toEqual(
+        gameState(localStatesA.shuttingDownResign, channelStates.concludeFromAccepted)
+      );
+    });
   });
 });
 // resign whenever takes you to a "closing game"

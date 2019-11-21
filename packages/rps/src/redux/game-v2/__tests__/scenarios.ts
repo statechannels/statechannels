@@ -52,15 +52,16 @@ export const channelStates = {
   preFund1: channelState(appData.start, 1, [5, 5]),
   postFund0: channelState(appData.start, 2, [5, 5]),
   postFund1: channelState(appData.start, 3, [5, 5]),
-  start: channelState(appData.start, 4, [5, 5]),
-  roundProposed: channelState(appData.roundProposed, 5, [5, 5]),
-  roundAccepted: channelState(appData.roundAccepted, 6, [4, 6]),
-  reveal: channelState(appData.reveal, 7, [6, 4]),
-  start2: channelState(appData.start, 8, [6, 4]),
+  concludeFromStart: channelState(appData.start, 4, [5, 5], 'concluding'),
+  roundProposed: channelState(appData.roundProposed, 4, [5, 5]),
+  roundAccepted: channelState(appData.roundAccepted, 5, [4, 6]),
+  concludeFromAccepted: channelState(appData.start, 6, [4, 6], 'concluding'),
+  reveal: channelState(appData.reveal, 6, [6, 4]),
+  start2: channelState(appData.start, 7, [6, 4]),
 
   // a wins, so this will move to at [10, 0] next
-  roundAcceptedInsufficientFundsB: channelState(appData.roundAccepted, 6, [8, 2]),
-  revealInsufficientFundsB: channelState(appData.reveal, 7, [10, 0]),
+  roundAcceptedInsufficientFundsB: channelState(appData.roundAccepted, 5, [8, 2]),
+  revealInsufficientFundsB: channelState(appData.reveal, 6, [10, 0]),
 };
 
 const asDetails = {name: aName, address: aAddress};
@@ -97,6 +98,7 @@ export const localStatesA: Record<string, LocalState> = {
   chooseWeapon2: {type: 'ChooseWeapon', ...playing},
   waitForRestart: {type: 'WaitForRestart', ...playing},
   shuttingDown: {type: 'ShuttingDown', reason: 'InsufficientFundsOpponent', ...playing},
+  shuttingDownResign: {type: 'ShuttingDown', reason: 'YouResigned', ...playing},
 };
 
 // player A
