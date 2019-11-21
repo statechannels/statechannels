@@ -14,61 +14,25 @@ export enum ErrorCodes {
 }
 
 export interface Participant {
-  /**
-   * App allocated id, used for relaying messages to the participant
-   */
-  participantId: string;
-
-  /**
-   * Address used to sign channel updates
-   */
-  signingAddress: string;
-
-  /**
-   * Address of EOA to receive channel proceeds (the account that'll get the funds).
-   */
-  destination: string;
+  participantId: string; // App allocated id, used for relaying messages to the participant
+  signingAddress: string; // Address used to sign channel updates
+  destination: string; // Address of EOA to receive channel proceeds (the account that'll get the funds).
 }
 
 export interface AllocationItem {
-  /**
-   * Address of EOA to receive channel proceeds.
-   */
-  destination: string;
-
-  /**
-   * How much funds will be transferred to the destination address.
-   */
-  amount: BigNumberish;
+  destination: string; // Address of EOA to receive channel proceeds.
+  amount: BigNumberish; // How much funds will be transferred to the destination address.
 }
 
 export interface Allocation {
-  /**
-   * The token's contract address.
-   */
-  token: string;
-
-  /**
-   * A list of allocations (how much funds will each destination address get).
-   */
-  allocationItems: AllocationItem[];
+  token: string; // The token's contract address.
+  allocationItems: AllocationItem[]; // A list of allocations (how much funds will each destination address get).
 }
 
 export interface Message {
-  /**
-   * Identifier of user that the message should be relayed to
-   */
-  recipient: string;
-
-  /**
-   * Identifier of user that the message is from
-   */
-  sender: string;
-
-  /**
-   * Message payload. Format defined by wallet and opaque to app.
-   */
-  data: string;
+  recipient: string; // Identifier of user that the message should be relayed to
+  sender: string; // Identifier of user that the message is from
+  data: string; // Message payload. Format defined by wallet and opaque to app.
 }
 
 export interface Funds {
