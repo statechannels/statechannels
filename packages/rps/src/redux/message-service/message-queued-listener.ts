@@ -8,8 +8,8 @@ export function* messageQueuedListener() {
   const rpsChannelClient = new RPSChannelClient();
 
   const subscribe = emit => {
-    rpsChannelClient.onMessageQueued(event => {
-      emit(event);
+    rpsChannelClient.onMessageQueued(notification => {
+      emit(notification);
     });
 
     return () => {
@@ -20,12 +20,12 @@ export function* messageQueuedListener() {
   const channel = eventChannel(subscribe, buffers.fixed(10));
 
   while (true) {
-    const message: JsonRPCNotification<Message> = yield take(channel);
-    const to = message.params.recipient;
+    const notification: JsonRPCNotification<Message> = yield take(channel);
+    const to = notification.params.recipient;
     yield fork(
       reduxSagaFirebase.database.create,
       `/messages/${to.toLowerCase()}`,
-      sanitizeMessageForFirebase(message)
+      sanitizeMessageForFirebase(notification.params)
     );
   }
 }
