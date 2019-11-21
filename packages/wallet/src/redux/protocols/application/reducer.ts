@@ -21,7 +21,7 @@ import {disputeReducer} from "../dispute/reducer";
 import {joinSignature} from "ethers/utils";
 import {State, SignedState} from "@statechannels/nitro-protocol";
 import {ChannelParticipant} from "../../channel-store";
-import {getAppDefinitionBytecode} from "src/redux/selectors";
+import {getAppDefinitionBytecode} from "../../../redux/selectors";
 
 // TODO: Right now we're using a fixed application ID
 // since we're not too concerned with handling multiple running app channels.
