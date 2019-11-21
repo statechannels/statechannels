@@ -261,15 +261,15 @@ export const ErrorCodesToObjectsMap: {[key in ErrorCodes]: typeof ChannelClientE
 export class ChannelClient {
   protected events = new EventEmitter();
 
-  onMessageQueued(callback: (message: JsonRPCNotification<Message>) => void) {
-    this.events.on('MessageQueued', (message: JsonRPCNotification<Message>) => {
-      callback(message);
+  onMessageQueued(callback: (notification: JsonRPCNotification<Message>) => void) {
+    this.events.on('MessageQueued', notification => {
+      callback(notification);
     });
   }
 
-  onChannelUpdated(callback: (message: JsonRPCNotification<Message>) => void) {
-    this.events.on('ChannelUpdated', (message: JsonRPCNotification<Message>) => {
-      callback(message);
+  onChannelUpdated(callback: (notification: ChannelUpdatedNotification) => void) {
+    this.events.on('ChannelUpdated', notification => {
+      callback(notification);
     });
   }
 
