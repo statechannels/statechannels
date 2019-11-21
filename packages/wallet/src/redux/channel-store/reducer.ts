@@ -71,7 +71,7 @@ export function checkAndInitialize(
 
 // Signs and stores a state from our own app or wallet.
 // Doesn't work for the first state - the channel must already exist.
-export function signAndStore(store: ChannelStore, state: State): SignResult {
+export function signAndStore(store: ChannelStore, state: State, bytecode: string): SignResult {
   const channelId = getChannelId(state.channel);
   let channel = getChannel(store, channelId);
 
@@ -81,9 +81,9 @@ export function signAndStore(store: ChannelStore, state: State): SignResult {
     return {isSuccess: false, reason: "TransitionUnsafe"};
   }
 
-  // if (!validAppTransition(channel, signedState.state, bytecode)) {
-  //   return {isSuccess: false, reason: "TransitionUnsafe"};
-  // }
+  if (!validAppTransition(channel, signedState.state, bytecode)) {
+    return {isSuccess: false, reason: "TransitionUnsafe"};
+  }
 
   channel = pushState(channel, signedState);
   store = setChannel(store, channel);

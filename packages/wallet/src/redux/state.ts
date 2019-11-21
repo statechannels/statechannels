@@ -310,7 +310,11 @@ interface CheckFailure {
 }
 
 export function signAndStore(sharedDataState: SharedData, state: State): SignResult {
-  const result = signAndStoreChannelStore(sharedDataState.channelStore, state);
+  const result = signAndStoreChannelStore(
+    sharedDataState.channelStore,
+    state,
+    sharedDataState.bytecodeStorage[state.appDefinition]
+  );
   if (result.isSuccess) {
     return {
       isSuccess: result.isSuccess,

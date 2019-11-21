@@ -231,6 +231,10 @@ const signAndUpdate = (
       sharedData.bytecodeStorage[state.appDefinition]
     );
   } else {
-    return signAndStore(sharedData.channelStore, state);
+    return signAndStore(
+      sharedData.channelStore,
+      state,
+      sharedData.bytecodeStorage[state.appDefinition]
+    );
   }
 };
