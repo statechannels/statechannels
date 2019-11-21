@@ -66,7 +66,7 @@ export class RPSChannelClient {
     await this.channelClient.getAddress();
   }
 
-  async onMessageQueued(callback: (message: JsonRPCNotification<Message>) => any) {
+  async onMessageQueued(callback: (notification: JsonRPCNotification<Message>) => any) {
     await this.channelClient.onMessageQueued(callback);
   }
 
