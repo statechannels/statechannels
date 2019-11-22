@@ -6,7 +6,7 @@ import {ChannelState, getLastState} from "../channel-store";
 import {createJsonRpcAllocationsFromOutcome} from "../../utils/json-rpc-utils";
 import jrs from "jsonrpc-lite";
 import {unreachable} from "../../utils/reducer-utils";
-import {validateResponse, validateNotification} from "../../messaging/validator";
+import {validateResponse, validateNotification} from "../../json-rpc-validation/validator";
 
 export function* messageSender(action: OutgoingApiAction) {
   const message = yield createResponseMessage(action);

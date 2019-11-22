@@ -13,7 +13,7 @@ import {
 } from "../../utils/json-rpc-utils";
 
 import {getProvider} from "../../utils/contract-utils";
-import {validateRequest} from "../../messaging/validator";
+import {validateRequest} from "../../json-rpc-validation/validator";
 
 export function* messageHandler(jsonRpcMessage: object, fromDomain: string) {
   const parsedMessage = jrs.parseObject(jsonRpcMessage);

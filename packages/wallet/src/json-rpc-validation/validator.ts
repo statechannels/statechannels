@@ -1,13 +1,13 @@
 import Ajv, {ErrorObject} from "ajv";
-import * as requestSchema from "./schema/request.json";
-import * as responseSchema from "./schema/response.json";
-import * as createChannelSchema from "./schema/create-channel.json";
-import * as getAddressSchema from "./schema/get-address.json";
-import * as joinChannelSchema from "./schema/join-channel.json";
-import * as updateChannelSchema from "./schema/update-channel.json";
-import * as definitionsSchema from "./schema/definitions.json";
-import * as pushMessageSchema from "./schema/push-message.json";
-import * as notifSchema from "./schema/notification.json";
+import * as requestSchema from "./schema/request.json.js";
+import * as responseSchema from "./schema/response.json.js";
+import * as createChannelSchema from "./schema/create-channel.json.js";
+import * as getAddressSchema from "./schema/get-address.json.js";
+import * as joinChannelSchema from "./schema/join-channel.json.js";
+import * as updateChannelSchema from "./schema/update-channel.json.js";
+import * as definitionsSchema from "./schema/definitions.json.js";
+import * as pushMessageSchema from "./schema/push-message.json.js";
+import * as notifSchema from "./schema/notification.json.js";
 
 export interface ValidationResult {
   isValid: boolean;
