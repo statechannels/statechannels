@@ -159,6 +159,16 @@ export function* gameSaga(channelClient: RPSChannelClient) {
           const state = yield call(channelClient.closeChannel, channelId);
           yield put(updateChannelState(state));
         }
+      } else if (
+        localState.type === 'WaitForRestart' &&
+        channelState &&
+        channelState.appData.type === 'reveal'
+      ) {
+        const {aBal, bBal, channelId} = channelState;
+        const start: AppData = {type: 'start'};
+        const state = yield call(channelClient.updateChannel, channelId, aBal, bBal, start);
+        yield put(updateChannelState(state));
+        yield put(restart());
       }
     }
   }

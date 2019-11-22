@@ -312,9 +312,18 @@ describe('when player A decides to play again', () => {
   });
 });
 
-describe.skip('when player B decides to play again', () => {
-  it('sends the new start state and transitions to ChooseWeapon', () => {
-    // todo
+describe('when player B decides to play again', () => {
+  it('sends the new start state and transitions to ChooseWeapon', async () => {
+    const initialState = gameState(localStatesB.resultPlayAgain, channelStates.reveal);
+    const action = playAgain();
+
+    const {storeState} = await expectSaga(gameSaga as any, client)
+      .withReducer(reducer, initialState)
+      .dispatch(action)
+      .provide([callUpdateChannel(channelStates.start2)])
+      .run({silenceTimeout: true});
+
+    expect(storeState).toEqual(gameState(localStatesB.chooseWeapon2, channelStates.start2));
   });
 });
 
