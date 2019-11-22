@@ -21,18 +21,8 @@
     "resolveJsonModule": true,
     "esModuleInterop": true
   },
-  "files": [
-    "src/json-rpc-validation/schema/create-channel.json",
-    "src/json-rpc-validation/schema/definitions.json",
-    "src/json-rpc-validation/schema/get-address.json",
-    "src/json-rpc-validation/schema/join-channel.json",
-    "src/json-rpc-validation/schema/notification.json",
-    "src/json-rpc-validation/schema/push-message.json",
-    "src/json-rpc-validation/schema/request.json",
-    "src/json-rpc-validation/schema/response.json",
-    "src/json-rpc-validation/schema/update-channel.json"
-  ],
-  "include": ["src/**/*", "src/**/*,", "types/globals.d.ts", "contracts/**/*.json", "index.ts"],
+
+  "include": ["src/**/*", "src/**/*.json", "types/globals.d.ts", "contracts/**/*.json", "index.ts"],
   "references": [{"path": "../nitro-protocol"}],
   "exclude": ["src/setupTests.ts"]
 }
