@@ -1,4 +1,4 @@
-import { saveConfig } from '../..//utils';
+import { saveConfig } from '../../utils';
 
 const success = { type: 'final' };
 const failure = { type: 'final' };

@@ -1,5 +1,5 @@
 import { Outcome } from '../../';
-import { saveConfig } from '../..//utils';
+import { saveConfig } from '../../utils';
 
 const PROTOCOL = 'ledger-update';
 

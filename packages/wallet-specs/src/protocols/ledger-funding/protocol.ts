@@ -1,5 +1,5 @@
-import { store } from '../..//store';
-import { saveConfig } from '../..//utils';
+import { store } from '../../store';
+import { saveConfig } from '../../utils';
 
 const PROTOCOL = 'ledger-funding';
 const success = { type: 'final' };

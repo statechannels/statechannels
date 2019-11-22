@@ -1,5 +1,5 @@
 import { ChannelState } from '../..';
-import { saveConfig } from '../..//utils';
+import { saveConfig } from '../../utils';
 import { store } from '../../store';
 
 const PROTOCOL = 'conclude-channel';
