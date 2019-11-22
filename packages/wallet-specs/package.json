@@ -1,0 +1,18 @@
+{
+  "name": "wallet-protocols",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "xstate": "^4.6"
+  },
+  "devDependencies": {
+    "@types/node": "^12.12.7",
+    "fs": "^0.0.1-security",
+    "typescript": "^3.7.2",
+    "prettier": "1.18.2",
+    "tslint-config-prettier": "1.18.0",
+    "tslint-plugin-prettier": "2.0.1",
+    "tslint": "5.20.0"
+  }
+}
