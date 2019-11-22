@@ -21,7 +21,8 @@
     "resolveJsonModule": true,
     "esModuleInterop": true
   },
-  "include": ["src/**/*", "types/globals.d.ts", "contracts/**/*.json", "index.ts"],
+
+  "include": ["src/**/*", "src/**/*.json", "types/globals.d.ts", "contracts/**/*.json", "index.ts"],
   "references": [{"path": "../nitro-protocol"}],
   "exclude": ["src/setupTests.ts"]
 }

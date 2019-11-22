@@ -40,6 +40,12 @@ export interface AdjudicatorKnown {
   adjudicator: string;
 }
 
+export interface AppDefinitionBytecodeReceived {
+  type: "WALLET.APP_DEFINITION_BYTECODE_RECEIVED";
+  appDefinition: string;
+  bytecode: string;
+}
+
 export interface MessageSent {
   type: "WALLET.MESSAGE_SENT";
 }
@@ -153,6 +159,13 @@ export const adjudicatorKnown: ActionConstructor<AdjudicatorKnown> = p => ({
   type: "WALLET.ADJUDICATOR_KNOWN"
 });
 
+export const appDefinitionBytecodeReceived: ActionConstructor<
+  AppDefinitionBytecodeReceived
+> = p => ({
+  ...p,
+  type: "WALLET.APP_DEFINITION_BYTECODE_RECEIVED"
+});
+
 export const messageSent: ActionConstructor<MessageSent> = p => ({
   ...p,
   type: "WALLET.MESSAGE_SENT"
@@ -250,6 +263,7 @@ export function isProtocolAction(action: WalletAction): action is ProtocolAction
 export type WalletAction =
   | AdvanceChannelAction
   | AdjudicatorKnown
+  | AppDefinitionBytecodeReceived
   | AdjudicatorEventAction
   | AssetHolderEventAction
   | BlockMined
@@ -265,10 +279,17 @@ export type WalletAction =
 export {directFunding as funding, NewLedgerChannel, protocol, application, advanceChannel};
 
 // These are any actions that update shared data directly without any protocol
-export type SharedDataUpdateAction = AdjudicatorEventAction | AssetHolderEventAction;
+export type SharedDataUpdateAction =
+  | AdjudicatorEventAction
+  | AssetHolderEventAction
+  | AppDefinitionBytecodeReceived;
 
 export function isSharedDataUpdateAction(action: WalletAction): action is SharedDataUpdateAction {
-  return isAdjudicatorEventAction(action) || isAssetHolderEventAction(action);
+  return (
+    isAdjudicatorEventAction(action) ||
+    isAssetHolderEventAction(action) ||
+    action.type === "WALLET.APP_DEFINITION_BYTECODE_RECEIVED"
+  );
 }
 
 export function isAdjudicatorEventAction(action: WalletAction): action is AdjudicatorEventAction {
@@ -403,6 +424,14 @@ export const joinChannelResponse: ActionConstructor<JoinChannelResponse> = p => 
   type: "WALLET.JOIN_CHANNEL_RESPONSE"
 });
 
+export interface ValidationError extends ApiAction {
+  type: "WALLET.VALIDATION_ERROR";
+}
+export const validationError: ActionConstructor<ValidationError> = p => ({
+  ...p,
+  type: "WALLET.VALIDATION_ERROR"
+});
+
 export type OutgoingApiAction =
   | AddressResponse
   | CreateChannelResponse
@@ -414,4 +443,5 @@ export type OutgoingApiAction =
   | PostMessageResponse
   | UnknownChannelId
   | NoContractError
-  | JoinChannelResponse;
+  | JoinChannelResponse
+  | ValidationError;

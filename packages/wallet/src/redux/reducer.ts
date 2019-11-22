@@ -59,6 +59,11 @@ function updateSharedData(
 ): states.Initialized {
   if (actions.isAdjudicatorEventAction(action)) {
     return {...state, adjudicatorState: adjudicatorStateReducer(state.adjudicatorState, action)};
+  } else if (action.type === "WALLET.APP_DEFINITION_BYTECODE_RECEIVED") {
+    return {
+      ...state,
+      bytecodeStorage: {...state.bytecodeStorage, [action.appDefinition]: action.bytecode}
+    };
   } else {
     return state;
   }

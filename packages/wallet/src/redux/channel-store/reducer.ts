@@ -2,7 +2,7 @@ import {ChannelStore, getChannel, setChannel} from "./state";
 import {pushState, initializeChannel, ChannelParticipant} from "./channel-state/states";
 import {State, SignedState, getChannelId} from "@statechannels/nitro-protocol";
 import {Signatures} from "@statechannels/nitro-protocol";
-import {validTransition} from "./channel-state/valid-transition";
+import {validTransition, validAppTransition} from "./channel-state/valid-transition";
 import {hasValidSignature} from "../../utils/signing-utils";
 
 // -----------------
@@ -29,7 +29,8 @@ export function signAndInitialize(
   store: ChannelStore,
   state: State,
   privateKey: string,
-  participants: ChannelParticipant[]
+  participants: ChannelParticipant[],
+  bytecode: string
 ): SignResult {
   const signedState = Signatures.signState(state, privateKey);
 
@@ -46,15 +47,22 @@ export function checkAndInitialize(
   store: ChannelStore,
   signedState: SignedState,
   privateKey: string,
-  participants: ChannelParticipant[]
+  participants: ChannelParticipant[],
+  bytecode: string
 ): CheckResult {
   if (signedState.state.turnNum !== 0) {
     return {isSuccess: false};
   }
+
   if (!hasValidSignature(signedState)) {
     return {isSuccess: false};
   }
+
   const channel = initializeChannel(signedState, privateKey, participants);
+
+  if (!validAppTransition(channel, signedState.state, bytecode)) {
+    return {isSuccess: false};
+  }
 
   store = setChannel(store, channel);
 
@@ -63,12 +71,17 @@ export function checkAndInitialize(
 
 // Signs and stores a state from our own app or wallet.
 // Doesn't work for the first state - the channel must already exist.
-export function signAndStore(store: ChannelStore, state: State): SignResult {
+export function signAndStore(store: ChannelStore, state: State, bytecode: string): SignResult {
   const channelId = getChannelId(state.channel);
   let channel = getChannel(store, channelId);
 
   const signedState = Signatures.signState(state, channel.privateKey);
+
   if (!validTransition(channel, state)) {
+    return {isSuccess: false, reason: "TransitionUnsafe"};
+  }
+
+  if (!validAppTransition(channel, signedState.state, bytecode)) {
     return {isSuccess: false, reason: "TransitionUnsafe"};
   }
 
@@ -94,7 +107,11 @@ interface CheckFailure {
 type CheckResult = CheckSuccess | CheckFailure;
 
 // For use with a signed state received from an opponent.
-export function checkAndStore(store: ChannelStore, signedState: SignedState): CheckResult {
+export function checkAndStore(
+  store: ChannelStore,
+  signedState: SignedState,
+  bytecode: string
+): CheckResult {
   if (!hasValidSignature(signedState)) {
     console.log("Failed to validate state signature");
     return {isSuccess: false};
@@ -104,6 +121,11 @@ export function checkAndStore(store: ChannelStore, signedState: SignedState): Ch
   if (!validTransition(channel, signedState.state)) {
     return {isSuccess: false};
   }
+
+  if (!validAppTransition(channel, signedState.state, bytecode)) {
+    return {isSuccess: false};
+  }
+
   channel = pushState(channel, signedState);
   store = setChannel(store, channel);
 

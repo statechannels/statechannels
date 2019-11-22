@@ -1,13 +1,16 @@
-import {AppData} from './app-data';
+import { AppData } from './app-data';
+
+export type ChannelStatus = 'proposed' | 'opening' | 'funding' | 'running' | 'closing' | 'closed';
 
 export interface ChannelState {
-  turnNum: number;
-  status: string;
+  channelId: string;
+  turnNum: string;
+  status: ChannelStatus;
   aUserId: string;
   bUserId: string;
   aDestination: string;
   bDestination: string;
-  aBal: number;
-  bBal: number;
+  aBal: string;
+  bBal: string;
   appData: AppData;
 }

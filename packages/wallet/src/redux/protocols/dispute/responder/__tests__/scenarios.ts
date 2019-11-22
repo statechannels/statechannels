@@ -4,7 +4,7 @@ import * as actions from "../actions";
 import * as transactionScenarios from "../../../transaction-submission/__tests__";
 import {EMPTY_SHARED_DATA, SharedData} from "../../../../state";
 
-import {ChannelState, ChannelStore} from "../../../../channel-store";
+import {ChannelState, ChannelStore, BytecodeStorage} from "../../../../channel-store";
 import * as transactionActions from "../../../transaction-submission/actions";
 import {challengeExpiredEvent} from "../../../../actions";
 import * as testScenarios from "../../../../__tests__/state-helpers";
@@ -45,6 +45,10 @@ const channelStore: ChannelStore = {
   [channelId]: channelStatus
 };
 
+const bytecodeStorage: BytecodeStorage = {
+  [libraryAddress]: testScenarios.trivialAppBytecode
+};
+
 const refuteChannelStatus: ChannelState = {
   ...channelStatus,
   signedStates: [gameSignedState2, gameSignedState3],
@@ -55,7 +59,7 @@ const refuteChannelState = {
 };
 const transactionSubmissionState = transactionScenarios.preSuccessState;
 const processId = "process-id.123";
-const sharedData: SharedData = {...EMPTY_SHARED_DATA, channelStore};
+const sharedData: SharedData = {...EMPTY_SHARED_DATA, channelStore, bytecodeStorage};
 const defaults = {processId, transactionSubmissionState, sharedData, channelId, expiryTime: 0};
 
 // ------

@@ -1,5 +1,5 @@
 import React from 'react';
-import {GameLayout} from './GameLayout';
+import { GameLayout } from './GameLayout';
 
 interface Props {
   reason: string;
@@ -7,7 +7,7 @@ interface Props {
 
 export default class WaitForWallet extends React.PureComponent<Props> {
   render() {
-    const {reason} = this.props;
+    const { reason } = this.props;
     return (
       <GameLayout>
         <div className="container centered-container">

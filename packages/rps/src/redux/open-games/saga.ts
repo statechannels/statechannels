@@ -1,14 +1,14 @@
-import {fork, take, select, cancel, call, apply} from 'redux-saga/effects';
+import { fork, take, select, cancel, call, apply } from 'redux-saga/effects';
 
 export const getGameState = (storeObj: any) => storeObj.game.gameState;
 // export const getWalletAddress = (storeObj: any) => storeObj.wallet.address;
 
-import {default as firebase, reduxSagaFirebase} from '../../gateways/firebase';
+import { default as firebase, reduxSagaFirebase } from '../../gateways/firebase';
 
 import * as actions from './actions';
 
-import {StateName, GameState} from '../game/state';
-import {bigNumberify} from 'ethers/utils';
+import { StateName, GameState } from '../game/state';
+import { bigNumberify } from 'ethers/utils';
 
 export default function* openGameSaga() {
   // could be more efficient by only watching actions that could change the state

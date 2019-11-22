@@ -1,34 +1,26 @@
 import { take, put } from 'redux-saga/effects';
 import { buffers, eventChannel } from 'redux-saga';
-import {
-  ChannelClient,
-  JsonRPCNotification,
-  Message,
-  NotificationName,
-} from '../../utils/channelClient';
-import { updateChannelState } from '../game/actions';
+import { RPSChannelClient } from '../../utils/rps-channel-client';
+import { updateChannelState } from '../game-v2/actions';
+import { ChannelState } from '../../core';
 
-// TODO this is copied from message-queued-listener.ts so can be factored into a helper
-function createSubscribeFunction(channelClient: ChannelClient, notificationName: NotificationName) {
+export function* channelUpdatedListener() {
+  const rpsChannelClient = new RPSChannelClient();
+
   const subscribe = emit => {
-    channelClient.onMessageReceived(notificationName, event => {
-      emit(event);
+    rpsChannelClient.onChannelUpdated(channelState => {
+      emit(channelState);
     });
 
     return () => {
-      channelClient.unSubscribe(notificationName); // TODO
+      rpsChannelClient.unSubscribe('ChannelUpdated');
     };
   };
-  return subscribe;
-}
 
-export function* channelUpdatedListener() {
-  const channelClient = new ChannelClient();
-  const subscribe = createSubscribeFunction(channelClient, 'ChannelUpdated');
   const channel = eventChannel(subscribe, buffers.fixed(10));
 
   while (true) {
-    const message: JsonRPCNotification<Message> = yield take(channel);
-    yield put(updateChannelState(message.params.data));
+    const channelState: ChannelState = yield take(channel);
+    yield put(updateChannelState(channelState));
   }
 }

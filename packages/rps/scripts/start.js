@@ -80,8 +80,6 @@ void (async () => {
   const etherlimePath = path.resolve(__dirname, process.cwd() + "/node_modules/.bin/etherlime");
   console.log(chalk.cyan("Compiling contracts...\n"));
   await execCommand(`${etherlimePath} compile --buildDirectory=./build/contracts`);
-  console.log(chalk.cyan("Deploying contracts...\n"));
-  await execCommand(`${etherlimePath} deploy`);
 
   const devServer = new WebpackDevServer(webpack(config), {hot: true, contentBase: paths.appPublic, compress: true});
   // Launch WebpackDevServer.

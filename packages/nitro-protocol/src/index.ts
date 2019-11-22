@@ -11,7 +11,7 @@ import {getAssetTransferredEvent, getDepositedEvent} from './contract/asset-hold
 import {getChallengeRegisteredEvent} from './contract/challenge';
 import {Channel, getChannelId} from './contract/channel';
 import {encodeConsensusData} from './contract/consensus-data';
-import {validTransition} from './contract/force-move-app';
+import {validTransition, ForceMoveAppContractInterface} from './contract/force-move-app';
 import {
   AllocationItem,
   encodeAllocation,
@@ -22,7 +22,7 @@ import {
   isGuaranteeOutcome,
 } from './contract/outcome';
 
-import {State, VariablePart} from './contract/state';
+import {State, VariablePart, getVariablePart} from './contract/state';
 import {createDepositTransaction as createERC20DepositTransaction} from './contract/transaction-creators/erc20-asset-holder';
 import {
   createDepositTransaction as createETHDepositTransaction,
@@ -38,7 +38,6 @@ export interface SignedState {
   state: State;
   signature: Signature;
 }
-
 // TODO: Find a use case for this or remove.
 // @nsario I don't think we need this here -- it should be in the adjudicator state of the wallet
 // Export interface ChannelStorage {
@@ -56,6 +55,7 @@ export {
   createETHDepositTransaction,
   createTransferAllTransaction,
   State,
+  ForceMoveAppContractInterface,
   encodeConsensusData,
   encodeAllocation,
   encodeOutcome,
@@ -66,6 +66,7 @@ export {
   getAssetTransferredEvent,
   getChallengeRegisteredEvent,
   getDepositedEvent,
+  getVariablePart,
   isAllocationOutcome,
   isGuaranteeOutcome,
   validTransition,

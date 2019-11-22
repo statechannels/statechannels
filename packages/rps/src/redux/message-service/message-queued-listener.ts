@@ -1,38 +1,31 @@
 import { take, fork } from 'redux-saga/effects';
 import { buffers, eventChannel } from 'redux-saga';
 import { reduxSagaFirebase } from '../../gateways/firebase';
-import {
-  ChannelClient,
-  JsonRPCNotification,
-  Message,
-  NotificationName,
-} from '../../utils/channelClient';
+import { MessageQueuedNotification } from '../../utils/channel-client';
+import { RPSChannelClient } from '../../utils/rps-channel-client';
 
-function createSubscribeFunction(channelClient: ChannelClient, notificationName: NotificationName) {
+export function* messageQueuedListener() {
+  const rpsChannelClient = new RPSChannelClient();
+
   const subscribe = emit => {
-    channelClient.onMessageReceived(notificationName, event => {
-      emit(event);
+    rpsChannelClient.onMessageQueued(notification => {
+      emit(notification);
     });
 
     return () => {
-      channelClient.unSubscribe(notificationName); // TODO
+      rpsChannelClient.unSubscribe('MessageQueued');
     };
   };
-  return subscribe;
-}
 
-export function* messageQueuedListener() {
-  const channelClient = new ChannelClient();
-  const subscribe = createSubscribeFunction(channelClient, 'MessageQueued');
   const channel = eventChannel(subscribe, buffers.fixed(10));
 
   while (true) {
-    const message: JsonRPCNotification<Message> = yield take(channel);
-    const to = message.params.recipient;
+    const notification: MessageQueuedNotification = yield take(channel);
+    const to = notification.params.recipient;
     yield fork(
       reduxSagaFirebase.database.create,
       `/messages/${to.toLowerCase()}`,
-      sanitizeMessageForFirebase(message)
+      sanitizeMessageForFirebase(notification.params)
     );
   }
 }

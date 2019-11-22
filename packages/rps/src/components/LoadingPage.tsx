@@ -1,4 +1,4 @@
-import {StyleSheet, css} from 'aphrodite';
+import { StyleSheet, css } from 'aphrodite';
 import React from 'react';
 import Loader from 'react-loader-spinner';
 

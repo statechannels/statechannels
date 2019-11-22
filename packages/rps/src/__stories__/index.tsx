@@ -1,21 +1,21 @@
 import React from 'react';
-import {storiesOf} from '@storybook/react';
+import { storiesOf } from '@storybook/react';
 import SiteContainer from '../containers/SiteContainer';
-import {Provider} from 'react-redux';
+import { Provider } from 'react-redux';
 // import { OpenGameEntry } from "../components/OpenGameCard";
 import * as states from '../redux/game/state';
-import {Player} from '../core/players';
+import { Player } from '../core/players';
 import BN from 'bn.js';
 // import { OpenGame } from "../redux/open-games/state";
 import '../index.scss';
-import {SiteState} from '../redux/reducer';
+import { SiteState } from '../redux/reducer';
 import HomePage from '../components/HomePage';
 import LoadingPage from '../components/LoadingPage';
 import MetamaskErrorPage from '../components/MetamaskErrorPage';
-import {MetamaskErrorType} from '../redux/metamask/actions';
+import { MetamaskErrorType } from '../redux/metamask/actions';
 // import CreatingOpenGameModal from "../components/CreatingOpenGameModal";
 import LoginErrorPage from '../components/LoginErrorPage';
-import {Channel} from 'fmg-core';
+import { Channel } from 'fmg-core';
 
 const finneyFiveFive = ['0x' + new BN(5).toString(16), '0x' + new BN(5).toString(16)] as [
   string,
@@ -56,7 +56,7 @@ const bsAddress = '0x6Ecbe1DB9EF729CBe972C83Fb886247691Fb6beb';
 const participants: [string, string] = [asAddress, bsAddress];
 const roundBuyIn = '0x' + new BN(1).toString(16);
 
-const channel: Channel = {channelType: libraryAddress, nonce: channelNonce, participants};
+const channel: Channel = { channelType: libraryAddress, nonce: channelNonce, participants };
 
 const base = {
   channel,
@@ -123,7 +123,7 @@ const initialState: SiteState = {
 export function siteStateFromGameState<T extends states.GameState>(gamestate: T): SiteState {
   return {
     ...initialState,
-    game: {messageState: {}, gameState: gamestate},
+    game: { messageState: {}, gameState: gamestate },
   };
 }
 
@@ -175,7 +175,7 @@ storiesOf('Setup', module)
   .add('Loading Page', () => <LoadingPage />)
   .add('Login Error Page', () => <LoginErrorPage error="Login error message" />)
   .add('MetaMask Error Page', () => (
-    <MetamaskErrorPage error={{errorType: MetamaskErrorType.WrongNetwork}} />
+    <MetamaskErrorPage error={{ errorType: MetamaskErrorType.WrongNetwork }} />
   ))
   .add('Home Page', () => <HomePage login={() => alert('login')} />)
   .add('Profile Modal', testState(noName));

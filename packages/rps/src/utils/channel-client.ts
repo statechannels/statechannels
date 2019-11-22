@@ -1,20 +1,9 @@
-import {BigNumberish} from 'ethers/utils';
-import {EventEmitter} from 'eventemitter3';
+import { BigNumberish } from 'ethers/utils';
+import { EventEmitter } from 'eventemitter3';
 
 export type JsonRPCVersion = '2.0';
 
-export type ChannelStatus = 'opening' | 'funding' | 'running' | 'closing';
-
-export type ChannelMethodName = 'CreateChannel' | 'JoinChannel' | 'UpdateChannel' | 'CloseChannel';
-export type AddressMethodName = 'GetAddress';
-export type MessageMethodName = 'PushMessage';
-
-export type MethodName = ChannelMethodName | AddressMethodName | MessageMethodName;
-
-export type ChannelNotificationName = 'ChannelProposed' | 'ChannelUpdated' | 'ChannelClosed';
-export type MessageNotificationName = 'MessageQueued';
-
-export type NotificationName = ChannelNotificationName | MessageNotificationName;
+export type ChannelStatus = 'proposed' | 'opening' | 'funding' | 'running' | 'closing' | 'closed';
 
 export enum ErrorCodes {
   SIGNING_ADDRESS_NOT_FOUND = 1000,
@@ -25,84 +14,69 @@ export enum ErrorCodes {
 }
 
 export interface Participant {
-  /**
-   * App allocated id, used for relaying messages to the participant
-   */
-  participantId: string;
-
-  /**
-   * Address used to sign channel updates
-   */
-  signingAddress: string;
-
-  /**
-   * Address of EOA to receive channel proceeds (the account that'll get the funds).
-   */
-  destination: string;
+  participantId: string; // App allocated id, used for relaying messages to the participant
+  signingAddress: string; // Address used to sign channel updates
+  destination: string; // Address of EOA to receive channel proceeds (the account that'll get the funds).
 }
 
 export interface AllocationItem {
-  /**
-   * Address of EOA to receive channel proceeds.
-   */
-  destination: string;
-
-  /**
-   * How much funds will be transferred to the destination address.
-   */
-  amount: BigNumberish;
+  destination: string; // Address of EOA to receive channel proceeds.
+  amount: BigNumberish; // How much funds will be transferred to the destination address.
 }
 
 export interface Allocation {
-  /**
-   * The token's contract address.
-   */
-  token: string;
-
-  /**
-   * A list of allocations (how much funds will each destination address get).
-   */
-  allocationItems: AllocationItem[];
+  token: string; // The token's contract address.
+  allocationItems: AllocationItem[]; // A list of allocations (how much funds will each destination address get).
 }
 
 export interface Message {
-  /**
-   * Identifier of user that the message should be relayed to
-   */
-  recipient: string;
-
-  /**
-   * Identifier of user that the message is from
-   */
-  sender: string;
-
-  /**
-   * Message payload. Format defined by wallet and opaque to app.
-   */
-  data: string;
+  recipient: string; // Identifier of user that the message should be relayed to
+  sender: string; // Identifier of user that the message is from
+  data: string; // Message payload. Format defined by wallet and opaque to app.
 }
-
-export type PushMessageParameters = Message;
 
 export interface Funds {
   token: string;
   amount: string;
 }
 
-export interface JsonRPCNotification<ParametersType> {
+export interface CreateChannelParameters {
+  participants: Participant[];
+  allocations: Allocation[];
+  appData: string;
+  appDefinition: string;
+}
+export interface ChannelResult {
+  participants: Participant[];
+  allocations: Allocation[];
+  appData: string;
+  appDefinition: string;
+  channelId: string;
+  status: ChannelStatus;
+  funding: Funds[];
+  turnNum: BigNumberish;
+}
+
+export interface UpdateChannelParameters {
+  participants: Participant[];
+  allocations: Allocation[];
+  appData: string;
+}
+
+export interface JsonRPCNotification<Name, ParametersType> {
   jsonrpc: JsonRPCVersion;
-  method: NotificationName;
+  method: Name;
   params: ParametersType;
 }
 
-export interface JsonRPCRequest<ParametersType> {
+export interface JsonRPCRequest<Name, ParametersType> {
   jsonrpc: JsonRPCVersion;
-  method: MethodName;
+  method: Name;
   params: ParametersType;
   id: string;
 }
 
-export interface JsonRPCResponse<ResultType = {[key: string]: any}> {
+export interface JsonRPCResponse<ResultType> {
   jsonrpc: JsonRPCVersion;
   id: string;
   result: ResultType;
@@ -111,7 +85,7 @@ export interface JsonRPCResponse<ResultType = {[key: string]: any}> {
 export interface JsonRPCError {
   code: number;
   message: string;
-  data?: {[key: string]: any};
+  data?: { [key: string]: any };
 }
 
 export interface JsonRPCErrorResponse<ErrorType extends JsonRPCError = JsonRPCError> {
@@ -120,20 +94,12 @@ export interface JsonRPCErrorResponse<ErrorType extends JsonRPCError = JsonRPCEr
   error: ErrorType;
 }
 
-export interface CreateChannelParameters extends UpdateChannelParameters {
-  appDefinition: string;
-}
+// Requests and Responses
+// ======================
 
-export interface ChannelResult extends CreateChannelParameters {
-  channelId: string;
-  status: ChannelStatus;
-  funding: Funds[];
-  turnNum: BigNumberish;
-}
+export type GetAddressRequest = JsonRPCRequest<'GetAddress', {}>; // todo: what are params
 
-export interface CreateChannelRequest extends JsonRPCRequest<CreateChannelParameters> {
-  method: 'CreateChannel';
-}
+export type CreateChannelRequest = JsonRPCRequest<'CreateChannel', CreateChannelParameters>;
 
 export interface CreateChannelResponse extends JsonRPCResponse<ChannelResult> {}
 
@@ -141,60 +107,51 @@ export interface JoinChannelParameters {
   channelId: string;
 }
 
-export interface JoinChannelRequest extends JsonRPCRequest<JoinChannelParameters> {
-  method: 'JoinChannel';
-}
+export type JoinChannelRequest = JsonRPCRequest<'JoinChannel', JoinChannelParameters>;
 
 export interface JoinChannelResponse extends JsonRPCResponse<ChannelResult> {}
 
-export interface UpdateChannelParameters {
-  participants: Participant[];
-  allocations: Allocation[];
-  appData: string;
-}
+export type UpdateChannelRequest = JsonRPCRequest<'UpdateChannel', UpdateChannelParameters>;
 
-export interface UpdateChannelRequest extends JsonRPCRequest<UpdateChannelParameters> {
-  method: 'UpdateChannel';
-}
-
-export interface PushMessageRequest extends JsonRPCRequest<Message> {
-  method: 'PushMessage';
-}
+export type PushMessageRequest = JsonRPCRequest<'PushMessage', Message>;
 
 export interface PushMessageResult {
   success: boolean;
 }
 
-export interface PushMessageResponse extends JsonRPCResponse<PushMessageResult> {}
+export type PushMessageResponse = JsonRPCResponse<PushMessageResult>;
 
 export interface CloseChannelParameters {
   channelId: string;
 }
 
-export interface CloseChannelRequest extends JsonRPCRequest<CloseChannelRequest> {}
+export type CloseChannelRequest = JsonRPCRequest<'CloseChannel', CloseChannelParameters>;
+export type CloseChannelResponse = JsonRPCResponse<ChannelResult>;
 
-export interface CloseChannelResponse extends JsonRPCResponse<ChannelResult> {}
+export type ChannelProposedNotification = JsonRPCNotification<'ChannelProposed', ChannelResult>;
+export type ChannelUpdatedNotification = JsonRPCNotification<'ChannelUpdated', ChannelResult>;
+export type ChannelClosingNotification = JsonRPCNotification<'ChannelClosed', ChannelResult>;
+export type MessageQueuedNotification = JsonRPCNotification<'MessageQueued', Message>;
 
-export interface ChannelProposedNotification extends JsonRPCNotification<ChannelResult> {
-  method: 'ChannelProposed';
-}
+export type Notification =
+  | ChannelProposedNotification
+  | ChannelUpdatedNotification
+  | ChannelClosingNotification
+  | MessageQueuedNotification;
 
-export interface ChannelUpdatedNotification extends JsonRPCNotification<ChannelResult> {
-  method: 'ChannelUpdated';
-}
+export type NotificationName = Notification['method'];
+type NotificationParameters = Notification['params'];
 
-export interface ChannelClosingNotification extends JsonRPCNotification<ChannelResult> {
-  method: 'ChannelClosed';
-}
+export type Request =
+  | GetAddressRequest
+  | CreateChannelRequest
+  | JoinChannelRequest
+  | UpdateChannelRequest
+  | PushMessageRequest
+  | CloseChannelRequest;
 
-export type ActionParameters =
-  | CreateChannelParameters
-  | JoinChannelParameters
-  | UpdateChannelParameters
-  | CloseChannelParameters
-  | PushMessageParameters;
-
-export type NotificationParameters = ChannelResult | Message;
+type MethodName = Request['method'];
+type ActionParameters = Request['params'];
 
 export class ChannelClientError implements JsonRPCErrorResponse {
   jsonrpc: JsonRPCVersion = '2.0';
@@ -250,7 +207,7 @@ export class ChannelNotFoundError extends ChannelClientError {
   };
 }
 
-export const ErrorCodesToObjectsMap: {[key in ErrorCodes]: typeof ChannelClientError} = {
+export const ErrorCodesToObjectsMap: { [key in ErrorCodes]: typeof ChannelClientError } = {
   [ErrorCodes.CHANNEL_NOT_FOUND]: ChannelNotFoundError,
   [ErrorCodes.INVALID_APP_DATA]: InvalidAppDataError,
   [ErrorCodes.INVALID_APP_DEFINITION]: InvalidAppDefinitionError,
@@ -261,22 +218,20 @@ export const ErrorCodesToObjectsMap: {[key in ErrorCodes]: typeof ChannelClientE
 export class ChannelClient {
   protected events = new EventEmitter();
 
-  onMessageReceived(
-    notificationName: NotificationName,
-    callback: (message: JsonRPCNotification<ActionParameters>) => void
-  ): void {
-    this.events.on(
-      'message',
-      (message: JsonRPCNotification<ActionParameters> | JsonRPCRequest<ActionParameters>) => {
-        if (message.method === notificationName) {
-          callback(message);
-        }
-      }
-    );
+  onMessageQueued(callback: (notification: MessageQueuedNotification) => void) {
+    this.events.on('MessageQueued', notification => {
+      callback(notification);
+    });
+  }
+
+  onChannelUpdated(callback: (notification: ChannelUpdatedNotification) => void) {
+    this.events.on('ChannelUpdated', notification => {
+      callback(notification);
+    });
   }
 
   unSubscribe(notificationName: NotificationName): void {
-    this.events.removeAllListeners('message');
+    this.events.removeAllListeners(notificationName);
   }
 
   async createChannel(parameters: CreateChannelParameters) {

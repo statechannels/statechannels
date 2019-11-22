@@ -1,5 +1,5 @@
 import React from 'react';
-import {StyleSheet, css} from 'aphrodite';
+import { StyleSheet, css } from 'aphrodite';
 
 interface ButtonStyles {
   button: Record<string, any>;
@@ -27,7 +27,7 @@ interface IProps {
   onClick: () => any;
 }
 
-const Button: React.SFC<IProps> = ({children, onClick}) => {
+const Button: React.SFC<IProps> = ({ children, onClick }) => {
   return (
     <button onClick={onClick} type="button" className={css(styles.button)}>
       {children}

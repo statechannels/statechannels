@@ -16,18 +16,16 @@ import ChannelState from '../channelState';
 
 async function getChannelStates(channelId): Promise<State> {
   const channel = await Channel.query()
-    .where({channel_id: channelId})
-    .select('id')
-    .first();
+    .findOne({channel_id: channelId})
+    .select('id');
   expect(channel).toBeTruthy();
   const channelState: ChannelState = await ChannelState.query()
-    .where({
+    .findOne({
       channel_id: channel.id,
       turn_num: 0
     })
     .eager('[channel.[participants], outcome.[allocation]]')
-    .select()
-    .first();
+    .select();
   return channelState.asStateObject();
 }
 

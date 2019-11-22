@@ -1,8 +1,8 @@
-import React, {Fragment} from 'react';
-import {connect} from 'react-redux';
+import React, { Fragment } from 'react';
+import { connect } from 'react-redux';
 
-import {Weapon, Player} from '../core';
-import {SiteState} from '../redux/reducer';
+import { Weapon, Player } from '../core';
+import { SiteState } from '../redux/reducer';
 import * as gameActions from '../redux/game/actions';
 
 import WaitingRoomPage from '../components/WaitingRoomPage';
@@ -19,7 +19,7 @@ import ProfileContainer from './ProfileContainer';
 
 import WaitForWallet from '../components/WaitForWallet'; // WaitForFunding, maybe others?
 
-import {GameState, StateName, PlayingState} from '../redux/game/state';
+import { GameState, StateName, PlayingState } from '../redux/game/state';
 
 interface GameProps {
   state: GameState;
@@ -38,8 +38,8 @@ function GameContainer(props: GameProps) {
 }
 
 function RenderGame(props: GameProps) {
-  const {state, chooseWeapon, playAgain, confirmGame, declineGame, conclude} = props;
-  const {player, turnNum} = state as PlayingState;
+  const { state, chooseWeapon, playAgain, confirmGame, declineGame, conclude } = props;
+  const { player, turnNum } = state as PlayingState;
   const ourTurn = player === Player.PlayerA ? turnNum % 2 !== 0 : turnNum % 2 === 0;
   switch (state.name) {
     case StateName.NoName:
@@ -140,7 +140,4 @@ const mapDispatchToProps = {
 
 // why does it think that mapStateToProps can return undefined??
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(GameContainer);
+export default connect(mapStateToProps, mapDispatchToProps)(GameContainer);

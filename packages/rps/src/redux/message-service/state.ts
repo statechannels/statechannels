@@ -1,6 +1,6 @@
 import * as actions from '../game/actions';
-import {Commitment, Address} from 'fmg-core';
-import {RPSCommitment, asCoreCommitment} from '../../core/rps-commitment';
+import { Commitment, Address } from 'fmg-core';
+import { RPSCommitment, asCoreCommitment } from '../../core/rps-commitment';
 
 export interface OutgoingMessage {
   opponentAddress: Address;
@@ -28,6 +28,6 @@ export function sendMessage(
 ): MessageState {
   return {
     ...state,
-    opponentOutbox: {opponentAddress, commitment: asCoreCommitment(commitment)},
+    opponentOutbox: { opponentAddress, commitment: asCoreCommitment(commitment) },
   };
 }

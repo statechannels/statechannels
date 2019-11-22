@@ -1,8 +1,8 @@
 import React from 'react';
 
-import {Button} from 'reactstrap';
+import { Button } from 'reactstrap';
 
-import {ApplicationLayout} from './ApplicationLayout';
+import { ApplicationLayout } from './ApplicationLayout';
 import * as web3Utils from 'web3-utils';
 interface Props {
   confirmGame: () => void;
@@ -13,7 +13,7 @@ interface Props {
 
 export default class ConfirmGamePage extends React.PureComponent<Props> {
   render() {
-    const {confirmGame, cancelGame, stake, opponentName} = this.props;
+    const { confirmGame, cancelGame, stake, opponentName } = this.props;
     return (
       <ApplicationLayout>
         <div className="w-100 text-center mb-5">

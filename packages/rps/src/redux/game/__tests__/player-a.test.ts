@@ -1,10 +1,10 @@
-import {gameReducer} from '../reducer';
-import {Player} from '../../../core';
+import { gameReducer } from '../reducer';
+import { Player } from '../../../core';
 import * as scenarios from '../../../core/test-scenarios';
 import * as actions from '../actions';
 import * as state from '../state';
 
-import {itSends, itTransitionsTo, itStoresAction, itIncreasesTurnNumBy} from './helpers';
+import { itSends, itTransitionsTo, itStoresAction, itIncreasesTurnNumBy } from './helpers';
 
 const {
   preFundSetupA,
@@ -60,44 +60,44 @@ describe("player A's app", () => {
   };
 
   describe('when in waitForGameConfirmationA', () => {
-    const gameState = state.waitForGameConfirmationA({...aProps, ...preFundSetupA});
+    const gameState = state.waitForGameConfirmationA({ ...aProps, ...preFundSetupA });
 
     describe('when receiving preFundSetupB', () => {
       const action = actions.commitmentReceived(preFundSetupB);
-      const updatedState = gameReducer({messageState, gameState}, action);
+      const updatedState = gameReducer({ messageState, gameState }, action);
 
       it('requests funding from the wallet', () => {
-        expect(updatedState.messageState.walletOutbox).toEqual({type: 'FUNDING_REQUESTED'});
+        expect(updatedState.messageState.walletOutbox).toEqual({ type: 'FUNDING_REQUESTED' });
       });
 
-      itIncreasesTurnNumBy(1, {gameState, messageState}, updatedState);
+      itIncreasesTurnNumBy(1, { gameState, messageState }, updatedState);
       itTransitionsTo(state.StateName.WaitForFunding, updatedState);
     });
   });
 
   describe('when in waitForFunding', () => {
-    const gameState = state.waitForFunding({...aProps, ...preFundSetupB});
+    const gameState = state.waitForFunding({ ...aProps, ...preFundSetupB });
 
     describe('when funding is successful', () => {
       const action = actions.fundingSuccess(postFundSetupB);
-      const updatedState = gameReducer({messageState, gameState}, action);
+      const updatedState = gameReducer({ messageState, gameState }, action);
 
       itTransitionsTo(state.StateName.PickWeapon, updatedState);
-      itIncreasesTurnNumBy(2, {gameState, messageState}, updatedState);
+      itIncreasesTurnNumBy(2, { gameState, messageState }, updatedState);
     });
   });
 
   describe('when in PickWeapon', () => {
-    const gameState = state.pickWeapon({...aProps, ...postFundSetupB});
+    const gameState = state.pickWeapon({ ...aProps, ...postFundSetupB });
 
     describe('when a move is chosen', () => {
       const action = actions.chooseWeapon(aWeapon);
       // todo: will need to stub out the randomness in the salt somehow
-      const updatedState = gameReducer({messageState, gameState}, action);
+      const updatedState = gameReducer({ messageState, gameState }, action);
 
       itSends(propose, updatedState);
       itTransitionsTo(state.StateName.WaitForOpponentToPickWeaponA, updatedState);
-      itIncreasesTurnNumBy(1, {gameState, messageState}, updatedState);
+      itIncreasesTurnNumBy(1, { gameState, messageState }, updatedState);
 
       it('stores the move and salt', () => {
         const newGameState = updatedState.gameState as state.WaitForOpponentToPickWeaponA;
@@ -108,17 +108,17 @@ describe("player A's app", () => {
   });
 
   describe('when in WaitForOpponentToPickWeaponA', () => {
-    const gameState = state.waitForOpponentToPickWeaponA({...aProps, ...propose, salt});
+    const gameState = state.waitForOpponentToPickWeaponA({ ...aProps, ...propose, salt });
 
     describe('when Accept arrives', () => {
       describe('when enough funds to continue', () => {
         const action = actions.commitmentReceived(accept);
 
-        const updatedState = gameReducer({messageState, gameState}, action);
+        const updatedState = gameReducer({ messageState, gameState }, action);
 
         itSends(reveal, updatedState);
         itTransitionsTo(state.StateName.PlayAgain, updatedState);
-        itIncreasesTurnNumBy(2, {gameState, messageState}, updatedState);
+        itIncreasesTurnNumBy(2, { gameState, messageState }, updatedState);
         it('sets theirWeapon and the result', () => {
           const newGameState = updatedState.gameState as state.PlayAgain;
           expect(newGameState.theirWeapon).toEqual(bWeapon);
@@ -133,9 +133,9 @@ describe("player A's app", () => {
           balances: proposeInsufficientFunds.allocation,
           latestPosition: proposeInsufficientFunds,
         };
-        const updatedState = gameReducer({messageState, gameState: gameState2}, action);
+        const updatedState = gameReducer({ messageState, gameState: gameState2 }, action);
 
-        itIncreasesTurnNumBy(2, {gameState, messageState}, updatedState);
+        itIncreasesTurnNumBy(2, { gameState, messageState }, updatedState);
         itSends(revealInsufficientFunds, updatedState);
         itTransitionsTo(state.StateName.GameOver, updatedState);
       });
@@ -143,57 +143,57 @@ describe("player A's app", () => {
   });
 
   describe('when in PlayAgain', () => {
-    const gameState = state.playAgain({...aProps, ...reveal});
+    const gameState = state.playAgain({ ...aProps, ...reveal });
 
     describe('if the player decides to continue', () => {
       const action = actions.playAgain();
-      const updatedState = gameReducer({messageState, gameState}, action);
+      const updatedState = gameReducer({ messageState, gameState }, action);
 
-      itIncreasesTurnNumBy(0, {gameState, messageState}, updatedState);
+      itIncreasesTurnNumBy(0, { gameState, messageState }, updatedState);
       itTransitionsTo(state.StateName.WaitForRestingA, updatedState);
     });
 
     describe('if Resting arrives', () => {
       const action = actions.commitmentReceived(resting);
-      const updatedState = gameReducer({messageState, gameState}, action);
+      const updatedState = gameReducer({ messageState, gameState }, action);
 
       itStoresAction(action, updatedState);
-      itIncreasesTurnNumBy(0, {gameState, messageState}, updatedState);
+      itIncreasesTurnNumBy(0, { gameState, messageState }, updatedState);
 
       describe('if the player decides to continue', () => {
         const playAction = actions.playAgain();
         const updatedState2 = gameReducer(updatedState, playAction);
 
-        itIncreasesTurnNumBy(1, {gameState, messageState}, updatedState2);
+        itIncreasesTurnNumBy(1, { gameState, messageState }, updatedState2);
         itTransitionsTo(state.StateName.PickWeapon, updatedState2);
       });
     });
   });
 
   describe('when in WaitForRestingA', () => {
-    const gameState = state.waitForRestingA({...aProps, ...reveal});
+    const gameState = state.waitForRestingA({ ...aProps, ...reveal });
 
     describe('when resting arrives', () => {
       const action = actions.commitmentReceived(resting);
-      const updatedState = gameReducer({messageState, gameState}, action);
+      const updatedState = gameReducer({ messageState, gameState }, action);
 
-      itIncreasesTurnNumBy(1, {gameState, messageState}, updatedState);
+      itIncreasesTurnNumBy(1, { gameState, messageState }, updatedState);
       itTransitionsTo(state.StateName.PickWeapon, updatedState);
     });
   });
 
   describe('when in GameOver', () => {
-    const gameState = state.gameOver({...aProps, ...conclude});
+    const gameState = state.gameOver({ ...aProps, ...conclude });
 
     describe('when the player wants to finish the game', () => {
       const action = actions.resign();
-      const updatedState = gameReducer({messageState, gameState}, action);
+      const updatedState = gameReducer({ messageState, gameState }, action);
 
       itTransitionsTo(state.StateName.WaitForWithdrawal, updatedState);
-      itIncreasesTurnNumBy(0, {gameState, messageState}, updatedState);
+      itIncreasesTurnNumBy(0, { gameState, messageState }, updatedState);
 
       it('requests a conclude from the wallet', () => {
-        expect(updatedState.messageState.walletOutbox).toEqual({type: 'CONCLUDE_REQUESTED'});
+        expect(updatedState.messageState.walletOutbox).toEqual({ type: 'CONCLUDE_REQUESTED' });
       });
     });
   });

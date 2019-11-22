@@ -1,8 +1,8 @@
 import React from 'react';
 
-import {Weapon} from '../core';
-import {WeaponBadge} from './WeaponBadge';
-import {GameLayout} from './GameLayout';
+import { Weapon } from '../core';
+import { WeaponBadge } from './WeaponBadge';
+import { GameLayout } from './GameLayout';
 
 interface Props {
   message: string;
@@ -15,7 +15,7 @@ export default class WeaponSelectedPage extends React.PureComponent<Props> {
   };
 
   render() {
-    const {message, yourWeapon} = this.props;
+    const { message, yourWeapon } = this.props;
 
     return (
       <GameLayout>

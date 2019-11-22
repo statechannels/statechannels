@@ -4,6 +4,10 @@ export interface ChannelStore {
   [channelId: string]: ChannelState;
 }
 
+export interface BytecodeStorage {
+  [appDefinition: string]: string;
+}
+
 export function emptyChannelStore(): ChannelStore {
   return {};
 }

@@ -1,6 +1,7 @@
 import {Channel as ChannelObject} from '@statechannels/nitro-protocol';
 import {Uint256} from 'fmg-core';
 import {Model, snakeCaseMappers} from 'objection';
+import ChannelHolding from './channelHoldings';
 import ChannelParticipant from './channelParticipants';
 import ChannelState from './channelState';
 
@@ -27,6 +28,14 @@ export default class Channel extends Model {
         from: 'channels.id',
         to: 'channel_states.channel_id'
       }
+    },
+    holdings: {
+      relation: Model.HasManyRelation,
+      modelClass: ChannelHolding,
+      join: {
+        from: 'channels.id',
+        to: 'channel_holdings.channel_id'
+      }
     }
   };
 
@@ -41,8 +50,8 @@ export default class Channel extends Model {
   readonly id!: number;
   channelId: string;
   chainId: Uint256;
-  holdings!: Uint256;
   channelNonce: Uint256;
   participants: ChannelParticipant[];
   states: ChannelState[];
+  holdings: ChannelHolding[];
 }

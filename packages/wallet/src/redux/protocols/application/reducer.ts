@@ -21,6 +21,7 @@ import {disputeReducer} from "../dispute/reducer";
 import {joinSignature} from "ethers/utils";
 import {State, SignedState} from "@statechannels/nitro-protocol";
 import {ChannelParticipant} from "../../channel-store";
+import {getAppDefinitionBytecode} from "../../../redux/selectors";
 
 // TODO: Right now we're using a fixed application ID
 // since we're not too concerned with handling multiple running app channels.
@@ -35,7 +36,12 @@ export function initialize(
   participants: ChannelParticipant[]
 ): ProtocolStateWithSharedData<states.ApplicationState> {
   return {
-    protocolState: states.waitForFirstState({channelId, privateKey, address, participants}),
+    protocolState: states.waitForFirstState({
+      channelId,
+      privateKey,
+      address,
+      participants
+    }),
     sharedData: registerChannelToMonitor(sharedData, APPLICATION_PROCESS_ID, channelId, [])
   };
 }
@@ -198,10 +204,15 @@ const validateAndUpdate = (
       sharedData.channelStore,
       signedState,
       protocolState.privateKey,
-      protocolState.participants
+      protocolState.participants,
+      getAppDefinitionBytecode(sharedData, signedState.state.appDefinition)
     );
   } else if (protocolState.type === "Application.Ongoing") {
-    return checkAndStore(sharedData.channelStore, signedState);
+    return checkAndStore(
+      sharedData.channelStore,
+      signedState,
+      getAppDefinitionBytecode(sharedData, signedState.state.appDefinition)
+    );
   } else {
     return {isSuccess: false, store: sharedData.channelStore};
   }
@@ -217,9 +228,14 @@ const signAndUpdate = (
       sharedData.channelStore,
       state,
       protocolState.privateKey,
-      protocolState.participants
+      protocolState.participants,
+      getAppDefinitionBytecode(sharedData, state.appDefinition)
     );
   } else {
-    return signAndStore(sharedData.channelStore, state);
+    return signAndStore(
+      sharedData.channelStore,
+      state,
+      getAppDefinitionBytecode(sharedData, state.appDefinition)
+    );
   }
 };

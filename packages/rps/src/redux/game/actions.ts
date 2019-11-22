@@ -1,6 +1,5 @@
 import { Weapon, RPSCommitment } from '../../core/rps-commitment';
 
-export const UPDATE_CHANNEL_STATE = 'CHANNEL.UPDATE_STATE';
 export const UPDATE_PROFILE = 'LOGIN.UPDATE_PROFILE';
 export const JOIN_OPEN_GAME = 'GAME.JOIN_OPEN_GAME';
 export const NEW_OPEN_GAME = 'GAME.NEW_OPEN_GAME';
@@ -21,11 +20,6 @@ export const CREATE_CHALLENGE = 'GAME.CREATE_CHALLENGE';
 export const RESPOND_TO_CHALLENGE = 'GAME.RESPOND_TO_CHALLENGE';
 export const CHALLENGE_RESPONSE_REQUESTED = 'GAME.CHALLENGE_RESPONSE_REQUESTED';
 export const CHALLENGE_COMPLETED = 'GAME.CHALLENGE_COMPLETED';
-
-export const updateChannelState = (data: string) => ({
-  type: UPDATE_CHANNEL_STATE as typeof UPDATE_CHANNEL_STATE,
-  data,
-});
 
 export const updateProfile = (name: string, twitterHandle: string) => ({
   type: UPDATE_PROFILE as typeof UPDATE_PROFILE,
@@ -120,7 +114,6 @@ export const messageSent = () => ({
   type: MESSAGE_SENT as typeof MESSAGE_SENT,
 });
 
-export type UpdateChannelState = ReturnType<typeof updateChannelState>;
 export type InitialCommitmentReceived = ReturnType<typeof initialCommitmentReceived>;
 export type NewOpenGame = ReturnType<typeof newOpenGame>;
 export type CancelOpenGame = ReturnType<typeof cancelOpenGame>;
@@ -142,7 +135,6 @@ export type ChallengeResponseRequested = ReturnType<typeof challengeResponseRequ
 export type ChallengeCompleted = ReturnType<typeof challengeCompleted>;
 
 export type GameAction =
-  | UpdateChannelState
   | UpdateProfile
   | NewOpenGame
   | CancelOpenGame

@@ -16,7 +16,8 @@ import {
   signAndInitialize as signAndInitializeChannelStore,
   emptyChannelStore,
   SignFailureReason,
-  ChannelParticipant
+  ChannelParticipant,
+  BytecodeStorage
 } from "./channel-store";
 import {Properties} from "./utils";
 import * as NewLedgerChannel from "./protocols/new-ledger-channel/states";
@@ -47,6 +48,8 @@ import {
   isTerminalConcludingState
 } from "./protocols/concluding/states";
 import {SignedState, State} from "@statechannels/nitro-protocol";
+import {CONSENSUS_LIBRARY_ADDRESS, CONSENSUS_LIBRARY_BYTECODE} from "../constants";
+import {getAppDefinitionBytecode} from "./selectors";
 
 export type WalletState = Initialized;
 
@@ -61,6 +64,7 @@ export const WALLET_INITIALIZED = "WALLET.INITIALIZED";
 
 export interface SharedData {
   channelStore: ChannelStore;
+  bytecodeStorage: BytecodeStorage;
   outboxState: OutboxState;
   channelSubscriptions: ChannelSubscriptions;
   adjudicatorState: AdjudicatorState;
@@ -151,7 +155,10 @@ export const EMPTY_SHARED_DATA: SharedData = {
   channelStore: emptyChannelStore(),
   channelSubscriptions: {},
   adjudicatorState: {},
-  fundingState: {}
+  fundingState: {},
+  bytecodeStorage: {
+    [CONSENSUS_LIBRARY_ADDRESS]: CONSENSUS_LIBRARY_BYTECODE
+  }
 };
 
 export function sharedData(params: SharedData): SharedData {
@@ -160,14 +167,16 @@ export function sharedData(params: SharedData): SharedData {
     channelStore: channelState,
     adjudicatorState,
     fundingState,
-    channelSubscriptions
+    channelSubscriptions,
+    bytecodeStorage
   } = params;
   return {
     outboxState,
     channelStore: channelState,
     adjudicatorState,
     fundingState,
-    channelSubscriptions
+    channelSubscriptions,
+    bytecodeStorage
   };
 }
 
@@ -245,7 +254,8 @@ export function signAndInitialize(
     sharedDataState.channelStore,
     state,
     privateKey,
-    participants
+    participants,
+    getAppDefinitionBytecode(sharedDataState, state.appDefinition)
   );
   if (result.isSuccess) {
     return {
@@ -268,7 +278,8 @@ export function checkAndInitialize(
     state.channelStore,
     signedState,
     privateKey,
-    participants
+    participants,
+    getAppDefinitionBytecode(state, signedState.state.appDefinition)
   );
   if (result.isSuccess) {
     return {...result, store: setChannelStore(state, result.store)};
@@ -278,7 +289,16 @@ export function checkAndInitialize(
 }
 
 export function checkAndStore(state: SharedData, signedState: SignedState): CheckResult {
-  const result = checkAndStoreChannelStore(state.channelStore, signedState);
+  const bytecode = getAppDefinitionBytecode(state, signedState.state.appDefinition);
+
+  if (!bytecode) {
+    throw new Error(
+      "Wallet tried to checkAndStore a channel using an appDefinition with no bytecode recorded"
+    );
+  }
+
+  const result = checkAndStoreChannelStore(state.channelStore, signedState, bytecode);
+
   if (result.isSuccess) {
     return {...result, store: setChannelStore(state, result.store)};
   } else {
@@ -296,7 +316,11 @@ interface CheckFailure {
 }
 
 export function signAndStore(sharedDataState: SharedData, state: State): SignResult {
-  const result = signAndStoreChannelStore(sharedDataState.channelStore, state);
+  const result = signAndStoreChannelStore(
+    sharedDataState.channelStore,
+    state,
+    getAppDefinitionBytecode(sharedDataState, state.appDefinition)
+  );
   if (result.isSuccess) {
     return {
       isSuccess: result.isSuccess,

@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import React from 'react';
 
-import {Button, Modal, ModalHeader, ModalBody} from 'reactstrap';
+import { Button, Modal, ModalHeader, ModalBody } from 'reactstrap';
 
 import * as web3Utils from 'web3-utils';
 
@@ -24,7 +24,7 @@ export default class CreatingOpenGameModal extends React.PureComponent<Props, St
   constructor(props) {
     super(props);
     this.buyInInput = React.createRef();
-    this.state = {errorMessage: '', buyIn: '', buyInChanged: false};
+    this.state = { errorMessage: '', buyIn: '', buyInChanged: false };
     this.createOpenGameHandler = this.createOpenGameHandler.bind(this);
     this.handleBuyInChange = this.handleBuyInChange.bind(this);
     this.modalClosed = this.modalClosed.bind(this);
@@ -40,7 +40,7 @@ export default class CreatingOpenGameModal extends React.PureComponent<Props, St
     } else if (buyIn < MIN_BUYIN || buyIn > MAX_BUYIN) {
       errorMessage = `Invalid round buy in amount ${this.state.buyIn}. Please enter an amount between ${MIN_BUYIN} and ${MAX_BUYIN}`;
     }
-    this.setState({errorMessage, buyIn: e.target.value, buyInChanged: true});
+    this.setState({ errorMessage, buyIn: e.target.value, buyInChanged: true });
   }
 
   componentDidUpdate() {
@@ -54,12 +54,12 @@ export default class CreatingOpenGameModal extends React.PureComponent<Props, St
     if (this.state.errorMessage === '') {
       this.props.createOpenGame(web3Utils.toWei(this.state.buyIn, 'ether'));
     } else {
-      this.setState({buyInChanged: true});
+      this.setState({ buyInChanged: true });
     }
   }
 
   modalClosed() {
-    this.setState({errorMessage: '', buyIn: '', buyInChanged: false});
+    this.setState({ errorMessage: '', buyIn: '', buyInChanged: false });
     this.props.cancelOpenGame();
   }
 
