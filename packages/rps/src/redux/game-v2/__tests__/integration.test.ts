@@ -398,6 +398,18 @@ describe('when either player resigns (which includes deciding not to play again)
   });
 });
 
-describe.skip('when the channel is closed', () => {
-  it('transitions to game over');
+// when the opponent resigns
+
+describe('when the channel is closed', () => {
+  it('transitions to game over', async () => {
+    const initialState = gameState(localStatesA.shuttingDownResign, channelStates.roundProposed);
+    const action = updateChannelState(channelStates.closed); // triggered by ChannelUpdatedListener
+
+    const { storeState } = await expectSaga(gameSaga as any, client)
+      .withReducer(reducer, initialState)
+      .dispatch(action)
+      .run({ silenceTimeout: true });
+
+    expect(storeState).toEqual(gameState(localStatesA.gameOverYouResigned, channelStates.closed));
+  });
 });

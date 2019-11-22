@@ -1,5 +1,6 @@
 import { BigNumber } from 'ethers/utils';
 import { ChannelState, Weapon, Result } from '../../core';
+import { ShutDownReason } from './state';
 
 export type GameAction =
   | JoinOpenGame
@@ -10,7 +11,8 @@ export type GameAction =
   | ResultArrived
   | PlayAgain
   | StartRound
-  | Resign;
+  | Resign
+  | GameOver;
 
 export interface UpdateChannelState {
   type: 'UpdateChannelState';
@@ -65,6 +67,11 @@ export interface Resign {
   type: 'Resign';
 }
 
+export interface GameOver {
+  type: 'GameOver';
+  reason: ShutDownReason;
+}
+
 // Constructors
 // ============
 
@@ -113,3 +120,4 @@ export const resultArrived = (
 export const playAgain = (): PlayAgain => ({ type: 'PlayAgain' });
 export const startRound = (): StartRound => ({ type: 'StartRound' });
 export const resign = (): Resign => ({ type: 'Resign' });
+export const gameOver = (reason: ShutDownReason): GameOver => ({ type: 'GameOver', reason });

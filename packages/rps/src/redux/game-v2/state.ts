@@ -83,7 +83,11 @@ export interface WaitForRestart extends Playing {
   type: 'WaitForRestart';
 }
 
-type ShutDownReason = 'InsufficientFundsYou' | 'InsufficientFundsOpponent' | 'YouResigned';
+export type ShutDownReason =
+  | 'InsufficientFundsYou'
+  | 'InsufficientFundsOpponent'
+  | 'YouResigned'
+  | 'TheyResigned';
 export interface ShuttingDown extends Playing {
   type: 'ShuttingDown';
   reason: ShutDownReason;
@@ -91,6 +95,7 @@ export interface ShuttingDown extends Playing {
 
 export interface GameOver extends Playing {
   type: 'GameOver';
+  reason: ShutDownReason;
 }
 
 // Helpers
@@ -171,6 +176,12 @@ export const shuttingDown = <T extends Playing>(
   reason: ShutDownReason
 ): ShuttingDown => ({
   type: 'ShuttingDown',
+  ...playing(state),
+  reason,
+});
+
+export const gameOver = <T extends Playing>(state: T, reason: ShutDownReason): GameOver => ({
+  type: 'GameOver',
   ...playing(state),
   reason,
 });

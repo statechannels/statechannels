@@ -7,8 +7,9 @@ import {
   resultArrived,
   startRound,
   FundingSituation,
+  gameOver,
 } from './actions';
-import { GameState } from './state';
+import { GameState, ShutDownReason } from './state';
 import { randomHex } from '../../utils/randomHex';
 import { bigNumberify, BigNumber } from 'ethers/utils';
 
@@ -111,6 +112,22 @@ export function* gameSaga(rpsChannelClient: RPSChannelClient) {
           channelState.channelId
         );
         yield put(updateChannelState(closingChannelState));
+      } else if (
+        localState.type !== 'GameOver' &&
+        channelState &&
+        channelState.status === 'closed'
+      ) {
+        let reason: ShutDownReason = 'YouResigned';
+        if (localState.type === 'ShuttingDown') {
+          reason = localState.reason;
+        } else if (
+          bigNumberify(channelState.turnNum)
+            .mod(2)
+            .eq(0)
+        ) {
+          reason = 'TheyResigned';
+        }
+        yield put(gameOver(reason));
       }
     } else {
       // player b
@@ -189,6 +206,22 @@ export function* gameSaga(rpsChannelClient: RPSChannelClient) {
         channelState.status === 'running'
       ) {
         yield put(startRound());
+      } else if (
+        localState.type !== 'GameOver' &&
+        channelState &&
+        channelState.status === 'closed'
+      ) {
+        let reason: ShutDownReason = 'YouResigned';
+        if (localState.type === 'ShuttingDown') {
+          reason = localState.reason;
+        } else if (
+          bigNumberify(channelState.turnNum)
+            .mod(2)
+            .eq(1)
+        ) {
+          reason = 'TheyResigned';
+        }
+        yield put(gameOver(reason));
       }
     }
   }

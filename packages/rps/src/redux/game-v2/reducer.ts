@@ -10,6 +10,7 @@ import {
   gameChosen,
   waitingRoom,
   opponentJoined,
+  gameOver,
 } from './state';
 import { Reducer, combineReducers } from 'redux';
 import {
@@ -24,6 +25,7 @@ import {
   CreateGame,
   GameJoined,
   StartRound,
+  GameOver,
 } from './actions';
 import { ChannelState } from '../../core';
 import { unreachable } from '../../utils/unreachable';
@@ -64,6 +66,8 @@ const localReducer: Reducer<LocalState> = (
       return handleStartRound(state, action);
     case 'Resign':
       return handleResign(state, action);
+    case 'GameOver':
+      return handleGameOver(state, action);
     default:
       return unreachable(action, state);
   }
@@ -167,6 +171,14 @@ const handleResign = (state: LocalState, action: Resign): LocalState => {
   if (state.type === 'Empty' || state.type === 'Lobby' || state.type === 'WaitingRoom') {
     return state;
   }
-
   return shuttingDown(state, 'YouResigned');
+};
+
+const handleGameOver = (state: LocalState, action: GameOver): LocalState => {
+  if (state.type === 'Empty' || state.type === 'Lobby' || state.type === 'WaitingRoom') {
+    return state;
+  }
+  const { reason } = action;
+
+  return gameOver(state, reason);
 };
