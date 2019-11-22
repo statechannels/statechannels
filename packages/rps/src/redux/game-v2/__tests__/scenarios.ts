@@ -1,5 +1,5 @@
 import {bigNumberify} from 'ethers/utils';
-import {AppData, RoundProposed, Start, RoundAccepted, Reveal, hashPreCommit} from '../../../core';
+import {AppData, hashPreCommit} from '../../../core';
 import {ChannelState, Result, Weapon, ChannelStatus} from '../../../core';
 import {LocalState} from '../state';
 import * as s from '../state';
@@ -22,11 +22,11 @@ const preCommit = hashPreCommit(aWeapon, salt);
 export const bWeapon = Weapon.Scissors;
 const playerBWeapon = bWeapon;
 
-const appData = {
-  start: {type: 'start'} as Start,
-  roundProposed: {type: 'roundProposed', stake, preCommit} as RoundProposed,
-  roundAccepted: {type: 'roundAccepted', stake, preCommit, playerBWeapon} as RoundAccepted,
-  reveal: {type: 'reveal', playerAWeapon, playerBWeapon, salt} as Reveal,
+const appData: Record<AppData['type'], AppData> = {
+  start: {type: 'start'},
+  roundProposed: {type: 'roundProposed', stake, preCommit},
+  roundAccepted: {type: 'roundAccepted', stake, preCommit, playerBWeapon},
+  reveal: {type: 'reveal', playerAWeapon, playerBWeapon, salt},
 };
 
 function channelState(
