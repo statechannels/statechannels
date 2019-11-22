@@ -1,10 +1,17 @@
 const config = {
   key: 'direct-funding',
-  initial: 'arrangeOutcome',
+  initial: 'updatePrefundOutcome',
   states: {
-    arrangeOutcome: {
+    updatePrefundOutcome: {
       invoke: {
         src: 'ledgerUpdate',
+        data: context => {
+          return {
+            targetChannelID: context.targetChannelID,
+            targetOutcome:
+              'preDepositOutcome(context.targetChannelID, context.minimalOutcome)',
+          };
+        },
         onDone: 'waiting',
       },
     },
@@ -12,7 +19,7 @@ const config = {
       on: {
         '*': [
           { target: 'deposit', cond: 'safeToDeposit', actions: 'deposit' },
-          { target: 'postFundSetup', cond: 'funded' },
+          { target: 'updatePostFundOutcome', cond: 'funded' },
         ],
       },
     },
@@ -21,8 +28,15 @@ const config = {
       onDone: 'waiting',
       onError: 'failure',
     },
-    postFundSetup: {
-      invoke: { src: 'advanceChannel', onDone: 'success', onError: 'failure' },
+    updatePostFundOutcome: {
+      invoke: {
+        src: 'ledgerUpdate',
+        data: context => ({
+          targetChannelID: context.targetChannelID,
+          targetOutcome: 'postDepositOutcome(context.targetChannelID)',
+        }),
+        onDone: 'success',
+      },
     },
     success: { type: 'final' },
     failure: { type: 'final' },

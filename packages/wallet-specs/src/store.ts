@@ -9,6 +9,7 @@ export class Store {
     this.store = {
       '0xabc': {
         state: {
+          channelID: '0xabc',
           turnNumber: 0,
           outcome: NULL_OUTCOME,
           appData: '0x',

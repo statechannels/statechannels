@@ -1,7 +1,11 @@
 export type AppData = string;
 export type Signature = string;
 export type Recipient = any;
-export type Outcome = any[];
+export interface OutcomeItem {
+  destination: string;
+  amount: number;
+}
+export type Outcome = OutcomeItem[];
 export type Address = string;
 export type PrivateKey = string;
 
@@ -10,6 +14,7 @@ export interface ChannelState {
   turnNumber: number;
   outcome: Outcome;
   appData: AppData;
+  channelID: string;
 }
 
 export interface SignedState {
@@ -27,3 +32,6 @@ export interface Failure {
 export interface Entry {
   type: '';
 }
+
+export { Chain } from './chain';
+export { Store } from './store';
