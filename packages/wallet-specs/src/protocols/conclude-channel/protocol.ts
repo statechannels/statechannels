@@ -1,40 +1,41 @@
+import { ChannelState } from '../..';
 import { saveConfig } from '../..//utils';
 import { store } from '../../store';
 
 const PROTOCOL = 'conclude-channel';
 
-function supported(channelID: string): boolean {
-  const { state } = store.getLatestWalletChannelSupport(channelID);
-  return state.isFinal;
+interface Init {
+  channelID: string;
 }
 
-function sendFinalState(channelID: string): void {
-  const { state: suppportedState } = store.getLatestWalletChannelSupport(
-    channelID
-  );
-  const unsupportedStates = store.getUnsupportedStates(channelID);
+function finalState({ channelID }: Init): ChannelState {
+  const latestState = store
+    .getUnsupportedStates(channelID)
+    .concat(store.getLatestWalletChannelSupport(channelID))
+    .filter(({ state }) => store.signedByMe(state))
+    .sort(({ state }) => state.turnNumber)
+    .pop();
 
-  unsupportedStates.map(({ state }) => {
-    if (store.signedByMe(state) && suppportedState.outcome !== state.outcome) {
-      throw new Error('Unsafe to send final state');
-    }
-  });
-  store.sendState({ ...suppportedState, isFinal: true });
+  if (!latestState) {
+    throw new Error('No state');
+  }
+
+  return {
+    ...latestState.state,
+    turnNumber: latestState.state.turnNumber + 1,
+    isFinal: true,
+  };
 }
 
 const waiting = {
-  entry: 'sendFinalState',
-  on: {
-    CHANNEL_UPDATED: [
-      {
-        target: 'success',
-        cond: 'supported',
-      },
-    ],
+  invoke: {
+    src: 'supportState',
+    data: 'finalState',
   },
+  onDone: 'success',
 };
 
-const advanceChannelConfig = {
+const config = {
   key: PROTOCOL,
   initial: 'waiting',
   states: {
@@ -43,10 +44,6 @@ const advanceChannelConfig = {
   },
 };
 
-const guards = {
-  supported: 'context => true',
-};
+const guards = {};
 
-saveConfig({ ...advanceChannelConfig }, { guards });
-
-export { advanceChannelConfig };
+saveConfig({ ...config }, { guards });

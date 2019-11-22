@@ -3,12 +3,12 @@ const config = {
   initial: 'waiting',
   states: {
     waiting: {
-      entry: 'sendFinalState',
-      on: { CHANNEL_UPDATED: [{ target: 'success', cond: 'supported' }] },
+      invoke: { src: 'supportState', data: 'finalState' },
+      onDone: 'success',
     },
     success: { type: 'final' },
   },
 };
-const guards = { supported: context => true };
+const guards = {};
 const customActions = {};
 const machine = Machine(config, { guards, actions: customActions });
