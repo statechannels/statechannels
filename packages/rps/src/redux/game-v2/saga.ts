@@ -10,7 +10,6 @@ import {bigNumberify, BigNumber} from 'ethers/utils';
 const getGameState = (state: any): GameState => state.game;
 
 export function* gameSaga(channelClient: RPSChannelClient) {
-  // const _gameState: GameState =
   while (true) {
     yield take('*'); // run after every action
 
@@ -98,6 +97,16 @@ export function* gameSaga(channelClient: RPSChannelClient) {
       ) {
         const closingChannelState = yield call(channelClient.closeChannel, channelState.channelId);
         yield put(updateChannelState(closingChannelState));
+      }
+    } else {
+      // player b
+      if (
+        localState.type === 'OpponentJoined' &&
+        channelState &&
+        channelState.status === 'proposed'
+      ) {
+        const preFundSetup1 = yield call(channelClient.joinChannel, channelState.channelId);
+        yield put(updateChannelState(preFundSetup1));
       }
     }
   }

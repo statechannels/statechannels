@@ -1,17 +1,17 @@
 import {bigNumberify} from 'ethers/utils';
 import {AppData, RoundProposed, Start, RoundAccepted, Reveal, hashPreCommit} from '../../../core';
-import {ChannelState, Result, Weapon} from '../../../core';
+import {ChannelState, Result, Weapon, ChannelStatus} from '../../../core';
 import {LocalState} from '../state';
 import * as s from '../state';
 
 export const channelId = '0xabc234';
-const aName = 'Alice';
+export const aName = 'Alice';
 export const bName = 'Bob';
 const aUserId = 'userA';
 const bUserId = 'userB';
 const aDestination = 'destinationA';
 const bDestination = 'destinationB';
-const aAddress = '0x5409ED021D9299bf6814279A6A1411A7e866A631';
+export const aAddress = '0x5409ED021D9299bf6814279A6A1411A7e866A631';
 export const bAddress = '0x6Ecbe1DB9EF729CBe972C83Fb886247691Fb6beb';
 export const stake = bigNumberify(1);
 const roundBuyIn = stake;
@@ -33,7 +33,7 @@ function channelState(
   appDataParam: AppData, // to avoid shadowed outer variable
   turnNum: number,
   balances: number[],
-  status = 'running'
+  status: ChannelStatus = 'running'
 ): ChannelState {
   return {
     channelId,
@@ -50,10 +50,10 @@ function channelState(
 }
 
 export const channelStates = {
-  preFund0: channelState(appData.start, 0, [5, 5]),
-  preFund1: channelState(appData.start, 1, [5, 5]),
-  postFund0: channelState(appData.start, 2, [5, 5]),
-  postFund1: channelState(appData.start, 3, [5, 5]),
+  preFund0: channelState(appData.start, 0, [5, 5], 'proposed'),
+  preFund1: channelState(appData.start, 1, [5, 5], 'opening'),
+  postFund0: channelState(appData.start, 2, [5, 5], 'opening'),
+  postFund1: channelState(appData.start, 3, [5, 5], 'opening'),
   concludeFromStart: channelState(appData.start, 4, [5, 5], 'concluding'),
   roundProposed: channelState(appData.roundProposed, 4, [5, 5]),
   roundAccepted: channelState(appData.roundAccepted, 5, [4, 6]),

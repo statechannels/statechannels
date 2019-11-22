@@ -11,6 +11,8 @@ import {
   channelStates,
   aWeapon,
   salt,
+  aName,
+  aAddress,
 } from './scenarios';
 import {
   joinOpenGame,
@@ -19,6 +21,7 @@ import {
   playAgain,
   resign,
   createGame,
+  gameJoined,
 } from '../actions';
 import {ChannelState} from '../../../core';
 import {RPSChannelClient} from '../../../utils/rps-channel-client';
@@ -68,9 +71,44 @@ describe('when joining an open game', () => {
   });
 });
 
-// moving to chooseWeapon when game is accepted
+describe('when opponent joins your game', () => {
+  describe('and the channel update arrives first', () => {
+    it('calls joinChannel and transitions to OpponentJoined', async () => {
+      const initialState = gameState(localStatesB.waitingRoom);
+      const appNotification = gameJoined(aName, aAddress);
+      const channelUpdate = updateChannelState(channelStates.preFund0);
 
-describe('when chosing a weapon', () => {
+      const {storeState} = await expectSaga(gameSaga as any, client)
+        .withReducer(reducer, initialState)
+        .dispatch(channelUpdate)
+        .dispatch(appNotification)
+        .provide([[match.call.fn(client.joinChannel), Promise.resolve(channelStates.preFund1)]])
+        .run({silenceTimeout: true});
+
+      expect(storeState).toEqual(gameState(localStatesB.opponentJoined, channelStates.preFund1));
+    });
+  });
+  describe('and the app notification update arrives first', () => {
+    it('calls joinChannel and transitions to OpponentJoined', async () => {
+      const initialState = gameState(localStatesB.waitingRoom);
+      const appNotification = gameJoined(aName, aAddress);
+      const channelUpdate = updateChannelState(channelStates.preFund0);
+
+      const {storeState} = await expectSaga(gameSaga as any, client)
+        .withReducer(reducer, initialState)
+        .dispatch(appNotification)
+        .dispatch(channelUpdate)
+        .provide([[match.call.fn(client.joinChannel), Promise.resolve(channelStates.preFund1)]])
+        .run({silenceTimeout: true});
+
+      expect(storeState).toEqual(gameState(localStatesB.opponentJoined, channelStates.preFund1));
+    });
+  });
+});
+
+// moving to chooseWeapon when game is funded (from GameChosen / OpponentJoined)
+
+describe('when chosing a weapon as player A', () => {
   it('generates a salt, calls updateState, and finishes in WeaponAndSaltChosen', async () => {
     const initialState = gameState(localStatesA.chooseWeapon, channelStates.postFund1);
     const action = chooseWeapon(aWeapon);
@@ -90,7 +128,18 @@ describe('when chosing a weapon', () => {
   });
 });
 
-describe("when the opponent's move arrives", () => {
+describe('when choosing a weapon as player B', () => {
+  describe('and player A has already sent their state', () => {
+    it('updates the channel state and transitions to WeaponChosen');
+  });
+
+  describe("and player A hasn't sent their state yet", () => {
+    it('transitions to WeaponChosen');
+    it("updates the channel state when player A's state arrives");
+  });
+});
+
+describe("when player A receives player B's move", () => {
   describe('and there are sufficient funds to continue', () => {
     it('calls updateState and transitions to ResultPlayAgain', async () => {
       const initialState = gameState(localStatesA.weaponAndSaltChosen, channelStates.roundProposed);
@@ -106,8 +155,8 @@ describe("when the opponent's move arrives", () => {
     });
   });
 
-  describe('and player A is out of funds', () => {
-    it('calls updateState and transitions to ShuttingDown', async () => {
+  describe('and player B is out of funds', () => {
+    it('sends the reveal and transitions to ShuttingDown', async () => {
       const initialState = gameState(localStatesA.weaponAndSaltChosen, channelStates.roundProposed);
       const action = updateChannelState(channelStates.roundAcceptedInsufficientFundsB); // triggered by ChannelUpdatedListener
 
@@ -129,7 +178,16 @@ describe("when the opponent's move arrives", () => {
   });
 });
 
-describe('when player decides to play again', () => {
+describe('when player B receives the reveal', () => {
+  describe('and there are sufficient funds to continue', () => {
+    it('transitions to ResultPlayAgain');
+  });
+  describe('and player B is out of funds', () => {
+    it('calls closeChannel and transitions to ShuttingDown');
+  });
+});
+
+describe('when player A decides to play again', () => {
   describe('and the opponent has already decided to play again', () => {
     it('transitions to ChooseWeapon', async () => {
       // being in start2 === we know the opponent has decided to play again
@@ -171,7 +229,13 @@ describe('when player decides to play again', () => {
   });
 });
 
-describe('when a player resigns (which includes deciding not to play again)', () => {
+describe('when player B decides to play again', () => {
+  it('sends the new start state and transitions to ChooseWeapon', () => {
+    // todo
+  });
+});
+
+describe('when either player resigns (which includes deciding not to play again)', () => {
   describe("and it's their turn", () => {
     it('transitions to ShuttingDown and calls closeChannel', async () => {
       // if we're in postFund1, it's A's turn
@@ -225,7 +289,7 @@ describe('when a player resigns (which includes deciding not to play again)', ()
     });
   });
 });
-// resign whenever takes you to a "closing game"
-// then to a game closed
 
-// receiving a resign => your opponent decided not to play again or your opponent abandoned
+describe('when the channel is closed', () => {
+  it('transitions to game over');
+});

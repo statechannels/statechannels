@@ -9,6 +9,7 @@ import {
   shuttingDown,
   gameChosen,
   waitingRoom,
+  opponentJoined,
 } from './state';
 import {Reducer, combineReducers} from 'redux';
 import {
@@ -22,6 +23,7 @@ import {
   Resign,
   UpdateChannelState,
   CreateGame,
+  GameJoined,
 } from './actions';
 import {ChannelState} from '../../core';
 import {unreachable} from '../../utils/unreachable';
@@ -48,6 +50,8 @@ const localReducer: Reducer<LocalState> = (
       return handleJoinOpenGame(state, action);
     case 'CreateGame':
       return handleCreateGame(state, action);
+    case 'GameJoined':
+      return handleGameJoined(state, action);
     case 'ChooseWeapon':
       return handleChooseWeapon(state, action);
     case 'ChooseSalt':
@@ -79,6 +83,17 @@ const handleJoinOpenGame = (state: LocalState, action: JoinOpenGame): LocalState
   const {name, address} = state;
 
   return gameChosen({name, address, opponentName, roundBuyIn}, opponentAddress);
+};
+
+const handleGameJoined = (state: LocalState, action: GameJoined): LocalState => {
+  if (state.type !== 'WaitingRoom') {
+    return state;
+  }
+
+  const {opponentName, opponentAddress} = action;
+  const {name, address, roundBuyIn} = state;
+
+  return opponentJoined({name, address, opponentName, roundBuyIn, opponentAddress});
 };
 
 const handleCreateGame = (state: LocalState, action: CreateGame): LocalState => {

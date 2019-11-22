@@ -3,6 +3,7 @@ import {ChannelState, Weapon, Result} from '../../core';
 
 export type GameAction =
   | JoinOpenGame
+  | GameJoined
   | CreateGame
   | ChooseWeapon
   | ChooseSalt
@@ -26,6 +27,12 @@ export interface JoinOpenGame {
   opponentName: string;
   opponentAddress: string;
   roundBuyIn: BigNumber;
+}
+
+export interface GameJoined {
+  type: 'GameJoined';
+  opponentName: string;
+  opponentAddress: string;
 }
 
 export interface ChooseWeapon {
@@ -81,6 +88,12 @@ export const joinOpenGame = (
   opponentName,
   opponentAddress,
   roundBuyIn,
+});
+
+export const gameJoined = (opponentName: string, opponentAddress: string): GameJoined => ({
+  type: 'GameJoined',
+  opponentName,
+  opponentAddress,
 });
 
 export const resultArrived = (
