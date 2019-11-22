@@ -1,22 +1,22 @@
 import { ChannelState } from '../..';
-import { saveConfig } from '../..//utils';
 import { store } from '../../store';
+import { saveConfig } from '../../utils';
 
 const PROTOCOL = 'support-state';
 
-interface Context {
+export interface Init {
   channelID: string;
   state: ChannelState;
 }
 
-function supported({ channelID, state }: Context): boolean {
+function supported({ channelID, state }: Init): boolean {
   const { state: supportedState } = store.getLatestWalletChannelSupport(
     channelID
   );
   return store.equals(state, supportedState);
 }
 
-function sendState({ channelID, state }: Context): void {
+function sendState({ channelID, state }: Init): void {
   const unsupportedStates = store.getUnsupportedStates(channelID);
 
   unsupportedStates.map(({ state: unsupportedState }) => {
