@@ -1,42 +1,12 @@
-import { ChannelState, Outcome, Recipient, SignedState } from '.';
+import { ChannelState, SignedState } from '.';
 
-const NULL_OUTCOME: Outcome = [];
-
-export class Store {
-  private store: { [channelID: string]: SignedState };
-
-  constructor() {
-    this.store = {
-      '0xabc': {
-        state: {
-          channelID: '0xabc',
-          turnNumber: 0,
-          outcome: NULL_OUTCOME,
-          appData: '0x',
-          participants: [],
-        },
-      },
-    };
-  }
-
-  public get(channelID: string): SignedState {
-    return this.store[channelID];
-  }
-
-  public sign(channelID: string, state: ChannelState, recipient?: Recipient) {
-    this.store[channelID] = signState(this.store[channelID] || { state });
-    if (recipient) {
-      // send to recipient
-    }
-  }
+interface Store {
+  getLatestState: (channelId: string) => ChannelState;
+  getLatestSupportState: (channelId: string) => SignedState; // Support in null channels must be a single state
+  getLatestSupportChain: (channelId: string) => SignedState[]; //  Application channels would typically have multiple states in its support
 }
 
-function signState({ state, signatures }: SignedState): SignedState {
-  return {
-    state,
-    signatures: (signatures || []).concat('Signature'),
-  };
-}
+export const store = (null as any) as Store;
 
 // The store would send this action whenever the channel is updated
 export interface ChannelUpdated {

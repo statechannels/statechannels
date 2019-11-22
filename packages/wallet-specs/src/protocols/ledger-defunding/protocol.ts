@@ -1,7 +1,5 @@
-import { Outcome, Store } from '../..';
+import { Outcome, store } from '../..';
 import { saveConfig } from '../../utils';
-
-const store = new Store();
 
 const PROTOCOL = 'ledger-defunding';
 const success = { type: 'final' };
@@ -10,8 +8,8 @@ function defundedOutcome(
   ledgerChannelID: string,
   targetChannelID: string
 ): Outcome {
-  const { outcome } = store.get(ledgerChannelID).state;
-  const concludedState = store.get(targetChannelID).state;
+  const { outcome } = store.getLatestState(ledgerChannelID);
+  const concludedState = store.getLatestState(targetChannelID);
 
   // Assumes that the target channel only has one entry in the ledger channel
   // TODO: How do we ensure this?

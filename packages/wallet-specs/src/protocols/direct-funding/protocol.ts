@@ -1,8 +1,7 @@
-import { Chain, ChannelState, Outcome, OutcomeItem, Store } from '../../';
+import { Chain, ChannelState, Outcome, OutcomeItem, store } from '../../';
 import { saveConfig } from '../..//utils';
 
 const chain = new Chain();
-const store = new Store();
 
 const PROTOCOL = 'direct-funding';
 const success = { type: 'final' };
@@ -61,7 +60,7 @@ function preDepositOutcome(
   channelID: string,
   minimalOutcome: Outcome
 ): Outcome {
-  const { state } = store.get(channelID);
+  const state = store.getLatestState(channelID);
   const { outcome } = state;
 
   const destinations = uniqueDestinations(outcome.concat(minimalOutcome));
@@ -78,7 +77,7 @@ function amount(item: OutcomeItem): number {
 }
 
 function postDepositOutcome(channelID: string): Outcome {
-  const { outcome } = store.get(channelID).state;
+  const { outcome } = store.getLatestState(channelID);
   const destinations = uniqueDestinations(outcome);
 
   return destinations.map(destination => ({

@@ -34,4 +34,4 @@ export interface Entry {
 }
 
 export { Chain } from './chain';
-export { Store } from './store';
+export { store } from './store';
