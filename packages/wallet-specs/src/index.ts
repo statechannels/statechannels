@@ -15,6 +15,7 @@ export interface ChannelState {
   outcome: Outcome;
   appData: AppData;
   channelID: string;
+  isFinal: boolean;
 }
 
 export interface SignedState {

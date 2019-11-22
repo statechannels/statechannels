@@ -4,6 +4,10 @@ interface Store {
   getLatestState: (channelId: string) => ChannelState;
   getLatestSupportState: (channelId: string) => SignedState; // Support in null channels must be a single state
   getLatestSupportChain: (channelId: string) => SignedState[]; //  Application channels would typically have multiple states in its support
+  getUnsupportedStates: (channelID: string) => SignedState[];
+
+  signedByMe: (state: ChannelState) => boolean;
+  sendState: (state: ChannelState) => void;
 }
 
 export const store = (null as any) as Store;
