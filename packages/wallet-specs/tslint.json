@@ -1,18 +1,26 @@
 {
   "defaultSeverity": "error",
-  "extends": ["tslint:recommended", "tslint-plugin-prettier", "tslint-config-prettier"],
+  "extends": [
+    "tslint:recommended",
+    "tslint-plugin-prettier",
+    "tslint-config-prettier"
+  ],
   "rulesDirectory": ["tslint-plugin-prettier"],
   "rules": {
     "interface-name": false,
     "member-ordering": false,
-    "newline-per-chained-call": true,
     "no-console": [true, "warning"],
     "no-switch-case-fall-through": true,
     "object-literal-sort-keys": false,
     "ordered-imports": true,
     "prefer-for-of": true,
     "prettier": [true, ".prettierrc.js"],
-    "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore"]
+    "variable-name": [
+      true,
+      "ban-keywords",
+      "check-format",
+      "allow-leading-underscore"
+    ]
   },
   "linterOptions": {
     "exclude": [
