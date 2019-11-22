@@ -2,7 +2,13 @@ import {take, select, call, put} from 'redux-saga/effects';
 // import { take } from 'redux-saga/effects';
 import {RPSChannelClient} from '../../utils/rps-channel-client';
 import {AppData, hashPreCommit, calculateResult, updateAllocation, Player} from '../../core';
-import {updateChannelState, chooseSalt, resultArrived, restart, FundingSituation} from './actions';
+import {
+  updateChannelState,
+  chooseSalt,
+  resultArrived,
+  startRound,
+  FundingSituation,
+} from './actions';
 import {GameState} from './state';
 import {randomHex} from '../../utils/randomHex';
 import {bigNumberify, BigNumber} from 'ethers/utils';
@@ -87,7 +93,13 @@ export function* gameSaga(channelClient: RPSChannelClient) {
         channelState &&
         channelState.appData.type === 'start'
       ) {
-        yield put(restart());
+        yield put(startRound());
+      } else if (
+        localState.type === 'GameChosen' &&
+        channelState &&
+        channelState.status === 'running'
+      ) {
+        yield put(startRound());
       } else if (
         localState.type === 'ShuttingDown' &&
         channelState &&
@@ -168,7 +180,13 @@ export function* gameSaga(channelClient: RPSChannelClient) {
         const start: AppData = {type: 'start'};
         const state = yield call(channelClient.updateChannel, channelId, aBal, bBal, start);
         yield put(updateChannelState(state));
-        yield put(restart());
+        yield put(startRound());
+      } else if (
+        localState.type === 'OpponentJoined' &&
+        channelState &&
+        channelState.status === 'running'
+      ) {
+        yield put(startRound());
       }
     }
   }

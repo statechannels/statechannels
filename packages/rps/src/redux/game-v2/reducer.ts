@@ -19,11 +19,11 @@ import {
   ChooseSalt,
   ResultArrived,
   PlayAgain,
-  Restart,
   Resign,
   UpdateChannelState,
   CreateGame,
   GameJoined,
+  StartRound,
 } from './actions';
 import {ChannelState} from '../../core';
 import {unreachable} from '../../utils/unreachable';
@@ -60,8 +60,8 @@ const localReducer: Reducer<LocalState> = (
       return handleResultArrived(state, action);
     case 'PlayAgain':
       return handlePlayAgain(state, action);
-    case 'Restart':
-      return handleRestart(state, action);
+    case 'StartRound':
+      return handleStartRound(state, action);
     case 'Resign':
       return handleResign(state, action);
     default:
@@ -151,8 +151,12 @@ const handlePlayAgain = (state: LocalState, action: PlayAgain): LocalState => {
   return waitForRestart(state);
 };
 
-const handleRestart = (state: LocalState, action: Restart): LocalState => {
-  if (state.type !== 'WaitForRestart') {
+const handleStartRound = (state: LocalState, action: StartRound): LocalState => {
+  if (
+    state.type !== 'WaitForRestart' &&
+    state.type !== 'GameChosen' &&
+    state.type !== 'OpponentJoined'
+  ) {
     return state;
   }
 

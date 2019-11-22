@@ -54,6 +54,7 @@ export const channelStates = {
   preFund1: channelState(appData.start, 1, [5, 5], 'opening'),
   postFund0: channelState(appData.start, 2, [5, 5], 'opening'),
   postFund1: channelState(appData.start, 3, [5, 5], 'opening'),
+  ready: channelState(appData.start, 3, [5, 5], 'running'),
   concludeFromStart: channelState(appData.start, 4, [5, 5], 'closing'),
   roundProposed: channelState(appData.roundProposed, 4, [5, 5]),
   roundAccepted: channelState(appData.roundAccepted, 5, [4, 6]),

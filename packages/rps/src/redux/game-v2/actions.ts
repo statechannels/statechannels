@@ -9,7 +9,7 @@ export type GameAction =
   | ChooseSalt
   | ResultArrived
   | PlayAgain
-  | Restart
+  | StartRound
   | Resign;
 
 export interface UpdateChannelState {
@@ -57,8 +57,8 @@ export interface PlayAgain {
   type: 'PlayAgain';
 }
 
-export interface Restart {
-  type: 'Restart';
+export interface StartRound {
+  type: 'StartRound';
 }
 
 export interface Resign {
@@ -108,5 +108,5 @@ export const resultArrived = (
 });
 
 export const playAgain = (): PlayAgain => ({type: 'PlayAgain'});
-export const restart = (): Restart => ({type: 'Restart'});
+export const startRound = (): StartRound => ({type: 'StartRound'});
 export const resign = (): Resign => ({type: 'Resign'});

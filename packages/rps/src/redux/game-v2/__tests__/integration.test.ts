@@ -136,9 +136,29 @@ describe('when opponent joins your game', () => {
   });
 });
 
-describe.skip('when funding completes', () => {
-  it('player A moves to chooseWeapon');
-  it('player B moves to chooseWeapon');
+describe('when funding completes', () => {
+  it('player A moves to chooseWeapon', async () => {
+    const initialState = gameState(localStatesA.gameChosen, channelStates.postFund1);
+    const action = updateChannelState(channelStates.ready);
+
+    const {storeState} = await expectSaga(gameSaga as any, client)
+      .withReducer(reducer, initialState)
+      .dispatch(action)
+      .run({silenceTimeout: true});
+
+    expect(storeState).toEqual(gameState(localStatesA.chooseWeapon, channelStates.ready));
+  });
+  it('player B moves to chooseWeapon', async () => {
+    const initialState = gameState(localStatesB.opponentJoined, channelStates.postFund1);
+    const action = updateChannelState(channelStates.ready);
+
+    const {storeState} = await expectSaga(gameSaga as any, client)
+      .withReducer(reducer, initialState)
+      .dispatch(action)
+      .run({silenceTimeout: true});
+
+    expect(storeState).toEqual(gameState(localStatesB.chooseWeapon, channelStates.ready));
+  });
 });
 
 describe('when chosing a weapon as player A', () => {
