@@ -109,6 +109,24 @@ jobs:
       - upload_logs:
           file: test-stats
 
+  # TODO: Get this working
+  integration-test:
+    <<: *defaults
+    steps:
+      - <<: *restore_code
+      - checkout:
+          path: /home/circleci/project
+      - log_stats:
+          file: integration-test-stats
+      - attach_workspace:
+          at: /home/circleci/project
+      - run:
+          command: (cd packages/wallet && yarn run start)
+          background: true
+      - run: (cd packages/wallet && yarn run test:ci:integration)
+      - upload_logs:
+          file: integration-test-stats
+
 workflows:
   statechannels:
     jobs:
