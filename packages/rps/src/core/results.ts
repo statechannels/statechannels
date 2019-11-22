@@ -1,6 +1,6 @@
-import {Player} from './players';
-import {BigNumber} from 'ethers/utils';
-import {Weapon} from './rps-commitment';
+import { Player } from './players';
+import { BigNumber } from 'ethers/utils';
+import { Weapon } from './rps-commitment';
 
 export enum Result {
   Tie,
@@ -77,4 +77,17 @@ export function allocationAfterResult(
     case AbsoluteResult.Tie:
       return [balances[0].add(roundBuyIn.mul(1)), balances[1].sub(roundBuyIn.mul(1))];
   }
+}
+
+export function updateAllocation(
+  relativeResult: Result,
+  youAre: Player,
+  roundBuyIn: BigNumber,
+  aBal: BigNumber,
+  bBal: BigNumber
+): [BigNumber, BigNumber] {
+  return allocationAfterResult(convertToAbsoluteResult(relativeResult, youAre), roundBuyIn, [
+    aBal,
+    bBal,
+  ]) as [BigNumber, BigNumber];
 }
