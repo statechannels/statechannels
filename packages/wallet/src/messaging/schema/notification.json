@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://statechannels.org/schemas/notification.json",
+  "description": "A State Channel JSON RPC 2.0 request",
+  "oneOf": [
+    {
+      "description": "An individual notification",
+      "$ref": "#/definitions/notification"
+    },
+    {
+      "description": "An array of notifications",
+      "type": "array",
+      "items": {"$ref": "#/definitions/notification"}
+    }
+  ],
+  "definitions": {
+    "request": {
+      "type": "object",
+      "required": ["jsonrpc", "method", "params"],
+      "properties": {
+        "jsonrpc": {"enum": ["2.0"]},
+        "method": {
+          "enum": ["MessageQueued", "ChannelProposed", "ChannelUpdated"]
+        },
+        "id": {
+          "type": ["string", "number"]
+        }
+      },
+
+      "allOf": [
+        {
+          "if": {
+            "properties": {"method": {"const": "MessageQueued"}}
+          },
+          "then": {
+            "properties": {
+              "params": {"$ref": "push-message.json#/definitions/PushMessageParams"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {"method": {"const": "ChannelProposed"}}
+          },
+          "then": {
+            "params": {"$ref": "create-channel.json#/definitions/CreateChannelResult"}
+          }
+        },
+        {
+          "if": {
+            "properties": {"method": {"const": "ChannelUpdated"}}
+          },
+          "then": {
+            "params": {"$ref": "update-channel.json#/definitions/UpdateChannelParams"}
+          }
+        }
+      ]
+    }
+  }
+}
