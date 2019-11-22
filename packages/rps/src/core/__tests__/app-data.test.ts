@@ -1,7 +1,7 @@
-import {decodeAppData, encodeAppData, Reveal, RoundProposed} from '../app-data';
-import {HashZero} from 'ethers/constants';
-import {Weapon} from '../weapons';
-import {bigNumberify} from 'ethers/utils';
+import { decodeAppData, encodeAppData, Reveal, RoundProposed } from '../app-data';
+import { HashZero } from 'ethers/constants';
+import { Weapon } from '../weapons';
+import { bigNumberify } from 'ethers/utils';
 
 const testReveal: Reveal = {
   type: 'reveal',

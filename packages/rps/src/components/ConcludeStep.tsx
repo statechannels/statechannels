@@ -1,5 +1,5 @@
 import React from 'react';
-import {StyleSheet, css} from 'aphrodite';
+import { StyleSheet, css } from 'aphrodite';
 
 import Button from './Button';
 
@@ -10,7 +10,7 @@ interface IProps {
 
 export default class ConcludeStep extends React.PureComponent<IProps> {
   render() {
-    const {handleReturnToOpponentSelection, winnings} = this.props;
+    const { handleReturnToOpponentSelection, winnings } = this.props;
 
     return (
       <React.Fragment>

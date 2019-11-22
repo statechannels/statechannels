@@ -1,11 +1,11 @@
-import {Player} from '../players';
-import {Weapon} from '../weapons';
+import { Player } from '../players';
+import { Weapon } from '../weapons';
 import {
   Result,
   calculateResult,
   calculateAbsoluteResult,
   convertToAbsoluteResult,
-  convertToRelativeResult
+  convertToRelativeResult,
 } from '../results';
 
 function testOutcome(yourWeapon: Weapon, theirWeapon: Weapon, expectedResult: Result) {

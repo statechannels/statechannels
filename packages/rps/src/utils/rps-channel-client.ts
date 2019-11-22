@@ -1,7 +1,7 @@
-import {AppData, ChannelState, encodeAppData, decodeAppData} from '../core';
-import {bigNumberify} from 'ethers/utils';
-import {ChannelClient, ChannelUpdatedNotification, Notification} from './channel-client';
-import {RPS_ADDRESS} from '../constants';
+import { AppData, ChannelState, encodeAppData, decodeAppData } from '../core';
+import { bigNumberify } from 'ethers/utils';
+import { ChannelClient, ChannelUpdatedNotification, Notification } from './channel-client';
+import { RPS_ADDRESS } from '../constants';
 
 // This class wraps the channel client converting the request/response formats to those used in the app
 
@@ -21,16 +21,16 @@ export class RPSChannelClient {
     appAttrs: AppData
   ): Promise<ChannelState> {
     const participants = [
-      {participantId: aAddress, signingAddress: aAddress, destination: aAddress},
-      {participantId: bAddress, signingAddress: bAddress, destination: bAddress},
+      { participantId: aAddress, signingAddress: aAddress, destination: aAddress },
+      { participantId: bAddress, signingAddress: bAddress, destination: bAddress },
     ];
 
     const allocations = [
       {
         token: '0x0',
         allocationItems: [
-          {destination: aAddress, amount: aBal},
-          {destination: bAddress, amount: bBal},
+          { destination: aAddress, amount: aBal },
+          { destination: bAddress, amount: bBal },
         ],
       },
     ];
@@ -40,7 +40,7 @@ export class RPSChannelClient {
     const appData = encodeAppData(appAttrs);
 
     // ignore return val for now and stub out response
-    await this.channelClient.createChannel({participants, allocations, appDefinition, appData});
+    await this.channelClient.createChannel({ participants, allocations, appDefinition, appData });
 
     return await {
       channelId: '0xsome-channel-id',

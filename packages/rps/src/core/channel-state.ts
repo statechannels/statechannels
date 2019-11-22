@@ -1,4 +1,4 @@
-import {AppData} from './app-data';
+import { AppData } from './app-data';
 
 export type ChannelStatus = 'proposed' | 'opening' | 'funding' | 'running' | 'closing' | 'closed';
 

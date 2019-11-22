@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {StyleSheet, css} from 'aphrodite';
+import { StyleSheet, css } from 'aphrodite';
 
 export default function Header() {
   return (

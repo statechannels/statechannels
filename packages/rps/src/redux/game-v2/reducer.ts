@@ -11,7 +11,7 @@ import {
   waitingRoom,
   opponentJoined,
 } from './state';
-import {Reducer, combineReducers} from 'redux';
+import { Reducer, combineReducers } from 'redux';
 import {
   GameAction,
   JoinOpenGame,
@@ -25,10 +25,10 @@ import {
   GameJoined,
   StartRound,
 } from './actions';
-import {ChannelState} from '../../core';
-import {unreachable} from '../../utils/unreachable';
+import { ChannelState } from '../../core';
+import { unreachable } from '../../utils/unreachable';
 
-const emptyLocalState: LocalState = {type: 'Empty'};
+const emptyLocalState: LocalState = { type: 'Empty' };
 
 const channelReducer: Reducer<ChannelState | null> = (
   state: ChannelState | null = null,
@@ -79,10 +79,10 @@ const handleJoinOpenGame = (state: LocalState, action: JoinOpenGame): LocalState
     return state;
   }
 
-  const {opponentName, opponentAddress, roundBuyIn} = action;
-  const {name, address} = state;
+  const { opponentName, opponentAddress, roundBuyIn } = action;
+  const { name, address } = state;
 
-  return gameChosen({name, address, opponentName, roundBuyIn}, opponentAddress);
+  return gameChosen({ name, address, opponentName, roundBuyIn }, opponentAddress);
 };
 
 const handleGameJoined = (state: LocalState, action: GameJoined): LocalState => {
@@ -90,10 +90,10 @@ const handleGameJoined = (state: LocalState, action: GameJoined): LocalState => 
     return state;
   }
 
-  const {opponentName, opponentAddress} = action;
-  const {name, address, roundBuyIn} = state;
+  const { opponentName, opponentAddress } = action;
+  const { name, address, roundBuyIn } = state;
 
-  return opponentJoined({name, address, opponentName, roundBuyIn, opponentAddress});
+  return opponentJoined({ name, address, opponentName, roundBuyIn, opponentAddress });
 };
 
 const handleCreateGame = (state: LocalState, action: CreateGame): LocalState => {
@@ -101,10 +101,10 @@ const handleCreateGame = (state: LocalState, action: CreateGame): LocalState => 
     return state;
   }
 
-  const {roundBuyIn} = action;
-  const {name, address} = state;
+  const { roundBuyIn } = action;
+  const { name, address } = state;
 
-  return waitingRoom({name, address, roundBuyIn});
+  return waitingRoom({ name, address, roundBuyIn });
 };
 
 const handleChooseWeapon = (state: LocalState, action: ChooseWeapon): LocalState => {
@@ -112,7 +112,7 @@ const handleChooseWeapon = (state: LocalState, action: ChooseWeapon): LocalState
     return state;
   }
 
-  const {weapon} = action;
+  const { weapon } = action;
   return weaponChosen(state, weapon);
 };
 
@@ -121,9 +121,9 @@ const handleChooseSalt = (state: LocalState, action: ChooseSalt): LocalState => 
     return state;
   }
   // not sure why typsecript can't see that player === 'A' here ...
-  const oldLocalState = state as (WeaponChosen & {player: 'A'});
+  const oldLocalState = state as WeaponChosen & { player: 'A' };
 
-  const {salt} = action;
+  const { salt } = action;
   return weaponAndSaltChosen(oldLocalState, salt);
 };
 
@@ -131,7 +131,7 @@ const handleResultArrived = (state: LocalState, action: ResultArrived): LocalSta
   if (state.type !== 'WeaponChosen' && state.type !== 'WeaponAndSaltChosen') {
     return state;
   }
-  const {theirWeapon, result, fundingSituation} = action;
+  const { theirWeapon, result, fundingSituation } = action;
   switch (fundingSituation) {
     case 'Ok':
       return resultPlayAgain(state, theirWeapon, result);

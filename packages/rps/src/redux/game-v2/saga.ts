@@ -1,6 +1,6 @@
-import {take, select, call, put} from 'redux-saga/effects';
-import {RPSChannelClient} from '../../utils/rps-channel-client';
-import {AppData, hashPreCommit, calculateResult, updateAllocation, Player} from '../../core';
+import { take, select, call, put } from 'redux-saga/effects';
+import { RPSChannelClient } from '../../utils/rps-channel-client';
+import { AppData, hashPreCommit, calculateResult, updateAllocation, Player } from '../../core';
 import {
   updateChannelState,
   chooseSalt,
@@ -8,9 +8,9 @@ import {
   startRound,
   FundingSituation,
 } from './actions';
-import {GameState} from './state';
-import {randomHex} from '../../utils/randomHex';
-import {bigNumberify, BigNumber} from 'ethers/utils';
+import { GameState } from './state';
+import { randomHex } from '../../utils/randomHex';
+import { bigNumberify, BigNumber } from 'ethers/utils';
 
 const getGameState = (state: any): GameState => state.game;
 
@@ -18,12 +18,12 @@ export function* gameSaga(rpsChannelClient: RPSChannelClient) {
   while (true) {
     yield take('*'); // run after every action
 
-    const {localState, channelState}: GameState = yield select(getGameState);
+    const { localState, channelState }: GameState = yield select(getGameState);
 
     if ('player' in localState && localState.player === 'A') {
       if (localState.type === 'GameChosen' && !channelState) {
         const openingBalance = localState.roundBuyIn.mul(5);
-        const startState: AppData = {type: 'start'};
+        const startState: AppData = { type: 'start' };
         const newChannelState = yield call(
           rpsChannelClient.createChannel,
           localState.address,
@@ -38,12 +38,12 @@ export function* gameSaga(rpsChannelClient: RPSChannelClient) {
         const salt = yield call(randomHex, 64);
         yield put(chooseSalt(salt)); // transitions us to WeaponAndSaltChosen
 
-        const {myWeapon, roundBuyIn: stake} = localState;
-        const {channelId, aBal, bBal} = channelState;
+        const { myWeapon, roundBuyIn: stake } = localState;
+        const { channelId, aBal, bBal } = channelState;
 
         const preCommit = hashPreCommit(myWeapon, salt);
 
-        const roundProposed: AppData = {type: 'roundProposed', preCommit, stake};
+        const roundProposed: AppData = { type: 'roundProposed', preCommit, stake };
 
         const updatedChannelState = yield call(
           rpsChannelClient.updateChannel,
@@ -58,9 +58,9 @@ export function* gameSaga(rpsChannelClient: RPSChannelClient) {
         channelState &&
         channelState.appData.type === 'roundAccepted'
       ) {
-        const {myWeapon, salt} = localState;
-        const {aBal, bBal, channelId} = channelState;
-        const {playerBWeapon: theirWeapon, stake} = channelState.appData;
+        const { myWeapon, salt } = localState;
+        const { aBal, bBal, channelId } = channelState;
+        const { playerBWeapon: theirWeapon, stake } = channelState.appData;
         const result = calculateResult(myWeapon, theirWeapon);
         const [aBal2, bBal2] = updateAllocation(
           result,
@@ -127,8 +127,8 @@ export function* gameSaga(rpsChannelClient: RPSChannelClient) {
         channelState.appData.type === 'roundProposed'
       ) {
         const playerBWeapon = localState.myWeapon;
-        const {channelId, aBal, bBal} = channelState;
-        const {stake, preCommit} = channelState.appData;
+        const { channelId, aBal, bBal } = channelState;
+        const { stake, preCommit } = channelState.appData;
         const roundAccepted: AppData = {
           type: 'roundAccepted',
           stake,
@@ -158,9 +158,9 @@ export function* gameSaga(rpsChannelClient: RPSChannelClient) {
         channelState &&
         channelState.appData.type === 'reveal'
       ) {
-        const {playerAWeapon: theirWeapon} = channelState.appData;
-        const {aBal, bBal, channelId} = channelState;
-        const {myWeapon, roundBuyIn} = localState;
+        const { playerAWeapon: theirWeapon } = channelState.appData;
+        const { aBal, bBal, channelId } = channelState;
+        const { myWeapon, roundBuyIn } = localState;
         const result = calculateResult(myWeapon, theirWeapon);
         const fundingSituation = calculateFundingSituation(
           Player.PlayerB,
@@ -178,8 +178,8 @@ export function* gameSaga(rpsChannelClient: RPSChannelClient) {
         channelState &&
         channelState.appData.type === 'reveal'
       ) {
-        const {aBal, bBal, channelId} = channelState;
-        const start: AppData = {type: 'start'};
+        const { aBal, bBal, channelId } = channelState;
+        const start: AppData = { type: 'start' };
         const state = yield call(rpsChannelClient.updateChannel, channelId, aBal, bBal, start);
         yield put(updateChannelState(state));
         yield put(startRound());

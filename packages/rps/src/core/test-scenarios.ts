@@ -1,9 +1,9 @@
-import {Result} from './results';
+import { Result } from './results';
 import * as commitmentHelper from './rps-commitment-helper';
-import {randomHex} from '../utils/randomHex';
-import {Weapon} from './rps-commitment';
-import {bigNumberify} from 'ethers/utils';
-import {Channel} from 'fmg-core';
+import { randomHex } from '../utils/randomHex';
+import { Weapon } from './rps-commitment';
+import { bigNumberify } from 'ethers/utils';
+import { Channel } from 'fmg-core';
 
 export const libraryAddress = '0x' + '1'.repeat(40);
 const channelNonce = 4;
@@ -24,7 +24,7 @@ const salt = randomHex(64);
 const preCommit = commitmentHelper.hashCommitment(aWeapon, salt);
 const bWeapon = Weapon.Scissors;
 
-const channel: Channel = {channelType: libraryAddress, nonce: channelNonce, participants};
+const channel: Channel = { channelType: libraryAddress, nonce: channelNonce, participants };
 
 const base = {
   channel,
@@ -135,9 +135,9 @@ export const standard = {
 
 export const aResignsAfterOneRound = {
   ...standard,
-  resting: commitmentHelper.resting({...baseWithBuyIn, turnNum: 7, allocation: sixFour}),
-  conclude: commitmentHelper.conclude({...base, turnNum: 8, allocation: sixFour}),
-  conclude2: commitmentHelper.conclude({...base, turnNum: 9, allocation: sixFour}),
+  resting: commitmentHelper.resting({ ...baseWithBuyIn, turnNum: 7, allocation: sixFour }),
+  conclude: commitmentHelper.conclude({ ...base, turnNum: 8, allocation: sixFour }),
+  conclude2: commitmentHelper.conclude({ ...base, turnNum: 9, allocation: sixFour }),
   restingHex:
     '0x0000000000000000000000001111111111111111111111111111111111111111000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000020000000000000000000000005409ED021D9299bf6814279A6A1411A7e866A6310000000000000000000000006Ecbe1DB9EF729CBe972C83Fb886247691Fb6beb0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001',
   restingSig:
@@ -152,12 +152,12 @@ export const aResignsAfterOneRound = {
 
 export const bResignsAfterOneRound = {
   ...standard,
-  conclude: commitmentHelper.conclude({...base, turnNum: 7, allocation: sixFour}),
+  conclude: commitmentHelper.conclude({ ...base, turnNum: 7, allocation: sixFour }),
   concludeHex:
     '0x0000000000000000000000001111111111111111111111111111111111111111000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000020000000000000000000000005409ED021D9299bf6814279A6A1411A7e866A6310000000000000000000000006Ecbe1DB9EF729CBe972C83Fb886247691Fb6beb00000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000007000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000004',
   concludeSig:
     '0xee40164052e7f409acd840ac099eee45ec233e068fb5b883e6871ea6d1e3b1516c7b4f7b587844b87ec20191daf2f891b81758db23481b2777bae653748efbf61b',
-  conclude2: commitmentHelper.conclude({...base, turnNum: 8, allocation: sixFour}),
+  conclude2: commitmentHelper.conclude({ ...base, turnNum: 8, allocation: sixFour }),
 };
 
 export const insufficientFunds = {
@@ -209,8 +209,8 @@ export const insufficientFunds = {
     aWeapon,
     salt,
   }),
-  conclude: commitmentHelper.conclude({...base, turnNum: 7, allocation: tenZero}),
-  conclude2: commitmentHelper.conclude({...base, turnNum: 8, allocation: tenZero}),
+  conclude: commitmentHelper.conclude({ ...base, turnNum: 7, allocation: tenZero }),
+  conclude2: commitmentHelper.conclude({ ...base, turnNum: 8, allocation: tenZero }),
 };
 
 export function build(
@@ -310,6 +310,6 @@ export function build(
       aWeapon,
       salt,
     }),
-    resting: commitmentHelper.resting({...baseWithBuyIn, turnNum: 7, allocation: sixFour}),
+    resting: commitmentHelper.resting({ ...baseWithBuyIn, turnNum: 7, allocation: sixFour }),
   };
 }

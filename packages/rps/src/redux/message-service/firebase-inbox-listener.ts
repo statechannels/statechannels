@@ -1,7 +1,7 @@
-import {take, call} from 'redux-saga/effects';
-import {buffers} from 'redux-saga';
-import {reduxSagaFirebase} from '../../gateways/firebase';
-import {RPSChannelClient} from '../../utils/rps-channel-client';
+import { take, call } from 'redux-saga/effects';
+import { buffers } from 'redux-saga';
+import { reduxSagaFirebase } from '../../gateways/firebase';
+import { RPSChannelClient } from '../../utils/rps-channel-client';
 
 export function* firebaseInboxListener() {
   const rpsChannelClient = new RPSChannelClient();

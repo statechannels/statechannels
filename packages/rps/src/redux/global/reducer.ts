@@ -1,7 +1,7 @@
-import {Reducer} from 'redux';
+import { Reducer } from 'redux';
 
 import * as actions from './actions';
-import {OverlayState} from './state';
+import { OverlayState } from './state';
 
 const initialState: OverlayState = {
   rulesVisible: false,
@@ -11,11 +11,11 @@ const initialState: OverlayState = {
 export const overlayReducer: Reducer<OverlayState> = (state = initialState, action: any) => {
   switch (action.type) {
     case actions.TOGGLE_RULES_VISIBILITY:
-      return {...state, rulesVisible: !state.rulesVisible};
+      return { ...state, rulesVisible: !state.rulesVisible };
     case actions.SHOW_WALLET:
-      return {...state, walletVisible: true};
+      return { ...state, walletVisible: true };
     case actions.HIDE_WALLET:
-      return {...state, walletVisible: false};
+      return { ...state, walletVisible: false };
     default:
       // unreachable
       return state;

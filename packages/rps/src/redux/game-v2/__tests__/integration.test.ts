@@ -1,7 +1,7 @@
-import {expectSaga} from 'redux-saga-test-plan';
-import {combineReducers} from 'redux';
-import {gameReducer} from '../reducer';
-import {gameSaga} from '../saga';
+import { expectSaga } from 'redux-saga-test-plan';
+import { combineReducers } from 'redux';
+import { gameReducer } from '../reducer';
+import { gameSaga } from '../saga';
 import {
   localStatesA,
   localStatesB,
@@ -24,10 +24,10 @@ import {
   createGame,
   gameJoined,
 } from '../actions';
-import {ChannelState} from '../../../core';
-import {RPSChannelClient} from '../../../utils/rps-channel-client';
+import { ChannelState } from '../../../core';
+import { RPSChannelClient } from '../../../utils/rps-channel-client';
 import * as match from 'redux-saga-test-plan/matchers';
-import {randomHex} from '../../../utils/randomHex';
+import { randomHex } from '../../../utils/randomHex';
 
 // need to get the same shape, so that selecting state in the saga works
 const reducer = combineReducers({
@@ -76,10 +76,10 @@ describe('when creating a game', () => {
     const initialState = gameState(localStatesB.lobby);
     const action = createGame(stake);
 
-    const {storeState} = await expectSaga(gameSaga as any, client)
+    const { storeState } = await expectSaga(gameSaga as any, client)
       .withReducer(reducer, initialState)
       .dispatch(action)
-      .run({silenceTimeout: true});
+      .run({ silenceTimeout: true });
 
     expect(storeState).toEqual(gameState(localStatesB.waitingRoom));
   });
@@ -91,11 +91,11 @@ describe('when joining an open game', () => {
     const action = joinOpenGame(bName, bAddress, stake);
     const state = channelStates.preFund0;
 
-    const {storeState} = await expectSaga(gameSaga as any, client)
+    const { storeState } = await expectSaga(gameSaga as any, client)
       .withReducer(reducer, initialState)
       .dispatch(action)
       .provide([callCreateChannel(state)])
-      .run({silenceTimeout: true});
+      .run({ silenceTimeout: true });
 
     expect(storeState).toEqual(gameState(localStatesA.gameChosen, channelStates.preFund0));
   });
@@ -108,12 +108,12 @@ describe('when opponent joins your game', () => {
       const appNotification = gameJoined(aName, aAddress);
       const channelUpdate = updateChannelState(channelStates.preFund0);
 
-      const {storeState} = await expectSaga(gameSaga as any, client)
+      const { storeState } = await expectSaga(gameSaga as any, client)
         .withReducer(reducer, initialState)
         .dispatch(channelUpdate)
         .dispatch(appNotification)
         .provide([callJoinChannel(channelStates.preFund1)])
-        .run({silenceTimeout: true});
+        .run({ silenceTimeout: true });
 
       expect(storeState).toEqual(gameState(localStatesB.opponentJoined, channelStates.preFund1));
     });
@@ -124,12 +124,12 @@ describe('when opponent joins your game', () => {
       const appNotification = gameJoined(aName, aAddress);
       const channelUpdate = updateChannelState(channelStates.preFund0);
 
-      const {storeState} = await expectSaga(gameSaga as any, client)
+      const { storeState } = await expectSaga(gameSaga as any, client)
         .withReducer(reducer, initialState)
         .dispatch(appNotification)
         .dispatch(channelUpdate)
         .provide([callJoinChannel(channelStates.preFund1)])
-        .run({silenceTimeout: true});
+        .run({ silenceTimeout: true });
 
       expect(storeState).toEqual(gameState(localStatesB.opponentJoined, channelStates.preFund1));
     });
@@ -141,10 +141,10 @@ describe('when funding completes', () => {
     const initialState = gameState(localStatesA.gameChosen, channelStates.postFund1);
     const action = updateChannelState(channelStates.ready);
 
-    const {storeState} = await expectSaga(gameSaga as any, client)
+    const { storeState } = await expectSaga(gameSaga as any, client)
       .withReducer(reducer, initialState)
       .dispatch(action)
-      .run({silenceTimeout: true});
+      .run({ silenceTimeout: true });
 
     expect(storeState).toEqual(gameState(localStatesA.chooseWeapon, channelStates.ready));
   });
@@ -152,10 +152,10 @@ describe('when funding completes', () => {
     const initialState = gameState(localStatesB.opponentJoined, channelStates.postFund1);
     const action = updateChannelState(channelStates.ready);
 
-    const {storeState} = await expectSaga(gameSaga as any, client)
+    const { storeState } = await expectSaga(gameSaga as any, client)
       .withReducer(reducer, initialState)
       .dispatch(action)
-      .run({silenceTimeout: true});
+      .run({ silenceTimeout: true });
 
     expect(storeState).toEqual(gameState(localStatesB.chooseWeapon, channelStates.ready));
   });
@@ -166,11 +166,11 @@ describe('when chosing a weapon as player A', () => {
     const initialState = gameState(localStatesA.chooseWeapon, channelStates.postFund1);
     const action = chooseWeapon(aWeapon);
 
-    const {storeState} = await expectSaga(gameSaga as any, client)
+    const { storeState } = await expectSaga(gameSaga as any, client)
       .withReducer(reducer, initialState)
       .dispatch(action)
       .provide([[match.call.fn(randomHex), salt], callUpdateChannel(channelStates.roundProposed)])
-      .run({silenceTimeout: true});
+      .run({ silenceTimeout: true });
 
     expect(storeState).toEqual(
       gameState(localStatesA.weaponAndSaltChosen, channelStates.roundProposed)
@@ -184,11 +184,11 @@ describe('when choosing a weapon as player B', () => {
       const initialState = gameState(localStatesB.chooseWeapon, channelStates.roundProposed);
       const action = chooseWeapon(bWeapon);
 
-      const {storeState} = await expectSaga(gameSaga as any, client)
+      const { storeState } = await expectSaga(gameSaga as any, client)
         .withReducer(reducer, initialState)
         .dispatch(action)
         .provide([callUpdateChannel(channelStates.roundAccepted)])
-        .run({silenceTimeout: true});
+        .run({ silenceTimeout: true });
 
       expect(storeState).toEqual(gameState(localStatesB.weaponChosen, channelStates.roundAccepted));
     });
@@ -199,10 +199,10 @@ describe('when choosing a weapon as player B', () => {
       const initialState = gameState(localStatesB.chooseWeapon, channelStates.postFund1);
       const action = chooseWeapon(bWeapon);
 
-      const {storeState} = await expectSaga(gameSaga as any, client)
+      const { storeState } = await expectSaga(gameSaga as any, client)
         .withReducer(reducer, initialState)
         .dispatch(action)
-        .run({silenceTimeout: true});
+        .run({ silenceTimeout: true });
 
       expect(storeState).toEqual(gameState(localStatesB.weaponChosen, channelStates.postFund1));
     });
@@ -210,11 +210,11 @@ describe('when choosing a weapon as player B', () => {
       const initialState = gameState(localStatesB.weaponChosen, channelStates.postFund1);
       const action = updateChannelState(channelStates.roundProposed); // triggered when state arrives
 
-      const {storeState} = await expectSaga(gameSaga as any, client)
+      const { storeState } = await expectSaga(gameSaga as any, client)
         .withReducer(reducer, initialState)
         .dispatch(action)
         .provide([callUpdateChannel(channelStates.roundAccepted)])
-        .run({silenceTimeout: true});
+        .run({ silenceTimeout: true });
 
       expect(storeState).toEqual(gameState(localStatesB.weaponChosen, channelStates.roundAccepted));
     });
@@ -227,11 +227,11 @@ describe("when player A receives player B's move", () => {
       const initialState = gameState(localStatesA.weaponAndSaltChosen, channelStates.roundProposed);
       const action = updateChannelState(channelStates.roundAccepted); // triggered by ChannelUpdatedListener
 
-      const {storeState} = await expectSaga(gameSaga as any, client)
+      const { storeState } = await expectSaga(gameSaga as any, client)
         .withReducer(reducer, initialState)
         .dispatch(action)
         .provide([callUpdateChannel(channelStates.reveal)])
-        .run({silenceTimeout: true});
+        .run({ silenceTimeout: true });
 
       expect(storeState).toEqual(gameState(localStatesA.resultPlayAgain, channelStates.reveal));
     });
@@ -242,11 +242,11 @@ describe("when player A receives player B's move", () => {
       const initialState = gameState(localStatesA.weaponAndSaltChosen, channelStates.roundProposed);
       const action = updateChannelState(channelStates.roundAcceptedInsufficientFundsB); // triggered by ChannelUpdatedListener
 
-      const {storeState} = await expectSaga(gameSaga as any, client)
+      const { storeState } = await expectSaga(gameSaga as any, client)
         .withReducer(reducer, initialState)
         .dispatch(action)
         .provide([callUpdateChannel(channelStates.revealInsufficientFundsB)])
-        .run({silenceTimeout: true});
+        .run({ silenceTimeout: true });
 
       expect(storeState).toEqual(
         gameState(localStatesA.shuttingDown, channelStates.revealInsufficientFundsB)
@@ -261,10 +261,10 @@ describe('when player B receives the reveal', () => {
       const initialState = gameState(localStatesB.weaponChosen, channelStates.roundAccepted);
       const action = updateChannelState(channelStates.reveal); // triggered by ChannelUpdatedListener
 
-      const {storeState} = await expectSaga(gameSaga as any, client)
+      const { storeState } = await expectSaga(gameSaga as any, client)
         .withReducer(reducer, initialState)
         .dispatch(action)
-        .run({silenceTimeout: true});
+        .run({ silenceTimeout: true });
 
       expect(storeState).toEqual(gameState(localStatesB.resultPlayAgain, channelStates.reveal));
     });
@@ -277,11 +277,11 @@ describe('when player B receives the reveal', () => {
       );
       const action = updateChannelState(channelStates.revealInsufficientFundsB); // triggered by ChannelUpdatedListener
 
-      const {storeState} = await expectSaga(gameSaga as any, client)
+      const { storeState } = await expectSaga(gameSaga as any, client)
         .withReducer(reducer, initialState)
         .dispatch(action)
         .provide([callCloseChannel(channelStates.concludeInsufficientFundsB)])
-        .run({silenceTimeout: true});
+        .run({ silenceTimeout: true });
 
       expect(storeState).toEqual(
         gameState(localStatesB.shuttingDown, channelStates.concludeInsufficientFundsB)
@@ -297,10 +297,10 @@ describe('when player A decides to play again', () => {
       const initialState = gameState(localStatesA.resultPlayAgain, channelStates.start2);
       const action = playAgain();
 
-      const {storeState} = await expectSaga(gameSaga as any, client)
+      const { storeState } = await expectSaga(gameSaga as any, client)
         .withReducer(reducer, initialState)
         .dispatch(action)
-        .run({silenceTimeout: true});
+        .run({ silenceTimeout: true });
 
       expect(storeState).toEqual(gameState(localStatesA.chooseWeapon2, channelStates.start2));
     });
@@ -311,10 +311,10 @@ describe('when player A decides to play again', () => {
       const initialState = gameState(localStatesA.resultPlayAgain, channelStates.reveal);
       const action = playAgain();
 
-      const {storeState} = await expectSaga(gameSaga as any, client)
+      const { storeState } = await expectSaga(gameSaga as any, client)
         .withReducer(reducer, initialState)
         .dispatch(action)
-        .run({silenceTimeout: true});
+        .run({ silenceTimeout: true });
 
       expect(storeState).toEqual(gameState(localStatesA.waitForRestart, channelStates.reveal));
     });
@@ -322,10 +322,10 @@ describe('when player A decides to play again', () => {
       const initialState = gameState(localStatesA.waitForRestart, channelStates.reveal);
       const action = updateChannelState(channelStates.start2); // triggered by ChannelUpdatedListener
 
-      const {storeState} = await expectSaga(gameSaga as any, client)
+      const { storeState } = await expectSaga(gameSaga as any, client)
         .withReducer(reducer, initialState)
         .dispatch(action)
-        .run({silenceTimeout: true});
+        .run({ silenceTimeout: true });
 
       expect(storeState).toEqual(gameState(localStatesA.chooseWeapon2, channelStates.start2));
     });
@@ -337,11 +337,11 @@ describe('when player B decides to play again', () => {
     const initialState = gameState(localStatesB.resultPlayAgain, channelStates.reveal);
     const action = playAgain();
 
-    const {storeState} = await expectSaga(gameSaga as any, client)
+    const { storeState } = await expectSaga(gameSaga as any, client)
       .withReducer(reducer, initialState)
       .dispatch(action)
       .provide([callUpdateChannel(channelStates.start2)])
-      .run({silenceTimeout: true});
+      .run({ silenceTimeout: true });
 
     expect(storeState).toEqual(gameState(localStatesB.chooseWeapon2, channelStates.start2));
   });
@@ -354,11 +354,11 @@ describe('when either player resigns (which includes deciding not to play again)
       const initialState = gameState(localStatesA.chooseWeapon, channelStates.postFund1);
       const action = resign();
 
-      const {storeState} = await expectSaga(gameSaga as any, client)
+      const { storeState } = await expectSaga(gameSaga as any, client)
         .withReducer(reducer, initialState)
         .dispatch(action)
         .provide([callCloseChannel(channelStates.concludeFromStart)])
-        .run({silenceTimeout: true});
+        .run({ silenceTimeout: true });
 
       expect(storeState).toEqual(
         gameState(localStatesA.shuttingDownResign, channelStates.concludeFromStart)
@@ -371,10 +371,10 @@ describe('when either player resigns (which includes deciding not to play again)
       const initialState = gameState(localStatesA.chooseWeapon, channelStates.roundProposed);
       const action = resign();
 
-      const {storeState} = await expectSaga(gameSaga as any, client)
+      const { storeState } = await expectSaga(gameSaga as any, client)
         .withReducer(reducer, initialState)
         .dispatch(action)
-        .run({silenceTimeout: true});
+        .run({ silenceTimeout: true });
 
       expect(storeState).toEqual(
         gameState(localStatesA.shuttingDownResign, channelStates.roundProposed)
@@ -385,11 +385,11 @@ describe('when either player resigns (which includes deciding not to play again)
       const initialState = gameState(localStatesA.shuttingDownResign, channelStates.roundProposed);
       const action = updateChannelState(channelStates.roundAccepted); // triggered by ChannelUpdatedListener
 
-      const {storeState} = await expectSaga(gameSaga as any, client)
+      const { storeState } = await expectSaga(gameSaga as any, client)
         .withReducer(reducer, initialState)
         .dispatch(action)
         .provide([callCloseChannel(channelStates.concludeFromAccepted)])
-        .run({silenceTimeout: true});
+        .run({ silenceTimeout: true });
 
       expect(storeState).toEqual(
         gameState(localStatesA.shuttingDownResign, channelStates.concludeFromAccepted)

@@ -1,5 +1,5 @@
-import {BigNumberish} from 'ethers/utils';
-import {EventEmitter} from 'eventemitter3';
+import { BigNumberish } from 'ethers/utils';
+import { EventEmitter } from 'eventemitter3';
 
 export type JsonRPCVersion = '2.0';
 
@@ -85,7 +85,7 @@ export interface JsonRPCResponse<ResultType> {
 export interface JsonRPCError {
   code: number;
   message: string;
-  data?: {[key: string]: any};
+  data?: { [key: string]: any };
 }
 
 export interface JsonRPCErrorResponse<ErrorType extends JsonRPCError = JsonRPCError> {
@@ -207,7 +207,7 @@ export class ChannelNotFoundError extends ChannelClientError {
   };
 }
 
-export const ErrorCodesToObjectsMap: {[key in ErrorCodes]: typeof ChannelClientError} = {
+export const ErrorCodesToObjectsMap: { [key in ErrorCodes]: typeof ChannelClientError } = {
   [ErrorCodes.CHANNEL_NOT_FOUND]: ChannelNotFoundError,
   [ErrorCodes.INVALID_APP_DATA]: InvalidAppDataError,
   [ErrorCodes.INVALID_APP_DEFINITION]: InvalidAppDefinitionError,

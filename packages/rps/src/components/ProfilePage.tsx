@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import React from 'react';
 
-import {Button, Form, FormGroup, Label, Input} from 'reactstrap';
-import {Modal, ModalBody} from 'reactstrap';
+import { Button, Form, FormGroup, Label, Input } from 'reactstrap';
+import { Modal, ModalBody } from 'reactstrap';
 
 interface Props {
   updateProfile: (name: string, twitterHandle?: string) => void;
@@ -19,7 +19,7 @@ interface State {
 export default class ProfilePage extends React.PureComponent<Props, State> {
   constructor(props) {
     super(props);
-    this.state = {name: '', twitterHandle: '', twitterErrorMessage: '', nameErrorMessage: ''};
+    this.state = { name: '', twitterHandle: '', twitterErrorMessage: '', nameErrorMessage: '' };
     this.updateProfileHandler = this.updateProfileHandler.bind(this);
     this.handleNameChange = this.handleNameChange.bind(this);
     this.handleTwitterChange = this.handleTwitterChange.bind(this);
@@ -37,7 +37,7 @@ export default class ProfilePage extends React.PureComponent<Props, State> {
     if (name.length > 20) {
       nameErrorMessage = 'Please use a name less than 20 characters';
     }
-    this.setState({name, nameErrorMessage});
+    this.setState({ name, nameErrorMessage });
   }
 
   handleTwitterChange(e) {
@@ -46,7 +46,7 @@ export default class ProfilePage extends React.PureComponent<Props, State> {
     if (!/^[a-zA-Z0-9_]{1,15}$/.test(twitterHandle) && twitterHandle !== '') {
       twitterErrorMessage = `${twitterHandle} is not a valid twitter handle`;
     }
-    this.setState({twitterErrorMessage, twitterHandle: e.target.value});
+    this.setState({ twitterErrorMessage, twitterHandle: e.target.value });
   }
 
   updateProfileHandler(e) {
