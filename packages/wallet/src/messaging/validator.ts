@@ -6,6 +6,7 @@ import * as getAddressSchema from "./schema/get-address.json";
 import * as joinChannelSchema from "./schema/join-channel.json";
 import * as updateChannelSchema from "./schema/update-channel.json";
 import * as definitionsSchema from "./schema/definitions.json";
+import * as pushMessageSchema from "./schema/push-message.json";
 import * as notifSchema from "./schema/notification.json";
 
 export interface ValidationResult {
@@ -21,6 +22,7 @@ export async function validateRequest(jsonRpcRequest: object): Promise<Validatio
     .addSchema(getAddressSchema)
     .addSchema(joinChannelSchema)
     .addSchema(updateChannelSchema)
+    .addSchema(pushMessageSchema)
     .compile(requestSchema);
   const isValid = await validate(jsonRpcRequest);
 
@@ -35,6 +37,7 @@ export async function validateResponse(jsonRpcResponse: object): Promise<Validat
     .addSchema(getAddressSchema)
     .addSchema(joinChannelSchema)
     .addSchema(updateChannelSchema)
+    .addSchema(pushMessageSchema)
     .compile(responseSchema);
   const isValid = await validate(jsonRpcResponse);
 
@@ -49,6 +52,9 @@ export async function validateNotification(jsonRpcNotification: object): Promise
     .addSchema(getAddressSchema)
     .addSchema(joinChannelSchema)
     .addSchema(updateChannelSchema)
+    .addSchema(pushMessageSchema)
+    .addSchema(requestSchema)
+    .addSchema(responseSchema)
     .compile(notifSchema);
   const isValid = await validate(jsonRpcNotification);
 

@@ -5,12 +5,12 @@
   "oneOf": [
     {
       "description": "An individual response",
-      "$ref": "#/definitions/request"
+      "$ref": "#/definitions/response"
     },
     {
       "description": "An array of responses",
       "type": "array",
-      "items": {"$ref": "#/definitions/responses"}
+      "items": {"$ref": "#/definitions/response"}
     }
   ],
   "definitions": {
@@ -26,10 +26,10 @@
         "result": {
           "anyOf": [
             {"$ref": "create-channel.json#/definitions/CreateChannelResult"},
-            {"$ref": "create-channel.json#/definitions/JoinChannelResult"},
-            {"$ref": "create-channel.json#/definitions/PushMessageResult"},
-            {"$ref": "create-channel.json#/definitions/GetAddressResult"},
-            {"$ref": "create-channel.json#/definitions/UpdateChannelResult"}
+            {"$ref": "join-channel.json#/definitions/JoinChannelResult"},
+            {"$ref": "push-message.json#/definitions/PushMessageResult"},
+            {"$ref": "get-address.json#/definitions/GetAddressResult"},
+            {"$ref": "update-channel.json#/definitions/UpdateChannelResult"}
           ]
         }
       }
