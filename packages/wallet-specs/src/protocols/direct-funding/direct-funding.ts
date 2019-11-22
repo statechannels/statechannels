@@ -1,5 +1,5 @@
-import { Chain, ChannelState, Outcome, OutcomeItem, Store } from '.';
-import { saveConfig } from './utils';
+import { Chain, ChannelState, Outcome, OutcomeItem, Store } from '../../';
+import { saveConfig } from '../..//utils';
 
 const chain = new Chain();
 const store = new Store();

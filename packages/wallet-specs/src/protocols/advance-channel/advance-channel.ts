@@ -1,8 +1,8 @@
 import { MachineConfig } from 'xstate';
 
-import { Entry, Failure } from '.';
-import { StoreEvent } from './store';
-import { saveConfig } from './utils';
+import { Entry, Failure } from '../../';
+import { StoreEvent } from '../..//store';
+import { saveConfig } from '../..//utils';
 
 const PROTOCOL = 'advance-channel';
 
@@ -21,7 +21,11 @@ interface AdvanceChannelContext {
 
 type Context = AdvanceChannelContext | Failure;
 
-const advanceChannelConfig: MachineConfig<Context, AdvanceChannelSchema, StoreEvent | Entry> = {
+const advanceChannelConfig: MachineConfig<
+  Context,
+  AdvanceChannelSchema,
+  StoreEvent | Entry
+> = {
   key: PROTOCOL,
   initial: 'waiting',
   states: {

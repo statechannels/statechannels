@@ -14,7 +14,11 @@ export class Chain {
     return this._holdings[channelID];
   }
 
-  public deposit(channelID: string, expectedHeld: number, amount: number): Deposited | Revert {
+  public deposit(
+    channelID: string,
+    expectedHeld: number,
+    amount: number
+  ): Deposited | Revert {
     const current = this._holdings[channelID] || 0;
     if (current >= expectedHeld) {
       this._holdings[channelID] = (this._holdings[channelID] || 0) + amount;

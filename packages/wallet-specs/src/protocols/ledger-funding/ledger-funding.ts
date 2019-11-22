@@ -1,5 +1,5 @@
-import { Store } from './store';
-import { saveConfig } from './utils';
+import { Store } from '../..//store';
+import { saveConfig } from '../..//utils';
 
 const store = new Store();
 

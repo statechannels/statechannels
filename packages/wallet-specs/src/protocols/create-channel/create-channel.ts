@@ -1,5 +1,5 @@
-import { Address, Outcome, PrivateKey } from '.';
-import { saveConfig } from './utils';
+import { Address, Outcome, PrivateKey } from '../../';
+import { saveConfig } from '../..//utils';
 
 const PROTOCOL = 'create-channel';
 
