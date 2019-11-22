@@ -37,6 +37,7 @@ const fundLedger = {
 const fundTarget = {
   invoke: {
     src: 'ledgerUpdate',
+    // This is a bit wrong: it should only allocate the necessary amount to context.targetChannelID
     data: `context => ({ channelID: context.ledgerChannelID, outcome: [context.targetChannelID, context.amount], })`,
     onDone: 'success',
     onError: 'failure',
