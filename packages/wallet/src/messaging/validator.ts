@@ -1,0 +1,26 @@
+import Ajv, {ErrorObject} from "ajv";
+import * as requestSchema from "./schema/request.json";
+import * as createChannelSchema from "./schema/create-channel.json";
+import * as getAddressSchema from "./schema/get-address.json";
+import * as joinChannelSchema from "./schema/join-channel.json";
+import * as updateChannelSchema from "./schema/update-channel.json";
+import * as definitionsSchema from "./schema/definitions.json";
+
+export interface ValidationResult {
+  isValid: boolean;
+  errors: ErrorObject[];
+}
+
+export async function validateRequest(jsonRpcRequest: object): Promise<ValidationResult> {
+  const ajv = new Ajv();
+  const validate = ajv
+    .addSchema(definitionsSchema)
+    .addSchema(createChannelSchema)
+    .addSchema(getAddressSchema)
+    .addSchema(joinChannelSchema)
+    .addSchema(updateChannelSchema)
+    .compile(requestSchema);
+  const isValid = await validate(jsonRpcRequest);
+
+  return {isValid, errors: validate.errors ? validate.errors : []};
+}

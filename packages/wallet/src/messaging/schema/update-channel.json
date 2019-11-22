@@ -1,10 +1,24 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "http://statechannels.org/schemas/create-channel.json",
+  "$id": "http://statechannels.org/schemas/update-channel.json",
   "definitions": {
-    "CreateChannelResult": {
+    "UpdateChannelResult": {
       "type": "object",
       "properties": {
+        "status": {"type": "string"},
+        "funding": {
+          "type": "array",
+          "items": {
+            "token": {
+              "$ref": "definitions.json#/definitions/AddressOrEmpty",
+              "title": "token"
+            },
+            "amount": {
+              "$ref": "definitions.json#/definitions/Amount",
+              "title": "amount"
+            }
+          }
+        },
         "participants": {
           "type": "array",
           "items": {
@@ -27,18 +41,13 @@
           "type": "string",
           "title": "appData"
         },
-        "status": {
-          "type": "string",
-          "const": "Opening"
-        },
         "turnNum": {
-          "type": "integer",
-          "const": 0
+          "type": "integer"
         }
       },
       "required": ["allocations", "appData", "appDefinition", "participants", "status", "turnNum"]
     },
-    "CreateChannelParams": {
+    "UpdateChannelParams": {
       "type": "object",
       "properties": {
         "participants": {
@@ -55,13 +64,12 @@
           },
           "title": "allocations"
         },
-        "appDefinition": {
-          "$ref": "definitions.json#/definitions/Address",
-          "title": "appDefinition"
-        },
         "appData": {
           "type": "string",
           "title": "appData"
+        },
+        "channelId": {
+          "$ref": "definitions.json#/definitions/ChannelId"
         }
       },
       "required": ["allocations", "appData", "appDefinition", "participants"]

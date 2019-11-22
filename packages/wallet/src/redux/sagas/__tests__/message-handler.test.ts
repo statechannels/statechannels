@@ -129,8 +129,8 @@ describe("message listener", () => {
         {
           token: "0x0",
           allocationItems: [
-            {destination: destinationA, amount: "12"},
-            {destination: destinationB, amount: "12"}
+            {destination: destinationA, amount: "0x12"},
+            {destination: destinationB, amount: "0x12"}
           ]
         }
       ];
@@ -171,8 +171,8 @@ describe("message listener", () => {
             {
               assetHolderAddress: "0x0",
               allocation: [
-                {destination: destinationA, amount: "12"},
-                {destination: destinationB, amount: "12"}
+                {destination: destinationA, amount: "0x12"},
+                {destination: destinationB, amount: "0x12"}
               ]
             }
           ]
@@ -213,8 +213,8 @@ describe("message listener", () => {
         {
           token: "0x0",
           allocationItems: [
-            {destination: destinationA, amount: "12"},
-            {destination: destinationB, amount: "12"}
+            {destination: destinationA, amount: "0x12"},
+            {destination: destinationB, amount: "0x12"}
           ]
         }
       ];
@@ -275,8 +275,8 @@ describe("message listener", () => {
         {
           token: "0x0",
           allocationItems: [
-            {destination: destinationA, amount: "12"},
-            {destination: destinationB, amount: "12"}
+            {destination: destinationA, amount: "0x12"},
+            {destination: destinationB, amount: "0x12"}
           ]
         }
       ];
@@ -326,8 +326,8 @@ describe("message listener", () => {
         {
           token: "0x0",
           allocationItems: [
-            {destination: destinationA, amount: "12"},
-            {destination: destinationB, amount: "12"}
+            {destination: destinationA, amount: "0x12"},
+            {destination: destinationB, amount: "0x12"}
           ]
         }
       ];

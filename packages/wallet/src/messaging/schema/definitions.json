@@ -2,35 +2,6 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "http://statechannels.org/schemas/definitions.json",
   "definitions": {
-    "CreateChannelParams": {
-      "type": "object",
-      "properties": {
-        "participants": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Participant"
-          },
-          "title": "participants"
-        },
-        "allocations": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Allocation"
-          },
-          "title": "allocations"
-        },
-        "appDefinition": {
-          "$ref": "#/definitions/Address",
-          "title": "appDefinition"
-        },
-        "appData": {
-          "type": "string",
-          "title": "appData"
-        }
-      },
-      "required": ["allocations", "appData", "appDefinition", "participants"]
-    },
-
     "AddressOrEmpty": {
       "type": "string",
       "pattern": "^0x([a-fA-F0-9]{40})|0$"

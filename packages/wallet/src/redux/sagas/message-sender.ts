@@ -25,6 +25,8 @@ function* createResponseMessage(action: OutgoingApiAction) {
       return jrs.success(action.id, action.address);
     case "WALLET.NO_CONTRACT_ERROR":
       return jrs.error(action.id, new jrs.JsonRpcError("Invalid app definition", 1001));
+    case "WALLET.VALIDATION_ERROR":
+      return jrs.error(action.id, jrs.JsonRpcError.invalidRequest(undefined));
     case "WALLET.UNKNOWN_SIGNING_ADDRESS_ERROR":
       return jrs.error(
         action.id,

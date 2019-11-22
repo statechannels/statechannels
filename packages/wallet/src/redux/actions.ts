@@ -403,6 +403,14 @@ export const joinChannelResponse: ActionConstructor<JoinChannelResponse> = p => 
   type: "WALLET.JOIN_CHANNEL_RESPONSE"
 });
 
+export interface ValidationError extends ApiAction {
+  type: "WALLET.VALIDATION_ERROR";
+}
+export const validationError: ActionConstructor<ValidationError> = p => ({
+  ...p,
+  type: "WALLET.VALIDATION_ERROR"
+});
+
 export type OutgoingApiAction =
   | AddressResponse
   | CreateChannelResponse
@@ -414,4 +422,5 @@ export type OutgoingApiAction =
   | PostMessageResponse
   | UnknownChannelId
   | NoContractError
-  | JoinChannelResponse;
+  | JoinChannelResponse
+  | ValidationError;

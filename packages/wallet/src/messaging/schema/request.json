@@ -16,11 +16,11 @@
   "definitions": {
     "request": {
       "type": "object",
-      "required": ["jsonrpc", "method"],
+      "required": ["jsonrpc", "method", "id"],
       "properties": {
         "jsonrpc": {"enum": ["2.0"]},
         "method": {
-          "enum": ["CreateChannel", "JoinChannel"]
+          "enum": ["CreateChannel", "JoinChannel", "GetAddress", "PushMessage", "UpdateChannel"]
         },
         "id": {
           "type": ["string", "number"]
@@ -43,7 +43,31 @@
             "properties": {"method": {"const": "JoinChannel"}}
           },
           "then": {
-            "properties": {"params": {"type": "string"}}
+            "params": {"$ref": "join-channel.json#/definitions/JoinChannelParams"}
+          }
+        },
+        {
+          "if": {
+            "properties": {"method": {"const": "GetAddress"}}
+          },
+          "then": {
+            "params": {"$ref": "get-address.json#/definitions/GetAddressParams"}
+          }
+        },
+        {
+          "if": {
+            "properties": {"method": {"const": "PushMessage"}}
+          },
+          "then": {
+            "params": {"$ref": "push-message.json#/definitions/PushMessageParams"}
+          }
+        },
+        {
+          "if": {
+            "properties": {"method": {"const": "UpdateChannel"}}
+          },
+          "then": {
+            "params": {"$ref": "update-channel.json#/definitions/UpdateChannelParams"}
           }
         }
       ]
