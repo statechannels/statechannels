@@ -4,12 +4,14 @@ import { store } from '../../store';
 const PROTOCOL = 'conclude-channel';
 
 function supported(channelID: string): boolean {
-  const { state } = store.getLatestSupportState(channelID);
+  const { state } = store.getLatestWalletChannelSupport(channelID);
   return state.isFinal;
 }
 
 function sendFinalState(channelID: string): void {
-  const { state: suppportedState } = store.getLatestSupportState(channelID);
+  const { state: suppportedState } = store.getLatestWalletChannelSupport(
+    channelID
+  );
   const unsupportedStates = store.getUnsupportedStates(channelID);
 
   unsupportedStates.map(({ state }) => {

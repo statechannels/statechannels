@@ -2,8 +2,12 @@ import { ChannelState, SignedState } from '.';
 
 interface Store {
   getLatestState: (channelId: string) => ChannelState;
-  getLatestSupportState: (channelId: string) => SignedState; // Support in null channels must be a single state
-  getLatestSupportChain: (channelId: string) => SignedState[]; //  Application channels would typically have multiple states in its support
+  getLatestWalletChannelSupport: (channelId: string) => SignedState; // Support in null channels must be a single state
+  getLatestAppChannelSupport: (channelId: string) => SignedState[]; //  Application channels would typically have multiple states in its support
+
+  // The channel store should garbage collect stale states on CHANNEL_UPDATED events.
+  // If a greater state becomes supported on such an event, it should replace the latest
+  // supported state, and remove any lesser, unsupported states.
   getUnsupportedStates: (channelID: string) => SignedState[];
 
   signedByMe: (state: ChannelState) => boolean;
