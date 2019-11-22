@@ -113,7 +113,7 @@ describe('when opponent joins your game', () => {
   });
 });
 
-describe('when funding completes', () => {
+describe.skip('when funding completes', () => {
   it('player A moves to chooseWeapon');
   it('player B moves to chooseWeapon');
 });
@@ -138,7 +138,7 @@ describe('when chosing a weapon as player A', () => {
   });
 });
 
-describe.only('when choosing a weapon as player B', () => {
+describe('when choosing a weapon as player B', () => {
   describe('and player A has already sent their state', () => {
     it('updates the channel state and transitions to WeaponChosen', async () => {
       const initialState = gameState(localStatesB.chooseWeapon, channelStates.roundProposed);
@@ -220,7 +220,7 @@ describe("when player A receives player B's move", () => {
   });
 });
 
-describe('when player B receives the reveal', () => {
+describe.skip('when player B receives the reveal', () => {
   describe('and there are sufficient funds to continue', () => {
     it('transitions to ResultPlayAgain');
   });
@@ -271,7 +271,7 @@ describe('when player A decides to play again', () => {
   });
 });
 
-describe('when player B decides to play again', () => {
+describe.skip('when player B decides to play again', () => {
   it('sends the new start state and transitions to ChooseWeapon', () => {
     // todo
   });
@@ -332,6 +332,6 @@ describe('when either player resigns (which includes deciding not to play again)
   });
 });
 
-describe('when the channel is closed', () => {
+describe.skip('when the channel is closed', () => {
   it('transitions to game over');
 });
