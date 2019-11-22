@@ -6,10 +6,11 @@ import {ChannelState, getLastState} from "../channel-store";
 import {createJsonRpcAllocationsFromOutcome} from "../../utils/json-rpc-utils";
 import jrs from "jsonrpc-lite";
 import {unreachable} from "../../utils/reducer-utils";
+import {validateResponse, validateNotification} from "../../json-rpc-validation/validator";
 
 export function* messageSender(action: OutgoingApiAction) {
   const message = yield createResponseMessage(action);
-
+  yield validate(message, action);
   yield call(window.parent.postMessage, message, "*");
 }
 
@@ -25,6 +26,8 @@ function* createResponseMessage(action: OutgoingApiAction) {
       return jrs.success(action.id, action.address);
     case "WALLET.NO_CONTRACT_ERROR":
       return jrs.error(action.id, new jrs.JsonRpcError("Invalid app definition", 1001));
+    case "WALLET.VALIDATION_ERROR":
+      return jrs.error(action.id, jrs.JsonRpcError.invalidRequest(undefined));
     case "WALLET.UNKNOWN_SIGNING_ADDRESS_ERROR":
       return jrs.error(
         action.id,
@@ -57,6 +60,23 @@ function* createResponseMessage(action: OutgoingApiAction) {
       );
     default:
       return unreachable(action);
+  }
+}
+
+function* validate(message: any, action: OutgoingApiAction) {
+  if (!("error" in message)) {
+    let result;
+    if ("id" in message) {
+      result = yield validateResponse(message);
+    } else {
+      result = yield validateNotification(message);
+    }
+    if (!result.isValid) {
+      console.error(`Outgoing message validation failed.`);
+      console.error(`Action\n${JSON.stringify(action)}`);
+      console.error(`Message\n${JSON.stringify(message)}`);
+      console.error(`Validation Errors\n${JSON.stringify(result.errors)}`);
+    }
   }
 }
 

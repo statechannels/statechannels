@@ -13,6 +13,7 @@ import {
 } from "../../utils/json-rpc-utils";
 
 import {getProvider} from "../../utils/contract-utils";
+import {validateRequest} from "../../json-rpc-validation/validator";
 
 export function* messageHandler(jsonRpcMessage: object, fromDomain: string) {
   const parsedMessage = jrs.parseObject(jsonRpcMessage);
@@ -24,6 +25,11 @@ export function* messageHandler(jsonRpcMessage: object, fromDomain: string) {
     case "error":
       throw new Error("TODO: Respond with error message");
     case "request":
+      const validationResult = yield validateRequest(jsonRpcMessage);
+      if (!validationResult.isValid) {
+        console.error(validationResult.errors);
+        yield fork(messageSender, actions.validationError({id: parsedMessage.payload.id}));
+      }
       yield handleMessage(parsedMessage.payload as RequestObject);
       break;
   }

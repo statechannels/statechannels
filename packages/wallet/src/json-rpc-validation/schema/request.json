@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://statechannels.org/schemas/request.json",
+  "description": "A State Channel JSON RPC 2.0 request",
+  "oneOf": [
+    {
+      "description": "An individual request",
+      "$ref": "#/definitions/request"
+    },
+    {
+      "description": "An array of requests",
+      "type": "array",
+      "items": {"$ref": "#/definitions/request"}
+    }
+  ],
+  "definitions": {
+    "request": {
+      "type": "object",
+      "required": ["jsonrpc", "method", "id"],
+      "properties": {
+        "jsonrpc": {"enum": ["2.0"]},
+        "method": {
+          "enum": ["CreateChannel", "JoinChannel", "GetAddress", "PushMessage", "UpdateChannel"]
+        },
+        "id": {
+          "type": ["string", "number"]
+        }
+      },
+
+      "allOf": [
+        {
+          "if": {
+            "properties": {"method": {"const": "CreateChannel"}}
+          },
+          "then": {
+            "properties": {
+              "params": {"$ref": "create-channel.json#/definitions/CreateChannelParams"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {"method": {"const": "JoinChannel"}}
+          },
+          "then": {
+            "params": {"$ref": "join-channel.json#/definitions/JoinChannelParams"}
+          }
+        },
+        {
+          "if": {
+            "properties": {"method": {"const": "GetAddress"}}
+          },
+          "then": {
+            "params": {"$ref": "get-address.json#/definitions/GetAddressParams"}
+          }
+        },
+        {
+          "if": {
+            "properties": {"method": {"const": "PushMessage"}}
+          },
+          "then": {
+            "params": {"$ref": "push-message.json#/definitions/PushMessageParams"}
+          }
+        },
+        {
+          "if": {
+            "properties": {"method": {"const": "UpdateChannel"}}
+          },
+          "then": {
+            "params": {"$ref": "update-channel.json#/definitions/UpdateChannelParams"}
+          }
+        }
+      ]
+    }
+  }
+}

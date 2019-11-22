@@ -1,0 +1,78 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://statechannels.org/schemas/update-channel.json",
+  "definitions": {
+    "UpdateChannelResult": {
+      "type": "object",
+      "properties": {
+        "status": {"type": "string"},
+        "funding": {
+          "type": "array",
+          "items": {
+            "token": {
+              "$ref": "definitions.json#/definitions/AddressOrEmpty",
+              "title": "token"
+            },
+            "amount": {
+              "$ref": "definitions.json#/definitions/Amount",
+              "title": "amount"
+            }
+          }
+        },
+        "participants": {
+          "type": "array",
+          "items": {
+            "$ref": "definitions.json#/definitions/Participant"
+          },
+          "title": "participants"
+        },
+        "allocations": {
+          "type": "array",
+          "items": {
+            "$ref": "definitions.json#/definitions/Allocation"
+          },
+          "title": "allocations"
+        },
+        "appDefinition": {
+          "$ref": "definitions.json#/definitions/Address",
+          "title": "appDefinition"
+        },
+        "appData": {
+          "type": "string",
+          "title": "appData"
+        },
+        "turnNum": {
+          "type": "integer"
+        }
+      },
+      "required": ["allocations", "appData", "appDefinition", "participants", "status", "turnNum"]
+    },
+    "UpdateChannelParams": {
+      "type": "object",
+      "properties": {
+        "participants": {
+          "type": "array",
+          "items": {
+            "$ref": "definitions.json#/definitions/Participant"
+          },
+          "title": "participants"
+        },
+        "allocations": {
+          "type": "array",
+          "items": {
+            "$ref": "definitions.json#/definitions/Allocation"
+          },
+          "title": "allocations"
+        },
+        "appData": {
+          "type": "string",
+          "title": "appData"
+        },
+        "channelId": {
+          "$ref": "definitions.json#/definitions/ChannelId"
+        }
+      },
+      "required": ["allocations", "appData", "appDefinition", "participants"]
+    }
+  }
+}
