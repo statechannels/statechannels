@@ -26,7 +26,7 @@ const { callJoinChannel, callUpdateChannel, callCloseChannel } = rpsChannelClien
 const gameState = (localState, channelState?: ChannelState) => ({
   game: {
     localState,
-    channelState: channelState || null,
+    channelState: channelState || undefined,
   },
 });
 

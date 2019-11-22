@@ -18,6 +18,16 @@ export type LocalStateWithPlayer =
   | GameOver;
 
 export type LocalState = Empty | Lobby | WaitingRoom | LocalStateWithPlayer;
+export type PlayingState =
+  | GameChosen
+  | OpponentJoined
+  | ChooseWeapon
+  | WeaponChosen
+  | WeaponAndSaltChosen
+  | ResultPlayAgain
+  | WaitForRestart
+  | ShuttingDown
+  | GameOver;
 
 export interface Empty {
   type: 'Empty';
@@ -190,3 +200,6 @@ export const gameOver = <T extends Playing>(state: T, reason: ShutDownReason): G
 
 export const isPlayerA = (state: LocalStateWithPlayer): boolean => state.player === 'A';
 export const isPlayerB = (state: LocalStateWithPlayer): boolean => state.player === 'B';
+export type StateName = LocalState['type'];
+
+export type PlayingStateName = PlayingState['type'];

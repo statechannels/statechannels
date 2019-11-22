@@ -11,6 +11,7 @@ import {
   waitingRoom,
   opponentJoined,
   gameOver,
+  GameState,
 } from './state';
 import { Reducer, combineReducers } from 'redux';
 import {
@@ -32,8 +33,8 @@ import { unreachable } from '../../utils/unreachable';
 
 const emptyLocalState: LocalState = { type: 'Empty' };
 
-const channelReducer: Reducer<ChannelState | null> = (
-  state: ChannelState | null = null,
+const channelReducer: Reducer<ChannelState | undefined> = (
+  state: ChannelState | undefined = undefined,
   action: UpdateChannelState
 ) => {
   if (action.type === 'UpdateChannelState') {
@@ -73,7 +74,7 @@ const localReducer: Reducer<LocalState> = (
   }
 };
 
-export const gameReducer = combineReducers({
+export const gameReducer: Reducer<GameState> = combineReducers({
   localState: localReducer,
   channelState: channelReducer,
 });

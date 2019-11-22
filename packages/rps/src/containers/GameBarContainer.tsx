@@ -2,21 +2,24 @@ import { connect } from 'react-redux';
 
 import GameBar from '../components/GameBar';
 import { SiteState } from '../redux/reducer';
-import { PlayingState } from '../redux/game/state';
+import { PlayingState } from 'src/redux/game-v2/state';
+import { ChannelState } from 'src/core';
 
 function mapStateToProps(state: SiteState) {
-  const gameState = state.game.gameState as PlayingState;
-  const { myName, opponentName, roundBuyIn, player, allocation } = gameState;
+  const { localState, channelState } = state.game;
 
-  const myBalance = allocation[player];
-  const opponentBalance = allocation[1 - player];
+  const { name, opponentName, roundBuyIn, player } = localState as PlayingState;
+  const { aBal, bBal } = channelState as ChannelState; // TODO do not use type assertions
+
+  const myBalance = player === 'A' ? aBal : bBal;
+  const opponentBalance = player === 'B' ? aBal : bBal;
 
   return {
-    myName,
+    myName: name,
     opponentName,
-    myBalance,
-    opponentBalance,
-    roundBuyIn,
+    myBalance: myBalance.toString(),
+    opponentBalance: opponentBalance.toString(),
+    roundBuyIn: roundBuyIn.toString(),
   };
 }
 
