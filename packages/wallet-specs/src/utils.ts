@@ -1,13 +1,16 @@
 import * as fs from 'fs';
 
-export function saveConfig(config: any, { guards, actions }: { guards?: any; actions?: any }) {
+export function saveConfig(
+  config: any,
+  { guards, actions }: { guards?: any; actions?: any }
+) {
   const pretty = (o: any) =>
     JSON.stringify(o, (key, val) => {
       return typeof val === 'function' ? val.toString() : val;
     });
 
   fs.writeFile(
-    `${config.key}.config.js`,
+    `protocol.config.js`,
     `
 const config = ${pretty(config)}
 const guards = ${pretty(guards || {})}
@@ -18,5 +21,5 @@ const machine = Machine(config, {guards, actions: customActions})
   );
   console.log('saved');
 
-  fs.writeFile(`${config.key}.config.json`, pretty(config), (err: any) => ({}));
+  fs.writeFile(`protocol.config.json`, pretty(config), (err: any) => ({}));
 }
