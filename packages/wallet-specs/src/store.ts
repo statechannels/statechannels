@@ -1,4 +1,4 @@
-import { Outcome, Recipient, SignedState, ChannelState } from '.';
+import { ChannelState, Outcome, Recipient, SignedState } from '.';
 
 const NULL_OUTCOME: Outcome = [];
 
@@ -11,17 +11,18 @@ export class Store {
         state: {
           turnNumber: 0,
           outcome: NULL_OUTCOME,
-          appData: '0x'
-        }
-      }
+          appData: '0x',
+          participants: [],
+        },
+      },
     };
   }
 
-  get(channelID: string): SignedState {
+  public get(channelID: string): SignedState {
     return this.store[channelID];
   }
 
-  sign(channelID: string, state: ChannelState, recipient?: Recipient) {
+  public sign(channelID: string, state: ChannelState, recipient?: Recipient) {
     this.store[channelID] = signState(this.store[channelID] || { state });
     if (recipient) {
       // send to recipient
@@ -32,7 +33,7 @@ export class Store {
 function signState({ state, signatures }: SignedState): SignedState {
   return {
     state,
-    signatures: (signatures || []).concat('Signature')
+    signatures: (signatures || []).concat('Signature'),
   };
 }
 
