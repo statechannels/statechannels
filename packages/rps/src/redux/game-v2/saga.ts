@@ -76,8 +76,8 @@ export function* gameSaga(channelClient: RPSChannelClient) {
         const updatedChannelState = yield call(
           channelClient.updateChannel,
           channelId,
-          aBal2,
-          bBal2,
+          aBal2.toString(),
+          bBal2.toString(),
           reveal
         );
         yield put(updateChannelState(updatedChannelState));
