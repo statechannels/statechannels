@@ -1,5 +1,5 @@
-import {BigNumber} from 'ethers/utils';
-import {ChannelState, Weapon, Result} from '../../core';
+import { BigNumber } from 'ethers/utils';
+import { ChannelState, Weapon, Result } from '../../core';
 
 export type GameAction =
   | JoinOpenGame
@@ -73,11 +73,14 @@ export const updateChannelState = (channelState: ChannelState): UpdateChannelSta
   channelState,
 });
 
-export const createGame = (roundBuyIn: BigNumber): CreateGame => ({type: 'CreateGame', roundBuyIn});
+export const createGame = (roundBuyIn: BigNumber): CreateGame => ({
+  type: 'CreateGame',
+  roundBuyIn,
+});
 
-export const chooseWeapon = (weapon: Weapon): ChooseWeapon => ({type: 'ChooseWeapon', weapon});
+export const chooseWeapon = (weapon: Weapon): ChooseWeapon => ({ type: 'ChooseWeapon', weapon });
 
-export const chooseSalt = (salt: string): ChooseSalt => ({type: 'ChooseSalt', salt});
+export const chooseSalt = (salt: string): ChooseSalt => ({ type: 'ChooseSalt', salt });
 
 export const joinOpenGame = (
   opponentName: string,
@@ -107,6 +110,6 @@ export const resultArrived = (
   fundingSituation,
 });
 
-export const playAgain = (): PlayAgain => ({type: 'PlayAgain'});
-export const startRound = (): StartRound => ({type: 'StartRound'});
-export const resign = (): Resign => ({type: 'Resign'});
+export const playAgain = (): PlayAgain => ({ type: 'PlayAgain' });
+export const startRound = (): StartRound => ({ type: 'StartRound' });
+export const resign = (): Resign => ({ type: 'Resign' });

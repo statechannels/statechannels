@@ -1,6 +1,6 @@
-export {Weapon} from './weapons';
+export { Weapon } from './weapons';
 export * from './results';
-export {Player} from './players';
+export { Player } from './players';
 
 export * from './channel-state';
 export * from './app-data';

@@ -1,8 +1,8 @@
 import * as React from 'react';
 
-import {Weapon, Result} from '../core';
-import {WeaponBadge} from './WeaponBadge';
-import {GameLayout} from './GameLayout';
+import { Weapon, Result } from '../core';
+import { WeaponBadge } from './WeaponBadge';
+import { GameLayout } from './GameLayout';
 
 interface Props {
   yourWeapon: Weapon;
@@ -13,7 +13,7 @@ interface Props {
 
 export default class WaitForRestingA extends React.PureComponent<Props> {
   renderResultText() {
-    const {result} = this.props;
+    const { result } = this.props;
 
     switch (result) {
       case Result.YouWin:
@@ -28,7 +28,7 @@ export default class WaitForRestingA extends React.PureComponent<Props> {
   }
 
   render() {
-    const {yourWeapon, theirWeapon} = this.props;
+    const { yourWeapon, theirWeapon } = this.props;
 
     return (
       <GameLayout>

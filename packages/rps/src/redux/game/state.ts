@@ -1,6 +1,6 @@
-import {Result, Player} from '../../core';
-import {Weapon} from '../../core/rps-commitment';
-import {Channel} from 'fmg-core';
+import { Result, Player } from '../../core';
+import { Weapon } from '../../core/rps-commitment';
+import { Channel } from 'fmg-core';
 
 // States of the form *A are player A only
 // States of the form *B are player B only
@@ -41,8 +41,8 @@ interface NoNameParams {
 }
 
 export function noName(obj: NoNameParams): NoName {
-  const {myAddress, libraryAddress} = obj;
-  return {name: StateName.NoName, myAddress, libraryAddress};
+  const { myAddress, libraryAddress } = obj;
+  return { name: StateName.NoName, myAddress, libraryAddress };
 }
 
 export interface Lobby {
@@ -61,8 +61,8 @@ interface LobbyParams {
 }
 
 export function lobby(obj: LobbyParams): Lobby {
-  const {myName, myAddress, libraryAddress, twitterHandle} = obj;
-  return {name: StateName.Lobby, myName, myAddress, libraryAddress, twitterHandle};
+  const { myName, myAddress, libraryAddress, twitterHandle } = obj;
+  return { name: StateName.Lobby, myName, myAddress, libraryAddress, twitterHandle };
 }
 
 export interface CreatingOpenGame {
@@ -74,8 +74,8 @@ export interface CreatingOpenGame {
 }
 
 export function creatingOpenGame(obj: LobbyParams): CreatingOpenGame {
-  const {myName, myAddress, libraryAddress, twitterHandle} = obj;
-  return {name: StateName.CreatingOpenGame, myName, myAddress, libraryAddress, twitterHandle};
+  const { myName, myAddress, libraryAddress, twitterHandle } = obj;
+  return { name: StateName.CreatingOpenGame, myName, myAddress, libraryAddress, twitterHandle };
 }
 
 export interface WaitingRoom {
@@ -96,7 +96,7 @@ interface WaitingRoomParams {
   [x: string]: any;
 }
 export function waitingRoom(obj: WaitingRoomParams): WaitingRoom {
-  const {myName, roundBuyIn, libraryAddress, myAddress, twitterHandle} = obj;
+  const { myName, roundBuyIn, libraryAddress, myAddress, twitterHandle } = obj;
   return {
     name: StateName.WaitingRoom,
     myName,
@@ -169,7 +169,7 @@ export interface WaitForGameConfirmationA extends Base {
   player: Player.PlayerA;
 }
 export function waitForGameConfirmationA(state: IncludesBase): WaitForGameConfirmationA {
-  return {...base(state), name: StateName.WaitForGameConfirmationA, player: Player.PlayerA};
+  return { ...base(state), name: StateName.WaitForGameConfirmationA, player: Player.PlayerA };
 }
 
 export interface ConfirmGameB extends Base {
@@ -177,7 +177,7 @@ export interface ConfirmGameB extends Base {
   player: Player.PlayerB;
 }
 export function confirmGameB(state: IncludesBase): ConfirmGameB {
-  return {...base(state), name: StateName.ConfirmGameB, player: Player.PlayerB};
+  return { ...base(state), name: StateName.ConfirmGameB, player: Player.PlayerB };
 }
 
 export interface DeclineGameB extends Base {
@@ -185,7 +185,7 @@ export interface DeclineGameB extends Base {
   player: Player.PlayerB;
 }
 export function declineGameB(state: IncludesBase): DeclineGameB {
-  return {...base(state), name: StateName.DeclineGame, player: Player.PlayerB};
+  return { ...base(state), name: StateName.DeclineGame, player: Player.PlayerB };
 }
 
 export interface WaitForFunding extends Base {
@@ -193,7 +193,7 @@ export interface WaitForFunding extends Base {
   player: Player;
 }
 export function waitForFunding(state: IncludesBase): WaitForFunding {
-  return {...base(state), name: StateName.WaitForFunding};
+  return { ...base(state), name: StateName.WaitForFunding };
 }
 
 export interface PickWeapon extends Base {
@@ -201,7 +201,7 @@ export interface PickWeapon extends Base {
   player: Player;
 }
 export function pickWeapon(state: IncludesBase): PickWeapon {
-  return {...base(state), name: StateName.PickWeapon};
+  return { ...base(state), name: StateName.PickWeapon };
 }
 
 export interface PickChallengeWeapon extends Base {
@@ -209,7 +209,7 @@ export interface PickChallengeWeapon extends Base {
   player: Player;
 }
 export function pickChallengeWeapon(state: IncludesBase): PickChallengeWeapon {
-  return {...base(state), name: StateName.PickChallengeWeapon};
+  return { ...base(state), name: StateName.PickChallengeWeapon };
 }
 
 export interface WaitForOpponentToPickWeaponA extends Base {
@@ -261,8 +261,8 @@ interface WaitForRevealBParams extends IncludesBase {
   preCommit: string;
 }
 export function waitForRevealB(state: WaitForRevealBParams): WaitForRevealB {
-  const {myWeapon, preCommit} = state;
-  return {...base(state), name: StateName.WaitForRevealB, myWeapon, preCommit};
+  const { myWeapon, preCommit } = state;
+  return { ...base(state), name: StateName.WaitForRevealB, myWeapon, preCommit };
 }
 
 interface IncludesResult extends IncludesBase {
@@ -279,8 +279,8 @@ export interface PlayAgain extends Base {
   player: Player;
 }
 export function playAgain(state: IncludesResult): PlayAgain {
-  const {myWeapon, theirWeapon, result} = state;
-  return {...base(state), name: StateName.PlayAgain, myWeapon, theirWeapon, result};
+  const { myWeapon, theirWeapon, result } = state;
+  return { ...base(state), name: StateName.PlayAgain, myWeapon, theirWeapon, result };
 }
 
 export interface WaitForRestingA extends Base {
@@ -291,8 +291,8 @@ export interface WaitForRestingA extends Base {
   player: Player.PlayerA;
 }
 export function waitForRestingA(state: IncludesResult): WaitForRestingA {
-  const {myWeapon, theirWeapon, result} = state;
-  return {...base(state), name: StateName.WaitForRestingA, myWeapon, theirWeapon, result};
+  const { myWeapon, theirWeapon, result } = state;
+  return { ...base(state), name: StateName.WaitForRestingA, myWeapon, theirWeapon, result };
 }
 
 export interface OpponentResigned extends Base {
@@ -300,7 +300,7 @@ export interface OpponentResigned extends Base {
   player: Player;
 }
 export function opponentResigned(state: IncludesBase): OpponentResigned {
-  return {...base(state), name: StateName.OpponentResigned};
+  return { ...base(state), name: StateName.OpponentResigned };
 }
 
 export interface WaitForResignationAcknowledgement extends Base {
@@ -310,7 +310,7 @@ export interface WaitForResignationAcknowledgement extends Base {
 export function waitForResignationAcknowledgement(
   state: IncludesBase
 ): WaitForResignationAcknowledgement {
-  return {...base(state), name: StateName.WaitForResignationAcknowledgement};
+  return { ...base(state), name: StateName.WaitForResignationAcknowledgement };
 }
 
 export interface GameOver extends Base {
@@ -318,7 +318,7 @@ export interface GameOver extends Base {
   player: Player;
 }
 export function gameOver(state: IncludesBase): GameOver {
-  return {...base(state), name: StateName.GameOver};
+  return { ...base(state), name: StateName.GameOver };
 }
 
 export interface WaitForWithdrawal extends Base {
@@ -326,7 +326,7 @@ export interface WaitForWithdrawal extends Base {
   player: Player;
 }
 export function waitForWithdrawal(state: IncludesBase): WaitForWithdrawal {
-  return {...base(state), name: StateName.WaitForWithdrawal};
+  return { ...base(state), name: StateName.WaitForWithdrawal };
 }
 
 export interface ChallengePlayAgain extends Base {
@@ -337,8 +337,8 @@ export interface ChallengePlayAgain extends Base {
   player: Player;
 }
 export function challengePlayAgain(state: IncludesResult): ChallengePlayAgain {
-  const {myWeapon, theirWeapon, result} = state;
-  return {...base(state), name: StateName.ChallengePlayAgain, myWeapon, theirWeapon, result};
+  const { myWeapon, theirWeapon, result } = state;
+  return { ...base(state), name: StateName.ChallengePlayAgain, myWeapon, theirWeapon, result };
 }
 
 export type PlayingState =

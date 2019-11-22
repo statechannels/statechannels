@@ -1,4 +1,4 @@
-import {Weapon, RPSCommitment} from '../../core/rps-commitment';
+import { Weapon, RPSCommitment } from '../../core/rps-commitment';
 
 export const UPDATE_PROFILE = 'LOGIN.UPDATE_PROFILE';
 export const JOIN_OPEN_GAME = 'GAME.JOIN_OPEN_GAME';

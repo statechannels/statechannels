@@ -2,8 +2,8 @@ import React from 'react';
 
 import * as web3Utils from 'web3-utils';
 
-import {Navbar} from 'reactstrap';
-import {bigNumberify} from 'ethers/utils';
+import { Navbar } from 'reactstrap';
+import { bigNumberify } from 'ethers/utils';
 
 interface Props {
   myName: string;
@@ -42,7 +42,7 @@ export default class GameBar extends React.PureComponent<Props> {
     ));
 
   render() {
-    const {myName, opponentName, roundBuyIn, myBalance, opponentBalance} = this.props;
+    const { myName, opponentName, roundBuyIn, myBalance, opponentBalance } = this.props;
 
     const myGameCount = Math.round(
       bigNumberify(myBalance)

@@ -1,5 +1,5 @@
-import {JointState} from '../reducer';
-import {RPSCommitment, asCoreCommitment} from '../../../core/rps-commitment';
+import { JointState } from '../reducer';
+import { RPSCommitment, asCoreCommitment } from '../../../core/rps-commitment';
 
 export const itSends = (commitment: RPSCommitment, jointState) => {
   it(`sends ${commitment.commitmentName}`, () => {

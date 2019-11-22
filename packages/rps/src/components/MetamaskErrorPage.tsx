@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {MetamaskError} from '../redux/metamask/actions';
+import { MetamaskError } from '../redux/metamask/actions';
 
 interface MetamaskErrorProps {
   error: MetamaskError;

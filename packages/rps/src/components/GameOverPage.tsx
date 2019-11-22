@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import React from 'react';
 
-import {Button, Modal, ModalBody} from 'reactstrap';
+import { Button, Modal, ModalBody } from 'reactstrap';
 
 interface Props {
   conclude: () => void;
@@ -11,7 +11,7 @@ interface Props {
 
 export default class GameOverPage extends React.PureComponent<Props> {
   render() {
-    const {ourTurn} = this.props;
+    const { ourTurn } = this.props;
     return (
       <Modal className="game-over-container" isOpen={this.props.visible} centered={true}>
         <ModalBody>

@@ -1,7 +1,7 @@
-import {Reducer} from 'redux';
+import { Reducer } from 'redux';
 
 import * as actions from './actions';
-import {OpenGameState} from './state';
+import { OpenGameState } from './state';
 
 const initialState = [];
 

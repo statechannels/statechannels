@@ -1,13 +1,13 @@
 import React from 'react';
-import {StyleSheet, css} from 'aphrodite';
+import { StyleSheet, css } from 'aphrodite';
 
-import {Button} from 'reactstrap';
+import { Button } from 'reactstrap';
 
 interface IProps {
   login: () => any;
 }
 
-const HomePage: React.SFC<IProps> = ({login}) => {
+const HomePage: React.SFC<IProps> = ({ login }) => {
   return (
     <div>
       <div className="homePage">

@@ -1,5 +1,5 @@
 import React from 'react';
-import {GameLayout} from './GameLayout';
+import { GameLayout } from './GameLayout';
 
 interface Props {
   message: string;
@@ -7,7 +7,7 @@ interface Props {
 
 export default class FundingConfirmedPage extends React.PureComponent<Props> {
   render() {
-    const {message} = this.props;
+    const { message } = this.props;
 
     return (
       <GameLayout>
