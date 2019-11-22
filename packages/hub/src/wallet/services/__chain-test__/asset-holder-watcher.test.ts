@@ -1,7 +1,11 @@
 import {bigNumberify} from 'ethers/utils';
-import {AssetHolderEventHandler, assetHolderListen, AssetHolderWatcherEvent} from '..';
 import {FUNDED_NONCE_CHANNEL_ID} from '../../../test/test_data';
-import {Blockchain} from '../../services/blockchain';
+import {
+  AssetHolderEventHandler,
+  assetHolderListen,
+  AssetHolderWatcherEvent
+} from '../asset-holder-watcher';
+import {Blockchain} from '../blockchain';
 
 jest.setTimeout(20000);
 const five = bigNumberify(5).toHexString();

@@ -1,8 +1,8 @@
 import {addHex} from '@statechannels/wallet';
 import {bigNumberify} from 'ethers/utils';
-import {Address, Uint256} from 'fmg-core';
 import {HUB_ADDRESS} from '../../constants';
 import Channel from '../models/channel';
+import {AssetHolderWatcherEvent} from './asset-holder-watcher';
 import {Blockchain} from './blockchain';
 
 /* todo:
@@ -14,30 +14,44 @@ import {Blockchain} from './blockchain';
  * If so, only deposit hub's share.
  */
 
-export async function onDepositEvent(
-  channelId: Address,
-  amountDeposited: Uint256,
-  destinationHoldings: Uint256
-) {
+export async function onDepositEvent(assetHolderEvent: AssetHolderWatcherEvent) {
   // todo: to avoid manual case conversions, we can switch to knexSnakeCaseMappers.
   // https://vincit.github.io/objection.js/recipes/snake-case-to-camel-case-conversion.html#snake-case-to-camel-case-conversion
-  const channel_id = channelId;
   const channel = await Channel.query()
     .findOne({
-      channel_id
+      channel_id: assetHolderEvent.channelId
     })
-    .eager('[states.[outcome.[allocation]], participants]');
+    .eager('[states.[outcome.[allocation]], participants, holdings]');
 
-  const holdings = destinationHoldings;
+  const holdings = assetHolderEvent.destinationHoldings;
 
   if (!channel) {
-    console.log(`Allocator channel ${channelId} not in database`);
+    console.log(`Allocator channel ${assetHolderEvent.channelId} not in database`);
     return;
   }
 
-  await Channel.query()
-    .findById(channel.id)
-    .patch({holdings});
+  const newHolding = {
+    assetHolderAddress: assetHolderEvent.assetHolderAddress,
+    amount: assetHolderEvent.destinationHoldings
+  };
+
+  let updatedHoldings = [newHolding];
+  if (channel.holdings) {
+    updatedHoldings = channel.holdings.map(channelHolding => {
+      if (channelHolding.assetHolderAddress === assetHolderEvent.assetHolderAddress) {
+        return {
+          assetHolderAddress: channelHolding.assetHolderAddress,
+          amount: channelHolding.amount
+        };
+      }
+      return newHolding;
+    });
+    if (updatedHoldings.length === channel.holdings.length) {
+      updatedHoldings = [...updatedHoldings, newHolding];
+    }
+  }
+  const updatedChannel = {...channel, holdings: updatedHoldings};
+  await Channel.query().upsertGraph(updatedChannel);
 
   const states = channel.states;
   const latestState = states.reduce((prevState, currentState) => {
@@ -48,17 +62,23 @@ export async function onDepositEvent(
     .map(participant => participant.address)
     .indexOf(HUB_ADDRESS);
 
-  // todo: need to consider the asset holder address
-  const totalNeededInChannel = latestState.outcome[0].allocation
+  const outcomesForAssetHolder = latestState.outcome.filter(
+    outcome => outcome.assetHolderAddress === assetHolderEvent.assetHolderAddress
+  );
+  if (outcomesForAssetHolder.length !== 1) {
+    throw Error('Deposited event cannot be matched with an allocation outcome');
+  }
+
+  const outcomeForAssetHolder = outcomesForAssetHolder[0];
+  const totalNeededInChannel = outcomeForAssetHolder.allocation
     .map(allocation => allocation.amount)
     .reduce(addHex);
 
   const channelNeedsMoreFunds = bigNumberify(totalNeededInChannel).gt(bigNumberify(holdings));
 
   if (channelNeedsMoreFunds) {
-    // todo: need to consider the asset holder address
-    const allocationNeededFromHub = latestState.outcome[0].allocation[hubParticipatIndex];
-    await Blockchain.fund(channelId, holdings, allocationNeededFromHub.amount);
+    const allocationNeededFromHub = outcomeForAssetHolder.allocation[hubParticipatIndex];
+    await Blockchain.fund(assetHolderEvent.channelId, holdings, allocationNeededFromHub.amount);
   } else {
     console.log('Channel is fully funded');
   }

@@ -1,16 +1,22 @@
 import {bigNumberify} from 'ethers/utils';
 import {Address, Uint256} from 'fmg-core';
+import {DUMMY_ASSET_HOLDER_ADDRESS} from '../../test/test-constants';
 import {BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID} from '../../test/test_data';
 import Channel from '../models/channel';
+import {
+  AssetHolderWatcherEvent,
+  AssetHolderWatcherEventType
+} from '../services/asset-holder-watcher';
 import {Blockchain} from '../services/blockchain';
 import {onDepositEvent} from '../services/depositManager';
 
 const channelId = BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID;
 
 async function getHoldings() {
-  return (await Channel.query()
+  const channel = await Channel.query()
     .findOne('channel_id', channelId)
-    .select('holdings')).holdings;
+    .eager('[holdings]');
+  return channel.holdings;
 }
 
 // Mock out Blockchain funding
@@ -32,19 +38,45 @@ beforeEach(() => {
 describe('deposit manager', () => {
   it('should not deposit, asset holder fully funded', async () => {
     const destinationHoldings = bigNumberify(10).toHexString();
-    await onDepositEvent(channelId, amountDeposited, destinationHoldings);
+    const assetHolderEvent: AssetHolderWatcherEvent = {
+      eventType: AssetHolderWatcherEventType.Deposited,
+      assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS,
+      channelId,
+      amountDeposited,
+      destinationHoldings
+    };
+    await onDepositEvent(assetHolderEvent);
 
     const postEventHoldings = await getHoldings();
-    expect(postEventHoldings).toMatch(destinationHoldings);
+    expect(postEventHoldings).toHaveLength(1);
+    expect(postEventHoldings[0]).toEqual(
+      expect.objectContaining({
+        assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS,
+        amount: destinationHoldings
+      })
+    );
     expect(mockBlockchainFund).toBeCalledTimes(0);
   });
 
   it('should deposit, asset holder not fully funded', async () => {
     const destinationHoldings = bigNumberify(5).toHexString();
-    await onDepositEvent(channelId, amountDeposited, destinationHoldings);
+    const assetHolderEvent: AssetHolderWatcherEvent = {
+      eventType: AssetHolderWatcherEventType.Deposited,
+      assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS,
+      channelId,
+      amountDeposited,
+      destinationHoldings
+    };
+    await onDepositEvent(assetHolderEvent);
 
     const postEventHoldings = await getHoldings();
-    expect(postEventHoldings).toMatch(destinationHoldings);
+    expect(postEventHoldings).toHaveLength(1);
+    expect(postEventHoldings[0]).toEqual(
+      expect.objectContaining({
+        assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS,
+        amount: destinationHoldings
+      })
+    );
     expect(mockBlockchainFund).toBeCalledWith(channelId, '0x05', '0x05');
   });
 });

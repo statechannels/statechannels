@@ -17,6 +17,8 @@ export const PARTICIPANT_2_ADDRESS = '0xd274673B5128F7E745Dc4ee16799721D2D835f1A
 export const DUMMY_RULES_ADDRESS = '0xabcd10b5ea16F12f5bEFc45d511978CFF2780568';
 export const UNKNOWN_RULES_ADDRESS = '0x92b5b042047731FF882423cB555554F11F632Bd6';
 
+export const DUMMY_ASSET_HOLDER_ADDRESS = '0xabcd10b5ea16F12f5bEFc45d511978CFF2780568';
+
 export const FUNDED_CHANNEL_NONCE = '3';
 export const FUNDED_CHANNEL_NONCE_3 = '33';
 export const FUNDED_CHANNEL_HOLDINGS = '0x00';
@@ -44,7 +46,6 @@ export const PARTICIPANTS_3: Address[] = [
 ];
 
 const hex5 = bigNumberify(5).toHexString();
-export const dummyEthAssetHolderAddress = '0x0000000000000000000000000000000000000001';
 
 export const allocation: AllocationItem[] = [
   {destination: convertAddressToBytes32(PARTICIPANT_1_ADDRESS), amount: hex5},
@@ -53,21 +54,21 @@ export const allocation: AllocationItem[] = [
 ];
 export const allocationOutcome2: Outcome = [
   {
-    assetHolderAddress: dummyEthAssetHolderAddress,
+    assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS,
     allocation: allocation.slice(0, 2)
   }
 ];
 
 export const allocationOutcome3: Outcome = [
   {
-    assetHolderAddress: dummyEthAssetHolderAddress,
+    assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS,
     allocation: allocation.slice(0, 3)
   }
 ];
 
 export const guaranteeOutcome2: GuaranteeAssetOutcome[] = [
   {
-    assetHolderAddress: dummyEthAssetHolderAddress,
+    assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS,
     guarantee: {targetChannelId: '1234', destinations: PARTICIPANTS}
   }
 ];

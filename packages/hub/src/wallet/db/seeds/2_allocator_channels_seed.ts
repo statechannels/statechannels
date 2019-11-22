@@ -3,11 +3,8 @@ import {Model} from 'objection';
 import {
   allocationOutcome2,
   allocationOutcome3,
-  BEGINNING_APP_CHANNEL_HOLDINGS,
   DUMMY_RULES_ADDRESS,
-  FUNDED_CHANNEL_HOLDINGS,
-  guaranteeOutcome2,
-  ONGOING_APP_CHANNEL_HOLDINGS
+  guaranteeOutcome2
 } from '../../../test/test-constants';
 import {
   BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID,
@@ -89,35 +86,30 @@ function appState(turnNum: number) {
 const fundedChannelWithStates = {
   ...channelObjectToModel(fundedChannel),
   channelId: FUNDED_NONCE_CHANNEL_ID,
-  holdings: FUNDED_CHANNEL_HOLDINGS,
   states: [prefundSetupState(0), prefundSetupState(1)]
 };
 
 const fundedGuarantorChannelWithStates = {
   ...channelObjectToModel(fundedGuarantorChannel),
   channelId: FUNDED_NONCE_GUARANTOR_CHANNEL_ID,
-  holdings: FUNDED_CHANNEL_HOLDINGS,
   states: [prefundSetupGuarantorState(0), prefundSetupGuarantorState(1)]
 };
 
 const fundedChannel3WithStates = {
   ...channelObjectToModel(fundedChannel3),
   channelId: FUNDED_NONCE_CHANNEL_ID_3,
-  holdings: FUNDED_CHANNEL_HOLDINGS,
   states: [prefundSetupState3(0), prefundSetupState3(1), prefundSetupState3(2)]
 };
 
 const beginningAppPhaseChannelWithStates = {
   ...channelObjectToModel(beginningAppPhaseChannel),
   channel_id: BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID,
-  holdings: BEGINNING_APP_CHANNEL_HOLDINGS,
   states: [postFundSetupState(2), postFundSetupState(3)]
 };
 
 const ongoingAppPhaseChannelWithStates = {
   ...channelObjectToModel(ongoingAppPhaseChannel),
   channel_id: ONGOING_APP_CHANNEL_NONCE_CHANNEL_ID,
-  holdings: ONGOING_APP_CHANNEL_HOLDINGS,
   states: [appState(4), appState(5)]
 };
 
