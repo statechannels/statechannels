@@ -12,6 +12,9 @@ interface Store {
 
   signedByMe: (state: ChannelState) => boolean;
   sendState: (state: ChannelState) => void;
+
+  // Helpers
+  equals: (left: ChannelState, right: ChannelState) => boolean;
 }
 
 export const store = (null as any) as Store;
