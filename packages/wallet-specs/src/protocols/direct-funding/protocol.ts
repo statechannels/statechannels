@@ -1,7 +1,5 @@
-import { Chain, ChannelState, Outcome, OutcomeItem, store } from '../../';
+import { chain, ChannelState, Outcome, OutcomeItem, store } from '../../';
 import { saveConfig } from '../..//utils';
-
-const chain = new Chain();
 
 const PROTOCOL = 'direct-funding';
 const success = { type: 'final' };

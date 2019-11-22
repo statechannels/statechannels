@@ -1,6 +1,15 @@
-import { ChannelState, Outcome, Recipient, SignedState } from '.';
+interface Chain {
+  holdings: (channelID: string) => number;
+  deposit: (
+    channelID: string,
+    expectedHeld: number,
+    amount: number
+  ) => Deposited | Revert;
+}
 
-export class Chain {
+export const chain = (null as any) as Chain;
+
+class ExampleChain {
   private _holdings: { [channelID: string]: number };
 
   constructor() {

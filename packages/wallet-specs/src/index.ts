@@ -33,5 +33,5 @@ export interface Entry {
   type: '';
 }
 
-export { Chain } from './chain';
+export { chain } from './chain';
 export { store } from './store';
