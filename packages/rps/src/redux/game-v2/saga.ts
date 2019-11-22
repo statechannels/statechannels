@@ -107,6 +107,38 @@ export function* gameSaga(channelClient: RPSChannelClient) {
       ) {
         const preFundSetup1 = yield call(channelClient.joinChannel, channelState.channelId);
         yield put(updateChannelState(preFundSetup1));
+      } else if (
+        localState.type === 'WeaponChosen' &&
+        channelState &&
+        channelState.appData.type === 'roundProposed'
+      ) {
+        const playerBWeapon = localState.myWeapon;
+        const {channelId, aBal, bBal} = channelState;
+        const {stake, preCommit} = channelState.appData;
+        const roundAccepted: AppData = {
+          type: 'roundAccepted',
+          stake,
+          preCommit,
+          playerBWeapon,
+        };
+
+        const [aBal2, bBal2] = [
+          bigNumberify(aBal)
+            .sub(stake)
+            .toString(),
+          bigNumberify(bBal)
+            .add(stake)
+            .toString(),
+        ];
+
+        const newState = yield call(
+          channelClient.updateChannel,
+          channelId,
+          aBal2,
+          bBal2,
+          roundAccepted
+        );
+        yield put(updateChannelState(newState));
       }
     }
   }

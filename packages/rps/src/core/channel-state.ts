@@ -1,6 +1,6 @@
 import {AppData} from './app-data';
 
-export type ChannelStatus = 'proposed' | 'opening' | 'running' | 'concluding' | 'closed';
+export type ChannelStatus = 'proposed' | 'opening' | 'funding' | 'running' | 'closing' | 'closed';
 
 export interface ChannelState {
   channelId: string;

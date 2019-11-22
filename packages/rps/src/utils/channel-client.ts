@@ -3,7 +3,7 @@ import {EventEmitter} from 'eventemitter3';
 
 export type JsonRPCVersion = '2.0';
 
-export type ChannelStatus = 'opening' | 'funding' | 'running' | 'closing';
+export type ChannelStatus = 'proposed' | 'opening' | 'funding' | 'running' | 'closing' | 'closed';
 
 export enum ErrorCodes {
   SIGNING_ADDRESS_NOT_FOUND = 1000,

@@ -45,7 +45,7 @@ export class RPSChannelClient {
     return await {
       channelId: '0xsome-channel-id',
       turnNum: bigNumberify(0).toString(),
-      status: 'open',
+      status: 'opening',
       aUserId: aAddress,
       bUserId: bAddress,
       aDestination: aAddress,

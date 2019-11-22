@@ -13,6 +13,7 @@ import {
   salt,
   aName,
   aAddress,
+  bWeapon,
 } from './scenarios';
 import {
   joinOpenGame,
@@ -32,6 +33,12 @@ import {randomHex} from '../../../utils/randomHex';
 const reducer = combineReducers({
   game: gameReducer,
 });
+
+// checks and mocks an updateChannel call, in the format expected by expectSaga.provide
+const updateChannelCall = (state: ChannelState): [match.Matcher, any] => [
+  match.call(client.updateChannel, state.channelId, state.aBal, state.bBal, state.appData),
+  Promise.resolve(state),
+];
 
 const gameState = (localState, channelState?: ChannelState) => ({
   game: {
@@ -106,7 +113,10 @@ describe('when opponent joins your game', () => {
   });
 });
 
-// moving to chooseWeapon when game is funded (from GameChosen / OpponentJoined)
+describe('when funding completes', () => {
+  it('player A moves to chooseWeapon');
+  it('player B moves to chooseWeapon');
+});
 
 describe('when chosing a weapon as player A', () => {
   it('generates a salt, calls updateState, and finishes in WeaponAndSaltChosen', async () => {
@@ -128,14 +138,46 @@ describe('when chosing a weapon as player A', () => {
   });
 });
 
-describe('when choosing a weapon as player B', () => {
+describe.only('when choosing a weapon as player B', () => {
   describe('and player A has already sent their state', () => {
-    it('updates the channel state and transitions to WeaponChosen');
+    it('updates the channel state and transitions to WeaponChosen', async () => {
+      const initialState = gameState(localStatesB.chooseWeapon, channelStates.roundProposed);
+      const action = chooseWeapon(bWeapon);
+
+      const {storeState} = await expectSaga(gameSaga as any, client)
+        .withReducer(reducer, initialState)
+        .dispatch(action)
+        .provide([updateChannelCall(channelStates.roundAccepted)])
+        .run({silenceTimeout: true});
+
+      expect(storeState).toEqual(gameState(localStatesB.weaponChosen, channelStates.roundAccepted));
+    });
   });
 
   describe("and player A hasn't sent their state yet", () => {
-    it('transitions to WeaponChosen');
-    it("updates the channel state when player A's state arrives");
+    it('transitions to WeaponChosen', async () => {
+      const initialState = gameState(localStatesB.chooseWeapon, channelStates.postFund1);
+      const action = chooseWeapon(bWeapon);
+
+      const {storeState} = await expectSaga(gameSaga as any, client)
+        .withReducer(reducer, initialState)
+        .dispatch(action)
+        .run({silenceTimeout: true});
+
+      expect(storeState).toEqual(gameState(localStatesB.weaponChosen, channelStates.postFund1));
+    });
+    it("updates the channel state when player A's state arrives", async () => {
+      const initialState = gameState(localStatesB.weaponChosen, channelStates.postFund1);
+      const action = updateChannelState(channelStates.roundProposed); // triggered when state arrives
+
+      const {storeState} = await expectSaga(gameSaga as any, client)
+        .withReducer(reducer, initialState)
+        .dispatch(action)
+        .provide([updateChannelCall(channelStates.roundAccepted)])
+        .run({silenceTimeout: true});
+
+      expect(storeState).toEqual(gameState(localStatesB.weaponChosen, channelStates.roundAccepted));
+    });
   });
 });
 
