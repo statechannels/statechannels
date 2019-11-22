@@ -139,6 +139,26 @@ export function* gameSaga(channelClient: RPSChannelClient) {
           roundAccepted
         );
         yield put(updateChannelState(newState));
+      } else if (
+        localState.type === 'WeaponChosen' &&
+        channelState &&
+        channelState.appData.type === 'reveal'
+      ) {
+        const {playerAWeapon: theirWeapon} = channelState.appData;
+        const {aBal, bBal, channelId} = channelState;
+        const {myWeapon, roundBuyIn} = localState;
+        const result = calculateResult(myWeapon, theirWeapon);
+        const fundingSituation = calculateFundingSituation(
+          Player.PlayerB,
+          bigNumberify(aBal),
+          bigNumberify(bBal),
+          bigNumberify(roundBuyIn)
+        );
+        yield put(resultArrived(theirWeapon, result, fundingSituation));
+        if (fundingSituation !== 'Ok') {
+          const state = yield call(channelClient.closeChannel, channelId);
+          yield put(updateChannelState(state));
+        }
       }
     }
   }

@@ -235,12 +235,38 @@ describe("when player A receives player B's move", () => {
   });
 });
 
-describe.skip('when player B receives the reveal', () => {
+describe('when player B receives the reveal', () => {
   describe('and there are sufficient funds to continue', () => {
-    it('transitions to ResultPlayAgain');
+    it('transitions to ResultPlayAgain', async () => {
+      const initialState = gameState(localStatesB.weaponChosen, channelStates.roundAccepted);
+      const action = updateChannelState(channelStates.reveal); // triggered by ChannelUpdatedListener
+
+      const {storeState} = await expectSaga(gameSaga as any, client)
+        .withReducer(reducer, initialState)
+        .dispatch(action)
+        .run({silenceTimeout: true});
+
+      expect(storeState).toEqual(gameState(localStatesB.resultPlayAgain, channelStates.reveal));
+    });
   });
   describe('and player B is out of funds', () => {
-    it('calls closeChannel and transitions to ShuttingDown');
+    it('calls closeChannel and transitions to ShuttingDown', async () => {
+      const initialState = gameState(
+        localStatesB.weaponChosen,
+        channelStates.roundAcceptedInsufficientFundsB
+      );
+      const action = updateChannelState(channelStates.revealInsufficientFundsB); // triggered by ChannelUpdatedListener
+
+      const {storeState} = await expectSaga(gameSaga as any, client)
+        .withReducer(reducer, initialState)
+        .dispatch(action)
+        .provide([callCloseChannel(channelStates.concludeInsufficientFundsB)])
+        .run({silenceTimeout: true});
+
+      expect(storeState).toEqual(
+        gameState(localStatesB.shuttingDown, channelStates.concludeInsufficientFundsB)
+      );
+    });
   });
 });
 

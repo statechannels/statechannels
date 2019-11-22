@@ -64,6 +64,7 @@ export const channelStates = {
   // a wins, so this will move to at [10, 0] next
   roundAcceptedInsufficientFundsB: channelState(appData.roundAccepted, 5, [8, 2]),
   revealInsufficientFundsB: channelState(appData.reveal, 6, [10, 0]),
+  concludeInsufficientFundsB: channelState(appData.reveal, 7, [10, 0]),
 };
 
 const propsA = {
@@ -107,4 +108,5 @@ export const localStatesB: Record<string, LocalState> = {
   weaponChosen: s.weaponChosen(propsB, propsB.myWeapon),
   resultPlayAgain: s.resultPlayAgain(propsB, playerAWeapon, Result.YouLose),
   chooseWeapon2: s.chooseWeapon(propsB),
+  shuttingDown: s.shuttingDown(propsB, 'InsufficientFundsYou'),
 };
