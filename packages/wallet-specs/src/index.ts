@@ -6,6 +6,7 @@ export type Address = string;
 export type PrivateKey = string;
 
 export interface ChannelState {
+  participants: Address[];
   turnNumber: number;
   outcome: Outcome;
   appData: AppData;
