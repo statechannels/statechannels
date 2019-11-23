@@ -181,7 +181,7 @@ module.exports = {
     'plugin:import/warnings',
     'plugin:import/typescript',
     'prettier/@typescript-eslint',
-    'plugin:prettier/recommended'
+    'prettier'
   ],
   rules: Object.assign(rules, TSRules),
   overrides: [
