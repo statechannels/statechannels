@@ -1,6 +1,13 @@
 import { take, select, call, put } from 'redux-saga/effects';
 import { RPSChannelClient } from '../../utils/rps-channel-client';
-import { AppData, hashPreCommit, calculateResult, updateAllocation, Player } from '../../core';
+import {
+  AppData,
+  hashPreCommit,
+  calculateResult,
+  updateAllocation,
+  Player,
+  ChannelState,
+} from '../../core';
 import {
   updateChannelState,
   chooseSalt,
@@ -9,17 +16,67 @@ import {
   FundingSituation,
   gameOver,
 } from './actions';
-import { GameState, ShutDownReason } from './state';
+import { GameState, ShutDownReason, LocalState } from './state';
 import { randomHex } from '../../utils/randomHex';
 import { bigNumberify, BigNumber } from 'ethers/utils';
+import { unreachable } from '../../utils/unreachable';
 
 const getGameState = (state: any): GameState => state.game;
+const isClosed = (state: ChannelState | undefined): state is ChannelState =>
+  (state && state.status === 'closed') || false;
 
 export function* gameSaga(rpsChannelClient: RPSChannelClient) {
   while (true) {
     yield take('*'); // run after every action
 
     const { localState, channelState }: GameState = yield select(getGameState);
+
+    // if we have a conclude, move to shutting down
+    // if we're done, move to gameOver
+    if (isClosed(channelState) && localState.type !== 'GameOver') {
+      yield* transitionToGameOver(localState, channelState);
+      continue;
+    }
+
+    switch (localState.type) {
+      case 'Empty':
+        // nothing
+        break;
+      case 'Lobby':
+        // nothing
+        break;
+      case 'WaitingRoom':
+        break;
+      case 'GameChosen': // player A
+        // if channel empty, create game
+        break;
+      case 'OpponentJoined': // player B
+        // if channelProposed, joinChannel
+        break;
+      case 'ChooseWeapon':
+        break;
+      case 'WeaponChosen':
+        // if playerA, chooseSalt and sendPropose
+        // if playerB and propose, send accept
+        break;
+      case 'WeaponAndSaltChosen': // player A
+        // if roundAccepted, calculateResultAndSendReveal
+        break;
+      case 'ResultPlayAgain':
+        // nothing ?!
+        break;
+      case 'WaitForRestart':
+        // if player A and in start, restart
+        // if player B and reveal, sendStart and restart
+        break;
+      case 'ShuttingDown':
+        // and my turn, send conclude
+        break;
+      case 'GameOver':
+        break;
+      default:
+        unreachable(localState);
+    }
 
     if ('player' in localState && localState.player === 'A') {
       if (localState.type === 'GameChosen' && !channelState) {
@@ -112,22 +169,6 @@ export function* gameSaga(rpsChannelClient: RPSChannelClient) {
           channelState.channelId
         );
         yield put(updateChannelState(closingChannelState));
-      } else if (
-        localState.type !== 'GameOver' &&
-        channelState &&
-        channelState.status === 'closed'
-      ) {
-        let reason: ShutDownReason = 'YouResigned';
-        if (localState.type === 'ShuttingDown') {
-          reason = localState.reason;
-        } else if (
-          bigNumberify(channelState.turnNum)
-            .mod(2)
-            .eq(0)
-        ) {
-          reason = 'TheyResigned';
-        }
-        yield put(gameOver(reason));
       }
     } else {
       // player b
@@ -207,38 +248,6 @@ export function* gameSaga(rpsChannelClient: RPSChannelClient) {
       ) {
         yield put(startRound());
       } else if (
-        localState.type !== 'GameOver' &&
-        channelState &&
-        channelState.status === 'closed'
-      ) {
-        let reason: ShutDownReason = 'YouResigned';
-        if (localState.type === 'ShuttingDown') {
-          reason = localState.reason;
-        } else if (
-          bigNumberify(channelState.turnNum)
-            .mod(2)
-            .eq(1)
-        ) {
-          reason = 'TheyResigned';
-        }
-        yield put(gameOver(reason));
-      } else if (
-        localState.type !== 'GameOver' &&
-        channelState &&
-        channelState.status === 'closed'
-      ) {
-        let reason: ShutDownReason = 'YouResigned';
-        if (localState.type === 'ShuttingDown') {
-          reason = localState.reason;
-        } else if (
-          bigNumberify(channelState.turnNum)
-            .mod(2)
-            .eq(1)
-        ) {
-          reason = 'TheyResigned';
-        }
-        yield put(gameOver(reason));
-      } else if (
         localState.type === 'ShuttingDown' &&
         channelState &&
         bigNumberify(channelState.turnNum)
@@ -254,6 +263,29 @@ export function* gameSaga(rpsChannelClient: RPSChannelClient) {
     }
   }
 }
+
+function* transitionToGameOver(localState: LocalState, channelState: ChannelState) {
+  let reason: ShutDownReason = 'TheyResigned';
+  if (localState.type === 'ShuttingDown') {
+    reason = localState.reason;
+  } else if (ourTurnToSend(localState, channelState)) {
+    // if the channel is done and it's our turn, it means we must have initiated the shutdown
+    reason = 'YouResigned';
+  }
+  yield put(gameOver(reason));
+}
+
+const ourTurnToSend = (localState: LocalState, channelState: ChannelState): boolean => {
+  if (!('player' in localState)) {
+    return false;
+  }
+  const playerIndex = localState.player === 'A' ? 0 : 1;
+
+  return bigNumberify(channelState.turnNum)
+    .sub(1) // for it to be our turn, the player before us must have just moved
+    .mod(2)
+    .eq(playerIndex);
+};
 
 const calculateFundingSituation = (
   player: Player,
