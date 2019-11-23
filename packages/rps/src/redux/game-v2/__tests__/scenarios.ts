@@ -56,6 +56,7 @@ export const channelStates = {
   ready: channelState(appData.start, 3, [5, 5], 'running'),
   concludeFromStart: channelState(appData.start, 4, [5, 5], 'closing'),
   roundProposed: channelState(appData.roundProposed, 4, [5, 5]),
+  concludeFromProposed: channelState(appData.roundProposed, 5, [5, 5]),
   roundAccepted: channelState(appData.roundAccepted, 5, [4, 6]),
   concludeFromAccepted: channelState(appData.start, 6, [4, 6], 'closing'),
   reveal: channelState(appData.reveal, 6, [6, 4]),
@@ -112,4 +113,6 @@ export const localStatesB = {
   resultPlayAgain: s.resultPlayAgain(propsB, playerAWeapon, Result.YouLose),
   chooseWeapon2: s.chooseWeapon(propsB),
   shuttingDown: s.shuttingDown(propsB, 'InsufficientFundsYou'),
+  shuttingDownResign: s.shuttingDown(propsB, 'YouResigned'),
+  gameOverResign: s.gameOver(propsB, 'YouResigned'),
 };

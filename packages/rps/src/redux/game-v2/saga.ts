@@ -222,6 +222,34 @@ export function* gameSaga(rpsChannelClient: RPSChannelClient) {
           reason = 'TheyResigned';
         }
         yield put(gameOver(reason));
+      } else if (
+        localState.type !== 'GameOver' &&
+        channelState &&
+        channelState.status === 'closed'
+      ) {
+        let reason: ShutDownReason = 'YouResigned';
+        if (localState.type === 'ShuttingDown') {
+          reason = localState.reason;
+        } else if (
+          bigNumberify(channelState.turnNum)
+            .mod(2)
+            .eq(1)
+        ) {
+          reason = 'TheyResigned';
+        }
+        yield put(gameOver(reason));
+      } else if (
+        localState.type === 'ShuttingDown' &&
+        channelState &&
+        bigNumberify(channelState.turnNum)
+          .mod(2)
+          .eq(0) // b's turn next
+      ) {
+        const closingChannelState = yield call(
+          rpsChannelClient.closeChannel,
+          channelState.channelId
+        );
+        yield put(updateChannelState(closingChannelState));
       }
     }
   }
