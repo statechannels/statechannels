@@ -1,8 +1,8 @@
-import { AppData, RoundProposed, Start, RoundAccepted, Reveal } from './app-data';
+import { AppData } from './app-data';
 
 export type ChannelStatus = 'proposed' | 'opening' | 'funding' | 'running' | 'closing' | 'closed';
 
-export interface ChannelStateVariant<T = AppData> {
+export interface ChannelState<T = AppData> {
   channelId: string;
   turnNum: string;
   status: ChannelStatus;
@@ -14,9 +14,3 @@ export interface ChannelStateVariant<T = AppData> {
   bBal: string;
   appData: T;
 }
-
-export type ChannelState =
-  | ChannelStateVariant<Start>
-  | ChannelStateVariant<RoundProposed>
-  | ChannelStateVariant<RoundAccepted>
-  | ChannelStateVariant<Reveal>;

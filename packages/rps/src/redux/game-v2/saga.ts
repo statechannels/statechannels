@@ -7,7 +7,6 @@ import {
   updateAllocation,
   Player,
   ChannelState,
-  ChannelStateVariant,
   RoundProposed,
 } from '../../core';
 import {
@@ -37,7 +36,7 @@ const isEmpty = (state: ChannelState | undefined): state is undefined => !state;
 const inChannelProposed = (state: ChannelState | undefined): state is ChannelState =>
   (state && state.status === 'proposed') || false;
 const isPlayerA = (state: LocalStateWithPlayer): boolean => state.player === 'A';
-const inRoundProposed = (state: ChannelState): state is ChannelStateVariant<RoundProposed> =>
+const inRoundProposed = (state: ChannelState): state is ChannelState<RoundProposed> =>
   (state && state.appData.type === 'roundProposed') || false;
 
 export function* gameSaga(rpsChannelClient: RPSChannelClient) {
@@ -272,7 +271,7 @@ function* generateSaltAndSendPropose(
 
 function* sendRoundAccepted(
   localState: WeaponChosen,
-  channelState: ChannelStateVariant<RoundProposed>,
+  channelState: ChannelState<RoundProposed>,
   client: RPSChannelClient
 ) {
   const playerBWeapon = localState.myWeapon;
