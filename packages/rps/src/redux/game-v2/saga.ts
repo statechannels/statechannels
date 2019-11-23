@@ -7,6 +7,8 @@ import {
   updateAllocation,
   Player,
   ChannelState,
+  ChannelStateVariant,
+  RoundProposed,
 } from '../../core';
 import {
   updateChannelState,
@@ -16,7 +18,14 @@ import {
   FundingSituation,
   gameOver,
 } from './actions';
-import { GameState, ShutDownReason, LocalState, GameChosen } from './state';
+import {
+  GameState,
+  ShutDownReason,
+  LocalState,
+  GameChosen,
+  LocalStateWithPlayer,
+  WeaponChosen,
+} from './state';
 import { randomHex } from '../../utils/randomHex';
 import { bigNumberify, BigNumber } from 'ethers/utils';
 import { unreachable } from '../../utils/unreachable';
@@ -27,6 +36,9 @@ const isClosed = (state: ChannelState | undefined): state is ChannelState =>
 const isEmpty = (state: ChannelState | undefined): state is undefined => !state;
 const inChannelProposed = (state: ChannelState | undefined): state is ChannelState =>
   (state && state.status === 'proposed') || false;
+const isPlayerA = (state: LocalStateWithPlayer): boolean => state.player === 'A';
+const inRoundProposed = (state: ChannelState): state is ChannelStateVariant<RoundProposed> =>
+  (state && state.appData.type === 'roundProposed') || false;
 
 export function* gameSaga(rpsChannelClient: RPSChannelClient) {
   while (true) {
@@ -63,8 +75,16 @@ export function* gameSaga(rpsChannelClient: RPSChannelClient) {
       case 'ChooseWeapon':
         break;
       case 'WeaponChosen':
-        // if playerA, chooseSalt and sendPropose
-        // if playerB and propose, send accept
+        if (isEmpty(channelState)) {
+          //raise error
+          break;
+        }
+
+        if (isPlayerA(localState)) {
+          yield* generateSaltAndSendPropose(localState, channelState, rpsChannelClient);
+        } /* isPlayerB */ else if (inRoundProposed(channelState)) {
+          yield* sendRoundAccepted(localState, channelState, rpsChannelClient);
+        }
         break;
       case 'WeaponAndSaltChosen': // player A
         // if roundAccepted, calculateResultAndSendReveal
@@ -86,27 +106,7 @@ export function* gameSaga(rpsChannelClient: RPSChannelClient) {
     }
 
     if ('player' in localState && localState.player === 'A') {
-      if (localState.type === 'WeaponChosen' && channelState) {
-        // if we're player A, we first generate a salt
-        const salt = yield call(randomHex, 64);
-        yield put(chooseSalt(salt)); // transitions us to WeaponAndSaltChosen
-
-        const { myWeapon, roundBuyIn: stake } = localState;
-        const { channelId, aBal, bBal } = channelState;
-
-        const preCommit = hashPreCommit(myWeapon, salt);
-
-        const roundProposed: AppData = { type: 'roundProposed', preCommit, stake };
-
-        const updatedChannelState = yield call(
-          rpsChannelClient.updateChannel,
-          channelId,
-          aBal,
-          bBal,
-          roundProposed
-        );
-        yield put(updateChannelState(updatedChannelState));
-      } else if (
+      if (
         localState.type === 'WeaponAndSaltChosen' &&
         channelState &&
         channelState.appData.type === 'roundAccepted'
@@ -172,33 +172,6 @@ export function* gameSaga(rpsChannelClient: RPSChannelClient) {
         channelState &&
         channelState.appData.type === 'roundProposed'
       ) {
-        const playerBWeapon = localState.myWeapon;
-        const { channelId, aBal, bBal } = channelState;
-        const { stake, preCommit } = channelState.appData;
-        const roundAccepted: AppData = {
-          type: 'roundAccepted',
-          stake,
-          preCommit,
-          playerBWeapon,
-        };
-
-        const [aBal2, bBal2] = [
-          bigNumberify(aBal)
-            .sub(stake)
-            .toString(),
-          bigNumberify(bBal)
-            .add(stake)
-            .toString(),
-        ];
-
-        const newState = yield call(
-          rpsChannelClient.updateChannel,
-          channelId,
-          aBal2,
-          bBal2,
-          roundAccepted
-        );
-        yield put(updateChannelState(newState));
       } else if (
         localState.type === 'WeaponChosen' &&
         channelState &&
@@ -269,6 +242,60 @@ function* createChannel(localState: GameChosen, client: RPSChannelClient) {
 function* joinChannel(channelState: ChannelState, client: RPSChannelClient) {
   const preFundSetup1 = yield call(client.joinChannel, channelState.channelId);
   yield put(updateChannelState(preFundSetup1));
+}
+
+function* generateSaltAndSendPropose(
+  localState: WeaponChosen,
+  channelState: ChannelState,
+  client: RPSChannelClient
+) {
+  // if we're player A, we first generate a salt
+  const salt = yield call(randomHex, 64);
+  yield put(chooseSalt(salt)); // transitions us to WeaponAndSaltChosen
+
+  const { myWeapon, roundBuyIn: stake } = localState;
+  const { channelId, aBal, bBal } = channelState;
+
+  const preCommit = hashPreCommit(myWeapon, salt);
+
+  const roundProposed: AppData = { type: 'roundProposed', preCommit, stake };
+
+  const updatedChannelState = yield call(
+    client.updateChannel,
+    channelId,
+    aBal,
+    bBal,
+    roundProposed
+  );
+  yield put(updateChannelState(updatedChannelState));
+}
+
+function* sendRoundAccepted(
+  localState: WeaponChosen,
+  channelState: ChannelStateVariant<RoundProposed>,
+  client: RPSChannelClient
+) {
+  const playerBWeapon = localState.myWeapon;
+  const { channelId, aBal, bBal } = channelState;
+  const { stake, preCommit } = channelState.appData;
+  const roundAccepted: AppData = {
+    type: 'roundAccepted',
+    stake,
+    preCommit,
+    playerBWeapon,
+  };
+
+  const [aBal2, bBal2] = [
+    bigNumberify(aBal)
+      .sub(stake)
+      .toString(),
+    bigNumberify(bBal)
+      .add(stake)
+      .toString(),
+  ];
+
+  const newState = yield call(client.updateChannel, channelId, aBal2, bBal2, roundAccepted);
+  yield put(updateChannelState(newState));
 }
 
 function* transitionToGameOver(localState: LocalState, channelState: ChannelState) {

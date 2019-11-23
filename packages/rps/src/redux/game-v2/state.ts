@@ -6,10 +6,7 @@ export interface GameState {
   channelState?: ChannelState;
 }
 
-export type LocalState =
-  | Empty
-  | Lobby
-  | WaitingRoom
+export type LocalStateWithPlayer =
   | GameChosen
   | OpponentJoined
   | ChooseWeapon
@@ -19,6 +16,8 @@ export type LocalState =
   | WaitForRestart
   | ShuttingDown
   | GameOver;
+
+export type LocalState = Empty | Lobby | WaitingRoom | LocalStateWithPlayer;
 
 export interface Empty {
   type: 'Empty';
