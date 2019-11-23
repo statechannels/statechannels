@@ -17,20 +17,9 @@ const config = {
         src: 'advance-channel',
         data: 'passChannelId',
         onDone: 'success',
-        onError: 'failure',
       },
     },
     success: { type: 'final' },
-    failure: { type: 'final' },
-  },
-  context: {
-    participants: ['me', 'you'],
-    privateKey: 'secret',
-    ourIndex: 0,
-    outcome: [],
-    appData: '0x',
-    appDefinition: 'contractAddress',
-    clearedToSend: true,
   },
 };
 const guards = { amFirst: context => true, dataMatches: context => true };
