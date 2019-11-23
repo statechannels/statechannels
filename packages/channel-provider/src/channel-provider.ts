@@ -17,7 +17,7 @@ class ChannelProvider implements IChannelProvider {
   protected readonly ui: UIService;
   protected readonly messaging: MessagingService;
 
-  protected url: string = 'http://localhost:1701';
+  protected url = 'http://localhost:1701';
 
   constructor() {
     this.events = new EventEmitter();

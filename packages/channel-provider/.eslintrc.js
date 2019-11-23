@@ -102,7 +102,6 @@ const rules = {
       printWidth: 100,
       singleQuote: true,
       tabWidth: 2,
-      trailingComma: 'es5',
     },
   ],
   'no-unused-vars': 'off',
@@ -186,24 +185,22 @@ module.exports = {
   rules: Object.assign(rules, TSRules),
   overrides: [
     {
-      files: ['test/**/*.ts'],
+      files: ['tests/**/*.ts'],
       env: {
         node: true
       },
       globals: {
+        jest: 'readonly',
+        document: 'readonly',
+        window: 'readonly',
         Promise: 'readonly',
         expect: 'readonly',
         it: 'readonly',
         describe: 'readonly',
         beforeAll: 'readonly',
         beforeEach: 'readonly',
+        afterEach: 'readonly',
       },
-    },
-    {
-      files: ['ganache/**/*.ts'],
-      env: {
-        node: true
-      }
     }
   ],
 };
