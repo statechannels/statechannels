@@ -16,9 +16,10 @@ const config = {
       invoke: {
         src: 'advance-channel',
         data: 'passChannelId',
-        onDone: 'success',
+        onDone: 'funding',
       },
     },
+    funding: {},
     success: { type: 'final' },
   },
 };

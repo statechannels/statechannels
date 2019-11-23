@@ -30,7 +30,7 @@ const channelKnown = {
   invoke: {
     src: 'advance-channel',
     data: 'passChannelId',
-    onDone: 'success',
+    onDone: 'funding',
   },
 };
 
@@ -40,6 +40,7 @@ const config = {
   states: {
     channelUnknown,
     channelKnown,
+    funding: {}, // TODO
     success: { type: 'final' },
   },
 };
