@@ -184,3 +184,9 @@ export const gameOver = <T extends Playing>(state: T, reason: ShutDownReason): G
   ...playing(state),
   reason,
 });
+
+// Helpers
+// =======
+
+export const isPlayerA = (state: LocalStateWithPlayer): boolean => state.player === 'A';
+export const isPlayerB = (state: LocalStateWithPlayer): boolean => state.player === 'B';
