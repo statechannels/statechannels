@@ -11,13 +11,13 @@
   "scripts": {
     "prepublish": "webpack",
     "build": "webpack",
-    "prepare": "yarn build",	
+    "prepare": "yarn build",
     "test": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:ci": "CI=true jest",
     "precommit": "lint-staged --quiet",
-    "lint:check": "tslint -c tslint.json -p .",
-    "lint:write": "tslint -c tslint.json -p . --fix"
+    "lint:check": "npx eslint \"*/**/*.ts\" --cache",
+    "lint:write": "npx eslint \"*/**/*.ts\" --fix"
   },
   "jest": {
     "roots": [
@@ -51,8 +51,15 @@
   "devDependencies": {
     "@types/jest": "24.0.18",
     "@types/node": "12.7.7",
+    "@typescript-eslint/eslint-plugin": "^2.7.0",
+    "@typescript-eslint/eslint-plugin-tslint": "^2.7.0",
+    "eslint": "^6.6.0",
+    "eslint-config-prettier": "^6.7.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-prettier": "^3.1.0",
     "jest": "24.9.0",
     "lint-staged": "9.4.0",
+    "prettier": "1.18.2",
     "ts-jest": "24.1.0",
     "ts-loader": "6.2.1",
     "typescript": "3.6.3",
