@@ -16,7 +16,7 @@ import {
   FundingSituation,
   gameOver,
 } from './actions';
-import { GameState, ShutDownReason, LocalState } from './state';
+import { GameState, ShutDownReason, LocalState, GameChosen } from './state';
 import { randomHex } from '../../utils/randomHex';
 import { bigNumberify, BigNumber } from 'ethers/utils';
 import { unreachable } from '../../utils/unreachable';
@@ -24,6 +24,9 @@ import { unreachable } from '../../utils/unreachable';
 const getGameState = (state: any): GameState => state.game;
 const isClosed = (state: ChannelState | undefined): state is ChannelState =>
   (state && state.status === 'closed') || false;
+const isEmpty = (state: ChannelState | undefined): state is undefined => !state;
+const inChannelProposed = (state: ChannelState | undefined): state is ChannelState =>
+  (state && state.status === 'proposed') || false;
 
 export function* gameSaga(rpsChannelClient: RPSChannelClient) {
   while (true) {
@@ -48,10 +51,14 @@ export function* gameSaga(rpsChannelClient: RPSChannelClient) {
       case 'WaitingRoom':
         break;
       case 'GameChosen': // player A
-        // if channel empty, create game
+        if (isEmpty(channelState)) {
+          yield* createChannel(localState, rpsChannelClient);
+        }
         break;
       case 'OpponentJoined': // player B
-        // if channelProposed, joinChannel
+        if (inChannelProposed(channelState)) {
+          yield* joinChannel(channelState, rpsChannelClient);
+        }
         break;
       case 'ChooseWeapon':
         break;
@@ -79,19 +86,7 @@ export function* gameSaga(rpsChannelClient: RPSChannelClient) {
     }
 
     if ('player' in localState && localState.player === 'A') {
-      if (localState.type === 'GameChosen' && !channelState) {
-        const openingBalance = localState.roundBuyIn.mul(5);
-        const startState: AppData = { type: 'start' };
-        const newChannelState = yield call(
-          rpsChannelClient.createChannel,
-          localState.address,
-          localState.opponentAddress,
-          openingBalance.toString(),
-          openingBalance.toString(),
-          startState
-        );
-        yield put(updateChannelState(newChannelState));
-      } else if (localState.type === 'WeaponChosen' && channelState) {
+      if (localState.type === 'WeaponChosen' && channelState) {
         // if we're player A, we first generate a salt
         const salt = yield call(randomHex, 64);
         yield put(chooseSalt(salt)); // transitions us to WeaponAndSaltChosen
@@ -173,13 +168,6 @@ export function* gameSaga(rpsChannelClient: RPSChannelClient) {
     } else {
       // player b
       if (
-        localState.type === 'OpponentJoined' &&
-        channelState &&
-        channelState.status === 'proposed'
-      ) {
-        const preFundSetup1 = yield call(rpsChannelClient.joinChannel, channelState.channelId);
-        yield put(updateChannelState(preFundSetup1));
-      } else if (
         localState.type === 'WeaponChosen' &&
         channelState &&
         channelState.appData.type === 'roundProposed'
@@ -262,6 +250,25 @@ export function* gameSaga(rpsChannelClient: RPSChannelClient) {
       }
     }
   }
+}
+
+function* createChannel(localState: GameChosen, client: RPSChannelClient) {
+  const openingBalance = localState.roundBuyIn.mul(5);
+  const startState: AppData = { type: 'start' };
+  const newChannelState = yield call(
+    client.createChannel,
+    localState.address,
+    localState.opponentAddress,
+    openingBalance.toString(),
+    openingBalance.toString(),
+    startState
+  );
+  yield put(updateChannelState(newChannelState));
+}
+
+function* joinChannel(channelState: ChannelState, client: RPSChannelClient) {
+  const preFundSetup1 = yield call(client.joinChannel, channelState.channelId);
+  yield put(updateChannelState(preFundSetup1));
 }
 
 function* transitionToGameOver(localState: LocalState, channelState: ChannelState) {
