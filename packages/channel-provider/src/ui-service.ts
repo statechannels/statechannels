@@ -45,7 +45,7 @@ export class UIService {
     return document.querySelector(`#${UIElementNames.Styles}`);
   }
 
-  protected url: string = '';
+  protected url = '';
 
   setUrl(url: string) {
     this.url = url;
@@ -98,6 +98,9 @@ export class UIService {
   }
 
   async getTarget(): Promise<Window> {
+    /* The below Promise shouldn't be an async executor according to this: 
+       https://eslint.org/docs/rules/no-async-promise-executor */
+    // eslint-disable-next-line no-async-promise-executor
     return new Promise(async resolve => {
       if (!this.iframe) {
         await this.mount();

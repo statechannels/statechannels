@@ -10,8 +10,8 @@ export type MessagingServiceOptions = {
 
 export class MessagingService {
   protected timeoutListener?: NodeJS.Timeout;
-  protected attempts: number = 0;
-  protected url: string = '';
+  protected attempts = 0;
+  protected url = '';
 
   protected readonly timeoutMs: number;
   protected readonly maxRetries: number;
