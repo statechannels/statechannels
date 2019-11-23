@@ -3,18 +3,11 @@ const config = {
   initial: 'waiting',
   states: {
     waiting: {
-      on: {
-        CHANNEL_UPDATED: [
-          { target: 'advanced', cond: 'advanced' },
-          { actions: 'sendIfSafe' },
-        ],
-      },
-      after: { '10000': 'failure' },
+      entry: 'send',
+      on: { '*': { target: 'success', cond: 'advanced' } },
     },
-    advanced: { type: 'final' },
-    failure: { type: 'final' },
+    success: { type: 'final' },
   },
-  context: { channelID: '0xabc', targetTurnNum: 1 },
 };
 const guards = { advanced: context => true };
 const customActions = {};

@@ -1,50 +1,37 @@
-import { MachineConfig } from 'xstate';
-
-import { Entry, Failure } from '../../';
-import { StoreEvent } from '../../store';
 import { saveConfig } from '../../utils';
 
 const PROTOCOL = 'advance-channel';
+/*
+In the current wallet, the post-fund-setup version of advance-channel is responsible for
+storing state updates as they come in.
+In this spec, the store itself is responsible for that, so you can simply spin up an
+advance-channel protocol once app funding is confirmed.
 
-export interface AdvanceChannelSchema {
-  states: {
-    waiting: {};
-    advanced: {};
-    failure: {};
-  };
-}
+Additionally, waiting until it's your turn isn't necessary once the channel is funded.
+Therefore, we send on entry into the protocol
+*/
 
-interface AdvanceChannelContext {
+interface Init {
   channelID: string;
   targetTurnNum: number;
 }
 
-type Context = AdvanceChannelContext | Failure;
+const waiting = {
+  entry: 'send',
+  on: {
+    '*': {
+      target: 'success',
+      cond: 'advanced',
+    },
+  },
+};
 
-const advanceChannelConfig: MachineConfig<
-  Context,
-  AdvanceChannelSchema,
-  StoreEvent | Entry
-> = {
+const advanceChannelConfig = {
   key: PROTOCOL,
   initial: 'waiting',
   states: {
-    waiting: {
-      on: {
-        CHANNEL_UPDATED: [
-          {
-            target: 'advanced',
-            cond: 'advanced',
-          },
-          {
-            actions: 'sendIfSafe',
-          },
-        ],
-      },
-      after: { 10000: 'failure' },
-    },
-    advanced: { type: 'final' },
-    failure: { type: 'final' },
+    waiting,
+    success: { type: 'final' },
   },
 };
 
@@ -52,11 +39,4 @@ const guards = {
   advanced: 'context => true',
 };
 
-const sampleContext: Context = {
-  channelID: '0xabc',
-  targetTurnNum: 1,
-};
-
-saveConfig({ ...advanceChannelConfig, context: sampleContext }, { guards });
-
-export { advanceChannelConfig };
+saveConfig(advanceChannelConfig, { guards });
