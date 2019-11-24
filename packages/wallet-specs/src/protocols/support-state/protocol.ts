@@ -10,9 +10,7 @@ export interface Init {
 }
 
 function supported({ channelID, state }: Init): boolean {
-  const { state: supportedState } = store.getLatestWalletChannelSupport(
-    channelID
-  );
+  const { state: supportedState } = store.getLatestConsensus(channelID);
   return store.equals(state, supportedState);
 }
 

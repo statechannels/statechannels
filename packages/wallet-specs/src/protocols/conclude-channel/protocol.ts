@@ -11,7 +11,7 @@ interface Init {
 function finalState({ channelID }: Init): ChannelState {
   const latestState = store
     .getUnsupportedStates(channelID)
-    .concat(store.getLatestWalletChannelSupport(channelID))
+    .concat(store.getLatestConsensus(channelID))
     .filter(({ state }) => store.signedByMe(state))
     .sort(({ state }) => state.turnNumber)
     .pop();
