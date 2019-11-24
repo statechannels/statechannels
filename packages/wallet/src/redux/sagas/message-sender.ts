@@ -34,17 +34,29 @@ function* createResponseMessage(action: OutgoingApiAction) {
         new jrs.JsonRpcError("Signing address not found in the participants array", 1000)
       );
     case "WALLET.SEND_CHANNEL_PROPOSED_MESSAGE":
-      const channelStatus: ChannelState = yield select(getChannelStatus, action.channelId);
+      const proposedChannelStatus: ChannelState = yield select(getChannelStatus, action.channelId);
 
-      const request = {
+      const openRequest = {
         type: "Channel.Open",
-        signedState: channelStatus.signedStates.slice(-1)[0],
-        participants: channelStatus.participants
+        signedState: proposedChannelStatus.signedStates.slice(-1)[0],
+        participants: proposedChannelStatus.participants
       };
       return jrs.notification("MessageQueued", {
         recipient: action.fromParticipantId,
         sender: action.toParticipantId,
-        data: request
+        data: openRequest
+      });
+    case "WALLET.SEND_CHANNEL_JOINED_MESSAGE":
+      const joinChannelState: ChannelState = yield select(getChannelStatus, action.channelId);
+      const joinedMessage = {
+        type: "Channel.Joined",
+        signedState: joinChannelState.signedStates.slice(-1)[0],
+        participants: joinChannelState.participants
+      };
+      return jrs.notification("MessageQueued", {
+        recipient: action.fromParticipantId,
+        sender: action.toParticipantId,
+        data: joinedMessage
       });
     case "WALLET.CHANNEL_PROPOSED_EVENT":
       return jrs.notification("ChannelProposed", yield getChannelInfo(action.channelId));
