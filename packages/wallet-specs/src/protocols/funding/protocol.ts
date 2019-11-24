@@ -4,6 +4,11 @@ const success = { type: 'final' };
 const failure = { type: 'final' };
 const PROTOCOL = 'funding';
 
+interface Init {
+  targetChannelID: string;
+  tries: 0 | 1;
+}
+
 const getClientChoice = {
   invoke: {
     id: 'ask-client-for-choice',
@@ -14,6 +19,7 @@ const getClientChoice = {
   },
   onDone: 'wait',
 };
+
 const wait = {
   on: {
     '*': [
@@ -56,41 +62,21 @@ const determineStrategy = {
   ],
 };
 
-const useStrategy = {
-  on: {
-    '': [
-      { target: 'fundDirectly', cond: 'directStrategyChosen' },
-      { target: 'fundIndirectly', cond: 'indirectStrategyChosen' },
-      { target: 'fundVirtually', cond: 'virtualStrategyChosen' },
-    ],
-  },
-};
-
 const fundDirectly = { invoke: 'directFunding', onDone: 'success' };
 const fundVirtually = { invoke: 'virtualFunding', onDone: 'success' };
 const fundIndirectly = { invoke: 'ledgerFunding', onDone: 'success' };
 
-// PROTOCOL DEFINITION
-const fundingConfig = {
+const config = {
   key: PROTOCOL,
   initial: 'determineStrategy',
   states: {
     determineStrategy,
-    // useStrategy,
     fundDirectly,
     fundIndirectly,
     fundVirtually,
     success,
     failure,
   },
-};
-
-// CREATE VISUALS
-const sampleContext = {
-  targetChannelId: '0xabc',
-  round: 0,
-  opponentAddress: 'you',
-  ourAddress: 'me',
 };
 
 const dummyGuard = 'x => true';
@@ -103,7 +89,4 @@ const guards = {
   maxTriesExceeded: dummyGuard,
 };
 
-const config = { ...fundingConfig, context: sampleContext };
 saveConfig(config, { guards });
-
-export default config;
