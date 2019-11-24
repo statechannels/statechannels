@@ -12,6 +12,7 @@ functions/
 .node-gyp
 .npm
 .rpt2_cache
+.eslintcache
 
 # coverage
 coverage
