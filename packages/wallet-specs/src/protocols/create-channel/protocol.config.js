@@ -19,10 +19,24 @@ const config = {
         onDone: 'funding',
       },
     },
-    funding: {},
+    funding: {
+      invoke: { src: 'funding', data: 'passChannelId' },
+      onDone: 'postFundSetup',
+    },
+    postFundSetup: {
+      invoke: { src: 'advance-channel', data: 'passChannelId' },
+      onDone: 'success',
+    },
     success: { type: 'final' },
   },
 };
-const guards = { amFirst: context => true, dataMatches: context => true };
+const guards = {
+  amFirst: function(context) {
+    return true;
+  },
+  dataMatches: function(context) {
+    return true;
+  },
+};
 const customActions = {};
 const machine = Machine(config, { guards, actions: customActions });

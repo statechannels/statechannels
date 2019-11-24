@@ -6,8 +6,11 @@ export function saveConfig(
   dirName = '/null', // TODO: make this required
   { guards, actions }: { guards?: any; actions?: any }
 ) {
+  const filename = `${dirName}/protocol.config.js`;
+  console.log(`Saving ${filename}`);
+
   fs.writeFile(
-    `${dirName}/protocol.config.js`,
+    filename,
     `
 const config = ${serialize(config)}
 const guards = ${serialize(guards || {})}

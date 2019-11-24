@@ -5,18 +5,24 @@ const config = {
     concludeTarget: {
       invoke: {
         src: 'concludeChannel',
-        data: context => ({ channelID: context.ledgerChannelID }),
+        data: function(context) {
+          return { channelID: context.ledgerChannelID };
+        },
         onDone: 'defundTarget',
       },
     },
     defundTarget: {
       invoke: {
         src: 'ledgerUpdate',
-        data: context => ({
-          channelID: context.ledgerChannelID,
-          outcome:
-            'defundedOutcome( context.ledgerChannelID, context.targetChannelID)',
-        }),
+        data: function(context) {
+          return {
+            channelID: context.ledgerChannelID,
+            outcome: defundedOutcome(
+              context.ledgerChannelID,
+              context.targetChannelID
+            ),
+          };
+        },
         onDone: 'success',
       },
     },
