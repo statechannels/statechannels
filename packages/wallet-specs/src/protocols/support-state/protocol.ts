@@ -52,7 +52,7 @@ const config = {
 };
 
 const guards = {
-  supported: 'context => true',
+  supported: context => true,
 };
 
-saveConfig({ ...config }, { guards });
+saveConfig(config, __dirname, { guards });

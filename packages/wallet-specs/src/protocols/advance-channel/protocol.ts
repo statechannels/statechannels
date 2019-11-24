@@ -36,7 +36,7 @@ const advanceChannelConfig = {
 };
 
 const guards = {
-  advanced: 'context => true',
+  advanced: context => true,
 };
 
-saveConfig(advanceChannelConfig, { guards });
+saveConfig(advanceChannelConfig, __dirname, { guards });

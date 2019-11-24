@@ -26,7 +26,7 @@ const waiting = {
 };
 
 // PROTOCOL DEFINITION
-const newLedgerConfig = {
+const config = {
   key: PROTOCOL,
   initial: 'waiting',
   states: {
@@ -37,16 +37,9 @@ const newLedgerConfig = {
 };
 
 // CREATE VISUALS
-const sampleContext = {
-  channelID: '0xabc',
-  currentTurnNumber: 7,
-  goal: [],
-};
-
 const guards = {
-  consensusReached: 'context => true',
-  dissent: 'context => false',
+  consensusReached: context => true,
+  dissent: context => false,
 };
 
-const config = { ...newLedgerConfig, context: sampleContext };
-saveConfig(config, { guards });
+saveConfig(config, __dirname, { guards });

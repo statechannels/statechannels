@@ -21,7 +21,7 @@ function defundedOutcome(
 const concludeTarget = {
   invoke: {
     src: 'concludeChannel',
-    data: 'context => ({ channelID: context.ledgerChannelID })',
+    data: context => ({ channelID: context.ledgerChannelID }),
     onDone: 'defundTarget',
   },
 };
@@ -29,8 +29,13 @@ const concludeTarget = {
 const defundTarget = {
   invoke: {
     src: 'ledgerUpdate',
-    data:
-      'context => ({ channelID: context.ledgerChannelID, outcome: defundedOutcome( context.ledgerChannelID, context.targetChannelID), })',
+    data: context => ({
+      channelID: context.ledgerChannelID,
+      outcome: defundedOutcome(
+        context.ledgerChannelID,
+        context.targetChannelID
+      ),
+    }),
     onDone: 'success',
   },
 };
@@ -47,4 +52,4 @@ const ledgerFundingConfig = {
 
 const guards = {};
 
-saveConfig(ledgerFundingConfig, { guards });
+saveConfig(ledgerFundingConfig, __dirname, { guards });

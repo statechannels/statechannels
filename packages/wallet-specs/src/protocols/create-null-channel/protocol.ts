@@ -59,10 +59,10 @@ const config = {
 
 // GRAPHICS
 
-const dummyGuard = 'context => true';
+const dummyGuard = context => true;
 const guards = {
   amFirst: dummyGuard,
   dataMatches: dummyGuard,
 };
 
-saveConfig(config, { guards });
+saveConfig(config, __dirname, { guards });

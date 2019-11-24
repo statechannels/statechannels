@@ -9,6 +9,10 @@ const config = {
     success: { type: 'final' },
   },
 };
-const guards = { advanced: context => true };
+const guards = {
+  advanced: function(context) {
+    return true;
+  },
+};
 const customActions = {};
 const machine = Machine(config, { guards, actions: customActions });

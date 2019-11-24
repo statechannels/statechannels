@@ -99,8 +99,15 @@ type UpdateOutcome = Base & {
 const updatePrefundOutcome = {
   invoke: {
     src: 'ledgerUpdate',
-    data:
-      'context => { return { targetChannelID: context.targetChannelID, targetOutcome: preDepositOutcome(context.targetChannelID, context.minimalOutcome), }; }',
+    data: context => {
+      return {
+        targetChannelID: context.targetChannelID,
+        targetOutcome: preDepositOutcome(
+          context.targetChannelID,
+          context.minimalOutcome
+        ),
+      };
+    },
     onDone: 'waiting',
   },
 };
@@ -125,8 +132,10 @@ const deposit = {
 const updatePostFundOutcome = {
   invoke: {
     src: 'ledgerUpdate',
-    data:
-      'context => ({ targetChannelID: context.targetChannelID, targetOutcome: postDepositOutcome(context.targetChannelID), })',
+    data: context => ({
+      targetChannelID: context.targetChannelID,
+      targetOutcome: postDepositOutcome(context.targetChannelID),
+    }),
     onDone: 'success',
   },
 };
@@ -145,8 +154,8 @@ const ledgerFundingConfig = {
 };
 
 const guards = {
-  safeToDeposit: 'x => true',
-  funded: 'x => true',
+  safeToDeposit: x => true,
+  funded: x => true,
 };
 
 const helpers = {
@@ -154,4 +163,4 @@ const helpers = {
   postDepositOutcome: x => true,
 };
 
-saveConfig(ledgerFundingConfig, { guards });
+saveConfig(ledgerFundingConfig, __dirname, { guards });

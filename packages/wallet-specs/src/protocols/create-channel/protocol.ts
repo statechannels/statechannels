@@ -34,21 +34,45 @@ const channelKnown = {
   },
 };
 
+const funding = {
+  invoke: {
+    src: 'funding',
+    data: 'passChannelId',
+  },
+  onDone: 'postFundSetup',
+};
+
+const postFundSetup = {
+  invoke: {
+    src: 'advance-channel',
+    data: 'passChannelId',
+  },
+  onDone: 'success',
+};
+
 const config = {
   key: PROTOCOL,
   initial: 'channelUnknown',
   states: {
     channelUnknown,
     channelKnown,
-    funding: {}, // TODO
+    funding,
+    postFundSetup,
     success: { type: 'final' },
   },
 };
 
-const dummyGuard = 'context => true';
-const guards = {
+interface Guards {
+  amFirst: any;
+  dataMatches: any;
+}
+
+const dummyGuard = context => true;
+const guards: Guards = {
   amFirst: dummyGuard,
   dataMatches: dummyGuard,
 };
 
-saveConfig(config, { guards });
+export { config, Guards };
+
+saveConfig(config, __dirname, { guards });

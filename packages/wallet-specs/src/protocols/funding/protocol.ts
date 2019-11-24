@@ -79,7 +79,7 @@ const config = {
   },
 };
 
-const dummyGuard = 'x => true';
+const dummyGuard = x => true;
 const guards = {
   consensus: dummyGuard,
   disagreement: dummyGuard,
@@ -89,4 +89,4 @@ const guards = {
   maxTriesExceeded: dummyGuard,
 };
 
-saveConfig(config, { guards });
+saveConfig(config, __dirname, { guards });

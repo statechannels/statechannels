@@ -1,6 +1,6 @@
 import { ChannelState } from '../..';
-import { saveConfig } from '../../utils';
 import { store } from '../../store';
+import { saveConfig } from '../../utils';
 
 const PROTOCOL = 'conclude-channel';
 
@@ -46,4 +46,4 @@ const config = {
 
 const guards = {};
 
-saveConfig({ ...config }, { guards });
+saveConfig(config, __dirname, { guards });
