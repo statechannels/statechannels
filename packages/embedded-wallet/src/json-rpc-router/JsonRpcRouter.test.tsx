@@ -8,9 +8,8 @@ import {JsonRpcRouter} from './JsonRpcRouter';
 
 Enzyme.configure({adapter: new Adapter()});
 
-const mockJsonRpcRouter = (children: ReactNode): ReactWrapper => {
-  return mount(<JsonRpcRouter>{children}</JsonRpcRouter>);
-};
+const mockJsonRpcRouter = (children: ReactNode): ReactWrapper =>
+  mount(<JsonRpcRouter>{children}</JsonRpcRouter>);
 
 const FooComponent: React.FC = () => <label data-foo-rendered>Foo</label>;
 const Foo2Component: React.FC = () => <label data-foo2-rendered>Foo</label>;
