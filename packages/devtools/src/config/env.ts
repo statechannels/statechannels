@@ -12,8 +12,8 @@ export function configureEnvVariables(monorepo = true) {
   let dotenvFiles = [
     `.env.${NODE_ENV}.local`,
     // Don't include `.env.local` for `test` environment
-    // Since normally you expect tests to produce the same
-    // Results for everyone
+    // since normally you expect tests to produce the same
+    // results for everyone
     NODE_ENV !== 'test' && `.env.local`,
     `.env.${NODE_ENV}`,
     '.env'
@@ -28,8 +28,8 @@ export function configureEnvVariables(monorepo = true) {
   }
 
   // Load environment variables from .env* files. Suppress warnings using silent
-  // If this file is missing. dotenv will never modify any environment variables
-  // That have already been set.  Variable expansion is supported in .env files.
+  // if this file is missing. dotenv will never modify any environment variables
+  // that have already been set.  Variable expansion is supported in .env files.
   // https://github.com/motdotla/dotenv
   // https://github.com/motdotla/dotenv-expand
   dotenvFiles.forEach((dotenvFile: string) => {
