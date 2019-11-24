@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "generateConfig": "npx ts-node src/protocols/*/protocol.ts && npx prettier --write src/protocols/*/protocol.config.js"
+  },
   "dependencies": {
     "xstate": "^4.6"
   },
