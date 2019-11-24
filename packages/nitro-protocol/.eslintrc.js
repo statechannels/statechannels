@@ -2,7 +2,7 @@ const rules = {
   'arrow-body-style': 'error',
   'arrow-parens': ['off', 'as-needed'],
   camelcase: 'error',
-  'capitalized-comments': 'error',
+  'capitalized-comments': ['error', 'always', {ignoreConsecutiveComments: true}],
   complexity: 'off',
   'constructor-super': 'error',
   curly: 'error',
@@ -159,18 +159,18 @@ const TSRules = {
   '@typescript-eslint/explicit-function-return-type': 'off',
   '@typescript-eslint/no-unused-vars': 'off',
   '@typescript-eslint/ban-ts-ignore': 'off',
-  '@typescript-eslint/no-use-before-define': 'off'
-}
+  '@typescript-eslint/no-use-before-define': 'off',
+};
 
 module.exports = {
   env: {
     browser: true,
-    es6: true
+    es6: true,
   },
   parser: '@typescript-eslint/parser',
   parserOptions: {
     project: 'tsconfig.json',
-    ecmaVersion:  2018,
+    ecmaVersion: 2018,
     sourceType: 'module',
   },
   plugins: ['@typescript-eslint', '@typescript-eslint/tslint', 'prettier'],
@@ -181,14 +181,14 @@ module.exports = {
     'plugin:import/warnings',
     'plugin:import/typescript',
     'prettier/@typescript-eslint',
-    'prettier'
+    'prettier',
   ],
   rules: Object.assign(rules, TSRules),
   overrides: [
     {
       files: ['test/**/*.ts'],
       env: {
-        node: true
+        node: true,
       },
       globals: {
         Promise: 'readonly',
@@ -202,8 +202,8 @@ module.exports = {
     {
       files: ['ganache/**/*.ts'],
       env: {
-        node: true
-      }
-    }
+        node: true,
+      },
+    },
   ],
 };
