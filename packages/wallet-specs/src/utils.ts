@@ -1,25 +1,22 @@
 import * as fs from 'fs';
+import serialize from 'serialize-javascript';
 
 export function saveConfig(
   config: any,
   { guards, actions }: { guards?: any; actions?: any }
 ) {
-  const pretty = (o: any) =>
-    JSON.stringify(o, (key, val) => {
-      return typeof val === 'function' ? val.toString() : val;
-    });
+  const path = process.cwd();
+  const dirName = path.substring(path.lastIndexOf('/') + 1);
+  const filename = `../../../src/protocols/${dirName}/protocol.config.js`;
 
   fs.writeFile(
-    `protocol.config.js`,
+    filename,
     `
-const config = ${pretty(config)}
-const guards = ${pretty(guards || {})}
-const customActions = ${pretty(actions || {})}
+const config = ${serialize(config)}
+const guards = ${serialize(guards || {})}
+const customActions = ${serialize(actions || {})}
 const machine = Machine(config, {guards, actions: customActions})
     `,
     (err: any) => ({})
   );
-  console.log('saved');
-
-  fs.writeFile(`protocol.config.json`, pretty(config), (err: any) => ({}));
 }
