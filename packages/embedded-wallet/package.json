@@ -18,8 +18,8 @@
     "test:ci": "react-scripts test",
     "test:coverage": "react-scripts test --coverage --watchAll=false",
     "eject": "react-scripts eject",
-    "lint:check": "tslint -c tslint.json -p .",
-    "lint:write": "tslint -c tslint.json -p . --fix"
+    "lint:check": "npx eslint \"*/**/*.{js,ts,tsx}\" --cache",
+    "lint:write": "npx eslint \"*/**/*.{js,ts,tsx}\" --fix"
   },
   "jest": {
     "collectCoverageFrom": [
@@ -55,10 +55,17 @@
     "@types/react": "16.9.3",
     "@types/react-dom": "16.9.1",
     "@types/react-router-dom": "5.1.0",
+    "@typescript-eslint/eslint-plugin": "^2.7.0",
+    "@typescript-eslint/eslint-plugin-tslint": "^2.7.0",
     "enzyme": "3.10.0",
     "enzyme-adapter-react-16": "1.15.1",
+    "eslint": "^6.6.0",
+    "eslint-config-prettier": "^6.0.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-prettier": "^3.1.0",
     "identity-obj-proxy": "3.0.0",
     "lint-staged": "9.4.0",
+    "prettier": "1.18.2",
     "typescript": "3.6.3"
   }
 }
