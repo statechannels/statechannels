@@ -16,7 +16,8 @@ import { SiteState } from '../redux/reducer';
 // // import CreatingOpenGameModal from "../components/CreatingOpenGameModal";
 // import LoginErrorPage from '../components/LoginErrorPage';
 // import {Channel} from 'fmg-core';
-import { localStatesA, localStatesB } from '../redux/game-v2/__tests__/scenarios';
+import { localStatesA, localStatesB, channelStates } from '../redux/game-v2/__tests__/scenarios';
+import { ChannelState } from '../core';
 
 // const finneyFiveFive = ['0x' + new BN(5).toString(16), '0x' + new BN(5).toString(16)] as [
 //   string,
@@ -102,6 +103,7 @@ const initialState: SiteState = {
   },
   game: {
     localState: { type: 'Empty' },
+    channelState: channelStates.preFund0,
   },
 };
 
@@ -118,10 +120,16 @@ const initialState: SiteState = {
 //   },
 // };
 
-export function siteStateFromLocalState<T extends states.LocalState>(localState: T): SiteState {
+export function siteStateFromLocalState<T extends states.LocalState>(
+  localState: T,
+  channelState?: ChannelState
+): SiteState {
+  if (!channelState) {
+    channelState = channelStates.preFund0;
+  }
   return {
     ...initialState,
-    game: { localState },
+    game: { localState, channelState: initialState.game.channelState },
   };
 }
 
