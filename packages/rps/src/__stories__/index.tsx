@@ -9,12 +9,12 @@ import * as states from '../redux/game-v2/state';
 // import { OpenGame } from "../redux/open-games/state";
 import '../index.scss';
 import { SiteState } from '../redux/reducer';
-// import HomePage from '../components/HomePage';
-// import LoadingPage from '../components/LoadingPage';
-// import MetamaskErrorPage from '../components/MetamaskErrorPage';
-// import {MetamaskErrorType} from '../redux/metamask/actions';
-// // import CreatingOpenGameModal from "../components/CreatingOpenGameModal";
-// import LoginErrorPage from '../components/LoginErrorPage';
+import HomePage from '../components/HomePage';
+import LoadingPage from '../components/LoadingPage';
+import MetamaskErrorPage from '../components/MetamaskErrorPage';
+import { MetamaskErrorType } from '../redux/metamask/actions';
+// import CreatingOpenGameModal from '../components/CreatingOpenGameModal';
+import LoginErrorPage from '../components/LoginErrorPage';
 // import {Channel} from 'fmg-core';
 import { localStatesA, localStatesB, channelStates } from '../redux/game-v2/__tests__/scenarios';
 import { ChannelState } from '../core';
@@ -103,7 +103,6 @@ const initialState: SiteState = {
   },
   game: {
     localState: { type: 'Empty' },
-    channelState: channelStates.preFund0,
   },
 };
 
@@ -177,14 +176,14 @@ export function siteStateFromLocalState<T extends states.LocalState>(
 // //   createdAt: 0,
 // // };
 
-// storiesOf('Setup', module)
-//   .add('Loading Page', () => <LoadingPage />)
-//   .add('Login Error Page', () => <LoginErrorPage error="Login error message" />)
-//   .add('MetaMask Error Page', () => (
-//     <MetamaskErrorPage error={{errorType: MetamaskErrorType.WrongNetwork}} />
-//   ))
-//   .add('Home Page', () => <HomePage login={() => alert('login')} />)
-//   .add('Profile Modal', testState(noName));
+storiesOf('Setup', module)
+  .add('Loading Page', () => <LoadingPage />)
+  .add('Login Error Page', () => <LoginErrorPage error="Login error message" />)
+  .add('MetaMask Error Page', () => (
+    <MetamaskErrorPage error={{ errorType: MetamaskErrorType.WrongNetwork }} />
+  ))
+  .add('Home Page', () => <HomePage login={() => alert('login')} />)
+  .add('Profile Modal', testState(initialState));
 
 // // storiesOf("Lobby", module)
 // //   .add("Open Game Entry", () => (
