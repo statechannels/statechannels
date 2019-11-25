@@ -11,14 +11,51 @@ Spawns a new process.
 None:
 
 - when my store receives a final state, it spawns a `conclude-channel` machine with the channel's id.
+  - this is wrong!
 
 # create-channel
 
-Spawns a new process.
+When my app calls `CreateChannel`, spawn a `create-channel` process.
 
-None:
+On init:
 
-- when my create-channel machine receives `CHANNEL_UPDATED`, if the data is appropriate for the given channel, it assumes the channel is meant for it.
+- generate a `nonce`, and therefore a `channelID`
+
+send a `message` of type
+
+```
+interface OpenChannel {
+  type: "Channel.Open";
+  messageID: string; // use the channel id
+  participants: ChannelParticipant[];
+  signedState: SignedState;
+}
+```
+
+# open-channel
+
+When my wallet receives an `OpenChannel` message, spawn an `open-channel` protocol, which asks my app if it should open the channel through a `CHANNEL_PROPOSED` event.
+
+My wallet sends a message of type `Response = UpdateChannel | RejectChannel`.
+
+- If the app accepts to open the channel (`JOIN_CHANNEL`), return
+
+```
+interface UpdateChannel {
+  type: "Channel.Update";
+  participants: ChannelParticipant[];
+  signedState: SignedState;
+}
+```
+
+- if my app refuses to open the channel (???), return
+
+```
+interface RejectChannel {
+  type: "Channel.Reject";
+  messageID: string; // use the channel id
+}
+```
 
 # create-null-channel
 
