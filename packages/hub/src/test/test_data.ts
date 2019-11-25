@@ -4,17 +4,18 @@ import {HUB_ADDRESS} from '../constants';
 import {
   allocationOutcome2,
   allocationOutcome3,
-  BEGINNING_APP_CHANNEL_NONCE,
+  BEGINNING_APP_NONCE,
   DUMMY_CHAIN_ID,
   DUMMY_RULES_ADDRESS,
-  FUNDED_CHANNEL_NONCE,
-  FUNDED_CHANNEL_NONCE_3,
-  FUNDED_GUARANTOR_CHANNEL_NONCE,
+  FUNDED_GUARANTOR_NONCE,
+  FUNDED_NONCE,
+  FUNDED_NONCE_3,
   NONCE,
-  ONGOING_APP_CHANNEL_NONCE,
+  ONGOING_APP_NONCE,
   PARTICIPANT_1_ADDRESS,
   PARTICIPANTS,
-  PARTICIPANTS_3
+  PARTICIPANTS_3,
+  UNFUNDED_NONCE
 } from './test-constants';
 
 export function channelObjectToModel(channel: Channel) {
@@ -39,41 +40,48 @@ const defaultChannel3: Channel = {
   chainId: DUMMY_CHAIN_ID
 };
 
+export const unfundedChannel: Channel = {
+  participants: PARTICIPANTS,
+  channelNonce: UNFUNDED_NONCE,
+  chainId: DUMMY_CHAIN_ID
+};
+
 export const fundedChannel: Channel = {
   participants: PARTICIPANTS,
-  channelNonce: FUNDED_CHANNEL_NONCE,
+  channelNonce: FUNDED_NONCE,
   chainId: DUMMY_CHAIN_ID
 };
 
 export const fundedChannel3: Channel = {
   participants: PARTICIPANTS_3,
-  channelNonce: FUNDED_CHANNEL_NONCE_3,
+  channelNonce: FUNDED_NONCE_3,
   chainId: DUMMY_CHAIN_ID
 };
 
 export const fundedGuarantorChannel: Channel = {
   participants: PARTICIPANTS,
-  channelNonce: FUNDED_GUARANTOR_CHANNEL_NONCE,
+  channelNonce: FUNDED_GUARANTOR_NONCE,
   chainId: DUMMY_CHAIN_ID
 };
 
 export const beginningAppPhaseChannel: Channel = {
   participants: PARTICIPANTS,
-  channelNonce: BEGINNING_APP_CHANNEL_NONCE,
+  channelNonce: BEGINNING_APP_NONCE,
   chainId: DUMMY_CHAIN_ID
 };
 
 export const ongoingAppPhaseChannel: Channel = {
   participants: PARTICIPANTS,
-  channelNonce: ONGOING_APP_CHANNEL_NONCE,
+  channelNonce: ONGOING_APP_NONCE,
   chainId: DUMMY_CHAIN_ID
 };
 
-export const FUNDED_NONCE_CHANNEL_ID = getChannelId(fundedChannel);
-export const FUNDED_NONCE_CHANNEL_ID_3 = getChannelId(fundedChannel3);
-export const FUNDED_NONCE_GUARANTOR_CHANNEL_ID = getChannelId(fundedGuarantorChannel);
-export const BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID = getChannelId(beginningAppPhaseChannel);
-export const ONGOING_APP_CHANNEL_NONCE_CHANNEL_ID = getChannelId(ongoingAppPhaseChannel);
+export const UNFUNDED_CHANNEL_ID = getChannelId(unfundedChannel);
+export const FUNDED_CHANNEL_ID = getChannelId(fundedChannel);
+export const FUNDED_CHANNEL_ID_3 = getChannelId(fundedChannel3);
+export const FUNDED_GUARANTOR_CHANNEL_ID = getChannelId(fundedGuarantorChannel);
+export const BEGINNING_APP_CHANNEL_ID = getChannelId(beginningAppPhaseChannel);
+export const ONGOING_APP_CHANNEL_ID = getChannelId(ongoingAppPhaseChannel);
 
 export const consensus_app_data2 = (n: number): ConsensusData => ({
   furtherVotesRequired: n,

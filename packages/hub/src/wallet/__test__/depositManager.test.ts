@@ -1,7 +1,7 @@
 import {bigNumberify} from 'ethers/utils';
 import {Address, Uint256} from 'fmg-core';
 import {DUMMY_ASSET_HOLDER_ADDRESS} from '../../test/test-constants';
-import {BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID} from '../../test/test_data';
+import {FUNDED_CHANNEL_ID, UNFUNDED_CHANNEL_ID} from '../../test/test_data';
 import Channel from '../models/channel';
 import {
   AssetHolderWatcherEvent,
@@ -10,9 +10,7 @@ import {
 import {Blockchain} from '../services/blockchain';
 import {onDepositEvent} from '../services/depositManager';
 
-const channelId = BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID;
-
-async function getHoldings() {
+async function getHoldings(channelId) {
   const channel = await Channel.query()
     .findOne('channel_id', channelId)
     .eager('[holdings]');
@@ -36,47 +34,73 @@ beforeEach(() => {
 });
 
 describe('deposit manager', () => {
-  it('should not deposit, asset holder fully funded', async () => {
-    const destinationHoldings = bigNumberify(10).toHexString();
-    const assetHolderEvent: AssetHolderWatcherEvent = {
-      eventType: AssetHolderWatcherEventType.Deposited,
-      assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS,
-      channelId,
-      amountDeposited,
-      destinationHoldings
-    };
-    await onDepositEvent(assetHolderEvent);
-
-    const postEventHoldings = await getHoldings();
-    expect(postEventHoldings).toHaveLength(1);
-    expect(postEventHoldings[0]).toEqual(
-      expect.objectContaining({
+  describe('no existing holdings for channel', () => {
+    it('should deposit, asset holder not fully funded', async () => {
+      const destinationHoldings = bigNumberify(5).toHexString();
+      const assetHolderEvent: AssetHolderWatcherEvent = {
+        eventType: AssetHolderWatcherEventType.Deposited,
         assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS,
-        amount: destinationHoldings
-      })
-    );
-    expect(mockBlockchainFund).toBeCalledTimes(0);
+        channelId: UNFUNDED_CHANNEL_ID,
+        amountDeposited,
+        destinationHoldings
+      };
+      await onDepositEvent(assetHolderEvent);
+
+      const postEventHoldings = await getHoldings(UNFUNDED_CHANNEL_ID);
+      expect(postEventHoldings).toHaveLength(1);
+      expect(postEventHoldings[0]).toEqual(
+        expect.objectContaining({
+          assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS,
+          amount: destinationHoldings
+        })
+      );
+      expect(mockBlockchainFund).toBeCalledWith(UNFUNDED_CHANNEL_ID, '0x05', '0x05');
+    });
   });
 
-  it('should deposit, asset holder not fully funded', async () => {
-    const destinationHoldings = bigNumberify(5).toHexString();
-    const assetHolderEvent: AssetHolderWatcherEvent = {
-      eventType: AssetHolderWatcherEventType.Deposited,
-      assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS,
-      channelId,
-      amountDeposited,
-      destinationHoldings
-    };
-    await onDepositEvent(assetHolderEvent);
-
-    const postEventHoldings = await getHoldings();
-    expect(postEventHoldings).toHaveLength(1);
-    expect(postEventHoldings[0]).toEqual(
-      expect.objectContaining({
+  describe('existing holdings for channel', () => {
+    it('should not deposit, asset holder fully funded', async () => {
+      const destinationHoldings = bigNumberify(10).toHexString();
+      const assetHolderEvent: AssetHolderWatcherEvent = {
+        eventType: AssetHolderWatcherEventType.Deposited,
         assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS,
-        amount: destinationHoldings
-      })
-    );
-    expect(mockBlockchainFund).toBeCalledWith(channelId, '0x05', '0x05');
+        channelId: FUNDED_CHANNEL_ID,
+        amountDeposited,
+        destinationHoldings
+      };
+      await onDepositEvent(assetHolderEvent);
+
+      const postEventHoldings = await getHoldings(FUNDED_CHANNEL_ID);
+      expect(postEventHoldings).toHaveLength(1);
+      expect(postEventHoldings[0]).toEqual(
+        expect.objectContaining({
+          assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS,
+          amount: destinationHoldings
+        })
+      );
+      expect(mockBlockchainFund).toBeCalledTimes(0);
+    });
+
+    it('should deposit, asset holder not fully funded', async () => {
+      const destinationHoldings = bigNumberify(5).toHexString();
+      const assetHolderEvent: AssetHolderWatcherEvent = {
+        eventType: AssetHolderWatcherEventType.Deposited,
+        assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS,
+        channelId: FUNDED_CHANNEL_ID,
+        amountDeposited,
+        destinationHoldings
+      };
+      await onDepositEvent(assetHolderEvent);
+
+      const postEventHoldings = await getHoldings(FUNDED_CHANNEL_ID);
+      expect(postEventHoldings).toHaveLength(1);
+      expect(postEventHoldings[0]).toEqual(
+        expect.objectContaining({
+          assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS,
+          amount: destinationHoldings
+        })
+      );
+      expect(mockBlockchainFund).toBeCalledWith(FUNDED_CHANNEL_ID, '0x05', '0x05');
+    });
   });
 });

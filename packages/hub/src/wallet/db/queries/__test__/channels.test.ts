@@ -52,7 +52,7 @@ describe('updateChannel', () => {
       const {channelNonce} = testDataConstructors.post_fund_setup(2).channel;
       const existing_allocator_channel = await Channel.query()
         .findOne({channel_nonce: channelNonce})
-        .eager('[states.[outcome.[allocation]], participants]');
+        .eager('[states.[outcome.[allocation]], participants, holdings]');
 
       expect(existing_allocator_channel).toMatchObject(seeds.fundedChannelWithStates);
 

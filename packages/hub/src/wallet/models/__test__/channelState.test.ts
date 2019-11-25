@@ -6,8 +6,8 @@ import {
 } from '../../../test/test-constants';
 import {
   consensus_app_data2,
-  FUNDED_NONCE_CHANNEL_ID,
-  FUNDED_NONCE_GUARANTOR_CHANNEL_ID,
+  FUNDED_CHANNEL_ID,
+  FUNDED_GUARANTOR_CHANNEL_ID,
   fundedChannel,
   fundedGuarantorChannel
 } from '../../../test/test_data';
@@ -31,7 +31,7 @@ async function getChannelStates(channelId): Promise<State> {
 
 describe('asStateObject', () => {
   it('allocation channelState relation to object conversion', async () => {
-    const state = await getChannelStates(FUNDED_NONCE_CHANNEL_ID);
+    const state = await getChannelStates(FUNDED_CHANNEL_ID);
 
     const expectedState: State = {
       turnNum: 0,
@@ -47,7 +47,7 @@ describe('asStateObject', () => {
   });
 
   it('guarantor channelState relation to object conversion', async () => {
-    const state = await getChannelStates(FUNDED_NONCE_GUARANTOR_CHANNEL_ID);
+    const state = await getChannelStates(FUNDED_GUARANTOR_CHANNEL_ID);
 
     const expectedState: State = {
       turnNum: 0,

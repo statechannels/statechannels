@@ -2,8 +2,28 @@ import {addHex} from '@statechannels/wallet';
 import {bigNumberify} from 'ethers/utils';
 import {HUB_ADDRESS} from '../../constants';
 import Channel from '../models/channel';
+import ChannelHolding from '../models/channelHoldings';
 import {AssetHolderWatcherEvent} from './asset-holder-watcher';
 import {Blockchain} from './blockchain';
+
+function updateHoldings(newHolding, currentHoldings: ChannelHolding[]): ChannelHolding[] {
+  let updatedHoldings = [newHolding];
+  if (
+    currentHoldings &&
+    currentHoldings.filter(holding => holding.assetHolderAddress === newHolding.assetHolderAddress)
+      .length > 0
+  ) {
+    updatedHoldings = currentHoldings.map(channelHolding => {
+      if (channelHolding.assetHolderAddress === newHolding.assetHolderAddress) {
+        return newHolding;
+      }
+      return channelHolding;
+    });
+  } else {
+    updatedHoldings = [...currentHoldings, newHolding];
+  }
+  return updatedHoldings;
+}
 
 /* todo:
  * Current logic of the deposit manager:
@@ -35,21 +55,7 @@ export async function onDepositEvent(assetHolderEvent: AssetHolderWatcherEvent) 
     amount: assetHolderEvent.destinationHoldings
   };
 
-  let updatedHoldings = [newHolding];
-  if (channel.holdings) {
-    updatedHoldings = channel.holdings.map(channelHolding => {
-      if (channelHolding.assetHolderAddress === assetHolderEvent.assetHolderAddress) {
-        return {
-          assetHolderAddress: channelHolding.assetHolderAddress,
-          amount: channelHolding.amount
-        };
-      }
-      return newHolding;
-    });
-    if (updatedHoldings.length === channel.holdings.length) {
-      updatedHoldings = [...updatedHoldings, newHolding];
-    }
-  }
+  const updatedHoldings = updateHoldings(newHolding, channel.holdings);
   const updatedChannel = {...channel, holdings: updatedHoldings};
   await Channel.query().upsertGraph(updatedChannel);
 

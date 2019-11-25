@@ -1,5 +1,5 @@
 import {bigNumberify} from 'ethers/utils';
-import {FUNDED_NONCE_CHANNEL_ID} from '../../../test/test_data';
+import {FUNDED_CHANNEL_ID} from '../../../test/test_data';
 import {
   AssetHolderEventHandler,
   assetHolderListen,
@@ -15,13 +15,13 @@ describe('asset holder listener', () => {
     let removeListeners = null;
     const eventHandler: AssetHolderEventHandler = (message: AssetHolderWatcherEvent) => {
       removeListeners();
-      expect(message.channelId).toEqual(FUNDED_NONCE_CHANNEL_ID);
+      expect(message.channelId).toEqual(FUNDED_CHANNEL_ID);
       expect(message.amountDeposited).toEqual(five);
       expect(message.destinationHoldings).toEqual(five);
       done();
     };
 
     removeListeners = await assetHolderListen(eventHandler);
-    await Blockchain.fund(FUNDED_NONCE_CHANNEL_ID, '0x0', five);
+    await Blockchain.fund(FUNDED_CHANNEL_ID, '0x0', five);
   });
 });

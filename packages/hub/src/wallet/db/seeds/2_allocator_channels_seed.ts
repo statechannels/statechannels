@@ -3,23 +3,28 @@ import {Model} from 'objection';
 import {
   allocationOutcome2,
   allocationOutcome3,
+  DUMMY_ASSET_HOLDER_ADDRESS,
   DUMMY_RULES_ADDRESS,
-  guaranteeOutcome2
+  guaranteeOutcome2,
+  holdings2,
+  holdings3
 } from '../../../test/test-constants';
 import {
-  BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID,
+  BEGINNING_APP_CHANNEL_ID,
   beginningAppPhaseChannel,
   channelObjectToModel,
   consensus_app_data2,
   consensus_app_data3,
-  FUNDED_NONCE_CHANNEL_ID,
-  FUNDED_NONCE_CHANNEL_ID_3,
-  FUNDED_NONCE_GUARANTOR_CHANNEL_ID,
+  FUNDED_CHANNEL_ID,
+  FUNDED_CHANNEL_ID_3,
+  FUNDED_GUARANTOR_CHANNEL_ID,
   fundedChannel,
   fundedChannel3,
   fundedGuarantorChannel,
-  ONGOING_APP_CHANNEL_NONCE_CHANNEL_ID,
-  ongoingAppPhaseChannel
+  ONGOING_APP_CHANNEL_ID,
+  ongoingAppPhaseChannel,
+  UNFUNDED_CHANNEL_ID,
+  unfundedChannel
 } from '../../../test/test_data';
 import Channel from '../../models/channel';
 import {outcomeObjectToModel} from '../../utilities/outcome';
@@ -83,37 +88,49 @@ function appState(turnNum: number) {
   };
 }
 
+const unfundedChannelWithStates = {
+  ...channelObjectToModel(unfundedChannel),
+  channelId: UNFUNDED_CHANNEL_ID,
+  states: [prefundSetupState(0), prefundSetupState(1)]
+};
+
 const fundedChannelWithStates = {
   ...channelObjectToModel(fundedChannel),
-  channelId: FUNDED_NONCE_CHANNEL_ID,
-  states: [prefundSetupState(0), prefundSetupState(1)]
+  channelId: FUNDED_CHANNEL_ID,
+  states: [prefundSetupState(0), prefundSetupState(1)],
+  holdings: [{assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS, amount: holdings2}]
 };
 
 const fundedGuarantorChannelWithStates = {
   ...channelObjectToModel(fundedGuarantorChannel),
-  channelId: FUNDED_NONCE_GUARANTOR_CHANNEL_ID,
-  states: [prefundSetupGuarantorState(0), prefundSetupGuarantorState(1)]
+  channelId: FUNDED_GUARANTOR_CHANNEL_ID,
+  states: [prefundSetupGuarantorState(0), prefundSetupGuarantorState(1)],
+  holdings: [{assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS, amount: holdings2}]
 };
 
 const fundedChannel3WithStates = {
   ...channelObjectToModel(fundedChannel3),
-  channelId: FUNDED_NONCE_CHANNEL_ID_3,
-  states: [prefundSetupState3(0), prefundSetupState3(1), prefundSetupState3(2)]
+  channelId: FUNDED_CHANNEL_ID_3,
+  states: [prefundSetupState3(0), prefundSetupState3(1), prefundSetupState3(2)],
+  holdings: [{assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS, amount: holdings3}]
 };
 
 const beginningAppPhaseChannelWithStates = {
   ...channelObjectToModel(beginningAppPhaseChannel),
-  channel_id: BEGINNING_APP_CHANNEL_NONCE_CHANNEL_ID,
-  states: [postFundSetupState(2), postFundSetupState(3)]
+  channel_id: BEGINNING_APP_CHANNEL_ID,
+  states: [postFundSetupState(2), postFundSetupState(3)],
+  holdings: [{assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS, amount: holdings2}]
 };
 
 const ongoingAppPhaseChannelWithStates = {
   ...channelObjectToModel(ongoingAppPhaseChannel),
-  channel_id: ONGOING_APP_CHANNEL_NONCE_CHANNEL_ID,
-  states: [appState(4), appState(5)]
+  channel_id: ONGOING_APP_CHANNEL_ID,
+  states: [appState(4), appState(5)],
+  holdings: [{assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS, amount: holdings2}]
 };
 
 const two_participant_channel_seeds = {
+  unfundedChannelWithStates,
   fundedChannelWithStates,
   fundedGuarantorChannelWithStates,
   beginningAppPhaseChannelWithStates,
