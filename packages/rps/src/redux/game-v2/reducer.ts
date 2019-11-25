@@ -33,7 +33,10 @@ import { unreachable } from '../../utils/unreachable';
 
 const emptyLocalState: LocalState = { type: 'Empty' };
 
-const channelReducer: Reducer<ChannelState> = (state: ChannelState, action: UpdateChannelState) => {
+const channelReducer: Reducer<ChannelState | null> = (
+  state: ChannelState | null = null,
+  action: UpdateChannelState
+) => {
   if (action.type === 'UpdateChannelState') {
     return action.channelState;
   } else {
@@ -150,7 +153,7 @@ const handlePlayAgain = (state: LocalState, action: PlayAgain): LocalState => {
   if (state.type !== 'ResultPlayAgain') {
     return state;
   }
-  return waitForRestart(state, state.myWeapon, state.result);
+  return waitForRestart(state, state.theirWeapon, state.result);
 };
 
 const handleStartRound = (state: LocalState, action: StartRound): LocalState => {
