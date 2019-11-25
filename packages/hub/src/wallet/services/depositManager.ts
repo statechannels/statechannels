@@ -28,7 +28,7 @@ function updateHoldings(
   return updatedHoldings;
 }
 
-/* todo:
+/* Todo:
  * Current logic of the deposit manager:
  * When a deposit even arrives, if the asset holder requires additional funding, fully fund the asset holder.
  *
@@ -38,7 +38,7 @@ function updateHoldings(
  */
 
 export async function onDepositEvent(assetHolderEvent: AssetHolderWatcherEvent) {
-  // todo: to avoid manual case conversions, we can switch to knexSnakeCaseMappers.
+  // Todo: to avoid manual case conversions, we can switch to knexSnakeCaseMappers.
   // https://vincit.github.io/objection.js/recipes/snake-case-to-camel-case-conversion.html#snake-case-to-camel-case-conversion
   const channel = await Channel.query()
     .findOne({
@@ -63,9 +63,9 @@ export async function onDepositEvent(assetHolderEvent: AssetHolderWatcherEvent) 
   await Channel.query().upsertGraph(updatedChannel);
 
   const states = channel.states;
-  const latestState = states.reduce((prevState, currentState) => {
-    return prevState.turnNum > currentState.turnNum ? prevState : currentState;
-  });
+  const latestState = states.reduce((prevState, currentState) =>
+    prevState.turnNum > currentState.turnNum ? prevState : currentState
+  );
 
   const hubParticipatIndex = channel.participants
     .map(participant => participant.address)

@@ -12,7 +12,7 @@ beforeAll(async () => {
 
 describe.skip('fund', () => {
   it('works', async () => {
-    const address = DUMMY_RULES_ADDRESS; // just needs to be a valid address
+    const address = DUMMY_RULES_ADDRESS; // Just needs to be a valid address
     const oldBalance = await nitro.holdings(address);
     await Blockchain.fund(address, '0x00', '0x05');
     expect(await nitro.holdings(address)).toMatchObject(oldBalance.add('0x05'));
@@ -21,7 +21,7 @@ describe.skip('fund', () => {
 
 describe.skip('holdings', () => {
   it('works', async () => {
-    const address = DUMMY_RULES_ADDRESS; // just needs to be a valid address
+    const address = DUMMY_RULES_ADDRESS; // Just needs to be a valid address
     const oldBalance = await nitro.holdings(address);
     await Blockchain.fund(address, '0x00', '0x05');
     expect(await nitro.holdings(address)).toMatchObject(oldBalance.add('0x05'));

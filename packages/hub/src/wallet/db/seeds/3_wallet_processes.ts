@@ -9,13 +9,13 @@ export function seed() {
   // Deletes ALL existing entries
   return knex('wallet_processes')
     .del()
-    .then(() => {
-      return WalletProcess.query().insert([
+    .then(() =>
+      WalletProcess.query().insert([
         {
           processId: '1234',
           theirAddress: PARTICIPANT_1_ADDRESS,
           protocol: EmbeddedProtocol.AdvanceChannel
         }
-      ]);
-    });
+      ])
+    );
 }
