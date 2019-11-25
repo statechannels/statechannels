@@ -1,14 +1,8 @@
 import * as scenarios from "./scenarios";
 import * as states from "../states";
 import {ProtocolStateWithSharedData} from "../..";
-import {itSendsThisMessage, describeScenarioStep} from "../../../__tests__/helpers";
+import {describeScenarioStep} from "../../../__tests__/helpers";
 import {initialize, applicationReducer} from "../reducer";
-import {
-  VALIDATION_SUCCESS,
-  SIGNATURE_SUCCESS,
-  VALIDATION_FAILURE,
-  SIGNATURE_FAILURE
-} from "../../../../magmo-wallet-client";
 
 function whenIn(state) {
   return `when in ${state}`;
@@ -35,7 +29,6 @@ describe("starting the application", () => {
     const result = applicationReducer(state, sharedData, action);
 
     itTransitionsTo(result, "Application.Ongoing");
-    itSendsThisMessage(result, SIGNATURE_SUCCESS);
   });
 });
 
@@ -47,7 +40,6 @@ describe("signing a state", () => {
     const result = applicationReducer(state, sharedData, action);
 
     itTransitionsTo(result, "Application.Ongoing");
-    itSendsThisMessage(result, SIGNATURE_SUCCESS);
   });
 });
 
@@ -60,7 +52,6 @@ describe("signing an invalid state", () => {
     const result = applicationReducer(state, sharedData, action);
 
     itTransitionsTo(result, "Application.Ongoing");
-    itSendsThisMessage(result, SIGNATURE_FAILURE);
   });
 });
 
@@ -73,7 +64,6 @@ describe("validating a state", () => {
     const result = applicationReducer(state, sharedData, action);
 
     itTransitionsTo(result, "Application.Ongoing");
-    itSendsThisMessage(result, VALIDATION_SUCCESS);
   });
 });
 
@@ -86,7 +76,6 @@ describe("validating an invalid state", () => {
     const result = applicationReducer(state, sharedData, action);
 
     itTransitionsTo(result, "Application.Ongoing");
-    itSendsThisMessage(result, VALIDATION_FAILURE);
   });
 });
 
