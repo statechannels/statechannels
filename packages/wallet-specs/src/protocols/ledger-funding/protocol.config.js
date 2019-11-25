@@ -15,7 +15,8 @@ const config = {
         data: function(context) {
           var _a = store_1.store.getLatestState(context.targetChannelID),
             outcome = _a.outcome,
-            participants = _a.participants;
+            channel = _a.channel;
+          var participants = channel.participants;
           return { participants: participants, outcome: outcome };
         },
       },
