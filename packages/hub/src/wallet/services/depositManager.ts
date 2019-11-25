@@ -6,7 +6,10 @@ import ChannelHolding from '../models/channelHoldings';
 import {AssetHolderWatcherEvent} from './asset-holder-watcher';
 import {Blockchain} from './blockchain';
 
-function updateHoldings(newHolding, currentHoldings: ChannelHolding[]): ChannelHolding[] {
+function updateHoldings(
+  newHolding: ChannelHolding,
+  currentHoldings: ChannelHolding[]
+): ChannelHolding[] {
   let updatedHoldings = [newHolding];
   if (
     currentHoldings &&
@@ -55,7 +58,7 @@ export async function onDepositEvent(assetHolderEvent: AssetHolderWatcherEvent) 
     amount: assetHolderEvent.destinationHoldings
   };
 
-  const updatedHoldings = updateHoldings(newHolding, channel.holdings);
+  const updatedHoldings = updateHoldings(ChannelHolding.fromJson(newHolding), channel.holdings);
   const updatedChannel = {...channel, holdings: updatedHoldings};
   await Channel.query().upsertGraph(updatedChannel);
 
