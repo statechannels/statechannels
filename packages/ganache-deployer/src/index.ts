@@ -1,7 +1,7 @@
-import {GanacheServer} from '@statechannels/devtools';
 import fs from 'fs';
-import log from 'loglevel';
 import path from 'path';
+import log from 'loglevel';
+import {GanacheServer} from '@statechannels/devtools';
 import writeJsonFile from 'write-json-file';
 import {deployContracts} from './deployer';
 
