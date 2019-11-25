@@ -1,11 +1,11 @@
-import { ChannelState } from '../..';
+import { State } from '../..';
 import { saveConfig } from '../../utils';
 
 const PROTOCOL = 'support-state';
 
 export interface Init {
   channelID: string;
-  state: ChannelState;
+  state: State;
 }
 
 const waiting = {

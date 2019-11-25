@@ -1,16 +1,24 @@
-import { EventObject, interpret, Machine } from 'xstate';
-import { ChannelState, Outcome, SignedState } from '../..';
+import { interpret, Machine } from 'xstate';
+import { Channel, Outcome, SignedState, State } from '../..';
 import { ChannelStoreEntry, Store } from '../../store';
 import { config, Init } from './protocol';
 
 const participants = ['me', 'you'];
-const outcome: Outcome = participants.map(p => ({ destination: p, amount: 2 }));
-const startingState: ChannelState = {
+const outcome: Outcome = participants.map(p => ({
+  destination: p,
+  amount: '2',
+}));
+const channel: Channel = {
   participants,
-  turnNumber: 0,
+  channelNonce: '2',
+  chainId: '4',
+};
+const startingState: State = {
+  channel,
+  turnNum: 0,
   outcome,
-  channelID: '0xabc',
   isFinal: false,
+  challengeDuration: '42',
 };
 const startingSignedState: SignedState = {
   state: startingState,
@@ -49,10 +57,10 @@ const actions = {
 const guards = {
   supported,
 };
-const turnNumber = 3;
+const turnNum = 3;
 const context: Init = {
   channelID: '0xabc',
-  state: { ...startingState, turnNumber },
+  state: { ...startingState, turnNum },
 };
 
 const pretty = o => JSON.stringify(o, null, 2);
@@ -69,7 +77,7 @@ const service = interpret(machine)
 
 let response = store.receiveStates([
   {
-    state: { ...startingState, turnNumber: turnNumber - 1 },
+    state: { ...startingState, turnNum: turnNum - 1 },
     signatures: ['mine', 'yours'],
   },
 ]);
@@ -79,7 +87,7 @@ if (response) {
 }
 
 response = store.receiveStates([
-  { state: { ...startingState, turnNumber }, signatures: ['mine', 'yours'] },
+  { state: { ...startingState, turnNum }, signatures: ['mine', 'yours'] },
 ]);
 if (response) {
   service.send(response);

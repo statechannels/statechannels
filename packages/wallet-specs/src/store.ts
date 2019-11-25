@@ -1,7 +1,7 @@
-import { ChannelState, SignedState } from '.';
+import { getChannelID, SignedState, State } from '.';
 
 interface IStore {
-  getLatestState: (channelID: string) => ChannelState;
+  getLatestState: (channelID: string) => State;
   getLatestConsensus: (channelID: string) => SignedState; // Used for null channels, whose support must be a single state
   getLatestSupport: (channelID: string) => SignedState[]; //  Used for application channels, which would typically have multiple states in its support
 
@@ -10,8 +10,8 @@ interface IStore {
   // supported state, and remove any lesser, unsupported states.
   getUnsupportedStates: (channelID: string) => SignedState[];
 
-  signedByMe: (state: ChannelState) => boolean;
-  sendState: (state: ChannelState) => void;
+  signedByMe: (state: State) => boolean;
+  sendState: (state: State) => void;
   receiveStates: (signedStates: SignedState[]) => ChannelUpdated | false;
 }
 
@@ -26,7 +26,7 @@ interface ChannelStore {
 }
 
 export class Store implements IStore {
-  public static equals(left: ChannelState, right: ChannelState) {
+  public static equals(left: State, right: State) {
     return JSON.stringify(left) === JSON.stringify(right);
   }
 
@@ -39,7 +39,7 @@ export class Store implements IStore {
   public getLatestState(channelID) {
     const { supportedState, unsupportedStates } = this.getEntry(channelID);
     if (unsupportedStates.length) {
-      return unsupportedStates.map(s => s.state).sort(s => -s.turnNumber)[0];
+      return unsupportedStates.map(s => s.state).sort(s => -s.turnNum)[0];
     } else {
       return supportedState[supportedState.length - 1].state;
     }
@@ -60,9 +60,9 @@ export class Store implements IStore {
     return this.getEntry(channelID).unsupportedStates;
   }
 
-  public signedByMe(state: ChannelState) {
-    const signedState = this.states(state.channelID).find((s: SignedState) =>
-      Store.equals(state, s.state)
+  public signedByMe(state: State) {
+    const signedState = this.states(getChannelID(state.channel)).find(
+      (s: SignedState) => Store.equals(state, s.state)
     );
 
     return (
@@ -72,13 +72,14 @@ export class Store implements IStore {
     );
   }
 
-  public sendState(state: ChannelState) {
+  public sendState(state: State) {
     this.receiveStates([{ state, signatures: ['mine'] }]);
   }
 
   public receiveStates(signedStates: SignedState[]): ChannelUpdated | false {
     try {
-      const { channelID } = signedStates[0].state;
+      const { channel } = signedStates[0].state;
+      const channelID = getChannelID(channel);
 
       // TODO: validate transition
       this.updateEntry(channelID, signedStates);
@@ -115,11 +116,11 @@ export class Store implements IStore {
 
     const nowSupported = unsupportedStates
       .filter(supported)
-      .sort(s => -s.state.turnNumber);
+      .sort(s => -s.state.turnNum);
 
     supportedState = nowSupported.length ? [nowSupported[0]] : supportedState;
     unsupportedStates = unsupportedStates.filter(
-      s => s.state.turnNumber > supportedState[0].state.turnNumber
+      s => s.state.turnNum > supportedState[0].state.turnNum
     );
 
     this._store[channelID] = {
@@ -153,7 +154,8 @@ function merge(left: SignedState[], right: SignedState[]): SignedState[] {
 function supported(signedState: SignedState) {
   // TODO: temporarily just check the required length
   return (
-    signedState.signatures.length === signedState.state.participants.length
+    signedState.signatures.length ===
+    signedState.state.channel.participants.length
   );
 }
 

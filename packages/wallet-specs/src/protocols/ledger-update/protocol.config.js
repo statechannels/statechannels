@@ -3,7 +3,7 @@ const config = {
   initial: 'waiting',
   states: {
     waiting: {
-      entry: ['assignCurrentTurnNumber', 'sendVote'],
+      entry: ['assignCurrentturnNum', 'sendVote'],
       on: {
         '*': [
           { target: 'success', cond: 'consensusReached' },

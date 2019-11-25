@@ -16,9 +16,10 @@ const waitForChannel = {
     src: 'createChannel',
     // Really, you would pass more data to createChannel:
     data: context => {
-      const { outcome, participants } = store.getLatestState(
+      const { outcome, channel } = store.getLatestState(
         context.targetChannelID
       );
+      const { participants } = channel;
       return { participants, outcome };
     },
   },

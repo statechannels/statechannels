@@ -5,12 +5,12 @@ const PROTOCOL = 'ledger-update';
 
 interface CommonContext {
   channelID: string;
-  currentTurnNumber: number;
+  currentturnNum: number;
   targetOutcome: Outcome;
 }
 
 const waiting = {
-  entry: ['assignCurrentTurnNumber', 'sendVote'],
+  entry: ['assignCurrentturnNum', 'sendVote'],
   on: {
     '*': [
       {

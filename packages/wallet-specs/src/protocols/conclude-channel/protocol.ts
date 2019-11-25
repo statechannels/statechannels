@@ -1,4 +1,4 @@
-import { ChannelState } from '../..';
+import { State } from '../..';
 import { store } from '../../store';
 import { saveConfig } from '../../utils';
 
@@ -8,12 +8,14 @@ interface Init {
   channelID: string;
 }
 
-function finalState({ channelID }: Init): ChannelState {
+function finalState({ channelID }: Init): State {
+  // Only works for wallet channels
+  // (and even doesn't really work reliably there)
   const latestState = store
     .getUnsupportedStates(channelID)
     .concat(store.getLatestConsensus(channelID))
     .filter(({ state }) => store.signedByMe(state))
-    .sort(({ state }) => state.turnNumber)
+    .sort(({ state }) => state.turnNum)
     .pop();
 
   if (!latestState) {
@@ -22,7 +24,7 @@ function finalState({ channelID }: Init): ChannelState {
 
   return {
     ...latestState.state,
-    turnNumber: latestState.state.turnNumber + 1,
+    turnNum: latestState.state.turnNum + 1,
     isFinal: true,
   };
 }

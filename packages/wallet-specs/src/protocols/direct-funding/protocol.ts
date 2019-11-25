@@ -1,4 +1,11 @@
-import { chain, ChannelState, Outcome, OutcomeItem, store } from '../../';
+import {
+  chain,
+  getChannelID,
+  Outcome,
+  OutcomeItem,
+  State,
+  store,
+} from '../../';
 import { saveConfig } from '../../utils';
 
 const PROTOCOL = 'direct-funding';
@@ -10,20 +17,25 @@ interface Context {
   minimalOutcome: Outcome;
 }
 
-const sum = (a, b) => a + b;
+type numberish = string | number;
+const add = (a: numberish, b: numberish) => (Number(a) + Number(b)).toString();
+const subtract = (a: numberish, b: numberish) =>
+  (Number(a) - Number(b)).toString();
+const max = (a: numberish, b: numberish) =>
+  Math.max(Number(a), Number(b)).toString();
 
-function getHoldings(state: ChannelState, destination: string): number {
+function getHoldings(state: State, destination: string): string {
   const { outcome } = state;
 
-  let currentFunding = chain.holdings(state.channelID);
+  let currentFunding = chain.holdings(getChannelID(state.channel));
   return outcome
     .filter(item => item.destination === destination)
     .map(item => {
-      const payout = Math.min(currentFunding, item.amount);
+      const payout = Math.min(currentFunding, Number(item.amount));
       currentFunding -= payout;
-      return payout;
+      return payout.toString();
     })
-    .reduce(sum);
+    .reduce(add);
 }
 
 function assertOk(minimalOutcome: Outcome): boolean {
@@ -31,19 +43,19 @@ function assertOk(minimalOutcome: Outcome): boolean {
 }
 
 function obligation(
-  state: ChannelState,
+  state: State,
   minimalOutcome: Outcome,
   destination: string
-): number {
+): string {
   assertOk(minimalOutcome);
   const myHoldings = getHoldings(state, destination);
 
   const myTargetLevel = (
     minimalOutcome.find(item => item.destination === destination) || {
-      amount: 0,
+      amount: '0',
     }
   ).amount;
-  return Math.max(myTargetLevel - myHoldings, 0);
+  return max(subtract(myTargetLevel, myHoldings), 0);
 }
 
 function uniqueDestinations(outcome: Outcome): string[] {
@@ -70,7 +82,7 @@ function preDepositOutcome(
   );
 }
 
-function amount(item: OutcomeItem): number {
+function amount(item: OutcomeItem): string {
   return item.amount;
 }
 
@@ -83,7 +95,7 @@ function postDepositOutcome(channelID: string): Outcome {
     amount: outcome
       .filter(i => i.destination === destination)
       .map(amount)
-      .reduce(sum),
+      .reduce(add),
   }));
 }
 
