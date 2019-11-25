@@ -1,18 +1,9 @@
 const config = {
   key: 'create-channel',
-  initial: 'channelUnknown',
+  initial: 'chooseNonce',
   states: {
-    channelUnknown: {
-      on: {
-        '': { target: 'channelKnown', cond: 'amFirst', actions: 'sendState' },
-        CHANNEL_UPDATED: {
-          target: 'channelKnown',
-          cond: 'dataMatches',
-          actions: 'assignChannelId',
-        },
-      },
-    },
-    channelKnown: {
+    chooseNonce: {
+      onEntry: ['assignChannelID', 'sendOpenChannelMessage'],
       invoke: {
         src: 'advance-channel',
         data: 'passChannelId',

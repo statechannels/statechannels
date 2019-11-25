@@ -1,32 +1,18 @@
-import { Address, Outcome, PrivateKey } from '../../';
+import { JsonRpcCreateChannelParams } from '../../json-rpc';
 import { saveConfig } from '../../utils';
 
 const PROTOCOL = 'create-channel';
 
-export interface Init {
-  participants: Address[];
-  outcome: Outcome;
-  appDefinition: Address;
-  appData: string;
-  privateKey: PrivateKey;
-}
+/*
+Spawned in a new process when the app calls CreateChannel
+*/
+export type Init = JsonRpcCreateChannelParams;
 
-const channelUnknown = {
-  on: {
-    '': {
-      target: 'channelKnown',
-      cond: 'amFirst',
-      actions: 'sendState',
-    },
-    CHANNEL_UPDATED: {
-      target: 'channelKnown',
-      cond: 'dataMatches',
-      actions: 'assignChannelId',
-    },
-  },
-};
-
-const channelKnown = {
+const chooseNonce = {
+  onEntry: [
+    'assignChannelID', // This should generate a nonce, and assign `channelID` to the context
+    'sendOpenChannelMessage',
+  ],
   invoke: {
     src: 'advance-channel',
     data: 'passChannelId',
@@ -52,10 +38,9 @@ const postFundSetup = {
 
 const config = {
   key: PROTOCOL,
-  initial: 'channelUnknown',
+  initial: 'chooseNonce',
   states: {
-    channelUnknown,
-    channelKnown,
+    chooseNonce,
     funding,
     postFundSetup,
     success: { type: 'final' },
