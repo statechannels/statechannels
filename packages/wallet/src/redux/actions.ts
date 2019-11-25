@@ -396,6 +396,18 @@ export const sendChannelProposedMessage: ActionConstructor<SendChannelProposedMe
   type: "WALLET.SEND_CHANNEL_PROPOSED_MESSAGE"
 });
 
+export interface SendChannelJoinedMessage {
+  type: "WALLET.SEND_CHANNEL_JOINED_MESSAGE";
+  channelId: string;
+  toParticipantId: string;
+  fromParticipantId: string;
+}
+
+export const sendChannelJoinedMessage: ActionConstructor<SendChannelJoinedMessage> = p => ({
+  ...p,
+  type: "WALLET.SEND_CHANNEL_JOINED_MESSAGE"
+});
+
 export interface ChannelProposedEvent {
   type: "WALLET.CHANNEL_PROPOSED_EVENT";
   channelId: string;
@@ -439,6 +451,7 @@ export type OutgoingApiAction =
   | UnknownSigningAddress
   | NoContractError
   | SendChannelProposedMessage
+  | SendChannelJoinedMessage
   | ChannelProposedEvent
   | PostMessageResponse
   | UnknownChannelId

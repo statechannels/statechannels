@@ -7,7 +7,8 @@ import {
   postMessageResponse,
   channelProposedEvent,
   updateChannelResponse,
-  unknownChannelId
+  unknownChannelId,
+  sendChannelJoinedMessage
 } from "../../actions";
 import {Wallet} from "ethers";
 import {expectSaga} from "redux-saga-test-plan";
@@ -47,6 +48,37 @@ describe("message sender", () => {
       }
     });
   });
+
+  it("creates a notification for WALLET.SEND_CHANNEL_JOINED_MESSAGE", async () => {
+    const state = stateHelpers.appState({turnNum: 0});
+
+    const initialState = setChannel(
+      EMPTY_SHARED_DATA,
+      channelFromStates([state], stateHelpers.asAddress, stateHelpers.asPrivateKey)
+    );
+    const channelId = stateHelpers.channelId;
+    const message = sendChannelJoinedMessage({
+      channelId,
+      fromParticipantId: "A",
+      toParticipantId: "B"
+    });
+
+    const {effects} = await expectSaga(messageSender, message)
+      .withState(initialState)
+      .provide([[matchers.call.fn(window.parent.postMessage), 0]])
+      .run();
+
+    expect(effects.call[0].payload.args[0]).toMatchObject({
+      jsonrpc: "2.0",
+      method: "MessageQueued",
+      params: {
+        recipient: "A",
+        sender: "B",
+        data: {type: "Channel.Joined", signedState: state}
+      }
+    });
+  });
+
   it("creates a notification for WALLET.CHANNEL_PROPOSED_EVENT", async () => {
     const state = stateHelpers.appState({turnNum: 0});
 

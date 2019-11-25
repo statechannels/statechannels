@@ -1,14 +1,6 @@
 import {ChannelState} from "./states";
-import {
-  getChannelId,
-  State,
-  SignedState,
-  getVariablePart,
-  ForceMoveAppContractInterface
-} from "@statechannels/nitro-protocol";
+import {getChannelId, State, SignedState} from "@statechannels/nitro-protocol";
 import {hasValidSignature} from "../../../utils/signing-utils";
-import {Interface, defaultAbiCoder} from "ethers/utils";
-import PureEVM from "pure-evm";
 
 export function validTransition(channelState: ChannelState, state: State): boolean {
   const channelNonce = state.channel.channelNonce;
@@ -35,26 +27,25 @@ export function validAppTransition(
   toState: State,
   bytecode: string
 ): boolean {
-  const fromState = channelState.signedStates[channelState.signedStates.length - 1].state;
-
-  const numberOfParticipants = toState.channel.participants.length;
-  const fromVariablePart = getVariablePart(fromState);
-  const toVariablePart = getVariablePart(toState);
-  const turnNumB = toState.turnNum;
-
-  const txData = new Interface(ForceMoveAppContractInterface.abi).functions.validTransition.encode([
-    fromVariablePart,
-    toVariablePart,
-    turnNumB,
-    numberOfParticipants
-  ]);
-
-  const result = PureEVM.exec(
-    Uint8Array.from(Buffer.from(bytecode.substr(2), "hex")),
-    Uint8Array.from(Buffer.from(txData.substr(2), "hex"))
-  );
-
-  return defaultAbiCoder.decode(["bool"], result)[0] as boolean;
+  return true;
+  // TODO: Enable this once pure-evm can be loaded from the browser
+  // see https://github.com/statechannels/monorepo/issues/537
+  // const fromState = channelState.signedStates[channelState.signedStates.length - 1].state;
+  // const numberOfParticipants = toState.channel.participants.length;
+  // const fromVariablePart = getVariablePart(fromState);
+  // const toVariablePart = getVariablePart(toState);
+  // const turnNumB = toState.turnNum;
+  // const txData = new Interface(ForceMoveAppContractInterface.abi).functions.validTransition.encode([
+  //   fromVariablePart,
+  //   toVariablePart,
+  //   turnNumB,
+  //   numberOfParticipants
+  // ]);
+  // const result = PureEVM.exec(
+  //   Uint8Array.from(Buffer.from(bytecode.substr(2), "hex")),
+  //   Uint8Array.from(Buffer.from(txData.substr(2), "hex"))
+  // );
+  // return defaultAbiCoder.decode(["bool"], result)[0] as boolean;
 }
 
 export function validTransitions(states: SignedState[]): boolean {

@@ -11,6 +11,8 @@ import {getProvider} from "../../../utils/contract-utils";
 import {setChannel} from "../../../../src/redux/channel-store";
 import {channelFromStates} from "../../channel-store/channel-state/__tests__";
 import * as stateHelpers from "../../__tests__/state-helpers";
+import {AddressZero} from "ethers/constants";
+import {convertAddressToBytes32} from "../../../utils/data-type-utils";
 
 describe("message listener", () => {
   const wallet = Wallet.createRandom();
@@ -42,7 +44,7 @@ describe("message listener", () => {
   });
 
   describe("PushMessage", () => {
-    it("handles a pushMessage", async () => {
+    it("handles a pushMessage with a channel open message", async () => {
       const signedState = appState({turnNum: 0});
       const destinationA = Wallet.createRandom().address;
       const signingAddressA = asAddress;
@@ -106,6 +108,43 @@ describe("message listener", () => {
       expect(effects.fork[1].payload.args[0]).toMatchObject({
         type: "WALLET.CHANNEL_PROPOSED_EVENT",
         channelId: expect.any(String)
+      });
+    });
+
+    it("handles a pushMessage with a channel joined message", async () => {
+      const signedState = appState({turnNum: 0});
+
+      const pushMessage = {
+        jsonrpc: "2.0",
+        method: "PushMessage",
+        id: 1,
+        params: {
+          recipient: "user-a",
+          sender: "user-b",
+          data: {type: "Channel.Joined", signedState}
+        }
+      };
+
+      const {effects} = await expectSaga(messageHandler, pushMessage, "localhost")
+        .withState(initialState)
+        // Mock out the fork call so we don't actually try to post the message
+        .provide([
+          [matchers.fork.fn(messageSender), 0],
+          [matchers.select.selector(getAddress), asAddress],
+          [
+            matchers.call.fn(getProvider),
+            {
+              getCode: address => {
+                return "0x12345";
+              }
+            }
+          ]
+        ])
+        .run();
+
+      expect(effects.put[0].payload.action).toMatchObject({
+        type: "WALLET.APPLICATION.OPPONENT_STATE_RECEIVED",
+        signedState
       });
     });
   });
@@ -174,10 +213,10 @@ describe("message listener", () => {
           channel: {participants: [signingAddressA, signingAddressB]},
           outcome: [
             {
-              assetHolderAddress: "0x0",
+              assetHolderAddress: AddressZero,
               allocation: [
-                {destination: destinationA, amount: "0x12"},
-                {destination: destinationB, amount: "0x12"}
+                {destination: convertAddressToBytes32(destinationA), amount: "0x12"},
+                {destination: convertAddressToBytes32(destinationB), amount: "0x12"}
               ]
             }
           ]
@@ -361,7 +400,15 @@ describe("message listener", () => {
         appData,
         turnNum: 1,
         outcome: [
-          {allocation: allocations[0].allocationItems, assetHolderAddress: allocations[0].token}
+          {
+            allocation: allocations[0].allocationItems.map(a => {
+              return {
+                amount: a.amount,
+                destination: convertAddressToBytes32(a.destination)
+              };
+            }),
+            assetHolderAddress: AddressZero
+          }
         ]
       };
 
@@ -438,6 +485,10 @@ describe("message listener", () => {
       expect(effects.fork[0].payload.args[0]).toMatchObject({
         type: "WALLET.JOIN_CHANNEL_RESPONSE",
         id: 1,
+        channelId: testChannel.channelId
+      });
+      expect(effects.fork[1].payload.args[0]).toMatchObject({
+        type: "WALLET.SEND_CHANNEL_JOINED_MESSAGE",
         channelId: testChannel.channelId
       });
     });
