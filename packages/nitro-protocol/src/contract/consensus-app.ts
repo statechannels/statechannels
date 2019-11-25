@@ -2,7 +2,7 @@ import {ConsensusData, encodeConsensusData} from './consensus-data';
 import {encodeOutcome, Outcome} from './outcome';
 import {VariablePart} from './state';
 
-// const ConsensusAppContractInterface = new Interface(ConsensusAppArtifact.abi);
+// Const ConsensusAppContractInterface = new Interface(ConsensusAppArtifact.abi);
 
 export function getVariablePart(consensusData: ConsensusData, outcome: Outcome): VariablePart {
   const appData = encodeConsensusData(consensusData);
@@ -20,24 +20,24 @@ export function validTransition(
 ): boolean {
   return true;
   // TODO: Enable this once pure-evm can be loaded from the browser
-  // see https://github.com/statechannels/monorepo/issues/537
-  // const fromVariablePart = getVariablePart(fromConsensusData, fromOutcome);
-  // const toVariablePart = getVariablePart(toConsensusData, toOutcome);
-  // const turnNumB = 0; // This isn't actually used by the contract so any value works
+  // See https://github.com/statechannels/monorepo/issues/537
+  // Const fromVariablePart = getVariablePart(fromConsensusData, fromOutcome);
+  // Const toVariablePart = getVariablePart(toConsensusData, toOutcome);
+  // Const turnNumB = 0; // This isn't actually used by the contract so any value works
 
-  // const iface = new Interface(ConsensusAppContractInterface.abi);
+  // Const iface = new Interface(ConsensusAppContractInterface.abi);
 
-  // const txData = iface.functions.validTransition.encode([
-  //   fromVariablePart,
-  //   toVariablePart,
-  //   turnNumB,
-  //   numberOfParticipants,
+  // Const txData = iface.functions.validTransition.encode([
+  //   FromVariablePart,
+  //   ToVariablePart,
+  //   TurnNumB,
+  //   NumberOfParticipants,
   // ]);
 
-  // const result = PureEVM.exec(
+  // Const result = PureEVM.exec(
   //   Uint8Array.from(Buffer.from(ConsensusAppArtifact.bytecode.substr(2), 'hex')),
   //   Uint8Array.from(Buffer.from(txData.substr(2), 'hex'))
   // );
 
-  // return defaultAbiCoder.decode(['bool'], result)[0] as boolean;
+  // Return defaultAbiCoder.decode(['bool'], result)[0] as boolean;
 }

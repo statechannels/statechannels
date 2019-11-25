@@ -8,25 +8,25 @@ export const ForceMoveAppContractInterface = new Interface(ForceMoveAppArtifact.
 export function validTransition(fromState: State, toState: State, appBytecode: string): boolean {
   return true;
   // TODO: Enable this once pure-evm can be loaded from the browser
-  // see https://github.com/statechannels/monorepo/issues/537
-  // const numberOfParticipants = toState.channel.participants.length;
-  // const fromVariablePart = getVariablePart(fromState);
-  // const toVariablePart = getVariablePart(toState);
-  // const turnNumB = toState.turnNum;
+  // See https://github.com/statechannels/monorepo/issues/537
+  // Const numberOfParticipants = toState.channel.participants.length;
+  // Const fromVariablePart = getVariablePart(fromState);
+  // Const toVariablePart = getVariablePart(toState);
+  // Const turnNumB = toState.turnNum;
 
-  // const iface = new Interface(ForceMoveAppContractInterface.abi);
+  // Const iface = new Interface(ForceMoveAppContractInterface.abi);
 
-  // const txData = iface.functions.validTransition.encode([
-  //   fromVariablePart,
-  //   toVariablePart,
-  //   turnNumB,
-  //   numberOfParticipants,
+  // Const txData = iface.functions.validTransition.encode([
+  //   FromVariablePart,
+  //   ToVariablePart,
+  //   TurnNumB,
+  //   NumberOfParticipants,
   // ]);
 
-  // const result = PureEVM.exec(
+  // Const result = PureEVM.exec(
   //   Uint8Array.from(Buffer.from(appBytecode.substr(2), 'hex')),
   //   Uint8Array.from(Buffer.from(txData.substr(2), 'hex'))
   // );
 
-  // return defaultAbiCoder.decode(['bool'], result)[0] as boolean;
+  // Return defaultAbiCoder.decode(['bool'], result)[0] as boolean;
 }
