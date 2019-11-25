@@ -52,6 +52,7 @@ const initialState: SiteState = {
   },
   game: {
     localState: { type: 'Empty' },
+    channelState: null,
   },
 };
 
