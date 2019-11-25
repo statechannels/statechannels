@@ -7,10 +7,7 @@ const config = {
       invoke: { src: 'askClient' },
       on: { CLOSE_CHANNEL: 'abort', JOIN_CHANNEL: 'funding' },
     },
-    abort: {
-      invoke: { src: 'concludeChannel', data: 'passChannelId' },
-      onDone: 'success',
-    },
+    abort: { type: 'final' },
     funding: {
       invoke: { src: 'funding', data: 'passChannelId' },
       onDone: 'postFundSetup',

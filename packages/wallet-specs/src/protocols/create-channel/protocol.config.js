@@ -11,10 +11,7 @@ const config = {
       },
       on: { CHANNEL_CLOSED: 'abort' },
     },
-    abort: {
-      invoke: { src: 'concludeChannel', data: 'passChannelId' },
-      onDone: 'success',
-    },
+    abort: { type: 'final' },
     funding: {
       invoke: { src: 'funding', data: 'passChannelId' },
       onDone: 'postFundSetup',

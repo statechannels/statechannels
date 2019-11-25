@@ -24,11 +24,7 @@ const chooseNonce = {
 };
 
 const abort = {
-  invoke: {
-    src: 'concludeChannel',
-    data: 'passChannelId',
-  },
-  onDone: 'success',
+  type: 'final',
 };
 
 const funding = {
