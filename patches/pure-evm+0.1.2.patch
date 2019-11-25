@@ -9,12 +9,3 @@ index f0dc756..18e99c7 100644
  
  let cachegetUint8Memory = null;
  function getUint8Memory() {
-@@ -67,7 +68,7 @@ heap.push(undefined, null, true, false);
- let heap_next = heap.length;
- 
- function dropObject(idx) {
--    if (idx < 36) return;
-+    if (idx < 36) { return; }
-     heap[idx] = heap_next;
-     heap_next = idx;
- }
