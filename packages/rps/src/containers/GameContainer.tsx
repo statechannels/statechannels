@@ -1,14 +1,25 @@
 import React, { Fragment } from 'react';
 import { connect } from 'react-redux';
 
-import { Weapon } from '../core';
 import { SiteState } from '../redux/reducer';
-import * as gameActions from '../redux/game/actions';
+import { Weapon } from '../core';
+import * as gameActions from '../redux/game-v2/actions';
 
 import WaitingRoomPage from '../components/WaitingRoomPage';
 import ProfileContainer from './ProfileContainer';
 
-import { LocalState } from '../redux/game-v2/state';
+import { LocalState, PlayingStateName } from '../redux/game-v2/state';
+
+import LobbyContainer from './LobbyContainer';
+import {
+  ProposeGamePage,
+  ConfirmGamePage,
+  SelectWeaponPage,
+  WeaponSelectedPage,
+  PlayAgain,
+  GameOverPage,
+} from '../components';
+import { unreachable } from '../utils/unreachable';
 
 interface GameProps {
   state: LocalState;
@@ -32,6 +43,8 @@ function RenderGame(props: GameProps) {
   switch (state.type) {
     case 'Empty':
       return <ProfileContainer />;
+    case 'Lobby':
+      return <LobbyContainer />;
     case 'WaitingRoom':
       return (
         <WaitingRoomPage
@@ -39,9 +52,55 @@ function RenderGame(props: GameProps) {
           roundBuyIn={state.roundBuyIn.toString()}
         />
       );
+    case 'GameChosen':
+      return <ProposeGamePage message="Waiting for opponent to confirm" />;
+    case 'OpponentJoined':
+      return (
+        <ConfirmGamePage
+          confirmGame={props.confirmGame}
+          cancelGame={props.declineGame}
+          stake={state.roundBuyIn.toString()}
+          opponentName={state.opponentName}
+        />
+      );
+    case 'ChooseWeapon':
+      return <SelectWeaponPage chooseWeapon={props.chooseWeapon} />;
+    case 'WeaponChosen':
+    case 'WeaponAndSaltChosen':
+      return (
+        <WeaponSelectedPage
+          message="Waiting for your opponent to choose their move"
+          yourWeapon={state.myWeapon}
+        />
+      );
+    case 'ResultPlayAgain':
+      return (
+        <PlayAgain
+          yourWeapon={state.myWeapon}
+          theirWeapon={state.theirWeapon}
+          result={state.result}
+          playAgain={props.playAgain}
+        />
+      );
+    case 'WaitForRestart':
+      throw new Error(`View not created for ${state.type}`);
 
+    case 'ShuttingDown':
+      throw new Error(`View not created for ${state.type}`);
+
+    case 'GameOver':
+      // const ourTurn = state.player === 'A' ? state.turnNum % 2 !== 0 : turnNum % 2 === 0;
+      const ourTurn = true; // TODO compute this properly
+      return (
+        <GameOverPage
+          visible={(state.name as PlayingStateName) === 'GameOver'}
+          conclude={props.conclude}
+          ourTurn={ourTurn}
+        />
+      );
     default:
-      throw new Error(`View not created for ${state.name}`);
+      unreachable(state);
+      throw new Error(`View not created`);
   }
 }
 
@@ -52,10 +111,18 @@ const mapStateToProps = (state: SiteState) => ({
 const mapDispatchToProps = {
   chooseWeapon: gameActions.chooseWeapon,
   playAgain: gameActions.playAgain,
-  confirmGame: gameActions.confirmGame,
-  declineGame: gameActions.declineGame,
-  createOpenGame: gameActions.createOpenGame,
-  cancelOpenGame: gameActions.cancelOpenGame,
+  confirmGame: () => {
+    /* */
+  }, // TODO create this action!
+  declineGame: () => {
+    /**/
+  }, // TODO create this action!
+  createOpenGame: () => {
+    /* */
+  }, // TODO wire up this action and fix type inconistencies
+  cancelOpenGame: {
+    /**/
+  }, // TODO create this action!
   conclude: gameActions.resign,
 };
 
