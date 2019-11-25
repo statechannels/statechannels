@@ -7,8 +7,8 @@ export const rpsChannelClientMocks = (client: RPSChannelClient) => {
   const callCreateChannel = (state: ChannelState): [match.Matcher, any] => [
     match.call(
       client.createChannel,
-      state.aDestination,
-      state.bDestination,
+      state.aAddress,
+      state.bAddress,
       state.aBal,
       state.bBal,
       state.appData
@@ -22,7 +22,15 @@ export const rpsChannelClientMocks = (client: RPSChannelClient) => {
   ];
   // checks and mocks an updateChannel call, in the format expected by expectSaga.provide
   const callUpdateChannel = (state: ChannelState): [match.Matcher, any] => [
-    match.call(client.updateChannel, state.channelId, state.aBal, state.bBal, state.appData),
+    match.call(
+      client.updateChannel,
+      state.channelId,
+      state.aAddress,
+      state.bAddress,
+      state.aBal,
+      state.bBal,
+      state.appData
+    ),
     Promise.resolve(state),
   ];
   // checks and mocks a closeChannel call, in the format expected by expectSaga.provide
