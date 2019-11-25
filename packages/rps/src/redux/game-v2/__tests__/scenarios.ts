@@ -88,7 +88,7 @@ export const localStatesA = {
   weaponAndSaltChosen: s.weaponAndSaltChosen(propsA, salt),
   resultPlayAgain: s.resultPlayAgain(propsA, playerBWeapon, Result.YouWin),
   chooseWeapon2: s.chooseWeapon(propsA),
-  waitForRestart: s.waitForRestart(propsA),
+  waitForRestart: s.waitForRestart(propsA, playerBWeapon, Result.YouWin),
   shuttingDown: s.shuttingDown(propsA, 'InsufficientFundsOpponent'),
   shuttingDownResign: s.shuttingDown(propsA, 'YouResigned'),
   gameOverYouResigned: s.gameOver(propsA, 'YouResigned'),

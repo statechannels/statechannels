@@ -18,6 +18,7 @@ import {
   WeaponSelectedPage,
   PlayAgain,
   GameOverPage,
+  WaitForResting,
 } from '../components';
 import { unreachable } from '../utils/unreachable';
 
@@ -83,8 +84,14 @@ function RenderGame(props: GameProps) {
         />
       );
     case 'WaitForRestart':
-      throw new Error(`View not created for ${state.type}`);
-
+      return (
+        <WaitForResting
+          yourWeapon={state.myWeapon}
+          theirWeapon={state.theirWeapon}
+          result={state.result}
+          playAgain={props.playAgain}
+        />
+      );
     case 'ShuttingDown':
       throw new Error(`View not created for ${state.type}`);
 

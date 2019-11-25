@@ -90,6 +90,9 @@ export interface ResultPlayAgain extends Playing {
 
 export interface WaitForRestart extends Playing {
   type: 'WaitForRestart';
+  myWeapon: Weapon;
+  theirWeapon: Weapon;
+  result: Result;
 }
 
 export type ShutDownReason =
@@ -175,9 +178,16 @@ export const resultPlayAgain = <T extends Playing & { myWeapon: Weapon }>(
   result,
 });
 
-export const waitForRestart = <T extends Playing>(state: T): WaitForRestart => ({
+export const waitForRestart = <T extends Playing & { myWeapon: Weapon }>(
+  state: T,
+  theirWeapon: Weapon,
+  result: Result
+): WaitForRestart => ({
   type: 'WaitForRestart',
   ...playing(state),
+  myWeapon: state.myWeapon,
+  theirWeapon,
+  result,
 });
 
 export const shuttingDown = <T extends Playing>(

@@ -150,7 +150,7 @@ const handlePlayAgain = (state: LocalState, action: PlayAgain): LocalState => {
   if (state.type !== 'ResultPlayAgain') {
     return state;
   }
-  return waitForRestart(state);
+  return waitForRestart(state, state.myWeapon, state.result);
 };
 
 const handleStartRound = (state: LocalState, action: StartRound): LocalState => {

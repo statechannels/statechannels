@@ -4,6 +4,7 @@ import SelectWeaponPage from './SelectWeaponPage';
 import WeaponSelectedPage from './WeaponSelectedPage';
 import PlayAgain from './PlayAgain';
 import GameOverPage from './GameOverPage';
+import WaitForResting from './WaitForRestingA';
 
 export {
   ProposeGamePage,
@@ -12,4 +13,5 @@ export {
   WeaponSelectedPage,
   PlayAgain,
   GameOverPage,
+  WaitForResting,
 };
