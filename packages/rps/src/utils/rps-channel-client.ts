@@ -1,16 +1,15 @@
 import { AppData, ChannelState, encodeAppData, decodeAppData } from '../core';
-import { bigNumberify } from 'ethers/utils';
-import { ChannelClient, ChannelUpdatedNotification, Notification } from './channel-client';
+import { IChannelClient, Message, FakeChannelClient, ChannelResult } from './channel-client';
 import { RPS_ADDRESS } from '../constants';
 
 // This class wraps the channel client converting the request/response formats to those used in the app
 
 export class RPSChannelClient {
-  channelClient: ChannelClient;
+  channelClient: IChannelClient;
 
   constructor() {
     // might want to pass this in later
-    this.channelClient = new ChannelClient();
+    this.channelClient = new FakeChannelClient();
   }
 
   async createChannel(
@@ -20,87 +19,105 @@ export class RPSChannelClient {
     bBal: string,
     appAttrs: AppData
   ): Promise<ChannelState> {
-    const participants = [
-      { participantId: aAddress, signingAddress: aAddress, destination: aAddress },
-      { participantId: bAddress, signingAddress: bAddress, destination: bAddress },
-    ];
-
-    const allocations = [
-      {
-        token: '0x0',
-        allocationItems: [
-          { destination: aAddress, amount: aBal },
-          { destination: bAddress, amount: bBal },
-        ],
-      },
-    ];
-
+    const participants = formatParticipants(aAddress, bAddress);
+    const allocations = formatAllocations(aAddress, bAddress, aBal, bBal);
     const appDefinition = RPS_ADDRESS;
 
     const appData = encodeAppData(appAttrs);
 
     // ignore return val for now and stub out response
-    await this.channelClient.createChannel({ participants, allocations, appDefinition, appData });
+    const channelResult = await this.channelClient.createChannel(
+      participants,
+      allocations,
+      appDefinition,
+      appData
+    );
 
-    return await {
-      channelId: '0xsome-channel-id',
-      turnNum: bigNumberify(0).toString(),
-      status: 'opening',
-      aUserId: aAddress,
-      bUserId: bAddress,
-      aDestination: aAddress,
-      bDestination: bAddress,
-      aBal,
-      bBal,
-      appData: appAttrs,
-    };
+    return convertToChannelState(channelResult);
   }
 
   async getAddress() {
     await this.channelClient.getAddress();
   }
 
-  async onMessageQueued(callback: (notification: Notification) => void) {
+  async onMessageQueued(callback: (message: Message) => void) {
     await this.channelClient.onMessageQueued(callback);
   }
 
   // Accepts an rps-friendly callback, performs the necessary encoding, and subscribes to the channelClient with an appropriate, API-compliant callback
   async onChannelUpdated(rpsCallback: (channelState: ChannelState) => any) {
-    function callback(notification: ChannelUpdatedNotification): any {
-      const channelState: ChannelState = {
-        ...notification.params,
-        turnNum: notification.params.turnNum.toString(),
-        appData: decodeAppData(notification.params.appData),
-        aUserId: notification.params.participants[0].participantId,
-        bUserId: notification.params.participants[1].participantId,
-        aDestination: notification.params.participants[0].destination,
-        bDestination: notification.params.participants[1].destination,
-        aBal: notification.params.allocations[0].allocationItems[0].amount.toString(),
-        bBal: notification.params.allocations[0].allocationItems[1].amount.toString(),
-      };
-      rpsCallback(channelState);
+    function callback(channelResult: ChannelResult): any {
+      rpsCallback(convertToChannelState(channelResult));
     }
     await this.channelClient.onChannelUpdated(callback);
   }
 
-  async unSubscribe(notificationName) {
-    await this.channelClient.unSubscribe(notificationName);
-  }
-
-  async joinChannel() {
-    /* TODO */
+  async joinChannel(channelId: string) {
+    const channelResult = await this.channelClient.joinChannel(channelId);
+    return convertToChannelState(channelResult);
   }
 
   async closeChannel(channelId: string): Promise<ChannelState> {
-    /* TODO */
-    return {} as any;
+    const channelResult = await this.channelClient.closeChannel(channelId);
+    return convertToChannelState(channelResult);
   }
 
-  async updateChannel(channelId, aBal, bBal, appData: AppData) {
-    /* TODO */
+  async updateChannel(
+    channelId: string,
+    aAddress: string,
+    bAddress: string,
+    aBal: string,
+    bBal: string,
+    appAttrs: AppData
+  ) {
+    const allocations = formatAllocations(aAddress, bAddress, aBal, bBal);
+    const participants = formatParticipants(aAddress, bAddress);
+
+    const appData = encodeAppData(appAttrs);
+
+    // ignore return val for now and stub out response
+    const channelResult = await this.channelClient.updateChannel(
+      channelId,
+      participants,
+      allocations,
+      appData
+    );
+
+    return convertToChannelState(channelResult);
   }
 
-  async pushMessage() {
-    /* TODO */
+  async pushMessage(message: Message) {
+    await this.channelClient.pushMessage(message);
   }
 }
+
+const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
+  return {
+    ...channelResult,
+    turnNum: channelResult.turnNum.toString(),
+    appData: decodeAppData(channelResult.appData),
+    aUserId: channelResult.participants[0].participantId,
+    bUserId: channelResult.participants[1].participantId,
+    aAddress: channelResult.participants[0].destination,
+    bAddress: channelResult.participants[1].destination,
+    aBal: channelResult.allocations[0].allocationItems[0].amount.toString(),
+    bBal: channelResult.allocations[0].allocationItems[1].amount.toString(),
+  };
+};
+
+const formatParticipants = (aAddress: string, bAddress: string) => [
+  { participantId: aAddress, signingAddress: aAddress, destination: aAddress },
+  { participantId: bAddress, signingAddress: bAddress, destination: bAddress },
+];
+
+const formatAllocations = (aAddress: string, bAddress: string, aBal: string, bBal: string) => {
+  return [
+    {
+      token: '0x0',
+      allocationItems: [
+        { destination: aAddress, amount: aBal },
+        { destination: bAddress, amount: bBal },
+      ],
+    },
+  ];
+};
