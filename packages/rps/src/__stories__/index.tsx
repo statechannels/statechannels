@@ -16,7 +16,7 @@ import { SiteState } from '../redux/reducer';
 // // import CreatingOpenGameModal from "../components/CreatingOpenGameModal";
 // import LoginErrorPage from '../components/LoginErrorPage';
 // import {Channel} from 'fmg-core';
-import { localStatesA } from '../redux/game-v2/__tests__/scenarios';
+import { localStatesA, localStatesB } from '../redux/game-v2/__tests__/scenarios';
 
 // const finneyFiveFive = ['0x' + new BN(5).toString(16), '0x' + new BN(5).toString(16)] as [
 //   string,
@@ -30,7 +30,7 @@ import { localStatesA } from '../redux/game-v2/__tests__/scenarios';
 
 const fakeStore = state => ({
   dispatch: action => {
-    alert(`Action ${action.type} triggered`);
+    console.log(`Action ${action.type} triggered`);
     return action;
   },
   getState: () => state,
@@ -190,8 +190,18 @@ export function siteStateFromLocalState<T extends states.LocalState>(localState:
 //   .add('Game Proposed', testState(gameProposed))
 //   .add('Confirm Game', testState(confirmGame));
 
-storiesOf('Game Screens', module).add(
-  'lobby',
-  testState(siteStateFromLocalState(localStatesA.lobby))
-);
+Object.keys(localStatesA).forEach(key => {
+  storiesOf('Game Screens (A)', module).add(
+    key,
+    testState(siteStateFromLocalState(localStatesA[key]))
+  );
+});
+
+Object.keys(localStatesB).forEach(key => {
+  storiesOf('Game Screens (B)', module).add(
+    key,
+    testState(siteStateFromLocalState(localStatesB[key]))
+  );
+});
+
 storiesOf('Game Over', module);
