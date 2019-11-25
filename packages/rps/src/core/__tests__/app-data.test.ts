@@ -1,7 +1,18 @@
-import { decodeAppData, encodeAppData, Reveal, RoundProposed } from '../app-data';
+import {
+  decodeAppData,
+  encodeAppData,
+  Reveal,
+  RoundProposed,
+  RoundAccepted,
+  Start,
+} from '../app-data';
 import { HashZero } from 'ethers/constants';
 import { Weapon } from '../weapons';
 import { bigNumberify } from 'ethers/utils';
+
+const testStart: Start = {
+  type: 'start',
+};
 
 const testReveal: Reveal = {
   type: 'reveal',
@@ -16,9 +27,18 @@ const testRoundProposed: RoundProposed = {
   preCommit: HashZero,
 };
 
+const testRoundAccepted: RoundAccepted = {
+  type: 'roundAccepted',
+  stake: bigNumberify(99),
+  preCommit: HashZero,
+  playerBWeapon: Weapon.Rock,
+};
+
 describe('app-data.ts', () => {
   test('decode is the inverse of encode', () => {
+    expect(decodeAppData(encodeAppData(testStart))).toStrictEqual(testStart);
     expect(decodeAppData(encodeAppData(testRoundProposed))).toStrictEqual(testRoundProposed);
+    expect(decodeAppData(encodeAppData(testRoundAccepted))).toStrictEqual(testRoundAccepted);
     expect(decodeAppData(encodeAppData(testReveal))).toStrictEqual(testReveal);
   });
 });
