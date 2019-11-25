@@ -13,14 +13,15 @@ export interface ChannelState {
   participants: Address[];
   turnNumber: number;
   outcome: Outcome;
-  appData: AppData;
+  appData?: AppData;
+  appDefinition?: string;
   channelID: string;
   isFinal: boolean;
 }
 
 export interface SignedState {
   state: ChannelState;
-  signatures?: Signature[];
+  signatures: Signature[];
 }
 
 export interface Failure {
@@ -35,4 +36,4 @@ export interface Entry {
 }
 
 export { chain } from './chain';
-export { store } from './store';
+export { store, Store } from './store';

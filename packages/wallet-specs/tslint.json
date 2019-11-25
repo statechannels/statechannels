@@ -15,6 +15,7 @@
     "ordered-imports": true,
     "prefer-for-of": true,
     "prettier": [true, ".prettierrc.js"],
+    "forin": false,
     "variable-name": [
       true,
       "ban-keywords",

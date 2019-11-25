@@ -12,14 +12,10 @@ interface IStore {
 
   signedByMe: (state: ChannelState) => boolean;
   sendState: (state: ChannelState) => void;
-
-  // Helpers
-  equals: (left: ChannelState, right: ChannelState) => boolean;
+  receiveStates: (signedStates: SignedState[]) => ChannelUpdated | false;
 }
 
-export const store = (null as any) as Store;
-
-interface ChannelStoreEntry {
+export interface ChannelStoreEntry {
   supportedState: SignedState[];
   unsupportedStates: SignedState[];
   privateKey: string;
@@ -29,8 +25,13 @@ interface ChannelStore {
   [channelID: string]: ChannelStoreEntry;
 }
 
-class Store implements IStore {
+export class Store implements IStore {
+  public static equals(left: ChannelState, right: ChannelState) {
+    return JSON.stringify(left) === JSON.stringify(right);
+  }
+
   private _store: ChannelStore;
+
   constructor(initialStore: ChannelStore = {}) {
     this._store = initialStore;
   }
@@ -61,7 +62,7 @@ class Store implements IStore {
 
   public signedByMe(state: ChannelState) {
     const signedState = this.states(state.channelID).find((s: SignedState) =>
-      this.equals(state, s.state)
+      Store.equals(state, s.state)
     );
 
     return (
@@ -72,11 +73,20 @@ class Store implements IStore {
   }
 
   public sendState(state: ChannelState) {
-    // TODO
+    this.receiveStates([{ state, signatures: ['mine'] }]);
   }
 
-  public equals(left: ChannelState, right: ChannelState) {
-    return JSON.stringify(left) === JSON.stringify(right);
+  public receiveStates(signedStates: SignedState[]): ChannelUpdated | false {
+    try {
+      const { channelID } = signedStates[0].state;
+
+      // TODO: validate transition
+      this.updateEntry(channelID, signedStates);
+
+      return { type: 'CHANNEL_UPDATED', channelID };
+    } catch (e) {
+      throw e;
+    }
   }
 
   // PRIVATE
@@ -94,6 +104,57 @@ class Store implements IStore {
 
     return this._store[channelID];
   }
+
+  private updateEntry(channelID: string, states: SignedState[]): true {
+    // TODO: This currently assumes that support comes from consensus on a single state
+    let supportedState: SignedState[];
+    let unsupportedStates: SignedState[];
+    ({ supportedState, unsupportedStates } = this.getEntry(channelID));
+
+    unsupportedStates = merge(unsupportedStates, states);
+
+    const nowSupported = unsupportedStates
+      .filter(supported)
+      .sort(s => -s.state.turnNumber);
+
+    supportedState = nowSupported.length ? [nowSupported[0]] : supportedState;
+    unsupportedStates = unsupportedStates.filter(
+      s => s.state.turnNumber > supportedState[0].state.turnNumber
+    );
+
+    this._store[channelID] = {
+      ...this._store[channelID],
+      supportedState,
+      unsupportedStates,
+    };
+
+    return true;
+  }
+}
+
+function merge(left: SignedState[], right: SignedState[]): SignedState[] {
+  // TODO this is horribly inefficient
+  right.map(rightState => {
+    const idx = left.findIndex(s => Store.equals(s.state, rightState.state));
+    const leftState = left[idx];
+    if (leftState) {
+      const signatures = [
+        ...new Set(leftState.signatures.concat(rightState.signatures)),
+      ];
+      left[idx] = { ...leftState, signatures };
+    } else {
+      left.push(rightState);
+    }
+  });
+
+  return left;
+}
+
+function supported(signedState: SignedState) {
+  // TODO: temporarily just check the required length
+  return (
+    signedState.signatures.length === signedState.state.participants.length
+  );
 }
 
 // The store would send this action whenever the channel is updated
@@ -109,3 +170,5 @@ export interface Deposit {
 }
 
 export type StoreEvent = ChannelUpdated | Deposit;
+
+export const store = new Store();
