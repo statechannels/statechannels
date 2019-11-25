@@ -3,7 +3,12 @@ import {getChannelId, State} from "@statechannels/nitro-protocol";
 import jrs, {RequestObject} from "jsonrpc-lite";
 
 import * as actions from "../actions";
-import {getAddress, getLastStateForChannel, doesAStateExistForChannel} from "../selectors";
+import {
+  getAddress,
+  getLastStateForChannel,
+  doesAStateExistForChannel,
+  getParticipants
+} from "../selectors";
 import {messageSender} from "./message-sender";
 import {APPLICATION_PROCESS_ID} from "../protocols/application/reducer";
 import {
@@ -81,6 +86,17 @@ function* handleJoinChannelMessage(payload: RequestObject) {
     );
 
     yield fork(messageSender, actions.joinChannelResponse({channelId, id}));
+    const address = yield select(getAddress);
+    const participants = yield select(getParticipants, channelId);
+    // We assume a two player channel
+    const {participantId: fromParticipantId} =
+      participants[0].signingAddress === address ? participants[0] : participants[1];
+    const {participantId: toParticipantId} =
+      participants[0].signingAddress !== address ? participants[0] : participants[1];
+    yield fork(
+      messageSender,
+      actions.sendChannelJoinedMessage({channelId, toParticipantId, fromParticipantId})
+    );
   }
 }
 
@@ -89,6 +105,14 @@ function* handlePushMessage(payload: RequestObject) {
   const {id} = payload;
   const message = payload.params as JsonRpcMessage;
   switch (message.data.type) {
+    case "Channel.Joined":
+      yield put(
+        actions.application.opponentStateReceived({
+          processId: APPLICATION_PROCESS_ID,
+          signedState: message.data.signedState
+        })
+      );
+      break;
     case "Channel.Open":
       const {signedState, participants} = message.data;
       // The channel gets initialized and the state will be pushed into the app protocol
