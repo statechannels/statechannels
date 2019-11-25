@@ -1,14 +1,14 @@
 import {bigNumberify} from 'ethers/utils';
 import {Address, Uint256} from 'fmg-core';
-import {DUMMY_ASSET_HOLDER_ADDRESS} from '../../test/test-constants';
-import {FUNDED_CHANNEL_ID, UNFUNDED_CHANNEL_ID} from '../../test/test_data';
-import Channel from '../models/channel';
+import {DUMMY_ASSET_HOLDER_ADDRESS} from '../../../test/test-constants';
+import {FUNDED_CHANNEL_ID, UNFUNDED_CHANNEL_ID} from '../../../test/test_data';
+import Channel from '../../models/channel';
 import {
   AssetHolderWatcherEvent,
   AssetHolderWatcherEventType
-} from '../services/asset-holder-watcher';
-import {Blockchain} from '../services/blockchain';
-import {onDepositEvent} from '../services/depositManager';
+} from '../../services/asset-holder-watcher';
+import {Blockchain} from '../../services/blockchain';
+import {onDepositEvent} from '../../services/depositManager';
 
 async function getHoldings(channelId) {
   const channel = await Channel.query()
