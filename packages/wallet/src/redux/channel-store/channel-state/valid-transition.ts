@@ -10,10 +10,13 @@ import {hasValidSignature} from "../../../utils/signing-utils";
 import {defaultAbiCoder, Interface} from "ethers/utils";
 
 let PureEVM;
-if (process.env.NODE_ENV === "test") {
-  /* tslint:disable */
-  PureEVM = require("pure-evm");
-} else if (process.env.NODE_ENV === "production") {
+if (
+  typeof window === "undefined" ||
+  (typeof process !== "undefined" && process.env.NODE_ENV === "test")
+) {
+  // tslint:disable
+  PureEVM = require('pure-evm');
+} else {
   import(/* WebpackMode: "eager" */ "pure-evm").then(x => (PureEVM = x));
 }
 

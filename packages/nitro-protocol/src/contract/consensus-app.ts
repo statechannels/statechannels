@@ -8,11 +8,7 @@ import {encodeOutcome, Outcome} from './outcome';
 import {VariablePart} from './state';
 
 let PureEVM;
-if (process.env.NODE_ENV === 'test') {
-  PureEVM = require('pure-evm');
-} else if (process.env.NODE_ENV === 'production') {
-  import(/* WebpackMode: "eager" */ 'pure-evm').then(x => (PureEVM = x));
-}
+import(/* WebpackMode: "eager" */ 'pure-evm').then(x => (PureEVM = x));
 
 const ConsensusAppContractInterface = new Interface(ConsensusAppArtifact.abi);
 
