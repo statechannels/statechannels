@@ -5,7 +5,11 @@ import ForceMoveAppArtifact from '../../build/contracts/ForceMoveApp.json';
 import {State, getVariablePart} from '../contract/state';
 
 let PureEVM;
-import(/* WebpackMode: "eager" */ 'pure-evm').then(x => (PureEVM = x));
+if (process.env.NODE_ENV === 'test') {
+  PureEVM = require('pure-evm');
+} else if (process.env.NODE_ENV === 'production') {
+  import(/* WebpackMode: "eager" */ 'pure-evm').then(x => (PureEVM = x));
+}
 
 export const ForceMoveAppContractInterface = new Interface(ForceMoveAppArtifact.abi);
 

@@ -10,7 +10,12 @@ import {hasValidSignature} from "../../../utils/signing-utils";
 import {defaultAbiCoder, Interface} from "ethers/utils";
 
 let PureEVM;
-import(/* webpackMode: "eager" */ "pure-evm").then(x => (PureEVM = x));
+if (process.env.NODE_ENV === "test") {
+  /* tslint:disable */
+  PureEVM = require("pure-evm");
+} else if (process.env.NODE_ENV === "production") {
+  import(/* WebpackMode: "eager" */ "pure-evm").then(x => (PureEVM = x));
+}
 
 export function validTransition(channelState: ChannelState, state: State): boolean {
   const channelNonce = state.channel.channelNonce;
