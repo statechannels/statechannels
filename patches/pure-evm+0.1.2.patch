@@ -1,0 +1,20 @@
+diff --git a/node_modules/pure-evm/pure-evm.js b/node_modules/pure-evm/pure-evm.js
+index f0dc756..18e99c7 100644
+--- a/node_modules/pure-evm/pure-evm.js
++++ b/node_modules/pure-evm/pure-evm.js
+@@ -1,4 +1,5 @@
+-import * as wasm from './pure-evm_bg';
++let wasm;
++import(/* webpackMode: 'eager' */ './pure-evm_bg.wasm').then(x => wasm = x);
+ 
+ let cachegetUint8Memory = null;
+ function getUint8Memory() {
+@@ -67,7 +68,7 @@ heap.push(undefined, null, true, false);
+ let heap_next = heap.length;
+ 
+ function dropObject(idx) {
+-    if (idx < 36) return;
++    if (idx < 36) { return; }
+     heap[idx] = heap_next;
+     heap_next = idx;
+ }

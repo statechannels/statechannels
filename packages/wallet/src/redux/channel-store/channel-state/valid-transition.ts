@@ -17,7 +17,7 @@ if (
   // tslint:disable
   PureEVM = require('pure-evm');
 } else {
-  import(/* WebpackMode: "eager" */ "pure-evm").then(x => (PureEVM = x));
+  import(/* webpackMode: "eager" */ "pure-evm").then(x => (PureEVM = x));
 }
 
 export function validTransition(channelState: ChannelState, state: State): boolean {
