@@ -26,12 +26,12 @@ async function updateChannel(stateRound: State[], hubState: State) {
 
   const outcome = (s: State) => outcomeObjectToModel(s.outcome);
   const stateModel = (s: State) => ({
-    turn_num: s.turnNum,
-    is_final: s.isFinal,
-    challenge_duration: s.challengeDuration,
+    turnNum: s.turnNum,
+    isFinal: s.isFinal,
+    challengeDuration: s.challengeDuration,
     outcome: outcome(s),
     appDefinition: s.appDefinition,
-    app_data: s.appData
+    appData: s.appData
   });
 
   const states = [...stateRound.map(s => stateModel(s)), stateModel(hubState)];

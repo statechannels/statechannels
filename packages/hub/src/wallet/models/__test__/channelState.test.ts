@@ -5,7 +5,7 @@ import {
   guaranteeOutcome2
 } from '../../../test/test-constants';
 import {
-  consensus_app_data2,
+  consensusAppData2,
   FUNDED_CHANNEL_ID,
   FUNDED_GUARANTOR_CHANNEL_ID,
   fundedChannel,
@@ -40,7 +40,7 @@ describe('asStateObject', () => {
       challengeDuration: 1000,
       outcome: allocationOutcome2,
       appDefinition: DUMMY_RULES_ADDRESS,
-      appData: encodeConsensusData(consensus_app_data2(2))
+      appData: encodeConsensusData(consensusAppData2(2))
     };
 
     expect(state).toMatchObject(expectedState);
@@ -56,7 +56,7 @@ describe('asStateObject', () => {
       challengeDuration: 1000,
       outcome: guaranteeOutcome2,
       appDefinition: DUMMY_RULES_ADDRESS,
-      appData: encodeConsensusData(consensus_app_data2(2))
+      appData: encodeConsensusData(consensusAppData2(2))
     };
 
     expect(state).toMatchObject(expectedState);
