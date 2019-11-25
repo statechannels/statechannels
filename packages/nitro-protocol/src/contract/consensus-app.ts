@@ -1,8 +1,16 @@
+import {Buffer} from 'buffer';
+import {Interface, defaultAbiCoder} from 'ethers/utils';
+
+import ConsensusAppArtifact from '../../build/contracts/ConsensusApp.json';
+
 import {ConsensusData, encodeConsensusData} from './consensus-data';
 import {encodeOutcome, Outcome} from './outcome';
 import {VariablePart} from './state';
 
-// Const ConsensusAppContractInterface = new Interface(ConsensusAppArtifact.abi);
+let PureEVM;
+import(/* WebpackMode: "eager" */ 'pure-evm').then(x => (PureEVM = x));
+
+const ConsensusAppContractInterface = new Interface(ConsensusAppArtifact.abi);
 
 export function getVariablePart(consensusData: ConsensusData, outcome: Outcome): VariablePart {
   const appData = encodeConsensusData(consensusData);
@@ -18,26 +26,23 @@ export function validTransition(
   toOutcome: Outcome,
   numberOfParticipants: number
 ): boolean {
-  return true;
-  // TODO: Enable this once pure-evm can be loaded from the browser
-  // See https://github.com/statechannels/monorepo/issues/537
-  // Const fromVariablePart = getVariablePart(fromConsensusData, fromOutcome);
-  // Const toVariablePart = getVariablePart(toConsensusData, toOutcome);
-  // Const turnNumB = 0; // This isn't actually used by the contract so any value works
+  const fromVariablePart = getVariablePart(fromConsensusData, fromOutcome);
+  const toVariablePart = getVariablePart(toConsensusData, toOutcome);
+  const turnNumB = 0; // This isn't actually used by the contract so any value works
 
-  // Const iface = new Interface(ConsensusAppContractInterface.abi);
+  const iface = new Interface(ConsensusAppContractInterface.abi);
 
-  // Const txData = iface.functions.validTransition.encode([
-  //   FromVariablePart,
-  //   ToVariablePart,
-  //   TurnNumB,
-  //   NumberOfParticipants,
-  // ]);
+  const txData = iface.functions.validTransition.encode([
+    fromVariablePart,
+    toVariablePart,
+    turnNumB,
+    numberOfParticipants,
+  ]);
 
-  // Const result = PureEVM.exec(
-  //   Uint8Array.from(Buffer.from(ConsensusAppArtifact.bytecode.substr(2), 'hex')),
-  //   Uint8Array.from(Buffer.from(txData.substr(2), 'hex'))
-  // );
+  const result = PureEVM.exec(
+    Uint8Array.from(Buffer.from(ConsensusAppArtifact.bytecode.substr(2), 'hex')),
+    Uint8Array.from(Buffer.from(txData.substr(2), 'hex'))
+  );
 
-  // Return defaultAbiCoder.decode(['bool'], result)[0] as boolean;
+  return defaultAbiCoder.decode(['bool'], result)[0] as boolean;
 }
