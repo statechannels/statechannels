@@ -20,7 +20,7 @@ import { bigNumberify, BigNumber } from 'ethers/utils';
 const getGameState = (state: any): ls.GameState => state.game;
 const isPlayersTurnNext = (
   localState: ls.LocalState,
-  channelState?: ChannelState
+  channelState: ChannelState | null
 ): channelState is ChannelState => {
   if (!('player' in localState) || !channelState) {
     return false;

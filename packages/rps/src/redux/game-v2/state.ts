@@ -3,7 +3,7 @@ import { BigNumber } from 'ethers/utils';
 
 export interface GameState {
   localState: LocalState;
-  channelState?: ChannelState;
+  channelState: ChannelState | null;
 }
 
 export type LocalStateWithPlayer =

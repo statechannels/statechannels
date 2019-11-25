@@ -15,25 +15,27 @@ export interface ChannelState<T = AppData> {
   appData: T;
 }
 
-export const isClosed = (state?: ChannelState): state is ChannelState =>
+export type MaybeChannelState = ChannelState | null;
+
+export const isClosed = (state: MaybeChannelState): state is ChannelState =>
   (state && state.status === 'closed') || false;
 
-export const isEmpty = (state?: ChannelState): state is undefined => !state;
+export const isEmpty = (state: MaybeChannelState): state is null => !state;
 
-export const inChannelProposed = (state?: ChannelState): state is ChannelState =>
+export const inChannelProposed = (state: MaybeChannelState): state is ChannelState =>
   (state && state.status === 'proposed') || false;
 
-export const isRunning = (state?: ChannelState): state is ChannelState =>
+export const isRunning = (state: MaybeChannelState): state is ChannelState =>
   (state && state.status === 'running') || false;
 
-export const inRoundProposed = (state?: ChannelState): state is ChannelState<RoundProposed> =>
+export const inRoundProposed = (state: MaybeChannelState): state is ChannelState<RoundProposed> =>
   (state && state.appData.type === 'roundProposed') || false;
 
-export const inRoundAccepted = (state?: ChannelState): state is ChannelState<RoundAccepted> =>
+export const inRoundAccepted = (state: MaybeChannelState): state is ChannelState<RoundAccepted> =>
   (state && state.appData.type === 'roundAccepted') || false;
 
-export const inReveal = (state?: ChannelState): state is ChannelState<Reveal> =>
+export const inReveal = (state: MaybeChannelState): state is ChannelState<Reveal> =>
   (state && state.appData.type === 'reveal') || false;
 
-export const inStart = (state?: ChannelState): state is ChannelState<Start> =>
+export const inStart = (state: MaybeChannelState): state is ChannelState<Start> =>
   (state && state.appData.type === 'start') || false;
