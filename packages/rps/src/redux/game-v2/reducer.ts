@@ -33,10 +33,7 @@ import { unreachable } from '../../utils/unreachable';
 
 const emptyLocalState: LocalState = { type: 'Empty' };
 
-const channelReducer: Reducer<ChannelState | undefined> = (
-  state: ChannelState | undefined = undefined,
-  action: UpdateChannelState
-) => {
+const channelReducer: Reducer<ChannelState> = (state: ChannelState, action: UpdateChannelState) => {
   if (action.type === 'UpdateChannelState') {
     return action.channelState;
   } else {
