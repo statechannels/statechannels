@@ -481,6 +481,9 @@ describe("message listener", () => {
         type: "WALLET.APPLICATION.OWN_STATE_RECEIVED",
         state: nextState
       });
+      expect(effects.put[1].payload.action).toMatchObject({
+        type: "WALLET.NEW_PROCESS.FUNDING_REQUESTED"
+      });
 
       expect(effects.fork[0].payload.args[0]).toMatchObject({
         type: "WALLET.JOIN_CHANNEL_RESPONSE",

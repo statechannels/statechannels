@@ -20,6 +20,8 @@ import {
 import {getProvider} from "../../utils/contract-utils";
 import {AddressZero} from "ethers/constants";
 import {validateRequest} from "../../json-rpc-validation/validator";
+import {fundingRequested} from "../protocols/actions";
+import {TwoPartyPlayerIndex} from "../types";
 
 export function* messageHandler(jsonRpcMessage: object, fromDomain: string) {
   const parsedMessage = jrs.parseObject(jsonRpcMessage);
@@ -84,7 +86,7 @@ function* handleJoinChannelMessage(payload: RequestObject) {
         processId: APPLICATION_PROCESS_ID
       })
     );
-
+    yield put(fundingRequested({channelId, playerIndex: TwoPartyPlayerIndex.B}));
     yield fork(messageSender, actions.joinChannelResponse({channelId, id}));
     const address = yield select(getAddress);
     const participants = yield select(getParticipants, channelId);
@@ -112,6 +114,15 @@ function* handlePushMessage(payload: RequestObject) {
           signedState: message.data.signedState
         })
       );
+
+      yield put(
+        fundingRequested({
+          channelId: getChannelId(message.data.signedState.state.channel),
+          playerIndex: TwoPartyPlayerIndex.A
+        })
+      );
+
+      yield fork(messageSender, actions.postMessageResponse({id}));
       break;
     case "Channel.Open":
       const {signedState, participants} = message.data;
