@@ -2,7 +2,7 @@ const rules = {
   'arrow-body-style': 'error',
   'arrow-parens': ['off', 'as-needed'],
   camelcase: 'error',
-  'capitalized-comments': 'error',
+  'capitalized-comments': ['error', 'always', {ignoreConsecutiveComments: true}],
   complexity: 'off',
   'constructor-super': 'error',
   curly: 'error',
@@ -19,7 +19,7 @@ const rules = {
     'string',
     'Boolean',
     'boolean',
-    'Undefined',
+    'Undefined'
     // 'undefined',
   ],
   'id-match': 'error',
@@ -59,9 +59,9 @@ const rules = {
         'profile',
         'profileEnd',
         'timeStamp',
-        'context',
-      ],
-    },
+        'context'
+      ]
+    }
   ],
   'no-debugger': 'error',
   'no-empty': 'error',
@@ -75,8 +75,8 @@ const rules = {
   'no-shadow': [
     'error',
     {
-      hoist: 'all',
-    },
+      hoist: 'all'
+    }
   ],
   'no-throw-literal': 'error',
   'no-trailing-spaces': 'off',
@@ -101,11 +101,11 @@ const rules = {
     {
       printWidth: 100,
       singleQuote: true,
-      tabWidth: 2,
-    },
+      tabWidth: 2
+    }
   ],
   'no-unused-vars': 'off',
-  'import/default': 'off',
+  'import/default': 'off'
 };
 
 const TSRules = {
@@ -118,8 +118,8 @@ const TSRules = {
   '@typescript-eslint/explicit-member-accessibility': [
     'off',
     {
-      accessibility: 'explicit',
-    },
+      accessibility: 'explicit'
+    }
   ],
   '@typescript-eslint/indent': 'off',
   '@typescript-eslint/interface-name-prefix': 'off',
@@ -129,13 +129,13 @@ const TSRules = {
     {
       multiline: {
         delimiter: 'none',
-        requireLast: true,
+        requireLast: true
       },
       singleline: {
         delimiter: 'semi',
-        requireLast: false,
-      },
-    },
+        requireLast: false
+      }
+    }
   ],
   '@typescript-eslint/member-ordering': 'error',
   '@typescript-eslint/no-empty-function': 'error',
@@ -159,7 +159,7 @@ const TSRules = {
   '@typescript-eslint/no-unused-vars': 'off',
   '@typescript-eslint/ban-ts-ignore': 'off',
   '@typescript-eslint/no-use-before-define': 'off'
-}
+};
 
 module.exports = {
   env: {
@@ -169,8 +169,8 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
     project: 'tsconfig.json',
-    ecmaVersion:  2018,
-    sourceType: 'module',
+    ecmaVersion: 2018,
+    sourceType: 'module'
   },
   plugins: ['@typescript-eslint', '@typescript-eslint/tslint', 'prettier'],
   extends: [
@@ -199,8 +199,8 @@ module.exports = {
         describe: 'readonly',
         beforeAll: 'readonly',
         beforeEach: 'readonly',
-        afterEach: 'readonly',
-      },
+        afterEach: 'readonly'
+      }
     }
-  ],
+  ]
 };

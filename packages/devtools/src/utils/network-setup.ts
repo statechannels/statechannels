@@ -1,25 +1,29 @@
-const privateKeyWithEth = "0xf2f48ee19680706196e2e339e5da3491186e0c4c5030670656b0e0164837257d";
+const privateKeyWithEth = '0xf2f48ee19680706196e2e339e5da3491186e0c4c5030670656b0e0164837257d';
 
 export function getGanacheProvider() {
-  const ethers = require("ethers");
+  // We should fix these requires
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const ethers = require('ethers');
   return new ethers.providers.JsonRpcProvider(
     `http://${process.env.GANACHE_HOST}:${process.env.GANACHE_PORT}`
   );
 }
 
 export function getPrivateKeyWithEth() {
-  // the following private key is funded with 1 million eth in the startGanache function
+  // The following private key is funded with 1 million eth in the startGanache function
   return privateKeyWithEth;
 }
 export function getWalletWithEthAndProvider() {
-  const ethers = require("ethers");
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const ethers = require('ethers');
   const ganacheProvider = new ethers.providers.JsonRpcProvider(
     `http://${process.env.GANACHE_HOST}:${process.env.GANACHE_PORT}`
   );
   return new ethers.Wallet(privateKeyWithEth, ganacheProvider);
 }
 export async function getNetworkId() {
-  const ethers = require("ethers");
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const ethers = require('ethers');
   const ganacheProvider = new ethers.providers.JsonRpcProvider(
     `http://${process.env.GANACHE_HOST}:${process.env.GANACHE_PORT}`
   );
@@ -29,14 +33,14 @@ export async function getNetworkId() {
 export function getNetworkName(networkId) {
   switch (networkId) {
     case 1:
-      return "live";
+      return 'live';
     case 3:
-      return "ropsten";
+      return 'ropsten';
     case 4:
-      return "rinkeby";
+      return 'rinkeby';
     case 42:
-      return "kovan";
+      return 'kovan';
     default:
-      return "development";
+      return 'development';
   }
 }
