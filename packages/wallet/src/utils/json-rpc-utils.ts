@@ -8,7 +8,7 @@ import {
 import {bigNumberify, randomBytes} from "ethers/utils";
 import {NETWORK_ID, CHALLENGE_DURATION} from "../constants";
 import {ChannelParticipant} from "../redux/channel-store";
-import {convertAddressToBytes32} from "./data-type-utils";
+import {convertAddressToBytes32, convertBytes32ToAddress} from "./data-type-utils";
 import {AddressZero} from "ethers/constants";
 
 export interface JsonRpcParticipant {
@@ -80,7 +80,10 @@ export function createJsonRpcAllocationsFromOutcome(outcome: Outcome): JsonRpcAl
     }
     return {
       token: o.assetHolderAddress,
-      allocationItems: o.allocation
+      allocationItems: o.allocation.map(a => ({
+        amount: a.amount,
+        destination: convertBytes32ToAddress(a.destination)
+      }))
     };
   });
 }

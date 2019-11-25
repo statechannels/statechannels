@@ -88,6 +88,7 @@ function* validate(message: any, action: OutgoingApiAction) {
       console.error(`Action\n${JSON.stringify(action)}`);
       console.error(`Message\n${JSON.stringify(message)}`);
       console.error(`Validation Errors\n${JSON.stringify(result.errors)}`);
+      throw new Error("Validation Failed");
     }
   }
 }
