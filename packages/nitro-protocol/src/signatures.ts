@@ -1,12 +1,4 @@
-import {Wallet} from 'ethers';
-import {
-  arrayify,
-  hashMessage,
-  Signature,
-  SigningKey,
-  splitSignature,
-  verifyMessage,
-} from 'ethers/utils';
+import {Wallet, utils} from 'ethers';
 import {hashChallengeMessage} from './contract/challenge';
 import {getChannelId} from './contract/channel';
 import {hashState, State} from './contract/state';
@@ -14,7 +6,7 @@ import {SignedState} from '.';
 
 export function getStateSignerAddress(signedState: SignedState): string {
   const stateHash = hashState(signedState.state);
-  const recoveredAddress = verifyMessage(arrayify(stateHash), signedState.signature);
+  const recoveredAddress = utils.verifyMessage(utils.arrayify(stateHash), signedState.signature);
   const {channel} = signedState.state;
   const {participants} = channel;
 
@@ -40,7 +32,10 @@ export function signState(state: State, privateKey: string): SignedState {
   return {state, signature};
 }
 
-export function signChallengeMessage(signedStates: SignedState[], privateKey: string): Signature {
+export function signChallengeMessage(
+  signedStates: SignedState[],
+  privateKey: string
+): utils.Signature {
   if (signedStates.length === 0) {
     throw new Error('At least one signed state must be provided');
   }
@@ -54,7 +49,7 @@ export function signChallengeMessage(signedStates: SignedState[], privateKey: st
   return signData(challengeHash, privateKey);
 }
 
-function signData(hashedData: string, privateKey: string): Signature {
-  const signingKey = new SigningKey(privateKey);
-  return splitSignature(signingKey.signDigest(hashMessage(arrayify(hashedData))));
+function signData(hashedData: string, privateKey: string): utils.Signature {
+  const signingKey = new utils.SigningKey(privateKey);
+  return utils.splitSignature(signingKey.signDigest(utils.hashMessage(utils.arrayify(hashedData))));
 }

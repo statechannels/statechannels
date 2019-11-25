@@ -13,6 +13,7 @@ import {
 } from "../../utils/json-rpc-utils";
 
 import {getProvider} from "../../utils/contract-utils";
+import {AddressZero} from "ethers/constants";
 import {validateRequest} from "../../json-rpc-validation/validator";
 
 export function* messageHandler(jsonRpcMessage: object, fromDomain: string) {
@@ -162,7 +163,8 @@ function* handleCreateChannelMessage(payload: RequestObject) {
   const addressMatches = participants[0].signingAddress !== address;
 
   const provider = yield call(getProvider);
-  const bytecode = yield call(provider.getCode, appDefinition);
+  const bytecode =
+    appDefinition !== AddressZero ? yield call(provider.getCode, appDefinition) : "0x0";
   const contractAtAddress = bytecode.length > 2;
 
   if (!addressMatches) {

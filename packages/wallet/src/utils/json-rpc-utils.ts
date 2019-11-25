@@ -8,6 +8,8 @@ import {
 import {bigNumberify, randomBytes} from "ethers/utils";
 import {NETWORK_ID, CHALLENGE_DURATION} from "../constants";
 import {ChannelParticipant} from "../redux/channel-store";
+import {convertAddressToBytes32} from "./data-type-utils";
+import {AddressZero} from "ethers/constants";
 
 export interface JsonRpcParticipant {
   participantId: string;
@@ -54,7 +56,16 @@ export interface JsonRpcUpdateChannelParams {
 
 function createAllocationOutcomeFromParams(params: JsonRpcAllocations): Outcome {
   return params.map(p => {
-    return {assetHolderAddress: p.token, allocation: p.allocationItems};
+    return {
+      // TODO: Need to look up the the asset holder for the token
+      assetHolderAddress: AddressZero,
+      allocation: p.allocationItems.map(a => {
+        return {
+          destination: convertAddressToBytes32(a.destination),
+          amount: a.amount
+        };
+      })
+    };
   });
 }
 
