@@ -47,17 +47,6 @@ const config = {
   },
 };
 
-interface Guards {
-  amFirst: any;
-  dataMatches: any;
-}
+export { config };
 
-const dummyGuard = context => true;
-const guards: Guards = {
-  amFirst: dummyGuard,
-  dataMatches: dummyGuard,
-};
-
-export { config, Guards };
-
-saveConfig(config, __dirname, { guards });
+saveConfig(config, __dirname, { guards: {} });

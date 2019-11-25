@@ -21,13 +21,6 @@ const config = {
     success: { type: 'final' },
   },
 };
-const guards = {
-  amFirst: function(context) {
-    return true;
-  },
-  dataMatches: function(context) {
-    return true;
-  },
-};
+const guards = {};
 const customActions = {};
 const machine = Machine(config, { guards, actions: customActions });
