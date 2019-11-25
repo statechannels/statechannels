@@ -45,7 +45,7 @@ function toRPSData(appData: AppData): RPSData {
   let positionType;
   switch (appData.type) {
     case 'start':
-      positionType = PositionType.Reveal;
+      positionType = PositionType.Start;
       break;
     case 'roundProposed':
       positionType = PositionType.RoundProposed;
