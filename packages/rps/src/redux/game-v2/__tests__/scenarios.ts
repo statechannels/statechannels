@@ -1,7 +1,6 @@
 import { bigNumberify } from 'ethers/utils';
 import { AppData, hashPreCommit } from '../../../core';
 import { ChannelState, Result, Weapon, ChannelStatus } from '../../../core';
-import { LocalState } from '../state';
 import * as s from '../state';
 
 export const channelId = '0xabc234';
@@ -57,6 +56,7 @@ export const channelStates = {
   ready: channelState(appData.start, 3, [5, 5], 'running'),
   concludeFromStart: channelState(appData.start, 4, [5, 5], 'closing'),
   roundProposed: channelState(appData.roundProposed, 4, [5, 5]),
+  concludeFromProposed: channelState(appData.roundProposed, 5, [5, 5]),
   roundAccepted: channelState(appData.roundAccepted, 5, [4, 6]),
   concludeFromAccepted: channelState(appData.start, 6, [4, 6], 'closing'),
   reveal: channelState(appData.reveal, 6, [6, 4]),
@@ -66,6 +66,8 @@ export const channelStates = {
   roundAcceptedInsufficientFundsB: channelState(appData.roundAccepted, 5, [8, 2]),
   revealInsufficientFundsB: channelState(appData.reveal, 6, [10, 0]),
   concludeInsufficientFundsB: channelState(appData.reveal, 7, [10, 0]),
+
+  closed: channelState(appData.start, 8, [10, 0], 'closed'),
 };
 
 const propsA = {
@@ -78,7 +80,7 @@ const propsA = {
   theirWeapon: playerBWeapon,
 };
 
-export const localStatesA: Record<string, LocalState> = {
+export const localStatesA = {
   lobby: s.lobby(propsA),
   gameChosen: s.gameChosen(propsA, bAddress),
   chooseWeapon: s.chooseWeapon(propsA),
@@ -89,6 +91,7 @@ export const localStatesA: Record<string, LocalState> = {
   waitForRestart: s.waitForRestart(propsA),
   shuttingDown: s.shuttingDown(propsA, 'InsufficientFundsOpponent'),
   shuttingDownResign: s.shuttingDown(propsA, 'YouResigned'),
+  gameOverYouResigned: s.gameOver(propsA, 'YouResigned'),
 };
 
 const propsB = {
@@ -101,7 +104,7 @@ const propsB = {
   theirWeapon: playerAWeapon,
 };
 
-export const localStatesB: Record<string, LocalState> = {
+export const localStatesB = {
   lobby: s.lobby(propsB),
   waitingRoom: s.waitingRoom(propsB),
   opponentJoined: s.opponentJoined(propsB),
@@ -110,4 +113,6 @@ export const localStatesB: Record<string, LocalState> = {
   resultPlayAgain: s.resultPlayAgain(propsB, playerAWeapon, Result.YouLose),
   chooseWeapon2: s.chooseWeapon(propsB),
   shuttingDown: s.shuttingDown(propsB, 'InsufficientFundsYou'),
+  shuttingDownResign: s.shuttingDown(propsB, 'YouResigned'),
+  gameOverResign: s.gameOver(propsB, 'YouResigned'),
 };

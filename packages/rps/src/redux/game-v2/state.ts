@@ -3,13 +3,10 @@ import { BigNumber } from 'ethers/utils';
 
 export interface GameState {
   localState: LocalState;
-  channelState?: ChannelState;
+  channelState: ChannelState | null;
 }
 
-export type LocalState =
-  | Empty
-  | Lobby
-  | WaitingRoom
+export type LocalStateWithPlayer =
   | GameChosen
   | OpponentJoined
   | ChooseWeapon
@@ -19,6 +16,8 @@ export type LocalState =
   | WaitForRestart
   | ShuttingDown
   | GameOver;
+
+export type LocalState = Empty | Lobby | WaitingRoom | LocalStateWithPlayer;
 
 export interface Empty {
   type: 'Empty';
@@ -83,7 +82,11 @@ export interface WaitForRestart extends Playing {
   type: 'WaitForRestart';
 }
 
-type ShutDownReason = 'InsufficientFundsYou' | 'InsufficientFundsOpponent' | 'YouResigned';
+export type ShutDownReason =
+  | 'InsufficientFundsYou'
+  | 'InsufficientFundsOpponent'
+  | 'YouResigned'
+  | 'TheyResigned';
 export interface ShuttingDown extends Playing {
   type: 'ShuttingDown';
   reason: ShutDownReason;
@@ -91,6 +94,7 @@ export interface ShuttingDown extends Playing {
 
 export interface GameOver extends Playing {
   type: 'GameOver';
+  reason: ShutDownReason;
 }
 
 // Helpers
@@ -174,3 +178,15 @@ export const shuttingDown = <T extends Playing>(
   ...playing(state),
   reason,
 });
+
+export const gameOver = <T extends Playing>(state: T, reason: ShutDownReason): GameOver => ({
+  type: 'GameOver',
+  ...playing(state),
+  reason,
+});
+
+// Helpers
+// =======
+
+export const isPlayerA = (state: LocalStateWithPlayer): boolean => state.player === 'A';
+export const isPlayerB = (state: LocalStateWithPlayer): boolean => state.player === 'B';
