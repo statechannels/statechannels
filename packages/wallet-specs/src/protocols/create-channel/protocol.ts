@@ -18,6 +18,17 @@ const chooseNonce = {
     data: 'passChannelId',
     onDone: 'funding',
   },
+  on: {
+    CHANNEL_CLOSED: 'abort',
+  },
+};
+
+const abort = {
+  invoke: {
+    src: 'concludeChannel',
+    data: 'passChannelId',
+  },
+  onDone: 'success',
 };
 
 const funding = {
@@ -41,6 +52,7 @@ const config = {
   initial: 'chooseNonce',
   states: {
     chooseNonce,
+    abort,
     funding,
     postFundSetup,
     success: { type: 'final' },
