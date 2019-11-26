@@ -44,6 +44,7 @@ function RenderGame(props: GameProps) {
   switch (state.type) {
     case 'Empty':
       return <ProfileContainer />;
+    case 'NeedAddress':
     case 'Lobby':
     case 'CreatingOpenGame':
       return <LobbyContainer />;

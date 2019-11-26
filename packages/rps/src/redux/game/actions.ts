@@ -3,6 +3,7 @@ import { ShutDownReason } from './state';
 
 export type GameAction =
   | UpdateProfile
+  | GotAddressFromWallet
   | NewOpenGame
   | JoinOpenGame
   | GameJoined
@@ -20,6 +21,11 @@ export interface UpdateProfile {
   type: 'UpdateProfile';
   name: string;
   twitterHandle: string;
+}
+
+export interface GotAddressFromWallet {
+  type: 'GotAddressFromWallet';
+  address: string;
 }
 export interface UpdateChannelState {
   type: 'UpdateChannelState';
@@ -93,6 +99,11 @@ export const updateProfile = (name: string, twitterHandle: string): UpdateProfil
   type: 'UpdateProfile',
   name,
   twitterHandle,
+});
+
+export const gotAddressFromWallet = (address: string): GotAddressFromWallet => ({
+  type: 'GotAddressFromWallet',
+  address,
 });
 
 export const updateChannelState = (channelState: ChannelState): UpdateChannelState => ({

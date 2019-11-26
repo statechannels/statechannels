@@ -16,7 +16,13 @@ export type LocalStateWithPlayer =
   | ShuttingDown
   | GameOver;
 
-export type LocalState = Empty | Lobby | CreatingOpenGame | WaitingRoom | LocalStateWithPlayer;
+export type LocalState =
+  | Empty
+  | NeedAddress
+  | Lobby
+  | CreatingOpenGame
+  | WaitingRoom
+  | LocalStateWithPlayer;
 export type PlayingState =
   | GameChosen
   | OpponentJoined
@@ -32,6 +38,10 @@ export interface Empty {
   type: 'Empty';
 }
 
+export interface NeedAddress {
+  type: 'NeedAddress';
+  name: string;
+}
 export interface Lobby {
   type: 'Lobby';
   name: string;
@@ -120,6 +130,11 @@ export interface GameOver extends Playing {
 
 // Helpers
 // =======
+
+export const needAddress = <T extends Omit<NeedAddress, 'type'>>(state: T): NeedAddress => {
+  const { name } = state;
+  return { type: 'NeedAddress', name };
+};
 
 export const lobby = <T extends Omit<Lobby, 'type'>>(state: T): Lobby => {
   const { name, address } = state;

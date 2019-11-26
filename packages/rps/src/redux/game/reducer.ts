@@ -14,6 +14,7 @@ import {
   gameOver,
   GameState,
   creatingOpenGame,
+  needAddress,
 } from './state';
 import { Reducer, combineReducers } from 'redux';
 import {
@@ -32,6 +33,7 @@ import {
   UpdateProfile,
   CancelGame,
   NewOpenGame,
+  GotAddressFromWallet,
 } from './actions';
 import { ChannelState } from '../../core';
 import { unreachable } from '../../utils/unreachable';
@@ -54,8 +56,10 @@ const localReducer: Reducer<LocalState> = (
   action: GameAction
 ) => {
   switch (action.type) {
+    case 'GotAddressFromWallet':
+      return handleGotAddressFromWallet(state, action);
     case 'UpdateProfile':
-      return updateProfile(state, action);
+      return handleUpdateProfile(state, action);
     case 'NewOpenGame':
       return handleNewOpenGame(state, action);
     case 'JoinOpenGame':
@@ -90,11 +94,26 @@ export const gameReducer: Reducer<GameState> = combineReducers({
   channelState: channelReducer,
 });
 
-const updateProfile = (state: LocalState, action: UpdateProfile): LocalState => {
+const handleUpdateProfile = (state: LocalState, action: UpdateProfile): LocalState => {
+  if (state.type !== 'Empty') {
+    return state;
+  }
+  return needAddress({
+    ...state,
+    ...action,
+  });
+};
+
+const handleGotAddressFromWallet = (
+  state: LocalState,
+  action: GotAddressFromWallet
+): LocalState => {
+  if (state.type !== 'NeedAddress') {
+    return state;
+  }
   return lobby({
     ...state,
     ...action,
-    address: '0xTODO', // TODO get this from the wallet
   });
 };
 
@@ -107,7 +126,7 @@ const handleNewOpenGame = (state: LocalState, action: NewOpenGame): LocalState =
 };
 
 const handleJoinOpenGame = (state: LocalState, action: JoinOpenGame): LocalState => {
-  if (state.type === 'Empty') {
+  if (state.type === 'Empty' || state.type === 'NeedAddress') {
     return state;
   }
 
@@ -129,7 +148,7 @@ const handleGameJoined = (state: LocalState, action: GameJoined): LocalState => 
 };
 
 const handleCreateGame = (state: LocalState, action: CreateGame): LocalState => {
-  if (state.type === 'Empty') {
+  if (state.type === 'Empty' || state.type === 'NeedAddress') {
     return state;
   }
 
@@ -206,6 +225,7 @@ const handleStartRound = (state: LocalState, action: StartRound): LocalState => 
 const handleResign = (state: LocalState, action: Resign): LocalState => {
   if (
     state.type === 'Empty' ||
+    state.type === 'NeedAddress' ||
     state.type === 'Lobby' ||
     state.type === 'WaitingRoom' ||
     state.type === 'CreatingOpenGame'
@@ -218,6 +238,7 @@ const handleResign = (state: LocalState, action: Resign): LocalState => {
 const handleGameOver = (state: LocalState, action: GameOver): LocalState => {
   if (
     state.type === 'Empty' ||
+    state.type === 'NeedAddress' ||
     state.type === 'Lobby' ||
     state.type === 'WaitingRoom' ||
     state.type === 'CreatingOpenGame'
