@@ -60,7 +60,7 @@ export default function* openGameSaga() {
           myGameIsOnFirebase = true;
         }
       }
-    } else if (localState.type !== 'Empty') {
+    } else if (localState.type !== 'Empty' && localState.type !== 'NeedAddress') {
       const { address } = localState;
       if (myGameIsOnFirebase) {
         // if we don't have a wallet address, something's gone very wrong
