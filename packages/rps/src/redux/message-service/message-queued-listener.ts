@@ -4,11 +4,9 @@ import { reduxSagaFirebase } from '../../gateways/firebase';
 import { MessageQueuedNotification } from '../../utils/channel-client';
 import { RPSChannelClient } from '../../utils/rps-channel-client';
 
-export function* messageQueuedListener() {
-  const rpsChannelClient = new RPSChannelClient();
-
-  const subscribe = emit => rpsChannelClient.onMessageQueued(emit);
-  const channel = eventChannel(subscribe, buffers.fixed(10));
+export function* messageQueuedListener(client: RPSChannelClient) {
+  const subscribe = emit => client.onMessageQueued(emit);
+  const channel = eventChannel(subscribe, buffers.fixed(20));
 
   while (true) {
     const notification: MessageQueuedNotification = yield take(channel);
