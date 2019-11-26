@@ -13,6 +13,7 @@ import {channelFromStates} from "../../channel-store/channel-state/__tests__";
 import * as stateHelpers from "../../__tests__/state-helpers";
 import {AddressZero} from "ethers/constants";
 import {convertAddressToBytes32} from "../../../utils/data-type-utils";
+import {strategyApproved} from "../../../communication";
 
 describe("message listener", () => {
   const wallet = Wallet.createRandom();
@@ -146,6 +147,42 @@ describe("message listener", () => {
         type: "WALLET.APPLICATION.OPPONENT_STATE_RECEIVED",
         signedState
       });
+    });
+
+    it("handles a pushMessage with a relay action message", async () => {
+      const actionToRelay = strategyApproved({
+        strategy: "IndirectFundingStrategy",
+        processId: "id"
+      });
+      const pushMessage = {
+        jsonrpc: "2.0",
+        method: "PushMessage",
+        id: 1,
+        params: {
+          recipient: "user-a",
+          sender: "user-b",
+          data: actionToRelay
+        }
+      };
+
+      const {effects} = await expectSaga(messageHandler, pushMessage, "localhost")
+        .withState(initialState)
+        // Mock out the fork call so we don't actually try to post the message
+        .provide([
+          [matchers.fork.fn(messageSender), 0],
+          [matchers.select.selector(getAddress), asAddress],
+          [
+            matchers.call.fn(getProvider),
+            {
+              getCode: address => {
+                return "0x12345";
+              }
+            }
+          ]
+        ])
+        .run();
+
+      expect(effects.put[0].payload.action).toMatchObject(actionToRelay);
     });
   });
 
