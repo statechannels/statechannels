@@ -4,18 +4,16 @@ import GameFooter from '../components/GameFooter';
 import * as gameActions from '../redux/game/actions';
 
 import { SiteState } from '../redux/reducer';
-import { PlayingState, StateName } from '../redux/game/state';
-import { Player } from '../core/players';
+import { PlayingState, PlayingStateName } from '../redux/game-v2/state';
 
 function mapStateToProps(state: SiteState) {
-  const gameState = state.game.gameState as PlayingState;
-  const { player, turnNum } = gameState;
-  const isNotOurTurn = player === Player.PlayerA ? turnNum % 2 === 0 : turnNum % 2 !== 0;
-  const canChallenge =
-    gameState.name === StateName.WaitForRestingA ||
-    gameState.name === StateName.WaitForOpponentToPickWeaponA ||
-    gameState.name === StateName.WaitForOpponentToPickWeaponB;
-  const challengeOngoing = gameState.name === 'PICK_CHALLENGE_WEAPON';
+  const localState = state.game.localState as PlayingState;
+  const { player } = localState;
+  const turnNum = state.game.channelState ? Number(state.game.channelState.turnNum) : 0;
+  const isNotOurTurn = player === 'A' ? turnNum % 2 === 0 : turnNum % 2 !== 0;
+  const localStateName: PlayingStateName = localState.type;
+  const canChallenge = localStateName === 'ChooseWeapon'; // TODO revisit this
+  const challengeOngoing = localState.name === 'PICK_CHALLENGE_WEAPON';
   return {
     isNotOurTurn,
     canChallenge,

@@ -18,6 +18,16 @@ export type LocalStateWithPlayer =
   | GameOver;
 
 export type LocalState = Empty | Lobby | WaitingRoom | LocalStateWithPlayer;
+export type PlayingState =
+  | GameChosen
+  | OpponentJoined
+  | ChooseWeapon
+  | WeaponChosen
+  | WeaponAndSaltChosen
+  | ResultPlayAgain
+  | WaitForRestart
+  | ShuttingDown
+  | GameOver;
 
 export interface Empty {
   type: 'Empty';
@@ -80,6 +90,9 @@ export interface ResultPlayAgain extends Playing {
 
 export interface WaitForRestart extends Playing {
   type: 'WaitForRestart';
+  myWeapon: Weapon;
+  theirWeapon: Weapon;
+  result: Result;
 }
 
 export type ShutDownReason =
@@ -90,6 +103,9 @@ export type ShutDownReason =
 export interface ShuttingDown extends Playing {
   type: 'ShuttingDown';
   reason: ShutDownReason;
+  myWeapon?: Weapon;
+  theirWeapon?: Weapon;
+  result?: Result;
 }
 
 export interface GameOver extends Playing {
@@ -165,17 +181,29 @@ export const resultPlayAgain = <T extends Playing & { myWeapon: Weapon }>(
   result,
 });
 
-export const waitForRestart = <T extends Playing>(state: T): WaitForRestart => ({
+export const waitForRestart = <T extends Playing & { myWeapon: Weapon }>(
+  state: T,
+  theirWeapon: Weapon,
+  result: Result
+): WaitForRestart => ({
   type: 'WaitForRestart',
   ...playing(state),
+  myWeapon: state.myWeapon,
+  theirWeapon,
+  result,
 });
 
-export const shuttingDown = <T extends Playing>(
+export const shuttingDown = <T extends Playing & { myWeapon?: Weapon }>(
   state: T,
-  reason: ShutDownReason
+  reason: ShutDownReason,
+  theirWeapon?: Weapon,
+  result?: Result
 ): ShuttingDown => ({
   type: 'ShuttingDown',
   ...playing(state),
+  myWeapon: state.myWeapon,
+  theirWeapon,
+  result,
   reason,
 });
 
@@ -190,3 +218,6 @@ export const gameOver = <T extends Playing>(state: T, reason: ShutDownReason): G
 
 export const isPlayerA = (state: LocalStateWithPlayer): boolean => state.player === 'A';
 export const isPlayerB = (state: LocalStateWithPlayer): boolean => state.player === 'B';
+export type StateName = LocalState['type'];
+
+export type PlayingStateName = PlayingState['type'];

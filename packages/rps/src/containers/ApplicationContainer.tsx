@@ -4,17 +4,16 @@ import { connect } from 'react-redux';
 import { SiteState } from '../redux/reducer';
 import GameContainer from './GameContainer';
 import LobbyContainer from './LobbyContainer';
-import * as gameStates from '../redux/game/state';
+import * as gameStates from '../redux/game-v2/state';
 
 interface ApplicationProps {
   gameState: gameStates.GameState;
 }
 
 function Application(props: ApplicationProps) {
-  switch (props.gameState.name) {
+  switch (props.gameState.localState.type) {
     // lobby is special as we need access to the list of open challenges
-    case gameStates.StateName.Lobby:
-    case gameStates.StateName.CreatingOpenGame:
+    case 'Lobby':
       return <LobbyContainer />;
     default:
       return <GameContainer />;
@@ -22,7 +21,7 @@ function Application(props: ApplicationProps) {
 }
 
 const mapStateToProps = (state: SiteState): ApplicationProps => ({
-  gameState: state.game.gameState,
+  gameState: state.game,
 });
 
 export default connect(mapStateToProps)(Application);

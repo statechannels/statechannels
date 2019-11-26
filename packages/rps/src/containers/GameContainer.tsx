@@ -1,28 +1,29 @@
 import React, { Fragment } from 'react';
 import { connect } from 'react-redux';
 
-import { Weapon, Player } from '../core';
 import { SiteState } from '../redux/reducer';
-import * as gameActions from '../redux/game/actions';
+import { Weapon } from '../core';
+import * as gameActions from '../redux/game-v2/actions';
 
 import WaitingRoomPage from '../components/WaitingRoomPage';
-import ConfirmGamePage from '../components/ConfirmGamePage';
-import SelectWeaponPage from '../components/SelectWeaponPage';
-import WaitForOpponentToPickWeapon from '../components/WaitForOpponentToPickWeapon';
-import WeaponSelectedPage from '../components/WeaponSelectedPage'; // WaitForReveal, WaitForResting
-import PlayAgain from '../components/PlayAgain';
-import WaitForRestingA from '../components/WaitForRestingA';
-import WaitForResignationAcknowledgement from '../components/WaitForResignationAcknowledgement';
-import GameOverPage from '../components/GameOverPage'; // GameOver, OpponentResigned
-import GameProposedPage from '../components/GameProposedPage';
 import ProfileContainer from './ProfileContainer';
 
-import WaitForWallet from '../components/WaitForWallet'; // WaitForFunding, maybe others?
+import { LocalState, PlayingStateName } from '../redux/game-v2/state';
 
-import { GameState, StateName, PlayingState } from '../redux/game/state';
+import LobbyContainer from './LobbyContainer';
+import {
+  ProposeGamePage,
+  ConfirmGamePage,
+  SelectWeaponPage,
+  WeaponSelectedPage,
+  ResultPage,
+  GameOverPage,
+  WaitForResting,
+} from '../components';
+import { unreachable } from '../utils/unreachable';
 
 interface GameProps {
-  state: GameState;
+  state: LocalState;
   chooseWeapon: (move: Weapon) => void;
   playAgain: () => void;
   confirmGame: () => void;
@@ -38,103 +39,105 @@ function GameContainer(props: GameProps) {
 }
 
 function RenderGame(props: GameProps) {
-  const { state, chooseWeapon, playAgain, confirmGame, declineGame, conclude } = props;
-  const { player, turnNum } = state as PlayingState;
-  const ourTurn = player === Player.PlayerA ? turnNum % 2 !== 0 : turnNum % 2 === 0;
-  switch (state.name) {
-    case StateName.NoName:
-      return <ProfileContainer />;
-    case StateName.WaitingRoom:
-      return (
-        <WaitingRoomPage cancelOpenGame={props.cancelOpenGame} roundBuyIn={state.roundBuyIn} />
-      );
+  const { state } = props;
 
-    case StateName.WaitForGameConfirmationA:
-      return <GameProposedPage message="Waiting for opponent to confirm" />;
-    case StateName.ConfirmGameB:
+  switch (state.type) {
+    case 'Empty':
+      return <ProfileContainer />;
+    case 'Lobby':
+      return <LobbyContainer />;
+    case 'WaitingRoom':
+      return (
+        <WaitingRoomPage
+          cancelOpenGame={props.cancelOpenGame}
+          roundBuyIn={state.roundBuyIn.toString()}
+        />
+      );
+    case 'GameChosen':
+      return <ProposeGamePage message="Waiting for opponent to confirm" />;
+    case 'OpponentJoined':
       return (
         <ConfirmGamePage
-          confirmGame={confirmGame}
-          cancelGame={declineGame}
-          stake={state.roundBuyIn}
+          confirmGame={props.confirmGame}
+          cancelGame={props.declineGame}
+          stake={state.roundBuyIn.toString()}
           opponentName={state.opponentName}
         />
       );
-    case StateName.PickWeapon:
-    case StateName.PickChallengeWeapon:
-      return <SelectWeaponPage chooseWeapon={chooseWeapon} />;
-
-    case StateName.WaitForOpponentToPickWeaponA:
+    case 'ChooseWeapon':
+      return <SelectWeaponPage chooseWeapon={props.chooseWeapon} />;
+    case 'WeaponChosen':
+    case 'WeaponAndSaltChosen':
       return (
         <WeaponSelectedPage
           message="Waiting for your opponent to choose their move"
           yourWeapon={state.myWeapon}
         />
       );
-
-    case StateName.GameOver:
-    // TODO: We probably want a seperate message for when your opponent resigns
-    case StateName.OpponentResigned:
+    case 'ResultPlayAgain':
+      return (
+        <ResultPage
+          yourWeapon={state.myWeapon}
+          theirWeapon={state.theirWeapon}
+          result={state.result}
+          playAgain={props.playAgain}
+          shutDownReason={undefined}
+        />
+      );
+    case 'WaitForRestart':
+      return (
+        <WaitForResting
+          yourWeapon={state.myWeapon}
+          theirWeapon={state.theirWeapon}
+          result={state.result}
+          playAgain={props.playAgain}
+        />
+      );
+    case 'ShuttingDown':
+      return (
+        <ResultPage
+          yourWeapon={state.myWeapon}
+          theirWeapon={state.theirWeapon}
+          result={state.result}
+          playAgain={props.playAgain}
+          shutDownReason={state.reason}
+        />
+      );
+    case 'GameOver':
+      // const ourTurn = state.player === 'A' ? state.turnNum % 2 !== 0 : turnNum % 2 === 0;
+      const ourTurn = true; // TODO compute this properly
       return (
         <GameOverPage
-          visible={state.name === StateName.OpponentResigned || state.name === StateName.GameOver}
-          conclude={conclude}
+          visible={(state.type as PlayingStateName) === 'GameOver'}
+          conclude={props.conclude}
           ourTurn={ourTurn}
         />
       );
-    case StateName.WaitForOpponentToPickWeaponB:
-      return <WaitForOpponentToPickWeapon />;
-
-    case StateName.WaitForRevealB:
-      return (
-        <WeaponSelectedPage
-          message="Waiting for your opponent to choose their move"
-          yourWeapon={state.myWeapon}
-        />
-      );
-
-    case StateName.PlayAgain:
-    case StateName.ChallengePlayAgain:
-      return (
-        <PlayAgain
-          yourWeapon={state.myWeapon}
-          theirWeapon={state.theirWeapon}
-          result={state.result}
-          playAgain={playAgain}
-        />
-      );
-
-    case StateName.WaitForRestingA:
-      return (
-        <WaitForRestingA
-          yourWeapon={state.myWeapon}
-          theirWeapon={state.theirWeapon}
-          result={state.result}
-          playAgain={playAgain}
-        />
-      );
-    case StateName.WaitForResignationAcknowledgement:
-      return <WaitForResignationAcknowledgement />;
-    case StateName.WaitForFunding:
-      return <WaitForWallet reason={'Waiting for funding confirmation.'} />;
-    case StateName.WaitForWithdrawal:
-      return <WaitForWallet reason={'Waiting for funds withdrawal.'} />;
     default:
-      throw new Error(`View not created for ${state.name}`);
+      unreachable(state);
+      throw new Error(`View not created`);
   }
 }
 
 const mapStateToProps = (state: SiteState) => ({
-  state: state.game.gameState,
+  state: state.game.localState,
 });
 
 const mapDispatchToProps = {
   chooseWeapon: gameActions.chooseWeapon,
   playAgain: gameActions.playAgain,
-  confirmGame: gameActions.confirmGame,
-  declineGame: gameActions.declineGame,
-  createOpenGame: gameActions.createOpenGame,
-  cancelOpenGame: gameActions.cancelOpenGame,
+  confirmGame: () => {
+    /* */
+  }, // TODO create this action!
+  declineGame: () => {
+    /**/
+  }, // TODO create this action!
+  createOpenGame: () => {
+    /* */
+  }, // TODO wire up this action and fix type inconistencies
+  cancelOpenGame: {
+    /**/
+  }, // TODO create this action!
   conclude: gameActions.resign,
 };
 

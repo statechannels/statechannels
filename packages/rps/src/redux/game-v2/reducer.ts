@@ -11,6 +11,7 @@ import {
   waitingRoom,
   opponentJoined,
   gameOver,
+  GameState,
 } from './state';
 import { Reducer, combineReducers } from 'redux';
 import {
@@ -73,7 +74,7 @@ const localReducer: Reducer<LocalState> = (
   }
 };
 
-export const gameReducer = combineReducers({
+export const gameReducer: Reducer<GameState> = combineReducers({
   localState: localReducer,
   channelState: channelReducer,
 });
@@ -140,9 +141,9 @@ const handleResultArrived = (state: LocalState, action: ResultArrived): LocalSta
     case 'Ok':
       return resultPlayAgain(state, theirWeapon, result);
     case 'MyFundsTooLow':
-      return shuttingDown(state, 'InsufficientFundsYou');
+      return shuttingDown(state, 'InsufficientFundsYou', theirWeapon, result);
     case 'OpponentsFundsTooLow':
-      return shuttingDown(state, 'InsufficientFundsOpponent');
+      return shuttingDown(state, 'InsufficientFundsOpponent', theirWeapon, result);
     default:
       return state;
   }
@@ -152,7 +153,7 @@ const handlePlayAgain = (state: LocalState, action: PlayAgain): LocalState => {
   if (state.type !== 'ResultPlayAgain') {
     return state;
   }
-  return waitForRestart(state);
+  return waitForRestart(state, state.theirWeapon, state.result);
 };
 
 const handleStartRound = (state: LocalState, action: StartRound): LocalState => {
@@ -171,7 +172,7 @@ const handleResign = (state: LocalState, action: Resign): LocalState => {
   if (state.type === 'Empty' || state.type === 'Lobby' || state.type === 'WaitingRoom') {
     return state;
   }
-  return shuttingDown(state, 'YouResigned');
+  return shuttingDown({ ...state, myWeapon: undefined }, 'YouResigned');
 };
 
 const handleGameOver = (state: LocalState, action: GameOver): LocalState => {

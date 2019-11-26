@@ -1,53 +1,36 @@
 import React from 'react';
 import { mount } from 'enzyme';
-import * as scenarios from '../../core/test-scenarios';
 import GameContainer from '../GameContainer';
-import { waitForGameConfirmationA } from '../../redux/game/state';
 import configureStore from 'redux-mock-store';
 import GameProposed from '../../components/GameProposedPage';
+import { SiteState } from '../../redux/reducer';
+import { localStatesA } from '../../redux/game-v2/__tests__/scenarios';
 
-const {
-  channel,
-  destination,
-  roundBuyIn,
-  myName,
-  opponentName,
-  twitterHandle,
-  asAddress: myAddress,
-} = scenarios.standard;
-const { libraryAddress } = scenarios;
-const base = {
-  channel,
-  destination,
-  roundBuyIn,
-  myName,
-  opponentName,
-  twitterHandle,
-  myAddress,
-  libraryAddress,
-};
 const mockStore = configureStore();
 
 describe('GameContainer', () => {
   // skipping for the time being to avoid having to figure out how to test nested containers
-  it('should render GameProposed for state WaitForGameConfirmationA', () => {
-    const { preFundSetupA } = scenarios.standard;
-
-    const gameState = waitForGameConfirmationA({ ...base, ...preFundSetupA });
-
-    const initialState = {
-      game: { gameState },
-      rules: { visible: true },
-      login: { user: { displayName: 'Tom' } },
-      wallet: {
-        display: {
-          showWallet: false,
-          showWalletHeader: false,
-        },
+  it('should render GameProposed for state GameChosen', () => {
+    const initialState: SiteState = {
+      login: {
+        loading: false,
+        loggedIn: true,
+        user: null,
+        error: undefined,
       },
+      metamask: {
+        loading: false,
+        error: null,
+        success: true,
+      },
+      openGames: [],
       overlay: {
         rulesVisible: false,
         walletVisible: false,
+      },
+      game: {
+        localState: localStatesA.gameChosen,
+        channelState: null,
       },
     };
     const store = mockStore(initialState);
