@@ -50,12 +50,14 @@ export interface ChannelResult {
   turnNum: string;
 }
 
+type UnsubscribeFunction = () => void;
+
 // The message Payload is designed to be opaque to the app. However, it's useful
 // to be able to specify the Payload type for the FakeChannelClient, as we'll be
 // manipulating it within the client.
 export interface IChannelClient<Payload = any> {
-  onMessageQueued: (callback: (message: Message<Payload>) => void) => void;
-  onChannelUpdated: (callback: (result: ChannelResult) => void) => void;
+  onMessageQueued: (callback: (message: Message<Payload>) => void) => UnsubscribeFunction;
+  onChannelUpdated: (callback: (result: ChannelResult) => void) => UnsubscribeFunction;
   createChannel: (
     participants: Participant[],
     allocations: Allocation[],
@@ -82,16 +84,18 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
   protected events = new EventEmitter<EventsWithArgs>();
   protected latestState?: ChannelResult;
 
-  onMessageQueued(callback: (message: Message) => void) {
+  onMessageQueued(callback: (message: Message) => void): UnsubscribeFunction {
     this.events.on('MessageQueued', message => {
       callback(message);
     });
+    return () => this.events.removeListener('MessageQueued', callback);
   }
 
-  onChannelUpdated(callback: (result: ChannelResult) => void) {
+  onChannelUpdated(callback: (result: ChannelResult) => void): UnsubscribeFunction {
     this.events.on('ChannelUpdated', result => {
       callback(result);
     });
+    return () => this.events.removeListener('ChannelUpdated', callback);
   }
 
   async createChannel(

@@ -40,16 +40,16 @@ export class RPSChannelClient {
     await this.channelClient.getAddress();
   }
 
-  async onMessageQueued(callback: (message: Message) => void) {
-    await this.channelClient.onMessageQueued(callback);
+  onMessageQueued(callback: (message: Message) => void) {
+    return this.channelClient.onMessageQueued(callback);
   }
 
   // Accepts an rps-friendly callback, performs the necessary encoding, and subscribes to the channelClient with an appropriate, API-compliant callback
-  async onChannelUpdated(rpsCallback: (channelState: ChannelState) => any) {
+  onChannelUpdated(rpsCallback: (channelState: ChannelState) => any) {
     function callback(channelResult: ChannelResult): any {
       rpsCallback(convertToChannelState(channelResult));
     }
-    await this.channelClient.onChannelUpdated(callback);
+    return this.channelClient.onChannelUpdated(callback);
   }
 
   async joinChannel(channelId: string) {
