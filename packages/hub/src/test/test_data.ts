@@ -83,12 +83,12 @@ export const FUNDED_GUARANTOR_CHANNEL_ID = getChannelId(fundedGuarantorChannel);
 export const BEGINNING_APP_CHANNEL_ID = getChannelId(beginningAppPhaseChannel);
 export const ONGOING_APP_CHANNEL_ID = getChannelId(ongoingAppPhaseChannel);
 
-export const consensus_app_data2 = (n: number): ConsensusData => ({
+export const consensusAppData2 = (n: number): ConsensusData => ({
   furtherVotesRequired: n,
   proposedOutcome: allocationOutcome2
 });
 
-export const consensus_app_data3 = (n: number): ConsensusData => ({
+export const consensusAppData3 = (n: number): ConsensusData => ({
   furtherVotesRequired: n,
   proposedOutcome: allocationOutcome3
 });
@@ -99,37 +99,37 @@ const baseState = (turnNum: number) => ({
   challengeDuration: 1000,
   outcome: allocationOutcome2,
   appDefinition: DUMMY_RULES_ADDRESS,
-  appData: encodeConsensusData(consensus_app_data2(0))
+  appData: encodeConsensusData(consensusAppData2(0))
 });
 
 const baseState3 = (turnNum: number) => ({
   ...baseState(turnNum),
   outcome: allocationOutcome3,
-  appData: encodeConsensusData(consensus_app_data3(0))
+  appData: encodeConsensusData(consensusAppData3(0))
 });
 
-function pre_fund_setup(turnNum: number): State {
+function prefundSetup(turnNum: number): State {
   return {
     ...baseState(turnNum),
     channel: {...defaultChannel}
   };
 }
 
-export function pre_fund_setup_3(turnNum: number): State {
+export function prefundSetup3(turnNum: number): State {
   return {
     ...baseState3(turnNum),
     channel: {...defaultChannel3}
   };
 }
 
-function post_fund_setup(turnNum: number): State {
+function postfundSetup(turnNum: number): State {
   return {
     ...baseState(turnNum),
     channel: {...fundedChannel}
   };
 }
 
-export function post_fund_setup_3(turnNum: number): State {
+export function postfundSetup3(turnNum: number): State {
   return {
     ...baseState3(turnNum),
     channel: {...fundedChannel3}
@@ -140,19 +140,19 @@ function app(turnNum: number, channel: Channel): State {
   return {
     ...baseState(turnNum),
     channel,
-    appData: encodeConsensusData(consensus_app_data2((turnNum + 1) % channel.participants.length))
+    appData: encodeConsensusData(consensusAppData2((turnNum + 1) % channel.participants.length))
   };
 }
 
 export const stateConstructors = {
-  pre_fund_setup,
-  post_fund_setup,
+  prefundSetup,
+  postfundSetup,
   app,
-  pre_fund_setup_3,
-  post_fund_setup_3
+  prefundSetup3,
+  postfundSetup3
 };
 
-const base_response = {
+const baseResponse = {
   channel: {
     channelNonce: expect.any(String),
     participants: PARTICIPANTS,
@@ -164,7 +164,7 @@ const base_response = {
   isFinal: false
 };
 
-const base_response_3 = {
+const baseResponse3 = {
   channel: {
     channelNonce: expect.any(String),
     participants: PARTICIPANTS_3,
@@ -177,61 +177,61 @@ const base_response_3 = {
 };
 
 // Ledger Channel Manager Responses
-export const pre_fund_setup_1_response: State = {
-  ...base_response,
+export const prefundSetup1Response: State = {
+  ...baseResponse,
   turnNum: 1,
-  appData: encodeConsensusData(consensus_app_data2(0))
+  appData: encodeConsensusData(consensusAppData2(0))
 };
 
-export const pre_fund_setup_3_2_response: State = {
-  ...base_response_3,
+export const prefundSetup2Response3: State = {
+  ...baseResponse3,
   turnNum: 2,
-  appData: encodeConsensusData(consensus_app_data3(0))
+  appData: encodeConsensusData(consensusAppData3(0))
 };
 
-export const post_fund_setup_1_response: State = {
-  ...base_response,
+export const postfundSetup1Response: State = {
+  ...baseResponse,
   turnNum: 3,
-  appData: encodeConsensusData(consensus_app_data2(0)),
+  appData: encodeConsensusData(consensusAppData2(0)),
   channel: fundedChannel
 };
 
-export const post_fund_setup_3_2_response: State = {
-  ...base_response_3,
+export const postfundSetup2Response3: State = {
+  ...baseResponse3,
   turnNum: 5,
-  appData: encodeConsensusData(consensus_app_data3(0)),
+  appData: encodeConsensusData(consensusAppData3(0)),
   channel: fundedChannel3
 };
 
-export const app_1_response: State = {
-  ...base_response,
+export const app1Response: State = {
+  ...baseResponse,
   turnNum: 5,
   appData: encodeConsensusData({proposedOutcome: [], furtherVotesRequired: 0}),
   channel: beginningAppPhaseChannel
 };
 
 // Ledger Channel Manager input states
-export const created_pre_fund_setup_1: State = {
+export const createdPrefundSetup1: State = {
   channel: defaultChannel,
   turnNum: 1,
   outcome: allocationOutcome2,
-  appData: encodeConsensusData(consensus_app_data2(1)),
+  appData: encodeConsensusData(consensusAppData2(1)),
   isFinal: false,
   challengeDuration: 1000,
   appDefinition: DUMMY_RULES_ADDRESS
 };
 
-export const created_pre_fund_setup_3_2: State = {
+export const createdPrefundSetup2Participants3: State = {
   channel: defaultChannel3,
   turnNum: 2,
   outcome: allocationOutcome3,
-  appData: encodeConsensusData(consensus_app_data3(1)),
+  appData: encodeConsensusData(consensusAppData3(1)),
   isFinal: false,
   challengeDuration: 1000,
   appDefinition: DUMMY_RULES_ADDRESS
 };
 
-export const created_channel = {
+export const createdChannel = {
   id: expect.any(Number),
   participants: [{address: PARTICIPANT_1_ADDRESS}, {address: HUB_ADDRESS}],
   chainId: DUMMY_CHAIN_ID

@@ -4,9 +4,9 @@ import ChannelState from '../../models/channelState';
 
 export async function getCurrentState(theirState: State) {
   const {channel: stateChannel} = theirState;
-  const channel_id = getChannelId(stateChannel);
+  const channelId = getChannelId(stateChannel);
   const channel = await Channel.query()
-    .findOne({channel_id})
+    .findOne({channel_id: channelId})
     .select('id');
   if (!channel) {
     return;

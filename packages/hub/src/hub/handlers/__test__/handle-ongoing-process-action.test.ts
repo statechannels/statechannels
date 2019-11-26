@@ -7,7 +7,7 @@ import {handleOngoingProcessAction} from '../handle-ongoing-process-action';
 
 describe('handle-ongoing-process-action', () => {
   it('postfund signed states received', async () => {
-    const state: State = stateConstructors.post_fund_setup(2);
+    const state: State = stateConstructors.postfundSetup(2);
     const signedStatesReceivedAction: SignedStatesReceived = {
       type: 'WALLET.COMMON.SIGNED_STATES_RECEIVED',
       processId: '1234',
@@ -21,6 +21,6 @@ describe('handle-ongoing-process-action', () => {
     const states: State[] = messageReleayRequested[0].messagePayload.signedStates.map(
       signedState => signedState.state
     );
-    expect(states).toEqual([state, stateConstructors.post_fund_setup(3)]);
+    expect(states).toEqual([state, stateConstructors.postfundSetup(3)]);
   });
 });

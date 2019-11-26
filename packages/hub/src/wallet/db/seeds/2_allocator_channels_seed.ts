@@ -13,8 +13,8 @@ import {
   BEGINNING_APP_CHANNEL_ID,
   beginningAppPhaseChannel,
   channelObjectToModel,
-  consensus_app_data2,
-  consensus_app_data3,
+  consensusAppData2,
+  consensusAppData3,
   FUNDED_CHANNEL_ID,
   FUNDED_CHANNEL_ID_3,
   FUNDED_GUARANTOR_CHANNEL_ID,
@@ -47,7 +47,7 @@ function prefundSetupState(turnNum: number) {
     ...baseStateProperties,
     turnNum,
     outcome: outcomeObjectToModel(allocationOutcome2),
-    appData: encodeConsensusData(consensus_app_data2(2))
+    appData: encodeConsensusData(consensusAppData2(2))
   };
 }
 
@@ -57,7 +57,7 @@ function prefundSetupGuarantorState(turnNum: number) {
     turnNum,
     outcome: outcomeObjectToModel(guaranteeOutcome2),
     // todo: appData does not reflect the outcome above
-    appData: encodeConsensusData(consensus_app_data2(2))
+    appData: encodeConsensusData(consensusAppData2(2))
   };
 }
 
@@ -66,16 +66,16 @@ function prefundSetupState3(turnNum: number) {
     ...baseStateProperties,
     turnNum,
     outcome: outcomeObjectToModel(allocationOutcome3),
-    appData: encodeConsensusData(consensus_app_data3(3))
+    appData: encodeConsensusData(consensusAppData3(3))
   };
 }
 
-function postFundSetupState(turnNum: number) {
+function postfundSetupState(turnNum: number) {
   return {
     ...baseStateProperties,
     turnNum,
     outcome: outcomeObjectToModel(allocationOutcome2),
-    appData: encodeConsensusData(consensus_app_data2(0))
+    appData: encodeConsensusData(consensusAppData2(0))
   };
 }
 
@@ -84,7 +84,7 @@ function appState(turnNum: number) {
     ...baseStateProperties,
     turnNum,
     outcome: outcomeObjectToModel(allocationOutcome2),
-    appData: encodeConsensusData(consensus_app_data2(turnNum % 2))
+    appData: encodeConsensusData(consensusAppData2(turnNum % 2))
   };
 }
 
@@ -118,7 +118,7 @@ const fundedChannel3WithStates = {
 const beginningAppPhaseChannelWithStates = {
   ...channelObjectToModel(beginningAppPhaseChannel),
   channel_id: BEGINNING_APP_CHANNEL_ID,
-  states: [postFundSetupState(2), postFundSetupState(3)],
+  states: [postfundSetupState(2), postfundSetupState(3)],
   holdings: [{assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS, amount: holdings2}]
 };
 
@@ -129,7 +129,7 @@ const ongoingAppPhaseChannelWithStates = {
   holdings: [{assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS, amount: holdings2}]
 };
 
-const two_participant_channel_seeds = {
+const twoParticipantChannelSeeds = {
   unfundedChannelWithStates,
   fundedChannelWithStates,
   fundedGuarantorChannelWithStates,
@@ -137,10 +137,10 @@ const two_participant_channel_seeds = {
   ongoingAppPhaseChannelWithStates
 };
 
-const three_participant_channel_seeds = {fundedChannel3WithStates};
+const threeParticipantChannelSeeds = {fundedChannel3WithStates};
 
-const SEEDED_CHANNELS_2 = Object.keys(two_participant_channel_seeds).length;
-const SEEDED_CHANNELS_3 = Object.keys(three_participant_channel_seeds).length;
+const SEEDED_CHANNELS_2 = Object.keys(twoParticipantChannelSeeds).length;
+const SEEDED_CHANNELS_3 = Object.keys(threeParticipantChannelSeeds).length;
 
 const SEEDED_STATES_2 = SEEDED_CHANNELS_2 * 2;
 const SEEDED_STATES_3 = SEEDED_CHANNELS_3 * 3;
@@ -160,8 +160,8 @@ export const SEEDED_ALLOCATIONS = SEEDED_ALLOCATIONS_2 + SEEDED_ALLOCATIONS_3;
 export const SEEDED_PARTICIPANTS = SEEDED_PARTICIPANTS_2 + SEEDED_PARTICIPANTS_3;
 
 export const seeds = {
-  ...two_participant_channel_seeds,
-  ...three_participant_channel_seeds
+  ...twoParticipantChannelSeeds,
+  ...threeParticipantChannelSeeds
 };
 
 export function seed() {
@@ -173,5 +173,5 @@ export function seed() {
 }
 
 export const stateConstructors = {
-  postFundSetupState
+  postfundSetupState
 };
