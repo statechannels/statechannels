@@ -3,7 +3,7 @@ import {signState} from '@statechannels/nitro-protocol/lib/src/signatures';
 import {Signature} from 'ethers/utils';
 import {
   DUMMY_CHAIN_ID,
-  FUNDED_CHANNEL_NONCE,
+  FUNDED_NONCE,
   PARTICIPANT_1_PRIVATE_KEY,
   PARTICIPANT_2_PRIVATE_KEY,
   PARTICIPANTS
@@ -94,7 +94,7 @@ describe('updateLedgerChannel', () => {
       expect.assertions(1);
 
       pre_fund_setup_0.channel = {
-        channelNonce: FUNDED_CHANNEL_NONCE,
+        channelNonce: FUNDED_NONCE,
         participants: PARTICIPANTS,
         chainId: DUMMY_CHAIN_ID
       };
