@@ -1,13 +1,12 @@
 import { fork, take, select, cancel, call, apply } from 'redux-saga/effects';
 
-export const getGameState = (storeObj: any) => storeObj.game.gameState;
-// export const getWalletAddress = (storeObj: any) => storeObj.wallet.address;
+export const getLocalState = (storeObj: any) => storeObj.game.localState;
 
 import { default as firebase, reduxSagaFirebase } from '../../gateways/firebase';
 
 import * as actions from './actions';
 
-import { StateName, GameState } from '../game/state';
+import { LocalState } from '../game/state';
 import { bigNumberify } from 'ethers/utils';
 
 export default function* openGameSaga() {
@@ -19,10 +18,9 @@ export default function* openGameSaga() {
   while (true) {
     yield take('*');
 
-    const gameState: GameState = yield select(getGameState);
-    const address = gameState.myAddress;
+    const localState: LocalState = yield select(getLocalState);
 
-    if (gameState.name === StateName.Lobby) {
+    if (localState.type === 'Lobby') {
       // if we're in the lobby we need to sync openGames
       if (!openGameSyncerProcess || !openGameSyncerProcess.isRunning()) {
         openGameSyncerProcess = yield fork(openGameSyncer);
@@ -34,8 +32,9 @@ export default function* openGameSaga() {
       }
     }
 
-    if (gameState.name === StateName.WaitingRoom) {
+    if (localState.type === 'WaitingRoom') {
       // if we don't have a wallet address, something's gone very wrong
+      const { address } = localState;
       if (address) {
         const myOpenGameKey = `/challenges/${address}`;
 
@@ -45,8 +44,8 @@ export default function* openGameSaga() {
 
           const myOpenGame = {
             address,
-            name: gameState.myName,
-            stake: gameState.roundBuyIn.toString(),
+            name: localState.name,
+            stake: localState.roundBuyIn.toString(),
             createdAt: new Date().getTime(),
             isPublic: true,
           };
@@ -61,7 +60,8 @@ export default function* openGameSaga() {
           myGameIsOnFirebase = true;
         }
       }
-    } else {
+    } else if (localState.type !== 'Empty') {
+      const { address } = localState;
       if (myGameIsOnFirebase) {
         // if we don't have a wallet address, something's gone very wrong
         if (address) {
