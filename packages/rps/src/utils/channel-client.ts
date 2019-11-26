@@ -109,7 +109,7 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
       allocations,
       appDefinition,
       appData,
-      channelId: '0x0',
+      channelId: '0xabc234',
       turnNum: bigNumberify(0).toString(),
       status: 'proposed',
     };
@@ -148,7 +148,7 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
   async pushMessage(parameters: Message<ChannelResult>): Promise<PushMessageResult> {
     this.latestState = parameters.data;
 
-    // notify app
+    this.notifyApp(this.latestState);
 
     return Promise.resolve({ success: true });
   }
