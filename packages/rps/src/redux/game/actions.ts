@@ -3,6 +3,7 @@ import { ShutDownReason } from './state';
 
 export type GameAction =
   | UpdateProfile
+  | NewOpenGame
   | JoinOpenGame
   | GameJoined
   | CreateGame
@@ -25,6 +26,9 @@ export interface UpdateChannelState {
   channelState: ChannelState;
 }
 
+export interface NewOpenGame {
+  type: 'NewOpenGame';
+}
 export interface CreateGame {
   type: 'CreateGame';
   roundBuyIn: string;
@@ -94,6 +98,10 @@ export const updateProfile = (name: string, twitterHandle: string): UpdateProfil
 export const updateChannelState = (channelState: ChannelState): UpdateChannelState => ({
   type: 'UpdateChannelState',
   channelState,
+});
+
+export const newOpenGame = (): NewOpenGame => ({
+  type: 'NewOpenGame',
 });
 
 export const createGame = (roundBuyIn: string): CreateGame => ({

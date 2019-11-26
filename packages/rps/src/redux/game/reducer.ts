@@ -13,6 +13,7 @@ import {
   opponentJoined,
   gameOver,
   GameState,
+  creatingOpenGame,
 } from './state';
 import { Reducer, combineReducers } from 'redux';
 import {
@@ -30,6 +31,7 @@ import {
   GameOver,
   UpdateProfile,
   CancelGame,
+  NewOpenGame,
 } from './actions';
 import { ChannelState } from '../../core';
 import { unreachable } from '../../utils/unreachable';
@@ -54,6 +56,8 @@ const localReducer: Reducer<LocalState> = (
   switch (action.type) {
     case 'UpdateProfile':
       return updateProfile(state, action);
+    case 'NewOpenGame':
+      return handleNewOpenGame(state, action);
     case 'JoinOpenGame':
       return handleJoinOpenGame(state, action);
     case 'CreateGame':
@@ -92,6 +96,14 @@ const updateProfile = (state: LocalState, action: UpdateProfile): LocalState => 
     ...action,
     address: '0xTODO', // TODO get this from the wallet
   });
+};
+
+const handleNewOpenGame = (state: LocalState, action: NewOpenGame): LocalState => {
+  if (state.type !== 'Lobby') {
+    return state;
+  }
+
+  return creatingOpenGame(state);
 };
 
 const handleJoinOpenGame = (state: LocalState, action: JoinOpenGame): LocalState => {
