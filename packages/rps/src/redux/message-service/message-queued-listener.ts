@@ -7,7 +7,8 @@ import { RPSChannelClient } from '../../utils/rps-channel-client';
 export function* messageQueuedListener() {
   const rpsChannelClient = new RPSChannelClient();
 
-  const channel = eventChannel(rpsChannelClient.onMessageQueued, buffers.fixed(10));
+  const subscribe = emit => rpsChannelClient.onMessageQueued(emit);
+  const channel = eventChannel(subscribe, buffers.fixed(10));
 
   while (true) {
     const notification: MessageQueuedNotification = yield take(channel);

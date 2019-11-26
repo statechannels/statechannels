@@ -7,7 +7,8 @@ import { ChannelState } from '../../core';
 export function* channelUpdatedListener() {
   const rpsChannelClient = new RPSChannelClient();
 
-  const channel = eventChannel(rpsChannelClient.onChannelUpdated, buffers.fixed(10));
+  const subscribe = emit => rpsChannelClient.onChannelUpdated(emit);
+  const channel = eventChannel(subscribe, buffers.fixed(10));
 
   while (true) {
     const channelState: ChannelState = yield take(channel);
