@@ -91,7 +91,7 @@ export function decodeAppData(appDataBytes: string): AppData {
   )[0];
 
   const positionType = parameters[0];
-  const stake = parameters[1];
+  const stake = parameters[1].toString();
   const preCommit = parameters[2];
   const playerAWeapon = parameters[3];
   const playerBWeapon = parameters[4];
