@@ -3,6 +3,7 @@ import { ChannelState, Weapon, Result } from '../../core';
 import { ShutDownReason } from './state';
 
 export type GameAction =
+  | UpdateProfile
   | JoinOpenGame
   | GameJoined
   | CreateGame
@@ -14,6 +15,11 @@ export type GameAction =
   | Resign
   | GameOver;
 
+export interface UpdateProfile {
+  type: 'UpdateProfile';
+  name: string;
+  twitterHandle: string;
+}
 export interface UpdateChannelState {
   type: 'UpdateChannelState';
   channelState: ChannelState;
@@ -74,6 +80,12 @@ export interface GameOver {
 
 // Constructors
 // ============
+
+export const updateProfile = (name: string, twitterHandle: string): UpdateProfile => ({
+  type: 'UpdateProfile',
+  name,
+  twitterHandle,
+});
 
 export const updateChannelState = (channelState: ChannelState): UpdateChannelState => ({
   type: 'UpdateChannelState',

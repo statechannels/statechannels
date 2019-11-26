@@ -4,6 +4,7 @@ import {
   weaponAndSaltChosen,
   resultPlayAgain,
   LocalState,
+  lobby,
   waitForRestart,
   chooseWeapon,
   shuttingDown,
@@ -27,6 +28,7 @@ import {
   GameJoined,
   StartRound,
   GameOver,
+  UpdateProfile,
 } from './actions';
 import { ChannelState } from '../../core';
 import { unreachable } from '../../utils/unreachable';
@@ -49,6 +51,8 @@ const localReducer: Reducer<LocalState> = (
   action: GameAction
 ) => {
   switch (action.type) {
+    case 'UpdateProfile':
+      return updateProfile(state, action);
     case 'JoinOpenGame':
       return handleJoinOpenGame(state, action);
     case 'CreateGame':
@@ -78,6 +82,14 @@ export const gameReducer: Reducer<GameState> = combineReducers({
   localState: localReducer,
   channelState: channelReducer,
 });
+
+const updateProfile = (state: LocalState, action: UpdateProfile): LocalState => {
+  return lobby({
+    ...state,
+    ...action,
+    address: '0xTODO', // TODO get this from the wallet
+  });
+};
 
 const handleJoinOpenGame = (state: LocalState, action: JoinOpenGame): LocalState => {
   if (state.type === 'Empty') {
