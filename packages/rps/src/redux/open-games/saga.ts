@@ -30,6 +30,14 @@ export default function* openGameSaga() {
       if (openGameSyncerProcess) {
         yield cancel(openGameSyncerProcess);
       }
+      if (localState.type === 'GameChosen') {
+        const openGameKey = `/challenges/${localState.opponentAddress}`;
+        const taggedOpenGame = {
+          isPublic: false,
+          playerA: localState.address,
+        };
+        yield call(reduxSagaFirebase.database.patch, openGameKey, taggedOpenGame);
+      }
     }
 
     if (localState.type === 'WaitingRoom') {
@@ -48,6 +56,7 @@ export default function* openGameSaga() {
             stake: localState.roundBuyIn.toString(),
             createdAt: new Date().getTime(),
             isPublic: true,
+            playerA: '',
           };
 
           const disconnect = firebase
@@ -78,11 +87,12 @@ const openGameTransformer = dict => {
   if (!dict.value) {
     return [];
   }
-  return Object.keys(dict.value).map(key => {
+  const allGames = Object.keys(dict.value).map(key => {
     // Convert to a proper BN hex string
     dict.value[key].stake = bigNumberify(dict.value[key].stake).toHexString();
     return dict.value[key];
   });
+  return allGames.filter(game => game.isPublic);
 };
 
 function* openGameSyncer() {
