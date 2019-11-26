@@ -101,7 +101,7 @@ function* createChannel(localState: ls.GameChosen, client: RPSChannelClient) {
   const openingBalance = localState.roundBuyIn.mul(5);
   const startState: AppData = { type: 'start' };
   const newChannelState = yield call(
-    client.createChannel,
+    [client, 'createChannel'],
     localState.address,
     localState.opponentAddress,
     openingBalance.toString(),
@@ -112,7 +112,7 @@ function* createChannel(localState: ls.GameChosen, client: RPSChannelClient) {
 }
 
 function* joinChannel(channelState: ChannelState, client: RPSChannelClient) {
-  const preFundSetup1 = yield call(client.joinChannel, channelState.channelId);
+  const preFundSetup1 = yield call([client, 'joinChannel'], channelState.channelId);
   yield put(a.updateChannelState(preFundSetup1));
 }
 
@@ -137,7 +137,7 @@ function* generateSaltAndSendPropose(
   const roundProposed: AppData = { type: 'roundProposed', preCommit, stake };
 
   const updatedChannelState = yield call(
-    client.updateChannel,
+    [client, 'updateChannel'],
     channelId,
     aAddress,
     bAddress,
@@ -173,7 +173,7 @@ function* sendRoundAccepted(
   ];
 
   const newState = yield call(
-    client.updateChannel,
+    [client, 'updateChannel'],
     channelId,
     aAddress,
     bAddress,
@@ -210,7 +210,7 @@ function* calculateResultAndSendReveal(
   };
 
   const updatedChannelState = yield call(
-    client.updateChannel,
+    [client, 'updateChannel'],
     channelId,
     aAddress,
     bAddress,
@@ -239,7 +239,7 @@ function* calculateResultAndCloseChannelIfNoFunds(
   );
   yield put(a.resultArrived(theirWeapon, result, fundingSituation));
   if (fundingSituation !== 'Ok') {
-    const state = yield call(client.closeChannel, channelId);
+    const state = yield call([client, 'closeChannel'], channelId);
     yield put(a.updateChannelState(state));
   }
 }
@@ -247,13 +247,21 @@ function* calculateResultAndCloseChannelIfNoFunds(
 function* sendStartAndStartRound(channelState: ChannelState<Reveal>, client: RPSChannelClient) {
   const { aBal, bBal, channelId, bAddress, aAddress } = channelState;
   const start: AppData = { type: 'start' };
-  const state = yield call(client.updateChannel, channelId, aAddress, bAddress, aBal, bBal, start);
+  const state = yield call(
+    [client, 'updateChannel'],
+    channelId,
+    aAddress,
+    bAddress,
+    aBal,
+    bBal,
+    start
+  );
   yield put(a.updateChannelState(state));
   yield put(a.startRound());
 }
 
 function* closeChannel(channelState: ChannelState, client: RPSChannelClient) {
-  const closingChannelState = yield call(client.closeChannel, channelState.channelId);
+  const closingChannelState = yield call([client, 'closeChannel'], channelState.channelId);
   yield put(a.updateChannelState(closingChannelState));
 }
 
