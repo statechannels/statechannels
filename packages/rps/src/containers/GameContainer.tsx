@@ -108,7 +108,7 @@ function RenderGame(props: GameProps) {
       const ourTurn = true; // TODO compute this properly
       return (
         <GameOverPage
-          visible={(state.name as PlayingStateName) === 'GameOver'}
+          visible={(state.type as PlayingStateName) === 'GameOver'}
           conclude={props.conclude}
           ourTurn={ourTurn}
         />
