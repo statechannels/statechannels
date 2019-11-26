@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { SiteState } from '../redux/reducer';
 import GameContainer from './GameContainer';
 import LobbyContainer from './LobbyContainer';
-import * as gameStates from '../redux/game-v2/state';
+import * as gameStates from '../redux/game/state';
 
 interface ApplicationProps {
   gameState: gameStates.GameState;

@@ -3,12 +3,12 @@ import { connect } from 'react-redux';
 
 import { SiteState } from '../redux/reducer';
 import { Weapon } from '../core';
-import * as gameActions from '../redux/game-v2/actions';
+import * as gameActions from '../redux/game/actions';
 
 import WaitingRoomPage from '../components/WaitingRoomPage';
 import ProfileContainer from './ProfileContainer';
 
-import { LocalState, PlayingStateName } from '../redux/game-v2/state';
+import { LocalState, PlayingStateName } from '../redux/game/state';
 
 import LobbyContainer from './LobbyContainer';
 import {

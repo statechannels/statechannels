@@ -2,7 +2,7 @@ import React from 'react';
 import { storiesOf } from '@storybook/react';
 import SiteContainer from '../containers/SiteContainer';
 import { Provider } from 'react-redux';
-import * as states from '../redux/game-v2/state';
+import * as states from '../redux/game/state';
 import '../index.scss';
 import { SiteState } from '../redux/reducer';
 import HomePage from '../components/HomePage';
@@ -10,7 +10,7 @@ import LoadingPage from '../components/LoadingPage';
 import MetamaskErrorPage from '../components/MetamaskErrorPage';
 import { MetamaskErrorType } from '../redux/metamask/actions';
 import LoginErrorPage from '../components/LoginErrorPage';
-import { localStatesA, localStatesB, channelStates } from '../redux/game-v2/__tests__/scenarios';
+import { localStatesA, localStatesB, channelStates } from '../redux/game/__tests__/scenarios';
 import { ChannelState } from '../core';
 
 const fakeStore = state => ({
