@@ -42,6 +42,7 @@ export interface JoinOpenGame {
   type: 'JoinOpenGame';
   opponentName: string;
   opponentAddress: string;
+  channelNonce: number;
   roundBuyIn: string;
 }
 
@@ -120,11 +121,13 @@ export const chooseSalt = (salt: string): ChooseSalt => ({ type: 'ChooseSalt', s
 export const joinOpenGame = (
   opponentName: string,
   opponentAddress: string,
+  channelNonce: number,
   roundBuyIn: string
 ): JoinOpenGame => ({
   type: 'JoinOpenGame',
   opponentName,
   opponentAddress,
+  channelNonce,
   roundBuyIn,
 });
 
