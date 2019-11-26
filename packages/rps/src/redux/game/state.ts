@@ -1,5 +1,4 @@
 import { ChannelState, Result, Weapon } from '../../core';
-import { BigNumber } from 'ethers/utils';
 
 export interface GameState {
   localState: LocalState;
@@ -43,7 +42,7 @@ export interface WaitingRoom {
   type: 'WaitingRoom';
   name: string;
   address: string;
-  roundBuyIn: BigNumber;
+  roundBuyIn: string;
 }
 
 export interface Playing {
@@ -51,7 +50,7 @@ export interface Playing {
   name: string;
   address: string;
   opponentName: string;
-  roundBuyIn: BigNumber;
+  roundBuyIn: string;
 }
 
 export interface GameChosen extends Playing {

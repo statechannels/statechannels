@@ -1,4 +1,3 @@
-import { BigNumber } from 'ethers/utils';
 import { ChannelState, Weapon, Result } from '../../core';
 import { ShutDownReason } from './state';
 
@@ -39,7 +38,7 @@ export interface JoinOpenGame {
   type: 'JoinOpenGame';
   opponentName: string;
   opponentAddress: string;
-  roundBuyIn: BigNumber;
+  roundBuyIn: string;
 }
 
 export interface GameJoined {
@@ -113,7 +112,7 @@ export const chooseSalt = (salt: string): ChooseSalt => ({ type: 'ChooseSalt', s
 export const joinOpenGame = (
   opponentName: string,
   opponentAddress: string,
-  roundBuyIn: BigNumber
+  roundBuyIn: string
 ): JoinOpenGame => ({
   type: 'JoinOpenGame',
   opponentName,
