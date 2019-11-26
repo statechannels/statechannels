@@ -12,9 +12,8 @@ export const walletIframeLoaded = () => ({
 export type WalletIframeLoaded = ReturnType<typeof walletIframeLoaded>;
 
 export const INITIALIZE_WALLET_SUCCESS = 'LOGIN.INITIALIZE_WALLET_SUCCESS';
-export const initializeWalletSuccess = (address: string) => ({
+export const initializeWalletSuccess = () => ({
   type: INITIALIZE_WALLET_SUCCESS as typeof INITIALIZE_WALLET_SUCCESS,
-  address,
 });
 export type InitializeWalletSuccess = ReturnType<typeof initializeWalletSuccess>;
 

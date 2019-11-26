@@ -1,5 +1,4 @@
 import { call, fork, put, take, takeEvery, all } from 'redux-saga/effects';
-import { ethers } from 'ethers';
 import * as loginActions from './actions';
 import { reduxSagaFirebase } from '../../gateways/firebase';
 import metamaskSaga from '../metamask/saga';
@@ -44,8 +43,7 @@ function* loginStatusWatcherSaga() {
           )
         );
       } else {
-        const walletAddress = ethers.Wallet.createRandom().address; // TODO:WALLET_SCRUBBED_OUT hook into channelClient
-        yield put(loginActions.initializeWalletSuccess(walletAddress));
+        yield put(loginActions.initializeWalletSuccess());
         yield put(loginActions.loginSuccess(user, libraryAddress));
       }
     } else {
