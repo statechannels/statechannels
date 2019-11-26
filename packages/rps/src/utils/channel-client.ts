@@ -85,6 +85,11 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
   playerIndex: 0 | 1;
   protected events = new EventEmitter<EventsWithArgs>();
   protected latestState?: ChannelResult;
+  protected address: string;
+
+  constructor() {
+    this.address = Wallet.createRandom().address;
+  }
 
   onMessageQueued(callback: (message: Message) => void): UnsubscribeFunction {
     this.events.on('MessageQueued', message => {
@@ -172,8 +177,7 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
   }
 
   async getAddress() {
-    const address = Wallet.createRandom().address;
-    return Promise.resolve(address);
+    return Promise.resolve(this.address);
   }
 
   async closeChannel(channelId: string) {
@@ -195,7 +199,7 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
   }
 
   protected notifyOpponent(data: ChannelResult) {
-    const sender = 'sender';
+    const sender = this.address;
     const recipient = 'recipient';
     this.events.emit('MessageQueued', { sender, recipient, data });
   }
