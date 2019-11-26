@@ -10,8 +10,8 @@ const mapStateToProps = (state: SiteState) => ({
 });
 
 const mapDispatchToProps = {
-  createOpenGame: gameActions.createOpenGame,
-  cancelOpenGame: gameActions.cancelOpenGame,
+  createOpenGame: gameActions.createGame,
+  cancelOpenGame: gameActions.cancelGame,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(CreatingOpenGameModal);

@@ -29,6 +29,7 @@ import {
   StartRound,
   GameOver,
   UpdateProfile,
+  CancelGame,
 } from './actions';
 import { ChannelState } from '../../core';
 import { unreachable } from '../../utils/unreachable';
@@ -57,6 +58,8 @@ const localReducer: Reducer<LocalState> = (
       return handleJoinOpenGame(state, action);
     case 'CreateGame':
       return handleCreateGame(state, action);
+    case 'CancelGame':
+      return handleCancelGame(state, action);
     case 'GameJoined':
       return handleGameJoined(state, action);
     case 'ChooseWeapon':
@@ -122,6 +125,14 @@ const handleCreateGame = (state: LocalState, action: CreateGame): LocalState => 
   const { name, address } = state;
 
   return waitingRoom({ name, address, roundBuyIn });
+};
+
+const handleCancelGame = (state: LocalState, action: CancelGame): LocalState => {
+  if (state.type !== 'Lobby') {
+    return state;
+  }
+
+  return lobby(state);
 };
 
 const handleChooseWeapon = (state: LocalState, action: ChooseWeapon): LocalState => {

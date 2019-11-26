@@ -7,6 +7,7 @@ export type GameAction =
   | JoinOpenGame
   | GameJoined
   | CreateGame
+  | CancelGame
   | ChooseWeapon
   | ChooseSalt
   | ResultArrived
@@ -27,7 +28,11 @@ export interface UpdateChannelState {
 
 export interface CreateGame {
   type: 'CreateGame';
-  roundBuyIn: BigNumber;
+  roundBuyIn: string;
+}
+
+export interface CancelGame {
+  type: 'CancelGame';
 }
 
 export interface JoinOpenGame {
@@ -92,9 +97,13 @@ export const updateChannelState = (channelState: ChannelState): UpdateChannelSta
   channelState,
 });
 
-export const createGame = (roundBuyIn: BigNumber): CreateGame => ({
+export const createGame = (roundBuyIn: string): CreateGame => ({
   type: 'CreateGame',
   roundBuyIn,
+});
+
+export const cancelGame = (): CancelGame => ({
+  type: 'CancelGame',
 });
 
 export const chooseWeapon = (weapon: Weapon): ChooseWeapon => ({ type: 'ChooseWeapon', weapon });
