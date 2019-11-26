@@ -1,3 +1,4 @@
+import { Wallet } from 'ethers';
 import { BigNumberish, bigNumberify } from 'ethers/utils';
 import { EventEmitter } from 'eventemitter3';
 
@@ -171,7 +172,8 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
   }
 
   async getAddress() {
-    return Promise.resolve('0xdummy');
+    const address = Wallet.createRandom().address;
+    return Promise.resolve(address);
   }
 
   async closeChannel(channelId: string) {
