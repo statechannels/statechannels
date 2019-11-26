@@ -204,14 +204,24 @@ const handleStartRound = (state: LocalState, action: StartRound): LocalState => 
 };
 
 const handleResign = (state: LocalState, action: Resign): LocalState => {
-  if (state.type === 'Empty' || state.type === 'Lobby' || state.type === 'WaitingRoom') {
+  if (
+    state.type === 'Empty' ||
+    state.type === 'Lobby' ||
+    state.type === 'WaitingRoom' ||
+    state.type === 'CreatingOpenGame'
+  ) {
     return state;
   }
   return shuttingDown({ ...state, myWeapon: undefined }, 'YouResigned');
 };
 
 const handleGameOver = (state: LocalState, action: GameOver): LocalState => {
-  if (state.type === 'Empty' || state.type === 'Lobby' || state.type === 'WaitingRoom') {
+  if (
+    state.type === 'Empty' ||
+    state.type === 'Lobby' ||
+    state.type === 'WaitingRoom' ||
+    state.type === 'CreatingOpenGame'
+  ) {
     return state;
   }
   const { reason } = action;
