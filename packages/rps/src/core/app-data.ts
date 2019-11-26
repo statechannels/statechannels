@@ -1,5 +1,5 @@
 import { Weapon } from './weapons';
-import { BigNumber, defaultAbiCoder, bigNumberify, keccak256 } from 'ethers/utils';
+import { defaultAbiCoder, bigNumberify, keccak256 } from 'ethers/utils';
 import { HashZero } from 'ethers/constants';
 import { randomHex } from '../utils/randomHex';
 
@@ -11,7 +11,7 @@ export enum PositionType {
 }
 export interface RPSData {
   positionType: PositionType;
-  stake: BigNumber; // uint256
+  stake: string; // uint256
   preCommit: string; // bytes32
   playerAWeapon: Weapon;
   playerBWeapon: Weapon;
@@ -22,13 +22,13 @@ export interface Start {
 }
 export interface RoundProposed {
   type: 'roundProposed';
-  stake: BigNumber;
+  stake: string;
   preCommit: string;
 }
 
 export interface RoundAccepted {
   type: 'roundAccepted';
-  stake: BigNumber;
+  stake: string;
   preCommit: string;
   playerBWeapon: Weapon;
 }
@@ -59,7 +59,7 @@ function toRPSData(appData: AppData): RPSData {
   }
   const defaults: RPSData = {
     positionType,
-    stake: bigNumberify(0),
+    stake: bigNumberify(0).toString(),
     preCommit: HashZero,
     playerAWeapon: Weapon.Rock,
     playerBWeapon: Weapon.Rock,

@@ -15,7 +15,7 @@ import * as cs from '../../core/channel-state';
 import * as a from './actions';
 import * as ls from './state';
 import { randomHex } from '../../utils/randomHex';
-import { bigNumberify, BigNumber } from 'ethers/utils';
+import { bigNumberify } from 'ethers/utils';
 
 const getGameState = (state: any): ls.GameState => state.game;
 const isPlayersTurnNext = (
@@ -98,7 +98,9 @@ function* gameSagaRun(client: RPSChannelClient) {
 }
 
 function* createChannel(localState: ls.GameChosen, client: RPSChannelClient) {
-  const openingBalance = localState.roundBuyIn.mul(5);
+  const openingBalance = bigNumberify(localState.roundBuyIn)
+    .mul(5)
+    .toString();
   const startState: AppData = { type: 'start' };
   const newChannelState = yield call(
     [client, 'createChannel'],
@@ -193,13 +195,7 @@ function* calculateResultAndSendReveal(
   const { aBal, bBal, channelId, aAddress, bAddress } = channelState;
   const { playerBWeapon: theirWeapon, stake } = channelState.appData;
   const result = calculateResult(myWeapon, theirWeapon);
-  const [aBal2, bBal2] = updateAllocation(
-    result,
-    Player.PlayerA,
-    stake,
-    bigNumberify(aBal),
-    bigNumberify(bBal)
-  );
+  const [aBal2, bBal2] = updateAllocation(result, Player.PlayerA, stake, aBal, bBal);
   const fundingSituation = calculateFundingSituation(Player.PlayerA, aBal2, bBal2, stake);
 
   const reveal: AppData = {
@@ -231,12 +227,7 @@ function* calculateResultAndCloseChannelIfNoFunds(
   const { aBal, bBal, channelId } = channelState;
   const { myWeapon, roundBuyIn } = localState;
   const result = calculateResult(myWeapon, theirWeapon);
-  const fundingSituation = calculateFundingSituation(
-    Player.PlayerB,
-    bigNumberify(aBal),
-    bigNumberify(bBal),
-    bigNumberify(roundBuyIn)
-  );
+  const fundingSituation = calculateFundingSituation(Player.PlayerB, aBal, bBal, roundBuyIn);
   yield put(a.resultArrived(theirWeapon, result, fundingSituation));
   if (fundingSituation !== 'Ok') {
     const state = yield call([client, 'closeChannel'], channelId);
@@ -278,15 +269,15 @@ function* transitionToGameOver(localState: ls.LocalState, channelState: ChannelS
 
 const calculateFundingSituation = (
   player: Player,
-  aBal: BigNumber,
-  bBal: BigNumber,
-  stake: BigNumber
+  aBal: string,
+  bBal: string,
+  stake: string
 ): a.FundingSituation => {
   const [myBal, theirBal] = player === Player.PlayerA ? [aBal, bBal] : [bBal, aBal];
 
-  if (myBal.lt(stake)) {
+  if (bigNumberify(myBal).lt(bigNumberify(stake))) {
     return 'MyFundsTooLow';
-  } else if (theirBal.lt(stake)) {
+  } else if (bigNumberify(theirBal).lt(stake)) {
     return 'OpponentsFundsTooLow';
   } else {
     return 'Ok';
