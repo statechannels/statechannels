@@ -110,6 +110,24 @@ describe("Player A", () => {
         const playerBState = {...messageData.signedState.state, turnNum: 1};
         const signedPlayerBState = signState(playerBState, playerBFakeWallet.privateKey);
         expect(signedPlayerBState).to.not.equal(undefined);
+        const channelOpenedMessage = {
+          jsonrpc: "2.0",
+          id: 5,
+          method: "PushMessage",
+          params: {
+            recipient: "user-a",
+            sender: "user-b",
+            data: {type: "Channel.Joined", signedState: signedPlayerBState}
+          }
+        };
+        const promise = createParentPostMessagePromise(walletWindow, {id: 5});
+        walletWindow.postMessage(channelOpenedMessage, "*");
+        return promise;
+      })
+      .then(message => {
+        cy.get("button")
+          .contains("Fund Channel")
+          .click();
       });
   });
 });
