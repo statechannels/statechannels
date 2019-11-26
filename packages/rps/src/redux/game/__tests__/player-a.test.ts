@@ -2,7 +2,16 @@ import { expectSaga } from 'redux-saga-test-plan';
 import { combineReducers } from 'redux';
 import { gameReducer } from '../reducer';
 import { gameSaga } from '../saga';
-import { localStatesA, bName, bAddress, stake, channelStates, aWeapon, salt } from './scenarios';
+import {
+  localStatesA,
+  bName,
+  bAddress,
+  stake,
+  channelStates,
+  aWeapon,
+  salt,
+  channelNonce,
+} from './scenarios';
 import { joinOpenGame, chooseWeapon, updateChannelState, playAgain, resign } from '../actions';
 import { ChannelState } from '../../../core';
 import * as match from 'redux-saga-test-plan/matchers';
@@ -28,7 +37,7 @@ const gameState = (localState, channelState?: ChannelState) => ({
 describe('when joining an open game', () => {
   it('calls createChannel and transitions to GameChosen', async () => {
     const initialState = gameState(localStatesA.lobby);
-    const action = joinOpenGame(bName, bAddress, stake);
+    const action = joinOpenGame(bName, bAddress, channelNonce, stake);
     const state = channelStates.preFund0;
 
     const { storeState } = await expectSaga(gameSaga as any, client)
