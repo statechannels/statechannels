@@ -2,7 +2,7 @@ import ProposeGamePage from './GameProposedPage';
 import ConfirmGamePage from './ConfirmGamePage';
 import SelectWeaponPage from './SelectWeaponPage';
 import WeaponSelectedPage from './WeaponSelectedPage';
-import PlayAgain from './PlayAgain';
+import ResultPage from './ResultPage';
 import GameOverPage from './GameOverPage';
 import WaitForResting from './WaitForRestingA';
 
@@ -11,7 +11,7 @@ export {
   ConfirmGamePage,
   SelectWeaponPage,
   WeaponSelectedPage,
-  PlayAgain,
+  ResultPage,
   GameOverPage,
   WaitForResting,
 };

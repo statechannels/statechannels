@@ -16,7 +16,7 @@ import {
   ConfirmGamePage,
   SelectWeaponPage,
   WeaponSelectedPage,
-  PlayAgain,
+  ResultPage,
   GameOverPage,
   WaitForResting,
 } from '../components';
@@ -76,11 +76,12 @@ function RenderGame(props: GameProps) {
       );
     case 'ResultPlayAgain':
       return (
-        <PlayAgain
+        <ResultPage
           yourWeapon={state.myWeapon}
           theirWeapon={state.theirWeapon}
           result={state.result}
           playAgain={props.playAgain}
+          shutDownReason={undefined}
         />
       );
     case 'WaitForRestart':
@@ -93,8 +94,15 @@ function RenderGame(props: GameProps) {
         />
       );
     case 'ShuttingDown':
-      throw new Error(`View not created for ${state.type}`);
-
+      return (
+        <ResultPage
+          yourWeapon={state.myWeapon}
+          theirWeapon={state.theirWeapon}
+          result={state.result}
+          playAgain={props.playAgain}
+          shutDownReason={state.reason}
+        />
+      );
     case 'GameOver':
       // const ourTurn = state.player === 'A' ? state.turnNum % 2 !== 0 : turnNum % 2 === 0;
       const ourTurn = true; // TODO compute this properly

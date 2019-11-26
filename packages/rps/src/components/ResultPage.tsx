@@ -10,7 +10,7 @@ interface Props {
   yourWeapon: Weapon;
   theirWeapon: Weapon;
   result: Result;
-  message: string;
+  shutDownReason?: string;
   playAgain: () => void;
 }
 
@@ -31,7 +31,7 @@ export default class ResultPage extends React.PureComponent<Props> {
   }
 
   render() {
-    const { yourWeapon, theirWeapon, playAgain } = this.props;
+    const { yourWeapon, theirWeapon, playAgain, shutDownReason } = this.props;
 
     return (
       <GameLayout>
@@ -55,10 +55,12 @@ export default class ResultPage extends React.PureComponent<Props> {
               </div>
             </div>
           </div>
-
-          <Button className="cog-button" onClick={playAgain}>
-            Play again
-          </Button>
+          {shutDownReason}
+          {!shutDownReason && (
+            <Button className="cog-button" onClick={playAgain}>
+              Play again
+            </Button>
+          )}
         </div>
       </GameLayout>
     );

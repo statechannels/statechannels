@@ -28,7 +28,7 @@ import {
   StartRound,
   GameOver,
 } from './actions';
-import { ChannelState } from '../../core';
+import { ChannelState, Weapon, Result } from '../../core';
 import { unreachable } from '../../utils/unreachable';
 
 const emptyLocalState: LocalState = { type: 'Empty' };
@@ -141,9 +141,9 @@ const handleResultArrived = (state: LocalState, action: ResultArrived): LocalSta
     case 'Ok':
       return resultPlayAgain(state, theirWeapon, result);
     case 'MyFundsTooLow':
-      return shuttingDown(state, 'InsufficientFundsYou');
+      return shuttingDown(state, theirWeapon, result, 'InsufficientFundsYou');
     case 'OpponentsFundsTooLow':
-      return shuttingDown(state, 'InsufficientFundsOpponent');
+      return shuttingDown(state, theirWeapon, result, 'InsufficientFundsOpponent');
     default:
       return state;
   }
@@ -172,7 +172,12 @@ const handleResign = (state: LocalState, action: Resign): LocalState => {
   if (state.type === 'Empty' || state.type === 'Lobby' || state.type === 'WaitingRoom') {
     return state;
   }
-  return shuttingDown(state, 'YouResigned');
+  return shuttingDown(
+    { ...state, myWeapon: Weapon.Paper },
+    Weapon.Paper,
+    Result.Tie,
+    'YouResigned'
+  ); // TODO make these properties optional>?
 };
 
 const handleGameOver = (state: LocalState, action: GameOver): LocalState => {
