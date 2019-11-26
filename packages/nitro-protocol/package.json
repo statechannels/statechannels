@@ -86,7 +86,7 @@
     "prettier-plugin-solidity": "1.0.0-alpha.34",
     "pure-evm": "^0.1.2",
     "server-destroy": "1.0.1",
-    "solc": "0.5.11",
+    "solc": "0.5.13",
     "solidoc": "https://github.com/statechannels/solidoc.git",
     "truffle": "5.0.37",
     "ts-jest": "24.1.0",
