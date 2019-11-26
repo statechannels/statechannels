@@ -37,7 +37,7 @@ export class RPSChannelClient {
   }
 
   async getAddress() {
-    await this.channelClient.getAddress();
+    return this.channelClient.getAddress();
   }
 
   onMessageQueued(callback: (message: Message) => void) {

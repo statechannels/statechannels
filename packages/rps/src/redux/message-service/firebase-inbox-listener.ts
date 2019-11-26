@@ -3,9 +3,9 @@ import { buffers } from 'redux-saga';
 import { reduxSagaFirebase } from '../../gateways/firebase';
 import { RPSChannelClient } from '../../utils/rps-channel-client';
 
-export function* firebaseInboxListener() {
+export function* firebaseInboxListener(client: RPSChannelClient) {
   const rpsChannelClient = new RPSChannelClient();
-  const address = yield call([rpsChannelClient, 'getAddress']);
+  const address: string = yield call([client, 'getAddress']);
   const channel = yield call(
     reduxSagaFirebase.database.channel,
     `/messages/${address.toLowerCase()}`,

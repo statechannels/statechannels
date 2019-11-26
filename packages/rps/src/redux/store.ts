@@ -8,16 +8,18 @@ const sagaMiddleware = createSagaMiddleware();
 import loginSaga from './login/saga';
 import openGameSaga from './open-games/saga';
 import { firebaseInboxListener } from './message-service/firebase-inbox-listener';
+import { RPSChannelClient } from '../utils/rps-channel-client';
 
 const composeEnhancers = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const enhancers = composeEnhancers(applyMiddleware(sagaMiddleware));
 
 const store = createStore(reducer, enhancers);
+const client = new RPSChannelClient();
 
 function* rootSaga() {
   yield fork(loginSaga);
   yield fork(openGameSaga);
-  yield fork(firebaseInboxListener);
+  yield fork(firebaseInboxListener, client);
 }
 
 sagaMiddleware.run(rootSaga);
