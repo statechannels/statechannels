@@ -1,12 +1,11 @@
 import * as states from "./states";
 import * as helpers from "../reducer-helpers";
 
-import {SharedData, queueMessage} from "../../state";
+import {SharedData, queueApiMessage} from "../../state";
 import {ProtocolStateWithSharedData, makeLocator, EMPTY_LOCATOR} from "..";
 import {unreachable} from "../../../utils/reducer-utils";
 
-import {showWallet, hideWallet, sendFundingComplete} from "../reducer-helpers";
-import {fundingFailure} from "../../../magmo-wallet-client";
+import {showWallet, hideWallet} from "../reducer-helpers";
 import {EmbeddedProtocol} from "../../../communication";
 
 import * as ledgerFundingStates from "../ledger-funding/states";
@@ -40,7 +39,7 @@ import {
   FundingStrategyNegotiationAction
 } from "../funding-strategy-negotiation/actions";
 import * as fundingStrategyNegotiationStates from "../funding-strategy-negotiation/states";
-import {ProtocolAction} from "../../actions";
+import {ProtocolAction, apiNotImplemented} from "../../actions";
 
 export function initialize(
   sharedData: SharedData,
@@ -154,11 +153,11 @@ function handleFundingStrategyNegotiationComplete({
   sharedData: SharedData;
 }) {
   if (fundingStrategyNegotiationStates.isFailure(fundingStrategyNegotiationState)) {
-    const message = fundingFailure(targetChannelId, "FundingDeclined");
+    const message = apiNotImplemented({apiMethod: "FundingDeclined"});
 
     return {
       protocolState: states.failure({reason: "FundingStrategyNegotiationFailure"}),
-      sharedData: queueMessage(sharedData, message)
+      sharedData: queueApiMessage(sharedData, message)
     };
   } else {
     let advanceChannelState: advanceChannelStates.AdvanceChannelState;
@@ -336,7 +335,8 @@ function fundingSuccessAcknowledged(state: states.FundingState, sharedData: Shar
   if (state.type !== "Funding.WaitForSuccessConfirmation") {
     return {protocolState: state, sharedData};
   }
-  const updatedSharedData = sendFundingComplete(sharedData, state.targetChannelId);
+  const message = apiNotImplemented({apiMethod: "FundingComplete"});
+  const updatedSharedData = queueApiMessage(sharedData, message);
   return {protocolState: states.success({}), sharedData: hideWallet(updatedSharedData)};
 }
 

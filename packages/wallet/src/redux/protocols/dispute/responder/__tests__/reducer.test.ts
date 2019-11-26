@@ -3,10 +3,10 @@ import {initialize, responderReducer} from "../reducer";
 
 import * as states from "../states";
 import * as TransactionGenerator from "../../../../../utils/transaction-generator";
-import {SHOW_WALLET, HIDE_WALLET, CHALLENGE_COMPLETE} from "../../../../../magmo-wallet-client";
 import {itSendsThisDisplayEventType, itSendsThisMessage} from "../../../../__tests__/helpers";
 import {describeScenarioStep} from "../../../../__tests__/helpers";
 import {State} from "@statechannels/nitro-protocol";
+import {apiNotImplemented} from "../../../../actions";
 
 // Mocks
 const mockTransaction = {to: "0xabc"};
@@ -64,7 +64,7 @@ describe("RESPOND WITH EXISTING MOVE HAPPY-PATH", () => {
     const result = initialize(processId, channelId, expiryTime, sharedData, challengeState);
 
     itTransitionsTo(result, "Responding.WaitForApproval");
-    itSendsThisDisplayEventType(result.sharedData, SHOW_WALLET);
+    itSendsThisDisplayEventType(result.sharedData, "Show");
     itSetsChallengeState(result, challengeState);
   });
 
@@ -147,13 +147,13 @@ describe("REQUIRE RESPONSE HAPPY-PATH ", () => {
     const {state, action} = scenario.waitForApprovalRequiresResponse;
     const result = responderReducer(state, sharedData, action);
     itTransitionsTo(result, "Responding.WaitForResponse");
-    itSendsThisDisplayEventType(result.sharedData, HIDE_WALLET);
+    itSendsThisDisplayEventType(result.sharedData, "Hide");
   });
 
   describeScenarioStep(scenario.waitForResponse, () => {
     const {state, action, responseState} = scenario.waitForResponse;
     const result = responderReducer(state, sharedData, action);
-    itSendsThisDisplayEventType(result.sharedData, SHOW_WALLET);
+    itSendsThisDisplayEventType(result.sharedData, "Show");
     itTransitionsTo(result, "Responding.WaitForTransaction");
     itCallsRespondWithMoveWith(responseState);
   });
@@ -167,8 +167,8 @@ describe("REQUIRE RESPONSE HAPPY-PATH ", () => {
   describeScenarioStep(scenario.waitForAcknowledgement, () => {
     const {state, action} = scenario.waitForAcknowledgement;
     const result = responderReducer(state, sharedData, action);
-    itSendsThisDisplayEventType(result.sharedData, HIDE_WALLET);
-    itSendsThisMessage(result.sharedData, CHALLENGE_COMPLETE);
+    itSendsThisDisplayEventType(result.sharedData, "Hide");
+    itSendsThisMessage(result.sharedData, apiNotImplemented({apiMethod: "ChallengeComplete"}));
     itTransitionsTo(result, "Responding.Success");
   });
 });
@@ -192,15 +192,15 @@ describe("CHALLENGE EXPIRES AND CHANNEL not DEFUNDED", () => {
     const {state, action} = scenario.waitForResponse;
     const result = responderReducer(state, sharedData, action);
     itTransitionsTo(result, "Responding.AcknowledgeTimeout");
-    itSendsThisDisplayEventType(result.sharedData, SHOW_WALLET);
-    itSendsThisMessage(result.sharedData, "WALLET.CONCLUDE.OPPONENT");
+    itSendsThisDisplayEventType(result.sharedData, "Show");
+    itSendsThisMessage(result.sharedData, apiNotImplemented({apiMethod: "OpponentConcluded"}));
   });
 
   describeScenarioStep(scenario.acknowledgeTimeout, () => {
     const {state, action} = scenario.acknowledgeTimeout;
     const result = responderReducer(state, sharedData, action);
     itTransitionsTo(result, "Responding.Failure");
-    itSendsThisDisplayEventType(result.sharedData, HIDE_WALLET);
+    itSendsThisDisplayEventType(result.sharedData, "Hide");
   });
 });
 
@@ -223,7 +223,7 @@ describe("CHALLENGE EXPIRES when in WaitForTransaction", () => {
     const {state, action} = scenario.waitForTransaction;
     const result = responderReducer(state, sharedData, action);
     itTransitionsTo(result, "Responding.AcknowledgeTimeout");
-    itSendsThisMessage(result.sharedData, "WALLET.CONCLUDE.OPPONENT");
+    itSendsThisMessage(result.sharedData, apiNotImplemented({apiMethod: "OpponentConcluded"}));
   });
 });
 
@@ -235,6 +235,6 @@ describe("CHALLENGE EXPIRES when in WaitForApproval", () => {
     const {state, action} = scenario.waitForApprovalRespond;
     const result = responderReducer(state, sharedData, action);
     itTransitionsTo(result, "Responding.AcknowledgeTimeout");
-    itSendsThisMessage(result.sharedData, "WALLET.CONCLUDE.OPPONENT");
+    itSendsThisMessage(result.sharedData, apiNotImplemented({apiMethod: "OpponentConcluded"}));
   });
 });

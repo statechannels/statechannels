@@ -1,6 +1,6 @@
 import * as states from "../states";
 
-import {EMPTY_SHARED_DATA, setChannel} from "../../../state";
+import {setChannel} from "../../../state";
 import * as scenarios from "../../../__tests__/state-helpers";
 import {preFund, postFund} from "../../advance-channel/__tests__";
 import {preSuccess as ledgerFundingPreSuccess} from "../../ledger-funding/__tests__";
@@ -11,13 +11,14 @@ import {
 import {channelFromStates} from "../../../channel-store/channel-state/__tests__";
 import {twoThree} from "../../../__tests__/state-helpers";
 import {CONSENSUS_LIBRARY_ADDRESS} from "../../../../constants";
-import {PlayerIndex} from "../../../../magmo-wallet-client/wallet-instructions";
 import {prependToLocator} from "../..";
 import {EmbeddedProtocol} from "../../../../communication";
 import {ADVANCE_CHANNEL_PROTOCOL_LOCATOR} from "../../advance-channel/reducer";
 import _ from "lodash";
 import {StateType} from "../../advance-channel/states";
 import {encodeConsensusData} from "@statechannels/nitro-protocol";
+import {TwoPartyPlayerIndex} from "../../../types";
+import {createSharedDataFromParticipants} from "../../../__tests__/helpers";
 
 // ---------
 // Test data
@@ -52,7 +53,11 @@ const initializeArgs = {
   hubAddress,
   protocolLocator: ADVANCE_CHANNEL_PROTOCOL_LOCATOR
 };
-
+const participantSharedData = createSharedDataFromParticipants([
+  asAddress,
+  scenarios.bsAddress,
+  hubAddress
+]);
 const props = {
   targetChannelId,
   processId,
@@ -60,7 +65,7 @@ const props = {
   startingOutcome,
   participants,
   hubAddress,
-  ourIndex: PlayerIndex.A,
+  ourIndex: TwoPartyPlayerIndex.A,
   protocolLocator: [],
   ourAddress: asAddress
 };
@@ -134,7 +139,7 @@ export const happyPath = {
   ...props,
   initialize: {
     args: initializeArgs,
-    sharedData: setChannel(EMPTY_SHARED_DATA, appChannel)
+    sharedData: setChannel(participantSharedData, appChannel)
   },
   openJ: {
     state: scenarioStates.waitForJointChannel1,

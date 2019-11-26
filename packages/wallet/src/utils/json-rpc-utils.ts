@@ -10,6 +10,7 @@ import {NETWORK_ID, CHALLENGE_DURATION} from "../constants";
 import {ChannelParticipant} from "../redux/channel-store";
 import {convertAddressToBytes32, convertBytes32ToAddress} from "./data-type-utils";
 import {AddressZero} from "ethers/constants";
+import {RelayableAction} from "../communication";
 
 export interface JsonRpcParticipant {
   participantId: string;
@@ -50,7 +51,7 @@ interface ChannelJoined {
   type: "Channel.Joined";
   signedState: SignedState;
 }
-type WalletMessage = OpenChannel | ChannelJoined;
+type WalletMessage = OpenChannel | ChannelJoined | RelayableAction;
 
 export interface JsonRpcUpdateChannelParams {
   allocations: JsonRpcAllocations;

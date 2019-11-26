@@ -1,7 +1,7 @@
 import * as scenarios from "./scenarios";
 import {describeScenarioStep, itSendsThisDisplayEventType} from "../../../__tests__/helpers";
 import {closeLedgerChannelReducer, initialize} from "../reducer";
-import {HIDE_WALLET} from "../../../../magmo-wallet-client";
+
 import * as states from "../states";
 
 const itTransitionsTo = (
@@ -33,7 +33,7 @@ describe("happy path", () => {
     const result = closeLedgerChannelReducer(state, sharedData, action);
 
     itTransitionsTo(result, "CloseLedgerChannel.Success");
-    itSendsThisDisplayEventType(result.sharedData, HIDE_WALLET);
+    itSendsThisDisplayEventType(result.sharedData, "Hide");
   });
 });
 
@@ -50,7 +50,7 @@ describe("channel already concluded", () => {
     const result = closeLedgerChannelReducer(state, sharedData, action);
 
     itTransitionsTo(result, "CloseLedgerChannel.Success");
-    itSendsThisDisplayEventType(result.sharedData, HIDE_WALLET);
+    itSendsThisDisplayEventType(result.sharedData, "Hide");
   });
 });
 

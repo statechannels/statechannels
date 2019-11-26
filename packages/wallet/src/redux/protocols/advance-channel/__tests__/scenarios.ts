@@ -1,7 +1,7 @@
 import * as states from "../states";
 import {ThreePartyPlayerIndex as PlayerIndex} from "../../../types";
 
-import {EMPTY_SHARED_DATA, setChannels, SharedData} from "../../../state";
+import {setChannels, SharedData} from "../../../state";
 import {channelFromStates} from "../../../channel-store/channel-state/__tests__";
 import * as scenarios from "../../../__tests__/state-helpers";
 import {EmbeddedProtocol, signedStatesReceived} from "../../../../communication";
@@ -10,6 +10,7 @@ import {clearedToSend} from "../actions";
 import {bigNumberify} from "ethers/utils";
 import {CONSENSUS_LIBRARY_ADDRESS, CONSENSUS_LIBRARY_BYTECODE} from "../../../../constants";
 import {makeLocator} from "../..";
+import {createSharedDataFromParticipants} from "../../../__tests__/helpers";
 
 // ---------
 // Test data
@@ -55,6 +56,8 @@ const initializeArgs = {
   clearedToSend: true,
   protocolLocator: makeLocator(EmbeddedProtocol.AdvanceChannel)
 };
+
+const participantSharedData = createSharedDataFromParticipants([asAddress, bsAddress, hubAddress]);
 
 const props = {
   ...initializeArgs,
@@ -148,54 +151,54 @@ const notSafeToSendHub = states.notSafeToSend({
 // -------
 
 const emptySharedData = {
-  ...EMPTY_SHARED_DATA,
+  ...participantSharedData,
   bytecodeStorage: {[CONSENSUS_LIBRARY_ADDRESS]: CONSENSUS_LIBRARY_BYTECODE}
 };
-// const channelCreated = { ...EMPTY_SHARED_DATA };
-const aSentPreFundState = setChannels(EMPTY_SHARED_DATA, [
+// const channelCreated = { ...sharedData };
+const aSentPreFundState = setChannels(participantSharedData, [
   channelFromStates(states0, asAddress, asPrivateKey)
 ]);
 
-const bSentPreFundState = setChannels(EMPTY_SHARED_DATA, [
+const bSentPreFundState = setChannels(participantSharedData, [
   channelFromStates(states1, bsAddress, bsPrivateKey)
 ]);
 
-const bReceivedPreFundSetup = setChannels(EMPTY_SHARED_DATA, [
+const bReceivedPreFundSetup = setChannels(participantSharedData, [
   channelFromStates(states2, bsAddress, bsPrivateKey)
 ]);
 
-const hubSentPreFundState = setChannels(EMPTY_SHARED_DATA, [
+const hubSentPreFundState = setChannels(participantSharedData, [
   channelFromStates(states2, hubAddress, hubPrivateKey)
 ]);
 
-const aReceivedPrefundSetup = setChannels(EMPTY_SHARED_DATA, [
+const aReceivedPrefundSetup = setChannels(participantSharedData, [
   channelFromStates(states2, asAddress, asPrivateKey)
 ]);
-const aSentPostFundState = setChannels(EMPTY_SHARED_DATA, [
+const aSentPostFundState = setChannels(participantSharedData, [
   channelFromStates(states3, asAddress, asPrivateKey)
 ]);
 
-const bSentPostFundSetupState = setChannels(EMPTY_SHARED_DATA, [
+const bSentPostFundSetupState = setChannels(participantSharedData, [
   channelFromStates(states4, bsAddress, bsPrivateKey)
 ]);
 
 const allPostFundSetupsReceived = (playerIndex: PlayerIndex): SharedData => {
   const {address, privateKey} = scenarios.addressAndPrivateKeyLookup[playerIndex];
-  return setChannels(EMPTY_SHARED_DATA, [channelFromStates(states5, address, privateKey)]);
+  return setChannels(participantSharedData, [channelFromStates(states5, address, privateKey)]);
 };
 
 const aSentConclude = (playerIndex: PlayerIndex): SharedData => {
   const {address, privateKey} = scenarios.addressAndPrivateKeyLookup[playerIndex];
-  return setChannels(EMPTY_SHARED_DATA, [channelFromStates(states6, address, privateKey)]);
+  return setChannels(participantSharedData, [channelFromStates(states6, address, privateKey)]);
 };
 const bSentConclude = (playerIndex: PlayerIndex): SharedData => {
   const {address, privateKey} = scenarios.addressAndPrivateKeyLookup[playerIndex];
-  return setChannels(EMPTY_SHARED_DATA, [channelFromStates(states7, address, privateKey)]);
+  return setChannels(participantSharedData, [channelFromStates(states7, address, privateKey)]);
 };
 
 const allConcludesReceived = (playerIndex: PlayerIndex): SharedData => {
   const {address, privateKey} = scenarios.addressAndPrivateKeyLookup[playerIndex];
-  return setChannels(EMPTY_SHARED_DATA, [channelFromStates(states8, address, privateKey)]);
+  return setChannels(participantSharedData, [channelFromStates(states8, address, privateKey)]);
 };
 
 // -------

@@ -1,11 +1,8 @@
-import {fundingSuccess} from "../../magmo-wallet-client";
-
 import {accumulateSideEffects} from "../outbox";
-import {SharedData, queueMessage, getExistingChannel, checkAndStore} from "../state";
+import {SharedData, queueRelayableActionMessage, getExistingChannel, checkAndStore} from "../state";
 import * as selectors from "../selectors";
 import {TwoPartyPlayerIndex, ThreePartyPlayerIndex} from "../types";
-import * as magmoWalletClient from "../../magmo-wallet-client";
-import {nextParticipant, getLastState} from "../channel-store";
+import {getLastState, nextParticipant} from "../channel-store";
 
 import {ProtocolLocator} from "../../communication";
 import * as comms from "../../communication";
@@ -13,22 +10,14 @@ import {ourTurn as ourTurnOnChannel} from "../channel-store";
 import _ from "lodash";
 import {bigNumberify} from "ethers/utils";
 
-import {SignedState, State} from "@statechannels/nitro-protocol";
+import {SignedState} from "@statechannels/nitro-protocol";
 import {getAllocationOutcome} from "../../utils/outcome-utils";
-
-export function sendFundingComplete(sharedData: SharedData, appChannelId: string) {
-  const channelState = selectors.getOpenedChannelState(sharedData, appChannelId);
-  const s = getLastState(channelState);
-  if (s.turnNum !== 3) {
-    throw new Error(`Expected a post fund setup B state. Instead received ${JSON.stringify(s)}.`);
-  }
-  return queueMessage(sharedData, fundingSuccess(appChannelId, s));
-}
+import {apiNotImplemented} from "../actions";
 
 export function showWallet(sharedData: SharedData): SharedData {
   const newSharedData = {...sharedData};
   newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
-    displayOutbox: magmoWalletClient.showWallet()
+    displayOutbox: "Show"
   });
   return newSharedData;
 }
@@ -36,7 +25,7 @@ export function showWallet(sharedData: SharedData): SharedData {
 export function hideWallet(sharedData: SharedData): SharedData {
   const newSharedData = {...sharedData};
   newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
-    displayOutbox: magmoWalletClient.hideWallet()
+    displayOutbox: "Hide"
   });
   return newSharedData;
 }
@@ -44,26 +33,28 @@ export function hideWallet(sharedData: SharedData): SharedData {
 export function sendConcludeSuccess(sharedData: SharedData): SharedData {
   const newSharedData = {...sharedData};
   newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
-    messageOutbox: magmoWalletClient.concludeSuccess()
+    messageOutbox: apiNotImplemented({apiMethod: "ConcludeSuccess"})
     // TODO could rename this helper function, as it covers both ways of finalizing a channel
   });
   return newSharedData;
 }
 
 export function sendConcludeInstigated(sharedData: SharedData, channelId: string): SharedData {
-  const channel = getExistingChannel(sharedData, channelId);
-  const {participants, ourIndex} = channel;
-  const messageRelay = comms.sendConcludeInstigated(
-    nextParticipant(participants, ourIndex),
-    channelId
-  );
-  return queueMessage(sharedData, messageRelay);
+  const channelState = selectors.getChannelState(sharedData, channelId);
+  const fromParticipantId = channelState.participants[channelState.ourIndex].participantId;
+  // Assume a 2 participant channel
+  const toParticipantId = channelState.participants[1 - channelState.ourIndex].participantId;
+  if (!fromParticipantId || !toParticipantId) {
+    throw new Error("No participant id found");
+  }
+  const messageRelay = comms.concludeInstigated({channelId});
+  return queueRelayableActionMessage(sharedData, messageRelay, toParticipantId, fromParticipantId);
 }
 
 export function sendOpponentConcluded(sharedData: SharedData): SharedData {
   const newSharedData = {...sharedData};
   newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
-    messageOutbox: magmoWalletClient.opponentConcluded()
+    messageOutbox: apiNotImplemented({apiMethod: "OpponentConcluded"})
     // TODO could rename this helper function, as it covers both ways of finalizing a channel
   });
   return newSharedData;
@@ -77,13 +68,24 @@ export function sendStates(
 ): SharedData {
   const channel = getExistingChannel(sharedData, channelId);
   const {participants, ourIndex} = channel;
-  const messageRelay = comms.sendStatesReceived(
-    nextParticipant(participants, ourIndex),
-    processId,
-    channel.signedStates,
-    protocolLocator
+  // TODO: It's possible the current channel participants do not have the participant id defined
+  const toParticipantId = selectors.getParticipantIdForAddress(
+    sharedData,
+    nextParticipant(participants, ourIndex).signingAddress
   );
-  return queueMessage(sharedData, messageRelay);
+  const fromParticipantId = selectors.getParticipantIdForAddress(
+    sharedData,
+    channel.participants[ourIndex].signingAddress
+  );
+  if (!fromParticipantId || !toParticipantId) {
+    throw new Error("Could not send states, could not find participant ids");
+  }
+  const messageRelay = comms.signedStatesReceived({
+    processId,
+    signedStates: channel.signedStates,
+    protocolLocator
+  });
+  return queueRelayableActionMessage(sharedData, messageRelay, toParticipantId, fromParticipantId);
 }
 
 export function checkStates(
@@ -108,21 +110,18 @@ export function checkStates(
   return sharedData;
 }
 
-export function sendChallengeResponseRequested(
-  sharedData: SharedData,
-  channelId: string
-): SharedData {
+export function sendChallengeResponseRequested(sharedData: SharedData): SharedData {
   const newSharedData = {...sharedData};
   newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
-    messageOutbox: magmoWalletClient.challengeResponseRequested(channelId)
+    messageOutbox: apiNotImplemented({apiMethod: "ChallengeResponseRequested"})
   });
   return newSharedData;
 }
 
-export function sendChallengeStateReceived(sharedData: SharedData, state: State) {
+export function sendChallengeStateReceived(sharedData: SharedData) {
   const newSharedData = {...sharedData};
   newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
-    messageOutbox: magmoWalletClient.challengeStateReceived(state)
+    messageOutbox: apiNotImplemented({apiMethod: "ChallengeStateReceived"})
   });
   return newSharedData;
 }
@@ -131,18 +130,15 @@ export function sendChallengeStateReceived(sharedData: SharedData, state: State)
 export function sendChallengeComplete(sharedData: SharedData) {
   const newSharedData = {...sharedData};
   newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
-    messageOutbox: magmoWalletClient.challengeComplete()
+    messageOutbox: apiNotImplemented({apiMethod: "ChallengeComplete"})
   });
   return newSharedData;
 }
 
-export function sendConcludeFailure(
-  sharedData: SharedData,
-  reason: "Other" | "UserDeclined"
-): SharedData {
+export function sendConcludeFailure(sharedData: SharedData): SharedData {
   const newSharedData = {...sharedData};
   newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
-    messageOutbox: magmoWalletClient.concludeFailure(reason)
+    messageOutbox: apiNotImplemented({apiMethod: "ConcludeFailure"})
   });
   return newSharedData;
 }

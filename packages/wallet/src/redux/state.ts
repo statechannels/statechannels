@@ -22,10 +22,9 @@ import {
 import {Properties} from "./utils";
 import * as NewLedgerChannel from "./protocols/new-ledger-channel/states";
 import {accumulateSideEffects} from "./outbox";
-import {WalletEvent} from "../magmo-wallet-client";
 import {TransactionRequest} from "ethers/providers";
 import {AdjudicatorState} from "./adjudicator-state/state";
-import {ProcessProtocol, ProtocolLocator} from "../communication";
+import {ProcessProtocol, ProtocolLocator, RelayableAction} from "../communication";
 import {
   TerminalApplicationState,
   isTerminalApplicationState,
@@ -50,6 +49,7 @@ import {
 import {SignedState, State} from "@statechannels/nitro-protocol";
 import {CONSENSUS_LIBRARY_ADDRESS, CONSENSUS_LIBRARY_BYTECODE} from "../constants";
 import {getAppDefinitionBytecode} from "./selectors";
+import {relayActionWithMessage, OutgoingApiAction} from "./actions";
 
 export type WalletState = Initialized;
 
@@ -219,7 +219,21 @@ export function getExistingChannel(state: SharedData, channelId: string) {
   return state.channelStore[channelId];
 }
 
-export function queueMessage(state: SharedData, message: WalletEvent): SharedData {
+export function queueRelayableActionMessage(
+  state: SharedData,
+  action: RelayableAction,
+  toParticipantId: string,
+  fromParticipantId: string
+): SharedData {
+  const message = relayActionWithMessage({
+    actionToRelay: action,
+    toParticipantId,
+    fromParticipantId
+  });
+  return {...state, outboxState: queueMessageOutbox(state.outboxState, message)};
+}
+
+export function queueApiMessage(state: SharedData, message: OutgoingApiAction): SharedData {
   return {...state, outboxState: queueMessageOutbox(state.outboxState, message)};
 }
 

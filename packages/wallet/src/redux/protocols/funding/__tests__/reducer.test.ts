@@ -7,7 +7,7 @@ import {
   itSendsThisDisplayEventType,
   describeScenarioStep
 } from "../../../__tests__/helpers";
-import {FUNDING_SUCCESS, HIDE_WALLET} from "../../../../magmo-wallet-client";
+import {apiNotImplemented} from "../../../actions";
 
 describe("ledger funding", () => {
   const scenario = scenarios.ledgerFunding;
@@ -38,8 +38,8 @@ describe("ledger funding", () => {
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, "Funding.Success");
-    itSendsThisMessage(result, FUNDING_SUCCESS);
-    itSendsThisDisplayEventType(result, HIDE_WALLET);
+    itSendsThisMessage(result, apiNotImplemented({apiMethod: "FundingComplete"}));
+    itSendsThisDisplayEventType(result, "Hide");
   });
 });
 

@@ -17,7 +17,6 @@ import {
   ConsensusUpdateState
 } from "../consensus-update";
 import {bigNumberify} from "ethers/utils";
-import {PlayerIndex} from "../../../magmo-wallet-client/wallet-instructions";
 import {ProtocolLocator, EmbeddedProtocol} from "../../../communication";
 import {CONSENSUS_UPDATE_PROTOCOL_LOCATOR} from "../consensus-update/reducer";
 import {DirectFundingState} from "../direct-funding/states";
@@ -89,8 +88,8 @@ const restoreOrderAndAddBTopUpUpdateReducer: ProtocolReducer<states.LedgerTopUpS
   } else if (consensusUpdateState.type === "ConsensusUpdate.Success") {
     // If player B already has enough funds then skip to success
     const playerBHasEnoughFunds = bigNumberify(
-      getAllocationAmountForIndex(originalOutcome, PlayerIndex.B)
-    ).gte(getAllocationAmountForIndex(proposedOutcome, PlayerIndex.B));
+      getAllocationAmountForIndex(originalOutcome, TwoPartyPlayerIndex.B)
+    ).gte(getAllocationAmountForIndex(proposedOutcome, TwoPartyPlayerIndex.B));
     if (playerBHasEnoughFunds) {
       return {protocolState: states.success({}), sharedData: consensusUpdateSharedData};
     }

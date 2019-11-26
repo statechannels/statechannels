@@ -8,7 +8,6 @@ import {
 } from "../../../__tests__/helpers";
 import {concludingReducer} from "../reducer";
 import {concludeInstigated} from "../../../../communication";
-import {SHOW_WALLET, HIDE_WALLET} from "../../../../magmo-wallet-client";
 
 describe("Opponent Concluded Happy Path", () => {
   const scenario = scenarios.opponentConcludedHappyPath;
@@ -34,7 +33,7 @@ describe("Opponent Concluded Happy Path", () => {
     const {action, state, sharedData} = scenario.decideClosing;
     const result = concludingReducer(state, sharedData, action);
     itTransitionsTo(result, "Concluding.Success");
-    itSendsThisDisplayEventType(result.sharedData, HIDE_WALLET);
+    itSendsThisDisplayEventType(result.sharedData, "Hide");
   });
 });
 
@@ -48,7 +47,7 @@ describe("Player Concluded Happy Path", () => {
       result.sharedData,
       concludeInstigated({channelId: scenario.initialize.channelId})
     );
-    itSendsThisDisplayEventType(result.sharedData, SHOW_WALLET);
+    itSendsThisDisplayEventType(result.sharedData, "Show");
   });
 
   describeScenarioStep(scenario.waitForConclude, () => {
@@ -67,7 +66,7 @@ describe("Player Concluded Happy Path", () => {
     const {action, state, sharedData} = scenario.decideClosing;
     const result = concludingReducer(state, sharedData, action);
     itTransitionsTo(result, "Concluding.Success");
-    itSendsThisDisplayEventType(result.sharedData, HIDE_WALLET);
+    itSendsThisDisplayEventType(result.sharedData, "Hide");
   });
 });
 
@@ -81,7 +80,7 @@ describe("Player Closes Channel Happy Path", () => {
       result.sharedData,
       concludeInstigated({channelId: scenario.initialize.channelId})
     );
-    itSendsThisDisplayEventType(result.sharedData, SHOW_WALLET);
+    itSendsThisDisplayEventType(result.sharedData, "Show");
   });
 
   describeScenarioStep(scenario.waitForConclude, () => {
@@ -106,7 +105,7 @@ describe("Player Closes Channel Happy Path", () => {
     const {action, state, sharedData} = scenario.waitForLedgerClosing;
     const result = concludingReducer(state, sharedData, action);
     itTransitionsTo(result, "Concluding.Success");
-    itSendsThisDisplayEventType(result.sharedData, HIDE_WALLET);
+    itSendsThisDisplayEventType(result.sharedData, "Hide");
   });
 });
 
