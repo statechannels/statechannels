@@ -103,9 +103,9 @@ export type ShutDownReason =
 export interface ShuttingDown extends Playing {
   type: 'ShuttingDown';
   reason: ShutDownReason;
-  myWeapon: Weapon;
-  theirWeapon: Weapon;
-  result: Result;
+  myWeapon?: Weapon;
+  theirWeapon?: Weapon;
+  result?: Result;
 }
 
 export interface GameOver extends Playing {
@@ -193,11 +193,11 @@ export const waitForRestart = <T extends Playing & { myWeapon: Weapon }>(
   result,
 });
 
-export const shuttingDown = <T extends Playing & { myWeapon: Weapon }>(
+export const shuttingDown = <T extends Playing & { myWeapon?: Weapon }>(
   state: T,
-  theirWeapon: Weapon,
-  result: Result,
-  reason: ShutDownReason
+  reason: ShutDownReason,
+  theirWeapon?: Weapon,
+  result?: Result
 ): ShuttingDown => ({
   type: 'ShuttingDown',
   ...playing(state),
