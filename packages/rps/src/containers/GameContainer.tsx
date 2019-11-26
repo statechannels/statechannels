@@ -45,6 +45,7 @@ function RenderGame(props: GameProps) {
     case 'Empty':
       return <ProfileContainer />;
     case 'Lobby':
+    case 'CreatingOpenGame':
       return <LobbyContainer />;
     case 'WaitingRoom':
       return (
