@@ -1,7 +1,5 @@
-import { BigNumberish } from 'ethers/utils';
+import { BigNumberish, bigNumberify } from 'ethers/utils';
 import { EventEmitter } from 'eventemitter3';
-
-export type JsonRPCVersion = '2.0';
 
 export type ChannelStatus = 'proposed' | 'opening' | 'funding' | 'running' | 'closing' | 'closed';
 
@@ -29,10 +27,11 @@ export interface Allocation {
   allocationItems: AllocationItem[]; // A list of allocations (how much funds will each destination address get).
 }
 
-export interface Message {
+export interface Message<T = any> {
   recipient: string; // Identifier of user that the message should be relayed to
   sender: string; // Identifier of user that the message is from
-  data: string; // Message payload. Format defined by wallet and opaque to app.
+  data: T; // Message payload. Format defined by wallet and opaque to app.
+  // But useful to be able to specify, for the purposes of the fake-client
 }
 
 export interface Funds {
@@ -40,12 +39,6 @@ export interface Funds {
   amount: string;
 }
 
-export interface CreateChannelParameters {
-  participants: Participant[];
-  allocations: Allocation[];
-  appData: string;
-  appDefinition: string;
-}
 export interface ChannelResult {
   participants: Participant[];
   allocations: Allocation[];
@@ -53,16 +46,151 @@ export interface ChannelResult {
   appDefinition: string;
   channelId: string;
   status: ChannelStatus;
-  funding: Funds[];
-  turnNum: BigNumberish;
+  // funding: Funds[]; // do we even need this?
+  turnNum: string;
 }
 
-export interface UpdateChannelParameters {
-  participants: Participant[];
-  allocations: Allocation[];
-  appData: string;
+type UnsubscribeFunction = () => void;
+
+// The message Payload is designed to be opaque to the app. However, it's useful
+// to be able to specify the Payload type for the FakeChannelClient, as we'll be
+// manipulating it within the client.
+export interface IChannelClient<Payload = any> {
+  onMessageQueued: (callback: (message: Message<Payload>) => void) => UnsubscribeFunction;
+  onChannelUpdated: (callback: (result: ChannelResult) => void) => UnsubscribeFunction;
+  createChannel: (
+    participants: Participant[],
+    allocations: Allocation[],
+    appDefinition: string,
+    appData: string
+  ) => Promise<ChannelResult>;
+  joinChannel: (channelId: string) => Promise<ChannelResult>;
+  updateChannel: (
+    channelId: string,
+    participants: Participant[],
+    allocations: Allocation[],
+    appData: string
+  ) => Promise<ChannelResult>;
+  closeChannel: (channelId: string) => Promise<ChannelResult>;
+  pushMessage: (message: Message<Payload>) => Promise<PushMessageResult>;
+  getAddress: () => Promise<string>;
 }
 
+interface EventsWithArgs {
+  MessageQueued: [Message<ChannelResult>];
+  ChannelUpdated: [ChannelResult];
+}
+export class FakeChannelClient implements IChannelClient<ChannelResult> {
+  protected events = new EventEmitter<EventsWithArgs>();
+  protected latestState?: ChannelResult;
+
+  onMessageQueued(callback: (message: Message) => void): UnsubscribeFunction {
+    this.events.on('MessageQueued', message => {
+      callback(message);
+    });
+    return () => this.events.removeListener('MessageQueued', callback);
+  }
+
+  onChannelUpdated(callback: (result: ChannelResult) => void): UnsubscribeFunction {
+    this.events.on('ChannelUpdated', result => {
+      callback(result);
+    });
+    return () => this.events.removeListener('ChannelUpdated', callback);
+  }
+
+  async createChannel(
+    participants: Participant[],
+    allocations: Allocation[],
+    appDefinition: string,
+    appData: string
+  ): Promise<ChannelResult> {
+    this.latestState = {
+      participants,
+      allocations,
+      appDefinition,
+      appData,
+      channelId: '0xabc234',
+      turnNum: bigNumberify(0).toString(),
+      status: 'proposed',
+    };
+    this.notifyOpponent(this.latestState);
+
+    return Promise.resolve(this.latestState);
+  }
+
+  async joinChannel(channelId: string): Promise<ChannelResult> {
+    const latestState = this.findChannel(channelId);
+    // skip funding by setting the channel to 'running' the moment it is joined
+    // [assuming we're working with 2-participant channels for the time being]
+    this.latestState = { ...latestState, turnNum: bigNumberify(1).toString(), status: 'running' };
+    this.notifyOpponent(this.latestState);
+
+    return Promise.resolve(this.latestState);
+  }
+
+  async updateChannel(
+    channelId: string,
+    participants: Participant[],
+    allocations: Allocation[],
+    appData: string
+  ): Promise<ChannelResult> {
+    const latestState = this.findChannel(channelId);
+    const turnNum = bigNumberify(latestState.turnNum)
+      .add(1)
+      .toString();
+
+    this.latestState = { ...latestState, turnNum, participants, allocations, appData };
+    this.notifyOpponent(this.latestState);
+
+    return Promise.resolve(this.latestState);
+  }
+
+  async pushMessage(parameters: Message<ChannelResult>): Promise<PushMessageResult> {
+    this.latestState = parameters.data;
+
+    this.notifyApp(this.latestState);
+
+    return Promise.resolve({ success: true });
+  }
+
+  async getAddress() {
+    return Promise.resolve('0xdummy');
+  }
+
+  async closeChannel(channelId: string) {
+    const latestState = this.findChannel(channelId);
+    const turnNum = bigNumberify(latestState.turnNum)
+      .add(1)
+      .toString();
+
+    this.latestState = { ...latestState, turnNum, status: 'closing' };
+    this.notifyOpponent(this.latestState);
+
+    return Promise.resolve(this.latestState);
+  }
+
+  protected notifyOpponent(data: ChannelResult) {
+    const sender = 'sender';
+    const recipient = 'recipient';
+    this.events.emit('MessageQueued', { sender, recipient, data });
+  }
+
+  protected notifyApp(data: ChannelResult) {
+    this.events.emit('ChannelUpdated', data);
+  }
+
+  protected findChannel(channelId: string): ChannelResult {
+    if (!(this.latestState && this.latestState.channelId === channelId)) {
+      throw Error(`Channel does't exist with channelId '${channelId}'`);
+    }
+    return this.latestState;
+  }
+}
+
+// Json RPC stuff
+// will be relevant when we build the non-fake channel client
+
+export type JsonRPCVersion = '2.0';
 export interface JsonRPCNotification<Name, ParametersType> {
   jsonrpc: JsonRPCVersion;
   method: Name;
@@ -92,6 +220,20 @@ export interface JsonRPCErrorResponse<ErrorType extends JsonRPCError = JsonRPCEr
   jsonrpc: JsonRPCVersion;
   id: string;
   error: ErrorType;
+}
+
+interface CreateChannelParameters {
+  participants: Participant[];
+  allocations: Allocation[];
+  appDefinition: string;
+  appData: string;
+}
+
+interface UpdateChannelParameters {
+  channelId: string;
+  participants: Participant[];
+  allocations: Allocation[];
+  appData: string;
 }
 
 // Requests and Responses
@@ -124,13 +266,13 @@ export type PushMessageResponse = JsonRPCResponse<PushMessageResult>;
 export interface CloseChannelParameters {
   channelId: string;
 }
-
 export type CloseChannelRequest = JsonRPCRequest<'CloseChannel', CloseChannelParameters>;
 export type CloseChannelResponse = JsonRPCResponse<ChannelResult>;
 
 export type ChannelProposedNotification = JsonRPCNotification<'ChannelProposed', ChannelResult>;
 export type ChannelUpdatedNotification = JsonRPCNotification<'ChannelUpdated', ChannelResult>;
 export type ChannelClosingNotification = JsonRPCNotification<'ChannelClosed', ChannelResult>;
+
 export type MessageQueuedNotification = JsonRPCNotification<'MessageQueued', Message>;
 
 export type Notification =
@@ -140,7 +282,6 @@ export type Notification =
   | MessageQueuedNotification;
 
 export type NotificationName = Notification['method'];
-type NotificationParameters = Notification['params'];
 
 export type Request =
   | GetAddressRequest
@@ -149,9 +290,6 @@ export type Request =
   | UpdateChannelRequest
   | PushMessageRequest
   | CloseChannelRequest;
-
-type MethodName = Request['method'];
-type ActionParameters = Request['params'];
 
 export class ChannelClientError implements JsonRPCErrorResponse {
   jsonrpc: JsonRPCVersion = '2.0';
@@ -214,110 +352,3 @@ export const ErrorCodesToObjectsMap: { [key in ErrorCodes]: typeof ChannelClient
   [ErrorCodes.SIGNING_ADDRESS_NOT_FOUND]: SigningAddressNotFoundError,
   [ErrorCodes.UNSUPPORTED_TOKEN]: UnsupportedTokenError,
 };
-
-export class ChannelClient {
-  protected events = new EventEmitter();
-
-  onMessageQueued(callback: (notification: MessageQueuedNotification) => void) {
-    this.events.on('MessageQueued', notification => {
-      callback(notification);
-    });
-  }
-
-  onChannelUpdated(callback: (notification: ChannelUpdatedNotification) => void) {
-    this.events.on('ChannelUpdated', notification => {
-      callback(notification);
-    });
-  }
-
-  unSubscribe(notificationName: NotificationName): void {
-    this.events.removeAllListeners(notificationName);
-  }
-
-  async createChannel(parameters: CreateChannelParameters) {
-    await this.sendToWallet('CreateChannel', parameters);
-
-    await this.notifyChannelProposed({
-      ...parameters,
-      channelId: '0x0',
-      turnNum: 0,
-      status: 'opening',
-    } as ChannelResult);
-  }
-
-  async joinChannel(parameters: JoinChannelParameters) {
-    await this.sendToWallet('JoinChannel', parameters);
-
-    await this.notifyChannelUpdated({
-      ...parameters,
-      channelId: '0x0',
-      status: 'running',
-      turnNum: 1,
-    } as ChannelResult);
-  }
-
-  async updateChannel(parameters: UpdateChannelParameters) {
-    await this.sendToWallet('UpdateChannel', parameters);
-
-    await this.notifyChannelUpdated(parameters as ChannelResult);
-  }
-
-  async pushMessage(parameters: Message) {
-    await this.sendToWallet('PushMessage', parameters);
-  }
-
-  async getAddress() {
-    await this.sendToWallet('GetAddress', {});
-    return '0xdummy';
-  }
-
-  async closeChannel(parameters: CloseChannelParameters) {
-    await this.sendToWallet('CloseChannel', parameters);
-
-    await this.notifyChannelClosed({
-      ...parameters,
-      status: 'closing',
-      turnNum: 2,
-    } as ChannelResult);
-  }
-
-  protected async sendToWallet(methodName: MethodName, parameters: ActionParameters | {}) {
-    this.events.emit('message', {
-      jsonrpc: '2.0',
-      id: Date.now(),
-      method: methodName,
-      params: parameters,
-    });
-  }
-
-  protected async notifyApp(
-    notificationName: NotificationName,
-    parameters: NotificationParameters
-  ) {
-    this.events.emit('message', {
-      jsonrpc: '2.0',
-      method: notificationName,
-      params: parameters,
-    });
-  }
-
-  protected async reportErrorToApp(errorCode: ErrorCodes, id?: string) {
-    this.events.emit('message', new ErrorCodesToObjectsMap[errorCode](id || ''));
-  }
-
-  protected async notifyChannelUpdated(parameters: NotificationParameters) {
-    await this.notifyApp('ChannelUpdated', parameters);
-  }
-
-  protected async notifyChannelProposed(parameters: NotificationParameters) {
-    await this.notifyApp('ChannelProposed', parameters);
-  }
-
-  protected async notifyChannelClosed(parameters: NotificationParameters) {
-    await this.notifyApp('ChannelClosed', parameters);
-  }
-
-  protected async notifyMessageQueued(parameters: NotificationParameters) {
-    await this.notifyApp('MessageQueued', parameters);
-  }
-}

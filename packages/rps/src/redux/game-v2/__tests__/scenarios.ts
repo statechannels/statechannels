@@ -6,12 +6,12 @@ import * as s from '../state';
 export const channelId = '0xabc234';
 export const aName = 'Alice';
 export const bName = 'Bob';
-const aUserId = 'userA';
-const bUserId = 'userB';
+export const aBal = bigNumberify(5).toString();
+export const bBal = bigNumberify(5).toString();
 export const aAddress = '0x5409ED021D9299bf6814279A6A1411A7e866A631';
 export const bAddress = '0x6Ecbe1DB9EF729CBe972C83Fb886247691Fb6beb';
-const aDestination = aAddress;
-const bDestination = bAddress;
+const aUserId = aAddress;
+const bUserId = bAddress;
 export const stake = bigNumberify(1);
 const roundBuyIn = stake;
 export const aWeapon = Weapon.Rock;
@@ -21,7 +21,7 @@ const preCommit = hashPreCommit(aWeapon, salt);
 export const bWeapon = Weapon.Scissors;
 const playerBWeapon = bWeapon;
 
-const appData: Record<AppData['type'], AppData> = {
+export const appData: Record<AppData['type'], AppData> = {
   start: { type: 'start' },
   roundProposed: { type: 'roundProposed', stake, preCommit },
   roundAccepted: { type: 'roundAccepted', stake, preCommit, playerBWeapon },
@@ -40,8 +40,8 @@ function channelState(
     status,
     aUserId,
     bUserId,
-    aDestination,
-    bDestination,
+    aAddress,
+    bAddress,
     aBal: bigNumberify(balances[0]).toString(),
     bBal: bigNumberify(balances[1]).toString(),
     appData: appDataParam,
