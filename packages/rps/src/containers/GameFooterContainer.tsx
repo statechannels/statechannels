@@ -4,7 +4,7 @@ import GameFooter from '../components/GameFooter';
 import * as gameActions from '../redux/game/actions';
 
 import { SiteState } from '../redux/reducer';
-import { PlayingState, PlayingStateName } from '../redux/game-v2/state';
+import { PlayingState, PlayingStateName } from '../redux/game/state';
 
 function mapStateToProps(state: SiteState) {
   const localState = state.game.localState as PlayingState;
@@ -22,7 +22,9 @@ function mapStateToProps(state: SiteState) {
 }
 const mapDispatchToProps = {
   resign: gameActions.resign,
-  createBlockchainChallenge: gameActions.createChallenge,
+  createBlockchainChallenge: () => {
+    /* TODO */
+  },
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(GameFooter);

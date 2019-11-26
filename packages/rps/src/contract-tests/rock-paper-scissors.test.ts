@@ -1,5 +1,7 @@
 import { expectRevert } from '@statechannels/devtools';
+// @ts-ignore
 import NetworkContext from '@statechannels/ganache-deployer/ganache-network-context.json';
+// @ts-ignore
 import RockPaperScissorsArtifact from '../../build/contracts/RockPaperScissors.json';
 import * as ethers from 'ethers';
 import { Contract } from 'ethers';
@@ -111,7 +113,7 @@ describe('validTransition', () => {
 
       const fromAppData: RPSData = {
         positionType: PositionIndex[fromPositionType],
-        stake: bigNumberify(stake.from),
+        stake: bigNumberify(stake.from).toString(),
         preCommit,
         playerAWeapon: WeaponIndex[AWeapon],
         playerBWeapon: WeaponIndex[BWeapon],
@@ -119,7 +121,7 @@ describe('validTransition', () => {
       };
       const toAppData: RPSData = {
         positionType: PositionIndex[toPositionType],
-        stake: bigNumberify(stake.to),
+        stake: bigNumberify(stake.to).toString(),
         preCommit,
         playerAWeapon: WeaponIndex[AWeapon],
         playerBWeapon: WeaponIndex[BWeapon],

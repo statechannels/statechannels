@@ -1,362 +1,235 @@
-import { Result, Player } from '../../core';
-import { Weapon } from '../../core/rps-commitment';
-import { Channel } from 'fmg-core';
+import { ChannelState, Result, Weapon } from '../../core';
 
-// States of the form *A are player A only
-// States of the form *B are player B only
-// All other states are both players
-export enum StateName {
-  NoName = 'NO_NAME',
-  Lobby = 'Lobby',
-  CreatingOpenGame = 'CREATING_OPEN_GAME',
-  WaitingRoom = 'WaitingRoom',
-  WaitForGameConfirmationA = 'WAIT_FOR_GAME_CONFIRMATION_A',
-  ConfirmGameB = 'CONFIRM_GAME_B',
-  DeclineGame = 'DECLINE_GAME_B',
-  WaitForFunding = 'WAIT_FOR_FUNDING',
-  PickWeapon = 'PICK_WEAPON',
-  WaitForOpponentToPickWeaponA = 'WAIT_FOR_OPPONENT_TO_PICK_WEAPON_A',
-  WaitForOpponentToPickWeaponB = 'WAIT_FOR_OPPONENT_TO_PICK_WEAPON_B',
-  WaitForRevealB = 'WAIT_FOR_REVEAL_B',
-  WaitForRestingA = 'WAIT_FOR_RESTING_A',
-  PlayAgain = 'PLAY_AGAIN',
-  OpponentResigned = 'OPPONENT_RESIGNED',
-  WaitForResignationAcknowledgement = 'WAIT_FOR_RESIGNATION_ACKNOWLEDGEMENT',
-  GameOver = 'GAME_OVER',
-  WaitForWithdrawal = 'WAIT_FOR_WITHDRAWAL',
-  PickChallengeWeapon = 'PICK_CHALLENGE_WEAPON',
-  ChallengePlayAgain = 'CHALLENGE_PLAY_AGAIN',
+export interface GameState {
+  localState: LocalState;
+  channelState: ChannelState | null;
 }
 
-export interface NoName {
-  name: StateName.NoName;
-  libraryAddress: string;
-  myAddress: string;
-}
+export type LocalStateWithPlayer =
+  | GameChosen
+  | OpponentJoined
+  | ChooseWeapon
+  | WeaponChosen
+  | WeaponAndSaltChosen
+  | ResultPlayAgain
+  | WaitForRestart
+  | ShuttingDown
+  | GameOver;
 
-interface NoNameParams {
-  myAddress: string;
-  libraryAddress: string;
-  [x: string]: any;
-}
+export type LocalState = Empty | Lobby | CreatingOpenGame | WaitingRoom | LocalStateWithPlayer;
+export type PlayingState =
+  | GameChosen
+  | OpponentJoined
+  | ChooseWeapon
+  | WeaponChosen
+  | WeaponAndSaltChosen
+  | ResultPlayAgain
+  | WaitForRestart
+  | ShuttingDown
+  | GameOver;
 
-export function noName(obj: NoNameParams): NoName {
-  const { myAddress, libraryAddress } = obj;
-  return { name: StateName.NoName, myAddress, libraryAddress };
+export interface Empty {
+  type: 'Empty';
 }
 
 export interface Lobby {
-  name: StateName.Lobby;
-  myName: string;
-  myAddress: string;
-  twitterHandle: string;
-  libraryAddress: string;
-}
-interface LobbyParams {
-  myName: string;
-  twitterHandle: string;
-  myAddress: string;
-  libraryAddress: string;
-  [x: string]: any;
-}
-
-export function lobby(obj: LobbyParams): Lobby {
-  const { myName, myAddress, libraryAddress, twitterHandle } = obj;
-  return { name: StateName.Lobby, myName, myAddress, libraryAddress, twitterHandle };
+  type: 'Lobby';
+  name: string;
+  address: string;
 }
 
 export interface CreatingOpenGame {
-  name: StateName.CreatingOpenGame;
-  myName: string;
-  twitterHandle: string;
-  myAddress: string;
-  libraryAddress: string;
+  type: 'CreatingOpenGame';
+  name: string;
+  address: string;
+  // libraryAddress: string; // TODO
 }
-
-export function creatingOpenGame(obj: LobbyParams): CreatingOpenGame {
-  const { myName, myAddress, libraryAddress, twitterHandle } = obj;
-  return { name: StateName.CreatingOpenGame, myName, myAddress, libraryAddress, twitterHandle };
-}
-
 export interface WaitingRoom {
-  name: StateName.WaitingRoom;
-  myName: string;
-  myAddress: string;
-  twitterHandle: string;
-  libraryAddress: string;
+  type: 'WaitingRoom';
+  name: string;
+  address: string;
   roundBuyIn: string;
 }
 
-interface WaitingRoomParams {
-  myName: string;
-  roundBuyIn: string;
-  myAddress: string;
-  twitterHandle: string;
-  libraryAddress: string;
-  [x: string]: any;
-}
-export function waitingRoom(obj: WaitingRoomParams): WaitingRoom {
-  const { myName, roundBuyIn, libraryAddress, myAddress, twitterHandle } = obj;
-  return {
-    name: StateName.WaitingRoom,
-    myName,
-    roundBuyIn,
-    libraryAddress,
-    myAddress,
-    twitterHandle,
-  };
-}
-
-interface TwoChannel {
-  myAddress: string;
-  channel: Channel;
-  destination: string[];
-}
-
-interface Base extends TwoChannel {
-  turnNum: number;
-  allocation: string[];
-  commitmentCount: number;
-  twitterHandle: string;
-  roundBuyIn: string;
-  myName: string;
+export interface Playing {
+  player: 'A' | 'B';
+  name: string;
+  address: string;
   opponentName: string;
-  libraryAddress: string;
+  roundBuyIn: string;
 }
 
-interface IncludesBase extends Base {
-  [x: string]: any;
+export interface GameChosen extends Playing {
+  type: 'GameChosen';
+  player: 'A';
+  opponentAddress: string; // need to keep opponentAddress until we have opened the channel
 }
 
-export function base(state: IncludesBase) {
-  const {
-    destination,
-    turnNum,
-    allocation,
-    commitmentCount,
-    roundBuyIn,
-    myName,
-    opponentName,
-    twitterHandle,
-    player,
-    myAddress,
-    channel,
-    libraryAddress,
-  } = state;
-
-  return {
-    channel,
-    destination,
-    turnNum,
-    allocation,
-    commitmentCount,
-    roundBuyIn,
-    myName,
-    twitterHandle,
-    opponentName,
-    player,
-    myAddress,
-    libraryAddress,
-  };
+export interface OpponentJoined extends Playing {
+  type: 'OpponentJoined';
+  player: 'B';
 }
 
-export function getOpponentAddress(state: IncludesBase) {
-  return state.destination[1 - state.player];
+export interface ChooseWeapon extends Playing {
+  type: 'ChooseWeapon';
 }
 
-export interface WaitForGameConfirmationA extends Base {
-  name: StateName.WaitForGameConfirmationA;
-  player: Player.PlayerA;
-}
-export function waitForGameConfirmationA(state: IncludesBase): WaitForGameConfirmationA {
-  return { ...base(state), name: StateName.WaitForGameConfirmationA, player: Player.PlayerA };
+export interface WeaponChosen extends Playing {
+  type: 'WeaponChosen';
+  myWeapon: Weapon;
 }
 
-export interface ConfirmGameB extends Base {
-  name: StateName.ConfirmGameB;
-  player: Player.PlayerB;
-}
-export function confirmGameB(state: IncludesBase): ConfirmGameB {
-  return { ...base(state), name: StateName.ConfirmGameB, player: Player.PlayerB };
-}
-
-export interface DeclineGameB extends Base {
-  name: StateName.DeclineGame;
-  player: Player.PlayerB;
-}
-export function declineGameB(state: IncludesBase): DeclineGameB {
-  return { ...base(state), name: StateName.DeclineGame, player: Player.PlayerB };
-}
-
-export interface WaitForFunding extends Base {
-  name: StateName.WaitForFunding;
-  player: Player;
-}
-export function waitForFunding(state: IncludesBase): WaitForFunding {
-  return { ...base(state), name: StateName.WaitForFunding };
-}
-
-export interface PickWeapon extends Base {
-  name: StateName.PickWeapon;
-  player: Player;
-}
-export function pickWeapon(state: IncludesBase): PickWeapon {
-  return { ...base(state), name: StateName.PickWeapon };
-}
-
-export interface PickChallengeWeapon extends Base {
-  name: StateName.PickChallengeWeapon;
-  player: Player;
-}
-export function pickChallengeWeapon(state: IncludesBase): PickChallengeWeapon {
-  return { ...base(state), name: StateName.PickChallengeWeapon };
-}
-
-export interface WaitForOpponentToPickWeaponA extends Base {
-  name: StateName.WaitForOpponentToPickWeaponA;
+export interface WeaponAndSaltChosen extends Playing {
+  type: 'WeaponAndSaltChosen';
   myWeapon: Weapon;
   salt: string;
-  player: Player.PlayerA;
-}
-interface IncludesWeapon extends IncludesBase {
-  myWeapon: Weapon;
+  player: 'A';
 }
 
-interface IncludesWeaponAndSalt extends IncludesWeapon {
-  salt: string;
-}
-export function waitForOpponentToPickWeaponA(
-  state: IncludesWeaponAndSalt
-): WaitForOpponentToPickWeaponA {
-  return {
-    ...base(state),
-    name: StateName.WaitForOpponentToPickWeaponA,
-    myWeapon: state.myWeapon,
-    salt: state.salt,
-  };
-}
-
-export interface WaitForOpponentToPickWeaponB extends Base {
-  name: StateName.WaitForOpponentToPickWeaponB;
-  myWeapon: Weapon;
-  player: Player.PlayerB;
-}
-export function waitForOpponentToPickWeaponB(state: IncludesWeapon): WaitForOpponentToPickWeaponB {
-  return {
-    ...base(state),
-    name: StateName.WaitForOpponentToPickWeaponB,
-    myWeapon: state.myWeapon,
-  };
-}
-
-export interface WaitForRevealB extends Base {
-  name: StateName.WaitForRevealB;
-  myWeapon: Weapon;
-  player: Player.PlayerB;
-  preCommit: string;
-}
-interface WaitForRevealBParams extends IncludesBase {
-  myWeapon: Weapon;
-  player: Player.PlayerB;
-  preCommit: string;
-}
-export function waitForRevealB(state: WaitForRevealBParams): WaitForRevealB {
-  const { myWeapon, preCommit } = state;
-  return { ...base(state), name: StateName.WaitForRevealB, myWeapon, preCommit };
-}
-
-interface IncludesResult extends IncludesBase {
+export interface ResultPlayAgain extends Playing {
+  type: 'ResultPlayAgain';
   myWeapon: Weapon;
   theirWeapon: Weapon;
   result: Result;
 }
 
-export interface PlayAgain extends Base {
-  name: StateName.PlayAgain;
+export interface WaitForRestart extends Playing {
+  type: 'WaitForRestart';
   myWeapon: Weapon;
   theirWeapon: Weapon;
   result: Result;
-  player: Player;
-}
-export function playAgain(state: IncludesResult): PlayAgain {
-  const { myWeapon, theirWeapon, result } = state;
-  return { ...base(state), name: StateName.PlayAgain, myWeapon, theirWeapon, result };
 }
 
-export interface WaitForRestingA extends Base {
-  name: StateName.WaitForRestingA;
-  myWeapon: Weapon;
-  theirWeapon: Weapon;
-  result: Result;
-  player: Player.PlayerA;
-}
-export function waitForRestingA(state: IncludesResult): WaitForRestingA {
-  const { myWeapon, theirWeapon, result } = state;
-  return { ...base(state), name: StateName.WaitForRestingA, myWeapon, theirWeapon, result };
-}
-
-export interface OpponentResigned extends Base {
-  name: StateName.OpponentResigned;
-  player: Player;
-}
-export function opponentResigned(state: IncludesBase): OpponentResigned {
-  return { ...base(state), name: StateName.OpponentResigned };
+export type ShutDownReason =
+  | 'InsufficientFundsYou'
+  | 'InsufficientFundsOpponent'
+  | 'YouResigned'
+  | 'TheyResigned';
+export interface ShuttingDown extends Playing {
+  type: 'ShuttingDown';
+  reason: ShutDownReason;
+  myWeapon?: Weapon;
+  theirWeapon?: Weapon;
+  result?: Result;
 }
 
-export interface WaitForResignationAcknowledgement extends Base {
-  name: StateName.WaitForResignationAcknowledgement;
-  player: Player;
-}
-export function waitForResignationAcknowledgement(
-  state: IncludesBase
-): WaitForResignationAcknowledgement {
-  return { ...base(state), name: StateName.WaitForResignationAcknowledgement };
+export interface GameOver extends Playing {
+  type: 'GameOver';
+  reason: ShutDownReason;
 }
 
-export interface GameOver extends Base {
-  name: StateName.GameOver;
-  player: Player;
-}
-export function gameOver(state: IncludesBase): GameOver {
-  return { ...base(state), name: StateName.GameOver };
+// Helpers
+// =======
+
+export const lobby = <T extends Omit<Lobby, 'type'>>(state: T): Lobby => {
+  const { name, address } = state;
+  return { type: 'Lobby', name, address };
+};
+
+export function creatingOpenGame<T extends Omit<CreatingOpenGame, 'type'>>(
+  state: T
+): CreatingOpenGame {
+  const { name, address } = state;
+  return { type: 'CreatingOpenGame', name, address };
 }
 
-export interface WaitForWithdrawal extends Base {
-  name: StateName.WaitForWithdrawal;
-  player: Player;
-}
-export function waitForWithdrawal(state: IncludesBase): WaitForWithdrawal {
-  return { ...base(state), name: StateName.WaitForWithdrawal };
-}
+export const waitingRoom = <T extends Omit<WaitingRoom, 'type'>>(state: T): WaitingRoom => {
+  const { name, address, roundBuyIn } = state;
+  return { type: 'WaitingRoom', name, address, roundBuyIn };
+};
 
-export interface ChallengePlayAgain extends Base {
-  name: StateName.ChallengePlayAgain;
-  myWeapon: Weapon;
-  theirWeapon: Weapon;
-  result: Result;
-  player: Player;
-}
-export function challengePlayAgain(state: IncludesResult): ChallengePlayAgain {
-  const { myWeapon, theirWeapon, result } = state;
-  return { ...base(state), name: StateName.ChallengePlayAgain, myWeapon, theirWeapon, result };
-}
+const playing = <T extends Playing>(state: T): Playing => {
+  const { player, name, address, opponentName, roundBuyIn } = state;
+  return { player, name, address, opponentName, roundBuyIn };
+};
 
-export type PlayingState =
-  | WaitForGameConfirmationA
-  | ConfirmGameB
-  | DeclineGameB
-  | WaitForFunding
-  | PickWeapon
-  | WaitForOpponentToPickWeaponA
-  | WaitForOpponentToPickWeaponB
-  | WaitForRevealB
-  | PlayAgain
-  | WaitForRestingA
-  | OpponentResigned
-  | WaitForResignationAcknowledgement
-  | GameOver
-  | WaitForWithdrawal
-  | PickChallengeWeapon
-  | ChallengePlayAgain;
+export const gameChosen = <T extends Omit<Playing, 'player'>>(
+  state: T,
+  opponentAddress: string
+): GameChosen => ({
+  type: 'GameChosen',
+  ...playing({ ...state, player: 'A' }),
+  opponentAddress,
+  player: 'A', // otherwise typescript can't tell that player is A
+});
 
-export type GameState = NoName | Lobby | CreatingOpenGame | WaitingRoom | PlayingState;
+export const opponentJoined = <T extends Omit<Playing, 'player'>>(state: T): OpponentJoined => ({
+  type: 'OpponentJoined',
+  ...playing({ ...state, player: 'B' }),
+  player: 'B', // otherwise typescript can't tell that player is B
+});
+
+export const chooseWeapon = <T extends Playing>(state: T): ChooseWeapon => ({
+  type: 'ChooseWeapon',
+  ...playing(state),
+});
+
+export const weaponChosen = <T extends Playing>(state: T, myWeapon: Weapon): WeaponChosen => ({
+  type: 'WeaponChosen',
+  ...playing(state),
+  myWeapon,
+});
+
+export const weaponAndSaltChosen = <T extends Playing & { myWeapon: Weapon; player: 'A' }>(
+  state: T,
+  salt: string
+): WeaponAndSaltChosen => ({
+  type: 'WeaponAndSaltChosen',
+  ...playing(state),
+  myWeapon: state.myWeapon,
+  player: 'A',
+  salt,
+});
+
+export const resultPlayAgain = <T extends Playing & { myWeapon: Weapon }>(
+  state: T,
+  theirWeapon: Weapon,
+  result: Result
+): ResultPlayAgain => ({
+  type: 'ResultPlayAgain',
+  ...playing(state),
+  myWeapon: state.myWeapon,
+  theirWeapon,
+  result,
+});
+
+export const waitForRestart = <T extends Playing & { myWeapon: Weapon }>(
+  state: T,
+  theirWeapon: Weapon,
+  result: Result
+): WaitForRestart => ({
+  type: 'WaitForRestart',
+  ...playing(state),
+  myWeapon: state.myWeapon,
+  theirWeapon,
+  result,
+});
+
+export const shuttingDown = <T extends Playing & { myWeapon?: Weapon }>(
+  state: T,
+  reason: ShutDownReason,
+  theirWeapon?: Weapon,
+  result?: Result
+): ShuttingDown => ({
+  type: 'ShuttingDown',
+  ...playing(state),
+  myWeapon: state.myWeapon,
+  theirWeapon,
+  result,
+  reason,
+});
+
+export const gameOver = <T extends Playing>(state: T, reason: ShutDownReason): GameOver => ({
+  type: 'GameOver',
+  ...playing(state),
+  reason,
+});
+
+// Helpers
+// =======
+
+export const isPlayerA = (state: LocalStateWithPlayer): boolean => state.player === 'A';
+export const isPlayerB = (state: LocalStateWithPlayer): boolean => state.player === 'B';
+export type StateName = LocalState['type'];
+
+export type PlayingStateName = PlayingState['type'];
