@@ -3,8 +3,8 @@ import {addAddressCheck} from '../utils';
 
 const TABLE_NAME = 'rules';
 
-exports.up = (knex: Knex) => {
-  return knex.schema
+exports.up = (knex: Knex) =>
+  knex.schema
     .createTable(TABLE_NAME, table => {
       table.increments();
       table
@@ -16,9 +16,6 @@ exports.up = (knex: Knex) => {
         .notNullable()
         .unique();
     })
-    .then(() => {
-      return addAddressCheck(knex, TABLE_NAME, 'address');
-    });
-};
+    .then(() => addAddressCheck(knex, TABLE_NAME, 'address'));
 
 exports.down = (knex: Knex) => knex.schema.dropTable(TABLE_NAME);

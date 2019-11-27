@@ -4,7 +4,7 @@ import {ethAssetHolder as ethAssetHolderConstrutor} from '../utilities/blockchai
 import {onDepositEvent} from './depositManager';
 
 /**
- * todos:
+ * Todos:
  * - wire up then other events.
  */
 

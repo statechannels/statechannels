@@ -1,6 +1,12 @@
 import {unreachable} from '@statechannels/wallet';
-import {SignedStatesReceived, StrategyProposed} from '@statechannels/wallet/lib/src/communication';
-import * as communication from '@statechannels/wallet/lib/src/communication';
+import {
+  SignedStatesReceived,
+  StrategyProposed,
+  RelayActionWithMessage,
+  relayActionWithMessage,
+  strategyApproved,
+  signedStatesReceived
+} from '@statechannels/wallet/lib/src/communication';
 import {HUB_ADDRESS} from '../../constants';
 import {errors} from '../../wallet';
 import {getCurrentState} from '../../wallet/db/queries/getCurrentState';
@@ -9,7 +15,7 @@ import {updateLedgerChannel} from '../../wallet/services';
 
 export async function handleOngoingProcessAction(
   action: StrategyProposed | SignedStatesReceived
-): Promise<communication.RelayActionWithMessage[]> {
+): Promise<RelayActionWithMessage[]> {
   switch (action.type) {
     case 'WALLET.COMMON.SIGNED_STATES_RECEIVED':
       return handleSignedStatesReceived(action);
@@ -29,10 +35,10 @@ async function handleStrategyProposed(action: StrategyProposed) {
 
   const {theirAddress} = process;
   return [
-    communication.relayActionWithMessage({
+    relayActionWithMessage({
       toParticipantId: theirAddress,
       fromParticipantId: 'hub',
-      actionToRelay: communication.strategyApproved({processId, strategy})
+      actionToRelay: strategyApproved({processId, strategy})
     })
   ];
 }
@@ -62,10 +68,10 @@ async function handleSignedStatesReceived(action: SignedStatesReceived) {
     return participants
       .filter((_, idx) => idx !== ourIndex)
       .map(p =>
-        communication.relayActionWithMessage({
+        relayActionWithMessage({
           toParticipantId: p,
           fromParticipantId: 'hub',
-          actionToRelay: communication.signedStatesReceived({
+          actionToRelay: signedStatesReceived({
             processId,
             signedStates: [
               ...action.signedStates,

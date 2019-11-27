@@ -19,9 +19,7 @@ export async function updateLedgerChannel(
       signedState => signedState.state.turnNum > lastStoredState.turnNum
     );
   }
-  statesToApply.sort((a, b) => {
-    return a.state.turnNum - b.state.turnNum;
-  });
+  statesToApply.sort((a, b) => a.state.turnNum - b.state.turnNum);
 
   let lastValidState = lastStoredState;
   for (const stateToApply of statesToApply) {
@@ -33,7 +31,7 @@ export async function updateLedgerChannel(
 
   const ourState = nextState(statesToApply);
   const stateToStore = statesToApply.map(signedState => signedState.state);
-  // todo: signatures need to be stored alongside states
+  // Todo: signatures need to be stored alongside states
   await queries.updateChannel(stateToStore, ourState);
   return ChannelManager.formResponse(ourState);
 }

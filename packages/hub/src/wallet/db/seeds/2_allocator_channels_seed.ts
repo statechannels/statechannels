@@ -56,7 +56,7 @@ function prefundSetupGuarantorState(turnNum: number) {
     ...baseStateProperties,
     turnNum,
     outcome: outcomeObjectToModel(guaranteeOutcome2),
-    // todo: appData does not reflect the outcome above
+    // Todo: appData does not reflect the outcome above
     appData: encodeConsensusData(consensusAppData2(2))
   };
 }
@@ -167,9 +167,7 @@ export const seeds = {
 export function seed() {
   return knex('channels')
     .del()
-    .then(() => {
-      return Channel.query().insertGraph(Object.values(seeds));
-    });
+    .then(() => Channel.query().insertGraph(Object.values(seeds)));
 }
 
 export const stateConstructors = {

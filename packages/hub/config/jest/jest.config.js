@@ -1,4 +1,4 @@
-const { resolve } = require('path');
+const {resolve} = require('path');
 const root = resolve(__dirname, '../../');
 
 module.exports = {
@@ -10,7 +10,7 @@ module.exports = {
   testEnvironment: 'node',
   testURL: 'http://localhost',
   transform: {
-    '^.+\\.tsx?$': 'ts-jest',
+    '^.+\\.tsx?$': 'ts-jest'
   },
   transformIgnorePatterns: ['[/\\\\]node_modules[/\\\\].+\\.(js|jsx|mjs|ts|tsx)$'],
   moduleFileExtensions: [
@@ -24,11 +24,11 @@ module.exports = {
     'jsx',
     'json',
     'node',
-    'mjs',
+    'mjs'
   ],
   globals: {
     'ts-jest': {
-      tsConfig: './tsconfig.json',
-    },
-  },
+      tsConfig: './tsconfig.json'
+    }
+  }
 };
