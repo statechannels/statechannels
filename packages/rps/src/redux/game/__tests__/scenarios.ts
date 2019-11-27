@@ -1,19 +1,19 @@
 import { bigNumberify } from 'ethers/utils';
 import { AppData, hashPreCommit } from '../../../core';
 import { ChannelState, Result, Weapon, ChannelStatus } from '../../../core';
-import { LocalState } from '../state';
 import * as s from '../state';
 
 export const channelId = '0xabc234';
+export const channelNonce = 1;
 export const aName = 'Alice';
 export const bName = 'Bob';
-const aUserId = 'userA';
-const bUserId = 'userB';
+export const aBal = bigNumberify(5).toString();
+export const bBal = bigNumberify(5).toString();
 export const aAddress = '0x5409ED021D9299bf6814279A6A1411A7e866A631';
 export const bAddress = '0x6Ecbe1DB9EF729CBe972C83Fb886247691Fb6beb';
-const aDestination = aAddress;
-const bDestination = bAddress;
-export const stake = bigNumberify(1);
+const aUserId = aAddress;
+const bUserId = bAddress;
+export const stake = bigNumberify(1).toString();
 const roundBuyIn = stake;
 export const aWeapon = Weapon.Rock;
 const playerAWeapon = aWeapon;
@@ -22,7 +22,7 @@ const preCommit = hashPreCommit(aWeapon, salt);
 export const bWeapon = Weapon.Scissors;
 const playerBWeapon = bWeapon;
 
-const appData: Record<AppData['type'], AppData> = {
+export const appData: Record<AppData['type'], AppData> = {
   start: { type: 'start' },
   roundProposed: { type: 'roundProposed', stake, preCommit },
   roundAccepted: { type: 'roundAccepted', stake, preCommit, playerBWeapon },
@@ -41,8 +41,8 @@ function channelState(
     status,
     aUserId,
     bUserId,
-    aDestination,
-    bDestination,
+    aAddress,
+    bAddress,
     aBal: bigNumberify(balances[0]).toString(),
     bBal: bigNumberify(balances[1]).toString(),
     appData: appDataParam,
@@ -57,6 +57,7 @@ export const channelStates = {
   ready: channelState(appData.start, 3, [5, 5], 'running'),
   concludeFromStart: channelState(appData.start, 4, [5, 5], 'closing'),
   roundProposed: channelState(appData.roundProposed, 4, [5, 5]),
+  concludeFromProposed: channelState(appData.roundProposed, 5, [5, 5]),
   roundAccepted: channelState(appData.roundAccepted, 5, [4, 6]),
   concludeFromAccepted: channelState(appData.start, 6, [4, 6], 'closing'),
   reveal: channelState(appData.reveal, 6, [6, 4]),
@@ -66,6 +67,8 @@ export const channelStates = {
   roundAcceptedInsufficientFundsB: channelState(appData.roundAccepted, 5, [8, 2]),
   revealInsufficientFundsB: channelState(appData.reveal, 6, [10, 0]),
   concludeInsufficientFundsB: channelState(appData.reveal, 7, [10, 0]),
+
+  closed: channelState(appData.start, 8, [10, 0], 'closed'),
 };
 
 const propsA = {
@@ -78,7 +81,7 @@ const propsA = {
   theirWeapon: playerBWeapon,
 };
 
-export const localStatesA: Record<string, LocalState> = {
+export const localStatesA = {
   lobby: s.lobby(propsA),
   gameChosen: s.gameChosen(propsA, bAddress),
   chooseWeapon: s.chooseWeapon(propsA),
@@ -86,9 +89,15 @@ export const localStatesA: Record<string, LocalState> = {
   weaponAndSaltChosen: s.weaponAndSaltChosen(propsA, salt),
   resultPlayAgain: s.resultPlayAgain(propsA, playerBWeapon, Result.YouWin),
   chooseWeapon2: s.chooseWeapon(propsA),
-  waitForRestart: s.waitForRestart(propsA),
-  shuttingDown: s.shuttingDown(propsA, 'InsufficientFundsOpponent'),
-  shuttingDownResign: s.shuttingDown(propsA, 'YouResigned'),
+  waitForRestart: s.waitForRestart(propsA, playerBWeapon, Result.YouWin),
+  shuttingDown: s.shuttingDown(propsA, 'InsufficientFundsOpponent', playerBWeapon, Result.YouWin),
+  shuttingDownResign: s.shuttingDown(
+    { ...propsA, myWeapon: undefined },
+    'YouResigned',
+    undefined,
+    undefined
+  ),
+  gameOverYouResigned: s.gameOver(propsA, 'YouResigned'),
 };
 
 const propsB = {
@@ -101,7 +110,7 @@ const propsB = {
   theirWeapon: playerAWeapon,
 };
 
-export const localStatesB: Record<string, LocalState> = {
+export const localStatesB = {
   lobby: s.lobby(propsB),
   waitingRoom: s.waitingRoom(propsB),
   opponentJoined: s.opponentJoined(propsB),
@@ -109,5 +118,12 @@ export const localStatesB: Record<string, LocalState> = {
   weaponChosen: s.weaponChosen(propsB, propsB.myWeapon),
   resultPlayAgain: s.resultPlayAgain(propsB, playerAWeapon, Result.YouLose),
   chooseWeapon2: s.chooseWeapon(propsB),
-  shuttingDown: s.shuttingDown(propsB, 'InsufficientFundsYou'),
+  shuttingDown: s.shuttingDown(propsB, 'InsufficientFundsYou', playerAWeapon, Result.YouLose),
+  shuttingDownResign: s.shuttingDown(
+    { ...propsB, myWeapon: undefined },
+    'YouResigned',
+    undefined,
+    undefined
+  ),
+  gameOverResign: s.gameOver(propsB, 'YouResigned'),
 };

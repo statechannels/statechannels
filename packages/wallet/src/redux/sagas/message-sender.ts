@@ -10,8 +10,10 @@ import {validateResponse, validateNotification} from "../../json-rpc-validation/
 
 export function* messageSender(action: OutgoingApiAction) {
   const message = yield createResponseMessage(action);
-  yield validate(message, action);
-  yield call(window.parent.postMessage, message, "*");
+  if (message) {
+    yield validate(message, action);
+    yield call(window.parent.postMessage, message, "*");
+  }
 }
 
 function* createResponseMessage(action: OutgoingApiAction) {
@@ -33,6 +35,13 @@ function* createResponseMessage(action: OutgoingApiAction) {
         action.id,
         new jrs.JsonRpcError("Signing address not found in the participants array", 1000)
       );
+    case "WALLET.RELAY_ACTION_WITH_MESSAGE":
+      return jrs.notification("MessageQueued", {
+        recipient: action.fromParticipantId,
+        sender: action.toParticipantId,
+        data: action.actionToRelay
+      });
+      break;
     case "WALLET.SEND_CHANNEL_PROPOSED_MESSAGE":
       const proposedChannelStatus: ChannelState = yield select(getChannelStatus, action.channelId);
 
@@ -70,6 +79,10 @@ function* createResponseMessage(action: OutgoingApiAction) {
           1000
         )
       );
+    case "WALLET.API_NOT_IMPLEMENTED":
+      console.error(`No API method implemented for ${action.apiMethod}`);
+      return undefined;
+      break;
     default:
       return unreachable(action);
   }
@@ -88,6 +101,7 @@ function* validate(message: any, action: OutgoingApiAction) {
       console.error(`Action\n${JSON.stringify(action)}`);
       console.error(`Message\n${JSON.stringify(message)}`);
       console.error(`Validation Errors\n${JSON.stringify(result.errors)}`);
+      throw new Error("Validation Failed");
     }
   }
 }

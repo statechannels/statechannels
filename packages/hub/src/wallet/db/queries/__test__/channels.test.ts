@@ -1,6 +1,6 @@
 import {errors} from '../../..';
 import {
-  created_channel,
+  createdChannel,
   fundedChannel,
   stateConstructors as testDataConstructors
 } from '../../../../test/test_data';
@@ -19,13 +19,13 @@ import {queries} from '../channels';
 describe('updateChannel', () => {
   describe('when theirState is a PreFundSetup', () => {
     it("works when the channel doesn't exist", async () => {
-      const allocator_channel = await queries.updateChannel(
-        [testDataConstructors.pre_fund_setup(0)],
-        testDataConstructors.pre_fund_setup(1)
+      const allocatorChannel = await queries.updateChannel(
+        [testDataConstructors.prefundSetup(0)],
+        testDataConstructors.prefundSetup(1)
       );
       expect.assertions(5);
 
-      expect(allocator_channel).toMatchObject(created_channel);
+      expect(allocatorChannel).toMatchObject(createdChannel);
       expect((await knex('channels').select('*')).length).toEqual(SEEDED_CHANNELS + 1);
       expect((await knex('channel_states').select('*')).length).toEqual(SEEDED_STATES + 2);
 
@@ -37,9 +37,9 @@ describe('updateChannel', () => {
     });
 
     it('throws when the channel exists', async () => {
-      const theirState = testDataConstructors.pre_fund_setup(0);
+      const theirState = testDataConstructors.prefundSetup(0);
       theirState.channel = fundedChannel;
-      const hubState = testDataConstructors.pre_fund_setup(1);
+      const hubState = testDataConstructors.prefundSetup(1);
       expect.assertions(1);
       await queries.updateChannel([theirState], hubState).catch(err => {
         expect(err).toMatchObject(errors.CHANNEL_EXISTS);
@@ -49,30 +49,30 @@ describe('updateChannel', () => {
 
   describe('when theirState is not a PreFundSetup', () => {
     it('works when the channel exists', async () => {
-      const {channelNonce} = testDataConstructors.post_fund_setup(2).channel;
-      const existing_allocator_channel = await Channel.query()
+      const {channelNonce} = testDataConstructors.postfundSetup(2).channel;
+      const existingAllocatorChannel = await Channel.query()
         .findOne({channel_nonce: channelNonce})
-        .eager('[states.[outcome.[allocation]], participants]');
+        .eager('[states.[outcome.[allocation]], participants, holdings]');
 
-      expect(existing_allocator_channel).toMatchObject(seeds.fundedChannelWithStates);
+      expect(existingAllocatorChannel).toMatchObject(seeds.fundedChannelWithStates);
 
-      const updated_allocator_channel = await queries.updateChannel(
-        [testDataConstructors.post_fund_setup(2)],
-        testDataConstructors.post_fund_setup(3)
+      const updatedAllocatorChannel = await queries.updateChannel(
+        [testDataConstructors.postfundSetup(2)],
+        testDataConstructors.postfundSetup(3)
       );
 
-      expect(updated_allocator_channel).toMatchObject({
+      expect(updatedAllocatorChannel).toMatchObject({
         ...seeds.fundedChannelWithStates,
         states: [
-          seedDataConstructors.postFundSetupState(2),
-          seedDataConstructors.postFundSetupState(3)
+          seedDataConstructors.postfundSetupState(2),
+          seedDataConstructors.postfundSetupState(3)
         ]
       });
 
       expect((await knex('channels').select('*')).length).toEqual(SEEDED_CHANNELS);
       expect(
         (await knex('channel_states')
-          .where({channel_id: updated_allocator_channel.id})
+          .where({channel_id: updatedAllocatorChannel.id})
           .select('*')).length
       ).toEqual(2);
 
@@ -83,9 +83,9 @@ describe('updateChannel', () => {
 
     it("throws when the channel doesn't exist and the commitment is not PreFundSetup", async () => {
       expect.assertions(1);
-      const theirState = testDataConstructors.post_fund_setup(2);
+      const theirState = testDataConstructors.postfundSetup(2);
       theirState.channel = {...fundedChannel, channelNonce: '1234'};
-      const hubState = testDataConstructors.post_fund_setup(1);
+      const hubState = testDataConstructors.postfundSetup(1);
       expect.assertions(1);
       await queries.updateChannel([theirState], hubState).catch(err => {
         expect(err).toMatchObject(errors.CHANNEL_MISSING);

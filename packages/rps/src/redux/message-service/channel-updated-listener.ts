@@ -1,23 +1,12 @@
 import { take, put } from 'redux-saga/effects';
 import { buffers, eventChannel } from 'redux-saga';
-import { RPSChannelClient } from '../../utils/rps-channel-client';
-import { updateChannelState } from '../game-v2/actions';
+import { updateChannelState } from '../game/actions';
 import { ChannelState } from '../../core';
+import { RPSChannelClient } from '../../utils/rps-channel-client';
 
-export function* channelUpdatedListener() {
-  const rpsChannelClient = new RPSChannelClient();
-
-  const subscribe = emit => {
-    rpsChannelClient.onChannelUpdated(channelState => {
-      emit(channelState);
-    });
-
-    return () => {
-      rpsChannelClient.unSubscribe('ChannelUpdated');
-    };
-  };
-
-  const channel = eventChannel(subscribe, buffers.fixed(10));
+export function* channelUpdatedListener(client: RPSChannelClient) {
+  const subscribe = emit => client.onChannelUpdated(emit);
+  const channel = eventChannel(subscribe, buffers.fixed(20));
 
   while (true) {
     const channelState: ChannelState = yield take(channel);

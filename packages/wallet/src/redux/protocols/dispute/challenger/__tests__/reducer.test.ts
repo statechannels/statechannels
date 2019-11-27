@@ -12,12 +12,7 @@ import {
   describeScenarioStep,
   itStoresThisState
 } from "../../../../__tests__/helpers";
-import {
-  HIDE_WALLET,
-  CHALLENGE_COMPLETE,
-  CHALLENGE_STATE_RECEIVED,
-  SHOW_WALLET
-} from "../../../../../magmo-wallet-client";
+import {apiNotImplemented} from "../../../../actions";
 
 describe("OPPONENT RESPONDS", () => {
   const scenario = scenarios.opponentResponds;
@@ -25,7 +20,7 @@ describe("OPPONENT RESPONDS", () => {
 
   describe("when initializing", () => {
     const result = initialize(channelId, processId, sharedData);
-    itSendsThisDisplayEventType(result.sharedData, SHOW_WALLET);
+    itSendsThisDisplayEventType(result.sharedData, "Show");
 
     itTransitionsTo(result, "Challenging.ApproveChallenge");
   });
@@ -65,7 +60,7 @@ describe("OPPONENT RESPONDS", () => {
     const {state, action, signedState} = scenario.waitForResponseOrTimeoutReceiveResponse;
     const result = challengerReducer(state, sharedData, action);
 
-    itSendsThisMessage(result.sharedData, CHALLENGE_STATE_RECEIVED);
+    itSendsThisMessage(result.sharedData, apiNotImplemented({apiMethod: "ChallengeStateReceived"}));
 
     itStoresThisState(result.sharedData, signedState);
     itTransitionsTo(result, "Challenging.AcknowledgeResponse");
@@ -76,8 +71,8 @@ describe("OPPONENT RESPONDS", () => {
     const result = challengerReducer(state, sharedData, action);
 
     itTransitionsTo(result, "Challenging.SuccessOpen");
-    itSendsThisMessage(result.sharedData, CHALLENGE_COMPLETE);
-    itSendsThisDisplayEventType(result.sharedData, HIDE_WALLET);
+    itSendsThisMessage(result.sharedData, apiNotImplemented({apiMethod: "ChallengeComplete"}));
+    itSendsThisDisplayEventType(result.sharedData, "Hide");
   });
 });
 
@@ -108,7 +103,7 @@ describe("CHALLENGE TIMES OUT AND IS not DEFUNDED", () => {
     const result = challengerReducer(state, sharedData, action);
 
     itTransitionsTo(result, "Challenging.SuccessClosed");
-    itSendsThisDisplayEventType(result.sharedData, HIDE_WALLET);
+    itSendsThisDisplayEventType(result.sharedData, "Hide");
   });
 });
 

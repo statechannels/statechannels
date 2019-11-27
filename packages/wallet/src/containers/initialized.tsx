@@ -12,10 +12,12 @@ interface Props {
 class WalletInitializedContainer extends PureComponent<Props> {
   render() {
     const {state} = this.props;
+    console.log(state.currentProcessId);
     if (!state.currentProcessId) {
       return <LandingPage />;
     } else {
       const protocolState = selectors.getProtocolState(state, state.currentProcessId);
+      console.log(protocolState);
       return <Protocol protocolState={protocolState} />;
     }
     return <LandingPage />;

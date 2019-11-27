@@ -2,13 +2,13 @@ import * as scenarios from "./scenarios";
 import * as states from "../states";
 import {fundingStrategyNegotiationReducer as reducer} from "../reducer";
 import {ProtocolStateWithSharedData} from "../../..";
-import {itSendsThisMessage, describeScenarioStep} from "../../../../__tests__/helpers";
-import {sendStrategyApproved} from "../../../../../communication";
+import {describeScenarioStep, itRelaysThisAction} from "../../../../__tests__/helpers";
 import {FundingStrategyNegotiationStateType} from "../../states";
+import * as commActions from "../../../../../communication/actions";
 
 describe("indirect funding strategy chosen", () => {
   const scenario = scenarios.indirectStrategyChosen;
-  const {processId, opponentAddress} = scenario;
+  const {processId} = scenario;
 
   describeScenarioStep(scenario.waitForStrategyProposal, () => {
     const {state, sharedData, action} = scenario.waitForStrategyProposal;
@@ -23,16 +23,16 @@ describe("indirect funding strategy chosen", () => {
 
     itTransitionsTo(result, "FundingStrategyNegotiation.PlayerB.Success");
 
-    itSendsThisMessage(
+    itRelaysThisAction(
       result,
-      sendStrategyApproved(opponentAddress, processId, "IndirectFundingStrategy")
+      commActions.strategyApproved({processId, strategy: "IndirectFundingStrategy"})
     );
   });
 });
 
 describe("virtual funding strategy chosen", () => {
   const scenario = scenarios.virtualStrategyChosen;
-  const {processId, opponentAddress} = scenario;
+  const {processId} = scenario;
 
   describeScenarioStep(scenario.waitForStrategyProposal, () => {
     const {state, sharedData, action} = scenario.waitForStrategyProposal;
@@ -47,9 +47,9 @@ describe("virtual funding strategy chosen", () => {
 
     itTransitionsTo(result, "FundingStrategyNegotiation.PlayerB.Success");
 
-    itSendsThisMessage(
+    itRelaysThisAction(
       result,
-      sendStrategyApproved(opponentAddress, processId, "VirtualFundingStrategy")
+      commActions.strategyApproved({processId, strategy: "VirtualFundingStrategy"})
     );
   });
 });

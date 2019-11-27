@@ -44,7 +44,7 @@ export const initialize = (
     }),
     sharedData: showWallet(
       registerChannelToMonitor(
-        sendChallengeResponseRequested(sharedData, channelId),
+        sendChallengeResponseRequested(sharedData),
         processId,
         channelId,
         [] // TODO: This should be passed a protocol locator

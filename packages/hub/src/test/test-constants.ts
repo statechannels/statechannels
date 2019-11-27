@@ -19,16 +19,18 @@ export const UNKNOWN_RULES_ADDRESS = '0x92b5b042047731FF882423cB555554F11F632Bd6
 
 export const DUMMY_ASSET_HOLDER_ADDRESS = '0xabcd10b5ea16F12f5bEFc45d511978CFF2780568';
 
-export const FUNDED_CHANNEL_NONCE = '3';
-export const FUNDED_CHANNEL_NONCE_3 = '33';
+export const UNFUNDED_NONCE = '2';
+
+export const FUNDED_NONCE = '3';
+export const FUNDED_NONCE_3 = '33';
 export const FUNDED_CHANNEL_HOLDINGS = '0x00';
 
-export const FUNDED_GUARANTOR_CHANNEL_NONCE = '31';
+export const FUNDED_GUARANTOR_NONCE = '31';
 
-export const BEGINNING_APP_CHANNEL_NONCE = '44';
+export const BEGINNING_APP_NONCE = '44';
 export const BEGINNING_APP_CHANNEL_HOLDINGS = '0x05';
 
-export const ONGOING_APP_CHANNEL_NONCE = '5';
+export const ONGOING_APP_NONCE = '5';
 export const ONGOING_APP_CHANNEL_HOLDINGS = '0x08';
 
 // just choose big numbers that won't be hit in seeding
@@ -72,3 +74,6 @@ export const guaranteeOutcome2: GuaranteeAssetOutcome[] = [
     guarantee: {targetChannelId: '1234', destinations: PARTICIPANTS}
   }
 ];
+
+export const holdings2 = bigNumberify(10).toHexString();
+export const holdings3 = bigNumberify(15).toHexString();

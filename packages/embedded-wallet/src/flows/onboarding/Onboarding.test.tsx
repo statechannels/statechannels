@@ -8,7 +8,7 @@ import {BudgetAllocation, ConnectToHub, NoHub, OnboardingFinished} from '../../d
 import {FlowRouter, FlowRouterProps} from '../../flow-router/FlowRouter';
 import {JsonRpcComponentProps} from '../../json-rpc-router';
 import * as Onboarding from './Onboarding';
-import {OnboardingFlow, OnboardingFlowPaths} from './Onboarding';
+const {OnboardingFlow, OnboardingFlowPaths} = Onboarding;
 
 Enzyme.configure({adapter: new Adapter()});
 

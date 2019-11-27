@@ -1,14 +1,8 @@
-import {SharedData, queueMessage, registerChannelToMonitor} from "../../state";
+import {SharedData, registerChannelToMonitor} from "../../state";
 import * as states from "./states";
 import * as actions from "./actions";
 import {ProtocolStateWithSharedData} from "..";
 import {unreachable} from "../../../utils/reducer-utils";
-import {
-  validationSuccess,
-  signatureSuccess,
-  signatureFailure,
-  validationFailure
-} from "../../../magmo-wallet-client";
 import {
   checkAndInitialize,
   signAndInitialize,
@@ -18,7 +12,6 @@ import {
 import {ProtocolAction} from "../../actions";
 import * as dispute from "../dispute";
 import {disputeReducer} from "../dispute/reducer";
-import {joinSignature} from "ethers/utils";
 import {State, SignedState} from "@statechannels/nitro-protocol";
 import {ChannelParticipant} from "../../channel-store";
 import {getAppDefinitionBytecode} from "../../../redux/selectors";
@@ -84,16 +77,13 @@ function ownStateReceivedReducer(
   const signResult = signAndUpdate(action.state, protocolState, sharedData);
   if (!signResult.isSuccess) {
     return {
-      sharedData: queueMessage(sharedData, signatureFailure("Other", signResult.reason)),
+      sharedData,
       protocolState
     };
   } else {
     const updatedSharedData = {...sharedData, channelStore: signResult.store};
     return {
-      sharedData: queueMessage(
-        updatedSharedData,
-        signatureSuccess(joinSignature(signResult.signedState.signature))
-      ),
+      sharedData: updatedSharedData,
       protocolState: states.ongoing(protocolState)
     };
   }
@@ -110,13 +100,13 @@ function opponentStateReceivedReducer(
     // TODO: Currently checkAndStore doesn't contain any validation messages
     // We might want to return a more descriptive message to the app?
     return {
-      sharedData: queueMessage(sharedData, validationFailure("InvalidSignature")),
+      sharedData,
       protocolState
     };
   } else {
     const updatedSharedData = {...sharedData, channelStore: validateResult.store};
     return {
-      sharedData: queueMessage(updatedSharedData, validationSuccess()),
+      sharedData: updatedSharedData,
       protocolState: states.ongoing(protocolState)
     };
   }

@@ -1,16 +1,16 @@
 import {unreachable} from '@statechannels/wallet';
 import {
   ConcludeInstigated,
-  SignedStatesReceived
+  SignedStatesReceived,
+  RelayActionWithMessage
 } from '@statechannels/wallet/lib/src/communication';
 import {HUB_ADDRESS} from '../../constants';
-import {MessageRelayRequested} from '../../wallet-client';
 import {startFundingProcess} from '../../wallet/db/queries/walletProcess';
 import * as ongoing from './handle-ongoing-process-action';
 
 export async function handleNewProcessAction(
   action: ConcludeInstigated | SignedStatesReceived
-): Promise<MessageRelayRequested[]> {
+): Promise<RelayActionWithMessage[]> {
   switch (action.type) {
     case 'WALLET.COMMON.SIGNED_STATES_RECEIVED':
       return handleSignedStatesReceived(action);
@@ -23,7 +23,7 @@ export async function handleNewProcessAction(
 
 async function handleSignedStatesReceived(
   action: SignedStatesReceived
-): Promise<MessageRelayRequested[]> {
+): Promise<RelayActionWithMessage[]> {
   const {processId, signedStates} = action;
   const {participants} = signedStates[0].state.channel;
   const ourIndex = participants.indexOf(HUB_ADDRESS);

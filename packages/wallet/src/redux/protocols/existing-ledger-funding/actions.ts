@@ -1,7 +1,8 @@
 import {WalletAction} from "../../actions";
 import {LedgerTopUpAction, isLedgerTopUpAction} from "../ledger-top-up/actions";
-import {EmbeddedProtocol, routerFactory} from "../../../communication";
+import {EmbeddedProtocol} from "../../../communication";
 import {isConsensusUpdateAction, ConsensusUpdateAction} from "../consensus-update";
+import {routerFactory} from "../../../communication/actions";
 
 export type ExistingLedgerFundingAction = ConsensusUpdateAction | LedgerTopUpAction;
 

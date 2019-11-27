@@ -1,13 +1,14 @@
 import {ChannelState, ChannelStore} from "../channel-store";
 import {StateWithSideEffects} from "../utils";
 import {QueuedTransaction, OutboxState, MessageOutbox} from "../outbox/state";
-import {SharedData} from "../state";
+import {SharedData, EMPTY_SHARED_DATA} from "../state";
 import {ProtocolStateWithSharedData} from "../protocols";
 import {ProtocolLocator, RelayableAction} from "../../communication";
 import _ from "lodash";
 import {State, SignedState, getChannelId} from "@statechannels/nitro-protocol";
 import {Signature} from "ethers/utils";
 import {OutgoingApiAction} from "../actions";
+import {Wallet, utils} from "ethers";
 
 type SideEffectState =
   | StateWithSideEffects<any>
@@ -75,9 +76,12 @@ export const itSendsThisMessage = (state: SideEffectState, message, idx = 0) => 
   }
 };
 
-export const itSendsThisDisplayEventType = (state: SideEffectState, eventType: string) => {
-  it(`sends event ${eventType}`, () => {
-    expectSideEffect("displayOutbox", state, item => expect(item.type).toEqual(eventType));
+export const itSendsThisDisplayEventType = (
+  state: SideEffectState,
+  displayAction: "Show" | "Hide"
+) => {
+  it(`sends event ${displayAction}`, () => {
+    expectSideEffect("displayOutbox", state, item => expect(item).toEqual(displayAction));
   });
 };
 
@@ -135,9 +139,7 @@ export const itSendsTheseStates = (
       expect(messageOutbox).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
-            messagePayload: expect.objectContaining({
-              signedStates: states.map(transformStateToMatcher)
-            })
+            signedStates: states.map(transformStateToMatcher)
           })
         ])
       );
@@ -152,7 +154,7 @@ export const itSendsTheseStates = (
         // for the correct state
         console.warn(`Message not found: inspecting mismatched message in position ${idx}`);
         expect(messageOutbox[idx]).toMatchObject({
-          messagePayload: {
+          actionToRelay: {
             type,
             signedStates: states
           }
@@ -181,7 +183,7 @@ export const itRelaysThisAction = (state: SideEffectState, action: RelayableActi
     expectSideEffect(
       "messageOutbox",
       state,
-      item => expect(item.messagePayload).toMatchObject(action),
+      item => expect(item.actionToRelay).toMatchObject(action),
       idx
     );
   });
@@ -264,4 +266,25 @@ export const mergeSharedData = (
   secondSharedData: SharedData
 ): SharedData => {
   return _.merge({}, firstSharedData, secondSharedData);
+};
+
+// Creates SharedData that contains valid participantIds
+export const createSharedDataFromParticipants = (participantAddresses: string[]): SharedData => {
+  const channelId = utils.id("");
+  const channelState: ChannelState = {
+    ourIndex: 0,
+    address: Wallet.createRandom().address,
+    privateKey: Wallet.createRandom().privateKey,
+    channelId,
+    channelNonce: "0x01",
+    funded: false,
+    turnNum: 0,
+    libraryAddress: Wallet.createRandom().address,
+    signedStates: [],
+    participants: participantAddresses.map((a, i) => {
+      return {participantId: `$participant-{i}`, signingAddress: a};
+    })
+  };
+  const channelStore = {[channelId]: channelState};
+  return {...EMPTY_SHARED_DATA, channelStore};
 };

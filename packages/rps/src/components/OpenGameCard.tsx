@@ -8,21 +8,14 @@ import { bigNumberify } from 'ethers/utils';
 
 interface Props {
   openGame: OpenGame;
-  joinOpenGame: (
-    opponentName: string,
-    opponentAddress: string,
-    channelNonce: number,
-    roundBuyIn: string
-  ) => void;
+  joinOpenGame: (opponentName: string, opponentAddress: string, roundBuyIn: string) => void;
 }
 
 export class OpenGameEntry extends React.PureComponent<Props, Commitment> {
   render() {
     // Generate a random number from 0 to MaxInt
-    const randomChannelNonce = Math.floor(Math.random() * 2147483647) + 1;
     const { openGame, joinOpenGame } = this.props;
-    const joinThisGame = () =>
-      joinOpenGame(openGame.name, openGame.address, randomChannelNonce, openGame.stake);
+    const joinThisGame = () => joinOpenGame(openGame.name, openGame.address, openGame.stake);
 
     const stake = openGame.stake;
     const buyin = bigNumberify(openGame.stake)

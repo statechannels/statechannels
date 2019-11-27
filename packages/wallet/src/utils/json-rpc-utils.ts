@@ -8,8 +8,9 @@ import {
 import {bigNumberify, randomBytes} from "ethers/utils";
 import {NETWORK_ID, CHALLENGE_DURATION} from "../constants";
 import {ChannelParticipant} from "../redux/channel-store";
-import {convertAddressToBytes32} from "./data-type-utils";
+import {convertAddressToBytes32, convertBytes32ToAddress} from "./data-type-utils";
 import {AddressZero} from "ethers/constants";
+import {RelayableAction} from "../communication";
 
 export interface JsonRpcParticipant {
   participantId: string;
@@ -50,7 +51,7 @@ interface ChannelJoined {
   type: "Channel.Joined";
   signedState: SignedState;
 }
-type WalletMessage = OpenChannel | ChannelJoined;
+type WalletMessage = OpenChannel | ChannelJoined | RelayableAction;
 
 export interface JsonRpcUpdateChannelParams {
   allocations: JsonRpcAllocations;
@@ -80,7 +81,10 @@ export function createJsonRpcAllocationsFromOutcome(outcome: Outcome): JsonRpcAl
     }
     return {
       token: o.assetHolderAddress,
-      allocationItems: o.allocation
+      allocationItems: o.allocation.map(a => ({
+        amount: a.amount,
+        destination: convertBytes32ToAddress(a.destination)
+      }))
     };
   });
 }

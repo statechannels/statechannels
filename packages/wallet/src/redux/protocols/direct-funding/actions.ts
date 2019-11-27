@@ -1,10 +1,6 @@
 import * as actions from "../../actions";
-import {
-  isCommonAction,
-  EmbeddedProtocol,
-  routerFactory,
-  SignedStatesReceived
-} from "../../../communication";
+import {isCommonAction, EmbeddedProtocol, SignedStatesReceived} from "../../../communication";
+import {routerFactory} from "../../../communication/actions";
 
 // -------
 // Actions

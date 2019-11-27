@@ -10,12 +10,7 @@ import CreatingOpenGameContainer from '../containers/CreatingOpenGameContainer';
 
 interface Props {
   openGames: OpenGame[];
-  joinOpenGame: (
-    opponentName: string,
-    opponentAddress: string,
-    channelNonce: number,
-    roundBuyIn: string
-  ) => void;
+  joinOpenGame: (opponentName: string, opponentAddress: string, roundBuyIn: string) => void;
   newOpenGame: () => void;
 }
 
@@ -27,7 +22,8 @@ export default class LobbyPage extends React.PureComponent<Props, State> {
 
   render() {
     const { newOpenGame, joinOpenGame } = this.props;
-    const openGames = this.props.openGames || [];
+
+    const openGames = this.props.openGames.filter(game => game.isPublic) || [];
 
     return (
       <ApplicationLayout>

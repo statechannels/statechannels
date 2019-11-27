@@ -3,7 +3,7 @@ import {PureComponent} from "react";
 import {connect} from "react-redux";
 
 import * as states from "../redux/state";
-import LandingPage from "../components/landing-page";
+import WalletInitializedContainer from "./initialized";
 
 interface WalletProps {
   state: states.WalletState;
@@ -13,10 +13,7 @@ interface WalletProps {
 class WalletContainer extends PureComponent<WalletProps> {
   render() {
     const {state} = this.props;
-    switch (state.type) {
-      default:
-        return <LandingPage />;
-    }
+    return <WalletInitializedContainer state={state} />;
   }
 }
 

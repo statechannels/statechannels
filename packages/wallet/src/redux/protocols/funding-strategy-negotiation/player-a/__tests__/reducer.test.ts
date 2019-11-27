@@ -2,9 +2,9 @@ import * as scenarios from "./scenarios";
 import * as states from "../states";
 import {fundingStrategyNegotiationReducer as reducer} from "../reducer";
 import {ProtocolStateWithSharedData} from "../../..";
-import {itSendsThisMessage, describeScenarioStep} from "../../../../__tests__/helpers";
-import {sendStrategyProposed} from "../../../../../communication";
+import {describeScenarioStep, itRelaysThisAction} from "../../../../__tests__/helpers";
 import {FundingStrategyNegotiationStateType} from "../../states";
+import * as commActions from "../../../../../communication/actions";
 
 describe("indirect strategy chosen", () => {
   const scenario = scenarios.indirectStrategyChosen;
@@ -14,10 +14,10 @@ describe("indirect strategy chosen", () => {
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, "FundingStrategyNegotiation.PlayerA.WaitForStrategyResponse");
-    const {processId, opponentAddress} = scenario;
-    itSendsThisMessage(
+    const {processId} = scenario;
+    itRelaysThisAction(
       result,
-      sendStrategyProposed(opponentAddress, processId, "IndirectFundingStrategy")
+      commActions.strategyApproved({processId, strategy: "IndirectFundingStrategy"})
     );
   });
 
@@ -37,10 +37,10 @@ describe("virtual strategy chosen", () => {
     const result = reducer(state, sharedData, action);
 
     itTransitionsTo(result, "FundingStrategyNegotiation.PlayerA.WaitForStrategyResponse");
-    const {processId, opponentAddress} = scenario;
-    itSendsThisMessage(
+    const {processId} = scenario;
+    itRelaysThisAction(
       result,
-      sendStrategyProposed(opponentAddress, processId, "VirtualFundingStrategy")
+      commActions.strategyApproved({processId, strategy: "VirtualFundingStrategy"})
     );
   });
 

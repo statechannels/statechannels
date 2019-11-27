@@ -95,7 +95,7 @@ export function theirAddress(state: ChannelState): string {
   return participants[theirIndex].signingAddress;
 }
 
-export function nextParticipant(participants, ourIndex: number): string {
+export function nextParticipant(participants, ourIndex: number): ChannelParticipant {
   if (ourIndex >= participants.length || ourIndex < 0) {
     throw new Error(`Invalid index: ${ourIndex} must be between 0 and ${participants.length}`);
   }

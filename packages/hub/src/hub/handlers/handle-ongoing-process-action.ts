@@ -3,14 +3,13 @@ import {SignedStatesReceived, StrategyProposed} from '@statechannels/wallet/lib/
 import * as communication from '@statechannels/wallet/lib/src/communication';
 import {HUB_ADDRESS} from '../../constants';
 import {errors} from '../../wallet';
-import {MessageRelayRequested} from '../../wallet-client';
 import {getCurrentState} from '../../wallet/db/queries/getCurrentState';
 import {getProcess} from '../../wallet/db/queries/walletProcess';
 import {updateLedgerChannel} from '../../wallet/services';
 
 export async function handleOngoingProcessAction(
   action: StrategyProposed | SignedStatesReceived
-): Promise<MessageRelayRequested[]> {
+): Promise<communication.RelayActionWithMessage[]> {
   switch (action.type) {
     case 'WALLET.COMMON.SIGNED_STATES_RECEIVED':
       return handleSignedStatesReceived(action);
@@ -29,7 +28,13 @@ async function handleStrategyProposed(action: StrategyProposed) {
   }
 
   const {theirAddress} = process;
-  return [communication.sendStrategyApproved(theirAddress, processId, strategy)];
+  return [
+    communication.relayActionWithMessage({
+      toParticipantId: theirAddress,
+      fromParticipantId: 'hub',
+      actionToRelay: communication.strategyApproved({processId, strategy})
+    })
+  ];
 }
 
 async function handleSignedStatesReceived(action: SignedStatesReceived) {
@@ -57,18 +62,21 @@ async function handleSignedStatesReceived(action: SignedStatesReceived) {
     return participants
       .filter((_, idx) => idx !== ourIndex)
       .map(p =>
-        communication.sendStatesReceived(
-          p,
-          processId,
-          [
-            ...action.signedStates,
-            {
-              state,
-              signature
-            }
-          ],
-          action.protocolLocator
-        )
+        communication.relayActionWithMessage({
+          toParticipantId: p,
+          fromParticipantId: 'hub',
+          actionToRelay: communication.signedStatesReceived({
+            processId,
+            signedStates: [
+              ...action.signedStates,
+              {
+                state,
+                signature
+              }
+            ],
+            protocolLocator: action.protocolLocator
+          })
+        })
       );
   }
 }
