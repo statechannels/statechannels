@@ -22,7 +22,8 @@ export default class LobbyPage extends React.PureComponent<Props, State> {
 
   render() {
     const { newOpenGame, joinOpenGame } = this.props;
-    const openGames = this.props.openGames || [];
+
+    const openGames = this.props.openGames.filter(game => game.isPublic) || [];
 
     return (
       <ApplicationLayout>

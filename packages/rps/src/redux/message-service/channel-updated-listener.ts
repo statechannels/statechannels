@@ -1,8 +1,8 @@
 import { take, put } from 'redux-saga/effects';
 import { buffers, eventChannel } from 'redux-saga';
-import { RPSChannelClient } from '../../utils/rps-channel-client';
 import { updateChannelState } from '../game/actions';
 import { ChannelState } from '../../core';
+import { RPSChannelClient } from '../../utils/rps-channel-client';
 
 export function* channelUpdatedListener(client: RPSChannelClient) {
   const subscribe = emit => client.onChannelUpdated(emit);

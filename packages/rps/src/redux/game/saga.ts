@@ -49,6 +49,10 @@ function* gameSagaRun(client: RPSChannelClient) {
   }
 
   switch (localState.type) {
+    case 'NeedAddress':
+      const address: string = yield call([client, 'getAddress']);
+      yield put(a.gotAddressFromWallet(address));
+      break;
     case 'GameChosen': // player A
       if (cs.isEmpty(channelState)) {
         yield* createChannel(localState, client);

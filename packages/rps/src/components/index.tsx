@@ -4,7 +4,7 @@ import SelectWeaponPage from './SelectWeaponPage';
 import WeaponSelectedPage from './WeaponSelectedPage';
 import ResultPage from './ResultPage';
 import GameOverPage from './GameOverPage';
-import WaitForResting from './WaitForRestingA';
+import WaitForResting from './WaitForResting';
 
 export {
   ProposeGamePage,

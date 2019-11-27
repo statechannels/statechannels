@@ -16,9 +16,9 @@ import {
   ConfirmGamePage,
   SelectWeaponPage,
   WeaponSelectedPage,
-  ResultPage,
   GameOverPage,
   WaitForResting,
+  ResultPage,
 } from '../components';
 import { unreachable } from '../utils/unreachable';
 
@@ -28,7 +28,6 @@ interface GameProps {
   playAgain: () => void;
   confirmGame: () => void;
   declineGame: () => void;
-  createOpenGame: (roundBuyIn: string) => void;
   cancelOpenGame: () => void;
   conclude: () => void;
 }
@@ -44,6 +43,7 @@ function RenderGame(props: GameProps) {
   switch (state.type) {
     case 'Empty':
       return <ProfileContainer />;
+    case 'NeedAddress':
     case 'Lobby':
     case 'CreatingOpenGame':
       return <LobbyContainer />;
@@ -77,12 +77,12 @@ function RenderGame(props: GameProps) {
       );
     case 'ResultPlayAgain':
       return (
-        <ResultPage
+        <WaitForResting
           yourWeapon={state.myWeapon}
           theirWeapon={state.theirWeapon}
           result={state.result}
           playAgain={props.playAgain}
-          shutDownReason={undefined}
+          waitForOpponent={false}
         />
       );
     case 'WaitForRestart':
@@ -92,6 +92,7 @@ function RenderGame(props: GameProps) {
           theirWeapon={state.theirWeapon}
           result={state.result}
           playAgain={props.playAgain}
+          waitForOpponent={true}
         />
       );
     case 'ShuttingDown':
@@ -127,15 +128,10 @@ const mapStateToProps = (state: SiteState) => ({
 const mapDispatchToProps = {
   chooseWeapon: gameActions.chooseWeapon,
   playAgain: gameActions.playAgain,
-  confirmGame: () => {
-    /* */
-  }, // TODO create this action!
+  confirmGame: gameActions.startRound,
   declineGame: () => {
     /**/
   }, // TODO create this action!
-  createOpenGame: () => {
-    /* */
-  }, // TODO wire up this action and fix type inconistencies
   cancelOpenGame: {
     /**/
   }, // TODO create this action!

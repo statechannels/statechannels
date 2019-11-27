@@ -1,6 +1,9 @@
-import { fork, take, select, cancel, call, apply } from 'redux-saga/effects';
+import { fork, take, select, cancel, call, apply, put } from 'redux-saga/effects';
 
 export const getLocalState = (storeObj: any) => storeObj.game.localState;
+function getOpenGame(storObj: any, address: string) {
+  return storObj.openGames.filter(game => (game.address = address))[0];
+}
 
 import { default as firebase, reduxSagaFirebase } from '../../gateways/firebase';
 
@@ -8,6 +11,7 @@ import * as actions from './actions';
 
 import { LocalState } from '../game/state';
 import { bigNumberify } from 'ethers/utils';
+import { gameJoined } from '../game/actions';
 
 export default function* openGameSaga() {
   // could be more efficient by only watching actions that could change the state
@@ -20,7 +24,7 @@ export default function* openGameSaga() {
 
     const localState: LocalState = yield select(getLocalState);
 
-    if (localState.type === 'Lobby') {
+    if (localState.type === 'Lobby' || localState.type === 'WaitingRoom') {
       // if we're in the lobby we need to sync openGames
       if (!openGameSyncerProcess || !openGameSyncerProcess.isRunning()) {
         openGameSyncerProcess = yield fork(openGameSyncer);
@@ -30,11 +34,20 @@ export default function* openGameSaga() {
       if (openGameSyncerProcess) {
         yield cancel(openGameSyncerProcess);
       }
+      if (localState.type === 'GameChosen') {
+        const openGameKey = `/challenges/${localState.opponentAddress}`;
+        const taggedOpenGame = {
+          isPublic: false,
+          playerAName: localState.name,
+        };
+        yield call(reduxSagaFirebase.database.patch, openGameKey, taggedOpenGame);
+      }
     }
 
     if (localState.type === 'WaitingRoom') {
       // if we don't have a wallet address, something's gone very wrong
       const { address } = localState;
+      let myOpenGame;
       if (address) {
         const myOpenGameKey = `/challenges/${address}`;
 
@@ -42,12 +55,13 @@ export default function* openGameSaga() {
           // my game isn't on firebase (as far as the app knows)
           // attempt to put the game on firebase - will be a no-op if already there
 
-          const myOpenGame = {
+          myOpenGame = {
             address,
             name: localState.name,
             stake: localState.roundBuyIn.toString(),
             createdAt: new Date().getTime(),
             isPublic: true,
+            playerAName: '',
           };
 
           const disconnect = firebase
@@ -58,16 +72,14 @@ export default function* openGameSaga() {
           // use update to allow us to pick our own key
           yield call(reduxSagaFirebase.database.update, myOpenGameKey, myOpenGame);
           myGameIsOnFirebase = true;
-        }
-      }
-    } else if (localState.type !== 'Empty') {
-      const { address } = localState;
-      if (myGameIsOnFirebase) {
-        // if we don't have a wallet address, something's gone very wrong
-        if (address) {
-          const myOpenGameKey = `/challenges/${address}`;
-          yield call(reduxSagaFirebase.database.delete, myOpenGameKey);
-          myGameIsOnFirebase = false;
+        } else {
+          const storeObj = yield select();
+          myOpenGame = getOpenGame(storeObj, myOpenGameKey);
+          if (myOpenGame && !myOpenGame.isPublic) {
+            yield put.resolve(gameJoined(myOpenGame.opponentName, myOpenGame.opponentAddress)); // block until dispatched
+            yield call(reduxSagaFirebase.database.delete, myOpenGameKey);
+            myGameIsOnFirebase = false;
+          }
         }
       }
     }
@@ -78,11 +90,13 @@ const openGameTransformer = dict => {
   if (!dict.value) {
     return [];
   }
-  return Object.keys(dict.value).map(key => {
+  const allGames = Object.keys(dict.value).map(key => {
     // Convert to a proper BN hex string
     dict.value[key].stake = bigNumberify(dict.value[key].stake).toHexString();
     return dict.value[key];
   });
+
+  return allGames;
 };
 
 function* openGameSyncer() {

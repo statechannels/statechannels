@@ -1,3 +1,4 @@
+import { Wallet } from 'ethers';
 import { BigNumberish, bigNumberify } from 'ethers/utils';
 import { EventEmitter } from 'eventemitter3';
 
@@ -84,6 +85,12 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
   playerIndex: 0 | 1;
   protected events = new EventEmitter<EventsWithArgs>();
   protected latestState?: ChannelResult;
+  protected address: string;
+  protected opponentAddress: string;
+
+  constructor() {
+    this.address = Wallet.createRandom().address;
+  }
 
   onMessageQueued(callback: (message: Message) => void): UnsubscribeFunction {
     this.events.on('MessageQueued', message => {
@@ -115,6 +122,8 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
       turnNum: bigNumberify(0).toString(),
       status: 'proposed',
     };
+    this.opponentAddress = this.latestState.participants[1].participantId;
+    // [assuming we're working with 2-participant channels for the time being]
     this.notifyOpponent(this.latestState);
 
     return Promise.resolve(this.latestState);
@@ -126,6 +135,8 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
     // skip funding by setting the channel to 'running' the moment it is joined
     // [assuming we're working with 2-participant channels for the time being]
     this.latestState = { ...latestState, turnNum: bigNumberify(3).toString(), status: 'running' };
+    this.opponentAddress = this.latestState.participants[0].participantId;
+
     this.notifyOpponent(this.latestState);
 
     return Promise.resolve(this.latestState);
@@ -171,7 +182,7 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
   }
 
   async getAddress() {
-    return Promise.resolve('0xdummy');
+    return Promise.resolve(this.address);
   }
 
   async closeChannel(channelId: string) {
@@ -193,8 +204,9 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
   }
 
   protected notifyOpponent(data: ChannelResult) {
-    const sender = 'sender';
-    const recipient = 'recipient';
+    const sender = this.address;
+    const recipient = this.opponentAddress;
+
     this.events.emit('MessageQueued', { sender, recipient, data });
   }
 
