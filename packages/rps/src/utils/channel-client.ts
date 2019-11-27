@@ -86,6 +86,7 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
   protected events = new EventEmitter<EventsWithArgs>();
   protected latestState?: ChannelResult;
   protected address: string;
+  protected opponentAddress: string;
 
   constructor() {
     this.address = Wallet.createRandom().address;
@@ -121,6 +122,8 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
       turnNum: bigNumberify(0).toString(),
       status: 'proposed',
     };
+    this.opponentAddress = this.latestState.participants[1].participantId;
+    // [assuming we're working with 2-participant channels for the time being]
     this.notifyOpponent(this.latestState);
 
     return Promise.resolve(this.latestState);
@@ -132,6 +135,8 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
     // skip funding by setting the channel to 'running' the moment it is joined
     // [assuming we're working with 2-participant channels for the time being]
     this.latestState = { ...latestState, turnNum: bigNumberify(3).toString(), status: 'running' };
+    this.opponentAddress = this.latestState.participants[0].participantId;
+
     this.notifyOpponent(this.latestState);
 
     return Promise.resolve(this.latestState);
@@ -200,7 +205,8 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
 
   protected notifyOpponent(data: ChannelResult) {
     const sender = this.address;
-    const recipient = 'recipient';
+    const recipient = this.opponentAddress;
+
     this.events.emit('MessageQueued', { sender, recipient, data });
   }
 
