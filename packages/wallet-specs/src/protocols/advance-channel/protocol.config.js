@@ -4,7 +4,7 @@ const config = {
   states: {
     waiting: {
       entry: 'send',
-      on: { '*': { target: 'success', cond: 'advanced' } },
+      on: { CHANNEL_UPDATED: { target: 'success', cond: 'advanced' } },
     },
     success: { type: 'final' },
   },

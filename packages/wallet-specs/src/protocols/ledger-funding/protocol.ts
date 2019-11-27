@@ -55,13 +55,12 @@ const createNewChannel = {
 };
 
 type LedgerExists = Init & { ledgerChannelID: string };
-const directFundingArgs: (ctx: LedgerExists) => DirectFundingArgs = ({
-  targetChannelID,
-  ledgerChannelID,
-}) => ({
-  channelID: ledgerChannelID,
-  minimalOutcome: store.getLatestState(targetChannelID).outcome,
-});
+function directFundingArgs(ctx: LedgerExists): DirectFundingArgs {
+  return {
+    channelID: ctx.ledgerChannelID,
+    minimalOutcome: store.getLatestState(ctx.targetChannelID).outcome,
+  };
+}
 const fundLedger = {
   invoke: {
     src: 'directFunding',
