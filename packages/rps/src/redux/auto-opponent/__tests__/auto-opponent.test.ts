@@ -32,7 +32,7 @@ it('runs to GameOver', async () => {
 
   const { storeState } = await expectSaga(saga)
     .withReducer(reducer, initialState)
-    .run(5000);
+    .silentRun(5000);
 
   expect(storeState.game.localState.type).toEqual('GameOver');
 }, 6000);
