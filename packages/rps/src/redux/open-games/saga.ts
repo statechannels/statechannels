@@ -95,7 +95,8 @@ const openGameTransformer = dict => {
     dict.value[key].stake = bigNumberify(dict.value[key].stake).toHexString();
     return dict.value[key];
   });
-  return allGames.filter(game => game.isPublic);
+
+  return allGames;
 };
 
 function* openGameSyncer() {
