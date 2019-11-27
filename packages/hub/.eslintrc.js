@@ -106,7 +106,7 @@ const rules = {
   ],
   'no-unused-vars': 'off',
   'import/default': 'off',
-  'camelcase': 'off' // This should probably be on...
+  camelcase: 'off'
 };
 
 const TSRules = {
@@ -209,7 +209,7 @@ module.exports = {
       files: ['config/**/*'],
       rules: Object.assign(rules, {
         '@typescript-eslint/no-var-requires': 'off'
-      }),
+      })
     }
   ]
 };
