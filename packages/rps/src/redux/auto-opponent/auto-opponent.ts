@@ -57,6 +57,7 @@ export function* autoOpponent(player: 'A' | 'B', externalClient: RPSChannelClien
   // we need the loop to run once before being triggered, so create a special action
   const initializerChannel = yield actionChannel('@@AutoPlayerInitializer', buffers.fixed(10));
   yield put({ type: '@@AutoPlayerInitializer' });
+
   while (true) {
     const { incomingMessage, outgoingMessage, gameJoined, gameCreated } = yield race({
       incomingMessage: take(incomingMessageChannel),
