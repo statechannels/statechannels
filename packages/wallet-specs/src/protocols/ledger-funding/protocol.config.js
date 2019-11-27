@@ -2,49 +2,31 @@ const config = {
   key: 'ledger-funding',
   initial: 'waitForChannel',
   states: {
-    waitForChannel: {
+    lookForExistingChannel: {
+      invoke: { src: 'findLedgerChannelId' },
       on: {
-        '': {
+        CHANNEL_FOUND: {
           target: 'fundLedger',
-          cond: 'suitableChannelExists',
-          actions: 'assignExistingLedgerChannelID',
+          actions: 'assignLedgerChannelId',
         },
+        CHANNEL_NOT_FOUND: 'createNewChannel',
       },
-      invoke: {
-        src: 'createChannel',
-        data: function(context) {
-          var _a = store_1.store.getLatestState(context.targetChannelID),
-            outcome = _a.outcome,
-            channel = _a.channel;
-          var participants = channel.participants;
-          return { participants: participants, outcome: outcome };
-        },
-      },
+    },
+    createNewChannel: {
+      invoke: { src: 'createNullChannel', data: 'createNullChannelArgs' },
       onDone: 'fundLedger',
     },
     fundLedger: {
       invoke: {
         src: 'directFunding',
-        data: function(context) {
-          return {
-            channelID: context.ledgerChannelID,
-            minimalOutcome: store_1.store.getLatestState(
-              context.targetChannelID
-            ).outcome,
-          };
-        },
+        data: 'directFundingArgs',
         onDone: 'fundTarget',
       },
     },
     fundTarget: {
       invoke: {
         src: 'ledgerUpdate',
-        data: function(context) {
-          return {
-            channelID: context.ledgerChannelID,
-            outcome: [context.targetChannelID, context.amount],
-          };
-        },
+        data: 'ledgerUpdateArgs',
         onDone: 'success',
       },
     },
