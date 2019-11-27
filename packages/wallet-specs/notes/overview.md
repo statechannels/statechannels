@@ -1,32 +1,32 @@
-WIP wire protocol notes
-
 # advance-channel
+
+## Wire protocol
 
 None
 
 # conclude-channel
 
-Spawns a new process.
+When my app calls `ConcludeChannel`, my wallet spawns a new `conclude-channel` process.
+When my store receives a final state, it spawns a `conclude-channel` machine with the channels id.
+
+## Wire protocol
 
 None:
-
-- when my store receives a final state, it spawns a `conclude-channel` machine with the channel's id.
-  - this is wrong!
 
 # create-channel
 
 When my app calls `CreateChannel`, spawn a `create-channel` process.
 
+## Wire protocol
+
 On init:
 
 - generate a `nonce`, and therefore a `channelID`
-
-send a `message` of type
+- send a `message` of type
 
 ```
 interface OpenChannel {
   type: "Channel.Open";
-  messageID: string; // use the channel id
   participants: ChannelParticipant[];
   signedState: SignedState;
 }
@@ -38,6 +38,8 @@ When my wallet receives an `OpenChannel` message, spawn an `open-channel` protoc
 
 My wallet sends a message of type `Response = UpdateChannel | RejectChannel`.
 
+## Wire protocol
+
 - If the app accepts to open the channel (`JOIN_CHANNEL`), return
 
 ```
@@ -48,14 +50,7 @@ interface UpdateChannel {
 }
 ```
 
-- if my app refuses to open the channel (???), return
-
-```
-interface RejectChannel {
-  type: "Channel.Reject";
-  messageID: string; // use the channel id
-}
-```
+- if my app refuses to open the channel, it calls `ConcludeChannel`, and the join-channel protocol shuts down
 
 # create-null-channel
 
