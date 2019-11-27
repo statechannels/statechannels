@@ -53,8 +53,8 @@ contract RockPaperScissors is ForceMoveApp {
     function validTransition(
         VariablePart memory fromPart,
         VariablePart memory toPart,
-        uint256 turnNumB,
-        uint256 nParticipants
+        uint256 /* turnNumB */,
+        uint256 /* nParticipants */
     ) public pure returns (bool) {
         Outcome.AllocationItem[] memory fromAllocation = extractAllocation(fromPart);
         Outcome.AllocationItem[] memory toAllocation = extractAllocation(toPart);
