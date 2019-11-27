@@ -20,11 +20,7 @@ const { choosePort } = require('react-dev-utils/WebpackDevServerUtils');
 
 const paths = require('../config/paths');
 const configFactory = require('../config/webpack.config');
-const { getNetworkName, GanacheServer } = require('@statechannels/devtools');
-const path = require('path');
-
-const useYarn = fs.existsSync(paths.yarnLockFile);
-const isInteractive = process.stdout.isTTY;
+const { getNetworkName } = require('@statechannels/devtools');
 
 void (async () => {
   //Allows the use of async/await
@@ -34,7 +30,7 @@ void (async () => {
   }
 
   // Tools like Cloud9 rely on this.
-  const DEFAULT_PORT = !!process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+  const DEFAULT_PORT = !!process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
   const HOST = process.env.HOST || '0.0.0.0';
 
   if (process.env.HOST) {
@@ -83,14 +79,6 @@ void (async () => {
   }
 
   process.env.TARGET_NETWORK = getNetworkName(process.env.CHAIN_NETWORK_ID);
-
-  console.log(chalk.cyan('Starting ganache...\n'));
-  const ganacheServer = new GanacheServer();
-  await ganacheServer.ready();
-
-  const etherlimePath = path.resolve(__dirname, process.cwd() + '/node_modules/.bin/etherlime');
-  console.log(chalk.cyan('Compiling contracts...\n'));
-  await execCommand(`${etherlimePath} compile --buildDirectory=./build/contracts`);
 
   const devServer = new WebpackDevServer(webpack(config), {
     hot: true,
