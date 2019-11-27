@@ -42,7 +42,7 @@
     "tree-kill": "1.2.1",
     "truffle": "5.0.37",
     "prettier": "1.18.2",
-    "typescript": "3.6.3"
+    "typescript": "3.7.2"
   },
   "lint-staged": {
     "{src,test}/**/*.ts": "yarn lint:check"
