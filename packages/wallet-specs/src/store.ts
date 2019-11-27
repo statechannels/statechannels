@@ -10,15 +10,25 @@ interface IStore {
   // supported state, and remove any lesser, unsupported states.
   getUnsupportedStates: (channelID: string) => SignedState[];
 
+  getEntry: (channelID: string) => ChannelStoreEntry;
+  findLedgerChannelId: (targetChannelId: string) => string | undefined;
+
   signedByMe: (state: State) => boolean;
   sendState: (state: State) => void;
   receiveStates: (signedStates: SignedState[]) => ChannelUpdated | false;
 }
 
+export interface Participant {
+  participantId: string;
+  signingAddress: string;
+  destination: string;
+}
+
 export interface ChannelStoreEntry {
   supportedState: SignedState[];
   unsupportedStates: SignedState[];
-  privateKey: string;
+  privateKey: string; // determines ourIndex
+  participants: Participant[];
 }
 
 interface ChannelStore {
@@ -34,6 +44,32 @@ export class Store implements IStore {
 
   constructor(initialStore: ChannelStore = {}) {
     this._store = initialStore;
+  }
+
+  public getEntry(channelID: string): ChannelStoreEntry {
+    if (!this._store[channelID]) {
+      throw new Error(`Channel ${channelID} not found`);
+    }
+
+    return this._store[channelID];
+  }
+
+  public findLedgerChannelId(targetChannelId: string): string | undefined {
+    const participantIds = this.participantIds(targetChannelId);
+    for (const channelId in this._store) {
+      const entry = this.getEntry(channelId);
+      if (
+        entry.supportedState[0].state.appDefinition === undefined &&
+        // TODO: correct array equality
+        this.participantIds(channelId) === participantIds
+      ) {
+        return channelId;
+      }
+    }
+  }
+
+  public participantIds(channelId: string): string[] {
+    return store.getEntry(channelId).participants.map(p => p.participantId);
   }
 
   public getLatestState(channelID) {
@@ -96,14 +132,6 @@ export class Store implements IStore {
     const entry = this.getEntry(channelID);
 
     return entry.unsupportedStates.concat(entry.supportedState);
-  }
-
-  private getEntry(channelID: string): ChannelStoreEntry {
-    if (!this._store[channelID]) {
-      throw new Error(`Channel ${channelID} not found`);
-    }
-
-    return this._store[channelID];
   }
 
   private updateEntry(channelID: string, states: SignedState[]): true {

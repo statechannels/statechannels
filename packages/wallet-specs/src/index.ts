@@ -47,3 +47,11 @@ export interface Entry {
 
 export { chain } from './chain';
 export { store, Store } from './store';
+
+type numberish = string | number;
+export const add = (a: numberish, b: numberish) =>
+  (Number(a) + Number(b)).toString();
+export const subtract = (a: numberish, b: numberish) =>
+  (Number(a) - Number(b)).toString();
+export const max = (a: numberish, b: numberish) =>
+  Math.max(Number(a), Number(b)).toString();

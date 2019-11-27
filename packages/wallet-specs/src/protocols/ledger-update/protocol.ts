@@ -3,9 +3,9 @@ import { saveConfig } from '../../utils';
 
 const PROTOCOL = 'ledger-update';
 
-interface CommonContext {
+export interface Init {
   channelID: string;
-  currentturnNum: number;
+  currentTurnNum: number;
   targetOutcome: Outcome;
 }
 

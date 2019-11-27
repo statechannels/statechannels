@@ -1,10 +1,13 @@
 import {
+  add,
   chain,
   getChannelID,
+  max,
   Outcome,
   OutcomeItem,
   State,
   store,
+  subtract,
 } from '../../';
 import { saveConfig } from '../../utils';
 
@@ -12,17 +15,10 @@ const PROTOCOL = 'direct-funding';
 const success = { type: 'final' };
 const failure = { type: 'final' };
 
-interface Context {
+export interface Init {
   channelID: string;
   minimalOutcome: Outcome;
 }
-
-type numberish = string | number;
-const add = (a: numberish, b: numberish) => (Number(a) + Number(b)).toString();
-const subtract = (a: numberish, b: numberish) =>
-  (Number(a) - Number(b)).toString();
-const max = (a: numberish, b: numberish) =>
-  Math.max(Number(a), Number(b)).toString();
 
 function getHoldings(state: State, destination: string): string {
   const { outcome } = state;

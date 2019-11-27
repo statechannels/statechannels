@@ -28,6 +28,7 @@ const storeEntry: ChannelStoreEntry = {
   privateKey: 'secret',
   supportedState: [startingSignedState],
   unsupportedStates: [],
+  participants: [],
 };
 const store = new Store({ '0xabc': storeEntry });
 

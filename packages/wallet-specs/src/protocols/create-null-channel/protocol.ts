@@ -1,13 +1,12 @@
-import { Address, Outcome, PrivateKey, store } from '../../';
+import { Outcome, store } from '../../';
 import { saveConfig } from '../../utils';
 import { Init as SupportStateArgs } from '../support-state/protocol';
 
 const PROTOCOL = 'create-null-channel';
 
-interface Init {
-  participants: Address[];
+export interface Init {
+  participantIds: string[];
   outcome: Outcome;
-  privateKey: PrivateKey;
 }
 
 const channelUnknown = {
