@@ -42,9 +42,8 @@ const lookForExistingChannel = {
 const createNullChannelArgs: (ctx: Init) => CreateNullChannelArgs = ({
   targetChannelID,
 }: Init) => {
-  const participantIds = store.participantIds(targetChannelID);
-  const { outcome } = store.getLatestState(targetChannelID);
-  return { participantIds, outcome };
+  const { channel, outcome } = store.getLatestState(targetChannelID);
+  return { channel, outcome };
 };
 
 const createNewChannel = {

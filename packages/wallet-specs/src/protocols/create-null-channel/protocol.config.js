@@ -1,18 +1,12 @@
 const config = {
   key: 'create-null-channel',
-  initial: 'channelUnknown',
+  initial: 'checkChannel',
   states: {
-    channelUnknown: {
-      on: {
-        '': { target: 'channelKnown', cond: 'amFirst', actions: 'sendState' },
-        CHANNEL_UPDATED: {
-          target: 'channelKnown',
-          cond: 'dataMatches',
-          actions: 'assignChannelId',
-        },
-      },
+    checkChannel: {
+      entry: 'assignChannelId',
+      on: { '': [{ target: 'preFundSetup', cond: 'channelOK' }, 'abort'] },
     },
-    channelKnown: {
+    preFundSetup: {
       invoke: { src: 'supportState', data: 'supportStateArgs' },
       onDone: 'success',
       onError: 'failure',
