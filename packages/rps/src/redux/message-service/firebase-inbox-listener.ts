@@ -16,7 +16,6 @@ export function* firebaseInboxListener(client: RPSChannelClient) {
     const firebaseResponse = yield take(channel);
     const key = firebaseResponse.snapshot.key;
     const message: Message = firebaseResponse.value;
-    console.log(message);
     yield call([client, 'pushMessage'], message);
     yield call(reduxSagaFirebase.database.delete, `/messages/${address}/${key}`);
   }
