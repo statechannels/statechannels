@@ -1,4 +1,5 @@
 import {ConcludeInstigated} from "./actions";
+export {relayActionWithMessage, RelayActionWithMessage} from "../redux/actions";
 
 export * from "./actions";
 

@@ -2,16 +2,17 @@ import {
   ConcludeInstigated,
   RelayableAction,
   SignedStatesReceived,
-  StrategyProposed
+  StrategyProposed,
+  RelayActionWithMessage
 } from '@statechannels/wallet/lib/src/communication';
-import {MessageRelayRequested} from '../../wallet-client';
+
 import {getProcess} from '../../wallet/db/queries/walletProcess';
 import {handleNewProcessAction} from './handle-new-process-action';
 import {handleOngoingProcessAction} from './handle-ongoing-process-action';
 
 export async function handleWalletMessage(
   message: RelayableAction
-): Promise<MessageRelayRequested[]> {
+): Promise<RelayActionWithMessage[]> {
   if (isNewProcessAction(message) && (await shouldHandleAsNewProcessAction(message))) {
     return handleNewProcessAction(message);
   } else if (isProtocolAction(message)) {
