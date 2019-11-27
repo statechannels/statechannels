@@ -1,9 +1,10 @@
 import {unreachable} from '@statechannels/wallet';
-/* eslint-disable import/no-duplicates */
-// Should we fix this?
-import {SignedStatesReceived, StrategyProposed} from '@statechannels/wallet/lib/src/communication';
-import * as communication from '@statechannels/wallet/lib/src/communication';
-/* eslint-enable import/no-duplicates */
+import {
+  SignedStatesReceived,
+  StrategyProposed,
+  sendStatesReceived,
+  sendStrategyApproved
+} from '@statechannels/wallet/lib/src/communication';
 import {HUB_ADDRESS} from '../../constants';
 import {errors} from '../../wallet';
 import {getCurrentState} from '../../wallet/db/queries/getCurrentState';

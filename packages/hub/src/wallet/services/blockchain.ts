@@ -28,10 +28,11 @@ export class Blockchain {
   }
 
   private static async attachEthAssetHolder() {
-    /* eslint-disable require-atomic-updates */
-    if (!Blockchain.ethAssetHolder) {
-      Blockchain.ethAssetHolder = await ethAssetHolder();
+    if (Blockchain.ethAssetHolder) {
+      return;
     }
-    /* eslint-enable require-atomic-updates */
+    const newAssetHolder = await ethAssetHolder();
+    // eslint-disable-next-line require-atomic-updates
+    Blockchain.ethAssetHolder = Blockchain.ethAssetHolder || newAssetHolder;
   }
 }
