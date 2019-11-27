@@ -1,4 +1,4 @@
-import { select, call, put, takeEvery } from 'redux-saga/effects';
+import { select, call, put, take } from 'redux-saga/effects';
 import { RPSChannelClient } from '../../utils/rps-channel-client';
 import {
   AppData,
@@ -34,7 +34,10 @@ const isPlayersTurnNext = (
 };
 
 export function* gameSaga(client: RPSChannelClient) {
-  yield takeEvery('*', gameSagaRun, client);
+  while (true) {
+    yield take('*');
+    yield* gameSagaRun(client);
+  }
 }
 
 function* gameSagaRun(client: RPSChannelClient) {
@@ -90,7 +93,7 @@ function* gameSagaRun(client: RPSChannelClient) {
       }
       break;
     case 'ShuttingDown':
-      if (isPlayersTurnNext(localState, channelState)) {
+      if (isPlayersTurnNext(localState, channelState) && !cs.isClosed(channelState)) {
         yield* closeChannel(channelState, client);
       }
       break;

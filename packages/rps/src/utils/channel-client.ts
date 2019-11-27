@@ -81,6 +81,7 @@ interface EventsWithArgs {
   ChannelUpdated: [ChannelResult];
 }
 export class FakeChannelClient implements IChannelClient<ChannelResult> {
+  playerIndex: 0 | 1;
   protected events = new EventEmitter<EventsWithArgs>();
   protected latestState?: ChannelResult;
 
@@ -104,6 +105,7 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
     appDefinition: string,
     appData: string
   ): Promise<ChannelResult> {
+    this.playerIndex = 0;
     this.latestState = {
       participants,
       allocations,
@@ -119,10 +121,11 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
   }
 
   async joinChannel(channelId: string): Promise<ChannelResult> {
+    this.playerIndex = 1;
     const latestState = this.findChannel(channelId);
     // skip funding by setting the channel to 'running' the moment it is joined
     // [assuming we're working with 2-participant channels for the time being]
-    this.latestState = { ...latestState, turnNum: bigNumberify(1).toString(), status: 'running' };
+    this.latestState = { ...latestState, turnNum: bigNumberify(3).toString(), status: 'running' };
     this.notifyOpponent(this.latestState);
 
     return Promise.resolve(this.latestState);
@@ -135,9 +138,14 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
     appData: string
   ): Promise<ChannelResult> {
     const latestState = this.findChannel(channelId);
-    const turnNum = bigNumberify(latestState.turnNum)
-      .add(1)
-      .toString();
+    const currentTurnNum = bigNumberify(latestState.turnNum);
+
+    if (currentTurnNum.mod(2).eq(this.playerIndex)) {
+      return Promise.reject(
+        `Not your turn: currentTurnNum = ${currentTurnNum}, index = ${this.playerIndex}`
+      );
+    }
+    const turnNum = currentTurnNum.add(1).toString();
 
     this.latestState = { ...latestState, turnNum, participants, allocations, appData };
     this.notifyOpponent(this.latestState);
@@ -147,8 +155,17 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
 
   async pushMessage(parameters: Message<ChannelResult>): Promise<PushMessageResult> {
     this.latestState = parameters.data;
-
     this.notifyApp(this.latestState);
+
+    // auto-close, if we received a close
+    if (parameters.data.status === 'closing') {
+      const turnNum = bigNumberify(this.latestState.turnNum)
+        .add(1)
+        .toString();
+      this.latestState = { ...this.latestState, turnNum, status: 'closed' };
+      this.notifyOpponent(this.latestState);
+      this.notifyApp(this.latestState);
+    }
 
     return Promise.resolve({ success: true });
   }
@@ -159,9 +176,15 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
 
   async closeChannel(channelId: string) {
     const latestState = this.findChannel(channelId);
-    const turnNum = bigNumberify(latestState.turnNum)
-      .add(1)
-      .toString();
+    const currentTurnNum = bigNumberify(latestState.turnNum);
+
+    if (currentTurnNum.mod(2).eq(this.playerIndex)) {
+      return Promise.reject(
+        `Not your turn: currentTurnNum = ${currentTurnNum}, index = ${this.playerIndex}`
+      );
+    }
+
+    const turnNum = currentTurnNum.add(1).toString();
 
     this.latestState = { ...latestState, turnNum, status: 'closing' };
     this.notifyOpponent(this.latestState);
