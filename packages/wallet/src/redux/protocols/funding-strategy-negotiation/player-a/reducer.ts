@@ -66,8 +66,7 @@ function strategyChosen(
 
   const {processId, opponentAddress, ourAddress} = state;
   const {strategy} = action;
-
-  const message = comms.strategyApproved({processId, strategy});
+  const message = comms.strategyProposed({processId, strategy});
   return {
     protocolState: states.waitForStrategyResponse({...state, strategy}),
     sharedData: queueRelayableActionMessage(

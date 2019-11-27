@@ -17,7 +17,7 @@ describe("indirect strategy chosen", () => {
     const {processId} = scenario;
     itRelaysThisAction(
       result,
-      commActions.strategyApproved({processId, strategy: "IndirectFundingStrategy"})
+      commActions.strategyProposed({processId, strategy: "IndirectFundingStrategy"})
     );
   });
 
@@ -40,7 +40,7 @@ describe("virtual strategy chosen", () => {
     const {processId} = scenario;
     itRelaysThisAction(
       result,
-      commActions.strategyApproved({processId, strategy: "VirtualFundingStrategy"})
+      commActions.strategyProposed({processId, strategy: "VirtualFundingStrategy"})
     );
   });
 
