@@ -65,7 +65,7 @@ export function siteStateFromLocalState<T extends states.LocalState>(
   }
   return {
     ...initialState,
-    game: { localState, channelState: initialState.game.channelState },
+    game: { localState, channelState },
   };
 }
 
