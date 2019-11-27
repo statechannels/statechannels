@@ -1,6 +1,6 @@
 import { Player } from './players';
-import { BigNumber } from 'ethers/utils';
 import { Weapon } from './rps-commitment';
+import { bigNumberify } from 'ethers/utils';
 
 export enum Result {
   Tie,
@@ -66,28 +66,42 @@ export function convertToRelativeResult(absoluteResult: AbsoluteResult, youAre: 
 
 export function allocationAfterResult(
   absoluteResult: AbsoluteResult,
-  roundBuyIn: BigNumber,
-  balances: BigNumber[]
-): BigNumber[] {
+  roundBuyIn: string,
+  balances: [string, string]
+): [string, string] {
   switch (absoluteResult) {
     case AbsoluteResult.AWins:
-      return [balances[0].add(roundBuyIn.mul(2)), balances[1].sub(roundBuyIn.mul(2))];
+      return [
+        bigNumberify(balances[0])
+          .add(bigNumberify(roundBuyIn).mul(2))
+          .toString(),
+        bigNumberify(balances[1])
+          .sub(bigNumberify(roundBuyIn).mul(2))
+          .toString(),
+      ];
     case AbsoluteResult.BWins:
       return balances;
     case AbsoluteResult.Tie:
-      return [balances[0].add(roundBuyIn.mul(1)), balances[1].sub(roundBuyIn.mul(1))];
+      return [
+        bigNumberify(balances[0])
+          .add(bigNumberify(roundBuyIn).mul(1))
+          .toString(),
+        bigNumberify(balances[1])
+          .sub(bigNumberify(roundBuyIn).mul(1))
+          .toString(),
+      ];
   }
 }
 
 export function updateAllocation(
   relativeResult: Result,
   youAre: Player,
-  roundBuyIn: BigNumber,
-  aBal: BigNumber,
-  bBal: BigNumber
-): [BigNumber, BigNumber] {
+  roundBuyIn: string,
+  aBal: string,
+  bBal: string
+): [string, string] {
   return allocationAfterResult(convertToAbsoluteResult(relativeResult, youAre), roundBuyIn, [
     aBal,
     bBal,
-  ]) as [BigNumber, BigNumber];
+  ]);
 }

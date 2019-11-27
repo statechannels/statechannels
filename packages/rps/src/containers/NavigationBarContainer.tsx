@@ -7,7 +7,7 @@ import * as globalActions from '../redux/global/actions';
 import { SiteState } from '../redux/reducer';
 
 const mapStateToProps = (state: SiteState) => {
-  const name = 'myName' in state.game.gameState ? state.game.gameState.myName : '';
+  const name = 'name' in state.game.localState ? state.game.localState.name : '';
   return {
     showRules: state.overlay.rulesVisible,
     loginDisplayName: name,

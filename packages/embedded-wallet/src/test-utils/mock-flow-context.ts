@@ -3,6 +3,8 @@ import * as Onboarding from '../flows/onboarding/Onboarding';
 
 export type Flow = 'Onboarding';
 
+/* globals jest */
+
 const MockRequests: {[key in Flow]: JsonRpcRequest} = {
   Onboarding: {
     jsonrpc: '2.0',

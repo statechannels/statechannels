@@ -75,7 +75,7 @@ const calculateOffsetX = (
   valueLabelRef: RefObject<HTMLLabelElement>,
   value: number,
   max: number,
-  min: number = 0,
+  min = 0,
   dialogContext: DialogContextProps
 ) => {
   if (dialogContext && dialogContext.ready === false) {

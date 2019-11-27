@@ -8,8 +8,8 @@ export interface ChannelState<T = AppData> {
   status: ChannelStatus;
   aUserId: string;
   bUserId: string;
-  aDestination: string;
-  bDestination: string;
+  aAddress: string;
+  bAddress: string;
   aBal: string;
   bBal: string;
   appData: T;

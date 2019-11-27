@@ -65,6 +65,7 @@
     "@types/web3": "1.0.19",
     "@typescript-eslint/eslint-plugin": "^2.7.0",
     "@typescript-eslint/eslint-plugin-tslint": "^2.7.0",
+    "@typescript-eslint/parser": "^2.8.0",
     "dotenv": "8.1.0",
     "dotenv-extended": "2.5.0",
     "eslint": "^6.6.0",

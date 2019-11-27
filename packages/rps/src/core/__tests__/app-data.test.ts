@@ -23,13 +23,13 @@ const testReveal: Reveal = {
 
 const testRoundProposed: RoundProposed = {
   type: 'roundProposed',
-  stake: bigNumberify(99),
+  stake: bigNumberify(99).toString(),
   preCommit: HashZero,
 };
 
 const testRoundAccepted: RoundAccepted = {
   type: 'roundAccepted',
-  stake: bigNumberify(99),
+  stake: bigNumberify(99).toString(),
   preCommit: HashZero,
   playerBWeapon: Weapon.Rock,
 };
