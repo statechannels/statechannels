@@ -12,6 +12,9 @@ import { MetamaskErrorType } from '../redux/metamask/actions';
 import LoginErrorPage from '../components/LoginErrorPage';
 import { localStatesA, localStatesB, channelStates } from '../redux/game/__tests__/scenarios';
 import { ChannelState } from '../core';
+import GameBar from '../components/GameBar';
+import { WeiPerEther } from 'ethers/constants';
+import { bigNumberify } from 'ethers/utils';
 
 const fakeStore = state => ({
   dispatch: action => {
@@ -91,5 +94,22 @@ Object.keys(localStatesB).forEach(key => {
     testState(siteStateFromLocalState(localStatesB[key]))
   );
 });
+
+const balancesArray = [
+  [5, 5],
+  [6, 4],
+  [4, 6],
+]; // denominated in ETH
+balancesArray.forEach(balances =>
+  storiesOf('GameBar', module).add(balances[0] + ' ETH , ' + balances[1] + ' ETH', () => (
+    <GameBar
+      myName={'Michael'}
+      opponentName={'Janet'}
+      myBalance={WeiPerEther.mul(balances[0]).toString()}
+      opponentBalance={WeiPerEther.mul(balances[1]).toString()}
+      roundBuyIn={WeiPerEther.mul(bigNumberify(0.1 * balances[0] + 0.1 * balances[1])).toString()}
+    />
+  ))
+);
 
 storiesOf('Game Over', module);
