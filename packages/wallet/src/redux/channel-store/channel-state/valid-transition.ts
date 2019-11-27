@@ -7,7 +7,7 @@ import {
   ForceMoveAppContractInterface
 } from "@statechannels/nitro-protocol";
 import {hasValidSignature} from "../../../utils/signing-utils";
-import {defaultAbiCoder, Interface} from "ethers/utils";
+import {defaultAbiCoder, Interface, bigNumberify} from "ethers/utils";
 
 let PureEVM;
 if (
@@ -15,7 +15,7 @@ if (
   (typeof process !== "undefined" && process.env.NODE_ENV === "test")
 ) {
   // tslint:disable
-  PureEVM = require('pure-evm');
+  PureEVM = require("pure-evm");
 } else {
   import(/* webpackMode: "eager" */ "pure-evm").then(x => (PureEVM = x));
 }
@@ -45,6 +45,9 @@ export function validAppTransition(
   toState: State,
   bytecode: string
 ): boolean {
+  if (bigNumberify(bytecode).isZero()) {
+    return true;
+  }
   const fromState = channelState.signedStates[channelState.signedStates.length - 1].state;
   const numberOfParticipants = toState.channel.participants.length;
   const fromVariablePart = getVariablePart(fromState);
@@ -56,6 +59,7 @@ export function validAppTransition(
     turnNumB,
     numberOfParticipants
   ]);
+
   const result = PureEVM.exec(
     Uint8Array.from(Buffer.from(bytecode.substr(2), "hex")),
     Uint8Array.from(Buffer.from(txData.substr(2), "hex"))
