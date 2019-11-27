@@ -1,7 +1,8 @@
 import {WalletAction} from "../../actions";
 import {isConsensusUpdateAction, ConsensusUpdateAction} from "../consensus-update";
 import {isDirectFundingAction, DirectFundingAction} from "../direct-funding/actions";
-import {routerFactory, EmbeddedProtocol} from "../../../communication";
+import {EmbeddedProtocol} from "../../../communication";
+import {routerFactory} from "../../../communication/actions";
 
 export type LedgerTopUpAction = ConsensusUpdateAction | DirectFundingAction;
 
