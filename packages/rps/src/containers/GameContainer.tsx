@@ -28,7 +28,6 @@ interface GameProps {
   playAgain: () => void;
   confirmGame: () => void;
   declineGame: () => void;
-  createOpenGame: (roundBuyIn: string) => void;
   cancelOpenGame: () => void;
   conclude: () => void;
 }
@@ -128,15 +127,10 @@ const mapStateToProps = (state: SiteState) => ({
 const mapDispatchToProps = {
   chooseWeapon: gameActions.chooseWeapon,
   playAgain: gameActions.playAgain,
-  confirmGame: () => {
-    /* */
-  }, // TODO create this action!
+  confirmGame: gameActions.startRound,
   declineGame: () => {
     /**/
   }, // TODO create this action!
-  createOpenGame: () => {
-    /* */
-  }, // TODO wire up this action and fix type inconistencies
   cancelOpenGame: {
     /**/
   }, // TODO create this action!
