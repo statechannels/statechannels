@@ -9,7 +9,6 @@ export function* messageQueuedListener(client: RPSChannelClient) {
 
   while (true) {
     const notification = yield take(channel);
-    console.log(notification);
     const to = notification.recipient;
     yield fork(
       reduxSagaFirebase.database.create,
