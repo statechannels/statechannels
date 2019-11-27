@@ -1,7 +1,8 @@
 import * as playerA from "./player-a/actions";
 import * as playerB from "./player-b/actions";
 import {WalletAction} from "../../../redux/actions";
-import {routerFactory, EmbeddedProtocol} from "../../../communication";
+import {EmbeddedProtocol} from "../../../communication";
+import {routerFactory} from "../../../communication/actions";
 
 // -------
 // Actions

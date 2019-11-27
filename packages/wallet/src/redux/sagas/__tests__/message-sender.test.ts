@@ -8,7 +8,8 @@ import {
   channelProposedEvent,
   updateChannelResponse,
   unknownChannelId,
-  sendChannelJoinedMessage
+  sendChannelJoinedMessage,
+  relayActionWithMessage
 } from "../../actions";
 import {Wallet} from "ethers";
 import {expectSaga} from "redux-saga-test-plan";
@@ -17,6 +18,7 @@ import {messageSender} from "../message-sender";
 import {channelFromStates} from "../../channel-store/channel-state/__tests__";
 import * as stateHelpers from "../../__tests__/state-helpers";
 import {setChannel, EMPTY_SHARED_DATA} from "../../state";
+import {strategyApproved} from "../../../communication";
 
 describe("message sender", () => {
   it("creates a notification for WALLET.SEND_CHANNEL_PROPOSED_MESSAGE", async () => {
@@ -75,6 +77,37 @@ describe("message sender", () => {
         recipient: "A",
         sender: "B",
         data: {type: "Channel.Joined", signedState: state}
+      }
+    });
+  });
+
+  it("creates a notification for WALLET.RELAY_ACTION_WITH_MESSAGE", async () => {
+    const state = stateHelpers.appState({turnNum: 0});
+
+    const initialState = setChannel(
+      EMPTY_SHARED_DATA,
+      channelFromStates([state], stateHelpers.asAddress, stateHelpers.asPrivateKey)
+    );
+
+    const actionToRelay = strategyApproved({strategy: "IndirectFundingStrategy", processId: "id"});
+    const message = relayActionWithMessage({
+      actionToRelay,
+      fromParticipantId: "A",
+      toParticipantId: "B"
+    });
+
+    const {effects} = await expectSaga(messageSender, message)
+      .withState(initialState)
+      .provide([[matchers.call.fn(window.parent.postMessage), 0]])
+      .run();
+
+    expect(effects.call[0].payload.args[0]).toMatchObject({
+      jsonrpc: "2.0",
+      method: "MessageQueued",
+      params: {
+        recipient: "A",
+        sender: "B",
+        data: actionToRelay
       }
     });
   });

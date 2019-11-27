@@ -1,5 +1,6 @@
 import {WalletAction} from "../../actions";
-import {isCommonAction, EmbeddedProtocol, routerFactory} from "../../../communication";
+import {isCommonAction, EmbeddedProtocol} from "../../../communication";
+import {routerFactory} from "../../../communication/actions";
 import {isDirectFundingAction, DirectFundingAction} from "../direct-funding/actions";
 import {AdvanceChannelAction, isAdvanceChannelAction} from "../advance-channel";
 

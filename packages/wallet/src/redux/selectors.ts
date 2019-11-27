@@ -167,3 +167,28 @@ export const getParticipants = (state: SharedData, channelId: string): ChannelPa
   const status = walletStates.getChannelStatus(state, channelId);
   return status.participants;
 };
+
+export const getParticipantForAddress = (
+  state: SharedData,
+  address: string
+): ChannelParticipant => {
+  for (const channelId of Object.keys(state.channelStore)) {
+    const channel = state.channelStore[channelId];
+    const participantMatch = channel.participants.find(p => p.signingAddress === address);
+    if (participantMatch) {
+      return participantMatch;
+    }
+  }
+  throw new Error(`Could not find a participant with address ${JSON.stringify(address)}`);
+};
+
+export const getParticipantIdForAddress = (state: SharedData, address: string): string => {
+  for (const channelId of Object.keys(state.channelStore)) {
+    const channel = state.channelStore[channelId];
+    const participantMatch = channel.participants.find(p => p.signingAddress === address);
+    if (participantMatch && participantMatch.participantId) {
+      return participantMatch.participantId;
+    }
+  }
+  throw new Error(`Could not find a participant id for address ${address}`);
+};

@@ -4,7 +4,8 @@ import {
   isExistingLedgerFundingAction
 } from "../existing-ledger-funding";
 import {WalletAction} from "../../actions";
-import {EmbeddedProtocol, routerFactory} from "../../../communication";
+import {EmbeddedProtocol} from "../../../communication";
+import {routerFactory} from "../../../communication/actions";
 
 export type LedgerFundingAction = NewLedgerChannelAction | ExistingLedgerFundingAction;
 

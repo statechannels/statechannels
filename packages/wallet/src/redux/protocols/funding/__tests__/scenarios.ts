@@ -1,7 +1,7 @@
 import * as states from "../states";
 import * as actions from "../actions";
 
-import {EMPTY_SHARED_DATA, setChannels} from "../../../state";
+import {setChannels} from "../../../state";
 import {
   channelId,
   bsAddress,
@@ -20,6 +20,9 @@ import {
   indirectPreSuccess as indirectNegotiationPreSuccess,
   virtualPreSuccess as virtualNegotiationPreSuccess
 } from "../../funding-strategy-negotiation/player-a/__tests__";
+import {createSharedDataFromParticipants, mergeSharedData} from "../../../__tests__/helpers";
+import {HUB_ADDRESS} from "../../../../constants";
+
 // ---------
 // Test data
 // ---------
@@ -42,8 +45,13 @@ const app0 = appState({turnNum: 0, balances: oneThree});
 const app1 = appState({turnNum: 1, balances: oneThree});
 const app2 = appState({turnNum: 2, balances: oneThree});
 const app3 = appState({turnNum: 3, balances: oneThree});
+const participantsSharedData = createSharedDataFromParticipants([
+  asAddress,
+  bsAddress,
+  HUB_ADDRESS
+]);
 const appChannelWaitingForFunding = channelFromStates([app0, app1], asAddress, asPrivateKey);
-const successSharedData = setChannels(EMPTY_SHARED_DATA, [
+const successSharedData = setChannels(participantsSharedData, [
   channelFromStates([app2, app3], asAddress, asPrivateKey)
 ]);
 // ----
@@ -92,7 +100,10 @@ export const ledgerFunding = {
 
   waitForStrategyNegotiation: {
     state: waitForIndirectStrategyNegotiation,
-    sharedData: setChannels(ledgerFundingPreSuccess.sharedData, [appChannelWaitingForFunding]),
+    sharedData: mergeSharedData(
+      setChannels(ledgerFundingPreSuccess.sharedData, [appChannelWaitingForFunding]),
+      participantsSharedData
+    ),
     action: indirectNegotiationPreSuccess.action
   },
   waitForLedgerFunding: {
@@ -116,9 +127,12 @@ export const virtualFunding = {
   ...props,
   waitForStrategyNegotiation: {
     state: waitForVirtualStrategyNegotiation,
-    sharedData: setChannels(virtualFundingPreSuccess.sharedData, [
-      channelFromStates([app2, app3], asAddress, asPrivateKey)
-    ]),
+    sharedData: mergeSharedData(
+      setChannels(virtualFundingPreSuccess.sharedData, [
+        channelFromStates([app2, app3], asAddress, asPrivateKey)
+      ]),
+      participantsSharedData
+    ),
     action: virtualNegotiationPreSuccess.action
   },
 

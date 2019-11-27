@@ -1,7 +1,8 @@
 import {WalletAction} from "../../actions";
 import {AdvanceChannelAction, isAdvanceChannelAction} from "../advance-channel";
-import {EmbeddedProtocol, routerFactory} from "../../../communication";
+import {EmbeddedProtocol} from "../../../communication";
 import {ConsensusUpdateAction, isConsensusUpdateAction} from "../consensus-update";
+import {routerFactory} from "../../../communication/actions";
 
 export type VirtualDefundingAction = AdvanceChannelAction | ConsensusUpdateAction;
 

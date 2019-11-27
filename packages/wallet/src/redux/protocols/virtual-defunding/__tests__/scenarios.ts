@@ -1,6 +1,5 @@
 import {channelFromStates} from "../../../channel-store/channel-state/__tests__";
 import * as scenarios from "../../../__tests__/state-helpers";
-import {PlayerIndex} from "../../../../magmo-wallet-client/wallet-instructions";
 import * as states from "../states";
 import {setChannel, EMPTY_SHARED_DATA, setFundingState} from "../../../state";
 import _ from "lodash";
@@ -13,6 +12,7 @@ import {ethers} from "ethers";
 import {encodeConsensusData} from "@statechannels/nitro-protocol";
 import {convertAddressToBytes32} from "../../../../utils/data-type-utils";
 import {bsAddress} from "../../../__tests__/state-helpers";
+import {TwoPartyPlayerIndex} from "../../../types";
 
 // ---------
 // Test data
@@ -87,7 +87,7 @@ const props = {
   processId,
   startingOutcome,
   hubAddress,
-  ourIndex: PlayerIndex.A,
+  ourIndex: TwoPartyPlayerIndex.A,
   protocolLocator: [],
   ourAddress: asAddress,
   jointChannelId,

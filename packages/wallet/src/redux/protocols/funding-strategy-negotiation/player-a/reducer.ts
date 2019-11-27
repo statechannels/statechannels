@@ -1,12 +1,14 @@
 import * as states from "./states";
 import * as actions from "./actions";
 
-import {SharedData, queueMessage} from "../../../state";
+import {SharedData, queueRelayableActionMessage} from "../../../state";
 import {ProtocolStateWithSharedData} from "../..";
 import {unreachable} from "../../../../utils/reducer-utils";
 import {TwoPartyPlayerIndex} from "../../../types";
 import {showWallet} from "../../reducer-helpers";
-import {sendStrategyProposed, ProtocolLocator} from "../../../../communication";
+
+import * as comms from "../../../../communication";
+import {getParticipantIdForAddress} from "../../../selectors";
 
 export function initialize({
   sharedData,
@@ -21,7 +23,7 @@ export function initialize({
   channelId: string;
   ourAddress: string;
   opponentAddress: string;
-  protocolLocator: ProtocolLocator;
+  protocolLocator: comms.ProtocolLocator;
 }): ProtocolStateWithSharedData<states.FundingStrategyNegotiationState> {
   return {
     protocolState: states.waitForStrategyChoice({
@@ -61,13 +63,19 @@ function strategyChosen(
   if (state.type !== "FundingStrategyNegotiation.PlayerA.WaitForStrategyChoice") {
     return {protocolState: state, sharedData};
   }
-  const {processId, opponentAddress} = state;
+
+  const {processId, opponentAddress, ourAddress} = state;
   const {strategy} = action;
 
-  const message = sendStrategyProposed(opponentAddress, processId, strategy);
+  const message = comms.strategyApproved({processId, strategy});
   return {
     protocolState: states.waitForStrategyResponse({...state, strategy}),
-    sharedData: queueMessage(sharedData, message)
+    sharedData: queueRelayableActionMessage(
+      sharedData,
+      message,
+      getParticipantIdForAddress(sharedData, opponentAddress),
+      getParticipantIdForAddress(sharedData, ourAddress)
+    )
   };
 }
 

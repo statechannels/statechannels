@@ -1,5 +1,4 @@
 import {TransactionRequest} from "ethers/providers";
-import {WalletEvent, DisplayAction} from "../../magmo-wallet-client";
 import {accumulateSideEffects} from ".";
 import {OutgoingApiAction} from "../actions";
 
@@ -11,8 +10,8 @@ export interface QueuedTransaction {
   transactionRequest: TransactionRequest;
   processId: string;
 }
-export type DisplayOutbox = DisplayAction[];
-export type MessageOutbox = Array<WalletEvent | OutgoingApiAction>;
+export type DisplayOutbox = Array<"Show" | "Hide">;
+export type MessageOutbox = OutgoingApiAction[];
 export type TransactionOutbox = QueuedTransaction[];
 
 export interface OutboxState {
@@ -29,7 +28,7 @@ export type SideEffects = {
 // Getters and setters
 // -------------------
 
-export function queueMessage(state: OutboxState, message: WalletEvent): OutboxState {
+export function queueMessage(state: OutboxState, message: OutgoingApiAction): OutboxState {
   return accumulateSideEffects(state, {messageOutbox: [message]});
 }
 
@@ -43,7 +42,7 @@ export function queueTransaction(
   });
 }
 
-export function getLastMessage(state: OutboxState): WalletEvent | OutgoingApiAction | undefined {
+export function getLastMessage(state: OutboxState): OutgoingApiAction | undefined {
   const messages = state.messageOutbox;
   return messages[messages.length - 1];
 }

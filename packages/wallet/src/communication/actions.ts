@@ -99,14 +99,15 @@ export type RelayableAction =
   | MultipleRelayableActions
   | ConcludeInstigated;
 
-export function isRelayableAction(action: WalletAction): action is RelayableAction {
+export function isRelayableAction(action): action is RelayableAction {
   return (
-    action.type === "WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_PROPOSED" ||
-    action.type === "WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_APPROVED" ||
-    action.type === "WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED" ||
-    action.type === "WALLET.NEW_PROCESS.CLOSE_LEDGER_CHANNEL" ||
-    action.type === "WALLET.COMMON.SIGNED_STATES_RECEIVED" ||
-    action.type === "WALLET.MULTIPLE_RELAYABLE_ACTIONS"
+    "type" in action &&
+    (action.type === "WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_PROPOSED" ||
+      action.type === "WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_APPROVED" ||
+      action.type === "WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED" ||
+      action.type === "WALLET.NEW_PROCESS.CLOSE_LEDGER_CHANNEL" ||
+      action.type === "WALLET.COMMON.SIGNED_STATES_RECEIVED" ||
+      action.type === "WALLET.MULTIPLE_RELAYABLE_ACTIONS")
   );
 }
 

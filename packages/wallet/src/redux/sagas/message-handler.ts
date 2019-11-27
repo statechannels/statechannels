@@ -20,6 +20,9 @@ import {
 import {getProvider} from "../../utils/contract-utils";
 import {AddressZero} from "ethers/constants";
 import {validateRequest} from "../../json-rpc-validation/validator";
+import {fundingRequested} from "../protocols/actions";
+import {TwoPartyPlayerIndex} from "../types";
+import {isRelayableAction} from "../../communication";
 
 export function* messageHandler(jsonRpcMessage: object, fromDomain: string) {
   const parsedMessage = jrs.parseObject(jsonRpcMessage);
@@ -84,7 +87,7 @@ function* handleJoinChannelMessage(payload: RequestObject) {
         processId: APPLICATION_PROCESS_ID
       })
     );
-
+    yield put(fundingRequested({channelId, playerIndex: TwoPartyPlayerIndex.B}));
     yield fork(messageSender, actions.joinChannelResponse({channelId, id}));
     const address = yield select(getAddress);
     const participants = yield select(getParticipants, channelId);
@@ -104,53 +107,66 @@ function* handlePushMessage(payload: RequestObject) {
   // TODO: We need to handle the case where we receive an invalid wallet message
   const {id} = payload;
   const message = payload.params as JsonRpcMessage;
-  switch (message.data.type) {
-    case "Channel.Joined":
-      yield put(
-        actions.application.opponentStateReceived({
-          processId: APPLICATION_PROCESS_ID,
-          signedState: message.data.signedState
-        })
-      );
-      break;
-    case "Channel.Open":
-      const {signedState, participants} = message.data;
-      // The channel gets initialized and the state will be pushed into the app protocol
-      // If the client doesn't want to join the channel then we dispose of these on that API call
-      // Since only our wallet can progress the app protocol from this point by signing the next state
-      // we're safe to initialize the channel before the client has called JoinChannel
-      // The only limitation is that our client cannot propose a new channel with the same channelId
-      // before they decline the opponent's proposed channel
+  if (isRelayableAction(message.data)) {
+    yield put(message.data);
+  } else {
+    switch (message.data.type) {
+      case "Channel.Joined":
+        yield put(
+          actions.application.opponentStateReceived({
+            processId: APPLICATION_PROCESS_ID,
+            signedState: message.data.signedState
+          })
+        );
 
-      const provider = yield call(getProvider);
-      const bytecode = yield call(provider.getCode, signedState.state.appDefinition);
+        yield put(
+          fundingRequested({
+            channelId: getChannelId(message.data.signedState.state.channel),
+            playerIndex: TwoPartyPlayerIndex.A
+          })
+        );
 
-      yield put(
-        actions.appDefinitionBytecodeReceived({
-          appDefinition: signedState.state.appDefinition,
-          bytecode
-        })
-      );
+        yield fork(messageSender, actions.postMessageResponse({id}));
+        break;
+      case "Channel.Open":
+        const {signedState, participants} = message.data;
+        // The channel gets initialized and the state will be pushed into the app protocol
+        // If the client doesn't want to join the channel then we dispose of these on that API call
+        // Since only our wallet can progress the app protocol from this point by signing the next state
+        // we're safe to initialize the channel before the client has called JoinChannel
+        // The only limitation is that our client cannot propose a new channel with the same channelId
+        // before they decline the opponent's proposed channel
 
-      yield put(
-        actions.protocol.initializeChannel({
-          channelId: getChannelId(signedState.state.channel),
-          participants
-        })
-      );
+        const provider = yield call(getProvider);
+        const bytecode = yield call(provider.getCode, signedState.state.appDefinition);
 
-      yield put(
-        actions.application.opponentStateReceived({
-          processId: APPLICATION_PROCESS_ID,
-          signedState
-        })
-      );
+        yield put(
+          actions.appDefinitionBytecodeReceived({
+            appDefinition: signedState.state.appDefinition,
+            bytecode
+          })
+        );
 
-      yield fork(messageSender, actions.postMessageResponse({id}));
+        yield put(
+          actions.protocol.initializeChannel({
+            channelId: getChannelId(signedState.state.channel),
+            participants
+          })
+        );
 
-      const channelId = getChannelId(signedState.state.channel);
-      yield fork(messageSender, actions.channelProposedEvent({channelId}));
-      break;
+        yield put(
+          actions.application.opponentStateReceived({
+            processId: APPLICATION_PROCESS_ID,
+            signedState
+          })
+        );
+
+        yield fork(messageSender, actions.postMessageResponse({id}));
+
+        const channelId = getChannelId(signedState.state.channel);
+        yield fork(messageSender, actions.channelProposedEvent({channelId}));
+        break;
+    }
   }
 }
 

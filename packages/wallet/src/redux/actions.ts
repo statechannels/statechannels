@@ -444,6 +444,30 @@ export const validationError: ActionConstructor<ValidationError> = p => ({
   type: "WALLET.VALIDATION_ERROR"
 });
 
+export interface RelayActionWithMessage {
+  type: "WALLET.RELAY_ACTION_WITH_MESSAGE";
+  toParticipantId: string;
+  fromParticipantId: string;
+  actionToRelay: RelayableAction;
+}
+
+export const relayActionWithMessage: ActionConstructor<RelayActionWithMessage> = p => ({
+  ...p,
+
+  type: "WALLET.RELAY_ACTION_WITH_MESSAGE"
+});
+
+// This is used when a protocol expects to send a message
+// but the json-rpc API has not been implemented yet
+export interface ApiNotImplemented {
+  type: "WALLET.API_NOT_IMPLEMENTED";
+  apiMethod: string;
+}
+export const apiNotImplemented: ActionConstructor<ApiNotImplemented> = p => ({
+  ...p,
+  type: "WALLET.API_NOT_IMPLEMENTED"
+});
+
 export type OutgoingApiAction =
   | AddressResponse
   | CreateChannelResponse
@@ -457,4 +481,6 @@ export type OutgoingApiAction =
   | UnknownChannelId
   | NoContractError
   | JoinChannelResponse
-  | ValidationError;
+  | ValidationError
+  | RelayActionWithMessage
+  | ApiNotImplemented;

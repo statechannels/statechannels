@@ -1,13 +1,5 @@
-import {messageRelayRequested} from "../magmo-wallet-client";
-import {
-  RelayableAction,
-  strategyProposed,
-  strategyApproved,
-  concludeInstigated,
-  ConcludeInstigated,
-  signedStatesReceived
-} from "./actions";
-import {SignedState} from "@statechannels/nitro-protocol";
+import {ConcludeInstigated} from "./actions";
+export {relayActionWithMessage, RelayActionWithMessage} from "../redux/actions";
 
 export * from "./actions";
 
@@ -37,33 +29,8 @@ export const enum EmbeddedProtocol {
 export type ProtocolLocator = EmbeddedProtocol[];
 export type FundingStrategy = "IndirectFundingStrategy" | "VirtualFundingStrategy";
 
-function sendMessage(to: string, message: RelayableAction) {
-  return messageRelayRequested(to, message);
-}
-
-export function sendStrategyProposed(to: string, processId: string, strategy: FundingStrategy) {
-  return sendMessage(to, strategyProposed({processId, strategy}));
-}
-
-export function sendStrategyApproved(to: string, processId: string, strategy: FundingStrategy) {
-  return sendMessage(to, strategyApproved({processId, strategy}));
-}
-
-export function sendConcludeInstigated(to: string, channelId) {
-  return sendMessage(to, concludeInstigated({channelId}));
-}
-
-export const sendStatesReceived = (
-  to: string,
-  processId: string,
-  signedStates: SignedState[],
-  protocolLocator: ProtocolLocator
-) => {
-  const payload = signedStatesReceived({processId, signedStates, protocolLocator});
-  return messageRelayRequested(to, payload);
-};
-
 export type StartProcessAction = ConcludeInstigated;
+
 export function isStartProcessAction(a: {type: string}): a is StartProcessAction {
   return a.type === "WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED";
 }

@@ -2,9 +2,9 @@ import * as states from "../states";
 import * as actions from "../actions";
 import {TwoPartyPlayerIndex} from "../../../../types";
 
-import {EMPTY_SHARED_DATA} from "../../../../state";
 import {FundingStrategy} from "../../../../../communication";
 import {channelId, asAddress, bsAddress} from "../../../../__tests__/state-helpers";
+import {createSharedDataFromParticipants} from "../../../../__tests__/helpers";
 
 // ---------
 // Test data
@@ -22,6 +22,8 @@ const props = {
   ourAddress,
   protocolLocator: []
 };
+
+const participantsSharedData = createSharedDataFromParticipants([ourAddress, opponentAddress]);
 
 // ------
 // States
@@ -66,12 +68,12 @@ export const indirectStrategyChosen = {
   ...props,
   waitForStrategyProposal: {
     state: waitForStrategyProposal,
-    sharedData: EMPTY_SHARED_DATA,
+    sharedData: participantsSharedData,
     action: indirectStrategyProposed
   },
   waitForStrategyApproval: {
     state: waitForIndirectStrategyApproval,
-    sharedData: EMPTY_SHARED_DATA,
+    sharedData: participantsSharedData,
     action: indirectStrategyApproved
   }
 };
@@ -80,12 +82,12 @@ export const virtualStrategyChosen = {
   strategy: "VirtualFundingStrategy",
   waitForStrategyProposal: {
     state: waitForStrategyProposal,
-    sharedData: EMPTY_SHARED_DATA,
+    sharedData: participantsSharedData,
     action: virtualStrategyProposed
   },
   waitForStrategyApproval: {
     state: waitForVirtualStrategyApproval,
-    sharedData: EMPTY_SHARED_DATA,
+    sharedData: participantsSharedData,
     action: virtualStrategyApproved
   }
 };
@@ -94,7 +96,7 @@ export const rejectedStrategy = {
   ...props,
   waitForStrategyApproval: {
     state: waitForIndirectStrategyApproval,
-    sharedData: EMPTY_SHARED_DATA,
+    sharedData: participantsSharedData,
     action: strategyRejected
   }
 };
@@ -103,12 +105,12 @@ export const cancelledByOpponent = {
   ...props,
   waitForStrategyApproval: {
     state: waitForIndirectStrategyApproval,
-    sharedData: EMPTY_SHARED_DATA,
+    sharedData: participantsSharedData,
     action: cancelledByA
   },
   waitForStrategyProposal: {
     state: waitForStrategyProposal,
-    sharedData: EMPTY_SHARED_DATA,
+    sharedData: participantsSharedData,
     action: cancelledByA
   }
 };
@@ -117,12 +119,12 @@ export const cancelledByUser = {
   ...props,
   waitForStrategyApproval: {
     state: waitForIndirectStrategyApproval,
-    sharedData: EMPTY_SHARED_DATA,
+    sharedData: participantsSharedData,
     action: cancelledByB
   },
   waitForStrategyProposal: {
     state: waitForStrategyProposal,
-    sharedData: EMPTY_SHARED_DATA,
+    sharedData: participantsSharedData,
     action: cancelledByB
   }
 };
