@@ -13,11 +13,23 @@ import { combineReducers } from 'redux';
 import { gameReducer } from '../game/reducer';
 import { openGamesReducer } from '../open-games/reducer';
 
-export const reducer = combineReducers({
-  game: gameReducer,
-  openGames: openGamesReducer,
-});
-
+// The auto-opponent simulates the actions of the opponent in an RPS game.
+//
+// To use it start the saga as part of your app setup:
+//
+//  function* rootSaga() {
+//     yield fork(gameSaga, client);
+//     yield fork(autoOpponent, 'A');
+//     // ... start any other sagas
+//
+//  }
+//
+// The saga will then play for against you in the app.
+//
+// Roughly, the auto-opponent works by starting up a second copy of
+// the app, with an auto-player running, and then wires these two
+// apps together, cutting firebase out of the loop.
+//
 export function* autoOpponent(player: 'A' | 'B', externalClient: RPSChannelClient) {
   let internalStoreState = {
     game: {
@@ -100,3 +112,8 @@ export function* autoOpponent(player: 'A' | 'B', externalClient: RPSChannelClien
     }
   }
 }
+
+export const reducer = combineReducers({
+  game: gameReducer,
+  openGames: openGamesReducer,
+});

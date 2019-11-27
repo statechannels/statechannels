@@ -5,6 +5,21 @@ import { bigNumberify } from 'ethers/utils';
 import { Weapon } from '../../core';
 import { OpenGame } from '../open-games/state';
 
+// The auto-player simulates the actions of the user in an RPS game.
+//
+// To use it start the saga as part of your app setup:
+//
+//  function* rootSaga() {
+//     yield fork(gameSaga, client);
+//     yield fork(autoPlayer, 'A');
+//     // ... start any other sagas
+//
+//  }
+//
+// The saga will then play for you in the app. Note that it plays _for_
+// you, not _against_ you - if you want someone to play against you, you
+// need to run the auto-opponent.
+//
 export function* autoPlayer(player: 'A' | 'B') {
   switch (player) {
     case 'A':
@@ -48,7 +63,7 @@ const getOpenGame = (state: any): OpenGame | undefined => state.openGames[0];
 function* autoPlayerARun() {
   // after every internal action, inspect my state, take any actions
   //    a. if in lobby, join a game (if one exists)
-  //    b. if in chooseWeapon, choose rock
+  //    b. if in chooseWeapon, choose scissors (will lose against autoPlayerB)
   //    c. if in playAgain, choose to playAgain
 
   const { localState, channelState }: GameState = yield select(getGameState);
