@@ -3,11 +3,11 @@ import {
   BaseProcessAction,
   isCommonAction,
   ProtocolLocator,
-  EmbeddedProtocol,
-  routerFactory
+  EmbeddedProtocol
 } from "../../../communication";
 import {WalletAction} from "../../actions";
 import {ActionConstructor} from "../../utils";
+import {routerFactory} from "../../../communication/actions";
 
 export interface ClearedToSend extends BaseProcessAction {
   type: "WALLET.ADVANCE_CHANNEL.CLEARED_TO_SEND";

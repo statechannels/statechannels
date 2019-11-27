@@ -2,8 +2,8 @@ import {WalletAction} from "../../actions";
 import {WithdrawalAction, isWithdrawalAction} from "../withdrawing/actions";
 import {LedgerDefundingAction, isLedgerDefundingAction} from "../ledger-defunding/actions";
 import {VirtualDefundingAction, isVirtualDefundingAction} from "../virtual-defunding";
-import {EmbeddedProtocol, routerFactory} from "../../../communication";
-
+import {EmbeddedProtocol} from "../../../communication";
+import {routerFactory} from "../../../communication/actions";
 // -------
 // Actions
 // -------

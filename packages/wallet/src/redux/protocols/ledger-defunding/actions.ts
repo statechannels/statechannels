@@ -1,13 +1,9 @@
 import {WalletAction} from "../../actions";
 import {ConsensusUpdateAction, isConsensusUpdateAction} from "../consensus-update";
 import {AdvanceChannelAction, isAdvanceChannelAction} from "../advance-channel";
-import {
-  routerFactory,
-  EmbeddedProtocol,
-  BaseProcessAction,
-  ProtocolLocator
-} from "../../../communication";
+import {EmbeddedProtocol, BaseProcessAction, ProtocolLocator} from "../../../communication";
 import {ActionConstructor} from "../../utils";
+import {routerFactory} from "../../../communication/actions";
 // -------
 // Actions
 // -------

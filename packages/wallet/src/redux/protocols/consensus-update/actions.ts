@@ -4,10 +4,10 @@ import {
   BaseProcessAction,
   isCommonAction,
   ProtocolLocator,
-  EmbeddedProtocol,
-  routerFactory
+  EmbeddedProtocol
 } from "../../../communication";
 import {ActionConstructor} from "../../utils";
+import {routerFactory} from "../../../communication/actions";
 
 export interface ClearedToSend extends BaseProcessAction {
   type: "WALLET.CONSENSUS_UPDATE.CLEARED_TO_SEND";
