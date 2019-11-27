@@ -16,9 +16,9 @@ import {
   ConfirmGamePage,
   SelectWeaponPage,
   WeaponSelectedPage,
-  ResultPage,
   GameOverPage,
   WaitForResting,
+  ResultPage,
 } from '../components';
 import { unreachable } from '../utils/unreachable';
 
@@ -77,12 +77,12 @@ function RenderGame(props: GameProps) {
       );
     case 'ResultPlayAgain':
       return (
-        <ResultPage
+        <WaitForResting
           yourWeapon={state.myWeapon}
           theirWeapon={state.theirWeapon}
           result={state.result}
           playAgain={props.playAgain}
-          shutDownReason={undefined}
+          waitForOpponent={false}
         />
       );
     case 'WaitForRestart':
@@ -92,6 +92,7 @@ function RenderGame(props: GameProps) {
           theirWeapon={state.theirWeapon}
           result={state.result}
           playAgain={props.playAgain}
+          waitForOpponent={true}
         />
       );
     case 'ShuttingDown':

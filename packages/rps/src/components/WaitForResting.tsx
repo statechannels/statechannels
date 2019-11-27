@@ -3,12 +3,14 @@ import * as React from 'react';
 import { Weapon, Result } from '../core';
 import { WeaponBadge } from './WeaponBadge';
 import { GameLayout } from './GameLayout';
+import { Button } from 'reactstrap';
 
 interface Props {
   yourWeapon: Weapon;
   theirWeapon: Weapon;
   result: Result;
   playAgain: () => void;
+  waitForOpponent: boolean;
 }
 
 export default class WaitForRestingA extends React.PureComponent<Props> {
@@ -28,7 +30,7 @@ export default class WaitForRestingA extends React.PureComponent<Props> {
   }
 
   render() {
-    const { yourWeapon, theirWeapon } = this.props;
+    const { yourWeapon, theirWeapon, playAgain, waitForOpponent } = this.props;
 
     return (
       <GameLayout>
@@ -53,7 +55,12 @@ export default class WaitForRestingA extends React.PureComponent<Props> {
             </div>
           </div>
 
-          <div> Waiting for opponent to confirm </div>
+          {!waitForOpponent && (
+            <Button className="cog-button" onClick={playAgain}>
+              Play again
+            </Button>
+          )}
+          {waitForOpponent && <div> Waiting for opponent to confirm </div>}
         </div>
       </GameLayout>
     );
