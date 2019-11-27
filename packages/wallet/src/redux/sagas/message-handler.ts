@@ -109,6 +109,7 @@ function* handlePushMessage(payload: RequestObject) {
   const message = payload.params as JsonRpcMessage;
   if (isRelayableAction(message.data)) {
     yield put(message.data);
+    yield fork(messageSender, actions.postMessageResponse({id}));
   } else {
     switch (message.data.type) {
       case "Channel.Joined":
