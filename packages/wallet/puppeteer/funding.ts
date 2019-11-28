@@ -5,25 +5,9 @@ import Emittery from "emittery";
 (async () => {
   // Unfortunately we need to use two separate windows
   // as otherwise the javascript gets paused on the non-selected tab
-  const browserA = await dappeteer.launch(puppeteer, {
-    headless: false,
-    devtools: true,
-    ignoreDefaultArgs: [
-      "--disable-background-timer-throttling",
-      "--disable-backgrounding-occluded-windows",
-      "--disable-renderer-backgrounding"
-    ]
-  });
-  const browserB = await dappeteer.launch(puppeteer, {
-    headless: false,
-    devtools: true,
-    ignoreDefaultArgs: [
-      "--disable-background-timer-throttling",
-      "--disable-backgrounding-occluded-windows",
-      "--disable-renderer-backgrounding"
-    ]
-  });
-
+  // see https://github.com/puppeteer/puppeteer/issues/3339
+  const browserA = await setUpBrowserAndMetamask();
+  const browserB = await setUpBrowserAndMetamask();
   const walletA = await browserA.newPage();
   const walletB = await browserB.newPage();
 
@@ -67,12 +51,34 @@ import Emittery from "emittery";
   await walletB.click("button");
 })();
 
+const timeout = ms => new Promise(res => setTimeout(res, ms));
+
+async function setUpBrowserAndMetamask(): Promise<puppeteer.Browser> {
+  const browser = await dappeteer.launch(puppeteer, {
+    headless: false,
+    // Needed to allow both windows to execute JS at the same time
+    ignoreDefaultArgs: [
+      "--disable-background-timer-throttling",
+      "--disable-backgrounding-occluded-windows",
+      "--disable-renderer-backgrounding"
+    ]
+  });
+  // dappeteer seems to resolve promises before the work is actually done
+  // To get around this we just pepper in some delays
+  const metamask = await dappeteer.getMetamask(browser, {});
+  await timeout(1000);
+  await metamask.importPK("0x7ab741b57e8d94dd7e1a29055646bafde7010f38a900f55bbd7647880faa6ee8");
+  await timeout(1000);
+  await metamask.addNetwork("http://localhost:8547");
+  await timeout(1000);
+  return browser;
+}
+
 function messageHandler(emitter: Emittery, player: "A" | "B", message) {
   const playerPrefix = `player${player}-`;
   if (message.id) {
     emitter.emit(`${playerPrefix}result`, message);
   } else if (message.method === "MessageQueued") {
-    console.log(message);
     emitter.emit(`${playerPrefix}message`, message);
   } else {
     emitter.emit(`${playerPrefix}notification`, message);
