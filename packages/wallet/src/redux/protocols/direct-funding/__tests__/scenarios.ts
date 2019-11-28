@@ -6,6 +6,7 @@ import * as transactionSubmissionScenarios from "../../transaction-submission/__
 import * as advanceChannelScenarios from "../../advance-channel/__tests__";
 import * as states from "../states";
 import {SharedData} from "../../../state";
+import {ETH_ASSET_HOLDER_ADDRESS} from "../../../../constants";
 
 const {threeWayLedgerId: channelId, twoThree} = scenarios;
 
@@ -21,6 +22,7 @@ const defaultsForA = {
   processId,
   totalFundingRequired: TOTAL_REQUIRED,
   requiredDeposit: YOUR_DEPOSIT_A,
+  assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
   channelId,
   ourIndex: 0,
   safeToDepositLevel: "0x",

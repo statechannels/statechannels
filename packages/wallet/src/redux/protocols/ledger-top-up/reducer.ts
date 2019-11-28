@@ -23,7 +23,7 @@ import {DirectFundingState} from "../direct-funding/states";
 import {clearedToSend} from "../consensus-update/actions";
 import {Outcome} from "@statechannels/nitro-protocol";
 import {ETH_ASSET_HOLDER_ADDRESS} from "../../../constants";
-import {getAllocationAmountForIndex, getAllocationItemAtIndex} from "../../../utils/outcome-utils";
+import {getAllocationAmountForIndex, getAllocationItemAtIndex, getAllocationOutcome} from "../../../utils/outcome-utils";
 export {LEDGER_TOP_UP_PROTOCOL_LOCATOR} from "../../../communication/protocol-locator";
 export function initialize({
   processId,
@@ -319,10 +319,13 @@ function initializeDirectFundingState(
     totalFundingRequired = addHex(proposedAmountForA, proposedAmountForB);
   }
 
+  const {assetHolderAddress} = getAllocationOutcome(currentOutcome);
+
   const {protocolState: directFundingState, sharedData: newSharedData} = initializeDirectFunding({
     processId,
     channelId: ledgerId,
     safeToDepositLevel: "0x0", // Since we only have one player depositing we can always deposit right away
+    assetHolderAddress,
     requiredDeposit,
     totalFundingRequired,
     ourIndex: isFirstPlayer ? TwoPartyPlayerIndex.A : TwoPartyPlayerIndex.B,

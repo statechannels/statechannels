@@ -27,7 +27,11 @@ import {isFirstPlayer, getTwoPlayerIndex, getLatestState} from "../reducer-helpe
 import {ADVANCE_CHANNEL_PROTOCOL_LOCATOR} from "../advance-channel/reducer";
 import {TwoPartyPlayerIndex} from "../../types";
 import {encodeConsensusData, Outcome} from "@statechannels/nitro-protocol";
-import {getAllocationTotal, getAllocationAmountForIndex} from "../../../utils/outcome-utils";
+import {
+  getAllocationTotal,
+  getAllocationAmountForIndex,
+  getAllocationOutcome
+} from "../../../utils/outcome-utils";
 
 type ReturnVal = ProtocolStateWithSharedData<NewLedgerChannelState>;
 type IDFAction = NewLedgerChannelAction;
@@ -165,10 +169,14 @@ function handleWaitForPreFundSetup(
         ? "0x0"
         : getAllocationAmountForIndex(latestState.outcome, 1);
       const ourIndex = getTwoPlayerIndex(ledgerId, sharedData);
+
+      const {assetHolderAddress} = getAllocationOutcome(latestState.outcome);
+
       // update the state
       const directFundingState = initializeDirectFunding({
         processId: protocolState.processId,
         channelId: ledgerId,
+        assetHolderAddress,
         safeToDepositLevel,
         totalFundingRequired: total,
         requiredDeposit,

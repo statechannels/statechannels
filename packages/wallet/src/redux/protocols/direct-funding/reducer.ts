@@ -18,6 +18,7 @@ type DFReducer = ProtocolReducer<states.DirectFundingState>;
 
 export function initialize({
   safeToDepositLevel,
+  assetHolderAddress,
   totalFundingRequired,
   requiredDeposit,
   channelId,
@@ -28,6 +29,7 @@ export function initialize({
 }: {
   sharedData: SharedData;
   safeToDepositLevel: string;
+  assetHolderAddress: string;
   totalFundingRequired: string;
   requiredDeposit: string;
   channelId: string;
