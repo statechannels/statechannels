@@ -1,6 +1,6 @@
 import {eventChannel} from "redux-saga";
 import {call, put, select, take} from "redux-saga/effects";
-import {ethers} from "ethers";
+import {Contract} from "ethers";
 import {getAssetTransferredEvent, getDepositedEvent} from "@statechannels/nitro-protocol";
 
 import * as actions from "../actions";
@@ -102,7 +102,7 @@ function* dispatchProcessEventAction(
 }
 
 function* createAssetHolderEventChannel(provider) {
-  const ETHAssetHolder: ethers.Contract = yield call(getETHAssetHolderContract, provider);
+  const ETHAssetHolder: Contract = yield call(getETHAssetHolderContract, provider);
 
   return eventChannel(emitter => {
     const assetTransferredFilter = ETHAssetHolder.filters.AssetTransferred();
