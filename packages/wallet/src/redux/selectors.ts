@@ -156,8 +156,8 @@ export const getChannelIds = (state: SharedData): string[] => {
 
 export const getAssetHolderAddresses = (state: SharedData): string[] =>
   Object.keys(
-    Object.values(state.channelStore).reduce(
-      (acc, val) => ({...acc, [val.signedStates[0].state.outcome[0].assetHolderAddress]: 1}),
+    getChannelIds(state).reduce(
+      (addresses, channelId) => ({...addresses, [getAssetHolderAddress(state, channelId)]: 1}),
       {}
     )
   );
