@@ -11,7 +11,6 @@ import {
 } from "../transaction-submission/reducer";
 import {isTerminal, isSuccess} from "../transaction-submission/states";
 import * as states from "./states";
-import * as selectors from "../../selectors";
 import {TwoPartyPlayerIndex} from "../../types";
 import {ProtocolLocator} from "../../../communication";
 
@@ -37,7 +36,7 @@ export function initialize({
   protocolLocator: ProtocolLocator;
 }): ProtocolStateWithSharedData<states.DirectFundingState> {
   sharedData = registerChannelToMonitor(sharedData, channelId, processId, protocolLocator);
-  const existingChannelFunding = selectors.getAdjudicatorChannelBalance(sharedData, channelId);
+  const existingChannelFunding = "0x0"; // FIXME: The wallet has no way of determining funding levels atm
   const alreadySafeToDeposit = bigNumberify(existingChannelFunding).gte(safeToDepositLevel);
   const alreadyFunded = bigNumberify(totalFundingRequired).eq("0x");
   const depositNotRequired = bigNumberify(requiredDeposit).eq("0x");
@@ -170,10 +169,7 @@ const notSafeToDepositReducer: DFReducer = (
         action.channelId === state.channelId &&
         bigNumberify(action.totalForDestination).gte(state.safeToDepositLevel)
       ) {
-        const existingChannelFunding = selectors.getAdjudicatorChannelBalance(
-          sharedData,
-          state.channelId
-        );
+        const existingChannelFunding = "0x0"; // FIXME: The wallet has no way of determining funding levels atm
         const depositTransaction = createETHDepositTransaction(
           state.channelId,
           state.requiredDeposit,

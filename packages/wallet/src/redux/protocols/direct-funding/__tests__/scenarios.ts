@@ -57,7 +57,7 @@ const sharedData = () => ({...advanceChannelScenarios.preSuccess.sharedData});
 
 const adjudicatorStateSharedData: SharedData = {
   ...sharedData(),
-  adjudicatorState: {[channelId]: {channelId, balance: "0x5", finalized: false}}
+  adjudicatorState: {[channelId]: {channelId, finalized: false}}
 };
 export const aHappyPath = {
   initialize: {...defaultsForA, sharedData: sharedData()},
