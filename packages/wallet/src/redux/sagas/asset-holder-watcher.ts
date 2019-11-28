@@ -4,7 +4,7 @@ import {Contract} from "ethers";
 import {getAssetTransferredEvent, getDepositedEvent} from "@statechannels/nitro-protocol";
 
 import * as actions from "../actions";
-import {getETHAssetHolderContract} from "../../utils/contract-utils";
+import {getETHAssetHolderContract, getETHAssetHolderAddress} from "../../utils/contract-utils";
 import {ChannelSubscriber} from "../state";
 import {getETHAssetHolderWatcherSubscribersForChannel} from "../selectors";
 import {ProtocolLocator} from "../../communication";
@@ -52,6 +52,7 @@ function* dispatchEventAction(event: AssetHolderEvent) {
       const depositedEvent = getDepositedEvent(event);
       yield put(
         actions.depositedEvent({
+          assetHolderAddress: yield select(getETHAssetHolderAddress),
           destination: depositedEvent.destination,
           amountDeposited: depositedEvent.amountDeposited,
           destinationHoldings: depositedEvent.destinationHoldings
@@ -86,6 +87,7 @@ function* dispatchProcessEventAction(
       const depositedEvent = getDepositedEvent(event);
       yield put(
         actions.depositedEvent({
+          assetHolderAddress: yield select(getETHAssetHolderAddress),
           destination: depositedEvent.destination,
           amountDeposited: depositedEvent.amountDeposited,
           destinationHoldings: depositedEvent.destinationHoldings
