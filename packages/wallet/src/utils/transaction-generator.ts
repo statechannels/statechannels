@@ -81,32 +81,6 @@ export function createWithdrawTransaction(
   };
 }
 
-export function createTransferAndWithdrawTransaction(
-  channelId: string,
-  participant: string,
-  destination: string,
-  amount: string,
-  verificationSignature: string
-) {
-  // TODO: Implement using Nitro
-  // const adjudicatorInterface = getAdjudicatorInterface();
-  // const {v, r, s} = splitSignature(verificationSignature);
-  // const data = adjudicatorInterface.functions.transferAndWithdraw.encode([
-  //   channelId,
-  //   participant,
-  //   destination,
-  //   amount,
-  //   v,
-  //   r,
-  //   s
-  // ]);
-
-  return {
-    data: "0x0",
-    gasLimit: 3000000
-  };
-}
-
 export function createETHDepositTransaction(
   destination: string,
   depositAmount: string,
