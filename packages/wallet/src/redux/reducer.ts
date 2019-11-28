@@ -15,6 +15,7 @@ import * as communication from "../communication";
 import * as closeLedgerChannelProtocol from "./protocols/close-ledger-channel";
 import _ from "lodash";
 import {Wallet} from "ethers";
+import { assetHolderStateReducer } from "./asset-holders-state/reducer";
 
 // If we're generating the initial state then we need to create a new key for the user
 const {address, privateKey} = Wallet.createRandom();
@@ -59,6 +60,8 @@ function updateSharedData(
 ): states.Initialized {
   if (actions.isAdjudicatorEventAction(action)) {
     return {...state, adjudicatorState: adjudicatorStateReducer(state.adjudicatorState, action)};
+  } else if (actions.isAssetHolderEventAction(action)) {
+    return {...state, assetHoldersState: assetHolderStateReducer(state.assetHoldersState, action)};
   } else if (action.type === "WALLET.APP_DEFINITION_BYTECODE_RECEIVED") {
     return {
       ...state,
