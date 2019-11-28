@@ -15,27 +15,50 @@ is _not_ fully-determined, as in order to construct the states a `channelNonce` 
 OpenChannel(participants, balances, appDefinition, appData, channelNonce) // fully-determined
 ```
 
-## Some names of fully-determined protocols [WIP]
+## [WIP] List of fully-determined protocols
 
-_This is a starting point for writing down some fully-determined protocols. More thought is probably required to figure out if they're actually fully-determined or not!_
-
-- `OpenChannel(participants, initialBalances, nonce, appData, appDef)`
+- `CreateNullChannel(channel, outcome)`
+  - Reaches consensus on outcome on turn 0
+- `JoinChannel(ctx: JsonRpcJoinChannelParams)`
   - Each participant checks to see they don't have a nonce collision
-  - Succeeds when we have a pre-fund-setup support
-- `DirectFund(channelId)`
-  - Abandon if channel doesn't exist or is not in pre-fund-setup
+  - After pre-fund round is complete, invoke `Fund(channelId)`
+  - Once funded, exchange post-fund setup
+  - Succeeds when channel is funded
+- `DirectFundingStrategy(channelId, balances, turnNum?)`
+  - Abandon if channel doesn't exist or channel has `appDefinition`
+  - pre-funding: arrange outcome to allow top-up if necessary
   - Fund when it's your turn.
-  - Succeeds when we have a post-fund-setup round
-- `TopUp(ledgerId, participant, amount, ledgerTurnNum)`
-  - Do we need the turnNum?
-- `PartialWithdrawal(ledgerId, participant, amount, newNonce)`
-  - Will need to call `OpenChannel` to create a replacement ledger channel.
-  - Probably also need `newParticipants`, to feed to `OpenChannel`, as we probably shouldn't assume that the parties will want to use the same signing keys
+  - post-funding: arrange outcome to merge allocation items
+  - Succeeds when post-fund outcome is supported
+  - Do we need a turnNum?
+- `PartialWithdrawal(ledgerId, participant, amount, newNonce, newParticipants)`
+  - Will need to call `CreateNullChannel` to create a replacement ledger channel.
 - `LedgerFund(channelId, ledgerId, ledgerTurnNum)`
-  - Ends when in post fund
-- `VirtualFund(balances, ledgerABId, jointNonce, guaranteeAHNonce, guaranteeBHNonce, ledgerAHId,....)`
+  - Assumes ledger exists
+  - Ends when `channelId` is funded
+- `VirtualFundAsLeaf(balances, ledgerID, jointChannel, guarantorChannel)`
+  - Used by "leaf" (endpoint?) in virtual funding. IE. A or B
+  - Assumes that a ledger exists between leaf and hub
+- `VirtualFundAsHub(balances, ledgerABId, jointNonce, guarantorANonce, guarantorBNonce)`
+  - Used by intermediary in virtual funding
+  - Spawned as new process on receipt of request for service
   - Assumes that the `ledgerAB` already exists
-  - No one participant actually needs all this information, which means there's scope to decompose this into a handful of fully-determined protocols between subsets of the participants. Conceptually it's probably useful to consider this as a protocol in its own right though. For example, these protocols could be:
-    - `VirtualFundA(balances, ledgerABId, jointNonce, .. things with AH)`
-    - `VirtualFundB(balances, ledgerABId, jointNonce, .. things with BH)`
-    - `VirtualFundH(balances, ledgerABId, jointNonce, .. things with AH and BH)`
+
+## List of "undetermined" protocols
+
+- `CreateChannel(ctx: JsonRpcCreateChannelParams)`
+  - First participant chooses a nonce, and notifies all other participants
+  - After pre-fund round is complete, invoke `Fund(channelId)`
+  - Once funded, exchange post-fund setup
+- `Fund(channelId)`
+  - Participants choose a funding strategy
+  - On agreement, they invoke either `DirectFundingStrategy`, `LedgerFundingStrategy` or `VirtualFundingStrategy`
+- `LedgerFundingStrategy(channelId)`
+  - Participants use an existing ledger, or open a new ledger
+    - if existing ledger exists, they use it
+  - Invokes `DirectFundingStrategy` if ledger is already directly funded but needs more funding
+  - Invokes `Fund(ledgerId)` otherwise
+  - When the ledger is sufficiently funded, invoke `LedgerFund(channelId, ledgerId)`
+- `VirtualFundingStrategy(channelId)`
+  - Participants negotiate on a hub, jointNonce and guarantorNonce
+  - On agreement, they inform the hub, and invoke `VirtualFundAsLeaf`
