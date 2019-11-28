@@ -2,6 +2,10 @@ import { Wallet } from 'ethers';
 import { BigNumberish, bigNumberify } from 'ethers/utils';
 import { EventEmitter } from 'eventemitter3';
 
+function sleep(time) {
+  return new Promise(resolve => setTimeout(resolve, time));
+}
+
 export type ChannelStatus = 'proposed' | 'opening' | 'funding' | 'running' | 'closing' | 'closed';
 
 export enum ErrorCodes {
@@ -124,6 +128,7 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
     };
     this.opponentAddress = this.latestState.participants[1].participantId;
     // [assuming we're working with 2-participant channels for the time being]
+    await sleep(1000);
     this.notifyOpponent(this.latestState);
 
     return Promise.resolve(this.latestState);
@@ -159,6 +164,7 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
     const turnNum = currentTurnNum.add(1).toString();
 
     this.latestState = { ...latestState, turnNum, participants, allocations, appData };
+    await sleep(1000);
     this.notifyOpponent(this.latestState);
 
     return Promise.resolve(this.latestState);
