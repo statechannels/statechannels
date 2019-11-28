@@ -13,7 +13,7 @@ import LoginErrorPage from '../components/LoginErrorPage';
 import { localStatesA, localStatesB, channelStates } from '../redux/game/__tests__/scenarios';
 import { ChannelState } from '../core';
 import GameBar from '../components/GameBar';
-import { WeiPerEther } from 'ethers/constants';
+import { toWei } from 'web3-utils';
 import { bigNumberify } from 'ethers/utils';
 
 const fakeStore = state => ({
@@ -96,20 +96,27 @@ Object.keys(localStatesB).forEach(key => {
 });
 
 const balancesArray = [
-  [5, 5],
-  [6, 4],
-  [4, 6],
+  ['5', '5'],
+  ['6', '4'],
+  ['4', '6'],
+  ['0.2', '0.8'],
 ]; // denominated in ETH
-balancesArray.forEach(balances =>
+balancesArray.forEach(balances => {
+  const balancesWei = balances.map(balance => toWei(balance, 'ether')); // now in Wei
   storiesOf('GameBar', module).add(balances[0] + ' ETH , ' + balances[1] + ' ETH', () => (
-    <GameBar
-      myName={'Michael'}
-      opponentName={'Janet'}
-      myBalance={WeiPerEther.mul(balances[0]).toString()}
-      opponentBalance={WeiPerEther.mul(balances[1]).toString()}
-      roundBuyIn={WeiPerEther.mul(bigNumberify(0.1 * balances[0] + 0.1 * balances[1])).toString()}
-    />
-  ))
-);
+    <div className="w-100">
+      <GameBar
+        myName={'Michael'}
+        opponentName={'Janet'}
+        myBalance={balancesWei[0]}
+        opponentBalance={balancesWei[1]}
+        roundBuyIn={bigNumberify(balancesWei[0])
+          .add(bigNumberify(balancesWei[1]))
+          .div('10')
+          .toString()}
+      />
+    </div>
+  ));
+});
 
 storiesOf('Game Over', module);
