@@ -13,6 +13,8 @@ import {isTerminal, isSuccess} from "../transaction-submission/states";
 import * as states from "./states";
 import {TwoPartyPlayerIndex} from "../../types";
 import {ProtocolLocator} from "../../../communication";
+import {ETH_ASSET_HOLDER_ADDRESS} from "../../../constants";
+import {TransactionRequest} from "ethers/providers";
 
 type DFReducer = ProtocolReducer<states.DirectFundingState>;
 
@@ -73,11 +75,18 @@ export function initialize({
   }
 
   if (alreadySafeToDeposit) {
-    const depositTransaction = createETHDepositTransaction(
-      channelId,
-      requiredDeposit,
-      existingChannelFunding
-    );
+    let depositTransaction: TransactionRequest;
+
+    if (assetHolderAddress === ETH_ASSET_HOLDER_ADDRESS) {
+      depositTransaction = createETHDepositTransaction(
+        channelId,
+        requiredDeposit,
+        existingChannelFunding
+      );
+    } else {
+      throw new Error("unsupported asset type");
+    }
+
     const {storage: newStorage, state: transactionSubmissionState} = initTransactionState(
       depositTransaction,
       processId,
