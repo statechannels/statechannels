@@ -23,7 +23,11 @@ import {DirectFundingState} from "../direct-funding/states";
 import {clearedToSend} from "../consensus-update/actions";
 import {Outcome} from "@statechannels/nitro-protocol";
 import {ETH_ASSET_HOLDER_ADDRESS} from "../../../constants";
-import {getAllocationAmountForIndex, getAllocationItemAtIndex, getAllocationOutcome} from "../../../utils/outcome-utils";
+import {
+  getAllocationAmountForIndex,
+  getAllocationItemAtIndex,
+  getAllocationOutcome
+} from "../../../utils/outcome-utils";
 export {LEDGER_TOP_UP_PROTOCOL_LOCATOR} from "../../../communication/protocol-locator";
 export function initialize({
   processId,

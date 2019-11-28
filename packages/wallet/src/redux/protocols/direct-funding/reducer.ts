@@ -1,6 +1,9 @@
 import {bigNumberify} from "ethers/utils";
 import {unreachable} from "../../../utils/reducer-utils";
-import {createETHDepositTransaction, createERC20DepositTransaction} from "../../../utils/transaction-generator";
+import {
+  createETHDepositTransaction,
+  createERC20DepositTransaction
+} from "../../../utils/transaction-generator";
 import * as actions from "../../actions";
 import {ProtocolReducer, ProtocolStateWithSharedData} from "../../protocols";
 import {SharedData, registerChannelToMonitor} from "../../state";
