@@ -1,19 +1,28 @@
-// TODO: Update to work with nitro protocol
-
 // import * as selectors from "../selectors";
 // import {select, call, put} from "redux-saga/effects";
-// import {getAdjudicatorHoldings, getProvider, getAdjudicatorOutcome} from "../../utils/contract-utils";
+// import {getProvider, getAdjudicatorChannelStorageHash} from "../../utils/contract-utils";
 // import {channelUpdate} from "../actions";
-// import {BigNumber, bigNumberify} from "ethers/utils";
+// import {bigNumberify} from "ethers/utils";
 
-// A simple saga that runs and dispatches update actions to load the latest adjudicator state
+// // A simple saga that runs and dispatches update actions to load the latest adjudicator state
 export function* adjudicatorStateUpdater() {
-  // const channelIds = yield select(selectors.getChannelIds);
-  // const provider = yield call(getProvider);
-  // for (const channelId of channelIds) {
-  //   const totalForChannel: BigNumber = yield call(getAdjudicatorHoldings, provider, channelId);
-  //   const outcome = yield call(getAdjudicatorOutcome, provider, channelId);
-  //   const isFinalized = bigNumberify(outcome.finalizedAt).gt("0x0");
-  //   yield put(channelUpdate({balance: totalForChannel.toHexString(), channelId, isFinalized}));
-  // }
+  //   const channelIds = yield select(selectors.getChannelIds);
+  //   const provider = yield call(getProvider);
+  //   for (const channelId of channelIds) {
+  //     // const channelStorageHash = yield call(getAdjudicatorChannelStorageHash, provider, channelId);
+  //     //
+  //     // const isFinalzied = ...
+  //     //
+  //     // TODO: To determine if this channel is in a "finalized" state we must learn about the most recent
+  //     // ChannelStorage object that has been put on chain by filtering all events since the most recently
+  //     // observed block of the wallet of any of these types:
+  //     // - ChallengeRegistered
+  //     // - ChallengeCleared
+  //     // - Concluded
+  //     // Then, based on the most recent one, understand the state that the channel is now in. If it is
+  //     // not explicitly finalized, then we should check the current block number to determine if it is.
+  //     // We can confirm our hypothesis by checking `channelStorageHash` against the hash of our guess.
+  //     //
+  //     // yield put(channelUpdate({channelId, isFinalized}));
+  //   }
 }
