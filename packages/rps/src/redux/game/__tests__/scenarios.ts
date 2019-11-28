@@ -8,15 +8,13 @@ export const channelId = '0xabc234';
 export const channelNonce = 1;
 export const aName = 'Alice';
 export const bName = 'Bob';
-export const aBal = bigNumberify(5).toString();
-export const bBal = bigNumberify(5).toString();
+export const aBal = WeiPerEther.mul(5).toString();
+export const bBal = WeiPerEther.mul(5).toString();
 export const aAddress = '0x5409ED021D9299bf6814279A6A1411A7e866A631';
 export const bAddress = '0x6Ecbe1DB9EF729CBe972C83Fb886247691Fb6beb';
 const aUserId = aAddress;
 const bUserId = bAddress;
-export const stake = bigNumberify(1)
-  .mul(WeiPerEther)
-  .toString();
+export const stake = WeiPerEther.toString();
 const roundBuyIn = stake;
 export const aWeapon = Weapon.Rock;
 const playerAWeapon = aWeapon;
@@ -46,12 +44,8 @@ function channelState(
     bUserId,
     aAddress,
     bAddress,
-    aBal: bigNumberify(balances[0])
-      .mul(WeiPerEther)
-      .toString(),
-    bBal: bigNumberify(balances[1])
-      .mul(WeiPerEther)
-      .toString(),
+    aBal: WeiPerEther.mul(balances[0]).toString(),
+    bBal: WeiPerEther.mul(balances[1]).toString(),
     appData: appDataParam,
   };
 }
