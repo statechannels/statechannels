@@ -108,15 +108,16 @@ function* createAssetHolderEventChannel(provider) {
     const assetTransferredFilter = ETHAssetHolder.filters.AssetTransferred();
     const depositedFilter = ETHAssetHolder.filters.Deposited();
 
-    ETHAssetHolder.on(assetTransferredFilter, (...eventArgs) => {
+    ETHAssetHolder.on(assetTransferredFilter, (...eventArgs) =>
       emitter({
         eventType: ETHAssetHolderEventType.AssetTransferred,
         eventArgs
-      });
-    });
-    ETHAssetHolder.on(depositedFilter, (...eventArgs) => {
-      emitter({eventType: ETHAssetHolderEventType.Deposited, eventArgs});
-    });
+      })
+    );
+
+    ETHAssetHolder.on(depositedFilter, (...eventArgs) =>
+      emitter({eventType: ETHAssetHolderEventType.Deposited, eventArgs})
+    );
 
     return () => {
       // This function is called when the channel gets closed
