@@ -28,7 +28,6 @@ interface GameProps {
   playAgain: () => void;
   confirmGame: () => void;
   declineGame: () => void;
-  cancelOpenGame: () => void;
   conclude: () => void;
 }
 
@@ -130,9 +129,6 @@ const mapDispatchToProps = {
   playAgain: gameActions.playAgain,
   confirmGame: gameActions.startRound,
   declineGame: gameActions.cancelGame,
-  cancelOpenGame: {
-    /**/
-  }, // TODO create this action!
   conclude: gameActions.resign,
 };
 
