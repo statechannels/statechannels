@@ -29,7 +29,7 @@ function supportStateArgs({ channelID }: Context): SupportStateArgs {
   }
   return {
     channelID,
-    state: states[0].state,
+    outcome: states[0].state.outcome,
   };
 }
 

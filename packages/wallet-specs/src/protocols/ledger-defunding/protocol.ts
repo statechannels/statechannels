@@ -8,14 +8,14 @@ function defundedOutcome(
   ledgerChannelID: string,
   targetChannelID: string
 ): Outcome {
-  const { outcome } = store.getLatestState(ledgerChannelID);
-  const concludedState = store.getLatestState(targetChannelID);
+  const outcome = store.getLatestSupportedAllocation(ledgerChannelID);
+  const concludedOutcome = store.getLatestSupportedAllocation(targetChannelID);
 
   // Assumes that the target channel only has one entry in the ledger channel
   // TODO: How do we ensure this?
   return outcome
     .filter(item => item.destination !== targetChannelID)
-    .concat(concludedState.outcome);
+    .concat(concludedOutcome);
 }
 
 const concludeTarget = {

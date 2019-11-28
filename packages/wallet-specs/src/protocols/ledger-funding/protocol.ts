@@ -74,8 +74,8 @@ function ledgerUpdateArgs({
   targetChannelID,
 }: LedgerExists): LedgerUpdateArgs {
   const amount = store
-    .getLatestState(targetChannelID)
-    .outcome.map(o => o.amount)
+    .getLatestSupportedAllocation(targetChannelID)
+    .map(o => o.amount)
     .reduce(add);
   return {
     channelID: ledgerChannelID,

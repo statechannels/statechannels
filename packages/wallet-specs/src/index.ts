@@ -1,11 +1,20 @@
 export type AppData = string;
 export type Signature = string;
 export type Recipient = any;
-export interface OutcomeItem {
+export interface AllocationItem {
   destination: string;
   amount: string;
 }
-export type Outcome = OutcomeItem[];
+export type Allocation = AllocationItem[];
+export interface Balance {
+  address: string;
+  wei: string;
+}
+export interface Guarantee {
+  target: string;
+  guarantee: string[];
+}
+export type Outcome = Allocation | Guarantee;
 export type Address = string;
 export type PrivateKey = string;
 

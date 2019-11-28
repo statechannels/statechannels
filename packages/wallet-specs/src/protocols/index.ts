@@ -9,6 +9,7 @@ import * as LedgerDefunding from './ledger-defunding/protocol';
 import * as LedgerFunding from './ledger-funding/protocol';
 import * as LedgerUpdate from './ledger-update/protocol';
 import * as SupportState from './support-state/protocol';
+import * as VirtualLeaf from './virtual-fund-as-leaf/protocol';
 
 // This is a hacky way to run the `saveConfig` function in each protocl.ts file
 // TODO: Make this less hacky
@@ -24,4 +25,5 @@ export {
   LedgerFunding,
   LedgerUpdate,
   SupportState,
+  VirtualLeaf,
 };

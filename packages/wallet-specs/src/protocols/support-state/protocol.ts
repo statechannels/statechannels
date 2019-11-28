@@ -1,20 +1,21 @@
-import { State } from '../..';
+import { Outcome, State } from '../..';
 import { saveConfig } from '../../utils';
 
 const PROTOCOL = 'support-state';
 
-/*
-TODO: What do we do in the face of unexpected states arriving?
-Do we abort? Or do we try to reach consensus on a later state?
-*/
-
 export interface Init {
   channelID: string;
-  state: State;
+  outcome: Outcome;
 }
 
+export type SendState = Init & { state: State };
+
+/*
+TODO: Define sendState
+Do we abort? Or do we try to reach consensus on a later state?
+*/
 const waiting = {
-  entry: 'sendState',
+  entry: ['assignState', 'sendState'],
   on: {
     CHANNEL_UPDATED: [
       {

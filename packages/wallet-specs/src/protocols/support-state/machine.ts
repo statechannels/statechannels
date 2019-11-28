@@ -1,22 +1,20 @@
 import { interpret, Machine } from 'xstate';
 import { Channel, Outcome, SignedState, State } from '../..';
 import { ChannelStoreEntry, Store } from '../../store';
-import { config, Init } from './protocol';
+import { config, Init, SendState } from './protocol';
 
 const participants = ['me', 'you'];
-const outcome: Outcome = participants.map(p => ({
-  destination: p,
-  amount: '2',
-}));
-const channel: Channel = {
-  participants,
-  channelNonce: '2',
-  chainId: '4',
-};
 const startingState: State = {
-  channel,
+  channel: {
+    participants,
+    channelNonce: '2',
+    chainId: '4',
+  },
   turnNum: 0,
-  outcome,
+  outcome: participants.map(p => ({
+    destination: p,
+    amount: '2',
+  })),
   isFinal: false,
   challengeDuration: '42',
 };
@@ -32,12 +30,12 @@ const storeEntry: ChannelStoreEntry = {
 };
 const store = new Store({ '0xabc': storeEntry });
 
-function supported({ channelID, state }: Init): boolean {
-  const { state: supportedState } = store.getLatestConsensus(channelID);
-  return Store.equals(state, supportedState);
+function supported({ channelID, outcome }: Init): boolean {
+  const { state } = store.getLatestConsensus(channelID);
+  return Store.equals(outcome, state.outcome);
 }
 
-function sendState({ channelID, state }: Init): void {
+function sendState({ channelID, state }: SendState): void {
   const unsupportedStates = store.getUnsupportedStates(channelID);
 
   unsupportedStates.map(({ state: unsupportedState }) => {
@@ -59,8 +57,9 @@ const guards = {
   supported,
 };
 const turnNum = 3;
-const context: Init = {
+const context: SendState = {
   channelID: '0xabc',
+  outcome: startingState.outcome,
   state: { ...startingState, turnNum },
 };
 

@@ -16,6 +16,7 @@
     "prefer-for-of": true,
     "prettier": [true, ".prettierrc.js"],
     "forin": false,
+    "no-unused-variable": false,
     "variable-name": [
       true,
       "ban-keywords",

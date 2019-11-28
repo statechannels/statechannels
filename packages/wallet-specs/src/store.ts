@@ -1,9 +1,9 @@
-import { getChannelID, SignedState, State } from '.';
-
+import { Allocation, getChannelID, Outcome, SignedState, State } from '.';
 interface IStore {
   getLatestState: (channelID: string) => State;
   getLatestConsensus: (channelID: string) => SignedState; // Used for null channels, whose support must be a single state
   getLatestSupport: (channelID: string) => SignedState[]; //  Used for application channels, which would typically have multiple states in its support
+  getLatestSupportedAllocation: (channelID: string) => Allocation;
 
   // The channel store should garbage collect stale states on CHANNEL_UPDATED events.
   // If a greater state becomes supported on such an event, it should replace the latest
@@ -36,7 +36,7 @@ interface ChannelStore {
 }
 
 export class Store implements IStore {
-  public static equals(left: State, right: State) {
+  public static equals(left: any, right: any) {
     return JSON.stringify(left) === JSON.stringify(right);
   }
 
@@ -79,6 +79,12 @@ export class Store implements IStore {
     } else {
       return supportedState[supportedState.length - 1].state;
     }
+  }
+
+  public getLatestSupportedAllocation(channelID): Allocation {
+    // TODO: Check the use of this. (Sometimes you want the latest outcome)
+    const { outcome } = this.getLatestState(channelID);
+    return shouldBe(isAllocation, outcome);
   }
 
   public getLatestConsensus(channelID: string) {
@@ -202,3 +208,16 @@ export interface Deposit {
 export type StoreEvent = ChannelUpdated | Deposit;
 
 export const store = new Store();
+
+export function isAllocation(outcome: Outcome): outcome is Allocation {
+  if ('target' in outcome) {
+    throw new Error('Not an allocation');
+  }
+  return true;
+}
+
+const throwError = (fn: (t1: any) => boolean, t) => {
+  throw new Error(`not valid, ${fn.name} failed on ${t}`);
+};
+export const shouldBe = <T>(fn: (t1) => t1 is T, t) =>
+  fn(t) ? t : throwError(fn, t);

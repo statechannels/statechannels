@@ -3,7 +3,7 @@ const config = {
   initial: 'waiting',
   states: {
     waiting: {
-      entry: 'sendState',
+      entry: ['assignState', 'sendState'],
       on: { CHANNEL_UPDATED: [{ target: 'success', cond: 'supported' }] },
     },
     success: { type: 'final' },

@@ -1,14 +1,16 @@
 import {
   add,
+  Allocation,
+  AllocationItem,
   chain,
   getChannelID,
   max,
   Outcome,
-  OutcomeItem,
   State,
   store,
   subtract,
 } from '../../';
+import { isAllocation, shouldBe } from '../../store';
 import { saveConfig } from '../../utils';
 
 const PROTOCOL = 'direct-funding';
@@ -24,7 +26,7 @@ function getHoldings(state: State, destination: string): string {
   const { outcome } = state;
 
   let currentFunding = chain.holdings(getChannelID(state.channel));
-  return outcome
+  return shouldBe(isAllocation, outcome)
     .filter(item => item.destination === destination)
     .map(item => {
       const payout = Math.min(currentFunding, Number(item.amount));
@@ -34,13 +36,13 @@ function getHoldings(state: State, destination: string): string {
     .reduce(add);
 }
 
-function assertOk(minimalOutcome: Outcome): boolean {
+function assertOk(minimalOutcome: Allocation): boolean {
   return uniqueDestinations(minimalOutcome).length === minimalOutcome.length;
 }
 
 function obligation(
   state: State,
-  minimalOutcome: Outcome,
+  minimalOutcome: Allocation,
   destination: string
 ): string {
   assertOk(minimalOutcome);
@@ -54,7 +56,7 @@ function obligation(
   return max(subtract(myTargetLevel, myHoldings), 0);
 }
 
-function uniqueDestinations(outcome: Outcome): string[] {
+function uniqueDestinations(outcome: Allocation): string[] {
   const firstEntry = (value, index, self) => {
     return self.indexOf(value) === index;
   };
@@ -64,10 +66,10 @@ function uniqueDestinations(outcome: Outcome): string[] {
 
 function preDepositOutcome(
   channelID: string,
-  minimalOutcome: Outcome
+  minimalOutcome: Allocation
 ): Outcome {
-  const state = store.getLatestState(channelID);
-  const { outcome } = state;
+  const { state } = store.getLatestConsensus(channelID);
+  const outcome = store.getLatestSupportedAllocation(channelID);
 
   const destinations = uniqueDestinations(outcome.concat(minimalOutcome));
   return outcome.concat(
@@ -78,12 +80,12 @@ function preDepositOutcome(
   );
 }
 
-function amount(item: OutcomeItem): string {
+function amount(item: AllocationItem): string {
   return item.amount;
 }
 
 function postDepositOutcome(channelID: string): Outcome {
-  const { outcome } = store.getLatestState(channelID);
+  const outcome = store.getLatestSupportedAllocation(channelID);
   const destinations = uniqueDestinations(outcome);
 
   return destinations.map(destination => ({
