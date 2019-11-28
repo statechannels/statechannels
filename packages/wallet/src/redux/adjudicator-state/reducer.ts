@@ -1,4 +1,4 @@
-import {AdjudicatorState, clearChallenge, markAsFinalized, setBalance, setChallenge} from "./state";
+import {AdjudicatorState, clearChallenge, markAsFinalized, setChallenge} from "./state";
 import * as actions from "../actions";
 import {unreachable} from "../../utils/reducer-utils";
 
@@ -9,8 +9,6 @@ export const adjudicatorStateReducer = (
   switch (action.type) {
     case "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED":
       return challengeExpiredReducer(state, action);
-    case "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT":
-      return fundingReceivedEventReducer(state, action);
     case "WALLET.ADJUDICATOR.CONCLUDED_EVENT":
       return concludedEventReducer(state, action);
     case "WALLET.ADJUDICATOR.REFUTED_EVENT":
@@ -59,20 +57,13 @@ const concludedEventReducer = (state: AdjudicatorState, action: actions.Conclude
   const {channelId} = action;
   return markAsFinalized(state, channelId);
 };
-const fundingReceivedEventReducer = (
-  state: AdjudicatorState,
-  action: actions.FundingReceivedEvent
-) => {
-  const {channelId} = action;
-  return setBalance(state, channelId, action.totalForDestination);
-};
+
 const channelUpdateReducer = (state: AdjudicatorState, action: actions.ChannelUpdate) => {
   const {channelId} = action;
-  let updatedState = setBalance(state, channelId, "0x0");
   if (action.isFinalized) {
-    updatedState = markAsFinalized(updatedState, channelId);
+    state = markAsFinalized(state, channelId);
   }
-  return updatedState;
+  return state;
 };
 
 const challengeExpiredReducer = (

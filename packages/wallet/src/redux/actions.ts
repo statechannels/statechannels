@@ -237,7 +237,6 @@ export type AdjudicatorEventAction =
   | ConcludedEvent
   | RefutedEvent
   | RespondWithMoveEvent
-  | FundingReceivedEvent
   | ChallengeExpiredEvent
   | ChallengeCreatedEvent
   | ChallengeClearedEvent
