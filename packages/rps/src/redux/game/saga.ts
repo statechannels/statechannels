@@ -64,7 +64,6 @@ function* gameSagaRun(client: RPSChannelClient) {
     case 'OpponentJoined': // player B
       if (cs.inChannelProposed(channelState)) {
         yield* joinChannel(channelState, client);
-      } else if (cs.isRunning(channelState)) {
         yield* startRound();
       }
       break;

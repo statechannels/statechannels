@@ -26,8 +26,6 @@ interface GameProps {
   state: LocalState;
   chooseWeapon: (move: Weapon) => void;
   playAgain: () => void;
-  confirmGame: () => void;
-  declineGame: () => void;
   cancelOpenGame: () => void;
   conclude: () => void;
 }
@@ -58,12 +56,7 @@ function RenderGame(props: GameProps) {
       return <ProposeGamePage message="Waiting for opponent to confirm" />;
     case 'OpponentJoined':
       return (
-        <ConfirmGamePage
-          confirmGame={props.confirmGame}
-          cancelGame={props.declineGame}
-          stake={state.roundBuyIn.toString()}
-          opponentName={state.opponentName}
-        />
+        <ConfirmGamePage stake={state.roundBuyIn.toString()} opponentName={state.opponentName} />
       );
     case 'ChooseWeapon':
       return <SelectWeaponPage chooseWeapon={props.chooseWeapon} />;
@@ -128,16 +121,8 @@ const mapStateToProps = (state: SiteState) => ({
 const mapDispatchToProps = {
   chooseWeapon: gameActions.chooseWeapon,
   playAgain: gameActions.playAgain,
-  confirmGame: gameActions.startRound,
-  declineGame: () => {
-    /**/
-  }, // TODO create this action!
-  cancelOpenGame: {
-    /**/
-  }, // TODO create this action!
+  cancelOpenGame: gameActions.cancelGame, // TODO create this action!
   conclude: gameActions.resign,
 };
-
-// why does it think that mapStateToProps can return undefined??
 
 export default connect(mapStateToProps, mapDispatchToProps)(GameContainer);
