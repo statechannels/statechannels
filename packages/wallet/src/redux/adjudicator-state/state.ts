@@ -5,7 +5,6 @@ export interface AdjudicatorState {
 }
 export interface AdjudicatorChannelState {
   channelId: string;
-  balance: string;
   finalized: boolean;
   challenge?: Challenge;
 }
@@ -20,7 +19,7 @@ function getOrCreateAdjudicatorChannelState(
 ): AdjudicatorChannelState {
   let channelState = getAdjudicatorChannelState(adjudicatorState, channelId);
   if (!channelState) {
-    channelState = {channelId, balance: "0x0", finalized: false};
+    channelState = {channelId, finalized: false};
   }
   return channelState;
 }
@@ -65,16 +64,5 @@ export function markAsFinalized(
 ): AdjudicatorState {
   const channelState = getOrCreateAdjudicatorChannelState(adjudicatorState, channelId);
   const newChannelState = {...channelState, finalized: true};
-  return setAdjudicatorChannelState(adjudicatorState, newChannelState);
-}
-
-export function setBalance(
-  adjudicatorState: AdjudicatorState,
-  channelId: string,
-  balance: string
-): AdjudicatorState {
-  const channelState = getOrCreateAdjudicatorChannelState(adjudicatorState, channelId);
-
-  const newChannelState = {...channelState, balance};
   return setAdjudicatorChannelState(adjudicatorState, newChannelState);
 }
