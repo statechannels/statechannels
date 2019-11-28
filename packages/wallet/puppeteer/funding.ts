@@ -1,17 +1,20 @@
 import puppeteer from "puppeteer";
-import * as dappeteer from "dappeteer";
 import Emittery from "emittery";
+import fs from "fs";
+import path from "path";
 
 (async () => {
   // Unfortunately we need to use two separate windows
   // as otherwise the javascript gets paused on the non-selected tab
   // see https://github.com/puppeteer/puppeteer/issues/3339
-  const browserA = await setUpBrowserAndMetamask();
-  const browserB = await setUpBrowserAndMetamask();
+  const browserA = await setUpBrowser();
+  const browserB = await setUpBrowser();
+
   const walletA = await browserA.newPage();
   const walletB = await browserB.newPage();
 
   const walletMessages = new Emittery();
+
   await loadWallet(walletA, m => messageHandler(walletMessages, "A", m));
   await loadWallet(walletB, m => messageHandler(walletMessages, "B", m));
 
@@ -51,29 +54,6 @@ import Emittery from "emittery";
   await walletB.click("button");
 })();
 
-const timeout = ms => new Promise(res => setTimeout(res, ms));
-
-async function setUpBrowserAndMetamask(): Promise<puppeteer.Browser> {
-  const browser = await dappeteer.launch(puppeteer, {
-    headless: false,
-    // Needed to allow both windows to execute JS at the same time
-    ignoreDefaultArgs: [
-      "--disable-background-timer-throttling",
-      "--disable-backgrounding-occluded-windows",
-      "--disable-renderer-backgrounding"
-    ]
-  });
-  // dappeteer seems to resolve promises before the work is actually done
-  // To get around this we just pepper in some delays
-  const metamask = await dappeteer.getMetamask(browser, {});
-  await timeout(1000);
-  await metamask.importPK("0x7ab741b57e8d94dd7e1a29055646bafde7010f38a900f55bbd7647880faa6ee8");
-  await timeout(1000);
-  await metamask.addNetwork("http://localhost:8547");
-  await timeout(1000);
-  return browser;
-}
-
 function messageHandler(emitter: Emittery, player: "A" | "B", message) {
   const playerPrefix = `player${player}-`;
   if (message.id) {
@@ -84,6 +64,42 @@ function messageHandler(emitter: Emittery, player: "A" | "B", message) {
     emitter.emit(`${playerPrefix}notification`, message);
   }
 }
+
+async function loadWallet(page: puppeteer.Page, messageListener: (message) => void) {
+  // TODO: This is kinda ugly but it works
+  // We need to instantiate a web3 for the wallet so we import the web 3 script
+  // and then assign it on the window
+  const web3JsFile = fs.readFileSync(path.resolve(__dirname, "web3/web3.min.js"), "utf8");
+  await page.evaluateOnNewDocument(web3JsFile);
+  await page.evaluateOnNewDocument('window.web3 = new Web3("http://localhost:8547")');
+  await page.goto("http://localhost:3055/");
+
+  await page.waitFor(3000); // Delay lets things load
+  // interceptMessage gets called in puppeteer's context
+  await page.exposeFunction("interceptMessage", message => {
+    messageListener(message);
+  });
+  await page.evaluate(() => {
+    // We override window.parent.postMessage with our interceptMesage
+    (window as any).parent = {...window.parent, postMessage: (window as any).interceptMessage};
+  });
+}
+
+async function setUpBrowser(): Promise<puppeteer.Browser> {
+  const browser = await puppeteer.launch({
+    headless: false,
+    devtools: true,
+    // Needed to allow both windows to execute JS at the same time
+    ignoreDefaultArgs: [
+      "--disable-background-timer-throttling",
+      "--disable-backgrounding-occluded-windows",
+      "--disable-renderer-backgrounding"
+    ]
+  });
+
+  return browser;
+}
+
 async function sendJoinChannel(page: puppeteer.Page, channelId: string) {
   await page.evaluate(cId => {
     window.postMessage(
@@ -141,20 +157,6 @@ async function sendCreateChannel(page: puppeteer.Page, playerAAddress, playerBAd
   );
 }
 
-async function pushMessage(page: puppeteer.Page, message: any) {
-  await page.evaluate(m => {
-    window.postMessage(
-      {
-        jsonrpc: "2.0",
-        method: "PushMessage",
-        id: 10,
-        params: m
-      },
-      "*"
-    );
-  }, message);
-}
-
 async function sendGetAddress(page: puppeteer.Page) {
   await page.evaluate(() => {
     window.postMessage(
@@ -169,17 +171,16 @@ async function sendGetAddress(page: puppeteer.Page) {
   });
 }
 
-async function loadWallet(page: puppeteer.Page, messageListener: (message) => void) {
-  await page.goto("http://localhost:3055/");
-  await page.waitFor(3000); // Delay lets things load
-  // interceptMessage gets called in puppeteer's context
-  await page.exposeFunction("interceptMessage", message => {
-    messageListener(message);
-  });
-  await page.evaluate(() => {
-    // We override window.parent.postMessage with our interceptMesage
-    (window as any).parent = {...window.parent, postMessage: (window as any).interceptMessage};
-  });
-  // Focus on our wallet page (since metamask grabs focus)
-  await page.bringToFront();
+async function pushMessage(page: puppeteer.Page, message: any) {
+  await page.evaluate(m => {
+    window.postMessage(
+      {
+        jsonrpc: "2.0",
+        method: "PushMessage",
+        id: 10,
+        params: m
+      },
+      "*"
+    );
+  }, message);
 }
