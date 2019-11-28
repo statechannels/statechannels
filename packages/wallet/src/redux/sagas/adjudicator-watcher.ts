@@ -95,16 +95,8 @@ function* dispatchProcessEventAction(
       );
       break;
     case AdjudicatorEventType.ChallengeCleared:
-      const newTurnNumRecord = event.eventArgs[1].toNumber();
-      yield put(
-        actions.challengeClearedEvent({
-          channelId,
-          newTurnNumRecord
-        })
-      );
       break;
     case AdjudicatorEventType.Concluded:
-      yield put(actions.concludedEvent({channelId}));
       break;
     default:
       throw new Error(
