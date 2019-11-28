@@ -2,10 +2,12 @@ import {
   getAdjudicatorContractAddress,
   getConsensusContractAddress,
   getNetworkId,
-  getETHAssetHolderAddress
+  getETHAssetHolderAddress,
+  getERC20AssetHolderAddress
 } from "./utils/contract-utils";
 
 export const ETH_ASSET_HOLDER_ADDRESS = getETHAssetHolderAddress();
+export const ERC20_ASSET_HOLDER_ADDRESS = getERC20AssetHolderAddress();
 export const ADJUDICATOR_ADDRESS = getAdjudicatorContractAddress();
 export const CONSENSUS_LIBRARY_ADDRESS = getConsensusContractAddress();
 // TODO: Dynamically fetch on wallet start saga

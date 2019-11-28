@@ -1,6 +1,6 @@
 import {bigNumberify} from "ethers/utils";
 import {unreachable} from "../../../utils/reducer-utils";
-import {createETHDepositTransaction} from "../../../utils/transaction-generator";
+import {createETHDepositTransaction, createERC20DepositTransaction} from "../../../utils/transaction-generator";
 import * as actions from "../../actions";
 import {ProtocolReducer, ProtocolStateWithSharedData} from "../../protocols";
 import {SharedData, registerChannelToMonitor} from "../../state";
@@ -13,7 +13,7 @@ import {isTerminal, isSuccess} from "../transaction-submission/states";
 import * as states from "./states";
 import {TwoPartyPlayerIndex} from "../../types";
 import {ProtocolLocator} from "../../../communication";
-import {ETH_ASSET_HOLDER_ADDRESS} from "../../../constants";
+import {ETH_ASSET_HOLDER_ADDRESS, ERC20_ASSET_HOLDER_ADDRESS} from "../../../constants";
 import {TransactionRequest} from "ethers/providers";
 
 type DFReducer = ProtocolReducer<states.DirectFundingState>;
@@ -83,8 +83,14 @@ export function initialize({
         requiredDeposit,
         existingChannelFunding
       );
+    } else if (assetHolderAddress === ERC20_ASSET_HOLDER_ADDRESS) {
+      depositTransaction = createERC20DepositTransaction(
+        channelId,
+        requiredDeposit,
+        existingChannelFunding
+      );
     } else {
-      throw new Error("unsupported asset type");
+      throw new Error(`Received unknown assetHolderAddress: ${assetHolderAddress}`);
     }
 
     const {storage: newStorage, state: transactionSubmissionState} = initTransactionState(
