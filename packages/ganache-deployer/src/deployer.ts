@@ -39,14 +39,14 @@ export async function deployContracts(chain: GanacheServer): Promise<object> {
     {
       artifact: erc20AssetHolderArtifact,
       arguments: (deployedArtifacts: DeployedArtifacts) => {
-        if (testNitroAdjudicatorArtifact.contractName in deployedArtifacts) {
+        if (nitroAdjudicatorArtifact.contractName in deployedArtifacts) {
           return [
-            deployedArtifacts[testNitroAdjudicatorArtifact.contractName].address,
+            deployedArtifacts[nitroAdjudicatorArtifact.contractName].address,
             deployedArtifacts[tokenArtifact.contractName].address,
           ];
         }
         throw Error(`${erc20AssetHolderArtifact.contractName} requires that the following contracts are deployed:
-          - ${testNitroAdjudicatorArtifact.contractName}
+          - ${nitroAdjudicatorArtifact.contractName}
           - ${tokenArtifact.contractName}
         `);
       },
@@ -54,11 +54,11 @@ export async function deployContracts(chain: GanacheServer): Promise<object> {
     {
       artifact: ethAssetHolderArtifact,
       arguments: (deployedArtifacts: DeployedArtifacts) => {
-        if (testNitroAdjudicatorArtifact.contractName in deployedArtifacts) {
-          return [deployedArtifacts[testNitroAdjudicatorArtifact.contractName].address];
+        if (nitroAdjudicatorArtifact.contractName in deployedArtifacts) {
+          return [deployedArtifacts[nitroAdjudicatorArtifact.contractName].address];
         }
         throw Error(`${ethAssetHolderArtifact.contractName} requires that the following contracts are deployed:
-          - ${testNitroAdjudicatorArtifact.contractName}
+          - ${nitroAdjudicatorArtifact.contractName}
         `);
       },
     },
