@@ -3,14 +3,35 @@ import * as dappeteer from "dappeteer";
 import Emittery from "emittery";
 
 (async () => {
-  const browser = await dappeteer.launch(puppeteer, {headless: false, devtools: true});
-  const walletA = await browser.newPage();
-  const walletB = await browser.newPage();
+  // Unfortunately we need to use two separate windows
+  // as otherwise the javascript gets paused on the non-selected tab
+  const browserA = await dappeteer.launch(puppeteer, {
+    headless: false,
+    devtools: true,
+    ignoreDefaultArgs: [
+      "--disable-background-timer-throttling",
+      "--disable-backgrounding-occluded-windows",
+      "--disable-renderer-backgrounding"
+    ]
+  });
+  const browserB = await dappeteer.launch(puppeteer, {
+    headless: false,
+    devtools: true,
+    ignoreDefaultArgs: [
+      "--disable-background-timer-throttling",
+      "--disable-backgrounding-occluded-windows",
+      "--disable-renderer-backgrounding"
+    ]
+  });
+
+  const walletA = await browserA.newPage();
+  const walletB = await browserB.newPage();
+
   const walletMessages = new Emittery();
   await loadWallet(walletA, m => messageHandler(walletMessages, "A", m));
   await loadWallet(walletB, m => messageHandler(walletMessages, "B", m));
 
-  // Automatically deliver messagequeued message to opponent's wallet
+  // Automatically deliver messageQueued message to opponent's wallet
   walletMessages.on("playerA-message", async message => {
     console.log("Delivering message from player A's wallet to player B's wallet");
     await pushMessage(walletB, (message as any).params);
@@ -37,7 +58,7 @@ import Emittery from "emittery";
   const joinChannelPromise: Promise<any> = walletMessages.once("playerB-result");
   await sendJoinChannel(walletB, channelId);
   await joinChannelPromise;
-  console.log(`Player B has join channel ${channelId}`);
+  console.log(`Player B has joined channel ${channelId}`);
 
   await walletA.waitFor("button");
   await walletA.click("button");
@@ -51,6 +72,7 @@ function messageHandler(emitter: Emittery, player: "A" | "B", message) {
   if (message.id) {
     emitter.emit(`${playerPrefix}result`, message);
   } else if (message.method === "MessageQueued") {
+    console.log(message);
     emitter.emit(`${playerPrefix}message`, message);
   } else {
     emitter.emit(`${playerPrefix}notification`, message);
@@ -152,4 +174,6 @@ async function loadWallet(page: puppeteer.Page, messageListener: (message) => vo
     // We override window.parent.postMessage with our interceptMesage
     (window as any).parent = {...window.parent, postMessage: (window as any).interceptMessage};
   });
+  // Focus on our wallet page (since metamask grabs focus)
+  await page.bringToFront();
 }
