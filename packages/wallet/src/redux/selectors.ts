@@ -11,6 +11,7 @@ import {ProcessProtocol} from "../communication";
 import {CONSENSUS_LIBRARY_ADDRESS} from "../constants";
 import {bigNumberify} from "ethers/utils";
 import {State} from "@statechannels/nitro-protocol";
+import {AddressZero} from "ethers/constants";
 
 export const getOpenedChannelState = (state: SharedData, channelId: string): OpenChannelState => {
   const channelStatus = getChannelState(state, channelId);
@@ -28,7 +29,7 @@ export const doesAStateExistForChannel = (state: SharedData, channelId: string):
 };
 
 export const getAppDefinitionBytecode = (state: SharedData, appDefinition: string): string => {
-  return state.bytecodeStorage[appDefinition];
+  return state.bytecodeStorage[appDefinition] || AddressZero;
 };
 
 export const getChannelState = (state: SharedData, channelId: string): ChannelState => {

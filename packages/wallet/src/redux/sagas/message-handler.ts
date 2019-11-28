@@ -23,13 +23,14 @@ import {validateRequest} from "../../json-rpc-validation/validator";
 import {fundingRequested} from "../protocols/actions";
 import {TwoPartyPlayerIndex} from "../types";
 import {isRelayableAction} from "../../communication";
+import {bigNumberify} from "ethers/utils";
 
 export function* messageHandler(jsonRpcMessage: object, fromDomain: string) {
   const parsedMessage = jrs.parseObject(jsonRpcMessage);
   switch (parsedMessage.type) {
     case "notification":
     case "success":
-      console.warn(`Received unexpected JSON-RPC message ${jsonRpcMessage}`);
+      console.warn(`Received unexpected JSON-RPC message ${JSON.stringify(jsonRpcMessage)}`);
       break;
     case "error":
       throw new Error("TODO: Respond with error message");
@@ -139,14 +140,16 @@ function* handlePushMessage(payload: RequestObject) {
         // before they decline the opponent's proposed channel
 
         const provider = yield call(getProvider);
-        const bytecode = yield call(provider.getCode, signedState.state.appDefinition);
+        if (!bigNumberify(signedState.state.appDefinition).isZero()) {
+          const bytecode = yield call(provider.getCode, signedState.state.appDefinition);
 
-        yield put(
-          actions.appDefinitionBytecodeReceived({
-            appDefinition: signedState.state.appDefinition,
-            bytecode
-          })
-        );
+          yield put(
+            actions.appDefinitionBytecodeReceived({
+              appDefinition: signedState.state.appDefinition,
+              bytecode
+            })
+          );
+        }
 
         yield put(
           actions.protocol.initializeChannel({
@@ -165,7 +168,12 @@ function* handlePushMessage(payload: RequestObject) {
         yield fork(messageSender, actions.postMessageResponse({id}));
 
         const channelId = getChannelId(signedState.state.channel);
-        yield fork(messageSender, actions.channelProposedEvent({channelId}));
+        yield fork(
+          messageSender,
+          actions.channelProposedEvent({
+            channelId
+          })
+        );
         break;
     }
   }
