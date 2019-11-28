@@ -31,7 +31,7 @@
     "test:ci": "yarn test:ci:contracts && yarn test:ci:app",
     "test:contracts": "npx jest --runInBand -c ./config/jest/jest.contracts.config.js --detectOpenHandles --bail",
     "test": "run-s 'test:app --all' 'test:contracts --all'",
-    "test:integration": "npx cypress open"
+    "test:integration": "npx ts-node ./puppeteer/funding.ts"
   },
   "dependencies": {
     "@firebase/app-types": "^0.3.2",
