@@ -2,6 +2,7 @@ import NetworkContext from "@statechannels/ganache-deployer/ganache-network-cont
 import {ethers} from "ethers";
 import {AddressZero} from "ethers/constants";
 import log from "loglevel";
+import { Provider } from "ethers/providers";
 
 log.setDefaultLevel(log.levels.DEBUG);
 
@@ -114,15 +115,8 @@ export function isDevelopmentNetwork(): boolean {
     networkId !== 61717561 // aquachain
   );
 }
-// TODO: Update to work with nitro protocol
-// export async function getAdjudicatorHoldings(provider, channelId) {
-//   const contract = await getAdjudicatorContract(provider);
-//   const holdingForChannel = await contract.holdings(channelId);
-//   return holdingForChannel;
-// }
 
-// export async function getAdjudicatorOutcome(provider, channelId) {
-//   const contract = await getAdjudicatorContract(provider);
-//   const outcomeForChannel = await contract.outcomes(channelId);
-//   return outcomeForChannel;
-// }
+export async function getAdjudicatorChannelStorageHash(provider: Provider, channelId: string) {
+  const contract = await getAdjudicatorContract(provider);
+  return await contract.channelStorageHashes(channelId);
+}

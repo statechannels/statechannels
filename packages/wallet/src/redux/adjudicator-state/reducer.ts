@@ -68,7 +68,7 @@ const fundingReceivedEventReducer = (
 };
 const channelUpdateReducer = (state: AdjudicatorState, action: actions.ChannelUpdate) => {
   const {channelId} = action;
-  let updatedState = setBalance(state, channelId, action.balance);
+  let updatedState = setBalance(state, channelId, "0x0");
   if (action.isFinalized) {
     updatedState = markAsFinalized(updatedState, channelId);
   }
