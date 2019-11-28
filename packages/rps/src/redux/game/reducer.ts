@@ -159,11 +159,11 @@ const handleCreateGame = (state: LocalState, action: CreateGame): LocalState => 
 };
 
 const handleCancelGame = (state: LocalState, action: CancelGame): LocalState => {
-  if (state.type !== 'Lobby') {
+  if (state.type === 'WaitingRoom' || state.type === 'OpponentJoined') {
+    return lobby(state);
+  } else {
     return state;
   }
-
-  return lobby(state);
 };
 
 const handleChooseWeapon = (state: LocalState, action: ChooseWeapon): LocalState => {

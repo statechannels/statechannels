@@ -83,6 +83,12 @@ export default function* openGameSaga() {
         }
       }
     }
+    if (localState.type === 'Lobby' && myGameIsOnFirebase && localState.address) {
+      // we cancelled our game
+      const myOpenGameKey = `/challenges/${localState.address}`;
+      yield call(reduxSagaFirebase.database.delete, myOpenGameKey);
+      myGameIsOnFirebase = false;
+    }
   }
 }
 // maps { '0xabc': openGame1Data, ... } to [openGame1Data, ....]

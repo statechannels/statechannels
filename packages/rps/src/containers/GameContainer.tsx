@@ -50,7 +50,7 @@ function RenderGame(props: GameProps) {
     case 'WaitingRoom':
       return (
         <WaitingRoomPage
-          cancelOpenGame={props.cancelOpenGame}
+          cancelOpenGame={props.declineGame}
           roundBuyIn={state.roundBuyIn.toString()}
         />
       );
@@ -129,15 +129,11 @@ const mapDispatchToProps = {
   chooseWeapon: gameActions.chooseWeapon,
   playAgain: gameActions.playAgain,
   confirmGame: gameActions.startRound,
-  declineGame: () => {
-    /**/
-  }, // TODO create this action!
+  declineGame: gameActions.cancelGame,
   cancelOpenGame: {
     /**/
   }, // TODO create this action!
   conclude: gameActions.resign,
 };
-
-// why does it think that mapStateToProps can return undefined??
 
 export default connect(mapStateToProps, mapDispatchToProps)(GameContainer);
