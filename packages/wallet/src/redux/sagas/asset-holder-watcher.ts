@@ -52,7 +52,7 @@ function* dispatchEventAction(event: AssetHolderEvent) {
       const depositedEvent = getDepositedEvent(event);
       yield put(
         actions.depositedEvent({
-          assetHolderAddress: yield select(getETHAssetHolderAddress),
+          assetHolderAddress: getETHAssetHolderAddress(),
           destination: depositedEvent.destination,
           amountDeposited: depositedEvent.amountDeposited,
           destinationHoldings: depositedEvent.destinationHoldings
@@ -87,7 +87,7 @@ function* dispatchProcessEventAction(
       const depositedEvent = getDepositedEvent(event);
       yield put(
         actions.depositedEvent({
-          assetHolderAddress: yield select(getETHAssetHolderAddress),
+          assetHolderAddress: getETHAssetHolderAddress(),
           destination: depositedEvent.destination,
           amountDeposited: depositedEvent.amountDeposited,
           destinationHoldings: depositedEvent.destinationHoldings
