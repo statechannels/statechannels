@@ -23,7 +23,7 @@
     "fs-extra": "8.1.0",
     "jest": "24.9.0",
     "loglevel": "1.6.6",
-    "solc": "0.5.11",
+    "solc": "0.5.13",
     "yargs": "14.0.0"
   },
   "devDependencies": {

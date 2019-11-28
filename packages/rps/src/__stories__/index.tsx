@@ -12,6 +12,9 @@ import { MetamaskErrorType } from '../redux/metamask/actions';
 import LoginErrorPage from '../components/LoginErrorPage';
 import { localStatesA, localStatesB, channelStates } from '../redux/game/__tests__/scenarios';
 import { ChannelState } from '../core';
+import GameBar from '../components/GameBar';
+import { toWei } from 'web3-utils';
+import { bigNumberify } from 'ethers/utils';
 
 const fakeStore = state => ({
   dispatch: action => {
@@ -65,7 +68,7 @@ export function siteStateFromLocalState<T extends states.LocalState>(
   }
   return {
     ...initialState,
-    game: { localState, channelState: initialState.game.channelState },
+    game: { localState, channelState },
   };
 }
 
@@ -90,6 +93,30 @@ Object.keys(localStatesB).forEach(key => {
     key,
     testState(siteStateFromLocalState(localStatesB[key]))
   );
+});
+
+const balancesArray = [
+  ['5', '5'],
+  ['6', '4'],
+  ['4', '6'],
+  ['0.2', '0.8'],
+]; // denominated in ETH
+balancesArray.forEach(balances => {
+  const balancesWei = balances.map(balance => toWei(balance, 'ether')); // now in Wei
+  storiesOf('GameBar', module).add(balances[0] + ' ETH , ' + balances[1] + ' ETH', () => (
+    <div className="w-100">
+      <GameBar
+        myName={'Michael'}
+        opponentName={'Janet'}
+        myBalance={balancesWei[0]}
+        opponentBalance={balancesWei[1]}
+        roundBuyIn={bigNumberify(balancesWei[0])
+          .add(bigNumberify(balancesWei[1]))
+          .div('10')
+          .toString()}
+      />
+    </div>
+  ));
 });
 
 storiesOf('Game Over', module);

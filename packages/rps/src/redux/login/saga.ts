@@ -35,7 +35,7 @@ function* loginStatusWatcherSaga() {
   while (true) {
     const { user } = yield take(channel);
     if (user) {
-      const libraryAddress = yield getLibraryAddress();
+      const libraryAddress = getLibraryAddress();
       if (!libraryAddress) {
         yield put(
           loginActions.loginFailure(
@@ -68,7 +68,7 @@ export default function* loginRootSaga() {
   ]);
 }
 
-function* getLibraryAddress() {
+function getLibraryAddress() {
   ethereum.enable();
   // const selectedNetworkId = parseInt(yield cps(web3.version.getNetwork), 10);
   // TODO network context does not provide network information

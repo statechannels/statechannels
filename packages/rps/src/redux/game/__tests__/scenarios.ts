@@ -2,6 +2,7 @@ import { bigNumberify } from 'ethers/utils';
 import { AppData, hashPreCommit } from '../../../core';
 import { ChannelState, Result, Weapon, ChannelStatus } from '../../../core';
 import * as s from '../state';
+import { WeiPerEther } from 'ethers/constants';
 
 export const channelId = '0xabc234';
 export const channelNonce = 1;
@@ -13,7 +14,9 @@ export const aAddress = '0x5409ED021D9299bf6814279A6A1411A7e866A631';
 export const bAddress = '0x6Ecbe1DB9EF729CBe972C83Fb886247691Fb6beb';
 const aUserId = aAddress;
 const bUserId = bAddress;
-export const stake = bigNumberify(1).toString();
+export const stake = bigNumberify(1)
+  .mul(WeiPerEther)
+  .toString();
 const roundBuyIn = stake;
 export const aWeapon = Weapon.Rock;
 const playerAWeapon = aWeapon;
@@ -43,8 +46,12 @@ function channelState(
     bUserId,
     aAddress,
     bAddress,
-    aBal: bigNumberify(balances[0]).toString(),
-    bBal: bigNumberify(balances[1]).toString(),
+    aBal: bigNumberify(balances[0])
+      .mul(WeiPerEther)
+      .toString(),
+    bBal: bigNumberify(balances[1])
+      .mul(WeiPerEther)
+      .toString(),
     appData: appDataParam,
   };
 }
