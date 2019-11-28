@@ -37,7 +37,6 @@ function* createResponseMessage(action: OutgoingApiAction) {
         new jrs.JsonRpcError("Signing address not found in the participants array", 1000)
       );
     case "WALLET.RELAY_ACTION_WITH_MESSAGE":
-      console.log("relay request", action.actionToRelay);
       return jrs.notification("MessageQueued", {
         recipient: action.fromParticipantId,
         sender: action.toParticipantId,
