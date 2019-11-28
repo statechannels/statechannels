@@ -17,9 +17,9 @@ function mapStateToProps(state: SiteState) {
   return {
     myName: name,
     opponentName,
-    myBalance: myBalance.toString(),
-    opponentBalance: opponentBalance.toString(),
-    roundBuyIn: roundBuyIn.toString(),
+    myBalance,
+    opponentBalance,
+    roundBuyIn,
   };
 }
 
