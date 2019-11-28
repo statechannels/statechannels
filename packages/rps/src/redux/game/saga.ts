@@ -1,4 +1,5 @@
 import { select, call, put, take } from 'redux-saga/effects';
+import { delay } from 'redux-saga';
 import { RPSChannelClient } from '../../utils/rps-channel-client';
 import {
   AppData,
@@ -57,6 +58,7 @@ function* gameSagaRun(client: RPSChannelClient) {
       if (cs.isEmpty(channelState)) {
         yield* createChannel(localState, client);
       } else if (cs.isRunning(channelState)) {
+        yield delay(1000);
         yield* startRound();
       }
 
@@ -64,6 +66,7 @@ function* gameSagaRun(client: RPSChannelClient) {
     case 'OpponentJoined': // player B
       if (cs.inChannelProposed(channelState)) {
         yield* joinChannel(channelState, client);
+        yield delay(1000);
         yield* startRound();
       }
       break;
