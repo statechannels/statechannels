@@ -10,7 +10,7 @@ import { saveConfig } from '../../utils';
 import { Init as CreateNullChannelArgs } from '../create-null-channel/protocol';
 import { Init as SupportStateArgs } from '../support-state/protocol';
 
-const PROTOCOL = 'ledger-update';
+const PROTOCOL = 'virtual-funding-as-leaf';
 
 enum Indices {
   Left = 0,
@@ -20,6 +20,7 @@ enum Indices {
 export interface Init {
   balances: Balance[];
   ledgerId: string;
+  targetChannelId: string;
   jointChannel: Channel;
   guarantorChannel: Channel;
   index: Indices.Left | Indices.Right;
@@ -92,6 +93,14 @@ const fundGuarantor = {
   invoke: {
     src: 'supportState',
     data: 'guarantorOutcome',
+    onDone: 'fundTarget',
+  },
+};
+
+const fundTarget = {
+  invoke: {
+    src: 'supportState',
+    data: 'jointOutcome',
     onDone: 'success',
   },
 };
@@ -103,6 +112,7 @@ const config = {
   states: {
     createChannels,
     fundGuarantor,
+    fundTarget,
     success: { type: 'final' },
   },
 };

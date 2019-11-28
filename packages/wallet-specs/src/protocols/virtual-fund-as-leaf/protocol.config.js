@@ -1,5 +1,5 @@
 const config = {
-  key: 'ledger-update',
+  key: 'virtual-funding-as-leaf',
   initial: 'createChannels',
   states: {
     createChannels: {
@@ -18,8 +18,11 @@ const config = {
       invoke: {
         src: 'supportState',
         data: 'guarantorOutcome',
-        onDone: 'success',
+        onDone: 'fundTarget',
       },
+    },
+    fundTarget: {
+      invoke: { src: 'supportState', data: 'jointOutcome', onDone: 'success' },
     },
     success: { type: 'final' },
   },

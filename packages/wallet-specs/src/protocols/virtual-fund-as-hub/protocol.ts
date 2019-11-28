@@ -1,20 +1,20 @@
-import {
-  add,
-  AllocationItem,
-  Balance,
-  Channel,
-  getChannelID,
-  Guarantee,
-} from '../../';
+import { Balance, Channel } from '../../';
 import { saveConfig } from '../../utils';
-import { Init as CreateNullChannelArgs } from '../create-null-channel/protocol';
-import { Init as SupportStateArgs } from '../support-state/protocol';
 
-const PROTOCOL = 'ledger-update';
+const PROTOCOL = 'virtual-funding-as-hub';
 
+/*
+Since this protocol requires communication from the "customers",
+they might as well inform the hub what the target channel is.
+
+TODO: We will probably later have a more passive hub protocol which simply agrees to any
+update in the joint channel that's hub-neutral. At that point, we can remove `targetChannelId` from
+the args here.
+*/
 export interface Init {
   balances: Balance[];
   jointChannel: Channel;
+  targetChannelId: string;
   leftLedgerId: string;
   leftGuarantorChannel: Channel;
   rightLedgerId: string;
@@ -71,7 +71,15 @@ const fundGuarantors = {
     fundLeftGuarantor,
     fundRightGuarantor,
   },
-  onDone: 'success',
+  onDone: 'fundTarget',
+};
+
+const fundTarget = {
+  invoke: {
+    src: 'supportState',
+    data: 'jointOutcome',
+    onDone: 'success',
+  },
 };
 
 // PROTOCOL DEFINITION
@@ -81,6 +89,7 @@ const config = {
   states: {
     createChannels,
     fundGuarantors,
+    fundTarget,
     success: { type: 'final' },
   },
 };
