@@ -154,6 +154,18 @@ export const getChannelIds = (state: SharedData): string[] => {
   return Object.keys(state.channelStore);
 };
 
+export const getAssetHolderAddresses = (state: SharedData): string[] =>
+  Object.keys(
+    Object.values(state.channelStore).reduce(
+      (acc, val) => ({...acc, [val.signedStates[0].state.outcome[0].assetHolderAddress]: 1}),
+      {}
+    )
+  );
+
+// TODO: This is error prone I think
+export const getAssetHolderAddress = (state: SharedData, channelId: string): string =>
+  state.channelStore[channelId].signedStates[0].state.outcome[0].assetHolderAddress;
+
 export const getParticipants = (state: SharedData, channelId: string): ChannelParticipant[] => {
   const status = walletStates.getChannelStatus(state, channelId);
   return status.participants;

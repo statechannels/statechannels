@@ -46,7 +46,7 @@ export async function getETHAssetHolderContract(provider) {
   return new ethers.Contract(contractAddress, getETHAssetHolderInterface(), provider);
 }
 
-export async function getERĆ0AssetHolderContract(provider) {
+export async function getERC20AssetHolderContract(provider) {
   await provider.ready;
 
   const contractAddress = getContractAddress("ERC20AssetHolder");
@@ -138,4 +138,14 @@ export function isDevelopmentNetwork(): boolean {
 export async function getAdjudicatorChannelStorageHash(provider: Provider, channelId: string) {
   const contract = await getAdjudicatorContract(provider);
   return await contract.channelStorageHashes(channelId);
+}
+
+export async function getETHAssetHolderHoldings(provider, channelId) {
+  const contract = await getETHAssetHolderContract(provider);
+  return await contract.functions.holdings(channelId);
+}
+
+export async function getERC20AssetHolderHoldings(provider, channelId) {
+  const contract = await getERC20AssetHolderContract(provider);
+  return await contract.functions.holdings(channelId);
 }

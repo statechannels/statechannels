@@ -8,7 +8,7 @@ import {
 import SagaTester from "redux-saga-tester";
 import {DepositedEvent} from "../redux/actions";
 import {adjudicatorWatcher} from "../redux/sagas/adjudicator-watcher";
-import {ETHAssetHolderWatcher} from "../redux/sagas/eth-asset-holder-watcher";
+import {ETHAssetHolderWatcher} from "../redux/sagas/asset-holder-watcher";
 import {depositIntoETHAssetHolder, createWatcherState, concludeGame, fiveFive} from "./test-utils";
 import {getGanacheProvider} from "@statechannels/devtools";
 import {bigNumberify} from "ethers/utils";
