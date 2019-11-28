@@ -9,21 +9,21 @@ import {ChannelSubscriber} from "../state";
 import {getETHAssetHolderWatcherSubscribersForChannel} from "../selectors";
 import {ProtocolLocator} from "../../communication";
 
-enum ETHAssetHolderEventType {
+enum AssetHolderEventType {
   AssetTransferred,
   Deposited
 }
 
-interface ETHAssetHolderEvent {
+interface AssetHolderEvent {
   eventArgs: any;
   channelId: string;
-  eventType: ETHAssetHolderEventType;
+  eventType: AssetHolderEventType;
 }
 
 export function* ETHAssetHolderWatcher(provider) {
   const ETHAssetHolderEventChannel = yield call(createAssetHolderEventChannel, provider);
   while (true) {
-    const event: ETHAssetHolderEvent = yield take(ETHAssetHolderEventChannel);
+    const event: AssetHolderEvent = yield take(ETHAssetHolderEventChannel);
 
     const channelSubscribers: ChannelSubscriber[] = yield select(
       getETHAssetHolderWatcherSubscribersForChannel,
@@ -37,9 +37,9 @@ export function* ETHAssetHolderWatcher(provider) {
   }
 }
 
-function* dispatchEventAction(event: ETHAssetHolderEvent) {
+function* dispatchEventAction(event: AssetHolderEvent) {
   switch (event.eventType) {
-    case ETHAssetHolderEventType.AssetTransferred:
+    case AssetHolderEventType.AssetTransferred:
       const assetTransferredEvent = getAssetTransferredEvent(event);
       yield put(
         actions.assetTransferredEvent({
@@ -48,7 +48,7 @@ function* dispatchEventAction(event: ETHAssetHolderEvent) {
         })
       );
       break;
-    case ETHAssetHolderEventType.Deposited:
+    case AssetHolderEventType.Deposited:
       const depositedEvent = getDepositedEvent(event);
       yield put(
         actions.depositedEvent({
@@ -60,7 +60,7 @@ function* dispatchEventAction(event: ETHAssetHolderEvent) {
       break;
     default:
       throw new Error(
-        `Event is not a known ETHAssetHolderEvent. Cannot dispatch event action: ${JSON.stringify(
+        `Event is not a known AssetHolderEvent. Cannot dispatch event action: ${JSON.stringify(
           event
         )}`
       );
@@ -68,12 +68,12 @@ function* dispatchEventAction(event: ETHAssetHolderEvent) {
 }
 
 function* dispatchProcessEventAction(
-  event: ETHAssetHolderEvent,
+  event: AssetHolderEvent,
   processId: string,
   protocolLocator: ProtocolLocator
 ) {
   switch (event.eventType) {
-    case ETHAssetHolderEventType.AssetTransferred:
+    case AssetHolderEventType.AssetTransferred:
       const assetTransferredEvent = getAssetTransferredEvent(event);
       yield put(
         actions.assetTransferredEvent({
@@ -82,7 +82,7 @@ function* dispatchProcessEventAction(
         })
       );
       break;
-    case ETHAssetHolderEventType.Deposited:
+    case AssetHolderEventType.Deposited:
       const depositedEvent = getDepositedEvent(event);
       yield put(
         actions.depositedEvent({
@@ -94,7 +94,7 @@ function* dispatchProcessEventAction(
       break;
     default:
       throw new Error(
-        `Event is not a known ETHAssetHolderEvent. Cannot dispatch process event action: ${JSON.stringify(
+        `Event is not a known AssetHolderEvent. Cannot dispatch process event action: ${JSON.stringify(
           event
         )}`
       );
@@ -110,13 +110,13 @@ function* createAssetHolderEventChannel(provider) {
 
     ETHAssetHolder.on(assetTransferredFilter, (...eventArgs) =>
       emitter({
-        eventType: ETHAssetHolderEventType.AssetTransferred,
+        eventType: AssetHolderEventType.AssetTransferred,
         eventArgs
       })
     );
 
     ETHAssetHolder.on(depositedFilter, (...eventArgs) =>
-      emitter({eventType: ETHAssetHolderEventType.Deposited, eventArgs})
+      emitter({eventType: AssetHolderEventType.Deposited, eventArgs})
     );
 
     return () => {
