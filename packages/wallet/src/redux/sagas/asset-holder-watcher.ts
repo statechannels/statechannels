@@ -22,9 +22,9 @@ interface AssetHolderEvent {
 }
 
 export function* ETHAssetHolderWatcher(provider: Web3Provider) {
-  const ETHAssetHolderEventChannel = yield call(createAssetHolderEventChannel, provider);
+  const assetHolderEventChannel = yield call(createAssetHolderEventChannel, provider);
   while (true) {
-    const event: AssetHolderEvent = yield take(ETHAssetHolderEventChannel);
+    const event: AssetHolderEvent = yield take(assetHolderEventChannel);
     if (event.eventType === AssetHolderEventType.Deposited) {
       const channelSubscribers: ChannelSubscriber[] = yield select(
         getAssetHolderWatcherSubscribersForChannel,
