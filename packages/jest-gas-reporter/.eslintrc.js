@@ -2,7 +2,6 @@ const rules = {
   'arrow-body-style': 'error',
   'arrow-parens': ['off', 'as-needed'],
   camelcase: 'error',
-  'capitalized-comments': ['error', 'always', {ignoreConsecutiveComments: true}],
   complexity: 'off',
   'constructor-super': 'error',
   curly: 'error',
@@ -96,15 +95,7 @@ const rules = {
   'spaced-comment': 'error',
   'use-isnan': 'error',
   'valid-typeof': 'off',
-  'prettier/prettier': [
-    'error',
-    {
-      printWidth: 100,
-      singleQuote: true,
-      tabWidth: 2,
-      trailingComma: 'es5',
-    },
-  ],
+  'prettier/prettier': 'error',
   'no-unused-vars': 'off',
   'import/default': 'off',
 };
