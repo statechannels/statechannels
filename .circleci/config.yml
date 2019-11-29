@@ -87,7 +87,6 @@ jobs:
       - upload_logs:
           file: test-stats
 
-  # TODO: Get this working
   integration-test:
     <<: *defaults
     steps:
@@ -114,5 +113,9 @@ workflows:
             - prepare
 
       - test:
+          requires:
+            - prepare
+
+      - integration-test:
           requires:
             - prepare
