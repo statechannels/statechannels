@@ -23,10 +23,10 @@ export async function loadWallet(page: puppeteer.Page, messageListener: (message
   });
 }
 
-export async function setUpBrowser(): Promise<puppeteer.Browser> {
+export async function setUpBrowser(headless: boolean): Promise<puppeteer.Browser> {
   const browser = await puppeteer.launch({
-    headless: false,
-    devtools: true,
+    headless,
+    devtools: headless,
     // Needed to allow both windows to execute JS at the same time
     ignoreDefaultArgs: [
       "--disable-background-timer-throttling",

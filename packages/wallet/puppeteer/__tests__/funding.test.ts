@@ -1,4 +1,4 @@
-import {loadWallet, setUpBrowser, pushMessage, sendGetAddress} from "./utils";
+import {loadWallet, setUpBrowser, pushMessage, sendGetAddress} from "../helpers";
 import Emittery from "emittery";
 jest.setTimeout(60000);
 
@@ -9,8 +9,8 @@ describe("Funding", () => {
   let walletB;
   let walletMessages;
   beforeAll(async () => {
-    browserA = await setUpBrowser();
-    browserB = await setUpBrowser();
+    browserA = await setUpBrowser(true);
+    browserB = await setUpBrowser(true);
 
     walletA = await browserA.newPage();
     walletB = await browserB.newPage();
