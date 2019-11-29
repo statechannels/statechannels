@@ -57,6 +57,7 @@ export interface Entry {
 export { chain } from './chain';
 export { store, Store } from './store';
 
+// This stuff should be replaced with some big number logic
 type numberish = string | number;
 export const add = (a: numberish, b: numberish) =>
   (Number(a) + Number(b)).toString();
@@ -64,3 +65,4 @@ export const subtract = (a: numberish, b: numberish) =>
   (Number(a) - Number(b)).toString();
 export const max = (a: numberish, b: numberish) =>
   Math.max(Number(a), Number(b)).toString();
+export const gt = (a: numberish, b: numberish) => Number(a) > Number(b);

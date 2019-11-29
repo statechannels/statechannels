@@ -31,7 +31,7 @@ OpenChannel(participants, balances, appDefinition, appData, channelNonce) // ful
   - post-funding: arrange outcome to merge allocation items
   - Succeeds when post-fund outcome is supported
   - Do we need a turnNum?
-- `PartialWithdrawal(ledgerId, participant, amount, newNonce, newParticipants)`
+- `PartialWithdrawal(ledgerId, participant, amount, newNonce, newParticipants)` [NOT DONE]
   - Will need to call `CreateNullChannel` to create a replacement ledger channel.
 - `LedgerFund(channelId, ledgerId, ledgerTurnNum)`
   - Assumes ledger exists
@@ -59,6 +59,6 @@ OpenChannel(participants, balances, appDefinition, appData, channelNonce) // ful
   - Invokes `DirectFundingStrategy` if ledger is already directly funded but needs more funding
   - Invokes `Fund(ledgerId)` otherwise
   - When the ledger is sufficiently funded, invoke `LedgerFund(channelId, ledgerId)`
-- `VirtualFundingStrategy(channelId)`
+- `VirtualFundingStrategy(channelId)` [NOT DONE]
   - Participants negotiate on a hub, jointNonce and guarantorNonce
   - On agreement, they inform the hub, and invoke `VirtualFundAsLeaf`

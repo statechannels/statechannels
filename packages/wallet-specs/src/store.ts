@@ -1,4 +1,13 @@
-import { Allocation, getChannelID, Outcome, SignedState, State } from '.';
+import { keys } from 'xstate/lib/utils';
+import {
+  add,
+  Allocation,
+  getChannelID,
+  gt,
+  Outcome,
+  SignedState,
+  State,
+} from '.';
 interface IStore {
   getLatestState: (channelID: string) => State;
   getLatestConsensus: (channelID: string) => SignedState; // Used for null channels, whose support must be a single state
@@ -16,6 +25,28 @@ interface IStore {
   signedByMe: (state: State) => boolean;
   sendState: (state: State) => void;
   receiveStates: (signedStates: SignedState[]) => ChannelUpdated | false;
+
+  /*
+  Nonce management
+  ----------------
+  Wallet stores should implement a getNextNonce method that is deterministic in the
+  "happy path". 
+  This may change, which would require nonce-negotiation by default in protocols that create
+  new channels.
+
+  For example, say each wallet keeps track of the largest nonce used by a given
+  set of participants. Then `getNextNonce` returns one more than the largest current nonce.
+  In the absence of dropped messages, this returns the same value in any two wallets.
+
+  Protocols which use new nonces need to have a safeguard against disagreement in the case of
+  unexpected circumstances.
+  The `useNonce` method can be used by a protocol to force the use of a nonce other than
+  the output of `getNextNonce`. It update the store if the nonce is safe, and throw if the nonce
+  is unsafe.
+  */
+  getNextNonce(participants: string[]): string;
+  useNonce(participants: string[], nonce): void;
+  nonceOk(participants: string[], nonce: string): boolean;
 }
 
 export interface Participant {
@@ -41,6 +72,7 @@ export class Store implements IStore {
   }
 
   private _store: ChannelStore;
+  private _nonces: Record<string, string>;
 
   constructor(initialStore: ChannelStore = {}) {
     this._store = initialStore;
@@ -130,6 +162,25 @@ export class Store implements IStore {
     } catch (e) {
       throw e;
     }
+  }
+
+  // Nonce management
+  private key(participants: string[]): string {
+    return JSON.stringify(participants);
+  }
+  public getNextNonce(participants: string[]): string {
+    const key = this.key(participants);
+    return (this._nonces[key] = add(this._nonces[key] || 0, '0x01'));
+  }
+  public useNonce(participants: string[], nonce: string): void {
+    if (this.nonceOk(participants, nonce)) {
+      this._nonces[this.key(participants)] = nonce;
+    } else {
+      throw new Error('Bad nonce');
+    }
+  }
+  public nonceOk(participants: string[], nonce: string): boolean {
+    return gt(nonce, this._nonces[this.key(participants)]);
   }
 
   // PRIVATE
