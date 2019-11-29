@@ -1,4 +1,4 @@
-import { fork, take, select, cancel, call, apply, putResolve } from 'redux-saga/effects';
+import { fork, take, select, cancel, call, apply, put } from 'redux-saga/effects';
 
 export const getLocalState = (storeObj: any) => storeObj.game.localState;
 function getOpenGame(storObj: any, address: string) {
@@ -61,7 +61,7 @@ export default function* openGameSaga() {
             stake: localState.roundBuyIn.toString(),
             createdAt: new Date().getTime(),
             isPublic: true,
-            playerAName: '',
+            playerAName: 'unknown',
           };
 
           const disconnect = firebase
@@ -76,7 +76,7 @@ export default function* openGameSaga() {
           const storeObj = yield select();
           myOpenGame = getOpenGame(storeObj, myOpenGameKey);
           if (myOpenGame && !myOpenGame.isPublic) {
-            yield putResolve(gameJoined(myOpenGame.opponentName, myOpenGame.opponentAddress)); // block until dispatched
+            yield put(gameJoined(myOpenGame.playerAName, myOpenGame.opponentAddress));
             yield call(reduxSagaFirebase.database.delete, myOpenGameKey);
             myGameIsOnFirebase = false;
           }
