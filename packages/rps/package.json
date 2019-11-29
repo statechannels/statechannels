@@ -91,6 +91,7 @@
   "devDependencies": {
     "@babel/runtime": "^7.0.0-beta.53",
     "@statechannels/devtools": "0.1.21",
+    "@statechannels/ganache-deployer": "^0.0.1",
     "@statechannels/jest-gas-reporter": "0.0.2",
     "@storybook/react": "5.2.6",
     "@types/jest": "24.0.18",
