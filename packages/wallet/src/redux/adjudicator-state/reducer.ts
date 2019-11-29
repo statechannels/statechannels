@@ -4,7 +4,7 @@ import {unreachable} from "../../utils/reducer-utils";
 
 export const adjudicatorStateReducer = (
   state: AdjudicatorState,
-  action: actions.AdjudicatorEventAction | actions.ChallengeCreatedEvent
+  action: actions.AdjudicatorEventAction
 ): AdjudicatorState => {
   switch (action.type) {
     case "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED":
