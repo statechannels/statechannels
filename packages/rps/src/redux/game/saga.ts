@@ -137,7 +137,7 @@ function* generateSaltAndSendPropose(
   client: RPSChannelClient
 ) {
   // if we're player A, we first generate a salt
-  const salt = randomHex(64);
+  const salt = yield call(randomHex, 64);
   yield put(a.chooseSalt(salt)); // transitions us to WeaponAndSaltChosen
 
   const { myWeapon, roundBuyIn: stake } = localState;
