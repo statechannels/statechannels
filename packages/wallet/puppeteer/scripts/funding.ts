@@ -5,7 +5,10 @@ import {
   pushMessage,
   sendGetAddress,
   sendCreateChannel,
-  sendJoinChannel
+  sendJoinChannel,
+  createMessageHandler,
+  MessageEventTypes,
+  MessageType
 } from "../helpers";
 
 (async () => {
@@ -18,23 +21,23 @@ import {
   const walletA = await browserA.newPage();
   const walletB = await browserB.newPage();
 
-  const walletMessages = new Emittery();
+  const walletMessages = new Emittery.Typed<MessageEventTypes>();
 
-  await loadWallet(walletA, m => messageHandler(walletMessages, "A", m));
-  await loadWallet(walletB, m => messageHandler(walletMessages, "B", m));
+  await loadWallet(walletA, createMessageHandler(walletMessages, "A"));
+  await loadWallet(walletB, createMessageHandler(walletMessages, "B"));
 
   // Automatically deliver messageQueued message to opponent's wallet
-  walletMessages.on("playerA-message", async message => {
+  walletMessages.on(MessageType.PlayerAMessage, async message => {
     console.log("Delivering message from player A's wallet to player B's wallet");
     await pushMessage(walletB, (message as any).params);
   });
-  walletMessages.on("playerB-message", async message => {
+  walletMessages.on(MessageType.PlayerBMessage, async message => {
     console.log("Delivering message from player B's wallet to player A's wallet");
     await pushMessage(walletA, (message as any).params);
   });
 
-  const playerAAddressPromise: Promise<any> = walletMessages.once("playerA-result");
-  const playerBAddressPromise: Promise<any> = walletMessages.once("playerB-result");
+  const playerAAddressPromise: Promise<any> = walletMessages.once(MessageType.PlayerAResult);
+  const playerBAddressPromise: Promise<any> = walletMessages.once(MessageType.PlayerBResult);
   await sendGetAddress(walletA);
   await sendGetAddress(walletB);
   const playerAAddress = (await playerAAddressPromise).result;
@@ -42,12 +45,12 @@ import {
   console.log("Player A address is ", playerAAddress);
   console.log("Player B address is ", playerBAddress);
 
-  const createChannelPromise: Promise<any> = walletMessages.once("playerA-result");
+  const createChannelPromise: Promise<any> = walletMessages.once(MessageType.PlayerAResult);
   await sendCreateChannel(walletA, playerAAddress, playerBAddress);
   const channelId = (await createChannelPromise).result.channelId;
   console.log(`Player A has created channel ${channelId}`);
 
-  const joinChannelPromise: Promise<any> = walletMessages.once("playerB-result");
+  const joinChannelPromise: Promise<any> = walletMessages.once(MessageType.PlayerBResult);
   await sendJoinChannel(walletB, channelId);
   await joinChannelPromise;
   console.log(`Player B has joined channel ${channelId}`);
@@ -58,14 +61,3 @@ import {
   await walletB.waitFor("button");
   await walletB.click("button");
 })();
-
-function messageHandler(emitter: Emittery, player: "A" | "B", message) {
-  const playerPrefix = `player${player}-`;
-  if (message.id) {
-    emitter.emit(`${playerPrefix}result`, message);
-  } else if (message.method === "MessageQueued") {
-    emitter.emit(`${playerPrefix}message`, message);
-  } else {
-    emitter.emit(`${playerPrefix}notification`, message);
-  }
-}

@@ -2,6 +2,45 @@ import puppeteer from "puppeteer";
 
 import fs from "fs";
 import path from "path";
+import Emittery from "emittery";
+
+export const enum MessageType {
+  PlayerAMessage = "playerA-message",
+  PlayerBMessage = "playerB-message",
+  PlayerAResult = "playerA-result",
+  PlayerBResult = "playerB-result",
+  PlayerANotification = "playerA-notification",
+  PlayerBNotification = "playerB-notification"
+}
+export type MessageEventTypes = {
+  [MessageType.PlayerAMessage]: any;
+  [MessageType.PlayerBMessage]: any;
+  [MessageType.PlayerAResult]: any;
+  [MessageType.PlayerBResult]: any;
+  [MessageType.PlayerANotification]: any;
+  [MessageType.PlayerBNotification]: any;
+};
+
+export function createMessageHandler(
+  emitter: Emittery.Typed<MessageEventTypes>,
+  player: "A" | "B"
+) {
+  return message => {
+    if (message.id) {
+      emitter.emit(player === "A" ? MessageType.PlayerAResult : MessageType.PlayerBResult, message);
+    } else if (message.method === "MessageQueued") {
+      emitter.emit(
+        player === "A" ? MessageType.PlayerAMessage : MessageType.PlayerBMessage,
+        message
+      );
+    } else {
+      emitter.emit(
+        player === "A" ? MessageType.PlayerANotification : MessageType.PlayerBNotification,
+        message
+      );
+    }
+  };
+}
 
 export async function loadWallet(page: puppeteer.Page, messageListener: (message) => void) {
   // TODO: This is kinda ugly but it works

@@ -4,7 +4,10 @@ import {
   pushMessage,
   sendGetAddress,
   sendCreateChannel,
-  sendJoinChannel
+  sendJoinChannel,
+  MessageEventTypes,
+  createMessageHandler,
+  MessageType
 } from "../helpers";
 import Emittery from "emittery";
 jest.setTimeout(10000);
@@ -14,7 +17,7 @@ describe("Funding", () => {
   let browserB;
   let walletA;
   let walletB;
-  let walletMessages: Emittery;
+  let walletMessages: Emittery.Typed<MessageEventTypes>;
   let messageQueueFromA;
   let messageQueueFromB;
   beforeAll(async () => {
@@ -23,17 +26,17 @@ describe("Funding", () => {
 
     walletA = await browserA.newPage();
     walletB = await browserB.newPage();
-    walletMessages = new Emittery();
-    messageQueueFromA = walletMessages.events("playerA-message");
-    messageQueueFromB = walletMessages.events("playerB-message");
+    walletMessages = new Emittery.Typed<MessageEventTypes>();
+    messageQueueFromA = walletMessages.events(MessageType.PlayerAMessage);
+    messageQueueFromB = walletMessages.events(MessageType.PlayerBMessage);
 
-    await loadWallet(walletA, m => messageHandler(walletMessages, "A", m));
-    await loadWallet(walletB, m => messageHandler(walletMessages, "B", m));
+    await loadWallet(walletA, createMessageHandler(walletMessages, "A"));
+    await loadWallet(walletB, createMessageHandler(walletMessages, "B"));
     // Automatically deliver messageQueued message to opponent's wallet
-    walletMessages.on("playerA-message", async message => {
+    walletMessages.on(MessageType.PlayerAMessage, async message => {
       await pushMessage(walletB, (message as any).params);
     });
-    walletMessages.on("playerB-message", async message => {
+    walletMessages.on(MessageType.PlayerBMessage, async message => {
       await pushMessage(walletA, (message as any).params);
     });
   });
@@ -49,7 +52,7 @@ describe("Funding", () => {
 
   let playerAAddress;
   it("gets As address", async () => {
-    const getAddressPromise: Promise<any> = walletMessages.once("playerA-result");
+    const getAddressPromise: Promise<any> = walletMessages.once(MessageType.PlayerAResult);
     await sendGetAddress(walletA);
     playerAAddress = (await getAddressPromise).result;
     expect(playerAAddress).toMatch(/^0x[a-fA-F0-9]{40}$/);
@@ -57,7 +60,7 @@ describe("Funding", () => {
 
   let playerBAddress;
   it("gets Bs address", async () => {
-    const getAddressPromise: Promise<any> = walletMessages.once("playerB-result");
+    const getAddressPromise: Promise<any> = walletMessages.once(MessageType.PlayerBResult);
     await sendGetAddress(walletB);
     playerBAddress = (await getAddressPromise).result;
     expect(playerBAddress).toMatch(/^0x[a-fA-F0-9]{40}$/);
@@ -65,7 +68,7 @@ describe("Funding", () => {
 
   let channelId;
   it("creates a channel for player A", async () => {
-    const createChannelPromise: Promise<any> = walletMessages.once("playerA-result");
+    const createChannelPromise: Promise<any> = walletMessages.once(MessageType.PlayerAResult);
     await sendCreateChannel(walletA, playerAAddress, playerBAddress);
     channelId = (await createChannelPromise).result.channelId;
     expect(channelId).toMatch(/^0x[a-fA-F0-9]{64}$/);
@@ -77,7 +80,7 @@ describe("Funding", () => {
   });
 
   it("joins a channel for player B", async () => {
-    const joinChannelPromise: Promise<any> = walletMessages.once("playerB-result");
+    const joinChannelPromise: Promise<any> = walletMessages.once(MessageType.PlayerBResult);
     await sendJoinChannel(walletB, channelId);
     const response = await joinChannelPromise;
 
@@ -88,17 +91,12 @@ describe("Funding", () => {
     const channelJoinedMessage = (await messageQueueFromB.next()).value;
     expect(channelJoinedMessage.params.data.type).toEqual("Channel.Joined");
   });
+  it("allows player A to approve funding", async () => {
+    await walletA.waitFor("button");
+    await walletA.click("button");
+  });
+  it("allows player B to approve funding", async () => {
+    await walletB.waitFor("button");
+    await walletB.click("button");
+  });
 });
-
-function messageHandler(emitter: Emittery, player: "A" | "B", message) {
-  const playerPrefix = `player${player}-`;
-  if (message.id) {
-    emitter.emit(`${playerPrefix}result`, message);
-  } else if (message.method === "MessageQueued") {
-    console.log(`${playerPrefix}message`, message);
-    emitter.emit(`${playerPrefix}message`, message);
-  } else {
-    console.log(`${playerPrefix}notification`, message);
-    emitter.emit(`${playerPrefix}notification`, message);
-  }
-}
