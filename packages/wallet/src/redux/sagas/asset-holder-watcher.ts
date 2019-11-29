@@ -42,8 +42,8 @@ export function* ETHAssetHolderWatcher(provider: Web3Provider) {
       channelId
     );
 
-    for (const subscriber of channelSubscribers) {
-      yield dispatchProcessEventAction(event, subscriber.processId, subscriber.protocolLocator);
+    for (const {processId, protocolLocator} of channelSubscribers) {
+      yield dispatchProcessEventAction(event, processId, protocolLocator);
     }
 
     yield dispatchEventAction(event);
