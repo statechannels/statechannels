@@ -4,7 +4,7 @@ This folder contains patches for node modules, managed by [patch-package](https:
 
 🚨 If you want to used a patched node module in one of the `packages`, you need to modify its `package.json` to ensure that patch package is run after a `yarn install`:
 
-```json
+```jsonc
 // package.json
 
 {
