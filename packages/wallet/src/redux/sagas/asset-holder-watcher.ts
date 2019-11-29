@@ -17,7 +17,7 @@ enum AssetHolderEventType {
 
 interface AssetHolderEvent {
   assetHolderAddress: string;
-  eventArgs: any;
+  eventResult: any[];
   eventType: AssetHolderEventType;
 }
 
@@ -25,29 +25,38 @@ export function* ETHAssetHolderWatcher(provider: Web3Provider) {
   const assetHolderEventChannel = yield call(createAssetHolderEventChannel, provider);
   while (true) {
     const event: AssetHolderEvent = yield take(assetHolderEventChannel);
-    if (event.eventType === AssetHolderEventType.Deposited) {
-      const channelSubscribers: ChannelSubscriber[] = yield select(
-        getAssetHolderWatcherSubscribersForChannel,
-        getDepositedEvent(event).destination
-      );
-      for (const subscriber of channelSubscribers) {
-        yield dispatchProcessEventAction(event, subscriber.processId, subscriber.protocolLocator);
-      }
+    const {eventType, eventResult} = event;
+
+    let channelId: string;
+
+    if (eventType === AssetHolderEventType.Deposited) {
+      channelId = getDepositedEvent(eventResult).destination;
+    } else if (eventType === AssetHolderEventType.AssetTransferred) {
+      channelId = getAssetTransferredEvent(eventResult).origin;
+    } else {
+      continue;
     }
+
+    const channelSubscribers: ChannelSubscriber[] = yield select(
+      getAssetHolderWatcherSubscribersForChannel,
+      channelId
+    );
+
+    for (const subscriber of channelSubscribers) {
+      yield dispatchProcessEventAction(event, subscriber.processId, subscriber.protocolLocator);
+    }
+
     yield dispatchEventAction(event);
   }
 }
 
-function* dispatchEventAction(event: AssetHolderEvent) {
-  const {eventType} = event;
+function* dispatchEventAction({eventResult, assetHolderAddress, eventType}: AssetHolderEvent) {
   switch (eventType) {
     case AssetHolderEventType.AssetTransferred:
-      // FIXME: We need some new kind of technique for dealing with AssetTransferred situations
-      const assetTransferredEvent = getAssetTransferredEvent(event);
       yield put(
         actions.assetTransferredEvent({
-          destination: assetTransferredEvent.destination,
-          amount: assetTransferredEvent.amount
+          assetHolderAddress,
+          ...getAssetTransferredEvent(eventResult)
         })
       );
       break;
@@ -63,29 +72,20 @@ function* dispatchEventAction(event: AssetHolderEvent) {
 }
 
 function* dispatchProcessEventAction(
-  event: AssetHolderEvent,
+  {eventResult, assetHolderAddress, eventType}: AssetHolderEvent,
   processId: string,
   protocolLocator: ProtocolLocator
 ) {
-  const {eventType, assetHolderAddress} = event;
   switch (eventType) {
     case AssetHolderEventType.AssetTransferred:
-      yield put(
-        actions.assetTransferredEvent({
-          ...getAssetTransferredEvent(event)
-        })
-      );
       break;
     case AssetHolderEventType.Deposited:
-      const {destination, amountDeposited, destinationHoldings} = getDepositedEvent(event);
       yield put(
         actions.depositedEvent({
           processId,
           protocolLocator,
           assetHolderAddress,
-          destination,
-          amountDeposited,
-          destinationHoldings
+          ...getDepositedEvent(eventResult)
         })
       );
       break;
@@ -108,35 +108,35 @@ function* createAssetHolderEventChannel(provider: Web3Provider) {
     const erc20AssetTransferredFilter = ERC20AssetHolder.filters.AssetTransferred();
     const erc20DepositedFilter = ERC20AssetHolder.filters.Deposited();
 
-    ETHAssetHolder.on(ethAssetTransferredFilter, (...eventArgs) =>
+    ETHAssetHolder.on(ethAssetTransferredFilter, (...eventResult) =>
       emitter({
         assetHolderAddress: ETHAssetHolder.address,
         eventType: AssetHolderEventType.AssetTransferred,
-        eventArgs
+        eventResult
       })
     );
 
-    ETHAssetHolder.on(ethDepositedFilter, (...eventArgs) =>
+    ETHAssetHolder.on(ethDepositedFilter, (...eventResult) =>
       emitter({
         assetHolderAddress: ETHAssetHolder.address,
         eventType: AssetHolderEventType.Deposited,
-        eventArgs
+        eventResult
       })
     );
 
-    ERC20AssetHolder.on(erc20AssetTransferredFilter, (...eventArgs) =>
+    ERC20AssetHolder.on(erc20AssetTransferredFilter, (...eventResult) =>
       emitter({
         assetHolderAddress: ERC20AssetHolder.address,
         eventType: AssetHolderEventType.AssetTransferred,
-        eventArgs
+        eventResult
       })
     );
 
-    ERC20AssetHolder.on(erc20DepositedFilter, (...eventArgs) =>
+    ERC20AssetHolder.on(erc20DepositedFilter, (...eventResult) =>
       emitter({
         assetHolderAddress: ERC20AssetHolder.address,
         eventType: AssetHolderEventType.Deposited,
-        eventArgs
+        eventResult
       })
     );
 
