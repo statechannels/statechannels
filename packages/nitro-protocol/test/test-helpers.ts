@@ -70,8 +70,8 @@ export async function setupContracts(provider: ethers.providers.JsonRpcProvider,
 }
 
 export function getPlaceHolderContractAddress(): string {
-  const networkContext = getNetworkMap();
-  return networkContext[countingAppArtifact.contractName].address;
+  const networkCont = getNetworkMap();
+  return networkCont[countingAppArtifact.contractName].address;
 }
 
 export async function sign(wallet: ethers.Wallet, msgHash: string | Uint8Array) {

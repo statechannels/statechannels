@@ -57,6 +57,7 @@
   "devDependencies": {
     "@statechannels/devtools": "0.1.21",
     "@statechannels/jest-gas-reporter": "0.0.2",
+    "@statechannels/ganache-deployer": "^0.0.1",
     "@types/jest": "24.0.18",
     "@types/koa": "2.0.52",
     "@types/koa-router": "7.0.42",
