@@ -8,7 +8,7 @@ import {
 import SagaTester from "redux-saga-tester";
 import {DepositedEvent} from "../redux/actions";
 import {adjudicatorWatcher} from "../redux/sagas/adjudicator-watcher";
-import {ETHAssetHolderWatcher} from "../redux/sagas/eth-asset-holder-watcher";
+import {ETHAssetHolderWatcher} from "../redux/sagas/asset-holder-watcher";
 import {depositIntoETHAssetHolder, createWatcherState, concludeGame, fiveFive} from "./test-utils";
 import {getGanacheProvider} from "@statechannels/devtools";
 import {bigNumberify} from "ethers/utils";
@@ -45,7 +45,7 @@ describe("ETHAssetHolder listener", () => {
 
     const processId = ethers.Wallet.createRandom().address;
 
-    const sagaTester = new SagaTester({initialState: createWatcherState(processId)});
+    const sagaTester = new SagaTester({initialState: createWatcherState(processId, channelId)});
     sagaTester.start(ETHAssetHolderWatcher, provider);
 
     const depositAmount = bigNumberify("0x05");
@@ -54,6 +54,7 @@ describe("ETHAssetHolder listener", () => {
     await sagaTester.waitFor("WALLET.ASSET_HOLDER.DEPOSITED");
 
     const action: DepositedEvent = sagaTester.getLatestCalledAction();
+    expect(action.assetHolderAddress).toEqual(getETHAssetHolderAddress());
     expect(action.destination).toEqual(channelId);
     expect(action.amountDeposited).toEqual(depositAmount);
     expect(action.destinationHoldings).toEqual(depositAmount);

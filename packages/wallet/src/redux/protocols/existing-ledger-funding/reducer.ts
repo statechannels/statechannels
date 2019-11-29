@@ -35,7 +35,6 @@ import {
   getAllocationTotal
 } from "../../../utils/outcome-utils";
 import {AllocationAssetOutcome} from "@statechannels/nitro-protocol/src/contract/outcome";
-import {ETH_ASSET_HOLDER_ADDRESS} from "../../../constants";
 export {EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR} from "../../../communication/protocol-locator";
 
 export const initialize = ({
@@ -269,7 +268,7 @@ function craftAppFunding(
 
   // TODO: Currently assuming ETH, this should be updated to handle any asset
   const newAllocation: AllocationAssetOutcome = {
-    assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
+    assetHolderAddress: startingAllocation.assetHolderAddress,
     allocation: []
   };
 

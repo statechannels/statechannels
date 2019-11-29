@@ -13,7 +13,9 @@ export function getAllocationAmount(outcome: Outcome, addressOrChannelId: string
 
 export function getAllocationOutcome(outcome: Outcome): AllocationAssetOutcome {
   if (outcome.length !== 1) {
-    throw new Error(`The wallet only works with 1 outcome. Received ${outcome.length}.`);
+    throw new Error(
+      `The wallet only works with outcomes of 1 asset type. Received ${outcome.length}.`
+    );
   }
   const assetOutcome = outcome[0];
   if (!isAllocationOutcome(assetOutcome)) {

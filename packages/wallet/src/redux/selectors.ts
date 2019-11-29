@@ -94,7 +94,7 @@ export const getAdjudicatorChannelState = (state: SharedData, channelId: string)
   return getAdjudicatorState(state)[channelId];
 };
 
-export const getETHAssetHolderWatcherSubscribersForChannel = (
+export const getAssetHolderWatcherSubscribersForChannel = (
   state: walletStates.Initialized,
   channelId: string
 ): walletStates.ChannelSubscriber[] => {
@@ -154,6 +154,18 @@ export const getNextNonce = (
 export const getChannelIds = (state: SharedData): string[] => {
   return Object.keys(state.channelStore);
 };
+
+export const getAssetHolderAddresses = (state: SharedData): string[] =>
+  Object.keys(
+    getChannelIds(state).reduce(
+      (addresses, channelId) => ({...addresses, [getAssetHolderAddress(state, channelId)]: 1}),
+      {}
+    )
+  );
+
+// TODO: This is error prone I think
+export const getAssetHolderAddress = (state: SharedData, channelId: string): string =>
+  state.channelStore[channelId].signedStates[0].state.outcome[0].assetHolderAddress;
 
 export const getParticipants = (state: SharedData, channelId: string): ChannelParticipant[] => {
   const status = walletStates.getChannelStatus(state, channelId);

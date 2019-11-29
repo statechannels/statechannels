@@ -46,12 +46,23 @@ export async function getETHAssetHolderContract(provider) {
   return new ethers.Contract(contractAddress, getETHAssetHolderInterface(), provider);
 }
 
+export async function getERC20AssetHolderContract(provider) {
+  await provider.ready;
+
+  const contractAddress = getContractAddress("ERC20AssetHolder");
+  return new ethers.Contract(contractAddress, getERC20AssetHolderInterface(), provider);
+}
+
 export function getAdjudicatorInterface(): ethers.utils.Interface {
   return new ethers.utils.Interface(getContractABI("NitroAdjudicator"));
 }
 
 export function getETHAssetHolderInterface(): ethers.utils.Interface {
   return new ethers.utils.Interface(getContractABI("ETHAssetHolder"));
+}
+
+export function getERC20AssetHolderInterface(): ethers.utils.Interface {
+  return new ethers.utils.Interface(getContractABI("ERC20AssetHolder"));
 }
 
 // FIXME: The tests ought to be able to run even without contracts having been built which
@@ -70,6 +81,14 @@ export function getTrivialAppAddress(): string {
 export function getETHAssetHolderAddress(): string {
   try {
     return getContractAddress("ETHAssetHolder");
+  } catch (e) {
+    return AddressZero;
+  }
+}
+
+export function getERC20AssetHolderAddress(): string {
+  try {
+    return getContractAddress("ERC20AssetHolder");
   } catch (e) {
     return AddressZero;
   }
@@ -119,4 +138,14 @@ export function isDevelopmentNetwork(): boolean {
 export async function getAdjudicatorChannelStorageHash(provider: Provider, channelId: string) {
   const contract = await getAdjudicatorContract(provider);
   return await contract.channelStorageHashes(channelId);
+}
+
+export async function getETHAssetHolderHoldings(provider, channelId) {
+  const contract = await getETHAssetHolderContract(provider);
+  return await contract.functions.holdings(channelId);
+}
+
+export async function getERC20AssetHolderHoldings(provider, channelId) {
+  const contract = await getERC20AssetHolderContract(provider);
+  return await contract.functions.holdings(channelId);
 }

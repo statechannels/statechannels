@@ -1,6 +1,9 @@
 import {bigNumberify} from "ethers/utils";
 import {unreachable} from "../../../utils/reducer-utils";
-import {createETHDepositTransaction} from "../../../utils/transaction-generator";
+import {
+  createETHDepositTransaction,
+  createERC20DepositTransaction
+} from "../../../utils/transaction-generator";
 import * as actions from "../../actions";
 import {ProtocolReducer, ProtocolStateWithSharedData} from "../../protocols";
 import {SharedData, registerChannelToMonitor} from "../../state";
@@ -13,11 +16,14 @@ import {isTerminal, isSuccess} from "../transaction-submission/states";
 import * as states from "./states";
 import {TwoPartyPlayerIndex} from "../../types";
 import {ProtocolLocator} from "../../../communication";
+import {ETH_ASSET_HOLDER_ADDRESS, ERC20_ASSET_HOLDER_ADDRESS} from "../../../constants";
+import {TransactionRequest} from "ethers/providers";
 
 type DFReducer = ProtocolReducer<states.DirectFundingState>;
 
 export function initialize({
   safeToDepositLevel,
+  assetHolderAddress,
   totalFundingRequired,
   requiredDeposit,
   channelId,
@@ -28,6 +34,7 @@ export function initialize({
 }: {
   sharedData: SharedData;
   safeToDepositLevel: string;
+  assetHolderAddress: string;
   totalFundingRequired: string;
   requiredDeposit: string;
   channelId: string;
@@ -71,11 +78,24 @@ export function initialize({
   }
 
   if (alreadySafeToDeposit) {
-    const depositTransaction = createETHDepositTransaction(
-      channelId,
-      requiredDeposit,
-      existingChannelFunding
-    );
+    let depositTransaction: TransactionRequest;
+
+    if (assetHolderAddress === ETH_ASSET_HOLDER_ADDRESS) {
+      depositTransaction = createETHDepositTransaction(
+        channelId,
+        requiredDeposit,
+        existingChannelFunding
+      );
+    } else if (assetHolderAddress === ERC20_ASSET_HOLDER_ADDRESS) {
+      depositTransaction = createERC20DepositTransaction(
+        channelId,
+        requiredDeposit,
+        existingChannelFunding
+      );
+    } else {
+      throw new Error(`Received unknown assetHolderAddress: ${assetHolderAddress}`);
+    }
+
     const {storage: newStorage, state: transactionSubmissionState} = initTransactionState(
       depositTransaction,
       processId,
@@ -118,11 +138,8 @@ export const directFundingStateReducer: DFReducer = (
   sharedData: SharedData,
   action: actions.WalletAction
 ): ProtocolStateWithSharedData<states.DirectFundingState> => {
-  if (
-    action.type === "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT" &&
-    action.channelId === state.channelId
-  ) {
-    if (bigNumberify(action.totalForDestination).gte(state.totalFundingRequired)) {
+  if (action.type === "WALLET.ASSET_HOLDER.DEPOSITED" && action.destination === state.channelId) {
+    if (bigNumberify(action.destinationHoldings).gte(state.totalFundingRequired)) {
       return fundingConfirmedReducer(state, sharedData, action);
     }
   }
@@ -164,10 +181,10 @@ const notSafeToDepositReducer: DFReducer = (
   action: actions.WalletAction
 ): ProtocolStateWithSharedData<states.DirectFundingState> => {
   switch (action.type) {
-    case "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT":
+    case "WALLET.ASSET_HOLDER.DEPOSITED":
       if (
-        action.channelId === state.channelId &&
-        bigNumberify(action.totalForDestination).gte(state.safeToDepositLevel)
+        action.destination === state.channelId &&
+        bigNumberify(action.destinationHoldings).gte(state.safeToDepositLevel)
       ) {
         const existingChannelFunding = "0x0"; // FIXME: The wallet has no way of determining funding levels atm
         const depositTransaction = createETHDepositTransaction(
@@ -201,7 +218,7 @@ const waitForDepositTransactionReducer: DFReducer = (
   sharedData: SharedData,
   action: actions.WalletAction
 ): ProtocolStateWithSharedData<states.DirectFundingState> => {
-  if (action.type === "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT") {
+  if (action.type === "WALLET.ASSET_HOLDER.DEPOSITED") {
     return {protocolState: {...protocolState, funded: true}, sharedData};
   }
   if (!isTransactionAction(action)) {
@@ -245,8 +262,8 @@ const channelFundedReducer: DFReducer = (
   sharedData: SharedData,
   action: actions.WalletAction
 ): ProtocolStateWithSharedData<states.DirectFundingState> => {
-  if (action.type === "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT") {
-    if (bigNumberify(action.totalForDestination).lt(state.totalFundingRequired)) {
+  if (action.type === "WALLET.ASSET_HOLDER.DEPOSITED") {
+    if (bigNumberify(action.destinationHoldings).lt(state.totalFundingRequired)) {
       // TODO: Deal with chain re-orgs that de-fund the channel here
       return {protocolState: state, sharedData};
     }

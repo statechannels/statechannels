@@ -50,6 +50,7 @@ import {SignedState, State} from "@statechannels/nitro-protocol";
 import {CONSENSUS_LIBRARY_ADDRESS, CONSENSUS_LIBRARY_BYTECODE} from "../constants";
 import {getAppDefinitionBytecode} from "./selectors";
 import {relayActionWithMessage, OutgoingApiAction} from "./actions";
+import {AssetHoldersState} from "./asset-holders-state/state";
 
 export type WalletState = Initialized;
 
@@ -69,6 +70,7 @@ export interface SharedData {
   channelSubscriptions: ChannelSubscriptions;
   adjudicatorState: AdjudicatorState;
   fundingState: FundingState;
+  assetHoldersState: AssetHoldersState;
   currentProcessId?: string;
 }
 
@@ -156,6 +158,7 @@ export const EMPTY_SHARED_DATA: SharedData = {
   channelSubscriptions: {},
   adjudicatorState: {},
   fundingState: {},
+  assetHoldersState: {},
   bytecodeStorage: {
     [CONSENSUS_LIBRARY_ADDRESS]: CONSENSUS_LIBRARY_BYTECODE
   }
@@ -167,6 +170,7 @@ export function sharedData(params: SharedData): SharedData {
     channelStore: channelState,
     adjudicatorState,
     fundingState,
+    assetHoldersState,
     channelSubscriptions,
     bytecodeStorage
   } = params;
@@ -175,6 +179,7 @@ export function sharedData(params: SharedData): SharedData {
     channelStore: channelState,
     adjudicatorState,
     fundingState,
+    assetHoldersState,
     channelSubscriptions,
     bytecodeStorage
   };

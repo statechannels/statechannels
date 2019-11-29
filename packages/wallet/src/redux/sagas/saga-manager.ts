@@ -14,8 +14,9 @@ import {challengeResponseInitiator} from "./challenge-response-initiator";
 import {multipleActionDispatcher} from "./multiple-action-dispatcher";
 
 import {adjudicatorStateUpdater} from "./adjudicator-state-updater";
+import {assetHolderStateUpdater} from "./asset-holder-state-updater";
 import {isLoadAction, OutgoingApiAction} from "../actions";
-import {ETHAssetHolderWatcher} from "./eth-asset-holder-watcher";
+import {ETHAssetHolderWatcher} from "./asset-holder-watcher";
 import {postMessageListener} from "./post-message-listener";
 import {messageSender} from "./message-sender";
 
@@ -39,6 +40,7 @@ export function* sagaManager(): IterableIterator<any> {
     // If it is a load action we update the adjudicator state with the latest on chain info
     if (isLoadAction(action)) {
       yield fork(adjudicatorStateUpdater);
+      yield fork(assetHolderStateUpdater);
     }
 
     // @ts-ignore TODO: Why is redux-saga select think its returning undefined?

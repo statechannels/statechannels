@@ -15,10 +15,7 @@ import {routerFactory} from "../../../communication/actions";
 
 type EmbeddedAction = actions.advanceChannel.AdvanceChannelAction | actions.TransactionAction;
 
-export type DirectFundingAction =
-  | SignedStatesReceived
-  | actions.FundingReceivedEvent
-  | EmbeddedAction;
+export type DirectFundingAction = SignedStatesReceived | actions.DepositedEvent | EmbeddedAction;
 
 function isEmbeddedAction(action: actions.WalletAction): action is EmbeddedAction {
   return (
@@ -28,7 +25,7 @@ function isEmbeddedAction(action: actions.WalletAction): action is EmbeddedActio
 
 export function isDirectFundingAction(action: actions.WalletAction): action is DirectFundingAction {
   return (
-    action.type === "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT" ||
+    action.type === "WALLET.ASSET_HOLDER.DEPOSITED" ||
     isCommonAction(action, EmbeddedProtocol.DirectFunding) ||
     isEmbeddedAction(action)
   );
