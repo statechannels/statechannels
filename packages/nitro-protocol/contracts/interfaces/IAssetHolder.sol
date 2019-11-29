@@ -40,9 +40,10 @@ interface IAssetHolder {
 
     /**
     * @dev Indicates that `amount` assets have been transferred to the external destination denoted by `destination`.
+    * @param origin The origin address (left-padded) or channelId of the funds being withdrawn.
     * @param destination An external destination, left-padded with zeros.
     * @param amount Number of assets transferred (wei or tokens).
     */
-    event AssetTransferred(bytes32 indexed destination, uint256 amount);
+    event AssetTransferred(bytes32 indexed origin, bytes32 indexed destination, uint256 amount);
 
 }

@@ -346,6 +346,7 @@ export function computeOutcome(outcomeShortHand: OutcomeShortHand): AllocationAs
 }
 
 export function assetTransferredEventsFromPayouts(
+  origin: string,
   singleAssetPayouts: AssetOutcomeShortHand,
   assetHolder: string
 ) {
@@ -355,7 +356,7 @@ export function assetTransferredEventsFromPayouts(
       assetTransferredEvents.push({
         contract: assetHolder,
         name: 'AssetTransferred',
-        values: {destination, amount: singleAssetPayouts[destination]},
+        values: {origin, destination, amount: singleAssetPayouts[destination]},
       });
     }
   });
