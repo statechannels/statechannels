@@ -16,7 +16,7 @@ import {multipleActionDispatcher} from "./multiple-action-dispatcher";
 import {adjudicatorStateUpdater} from "./adjudicator-state-updater";
 import {assetHolderStateUpdater} from "./asset-holder-state-updater";
 import {isLoadAction, OutgoingApiAction} from "../actions";
-import {ETHAssetHolderWatcher} from "./asset-holder-watcher";
+import {assetHoldersWatcher} from "./asset-holder-watcher";
 import {postMessageListener} from "./post-message-listener";
 import {messageSender} from "./message-sender";
 import {Web3Provider} from "ethers/providers";
@@ -55,7 +55,7 @@ export function* sagaManager(): IterableIterator<any> {
         adjudicatorWatcherProcess = yield fork(adjudicatorWatcher, provider);
       }
       if (!ETHAssetHolderWatcherProcess) {
-        ETHAssetHolderWatcherProcess = yield fork(ETHAssetHolderWatcher, provider);
+        ETHAssetHolderWatcherProcess = yield fork(assetHoldersWatcher, provider);
       }
       // TODO: To cut down on block mined spam we could require processes to register/unregister when they want to listen for these events
       if (!challengeWatcherProcess) {

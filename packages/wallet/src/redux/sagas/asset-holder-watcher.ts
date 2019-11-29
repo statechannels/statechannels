@@ -21,7 +21,7 @@ interface AssetHolderEvent {
   eventType: AssetHolderEventType;
 }
 
-export function* ETHAssetHolderWatcher(provider: Web3Provider) {
+export function* assetHoldersWatcher(provider: Web3Provider) {
   const assetHolderEventChannel = yield call(createAssetHolderEventChannel, provider);
   while (true) {
     const event: AssetHolderEvent = yield take(assetHolderEventChannel);
