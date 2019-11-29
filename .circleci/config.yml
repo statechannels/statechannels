@@ -1,5 +1,6 @@
 version: 2.1
-
+orbs:
+  puppeteer: threetreeslight/puppeteer@0.1.2
 defaults: &defaults
   working_directory: /home/circleci/project
   resource_class: large
@@ -92,6 +93,7 @@ jobs:
     steps:
       - checkout:
           path: /home/circleci/project
+      - puppeteer/install
       - log_stats:
           file: integration-test-stats
       - attach_workspace:
