@@ -74,6 +74,7 @@ function* dispatchProcessEventAction(
           ...getAssetTransferredEvent(event)
         })
       );
+      break;
     case AssetHolderEventType.Deposited:
       const {destination, amountDeposited, destinationHoldings} = getDepositedEvent(event);
       yield put(
