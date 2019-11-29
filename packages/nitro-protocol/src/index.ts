@@ -7,7 +7,12 @@ import {
   replaceAddressesAndBigNumberify,
   setupContracts,
 } from '../test/test-helpers';
-import {getAssetTransferredEvent, getDepositedEvent} from './contract/asset-holder';
+import {
+  getAssetTransferredEvent,
+  getDepositedEvent,
+  convertBytes32ToAddress,
+  convertAddressToBytes32,
+} from './contract/asset-holder';
 import {getChallengeRegisteredEvent} from './contract/challenge';
 import {Channel, getChannelId} from './contract/channel';
 import {encodeConsensusData} from './contract/consensus-data';
@@ -51,6 +56,8 @@ export interface SignedState {
 // TODO: Export this with more thought to what is exposed by @statchannels/nitro-protocol
 export {
   Allocation,
+  convertBytes32ToAddress,
+  convertAddressToBytes32,
   createERC20DepositTransaction,
   createETHDepositTransaction,
   createTransferAllTransaction,

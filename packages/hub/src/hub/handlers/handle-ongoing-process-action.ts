@@ -1,13 +1,12 @@
-import {unreachable} from '@statechannels/wallet';
 import {
-  SignedStatesReceived,
-  StrategyProposed,
   RelayActionWithMessage,
   relayActionWithMessage,
+  SignedStatesReceived,
+  signedStatesReceived,
   strategyApproved,
-  signedStatesReceived
+  StrategyProposed
 } from '@statechannels/wallet/lib/src/communication';
-import {HUB_ADDRESS} from '../../constants';
+import {HUB_ADDRESS, unreachable} from '../../constants';
 import {errors} from '../../wallet';
 import {getCurrentState} from '../../wallet/db/queries/getCurrentState';
 import {getProcess} from '../../wallet/db/queries/walletProcess';

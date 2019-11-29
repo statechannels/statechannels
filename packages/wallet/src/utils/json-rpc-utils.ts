@@ -3,12 +3,13 @@ import {
   State,
   Channel,
   isAllocationOutcome,
-  SignedState
+  SignedState,
+  convertBytes32ToAddress,
+  convertAddressToBytes32
 } from "@statechannels/nitro-protocol";
 import {bigNumberify, randomBytes} from "ethers/utils";
 import {NETWORK_ID, CHALLENGE_DURATION, ETH_ASSET_HOLDER_ADDRESS} from "../constants";
 import {ChannelParticipant} from "../redux/channel-store";
-import {convertAddressToBytes32, convertBytes32ToAddress} from "./data-type-utils";
 import {RelayableAction} from "../communication";
 
 export interface JsonRpcParticipant {
