@@ -1,31 +1,35 @@
-import NetworkContext from "@statechannels/ganache-deployer/ganache-network-context.json";
 import {Contract} from "ethers";
 import {AddressZero} from "ethers/constants";
 import log from "loglevel";
 import {Web3Provider} from "ethers/providers";
-import { Interface } from "ethers/utils";
+import {Interface} from "ethers/utils";
+import {getNetworkContext} from "@statechannels/ganache-deployer";
+import {AddressZero} from "ethers/constants";
+import log from "loglevel";
 
 log.setDefaultLevel(log.levels.DEBUG);
 
+const networkContext = getNetworkContext();
+
 export function getContractAddress(contractName: string): string {
-  if (NetworkContext[contractName]) {
-    return NetworkContext[contractName].address;
+  if (networkContext[contractName]) {
+    return networkContext[contractName].address;
   }
-  console.error(contractName, NetworkContext);
+  console.error(contractName, networkContext);
 
   throw new Error(
-    `Could not find ${contractName} in network map ${JSON.stringify(NetworkContext)}}`
+    `Could not find ${contractName} in network map ${JSON.stringify(networkContext)}}`
   );
 }
 
 export function getContractABI(contractName: string): string {
-  if (NetworkContext[contractName]) {
-    return NetworkContext[contractName].abi;
+  if (networkContext[contractName]) {
+    return networkContext[contractName].abi;
   }
-  console.error(contractName, NetworkContext);
+  console.error(contractName, networkContext);
 
   throw new Error(
-    `Could not find ${contractName} in network map ${JSON.stringify(NetworkContext)}}`
+    `Could not find ${contractName} in network map ${JSON.stringify(networkContext)}}`
   );
 }
 
@@ -106,8 +110,8 @@ export function getConsensusContractAddress(): string {
 }
 
 export function getNetworkId(): number {
-  if (NetworkContext["NetworkID"]) {
-    return parseInt(NetworkContext["NetworkID"], 10);
+  if (networkContext["NetworkID"]) {
+    return parseInt(networkContext["NetworkID"], 10);
   } else {
     throw new Error("There is no target network ID specified.");
   }

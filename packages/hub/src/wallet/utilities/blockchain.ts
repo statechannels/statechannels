@@ -1,4 +1,5 @@
 import EthAssetHolderArtifact from '@statechannels/nitro-protocol/build/contracts/ETHAssetHolder.json';
+import {getNetworkContext} from '@statechannels/ganache-deployer';
 
 import {ContractFactory, ethers, providers} from 'ethers';
 import {HUB_SIGNER_PRIVATE_KEY} from '../../constants';
@@ -32,7 +33,7 @@ async function setupContract(artifact: any) {
     throw err;
   }
 
-  const networkContext = require('@statechannels/ganache-deployer/ganache-network-context.json');
+  const networkContext = getNetworkContext();
   const contract = await ethAssetHolderFactory.attach(networkContext.ETHAssetHolder.address);
 
   return contract;

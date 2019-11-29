@@ -1,4 +1,4 @@
-import NetworkContext from '@statechannels/ganache-deployer/ganache-network-context.json';
+import {getNetworkContext} from '@statechannels/ganache-deployer';
 import {Contract, ethers, Wallet} from 'ethers';
 import {AddressZero, HashZero} from 'ethers/constants';
 import {TransactionReceipt, TransactionRequest} from 'ethers/providers';
@@ -25,6 +25,7 @@ import {
 } from '../src/contract/outcome';
 import {hashState, State} from '../src/contract/state';
 
+const networkContext = getNetworkContext();
 // Interfaces
 
 // E.g. {ALICE:2, BOB:3}
@@ -52,8 +53,8 @@ export const getTestProvider = () => {
 export function getNetworkMap() {
   // TODO: validate deployments against a whitelist
   // TODO: share type info for what's expected from this end point
-  if (Object.keys(NetworkContext).length > 0) {
-    return NetworkContext;
+  if (Object.keys(networkContext).length > 0) {
+    return networkContext;
   }
   throw Error(`Empty Network Context option. Make sure the Ganache server has been deployed.`);
 }

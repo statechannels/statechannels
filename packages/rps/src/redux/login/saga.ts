@@ -6,7 +6,7 @@ import metamaskSaga from '../metamask/saga';
 import RPSGameArtifact from '../../../build/contracts/RockPaperScissors.json';
 // import {WALLET_IFRAME_ID} from '../../constants'; TODO:WALLET_SCRUBBED_OUT
 
-import NetworkContext from '@statechannels/ganache-deployer/ganache-network-context.json';
+import { getNetworkContext } from '@statechannels/ganache-deployer';
 
 function* loginSaga() {
   try {
@@ -72,5 +72,6 @@ function getLibraryAddress() {
   ethereum.enable();
   // const selectedNetworkId = parseInt(yield cps(web3.version.getNetwork), 10);
   // TODO network context does not provide network information
-  return NetworkContext[RPSGameArtifact.contractName].address;
+  const networkContext = getNetworkContext();
+  return networkContext[RPSGameArtifact.contractName].address;
 }

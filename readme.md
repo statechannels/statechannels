@@ -111,7 +111,7 @@ Run the following script _from the root of the repo_ to start a ganache server, 
 yarn start:ganache
 ```
 
-The `NetworkContext` object is held at a specific path of the `ganache-deployer` package that can be referenced in other packages via `import NetworkContext from '@statechannels/ganache-deployer/ganache-network-context.json';`.
+The `NetworkContext` object is held at a specific path of the `ganache-deployer` package that can be referenced in other packages via `import { getNetworkContext } from '@statechannels/ganache-deployer';`.
 
 Running the above script should produce an output similar to this:
 

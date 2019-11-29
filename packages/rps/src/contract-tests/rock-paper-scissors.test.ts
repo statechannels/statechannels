@@ -1,6 +1,5 @@
 import { expectRevert } from '@statechannels/devtools';
-// @ts-ignore
-import NetworkContext from '@statechannels/ganache-deployer/ganache-network-context.json';
+import { getNetworkContext } from '@statechannels/ganache-deployer';
 // @ts-ignore
 import RockPaperScissorsArtifact from '../../build/contracts/RockPaperScissors.json';
 import * as ethers from 'ethers';
@@ -24,6 +23,8 @@ import { Weapon } from '../core/weapons';
 import loadJsonFile from 'load-json-file';
 
 import { randomHex } from '../utils/randomHex';
+
+const networkContext = getNetworkContext();
 
 dotEnvExtended.load();
 
@@ -187,7 +188,7 @@ export async function setupContracts(provider: ethers.providers.JsonRpcProvider,
   const signer = provider.getSigner(0);
 
   const contractName = artifact.contractName;
-  const contractAddress = NetworkContext[contractName]['address'];
+  const contractAddress = networkContext[contractName]['address'];
   const contract = new ethers.Contract(contractAddress, artifact.abi, signer);
   return contract;
 }

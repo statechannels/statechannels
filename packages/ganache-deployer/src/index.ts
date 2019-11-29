@@ -9,6 +9,14 @@ const GANACHE_CONTRACTS_FILE = 'ganache-network-context.json';
 const GANACHE_CONTRACTS_PATH = path.join(__dirname, '../', GANACHE_CONTRACTS_FILE);
 const GANACHE_CONTRACTS_BACKUP_PATH = path.join(__dirname, '../', `${GANACHE_CONTRACTS_FILE}.bak`);
 
+export function getNetworkContext() {
+  if (!fs.existsSync(GANACHE_CONTRACTS_PATH)) {
+    throw Error("Couldn't find contract addresses. Has the ganache-deployer run?");
+  }
+  const rawData = fs.readFileSync(GANACHE_CONTRACTS_PATH);
+  return JSON.parse(rawData.toString());
+}
+
 export async function startGanacheAndDeploy(): Promise<GanacheServer> {
   // TODO: This should probably merge the existing file instead of replacing it
   log.info(`Moving existing network context file to : ${GANACHE_CONTRACTS_BACKUP_PATH}\n`);
