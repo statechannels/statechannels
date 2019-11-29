@@ -5,10 +5,14 @@ import {SignedState} from "@statechannels/nitro-protocol";
 import _ from "lodash";
 import {signState} from "@statechannels/nitro-protocol/lib/src/signatures";
 import {createParentPostMessagePromise} from "../helpers";
+
 const playerA = ethers.Wallet.createRandom();
 const playerB = ethers.Wallet.createRandom();
 const playerBFakeWallet = ethers.Wallet.createRandom();
 
+// TODO: This is used to keep track of a promise when we have to interact with the UI
+// There might be a better way of doing this
+let messagePromise;
 // TODO: Probably a better way of referencing this
 let walletWindow;
 
@@ -124,10 +128,42 @@ describe("Player A", () => {
         walletWindow.postMessage(channelOpenedMessage, "*");
         return promise;
       })
-      .then(message => {
-        cy.get("button")
-          .contains("Fund Channel")
-          .click();
+      .then(() => {
+        messagePromise = createParentPostMessagePromise(walletWindow, {
+          method: "MessageQueued"
+        });
+      })
+      .get("button")
+      .contains("Fund Channel")
+      .click()
+      .then(() => {
+        return messagePromise;
+      })
+      .then((messages: any) => {
+        expect(messages[0].params.data.type).to.equal(
+          "WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_PROPOSED"
+        );
+        expect(messages[0].params.data.strategy).to.equal("IndirectFundingStrategy");
+        return messages[0].params.data.processId;
+      })
+      .then(processId => {
+        const playerBApprovalMessage = {
+          jsonrpc: "2.0",
+          id: 6,
+          method: "PushMessage",
+          params: {
+            recipient: "user-a",
+            sender: "user-b",
+            data: {
+              strategy: "IndirectFundingStrategy",
+              processId,
+              type: "WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_APPROVED"
+            }
+          }
+        };
+        const promise = createParentPostMessagePromise(walletWindow, {id: 6});
+        walletWindow.postMessage(playerBApprovalMessage, "*");
+        return promise;
       });
   });
 });

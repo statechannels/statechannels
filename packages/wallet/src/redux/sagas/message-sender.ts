@@ -1,6 +1,6 @@
-import {OutgoingApiAction} from "../actions";
+import {OutgoingApiAction, messageSent} from "../actions";
 
-import {call, select} from "redux-saga/effects";
+import {call, select, put} from "redux-saga/effects";
 import {getChannelStatus} from "../state";
 import {ChannelState, getLastState} from "../channel-store";
 import {createJsonRpcAllocationsFromOutcome} from "../../utils/json-rpc-utils";
@@ -13,6 +13,7 @@ export function* messageSender(action: OutgoingApiAction) {
   if (message) {
     yield validate(message, action);
     yield call(window.parent.postMessage, message, "*");
+    yield put(messageSent({}));
   }
 }
 

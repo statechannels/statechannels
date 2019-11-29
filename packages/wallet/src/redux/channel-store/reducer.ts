@@ -48,7 +48,7 @@ export function checkAndInitialize(
   signedState: SignedState,
   privateKey: string,
   participants: ChannelParticipant[],
-  bytecode: string
+  bytecode?: string
 ): CheckResult {
   if (signedState.state.turnNum !== 0) {
     return {isSuccess: false};
@@ -60,7 +60,7 @@ export function checkAndInitialize(
 
   const channel = initializeChannel(signedState, privateKey, participants);
 
-  if (!validAppTransition(channel, signedState.state, bytecode)) {
+  if (bytecode && !validAppTransition(channel, signedState.state, bytecode)) {
     return {isSuccess: false};
   }
 
@@ -110,7 +110,7 @@ type CheckResult = CheckSuccess | CheckFailure;
 export function checkAndStore(
   store: ChannelStore,
   signedState: SignedState,
-  bytecode: string
+  bytecode?: string
 ): CheckResult {
   if (!hasValidSignature(signedState)) {
     console.log("Failed to validate state signature");
@@ -122,7 +122,7 @@ export function checkAndStore(
     return {isSuccess: false};
   }
 
-  if (!validAppTransition(channel, signedState.state, bytecode)) {
+  if (bytecode && !validAppTransition(channel, signedState.state, bytecode)) {
     return {isSuccess: false};
   }
 
