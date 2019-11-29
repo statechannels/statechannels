@@ -1,4 +1,4 @@
-import { select, call, put, take } from 'redux-saga/effects';
+import { select, call, put, take, actionChannel } from 'redux-saga/effects';
 import { RPSChannelClient } from '../../utils/rps-channel-client';
 import {
   AppData,
@@ -16,6 +16,7 @@ import * as a from './actions';
 import * as ls from './state';
 import { randomHex } from '../../utils/randomHex';
 import { bigNumberify } from 'ethers/utils';
+import { buffers } from 'redux-saga';
 
 const getGameState = (state: any): ls.GameState => state.game;
 const isPlayersTurnNext = (
@@ -34,8 +35,9 @@ const isPlayersTurnNext = (
 };
 
 export function* gameSaga(client: RPSChannelClient) {
+  const channel = yield actionChannel('*', buffers.fixed(10));
   while (true) {
-    yield take('*');
+    yield take(channel);
     yield* gameSagaRun(client);
   }
 }
@@ -135,7 +137,7 @@ function* generateSaltAndSendPropose(
   client: RPSChannelClient
 ) {
   // if we're player A, we first generate a salt
-  const salt = yield call(randomHex, 64);
+  const salt = randomHex(64);
   yield put(a.chooseSalt(salt)); // transitions us to WeaponAndSaltChosen
 
   const { myWeapon, roundBuyIn: stake } = localState;
