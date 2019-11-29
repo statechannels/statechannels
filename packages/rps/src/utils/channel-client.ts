@@ -2,6 +2,11 @@ import { Wallet } from 'ethers';
 import { BigNumberish, bigNumberify } from 'ethers/utils';
 import { EventEmitter } from 'eventemitter3';
 
+const FAKE_DELAY = 100; // ms
+function sleep(time) {
+  return new Promise(resolve => setTimeout(resolve, time));
+}
+
 export type ChannelStatus = 'proposed' | 'opening' | 'funding' | 'running' | 'closing' | 'closed';
 
 export enum ErrorCodes {
@@ -124,6 +129,7 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
     };
     this.opponentAddress = this.latestState.participants[1].participantId;
     // [assuming we're working with 2-participant channels for the time being]
+    await sleep(FAKE_DELAY);
     this.notifyOpponent(this.latestState);
 
     return Promise.resolve(this.latestState);
@@ -136,7 +142,7 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
     // [assuming we're working with 2-participant channels for the time being]
     this.latestState = { ...latestState, turnNum: bigNumberify(3).toString(), status: 'running' };
     this.opponentAddress = this.latestState.participants[0].participantId;
-
+    await sleep(FAKE_DELAY);
     this.notifyOpponent(this.latestState);
 
     return Promise.resolve(this.latestState);
@@ -151,16 +157,20 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
     const latestState = this.findChannel(channelId);
     const currentTurnNum = bigNumberify(latestState.turnNum);
 
-    if (currentTurnNum.mod(2).eq(this.playerIndex)) {
-      return Promise.reject(
-        `Not your turn: currentTurnNum = ${currentTurnNum}, index = ${this.playerIndex}`
-      );
+    const nextState = { ...latestState, participants, allocations, appData };
+    if (nextState !== latestState) {
+      if (currentTurnNum.mod(2).eq(this.playerIndex)) {
+        return Promise.reject(
+          `Not your turn: currentTurnNum = ${currentTurnNum}, index = ${this.playerIndex}`
+        );
+      }
+      nextState.turnNum = currentTurnNum.add(1).toString();
+      console.log('Updated channel to turnNum:' + nextState.turnNum);
     }
-    const turnNum = currentTurnNum.add(1).toString();
 
-    this.latestState = { ...latestState, turnNum, participants, allocations, appData };
+    this.latestState = nextState;
+
     this.notifyOpponent(this.latestState);
-
     return Promise.resolve(this.latestState);
   }
 

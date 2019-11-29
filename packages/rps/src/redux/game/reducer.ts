@@ -159,10 +159,9 @@ const handleCreateGame = (state: LocalState, action: CreateGame): LocalState => 
 };
 
 const handleCancelGame = (state: LocalState, action: CancelGame): LocalState => {
-  if (state.type !== 'Lobby') {
+  if (state.type !== 'WaitingRoom') {
     return state;
   }
-
   return lobby(state);
 };
 
