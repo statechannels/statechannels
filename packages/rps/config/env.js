@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const {configureEnvVariables} = require('@statechannels/devtools');
+const { configureEnvVariables } = require('@statechannels/devtools');
 
 const NODE_ENV = process.env.NODE_ENV;
 if (!NODE_ENV) {
@@ -36,6 +36,8 @@ const MAGMO_VALUES = [
   'FIREBASE_API_KEY',
   'WALLET_URL',
   'BOT_URL',
+  'AUTO_PLAYER',
+  'AUTO_OPPONENT',
 ];
 
 function getClientEnvironment(publicUrl) {

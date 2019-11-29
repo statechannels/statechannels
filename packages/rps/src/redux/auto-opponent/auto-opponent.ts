@@ -4,7 +4,6 @@ import { put, take, fork, call, actionChannel, race } from 'redux-saga/effects';
 import { expectSaga } from 'redux-saga-test-plan';
 import { GameState, lobby } from '../game/state';
 import { gameJoined as gameJoinedAction } from '../game/actions';
-import { bigNumberify } from 'ethers/utils';
 import { syncOpenGames } from '../open-games/actions';
 import { gameSaga } from '../game/saga';
 import { channelUpdatedListener } from '../message-service/channel-updated-listener';
@@ -12,6 +11,7 @@ import { autoPlayer } from './auto-player';
 import { combineReducers } from 'redux';
 import { gameReducer } from '../game/reducer';
 import { openGamesReducer } from '../open-games/reducer';
+import { WeiPerEther } from 'ethers/constants';
 
 // The auto-opponent simulates the actions of the opponent in an RPS game.
 //
@@ -102,7 +102,7 @@ export function* autoOpponent(player: 'A' | 'B', externalClient: RPSChannelClien
           {
             address: 'todo: autoPlayerAddress',
             name: 'AutoPlayer',
-            stake: bigNumberify(1).toString(),
+            stake: WeiPerEther.toString(),
             createdAt: new Date().getTime(),
             isPublic: true,
           },
