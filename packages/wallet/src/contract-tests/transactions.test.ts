@@ -17,16 +17,12 @@ import {transactionSender} from "../redux/sagas/transaction-sender";
 import {testSaga} from "redux-saga-test-plan";
 import {getProvider, getContractAddress} from "../utils/contract-utils";
 import {transactionSent, transactionSubmitted, transactionConfirmed} from "../redux/actions";
-import {
-  ADJUDICATOR_ADDRESS,
-  ETH_ASSET_HOLDER_ADDRESS,
-  NETWORK_ID,
-  CHALLENGE_DURATION
-} from "../constants";
+import {NETWORK_ID, CHALLENGE_DURATION} from "../constants";
 import {State, Channel, getChannelId} from "@statechannels/nitro-protocol";
 import {bigNumberify} from "ethers/utils";
 import {convertBalanceToOutcome} from "../redux/__tests__/state-helpers";
 import {Signatures} from "@statechannels/nitro-protocol";
+import {TransactionRequestWithTarget} from "../redux/outbox/state";
 
 jest.setTimeout(90000);
 
@@ -43,17 +39,13 @@ describe("transactions", () => {
     return bigNumberify(++nonce).toHexString();
   }
 
-  async function testTransactionSender(transactionToSend) {
+  async function testTransactionSender(transactionToSend: TransactionRequestWithTarget) {
     const processId = "processId";
     const queuedTransaction = {transactionRequest: transactionToSend, processId};
-    const transactionPayload = {
-      to: ADJUDICATOR_ADDRESS,
-      ...queuedTransaction.transactionRequest
-    };
 
     // TODO: Currently we're actually attempting to send the transactions
     // but we could probably do that in nitro-protocol package instead
-    const transactionResult = await signer.sendTransaction(transactionPayload);
+    const transactionResult = await signer.sendTransaction(queuedTransaction.transactionRequest);
     const confirmedTransaction = await transactionResult.wait();
     // TODO: Redux saga test plan is complaining about the typing on transactionSender
     testSaga(transactionSender as any, queuedTransaction)
@@ -64,7 +56,7 @@ describe("transactions", () => {
       .next(signer)
       .put(transactionSent({processId}))
       .next()
-      .call([signer, signer.sendTransaction], transactionPayload)
+      .call([signer, signer.sendTransaction], queuedTransaction.transactionRequest)
       .next(transactionResult)
       .put(transactionSubmitted({processId, transactionHash: transactionResult.hash || ""}))
       .next(transactionResult)
@@ -94,7 +86,7 @@ describe("transactions", () => {
     const depositTransactionData = createETHDepositTransaction(someChannelId, "0x5", "0x0");
     await testTransactionSender({
       ...depositTransactionData,
-      to: ETH_ASSET_HOLDER_ADDRESS,
+
       value: 5
     });
   });

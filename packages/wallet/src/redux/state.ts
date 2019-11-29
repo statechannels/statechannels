@@ -3,7 +3,8 @@ import {
   emptyDisplayOutboxState,
   SideEffects,
   queueMessage as queueMessageOutbox,
-  queueTransaction as queueTransactionOutbox
+  queueTransaction as queueTransactionOutbox,
+  TransactionRequestWithTarget
 } from "./outbox/state";
 import {
   ChannelStore,
@@ -22,7 +23,6 @@ import {
 import {Properties} from "./utils";
 import * as NewLedgerChannel from "./protocols/new-ledger-channel/states";
 import {accumulateSideEffects} from "./outbox";
-import {TransactionRequest} from "ethers/providers";
 import {AdjudicatorState} from "./adjudicator-state/state";
 import {ProcessProtocol, ProtocolLocator, RelayableAction} from "../communication";
 import {
@@ -364,7 +364,7 @@ interface SignFailure {
 
 export function queueTransaction(
   state: SharedData,
-  transaction: TransactionRequest,
+  transaction: TransactionRequestWithTarget,
   processId: string
 ): SharedData {
   return {

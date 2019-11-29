@@ -17,7 +17,7 @@ import * as states from "./states";
 import {TwoPartyPlayerIndex} from "../../types";
 import {ProtocolLocator} from "../../../communication";
 import {ETH_ASSET_HOLDER_ADDRESS, ERC20_ASSET_HOLDER_ADDRESS} from "../../../constants";
-import {TransactionRequest} from "ethers/providers";
+import {TransactionRequestWithTarget} from "../../outbox/state";
 
 type DFReducer = ProtocolReducer<states.DirectFundingState>;
 
@@ -78,7 +78,7 @@ export function initialize({
   }
 
   if (alreadySafeToDeposit) {
-    let depositTransaction: TransactionRequest;
+    let depositTransaction: TransactionRequestWithTarget;
 
     if (assetHolderAddress === ETH_ASSET_HOLDER_ADDRESS) {
       depositTransaction = createETHDepositTransaction(
