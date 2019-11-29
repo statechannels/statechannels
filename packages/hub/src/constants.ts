@@ -7,3 +7,5 @@ export const HUB_SIGNER_ADDRESS = '0xD9995BAE12FEe327256FFec1e3184d492bD94C31';
 
 export const HUB_ADDRESS = '0x100063c326b27f78b2cBb7cd036B8ddE4d4FCa7C';
 export const HUB_PRIVATE_KEY = '0x1b427b7ab88e2e10674b5aa92bb63c0ca26aa0b5a858e1d17295db6ad91c049b';
+
+export const unreachable = (x: never) => x;

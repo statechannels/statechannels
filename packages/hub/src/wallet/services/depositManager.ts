@@ -1,8 +1,8 @@
-import {addHex} from '@statechannels/wallet';
 import {bigNumberify} from 'ethers/utils';
 import {HUB_ADDRESS} from '../../constants';
 import Channel from '../models/channel';
 import ChannelHolding from '../models/channelHoldings';
+import {addHex} from '../utilities/hex-utils';
 import {AssetHolderWatcherEvent} from './asset-holder-watcher';
 import {Blockchain} from './blockchain';
 
