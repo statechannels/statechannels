@@ -12,7 +12,7 @@ export async function loadWallet(page: puppeteer.Page, messageListener: (message
   await page.evaluateOnNewDocument('window.web3 = new Web3("http://localhost:8547")');
   await page.goto("http://localhost:3055/");
 
-  await page.waitFor(3000); // Delay lets things load
+  await page.waitFor(500); // Delay lets things load
   // interceptMessage gets called in puppeteer's context
   await page.exposeFunction("interceptMessage", message => {
     messageListener(message);
