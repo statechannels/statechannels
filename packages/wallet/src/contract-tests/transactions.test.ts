@@ -1,6 +1,6 @@
 import {ethers} from "ethers";
 
-import {createChallenge, concludeGame, fiveFive} from "./test-utils";
+import {createChallenge, fiveFive} from "./test-utils";
 import {
   createForceMoveTransaction,
   createETHDepositTransaction,
@@ -8,8 +8,7 @@ import {
   createRefuteTransaction,
   createConcludeTransaction,
   ConcludePushOutcomeAndTransferAllArgs,
-  createConcludePushOutcomeAndTransferAllTransaction,
-  createTransferAndWithdrawTransaction
+  createConcludePushOutcomeAndTransferAllTransaction
 } from "../utils/transaction-generator";
 
 import {depositIntoETHAssetHolder} from "./test-utils";
@@ -247,31 +246,7 @@ describe("transactions", () => {
     await testTransactionSender(concludeTransaction);
   });
 
-  it.skip("should send a transferAndWithdraw transaction", async () => {
-    const channelNonce = getNextNonce();
-    const channel: Channel = {
-      channelNonce,
-      chainId: bigNumberify(NETWORK_ID).toHexString(),
-      participants: [participantA.address, participantB.address]
-    };
-    const channelId = getChannelId(channel);
-
-    await depositIntoETHAssetHolder(provider, channelId);
-    await depositIntoETHAssetHolder(provider, channelId);
-    await concludeGame(provider, channel.channelNonce, participantA, participantB);
-
-    const verificationSignature = "0x0";
-    const transferAndWithdraw = createTransferAndWithdrawTransaction(
-      channelId,
-      participantA.address,
-      participantA.address,
-      "0x01",
-      verificationSignature
-    );
-    await testTransactionSender(transferAndWithdraw);
-  });
-
-  it.skip("should send a conclude, push outcome, and transfer all transaction", async () => {
+  it("should send a conclude, push outcome, and transfer all transaction", async () => {
     const channelNonce = getNextNonce();
     const channel: Channel = {
       channelNonce,
