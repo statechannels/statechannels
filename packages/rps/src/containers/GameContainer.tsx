@@ -30,7 +30,6 @@ interface GameProps {
   conclude: () => void;
 }
 
-// TODO: Add wallet from wallet package
 function GameContainer(props: GameProps) {
   return <Fragment>{RenderGame(props)}</Fragment>;
 }
@@ -121,7 +120,7 @@ const mapStateToProps = (state: SiteState) => ({
 const mapDispatchToProps = {
   chooseWeapon: gameActions.chooseWeapon,
   playAgain: gameActions.playAgain,
-  cancelOpenGame: gameActions.cancelGame, // TODO create this action!
+  cancelOpenGame: gameActions.cancelGame,
   conclude: gameActions.resign,
 };
 
