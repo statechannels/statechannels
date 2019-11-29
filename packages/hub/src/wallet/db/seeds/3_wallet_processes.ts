@@ -1,5 +1,5 @@
-import {EmbeddedProtocol} from '@statechannels/wallet/lib/src/communication';
 import {Model} from 'objection';
+import {EmbeddedProtocol} from '../../../constants';
 import {PARTICIPANT_1_ADDRESS} from '../../../test/test-constants';
 import WalletProcess from '../../models/WalletProcess';
 import knex from '../connection';
