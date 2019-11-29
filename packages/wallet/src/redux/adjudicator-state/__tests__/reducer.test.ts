@@ -53,24 +53,6 @@ describe("adjudicator state reducer", () => {
     });
   });
 
-  describe("when a funding received event is received", () => {
-    const action = actions.fundingReceivedEvent({
-      processId: "processId",
-      protocolLocator: [],
-      channelId,
-      totalForDestination: "0x06",
-      amount: "0x5"
-    });
-    const updatedState = adjudicatorStateReducer(state, action);
-    it("sets the balance", () => {
-      expect(updatedState[channelId].balance).toEqual("0x06");
-    });
-    const secondUpdatedState = adjudicatorStateReducer(state, action);
-    it("handles a duplicate funding event", () => {
-      expect(secondUpdatedState[channelId].balance).toEqual("0x06");
-    });
-  });
-
   describe("when a challenge expired event is received", () => {
     // tslint:disable-next-line: no-shadowed-variable
     const state = {

@@ -1,8 +1,8 @@
 import {Bytes} from 'fmg-core';
+import {State} from '@statechannels/nitro-protocol';
 import {queries} from './db/queries/channels';
 import {formResponse, nextState, validSignature} from './services/channelManager';
 
-import {State} from '@statechannels/nitro-protocol';
 import errors from './errors';
 import {getApplications} from './services/applicationManager';
 import {updateLedgerChannel} from './services/ledgerChannelManager';

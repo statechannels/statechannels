@@ -33,7 +33,7 @@ export const BEGINNING_APP_CHANNEL_HOLDINGS = '0x05';
 export const ONGOING_APP_NONCE = '5';
 export const ONGOING_APP_CHANNEL_HOLDINGS = '0x08';
 
-// just choose big numbers that won't be hit in seeding
+// Just choose big numbers that won't be hit in seeding
 export const NONCE = '1000';
 
 export const DUMMY_CHAIN_ID = '8888';

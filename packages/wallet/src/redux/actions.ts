@@ -143,7 +143,6 @@ export interface ChannelUpdate {
   type: "WALLET.ADJUDICATOR.CHANNEL_UPDATE";
   channelId: string;
   isFinalized: boolean;
-  balance: string;
 }
 // -------
 // Constructors
@@ -238,7 +237,6 @@ export type AdjudicatorEventAction =
   | ConcludedEvent
   | RefutedEvent
   | RespondWithMoveEvent
-  | FundingReceivedEvent
   | ChallengeExpiredEvent
   | ChallengeCreatedEvent
   | ChallengeClearedEvent

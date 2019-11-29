@@ -8,7 +8,7 @@ const fs = require('fs');
 const appDirectory = fs.realpathSync(process.cwd());
 const resolveApp = relativePath => path.resolve(appDirectory, relativePath);
 
-// config after eject: we're in ./config/
+// Config after eject: we're in ./config/
 module.exports = {
-  dotenv: resolveApp('.env'),
+  dotenv: resolveApp('.env')
 };

@@ -2,8 +2,8 @@ import * as Knex from 'knex';
 
 const TABLE_NAME = 'channels';
 
-exports.up = (knex: Knex) => {
-  return knex.schema.createTable(TABLE_NAME, table => {
+exports.up = (knex: Knex) =>
+  knex.schema.createTable(TABLE_NAME, table => {
     table.increments();
     table
       .string('channel_nonce')
@@ -14,6 +14,5 @@ exports.up = (knex: Knex) => {
     // TODO: Store participants on this table as an array, and add
     // uniqueness on [nonce, participants]
   });
-};
 
 exports.down = (knex: Knex) => knex.schema.dropTable(TABLE_NAME);

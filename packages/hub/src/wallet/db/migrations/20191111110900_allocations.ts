@@ -3,8 +3,8 @@ import {addBytesCheck} from '../utils';
 
 const TABLE_NAME = 'allocations';
 
-exports.up = (knex: Knex) => {
-  return knex.schema
+exports.up = (knex: Knex) =>
+  knex.schema
     .createTable(TABLE_NAME, table => {
       table.increments();
       table
@@ -24,9 +24,6 @@ exports.up = (knex: Knex) => {
 
       table.unique(['outcome_id', 'priority']);
     })
-    .then(() => {
-      return addBytesCheck(knex, TABLE_NAME, 'destination');
-    });
-};
+    .then(() => addBytesCheck(knex, TABLE_NAME, 'destination'));
 
 exports.down = (knex: Knex) => knex.schema.dropTable(TABLE_NAME);

@@ -46,15 +46,13 @@ contract RockPaperScissors is ForceMoveApp {
     * @dev Encodes the RPS update rules.
     * @param fromPart State being transitioned from.
     * @param toPart State being transitioned to.
-    * @param turnNumB Turn number being transitioned to.
-    * @param nParticipants Number of participants in this state channel.
     * @return true if the transition conforms to the rules, false otherwise.
     */
     function validTransition(
         VariablePart memory fromPart,
         VariablePart memory toPart,
-        uint256 turnNumB,
-        uint256 nParticipants
+        uint256, /* turnNumB */
+        uint256  /* nParticipants */
     ) public pure returns (bool) {
         Outcome.AllocationItem[] memory fromAllocation = extractAllocation(fromPart);
         Outcome.AllocationItem[] memory toAllocation = extractAllocation(toPart);

@@ -4,6 +4,7 @@ import { createGame, chooseWeapon, playAgain, resign, joinOpenGame } from '../ga
 import { bigNumberify } from 'ethers/utils';
 import { Weapon } from '../../core';
 import { OpenGame } from '../open-games/state';
+import { WeiPerEther } from 'ethers/constants';
 
 // The auto-player simulates the actions of the user in an RPS game.
 //
@@ -43,7 +44,7 @@ function* autoPlayerBRun() {
 
   switch (localState.type) {
     case 'Lobby':
-      yield put(createGame(bigNumberify(1).toString()));
+      yield put(createGame(WeiPerEther.toString()));
       break;
     case 'ChooseWeapon':
       yield put(chooseWeapon(Weapon.Rock));

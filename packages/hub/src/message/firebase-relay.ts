@@ -61,7 +61,7 @@ if (require.main === module) {
   listen();
 }
 
-// todo: refactor to comply with new wallet messaging
+// Todo: refactor to comply with new wallet messaging
 function initializeStateArraysFromFirebase(payload) {
   const arraysToInitialize = ['allocation'];
   for (const arrayToInitialize of arraysToInitialize) {

@@ -8,8 +8,8 @@ export function seed() {
   // Deletes ALL existing entries
   return knex('rules')
     .del()
-    .then(() => {
-      return Rule.query().insert([
+    .then(() =>
+      Rule.query().insert([
         {
           address: DUMMY_RULES_ADDRESS,
           name: "DUMMY GAME -- DON'T PLAY"
@@ -18,6 +18,6 @@ export function seed() {
           address: '0x311596fD021E5B5fE759EA715AFd53EB0857F436',
           name: 'ConsensusApp'
         }
-      ]);
-    });
+      ])
+    );
 }
