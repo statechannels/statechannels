@@ -138,11 +138,8 @@ export const directFundingStateReducer: DFReducer = (
   sharedData: SharedData,
   action: actions.WalletAction
 ): ProtocolStateWithSharedData<states.DirectFundingState> => {
-  if (
-    action.type === "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT" &&
-    action.channelId === state.channelId
-  ) {
-    if (bigNumberify(action.totalForDestination).gte(state.totalFundingRequired)) {
+  if (action.type === "WALLET.ASSET_HOLDER.DEPOSITED" && action.destination === state.channelId) {
+    if (bigNumberify(action.destinationHoldings).gte(state.totalFundingRequired)) {
       return fundingConfirmedReducer(state, sharedData, action);
     }
   }
@@ -184,10 +181,10 @@ const notSafeToDepositReducer: DFReducer = (
   action: actions.WalletAction
 ): ProtocolStateWithSharedData<states.DirectFundingState> => {
   switch (action.type) {
-    case "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT":
+    case "WALLET.ASSET_HOLDER.DEPOSITED":
       if (
-        action.channelId === state.channelId &&
-        bigNumberify(action.totalForDestination).gte(state.safeToDepositLevel)
+        action.destination === state.channelId &&
+        bigNumberify(action.destinationHoldings).gte(state.safeToDepositLevel)
       ) {
         const existingChannelFunding = "0x0"; // FIXME: The wallet has no way of determining funding levels atm
         const depositTransaction = createETHDepositTransaction(
@@ -221,7 +218,7 @@ const waitForDepositTransactionReducer: DFReducer = (
   sharedData: SharedData,
   action: actions.WalletAction
 ): ProtocolStateWithSharedData<states.DirectFundingState> => {
-  if (action.type === "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT") {
+  if (action.type === "WALLET.ASSET_HOLDER.DEPOSITED") {
     return {protocolState: {...protocolState, funded: true}, sharedData};
   }
   if (!isTransactionAction(action)) {
@@ -265,8 +262,8 @@ const channelFundedReducer: DFReducer = (
   sharedData: SharedData,
   action: actions.WalletAction
 ): ProtocolStateWithSharedData<states.DirectFundingState> => {
-  if (action.type === "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT") {
-    if (bigNumberify(action.totalForDestination).lt(state.totalFundingRequired)) {
+  if (action.type === "WALLET.ASSET_HOLDER.DEPOSITED") {
+    if (bigNumberify(action.destinationHoldings).lt(state.totalFundingRequired)) {
       // TODO: Deal with chain re-orgs that de-fund the channel here
       return {protocolState: state, sharedData};
     }

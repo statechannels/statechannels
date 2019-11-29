@@ -11,11 +11,12 @@ export interface AssetTransferredEvent {
   amount: BigNumber;
 }
 
-export function getDepositedEvent(eventResult): DepositedEvent {
-  const args = eventResult.eventArgs;
-  const destination = args[0];
-  const amountDeposited = args[1];
-  const destinationHoldings = args[2];
+export function getDepositedEvent({eventArgs}): DepositedEvent {
+  const [
+    {
+      args: {destination, amountDeposited, destinationHoldings},
+    },
+  ] = eventArgs.slice(-1);
 
   return {
     destination,
@@ -24,10 +25,15 @@ export function getDepositedEvent(eventResult): DepositedEvent {
   };
 }
 
-export function getAssetTransferredEvent(eventResult): AssetTransferredEvent {
-  const args = eventResult.eventArgs;
+export function getAssetTransferredEvent({eventArgs}): AssetTransferredEvent {
+  const [
+    {
+      args: {destination, amount},
+    },
+  ] = eventArgs.slice(-1);
+
   return {
-    destination: args[0],
-    amount: bigNumberify(args[1]),
+    destination,
+    amount: bigNumberify(amount),
   };
 }

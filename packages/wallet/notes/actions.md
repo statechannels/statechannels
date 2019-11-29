@@ -20,7 +20,7 @@ subgraph AdjudicatorEventAction
 AdjudicatorEventAction --> WALLET.ADJUDICATOR.CONCLUDED_EVENT
 AdjudicatorEventAction --> WALLET.ADJUDICATOR.REFUTED_EVENT
 AdjudicatorEventAction --> WALLET.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT
-AdjudicatorEventAction --> WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT
+AdjudicatorEventAction --> WALLET.ASSET_HOLDER.DEPOSITED
 AdjudicatorEventAction --> WALLET.ADJUDICATOR.CHALLENGE_EXPIRED_EVENT
 AdjudicatorEventAction --> WALLET.ADJUDICATOR.CHALLENGE_EXPIRY_SET_EVENT;
 end
@@ -118,7 +118,7 @@ ResponderAction --> WALLET.DISPUTE.RESPONDER.ACKNOWLEDGED
 end
 
 subgraph DirectFundingAction
-DirectFundingAction --> WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT
+DirectFundingAction --> WALLET.ASSET_HOLDER.DEPOSITED
 DirectFundingAction --> WALLET.DIRECT_FUNDING.DIRECT_FUNDING_REQUESTED
 DirectFundingAction --> WALLET.COMMON.SIGNED_STATES_RECEIVED
 DirectFundingAction --> TransactionAction

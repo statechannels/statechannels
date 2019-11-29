@@ -93,7 +93,7 @@ export const getAdjudicatorChannelState = (state: SharedData, channelId: string)
   return getAdjudicatorState(state)[channelId];
 };
 
-export const getETHAssetHolderWatcherSubscribersForChannel = (
+export const getAssetHolderWatcherSubscribersForChannel = (
   state: walletStates.Initialized,
   channelId: string
 ): walletStates.ChannelSubscriber[] => {

@@ -7,9 +7,10 @@ import * as advanceChannelScenarios from "../../advance-channel/__tests__";
 import * as states from "../states";
 import {SharedData} from "../../../state";
 import {ETH_ASSET_HOLDER_ADDRESS} from "../../../../constants";
+import {bigNumberify} from "ethers/utils";
 
 const {threeWayLedgerId: channelId, twoThree} = scenarios;
-
+export const assetHolderAddress = "0x0";
 export const YOUR_DEPOSIT_A = twoThree[0].wei;
 export const YOUR_DEPOSIT_B = twoThree[1].wei;
 export const TOTAL_REQUIRED = addHex(twoThree[0].wei, twoThree[1].wei);
@@ -40,18 +41,21 @@ const defaultsForB = {
 
 // actions
 
-const aFundingReceivedEvent = globalActions.fundingReceivedEvent({
+const aDepositedEvent = globalActions.depositedEvent({
   processId,
-  channelId,
-  amount: YOUR_DEPOSIT_A,
-  totalForDestination: YOUR_DEPOSIT_A,
+  assetHolderAddress,
+  destination: channelId,
+  amountDeposited: bigNumberify(YOUR_DEPOSIT_A),
+  destinationHoldings: bigNumberify(YOUR_DEPOSIT_A),
   protocolLocator: []
 });
-const bFundingReceivedEvent = globalActions.fundingReceivedEvent({
+
+const bDepositedEvent = globalActions.depositedEvent({
   processId,
-  channelId,
-  amount: YOUR_DEPOSIT_B,
-  totalForDestination: TOTAL_REQUIRED,
+  assetHolderAddress,
+  destination: channelId,
+  amountDeposited: bigNumberify(YOUR_DEPOSIT_B),
+  destinationHoldings: bigNumberify(TOTAL_REQUIRED),
   protocolLocator: []
 });
 
@@ -75,7 +79,7 @@ export const aHappyPath = {
   waitForFunding: {
     state: states.waitForFunding(defaultsForA),
     sharedData: sharedData(),
-    action: bFundingReceivedEvent
+    action: bDepositedEvent
   }
 };
 
@@ -83,7 +87,7 @@ export const bHappyPath = {
   initialize: {...defaultsForB, sharedData: sharedData()},
   notSafeToDeposit: {
     state: states.notSafeToDeposit(defaultsForB),
-    action: aFundingReceivedEvent,
+    action: aDepositedEvent,
     sharedData: sharedData()
   },
   waitForDepositTransaction: {
@@ -97,7 +101,7 @@ export const bHappyPath = {
   waitForFunding: {
     state: states.waitForFunding(defaultsForB),
     sharedData: sharedData(),
-    action: bFundingReceivedEvent
+    action: bDepositedEvent
   }
 };
 
@@ -132,7 +136,7 @@ export const fundsReceivedArrivesEarly = {
       transactionSubmissionState: transactionSubmissionScenarios.preSuccessState
     }),
     sharedData: sharedData(),
-    action: aFundingReceivedEvent
+    action: aDepositedEvent
   },
   waitForDepositTransactionFunded: {
     state: states.waitForDepositTransaction({
@@ -147,6 +151,6 @@ export const fundsReceivedArrivesEarly = {
   waitForFunding: {
     state: states.waitForFunding(defaultsForA),
     sharedData: sharedData(),
-    action: bFundingReceivedEvent
+    action: bDepositedEvent
   }
 };

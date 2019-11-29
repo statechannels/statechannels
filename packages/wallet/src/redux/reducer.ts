@@ -15,7 +15,7 @@ import * as communication from "../communication";
 import * as closeLedgerChannelProtocol from "./protocols/close-ledger-channel";
 import _ from "lodash";
 import {Wallet} from "ethers";
-import { assetHolderStateReducer } from "./asset-holders-state/reducer";
+import {assetHolderStateReducer} from "./asset-holders-state/reducer";
 
 // If we're generating the initial state then we need to create a new key for the user
 const {address, privateKey} = Wallet.createRandom();

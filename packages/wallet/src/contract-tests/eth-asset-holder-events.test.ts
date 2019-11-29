@@ -45,7 +45,7 @@ describe("ETHAssetHolder listener", () => {
 
     const processId = ethers.Wallet.createRandom().address;
 
-    const sagaTester = new SagaTester({initialState: createWatcherState(processId)});
+    const sagaTester = new SagaTester({initialState: createWatcherState(processId, channelId)});
     sagaTester.start(ETHAssetHolderWatcher, provider);
 
     const depositAmount = bigNumberify("0x05");

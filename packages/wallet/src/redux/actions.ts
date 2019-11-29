@@ -64,6 +64,8 @@ export interface AssetTransferredEvent {
 
 export interface DepositedEvent {
   type: "WALLET.ASSET_HOLDER.DEPOSITED";
+  processId: string;
+  protocolLocator: ProtocolLocator;
   assetHolderAddress: string;
   // This is either a `channelId` or an external destination (both bytes32).
   destination: string;
@@ -120,15 +122,6 @@ export interface RespondWithMoveEvent {
   channelId: string;
   signedResponseState: SignedState;
   type: "WALLET.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT";
-}
-
-export interface FundingReceivedEvent {
-  type: "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT";
-  processId: string;
-  protocolLocator: ProtocolLocator;
-  channelId: string;
-  amount: string;
-  totalForDestination: string;
 }
 
 export interface ChallengeExpiredEvent {
@@ -216,10 +209,6 @@ export const respondWithMoveEvent: ActionConstructor<RespondWithMoveEvent> = p =
   ...p,
   type: "WALLET.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT"
 });
-export const fundingReceivedEvent: ActionConstructor<FundingReceivedEvent> = p => ({
-  ...p,
-  type: "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT"
-});
 export const challengeExpiredEvent: ActionConstructor<ChallengeExpiredEvent> = p => ({
   ...p,
   type: "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED"
@@ -295,7 +284,6 @@ export function isAdjudicatorEventAction(action: WalletAction): action is Adjudi
     action.type === "WALLET.ADJUDICATOR.CONCLUDED_EVENT" ||
     action.type === "WALLET.ADJUDICATOR.REFUTED_EVENT" ||
     action.type === "WALLET.ADJUDICATOR.RESPOND_WITH_MOVE_EVENT" ||
-    action.type === "WALLET.ADJUDICATOR.FUNDING_RECEIVED_EVENT" ||
     action.type === "WALLET.ADJUDICATOR.CHALLENGE_EXPIRED" ||
     action.type === "WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT" ||
     action.type === "WALLET.ADJUDICATOR.CHALLENGE_CLEARED_EVENT" ||
