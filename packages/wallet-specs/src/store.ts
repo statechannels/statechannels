@@ -1,4 +1,3 @@
-import { keys } from 'xstate/lib/utils';
 import {
   add,
   Allocation,
@@ -14,13 +13,14 @@ interface IStore {
   getLatestSupport: (channelID: string) => SignedState[]; //  Used for application channels, which would typically have multiple states in its support
   getLatestSupportedAllocation: (channelID: string) => Allocation;
   getEntry: (channelID: string) => ChannelStoreEntry;
+  getIndex: (channelId: string) => 0 | 1;
 
   // The channel store should garbage collect stale states on CHANNEL_UPDATED events.
   // If a greater state becomes supported on such an event, it should replace the latest
   // supported state, and remove any lesser, unsupported states.
   getUnsupportedStates: (channelID: string) => SignedState[];
 
-  findLedgerChannelId: (targetChannelId: string) => string | undefined;
+  findLedgerChannelId: (participants: string[]) => string | undefined;
 
   signedByMe: (state: State) => boolean;
   sendState: (state: State) => void;
@@ -86,8 +86,18 @@ export class Store implements IStore {
     return this._store[channelID];
   }
 
-  public findLedgerChannelId(targetChannelId: string): string | undefined {
-    const participantIds = this.participantIds(targetChannelId);
+  public getIndex(channelId: string): 0 | 1 {
+    const entry = this.getEntry(channelId);
+    const { participants } = entry.supportedState[0].state.channel;
+    if (participants.length !== 2) {
+      throw new Error('Assumes two participants');
+    }
+
+    const ourAddress = `addressFrom${entry.privateKey}`;
+    return participants.indexOf(ourAddress) as 0 | 1;
+  }
+
+  public findLedgerChannelId(participantIds: string[]): string | undefined {
     for (const channelId in this._store) {
       const entry = this.getEntry(channelId);
       if (
@@ -261,6 +271,7 @@ export type StoreEvent = ChannelUpdated | Deposit;
 export const store = new Store();
 
 export function isAllocation(outcome: Outcome): outcome is Allocation {
+  // TODO: This should sometimes be isEthAllocation
   if ('target' in outcome) {
     throw new Error('Not an allocation');
   }
