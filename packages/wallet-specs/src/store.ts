@@ -13,13 +13,13 @@ interface IStore {
   getLatestConsensus: (channelID: string) => SignedState; // Used for null channels, whose support must be a single state
   getLatestSupport: (channelID: string) => SignedState[]; //  Used for application channels, which would typically have multiple states in its support
   getLatestSupportedAllocation: (channelID: string) => Allocation;
+  getEntry: (channelID: string) => ChannelStoreEntry;
 
   // The channel store should garbage collect stale states on CHANNEL_UPDATED events.
   // If a greater state becomes supported on such an event, it should replace the latest
   // supported state, and remove any lesser, unsupported states.
   getUnsupportedStates: (channelID: string) => SignedState[];
 
-  getEntry: (channelID: string) => ChannelStoreEntry;
   findLedgerChannelId: (targetChannelId: string) => string | undefined;
 
   signedByMe: (state: State) => boolean;

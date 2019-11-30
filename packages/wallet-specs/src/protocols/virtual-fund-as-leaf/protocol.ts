@@ -1,3 +1,4 @@
+import { assign } from 'xstate';
 import {
   add,
   AllocationItem,
@@ -5,6 +6,7 @@ import {
   Channel,
   getChannelID,
   Guarantee,
+  store,
 } from '../../';
 import { saveConfig } from '../../utils';
 import { Init as CreateNullChannelArgs } from '../create-null-channel/protocol';
@@ -25,10 +27,33 @@ export interface Init {
   index: Indices.Left | Indices.Right;
 }
 
-const initial = {
-  invoke: 'assignChannels',
-  onDone: 'createChannels',
-};
+export const assignChannels = assign(
+  (init: Init): ChannelsKnown => {
+    const { hubAddress, targetChannelId, index } = init;
+    const participants = store
+      .getEntry(targetChannelId)
+      .participants.map(p => p.destination);
+    const jointParticipants = [participants[0], hubAddress, participants[1]];
+    const jointChannel: Channel = {
+      participants: jointParticipants,
+      channelNonce: store.getNextNonce(jointParticipants),
+      chainId: 'TODO',
+    };
+
+    const guarantorParticipants = [participants[index], hubAddress];
+    const guarantorChannel: Channel = {
+      participants: guarantorParticipants,
+      channelNonce: store.getNextNonce(guarantorParticipants),
+      chainId: 'TODO',
+    };
+
+    return {
+      ...init,
+      jointChannel,
+      guarantorChannel,
+    };
+  }
+);
 
 export type ChannelsKnown = Init & {
   jointChannel: Channel;
@@ -92,6 +117,7 @@ export function fundGuarantorArgs({
   };
 }
 const createChannels = {
+  entry: 'assignChannels',
   type: 'parallel',
   states: {
     createGuarantorChannel,
@@ -119,9 +145,8 @@ const fundTarget = {
 // PROTOCOL DEFINITION
 const config = {
   key: PROTOCOL,
-  initial: 'initial',
+  initial: 'createChannels',
   states: {
-    initial,
     createChannels,
     fundGuarantor,
     fundTarget,
