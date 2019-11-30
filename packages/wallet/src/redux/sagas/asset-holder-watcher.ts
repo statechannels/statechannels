@@ -8,6 +8,7 @@ import {getETHAssetHolderContract, getERC20AssetHolderContract} from "../../util
 import {getAssetHolderWatcherSubscribersForChannel} from "../selectors";
 import {ChannelSubscriber} from "../state";
 import {ProtocolLocator} from "../../communication";
+import {Web3Provider} from "ethers/providers";
 
 enum AssetHolderEventType {
   AssetTransferred,
@@ -20,7 +21,7 @@ interface AssetHolderEvent {
   eventType: AssetHolderEventType;
 }
 
-export function* ETHAssetHolderWatcher(provider) {
+export function* ETHAssetHolderWatcher(provider: Web3Provider) {
   const ETHAssetHolderEventChannel = yield call(createAssetHolderEventChannel, provider);
   while (true) {
     const event: AssetHolderEvent = yield take(ETHAssetHolderEventChannel);
@@ -97,7 +98,7 @@ function* dispatchProcessEventAction(
   }
 }
 
-function* createAssetHolderEventChannel(provider) {
+function* createAssetHolderEventChannel(provider: Web3Provider) {
   const ETHAssetHolder: Contract = yield call(getETHAssetHolderContract, provider);
   const ERC20AssetHolder: Contract = yield call(getERC20AssetHolderContract, provider);
 

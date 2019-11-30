@@ -1,8 +1,9 @@
 import NetworkContext from "@statechannels/ganache-deployer/ganache-network-context.json";
-import {ethers} from "ethers";
+import {Contract} from "ethers";
 import {AddressZero} from "ethers/constants";
 import log from "loglevel";
-import { Provider } from "ethers/providers";
+import {Web3Provider} from "ethers/providers";
+import { Interface } from "ethers/utils";
 
 log.setDefaultLevel(log.levels.DEBUG);
 
@@ -28,41 +29,35 @@ export function getContractABI(contractName: string): string {
   );
 }
 
-export async function getProvider(): Promise<ethers.providers.Web3Provider> {
-  return await new ethers.providers.Web3Provider(web3.currentProvider);
+export function getProvider(): Web3Provider {
+  return new Web3Provider(web3.currentProvider);
 }
 
-export async function getAdjudicatorContract(provider) {
-  await provider.ready;
-
+export async function getAdjudicatorContract(provider: Web3Provider) {
   const contractAddress = getContractAddress("NitroAdjudicator");
-  return new ethers.Contract(contractAddress, getAdjudicatorInterface(), provider);
+  return new Contract(contractAddress, getAdjudicatorInterface(), provider);
 }
 
-export async function getETHAssetHolderContract(provider) {
-  await provider.ready;
-
+export async function getETHAssetHolderContract(provider: Web3Provider) {
   const contractAddress = getContractAddress("ETHAssetHolder");
-  return new ethers.Contract(contractAddress, getETHAssetHolderInterface(), provider);
+  return new Contract(contractAddress, getETHAssetHolderInterface(), provider);
 }
 
-export async function getERC20AssetHolderContract(provider) {
-  await provider.ready;
-
+export async function getERC20AssetHolderContract(provider: Web3Provider) {
   const contractAddress = getContractAddress("ERC20AssetHolder");
-  return new ethers.Contract(contractAddress, getERC20AssetHolderInterface(), provider);
+  return new Contract(contractAddress, getERC20AssetHolderInterface(), provider);
 }
 
-export function getAdjudicatorInterface(): ethers.utils.Interface {
-  return new ethers.utils.Interface(getContractABI("NitroAdjudicator"));
+export function getAdjudicatorInterface(): Interface {
+  return new Interface(getContractABI("NitroAdjudicator"));
 }
 
-export function getETHAssetHolderInterface(): ethers.utils.Interface {
-  return new ethers.utils.Interface(getContractABI("ETHAssetHolder"));
+export function getETHAssetHolderInterface(): Interface {
+  return new Interface(getContractABI("ETHAssetHolder"));
 }
 
-export function getERC20AssetHolderInterface(): ethers.utils.Interface {
-  return new ethers.utils.Interface(getContractABI("ERC20AssetHolder"));
+export function getERC20AssetHolderInterface(): Interface {
+  return new Interface(getContractABI("ERC20AssetHolder"));
 }
 
 // FIXME: The tests ought to be able to run even without contracts having been built which
@@ -135,17 +130,17 @@ export function isDevelopmentNetwork(): boolean {
   );
 }
 
-export async function getAdjudicatorChannelStorageHash(provider: Provider, channelId: string) {
+export async function getAdjudicatorChannelStorageHash(provider: Web3Provider, channelId: string) {
   const contract = await getAdjudicatorContract(provider);
   return await contract.channelStorageHashes(channelId);
 }
 
-export async function getETHAssetHolderHoldings(provider, channelId) {
+export async function getETHAssetHolderHoldings(provider: Web3Provider, channelId: string) {
   const contract = await getETHAssetHolderContract(provider);
   return await contract.functions.holdings(channelId);
 }
 
-export async function getERC20AssetHolderHoldings(provider, channelId) {
+export async function getERC20AssetHolderHoldings(provider: Web3Provider, channelId: string) {
   const contract = await getERC20AssetHolderContract(provider);
   return await contract.functions.holdings(channelId);
 }
