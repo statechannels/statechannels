@@ -1,7 +1,8 @@
 const config = {
   key: 'virtual-funding-as-leaf',
-  initial: 'createChannels',
+  initial: 'initial',
   states: {
+    initial: { invoke: 'assignChannels', onDone: 'createChannels' },
     createChannels: {
       type: 'parallel',
       states: {

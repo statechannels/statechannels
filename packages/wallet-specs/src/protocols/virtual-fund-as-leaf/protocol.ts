@@ -21,16 +21,24 @@ export interface Init {
   balances: Balance[];
   ledgerId: string;
   targetChannelId: string;
-  jointChannel: Channel;
-  guarantorChannel: Channel;
+  hubAddress: string;
   index: Indices.Left | Indices.Right;
 }
 
+const initial = {
+  invoke: 'assignChannels',
+  onDone: 'createChannels',
+};
+
+export type ChannelsKnown = Init & {
+  jointChannel: Channel;
+  guarantorChannel: Channel;
+};
 const total = (balances: Balance[]) => balances.map(b => b.wei).reduce(add);
 export function jointChannelArgs({
   balances,
   jointChannel,
-}: Init): CreateNullChannelArgs {
+}: ChannelsKnown): CreateNullChannelArgs {
   const allocation: (i: Indices) => AllocationItem = i => ({
     destination: balances[i].address,
     amount: balances[i].wei,
@@ -52,7 +60,10 @@ const createJointChannel = {
   },
 };
 
-export function guarantorChannelArgs({ jointChannel, index }: Init): Guarantee {
+export function guarantorChannelArgs({
+  jointChannel,
+  index,
+}: ChannelsKnown): Guarantee {
   const { participants } = jointChannel;
 
   return {
@@ -73,7 +84,7 @@ export function fundGuarantorArgs({
   guarantorChannel,
   ledgerId,
   balances,
-}: Init): SupportStateArgs {
+}: ChannelsKnown): SupportStateArgs {
   const amount = total(balances);
   return {
     channelID: ledgerId,
@@ -108,8 +119,9 @@ const fundTarget = {
 // PROTOCOL DEFINITION
 const config = {
   key: PROTOCOL,
-  initial: 'createChannels',
+  initial: 'initial',
   states: {
+    initial,
     createChannels,
     fundGuarantor,
     fundTarget,
