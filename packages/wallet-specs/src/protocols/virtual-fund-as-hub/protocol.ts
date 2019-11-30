@@ -1,4 +1,5 @@
-import { Balance, Channel } from '../../';
+import { assign } from 'xstate';
+import { Balance, Channel, store } from '../../';
 import { saveConfig } from '../../utils';
 
 const PROTOCOL = 'virtual-funding-as-hub';
@@ -13,14 +14,51 @@ the args here.
 */
 export interface Init {
   balances: Balance[];
-  jointChannel: Channel;
   targetChannelId: string;
   leftLedgerId: string;
-  leftGuarantorChannel: Channel;
   rightLedgerId: string;
-  rightGuarantorChannel: Channel;
 }
 
+type ChannelsKnown = Init & {
+  jointChannel: Channel;
+  leftGuarantorChannel: Channel;
+  rightGuarantorChannel: Channel;
+};
+
+export const assignChannels = assign(
+  (init: Init): ChannelsKnown => {
+    const { leftLedgerId, rightLedgerId, targetChannelId } = init;
+    const { channel: leftLedgerChannel } = store.getLatestState(leftLedgerId);
+    const { channel: rightLedgerChannel } = store.getLatestState(rightLedgerId);
+
+    const jointParticipants = [
+      ...leftLedgerChannel.participants,
+      rightLedgerChannel.participants[1],
+    ];
+    const jointChannel: Channel = {
+      participants: jointParticipants,
+      channelNonce: store.getNextNonce(jointParticipants),
+      chainId: 'TODO',
+    };
+
+    const leftGuarantorChannel: Channel = {
+      ...leftLedgerChannel,
+      channelNonce: store.getNextNonce(leftLedgerChannel.participants),
+    };
+
+    const rightGuarantorChannel: Channel = {
+      ...rightLedgerChannel,
+      channelNonce: store.getNextNonce(rightLedgerChannel.participants),
+    };
+
+    return {
+      ...init,
+      jointChannel,
+      leftGuarantorChannel,
+      rightGuarantorChannel,
+    };
+  }
+);
 const createJointChannel = {
   invoke: {
     src: 'createNullChannel',
@@ -43,6 +81,7 @@ const createRightGuarantorChannel = {
 };
 
 const createChannels = {
+  entry: 'assignChannels',
   type: 'parallel',
   states: {
     createLeftGuarantorChannel,

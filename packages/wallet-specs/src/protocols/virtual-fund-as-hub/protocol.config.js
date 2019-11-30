@@ -3,6 +3,7 @@ const config = {
   initial: 'createChannels',
   states: {
     createChannels: {
+      entry: 'assignChannels',
       type: 'parallel',
       states: {
         createLeftGuarantorChannel: {
