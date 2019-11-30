@@ -47,8 +47,7 @@ const moduleFileExtensions = [
   "tsx",
   "json",
   "web.jsx",
-  "jsx",
-  "wasm"
+  "jsx"
 ];
 
 // Resolve file paths in the same order as webpack
@@ -79,7 +78,6 @@ module.exports = {
   testsSetup: resolveModule(resolveApp, "src/setupTests"),
   proxySetup: resolveApp("src/setupProxy.js"),
   appNodeModules: resolveApp("node_modules"),
-  pureEVM: resolveApp("../../node_modules/pure-evm/pure-evm_bg.wasm"),
   publicUrl: getPublicUrl(resolveApp("package.json")),
   servedPath: getServedPath(resolveApp("package.json"))
 };
