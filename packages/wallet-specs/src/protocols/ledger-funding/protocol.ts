@@ -42,7 +42,13 @@ const lookForExistingChannel = {
 const createNullChannelArgs: (ctx: Init) => CreateNullChannelArgs = ({
   targetChannelID,
 }: Init) => {
-  const { channel, outcome } = store.getLatestState(targetChannelID);
+  const { channel: targetChannel, outcome } = store.getLatestState(
+    targetChannelID
+  );
+  const channel = {
+    ...targetChannel,
+    channelNonce: store.getNextNonce(targetChannel.participants),
+  };
   return { channel, outcome };
 };
 
