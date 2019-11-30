@@ -62,7 +62,7 @@ describe('validTransition', () => {
 
     expect(
       // Use the helper function, which accepts States instead of VariableParts
-      validTransition(fromState, toState, TrivialAppArtifact.bytecode)
+      await validTransition(fromState, toState, trivialApp)
     ).toBe(true);
   });
 });

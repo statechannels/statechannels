@@ -1,14 +1,9 @@
-import {Buffer} from 'buffer';
-import {Interface, defaultAbiCoder} from 'ethers/utils';
-
+import {Contract, Signer} from 'ethers';
+import {Interface} from 'ethers/utils';
 import ConsensusAppArtifact from '../../build/contracts/ConsensusApp.json';
-
 import {ConsensusData, encodeConsensusData} from './consensus-data';
 import {encodeOutcome, Outcome} from './outcome';
 import {VariablePart} from './state';
-
-let PureEVM;
-import(/* WebpackMode: "eager" */ 'pure-evm').then(x => (PureEVM = x));
 
 const ConsensusAppContractInterface = new Interface(ConsensusAppArtifact.abi);
 
@@ -17,32 +12,26 @@ export function getVariablePart(consensusData: ConsensusData, outcome: Outcome):
   return {appData, outcome: encodeOutcome(outcome)};
 }
 
-// ValidTransition is a pure function so using this method will not use gas
+// validTransition is a pure function so using this method will not use gas
 // This should be used over createValidTransitionTransaction
-export function validTransition(
+export async function validTransition(
   fromConsensusData: ConsensusData,
   fromOutcome: Outcome,
   toConsensusData: ConsensusData,
   toOutcome: Outcome,
-  numberOfParticipants: number
-): boolean {
+  numberOfParticipants: number,
+  signer: Signer,
+  contractAddress: string
+): Promise<boolean> {
   const fromVariablePart = getVariablePart(fromConsensusData, fromOutcome);
   const toVariablePart = getVariablePart(toConsensusData, toOutcome);
   const turnNumB = 0; // This isn't actually used by the contract so any value works
 
-  const iface = new Interface(ConsensusAppContractInterface.abi);
-
-  const txData = iface.functions.validTransition.encode([
+  const contract = new Contract(contractAddress, ConsensusAppContractInterface.abi, signer);
+  return await contract.functions.validTransition(
     fromVariablePart,
     toVariablePart,
     turnNumB,
-    numberOfParticipants,
-  ]);
-
-  const result = PureEVM.exec(
-    Uint8Array.from(Buffer.from(ConsensusAppArtifact.bytecode.substr(2), 'hex')),
-    Uint8Array.from(Buffer.from(txData.substr(2), 'hex'))
+    numberOfParticipants
   );
-
-  return defaultAbiCoder.decode(['bool'], result)[0] as boolean;
 }
