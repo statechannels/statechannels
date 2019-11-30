@@ -6,6 +6,22 @@ import '../AssetHolder.sol';
   * @dev This contract extends the AssetHolder contract to enable it to be more easily unit-tested. It exposes public or external functions that set storage variables or wrap otherwise internal functions. It should not be deployed in a production environment.
 */
 contract TESTAssetHolder is AssetHolder {
+    address AdjudicatorAddress;
+
+    /**
+    * @notice Constructor function storing the AdjudicatorAddress.
+    * @dev Constructor function storing the AdjudicatorAddress.
+    * @param _AdjudicatorAddress Address of an Adjudicator  contract, supplied at deploy-time.
+    */
+    constructor(address _AdjudicatorAddress) public {
+        AdjudicatorAddress = _AdjudicatorAddress;
+    }
+
+    modifier AdjudicatorOnly {
+        require(msg.sender == AdjudicatorAddress, 'Only the NitroAdjudicator is authorized');
+        _;
+    }
+
     // Public wrappers for internal methods:
 
     /**
