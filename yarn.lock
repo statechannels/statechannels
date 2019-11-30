@@ -11512,7 +11512,7 @@ ethers@4.0.39, ethers@^4.0.15, ethers@^4.0.26, ethers@^4.0.27, ethers@^4.0.39, e
 
 "ethers@git+https://github.com/LimeChain/ethers.js.git#master":
   version "4.0.29"
-  resolved "git+https://github.com/LimeChain/ethers.js.git#9cd9e35696e522a0930fcd4e0fe15180beb5bd0c"
+  resolved "git+https://github.com/LimeChain/ethers.js.git#13c82e89991c3cbe81c51d1ceec453a43dbb4415"
   dependencies:
     "@types/node" "^10.3.2"
     aes-js "3.0.0"
