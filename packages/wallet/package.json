@@ -31,7 +31,7 @@
     "test:ci": "yarn test:ci:contracts && yarn test:ci:app",
     "test:contracts": "npx jest --runInBand -c ./config/jest/jest.contracts.config.js --detectOpenHandles --bail",
     "test": "run-s 'test:app --all' 'test:contracts --all'",
-    "test:integration": "npx cypress open"
+    "test:integration": "npx ts-node ./puppeteer/funding.ts"
   },
   "dependencies": {
     "@firebase/app-types": "^0.3.2",
@@ -51,6 +51,7 @@
     "case-sensitive-paths-webpack-plugin": "2.1.1",
     "chalk": "2.4.2",
     "css-loader": "3.2.0",
+    "emittery": "0.5.1",
     "enum": "^2.5.0",
     "ethers": "4.0.39",
     "eventemitter2": "5.0.1",
@@ -94,7 +95,6 @@
   },
   "devDependencies": {
     "@babel/runtime": "7.6.2",
-    "@cypress/webpack-preprocessor": "4.1.1",
     "@statechannels/devtools": "0.1.21",
     "@statechannels/ganache-deployer": "^0.0.1",
     "@types/jest": "24.0.18",
@@ -103,6 +103,7 @@
     "@types/loglevel": "1.6.3",
     "@types/node": "^10.5.4",
     "@types/prop-types": "^15.5.4",
+    "@types/puppeteer": "2.0.0",
     "@types/react": "16.9.2",
     "@types/react-dom": "^16.0.6",
     "@types/react-redux": "^7.0.0",
@@ -117,7 +118,6 @@
     "babel-register": "6.26.0",
     "concurrently": "5.0.0",
     "copyfiles": "2.1.1",
-    "cypress": "3.6.1",
     "detect-port": "1.3.0",
     "dotenv-extended": "2.5.0",
     "enzyme": "3.10.0",
@@ -141,6 +141,7 @@
     "postcss-safe-parser": "4.0.1",
     "precss": "4.0.0",
     "prettier": "1.18.2",
+    "puppeteer": "2.0.0",
     "redux-mock-store": "1.5.3",
     "redux-saga-test-plan": "4.0.0-rc.3",
     "redux-saga-tester": "1.0.565",
