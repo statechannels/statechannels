@@ -34,6 +34,7 @@ async function setupContract(artifact: any) {
   }
 
   const networkContext = getNetworkContext();
+  // eslint-disable-next-line
   const contract = await ethAssetHolderFactory.attach(networkContext['ETHAssetHolder'].address);
 
   return contract;

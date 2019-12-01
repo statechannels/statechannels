@@ -7,7 +7,7 @@ const tokenArtifact = require("../build/contracts/Token.json");
 
 const {GanacheNCacheDeployer} = require("@statechannels/ganache-deployer");
 
-const deploy = async (_network, _secret, _etherscanApiKey) => {
+const deploy = async (network, secret, etherscanApiKey) => {
   const deployer = new GanacheNCacheDeployer(8547);
 
   await deployer.deploy(consensusAppArtifact);

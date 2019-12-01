@@ -1,6 +1,6 @@
 import fs from 'fs';
-import log from 'loglevel';
 import path from 'path';
+import log from 'loglevel';
 import {loadDeployments} from './deployer';
 export {GanacheNCacheDeployer} from './deployer';
 import {GanacheServer} from '@statechannels/devtools';
