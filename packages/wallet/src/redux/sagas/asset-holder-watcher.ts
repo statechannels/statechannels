@@ -1,7 +1,7 @@
 import {eventChannel} from "redux-saga";
 import {call, put, take, select} from "redux-saga/effects";
 import {Contract} from "ethers";
-import {getDepositedEvent} from "@statechannels/nitro-protocol";
+import {getDepositedEvent, getAssetTransferredEvent} from "@statechannels/nitro-protocol";
 
 import * as actions from "../actions";
 import {getETHAssetHolderContract, getERC20AssetHolderContract} from "../../utils/contract-utils";
@@ -33,33 +33,33 @@ export function* ETHAssetHolderWatcher(provider) {
         yield dispatchProcessEventAction(event, subscriber.processId, subscriber.protocolLocator);
       }
     }
-    // yield dispatchEventAction(event);
+    yield dispatchEventAction(event);
   }
 }
 
-// function* dispatchEventAction(event: AssetHolderEvent) {
-//   const {eventType} = event;
-//   switch (eventType) {
-//     case AssetHolderEventType.AssetTransferred:
-//       // FIXME: We need some new kind of technique for dealing with AssetTransferred situations
-//       // const assetTransferredEvent = getAssetTransferredEvent(event);
-//       // yield put(
-//       //   actions.assetTransferredEvent({
-//       //     destination: assetTransferredEvent.destination,
-//       //     amount: assetTransferredEvent.amount
-//       //   })
-//       // );
-//       break;
-//     case AssetHolderEventType.Deposited:
-//       break;
-//     default:
-//       throw new Error(
-//         `Event is not a known AssetHolderEvent. Cannot dispatch event action: ${JSON.stringify(
-//           event
-//         )}`
-//       );
-//   }
-// }
+function* dispatchEventAction(event: AssetHolderEvent) {
+  const {eventType} = event;
+  switch (eventType) {
+    case AssetHolderEventType.AssetTransferred:
+      // FIXME: We need some new kind of technique for dealing with AssetTransferred situations
+      const assetTransferredEvent = getAssetTransferredEvent(event);
+      yield put(
+        actions.assetTransferredEvent({
+          destination: assetTransferredEvent.destination,
+          amount: assetTransferredEvent.amount
+        })
+      );
+      break;
+    case AssetHolderEventType.Deposited:
+      break;
+    default:
+      throw new Error(
+        `Event is not a known AssetHolderEvent. Cannot dispatch event action: ${JSON.stringify(
+          event
+        )}`
+      );
+  }
+}
 
 function* dispatchProcessEventAction(
   event: AssetHolderEvent,
@@ -69,6 +69,11 @@ function* dispatchProcessEventAction(
   const {eventType, assetHolderAddress} = event;
   switch (eventType) {
     case AssetHolderEventType.AssetTransferred:
+      yield put(
+        actions.assetTransferredEvent({
+          ...getAssetTransferredEvent(event)
+        })
+      );
       break;
     case AssetHolderEventType.Deposited:
       const {destination, amountDeposited, destinationHoldings} = getDepositedEvent(event);
