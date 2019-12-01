@@ -1,9 +1,10 @@
-const consensusAppArtifact = require("../build/contracts/ConsensusApp.json");
-const ethAssetHolderArtifact = require("../build/contracts/ETHAssetHolder.json");
-const nitroAdjudicatorArtifact = require("../build/contracts/NitroAdjudicator.json");
-const trivialAppArtifact = require("../build/contracts/TrivialApp.json");
+/* eslint-disable */
+const consensusAppArtifact = require('../build/contracts/ConsensusApp.json');
+const ethAssetHolderArtifact = require('../build/contracts/ETHAssetHolder.json');
+const nitroAdjudicatorArtifact = require('../build/contracts/NitroAdjudicator.json');
+const trivialAppArtifact = require('../build/contracts/TrivialApp.json');
 
-const {GanacheNCacheDeployer} = require("@statechannels/ganache-deployer");
+const {GanacheNCacheDeployer} = require('@statechannels/ganache-deployer');
 
 const deploy = async (_network, _secret, _etherscanApiKey) => {
   const deployer = new GanacheNCacheDeployer(8547);

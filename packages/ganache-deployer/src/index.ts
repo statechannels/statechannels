@@ -1,3 +1,4 @@
+/* eslint-disable */
 import {GanacheServer} from '@statechannels/devtools';
 import fs from 'fs';
 import log from 'loglevel';
