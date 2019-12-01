@@ -8,6 +8,7 @@ import {ProtocolLocator} from "../../communication";
 import {getChallengeRegisteredEvent} from "@statechannels/nitro-protocol";
 import {bigNumberify} from "ethers/utils";
 import {Contract} from "ethers";
+import {Web3Provider} from "ethers/providers";
 
 enum AdjudicatorEventType {
   ChallengeRegistered,
@@ -21,7 +22,7 @@ interface AdjudicatorEvent {
   eventType: AdjudicatorEventType;
 }
 
-export function* adjudicatorWatcher(provider) {
+export function* adjudicatorWatcher(provider: Web3Provider) {
   const adjudicatorEventChannel = yield call(createAdjudicatorEventChannel, provider);
   while (true) {
     const event: AdjudicatorEvent = yield take(adjudicatorEventChannel);
@@ -107,7 +108,7 @@ function* dispatchProcessEventAction(
   }
 }
 
-function* createAdjudicatorEventChannel(provider) {
+function* createAdjudicatorEventChannel(provider: Web3Provider) {
   const adjudicator: Contract = yield call(getAdjudicatorContract, provider);
 
   return eventChannel(emitter => {

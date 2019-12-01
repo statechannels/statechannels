@@ -19,6 +19,7 @@ import {isLoadAction, OutgoingApiAction} from "../actions";
 import {ETHAssetHolderWatcher} from "./asset-holder-watcher";
 import {postMessageListener} from "./post-message-listener";
 import {messageSender} from "./message-sender";
+import {Web3Provider} from "ethers/providers";
 
 export function* sagaManager(): IterableIterator<any> {
   let adjudicatorWatcherProcess;
@@ -46,7 +47,9 @@ export function* sagaManager(): IterableIterator<any> {
     // @ts-ignore TODO: Why is redux-saga select think its returning undefined?
     const state: WalletState = yield select((walletState: WalletState) => walletState);
 
-    const provider = yield getProvider();
+    // @ts-ignore TODO: Why is redux-saga select think its returning undefined?
+    const provider: Web3Provider = yield getProvider();
+
     if (state.type === WALLET_INITIALIZED) {
       if (!adjudicatorWatcherProcess) {
         adjudicatorWatcherProcess = yield fork(adjudicatorWatcher, provider);
