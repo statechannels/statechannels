@@ -34,7 +34,7 @@ async function setupContract(artifact: any) {
   }
 
   const networkContext = getNetworkContext();
-  const contract = await ethAssetHolderFactory.attach(networkContext.ETHAssetHolder.address);
+  const contract = await ethAssetHolderFactory.attach(networkContext['ETHAssetHolder'].address);
 
   return contract;
 }
