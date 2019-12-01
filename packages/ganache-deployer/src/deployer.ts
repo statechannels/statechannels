@@ -121,7 +121,7 @@ export class GanacheNCacheDeployer {
     const existingAddress = addressFromCache(cacheKey);
     if (existingAddress) {
       logger.log(
-        `Contract ${colors.colorName(name)} already existed at address: ${colors.colorAddress(
+        `Contract ${colors.colorName(name)} already exists address: ${colors.colorAddress(
           existingAddress
         )}`
       );
@@ -137,7 +137,7 @@ export class GanacheNCacheDeployer {
       if (e instanceof KeyExistsError) {
         const conflictAddress = e.address;
         logger.log(
-          `Contract ${colors.colorName(name)} already existed at address: ${colors.colorAddress(
+          `Contract ${colors.colorName(name)} already exists at address: ${colors.colorAddress(
             conflictAddress
           )}. We also deployed it at ${colors.colorAddress(
             deployedContract.contractAddress

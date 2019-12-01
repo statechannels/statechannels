@@ -25,7 +25,6 @@ import {
 } from '../src/contract/outcome';
 import {hashState, State} from '../src/contract/state';
 
-const networkContext = getNetworkContext();
 // Interfaces
 
 // E.g. {ALICE:2, BOB:3}
@@ -51,6 +50,7 @@ export const getTestProvider = () => {
 };
 
 export function getNetworkMap() {
+  const networkContext = getNetworkContext();
   // TODO: validate deployments against a whitelist
   // TODO: share type info for what's expected from this end point
   if (Object.keys(networkContext).length > 0) {
@@ -65,6 +65,10 @@ export async function setupContracts(provider: ethers.providers.JsonRpcProvider,
 
   const contractName = artifact.contractName;
   const contractAddress = networkMap[contractName].address;
+  if (!contractAddress) {
+    console.log('networkMap', networkMap);
+    throw Error(`Address for ${contractName} not found in networkmap`);
+  }
   const contract = new ethers.Contract(contractAddress, artifact.abi, signer);
   return contract;
 }

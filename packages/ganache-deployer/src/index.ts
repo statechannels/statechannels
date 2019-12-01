@@ -15,7 +15,9 @@ export function getNetworkContext() {
   const deployments = loadDeployments() || [];
   // should be a mapping of name -> address
   const networkContext = {};
-  deployments.forEach(deployment => (networkContext[deployment.name] = deployment.address));
+  deployments.forEach(
+    deployment => (networkContext[deployment.name] = {address: deployment.address})
+  );
 
   return networkContext;
 }
