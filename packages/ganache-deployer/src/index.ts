@@ -1,32 +1,33 @@
 import fs from 'fs';
-import path from 'path';
 import log from 'loglevel';
+import path from 'path';
+import {loadDeployments} from './deployer';
+export {GanacheNCacheDeployer} from './deployer';
 import {GanacheServer} from '@statechannels/devtools';
-import writeJsonFile from 'write-json-file';
-import {deployContracts} from './deployer';
 
 const GANACHE_CONTRACTS_FILE = 'ganache-network-context.json';
 const GANACHE_CONTRACTS_PATH = path.join(__dirname, '../', GANACHE_CONTRACTS_FILE);
 
+// Returns the old style network context expected by the packages.
+// Note that if multiple copies of a contract are deployed, this will just return the last address.
+// TODO: replace with a more-reliable method.
 export function getNetworkContext() {
-  if (!fs.existsSync(GANACHE_CONTRACTS_PATH)) {
-    throw Error("Couldn't find contract addresses. Has the ganache-deployer run?");
-  }
-  const rawData = fs.readFileSync(GANACHE_CONTRACTS_PATH);
-  return JSON.parse(rawData.toString());
+  const deployments = loadDeployments() || [];
+  // should be a mapping of name -> address
+  const networkContext = {};
+  deployments.forEach(deployment => (networkContext[deployment.name] = deployment.address));
+
+  return networkContext;
 }
 
+// WARNING: the name here is misleading. This function doesn't currently do any deployment.
+// TODO: rename
 export async function startGanacheAndDeploy(): Promise<GanacheServer> {
   try {
     const chain = new GanacheServer(Number(process.env.GANACHE_PORT));
     chain.onClose(exitHandler);
     await chain.ready();
 
-    const networkContext = (await deployContracts(chain)) as {NetworkID: string};
-    networkContext.NetworkID = process.env.GANACHE_NETWORK_ID || '123456789';
-    await writeJsonFile(GANACHE_CONTRACTS_PATH, networkContext);
-
-    log.info(`Network context written to ${GANACHE_CONTRACTS_FILE}`);
     return chain;
   } catch (e) {
     throw Error(e);
