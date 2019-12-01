@@ -33,12 +33,12 @@
   "homepage": "https://github.com/statechannels/nitro-protocol/",
   "scripts": {
     "precommit": "lint-staged --quiet",
-    "build": "run-s contract:clean clearLib contract:compile build:typescript",
+    "build": "run-s contracts:clean clearLib contracts:compile build:typescript",
     "build:typescript": "yarn lint:check && tsc -b",
-    "contract:clean": "rm -rf build/contracts",
-    "contract:compile": "node ./bin/compile.js",
-    "contract:deploy": "npx etherlime deploy --compile=false --file=./deployment/deploy.js",
-    "contract:prepare": "run-s contract:clean contract:compile contract:deploy",
+    "contracts:clean": "rm -rf build/contracts",
+    "contracts:compile": "node ./bin/compile.js",
+    "contracts:deploy": "npx etherlime deploy --compile=false --file=./deployment/deploy.js",
+    "contracts:prepare": "run-s contracts:clean contracts:compile contracts:deploy",
     "clearLib": "rm -rf lib",
     "lint:check": "npx eslint \"*/**/*.ts\" --cache",
     "lint:write": "npx eslint \"*/**/*.ts\" --fix",
@@ -46,10 +46,10 @@
     "docgen": "npx solidoc",
     "prettier:check": "npx prettier --check '{contracts,src,test}/**/*.{ts,tsx,sol}'",
     "prettier:write": "npx prettier --write '{contracts,src,test}/**/*.{ts,tsx,sol}'",
-    "test:ci": "yarn contract:prepare && npx jest --ci --bail --runInBand",
+    "test:ci": "yarn contracts:prepare && npx jest --ci --bail --runInBand",
     "test:typescript": "npx jest --testPathIgnorePatterns='test/contracts' --reporters='default'",
-    "test": "yarn contract:prepare && npx jest",
-    "website:deploy": "yarn contract:compile && yarn docgen && cd website && yarn install && yarn build"
+    "test": "yarn contracts:prepare && npx jest",
+    "website:deploy": "yarn contracts:compile && yarn docgen && cd website && yarn install && yarn build"
   },
   "dependencies": {
     "@counterfactual/cf-adjudicator-contracts": "^0.0.8",
