@@ -36,7 +36,7 @@
     "build": "run-s contracts:clean clearLib contracts:compile build:typescript",
     "build:typescript": "yarn lint:check && tsc -b",
     "contracts:clean": "rm -rf build/contracts",
-    "contracts:compile": "node ./bin/compile.js",
+    "contracts:compile": "yarn contracts:clean && node ./bin/compile.js",
     "contracts:deploy": "npx etherlime deploy --compile=false --file=./deployment/deploy.js",
     "contracts:prepare": "run-s contracts:clean contracts:compile contracts:deploy",
     "clearLib": "rm -rf lib",

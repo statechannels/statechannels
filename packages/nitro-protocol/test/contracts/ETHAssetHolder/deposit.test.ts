@@ -2,7 +2,7 @@ import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet} from 'ethers';
 import {bigNumberify, parseUnits} from 'ethers/utils';
 // @ts-ignore
-import ETHAssetHolderArtifact from '../../../build/contracts/ETHAssetHolder.json';
+import ETHAssetHolderArtifact from '../../../build/contracts/TestEthAssetHolder.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {getTestProvider, setupContracts} from '../../test-helpers';
 
