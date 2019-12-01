@@ -4,8 +4,9 @@ import log from "loglevel";
 import {Web3Provider} from "ethers/providers";
 import {Interface} from "ethers/utils";
 import {getNetworkContext} from "@statechannels/ganache-deployer";
-import {AddressZero} from "ethers/constants";
-import log from "loglevel";
+import NitroAdjudicator from "../../build/contracts/NitroAdjudicator.json";
+import ETHAssetHolder from "../../build/contracts/ETHAssetHolder.json";
+import ERC20AssetHolder from "../../build/contracts/ERC20AssetHolder.json";
 
 log.setDefaultLevel(log.levels.DEBUG);
 
@@ -22,19 +23,8 @@ export function getContractAddress(contractName: string): string {
   );
 }
 
-export function getContractABI(contractName: string): string {
-  if (networkContext[contractName]) {
-    return networkContext[contractName].abi;
-  }
-  console.error(contractName, networkContext);
-
-  throw new Error(
-    `Could not find ${contractName} in network map ${JSON.stringify(networkContext)}}`
-  );
-}
-
-export function getProvider(): Web3Provider {
-  return new Web3Provider(web3.currentProvider);
+export async function getProvider(): Promise<Web3Provider> {
+  return await new Web3Provider(web3.currentProvider);
 }
 
 export async function getAdjudicatorContract(provider: Web3Provider) {
@@ -53,15 +43,15 @@ export async function getERC20AssetHolderContract(provider: Web3Provider) {
 }
 
 export function getAdjudicatorInterface(): Interface {
-  return new Interface(getContractABI("NitroAdjudicator"));
+  return new Interface(NitroAdjudicator["abi"]);
 }
 
 export function getETHAssetHolderInterface(): Interface {
-  return new Interface(getContractABI("ETHAssetHolder"));
+  return new Interface(ETHAssetHolder["abi"]);
 }
 
 export function getERC20AssetHolderInterface(): Interface {
-  return new Interface(getContractABI("ERC20AssetHolder"));
+  return new Interface(ERC20AssetHolder["abi"]);
 }
 
 // FIXME: The tests ought to be able to run even without contracts having been built which

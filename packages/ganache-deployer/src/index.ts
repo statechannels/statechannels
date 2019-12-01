@@ -14,7 +14,11 @@ const GANACHE_CONTRACTS_PATH = path.join(__dirname, '../', GANACHE_CONTRACTS_FIL
 export function getNetworkContext() {
   const deployments = loadDeployments() || [];
   // should be a mapping of name -> address
-  const networkContext = {};
+  const networkContext = {
+    // TODO: don't hardcode this here. Individual packages should set this themselves.
+    // (Currently used in the wallet)
+    NetworkID: '9001',
+  };
   deployments.forEach(
     deployment => (networkContext[deployment.name] = {address: deployment.address})
   );
