@@ -1,9 +1,9 @@
+import {GanacheServer} from '@statechannels/devtools';
 import fs from 'fs';
-import path from 'path';
 import log from 'loglevel';
+import path from 'path';
 import {loadDeployments} from './deployer';
 export {GanacheNCacheDeployer} from './deployer';
-import {GanacheServer} from '@statechannels/devtools';
 
 const GANACHE_CONTRACTS_FILE = 'ganache-network-context.json';
 const GANACHE_CONTRACTS_PATH = path.join(__dirname, '../', GANACHE_CONTRACTS_FILE);
