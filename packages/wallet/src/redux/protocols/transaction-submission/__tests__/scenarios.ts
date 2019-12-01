@@ -5,7 +5,7 @@ import {EMPTY_SHARED_DATA} from "../../../state";
 // ---------
 // Test data
 // ---------
-const transaction = {};
+const transaction = {to: "0x0"};
 const processId = "process-id.123";
 const transactionHash = "transaction-hash.123";
 const sharedData = EMPTY_SHARED_DATA;

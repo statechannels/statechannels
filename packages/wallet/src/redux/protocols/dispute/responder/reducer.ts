@@ -5,7 +5,6 @@ import {unreachable} from "../../../../utils/reducer-utils";
 import * as selectors from "../../../selectors";
 import * as TransactionGenerator from "../../../../utils/transaction-generator";
 import {TwoPartyPlayerIndex} from "../../../types";
-import {TransactionRequest} from "ethers/providers";
 import {
   initialize as initTransactionState,
   transactionReducer
@@ -28,6 +27,8 @@ import {
 import {ProtocolAction} from "../../../actions";
 import * as _ from "lodash";
 import {State, getChannelId, SignedState} from "@statechannels/nitro-protocol";
+import {TransactionRequestWithTarget} from "../../../outbox/state";
+import {ADJUDICATOR_ADDRESS} from "../../../../constants";
 export const initialize = (
   processId: string,
   channelId: string,
@@ -238,7 +239,7 @@ const handleTransactionSubmissionComplete = (
 };
 
 const transitionToWaitForTransaction = (
-  transaction: TransactionRequest,
+  transaction: TransactionRequestWithTarget,
   protocolState: states.WaitForResponse | states.WaitForApproval,
   sharedData: SharedData
 ) => {
@@ -263,15 +264,21 @@ const craftResponseTransactionWithExistingState = (
   processId: string,
   challengeState: State,
   sharedData: SharedData
-): TransactionRequest => {
+): TransactionRequestWithTarget => {
   const {penultimateSignedState, lastSignedState} = getStoredStates(challengeState, sharedData);
 
   // TODO: Check to see if we need to pass in an array of n-states e.g., if the thing to refute
   // involves a "respond with alternative" basically
   if (canRefute(challengeState, sharedData)) {
-    return TransactionGenerator.createRefuteTransaction([penultimateSignedState, lastSignedState]);
+    return {
+      ...TransactionGenerator.createRefuteTransaction([penultimateSignedState, lastSignedState]),
+      to: ADJUDICATOR_ADDRESS
+    };
   } else if (canRespondWithExistingState(challengeState, sharedData)) {
-    return TransactionGenerator.createRespondTransaction(challengeState, lastSignedState);
+    return {
+      ...TransactionGenerator.createRespondTransaction(challengeState, lastSignedState),
+      to: ADJUDICATOR_ADDRESS
+    };
   } else {
     // TODO: We should never actually hit this, currently a sanity check to help out debugging
     throw new Error("Cannot refute or respond with existing state.");

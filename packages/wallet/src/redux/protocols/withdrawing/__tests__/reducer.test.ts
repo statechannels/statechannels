@@ -4,9 +4,10 @@ import * as states from "../states";
 import * as TransactionGenerator from "../../../../utils/transaction-generator";
 import {SharedData} from "../../../state";
 import {describeScenarioStep} from "../../../__tests__/helpers";
+import {ADJUDICATOR_ADDRESS} from "../../../../constants";
 
 // Mocks
-const mockTransaction = {to: "0xabc"};
+const mockTransaction = {to: ADJUDICATOR_ADDRESS};
 const createConcludePushOutcomeAndTransferAllMock = jest.fn().mockReturnValue(mockTransaction);
 Object.defineProperty(TransactionGenerator, "createConcludePushOutcomeAndTransferAllTransaction", {
   value: createConcludePushOutcomeAndTransferAllMock

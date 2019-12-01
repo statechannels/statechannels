@@ -3,7 +3,6 @@ import * as actions from "../actions";
 import {getProvider} from "../../utils/contract-utils";
 import {TransactionResponse, JsonRpcProvider} from "ethers/providers";
 import {QueuedTransaction} from "../outbox";
-import {ADJUDICATOR_ADDRESS} from "../../constants";
 
 export function* transactionSender(transaction: QueuedTransaction) {
   const provider: JsonRpcProvider = yield call(getProvider);
@@ -12,10 +11,10 @@ export function* transactionSender(transaction: QueuedTransaction) {
   yield put(actions.transactionSent({processId}));
   let transactionResult: TransactionResponse;
   try {
-    transactionResult = yield call([signer, signer.sendTransaction], {
-      to: ADJUDICATOR_ADDRESS,
-      ...transaction.transactionRequest
-    });
+    transactionResult = yield call(
+      [signer, signer.sendTransaction],
+      transaction.transactionRequest
+    );
   } catch (error) {
     yield put(actions.transactionSubmissionFailed({processId, error}));
     return;

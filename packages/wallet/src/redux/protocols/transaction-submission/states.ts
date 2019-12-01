@@ -1,6 +1,6 @@
 import {StateConstructor} from "../../utils";
-import {TransactionRequest} from "ethers/providers";
 import {ProtocolState} from "..";
+import {TransactionRequestWithTarget} from "../../outbox/state";
 
 // -------
 // States
@@ -10,21 +10,21 @@ export type FailureReason = "TransactionFailed" | "UserDeclinedRetry";
 
 export interface WaitForSend {
   type: "TransactionSubmission.WaitForSend";
-  transaction: TransactionRequest;
+  transaction: TransactionRequestWithTarget;
   processId: string;
   channelId: string;
 }
 
 export interface WaitForSubmission {
   type: "TransactionSubmission.WaitForSubmission";
-  transaction: TransactionRequest;
+  transaction: TransactionRequestWithTarget;
   processId: string;
   channelId: string;
 }
 
 export interface WaitForConfirmation {
   type: "TransactionSubmission.WaitForConfirmation";
-  transaction: TransactionRequest;
+  transaction: TransactionRequestWithTarget;
   transactionHash: string;
   processId: string;
   channelId: string;
@@ -32,7 +32,7 @@ export interface WaitForConfirmation {
 
 export interface ApproveRetry {
   type: "TransactionSubmission.ApproveRetry";
-  transaction: TransactionRequest;
+  transaction: TransactionRequestWithTarget;
   processId: string;
   channelId: string;
 }

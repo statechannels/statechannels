@@ -6,7 +6,6 @@ import {
   createConcludePushOutcomeAndTransferAllTransaction as nitroCreateConcludePushOutcomeAndTransferAllTransaction,
   ConcludePushOutcomeAndTransferAllArgs
 } from "../../../utils/transaction-generator";
-import {TransactionRequest} from "ethers/providers";
 import {
   initialize as initTransactionState,
   transactionReducer
@@ -15,6 +14,8 @@ import {isTransactionAction} from "../transaction-submission/actions";
 import {isTerminal, TransactionSubmissionState, isSuccess} from "../transaction-submission/states";
 import {unreachable} from "../../../utils/reducer-utils";
 import {SharedData} from "../../state";
+import {TransactionRequestWithTarget} from "../../outbox/state";
+import {ADJUDICATOR_ADDRESS} from "../../../constants";
 
 export const initialize = (
   withdrawalAmount: string,
@@ -155,7 +156,7 @@ const channelIsClosed = (channelId: string, sharedData: SharedData): boolean => 
 const createConcludePushOutcomeAndTransferAllTransaction = (
   channelId: string,
   sharedData: SharedData
-): TransactionRequest => {
+): TransactionRequestWithTarget => {
   const channelState = selectors.getOpenedChannelState(sharedData, channelId);
   const {signedStates: lastRound} = channelState;
   const [penultimateState, lastState] = lastRound;
@@ -164,5 +165,8 @@ const createConcludePushOutcomeAndTransferAllTransaction = (
     fromSignedState: penultimateState,
     toSignedState: lastState
   };
-  return nitroCreateConcludePushOutcomeAndTransferAllTransaction(args);
+  return {
+    ...nitroCreateConcludePushOutcomeAndTransferAllTransaction(args),
+    to: ADJUDICATOR_ADDRESS
+  };
 };

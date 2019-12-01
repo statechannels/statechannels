@@ -10,8 +10,8 @@ import {
   failure
 } from "./states";
 import {unreachable} from "../../../utils/reducer-utils";
-import {TransactionRequest} from "ethers/providers";
 import {queueTransaction, SharedData} from "../../state";
+import {TransactionRequestWithTarget} from "../../outbox/state";
 
 type Storage = SharedData;
 
@@ -46,7 +46,7 @@ export function transactionReducer(
 }
 
 export function initialize(
-  transaction: TransactionRequest,
+  transaction: TransactionRequestWithTarget,
   processId: string,
   channelId: string,
   storage: Storage

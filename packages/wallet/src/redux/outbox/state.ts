@@ -5,9 +5,9 @@ import {OutgoingApiAction} from "../actions";
 export function emptyDisplayOutboxState(): OutboxState {
   return {displayOutbox: [], messageOutbox: [], transactionOutbox: []};
 }
-
+export type TransactionRequestWithTarget = TransactionRequest & {to: string};
 export interface QueuedTransaction {
-  transactionRequest: TransactionRequest;
+  transactionRequest: TransactionRequestWithTarget;
   processId: string;
 }
 export type DisplayOutbox = Array<"Show" | "Hide">;
@@ -34,7 +34,7 @@ export function queueMessage(state: OutboxState, message: OutgoingApiAction): Ou
 
 export function queueTransaction(
   state: OutboxState,
-  transaction: TransactionRequest,
+  transaction: TransactionRequestWithTarget,
   processId: string
 ): OutboxState {
   return accumulateSideEffects(state, {
