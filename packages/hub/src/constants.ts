@@ -9,25 +9,3 @@ export const HUB_ADDRESS = '0x100063c326b27f78b2cBb7cd036B8ddE4d4FCa7C';
 export const HUB_PRIVATE_KEY = '0x1b427b7ab88e2e10674b5aa92bb63c0ca26aa0b5a858e1d17295db6ad91c049b';
 
 export const unreachable = (x: never) => x;
-
-export const enum EmbeddedProtocol {
-  AdvanceChannel = 'AdvanceChannel',
-  ConsensusUpdate = 'ConsensusUpdate',
-  DirectFunding = 'DirectFunding', // TODO: Post-fund-setup exchange will be removed from direct funding, so this should be removed
-  ExistingLedgerFunding = 'ExistingLedgerFunding',
-  LedgerDefunding = 'LedgerDefunding',
-  LedgerFunding = 'LedgerFunding',
-  LedgerTopUp = 'LedgerTopUp',
-  NewLedgerChannel = 'NewLedgerChannel',
-  VirtualFunding = 'VirtualFunding',
-  FundingStrategyNegotiation = 'FundingStrategyNegotiation',
-  VirtualDefunding = 'VirtualDefunding',
-  Defunding = 'Defunding'
-}
-
-export const enum ProcessProtocol {
-  Application = 'Application',
-  Funding = 'Funding',
-  Concluding = 'Concluding',
-  CloseLedgerChannel = 'CloseLedgerChannel'
-}

@@ -2,7 +2,7 @@ import {
   ConcludeInstigated,
   RelayActionWithMessage,
   SignedStatesReceived
-} from '@statechannels/wallet/lib/src/communication';
+} from '../../communication';
 import {HUB_ADDRESS, unreachable} from '../../constants';
 import {startFundingProcess} from '../../wallet/db/queries/walletProcess';
 import * as ongoing from './handle-ongoing-process-action';

@@ -5,7 +5,7 @@ import {
   signedStatesReceived,
   strategyApproved,
   StrategyProposed
-} from '@statechannels/wallet/lib/src/communication';
+} from '../../communication';
 import {HUB_ADDRESS, unreachable} from '../../constants';
 import {errors} from '../../wallet';
 import {getCurrentState} from '../../wallet/db/queries/getCurrentState';

@@ -4,7 +4,7 @@ import {
   SignedStatesReceived,
   StrategyProposed,
   RelayActionWithMessage
-} from '@statechannels/wallet/lib/src/communication';
+} from '../../communication';
 
 import {getProcess} from '../../wallet/db/queries/walletProcess';
 import {handleNewProcessAction} from './handle-new-process-action';
