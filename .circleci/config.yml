@@ -5,7 +5,7 @@ defaults: &defaults
   resource_class: large
   docker:
     - image: circleci/node:10.16.3
-    - image: circleci/postgres:12.0-alpine-postgis
+    - image: circleci/postgres:12.0-alpine
       environment:
         POSTGRES_USER: root
         POSTGRES_DB: server_wallet_test
