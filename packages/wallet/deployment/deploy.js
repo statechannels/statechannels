@@ -3,7 +3,8 @@ const {
   ConsensusAppArtifact,
   EthAssetHolderArtifact,
   Erc20AssetHolderArtifact,
-  TrivialAppArtifact
+  TrivialAppArtifact,
+  TokenArtifact
 } = require("@statechannels/nitro-protocol");
 
 const {ETHERLIME_ACCOUNTS} = require("@statechannels/devtools");
