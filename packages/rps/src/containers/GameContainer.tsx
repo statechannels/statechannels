@@ -19,6 +19,7 @@ import {
   WaitForResting,
   InsufficientFunds,
   GameOverPage,
+  Resigned,
 } from '../components';
 import { unreachable } from '../utils/unreachable';
 
@@ -38,7 +39,7 @@ function GameContainer(props: GameProps) {
 }
 
 function RenderGame(props: GameProps) {
-  const { localState } = props;
+  const { localState, channelState } = props;
 
   switch (localState.type) {
     case 'Empty':
@@ -103,7 +104,11 @@ function RenderGame(props: GameProps) {
         />
       );
     case 'Resigned':
-      return <div>someone resigned</div>; // todo
+      const ourTurn =
+        localState.player === 'A'
+          ? Number(channelState.turnNum) % 2 !== 0
+          : Number(channelState.turnNum) % 2 === 0;
+      return <Resigned iResigned={ourTurn} action={props.gameOver} />; // todo
     case 'GameOver':
       return (
         <GameOverPage
