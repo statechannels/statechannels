@@ -9,7 +9,7 @@
     "firebase/**/grpc": "^1.16.1"
   },
   "scripts": {
-    "build:ci": "run-s contracts:clean build:typescript contracts:compile",
+    "build:ci": "run-s contracts:compile build:typescript",
     "build:typescript": "npx tsc -b",
     "build:webpack": "CI=false node scripts/build.js",
     "build": "run-s contracts:clean build:typescript build:webpack",
@@ -22,10 +22,10 @@
     "postinstall": "rm -f node_modules/web3/index.d.ts",
     "prettier:check": "npx prettier --check 'src/**/*.{ts,tsx}'",
     "prettier:write": "npx prettier --write 'src/**/*.{ts,tsx}'",
-    "start": "yarn contracts:prepare && node scripts/start.js",
+    "start": "yarn contracts:deploy && node scripts/start.js",
     "prepare": "yarn build:ci",
     "test:app": "npx run-jest -c ./config/jest/jest.config.js",
-    "test:contracts": "yarn contracts:prepare && npx run-jest -c ./config/jest/jest.contracts.config.js",
+    "test:contracts": "yarn contracts:deploy && npx run-jest -c ./config/jest/jest.contracts.config.js",
     "test": "run-s prettier:check test:contracts 'test:app --all'",
     "test:ci": "yarn test:ci:contracts && yarn test:ci:app",
     "test:ci:contracts": "yarn test:contracts --all --ci",
