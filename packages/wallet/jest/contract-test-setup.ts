@@ -1,6 +1,6 @@
 import "../config/env";
 import {GanacheServer} from "@statechannels/devtools";
-const {deploy} = require("../deployment/deploy");
+import {deploy} from "../deployment/deploy";
 
 export default async function setup() {
   const ganacheServer = new GanacheServer(
