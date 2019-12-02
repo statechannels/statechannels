@@ -3,7 +3,7 @@ import {Contract, Wallet} from 'ethers';
 import {AddressZero} from 'ethers/constants';
 import {bigNumberify} from 'ethers/utils';
 // @ts-ignore
-import ERC20AssetHolderArtifact from '../../../build/contracts/TestErc20AssetHolder.json';
+import ERC20AssetHolderArtifact from '../../../build/contracts/ERC20AssetHolder.json';
 // @ts-ignore
 import TokenArtifact from '../../../build/contracts/Token.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
