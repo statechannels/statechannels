@@ -7,13 +7,13 @@ const config = {
       invoke: {
         src: 'createNullChannel',
         data: 'replacementChannelArgs',
-        onDone: 'updateOutcome',
+        onDone: 'updateOldChannelOutcome',
       },
     },
-    updateOutcome: {
+    updateOldChannelOutcome: {
       invoke: {
         src: 'ledgerUpdate',
-        data: 'newOutcome',
+        data: 'concludeOutcome',
         onDone: 'concludeOldChannel',
       },
     },

@@ -46,7 +46,7 @@ const createReplacement = {
   invoke: {
     src: 'createNullChannel',
     data: replacementChannelArgs.name,
-    onDone: 'updateOutcome',
+    onDone: 'updateOldChannelOutcome',
   },
 };
 type NewChannelCreated = Init & { newChannelId: string };
@@ -62,7 +62,7 @@ export function concludeOutcome({
     currentTurnNum: state.turnNum,
   };
 }
-const updateOutcome = {
+const updateOldChannelOutcome = {
   invoke: {
     src: 'ledgerUpdate',
     data: concludeOutcome.name,
@@ -96,7 +96,7 @@ const config = {
   initial: 'createReplacement',
   states: {
     createReplacement,
-    updateOutcome,
+    updateOldChannelOutcome,
     concludeOldChannel,
     transfer,
     success,
