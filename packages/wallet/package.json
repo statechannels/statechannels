@@ -10,7 +10,7 @@
     "node": "^10.16.3"
   },
   "scripts": {
-    "build:ci": "run-s clearContracts build:typescript",
+    "build:ci": "build:typescript",
     "build:typescript": "npx tsc -b",
     "build:webpack": "CI=false node scripts/build.js",
     "build": "run-s clearContracts build:typescript build:webpack",
