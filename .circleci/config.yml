@@ -32,7 +32,7 @@ commands:
         default: stats
     steps:
       - run:
-          command: bash bin/log_memory.sh <<parameters.file>>
+          command: bash bin/log_memory.sh <<parameters.log_filename>>
           background: true
 
   upload_memory_usage_artifact:
@@ -43,8 +43,8 @@ commands:
         default: memory-usage.txt
     steps:
       - store_artifacts:
-          path: /home/circleci/<< parameters.file >>.txt
-          destination: << parameters.file >>
+          path: /home/circleci/<< parameters.log_filename >>.txt
+          destination: << parameters.log_filename >>
 
 jobs:
   prepare:
