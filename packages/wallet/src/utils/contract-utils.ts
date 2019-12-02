@@ -4,9 +4,11 @@ import log from "loglevel";
 import {Web3Provider} from "ethers/providers";
 import {Interface} from "ethers/utils";
 import {getNetworkContext} from "@statechannels/ganache-deployer";
-import NitroAdjudicator from "../../build/contracts/NitroAdjudicator.json";
-import ETHAssetHolder from "../../build/contracts/ETHAssetHolder.json";
-import ERC20AssetHolder from "../../build/contracts/ERC20AssetHolder.json";
+import {
+  NitroAdjudicatorArtifact,
+  EthAssetHolderArtifact,
+  Erc20AssetHolderArtifact
+} from "@statechannels/nitro-protocol";
 
 log.setDefaultLevel(log.levels.DEBUG);
 
@@ -43,15 +45,15 @@ export async function getERC20AssetHolderContract(provider: Web3Provider) {
 }
 
 export function getAdjudicatorInterface(): Interface {
-  return new Interface(NitroAdjudicator["abi"]);
+  return new Interface(NitroAdjudicatorArtifact["abi"]);
 }
 
 export function getETHAssetHolderInterface(): Interface {
-  return new Interface(ETHAssetHolder["abi"]);
+  return new Interface(EthAssetHolderArtifact["abi"]);
 }
 
 export function getERC20AssetHolderInterface(): Interface {
-  return new Interface(ERC20AssetHolder["abi"]);
+  return new Interface(Erc20AssetHolderArtifact["abi"]);
 }
 
 // FIXME: The tests ought to be able to run even without contracts having been built which
