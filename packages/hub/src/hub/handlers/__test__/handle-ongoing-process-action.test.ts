@@ -5,7 +5,7 @@ import {PARTICIPANT_1_PRIVATE_KEY} from '../../../test/test-constants';
 import {stateConstructors} from '../../../test/test_data';
 import {handleOngoingProcessAction} from '../handle-ongoing-process-action';
 
-describe('handle-ongoing-process-action', () => {
+describe.skip('handle-ongoing-process-action', () => {
   it('postfund signed states received', async () => {
     const state: State = stateConstructors.postfundSetup(2);
     const signedStatesReceivedAction: SignedStatesReceived = {
