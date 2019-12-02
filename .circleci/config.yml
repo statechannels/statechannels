@@ -11,32 +11,34 @@ defaults: &defaults
         POSTGRES_DB: server_wallet_test
         POSTGRES_PASSWORD: ''
 
-save_dep: &save_dep
+save_node_modules: &save_node_modules
   save_cache:
     key: dependency-cache-{{ checksum "yarn.lock" }}
     paths:
       - node_modules
       - packages/*/node_modules
 
-restore_dep: &restore_dep
+restore_node_modules: &restore_node_modules
   restore_cache:
     key: dependency-cache-{{ checksum "yarn.lock" }}
 
 commands:
-  log_stats:
-    description: 'Log stats '
+
+  start_memory_logging_process:
+    description: 'Start tracking memory usage'
     parameters:
-      file:
+      log_filename:
         type: string
         default: stats
     steps:
       - run:
           command: bash bin/log_memory.sh <<parameters.file>>
           background: true
-  upload_logs:
-    description: 'Upload logs '
+
+  upload_memory_usage_artifact:
+    description: 'Upload memory usage artifact'
     parameters:
-      file:
+      log_filename:
         type: string
         default: memory-usage.txt
     steps:
@@ -49,11 +51,11 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-      - log_stats:
-          file: prepare-stats
-      - <<: *restore_dep
+      - start_memory_logging_process:
+          log_filename: prepare-memory-usage.txt
+      - <<: *restore_node_modules
       - run: yarn --frozen-lockfile
-      - <<: *save_dep
+      - <<: *save_node_modules
 
       - persist_to_workspace:
           root: /home/circleci/project
@@ -63,8 +65,8 @@ jobs:
             - packages/*/lib
             - packages/*/node_modules
             - node_modules
-      - upload_logs:
-          file: prepare-stats
+      - upload_memory_usage_artifact:
+          log_filename: prepare-memory-usage.txt
 
   build:
     <<: *defaults
@@ -79,8 +81,8 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-      - log_stats:
-          file: test-stats
+      - start_memory_logging_process:
+          log_filename: test-memory-usage.txt
       - attach_workspace:
           at: /home/circleci/project
       - run:
@@ -92,8 +94,8 @@ jobs:
           command: |
             wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 10 http://localhost:3000
       - run: yarn test:ci
-      - upload_logs:
-          file: test-stats
+      - upload_memory_usage_artifact:
+          log_filename: test-memory-usage.txt
 
   # TODO: Get this working
   integration-test:
@@ -101,16 +103,16 @@ jobs:
     steps:
       - checkout:
           path: /home/circleci/project
-      - log_stats:
-          file: integration-test-stats
+      - start_memory_logging_process:
+          log_filename: integration-test-memory-usage.txt
       - attach_workspace:
           at: /home/circleci/project
       - run:
           command: (cd packages/wallet && yarn run start)
           background: true
       - run: (cd packages/wallet && yarn run test:ci:integration)
-      - upload_logs:
-          file: integration-test-stats
+      - upload_memory_usage_artifact:
+          log_filename: integration-test-memory-usage.txt
 
 workflows:
   statechannels:
