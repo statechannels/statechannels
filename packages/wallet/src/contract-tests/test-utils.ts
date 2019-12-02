@@ -192,6 +192,7 @@ async function sendTransaction(
   provider: JsonRpcProvider,
   tx: TransactionRequest
 ): Promise<TransactionResponse> {
-  const signer = await provider.getSigner();
+  // want to use a different account in each package, so they don't conflict in circleci
+  const signer = await provider.getSigner(1);
   return await signer.sendTransaction({to: ADJUDICATOR_ADDRESS, ...tx});
 }

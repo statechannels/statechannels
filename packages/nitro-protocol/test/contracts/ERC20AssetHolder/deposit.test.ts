@@ -10,7 +10,7 @@ import {Channel, getChannelId} from '../../../src/contract/channel';
 import {getTestProvider, setupContracts} from '../../test-helpers';
 
 const provider = getTestProvider();
-const signer0 = provider.getSigner(0); // Convention matches setupContracts function
+const signer0 = provider.getSigner(2); // Convention matches setupContracts function
 let signer0Address;
 let ERC20AssetHolder: Contract;
 let Token: Contract;

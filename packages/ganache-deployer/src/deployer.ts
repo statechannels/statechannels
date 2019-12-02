@@ -1,8 +1,8 @@
-import fs from 'fs';
-import path from 'path';
 import {CompiledContract, EtherlimeGanacheDeployer} from 'etherlime-lib';
 import {logger} from 'etherlime-logger';
 import {colors} from 'etherlime-utils';
+import fs from 'fs';
+import path from 'path';
 import writeJsonFile from 'write-json-file';
 
 const GANACHE_CONTRACTS_FILE = 'ganache-network-context.json';

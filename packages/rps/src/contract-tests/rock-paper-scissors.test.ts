@@ -185,7 +185,7 @@ export const getNetworkMap = async () => {
 };
 
 export async function setupContracts(provider: ethers.providers.JsonRpcProvider, artifact) {
-  const signer = provider.getSigner(0);
+  const signer = provider.getSigner(3);
 
   const contractName = artifact.contractName;
   const contractAddress = networkContext[contractName]['address'];
@@ -199,7 +199,7 @@ export function hashPreCommit(weapon: Weapon, salt: string) {
 
 async function sendTransaction(contractAddress: string, transaction: TransactionRequest) {
   // move to devtools
-  const signer = testProvider.getSigner();
+  const signer = testProvider.getSigner(3);
   const response = await signer.sendTransaction({ to: contractAddress, ...transaction });
   await response.wait();
 }

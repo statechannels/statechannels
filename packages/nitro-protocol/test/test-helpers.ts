@@ -60,7 +60,8 @@ export function getNetworkMap() {
 }
 
 export async function setupContracts(provider: ethers.providers.JsonRpcProvider, artifact) {
-  const signer = provider.getSigner(0);
+  // want to use a different account in each package, so they don't conflict in circleci
+  const signer = provider.getSigner(2);
   const networkMap = getNetworkMap();
 
   const contractName = artifact.contractName;
@@ -219,7 +220,7 @@ export async function sendTransaction(
   contractAddress: string,
   transaction: TransactionRequest
 ): Promise<TransactionReceipt> {
-  const signer = provider.getSigner();
+  const signer = provider.getSigner(2);
   const response = await signer.sendTransaction({to: contractAddress, ...transaction});
   return await response.wait();
 }

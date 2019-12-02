@@ -157,7 +157,7 @@ async function pushOutcome(
   const nitroAdjudicator = new Contract(
     adjudicatorAddress,
     adjudicatorInterface,
-    await provider.getSigner()
+    await provider.getSigner(1)
   );
 
   await nitroAdjudicator.functions.pushOutcome(
@@ -176,7 +176,7 @@ async function transferAll(channelId: string, allocation: string, provider: Json
   const assetHolder = new Contract(
     assetHolderAddress,
     assetHolderInterface,
-    await provider.getSigner()
+    await provider.getSigner(1)
   );
 
   assetHolder.functions.transferAll(channelId, allocation);

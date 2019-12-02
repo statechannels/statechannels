@@ -85,7 +85,7 @@ describe('validTransition', () => {
 
 async function sendTransaction(contractAddress: string, transaction: TransactionRequest) {
   // TODO import from test-helpers instead (does not yet exist pending rebase or merge)
-  const signer = provider.getSigner();
+  const signer = provider.getSigner(0);
   const response = await signer.sendTransaction({to: contractAddress, ...transaction});
   await response.wait();
 }

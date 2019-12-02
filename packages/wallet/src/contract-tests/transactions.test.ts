@@ -33,7 +33,7 @@ describe("transactions", () => {
   let participantB = ethers.Wallet.createRandom();
 
   const provider: ethers.providers.JsonRpcProvider = getGanacheProvider();
-  const signer = provider.getSigner();
+  const signer = provider.getSigner(1);
 
   function getNextNonce() {
     return bigNumberify(++nonce).toHexString();
