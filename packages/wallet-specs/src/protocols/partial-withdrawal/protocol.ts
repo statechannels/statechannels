@@ -1,4 +1,4 @@
-import { Allocation, Channel, subtract } from '../..';
+import { add, Allocation, Channel, subtract } from '../..';
 import { isAllocation, shouldBe, store } from '../../store';
 import { saveConfig } from '../../utils';
 import * as ConcludeChannel from '../conclude-channel/protocol';
@@ -8,6 +8,8 @@ import * as LedgerUpdate from '../ledger-update/protocol';
 const PROTOCOL = 'partial-withdrawal';
 const success = { type: 'final' };
 
+/*
+ */
 interface Init {
   ledgerId: string;
   newOutcome: Allocation;
@@ -53,9 +55,21 @@ type NewChannelCreated = Init & { newChannelId: string };
 
 export function concludeOutcome({
   ledgerId,
-  newOutcome: targetOutcome,
+  newOutcome,
+  newChannelId,
 }: NewChannelCreated): LedgerUpdate.Init {
   const { state } = store.getLatestConsensus(ledgerId);
+  const currentlyAllocated = shouldBe(isAllocation, state.outcome)
+    .map(a => a.amount)
+    .reduce(add, 0);
+  const toBeWithdrawn = newOutcome.map(a => a.amount).reduce(add, 0);
+  const targetOutcome = [
+    ...newOutcome,
+    {
+      destination: newChannelId,
+      amount: subtract(currentlyAllocated, toBeWithdrawn),
+    },
+  ];
   return {
     channelID: ledgerId,
     targetOutcome,
