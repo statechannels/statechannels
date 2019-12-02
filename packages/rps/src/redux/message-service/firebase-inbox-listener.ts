@@ -1,5 +1,5 @@
 import { take, call } from 'redux-saga/effects';
-import { buffers } from 'redux-saga';
+// import { buffers } from 'redux-saga';
 import { reduxSagaFirebase } from '../../gateways/firebase';
 import { RPSChannelClient } from '../../utils/rps-channel-client';
 import { Message } from '../../utils/channel-client';
@@ -10,7 +10,8 @@ export function* firebaseInboxListener(client: RPSChannelClient) {
     reduxSagaFirebase.database.channel,
     `/messages/${address.toLowerCase()}`,
     'child_added',
-    buffers.fixed(10)
+    // TODO: @george why was buffers added here?
+    // buffers.fixed(10)
   );
   while (true) {
     const firebaseResponse = yield take(channel);

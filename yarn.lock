@@ -21887,18 +21887,6 @@ redux-saga-test-plan@4.0.0-rc.3:
     object-assign "^4.1.0"
     util-inspect "^0.1.8"
 
-redux-saga-test-plan@^3.7.0:
-  version "3.7.0"
-  resolved "https://registry.yarnpkg.com/redux-saga-test-plan/-/redux-saga-test-plan-3.7.0.tgz#c8f513b1c6e13eef526a6b8a2e9076b6f26f5698"
-  integrity sha512-et9kCnME01kjoKXFfSk4FkozgOPPvllt9TlpL6A7ZYIS/WgoEFMLXk/UYww8KWXbmk5Qo2IF6xCc/IS1KmvP6A==
-  dependencies:
-    core-js "^2.4.1"
-    fsm-iterator "^1.1.0"
-    lodash.isequal "^4.5.0"
-    lodash.ismatch "^4.4.0"
-    object-assign "^4.1.0"
-    util-inspect "^0.1.8"
-
 redux-saga-tester@1.0.381:
   version "1.0.381"
   resolved "https://registry.yarnpkg.com/redux-saga-tester/-/redux-saga-tester-1.0.381.tgz#9ea1348bb887aa67cbe40f33ba67f28b08177a83"
