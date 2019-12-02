@@ -114,7 +114,10 @@ describe('pushOutcome', () => {
       );
 
       // Call public wrapper to set state (only works on test contract)
-      const tx = await TestNitroAdjudicator.setChannelStorageHash(channelId, initialChannelStorageHash);
+      const tx = await TestNitroAdjudicator.setChannelStorageHash(
+        channelId,
+        initialChannelStorageHash
+      );
       await tx.wait();
       expect(await TestNitroAdjudicator.channelStorageHashes(channelId)).toEqual(
         initialChannelStorageHash
