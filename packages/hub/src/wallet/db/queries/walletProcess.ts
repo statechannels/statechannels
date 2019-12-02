@@ -1,8 +1,4 @@
-import {
-  ConcludeInstigated,
-  getProcessId,
-  ProcessProtocol
-} from '@statechannels/wallet/lib/src/communication';
+import {ConcludeInstigated, getProcessId, ProcessProtocol} from '../../../communication';
 import WalletProcess from '../../models/WalletProcess';
 
 export const queries = {

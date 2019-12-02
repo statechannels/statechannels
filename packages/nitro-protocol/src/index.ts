@@ -14,7 +14,12 @@ import {
   replaceAddressesAndBigNumberify,
   setupContracts,
 } from '../test/test-helpers';
-import {getAssetTransferredEvent, getDepositedEvent} from './contract/asset-holder';
+import {
+  getAssetTransferredEvent,
+  getDepositedEvent,
+  convertBytes32ToAddress,
+  convertAddressToBytes32,
+} from './contract/asset-holder';
 import {getChallengeRegisteredEvent} from './contract/challenge';
 import {Channel, getChannelId} from './contract/channel';
 import {encodeConsensusData} from './contract/consensus-data';
@@ -85,6 +90,8 @@ export {
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
   setupContracts,
+  convertAddressToBytes32,
+  convertBytes32ToAddress,
 };
 
 // artifacts
