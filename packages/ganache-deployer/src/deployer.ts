@@ -106,8 +106,8 @@ const addToCache = (key: CacheKey, address: string) => {
 export class GanacheNCacheDeployer {
   etherlimeDeployer: EtherlimeGanacheDeployer;
 
-  constructor(port: number) {
-    this.etherlimeDeployer = new EtherlimeGanacheDeployer(undefined, port);
+  constructor(port: number, privateKey?: string) {
+    this.etherlimeDeployer = new EtherlimeGanacheDeployer(privateKey, port);
   }
 
   public async deploy(

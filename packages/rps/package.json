@@ -12,7 +12,7 @@
     "build:ci": "run-s contracts:compile build:typescript",
     "build:typescript": "npx tsc -b",
     "build:webpack": "CI=false node scripts/build.js",
-    "build": "run-s contracts:clean build:typescript build:webpack",
+    "build": "run-s contracts:compile build:typescript build:webpack",
     "contracts:clean": "rm -rf ./build/contracts",
     "contracts:compile": "yarn contracts:clean && node ./bin/compile.js",
     "contracts:deploy": "npx etherlime deploy --compile=false --file=./deployment/deploy.js",

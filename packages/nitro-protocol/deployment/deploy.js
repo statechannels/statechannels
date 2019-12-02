@@ -11,10 +11,11 @@ const testNitroAdjudicatorArtifact = require('../build/contracts/TESTNitroAdjudi
 const tokenArtifact = require('../build/contracts/Token.json');
 const trivialAppArtifact = require('../build/contracts/TrivialApp.json');
 
+const {ETHERLIME_ACCOUNTS} = require('@statechannels/devtools');
 const {GanacheNCacheDeployer} = require('@statechannels/ganache-deployer');
 
 const deploy = async (_network, _secret, _etherscanApiKey) => {
-  const deployer = new GanacheNCacheDeployer(8547);
+  const deployer = new GanacheNCacheDeployer(8547, ETHERLIME_ACCOUNTS[2].privateKey);
 
   const nitroAdjudicatorAddress = await deployer.deploy(nitroAdjudicatorArtifact);
 
