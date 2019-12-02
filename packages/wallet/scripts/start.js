@@ -30,7 +30,8 @@ const {choosePort} = require("react-dev-utils/WebpackDevServerUtils");
 const paths = require("../config/paths");
 const configFactory = require("../config/webpack.config");
 const {getNetworkName} = require("@statechannels/devtools");
-const {startGanacheAndDeploy} = require("@statechannels/ganache-deployer");
+const {GanacheServer} = require("@statechannels/devtools");
+const {deploy} = require("../deployment/deploy");
 
 void (async () => {
   process.on("SIGINT", () => {
@@ -83,7 +84,27 @@ void (async () => {
   }
 
   console.log(chalk.cyan("Starting ganache and deploying contract..."));
-  ganacheServer = await startGanacheAndDeploy();
+  ganacheServer = new GanacheServer(
+    Number(process.env.GANACHE_PORT),
+    Number(process.env.CHAIN_NETWORK_ID)
+  );
+  await ganacheServer.ready();
+
+  const {
+    CONSENSUS_APP_ADDRESS,
+    TRIVIAL_APP_ADDRESS,
+    NITRO_ADJUDICATOR_ADDRESS,
+    ETH_ASSET_HOLDER_ADDRESS,
+    TEST_TOKEN_ADDRESS,
+    TEST_TOKEN_ASSET_HOLDER_ADDRESS
+  } = await deploy();
+
+  process.env.CONSENSUS_APP_ADDRESS = CONSENSUS_APP_ADDRESS;
+  process.env.TRIVIAL_APP_ADDRESS = TRIVIAL_APP_ADDRESS;
+  process.env.NITRO_ADJUDICATOR_ADDRESS = NITRO_ADJUDICATOR_ADDRESS;
+  process.env.ETH_ASSET_HOLDER_ADDRESS = ETH_ASSET_HOLDER_ADDRESS;
+  process.env.TEST_TOKEN_ADDRESS = TEST_TOKEN_ADDRESS;
+  process.env.TEST_TOKEN_ASSET_HOLDER_ADDRESS = TEST_TOKEN_ASSET_HOLDER_ADDRESS;
 
   process.env.TARGET_NETWORK = getNetworkName(process.env.CHAIN_NETWORK_ID);
 

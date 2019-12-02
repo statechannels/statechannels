@@ -1,5 +1,4 @@
 import {spawn} from 'child_process';
-import {EtherlimeGanacheDeployer} from 'etherlime-lib';
 import {ethers} from 'ethers';
 import {JsonRpcProvider} from 'ethers/providers';
 import log from 'loglevel';
@@ -7,7 +6,7 @@ import {waitUntilFree, waitUntilUsed} from 'tcp-port-used';
 import kill from 'tree-kill';
 
 import {ETHERLIME_ACCOUNTS} from '../constants';
-import {Account, DeployedArtifacts, Deployment} from '../types';
+import {Account} from '../types';
 
 log.setDefaultLevel(log.levels.INFO);
 
@@ -18,14 +17,13 @@ export class GanacheServer {
 
   constructor(
     public readonly port: number = 8545,
+    public readonly chainId: number = 9001,
     accounts: Account[] = ETHERLIME_ACCOUNTS,
     public readonly timeout: number = 5000,
     gasLimit = 1000000000,
     gasPrice = '0x01'
   ) {
-    log.info(
-      `Starting ganache on port ${this.port} with network ID ${process.env.GANACHE_NETWORK_ID}`
-    );
+    log.info(`Starting ganache on port ${this.port} with network ID ${this.chainId}`);
 
     this.fundedPrivateKey = accounts[0].privateKey;
 
@@ -33,7 +31,7 @@ export class GanacheServer {
 
     const concat = (a, b) => a.concat(b);
     const opts = [
-      [`--networkId ${process.env.GANACHE_NETWORK_ID}`, `--port ${this.port}`],
+      [`--networkId ${this.chainId}`, `--port ${this.port}`],
       accounts.map(a => `--account ${a.privateKey},${a.amount || oneMillion}`),
       [`--gasLimit ${gasLimit}`, `--gasPrice ${gasPrice}`]
     ]
@@ -72,27 +70,27 @@ export class GanacheServer {
   onClose(listener: () => void) {
     this.server.on('close', listener);
   }
+  // TODO: Obsolete?
+  // async deployContracts(deployments: (Deployment | any)[]): Promise<DeployedArtifacts> {
+  //   const deployer = new EtherlimeGanacheDeployer(undefined, Number(process.env.GANACHE_PORT));
 
-  async deployContracts(deployments: (Deployment | any)[]): Promise<DeployedArtifacts> {
-    const deployer = new EtherlimeGanacheDeployer(undefined, Number(process.env.GANACHE_PORT));
+  //   const deployedArtifacts: DeployedArtifacts = {};
+  //   for (const deployment of deployments) {
+  //     const artifact = deployment.artifact || deployment;
 
-    const deployedArtifacts: DeployedArtifacts = {};
-    for (const deployment of deployments) {
-      const artifact = deployment.artifact || deployment;
+  //     let args: string[] = [];
+  //     if (deployment.arguments) {
+  //       args = deployment.arguments(deployedArtifacts);
+  //     }
 
-      let args: string[] = [];
-      if (deployment.arguments) {
-        args = deployment.arguments(deployedArtifacts);
-      }
+  //     const deployedArtifact = await deployer.deploy(artifact, undefined, ...args);
 
-      const deployedArtifact = await deployer.deploy(artifact, undefined, ...args);
-
-      deployedArtifacts[artifact.contractName] = {
-        address: deployedArtifact.contractAddress,
-        abi: JSON.stringify(artifact.abi)
-      };
-    }
-    log.info(`Contracts deployed to chain`);
-    return deployedArtifacts;
-  }
+  //     deployedArtifacts[artifact.contractName] = {
+  //       address: deployedArtifact.contractAddress,
+  //       abi: JSON.stringify(artifact.abi)
+  //     };
+  //   }
+  //   log.info(`Contracts deployed to chain`);
+  //   return deployedArtifacts;
+  // }
 }
