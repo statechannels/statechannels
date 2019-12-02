@@ -8,7 +8,7 @@ export interface DepositedEvent {
 }
 
 export interface AssetTransferredEvent {
-  origin: string;
+  channelId: string;
   destination: string;
   amount: BigNumber;
 }
@@ -23,9 +23,9 @@ export function getDepositedEvent(eventResult: any[]): DepositedEvent {
 }
 
 export function getAssetTransferredEvent(eventResult: any[]): AssetTransferredEvent {
-  const {origin, destination, amount} = parseEventResult(eventResult);
+  const {channelId, destination, amount} = parseEventResult(eventResult);
   return {
-    origin,
+    channelId,
     destination,
     amount: bigNumberify(amount),
   };

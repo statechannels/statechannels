@@ -32,7 +32,7 @@ export function* assetHoldersWatcher(provider: Web3Provider) {
     if (eventType === AssetHolderEventType.Deposited) {
       channelId = getDepositedEvent(eventResult).destination;
     } else if (eventType === AssetHolderEventType.AssetTransferred) {
-      channelId = getAssetTransferredEvent(eventResult).origin;
+      channelId = getAssetTransferredEvent(eventResult).channelId;
     } else {
       continue;
     }

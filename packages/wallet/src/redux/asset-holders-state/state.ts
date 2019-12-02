@@ -86,7 +86,7 @@ export function recordDeposit(
 export function recordAssetTransfer(
   assetHoldersState: AssetHoldersState,
   assetHolderAddress: string,
-  origin: string,
+  channelId: string,
   // @ts-ignore
   destination: string, // TODO: Should we take this into account?
   amount: BigNumber
@@ -94,7 +94,7 @@ export function recordAssetTransfer(
   const assetHolderChannelState = getOrCreateAssetHolderChannelState(
     assetHoldersState,
     assetHolderAddress,
-    origin
+    channelId
   );
   const newAssetHolderChannelState = {
     ...assetHolderChannelState,
