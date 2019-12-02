@@ -4,9 +4,9 @@ import {JsonRpcProvider} from 'ethers/providers';
 import log from 'loglevel';
 import {waitUntilFree, waitUntilUsed} from 'tcp-port-used';
 import kill from 'tree-kill';
-
+import {EtherlimeGanacheDeployer} from 'etherlime-lib';
 import {ETHERLIME_ACCOUNTS} from '../constants';
-import {Account} from '../types';
+import {Account, DeployedArtifacts, Deployment} from '../types';
 
 log.setDefaultLevel(log.levels.INFO);
 
@@ -70,27 +70,27 @@ export class GanacheServer {
   onClose(listener: () => void) {
     this.server.on('close', listener);
   }
-  // TODO: Obsolete?
-  // async deployContracts(deployments: (Deployment | any)[]): Promise<DeployedArtifacts> {
-  //   const deployer = new EtherlimeGanacheDeployer(undefined, Number(process.env.GANACHE_PORT));
 
-  //   const deployedArtifacts: DeployedArtifacts = {};
-  //   for (const deployment of deployments) {
-  //     const artifact = deployment.artifact || deployment;
+  async deployContracts(deployments: (Deployment | any)[]): Promise<DeployedArtifacts> {
+    const deployer = new EtherlimeGanacheDeployer(undefined, Number(process.env.GANACHE_PORT));
 
-  //     let args: string[] = [];
-  //     if (deployment.arguments) {
-  //       args = deployment.arguments(deployedArtifacts);
-  //     }
+    const deployedArtifacts: DeployedArtifacts = {};
+    for (const deployment of deployments) {
+      const artifact = deployment.artifact || deployment;
 
-  //     const deployedArtifact = await deployer.deploy(artifact, undefined, ...args);
+      let args: string[] = [];
+      if (deployment.arguments) {
+        args = deployment.arguments(deployedArtifacts);
+      }
 
-  //     deployedArtifacts[artifact.contractName] = {
-  //       address: deployedArtifact.contractAddress,
-  //       abi: JSON.stringify(artifact.abi)
-  //     };
-  //   }
-  //   log.info(`Contracts deployed to chain`);
-  //   return deployedArtifacts;
-  // }
+      const deployedArtifact = await deployer.deploy(artifact, undefined, ...args);
+
+      deployedArtifacts[artifact.contractName] = {
+        address: deployedArtifact.contractAddress,
+        abi: JSON.stringify(artifact.abi)
+      };
+    }
+    log.info(`Contracts deployed to chain`);
+    return deployedArtifacts;
+  }
 }
