@@ -2,7 +2,7 @@ import { Weapon } from './weapons';
 import { defaultAbiCoder, bigNumberify, keccak256 } from 'ethers/utils';
 import { HashZero } from 'ethers/constants';
 import { randomHex } from '../utils/randomHex';
-import { unreachable } from 'src/utils/unreachable';
+import { unreachable } from '../utils/unreachable';
 
 export enum PositionType {
   Start, // 0
