@@ -51,7 +51,6 @@ function* loginStatusWatcherSaga() {
 
 export default function* loginRootSaga() {
   yield take(loginActions.WALLET_IFRAME_LOADED);
-  ethereum.enable();
 
   const metaMask = yield metamaskSaga();
 
@@ -59,7 +58,7 @@ export default function* loginRootSaga() {
   if (!metaMask) {
     return;
   }
-
+  ethereum.enable();
   yield fork(loginStatusWatcherSaga);
   yield all([
     takeEvery(loginActions.LOGIN_REQUEST, loginSaga),
