@@ -7,10 +7,8 @@
   "author": "",
   "license": "MIT",
   "scripts": {
-    "contracts:clean": "rm -rf ./build/contracts",
-    "contracts:compile": "yarn contracts:clean && node ./bin/compile.js",
     "contracts:deploy": "npx etherlime deploy --compile=false --file=./deployment/deploy.js",
-    "contracts:prepare": "run-s contracts:clean contracts:compile contracts:deploy",
+    "contracts:prepare": "run-s contracts:deploy",
     "db:drop": "dropdb server_wallet_${NODE_ENV}",
     "db:create": "createdb server_wallet_${NODE_ENV}",
     "db:migrate": "npx knex migrate:latest",
