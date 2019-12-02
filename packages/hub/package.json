@@ -61,7 +61,6 @@
     "@types/node": "11.15.2",
     "@types/supertest": "2.0.8",
     "@typescript-eslint/eslint-plugin": "^2.7.0",
-    "@typescript-eslint/eslint-plugin-tslint": "^2.7.0",
     "@typescript-eslint/parser": "^2.7.0",
     "babel-register": "6.26.0",
     "eslint": "^6.6.0",
