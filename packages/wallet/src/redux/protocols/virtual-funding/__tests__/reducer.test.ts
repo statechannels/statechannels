@@ -15,7 +15,7 @@ import {
 } from "../../../__tests__/state-helpers";
 import {bigNumberify} from "ethers/utils";
 import {ETH_ASSET_HOLDER_ADDRESS} from "../../../../constants";
-import {convertAddressToBytes32} from "../../../../utils/data-type-utils";
+import {convertAddressToBytes32} from "@statechannels/nitro-protocol";
 
 const itTransitionsTo = (
   result: states.VirtualFundingState,
