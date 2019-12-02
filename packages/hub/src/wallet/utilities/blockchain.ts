@@ -1,4 +1,4 @@
-import EthAssetHolderArtifact from '@statechannels/nitro-protocol/build/contracts/ETHAssetHolder.json';
+import EthAssetHolderArtifact from '@statechannels/nitro-protocol';
 import {getNetworkContext} from '@statechannels/ganache-deployer';
 
 import {ContractFactory, ethers, providers} from 'ethers';
