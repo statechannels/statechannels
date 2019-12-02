@@ -20,7 +20,6 @@ coverage
 # misc
 package-lock.json
 .DS_Store
-.vscode
 .idea/
 *.iml
 *.sw[op]
