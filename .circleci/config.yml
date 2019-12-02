@@ -11,22 +11,12 @@ defaults: &defaults
         POSTGRES_DB: server_wallet_test
         POSTGRES_PASSWORD: ''
 
-save_code: &save_code
-  save_cache:
-    key: code-{{ .Revision }}
-    paths:
-      - .git
-
 save_dep: &save_dep
   save_cache:
     key: dependency-cache-{{ checksum "yarn.lock" }}
     paths:
       - node_modules
       - packages/*/node_modules
-
-restore_code: &restore_code
-  restore_cache:
-    key: code-{{ .Revision }}
 
 restore_dep: &restore_dep
   restore_cache:
@@ -58,11 +48,9 @@ jobs:
   prepare:
     <<: *defaults
     steps:
-      - <<: *restore_code
       - checkout
       - log_stats:
           file: prepare-stats
-      - <<: *save_code
       - <<: *restore_dep
       - run: yarn --frozen-lockfile
       - <<: *save_dep
@@ -81,7 +69,6 @@ jobs:
   build:
     <<: *defaults
     steps:
-      - <<: *restore_code
       - checkout
       - attach_workspace:
           at: /home/circleci/project
@@ -91,7 +78,6 @@ jobs:
   test:
     <<: *defaults
     steps:
-      - <<: *restore_code
       - checkout
       - log_stats:
           file: test-stats
@@ -113,7 +99,6 @@ jobs:
   integration-test:
     <<: *defaults
     steps:
-      - <<: *restore_code
       - checkout:
           path: /home/circleci/project
       - log_stats:
