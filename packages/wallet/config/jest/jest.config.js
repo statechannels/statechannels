@@ -5,7 +5,7 @@ module.exports = {
   rootDir: root,
   collectCoverageFrom: ["src/**/*.{js,jsx,ts,tsx}"],
   setupFiles: ["<rootDir>/config/polyfills.js"],
-  setupFilesAfterEnv: ["<rootDir>/src/setupTests.ts"],
+  setupFilesAfterEnv: ["<rootDir>/jest/test-setup.ts"],
   testMatch: ["<rootDir>/src/**/__tests__/?(*.)test.ts?(x)"],
   testEnvironment: "jsdom",
   testURL: "http://localhost",
