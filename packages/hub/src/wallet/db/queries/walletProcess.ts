@@ -1,7 +1,4 @@
-import {
-  ConcludeInstigated,
-  getProcessId
-} from '@statechannels/wallet/lib/src/communication';
+import {ConcludeInstigated, getProcessId} from '@statechannels/wallet/lib/src/communication';
 import {ProcessProtocol} from '../../../constants';
 import WalletProcess from '../../models/WalletProcess';
 
