@@ -31,5 +31,8 @@ module.exports = {
     "json",
     "node",
     "mjs"
-  ]
+  ],
+  globals: {
+    PureEVM: require("pure-evm")
+  }
 };

@@ -9,17 +9,6 @@ import {
 import {hasValidSignature} from "../../../utils/signing-utils";
 import {defaultAbiCoder, Interface, bigNumberify} from "ethers/utils";
 
-let PureEVM;
-if (
-  typeof window === "undefined" ||
-  (typeof process !== "undefined" && process.env.NODE_ENV === "test")
-) {
-  // tslint:disable
-  PureEVM = require("pure-evm");
-} else {
-  import(/* webpackMode: "eager" */ "pure-evm").then(x => (PureEVM = x));
-}
-
 export function validTransition(channelState: ChannelState, state: State): boolean {
   const channelNonce = state.channel.channelNonce;
   const channelId = getChannelId(state.channel);
@@ -59,7 +48,6 @@ export function validAppTransition(
     turnNumB,
     numberOfParticipants
   ]);
-
   const result = PureEVM.exec(
     Uint8Array.from(Buffer.from(bytecode.substr(2), "hex")),
     Uint8Array.from(Buffer.from(txData.substr(2), "hex"))
