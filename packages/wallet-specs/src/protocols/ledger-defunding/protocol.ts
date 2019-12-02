@@ -40,7 +40,7 @@ const defundTarget = {
   },
 };
 
-const ledgerFundingConfig = {
+const config = {
   key: PROTOCOL,
   initial: 'concludeTarget',
   states: {
@@ -52,4 +52,4 @@ const ledgerFundingConfig = {
 
 const guards = {};
 
-saveConfig(ledgerFundingConfig, __dirname, { guards });
+saveConfig(config, __dirname, { guards });

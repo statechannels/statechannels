@@ -4,7 +4,7 @@ import { saveConfig } from '../../utils';
 
 const PROTOCOL = 'conclude-channel';
 
-interface Init {
+export interface Init {
   channelID: string;
 }
 

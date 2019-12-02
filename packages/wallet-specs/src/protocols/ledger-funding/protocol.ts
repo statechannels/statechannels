@@ -21,8 +21,6 @@ My wallet's rule is to have at most one ledger channel open with any given peer.
 Therefore, two correct wallets should agree on which existing ledger channel, if any, to use
 in order to fund the target channel.
 
-TODO: Sort out behaviour if one wallet is missing the ledger channel?
-
 A peer is identified by their participantId.
 */
 
