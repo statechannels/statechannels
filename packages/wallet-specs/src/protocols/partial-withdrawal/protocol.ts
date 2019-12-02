@@ -1,5 +1,5 @@
-import { Allocation } from '../..';
-import { store } from '../../store';
+import { Allocation, Channel, subtract } from '../..';
+import { isAllocation, shouldBe, store } from '../../store';
 import { saveConfig } from '../../utils';
 import * as ConcludeChannel from '../conclude-channel/protocol';
 import * as CreateNullChannel from '../create-null-channel/protocol';
@@ -14,12 +14,31 @@ interface Init {
   participantMapping: Record<string, string>;
 }
 
-function replacementChannelArgs({ ledgerId }: Init): CreateNullChannel.Init {
-  // TODO: Properly compute new outcome and channel
-  const { channel: newChannel, outcome } = store.getLatestState(ledgerId);
+function replacementChannelArgs({
+  ledgerId,
+  newOutcome,
+  participantMapping,
+}: Init): CreateNullChannel.Init {
+  const { channel, outcome } = store.getLatestConsensus(ledgerId).state;
+  const newParticipants = channel.participants
+    .filter(p => newOutcome.find(allocation => allocation.destination === p))
+    .map(p => participantMapping[p]);
+  const newChannel: Channel = {
+    chainId: channel.chainId,
+    participants: newParticipants,
+    channelNonce: store.getNextNonce(newParticipants),
+  };
+
+  const newChannelOutcome: Allocation = shouldBe(isAllocation, outcome).map(
+    ({ destination, amount }) => ({
+      destination: participantMapping[destination],
+      amount: subtract(outcome[destination], newOutcome[destination]),
+    })
+  );
+
   return {
     channel: newChannel,
-    outcome,
+    outcome: newChannelOutcome,
   };
 }
 const createReplacement = {
@@ -32,9 +51,11 @@ const createReplacement = {
 };
 type NewChannelCreated = Init & { newChannelId: string };
 
-export function newOutcome({ ledgerId }: NewChannelCreated): LedgerUpdate.Init {
+export function concludeOutcome({
+  ledgerId,
+  newOutcome: targetOutcome,
+}: NewChannelCreated): LedgerUpdate.Init {
   const { state } = store.getLatestConsensus(ledgerId);
-  const targetOutcome = state.outcome; // TODO: update
   return {
     channelID: ledgerId,
     targetOutcome,
@@ -44,7 +65,7 @@ export function newOutcome({ ledgerId }: NewChannelCreated): LedgerUpdate.Init {
 const updateOutcome = {
   invoke: {
     src: 'ledgerUpdate',
-    data: newOutcome.name,
+    data: concludeOutcome.name,
     onDone: 'concludeOldChannel',
   },
 };
