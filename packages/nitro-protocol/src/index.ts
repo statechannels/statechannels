@@ -7,6 +7,15 @@ import {
   replaceAddressesAndBigNumberify,
   setupContracts,
 } from '../test/test-helpers';
+
+// artifacts
+import NitroAdjudicatorArtifact from '../build/contracts/NitroAdjudicator.json';
+import TrivialAppArtifact from '../build/contracts/TrivialApp.json';
+import TokenArtifact from '../build/contracts/Token.json';
+import Erc20AssetHolderArtifact from '../build/contracts/ERC20AssetHolder.json';
+import EthAssetHolderArtifact from '../build/contracts/ETHAssetHolder.json';
+import ConsensusAppArtifact from '../build/contracts/ConsensusApp.json';
+
 import {
   getAssetTransferredEvent,
   getDepositedEvent,
@@ -85,4 +94,11 @@ export {
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
   setupContracts,
+  // artifacts
+  NitroAdjudicatorArtifact,
+  TrivialAppArtifact,
+  Erc20AssetHolderArtifact,
+  EthAssetHolderArtifact,
+  TokenArtifact,
+  ConsensusAppArtifact,
 };
