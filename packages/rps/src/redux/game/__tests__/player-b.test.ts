@@ -151,7 +151,7 @@ describe('when player B receives the reveal', () => {
     });
   });
   describe('and player B is out of funds', () => {
-    it('calls closeChannel and transitions to ShuttingDown', async () => {
+    it('calls closeChannel and transitions to InsufficientFunds', async () => {
       const initialState = gameState(
         localStatesB.weaponChosen,
         channelStates.roundAcceptedInsufficientFundsB
@@ -165,7 +165,7 @@ describe('when player B receives the reveal', () => {
         .run({ silenceTimeout: true });
 
       expect(storeState).toEqual(
-        gameState(localStatesB.shuttingDown, channelStates.concludeInsufficientFundsB)
+        gameState(localStatesB.insufficientFunds, channelStates.concludeInsufficientFundsB)
       );
     });
   });
@@ -200,7 +200,7 @@ describe('when the player resigns (which includes deciding not to play again)', 
         .run({ silenceTimeout: true });
 
       expect(storeState).toEqual(
-        gameState(localStatesB.shuttingDownResign, channelStates.concludeFromProposed)
+        gameState(localStatesB.resigned, channelStates.concludeFromProposed)
       );
     });
   });
@@ -216,13 +216,11 @@ describe('when the player resigns (which includes deciding not to play again)', 
         .dispatch(action)
         .run({ silenceTimeout: true });
 
-      expect(storeState).toEqual(
-        gameState(localStatesB.shuttingDownResign, channelStates.postFund1)
-      );
+      expect(storeState).toEqual(gameState(localStatesB.resigned, channelStates.postFund1));
     });
 
     it('later calls closeChannel, when another state arrives', async () => {
-      const initialState = gameState(localStatesB.shuttingDownResign, channelStates.postFund1);
+      const initialState = gameState(localStatesB.resigned, channelStates.postFund1);
       const action = updateChannelState(channelStates.roundProposed); // triggered by ChannelUpdatedListener
 
       const { storeState } = await expectSaga(gameSaga as any, client)
@@ -232,7 +230,7 @@ describe('when the player resigns (which includes deciding not to play again)', 
         .run({ silenceTimeout: true });
 
       expect(storeState).toEqual(
-        gameState(localStatesB.shuttingDownResign, channelStates.concludeFromProposed)
+        gameState(localStatesB.resigned, channelStates.concludeFromProposed)
       );
     });
   });
@@ -242,7 +240,7 @@ describe('when the player resigns (which includes deciding not to play again)', 
 
 describe('when the channel is closed', () => {
   it('transitions to game over', async () => {
-    const initialState = gameState(localStatesB.shuttingDownResign, channelStates.roundProposed);
+    const initialState = gameState(localStatesB.resigned, channelStates.roundProposed);
     const action = updateChannelState(channelStates.closed); // triggered by ChannelUpdatedListener
 
     const { storeState } = await expectSaga(gameSaga as any, client)
@@ -250,6 +248,6 @@ describe('when the channel is closed', () => {
       .dispatch(action)
       .run({ silenceTimeout: true });
 
-    expect(storeState).toEqual(gameState(localStatesB.gameOverResign, channelStates.closed));
+    expect(storeState).toEqual(gameState(localStatesB.gameOver, channelStates.closed));
   });
 });

@@ -13,7 +13,8 @@ export type LocalStateWithPlayer =
   | WeaponAndSaltChosen
   | ResultPlayAgain
   | WaitForRestart
-  | ShuttingDown
+  | InsufficientFunds
+  | Resigned
   | GameOver;
 
 export type LocalState =
@@ -23,6 +24,7 @@ export type LocalState =
   | CreatingOpenGame
   | WaitingRoom
   | LocalStateWithPlayer;
+
 export type PlayingState =
   | GameChosen
   | OpponentJoined
@@ -31,7 +33,7 @@ export type PlayingState =
   | WeaponAndSaltChosen
   | ResultPlayAgain
   | WaitForRestart
-  | ShuttingDown
+  | InsufficientFunds
   | GameOver;
 
 export interface Empty {
@@ -110,22 +112,19 @@ export interface WaitForRestart extends Playing {
   result: Result;
 }
 
-export type ShutDownReason =
-  | 'InsufficientFundsYou'
-  | 'InsufficientFundsOpponent'
-  | 'YouResigned'
-  | 'TheyResigned';
-export interface ShuttingDown extends Playing {
-  type: 'ShuttingDown';
-  reason: ShutDownReason;
-  myWeapon?: Weapon;
-  theirWeapon?: Weapon;
-  result?: Result;
+export interface InsufficientFunds extends Playing {
+  type: 'InsufficientFunds';
+  myWeapon: Weapon;
+  theirWeapon: Weapon;
+  result: Result;
+}
+
+export interface Resigned extends Playing {
+  type: 'Resigned';
 }
 
 export interface GameOver extends Playing {
   type: 'GameOver';
-  reason: ShutDownReason;
 }
 
 // Helpers
@@ -220,24 +219,26 @@ export const waitForRestart = <T extends Playing & { myWeapon: Weapon }>(
   result,
 });
 
-export const shuttingDown = <T extends Playing & { myWeapon?: Weapon }>(
+export const insufficientFunds = <T extends Playing & { myWeapon: Weapon }>(
   state: T,
-  reason: ShutDownReason,
-  theirWeapon?: Weapon,
-  result?: Result
-): ShuttingDown => ({
-  type: 'ShuttingDown',
+  theirWeapon: Weapon,
+  result: Result
+): InsufficientFunds => ({
+  type: 'InsufficientFunds',
   ...playing(state),
   myWeapon: state.myWeapon,
   theirWeapon,
   result,
-  reason,
 });
 
-export const gameOver = <T extends Playing>(state: T, reason: ShutDownReason): GameOver => ({
+export const resigned = <T extends Playing>(state: T): Resigned => ({
+  type: 'Resigned',
+  ...playing(state),
+});
+
+export const gameOver = <T extends Playing>(state: T): GameOver => ({
   type: 'GameOver',
   ...playing(state),
-  reason,
 });
 
 // Helpers

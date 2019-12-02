@@ -7,7 +7,7 @@ import {
   lobby,
   waitForRestart,
   chooseWeapon,
-  shuttingDown,
+  resigned,
   gameChosen,
   waitingRoom,
   opponentJoined,
@@ -15,6 +15,7 @@ import {
   GameState,
   creatingOpenGame,
   needAddress,
+  insufficientFunds,
 } from './state';
 import { Reducer, combineReducers } from 'redux';
 import {
@@ -34,6 +35,7 @@ import {
   CancelGame,
   NewOpenGame,
   GotAddressFromWallet,
+  ExitToLobby,
 } from './actions';
 import { ChannelState } from '../../core';
 import { unreachable } from '../../utils/unreachable';
@@ -84,6 +86,8 @@ const localReducer: Reducer<LocalState> = (
       return handleResign(state, action);
     case 'GameOver':
       return handleGameOver(state, action);
+    case 'ExitToLobby':
+      return handleExitToLobby(state, action);
     default:
       return unreachable(action, state);
   }
@@ -194,9 +198,8 @@ const handleResultArrived = (state: LocalState, action: ResultArrived): LocalSta
     case 'Ok':
       return resultPlayAgain(state, theirWeapon, result);
     case 'MyFundsTooLow':
-      return shuttingDown(state, 'InsufficientFundsYou', theirWeapon, result);
     case 'OpponentsFundsTooLow':
-      return shuttingDown(state, 'InsufficientFundsOpponent', theirWeapon, result);
+      return insufficientFunds(state, theirWeapon, result);
     default:
       return state;
   }
@@ -231,7 +234,7 @@ const handleResign = (state: LocalState, action: Resign): LocalState => {
   ) {
     return state;
   }
-  return shuttingDown({ ...state, myWeapon: undefined }, 'YouResigned');
+  return resigned(state);
 };
 
 const handleGameOver = (state: LocalState, action: GameOver): LocalState => {
@@ -244,7 +247,12 @@ const handleGameOver = (state: LocalState, action: GameOver): LocalState => {
   ) {
     return state;
   }
-  const { reason } = action;
+  return gameOver(state);
+};
 
-  return gameOver(state, reason);
+const handleExitToLobby = (state: LocalState, action: ExitToLobby): LocalState => {
+  if (state.type !== 'GameOver') {
+    return state;
+  }
+  return lobby(state);
 };

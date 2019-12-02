@@ -17,6 +17,9 @@ export interface ChannelState<T = AppData> {
 
 export type MaybeChannelState = ChannelState | null;
 
+export const isClosing = (state: MaybeChannelState): state is ChannelState =>
+  (state && state.status === 'closing') || false;
+
 export const isClosed = (state: MaybeChannelState): state is ChannelState =>
   (state && state.status === 'closed') || false;
 
