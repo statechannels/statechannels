@@ -1,5 +1,6 @@
 import {CompiledContract, EtherlimeGanacheDeployer} from 'etherlime-lib';
 import log from 'loglevel';
+import {colors} from 'etherlime-utils';
 
 export class GanacheDeployer {
   etherlimeDeployer: EtherlimeGanacheDeployer;
@@ -14,7 +15,11 @@ export class GanacheDeployer {
     ...args
   ): Promise<string> {
     const deployedContract = await this.etherlimeDeployer.deploy(contract, libraries, ...args);
-    log.info(`Contract ${contract.contractName} deployed to ganache`);
+    log.info(
+      `Contract ${contract.contractName} deployed to ganache: ${colors.colorAddress(
+        deployedContract.contractAddress
+      )}`
+    );
     return deployedContract.contractAddress;
   }
 }
