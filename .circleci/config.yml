@@ -84,7 +84,9 @@ jobs:
           file: test-stats
       - attach_workspace:
           at: /home/circleci/project
-      - run: yarn test:ci
+      - run:
+          command: yarn test:ci
+          no_output_timeout: 20m
       - upload_logs:
           file: test-stats
 
