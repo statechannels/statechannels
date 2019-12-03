@@ -2,7 +2,6 @@
   "extends": "../../tsconfig.json",
   "include": ["src/**/*.ts"],
   "compilerOptions": {
-    "composite": true,
     "outDir": "lib",
     "rootDir": "src",
     "module": "commonjs" /* Specify module code generation: 'none', 'commonjs', 'amd', 'system', 'umd', 'es2015', or 'ESNext'. */,
@@ -12,8 +11,5 @@
     "moduleResolution": "node" /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */,
     "types": ["node"],
     "noUnusedLocals": true
-  },
-  "references": [
-    { "path": "../devtools" }
-  ]
+  }
 }

@@ -21,7 +21,7 @@
   },
   "scripts": {
     "start:ganache": "npx ts-node src/start-script.ts",
-    "build": "npx tsc -b",
+    "build": "npx tsc",
     "prettier:check": "npx prettier --check 'src/**/*.ts'",
     "prettier:write": "npx prettier --write 'src/**/*.ts'",
     "lint:check": "npx eslint \"*/**/*.{js,ts}\" --cache",
@@ -48,8 +48,6 @@
   },
   "dependencies": {
     "@statechannels/devtools": "^0.1.21",
-    "@statechannels/nitro-protocol": "^0.0.1",
-    "@statechannels/rps": "^0.0.1",
     "koa": "2.11.0",
     "ts-node": "8.5.2",
     "write-json-file": "4.2.0"

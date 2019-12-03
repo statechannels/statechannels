@@ -1,86 +1,152 @@
-import {DeployedArtifacts, GanacheServer} from '@statechannels/devtools';
-import log from 'loglevel';
+import fs from 'fs';
+import path from 'path';
+import {CompiledContract, EtherlimeGanacheDeployer} from 'etherlime-lib';
+import {logger} from 'etherlime-logger';
+import {colors} from 'etherlime-utils';
+import writeJsonFile from 'write-json-file';
 
-/* eslint-disable import/no-unresolved */
-// @ts-ignore
-import consensusAppArtifact from '@statechannels/nitro-protocol/build/contracts/ConsensusApp.json';
-/* eslint-enable import/no-unresolved */
-import countingAppArtifact from '@statechannels/nitro-protocol/build/contracts/CountingApp.json';
-import erc20AssetHolderArtifact from '@statechannels/nitro-protocol/build/contracts/ERC20AssetHolder.json';
-import ethAssetHolderArtifact from '@statechannels/nitro-protocol/build/contracts/ETHAssetHolder.json';
-import nitroAdjudicatorArtifact from '@statechannels/nitro-protocol/build/contracts/NitroAdjudicator.json';
-import singleAssetPaymentsArtifact from '@statechannels/nitro-protocol/build/contracts/SingleAssetPayments.json';
-import testAssetHolderArtifact1 from '@statechannels/nitro-protocol/build/contracts/TESTAssetHolder.json';
-import testAssetHolderArtifact2 from '@statechannels/nitro-protocol/build/contracts/TESTAssetHolder2.json';
-import testForceMoveArtifact from '@statechannels/nitro-protocol/build/contracts/TESTForceMove.json';
-import testNitroAdjudicatorArtifact from '@statechannels/nitro-protocol/build/contracts/TESTNitroAdjudicator.json';
-import tokenArtifact from '@statechannels/nitro-protocol/build/contracts/Token.json';
-import trivialAppArtifact from '@statechannels/nitro-protocol/build/contracts/TrivialApp.json';
-// @ts-ignore
-import forceMoveAppArtifact from '@statechannels/rps/build/contracts/ForceMoveApp.json';
-import rpsArtifact from '@statechannels/rps/build/contracts/RockPaperScissors.json';
+const GANACHE_CONTRACTS_FILE = 'ganache-network-context.json';
+const GANACHE_CONTRACTS_PATH = path.join(__dirname, '../', GANACHE_CONTRACTS_FILE);
 
-export async function deployContracts(chain: GanacheServer): Promise<object> {
-  log.info(`Deploying built contracts to chain at: ${chain.provider.connection.url}`);
+interface CacheKey {
+  name: string;
+  libraries: Record<string, string>; // name -> address
+  args: any[];
+  bytecode: string;
+}
 
-  return chain.deployContracts([
-    rpsArtifact,
-    forceMoveAppArtifact,
-    consensusAppArtifact,
-    testForceMoveArtifact,
-    trivialAppArtifact,
-    countingAppArtifact,
-    singleAssetPaymentsArtifact,
-    nitroAdjudicatorArtifact,
-    testNitroAdjudicatorArtifact,
-    tokenArtifact,
-    {
-      artifact: erc20AssetHolderArtifact,
-      arguments: (deployedArtifacts: DeployedArtifacts) => {
-        if (nitroAdjudicatorArtifact.contractName in deployedArtifacts) {
-          return [
-            deployedArtifacts[nitroAdjudicatorArtifact.contractName].address,
-            deployedArtifacts[tokenArtifact.contractName].address,
-          ];
-        }
-        throw Error(`${erc20AssetHolderArtifact.contractName} requires that the following contracts are deployed:
-          - ${nitroAdjudicatorArtifact.contractName}
-          - ${tokenArtifact.contractName}
-        `);
-      },
-    },
-    {
-      artifact: ethAssetHolderArtifact,
-      arguments: (deployedArtifacts: DeployedArtifacts) => {
-        if (nitroAdjudicatorArtifact.contractName in deployedArtifacts) {
-          return [deployedArtifacts[nitroAdjudicatorArtifact.contractName].address];
-        }
-        throw Error(`${ethAssetHolderArtifact.contractName} requires that the following contracts are deployed:
-          - ${nitroAdjudicatorArtifact.contractName}
-        `);
-      },
-    },
-    {
-      artifact: testAssetHolderArtifact1,
-      arguments: (deployedArtifacts: DeployedArtifacts) => {
-        if (testNitroAdjudicatorArtifact.contractName in deployedArtifacts) {
-          return [deployedArtifacts[testNitroAdjudicatorArtifact.contractName].address];
-        }
-        throw Error(`${testAssetHolderArtifact1.contractName} requires that the following contracts are deployed:
-          - ${testNitroAdjudicatorArtifact.contractName}
-        `);
-      },
-    },
-    {
-      artifact: testAssetHolderArtifact2,
-      arguments: (deployedArtifacts: DeployedArtifacts) => {
-        if (testNitroAdjudicatorArtifact.contractName in deployedArtifacts) {
-          return [deployedArtifacts[testNitroAdjudicatorArtifact.contractName].address];
-        }
-        throw Error(`${testAssetHolderArtifact2.contractName} requires that the following contracts are deployed:
-          - ${testNitroAdjudicatorArtifact.contractName}
-        `);
-      },
-    },
-  ]);
+interface Deployment {
+  name: string;
+  address: string;
+  libraries: Record<string, string>; // name -> address
+  args: any[];
+  bytecode: string;
+}
+
+interface DeploymentsFile {
+  deploymentsFileVersion: '0.1';
+  deployments: Deployment[];
+}
+
+export const loadDeployments = (): Deployment[] | undefined => {
+  if (fs.existsSync(GANACHE_CONTRACTS_PATH)) {
+    const raw = fs.readFileSync(GANACHE_CONTRACTS_PATH);
+    const parsed = JSON.parse(raw.toString());
+    if ('deploymentsFileVersion' in parsed && parsed.deploymentsFileVersion === '0.1') {
+      return (parsed as DeploymentsFile).deployments;
+    }
+  }
+  return undefined;
+};
+
+const findDeployment = (deployments: Deployment[], key: CacheKey): Deployment | undefined => {
+  const {name, libraries, args, bytecode} = key;
+
+  return deployments.find(deployment => {
+    // easy checks first
+    if (deployment.name !== name || deployment.bytecode !== bytecode) {
+      return false;
+    }
+    // check args
+    if (deployment.args.length !== args.length) {
+      return false;
+    }
+    for (let i = 0; i < args.length; i++) {
+      if (deployment.args[i] !== args[i]) {
+        return false;
+      }
+    }
+    // check existing libraries are a subset of those passed in
+    let librariesMatch = true;
+    for (const libraryName of Object.keys(deployment.libraries)) {
+      librariesMatch =
+        librariesMatch && libraries[libraryName] === deployment.libraries[libraryName];
+    }
+    return librariesMatch;
+  });
+};
+
+const addressFromCache = (key: CacheKey): string | undefined => {
+  const deployments = loadDeployments();
+  if (!deployments) {
+    return undefined;
+  }
+  const existingDeployment = findDeployment(deployments, key);
+  return existingDeployment && existingDeployment.address;
+};
+
+class KeyExistsError extends Error {
+  public address: string;
+  constructor(key: CacheKey, address: string) {
+    super(`Key already exists for contract ${key.name}!`);
+    this.address = address;
+  }
+}
+
+const addToCache = (key: CacheKey, address: string) => {
+  const deployments = loadDeployments();
+
+  if (deployments) {
+    // check it hasn't been added in the meantime
+    const existingDeployment = findDeployment(deployments, key);
+    if (existingDeployment) {
+      throw new KeyExistsError(key, existingDeployment.address);
+    }
+  }
+  const newDeployment: Deployment = {...key, address};
+  const newDeployments = deployments || [];
+  newDeployments.push(newDeployment);
+  // we could still, technically, be overwriting a file that has been changed in the meantime
+  // but that's probably unlikely enough that we won't worry about it
+  const fileData: DeploymentsFile = {deploymentsFileVersion: '0.1', deployments: newDeployments};
+
+  writeJsonFile(GANACHE_CONTRACTS_PATH, fileData);
+};
+
+export class GanacheNCacheDeployer {
+  etherlimeDeployer: EtherlimeGanacheDeployer;
+
+  constructor(port: number, privateKey?: string) {
+    this.etherlimeDeployer = new EtherlimeGanacheDeployer(privateKey, port);
+  }
+
+  public async deploy(
+    contract: CompiledContract,
+    libraries: Record<string, string> = {},
+    ...args
+  ): Promise<string> {
+    const {contractName: name, bytecode} = contract;
+    const cacheKey = {name, libraries, bytecode, args};
+
+    const existingAddress = addressFromCache(cacheKey);
+    if (existingAddress) {
+      logger.log(
+        `Contract ${colors.colorName(name)} already exists address: ${colors.colorAddress(
+          existingAddress
+        )}`
+      );
+      return existingAddress;
+    }
+
+    const deployedContract = await this.etherlimeDeployer.deploy(contract, libraries, ...args);
+
+    try {
+      addToCache(cacheKey, deployedContract.contractAddress);
+      return deployedContract.contractAddress;
+    } catch (e) {
+      if (e instanceof KeyExistsError) {
+        const conflictAddress = e.address;
+        logger.log(
+          `Contract ${colors.colorName(name)} already exists at address: ${colors.colorAddress(
+            conflictAddress
+          )}. We also deployed it at ${colors.colorAddress(
+            deployedContract.contractAddress
+          )}, due to a race condition.`
+        );
+        return conflictAddress;
+      } else {
+        throw e;
+      }
+    }
+  }
 }
