@@ -10,6 +10,8 @@ import {Account, DeployedArtifacts, Deployment} from '../types';
 
 log.setDefaultLevel(log.levels.INFO);
 
+export const ganacheIsRunning = (port: number): boolean => false;
+
 export class GanacheServer {
   provider: JsonRpcProvider;
   fundedPrivateKey: string;
@@ -21,7 +23,7 @@ export class GanacheServer {
     accounts: Account[] = ETHERLIME_ACCOUNTS,
     public readonly timeout: number = 5000,
     gasLimit = 1000000000,
-    gasPrice = '0x01'
+    gasPrice = 1
   ) {
     log.info(`Starting ganache on port ${this.port} with network ID ${this.chainId}`);
 
