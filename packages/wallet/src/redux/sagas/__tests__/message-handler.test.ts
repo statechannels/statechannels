@@ -1,3 +1,4 @@
+import {convertAddressToBytes32} from "@statechannels/nitro-protocol";
 import {messageHandler} from "../message-handler";
 import * as walletStates from "../../state";
 import {addressResponse} from "../../actions";
@@ -12,7 +13,6 @@ import {setChannel} from "../../../../src/redux/channel-store";
 import {channelFromStates} from "../../channel-store/channel-state/__tests__";
 import * as stateHelpers from "../../__tests__/state-helpers";
 import {AddressZero} from "ethers/constants";
-import {convertAddressToBytes32} from "../../../utils/data-type-utils";
 import {strategyApproved} from "../../../communication";
 
 describe("message listener", () => {

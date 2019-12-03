@@ -10,10 +10,10 @@ import {
   Channel,
   getChannelId,
   Signatures,
-  SignedState
+  SignedState,
+  convertAddressToBytes32
 } from "@statechannels/nitro-protocol";
 import {NETWORK_ID, ETH_ASSET_HOLDER_ADDRESS, CONSENSUS_LIBRARY_ADDRESS} from "../../constants";
-import {convertAddressToBytes32} from "../../utils/data-type-utils";
 import {TwoPartyPlayerIndex, ThreePartyPlayerIndex} from "../types";
 import {unreachable} from "../../utils/reducer-utils";
 import {ChannelParticipant} from "../channel-store";

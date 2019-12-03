@@ -9,8 +9,7 @@ import {makeLocator} from "../..";
 import * as consensusStates from "../../consensus-update/states";
 import {HUB_ADDRESS, ETH_ASSET_HOLDER_ADDRESS} from "../../../../constants";
 import {ethers} from "ethers";
-import {encodeConsensusData} from "@statechannels/nitro-protocol";
-import {convertAddressToBytes32} from "../../../../utils/data-type-utils";
+import {encodeConsensusData, convertAddressToBytes32} from "@statechannels/nitro-protocol";
 import {bsAddress} from "../../../__tests__/state-helpers";
 import {TwoPartyPlayerIndex} from "../../../types";
 
