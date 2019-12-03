@@ -6,7 +6,7 @@
   "main": "lib/src/index.js",
   "scripts": {
     "prepare": "yarn build:typescript",
-    "build:typescript": "npx tsc",
+    "build:typescript": "npx tsc -b",
     "lint:check": "npx eslint \"*/**/*.ts\" --cache",
     "lint:write": "npx eslint \"*/**/*.ts\" --fix",
     "precommit": "lint-staged --quiet"
