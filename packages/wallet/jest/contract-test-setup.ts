@@ -9,21 +9,8 @@ export default async function setup() {
   );
   await ganacheServer.ready();
 
-  const {
-    CONSENSUS_APP_ADDRESS,
-    TRIVIAL_APP_ADDRESS,
-    NITRO_ADJUDICATOR_ADDRESS,
-    ETH_ASSET_HOLDER_ADDRESS,
-    TEST_TOKEN_ADDRESS,
-    TEST_TOKEN_ASSET_HOLDER_ADDRESS
-  } = await deploy();
+  const deployedArtifacts = await deploy();
 
-  process.env.CONSENSUS_APP_ADDRESS = CONSENSUS_APP_ADDRESS;
-  process.env.TRIVIAL_APP_ADDRESS = TRIVIAL_APP_ADDRESS;
-  process.env.NITRO_ADJUDICATOR_ADDRESS = NITRO_ADJUDICATOR_ADDRESS;
-  process.env.ETH_ASSET_HOLDER_ADDRESS = ETH_ASSET_HOLDER_ADDRESS;
-  process.env.TEST_TOKEN_ADDRESS = TEST_TOKEN_ADDRESS;
-  process.env.TEST_TOKEN_ASSET_HOLDER_ADDRESS = TEST_TOKEN_ASSET_HOLDER_ADDRESS;
-
+  process.env = {...process.env, ...deployedArtifacts};
   (global as any).__GANACHE_SERVER__ = ganacheServer;
 }

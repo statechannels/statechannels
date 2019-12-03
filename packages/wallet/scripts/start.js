@@ -20,7 +20,6 @@ process.on("unhandledRejection", err => {
 // Ensure environment variables are read.
 require("../config/env");
 
-const fs = require("fs");
 const chalk = require("chalk");
 const webpack = require("webpack");
 const WebpackDevServer = require("webpack-dev-server");
@@ -90,21 +89,9 @@ void (async () => {
   );
   await ganacheServer.ready();
 
-  const {
-    CONSENSUS_APP_ADDRESS,
-    TRIVIAL_APP_ADDRESS,
-    NITRO_ADJUDICATOR_ADDRESS,
-    ETH_ASSET_HOLDER_ADDRESS,
-    TEST_TOKEN_ADDRESS,
-    TEST_TOKEN_ASSET_HOLDER_ADDRESS
-  } = await deploy();
+  const deployedArtifacts = await deploy();
 
-  process.env.CONSENSUS_APP_ADDRESS = CONSENSUS_APP_ADDRESS;
-  process.env.TRIVIAL_APP_ADDRESS = TRIVIAL_APP_ADDRESS;
-  process.env.NITRO_ADJUDICATOR_ADDRESS = NITRO_ADJUDICATOR_ADDRESS;
-  process.env.ETH_ASSET_HOLDER_ADDRESS = ETH_ASSET_HOLDER_ADDRESS;
-  process.env.TEST_TOKEN_ADDRESS = TEST_TOKEN_ADDRESS;
-  process.env.TEST_TOKEN_ASSET_HOLDER_ADDRESS = TEST_TOKEN_ASSET_HOLDER_ADDRESS;
+  process.env = {...process.env, ...deployedArtifacts};
 
   process.env.TARGET_NETWORK = getNetworkName(process.env.CHAIN_NETWORK_ID);
 
