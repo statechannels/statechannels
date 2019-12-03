@@ -48,7 +48,7 @@ export async function loadWallet(page: puppeteer.Page, messageListener: (message
   // and then assign it on the window
   const web3JsFile = fs.readFileSync(path.resolve(__dirname, "web3/web3.min.js"), "utf8");
   await page.evaluateOnNewDocument(web3JsFile);
-  await page.evaluateOnNewDocument('window.web3 = new Web3("http://localhost:8547")');
+  await page.evaluateOnNewDocument('window.web3 = new Web3("http://localhost:8560")');
   await page.goto("http://localhost:3055/");
 
   await page.waitFor(500); // Delay lets things load
