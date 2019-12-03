@@ -20,15 +20,23 @@ const deploy = async () => {
 
   const COUNTING_APP_ADDRESS = await deployer.deploy(countingAppArtifact);
   const SINGLE_ASSET_PAYMENT_ADDRESS = await deployer.deploy(singleAssetPaymentsArtifact);
-
+  const TEST_NITRO_ADJUDICATOR_ADDRESS = await deployer.deploy(testNitroAdjudicatorArtifact);
   const CONSENSUS_APP_ADDRESS = await deployer.deploy(consensusAppArtifact);
   const TRIVIAL_APP_ADDRESS = await deployer.deploy(trivialAppArtifact);
   const TEST_FORCE_MOVE_ADDRESS = await deployer.deploy(testForceMoveArtifact);
-  const TEST_ASSET_HOLDER_ADDRESS = await deployer.deploy(testAssetHolderArtifact1);
-  const TEST_ASSET_HOLDER2_ADDRESS = await deployer.deploy(testAssetHolderArtifact2);
+  const TEST_ASSET_HOLDER_ADDRESS = await deployer.deploy(
+    testAssetHolderArtifact1,
+    {},
+    TEST_NITRO_ADJUDICATOR_ADDRESS
+  );
+  const TEST_ASSET_HOLDER2_ADDRESS = await deployer.deploy(
+    testAssetHolderArtifact2,
+    {},
+    TEST_NITRO_ADJUDICATOR_ADDRESS
+  );
 
   // for test purposes in this package, wire up the assetholders with the testNitroAdjudicator
-  const TEST_NITRO_ADJUDICATOR_ADDRESS = await deployer.deploy(testNitroAdjudicatorArtifact);
+
   const TEST_TOKEN_ADDRESS = await deployer.deploy(tokenArtifact);
   const TEST_ETH_ASSET_HOLDER_ADDRESS = await deployer.deploy(
     ethAssetHolderArtifact,
