@@ -1,4 +1,4 @@
-import { SignedState } from '@statechannels/nitro-protocol';
+import {SignedState} from '@statechannels/nitro-protocol';
 import {
   ProtocolLocator,
   RelayActionWithMessage,
@@ -6,7 +6,7 @@ import {
   StrategyApproved,
   StrategyProposed
 } from '@statechannels/wallet/lib/src/communication';
-import { ActionConstructor } from '@statechannels/wallet/lib/src/redux/utils';
+import {ActionConstructor} from '@statechannels/wallet/lib/src/redux/utils';
 import {HUB_ADDRESS, unreachable} from '../../constants';
 import {errors} from '../../wallet';
 import {getCurrentState} from '../../wallet/db/queries/getCurrentState';
@@ -96,16 +96,15 @@ export const signedStatesReceived = (p: {
   processId: string;
 }): SignedStatesReceived => ({
   ...p,
-  type: "WALLET.COMMON.SIGNED_STATES_RECEIVED"
+  type: 'WALLET.COMMON.SIGNED_STATES_RECEIVED'
 });
 
 export const relayActionWithMessage: ActionConstructor<RelayActionWithMessage> = p => ({
   ...p,
-  type: "WALLET.RELAY_ACTION_WITH_MESSAGE"
+  type: 'WALLET.RELAY_ACTION_WITH_MESSAGE'
 });
 
 export const strategyApproved: ActionConstructor<StrategyApproved> = p => ({
   ...p,
-  type: "WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_APPROVED"
+  type: 'WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_APPROVED'
 });
-
