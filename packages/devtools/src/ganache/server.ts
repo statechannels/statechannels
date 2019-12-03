@@ -47,6 +47,7 @@ export class GanacheServer {
       log.error(`Server threw error ${data}`);
       throw new Error('Ganache server failed to start');
     });
+
     this.provider = new JsonRpcProvider(`http://localhost:${this.port}`);
   }
 

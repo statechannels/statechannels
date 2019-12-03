@@ -99,8 +99,18 @@ export const startOwnGanache = async (p: Partial<Params> = {}): Promise<GanacheS
 export async function startSharedGanache(
   deploymentsPath: string,
   p: Partial<Params> = {}
-): Promise<GanacheServer> {
+): Promise<GanacheServer | undefined> {
   const port = Number(p.port || process.env.SHARED_GANACHE_PORT);
+
+  if (isNaN(port)) {
+    say(`No port provided. Did you set SHARED_GANACHE_PORT in the env? Continuing with default.`);
+  }
+
+  if (await ganacheIsRunning(port)) {
+    say(`A shared ganache instance is already running on http://localhost:${port}`);
+    return undefined;
+  }
+
   const server = await startOwnGanache({...p, port});
 
   say(`Deployments will be written to ${deploymentsPath}.`);
