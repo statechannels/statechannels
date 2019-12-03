@@ -75,11 +75,15 @@ const defundTarget = {
   exit: 'garbageCollectTargetChannel',
 };
 
-function defundGuarantorInLedger({
+// Without is used so that defundGuarantorInLedger can be used by the hub as well
+type Without<T, K> = {
+  [L in Exclude<keyof T, K>]: T[L];
+};
+export function defundGuarantorInLedger({
   hubLedgerId,
   jointChannelId,
   index,
-}: ChannelsSet): LedgerUpdate.Init {
+}: Without<ChannelsSet, 'targetChannelId'>): LedgerUpdate.Init {
   /*
   Case:
     - jointOutcome == [(A, a), (H, a+b), (B, b)]

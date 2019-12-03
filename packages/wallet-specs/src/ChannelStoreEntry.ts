@@ -18,7 +18,7 @@ interface VirtualFunding {
 
 interface Guaranteed {
   type: 'Guarantee';
-  guarantorChannelIds: string[];
+  guarantorChannelIds: [string, string];
 }
 
 export type Funding =
