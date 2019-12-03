@@ -15,7 +15,7 @@
     "start": "cp ../../node_modules/@statechannels/channel-provider/dist/*.js ./public/ && react-scripts start",
     "build": "react-scripts build && cp -r ../../node_modules/@statechannels/channel-provider/dist/* ./build/",
     "test": "react-scripts test",
-    "test:ci": "react-scripts test",
+    "test:ci": "react-scripts test --runInBand",
     "test:coverage": "react-scripts test --coverage --watchAll=false",
     "eject": "react-scripts eject",
     "lint:check": "npx eslint \"*/**/*.{js,ts,tsx}\" --cache",
