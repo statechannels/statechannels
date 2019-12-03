@@ -10,7 +10,11 @@ import {getTestProvider, randomChannelId, setupContracts} from '../../test-helpe
 const provider = getTestProvider();
 let ForceMove: Contract;
 beforeAll(async () => {
-  ForceMove = await setupContracts(provider, ForceMoveArtifact);
+  ForceMove = await setupContracts(
+    provider,
+    ForceMoveArtifact,
+    process.env.TEST_FORCE_MOVE_ADDRESS
+  );
 });
 
 const zeroData = {stateHash: HashZero, outcomeHash: HashZero, challengerAddress: AddressZero};

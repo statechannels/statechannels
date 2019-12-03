@@ -3,10 +3,10 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet} from 'ethers';
 import {AddressZero} from 'ethers/constants';
-import TESTAssetHolder2Artifact from '../../../build/contracts/TESTAssetHolder2.json';
+import ERC20AssetHolderArtifact from '../../../build/contracts/TestErc20AssetHolder.json';
 // @ts-ignore
-import TESTAssetHolder1Artifact from '../../../build/contracts/TESTAssetHolder.json';
-import TESTNitroAdjudicatorArtifact from '../../../build/contracts/TESTNitroAdjudicator.json';
+import ETHAssetHolderArtifact from '../../../build/contracts/TestEthAssetHolder.json';
+import NitroAdjudicatorArtifact from '../../../build/contracts/TESTNitroAdjudicator.json';
 
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {AllocationAssetOutcome, hashAssetOutcome} from '../../../src/contract/outcome';
@@ -26,8 +26,8 @@ import {
 
 const provider = getTestProvider();
 let TestNitroAdjudicator: Contract;
-let TESTAssetHolder1: Contract;
-let TESTAssetHolder2: Contract;
+let ETHAssetHolder: Contract;
+let ERC20AssetHolder: Contract;
 
 // Constants for this test suite
 
@@ -41,9 +41,21 @@ for (let i = 0; i < 3; i++) {
   participants[i] = wallets[i].address;
 }
 beforeAll(async () => {
-  TestNitroAdjudicator = await setupContracts(provider, TESTNitroAdjudicatorArtifact);
-  TESTAssetHolder1 = await setupContracts(provider, TESTAssetHolder1Artifact);
-  TESTAssetHolder2 = await setupContracts(provider, TESTAssetHolder2Artifact);
+  TestNitroAdjudicator = await setupContracts(
+    provider,
+    NitroAdjudicatorArtifact,
+    process.env.TEST_NITRO_ADJUDICATOR_ADDRESS
+  );
+  ETHAssetHolder = await setupContracts(
+    provider,
+    ETHAssetHolderArtifact,
+    process.env.TEST_ETH_ASSET_HOLDER_ADDRESS
+  );
+  ERC20AssetHolder = await setupContracts(
+    provider,
+    ERC20AssetHolderArtifact,
+    process.env.TEST_TOKEN_ASSET_HOLDER_ADDRESS
+  );
 });
 
 // Scenarios are synonymous with channelNonce:
@@ -83,11 +95,11 @@ describe('pushOutcome', () => {
 
       const outcome: AllocationAssetOutcome[] = [
         {
-          assetHolderAddress: TESTAssetHolder1.address,
+          assetHolderAddress: ETHAssetHolder.address,
           allocation: [{destination: A, amount: '1'}, {destination: B, amount: '2'}],
         },
         {
-          assetHolderAddress: TESTAssetHolder2.address,
+          assetHolderAddress: ERC20AssetHolder.address,
           allocation: [{destination: C, amount: '3'}, {destination: D, amount: '4'}],
         },
       ];
@@ -145,10 +157,10 @@ describe('pushOutcome', () => {
       } else {
         await sendTransaction(provider, TestNitroAdjudicator.address, transactionRequest);
         // Check 2x AssetHolder storage against the expected value
-        expect(await TESTAssetHolder1.assetOutcomeHashes(channelId)).toEqual(
+        expect(await ETHAssetHolder.assetOutcomeHashes(channelId)).toEqual(
           hashAssetOutcome(outcome[0].allocation)
         );
-        expect(await TESTAssetHolder2.assetOutcomeHashes(channelId)).toEqual(
+        expect(await ERC20AssetHolder.assetOutcomeHashes(channelId)).toEqual(
           hashAssetOutcome(outcome[1].allocation)
         );
       }

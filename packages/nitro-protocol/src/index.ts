@@ -1,4 +1,11 @@
 import {Signature} from 'ethers/utils';
+import NitroAdjudicatorArtifact from '../build/contracts/NitroAdjudicator.json';
+import TrivialAppArtifact from '../build/contracts/TrivialApp.json';
+import TokenArtifact from '../build/contracts/Token.json';
+import Erc20AssetHolderArtifact from '../build/contracts/ERC20AssetHolder.json';
+import EthAssetHolderArtifact from '../build/contracts/ETHAssetHolder.json';
+import ConsensusAppArtifact from '../build/contracts/ConsensusApp.json';
+
 import {
   AssetOutcomeShortHand,
   getTestProvider,
@@ -85,4 +92,14 @@ export {
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
   setupContracts,
+};
+
+// artifacts
+export const ContractArtifacts = {
+  NitroAdjudicatorArtifact,
+  TrivialAppArtifact,
+  Erc20AssetHolderArtifact,
+  EthAssetHolderArtifact,
+  TokenArtifact,
+  ConsensusAppArtifact,
 };

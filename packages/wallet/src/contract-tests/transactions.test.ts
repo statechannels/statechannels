@@ -15,7 +15,7 @@ import {depositIntoETHAssetHolder} from "./test-utils";
 import {getGanacheProvider} from "@statechannels/devtools";
 import {transactionSender} from "../redux/sagas/transaction-sender";
 import {testSaga} from "redux-saga-test-plan";
-import {getProvider, getContractAddress} from "../utils/contract-utils";
+import {getProvider, getTrivialAppAddress} from "../utils/contract-utils";
 import {transactionSent, transactionSubmitted, transactionConfirmed} from "../redux/actions";
 import {NETWORK_ID, CHALLENGE_DURATION} from "../constants";
 import {State, Channel, getChannelId} from "@statechannels/nitro-protocol";
@@ -73,7 +73,7 @@ describe("transactions", () => {
   }
 
   beforeAll(async () => {
-    libraryAddress = getContractAddress("TrivialApp");
+    libraryAddress = await getTrivialAppAddress();
   });
 
   beforeEach(() => {

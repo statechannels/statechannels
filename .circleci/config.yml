@@ -83,14 +83,6 @@ jobs:
           file: test-stats
       - attach_workspace:
           at: /home/circleci/project
-      - run:
-          command: npx lerna run start:ganache --scope=@statechannels/ganache-deployer
-          background: true
-      # Wait for Ganache to come up and for contract migrations to take place
-      - run:
-          shell: /bin/sh
-          command: |
-            wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 10 http://localhost:3000
       - run: yarn test:ci
       - upload_logs:
           file: test-stats

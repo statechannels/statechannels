@@ -17,7 +17,11 @@ let consensusApp: Contract;
 const numParticipants = 3;
 
 beforeAll(async () => {
-  consensusApp = await setupContracts(provider, ConsensusAppArtifact);
+  consensusApp = await setupContracts(
+    provider,
+    ConsensusAppArtifact,
+    process.env.CONSENSUS_APP_ADDRESS
+  );
 });
 
 describe('validTransition', () => {

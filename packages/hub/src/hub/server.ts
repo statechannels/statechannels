@@ -1,6 +1,6 @@
 import {fork} from 'child_process';
-import {RelayableAction} from '@statechannels/wallet/lib/src/communication';
 import {Model} from 'objection';
+import {RelayableAction} from '../communication';
 import knex from '../wallet/db/connection';
 import {assetHolderListen} from '../wallet/services/asset-holder-watcher';
 import {handleWalletMessage} from './handlers/handle-wallet-message';

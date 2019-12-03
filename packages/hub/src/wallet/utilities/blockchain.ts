@@ -32,8 +32,7 @@ async function setupContract(artifact: any) {
     throw err;
   }
 
-  const networkContext = require('@statechannels/ganache-deployer/ganache-network-context.json');
-  const contract = await ethAssetHolderFactory.attach(networkContext.ETHAssetHolder.address);
+  const contract = await ethAssetHolderFactory.attach(process.env.ETH_ASSET_HOLDER_ADDRESS);
 
   return contract;
 }
