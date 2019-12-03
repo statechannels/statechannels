@@ -1,6 +1,6 @@
 import { Outcome, store } from '../..';
 import { isIndirectFunding } from '../../ChannelStoreEntry';
-import { shouldBe } from '../../store';
+import { checkThat } from '../../store';
 import { saveConfig } from '../../utils';
 import * as LedgerUpdate from '../ledger-update/protocol';
 
@@ -12,9 +12,9 @@ export interface Init {
 }
 
 function ledgerUpdateArgs({ targetChannelId }: Init): LedgerUpdate.Init {
-  const { ledgerId } = shouldBe(
-    isIndirectFunding,
-    store.getEntry(targetChannelId).funding
+  const { ledgerId } = checkThat(
+    store.getEntry(targetChannelId).funding,
+    isIndirectFunding
   );
   const outcome = store.getLatestSupportedAllocation(ledgerId);
   const concludedOutcome = store.getLatestSupportedAllocation(targetChannelId);

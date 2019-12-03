@@ -10,7 +10,7 @@ import {
   store,
   subtract,
 } from '../../';
-import { isAllocation, shouldBe } from '../../store';
+import { checkThat, isAllocation } from '../../store';
 import { saveConfig } from '../../utils';
 import * as LedgerUpdate from '../ledger-update/protocol';
 
@@ -27,7 +27,7 @@ function getHoldings(state: State, destination: string): string {
   const { outcome } = state;
 
   let currentFunding = chain.holdings(getChannelID(state.channel));
-  return shouldBe(isAllocation, outcome)
+  return checkThat(outcome, isAllocation)
     .filter(item => item.destination === destination)
     .map(item => {
       const payout = Math.min(currentFunding, Number(item.amount));

@@ -1,5 +1,5 @@
 import { add, Allocation, Channel, subtract } from '../..';
-import { isAllocation, shouldBe, store } from '../../store';
+import { checkThat, isAllocation, store } from '../../store';
 import { saveConfig } from '../../utils';
 import * as ConcludeChannel from '../conclude-channel/protocol';
 import * as CreateNullChannel from '../create-null-channel/protocol';
@@ -37,7 +37,7 @@ function replacementChannelArgs({
     channelNonce: store.getNextNonce(newParticipants),
   };
 
-  const newChannelOutcome: Allocation = shouldBe(isAllocation, outcome).map(
+  const newChannelOutcome: Allocation = checkThat(outcome, isAllocation).map(
     ({ destination, amount }) => ({
       destination: participantMapping[destination],
       amount: subtract(outcome[destination], newOutcome[destination]),
@@ -65,7 +65,7 @@ export function concludeOutcome({
   newChannelId,
 }: NewChannelCreated): LedgerUpdate.Init {
   const { state } = store.getLatestConsensus(ledgerId);
-  const currentlyAllocated = shouldBe(isAllocation, state.outcome)
+  const currentlyAllocated = checkThat(state.outcome, isAllocation)
     .map(a => a.amount)
     .reduce(add, 0);
   const toBeWithdrawn = newOutcome.map(a => a.amount).reduce(add, 0);

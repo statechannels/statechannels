@@ -1,7 +1,7 @@
 import { assign } from 'xstate';
 import { Allocation, nextState, State, store } from '../../';
 import { isIndirectFunding, isVirtualFunding } from '../../ChannelStoreEntry';
-import { isAllocation, shouldBe } from '../../store';
+import { checkThat, isAllocation } from '../../store';
 import { saveConfig } from '../../utils';
 
 import * as LedgerUpdate from '../ledger-update/protocol';
@@ -14,14 +14,14 @@ export interface Init {
 
 export const assignChannels = assign(
   ({ targetChannelId, index }: Init): ChannelsSet => {
-    const { jointChannelId, guarantorChannelId } = shouldBe(
-      isVirtualFunding,
-      store.getEntry(targetChannelId).funding
+    const { jointChannelId, guarantorChannelId } = checkThat(
+      store.getEntry(targetChannelId).funding,
+      isVirtualFunding
     );
 
-    const { ledgerId: hubLedgerId } = shouldBe(
-      isIndirectFunding,
-      store.getEntry(guarantorChannelId).funding
+    const { ledgerId: hubLedgerId } = checkThat(
+      store.getEntry(guarantorChannelId).funding,
+      isIndirectFunding
     );
 
     return {
@@ -52,12 +52,12 @@ function finalJointChannelUpdate({
   }
   const { state: jointState } = store.getLatestConsensus(jointChannelId);
 
-  const jointOutcome = shouldBe(isAllocation, jointState.outcome);
+  const jointOutcome = checkThat(jointState.outcome, isAllocation);
   const targetChannelIdx = jointOutcome.findIndex(
     a => a.destination === targetChannelId
   );
   const targetOutcome = [
-    ...shouldBe(isAllocation, targetChannelState.outcome),
+    ...checkThat(targetChannelState.outcome, isAllocation),
     ...jointOutcome.splice(targetChannelIdx),
   ];
   return {

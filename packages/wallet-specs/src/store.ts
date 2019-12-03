@@ -126,7 +126,7 @@ export class Store implements IStore {
   public getLatestSupportedAllocation(channelID): Allocation {
     // TODO: Check the use of this. (Sometimes you want the latest outcome)
     const { outcome } = this.getLatestState(channelID);
-    return shouldBe(isAllocation, outcome);
+    return checkThat(outcome, isAllocation);
   }
 
   public getLatestConsensus(channelID: string) {
@@ -281,12 +281,10 @@ export function isAllocation(outcome: Outcome): outcome is Allocation {
 const throwError = (fn: (t1: any) => boolean, t) => {
   throw new Error(`not valid, ${fn.name} failed on ${t}`);
 };
-/*
-TODO: replace shouldBe with checkThat
-reasoning: checkThat(outcome, isAllocation) reads like an english sentence
-*/
-export const shouldBe = <T>(fn: (t1) => t1 is T, t) =>
-  fn(t) ? t : throwError(fn, t);
-
-export const checkThat = <T>(t, fn: (t1) => t1 is T) =>
-  fn(t) ? t : throwError(fn, t);
+type TypeGuard<T> = (t1: any) => t1 is T;
+export function checkThat<T>(t, isTypeT: TypeGuard<T>): T {
+  if (!isTypeT(t)) {
+    throwError(isTypeT, t);
+  }
+  return t;
+}

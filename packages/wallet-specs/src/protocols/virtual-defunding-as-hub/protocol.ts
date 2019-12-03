@@ -1,7 +1,7 @@
 import { assign } from 'xstate';
 import { store } from '../../';
 import { isGuarantee, isIndirectFunding } from '../../ChannelStoreEntry';
-import { shouldBe } from '../../store';
+import { checkThat } from '../../store';
 import { saveConfig } from '../../utils';
 import * as LedgerUpdate from '../ledger-update/protocol';
 import { defundGuarantorInLedger } from '../virtual-defunding-as-leaf/protocol';
@@ -20,18 +20,18 @@ type ChannelsSet = Init & {
 
 export const assignChannels = assign(
   ({ jointChannelId }: Init): ChannelsSet => {
-    const { guarantorChannelIds } = shouldBe(
-      isGuarantee,
-      store.getEntry(jointChannelId).funding
+    const { guarantorChannelIds } = checkThat(
+      store.getEntry(jointChannelId).funding,
+      isGuarantee
     );
 
-    const { ledgerId: leftLedgerId } = shouldBe(
-      isIndirectFunding,
-      store.getEntry(guarantorChannelIds[0]).funding
+    const { ledgerId: leftLedgerId } = checkThat(
+      store.getEntry(guarantorChannelIds[0]).funding,
+      isIndirectFunding
     );
-    const { ledgerId: rightLedgerId } = shouldBe(
-      isIndirectFunding,
-      store.getEntry(guarantorChannelIds[1]).funding
+    const { ledgerId: rightLedgerId } = checkThat(
+      store.getEntry(guarantorChannelIds[1]).funding,
+      isIndirectFunding
     );
     const ledgerChannelIds: [string, string] = [leftLedgerId, rightLedgerId];
 

@@ -1,6 +1,6 @@
 import { assign } from 'xstate';
 import { Balance } from '../..';
-import { isAllocation, shouldBe, store } from '../../store';
+import { checkThat, isAllocation, store } from '../../store';
 import { saveConfig } from '../../utils';
 import { HubChoice } from '../../wire-protocol';
 import { Init as VirtualFundAsLeafArgs } from '../virtual-fund-as-leaf/protocol';
@@ -43,7 +43,7 @@ function virtualFundAsLeafArgs({
   hubAddress,
 }: HubKnown): VirtualFundAsLeafArgs {
   const { channel, outcome } = store.getLatestState(targetChannelId);
-  const balances: Balance[] = shouldBe(isAllocation, outcome).map(o => ({
+  const balances: Balance[] = checkThat(outcome, isAllocation).map(o => ({
     address: o.destination,
     wei: o.amount,
   }));
