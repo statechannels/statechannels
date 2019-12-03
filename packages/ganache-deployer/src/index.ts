@@ -1,4 +1,3 @@
-/* eslint-disable */
 import {GanacheServer} from '@statechannels/devtools';
 import fs from 'fs';
 import log from 'loglevel';
@@ -10,9 +9,12 @@ const GANACHE_CONTRACTS_PATH = path.join(__dirname, '../', GANACHE_CONTRACTS_FIL
 
 // A simple wrapper around a ganache server that ensures that `ganache-network-context.json`
 // is removed when the server is shutdown.
-export async function startGanacheNCacheServer(): Promise<GanacheServer> {
+export async function startGanacheNCacheServer(
+  port: number,
+  chainNetworkId: number
+): Promise<GanacheServer> {
   try {
-    const chain = new GanacheServer(Number(process.env.GANACHE_PORT));
+    const chain = new GanacheServer(port, chainNetworkId);
     chain.onClose(exitHandler);
     await chain.ready();
 
