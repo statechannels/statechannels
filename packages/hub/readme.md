@@ -43,10 +43,12 @@ You will also need to make sure that the server's address has funds. You can fin
 
 ## Testing
 
+For any environment variables specific to local setup, such as postgres host or port, do not modify `.env` files checked into the repository. Instead, add the variables to `.env.test.local` (or to other local `.env` files).
+
 ```
 yarn install
 NODE_ENV=test yarn db:create
-yarn test
+yarn test:ci
 ```
 
 ## Deploying
