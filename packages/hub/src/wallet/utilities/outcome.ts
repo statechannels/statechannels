@@ -3,7 +3,7 @@ import {
   AssetOutcome,
   isGuaranteeOutcome
 } from '@statechannels/nitro-protocol/lib/src/contract/outcome';
-import {unreachable} from '@statechannels/wallet';
+import {unreachable} from '../../constants';
 
 function assetOutcomeObjectToModel(assetOutcome: AssetOutcome) {
   if (isAllocationOutcome(assetOutcome)) {
