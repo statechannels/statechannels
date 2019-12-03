@@ -1,6 +1,7 @@
 import {applyMiddleware, compose, createStore} from "redux";
 import {fork} from "redux-saga/effects";
 import createSagaMiddleware from "redux-saga";
+import {call} from "redux-saga/effects";
 import * as storage from "redux-storage";
 const sagaMiddleware = createSagaMiddleware();
 
@@ -35,6 +36,18 @@ if (USE_STORAGE) {
 function* rootSaga() {
   yield fork(sagaManager);
 }
+
+function* webAssemblyModuleLoaderSaga() {
+  window.PureEVM = ((yield call(() =>
+    Promise.resolve(
+      new Promise(async resolve => resolve(await import(/* webpackPrefetch: true */ "pure-evm")))
+    )
+  )) as unknown) as typeof import("pure-evm");
+  console.info("🔋 Loaded pure-evm WebAssembly module!");
+}
+
+// Must run before anything else runs
+sagaMiddleware.run(webAssemblyModuleLoaderSaga);
 
 sagaMiddleware.run(rootSaga);
 

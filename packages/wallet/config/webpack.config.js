@@ -396,15 +396,6 @@ module.exports = function(webpackEnv) {
               )
             },
 
-            {
-              test: /\.(wasm)$/,
-              // Using javascript/auto turns off the auto-parser by WebPack on wasm
-              // See https://github.com/webpack/webpack/issues/7264 for context
-              type: "javascript/auto",
-              include: paths.pureEVM,
-              loader: require.resolve("wasm-loader")
-            },
-
             // "file" loader makes sure those assets get served by WebpackDevServer.
             // When you `import` an asset, you get its (virtual) filename.
             // In production, they would get copied to the `build` folder.
