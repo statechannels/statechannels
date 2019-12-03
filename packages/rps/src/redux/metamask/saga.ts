@@ -32,7 +32,6 @@ export default function* checkMetamask() {
 
   try {
     const targetNetworkName = process.env.TARGET_NETWORK;
-    ethereum.enable();
 
     // Find the network name that matches the currently selected network id
     const selectedNetworkId = parseInt(yield cps(web3.version.getNetwork), 10);

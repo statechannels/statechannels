@@ -2,7 +2,7 @@ import React, { Fragment } from 'react';
 import { connect } from 'react-redux';
 
 import { SiteState } from '../redux/reducer';
-import { Weapon } from '../core';
+import { Weapon, ChannelState } from '../core';
 import * as gameActions from '../redux/game/actions';
 
 import WaitingRoomPage from '../components/WaitingRoomPage';
@@ -16,29 +16,31 @@ import {
   ConfirmGamePage,
   SelectWeaponPage,
   WeaponSelectedPage,
-  GameOverPage,
   WaitForResting,
-  ResultPage,
+  InsufficientFunds,
+  GameOverPage,
+  Resigned,
 } from '../components';
 import { unreachable } from '../utils/unreachable';
 
 interface GameProps {
-  state: LocalState;
+  localState: LocalState;
+  channelState: ChannelState;
   chooseWeapon: (move: Weapon) => void;
   playAgain: () => void;
   cancelOpenGame: () => void;
-  conclude: () => void;
+  gameOver: () => void;
+  exitToLobby: () => void;
 }
 
-// TODO: Add wallet from wallet package
 function GameContainer(props: GameProps) {
   return <Fragment>{RenderGame(props)}</Fragment>;
 }
 
 function RenderGame(props: GameProps) {
-  const { state } = props;
+  const { localState } = props;
 
-  switch (state.type) {
+  switch (localState.type) {
     case 'Empty':
       return <ProfileContainer />;
     case 'NeedAddress':
@@ -49,14 +51,17 @@ function RenderGame(props: GameProps) {
       return (
         <WaitingRoomPage
           cancelOpenGame={props.cancelOpenGame}
-          roundBuyIn={state.roundBuyIn.toString()}
+          roundBuyIn={localState.roundBuyIn.toString()}
         />
       );
     case 'GameChosen':
       return <ProposeGamePage message="Waiting for opponent to confirm" />;
     case 'OpponentJoined':
       return (
-        <ConfirmGamePage stake={state.roundBuyIn.toString()} opponentName={state.opponentName} />
+        <ConfirmGamePage
+          stake={localState.roundBuyIn.toString()}
+          opponentName={localState.opponentName}
+        />
       );
     case 'ChooseWeapon':
       return <SelectWeaponPage chooseWeapon={props.chooseWeapon} />;
@@ -65,15 +70,15 @@ function RenderGame(props: GameProps) {
       return (
         <WeaponSelectedPage
           message="Waiting for your opponent to choose their move"
-          yourWeapon={state.myWeapon}
+          yourWeapon={localState.myWeapon}
         />
       );
     case 'ResultPlayAgain':
       return (
         <WaitForResting
-          yourWeapon={state.myWeapon}
-          theirWeapon={state.theirWeapon}
-          result={state.result}
+          yourWeapon={localState.myWeapon}
+          theirWeapon={localState.theirWeapon}
+          result={localState.result}
           playAgain={props.playAgain}
           waitForOpponent={false}
         />
@@ -81,48 +86,48 @@ function RenderGame(props: GameProps) {
     case 'WaitForRestart':
       return (
         <WaitForResting
-          yourWeapon={state.myWeapon}
-          theirWeapon={state.theirWeapon}
-          result={state.result}
+          yourWeapon={localState.myWeapon}
+          theirWeapon={localState.theirWeapon}
+          result={localState.result}
           playAgain={props.playAgain}
           waitForOpponent={true}
         />
       );
-    case 'ShuttingDown':
+    case 'InsufficientFunds':
       return (
-        <ResultPage
-          yourWeapon={state.myWeapon}
-          theirWeapon={state.theirWeapon}
-          result={state.result}
-          playAgain={props.playAgain}
-          shutDownReason={state.reason}
+        <InsufficientFunds
+          yourWeapon={localState.myWeapon}
+          theirWeapon={localState.theirWeapon}
+          result={localState.result}
+          action={props.gameOver}
         />
       );
+    case 'Resigned':
+      return <Resigned iResigned={localState.iResigned} action={props.gameOver} />;
     case 'GameOver':
-      // const ourTurn = state.player === 'A' ? state.turnNum % 2 !== 0 : turnNum % 2 === 0;
-      const ourTurn = true; // TODO compute this properly
       return (
         <GameOverPage
-          visible={(state.type as PlayingStateName) === 'GameOver'}
-          conclude={props.conclude}
-          ourTurn={ourTurn}
+          visible={(localState.type as PlayingStateName) === 'GameOver'}
+          exitToLobby={props.exitToLobby}
         />
       );
     default:
-      unreachable(state);
+      unreachable(localState);
       throw new Error(`View not created`);
   }
 }
 
-const mapStateToProps = (state: SiteState) => ({
-  state: state.game.localState,
+const mapStateToProps = (siteState: SiteState) => ({
+  localState: siteState.game.localState,
+  channelState: siteState.game.channelState,
 });
 
 const mapDispatchToProps = {
   chooseWeapon: gameActions.chooseWeapon,
   playAgain: gameActions.playAgain,
-  cancelOpenGame: gameActions.cancelGame, // TODO create this action!
-  conclude: gameActions.resign,
+  cancelOpenGame: gameActions.cancelGame,
+  gameOver: gameActions.gameOver,
+  exitToLobby: gameActions.exitToLobby,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(GameContainer);

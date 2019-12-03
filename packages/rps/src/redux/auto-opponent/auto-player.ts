@@ -1,6 +1,13 @@
 import { put, takeEvery, select } from 'redux-saga/effects';
 import { GameState } from '../game/state';
-import { createGame, chooseWeapon, playAgain, resign, joinOpenGame } from '../game/actions';
+import {
+  createGame,
+  chooseWeapon,
+  playAgain,
+  resign,
+  joinOpenGame,
+  gameOver,
+} from '../game/actions';
 import { bigNumberify } from 'ethers/utils';
 import { Weapon } from '../../core';
 import { OpenGame } from '../open-games/state';
@@ -53,8 +60,15 @@ function* autoPlayerBRun() {
       if (channelState && bigNumberify(channelState.turnNum).lt(12)) {
         yield put(playAgain());
       } else {
-        yield put(resign());
+        yield put(resign(true));
       }
+      break;
+    case 'Resigned':
+      yield put(gameOver());
+      break;
+    case 'InsufficientFunds':
+      yield put(gameOver());
+      break;
   }
 }
 
@@ -84,7 +98,14 @@ function* autoPlayerARun() {
       if (channelState && bigNumberify(channelState.turnNum).lt(12)) {
         yield put(playAgain());
       } else {
-        yield put(resign());
+        yield put(resign(true));
       }
+      break;
+    case 'Resigned':
+      yield put(gameOver());
+      break;
+    case 'InsufficientFunds':
+      yield put(gameOver());
+      break;
   }
 }

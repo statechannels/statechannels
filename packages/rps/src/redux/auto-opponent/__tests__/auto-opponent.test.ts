@@ -9,7 +9,7 @@ import { openGamesReducer } from '../../open-games/reducer';
 import { channelUpdatedListener } from '../../message-service/channel-updated-listener';
 import { autoPlayer, autoOpponent } from '../';
 
-const SUFFICIENT_TIME_TO_GET_TO_TURNUM_14 = 7000; // test will take at least this long to run
+const SUFFICIENT_TIME_TO_GET_TO_TURNUM_16 = 7000; // test will take at least this long to run
 const reducer = combineReducers({
   game: gameReducer,
   openGames: openGamesReducer,
@@ -35,8 +35,9 @@ it(
 
     const { storeState } = await expectSaga(saga)
       .withReducer(reducer, initialState)
-      .silentRun(SUFFICIENT_TIME_TO_GET_TO_TURNUM_14); // Kill the saga after (hopefully) enough time. Brittle.
+      .silentRun(SUFFICIENT_TIME_TO_GET_TO_TURNUM_16); // Kill the saga after (hopefully) enough time. Brittle.
     expect(storeState.game.localState.type).toEqual('GameOver');
+    expect(storeState.game.channelState.turnNum).toEqual('16');
   },
-  SUFFICIENT_TIME_TO_GET_TO_TURNUM_14 + 1000
+  SUFFICIENT_TIME_TO_GET_TO_TURNUM_16 + 1000
 ); // We don't want jest to timeout

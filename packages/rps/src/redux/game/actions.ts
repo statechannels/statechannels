@@ -1,5 +1,4 @@
 import { ChannelState, Weapon, Result } from '../../core';
-import { ShutDownReason } from './state';
 
 export type GameAction =
   | UpdateProfile
@@ -15,7 +14,8 @@ export type GameAction =
   | PlayAgain
   | StartRound
   | Resign
-  | GameOver;
+  | GameOver
+  | ExitToLobby;
 
 export interface UpdateProfile {
   type: 'UpdateProfile';
@@ -85,11 +85,15 @@ export interface StartRound {
 
 export interface Resign {
   type: 'Resign';
+  iResigned: boolean;
 }
 
 export interface GameOver {
   type: 'GameOver';
-  reason: ShutDownReason;
+}
+
+export interface ExitToLobby {
+  type: 'ExitToLobby';
 }
 
 // Constructors
@@ -158,5 +162,6 @@ export const resultArrived = (
 
 export const playAgain = (): PlayAgain => ({ type: 'PlayAgain' });
 export const startRound = (): StartRound => ({ type: 'StartRound' });
-export const resign = (): Resign => ({ type: 'Resign' });
-export const gameOver = (reason: ShutDownReason): GameOver => ({ type: 'GameOver', reason });
+export const resign = (iResigned: boolean): Resign => ({ type: 'Resign', iResigned });
+export const gameOver = (): GameOver => ({ type: 'GameOver' });
+export const exitToLobby = (): ExitToLobby => ({ type: 'ExitToLobby' });

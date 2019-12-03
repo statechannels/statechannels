@@ -165,7 +165,7 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
         );
       }
       nextState.turnNum = currentTurnNum.add(1).toString();
-      console.log('Updated channel to turnNum:' + nextState.turnNum);
+      console.log(this.playerIndex + '  updated channel to turnNum:' + nextState.turnNum);
     }
 
     this.latestState = nextState;
@@ -206,6 +206,7 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
     }
 
     const turnNum = currentTurnNum.add(1).toString();
+    console.log(this.playerIndex + '  updated channel to turnNum:' + turnNum);
 
     this.latestState = { ...latestState, turnNum, status: 'closing' };
     this.notifyOpponent(this.latestState);
