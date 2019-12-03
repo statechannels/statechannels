@@ -54,11 +54,13 @@ OpenChannel(participants, balances, appDefinition, appData, channelNonce) // ful
   - Concludes the target channel
   - Determines the ledger channel from the store
   - updates the outcome of the ledger channel based on the outcome of the target channel.
-- [ ] `PartialWithdrawal(ledgerId, newOutcome, participantMapping)`
+- [*] `PartialWithdrawal(ledgerId, newOutcome, participantMapping)`
   - Calls `CreateNullChannel` to create a replacement ledger channel.
     - The new channel is determined by the `participantMapping` (participant addresses might change)
   - Conclude old ledger
   - Transfer funds from old ledger
+- [*] `ConcludeChannel(channelId)`
+  - Calls `SupportState` to support a final state
 
 ## List of "undetermined" protocols
 
@@ -74,3 +76,6 @@ OpenChannel(participants, balances, appDefinition, appData, channelNonce) // ful
 - [*] `VirtualFundingStrategy(channelId)` [NOT DONE]
   - Participants negotiate on a hub, jointNonce and guarantorNonce
   - On agreement, they inform the hub, and invoke `VirtualFundAsLeaf`
+- [ ] `InitiatePartialWithdrawal(ledgerId)`
+  - Determines the desired withdrawal amounts and new participants in the replacement channel
+  - Invokes `PartialWithdrawal`

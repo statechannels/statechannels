@@ -9,7 +9,13 @@ const PROTOCOL = 'partial-withdrawal';
 const success = { type: 'final' };
 
 /*
- */
+participantMapping allows participants to change their signing keys in the new channel.
+
+This protocol allows for more than one participant to withdraw from the channel.
+This may be useful, for instance, if a customer of the hub decides to lower their "channel rent",
+and the hub responds accordingly by lowering their stake.
+This would have to be negotiated in a different, undetermined protocol.
+*/
 interface Init {
   ledgerId: string;
   newOutcome: Allocation;
@@ -73,7 +79,6 @@ export function concludeOutcome({
   return {
     channelID: ledgerId,
     targetOutcome,
-    currentTurnNum: state.turnNum,
   };
 }
 const updateOldChannelOutcome = {

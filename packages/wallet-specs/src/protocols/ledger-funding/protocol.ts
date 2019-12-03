@@ -84,7 +84,6 @@ function ledgerUpdateArgs({
   return {
     channelID: ledgerChannelID,
     targetOutcome: [{ destination: targetChannelID, amount }],
-    currentTurnNum: store.getLatestConsensus(ledgerChannelID).state.turnNum,
   };
 }
 const fundTarget = {

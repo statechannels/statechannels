@@ -9,6 +9,8 @@ None
 When my app calls `ConcludeChannel`, my wallet spawns a new `conclude-channel` process.
 When my store receives a final state, it spawns a `conclude-channel` machine with the channels id.
 
+TODO: Should my wallet spawn a defunding protocol? Or should it spawn a `conclude-channel` protocol, which invokes the appropriate defunding protocol?
+
 ## Wire protocol
 
 None:

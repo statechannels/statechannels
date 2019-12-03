@@ -12,6 +12,7 @@ import {
 } from '../../';
 import { isAllocation, shouldBe } from '../../store';
 import { saveConfig } from '../../utils';
+import * as LedgerUpdate from '../ledger-update/protocol';
 
 const PROTOCOL = 'direct-funding';
 const success = { type: 'final' };
@@ -99,25 +100,29 @@ function postDepositOutcome(channelID: string): Outcome {
 
 interface Base {
   targetChannelID: string;
-  minimalOutcome: Outcome;
+  minimalOutcome: Allocation;
 }
 
 type UpdateOutcome = Base & {
   targetOutcome: Outcome;
 };
 
+function preFundLedgerUpdateParams({
+  targetChannelID: channelID,
+  minimalOutcome,
+}: UpdateOutcome): LedgerUpdate.Init {
+  return {
+    channelID,
+    targetOutcome: preDepositOutcome(channelID, minimalOutcome),
+  };
+}
 const updatePrefundOutcome = {
+  on: {
+    '': { target: 'waiting', cond: 'noUpdateNeeded' },
+  },
   invoke: {
     src: 'ledgerUpdate',
-    data: context => {
-      return {
-        targetChannelID: context.targetChannelID,
-        targetOutcome: preDepositOutcome(
-          context.targetChannelID,
-          context.minimalOutcome
-        ),
-      };
-    },
+    data: preFundLedgerUpdateParams.name,
     onDone: 'waiting',
   },
 };
@@ -139,18 +144,21 @@ const deposit = {
   onError: 'failure',
 };
 
+function postFundLedgerUpdateParams({ targetChannelID }: UpdateOutcome) {
+  return {
+    targetChannelID,
+    targetOutcome: postDepositOutcome(targetChannelID),
+  };
+}
 const updatePostFundOutcome = {
   invoke: {
     src: 'ledgerUpdate',
-    data: context => ({
-      targetChannelID: context.targetChannelID,
-      targetOutcome: postDepositOutcome(context.targetChannelID),
-    }),
+    data: postFundLedgerUpdateParams.name,
     onDone: 'success',
   },
 };
 
-const ledgerFundingConfig = {
+const config = {
   key: PROTOCOL,
   initial: 'updatePrefundOutcome',
   states: {
@@ -164,13 +172,9 @@ const ledgerFundingConfig = {
 };
 
 const guards = {
+  noUpdateNeeded: x => true,
   safeToDeposit: x => true,
   funded: x => true,
 };
 
-const helpers = {
-  preDepositOutcome: x => true,
-  postDepositOutcome: x => true,
-};
-
-saveConfig(ledgerFundingConfig, __dirname, { guards });
+saveConfig(config, __dirname, { guards });
