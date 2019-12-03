@@ -16,7 +16,16 @@ interface VirtualFunding {
   guarantorChannelId: string;
 }
 
-export type Funding = DirectFunding | IndirectFunding | VirtualFunding;
+interface Guaranteed {
+  type: 'Guarantee';
+  guarantorChannelIds: string[];
+}
+
+export type Funding =
+  | DirectFunding
+  | IndirectFunding
+  | VirtualFunding
+  | Guaranteed;
 
 export function isIndirectFunding(
   funding: Funding
@@ -26,6 +35,10 @@ export function isIndirectFunding(
 
 export function isVirtualFunding(funding: Funding): funding is VirtualFunding {
   return funding.type === 'Virtual';
+}
+
+export function isGuarantee(funding: Funding): funding is Guaranteed {
+  return funding.type === 'Guarantee';
 }
 
 export interface IChannelStoreEntry {
