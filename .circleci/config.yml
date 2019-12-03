@@ -9,7 +9,7 @@ defaults: &defaults
     - image: circleci/postgres:12.0-alpine
       environment:
         POSTGRES_USER: root
-        POSTGRES_DB: server_wallet_test
+        POSTGRES_DB: hub_wallet_test
         POSTGRES_PASSWORD: ''
 
 save_dep: &save_dep
