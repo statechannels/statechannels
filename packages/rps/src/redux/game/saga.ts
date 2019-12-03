@@ -18,6 +18,8 @@ import { randomHex } from '../../utils/randomHex';
 import { bigNumberify } from 'ethers/utils';
 import { buffers } from 'redux-saga';
 
+let opponentResigned;
+opponentResigned = false;
 const getGameState = (state: any): ls.GameState => state.game;
 const isPlayersTurnNext = (
   localState: ls.LocalState,
@@ -44,6 +46,18 @@ export function* gameSaga(client: RPSChannelClient) {
 
 function* gameSagaRun(client: RPSChannelClient) {
   const { localState, channelState }: ls.GameState = yield select(getGameState);
+
+  if (
+    !isPlayersTurnNext(localState, channelState) &&
+    cs.isClosed(channelState) &&
+    localState.type !== 'InsufficientFunds' &&
+    localState.type !== 'Resigned' &&
+    !opponentResigned
+  ) {
+    // I just sent the state that closed the channel
+    yield put(a.resign());
+    opponentResigned = true;
+  }
 
   switch (localState.type) {
     case 'NeedAddress':

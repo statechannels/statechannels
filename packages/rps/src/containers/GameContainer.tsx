@@ -108,7 +108,11 @@ function RenderGame(props: GameProps) {
         localState.player === 'A'
           ? Number(channelState.turnNum) % 2 !== 0
           : Number(channelState.turnNum) % 2 === 0;
-      return <Resigned iResigned={ourTurn} action={props.gameOver} />; // todo
+      const iResigned =
+        (ourTurn && channelState.status === 'running') ||
+        (!ourTurn && channelState.status === 'closing') ||
+        (ourTurn && channelState.status === 'closed');
+      return <Resigned iResigned={iResigned} action={props.gameOver} />;
     case 'GameOver':
       return (
         <GameOverPage
