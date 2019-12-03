@@ -1,4 +1,3 @@
-// Update with your config settings.
 const path = require('path');
 require('./env');
 
@@ -13,7 +12,8 @@ const baseProperties = {
   connection: {
     host: process.env.HUB_DB_HOST,
     port: process.env.HUB_DB_PORT,
-    database: process.env.HUB_DB_NAME
+    database: process.env.HUB_DB_NAME,
+    user: process.env.HUB_DB_USER
   },
   migrations: {
     directory: path.join(BASE_PATH, 'migrations'),
