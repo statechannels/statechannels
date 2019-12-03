@@ -2,6 +2,8 @@ import { State } from '../..';
 import { store } from '../../store';
 import { saveConfig } from '../../utils';
 import * as LedgerDefunding from '../ledger-defunding/protocol';
+import * as VirtualDefundingAsHub from '../virtual-defunding-as-hub/protocol';
+import * as VirtualDefundingAsLeaf from '../virtual-defunding-as-leaf/protocol';
 
 const PROTOCOL = 'conclude-channel';
 
@@ -37,16 +39,16 @@ const concludeTarget = {
   },
   onDone: [
     {
-      target: 'ledgerDefunding',
-      cond: 'indirectlyFunded',
-    },
-    {
       target: 'virtualDefunding',
       cond: 'virtuallyFunded',
     },
     {
       target: 'success',
       cond: 'directlyFunded',
+    },
+    {
+      target: 'ledgerDefunding',
+      cond: 'indirectlyFunded',
     },
   ],
 };
@@ -58,26 +60,59 @@ const ledgerDefunding = {
   invoke: {
     src: 'ledgerDefunding',
     data: ledgerDefundingArgs.name,
+    onDone: 'success',
   },
 };
 
-function virtualDefundingArgs(ctx: Init): void {
-  // TODO
+function virtualDefundingAsLeafArgs(ctx: Init): VirtualDefundingAsLeaf.Init {
+  const targetChannelId = 'target';
+  const index = 0;
+  return {
+    targetChannelId,
+    index,
+  };
+}
+function virtualDefundingAsHubArgs(ctx: Init): VirtualDefundingAsHub.Init {
+  const jointChannelId = 'joint';
+  return { jointChannelId };
 }
 const virtualDefunding = {
-  invoke: {
-    src: 'virtualDefunding',
-    data: virtualDefundingArgs.name,
+  initial: 'start',
+  states: {
+    start: {
+      on: {
+        '': [
+          { target: 'asLeaf', cond: 'amLeaf' },
+          { target: 'asHub', cond: 'amHub' },
+        ],
+      },
+    },
+    asLeaf: {
+      invoke: {
+        src: 'virtualDefundingAsLeaf',
+        data: virtualDefundingAsLeafArgs.name,
+        onDone: 'success',
+      },
+    },
+    asHub: {
+      invoke: {
+        src: 'virtualDefundingAsHub',
+        data: virtualDefundingAsHubArgs.name,
+        onDone: 'success',
+      },
+    },
+    success: { type: 'final' },
   },
+  onDone: 'success',
 };
 
 const config = {
   key: PROTOCOL,
-  initial: 'waiting',
+  initial: 'concludeTarget',
   states: {
     concludeTarget,
-    ledgerDefunding,
     virtualDefunding,
+    ledgerDefunding,
     success: { type: 'final' },
   },
 };

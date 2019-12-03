@@ -7,11 +7,7 @@ import {
   SignedState,
   State,
 } from '.';
-import {
-  ChannelStoreEntry,
-  Funding,
-  IChannelStoreEntry,
-} from './ChannelStoreEntry';
+import { ChannelStoreEntry, IChannelStoreEntry } from './ChannelStoreEntry';
 interface IStore {
   getLatestState: (channelID: string) => State;
   getLatestConsensus: (channelID: string) => SignedState; // Used for null channels, whose support must be a single state
@@ -271,9 +267,9 @@ export type StoreEvent = ChannelUpdated | Deposit;
 export const store = new Store();
 
 export function isAllocation(outcome: Outcome): outcome is Allocation {
-  // TODO: This should sometimes be isEthAllocation
+  // TODO: I think this might need to be isEthAllocation (sometimes?)
   if ('target' in outcome) {
-    throw new Error('Not an allocation');
+    return false;
   }
   return true;
 }
