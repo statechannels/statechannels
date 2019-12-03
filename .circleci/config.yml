@@ -78,6 +78,7 @@ jobs:
 
   test:
     <<: *defaults
+    resource_class: xlarge
     steps:
       - checkout
       - log_stats:
