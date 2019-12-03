@@ -13,7 +13,7 @@
     "build:ci": "yarn build:typescript",
     "build:typescript": "npx tsc -b",
     "build:webpack": "CI=false node scripts/build.js",
-    "build": "run-s clearContracts build:typescript build:webpack",
+    "build": "run-s build:typescript build:webpack",
     "lint:check": "yarn run tslint --config tslint.json  './**/*.{ts,js,tsx,jsx}'",
     "lint:write": "yarn run tslint --config tslint.json  './**/*.{ts,js,tsx,jsx}' --fix ",
     "patch-package": "cd ../.. && yarn patch-package",
