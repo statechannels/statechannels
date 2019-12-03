@@ -12,7 +12,7 @@
     "db:migrate": "npx knex migrate:latest",
     "db:rollback": "npx knex migrate:rollback",
     "db:seed": "npx knex seed:run",
-    "test:ci": "run-s prettier:check chain:ci:test server:test",
+    "test:ci": "run-s chain:ci:test server:test",
     "chain:ci:test": "yarn chain:test --all --ci",
     "chain:test": "npx jest --runInBand -c ./config/jest/jest.chain.config.js",
     "asset-holder-watcher:start": "node lib/wallet/asset-holder-watcher/index.js",
