@@ -30,7 +30,7 @@
     "test:contracts": "npx jest --runInBand -c ./config/jest/jest.contracts.config.js --detectOpenHandles",
     "test": "run-s 'test:app --all' 'test:contracts --all'",
     "test:puppeteer": "npx jest --runInBand -c ./config/jest/jest.puppeteer.config.js",
-    "puppeteer:script": "npx ts-node ./puppeteer/scripts/funding.ts",
+    "puppeteer:script": "npx ts-node -O '{\"module\":\"commonjs\"}' ./puppeteer/scripts/funding.ts ",
     "test:ci:integration": "wait-on http-get://localhost:3055/ && yarn test:puppeteer"
   },
   "dependencies": {
