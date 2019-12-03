@@ -7,7 +7,7 @@ import {
 } from "../utils/transaction-generator";
 import * as walletStates from "../redux/state";
 
-import {bigNumberify} from "ethers/utils";
+import {bigNumberify, BigNumberish} from "ethers/utils";
 import {
   ADJUDICATOR_ADDRESS,
   ETH_ASSET_HOLDER_ADDRESS,
@@ -71,14 +71,14 @@ export async function depositIntoETHAssetHolder(
 
 export async function createChallenge(
   provider: ethers.providers.JsonRpcProvider,
-  channelNonce,
+  channelNonce: BigNumberish,
   participantA,
   participantB
 ) {
   const libraryAddress = getTrivialAppAddress();
 
   const channel: Channel = {
-    channelNonce,
+    channelNonce: bigNumberify(channelNonce).toHexString(),
     chainId: bigNumberify(NETWORK_ID).toHexString(),
     participants: [participantA.address, participantB.address]
   };
