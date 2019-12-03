@@ -10,6 +10,7 @@ import {
   resign,
   createGame,
   gameJoined,
+  gameOver,
 } from '../actions';
 import { ChannelState } from '../../../core';
 import { RPSChannelClient } from '../../../utils/rps-channel-client';
@@ -238,16 +239,18 @@ describe('when the player resigns (which includes deciding not to play again)', 
 
 // when the opponent resigns
 
-describe('when the channel is closed', () => {
+describe('when in Resigned and user clicks on button', () => {
   it('transitions to game over', async () => {
-    const initialState = gameState(localStatesB.resigned, channelStates.roundProposed);
-    const action = updateChannelState(channelStates.closed); // triggered by ChannelUpdatedListener
+    const initialState = gameState(localStatesB.resigned, channelStates.concludeFromAccepted);
+    const action = gameOver();
 
     const { storeState } = await expectSaga(gameSaga as any, client)
       .withReducer(reducer, initialState)
       .dispatch(action)
       .run({ silenceTimeout: true });
 
-    expect(storeState).toEqual(gameState(localStatesB.gameOver, channelStates.closed));
+    expect(storeState).toEqual(
+      gameState(localStatesB.gameOver, channelStates.concludeFromAccepted)
+    );
   });
 });

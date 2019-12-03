@@ -3,7 +3,14 @@ import { combineReducers } from 'redux';
 import { gameReducer } from '../reducer';
 import { gameSaga } from '../saga';
 import { localStatesA, bName, bAddress, stake, channelStates, aWeapon, salt } from './scenarios';
-import { joinOpenGame, chooseWeapon, updateChannelState, playAgain, resign } from '../actions';
+import {
+  joinOpenGame,
+  chooseWeapon,
+  updateChannelState,
+  playAgain,
+  resign,
+  gameOver,
+} from '../actions';
 import { ChannelState } from '../../../core';
 import * as match from 'redux-saga-test-plan/matchers';
 import { RPSChannelClient } from '../../../utils/rps-channel-client';
@@ -194,16 +201,18 @@ describe('when the player resigns (which includes deciding not to play again)', 
   });
 });
 
-describe('when the channel is closed', () => {
+describe('when in Resigned and user clicks on button', () => {
   it('transitions to game over', async () => {
-    const initialState = gameState(localStatesA.resigned, channelStates.roundProposed);
-    const action = updateChannelState(channelStates.closed); // triggered by ChannelUpdatedListener
+    const initialState = gameState(localStatesA.resigned, channelStates.concludeFromProposed);
+    const action = gameOver();
 
     const { storeState } = await expectSaga(gameSaga as any, client)
       .withReducer(reducer, initialState)
       .dispatch(action)
       .run({ silenceTimeout: true });
 
-    expect(storeState).toEqual(gameState(localStatesA.gameOver, channelStates.closed));
+    expect(storeState).toEqual(
+      gameState(localStatesA.gameOver, channelStates.concludeFromProposed)
+    );
   });
 });
