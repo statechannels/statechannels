@@ -102,9 +102,10 @@ export async function startSharedGanache(
 ): Promise<GanacheServer> {
   const port = Number(p.port || process.env.SHARED_GANACHE_PORT);
   const server = await startOwnGanache({...p, port});
+
   say(`Deployments will be written to ${deploymentsPath}.`);
 
-  server.onClose(() => fs.unlinkSync(deploymentsPath));
+  server.onClose(() => fs.existsSync(deploymentsPath) && fs.unlinkSync(deploymentsPath));
 
   return server;
 }
