@@ -10,7 +10,7 @@ import {
   FUNDED_GUARANTOR_CHANNEL_ID,
   fundedChannel,
   fundedGuarantorChannel
-} from '../../../test/test_data';
+} from '../../../test/test-data';
 import Channel from '../channel';
 import ChannelState from '../channelState';
 

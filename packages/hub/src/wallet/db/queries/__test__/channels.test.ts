@@ -1,9 +1,5 @@
 import {errors} from '../../..';
-import {
-  createdChannel,
-  fundedChannel,
-  stateConstructors as testDataConstructors
-} from '../../../../test/test_data';
+import {fundedChannel, stateConstructors as testDataConstructors} from '../../../../test/test-data';
 import Channel from '../../../models/channel';
 import knex from '../../connection';
 import {
@@ -15,6 +11,7 @@ import {
   stateConstructors as seedDataConstructors
 } from '../../seeds/2_allocator_channels_seed';
 import {queries} from '../channels';
+import {createdChannel} from '../../../../test/test-responses';
 
 describe('updateChannel', () => {
   describe('when theirState is a PreFundSetup', () => {
