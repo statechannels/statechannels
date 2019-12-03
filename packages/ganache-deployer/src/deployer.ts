@@ -25,6 +25,8 @@ interface Deployment {
 
 interface DeploymentsFile {
   deploymentsFileVersion: '0.1';
+  port: number;
+  chainNetworkId: number;
   deployments: Deployment[];
 }
 
