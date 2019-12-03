@@ -28,8 +28,6 @@ export async function deployContracts(chain: GanacheServer): Promise<object> {
     forceMoveAppArtifact,
     consensusAppArtifact,
     testForceMoveArtifact,
-    testAssetHolderArtifact1,
-    testAssetHolderArtifact2,
     trivialAppArtifact,
     countingAppArtifact,
     singleAssetPaymentsArtifact,
@@ -59,6 +57,28 @@ export async function deployContracts(chain: GanacheServer): Promise<object> {
         }
         throw Error(`${ethAssetHolderArtifact.contractName} requires that the following contracts are deployed:
           - ${nitroAdjudicatorArtifact.contractName}
+        `);
+      },
+    },
+    {
+      artifact: testAssetHolderArtifact1,
+      arguments: (deployedArtifacts: DeployedArtifacts) => {
+        if (testNitroAdjudicatorArtifact.contractName in deployedArtifacts) {
+          return [deployedArtifacts[testNitroAdjudicatorArtifact.contractName].address];
+        }
+        throw Error(`${testAssetHolderArtifact1.contractName} requires that the following contracts are deployed:
+          - ${testNitroAdjudicatorArtifact.contractName}
+        `);
+      },
+    },
+    {
+      artifact: testAssetHolderArtifact2,
+      arguments: (deployedArtifacts: DeployedArtifacts) => {
+        if (testNitroAdjudicatorArtifact.contractName in deployedArtifacts) {
+          return [deployedArtifacts[testNitroAdjudicatorArtifact.contractName].address];
+        }
+        throw Error(`${testAssetHolderArtifact2.contractName} requires that the following contracts are deployed:
+          - ${testNitroAdjudicatorArtifact.contractName}
         `);
       },
     },
