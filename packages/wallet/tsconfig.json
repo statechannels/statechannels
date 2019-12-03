@@ -3,7 +3,7 @@
     "baseUrl": ".",
     "composite": true,
     "outDir": "lib",
-    "module": "commonjs",
+    "module": "esnext",
     "target": "es2015",
     "lib": ["es6", "dom"],
     "sourceMap": true,
