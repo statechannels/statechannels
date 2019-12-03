@@ -22,13 +22,14 @@
     "lint:check": "lerna run lint:check --parallel --no-bail",
     "lint:write": "lerna run lint:write --parallel --no-bail",
     "publish": "lerna publish --yes from-package patch",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package && typesync"
   },
   "keywords": [
     "ethereum",
     "state channels"
   ],
   "devDependencies": {
+    "@types/prettier": "1.18.2",
     "husky": "3.0.7",
     "lerna": "3.16.4",
     "patch-package": "6.2.0",
@@ -37,7 +38,8 @@
     "tslint": "5.20.0",
     "tslint-config-prettier": "1.18.0",
     "tslint-plugin-prettier": "2.0.1",
-    "typescript": "3.7.2"
+    "typescript": "3.7.2",
+    "typesync": "^0.6.1"
   },
   "husky": {
     "hooks": {
