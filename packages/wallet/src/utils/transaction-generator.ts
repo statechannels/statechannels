@@ -113,7 +113,8 @@ export function createETHDepositTransaction(
   }
   return {
     ...createNitroETHDepositTransaction(destination, expectedHeld, depositAmount),
-    to: ETH_ASSET_HOLDER_ADDRESS
+    to: ETH_ASSET_HOLDER_ADDRESS,
+    value: depositAmount
   };
 }
 

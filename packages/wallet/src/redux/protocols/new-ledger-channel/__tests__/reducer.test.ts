@@ -1,7 +1,7 @@
 import * as scenarios from "./scenarios";
 import {NewLedgerChannelReducer, initialize} from "../reducer";
 import {ProtocolStateWithSharedData} from "../..";
-import {NewLedgerChannelState} from "../states";
+import {NewLedgerChannelState, WaitForDirectFunding} from "../states";
 
 import {describeScenarioStep, itSendsAMessage} from "../../../__tests__/helpers";
 import * as selectors from "../../../selectors";
@@ -26,6 +26,10 @@ describe("happy-path scenario", () => {
     const updatedState = NewLedgerChannelReducer(state, sharedData, action);
 
     itTransitionsTo(updatedState, "NewLedgerChannel.WaitForDirectFunding");
+    // TODO: We should be testing this for player B as well
+    expect(
+      (updatedState.protocolState as WaitForDirectFunding).directFundingState.safeToDepositLevel
+    ).toEqual("0x0");
   });
 
   describeScenarioStep(scenario.waitForDirectFunding, () => {

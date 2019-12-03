@@ -84,10 +84,9 @@ describe("transactions", () => {
   it("should deposit ETH into the ETH asset holder", async () => {
     const someChannelId = ethers.utils.hexlify(ethers.utils.randomBytes(32));
     const depositTransactionData = createETHDepositTransaction(someChannelId, "0x5", "0x0");
+    expect(depositTransactionData.value).toBe("0x5");
     await testTransactionSender({
-      ...depositTransactionData,
-
-      value: 5
+      ...depositTransactionData
     });
   });
 
