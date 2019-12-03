@@ -12,7 +12,7 @@ describe('handle-ongoing-process-action', () => {
     const signedStatesReceivedAction: SignedStatesReceived = {
       type: 'WALLET.COMMON.SIGNED_STATES_RECEIVED',
       processId: '1234',
-      protocolLocator: [EmbeddedProtocol.AdvanceChannel],
+      protocolLocator: [EmbeddedProtocol.AdvanceChannel as any],
       signedStates: [signState(state, PARTICIPANT_1_PRIVATE_KEY)]
     };
     const messageReleayRequested = await handleOngoingProcessAction(signedStatesReceivedAction);
