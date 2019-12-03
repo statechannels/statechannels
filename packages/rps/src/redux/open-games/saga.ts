@@ -1,4 +1,4 @@
-import { fork, take, select, cancel, call, apply, put } from 'redux-saga/effects';
+import { fork, take, select, cancel, call, apply, putResolve } from 'redux-saga/effects';
 
 export const getLocalState = (storeObj: any) => storeObj.game.localState;
 function getOpenGame(storObj: any, address: string) {
@@ -68,7 +68,7 @@ export default function* openGameSaga() {
             .database()
             .ref(myOpenGameKey)
             .onDisconnect();
-          yield apply(disconnect, disconnect.remove);
+          yield apply(disconnect, disconnect.remove, []);
           // use update to allow us to pick our own key
           yield call(reduxSagaFirebase.database.update, myOpenGameKey, myOpenGame);
           myGameIsOnFirebase = true;
@@ -76,7 +76,7 @@ export default function* openGameSaga() {
           const storeObj = yield select();
           myOpenGame = getOpenGame(storeObj, myOpenGameKey);
           if (myOpenGame && !myOpenGame.isPublic) {
-            yield put.resolve(gameJoined(myOpenGame.opponentName, myOpenGame.opponentAddress)); // block until dispatched
+            yield putResolve(gameJoined(myOpenGame.opponentName, myOpenGame.opponentAddress)); // block until dispatched
             yield call(reduxSagaFirebase.database.delete, myOpenGameKey);
             myGameIsOnFirebase = false;
           }

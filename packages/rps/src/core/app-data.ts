@@ -2,6 +2,7 @@ import { Weapon } from './weapons';
 import { defaultAbiCoder, bigNumberify, keccak256 } from 'ethers/utils';
 import { HashZero } from 'ethers/constants';
 import { randomHex } from '../utils/randomHex';
+import { unreachable } from '../utils/unreachable';
 
 export enum PositionType {
   Start, // 0
@@ -90,14 +91,14 @@ export function decodeAppData(appDataBytes: string): AppData {
     appDataBytes
   )[0];
 
-  const positionType = parameters[0];
+  const positionType = parameters[0] as PositionType;
   const stake = parameters[1].toString();
   const preCommit = parameters[2];
   const playerAWeapon = parameters[3];
   const playerBWeapon = parameters[4];
   const salt = parameters[5];
 
-  switch (positionType as PositionType) {
+  switch (positionType) {
     case PositionType.Start: // TODO replace these with functions that project out the desired fields
       const start: Start = {
         type: 'start',
@@ -126,6 +127,8 @@ export function decodeAppData(appDataBytes: string): AppData {
         salt,
       };
       return reveal;
+    default:
+      return unreachable(positionType);
   }
 }
 
