@@ -59,7 +59,7 @@ OpenChannel(participants, balances, appDefinition, appData, channelNonce) // ful
     - The new channel is determined by the `participantMapping` (participant addresses might change)
   - Conclude old ledger
   - Transfer funds from old ledger
-- [*] `ConcludeChannel(channelId)`
+- [ ] `ConcludeChannel(channelId)`
   - Calls `SupportState` to support a final state
 
 ## List of "undetermined" protocols

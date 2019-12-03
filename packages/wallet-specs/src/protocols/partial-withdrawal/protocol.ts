@@ -90,9 +90,9 @@ const updateOldChannelOutcome = {
 };
 
 function oldChannelId({
-  ledgerId: channelID,
+  ledgerId: channelId,
 }: NewChannelCreated): ConcludeChannel.Init {
-  return { channelID };
+  return { channelId };
 }
 const concludeOldChannel = {
   invoke: {

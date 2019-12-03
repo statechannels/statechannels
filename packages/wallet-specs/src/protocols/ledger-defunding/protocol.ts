@@ -1,41 +1,35 @@
 import { Outcome, store } from '../..';
+import { isIndirectFunding } from '../../ChannelStoreEntry';
+import { shouldBe } from '../../store';
 import { saveConfig } from '../../utils';
+import * as LedgerUpdate from '../ledger-update/protocol';
 
 const PROTOCOL = 'ledger-defunding';
 const success = { type: 'final' };
 
-function defundedOutcome(
-  ledgerChannelID: string,
-  targetChannelID: string
-): Outcome {
-  const outcome = store.getLatestSupportedAllocation(ledgerChannelID);
-  const concludedOutcome = store.getLatestSupportedAllocation(targetChannelID);
-
-  // Assumes that the target channel only has one entry in the ledger channel
-  // TODO: How do we ensure this?
-  return outcome
-    .filter(item => item.destination !== targetChannelID)
-    .concat(concludedOutcome);
+export interface Init {
+  targetChannelId;
 }
 
-const concludeTarget = {
-  invoke: {
-    src: 'concludeChannel',
-    data: context => ({ channelID: context.ledgerChannelID }),
-    onDone: 'defundTarget',
-  },
-};
-
+function ledgerUpdateArgs({ targetChannelId }: Init): LedgerUpdate.Init {
+  const { ledgerId } = shouldBe(
+    isIndirectFunding,
+    store.getEntry(targetChannelId).funding
+  );
+  const outcome = store.getLatestSupportedAllocation(ledgerId);
+  const concludedOutcome = store.getLatestSupportedAllocation(targetChannelId);
+  const targetOutcome = outcome
+    .filter(item => item.destination !== targetChannelId)
+    .concat(concludedOutcome);
+  return {
+    channelID: ledgerId,
+    targetOutcome,
+  };
+}
 const defundTarget = {
   invoke: {
     src: 'ledgerUpdate',
-    data: context => ({
-      channelID: context.ledgerChannelID,
-      outcome: defundedOutcome(
-        context.ledgerChannelID,
-        context.targetChannelID
-      ),
-    }),
+    data: ledgerUpdateArgs.name,
     onDone: 'success',
   },
 };
@@ -44,7 +38,6 @@ const config = {
   key: PROTOCOL,
   initial: 'concludeTarget',
   states: {
-    concludeTarget,
     defundTarget,
     success,
   },

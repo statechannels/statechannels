@@ -1,6 +1,7 @@
 import { interpret, Machine } from 'xstate';
 import { Channel, Outcome, SignedState, State } from '../..';
-import { ChannelStoreEntry, Store } from '../../store';
+import { ChannelStoreEntry, IChannelStoreEntry } from '../../ChannelStoreEntry';
+import { Store } from '../../store';
 import { config, Init, SendState } from './protocol';
 
 const participants = ['me', 'you'];
@@ -22,11 +23,12 @@ const startingSignedState: SignedState = {
   state: startingState,
   signatures: ['mine', 'yours'],
 };
-const storeEntry: ChannelStoreEntry = {
+const storeEntry: IChannelStoreEntry = {
   privateKey: 'secret',
   supportedState: [startingSignedState],
   unsupportedStates: [],
   participants: [],
+  funding: { type: 'Direct' },
 };
 const store = new Store({ '0xabc': storeEntry });
 

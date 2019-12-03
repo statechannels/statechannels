@@ -7,6 +7,11 @@ import {
   SignedState,
   State,
 } from '.';
+import {
+  ChannelStoreEntry,
+  Funding,
+  IChannelStoreEntry,
+} from './ChannelStoreEntry';
 interface IStore {
   getLatestState: (channelID: string) => State;
   getLatestConsensus: (channelID: string) => SignedState; // Used for null channels, whose support must be a single state
@@ -21,10 +26,12 @@ interface IStore {
   getUnsupportedStates: (channelID: string) => SignedState[];
 
   findLedgerChannelId: (participants: string[]) => string | undefined;
-
   signedByMe: (state: State) => boolean;
+
   sendState: (state: State) => void;
   receiveStates: (signedStates: SignedState[]) => ChannelUpdated | false;
+  // TODO: set funding
+  // setFunding(channelId: string, funding: Funding): void;
 
   /*
   Nonce management
@@ -55,15 +62,8 @@ export interface Participant {
   destination: string;
 }
 
-export interface ChannelStoreEntry {
-  supportedState: SignedState[];
-  unsupportedStates: SignedState[];
-  privateKey: string; // determines ourIndex
-  participants: Participant[];
-}
-
 interface ChannelStore {
-  [channelID: string]: ChannelStoreEntry;
+  [channelID: string]: IChannelStoreEntry;
 }
 
 export class Store implements IStore {
@@ -83,7 +83,7 @@ export class Store implements IStore {
       throw new Error(`Channel ${channelID} not found`);
     }
 
-    return this._store[channelID];
+    return new ChannelStoreEntry(this._store[channelID]);
   }
 
   public getIndex(channelId: string): 0 | 1 {
