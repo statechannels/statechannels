@@ -9,9 +9,7 @@ const {
 
 const {GanacheDeployer} = require("@statechannels/devtools");
 
-const deploy = async () => {
-  const deployer = new GanacheDeployer(Number(process.env.GANACHE_PORT));
-
+const deploy = async deployer => {
   const CONSENSUS_APP_ADDRESS = await deployer.deploy(ConsensusAppArtifact);
   const TRIVIAL_APP_ADDRESS = await deployer.deploy(TrivialAppArtifact);
 
