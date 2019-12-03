@@ -48,7 +48,7 @@ export function validAppTransition(
     turnNumB,
     numberOfParticipants
   ]);
-  const result = PureEVM.exec(
+  const result = window.PureEVM.exec(
     Uint8Array.from(Buffer.from(bytecode.substr(2), "hex")),
     Uint8Array.from(Buffer.from(txData.substr(2), "hex"))
   );

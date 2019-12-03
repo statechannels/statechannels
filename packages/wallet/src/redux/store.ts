@@ -41,7 +41,10 @@ function* webAssemblyModuleLoaderSaga() {
   function* dynamicImportSaga(path) {
     return yield call(() => Promise.resolve(new Promise(resolve => import(path).then(resolve))));
   }
-  PureEVM = ((yield call(dynamicImportSaga, "pure-evm")) as unknown) as typeof import("pure-evm");
+  window.PureEVM = ((yield call(
+    dynamicImportSaga,
+    "pure-evm"
+  )) as unknown) as typeof import("pure-evm");
 }
 
 // Must run before anything else runs
