@@ -1,11 +1,10 @@
 import {
   ConcludeInstigated,
   RelayableAction,
+  RelayActionWithMessage,
   SignedStatesReceived,
-  StrategyProposed,
-  RelayActionWithMessage
+  StrategyProposed
 } from '../../communication';
-
 import {getProcess} from '../../wallet/db/queries/walletProcess';
 import {handleNewProcessAction} from './handle-new-process-action';
 import {handleOngoingProcessAction} from './handle-ongoing-process-action';

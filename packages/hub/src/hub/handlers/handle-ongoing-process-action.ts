@@ -1,12 +1,12 @@
 import {SignedState} from '@statechannels/nitro-protocol';
+import {ActionConstructor} from '@statechannels/wallet/lib/src/redux/utils';
 import {
-  ProtocolLocator,
   RelayActionWithMessage,
   SignedStatesReceived,
-  StrategyApproved,
-  StrategyProposed
-} from '@statechannels/wallet/lib/src/communication';
-import {ActionConstructor} from '@statechannels/wallet/lib/src/redux/utils';
+  StrategyProposed,
+  ProtocolLocator,
+  StrategyApproved
+} from '../../communication';
 import {HUB_ADDRESS, unreachable} from '../../constants';
 import {errors} from '../../wallet';
 import {getCurrentState} from '../../wallet/db/queries/getCurrentState';

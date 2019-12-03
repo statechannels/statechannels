@@ -1,6 +1,7 @@
 import {State} from '@statechannels/nitro-protocol';
 import {signState} from '@statechannels/nitro-protocol/lib/src/signatures';
-import {SignedStatesReceived} from '@statechannels/wallet/lib/src/communication';
+
+import {SignedStatesReceived} from '../../../communication';
 import {EmbeddedProtocol} from '../../../constants';
 import {PARTICIPANT_1_PRIVATE_KEY} from '../../../test/test-constants';
 import {stateConstructors} from '../../../test/test_data';
