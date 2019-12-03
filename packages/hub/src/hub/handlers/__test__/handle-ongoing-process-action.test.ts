@@ -4,7 +4,7 @@ import {signState} from '@statechannels/nitro-protocol/lib/src/signatures';
 import {SignedStatesReceived} from '../../../communication';
 import {EmbeddedProtocol} from '../../../constants';
 import {PARTICIPANT_1_PRIVATE_KEY} from '../../../test/test-constants';
-import {stateConstructors} from '../../../test/test_data';
+import {stateConstructors} from '../../../test/test-data';
 import {handleOngoingProcessAction} from '../handle-ongoing-process-action';
 
 describe('handle-ongoing-process-action', () => {

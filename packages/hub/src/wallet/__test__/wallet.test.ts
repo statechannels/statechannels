@@ -1,5 +1,5 @@
 import {State} from '@statechannels/nitro-protocol';
-import {stateConstructors as testDataConstructors} from '../../test/test_data';
+import {stateConstructors as testDataConstructors} from '../../test/test-data';
 import Wallet from '..';
 
 let preFundSetup0: State;

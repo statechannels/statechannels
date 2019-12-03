@@ -1,7 +1,7 @@
 import {bigNumberify} from 'ethers/utils';
 import {Address, Uint256} from 'fmg-core';
 import {DUMMY_ASSET_HOLDER_ADDRESS} from '../../../test/test-constants';
-import {FUNDED_CHANNEL_ID, UNFUNDED_CHANNEL_ID} from '../../../test/test_data';
+import {FUNDED_CHANNEL_ID, UNFUNDED_CHANNEL_ID} from '../../../test/test-data';
 import Channel from '../../models/channel';
 import {
   AssetHolderWatcherEvent,

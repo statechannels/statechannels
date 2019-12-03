@@ -9,9 +9,9 @@
   "scripts": {
     "db:drop": "dropdb server_wallet_${NODE_ENV}",
     "db:create": "createdb server_wallet_${NODE_ENV}",
-    "db:migrate": "npx knex migrate:latest",
-    "db:rollback": "npx knex migrate:rollback",
-    "db:seed": "npx knex seed:run",
+    "db:migrate": "npx knex migrate:latest --knexfile lib/config/knexfile",
+    "db:rollback": "npx knex migrate:rollback --knexfile lib/config/knexfile",
+    "db:seed": "npx knex seed:run --knexfile lib/config/knexfile",
     "server:start": "node ./lib/hub/server.js",
     "server:watch": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node ./src/hub/server.ts",
     "firebase-relay:start:sdev": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node src/message/firebase-relay",
