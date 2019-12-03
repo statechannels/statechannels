@@ -234,7 +234,8 @@ const handleResign = (state: LocalState, action: Resign): LocalState => {
   ) {
     return state;
   }
-  return resigned(state);
+
+  return resigned(state, action.iResigned);
 };
 
 const handleGameOver = (state: LocalState, action: GameOver): LocalState => {

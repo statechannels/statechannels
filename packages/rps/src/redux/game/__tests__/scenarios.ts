@@ -92,7 +92,8 @@ export const localStatesA = {
   chooseWeapon2: s.chooseWeapon(propsA),
   waitForRestart: s.waitForRestart(propsA, playerBWeapon, Result.YouWin),
   insuffcientFunds: s.insufficientFunds(propsA, playerBWeapon, Result.YouWin),
-  resigned: s.resigned(propsA),
+  resignedMe: s.resigned(propsA, true),
+  resignedThem: s.resigned(propsA, false),
   gameOver: s.gameOver(propsA),
 };
 
@@ -115,6 +116,7 @@ export const localStatesB = {
   resultPlayAgain: s.resultPlayAgain(propsB, playerAWeapon, Result.YouLose),
   chooseWeapon2: s.chooseWeapon(propsB),
   insufficientFunds: s.insufficientFunds(propsB, playerAWeapon, Result.YouLose),
-  resigned: s.resigned(propsB),
+  resignedMe: s.resigned(propsB, true),
+  resignedThem: s.resigned(propsB, false),
   gameOver: s.gameOver(propsB),
 };

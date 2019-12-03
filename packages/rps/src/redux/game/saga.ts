@@ -55,7 +55,7 @@ function* gameSagaRun(client: RPSChannelClient) {
     !opponentResigned
   ) {
     // I just sent the state that closed the channel
-    yield put(a.resign());
+    yield put(a.resign(true));
     opponentResigned = true;
   }
 

@@ -121,6 +121,7 @@ export interface InsufficientFunds extends Playing {
 
 export interface Resigned extends Playing {
   type: 'Resigned';
+  iResigned: boolean;
 }
 
 export interface GameOver extends Playing {
@@ -231,9 +232,10 @@ export const insufficientFunds = <T extends Playing & { myWeapon: Weapon }>(
   result,
 });
 
-export const resigned = <T extends Playing>(state: T): Resigned => ({
+export const resigned = <T extends Playing>(state: T, iResigned: boolean): Resigned => ({
   type: 'Resigned',
   ...playing(state),
+  iResigned,
 });
 
 export const gameOver = <T extends Playing>(state: T): GameOver => ({

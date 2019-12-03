@@ -29,7 +29,6 @@ interface GameProps {
   chooseWeapon: (move: Weapon) => void;
   playAgain: () => void;
   cancelOpenGame: () => void;
-  conclude: () => void;
   gameOver: () => void;
   exitToLobby: () => void;
 }
@@ -39,7 +38,7 @@ function GameContainer(props: GameProps) {
 }
 
 function RenderGame(props: GameProps) {
-  const { localState, channelState } = props;
+  const { localState } = props;
 
   switch (localState.type) {
     case 'Empty':
@@ -104,15 +103,7 @@ function RenderGame(props: GameProps) {
         />
       );
     case 'Resigned':
-      const ourTurn =
-        localState.player === 'A'
-          ? Number(channelState.turnNum) % 2 !== 0
-          : Number(channelState.turnNum) % 2 === 0;
-      const iResigned =
-        (ourTurn && channelState.status === 'running') ||
-        (!ourTurn && channelState.status === 'closing') ||
-        (ourTurn && channelState.status === 'closed');
-      return <Resigned iResigned={iResigned} action={props.gameOver} />;
+      return <Resigned iResigned={localState.iResigned} action={props.gameOver} />;
     case 'GameOver':
       return (
         <GameOverPage
@@ -135,7 +126,6 @@ const mapDispatchToProps = {
   chooseWeapon: gameActions.chooseWeapon,
   playAgain: gameActions.playAgain,
   cancelOpenGame: gameActions.cancelGame,
-  conclude: gameActions.resign,
   gameOver: gameActions.gameOver,
   exitToLobby: gameActions.exitToLobby,
 };

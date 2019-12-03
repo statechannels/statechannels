@@ -60,7 +60,7 @@ function* autoPlayerBRun() {
       if (channelState && bigNumberify(channelState.turnNum).lt(12)) {
         yield put(playAgain());
       } else {
-        yield put(resign());
+        yield put(resign(true));
       }
       break;
     case 'Resigned':
@@ -98,7 +98,7 @@ function* autoPlayerARun() {
       if (channelState && bigNumberify(channelState.turnNum).lt(12)) {
         yield put(playAgain());
       } else {
-        yield put(resign());
+        yield put(resign(true));
       }
       break;
     case 'Resigned':
