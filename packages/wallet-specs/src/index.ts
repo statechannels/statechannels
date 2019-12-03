@@ -18,14 +18,25 @@ export type Outcome = Allocation | Guarantee;
 export type Address = string;
 export type PrivateKey = string;
 
-export interface State {
+interface VariablePart {
   turnNum: number;
   outcome: Outcome;
+  isFinal: boolean;
+}
+
+export type State = VariablePart & {
   appData?: AppData;
   appDefinition?: string;
   channel: Channel;
   challengeDuration: string;
-  isFinal: boolean;
+};
+
+export function nextState(state: State, opts?: Partial<VariablePart>): State {
+  return {
+    ...state,
+    turnNum: state.turnNum + 1,
+    ...opts,
+  };
 }
 
 export interface Channel {

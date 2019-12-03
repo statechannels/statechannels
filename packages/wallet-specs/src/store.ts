@@ -281,5 +281,12 @@ export function isAllocation(outcome: Outcome): outcome is Allocation {
 const throwError = (fn: (t1: any) => boolean, t) => {
   throw new Error(`not valid, ${fn.name} failed on ${t}`);
 };
+/*
+TODO: replace shouldBe with checkThat
+reasoning: checkThat(outcome, isAllocation) reads like an english sentence
+*/
 export const shouldBe = <T>(fn: (t1) => t1 is T, t) =>
+  fn(t) ? t : throwError(fn, t);
+
+export const checkThat = <T>(t, fn: (t1) => t1 is T) =>
   fn(t) ? t : throwError(fn, t);

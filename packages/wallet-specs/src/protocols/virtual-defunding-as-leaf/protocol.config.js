@@ -3,10 +3,10 @@ const config = {
   initial: 'defundTarget',
   states: {
     defundTarget: {
-      entry: ['assignChannels', 'ensureTargetIsConcluded'],
+      entry: 'assignChannels',
       invoke: {
         src: 'supportState',
-        data: 'finalJointChannelState',
+        data: 'finalJointChannelUpdate',
         onDone: 'defundGuarantor',
       },
       exit: 'garbageCollectTargetChannel',
