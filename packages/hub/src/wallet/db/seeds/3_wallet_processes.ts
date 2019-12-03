@@ -1,5 +1,5 @@
 import {Model} from 'objection';
-import {EmbeddedProtocol} from '../../../communication';
+import {EmbeddedProtocol} from '../../../constants';
 import {PARTICIPANT_1_ADDRESS} from '../../../test/test-constants';
 import WalletProcess from '../../models/WalletProcess';
 import knex from '../connection';

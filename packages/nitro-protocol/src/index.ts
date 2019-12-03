@@ -63,6 +63,8 @@ export interface SignedState {
 // TODO: Export this with more thought to what is exposed by @statchannels/nitro-protocol
 export {
   Allocation,
+  convertBytes32ToAddress,
+  convertAddressToBytes32,
   createERC20DepositTransaction,
   createETHDepositTransaction,
   createTransferAllTransaction,

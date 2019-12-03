@@ -49,6 +49,7 @@
     "pg": "7.12.1"
   },
   "devDependencies": {
+    "@statechannels/wallet": "0.0.1",
     "@types/async-lock": "1.1.1",
     "@types/config": "0.0.34",
     "@types/dotenv": "6.1.1",
@@ -60,7 +61,6 @@
     "@types/node": "11.15.2",
     "@types/supertest": "2.0.8",
     "@typescript-eslint/eslint-plugin": "^2.7.0",
-    "@typescript-eslint/eslint-plugin-tslint": "^2.7.0",
     "@typescript-eslint/parser": "^2.7.0",
     "babel-register": "6.26.0",
     "eslint": "^6.6.0",
@@ -75,8 +75,6 @@
     "npm-run-all": "4.1.5",
     "prettier": "1.18.2",
     "supertest": "3.4.2",
-    "truffle": "5.0.42",
-    "truffle-hdwallet-provider": "1.0.17",
     "ts-jest": "24.1.0",
     "ts-node": "8.4.1",
     "typescript": "3.6.3"
