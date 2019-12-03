@@ -3,7 +3,11 @@
     "baseUrl": ".",
     "composite": true,
     "outDir": "lib",
+  
+    // esnext is required for TypeScript to recognize dynamic imports (which pure-evm must be)
+    // https://github.com/Microsoft/TypeScript/issues/16820
     "module": "esnext",
+  
     "target": "es2015",
     "lib": ["es6", "dom"],
     "sourceMap": true,
