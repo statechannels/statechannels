@@ -6,10 +6,10 @@ import {
   createTransferAllTransaction as createNitroTransferAllTransaction,
   Transactions as nitroTrans,
   SignedState,
-  State
+  State,
+  convertAddressToBytes32
 } from "@statechannels/nitro-protocol";
 import {Allocation, AllocationItem} from "@statechannels/nitro-protocol/src/contract/outcome";
-import {convertAddressToBytes32} from "./data-type-utils";
 import {TransactionRequestWithTarget} from "../redux/outbox/state";
 import {
   ADJUDICATOR_ADDRESS,

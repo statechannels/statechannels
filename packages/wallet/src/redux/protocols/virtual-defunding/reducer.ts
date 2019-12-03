@@ -12,14 +12,13 @@ import {getTwoPlayerIndex, getFundingChannelId, getLatestState} from "../reducer
 import {VirtualDefundingAction} from "./actions";
 import {routesToConsensusUpdate} from "../consensus-update/actions";
 import {HUB_ADDRESS} from "../../../constants";
-import {Outcome} from "@statechannels/nitro-protocol";
+import {Outcome, convertAddressToBytes32} from "@statechannels/nitro-protocol";
 import {
   getAllocationOutcome,
   getAllocationTotal,
   getAllocationItemAtIndex,
   getAllocationAmountForIndex
 } from "../../../utils/outcome-utils";
-import {convertAddressToBytes32} from "../../../utils/data-type-utils";
 import {TwoPartyPlayerIndex} from "../../types";
 
 export function initialize({
