@@ -1,7 +1,5 @@
 const consensusAppArtifact = require('../build/contracts/ConsensusApp.json');
 const countingAppArtifact = require('../build/contracts/CountingApp.json');
-const erc20AssetHolderArtifact = require('../build/contracts/TestErc20AssetHolder.json');
-const ethAssetHolderArtifact = require('../build/contracts/TestEthAssetHolder.json');
 const nitroAdjudicatorArtifact = require('../build/contracts/NitroAdjudicator.json');
 const singleAssetPaymentsArtifact = require('../build/contracts/SingleAssetPayments.json');
 const testAssetHolderArtifact1 = require('../build/contracts/TESTAssetHolder.json');
@@ -30,8 +28,10 @@ const deploy = async (_network, _secret, _etherscanApiKey) => {
   // for test purposes in this package, wire up the assetholders with the testNitroAdjudicator
   const testNitroAdjudicatorAddress = await deployer.deploy(testNitroAdjudicatorArtifact);
   const tokenAddress = await deployer.deploy(tokenArtifact);
-  await deployer.deploy(ethAssetHolderArtifact, {}, testNitroAdjudicatorAddress);
-  await deployer.deploy(erc20AssetHolderArtifact, {}, testNitroAdjudicatorAddress, tokenAddress);
+  await deployer.deploy(ethAssetHolderArtifact, {}, nitroAdjudicatorAddress);
+  await deployer.deploy(erc20AssetHolderArtifact, {}, nitroAdjudicatorAddress, tokenAddress);
+  await deployer.deploy(testAssetHolderArtifact1, {}, testNitroAdjudicatorAddress);
+  await deployer.deploy(testAssetHolderArtifact2, {}, testNitroAdjudicatorAddress);
 };
 
 module.exports = {
