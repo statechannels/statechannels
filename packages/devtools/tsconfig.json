@@ -1,26 +1,15 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "baseUrl": ".",
     "composite": true,
-    "outDir": "lib",
+    "lib": ["es6"],
     "module": "commonjs",
-    "target": "es2015",
-    "lib": ["es6", "dom"],
-    "sourceMap": true,
-    "jsx": "react",
-    "moduleResolution": "node",
-    "declaration": true,
-    "declarationMap": true,
-    "forceConsistentCasingInFileNames": true,
-    "noImplicitReturns": true,
     "noImplicitThis": true,
+    "outDir": "lib",
     "strictNullChecks": true,
-    "suppressImplicitAnyIndexErrors": true,
-    "noUnusedLocals": true,
-    "allowSyntheticDefaultImports": true,
-    "resolveJsonModule": true,
-    "esModuleInterop": true,
-    "types": ["node", "jest"]
+    "target": "es2015",
+    "types": ["node", "jest"],
   },
   "include": ["src/**/*"]
 }
