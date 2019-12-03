@@ -84,7 +84,7 @@ describe("adjudicator listener", () => {
 
     const action = sagaTester.getLatestCalledAction() as actions.ChallengeCreatedEvent;
 
-    expect(action.channelId).toBe(getChannelId(channelNonce, participantA, participantB));
+    expect(action.channelId).toBe(await getChannelId(channelNonce, participantA, participantB));
     expect(action.finalizedAt).toBeGreaterThan(startTimestamp);
     expect(action.challengeStates[1].state).toMatchObject(challengeState);
   });
