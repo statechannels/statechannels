@@ -47,7 +47,6 @@ export async function loadWallet(page: puppeteer.Page, messageListener: (message
   // We need to instantiate a web3 for the wallet so we import the web 3 script
   // and then assign it on the window
   const port = process.env.GANACHE_PORT || 8560;
-  console.log(port);
   const web3JsFile = fs.readFileSync(path.resolve(__dirname, "web3/web3.min.js"), "utf8");
   await page.evaluateOnNewDocument(web3JsFile);
   await page.evaluateOnNewDocument(`window.web3 = new Web3("http://localhost:${port}")`);
