@@ -67,5 +67,6 @@ export default function* loginRootSaga() {
 }
 
 function getLibraryAddress() {
-  return process.env.RPS_CONTRACT_ADDRESS;
+  return '0x0'; // TODO fix this
+  // return process.env.RPS_CONTRACT_ADDRESS;
 }
