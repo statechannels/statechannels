@@ -38,13 +38,12 @@ function* rootSaga() {
 }
 
 function* webAssemblyModuleLoaderSaga() {
-  function* dynamicImportSaga(path) {
-    return yield call(() => Promise.resolve(new Promise(resolve => import(path).then(resolve))));
-  }
-  window.PureEVM = ((yield call(
-    dynamicImportSaga,
-    "pure-evm"
+  window.PureEVM = ((yield call(() =>
+    Promise.resolve(
+      new Promise(async resolve => resolve(await import(/* webpackPrefetch: true */ "pure-evm")))
+    )
   )) as unknown) as typeof import("pure-evm");
+  console.info("🔋 Loaded pure-evm WebAssembly module!");
 }
 
 // Must run before anything else runs
