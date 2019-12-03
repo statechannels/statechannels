@@ -150,7 +150,11 @@ describe('claimAll', () => {
 
         // Add AssetTransferred events to expectations
         Object.keys(payouts).forEach(assetHolder => {
-          expectedEvents = assetTransferredEventsFromPayouts(payouts, AssetHolder.address);
+          expectedEvents = assetTransferredEventsFromPayouts(
+            guarantorId,
+            payouts,
+            AssetHolder.address
+          );
         });
 
         // Extract logs

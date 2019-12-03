@@ -1,5 +1,5 @@
 import {Zero} from "ethers/constants";
-import {BigNumber} from "ethers/utils";
+import {BigNumber, bigNumberify} from "ethers/utils";
 import {Uint256} from "@statechannels/nitro-protocol/src/contract/types";
 
 export interface AssetHoldersState {
@@ -76,6 +76,32 @@ export function recordDeposit(
     channelId
   );
   const newAssetHolderChannelState = {...assetHolderChannelState, holdings: holdings.toHexString()};
+  return setAssetHolderChannelState(
+    assetHoldersState,
+    assetHolderAddress,
+    newAssetHolderChannelState
+  );
+}
+
+export function recordAssetTransfer(
+  assetHoldersState: AssetHoldersState,
+  assetHolderAddress: string,
+  channelId: string,
+  // @ts-ignore
+  destination: string, // TODO: Should we take this into account?
+  amount: BigNumber
+): AssetHoldersState {
+  const assetHolderChannelState = getOrCreateAssetHolderChannelState(
+    assetHoldersState,
+    assetHolderAddress,
+    channelId
+  );
+  const newAssetHolderChannelState = {
+    ...assetHolderChannelState,
+    holdings: bigNumberify(assetHolderChannelState.holdings)
+      .sub(amount)
+      .toHexString()
+  };
   return setAssetHolderChannelState(
     assetHoldersState,
     assetHolderAddress,

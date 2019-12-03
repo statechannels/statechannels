@@ -1,14 +1,15 @@
-import {AssetHoldersState, recordDeposit} from "./state";
-import * as actions from "../actions";
+import {AssetHolderEventAction, DepositedEvent, AssetTransferredEvent} from "../actions";
 import {unreachable} from "../../utils/reducer-utils";
+
+import {AssetHoldersState, recordDeposit, recordAssetTransfer} from "./state";
 
 export const assetHolderStateReducer = (
   state: AssetHoldersState,
-  action: actions.AssetHolderEventAction
+  action: AssetHolderEventAction
 ): AssetHoldersState => {
   switch (action.type) {
     case "WALLET.ASSET_HOLDER.ASSET_TRANSFERRED":
-      throw Error("cant handle this");
+      return assetTransferredReducer(state, action);
     case "WALLET.ASSET_HOLDER.DEPOSITED":
       return depositedReducer(state, action);
     default:
@@ -16,11 +17,18 @@ export const assetHolderStateReducer = (
   }
 };
 
-const depositedReducer = (state: AssetHoldersState, action: actions.DepositedEvent) => {
+const depositedReducer = (state: AssetHoldersState, action: DepositedEvent) => {
   return recordDeposit(
     state,
     action.assetHolderAddress,
     action.destination,
     action.destinationHoldings
   );
+};
+
+const assetTransferredReducer = (
+  state: AssetHoldersState,
+  {assetHolderAddress, channelId, destination, amount}: AssetTransferredEvent
+) => {
+  return recordAssetTransfer(state, assetHolderAddress, channelId, destination, amount);
 };

@@ -106,7 +106,7 @@ describe('transferAll', () => {
           if (payouts[destination] && payouts[destination].gt(0)) {
             expectedEvents.push({
               event: 'AssetTransferred',
-              args: {destination, amount: payouts[destination]},
+              args: {channelId, destination, amount: payouts[destination]},
             });
           }
         });

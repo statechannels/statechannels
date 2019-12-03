@@ -1,4 +1,5 @@
 import {BigNumber, bigNumberify, getAddress} from 'ethers/utils';
+import {parseEventResult} from '../ethers-utils';
 
 export interface DepositedEvent {
   destination: string;
@@ -7,17 +8,13 @@ export interface DepositedEvent {
 }
 
 export interface AssetTransferredEvent {
+  channelId: string;
   destination: string;
   amount: BigNumber;
 }
 
-export function getDepositedEvent({eventArgs}): DepositedEvent {
-  const [
-    {
-      args: {destination, amountDeposited, destinationHoldings},
-    },
-  ] = eventArgs.slice(-1);
-
+export function getDepositedEvent(eventResult: any[]): DepositedEvent {
+  const {destination, amountDeposited, destinationHoldings} = parseEventResult(eventResult);
   return {
     destination,
     amountDeposited: bigNumberify(amountDeposited),
@@ -25,14 +22,10 @@ export function getDepositedEvent({eventArgs}): DepositedEvent {
   };
 }
 
-export function getAssetTransferredEvent({eventArgs}): AssetTransferredEvent {
-  const [
-    {
-      args: {destination, amount},
-    },
-  ] = eventArgs.slice(-1);
-
+export function getAssetTransferredEvent(eventResult: any[]): AssetTransferredEvent {
+  const {channelId, destination, amount} = parseEventResult(eventResult);
   return {
+    channelId,
     destination,
     amount: bigNumberify(amount),
   };

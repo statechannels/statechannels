@@ -206,7 +206,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
         // Add AssetTransferred events to expectations
         Object.keys(payouts).forEach(assetHolder => {
           expectedEvents = expectedEvents.concat(
-            assetTransferredEventsFromPayouts(payouts[assetHolder], assetHolder)
+            assetTransferredEventsFromPayouts(channelId, payouts[assetHolder], assetHolder)
           );
         });
 
