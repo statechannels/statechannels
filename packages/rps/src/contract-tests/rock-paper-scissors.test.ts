@@ -1,7 +1,4 @@
 import { expectRevert } from '@statechannels/devtools';
-// @ts-ignore
-import NetworkContext from '@statechannels/ganache-deployer/ganache-network-context.json';
-// @ts-ignore
 import RockPaperScissorsArtifact from '../../build/contracts/RockPaperScissors.json';
 import * as ethers from 'ethers';
 import { Contract } from 'ethers';
@@ -56,7 +53,11 @@ const addresses = {
 };
 
 beforeAll(async () => {
-  RockPaperScissors = await setupContracts(testProvider, RockPaperScissorsArtifact);
+  RockPaperScissors = await setupContracts(
+    testProvider,
+    RockPaperScissorsArtifact,
+    process.env.RPS_CONTRACT_ADDRESS
+  );
 });
 
 const salt = randomHex(64);
@@ -183,12 +184,14 @@ export const getNetworkMap = async () => {
   }
 };
 
-export async function setupContracts(provider: ethers.providers.JsonRpcProvider, artifact) {
+export async function setupContracts(
+  provider: ethers.providers.JsonRpcProvider,
+  artifact,
+  address
+) {
   const signer = provider.getSigner(0);
 
-  const contractName = artifact.contractName;
-  const contractAddress = NetworkContext[contractName]['address'];
-  const contract = new ethers.Contract(contractAddress, artifact.abi, signer);
+  const contract = new ethers.Contract(address, artifact.abi, signer);
   return contract;
 }
 
