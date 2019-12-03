@@ -1,9 +1,9 @@
-import Knex, {Config} from 'knex';
+import Knex from 'knex';
 import {Model} from 'objection';
 import * as knexConfig from '../../config/knexfile';
 
 const environment = process.env.NODE_ENV || 'development';
-let config: Config;
+let config: Knex.Config;
 if (environment === 'test') {
   config = knexConfig.test;
 } else if (environment === 'development') {
