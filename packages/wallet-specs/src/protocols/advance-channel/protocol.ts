@@ -17,7 +17,7 @@ Therefore, we send on entry into the protocol.
 */
 
 export interface Init {
-  channelID: string;
+  channelId: string;
   targetTurnNum: number; // should either be numParticipants-1 or 2*numParticipants-1
 }
 

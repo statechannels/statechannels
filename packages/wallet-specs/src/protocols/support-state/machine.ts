@@ -1,6 +1,6 @@
 import { interpret, Machine } from 'xstate';
-import { Channel, Outcome, SignedState, State } from '../..';
-import { ChannelStoreEntry, IChannelStoreEntry } from '../../ChannelStoreEntry';
+import { SignedState, State } from '../..';
+import { IChannelStoreEntry } from '../../ChannelStoreEntry';
 import { Store } from '../../store';
 import { config, Init, SendState } from './protocol';
 
@@ -29,6 +29,7 @@ const storeEntry: IChannelStoreEntry = {
   unsupportedStates: [],
   participants: [],
   funding: { type: 'Direct' },
+  channel: startingState.channel,
 };
 const store = new Store({ '0xabc': storeEntry });
 

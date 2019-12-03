@@ -23,9 +23,15 @@ interface IStore {
 
   findLedgerChannelId: (participants: string[]) => string | undefined;
   signedByMe: (state: State) => boolean;
+  getPrivateKey: (participantIds: string[]) => string;
 
+  /*
+  Store modifiers
+  */
+  initializeChannel: (entry: ChannelStoreEntry) => void;
   sendState: (state: State) => void;
   receiveStates: (signedStates: SignedState[]) => ChannelUpdated | false;
+
   // TODO: set funding
   // setFunding(channelId: string, funding: Funding): void;
 
@@ -69,6 +75,7 @@ export class Store implements IStore {
 
   private _store: ChannelStore;
   private _nonces: Record<string, string>;
+  private _privateKeys: Record<string, string>;
 
   constructor(initialStore: ChannelStore = {}) {
     this._store = initialStore;
@@ -80,6 +87,14 @@ export class Store implements IStore {
     }
 
     return new ChannelStoreEntry(this._store[channelID]);
+  }
+
+  public getPrivateKey(participantIds: string[]): string {
+    const myId = participantIds.find(id => this._privateKeys[id]);
+    if (!myId) {
+      throw new Error('Missing');
+    }
+    return this._privateKeys[myId];
   }
 
   public getIndex(channelId: string): 0 | 1 {
@@ -150,6 +165,15 @@ export class Store implements IStore {
       !!signedState.signatures &&
       signedState.signatures.includes('me')
     );
+  }
+
+  public initializeChannel(data: IChannelStoreEntry) {
+    const entry = new ChannelStoreEntry(data);
+    if (this._store[entry.channelId]) {
+      throw new Error('Channel already initialized');
+    }
+
+    this._store[entry.channelId] = entry.args;
   }
 
   public sendState(state: State) {

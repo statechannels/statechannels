@@ -4,7 +4,7 @@ const success = { type: 'final' };
 const failure = { type: 'final' };
 const PROTOCOL = 'funding';
 
-interface Init {
+export interface Init {
   targetChannelID: string;
   tries: 0 | 1;
 }
