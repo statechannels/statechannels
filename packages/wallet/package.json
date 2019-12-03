@@ -97,7 +97,6 @@
   "devDependencies": {
     "@babel/runtime": "7.6.2",
     "@statechannels/devtools": "0.1.21",
-    "@statechannels/ganache-deployer": "^0.0.1",
     "@types/autoprefixer": "^9.6.1",
     "@types/babel-core": "6.25.6",
     "@types/bn.js": "^4.11.5",
