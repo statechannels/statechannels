@@ -92,8 +92,6 @@ export {
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
   setupContracts,
-  convertAddressToBytes32,
-  convertBytes32ToAddress,
 };
 
 // artifacts
