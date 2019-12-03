@@ -13,6 +13,7 @@ functions/
 .npm
 .rpt2_cache
 .eslintcache
+tsconfig.tsbuildinfo
 
 # coverage
 coverage
