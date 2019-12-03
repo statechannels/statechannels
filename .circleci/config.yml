@@ -1,5 +1,6 @@
 version: 2.1
-
+orbs:
+  puppeteer: threetreeslight/puppeteer@0.1.2
 defaults: &defaults
   working_directory: /home/circleci/project
   resource_class: large
@@ -87,12 +88,12 @@ jobs:
       - upload_logs:
           file: test-stats
 
-  # TODO: Get this working
   integration-test:
     <<: *defaults
     steps:
       - checkout:
           path: /home/circleci/project
+      - puppeteer/install
       - log_stats:
           file: integration-test-stats
       - attach_workspace:
@@ -114,5 +115,9 @@ workflows:
             - prepare
 
       - test:
+          requires:
+            - prepare
+
+      - integration-test:
           requires:
             - prepare
