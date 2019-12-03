@@ -17,7 +17,7 @@
     "clean:dry": "git clean -Xdn --exclude=\"!.env\"",
     "start:ganache": "lerna run --parallel start:ganache",
     "test": "lerna run --stream --parallel test",
-    "test:ci": "lerna run --stream --parallel test:ci --since $(git merge-base $(git rev-parse --abbrev-ref HEAD) origin/master) build:ci",
+    "test:ci": "lerna run --stream --parallel test:ci --include-dependents --since $(git merge-base $(git rev-parse --abbrev-ref HEAD) origin/master) build:ci",
     "test:w3t": "lerna run test --concurrency 1 --scope=**/web3torrent ",
     "lint:check": "lerna run lint:check --parallel --no-bail",
     "lint:write": "lerna run lint:write --parallel --no-bail",
