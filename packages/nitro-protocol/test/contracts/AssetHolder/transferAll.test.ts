@@ -29,7 +29,11 @@ const addresses = {
 };
 
 beforeAll(async () => {
-  AssetHolder = await setupContracts(provider, AssetHolderArtifact);
+  AssetHolder = await setupContracts(
+    provider,
+    AssetHolderArtifact,
+    process.env.TEST_ASSET_HOLDER_ADDRESS
+  );
 });
 
 const reason0 = 'transferAll | submitted data does not match stored assetOutcomeHash';

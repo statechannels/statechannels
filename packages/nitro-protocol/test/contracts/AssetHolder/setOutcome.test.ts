@@ -2,7 +2,7 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet} from 'ethers';
 import {id, keccak256} from 'ethers/utils';
-import AssetHolderArtifact from '../../../build/contracts/ETHAssetHolder.json';
+import AssetHolderArtifact from '../../../build/contracts/TestETHAssetHolder.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {getTestProvider, setupContracts} from '../../test-helpers';
 
@@ -23,7 +23,11 @@ for (let i = 0; i < 3; i++) {
 }
 
 beforeAll(async () => {
-  AssetHolder = await setupContracts(provider, AssetHolderArtifact);
+  AssetHolder = await setupContracts(
+    provider,
+    AssetHolderArtifact,
+    process.env.TEST_ETH_ASSET_HOLDER_ADDRESS
+  );
   const channel: Channel = {chainId, participants, channelNonce};
   channelId = getChannelId(channel);
 });

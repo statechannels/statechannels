@@ -2,7 +2,7 @@ import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet} from 'ethers';
 import {bigNumberify, parseUnits} from 'ethers/utils';
 // @ts-ignore
-import ETHAssetHolderArtifact from '../../../build/contracts/ETHAssetHolder.json';
+import ETHAssetHolderArtifact from '../../../build/contracts/TestETHAssetHolder.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {getTestProvider, setupContracts} from '../../test-helpers';
 
@@ -17,7 +17,11 @@ for (let i = 0; i < 3; i++) {
 }
 
 beforeAll(async () => {
-  ETHAssetHolder = await setupContracts(provider, ETHAssetHolderArtifact);
+  ETHAssetHolder = await setupContracts(
+    provider,
+    ETHAssetHolderArtifact,
+    process.env.TEST_ETH_ASSET_HOLDER_ADDRESS
+  );
 });
 
 const description0 = 'Deposits ETH (msg.value = amount , expectedHeld = 0)';

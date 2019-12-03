@@ -3,9 +3,9 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet} from 'ethers';
 import {AddressZero} from 'ethers/constants';
-import ERC20AssetHolderArtifact from '../../../build/contracts/ERC20AssetHolder.json';
+import ERC20AssetHolderArtifact from '../../../build/contracts/TestERC20AssetHolder.json';
 // @ts-ignore
-import ETHAssetHolderArtifact from '../../../build/contracts/ETHAssetHolder.json';
+import ETHAssetHolderArtifact from '../../../build/contracts/TestETHAssetHolder.json';
 import NitroAdjudicatorArtifact from '../../../build/contracts/TESTNitroAdjudicator.json';
 
 import {Channel, getChannelId} from '../../../src/contract/channel';
@@ -41,9 +41,21 @@ for (let i = 0; i < 3; i++) {
   participants[i] = wallets[i].address;
 }
 beforeAll(async () => {
-  NitroAdjudicator = await setupContracts(provider, NitroAdjudicatorArtifact);
-  ETHAssetHolder = await setupContracts(provider, ETHAssetHolderArtifact);
-  ERC20AssetHolder = await setupContracts(provider, ERC20AssetHolderArtifact);
+  NitroAdjudicator = await setupContracts(
+    provider,
+    NitroAdjudicatorArtifact,
+    process.env.TEST_NITRO_ADJUDICATOR_ADDRESS
+  );
+  ETHAssetHolder = await setupContracts(
+    provider,
+    ETHAssetHolderArtifact,
+    process.env.TEST_ETH_ASSET_HOLDER_ADDRESS
+  );
+  ERC20AssetHolder = await setupContracts(
+    provider,
+    ERC20AssetHolderArtifact,
+    process.env.TEST_TOKEN_ASSET_HOLDER_ADDRESS
+  );
 });
 
 // Scenarios are synonymous with channelNonce:

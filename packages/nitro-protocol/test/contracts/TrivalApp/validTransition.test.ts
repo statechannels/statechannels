@@ -29,7 +29,7 @@ function getRandomVariablePart(): VariablePart {
 }
 
 beforeAll(async () => {
-  trivialApp = await setupContracts(provider, TrivialAppArtifact);
+  trivialApp = await setupContracts(provider, TrivialAppArtifact, process.env.TRIVIAL_APP_ADDRESS);
 });
 
 describe('validTransition', () => {
