@@ -3,9 +3,9 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet} from 'ethers';
 import {AddressZero} from 'ethers/constants';
-import ERC20AssetHolderArtifact from '../../../build/contracts/TestERC20AssetHolder.json';
+import ERC20AssetHolderArtifact from '../../../build/contracts/TestErc20AssetHolder.json';
 // @ts-ignore
-import ETHAssetHolderArtifact from '../../../build/contracts/TestETHAssetHolder.json';
+import ETHAssetHolderArtifact from '../../../build/contracts/TestEthAssetHolder.json';
 import NitroAdjudicatorArtifact from '../../../build/contracts/TESTNitroAdjudicator.json';
 
 import {Channel, getChannelId} from '../../../src/contract/channel';
