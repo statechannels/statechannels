@@ -4,6 +4,9 @@
   "version": "0.1.21",
   "description": "Scripts used for Magmo development processes",
   "main": "lib/src/index.js",
+  "bin": {
+    "start-shared-ganache": "lib/src/ganache/start-ganache-script.js"
+  },
   "scripts": {
     "prepare": "yarn build:typescript",
     "build:typescript": "npx tsc -b",

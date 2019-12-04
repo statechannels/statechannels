@@ -21,7 +21,7 @@ export class GanacheServer {
     accounts: Account[] = ETHERLIME_ACCOUNTS,
     public readonly timeout: number = 5000,
     gasLimit = 1000000000,
-    gasPrice = '0x01'
+    gasPrice = 1
   ) {
     log.info(`Starting ganache on port ${this.port} with network ID ${this.chainId}`);
 
@@ -45,6 +45,7 @@ export class GanacheServer {
       log.error(`Server threw error ${data}`);
       throw new Error('Ganache server failed to start');
     });
+
     this.provider = new JsonRpcProvider(`http://localhost:${this.port}`);
   }
 

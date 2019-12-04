@@ -8,6 +8,7 @@ export {
   getWalletWithEthAndProvider
 } from './utils/network-setup';
 export {configureEnvVariables} from './config/env';
-export {GanacheServer} from './utils/ganache-server';
-export {GanacheDeployer} from './utils/ganache-deployer';
+export {setupGanache, ganacheIsRunning, startSharedGanache} from './ganache';
+export {GanacheServer} from './ganache/server';
+export {GanacheDeployer} from './ganache/deployer';
 export * from './types';

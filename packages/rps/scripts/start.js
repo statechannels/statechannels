@@ -30,23 +30,16 @@ const { choosePort } = require('react-dev-utils/WebpackDevServerUtils');
 
 const paths = require('../config/paths');
 const configFactory = require('../config/webpack.config');
-const { getNetworkName } = require('@statechannels/devtools');
-const { GanacheServer } = require('@statechannels/devtools');
+const { getNetworkName, setupGanache } = require('@statechannels/devtools');
 const { deploy } = require('../deployment/deploy');
 
 void (async () => {
   process.on('SIGINT', () => {
-    if (ganacheServer) {
-      ganacheServer.close();
-    }
     if (devServer) {
       devServer.close();
     }
   });
   process.on('SIGTERM', () => {
-    if (ganacheServer) {
-      ganacheServer.close();
-    }
     if (devServer) {
       devServer.close();
     }
@@ -84,14 +77,8 @@ void (async () => {
     process.exit(1);
   }
 
-  console.log(chalk.cyan('Starting ganache and deploying contract...'));
-  ganacheServer = new GanacheServer(
-    Number(process.env.GANACHE_PORT),
-    Number(process.env.CHAIN_NETWORK_ID)
-  );
-  await ganacheServer.ready();
-
-  const deployedArtifacts = await deploy();
+  const { deployer } = await setupGanache();
+  const deployedArtifacts = await deploy(deployer);
 
   process.env = { ...process.env, ...deployedArtifacts };
 
