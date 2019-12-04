@@ -16,6 +16,12 @@ function test<T extends XORY>(t: T['a']): T['b'] {
   return t === 1 ? 2 : 4;
 }
 
+interface GetAddressReqResp {
+  methodName: 'getAddress';
+  request: JsonRPCRequest<'GetAddress', {}>;
+  response: string;
+}
+
 export interface IChannelProvider {
   enable(url?: string): Promise<void>;
   send<ResultType = any>(method: string, params?: any[]): Promise<ResultType>;
