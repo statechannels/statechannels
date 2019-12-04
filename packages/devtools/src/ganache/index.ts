@@ -44,7 +44,7 @@ export const setupGanache = async (): Promise<SharedReturnType | IndividualRetur
     );
   } else if (!foundShared) {
     say(
-      `Didn't find a shared ganache instance at http://localhost:${sharedPort}. Did you run 'yarn start:ganache'?`
+      `Didn't find a shared ganache instance at http://localhost:${sharedPort}. Did you run 'yarn start:shared-ganache'?`
     );
   }
 
