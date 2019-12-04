@@ -1,7 +1,10 @@
 /* eslint-disable */
 const {ContractArtifacts} = require('@statechannels/nitro-protocol');
+const {GanacheDeployer} = require('@statechannels/devtools');
 
 const deploy = async deployer => {
+  deployer = deployer || new GanacheDeployer(Number(process.env.GANACHE_PORT));
+
   const CONSENSUS_APP_ADDRESS = await deployer.deploy(ContractArtifacts.ConsensusAppArtifact);
   const TRIVIAL_APP_ADDRESS = await deployer.deploy(ContractArtifacts.TrivialAppArtifact);
 
