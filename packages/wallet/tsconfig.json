@@ -27,6 +27,6 @@
   },
 
   "include": ["src/**/*", "src/**/*.json", "types/globals.d.ts", "contracts/**/*.json", "index.ts"],
-  "references": [{"path": "../nitro-protocol"}],
+  "references": [{"path": "../nitro-protocol"}, {"path": "../devtools"}],
   "exclude": ["src/setupTests.ts"]
 }
