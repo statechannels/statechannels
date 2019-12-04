@@ -116,13 +116,13 @@ export async function createChallenge(
 
 export async function concludeGame(
   signer: Signer,
-  channelNonce: number,
+  channelNonce: BigNumberish,
   participantA: Wallet,
   participantB: Wallet
 ) {
   const libraryAddress = getTrivialAppAddress();
   const channel: Channel = {
-    channelNonce: channelNonce.toString(16),
+    channelNonce: bigNumberify(channelNonce).toHexString(),
     chainId: bigNumberify(NETWORK_ID).toHexString(),
     participants: [participantA.address, participantB.address]
   };
