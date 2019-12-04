@@ -14,7 +14,7 @@ that you have already cloned the monorepo, and run `yarn install` from the root 
 1. Start ganache from the root folder of the monorepo:
    ```
    // in monorepo/
-   yarn start:ganache
+   yarn start:shared-ganache
    ```
 2. In the rps folder, start the app with the auto-opponent:
    ```

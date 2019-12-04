@@ -103,35 +103,30 @@ yarn test
 
 ### Development Flow
 
-The tests for the `rps`, `nitro-protocol`, `wallet` and `hub` packages need to interact with a local blockchain.
+The `rps`, `nitro-protocol`, `wallet`, and `hub` packages will need to interact with a local
+blockchain when running and testing locally.
 
-Run the following script _from the root of the repo_ to start a ganache server, deploy the contracts listed [here](./packages/ganache-deployer/src/deployer.ts), and create a common `NetworkContext` object that holds the relevant contract information for the various packages that need to interface with the corresponding deployed contracts.
+#### Running locally
 
-```shell
-yarn start:ganache
-```
+When running locally, it's often important to have the packages pointing to the same contracts
+on the same local blockchain.
 
-The `NetworkContext` object is held at a specific path of the `ganache-deployer` package that can be referenced in other packages via `import NetworkContext from '@statechannels/ganache-deployer/ganache-network-context.json';`.
+When started via `yarn start` the `rps`, `wallet`, and `hub` packages will:
 
-Running the above script should produce an output similar to this:
+1. Check for a "shared ganache" instance running at the `SHARED_GANACHE_PORT`, as defined
+   in their `.env` file. (This is currently set the same for all packages.) This shared
+   ganache instance can be started by running `yarn start:shared-ganache` from any of the
+   packages.
+2. If the shared ganache instance is found, they will deploy contracts to this instance, and
+   make the addresses available in the application via `process.ENV`. Details of the deployed
+   contract will also be stored in the `monorepo/ganache-deployments.json` file, so that
+   if another project attempts to deploy another contract with the same args and bytecode,
+   the address of the existing contract will be returned instead.
+3. If no shared ganache instance is found, the package will start their own ganache instance,
+   which won't be shared with any other package.
 
-```shell
-Writing network context into file: ~/monorepo/packages/nitro-protocol/ganache/ganache-network-context.json
-
-HTTP server listening on port 3000
-Starting ganache on port 8547 with network ID 9001
-Deploying built contracts to chain at: http://localhost:8547
-Contracts deployed to chain
-Network context written to ganache-network-context.json
-```
-
-The configuration used for this chain can be updated via the `.env` file in the `ganache-deployer` package.
-
-Once this server is shut down, it'll remove the `NetworkContext` object that was created for that instance of the ganache and it should display something similar to:
-
-```shell
-Deleted locally deployed network context: ganache-network-context.json
-```
+TL;DR: to share deployed contracts between packages in development, you **must start a shared
+ganache server** with `yarn start:shared-ganache`.
 
 ## Community
 

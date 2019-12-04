@@ -15,7 +15,7 @@ import {depositIntoETHAssetHolder} from "./test-utils";
 import {getGanacheProvider} from "@statechannels/devtools";
 import {transactionSender} from "../redux/sagas/transaction-sender";
 import {testSaga} from "redux-saga-test-plan";
-import {getProvider, getContractAddress} from "../utils/contract-utils";
+import {getProvider, getTrivialAppAddress} from "../utils/contract-utils";
 import {transactionSent, transactionSubmitted, transactionConfirmed} from "../redux/actions";
 import {NETWORK_ID, CHALLENGE_DURATION} from "../constants";
 import {State, Channel, getChannelId} from "@statechannels/nitro-protocol";
@@ -73,7 +73,7 @@ describe("transactions", () => {
   }
 
   beforeAll(async () => {
-    libraryAddress = getContractAddress("TrivialApp");
+    libraryAddress = await getTrivialAppAddress();
   });
 
   beforeEach(() => {
@@ -84,10 +84,9 @@ describe("transactions", () => {
   it("should deposit ETH into the ETH asset holder", async () => {
     const someChannelId = ethers.utils.hexlify(ethers.utils.randomBytes(32));
     const depositTransactionData = createETHDepositTransaction(someChannelId, "0x5", "0x0");
+    expect(depositTransactionData.value).toBe("0x5");
     await testTransactionSender({
-      ...depositTransactionData,
-
-      value: 5
+      ...depositTransactionData
     });
   });
 

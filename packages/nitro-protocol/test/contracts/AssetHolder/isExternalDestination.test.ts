@@ -17,7 +17,11 @@ for (let i = 0; i < 3; i++) {
 }
 
 beforeAll(async () => {
-  AssetHolder = await setupContracts(provider, AssetHolderArtifact);
+  AssetHolder = await setupContracts(
+    provider,
+    AssetHolderArtifact,
+    process.env.TEST_ASSET_HOLDER_ADDRESS
+  );
 });
 
 describe('isExternalDestination', () => {

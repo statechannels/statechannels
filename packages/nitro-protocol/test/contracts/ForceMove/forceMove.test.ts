@@ -45,7 +45,11 @@ for (let i = 0; i < 3; i++) {
 }
 
 beforeAll(async () => {
-  ForceMove = await setupContracts(provider, ForceMoveArtifact);
+  ForceMove = await setupContracts(
+    provider,
+    ForceMoveArtifact,
+    process.env.TEST_FORCE_MOVE_ADDRESS
+  );
   appDefinition = getPlaceHolderContractAddress();
 });
 

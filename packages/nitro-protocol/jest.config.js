@@ -3,6 +3,8 @@ configureEnvVariables();
 
 module.exports = {
   setupFilesAfterEnv: ['./jest.setup.js'],
+  globalSetup: '<rootDir>/jest/test-setup.ts',
+  globalTeardown: '<rootDir>/jest/test-teardown.ts',
   collectCoverageFrom: ['src/**/*.{js,jsx,ts,tsx}'],
   reporters: ['default', '@statechannels/jest-gas-reporter'],
   testMatch: ['<rootDir>/test/**/?(*.)(spec|test).(t)s?(x)'],

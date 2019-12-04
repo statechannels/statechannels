@@ -29,7 +29,11 @@ const addresses = {
 };
 
 beforeAll(async () => {
-  AssetHolder = await setupContracts(provider, AssetHolderArtifact);
+  AssetHolder = await setupContracts(
+    provider,
+    AssetHolderArtifact,
+    process.env.TEST_ASSET_HOLDER_ADDRESS
+  );
 });
 
 const reason0 = 'transferAll | submitted data does not match stored assetOutcomeHash';
@@ -102,7 +106,7 @@ describe('transferAll', () => {
           if (payouts[destination] && payouts[destination].gt(0)) {
             expectedEvents.push({
               event: 'AssetTransferred',
-              args: {destination, amount: payouts[destination]},
+              args: {channelId, destination, amount: payouts[destination]},
             });
           }
         });

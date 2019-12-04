@@ -1,5 +1,5 @@
 import {bigNumberify} from 'ethers/utils';
-import {FUNDED_CHANNEL_ID} from '../../../test/test_data';
+import {FUNDED_CHANNEL_ID} from '../../../test/test-data';
 import {
   AssetHolderEventHandler,
   assetHolderListen,

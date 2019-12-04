@@ -273,8 +273,18 @@ module.exports = function(webpackEnv) {
         PnpWebpackPlugin.moduleLoader(module)
       ]
     },
+    
+    // Webpack has some issue with ts-loader, transpileOnly, and esnext
+    // https://github.com/TypeStrong/ts-loader/issues/751#issuecomment-376318718
+    stats: {
+      warningsFilter: /export .* was not found in/,
+    },
+
     module: {
-      strictExportPresence: true,
+      // Because of the issue above w.r.t. ts-loader warnings, this must be set to false
+      // otherwise those meaningless warnings would break the compilation
+      strictExportPresence: false,
+
       rules: [
         // Disable require.ensure as it's not a standard language feature.
         {
@@ -386,15 +396,6 @@ module.exports = function(webpackEnv) {
               )
             },
 
-            {
-              test: /\.(wasm)$/,
-              // Using javascript/auto turns off the auto-parser by WebPack on wasm
-              // See https://github.com/webpack/webpack/issues/7264 for context
-              type: "javascript/auto",
-              include: paths.pureEVM,
-              loader: require.resolve("wasm-loader")
-            },
-
             // "file" loader makes sure those assets get served by WebpackDevServer.
             // When you `import` an asset, you get its (virtual) filename.
             // In production, they would get copied to the `build` folder.
@@ -406,7 +407,7 @@ module.exports = function(webpackEnv) {
               // its runtime that would otherwise be processed through "file" loader.
               // Also exclude `html` and `json` extensions so they get processed
               // by webpacks internal loaders.
-              exclude: [/\.(js|mjs|jsx|ts|tsx)$/, /\.html$/, /\.json$/],
+              exclude: [/\.(js|mjs|jsx|ts|tsx)$/, /\.wasm$/, /\.html$/, /\.json$/],
               options: {
                 name: "static/media/[name].[hash:8].[ext]"
               }
@@ -510,7 +511,7 @@ module.exports = function(webpackEnv) {
         async: false,
         checkSyntacticErrors: true,
         useTypescriptIncrementalApi: false, // This seems to speed up type checking
-        tslint: true,
+        tslint: false,
         reportFiles: ["src/**/*.{ts,tsx}"],
         watch: paths.appSrc
       })

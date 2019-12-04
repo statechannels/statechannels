@@ -17,7 +17,7 @@ export function configureEnvVariables(monorepo = true) {
     NODE_ENV !== 'test' && `.env.local`,
     `.env.${NODE_ENV}`,
     '.env'
-  ].filter(Boolean);
+  ].filter((x): x is string => !!x);
 
   if (monorepo) {
     const monorepoDotenvFiles = dotenvFiles.slice(0);

@@ -1,8 +1,8 @@
+import fs from 'fs';
+import path from 'path';
 import easyTable from 'easy-table';
 import {JsonRpcProvider} from 'ethers/providers';
 import {Interface} from 'ethers/utils';
-import fs from 'fs';
-import path from 'path';
 import linker from 'solc/linker';
 interface MethodCalls {
   [methodName: string]: {

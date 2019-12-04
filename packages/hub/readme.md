@@ -1,22 +1,20 @@
-## Requirements
+# Unit testing and running the hub locally
+
+## Setup
 
 ### postgresql
 
 The simplest way to get this going on a mac is to install the [postgres app](https://postgresapp.com)
 
-### heroku
-
-https://devcenter.heroku.com/articles/heroku-cli
-
 ### .env
 
-The default `.env` should work as is but you can modify it to make it your own if any customizations are needed.
+You'll notice a set files with the `.env` prefix. The `.env` file contains environment variables that apply to all users across all environments. To add an environment variable specific to your local setup, add the variable to `.env.NODE_ENV.local` where NODE_ENV can be test, development, etc.
 
 ### Local Ganache
 
 Make sure a local ganache instance is running by following [the instructions at the root of the repo](../../readme.md#Development-Flow)
 
-### Setup
+## Run the hub
 
 ```
 $ npm i -g yarn
@@ -25,28 +23,28 @@ $ yarn install
 $ NODE_ENV=development yarn db:create
 $ NODE_ENV=development yarn db:migrate
 $ NODE_ENV=development yarn db:seed
-$ yarn server:watch (will rebuild app on file change)
+$ yarn hub:watch (will rebuild app on file change)
 
 ```
 
-### Interacting with the server from a browser
+### Interacting with the hub from a browser
 
-To play against the server from the browser client, the server and the browser need to:
+To play against the hub from the browser client, the hub and the browser need to:
 
-- Share the state-channel address of the server/hub. A good way to do so is to create a `.env.development.local` in the monorepo root with HUB_ADDRESS and HUB_PRIVATE_KEY defined.
+- Share the state-channel address of the hub. A good way to do so is to create a `.env.development.local` in the monorepo root with HUB_ADDRESS and HUB_PRIVATE_KEY defined.
 - Point to the same local Ganache server. Configure your `.env.*.local` files accordingly.
-- Point to the same contract addresses on Ganache. For now, run something like `cp ../wallet/build/contracts/* build/contracts/` after deploying the contracts from the wallet.
-- The server relies on transpiled wallet code. If there are transpile errors when building the server, try transpiling the wallet package by running `npx tsc` in `packages/wallet`.
-  Another option is to leave `npx tsc --watch` running in `packages/wallet` to ensure that the transpiled project is always up to date.
+- Point to the same contract addresses on Ganache.
 
-You will also need to make sure that the server's address has funds. You can find the server address in [constants.ts](https://github.com/magmo/node-bot/blob/master/src/constants.ts)
+You will also need to make sure that the hub's address has funds. You can find the hub address in [constants.ts](https://github.com/magmo/node-bot/blob/master/src/constants.ts)
 
 ## Testing
+
+For any environment variables specific to local setup, such as postgres host or port, do not modify `.env` files checked into the repository. Instead, add the variables to `.env.test.local` (or to other local `.env` files).
 
 ```
 yarn install
 NODE_ENV=test yarn db:create
-yarn test
+yarn test:ci
 ```
 
 ## Deploying

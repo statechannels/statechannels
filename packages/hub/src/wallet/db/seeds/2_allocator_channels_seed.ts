@@ -25,7 +25,7 @@ import {
   ongoingAppPhaseChannel,
   UNFUNDED_CHANNEL_ID,
   unfundedChannel
-} from '../../../test/test_data';
+} from '../../../test/test-data';
 import Channel from '../../models/channel';
 import {outcomeObjectToModel} from '../../utilities/outcome';
 import knex from '../connection';

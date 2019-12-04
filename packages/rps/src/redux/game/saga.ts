@@ -18,6 +18,8 @@ import { randomHex } from '../../utils/randomHex';
 import { bigNumberify } from 'ethers/utils';
 import { buffers } from 'redux-saga';
 
+let opponentResigned;
+opponentResigned = false;
 const getGameState = (state: any): ls.GameState => state.game;
 const isPlayersTurnNext = (
   localState: ls.LocalState,
@@ -45,9 +47,16 @@ export function* gameSaga(client: RPSChannelClient) {
 function* gameSagaRun(client: RPSChannelClient) {
   const { localState, channelState }: ls.GameState = yield select(getGameState);
 
-  if (cs.isClosed(channelState) && localState.type !== 'GameOver') {
-    yield* transitionToGameOver(localState, channelState);
-    return;
+  if (
+    !isPlayersTurnNext(localState, channelState) &&
+    cs.isClosed(channelState) &&
+    localState.type !== 'InsufficientFunds' &&
+    localState.type !== 'Resigned' &&
+    !opponentResigned
+  ) {
+    // I just sent the state that closed the channel
+    yield put(a.resign(false));
+    opponentResigned = true;
   }
 
   switch (localState.type) {
@@ -72,6 +81,7 @@ function* gameSagaRun(client: RPSChannelClient) {
       break;
     case 'WeaponChosen':
       if (ls.isPlayerA(localState)) {
+        // player A
         if (cs.isEmpty(channelState)) {
           // raise error
           break;
@@ -98,8 +108,13 @@ function* gameSagaRun(client: RPSChannelClient) {
         yield* sendStartAndStartRound(channelState, client);
       }
       break;
-    case 'ShuttingDown':
-      if (isPlayersTurnNext(localState, channelState) && !cs.isClosed(channelState)) {
+    case 'InsufficientFunds':
+    case 'Resigned':
+      if (
+        isPlayersTurnNext(localState, channelState) &&
+        !cs.isClosing(channelState) &&
+        !cs.isClosed(channelState)
+      ) {
         yield* closeChannel(channelState, client);
       }
       break;
@@ -263,17 +278,6 @@ function* sendStartAndStartRound(channelState: ChannelState<Reveal>, client: RPS
 function* closeChannel(channelState: ChannelState, client: RPSChannelClient) {
   const closingChannelState = yield call([client, 'closeChannel'], channelState.channelId);
   yield put(a.updateChannelState(closingChannelState));
-}
-
-function* transitionToGameOver(localState: ls.LocalState, channelState: ChannelState) {
-  let reason: ls.ShutDownReason = 'TheyResigned';
-  if (localState.type === 'ShuttingDown') {
-    reason = localState.reason;
-  } else if (isPlayersTurnNext(localState, channelState)) {
-    // if the channel is done and it's our turn, it means we must have initiated the shutdown
-    reason = 'YouResigned';
-  }
-  yield put(a.gameOver(reason));
 }
 
 const calculateFundingSituation = (

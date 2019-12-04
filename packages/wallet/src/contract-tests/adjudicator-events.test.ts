@@ -73,15 +73,20 @@ describe("adjudicator listener", () => {
     const sagaTester = new SagaTester({initialState: createWatcherState(processId)});
     sagaTester.start(adjudicatorWatcher, provider);
 
-    await createChallenge(provider, channelNonce, participantA, participantB);
+    const challengeState = await createChallenge(
+      provider,
+      channelNonce,
+      participantA,
+      participantB
+    );
 
     await sagaTester.waitFor("WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT");
 
-    const action: actions.ChallengeCreatedEvent = sagaTester.getLatestCalledAction();
+    const action = sagaTester.getLatestCalledAction() as actions.ChallengeCreatedEvent;
 
+    expect(action.channelId).toBe(await getChannelId(channelNonce, participantA, participantB));
     expect(action.finalizedAt).toBeGreaterThan(startTimestamp);
-    // TODO: Enable this once things are converted to SignedStates
-    // expect(action.challengeStates[1].state).toMatchObject(challengeState);
+    expect(action.challengeStates[1].state).toMatchObject(challengeState);
   });
 
   it("should handle a ChallengeCleared event when registered for that channel", async () => {
@@ -102,7 +107,8 @@ describe("adjudicator listener", () => {
 
     await sagaTester.waitFor("WALLET.ADJUDICATOR.CHALLENGE_CLEARED_EVENT");
 
-    const action: actions.ChallengeClearedEvent = sagaTester.getLatestCalledAction();
+    const action = sagaTester.getLatestCalledAction() as actions.ChallengeClearedEvent;
+
     expect(action.channelId).toEqual(channelId);
     expect(action.newTurnNumRecord).toEqual(response.state.turnNum);
   });
@@ -121,7 +127,8 @@ describe("adjudicator listener", () => {
     await concludeGame(provider, channelNonce, participantA, participantB);
 
     await sagaTester.waitFor("WALLET.ADJUDICATOR.CONCLUDED_EVENT");
-    const action: actions.ConcludedEvent = sagaTester.getLatestCalledAction();
+
+    const action = sagaTester.getLatestCalledAction() as actions.ConcludedEvent;
 
     expect(action.channelId).toEqual(channelId);
   });

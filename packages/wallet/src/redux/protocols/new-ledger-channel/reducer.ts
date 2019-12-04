@@ -167,7 +167,7 @@ function handleWaitForPreFundSetup(
 
       const safeToDepositLevel = isFirstPlayer(ledgerId, sharedData)
         ? "0x0"
-        : getAllocationAmountForIndex(latestState.outcome, 1);
+        : getAllocationAmountForIndex(latestState.outcome, 0);
       const ourIndex = getTwoPlayerIndex(ledgerId, sharedData);
 
       const {assetHolderAddress} = getAllocationOutcome(latestState.outcome);

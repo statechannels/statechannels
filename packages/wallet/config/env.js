@@ -44,10 +44,12 @@ const MAGMO_VALUES = [
   "USE_STORAGE"
 ];
 
+const CONTRACT_ADDRESSES = /_ADDRESS$/i;
+
 function getClientEnvironment(publicUrl) {
   const raw = Object.keys(process.env)
     .filter(key => {
-      return REACT_APP.test(key) || MAGMO_VALUES.indexOf(key) > -1;
+      return REACT_APP.test(key) || CONTRACT_ADDRESSES.test(key) || MAGMO_VALUES.indexOf(key) > -1;
     })
     .reduce(
       (env, key) => {

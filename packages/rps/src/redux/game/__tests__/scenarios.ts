@@ -91,14 +91,10 @@ export const localStatesA = {
   resultPlayAgain: s.resultPlayAgain(propsA, playerBWeapon, Result.YouWin),
   chooseWeapon2: s.chooseWeapon(propsA),
   waitForRestart: s.waitForRestart(propsA, playerBWeapon, Result.YouWin),
-  shuttingDown: s.shuttingDown(propsA, 'InsufficientFundsOpponent', playerBWeapon, Result.YouWin),
-  shuttingDownResign: s.shuttingDown(
-    { ...propsA, myWeapon: undefined },
-    'YouResigned',
-    undefined,
-    undefined
-  ),
-  gameOverYouResigned: s.gameOver(propsA, 'YouResigned'),
+  insuffcientFunds: s.insufficientFunds(propsA, playerBWeapon, Result.YouWin),
+  resignedMe: s.resigned(propsA, true),
+  resignedThem: s.resigned(propsA, false),
+  gameOver: s.gameOver(propsA),
 };
 
 const propsB = {
@@ -119,12 +115,8 @@ export const localStatesB = {
   weaponChosen: s.weaponChosen(propsB, propsB.myWeapon),
   resultPlayAgain: s.resultPlayAgain(propsB, playerAWeapon, Result.YouLose),
   chooseWeapon2: s.chooseWeapon(propsB),
-  shuttingDown: s.shuttingDown(propsB, 'InsufficientFundsYou', playerAWeapon, Result.YouLose),
-  shuttingDownResign: s.shuttingDown(
-    { ...propsB, myWeapon: undefined },
-    'YouResigned',
-    undefined,
-    undefined
-  ),
-  gameOverResign: s.gameOver(propsB, 'YouResigned'),
+  insufficientFunds: s.insufficientFunds(propsB, playerAWeapon, Result.YouLose),
+  resignedMe: s.resigned(propsB, true),
+  resignedThem: s.resigned(propsB, false),
+  gameOver: s.gameOver(propsB),
 };

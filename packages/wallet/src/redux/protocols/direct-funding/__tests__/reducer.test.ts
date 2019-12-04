@@ -51,6 +51,7 @@ describe("Player B Happy path", () => {
     const {action, state, sharedData} = scenario.notSafeToDeposit;
     const updatedState = directFundingStateReducer(state, sharedData, action);
     itTransitionsTo(updatedState, "DirectFunding.WaitForDepositTransaction");
+    // TODO: We should verify the parameters being passed into createDepositTransaction
     itSendsATransaction(updatedState);
   });
 

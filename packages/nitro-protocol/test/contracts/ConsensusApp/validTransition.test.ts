@@ -17,7 +17,11 @@ let consensusApp: Contract;
 const numParticipants = 3;
 
 beforeAll(async () => {
-  consensusApp = await setupContracts(provider, ConsensusAppArtifact);
+  consensusApp = await setupContracts(
+    provider,
+    ConsensusAppArtifact,
+    process.env.CONSENSUS_APP_ADDRESS
+  );
 });
 
 describe('validTransition', () => {
@@ -68,12 +72,14 @@ describe('validTransition', () => {
         await sendTransaction(consensusApp.address, transactionRequest);
 
         // Just call the function, so we can check the return value easily
-        const isValidFromCall = validTransition(
+        const isValidFromCall = await validTransition(
           fromConsensusData,
           fromOutcome,
           toConsensusData,
           toOutcome,
-          numParticipants
+          numParticipants,
+          consensusApp.signer,
+          consensusApp.address
         );
         expect(isValidFromCall).toBe(true);
       } else {

@@ -96,7 +96,7 @@ contract AssetHolder is IAssetHolder {
             }
             if (_isExternalDestination(allocation[m].destination)) {
                 _transferAsset(_bytes32ToAddress(allocation[m].destination), payoutAmount);
-                emit AssetTransferred(allocation[m].destination, payoutAmount);
+                emit AssetTransferred(channelId, allocation[m].destination, payoutAmount);
             } else {
                 holdings[allocation[m].destination] += payoutAmount;
             }
@@ -263,7 +263,7 @@ contract AssetHolder is IAssetHolder {
             if (payouts[j] > 0) {
                 if (_isExternalDestination(allocation[j].destination)) {
                     _transferAsset(_bytes32ToAddress(allocation[j].destination), payouts[j]);
-                    emit AssetTransferred(allocation[j].destination, payouts[j]);
+                    emit AssetTransferred(guarantorChannelId, allocation[j].destination, payouts[j]);
                 } else {
                     holdings[allocation[j].destination] += payouts[j];
                 }

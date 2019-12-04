@@ -3,9 +3,9 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet} from 'ethers';
 import {AddressZero} from 'ethers/constants';
-import ERC20AssetHolderArtifact from '../../../build/contracts/ERC20AssetHolder.json';
+import ERC20AssetHolderArtifact from '../../../build/contracts/TestErc20AssetHolder.json';
 // @ts-ignore
-import ETHAssetHolderArtifact from '../../../build/contracts/ETHAssetHolder.json';
+import ETHAssetHolderArtifact from '../../../build/contracts/TestEthAssetHolder.json';
 import NitroAdjudicatorArtifact from '../../../build/contracts/TESTNitroAdjudicator.json';
 
 import {Channel, getChannelId} from '../../../src/contract/channel';
@@ -25,7 +25,7 @@ import {
 } from '../../test-helpers';
 
 const provider = getTestProvider();
-let NitroAdjudicator: Contract;
+let TestNitroAdjudicator: Contract;
 let ETHAssetHolder: Contract;
 let ERC20AssetHolder: Contract;
 
@@ -41,18 +41,30 @@ for (let i = 0; i < 3; i++) {
   participants[i] = wallets[i].address;
 }
 beforeAll(async () => {
-  NitroAdjudicator = await setupContracts(provider, NitroAdjudicatorArtifact);
-  ETHAssetHolder = await setupContracts(provider, ETHAssetHolderArtifact);
-  ERC20AssetHolder = await setupContracts(provider, ERC20AssetHolderArtifact);
+  TestNitroAdjudicator = await setupContracts(
+    provider,
+    NitroAdjudicatorArtifact,
+    process.env.TEST_NITRO_ADJUDICATOR_ADDRESS
+  );
+  ETHAssetHolder = await setupContracts(
+    provider,
+    ETHAssetHolderArtifact,
+    process.env.TEST_ETH_ASSET_HOLDER_ADDRESS
+  );
+  ERC20AssetHolder = await setupContracts(
+    provider,
+    ERC20AssetHolderArtifact,
+    process.env.TEST_TOKEN_ASSET_HOLDER_ADDRESS
+  );
 });
 
 // Scenarios are synonymous with channelNonce:
 
 const description1 =
-  'NitroAdjudicator accepts a pushOutcome tx for a finalized channel, and 2x AssetHolder storage updated correctly';
-const description2 = 'NitroAdjudicator rejects a pushOutcome tx for a not-finalized channel';
+  'TestNitroAdjudicator accepts a pushOutcome tx for a finalized channel, and 2x AssetHolder storage updated correctly';
+const description2 = 'TestNitroAdjudicator rejects a pushOutcome tx for a not-finalized channel';
 const description3 =
-  'NitroAdjudicator rejects a pushOutcome tx when declaredTurnNumRecord is incorrect';
+  'TestNitroAdjudicator rejects a pushOutcome tx when declaredTurnNumRecord is incorrect';
 const description4 = 'AssetHolders reject a setOutcome when outcomeHash already exists';
 
 describe('pushOutcome', () => {
@@ -114,9 +126,12 @@ describe('pushOutcome', () => {
       );
 
       // Call public wrapper to set state (only works on test contract)
-      const tx = await NitroAdjudicator.setChannelStorageHash(channelId, initialChannelStorageHash);
+      const tx = await TestNitroAdjudicator.setChannelStorageHash(
+        channelId,
+        initialChannelStorageHash
+      );
       await tx.wait();
-      expect(await NitroAdjudicator.channelStorageHashes(channelId)).toEqual(
+      expect(await TestNitroAdjudicator.channelStorageHashes(channelId)).toEqual(
         initialChannelStorageHash
       );
       const transactionRequest = createPushOutcomeTransaction(
@@ -127,7 +142,7 @@ describe('pushOutcome', () => {
       );
 
       if (outcomeHashExits) {
-        await sendTransaction(provider, NitroAdjudicator.address, transactionRequest);
+        await sendTransaction(provider, TestNitroAdjudicator.address, transactionRequest);
       }
 
       // Call method in a slightly different way if expecting a revert
@@ -136,11 +151,11 @@ describe('pushOutcome', () => {
           '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$'
         );
         await expectRevert(
-          () => sendTransaction(provider, NitroAdjudicator.address, transactionRequest),
+          () => sendTransaction(provider, TestNitroAdjudicator.address, transactionRequest),
           regex
         );
       } else {
-        await sendTransaction(provider, NitroAdjudicator.address, transactionRequest);
+        await sendTransaction(provider, TestNitroAdjudicator.address, transactionRequest);
         // Check 2x AssetHolder storage against the expected value
         expect(await ETHAssetHolder.assetOutcomeHashes(channelId)).toEqual(
           hashAssetOutcome(outcome[0].allocation)

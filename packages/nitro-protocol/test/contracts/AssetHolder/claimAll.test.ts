@@ -30,7 +30,11 @@ const addresses = {
 let AssetHolder: Contract;
 
 beforeAll(async () => {
-  AssetHolder = await setupContracts(provider, AssetHolderArtifact);
+  AssetHolder = await setupContracts(
+    provider,
+    AssetHolderArtifact,
+    process.env.TEST_ASSET_HOLDER_ADDRESS
+  );
 });
 
 const reason5 =
@@ -146,7 +150,11 @@ describe('claimAll', () => {
 
         // Add AssetTransferred events to expectations
         Object.keys(payouts).forEach(assetHolder => {
-          expectedEvents = assetTransferredEventsFromPayouts(payouts, AssetHolder.address);
+          expectedEvents = assetTransferredEventsFromPayouts(
+            guarantorId,
+            payouts,
+            AssetHolder.address
+          );
         });
 
         // Extract logs

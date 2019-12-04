@@ -9,7 +9,7 @@ function mapStateToProps(state: SiteState) {
 
   const { name, opponentName, roundBuyIn, player } = localState as PlayingState;
   const aBal = channelState ? channelState.aBal : '';
-  const bBal = channelState ? channelState.aBal : '';
+  const bBal = channelState ? channelState.bBal : '';
 
   const myBalance = player === 'A' ? aBal : bBal;
   const opponentBalance = player === 'B' ? aBal : bBal;

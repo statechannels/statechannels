@@ -1,21 +1,16 @@
 version: 2.1
-
+orbs:
+  puppeteer: threetreeslight/puppeteer@0.1.2
 defaults: &defaults
   working_directory: /home/circleci/project
   resource_class: large
   docker:
     - image: circleci/node:10.16.3
-    - image: circleci/postgres:12.0-alpine-postgis
+    - image: circleci/postgres:12.0-alpine
       environment:
         POSTGRES_USER: root
-        POSTGRES_DB: server_wallet_test
+        POSTGRES_DB: hub_wallet_test
         POSTGRES_PASSWORD: ''
-
-save_code: &save_code
-  save_cache:
-    key: code-{{ .Revision }}
-    paths:
-      - .git
 
 save_dep: &save_dep
   save_cache:
@@ -23,10 +18,6 @@ save_dep: &save_dep
     paths:
       - node_modules
       - packages/*/node_modules
-
-restore_code: &restore_code
-  restore_cache:
-    key: code-{{ .Revision }}
 
 restore_dep: &restore_dep
   restore_cache:
@@ -58,11 +49,9 @@ jobs:
   prepare:
     <<: *defaults
     steps:
-      - <<: *restore_code
       - checkout
       - log_stats:
           file: prepare-stats
-      - <<: *save_code
       - <<: *restore_dep
       - run: yarn --frozen-lockfile
       - <<: *save_dep
@@ -81,7 +70,6 @@ jobs:
   build:
     <<: *defaults
     steps:
-      - <<: *restore_code
       - checkout
       - attach_workspace:
           at: /home/circleci/project
@@ -91,31 +79,23 @@ jobs:
   test:
     <<: *defaults
     steps:
-      - <<: *restore_code
       - checkout
       - log_stats:
           file: test-stats
       - attach_workspace:
           at: /home/circleci/project
       - run:
-          command: npx lerna run start:ganache --scope=@statechannels/ganache-deployer
-          background: true
-      # Wait for Ganache to come up and for contract migrations to take place
-      - run:
-          shell: /bin/sh
-          command: |
-            wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 -t 10 http://localhost:3000
-      - run: yarn test:ci
+          command: yarn test:ci
+          no_output_timeout: 30m
       - upload_logs:
           file: test-stats
 
-  # TODO: Get this working
   integration-test:
     <<: *defaults
     steps:
-      - <<: *restore_code
       - checkout:
           path: /home/circleci/project
+      - puppeteer/install
       - log_stats:
           file: integration-test-stats
       - attach_workspace:
@@ -137,5 +117,9 @@ workflows:
             - prepare
 
       - test:
+          requires:
+            - prepare
+
+      - integration-test:
           requires:
             - prepare

@@ -7,7 +7,7 @@ import {
 } from "../utils/transaction-generator";
 import * as walletStates from "../redux/state";
 
-import {bigNumberify} from "ethers/utils";
+import {bigNumberify, BigNumberish} from "ethers/utils";
 import {
   ADJUDICATOR_ADDRESS,
   ETH_ASSET_HOLDER_ADDRESS,
@@ -15,7 +15,7 @@ import {
   CHALLENGE_DURATION
 } from "../constants";
 import {JsonRpcProvider, TransactionRequest, TransactionResponse} from "ethers/providers";
-import {getContractAddress} from "../utils/contract-utils";
+import {getTrivialAppAddress} from "../utils/contract-utils";
 import {State, getChannelId as getNitroChannelId, Channel} from "@statechannels/nitro-protocol";
 import {Signatures} from "@statechannels/nitro-protocol";
 import {convertBalanceToOutcome} from "../redux/__tests__/state-helpers";
@@ -71,14 +71,14 @@ export async function depositIntoETHAssetHolder(
 
 export async function createChallenge(
   provider: ethers.providers.JsonRpcProvider,
-  channelNonce,
+  channelNonce: BigNumberish,
   participantA,
   participantB
 ) {
-  const libraryAddress = getContractAddress("TrivialApp");
+  const libraryAddress = getTrivialAppAddress();
 
   const channel: Channel = {
-    channelNonce,
+    channelNonce: bigNumberify(channelNonce).toHexString(),
     chainId: bigNumberify(NETWORK_ID).toHexString(),
     participants: [participantA.address, participantB.address]
   };
@@ -120,7 +120,7 @@ export async function concludeGame(
   participantA,
   participantB
 ) {
-  const libraryAddress = getContractAddress("TrivialApp");
+  const libraryAddress = getTrivialAppAddress();
   const channel: Channel = {
     channelNonce,
     chainId: bigNumberify(NETWORK_ID).toHexString(),
@@ -162,7 +162,7 @@ export async function respond(
   participantB,
   challenge: State
 ) {
-  const libraryAddress = getContractAddress("TrivialApp");
+  const libraryAddress = getTrivialAppAddress();
   const channel: Channel = {
     channelNonce,
     chainId: bigNumberify(NETWORK_ID).toHexString(),

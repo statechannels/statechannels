@@ -9,16 +9,18 @@ import {
   PARTICIPANTS
 } from '../../../test/test-constants';
 import {
-  app1Response,
   beginningAppPhaseChannel,
   createdPrefundSetup1,
   createdPrefundSetup2Participants3,
+  stateConstructors as testDataConstructors
+} from '../../../test/test-data';
+import {
+  app1Response,
   postfundSetup1Response,
   postfundSetup2Response3,
   prefundSetup1Response,
-  prefundSetup2Response3,
-  stateConstructors as testDataConstructors
-} from '../../../test/test_data';
+  prefundSetup2Response3
+} from '../../../test/test-responses';
 import errors from '../../errors';
 import * as ChannelManager from '../channelManager';
 import * as LedgerChannelManager from '../ledgerChannelManager';

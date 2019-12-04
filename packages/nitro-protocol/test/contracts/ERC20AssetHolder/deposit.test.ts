@@ -3,7 +3,7 @@ import {Contract, Wallet} from 'ethers';
 import {AddressZero} from 'ethers/constants';
 import {bigNumberify} from 'ethers/utils';
 // @ts-ignore
-import ERC20AssetHolderArtifact from '../../../build/contracts/ERC20AssetHolder.json';
+import ERC20AssetHolderArtifact from '../../../build/contracts/TestErc20AssetHolder.json';
 // @ts-ignore
 import TokenArtifact from '../../../build/contracts/Token.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
@@ -23,8 +23,12 @@ for (let i = 0; i < 3; i++) {
 }
 
 beforeAll(async () => {
-  ERC20AssetHolder = await setupContracts(provider, ERC20AssetHolderArtifact);
-  Token = await setupContracts(provider, TokenArtifact);
+  ERC20AssetHolder = await setupContracts(
+    provider,
+    ERC20AssetHolderArtifact,
+    process.env.TEST_TOKEN_ASSET_HOLDER_ADDRESS
+  );
+  Token = await setupContracts(provider, TokenArtifact, process.env.TEST_TOKEN_ADDRESS);
   signer0Address = await signer0.getAddress();
 });
 

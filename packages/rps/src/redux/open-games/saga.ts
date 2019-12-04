@@ -18,6 +18,7 @@ export default function* openGameSaga() {
   // this is more robust though, so stick to watching all actions for the time being
   let openGameSyncerProcess: any = null;
   let myGameIsOnFirebase = false;
+  let joinedAGame = false;
 
   while (true) {
     yield take('*');
@@ -34,14 +35,16 @@ export default function* openGameSaga() {
       if (openGameSyncerProcess) {
         yield cancel(openGameSyncerProcess);
       }
-      if (localState.type === 'GameChosen') {
-        const openGameKey = `/challenges/${localState.opponentAddress}`;
-        const taggedOpenGame = {
-          isPublic: false,
-          playerAName: localState.name,
-        };
-        yield call(reduxSagaFirebase.database.patch, openGameKey, taggedOpenGame);
-      }
+    }
+
+    if (localState.type === 'GameChosen' && !joinedAGame) {
+      const openGameKey = `/challenges/${localState.opponentAddress}`;
+      const taggedOpenGame = {
+        isPublic: false,
+        playerAName: localState.name,
+      };
+      yield call(reduxSagaFirebase.database.patch, openGameKey, taggedOpenGame);
+      joinedAGame = true;
     }
 
     if (localState.type === 'WaitingRoom') {
@@ -61,14 +64,14 @@ export default function* openGameSaga() {
             stake: localState.roundBuyIn.toString(),
             createdAt: new Date().getTime(),
             isPublic: true,
-            playerAName: '',
+            playerAName: 'unknown',
           };
 
           const disconnect = firebase
             .database()
             .ref(myOpenGameKey)
             .onDisconnect();
-          yield apply(disconnect, disconnect.remove);
+          yield apply(disconnect, disconnect.remove, []);
           // use update to allow us to pick our own key
           yield call(reduxSagaFirebase.database.update, myOpenGameKey, myOpenGame);
           myGameIsOnFirebase = true;
@@ -76,7 +79,7 @@ export default function* openGameSaga() {
           const storeObj = yield select();
           myOpenGame = getOpenGame(storeObj, myOpenGameKey);
           if (myOpenGame && !myOpenGame.isPublic) {
-            yield put.resolve(gameJoined(myOpenGame.opponentName, myOpenGame.opponentAddress)); // block until dispatched
+            yield put(gameJoined(myOpenGame.playerAName, myOpenGame.opponentAddress));
             yield call(reduxSagaFirebase.database.delete, myOpenGameKey);
             myGameIsOnFirebase = false;
           }

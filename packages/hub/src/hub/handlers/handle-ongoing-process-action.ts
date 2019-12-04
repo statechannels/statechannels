@@ -1,13 +1,13 @@
-import {unreachable} from '@statechannels/wallet';
+import {SignedState} from '@statechannels/nitro-protocol';
+import {ActionConstructor} from '@statechannels/wallet/lib/src/redux/utils';
 import {
+  RelayActionWithMessage,
   SignedStatesReceived,
   StrategyProposed,
-  RelayActionWithMessage,
-  relayActionWithMessage,
-  strategyApproved,
-  signedStatesReceived
-} from '@statechannels/wallet/lib/src/communication';
-import {HUB_ADDRESS} from '../../constants';
+  ProtocolLocator,
+  StrategyApproved
+} from '../../communication';
+import {HUB_ADDRESS, unreachable} from '../../constants';
 import {errors} from '../../wallet';
 import {getCurrentState} from '../../wallet/db/queries/getCurrentState';
 import {getProcess} from '../../wallet/db/queries/walletProcess';
@@ -86,3 +86,25 @@ async function handleSignedStatesReceived(action: SignedStatesReceived) {
       );
   }
 }
+
+// TODO: The following three helper functions are direct copy and paste from the wallet
+// https://github.com/statechannels/monorepo/blob/1ce06fdc98456e268a341c6aec19ef8b0a86a510/packages/wallet/src/communication/actions.ts
+
+export const signedStatesReceived = (p: {
+  protocolLocator: ProtocolLocator;
+  signedStates: SignedState[];
+  processId: string;
+}): SignedStatesReceived => ({
+  ...p,
+  type: 'WALLET.COMMON.SIGNED_STATES_RECEIVED'
+});
+
+export const relayActionWithMessage: ActionConstructor<RelayActionWithMessage> = p => ({
+  ...p,
+  type: 'WALLET.RELAY_ACTION_WITH_MESSAGE'
+});
+
+export const strategyApproved: ActionConstructor<StrategyApproved> = p => ({
+  ...p,
+  type: 'WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_APPROVED'
+});

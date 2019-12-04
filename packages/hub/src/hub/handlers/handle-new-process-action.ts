@@ -1,10 +1,9 @@
-import {unreachable} from '@statechannels/wallet';
 import {
   ConcludeInstigated,
-  SignedStatesReceived,
-  RelayActionWithMessage
-} from '@statechannels/wallet/lib/src/communication';
-import {HUB_ADDRESS} from '../../constants';
+  RelayActionWithMessage,
+  SignedStatesReceived
+} from '../../communication';
+import {HUB_ADDRESS, unreachable} from '../../constants';
 import {startFundingProcess} from '../../wallet/db/queries/walletProcess';
 import * as ongoing from './handle-ongoing-process-action';
 

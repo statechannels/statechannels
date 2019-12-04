@@ -1,63 +1,49 @@
-import NetworkContext from "@statechannels/ganache-deployer/ganache-network-context.json";
 import {Contract} from "ethers";
-import {AddressZero} from "ethers/constants";
 import log from "loglevel";
 import {Web3Provider} from "ethers/providers";
-import { Interface } from "ethers/utils";
+import {Interface} from "ethers/utils";
+import {ContractArtifacts} from "@statechannels/nitro-protocol";
 
 log.setDefaultLevel(log.levels.DEBUG);
 
-export function getContractAddress(contractName: string): string {
-  if (NetworkContext[contractName]) {
-    return NetworkContext[contractName].address;
+function getContractAddress(name: string): string {
+  const address = process.env[name];
+  if (address) {
+    return address;
   }
-  console.error(contractName, NetworkContext);
 
-  throw new Error(
-    `Could not find ${contractName} in network map ${JSON.stringify(NetworkContext)}}`
-  );
+  throw new Error(`Could not find ${name} in environment`);
 }
 
-export function getContractABI(contractName: string): string {
-  if (NetworkContext[contractName]) {
-    return NetworkContext[contractName].abi;
-  }
-  console.error(contractName, NetworkContext);
-
-  throw new Error(
-    `Could not find ${contractName} in network map ${JSON.stringify(NetworkContext)}}`
-  );
-}
-
-export function getProvider(): Web3Provider {
-  return new Web3Provider(web3.currentProvider);
+export async function getProvider(): Promise<Web3Provider> {
+  return await new Web3Provider(web3.currentProvider);
 }
 
 export async function getAdjudicatorContract(provider: Web3Provider) {
-  const contractAddress = getContractAddress("NitroAdjudicator");
+  const contractAddress = getAdjudicatorContractAddress();
   return new Contract(contractAddress, getAdjudicatorInterface(), provider);
 }
 
 export async function getETHAssetHolderContract(provider: Web3Provider) {
-  const contractAddress = getContractAddress("ETHAssetHolder");
+  const contractAddress = getETHAssetHolderAddress();
   return new Contract(contractAddress, getETHAssetHolderInterface(), provider);
 }
 
 export async function getERC20AssetHolderContract(provider: Web3Provider) {
-  const contractAddress = getContractAddress("ERC20AssetHolder");
+  const contractAddress = getERC20AssetHolderAddress();
   return new Contract(contractAddress, getERC20AssetHolderInterface(), provider);
 }
 
 export function getAdjudicatorInterface(): Interface {
-  return new Interface(getContractABI("NitroAdjudicator"));
+  return new Interface(ContractArtifacts.NitroAdjudicatorArtifact["abi"]);
 }
 
 export function getETHAssetHolderInterface(): Interface {
-  return new Interface(getContractABI("ETHAssetHolder"));
+  return new Interface(ContractArtifacts.EthAssetHolderArtifact["abi"]);
 }
 
 export function getERC20AssetHolderInterface(): Interface {
-  return new Interface(getContractABI("ERC20AssetHolder"));
+  return new Interface(ContractArtifacts.Erc20AssetHolderArtifact["abi"]);
 }
 
 // FIXME: The tests ought to be able to run even without contracts having been built which
@@ -66,51 +52,32 @@ export function getERC20AssetHolderInterface(): Interface {
 // with the blockchain are currently skipped, and so the AddressZero value is never used.
 
 export function getTrivialAppAddress(): string {
-  try {
-    return getContractAddress("TrivialApp");
-  } catch (e) {
-    return AddressZero;
-  }
+  return getContractAddress("TRIVIAL_APP_ADDRESS");
 }
 
 export function getETHAssetHolderAddress(): string {
-  try {
-    return getContractAddress("ETHAssetHolder");
-  } catch (e) {
-    return AddressZero;
-  }
+  return getContractAddress("ETH_ASSET_HOLDER_ADDRESS");
 }
 
 export function getERC20AssetHolderAddress(): string {
-  try {
-    return getContractAddress("ERC20AssetHolder");
-  } catch (e) {
-    return AddressZero;
-  }
+  return getContractAddress("TEST_TOKEN_ASSET_HOLDER_ADDRESS");
 }
 
 export function getAdjudicatorContractAddress(): string {
-  try {
-    return getContractAddress("NitroAdjudicator");
-  } catch (e) {
-    return AddressZero;
-  }
+  return getContractAddress("NITRO_ADJUDICATOR_ADDRESS");
 }
 
 export function getConsensusContractAddress(): string {
-  try {
-    return getContractAddress("ConsensusApp");
-  } catch (e) {
-    return AddressZero;
-  }
+  return getContractAddress("CONSENSUS_APP_ADDRESS");
 }
 
 export function getNetworkId(): number {
-  if (NetworkContext["NetworkID"]) {
-    return parseInt(NetworkContext["NetworkID"], 10);
-  } else {
-    throw new Error("There is no target network ID specified.");
+  const id = process.env["CHAIN_NETWORK_ID"];
+  if (id) {
+    return Number(id);
   }
+
+  throw new Error(`Could not find CHAIN_NETWORK_ID in environment`);
 }
 
 export function isDevelopmentNetwork(): boolean {

@@ -20,7 +20,6 @@ process.on("unhandledRejection", err => {
 // Ensure environment variables are read.
 require("../config/env");
 
-const fs = require("fs");
 const chalk = require("chalk");
 const webpack = require("webpack");
 const WebpackDevServer = require("webpack-dev-server");
@@ -29,22 +28,16 @@ const {choosePort} = require("react-dev-utils/WebpackDevServerUtils");
 
 const paths = require("../config/paths");
 const configFactory = require("../config/webpack.config");
-const {getNetworkName} = require("@statechannels/devtools");
-const {startGanacheAndDeploy} = require("@statechannels/ganache-deployer");
+const {getNetworkName, setupGanache} = require("@statechannels/devtools");
+const {deploy} = require("../deployment/deploy");
 
 void (async () => {
   process.on("SIGINT", () => {
-    if (ganacheServer) {
-      ganacheServer.close();
-    }
     if (devServer) {
       devServer.close();
     }
   });
   process.on("SIGTERM", () => {
-    if (ganacheServer) {
-      ganacheServer.close();
-    }
     if (devServer) {
       devServer.close();
     }
@@ -82,8 +75,10 @@ void (async () => {
     process.exit(1);
   }
 
-  console.log(chalk.cyan("Starting ganache and deploying contract..."));
-  ganacheServer = await startGanacheAndDeploy();
+  const {deployer} = await setupGanache();
+  const deployedArtifacts = await deploy(deployer);
+
+  process.env = {...process.env, ...deployedArtifacts};
 
   process.env.TARGET_NETWORK = getNetworkName(process.env.CHAIN_NETWORK_ID);
 

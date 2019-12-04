@@ -1,4 +1,11 @@
 import {Signature} from 'ethers/utils';
+import NitroAdjudicatorArtifact from '../build/contracts/NitroAdjudicator.json';
+import TrivialAppArtifact from '../build/contracts/TrivialApp.json';
+import TokenArtifact from '../build/contracts/Token.json';
+import Erc20AssetHolderArtifact from '../build/contracts/ERC20AssetHolder.json';
+import EthAssetHolderArtifact from '../build/contracts/ETHAssetHolder.json';
+import ConsensusAppArtifact from '../build/contracts/ConsensusApp.json';
+
 import {
   AssetOutcomeShortHand,
   getTestProvider,
@@ -7,7 +14,12 @@ import {
   replaceAddressesAndBigNumberify,
   setupContracts,
 } from '../test/test-helpers';
-import {getAssetTransferredEvent, getDepositedEvent} from './contract/asset-holder';
+import {
+  getAssetTransferredEvent,
+  getDepositedEvent,
+  convertBytes32ToAddress,
+  convertAddressToBytes32,
+} from './contract/asset-holder';
 import {getChallengeRegisteredEvent} from './contract/challenge';
 import {Channel, getChannelId} from './contract/channel';
 import {encodeConsensusData} from './contract/consensus-data';
@@ -51,6 +63,8 @@ export interface SignedState {
 // TODO: Export this with more thought to what is exposed by @statchannels/nitro-protocol
 export {
   Allocation,
+  convertBytes32ToAddress,
+  convertAddressToBytes32,
   createERC20DepositTransaction,
   createETHDepositTransaction,
   createTransferAllTransaction,
@@ -78,4 +92,14 @@ export {
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
   setupContracts,
+};
+
+// artifacts
+export const ContractArtifacts = {
+  NitroAdjudicatorArtifact,
+  TrivialAppArtifact,
+  Erc20AssetHolderArtifact,
+  EthAssetHolderArtifact,
+  TokenArtifact,
+  ConsensusAppArtifact,
 };

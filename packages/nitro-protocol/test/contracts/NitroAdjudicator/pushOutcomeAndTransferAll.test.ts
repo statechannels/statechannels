@@ -56,9 +56,21 @@ for (let i = 0; i < 3; i++) {
   participants[i] = wallets[i].address;
 }
 beforeAll(async () => {
-  NitroAdjudicator = await setupContracts(provider, NitroAdjudicatorArtifact);
-  AssetHolder1 = await setupContracts(provider, AssetHolderArtifact1);
-  AssetHolder2 = await setupContracts(provider, AssetHolderArtifact2);
+  NitroAdjudicator = await setupContracts(
+    provider,
+    NitroAdjudicatorArtifact,
+    process.env.TEST_NITRO_ADJUDICATOR_ADDRESS
+  );
+  AssetHolder1 = await setupContracts(
+    provider,
+    AssetHolderArtifact1,
+    process.env.TEST_ASSET_HOLDER_ADDRESS
+  );
+  AssetHolder2 = await setupContracts(
+    provider,
+    AssetHolderArtifact2,
+    process.env.TEST_ASSET_HOLDER2_ADDRESS
+  );
   addresses.ETH = AssetHolder1.address;
   addresses.TOK = AssetHolder2.address;
 });
@@ -177,7 +189,7 @@ describe('pushOutcomeAndTransferAll', () => {
         // Add AssetTransferred events to expectations
         Object.keys(payouts).forEach(assetHolder => {
           expectedEvents = expectedEvents.concat(
-            assetTransferredEventsFromPayouts(payouts[assetHolder], assetHolder)
+            assetTransferredEventsFromPayouts(channelId, payouts[assetHolder], assetHolder)
           );
         });
 
