@@ -30,7 +30,8 @@
     "test:ci": "yarn test:ci:contracts && yarn test:ci:app",
     "test:ci:contracts": "yarn test:contracts --all --ci --runInBand --detectOpenHandles",
     "test:ci:app": "yarn test:app --all --ci --runInBand --detectOpenHandles",
-    "storybook": "start-storybook -p 9001 -c .storybook"
+    "storybook": "start-storybook -p 9001 -c .storybook",
+    "precommit": "lint-staged --quiet"
   },
   "lint-staged": {
     "{src,tests}/**/*.tsx?": "yarn lint:check"
@@ -156,6 +157,7 @@
     "ganache-cli": "^6.1.8",
     "html-webpack-plugin": "4.0.0-beta.5",
     "jest": "24.9.0",
+    "lint-staged": "9.4.0",
     "node-sass": "4.12.0",
     "optimize-css-assets-webpack-plugin": "5.0.1",
     "pnp-webpack-plugin": "1.2.1",

@@ -38,8 +38,8 @@
     "contract:compile": "node ./bin/compile.js",
     "clearContracts": "rm -rf build/contracts",
     "clearLib": "rm -rf lib",
-    "lint:check": "npx eslint \"*/**/*.ts\" --cache",
-    "lint:write": "npx eslint \"*/**/*.ts\" --fix",
+    "lint:check": "eslint \"*/**/*.ts\" --cache",
+    "lint:write": "eslint \"*/**/*.ts\" --fix",
     "prepare": "yarn patch-package && yarn build",
     "docgen": "npx solidoc",
     "patch-package": "cd ../.. && yarn patch-package",
@@ -98,6 +98,6 @@
     "write-json-file": "4.2.0"
   },
   "lint-staged": {
-    "{src,test}/**/*.tsx?": "yarn lint:check"
+    "{src,test}/**/*.tsx?": "eslint"
   }
 }

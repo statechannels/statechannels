@@ -11,11 +11,11 @@
     "precommit": "lint-staged --quiet",
     "prepare": "yarn build",
     "build": "yarn lint:check && tsc -b",
-    "lint:check": "npx eslint \"*/**/*.ts\" --cache",
-    "lint:write": "npx eslint \"*/**/*.ts\" --fix"
+    "lint:check": "eslint \"*/**/*.ts\" --cache",
+    "lint:write": "eslint \"*/**/*.ts\" --fix"
   },
   "lint-staged": {
-    "src/*.ts": "yarn lint:check"
+    "src/*.ts": "eslint"
   },
   "devDependencies": {
     "@types/easy-table": "0.0.32",

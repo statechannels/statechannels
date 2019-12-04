@@ -18,8 +18,8 @@
     "test:ci": "react-scripts test --runInBand",
     "test:coverage": "react-scripts test --coverage --watchAll=false",
     "eject": "react-scripts eject",
-    "lint:check": "npx eslint \"*/**/*.{js,ts,tsx}\" --cache",
-    "lint:write": "npx eslint \"*/**/*.{js,ts,tsx}\" --fix"
+    "lint:check": "eslint \"*/**/*.{js,ts,tsx}\" --cache",
+    "lint:write": "eslint \"*/**/*.{js,ts,tsx}\" --fix"
   },
   "jest": {
     "collectCoverageFrom": [
@@ -33,7 +33,7 @@
     }
   },
   "lint-staged": {
-    "src/**/*.tsx?": "yarn lint:check"
+    "src/**/*.tsx?": "eslint"
   },
   "browserslist": {
     "production": [
