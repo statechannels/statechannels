@@ -10,8 +10,6 @@ import {Account, DeployedArtifacts, Deployment} from '../types';
 
 log.setDefaultLevel(log.levels.INFO);
 
-export const ganacheIsRunning = (port: number): boolean => false;
-
 export class GanacheServer {
   provider: JsonRpcProvider;
   fundedPrivateKey: string;
