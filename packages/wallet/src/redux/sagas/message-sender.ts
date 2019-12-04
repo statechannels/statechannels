@@ -12,7 +12,7 @@ export function* messageSender(action: OutgoingApiAction) {
   const message = yield createResponseMessage(action);
   if (message) {
     yield validate(message, action);
-    yield call(window.parent.postMessage, message, "*");
+    yield call([window.parent, window.parent.postMessage], message, "*");
     yield put(messageSent({}));
   }
 }

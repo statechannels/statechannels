@@ -1,23 +1,20 @@
-import debug from 'debug';
 import EventEmitter from 'eventemitter3';
 import {MessagingService} from './messaging-service';
 import {
-  ChannelProviderUIMessage,
+  EventType,
   IChannelProvider,
-  JsonRpcRequest,
-  JsonRpcSubscribeResult,
-  JsonRpcUnsubscribeResult
+  isJsonRpcErrorResponse,
+  isJsonRpcNotification,
+  isJsonRpcResponse
 } from './types';
 import {UIService} from './ui-service';
-
-const log = debug('channel-provider');
 
 class ChannelProvider implements IChannelProvider {
   protected readonly events: EventEmitter;
   protected readonly ui: UIService;
   protected readonly messaging: MessagingService;
 
-  protected url = 'http://localhost:1701';
+  protected url = '';
 
   constructor() {
     this.events = new EventEmitter();
@@ -35,7 +32,9 @@ class ChannelProvider implements IChannelProvider {
     this.ui.setUrl(this.url);
     this.messaging.setUrl(this.url);
 
-    this.events.emit('connect');
+    await this.ui.mount();
+
+    this.events.emit('Connect');
   }
 
   async send<ResultType = any>(method: string, params: any[] = []): Promise<ResultType> {
@@ -49,56 +48,48 @@ class ChannelProvider implements IChannelProvider {
     return response;
   }
 
-  async subscribe(subscriptionType: string, params: any[] = []): Promise<string> {
-    const response = await this.send<JsonRpcSubscribeResult>('chan_subscribe', [
-      subscriptionType,
-      ...params
-    ]);
-
-    return response.subscription;
+  // TODO: Do we want to implement subscriptions?
+  async subscribe(_subscriptionType: string, _params: any[] = []): Promise<string> {
+    throw new Error('Subscriptions are not implemented');
   }
 
-  async unsubscribe(subscriptionId: string): Promise<boolean> {
-    const response = await this.send<JsonRpcUnsubscribeResult>('chan_unsubscribe', [
-      subscriptionId
-    ]);
-
-    this.off(subscriptionId);
-
-    return response.success;
+  async unsubscribe(_subscriptionId: string): Promise<boolean> {
+    throw new Error('Subscriptions are not implemented');
   }
 
-  on(event: string, callback: EventEmitter.ListenerFn<any[]>): void {
+  on(event: EventType, callback: EventEmitter.ListenerFn<any[]>): void {
     this.events.on(event, callback);
   }
 
-  off(event: string, callback?: EventEmitter.ListenerFn<any[]> | undefined): void {
+  off(event: EventType, callback?: EventEmitter.ListenerFn<any[]> | undefined): void {
     this.events.off(event, callback);
+  }
+  onNotification(callback: EventEmitter.ListenerFn<any[]>): void {
+    this.events.on('Notification', callback);
+  }
+
+  offNotification(callback?: EventEmitter.ListenerFn<any[]> | undefined): void {
+    this.events.off('Notification', callback);
   }
 
   protected async onMessage(event: MessageEvent) {
-    const message = event.data as ChannelProviderUIMessage | JsonRpcRequest;
-
-    if (message === ChannelProviderUIMessage.Close) {
-      log('Close signal received: %o', message);
-      this.ui.unmount();
+    const message = event.data;
+    if (!message.jsonrpc) {
       return;
     }
 
-    if (message === ChannelProviderUIMessage.Acknowledge) {
-      this.messaging.acknowledge();
-      return;
+    if (isJsonRpcErrorResponse(message)) {
+      this.events.emit('MessageError', message);
+    } else if (isJsonRpcResponse(message)) {
+      this.events.emit('MessageResult', message);
+    } else if (isJsonRpcNotification(message)) {
+      if (message.method === 'UIUpdate') {
+        this.ui.setVisibility(message.params.showWallet);
+      }
+      this.events.emit('Notification', message);
     }
-
-    if (!message.jsonrpc || 'result' in message) {
-      return;
-    }
-
-    const target = await this.ui.getTarget();
-    this.messaging.send(target, message, this.url);
   }
 }
-
 const channelProvider = new ChannelProvider();
 
 export {channelProvider};
