@@ -28,7 +28,7 @@ const depositedReducer = (state: AssetHoldersState, action: DepositedEvent) => {
 
 const assetTransferredReducer = (
   state: AssetHoldersState,
-  {assetHolderAddress, channelId, destination, amount}: AssetTransferredEvent
+  {assetHolderAddress, channelId, amount}: AssetTransferredEvent
 ) => {
-  return recordAssetTransfer(state, assetHolderAddress, channelId, destination, amount);
+  return recordAssetTransfer(state, assetHolderAddress, channelId, amount);
 };
