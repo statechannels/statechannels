@@ -1,4 +1,4 @@
-import {ethers, Contract} from "ethers";
+import {ethers, Contract, Signer} from "ethers";
 import {
   encodeAllocation,
   encodeOutcome,
@@ -19,14 +19,14 @@ import {
   getETHAssetHolderInterface,
   getETHAssetHolderAddress
 } from "../utils/contract-utils";
-import {JsonRpcProvider} from "ethers/providers";
 
 import {getAllocationOutcome} from "../utils/outcome-utils";
 import {convertBalanceToOutcome} from "../redux/__tests__/state-helpers";
 jest.setTimeout(60000);
 
 describe("ETHAssetHolder listener", () => {
-  const provider: ethers.providers.JsonRpcProvider = getGanacheProvider();
+  const provider = getGanacheProvider();
+  const signer = provider.getSigner();
 
   const participantA = ethers.Wallet.createRandom();
   const participantB = ethers.Wallet.createRandom();
@@ -49,7 +49,8 @@ describe("ETHAssetHolder listener", () => {
     sagaTester.start(assetHoldersWatcher, provider);
 
     const depositAmount = bigNumberify("0x05");
-    await depositIntoETHAssetHolder(provider, channelId, depositAmount.toHexString());
+
+    await depositIntoETHAssetHolder(signer, channelId, depositAmount.toHexString());
 
     await sagaTester.waitFor("WALLET.ASSET_HOLDER.DEPOSITED");
 
@@ -75,9 +76,9 @@ describe("ETHAssetHolder listener", () => {
     // to not be hardcoded
     const depositAmount = bigNumberify("0x05");
     // deposit double so that 0x05 can be transferred to each participant
-    await depositIntoETHAssetHolder(provider, channelId, depositAmount.mul(2).toHexString());
+    await depositIntoETHAssetHolder(signer, channelId, depositAmount.mul(2).toHexString());
 
-    await finalizeChannel(channelId, channelNonce, provider, participantA, participantB);
+    await finalizeChannel(channelId, channelNonce, signer, participantA, participantB);
 
     const {turnNumRecord, finalizesAt} = await getOnChainChannelStorage(provider, channelId);
     // This is the outcome that gets used to set the outcomeHash on the adjudicator
@@ -103,7 +104,7 @@ describe("ETHAssetHolder listener", () => {
       stateHash,
       challengerAddress,
       outcomeBytes,
-      provider
+      signer
     );
 
     const allocation = getAllocationOutcome(outcome).allocation;
@@ -111,7 +112,7 @@ describe("ETHAssetHolder listener", () => {
     const sagaTester = new SagaTester({initialState: createWatcherState(processId, channelId)});
     sagaTester.start(assetHoldersWatcher, provider);
 
-    await transferAll(channelId, encodeAllocation(allocation), provider);
+    await transferAll(channelId, encodeAllocation(allocation), signer);
 
     await sagaTester.waitFor("WALLET.ASSET_HOLDER.ASSET_TRANSFERRED");
   });
@@ -120,15 +121,15 @@ describe("ETHAssetHolder listener", () => {
 async function finalizeChannel(
   channelId: string,
   channelNonce: number,
-  provider,
+  signer: Signer,
   participantA: ethers.Wallet,
   participantB: ethers.Wallet
 ) {
   const processId = ethers.Wallet.createRandom().address;
   const sagaTester = new SagaTester({initialState: createWatcherState(processId, channelId)});
-  sagaTester.start(adjudicatorWatcher, provider);
+  sagaTester.start(adjudicatorWatcher, signer);
 
-  await concludeGame(provider, channelNonce, participantA, participantB);
+  await concludeGame(signer, channelNonce, participantA, participantB);
   await sagaTester.waitFor("WALLET.ADJUDICATOR.CONCLUDED_EVENT");
 }
 
@@ -151,15 +152,11 @@ async function pushOutcome(
   stateHash: string,
   challengerAddress: string,
   outcomeBytes: string,
-  provider: JsonRpcProvider
+  signer: Signer
 ): Promise<void> {
   const adjudicatorInterface = getAdjudicatorInterface();
   const adjudicatorAddress = getAdjudicatorContractAddress();
-  const nitroAdjudicator = new Contract(
-    adjudicatorAddress,
-    adjudicatorInterface,
-    await provider.getSigner()
-  );
+  const nitroAdjudicator = new Contract(adjudicatorAddress, adjudicatorInterface, signer);
 
   await nitroAdjudicator.functions.pushOutcome(
     channelId,
@@ -171,14 +168,10 @@ async function pushOutcome(
   );
 }
 
-async function transferAll(channelId: string, allocation: string, provider: JsonRpcProvider) {
+async function transferAll(channelId: string, allocation: string, signer: Signer) {
   const assetHolderInterface = getETHAssetHolderInterface();
   const assetHolderAddress = getETHAssetHolderAddress();
-  const assetHolder = new Contract(
-    assetHolderAddress,
-    assetHolderInterface,
-    await provider.getSigner()
-  );
+  const assetHolder = new Contract(assetHolderAddress, assetHolderInterface, signer);
 
   assetHolder.functions.transferAll(channelId, allocation);
 }

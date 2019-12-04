@@ -1,12 +1,9 @@
+import {JsonRpcProvider} from 'ethers/providers';
+
 const privateKeyWithEth = '0xf2f48ee19680706196e2e339e5da3491186e0c4c5030670656b0e0164837257d';
 
 export function getGanacheProvider() {
-  // We should fix these requires
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const ethers = require('ethers');
-  return new ethers.providers.JsonRpcProvider(
-    `http://${process.env.GANACHE_HOST}:${process.env.GANACHE_PORT}`
-  );
+  return new JsonRpcProvider(`http://${process.env.GANACHE_HOST}:${process.env.GANACHE_PORT}`);
 }
 
 export function getPrivateKeyWithEth() {
