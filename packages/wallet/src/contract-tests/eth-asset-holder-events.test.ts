@@ -53,7 +53,8 @@ describe("ETHAssetHolder listener", () => {
 
     await sagaTester.waitFor("WALLET.ASSET_HOLDER.DEPOSITED");
 
-    const action: DepositedEvent = sagaTester.getLatestCalledAction();
+    const action = sagaTester.getLatestCalledAction() as DepositedEvent;
+
     expect(action.assetHolderAddress).toEqual(getETHAssetHolderAddress());
     expect(action.destination).toEqual(channelId);
     expect(action.amountDeposited).toEqual(depositAmount);
