@@ -1,9 +1,9 @@
 import {spawn} from 'child_process';
 import {ethers} from 'ethers';
 import {JsonRpcProvider} from 'ethers/providers';
-import log from 'loglevel';
+import * as log from 'loglevel';
 import {waitUntilFree, waitUntilUsed} from 'tcp-port-used';
-import kill from 'tree-kill';
+import kill = require('tree-kill'); // This library uses `export =` syntax
 import {EtherlimeGanacheDeployer} from 'etherlime-lib';
 import {ETHERLIME_ACCOUNTS} from '../constants';
 import {Account, DeployedArtifacts, Deployment} from '../types';
@@ -29,19 +29,18 @@ export class GanacheServer {
 
     const oneMillion = ethers.utils.parseEther('1000000');
 
-    const concat = (a, b) => a.concat(b);
     const opts = [
       [`--networkId ${this.chainId}`, `--port ${this.port}`],
       accounts.map(a => `--account ${a.privateKey},${a.amount || oneMillion}`),
       [`--gasLimit ${gasLimit}`, `--gasPrice ${gasPrice}`]
     ]
-      .reduce(concat)
+      .reduce((a, b) => a.concat(b))
       .join(' ');
 
     const cmd = `ganache-cli ${opts}`;
 
     this.server = spawn('npx', ['-c', cmd], {stdio: 'pipe'});
-    this.server.stderr.on('data', data => {
+    this.server.stderr.on('data', (data: unknown) => {
       log.error(`Server threw error ${data}`);
       throw new Error('Ganache server failed to start');
     });

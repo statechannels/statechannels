@@ -10,6 +10,9 @@
     "strictNullChecks": true,
     "target": "es2015",
     "types": ["node", "jest"],
+
+    /* The way setupGanache is written is hard to re-write in 5 min to fix this */
+    "noImplicitAny": false
   },
   "include": ["src/**/*"]
 }

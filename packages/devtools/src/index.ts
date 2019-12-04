@@ -1,5 +1,4 @@
 export {expectRevert} from './utils/expect-revert';
-export {DURATION, increaseTime} from './utils/increase-time';
 export {
   getGanacheProvider,
   getNetworkId,

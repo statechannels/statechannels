@@ -1,13 +1,13 @@
-import path from 'path';
-import fs from 'fs';
+import * as fs from 'fs';
+import * as path from 'path';
 import chalk from 'chalk';
 // import {ETHERLIME_ACCOUNTS} from '../constants';
 import {JsonRpcProvider} from 'ethers/providers';
-import {Account} from '../types';
 import {ETHERLIME_ACCOUNTS} from '../constants';
-import {GanacheServer} from './server';
-import {GanacheNCacheDeployer} from './deployer-with-cache';
+import {Account} from '../types';
 import {GanacheDeployer} from './deployer';
+import {GanacheNCacheDeployer} from './deployer-with-cache';
+import {GanacheServer} from './server';
 
 export const ganacheIsRunning = async (port: number): Promise<boolean> => {
   const provider = new JsonRpcProvider(`http://localhost:${port}`);
@@ -50,7 +50,7 @@ export const setupGanache = async (): Promise<SharedReturnType | IndividualRetur
 
   let server;
   let deployer;
-  let type;
+  let type: 'shared' | 'individual';
   if (deploymentsFile && foundShared) {
     say(`Found shared ganache instance running on http://localhost:${sharedPort}.`);
     const deploymentsPath = path.join(process.cwd(), deploymentsFile);
