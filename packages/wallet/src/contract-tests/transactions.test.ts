@@ -43,8 +43,6 @@ describe("transactions", () => {
     const processId = "processId";
     const queuedTransaction = {transactionRequest: transactionToSend, processId};
 
-    // TODO: Currently we're actually attempting to send the transactions
-    // but we could probably do that in nitro-protocol package instead
     const transactionResult = await signer.sendTransaction(queuedTransaction.transactionRequest);
     const confirmedTransaction = await transactionResult.wait();
     // TODO: Redux saga test plan is complaining about the typing on transactionSender
