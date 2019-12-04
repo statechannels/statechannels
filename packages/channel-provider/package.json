@@ -14,7 +14,7 @@
     "prepare": "yarn build",
     "test": "jest --watch",
     "test:coverage": "jest --coverage",
-    "test:ci": "CI=true jest",
+    "test:ci": "CI=true jest --runInBand --ci --all --detectOpenHandles",
     "precommit": "lint-staged --quiet",
     "lint:check": "npx eslint \"*/**/*.ts\" --cache",
     "lint:write": "npx eslint \"*/**/*.ts\" --fix"
