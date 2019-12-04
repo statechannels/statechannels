@@ -34,7 +34,7 @@ describe("Funding", () => {
 
     await loadWallet(walletA, createMessageHandler(walletMessages, "A"));
     await loadWallet(walletB, createMessageHandler(walletMessages, "B"));
-    // Automatically deliver messageQueued message to opponent's wallet
+    //  Automatically deliver messageQueued message to opponent's wallet
     walletMessages.on(MessageType.PlayerAMessage, async message => {
       await pushMessage(walletB, (message as any).params);
     });
