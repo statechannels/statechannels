@@ -51,4 +51,4 @@ junit.xml
 **/.outputParameter
 
 
-.ganache-deployments
+ganache-deployments.json
