@@ -1,8 +1,9 @@
 import {displaySender} from "../display-sender";
 import * as matchers from "redux-saga-test-plan/matchers";
 import {expectSaga} from "redux-saga-test-plan";
-describe("message listener", () => {
-  it("creates a notification for displaying the wallet", async () => {
+
+describe("display sender", () => {
+  it("sends a notification for displaying the wallet", async () => {
     const {effects} = await expectSaga(displaySender, "Show")
       .provide([[matchers.call.fn(window.parent.postMessage), 0]])
       .run();
@@ -19,7 +20,7 @@ describe("message listener", () => {
     });
   });
 
-  it("creates a notification for hiding the wallet", async () => {
+  it("sends a notification for hiding the wallet", async () => {
     const {effects} = await expectSaga(displaySender, "Hide")
       .provide([[matchers.call.fn(window.parent.postMessage), 0]])
       .run();
