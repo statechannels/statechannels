@@ -83,7 +83,7 @@ function* createResponseMessage(action: OutgoingApiAction) {
         )
       );
     case "WALLET.API_NOT_IMPLEMENTED":
-      console.error(`No API method implemented for ${action.apiMethod}`);
+      console.warn(`No API method implemented for ${action.apiMethod}`);
       return undefined;
       break;
     default:
