@@ -30,6 +30,24 @@
       "allOf": [
         {
           "if": {
+            "properties": {
+              "method": {
+                "const": "UIUpdate"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "params": {
+                "showWallet": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
             "properties": {"method": {"const": "MessageQueued"}}
           },
           "then": {
