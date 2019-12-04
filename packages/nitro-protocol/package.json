@@ -98,6 +98,6 @@
     "write-json-file": "4.2.0"
   },
   "lint-staged": {
-    "{src,test}/**/*.tsx?": "eslint"
+    "{src,test}/**/*.{ts,tsx}": "eslint"
   }
 }

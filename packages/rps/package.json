@@ -34,7 +34,7 @@
     "precommit": "lint-staged --quiet"
   },
   "lint-staged": {
-    "{src,tests}/**/*.tsx?": "yarn lint:check"
+    "{src,tests}/**/*.{ts,tsx}": "yarn lint:check"
   },
   "dependencies": {
     "@babel/core": "^7.6.2",

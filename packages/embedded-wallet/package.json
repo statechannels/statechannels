@@ -33,7 +33,7 @@
     }
   },
   "lint-staged": {
-    "src/**/*.tsx?": "eslint"
+    "src/**/*.{ts,tsx}": "eslint"
   },
   "browserslist": {
     "production": [

@@ -103,7 +103,7 @@
     "lint:write": "tslint -c tslint.json -p . --fix"
   },
   "lint-staged": {
-    "src/**/*.tsx?": "yarn lint:check"
+    "src/**/*.ts*": "yarn lint:check"
   },
   "browserslist": [
     ">0.2%",

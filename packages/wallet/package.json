@@ -14,8 +14,8 @@
     "build:typescript": "npx tsc -b",
     "build:webpack": "CI=false node scripts/build.js",
     "build": "run-s build:typescript build:webpack",
-    "lint:check": "yarn tslint -c tslint.json -p .",
-    "lint:write": "yarn tslint -c tslint.json -p . --fix ",
+    "lint:check": "tslint -c tslint.json -p .",
+    "lint:write": "tslint -c tslint.json -p . --fix ",
     "patch-package": "cd ../.. && yarn patch-package",
     "postinstall": "rm -f node_modules/web3/index.d.ts",
     "prepare": "yarn patch-package && yarn build:typescript",
@@ -210,6 +210,6 @@
     "yargs": "14.0.0"
   },
   "lint-staged": {
-    "{src,test}/**/*.tsx?": "yarn lint:check"
+    "{src,test}/**/*.{ts,tsx}": "yarn lint:check"
   }
 }
