@@ -97,7 +97,7 @@
     "build:ci": "react-scripts build",
     "eject": "react-scripts eject",
     "test": "TRACKER_URL=http://localhost:4242/announce react-scripts test",
-    "test:ci": "CI=true yarn test --runInBand --detectOpenHandles --ci --all",
+    "test:ci": "CI=true yarn test --runInBand --detectOpenHandles --ci --all --forceExit",
     "test:coverage": "yarn test --coverage",
     "lint:check": "tslint -c tslint.json -p .",
     "lint:write": "tslint -c tslint.json -p . --fix"
