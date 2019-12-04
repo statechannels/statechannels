@@ -13,6 +13,7 @@
     "@types/node": "^12.12.7",
     "fs": "^0.0.1-security",
     "i": "^0.3.6",
+    "madge": "^3.6.0",
     "npm": "^6.13.1",
     "prettier": "1.18.2",
     "serialize-javascript": "^2.1.0",
