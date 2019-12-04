@@ -45,8 +45,8 @@ describe("transactions", () => {
 
     const transactionResult = await signer.sendTransaction(queuedTransaction.transactionRequest);
     const confirmedTransaction = await transactionResult.wait();
-    // TODO: Redux saga test plan is complaining about the typing on transactionSender
-    testSaga(transactionSender as any, queuedTransaction)
+
+    testSaga(transactionSender, queuedTransaction)
       .next()
       .call(getProvider)
       .next(provider)
