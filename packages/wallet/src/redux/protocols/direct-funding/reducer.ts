@@ -186,7 +186,8 @@ const notSafeToDepositReducer: DFReducer = (
         action.destination === state.channelId &&
         bigNumberify(action.destinationHoldings).gte(state.safeToDepositLevel)
       ) {
-        const existingChannelFunding = "0x0"; // FIXME: The wallet has no way of determining funding levels atm
+        // FIXME: The wallet has no way of determining funding levels atm
+        const existingChannelFunding = action.destinationHoldings.toHexString();
         const depositTransaction = createETHDepositTransaction(
           state.channelId,
           state.requiredDeposit,

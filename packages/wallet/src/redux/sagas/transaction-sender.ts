@@ -16,6 +16,7 @@ export function* transactionSender(transaction: QueuedTransaction) {
       transaction.transactionRequest
     );
   } catch (error) {
+    console.error(error);
     yield put(actions.transactionSubmissionFailed({processId, error}));
     return;
   }
