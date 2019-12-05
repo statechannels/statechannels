@@ -1,5 +1,6 @@
 import {setupGanache} from '@statechannels/devtools';
 import {deploy} from '../deployment/deploy';
+import '../config/env'; // Note: importing this module has the side effect of modifying env vars
 import {startServer} from './hub/server';
 
 async function setupGanacheAndContracts() {
