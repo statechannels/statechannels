@@ -1,7 +1,7 @@
 import {put, call} from "redux-saga/effects";
-import {displayMessageSent} from "../actions";
+import {displayMessageSent} from "../../actions";
 import jrs from "jsonrpc-lite";
-import {validateNotification} from "../../json-rpc-validation/validator";
+import {validateNotification} from "../../../json-rpc-validation/validator";
 
 export function* displaySender(displayMessage: "Show" | "Hide") {
   const showWallet = displayMessage === "Show";

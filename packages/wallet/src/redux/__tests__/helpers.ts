@@ -7,8 +7,8 @@ import {ProtocolLocator, RelayableAction} from "../../communication";
 import _ from "lodash";
 import {State, SignedState, getChannelId} from "@statechannels/nitro-protocol";
 import {Signature} from "ethers/utils";
-import {OutgoingApiAction} from "../actions";
 import {Wallet, utils} from "ethers";
+import {OutgoingApiAction} from "../sagas/messaging/outgoing-api-actions";
 
 type SideEffectState =
   | StateWithSideEffects<any>

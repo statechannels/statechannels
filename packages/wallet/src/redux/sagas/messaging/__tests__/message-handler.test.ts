@@ -1,19 +1,19 @@
 import {convertAddressToBytes32} from "@statechannels/nitro-protocol";
 import {messageHandler} from "../message-handler";
-import * as walletStates from "../../state";
-import {addressResponse} from "../../actions";
+import * as walletStates from "../../../state";
+import {addressResponse} from "../outgoing-api-actions";
 import {expectSaga} from "redux-saga-test-plan";
 import {Wallet} from "ethers";
 import {messageSender} from "../message-sender";
 import * as matchers from "redux-saga-test-plan/matchers";
-import {getAddress} from "../../selectors";
-import {asAddress, bsAddress, appState, asPrivateKey} from "../../__tests__/state-helpers";
-import {getProvider} from "../../../utils/contract-utils";
-import {setChannel} from "../../../../src/redux/channel-store";
-import {channelFromStates} from "../../channel-store/channel-state/__tests__";
-import * as stateHelpers from "../../__tests__/state-helpers";
+import {getAddress} from "../../../selectors";
+import {asAddress, bsAddress, appState, asPrivateKey} from "../../../__tests__/state-helpers";
+import {getProvider} from "../../../../utils/contract-utils";
+import {setChannel} from "../../../channel-store";
+import {channelFromStates} from "../../../channel-store/channel-state/__tests__";
+import * as stateHelpers from "../../../__tests__/state-helpers";
 import {AddressZero} from "ethers/constants";
-import {strategyApproved} from "../../../communication";
+import {strategyApproved} from "../../../../communication";
 
 describe("message listener", () => {
   const wallet = Wallet.createRandom();

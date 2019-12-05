@@ -7,7 +7,7 @@ import {challengeWatcher} from "./challenge-watcher";
 import {WalletState} from "../state";
 import {getProvider, isDevelopmentNetwork} from "../../utils/contract-utils";
 
-import {displaySender} from "./display-sender";
+import {displaySender} from "./messaging/display-sender";
 import {ganacheMiner} from "./ganache-miner";
 import {WALLET_INITIALIZED} from "../state";
 import {challengeResponseInitiator} from "./challenge-response-initiator";
@@ -15,11 +15,12 @@ import {multipleActionDispatcher} from "./multiple-action-dispatcher";
 
 import {adjudicatorStateUpdater} from "./adjudicator-state-updater";
 import {assetHolderStateUpdater} from "./asset-holder-state-updater";
-import {isLoadAction, OutgoingApiAction} from "../actions";
+import {isLoadAction} from "../actions";
 import {assetHoldersWatcher} from "./asset-holder-watcher";
-import {postMessageListener} from "./post-message-listener";
-import {messageSender} from "./message-sender";
+import {postMessageListener} from "./messaging/post-message-listener";
+import {messageSender} from "./messaging/message-sender";
 import {Web3Provider} from "ethers/providers";
+import {OutgoingApiAction} from "./messaging/outgoing-api-actions";
 
 export function* sagaManager(): IterableIterator<any> {
   let adjudicatorWatcherProcess;

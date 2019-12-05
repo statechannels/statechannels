@@ -39,7 +39,8 @@ import {
   FundingStrategyNegotiationAction
 } from "../funding-strategy-negotiation/actions";
 import * as fundingStrategyNegotiationStates from "../funding-strategy-negotiation/states";
-import {ProtocolAction, apiNotImplemented} from "../../actions";
+import {ProtocolAction} from "../../actions";
+import {apiNotImplemented} from "../../sagas/messaging/outgoing-api-actions";
 
 export function initialize(
   sharedData: SharedData,
