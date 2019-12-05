@@ -17,8 +17,9 @@ import * as matchers from "redux-saga-test-plan/matchers";
 import {messageSender} from "../message-sender";
 import {channelFromStates} from "../../channel-store/channel-state/__tests__";
 import * as stateHelpers from "../../__tests__/state-helpers";
-import {setChannel, EMPTY_SHARED_DATA} from "../../state";
+import {setChannel, EMPTY_SHARED_DATA, SharedData} from "../../state";
 import {strategyApproved} from "../../../communication";
+import {ETH_ASSET_HOLDER_ADDRESS} from "../../../constants";
 
 describe("message sender", () => {
   it("creates a notification for WALLET.SEND_CHANNEL_PROPOSED_MESSAGE", async () => {
@@ -200,12 +201,16 @@ describe("message sender", () => {
 
   it("creates a correct response message for WALLET.UPDATE_CHANNEL_RESPONSE", async () => {
     const {state, signature} = stateHelpers.appState({turnNum: 1});
-
+    const channelId = stateHelpers.channelId;
+    const testSharedData: SharedData = {
+      ...EMPTY_SHARED_DATA,
+      assetHoldersState: {[ETH_ASSET_HOLDER_ADDRESS]: {[channelId]: {holdings: "0x5", channelId}}}
+    };
     const initialState = setChannel(
-      EMPTY_SHARED_DATA,
+      testSharedData,
       channelFromStates([{state, signature}], stateHelpers.asAddress, stateHelpers.asPrivateKey)
     );
-    const channelId = stateHelpers.channelId;
+
     const message = updateChannelResponse({
       id: 1,
       channelId
@@ -220,7 +225,7 @@ describe("message sender", () => {
       jsonrpc: "2.0",
       id: 1,
       result: {
-        funding: [],
+        funding: [{token: "0x0", amount: "0x5"}],
         turnNum: 1,
         status: "Running",
         channelId
