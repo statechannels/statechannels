@@ -9,13 +9,6 @@ async function setupGanacheAndContracts() {
   process.env = {...process.env, ...deployedArtifacts};
 }
 
-process.on('SIGINT', () => {
-  console.log('SIGINT');
-});
-process.on('SIGTERM', () => {
-  console.log('SIGTERM');
-});
-
 setupGanacheAndContracts()
   .then(startServer)
   .then(removeListeners => {
