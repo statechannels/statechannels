@@ -32,6 +32,7 @@ import {
   Allocation,
   isAllocationOutcome,
   isGuaranteeOutcome,
+  GuaranteeAssetOutcome,
 } from './contract/outcome';
 
 import {State, VariablePart, getVariablePart} from './contract/state';
@@ -81,6 +82,7 @@ export {
   getChallengeRegisteredEvent,
   getDepositedEvent,
   getVariablePart,
+  GuaranteeAssetOutcome,
   isAllocationOutcome,
   isGuaranteeOutcome,
   validTransition,
