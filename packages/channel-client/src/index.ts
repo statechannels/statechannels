@@ -1,6 +1,14 @@
-import {BigNumberish} from 'ethers/utils';
+import { IChannelProvider } from '@statechannels/channel-provider';
 
-export type ChannelStatus = 'proposed' | 'opening' | 'funding' | 'running' | 'closing' | 'closed';
+import {
+  ChannelClientInterface,
+  ChannelResult,
+  UnsubscribeFunction,
+  Message,
+  Participant,
+  Allocation,
+  PushMessageResult
+} from './types';
 
 export enum ErrorCodes {
   SIGNING_ADDRESS_NOT_FOUND = 1000,
@@ -10,74 +18,86 @@ export enum ErrorCodes {
   CHANNEL_NOT_FOUND = 1004
 }
 
-export interface Participant {
-  participantId: string; // App allocated id, used for relaying messages to the participant
-  signingAddress: string; // Address used to sign channel updates
-  destination: string; // Address of EOA to receive channel proceeds (the account that'll get the funds).
-}
+export default class ChannelClient implements ChannelClientInterface<ChannelResult> {
+  constructor(private readonly provider: IChannelProvider) {}
 
-export interface AllocationItem {
-  destination: string; // Address of EOA to receive channel proceeds.
-  amount: BigNumberish; // How much funds will be transferred to the destination address.
-}
+  // TODO: Ask Tom if this needs to be a syncronous function
+  onMessageQueued(callback: (message: Message<ChannelResult>) => void): UnsubscribeFunction {
+    let unsubscribe = (): void => {
+      throw new Error('Subscription has not been confirmed yet!');
+    };
 
-export interface Allocation {
-  token: string; // The token's contract address.
-  allocationItems: AllocationItem[]; // A list of allocations (how much funds will each destination address get).
-}
+    this.provider.subscribe('not sure what goes here 1').then(subscriptionId => {
+      this.provider.on('MessageQueued', callback);
+      unsubscribe = (): void => {
+        this.provider.unsubscribe(subscriptionId);
+      };
+    });
 
-export interface Message<T = object> {
-  recipient: string; // Identifier of user that the message should be relayed to
-  sender: string; // Identifier of user that the message is from
-  data: T; // Message payload. Format defined by wallet and opaque to app.
-  // But useful to be able to specify, for the purposes of the fake-client
-}
+    return (): void => {
+      unsubscribe();
+    };
+  }
 
-export interface Funds {
-  token: string;
-  amount: string;
-}
+  // TODO: Ask Tom if this needs to be a syncronous function
+  onChannelUpdated(callback: (result: ChannelResult) => void): UnsubscribeFunction {
+    let unsubscribe = (): void => {
+      throw new Error('Subscription has not been confirmed yet!');
+    };
 
-export interface ChannelResult {
-  participants: Participant[];
-  allocations: Allocation[];
-  appData: string;
-  appDefinition: string;
-  channelId: string;
-  status: ChannelStatus;
-  // funding: Funds[]; // do we even need this?
-  turnNum: string;
-}
+    this.provider.subscribe('not sure what goes here 2').then(subscriptionId => {
+      this.provider.on('ChannelUpdated', callback);
+      unsubscribe = (): void => {
+        this.provider.unsubscribe(subscriptionId);
+      };
+    });
 
-type UnsubscribeFunction = () => void;
+    return (): void => {
+      unsubscribe();
+    };
+  }
 
-export interface PushMessageResult {
-  success: boolean;
-}
-
-// The message Payload is designed to be opaque to the app. However, it's useful
-// to be able to specify the Payload type for the FakeChannelClient, as we'll be
-// manipulating it within the client.
-export interface ChannelClientInterface<Payload = object> {
-  onMessageQueued: (callback: (message: Message<Payload>) => void) => UnsubscribeFunction;
-  onChannelUpdated: (callback: (result: ChannelResult) => void) => UnsubscribeFunction;
-  createChannel: (
+  async createChannel(
     participants: Participant[],
     allocations: Allocation[],
     appDefinition: string,
     appData: string
-  ) => Promise<ChannelResult>;
-  joinChannel: (channelId: string) => Promise<ChannelResult>;
-  updateChannel: (
+  ): Promise<ChannelResult> {
+    return this.provider.send('CreateChannel', {
+      participants,
+      allocations,
+      appDefinition,
+      appData
+    });
+  }
+
+  async joinChannel(channelId: string): Promise<ChannelResult> {
+    return this.provider.send('JoinChannel', { channelId });
+  }
+
+  async updateChannel(
     channelId: string,
     participants: Participant[],
     allocations: Allocation[],
     appData: string
-  ) => Promise<ChannelResult>;
-  closeChannel: (channelId: string) => Promise<ChannelResult>;
-  pushMessage: (message: Message<Payload>) => Promise<PushMessageResult>;
-  getAddress: () => Promise<string>;
-}
+  ): Promise<ChannelResult> {
+    return this.provider.send('UpdateChannel', {
+      channelId,
+      participants,
+      allocations,
+      appData
+    });
+  }
 
-// TODO: Implement this
-// export default class ChannelClient implements ChannelClientInterface<ChannelResult> {}
+  async closeChannel(channelId: string): Promise<ChannelResult> {
+    return this.provider.send('CloseChannel', { channelId });
+  }
+
+  async pushMessage(message: Message<ChannelResult>): Promise<PushMessageResult> {
+    return this.provider.send('PushMessage', message);
+  }
+
+  async getAddress(): Promise<string> {
+    return this.provider.send('GetAddress', {});
+  }
+}

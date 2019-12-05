@@ -2,19 +2,19 @@ module.exports = {
   env: {
     browser: true
   },
-  parser: "@typescript-eslint/parser",
-  plugins: ["@typescript-eslint", "prettier", "jest", "import"],
+  parser: '@typescript-eslint/parser',
+  plugins: ['@typescript-eslint', 'prettier', 'jest', 'import'],
   extends: [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:jest/recommended",
-    "plugin:jest/style",
-    "plugin:import/errors",
-    "plugin:import/warnings",
-    "plugin:import/typescript",
-    "plugin:prettier/recommended"
+    'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:jest/recommended',
+    'plugin:jest/style',
+    'plugin:import/errors',
+    'plugin:import/warnings',
+    'plugin:import/typescript',
+    'plugin:prettier/recommended'
   ],
   rules: {
-    "prettier/prettier": ["warn", require("../../.prettierrc.js")],
+    'prettier/prettier': ['warn', require('./.prettierrc.js')]
   }
 };
