@@ -1,5 +1,6 @@
 import {CompiledContract, EtherlimeGanacheDeployer} from 'etherlime-lib';
-import log from 'loglevel';
+import * as log from 'loglevel';
+// @ts-ignore etherlime-utils does not export any types
 import {colors} from 'etherlime-utils';
 
 export class GanacheDeployer {
@@ -12,7 +13,7 @@ export class GanacheDeployer {
   public async deploy(
     contract: CompiledContract,
     libraries: Record<string, string> = {},
-    ...args
+    ...args: any[]
   ): Promise<string> {
     const deployedContract = await this.etherlimeDeployer.deploy(contract, libraries, ...args);
     log.info(

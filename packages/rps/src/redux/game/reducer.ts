@@ -22,9 +22,9 @@ import { ChannelState } from '../../core';
 
 const emptyLocalState: LocalState = { type: 'Empty' };
 
-const channelReducer: Reducer<ChannelState | null> = (
+const channelReducer: Reducer<ChannelState | null, UpdateChannelState> = (
   state: ChannelState | null = null,
-  action: UpdateChannelState
+  action
 ) => {
   if (action.type === 'UpdateChannelState') {
     return action.channelState;

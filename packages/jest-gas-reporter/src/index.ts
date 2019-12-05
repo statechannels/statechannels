@@ -33,8 +33,7 @@ export class GasReporter implements jest.Reporter {
   options: any;
   provider: JsonRpcProvider;
   globalConfig: any;
-  startBlockNum: number;
-  contractArtifactDirectory: string;
+  startBlockNum = 0;
 
   constructor(globalConfig: any, options: any) {
     this.globalConfig = globalConfig;

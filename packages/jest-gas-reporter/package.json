@@ -11,6 +11,7 @@
     "precommit": "lint-staged --quiet",
     "prepare": "yarn build",
     "build": "yarn lint:check && tsc -b",
+    "build:typescript": "tsc -b",
     "lint:check": "eslint \"*/**/*.ts\" --cache",
     "lint:write": "eslint \"*/**/*.ts\" --fix"
   },

@@ -1,5 +1,5 @@
 import debug from 'debug';
-import EventEmitter from 'eventemitter3';
+import * as EventEmitter from 'eventemitter3';
 import {MessagingService} from './messaging-service';
 import {
   ChannelProviderUIMessage,

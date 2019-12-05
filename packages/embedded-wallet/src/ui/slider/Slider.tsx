@@ -79,7 +79,7 @@ const calculateOffsetX = (
   dialogContext: DialogContextProps
 ) => {
   if (dialogContext && dialogContext.ready === false) {
-    return;
+    return 0;
   }
 
   const container = containerRef.current as HTMLDivElement;
