@@ -11,6 +11,7 @@ import {
   createGame,
   gameJoined,
   gameOver,
+  newOpenGame,
 } from '../actions';
 import { ChannelState } from '../../../core';
 import { RPSChannelClient } from '../../../utils/rps-channel-client';
@@ -31,9 +32,23 @@ const gameState = (localState, channelState?: ChannelState) => ({
   },
 });
 
-describe('when creating a game', () => {
-  it('moves to the WaitingRoom', async () => {
+describe('when in Lobby and clicking "create a game"', () => {
+  it('moves to CreateOpenGame', async () => {
     const initialState = gameState(localStatesB.lobby);
+    const action = newOpenGame();
+
+    const { storeState } = await expectSaga(gameSaga as any, client)
+      .withReducer(reducer, initialState)
+      .dispatch(action)
+      .run({ silenceTimeout: true });
+
+    expect(storeState).toEqual(gameState(localStatesB.createOpenGame));
+  });
+});
+
+describe('when in CreateOpenGame and creating a game', () => {
+  it('moves to the WaitingRoom', async () => {
+    const initialState = gameState(localStatesB.createOpenGame);
     const action = createGame(stake);
 
     const { storeState } = await expectSaga(gameSaga as any, client)
