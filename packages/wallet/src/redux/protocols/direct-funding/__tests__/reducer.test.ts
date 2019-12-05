@@ -53,25 +53,19 @@ describe("Player B Happy path", () => {
     const updatedState = directFundingStateReducer(state, sharedData, action);
     itTransitionsTo(updatedState, "DirectFunding.WaitForDepositTransaction");
 
-    const {
-      assetHolderAddress,
-      amountDeposited,
-      destination,
-      destinationHoldings,
-      processId
-    } = action;
+    const {assetHolderAddress, destination, destinationHoldings, processId} = action;
     itSendsThisTransaction(updatedState, {
       processId,
       transactionRequest: {
         to: assetHolderAddress,
-        value: amountDeposited.toHexString(),
+        value: updatedState.protocolState.requiredDeposit,
         data: new Interface([
           // NOTE: Copied from ETHAssetHolder.sol
           "deposit(bytes32 destination, uint256 expectedHeld, uint256 amount)"
         ]).functions.deposit.encode([
           destination,
-          destinationHoldings.add(amountDeposited),
-          amountDeposited
+          destinationHoldings,
+          updatedState.protocolState.requiredDeposit
         ])
       }
     });
