@@ -7,7 +7,7 @@
     "generateConfig": "npx ts-node src/protocols/index.ts && npx prettier --write src/protocols/*/protocol.config.js"
   },
   "dependencies": {
-    "xstate": "^4.6"
+    "xstate": "^4.7"
   },
   "devDependencies": {
     "@types/node": "^12.12.7",
