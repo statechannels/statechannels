@@ -2,15 +2,15 @@ import {
   OpenChannelState,
   ChannelState,
   isFullyOpen,
-  getLastState,
-  ChannelParticipant
+  ChannelParticipant,
+  getLastSignedState
 } from "./channel-store";
 import * as walletStates from "./state";
 import {SharedData, FundingState} from "./state";
 import {ProcessProtocol} from "../communication";
 import {CONSENSUS_LIBRARY_ADDRESS, ETH_ASSET_HOLDER_ADDRESS} from "../constants";
 import {bigNumberify} from "ethers/utils";
-import {State} from "@statechannels/nitro-protocol";
+import {State, SignedState} from "@statechannels/nitro-protocol";
 import {AddressZero} from "ethers/constants";
 
 export const getOpenedChannelState = (state: SharedData, channelId: string): OpenChannelState => {
@@ -40,9 +40,13 @@ export const getChannelState = (state: SharedData, channelId: string): ChannelSt
   return channelStatus;
 };
 
-export const getLastStateForChannel = (state: SharedData, channelId: string): State => {
+export const getLastSignedStateForChannel = (state: SharedData, channelId: string): SignedState => {
   const channelState = getChannelState(state, channelId);
-  return getLastState(channelState);
+  return getLastSignedState(channelState);
+};
+
+export const getLastStateForChannel = (state: SharedData, channelId: string): State => {
+  return getLastSignedStateForChannel(state, channelId).state;
 };
 
 export const getFundedLedgerChannelForParticipants = (

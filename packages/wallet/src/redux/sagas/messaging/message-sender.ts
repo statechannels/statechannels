@@ -7,7 +7,7 @@ import {createJsonRpcAllocationsFromOutcome} from "../../../utils/json-rpc-utils
 import jrs from "jsonrpc-lite";
 import {unreachable} from "../../../utils/reducer-utils";
 import {validateResponse, validateNotification} from "../../../json-rpc-validation/validator";
-import {getChannelHoldings} from "../../selectors";
+import {getChannelHoldings, getLastSignedStateForChannel} from "../../selectors";
 import {bigNumberify} from "ethers/utils";
 
 export function* messageSender(action: OutgoingApiAction) {
@@ -70,6 +70,18 @@ function* createResponseMessage(action: OutgoingApiAction) {
         sender: action.toParticipantId,
         data: joinedMessage
       });
+    case "WALLET.SEND_CHANNEL_UPDATED_MESSAGE":
+      const channelUpdated = {
+        type: "Channel.Updated",
+        signedState: yield select(getLastSignedStateForChannel, action.channelId)
+      };
+      return jrs.notification("MessageQueued", {
+        recipient: action.fromParticipantId,
+        sender: action.toParticipantId,
+        data: channelUpdated
+      });
+    case "WALLET.CHANNEL_UPDATED_EVENT":
+      return jrs.notification("ChannelUpdated", yield getChannelInfo(action.channelId));
     case "WALLET.CHANNEL_PROPOSED_EVENT":
       return jrs.notification("ChannelProposed", yield getChannelInfo(action.channelId));
     case "WALLET.POST_MESSAGE_RESPONSE":
