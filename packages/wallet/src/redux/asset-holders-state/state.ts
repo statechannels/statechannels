@@ -87,8 +87,6 @@ export function recordAssetTransfer(
   assetHoldersState: AssetHoldersState,
   assetHolderAddress: string,
   channelId: string,
-  // @ts-ignore
-  destination: string, // TODO: Should we take this into account?
   amount: BigNumber
 ): AssetHoldersState {
   const assetHolderChannelState = getOrCreateAssetHolderChannelState(

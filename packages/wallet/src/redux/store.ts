@@ -52,5 +52,3 @@ sagaMiddleware.run(webAssemblyModuleLoaderSaga);
 sagaMiddleware.run(rootSaga);
 
 export default store;
-export const getWalletState = (storeObj: any) => storeObj.getState();
-export const getFundingState = (storeObj: any) => storeObj.getState().fundingState;
