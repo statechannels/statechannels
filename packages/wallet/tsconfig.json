@@ -1,32 +1,32 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
-    "composite": true,
-    "outDir": "lib",
-  
+    "esModuleInterop": true,
+    "jsx": "react",
+    "lib": ["es6", "dom"],
+
     // esnext is required for TypeScript to recognize dynamic imports (which pure-evm must be)
     // https://github.com/Microsoft/TypeScript/issues/16820
+    // This is in the default tsconfig.json, but putting it here so we remember this ^^^
     "module": "esnext",
-  
-    "target": "es2015",
-    "lib": ["es6", "dom"],
-    "sourceMap": true,
-    "jsx": "react",
-    "moduleResolution": "node",
-    "declaration": true,
-    "declarationMap": true,
-    "forceConsistentCasingInFileNames": true,
+
+    "noImplicitAny": false,
     "noImplicitReturns": true,
     "noImplicitThis": true,
-    "strictNullChecks": true,
-    "suppressImplicitAnyIndexErrors": true,
     "noUnusedLocals": true,
-    "allowSyntheticDefaultImports": true,
-    "resolveJsonModule": true,
-    "esModuleInterop": true
-  },
+    "outDir": "lib",
+    "strict": false,
+    "suppressImplicitAnyIndexErrors": true,
 
+    // Turning this off throws this error for an unknown reason:
+    // https://github.com/Microsoft/TypeScript/issues/26627
+    "strictNullChecks": true,
+
+    "target": "es2015",
+  },
   "include": ["src/**/*", "src/**/*.json", "types/globals.d.ts", "contracts/**/*.json"],
-  "references": [{"path": "../nitro-protocol"}],
+  "references": [{"path": "../nitro-protocol"}, {"path": "../devtools"}],
   "exclude": ["src/setupTests.ts"]
 }

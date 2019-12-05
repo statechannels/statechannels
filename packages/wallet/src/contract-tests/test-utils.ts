@@ -1,4 +1,4 @@
-import {ethers} from "ethers";
+import {Wallet, Signer} from "ethers";
 import {
   createETHDepositTransaction,
   createForceMoveTransaction,
@@ -14,7 +14,7 @@ import {
   NETWORK_ID,
   CHALLENGE_DURATION
 } from "../constants";
-import {JsonRpcProvider, TransactionRequest, TransactionResponse} from "ethers/providers";
+import {TransactionRequest, TransactionResponse} from "ethers/providers";
 import {getTrivialAppAddress} from "../utils/contract-utils";
 import {State, getChannelId as getNitroChannelId, Channel} from "@statechannels/nitro-protocol";
 import {Signatures} from "@statechannels/nitro-protocol";
@@ -56,12 +56,12 @@ export async function getChannelId(channelNonce, participantA, participantB) {
 }
 
 export async function depositIntoETHAssetHolder(
-  provider: ethers.providers.JsonRpcProvider,
+  signer: Signer,
   participant: string,
   amount = defaultDepositAmount
 ) {
   const depositTransactionData = createETHDepositTransaction(participant, amount, "0x0");
-  const transactionReceipt = await sendTransaction(provider, {
+  const transactionReceipt = await sendTransaction(signer, {
     ...depositTransactionData,
     to: ETH_ASSET_HOLDER_ADDRESS,
     value: amount
@@ -70,7 +70,7 @@ export async function depositIntoETHAssetHolder(
 }
 
 export async function createChallenge(
-  provider: ethers.providers.JsonRpcProvider,
+  signer: Signer,
   channelNonce: BigNumberish,
   participantA,
   participantB
@@ -109,20 +109,20 @@ export async function createChallenge(
     participantB.privateKey
   );
 
-  const transactionReceipt = await sendTransaction(provider, challengeTransaction);
+  const transactionReceipt = await sendTransaction(signer, challengeTransaction);
   await transactionReceipt.wait();
   return toState;
 }
 
 export async function concludeGame(
-  provider: ethers.providers.JsonRpcProvider,
-  channelNonce,
-  participantA,
-  participantB
+  signer: Signer,
+  channelNonce: BigNumberish,
+  participantA: Wallet,
+  participantB: Wallet
 ) {
   const libraryAddress = getTrivialAppAddress();
   const channel: Channel = {
-    channelNonce,
+    channelNonce: bigNumberify(channelNonce).toHexString(),
     chainId: bigNumberify(NETWORK_ID).toHexString(),
     participants: [participantA.address, participantB.address]
   };
@@ -151,12 +151,12 @@ export async function concludeGame(
   const signedToState = Signatures.signState(toState, participantB.privateKey);
 
   const concludeTransaction = createConcludeTransaction(signedFromState, signedToState);
-  const transactionReceipt = await sendTransaction(provider, concludeTransaction);
+  const transactionReceipt = await sendTransaction(signer, concludeTransaction);
   await transactionReceipt.wait();
 }
 
 export async function respond(
-  provider: ethers.providers.JsonRpcProvider,
+  signer: Signer,
   channelNonce,
   participantA,
   participantB,
@@ -183,15 +183,14 @@ export async function respond(
 
   const respondWithMoveTransaction = createRespondTransaction(challenge, toSignedState);
 
-  const transactionReceipt = await sendTransaction(provider, respondWithMoveTransaction);
+  const transactionReceipt = await sendTransaction(signer, respondWithMoveTransaction);
   await transactionReceipt.wait();
   return toSignedState;
 }
 
 async function sendTransaction(
-  provider: JsonRpcProvider,
+  signer: Signer,
   tx: TransactionRequest
 ): Promise<TransactionResponse> {
-  const signer = await provider.getSigner();
   return await signer.sendTransaction({to: ADJUDICATOR_ADDRESS, ...tx});
 }

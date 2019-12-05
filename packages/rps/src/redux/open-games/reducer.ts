@@ -5,9 +5,9 @@ import { OpenGameState } from './state';
 
 const initialState = [];
 
-export const openGamesReducer: Reducer<OpenGameState> = (
+export const openGamesReducer: Reducer<OpenGameState, actions.SyncOpenGames> = (
   state = initialState,
-  action: actions.SyncOpenGames
+  action
 ) => {
   switch (action.type) {
     case actions.SYNC_OPEN_GAMES:

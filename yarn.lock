@@ -4860,14 +4860,6 @@
     "@types/prop-types" "*"
     csstype "^2.2.0"
 
-"@types/react@16.9.3":
-  version "16.9.3"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-16.9.3.tgz#6d13251e441a3e67fb60d719d1fc8785b984a2ec"
-  integrity sha512-Ogb2nSn+2qQv5opoCv7Ls5yFxtyrdUYxp5G+SWTrlGk7dmFKw331GiezCgEZj9U7QeXJi1CDtws9pdXU1zUL4g==
-  dependencies:
-    "@types/prop-types" "*"
-    csstype "^2.2.0"
-
 "@types/reactstrap@^8.0.0":
   version "8.0.4"
   resolved "https://registry.yarnpkg.com/@types/reactstrap/-/reactstrap-8.0.4.tgz#1e45e57eaf9606b18241bc9719b60a5165baf8fa"

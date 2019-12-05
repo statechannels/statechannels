@@ -1,5 +1,4 @@
 import * as path from 'path';
-import '../../config/env';
 import {Config} from 'knex';
 
 let sourceDirectory = 'src';

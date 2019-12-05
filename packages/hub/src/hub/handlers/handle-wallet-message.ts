@@ -11,7 +11,7 @@ import {handleOngoingProcessAction} from './handle-ongoing-process-action';
 
 export async function handleWalletMessage(
   message: RelayableAction
-): Promise<RelayActionWithMessage[]> {
+): Promise<RelayActionWithMessage[] | undefined> {
   if (isNewProcessAction(message) && (await shouldHandleAsNewProcessAction(message))) {
     return handleNewProcessAction(message);
   } else if (isProtocolAction(message)) {
@@ -32,6 +32,7 @@ async function shouldHandleAsNewProcessAction(
   if (action.type === 'WALLET.COMMON.SIGNED_STATES_RECEIVED') {
     return !(await getProcess(action.processId));
   }
+  return false;
 }
 
 function isNewProcessAction(

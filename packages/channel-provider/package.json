@@ -12,6 +12,7 @@
   "scripts": {
     "prepublish": "webpack",
     "build": "webpack",
+    "build:typescript": "tsc -b .",
     "prepare": "yarn build",
     "test": "jest --watch",
     "test:coverage": "jest --coverage",

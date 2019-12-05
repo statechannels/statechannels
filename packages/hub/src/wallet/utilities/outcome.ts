@@ -22,7 +22,7 @@ function assetOutcomeObjectToModel(assetOutcome: AssetOutcome) {
       allocation: guaranteeWithPriorities
     };
   } else {
-    unreachable(assetOutcome);
+    return unreachable(assetOutcome);
   }
 }
 export function outcomeObjectToModel(outcome: Outcome) {

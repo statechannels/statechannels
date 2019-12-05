@@ -14,13 +14,11 @@
     "build:typescript": "npx tsc -b",
     "build:webpack": "CI=false node scripts/build.js",
     "build": "run-s build:typescript build:webpack",
-    "lint:check": "tslint -c tslint.json -p .",
-    "lint:write": "tslint -c tslint.json -p . --fix ",
+    "lint:check": "eslint \"*/**/*.{js,ts,tsx}\" --cache",
+    "lint:write": "eslint \"*/**/*.{js,ts,tsx}\" --fix",
     "patch-package": "cd ../.. && yarn patch-package",
     "postinstall": "rm -f node_modules/web3/index.d.ts",
     "prepare": "yarn patch-package && yarn build:typescript",
-    "prettier:check": "npx prettier --check './**/*.{ts,js,tsx,jsx}'",
-    "prettier:write": "npx prettier --write './**/*.{ts,js,tsx,jsx}'",
     "start": "node scripts/start.js",
     "storybook": "start-storybook -p 9001 -c .storybook",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
@@ -149,6 +147,9 @@
     "@types/webpack-manifest-plugin": "2.1.0",
     "@types/workbox-webpack-plugin": "4.1.0",
     "@types/yargs": "13.0.3",
+    "@typescript-eslint/eslint-plugin": "^2.7.0",
+    "@typescript-eslint/eslint-plugin-tslint": "^2.7.0",
+    "@typescript-eslint/parser": "^2.8.0",
     "awesome-typescript-loader": "5.2.1",
     "babel-jest": "24.9.0",
     "babel-loader": "8.0.6",
@@ -160,6 +161,10 @@
     "dotenv-extended": "2.5.0",
     "enzyme": "3.10.0",
     "enzyme-adapter-react-16": "1.14.0",
+    "eslint": "^6.6.0",
+    "eslint-config-prettier": "^6.0.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-prettier": "^3.1.0",
     "etherlime": "2.2.4",
     "etherlime-lib": "1.1.5",
     "extract-text-webpack-plugin": "4.0.0-beta.0",
@@ -197,9 +202,6 @@
     "ts-loader": "6.1.2",
     "ts-node": "8.4.1",
     "tsconfig-paths-webpack-plugin": "3.2.0",
-    "tslint": "5.20.0",
-    "tslint-config-prettier": "1.18.0",
-    "tslint-react": "4.1.0",
     "typescript": "3.7.2",
     "typescript-eslint-parser": "21.0.2",
     "uglifyjs-webpack-plugin": "2.2.0",
@@ -210,6 +212,6 @@
     "yargs": "14.0.0"
   },
   "lint-staged": {
-    "{src,test}/**/*.{ts,tsx}": "yarn lint:check"
+    "{src,test}/**/*.{ts,tsx}": "eslint"
   }
 }

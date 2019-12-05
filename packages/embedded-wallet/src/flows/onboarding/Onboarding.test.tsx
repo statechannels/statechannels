@@ -87,7 +87,7 @@ describe('Onboarding Flow', () => {
       (path, showsBudgetAllocation, showsNoHub, showsConnectToHub, showsOnboardingFinished) => {
         const {history, flowWrapper} = flow;
 
-        history.push(path as OnboardingFlowPaths);
+        history.push(path as string);
         flow = refreshFlowFrom(flowWrapper);
 
         const {

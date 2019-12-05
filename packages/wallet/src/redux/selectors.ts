@@ -8,7 +8,7 @@ import {
 import * as walletStates from "./state";
 import {SharedData, FundingState} from "./state";
 import {ProcessProtocol} from "../communication";
-import {CONSENSUS_LIBRARY_ADDRESS} from "../constants";
+import {CONSENSUS_LIBRARY_ADDRESS, ETH_ASSET_HOLDER_ADDRESS} from "../constants";
 import {bigNumberify} from "ethers/utils";
 import {State} from "@statechannels/nitro-protocol";
 import {AddressZero} from "ethers/constants";
@@ -195,4 +195,18 @@ export const getParticipantIdForAddress = (state: SharedData, address: string): 
     }
   }
   throw new Error(`Could not find a participant id for address ${address}`);
+};
+
+export const getChannelHoldings = (
+  state: SharedData,
+  channelId: string,
+  assetHolderAddress = ETH_ASSET_HOLDER_ADDRESS
+): string => {
+  if (!state.assetHoldersState[assetHolderAddress]) {
+    return "0x0";
+  }
+  if (!state.assetHoldersState[assetHolderAddress][channelId]) {
+    return "0x0";
+  }
+  return state.assetHoldersState[assetHolderAddress][channelId].holdings;
 };

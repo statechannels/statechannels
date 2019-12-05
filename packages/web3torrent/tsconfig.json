@@ -1,12 +1,27 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "composite": false,
     "declaration": false,
     "declarationMap": false,
-    "strict": true,
     "jsx": "react",
     "isolatedModules": true,
-    "noEmit": true
+    "allowSyntheticDefaultImports": true,
+    "noEmit": true,
+    "strict": false,
+
+      // react-script injects these fields when you run the test script
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true
   },
-  "include": ["**/*.ts", "**/*.tsx"]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ]
 }

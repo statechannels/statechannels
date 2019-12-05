@@ -1,6 +1,7 @@
-import fs from 'fs';
+import * as fs from 'fs';
 import {CompiledContract} from 'etherlime-lib';
-import log from 'loglevel';
+import * as log from 'loglevel';
+// @ts-ignore etherlime-utils does not export any types
 import {colors} from 'etherlime-utils';
 import writeJsonFile from 'write-json-file';
 import {GanacheDeployer} from './deployer';
@@ -44,10 +45,14 @@ export class GanacheNCacheDeployer {
     this.deployer = new GanacheDeployer(port, privateKey);
   }
 
+  get etherlimeDeployer() {
+    return this.deployer.etherlimeDeployer;
+  }
+
   public async deploy(
     contract: CompiledContract,
     libraries: Record<string, string> = {},
-    ...args
+    ...args: any[]
   ): Promise<string> {
     const {contractName: name, bytecode} = contract;
     const cacheKey = {name, libraries, bytecode, args};

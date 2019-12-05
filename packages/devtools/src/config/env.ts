@@ -1,6 +1,5 @@
-'use strict';
-import fs from 'fs';
-import path from 'path';
+import * as fs from 'fs';
+import * as path from 'path';
 
 export function configureEnvVariables(monorepo = true) {
   const NODE_ENV = process.env.NODE_ENV;

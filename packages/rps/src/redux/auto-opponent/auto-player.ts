@@ -7,6 +7,7 @@ import {
   resign,
   joinOpenGame,
   gameOver,
+  newOpenGame,
 } from '../game/actions';
 import { bigNumberify } from 'ethers/utils';
 import { Weapon } from '../../core';
@@ -51,6 +52,9 @@ function* autoPlayerBRun() {
 
   switch (localState.type) {
     case 'Lobby':
+      yield put(newOpenGame());
+      break;
+    case 'CreatingOpenGame':
       yield put(createGame(WeiPerEther.toString()));
       break;
     case 'ChooseWeapon':

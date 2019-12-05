@@ -190,8 +190,8 @@ const notSafeToDepositReducer: DFReducer = (
         const existingChannelFunding = action.destinationHoldings.toHexString();
         const depositTransaction = createETHDepositTransaction(
           state.channelId,
-          state.requiredDeposit,
-          existingChannelFunding
+          action.amountDeposited.toHexString(),
+          action.amountDeposited.add(existingChannelFunding).toHexString()
         );
 
         const {

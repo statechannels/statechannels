@@ -59,8 +59,9 @@ export interface AssetTransferredEvent {
   assetHolderAddress: string;
   channelId: string;
 
+  // NOTE: This is a parameter on the event, but it is not used in the wallet
   // This is either a `channelId` or an external destination (both bytes32).
-  destination: string;
+  // destination: string;
 
   amount: BigNumber;
 }

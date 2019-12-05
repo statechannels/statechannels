@@ -1,6 +1,5 @@
 import * as firebase from 'firebase';
 
-import '../../config/env';
 import {HUB_ADDRESS} from '../constants';
 import {MessageRelayRequested} from '../wallet-client';
 

@@ -1,6 +1,6 @@
 #! /usr/local/bin/node
 
-import path from 'path';
+import * as path from 'path';
 import {configureEnvVariables} from '../config/env';
 import {startSharedGanache} from '.';
 

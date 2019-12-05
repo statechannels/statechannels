@@ -43,12 +43,10 @@ describe("transactions", () => {
     const processId = "processId";
     const queuedTransaction = {transactionRequest: transactionToSend, processId};
 
-    // TODO: Currently we're actually attempting to send the transactions
-    // but we could probably do that in nitro-protocol package instead
     const transactionResult = await signer.sendTransaction(queuedTransaction.transactionRequest);
     const confirmedTransaction = await transactionResult.wait();
-    // TODO: Redux saga test plan is complaining about the typing on transactionSender
-    testSaga(transactionSender as any, queuedTransaction)
+
+    testSaga(transactionSender, queuedTransaction)
       .next()
       .call(getProvider)
       .next(provider)
@@ -134,7 +132,7 @@ describe("transactions", () => {
       participants: [participantA.address, participantB.address]
     };
 
-    await createChallenge(provider, channelNonce, participantA, participantB);
+    await createChallenge(signer, channelNonce, participantA, participantB);
 
     // NOTE: Copied from createChallenge
     const fromState: State = {
@@ -173,7 +171,7 @@ describe("transactions", () => {
       participants: [participantA.address, participantB.address]
     };
 
-    await createChallenge(provider, channelNonce, participantA, participantB);
+    await createChallenge(signer, channelNonce, participantA, participantB);
     const fromState: State = {
       channel,
       appDefinition: libraryAddress,
@@ -245,7 +243,7 @@ describe("transactions", () => {
       participants: [participantA.address, participantB.address]
     };
     const channelId = getChannelId(channel);
-    await depositIntoETHAssetHolder(provider, channelId);
+    await depositIntoETHAssetHolder(signer, channelId);
 
     const fromState: State = {
       channel,
