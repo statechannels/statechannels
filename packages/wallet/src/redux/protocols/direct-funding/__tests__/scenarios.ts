@@ -10,7 +10,7 @@ import {ETH_ASSET_HOLDER_ADDRESS} from "../../../../constants";
 import {bigNumberify} from "ethers/utils";
 
 const {threeWayLedgerId: channelId, twoThree} = scenarios;
-export const assetHolderAddress = "0x0";
+export const assetHolderAddress = ETH_ASSET_HOLDER_ADDRESS;
 export const YOUR_DEPOSIT_A = twoThree[0].wei;
 export const YOUR_DEPOSIT_B = twoThree[1].wei;
 export const TOTAL_REQUIRED = addHex(twoThree[0].wei, twoThree[1].wei);

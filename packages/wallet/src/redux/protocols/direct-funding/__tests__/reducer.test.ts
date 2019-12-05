@@ -2,8 +2,9 @@ import {directFundingStateReducer, initialize} from "../reducer";
 import * as states from "../states";
 import * as scenarios from "./scenarios";
 import {ProtocolStateWithSharedData} from "../..";
-import {itSendsATransaction} from "../../../__tests__/helpers";
+import {itSendsATransaction, itSendsThisTransaction} from "../../../__tests__/helpers";
 import {describeScenarioStep} from "../../../__tests__/helpers";
+import {Interface} from "ethers/utils";
 
 describe("Player A Happy path", () => {
   const scenario = scenarios.aHappyPath;
@@ -51,8 +52,29 @@ describe("Player B Happy path", () => {
     const {action, state, sharedData} = scenario.notSafeToDeposit;
     const updatedState = directFundingStateReducer(state, sharedData, action);
     itTransitionsTo(updatedState, "DirectFunding.WaitForDepositTransaction");
-    // TODO: We should verify the parameters being passed into createDepositTransaction
-    itSendsATransaction(updatedState);
+
+    const {
+      assetHolderAddress,
+      amountDeposited,
+      destination,
+      destinationHoldings,
+      processId
+    } = action;
+    itSendsThisTransaction(updatedState, {
+      processId,
+      transactionRequest: {
+        to: assetHolderAddress,
+        value: amountDeposited.toHexString(),
+        data: new Interface([
+          // NOTE: Copied from ETHAssetHolder.sol
+          "deposit(bytes32 destination, uint256 expectedHeld, uint256 amount)"
+        ]).functions.deposit.encode([
+          destination,
+          destinationHoldings.add(amountDeposited),
+          amountDeposited
+        ])
+      }
+    });
   });
 
   describeScenarioStep(scenario.waitForDepositTransaction, () => {
