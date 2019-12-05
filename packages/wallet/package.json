@@ -14,12 +14,12 @@
     "build:typescript": "npx tsc -b",
     "build:webpack": "CI=false node scripts/build.js",
     "build": "run-s build:typescript build:webpack",
-    "lint:check": "yarn run tslint --config tslint.json  './**/*.{ts,js,tsx,jsx}'",
-    "lint:write": "yarn run tslint --config tslint.json  './**/*.{ts,js,tsx,jsx}' --fix ",
+    "lint:check": "tslint -c tslint.json -p .",
+    "lint:write": "tslint -c tslint.json -p . --fix ",
     "patch-package": "cd ../.. && yarn patch-package",
     "postinstall": "rm -f node_modules/web3/index.d.ts",
     "prepare": "yarn patch-package && yarn build:typescript",
-    "prettier:check": "npx prettier --check  './**/*.{ts,js,tsx,jsx}'",
+    "prettier:check": "npx prettier --check './**/*.{ts,js,tsx,jsx}'",
     "prettier:write": "npx prettier --write './**/*.{ts,js,tsx,jsx}'",
     "start": "node scripts/start.js",
     "storybook": "start-storybook -p 9001 -c .storybook",
@@ -32,7 +32,8 @@
     "test": "run-s 'test:app --all' 'test:contracts --all'",
     "test:puppeteer": "npx jest --runInBand -c ./config/jest/jest.puppeteer.config.js",
     "puppeteer:script": "npx ts-node -O '{\"module\":\"commonjs\"}' ./puppeteer/scripts/funding.ts ",
-    "test:ci:integration": "wait-on http-get://localhost:3055/ && yarn test:puppeteer"
+    "test:ci:integration": "wait-on http-get://localhost:3055/ && yarn test:puppeteer",
+    "precommit": "lint-staged --quiet"
   },
   "dependencies": {
     "@firebase/app-types": "^0.3.2",
@@ -209,6 +210,6 @@
     "yargs": "14.0.0"
   },
   "lint-staged": {
-    "{src,test}/**/*.ts": "yarn lint:check"
+    "{src,test}/**/*.{ts,tsx}": "yarn lint:check"
   }
 }
