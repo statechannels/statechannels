@@ -64,6 +64,7 @@ export class ChannelStoreEntry implements IChannelStoreEntry {
     this.privateKey = args.privateKey;
     this.participants = args.participants;
     this.funding = args.funding;
+    this.channel = args.channel;
   }
 
   get args(): IChannelStoreEntry {
