@@ -35,8 +35,8 @@ const config = {
           var channelId = _a.channelId;
           return { channelId: channelId };
         },
+        onDone: 'postFundSetup',
       },
-      onDone: 'postFundSetup',
     },
     postFundSetup: {
       invoke: {
@@ -48,8 +48,8 @@ const config = {
             targetTurnNum: i,
           };
         },
+        onDone: 'success',
       },
-      onDone: 'success',
     },
     success: { type: 'final' },
   },

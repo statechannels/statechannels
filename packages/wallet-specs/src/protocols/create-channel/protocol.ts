@@ -55,16 +55,16 @@ const funding = {
   invoke: {
     src: 'funding',
     data: ({ channelId }: ChannelSet) => ({ channelId }),
+    onDone: 'postFundSetup',
   },
-  onDone: 'postFundSetup',
 };
 
 const postFundSetup = {
   invoke: {
     src: 'advanceChannel',
     data: advanceChannelArgs(3),
+    onDone: 'success',
   },
-  onDone: 'success',
 };
 
 const config = {
