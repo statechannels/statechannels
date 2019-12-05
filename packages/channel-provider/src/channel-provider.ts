@@ -1,25 +1,21 @@
 import EventEmitter from 'eventemitter3';
+import {Guid} from 'guid-typescript';
 import {MessagingService} from './messaging-service';
-import {
-  EventType,
-  IChannelProvider,
-  isJsonRpcErrorResponse,
-  isJsonRpcNotification,
-  isJsonRpcResponse
-} from './types';
+import {IChannelProvider, isJsonRpcNotification} from './types';
 import {UIService} from './ui-service';
 
 class ChannelProvider implements IChannelProvider {
   protected readonly events: EventEmitter;
   protected readonly ui: UIService;
   protected readonly messaging: MessagingService;
-
+  protected readonly subscriptions: {[eventName: string]: string[]};
   protected url = '';
 
   constructor() {
     this.events = new EventEmitter();
     this.ui = new UIService();
     this.messaging = new MessagingService();
+    this.subscriptions = {};
   }
 
   async enable(url?: string) {
@@ -48,28 +44,30 @@ class ChannelProvider implements IChannelProvider {
     return response;
   }
 
-  // TODO: Do we want to implement subscriptions?
-  async subscribe(_subscriptionType: string, _params: any[] = []): Promise<string> {
-    throw new Error('Subscriptions are not implemented');
+  async subscribe(subscriptionType: string, _params: any[] = []): Promise<string> {
+    const subscriptionId = Guid.create().toString();
+    if (!this.subscriptions[subscriptionType]) {
+      this.subscriptions[subscriptionType] = [];
+    }
+    this.subscriptions[subscriptionType].push(subscriptionId);
+    return subscriptionId;
   }
 
-  async unsubscribe(_subscriptionId: string): Promise<boolean> {
-    throw new Error('Subscriptions are not implemented');
+  async unsubscribe(subscriptionId: string): Promise<boolean> {
+    Object.keys(this.subscriptions).map(e => {
+      this.subscriptions[e] = this.subscriptions[e]
+        ? this.subscriptions[e].filter(s => s !== subscriptionId)
+        : [];
+    });
+    return true;
   }
 
-  on(event: EventType, callback: EventEmitter.ListenerFn<any[]>): void {
+  on(event: string, callback: EventEmitter.ListenerFn<any[]>): void {
     this.events.on(event, callback);
   }
 
-  off(event: EventType, callback?: EventEmitter.ListenerFn<any[]> | undefined): void {
+  off(event: string, callback?: EventEmitter.ListenerFn<any[]> | undefined): void {
     this.events.off(event, callback);
-  }
-  onNotification(callback: EventEmitter.ListenerFn<any[]>): void {
-    this.events.on('Notification', callback);
-  }
-
-  offNotification(callback?: EventEmitter.ListenerFn<any[]> | undefined): void {
-    this.events.off('Notification', callback);
   }
 
   protected async onMessage(event: MessageEvent) {
@@ -78,15 +76,18 @@ class ChannelProvider implements IChannelProvider {
       return;
     }
 
-    if (isJsonRpcErrorResponse(message)) {
-      this.events.emit('MessageError', message);
-    } else if (isJsonRpcResponse(message)) {
-      this.events.emit('MessageResult', message);
-    } else if (isJsonRpcNotification(message)) {
-      if (message.method === 'UIUpdate') {
+    if (isJsonRpcNotification(message)) {
+      const eventName = message.method;
+      if (eventName === 'UIUpdate') {
         this.ui.setVisibility(message.params.showWallet);
       }
-      this.events.emit('Notification', message);
+      this.events.emit(eventName, message);
+
+      if (this.subscriptions[eventName]) {
+        this.subscriptions[eventName].forEach(s => {
+          this.events.emit(s, message);
+        });
+      }
     }
   }
 }

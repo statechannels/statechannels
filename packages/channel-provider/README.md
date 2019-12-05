@@ -33,5 +33,3 @@ window.channelProvider.enable('http://sc-embedded-wallet.netlify.com');
 | `off(eventNameOrSubscriptionId: string, callback?: Function): void`         | Allows to un-register for events or subscriptions received from the wallet.                                       |
 | `subscribe(subscriptionType: string, callback?: Function): Promise<string>` | Allows to subscribe to an event feed, returns a `subscriptionId` that can be used later with `.on()` or `.off()`. |
 | `unsubscribe(subscriptionId: string)`                                       | Removes all event listeners tied to a given `subscriptionId` and stops listening events on the requested feed.    |
-| `onNotification(callback?: Function): void`                                 | Allows to to register for notifications received from the wallet.                                                 |
-| `offNotification(, callback?: Function): void`                              | Allows to un-register for notifications received from the wallet.                                                 |
