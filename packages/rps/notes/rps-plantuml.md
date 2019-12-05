@@ -1,46 +1,51 @@
 ```plantuml
 @startuml
-skinparam monochrome true
+skinparam state{
+  BackgroundColor White
+  BackgroundColor<<Warning>> Olive
+  BorderColor Black
+  FontName Helvetica
+}
 skinparam handwritten true
 hide empty description
 ' Startgame
 state Setup{
-    [*] --> Empty
-    Empty --> NeedAddress : UpdateProfile
-    NeedAddress --> Lobby : GotAddressFromWallet
+    [*] -[#black]-> Empty
+    Empty -[#black]-> NeedAddress : UpdateProfile
+    NeedAddress -[#black]-> Lobby : GotAddressFromWallet
 }
 
 ' Player A
     state PlayerA {
-    Lobby --> GameChosen : JoinOpenGame
-    GameChosen --> ChooseWeapon : StartRound
-    ChooseWeapon --> WeaponChosen : ChooseWeapon
-    WeaponChosen --> WeaponAndSaltChosen : ChooseSalt
-    WeaponAndSaltChosen --> ResultPlayAgain : ResultArrived
-    ResultPlayAgain --> WaitForRestart : PlayAgain
-    WaitForRestart --> ChooseWeapon : StartRound
+    Lobby -[#blue]-> GameChosen : JoinOpenGame
+    GameChosen -[#blue]-> ChooseWeapon : StartRound
+    ChooseWeapon -[#blue]-> WeaponChosen : ChooseWeapon
+    WeaponChosen -[#blue]-> WeaponAndSaltChosen : ChooseSalt
+    WeaponAndSaltChosen -[#blue]-> ResultPlayAgain : ResultArrived
+    ResultPlayAgain -[#blue]-> WaitForRestart : PlayAgain
+    WaitForRestart -[#blue]-> ChooseWeapon : StartRound
     }
 
 ' Player B
 ' NOTE: ChooseWeaponB is actually just ChooseWeapon. Could refactor code to make it clearer though
     state PlayerB {
-    Lobby --> CreatingOpenGame : NewOpenGame
-    CreatingOpenGame --> WaitingRoom : CreateGame
-    WaitingRoom --> Lobby: CancelGame
-    WaitingRoom --> OpponentJoined : GameJoined
-    OpponentJoined -->ChooseWeaponB : StartRound
-    ChooseWeaponB --> WeaponChosenB : ChooseWeapon
-    WeaponChosenB --> ResultPlayAgainB : ResultArrived
-    ResultPlayAgainB --> ChooseWeaponB : StartRound
+    Lobby -[#red]-> CreatingOpenGame : NewOpenGame
+    CreatingOpenGame -[#red]-> WaitingRoom : CreateGame
+    WaitingRoom -[#red]-> Lobby: CancelGame
+    WaitingRoom -[#red]-> OpponentJoined : GameJoined
+    OpponentJoined -[#red]->ChooseWeaponB : StartRound
+    ChooseWeaponB -[#red]-> WeaponChosenB : ChooseWeapon
+    WeaponChosenB -[#red]-> ResultPlayAgainB : ResultArrived
+    ResultPlayAgainB -[#red]-> ChooseWeaponB : StartRound
     }
 
 ' Endgame
 state EndGame {
-    WeaponChosenB --> InsufficientFunds
-    WeaponAndSaltChosen --> InsufficientFunds
-    InsufficientFunds --> GameOver : GameOver
-    GameOver --> Lobby : ExitToLobby
-    Resigned --> GameOver : GameOver
+    WeaponChosenB -[#black]-> InsufficientFunds
+    WeaponAndSaltChosen -[#black]-> InsufficientFunds
+    InsufficientFunds -[#black]-> GameOver : GameOver
+    GameOver -[#black]-> Lobby : ExitToLobby
+    Resigned -[#black]-> GameOver : GameOver
 }
 
 ' Map States to Views
