@@ -33,6 +33,7 @@
     "typescript": "^3.7.3"
   },
   "dependencies": {
+    "@statechannels/channel-provider": "^0.0.3",
     "ethers": "^4.0.40"
   },
   "lint-staged": {
