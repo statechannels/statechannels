@@ -1,37 +1,7 @@
 import { interpret, Machine } from 'xstate';
-import { SignedState, State } from '../..';
-import { IChannelStoreEntry } from '../../ChannelStoreEntry';
+import { startingState, store } from '../../mock-store';
 import { Store } from '../../store';
 import { config, Init, SendState } from './protocol';
-
-const participants = ['me', 'you'];
-const startingState: State = {
-  channel: {
-    participants,
-    channelNonce: '2',
-    chainId: '4',
-  },
-  turnNum: 0,
-  outcome: participants.map(p => ({
-    destination: p,
-    amount: '2',
-  })),
-  isFinal: false,
-  challengeDuration: '42',
-};
-const startingSignedState: SignedState = {
-  state: startingState,
-  signatures: ['mine', 'yours'],
-};
-const storeEntry: IChannelStoreEntry = {
-  privateKey: 'secret',
-  supportedState: [startingSignedState],
-  unsupportedStates: [],
-  participants: [],
-  funding: { type: 'Direct' },
-  channel: startingState.channel,
-};
-const store = new Store({ '0xabc': storeEntry });
 
 function supported({ channelID, outcome }: Init): boolean {
   const { state } = store.getLatestConsensus(channelID);
@@ -67,7 +37,9 @@ const context: SendState = {
 };
 
 const pretty = o => JSON.stringify(o, null, 2);
-export const machine = Machine({ ...config, context }, { guards, actions });
+export const machine = Machine(config, { guards, actions }).withContext(
+  context
+);
 
 const service = interpret(machine)
   .onTransition(state => {
