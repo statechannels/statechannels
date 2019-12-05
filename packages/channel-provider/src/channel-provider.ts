@@ -33,7 +33,7 @@ class ChannelProvider implements IChannelProvider {
     this.events.emit('Connect');
   }
 
-  async send<ResultType = any>(method: string, params: any[] = []): Promise<ResultType> {
+  async send<ResultType = any>(method: string, params: any): Promise<ResultType> {
     const target = await this.ui.getTarget();
     const response = (await this.messaging.request(target, {
       jsonrpc: '2.0',
@@ -44,7 +44,7 @@ class ChannelProvider implements IChannelProvider {
     return response;
   }
 
-  async subscribe(subscriptionType: string, _params: any[] = []): Promise<string> {
+  async subscribe(subscriptionType: string, _params: any): Promise<string> {
     const subscriptionId = Guid.create().toString();
     if (!this.subscriptions[subscriptionType]) {
       this.subscriptions[subscriptionType] = [];
@@ -62,11 +62,11 @@ class ChannelProvider implements IChannelProvider {
     return true;
   }
 
-  on(event: string, callback: EventEmitter.ListenerFn<any[]>): void {
+  on(event: string, callback: EventEmitter.ListenerFn<any>): void {
     this.events.on(event, callback);
   }
 
-  off(event: string, callback?: EventEmitter.ListenerFn<any[]> | undefined): void {
+  off(event: string, callback?: EventEmitter.ListenerFn<any> | undefined): void {
     this.events.off(event, callback);
   }
 
