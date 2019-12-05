@@ -1,23 +1,54 @@
 const config = {
   key: 'create-channel',
-  initial: 'chooseNonce',
+  initial: 'initializeChannel',
   states: {
-    chooseNonce: {
-      onEntry: ['assignChannelID', 'sendOpenChannelMessage'],
+    initializeChannel: {
+      invoke: { src: 'setChannelId', onDone: 'preFundSetup' },
+      exit: {
+        type: 'xstate.assign',
+        assignment: function(ctx, _a) {
+          var channelId = _a.channelId;
+          return __assign(__assign({}, ctx), { channelId: channelId });
+        },
+      },
+    },
+    preFundSetup: {
+      onEntry: 'sendOpenChannelMessage',
       invoke: {
-        src: 'advance-channel',
-        data: 'passChannelId',
+        src: 'advanceChannel',
+        data: function(_a) {
+          var channelId = _a.channelId;
+          return {
+            channelId: channelId,
+            targetTurnNum: i,
+          };
+        },
         onDone: 'funding',
       },
       on: { CHANNEL_CLOSED: 'abort' },
     },
     abort: { type: 'final' },
     funding: {
-      invoke: { src: 'funding', data: 'passChannelId' },
+      invoke: {
+        src: 'funding',
+        data: function(_a) {
+          var channelId = _a.channelId;
+          return { channelId: channelId };
+        },
+      },
       onDone: 'postFundSetup',
     },
     postFundSetup: {
-      invoke: { src: 'advance-channel', data: 'passChannelId' },
+      invoke: {
+        src: 'advanceChannel',
+        data: function(_a) {
+          var channelId = _a.channelId;
+          return {
+            channelId: channelId,
+            targetTurnNum: i,
+          };
+        },
+      },
       onDone: 'success',
     },
     success: { type: 'final' },

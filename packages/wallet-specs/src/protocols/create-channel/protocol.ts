@@ -1,6 +1,6 @@
-import { assign } from 'xstate';
+import { assign, InvokeCreator } from 'xstate';
 import { AdvanceChannel } from '..';
-import { Channel, State, store } from '../..';
+import { Channel, State, store, success } from '../..';
 import { ChannelStoreEntry } from '../../ChannelStoreEntry';
 import { JsonRpcCreateChannelParams } from '../../json-rpc';
 import { saveConfig } from '../../utils';
@@ -13,58 +13,35 @@ Spawned in a new process when the app calls CreateChannel
 export type Init = JsonRpcCreateChannelParams;
 
 type ChannelSet = Init & { channelId: string };
-export const assignChannelId = assign(
-  (ctx: Init): ChannelSet => {
-    const participants = ctx.participants.map(p => p.destination);
-    const channelNonce = store.getNextNonce(participants);
-    const channel: Channel = {
-      participants,
-      channelNonce,
-      chainId: 'mainnet?',
-    };
-
-    const { allocations: outcome, appData, appDefinition } = ctx;
-    const firstState: State = {
-      appData,
-      appDefinition,
-      isFinal: false,
-      turnNum: 0,
-      outcome,
-      channel,
-      challengeDuration: 'TODO', // TODO
-    };
-
-    const entry = new ChannelStoreEntry({
-      channel,
-      supportedState: [],
-      unsupportedStates: [{ state: firstState, signatures: ['me'] }],
-      privateKey: store.getPrivateKey(
-        ctx.participants.map(p => p.participantId)
-      ),
-      participants: ctx.participants,
-    });
-    store.initializeChannel(entry.args);
-
-    const { channelId } = entry;
-
-    return { ...ctx, channelId };
-  }
+export interface SetChannel {
+  type: 'CHANNEL_INITIALIZED';
+  channelId: string;
+}
+const assignChannelId = assign(
+  (ctx: Init, { channelId }: SetChannel): ChannelSet => ({
+    ...ctx,
+    channelId,
+  })
 );
 
-function advanceChannelArgs({ channelId }: ChannelSet): AdvanceChannel.Init {
-  return {
-    channelId,
-    targetTurnNum: 1,
-  };
-}
+export const advanceChannelArgs = (i: 1 | 3) => ({
+  channelId,
+}: ChannelSet): AdvanceChannel.Init => ({
+  channelId,
+  targetTurnNum: i,
+});
+const initializeChannel = {
+  invoke: {
+    src: 'setChannelId',
+    onDone: 'preFundSetup',
+  },
+  exit: assignChannelId,
+};
 const preFundSetup = {
-  onEntry: [
-    'assignChannelId', // This should generate a nonce, and assign `channelId` to the context
-    'sendOpenChannelMessage',
-  ],
+  onEntry: 'sendOpenChannelMessage',
   invoke: {
     src: 'advanceChannel',
-    data: advanceChannelArgs.name,
+    data: advanceChannelArgs(1),
     onDone: 'funding',
   },
   on: {
@@ -72,14 +49,12 @@ const preFundSetup = {
   },
 };
 
-const abort = {
-  type: 'final',
-};
+const abort = success;
 
 const funding = {
   invoke: {
     src: 'funding',
-    data: 'passChannelId',
+    data: ({ channelId }: ChannelSet) => ({ channelId }),
   },
   onDone: 'postFundSetup',
 };
@@ -87,20 +62,21 @@ const funding = {
 const postFundSetup = {
   invoke: {
     src: 'advanceChannel',
-    data: 'passChannelId',
+    data: advanceChannelArgs(3),
   },
   onDone: 'success',
 };
 
 const config = {
   key: PROTOCOL,
-  initial: 'chooseNonce',
+  initial: 'initializeChannel',
   states: {
+    initializeChannel,
     preFundSetup,
     abort,
     funding,
     postFundSetup,
-    success: { type: 'final' },
+    success,
   },
 };
 
