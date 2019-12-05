@@ -3,7 +3,7 @@
   "license": "MIT",
   "version": "0.0.3",
   "main": "dist/channel-provider.min.js",
-  "types": "dist/index.d.ts",
+  "types": "dist/src/index.d.ts",
   "dependencies": {
     "debug": "4.1.1",
     "eventemitter3": "4.0.0"
