@@ -1,26 +1,9 @@
-import {
-  weaponChosen,
-  weaponAndSaltChosen,
-  resultPlayAgain,
-  LocalState,
-  lobby,
-  chooseWeapon,
-  resigned,
-  gameChosen,
-  gameOver,
-  GameState,
-  creatingOpenGame,
-  needAddress,
-  insufficientFunds,
-  waitForRestart,
-  waitingRoom,
-  opponentJoined,
-} from './state';
+import {LocalState} from './state';
 import {Reducer, combineReducers} from 'redux';
 import {GameAction, UpdateChannelState} from './actions';
 import {ChannelState} from '../../core';
 
-const emptyLocalState: LocalState = {type: 'Empty'};
+const emptyLocalState: LocalState = {type: 'Setup.Empty'};
 
 const channelReducer: Reducer<ChannelState | null, UpdateChannelState> = (
   state: ChannelState | null = null,
@@ -40,21 +23,21 @@ const localReducer: Reducer<LocalState> = (
   let newState = state;
   if (
     action.type === 'Resign' &&
-    state.type !== 'Empty' &&
-    state.type !== 'NeedAddress' &&
-    state.type !== 'Lobby' &&
-    state.type !== 'WaitingRoom' &&
-    state.type !== 'CreatingOpenGame'
+    state.type !== 'Setup.Empty' &&
+    state.type !== 'Setup.NeedAddress' &&
+    state.type !== 'Setup.Lobby' &&
+    state.type !== 'B.WaitingRoom' &&
+    state.type !== 'B.CreatingOpenGame'
   ) {
     newState = resigned(state, action.iResigned);
   }
   switch (state.type) {
-    case 'Empty':
+    case 'Setup.Empty':
       if (action.type === 'UpdateProfile') {
         newState = needAddress({...state, ...action});
       }
       break;
-    case 'NeedAddress':
+    case 'Setup.NeedAddress':
       if (action.type === 'GotAddressFromWallet') {
         newState = lobby({
           ...state,
@@ -62,7 +45,7 @@ const localReducer: Reducer<LocalState> = (
         });
       }
       break;
-    case 'Lobby':
+    case 'Setup.Lobby':
       if (action.type === 'NewOpenGame') {
         newState = creatingOpenGame(state);
       }
@@ -72,35 +55,38 @@ const localReducer: Reducer<LocalState> = (
         newState = gameChosen({name, address, opponentName, roundBuyIn}, opponentAddress);
       }
       break;
-    case 'CreatingOpenGame':
+    case 'B.CreatingOpenGame':
       if (action.type === 'CreateGame') {
         newState = waitingRoom({...state, ...action});
       }
       break;
-    case 'ResultPlayAgain':
+    case 'A.ResultPlayAgain':
+    case 'B.ResultPlayAgain':
       if (action.type === 'PlayAgain') {
         newState = waitForRestart(state, state.theirWeapon, state.result);
       }
       break;
-    case 'WaitingRoom':
+    case 'B.WaitingRoom':
       if (action.type === 'GameJoined') {
         newState = opponentJoined({...state, ...action});
       }
       break;
-    case 'OpponentJoined':
-    case 'GameChosen':
-    case 'WaitForRestart':
+    case 'B.OpponentJoined':
+    case 'A.GameChosen':
+    case 'A.WaitForRestart':
       if (action.type === 'StartRound') {
         newState = chooseWeapon(state);
       }
       break;
-    case 'ChooseWeapon':
+    case 'A.ChooseWeapon':
+    case 'B.ChooseWeapon':
       if (action.type === 'ChooseWeapon') {
         newState = weaponChosen(state, action.weapon);
       }
       break;
-    case 'WeaponChosen':
-    case 'WeaponAndSaltChosen':
+    case 'A.WeaponChosen':
+    case 'A.WeaponAndSaltChosen':
+    case 'B.WeaponChosen':
       if (state.player === 'A' && action.type === 'ChooseSalt') {
         newState = weaponAndSaltChosen({...state, player: 'A'}, action.salt);
       }
@@ -112,8 +98,8 @@ const localReducer: Reducer<LocalState> = (
         }
       }
       break;
-    case 'Resigned':
-    case 'InsufficientFunds':
+    case 'EndGame.Resigned':
+    case 'EndGame.InsufficientFunds':
       if (action.type === 'GameOver') {
         newState = gameOver(state);
       }
