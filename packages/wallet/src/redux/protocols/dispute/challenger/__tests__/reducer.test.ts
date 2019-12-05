@@ -12,7 +12,7 @@ import {
   describeScenarioStep,
   itStoresThisState
 } from "../../../../__tests__/helpers";
-import {apiNotImplemented} from "../../../../actions";
+import {apiNotImplemented} from "../../../../sagas/messaging/outgoing-api-actions";
 
 describe("OPPONENT RESPONDS", () => {
   const scenario = scenarios.opponentResponds;

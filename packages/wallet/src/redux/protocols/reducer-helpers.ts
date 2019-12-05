@@ -12,7 +12,7 @@ import {bigNumberify} from "ethers/utils";
 
 import {SignedState} from "@statechannels/nitro-protocol";
 import {getAllocationOutcome} from "../../utils/outcome-utils";
-import {apiNotImplemented} from "../actions";
+import {apiNotImplemented} from "../sagas/messaging/outgoing-api-actions";
 
 export function showWallet(sharedData: SharedData): SharedData {
   const newSharedData = {...sharedData};

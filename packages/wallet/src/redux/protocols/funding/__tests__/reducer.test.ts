@@ -7,7 +7,7 @@ import {
   itSendsThisDisplayEventType,
   describeScenarioStep
 } from "../../../__tests__/helpers";
-import {apiNotImplemented} from "../../../actions";
+import {apiNotImplemented} from "../../../sagas/messaging/outgoing-api-actions";
 
 describe("ledger funding", () => {
   const scenario = scenarios.ledgerFunding;

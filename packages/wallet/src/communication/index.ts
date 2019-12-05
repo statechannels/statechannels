@@ -1,5 +1,8 @@
 import {ConcludeInstigated} from "./actions";
-export {relayActionWithMessage, RelayActionWithMessage} from "../redux/actions";
+export {
+  relayActionWithMessage,
+  RelayActionWithMessage
+} from "../redux/sagas/messaging/outgoing-api-actions";
 
 export * from "./actions";
 
