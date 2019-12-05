@@ -19,9 +19,11 @@ export enum ErrorCodes {
 }
 
 export default class ChannelClient implements ChannelClientInterface<ChannelResult> {
-  constructor(private readonly provider: IChannelProvider) {}
+  constructor(private readonly provider: IChannelProvider) {
+    this.provider.enable();
+  }
 
-  // TODO: Ask Tom if this needs to be a syncronous function
+  // TODO: Ask Tom if this needs to be a synchronous function
   onMessageQueued(callback: (message: Message<ChannelResult>) => void): UnsubscribeFunction {
     let unsubscribe = (): void => {
       throw new Error('Subscription has not been confirmed yet!');
@@ -39,7 +41,7 @@ export default class ChannelClient implements ChannelClientInterface<ChannelResu
     };
   }
 
-  // TODO: Ask Tom if this needs to be a syncronous function
+  // TODO: Ask Tom if this needs to be a synchronous function
   onChannelUpdated(callback: (result: ChannelResult) => void): UnsubscribeFunction {
     let unsubscribe = (): void => {
       throw new Error('Subscription has not been confirmed yet!');

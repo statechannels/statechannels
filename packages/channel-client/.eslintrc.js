@@ -15,6 +15,6 @@ module.exports = {
     'plugin:prettier/recommended'
   ],
   rules: {
-    'prettier/prettier': ['warn', require('./.prettierrc.js')]
+    'prettier/prettier': ['warn']
   }
 };
