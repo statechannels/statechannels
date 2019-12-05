@@ -1,11 +1,38 @@
 {
-  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
   "eslint.workingDirectories": [
-    {"directory": "packages/channel-provider", "changeProcessCWD": true},
-    {"directory": "packages/devtools", "changeProcessCWD": true},
-    {"directory": "packages/embedded-wallet", "changeProcessCWD": true},
-    {"directory": "packages/hub", "changeProcessCWD": true},
-    {"directory": "packages/jest-gas-reporter", "changeProcessCWD": true},
-    {"directory": "packages/nitro-protocol", "changeProcessCWD": true}
-  ]
+    {
+      "directory": "packages/channel-provider",
+      "changeProcessCWD": true
+    },
+    {
+      "directory": "packages/devtools",
+      "changeProcessCWD": true
+    },
+    {
+      "directory": "packages/embedded-wallet",
+      "changeProcessCWD": true
+    },
+    {
+      "directory": "packages/hub",
+      "changeProcessCWD": true
+    },
+    {
+      "directory": "packages/jest-gas-reporter",
+      "changeProcessCWD": true
+    },
+    {
+      "directory": "packages/nitro-protocol",
+      "changeProcessCWD": true
+    },
+    {
+      "directory": "packages/channel-client",
+      "changeProcessCWD": true
+    }
+  ],
 }

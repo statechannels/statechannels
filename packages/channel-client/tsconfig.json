@@ -1,0 +1,7 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    // This package is meant to emit webpack processed files 
+    "noEmit": true
+  }
+}
