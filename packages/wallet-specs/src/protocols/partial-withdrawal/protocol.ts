@@ -1,5 +1,5 @@
-import { add, Allocation, Channel, subtract } from '../..';
-import { checkThat, isAllocation, store } from '../../store';
+import { add, Allocation, Channel, store, subtract } from '../..';
+import { checkThat, isAllocation } from '../../store';
 import { saveConfig } from '../../utils';
 import * as ConcludeChannel from '../conclude-channel/protocol';
 import * as CreateNullChannel from '../create-null-channel/protocol';

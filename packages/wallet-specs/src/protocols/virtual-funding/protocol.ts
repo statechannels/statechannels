@@ -1,6 +1,6 @@
 import { assign } from 'xstate';
-import { Balance } from '../..';
-import { checkThat, isAllocation, store } from '../../store';
+import { Balance, store } from '../..';
+import { checkThat, isAllocation } from '../../store';
 import { saveConfig } from '../../utils';
 import { HubChoice } from '../../wire-protocol';
 import { Init as VirtualFundAsLeafArgs } from '../virtual-fund-as-leaf/protocol';

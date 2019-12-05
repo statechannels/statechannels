@@ -31,7 +31,7 @@ export const config = {
   initial: 'waiting',
   states: {
     waiting,
-    success: { type: 'final' },
+    success: { type: 'final' as 'final' },
   },
 };
 

@@ -79,6 +79,8 @@ export class Store implements IStore {
 
   constructor(initialStore: ChannelStore = {}) {
     this._store = initialStore;
+    this._privateKeys = {};
+    this._nonces = {};
   }
 
   public getEntry(channelID: string): ChannelStoreEntry {
@@ -122,7 +124,7 @@ export class Store implements IStore {
   }
 
   public participantIds(channelId: string): string[] {
-    return store.getEntry(channelId).participants.map(p => p.participantId);
+    return this.getEntry(channelId).participants.map(p => p.participantId);
   }
 
   public getLatestState(channelID) {
@@ -288,8 +290,6 @@ export interface Deposit {
 
 export type StoreEvent = ChannelUpdated | Deposit;
 
-export const store = new Store();
-
 export function isAllocation(outcome: Outcome): outcome is Allocation {
   // TODO: I think this might need to be isEthAllocation (sometimes?)
   if ('target' in outcome) {
@@ -308,3 +308,5 @@ export function checkThat<T>(t, isTypeT: TypeGuard<T>): T {
   }
   return t;
 }
+
+export const store = new Store();

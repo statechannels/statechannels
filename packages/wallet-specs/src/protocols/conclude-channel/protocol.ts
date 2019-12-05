@@ -1,5 +1,4 @@
-import { State } from '../..';
-import { store } from '../../store';
+import { State, store } from '../..';
 import { saveConfig } from '../../utils';
 import * as LedgerDefunding from '../ledger-defunding/protocol';
 import * as VirtualDefundingAsHub from '../virtual-defunding-as-hub/protocol';

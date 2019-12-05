@@ -1,5 +1,4 @@
-import { add } from '../..';
-import { store } from '../../store';
+import { add, store } from '../..';
 import { saveConfig } from '../../utils';
 import { Init as CreateNullChannelArgs } from '../create-null-channel/protocol';
 import { Init as DirectFundingArgs } from '../direct-funding/protocol';
