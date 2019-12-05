@@ -3,6 +3,9 @@
     // For default values, see here:
     // https://www.typescriptlang.org/docs/handbook/compiler-options.html
 
+    /* This is needed for TypeScript References to work; a useful tool */
+    "composite": true,
+
     /* We always want .d.ts files to be emitted for external packages re-using types */
     "declaration": true,
 
@@ -14,6 +17,9 @@
 
     /* As a default, we like to build modules for bleeding-edge compatible outputs */
     "module": "esnext",
+
+    /* Node module resolution is the more recent version */
+    "moduleResolution": "node",
 
     /* This is useful for detecting potentially buggy code */
     "noImplicitReturns": true,

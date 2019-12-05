@@ -34,7 +34,7 @@
   "scripts": {
     "precommit": "lint-staged --quiet",
     "build": "run-s clearContracts clearLib contract:compile build:typescript",
-    "build:typescript": "yarn lint:check && tsc -b",
+    "build:typescript": "tsc -b .",
     "contract:compile": "node ./bin/compile.js",
     "clearContracts": "rm -rf build/contracts",
     "clearLib": "rm -rf lib",

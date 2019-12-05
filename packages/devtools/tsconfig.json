@@ -2,12 +2,9 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "baseUrl": ".",
-    "composite": true,
     "lib": ["es6"],
     "module": "commonjs",
-    "noImplicitThis": true,
     "outDir": "lib",
-    "strictNullChecks": true,
     "target": "es2015",
     "types": ["node", "jest"],
 

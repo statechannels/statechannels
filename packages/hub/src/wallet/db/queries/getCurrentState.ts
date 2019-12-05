@@ -9,7 +9,7 @@ export async function getCurrentState(theirState: State) {
     .findOne({channel_id: channelId})
     .select('id');
   if (!channel) {
-    return;
+    return null;
   }
   const currentState = await ChannelState.query()
     .where({channel_id: channel.id})

@@ -20,6 +20,7 @@
     "test:ci": "run-s chain:test hub:test",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
     "build": "npx tsc",
+    "build:typescript": "tsc -b .",
     "prepare": "yarn build",
     "prestart": "yarn build && npm run db:rollback && npm run db:migrate && npm run db:seed",
     "lint:check": "eslint \"*/**/*.{js,ts,tsx}\" --cache",

@@ -1,12 +1,14 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "composite": false,
     "declaration": false,
     "declarationMap": false,
-    "strict": true,
     "jsx": "react",
     "isolatedModules": true,
-    "noEmit": true
+    "allowSyntheticDefaultImports": true,
+    "noEmit": true,
+    "strict": false
   },
   "include": ["**/*.ts", "**/*.tsx"]
 }
