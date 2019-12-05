@@ -1,4 +1,6 @@
-export { store, Store } from './store';
+import { Store } from './store';
+const store = new Store();
+export { Store, store };
 
 export type AppData = string;
 export type Signature = string;
@@ -48,7 +50,7 @@ export interface Channel {
 }
 
 export function getChannelID(channel: Channel) {
-  return JSON.stringify(channel);
+  return channel.participants.join('+');
 }
 
 export interface SignedState {

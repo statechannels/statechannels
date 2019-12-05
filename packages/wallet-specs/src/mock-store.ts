@@ -31,4 +31,5 @@ const storeEntry: IChannelStoreEntry = {
   channel: startingState.channel,
 };
 
-export const store = new Store({ '0xabc': storeEntry });
+const privateKeys = { me: 'secret' };
+export const store = new Store({ privateKeys });

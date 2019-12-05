@@ -68,6 +68,11 @@ interface ChannelStore {
   [channelID: string]: IChannelStoreEntry;
 }
 
+type Constructor = Partial<{
+  store: ChannelStore;
+  privateKeys: Record<string, string>;
+  nonces: Record<string, string>;
+}>;
 export class Store implements IStore {
   public static equals(left: any, right: any) {
     return JSON.stringify(left) === JSON.stringify(right);
@@ -77,10 +82,11 @@ export class Store implements IStore {
   private _nonces: Record<string, string>;
   private _privateKeys: Record<string, string>;
 
-  constructor(initialStore: ChannelStore = {}) {
-    this._store = initialStore;
-    this._privateKeys = {};
-    this._nonces = {};
+  constructor(args?: Constructor) {
+    const { store, privateKeys, nonces } = args || {};
+    this._store = store || {};
+    this._privateKeys = privateKeys || {};
+    this._nonces = nonces || {};
   }
 
   public getEntry(channelID: string): ChannelStoreEntry {
@@ -308,5 +314,3 @@ export function checkThat<T>(t, isTypeT: TypeGuard<T>): T {
   }
   return t;
 }
-
-export const store = new Store();
