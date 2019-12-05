@@ -26,7 +26,7 @@ import {TwoPartyPlayerIndex} from "../../types";
 import {isRelayableAction} from "../../../communication";
 import {bigNumberify} from "ethers/utils";
 
-export function* messageHandler(jsonRpcMessage: object, fromDomain: string) {
+export function* messageHandler(jsonRpcMessage: object, _domain: string) {
   const parsedMessage = jrs.parseObject(jsonRpcMessage);
   switch (parsedMessage.type) {
     case "notification":
@@ -94,19 +94,12 @@ function* handleJoinChannelMessage(payload: RequestObject) {
     );
     yield put(fundingRequested({channelId, playerIndex: TwoPartyPlayerIndex.B}));
     yield fork(messageSender, outgoingMessageActions.joinChannelResponse({channelId, id}));
-    const address = yield select(getAddress);
-    const participants = yield select(getParticipants, channelId);
-    // We assume a two player channel
-    const {participantId: fromParticipantId} =
-      participants[0].signingAddress === address ? participants[0] : participants[1];
-    const {participantId: toParticipantId} =
-      participants[0].signingAddress !== address ? participants[0] : participants[1];
+
     yield fork(
       messageSender,
       outgoingMessageActions.sendChannelJoinedMessage({
         channelId,
-        toParticipantId,
-        fromParticipantId
+        ...(yield getMessageParticipantIds(channelId))
       })
     );
   }
@@ -121,6 +114,14 @@ function* handlePushMessage(payload: RequestObject) {
     yield fork(messageSender, outgoingMessageActions.postMessageResponse({id}));
   } else {
     switch (message.data.type) {
+      case "Channel.Updated":
+        yield put(
+          actions.application.opponentStateReceived({
+            processId: APPLICATION_PROCESS_ID,
+            signedState: message.data.signedState
+          })
+        );
+        break;
       case "Channel.Joined":
         yield put(
           actions.application.opponentStateReceived({
@@ -208,6 +209,13 @@ function* handleUpdateChannelMessage(payload: RequestObject) {
     );
 
     yield fork(messageSender, outgoingMessageActions.updateChannelResponse({id, channelId}));
+    yield fork(
+      messageSender,
+      outgoingMessageActions.sendChannelUpdatedMessage({
+        channelId,
+        ...(yield getMessageParticipantIds(channelId))
+      })
+    );
   }
 }
 
@@ -275,4 +283,15 @@ function* handleCreateChannelMessage(payload: RequestObject) {
       })
     );
   }
+}
+
+function* getMessageParticipantIds(channelId: string) {
+  const address = yield select(getAddress);
+  const participants = yield select(getParticipants, channelId);
+  // We assume a two player channel
+  const {participantId: fromParticipantId} =
+    participants[0].signingAddress === address ? participants[0] : participants[1];
+  const {participantId: toParticipantId} =
+    participants[0].signingAddress !== address ? participants[0] : participants[1];
+  return {fromParticipantId, toParticipantId};
 }

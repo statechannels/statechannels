@@ -144,6 +144,43 @@ describe("message listener", () => {
       });
     });
 
+    it("handles a pushMessage with a channel updated message", async () => {
+      const signedState = appState({turnNum: 5});
+
+      const pushMessage = {
+        jsonrpc: "2.0",
+        method: "PushMessage",
+        id: 1,
+        params: {
+          recipient: "user-a",
+          sender: "user-b",
+          data: {type: "Channel.Updated", signedState}
+        }
+      };
+
+      const {effects} = await expectSaga(messageHandler, pushMessage, "localhost")
+        .withState(initialState)
+        // Mock out the fork call so we don't actually try to post the message
+        .provide([
+          [matchers.fork.fn(messageSender), 0],
+          [matchers.select.selector(getAddress), asAddress],
+          [
+            matchers.call.fn(getProvider),
+            {
+              getCode: address => {
+                return "0x12345";
+              }
+            }
+          ]
+        ])
+        .run();
+
+      expect(effects.put[0].payload.action).toMatchObject({
+        type: "WALLET.APPLICATION.OPPONENT_STATE_RECEIVED",
+        signedState
+      });
+    });
+
     it("handles a pushMessage with a relay action message", async () => {
       const actionToRelay = strategyApproved({
         strategy: "IndirectFundingStrategy",
@@ -452,6 +489,11 @@ describe("message listener", () => {
       expect(effects.fork[0].payload.args[0]).toMatchObject({
         type: "WALLET.UPDATE_CHANNEL_RESPONSE",
         id: 1,
+        channelId: stateHelpers.channelId
+      });
+
+      expect(effects.fork[1].payload.args[0]).toMatchObject({
+        type: "WALLET.SEND_CHANNEL_UPDATED_MESSAGE",
         channelId: stateHelpers.channelId
       });
     });
