@@ -38,7 +38,7 @@ class ChannelProvider implements IChannelProvider {
     this.events.emit('connect');
   }
 
-  async send<ResultType = any>(method: string, params: any[] = []): Promise<ResultType> {
+  async send<ResultType = any>(method: string, params: object = {}): Promise<ResultType> {
     const target = await this.ui.getTarget();
     const response = (await this.messaging.request(target, {
       jsonrpc: '2.0',
@@ -49,7 +49,7 @@ class ChannelProvider implements IChannelProvider {
     return response;
   }
 
-  async subscribe(subscriptionType: string, params: any[] = []): Promise<string> {
+  async subscribe(subscriptionType: string, params: object = {}): Promise<string> {
     const response = await this.send<JsonRpcSubscribeResult>('chan_subscribe', [
       subscriptionType,
       ...params

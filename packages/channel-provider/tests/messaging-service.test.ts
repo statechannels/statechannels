@@ -13,7 +13,7 @@ describe('MessagingService', () => {
     jsonrpc: '2.0',
     id: 123,
     method: 'foo',
-    params: ['bar', 1, true]
+    params: {0: 'bar', 1: 1, 2: true}
   } as JsonRpcRequest;
 
   const response = {

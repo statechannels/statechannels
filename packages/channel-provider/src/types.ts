@@ -4,7 +4,7 @@ export type JsonRpcRequest = {
   id?: number;
   jsonrpc: '2.0';
   method: string;
-  params: any[];
+  params: object;
 };
 
 export type JsonRpcResponse<ResultType = any> = {
@@ -29,8 +29,8 @@ export type JsonRpcErrorResponse = {
 
 export interface IChannelProvider {
   enable(url?: string): Promise<void>;
-  send<ResultType = any>(method: string, params?: any[]): Promise<ResultType>;
-  subscribe(subscriptionType: string, params?: any[]): Promise<string>;
+  send<ResultType = any>(method: string, params?: object): Promise<ResultType>;
+  subscribe(subscriptionType: string, params?: object): Promise<string>;
   unsubscribe(subscriptionId: string): Promise<boolean>;
   on(event: string, callback: ListenerFn): void;
   off(event: string, callback?: ListenerFn): void;
