@@ -49,6 +49,8 @@ export function validAppTransition(
     numberOfParticipants
   ]);
   const result = window.PureEVM.exec(
+    // NOTE: A Buffer polyfill is added by webpack in the browser. It is a primitive in Node.JS
+    // https://github.com/webpack/docs/wiki/internal-webpack-plugins#nodenodesourcepluginoptions
     Uint8Array.from(Buffer.from(bytecode.substr(2), "hex")),
     Uint8Array.from(Buffer.from(txData.substr(2), "hex"))
   );
