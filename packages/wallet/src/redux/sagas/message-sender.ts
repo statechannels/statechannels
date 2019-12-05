@@ -7,6 +7,8 @@ import {createJsonRpcAllocationsFromOutcome} from "../../utils/json-rpc-utils";
 import jrs from "jsonrpc-lite";
 import {unreachable} from "../../utils/reducer-utils";
 import {validateResponse, validateNotification} from "../../json-rpc-validation/validator";
+import {getChannelHoldings} from "../selectors";
+import {bigNumberify} from "ethers/utils";
 
 export function* messageSender(action: OutgoingApiAction) {
   const message = yield createResponseMessage(action);
@@ -113,7 +115,13 @@ function* getChannelInfo(channelId: string) {
 
   const {participants} = channelStatus;
   const {appData, appDefinition, turnNum} = state;
-  const funding = [];
+
+  const channelHoldings = yield select(getChannelHoldings, channelId);
+  let funding: any[] = [];
+  // TODO: For now we assume ETH
+  if (!bigNumberify(channelHoldings).isZero()) {
+    funding = [{token: "0x0", amount: channelHoldings}];
+  }
   const status = channelStatus.turnNum < participants.length - 1 ? "Opening" : "Running";
   return {
     participants,
