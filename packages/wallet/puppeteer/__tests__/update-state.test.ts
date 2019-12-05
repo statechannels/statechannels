@@ -18,8 +18,8 @@ describe("State Updating", () => {
   let playerAAddress;
   let playerBAddress;
   let walletMessages: Emittery.Typed<MessageEventTypes>;
-  // let messageQueueFromA;
-  // let messageQueueFromB;
+  let messageQueueFromA;
+  let messageQueueFromB;
   beforeAll(async () => {
     browserA = await setUpBrowser(true);
     browserB = await setUpBrowser(true);
@@ -28,8 +28,8 @@ describe("State Updating", () => {
     walletB = await browserB.newPage();
 
     walletMessages = new Emittery.Typed<MessageEventTypes>();
-    // messageQueueFromA = walletMessages.events(MessageType.PlayerAMessage);
-    // messageQueueFromB = walletMessages.events(MessageType.PlayerBMessage);
+    messageQueueFromA = walletMessages.events(MessageType.PlayerAMessage);
+    messageQueueFromB = walletMessages.events(MessageType.PlayerBMessage);
 
     await loadWallet(walletA, createMessageHandler(walletMessages, "A"));
     await loadWallet(walletB, createMessageHandler(walletMessages, "B"));
@@ -42,12 +42,24 @@ describe("State Updating", () => {
   it("updates the state for player A", async () => {
     const updateStatePromise: Promise<any> = walletMessages.once(MessageType.PlayerAResult);
     await sendUpdateState(walletA, channelId, playerAAddress, playerBAddress);
-    expect(await updateStatePromise).toBeDefined();
+    const response = await updateStatePromise;
+
+    expect(response).toMatchObject({
+      turnNum: 4,
+      status: "Running",
+      channelId
+    });
   });
   it("updates the state for player B", async () => {
     const updateStatePromise: Promise<any> = walletMessages.once(MessageType.PlayerBResult);
     await sendUpdateState(walletB, channelId, playerAAddress, playerBAddress);
-    expect(await updateStatePromise).toBeDefined();
+    const response = await updateStatePromise;
+
+    expect(response).toMatchObject({
+      turnNum: 4,
+      status: "Running",
+      channelId
+    });
   });
 
   afterAll(async () => {
