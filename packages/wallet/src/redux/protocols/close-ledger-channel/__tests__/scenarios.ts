@@ -1,7 +1,6 @@
 import * as states from "../states";
 import * as withdrawalScenarios from "../../withdrawing/__tests__/scenarios";
 import * as testScenarios from "../../../__tests__/state-helpers";
-import _ from "lodash";
 import {prependToLocator} from "../..";
 import {EmbeddedProtocol} from "../../../../communication";
 import * as advanceChannelScenarios from "../../advance-channel/__tests__";

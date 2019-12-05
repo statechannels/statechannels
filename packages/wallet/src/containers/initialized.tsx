@@ -18,7 +18,6 @@ class WalletInitializedContainer extends PureComponent<Props> {
       const protocolState = selectors.getProtocolState(state, state.currentProcessId);
       return <Protocol protocolState={protocolState} />;
     }
-    return <LandingPage />;
   }
 }
 

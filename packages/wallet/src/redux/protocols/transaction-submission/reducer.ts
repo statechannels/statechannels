@@ -88,7 +88,7 @@ function transactionConfirmed(state: NonTerminalTSState, storage: Storage): Retu
     case "TransactionSubmission.WaitForConfirmation":
     case "TransactionSubmission.WaitForSubmission": // in case we didn't hear the TRANSACTION_SUBMITTED
     case "TransactionSubmission.WaitForSend": // in case we didn't hear the TRANSACTION_SENT
-      return {state: success({}), storage};
+      return {state: success(), storage};
     default:
       return {state, storage};
   }

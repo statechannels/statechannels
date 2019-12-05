@@ -1,8 +1,11 @@
 import React from "react";
-import {PureComponent} from "react";
 import NetworkStatus from "./network-status";
 
-export default class StatusBarLayout extends PureComponent {
+interface Props {
+  children: any;
+}
+
+export default class StatusBarLayout extends React.PureComponent<Props> {
   render() {
     return (
       <div className="d-flex flex-column h-100">
