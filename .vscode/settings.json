@@ -8,5 +8,5 @@
     {"directory": "packages/jest-gas-reporter", "changeProcessCWD": true},
     {"directory": "packages/nitro-protocol", "changeProcessCWD": true}
   ],
-  "editor.formatOnSave": true
+  "editor.formatOnSave": false
 }
