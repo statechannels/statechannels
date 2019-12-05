@@ -45,8 +45,8 @@ describe("message sender", () => {
       jsonrpc: "2.0",
       method: "MessageQueued",
       params: {
-        recipient: "A",
-        sender: "B",
+        recipient: "B",
+        sender: "A",
         data: {type: "Channel.Open", signedState: state}
       }
     });
@@ -75,8 +75,8 @@ describe("message sender", () => {
       jsonrpc: "2.0",
       method: "MessageQueued",
       params: {
-        recipient: "A",
-        sender: "B",
+        recipient: "B",
+        sender: "A",
         data: {type: "Channel.Joined", signedState: state}
       }
     });
@@ -106,8 +106,8 @@ describe("message sender", () => {
       jsonrpc: "2.0",
       method: "MessageQueued",
       params: {
-        recipient: "A",
-        sender: "B",
+        recipient: "B",
+        sender: "A",
         data: actionToRelay
       }
     });
