@@ -109,6 +109,7 @@ const propsB = {
 
 export const localStatesB = {
   lobby: s.lobby(propsB),
+  createOpenGame: s.creatingOpenGame(propsB),
   waitingRoom: s.waitingRoom(propsB),
   opponentJoined: s.opponentJoined(propsB),
   chooseWeapon: s.chooseWeapon(propsB),
