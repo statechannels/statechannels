@@ -73,8 +73,9 @@ const localReducer: Reducer<LocalState> = (
       if (action.type === 'ResultArrived') {
         if (action.fundingSituation === 'Ok') {
           newState = A.resultPlayAgain({...state, ...action});
+        } else {
+          newState = EndGame.insufficientFunds({...state, ...action});
         }
-        newState = EndGame.insufficientFunds({...state, ...action});
       }
       break;
     case 'A.ResultPlayAgain':
@@ -93,6 +94,11 @@ const localReducer: Reducer<LocalState> = (
       }
       break;
     case 'B.ResultPlayAgain':
+      if (action.type === 'PlayAgain') {
+        newState = B.waitForRestart({...state, ...action});
+      }
+      break;
+    case 'B.WaitForRestart':
     case 'B.OpponentJoined':
       if (action.type === 'StartRound') {
         newState = B.chooseWeapon({...state, ...action});
@@ -107,8 +113,9 @@ const localReducer: Reducer<LocalState> = (
       if (action.type === 'ResultArrived') {
         if (action.fundingSituation === 'Ok') {
           newState = B.resultPlayAgain({...state, ...action});
+        } else {
+          newState = EndGame.insufficientFunds({...state, ...action});
         }
-        newState = EndGame.insufficientFunds({...state, ...action});
       }
       break;
     case 'EndGame.Resigned':
