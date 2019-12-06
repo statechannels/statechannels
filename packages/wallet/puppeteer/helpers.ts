@@ -60,7 +60,7 @@ export async function loadWallet(page: puppeteer.Page, messageListener: (message
     }
   });
 
-  await page.waitFor(500); // Delay lets things load
+  await page.waitFor(1000); // Delay lets things load
   // interceptMessage gets called in puppeteer's context
   await page.exposeFunction("interceptMessage", message => {
     messageListener(message);
