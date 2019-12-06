@@ -63,6 +63,7 @@ jobs:
             - packages/*/build
             - packages/*/lib
             - packages/*/node_modules
+            - packages/client-api-schema/types
             - node_modules
       - upload_logs:
           file: prepare-stats
