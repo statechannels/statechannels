@@ -283,8 +283,8 @@ function* handleCreateChannelMessage(payload: RequestObject) {
     yield fork(
       messageSender,
       outgoingMessageActions.sendChannelProposedMessage({
-        toParticipantId: participants[0].participantId,
-        fromParticipantId: participants[1].participantId,
+        toParticipantId: participants[1].participantId,
+        fromParticipantId: participants[0].participantId,
         channelId: getChannelId(state.channel)
       })
     );

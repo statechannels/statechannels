@@ -303,6 +303,8 @@ describe("message listener", () => {
       });
       expect(effects.fork[1].payload.args[0]).toMatchObject({
         type: "WALLET.SEND_CHANNEL_PROPOSED_MESSAGE",
+        toParticipantId: "user-b",
+        fromParticipantId: "user-a",
         channelId: expect.any(String)
       });
     });
