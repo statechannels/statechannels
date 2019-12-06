@@ -72,7 +72,7 @@ module.exports = {
   ],
   rules: {
     // Prettier violations should result in linting errors
-    "prettier/prettier": ["error", require("./.prettierrc.js")],
+    "prettier/prettier": "warn",
 
     // @typescript-eslint/no-unused-vars overrides this
     "no-unused-vars": "off",
