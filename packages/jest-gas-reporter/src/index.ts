@@ -1,9 +1,10 @@
-import fs from 'fs';
-import path from 'path';
-import easyTable from 'easy-table';
+import {Interface, ParamType} from 'ethers/utils';
 import {JsonRpcProvider} from 'ethers/providers';
-import {Interface} from 'ethers/utils';
+import easyTable from 'easy-table';
+import fs from 'fs';
 import linker from 'solc/linker';
+import path from 'path';
+
 interface MethodCalls {
   [methodName: string]: {
     gasData: number[];
@@ -24,24 +25,35 @@ interface ContractCalls {
   };
 }
 
+interface Options {
+  contractArtifactFolder: string;
+}
+
+interface ParsedArtifact {
+  abi: ParamType[];
+  deployedBytecode: object;
+  contractName: string;
+  networks: {[networkName: string]: {address: string}};
+}
+
 /* TODO: 
  - Handle failures gracefully
  - Organize and clean up
 */
 
 export class GasReporter implements jest.Reporter {
-  options: any;
+  options: Options;
   provider: JsonRpcProvider;
-  globalConfig: any;
+  globalConfig: jest.GlobalConfig;
   startBlockNum = 0;
 
-  constructor(globalConfig: any, options: any) {
+  constructor(globalConfig: jest.GlobalConfig, options: Options) {
     this.globalConfig = globalConfig;
     this.options = options;
     this.provider = new JsonRpcProvider(`http://localhost:${process.env.GANACHE_PORT || 8545}`);
   }
 
-  onRunStart(results: jest.AggregatedResult, options: jest.ReporterOnStartOptions): void {
+  onRunStart(): void {
     if (!this.options.contractArtifactFolder) {
       console.log(
         "The contractArtifactFolder was not set in options, assuming a default folder of '/build/contracts/'"
@@ -59,7 +71,7 @@ export class GasReporter implements jest.Reporter {
       });
   }
 
-  onRunComplete(contexts: jest.Set<jest.Context>, results: jest.AggregatedResult): Promise<void> {
+  onRunComplete(): Promise<void> {
     return new Promise((resolve, reject) => {
       this.generateFinalResults()
         .then(() => {
@@ -71,7 +83,7 @@ export class GasReporter implements jest.Reporter {
     });
   }
 
-  async generateFinalResults() {
+  async generateFinalResults(): Promise<void> {
     const endBlockNum = await this.provider.getBlockNumber();
     const contractCalls = await this.parseContractCalls(
       this.startBlockNum,
@@ -115,7 +127,7 @@ export class GasReporter implements jest.Reporter {
     return contractCalls;
   }
 
-  parseCode(parsedArtifact: any, contractCalls: ContractCalls) {
+  parseCode(parsedArtifact: ParsedArtifact, contractCalls: ContractCalls): void {
     const lookup = {};
     for (const contractName of Object.keys(contractCalls)) {
       if (contractCalls[contractName].address) {
@@ -129,7 +141,11 @@ export class GasReporter implements jest.Reporter {
     }
   }
 
-  parseInterfaceAndAddress(parsedArtifact: any, networkId: number, contractCalls: ContractCalls) {
+  parseInterfaceAndAddress(
+    parsedArtifact: ParsedArtifact,
+    networkId: number,
+    contractCalls: ContractCalls
+  ): void {
     // Only attempt to parse as a contract if we have a defined ABI and contractName
     if (parsedArtifact.abi && parsedArtifact.contractName) {
       const contractInterface = new Interface(parsedArtifact.abi);
@@ -137,7 +153,7 @@ export class GasReporter implements jest.Reporter {
       contractCalls[parsedArtifact.contractName] = {
         methodCalls: {},
         code: '',
-        interface: contractInterface,
+        interface: contractInterface
       };
 
       if (parsedArtifact.networks[networkId]) {
@@ -147,7 +163,7 @@ export class GasReporter implements jest.Reporter {
     }
   }
 
-  outputGasInfo(contractCalls: ContractCalls) {
+  outputGasInfo(contractCalls: ContractCalls): void {
     console.log();
     console.log('Gas Info:');
     console.log();
@@ -193,7 +209,7 @@ export class GasReporter implements jest.Reporter {
     console.log(deployTable.toString());
   }
 
-  async parseBlock(blockNum: number, contractCalls: ContractCalls) {
+  async parseBlock(blockNum: number, contractCalls: ContractCalls): Promise<void> {
     const block = await this.provider.getBlock(blockNum);
     for (const transHash of block.transactions) {
       const transaction = await this.provider.getTransaction(transHash);
@@ -211,7 +227,7 @@ export class GasReporter implements jest.Reporter {
               if (!contractCall.methodCalls[details.name]) {
                 contractCall.methodCalls[details.name] = {
                   gasData: [],
-                  calls: 0,
+                  calls: 0
                 };
               }
               contractCall.methodCalls[details.name].gasData.push(
