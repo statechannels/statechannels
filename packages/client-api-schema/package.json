@@ -10,7 +10,8 @@
     "build": "ts-node index.ts",
     "lint:check": "eslint index.ts",
     "lint:write": "eslint index.ts --fix",
-    "precommit": "lint-staged --quiet"
+    "precommit": "lint-staged --quiet",
+    "prepare": "yarn build"
   },
   "repository": {
     "type": "git",
