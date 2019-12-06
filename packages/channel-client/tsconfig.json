@@ -1,8 +1,11 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "outDir": "lib"
+    // TODO: Build with webpack
     // This package is meant to emit webpack processed files
-    "noEmit": true
+    // "noEmit": true
   },
-  "references": [{ "path": "../channel-provider" }]
+  "references": [{ "path": "../channel-provider" }],
+  "include": ["src", "tests"]
 }

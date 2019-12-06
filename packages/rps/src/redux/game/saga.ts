@@ -61,7 +61,9 @@ function* gameSagaRun(client: RPSChannelClient) {
 
   switch (localState.type) {
     case 'NeedAddress':
+      console.log('getAddress');
       const address: string = yield call([client, 'getAddress']);
+      console.log(address);
       yield put(a.gotAddressFromWallet(address));
       break;
     case 'GameChosen': // player A

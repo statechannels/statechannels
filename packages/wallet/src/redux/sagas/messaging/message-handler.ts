@@ -234,6 +234,8 @@ function* handleCreateChannelMessage(payload: RequestObject) {
   const addressMatches = participants[0].signingAddress !== address;
 
   const provider = yield call(getProvider);
+  console.log(appDefinition);
+  console.log(provider);
   const bytecode =
     appDefinition !== AddressZero ? yield call(provider.getCode, appDefinition) : "0x0";
   const contractAtAddress = bytecode.length > 2;

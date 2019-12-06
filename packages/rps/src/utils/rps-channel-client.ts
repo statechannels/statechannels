@@ -1,15 +1,26 @@
 import { AppData, ChannelState, encodeAppData, decodeAppData } from '../core';
-import { IChannelClient, Message, FakeChannelClient, ChannelResult } from './channel-client';
+import ChannelClient, {
+  ChannelResult,
+  Message,
+  ChannelClientInterface,
+} from '@statechannels/channel-client';
 import { RPS_ADDRESS } from '../constants';
+import { IChannelProvider, channelProvider } from '@statechannels/channel-provider';
+import { bigNumberify } from 'ethers/utils';
 
 // This class wraps the channel client converting the request/response formats to those used in the app
 
 export class RPSChannelClient {
-  channelClient: IChannelClient;
+  channelClient: ChannelClientInterface;
 
-  constructor() {
+  async enable() {
+    // TODO: Use webpack to import channelProvider
+    console.log(channelProvider);
+    const provider: IChannelProvider = (window as any).channelProvider;
+    await provider.enable('http://localhost:3055');
+    console.log('Done');
     // might want to pass this in later
-    this.channelClient = new FakeChannelClient();
+    this.channelClient = new ChannelClient(provider);
   }
 
   async createChannel(
@@ -22,7 +33,7 @@ export class RPSChannelClient {
     const participants = formatParticipants(aAddress, bAddress);
     const allocations = formatAllocations(aAddress, bAddress, aBal, bBal);
     const appDefinition = RPS_ADDRESS;
-
+    console.log(allocations);
     const appData = encodeAppData(appAttrs);
 
     // ignore return val for now and stub out response
@@ -117,8 +128,8 @@ const formatAllocations = (aAddress: string, bAddress: string, aBal: string, bBa
     {
       token: '0x0',
       allocationItems: [
-        { destination: aAddress, amount: aBal },
-        { destination: bAddress, amount: bBal },
+        { destination: aAddress, amount: bigNumberify(aBal).toHexString() },
+        { destination: bAddress, amount: bigNumberify(bBal).toHexString() },
       ],
     },
   ];

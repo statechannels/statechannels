@@ -18,10 +18,18 @@ export enum ErrorCodes {
   CHANNEL_NOT_FOUND = 1004
 }
 
+export {
+  ChannelClientInterface,
+  ChannelResult,
+  UnsubscribeFunction,
+  Message,
+  Participant,
+  Allocation,
+  PushMessageResult
+} from './types';
+
 export default class ChannelClient implements ChannelClientInterface<ChannelResult> {
-  constructor(private readonly provider: IChannelProvider) {
-    this.provider.enable();
-  }
+  constructor(private readonly provider: IChannelProvider) {}
 
   // TODO: Ask Tom if this needs to be a synchronous function
   onMessageQueued(callback: (message: Message<ChannelResult>) => void): UnsubscribeFunction {

@@ -1,5 +1,5 @@
 import { applyMiddleware, compose, createStore } from 'redux';
-import { fork } from 'redux-saga/effects';
+import { fork, call } from 'redux-saga/effects';
 import createSagaMiddleware from 'redux-saga';
 
 import reducer from './reducer';
@@ -21,6 +21,9 @@ const store = createStore(reducer, enhancers);
 const client = new RPSChannelClient();
 
 function* rootSaga() {
+  yield call([client, client.enable]);
+
+  console.log('Client enabled');
   yield fork(loginSaga);
   yield fork(channelUpdatedListener, client);
   yield fork(messageQueuedListener, client);
