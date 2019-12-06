@@ -34,8 +34,8 @@ const itTransitionsToFailure = (
 const itCallsRespondWithMoveWith = (responseState: State) => {
   it("calls respond with move with the correct state", () => {
     expect(createRespondWithMoveMock).toHaveBeenCalledWith(
-      jasmine.any(Object),
-      jasmine.objectContaining({state: responseState})
+      expect.anything(),
+      expect.objectContaining({state: responseState})
     );
   });
 };

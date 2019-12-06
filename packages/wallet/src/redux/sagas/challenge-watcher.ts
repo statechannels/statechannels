@@ -8,7 +8,7 @@ import {ChannelSubscriber} from "../state";
 
 export function* challengeWatcher() {
   const provider = yield getProvider();
-  const blockMinedChannel = yield createBlockMinedEventChannel(provider);
+  const blockMinedChannel = createBlockMinedEventChannel(provider);
   while (true) {
     const blockNumber = yield take(blockMinedChannel);
     const block = yield provider.getBlock(blockNumber);
@@ -36,7 +36,7 @@ export function* challengeWatcher() {
   }
 }
 
-function* createBlockMinedEventChannel(provider) {
+function createBlockMinedEventChannel(provider) {
   return eventChannel(emit => {
     provider.on("block", blockNumber => {
       emit(blockNumber);

@@ -44,7 +44,6 @@ function* createResponseMessage(action: OutgoingApiAction) {
         sender: action.toParticipantId,
         data: action.actionToRelay
       });
-      break;
     case "WALLET.SEND_CHANNEL_PROPOSED_MESSAGE":
       const proposedChannelStatus: ChannelState = yield select(getChannelStatus, action.channelId);
 
@@ -85,7 +84,6 @@ function* createResponseMessage(action: OutgoingApiAction) {
     case "WALLET.API_NOT_IMPLEMENTED":
       console.error(`No API method implemented for ${action.apiMethod}`);
       return undefined;
-      break;
     default:
       return unreachable(action);
   }

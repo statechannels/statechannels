@@ -4,7 +4,7 @@ import {faDotCircle} from "@fortawesome/free-solid-svg-icons";
 import {connect} from "react-redux";
 import {getNetworkId} from "../utils/contract-utils";
 
-export class NetworkStatus extends React.PureComponent {
+export class NetworkStatusComponent extends React.PureComponent {
   render() {
     const networkId = getNetworkId();
     switch (networkId) {
@@ -48,4 +48,4 @@ export class NetworkStatus extends React.PureComponent {
   }
 }
 
-export default connect()(NetworkStatus);
+export default connect()(NetworkStatusComponent);

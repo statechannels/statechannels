@@ -245,7 +245,7 @@ function itHasFailureReason(result: ReturnVal, reason: FailureReason) {
     if ("reason" in result.state) {
       expect(result.state.reason).toEqual(reason);
     } else {
-      fail(`State ${result.state.type} doesn't have a failure reason.`);
+      throw new Error(`State ${result.state.type} doesn't have a failure reason.`);
     }
   });
 }
