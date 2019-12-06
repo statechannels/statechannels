@@ -36,7 +36,8 @@ state Setup{
     OpponentJoined -[#red]->ChooseWeaponB : StartRound
     ChooseWeaponB -[#red]-> WeaponChosenB : ChooseWeapon
     WeaponChosenB -[#red]-> ResultPlayAgainB : ResultArrived
-    ResultPlayAgainB -[#red]-> ChooseWeaponB : StartRound
+    ResultPlayAgainB -[#red]-> WaitForRestartB: PlayAgain
+    WaitForRestartB -[#red]-> ChooseWeaponB : StartRound
     }
 
 ' Endgame
@@ -57,5 +58,7 @@ state EndGame {
 '    GameChosen: <ProposeGame />
 '    OpponentJoined: <OpponentJoined />
 '    ChooseWeapon: <ChooseWeapon />
+
+' style arrows to differentiate UI action from sage-put action ?
 @enduml
 ```
