@@ -240,7 +240,7 @@ function* handleCreateChannelMessage(payload: RequestObject) {
   const {id} = payload;
 
   const address = yield select(getAddress);
-  const addressMatches = participants[0].signingAddress !== address;
+  const addressMatches = participants[0].signingAddress === address;
 
   const provider = yield call(getProvider);
   const bytecode =

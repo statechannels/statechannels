@@ -268,7 +268,7 @@ describe("message listener", () => {
         // Mock out the fork call so we don't actually try to post the message
         .provide([
           [matchers.fork.fn(messageSender), 0],
-          [matchers.select.selector(getAddress), asAddress],
+          [matchers.select.selector(getAddress), signingAddressA],
           [
             matchers.call.fn(getProvider),
             {
@@ -353,7 +353,7 @@ describe("message listener", () => {
         // Mock out the fork call so we don't actually try to post the message
         .provide([
           [matchers.fork.fn(messageSender), 0],
-          [matchers.select.selector(getAddress), asAddress],
+          [matchers.select.selector(getAddress), signingAddressA],
           [
             matchers.call.fn(getProvider),
             {
@@ -416,7 +416,7 @@ describe("message listener", () => {
         // Mock out the fork call so we don't actually try to post the message
         .provide([
           [matchers.fork.fn(messageSender), 0],
-          [matchers.select.selector(getAddress), asAddress],
+          [matchers.select.selector(getAddress), Wallet.createRandom().address],
           [
             matchers.call.fn(getProvider),
             {
@@ -429,7 +429,7 @@ describe("message listener", () => {
         .run();
 
       expect(effects.fork[0].payload.args[0]).toMatchObject({
-        type: "WALLET.NO_CONTRACT_ERROR",
+        type: "WALLET.UNKNOWN_SIGNING_ADDRESS_ERROR",
         id: 1
       });
     });
