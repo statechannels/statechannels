@@ -11,6 +11,7 @@ module.exports = {
     'plugin:prettier/recommended'
   ],
   rules: {
-    'prettier/prettier': 'warn'
+    'prettier/prettier': 'warn',
+    '@typescript-eslint/ban-ts-ignore': 'off'
   }
 };

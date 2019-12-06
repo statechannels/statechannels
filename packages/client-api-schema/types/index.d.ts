@@ -3,11 +3,15 @@
 // https://github.com/bcherny/json-schema-to-typescript/issues/16
 
 export * from './create-channel';
+// @ts-ignore
 export * from './definitions';
 export * from './get-address';
+// @ts-ignore
 export * from './join-channel';
 export * from './notification';
 export * from './push-message';
 export * from './request';
+// @ts-ignore
 export * from './response';
+// @ts-ignore
 export * from './update-channel';
