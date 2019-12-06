@@ -41,7 +41,7 @@ const importRules = {
 };
 
 const reactRules = {
-  "react/no-unescaped-entities": "off",
+  "react/no-unescaped-entities": "off"
 };
 
 module.exports = {
@@ -55,11 +55,9 @@ module.exports = {
   },
   plugins: ["@typescript-eslint", "prettier", "jest", "react"],
   settings: {
-    "settings": {
-      // TODO: Fix a warning being thrown despite the version being set here
-      "react": {
-        "version": "detect"
-      }
+    // TODO: Fix a warning being thrown despite the version being set here
+    react: {
+      version: "detect"
     }
   },
   extends: [
