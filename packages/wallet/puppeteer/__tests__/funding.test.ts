@@ -11,7 +11,7 @@ import {
 } from "../helpers";
 import Emittery from "emittery";
 
-jest.setTimeout(10000);
+jest.setTimeout(30000);
 
 describe("Funding", () => {
   let browserA;

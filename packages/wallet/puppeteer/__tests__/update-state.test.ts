@@ -8,7 +8,9 @@ import {
   MessageType
 } from "../helpers";
 import Emittery from "emittery";
-jest.setTimeout(100000);
+
+jest.setTimeout(30000);
+
 describe("State Updating", () => {
   let browserA;
   let browserB;
@@ -44,23 +46,38 @@ describe("State Updating", () => {
 
   it("updates the state for player A", async () => {
     const updateStatePromise: Promise<any> = walletMessages.once(MessageType.PlayerAResult);
+
     await sendUpdateState(walletA, channelId, playerAAddress, playerBAddress);
     const response = await updateStatePromise;
 
-    expect(response).toMatchObject({
+    expect(response.result).toMatchObject({
       turnNum: 4,
       status: "Running",
       channelId
     });
   });
+
   it("sends a channel updated message to player B", async () => {
-    const channelUpdatedMessage = (await messageQueueFromA.next()).value;
+    let channelUpdatedMessage;
+    for await (const message of messageQueueFromA) {
+      if (message.params.data.type === "Channel.Updated") {
+        channelUpdatedMessage = message;
+        break;
+      }
+    }
+
     expect(channelUpdatedMessage.params.data.type).toEqual("Channel.Updated");
   });
 
-  it("sends a channel updated event", async () => {
-    const channelUpdatedEvent = (await notificationQueueFromB.next()).value;
-    expect(channelUpdatedEvent.method).toEqual("ChannelUpdated");
+  it("sends a channel updated event from player B's wallet", async () => {
+    let channelUpdatedEvent;
+    for await (const message of notificationQueueFromB) {
+      if (message.method === "ChannelUpdated") {
+        channelUpdatedEvent = message;
+        break;
+      }
+    }
+    expect(channelUpdatedEvent.params.channelId).toEqual(channelId);
   });
 
   it("updates the state for player B", async () => {
@@ -68,7 +85,7 @@ describe("State Updating", () => {
     await sendUpdateState(walletB, channelId, playerAAddress, playerBAddress);
     const response = await updateStatePromise;
 
-    expect(response).toMatchObject({
+    expect(response.result).toMatchObject({
       turnNum: 5,
       status: "Running",
       channelId
@@ -76,13 +93,25 @@ describe("State Updating", () => {
   });
 
   it("sends a channel updated message to player A", async () => {
-    const channelUpdatedMessage = (await messageQueueFromB.next()).value;
+    let channelUpdatedMessage;
+    for await (const message of messageQueueFromB) {
+      if (message.params.data.type === "Channel.Updated") {
+        channelUpdatedMessage = message;
+        break;
+      }
+    }
     expect(channelUpdatedMessage.params.data.type).toEqual("Channel.Updated");
   });
 
-  it("sends a channel updated event", async () => {
-    const channelUpdatedEvent = (await notificationQueueFromA.next()).value;
-    expect(channelUpdatedEvent.method).toEqual("ChannelUpdated");
+  it("sends a channel updated notification from player A's wallet", async () => {
+    let channelUpdatedEvent;
+    for await (const message of notificationQueueFromA) {
+      if (message.method === "ChannelUpdated") {
+        channelUpdatedEvent = message;
+        break;
+      }
+    }
+    expect(channelUpdatedEvent.params.channelId).toEqual(channelId);
   });
 
   afterAll(async () => {
