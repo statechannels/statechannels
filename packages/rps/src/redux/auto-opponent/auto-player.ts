@@ -51,26 +51,26 @@ function* autoPlayerBRun() {
   const {localState, channelState}: GameState = yield select(getGameState);
 
   switch (localState.type) {
-    case 'Lobby':
+    case 'Setup.Lobby':
       yield put(newOpenGame());
       break;
-    case 'CreatingOpenGame':
+    case 'B.CreatingOpenGame':
       yield put(createGame(WeiPerEther.toString()));
       break;
-    case 'ChooseWeapon':
+    case 'B.ChooseWeapon':
       yield put(chooseWeapon(Weapon.Rock));
       break;
-    case 'ResultPlayAgain':
+    case 'B.ResultPlayAgain':
       if (channelState && bigNumberify(channelState.turnNum).lt(12)) {
         yield put(playAgain());
       } else {
         yield put(resign(true));
       }
       break;
-    case 'Resigned':
+    case 'EndGame.Resigned':
       yield put(gameOver());
       break;
-    case 'InsufficientFunds':
+    case 'EndGame.InsufficientFunds':
       yield put(gameOver());
       break;
   }
@@ -88,27 +88,27 @@ function* autoPlayerARun() {
   const {localState, channelState}: GameState = yield select(getGameState);
 
   switch (localState.type) {
-    case 'Lobby':
+    case 'Setup.Lobby':
       const openGame = yield select(getOpenGame);
       if (openGame) {
         const {address, name, stake} = openGame;
         yield put(joinOpenGame(name, address, stake));
       }
       break;
-    case 'ChooseWeapon':
+    case 'A.ChooseWeapon':
       yield put(chooseWeapon(Weapon.Scissors));
       break;
-    case 'ResultPlayAgain':
+    case 'A.ResultPlayAgain':
       if (channelState && bigNumberify(channelState.turnNum).lt(12)) {
         yield put(playAgain());
       } else {
         yield put(resign(true));
       }
       break;
-    case 'Resigned':
+    case 'EndGame.Resigned':
       yield put(gameOver());
       break;
-    case 'InsufficientFunds':
+    case 'EndGame.InsufficientFunds':
       yield put(gameOver());
       break;
   }

@@ -8,7 +8,7 @@ import * as gameActions from '../redux/game/actions';
 import WaitingRoomPage from '../components/WaitingRoomPage';
 import ProfileContainer from './ProfileContainer';
 
-import {LocalState, PlayingStateName} from '../redux/game/state';
+import {LocalState} from '../redux/game/state';
 
 import LobbyContainer from './LobbyContainer';
 import {
@@ -41,39 +41,42 @@ function RenderGame(props: GameProps) {
   const {localState} = props;
 
   switch (localState.type) {
-    case 'Empty':
+    case 'Setup.Empty':
       return <ProfileContainer />;
-    case 'NeedAddress':
-    case 'Lobby':
-    case 'CreatingOpenGame':
+    case 'Setup.NeedAddress':
+    case 'Setup.Lobby':
+    case 'B.CreatingOpenGame':
       return <LobbyContainer />;
-    case 'WaitingRoom':
+    case 'B.WaitingRoom':
       return (
         <WaitingRoomPage
           cancelOpenGame={props.cancelOpenGame}
           roundBuyIn={localState.roundBuyIn.toString()}
         />
       );
-    case 'GameChosen':
+    case 'A.GameChosen':
       return <ProposeGamePage message="Waiting for opponent to confirm" />;
-    case 'OpponentJoined':
+    case 'B.OpponentJoined':
       return (
         <ConfirmGamePage
           stake={localState.roundBuyIn.toString()}
           opponentName={localState.opponentName}
         />
       );
-    case 'ChooseWeapon':
+    case 'A.ChooseWeapon':
+    case 'B.ChooseWeapon':
       return <SelectWeaponPage chooseWeapon={props.chooseWeapon} />;
-    case 'WeaponChosen':
-    case 'WeaponAndSaltChosen':
+    case 'A.WeaponChosen':
+    case 'A.WeaponAndSaltChosen':
+    case 'B.WeaponChosen':
       return (
         <WeaponSelectedPage
           message="Waiting for your opponent to choose their move"
           yourWeapon={localState.myWeapon}
         />
       );
-    case 'ResultPlayAgain':
+    case 'A.ResultPlayAgain':
+    case 'B.ResultPlayAgain':
       return (
         <WaitForResting
           yourWeapon={localState.myWeapon}
@@ -83,7 +86,8 @@ function RenderGame(props: GameProps) {
           waitForOpponent={false}
         />
       );
-    case 'WaitForRestart':
+    case 'A.WaitForRestart':
+    case 'B.WaitForRestart':
       return (
         <WaitForResting
           yourWeapon={localState.myWeapon}
@@ -93,7 +97,7 @@ function RenderGame(props: GameProps) {
           waitForOpponent={true}
         />
       );
-    case 'InsufficientFunds':
+    case 'EndGame.InsufficientFunds':
       return (
         <InsufficientFunds
           yourWeapon={localState.myWeapon}
@@ -102,15 +106,10 @@ function RenderGame(props: GameProps) {
           action={props.gameOver}
         />
       );
-    case 'Resigned':
+    case 'EndGame.Resigned':
       return <Resigned iResigned={localState.iResigned} action={props.gameOver} />;
-    case 'GameOver':
-      return (
-        <GameOverPage
-          visible={(localState.type as PlayingStateName) === 'GameOver'}
-          exitToLobby={props.exitToLobby}
-        />
-      );
+    case 'EndGame.GameOver':
+      return <GameOverPage visible={true} exitToLobby={props.exitToLobby} />;
     default:
       unreachable(localState);
       throw new Error(`View not created`);

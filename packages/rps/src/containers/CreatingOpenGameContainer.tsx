@@ -6,7 +6,7 @@ import * as gameActions from '../redux/game/actions';
 import {SiteState} from '../redux/reducer';
 
 const mapStateToProps = (state: SiteState) => ({
-  visible: state.game.localState.type === 'CreatingOpenGame',
+  visible: state.game.localState.type === 'B.CreatingOpenGame',
 });
 
 const mapDispatchToProps = {
