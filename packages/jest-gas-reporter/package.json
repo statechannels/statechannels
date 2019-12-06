@@ -16,7 +16,7 @@
     "lint:write": "eslint \"src/**/*.ts\" --fix"
   },
   "lint-staged": {
-    "src/*.ts": "eslint"
+    "src/*.ts": "eslint --max-warnings=0"
   },
   "devDependencies": {
     "@types/easy-table": "0.0.32",
