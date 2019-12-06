@@ -1,5 +1,11 @@
 import {select, fork, put, call} from "redux-saga/effects";
 import {getChannelId, State} from "@statechannels/nitro-protocol";
+import {
+  JoinChannelParams,
+  PushMessageParams,
+  UpdateChannelParams,
+  CreateChannelParams
+} from "@statechannels/client-api-schema";
 import jrs, {RequestObject} from "jsonrpc-lite";
 
 import * as outgoingMessageActions from "./outgoing-api-actions";
@@ -14,8 +20,7 @@ import {messageSender} from "./message-sender";
 import {APPLICATION_PROCESS_ID} from "../../protocols/application/reducer";
 import {
   createStateFromCreateChannelParams,
-  createStateFromUpdateChannelParams,
-  JsonRpcMessage
+  createStateFromUpdateChannelParams
 } from "../../../utils/json-rpc-utils";
 
 import {getProvider} from "../../../utils/contract-utils";
@@ -74,7 +79,7 @@ function* handleMessage(payload: RequestObject) {
 
 function* handleJoinChannelMessage(payload: RequestObject) {
   const {id} = payload;
-  const {channelId} = payload.params as any;
+  const {channelId} = payload.params as JoinChannelParams;
 
   const channelExists = yield select(doesAStateExistForChannel, channelId);
 
@@ -108,11 +113,12 @@ function* handleJoinChannelMessage(payload: RequestObject) {
 function* handlePushMessage(payload: RequestObject) {
   // TODO: We need to handle the case where we receive an invalid wallet message
   const {id} = payload;
-  const message = payload.params as JsonRpcMessage;
+  const message = payload.params as PushMessageParams;
   if (isRelayableAction(message.data)) {
     yield put(message.data);
     yield fork(messageSender, outgoingMessageActions.postMessageResponse({id}));
   } else {
+    // TODO: Add schema for PushMessageParams.data to client-api-schema/schema/push-message.json
     switch (message.data.type) {
       case "Channel.Updated":
         yield put(
@@ -196,7 +202,7 @@ function* handlePushMessage(payload: RequestObject) {
 
 function* handleUpdateChannelMessage(payload: RequestObject) {
   const {id, params} = payload;
-  const {channelId} = params as any;
+  const {channelId} = params as UpdateChannelParams;
 
   const channelExists = yield select(doesAStateExistForChannel, channelId);
 
@@ -205,7 +211,10 @@ function* handleUpdateChannelMessage(payload: RequestObject) {
   } else {
     const mostRecentState: State = yield select(getLastStateForChannel, channelId);
 
-    const newState = createStateFromUpdateChannelParams(mostRecentState, payload.params as any);
+    const newState = createStateFromUpdateChannelParams(
+      mostRecentState,
+      params as UpdateChannelParams
+    );
 
     yield put(
       actions.application.ownStateReceived({
@@ -227,10 +236,10 @@ function* handleUpdateChannelMessage(payload: RequestObject) {
 
 function* handleCreateChannelMessage(payload: RequestObject) {
   // TODO: We should verify the params we expect are there
-  const {participants, appDefinition} = payload.params as any;
+  const {participants, appDefinition} = payload.params as CreateChannelParams;
   const {id} = payload;
 
-  const address = select(getAddress);
+  const address = yield select(getAddress);
   const addressMatches = participants[0].signingAddress !== address;
 
   const provider = yield call(getProvider);
@@ -249,7 +258,7 @@ function* handleCreateChannelMessage(payload: RequestObject) {
   } else if (!contractAtAddress) {
     yield fork(messageSender, outgoingMessageActions.noContractError({id, address: appDefinition}));
   } else {
-    const state = createStateFromCreateChannelParams(payload.params as any);
+    const state = createStateFromCreateChannelParams(payload.params as CreateChannelParams);
 
     yield put(
       actions.appDefinitionBytecodeReceived({
