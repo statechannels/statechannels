@@ -1,0 +1,44 @@
+{
+  "name": "@statechannels/client-api-schema",
+  "version": "0.0.1",
+  "description": "JSON-RPC Schema and TypeScript typings for the State Channels Client API",
+  "types": "types/index.d.ts",
+  "files": [
+    "schema"
+  ],
+  "scripts": {
+    "build": "ts-node index.ts",
+    "lint:check": "eslint index.ts",
+    "lint:write": "eslint index.ts --fix",
+    "precommit": "lint-staged --quiet"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/statechannels/monorepo/blob/master/packages/client-api-schema"
+  },
+  "keywords": [
+    "ethereum",
+    "state channels",
+    "client api",
+    "jsonrpc"
+  ],
+  "author": "snario <liam@l4v.io>",
+  "contributors": [
+    "Liam Horne <liam@l4v.io>",
+    "Alex Gap <alex.gap@consensys.net>"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/eslint": "^6.1.3",
+    "@types/eslint-plugin-prettier": "^2.2.0",
+    "@typescript-eslint/eslint-plugin": "^2.10.0",
+    "@typescript-eslint/parser": "^2.10.0",
+    "eslint": "^6.7.2",
+    "eslint-plugin-prettier": "^3.1.1",
+    "json-schema-to-typescript": "^8.0.0",
+    "lint-staged": "9.4.0"
+  },
+  "lint-staged": {
+    "index.ts": "yarn lint:check --max-warnings=0"
+  }
+}
