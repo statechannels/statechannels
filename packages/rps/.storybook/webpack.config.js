@@ -1,6 +1,6 @@
 const path = require('path');
 
-module.exports = async ({config, mode}) => {
+module.exports = async ({ config, mode }) => {
   config.module.rules.push({
     test: /\.(ts|tsx)$/,
     loader: require.resolve('awesome-typescript-loader'),

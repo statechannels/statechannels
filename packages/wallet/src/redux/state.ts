@@ -49,8 +49,8 @@ import {
 import {SignedState, State} from "@statechannels/nitro-protocol";
 import {CONSENSUS_LIBRARY_ADDRESS, CONSENSUS_LIBRARY_BYTECODE} from "../constants";
 import {getAppDefinitionBytecode} from "./selectors";
-import {relayActionWithMessage, OutgoingApiAction} from "./actions";
 import {AssetHoldersState} from "./asset-holders-state/state";
+import {relayActionWithMessage, OutgoingApiAction} from "./sagas/messaging/outgoing-api-actions";
 
 export type WalletState = Initialized;
 

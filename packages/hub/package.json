@@ -12,8 +12,8 @@
     "db:migrate": "npx knex migrate:latest --knexfile lib/config/knexfile",
     "db:rollback": "npx knex migrate:rollback --knexfile lib/config/knexfile",
     "db:seed": "npx knex seed:run --knexfile lib/config/knexfile",
-    "hub:start": "node ./lib/hub/server.js",
-    "hub:watch": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node ./src/hub/server.ts",
+    "hub:start:dev": "node ./lib/start-dev-server.js",
+    "hub:watch": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node ./src/start-dev-server.ts",
     "firebase-relay:start:sdev": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node src/message/firebase-relay",
     "chain:test": "npx jest --runInBand -c ./config/jest/jest.chain.config.js",
     "hub:test": "npx jest --runInBand -c ./config/jest/jest.config.js",
@@ -32,6 +32,7 @@
   "dependencies": {
     "@koa/cors": "2.2.3",
     "@statechannels/nitro-protocol": "0.0.1",
+    "@statechannels/wallet": "0.0.1",
     "async-lock": "1.2.2",
     "dotenv": "6.2.0",
     "dotenv-expand": "4.2.0",
@@ -42,12 +43,11 @@
     "koa-body": "4.1.1",
     "koa-router": "7.4.0",
     "lodash": "^4.17.15",
-    "magmo-devtools": "git+https://github.com/magmo/devtools.git#v0.1.20",
     "objection": "1.6.11",
     "pg": "7.12.1"
   },
   "devDependencies": {
-    "@statechannels/wallet": "0.0.1",
+    "@statechannels/devtools": "0.1.21",
     "@types/async-lock": "1.1.1",
     "@types/dotenv": "6.1.1",
     "@types/eslint": "^6.1.3",

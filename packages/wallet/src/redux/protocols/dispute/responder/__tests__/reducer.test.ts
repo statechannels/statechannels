@@ -6,7 +6,7 @@ import * as TransactionGenerator from "../../../../../utils/transaction-generato
 import {itSendsThisDisplayEventType, itSendsThisMessage} from "../../../../__tests__/helpers";
 import {describeScenarioStep} from "../../../../__tests__/helpers";
 import {State} from "@statechannels/nitro-protocol";
-import {apiNotImplemented} from "../../../../actions";
+import {apiNotImplemented} from "../../../../sagas/messaging/outgoing-api-actions";
 
 // Mocks
 const mockTransaction = {to: "0xabc"};
@@ -34,8 +34,8 @@ const itTransitionsToFailure = (
 const itCallsRespondWithMoveWith = (responseState: State) => {
   it("calls respond with move with the correct state", () => {
     expect(createRespondWithMoveMock).toHaveBeenCalledWith(
-      jasmine.any(Object),
-      jasmine.objectContaining({state: responseState})
+      expect.anything(),
+      expect.objectContaining({state: responseState})
     );
   });
 };

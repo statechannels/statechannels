@@ -87,7 +87,7 @@ export const waitForConfirmation: StateConstructor<WaitForConfirmation> = p => {
   };
 };
 
-export function success({}): Success {
+export function success(): Success {
   return {type: "TransactionSubmission.Success"};
 }
 

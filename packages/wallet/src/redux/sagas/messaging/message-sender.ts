@@ -1,13 +1,13 @@
-import {OutgoingApiAction, messageSent} from "../actions";
-
+import {messageSent} from "../../actions";
+import {OutgoingApiAction} from "./outgoing-api-actions";
 import {call, select, put} from "redux-saga/effects";
-import {getChannelStatus} from "../state";
-import {ChannelState, getLastState} from "../channel-store";
-import {createJsonRpcAllocationsFromOutcome} from "../../utils/json-rpc-utils";
+import {getChannelStatus} from "../../state";
+import {ChannelState, getLastState} from "../../channel-store";
+import {createJsonRpcAllocationsFromOutcome} from "../../../utils/json-rpc-utils";
 import jrs from "jsonrpc-lite";
-import {unreachable} from "../../utils/reducer-utils";
-import {validateResponse, validateNotification} from "../../json-rpc-validation/validator";
-import {getChannelHoldings} from "../selectors";
+import {unreachable} from "../../../utils/reducer-utils";
+import {validateResponse, validateNotification} from "../../../json-rpc-validation/validator";
+import {getChannelHoldings, getLastSignedStateForChannel} from "../../selectors";
 import {bigNumberify} from "ethers/utils";
 
 export function* messageSender(action: OutgoingApiAction) {
@@ -44,7 +44,6 @@ function* createResponseMessage(action: OutgoingApiAction) {
         sender: action.toParticipantId,
         data: action.actionToRelay
       });
-      break;
     case "WALLET.SEND_CHANNEL_PROPOSED_MESSAGE":
       const proposedChannelStatus: ChannelState = yield select(getChannelStatus, action.channelId);
 
@@ -70,6 +69,18 @@ function* createResponseMessage(action: OutgoingApiAction) {
         sender: action.toParticipantId,
         data: joinedMessage
       });
+    case "WALLET.SEND_CHANNEL_UPDATED_MESSAGE":
+      const channelUpdated = {
+        type: "Channel.Updated",
+        signedState: yield select(getLastSignedStateForChannel, action.channelId)
+      };
+      return jrs.notification("MessageQueued", {
+        recipient: action.fromParticipantId,
+        sender: action.toParticipantId,
+        data: channelUpdated
+      });
+    case "WALLET.CHANNEL_UPDATED_EVENT":
+      return jrs.notification("ChannelUpdated", yield getChannelInfo(action.channelId));
     case "WALLET.CHANNEL_PROPOSED_EVENT":
       return jrs.notification("ChannelProposed", yield getChannelInfo(action.channelId));
     case "WALLET.POST_MESSAGE_RESPONSE":
@@ -83,9 +94,8 @@ function* createResponseMessage(action: OutgoingApiAction) {
         )
       );
     case "WALLET.API_NOT_IMPLEMENTED":
-      console.error(`No API method implemented for ${action.apiMethod}`);
+      console.warn(`No API method implemented for ${action.apiMethod}`);
       return undefined;
-      break;
     default:
       return unreachable(action);
   }

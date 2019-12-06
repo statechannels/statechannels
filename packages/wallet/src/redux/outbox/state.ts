@@ -1,6 +1,6 @@
 import {TransactionRequest} from "ethers/providers";
 import {accumulateSideEffects} from ".";
-import {OutgoingApiAction} from "../actions";
+import {OutgoingApiAction} from "../sagas/messaging/outgoing-api-actions";
 
 export function emptyDisplayOutboxState(): OutboxState {
   return {displayOutbox: [], messageOutbox: [], transactionOutbox: []};

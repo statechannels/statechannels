@@ -51,8 +51,16 @@ export async function loadWallet(page: puppeteer.Page, messageListener: (message
   await page.evaluateOnNewDocument(web3JsFile);
   await page.evaluateOnNewDocument(`window.web3 = new Web3("http://localhost:${port}")`);
   await page.goto("http://localhost:3055/");
+  page.on("pageerror", error => {
+    throw error;
+  });
+  page.on("console", msg => {
+    if (msg.type() === "error") {
+      throw new Error(`Error was logged into the console ${msg.text()}`);
+    }
+  });
 
-  await page.waitFor(500); // Delay lets things load
+  await page.waitFor(1000); // Delay lets things load
   // interceptMessage gets called in puppeteer's context
   await page.exposeFunction("interceptMessage", message => {
     messageListener(message);
@@ -149,6 +157,40 @@ export async function sendGetAddress(page: puppeteer.Page) {
   });
 }
 
+export async function sendUpdateState(
+  page: puppeteer.Page,
+  channelId: string,
+  playerAAddress,
+  playerBAddress
+) {
+  await page.evaluate(
+    (a, b, cId) => {
+      const allocations = [
+        {
+          token: "0x0",
+          allocationItems: [{destination: a, amount: "0x1"}, {destination: b, amount: "0x1"}]
+        }
+      ];
+      window.postMessage(
+        {
+          jsonrpc: "2.0",
+          method: "UpdateChannel",
+          id: 1,
+          params: {
+            channelId: cId,
+            allocations,
+            appData: "0x0"
+          }
+        },
+        "*"
+      );
+    },
+    playerAAddress,
+    playerBAddress,
+    channelId
+  );
+}
+
 export async function pushMessage(page: puppeteer.Page, message: any) {
   await page.evaluate(m => {
     window.postMessage(
@@ -161,4 +203,46 @@ export async function pushMessage(page: puppeteer.Page, message: any) {
       "*"
     );
   }, message);
+}
+
+export async function completeFunding(
+  walletA: puppeteer.Page,
+  walletB: puppeteer.Page,
+  walletMessages
+): Promise<{playerAAddress: string; playerBAddress: string; channelId: string}> {
+  //  Automatically deliver messageQueued message to opponent's wallet
+  walletMessages.on(MessageType.PlayerAMessage, async message => {
+    await pushMessage(walletB, (message as any).params);
+  });
+  walletMessages.on(MessageType.PlayerBMessage, async message => {
+    await pushMessage(walletA, (message as any).params);
+  });
+
+  const playerAAddressPromise: Promise<any> = walletMessages.once(MessageType.PlayerAResult);
+  const playerBAddressPromise: Promise<any> = walletMessages.once(MessageType.PlayerBResult);
+
+  await sendGetAddress(walletA);
+  await sendGetAddress(walletB);
+
+  const playerAAddress = (await playerAAddressPromise).result;
+  const playerBAddress = (await playerBAddressPromise).result;
+
+  const createChannelPromise: Promise<any> = walletMessages.once(MessageType.PlayerAResult);
+  await sendCreateChannel(walletA, playerAAddress, playerBAddress);
+  const channelId = (await createChannelPromise).result.channelId;
+
+  const joinChannelPromise: Promise<any> = walletMessages.once(MessageType.PlayerBResult);
+  await sendJoinChannel(walletB, channelId);
+  await joinChannelPromise;
+
+  await walletA.waitFor("button");
+  await walletA.click("button");
+  await walletB.waitFor("button");
+  await walletB.click("button");
+
+  await walletA.waitFor("button");
+  await walletA.click("button");
+  await walletB.waitFor("button");
+  await walletB.click("button");
+  return {playerAAddress, playerBAddress, channelId};
 }

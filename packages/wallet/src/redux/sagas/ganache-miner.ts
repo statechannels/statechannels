@@ -3,6 +3,8 @@ import {JsonRpcProvider} from "ethers/providers";
 
 export function* ganacheMiner() {
   const provider: JsonRpcProvider = new JsonRpcProvider(
+    // TODO: Figure out why we use process here
+    /* eslint:disable */
     `http://localhost:${process.env.GANACHE_PORT}`
   );
   const DELAY_TIME = 30000; // 30 seconds

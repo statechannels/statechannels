@@ -7,8 +7,8 @@ import {ProtocolLocator, RelayableAction} from "../../communication";
 import _ from "lodash";
 import {State, SignedState, getChannelId} from "@statechannels/nitro-protocol";
 import {Signature} from "ethers/utils";
-import {OutgoingApiAction} from "../actions";
 import {Wallet, utils} from "ethers";
+import {OutgoingApiAction} from "../sagas/messaging/outgoing-api-actions";
 
 type SideEffectState =
   | StateWithSideEffects<any>
@@ -229,7 +229,7 @@ export const itIncreasesTurnNumBy = (
 ) => {
   it(`increases the turnNum by ${increase}`, () => {
     if (!("turnNum" in newState.state) || !("turnNum" in oldState)) {
-      fail("turnNum does not exist on one of the states");
+      throw new Error("turnNum does not exist on one of the states");
     } else {
       expect(newState.state.turnNum).toEqual(oldState.turnNum + increase);
     }
@@ -282,7 +282,7 @@ export const createSharedDataFromParticipants = (participantAddresses: string[])
     libraryAddress: Wallet.createRandom().address,
     signedStates: [],
     participants: participantAddresses.map((a, i) => {
-      return {participantId: `$participant-{i}`, signingAddress: a};
+      return {participantId: `participant-${i}`, signingAddress: a};
     })
   };
   const channelStore = {[channelId]: channelState};

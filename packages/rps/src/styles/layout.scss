@@ -1,6 +1,8 @@
-@import "./dimensions";
+@import './dimensions';
 
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
 }
 
@@ -43,5 +45,4 @@ code {
 
 .wallet-overlay {
   z-index: 1035 !important;
-
 }

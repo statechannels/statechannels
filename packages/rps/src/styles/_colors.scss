@@ -3,13 +3,12 @@ $rps-dark-blue: #151b44;
 $rps-light-blue: #4285f4;
 $rps-red: #e34754;
 $rps-white: #ffffff;
-$rps-wallet-orange:#fe7439;
+$rps-wallet-orange: #fe7439;
 $rps-background: #fafafa;
 $rps-wallet-muted: #f3f3f3;
 $rps-wallet-grey: #595959;
 $rps-wallet-light-grey: #a6a6a6;
 $rps-footer-grey: #777777;
-
 
 $rps-ogc-off-white: #e9e9e9;
 $rps-ogc-grey: #747474;
@@ -21,4 +20,3 @@ $game-bar-color: #2a3163;
 // overriding bootstrap variables here will change the colors throughout reactstrap
 // take a look at node_modules/bootstrap/sass/_variables.scss for variable to override
 $body-bg: $rps-background;
-
