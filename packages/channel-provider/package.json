@@ -6,7 +6,8 @@
   "types": "dist/index.d.ts",
   "dependencies": {
     "debug": "4.1.1",
-    "eventemitter3": "4.0.0"
+    "eventemitter3": "4.0.0",
+    "guid-typescript": "1.0.9"
   },
   "scripts": {
     "prepublish": "webpack",

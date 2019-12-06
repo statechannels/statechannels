@@ -30,7 +30,11 @@ div#${UIElementNames.Container} {
   height: 100%;
   background: rgba(0, 0, 0, 0.32);
   z-index: 0;
-}`;
+}
+.hide {
+  display:none;
+}
+`;
 
 export class UIService {
   protected get container(): HTMLDivElement | null {
@@ -69,14 +73,15 @@ export class UIService {
 
       iframe.id = UIElementNames.IFrame;
       iframe.src = this.url;
+
       iframe.onload = () => {
         resolve();
       };
 
       container.appendChild(iframe);
-
       document.head.appendChild(style);
       document.body.appendChild(container);
+      this.setVisibility(false);
     });
   }
 
@@ -95,6 +100,13 @@ export class UIService {
       this.styles.remove();
       log('UI Styles removed');
     }
+  }
+
+  setVisibility(visible: boolean) {
+    if (!this.container) {
+      throw new Error('Cannot find the wallet iFrame container.');
+    }
+    this.container.classList.toggle('hide', !visible);
   }
 
   async getTarget(): Promise<Window> {

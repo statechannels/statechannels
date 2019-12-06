@@ -1,28 +1,21 @@
-import debug from 'debug';
 import * as EventEmitter from 'eventemitter3';
+import {Guid} from 'guid-typescript';
 import {MessagingService} from './messaging-service';
-import {
-  ChannelProviderUIMessage,
-  IChannelProvider,
-  JsonRpcRequest,
-  JsonRpcSubscribeResult,
-  JsonRpcUnsubscribeResult
-} from './types';
+import {IChannelProvider, isJsonRpcNotification} from './types';
 import {UIService} from './ui-service';
-
-const log = debug('channel-provider');
 
 class ChannelProvider implements IChannelProvider {
   protected readonly events: EventEmitter;
   protected readonly ui: UIService;
   protected readonly messaging: MessagingService;
-
-  protected url = 'http://localhost:1701';
+  protected readonly subscriptions: {[eventName: string]: string[]};
+  protected url = '';
 
   constructor() {
     this.events = new EventEmitter();
     this.ui = new UIService();
     this.messaging = new MessagingService();
+    this.subscriptions = {};
   }
 
   async enable(url?: string) {
@@ -35,10 +28,12 @@ class ChannelProvider implements IChannelProvider {
     this.ui.setUrl(this.url);
     this.messaging.setUrl(this.url);
 
-    this.events.emit('connect');
+    await this.ui.mount();
+
+    this.events.emit('Connect');
   }
 
-  async send<ResultType = any>(method: string, params: any[] = []): Promise<ResultType> {
+  async send<ResultType = any>(method: string, params: any): Promise<ResultType> {
     const target = await this.ui.getTarget();
     const response = (await this.messaging.request(target, {
       jsonrpc: '2.0',
@@ -49,56 +44,53 @@ class ChannelProvider implements IChannelProvider {
     return response;
   }
 
-  async subscribe(subscriptionType: string, params: any[] = []): Promise<string> {
-    const response = await this.send<JsonRpcSubscribeResult>('chan_subscribe', [
-      subscriptionType,
-      ...params
-    ]);
-
-    return response.subscription;
+  async subscribe(subscriptionType: string, _params: any): Promise<string> {
+    const subscriptionId = Guid.create().toString();
+    if (!this.subscriptions[subscriptionType]) {
+      this.subscriptions[subscriptionType] = [];
+    }
+    this.subscriptions[subscriptionType].push(subscriptionId);
+    return subscriptionId;
   }
 
   async unsubscribe(subscriptionId: string): Promise<boolean> {
-    const response = await this.send<JsonRpcUnsubscribeResult>('chan_unsubscribe', [
-      subscriptionId
-    ]);
-
-    this.off(subscriptionId);
-
-    return response.success;
+    Object.keys(this.subscriptions).map(e => {
+      this.subscriptions[e] = this.subscriptions[e]
+        ? this.subscriptions[e].filter(s => s !== subscriptionId)
+        : [];
+    });
+    return true;
   }
 
-  on(event: string, callback: EventEmitter.ListenerFn<any[]>): void {
+  on(event: string, callback: EventEmitter.ListenerFn<any>): void {
     this.events.on(event, callback);
   }
 
-  off(event: string, callback?: EventEmitter.ListenerFn<any[]> | undefined): void {
+  off(event: string, callback?: EventEmitter.ListenerFn<any> | undefined): void {
     this.events.off(event, callback);
   }
 
   protected async onMessage(event: MessageEvent) {
-    const message = event.data as ChannelProviderUIMessage | JsonRpcRequest;
-
-    if (message === ChannelProviderUIMessage.Close) {
-      log('Close signal received: %o', message);
-      this.ui.unmount();
+    const message = event.data;
+    if (!message.jsonrpc) {
       return;
     }
 
-    if (message === ChannelProviderUIMessage.Acknowledge) {
-      this.messaging.acknowledge();
-      return;
-    }
+    if (isJsonRpcNotification(message)) {
+      const eventName = message.method;
+      if (eventName === 'UIUpdate') {
+        this.ui.setVisibility(message.params.showWallet);
+      }
+      this.events.emit(eventName, message);
 
-    if (!message.jsonrpc || 'result' in message) {
-      return;
+      if (this.subscriptions[eventName]) {
+        this.subscriptions[eventName].forEach(s => {
+          this.events.emit(s, message);
+        });
+      }
     }
-
-    const target = await this.ui.getTarget();
-    this.messaging.send(target, message, this.url);
   }
 }
-
 const channelProvider = new ChannelProvider();
 
 export {channelProvider};
