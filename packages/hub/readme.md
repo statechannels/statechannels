@@ -15,9 +15,6 @@ You'll notice a set files with the `.env` prefix. The `.env` file contains envir
 If you have `NODE_ENV=development`, you'd have a local file named `.env.development.local` with similar content to the following:
 
 ```
-FIREBASE_PROJECT='rock-paper-scissors-dev'
-FIREBASE_API_KEY='AIzaSyAlGe17xjJjfoJ_KDYjCREg7ZL4ns61Chc'
-
 HUB_DB_HOST=localhost
 # assuming your postgres instance is open on port 5432
 HUB_DB_PORT=5432
