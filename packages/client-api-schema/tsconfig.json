@@ -1,0 +1,7 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs", // Because we use ts-node which cant' understand ES Modules
+    "noEmit": true // Because we don't care about the output, we just use TS for the script
+  }
+}
