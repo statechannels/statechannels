@@ -4,7 +4,10 @@
   "definitions": {
     "PushMessageResult": {
       "properties": {
-        "success": {"const": true}
+        "success": {
+          "type": "boolean",
+          "const": true
+        }
       },
       "required": ["success"]
     },

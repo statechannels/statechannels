@@ -38,7 +38,7 @@
           "title": "appData"
         },
         "turnNum": {
-          "type": "integer"
+          "type": "string"
         },
         "channelId": {
           "$ref": "definitions.json#/definitions/ChannelId"

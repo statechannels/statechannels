@@ -1,6 +1,12 @@
-import { AppData, ChannelState, encodeAppData, decodeAppData } from '../core';
+import { AppData, ChannelState, encodeAppData, decodeAppData, ChannelStatus } from '../core';
 import { IChannelClient, Message, FakeChannelClient, ChannelResult } from './channel-client';
 import { RPS_ADDRESS } from '../constants';
+import {
+  CreateChannelResult,
+  UpdateChannelResult,
+  JoinChannelResult,
+  CloseChannelResult,
+} from '@statechannels/client-api-schema';
 
 // This class wraps the channel client converting the request/response formats to those used in the app
 
@@ -18,7 +24,7 @@ export class RPSChannelClient {
     aBal: string,
     bBal: string,
     appAttrs: AppData
-  ): Promise<ChannelState> {
+  ) {
     const participants = formatParticipants(aAddress, bAddress);
     const allocations = formatAllocations(aAddress, bAddress, aBal, bBal);
     const appDefinition = RPS_ADDRESS;
@@ -91,12 +97,14 @@ export class RPSChannelClient {
   }
 }
 
-const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
+const convertToChannelState = (
+  channelResult: CreateChannelResult | UpdateChannelResult | JoinChannelResult | CloseChannelResult
+): ChannelState => {
   const { turnNum, channelId, status, participants, allocations, appData } = channelResult;
   return {
     channelId,
     turnNum,
-    status,
+    status: status as ChannelStatus,
     appData: decodeAppData(appData),
     aUserId: participants[0].participantId,
     bUserId: participants[1].participantId,

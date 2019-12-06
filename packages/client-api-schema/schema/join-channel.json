@@ -29,11 +29,12 @@
         },
         "status": {
           "type": "string",
-          "const": "Opening"
+          "const": "opening",
+          "enum": ["proposed", "opening", "funding", "running", "closing", "closed"]
         },
         "turnNum": {
-          "type": "integer",
-          "const": 1
+          "type": "string",
+          "const": "0x00"
         }
       },
       "required": ["allocations", "appData", "appDefinition", "participants", "status", "turnNum"]

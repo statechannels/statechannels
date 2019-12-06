@@ -1,5 +1,16 @@
+import {
+  Participant,
+  Allocation,
+  CreateChannelResult,
+  JoinChannelResult,
+  CreateChannelParams,
+  CloseChannelParams,
+  UpdateChannelParams,
+  PushMessageResult,
+  CloseChannelResult,
+} from '@statechannels/client-api-schema';
 import { Wallet } from 'ethers';
-import { BigNumberish, bigNumberify } from 'ethers/utils';
+import { bigNumberify } from 'ethers/utils';
 import { EventEmitter } from 'eventemitter3';
 
 const FAKE_DELAY = 100; // ms
@@ -15,22 +26,6 @@ export enum ErrorCodes {
   INVALID_APP_DATA = 1002,
   UNSUPPORTED_TOKEN = 1003,
   CHANNEL_NOT_FOUND = 1004,
-}
-
-export interface Participant {
-  participantId: string; // App allocated id, used for relaying messages to the participant
-  signingAddress: string; // Address used to sign channel updates
-  destination: string; // Address of EOA to receive channel proceeds (the account that'll get the funds).
-}
-
-export interface AllocationItem {
-  destination: string; // Address of EOA to receive channel proceeds.
-  amount: BigNumberish; // How much funds will be transferred to the destination address.
-}
-
-export interface Allocation {
-  token: string; // The token's contract address.
-  allocationItems: AllocationItem[]; // A list of allocations (how much funds will each destination address get).
 }
 
 export interface Message<T = any> {
@@ -69,15 +64,15 @@ export interface IChannelClient<Payload = any> {
     allocations: Allocation[],
     appDefinition: string,
     appData: string
-  ) => Promise<ChannelResult>;
-  joinChannel: (channelId: string) => Promise<ChannelResult>;
+  ) => Promise<CreateChannelResult>;
+  joinChannel: (channelId: string) => Promise<JoinChannelResult>;
   updateChannel: (
     channelId: string,
     participants: Participant[],
     allocations: Allocation[],
     appData: string
   ) => Promise<ChannelResult>;
-  closeChannel: (channelId: string) => Promise<ChannelResult>;
+  closeChannel: (channelId: string) => Promise<CloseChannelResult>;
   pushMessage: (message: Message<Payload>) => Promise<PushMessageResult>;
   getAddress: () => Promise<string>;
 }
@@ -135,7 +130,7 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
     return Promise.resolve(this.latestState);
   }
 
-  async joinChannel(channelId: string): Promise<ChannelResult> {
+  async joinChannel(channelId: string): Promise<JoinChannelResult> {
     this.playerIndex = 1;
     const latestState = this.findChannel(channelId);
     // skip funding by setting the channel to 'running' the moment it is joined
@@ -268,26 +263,12 @@ export interface JsonRPCErrorResponse<ErrorType extends JsonRPCError = JsonRPCEr
   error: ErrorType;
 }
 
-interface CreateChannelParameters {
-  participants: Participant[];
-  allocations: Allocation[];
-  appDefinition: string;
-  appData: string;
-}
-
-interface UpdateChannelParameters {
-  channelId: string;
-  participants: Participant[];
-  allocations: Allocation[];
-  appData: string;
-}
-
 // Requests and Responses
 // ======================
 
 export type GetAddressRequest = JsonRPCRequest<'GetAddress', {}>; // todo: what are params
 
-export type CreateChannelRequest = JsonRPCRequest<'CreateChannel', CreateChannelParameters>;
+export type CreateChannelRequest = JsonRPCRequest<'CreateChannel', CreateChannelParams>;
 
 export interface CreateChannelResponse extends JsonRPCResponse<ChannelResult> {}
 
@@ -299,21 +280,12 @@ export type JoinChannelRequest = JsonRPCRequest<'JoinChannel', JoinChannelParame
 
 export interface JoinChannelResponse extends JsonRPCResponse<ChannelResult> {}
 
-export type UpdateChannelRequest = JsonRPCRequest<'UpdateChannel', UpdateChannelParameters>;
+export type UpdateChannelRequest = JsonRPCRequest<'UpdateChannel', UpdateChannelParams>;
 
 export type PushMessageRequest = JsonRPCRequest<'PushMessage', Message>;
 
-export interface PushMessageResult {
-  success: boolean;
-}
-
-export type PushMessageResponse = JsonRPCResponse<PushMessageResult>;
-
-export interface CloseChannelParameters {
-  channelId: string;
-}
-export type CloseChannelRequest = JsonRPCRequest<'CloseChannel', CloseChannelParameters>;
-export type CloseChannelResponse = JsonRPCResponse<ChannelResult>;
+export type CloseChannelRequest = JsonRPCRequest<'CloseChannel', CloseChannelParams>;
+export type CloseChannelResponse = JsonRPCResponse<CloseChannelResult>;
 
 export type ChannelProposedNotification = JsonRPCNotification<'ChannelProposed', ChannelResult>;
 export type ChannelUpdatedNotification = JsonRPCNotification<'ChannelUpdated', ChannelResult>;
