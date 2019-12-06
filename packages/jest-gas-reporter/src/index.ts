@@ -41,7 +41,7 @@ interface ParsedArtifact {
  - Organize and clean up
 */
 
-export default class GasReporter implements jest.Reporter {
+export class GasReporter implements jest.Reporter {
   options: Options;
   provider: JsonRpcProvider;
   globalConfig: jest.GlobalConfig;
@@ -254,3 +254,5 @@ export default class GasReporter implements jest.Reporter {
     }
   }
 }
+
+module.exports = GasReporter;
