@@ -1,4 +1,4 @@
-import {LocalState} from './state';
+import {GameState, LocalState, Setup, EndGame, A, B} from './state';
 import {Reducer, combineReducers} from 'redux';
 import {GameAction, UpdateChannelState} from './actions';
 import {ChannelState} from '../../core';
@@ -29,17 +29,17 @@ const localReducer: Reducer<LocalState> = (
     state.type !== 'B.WaitingRoom' &&
     state.type !== 'B.CreatingOpenGame'
   ) {
-    newState = resigned(state, action.iResigned);
+    newState = EndGame.resigned({...state, ...action});
   }
   switch (state.type) {
     case 'Setup.Empty':
       if (action.type === 'UpdateProfile') {
-        newState = needAddress({...state, ...action});
+        newState = Setup.needAddress({...state, ...action});
       }
       break;
     case 'Setup.NeedAddress':
       if (action.type === 'GotAddressFromWallet') {
-        newState = lobby({
+        newState = Setup.lobby({
           ...state,
           ...action,
         });
@@ -47,61 +47,74 @@ const localReducer: Reducer<LocalState> = (
       break;
     case 'Setup.Lobby':
       if (action.type === 'NewOpenGame') {
-        newState = creatingOpenGame(state);
+        newState = B.creatingOpenGame({...state, ...action});
       }
       if (action.type === 'JoinOpenGame') {
-        const {opponentName, opponentAddress, roundBuyIn} = action;
-        const {name, address} = state;
-        newState = gameChosen({name, address, opponentName, roundBuyIn}, opponentAddress);
+        newState = A.gameChosen({...state, ...action});
+      }
+      break;
+    case 'A.GameChosen':
+    case 'A.WaitForRestart':
+      if (action.type === 'StartRound') {
+        newState = A.chooseWeapon({...state, ...action});
+      }
+      break;
+    case 'A.ChooseWeapon':
+      if (action.type === 'ChooseWeapon') {
+        newState = A.weaponChosen({...state, ...action});
+      }
+      break;
+    case 'A.WeaponChosen':
+      if (action.type === 'ChooseSalt') {
+        newState = A.weaponAndSaltChosen({...state, ...action});
+      }
+      break;
+    case 'A.WeaponAndSaltChosen':
+      if (action.type === 'ResultArrived') {
+        if (action.fundingSituation === 'Ok') {
+          newState = A.resultPlayAgain({...state, ...action});
+        }
+        newState = EndGame.insufficientFunds({...state, ...action});
+      }
+      break;
+    case 'A.ResultPlayAgain':
+      if (action.type === 'PlayAgain') {
+        newState = A.waitForRestart({...state, ...action});
       }
       break;
     case 'B.CreatingOpenGame':
       if (action.type === 'CreateGame') {
-        newState = waitingRoom({...state, ...action});
-      }
-      break;
-    case 'A.ResultPlayAgain':
-    case 'B.ResultPlayAgain':
-      if (action.type === 'PlayAgain') {
-        newState = waitForRestart(state, state.theirWeapon, state.result);
+        newState = B.waitingRoom({...state, ...action});
       }
       break;
     case 'B.WaitingRoom':
       if (action.type === 'GameJoined') {
-        newState = opponentJoined({...state, ...action});
+        newState = B.opponentJoined({...state, ...action});
       }
       break;
+    case 'B.ResultPlayAgain':
     case 'B.OpponentJoined':
-    case 'A.GameChosen':
-    case 'A.WaitForRestart':
       if (action.type === 'StartRound') {
-        newState = chooseWeapon(state);
+        newState = B.chooseWeapon({...state, ...action});
       }
       break;
-    case 'A.ChooseWeapon':
     case 'B.ChooseWeapon':
       if (action.type === 'ChooseWeapon') {
-        newState = weaponChosen(state, action.weapon);
+        newState = B.weaponChosen({...state, ...action});
       }
       break;
-    case 'A.WeaponChosen':
-    case 'A.WeaponAndSaltChosen':
     case 'B.WeaponChosen':
-      if (state.player === 'A' && action.type === 'ChooseSalt') {
-        newState = weaponAndSaltChosen({...state, player: 'A'}, action.salt);
-      }
       if (action.type === 'ResultArrived') {
         if (action.fundingSituation === 'Ok') {
-          newState = resultPlayAgain(state, action.theirWeapon, action.result);
-        } else {
-          newState = insufficientFunds(state, action.theirWeapon, action.result);
+          newState = B.resultPlayAgain({...state, ...action});
         }
+        newState = EndGame.insufficientFunds({...state, ...action});
       }
       break;
     case 'EndGame.Resigned':
     case 'EndGame.InsufficientFunds':
       if (action.type === 'GameOver') {
-        newState = gameOver(state);
+        newState = EndGame.gameOver({...state, ...action});
       }
       break;
   }
