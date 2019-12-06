@@ -2,27 +2,28 @@ import {select, fork, put, call} from "redux-saga/effects";
 import {getChannelId, State} from "@statechannels/nitro-protocol";
 import jrs, {RequestObject} from "jsonrpc-lite";
 
-import * as actions from "../actions";
+import * as outgoingMessageActions from "./outgoing-api-actions";
+import * as actions from "../../actions";
 import {
   getAddress,
   getLastStateForChannel,
   doesAStateExistForChannel,
   getParticipants
-} from "../selectors";
+} from "../../selectors";
 import {messageSender} from "./message-sender";
-import {APPLICATION_PROCESS_ID} from "../protocols/application/reducer";
+import {APPLICATION_PROCESS_ID} from "../../protocols/application/reducer";
 import {
   createStateFromCreateChannelParams,
   createStateFromUpdateChannelParams,
   JsonRpcMessage
-} from "../../utils/json-rpc-utils";
+} from "../../../utils/json-rpc-utils";
 
-import {getProvider} from "../../utils/contract-utils";
+import {getProvider} from "../../../utils/contract-utils";
 import {AddressZero} from "ethers/constants";
-import {validateRequest} from "../../json-rpc-validation/validator";
-import {fundingRequested} from "../protocols/actions";
-import {TwoPartyPlayerIndex} from "../types";
-import {isRelayableAction} from "../../communication";
+import {validateRequest} from "../../../json-rpc-validation/validator";
+import {fundingRequested} from "../../protocols/actions";
+import {TwoPartyPlayerIndex} from "../../types";
+import {isRelayableAction} from "../../../communication";
 import {bigNumberify} from "ethers/utils";
 
 export function* messageHandler(jsonRpcMessage: object, fromDomain: string) {
@@ -38,7 +39,10 @@ export function* messageHandler(jsonRpcMessage: object, fromDomain: string) {
       const validationResult = yield validateRequest(jsonRpcMessage);
       if (!validationResult.isValid) {
         console.error(validationResult.errors);
-        yield fork(messageSender, actions.validationError({id: parsedMessage.payload.id}));
+        yield fork(
+          messageSender,
+          outgoingMessageActions.validationError({id: parsedMessage.payload.id})
+        );
       }
       yield handleMessage(parsedMessage.payload as RequestObject);
       break;
@@ -51,7 +55,7 @@ function* handleMessage(payload: RequestObject) {
   switch (payload.method) {
     case "GetAddress":
       const address = yield select(getAddress);
-      yield fork(messageSender, actions.addressResponse({id, address}));
+      yield fork(messageSender, outgoingMessageActions.addressResponse({id, address}));
       break;
     case "CreateChannel":
       yield handleCreateChannelMessage(payload);
@@ -75,7 +79,7 @@ function* handleJoinChannelMessage(payload: RequestObject) {
   const channelExists = yield select(doesAStateExistForChannel, channelId);
 
   if (!channelExists) {
-    yield fork(messageSender, actions.unknownChannelId({id, channelId}));
+    yield fork(messageSender, outgoingMessageActions.unknownChannelId({id, channelId}));
   } else {
     const lastState: State = yield select(getLastStateForChannel, channelId);
 
@@ -89,7 +93,7 @@ function* handleJoinChannelMessage(payload: RequestObject) {
       })
     );
     yield put(fundingRequested({channelId, playerIndex: TwoPartyPlayerIndex.B}));
-    yield fork(messageSender, actions.joinChannelResponse({channelId, id}));
+    yield fork(messageSender, outgoingMessageActions.joinChannelResponse({channelId, id}));
     const address = yield select(getAddress);
     const participants = yield select(getParticipants, channelId);
     // We assume a two player channel
@@ -99,7 +103,11 @@ function* handleJoinChannelMessage(payload: RequestObject) {
       participants[0].signingAddress !== address ? participants[0] : participants[1];
     yield fork(
       messageSender,
-      actions.sendChannelJoinedMessage({channelId, toParticipantId, fromParticipantId})
+      outgoingMessageActions.sendChannelJoinedMessage({
+        channelId,
+        toParticipantId,
+        fromParticipantId
+      })
     );
   }
 }
@@ -110,7 +118,7 @@ function* handlePushMessage(payload: RequestObject) {
   const message = payload.params as JsonRpcMessage;
   if (isRelayableAction(message.data)) {
     yield put(message.data);
-    yield fork(messageSender, actions.postMessageResponse({id}));
+    yield fork(messageSender, outgoingMessageActions.postMessageResponse({id}));
   } else {
     switch (message.data.type) {
       case "Channel.Joined":
@@ -128,7 +136,7 @@ function* handlePushMessage(payload: RequestObject) {
           })
         );
 
-        yield fork(messageSender, actions.postMessageResponse({id}));
+        yield fork(messageSender, outgoingMessageActions.postMessageResponse({id}));
         break;
       case "Channel.Open":
         const {signedState, participants} = message.data;
@@ -165,12 +173,12 @@ function* handlePushMessage(payload: RequestObject) {
           })
         );
 
-        yield fork(messageSender, actions.postMessageResponse({id}));
+        yield fork(messageSender, outgoingMessageActions.postMessageResponse({id}));
 
         const channelId = getChannelId(signedState.state.channel);
         yield fork(
           messageSender,
-          actions.channelProposedEvent({
+          outgoingMessageActions.channelProposedEvent({
             channelId
           })
         );
@@ -186,7 +194,7 @@ function* handleUpdateChannelMessage(payload: RequestObject) {
   const channelExists = yield select(doesAStateExistForChannel, channelId);
 
   if (!channelExists) {
-    yield fork(messageSender, actions.unknownChannelId({id, channelId}));
+    yield fork(messageSender, outgoingMessageActions.unknownChannelId({id, channelId}));
   } else {
     const mostRecentState: State = yield select(getLastStateForChannel, channelId);
 
@@ -199,7 +207,7 @@ function* handleUpdateChannelMessage(payload: RequestObject) {
       })
     );
 
-    yield fork(messageSender, actions.updateChannelResponse({id, channelId}));
+    yield fork(messageSender, outgoingMessageActions.updateChannelResponse({id, channelId}));
   }
 }
 
@@ -219,10 +227,13 @@ function* handleCreateChannelMessage(payload: RequestObject) {
   if (!addressMatches) {
     yield fork(
       messageSender,
-      actions.unknownSigningAddress({id, signingAddress: participants[0].signingAddress})
+      outgoingMessageActions.unknownSigningAddress({
+        id,
+        signingAddress: participants[0].signingAddress
+      })
     );
   } else if (!contractAtAddress) {
-    yield fork(messageSender, actions.noContractError({id, address: appDefinition}));
+    yield fork(messageSender, outgoingMessageActions.noContractError({id, address: appDefinition}));
   } else {
     const state = createStateFromCreateChannelParams(payload.params as any);
 
@@ -249,7 +260,7 @@ function* handleCreateChannelMessage(payload: RequestObject) {
 
     yield fork(
       messageSender,
-      actions.createChannelResponse({
+      outgoingMessageActions.createChannelResponse({
         id,
         channelId: getChannelId(state.channel)
       })
@@ -257,7 +268,7 @@ function* handleCreateChannelMessage(payload: RequestObject) {
 
     yield fork(
       messageSender,
-      actions.sendChannelProposedMessage({
+      outgoingMessageActions.sendChannelProposedMessage({
         toParticipantId: participants[1].participantId,
         fromParticipantId: participants[0].participantId,
         channelId: getChannelId(state.channel)

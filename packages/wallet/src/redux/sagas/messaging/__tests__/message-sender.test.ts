@@ -10,16 +10,16 @@ import {
   unknownChannelId,
   sendChannelJoinedMessage,
   relayActionWithMessage
-} from "../../actions";
+} from "../outgoing-api-actions";
 import {Wallet} from "ethers";
 import {expectSaga} from "redux-saga-test-plan";
 import * as matchers from "redux-saga-test-plan/matchers";
 import {messageSender} from "../message-sender";
-import {channelFromStates} from "../../channel-store/channel-state/__tests__";
-import * as stateHelpers from "../../__tests__/state-helpers";
-import {setChannel, EMPTY_SHARED_DATA, SharedData} from "../../state";
-import {strategyApproved} from "../../../communication";
-import {ETH_ASSET_HOLDER_ADDRESS} from "../../../constants";
+import {channelFromStates} from "../../../channel-store/channel-state/__tests__";
+import * as stateHelpers from "../../../__tests__/state-helpers";
+import {setChannel, EMPTY_SHARED_DATA, SharedData} from "../../../state";
+import {strategyApproved} from "../../../../communication";
+import {ETH_ASSET_HOLDER_ADDRESS} from "../../../../constants";
 
 describe("message sender", () => {
   it("creates a notification for WALLET.SEND_CHANNEL_PROPOSED_MESSAGE", async () => {

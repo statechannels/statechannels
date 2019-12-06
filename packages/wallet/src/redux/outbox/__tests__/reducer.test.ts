@@ -2,6 +2,7 @@ import {clearOutbox} from "../reducer";
 
 import * as actions from "../../actions";
 import {OutboxState} from "../state";
+import {apiNotImplemented} from "../../sagas/messaging/outgoing-api-actions";
 
 const mockTransactionOutboxItem = {
   transactionRequest: {to: "0xabc"},
@@ -10,8 +11,8 @@ const mockTransactionOutboxItem = {
 };
 
 describe("when a side effect occured", () => {
-  const sendMessageA = actions.apiNotImplemented({apiMethod: "testA"});
-  const sendMessageB = actions.apiNotImplemented({apiMethod: "testB"});
+  const sendMessageA = apiNotImplemented({apiMethod: "testA"});
+  const sendMessageB = apiNotImplemented({apiMethod: "testB"});
   const displayOutbox: Array<"Hide" | "Show"> = ["Hide", "Show"];
   const transactionOutbox = [mockTransactionOutboxItem, mockTransactionOutboxItem];
   const messageOutbox = [sendMessageA, sendMessageB];

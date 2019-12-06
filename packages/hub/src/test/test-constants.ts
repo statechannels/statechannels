@@ -1,5 +1,9 @@
-import {AllocationItem, convertAddressToBytes32, Outcome} from '@statechannels/nitro-protocol';
-import {GuaranteeAssetOutcome} from '@statechannels/nitro-protocol/lib/src/contract/outcome';
+import {
+  AllocationItem,
+  convertAddressToBytes32,
+  GuaranteeAssetOutcome,
+  Outcome
+} from '@statechannels/nitro-protocol';
 import {ethers} from 'ethers';
 import {bigNumberify} from 'ethers/utils';
 import {Address, Uint256} from 'fmg-core';
