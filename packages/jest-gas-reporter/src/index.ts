@@ -1,5 +1,5 @@
-import { Interface, ParamType } from 'ethers/utils';
-import { JsonRpcProvider } from 'ethers/providers';
+import {Interface, ParamType} from 'ethers/utils';
+import {JsonRpcProvider} from 'ethers/providers';
 import easyTable from 'easy-table';
 import fs from 'fs';
 import linker from 'solc/linker';
@@ -33,7 +33,7 @@ interface ParsedArtifact {
   abi: ParamType[];
   deployedBytecode: object;
   contractName: string;
-  networks: { [networkName: string]: { address: string } };
+  networks: {[networkName: string]: {address: string}};
 }
 
 /* TODO: 
@@ -220,7 +220,7 @@ export default class GasReporter implements jest.Reporter {
 
         for (const contractName of Object.keys(contractCalls)) {
           const contractCall = contractCalls[contractName];
-          if (contractCall.code.localeCompare(code, undefined, { sensitivity: 'base' }) === 0) {
+          if (contractCall.code.localeCompare(code, undefined, {sensitivity: 'base'}) === 0) {
             const details = contractCall.interface.parseTransaction(transaction);
 
             if (details != null) {
@@ -242,9 +242,9 @@ export default class GasReporter implements jest.Reporter {
 
         for (const contractName of Object.keys(contractCalls)) {
           const contractCall = contractCalls[contractName];
-          if (contractCall.code.localeCompare(code, undefined, { sensitivity: 'base' }) === 0) {
+          if (contractCall.code.localeCompare(code, undefined, {sensitivity: 'base'}) === 0) {
             if (!contractCall.deploy) {
-              contractCall.deploy = { calls: 0, gasData: [] };
+              contractCall.deploy = {calls: 0, gasData: []};
             }
             contractCall.deploy.calls++;
             contractCall.deploy.gasData.push(transactionReceipt.gasUsed.toNumber());

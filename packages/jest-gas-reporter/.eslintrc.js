@@ -11,6 +11,6 @@ module.exports = {
     'plugin:prettier/recommended'
   ],
   rules: {
-    'prettier/prettier': ['warn']
+    'prettier/prettier': 'warn'
   }
 };
