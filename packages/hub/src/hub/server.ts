@@ -1,5 +1,3 @@
-import '../../config/env';
-
 import {fork} from 'child_process';
 import {Model} from 'objection';
 import {RelayableAction} from '../communication';

@@ -1,4 +1,4 @@
 module.exports = {
   ...require('../../.prettierrc.js'),
-  trailingComma: "all",
+  trailingComma: 'es5',
 };

@@ -1,4 +1,4 @@
-@import "./_colors";
+@import './_colors';
 
 .ogc-container {
   width: 230px;
@@ -6,7 +6,7 @@
   border-radius: 10px;
   border: solid 1px $rps-ogc-off-white;
   background-color: $rps-white;
-  
+
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
@@ -18,7 +18,9 @@
   justify-content: center;
 }
 
-.ogc-card-title, .ogc-opponent-name, .ogc-vs {
+.ogc-card-title,
+.ogc-opponent-name,
+.ogc-vs {
   font-size: 25px;
   font-weight: bold;
 }
@@ -35,7 +37,8 @@
   align-items: center;
 }
 
-.ogc-buyin, .ogc-round-buyin {
+.ogc-buyin,
+.ogc-round-buyin {
   display: flex;
   flex-direction: column;
   align-items: center;
