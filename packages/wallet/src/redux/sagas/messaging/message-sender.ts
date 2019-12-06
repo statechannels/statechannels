@@ -40,8 +40,8 @@ function* createResponseMessage(action: OutgoingApiAction) {
       );
     case "WALLET.RELAY_ACTION_WITH_MESSAGE":
       return jrs.notification("MessageQueued", {
-        recipient: action.fromParticipantId,
-        sender: action.toParticipantId,
+        recipient: action.toParticipantId,
+        sender: action.fromParticipantId,
         data: action.actionToRelay
       });
     case "WALLET.SEND_CHANNEL_PROPOSED_MESSAGE":
@@ -53,8 +53,8 @@ function* createResponseMessage(action: OutgoingApiAction) {
         participants: proposedChannelStatus.participants
       };
       return jrs.notification("MessageQueued", {
-        recipient: action.fromParticipantId,
-        sender: action.toParticipantId,
+        recipient: action.toParticipantId,
+        sender: action.fromParticipantId,
         data: openRequest
       });
     case "WALLET.SEND_CHANNEL_JOINED_MESSAGE":
@@ -65,8 +65,8 @@ function* createResponseMessage(action: OutgoingApiAction) {
         participants: joinChannelState.participants
       };
       return jrs.notification("MessageQueued", {
-        recipient: action.fromParticipantId,
-        sender: action.toParticipantId,
+        recipient: action.toParticipantId,
+        sender: action.fromParticipantId,
         data: joinedMessage
       });
     case "WALLET.SEND_CHANNEL_UPDATED_MESSAGE":
