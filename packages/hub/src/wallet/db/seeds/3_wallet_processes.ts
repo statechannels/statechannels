@@ -2,7 +2,7 @@ import {Model} from 'objection';
 import {EmbeddedProtocol} from '../../../constants';
 import {PARTICIPANT_1_ADDRESS} from '../../../test/test-constants';
 import WalletProcess from '../../models/WalletProcess';
-import knex from '../connection';
+import knex from '../../../db-admin/db-admin-connection';
 Model.knex(knex);
 
 export function seed() {

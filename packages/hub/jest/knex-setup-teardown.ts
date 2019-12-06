@@ -1,4 +1,4 @@
-import knex from '../wallet/db/connection';
+import knex from '../src/db-admin/db-admin-connection';
 
 beforeAll(() => knex.migrate.rollback().then(() => knex.migrate.latest()));
 

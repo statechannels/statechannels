@@ -13,6 +13,10 @@ import {
 import {queries} from '../channels';
 import {createdChannel} from '../../../../test/test-responses';
 
+afterAll(() => {
+  knex.destroy();
+});
+
 describe('updateChannel', () => {
   describe('when theirState is a PreFundSetup', () => {
     it("works when the channel doesn't exist", async () => {
