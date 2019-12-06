@@ -1,8 +1,8 @@
 import Knex from 'knex';
 import {Model} from 'objection';
-import {dbCofig} from '../../db-config';
+import * as knexConfig from './knexfile';
 
-const knex = Knex(dbCofig);
+const knex = Knex(knexConfig);
 Model.knex(knex);
 
 export default knex;

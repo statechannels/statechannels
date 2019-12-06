@@ -1,4 +1,4 @@
-import '../config/env'; // Note: importing this module has the side effect of modifying env vars
+import '../env'; // Note: importing this module has the side effect of modifying env vars
 
 import {setupGanache} from '@statechannels/devtools';
 import {deploy} from '../deployment/deploy';
