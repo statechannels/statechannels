@@ -10,6 +10,20 @@ The simplest way to get this going on a mac is to install the [postgres app](htt
 
 You'll notice a set files with the `.env` prefix. The `.env` file contains environment variables that apply to all users across all environments. To add an environment variable specific to your local setup, add the variable to `.env.NODE_ENV.local` where NODE_ENV can be test, development, etc.
 
+#### Example local env file
+
+If you have `NODE_ENV=development`, you'd have a local file named `.env.development.local` with similar content to the following:
+
+```
+SERVER_URL=http://localhost:3002
+FIREBASE_PROJECT='rock-paper-scissors-dev'
+FIREBASE_API_KEY='AIzaSyAlGe17xjJjfoJ_KDYjCREg7ZL4ns61Chc'
+
+HUB_DB_HOST=localhost
+# assuming your postgres instance is open on port 5432
+HUB_DB_PORT=5432
+```
+
 ### Local Ganache
 
 Make sure a local ganache instance is running by following [the instructions at the root of the repo](../../readme.md#Development-Flow)
