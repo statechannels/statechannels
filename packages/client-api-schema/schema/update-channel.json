@@ -44,15 +44,7 @@
           "$ref": "definitions.json#/definitions/ChannelId"
         }
       },
-      "required": [
-        "allocations",
-        "appData",
-        "appDefinition",
-        "participants",
-        "status",
-        "turnNum",
-        "channelId"
-      ]
+      "required": ["allocations", "appData", "participants", "status", "turnNum", "channelId"]
     },
     "UpdateChannelParams": {
       "type": "object",
