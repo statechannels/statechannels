@@ -51,7 +51,12 @@ interface ChannelJoined {
   type: "Channel.Joined";
   signedState: SignedState;
 }
-type WalletMessage = OpenChannel | ChannelJoined | RelayableAction;
+
+interface ChannelUpdated {
+  type: "Channel.Updated";
+  signedState: SignedState;
+}
+type WalletMessage = OpenChannel | ChannelJoined | RelayableAction | ChannelUpdated;
 
 export interface JsonRpcUpdateChannelParams {
   allocations: JsonRpcAllocations;

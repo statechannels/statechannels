@@ -22,8 +22,11 @@ export interface ChannelState {
 
 export type OpenChannelState = ChannelState;
 
+export function getLastSignedState(state: ChannelState): SignedState {
+  return state.signedStates.slice(-1)[0];
+}
 export function getLastState(state: ChannelState): State {
-  return state.signedStates.slice(-1)[0].state;
+  return getLastSignedState(state).state;
 }
 
 export function getPenultimateState(state: ChannelState): State {

@@ -1,12 +1,17 @@
 import {ActionConstructor} from "../../utils";
 import {RelayableAction} from "../../../communication";
 
-export interface ApiAction {
+export interface ApiResponseAction {
   id: number | string; // Either a string or number is technically valid
   type: string;
 }
+export interface ApiMessageNotificationAction {
+  type: string;
+  toParticipantId: string;
+  fromParticipantId: string;
+}
 
-export interface CreateChannelResponse extends ApiAction {
+export interface CreateChannelResponse extends ApiResponseAction {
   type: "WALLET.CREATE_CHANNEL_RESPONSE";
   channelId: string;
 }
@@ -15,7 +20,7 @@ export const createChannelResponse: ActionConstructor<CreateChannelResponse> = p
   type: "WALLET.CREATE_CHANNEL_RESPONSE"
 });
 
-export interface UpdateChannelResponse extends ApiAction {
+export interface UpdateChannelResponse extends ApiResponseAction {
   type: "WALLET.UPDATE_CHANNEL_RESPONSE";
   channelId: string;
 }
@@ -24,7 +29,7 @@ export const updateChannelResponse: ActionConstructor<UpdateChannelResponse> = p
   type: "WALLET.UPDATE_CHANNEL_RESPONSE"
 });
 
-export interface AddressResponse extends ApiAction {
+export interface AddressResponse extends ApiResponseAction {
   type: "WALLET.ADDRESS_RESPONSE";
   address: string;
 }
@@ -33,7 +38,7 @@ export const addressResponse: ActionConstructor<AddressResponse> = p => ({
   type: "WALLET.ADDRESS_RESPONSE"
 });
 
-export interface UnknownSigningAddress extends ApiAction {
+export interface UnknownSigningAddress extends ApiResponseAction {
   type: "WALLET.UNKNOWN_SIGNING_ADDRESS_ERROR";
   signingAddress: string;
 }
@@ -43,7 +48,7 @@ export const unknownSigningAddress: ActionConstructor<UnknownSigningAddress> = p
   type: "WALLET.UNKNOWN_SIGNING_ADDRESS_ERROR"
 });
 
-export interface UnknownChannelId extends ApiAction {
+export interface UnknownChannelId extends ApiResponseAction {
   type: "WALLET.UNKNOWN_CHANNEL_ID_ERROR";
   channelId: string;
 }
@@ -53,7 +58,7 @@ export const unknownChannelId: ActionConstructor<UnknownChannelId> = p => ({
   type: "WALLET.UNKNOWN_CHANNEL_ID_ERROR"
 });
 
-export interface NoContractError extends ApiAction {
+export interface NoContractError extends ApiResponseAction {
   address: string;
   type: "WALLET.NO_CONTRACT_ERROR";
 }
@@ -62,11 +67,9 @@ export const noContractError: ActionConstructor<NoContractError> = p => ({
   type: "WALLET.NO_CONTRACT_ERROR"
 });
 
-export interface SendChannelProposedMessage {
+export interface SendChannelProposedMessage extends ApiMessageNotificationAction {
   type: "WALLET.SEND_CHANNEL_PROPOSED_MESSAGE";
   channelId: string;
-  toParticipantId: string;
-  fromParticipantId: string;
 }
 
 export const sendChannelProposedMessage: ActionConstructor<SendChannelProposedMessage> = p => ({
@@ -74,11 +77,9 @@ export const sendChannelProposedMessage: ActionConstructor<SendChannelProposedMe
   type: "WALLET.SEND_CHANNEL_PROPOSED_MESSAGE"
 });
 
-export interface SendChannelJoinedMessage {
+export interface SendChannelJoinedMessage extends ApiMessageNotificationAction {
   type: "WALLET.SEND_CHANNEL_JOINED_MESSAGE";
   channelId: string;
-  toParticipantId: string;
-  fromParticipantId: string;
 }
 
 export const sendChannelJoinedMessage: ActionConstructor<SendChannelJoinedMessage> = p => ({
@@ -96,7 +97,7 @@ export const channelProposedEvent: ActionConstructor<ChannelProposedEvent> = p =
   type: "WALLET.CHANNEL_PROPOSED_EVENT"
 });
 
-export interface PostMessageResponse extends ApiAction {
+export interface PostMessageResponse extends ApiResponseAction {
   type: "WALLET.POST_MESSAGE_RESPONSE";
 }
 
@@ -105,7 +106,7 @@ export const postMessageResponse: ActionConstructor<PostMessageResponse> = p => 
   type: "WALLET.POST_MESSAGE_RESPONSE"
 });
 
-export interface JoinChannelResponse extends ApiAction {
+export interface JoinChannelResponse extends ApiResponseAction {
   type: "WALLET.JOIN_CHANNEL_RESPONSE";
   channelId: string;
 }
@@ -114,7 +115,7 @@ export const joinChannelResponse: ActionConstructor<JoinChannelResponse> = p => 
   type: "WALLET.JOIN_CHANNEL_RESPONSE"
 });
 
-export interface ValidationError extends ApiAction {
+export interface ValidationError extends ApiResponseAction {
   type: "WALLET.VALIDATION_ERROR";
 }
 export const validationError: ActionConstructor<ValidationError> = p => ({
@@ -122,10 +123,8 @@ export const validationError: ActionConstructor<ValidationError> = p => ({
   type: "WALLET.VALIDATION_ERROR"
 });
 
-export interface RelayActionWithMessage {
+export interface RelayActionWithMessage extends ApiMessageNotificationAction {
   type: "WALLET.RELAY_ACTION_WITH_MESSAGE";
-  toParticipantId: string;
-  fromParticipantId: string;
   actionToRelay: RelayableAction;
 }
 
@@ -146,6 +145,25 @@ export const apiNotImplemented: ActionConstructor<ApiNotImplemented> = p => ({
   type: "WALLET.API_NOT_IMPLEMENTED"
 });
 
+export interface SendChannelUpdatedMessage extends ApiMessageNotificationAction {
+  type: "WALLET.SEND_CHANNEL_UPDATED_MESSAGE";
+  channelId: string;
+}
+
+export const sendChannelUpdatedMessage: ActionConstructor<SendChannelUpdatedMessage> = p => ({
+  ...p,
+  type: "WALLET.SEND_CHANNEL_UPDATED_MESSAGE"
+});
+
+export interface ChannelUpdatedEvent {
+  type: "WALLET.CHANNEL_UPDATED_EVENT";
+  channelId: string;
+}
+export const channelUpdatedEvent: ActionConstructor<ChannelUpdatedEvent> = p => ({
+  ...p,
+  type: "WALLET.CHANNEL_UPDATED_EVENT"
+});
+
 export type OutgoingApiAction =
   | AddressResponse
   | CreateChannelResponse
@@ -161,4 +179,6 @@ export type OutgoingApiAction =
   | JoinChannelResponse
   | ValidationError
   | RelayActionWithMessage
-  | ApiNotImplemented;
+  | ApiNotImplemented
+  | SendChannelUpdatedMessage
+  | ChannelUpdatedEvent;

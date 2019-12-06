@@ -10,7 +10,8 @@ import {
   MessageType
 } from "../helpers";
 import Emittery from "emittery";
-jest.setTimeout(10000);
+
+jest.setTimeout(30000);
 
 describe("Funding", () => {
   let browserA;
@@ -26,13 +27,14 @@ describe("Funding", () => {
 
     walletA = await browserA.newPage();
     walletB = await browserB.newPage();
+
     walletMessages = new Emittery.Typed<MessageEventTypes>();
     messageQueueFromA = walletMessages.events(MessageType.PlayerAMessage);
     messageQueueFromB = walletMessages.events(MessageType.PlayerBMessage);
 
     await loadWallet(walletA, createMessageHandler(walletMessages, "A"));
     await loadWallet(walletB, createMessageHandler(walletMessages, "B"));
-    // Automatically deliver messageQueued message to opponent's wallet
+    //  Automatically deliver messageQueued message to opponent's wallet
     walletMessages.on(MessageType.PlayerAMessage, async message => {
       await pushMessage(walletB, (message as any).params);
     });
@@ -98,5 +100,13 @@ describe("Funding", () => {
   it("allows player B to approve funding", async () => {
     await walletB.waitFor("button");
     await walletB.click("button");
+  });
+  it("completes funding for player A", async () => {
+    await walletA.waitFor("button");
+    expect(await walletA.content()).toMatch(/.*[Channel\ funded\!].*/);
+  });
+  it("completes funding for player B", async () => {
+    await walletB.waitFor("button");
+    expect(await walletB.content()).toMatch(/.*[Channel\ funded\!].*/);
   });
 });
