@@ -118,7 +118,6 @@ function* handlePushMessage(payload: RequestObject) {
     yield put(message.data);
     yield fork(messageSender, outgoingMessageActions.postMessageResponse({id}));
   } else {
-    // TODO: Add schema for PushMessageParams.data to client-api-schema/schema/push-message.json
     switch (message.data.type) {
       case "Channel.Updated":
         yield put(
