@@ -121,6 +121,12 @@ function* handlePushMessage(payload: RequestObject) {
             signedState: message.data.signedState
           })
         );
+        yield fork(
+          messageSender,
+          outgoingMessageActions.channelUpdatedEvent({
+            channelId: getChannelId(message.data.signedState.state.channel)
+          })
+        );
         break;
       case "Channel.Joined":
         yield put(
