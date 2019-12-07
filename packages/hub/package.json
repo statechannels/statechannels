@@ -36,6 +36,7 @@
     "async-lock": "1.2.2",
     "dotenv": "6.2.0",
     "dotenv-expand": "4.2.0",
+    "eslint-plugin-jest": "^23.1.1",
     "firebase": "6.6.2",
     "fmg-core": "0.5.9",
     "knex": "0.20.3",

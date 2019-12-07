@@ -54,7 +54,7 @@ describe('deposit manager', () => {
           amount: destinationHoldings
         })
       );
-      expect(mockBlockchainFund).toBeCalledWith(UNFUNDED_CHANNEL_ID, '0x05', '0x05');
+      expect(mockBlockchainFund).toHaveBeenCalledWith(UNFUNDED_CHANNEL_ID, '0x05', '0x05');
     });
   });
 
@@ -78,7 +78,7 @@ describe('deposit manager', () => {
           amount: destinationHoldings
         })
       );
-      expect(mockBlockchainFund).toBeCalledTimes(0);
+      expect(mockBlockchainFund).toHaveBeenCalledTimes(0);
     });
 
     it('should deposit, asset holder not fully funded', async () => {
@@ -100,7 +100,7 @@ describe('deposit manager', () => {
           amount: destinationHoldings
         })
       );
-      expect(mockBlockchainFund).toBeCalledWith(FUNDED_CHANNEL_ID, '0x05', '0x05');
+      expect(mockBlockchainFund).toHaveBeenCalledWith(FUNDED_CHANNEL_ID, '0x05', '0x05');
     });
   });
 });
