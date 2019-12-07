@@ -2,14 +2,14 @@ import React from 'react';
 
 import ApplicationContainer from './ApplicationContainer';
 import HomePageContainer from './HomePageContainer';
-import { connect } from 'react-redux';
+import {connect} from 'react-redux';
 
-import { SiteState } from '../redux/reducer';
+import {SiteState} from '../redux/reducer';
 import MetamaskErrorPage from '../components/MetamaskErrorPage';
-import { MetamaskError } from '../redux/metamask/actions';
+import {MetamaskError} from '../redux/metamask/actions';
 import LoadingPage from '../components/LoadingPage';
-import { createWalletIFrame } from 'magmo-wallet-client';
-import { WALLET_IFRAME_ID, WALLET_URL } from '../constants';
+import {createWalletIFrame} from 'magmo-wallet-client';
+import {WALLET_IFRAME_ID, WALLET_URL} from '../constants';
 import LoginErrorPage from '../components/LoginErrorPage';
 import * as actions from '../redux/login/actions';
 interface SiteProps {

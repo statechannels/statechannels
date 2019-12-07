@@ -1,10 +1,10 @@
 import React from 'react';
 
-import { Weapon } from '../core';
+import {Weapon} from '../core';
 
-import { WeaponBadge } from './WeaponBadge';
+import {WeaponBadge} from './WeaponBadge';
 
-import { GameLayout } from './GameLayout';
+import {GameLayout} from './GameLayout';
 
 interface Props {
   chooseWeapon: (move: Weapon) => void;
@@ -18,7 +18,7 @@ export default class SelectWeaponStep extends React.PureComponent<Props> {
   }
 
   render() {
-    const { afterOpponent, chooseWeapon, challengeExpirationDate } = this.props;
+    const {afterOpponent, chooseWeapon, challengeExpirationDate} = this.props;
     const renderChooseButton = this.renderChooseButton;
 
     return (

@@ -1,10 +1,10 @@
 import * as React from 'react';
 
-import { Button } from 'reactstrap';
+import {Button} from 'reactstrap';
 
-import { Weapon, Result } from '../core';
-import { WeaponBadge } from './WeaponBadge';
-import { GameLayout } from './GameLayout';
+import {Weapon, Result} from '../core';
+import {WeaponBadge} from './WeaponBadge';
+import {GameLayout} from './GameLayout';
 
 interface Props {
   yourWeapon: Weapon;
@@ -15,7 +15,7 @@ interface Props {
 
 export default class InsufficientFunds extends React.PureComponent<Props> {
   renderResultText() {
-    const { result } = this.props;
+    const {result} = this.props;
 
     switch (result) {
       case Result.YouWin:
@@ -30,7 +30,7 @@ export default class InsufficientFunds extends React.PureComponent<Props> {
   }
 
   render() {
-    const { yourWeapon, theirWeapon, action } = this.props;
+    const {yourWeapon, theirWeapon, action} = this.props;
 
     return (
       // TODO extract the badges into a new component shared with ResultPlayAgain

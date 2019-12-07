@@ -1,9 +1,9 @@
-import { connect } from 'react-redux';
+import {connect} from 'react-redux';
 
 import CreatingOpenGameModal from '../components/CreatingOpenGameModal';
 import * as gameActions from '../redux/game/actions';
 
-import { SiteState } from '../redux/reducer';
+import {SiteState} from '../redux/reducer';
 
 const mapStateToProps = (state: SiteState) => ({
   visible: state.game.localState.type === 'CreatingOpenGame',

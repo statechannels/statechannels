@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Weapon } from '../core';
+import {Weapon} from '../core';
 import ROCK_BADGE from '../images/rock_badge.svg';
 import PAPER_BADGE from '../images/paper_badge.svg';
 import SCISSORS_BADGE from '../images/scissors_badge.svg';
@@ -13,7 +13,7 @@ interface Props {
 interface State {
   hover: boolean;
 }
-const initialState = { hover: false };
+const initialState = {hover: false};
 
 export class WeaponBadge extends React.Component<Props, State> {
   constructor(props) {
@@ -24,16 +24,16 @@ export class WeaponBadge extends React.Component<Props, State> {
   }
 
   hoverOn() {
-    this.setState({ hover: true });
+    this.setState({hover: true});
   }
 
   hoverOff() {
-    this.setState({ hover: false });
+    this.setState({hover: false});
   }
 
   // todo: get hover to change the appearance
   render() {
-    const { move, action } = this.props;
+    const {move, action} = this.props;
     switch (move) {
       case Weapon.Rock:
         return (

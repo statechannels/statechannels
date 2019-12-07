@@ -1,5 +1,5 @@
-import { soliditySha3 } from 'web3-utils';
-import { BaseCommitment, CommitmentType, Bytes32 } from 'fmg-core';
+import {soliditySha3} from 'web3-utils';
+import {BaseCommitment, CommitmentType, Bytes32} from 'fmg-core';
 import {
   AppAttributes,
   RPSCommitment,
@@ -28,7 +28,7 @@ interface BaseWithBuyInParams extends BaseParams {
 }
 
 function base(obj: BaseCommitment): BaseCommitment {
-  const { channel, turnNum, allocation, destination, commitmentCount } = obj;
+  const {channel, turnNum, allocation, destination, commitmentCount} = obj;
   return {
     channel,
     turnNum,
@@ -109,10 +109,7 @@ export function propose(obj: ProposeParams): RPSCommitment {
 }
 
 export function hashCommitment(play: Weapon, salt: string) {
-  return soliditySha3(
-    { type: 'uint256', value: play.toString() },
-    { type: 'bytes32', value: salt }
-  );
+  return soliditySha3({type: 'uint256', value: play.toString()}, {type: 'bytes32', value: salt});
 }
 
 interface ProposeWithWeaponAndSaltParams extends BaseWithBuyInParams {
@@ -120,7 +117,7 @@ interface ProposeWithWeaponAndSaltParams extends BaseWithBuyInParams {
   aWeapon: Weapon;
 }
 export function proposeFromSalt(obj: ProposeWithWeaponAndSaltParams): RPSCommitment {
-  const { salt, aWeapon } = obj;
+  const {salt, aWeapon} = obj;
   const preCommit = hashCommitment(aWeapon, salt);
   const appAttributes = {
     ...defaultAppAttrs(obj.roundBuyIn),
@@ -143,7 +140,7 @@ interface AcceptParams extends BaseWithBuyInParams {
 }
 
 export function accept(obj: AcceptParams): RPSCommitment {
-  const { preCommit, bWeapon } = obj;
+  const {preCommit, bWeapon} = obj;
   return {
     ...base(obj),
     commitmentType: CommitmentType.App,
@@ -162,7 +159,7 @@ interface RevealParams extends BaseWithBuyInParams {
 }
 
 export function reveal(obj: RevealParams): RPSCommitment {
-  const { aWeapon, bWeapon, salt } = obj;
+  const {aWeapon, bWeapon, salt} = obj;
   return {
     ...base(obj),
     commitmentType: CommitmentType.App,

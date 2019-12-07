@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, ModalBody, ModalHeader } from 'reactstrap';
+import {Modal, ModalBody, ModalHeader} from 'reactstrap';
 
 interface Props {
   visible: boolean;

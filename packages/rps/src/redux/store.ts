@@ -1,5 +1,5 @@
-import { applyMiddleware, compose, createStore } from 'redux';
-import { fork } from 'redux-saga/effects';
+import {applyMiddleware, compose, createStore} from 'redux';
+import {fork} from 'redux-saga/effects';
 import createSagaMiddleware from 'redux-saga';
 
 import reducer from './reducer';
@@ -7,12 +7,12 @@ const sagaMiddleware = createSagaMiddleware();
 
 import loginSaga from './login/saga';
 import openGameSaga from './open-games/saga';
-import { firebaseInboxListener } from './message-service/firebase-inbox-listener';
-import { RPSChannelClient } from '../utils/rps-channel-client';
-import { channelUpdatedListener } from './message-service/channel-updated-listener';
-import { messageQueuedListener } from './message-service/message-queued-listener';
-import { gameSaga } from './game/saga';
-import { autoPlayer, autoOpponent } from './auto-opponent';
+import {firebaseInboxListener} from './message-service/firebase-inbox-listener';
+import {RPSChannelClient} from '../utils/rps-channel-client';
+import {channelUpdatedListener} from './message-service/channel-updated-listener';
+import {messageQueuedListener} from './message-service/message-queued-listener';
+import {gameSaga} from './game/saga';
+import {autoPlayer, autoOpponent} from './auto-opponent';
 
 const composeEnhancers = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const enhancers = composeEnhancers(applyMiddleware(sagaMiddleware));

@@ -1,17 +1,17 @@
-import { RPSChannelClient } from '../../utils/rps-channel-client';
-import { eventChannel, buffers } from 'redux-saga';
-import { put, take, fork, call, actionChannel, race } from 'redux-saga/effects';
-import { expectSaga } from 'redux-saga-test-plan';
-import { GameState, lobby } from '../game/state';
-import { gameJoined as gameJoinedAction } from '../game/actions';
-import { syncOpenGames } from '../open-games/actions';
-import { gameSaga } from '../game/saga';
-import { channelUpdatedListener } from '../message-service/channel-updated-listener';
-import { autoPlayer } from './auto-player';
-import { combineReducers } from 'redux';
-import { gameReducer } from '../game/reducer';
-import { openGamesReducer } from '../open-games/reducer';
-import { WeiPerEther } from 'ethers/constants';
+import {RPSChannelClient} from '../../utils/rps-channel-client';
+import {eventChannel, buffers} from 'redux-saga';
+import {put, take, fork, call, actionChannel, race} from 'redux-saga/effects';
+import {expectSaga} from 'redux-saga-test-plan';
+import {GameState, lobby} from '../game/state';
+import {gameJoined as gameJoinedAction} from '../game/actions';
+import {syncOpenGames} from '../open-games/actions';
+import {gameSaga} from '../game/saga';
+import {channelUpdatedListener} from '../message-service/channel-updated-listener';
+import {autoPlayer} from './auto-player';
+import {combineReducers} from 'redux';
+import {gameReducer} from '../game/reducer';
+import {openGamesReducer} from '../open-games/reducer';
+import {WeiPerEther} from 'ethers/constants';
 
 // The auto-opponent simulates the actions of the opponent in an RPS game.
 //
@@ -33,7 +33,7 @@ import { WeiPerEther } from 'ethers/constants';
 export function* autoOpponent(player: 'A' | 'B', externalClient: RPSChannelClient) {
   let internalStoreState = {
     game: {
-      localState: lobby({ name: 'AutoBot', address: 'blah' }),
+      localState: lobby({name: 'AutoBot', address: 'blah'}),
       channelState: null,
     } as GameState,
     openGames: [],
@@ -56,10 +56,10 @@ export function* autoOpponent(player: 'A' | 'B', externalClient: RPSChannelClien
   // and then when A joins, B needs to know
   // we need the loop to run once before being triggered, so create a special action
   const initializerChannel = yield actionChannel('@@AutoPlayerInitializer', buffers.fixed(10));
-  yield put({ type: '@@AutoPlayerInitializer' });
+  yield put({type: '@@AutoPlayerInitializer'});
 
   while (true) {
-    const { incomingMessage, outgoingMessage, gameJoined, gameCreated } = yield race({
+    const {incomingMessage, outgoingMessage, gameJoined, gameCreated} = yield race({
       incomingMessage: take(incomingMessageChannel),
       outgoingMessage: take(outgoingMessageChannel),
       gameJoined: take(gameJoinedChannel),

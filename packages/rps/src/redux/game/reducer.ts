@@ -16,11 +16,11 @@ import {
   waitingRoom,
   opponentJoined,
 } from './state';
-import { Reducer, combineReducers } from 'redux';
-import { GameAction, UpdateChannelState } from './actions';
-import { ChannelState } from '../../core';
+import {Reducer, combineReducers} from 'redux';
+import {GameAction, UpdateChannelState} from './actions';
+import {ChannelState} from '../../core';
 
-const emptyLocalState: LocalState = { type: 'Empty' };
+const emptyLocalState: LocalState = {type: 'Empty'};
 
 const channelReducer: Reducer<ChannelState | null, UpdateChannelState> = (
   state: ChannelState | null = null,
@@ -51,7 +51,7 @@ const localReducer: Reducer<LocalState> = (
   switch (state.type) {
     case 'Empty':
       if (action.type === 'UpdateProfile') {
-        newState = needAddress({ ...state, ...action });
+        newState = needAddress({...state, ...action});
       }
       break;
     case 'NeedAddress':
@@ -67,14 +67,14 @@ const localReducer: Reducer<LocalState> = (
         newState = creatingOpenGame(state);
       }
       if (action.type === 'JoinOpenGame') {
-        const { opponentName, opponentAddress, roundBuyIn } = action;
-        const { name, address } = state;
-        newState = gameChosen({ name, address, opponentName, roundBuyIn }, opponentAddress);
+        const {opponentName, opponentAddress, roundBuyIn} = action;
+        const {name, address} = state;
+        newState = gameChosen({name, address, opponentName, roundBuyIn}, opponentAddress);
       }
       break;
     case 'CreatingOpenGame':
       if (action.type === 'CreateGame') {
-        newState = waitingRoom({ ...state, ...action });
+        newState = waitingRoom({...state, ...action});
       }
       break;
     case 'ResultPlayAgain':
@@ -84,7 +84,7 @@ const localReducer: Reducer<LocalState> = (
       break;
     case 'WaitingRoom':
       if (action.type === 'GameJoined') {
-        newState = opponentJoined({ ...state, ...action });
+        newState = opponentJoined({...state, ...action});
       }
       break;
     case 'OpponentJoined':
@@ -102,7 +102,7 @@ const localReducer: Reducer<LocalState> = (
     case 'WeaponChosen':
     case 'WeaponAndSaltChosen':
       if (state.player === 'A' && action.type === 'ChooseSalt') {
-        newState = weaponAndSaltChosen({ ...state, player: 'A' }, action.salt);
+        newState = weaponAndSaltChosen({...state, player: 'A'}, action.salt);
       }
       if (action.type === 'ResultArrived') {
         if (action.fundingSituation === 'Ok') {

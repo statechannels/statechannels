@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import React from 'react';
 
-import { Button, Modal, ModalBody } from 'reactstrap';
+import {Button, Modal, ModalBody} from 'reactstrap';
 
 interface Props {
   exitToLobby: () => void;

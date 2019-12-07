@@ -1,6 +1,6 @@
 import * as match from 'redux-saga-test-plan/matchers';
-import { ChannelState } from '../../../core';
-import { RPSChannelClient } from '../../../utils/rps-channel-client';
+import {ChannelState} from '../../../core';
+import {RPSChannelClient} from '../../../utils/rps-channel-client';
 
 export const rpsChannelClientMocks = (client: RPSChannelClient) => {
   // checks and mocks a createChannel call, in the format expected by expectSaga.provide
@@ -39,5 +39,5 @@ export const rpsChannelClientMocks = (client: RPSChannelClient) => {
     Promise.resolve(state),
   ];
 
-  return { callCreateChannel, callJoinChannel, callUpdateChannel, callCloseChannel };
+  return {callCreateChannel, callJoinChannel, callUpdateChannel, callCloseChannel};
 };

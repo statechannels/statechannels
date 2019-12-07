@@ -1,13 +1,13 @@
-import { combineReducers } from 'redux';
+import {combineReducers} from 'redux';
 
-import { loginReducer, LoginState } from './login/reducer';
-import { MetamaskState, metamaskReducer } from './metamask/reducer';
-import { OpenGameState } from './open-games/state';
-import { openGamesReducer } from './open-games/reducer';
-import { overlayReducer } from './global/reducer';
-import { OverlayState } from './global/state';
-import { GameState } from './game/state';
-import { gameReducer } from './game/reducer';
+import {loginReducer, LoginState} from './login/reducer';
+import {MetamaskState, metamaskReducer} from './metamask/reducer';
+import {OpenGameState} from './open-games/state';
+import {openGamesReducer} from './open-games/reducer';
+import {overlayReducer} from './global/reducer';
+import {OverlayState} from './global/state';
+import {GameState} from './game/state';
+import {gameReducer} from './game/reducer';
 
 export interface SiteState {
   login: LoginState;

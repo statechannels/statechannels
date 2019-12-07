@@ -1,7 +1,7 @@
-import { take, fork } from 'redux-saga/effects';
-import { buffers, eventChannel } from 'redux-saga';
-import { reduxSagaFirebase } from '../../gateways/firebase';
-import { RPSChannelClient } from '../../utils/rps-channel-client';
+import {take, fork} from 'redux-saga/effects';
+import {buffers, eventChannel} from 'redux-saga';
+import {reduxSagaFirebase} from '../../gateways/firebase';
+import {RPSChannelClient} from '../../utils/rps-channel-client';
 
 export function* messageQueuedListener(client: RPSChannelClient) {
   const subscribe = emit => client.onMessageQueued(emit);

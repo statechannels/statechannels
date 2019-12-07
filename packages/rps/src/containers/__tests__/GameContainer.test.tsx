@@ -1,10 +1,10 @@
 import React from 'react';
-import { mount } from 'enzyme';
+import {mount} from 'enzyme';
 import GameContainer from '../GameContainer';
 import configureStore from 'redux-mock-store';
 import GameProposed from '../../components/GameProposedPage';
-import { SiteState } from '../../redux/reducer';
-import { localStatesA } from '../../redux/game/__tests__/scenarios';
+import {SiteState} from '../../redux/reducer';
+import {localStatesA} from '../../redux/game/__tests__/scenarios';
 
 const mockStore = configureStore();
 
@@ -34,7 +34,7 @@ describe('GameContainer', () => {
       },
     };
     const store = mockStore(initialState);
-    const component = mount(<GameContainer />, { context: { store } });
+    const component = mount(<GameContainer />, {context: {store}});
     expect(component.find(GameProposed)).toHaveLength(1);
   });
 });

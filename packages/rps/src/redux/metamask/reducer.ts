@@ -1,4 +1,4 @@
-import { Reducer } from 'redux';
+import {Reducer} from 'redux';
 import * as metamaskActions from './actions';
 
 export interface MetamaskState {
