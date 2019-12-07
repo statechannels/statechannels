@@ -86,7 +86,4 @@ const mapDispatchToProps = {
   defund: closeLedgerChannelAndExitChallenge
 };
 
-export const Responder = connect(
-  () => ({}),
-  mapDispatchToProps
-)(ResponderContainer);
+export const Responder = connect(() => ({}), mapDispatchToProps)(ResponderContainer);

@@ -50,9 +50,7 @@ export function initialize({
   }
 }
 
-export const fundingStrategyNegotiationReducer: ProtocolReducer<
-  states.FundingStrategyNegotiationState
-> = (
+export const fundingStrategyNegotiationReducer: ProtocolReducer<states.FundingStrategyNegotiationState> = (
   protocolState: states.FundingStrategyNegotiationState,
   sharedData: SharedData,
   action: actions.FundingStrategyNegotiationAction

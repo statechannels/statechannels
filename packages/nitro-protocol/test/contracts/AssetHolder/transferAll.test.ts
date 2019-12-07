@@ -88,10 +88,9 @@ describe('transferAll', () => {
       const [, assetOutcomeHash] = allocationToParams(allocation);
 
       // Set assetOutcomeHash
-      await (await AssetHolder.setAssetOutcomeHashPermissionless(
-        channelId,
-        assetOutcomeHash
-      )).wait();
+      await (
+        await AssetHolder.setAssetOutcomeHashPermissionless(channelId, assetOutcomeHash)
+      ).wait();
       expect(await AssetHolder.assetOutcomeHashes(channelId)).toBe(assetOutcomeHash);
 
       const tx = AssetHolder.transferAll(channelId, encodeAllocation(allocation));
