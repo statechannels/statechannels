@@ -29,7 +29,7 @@ export interface CloseChannelResult {
   allocations: Allocations;
   appDefinition: AppDefinition;
   appData: AppData;
-  status: "proposed" | "opening" | "funding" | "running" | "closing" | "closed";
+  status: 'proposed' | 'opening' | 'funding' | 'running' | 'closing' | 'closed';
   turnNum: string;
   [k: string]: any;
 }
