@@ -1,7 +1,7 @@
 process.env.NODE_ENV = process.env.NODE_ENV || 'test';
 
-const { configureEnvVariables } = require('@statechannels/devtools');
-const { spawn } = require('child_process');
+const {configureEnvVariables} = require('@statechannels/devtools');
+const {spawn} = require('child_process');
 
 configureEnvVariables();
 

@@ -43,7 +43,4 @@ const mapDispatchToProps = {
 
 // why does it think that mapStateToProps can return undefined??
 
-export const DirectFunding = connect(
-  () => ({}),
-  mapDispatchToProps
-)(DirectFundingContainer);
+export const DirectFunding = connect(() => ({}), mapDispatchToProps)(DirectFundingContainer);

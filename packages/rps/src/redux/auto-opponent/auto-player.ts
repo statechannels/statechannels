@@ -1,5 +1,5 @@
-import { put, takeEvery, select } from 'redux-saga/effects';
-import { GameState } from '../game/state';
+import {put, takeEvery, select} from 'redux-saga/effects';
+import {GameState} from '../game/state';
 import {
   createGame,
   chooseWeapon,
@@ -9,10 +9,10 @@ import {
   gameOver,
   newOpenGame,
 } from '../game/actions';
-import { bigNumberify } from 'ethers/utils';
-import { Weapon } from '../../core';
-import { OpenGame } from '../open-games/state';
-import { WeiPerEther } from 'ethers/constants';
+import {bigNumberify} from 'ethers/utils';
+import {Weapon} from '../../core';
+import {OpenGame} from '../open-games/state';
+import {WeiPerEther} from 'ethers/constants';
 
 // The auto-player simulates the actions of the user in an RPS game.
 //
@@ -48,7 +48,7 @@ function* autoPlayerBRun() {
   //    b. if in chooseWeapon, choose rock
   //    c. if in playAgain, choose to playAgain
 
-  const { localState, channelState }: GameState = yield select(getGameState);
+  const {localState, channelState}: GameState = yield select(getGameState);
 
   switch (localState.type) {
     case 'Lobby':
@@ -85,13 +85,13 @@ function* autoPlayerARun() {
   //    b. if in chooseWeapon, choose scissors (will lose against autoPlayerB)
   //    c. if in playAgain, choose to playAgain
 
-  const { localState, channelState }: GameState = yield select(getGameState);
+  const {localState, channelState}: GameState = yield select(getGameState);
 
   switch (localState.type) {
     case 'Lobby':
       const openGame = yield select(getOpenGame);
       if (openGame) {
-        const { address, name, stake } = openGame;
+        const {address, name, stake} = openGame;
         yield put(joinOpenGame(name, address, stake));
       }
       break;

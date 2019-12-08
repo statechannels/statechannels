@@ -96,11 +96,17 @@ describe('pushOutcome', () => {
       const outcome: AllocationAssetOutcome[] = [
         {
           assetHolderAddress: ETHAssetHolder.address,
-          allocation: [{destination: A, amount: '1'}, {destination: B, amount: '2'}],
+          allocation: [
+            {destination: A, amount: '1'},
+            {destination: B, amount: '2'},
+          ],
         },
         {
           assetHolderAddress: ERC20AssetHolder.address,
-          allocation: [{destination: C, amount: '3'}, {destination: D, amount: '4'}],
+          allocation: [
+            {destination: C, amount: '3'},
+            {destination: D, amount: '4'},
+          ],
         },
       ];
 

@@ -148,9 +148,7 @@ export const adjudicatorKnown: ActionConstructor<AdjudicatorKnown> = p => ({
   type: "WALLET.ADJUDICATOR_KNOWN"
 });
 
-export const appDefinitionBytecodeReceived: ActionConstructor<
-  AppDefinitionBytecodeReceived
-> = p => ({
+export const appDefinitionBytecodeReceived: ActionConstructor<AppDefinitionBytecodeReceived> = p => ({
   ...p,
   type: "WALLET.APP_DEFINITION_BYTECODE_RECEIVED"
 });

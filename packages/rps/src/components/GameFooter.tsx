@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from 'reactstrap';
+import {Button} from 'reactstrap';
 import MAGMO_LOGO from '../images/magmo_logo.svg';
 
 interface Props {

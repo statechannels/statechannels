@@ -118,7 +118,4 @@ const mapDispatchToProps = {
   defund: closeLedgerChannelAndExitChallenge
 };
 
-export const Challenger = connect(
-  () => ({}),
-  mapDispatchToProps
-)(ChallengerContainer);
+export const Challenger = connect(() => ({}), mapDispatchToProps)(ChallengerContainer);

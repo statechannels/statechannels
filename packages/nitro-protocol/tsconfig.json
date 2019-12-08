@@ -11,5 +11,5 @@
     "types": ["node", "jest"]
   },
   "include": ["src/**/*", "test/**/*", "build/contracts/*.json", "ganache/**/*"],
-  "references": [{ "path": "../jest-gas-reporter" }]
+  "references": [{"path": "../jest-gas-reporter"}]
 }

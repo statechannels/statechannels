@@ -1,17 +1,17 @@
-import { fork, take, select, cancel, call, apply, put } from 'redux-saga/effects';
+import {fork, take, select, cancel, call, apply, put} from 'redux-saga/effects';
 
 export const getLocalState = (storeObj: any) => storeObj.game.localState;
 function getOpenGame(storObj: any, address: string) {
   return storObj.openGames.filter(game => (game.address = address))[0];
 }
 
-import { default as firebase, reduxSagaFirebase } from '../../gateways/firebase';
+import {default as firebase, reduxSagaFirebase} from '../../gateways/firebase';
 
 import * as actions from './actions';
 
-import { LocalState } from '../game/state';
-import { bigNumberify } from 'ethers/utils';
-import { gameJoined } from '../game/actions';
+import {LocalState} from '../game/state';
+import {bigNumberify} from 'ethers/utils';
+import {gameJoined} from '../game/actions';
 
 export default function* openGameSaga() {
   // could be more efficient by only watching actions that could change the state
@@ -49,7 +49,7 @@ export default function* openGameSaga() {
 
     if (localState.type === 'WaitingRoom') {
       // if we don't have a wallet address, something's gone very wrong
-      const { address } = localState;
+      const {address} = localState;
       let myOpenGame;
       if (address) {
         const myOpenGameKey = `/challenges/${address}`;

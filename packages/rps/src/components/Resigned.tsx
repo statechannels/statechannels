@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { Button } from 'reactstrap';
-import { GameLayout } from './GameLayout';
+import {Button} from 'reactstrap';
+import {GameLayout} from './GameLayout';
 
 interface Props {
   iResigned: boolean;

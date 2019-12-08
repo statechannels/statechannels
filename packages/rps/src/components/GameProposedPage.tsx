@@ -1,5 +1,5 @@
 import React from 'react';
-import { ApplicationLayout } from './ApplicationLayout';
+import {ApplicationLayout} from './ApplicationLayout';
 
 interface Props {
   message: string;
@@ -7,7 +7,7 @@ interface Props {
 
 export default class ProposeGamePage extends React.PureComponent<Props> {
   render() {
-    const { message } = this.props;
+    const {message} = this.props;
 
     return (
       <ApplicationLayout>

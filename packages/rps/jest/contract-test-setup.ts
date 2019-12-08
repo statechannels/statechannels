@@ -1,6 +1,6 @@
 import '../config/env';
-import { GanacheServer } from '@statechannels/devtools';
-import { deploy } from '../deployment/deploy';
+import {GanacheServer} from '@statechannels/devtools';
+import {deploy} from '../deployment/deploy';
 
 export default async function setup() {
   console.log('test');
@@ -12,6 +12,6 @@ export default async function setup() {
 
   const deployedArtifacts = await deploy();
 
-  process.env = { ...process.env, ...deployedArtifacts };
+  process.env = {...process.env, ...deployedArtifacts};
   (global as any).__GANACHE_SERVER__ = ganacheServer;
 }

@@ -33,7 +33,4 @@ class ApplicationContainer extends PureComponent<Props> {
 
 const mapDispatchToProps = {};
 
-export const Application = connect(
-  () => ({}),
-  mapDispatchToProps
-)(ApplicationContainer);
+export const Application = connect(() => ({}), mapDispatchToProps)(ApplicationContainer);

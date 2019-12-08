@@ -273,11 +273,11 @@ module.exports = function(webpackEnv) {
         PnpWebpackPlugin.moduleLoader(module)
       ]
     },
-    
+
     // Webpack has some issue with ts-loader, transpileOnly, and esnext
     // https://github.com/TypeStrong/ts-loader/issues/751#issuecomment-376318718
     stats: {
-      warningsFilter: /export .* was not found in/,
+      warningsFilter: /export .* was not found in/
     },
 
     module: {

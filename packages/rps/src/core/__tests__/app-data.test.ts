@@ -6,9 +6,9 @@ import {
   RoundAccepted,
   Start,
 } from '../app-data';
-import { HashZero } from 'ethers/constants';
-import { Weapon } from '../weapons';
-import { bigNumberify } from 'ethers/utils';
+import {HashZero} from 'ethers/constants';
+import {Weapon} from '../weapons';
+import {bigNumberify} from 'ethers/utils';
 
 const testStart: Start = {
   type: 'start',

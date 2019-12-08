@@ -45,7 +45,4 @@ const mapDispatchToProps = {
   closeSelected: actions.closeSelected,
   keepOpenSelected: actions.keepOpenSelected
 };
-export const Concluding = connect(
-  () => ({}),
-  mapDispatchToProps
-)(ConcludingContainer);
+export const Concluding = connect(() => ({}), mapDispatchToProps)(ConcludingContainer);

@@ -1,9 +1,9 @@
-@import "./styles/variables";
-@import "./styles/reset";
-@import "./styles/box-sizing";
-@import "./styles/layout";
-@import "./styles/typography";
-@import "./styles/responsive";
+@import './styles/variables';
+@import './styles/reset';
+@import './styles/box-sizing';
+@import './styles/layout';
+@import './styles/typography';
+@import './styles/responsive';
 @import url('https://fonts.googleapis.com/css?family=Nunito:400,700&display=swap');
 
 /*
@@ -15,10 +15,10 @@
 
   Any global CSS variables should also be applied here.
 */
-@import url("https://rsms.me/inter/inter.css");
+@import url('https://rsms.me/inter/inter.css');
 
 html {
-  font-family: "Nunito Sans", sans-serif;
+  font-family: 'Nunito Sans', sans-serif;
   font-weight: 400;
   font-size: 18px;
   box-sizing: border-box;
