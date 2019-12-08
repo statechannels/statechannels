@@ -33,7 +33,7 @@ export interface JsonRpcCreateChannelParams {
 }
 
 export interface JsonRpcJoinChannelParams {
-  channelID: string;
+  channelId: string;
 }
 
 export interface JsonRpcMessage {

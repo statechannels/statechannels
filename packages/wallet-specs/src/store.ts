@@ -8,6 +8,8 @@ import {
   State,
 } from '.';
 import { ChannelStoreEntry, IChannelStoreEntry } from './ChannelStoreEntry';
+import { messageService } from './messaging';
+import { AddressableMessage, OpenChannel } from './wire-protocol';
 interface IStore {
   getLatestState: (channelID: string) => State;
   getLatestConsensus: (channelID: string) => SignedState; // Used for null channels, whose support must be a single state
@@ -30,7 +32,8 @@ interface IStore {
   */
   initializeChannel: (entry: ChannelStoreEntry) => void;
   sendState: (state: State) => void;
-  receiveStates: (signedStates: SignedState[]) => ChannelUpdated | false;
+  sendOpenChannel: (state: State) => void;
+  receiveStates: (signedStates: SignedState[]) => void;
 
   // TODO: set funding
   // setFunding(channelId: string, funding: Funding): void;
@@ -97,17 +100,22 @@ export class Store implements IStore {
     return new ChannelStoreEntry(this._store[channelID]);
   }
 
+  public maybeGetEntry(channelID: string): ChannelStoreEntry | false {
+    const entry = this._store[channelID];
+    return !!entry && new ChannelStoreEntry(entry);
+  }
+
   public getPrivateKey(participantIds: string[]): string {
     const myId = participantIds.find(id => this._privateKeys[id]);
     if (!myId) {
-      throw new Error('Missing');
+      throw new Error(`No private key found for ${myId}`);
     }
     return this._privateKeys[myId];
   }
 
   public getIndex(channelId: string): 0 | 1 {
     const entry = this.getEntry(channelId);
-    const { participants } = entry.supportedState[0].state.channel;
+    const { participants } = entry.states[0].state.channel;
     if (participants.length !== 2) {
       throw new Error('Assumes two participants');
     }
@@ -164,14 +172,15 @@ export class Store implements IStore {
   }
 
   public signedByMe(state: State) {
-    const signedState = this.states(getChannelID(state.channel)).find(
-      (s: SignedState) => Store.equals(state, s.state)
+    const { states } = this.getEntry(getChannelID(state.channel));
+    const signedState = states.find((s: SignedState) =>
+      Store.equals(state, s.state)
     );
 
     return (
       !!signedState &&
       !!signedState.signatures &&
-      signedState.signatures.includes('me')
+      signedState.signatures.includes('first')
     );
   }
 
@@ -185,18 +194,55 @@ export class Store implements IStore {
   }
 
   public sendState(state: State) {
-    this.receiveStates([{ state, signatures: ['mine'] }]);
+    // 1. Check if it's safe to send the state
+    // TODO
+    const channelId = getChannelID(state.channel);
+
+    // 2. Sign & store the state
+    const { privateKey: signature } = this.getEntry(channelId);
+    const signedStates: SignedState[] = [{ state, signatures: [signature] }];
+    this.updateOrCreateEntry(channelId, signedStates);
+
+    // 3. Look up recipients
+    // TODO
+    const recipients = state.channel.participants;
+
+    // 4. Send the message
+    const message: AddressableMessage = {
+      type: 'SendStates',
+      signedStates,
+      to: 'BLANK',
+    };
+    recipients.forEach(to => messageService.sendMessage({ ...message, to }));
   }
 
-  public receiveStates(signedStates: SignedState[]): ChannelUpdated | false {
+  public sendOpenChannel(state: State) {
+    // 1. Check if it's safe to send the state
+    // TODO
+    const channelId = getChannelID(state.channel);
+
+    // 2. Sign & store the state
+    const signedState: SignedState = this.signState(state);
+    const newEntry = this.updateOrCreateEntry(channelId, [signedState]);
+
+    // 3. Send the message
+    const message: AddressableMessage = {
+      type: 'OPEN_CHANNEL',
+      signedState,
+      to: 'BLANK',
+    };
+    newEntry.recipients.forEach(to =>
+      messageService.sendMessage({ ...message, to })
+    );
+  }
+
+  public receiveStates(signedStates: SignedState[]): void {
     try {
       const { channel } = signedStates[0].state;
       const channelID = getChannelID(channel);
 
       // TODO: validate transition
-      this.updateEntry(channelID, signedStates);
-
-      return { type: 'CHANNEL_UPDATED', channelID };
+      this.updateOrCreateEntry(channelID, signedStates);
     } catch (e) {
       throw e;
     }
@@ -218,22 +264,35 @@ export class Store implements IStore {
     }
   }
   public nonceOk(participants: string[], nonce: string): boolean {
-    return gt(nonce, this._nonces[this.key(participants)]);
+    return gt(nonce, this._nonces[this.key(participants)] || -1);
   }
 
   // PRIVATE
 
-  private states(channelID: string): SignedState[] {
-    const entry = this.getEntry(channelID);
+  private signState(state: State): SignedState {
+    console.log(
+      `signing ${state.turnNum} with key ${
+        this.getEntry(getChannelID(state.channel)).privateKey
+      }`
+    );
 
-    return entry.unsupportedStates.concat(entry.supportedState);
+    return {
+      state,
+      signatures: [this.getEntry(getChannelID(state.channel)).privateKey],
+    };
   }
 
-  private updateEntry(channelID: string, states: SignedState[]): true {
+  private updateOrCreateEntry(
+    channelID: string,
+    states: SignedState[]
+  ): ChannelStoreEntry {
     // TODO: This currently assumes that support comes from consensus on a single state
-    let supportedState: SignedState[];
-    let unsupportedStates: SignedState[];
-    ({ supportedState, unsupportedStates } = this.getEntry(channelID));
+    let supportedState: SignedState[] = [];
+    let unsupportedStates: SignedState[] = [];
+    const entry = this.maybeGetEntry(channelID);
+    if (entry) {
+      ({ supportedState, unsupportedStates } = entry);
+    }
 
     unsupportedStates = merge(unsupportedStates, states);
 
@@ -242,17 +301,42 @@ export class Store implements IStore {
       .sort(s => -s.state.turnNum);
 
     supportedState = nowSupported.length ? [nowSupported[0]] : supportedState;
-    unsupportedStates = unsupportedStates.filter(
-      s => s.state.turnNum > supportedState[0].state.turnNum
+    if (supportedState.length > 0) {
+      unsupportedStates = unsupportedStates.filter(
+        s => s.state.turnNum > supportedState[0].state.turnNum
+      );
+    }
+
+    if (entry) {
+      this._store[channelID] = {
+        ...this._store[channelID],
+        supportedState,
+        unsupportedStates,
+      };
+    } else {
+      const { channel } = states[0].state;
+      const { participants } = channel;
+      const entryParticipants: Participant[] = participants.map(p => ({
+        destination: p,
+        signingAddress: p,
+        participantId: p,
+      }));
+      const privateKey = this.getPrivateKey(participants);
+      this._store[channelID] = {
+        supportedState,
+        unsupportedStates,
+        privateKey,
+        participants: entryParticipants,
+        channel,
+      };
+    }
+
+    console.log(
+      `Latest state signatures: ${supportedState.length &&
+        supportedState[0].signatures}`
     );
 
-    this._store[channelID] = {
-      ...this._store[channelID],
-      supportedState,
-      unsupportedStates,
-    };
-
-    return true;
+    return new ChannelStoreEntry(this._store[channelID]);
   }
 }
 
@@ -277,7 +361,7 @@ function merge(left: SignedState[], right: SignedState[]): SignedState[] {
 function supported(signedState: SignedState) {
   // TODO: temporarily just check the required length
   return (
-    signedState.signatures.length ===
+    signedState.signatures.filter(Boolean).length ===
     signedState.state.channel.participants.length
   );
 }
@@ -285,7 +369,7 @@ function supported(signedState: SignedState) {
 // The store would send this action whenever the channel is updated
 export interface ChannelUpdated {
   type: 'CHANNEL_UPDATED';
-  channelID: string;
+  channelId: string;
 }
 
 export interface Deposit {

@@ -1,3 +1,10 @@
+import {
+  AnyEventObject,
+  ConditionPredicate,
+  Machine,
+  MachineConfig,
+} from 'xstate';
+import { State, Store } from '../..';
 import { saveConfig } from '../../utils';
 
 const PROTOCOL = 'advance-channel';
@@ -21,17 +28,19 @@ export interface Init {
   targetTurnNum: number; // should either be numParticipants-1 or 2*numParticipants-1
 }
 
+const toSuccess = {
+  target: 'success',
+  cond: 'advanced',
+};
 const waiting = {
-  entry: 'send',
+  entry: 'sendState',
   on: {
-    CHANNEL_UPDATED: {
-      target: 'success',
-      cond: 'advanced',
-    },
+    CHANNEL_UPDATED: toSuccess,
+    '': toSuccess,
   },
 };
 
-const advanceChannelConfig = {
+export const config: MachineConfig<Init, any, AnyEventObject> = {
   key: PROTOCOL,
   initial: 'waiting',
   states: {
@@ -40,8 +49,53 @@ const advanceChannelConfig = {
   },
 };
 
-const guards = {
-  advanced: context => true,
+export type Guards = {
+  advanced: ConditionPredicate<Init, AnyEventObject>;
 };
 
-saveConfig(advanceChannelConfig, __dirname, { guards });
+export type Actions = {
+  sendState: any;
+};
+
+{
+  const guards: Guards = {
+    advanced: context => true,
+  };
+  const actions: Actions = { sendState: ctx => true };
+  saveConfig(config, __dirname, { guards, actions });
+}
+
+export function machine(store: Store, context?: Init) {
+  const guards: Guards = {
+    advanced: ({ channelId, targetTurnNum }: Init) => {
+      const { latestSupportedState, unsupportedStates } = store.getEntry(
+        channelId
+      );
+
+      return (
+        !!latestSupportedState && latestSupportedState.turnNum >= targetTurnNum
+      );
+    },
+  };
+
+  const actions: Actions = {
+    sendState: ({ channelId, targetTurnNum }: Init) => {
+      const { latestSupportedState, unsupportedStates } = store.getEntry(
+        channelId
+      );
+      const turnNum = targetTurnNum;
+      if (!latestSupportedState) {
+        store.sendState({ ...unsupportedStates[0].state, turnNum });
+        return;
+      }
+      if (latestSupportedState.turnNum >= targetTurnNum) {
+        return;
+      } else {
+        store.sendState({ ...latestSupportedState, turnNum });
+      }
+    },
+  };
+
+  const services = {};
+  return Machine({ ...config, context }, { guards, actions, services });
+}
