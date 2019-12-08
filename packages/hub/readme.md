@@ -57,6 +57,20 @@ NODE_ENV=test yarn db:create
 yarn test:ci
 ```
 
+### Troubleshooting Test Errors
+
+If you run into the following error
+
+```shell
+    getaddrinfo ENOTFOUND RequiredInLocalDotenv RequiredInLocalDotenv:5432
+```
+
+Make sure you have a local .env file dedicated to testing, by running the following:
+
+```shell
+cp .env.development.local .env.test.local
+```
+
 ## Deploying
 
 Heroku is configured to automatically deploy from the watched `deploy` branch.
