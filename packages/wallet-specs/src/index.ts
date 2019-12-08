@@ -1,6 +1,6 @@
-import { SendAction } from 'xstate';
+import { AnyEventObject, EventObject, SendAction, StateMachine } from 'xstate';
 import { forwardTo } from 'xstate/lib/actions';
-import { ChannelUpdated, Store } from './store';
+import { ChannelUpdated, IStore, Store } from './store';
 const store = new Store();
 export { Store, store };
 
@@ -96,3 +96,8 @@ type T<C> = { actions: SendAction<C, ChannelUpdated> };
 export function forwardChannelUpdated<C>(id: string): T<C> {
   return { actions: forwardTo(id) };
 }
+
+export type MachineFactory<I, E extends EventObject> = (
+  store: IStore,
+  context?: I
+) => StateMachine<I, any, E>;

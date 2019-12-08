@@ -4,7 +4,7 @@ import {
   Machine,
   MachineConfig,
 } from 'xstate';
-import { Store } from '../..';
+import { MachineFactory, Store } from '../..';
 import { log } from '../../utils';
 
 const PROTOCOL = 'advance-channel';
@@ -62,7 +62,10 @@ export const mockOptions = {
   actions: { sendState: ctx => true },
 };
 
-export function machine(store: Store, context?: Init) {
+export const machine: MachineFactory<Init, any> = (
+  store: Store,
+  context?: Init
+) => {
   const guards: Guards = {
     advanced: ({ channelId, targetTurnNum }: Init) => {
       const { latestSupportedState: state } = store.getEntry(channelId);
@@ -91,4 +94,4 @@ export function machine(store: Store, context?: Init) {
   const services = {};
   const options = { guards, actions, services };
   return Machine(config).withConfig(options, context);
-}
+};

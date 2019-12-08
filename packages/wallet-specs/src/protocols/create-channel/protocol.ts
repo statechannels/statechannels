@@ -1,6 +1,13 @@
 import { assign, InvokeCreator, Machine, sendParent } from 'xstate';
 import { AdvanceChannel } from '..';
-import { Channel, forwardChannelUpdated, State, Store, success } from '../..';
+import {
+  Channel,
+  forwardChannelUpdated,
+  MachineFactory,
+  State,
+  Store,
+  success,
+} from '../..';
 import { ChannelStoreEntry } from '../../ChannelStoreEntry';
 import { JsonRpcCreateChannelParams } from '../../json-rpc';
 
@@ -88,7 +95,10 @@ export const mockOptions = {
   actions: { sendOpenChannelMessage },
 };
 
-export function machine(store: Store, init: Init) {
+export const machine: MachineFactory<Init, any> = (
+  store: Store,
+  init: Init
+) => {
   const setChannelId: InvokeCreator<any> = (ctx: Init): Promise<SetChannel> => {
     const participants = ctx.participants.map(p => p.destination);
     const channelNonce = store.getNextNonce(participants);
@@ -150,4 +160,4 @@ export function machine(store: Store, init: Init) {
   };
 
   return Machine(config, options).withContext(init);
-}
+};

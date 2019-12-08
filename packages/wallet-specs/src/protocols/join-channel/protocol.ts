@@ -1,6 +1,6 @@
 import { Machine, MachineConfig, send, SendAction, sendParent } from 'xstate';
 import { AdvanceChannel, JoinChannel } from '..';
-import { forwardChannelUpdated, Store, success } from '../..';
+import { forwardChannelUpdated, MachineFactory, Store, success } from '../..';
 import { JsonRpcJoinChannelParams } from '../../json-rpc';
 import { ChannelUpdated } from '../../store';
 import { CloseChannel, OpenChannel } from '../../wire-protocol';
@@ -80,7 +80,7 @@ const postFundSetup = {
 export const config: MachineConfig<
   Init,
   any,
-  OpenChannel | CloseChannel | ChannelUpdated | any
+  OpenChannel | CloseChannel | ChannelUpdated
 > = {
   key: PROTOCOL,
   initial: 'checkNonce',
@@ -110,7 +110,10 @@ export type Actions = {
   storeState: ({ channelId }: Init, { signedState }: OpenChannel) => void;
 };
 
-export function machine(store: Store, { channelId }: JoinChannel.Init) {
+export const machine: MachineFactory<Init, any> = (
+  store: Store,
+  { channelId }: JoinChannel.Init
+) => {
   const guards: Guards = {
     nonceOk: ({}, event: OpenChannelEvent) => {
       const { channel } = event.signedState.state;
@@ -136,4 +139,4 @@ export function machine(store: Store, { channelId }: JoinChannel.Init) {
 
   const context = { channelId };
   return Machine(config, options).withConfig(options, context);
-}
+};
