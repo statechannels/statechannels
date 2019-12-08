@@ -16,6 +16,7 @@ export type Process = {
   ref: any;
 };
 export interface Init {
+  id: string;
   processes: Process[];
 }
 
@@ -24,18 +25,21 @@ function forwardToChildren(
   event: AnyEventObject,
   { state }: { state: State<any, any, any> }
 ) {
-  Object.values(state.children).forEach(child => child.send(event));
+  state.context.processes.forEach(({ ref }: Process) => ref.send(event));
 }
 const config = {
   key: PROTOCOL,
   initial: 'running',
-  // context: { processes: [] },
+  context: { processes: [], id: 'unknown' },
   states: {
     running: {
       on: {
         OPEN_CHANNEL: { actions: 'spawnJoinChannel' },
         CREATE_CHANNEL: { actions: 'spawnCreateChannel' },
         '*': { actions: forwardToChildren },
+        // CHANNEL_UPDATED: {
+        //   actions: [forwardToChildren],
+        // },
       },
     },
   },
@@ -56,6 +60,18 @@ export type Actions = {
 
 export type Events = OpenChannelEvent & CreateChannelEvent;
 
+function addLogs(process: Process, ctx): Process {
+  process.ref
+    .onTransition(state =>
+      console.log(`TRANSITION: ${ctx.id}/${process.id}: ${state.value}`)
+    )
+    .onEvent(event => {
+      console.log(`EVENT: ${ctx.id}/${process.id}: ${event.type}`);
+    });
+
+  return process;
+}
+
 export function machine(store: Store) {
   const spawnCreateChannel = assign(
     (ctx: Init, { type, ...init }: CreateChannelEvent): Init => {
@@ -64,13 +80,16 @@ export function machine(store: Store) {
         throw new Error('Process exists');
       }
 
-      const process = {
-        id: processId,
-        ref: spawn(
-          CreateChannel.machine(store, init).withContext(init),
-          processId
-        ),
-      };
+      const process = addLogs(
+        {
+          id: processId,
+          ref: spawn(
+            CreateChannel.machine(store, init).withContext(init),
+            processId
+          ),
+        },
+        ctx
+      );
 
       return {
         ...ctx,
@@ -85,10 +104,14 @@ export function machine(store: Store) {
     if (ctx.processes.find(p => p.id === processId)) {
       throw new Error('Process exists');
     }
-    const process = {
-      id: channelId,
-      ref: spawn(JoinChannel.machine(store, { channelId }), processId),
-    };
+    const joinChannelMachine = JoinChannel.machine(store, { channelId });
+    const process = addLogs(
+      {
+        id: processId,
+        ref: spawn(joinChannelMachine, processId),
+      },
+      ctx
+    );
     return {
       ...ctx,
       processes: ctx.processes.concat([process]),

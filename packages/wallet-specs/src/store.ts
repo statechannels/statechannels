@@ -199,13 +199,12 @@ export class Store implements IStore {
     const channelId = getChannelID(state.channel);
 
     // 2. Sign & store the state
-    const { privateKey: signature } = this.getEntry(channelId);
-    const signedStates: SignedState[] = [{ state, signatures: [signature] }];
-    this.updateOrCreateEntry(channelId, signedStates);
+    const signedStates: SignedState[] = [this.signState(state)];
+    const { privateKey } = this.updateOrCreateEntry(channelId, signedStates);
 
     // 3. Look up recipients
-    // TODO
-    const recipients = state.channel.participants;
+    // TODO properly get the recipients
+    const recipients = state.channel.participants.filter(p => p !== privateKey);
 
     // 4. Send the message
     const message: AddressableMessage = {
@@ -270,12 +269,6 @@ export class Store implements IStore {
   // PRIVATE
 
   private signState(state: State): SignedState {
-    console.log(
-      `signing ${state.turnNum} with key ${
-        this.getEntry(getChannelID(state.channel)).privateKey
-      }`
-    );
-
     return {
       state,
       signatures: [this.getEntry(getChannelID(state.channel)).privateKey],
@@ -330,11 +323,6 @@ export class Store implements IStore {
         channel,
       };
     }
-
-    console.log(
-      `Latest state signatures: ${supportedState.length &&
-        supportedState[0].signatures}`
-    );
 
     return new ChannelStoreEntry(this._store[channelID]);
   }

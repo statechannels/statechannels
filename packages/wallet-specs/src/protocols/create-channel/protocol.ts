@@ -29,7 +29,6 @@ export const advanceChannelArgs = (i: 1 | 3) => ({
   targetTurnNum: i,
 });
 const initializeChannel = {
-  entry: () => console.log('CREATING CHANNEL'),
   invoke: {
     src: 'setChannelId',
     onDone: 'preFundSetup',

@@ -4,7 +4,8 @@ import {
   Machine,
   MachineConfig,
 } from 'xstate';
-import { State, Store } from '../..';
+import { Store } from '../..';
+import { log } from '../../utils';
 
 const PROTOCOL = 'advance-channel';
 /*
@@ -64,13 +65,8 @@ export const mockOptions = {
 export function machine(store: Store, context?: Init) {
   const guards: Guards = {
     advanced: ({ channelId, targetTurnNum }: Init) => {
-      const { latestSupportedState, unsupportedStates } = store.getEntry(
-        channelId
-      );
-
-      return (
-        !!latestSupportedState && latestSupportedState.turnNum >= targetTurnNum
-      );
+      const { latestSupportedState: state } = store.getEntry(channelId);
+      return !!state && state.turnNum >= targetTurnNum;
     },
   };
 
@@ -79,7 +75,7 @@ export function machine(store: Store, context?: Init) {
       const { latestSupportedState, unsupportedStates } = store.getEntry(
         channelId
       );
-      const turnNum = targetTurnNum;
+      const turnNum = targetTurnNum; // TODO: fix
       if (!latestSupportedState) {
         store.sendState({ ...unsupportedStates[0].state, turnNum });
         return;
@@ -93,5 +89,6 @@ export function machine(store: Store, context?: Init) {
   };
 
   const services = {};
-  return Machine({ ...config, context }, { guards, actions, services });
+  const options = { guards, actions, services };
+  return Machine(config).withConfig(options, context);
 }

@@ -80,7 +80,7 @@ const postFundSetup = {
 export const config: MachineConfig<
   Init,
   any,
-  OpenChannel | CloseChannel | ChannelUpdated
+  OpenChannel | CloseChannel | ChannelUpdated | any
 > = {
   key: PROTOCOL,
   initial: 'checkNonce',
@@ -134,5 +134,6 @@ export function machine(store: Store, { channelId }: JoinChannel.Init) {
     services,
   };
 
-  return Machine({ ...config, context: { channelId } }, options);
+  const context = { channelId };
+  return Machine(config, options).withConfig(options, context);
 }
