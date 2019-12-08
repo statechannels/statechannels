@@ -30,11 +30,20 @@ const stores = {
 };
 
 const logEvents = name => event =>
-  console.log(`EVENT: ${name}: ${event.type}`);
+  console.log(
+    pretty({
+      EVENT_LOGGED: {
+        wallet: name,
+        event: event.type,
+      },
+    })
+  );
 const logStore = name => state =>
   console.log(`${name}'s store: ${pretty(stores[name])}`);
 const wallet = name => {
-  return interpret(Wallet.machine(stores[name]).withContext({ processes: [], id: name}))
+  return interpret(
+    Wallet.machine(stores[name]).withContext({ processes: [], id: name })
+  )
     .onEvent(logEvents(name))
     .start();
 };

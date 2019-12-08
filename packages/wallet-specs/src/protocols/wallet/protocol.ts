@@ -7,7 +7,7 @@ import {
   State,
 } from 'xstate';
 import { CreateChannel, JoinChannel } from '..';
-import { getChannelID, Store } from '../..';
+import { getChannelID, pretty, Store } from '../..';
 import { OpenChannel } from '../../wire-protocol';
 
 const PROTOCOL = 'wallet';
@@ -63,10 +63,20 @@ export type Events = OpenChannelEvent & CreateChannelEvent;
 function addLogs(process: Process, ctx): Process {
   process.ref
     .onTransition(state =>
-      console.log(`TRANSITION: ${ctx.id}/${process.id}: ${state.value}`)
+      console.log(
+        pretty({
+          actor: `${ctx.id}.${process.id}`,
+          TRANSITION: { state: state.value },
+        })
+      )
     )
     .onEvent(event => {
-      console.log(`EVENT: ${ctx.id}/${process.id}: ${event.type}`);
+      console.log(
+        pretty({
+          actor: `${ctx.id}.${process.id}`,
+          EVENT: { event: event.type },
+        })
+      );
     });
 
   return process;
