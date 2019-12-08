@@ -21,3 +21,4 @@
 /.storybook/
 /truffle.ts
 /migrations/
+src/contract-tests/rock-paper-scissors.test.ts
