@@ -10,7 +10,7 @@
  */
 export type Response1 =
   | {
-      jsonrpc: '2.0';
+      jsonrpc: "2.0";
       id: string | number;
       result?:
         | {
@@ -89,7 +89,7 @@ export interface AllocationItem {
   [k: string]: any;
 }
 export interface Response {
-  jsonrpc: '2.0';
+  jsonrpc: "2.0";
   id: string | number;
   result?:
     | {
