@@ -55,8 +55,7 @@ module.exports = {
     ecmaVersion: 2018,
     sourceType: 'module',
   },
-
-  plugins: ['@typescript-eslint', 'prettier', , 'jest', 'react'],
+  plugins: ['@typescript-eslint', 'prettier', 'jest', 'react'],
   settings: {
     react: {
       version: 'detect',
@@ -84,26 +83,13 @@ module.exports = {
     ...jestViolations,
     ...reactRules,
   },
-  //   overrides: [
-  //     {
-  //       files: ["test/**/*.ts"],
-  //       env: {
-  //         node: true
-  //       },
-  //       globals: {
-  //         Promise: "readonly",
-  //         expect: "readonly",
-  //         it: "readonly",
-  //         describe: "readonly",
-  //         beforeAll: "readonly",
-  //         beforeEach: "readonly"
-  //       }
-  //     },
-  //     {
-  //       files: ["ganache/**/*.ts"],
-  //       env: {
-  //         node: true
-  //       }
-  //     }
-  //   ]
+  overrides: [
+    {
+      files: ['**/*.{json,js}'],
+      parser: 'babel-eslint',
+      env: {
+        node: true,
+      },
+    },
+  ],
 };
