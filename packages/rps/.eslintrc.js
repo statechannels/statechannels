@@ -86,8 +86,11 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['**/*.{json,js}'],
+      files: ['**/*.js'],
       parser: 'babel-eslint',
+      rules: {
+        '@typescript-eslint/no-var-requires': 'off',
+      },
       env: {
         node: true,
       },
