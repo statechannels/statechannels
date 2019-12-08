@@ -76,9 +76,6 @@ const defundTarget = {
 };
 
 // Without is used so that defundGuarantorInLedger can be used by the hub as well
-type Without<T, K> = {
-  [L in Exclude<keyof T, K>]: T[L];
-};
 export function defundGuarantorInLedger({
   hubLedgerId,
   jointChannelId,

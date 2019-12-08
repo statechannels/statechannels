@@ -1,4 +1,6 @@
-import { Store } from './store';
+import { SendAction } from 'xstate';
+import { forwardTo } from 'xstate/lib/actions';
+import { ChannelUpdated, Store } from './store';
 const store = new Store();
 export { Store, store };
 
@@ -82,3 +84,15 @@ export const max = (a: numberish, b: numberish) =>
 export const gt = (a: numberish, b: numberish) => Number(a) > Number(b);
 
 export const success: { type: 'final' } = { type: 'final' };
+export const failure: { type: 'final' } = { type: 'final' };
+
+export type Without<T, K> = {
+  [L in Exclude<keyof T, K>]: T[L];
+};
+
+export const pretty = o => JSON.stringify(o, null, 2);
+
+type T<C> = { actions: SendAction<C, ChannelUpdated> };
+export function forwardChannelUpdated<C>(id: string): T<C> {
+  return { actions: forwardTo(id) };
+}
