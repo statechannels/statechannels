@@ -42,6 +42,7 @@ const importRules = {
 
 const reactRules = {
   'react/no-unescaped-entities': 'off',
+  'react/prop-types': 'off', // We have Typescript
 };
 
 module.exports = {
