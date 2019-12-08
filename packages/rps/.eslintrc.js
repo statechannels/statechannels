@@ -74,7 +74,7 @@ module.exports = {
     'plugin:prettier/recommended',
   ],
   rules: {
-    'prettier/prettier': 'error',
+    'prettier/prettier': 'warn',
     // @typescript-eslint/no-unused-vars overrides this
     'no-unused-vars': 'off',
 
