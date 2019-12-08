@@ -1,11 +1,11 @@
 import {AppData, ChannelState, encodeAppData, decodeAppData} from '../core';
-import {IChannelClient, Message, FakeChannelClient, ChannelResult} from './channel-client';
+import {ChannelClient, Message, FakeChannelClient, ChannelResult} from './channel-client';
 import {RPS_ADDRESS} from '../constants';
 
 // This class wraps the channel client converting the request/response formats to those used in the app
 
 export class RPSChannelClient {
-  channelClient: IChannelClient;
+  channelClient: ChannelClient;
 
   constructor() {
     // might want to pass this in later

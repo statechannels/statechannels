@@ -61,7 +61,7 @@ type UnsubscribeFunction = () => void;
 // The message Payload is designed to be opaque to the app. However, it's useful
 // to be able to specify the Payload type for the FakeChannelClient, as we'll be
 // manipulating it within the client.
-export interface IChannelClient<Payload = any> {
+export interface ChannelClient<Payload = any> {
   onMessageQueued: (callback: (message: Message<Payload>) => void) => UnsubscribeFunction;
   onChannelUpdated: (callback: (result: ChannelResult) => void) => UnsubscribeFunction;
   createChannel: (
@@ -86,7 +86,7 @@ interface EventsWithArgs {
   MessageQueued: [Message<ChannelResult>];
   ChannelUpdated: [ChannelResult];
 }
-export class FakeChannelClient implements IChannelClient<ChannelResult> {
+export class FakeChannelClient implements ChannelClient<ChannelResult> {
   playerIndex: 0 | 1;
   protected events = new EventEmitter<EventsWithArgs>();
   protected latestState?: ChannelResult;
