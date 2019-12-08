@@ -9,6 +9,7 @@
   "rules": {
     "interface-name": false,
     "member-ordering": false,
+    "interface-over-type-literal": false,
     "no-console": [true, "warning"],
     "no-switch-case-fall-through": true,
     "object-literal-sort-keys": false,
