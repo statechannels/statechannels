@@ -3,8 +3,11 @@ const config = {
   initial: 'waiting',
   states: {
     waiting: {
-      entry: 'send',
-      on: { CHANNEL_UPDATED: { target: 'success', cond: 'advanced' } },
+      entry: 'sendState',
+      on: {
+        CHANNEL_UPDATED: { target: 'success', cond: 'advanced' },
+        '': { target: 'success', cond: 'advanced' },
+      },
     },
     success: { type: 'final' },
   },
@@ -14,5 +17,9 @@ const guards = {
     return true;
   },
 };
-const customActions = {};
+const customActions = {
+  sendState: function(ctx) {
+    return true;
+  },
+};
 const machine = Machine(config, { guards, actions: customActions });

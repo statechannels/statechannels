@@ -3,25 +3,44 @@ const config = {
   initial: 'determineStrategy',
   states: {
     determineStrategy: {
-      on: { PROPOSAL_RECEIVED: { actions: 'assignProposal' } },
+      on: {
+        PROPOSAL_RECEIVED: {
+          actions: {
+            type: 'xstate.assign',
+            assignment: function(ctx, _a) {
+              var data = _a.data;
+              return __assign(__assign({}, ctx), { peerChoice: data.choice });
+            },
+          },
+        },
+      },
       initial: 'getClientChoice',
       states: {
         getClientChoice: {
           invoke: {
             id: 'ask-client-for-choice',
             src: 'askClient',
-            onDone: { actions: ['sendClientChoice', 'assignClientChoice'] },
+            onDone: {
+              actions: [
+                'sendClientChoice',
+                {
+                  type: 'xstate.assign',
+                  assignment: function(ctx, _a) {
+                    var data = _a.data;
+                    return __assign(__assign({}, ctx), {
+                      clientChoice: data.choice,
+                    });
+                  },
+                },
+              ],
+            },
           },
           onDone: 'wait',
         },
         wait: {
           on: {
             '*': [
-              {
-                target: 'success',
-                cond: 'consensus',
-                actions: 'assignStrategy',
-              },
+              { target: 'success', cond: 'consensus' },
               { target: 'retry', cond: 'disagreement' },
             ],
           },
@@ -44,9 +63,9 @@ const config = {
         { target: 'fundVirtually', cond: 'virtualStrategyChosen' },
       ],
     },
-    fundDirectly: { invoke: 'directFunding', onDone: 'success' },
-    fundIndirectly: { invoke: 'ledgerFunding', onDone: 'success' },
-    fundVirtually: { invoke: 'virtualFunding', onDone: 'success' },
+    fundDirectly: { invoke: { src: 'directFunding', onDone: 'success' } },
+    fundIndirectly: { invoke: { src: 'ledgerFunding', onDone: 'success' } },
+    fundVirtually: { invoke: { src: 'virtualFunding', onDone: 'success' } },
     success: { type: 'final' },
     failure: { type: 'final' },
   },

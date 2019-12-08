@@ -3,18 +3,27 @@ const config = {
   initial: 'initializeChannel',
   states: {
     initializeChannel: {
-      invoke: { src: 'setChannelId', onDone: 'preFundSetup' },
-      exit: {
-        type: 'xstate.assign',
-        assignment: function(ctx, _a) {
-          var channelId = _a.channelId;
-          return __assign(__assign({}, ctx), { channelId: channelId });
-        },
+      entry: function() {
+        return console.log('CREATING CHANNEL');
       },
+      invoke: { src: 'setChannelId', onDone: 'preFundSetup' },
+      exit: [
+        {
+          type: 'xstate.assign',
+          assignment: {
+            channelId: function(_, event) {
+              return event.data.channelId;
+            },
+          },
+        },
+        function(ctx) {
+          return console.log('Sending open channel message');
+        },
+      ],
     },
     preFundSetup: {
-      onEntry: 'sendOpenChannelMessage',
       invoke: {
+        id: 'preFundSetup',
         src: 'advanceChannel',
         data: function(_a) {
           var channelId = _a.channelId;
@@ -25,7 +34,20 @@ const config = {
         },
         onDone: 'funding',
       },
-      on: { CHANNEL_CLOSED: 'abort' },
+      on: {
+        CHANNEL_CLOSED: 'abort',
+        CHANNEL_UPDATED: {
+          actions: {
+            to: 'preFundSetup',
+            type: 'xstate.send',
+            event: function(_, event) {
+              return event;
+            },
+            delay: undefined,
+            id: '',
+          },
+        },
+      },
     },
     abort: { type: 'final' },
     funding: {
@@ -40,6 +62,7 @@ const config = {
     },
     postFundSetup: {
       invoke: {
+        id: 'postFundSetup',
         src: 'advanceChannel',
         data: function(_a) {
           var channelId = _a.channelId;
@@ -50,10 +73,36 @@ const config = {
         },
         onDone: 'success',
       },
+      on: {
+        CHANNEL_UPDATED: {
+          actions: {
+            to: 'postFundSetup',
+            type: 'xstate.send',
+            event: function(_, event) {
+              return event;
+            },
+            delay: undefined,
+            id: '',
+          },
+        },
+      },
     },
-    success: { type: 'final' },
+    success: {
+      type: 'final',
+      entry: {
+        to: '#_parent',
+        type: 'xstate.send',
+        event: { type: 'CHANNEL_CREATED' },
+        delay: undefined,
+        id: 'CHANNEL_CREATED',
+      },
+    },
   },
 };
 const guards = {};
-const customActions = {};
+const customActions = {
+  sendOpenChannelMessage: function(ctx) {
+    return console.log('Sending open channel message');
+  },
+};
 const machine = Machine(config, { guards, actions: customActions });

@@ -3,17 +3,10 @@ const config = {
   initial: 'updatePrefundOutcome',
   states: {
     updatePrefundOutcome: {
+      on: { '': { target: 'waiting', cond: 'noUpdateNeeded' } },
       invoke: {
         src: 'ledgerUpdate',
-        data: function(context) {
-          return {
-            targetChannelID: context.targetChannelID,
-            targetOutcome: preDepositOutcome(
-              context.targetChannelID,
-              context.minimalOutcome
-            ),
-          };
-        },
+        data: 'preFundLedgerUpdateParams',
         onDone: 'waiting',
       },
     },
@@ -33,12 +26,7 @@ const config = {
     updatePostFundOutcome: {
       invoke: {
         src: 'ledgerUpdate',
-        data: function(context) {
-          return {
-            targetChannelID: context.targetChannelID,
-            targetOutcome: postDepositOutcome(context.targetChannelID),
-          };
-        },
+        data: 'postFundLedgerUpdateParams',
         onDone: 'success',
       },
     },
@@ -47,6 +35,9 @@ const config = {
   },
 };
 const guards = {
+  noUpdateNeeded: function(x) {
+    return true;
+  },
   safeToDeposit: function(x) {
     return true;
   },

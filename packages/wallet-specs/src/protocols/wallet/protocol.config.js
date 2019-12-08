@@ -1,7 +1,6 @@
 const config = {
   key: 'wallet',
   initial: 'running',
-  context: { processes: [] },
   states: {
     running: {
       on: {
