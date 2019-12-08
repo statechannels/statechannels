@@ -1,5 +1,4 @@
 import { Outcome, State } from '../..';
-import { saveConfig } from '../../utils';
 
 const PROTOCOL = 'support-state';
 
@@ -35,8 +34,5 @@ export const config = {
   },
 };
 
-const guards = {
-  supported: context => true,
-};
-
-saveConfig(config, __dirname, { guards });
+const guards = { supported: context => true };
+export const mockOptions = { guards };

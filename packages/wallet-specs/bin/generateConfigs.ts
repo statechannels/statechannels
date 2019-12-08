@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import path from 'path';
 import serialize from 'serialize-javascript';
 
 export function saveConfig(
@@ -19,4 +20,17 @@ const machine = Machine(config, {guards, actions: customActions})
     `,
     console.error
   );
+}
+
+const protocolsDir = path.join(__dirname, '..', 'src', 'protocols');
+const protocols = fs.readdirSync(protocolsDir).filter(f => !f.endsWith('.ts'));
+
+for (const protocol of protocols) {
+  const protocolDir = path.join(protocolsDir, protocol);
+  const { config, mockOptions } = require(path.join(
+    protocolDir,
+    'protocol.ts'
+  ));
+
+  saveConfig(config, protocolDir, mockOptions || {});
 }

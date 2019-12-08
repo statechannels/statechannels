@@ -3,7 +3,6 @@ import { AdvanceChannel, JoinChannel } from '..';
 import { forwardChannelUpdated, Store, success } from '../..';
 import { JsonRpcJoinChannelParams } from '../../json-rpc';
 import { ChannelUpdated } from '../../store';
-import { saveConfig } from '../../utils';
 import { CloseChannel, OpenChannel } from '../../wire-protocol';
 import { OpenChannelEvent } from '../wallet/protocol';
 
@@ -78,7 +77,7 @@ const postFundSetup = {
   },
 };
 
-const config: MachineConfig<
+export const config: MachineConfig<
   Init,
   any,
   OpenChannel | CloseChannel | ChannelUpdated
@@ -96,7 +95,9 @@ const config: MachineConfig<
   },
 };
 
-export { config };
+export const mockOptions: { guards: Guards } = {
+  guards: { nonceOk: () => true },
+};
 export type Guards = {
   nonceOk: ({  }: Init, event: OpenChannelEvent) => boolean;
 };
@@ -105,9 +106,9 @@ export type Services = {
   funding: any;
   advanceChannel: any;
 };
-export interface Actions {
+export type Actions = {
   storeState: ({ channelId }: Init, { signedState }: OpenChannel) => void;
-}
+};
 
 export function machine(store: Store, { channelId }: JoinChannel.Init) {
   const guards: Guards = {
@@ -135,5 +136,3 @@ export function machine(store: Store, { channelId }: JoinChannel.Init) {
 
   return Machine({ ...config, context: { channelId } }, options);
 }
-
-saveConfig(config, __dirname, { guards: {} });

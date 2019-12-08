@@ -3,7 +3,6 @@ import { AdvanceChannel } from '..';
 import { Channel, forwardChannelUpdated, State, Store, success } from '../..';
 import { ChannelStoreEntry } from '../../ChannelStoreEntry';
 import { JsonRpcCreateChannelParams } from '../../json-rpc';
-import { saveConfig } from '../../utils';
 
 const PROTOCOL = 'create-channel';
 
@@ -73,7 +72,7 @@ const postFundSetup = {
   },
 };
 
-const config = {
+export const config = {
   key: PROTOCOL,
   initial: 'initializeChannel',
   states: {
@@ -86,14 +85,9 @@ const config = {
   },
 };
 
-export { config };
-{
-  const actions = {
-    sendOpenChannelMessage,
-  };
-
-  saveConfig(config, __dirname, { actions });
-}
+export const mockOptions = {
+  actions: { sendOpenChannelMessage },
+};
 
 export function machine(store: Store, init: Init) {
   const setChannelId: InvokeCreator<any> = (ctx: Init): Promise<SetChannel> => {

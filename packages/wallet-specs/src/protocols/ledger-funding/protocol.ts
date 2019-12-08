@@ -1,5 +1,4 @@
 import { add, store } from '../..';
-import { saveConfig } from '../../utils';
 import { Init as CreateNullChannelArgs } from '../create-null-channel/protocol';
 import { Init as DirectFundingArgs } from '../direct-funding/protocol';
 import { Init as LedgerUpdateArgs } from '../ledger-update/protocol';
@@ -93,7 +92,7 @@ const fundTarget = {
   },
 };
 
-const ledgerFundingConfig = {
+export const config = {
   key: PROTOCOL,
   initial: 'waitForChannel',
   states: {
@@ -108,5 +107,4 @@ const ledgerFundingConfig = {
 const guards = {
   suitableChannelExists: x => true,
 };
-
-saveConfig(ledgerFundingConfig, __dirname, { guards });
+export const mockOptions = { guards };

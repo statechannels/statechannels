@@ -1,7 +1,6 @@
 import { assign } from 'xstate';
 import { Balance, store } from '../..';
 import { checkThat, isAllocation } from '../../store';
-import { saveConfig } from '../../utils';
 import { HubChoice } from '../../wire-protocol';
 import { Init as VirtualFundAsLeafArgs } from '../virtual-fund-as-leaf/protocol';
 
@@ -69,7 +68,7 @@ const fund = {
   },
 };
 
-const config = {
+export const config = {
   key: PROTOCOL,
   initial: 'chooseHub',
   states: {
@@ -78,5 +77,3 @@ const config = {
     success,
   },
 };
-
-saveConfig(config, __dirname, { guards: {} });

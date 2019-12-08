@@ -5,7 +5,6 @@ import {
   MachineConfig,
 } from 'xstate';
 import { State, Store } from '../..';
-import { saveConfig } from '../../utils';
 
 const PROTOCOL = 'advance-channel';
 /*
@@ -57,13 +56,10 @@ export type Actions = {
   sendState: any;
 };
 
-{
-  const guards: Guards = {
-    advanced: context => true,
-  };
-  const actions: Actions = { sendState: ctx => true };
-  saveConfig(config, __dirname, { guards, actions });
-}
+export const mockOptions = {
+  guards: { advanced: context => true },
+  actions: { sendState: ctx => true },
+};
 
 export function machine(store: Store, context?: Init) {
   const guards: Guards = {

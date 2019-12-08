@@ -1,7 +1,6 @@
-import { Outcome, store } from '../..';
+import { store } from '../..';
 import { isIndirectFunding } from '../../ChannelStoreEntry';
 import { checkThat } from '../../store';
-import { saveConfig } from '../../utils';
 import * as LedgerUpdate from '../ledger-update/protocol';
 
 const PROTOCOL = 'ledger-defunding';
@@ -34,7 +33,7 @@ const defundTarget = {
   },
 };
 
-const config = {
+export const config = {
   key: PROTOCOL,
   initial: 'concludeTarget',
   states: {
@@ -42,7 +41,3 @@ const config = {
     success,
   },
 };
-
-const guards = {};
-
-saveConfig(config, __dirname, { guards });

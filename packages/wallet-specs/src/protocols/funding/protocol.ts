@@ -1,6 +1,5 @@
 import { assign, DoneInvokeEvent, Machine } from 'xstate';
 import { failure, Store, success } from '../..';
-import { saveConfig } from '../../utils';
 import { FundingStrategy, FundingStrategyProposed } from '../../wire-protocol';
 
 const PROTOCOL = 'funding';
@@ -97,7 +96,7 @@ const fundIndirectly = {
   },
 };
 
-const config = {
+export const config = {
   key: PROTOCOL,
   initial: 'determineStrategy',
   states: {
@@ -147,6 +146,7 @@ const guards: Guards = {
   virtualStrategyChosen: dummyGuard,
   maxTriesExceeded: dummyGuard,
 };
+export const mockOptions: Options = { guards };
 
 export function machine(store: Store, context: Init) {
   const options: Options = {
@@ -165,8 +165,4 @@ export function machine(store: Store, context: Init) {
     },
   };
   return Machine(config, options).withContext(context);
-}
-
-{
-  saveConfig(config, __dirname, { guards });
 }

@@ -8,7 +8,6 @@ import {
 } from 'xstate';
 import { CreateChannel, JoinChannel } from '..';
 import { getChannelID, Store } from '../..';
-import { saveConfig } from '../../utils';
 import { OpenChannel } from '../../wire-protocol';
 
 const PROTOCOL = 'wallet';
@@ -30,7 +29,7 @@ function forwardToChildren(
 const config = {
   key: PROTOCOL,
   initial: 'running',
-  context: { processes: [] },
+  // context: { processes: [] },
   states: {
     running: {
       on: {
@@ -56,8 +55,6 @@ export type Actions = {
 };
 
 export type Events = OpenChannelEvent & CreateChannelEvent;
-
-saveConfig(config, __dirname, { guards: {} });
 
 export function machine(store: Store) {
   const spawnCreateChannel = assign(

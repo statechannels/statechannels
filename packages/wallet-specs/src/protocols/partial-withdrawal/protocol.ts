@@ -1,6 +1,5 @@
 import { add, Allocation, Channel, store, subtract } from '../..';
 import { checkThat, isAllocation } from '../../store';
-import { saveConfig } from '../../utils';
 import * as ConcludeChannel from '../conclude-channel/protocol';
 import * as CreateNullChannel from '../create-null-channel/protocol';
 import * as LedgerUpdate from '../ledger-update/protocol';
@@ -110,7 +109,7 @@ const transfer = {
   },
 };
 
-const config = {
+export const config = {
   key: PROTOCOL,
   initial: 'createReplacement',
   states: {
@@ -121,7 +120,3 @@ const config = {
     success,
   },
 };
-
-const guards = {};
-
-saveConfig(config, __dirname, { guards });

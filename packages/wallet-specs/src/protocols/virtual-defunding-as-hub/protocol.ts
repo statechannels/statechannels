@@ -2,7 +2,6 @@ import { assign } from 'xstate';
 import { store } from '../../';
 import { isGuarantee, isIndirectFunding } from '../../ChannelStoreEntry';
 import { checkThat } from '../../store';
-import { saveConfig } from '../../utils';
 import * as LedgerUpdate from '../ledger-update/protocol';
 import { defundGuarantorInLedger } from '../virtual-defunding-as-leaf/protocol';
 
@@ -81,8 +80,7 @@ const defundGuarantors = {
   onDone: 'success',
 };
 
-// PROTOCOL DEFINITION
-const config = {
+export const config = {
   key: PROTOCOL,
   initial: 'defundGuarantors',
   states: {
@@ -90,6 +88,3 @@ const config = {
     success: { type: 'final' },
   },
 };
-
-const guards = {};
-saveConfig(config, __dirname, { guards });

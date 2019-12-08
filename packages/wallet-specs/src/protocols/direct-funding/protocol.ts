@@ -11,7 +11,6 @@ import {
   subtract,
 } from '../../';
 import { checkThat, isAllocation } from '../../store';
-import { saveConfig } from '../../utils';
 import * as LedgerUpdate from '../ledger-update/protocol';
 
 const PROTOCOL = 'direct-funding';
@@ -158,7 +157,7 @@ const updatePostFundOutcome = {
   },
 };
 
-const config = {
+export const config = {
   key: PROTOCOL,
   initial: 'updatePrefundOutcome',
   states: {
@@ -176,5 +175,4 @@ const guards = {
   safeToDeposit: x => true,
   funded: x => true,
 };
-
-saveConfig(config, __dirname, { guards });
+export const mockOptions = { guards };

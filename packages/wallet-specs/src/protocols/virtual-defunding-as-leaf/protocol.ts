@@ -1,8 +1,7 @@
 import { assign } from 'xstate';
-import { Allocation, nextState, State, store } from '../../';
+import { Allocation, store, Without } from '../../';
 import { isIndirectFunding, isVirtualFunding } from '../../ChannelStoreEntry';
 import { checkThat, isAllocation } from '../../store';
-import { saveConfig } from '../../utils';
 
 import * as LedgerUpdate from '../ledger-update/protocol';
 const PROTOCOL = 'virtual-defunding-as-leaf';
@@ -119,7 +118,7 @@ const defundGuarantor = {
   exit: ['garbageCollectJointChannel', 'garbageCollectGuarantorChannel'],
 };
 
-const config = {
+export const config = {
   key: PROTOCOL,
   initial: 'defundTarget',
   states: {
@@ -128,6 +127,3 @@ const config = {
     success: { type: 'final' },
   },
 };
-
-const guards = {};
-saveConfig(config, __dirname, { guards });

@@ -1,5 +1,4 @@
 import { State, store } from '../..';
-import { saveConfig } from '../../utils';
 import * as LedgerDefunding from '../ledger-defunding/protocol';
 import * as VirtualDefundingAsHub from '../virtual-defunding-as-hub/protocol';
 import * as VirtualDefundingAsLeaf from '../virtual-defunding-as-leaf/protocol';
@@ -105,7 +104,7 @@ const virtualDefunding = {
   onDone: 'success',
 };
 
-const config = {
+export const config = {
   key: PROTOCOL,
   initial: 'concludeTarget',
   states: {
@@ -121,5 +120,4 @@ const guards = {
   indirectlyFunded: _ => true,
   directlyFunded: _ => true,
 };
-
-saveConfig(config, __dirname, { guards });
+export const mockOptions = { guards };

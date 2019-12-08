@@ -8,7 +8,6 @@ import {
   Guarantee,
   store,
 } from '../../';
-import { saveConfig } from '../../utils';
 import { Init as CreateNullChannelArgs } from '../create-null-channel/protocol';
 import { Init as SupportStateArgs } from '../support-state/protocol';
 
@@ -143,7 +142,7 @@ const fundTarget = {
 };
 
 // PROTOCOL DEFINITION
-const config = {
+export const config = {
   key: PROTOCOL,
   initial: 'createChannels',
   states: {
@@ -153,6 +152,3 @@ const config = {
     success: { type: 'final' },
   },
 };
-
-const guards = {};
-saveConfig(config, __dirname, { guards });

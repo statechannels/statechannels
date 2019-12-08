@@ -1,6 +1,5 @@
 import { assign } from 'xstate';
 import { Balance, Channel, store } from '../../';
-import { saveConfig } from '../../utils';
 
 const PROTOCOL = 'virtual-funding-as-hub';
 
@@ -122,7 +121,7 @@ const fundTarget = {
 };
 
 // PROTOCOL DEFINITION
-const config = {
+export const config = {
   key: PROTOCOL,
   initial: 'createChannels',
   states: {
@@ -132,6 +131,3 @@ const config = {
     success: { type: 'final' },
   },
 };
-
-const guards = {};
-saveConfig(config, __dirname, { guards });

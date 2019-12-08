@@ -1,5 +1,4 @@
 import { Outcome } from '../../';
-import { saveConfig } from '../../utils';
 
 const PROTOCOL = 'ledger-update';
 
@@ -24,8 +23,7 @@ const waiting = {
   },
 };
 
-// PROTOCOL DEFINITION
-const config = {
+export const config = {
   key: PROTOCOL,
   initial: 'waiting',
   states: {
@@ -40,5 +38,4 @@ const guards = {
   consensusReached: context => true,
   dissent: context => false,
 };
-
-saveConfig(config, __dirname, { guards });
+export const mockOptions = { guards };

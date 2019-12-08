@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "generateConfig": "npx ts-node src/protocols/index.ts && npx prettier --write src/protocols/*/protocol.config.js"
+    "generateConfigs": "yarn run ts-node bin/generateConfigs.ts && npx prettier --write src/protocols/*/protocol.config.js"
   },
   "dependencies": {
     "xstate": "^4.7"

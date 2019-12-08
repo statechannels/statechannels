@@ -1,5 +1,4 @@
 import { Channel, Outcome, store } from '../../';
-import { saveConfig } from '../../utils';
 import { Init as SupportStateArgs } from '../support-state/protocol';
 
 const PROTOCOL = 'create-null-channel';
@@ -60,7 +59,7 @@ const preFundSetup = {
   onError: 'failure',
 };
 
-const config = {
+export const config = {
   key: PROTOCOL,
   initial: 'checkChannel',
   states: {
@@ -75,5 +74,4 @@ const guards = {
   amFirst: dummyGuard,
   dataMatches: dummyGuard,
 };
-
-saveConfig(config, __dirname, { guards });
+export const mockOptions = { guards };
