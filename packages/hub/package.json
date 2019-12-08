@@ -87,6 +87,6 @@
     "typescript": "3.7.2"
   },
   "lint-staged": {
-    "src/**/*.ts": "eslint"
+    "src/**/*.ts": "eslint --max-warnings=0"
   }
 }
