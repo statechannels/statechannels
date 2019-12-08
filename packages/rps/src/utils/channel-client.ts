@@ -1,6 +1,6 @@
-import { Wallet } from 'ethers';
-import { BigNumberish, bigNumberify } from 'ethers/utils';
-import { EventEmitter } from 'eventemitter3';
+import {Wallet} from 'ethers';
+import {BigNumberish, bigNumberify} from 'ethers/utils';
+import {EventEmitter} from 'eventemitter3';
 
 const FAKE_DELAY = 100; // ms
 function sleep(time) {
@@ -140,7 +140,7 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
     const latestState = this.findChannel(channelId);
     // skip funding by setting the channel to 'running' the moment it is joined
     // [assuming we're working with 2-participant channels for the time being]
-    this.latestState = { ...latestState, turnNum: bigNumberify(3).toString(), status: 'running' };
+    this.latestState = {...latestState, turnNum: bigNumberify(3).toString(), status: 'running'};
     this.opponentAddress = this.latestState.participants[0].participantId;
     await sleep(FAKE_DELAY);
     this.notifyOpponent(this.latestState);
@@ -157,7 +157,7 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
     const latestState = this.findChannel(channelId);
     const currentTurnNum = bigNumberify(latestState.turnNum);
 
-    const nextState = { ...latestState, participants, allocations, appData };
+    const nextState = {...latestState, participants, allocations, appData};
     if (nextState !== latestState) {
       if (currentTurnNum.mod(2).eq(this.playerIndex)) {
         return Promise.reject(
@@ -183,12 +183,12 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
       const turnNum = bigNumberify(this.latestState.turnNum)
         .add(1)
         .toString();
-      this.latestState = { ...this.latestState, turnNum, status: 'closed' };
+      this.latestState = {...this.latestState, turnNum, status: 'closed'};
       this.notifyOpponent(this.latestState);
       this.notifyApp(this.latestState);
     }
 
-    return Promise.resolve({ success: true });
+    return Promise.resolve({success: true});
   }
 
   async getAddress() {
@@ -208,7 +208,7 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
     const turnNum = currentTurnNum.add(1).toString();
     console.log(this.playerIndex + '  updated channel to turnNum:' + turnNum);
 
-    this.latestState = { ...latestState, turnNum, status: 'closing' };
+    this.latestState = {...latestState, turnNum, status: 'closing'};
     this.notifyOpponent(this.latestState);
 
     return Promise.resolve(this.latestState);
@@ -218,7 +218,7 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
     const sender = this.address;
     const recipient = this.opponentAddress;
 
-    this.events.emit('MessageQueued', { sender, recipient, data });
+    this.events.emit('MessageQueued', {sender, recipient, data});
   }
 
   protected notifyApp(data: ChannelResult) {
@@ -259,7 +259,7 @@ export interface JsonRPCResponse<ResultType> {
 export interface JsonRPCError {
   code: number;
   message: string;
-  data?: { [key: string]: any };
+  data?: {[key: string]: any};
 }
 
 export interface JsonRPCErrorResponse<ErrorType extends JsonRPCError = JsonRPCError> {
@@ -391,7 +391,7 @@ export class ChannelNotFoundError extends ChannelClientError {
   };
 }
 
-export const ErrorCodesToObjectsMap: { [key in ErrorCodes]: typeof ChannelClientError } = {
+export const ErrorCodesToObjectsMap: {[key in ErrorCodes]: typeof ChannelClientError} = {
   [ErrorCodes.CHANNEL_NOT_FOUND]: ChannelNotFoundError,
   [ErrorCodes.INVALID_APP_DATA]: InvalidAppDataError,
   [ErrorCodes.INVALID_APP_DEFINITION]: InvalidAppDefinitionError,

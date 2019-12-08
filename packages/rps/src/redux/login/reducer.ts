@@ -1,4 +1,4 @@
-import { Reducer } from 'redux';
+import {Reducer} from 'redux';
 import * as loginActions from './actions';
 
 export interface LoginState {

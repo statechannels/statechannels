@@ -1,5 +1,11 @@
 import {select, fork, put, call} from "redux-saga/effects";
 import {getChannelId, State} from "@statechannels/nitro-protocol";
+import {
+  JoinChannelParams,
+  PushMessageParams,
+  UpdateChannelParams,
+  CreateChannelParams
+} from "@statechannels/client-api-schema";
 import jrs, {RequestObject} from "jsonrpc-lite";
 
 import * as outgoingMessageActions from "./outgoing-api-actions";
@@ -14,8 +20,7 @@ import {messageSender} from "./message-sender";
 import {APPLICATION_PROCESS_ID} from "../../protocols/application/reducer";
 import {
   createStateFromCreateChannelParams,
-  createStateFromUpdateChannelParams,
-  JsonRpcMessage
+  createStateFromUpdateChannelParams
 } from "../../../utils/json-rpc-utils";
 
 import {getProvider} from "../../../utils/contract-utils";
@@ -26,7 +31,7 @@ import {TwoPartyPlayerIndex} from "../../types";
 import {isRelayableAction} from "../../../communication";
 import {bigNumberify} from "ethers/utils";
 
-export function* messageHandler(jsonRpcMessage: object, fromDomain: string) {
+export function* messageHandler(jsonRpcMessage: object, _domain: string) {
   const parsedMessage = jrs.parseObject(jsonRpcMessage);
   switch (parsedMessage.type) {
     case "notification":
@@ -74,7 +79,7 @@ function* handleMessage(payload: RequestObject) {
 
 function* handleJoinChannelMessage(payload: RequestObject) {
   const {id} = payload;
-  const {channelId} = payload.params as any;
+  const {channelId} = payload.params as JoinChannelParams;
 
   const channelExists = yield select(doesAStateExistForChannel, channelId);
 
@@ -94,19 +99,12 @@ function* handleJoinChannelMessage(payload: RequestObject) {
     );
     yield put(fundingRequested({channelId, playerIndex: TwoPartyPlayerIndex.B}));
     yield fork(messageSender, outgoingMessageActions.joinChannelResponse({channelId, id}));
-    const address = yield select(getAddress);
-    const participants = yield select(getParticipants, channelId);
-    // We assume a two player channel
-    const {participantId: fromParticipantId} =
-      participants[0].signingAddress === address ? participants[0] : participants[1];
-    const {participantId: toParticipantId} =
-      participants[0].signingAddress !== address ? participants[0] : participants[1];
+
     yield fork(
       messageSender,
       outgoingMessageActions.sendChannelJoinedMessage({
         channelId,
-        toParticipantId,
-        fromParticipantId
+        ...(yield getMessageParticipantIds(channelId))
       })
     );
   }
@@ -115,12 +113,26 @@ function* handleJoinChannelMessage(payload: RequestObject) {
 function* handlePushMessage(payload: RequestObject) {
   // TODO: We need to handle the case where we receive an invalid wallet message
   const {id} = payload;
-  const message = payload.params as JsonRpcMessage;
+  const message = payload.params as PushMessageParams;
   if (isRelayableAction(message.data)) {
     yield put(message.data);
     yield fork(messageSender, outgoingMessageActions.postMessageResponse({id}));
   } else {
     switch (message.data.type) {
+      case "Channel.Updated":
+        yield put(
+          actions.application.opponentStateReceived({
+            processId: APPLICATION_PROCESS_ID,
+            signedState: message.data.signedState
+          })
+        );
+        yield fork(
+          messageSender,
+          outgoingMessageActions.channelUpdatedEvent({
+            channelId: getChannelId(message.data.signedState.state.channel)
+          })
+        );
+        break;
       case "Channel.Joined":
         yield put(
           actions.application.opponentStateReceived({
@@ -189,7 +201,7 @@ function* handlePushMessage(payload: RequestObject) {
 
 function* handleUpdateChannelMessage(payload: RequestObject) {
   const {id, params} = payload;
-  const {channelId} = params as any;
+  const {channelId} = params as UpdateChannelParams;
 
   const channelExists = yield select(doesAStateExistForChannel, channelId);
 
@@ -198,7 +210,10 @@ function* handleUpdateChannelMessage(payload: RequestObject) {
   } else {
     const mostRecentState: State = yield select(getLastStateForChannel, channelId);
 
-    const newState = createStateFromUpdateChannelParams(mostRecentState, payload.params as any);
+    const newState = createStateFromUpdateChannelParams(
+      mostRecentState,
+      params as UpdateChannelParams
+    );
 
     yield put(
       actions.application.ownStateReceived({
@@ -208,16 +223,23 @@ function* handleUpdateChannelMessage(payload: RequestObject) {
     );
 
     yield fork(messageSender, outgoingMessageActions.updateChannelResponse({id, channelId}));
+    yield fork(
+      messageSender,
+      outgoingMessageActions.sendChannelUpdatedMessage({
+        channelId,
+        ...(yield getMessageParticipantIds(channelId))
+      })
+    );
   }
 }
 
 function* handleCreateChannelMessage(payload: RequestObject) {
   // TODO: We should verify the params we expect are there
-  const {participants, appDefinition} = payload.params as any;
+  const {participants, appDefinition} = payload.params as CreateChannelParams;
   const {id} = payload;
 
-  const address = select(getAddress);
-  const addressMatches = participants[0].signingAddress !== address;
+  const address = yield select(getAddress);
+  const addressMatches = participants[0].signingAddress === address;
 
   const provider = yield call(getProvider);
   const bytecode =
@@ -235,7 +257,7 @@ function* handleCreateChannelMessage(payload: RequestObject) {
   } else if (!contractAtAddress) {
     yield fork(messageSender, outgoingMessageActions.noContractError({id, address: appDefinition}));
   } else {
-    const state = createStateFromCreateChannelParams(payload.params as any);
+    const state = createStateFromCreateChannelParams(payload.params as CreateChannelParams);
 
     yield put(
       actions.appDefinitionBytecodeReceived({
@@ -269,10 +291,21 @@ function* handleCreateChannelMessage(payload: RequestObject) {
     yield fork(
       messageSender,
       outgoingMessageActions.sendChannelProposedMessage({
-        toParticipantId: participants[0].participantId,
-        fromParticipantId: participants[1].participantId,
+        toParticipantId: participants[1].participantId,
+        fromParticipantId: participants[0].participantId,
         channelId: getChannelId(state.channel)
       })
     );
   }
+}
+
+function* getMessageParticipantIds(channelId: string) {
+  const address = yield select(getAddress);
+  const participants = yield select(getParticipants, channelId);
+  // We assume a two player channel
+  const {participantId: fromParticipantId} =
+    participants[0].signingAddress === address ? participants[0] : participants[1];
+  const {participantId: toParticipantId} =
+    participants[0].signingAddress !== address ? participants[0] : participants[1];
+  return {fromParticipantId, toParticipantId};
 }

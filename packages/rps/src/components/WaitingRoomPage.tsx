@@ -1,9 +1,9 @@
 import React from 'react';
 
-import { Button } from 'reactstrap';
+import {Button} from 'reactstrap';
 
 import * as web3Utils from 'web3-utils';
-import { ApplicationLayout } from './ApplicationLayout';
+import {ApplicationLayout} from './ApplicationLayout';
 
 interface Props {
   cancelOpenGame: () => void;
@@ -12,7 +12,7 @@ interface Props {
 
 export default class WaitingRoomPage extends React.PureComponent<Props> {
   render() {
-    const { cancelOpenGame, roundBuyIn } = this.props;
+    const {cancelOpenGame, roundBuyIn} = this.props;
     return (
       <ApplicationLayout>
         <div className="waiting-room-container">

@@ -1,11 +1,11 @@
 import _ from 'lodash';
 import React from 'react';
 
-import { OpenGame } from '../redux/open-games/state';
+import {OpenGame} from '../redux/open-games/state';
 
-import { Button } from 'reactstrap';
-import { ApplicationLayout } from './ApplicationLayout';
-import { OpenGameEntry } from './OpenGameCard';
+import {Button} from 'reactstrap';
+import {ApplicationLayout} from './ApplicationLayout';
+import {OpenGameEntry} from './OpenGameCard';
 import CreatingOpenGameContainer from '../containers/CreatingOpenGameContainer';
 
 interface Props {
@@ -14,14 +14,14 @@ interface Props {
   newOpenGame: () => void;
 }
 
-const initialState = { showChallenges: true };
+const initialState = {showChallenges: true};
 type State = Readonly<typeof initialState>;
 
 export default class LobbyPage extends React.PureComponent<Props, State> {
   readonly state: State = initialState;
 
   render() {
-    const { newOpenGame, joinOpenGame } = this.props;
+    const {newOpenGame, joinOpenGame} = this.props;
 
     const openGames = this.props.openGames.filter(game => game.isPublic) || [];
 

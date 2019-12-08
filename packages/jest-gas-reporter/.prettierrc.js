@@ -1,4 +1,1 @@
-module.exports = {
-    ...require('../../.prettierrc.js'),
-    "trailingComma": "es5"
-}
+module.exports = require('../../.prettierrc.js');

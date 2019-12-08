@@ -1,4 +1,4 @@
-import { BaseCommitment, Bytes32, Uint8, Uint256, Commitment, CommitmentType } from 'fmg-core';
+import {BaseCommitment, Bytes32, Uint8, Uint256, Commitment, CommitmentType} from 'fmg-core';
 import abi from 'web3-eth-abi';
 
 export interface AppAttributes {
@@ -46,7 +46,7 @@ export interface RPSCommitment extends RPSBaseCommitment {
 }
 
 function encodeAppAttributes(appAttrs: AppAttributes): string {
-  const { positionType, stake, preCommit, bWeapon, aWeapon, salt } = appAttrs;
+  const {positionType, stake, preCommit, bWeapon, aWeapon, salt} = appAttrs;
   return abi.encodeParameter(SolidityRPSCommitmentType, [
     positionType,
     stake,
@@ -70,7 +70,7 @@ function decodeAppAttributes(appAttrs: string): AppAttributes {
 }
 
 export function fromCoreCommitment(commitment: Commitment): RPSCommitment {
-  const { channel, commitmentType, turnNum, allocation, destination, commitmentCount } = commitment;
+  const {channel, commitmentType, turnNum, allocation, destination, commitmentCount} = commitment;
   return {
     channel,
     commitmentType,
@@ -106,7 +106,7 @@ export function asCoreCommitment(rpsCommitment: RPSCommitment): Commitment {
     allocation,
     destination,
     commitmentCount,
-    appAttributes: encodeAppAttributes({ positionType, stake, preCommit, bWeapon, aWeapon, salt }),
+    appAttributes: encodeAppAttributes({positionType, stake, preCommit, bWeapon, aWeapon, salt}),
   };
 }
 

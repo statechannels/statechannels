@@ -1,6 +1,6 @@
-import { Player } from './players';
-import { Weapon } from './rps-commitment';
-import { bigNumberify } from 'ethers/utils';
+import {Player} from './players';
+import {Weapon} from './rps-commitment';
+import {bigNumberify} from 'ethers/utils';
 
 export enum Result {
   Tie,

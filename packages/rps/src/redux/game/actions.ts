@@ -1,4 +1,4 @@
-import { ChannelState, Weapon, Result } from '../../core';
+import {ChannelState, Weapon, Result} from '../../core';
 
 export type GameAction =
   | UpdateProfile
@@ -128,9 +128,9 @@ export const cancelGame = (): CancelGame => ({
   type: 'CancelGame',
 });
 
-export const chooseWeapon = (weapon: Weapon): ChooseWeapon => ({ type: 'ChooseWeapon', weapon });
+export const chooseWeapon = (weapon: Weapon): ChooseWeapon => ({type: 'ChooseWeapon', weapon});
 
-export const chooseSalt = (salt: string): ChooseSalt => ({ type: 'ChooseSalt', salt });
+export const chooseSalt = (salt: string): ChooseSalt => ({type: 'ChooseSalt', salt});
 
 export const joinOpenGame = (
   opponentName: string,
@@ -160,8 +160,8 @@ export const resultArrived = (
   fundingSituation,
 });
 
-export const playAgain = (): PlayAgain => ({ type: 'PlayAgain' });
-export const startRound = (): StartRound => ({ type: 'StartRound' });
-export const resign = (iResigned: boolean): Resign => ({ type: 'Resign', iResigned });
-export const gameOver = (): GameOver => ({ type: 'GameOver' });
-export const exitToLobby = (): ExitToLobby => ({ type: 'ExitToLobby' });
+export const playAgain = (): PlayAgain => ({type: 'PlayAgain'});
+export const startRound = (): StartRound => ({type: 'StartRound'});
+export const resign = (iResigned: boolean): Resign => ({type: 'Resign', iResigned});
+export const gameOver = (): GameOver => ({type: 'GameOver'});
+export const exitToLobby = (): ExitToLobby => ({type: 'ExitToLobby'});

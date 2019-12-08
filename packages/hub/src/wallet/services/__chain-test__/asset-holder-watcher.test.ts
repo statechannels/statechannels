@@ -11,6 +11,7 @@ jest.setTimeout(20000);
 const five = bigNumberify(5).toHexString();
 
 describe('asset holder listener', () => {
+  // eslint-disable-next-line jest/no-test-callback
   it('should handle a funds received event when channel is in the database', async done => {
     let removeListeners = null;
     const eventHandler: AssetHolderEventHandler = (message: AssetHolderWatcherEvent) => {

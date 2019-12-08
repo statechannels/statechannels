@@ -32,12 +32,6 @@ describe('validSignature', () => {
     // TODO: Unskip when validation is enabled
     expect(ChannelManager.validSignature(prefundSetup0, hubSignature)).toBe(false);
   });
-
-  it.skip('returns false when the state was not signed by the mover', async () => {
-    // TODO: Unskip when validation is enabled
-    const signature = signState(prefundSetup0, '0xf00').signature;
-    expect(ChannelManager.validSignature(prefundSetup0, signature)).toBe(false);
-  });
 });
 
 describe('formResponse', () => {
@@ -63,6 +57,6 @@ describe('nextState', () => {
   });
 
   it('throws on app commitments', () => {
-    expect(() => ChannelManager.nextState(app0)).toThrowError();
+    expect(() => ChannelManager.nextState(app0)).toThrow();
   });
 });

@@ -5,10 +5,6 @@ import * as protocol from "./protocols/actions";
 import * as advanceChannel from "./protocols/advance-channel";
 import {FundingAction, isFundingAction} from "./protocols/funding/actions";
 import {RelayableAction, ProtocolLocator} from "../communication";
-import {
-  TransactionAction as TA,
-  isTransactionAction as isTA
-} from "./protocols/transaction-submission/actions";
 
 import {ConcludingAction, isConcludingAction} from "./protocols/concluding";
 import {ApplicationAction} from "./protocols/application/actions";
@@ -22,9 +18,6 @@ import {LOAD as LOAD_FROM_STORAGE} from "redux-storage";
 import {SignedState, State} from "@statechannels/nitro-protocol";
 import {BigNumber} from "ethers/utils";
 export * from "./protocols/transaction-submission/actions";
-
-export type TransactionAction = TA;
-export const isTransactionAction = isTA;
 
 // -------
 // Actions
@@ -155,9 +148,7 @@ export const adjudicatorKnown: ActionConstructor<AdjudicatorKnown> = p => ({
   type: "WALLET.ADJUDICATOR_KNOWN"
 });
 
-export const appDefinitionBytecodeReceived: ActionConstructor<
-  AppDefinitionBytecodeReceived
-> = p => ({
+export const appDefinitionBytecodeReceived: ActionConstructor<AppDefinitionBytecodeReceived> = p => ({
   ...p,
   type: "WALLET.APP_DEFINITION_BYTECODE_RECEIVED"
 });

@@ -1,5 +1,5 @@
-import { select, call, put, take, actionChannel } from 'redux-saga/effects';
-import { RPSChannelClient } from '../../utils/rps-channel-client';
+import {select, call, put, take, actionChannel} from 'redux-saga/effects';
+import {RPSChannelClient} from '../../utils/rps-channel-client';
 import {
   AppData,
   hashPreCommit,
@@ -14,9 +14,9 @@ import {
 import * as cs from '../../core/channel-state';
 import * as a from './actions';
 import * as ls from './state';
-import { randomHex } from '../../utils/randomHex';
-import { bigNumberify } from 'ethers/utils';
-import { buffers } from 'redux-saga';
+import {randomHex} from '../../utils/randomHex';
+import {bigNumberify} from 'ethers/utils';
+import {buffers} from 'redux-saga';
 
 let opponentResigned;
 opponentResigned = false;
@@ -45,7 +45,7 @@ export function* gameSaga(client: RPSChannelClient) {
 }
 
 function* gameSagaRun(client: RPSChannelClient) {
-  const { localState, channelState }: ls.GameState = yield select(getGameState);
+  const {localState, channelState}: ls.GameState = yield select(getGameState);
 
   if (
     !isPlayersTurnNext(localState, channelState) &&
@@ -125,7 +125,7 @@ function* createChannel(localState: ls.GameChosen, client: RPSChannelClient) {
   const openingBalance = bigNumberify(localState.roundBuyIn)
     .mul(5)
     .toString();
-  const startState: AppData = { type: 'start' };
+  const startState: AppData = {type: 'start'};
   const newChannelState = yield call(
     [client, 'createChannel'],
     localState.address,
@@ -155,12 +155,12 @@ function* generateSaltAndSendPropose(
   const salt = yield call(randomHex, 64);
   yield put(a.chooseSalt(salt)); // transitions us to WeaponAndSaltChosen
 
-  const { myWeapon, roundBuyIn: stake } = localState;
-  const { channelId, aBal, bBal, aAddress, bAddress } = channelState;
+  const {myWeapon, roundBuyIn: stake} = localState;
+  const {channelId, aBal, bBal, aAddress, bAddress} = channelState;
 
   const preCommit = hashPreCommit(myWeapon, salt);
 
-  const roundProposed: AppData = { type: 'roundProposed', preCommit, stake };
+  const roundProposed: AppData = {type: 'roundProposed', preCommit, stake};
 
   const updatedChannelState = yield call(
     [client, 'updateChannel'],
@@ -180,8 +180,8 @@ function* sendRoundAccepted(
   client: RPSChannelClient
 ) {
   const playerBWeapon = localState.myWeapon;
-  const { channelId, aBal, bBal, aAddress, bAddress } = channelState;
-  const { stake, preCommit } = channelState.appData;
+  const {channelId, aBal, bBal, aAddress, bAddress} = channelState;
+  const {stake, preCommit} = channelState.appData;
   const roundAccepted: AppData = {
     type: 'roundAccepted',
     stake,
@@ -215,9 +215,9 @@ function* calculateResultAndSendReveal(
   channelState: ChannelState<RoundAccepted>,
   client: RPSChannelClient
 ) {
-  const { myWeapon, salt } = localState;
-  const { aBal, bBal, channelId, aAddress, bAddress } = channelState;
-  const { playerBWeapon: theirWeapon, stake } = channelState.appData;
+  const {myWeapon, salt} = localState;
+  const {aBal, bBal, channelId, aAddress, bAddress} = channelState;
+  const {playerBWeapon: theirWeapon, stake} = channelState.appData;
   const result = calculateResult(myWeapon, theirWeapon);
   const [aBal2, bBal2] = updateAllocation(result, Player.PlayerA, stake, aBal, bBal);
   const fundingSituation = calculateFundingSituation(Player.PlayerA, aBal2, bBal2, stake);
@@ -247,9 +247,9 @@ function* calculateResultAndCloseChannelIfNoFunds(
   channelState: ChannelState<Reveal>,
   client: RPSChannelClient
 ) {
-  const { playerAWeapon: theirWeapon } = channelState.appData;
-  const { aBal, bBal, channelId } = channelState;
-  const { myWeapon, roundBuyIn } = localState;
+  const {playerAWeapon: theirWeapon} = channelState.appData;
+  const {aBal, bBal, channelId} = channelState;
+  const {myWeapon, roundBuyIn} = localState;
   const result = calculateResult(myWeapon, theirWeapon);
   const fundingSituation = calculateFundingSituation(Player.PlayerB, aBal, bBal, roundBuyIn);
   yield put(a.resultArrived(theirWeapon, result, fundingSituation));
@@ -260,8 +260,8 @@ function* calculateResultAndCloseChannelIfNoFunds(
 }
 
 function* sendStartAndStartRound(channelState: ChannelState<Reveal>, client: RPSChannelClient) {
-  const { aBal, bBal, channelId, bAddress, aAddress } = channelState;
-  const start: AppData = { type: 'start' };
+  const {aBal, bBal, channelId, bAddress, aAddress} = channelState;
+  const start: AppData = {type: 'start'};
   const state = yield call(
     [client, 'updateChannel'],
     channelId,

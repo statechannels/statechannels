@@ -1,6 +1,6 @@
-import "../config/env";
-import {GanacheServer} from "@statechannels/devtools";
-import {deploy} from "../deployment/deploy";
+import '../env';
+import {GanacheServer} from '@statechannels/devtools';
+import {deploy} from '../deployment/deploy';
 
 export default async function setup() {
   const ganacheServer = new GanacheServer(

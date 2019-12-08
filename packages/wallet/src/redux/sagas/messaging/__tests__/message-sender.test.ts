@@ -9,7 +9,9 @@ import {
   updateChannelResponse,
   unknownChannelId,
   sendChannelJoinedMessage,
-  relayActionWithMessage
+  relayActionWithMessage,
+  sendChannelUpdatedMessage,
+  channelUpdatedEvent
 } from "../outgoing-api-actions";
 import {Wallet} from "ethers";
 import {expectSaga} from "redux-saga-test-plan";
@@ -22,6 +24,65 @@ import {strategyApproved} from "../../../../communication";
 import {ETH_ASSET_HOLDER_ADDRESS} from "../../../../constants";
 
 describe("message sender", () => {
+  it("creates a notification for WALLET.CHANNEL_UPDATED_EVENT", async () => {
+    const state = stateHelpers.appState({turnNum: 5});
+
+    const initialState = setChannel(
+      EMPTY_SHARED_DATA,
+      channelFromStates([state], stateHelpers.asAddress, stateHelpers.asPrivateKey)
+    );
+    const channelId = stateHelpers.channelId;
+    const message = channelUpdatedEvent({
+      channelId
+    });
+
+    const {effects} = await expectSaga(messageSender, message)
+      .withState(initialState)
+      .provide([[matchers.call.fn(window.parent.postMessage), 0]])
+      .run();
+
+    expect(effects.call[0].payload.args[0]).toMatchObject({
+      jsonrpc: "2.0",
+      method: "ChannelUpdated",
+      params: {
+        funding: [],
+        turnNum: 5,
+        status: "Running",
+        channelId
+      }
+    });
+  });
+
+  it("creates a notification for WALLET.SEND_CHANNEL_UPDATED_MESSAGE", async () => {
+    const state = stateHelpers.appState({turnNum: 0});
+
+    const initialState = setChannel(
+      EMPTY_SHARED_DATA,
+      channelFromStates([state], stateHelpers.asAddress, stateHelpers.asPrivateKey)
+    );
+    const channelId = stateHelpers.channelId;
+    const message = sendChannelUpdatedMessage({
+      channelId,
+      fromParticipantId: "A",
+      toParticipantId: "B"
+    });
+
+    const {effects} = await expectSaga(messageSender, message)
+      .withState(initialState)
+      .provide([[matchers.call.fn(window.parent.postMessage), 0]])
+      .run();
+
+    expect(effects.call[0].payload.args[0]).toMatchObject({
+      jsonrpc: "2.0",
+      method: "MessageQueued",
+      params: {
+        recipient: "A",
+        sender: "B",
+        data: {type: "Channel.Updated", signedState: state}
+      }
+    });
+  });
+
   it("creates a notification for WALLET.SEND_CHANNEL_PROPOSED_MESSAGE", async () => {
     const state = stateHelpers.appState({turnNum: 0});
 
@@ -45,8 +106,8 @@ describe("message sender", () => {
       jsonrpc: "2.0",
       method: "MessageQueued",
       params: {
-        recipient: "A",
-        sender: "B",
+        recipient: "B",
+        sender: "A",
         data: {type: "Channel.Open", signedState: state}
       }
     });
@@ -75,8 +136,8 @@ describe("message sender", () => {
       jsonrpc: "2.0",
       method: "MessageQueued",
       params: {
-        recipient: "A",
-        sender: "B",
+        recipient: "B",
+        sender: "A",
         data: {type: "Channel.Joined", signedState: state}
       }
     });
@@ -106,8 +167,8 @@ describe("message sender", () => {
       jsonrpc: "2.0",
       method: "MessageQueued",
       params: {
-        recipient: "A",
-        sender: "B",
+        recipient: "B",
+        sender: "A",
         data: actionToRelay
       }
     });
@@ -141,6 +202,7 @@ describe("message sender", () => {
       }
     });
   });
+
   it("sends a correct response message for WALLET.POST_MESSAGE", async () => {
     const message = postMessageResponse({id: 5});
     const {effects} = await expectSaga(messageSender, message)

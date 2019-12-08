@@ -28,7 +28,7 @@ import {
 } from '../../../test/test-data';
 import Channel from '../../models/channel';
 import {outcomeObjectToModel} from '../../utilities/outcome';
-import knex from '../connection';
+import knex from '../../../db-admin/db-admin-connection';
 
 Model.knex(knex);
 

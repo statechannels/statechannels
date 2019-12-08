@@ -120,9 +120,7 @@ export const acknowledgeFailure: StateConstructor<AcknowledgeFailure> = p => {
   return {...base(p), reason: p.reason, type: "Challenging.AcknowledgeFailure"};
 };
 
-export const acknowledgeClosedButNotDefunded: StateConstructor<
-  AcknowledgeClosedButNotDefunded
-> = p => {
+export const acknowledgeClosedButNotDefunded: StateConstructor<AcknowledgeClosedButNotDefunded> = p => {
   return {...base(p), type: "Challenging.AcknowledgeClosedButNotDefunded"};
 };
 

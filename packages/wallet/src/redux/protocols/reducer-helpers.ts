@@ -154,8 +154,10 @@ export const channelFundsAnotherChannel = (channelId: string, sharedData: Shared
   const latestState = getLatestState(channelId, sharedData);
   const {allocation} = getAllocationOutcome(latestState.outcome);
   return (
-    _.intersection(selectors.getChannelIds(sharedData), allocation.map(a => a.destination)).length >
-    0
+    _.intersection(
+      selectors.getChannelIds(sharedData),
+      allocation.map(a => a.destination)
+    ).length > 0
   );
 };
 

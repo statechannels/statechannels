@@ -1,4 +1,4 @@
-import { connect } from 'react-redux';
+import {connect} from 'react-redux';
 
 import HomePage from '../components/HomePage';
 import * as loginActions from '../redux/login/actions';

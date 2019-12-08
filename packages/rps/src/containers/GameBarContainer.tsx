@@ -1,13 +1,13 @@
-import { connect } from 'react-redux';
+import {connect} from 'react-redux';
 
 import GameBar from '../components/GameBar';
-import { SiteState } from '../redux/reducer';
-import { PlayingState } from 'src/redux/game/state';
+import {SiteState} from '../redux/reducer';
+import {PlayingState} from 'src/redux/game/state';
 
 function mapStateToProps(state: SiteState) {
-  const { localState, channelState } = state.game;
+  const {localState, channelState} = state.game;
 
-  const { name, opponentName, roundBuyIn, player } = localState as PlayingState;
+  const {name, opponentName, roundBuyIn, player} = localState as PlayingState;
   const aBal = channelState ? channelState.aBal : '';
   const bBal = channelState ? channelState.bBal : '';
 

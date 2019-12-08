@@ -4,7 +4,7 @@ export type JsonRpcRequest = {
   id?: number;
   jsonrpc: '2.0';
   method: string;
-  params: any[];
+  params: any;
 };
 
 export type JsonRpcResponse<ResultType = any> = {
@@ -13,7 +13,12 @@ export type JsonRpcResponse<ResultType = any> = {
   result: ResultType;
 };
 
+export function isJsonRpcResponse(message: any): message is JsonRpcResponse {
+  return 'result' in message;
+}
+
 export type JsonRpcError = {
+  jsonrpc: '2.0';
   code: number;
   message: string;
   data?: {
@@ -21,25 +26,31 @@ export type JsonRpcError = {
   };
 };
 
+export type JsonRpcNotification = {
+  jsonrpc: '2.0';
+  method: string;
+  params: any;
+};
+
+export function isJsonRpcNotification(message: any): message is JsonRpcNotification {
+  return 'method' in message && !('id' in message);
+}
+
 export type JsonRpcErrorResponse = {
   id: number;
   jsonrpc: '2.0';
   error: JsonRpcError;
 };
 
+export function isJsonRpcErrorResponse(message: any): message is JsonRpcErrorResponse {
+  return 'error' in message;
+}
+
 export interface IChannelProvider {
   enable(url?: string): Promise<void>;
-  send<ResultType = any>(method: string, params?: any[]): Promise<ResultType>;
-  subscribe(subscriptionType: string, params?: any[]): Promise<string>;
-  unsubscribe(subscriptionId: string): Promise<boolean>;
+  send<ResultType = any>(method: string, params?: any): Promise<ResultType>;
   on(event: string, callback: ListenerFn): void;
   off(event: string, callback?: ListenerFn): void;
+  subscribe(subscriptionType: string, params?: any): Promise<string>;
+  unsubscribe(subscriptionId: string): Promise<boolean>;
 }
-
-export enum ChannelProviderUIMessage {
-  Close = 'ui:wallet:close',
-  Acknowledge = 'ui:wallet:ack'
-}
-
-export type JsonRpcSubscribeResult = {subscription: string};
-export type JsonRpcUnsubscribeResult = {success: boolean};

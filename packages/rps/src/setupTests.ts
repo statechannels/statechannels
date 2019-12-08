@@ -4,4 +4,4 @@ import Adapter from 'enzyme-adapter-react-16';
 // Load environment variables from .env
 import '../config/env';
 
-Enzyme.configure({ adapter: new Adapter() });
+Enzyme.configure({adapter: new Adapter()});

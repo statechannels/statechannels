@@ -57,7 +57,4 @@ const mapDispatchToProps = {
   fundingSuccessAcknowledged: actions.fundingSuccessAcknowledged
 };
 
-export const Funding = connect(
-  () => ({}),
-  mapDispatchToProps
-)(FundingContainer);
+export const Funding = connect(() => ({}), mapDispatchToProps)(FundingContainer);

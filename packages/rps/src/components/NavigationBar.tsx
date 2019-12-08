@@ -1,8 +1,8 @@
 import React from 'react';
 
-import { Button, Navbar } from 'reactstrap';
-import { Commitment } from 'fmg-core';
-import { RulesModal } from './RulesModal';
+import {Button, Navbar} from 'reactstrap';
+import {Commitment} from 'fmg-core';
+import {RulesModal} from './RulesModal';
 
 interface Props {
   showRules: boolean;

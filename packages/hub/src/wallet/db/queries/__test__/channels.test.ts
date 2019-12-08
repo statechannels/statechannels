@@ -13,6 +13,10 @@ import {
 import {queries} from '../channels';
 import {createdChannel} from '../../../../test/test-responses';
 
+afterAll(() => {
+  knex.destroy();
+});
+
 describe('updateChannel', () => {
   describe('when theirState is a PreFundSetup', () => {
     it("works when the channel doesn't exist", async () => {
@@ -23,14 +27,12 @@ describe('updateChannel', () => {
       expect.assertions(5);
 
       expect(allocatorChannel).toMatchObject(createdChannel);
-      expect((await knex('channels').select('*')).length).toEqual(SEEDED_CHANNELS + 1);
-      expect((await knex('channel_states').select('*')).length).toEqual(SEEDED_STATES + 2);
+      expect(await knex('channels').select('*')).toHaveLength(SEEDED_CHANNELS + 1);
+      expect(await knex('channel_states').select('*')).toHaveLength(SEEDED_STATES + 2);
 
-      expect((await knex('allocations').select('*')).length).toEqual(SEEDED_ALLOCATIONS + 4);
+      expect(await knex('allocations').select('*')).toHaveLength(SEEDED_ALLOCATIONS + 4);
 
-      expect((await knex('channel_participants').select('*')).length).toEqual(
-        SEEDED_PARTICIPANTS + 2
-      );
+      expect(await knex('channel_participants').select('*')).toHaveLength(SEEDED_PARTICIPANTS + 2);
     });
 
     it('throws when the channel exists', async () => {
@@ -66,16 +68,16 @@ describe('updateChannel', () => {
         ]
       });
 
-      expect((await knex('channels').select('*')).length).toEqual(SEEDED_CHANNELS);
+      expect(await knex('channels').select('*')).toHaveLength(SEEDED_CHANNELS);
       expect(
-        (await knex('channel_states')
+        await knex('channel_states')
           .where({channel_id: updatedAllocatorChannel.id})
-          .select('*')).length
-      ).toEqual(2);
+          .select('*')
+      ).toHaveLength(2);
 
-      expect((await knex('allocations').select('*')).length).toEqual(SEEDED_ALLOCATIONS);
+      expect(await knex('allocations').select('*')).toHaveLength(SEEDED_ALLOCATIONS);
 
-      expect((await knex('channel_participants').select('*')).length).toEqual(SEEDED_PARTICIPANTS);
+      expect(await knex('channel_participants').select('*')).toHaveLength(SEEDED_PARTICIPANTS);
     });
 
     it("throws when the channel doesn't exist and the commitment is not PreFundSetup", async () => {

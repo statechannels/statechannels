@@ -26,12 +26,12 @@ const chalk = require('chalk');
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 const checkRequiredFiles = require('react-dev-utils/checkRequiredFiles');
-const { choosePort } = require('react-dev-utils/WebpackDevServerUtils');
+const {choosePort} = require('react-dev-utils/WebpackDevServerUtils');
 
 const paths = require('../config/paths');
 const configFactory = require('../config/webpack.config');
-const { getNetworkName, setupGanache } = require('@statechannels/devtools');
-const { deploy } = require('../deployment/deploy');
+const {getNetworkName, setupGanache} = require('@statechannels/devtools');
+const {deploy} = require('../deployment/deploy');
 
 void (async () => {
   process.on('SIGINT', () => {
@@ -77,10 +77,10 @@ void (async () => {
     process.exit(1);
   }
 
-  const { deployer } = await setupGanache();
+  const {deployer} = await setupGanache();
   const deployedArtifacts = await deploy(deployer);
 
-  process.env = { ...process.env, ...deployedArtifacts };
+  process.env = {...process.env, ...deployedArtifacts};
 
   process.env.TARGET_NETWORK = getNetworkName(process.env.CHAIN_NETWORK_ID);
 

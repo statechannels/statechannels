@@ -57,19 +57,18 @@ class ChallengerContainer extends PureComponent<Props> {
         return (
           <ApproveX
             title={"Challenge timed out!"}
-            children={
-              <div>
-                The challenge timed out. Channel
-                <div className="channel-address">{state.channelId}</div>
-                is now finalized -- would you like to defund it?
-              </div>
-            }
             description={""}
             yesMessage={"Defund"}
             approvalAction={() => defund(processId, state.channelId)}
             noMessage={"No"}
             rejectionAction={() => acknowledged({processId})}
-          />
+          >
+            <div>
+              The challenge timed out. Channel
+              <div className="channel-address">{state.channelId}</div>
+              is now finalized -- would you like to defund it?
+            </div>
+          </ApproveX>
         );
       case "Challenging.AcknowledgeFailure":
         const description = describeFailure(state.reason);
@@ -119,7 +118,4 @@ const mapDispatchToProps = {
   defund: closeLedgerChannelAndExitChallenge
 };
 
-export const Challenger = connect(
-  () => ({}),
-  mapDispatchToProps
-)(ChallengerContainer);
+export const Challenger = connect(() => ({}), mapDispatchToProps)(ChallengerContainer);

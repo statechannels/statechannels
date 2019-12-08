@@ -3,63 +3,36 @@ import {
   State,
   Channel,
   isAllocationOutcome,
-  SignedState,
   convertBytes32ToAddress,
   convertAddressToBytes32
 } from "@statechannels/nitro-protocol";
 import {bigNumberify, randomBytes} from "ethers/utils";
 import {NETWORK_ID, CHALLENGE_DURATION, ETH_ASSET_HOLDER_ADDRESS} from "../constants";
-import {ChannelParticipant} from "../redux/channel-store";
-import {RelayableAction} from "../communication";
+import {
+  UpdateChannelParams,
+  Allocations,
+  CreateChannelParams
+} from "@statechannels/client-api-schema";
 
-export interface JsonRpcParticipant {
-  participantId: string;
-  signingAddress: string;
-  destination: string;
-}
+// TODO: Figure out how these should have been used
+// interface OpenChannel {
+//   type: "Channel.Open";
+//   participants: ChannelParticipant[];
+//   signedState: SignedState;
+// }
+// interface ChannelJoined {
+//   type: "Channel.Joined";
+//   signedState: SignedState;
+// }
 
-export interface JsonRpcAllocationItem {
-  destination: string;
-  amount: string;
-}
-export type JsonRpcAllocations = JsonRpcAllocation[];
+// interface ChannelUpdated {
+//   type: "Channel.Updated";
+//   signedState: SignedState;
+// }
 
-export interface JsonRpcAllocation {
-  token: string;
-  allocationItems: JsonRpcAllocationItem[];
-}
+// type WalletMessage = OpenChannel | ChannelJoined | RelayableAction | ChannelUpdated;
 
-export interface JsonRpcCreateChannelParams {
-  participants: JsonRpcParticipant[];
-  allocations: JsonRpcAllocations;
-  appDefinition: string;
-  appData: string;
-}
-
-export interface JsonRpcMessage {
-  recipient: string;
-  sender: string;
-  data: WalletMessage;
-}
-
-interface OpenChannel {
-  type: "Channel.Open";
-  participants: ChannelParticipant[];
-  signedState: SignedState;
-}
-interface ChannelJoined {
-  type: "Channel.Joined";
-  signedState: SignedState;
-}
-type WalletMessage = OpenChannel | ChannelJoined | RelayableAction;
-
-export interface JsonRpcUpdateChannelParams {
-  allocations: JsonRpcAllocations;
-  appData: string;
-  channelId: string;
-}
-
-function createAllocationOutcomeFromParams(params: JsonRpcAllocations): Outcome {
+function createAllocationOutcomeFromParams(params: Allocations): Outcome {
   return params.map(p => {
     return {
       // TODO: Need to look up the the asset holder for the token
@@ -74,7 +47,7 @@ function createAllocationOutcomeFromParams(params: JsonRpcAllocations): Outcome 
   });
 }
 
-export function createJsonRpcAllocationsFromOutcome(outcome: Outcome): JsonRpcAllocations {
+export function createJsonRpcAllocationsFromOutcome(outcome: Outcome): Allocations {
   return outcome.map(o => {
     if (!isAllocationOutcome(o)) {
       throw new Error("Attempted to convert non allocation outcome to an allocation");
@@ -90,7 +63,7 @@ export function createJsonRpcAllocationsFromOutcome(outcome: Outcome): JsonRpcAl
 }
 
 // TODO: Error handling
-export function createStateFromCreateChannelParams(params: JsonRpcCreateChannelParams): State {
+export function createStateFromCreateChannelParams(params: CreateChannelParams): State {
   const {appData, appDefinition} = params;
 
   // TODO: We should implement a nonce negotiation protocol once it's fully specced out
@@ -114,7 +87,7 @@ export function createStateFromCreateChannelParams(params: JsonRpcCreateChannelP
 // TODO: Error handling
 export function createStateFromUpdateChannelParams(
   state: State,
-  params: JsonRpcUpdateChannelParams
+  params: UpdateChannelParams
 ): State {
   const {appData, allocations} = params;
 

@@ -67,7 +67,4 @@ const mapDispatchToProps = {
   withdrawalSuccessAcknowledged: actions.withdrawalSuccessAcknowledged
 };
 
-export const Withdrawal = connect(
-  () => ({}),
-  mapDispatchToProps
-)(WithdrawalContainer);
+export const Withdrawal = connect(() => ({}), mapDispatchToProps)(WithdrawalContainer);
