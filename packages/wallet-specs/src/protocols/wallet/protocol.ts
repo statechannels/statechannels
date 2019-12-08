@@ -112,6 +112,7 @@ export function machine(store: Store) {
       },
       ctx
     );
+    process.ref.send(event);
     return {
       ...ctx,
       processes: ctx.processes.concat([process]),
