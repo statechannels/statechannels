@@ -15,6 +15,7 @@ const leftoverTsLintRules = {
   '@typescript-eslint/no-non-null-assertion': 'off',
   // TODO: Get rid of this, there are just a small number of cases
   '@typescript-eslint/no-unused-vars': 'off',
+  '@typescript-eslint/interface-name-prefix': 'off',
 };
 
 // Jest violations
