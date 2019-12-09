@@ -9,11 +9,11 @@ export function* messageQueuedListener(client: RPSChannelClient) {
 
   while (true) {
     const notification = yield take(channel);
-    const to = notification.recipient;
+    const to = notification.params.recipient;
     yield fork(
       reduxSagaFirebase.database.create,
       `/messages/${to.toLowerCase()}`,
-      sanitizeMessageForFirebase(notification)
+      sanitizeMessageForFirebase(notification.params)
     );
   }
 }
