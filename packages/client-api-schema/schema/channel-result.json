@@ -42,12 +42,10 @@
         },
         "status": {
           "type": "string",
-          "const": "opening",
           "enum": ["proposed", "opening", "funding", "running", "closing", "closed"]
         },
         "turnNum": {
-          "type": "string",
-          "const": "0x00"
+          "type": "integer"
         }
       },
       "required": [

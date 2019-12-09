@@ -47,7 +47,7 @@ describe("message sender", () => {
       params: {
         funding: [],
         turnNum: 5,
-        status: "Running",
+        status: "running",
         channelId
       }
     });
@@ -197,7 +197,7 @@ describe("message sender", () => {
       params: {
         funding: [],
         turnNum: 0,
-        status: "Opening",
+        status: "opening",
         channelId
       }
     });
@@ -255,7 +255,7 @@ describe("message sender", () => {
       result: {
         funding: [],
         turnNum: 0,
-        status: "Opening",
+        status: "opening",
         channelId
       }
     });
@@ -289,7 +289,7 @@ describe("message sender", () => {
       result: {
         funding: [{token: "0x0", amount: "0x5"}],
         turnNum: 1,
-        status: "Running",
+        status: "running",
         channelId
       }
     });
