@@ -89,7 +89,7 @@ export const startOwnGanache = async (p: Partial<Params> = {}): Promise<GanacheS
   process.on('SIGINT', () => server && server.close());
   process.on('SIGTERM', () => server && server.close());
 
-  say(`Starting a ganche server on http://localhost:${port}`);
+  say(`Starting a ganache server on http://localhost:${port}`);
 
   await server.ready();
   return server;
