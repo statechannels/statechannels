@@ -2,9 +2,8 @@
   "name": "@statechannels/channel-client",
   "version": "0.0.1",
   "description": "Browser-compatible JS client implementing the State Channels Client API",
-  "main": "lib/src/index.js",
+  "main": "index.js",
   "scripts": {
-    "prepare": "yarn build",
     "precommit": "lint-staged --quiet",
     "test": "jest",
     "build": "yarn build:typescript",
@@ -29,6 +28,7 @@
     "@typescript-eslint/eslint-plugin": "^2.10.0",
     "@typescript-eslint/parser": "^2.10.0",
     "eslint": "^6.6.0",
+    "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-jest": "^23.1.1",
     "eslint-plugin-prettier": "^3.1.1",
     "lint-staged": "9.4.1",
@@ -41,6 +41,6 @@
     "ethers": "^4.0.40"
   },
   "lint-staged": {
-    "src/**/*.ts": "eslint --max-warnings=0"
+    "src/**/*.ts": "eslint"
   }
 }

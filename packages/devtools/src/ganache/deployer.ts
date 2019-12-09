@@ -1,6 +1,5 @@
 import {CompiledContract, EtherlimeGanacheDeployer} from 'etherlime-lib';
 import * as log from 'loglevel';
-// @ts-ignore etherlime-utils does not export any types
 import {colors} from 'etherlime-utils';
 
 export class GanacheDeployer {

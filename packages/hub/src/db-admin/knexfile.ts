@@ -6,11 +6,7 @@ import {Config} from 'knex';
 import {dbCofig} from '../db-config';
 
 const BASE_PATH = path.join(__dirname, '..', 'wallet', 'db');
-
-let extensions = ['js'];
-if (process.env.NODE_ENV === 'test') {
-  extensions = ['.ts'];
-}
+const extensions = [path.extname(__filename)];
 
 let knexConfig: Config = {
   ...dbCofig,

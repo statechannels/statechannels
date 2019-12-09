@@ -8,4 +8,4 @@ export {
   PushMessageResult
 } from './types';
 
-export {ChannelClient} from './channel-client';
+export { ChannelClient } from './channel-client';

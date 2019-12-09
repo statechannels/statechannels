@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import {CompiledContract} from 'etherlime-lib';
 import * as log from 'loglevel';
-// @ts-ignore etherlime-utils does not export any types
 import {colors} from 'etherlime-utils';
 import writeJsonFile from 'write-json-file';
 import {GanacheDeployer} from './deployer';
