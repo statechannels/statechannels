@@ -24,11 +24,12 @@ state Setup{
     A.WeaponAndSaltChosen -[#blue]-> A.ResultPlayAgain : ResultArrived
     A.ResultPlayAgain -[#blue]-> A.WaitForRestart : PlayAgain
     A.WaitForRestart -[#blue]-> A.ChooseWeapon : StartRound
+    A.WeaponAndSaltChosen -[#black]-> A.InsufficientFunds
     A.Resigned :
+
     }
 
 ' Player B
-' NOTE: ChooseWeaponB is actually just ChooseWeapon. Could refactor code to make it clearer though
     state PlayerB {
     Lobby -[#red]right-> B.CreatingOpenGame : NewOpenGame
     B.CreatingOpenGame -[#red]-> B.WaitingRoom : CreateGame
@@ -39,17 +40,19 @@ state Setup{
     B.WeaponChosen -[#red]-> B.ResultPlayAgain : ResultArrived
     B.ResultPlayAgain -[#red]-> B.WaitForRestart: PlayAgain
     B.WaitForRestart -[#red]-> B.ChooseWeapon : StartRound
+    B.WeaponChosen -[#red]-> B.InsufficientFunds
     B.Resigned :
     }
 
 ' Endgame
 state EndGame {
-    B.WeaponChosen -[#black]-> InsufficientFunds
-    A.WeaponAndSaltChosen -[#black]-> InsufficientFunds
-    InsufficientFunds -[#black]-> GameOver : GameOver
+
+
+    A.InsufficientFunds -[#blue]-> GameOver : GameOver
+    B.InsufficientFunds -[#red]-> GameOver : GameOver
     GameOver -[#black]-> Lobby : ExitToLobby
-    A.Resigned -[#black]-> GameOver : GameOver
-    B.Resigned -[#black]-> GameOver : GameOver
+    A.Resigned -[#blue]-> GameOver : GameOver
+    B.Resigned -[#red]-> GameOver : GameOver
 }
 
 ' Map States to Views

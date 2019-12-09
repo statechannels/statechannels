@@ -13,7 +13,8 @@ export type A =
   | A.WeaponAndSaltChosen
   | A.ResultPlayAgain
   | A.WaitForRestart
-  | A.Resigned;
+  | A.Resigned
+  | A.InsufficientFunds;
 
 export function isPlayerA(state: LocalState): state is A {
   return (
@@ -23,7 +24,8 @@ export function isPlayerA(state: LocalState): state is A {
     state.type === 'A.WeaponAndSaltChosen' ||
     state.type === 'A.ResultPlayAgain' ||
     state.type === 'A.WaitForRestart' ||
-    state.type === 'A.Resigned'
+    state.type === 'A.Resigned' ||
+    state.type === 'A.InsufficientFunds'
   );
 }
 export type B =
@@ -34,7 +36,8 @@ export type B =
   | B.WeaponChosen
   | B.ResultPlayAgain
   | B.WaitForRestart
-  | B.Resigned;
+  | B.Resigned
+  | B.InsufficientFunds;
 
 export function isPlayerB(state: LocalState): state is A {
   return (
@@ -45,10 +48,11 @@ export function isPlayerB(state: LocalState): state is A {
     state.type === 'B.WeaponChosen' ||
     state.type === 'B.ResultPlayAgain' ||
     state.type === 'B.WaitForRestart' ||
-    state.type === 'A.Resigned'
+    state.type === 'B.Resigned' ||
+    state.type === 'B.InsufficientFunds'
   );
 }
-export type EndGame = EndGame.InsufficientFunds | EndGame.GameOver;
+export type EndGame = EndGame.GameOver;
 export type LocalState = Setup | A | B | EndGame;
 
 export interface Playing {
@@ -197,6 +201,22 @@ export namespace A {
       type: 'A.Resigned',
     };
   };
+
+  export interface InsufficientFunds extends Playing {
+    type: 'A.InsufficientFunds';
+    myWeapon: Weapon;
+    theirWeapon: Weapon;
+    result: Result;
+  }
+  export const insufficientFunds: StateConstructor<InsufficientFunds> = params => {
+    return {
+      ...extractPlayingFromParams(params),
+      myWeapon: params.myWeapon,
+      theirWeapon: params.theirWeapon,
+      result: params.result,
+      type: 'A.InsufficientFunds',
+    };
+  };
 }
 
 // Player B
@@ -296,13 +316,9 @@ export namespace B {
       type: 'B.Resigned',
     };
   };
-}
-// EndGame
 
-// tslint:disable-next-line: no-namespace
-export namespace EndGame {
   export interface InsufficientFunds extends Playing {
-    type: 'EndGame.InsufficientFunds';
+    type: 'B.InsufficientFunds';
     myWeapon: Weapon;
     theirWeapon: Weapon;
     result: Result;
@@ -313,10 +329,14 @@ export namespace EndGame {
       myWeapon: params.myWeapon,
       theirWeapon: params.theirWeapon,
       result: params.result,
-      type: 'EndGame.InsufficientFunds',
+      type: 'B.InsufficientFunds',
     };
   };
+}
+// EndGame
 
+// tslint:disable-next-line: no-namespace
+export namespace EndGame {
   export interface GameOver {
     type: 'EndGame.GameOver';
     name: string;

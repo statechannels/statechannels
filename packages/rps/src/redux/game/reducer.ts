@@ -82,7 +82,7 @@ const localReducer: Reducer<LocalState> = (
         if (action.fundingSituation === 'Ok') {
           newState = A.resultPlayAgain({...state, ...action});
         } else {
-          newState = EndGame.insufficientFunds({...state, ...action});
+          newState = A.insufficientFunds({...state, ...action});
         }
       }
       break;
@@ -122,13 +122,14 @@ const localReducer: Reducer<LocalState> = (
         if (action.fundingSituation === 'Ok') {
           newState = B.resultPlayAgain({...state, ...action});
         } else {
-          newState = EndGame.insufficientFunds({...state, ...action});
+          newState = B.insufficientFunds({...state, ...action});
         }
       }
       break;
     case 'A.Resigned':
     case 'B.Resigned':
-    case 'EndGame.InsufficientFunds':
+    case 'A.InsufficientFunds':
+    case 'B.InsufficientFunds':
       if (action.type === 'GameOver') {
         newState = EndGame.gameOver({...state, ...action});
       }

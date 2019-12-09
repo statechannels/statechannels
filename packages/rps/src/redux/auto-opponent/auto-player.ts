@@ -70,7 +70,7 @@ function* autoPlayerBRun() {
     case 'B.Resigned':
       yield put(gameOver());
       break;
-    case 'EndGame.InsufficientFunds':
+    case 'B.InsufficientFunds':
       yield put(gameOver());
       break;
   }
@@ -108,7 +108,7 @@ function* autoPlayerARun() {
     case 'A.Resigned':
       yield put(gameOver());
       break;
-    case 'EndGame.InsufficientFunds':
+    case 'A.InsufficientFunds':
       yield put(gameOver());
       break;
   }

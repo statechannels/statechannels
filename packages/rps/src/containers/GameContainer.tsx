@@ -106,7 +106,8 @@ function RenderGame(props: GameProps) {
           channelClosed={isClosed(channelState)}
         />
       );
-    case 'EndGame.InsufficientFunds':
+    case 'A.InsufficientFunds':
+    case 'B.InsufficientFunds':
       return (
         <InsufficientFunds
           yourWeapon={localState.myWeapon}

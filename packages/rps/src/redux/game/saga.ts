@@ -10,7 +10,6 @@ import {
   RoundProposed,
   RoundAccepted,
   Reveal,
-  Result,
 } from '../../core';
 import * as cs from '../../core/channel-state';
 import * as a from './actions';
@@ -51,7 +50,8 @@ function* gameSagaRun(client: RPSChannelClient) {
   if (
     !isPlayersTurnNext(localState, channelState) &&
     cs.isClosed(channelState) &&
-    localState.type !== 'EndGame.InsufficientFunds' &&
+    localState.type !== 'A.InsufficientFunds' &&
+    localState.type !== 'B.InsufficientFunds' &&
     localState.type !== 'A.Resigned' &&
     localState.type !== 'B.Resigned' &&
     !opponentResigned
@@ -109,9 +109,10 @@ function* gameSagaRun(client: RPSChannelClient) {
         yield* sendStartAndStartRound(channelState, client);
       }
       break;
-    case 'EndGame.InsufficientFunds':
+    case 'A.InsufficientFunds':
+    case 'B.InsufficientFunds':
       if (
-        localState.result === Result.YouLose &&
+        isPlayersTurnNext(localState, channelState) &&
         channelState &&
         !cs.isClosing(channelState) &&
         !cs.isClosed(channelState)
@@ -255,7 +256,7 @@ function* calculateResultAndSendReveal(
 }
 
 function* calculateResultAndCloseChannelIfNoFunds(
-  localState: ls.A.WeaponChosen | ls.B.WeaponChosen,
+  localState: ls.B.WeaponChosen,
   channelState: ChannelState<Reveal>,
   client: RPSChannelClient
 ) {
