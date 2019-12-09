@@ -16,7 +16,9 @@ export class MessagingService {
   protected readonly timeoutMs: number;
   protected readonly maxRetries: number;
 
-  constructor({timeoutMs = 50, maxRetries = 5}: MessagingServiceOptions = {}) {
+  // TODO: We need to think about timeouts and how we handle them
+  // If the timeout is too short then we can end up generating duplicate messages to the wallet.
+  constructor({timeoutMs = 1000, maxRetries = 5}: MessagingServiceOptions = {}) {
     this.timeoutMs = timeoutMs;
     this.maxRetries = maxRetries;
   }
