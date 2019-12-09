@@ -25,6 +25,11 @@ export class ChannelClient implements ChannelClientInterface<ChannelResult> {
     return this.provider.off.bind(this, 'ChannelUpdated', callback);
   }
 
+  onChannelProposed(callback: (result: ChannelResult) => void): UnsubscribeFunction {
+    this.provider.on('ChannelProposed', result => callback(result.params));
+    return this.provider.off.bind(this, 'ChannelProposed', callback);
+  }
+
   async createChannel(
     participants: Participant[],
     allocations: Allocation[],

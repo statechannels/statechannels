@@ -51,6 +51,7 @@ export interface PushMessageResult {
 export interface ChannelClientInterface<Payload = object> {
   onMessageQueued: (callback: (message: Message<Payload>) => void) => UnsubscribeFunction;
   onChannelUpdated: (callback: (result: ChannelResult) => void) => UnsubscribeFunction;
+  onChannelProposed: (callback: (result: ChannelResult) => void) => UnsubscribeFunction;
   createChannel: (
     participants: Participant[],
     allocations: Allocation[],

@@ -1,13 +1,13 @@
-import {AppData, ChannelState, encodeAppData, decodeAppData} from '../core';
+import { AppData, ChannelState, encodeAppData, decodeAppData } from '../core';
 import {
   ChannelClient,
   ChannelResult,
   Message,
   ChannelClientInterface,
 } from '@statechannels/channel-client';
-import {RPS_ADDRESS} from '../constants';
-import {IChannelProvider, channelProvider} from '@statechannels/channel-provider';
-import {bigNumberify} from 'ethers/utils';
+import { RPS_ADDRESS } from '../constants';
+import { IChannelProvider, channelProvider } from '@statechannels/channel-provider';
+import { bigNumberify } from 'ethers/utils';
 
 // This class wraps the channel client converting the request/response formats to those used in the app
 
@@ -61,7 +61,16 @@ export class RPSChannelClient {
     function callback(channelResult: ChannelResult): any {
       rpsCallback(convertToChannelState(channelResult));
     }
-    return this.channelClient.onChannelUpdated(callback);
+    // These are two distinct events from the channel client
+    // but for our purposes we can treat them the same
+    // and rely on the channel status
+    const unsubChannelUpdated = this.channelClient.onChannelUpdated(callback);
+    const unsubChannelProposed = this.channelClient.onChannelProposed(callback);
+
+    return () => {
+      unsubChannelUpdated();
+      unsubChannelProposed();
+    };
   }
 
   async joinChannel(channelId: string) {
@@ -104,7 +113,7 @@ export class RPSChannelClient {
 }
 
 const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
-  const {turnNum, channelId, status, participants, allocations, appData} = channelResult;
+  const { turnNum, channelId, status, participants, allocations, appData } = channelResult;
   return {
     channelId,
     turnNum,
@@ -120,8 +129,8 @@ const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
 };
 
 const formatParticipants = (aAddress: string, bAddress: string) => [
-  {participantId: aAddress, signingAddress: aAddress, destination: aAddress},
-  {participantId: bAddress, signingAddress: bAddress, destination: bAddress},
+  { participantId: aAddress, signingAddress: aAddress, destination: aAddress },
+  { participantId: bAddress, signingAddress: bAddress, destination: bAddress },
 ];
 
 const formatAllocations = (aAddress: string, bAddress: string, aBal: string, bBal: string) => {
@@ -129,8 +138,8 @@ const formatAllocations = (aAddress: string, bAddress: string, aBal: string, bBa
     {
       token: '0x0',
       allocationItems: [
-        {destination: aAddress, amount: bigNumberify(aBal).toHexString()},
-        {destination: bAddress, amount: bigNumberify(bBal).toHexString()},
+        { destination: aAddress, amount: bigNumberify(aBal).toHexString() },
+        { destination: bAddress, amount: bigNumberify(bBal).toHexString() },
       ],
     },
   ];
