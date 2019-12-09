@@ -49,7 +49,7 @@ You will also need to make sure that the hub's address has funds. You can find t
 
 ## Testing
 
-For any environment variables specific to local setup, such as postgres host or port, do not modify `.env` files checked into the repository. Instead, add the variables to `.env.test.local` (or to other local `.env` files).
+For any environment variables specific to local setup, such as postgres host or port, do not modify `.env` files checked into the repository. Instead, add the variables to `.env.test.local` (or to other local `.env` files). Specifically, you might want to override `HUB_DB_HOST` and `HUB_DB_PORT`.
 
 ```
 yarn install
