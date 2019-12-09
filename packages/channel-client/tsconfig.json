@@ -6,6 +6,6 @@
     // This package is meant to emit webpack processed files
     // "noEmit": true
   },
-  "references": [{ "path": "../channel-provider" }],
+  "references": [{"path": "../channel-provider"}],
   "include": ["src", "tests"]
 }
