@@ -11,42 +11,18 @@ import {
 } from './types';
 
 export class ChannelClient implements ChannelClientInterface<ChannelResult> {
-  constructor(private readonly provider: IChannelProvider) {}
-
-  // TODO: Ask Tom if this needs to be a synchronous function
-  onMessageQueued(callback: (message: Message<ChannelResult>) => void): UnsubscribeFunction {
-    let unsubscribe = (): void => {
-      throw new Error('Subscription has not been confirmed yet!');
-    };
-
-    this.provider.subscribe('not sure what goes here 1').then(subscriptionId => {
-      this.provider.on('MessageQueued', callback);
-      unsubscribe = (): void => {
-        this.provider.unsubscribe(subscriptionId);
-      };
-    });
-
-    return (): void => {
-      unsubscribe();
-    };
+  constructor(private readonly provider: IChannelProvider) {
+    console.info("[INFO] ChannelClient constructor assumes provider is 'enabled'");
   }
 
-  // TODO: Ask Tom if this needs to be a synchronous function
+  onMessageQueued(callback: (message: Message<ChannelResult>) => void): UnsubscribeFunction {
+    this.provider.on('MessageQueued', callback);
+    return this.provider.off.bind(this, 'MessageQueued', callback);
+  }
+
   onChannelUpdated(callback: (result: ChannelResult) => void): UnsubscribeFunction {
-    let unsubscribe = (): void => {
-      throw new Error('Subscription has not been confirmed yet!');
-    };
-
-    this.provider.subscribe('not sure what goes here 2').then(subscriptionId => {
-      this.provider.on('ChannelUpdated', callback);
-      unsubscribe = (): void => {
-        this.provider.unsubscribe(subscriptionId);
-      };
-    });
-
-    return (): void => {
-      unsubscribe();
-    };
+    this.provider.on('ChannelUpdated', callback);
+    return this.provider.off.bind(this, 'ChannelUpdated', callback);
   }
 
   async createChannel(
