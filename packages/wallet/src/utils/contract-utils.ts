@@ -15,8 +15,8 @@ function getContractAddress(name: string): string {
   throw new Error(`Could not find ${name} in environment`);
 }
 
-export async function getProvider(): Promise<Web3Provider> {
-  return await new Web3Provider(web3.currentProvider);
+export function getProvider(): Web3Provider {
+  return new Web3Provider(web3.currentProvider);
 }
 
 export async function getAdjudicatorContract(provider: Web3Provider) {
