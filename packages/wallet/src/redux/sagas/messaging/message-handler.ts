@@ -148,7 +148,12 @@ function* handlePushMessage(payload: RequestObject) {
             playerIndex: TwoPartyPlayerIndex.A
           })
         );
-
+        yield fork(
+          messageSender,
+          outgoingMessageActions.channelUpdatedEvent({
+            channelId: getChannelId(message.data.signedState.state.channel)
+          })
+        );
         yield fork(messageSender, outgoingMessageActions.postMessageResponse({id}));
         break;
       case "Channel.Open":

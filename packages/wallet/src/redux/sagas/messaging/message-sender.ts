@@ -132,7 +132,7 @@ function* getChannelInfo(channelId: string) {
   if (!bigNumberify(channelHoldings).isZero()) {
     funding = [{token: "0x0", amount: channelHoldings}];
   }
-  const status = channelStatus.turnNum < participants.length - 1 ? "Opening" : "Running";
+  const status = channelStatus.turnNum < participants.length - 1 ? "proposed" : "running";
   return {
     participants,
     allocations: createJsonRpcAllocationsFromOutcome(state.outcome),
