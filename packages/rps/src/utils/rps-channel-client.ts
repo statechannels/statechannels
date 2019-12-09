@@ -15,11 +15,12 @@ export class RPSChannelClient {
   channelClient: ChannelClientInterface;
 
   async enable() {
+    // TODO: This is really ugly!!
     // TODO: Use webpack to import channelProvider
-    console.log(channelProvider);
+    // tslint:disable-next-line: no-unused-expression
+    channelProvider;
     const provider: IChannelProvider = (window as any).channelProvider;
-    await provider.enable('http://localhost:3055');
-    console.log('Done');
+    await provider.enable(process.env.WALLET_URL);
     // might want to pass this in later
     this.channelClient = new ChannelClient(provider);
   }
@@ -34,7 +35,6 @@ export class RPSChannelClient {
     const participants = formatParticipants(aAddress, bAddress);
     const allocations = formatAllocations(aAddress, bAddress, aBal, bBal);
     const appDefinition = RPS_ADDRESS;
-    console.log(allocations);
     const appData = encodeAppData(appAttrs);
 
     // ignore return val for now and stub out response

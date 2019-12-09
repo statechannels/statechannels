@@ -2,7 +2,7 @@
   "name": "@statechannels/channel-client",
   "version": "0.0.1",
   "description": "Browser-compatible JS client implementing the State Channels Client API",
-  "main": "index.js",
+  "main": "lib/src/index.js",
   "scripts": {
     "prepare": "yarn build",
     "precommit": "lint-staged --quiet",

@@ -7,7 +7,6 @@ import metamaskSaga from '../metamask/saga';
 
 function* loginSaga() {
   try {
-    console.log(reduxSagaFirebase);
     yield call(reduxSagaFirebase.auth.signInAnonymously);
     // successful login will trigger the loginStatusWatcher, which will update the state
   } catch (error) {
