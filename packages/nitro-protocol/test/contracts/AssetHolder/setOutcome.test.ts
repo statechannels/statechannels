@@ -38,7 +38,7 @@ describe('setOutcome', () => {
     const regex = new RegExp(
       '^' + 'VM Exception while processing transaction: revert ' + reasonString + '$'
     );
-    await expect(() =>
+    await expect(
       AssetHolder.setAssetOutcomeHash(channelId, keccak256(outcomeContent))
     ).rejects.toThrow(regex);
   });
