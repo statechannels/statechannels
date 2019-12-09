@@ -1,4 +1,4 @@
-import { AnyEventObject, EventObject, SendAction, StateMachine } from 'xstate';
+import { EventObject, SendAction, StateMachine } from 'xstate';
 import { forwardTo } from 'xstate/lib/actions';
 import { ChannelUpdated, IStore, Store } from './store';
 const store = new Store();
@@ -101,3 +101,7 @@ export type MachineFactory<I, E extends EventObject> = (
   store: IStore,
   context?: I
 ) => StateMachine<I, any, E>;
+
+export function unreachable(x: never) {
+  return x;
+}

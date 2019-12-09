@@ -7,8 +7,8 @@ import {
   State,
 } from 'xstate';
 import { CreateChannel, JoinChannel } from '..';
-import { getChannelID, pretty, Store } from '../..';
-import { OpenChannel } from '../../wire-protocol';
+import { getChannelID, pretty, Store, unreachable } from '../..';
+import { OpenChannel, SendStates } from '../../wire-protocol';
 
 const PROTOCOL = 'wallet';
 export type Process = {
@@ -36,10 +36,7 @@ const config = {
       on: {
         OPEN_CHANNEL: { actions: 'spawnJoinChannel' },
         CREATE_CHANNEL: { actions: 'spawnCreateChannel' },
-        '*': { actions: forwardToChildren },
-        // CHANNEL_UPDATED: {
-        //   actions: [forwardToChildren],
-        // },
+        '*': { actions: ['updateStore', forwardToChildren] },
       },
     },
   },
@@ -56,9 +53,10 @@ export type Actions = {
   spawnJoinChannel: AssignAction<Init, OpenChannelEvent>;
   spawnCreateChannel: AssignAction<Init, CreateChannelEvent>;
   forwardToChildren: typeof forwardToChildren;
+  updateStore: any; // TODO
 };
 
-export type Events = OpenChannelEvent & CreateChannelEvent;
+export type Events = OpenChannelEvent | CreateChannelEvent | SendStates;
 
 function addLogs(process: Process, ctx): Process {
   process.ref
@@ -128,12 +126,31 @@ export function machine(store: Store) {
       processes: ctx.processes.concat([process]),
     };
   });
-  const options: { actions: any } = {
+
+  // TODO: Should this send `CHANNEL_UPDATED` to children?
+  const updateStore = (_ctx, event: Events) => {
+    switch (event.type) {
+      case 'OPEN_CHANNEL':
+        store.receiveStates([event.signedState]);
+        break;
+      case 'SendStates':
+        store.receiveStates(event.signedStates);
+        break;
+      case 'CREATE_CHANNEL':
+        break;
+      default:
+        unreachable(event);
+    }
+  };
+
+  const options: { actions: Actions } = {
     actions: {
       spawnCreateChannel,
       spawnJoinChannel,
       forwardToChildren,
+      updateStore,
     },
   };
+
   return Machine(config, options);
 }
