@@ -1,28 +1,33 @@
-import {select, take, fork, actionChannel, cancel} from "redux-saga/effects";
+import {actionChannel, cancel, fork, select, take} from "redux-saga/effects";
 
-import {transactionSender} from "./transaction-sender";
 import {adjudicatorWatcher} from "./adjudicator-watcher";
 import {challengeWatcher} from "./challenge-watcher";
+import {transactionSender} from "./transaction-sender";
 
-import {WalletState} from "../state";
 import {getProvider, isDevelopmentNetwork} from "../../utils/contract-utils";
+import {WalletState} from "../state";
 
-import {displaySender} from "./messaging/display-sender";
-import {ganacheMiner} from "./ganache-miner";
 import {WALLET_INITIALIZED} from "../state";
 import {challengeResponseInitiator} from "./challenge-response-initiator";
+import {ganacheMiner} from "./ganache-miner";
+import {displaySender} from "./messaging/display-sender";
 import {multipleActionDispatcher} from "./multiple-action-dispatcher";
 
+import {Web3Provider} from "ethers/providers";
+import {isLoadAction} from "../actions";
 import {adjudicatorStateUpdater} from "./adjudicator-state-updater";
 import {assetHolderStateUpdater} from "./asset-holder-state-updater";
-import {isLoadAction} from "../actions";
 import {assetHoldersWatcher} from "./asset-holder-watcher";
-import {postMessageListener} from "./messaging/post-message-listener";
 import {messageSender} from "./messaging/message-sender";
-import {Web3Provider} from "ethers/providers";
 import {OutgoingApiAction} from "./messaging/outgoing-api-actions";
+import {postMessageListener} from "./messaging/post-message-listener";
 
 export function* sagaManager(): IterableIterator<any> {
+  // If we are using storage we want to wait until storage is loaded before handling anything
+  if (process.env.USE_STORAGE) {
+    yield take("REDUX_STORAGE_LOAD");
+  }
+
   let adjudicatorWatcherProcess;
   let ETHAssetHolderWatcherProcess;
   let challengeWatcherProcess;
@@ -39,6 +44,7 @@ export function* sagaManager(): IterableIterator<any> {
 
   while (true) {
     const action = yield take(channel);
+
     // If it is a load action we update the adjudicator state with the latest on chain info
     if (isLoadAction(action)) {
       yield fork(adjudicatorStateUpdater);
