@@ -29,7 +29,6 @@
     "@typescript-eslint/eslint-plugin": "^2.10.0",
     "@typescript-eslint/parser": "^2.10.0",
     "eslint": "^6.6.0",
-    "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-jest": "^23.1.1",
     "eslint-plugin-prettier": "^3.1.1",
     "lint-staged": "9.4.1",
@@ -42,6 +41,6 @@
     "ethers": "^4.0.40"
   },
   "lint-staged": {
-    "src/**/*.ts": "eslint"
+    "src/**/*.ts": "eslint --max-warnings=0"
   }
 }
