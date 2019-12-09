@@ -38,6 +38,7 @@ const askClient = {
 };
 
 const abort = {
+  entry: 'sendCloseChannel',
   type: 'final' as 'final',
 };
 
@@ -107,7 +108,8 @@ export type Services = {
   advanceChannel: any;
 };
 export type Actions = {
-  storeState: ({ channelId }: Init, { signedState }: OpenChannel) => void;
+  storeState({ channelId }: Init, { signedState }: OpenChannel): void;
+  sendCloseChannel({ channelId }: Init): void;
 };
 
 export const machine: MachineFactory<Init, any> = (
@@ -123,6 +125,9 @@ export const machine: MachineFactory<Init, any> = (
   const actions: Actions = {
     storeState: ({  }: Init, { signedState }: OpenChannel) => {
       store.receiveStates([signedState]);
+    },
+    sendCloseChannel: () => {
+      console.log('TODO: Send close channel');
     },
   };
 
