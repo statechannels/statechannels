@@ -5,7 +5,6 @@ import {
   MachineConfig,
 } from 'xstate';
 import { MachineFactory, Store } from '../..';
-import { log } from '../../utils';
 
 const PROTOCOL = 'advance-channel';
 /*
@@ -32,8 +31,13 @@ const toSuccess = {
   target: 'success',
   cond: 'advanced',
 };
+const sendingState = {
+  invoke: {
+    src: 'sendState',
+    onDone: 'waiting',
+  },
+};
 const waiting = {
-  entry: 'sendState',
   on: {
     CHANNEL_UPDATED: toSuccess,
     '': toSuccess,
@@ -42,8 +46,9 @@ const waiting = {
 
 export const config: MachineConfig<Init, any, AnyEventObject> = {
   key: PROTOCOL,
-  initial: 'waiting',
+  initial: 'sendingState',
   states: {
+    sendingState,
     waiting,
     success: { type: 'final' },
   },
@@ -53,13 +58,14 @@ export type Guards = {
   advanced: ConditionPredicate<Init, AnyEventObject>;
 };
 
-export type Actions = {
-  sendState: any;
+export type Actions = {};
+export type Services = {
+  sendState(ctx: Init): Promise<void>;
 };
 
 export const mockOptions = {
   guards: { advanced: context => true },
-  actions: { sendState: ctx => true },
+  services: async () => true,
 };
 
 export const machine: MachineFactory<Init, any> = (
@@ -67,14 +73,16 @@ export const machine: MachineFactory<Init, any> = (
   context?: Init
 ) => {
   const guards: Guards = {
-    advanced: ({ channelId, targetTurnNum }: Init) => {
+    advanced: ({ channelId, targetTurnNum }: Init, event, { state: s }) => {
       const { latestSupportedState: state } = store.getEntry(channelId);
       return !!state && state.turnNum >= targetTurnNum;
     },
   };
 
-  const actions: Actions = {
-    sendState: ({ channelId, targetTurnNum }: Init) => {
+  const actions: Actions = {};
+
+  const services: Services = {
+    sendState: async ({ channelId, targetTurnNum }: Init) => {
       const { latestSupportedState, unsupportedStates } = store.getEntry(
         channelId
       );
@@ -90,8 +98,6 @@ export const machine: MachineFactory<Init, any> = (
       }
     },
   };
-
-  const services = {};
   const options = { guards, actions, services };
   return Machine(config).withConfig(options, context);
 };
