@@ -10,14 +10,11 @@ import {MetamaskError} from '../redux/metamask/actions';
 import LoadingPage from '../components/LoadingPage';
 
 import LoginErrorPage from '../components/LoginErrorPage';
-import * as actions from '../redux/login/actions';
 interface SiteProps {
   isAuthenticated: boolean;
   metamaskError: MetamaskError | null;
   loginError: string | undefined;
   loading: boolean;
-  walletVisible: boolean;
-  walletIFrameLoaded: () => void;
 }
 
 class Site extends React.PureComponent<SiteProps> {
@@ -59,7 +56,5 @@ const mapStateToProps = (state: SiteState) => {
     loginError: state.login.error,
   };
 };
-const mapDispatchToProps = {
-  walletIFrameLoaded: actions.walletIframeLoaded,
-};
-export default connect(mapStateToProps, mapDispatchToProps)(Site);
+
+export default connect(mapStateToProps)(Site);
