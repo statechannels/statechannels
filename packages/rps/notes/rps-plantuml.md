@@ -17,36 +17,39 @@ state Setup{
 
 ' Player A
     state PlayerA {
-    Lobby -[#blue]-> GameChosen : JoinOpenGame
-    GameChosen -[#blue]-> ChooseWeapon : StartRound
-    ChooseWeapon -[#blue]-> WeaponChosen : ChooseWeapon
-    WeaponChosen -[#blue]-> WeaponAndSaltChosen : ChooseSalt
-    WeaponAndSaltChosen -[#blue]-> ResultPlayAgain : ResultArrived
-    ResultPlayAgain -[#blue]-> WaitForRestart : PlayAgain
-    WaitForRestart -[#blue]-> ChooseWeapon : StartRound
+    Lobby -[#blue]left-> A.GameChosen : JoinOpenGame
+    A.GameChosen -[#blue]-> A.ChooseWeapon : StartRound
+    A.ChooseWeapon -[#blue]-> A.WeaponChosen : ChooseWeapon
+    A.WeaponChosen -[#blue]-> A.WeaponAndSaltChosen : ChooseSalt
+    A.WeaponAndSaltChosen -[#blue]-> A.ResultPlayAgain : ResultArrived
+    A.ResultPlayAgain -[#blue]-> A.WaitForRestart : PlayAgain
+    A.WaitForRestart -[#blue]-> A.ChooseWeapon : StartRound
+    A.Resigned :
     }
 
 ' Player B
 ' NOTE: ChooseWeaponB is actually just ChooseWeapon. Could refactor code to make it clearer though
     state PlayerB {
-    Lobby -[#red]-> CreatingOpenGame : NewOpenGame
-    CreatingOpenGame -[#red]-> WaitingRoom : CreateGame
-    WaitingRoom -[#red]-> Lobby: CancelGame
-    WaitingRoom -[#red]-> OpponentJoined : GameJoined
-    OpponentJoined -[#red]->ChooseWeaponB : StartRound
-    ChooseWeaponB -[#red]-> WeaponChosenB : ChooseWeapon
-    WeaponChosenB -[#red]-> ResultPlayAgainB : ResultArrived
-    ResultPlayAgainB -[#red]-> WaitForRestartB: PlayAgain
-    WaitForRestartB -[#red]-> ChooseWeaponB : StartRound
+    Lobby -[#red]right-> B.CreatingOpenGame : NewOpenGame
+    B.CreatingOpenGame -[#red]-> B.WaitingRoom : CreateGame
+    B.WaitingRoom -[#red]-> Lobby: CancelGame
+    B.WaitingRoom -[#red]-> B.OpponentJoined : GameJoined
+    B.OpponentJoined -[#red]->B.ChooseWeapon : StartRound
+    B.ChooseWeapon -[#red]-> B.WeaponChosen : ChooseWeapon
+    B.WeaponChosen -[#red]-> B.ResultPlayAgain : ResultArrived
+    B.ResultPlayAgain -[#red]-> B.WaitForRestart: PlayAgain
+    B.WaitForRestart -[#red]-> B.ChooseWeapon : StartRound
+    B.Resigned :
     }
 
 ' Endgame
 state EndGame {
-    WeaponChosenB -[#black]-> InsufficientFunds
-    WeaponAndSaltChosen -[#black]-> InsufficientFunds
+    B.WeaponChosen -[#black]-> InsufficientFunds
+    A.WeaponAndSaltChosen -[#black]-> InsufficientFunds
     InsufficientFunds -[#black]-> GameOver : GameOver
     GameOver -[#black]-> Lobby : ExitToLobby
-    Resigned -[#black]-> GameOver : GameOver
+    A.Resigned -[#black]-> GameOver : GameOver
+    B.Resigned -[#black]-> GameOver : GameOver
 }
 
 ' Map States to Views

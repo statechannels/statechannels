@@ -165,6 +165,9 @@ export const resultArrived = (
 
 export const playAgain = (): PlayAgain => ({type: 'PlayAgain'});
 export const startRound = (): StartRound => ({type: 'StartRound'});
-export const resign = (iResigned: boolean): Resign => ({type: 'Resign', iResigned});
+export const resign = (iResigned: boolean): Resign => ({
+  type: 'Resign',
+  iResigned,
+});
 export const gameOver = (): GameOver => ({type: 'GameOver'});
 export const exitToLobby = (): ExitToLobby => ({type: 'ExitToLobby'});

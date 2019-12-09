@@ -1,4 +1,4 @@
-import {GameState, LocalState, Setup, EndGame, A, B} from './state';
+import {GameState, LocalState, Setup, EndGame, A, B, isPlayerB, isPlayerA} from './state';
 import {Reducer, combineReducers} from 'redux';
 import {GameAction, UpdateChannelState} from './actions';
 import {ChannelState} from '../../core';
@@ -26,10 +26,18 @@ const localReducer: Reducer<LocalState> = (
     state.type !== 'Setup.Empty' &&
     state.type !== 'Setup.NeedAddress' &&
     state.type !== 'Setup.Lobby' &&
+    state.type !== 'B.CreatingOpenGame' &&
     state.type !== 'B.WaitingRoom' &&
-    state.type !== 'B.CreatingOpenGame'
+    state.type !== 'A.Resigned' &&
+    state.type !== 'B.Resigned' &&
+    state.type !== 'EndGame.GameOver'
   ) {
-    newState = EndGame.resigned({...state, ...action});
+    if (isPlayerA(state)) {
+      newState = A.resigned({...state, ...action});
+    }
+    if (isPlayerB(state)) {
+      newState = B.resigned({...state, ...action});
+    }
   }
   switch (state.type) {
     case 'Setup.Empty':
@@ -118,10 +126,16 @@ const localReducer: Reducer<LocalState> = (
         }
       }
       break;
-    case 'EndGame.Resigned':
+    case 'A.Resigned':
+    case 'B.Resigned':
     case 'EndGame.InsufficientFunds':
       if (action.type === 'GameOver') {
         newState = EndGame.gameOver({...state, ...action});
+      }
+      break;
+    case 'EndGame.GameOver':
+      if (action.type === 'ExitToLobby') {
+        newState = Setup.lobby({...state, ...action});
       }
       break;
   }

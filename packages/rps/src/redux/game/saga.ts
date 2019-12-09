@@ -26,10 +26,10 @@ const isPlayersTurnNext = (
   localState: ls.LocalState,
   channelState: ChannelState | null
 ): channelState is ChannelState => {
-  if (!('player' in localState) || !channelState) {
+  const playerIndex = ls.isPlayerA(localState) ? 0 : 1;
+  if (!channelState) {
     return false;
   }
-  const playerIndex = ls.isPlayerA(localState) ? 0 : 1;
 
   return bigNumberify(channelState.turnNum)
     .sub(1) // for it to be our turn, the player before us must have just moved
@@ -52,7 +52,8 @@ function* gameSagaRun(client: RPSChannelClient) {
     !isPlayersTurnNext(localState, channelState) &&
     cs.isClosed(channelState) &&
     localState.type !== 'EndGame.InsufficientFunds' &&
-    localState.type !== 'EndGame.Resigned' &&
+    localState.type !== 'A.Resigned' &&
+    localState.type !== 'B.Resigned' &&
     !opponentResigned
   ) {
     // I just sent the state that closed the channel
@@ -110,7 +111,7 @@ function* gameSagaRun(client: RPSChannelClient) {
       break;
     case 'EndGame.InsufficientFunds':
       if (
-        localState.result === Result.YouWin &&
+        localState.result === Result.YouLose &&
         channelState &&
         !cs.isClosing(channelState) &&
         !cs.isClosed(channelState)
@@ -118,12 +119,13 @@ function* gameSagaRun(client: RPSChannelClient) {
         yield* closeChannel(channelState, client);
       }
       break;
-    case 'EndGame.Resigned':
+    case 'A.Resigned':
+    case 'B.Resigned':
       if (
-        localState.iResigned &&
         channelState &&
         !cs.isClosing(channelState) &&
-        !cs.isClosed(channelState)
+        !cs.isClosed(channelState) &&
+        isPlayersTurnNext(localState, channelState)
       ) {
         yield* closeChannel(channelState, client);
       }

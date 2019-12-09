@@ -12,7 +12,8 @@ export type A =
   | A.WeaponChosen
   | A.WeaponAndSaltChosen
   | A.ResultPlayAgain
-  | A.WaitForRestart;
+  | A.WaitForRestart
+  | A.Resigned;
 
 export function isPlayerA(state: LocalState): state is A {
   return (
@@ -21,7 +22,8 @@ export function isPlayerA(state: LocalState): state is A {
     state.type === 'A.WeaponChosen' ||
     state.type === 'A.WeaponAndSaltChosen' ||
     state.type === 'A.ResultPlayAgain' ||
-    state.type === 'A.WaitForRestart'
+    state.type === 'A.WaitForRestart' ||
+    state.type === 'A.Resigned'
   );
 }
 export type B =
@@ -31,7 +33,8 @@ export type B =
   | B.ChooseWeapon
   | B.WeaponChosen
   | B.ResultPlayAgain
-  | B.WaitForRestart;
+  | B.WaitForRestart
+  | B.Resigned;
 
 export function isPlayerB(state: LocalState): state is A {
   return (
@@ -41,10 +44,11 @@ export function isPlayerB(state: LocalState): state is A {
     state.type === 'B.ChooseWeapon' ||
     state.type === 'B.WeaponChosen' ||
     state.type === 'B.ResultPlayAgain' ||
-    state.type === 'B.WaitForRestart'
+    state.type === 'B.WaitForRestart' ||
+    state.type === 'A.Resigned'
   );
 }
-export type EndGame = EndGame.InsufficientFunds | EndGame.Resigned | EndGame.GameOver;
+export type EndGame = EndGame.InsufficientFunds | EndGame.GameOver;
 export type LocalState = Setup | A | B | EndGame;
 
 export interface Playing {
@@ -95,7 +99,11 @@ export namespace Setup {
     address: string;
   }
   export const lobby: StateConstructor<Lobby> = params => {
-    return { name: params.name, address: params.address, type: 'Setup.Lobby' };
+    return {
+      name: params.name,
+      address: params.address,
+      type: 'Setup.Lobby',
+    };
   };
 }
 
@@ -175,6 +183,18 @@ export namespace A {
       theirWeapon: params.theirWeapon,
       result: params.result,
       type: 'A.WaitForRestart',
+    };
+  };
+
+  export interface Resigned extends Playing {
+    type: 'A.Resigned';
+    iResigned: boolean;
+  }
+  export const resigned: StateConstructor<Resigned> = params => {
+    return {
+      ...extractPlayingFromParams(params),
+      iResigned: params.iResigned,
+      type: 'A.Resigned',
     };
   };
 }
@@ -264,12 +284,24 @@ export namespace B {
       type: 'B.WaitForRestart',
     };
   };
+
+  export interface Resigned extends Playing {
+    type: 'B.Resigned';
+    iResigned: boolean;
+  }
+  export const resigned: StateConstructor<Resigned> = params => {
+    return {
+      ...extractPlayingFromParams(params),
+      iResigned: params.iResigned,
+      type: 'B.Resigned',
+    };
+  };
 }
 // EndGame
 
 // tslint:disable-next-line: no-namespace
 export namespace EndGame {
-  export interface InsufficientFunds {
+  export interface InsufficientFunds extends Playing {
     type: 'EndGame.InsufficientFunds';
     myWeapon: Weapon;
     theirWeapon: Weapon;
@@ -277,6 +309,7 @@ export namespace EndGame {
   }
   export const insufficientFunds: StateConstructor<InsufficientFunds> = params => {
     return {
+      ...extractPlayingFromParams(params),
       myWeapon: params.myWeapon,
       theirWeapon: params.theirWeapon,
       result: params.result,
@@ -284,18 +317,12 @@ export namespace EndGame {
     };
   };
 
-  export interface Resigned {
-    type: 'EndGame.Resigned';
-    iResigned: boolean;
-  }
-  export const resigned: StateConstructor<Resigned> = params => {
-    return { iResigned: params.iResigned, type: 'EndGame.Resigned' };
-  };
-
   export interface GameOver {
     type: 'EndGame.GameOver';
+    name: string;
+    address: string;
   }
   export const gameOver: StateConstructor<GameOver> = params => {
-    return { type: 'EndGame.GameOver' };
+    return { name: params.name, address: params.address, type: 'EndGame.GameOver' };
   };
 }

@@ -2,7 +2,7 @@ import React, {Fragment} from 'react';
 import {connect} from 'react-redux';
 
 import {SiteState} from '../redux/reducer';
-import {Weapon, ChannelState} from '../core';
+import {Weapon, ChannelState, isClosed} from '../core';
 import * as gameActions from '../redux/game/actions';
 
 import WaitingRoomPage from '../components/WaitingRoomPage';
@@ -38,7 +38,7 @@ function GameContainer(props: GameProps) {
 }
 
 function RenderGame(props: GameProps) {
-  const {localState} = props;
+  const {localState, channelState} = props;
 
   switch (localState.type) {
     case 'Setup.Empty':
@@ -97,6 +97,15 @@ function RenderGame(props: GameProps) {
           waitForOpponent={true}
         />
       );
+    case 'A.Resigned':
+    case 'B.Resigned':
+      return (
+        <Resigned
+          iResigned={localState.iResigned}
+          action={props.gameOver}
+          channelClosed={isClosed(channelState)}
+        />
+      );
     case 'EndGame.InsufficientFunds':
       return (
         <InsufficientFunds
@@ -106,8 +115,6 @@ function RenderGame(props: GameProps) {
           action={props.gameOver}
         />
       );
-    case 'EndGame.Resigned':
-      return <Resigned iResigned={localState.iResigned} action={props.gameOver} />;
     case 'EndGame.GameOver':
       return <GameOverPage visible={true} exitToLobby={props.exitToLobby} />;
     default:

@@ -5,20 +5,13 @@ import MAGMO_LOGO from '../images/magmo_logo.svg';
 interface Props {
   createBlockchainChallenge: () => void;
   resign: (iResigned: boolean) => void;
-  isNotOurTurn: boolean;
   canChallenge: boolean;
   challengeOngoing: boolean;
 }
 
 export default class GameFooter extends React.PureComponent<Props> {
   render() {
-    const {
-      resign,
-      createBlockchainChallenge,
-      isNotOurTurn,
-      canChallenge,
-      challengeOngoing,
-    } = this.props;
+    const { resign, createBlockchainChallenge, canChallenge, challengeOngoing } = this.props;
 
     return (
       <nav className="navbar fixed-bottom navbar-light footer-bar">
@@ -30,9 +23,9 @@ export default class GameFooter extends React.PureComponent<Props> {
               className="footer-resign"
               outline={true}
               onClick={() => resign(true)}
-              disabled={isNotOurTurn}
+              disabled={false}
             >
-              {isNotOurTurn ? "Can't Resign" : 'Resign'}
+              Resign
             </Button>
             <Button
               className="footer-challenge"
