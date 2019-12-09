@@ -1,16 +1,7 @@
 module.exports = {
+  ...require('../../.eslintrc.js'),
   env: {
-    node: true,
+    node: true, // Jest Gas Reporter is meant to be used in a `jest` process
     es6: true
-  },
-  parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint', 'prettier'],
-  extends: [
-    'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:prettier/recommended'
-  ],
-  rules: {
-    'prettier/prettier': 'warn'
   }
 };
