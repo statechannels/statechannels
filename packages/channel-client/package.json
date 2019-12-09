@@ -4,6 +4,7 @@
   "description": "Browser-compatible JS client implementing the State Channels Client API",
   "main": "index.js",
   "scripts": {
+    "prepare": "yarn build",
     "precommit": "lint-staged --quiet",
     "test": "jest",
     "build": "yarn build:typescript",
