@@ -3,10 +3,10 @@ import {JsonRpcRequest} from './types';
 
 const log = debug('channel-provider:messaging');
 
-export type MessagingServiceOptions = {
+export interface MessagingServiceOptions {
   timeoutMs?: number;
   maxRetries?: number;
-};
+}
 
 export class MessagingService {
   protected timeoutListener?: NodeJS.Timeout;
@@ -89,7 +89,7 @@ export class MessagingService {
         if (callback) {
           callback(event.data.result);
         }
-
+        this.acknowledge();
         window.removeEventListener('message', listener);
         log('Received response: %o', event.data);
         resolve(event.data.result);
