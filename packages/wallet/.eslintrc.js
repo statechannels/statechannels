@@ -1,3 +1,5 @@
+const baseConfig = require("../../.eslintrc.js");
+
 const generalRules = {
   "no-var": "off",
   "no-async-promise-executor": "off",
@@ -45,34 +47,28 @@ const reactRules = {
 };
 
 module.exports = {
+  ...baseConfig,
   env: {
     browser: true,
     es6: true
   },
-  parser: "@typescript-eslint/parser",
-  parserOptions: {
-    project: "tsconfig.json"
-  },
-  plugins: ["@typescript-eslint", "prettier", "jest", "react"],
+  plugins: [...baseConfig.plugins, "jest", "react"],
   settings: {
     react: {
       version: "detect"
     }
   },
   extends: [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
+    ...baseConfig.extends,
     "plugin:jest/recommended",
     "plugin:jest/style",
     "plugin:import/errors",
     "plugin:import/warnings",
     "plugin:import/typescript",
-    "plugin:react/recommended",
-    "plugin:prettier/recommended"
+    "plugin:react/recommended"
   ],
   rules: {
-    // Prettier violations should result in linting errors
-    "prettier/prettier": "warn",
+    ...baseConfig.rules,
 
     // @typescript-eslint/no-unused-vars overrides this
     "no-unused-vars": "off",
