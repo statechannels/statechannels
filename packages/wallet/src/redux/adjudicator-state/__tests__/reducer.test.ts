@@ -22,7 +22,6 @@ const challengeState: SignedState = {
   signature: {v: 0, r: "", s: ""}
 };
 const gameState1 = testScenarios.appState({turnNum: 19});
-// tslint:disable-next-line: no-shadowed-variable
 const createChallengeState = (channelId: string, expiryTime) => {
   return {
     channelId,
@@ -54,7 +53,6 @@ describe("adjudicator state reducer", () => {
   });
 
   describe("when a challenge expired event is received", () => {
-    // tslint:disable-next-line: no-shadowed-variable
     const state = {
       [channelId]: createChallengeState(channelId, 123)
     };
@@ -76,7 +74,6 @@ describe("adjudicator state reducer", () => {
   });
 
   describe("when a refute event arrives", () => {
-    // tslint:disable-next-line: no-shadowed-variable
     const state = {
       [channelId]: createChallengeState(channelId, 123)
     };
@@ -94,7 +91,6 @@ describe("adjudicator state reducer", () => {
   });
 
   describe("when a respond with move event arrives", () => {
-    // tslint:disable-next-line: no-shadowed-variable
     const state = {
       [channelId]: createChallengeState(channelId, 123)
     };
@@ -112,7 +108,6 @@ describe("adjudicator state reducer", () => {
   });
 
   describe("when a concluded event arrives", () => {
-    // tslint:disable-next-line: no-shadowed-variable
     const state = {};
     const action = actions.concludedEvent({channelId});
     const updatedState = adjudicatorStateReducer(state, action);
