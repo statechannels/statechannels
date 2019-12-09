@@ -1,4 +1,4 @@
-import { IChannelProvider } from '@statechannels/channel-provider';
+import {IChannelProvider} from '@statechannels/channel-provider';
 
 import {
   ChannelClientInterface,
@@ -74,7 +74,7 @@ export default class ChannelClient implements ChannelClientInterface<ChannelResu
   }
 
   async joinChannel(channelId: string): Promise<ChannelResult> {
-    return this.provider.send('JoinChannel', { channelId });
+    return this.provider.send('JoinChannel', {channelId});
   }
 
   async updateChannel(
@@ -92,7 +92,7 @@ export default class ChannelClient implements ChannelClientInterface<ChannelResu
   }
 
   async closeChannel(channelId: string): Promise<ChannelResult> {
-    return this.provider.send('CloseChannel', { channelId });
+    return this.provider.send('CloseChannel', {channelId});
   }
 
   async pushMessage(message: Message<ChannelResult>): Promise<PushMessageResult> {

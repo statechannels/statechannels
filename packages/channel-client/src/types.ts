@@ -1,4 +1,4 @@
-import { BigNumberish } from 'ethers/utils';
+import {BigNumberish} from 'ethers/utils';
 
 export type ChannelStatus = 'proposed' | 'opening' | 'funding' | 'running' | 'closing' | 'closed';
 

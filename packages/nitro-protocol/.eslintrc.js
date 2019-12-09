@@ -20,12 +20,7 @@ module.exports = {
     es6: true,
   },
   plugins: [...baseConfig.plugins, 'jest'],
-  extends: [
-    ...baseConfig.extends,
-    'plugin:jest/recommended',
-    'plugin:jest/style',
-    'plugin:react/recommended',
-  ],
+  extends: [...baseConfig.extends, 'plugin:jest/recommended', 'plugin:jest/style'],
   rules: {
     ...baseConfig.rules,
     ...leftoverTsLintRules,
