@@ -308,7 +308,7 @@ export function checkMultipleAssetOutcomeHashes(
     const [, expectedNewAssetOutcomeHash] = allocationToParams(allocationAfter);
     contractsArray.forEach(async contract => {
       if (contract.address === assetHolder) {
-        expect((await contract.assetOutcomeHashes(channelId)).toEqual(expectedNewAssetOutcomeHash));
+        expect(await contract.assetOutcomeHashes(channelId)).toEqual(expectedNewAssetOutcomeHash);
       }
     });
   });
