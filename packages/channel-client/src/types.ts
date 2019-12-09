@@ -1,5 +1,3 @@
-import {BigNumberish} from 'ethers/utils';
-
 export type ChannelStatus = 'proposed' | 'opening' | 'funding' | 'running' | 'closing' | 'closed';
 
 export interface Participant {
@@ -10,7 +8,7 @@ export interface Participant {
 
 export interface AllocationItem {
   destination: string; // Address of EOA to receive channel proceeds.
-  amount: BigNumberish; // How much funds will be transferred to the destination address.
+  amount: string; // How much funds will be transferred to the destination address.
 }
 
 export interface Allocation {
