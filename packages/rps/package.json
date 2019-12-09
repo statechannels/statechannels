@@ -33,10 +33,7 @@
     "test:ci:contracts": "yarn test:contracts --all --ci --runInBand --detectOpenHandles",
     "test:ci:app": "yarn test:app --all --ci --runInBand --detectOpenHandles",
     "storybook": "start-storybook -p 9001 -c .storybook",
-    "precommit": "lint-staged --quiet"
-  },
-  "lint-staged": {
-    "**/*.{js,ts,tsx}": "eslint --max-warnings=0"
+    "precommit": "eslint:check --quiet"
   },
   "dependencies": {
     "@babel/core": "^7.6.2",
@@ -189,9 +186,6 @@
     "ts-loader": "5.3.3",
     "ts-node": "^7.0.1",
     "tsconfig-paths-webpack-plugin": "^2.0.0",
-    "tslint": "5.20.0",
-    "tslint-config-prettier": "1.18.0",
-    "tslint-react": "4.1.0",
     "typescript": "3.7.2",
     "typescript-eslint-parser": "^17.0.1",
     "uglifyjs-webpack-plugin": "^1.1.8",
