@@ -33,7 +33,7 @@
     "test:ci:contracts": "yarn test:contracts --all --ci --runInBand --detectOpenHandles",
     "test:ci:app": "yarn test:app --all --ci --runInBand --detectOpenHandles",
     "storybook": "start-storybook -p 9001 -c .storybook",
-    "precommit": "eslint:check --quiet"
+    "precommit": "yarn eslint:check --quiet"
   },
   "dependencies": {
     "@babel/core": "^7.6.2",
