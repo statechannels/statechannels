@@ -1,11 +1,11 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "lib"
-    // TODO: Build with webpack
-    // This package is meant to emit webpack processed files
-    // "noEmit": true
+    "baseUrl": "src",
+    "module": "commonjs",
+    "outDir": "lib",
+    "target": "es2015"
   },
-  "include": ["src", "tests"],
+
   "references": [{"path": "../channel-provider"}]
 }
