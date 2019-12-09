@@ -55,8 +55,8 @@ function* gameSagaRun(client: RPSChannelClient) {
     !opponentResigned
   ) {
     // I just sent the state that closed the channel
+    opponentResigned = true;
     yield put(a.resign(false));
-    opponentResigned = true; // eslint-disable-line require-atomic-updates
   }
 
   switch (localState.type) {
