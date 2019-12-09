@@ -1,5 +1,5 @@
 import { assign, InvokeCreator, Machine, sendParent } from 'xstate';
-import { AdvanceChannel } from '..';
+import { AdvanceChannel, Funding } from '..';
 import {
   Channel,
   forwardChannelUpdated,
@@ -149,7 +149,7 @@ export const machine: MachineFactory<Init, any> = (
   };
   const services = {
     setChannelId,
-    funding: async () => console.log('currently funding'),
+    funding: Funding.machine(store),
     advanceChannel: AdvanceChannel.machine(store),
   };
 

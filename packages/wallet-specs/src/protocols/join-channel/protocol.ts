@@ -1,5 +1,5 @@
 import { Machine, MachineConfig, send, SendAction, sendParent } from 'xstate';
-import { AdvanceChannel, JoinChannel } from '..';
+import { AdvanceChannel, Funding, JoinChannel } from '..';
 import { forwardChannelUpdated, MachineFactory, Store, success } from '../..';
 import { JsonRpcJoinChannelParams } from '../../json-rpc';
 import { ChannelUpdated } from '../../store';
@@ -128,7 +128,7 @@ export const machine: MachineFactory<Init, any> = (
 
   const services: Services = {
     askClient: async () => 'JOIN_CHANNEL',
-    funding: async () => true,
+    funding: Funding.machine(store),
     advanceChannel: AdvanceChannel.machine(store),
   };
   const options = {

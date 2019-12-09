@@ -1,5 +1,6 @@
 import { assign, DoneInvokeEvent, Machine } from 'xstate';
-import { failure, Store, success } from '../..';
+import { LedgerFunding } from '..';
+import { failure, MachineFactory, Store, success } from '../..';
 import { FundingStrategy, FundingStrategyProposed } from '../../wire-protocol';
 
 const PROTOCOL = 'funding';
@@ -148,10 +149,13 @@ const guards: Guards = {
 };
 export const mockOptions: Options = { guards };
 
-export function machine(store: Store, context: Init) {
+export const machine: MachineFactory<Init, any> = (
+  store: Store,
+  context: Init
+) => {
   const options: Options = {
     services: {
-      askClient: async () => true,
+      askClient: async () => 'LEDGER',
       directFunding: async () => true,
       ledgerFunding: async () => true,
       virtualFunding: async () => true,
@@ -164,5 +168,6 @@ export function machine(store: Store, context: Init) {
       assignStrategy: async () => true,
     },
   };
+
   return Machine(config, options).withContext(context);
-}
+};
