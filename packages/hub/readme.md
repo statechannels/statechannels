@@ -26,7 +26,7 @@ Make sure a local ganache instance is running by following [the instructions at 
 
 ## Run the hub
 
-```
+```shell
 $ npm i -g yarn
 $ yarn install
 // you will need to run `yarn db:drop` if the database already exists
@@ -57,12 +57,26 @@ NODE_ENV=test yarn db:create
 yarn test:ci
 ```
 
+### Troubleshooting Test Errors
+
+If you run into the following error
+
+```shell
+   getaddrinfo ENOTFOUND RequiredInLocalDotenv RequiredInLocalDotenv:5432
+```
+
+Make sure you have a local .env file dedicated to testing, by running the following:
+
+```shell
+cp .env.development.local .env.test.local
+```
+
 ## Deploying
 
 Heroku is configured to automatically deploy from the watched `deploy` branch.
 To run a test deploy, run
 
-```
+```shell
  // only needs to be run once to create a local "production" database
 $ NODE_ENV=production yarn db:create
 // Starts a local server serving the app
