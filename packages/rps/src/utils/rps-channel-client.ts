@@ -1,5 +1,6 @@
 import {AppData, ChannelState, encodeAppData, decodeAppData} from '../core';
-import ChannelClient, {
+import {
+  ChannelClient,
   ChannelResult,
   Message,
   ChannelClientInterface,
