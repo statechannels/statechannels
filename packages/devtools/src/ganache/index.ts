@@ -32,6 +32,25 @@ interface IndividualReturnType {
   type: 'individual';
 }
 
+export const startOwnGanache = async (p: Partial<Params> = {}): Promise<GanacheServer> => {
+  const port = Number(p.port || process.env.GANACHE_PORT || 8545);
+  const chainId = Number(p.chainId || process.env.CHAIN_NETWORK_ID || 9001);
+  const accounts = p.accounts || ETHERLIME_ACCOUNTS;
+  const timeout = Number(p.timeout || process.env.GANACHE_TIMEOUT || 5000);
+  const gasLimit = Number(p.gasLimit || process.env.GANACHE_GAS_LIMIT || 1000000000);
+  const gasPrice = Number(p.gasPrice || process.env.GANACHE_GAS_PRICE || 1);
+
+  const server = new GanacheServer(port, chainId, accounts, timeout, gasLimit, gasPrice);
+
+  process.on('SIGINT', () => server && server.close());
+  process.on('SIGTERM', () => server && server.close());
+
+  say(`Starting a ganche server on http://localhost:${port}`);
+
+  await server.ready();
+  return server;
+};
+
 export const setupGanache = async (): Promise<SharedReturnType | IndividualReturnType> => {
   const sharedPort = Number(process.env.SHARED_GANACHE_PORT || '8547');
 
@@ -75,25 +94,6 @@ interface Params {
   gasLimit: number;
   gasPrice: string;
 }
-
-export const startOwnGanache = async (p: Partial<Params> = {}): Promise<GanacheServer> => {
-  const port = Number(p.port || process.env.GANACHE_PORT || 8545);
-  const chainId = Number(p.chainId || process.env.CHAIN_NETWORK_ID || 9001);
-  const accounts = p.accounts || ETHERLIME_ACCOUNTS;
-  const timeout = Number(p.timeout || process.env.GANACHE_TIMEOUT || 5000);
-  const gasLimit = Number(p.gasLimit || process.env.GANACHE_GAS_LIMIT || 1000000000);
-  const gasPrice = Number(p.gasPrice || process.env.GANACHE_GAS_PRICE || 1);
-
-  const server = new GanacheServer(port, chainId, accounts, timeout, gasLimit, gasPrice);
-
-  process.on('SIGINT', () => server && server.close());
-  process.on('SIGTERM', () => server && server.close());
-
-  say(`Starting a ganche server on http://localhost:${port}`);
-
-  await server.ready();
-  return server;
-};
 
 // just need to make sure that the deploymentsPath is deleted at the end
 export async function startSharedGanache(
