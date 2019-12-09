@@ -70,3 +70,10 @@ export interface ChannelClientInterface<Payload = object> {
   pushMessage: (message: Message<Payload>) => Promise<PushMessageResult>;
   getAddress: () => Promise<string>;
 }
+
+export interface EventsWithArgs {
+  MessageQueued: [Message<ChannelResult>];
+  ChannelUpdated: [ChannelResult];
+}
+
+type UnsubscribeFunction = () => void;
