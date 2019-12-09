@@ -49,7 +49,7 @@ describe('signatures', () => {
 
       expect(() => {
         signState(state, wallet.privateKey);
-      }).toThrowError();
+      }).toThrow();
     });
   });
   describe('signChallengeMessage', () => {
@@ -94,7 +94,7 @@ describe('signatures', () => {
       const signature = splitSignature(await wallet.signMessage(arrayify(hashedState)));
       expect(() => {
         signChallengeMessage([{state, signature}], wallet.privateKey);
-      }).toThrowError();
+      }).toThrow();
     });
   });
   describe('getStateSignerAddress', () => {
@@ -133,7 +133,7 @@ describe('signatures', () => {
       const hashedState = hashState(state);
       const signature = splitSignature(await wallet.signMessage(arrayify(hashedState)));
 
-      expect(() => getStateSignerAddress({state, signature})).toThrowError();
+      expect(() => getStateSignerAddress({state, signature})).toThrow();
     });
   });
 });
