@@ -1,20 +1,20 @@
 import React from 'react';
-import { storiesOf } from '@storybook/react';
+import {storiesOf} from '@storybook/react';
 import SiteContainer from '../containers/SiteContainer';
-import { Provider } from 'react-redux';
+import {Provider} from 'react-redux';
 import * as states from '../redux/game/state';
 import '../index.scss';
-import { SiteState } from '../redux/reducer';
+import {SiteState} from '../redux/reducer';
 import HomePage from '../components/HomePage';
 import LoadingPage from '../components/LoadingPage';
 import MetamaskErrorPage from '../components/MetamaskErrorPage';
-import { MetamaskErrorType } from '../redux/metamask/actions';
+import {MetamaskErrorType} from '../redux/metamask/actions';
 import LoginErrorPage from '../components/LoginErrorPage';
-import { localStatesA, localStatesB, channelStates } from '../redux/game/__tests__/scenarios';
-import { ChannelState } from '../core';
+import {localStatesA, localStatesB, channelStates} from '../redux/game/__tests__/scenarios';
+import {ChannelState} from '../core';
 import GameBar from '../components/GameBar';
-import { toWei } from 'web3-utils';
-import { bigNumberify } from 'ethers/utils';
+import {toWei} from 'web3-utils';
+import {bigNumberify} from 'ethers/utils';
 
 const fakeStore = state => ({
   dispatch: action => {
@@ -54,7 +54,7 @@ const initialState: SiteState = {
     walletVisible: false,
   },
   game: {
-    localState: { type: 'Empty' },
+    localState: {type: 'Empty'},
     channelState: null,
   },
 };
@@ -68,7 +68,7 @@ export function siteStateFromLocalState<T extends states.LocalState>(
   }
   return {
     ...initialState,
-    game: { localState, channelState },
+    game: {localState, channelState},
   };
 }
 
@@ -76,7 +76,7 @@ storiesOf('Setup', module)
   .add('Loading Page', () => <LoadingPage />)
   .add('Login Error Page', () => <LoginErrorPage error="Login error message" />)
   .add('MetaMask Error Page', () => (
-    <MetamaskErrorPage error={{ errorType: MetamaskErrorType.WrongNetwork }} />
+    <MetamaskErrorPage error={{errorType: MetamaskErrorType.WrongNetwork}} />
   ))
   .add('Home Page', () => <HomePage login={() => alert('login')} />)
   .add('Profile Modal', testState(initialState));

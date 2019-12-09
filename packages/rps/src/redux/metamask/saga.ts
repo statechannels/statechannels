@@ -1,6 +1,6 @@
 import * as metamaskActions from './actions';
-import { put, cps, delay } from 'redux-saga/effects';
-import { MetamaskErrorType } from './actions';
+import {put, cps, delay} from 'redux-saga/effects';
+import {MetamaskErrorType} from './actions';
 
 export default function* checkMetamask() {
   if (typeof web3 !== 'object' || web3 === null) {
@@ -67,7 +67,7 @@ export default function* checkMetamask() {
     yield put(metamaskActions.metamaskSuccess());
     return true;
   } catch {
-    yield put(metamaskActions.metamaskErrorOccurred({ errorType: MetamaskErrorType.UnknownError }));
+    yield put(metamaskActions.metamaskErrorOccurred({errorType: MetamaskErrorType.UnknownError}));
   }
   return false;
 }

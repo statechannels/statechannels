@@ -1,7 +1,7 @@
-import { connect } from 'react-redux';
+import {connect} from 'react-redux';
 
 import ProfilePage from '../components/ProfilePage';
-import { SiteState } from '../redux/reducer';
+import {SiteState} from '../redux/reducer';
 
 import * as gameActions from '../redux/game/actions';
 import * as loginActions from '../redux/login/actions';

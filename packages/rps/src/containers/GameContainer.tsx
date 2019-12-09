@@ -1,14 +1,14 @@
-import React, { Fragment } from 'react';
-import { connect } from 'react-redux';
+import React, {Fragment} from 'react';
+import {connect} from 'react-redux';
 
-import { SiteState } from '../redux/reducer';
-import { Weapon, ChannelState } from '../core';
+import {SiteState} from '../redux/reducer';
+import {Weapon, ChannelState} from '../core';
 import * as gameActions from '../redux/game/actions';
 
 import WaitingRoomPage from '../components/WaitingRoomPage';
 import ProfileContainer from './ProfileContainer';
 
-import { LocalState, PlayingStateName } from '../redux/game/state';
+import {LocalState, PlayingStateName} from '../redux/game/state';
 
 import LobbyContainer from './LobbyContainer';
 import {
@@ -21,7 +21,7 @@ import {
   GameOverPage,
   Resigned,
 } from '../components';
-import { unreachable } from '../utils/unreachable';
+import {unreachable} from '../utils/unreachable';
 
 interface GameProps {
   localState: LocalState;
@@ -38,7 +38,7 @@ function GameContainer(props: GameProps) {
 }
 
 function RenderGame(props: GameProps) {
-  const { localState } = props;
+  const {localState} = props;
 
   switch (localState.type) {
     case 'Empty':

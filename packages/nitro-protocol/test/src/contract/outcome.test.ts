@@ -22,7 +22,10 @@ const guarantee: Guarantee = {
 };
 const allocation: Allocation = [{destination, amount: '0x05'}];
 
-const outcome = [{assetHolderAddress, allocation}, {assetHolderAddress, guarantee}];
+const outcome = [
+  {assetHolderAddress, allocation},
+  {assetHolderAddress, guarantee},
+];
 const emptyOutcome = [];
 
 const description0 = 'Encodes and decodes guarantee';

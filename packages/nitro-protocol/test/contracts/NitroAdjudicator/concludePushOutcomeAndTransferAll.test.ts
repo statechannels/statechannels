@@ -151,10 +151,9 @@ describe('concludePushOutcomeAndTransferAll', () => {
       }
 
       // Call public wrapper to set state (only works on test contract)
-      await (await NitroAdjudicator.setChannelStorageHash(
-        channelId,
-        initialChannelStorageHash
-      )).wait();
+      await (
+        await NitroAdjudicator.setChannelStorageHash(channelId, initialChannelStorageHash)
+      ).wait();
       expect(await NitroAdjudicator.channelStorageHashes(channelId)).toEqual(
         initialChannelStorageHash
       );

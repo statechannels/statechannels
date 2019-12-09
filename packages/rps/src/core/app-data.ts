@@ -1,8 +1,8 @@
-import { Weapon } from './weapons';
-import { defaultAbiCoder, bigNumberify, keccak256 } from 'ethers/utils';
-import { HashZero } from 'ethers/constants';
-import { randomHex } from '../utils/randomHex';
-import { unreachable } from '../utils/unreachable';
+import {Weapon} from './weapons';
+import {defaultAbiCoder, bigNumberify, keccak256} from 'ethers/utils';
+import {HashZero} from 'ethers/constants';
+import {randomHex} from '../utils/randomHex';
+import {unreachable} from '../utils/unreachable';
 
 export enum PositionType {
   Start, // 0
@@ -67,7 +67,7 @@ function toRPSData(appData: AppData): RPSData {
     salt: randomHex(64),
   };
 
-  return { ...defaults, ...appData };
+  return {...defaults, ...appData};
 }
 
 export function encodeAppData(appData: AppData): string {

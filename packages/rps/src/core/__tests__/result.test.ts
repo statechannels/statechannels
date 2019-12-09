@@ -1,5 +1,5 @@
-import { Player } from '../players';
-import { Weapon } from '../weapons';
+import {Player} from '../players';
+import {Weapon} from '../weapons';
 import {
   Result,
   calculateResult,

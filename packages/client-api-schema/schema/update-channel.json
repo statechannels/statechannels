@@ -33,30 +33,22 @@
           },
           "title": "allocations"
         },
-        "appDefinition": {
-          "$ref": "definitions.json#/definitions/Address",
-          "title": "appDefinition"
-        },
         "appData": {
           "type": "string",
           "title": "appData"
         },
         "turnNum": {
           "type": "integer"
+        },
+        "channelId": {
+          "$ref": "definitions.json#/definitions/ChannelId"
         }
       },
-      "required": ["allocations", "appData", "appDefinition", "participants", "status", "turnNum"]
+      "required": ["allocations", "appData", "participants", "status", "turnNum", "channelId"]
     },
     "UpdateChannelParams": {
       "type": "object",
       "properties": {
-        "participants": {
-          "type": "array",
-          "items": {
-            "$ref": "definitions.json#/definitions/Participant"
-          },
-          "title": "participants"
-        },
         "allocations": {
           "type": "array",
           "items": {
@@ -72,7 +64,7 @@
           "$ref": "definitions.json#/definitions/ChannelId"
         }
       },
-      "required": ["allocations", "appData", "appDefinition", "participants"]
+      "required": ["allocations", "appData", "channelId"]
     }
   }
 }

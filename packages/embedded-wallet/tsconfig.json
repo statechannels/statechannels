@@ -11,16 +11,10 @@
     "allowSyntheticDefaultImports": true,
 
     // react-script injects these fields when you run the test script
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true
   },
-  "include": [
-    "src"
-  ]
+  "include": ["src"]
 }

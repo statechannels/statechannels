@@ -120,7 +120,10 @@ export async function sendCreateChannel(page: puppeteer.Page, playerAAddress, pl
       const allocations = [
         {
           token: "0x0",
-          allocationItems: [{destination: a, amount: "0x1"}, {destination: b, amount: "0x1"}]
+          allocationItems: [
+            {destination: a, amount: "0x1"},
+            {destination: b, amount: "0x1"}
+          ]
         }
       ];
       window.postMessage(
@@ -168,7 +171,10 @@ export async function sendUpdateState(
       const allocations = [
         {
           token: "0x0",
-          allocationItems: [{destination: a, amount: "0x1"}, {destination: b, amount: "0x1"}]
+          allocationItems: [
+            {destination: a, amount: "0x1"},
+            {destination: b, amount: "0x1"}
+          ]
         }
       ];
       window.postMessage(

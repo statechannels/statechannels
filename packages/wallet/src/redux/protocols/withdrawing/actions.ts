@@ -35,9 +35,7 @@ export const withdrawalRejected: ActionConstructor<WithdrawalRejected> = p => ({
   type: "WALLET.WITHDRAWING.WITHDRAWAL_REJECTED"
 });
 
-export const withdrawalSuccessAcknowledged: ActionConstructor<
-  WithdrawalSuccessAcknowledged
-> = p => ({
+export const withdrawalSuccessAcknowledged: ActionConstructor<WithdrawalSuccessAcknowledged> = p => ({
   ...p,
   type: "WALLET.WITHDRAWING.WITHDRAWAL_SUCCESS_ACKNOWLEDGED"
 });
