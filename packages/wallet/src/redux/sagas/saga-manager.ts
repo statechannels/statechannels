@@ -21,10 +21,11 @@ import {assetHoldersWatcher} from "./asset-holder-watcher";
 import {messageSender} from "./messaging/message-sender";
 import {OutgoingApiAction} from "./messaging/outgoing-api-actions";
 import {postMessageListener} from "./messaging/post-message-listener";
+import {USE_STORAGE} from "../../constants";
 
 export function* sagaManager(): IterableIterator<any> {
   // If we are using storage we want to wait until storage is loaded before handling anything
-  if (process.env.USE_STORAGE) {
+  if (USE_STORAGE) {
     yield take("REDUX_STORAGE_LOAD");
   }
 
