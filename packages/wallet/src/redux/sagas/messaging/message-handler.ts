@@ -30,6 +30,7 @@ import {fundingRequested} from "../../protocols/actions";
 import {TwoPartyPlayerIndex} from "../../types";
 import {isRelayableAction} from "../../../communication";
 import {bigNumberify} from "ethers/utils";
+import {Web3Provider} from "ethers/providers";
 
 export function* messageHandler(jsonRpcMessage: object, _domain: string) {
   const parsedMessage = jrs.parseObject(jsonRpcMessage);
@@ -158,10 +159,13 @@ function* handlePushMessage(payload: RequestObject) {
         // we're safe to initialize the channel before the client has called JoinChannel
         // The only limitation is that our client cannot propose a new channel with the same channelId
         // before they decline the opponent's proposed channel
+        const provider: Web3Provider = yield call(getProvider);
 
-        const provider = yield call(getProvider);
         if (!bigNumberify(signedState.state.appDefinition).isZero()) {
-          const bytecode = yield call(provider.getCode, signedState.state.appDefinition);
+          const bytecode = yield call(
+            [provider, provider.getCode],
+            signedState.state.appDefinition
+          );
 
           yield put(
             actions.appDefinitionBytecodeReceived({
@@ -242,10 +246,9 @@ function* handleCreateChannelMessage(payload: RequestObject) {
   const addressMatches = participants[0].signingAddress === address;
 
   const provider = yield call(getProvider);
-  console.log(appDefinition);
-  console.log(provider);
+
   const bytecode =
-    appDefinition !== AddressZero ? yield call(provider.getCode, appDefinition) : "0x0";
+    appDefinition !== AddressZero ? yield call([provider, provider.getCode], appDefinition) : "0x0";
   const contractAtAddress = bytecode.length > 2;
 
   if (!addressMatches) {
