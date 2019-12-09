@@ -4,7 +4,7 @@
   "version": "0.0.3",
   "main": "dist/channel-provider.js",
   "browser": "dist/channel-provider.min.js",
-  "types": "src/index.ts",
+  "types": "dist/src/index.d.ts",
   "dependencies": {
     "debug": "4.1.1",
     "eventemitter3": "4.0.0",
