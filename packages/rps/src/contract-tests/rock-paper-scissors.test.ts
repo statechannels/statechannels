@@ -1,12 +1,8 @@
 import {expectRevert} from '@statechannels/devtools';
-import RockPaperScissorsArtifact from '../../build/contracts/RockPaperScissors.json';
-import * as ethers from 'ethers';
-import {Contract} from 'ethers';
-import {defaultAbiCoder, bigNumberify, keccak256, Interface} from 'ethers/utils';
-import dotEnvExtended from 'dotenv-extended';
-import path from 'path';
+// import RockPaperScissorsArtifact from '../../build/contracts/RockPaperScissors.json';
+const {contract} = require('@openzeppelin/test-environment');
+import {defaultAbiCoder, bigNumberify, keccak256} from 'ethers/utils';
 import {AddressZero} from 'ethers/constants';
-import {TransactionRequest} from 'ethers/providers';
 import {
   Allocation,
   encodeOutcome,
@@ -17,18 +13,10 @@ import {
 import {VariablePart} from '@statechannels/nitro-protocol';
 import {RPSData, PositionType, encodeRPSData} from '../core/app-data';
 import {Weapon} from '../core/weapons';
-
-import loadJsonFile from 'load-json-file';
-
+// import loadJsonFile from 'load-json-file';
 import {randomHex} from '../utils/randomHex';
 
-dotEnvExtended.load();
-
 jest.setTimeout(20000);
-
-const testProvider = new ethers.providers.JsonRpcProvider(
-  `http://localhost:${process.env.GANACHE_PORT}`
-);
 
 const PositionIndex = {
   Start: PositionType.Start,
@@ -43,8 +31,6 @@ const WeaponIndex = {
   Scissors: Weapon.Scissors,
 };
 
-let RockPaperScissors: Contract;
-
 const numParticipants = 3;
 const addresses = {
   // participants
@@ -52,12 +38,11 @@ const addresses = {
   B: randomExternalDestination(),
 };
 
+let RockPaperScissors;
+
 beforeAll(async () => {
-  RockPaperScissors = await setupContracts(
-    testProvider,
-    RockPaperScissorsArtifact,
-    process.env.RPS_CONTRACT_ADDRESS
-  );
+  const _RockPaperScissors = contract.fromArtifact('RockPaperScissors');
+  RockPaperScissors = await _RockPaperScissors.new();
 });
 
 const salt = randomHex(64);
@@ -141,15 +126,15 @@ describe('validTransition', () => {
       };
 
       if (isValid) {
-        const RockPaperScissorsContractInterface = new Interface(RockPaperScissorsArtifact.abi);
-        const data = RockPaperScissorsContractInterface.functions.validTransition.encode([
-          fromVariablePart,
-          toVariablePart,
-          1,
-          numParticipants,
-        ]);
+        // const RockPaperScissorsContractInterface = new Interface(RockPaperScissorsArtifact.abi);
+        // const data = RockPaperScissorsContractInterface.functions.validTransition.encode([
+        //   fromVariablePart,
+        //   toVariablePart,
+        //   1,
+        //   numParticipants,
+        // ]);
 
-        await sendTransaction(RockPaperScissors.address, {data, gasLimit: 3000000});
+        // await sendTransaction(RockPaperScissors.address, {data, gasLimit: 3000000});
 
         const isValidFromCall = await RockPaperScissors.validTransition(
           fromVariablePart,
@@ -172,36 +157,25 @@ describe('validTransition', () => {
   );
 });
 
-export const getNetworkMap = async () => {
-  try {
-    return await loadJsonFile(path.join(__dirname, '../../deployment/network-map.json'));
-  } catch (err) {
-    if (!!err.message.match('ENOENT: no such file or directory')) {
-      return {};
-    } else {
-      throw err;
-    }
-  }
-};
-
-export async function setupContracts(
-  provider: ethers.providers.JsonRpcProvider,
-  artifact,
-  address
-) {
-  const signer = provider.getSigner(0);
-
-  const contract = new ethers.Contract(address, artifact.abi, signer);
-  return contract;
-}
+// export const getNetworkMap = async () => {
+//   try {
+//     return await loadJsonFile(path.join(__dirname, '../../deployment/network-map.json'));
+//   } catch (err) {
+//     if (!!err.message.match('ENOENT: no such file or directory')) {
+//       return {};
+//     } else {
+//       throw err;
+//     }
+//   }
+// };
 
 export function hashPreCommit(weapon: Weapon, salt: string) {
   return keccak256(defaultAbiCoder.encode(['uint256', 'bytes32'], [weapon, salt]));
 }
 
-async function sendTransaction(contractAddress: string, transaction: TransactionRequest) {
-  // move to devtools
-  const signer = testProvider.getSigner();
-  const response = await signer.sendTransaction({to: contractAddress, ...transaction});
-  await response.wait();
-}
+// async function sendTransaction(contractAddress: string, transaction: TransactionRequest) {
+//   // move to devtools
+//   const signer = testProvider.getSigner();
+//   const response = await signer.sendTransaction({to: contractAddress, ...transaction});
+//   await response.wait();
+// }
