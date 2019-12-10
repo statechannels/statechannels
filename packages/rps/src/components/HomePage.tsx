@@ -3,11 +3,11 @@ import {StyleSheet, css} from 'aphrodite';
 
 import {Button} from 'reactstrap';
 
-interface IProps {
+interface Props {
   login: () => any;
 }
 
-const HomePage: React.SFC<IProps> = ({login}) => {
+const HomePage: React.SFC<Props> = ({login}) => {
   return (
     <div>
       <div className="homePage">

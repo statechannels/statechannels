@@ -9,7 +9,7 @@ import {
 } from "../helpers";
 import Emittery from "emittery";
 
-jest.setTimeout(30000);
+jest.setTimeout(60000);
 
 describe("State Updating", () => {
   let browserA;
@@ -52,7 +52,7 @@ describe("State Updating", () => {
 
     expect(response.result).toMatchObject({
       turnNum: 4,
-      status: "Running",
+      status: "running",
       channelId
     });
   });
@@ -87,7 +87,7 @@ describe("State Updating", () => {
 
     expect(response.result).toMatchObject({
       turnNum: 5,
-      status: "Running",
+      status: "running",
       channelId
     });
   });

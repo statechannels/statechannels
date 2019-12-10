@@ -3,10 +3,10 @@ import {JsonRpcRequest} from './types';
 
 const log = debug('channel-provider:messaging');
 
-export type MessagingServiceOptions = {
+export interface MessagingServiceOptions {
   timeoutMs?: number;
   maxRetries?: number;
-};
+}
 
 export class MessagingService {
   protected timeoutListener?: NodeJS.Timeout;
@@ -16,7 +16,9 @@ export class MessagingService {
   protected readonly timeoutMs: number;
   protected readonly maxRetries: number;
 
-  constructor({timeoutMs = 50, maxRetries = 5}: MessagingServiceOptions = {}) {
+  // TODO: We need to think about timeouts and how we handle them
+  // If the timeout is too short then we can end up generating duplicate messages to the wallet.
+  constructor({timeoutMs = 1000, maxRetries = 5}: MessagingServiceOptions = {}) {
     this.timeoutMs = timeoutMs;
     this.maxRetries = maxRetries;
   }
@@ -89,7 +91,7 @@ export class MessagingService {
         if (callback) {
           callback(event.data.result);
         }
-
+        this.acknowledge();
         window.removeEventListener('message', listener);
         log('Received response: %o', event.data);
         resolve(event.data.result);

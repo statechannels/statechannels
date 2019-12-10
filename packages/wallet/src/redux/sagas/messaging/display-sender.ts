@@ -8,6 +8,6 @@ export function* displaySender(displayMessage: "Show" | "Hide") {
 
   const message = jrs.notification("UIUpdate", {showWallet});
   yield validateNotification(message);
-  yield call(window.parent.postMessage, message, "*");
+  yield call([window.parent, window.parent.postMessage], message, "*");
   yield put(displayMessageSent({}));
 }

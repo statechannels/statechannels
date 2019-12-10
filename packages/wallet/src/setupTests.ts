@@ -14,7 +14,6 @@ jest.mock("./utils/contract-utils.ts", () => ({
   getETHAssetHolderAddress: jest.fn(() => AddressZero),
   getERC20AssetHolderAddress: jest.fn(() => AddressZero),
   getAdjudicatorContractAddress: jest.fn(() => AddressZero),
-  // tslint:disable-next-line: no-empty
   getAdjudicatorContract: jest.fn(() => {}),
   getConsensusContractAddress: jest.fn(() => AddressZero),
   getProvider: jest.fn(() => {

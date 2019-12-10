@@ -43,10 +43,10 @@ export function createMessageHandler(
 }
 
 export async function loadWallet(page: puppeteer.Page, messageListener: (message) => void) {
+  const port = process.env.GANACHE_PORT ? Number.parseInt(process.env.GANACHE_PORT) : 8560;
   // TODO: This is kinda ugly but it works
   // We need to instantiate a web3 for the wallet so we import the web 3 script
   // and then assign it on the window
-  const port = process.env.GANACHE_PORT || 8560;
   const web3JsFile = fs.readFileSync(path.resolve(__dirname, "web3/web3.min.js"), "utf8");
   await page.evaluateOnNewDocument(web3JsFile);
   await page.evaluateOnNewDocument(`window.web3 = new Web3("http://localhost:${port}")`);
@@ -67,7 +67,10 @@ export async function loadWallet(page: puppeteer.Page, messageListener: (message
   });
   await page.evaluate(() => {
     // We override window.parent.postMessage with our interceptMesage
-    (window as any).parent = {...window.parent, postMessage: (window as any).interceptMessage};
+    (window as any).parent = {
+      ...window.parent,
+      postMessage: (window as any).interceptMessage
+    };
   });
 }
 

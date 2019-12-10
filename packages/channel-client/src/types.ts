@@ -1,5 +1,3 @@
-import {BigNumberish} from 'ethers/utils';
-
 export type ChannelStatus = 'proposed' | 'opening' | 'funding' | 'running' | 'closing' | 'closed';
 
 export interface Participant {
@@ -10,7 +8,7 @@ export interface Participant {
 
 export interface AllocationItem {
   destination: string; // Address of EOA to receive channel proceeds.
-  amount: BigNumberish; // How much funds will be transferred to the destination address.
+  amount: string; // How much funds will be transferred to the destination address.
 }
 
 export interface Allocation {
@@ -53,6 +51,7 @@ export interface PushMessageResult {
 export interface ChannelClientInterface<Payload = object> {
   onMessageQueued: (callback: (message: Message<Payload>) => void) => UnsubscribeFunction;
   onChannelUpdated: (callback: (result: ChannelResult) => void) => UnsubscribeFunction;
+  onChannelProposed: (callback: (result: ChannelResult) => void) => UnsubscribeFunction;
   createChannel: (
     participants: Participant[],
     allocations: Allocation[],
@@ -74,6 +73,8 @@ export interface ChannelClientInterface<Payload = object> {
 export interface EventsWithArgs {
   MessageQueued: [Message<ChannelResult>];
   ChannelUpdated: [ChannelResult];
+  // TODO: Is `ChannelResult` the right type to use here?
+  ChannelProposed: [ChannelResult];
 }
 
 type UnsubscribeFunction = () => void;

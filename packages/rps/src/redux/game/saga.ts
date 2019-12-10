@@ -25,10 +25,10 @@ const isPlayersTurnNext = (
   localState: ls.LocalState,
   channelState: ChannelState | null
 ): channelState is ChannelState => {
-  if (!('player' in localState) || !channelState) {
+  const playerIndex = ls.isPlayerA(localState) ? 0 : 1;
+  if (!channelState) {
     return false;
   }
-  const playerIndex = localState.player === 'A' ? 0 : 1;
 
   return bigNumberify(channelState.turnNum)
     .sub(1) // for it to be our turn, the player before us must have just moved
@@ -50,70 +50,83 @@ function* gameSagaRun(client: RPSChannelClient) {
   if (
     !isPlayersTurnNext(localState, channelState) &&
     cs.isClosed(channelState) &&
-    localState.type !== 'InsufficientFunds' &&
-    localState.type !== 'Resigned' &&
+    localState.type !== 'A.InsufficientFunds' &&
+    localState.type !== 'B.InsufficientFunds' &&
+    localState.type !== 'A.Resigned' &&
+    localState.type !== 'B.Resigned' &&
     !opponentResigned
   ) {
     // I just sent the state that closed the channel
-    yield put(a.resign(false));
     opponentResigned = true;
+    yield put(a.resign(false));
   }
 
   switch (localState.type) {
-    case 'NeedAddress':
+    case 'Setup.NeedAddress':
       const address: string = yield call([client, 'getAddress']);
       yield put(a.gotAddressFromWallet(address));
       break;
-    case 'GameChosen': // player A
+    case 'A.GameChosen':
       if (cs.isEmpty(channelState)) {
         yield* createChannel(localState, client);
       } else if (cs.isRunning(channelState)) {
         yield* startRound();
       }
-
       break;
-    case 'OpponentJoined': // player B
+    case 'B.OpponentJoined':
       if (cs.inChannelProposed(channelState)) {
         yield* joinChannel(channelState, client);
       } else if (cs.isRunning(channelState)) {
         yield* startRound();
       }
       break;
-    case 'WeaponChosen':
-      if (ls.isPlayerA(localState)) {
-        // player A
-        if (cs.isEmpty(channelState)) {
-          // raise error
-          break;
-        }
-        yield* generateSaltAndSendPropose(localState, channelState, client);
-      } else {
-        // player b
-        if (cs.inRoundProposed(channelState)) {
-          yield* sendRoundAccepted(localState, channelState, client);
-        } else if (cs.inReveal(channelState)) {
-          yield* calculateResultAndCloseChannelIfNoFunds(localState, channelState, client);
-        }
+    case 'A.WeaponChosen':
+      if (cs.isEmpty(channelState)) {
+        // raise error
+        break;
+      }
+      yield* generateSaltAndSendPropose(localState, channelState, client);
+      break;
+    case 'B.WeaponChosen':
+      if (cs.inRoundProposed(channelState)) {
+        yield* sendRoundAccepted(localState, channelState, client);
+      } else if (cs.inReveal(channelState)) {
+        yield* calculateResultAndCloseChannelIfNoFunds(localState, channelState, client);
       }
       break;
-    case 'WeaponAndSaltChosen': // player A
+    case 'A.WeaponAndSaltChosen':
       if (cs.inRoundAccepted(channelState)) {
         yield* calculateResultAndSendReveal(localState, channelState, client);
       }
       break;
-    case 'WaitForRestart':
-      if (ls.isPlayerA(localState) && cs.inStart(channelState)) {
+    case 'A.WaitForRestart':
+      if (cs.inStart(channelState)) {
         yield* startRound();
-      } else if (ls.isPlayerB(localState) && cs.inReveal(channelState)) {
+      }
+      break;
+    case 'B.WaitForRestart':
+      if (cs.inReveal(channelState)) {
         yield* sendStartAndStartRound(channelState, client);
       }
       break;
-    case 'InsufficientFunds':
-    case 'Resigned':
+    case 'A.InsufficientFunds':
+    case 'B.InsufficientFunds':
       if (
         isPlayersTurnNext(localState, channelState) &&
+        channelState &&
         !cs.isClosing(channelState) &&
         !cs.isClosed(channelState)
+      ) {
+        yield* closeChannel(channelState, client);
+      }
+      break;
+    case 'A.Resigned':
+    case 'B.Resigned':
+      if (
+        channelState &&
+        !cs.isClosing(channelState) &&
+        !cs.isClosed(channelState) &&
+        isPlayersTurnNext(localState, channelState)
       ) {
         yield* closeChannel(channelState, client);
       }
@@ -121,7 +134,7 @@ function* gameSagaRun(client: RPSChannelClient) {
   }
 }
 
-function* createChannel(localState: ls.GameChosen, client: RPSChannelClient) {
+function* createChannel(localState: ls.A.GameChosen, client: RPSChannelClient) {
   const openingBalance = bigNumberify(localState.roundBuyIn)
     .mul(5)
     .toString();
@@ -147,7 +160,7 @@ function* startRound() {
 }
 
 function* generateSaltAndSendPropose(
-  localState: ls.WeaponChosen,
+  localState: ls.A.WeaponChosen,
   channelState: ChannelState,
   client: RPSChannelClient
 ) {
@@ -175,7 +188,7 @@ function* generateSaltAndSendPropose(
 }
 
 function* sendRoundAccepted(
-  localState: ls.WeaponChosen,
+  localState: ls.A.WeaponChosen | ls.B.WeaponChosen,
   channelState: ChannelState<RoundProposed>,
   client: RPSChannelClient
 ) {
@@ -211,7 +224,7 @@ function* sendRoundAccepted(
 }
 
 function* calculateResultAndSendReveal(
-  localState: ls.WeaponAndSaltChosen,
+  localState: ls.A.WeaponAndSaltChosen,
   channelState: ChannelState<RoundAccepted>,
   client: RPSChannelClient
 ) {
@@ -243,7 +256,7 @@ function* calculateResultAndSendReveal(
 }
 
 function* calculateResultAndCloseChannelIfNoFunds(
-  localState: ls.WeaponChosen,
+  localState: ls.B.WeaponChosen,
   channelState: ChannelState<Reveal>,
   client: RPSChannelClient
 ) {
@@ -274,7 +287,6 @@ function* sendStartAndStartRound(channelState: ChannelState<Reveal>, client: RPS
   yield put(a.updateChannelState(state));
   yield put(a.startRound());
 }
-
 function* closeChannel(channelState: ChannelState, client: RPSChannelClient) {
   const closingChannelState = yield call([client, 'closeChannel'], channelState.channelId);
   yield put(a.updateChannelState(closingChannelState));

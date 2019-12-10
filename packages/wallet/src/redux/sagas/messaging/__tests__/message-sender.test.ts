@@ -1,27 +1,27 @@
-import {
-  addressResponse,
-  createChannelResponse,
-  noContractError,
-  unknownSigningAddress,
-  sendChannelProposedMessage,
-  postMessageResponse,
-  channelProposedEvent,
-  updateChannelResponse,
-  unknownChannelId,
-  sendChannelJoinedMessage,
-  relayActionWithMessage,
-  sendChannelUpdatedMessage,
-  channelUpdatedEvent
-} from "../outgoing-api-actions";
 import {Wallet} from "ethers";
 import {expectSaga} from "redux-saga-test-plan";
 import * as matchers from "redux-saga-test-plan/matchers";
-import {messageSender} from "../message-sender";
-import {channelFromStates} from "../../../channel-store/channel-state/__tests__";
-import * as stateHelpers from "../../../__tests__/state-helpers";
-import {setChannel, EMPTY_SHARED_DATA, SharedData} from "../../../state";
 import {strategyApproved} from "../../../../communication";
 import {ETH_ASSET_HOLDER_ADDRESS} from "../../../../constants";
+import * as stateHelpers from "../../../__tests__/state-helpers";
+import {channelFromStates} from "../../../channel-store/channel-state/__tests__";
+import {EMPTY_SHARED_DATA, setChannel, SharedData} from "../../../state";
+import {messageSender} from "../message-sender";
+import {
+  addressResponse,
+  channelProposedEvent,
+  channelUpdatedEvent,
+  createChannelResponse,
+  noContractError,
+  postMessageResponse,
+  relayActionWithMessage,
+  sendChannelJoinedMessage,
+  sendChannelProposedMessage,
+  sendChannelUpdatedMessage,
+  unknownChannelId,
+  unknownSigningAddress,
+  updateChannelResponse
+} from "../outgoing-api-actions";
 
 describe("message sender", () => {
   it("creates a notification for WALLET.CHANNEL_UPDATED_EVENT", async () => {
@@ -47,7 +47,7 @@ describe("message sender", () => {
       params: {
         funding: [],
         turnNum: 5,
-        status: "Running",
+        status: "running",
         channelId
       }
     });
@@ -197,7 +197,7 @@ describe("message sender", () => {
       params: {
         funding: [],
         turnNum: 0,
-        status: "Opening",
+        status: "proposed",
         channelId
       }
     });
@@ -255,7 +255,7 @@ describe("message sender", () => {
       result: {
         funding: [],
         turnNum: 0,
-        status: "Opening",
+        status: "proposed",
         channelId
       }
     });
@@ -289,7 +289,7 @@ describe("message sender", () => {
       result: {
         funding: [{token: "0x0", amount: "0x5"}],
         turnNum: 1,
-        status: "Running",
+        status: "running",
         channelId
       }
     });

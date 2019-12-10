@@ -8,6 +8,45 @@ export enum ErrorCodes {
   CHANNEL_NOT_FOUND = 1004,
 }
 
+export interface Participant {
+  participantId: string; // App allocated id, used for relaying messages to the participant
+  signingAddress: string; // Address used to sign channel updates
+  destination: string; // Address of EOA to receive channel proceeds (the account that'll get the funds).
+}
+
+export interface AllocationItem {
+  destination: string; // Address of EOA to receive channel proceeds.
+  amount: string; // How much funds will be transferred to the destination address.
+}
+
+export interface Allocation {
+  token: string; // The token's contract address.
+  allocationItems: AllocationItem[]; // A list of allocations (how much funds will each destination address get).
+}
+
+export interface Message<T = object> {
+  recipient: string; // Identifier of user that the message should be relayed to
+  sender: string; // Identifier of user that the message is from
+  data: T; // Message payload. Format defined by wallet and opaque to app.
+  // But useful to be able to specify, for the purposes of the fake-client
+}
+
+export interface Funds {
+  token: string;
+  amount: string;
+}
+
+export interface ChannelResult {
+  participants: Participant[];
+  allocations: Allocation[];
+  appData: string;
+  appDefinition: string;
+  channelId: string;
+  status: ChannelStatus;
+  // funding: Funds[]; // do we even need this?
+  turnNum: string;
+}
+
 // Json RPC stuff
 // will be relevant when we build the non-fake channel client
 
@@ -64,7 +103,7 @@ export type GetAddressRequest = JsonRPCRequest<'GetAddress', {}>; // todo: what 
 
 export type CreateChannelRequest = JsonRPCRequest<'CreateChannel', CreateChannelParameters>;
 
-export interface CreateChannelResponse extends JsonRPCResponse<ChannelResult> {}
+export type CreateChannelResponse = JsonRPCResponse<ChannelResult>;
 
 export interface JoinChannelParameters {
   channelId: string;
@@ -72,8 +111,7 @@ export interface JoinChannelParameters {
 
 export type JoinChannelRequest = JsonRPCRequest<'JoinChannel', JoinChannelParameters>;
 
-// FIXME: fetch this from channel-client package
-export interface JoinChannelResponse extends JsonRPCResponse<ChannelResult> {}
+export type JoinChannelResponse = JsonRPCResponse<ChannelResult>;
 
 export type UpdateChannelRequest = JsonRPCRequest<'UpdateChannel', UpdateChannelParameters>;
 

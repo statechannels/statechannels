@@ -1,5 +1,5 @@
-import ChannelClient from '../src';
-import {IChannelProvider} from '@statechannels/channel-provider';
+import { ChannelClient } from '../src/channel-client';
+import { ChannelProviderInterface } from '@statechannels/channel-provider';
 
 // TODO: Figure out how to test
 describe('ChannelClient', () => {
@@ -9,7 +9,7 @@ describe('ChannelClient', () => {
         enable: () => {
           /* do nothing */
         }
-      } as IChannelProvider)
+      } as ChannelProviderInterface)
     ).toBeDefined();
   });
 });

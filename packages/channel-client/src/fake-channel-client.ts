@@ -1,6 +1,6 @@
 import {Wallet} from 'ethers';
 import {bigNumberify} from 'ethers/utils';
-import EventEmitter from 'eventemitter3';
+import EventEmitter = require('eventemitter3');
 
 import {
   ChannelClientInterface,
@@ -41,6 +41,13 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
       callback(result);
     });
     return () => this.events.removeListener('ChannelUpdated', callback);
+  }
+
+  onChannelProposed(callback: (result: ChannelResult) => void): UnsubscribeFunction {
+    this.events.on('ChannelProposed', result => {
+      callback(result);
+    });
+    return () => this.events.removeListener('ChannelProposed', callback);
   }
 
   async createChannel(

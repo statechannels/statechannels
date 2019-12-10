@@ -3,7 +3,6 @@ import {GanacheServer} from '@statechannels/devtools';
 import {deploy} from '../deployment/deploy';
 
 export default async function setup() {
-  console.log('test');
   const ganacheServer = new GanacheServer(
     Number(process.env.GANACHE_PORT),
     Number(process.env.CHAIN_NETWORK_ID)
