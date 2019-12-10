@@ -90,7 +90,10 @@ export class GasReporter implements jest.Reporter {
       endBlockNum,
       this.options.contractArtifactFolder
     );
-    await this.saveResultsToFile(this.outputGasInfo(contractCalls));
+    const results = this.outputGasInfo(contractCalls);
+    if (results[0] !== '\n\n' || results[1] !== '\n\n') {
+      await this.saveResultsToFile(results);
+    }
   }
 
   async parseContractCalls(
@@ -115,12 +118,6 @@ export class GasReporter implements jest.Reporter {
       const fileContent = fs.readFileSync(fileLocation, 'utf8');
       const parsedArtifact = JSON.parse(fileContent);
       this.parseInterfaceAndAddress(parsedArtifact, networkId, contractCalls);
-    });
-
-    contractArtifacts.forEach((artifact: string) => {
-      const fileLocation = path.join(contractFolder, artifact);
-      const fileContent = fs.readFileSync(fileLocation, 'utf8');
-      const parsedArtifact = JSON.parse(fileContent);
       this.parseCode(parsedArtifact, contractCalls);
     });
 
@@ -256,10 +253,17 @@ export class GasReporter implements jest.Reporter {
   }
 
   async saveResultsToFile(array: string[]): Promise<void> {
+    array.unshift(
+      'Gas consumption measured at ' +
+        Date.now() +
+        ' against network with name ' +
+        this.provider.network.name +
+        `\n`
+    );
     array.forEach(async string => {
       await fs.appendFile('./gasCostsRecord.txt', string, err => {
         if (err) throw err;
-        console.log('Saved!');
+        console.log('Wrote to file');
       });
     });
   }
