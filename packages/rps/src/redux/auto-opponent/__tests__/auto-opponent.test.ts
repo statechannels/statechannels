@@ -1,7 +1,7 @@
 import {RPSChannelClient} from '../../../utils/rps-channel-client';
 import {fork} from 'redux-saga/effects';
 import {expectSaga} from 'redux-saga-test-plan';
-import {lobby} from '../../game/state';
+import {Setup} from '../../game/state';
 import {gameSaga} from '../../game/saga';
 import {combineReducers} from 'redux';
 import {gameReducer} from '../../game/reducer';
@@ -27,7 +27,7 @@ it(
     }
     const initialState = {
       game: {
-        localState: lobby({name: 'Player A', address: 'blah'}),
+        localState: Setup.lobby({name: 'Player A', address: 'blah'}),
         channelState: null,
       },
       openGames: [],
@@ -36,7 +36,7 @@ it(
     const {storeState} = await expectSaga(saga)
       .withReducer(reducer, initialState)
       .silentRun(SUFFICIENT_TIME_TO_GET_TO_TURNUM_16); // Kill the saga after (hopefully) enough time. Brittle.
-    expect(storeState.game.localState.type).toEqual('GameOver');
+    expect(storeState.game.localState.type).toEqual('EndGame.GameOver');
     expect(storeState.game.channelState.turnNum).toEqual('16');
   },
   SUFFICIENT_TIME_TO_GET_TO_TURNUM_16 + 1000

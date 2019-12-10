@@ -25,7 +25,7 @@ export default function* openGameSaga() {
 
     const localState: LocalState = yield select(getLocalState);
 
-    if (localState.type === 'Lobby' || localState.type === 'WaitingRoom') {
+    if (localState.type === 'Setup.Lobby' || localState.type === 'B.WaitingRoom') {
       // if we're in the lobby we need to sync openGames
       if (!openGameSyncerProcess || !openGameSyncerProcess.isRunning()) {
         openGameSyncerProcess = yield fork(openGameSyncer);
@@ -37,7 +37,7 @@ export default function* openGameSaga() {
       }
     }
 
-    if (localState.type === 'GameChosen' && !joinedAGame) {
+    if (localState.type === 'A.GameChosen' && !joinedAGame) {
       const openGameKey = `/challenges/${localState.opponentAddress}`;
       const taggedOpenGame = {
         isPublic: false,
@@ -47,7 +47,7 @@ export default function* openGameSaga() {
       joinedAGame = true;
     }
 
-    if (localState.type === 'WaitingRoom') {
+    if (localState.type === 'B.WaitingRoom') {
       // if we don't have a wallet address, something's gone very wrong
       const {address} = localState;
       let myOpenGame;
@@ -86,7 +86,7 @@ export default function* openGameSaga() {
         }
       }
     }
-    if (localState.type === 'Lobby' && myGameIsOnFirebase && localState.address) {
+    if (localState.type === 'Setup.Lobby' && myGameIsOnFirebase && localState.address) {
       // we cancelled our game
       const myOpenGameKey = `/challenges/${localState.address}`;
       yield call(reduxSagaFirebase.database.delete, myOpenGameKey);

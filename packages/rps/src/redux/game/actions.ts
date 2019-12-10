@@ -59,7 +59,7 @@ export interface GameJoined {
 
 export interface ChooseWeapon {
   type: 'ChooseWeapon';
-  weapon: Weapon;
+  myWeapon: Weapon;
 }
 
 export interface ChooseSalt {
@@ -128,7 +128,10 @@ export const cancelGame = (): CancelGame => ({
   type: 'CancelGame',
 });
 
-export const chooseWeapon = (weapon: Weapon): ChooseWeapon => ({type: 'ChooseWeapon', weapon});
+export const chooseWeapon = (myWeapon: Weapon): ChooseWeapon => ({
+  type: 'ChooseWeapon',
+  myWeapon,
+});
 
 export const chooseSalt = (salt: string): ChooseSalt => ({type: 'ChooseSalt', salt});
 
@@ -162,6 +165,9 @@ export const resultArrived = (
 
 export const playAgain = (): PlayAgain => ({type: 'PlayAgain'});
 export const startRound = (): StartRound => ({type: 'StartRound'});
-export const resign = (iResigned: boolean): Resign => ({type: 'Resign', iResigned});
+export const resign = (iResigned: boolean): Resign => ({
+  type: 'Resign',
+  iResigned,
+});
 export const gameOver = (): GameOver => ({type: 'GameOver'});
 export const exitToLobby = (): ExitToLobby => ({type: 'ExitToLobby'});

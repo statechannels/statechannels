@@ -4,6 +4,7 @@ import {GameLayout} from './GameLayout';
 
 interface Props {
   iResigned: boolean;
+  channelClosed: boolean;
   action: () => void;
 }
 
@@ -16,9 +17,15 @@ export default class Resigned extends React.PureComponent<Props> {
             {this.props.iResigned && 'You resigned'}
             {!this.props.iResigned && 'Your opponent resigned'}
           </h1>
-          <Button className="cog-button" onClick={this.props.action}>
+          <Button
+            className="cog-button"
+            onClick={this.props.action}
+            disabled={!this.props.channelClosed}
+          >
             {'Withdraw'}
           </Button>
+          <br />
+          {!this.props.channelClosed && 'Waiting for your opponent...'}
         </div>
       </GameLayout>
     );

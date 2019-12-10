@@ -13,7 +13,7 @@ interface ApplicationProps {
 function Application(props: ApplicationProps) {
   switch (props.gameState.localState.type) {
     // lobby is special as we need access to the list of open challenges
-    case 'Lobby':
+    case 'Setup.Lobby':
       return <LobbyContainer />;
     default:
       return <GameContainer />;
