@@ -100,6 +100,9 @@ const localReducer: Reducer<LocalState> = (
       if (action.type === 'GameJoined') {
         newState = B.opponentJoined({...state, ...action});
       }
+      if (action.type === 'CancelGame') {
+        newState = Setup.lobby({...state, ...action});
+      }
       break;
     case 'B.ResultPlayAgain':
       if (action.type === 'PlayAgain') {
