@@ -2,9 +2,7 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     // This package is meant to emit webpack processed files
-    "noEmit": true,
-    // Needed for EventEmitter import
-    "allowSyntheticDefaultImports": true
+    "noEmit": true
   },
   "references": [{"path": "../channel-provider"}]
 }
