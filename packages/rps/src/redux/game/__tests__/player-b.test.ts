@@ -12,6 +12,7 @@ import {
   gameJoined,
   gameOver,
   newOpenGame,
+  cancelGame,
 } from '../actions';
 import {ChannelState} from '../../../core';
 import {RPSChannelClient} from '../../../utils/rps-channel-client';
@@ -57,6 +58,20 @@ describe('when in CreateOpenGame and creating a game', () => {
       .run({silenceTimeout: true});
 
     expect(storeState).toEqual(gameState(localStatesB.waitingRoom));
+  });
+});
+
+describe('when in WaitingRoom and clicking cancel', () => {
+  it('moves to the WaitingRoom', async () => {
+    const initialState = gameState(localStatesB.waitingRoom);
+    const action = cancelGame();
+
+    const {storeState} = await expectSaga(gameSaga as any, client)
+      .withReducer(reducer, initialState)
+      .dispatch(action)
+      .run({silenceTimeout: true});
+
+    expect(storeState).toEqual(gameState(localStatesB.lobby));
   });
 });
 
