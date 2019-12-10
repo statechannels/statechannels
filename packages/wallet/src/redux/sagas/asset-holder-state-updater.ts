@@ -19,7 +19,7 @@ export function* assetHolderStateUpdater() {
       [ETH_ASSET_HOLDER_ADDRESS]: getETHAssetHolderHoldings,
       [ERC20_ASSET_HOLDER_ADDRESS]: getERC20AssetHolderHoldings
     }[assetHolderAddress];
-    const holdings: BigNumber = yield call(getter, provider, channelId);
+    const holdings: BigNumber = yield call(getter[assetHolderAddress], provider, channelId);
     console.info(assetHolderAddress, channelId, holdings);
     // yield put( <TODO: make an action > );
   }

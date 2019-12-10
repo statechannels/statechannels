@@ -53,7 +53,7 @@ describe('MessagingService', () => {
 
       jest.useFakeTimers();
       messagingService.send(target, request, '*');
-      jest.advanceTimersByTime(150);
+      jest.advanceTimersByTime(3000);
 
       expect(sendSpy).toHaveBeenCalledTimes(4);
       target.onmessage = originalMessageHandler;
@@ -76,7 +76,7 @@ describe('MessagingService', () => {
 
     jest.useFakeTimers();
     messagingService.send(target, request, '*');
-    jest.advanceTimersByTime(300);
+    jest.advanceTimersByTime(5000);
 
     expect(sendSpy).toHaveBeenCalledTimes(5);
 
@@ -103,7 +103,7 @@ describe('MessagingService', () => {
 
     jest.useFakeTimers();
     messagingService.send(target, request, '*');
-    jest.advanceTimersByTime(100);
+    jest.advanceTimersByTime(2000);
 
     messagingService.acknowledge();
     jest.useRealTimers();

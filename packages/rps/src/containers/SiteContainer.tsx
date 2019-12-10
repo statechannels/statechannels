@@ -8,17 +8,13 @@ import {SiteState} from '../redux/reducer';
 import MetamaskErrorPage from '../components/MetamaskErrorPage';
 import {MetamaskError} from '../redux/metamask/actions';
 import LoadingPage from '../components/LoadingPage';
-import {createWalletIFrame} from 'magmo-wallet-client';
-import {WALLET_IFRAME_ID, WALLET_URL} from '../constants';
+
 import LoginErrorPage from '../components/LoginErrorPage';
-import * as actions from '../redux/login/actions';
 interface SiteProps {
   isAuthenticated: boolean;
   metamaskError: MetamaskError | null;
   loginError: string | undefined;
   loading: boolean;
-  walletVisible: boolean;
-  walletIFrameLoaded: () => void;
 }
 
 class Site extends React.PureComponent<SiteProps> {
@@ -27,13 +23,7 @@ class Site extends React.PureComponent<SiteProps> {
     super(props);
     this.walletDiv = React.createRef();
   }
-  componentDidMount() {
-    const walletIframe = createWalletIFrame(WALLET_IFRAME_ID, WALLET_URL);
-    walletIframe.addEventListener('load', () => {
-      this.props.walletIFrameLoaded();
-    });
-    this.walletDiv.current.appendChild(walletIframe);
-  }
+
   render() {
     let component;
     if (this.props.loading) {
@@ -44,18 +34,6 @@ class Site extends React.PureComponent<SiteProps> {
       component = <MetamaskErrorPage error={this.props.metamaskError} />;
     } else if (this.props.isAuthenticated) {
       component = <ApplicationContainer />;
-      const iFrame = document.getElementById(WALLET_IFRAME_ID) as HTMLIFrameElement;
-      if (iFrame && this.props.walletVisible) {
-        iFrame.style.display = 'initial';
-        document.body.style.overflow = 'hidden';
-        iFrame.width = '100%';
-        iFrame.height = '100%';
-      } else if (iFrame && !this.props.walletVisible) {
-        iFrame.style.display = 'none';
-        document.body.style.overflow = 'initial';
-        iFrame.width = '0';
-        iFrame.height = '0';
-      }
     } else {
       component = <HomePageContainer />;
     }
@@ -78,7 +56,5 @@ const mapStateToProps = (state: SiteState) => {
     loginError: state.login.error,
   };
 };
-const mapDispatchToProps = {
-  walletIFrameLoaded: actions.walletIframeLoaded,
-};
-export default connect(mapStateToProps, mapDispatchToProps)(Site);
+
+export default connect(mapStateToProps)(Site);

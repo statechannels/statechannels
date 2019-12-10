@@ -45,8 +45,8 @@ like `https://myserver.com/state_channel_callback`.
 {
   "token": "0x...", // 0x0 for ETH
   "allocationItems": [
-    { "destination": "0xa...", "amount": "0x1a" },
-    { "destination": "0xb...", "amount": "0x1a" }
+    {"destination": "0xa...", "amount": "0x1a"},
+    {"destination": "0xb...", "amount": "0x1a"}
   ]
 }
 ```
@@ -97,7 +97,7 @@ Used to push messages received from other participants into the wallet.
 {
   "jsonrpc": "2.0",
   "id": 1,
-  "result": { "success": true }
+  "result": {"success": true}
 }
 ```
 
@@ -156,8 +156,8 @@ Returns the signing address(es) for the current domain.
       {
         "token": "0x...", // 0x0 for ETH
         "allocationItems": [
-          { "destination": "0xa...", "amount": "0x1a" },
-          { "destination": "0xb...", "amount": "0x1a" }
+          {"destination": "0xa...", "amount": "0x1a"},
+          {"destination": "0xb...", "amount": "0x1a"}
         ]
       }
     ],
@@ -175,7 +175,7 @@ Returns the signing address(es) for the current domain.
   "id": 1,
   "result": {
     "channelId": "0xabc123...",
-    "status": "opening",
+    "status": "proposed",
     "funding": [],
     "participants": [
       {
@@ -194,8 +194,8 @@ Returns the signing address(es) for the current domain.
       {
         "token": "0x...", // 0x0 for ETH
         "allocationItems": [
-          { "destination": "0xa...", "amount": "0x1a" },
-          { "destination": "0xb...", "amount": "0x1a" }
+          {"destination": "0xa...", "amount": "0x1a"},
+          {"destination": "0xb...", "amount": "0x1a"}
         ]
       }
     ],
@@ -267,8 +267,8 @@ Possible response to a `Channel Proposed` event.
       {
         "token": "0x...", // 0x0 for ETH
         "allocationItems": [
-          { "destination": "0xa...", "amount": "0x1a" },
-          { "destination": "0xb...", "amount": "0x1a" }
+          {"destination": "0xa...", "amount": "0x1a"},
+          {"destination": "0xb...", "amount": "0x1a"}
         ]
       }
     ],
@@ -298,8 +298,8 @@ Possible response to a `Channel Proposed` event.
       {
         "token": "0x...", // 0x0 for ETH
         "allocationItems": [
-          { "destination": "0xa...", "amount": "18" },
-          { "destination": "0xb...", "amount": "6" }
+          {"destination": "0xa...", "amount": "18"},
+          {"destination": "0xb...", "amount": "6"}
         ]
       }
     ],
@@ -317,7 +317,7 @@ Possible response to a `Channel Proposed` event.
   "result": {
     "channelId": "0xabc123...",
     "status": "running",
-    "funding": [{ "token": "0x0", "amount": "24" }],
+    "funding": [{"token": "0x0", "amount": "24"}],
     "participants": [
       {
         "participantId": "user123",
@@ -335,8 +335,8 @@ Possible response to a `Channel Proposed` event.
       {
         "token": "0x...", // 0x0 for ETH
         "allocationItems": [
-          { "destination": "0xa...", "amount": "18" },
-          { "destination": "0xb...", "amount": "6" }
+          {"destination": "0xa...", "amount": "18"},
+          {"destination": "0xb...", "amount": "6"}
         ]
       }
     ],
@@ -393,8 +393,8 @@ Possible response to a `Channel Proposed` event.
       {
         "token": "0x...", // 0x0 for ETH
         "allocationItems": [
-          { "destination": "0xa...", "amount": "0x1a" },
-          { "destination": "0xb...", "amount": "0x1a" }
+          {"destination": "0xa...", "amount": "0x1a"},
+          {"destination": "0xb...", "amount": "0x1a"}
         ]
       }
     ],
@@ -462,8 +462,8 @@ App should respond by either calling `JoinChannel`, or TODO.
       {
         "token": "0x...", // 0x0 for ETH
         "allocationItems": [
-          { "destination": "0xa...", "amount": "18" },
-          { "destination": "0xb...", "amount": "6" }
+          {"destination": "0xa...", "amount": "18"},
+          {"destination": "0xb...", "amount": "6"}
         ]
       }
     ],
@@ -487,7 +487,7 @@ Triggered when a channel update occurs by any means, including:
   "params": {
     "channelId": "0xabc123...",
     "status": "running",
-    "funding": [{ "token": "0x0", "amount": "24" }],
+    "funding": [{"token": "0x0", "amount": "24"}],
     "participants": [
       {
         "participantId": "user123",
@@ -505,8 +505,8 @@ Triggered when a channel update occurs by any means, including:
       {
         "token": "0x...", // 0x0 for ETH
         "allocationItems": [
-          { "destination": "0xa...", "amount": "18" },
-          { "destination": "0xb...", "amount": "6" }
+          {"destination": "0xa...", "amount": "18"},
+          {"destination": "0xb...", "amount": "6"}
         ]
       }
     ],
