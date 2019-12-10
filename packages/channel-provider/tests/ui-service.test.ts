@@ -22,9 +22,9 @@ describe('UIService', () => {
   it('should unmount the UI', () => {
     uiService.unmount();
 
-    expect(document.querySelector(`#${UIElementNames.Styles}`)).toBe(null);
-    expect(document.querySelector(`#${UIElementNames.Container}`)).toBe(null);
-    expect(document.querySelector(`#${UIElementNames.IFrame}`)).toBe(null);
+    expect(document.querySelector(`#${UIElementNames.Styles}`)).toBeNull();
+    expect(document.querySelector(`#${UIElementNames.Container}`)).toBeNull();
+    expect(document.querySelector(`#${UIElementNames.IFrame}`)).toBeNull();
   });
 
   it("should return a reference to the iframe's content window", async () => {

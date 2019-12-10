@@ -1,4 +1,4 @@
-import {IChannelProvider} from '@statechannels/channel-provider';
+import {ChannelProviderInterface} from '@statechannels/channel-provider';
 
 import {
   ChannelClientInterface,
@@ -11,7 +11,7 @@ import {
 } from './types';
 
 export class ChannelClient implements ChannelClientInterface<ChannelResult> {
-  constructor(private readonly provider: IChannelProvider) {
+  constructor(private readonly provider: ChannelProviderInterface) {
     console.info("[INFO] ChannelClient constructor assumes provider is 'enabled'");
   }
 

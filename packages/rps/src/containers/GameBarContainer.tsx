@@ -2,25 +2,38 @@ import {connect} from 'react-redux';
 
 import GameBar from '../components/GameBar';
 import {SiteState} from '../redux/reducer';
-import {PlayingState} from 'src/redux/game/state';
+import {isPlayerA, isPlayerB} from '../redux/game/state';
 
 function mapStateToProps(state: SiteState) {
   const {localState, channelState} = state.game;
-
-  const {name, opponentName, roundBuyIn, player} = localState as PlayingState;
   const aBal = channelState ? channelState.aBal : '';
   const bBal = channelState ? channelState.bBal : '';
 
-  const myBalance = player === 'A' ? aBal : bBal;
-  const opponentBalance = player === 'B' ? aBal : bBal;
-
-  return {
-    myName: name,
-    opponentName,
-    myBalance,
-    opponentBalance,
-    roundBuyIn,
-  };
+  if (isPlayerA(localState)) {
+    return {
+      myName: name,
+      opponentName: localState.opponentName,
+      myBalance: aBal,
+      opponentBalance: bBal,
+      roundBuyIn: localState.roundBuyIn,
+    };
+  } else if (isPlayerB(localState)) {
+    return {
+      myName: name,
+      opponentName: localState.opponentName,
+      myBalance: bBal,
+      opponentBalance: aBal,
+      roundBuyIn: localState.roundBuyIn,
+    };
+  } else {
+    return {
+      myName: name,
+      opponentName: undefined,
+      myBalance: '0',
+      opponentBalance: '0',
+      roundBuyIn: '1',
+    };
+  }
 }
 
 const mapDispatchToProps = {};

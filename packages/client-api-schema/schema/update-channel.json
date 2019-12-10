@@ -3,48 +3,7 @@
   "$id": "http://statechannels.org/schemas/update-channel.json",
   "definitions": {
     "UpdateChannelResult": {
-      "type": "object",
-      "properties": {
-        "status": {"type": "string"},
-        "funding": {
-          "type": "array",
-          "items": {
-            "token": {
-              "$ref": "definitions.json#/definitions/AddressOrEmpty",
-              "title": "token"
-            },
-            "amount": {
-              "$ref": "definitions.json#/definitions/Amount",
-              "title": "amount"
-            }
-          }
-        },
-        "participants": {
-          "type": "array",
-          "items": {
-            "$ref": "definitions.json#/definitions/Participant"
-          },
-          "title": "participants"
-        },
-        "allocations": {
-          "type": "array",
-          "items": {
-            "$ref": "definitions.json#/definitions/Allocation"
-          },
-          "title": "allocations"
-        },
-        "appData": {
-          "type": "string",
-          "title": "appData"
-        },
-        "turnNum": {
-          "type": "integer"
-        },
-        "channelId": {
-          "$ref": "definitions.json#/definitions/ChannelId"
-        }
-      },
-      "required": ["allocations", "appData", "participants", "status", "turnNum", "channelId"]
+      "$ref": "channel-result.json#/definitions/ChannelResult"
     },
     "UpdateChannelParams": {
       "type": "object",

@@ -10,7 +10,7 @@ defaults: &defaults
       environment:
         POSTGRES_USER: root
         POSTGRES_DB: hub_wallet_test
-        POSTGRES_PASSWORD: ''
+        POSTGRES_PASSWORD: ""
 
 save_dep: &save_dep
   save_cache:
@@ -25,7 +25,7 @@ restore_dep: &restore_dep
 
 commands:
   log_stats:
-    description: 'Log stats '
+    description: "Log stats "
     parameters:
       file:
         type: string
@@ -35,7 +35,7 @@ commands:
           command: bash bin/log_memory.sh <<parameters.file>>
           background: true
   upload_logs:
-    description: 'Upload logs '
+    description: "Upload logs "
     parameters:
       file:
         type: string

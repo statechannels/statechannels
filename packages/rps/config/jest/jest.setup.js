@@ -1,4 +1,4 @@
-const {configureEnvVariables} = require('@statechannels/devtools');
+const { configureEnvVariables } = require('@statechannels/devtools');
 configureEnvVariables();
 
-jest.setTimeout(60000);
+jest.setTimeout(20000);

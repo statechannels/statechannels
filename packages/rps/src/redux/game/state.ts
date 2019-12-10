@@ -5,249 +5,344 @@ export interface GameState {
   channelState: ChannelState | null;
 }
 
-export type LocalStateWithPlayer =
-  | GameChosen
-  | OpponentJoined
-  | ChooseWeapon
-  | WeaponChosen
-  | WeaponAndSaltChosen
-  | ResultPlayAgain
-  | WaitForRestart
-  | InsufficientFunds
-  | Resigned
-  | GameOver;
+export type Setup = Setup.Empty | Setup.Lobby | Setup.NeedAddress;
+export type A =
+  | A.GameChosen
+  | A.ChooseWeapon
+  | A.WeaponChosen
+  | A.WeaponAndSaltChosen
+  | A.ResultPlayAgain
+  | A.WaitForRestart
+  | A.Resigned
+  | A.InsufficientFunds;
 
-export type LocalState =
-  | Empty
-  | NeedAddress
-  | Lobby
-  | CreatingOpenGame
-  | WaitingRoom
-  | LocalStateWithPlayer;
+export function isPlayerA(state: LocalState): state is A {
+  return (
+    state.type === 'A.GameChosen' ||
+    state.type === 'A.ChooseWeapon' ||
+    state.type === 'A.WeaponChosen' ||
+    state.type === 'A.WeaponAndSaltChosen' ||
+    state.type === 'A.ResultPlayAgain' ||
+    state.type === 'A.WaitForRestart' ||
+    state.type === 'A.Resigned' ||
+    state.type === 'A.InsufficientFunds'
+  );
+}
+export type B =
+  | B.CreatingOpenGame
+  | B.WaitingRoom
+  | B.OpponentJoined
+  | B.ChooseWeapon
+  | B.WeaponChosen
+  | B.ResultPlayAgain
+  | B.WaitForRestart
+  | B.Resigned
+  | B.InsufficientFunds;
 
-export type PlayingState =
-  | GameChosen
-  | OpponentJoined
-  | ChooseWeapon
-  | WeaponChosen
-  | WeaponAndSaltChosen
-  | ResultPlayAgain
-  | WaitForRestart
-  | InsufficientFunds
-  | GameOver;
-
-export interface Empty {
-  type: 'Empty';
+export function isPlayerB(state: LocalState): state is A {
+  return (
+    state.type === 'B.CreatingOpenGame' ||
+    state.type === 'B.WaitingRoom' ||
+    state.type === 'B.OpponentJoined' ||
+    state.type === 'B.ChooseWeapon' ||
+    state.type === 'B.WeaponChosen' ||
+    state.type === 'B.ResultPlayAgain' ||
+    state.type === 'B.WaitForRestart' ||
+    state.type === 'B.Resigned' ||
+    state.type === 'B.InsufficientFunds'
+  );
 }
-
-export interface NeedAddress {
-  type: 'NeedAddress';
-  name: string;
-}
-export interface Lobby {
-  type: 'Lobby';
-  name: string;
-  address: string;
-}
-
-export interface CreatingOpenGame {
-  type: 'CreatingOpenGame';
-  name: string;
-  address: string;
-  // libraryAddress: string; // TODO
-}
-export interface WaitingRoom {
-  type: 'WaitingRoom';
-  name: string;
-  address: string;
-  roundBuyIn: string;
-}
+export type EndGame = EndGame.GameOver;
+export type LocalState = Setup | A | B | EndGame;
 
 export interface Playing {
-  player: 'A' | 'B';
   name: string;
   address: string;
   opponentName: string;
   roundBuyIn: string;
 }
 
-export interface GameChosen extends Playing {
-  type: 'GameChosen';
-  player: 'A';
-  opponentAddress: string; // need to keep opponentAddress until we have opened the channel
+function extractPlayingFromParams(params: Playing & Anything) {
+  return {
+    name: params.name,
+    address: params.address,
+    opponentName: params.opponentName,
+    roundBuyIn: params.roundBuyIn,
+  };
 }
 
-export interface OpponentJoined extends Playing {
-  type: 'OpponentJoined';
-  player: 'B';
+// TODO BEGIN -- move to devtools
+interface Anything {
+  [propName: string]: any;
+}
+// params can we have a generic type that has all of type State's properties except 'type' plus anything else as an optional property
+// A function of this type will accept those params and return an object with the type State. The implementation needs to all desired remaining properties off params:
+export type StateConstructor<State> = (
+  params: Pick<State, Exclude<keyof State, 'type'>> & Anything
+) => State;
+// TODO END -- move to devtools
+
+// Setup
+
+// eslint-disable-next-line @typescript-eslint/no-namespace
+export namespace Setup {
+  export interface Empty {
+    type: 'Setup.Empty';
+  }
+
+  export interface NeedAddress {
+    type: 'Setup.NeedAddress';
+    name: string;
+  }
+  export const needAddress: StateConstructor<NeedAddress> = params => {
+    return {name: params.name, type: 'Setup.NeedAddress'};
+  };
+  export interface Lobby {
+    type: 'Setup.Lobby';
+    name: string;
+    address: string;
+  }
+  export const lobby: StateConstructor<Lobby> = params => {
+    return {
+      name: params.name,
+      address: params.address,
+      type: 'Setup.Lobby',
+    };
+  };
 }
 
-export interface ChooseWeapon extends Playing {
-  type: 'ChooseWeapon';
+// Player A
+// eslint-disable-next-line @typescript-eslint/no-namespace
+export namespace A {
+  export interface GameChosen extends Playing {
+    type: 'A.GameChosen';
+    opponentAddress: string; // need to keep opponentAddress until we have opened the channel
+  }
+  export const gameChosen: StateConstructor<GameChosen> = params => {
+    return {
+      ...extractPlayingFromParams(params),
+      opponentAddress: params.opponentAddress,
+      type: 'A.GameChosen',
+    };
+  };
+
+  export interface ChooseWeapon extends Playing {
+    type: 'A.ChooseWeapon';
+  }
+  export const chooseWeapon: StateConstructor<ChooseWeapon> = params => {
+    return {...extractPlayingFromParams(params), type: 'A.ChooseWeapon'};
+  };
+
+  export interface WeaponChosen extends Playing {
+    type: 'A.WeaponChosen';
+    myWeapon: Weapon;
+  }
+  export const weaponChosen: StateConstructor<WeaponChosen> = params => {
+    return {
+      ...extractPlayingFromParams(params),
+      myWeapon: params.myWeapon,
+      type: 'A.WeaponChosen',
+    };
+  };
+  export interface WeaponAndSaltChosen extends Playing {
+    type: 'A.WeaponAndSaltChosen';
+    myWeapon: Weapon;
+    salt: string;
+  }
+  export const weaponAndSaltChosen: StateConstructor<WeaponAndSaltChosen> = params => {
+    return {
+      ...extractPlayingFromParams(params),
+      myWeapon: params.myWeapon,
+      salt: params.salt,
+      type: 'A.WeaponAndSaltChosen',
+    };
+  };
+
+  export interface ResultPlayAgain extends Playing {
+    type: 'A.ResultPlayAgain';
+    myWeapon: Weapon;
+    theirWeapon: Weapon;
+    result: Result;
+  }
+  export const resultPlayAgain: StateConstructor<ResultPlayAgain> = params => {
+    return {
+      ...extractPlayingFromParams(params),
+      myWeapon: params.myWeapon,
+      theirWeapon: params.theirWeapon,
+      result: params.result,
+      type: 'A.ResultPlayAgain',
+    };
+  };
+
+  export interface WaitForRestart extends Playing {
+    type: 'A.WaitForRestart';
+    myWeapon: Weapon;
+    theirWeapon: Weapon;
+    result: Result;
+  }
+  export const waitForRestart: StateConstructor<WaitForRestart> = params => {
+    return {
+      ...extractPlayingFromParams(params),
+      myWeapon: params.myWeapon,
+      theirWeapon: params.theirWeapon,
+      result: params.result,
+      type: 'A.WaitForRestart',
+    };
+  };
+
+  export interface Resigned extends Playing {
+    type: 'A.Resigned';
+    iResigned: boolean;
+  }
+  export const resigned: StateConstructor<Resigned> = params => {
+    return {
+      ...extractPlayingFromParams(params),
+      iResigned: params.iResigned,
+      type: 'A.Resigned',
+    };
+  };
+
+  export interface InsufficientFunds extends Playing {
+    type: 'A.InsufficientFunds';
+    myWeapon: Weapon;
+    theirWeapon: Weapon;
+    result: Result;
+  }
+  export const insufficientFunds: StateConstructor<InsufficientFunds> = params => {
+    return {
+      ...extractPlayingFromParams(params),
+      myWeapon: params.myWeapon,
+      theirWeapon: params.theirWeapon,
+      result: params.result,
+      type: 'A.InsufficientFunds',
+    };
+  };
 }
 
-export interface WeaponChosen extends Playing {
-  type: 'WeaponChosen';
-  myWeapon: Weapon;
+// Player B
+
+// eslint-disable-next-line @typescript-eslint/no-namespace
+export namespace B {
+  export interface CreatingOpenGame {
+    type: 'B.CreatingOpenGame';
+    name: string;
+    address: string;
+    // libraryAddress: string; // TODO
+  }
+  export const creatingOpenGame: StateConstructor<CreatingOpenGame> = params => {
+    return {name: params.name, address: params.address, type: 'B.CreatingOpenGame'};
+  };
+  export interface WaitingRoom {
+    type: 'B.WaitingRoom';
+    name: string;
+    address: string;
+    roundBuyIn: string;
+  }
+  export const waitingRoom: StateConstructor<WaitingRoom> = params => {
+    return {
+      name: params.name,
+      address: params.address,
+      roundBuyIn: params.roundBuyIn,
+      type: 'B.WaitingRoom',
+    };
+  };
+
+  export interface OpponentJoined extends Playing {
+    type: 'B.OpponentJoined';
+  }
+  export const opponentJoined: StateConstructor<OpponentJoined> = params => {
+    return {...extractPlayingFromParams(params), type: 'B.OpponentJoined'};
+  };
+
+  export interface ChooseWeapon extends Playing {
+    type: 'B.ChooseWeapon';
+  }
+  export const chooseWeapon: StateConstructor<ChooseWeapon> = params => {
+    return {...extractPlayingFromParams(params), type: 'B.ChooseWeapon'};
+  };
+
+  export interface WeaponChosen extends Playing {
+    type: 'B.WeaponChosen';
+    myWeapon: Weapon;
+  }
+  export const weaponChosen: StateConstructor<WeaponChosen> = params => {
+    return {
+      ...extractPlayingFromParams(params),
+      myWeapon: params.myWeapon,
+      type: 'B.WeaponChosen',
+    };
+  };
+
+  export interface ResultPlayAgain extends Playing {
+    type: 'B.ResultPlayAgain';
+    myWeapon: Weapon;
+    theirWeapon: Weapon;
+    result: Result;
+  }
+  export const resultPlayAgain: StateConstructor<ResultPlayAgain> = params => {
+    return {
+      ...extractPlayingFromParams(params),
+      myWeapon: params.myWeapon,
+      theirWeapon: params.theirWeapon,
+      result: params.result,
+      type: 'B.ResultPlayAgain',
+    };
+  };
+
+  export interface WaitForRestart extends Playing {
+    type: 'B.WaitForRestart';
+    myWeapon: Weapon;
+    theirWeapon: Weapon;
+    result: Result;
+  }
+  export const waitForRestart: StateConstructor<WaitForRestart> = params => {
+    return {
+      ...extractPlayingFromParams(params),
+      myWeapon: params.myWeapon,
+      theirWeapon: params.theirWeapon,
+      result: params.result,
+      type: 'B.WaitForRestart',
+    };
+  };
+
+  export interface Resigned extends Playing {
+    type: 'B.Resigned';
+    iResigned: boolean;
+  }
+  export const resigned: StateConstructor<Resigned> = params => {
+    return {
+      ...extractPlayingFromParams(params),
+      iResigned: params.iResigned,
+      type: 'B.Resigned',
+    };
+  };
+
+  export interface InsufficientFunds extends Playing {
+    type: 'B.InsufficientFunds';
+    myWeapon: Weapon;
+    theirWeapon: Weapon;
+    result: Result;
+  }
+  export const insufficientFunds: StateConstructor<InsufficientFunds> = params => {
+    return {
+      ...extractPlayingFromParams(params),
+      myWeapon: params.myWeapon,
+      theirWeapon: params.theirWeapon,
+      result: params.result,
+      type: 'B.InsufficientFunds',
+    };
+  };
 }
+// EndGame
 
-export interface WeaponAndSaltChosen extends Playing {
-  type: 'WeaponAndSaltChosen';
-  myWeapon: Weapon;
-  salt: string;
-  player: 'A';
+// eslint-disable-next-line @typescript-eslint/no-namespace
+export namespace EndGame {
+  export interface GameOver {
+    type: 'EndGame.GameOver';
+    name: string;
+    address: string;
+  }
+  export const gameOver: StateConstructor<GameOver> = params => {
+    return {name: params.name, address: params.address, type: 'EndGame.GameOver'};
+  };
 }
-
-export interface ResultPlayAgain extends Playing {
-  type: 'ResultPlayAgain';
-  myWeapon: Weapon;
-  theirWeapon: Weapon;
-  result: Result;
-}
-
-export interface WaitForRestart extends Playing {
-  type: 'WaitForRestart';
-  myWeapon: Weapon;
-  theirWeapon: Weapon;
-  result: Result;
-}
-
-export interface InsufficientFunds extends Playing {
-  type: 'InsufficientFunds';
-  myWeapon: Weapon;
-  theirWeapon: Weapon;
-  result: Result;
-}
-
-export interface Resigned extends Playing {
-  type: 'Resigned';
-  iResigned: boolean;
-}
-
-export interface GameOver extends Playing {
-  type: 'GameOver';
-}
-
-// Helpers
-// =======
-
-export const needAddress = <T extends Omit<NeedAddress, 'type'>>(state: T): NeedAddress => {
-  const {name} = state;
-  return {type: 'NeedAddress', name};
-};
-
-export const lobby = <T extends Omit<Lobby, 'type'>>(state: T): Lobby => {
-  const {name, address} = state;
-  return {type: 'Lobby', name, address};
-};
-
-export function creatingOpenGame<T extends Omit<CreatingOpenGame, 'type'>>(
-  state: T
-): CreatingOpenGame {
-  const {name, address} = state;
-  return {type: 'CreatingOpenGame', name, address};
-}
-
-export const waitingRoom = <T extends Omit<WaitingRoom, 'type'>>(state: T): WaitingRoom => {
-  const {name, address, roundBuyIn} = state;
-  return {type: 'WaitingRoom', name, address, roundBuyIn};
-};
-
-const playing = <T extends Playing>(state: T): Playing => {
-  const {player, name, address, opponentName, roundBuyIn} = state;
-  return {player, name, address, opponentName, roundBuyIn};
-};
-
-export const gameChosen = <T extends Omit<Playing, 'player'>>(
-  state: T,
-  opponentAddress: string
-): GameChosen => ({
-  type: 'GameChosen',
-  ...playing({...state, player: 'A'}),
-  opponentAddress,
-  player: 'A', // otherwise typescript can't tell that player is A
-});
-
-export const opponentJoined = <T extends Omit<Playing, 'player'>>(state: T): OpponentJoined => ({
-  type: 'OpponentJoined',
-  ...playing({...state, player: 'B'}),
-  player: 'B', // otherwise typescript can't tell that player is B
-});
-
-export const chooseWeapon = <T extends Playing>(state: T): ChooseWeapon => ({
-  type: 'ChooseWeapon',
-  ...playing(state),
-});
-
-export const weaponChosen = <T extends Playing>(state: T, myWeapon: Weapon): WeaponChosen => ({
-  type: 'WeaponChosen',
-  ...playing(state),
-  myWeapon,
-});
-
-export const weaponAndSaltChosen = <T extends Playing & {myWeapon: Weapon; player: 'A'}>(
-  state: T,
-  salt: string
-): WeaponAndSaltChosen => ({
-  type: 'WeaponAndSaltChosen',
-  ...playing(state),
-  myWeapon: state.myWeapon,
-  player: 'A',
-  salt,
-});
-
-export const resultPlayAgain = <T extends Playing & {myWeapon: Weapon}>(
-  state: T,
-  theirWeapon: Weapon,
-  result: Result
-): ResultPlayAgain => ({
-  type: 'ResultPlayAgain',
-  ...playing(state),
-  myWeapon: state.myWeapon,
-  theirWeapon,
-  result,
-});
-
-export const waitForRestart = <T extends Playing & {myWeapon: Weapon}>(
-  state: T,
-  theirWeapon: Weapon,
-  result: Result
-): WaitForRestart => ({
-  type: 'WaitForRestart',
-  ...playing(state),
-  myWeapon: state.myWeapon,
-  theirWeapon,
-  result,
-});
-
-export const insufficientFunds = <T extends Playing & {myWeapon: Weapon}>(
-  state: T,
-  theirWeapon: Weapon,
-  result: Result
-): InsufficientFunds => ({
-  type: 'InsufficientFunds',
-  ...playing(state),
-  myWeapon: state.myWeapon,
-  theirWeapon,
-  result,
-});
-
-export const resigned = <T extends Playing>(state: T, iResigned: boolean): Resigned => ({
-  type: 'Resigned',
-  ...playing(state),
-  iResigned,
-});
-
-export const gameOver = <T extends Playing>(state: T): GameOver => ({
-  type: 'GameOver',
-  ...playing(state),
-});
-
-// Helpers
-// =======
-
-export const isPlayerA = (state: LocalStateWithPlayer): boolean => state.player === 'A';
-export const isPlayerB = (state: LocalStateWithPlayer): boolean => state.player === 'B';
-export type StateName = LocalState['type'];
-
-export type PlayingStateName = PlayingState['type'];

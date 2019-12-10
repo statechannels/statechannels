@@ -1,10 +1,10 @@
 import EventEmitter = require('eventemitter3');
 import {Guid} from 'guid-typescript';
 import {MessagingService} from './messaging-service';
-import {IChannelProvider, isJsonRpcNotification} from './types';
+import {ChannelProviderInterface, isJsonRpcNotification} from './types';
 import {UIService} from './ui-service';
 
-class ChannelProvider implements IChannelProvider {
+class ChannelProvider implements ChannelProviderInterface {
   protected readonly events: EventEmitter;
   protected readonly ui: UIService;
   protected readonly messaging: MessagingService;
@@ -44,7 +44,7 @@ class ChannelProvider implements IChannelProvider {
     return response;
   }
 
-  async subscribe(subscriptionType: string, _params: any): Promise<string> {
+  async subscribe(subscriptionType: string): Promise<string> {
     const subscriptionId = Guid.create().toString();
     if (!this.subscriptions[subscriptionType]) {
       this.subscriptions[subscriptionType] = [];

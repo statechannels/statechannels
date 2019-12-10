@@ -45,7 +45,7 @@ export function isJsonRpcErrorResponse(message: any): message is JsonRpcErrorRes
   return 'error' in message;
 }
 
-export interface IChannelProvider {
+export interface ChannelProviderInterface {
   enable(url?: string): Promise<void>;
   send<ResultType = any>(method: string, params?: any): Promise<ResultType>;
   on(event: string, callback: ListenerFn): void;
