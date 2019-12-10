@@ -1,30 +1,25 @@
 import {
   ConcludeInstigated,
   RelayActionWithMessage,
-  SignedStatesReceived
+  SignedStatesReceived,
+  ChannelOpen,
+  getProcessId
 } from '../../communication';
 import {HUB_ADDRESS, unreachable} from '../../constants';
 import {startFundingProcess} from '../../wallet/db/queries/walletProcess';
 import * as ongoing from './handle-ongoing-process-action';
+import {signState} from '@statechannels/nitro-protocol/lib/src/signatures';
 
 export async function handleNewProcessAction(
-  action: ConcludeInstigated | SignedStatesReceived
+  action: ChannelOpen
 ): Promise<RelayActionWithMessage[]> {
-  switch (action.type) {
-    case 'WALLET.COMMON.SIGNED_STATES_RECEIVED':
-      return handleSignedStatesReceived(action);
-    case 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED':
-      throw new Error('The hub does not support the concluding application channels');
-    default:
-      return unreachable(action);
-  }
+  return handleOpenChannelReceived(action);
 }
 
-async function handleSignedStatesReceived(
-  action: SignedStatesReceived
-): Promise<RelayActionWithMessage[]> {
-  const {processId, signedStates} = action;
-  const {participants} = signedStates[0].state.channel;
+async function handleOpenChannelReceived(action: ChannelOpen): Promise<RelayActionWithMessage[]> {
+  const processId = getProcessId(action);
+  const {signedState} = action;
+  const {participants} = signedState.state.channel;
   const ourIndex = participants.indexOf(HUB_ADDRESS);
   const theirAddress = participants[(ourIndex + 1) % participants.length];
   await startFundingProcess({processId, theirAddress});

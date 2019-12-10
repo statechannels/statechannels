@@ -3,11 +3,14 @@ import {
   RelayableAction,
   RelayActionWithMessage,
   SignedStatesReceived,
-  StrategyProposed
+  StrategyProposed,
+  ChannelOpen,
+  getProcessId
 } from '../../communication';
 import {getProcess} from '../../wallet/db/queries/walletProcess';
 import {handleNewProcessAction} from './handle-new-process-action';
 import {handleOngoingProcessAction} from './handle-ongoing-process-action';
+import {getChannelId} from '@statechannels/nitro-protocol';
 
 export async function handleWalletMessage(
   message: RelayableAction
@@ -21,27 +24,12 @@ export async function handleWalletMessage(
   }
 }
 
-// TODO: We should define types for NewProcessAction and ProtocolAction
-
-async function shouldHandleAsNewProcessAction(
-  action: ConcludeInstigated | SignedStatesReceived
-): Promise<boolean> {
-  if (action.type === 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED') {
-    return true;
-  }
-  if (action.type === 'WALLET.COMMON.SIGNED_STATES_RECEIVED') {
-    return !(await getProcess(action.processId));
-  }
-  return false;
+async function shouldHandleAsNewProcessAction(action: ChannelOpen): Promise<boolean> {
+  return !(await getProcess(getProcessId(action)));
 }
 
-function isNewProcessAction(
-  action: RelayableAction
-): action is ConcludeInstigated | SignedStatesReceived {
-  return (
-    action.type === 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED' ||
-    action.type === 'WALLET.COMMON.SIGNED_STATES_RECEIVED'
-  );
+function isNewProcessAction(action: RelayableAction): action is ChannelOpen {
+  return action.type === 'Channel.Open';
 }
 
 function isProtocolAction(
