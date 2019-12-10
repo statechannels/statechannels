@@ -11,7 +11,7 @@ interface Props {
 
 export default class GameFooter extends React.PureComponent<Props> {
   render() {
-    const { resign, createBlockchainChallenge, canChallenge, challengeOngoing } = this.props;
+    const {resign, createBlockchainChallenge, canChallenge, challengeOngoing} = this.props;
 
     return (
       <nav className="navbar fixed-bottom navbar-light footer-bar">

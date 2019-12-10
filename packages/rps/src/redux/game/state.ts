@@ -84,7 +84,7 @@ export type StateConstructor<State> = (
 
 // Setup
 
-// tslint:disable-next-line: no-namespace
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace Setup {
   export interface Empty {
     type: 'Setup.Empty';
@@ -95,7 +95,7 @@ export namespace Setup {
     name: string;
   }
   export const needAddress: StateConstructor<NeedAddress> = params => {
-    return { name: params.name, type: 'Setup.NeedAddress' };
+    return {name: params.name, type: 'Setup.NeedAddress'};
   };
   export interface Lobby {
     type: 'Setup.Lobby';
@@ -112,7 +112,7 @@ export namespace Setup {
 }
 
 // Player A
-// tslint:disable-next-line: no-namespace
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace A {
   export interface GameChosen extends Playing {
     type: 'A.GameChosen';
@@ -130,7 +130,7 @@ export namespace A {
     type: 'A.ChooseWeapon';
   }
   export const chooseWeapon: StateConstructor<ChooseWeapon> = params => {
-    return { ...extractPlayingFromParams(params), type: 'A.ChooseWeapon' };
+    return {...extractPlayingFromParams(params), type: 'A.ChooseWeapon'};
   };
 
   export interface WeaponChosen extends Playing {
@@ -221,7 +221,7 @@ export namespace A {
 
 // Player B
 
-// tslint:disable-next-line: no-namespace
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace B {
   export interface CreatingOpenGame {
     type: 'B.CreatingOpenGame';
@@ -230,7 +230,7 @@ export namespace B {
     // libraryAddress: string; // TODO
   }
   export const creatingOpenGame: StateConstructor<CreatingOpenGame> = params => {
-    return { name: params.name, address: params.address, type: 'B.CreatingOpenGame' };
+    return {name: params.name, address: params.address, type: 'B.CreatingOpenGame'};
   };
   export interface WaitingRoom {
     type: 'B.WaitingRoom';
@@ -251,14 +251,14 @@ export namespace B {
     type: 'B.OpponentJoined';
   }
   export const opponentJoined: StateConstructor<OpponentJoined> = params => {
-    return { ...extractPlayingFromParams(params), type: 'B.OpponentJoined' };
+    return {...extractPlayingFromParams(params), type: 'B.OpponentJoined'};
   };
 
   export interface ChooseWeapon extends Playing {
     type: 'B.ChooseWeapon';
   }
   export const chooseWeapon: StateConstructor<ChooseWeapon> = params => {
-    return { ...extractPlayingFromParams(params), type: 'B.ChooseWeapon' };
+    return {...extractPlayingFromParams(params), type: 'B.ChooseWeapon'};
   };
 
   export interface WeaponChosen extends Playing {
@@ -335,7 +335,7 @@ export namespace B {
 }
 // EndGame
 
-// tslint:disable-next-line: no-namespace
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace EndGame {
   export interface GameOver {
     type: 'EndGame.GameOver';
@@ -343,6 +343,6 @@ export namespace EndGame {
     address: string;
   }
   export const gameOver: StateConstructor<GameOver> = params => {
-    return { name: params.name, address: params.address, type: 'EndGame.GameOver' };
+    return {name: params.name, address: params.address, type: 'EndGame.GameOver'};
   };
 }

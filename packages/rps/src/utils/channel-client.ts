@@ -183,7 +183,7 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
       const turnNum = bigNumberify(this.latestState.turnNum)
         .add(1)
         .toString();
-      this.latestState = { ...this.latestState, turnNum, status: 'closed' };
+      this.latestState = {...this.latestState, turnNum, status: 'closed'};
       console.log(
         this.playerIndex + ' updated channel to turnNum:' + turnNum + ' and status: closed'
       );
@@ -212,7 +212,7 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
       console.log(
         this.playerIndex + ' updated channel to turnNum:' + turnNum + ' and status: closing'
       );
-      this.latestState = { ...latestState, turnNum, status: 'closing' };
+      this.latestState = {...latestState, turnNum, status: 'closing'};
       this.notifyOpponent(this.latestState);
     }
     return Promise.resolve(this.latestState);
