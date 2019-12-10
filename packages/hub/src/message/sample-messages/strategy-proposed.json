@@ -1,0 +1,5 @@
+{
+  "processId": "Funding-0x87578605eeb0ba31a2ccbb02a703a547440e6126b3546b177e04bdad7c648f8a",
+  "strategy": "IndirectFundingStrategy",
+  "type": "WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_PROPOSED"
+}
