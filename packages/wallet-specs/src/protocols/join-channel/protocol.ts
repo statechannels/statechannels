@@ -57,12 +57,19 @@ const preFundSetup = {
     CHANNEL_UPDATED: forwardChannelUpdated<Init>('preFundSetup'),
   },
 };
-const passChannelId = ({ channelId }: Init) => ({ channelId });
+export const passChannelId: (c: Init) => Funding.Init = ({
+  channelId,
+}: Init) => ({
+  targetChannelId: channelId,
+  tries: 0,
+});
+
 const funding = {
   invoke: {
     src: 'funding',
     data: passChannelId,
     onDone: 'postFundSetup',
+    autoForward: true,
   },
 };
 

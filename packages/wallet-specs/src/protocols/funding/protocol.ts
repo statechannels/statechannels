@@ -1,12 +1,13 @@
 import { assign, DoneInvokeEvent, Machine } from 'xstate';
-import { LedgerFunding } from '..';
+import { LedgerFunding, VirtualHub } from '..';
 import { failure, MachineFactory, Store, success } from '../..';
+import { log } from '../../utils';
 import { FundingStrategy, FundingStrategyProposed } from '../../wire-protocol';
 
 const PROTOCOL = 'funding';
 
 export interface Init {
-  targetChannelID: string;
+  targetChannelId: string;
   tries: 0 | 1;
   clientChoice?: FundingStrategy;
   peerChoice?: FundingStrategy;
@@ -17,9 +18,9 @@ type ClientChoiceKnown = Init & {
 };
 
 const assignClientChoice = assign<ClientChoiceKnown>(
-  (ctx: Init, { data }: DoneInvokeEvent<FundingStrategyProposed>) => ({
+  (ctx: Init, { data: clientChoice }: DoneInvokeEvent<FundingStrategy>) => ({
     ...ctx,
-    clientChoice: data.choice,
+    clientChoice,
   })
 );
 const getClientChoice = {
@@ -27,14 +28,18 @@ const getClientChoice = {
     id: 'ask-client-for-choice',
     src: 'askClient',
     onDone: {
+      target: 'wait',
       actions: ['sendClientChoice', assignClientChoice],
     },
   },
-  onDone: 'wait',
 };
 
 const wait = {
   on: {
+    '': [
+      { target: 'success', cond: 'consensus' },
+      { target: 'retry', cond: 'disagreement' },
+    ],
     '*': [
       { target: 'success', cond: 'consensus' },
       { target: 'retry', cond: 'disagreement' },
@@ -54,14 +59,16 @@ const retry = {
 
 type PeerChoiceKnown = Init & { peerChoice: FundingStrategy };
 const assignPeerChoice = assign<PeerChoiceKnown>(
-  (ctx: Init, { data }: DoneInvokeEvent<FundingStrategyProposed>) => ({
+  (ctx: Init, { choice }: FundingStrategyProposed) => ({
     ...ctx,
-    peerChoice: data.choice,
+    peerChoice: choice,
   })
 );
 const determineStrategy = {
   on: {
-    PROPOSAL_RECEIVED: { actions: assignPeerChoice },
+    FUNDING_STRATEGY_PROPOSED: {
+      actions: assignPeerChoice,
+    },
   },
   initial: 'getClientChoice',
   states: {
@@ -109,13 +116,14 @@ export const config = {
     failure,
   },
 };
+
 export type Guards = {
   consensus: any;
   disagreement: any;
-  directStrategyChosen: any;
-  indirectStrategyChosen: any;
-  virtualStrategyChosen: any;
-  maxTriesExceeded: any;
+  directStrategyChosen(ctx: Init): boolean;
+  indirectStrategyChosen(ctx: Init): boolean;
+  virtualStrategyChosen(ctx: Init): boolean;
+  maxTriesExceeded(ctx: Init): boolean;
 };
 
 export type Actions = {
@@ -126,7 +134,7 @@ export type Actions = {
 };
 
 export type Services = {
-  askClient: any;
+  askClient(): Promise<FundingStrategy>;
   directFunding: any;
   virtualFunding: any;
   ledgerFunding: any;
@@ -138,13 +146,20 @@ export type Options = Partial<{
   actions: Actions;
 }>;
 
-const dummyGuard = x => true;
+const dummyGuard = x => {
+  return true;
+};
 const guards: Guards = {
-  consensus: dummyGuard,
-  disagreement: dummyGuard,
-  directStrategyChosen: dummyGuard,
-  indirectStrategyChosen: dummyGuard,
-  virtualStrategyChosen: dummyGuard,
+  consensus: ({ clientChoice, peerChoice }: Init) => {
+    return !!clientChoice && clientChoice === peerChoice;
+  },
+  disagreement: ({ clientChoice, peerChoice }: Init) => {
+    return clientChoice && peerChoice && clientChoice !== peerChoice;
+  },
+  directStrategyChosen: ({ clientChoice }: Init) => clientChoice === 'Direct',
+  indirectStrategyChosen: ({ clientChoice }: Init) =>
+    clientChoice === 'Indirect',
+  virtualStrategyChosen: ({ clientChoice }: Init) => clientChoice === 'Virtual',
   maxTriesExceeded: dummyGuard,
 };
 export const mockOptions: Options = { guards };
@@ -153,17 +168,28 @@ export const machine: MachineFactory<Init, any> = (
   store: Store,
   context: Init
 ) => {
+  function sendClientChoice({
+    clientChoice,
+    targetChannelId,
+  }: ClientChoiceKnown) {
+    store.sendStrategyChoice({
+      type: 'FUNDING_STRATEGY_PROPOSED',
+      choice: clientChoice,
+      targetChannelId,
+    });
+  }
+
   const options: Options = {
     services: {
-      askClient: async () => 'LEDGER',
+      askClient: async () => 'Indirect',
       directFunding: async () => true,
-      ledgerFunding: async () => true,
+      ledgerFunding: LedgerFunding.machine(store).withContext(context),
       virtualFunding: async () => true,
     },
     guards,
     actions: {
-      sendClientChoice: async () => true,
-      assignClientChoice: async () => true,
+      sendClientChoice,
+      assignClientChoice,
       assignProposal: async () => true,
       assignStrategy: async () => true,
     },

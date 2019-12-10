@@ -14,10 +14,11 @@ export interface Init {
 const assignChoice = assign(
   (ctx: Init): HubKnown => ({ ...ctx, hubAddress: 'TODO' })
 );
-function sendProposal({ hubAddress }: HubKnown): HubChoice {
+function sendProposal({ hubAddress, targetChannelId }: HubKnown): HubChoice {
   return {
     type: 'HubChoice',
     hubAddress,
+    targetChannelId,
   };
 }
 function agreement(

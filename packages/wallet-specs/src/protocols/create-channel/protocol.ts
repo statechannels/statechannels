@@ -10,6 +10,7 @@ import {
 } from '../..';
 import { ChannelStoreEntry } from '../../ChannelStoreEntry';
 import { JsonRpcCreateChannelParams } from '../../json-rpc';
+import { passChannelId } from '../join-channel/protocol';
 
 const PROTOCOL = 'create-channel';
 
@@ -61,7 +62,7 @@ const abort = success;
 const funding = {
   invoke: {
     src: 'funding',
-    data: ({ channelId }: ChannelSet) => ({ channelId }),
+    data: passChannelId,
     onDone: 'postFundSetup',
   },
 };

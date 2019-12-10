@@ -1,4 +1,5 @@
-import { Machine } from 'xstate';
+import { DoneInvokeEvent, Machine, TransitionConfig } from 'xstate';
+import { CreateChannel } from '..';
 import { add, MachineFactory, Store, success } from '../..';
 import { Init as CreateNullChannelArgs } from '../create-null-channel/protocol';
 import { Init as DirectFundingArgs } from '../direct-funding/protocol';
@@ -7,7 +8,7 @@ import { Init as LedgerUpdateArgs } from '../ledger-update/protocol';
 const PROTOCOL = 'ledger-funding';
 
 interface Init {
-  targetChannelID: string;
+  targetChannelId: string;
 }
 
 /*
@@ -21,19 +22,33 @@ A peer is identified by their participantId.
 const lookForExistingChannel = {
   invoke: {
     src: 'findLedgerChannelId',
-  },
-  on: {
-    CHANNEL_FOUND: {
-      target: 'fundLedger',
-      actions: 'assignLedgerChannelId',
-    },
-    CHANNEL_NOT_FOUND: 'createNewChannel',
+    onDone: [
+      {
+        target: 'success',
+        cond: 'channelFound',
+        actions: 'assignLedgerChannelId',
+      },
+      { target: 'createNewChannel' },
+    ],
   },
 };
 
 const createNewChannel = {
   invoke: {
     src: 'createNullChannel',
+    onDone: {
+      target: 'success',
+      actions: 'assignLedgerChannelId',
+    },
+  },
+};
+
+const waitForChannel = {
+  initial: 'lookForExistingChannel',
+  states: {
+    lookForExistingChannel,
+    createNewChannel,
+    success,
   },
   onDone: 'fundLedger',
 };
@@ -57,8 +72,7 @@ export const config = {
   key: PROTOCOL,
   initial: 'waitForChannel',
   states: {
-    lookForExistingChannel,
-    createNewChannel,
+    waitForChannel,
     fundLedger,
     fundTarget,
     success,
@@ -66,10 +80,19 @@ export const config = {
 };
 
 export type Services = {
-  findLedgerChannelId: any;
+  findLedgerChannelId(
+    ctx: Init
+  ): Promise<{ type: 'FOUND'; channelId: string } | { type: 'NOT_FOUND' }>;
   createNullChannel: any;
   directFunding: any;
   ledgerUpdate: any;
+};
+
+export const guards = {
+  channelFound: (
+    _,
+    { data }: DoneInvokeEvent<{ type: 'FOUND' | 'NOT_FOUND' }>
+  ) => data.type === 'FOUND',
 };
 
 export const machine: MachineFactory<Init, any> = (
@@ -77,7 +100,7 @@ export const machine: MachineFactory<Init, any> = (
   context: Init
 ) => {
   const createNullChannelArgs: (ctx: Init) => CreateNullChannelArgs = ({
-    targetChannelID,
+    targetChannelId: targetChannelID,
   }: Init) => {
     const { channel: targetChannel, outcome } = store.getLatestState(
       targetChannelID
@@ -91,12 +114,12 @@ export const machine: MachineFactory<Init, any> = (
   function directFundingArgs(ctx: LedgerExists): DirectFundingArgs {
     return {
       channelID: ctx.ledgerChannelID,
-      minimalOutcome: store.getLatestState(ctx.targetChannelID).outcome,
+      minimalOutcome: store.getLatestState(ctx.targetChannelId).outcome,
     };
   }
   function ledgerUpdateArgs({
     ledgerChannelID,
-    targetChannelID,
+    targetChannelId: targetChannelID,
   }: LedgerExists): LedgerUpdateArgs {
     const amount = store
       .getLatestSupportedAllocation(targetChannelID)
@@ -109,13 +132,13 @@ export const machine: MachineFactory<Init, any> = (
   }
 
   const services: Services = {
-    findLedgerChannelId: () => true,
+    findLedgerChannelId: async () => ({ type: 'NOT_FOUND' }),
     ledgerUpdate: () => true,
     directFunding: () => true,
     createNullChannel: () => true,
   };
 
-  const options = { services };
+  const options = { services, guards };
 
   return Machine(config).withConfig(options, context);
 };
