@@ -2,13 +2,17 @@ import { SignedState } from '.';
 
 export type HubChoice = {
   type: 'HubChoice';
+  targetChannelId: string;
   hubAddress: string;
 };
 
 export type FundingStrategy = 'Direct' | 'Indirect' | 'Virtual';
 export type FundingStrategyProposed = {
-  type: 'FundingStrategyProposed';
+  type: 'FUNDING_STRATEGY_PROPOSED';
+  targetChannelId: string;
   choice: FundingStrategy;
+  // signature: string // TODO
+  // from: string; // TODO will we ever get strategy proposed by multiple clients?
 };
 
 export type OpenChannel = {

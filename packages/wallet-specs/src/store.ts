@@ -9,7 +9,11 @@ import {
 } from '.';
 import { ChannelStoreEntry, IChannelStoreEntry } from './ChannelStoreEntry';
 import { messageService } from './messaging';
-import { AddressableMessage, OpenChannel } from './wire-protocol';
+import {
+  AddressableMessage,
+  FundingStrategyProposed,
+  OpenChannel,
+} from './wire-protocol';
 export interface IStore {
   getLatestState: (channelID: string) => State;
   getLatestConsensus: (channelID: string) => SignedState; // Used for null channels, whose support must be a single state
@@ -200,19 +204,15 @@ export class Store implements IStore {
 
     // 2. Sign & store the state
     const signedStates: SignedState[] = [this.signState(state)];
-    const { privateKey } = this.updateOrCreateEntry(channelId, signedStates);
+    this.updateOrCreateEntry(channelId, signedStates);
 
-    // 3. Look up recipients
-    // TODO properly get the recipients
-    const recipients = state.channel.participants.filter(p => p !== privateKey);
-
-    // 4. Send the message
+    // 3. Send the message
     const message: AddressableMessage = {
       type: 'SendStates',
       signedStates,
       to: 'BLANK',
     };
-    recipients.forEach(to => messageService.sendMessage({ ...message, to }));
+    this.sendMessage(message, this.recipients(state));
   }
 
   public sendOpenChannel(state: State) {
@@ -230,9 +230,22 @@ export class Store implements IStore {
       signedState,
       to: 'BLANK',
     };
-    newEntry.recipients.forEach(to =>
-      messageService.sendMessage({ ...message, to })
-    );
+
+    this.sendMessage(message, newEntry.recipients);
+  }
+
+  public sendStrategyChoice(message: FundingStrategyProposed) {
+    const { recipients } = this.getEntry(message.targetChannelId);
+    this.sendMessage(message, recipients);
+  }
+
+  private recipients(state: State): string[] {
+    const privateKey = this.getPrivateKey(state.channel.participants);
+    return state.channel.participants.filter(p => p !== privateKey);
+  }
+
+  private sendMessage(message: any, recipients: string[]) {
+    recipients.forEach(to => messageService.sendMessage({ ...message, to }));
   }
 
   public receiveStates(signedStates: SignedState[]): void {
