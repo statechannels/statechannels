@@ -90,7 +90,7 @@ export class GasReporter implements jest.Reporter {
       endBlockNum,
       this.options.contractArtifactFolder
     );
-    this.outputGasInfo(contractCalls);
+    await this.saveResultsToFile(this.outputGasInfo(contractCalls));
   }
 
   async parseContractCalls(
@@ -163,7 +163,7 @@ export class GasReporter implements jest.Reporter {
     }
   }
 
-  outputGasInfo(contractCalls: ContractCalls): void {
+  outputGasInfo(contractCalls: ContractCalls): [string, string] {
     console.log();
     console.log('Gas Info:');
     console.log();
@@ -207,6 +207,7 @@ export class GasReporter implements jest.Reporter {
       }
     }
     console.log(deployTable.toString());
+    return [methodTable.toString(), deployTable.toString()];
   }
 
   async parseBlock(blockNum: number, contractCalls: ContractCalls): Promise<void> {
@@ -252,6 +253,15 @@ export class GasReporter implements jest.Reporter {
         }
       }
     }
+  }
+
+  async saveResultsToFile(array: string[]): Promise<void> {
+    array.forEach(async string => {
+      await fs.appendFile('./gasCostsRecord.txt', string, err => {
+        if (err) throw err;
+        console.log('Saved!');
+      });
+    });
   }
 }
 
