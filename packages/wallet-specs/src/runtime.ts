@@ -1,5 +1,5 @@
 import { AnyEventObject, interpret, Interpreter } from 'xstate';
-import { getChannelID, pretty } from '.';
+import { pretty } from '.';
 import { messageService } from './messaging';
 import { Wallet } from './protocols';
 import { AddressableMessage } from './wire-protocol';
@@ -10,14 +10,6 @@ import { Store } from './store';
 const store = name => {
   const privateKeys = { [name]: name };
   const _store = new Store({ privateKeys });
-  messageService.on('message', (m: AddressableMessage) => {
-    if (m.to === name) {
-      switch (m.type) {
-        case 'SendStates':
-          _store.receiveStates(m.signedStates);
-      }
-    }
-  });
 
   return _store;
 };
@@ -55,22 +47,7 @@ const wallets: Record<string, Interpreter<Wallet.Init, any, AnyEventObject>> = {
 
 // This is sort of the "dispatcher"
 messageService.on('message', ({ to, ...event }: AddressableMessage) => {
-  switch (event.type) {
-    case 'SendStates': {
-      stores[to].receiveStates(event.signedStates);
-      const channelId = getChannelID(event.signedStates[0].state.channel);
-
-      wallets[to].send({
-        type: 'CHANNEL_UPDATED',
-        channelId,
-      });
-      break;
-    }
-    case 'OPEN_CHANNEL': {
-      wallets[to].send(event);
-      break;
-    }
-  }
+  wallets[to].send(event);
 });
 
 const createChannel: CreateChannelEvent = {
