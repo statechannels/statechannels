@@ -44,7 +44,7 @@ class ChannelProvider implements ChannelProviderInterface {
     return response;
   }
 
-  async subscribe(subscriptionType: string, _params: any): Promise<string> {
+  async subscribe(subscriptionType: string): Promise<string> {
     const subscriptionId = Guid.create().toString();
     if (!this.subscriptions[subscriptionType]) {
       this.subscriptions[subscriptionType] = [];
