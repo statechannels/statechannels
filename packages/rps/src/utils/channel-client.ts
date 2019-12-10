@@ -289,7 +289,7 @@ export type GetAddressRequest = JsonRPCRequest<'GetAddress', {}>; // todo: what 
 
 export type CreateChannelRequest = JsonRPCRequest<'CreateChannel', CreateChannelParameters>;
 
-export interface CreateChannelResponse extends JsonRPCResponse<ChannelResult> {}
+export type CreateChannelResponse = JsonRPCResponse<ChannelResult>;
 
 export interface JoinChannelParameters {
   channelId: string;
@@ -297,7 +297,7 @@ export interface JoinChannelParameters {
 
 export type JoinChannelRequest = JsonRPCRequest<'JoinChannel', JoinChannelParameters>;
 
-export interface JoinChannelResponse extends JsonRPCResponse<ChannelResult> {}
+export type JoinChannelResponse = JsonRPCResponse<ChannelResult>;
 
 export type UpdateChannelRequest = JsonRPCRequest<'UpdateChannel', UpdateChannelParameters>;
 

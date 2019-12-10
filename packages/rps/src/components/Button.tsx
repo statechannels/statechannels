@@ -22,12 +22,12 @@ export const buttonStyles: ButtonStyles = {
   },
 };
 
-interface IProps {
+interface Props {
   children: any;
   onClick: () => any;
 }
 
-const Button: React.SFC<IProps> = ({children, onClick}) => {
+const Button: React.SFC<Props> = ({children, onClick}) => {
   return (
     <button onClick={onClick} type="button" className={css(styles.button)}>
       {children}
