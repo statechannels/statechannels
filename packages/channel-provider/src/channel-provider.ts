@@ -1,10 +1,10 @@
 import * as EventEmitter from 'eventemitter3';
 import {Guid} from 'guid-typescript';
 import {MessagingService} from './messaging-service';
-import {IChannelProvider, isJsonRpcNotification} from './types';
+import {ChannelProviderInterface, isJsonRpcNotification} from './types';
 import {UIService} from './ui-service';
 
-class ChannelProvider implements IChannelProvider {
+class ChannelProvider implements ChannelProviderInterface {
   protected readonly events: EventEmitter;
   protected readonly ui: UIService;
   protected readonly messaging: MessagingService;

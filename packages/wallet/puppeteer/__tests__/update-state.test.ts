@@ -52,7 +52,7 @@ describe("State Updating", () => {
 
     expect(response.result).toMatchObject({
       turnNum: 4,
-      status: "Running",
+      status: "running",
       channelId
     });
   });
@@ -87,7 +87,7 @@ describe("State Updating", () => {
 
     expect(response.result).toMatchObject({
       turnNum: 5,
-      status: "Running",
+      status: "running",
       channelId
     });
   });
