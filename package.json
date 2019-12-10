@@ -29,8 +29,8 @@
     "state channels"
   ],
   "devDependencies": {
-    "@types/prettier": "1.19.0",
     "@statechannels/devtools": "0.1.21",
+    "@types/prettier": "1.19.0",
     "husky": "3.0.7",
     "lerna": "3.16.4",
     "patch-package": "6.2.0",
