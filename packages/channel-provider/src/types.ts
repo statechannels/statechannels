@@ -18,7 +18,6 @@ export function isJsonRpcResponse(message: any): message is JsonRpcResponse {
 }
 
 export type JsonRpcError = {
-  jsonrpc: '2.0';
   code: number;
   message: string;
   data?: {
