@@ -86,6 +86,10 @@ const localReducer: Reducer<LocalState> = (
       if (action.type === 'GameJoined') {
         newState = opponentJoined({...state, ...action});
       }
+      if (action.type === 'CancelGame') {
+        const {name, address} = state;
+        newState = lobby({name, address});
+      }
       break;
     case 'OpponentJoined':
     case 'GameChosen':
