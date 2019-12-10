@@ -1,14 +1,14 @@
-import {messageSent} from "../../actions";
-import {OutgoingApiAction} from "./outgoing-api-actions";
-import {call, select, put} from "redux-saga/effects";
-import {getChannelStatus} from "../../state";
-import {ChannelState, getLastState} from "../../channel-store";
-import {createJsonRpcAllocationsFromOutcome} from "../../../utils/json-rpc-utils";
-import jrs from "jsonrpc-lite";
-import {unreachable} from "../../../utils/reducer-utils";
-import {validateResponse, validateNotification} from "../../../json-rpc-validation/validator";
-import {getChannelHoldings, getLastSignedStateForChannel} from "../../selectors";
 import {bigNumberify} from "ethers/utils";
+import jrs from "jsonrpc-lite";
+import {call, put, select} from "redux-saga/effects";
+import {validateNotification, validateResponse} from "../../../json-rpc-validation/validator";
+import {createJsonRpcAllocationsFromOutcome} from "../../../utils/json-rpc-utils";
+import {unreachable} from "../../../utils/reducer-utils";
+import {messageSent} from "../../actions";
+import {ChannelState, getLastState} from "../../channel-store";
+import {getChannelHoldings, getLastSignedStateForChannel} from "../../selectors";
+import {getChannelStatus} from "../../state";
+import {OutgoingApiAction} from "./outgoing-api-actions";
 
 export function* messageSender(action: OutgoingApiAction) {
   const message = yield createResponseMessage(action);
@@ -132,7 +132,12 @@ function* getChannelInfo(channelId: string) {
   if (!bigNumberify(channelHoldings).isZero()) {
     funding = [{token: "0x0", amount: channelHoldings}];
   }
-  const status = channelStatus.turnNum < participants.length - 1 ? "proposed" : "running";
+  const status =
+    channelStatus.turnNum === 0
+      ? "proposed"
+      : channelStatus.turnNum < participants.length - 1
+      ? "opening"
+      : "running";
   return {
     participants,
     allocations: createJsonRpcAllocationsFromOutcome(state.outcome),

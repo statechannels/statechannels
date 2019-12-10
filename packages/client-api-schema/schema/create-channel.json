@@ -29,7 +29,7 @@
         },
         "status": {
           "type": "string",
-          "const": "Opening"
+          "const": "proposed"
         },
         "turnNum": {
           "type": "integer",
