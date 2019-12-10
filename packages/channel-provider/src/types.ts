@@ -17,14 +17,13 @@ export function isJsonRpcResponse(message: any): message is JsonRpcResponse {
   return 'result' in message;
 }
 
-export interface JsonRpcError {
-  jsonrpc: '2.0';
+export type JsonRpcError = {
   code: number;
   message: string;
   data?: {
     [key: string]: any;
   };
-}
+};
 
 export interface JsonRpcNotification {
   jsonrpc: '2.0';
