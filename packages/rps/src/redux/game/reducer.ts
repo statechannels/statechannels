@@ -105,7 +105,7 @@ const localReducer: Reducer<LocalState> = (
       }
       if (action.type === 'CancelGame') {
         const {name, address} = state;
-        newState = lobby({name, address});
+        newState = Setup.lobby({name, address});
       }
       break;
     case 'B.ResultPlayAgain':
