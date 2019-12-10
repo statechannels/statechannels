@@ -5,7 +5,7 @@ import {validateNotification, validateResponse} from "../../../json-rpc-validati
 import {createJsonRpcAllocationsFromOutcome} from "../../../utils/json-rpc-utils";
 import {unreachable} from "../../../utils/reducer-utils";
 import {messageSent} from "../../actions";
-import {ChannelState, getLastState} from "../../channel-store";
+import {ChannelParticipant, ChannelState, getLastState} from "../../channel-store";
 import {getChannelHoldings, getLastSignedStateForChannel} from "../../selectors";
 import {getChannelStatus} from "../../state";
 import {OutgoingApiAction} from "./outgoing-api-actions";
@@ -132,12 +132,8 @@ function* getChannelInfo(channelId: string) {
   if (!bigNumberify(channelHoldings).isZero()) {
     funding = [{token: "0x0", amount: channelHoldings}];
   }
-  const status =
-    channelStatus.turnNum === 0
-      ? "proposed"
-      : channelStatus.turnNum < participants.length - 1
-      ? "opening"
-      : "running";
+  const status = getChannelInfoStatus(turnNum, participants);
+
   return {
     participants,
     allocations: createJsonRpcAllocationsFromOutcome(state.outcome),
@@ -148,4 +144,11 @@ function* getChannelInfo(channelId: string) {
     turnNum,
     channelId
   };
+}
+
+function getChannelInfoStatus(
+  turnNum: number,
+  participants: ChannelParticipant[]
+): "proposed" | "opening" | "running" {
+  return turnNum === 0 ? "proposed" : turnNum < participants.length - 1 ? "opening" : "running";
 }
