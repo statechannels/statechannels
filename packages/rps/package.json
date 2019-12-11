@@ -30,8 +30,8 @@
     "test:contracts": "npx jest -c ./config/jest/jest.contracts.config.js",
     "test": "run-s test:contracts 'test:app --all'",
     "test:ci": "yarn test:ci:contracts && yarn test:ci:app",
-    "test:ci:contracts": "yarn test:contracts --all --ci --runInBand --detectOpenHandles",
-    "test:ci:app": "yarn test:app --all --ci --runInBand --detectOpenHandles",
+    "test:ci:contracts": "yarn test:contracts --all --ci --runInBand --detectOpenHandles --bail",
+    "test:ci:app": "yarn test:app --all --ci --runInBand --detectOpenHandles --bail",
     "storybook": "start-storybook -p 9001 -c .storybook",
     "precommit": "yarn eslint:check --quiet"
   },
