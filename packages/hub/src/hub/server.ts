@@ -18,20 +18,20 @@ export async function startServer(): Promise<RemoveListeners> {
     env: process.env
   });
   firebaseRelay.on('message', (message: RelayableAction) => {
-    console.log(
+    /*console.log(
       `Parent process received message from firebase": ${JSON.stringify(message, null, 1)}`
-    );
+    );*/
 
     handleWalletMessage(message)
       .then(outgoingMessages => {
         for (const outgoingMessage of outgoingMessages) {
-          console.log(
+          /*console.log(
             `Parent process sending message to firebase: ${JSON.stringify(
               outgoingMessage,
               null,
               1
             )}`
-          );
+          );*/
           firebaseRelay.send(outgoingMessage);
         }
       })
