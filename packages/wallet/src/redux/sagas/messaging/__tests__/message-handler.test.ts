@@ -184,7 +184,7 @@ describe("message listener", () => {
         type: "WALLET.PUSH_MESSAGE_RESPONSE",
         id: 1
       });
-
+      
       expect(effects.fork[1].payload.args[0]).toMatchObject({
         type: "WALLET.CHANNEL_UPDATED_EVENT",
         channelId: expect.any(String)
