@@ -9,7 +9,7 @@ const config = {
         data: 'finalJointChannelUpdate',
         onDone: 'defundGuarantor',
       },
-      exit: 'garbageCollectTargetChannel',
+      exit: 'garbageCollecttargetChannel',
     },
     defundGuarantor: {
       invoke: {

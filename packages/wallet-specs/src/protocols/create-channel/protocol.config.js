@@ -3,9 +3,6 @@ const config = {
   initial: 'initializeChannel',
   states: {
     initializeChannel: {
-      entry: function() {
-        return console.log('CREATING CHANNEL');
-      },
       invoke: { src: 'setChannelId', onDone: 'preFundSetup' },
       exit: [
         {
@@ -16,9 +13,7 @@ const config = {
             },
           },
         },
-        function(ctx) {
-          return console.log('Sending open channel message');
-        },
+        'sendOpenChannelMessage',
       ],
     },
     preFundSetup: {
@@ -55,9 +50,13 @@ const config = {
         src: 'funding',
         data: function(_a) {
           var channelId = _a.channelId;
-          return { channelId: channelId };
+          return {
+            targetChannelId: channelId,
+            tries: 0,
+          };
         },
         onDone: 'postFundSetup',
+        autoForward: true,
       },
     },
     postFundSetup: {
@@ -100,9 +99,5 @@ const config = {
   },
 };
 const guards = {};
-const customActions = {
-  sendOpenChannelMessage: function(ctx) {
-    return console.log('Sending open channel message');
-  },
-};
+const customActions = {};
 const machine = Machine(config, { guards, actions: customActions });

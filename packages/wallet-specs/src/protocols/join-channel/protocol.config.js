@@ -25,7 +25,7 @@ const config = {
         ],
       },
     },
-    abort: { type: 'final' },
+    abort: { entry: 'sendCloseChannel', type: 'final' },
     preFundSetup: {
       invoke: {
         id: 'preFundSetup',
@@ -58,9 +58,13 @@ const config = {
         src: 'funding',
         data: function(_a) {
           var channelId = _a.channelId;
-          return { channelId: channelId };
+          return {
+            targetChannelId: channelId,
+            tries: 0,
+          };
         },
         onDone: 'postFundSetup',
+        autoForward: true,
       },
     },
     postFundSetup: {

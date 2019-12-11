@@ -3,11 +3,14 @@ const config = {
   initial: 'waiting',
   states: {
     waiting: {
-      entry: ['assignState', 'sendState'],
-      on: { CHANNEL_UPDATED: [{ target: 'success', cond: 'supported' }] },
+      invoke: {
+        src: 'sendState',
+        onDone: { target: 'success', cond: 'supported' },
+      },
     },
     success: { type: 'final' },
   },
+  on: { '*': [{ target: 'success', cond: 'supported' }] },
 };
 const guards = {
   supported: function(context) {

@@ -1,9 +1,9 @@
 const config = {
   key: 'advance-channel',
-  initial: 'waiting',
+  initial: 'sendingState',
   states: {
+    sendingState: { invoke: { src: 'sendState', onDone: 'waiting' } },
     waiting: {
-      entry: 'sendState',
       on: {
         CHANNEL_UPDATED: { target: 'success', cond: 'advanced' },
         '': { target: 'success', cond: 'advanced' },
@@ -17,9 +17,5 @@ const guards = {
     return true;
   },
 };
-const customActions = {
-  sendState: function(ctx) {
-    return true;
-  },
-};
+const customActions = {};
 const machine = Machine(config, { guards, actions: customActions });

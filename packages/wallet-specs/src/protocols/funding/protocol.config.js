@@ -4,12 +4,12 @@ const config = {
   states: {
     determineStrategy: {
       on: {
-        PROPOSAL_RECEIVED: {
+        FUNDING_STRATEGY_PROPOSED: {
           actions: {
             type: 'xstate.assign',
             assignment: function(ctx, _a) {
-              var data = _a.data;
-              return __assign(__assign({}, ctx), { peerChoice: data.choice });
+              var choice = _a.choice;
+              return __assign(__assign({}, ctx), { peerChoice: choice });
             },
           },
         },
@@ -21,24 +21,28 @@ const config = {
             id: 'ask-client-for-choice',
             src: 'askClient',
             onDone: {
+              target: 'wait',
               actions: [
                 'sendClientChoice',
                 {
                   type: 'xstate.assign',
                   assignment: function(ctx, _a) {
-                    var data = _a.data;
+                    var clientChoice = _a.data;
                     return __assign(__assign({}, ctx), {
-                      clientChoice: data.choice,
+                      clientChoice: clientChoice,
                     });
                   },
                 },
               ],
             },
           },
-          onDone: 'wait',
         },
         wait: {
           on: {
+            '': [
+              { target: 'success', cond: 'consensus' },
+              { target: 'retry', cond: 'disagreement' },
+            ],
             '*': [
               { target: 'success', cond: 'consensus' },
               { target: 'retry', cond: 'disagreement' },
@@ -64,31 +68,59 @@ const config = {
       ],
     },
     fundDirectly: { invoke: { src: 'directFunding', onDone: 'success' } },
-    fundIndirectly: { invoke: { src: 'ledgerFunding', onDone: 'success' } },
+    fundIndirectly: {
+      invoke: {
+        src: 'ledgerFunding',
+        data: function(_a) {
+          var targetChannelId = _a.targetChannelId;
+          return { targetChannelId: targetChannelId };
+        },
+        onDone: 'success',
+        autoForward: true,
+      },
+    },
     fundVirtually: { invoke: { src: 'virtualFunding', onDone: 'success' } },
     success: { type: 'final' },
     failure: { type: 'final' },
   },
 };
 const guards = {
-  consensus: function(x) {
-    return true;
+  consensus: function(_a) {
+    var clientChoice = _a.clientChoice,
+      peerChoice = _a.peerChoice;
+    return !!clientChoice && clientChoice === peerChoice;
   },
-  disagreement: function(x) {
-    return true;
+  disagreement: function(_a) {
+    var clientChoice = _a.clientChoice,
+      peerChoice = _a.peerChoice;
+    return clientChoice && peerChoice && clientChoice !== peerChoice;
   },
-  directStrategyChosen: function(x) {
-    return true;
+  directStrategyChosen: function(_a) {
+    var clientChoice = _a.clientChoice;
+    return clientChoice === 'Direct';
   },
-  indirectStrategyChosen: function(x) {
-    return true;
+  indirectStrategyChosen: function(_a) {
+    var clientChoice = _a.clientChoice;
+    return clientChoice === 'Indirect';
   },
-  virtualStrategyChosen: function(x) {
-    return true;
+  virtualStrategyChosen: function(_a) {
+    var clientChoice = _a.clientChoice;
+    return clientChoice === 'Virtual';
   },
-  maxTriesExceeded: function(x) {
+  maxTriesExceeded: function() {
     return true;
   },
 };
-const customActions = {};
+const customActions = {
+  sendClientChoice: function(ctx) {
+    console.log('Sending ' + __2.pretty(strategyChoice(ctx)));
+  },
+  assignClientChoice: {
+    type: 'xstate.assign',
+    assignment: function(ctx, _a) {
+      var clientChoice = _a.data;
+      return __assign(__assign({}, ctx), { clientChoice: clientChoice });
+    },
+  },
+};
 const machine = Machine(config, { guards, actions: customActions });

@@ -2,41 +2,90 @@ const config = {
   key: 'ledger-funding',
   initial: 'waitForChannel',
   states: {
-    lookForExistingChannel: {
-      invoke: { src: 'findLedgerChannelId' },
-      on: {
-        CHANNEL_FOUND: {
-          target: 'fundLedger',
-          actions: 'assignLedgerChannelId',
+    waitForChannel: {
+      initial: 'lookForExistingChannel',
+      states: {
+        lookForExistingChannel: {
+          invoke: {
+            src: 'findLedgerChannelId',
+            onDone: [
+              {
+                target: 'success',
+                cond: 'channelFound',
+                actions: {
+                  type: 'xstate.assign',
+                  assignment: function(ctx, event) {
+                    return __assign(__assign({}, ctx), {
+                      ledgerChannelId: event.data.channelId,
+                    });
+                  },
+                },
+              },
+              { target: 'determineLedgerChannel' },
+            ],
+          },
         },
-        CHANNEL_NOT_FOUND: 'createNewChannel',
+        determineLedgerChannel: {
+          invoke: { src: 'getNullChannelArgs', onDone: 'createNewLedger' },
+        },
+        createNewLedger: {
+          invoke: {
+            src: 'createNullChannel',
+            data: function(_, _a) {
+              var data = _a.data;
+              return {
+                channel: data.channel,
+                outcome: data.outcome,
+              };
+            },
+            onDone: {
+              target: 'success',
+              actions: {
+                type: 'xstate.assign',
+                assignment: function(ctx, event) {
+                  return __assign(__assign({}, ctx), {
+                    ledgerChannelId: event.data.channelId,
+                  });
+                },
+              },
+            },
+            autoForward: true,
+          },
+        },
+        success: { type: 'final' },
       },
-    },
-    createNewChannel: {
-      invoke: { src: 'createNullChannel', data: 'createNullChannelArgs' },
-      onDone: 'fundLedger',
+      onDone: { target: 'fundLedger' },
     },
     fundLedger: {
-      invoke: {
-        src: 'directFunding',
-        data: 'directFundingArgs',
-        onDone: 'fundTarget',
-      },
+      invoke: { src: 'directFunding', onDone: 'fundTarget', autoForward: true },
     },
     fundTarget: {
-      invoke: {
-        src: 'ledgerUpdate',
-        data: 'ledgerUpdateArgs',
-        onDone: 'success',
+      initial: 'getTargetOutcome',
+      states: {
+        getTargetOutcome: {
+          invoke: { src: 'getTargetOutcome', onDone: 'ledgerUpdate' },
+        },
+        ledgerUpdate: {
+          invoke: {
+            src: 'supportState',
+            data: function(ctx, _a) {
+              var data = _a.data;
+              return {
+                channelId: ctx.ledgerChannelId,
+                outcome: data.outcome,
+              };
+            },
+            autoForward: true,
+            onDone: 'success',
+          },
+        },
+        success: { type: 'final' },
       },
+      onDone: 'success',
     },
     success: { type: 'final' },
   },
 };
-const guards = {
-  suitableChannelExists: function(x) {
-    return true;
-  },
-};
+const guards = {};
 const customActions = {};
 const machine = Machine(config, { guards, actions: customActions });
