@@ -164,6 +164,16 @@ export const channelUpdatedEvent: ActionConstructor<ChannelUpdatedEvent> = p => 
   type: "WALLET.CHANNEL_UPDATED_EVENT"
 });
 
+export interface CloseChannelResponse extends ApiResponseAction {
+  type: "WALLET.CLOSE_CHANNEL_RESPONSE";
+  channelId: string;
+}
+
+export const closeChannelResponse: ActionConstructor<CloseChannelResponse> = p => ({
+  ...p,
+  type: "WALLET.CLOSE_CHANNEL_RESPONSE"
+});
+
 export type OutgoingApiAction =
   | AddressResponse
   | CreateChannelResponse
@@ -181,4 +191,5 @@ export type OutgoingApiAction =
   | RelayActionWithMessage
   | ApiNotImplemented
   | SendChannelUpdatedMessage
-  | ChannelUpdatedEvent;
+  | ChannelUpdatedEvent
+  | CloseChannelResponse;

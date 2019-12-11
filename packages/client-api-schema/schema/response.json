@@ -29,7 +29,8 @@
             {"$ref": "join-channel.json#/definitions/JoinChannelResult"},
             {"$ref": "push-message.json#/definitions/PushMessageResult"},
             {"$ref": "get-address.json#/definitions/GetAddressResult"},
-            {"$ref": "update-channel.json#/definitions/UpdateChannelResult"}
+            {"$ref": "update-channel.json#/definitions/UpdateChannelResult"},
+            {"$ref": "close-channel.json#/definitions/CloseChannelResult"}
           ]
         }
       }

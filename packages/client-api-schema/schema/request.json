@@ -20,7 +20,14 @@
       "properties": {
         "jsonrpc": {"enum": ["2.0"]},
         "method": {
-          "enum": ["CreateChannel", "JoinChannel", "GetAddress", "PushMessage", "UpdateChannel"]
+          "enum": [
+            "CreateChannel",
+            "JoinChannel",
+            "GetAddress",
+            "PushMessage",
+            "UpdateChannel",
+            "CloseChannel"
+          ]
         },
         "id": {
           "type": ["string", "number"]
@@ -68,6 +75,14 @@
           },
           "then": {
             "params": {"$ref": "update-channel.json#/definitions/UpdateChannelParams"}
+          }
+        },
+        {
+          "if": {
+            "properties": {"method": {"const": "CloseChannel"}}
+          },
+          "then": {
+            "params": {"$ref": "close-channel.json#/definitions/CloseChannelParams"}
           }
         }
       ]
