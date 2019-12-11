@@ -15,5 +15,5 @@ void (async () => {
   }
   const deploymentsFile = path.join(process.cwd(), cacheFolder, `ganache-deployments-${port}.json`);
 
-  await startSharedGanache(deploymentsFile);
+  await startSharedGanache(deploymentsFile, {port});
 })();
