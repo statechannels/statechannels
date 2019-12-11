@@ -22,12 +22,14 @@ export async function handleWalletMessage(
   }
 }
 
-async function shouldHandleAsNewProcessAction(action: ChannelOpen): Promise<boolean> {
+async function shouldHandleAsNewProcessAction(
+  action: ChannelOpen | SignedStatesReceived
+): Promise<boolean> {
   return !(await getProcess(getProcessId(action)));
 }
 
-function isNewProcessAction(action: RelayableAction): action is ChannelOpen {
-  return action.type === 'Channel.Open';
+function isNewProcessAction(action: RelayableAction): action is ChannelOpen | SignedStatesReceived {
+  return action.type === 'Channel.Open' || action.type === 'WALLET.COMMON.SIGNED_STATES_RECEIVED';
 }
 
 function isProtocolAction(

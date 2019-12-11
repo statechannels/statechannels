@@ -1,7 +1,7 @@
 import * as firebase from 'firebase';
 
 import {HUB_ADDRESS} from '../constants';
-import {MessageRelayRequested} from '../wallet-client';
+import {RelayActionWithMessage} from '../communication';
 
 const config = {
   apiKey: process.env.FIREBASE_API_KEY,
@@ -37,11 +37,11 @@ async function listen() {
   });
 }
 
-process.on('message', (message: MessageRelayRequested) => {
-  const sanitizedPayload = JSON.parse(JSON.stringify(message.messagePayload));
+process.on('message', (message: RelayActionWithMessage) => {
+  const sanitizedPayload = JSON.parse(JSON.stringify(message));
   getMessagesRef()
-    .child(message.to.toLowerCase())
-    .push({payload: sanitizedPayload, queue: 'WALLET'});
+    .child(message.toParticipantId.toLowerCase())
+    .push(sanitizedPayload);
 });
 
 if (require.main === module) {

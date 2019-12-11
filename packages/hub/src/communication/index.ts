@@ -128,7 +128,14 @@ export function isStartProcessAction(a: {type: string}): a is StartProcessAction
   return a.type === 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED';
 }
 
-export function getProcessId(action: ChannelOpen) {
-  const processId = getChannelId(action.signedState.state.channel);
-  return `Funding-${processId}`;
+export function isChannelOpenAction(a: RelayableAction): a is ChannelOpen {
+  return a.type === 'Channel.Open';
+}
+
+export function getProcessId(action: ChannelOpen | SignedStatesReceived) {
+  if (isChannelOpenAction(action)) {
+    const processId = getChannelId(action.signedState.state.channel);
+    return `Funding-${processId}`;
+  }
+  return action.processId;
 }
