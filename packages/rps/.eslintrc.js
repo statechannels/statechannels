@@ -51,34 +51,19 @@ module.exports = {
     browser: true,
     es6: true,
   },
-  parser: '@typescript-eslint/parser',
-  parserOptions: {
-    project: 'tsconfig.json',
-    ecmaVersion: 2018,
-    sourceType: 'module',
-  },
-  plugins: ['@typescript-eslint', 'prettier', 'jest', 'react'],
+  plugins: ['jest', 'react'],
   settings: {
     react: {
       version: 'detect',
     },
   },
   extends: [
-    'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
+    '../../.eslintrc.js',
     'plugin:jest/recommended',
     'plugin:jest/style',
-    'plugin:import/errors',
-    'plugin:import/warnings',
-    'plugin:import/typescript',
     'plugin:react/recommended',
-    'plugin:prettier/recommended',
   ],
   rules: {
-    'prettier/prettier': 'warn',
-    // @typescript-eslint/no-unused-vars overrides this
-    'no-unused-vars': 'off',
-
     ...generalRules,
     ...leftoverTsLintRules,
     ...importRules,
