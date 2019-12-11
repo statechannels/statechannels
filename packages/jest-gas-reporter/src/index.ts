@@ -1,6 +1,5 @@
 import {Interface, ParamType} from 'ethers/utils';
 import {JsonRpcProvider} from 'ethers/providers';
-import easyTable from 'easy-table';
 import fs from 'fs';
 import linker from 'solc/linker';
 import path from 'path';
@@ -36,6 +35,7 @@ interface ParsedArtifact {
   networks: {[networkName: string]: {address: string}};
 }
 
+const gasCosts = {};
 /* TODO: 
  - Handle failures gracefully
  - Organize and clean up
@@ -90,9 +90,9 @@ export class GasReporter implements jest.Reporter {
       endBlockNum,
       this.options.contractArtifactFolder
     );
-    const results = this.outputGasInfo(contractCalls);
-    if (process.env.CIRCLECI && (results[0] !== '\n\n' || results[1] !== '\n\n')) {
-      await this.saveResultsToFile(results, process.env.CIRCLE_SHA1);
+    this.outputGasInfo(contractCalls);
+    if (process.env.CIRCLECI && gasCosts !== {}) {
+      await this.saveResultsToFile(gasCosts, process.env.CIRCLE_SHA1);
     }
   }
 
@@ -160,13 +160,14 @@ export class GasReporter implements jest.Reporter {
     }
   }
 
-  outputGasInfo(contractCalls: ContractCalls): [string, string] {
+  outputGasInfo(contractCalls: ContractCalls): void {
     console.log();
     console.log('Gas Info:');
     console.log();
     console.log('Function Calls:');
-    const methodTable = new easyTable();
+    // const methodTable = new easyTable();
     for (const contractName of Object.keys(contractCalls)) {
+      const gasCostsForSingleContract = {};
       const methodCalls = contractCalls[contractName].methodCalls;
       Object.keys(methodCalls).forEach(methodName => {
         const method = methodCalls[methodName];
@@ -174,19 +175,18 @@ export class GasReporter implements jest.Reporter {
         const average = Math.round(total / method.gasData.length);
         const min = Math.min(...method.gasData);
         const max = Math.max(...method.gasData);
-        methodTable.cell('Contract Name', contractName);
-        methodTable.cell('Method Name', methodName);
-        methodTable.cell('Calls', method.calls);
-        methodTable.cell('Min Gas', min);
-        methodTable.cell('Max Gas', max);
-        methodTable.cell('Average Gas', average);
-        methodTable.newRow();
+        gasCostsForSingleContract['methods'][methodName].calls = method.calls;
+        gasCostsForSingleContract['methods'][methodName].minGas = min;
+        gasCostsForSingleContract['methods'][methodName].maxGas = max;
+        gasCostsForSingleContract['methods'][methodName].meanGas = average;
+        // methodTable.cell('Contract Name', contractName);
+        // methodTable.cell('Method Name', methodName);
+        // methodTable.cell('Calls', method.calls);
+        // methodTable.cell('Min Gas', min);
+        // methodTable.cell('Max Gas', max);
+        // methodTable.cell('Average Gas', average);
+        // methodTable.newRow();
       });
-    }
-    console.log(methodTable.toString());
-    console.log('Deployments:');
-    const deployTable = new easyTable();
-    for (const contractName of Object.keys(contractCalls)) {
       if (contractCalls[contractName].deploy) {
         const deploy = contractCalls[contractName].deploy;
 
@@ -195,16 +195,25 @@ export class GasReporter implements jest.Reporter {
         const min = Math.min(...deploy.gasData);
         const max = Math.max(...deploy.gasData);
 
-        deployTable.cell('Contract Name', contractName);
-        deployTable.cell('Deployments', deploy.calls);
-        deployTable.cell('Min Gas', min);
-        deployTable.cell('Max Gas', max);
-        deployTable.cell('Average Gas', average);
-        deployTable.newRow();
+        gasCostsForSingleContract['deployment'].minGas = min;
+        gasCostsForSingleContract['deployment'].maxGas = max;
+        gasCostsForSingleContract['deployment'].meanGas = average;
+
+        // deployTable.cell('Contract Name', contractName);
+
+        // deployTable.cell('Min Gas', min);
+        // deployTable.cell('Max Gas', max);
+        // deployTable.cell('Average Gas', average);
+        // deployTable.newRow();
       }
+      gasCosts[contractName] = gasCostsForSingleContract;
     }
-    console.log(deployTable.toString());
-    return [methodTable.toString(), deployTable.toString()];
+    // console.log(methodTable.toString());
+    // console.log('Deployments:');
+    // const deployTable = new easyTable();
+    // for (const contractName of Object.keys(contractCalls)) {
+    // }
+    console.log(gasCosts);
   }
 
   async parseBlock(blockNum: number, contractCalls: ContractCalls): Promise<void> {
@@ -252,7 +261,9 @@ export class GasReporter implements jest.Reporter {
     }
   }
 
-  async saveResultsToFile(array: string[], hash: string): Promise<void> {
+  async saveResultsToFile(gasCosts: object, hash: string): Promise<void> {
+    const gasCostsString = JSON.stringify(gasCosts);
+    const array = [gasCostsString];
     array.unshift(
       'Gas consumption measured at ' +
         Date.now() +
