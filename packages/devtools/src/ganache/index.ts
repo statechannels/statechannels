@@ -108,8 +108,11 @@ export const setupGanache = async (): Promise<SharedReturnType | IndividualRetur
     }
     say(`Using the deployments cache at ${deploymentsFile}.`);
 
+    const deployerAccountIndex = Number(process.env.DEPLOYER_ACCOUNT_INDEX || 0);
+    const deployerAccountKey = ETHERLIME_ACCOUNTS[deployerAccountIndex].privateKey;
+
     type = 'shared';
-    deployer = new GanacheNCacheDeployer(port, deploymentsFile);
+    deployer = new GanacheNCacheDeployer(port, deploymentsFile, deployerAccountKey);
   } else {
     say(
       'The USE_GANACHE_DEPLOYMENT_CACHE option is not set, so starting an individual ganache instance.'
