@@ -86,7 +86,13 @@ export const machine: MachineFactory<Init, any> = (
       const { latestSupportedState, unsupportedStates } = store.getEntry(
         channelId
       );
-      const turnNum = targetTurnNum; // TODO: fix
+      const turnNum = targetTurnNum;
+      /*
+      TODO: the actual turnNum is calculated below. However, to determine whether
+      a state is supported requires us to implement signature checking.
+      const turnNum =
+        targetTurnNum - channel.participants.length + ourIndex + 1;
+      */
       if (!latestSupportedState) {
         store.sendState({ ...unsupportedStates[0].state, turnNum });
         return;

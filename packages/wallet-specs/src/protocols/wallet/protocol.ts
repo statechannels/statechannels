@@ -1,6 +1,13 @@
-import { AnyEventObject, assign, AssignAction, Machine, spawn } from 'xstate';
+import {
+  AnyEventObject,
+  assign,
+  AssignAction,
+  Interpreter,
+  Machine,
+  spawn,
+} from 'xstate';
 import { CreateChannel, JoinChannel } from '..';
-import { getChannelID, pretty, Store, unreachable } from '../..';
+import { getChannelId, pretty, Store, unreachable } from '../..';
 import { ChannelUpdated } from '../../store';
 import {
   FundingStrategyProposed,
@@ -16,7 +23,7 @@ export type Events =
   | FundingStrategyProposed;
 export type Process = {
   id: string;
-  ref: any;
+  ref: Interpreter<any, any, any>;
 };
 
 export interface Init {
@@ -66,12 +73,12 @@ export type Actions = {
   updateStore: any; // TODO
 };
 
-function addLogs(process: Process, ctx): Process {
-  process.ref
+function addLogs(walletProcess: Process, ctx): Process {
+  walletProcess.ref
     .onTransition(state =>
       console.log(
         pretty({
-          actor: `${ctx.id}.${process.id}`,
+          actor: `${ctx.id}.${walletProcess.id}`,
           TRANSITION: { state: state.value },
         })
       )
@@ -79,13 +86,13 @@ function addLogs(process: Process, ctx): Process {
     .onEvent(event => {
       console.log(
         pretty({
-          actor: `${ctx.id}.${process.id}`,
+          actor: `${ctx.id}.${walletProcess.id}`,
           EVENT: { event: event.type },
         })
       );
     });
 
-  return process;
+  return walletProcess;
 }
 
 export function machine(store: Store, context: Init) {
@@ -96,42 +103,42 @@ export function machine(store: Store, context: Init) {
         throw new Error('Process exists');
       }
 
-      const process = addLogs(
-        {
-          id: processId,
-          ref: spawn(
-            CreateChannel.machine(store, init).withContext(init),
-            processId
-          ),
-        },
-        ctx
-      );
+      const walletProcess = {
+        id: processId,
+        ref: spawn(
+          CreateChannel.machine(store, init).withContext(init),
+          processId
+        ),
+      };
+      if (process.env.ADD_LOGS) {
+        addLogs(walletProcess, ctx);
+      }
 
       return {
         ...ctx,
-        processes: ctx.processes.concat([process]),
+        processes: ctx.processes.concat([walletProcess]),
       };
     }
   );
 
   const spawnJoinChannel = assign((ctx: Init, event: OpenChannelEvent) => {
-    const channelId = getChannelID(event.signedState.state.channel);
+    const channelId = getChannelId(event.signedState.state.channel);
     const processId = `join-${channelId}`;
     if (ctx.processes.find(p => p.id === processId)) {
       throw new Error('Process exists');
     }
     const joinChannelMachine = JoinChannel.machine(store, { channelId });
-    const process = addLogs(
-      {
-        id: processId,
-        ref: spawn(joinChannelMachine, processId),
-      },
-      ctx
-    );
-    process.ref.send(event);
+    const walletProcess: Process = {
+      id: processId,
+      ref: spawn(joinChannelMachine, processId),
+    };
+    if (process.env.ADD_LOGS) {
+      addLogs(walletProcess, ctx);
+    }
+    walletProcess.ref.send(event);
     return {
       ...ctx,
-      processes: ctx.processes.concat([process]),
+      processes: ctx.processes.concat([walletProcess]),
     };
   });
 
@@ -141,11 +148,11 @@ export function machine(store: Store, context: Init) {
     switch (event.type) {
       case 'OPEN_CHANNEL':
         store.receiveStates([event.signedState]);
-        channelId = getChannelID(event.signedState.state.channel);
+        channelId = getChannelId(event.signedState.state.channel);
         break;
       case 'SendStates':
         store.receiveStates(event.signedStates);
-        channelId = getChannelID(event.signedStates[0].state.channel);
+        channelId = getChannelId(event.signedStates[0].state.channel);
         break;
       case 'CREATE_CHANNEL':
       case 'FUNDING_STRATEGY_PROPOSED':

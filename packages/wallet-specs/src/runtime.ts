@@ -20,18 +20,22 @@ const stores = {
   second: store(second),
 };
 
-const logEvents = name => event => {
-  console.log(
-    pretty({
-      EVENT_LOGGED: {
-        wallet: name,
-        event: event.type,
-      },
-    })
-  );
-};
-const logStore = name => state =>
-  console.log(`${name}'s store: ${pretty(stores[name])}`);
+const logEvents = name =>
+  process.env.ADD_LOGS
+    ? event =>
+        console.log(
+          pretty({
+            EVENT_LOGGED: {
+              wallet: name,
+              event: event.type,
+            },
+          })
+        )
+    : () => {};
+const logStore = name =>
+  process.env.ADD_LOGS
+    ? state => console.log(`${name}'s store: ${pretty(stores[name])}`)
+    : () => {};
 const wallet = (name: string) => {
   const machine = Wallet.machine(stores[name], { processes: [], id: name });
   return interpret<Wallet.Init, any, Wallet.Events>(machine)

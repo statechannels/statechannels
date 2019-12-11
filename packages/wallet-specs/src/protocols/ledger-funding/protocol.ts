@@ -1,16 +1,13 @@
 import { assign, DoneInvokeEvent, Machine } from 'xstate';
-import { CreateNullChannel } from '..';
+import { CreateNullChannel, DirectFunding, SupportState } from '..';
 import {
-  add,
+  Allocation,
   Channel,
   ensureExists,
   MachineFactory,
   Store,
   success,
 } from '../..';
-import { Init as CreateNullChannelArgs } from '../create-null-channel/protocol';
-import { Init as DirectFundingArgs } from '../direct-funding/protocol';
-import { Init as LedgerUpdateArgs } from '../ledger-update/protocol';
 
 const PROTOCOL = 'ledger-funding';
 
@@ -61,6 +58,7 @@ const createNewLedger = {
       outcome: data.outcome,
     }),
     onDone: { target: 'success', actions: assignLedgerChannelId },
+    autoForward: true,
   },
 };
 
@@ -75,19 +73,41 @@ const waitForChannel = {
   onDone: { target: 'fundLedger' },
 };
 
-type LedgerExists = Init & { ledgerChannelID: string };
+type LedgerExists = Init & { ledgerChannelId: string };
 const fundLedger = {
   invoke: {
     src: 'directFunding',
     onDone: 'fundTarget',
+    autoForward: true,
   },
 };
 
 const fundTarget = {
-  invoke: {
-    src: 'ledgerUpdate',
-    onDone: 'success',
+  initial: 'getTargetOutcome',
+  states: {
+    getTargetOutcome: {
+      invoke: {
+        src: 'getTargetOutcome',
+        onDone: 'ledgerUpdate',
+      },
+    },
+    ledgerUpdate: {
+      invoke: {
+        src: 'supportState',
+        data: (
+          ctx: LedgerExists,
+          { data }: DoneInvokeEvent<{ outcome: Allocation }>
+        ) => ({
+          channelId: ctx.ledgerChannelId,
+          outcome: data.outcome,
+        }),
+        autoForward: true,
+        onDone: 'success',
+      },
+    },
+    success,
   },
+  onDone: 'success',
 };
 
 export const config = {
@@ -108,7 +128,8 @@ export type Services = {
   getNullChannelArgs(ctx: Init): Promise<CreateNullChannel.Init>;
   createNullChannel: any;
   directFunding: any;
-  ledgerUpdate: any;
+  getTargetOutcome(ctx: LedgerExists): Promise<SupportState.Init>;
+  supportState: any;
 };
 
 export const guards = {
@@ -122,35 +143,10 @@ export const machine: MachineFactory<Init, any> = (
   store: Store,
   context: Init
 ) => {
-  const createNullChannelArgs: (ctx: Init) => CreateNullChannelArgs = ({
-    targetChannelId: targetChannelID,
-  }: Init) => {
-    const { channel: targetChannel, outcome } = store.getLatestState(
-      targetChannelID
-    );
-    const channel = {
-      ...targetChannel,
-      channelNonce: store.getNextNonce(targetChannel.participants),
-    };
-    return { channel, outcome };
-  };
-  function directFundingArgs(ctx: LedgerExists): DirectFundingArgs {
+  function directFundingArgs(ctx: LedgerExists): DirectFunding.Init {
     return {
-      channelID: ctx.ledgerChannelID,
+      channelId: ctx.ledgerChannelId,
       minimalOutcome: store.getLatestState(ctx.targetChannelId).outcome,
-    };
-  }
-  function ledgerUpdateArgs({
-    ledgerChannelID,
-    targetChannelId: targetChannelID,
-  }: LedgerExists): LedgerUpdateArgs {
-    const amount = store
-      .getLatestSupportedAllocation(targetChannelID)
-      .map(o => o.amount)
-      .reduce(add);
-    return {
-      channelID: ledgerChannelID,
-      targetOutcome: [{ destination: targetChannelID, amount }],
     };
   }
 
@@ -175,12 +171,32 @@ export const machine: MachineFactory<Init, any> = (
     };
   }
 
+  async function getTargetOutcome({
+    targetChannelId,
+    ledgerChannelId,
+  }: LedgerExists): Promise<SupportState.Init> {
+    // const { latestState: ledgerState } = store.getEntry(ledgerChannelId);
+    // const { latestState: targetChannelState } = store.getEntry(targetChannelId);
+
+    const outcome: Allocation = [
+      {
+        destination: targetChannelId,
+        amount: 'TODO', // TODO
+      },
+    ];
+    return {
+      channelId: ledgerChannelId,
+      outcome,
+    };
+  }
+
   const services: Services = {
-    findLedgerChannelId: async () => ({ type: 'NOT_FOUND' }),
+    findLedgerChannelId: async () => ({ type: 'NOT_FOUND' }), // TODO
     getNullChannelArgs,
     createNullChannel: CreateNullChannel.machine(store),
-    ledgerUpdate: () => true,
-    directFunding: () => true,
+    directFunding: async () => true,
+    getTargetOutcome,
+    supportState: SupportState.machine(store),
   };
 
   const options = { services, guards };

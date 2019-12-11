@@ -123,3 +123,7 @@ export function isDefined<T>(t: T | undefined): t is T {
 }
 
 export const FINAL = 'final' as 'final';
+
+export function outcomesEqual(left: Outcome, right: Outcome): boolean {
+  return JSON.stringify(left) === JSON.stringify(right);
+}
