@@ -104,6 +104,8 @@ jobs:
       - upload_logs:
           file: test-stats
       - notify_slack
+      - store_artifacts:
+          path: /rps/gas.txt
 
   integration-test:
     <<: *defaults
