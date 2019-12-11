@@ -1,11 +1,11 @@
 import { AnyEventObject, interpret, Interpreter } from 'xstate';
 import { pretty } from '.';
 import { messageService } from './messaging';
+import { createChannel } from './mock-messages';
 import { Wallet } from './protocols';
-import { AddressableMessage } from './wire-protocol';
-
-import { CreateChannelEvent } from './protocols/wallet/protocol';
+import { Process } from './protocols/wallet/protocol';
 import { Store } from './store';
+import { AddressableMessage } from './wire-protocol';
 
 const store = name => {
   const privateKeys = { [name]: name };
@@ -21,7 +21,7 @@ const stores = {
   second: store(second),
 };
 
-const logEvents = name => event =>
+const logEvents = name => event => {
   console.log(
     pretty({
       EVENT_LOGGED: {
@@ -30,17 +30,18 @@ const logEvents = name => event =>
       },
     })
   );
+};
 const logStore = name => state =>
   console.log(`${name}'s store: ${pretty(stores[name])}`);
-const wallet = name => {
-  return interpret(
-    Wallet.machine(stores[name]).withContext({ processes: [], id: name })
-  )
+const wallet = (name: string) => {
+  const machine = Wallet.machine(stores[name], { processes: [], id: name });
+  return interpret<Wallet.Init, any, Wallet.Events>(machine)
     .onEvent(logEvents(name))
+    .onTransition(logStore(name))
     .start();
 };
 
-const wallets: Record<string, Interpreter<Wallet.Init, any, AnyEventObject>> = {
+const wallets = {
   first: wallet(first),
   second: wallet(second),
 };
@@ -49,27 +50,5 @@ const wallets: Record<string, Interpreter<Wallet.Init, any, AnyEventObject>> = {
 messageService.on('message', ({ to, ...event }: AddressableMessage) => {
   wallets[to].send(event);
 });
-
-const createChannel: CreateChannelEvent = {
-  type: 'CREATE_CHANNEL',
-  participants: [
-    {
-      participantId: first,
-      signingAddress: first,
-      destination: first,
-    },
-    {
-      participantId: second,
-      signingAddress: second,
-      destination: second,
-    },
-  ],
-  allocations: [
-    { destination: first, amount: '3' },
-    { destination: second, amount: '1' },
-  ],
-  appDefinition: '0x',
-  appData: '0x',
-};
 
 wallets[first].send(createChannel);

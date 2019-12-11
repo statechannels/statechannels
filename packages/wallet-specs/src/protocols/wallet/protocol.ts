@@ -7,25 +7,48 @@ import {
   State,
 } from 'xstate';
 import { CreateChannel, JoinChannel } from '..';
-import { getChannelID, pretty, Store, unreachable } from '../..';
-import { OpenChannel, SendStates } from '../../wire-protocol';
+import {
+  forwardChannelUpdated,
+  getChannelID,
+  pretty,
+  Store,
+  unreachable,
+} from '../..';
+import { ChannelUpdated } from '../../store';
+import {
+  FundingStrategyProposed,
+  OpenChannel,
+  SendStates,
+} from '../../wire-protocol';
 
 const PROTOCOL = 'wallet';
+export type Events =
+  | OpenChannelEvent
+  | CreateChannelEvent
+  | SendStates
+  | FundingStrategyProposed;
 export type Process = {
   id: string;
   ref: any;
 };
+
 export interface Init {
   id: string;
   processes: Process[];
 }
 
-function forwardToChildren(
-  _ctx,
-  event: AnyEventObject,
-  { state }: { state: State<any, any, any> }
-) {
-  state.context.processes.forEach(({ ref }: Process) => ref.send(event));
+function forwardToChildren(_ctx, event: Events, { state }) {
+  switch (event.type) {
+    case 'FUNDING_STRATEGY_PROPOSED':
+      state.context.processes.forEach(({ ref }: Process) => ref.send(event));
+      break;
+    case 'CREATE_CHANNEL':
+    case 'OPEN_CHANNEL':
+    case 'SendStates':
+      break;
+    default:
+      unreachable(event);
+  }
 }
 const config = {
   key: PROTOCOL,
@@ -56,8 +79,6 @@ export type Actions = {
   updateStore: any; // TODO
 };
 
-export type Events = OpenChannelEvent | CreateChannelEvent | SendStates;
-
 function addLogs(process: Process, ctx): Process {
   process.ref
     .onTransition(state =>
@@ -80,7 +101,7 @@ function addLogs(process: Process, ctx): Process {
   return process;
 }
 
-export function machine(store: Store) {
+export function machine(store: Store, context: Init) {
   const spawnCreateChannel = assign(
     (ctx: Init, { type, ...init }: CreateChannelEvent): Init => {
       const processId = `create-channel`;
@@ -128,18 +149,32 @@ export function machine(store: Store) {
   });
 
   // TODO: Should this send `CHANNEL_UPDATED` to children?
-  const updateStore = (_ctx, event: Events) => {
+  const updateStore = (_ctx, event: Events, { state }) => {
+    let channelId: string = '';
     switch (event.type) {
       case 'OPEN_CHANNEL':
         store.receiveStates([event.signedState]);
+        channelId = getChannelID(event.signedState.state.channel);
         break;
       case 'SendStates':
         store.receiveStates(event.signedStates);
+        channelId = getChannelID(event.signedStates[0].state.channel);
         break;
       case 'CREATE_CHANNEL':
+      case 'FUNDING_STRATEGY_PROPOSED':
         break;
       default:
         unreachable(event);
+    }
+
+    if (channelId) {
+      const channelUpdated: ChannelUpdated = {
+        type: 'CHANNEL_UPDATED',
+        channelId,
+      };
+      state.context.processes.forEach(({ ref }: Process) =>
+        ref.send(channelUpdated)
+      );
     }
   };
 
@@ -152,5 +187,5 @@ export function machine(store: Store) {
     },
   };
 
-  return Machine(config, options);
+  return Machine(config, options).withContext(context);
 }
