@@ -36,7 +36,8 @@
     "precommit": "lint-staged --quiet"
   },
   "lint-staged": {
-    "**/*.{ts,tsx}": "eslint --max-warnings=0"
+    "**/*.{js,ts,tsx}": "eslint --cache --max-warnings=0",
+    "**/*.{json,scss}": "prettier --ignore-path '.gitignore'"
   },
   "dependencies": {
     "@babel/core": "^7.6.2",
