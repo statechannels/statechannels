@@ -13,6 +13,7 @@ defaults: &defaults
         POSTGRES_USER: root
         POSTGRES_DB: hub_wallet_test
         POSTGRES_PASSWORD: ''
+        NODE_ENV: test
 
 save_dep: &save_dep
   save_cache:
@@ -105,7 +106,11 @@ jobs:
           file: test-stats
       - notify_slack
       - store_artifacts:
-          path: /rps/gas.txt
+          path: /packages/rps/gas.txt
+      - store_artifacts:
+          path: /packages/nitro-protocol/gas.txt
+      - store_artifacts:
+          path: /packages/wallet/gas.txt
 
   integration-test:
     <<: *defaults
