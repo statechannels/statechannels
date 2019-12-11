@@ -84,10 +84,9 @@ export type RelayableAction =
 export type ActionConstructor<T> = (p: Pick<T, Exclude<keyof T, 'type' | 'protocol'>>) => T;
 
 export interface RelayActionWithMessage {
-  type: 'WALLET.RELAY_ACTION_WITH_MESSAGE';
-  toParticipantId: string;
-  fromParticipantId: string;
-  actionToRelay: RelayableAction;
+  recipient: string;
+  sender: string;
+  data: RelayableAction;
 }
 
 export const relayActionWithMessage: ActionConstructor<RelayActionWithMessage> = p => ({

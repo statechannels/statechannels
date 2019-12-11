@@ -40,7 +40,7 @@ async function listen() {
 process.on('message', (message: RelayActionWithMessage) => {
   const sanitizedPayload = JSON.parse(JSON.stringify(message));
   getMessagesRef()
-    .child(message.toParticipantId.toLowerCase())
+    .child(message.recipient.toLowerCase())
     .push(sanitizedPayload);
 });
 
