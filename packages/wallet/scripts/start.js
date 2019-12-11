@@ -94,6 +94,6 @@ void (async () => {
     if (err) {
       return console.log(err);
     }
-    console.log(chalk.cyan("Starting the development server...\n"));
+    console.log(chalk.cyan(`Starting the development server at ${HOST}:${port} ...\n`));
   });
 })();

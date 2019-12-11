@@ -7,7 +7,6 @@ import metamaskSaga from '../metamask/saga';
 
 function* loginSaga() {
   try {
-    console.log(reduxSagaFirebase);
     yield call(reduxSagaFirebase.auth.signInAnonymously);
     // successful login will trigger the loginStatusWatcher, which will update the state
   } catch (error) {
@@ -50,8 +49,6 @@ function* loginStatusWatcherSaga() {
 }
 
 export default function* loginRootSaga() {
-  yield take(loginActions.WALLET_IFRAME_LOADED);
-
   const metaMask = yield metamaskSaga();
 
   // If metamask is not properly set up we can halt processing and wait for the reload

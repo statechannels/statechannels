@@ -3,40 +3,7 @@
   "$id": "http://statechannels.org/schemas/join-channel.json",
   "definitions": {
     "JoinChannelResult": {
-      "type": "object",
-      "properties": {
-        "participants": {
-          "type": "array",
-          "items": {
-            "$ref": "definitions.json#/definitions/Participant"
-          },
-          "title": "participants"
-        },
-        "allocations": {
-          "type": "array",
-          "items": {
-            "$ref": "definitions.json#/definitions/Allocation"
-          },
-          "title": "allocations"
-        },
-        "appDefinition": {
-          "$ref": "definitions.json#/definitions/Address",
-          "title": "appDefinition"
-        },
-        "appData": {
-          "type": "string",
-          "title": "appData"
-        },
-        "status": {
-          "type": "string",
-          "const": "Opening"
-        },
-        "turnNum": {
-          "type": "integer",
-          "const": 1
-        }
-      },
-      "required": ["allocations", "appData", "appDefinition", "participants", "status", "turnNum"]
+      "$ref": "channel-result.json#/definitions/ChannelResult"
     },
     "JoinChannelParams": {
       "type": "object",

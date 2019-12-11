@@ -14,19 +14,19 @@ export default function* checkMetamask() {
 
   const networks = {
     development: {
-      network_id: '*', // match any network
+      networkId: '*', // match any network
     },
     main: {
-      network_id: 1,
+      networkId: 1,
     },
     ropsten: {
-      network_id: 3,
+      networkId: 3,
     },
     rinkeby: {
-      network_id: 4,
+      networkId: 4,
     },
     kovan: {
-      network_id: 42,
+      networkId: 42,
     },
   };
 

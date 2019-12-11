@@ -1,14 +1,14 @@
-import {messageSent} from "../../actions";
-import {OutgoingApiAction} from "./outgoing-api-actions";
-import {call, select, put} from "redux-saga/effects";
-import {getChannelStatus} from "../../state";
-import {ChannelState, getLastState} from "../../channel-store";
-import {createJsonRpcAllocationsFromOutcome} from "../../../utils/json-rpc-utils";
-import jrs from "jsonrpc-lite";
-import {unreachable} from "../../../utils/reducer-utils";
-import {validateResponse, validateNotification} from "../../../json-rpc-validation/validator";
-import {getChannelHoldings, getLastSignedStateForChannel} from "../../selectors";
 import {bigNumberify} from "ethers/utils";
+import jrs from "jsonrpc-lite";
+import {call, put, select} from "redux-saga/effects";
+import {validateNotification, validateResponse} from "../../../json-rpc-validation/validator";
+import {createJsonRpcAllocationsFromOutcome} from "../../../utils/json-rpc-utils";
+import {unreachable} from "../../../utils/reducer-utils";
+import {messageSent} from "../../actions";
+import {ChannelParticipant, ChannelState, getLastState} from "../../channel-store";
+import {getChannelHoldings, getLastSignedStateForChannel} from "../../selectors";
+import {getChannelStatus} from "../../state";
+import {OutgoingApiAction} from "./outgoing-api-actions";
 
 export function* messageSender(action: OutgoingApiAction) {
   const message = yield createResponseMessage(action);
@@ -75,15 +75,15 @@ function* createResponseMessage(action: OutgoingApiAction) {
         signedState: yield select(getLastSignedStateForChannel, action.channelId)
       };
       return jrs.notification("MessageQueued", {
-        recipient: action.fromParticipantId,
-        sender: action.toParticipantId,
+        recipient: action.toParticipantId,
+        sender: action.fromParticipantId,
         data: channelUpdated
       });
     case "WALLET.CHANNEL_UPDATED_EVENT":
       return jrs.notification("ChannelUpdated", yield getChannelInfo(action.channelId));
     case "WALLET.CHANNEL_PROPOSED_EVENT":
       return jrs.notification("ChannelProposed", yield getChannelInfo(action.channelId));
-    case "WALLET.POST_MESSAGE_RESPONSE":
+    case "WALLET.PUSH_MESSAGE_RESPONSE":
       return jrs.success(action.id, {success: true});
     case "WALLET.UNKNOWN_CHANNEL_ID_ERROR":
       return jrs.error(
@@ -111,9 +111,9 @@ function* validate(message: any, action: OutgoingApiAction) {
     }
     if (!result.isValid) {
       console.error(`Outgoing message validation failed.`);
-      console.error(`Action\n${JSON.stringify(action)}`);
-      console.error(`Message\n${JSON.stringify(message)}`);
-      console.error(`Validation Errors\n${JSON.stringify(result.errors)}`);
+      console.error(`Action\n${JSON.stringify(action, null, 2)}`);
+      console.error(`Message\n${JSON.stringify(message, null, 2)}`);
+      console.error(`Validation Errors\n${JSON.stringify(result.errors, null, 2)}`);
       throw new Error("Validation Failed");
     }
   }
@@ -132,7 +132,8 @@ function* getChannelInfo(channelId: string) {
   if (!bigNumberify(channelHoldings).isZero()) {
     funding = [{token: "0x0", amount: channelHoldings}];
   }
-  const status = channelStatus.turnNum < participants.length - 1 ? "Opening" : "Running";
+  const status = getChannelInfoStatus(turnNum, participants);
+
   return {
     participants,
     allocations: createJsonRpcAllocationsFromOutcome(state.outcome),
@@ -143,4 +144,11 @@ function* getChannelInfo(channelId: string) {
     turnNum,
     channelId
   };
+}
+
+function getChannelInfoStatus(
+  turnNum: number,
+  participants: ChannelParticipant[]
+): "proposed" | "opening" | "running" {
+  return turnNum === 0 ? "proposed" : turnNum < participants.length - 1 ? "opening" : "running";
 }

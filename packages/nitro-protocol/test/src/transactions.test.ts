@@ -88,7 +88,7 @@ describe('transaction-generators', () => {
     it('throws an error when there is no challenge state', async () => {
       expect(() => {
         createRespondTransaction(null, signedState);
-      }).toThrowError();
+      }).toThrow();
     });
   });
 

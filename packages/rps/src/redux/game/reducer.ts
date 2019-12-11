@@ -1,26 +1,9 @@
-import {
-  weaponChosen,
-  weaponAndSaltChosen,
-  resultPlayAgain,
-  LocalState,
-  lobby,
-  chooseWeapon,
-  resigned,
-  gameChosen,
-  gameOver,
-  GameState,
-  creatingOpenGame,
-  needAddress,
-  insufficientFunds,
-  waitForRestart,
-  waitingRoom,
-  opponentJoined,
-} from './state';
+import {GameState, LocalState, Setup, EndGame, A, B, isPlayerB, isPlayerA} from './state';
 import {Reducer, combineReducers} from 'redux';
 import {GameAction, UpdateChannelState} from './actions';
 import {ChannelState} from '../../core';
 
-const emptyLocalState: LocalState = {type: 'Empty'};
+const emptyLocalState: LocalState = {type: 'Setup.Empty'};
 
 const channelReducer: Reducer<ChannelState | null, UpdateChannelState> = (
   state: ChannelState | null = null,
@@ -40,82 +23,123 @@ const localReducer: Reducer<LocalState> = (
   let newState = state;
   if (
     action.type === 'Resign' &&
-    state.type !== 'Empty' &&
-    state.type !== 'NeedAddress' &&
-    state.type !== 'Lobby' &&
-    state.type !== 'WaitingRoom' &&
-    state.type !== 'CreatingOpenGame'
+    state.type !== 'Setup.Empty' &&
+    state.type !== 'Setup.NeedAddress' &&
+    state.type !== 'Setup.Lobby' &&
+    state.type !== 'B.CreatingOpenGame' &&
+    state.type !== 'B.WaitingRoom' &&
+    state.type !== 'A.Resigned' &&
+    state.type !== 'B.Resigned' &&
+    state.type !== 'EndGame.GameOver'
   ) {
-    newState = resigned(state, action.iResigned);
+    if (isPlayerA(state)) {
+      newState = A.resigned({...state, ...action});
+    }
+    if (isPlayerB(state)) {
+      newState = B.resigned({...state, ...action});
+    }
   }
   switch (state.type) {
-    case 'Empty':
+    case 'Setup.Empty':
       if (action.type === 'UpdateProfile') {
-        newState = needAddress({...state, ...action});
+        newState = Setup.needAddress({...state, ...action});
       }
       break;
-    case 'NeedAddress':
+    case 'Setup.NeedAddress':
       if (action.type === 'GotAddressFromWallet') {
-        newState = lobby({
+        newState = Setup.lobby({
           ...state,
           ...action,
         });
       }
       break;
-    case 'Lobby':
+    case 'Setup.Lobby':
       if (action.type === 'NewOpenGame') {
-        newState = creatingOpenGame(state);
+        newState = B.creatingOpenGame({...state, ...action});
       }
       if (action.type === 'JoinOpenGame') {
-        const {opponentName, opponentAddress, roundBuyIn} = action;
-        const {name, address} = state;
-        newState = gameChosen({name, address, opponentName, roundBuyIn}, opponentAddress);
+        newState = A.gameChosen({...state, ...action});
       }
       break;
-    case 'CreatingOpenGame':
-      if (action.type === 'CreateGame') {
-        newState = waitingRoom({...state, ...action});
-      }
-      break;
-    case 'ResultPlayAgain':
-      if (action.type === 'PlayAgain') {
-        newState = waitForRestart(state, state.theirWeapon, state.result);
-      }
-      break;
-    case 'WaitingRoom':
-      if (action.type === 'GameJoined') {
-        newState = opponentJoined({...state, ...action});
-      }
-      break;
-    case 'OpponentJoined':
-    case 'GameChosen':
-    case 'WaitForRestart':
+    case 'A.GameChosen':
+    case 'A.WaitForRestart':
       if (action.type === 'StartRound') {
-        newState = chooseWeapon(state);
+        newState = A.chooseWeapon({...state, ...action});
       }
       break;
-    case 'ChooseWeapon':
+    case 'A.ChooseWeapon':
       if (action.type === 'ChooseWeapon') {
-        newState = weaponChosen(state, action.weapon);
+        newState = A.weaponChosen({...state, ...action});
       }
       break;
-    case 'WeaponChosen':
-    case 'WeaponAndSaltChosen':
-      if (state.player === 'A' && action.type === 'ChooseSalt') {
-        newState = weaponAndSaltChosen({...state, player: 'A'}, action.salt);
+    case 'A.WeaponChosen':
+      if (action.type === 'ChooseSalt') {
+        newState = A.weaponAndSaltChosen({...state, ...action});
       }
+      break;
+    case 'A.WeaponAndSaltChosen':
       if (action.type === 'ResultArrived') {
         if (action.fundingSituation === 'Ok') {
-          newState = resultPlayAgain(state, action.theirWeapon, action.result);
+          newState = A.resultPlayAgain({...state, ...action});
         } else {
-          newState = insufficientFunds(state, action.theirWeapon, action.result);
+          newState = A.insufficientFunds({...state, ...action});
         }
       }
       break;
-    case 'Resigned':
-    case 'InsufficientFunds':
+    case 'A.ResultPlayAgain':
+      if (action.type === 'PlayAgain') {
+        newState = A.waitForRestart({...state, ...action});
+      }
+      break;
+    case 'B.CreatingOpenGame':
+      if (action.type === 'CreateGame') {
+        newState = B.waitingRoom({...state, ...action});
+      }
+      break;
+    case 'B.WaitingRoom':
+      if (action.type === 'GameJoined') {
+        newState = B.opponentJoined({...state, ...action});
+      }
+      if (action.type === 'CancelGame') {
+        newState = Setup.lobby({...state, ...action});
+      }
+      break;
+    case 'B.ResultPlayAgain':
+      if (action.type === 'PlayAgain') {
+        newState = B.waitForRestart({...state, ...action});
+      }
+      break;
+    case 'B.WaitForRestart':
+    case 'B.OpponentJoined':
+      if (action.type === 'StartRound') {
+        newState = B.chooseWeapon({...state, ...action});
+      }
+      break;
+    case 'B.ChooseWeapon':
+      if (action.type === 'ChooseWeapon') {
+        newState = B.weaponChosen({...state, ...action});
+      }
+      break;
+    case 'B.WeaponChosen':
+      if (action.type === 'ResultArrived') {
+        if (action.fundingSituation === 'Ok') {
+          newState = B.resultPlayAgain({...state, ...action});
+        } else {
+          newState = B.insufficientFunds({...state, ...action});
+        }
+      }
+      break;
+    case 'A.Resigned':
+    case 'B.Resigned':
+    case 'A.InsufficientFunds':
+    case 'B.InsufficientFunds':
       if (action.type === 'GameOver') {
-        newState = gameOver(state);
+        newState = EndGame.gameOver({...state, ...action});
+      }
+      break;
+    case 'EndGame.GameOver':
+      if (action.type === 'ExitToLobby') {
+        newState = Setup.lobby({...state, ...action});
       }
       break;
   }

@@ -54,7 +54,7 @@ const initialState: SiteState = {
     walletVisible: false,
   },
   game: {
-    localState: {type: 'Empty'},
+    localState: {type: 'Setup.Empty'},
     channelState: null,
   },
 };

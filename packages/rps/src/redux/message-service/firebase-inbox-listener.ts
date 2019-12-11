@@ -2,7 +2,7 @@ import {take, call} from 'redux-saga/effects';
 
 import {reduxSagaFirebase} from '../../gateways/firebase';
 import {RPSChannelClient} from '../../utils/rps-channel-client';
-import {Message} from '../../utils/channel-client';
+import {Message} from '@statechannels/channel-client';
 
 export function* firebaseInboxListener(client: RPSChannelClient) {
   const address: string = yield call([client, 'getAddress']);

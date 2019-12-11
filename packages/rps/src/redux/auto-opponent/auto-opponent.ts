@@ -2,7 +2,7 @@ import {RPSChannelClient} from '../../utils/rps-channel-client';
 import {eventChannel, buffers} from 'redux-saga';
 import {put, take, fork, call, actionChannel, race} from 'redux-saga/effects';
 import {expectSaga} from 'redux-saga-test-plan';
-import {GameState, lobby} from '../game/state';
+import {GameState, Setup} from '../game/state';
 import {gameJoined as gameJoinedAction} from '../game/actions';
 import {syncOpenGames} from '../open-games/actions';
 import {gameSaga} from '../game/saga';
@@ -33,7 +33,7 @@ import {WeiPerEther} from 'ethers/constants';
 export function* autoOpponent(player: 'A' | 'B', externalClient: RPSChannelClient) {
   let internalStoreState = {
     game: {
-      localState: lobby({name: 'AutoBot', address: 'blah'}),
+      localState: Setup.lobby({name: 'AutoBot', address: 'blah'}),
       channelState: null,
     } as GameState,
     openGames: [],
@@ -96,7 +96,7 @@ export function* autoOpponent(player: 'A' | 'B', externalClient: RPSChannelClien
     const result = yield call(() => promise);
     internalStoreState = result.storeState;
     // finally we inspect the result to see if the auto-player just create/joined a game
-    if (internalStoreState.game.localState.type === 'WaitingRoom') {
+    if (internalStoreState.game.localState.type === 'B.WaitingRoom') {
       yield put(
         syncOpenGames([
           {
@@ -108,7 +108,7 @@ export function* autoOpponent(player: 'A' | 'B', externalClient: RPSChannelClien
           },
         ])
       );
-    } else if (internalStoreState.game.localState.type === 'GameChosen') {
+    } else if (internalStoreState.game.localState.type === 'A.GameChosen') {
       yield put(gameJoinedAction('AutoPlayer', 'some-address'));
     }
   }

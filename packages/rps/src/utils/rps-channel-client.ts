@@ -1,15 +1,28 @@
 import {AppData, ChannelState, encodeAppData, decodeAppData} from '../core';
-import {IChannelClient, Message, FakeChannelClient, ChannelResult} from './channel-client';
+import {
+  ChannelClient,
+  ChannelResult,
+  Message,
+  ChannelClientInterface,
+} from '@statechannels/channel-client';
 import {RPS_ADDRESS} from '../constants';
+import {ChannelProviderInterface, channelProvider} from '@statechannels/channel-provider';
+import {bigNumberify} from 'ethers/utils';
 
 // This class wraps the channel client converting the request/response formats to those used in the app
 
 export class RPSChannelClient {
-  channelClient: IChannelClient;
+  channelClient: ChannelClientInterface;
 
-  constructor() {
+  async enable() {
+    // TODO: This is really ugly!!
+    // TODO: Use webpack to import channelProvider
+    // tslint:disable-next-line: no-unused-expression
+    channelProvider;
+    const provider: ChannelProviderInterface = (window as any).channelProvider;
+    await provider.enable(process.env.WALLET_URL);
     // might want to pass this in later
-    this.channelClient = new FakeChannelClient();
+    this.channelClient = new ChannelClient(provider);
   }
 
   async createChannel(
@@ -22,7 +35,6 @@ export class RPSChannelClient {
     const participants = formatParticipants(aAddress, bAddress);
     const allocations = formatAllocations(aAddress, bAddress, aBal, bBal);
     const appDefinition = RPS_ADDRESS;
-
     const appData = encodeAppData(appAttrs);
 
     // ignore return val for now and stub out response
@@ -49,7 +61,16 @@ export class RPSChannelClient {
     function callback(channelResult: ChannelResult): any {
       rpsCallback(convertToChannelState(channelResult));
     }
-    return this.channelClient.onChannelUpdated(callback);
+    // These are two distinct events from the channel client
+    // but for our purposes we can treat them the same
+    // and rely on the channel status
+    const unsubChannelUpdated = this.channelClient.onChannelUpdated(callback);
+    const unsubChannelProposed = this.channelClient.onChannelProposed(callback);
+
+    return () => {
+      unsubChannelUpdated();
+      unsubChannelProposed();
+    };
   }
 
   async joinChannel(channelId: string) {
@@ -117,8 +138,8 @@ const formatAllocations = (aAddress: string, bAddress: string, aBal: string, bBa
     {
       token: '0x0',
       allocationItems: [
-        {destination: aAddress, amount: aBal},
-        {destination: bAddress, amount: bBal},
+        {destination: aAddress, amount: bigNumberify(aBal).toHexString()},
+        {destination: bAddress, amount: bigNumberify(bBal).toHexString()},
       ],
     },
   ];

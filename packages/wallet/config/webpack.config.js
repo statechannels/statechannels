@@ -511,7 +511,6 @@ module.exports = function(webpackEnv) {
         async: false,
         checkSyntacticErrors: true,
         useTypescriptIncrementalApi: false, // This seems to speed up type checking
-        tslint: false,
         reportFiles: ["src/**/*.{ts,tsx}"],
         watch: paths.appSrc
       })

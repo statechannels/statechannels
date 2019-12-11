@@ -1,12 +1,9 @@
-import {delay} from "redux-saga/effects";
 import {JsonRpcProvider} from "ethers/providers";
+import {call, delay} from "redux-saga/effects";
+import {getProvider} from "../../utils/contract-utils";
 
 export function* ganacheMiner() {
-  const provider: JsonRpcProvider = new JsonRpcProvider(
-    // TODO: Figure out why we use process here
-    /* eslint:disable */
-    `http://localhost:${process.env.GANACHE_PORT}`
-  );
+  const provider: JsonRpcProvider = yield call(getProvider);
   const DELAY_TIME = 30000; // 30 seconds
   while (true) {
     const timeStamp = Math.round(Date.now() / 1000);

@@ -1,27 +1,27 @@
-import {
-  addressResponse,
-  createChannelResponse,
-  noContractError,
-  unknownSigningAddress,
-  sendChannelProposedMessage,
-  postMessageResponse,
-  channelProposedEvent,
-  updateChannelResponse,
-  unknownChannelId,
-  sendChannelJoinedMessage,
-  relayActionWithMessage,
-  sendChannelUpdatedMessage,
-  channelUpdatedEvent
-} from "../outgoing-api-actions";
 import {Wallet} from "ethers";
 import {expectSaga} from "redux-saga-test-plan";
 import * as matchers from "redux-saga-test-plan/matchers";
-import {messageSender} from "../message-sender";
-import {channelFromStates} from "../../../channel-store/channel-state/__tests__";
-import * as stateHelpers from "../../../__tests__/state-helpers";
-import {setChannel, EMPTY_SHARED_DATA, SharedData} from "../../../state";
 import {strategyApproved} from "../../../../communication";
 import {ETH_ASSET_HOLDER_ADDRESS} from "../../../../constants";
+import * as stateHelpers from "../../../__tests__/state-helpers";
+import {channelFromStates} from "../../../channel-store/channel-state/__tests__";
+import {EMPTY_SHARED_DATA, setChannel, SharedData} from "../../../state";
+import {messageSender} from "../message-sender";
+import {
+  addressResponse,
+  channelProposedEvent,
+  channelUpdatedEvent,
+  createChannelResponse,
+  noContractError,
+  pushMessageResponse,
+  relayActionWithMessage,
+  sendChannelJoinedMessage,
+  sendChannelProposedMessage,
+  sendChannelUpdatedMessage,
+  unknownChannelId,
+  unknownSigningAddress,
+  updateChannelResponse
+} from "../outgoing-api-actions";
 
 describe("message sender", () => {
   it("creates a notification for WALLET.CHANNEL_UPDATED_EVENT", async () => {
@@ -47,7 +47,7 @@ describe("message sender", () => {
       params: {
         funding: [],
         turnNum: 5,
-        status: "Running",
+        status: "running",
         channelId
       }
     });
@@ -76,8 +76,8 @@ describe("message sender", () => {
       jsonrpc: "2.0",
       method: "MessageQueued",
       params: {
-        recipient: "A",
-        sender: "B",
+        recipient: "B",
+        sender: "A",
         data: {type: "Channel.Updated", signedState: state}
       }
     });
@@ -197,14 +197,14 @@ describe("message sender", () => {
       params: {
         funding: [],
         turnNum: 0,
-        status: "Opening",
+        status: "proposed",
         channelId
       }
     });
   });
 
   it("sends a correct response message for WALLET.POST_MESSAGE", async () => {
-    const message = postMessageResponse({id: 5});
+    const message = pushMessageResponse({id: 5});
     const {effects} = await expectSaga(messageSender, message)
       .provide([[matchers.call.fn(window.parent.postMessage), 0]])
 
@@ -255,7 +255,7 @@ describe("message sender", () => {
       result: {
         funding: [],
         turnNum: 0,
-        status: "Opening",
+        status: "proposed",
         channelId
       }
     });
@@ -289,7 +289,7 @@ describe("message sender", () => {
       result: {
         funding: [{token: "0x0", amount: "0x5"}],
         turnNum: 1,
-        status: "Running",
+        status: "running",
         channelId
       }
     });

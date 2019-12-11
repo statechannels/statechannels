@@ -6,6 +6,8 @@ import getAddressSchema from "@statechannels/client-api-schema/schema/get-addres
 import joinChannelSchema from "@statechannels/client-api-schema/schema/join-channel.json";
 import updateChannelSchema from "@statechannels/client-api-schema/schema/update-channel.json";
 import definitionsSchema from "@statechannels/client-api-schema/schema/definitions.json";
+import channelResultSchema from "@statechannels/client-api-schema/schema/channel-result.json";
+import closeChannelSchema from "@statechannels/client-api-schema/schema/close-channel.json";
 import pushMessageSchema from "@statechannels/client-api-schema/schema/push-message.json";
 import notifSchema from "@statechannels/client-api-schema/schema/notification.json";
 
@@ -18,11 +20,13 @@ export async function validateRequest(jsonRpcRequest: object): Promise<Validatio
   const ajv = new Ajv();
   const validate = ajv
     .addSchema(definitionsSchema)
+    .addSchema(channelResultSchema)
     .addSchema(createChannelSchema)
     .addSchema(getAddressSchema)
     .addSchema(joinChannelSchema)
     .addSchema(updateChannelSchema)
     .addSchema(pushMessageSchema)
+    .addSchema(closeChannelSchema)
     .compile(requestSchema);
   const isValid = await validate(jsonRpcRequest);
 
@@ -33,11 +37,13 @@ export async function validateResponse(jsonRpcResponse: object): Promise<Validat
   const ajv = new Ajv();
   const validate = ajv
     .addSchema(definitionsSchema)
+    .addSchema(channelResultSchema)
     .addSchema(createChannelSchema)
     .addSchema(getAddressSchema)
     .addSchema(joinChannelSchema)
     .addSchema(updateChannelSchema)
     .addSchema(pushMessageSchema)
+    .addSchema(closeChannelSchema)
     .compile(responseSchema);
   const isValid = await validate(jsonRpcResponse);
 
@@ -48,6 +54,7 @@ export async function validateNotification(jsonRpcNotification: object): Promise
   const ajv = new Ajv();
   const validate = ajv
     .addSchema(definitionsSchema)
+    .addSchema(channelResultSchema)
     .addSchema(createChannelSchema)
     .addSchema(getAddressSchema)
     .addSchema(joinChannelSchema)
@@ -55,6 +62,7 @@ export async function validateNotification(jsonRpcNotification: object): Promise
     .addSchema(pushMessageSchema)
     .addSchema(requestSchema)
     .addSchema(responseSchema)
+    .addSchema(closeChannelSchema)
     .compile(notifSchema);
   const isValid = await validate(jsonRpcNotification);
 

@@ -75,32 +75,32 @@ export const channelStates = {
 const propsA = {
   name: aName,
   address: aAddress,
-  player: 'A' as 'A', // yuk
   opponentName: bName,
   roundBuyIn,
   myWeapon: playerAWeapon,
   theirWeapon: playerBWeapon,
+  opponentAddress: bAddress,
+  salt,
 };
 
 export const localStatesA = {
-  lobby: s.lobby(propsA),
-  gameChosen: s.gameChosen(propsA, bAddress),
-  chooseWeapon: s.chooseWeapon(propsA),
-  weaponChosen: s.weaponChosen(propsA, playerAWeapon),
-  weaponAndSaltChosen: s.weaponAndSaltChosen(propsA, salt),
-  resultPlayAgain: s.resultPlayAgain(propsA, playerBWeapon, Result.YouWin),
-  chooseWeapon2: s.chooseWeapon(propsA),
-  waitForRestart: s.waitForRestart(propsA, playerBWeapon, Result.YouWin),
-  insuffcientFunds: s.insufficientFunds(propsA, playerBWeapon, Result.YouWin),
-  resignedMe: s.resigned(propsA, true),
-  resignedThem: s.resigned(propsA, false),
-  gameOver: s.gameOver(propsA),
+  lobby: s.Setup.lobby(propsA),
+  gameChosen: s.A.gameChosen(propsA),
+  chooseWeapon: s.A.chooseWeapon(propsA),
+  weaponChosen: s.A.weaponChosen(propsA),
+  weaponAndSaltChosen: s.A.weaponAndSaltChosen(propsA),
+  resultPlayAgain: s.A.resultPlayAgain({...propsA, result: Result.YouWin}),
+  chooseWeapon2: s.A.chooseWeapon(propsA),
+  waitForRestart: s.A.waitForRestart({...propsA, result: Result.YouWin}),
+  insuffcientFunds: s.A.insufficientFunds({...propsA, result: Result.YouWin}),
+  resignedMyTurn: s.A.resigned({...propsA, iResigned: true}),
+  resignedTheirTurn: s.A.resigned({...propsA, iResigned: true}),
+  gameOver: s.EndGame.gameOver(propsA),
 };
 
 const propsB = {
   name: bName,
   address: bAddress,
-  player: 'B' as 'B', // yuk
   opponentName: aName,
   roundBuyIn,
   myWeapon: playerBWeapon,
@@ -108,16 +108,16 @@ const propsB = {
 };
 
 export const localStatesB = {
-  lobby: s.lobby(propsB),
-  createOpenGame: s.creatingOpenGame(propsB),
-  waitingRoom: s.waitingRoom(propsB),
-  opponentJoined: s.opponentJoined(propsB),
-  chooseWeapon: s.chooseWeapon(propsB),
-  weaponChosen: s.weaponChosen(propsB, propsB.myWeapon),
-  resultPlayAgain: s.resultPlayAgain(propsB, playerAWeapon, Result.YouLose),
-  chooseWeapon2: s.chooseWeapon(propsB),
-  insufficientFunds: s.insufficientFunds(propsB, playerAWeapon, Result.YouLose),
-  resignedMe: s.resigned(propsB, true),
-  resignedThem: s.resigned(propsB, false),
-  gameOver: s.gameOver(propsB),
+  lobby: s.Setup.lobby(propsB),
+  createOpenGame: s.B.creatingOpenGame(propsB),
+  waitingRoom: s.B.waitingRoom(propsB),
+  opponentJoined: s.B.opponentJoined(propsB),
+  chooseWeapon: s.B.chooseWeapon(propsB),
+  weaponChosen: s.B.weaponChosen(propsB),
+  resultPlayAgain: s.B.resultPlayAgain({...propsB, result: Result.YouLose}),
+  chooseWeapon2: s.B.chooseWeapon(propsB),
+  insufficientFunds: s.B.insufficientFunds({...propsB, result: Result.YouLose}),
+  resignedMyTurn: s.B.resigned({...propsB, iResigned: true}),
+  resignedTheirTurn: s.B.resigned({...propsB, iResigned: true}),
+  gameOver: s.EndGame.gameOver(propsB),
 };

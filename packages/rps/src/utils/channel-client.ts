@@ -184,6 +184,9 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
         .add(1)
         .toString();
       this.latestState = {...this.latestState, turnNum, status: 'closed'};
+      console.log(
+        this.playerIndex + ' updated channel to turnNum:' + turnNum + ' and status: closed'
+      );
       this.notifyOpponent(this.latestState);
       this.notifyApp(this.latestState);
     }
@@ -200,17 +203,18 @@ export class FakeChannelClient implements IChannelClient<ChannelResult> {
     const currentTurnNum = bigNumberify(latestState.turnNum);
 
     if (currentTurnNum.mod(2).eq(this.playerIndex)) {
-      return Promise.reject(
+      console.warn(
         `Not your turn: currentTurnNum = ${currentTurnNum}, index = ${this.playerIndex}`
       );
+      this.latestState = latestState;
+    } else {
+      const turnNum = currentTurnNum.add(1).toString();
+      console.log(
+        this.playerIndex + ' updated channel to turnNum:' + turnNum + ' and status: closing'
+      );
+      this.latestState = {...latestState, turnNum, status: 'closing'};
+      this.notifyOpponent(this.latestState);
     }
-
-    const turnNum = currentTurnNum.add(1).toString();
-    console.log(this.playerIndex + '  updated channel to turnNum:' + turnNum);
-
-    this.latestState = {...latestState, turnNum, status: 'closing'};
-    this.notifyOpponent(this.latestState);
-
     return Promise.resolve(this.latestState);
   }
 
@@ -289,7 +293,7 @@ export type GetAddressRequest = JsonRPCRequest<'GetAddress', {}>; // todo: what 
 
 export type CreateChannelRequest = JsonRPCRequest<'CreateChannel', CreateChannelParameters>;
 
-export interface CreateChannelResponse extends JsonRPCResponse<ChannelResult> {}
+export type CreateChannelResponse = JsonRPCResponse<ChannelResult>;
 
 export interface JoinChannelParameters {
   channelId: string;
@@ -297,7 +301,7 @@ export interface JoinChannelParameters {
 
 export type JoinChannelRequest = JsonRPCRequest<'JoinChannel', JoinChannelParameters>;
 
-export interface JoinChannelResponse extends JsonRPCResponse<ChannelResult> {}
+export type JoinChannelResponse = JsonRPCResponse<ChannelResult>;
 
 export type UpdateChannelRequest = JsonRPCRequest<'UpdateChannel', UpdateChannelParameters>;
 

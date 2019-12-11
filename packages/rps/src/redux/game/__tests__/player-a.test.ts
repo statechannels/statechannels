@@ -168,7 +168,7 @@ describe('when the player resigns (which includes deciding not to play again)', 
         .run({silenceTimeout: true});
 
       expect(storeState).toEqual(
-        gameState(localStatesA.resignedMe, channelStates.concludeFromStart)
+        gameState(localStatesA.resignedMyTurn, channelStates.concludeFromStart)
       );
     });
   });
@@ -176,18 +176,20 @@ describe('when the player resigns (which includes deciding not to play again)', 
     it('transitions to Resigned', async () => {
       // if we're in roundProposed, it's B's turn
       const initialState = gameState(localStatesA.chooseWeapon, channelStates.roundProposed);
-      const action = resign(false);
+      const action = resign(true);
 
       const {storeState} = await expectSaga(gameSaga as any, client)
         .withReducer(reducer, initialState)
         .dispatch(action)
         .run({silenceTimeout: true});
 
-      expect(storeState).toEqual(gameState(localStatesA.resignedThem, channelStates.roundProposed));
+      expect(storeState).toEqual(
+        gameState(localStatesA.resignedTheirTurn, channelStates.roundProposed)
+      );
     });
 
     it('later calls closeChannel, when another state arrives', async () => {
-      const initialState = gameState(localStatesA.resignedThem, channelStates.roundProposed);
+      const initialState = gameState(localStatesA.resignedTheirTurn, channelStates.roundProposed);
       const action = updateChannelState(channelStates.roundAccepted); // triggered by ChannelUpdatedListener
 
       const {storeState} = await expectSaga(gameSaga as any, client)
@@ -197,7 +199,7 @@ describe('when the player resigns (which includes deciding not to play again)', 
         .run({silenceTimeout: true});
 
       expect(storeState).toEqual(
-        gameState(localStatesA.resignedThem, channelStates.concludeFromAccepted)
+        gameState(localStatesA.resignedTheirTurn, channelStates.concludeFromAccepted)
       );
     });
   });
@@ -205,7 +207,10 @@ describe('when the player resigns (which includes deciding not to play again)', 
 
 describe('when in Resigned and user clicks on button', () => {
   it('transitions to game over', async () => {
-    const initialState = gameState(localStatesA.resignedThem, channelStates.concludeFromProposed);
+    const initialState = gameState(
+      localStatesA.resignedTheirTurn,
+      channelStates.concludeFromProposed
+    );
     const action = gameOver();
 
     const {storeState} = await expectSaga(gameSaga as any, client)
