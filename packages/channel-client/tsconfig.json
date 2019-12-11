@@ -6,6 +6,5 @@
     "outDir": "lib",
     "target": "es2015"
   },
-
   "references": [{"path": "../channel-provider"}]
 }

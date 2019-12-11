@@ -1,10 +1,10 @@
 import {ListenerFn} from 'eventemitter3';
 
-export interface JsonRpcRequest {
+export interface JsonRpcRequest<MethodName = string, RequestParams = any> {
   id?: number;
   jsonrpc: '2.0';
-  method: string;
-  params: any;
+  method: MethodName;
+  params: RequestParams;
 }
 
 export interface JsonRpcResponse<ResultType = any> {
@@ -25,10 +25,10 @@ export type JsonRpcError = {
   };
 };
 
-export interface JsonRpcNotification {
+export interface JsonRpcNotification<NotificationName = string, NotificationParams = any> {
   jsonrpc: '2.0';
-  method: string;
-  params: any;
+  method: NotificationName;
+  params: NotificationParams;
 }
 
 export function isJsonRpcNotification(message: any): message is JsonRpcNotification {
