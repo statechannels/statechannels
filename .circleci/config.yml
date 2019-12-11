@@ -106,11 +106,17 @@ jobs:
           file: test-stats
       - notify_slack
       - store_artifacts:
+          path: /packages/rps/gas.json
+      - store_artifacts:
           path: /packages/rps/gas.txt
       - store_artifacts:
-          path: /packages/nitro-protocol/gas.txt
+          path: /packages/nitro-protocol/gas.json
       - store_artifacts:
-          path: /packages/wallet/gas.txt
+          path: /packages/rps/gas.txt
+      - store_artifacts:
+          path: /packages/wallet/gas.json
+      - store_artifacts:
+          path: /packages/rps/gas.txt
 
   integration-test:
     <<: *defaults
