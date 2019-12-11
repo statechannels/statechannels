@@ -57,7 +57,7 @@
     "enum": "^2.5.0",
     "ethers": "4.0.39",
     "eventemitter2": "5.0.1",
-    "firebase": "^7.0.0",
+    "firebase": "^7.5.2",
     "fs-extra": "8.1.0",
     "jsonrpc-lite": "2.1.0",
     "key-mirror": "^1.0.1",
