@@ -121,3 +121,5 @@ export function ensureExists<T>(t: T | undefined): T {
 export function isDefined<T>(t: T | undefined): t is T {
   return !!t;
 }
+
+export const FINAL = 'final' as 'final';

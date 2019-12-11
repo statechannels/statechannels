@@ -1,7 +1,16 @@
-import { Machine } from 'xstate';
-import { Channel, MachineFactory, Outcome, success } from '../../';
+import { createContext } from 'vm';
+import { assign, Machine } from 'xstate';
+import {
+  Channel,
+  FINAL,
+  getChannelID,
+  MachineFactory,
+  Outcome,
+  success,
+} from '../../';
 import { ChannelStoreEntry } from '../../ChannelStoreEntry';
 import { Participant } from '../../store';
+import { debugAction } from '../../utils';
 import { Init as SupportStateArgs } from '../support-state/protocol';
 
 const PROTOCOL = 'create-null-channel';
@@ -18,25 +27,31 @@ These differences allow create-null-channel to be fully-determined.
 */
 
 export interface Init {
-  // channelId: string; // For convenience
   channel: Channel;
   outcome: Outcome;
 }
 
-type Context = Init & { channelID: string };
+// For convenience, assign the channel id
+type Context = Init & { channelId: string };
 
 const checkChannel = {
   invoke: {
     src: 'checkChannel',
-    onDone: 'preFundSetup',
+    onDone: {
+      target: 'preFundSetup',
+      actions: assign((ctx: Init) => ({
+        ...ctx,
+        channelId: getChannelID(ctx.channel),
+      })),
+    },
   },
 };
 
 const preFundSetup = {
   invoke: {
     src: 'supportState',
+    onDone: 'success',
   },
-  onDone: 'success',
 };
 
 export const config = {
@@ -45,7 +60,10 @@ export const config = {
   states: {
     checkChannel,
     preFundSetup,
-    success,
+    success: {
+      type: FINAL,
+      data: ({ channelId }: Context) => ({ channelId }),
+    },
   },
 };
 
@@ -71,7 +89,9 @@ export const machine: MachineFactory<Init, any> = (store, context: Init) => {
     return true;
   }
 
-  function supportStateArgs({ channelID }: Context): SupportStateArgs {
+  function supportStateArgs({
+    channelId: channelID,
+  }: Context): SupportStateArgs {
     const states = store.getUnsupportedStates(channelID);
     if (states.length !== 1) {
       throw new Error('Unexpected states');

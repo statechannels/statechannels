@@ -1,4 +1,12 @@
-import { assign, InvokeCreator, Machine, sendParent } from 'xstate';
+import {
+  AnyEventObject,
+  assign,
+  DoneInvokeEvent,
+  InvokeCreator,
+  Machine,
+  MachineConfig,
+  sendParent,
+} from 'xstate';
 import { AdvanceChannel, Funding } from '..';
 import {
   Channel,
@@ -24,12 +32,10 @@ export interface SetChannel {
   type: 'CHANNEL_INITIALIZED';
   channelId: string;
 }
-const assignChannelId = assign({
-  channelId: (_, event: any) => event.data.channelId,
+const assignChannelId: any = assign({
+  channelId: (_: Context, event: DoneInvokeEvent<any>) => event.data.channelId,
 });
 
-const sendOpenChannelMessage = (ctx: SetChannel) =>
-  console.log('Sending open channel message');
 export const advanceChannelArgs = (i: 1 | 3) => ({
   channelId,
 }: ChannelSet): AdvanceChannel.Init => ({
@@ -41,7 +47,7 @@ const initializeChannel = {
     src: 'setChannelId',
     onDone: 'preFundSetup',
   },
-  exit: [assignChannelId, sendOpenChannelMessage],
+  exit: [assignChannelId, 'sendOpenChannelMessage'],
 };
 
 const preFundSetup = {
@@ -53,7 +59,7 @@ const preFundSetup = {
   },
   on: {
     CHANNEL_CLOSED: 'abort',
-    CHANNEL_UPDATED: forwardChannelUpdated('preFundSetup'),
+    CHANNEL_UPDATED: forwardChannelUpdated<Context>('preFundSetup'),
   },
 };
 
@@ -76,11 +82,12 @@ const postFundSetup = {
     onDone: 'success',
   },
   on: {
-    CHANNEL_UPDATED: forwardChannelUpdated('postFundSetup'),
+    CHANNEL_UPDATED: forwardChannelUpdated<Context>('postFundSetup'),
   },
 };
 
-export const config = {
+type Context = Init | ChannelSet;
+export const config: MachineConfig<Context, any, any> = {
   key: PROTOCOL,
   initial: 'initializeChannel',
   states: {
@@ -94,7 +101,7 @@ export const config = {
 };
 
 export const mockOptions = {
-  actions: { sendOpenChannelMessage },
+  // actions: { sendOpenChannelMessage },
 };
 
 export const machine: MachineFactory<Init, any> = (

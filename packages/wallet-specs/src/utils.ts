@@ -7,6 +7,13 @@ export function log(cond: boolean, message: string) {
   }
 }
 
+export function debugAction(id) {
+  return (ctx, event) => {
+    const saveMe = id;
+    debugger;
+  };
+}
+
 export function addLogs(
   _ctx,
   _event,

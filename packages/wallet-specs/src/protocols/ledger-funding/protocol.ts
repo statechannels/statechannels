@@ -1,16 +1,13 @@
-import { DoneInvokeEvent, Machine } from 'xstate';
+import { assign, DoneInvokeEvent, Machine } from 'xstate';
 import { CreateNullChannel } from '..';
 import {
   add,
   Channel,
   ensureExists,
-  isDefined,
   MachineFactory,
-  State,
   Store,
   success,
 } from '../..';
-import { checkThat } from '../../store';
 import { Init as CreateNullChannelArgs } from '../create-null-channel/protocol';
 import { Init as DirectFundingArgs } from '../direct-funding/protocol';
 import { Init as LedgerUpdateArgs } from '../ledger-update/protocol';
@@ -29,6 +26,12 @@ in order to fund the target channel.
 A peer is identified by their participantId.
 */
 
+const assignLedgerChannelId = assign(
+  (ctx: Init, event: DoneInvokeEvent<{ channelId: string }>) => ({
+    ...ctx,
+    ledgerChannelId: event.data.channelId,
+  })
+);
 const lookForExistingChannel = {
   invoke: {
     src: 'findLedgerChannelId',
@@ -36,7 +39,7 @@ const lookForExistingChannel = {
       {
         target: 'success',
         cond: 'channelFound',
-        actions: 'assignLedgerChannelId',
+        actions: assignLedgerChannelId,
       },
       { target: 'determineLedgerChannel' },
     ],
@@ -57,10 +60,7 @@ const createNewLedger = {
       channel: data.channel,
       outcome: data.outcome,
     }),
-    onDone: {
-      target: 'success',
-      actions: 'assignLedgerChannelId',
-    },
+    onDone: { target: 'success', actions: assignLedgerChannelId },
   },
 };
 
@@ -72,7 +72,7 @@ const waitForChannel = {
     createNewLedger,
     success,
   },
-  onDone: 'fundLedger',
+  onDone: { target: 'fundLedger' },
 };
 
 type LedgerExists = Init & { ledgerChannelID: string };
