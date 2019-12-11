@@ -36,9 +36,7 @@ class FundingStrategyNegotiationContainer extends PureComponent<Props> {
             description="Do you want to fund this state channel with a re-usable ledger channel?"
             yesMessage="Fund Channel"
             noMessage="Cancel"
-            approvalAction={() =>
-              strategyApproved({processId, strategy: "IndirectFundingStrategy"})
-            }
+            approvalAction={() => strategyApproved({processId, strategy: "VirtualFundingStrategy"})}
             rejectionAction={() => cancelled({processId, by: TwoPartyPlayerIndex.B})}
           >
             <React.Fragment>
