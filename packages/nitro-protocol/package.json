@@ -49,8 +49,8 @@
     "test:contracts": "npx jest -c ./config/jest/jest.contracts.config.js",
     "test": "run-s test:contracts 'test:app --all'",
     "test:ci": "yarn test:ci:contracts && yarn test:ci:app",
-    "test:ci:contracts": "yarn test:contracts --all --ci --runInBand --detectOpenHandles --bail",
-    "test:ci:app": "yarn test:app --all --ci --runInBand --detectOpenHandles --bail",
+    "test:ci:contracts": "yarn test:contracts --all --ci --runInBand --bail",
+    "test:ci:app": "yarn test:app --all --ci --runInBand --bail",
     "website:deploy": "yarn contract:compile && yarn docgen && cd website && yarn install && yarn build"
   },
   "dependencies": {
