@@ -45,9 +45,12 @@
     "patch-package": "cd ../.. && yarn patch-package",
     "prettier:check": "npx prettier --check '{contracts,src,test}/**/*.{ts,tsx,sol}'",
     "prettier:write": "npx prettier --write '{contracts,src,test}/**/*.{ts,tsx,sol}'",
-    "test:ci": "yarn contract:compile && npx jest --ci --bail --runInBand",
-    "test:typescript": "npx jest --testPathIgnorePatterns='test/contracts' --reporters='default'",
-    "test": "yarn contract:compile && npx jest",
+    "test:app": "jest -c ./config/jest/jest.config.js",
+    "test:contracts": "npx jest -c ./config/jest/jest.contracts.config.js",
+    "test": "run-s test:contracts 'test:app --all'",
+    "test:ci": "yarn test:ci:contracts && yarn test:ci:app",
+    "test:ci:contracts": "yarn test:contracts --all --ci --runInBand --detectOpenHandles",
+    "test:ci:app": "yarn test:app --all --ci --runInBand --detectOpenHandles",
     "website:deploy": "yarn contract:compile && yarn docgen && cd website && yarn install && yarn build"
   },
   "dependencies": {
