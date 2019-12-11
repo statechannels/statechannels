@@ -15,13 +15,13 @@
     "build": "run-s clearContracts build:typescript build:webpack",
     "clearContracts": "rm -rf ./build/contracts",
     "contracts:compile": "node ./bin/compile.js",
+    "prettier:check": "prettier --check '**/*.{scss,json}' --ignore-path '.gitignore'",
+    "prettier:write": "prettier --write '**/*.{scss,json}' --ignore-path '.gitignore'",
     "lint:check": "run-s eslint:check prettier:check",
     "lint:write": "run-s eslint:write prettier:write",
     "eslint:check": "eslint \"**/*.{js,ts,tsx}\" --cache --max-warnings=0",
     "eslint:write": "eslint \"**/*.{js,ts,tsx}\" --fix --max-warnings=0",
     "postinstall": "rm -f node_modules/web3/index.d.ts",
-    "prettier:check": "prettier --check '**/*.{scss,json}' --ignore-path '.gitignore'",
-    "prettier:write": "prettier --write '**/*.{scss,json}' --ignore-path '.gitignore'",
     "start": "yarn contracts:compile && node scripts/start.js",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
     "prepare": "yarn build:ci",
@@ -33,7 +33,10 @@
     "test:ci:contracts": "yarn test:contracts --all --ci --runInBand --detectOpenHandles",
     "test:ci:app": "yarn test:app --all --ci --runInBand --detectOpenHandles",
     "storybook": "start-storybook -p 9001 -c .storybook",
-    "precommit": "yarn eslint:check --quiet"
+    "precommit": "lint-staged --quiet"
+  },
+  "lint-staged": {
+    "**/*.{ts,tsx}": "eslint --max-warnings=0"
   },
   "dependencies": {
     "@babel/core": "^7.6.2",
