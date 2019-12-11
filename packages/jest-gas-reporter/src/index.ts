@@ -3,6 +3,7 @@ import {JsonRpcProvider} from 'ethers/providers';
 import fs from 'fs';
 import linker from 'solc/linker';
 import path from 'path';
+import easyTable from 'easy-table';
 
 interface MethodCalls {
   [methodName: string]: {
@@ -35,7 +36,22 @@ interface ParsedArtifact {
   networks: {[networkName: string]: {address: string}};
 }
 
-const gasCosts = {};
+interface GasCosts {
+  [contract: string]: ContractStats;
+}
+
+interface ContractStats {
+  deployment: Stats;
+  methods: {[method: string]: Stats};
+}
+
+interface Stats {
+  calls: number;
+  min: number;
+  max: number;
+  avg: number;
+}
+const gasCosts: GasCosts = {};
 /* TODO: 
  - Handle failures gracefully
  - Organize and clean up
@@ -82,9 +98,9 @@ export class GasReporter implements jest.Reporter {
       this.options.contractArtifactFolder
     );
     this.outputGasInfo(contractCalls);
-    if (process.env.CIRCLECI) {
-      await this.saveResultsToFile(gasCosts, process.env.CIRCLE_SHA1);
-    }
+    // if (process.env.CIRCLECI) {
+    await this.saveResultsToFile(process.env.CIRCLE_SHA1);
+    // }
   }
 
   async parseContractCalls(
@@ -152,14 +168,9 @@ export class GasReporter implements jest.Reporter {
   }
 
   outputGasInfo(contractCalls: ContractCalls): void {
-    console.log();
-    console.log('Gas Info:');
-    console.log();
-    console.log('Function Calls:');
-    // const methodTable = new easyTable();
     for (const contractName of Object.keys(contractCalls)) {
-      const gasCostsForSingleContract = {
-        deployment: {},
+      const contractStats: ContractStats = {
+        deployment: {calls: 0, min: 0, max: 0, avg: 0},
         methods: {}
       };
       if (contractCalls[contractName].deploy) {
@@ -170,8 +181,8 @@ export class GasReporter implements jest.Reporter {
         const min = Math.min(...deploy.gasData);
         const max = Math.max(...deploy.gasData);
 
-        const stats = {minGas: min, maxGas: max, meanGas: average};
-        gasCostsForSingleContract.deployment = stats;
+        const stats: Stats = {calls: 1, min: min, max: max, avg: average};
+        contractStats.deployment = stats;
       }
       const methodCalls = contractCalls[contractName].methodCalls;
       Object.keys(methodCalls).forEach(methodName => {
@@ -181,16 +192,40 @@ export class GasReporter implements jest.Reporter {
         const min = Math.min(...method.gasData);
         const max = Math.max(...method.gasData);
 
-        const stats = {calls: method.calls, minGas: min, maxGas: max, meanGas: average};
-        gasCostsForSingleContract.methods[methodName] = stats;
+        const stats: Stats = {calls: method.calls, min: min, max: max, avg: average};
+        contractStats.methods[methodName] = stats;
       });
 
-      if (Object.keys(gasCostsForSingleContract.deployment).length !== 0) {
-        gasCosts[contractName] = gasCostsForSingleContract;
+      if (contractStats.deployment.calls > 0) {
+        gasCosts[contractName] = contractStats;
       }
     }
 
-    console.log(JSON.stringify(gasCosts));
+    console.log(this.objectToTable(gasCosts).toString());
+  }
+
+  objectToTable(gasCosts: GasCosts): easyTable {
+    const table = new easyTable();
+    Object.keys(gasCosts).forEach(contract => {
+      const contractStats = gasCosts[contract];
+      table.cell('Contract', contract);
+      table.newRow();
+      table.cell('Operation', ' - deployment - ');
+      table.cell('Min', contractStats.deployment.min);
+      table.cell('Avg', contractStats.deployment.avg);
+      table.cell('Max', contractStats.deployment.max);
+      Object.keys(contractStats.methods).forEach(method => {
+        table.newRow();
+        table.cell('Operation', method);
+        const methodStats = contractStats.methods[method];
+        table.cell('Calls', methodStats.calls);
+        table.cell('Min', methodStats.min);
+        table.cell('Avg', methodStats.avg);
+        table.cell('Max', methodStats.max);
+        table.newRow();
+      });
+    });
+    return table;
   }
 
   async parseBlock(blockNum: number, contractCalls: ContractCalls): Promise<void> {
@@ -238,7 +273,7 @@ export class GasReporter implements jest.Reporter {
     }
   }
 
-  async saveResultsToFile(gasCosts: object, hash: string): Promise<void> {
+  async saveResultsToFile(hash: string): Promise<void> {
     const results = {
       date: Date.now(),
       networkName: this.provider.network.name,
@@ -248,7 +283,11 @@ export class GasReporter implements jest.Reporter {
     const resultsString = JSON.stringify(results, null, 4) + '\n';
     await fs.appendFile('./gas.json', resultsString, err => {
       if (err) throw err;
-      console.log('Wrote to file');
+      console.log('Wrote json to gas.json');
+    });
+    await fs.appendFile('./gas.txt', this.objectToTable(gasCosts).toString(), err => {
+      if (err) throw err;
+      console.log('Wrote table to gas.txt');
     });
   }
 }
