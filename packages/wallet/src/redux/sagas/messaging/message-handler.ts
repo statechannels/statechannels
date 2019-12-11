@@ -117,7 +117,7 @@ function* handlePushMessage(payload: RequestObject) {
   const message = payload.params as PushMessageParams;
   if (isRelayableAction(message.data)) {
     yield put(message.data);
-    yield fork(messageSender, outgoingMessageActions.postMessageResponse({id}));
+    yield fork(messageSender, outgoingMessageActions.pushMessageResponse({id}));
   } else {
     switch (message.data.type) {
       case "Channel.Updated":
@@ -127,12 +127,15 @@ function* handlePushMessage(payload: RequestObject) {
             signedState: message.data.signedState
           })
         );
+        yield fork(messageSender, outgoingMessageActions.pushMessageResponse({id}));
+
         yield fork(
           messageSender,
           outgoingMessageActions.channelUpdatedEvent({
             channelId: getChannelId(message.data.signedState.state.channel)
           })
         );
+
         break;
       case "Channel.Joined":
         yield put(
@@ -154,7 +157,7 @@ function* handlePushMessage(payload: RequestObject) {
             channelId: getChannelId(message.data.signedState.state.channel)
           })
         );
-        yield fork(messageSender, outgoingMessageActions.postMessageResponse({id}));
+        yield fork(messageSender, outgoingMessageActions.pushMessageResponse({id}));
         break;
       case "Channel.Open":
         const {signedState, participants} = message.data;
@@ -194,7 +197,7 @@ function* handlePushMessage(payload: RequestObject) {
           })
         );
 
-        yield fork(messageSender, outgoingMessageActions.postMessageResponse({id}));
+        yield fork(messageSender, outgoingMessageActions.pushMessageResponse({id}));
 
         const channelId = getChannelId(signedState.state.channel);
         yield fork(
@@ -204,6 +207,8 @@ function* handlePushMessage(payload: RequestObject) {
           })
         );
         break;
+      default:
+        console.error(`Could not handle message data with type ${message.data.type}`);
     }
   }
 }

@@ -75,15 +75,15 @@ function* createResponseMessage(action: OutgoingApiAction) {
         signedState: yield select(getLastSignedStateForChannel, action.channelId)
       };
       return jrs.notification("MessageQueued", {
-        recipient: action.fromParticipantId,
-        sender: action.toParticipantId,
+        recipient: action.toParticipantId,
+        sender: action.fromParticipantId,
         data: channelUpdated
       });
     case "WALLET.CHANNEL_UPDATED_EVENT":
       return jrs.notification("ChannelUpdated", yield getChannelInfo(action.channelId));
     case "WALLET.CHANNEL_PROPOSED_EVENT":
       return jrs.notification("ChannelProposed", yield getChannelInfo(action.channelId));
-    case "WALLET.POST_MESSAGE_RESPONSE":
+    case "WALLET.PUSH_MESSAGE_RESPONSE":
       return jrs.success(action.id, {success: true});
     case "WALLET.UNKNOWN_CHANNEL_ID_ERROR":
       return jrs.error(

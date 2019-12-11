@@ -97,13 +97,13 @@ export const channelProposedEvent: ActionConstructor<ChannelProposedEvent> = p =
   type: "WALLET.CHANNEL_PROPOSED_EVENT"
 });
 
-export interface PostMessageResponse extends ApiResponseAction {
-  type: "WALLET.POST_MESSAGE_RESPONSE";
+export interface PushMessageResponse extends ApiResponseAction {
+  type: "WALLET.PUSH_MESSAGE_RESPONSE";
 }
 
-export const postMessageResponse: ActionConstructor<PostMessageResponse> = p => ({
+export const pushMessageResponse: ActionConstructor<PushMessageResponse> = p => ({
   ...p,
-  type: "WALLET.POST_MESSAGE_RESPONSE"
+  type: "WALLET.PUSH_MESSAGE_RESPONSE"
 });
 
 export interface JoinChannelResponse extends ApiResponseAction {
@@ -173,7 +173,7 @@ export type OutgoingApiAction =
   | SendChannelProposedMessage
   | SendChannelJoinedMessage
   | ChannelProposedEvent
-  | PostMessageResponse
+  | PushMessageResponse
   | UnknownChannelId
   | NoContractError
   | JoinChannelResponse
