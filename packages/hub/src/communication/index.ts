@@ -129,6 +129,6 @@ export function isStartProcessAction(a: {type: string}): a is StartProcessAction
 }
 
 export function getProcessId(action: ChannelOpen) {
-  const processId = 'Funding-' + getChannelId(action.signedState.state.channel);
+  const processId = getChannelId(action.signedState.state.channel);
   return `Funding-${processId}`;
 }
