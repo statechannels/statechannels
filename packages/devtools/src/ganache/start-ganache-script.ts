@@ -7,13 +7,13 @@ import {startSharedGanache} from '.';
 configureEnvVariables();
 
 void (async () => {
-  const deploymentsFile = process.env.GANACHE_DEPLOYMENTS_FILE;
+  const cacheFolder = process.env.GANACHE_CACHE_FOLDER;
+  const port = Number(process.env.GANACHE_PORT || 8545);
 
-  if (!deploymentsFile) {
-    throw Error('Must set a GANACHE_DEPLOYMENTS_FILE in env to start a shared ganache instance');
+  if (!cacheFolder) {
+    throw Error('Must set a GANACHE_CACHE_FOLDER in env to start a shared ganache instance');
   }
+  const deploymentsFile = path.join(process.cwd(), cacheFolder, `ganache-deployments-${port}.json`);
 
-  const deploymentsPath = path.join(process.cwd(), deploymentsFile);
-
-  await startSharedGanache(deploymentsPath);
+  await startSharedGanache(deploymentsFile);
 })();
