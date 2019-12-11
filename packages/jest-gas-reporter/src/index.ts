@@ -36,12 +36,12 @@ interface ParsedArtifact {
   networks: {[networkName: string]: {address: string}};
 }
 
-interface GasCosts {
+interface GasConsumed {
   [contract: string]: ContractStats;
 }
 
 interface ContractStats {
-  deployment: Stats;
+  deployment: number;
   methods: {[method: string]: Stats};
 }
 
@@ -51,7 +51,7 @@ interface Stats {
   max: number;
   avg: number;
 }
-const gasCosts: GasCosts = {};
+const gasConsumed: GasConsumed = {};
 /* TODO: 
  - Handle failures gracefully
  - Organize and clean up
@@ -170,19 +170,17 @@ export class GasReporter implements jest.Reporter {
   outputGasInfo(contractCalls: ContractCalls): void {
     for (const contractName of Object.keys(contractCalls)) {
       const contractStats: ContractStats = {
-        deployment: {calls: 0, min: 0, max: 0, avg: 0},
+        deployment: 0,
         methods: {}
       };
       if (contractCalls[contractName].deploy) {
-        const deploy = contractCalls[contractName].deploy;
+        const deployGas = contractCalls[contractName].deploy.gasData;
 
-        const total = deploy.gasData.reduce((acc, datum) => acc + datum, 0);
-        const average = Math.round(total / deploy.gasData.length);
-        const min = Math.min(...deploy.gasData);
-        const max = Math.max(...deploy.gasData);
-
-        const stats: Stats = {calls: 1, min: min, max: max, avg: average};
-        contractStats.deployment = stats;
+        if (deployGas[1] && deployGas[1] !== deployGas[0]) {
+          throw new Error('Multiple deployments with differing gas costs detected!');
+          // This shouldn't happen with our current workflow where contracts are deployed exactly once before tests are run.
+        }
+        contractStats.deployment = deployGas[0];
       }
       const methodCalls = contractCalls[contractName].methodCalls;
       Object.keys(methodCalls).forEach(methodName => {
@@ -196,27 +194,23 @@ export class GasReporter implements jest.Reporter {
         contractStats.methods[methodName] = stats;
       });
 
-      if (contractStats.deployment.calls > 0) {
-        gasCosts[contractName] = contractStats;
+      if (contractStats.deployment > 0) {
+        gasConsumed[contractName] = contractStats;
       }
     }
 
-    console.log(this.objectToTable(gasCosts).toString());
+    console.log(this.objectToTable(gasConsumed).toString());
   }
 
-  objectToTable(gasCosts: GasCosts): easyTable {
+  objectToTable(gasConsumed: GasConsumed): easyTable {
     const table = new easyTable();
-    Object.keys(gasCosts).forEach(contract => {
-      const contractStats = gasCosts[contract];
+    Object.keys(gasConsumed).forEach(contract => {
+      const contractStats = gasConsumed[contract];
       table.cell('Contract', contract);
-      table.newRow();
-      table.cell('Operation', ' - deployment - ');
-      table.cell('Min', contractStats.deployment.min);
-      table.cell('Avg', contractStats.deployment.avg);
-      table.cell('Max', contractStats.deployment.max);
+      table.cell('Deployment', contractStats.deployment);
       Object.keys(contractStats.methods).forEach(method => {
         table.newRow();
-        table.cell('Operation', method);
+        table.cell('Method', method);
         const methodStats = contractStats.methods[method];
         table.cell('Calls', methodStats.calls);
         table.cell('Min', methodStats.min);
@@ -278,7 +272,7 @@ export class GasReporter implements jest.Reporter {
       date: Date.now(),
       networkName: this.provider.network.name,
       revision: hash,
-      gasCosts: gasCosts
+      gasConsumed
     };
     const resultsString = JSON.stringify(results, null, 4) + '\n';
     await fs.appendFile('./gas.json', resultsString, err => {
@@ -294,7 +288,7 @@ export class GasReporter implements jest.Reporter {
         '\nrevision: ' +
         hash +
         '\n' +
-        this.objectToTable(gasCosts).toString(),
+        this.objectToTable(gasConsumed).toString(),
       err => {
         if (err) throw err;
         console.log('Wrote table to gas.txt');
