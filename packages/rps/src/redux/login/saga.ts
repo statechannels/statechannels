@@ -55,7 +55,6 @@ export default function* loginRootSaga() {
   if (!metaMask) {
     return;
   }
-  ethereum.enable();
   yield fork(loginStatusWatcherSaga);
   yield all([
     takeEvery(loginActions.LOGIN_REQUEST, loginSaga),
