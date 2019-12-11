@@ -15,10 +15,11 @@ export default function* checkWallet() {
   try {
     if (window.channelProvider) {
       try {
-        yield call([window.channelProvider, window.channelProvider.enable], process.env.WALLET_URL);
+        yield call([window.channelProvider, 'enable'], process.env.WALLET_URL);
         yield put(walletActions.walletSuccess());
         return true;
-      } catch (error) {
+      } catch (e) {
+        console.error(e);
         yield put(
           walletActions.walletErrorOccurred({
             errorType: WalletErrorType.EnablingError,
@@ -27,6 +28,7 @@ export default function* checkWallet() {
       }
     }
   } catch (e) {
+    console.error(e);
     yield put(
       walletActions.walletErrorOccurred({
         errorType: WalletErrorType.UnknownError,
