@@ -178,9 +178,9 @@ export const machine: MachineFactory<Init, any> = (
   const services: Services = {
     findLedgerChannelId: async () => ({ type: 'NOT_FOUND' }),
     getNullChannelArgs,
+    createNullChannel: CreateNullChannel.machine(store),
     ledgerUpdate: () => true,
     directFunding: () => true,
-    createNullChannel: () => true,
   };
 
   const options = { services, guards };

@@ -55,16 +55,21 @@ export class ChannelStoreEntry implements IChannelStoreEntry {
   public unsupportedStates: SignedState[];
   public privateKey: string;
   public participants: Participant[];
-  public funding: Funding | undefined;
+  public funding?: Funding;
   public channel: Channel;
 
-  constructor(args: IChannelStoreEntry) {
-    this.supportedState = args.supportedState;
-    this.unsupportedStates = args.unsupportedStates;
-    this.privateKey = args.privateKey;
-    this.participants = args.participants;
+  constructor(args: Partial<IChannelStoreEntry>) {
+    const { privateKey, participants, channel } = args;
+    if (privateKey && participants && channel) {
+      this.privateKey = privateKey;
+      this.participants = participants;
+      this.channel = channel;
+    } else {
+      throw new Error('Required arguments missing');
+    }
+    this.supportedState = args.supportedState || [];
+    this.unsupportedStates = args.unsupportedStates || [];
     this.funding = args.funding;
-    this.channel = args.channel;
   }
 
   get args(): IChannelStoreEntry {

@@ -1,4 +1,7 @@
-import { Channel, Outcome, store } from '../../';
+import { Machine } from 'xstate';
+import { Channel, MachineFactory, Outcome, success } from '../../';
+import { ChannelStoreEntry } from '../../ChannelStoreEntry';
+import { Participant } from '../../store';
 import { Init as SupportStateArgs } from '../support-state/protocol';
 
 const PROTOCOL = 'create-null-channel';
@@ -15,48 +18,25 @@ These differences allow create-null-channel to be fully-determined.
 */
 
 export interface Init {
+  // channelId: string; // For convenience
   channel: Channel;
   outcome: Outcome;
 }
 
 type Context = Init & { channelID: string };
 
-function supportStateArgs({ channelID }: Context): SupportStateArgs {
-  const states = store.getUnsupportedStates(channelID);
-  if (states.length !== 1) {
-    throw new Error('Unexpected states');
-  }
-  return {
-    channelID,
-    outcome: states[0].state.outcome,
-  };
-}
-
-function channelOK({ channel, outcome }): boolean {
-  // Should check that the nonce is used, that we have the private key for one of the signers, etc
-  return true;
-}
-
 const checkChannel = {
-  entry: 'assignChannelId', // for convenience
-  on: {
-    '': [
-      {
-        target: 'preFundSetup',
-        cond: 'channelOK',
-      },
-      'abort',
-    ],
+  invoke: {
+    src: 'checkChannel',
+    onDone: 'preFundSetup',
   },
 };
 
 const preFundSetup = {
   invoke: {
     src: 'supportState',
-    data: 'supportStateArgs',
   },
   onDone: 'success',
-  onError: 'failure',
 };
 
 export const config = {
@@ -65,13 +45,47 @@ export const config = {
   states: {
     checkChannel,
     preFundSetup,
-    success: { type: 'final' },
+    success,
   },
 };
 
-const dummyGuard = context => true;
-const guards = {
-  amFirst: dummyGuard,
-  dataMatches: dummyGuard,
+export const machine: MachineFactory<Init, any> = (store, context: Init) => {
+  async function checkChannelService({ channel }: Init): Promise<boolean> {
+    // TODO: Should check that
+    // - the nonce is used,
+    // - that we have the private key for one of the signers, etc
+
+    // TODO: Use the correct participant ids
+    const participants: Participant[] = channel.participants.map(p => ({
+      destination: p,
+      participantId: p,
+      signingAddress: p,
+    }));
+    const privateKey = store.getPrivateKey(
+      participants.map(p => p.participantId)
+    );
+    store.initializeChannel(
+      new ChannelStoreEntry({ channel, privateKey, participants })
+    );
+
+    return true;
+  }
+
+  function supportStateArgs({ channelID }: Context): SupportStateArgs {
+    const states = store.getUnsupportedStates(channelID);
+    if (states.length !== 1) {
+      throw new Error('Unexpected states');
+    }
+    return {
+      channelID,
+      outcome: states[0].state.outcome,
+    };
+  }
+  const services = {
+    checkChannel: checkChannelService,
+    supportState: async () => true, // TODO: use supportedStateArgs
+  };
+
+  const options = { services };
+  return Machine(config, options).withContext(context);
 };
-export const mockOptions = { guards };
