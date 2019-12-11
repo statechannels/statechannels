@@ -285,10 +285,21 @@ export class GasReporter implements jest.Reporter {
       if (err) throw err;
       console.log('Wrote json to gas.json');
     });
-    await fs.appendFile('./gas.txt', this.objectToTable(gasCosts).toString(), err => {
-      if (err) throw err;
-      console.log('Wrote table to gas.txt');
-    });
+    await fs.appendFile(
+      './gas.txt',
+      '\n\n\ndate: ' +
+        Date.now() +
+        '\nnetworkName: ' +
+        this.provider.network.name +
+        '\nrevision: ' +
+        hash +
+        '\n' +
+        this.objectToTable(gasCosts).toString(),
+      err => {
+        if (err) throw err;
+        console.log('Wrote table to gas.txt');
+      }
+    );
   }
 }
 
