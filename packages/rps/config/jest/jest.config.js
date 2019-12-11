@@ -41,4 +41,5 @@ module.exports = {
     'node',
     'mjs',
   ],
+  roots: ['<rootDir>/src'],
 };
