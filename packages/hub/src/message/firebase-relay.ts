@@ -32,17 +32,7 @@ async function listen() {
   hubRef.on('child_added', async snapshot => {
     const key = snapshot.key;
     const value = snapshot.val();
-    const queue = value.queue;
-    if (queue === 'GAME_WALLET') {
-      throw new Error(
-        `The hub does not support handling application states. Received ${JSON.stringify(value)}`
-      );
-    } else if (queue === 'WALLET') {
-      process.send(value.payload);
-    } else {
-      throw new Error('Unknown queue');
-    }
-
+    process.send(value.data);
     hubRef.child(key).remove();
   });
 }

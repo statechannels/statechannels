@@ -1,5 +1,4 @@
 import {
-  ConcludeInstigated,
   RelayableAction,
   RelayActionWithMessage,
   SignedStatesReceived,
@@ -10,7 +9,6 @@ import {
 import {getProcess} from '../../wallet/db/queries/walletProcess';
 import {handleNewProcessAction} from './handle-new-process-action';
 import {handleOngoingProcessAction} from './handle-ongoing-process-action';
-import {getChannelId} from '@statechannels/nitro-protocol';
 
 export async function handleWalletMessage(
   message: RelayableAction
