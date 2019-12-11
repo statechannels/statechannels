@@ -1,5 +1,5 @@
+import {cps, delay, put} from 'redux-saga/effects';
 import * as metamaskActions from './actions';
-import {put, cps, delay} from 'redux-saga/effects';
 import {MetamaskErrorType} from './actions';
 
 export default function* checkMetamask() {
@@ -50,22 +50,31 @@ export default function* checkMetamask() {
       );
       return false;
     }
-    let accountUnlocked = false;
-    while (!accountUnlocked) {
-      const accounts = yield cps(web3.eth.getAccounts);
-      accountUnlocked = accounts && accounts.length > 0;
-      if (!accountUnlocked) {
+
+    if (window.ethereum) {
+      try {
+        yield ethereum.enable();
+        yield put(metamaskActions.metamaskSuccess());
+        return true;
+      } catch (error) {
         yield put(
           metamaskActions.metamaskErrorOccurred({
             errorType: MetamaskErrorType.MetamaskLocked,
           })
         );
-      } else {
-        delay(1000);
+      }
+    } else {
+      let accountUnlocked = false;
+      while (!accountUnlocked) {
+        const accounts = yield cps(web3.eth.getAccounts);
+        accountUnlocked = accounts && accounts.length > 0;
+        if (!accountUnlocked) {
+          yield put(metamaskActions.metamaskSuccess());
+        } else {
+          delay(1000);
+        }
       }
     }
-    yield put(metamaskActions.metamaskSuccess());
-    return true;
   } catch {
     yield put(metamaskActions.metamaskErrorOccurred({errorType: MetamaskErrorType.UnknownError}));
   }
