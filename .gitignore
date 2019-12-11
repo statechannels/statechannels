@@ -49,6 +49,7 @@ junit.xml
 **/deployment/network-map.json
 **/.etherlime-store/
 **/.outputParameter
+**/gas.json
 
 
 ganache-deployments.json
