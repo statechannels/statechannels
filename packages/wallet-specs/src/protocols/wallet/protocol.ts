@@ -1,19 +1,6 @@
-import {
-  AnyEventObject,
-  assign,
-  AssignAction,
-  Machine,
-  spawn,
-  State,
-} from 'xstate';
+import { AnyEventObject, assign, AssignAction, Machine, spawn } from 'xstate';
 import { CreateChannel, JoinChannel } from '..';
-import {
-  forwardChannelUpdated,
-  getChannelID,
-  pretty,
-  Store,
-  unreachable,
-} from '../..';
+import { getChannelID, pretty, Store, unreachable } from '../..';
 import { ChannelUpdated } from '../../store';
 import {
   FundingStrategyProposed,

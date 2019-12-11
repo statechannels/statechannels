@@ -64,6 +64,7 @@ const funding = {
     src: 'funding',
     data: passChannelId,
     onDone: 'postFundSetup',
+    autoForward: true,
   },
 };
 
