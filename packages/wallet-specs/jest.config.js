@@ -1,8 +1,5 @@
-const { resolve } = require('path');
-const root = resolve(__dirname, '../../');
-
 module.exports = {
-  rootDir: root,
+  rootDir: '.',
   testMatch: ['<rootDir>/src/**/test.ts'],
   testEnvironment: 'node',
   testURL: 'http://localhost',

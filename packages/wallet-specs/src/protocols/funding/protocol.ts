@@ -1,6 +1,6 @@
 import { assign, DoneInvokeEvent, Machine } from 'xstate';
 import { LedgerFunding } from '..';
-import { failure, MachineFactory, Store, success } from '../..';
+import { failure, MachineFactory, pretty, Store, success } from '../..';
 import { FundingStrategy, FundingStrategyProposed } from '../../wire-protocol';
 
 const PROTOCOL = 'funding';
@@ -129,8 +129,6 @@ export type Guards = {
 export type Actions = {
   sendClientChoice: any;
   assignClientChoice: any;
-  assignStrategy: any;
-  assignProposal: any;
 };
 
 export type Services = {
@@ -146,9 +144,6 @@ export type Options = Partial<{
   actions: Actions;
 }>;
 
-const dummyGuard = x => {
-  return true;
-};
 const guards: Guards = {
   consensus: ({ clientChoice, peerChoice }: Init) => {
     return !!clientChoice && clientChoice === peerChoice;
@@ -160,23 +155,44 @@ const guards: Guards = {
   indirectStrategyChosen: ({ clientChoice }: Init) =>
     clientChoice === 'Indirect',
   virtualStrategyChosen: ({ clientChoice }: Init) => clientChoice === 'Virtual',
-  maxTriesExceeded: dummyGuard,
+  maxTriesExceeded: () => true,
 };
-export const mockOptions: Options = { guards };
+
+function strategyChoice({
+  clientChoice,
+  targetChannelId,
+}: ClientChoiceKnown): FundingStrategyProposed {
+  return {
+    type: 'FUNDING_STRATEGY_PROPOSED',
+    choice: clientChoice,
+    targetChannelId,
+  };
+}
+const mockServices: Services = {
+  askClient: async () => 'Indirect',
+  directFunding: async () => true,
+  ledgerFunding: async () => true,
+  virtualFunding: async () => true,
+};
+const mockActions: Actions = {
+  sendClientChoice: (ctx: ClientChoiceKnown) => {
+    console.log(`Sending ${pretty(strategyChoice(ctx))}`);
+  },
+  assignClientChoice,
+};
+
+export const mockOptions: Options = {
+  guards,
+  services: mockServices,
+  actions: mockActions,
+};
 
 export const machine: MachineFactory<Init, any> = (
   store: Store,
   context: Init
 ) => {
-  function sendClientChoice({
-    clientChoice,
-    targetChannelId,
-  }: ClientChoiceKnown) {
-    store.sendStrategyChoice({
-      type: 'FUNDING_STRATEGY_PROPOSED',
-      choice: clientChoice,
-      targetChannelId,
-    });
+  function sendClientChoice(ctx: ClientChoiceKnown) {
+    store.sendStrategyChoice(strategyChoice(ctx));
   }
 
   const options: Options = {
@@ -190,8 +206,6 @@ export const machine: MachineFactory<Init, any> = (
     actions: {
       sendClientChoice,
       assignClientChoice,
-      assignProposal: async () => true,
-      assignStrategy: async () => true,
     },
   };
 
