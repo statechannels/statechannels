@@ -91,8 +91,8 @@ export class GasReporter implements jest.Reporter {
       this.options.contractArtifactFolder
     );
     const results = this.outputGasInfo(contractCalls);
-    if (results[0] !== '\n\n' || results[1] !== '\n\n') {
-      await this.saveResultsToFile(results);
+    if (process.env.CIRCLECI && (results[0] !== '\n\n' || results[1] !== '\n\n')) {
+      await this.saveResultsToFile(results, process.env.CIRCLE_SHA1);
     }
   }
 
@@ -252,16 +252,18 @@ export class GasReporter implements jest.Reporter {
     }
   }
 
-  async saveResultsToFile(array: string[]): Promise<void> {
+  async saveResultsToFile(array: string[], hash: string): Promise<void> {
     array.unshift(
       'Gas consumption measured at ' +
         Date.now() +
         ' against network with name ' +
         this.provider.network.name +
-        `\n`
+        `\n` +
+        ' the hash is ' +
+        hash
     );
     array.forEach(async string => {
-      await fs.appendFile('./gasCostsRecord.txt', string, err => {
+      await fs.appendFile('./gas.txt', string, err => {
         if (err) throw err;
         console.log('Wrote to file');
       });
