@@ -5,10 +5,11 @@ import {validateNotification, validateResponse} from "../../../json-rpc-validati
 import {createJsonRpcAllocationsFromOutcome} from "../../../utils/json-rpc-utils";
 import {unreachable} from "../../../utils/reducer-utils";
 import {messageSent} from "../../actions";
-import {ChannelParticipant, ChannelState, getLastState} from "../../channel-store";
+import {ChannelState, getLastState} from "../../channel-store";
 import {getChannelHoldings, getLastSignedStateForChannel} from "../../selectors";
 import {getChannelStatus} from "../../state";
 import {OutgoingApiAction} from "./outgoing-api-actions";
+import {State} from "@statechannels/nitro-protocol";
 
 export function* messageSender(action: OutgoingApiAction) {
   const message = yield createResponseMessage(action);
@@ -134,7 +135,7 @@ function* getChannelInfo(channelId: string) {
   if (!bigNumberify(channelHoldings).isZero()) {
     funding = [{token: "0x0", amount: channelHoldings}];
   }
-  const status = getChannelInfoStatus(turnNum, participants);
+  const status = getChannelInfoStatus(state);
 
   return {
     participants,
@@ -148,9 +149,14 @@ function* getChannelInfo(channelId: string) {
   };
 }
 
-function getChannelInfoStatus(
-  turnNum: number,
-  participants: ChannelParticipant[]
-): "proposed" | "opening" | "running" {
-  return turnNum === 0 ? "proposed" : turnNum < participants.length - 1 ? "opening" : "running";
+function getChannelInfoStatus(state: State): "proposed" | "opening" | "running" | "closing" {
+  if (state.isFinal) {
+    return "closing";
+  } else if (state.turnNum === 0) {
+    return "proposed";
+  } else if (state.turnNum < state.channel.participants.length - 1) {
+    return "opening";
+  } else {
+    return "running";
+  }
 }

@@ -20,7 +20,8 @@ import {
   sendChannelUpdatedMessage,
   unknownChannelId,
   unknownSigningAddress,
-  updateChannelResponse
+  updateChannelResponse,
+  closeChannelResponse
 } from "../outgoing-api-actions";
 
 describe("message sender", () => {
@@ -231,6 +232,34 @@ describe("message sender", () => {
     });
   });
 
+  it("responds with a correct response message for WALLET.CLOSE_CHANNEL_RESPONSE", async () => {
+    const state = stateHelpers.appState({turnNum: 10, isFinal: true});
+
+    const initialState = setChannel(
+      EMPTY_SHARED_DATA,
+      channelFromStates([state], stateHelpers.asAddress, stateHelpers.asPrivateKey)
+    );
+    const channelId = stateHelpers.channelId;
+    const message = closeChannelResponse({
+      id: 1,
+      channelId
+    });
+
+    const {effects} = await expectSaga(messageSender, message)
+      .withState(initialState)
+      .provide([[matchers.call.fn(window.parent.postMessage), 0]])
+      .run();
+
+    expect(effects.call[0].payload.args[0]).toMatchObject({
+      jsonrpc: "2.0",
+      id: 1,
+      result: {
+        turnNum: 10,
+        status: "closing",
+        channelId
+      }
+    });
+  });
   it("creates a correct response message for WALLET.CREATE_CHANNEL_RESPONSE", async () => {
     const state = stateHelpers.appState({turnNum: 0});
 
