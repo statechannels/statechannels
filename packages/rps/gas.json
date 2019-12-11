@@ -1,0 +1,21 @@
+{
+    "date": 1576068071558,
+    "networkName": "unknown",
+    "gasCosts": {
+        "RockPaperScissors": {
+            "deployment": {
+                "minGas": 2724056,
+                "maxGas": 2724056,
+                "meanGas": 2724056
+            },
+            "methods": {
+                "validTransition": {
+                    "calls": 132,
+                    "minGas": 64824,
+                    "maxGas": 67793,
+                    "meanGas": 66042
+                }
+            }
+        }
+    }
+}
