@@ -1,17 +1,15 @@
-import { createContext } from 'vm';
 import { assign, Machine } from 'xstate';
+import { SupportState } from '..';
 import {
   Channel,
   FINAL,
-  getChannelID,
+  getChannelId,
   MachineFactory,
   Outcome,
-  success,
+  SignedState,
 } from '../../';
 import { ChannelStoreEntry } from '../../ChannelStoreEntry';
 import { Participant } from '../../store';
-import { debugAction } from '../../utils';
-import { Init as SupportStateArgs } from '../support-state/protocol';
 
 const PROTOCOL = 'create-null-channel';
 /*
@@ -41,16 +39,24 @@ const checkChannel = {
       target: 'preFundSetup',
       actions: assign((ctx: Init) => ({
         ...ctx,
-        channelId: getChannelID(ctx.channel),
+        channelId: getChannelId(ctx.channel),
       })),
     },
   },
 };
 
+function preFundData({ channelId, outcome }: Context): SupportState.Init {
+  return {
+    channelId,
+    outcome,
+  };
+}
 const preFundSetup = {
   invoke: {
     src: 'supportState',
+    data: preFundData,
     onDone: 'success',
+    autoForward: true,
   },
 };
 
@@ -68,7 +74,10 @@ export const config = {
 };
 
 export const machine: MachineFactory<Init, any> = (store, context: Init) => {
-  async function checkChannelService({ channel }: Init): Promise<boolean> {
+  async function checkChannelService({
+    channel,
+    outcome,
+  }: Init): Promise<boolean> {
     // TODO: Should check that
     // - the nonce is used,
     // - that we have the private key for one of the signers, etc
@@ -82,28 +91,33 @@ export const machine: MachineFactory<Init, any> = (store, context: Init) => {
     const privateKey = store.getPrivateKey(
       participants.map(p => p.participantId)
     );
+    const unsupportedStates: SignedState[] = [
+      {
+        state: {
+          turnNum: 0,
+          outcome,
+          channel,
+          isFinal: false,
+          challengeDuration: '1',
+        },
+        signatures: [],
+      },
+    ];
     store.initializeChannel(
-      new ChannelStoreEntry({ channel, privateKey, participants })
+      new ChannelStoreEntry({
+        channel,
+        privateKey,
+        participants,
+        unsupportedStates,
+      })
     );
 
     return true;
   }
 
-  function supportStateArgs({
-    channelId: channelID,
-  }: Context): SupportStateArgs {
-    const states = store.getUnsupportedStates(channelID);
-    if (states.length !== 1) {
-      throw new Error('Unexpected states');
-    }
-    return {
-      channelID,
-      outcome: states[0].state.outcome,
-    };
-  }
   const services = {
     checkChannel: checkChannelService,
-    supportState: async () => true, // TODO: use supportedStateArgs
+    supportState: SupportState.machine(store),
   };
 
   const options = { services };

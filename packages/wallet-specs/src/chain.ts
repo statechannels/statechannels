@@ -1,7 +1,7 @@
 interface Chain {
-  holdings: (channelID: string) => number;
+  holdings: (channelId: string) => number;
   deposit: (
-    channelID: string,
+    channelId: string,
     expectedHeld: number,
     amount: number
   ) => Deposited | Revert;
@@ -10,7 +10,7 @@ interface Chain {
 export const chain = (null as any) as Chain;
 
 class ExampleChain {
-  private _holdings: { [channelID: string]: number };
+  private _holdings: { [channelId: string]: number };
 
   constructor() {
     this._holdings = {
@@ -19,23 +19,23 @@ class ExampleChain {
     };
   }
 
-  public holdings(channelID) {
-    return this._holdings[channelID];
+  public holdings(channelId) {
+    return this._holdings[channelId];
   }
 
   public deposit(
-    channelID: string,
+    channelId: string,
     expectedHeld: number,
     amount: number
   ): Deposited | Revert {
-    const current = this._holdings[channelID] || 0;
+    const current = this._holdings[channelId] || 0;
     if (current >= expectedHeld) {
-      this._holdings[channelID] = (this._holdings[channelID] || 0) + amount;
+      this._holdings[channelId] = (this._holdings[channelId] || 0) + amount;
       return {
         type: 'DEPOSITED',
-        channelID,
+        channelId,
         amount,
-        total: this._holdings[channelID],
+        total: this._holdings[channelId],
       };
     } else {
       return 'REVERT';
@@ -46,7 +46,7 @@ class ExampleChain {
 // The store would send this action whenever the channel is updated
 export interface Deposited {
   type: 'DEPOSITED';
-  channelID: string;
+  channelId: string;
   amount: number;
   total: number;
 }

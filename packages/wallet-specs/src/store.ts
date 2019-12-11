@@ -2,7 +2,7 @@ import {
   add,
   Allocation,
   Channel,
-  getChannelID,
+  getChannelId,
   gt,
   Outcome,
   SignedState,
@@ -12,17 +12,17 @@ import { ChannelStoreEntry, IChannelStoreEntry } from './ChannelStoreEntry';
 import { messageService } from './messaging';
 import { AddressableMessage, FundingStrategyProposed } from './wire-protocol';
 export interface IStore {
-  getLatestState: (channelID: string) => State;
-  getLatestConsensus: (channelID: string) => SignedState; // Used for null channels, whose support must be a single state
-  getLatestSupport: (channelID: string) => SignedState[]; //  Used for application channels, which would typically have multiple states in its support
-  getLatestSupportedAllocation: (channelID: string) => Allocation;
-  getEntry: (channelID: string) => ChannelStoreEntry;
+  getLatestState: (channelId: string) => State;
+  getLatestConsensus: (channelId: string) => SignedState; // Used for null channels, whose support must be a single state
+  getLatestSupport: (channelId: string) => SignedState[]; //  Used for application channels, which would typically have multiple states in its support
+  getLatestSupportedAllocation: (channelId: string) => Allocation;
+  getEntry: (channelId: string) => ChannelStoreEntry;
   getIndex: (channelId: string) => 0 | 1;
 
   // The channel store should garbage collect stale states on CHANNEL_UPDATED events.
   // If a greater state becomes supported on such an event, it should replace the latest
   // supported state, and remove any lesser, unsupported states.
-  getUnsupportedStates: (channelID: string) => SignedState[];
+  getUnsupportedStates: (channelId: string) => SignedState[];
 
   findLedgerChannelId: (participants: string[]) => string | undefined;
   signedByMe: (state: State) => boolean;
@@ -51,7 +51,7 @@ export interface Participant {
 }
 
 interface ChannelStore {
-  [channelID: string]: IChannelStoreEntry;
+  [channelId: string]: IChannelStoreEntry;
 }
 
 type Constructor = Partial<{
@@ -74,16 +74,16 @@ export class Store implements IStore {
     this._privateKeys = privateKeys || {};
   }
 
-  public getEntry(channelID: string): ChannelStoreEntry {
-    if (!this._store[channelID]) {
-      throw new Error(`Channel ${channelID} not found`);
+  public getEntry(channelId: string): ChannelStoreEntry {
+    if (!this._store[channelId]) {
+      throw new Error(`Channel ${channelId} not found`);
     }
 
-    return new ChannelStoreEntry(this._store[channelID]);
+    return new ChannelStoreEntry(this._store[channelId]);
   }
 
-  public maybeGetEntry(channelID: string): ChannelStoreEntry | false {
-    const entry = this._store[channelID];
+  public maybeGetEntry(channelId: string): ChannelStoreEntry | false {
+    const entry = this._store[channelId];
     return !!entry && new ChannelStoreEntry(entry);
   }
 
@@ -123,8 +123,8 @@ export class Store implements IStore {
     return this.getEntry(channelId).participants.map(p => p.participantId);
   }
 
-  public getLatestState(channelID) {
-    const { supportedState, unsupportedStates } = this.getEntry(channelID);
+  public getLatestState(channelId) {
+    const { supportedState, unsupportedStates } = this.getEntry(channelId);
     if (unsupportedStates.length) {
       return unsupportedStates.map(s => s.state).sort(s => -s.turnNum)[0];
     } else {
@@ -132,29 +132,29 @@ export class Store implements IStore {
     }
   }
 
-  public getLatestSupportedAllocation(channelID): Allocation {
+  public getLatestSupportedAllocation(channelId): Allocation {
     // TODO: Check the use of this. (Sometimes you want the latest outcome)
-    const { outcome } = this.getLatestState(channelID);
+    const { outcome } = this.getLatestState(channelId);
     return checkThat(outcome, isAllocation);
   }
 
-  public getLatestConsensus(channelID: string) {
-    const { supportedState } = this.getEntry(channelID);
+  public getLatestConsensus(channelId: string) {
+    const { supportedState } = this.getEntry(channelId);
     if (supportedState.length !== 1) {
       throw new Error('Support contains multiple states');
     }
     return supportedState[0];
   }
 
-  public getLatestSupport(channelID: string) {
-    return this.getEntry(channelID).supportedState;
+  public getLatestSupport(channelId: string) {
+    return this.getEntry(channelId).supportedState;
   }
-  public getUnsupportedStates(channelID: string) {
-    return this.getEntry(channelID).unsupportedStates;
+  public getUnsupportedStates(channelId: string) {
+    return this.getEntry(channelId).unsupportedStates;
   }
 
   public signedByMe(state: State) {
-    const { states } = this.getEntry(getChannelID(state.channel));
+    const { states } = this.getEntry(getChannelId(state.channel));
     const signedState = states.find((s: SignedState) =>
       Store.equals(state, s.state)
     );
@@ -186,7 +186,7 @@ export class Store implements IStore {
   public sendState(state: State) {
     // 1. Check if it's safe to send the state
     // TODO
-    const channelId = getChannelID(state.channel);
+    const channelId = getChannelId(state.channel);
 
     // 2. Sign & store the state
     const signedStates: SignedState[] = [this.signState(state)];
@@ -204,7 +204,7 @@ export class Store implements IStore {
   public sendOpenChannel(state: State) {
     // 1. Check if it's safe to send the state
     // TODO
-    const channelId = getChannelID(state.channel);
+    const channelId = getChannelId(state.channel);
 
     // 2. Sign & store the state
     const signedState: SignedState = this.signState(state);
@@ -237,10 +237,10 @@ export class Store implements IStore {
   public receiveStates(signedStates: SignedState[]): void {
     try {
       const { channel } = signedStates[0].state;
-      const channelID = getChannelID(channel);
+      const channelId = getChannelId(channel);
 
       // TODO: validate transition
-      this.updateOrCreateEntry(channelID, signedStates);
+      this.updateOrCreateEntry(channelId, signedStates);
     } catch (e) {
       throw e;
     }
@@ -273,18 +273,18 @@ export class Store implements IStore {
   private signState(state: State): SignedState {
     return {
       state,
-      signatures: [this.getEntry(getChannelID(state.channel)).privateKey],
+      signatures: [this.getEntry(getChannelId(state.channel)).privateKey],
     };
   }
 
   private updateOrCreateEntry(
-    channelID: string,
+    channelId: string,
     states: SignedState[]
   ): ChannelStoreEntry {
     // TODO: This currently assumes that support comes from consensus on a single state
     let supportedState: SignedState[] = [];
     let unsupportedStates: SignedState[] = [];
-    const entry = this.maybeGetEntry(channelID);
+    const entry = this.maybeGetEntry(channelId);
     if (entry) {
       ({ supportedState, unsupportedStates } = entry);
     } else {
@@ -306,8 +306,8 @@ export class Store implements IStore {
     }
 
     if (entry) {
-      this._store[channelID] = {
-        ...this._store[channelID],
+      this._store[channelId] = {
+        ...this._store[channelId],
         supportedState,
         unsupportedStates,
       };
@@ -320,7 +320,7 @@ export class Store implements IStore {
         participantId: p,
       }));
       const privateKey = this.getPrivateKey(participants);
-      this._store[channelID] = {
+      this._store[channelId] = {
         supportedState,
         unsupportedStates,
         privateKey,
@@ -329,7 +329,7 @@ export class Store implements IStore {
       };
     }
 
-    return new ChannelStoreEntry(this._store[channelID]);
+    return new ChannelStoreEntry(this._store[channelId]);
   }
 }
 
@@ -367,7 +367,7 @@ export interface ChannelUpdated {
 
 export interface Deposit {
   type: 'DEPOSIT';
-  channelID: string;
+  channelId: string;
   currentAmount: number;
 }
 

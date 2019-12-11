@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import path from 'path';
 import serialize from 'serialize-javascript';
 
-export function saveConfig(
+function saveConfig(
   config: any,
   dirName = '/null', // TODO: make this required
   { guards, actions }: { guards?: any; actions?: any }

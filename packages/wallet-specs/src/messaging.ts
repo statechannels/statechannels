@@ -12,6 +12,7 @@ class MessageService extends EventEmitter implements IMessageService {
     if ('signedStates' in m) {
       states = m.signedStates.map(({ state, signatures }) => ({
         state: state.turnNum,
+        channel: state.channel.channelNonce,
         signatures,
       }));
     }

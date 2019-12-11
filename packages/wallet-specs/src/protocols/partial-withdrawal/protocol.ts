@@ -76,7 +76,7 @@ export function concludeOutcome({
     },
   ];
   return {
-    channelID: ledgerId,
+    channelId: ledgerId,
     targetOutcome,
   };
 }

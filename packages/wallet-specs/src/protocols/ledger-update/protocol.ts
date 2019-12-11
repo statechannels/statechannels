@@ -3,7 +3,7 @@ import { Outcome } from '../../';
 const PROTOCOL = 'ledger-update';
 
 export interface Init {
-  channelID: string;
+  channelId: string;
   targetOutcome: Outcome;
 }
 

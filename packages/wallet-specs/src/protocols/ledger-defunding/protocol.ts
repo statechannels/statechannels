@@ -21,7 +21,7 @@ function ledgerUpdateArgs({ targetChannelId }: Init): LedgerUpdate.Init {
     .filter(item => item.destination !== targetChannelId)
     .concat(concludedOutcome);
   return {
-    channelID: ledgerId,
+    channelId: ledgerId,
     targetOutcome,
   };
 }

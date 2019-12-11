@@ -4,7 +4,7 @@ import {
   AllocationItem,
   Balance,
   Channel,
-  getChannelID,
+  getChannelId,
   Guarantee,
   store,
 } from '../../';
@@ -91,7 +91,7 @@ export function guarantorChannelArgs({
   const { participants } = jointChannel;
 
   return {
-    target: getChannelID(jointChannel),
+    target: getChannelId(jointChannel),
     // Note that index in the joint channel is twice the index in the target channel
     guarantee: [participants[2 * index], participants[1]],
   };
@@ -111,8 +111,8 @@ export function fundGuarantorArgs({
 }: ChannelsKnown): SupportStateArgs {
   const amount = total(balances);
   return {
-    channelID: ledgerId,
-    outcome: [{ destination: getChannelID(guarantorChannel), amount }],
+    channelId: ledgerId,
+    outcome: [{ destination: getChannelId(guarantorChannel), amount }],
   };
 }
 const createChannels = {

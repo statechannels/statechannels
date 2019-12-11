@@ -52,7 +52,7 @@ export interface Channel {
   chainId: string;
 }
 
-export function getChannelID(channel: Channel) {
+export function getChannelId(channel: Channel) {
   return channel.participants.concat(channel.channelNonce).join('+');
 }
 

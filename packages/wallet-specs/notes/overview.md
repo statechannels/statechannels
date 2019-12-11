@@ -21,7 +21,7 @@ When my app calls `CreateChannel`, spawn a `create-channel` process.
 
 On init:
 
-- generate a `nonce`, and therefore a `channelID`
+- generate a `nonce`, and therefore a `channelId`
 - send a `message` of type
 
 ```
@@ -76,7 +76,7 @@ Funding strategy negotiation:
 
 ```
 interface Propose {
-  channelID: string;
+  channelId: string;
   strategy: 'direct' | 'indirect' | 'virtual'
 }
 ```

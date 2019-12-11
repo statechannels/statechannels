@@ -1,4 +1,4 @@
-import { Channel, getChannelID, SignedState, State } from '.';
+import { Channel, getChannelId, SignedState, State } from '.';
 import { Participant } from './store';
 
 interface DirectFunding {
@@ -111,11 +111,17 @@ export class ChannelStoreEntry implements IChannelStoreEntry {
   }
 
   get channelId() {
-    return getChannelID(this.channel);
+    return getChannelId(this.channel);
   }
 
   get states(): SignedState[] {
     return this.unsupportedStates.concat(this.supportedState);
+  }
+  get latestState(): State {
+    if (!this.states.length) {
+      throw new Error('No states found');
+    }
+    return this.states.sort(s => -s.state.turnNum)[0].state;
   }
 
   get recipients(): string[] {

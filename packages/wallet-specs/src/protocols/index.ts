@@ -13,8 +13,6 @@ import * as VirtualHub from './virtual-fund-as-hub/protocol';
 import * as VirtualLeaf from './virtual-fund-as-leaf/protocol';
 import * as Wallet from './wallet/protocol';
 
-// This is a hacky way to run the `saveConfig` function in each protocl.ts file
-// TODO: Make this less hacky
 export {
   AdvanceChannel,
   ConcludeChannel,

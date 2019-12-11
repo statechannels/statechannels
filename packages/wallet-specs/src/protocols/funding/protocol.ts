@@ -101,6 +101,7 @@ const fundIndirectly = {
     src: 'ledgerFunding',
     data: ({ targetChannelId }: Init) => ({ targetChannelId }),
     onDone: 'success',
+    autoForward: true,
   },
 };
 

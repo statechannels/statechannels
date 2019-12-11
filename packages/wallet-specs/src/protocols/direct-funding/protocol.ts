@@ -3,7 +3,7 @@ import {
   Allocation,
   AllocationItem,
   chain,
-  getChannelID,
+  getChannelId,
   max,
   Outcome,
   State,
@@ -18,14 +18,14 @@ const success = { type: 'final' };
 const failure = { type: 'final' };
 
 export interface Init {
-  channelID: string;
+  channelId: string;
   minimalOutcome: Outcome;
 }
 
 function getHoldings(state: State, destination: string): string {
   const { outcome } = state;
 
-  let currentFunding = chain.holdings(getChannelID(state.channel));
+  let currentFunding = chain.holdings(getChannelId(state.channel));
   return checkThat(outcome, isAllocation)
     .filter(item => item.destination === destination)
     .map(item => {
@@ -65,11 +65,11 @@ function uniqueDestinations(outcome: Allocation): string[] {
 }
 
 function preDepositOutcome(
-  channelID: string,
+  channelId: string,
   minimalOutcome: Allocation
 ): Outcome {
-  const { state } = store.getLatestConsensus(channelID);
-  const outcome = store.getLatestSupportedAllocation(channelID);
+  const { state } = store.getLatestConsensus(channelId);
+  const outcome = store.getLatestSupportedAllocation(channelId);
 
   const destinations = uniqueDestinations(outcome.concat(minimalOutcome));
   return outcome.concat(
@@ -84,8 +84,8 @@ function amount(item: AllocationItem): string {
   return item.amount;
 }
 
-function postDepositOutcome(channelID: string): Outcome {
-  const outcome = store.getLatestSupportedAllocation(channelID);
+function postDepositOutcome(channelId: string): Outcome {
+  const outcome = store.getLatestSupportedAllocation(channelId);
   const destinations = uniqueDestinations(outcome);
 
   return destinations.map(destination => ({
@@ -98,7 +98,7 @@ function postDepositOutcome(channelID: string): Outcome {
 }
 
 interface Base {
-  targetChannelID: string;
+  targetChannelId: string;
   minimalOutcome: Allocation;
 }
 
@@ -107,12 +107,12 @@ type UpdateOutcome = Base & {
 };
 
 function preFundLedgerUpdateParams({
-  targetChannelID: channelID,
+  targetChannelId: channelId,
   minimalOutcome,
 }: UpdateOutcome): LedgerUpdate.Init {
   return {
-    channelID,
-    targetOutcome: preDepositOutcome(channelID, minimalOutcome),
+    channelId,
+    targetOutcome: preDepositOutcome(channelId, minimalOutcome),
   };
 }
 const updatePrefundOutcome = {
@@ -143,10 +143,10 @@ const deposit = {
   onError: 'failure',
 };
 
-function postFundLedgerUpdateParams({ targetChannelID }: UpdateOutcome) {
+function postFundLedgerUpdateParams({ targetChannelId }: UpdateOutcome) {
   return {
-    targetChannelID,
-    targetOutcome: postDepositOutcome(targetChannelID),
+    targetChannelId,
+    targetOutcome: postDepositOutcome(targetChannelId),
   };
 }
 const updatePostFundOutcome = {

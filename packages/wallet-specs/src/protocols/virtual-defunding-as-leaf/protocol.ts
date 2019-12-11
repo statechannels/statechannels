@@ -60,7 +60,7 @@ function finalJointChannelUpdate({
     ...jointOutcome.splice(targetChannelIdx),
   ];
   return {
-    channelID: jointChannelId,
+    channelId: jointChannelId,
     targetOutcome,
   };
 }
@@ -71,7 +71,7 @@ const defundTarget = {
     data: finalJointChannelUpdate.name,
     onDone: 'defundGuarantor',
   },
-  exit: 'garbageCollectTargetChannel',
+  exit: 'garbageCollecttargetChannel',
 };
 
 // Without is used so that defundGuarantorInLedger can be used by the hub as well
@@ -105,7 +105,7 @@ export function defundGuarantorInLedger({
     },
   ];
   return {
-    channelID: hubLedgerId,
+    channelId: hubLedgerId,
     targetOutcome,
   };
 }

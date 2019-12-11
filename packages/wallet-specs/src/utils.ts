@@ -8,7 +8,7 @@ export function log(cond: boolean, message: string) {
 }
 
 export function debugAction(id) {
-  return (ctx, event) => {
+  return (ctx, event, { state }) => {
     const saveMe = id;
     debugger;
   };
