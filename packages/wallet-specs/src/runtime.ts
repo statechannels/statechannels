@@ -1,9 +1,8 @@
-import { AnyEventObject, interpret, Interpreter } from 'xstate';
+import { interpret } from 'xstate';
 import { pretty } from '.';
 import { messageService } from './messaging';
 import { createChannel } from './mock-messages';
 import { Wallet } from './protocols';
-import { Process } from './protocols/wallet/protocol';
 import { Store } from './store';
 import { AddressableMessage } from './wire-protocol';
 

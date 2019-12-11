@@ -10,13 +10,16 @@
     "xstate": "^4.7"
   },
   "devDependencies": {
+    "@types/jest": "^24.0.23",
     "@types/node": "^12.12.7",
     "fs": "^0.0.1-security",
     "i": "^0.3.6",
+    "jest": "^24.9.0",
     "madge": "^3.6.0",
     "npm": "^6.13.1",
     "prettier": "1.18.2",
     "serialize-javascript": "^2.1.0",
+    "ts-jest": "^24.2.0",
     "ts-node": "^8.5.2",
     "tslint": "5.20.0",
     "tslint-config-prettier": "1.18.0",
