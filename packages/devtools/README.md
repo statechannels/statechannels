@@ -7,13 +7,13 @@ Developer tooling, used by statechannels packages.
 From a node project, install as a dev dependency:
 
 ```
-$ npm i -D https://github.com/magmo/devtools
+$ npm i -D https://github.com/statechannels/monorepo/blob/master/packages/devtools
 ```
 
 or
 
 ```
-$ yarn add -D https://github.com/magmo/devtools
+$ yarn add -D https://github.com/statechannels/monorepo/blob/master/packages/devtools
 ```
 
 This will install binaries in your project that can be run, eg. with `npx`.

@@ -16,7 +16,10 @@
   },
   "author": "Andrew Stewart",
   "license": "MIT",
-  "repository": "https://github.com/magmo/devtools",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/statechannels/monorepo/blob/master/packages/devtools"
+  },
   "dependencies": {
     "chai": "4.2.0",
     "detect-port": "1.3.0",

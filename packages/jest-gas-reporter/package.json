@@ -4,7 +4,10 @@
   "description": "A jest reporter that reports the gas used by various calls to ethereum contracts.",
   "main": "lib/src/index.js",
   "types": "lib/src/index.d.ts",
-  "repository": "https://github.com/magmo/jest-gas-reporter.git",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/statechannels/monorepo/blob/master/packages/jest-gas-reporter"
+  },
   "author": "Alex Gap <alex@magmo.com>",
   "license": "MIT",
   "scripts": {
