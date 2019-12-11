@@ -6,7 +6,6 @@ import {
   ChannelClientInterface,
 } from '@statechannels/channel-client';
 import {RPS_ADDRESS} from '../constants';
-import {ChannelProviderInterface, channelProvider} from '@statechannels/channel-provider';
 import {bigNumberify} from 'ethers/utils';
 
 // This class wraps the channel client converting the request/response formats to those used in the app
@@ -15,14 +14,8 @@ export class RPSChannelClient {
   channelClient: ChannelClientInterface;
 
   async enable() {
-    // TODO: This is really ugly!!
-    // TODO: Use webpack to import channelProvider
-    // tslint:disable-next-line: no-unused-expression
-    channelProvider;
-    const provider: ChannelProviderInterface = (window as any).channelProvider;
-    await provider.enable(process.env.WALLET_URL);
     // might want to pass this in later
-    this.channelClient = new ChannelClient(provider);
+    this.channelClient = new ChannelClient(window.channelProvider);
   }
 
   async createChannel(
