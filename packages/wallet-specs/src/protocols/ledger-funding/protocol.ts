@@ -1,6 +1,16 @@
-import { DoneInvokeEvent, Machine, TransitionConfig } from 'xstate';
-import { CreateChannel } from '..';
-import { add, MachineFactory, Store, success } from '../..';
+import { DoneInvokeEvent, Machine } from 'xstate';
+import { CreateNullChannel } from '..';
+import {
+  add,
+  Channel,
+  ensureExists,
+  isDefined,
+  MachineFactory,
+  State,
+  Store,
+  success,
+} from '../..';
+import { checkThat } from '../../store';
 import { Init as CreateNullChannelArgs } from '../create-null-channel/protocol';
 import { Init as DirectFundingArgs } from '../direct-funding/protocol';
 import { Init as LedgerUpdateArgs } from '../ledger-update/protocol';
@@ -28,14 +38,25 @@ const lookForExistingChannel = {
         cond: 'channelFound',
         actions: 'assignLedgerChannelId',
       },
-      { target: 'createNewChannel' },
+      { target: 'determineLedgerChannel' },
     ],
   },
 };
 
-const createNewChannel = {
+const determineLedgerChannel = {
+  invoke: {
+    src: 'getNullChannelArgs',
+    onDone: 'createNewLedger',
+  },
+};
+
+const createNewLedger = {
   invoke: {
     src: 'createNullChannel',
+    data: (_, { data }: DoneInvokeEvent<CreateNullChannel.Init>) => ({
+      channel: data.channel,
+      outcome: data.outcome,
+    }),
     onDone: {
       target: 'success',
       actions: 'assignLedgerChannelId',
@@ -47,7 +68,8 @@ const waitForChannel = {
   initial: 'lookForExistingChannel',
   states: {
     lookForExistingChannel,
-    createNewChannel,
+    determineLedgerChannel,
+    createNewLedger,
     success,
   },
   onDone: 'fundLedger',
@@ -83,6 +105,7 @@ export type Services = {
   findLedgerChannelId(
     ctx: Init
   ): Promise<{ type: 'FOUND'; channelId: string } | { type: 'NOT_FOUND' }>;
+  getNullChannelArgs(ctx: Init): Promise<CreateNullChannel.Init>;
   createNullChannel: any;
   directFunding: any;
   ledgerUpdate: any;
@@ -131,8 +154,30 @@ export const machine: MachineFactory<Init, any> = (
     };
   }
 
+  async function getNullChannelArgs({
+    targetChannelId,
+  }: Init): Promise<CreateNullChannel.Init> {
+    const { channel: targetChannel, latestSupportedState } = store.getEntry(
+      targetChannelId
+    );
+
+    const channel: Channel = {
+      ...targetChannel,
+      channelNonce: store.getNextNonce(targetChannel.participants),
+    };
+
+    // TODO: check that the latest supported state is the last prefund setup state?
+    const { outcome } = ensureExists(latestSupportedState);
+
+    return {
+      channel,
+      outcome,
+    };
+  }
+
   const services: Services = {
     findLedgerChannelId: async () => ({ type: 'NOT_FOUND' }),
+    getNullChannelArgs,
     ledgerUpdate: () => true,
     directFunding: () => true,
     createNullChannel: () => true,

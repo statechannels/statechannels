@@ -100,6 +100,7 @@ const fundVirtually = {
 const fundIndirectly = {
   invoke: {
     src: 'ledgerFunding',
+    data: ({ targetChannelId }: Init) => ({ targetChannelId }),
     onDone: 'success',
   },
 };
@@ -183,7 +184,7 @@ export const machine: MachineFactory<Init, any> = (
     services: {
       askClient: async () => 'Indirect',
       directFunding: async () => true,
-      ledgerFunding: LedgerFunding.machine(store).withContext(context),
+      ledgerFunding: LedgerFunding.machine(store),
       virtualFunding: async () => true,
     },
     guards,
