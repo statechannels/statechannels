@@ -116,7 +116,7 @@ jobs:
       - attach_workspace:
           at: /home/circleci/project
       - run:
-          command: (cd packages/wallet && USE_GANACHE_DEPLOYMENT_CACHE=false yarn run start)
+          command: (cd packages/wallet && yarn run start:integration)
           background: true
       - run: (cd packages/wallet && yarn run test:ci:integration)
       - upload_logs:
