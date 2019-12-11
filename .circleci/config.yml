@@ -112,11 +112,7 @@ jobs:
       - store_artifacts:
           path: /home/circleci/project/packages/nitro-protocol/gas.json
       - store_artifacts:
-          path: /home/circleci/project/packages/rps/gas.txt
-      - store_artifacts:
-          path: /home/circleci/project/packages/wallet/gas.json
-      - store_artifacts:
-          path: /home/circleci/project/packages/rps/gas.txt
+          path: /home/circleci/project/packages/nitro-protocol/gas.txt
 
   integration-test:
     <<: *defaults
