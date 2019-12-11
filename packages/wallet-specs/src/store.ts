@@ -1,7 +1,15 @@
-import { Allocation, getChannelID, Outcome, SignedState, State } from '.';
+import {
+  add,
+  Allocation,
+  Channel,
+  getChannelID,
+  gt,
+  Outcome,
+  SignedState,
+  State,
+} from '.';
 import { ChannelStoreEntry, IChannelStoreEntry } from './ChannelStoreEntry';
 import { messageService } from './messaging';
-import { NonceManager, NonceManagerInterface } from './nonce-manager';
 import { AddressableMessage, FundingStrategyProposed } from './wire-protocol';
 export interface IStore {
   getLatestState: (channelID: string) => State;
@@ -58,18 +66,13 @@ export class Store implements IStore {
 
   private _store: ChannelStore;
   private _privateKeys: Record<string, string>;
-  private _nonceManager: NonceManagerInterface;
+  private _nonces: Record<string, string> = {};
 
   constructor(args?: Constructor) {
     const { store, privateKeys, nonces } = args || {};
     this._store = store || {};
     this._privateKeys = privateKeys || {};
-    this._nonceManager = new NonceManager();
   }
-
-  public getNextNonce = this._nonceManager.getNextNonce;
-  public useNonce = this._nonceManager.useNonce;
-  public nonceOk = this._nonceManager.nonceOk;
 
   public getEntry(channelID: string): ChannelStoreEntry {
     if (!this._store[channelID]) {
@@ -171,7 +174,13 @@ export class Store implements IStore {
       );
     }
 
-    this._store[entry.channelId] = entry.args;
+    const { participants, channelNonce } = entry.channel;
+    if (this.nonceOk(participants, channelNonce)) {
+      this._store[entry.channelId] = entry.args;
+      this.useNonce(participants, channelNonce);
+    } else {
+      throw new Error('Nonce used for these participants');
+    }
   }
 
   public sendState(state: State) {
@@ -239,6 +248,26 @@ export class Store implements IStore {
 
   // Nonce management
 
+  private key(participants: string[]): string {
+    return JSON.stringify(participants);
+  }
+
+  public getNextNonce(participants: string[]): string {
+    return add(1, this._nonces[this.key(participants)]);
+  }
+
+  public useNonce(participants: string[], nonce: string): boolean {
+    if (this.nonceOk(participants, nonce)) {
+      this._nonces[this.key(participants)] = nonce;
+      return true;
+    } else {
+      throw new Error("Can't use this nonce");
+    }
+  }
+
+  public nonceOk(participants: string[], nonce: string): boolean {
+    return gt(nonce, this._nonces[this.key(participants)] || -1);
+  }
   // PRIVATE
 
   private signState(state: State): SignedState {
@@ -258,6 +287,9 @@ export class Store implements IStore {
     const entry = this.maybeGetEntry(channelID);
     if (entry) {
       ({ supportedState, unsupportedStates } = entry);
+    } else {
+      const { participants, channelNonce } = states[0].state.channel;
+      this.useNonce(participants, channelNonce);
     }
 
     unsupportedStates = merge(unsupportedStates, states);
