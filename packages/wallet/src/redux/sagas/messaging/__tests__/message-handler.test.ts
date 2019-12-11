@@ -97,7 +97,7 @@ describe("message listener", () => {
       });
 
       expect(effects.fork[0].payload.args[0]).toMatchObject({
-        type: "WALLET.POST_MESSAGE_RESPONSE",
+        type: "WALLET.PUSH_MESSAGE_RESPONSE",
         id: 1
       });
 
@@ -179,7 +179,13 @@ describe("message listener", () => {
         type: "WALLET.APPLICATION.OPPONENT_STATE_RECEIVED",
         signedState
       });
+
       expect(effects.fork[0].payload.args[0]).toMatchObject({
+        type: "WALLET.PUSH_MESSAGE_RESPONSE",
+        id: 1
+      });
+      
+      expect(effects.fork[1].payload.args[0]).toMatchObject({
         type: "WALLET.CHANNEL_UPDATED_EVENT",
         channelId: expect.any(String)
       });

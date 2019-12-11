@@ -13,7 +13,7 @@ import {
   channelUpdatedEvent,
   createChannelResponse,
   noContractError,
-  postMessageResponse,
+  pushMessageResponse,
   relayActionWithMessage,
   sendChannelJoinedMessage,
   sendChannelProposedMessage,
@@ -76,8 +76,8 @@ describe("message sender", () => {
       jsonrpc: "2.0",
       method: "MessageQueued",
       params: {
-        recipient: "A",
-        sender: "B",
+        recipient: "B",
+        sender: "A",
         data: {type: "Channel.Updated", signedState: state}
       }
     });
@@ -204,7 +204,7 @@ describe("message sender", () => {
   });
 
   it("sends a correct response message for WALLET.POST_MESSAGE", async () => {
-    const message = postMessageResponse({id: 5});
+    const message = pushMessageResponse({id: 5});
     const {effects} = await expectSaga(messageSender, message)
       .provide([[matchers.call.fn(window.parent.postMessage), 0]])
 
