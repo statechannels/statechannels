@@ -53,7 +53,7 @@ export interface Channel {
 }
 
 export function getChannelID(channel: Channel) {
-  return channel.participants.join('+');
+  return channel.participants.concat(channel.channelNonce).join('+');
 }
 
 export interface SignedState {
