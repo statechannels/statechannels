@@ -1,3 +1,4 @@
+import { isUndefined } from 'util';
 import { EventObject, SendAction, StateMachine } from 'xstate';
 import { forwardTo } from 'xstate/lib/actions';
 import { ChannelUpdated, IStore, Store } from './store';
@@ -92,11 +93,14 @@ export type Without<T, K> = {
 
 export const pretty = o => JSON.stringify(o, null, 2);
 
-type T<C> = { actions: SendAction<C, ChannelUpdated> };
-export function forwardChannelUpdated<C>(id: string): T<C> {
+type Transition<C> = { actions: SendAction<C, ChannelUpdated> };
+export function forwardChannelUpdated<C>(id: string): Transition<C> {
   return { actions: forwardTo(id) };
 }
 
+// TODO
+// Some machine factories require a context, and some don't
+// Sort this out.
 export type MachineFactory<I, E extends EventObject> = (
   store: IStore,
   context?: I
@@ -104,4 +108,16 @@ export type MachineFactory<I, E extends EventObject> = (
 
 export function unreachable(x: never) {
   return x;
+}
+
+export function ensureExists<T>(t: T | undefined): T {
+  if (!t) {
+    throw new Error('Is undefined');
+  }
+
+  return t;
+}
+
+export function isDefined<T>(t: T | undefined): t is T {
+  return !!t;
 }
