@@ -16,7 +16,7 @@ function getContractAddress(name: string): string {
 }
 
 export function getProvider(): Web3Provider {
-  return new Web3Provider(web3.currentProvider);
+  return new Web3Provider(window.web3.currentProvider);
 }
 
 export async function getAdjudicatorContract(provider: Web3Provider) {

@@ -4,6 +4,7 @@ import createSagaMiddleware from 'redux-saga';
 
 import reducer from './reducer';
 const sagaMiddleware = createSagaMiddleware();
+import stateChannelWalletSaga from './wallet/saga';
 
 import loginSaga from './login/saga';
 import openGameSaga from './open-games/saga';
@@ -18,29 +19,34 @@ const composeEnhancers = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ ||
 const enhancers = composeEnhancers(applyMiddleware(sagaMiddleware));
 
 const store = createStore(reducer, enhancers);
-const client = new RPSChannelClient();
 
 function* rootSaga() {
-  yield call([client, client.enable]);
-
   yield fork(loginSaga);
-  yield fork(channelUpdatedListener, client);
-  yield fork(messageQueuedListener, client);
-  yield fork(gameSaga, client);
 
-  if (process.env.AUTO_PLAYER === 'A') {
-    yield fork(autoPlayer, 'A');
-  } else if (process.env.AUTO_PLAYER === 'B') {
-    yield fork(autoPlayer, 'B');
-  }
+  const channelProviderEnabled = yield stateChannelWalletSaga();
 
-  if (process.env.AUTO_OPPONENT === 'A') {
-    yield fork(autoOpponent, 'A', client);
-  } else if (process.env.AUTO_OPPONENT === 'B') {
-    yield fork(autoOpponent, 'B', client);
-  } else {
-    yield fork(firebaseInboxListener, client);
-    yield fork(openGameSaga);
+  if (channelProviderEnabled) {
+    const client = new RPSChannelClient();
+
+    yield call([client, client.enable]);
+    yield fork(channelUpdatedListener, client);
+    yield fork(messageQueuedListener, client);
+    yield fork(gameSaga, client);
+
+    if (process.env.AUTO_PLAYER === 'A') {
+      yield fork(autoPlayer, 'A');
+    } else if (process.env.AUTO_PLAYER === 'B') {
+      yield fork(autoPlayer, 'B');
+    }
+
+    if (process.env.AUTO_OPPONENT === 'A') {
+      yield fork(autoOpponent, 'A', client);
+    } else if (process.env.AUTO_OPPONENT === 'B') {
+      yield fork(autoOpponent, 'B', client);
+    } else {
+      yield fork(firebaseInboxListener, client);
+      yield fork(openGameSaga);
+    }
   }
 }
 

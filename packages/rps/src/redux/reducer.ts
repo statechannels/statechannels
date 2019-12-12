@@ -8,10 +8,12 @@ import {overlayReducer} from './global/reducer';
 import {OverlayState} from './global/state';
 import {GameState} from './game/state';
 import {gameReducer} from './game/reducer';
+import {WalletState, walletReducer} from './wallet/reducer';
 
 export interface SiteState {
   login: LoginState;
   metamask: MetamaskState;
+  wallet: WalletState;
   openGames: OpenGameState;
   game: GameState;
   overlay: OverlayState;
@@ -20,6 +22,7 @@ export interface SiteState {
 export default combineReducers<SiteState>({
   login: loginReducer,
   metamask: metamaskReducer,
+  wallet: walletReducer,
   openGames: openGamesReducer,
   game: gameReducer,
   overlay: overlayReducer,
