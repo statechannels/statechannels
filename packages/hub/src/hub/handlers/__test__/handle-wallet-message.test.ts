@@ -22,7 +22,7 @@ async function step<Incoming extends RelayableAction, Outgoing extends Relayable
   const messageReleayRequested1 = await handleWalletMessage(incomingAction);
   expect(messageReleayRequested1).toHaveLength(1);
   const expectedAction1: Outgoing = readSampleMessage(outgoing);
-  const receivedAction1 = messageReleayRequested1[0].actionToRelay;
+  const receivedAction1 = messageReleayRequested1[0].data;
   expect(receivedAction1).toMatchObject(expectedAction1);
 }
 

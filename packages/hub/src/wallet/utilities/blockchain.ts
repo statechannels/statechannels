@@ -17,13 +17,12 @@ const provider = new providers.JsonRpcProvider(rpcEndpoint);
 const walletWithProvider = new ethers.Wallet(HUB_SIGNER_PRIVATE_KEY, provider);
 
 export async function ethAssetHolder() {
-  return setupContract(EthAssetHolderArtifact);
-}
-
-async function setupContract(artifact: any) {
   let ethAssetHolderFactory;
   try {
-    ethAssetHolderFactory = await ContractFactory.fromSolidity(artifact, walletWithProvider);
+    ethAssetHolderFactory = await ContractFactory.fromSolidity(
+      EthAssetHolderArtifact,
+      walletWithProvider
+    );
   } catch (err) {
     if (err.message.match('bytecode must be a valid hex string')) {
       throw new Error(`Contract not deployed on network ${process.env.CHAIN_NETWORK_ID}`);

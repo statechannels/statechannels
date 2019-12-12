@@ -151,7 +151,7 @@ describe("message sender", () => {
       channelFromStates([state], stateHelpers.asAddress, stateHelpers.asPrivateKey)
     );
 
-    const actionToRelay = strategyApproved({strategy: "IndirectFundingStrategy", processId: "id"});
+    const actionToRelay = strategyApproved({strategy: "VirtualFundingStrategy", processId: "id"});
     const message = relayActionWithMessage({
       actionToRelay,
       fromParticipantId: "A",

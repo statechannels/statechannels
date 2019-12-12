@@ -10,8 +10,9 @@ export class Blockchain {
     // When ethers.js attempts to run multiple transactions around the same time it results in an error
     // due to the nonce getting out of sync.
     // To avoid this we only allow deposit transactions to happen serially.
+    await Blockchain.attachEthAssetHolder();
+
     return lock.acquire('depositing', async () => {
-      await Blockchain.attachEthAssetHolder();
       const tx = await Blockchain.ethAssetHolder.deposit(channelID, expectedHeld, value, {
         value
       });
