@@ -25,13 +25,13 @@ export async function startServer(): Promise<RemoveListeners> {
     handleWalletMessage(message)
       .then(outgoingMessages => {
         for (const outgoingMessage of outgoingMessages) {
-          console.log(
+          /*console.log(
             `Parent process sending message to firebase: ${JSON.stringify(
               outgoingMessage,
               null,
               1
             )}`
-          );
+          );*/
           firebaseRelay.send(outgoingMessage);
         }
       })

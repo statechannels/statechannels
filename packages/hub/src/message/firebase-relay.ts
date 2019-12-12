@@ -1,7 +1,7 @@
 import * as firebase from 'firebase';
 
 import {HUB_ADDRESS} from '../constants';
-import {MessageRelayRequested} from '../wallet-client';
+import {RelayActionWithMessage} from '../communication';
 
 const config = {
   apiKey: process.env.FIREBASE_API_KEY,
@@ -32,26 +32,16 @@ async function listen() {
   hubRef.on('child_added', async snapshot => {
     const key = snapshot.key;
     const value = snapshot.val();
-    const queue = value.queue;
-    if (queue === 'GAME_WALLET') {
-      throw new Error(
-        `The hub does not support handling application states. Received ${JSON.stringify(value)}`
-      );
-    } else if (queue === 'WALLET') {
-      process.send(value.payload);
-    } else {
-      throw new Error('Unknown queue');
-    }
-
+    process.send(value.data);
     hubRef.child(key).remove();
   });
 }
 
-process.on('message', (message: MessageRelayRequested) => {
-  const sanitizedPayload = JSON.parse(JSON.stringify(message.messagePayload));
+process.on('message', (message: RelayActionWithMessage) => {
+  const sanitizedPayload = JSON.parse(JSON.stringify(message));
   getMessagesRef()
-    .child(message.to.toLowerCase())
-    .push({payload: sanitizedPayload, queue: 'WALLET'});
+    .child(message.recipient.toLowerCase())
+    .push(sanitizedPayload);
 });
 
 if (require.main === module) {

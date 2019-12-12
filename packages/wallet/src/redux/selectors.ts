@@ -8,7 +8,7 @@ import {
 import * as walletStates from "./state";
 import {SharedData, FundingState} from "./state";
 import {ProcessProtocol} from "../communication";
-import {CONSENSUS_LIBRARY_ADDRESS, ETH_ASSET_HOLDER_ADDRESS} from "../constants";
+import {CONSENSUS_LIBRARY_ADDRESS, ETH_ASSET_HOLDER_ADDRESS, HUB_ADDRESS} from "../constants";
 import {bigNumberify} from "ethers/utils";
 import {State, SignedState} from "@statechannels/nitro-protocol";
 import {AddressZero} from "ethers/constants";
@@ -191,6 +191,9 @@ export const getParticipantForAddress = (
 };
 
 export const getParticipantIdForAddress = (state: SharedData, address: string): string => {
+  if (address === HUB_ADDRESS) {
+    return HUB_ADDRESS;
+  }
   for (const channelId of Object.keys(state.channelStore)) {
     const channel = state.channelStore[channelId];
     const participantMatch = channel.participants.find(p => p.signingAddress === address);
