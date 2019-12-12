@@ -12,21 +12,19 @@ import {
   Allocation,
   PushMessageResult
 } from './types';
-import {sleep} from './utils';
 
-const FAKE_DELAY = 100; // ms
+export const CHANNEL_ID = '0x1234';
 
 export class FakeChannelClient implements ChannelClientInterface<ChannelResult> {
   playerIndex: 0 | 1;
   protected events = new EventEmitter<EventsWithArgs>();
   protected latestState?: ChannelResult;
   protected address: string;
-  protected opponentAddress: string;
+  protected opponentAddress?: string;
 
-  constructor(opponentAddress: string) {
+  constructor() {
     this.playerIndex = 0;
     this.address = Wallet.createRandom().address;
-    this.opponentAddress = opponentAddress;
   }
 
   onMessageQueued(callback: (message: Message<ChannelResult>) => void): UnsubscribeFunction {
@@ -62,13 +60,11 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
       allocations,
       appDefinition,
       appData,
-      channelId: '0xabc234',
+      channelId: CHANNEL_ID,
       turnNum: bigNumberify(0).toString(),
       status: 'proposed'
     };
     this.opponentAddress = this.latestState.participants[1].participantId;
-    // [assuming we're working with 2-participant channels for the time being]
-    await sleep(FAKE_DELAY);
     this.notifyOpponent(this.latestState);
 
     return this.latestState;
@@ -81,7 +77,6 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
     // [assuming we're working with 2-participant channels for the time being]
     this.latestState = {...latestState, turnNum: bigNumberify(3).toString(), status: 'running'};
     this.opponentAddress = this.latestState.participants[0].participantId;
-    await sleep(FAKE_DELAY);
     this.notifyOpponent(this.latestState);
 
     return this.latestState;
@@ -157,6 +152,9 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
     const sender = this.address;
     const recipient = this.opponentAddress;
 
+    if (!recipient) {
+      throw Error(`Cannot notify opponent - opponent address not set`);
+    }
     this.events.emit('MessageQueued', {sender, recipient, data});
   }
 
