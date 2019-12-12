@@ -12,6 +12,7 @@ import {CONSENSUS_LIBRARY_ADDRESS, ETH_ASSET_HOLDER_ADDRESS, HUB_ADDRESS} from "
 import {bigNumberify} from "ethers/utils";
 import {State, SignedState} from "@statechannels/nitro-protocol";
 import {AddressZero} from "ethers/constants";
+import {ID} from "jsonrpc-lite";
 
 export const getOpenedChannelState = (state: SharedData, channelId: string): OpenChannelState => {
   const channelStatus = getChannelState(state, channelId);
@@ -88,6 +89,10 @@ export const getPrivateKey = (state: walletStates.Initialized) => {
 
 export const getAddress = (state: walletStates.Initialized) => {
   return state.address;
+};
+
+export const messageBeingHandled = (state: SharedData, id: ID) => {
+  return state.messagesBeingHandled[id.toString()];
 };
 
 export const getAdjudicatorState = (state: SharedData) => {

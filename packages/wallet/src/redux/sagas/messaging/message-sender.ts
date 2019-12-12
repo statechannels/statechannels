@@ -8,8 +8,8 @@ import {unreachable} from "../../../utils/reducer-utils";
 import {ChannelState, getLastState, getPenultimateState} from "../../channel-store";
 import {getChannelHoldings, getLastSignedStateForChannel} from "../../selectors";
 import {getChannelStatus} from "../../state";
-import {OutgoingApiAction} from "./outgoing-api-actions";
 import {State} from "@statechannels/nitro-protocol";
+import {OutgoingApiAction, messageHasBeenHandled} from "./outgoing-api-actions";
 
 export function* messageSender(action: OutgoingApiAction) {
   const message = yield createResponseMessage(action);
@@ -20,6 +20,8 @@ export function* messageSender(action: OutgoingApiAction) {
 }
 
 function* createResponseMessage(action: OutgoingApiAction) {
+  if ("id" in action) yield put(messageHasBeenHandled(action));
+
   switch (action.type) {
     case "WALLET.JOIN_CHANNEL_RESPONSE":
       return jrs.success(action.id, yield getChannelInfo(action.channelId));

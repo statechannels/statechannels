@@ -18,6 +18,7 @@ import {LOAD as LOAD_FROM_STORAGE} from "redux-storage";
 import {SignedState, State} from "@statechannels/nitro-protocol";
 import {BigNumber} from "ethers/utils";
 import {CloseLedgerChannelAction} from "./protocols/close-ledger-channel";
+import {MessageBeingHandled, MessageHasBeenHandled} from "./sagas/messaging/outgoing-api-actions";
 export * from "./protocols/transaction-submission/actions";
 
 // -------
@@ -252,6 +253,8 @@ export type WalletAction =
   | BlockMined
   | DisplayMessageSent
   | MessageSent
+  | MessageBeingHandled
+  | MessageHasBeenHandled
   | ProtocolAction
   | protocol.NewProcessAction
   | RelayableAction
@@ -266,13 +269,16 @@ export {directFunding as funding, NewLedgerChannel, protocol, application, advan
 export type SharedDataUpdateAction =
   | AdjudicatorEventAction
   | AssetHolderEventAction
-  | AppDefinitionBytecodeReceived;
+  | AppDefinitionBytecodeReceived
+  | MessageBeingHandled
+  | MessageHasBeenHandled;
 
 export function isSharedDataUpdateAction(action: WalletAction): action is SharedDataUpdateAction {
   return (
     isAdjudicatorEventAction(action) ||
     isAssetHolderEventAction(action) ||
-    action.type === "WALLET.APP_DEFINITION_BYTECODE_RECEIVED"
+    action.type === "WALLET.APP_DEFINITION_BYTECODE_RECEIVED" ||
+    action.type === "WALLET.MESSAGE_BEING_HANDLED"
   );
 }
 

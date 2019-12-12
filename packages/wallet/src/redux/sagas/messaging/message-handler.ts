@@ -15,7 +15,8 @@ import {
   getAddress,
   getLastStateForChannel,
   doesAStateExistForChannel,
-  getParticipants
+  getParticipants,
+  messageBeingHandled
 } from "../../selectors";
 import {messageSender} from "./message-sender";
 import {APPLICATION_PROCESS_ID} from "../../protocols/application/reducer";
@@ -35,6 +36,7 @@ import {Web3Provider} from "ethers/providers";
 
 export function* messageHandler(jsonRpcMessage: object, _domain: string) {
   const parsedMessage = jrs.parseObject(jsonRpcMessage);
+
   switch (parsedMessage.type) {
     case "notification":
     case "success":
@@ -58,6 +60,13 @@ export function* messageHandler(jsonRpcMessage: object, _domain: string) {
 
 function* handleMessage(payload: RequestObject) {
   const {id} = payload;
+
+  if (yield select(messageBeingHandled, id)) {
+    return console.warn(`Received duplicate JSON-RPC request ID: ${id}. Ignoring.`);
+  } else {
+    yield put(outgoingMessageActions.messageBeingHandled({id}));
+  }
+
   switch (payload.method) {
     case "GetAddress":
       const address = yield select(getAddress);

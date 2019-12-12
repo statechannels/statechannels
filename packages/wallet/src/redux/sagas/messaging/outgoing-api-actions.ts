@@ -1,5 +1,6 @@
 import {ActionConstructor} from "../../utils";
 import {RelayableAction} from "../../../communication";
+import {ID} from "jsonrpc-lite";
 
 export interface ApiResponseAction {
   id: number | string; // Either a string or number is technically valid
@@ -10,6 +11,26 @@ export interface ApiMessageNotificationAction {
   toParticipantId: string;
   fromParticipantId: string;
 }
+
+export interface MessageBeingHandled extends ApiResponseAction {
+  type: "WALLET.MESSAGE_BEING_HANDLED";
+  jsonRpcId: ID;
+}
+
+export const messageBeingHandled = p => ({
+  ...p,
+  type: "WALLET.MESSAGE_BEING_HANDLED"
+});
+
+export interface MessageHasBeenHandled extends ApiResponseAction {
+  type: "WALLET.MESSAGE_HAS_BEEN_HANDLED";
+  jsonRpcId: ID;
+}
+
+export const messageHasBeenHandled = p => ({
+  ...p,
+  type: "WALLET.MESSAGE_HAS_BEEN_HANDLED"
+});
 
 export interface CreateChannelResponse extends ApiResponseAction {
   type: "WALLET.CREATE_CHANNEL_RESPONSE";

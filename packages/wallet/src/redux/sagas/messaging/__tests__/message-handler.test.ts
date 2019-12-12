@@ -44,6 +44,38 @@ describe("message listener", () => {
     );
   });
 
+  // TODO: Figure out how to test this behaviour
+  // it("does not execute code twice for the same request ID before responding", async () => {
+  //   const requestMessage = {
+  //     jsonrpc: "2.0",
+  //     method: "GetAddress",
+  //     id: 1,
+  //     params: {}
+  //   };
+
+  //   let responses = 0;
+
+  //   expectSaga(messageHandler, requestMessage, "localhost")
+  //     .withState(initialState)
+  //     .provide([
+  //       [matchers.fork.fn(messageSender), 0],
+  //       [matchers.select(getAddress), "poop"]
+  //     ])
+  //     .fork(messageSender, addressResponse({id: 1, address: "poop"}))
+  //     .run();
+
+  //   await expectSaga(messageHandler, requestMessage, "localhost")
+  //     .withState(initialState)
+  //     .provide([
+  //       [matchers.fork.fn(messageSender), 0],
+  //       [matchers.select(getAddress), "not poop"]
+  //     ])
+  //     .fork(messageSender, addressResponse({id: 1, address: "poop"}))
+  //     .run();
+
+  //   expect(responses).toBe(1);
+  // });
+
   describe("PushMessage", () => {
     it("handles a pushMessage with a channel open message", async () => {
       const signedState = appState({turnNum: 0});
@@ -91,7 +123,7 @@ describe("message listener", () => {
         ])
         .run();
 
-      expect(effects.put[1].payload.action).toMatchObject({
+      expect(effects.put[2].payload.action).toMatchObject({
         type: "WALLET.APPLICATION.OPPONENT_STATE_RECEIVED",
         signedState
       });
@@ -138,7 +170,7 @@ describe("message listener", () => {
         ])
         .run();
 
-      expect(effects.put[0].payload.action).toMatchObject({
+      expect(effects.put[1].payload.action).toMatchObject({
         type: "WALLET.APPLICATION.OPPONENT_STATE_RECEIVED",
         signedState
       });
@@ -175,7 +207,7 @@ describe("message listener", () => {
         ])
         .run();
 
-      expect(effects.put[0].payload.action).toMatchObject({
+      expect(effects.put[1].payload.action).toMatchObject({
         type: "WALLET.APPLICATION.OPPONENT_STATE_RECEIVED",
         signedState
       });
@@ -224,7 +256,7 @@ describe("message listener", () => {
         ])
         .run();
 
-      expect(effects.put[0].payload.action).toMatchObject(actionToRelay);
+      expect(effects.put[1].payload.action).toMatchObject(actionToRelay);
     });
   });
 
@@ -286,7 +318,7 @@ describe("message listener", () => {
         ])
         .run();
 
-      expect(effects.put[2].payload.action).toMatchObject({
+      expect(effects.put[3].payload.action).toMatchObject({
         type: "WALLET.APPLICATION.OWN_STATE_RECEIVED",
         state: {
           channel: {participants: [signingAddressA, signingAddressB]},
@@ -493,7 +525,7 @@ describe("message listener", () => {
         ]
       };
 
-      expect(effects.put[0].payload.action).toMatchObject({
+      expect(effects.put[1].payload.action).toMatchObject({
         type: "WALLET.APPLICATION.OWN_STATE_RECEIVED",
         state
       });
@@ -620,11 +652,11 @@ describe("message listener", () => {
         turnNum: 1
       };
 
-      expect(effects.put[0].payload.action).toMatchObject({
+      expect(effects.put[1].payload.action).toMatchObject({
         type: "WALLET.APPLICATION.OWN_STATE_RECEIVED",
         state: nextState
       });
-      expect(effects.put[1].payload.action).toMatchObject({
+      expect(effects.put[2].payload.action).toMatchObject({
         type: "WALLET.NEW_PROCESS.FUNDING_REQUESTED"
       });
 

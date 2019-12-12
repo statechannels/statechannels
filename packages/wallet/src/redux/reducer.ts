@@ -67,6 +67,19 @@ function updateSharedData(
       ...state,
       bytecodeStorage: {...state.bytecodeStorage, [action.appDefinition]: action.bytecode}
     };
+  } else if (action.type === "WALLET.MESSAGE_BEING_HANDLED") {
+    return {
+      ...state,
+      messagesBeingHandled: {...state.messagesBeingHandled, [action.id.toString()]: true}
+    };
+  } else if (action.type === "WALLET.MESSAGE_HAS_BEEN_HANDLED") {
+    return {
+      ...state,
+      messagesBeingHandled: Object.keys(state.messagesBeingHandled).reduce(
+        (o, k) => (k !== action.id.toString() ? {...o, [k]: true} : o),
+        {}
+      )
+    };
   } else {
     return state;
   }

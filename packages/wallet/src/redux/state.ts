@@ -72,6 +72,7 @@ export interface SharedData {
   fundingState: FundingState;
   assetHoldersState: AssetHoldersState;
   currentProcessId?: string;
+  messagesBeingHandled: {[id: string]: true};
 }
 
 export interface ChannelSubscriptions {
@@ -161,7 +162,8 @@ export const EMPTY_SHARED_DATA: SharedData = {
   assetHoldersState: {},
   bytecodeStorage: {
     [CONSENSUS_LIBRARY_ADDRESS]: CONSENSUS_LIBRARY_BYTECODE
-  }
+  },
+  messagesBeingHandled: {}
 };
 
 export function sharedData(params: SharedData): SharedData {
@@ -172,7 +174,8 @@ export function sharedData(params: SharedData): SharedData {
     fundingState,
     assetHoldersState,
     channelSubscriptions,
-    bytecodeStorage
+    bytecodeStorage,
+    messagesBeingHandled
   } = params;
   return {
     outboxState,
@@ -181,7 +184,8 @@ export function sharedData(params: SharedData): SharedData {
     fundingState,
     assetHoldersState,
     channelSubscriptions,
-    bytecodeStorage
+    bytecodeStorage,
+    messagesBeingHandled
   };
 }
 
