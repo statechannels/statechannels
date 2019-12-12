@@ -45,7 +45,7 @@ To play against the hub from the browser client, the hub and the browser need to
 - Point to the same local Ganache server. Configure your `.env.*.local` files accordingly.
 - Point to the same contract addresses on Ganache.
 
-You will also need to make sure that the hub's address has funds. You can find the hub address in [constants.ts](https://github.com/magmo/node-bot/blob/master/src/constants.ts)
+You will also need to make sure that the hub's address has funds. You can find the hub address in [constants.ts](https://github.com/statechannels/monorepo/blob/master/packages/hub/src/constants.ts)
 
 ## Testing
 
