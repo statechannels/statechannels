@@ -143,7 +143,6 @@ function* handlePushMessage(payload: RequestObject) {
   const {id} = payload;
   const message = payload.params as PushMessageParams;
   if (isRelayableAction(message.data)) {
-    console.log("action relay ", message.data.type);
     yield put(message.data);
     yield fork(messageSender, outgoingMessageActions.pushMessageResponse({id}));
   } else {

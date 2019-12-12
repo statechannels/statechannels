@@ -104,7 +104,6 @@ function decideClosingReducer(
 
   // Handle a close ledger channel action that arrives early
   if (isCloseLedgerChannelAction(action)) {
-    console.log("close ledger channel received early");
     let ledgerClosing: CloseLedgerChannelState;
 
     ({protocolState: ledgerClosing, sharedData} = closeLedgerChannelReducer(
@@ -134,8 +133,7 @@ function decideClosingReducer(
           protocolLocator: makeLocator(EMPTY_LOCATOR, EmbeddedProtocol.CloseLedgerChannel)
         })
       ));
-      console.log(ledgerClosing.type);
-      console.log(JSON.stringify(sharedData.outboxState));
+
       switch (ledgerClosing.type) {
         case "CloseLedgerChannel.Failure":
           return {
@@ -161,8 +159,6 @@ function waitForDefundReducer(
   sharedData: SharedData,
   action: ProtocolAction
 ): ProtocolStateWithSharedData<ConcludingState> {
-  console.log(protocolState.type);
-  console.log(action.type);
   if (!routesToDefunding(action, EMPTY_LOCATOR)) {
     console.warn(`Expected defunding, received ${action.type} instead`);
     return {protocolState, sharedData};
@@ -218,7 +214,7 @@ function waitForConcludeReducer(
     sharedData,
     action
   ));
-  console.log(concluding.type);
+
   switch (concluding.type) {
     case "AdvanceChannel.Failure":
       sharedData = sendConcludeFailure(sharedData);
