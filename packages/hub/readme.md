@@ -39,13 +39,15 @@ $ yarn hub:watch (will rebuild app on file change)
 
 ### Interacting with the hub from a browser
 
+**NOTE**: it is important to define a unique `HUB_ADDRESS` if others are running the hub locally since all hub instances use the same Firebase realtime database.
+
 To play against the hub from the browser client, the hub and the browser need to:
 
-- Share the state-channel address of the hub. A good way to do so is to create a `.env.development.local` in the monorepo root with HUB_ADDRESS and HUB_PRIVATE_KEY defined.
-- Point to the same local Ganache server. Configure your `.env.*.local` files accordingly.
-- Point to the same contract addresses on Ganache.
+- Share the state-channel address of the hub. A good way to do so is to create a `.env.development.local` in the monorepo root with `HUB_ADDRESS` and `HUB_PRIVATE_KEY` defined.
+- Point to the same local Ganache server. Configure your `.env` files accordingly. This should work without any modifications.
+- Point to the same contract addresses on Ganache. This will be the case if the hub and the client wallet point to the same Ganache server.
 
-You will also need to make sure that the hub's address has funds. You can find the hub address in [constants.ts](https://github.com/statechannels/monorepo/blob/master/packages/hub/src/constants.ts)
+You will also need to make sure that the hub's blockchain address has funds. The default hub blockchain address `HUB_SIGNER_ADDRESS` is in [constants.ts](https://github.com/statechannels/monorepo/blob/master/packages/hub/src/constants.ts)
 
 ## Testing
 
