@@ -94,14 +94,6 @@ function* handleCloseChannelMessage(payload: RequestObject) {
   } else {
     yield put(actions.protocol.concludeRequested({channelId}));
     yield fork(messageSender, outgoingMessageActions.closeChannelResponse({id, channelId}));
-    // TODO: Is this right?
-    // yield fork(
-    //   messageSender,
-    //   outgoingMessageActions.sendChannelUpdatedMessage({
-    //     channelId,
-    //     ...(yield getMessageParticipantIds(channelId))
-    //   })
-    // );
   }
 }
 

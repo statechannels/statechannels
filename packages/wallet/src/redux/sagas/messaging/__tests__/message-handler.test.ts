@@ -567,11 +567,6 @@ describe("message listener", () => {
         id: 1,
         channelId: stateHelpers.channelId
       });
-
-      expect(effects.fork[1].payload.args[0]).toMatchObject({
-        type: "WALLET.SEND_CHANNEL_UPDATED_MESSAGE",
-        channelId: stateHelpers.channelId
-      });
     });
 
     it("returns an error when the channelId is not known", async () => {
