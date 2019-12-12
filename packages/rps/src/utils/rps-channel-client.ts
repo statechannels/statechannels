@@ -17,7 +17,6 @@ export class RPSChannelClient {
   async enable() {
     // TODO: This is really ugly!!
     // TODO: Use webpack to import channelProvider
-    // tslint:disable-next-line: no-unused-expression
     channelProvider;
     const provider: ChannelProviderInterface = (window as any).channelProvider;
     await provider.enable(process.env.WALLET_URL);
