@@ -33,21 +33,21 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
     this.events.on('MessageQueued', message => {
       callback(message);
     });
-    return () => this.events.removeListener('MessageQueued', callback);
+    return () => this.events.removeListener('MessageQueued', callback); // eslint-disable-line  @typescript-eslint/explicit-function-return-type
   }
 
   onChannelUpdated(callback: (result: ChannelResult) => void): UnsubscribeFunction {
     this.events.on('ChannelUpdated', result => {
       callback(result);
     });
-    return () => this.events.removeListener('ChannelUpdated', callback);
+    return () => this.events.removeListener('ChannelUpdated', callback); // eslint-disable-line  @typescript-eslint/explicit-function-return-type
   }
 
   onChannelProposed(callback: (result: ChannelResult) => void): UnsubscribeFunction {
     this.events.on('ChannelProposed', result => {
       callback(result);
     });
-    return () => this.events.removeListener('ChannelProposed', callback);
+    return () => this.events.removeListener('ChannelProposed', callback); // eslint-disable-line  @typescript-eslint/explicit-function-return-type
   }
 
   async createChannel(
