@@ -50,7 +50,7 @@ export async function loadWallet(page: puppeteer.Page, messageListener: (message
   const web3JsFile = fs.readFileSync(path.resolve(__dirname, "web3/web3.min.js"), "utf8");
   await page.evaluateOnNewDocument(web3JsFile);
   await page.evaluateOnNewDocument(`window.web3 = new Web3("http://localhost:${port}")`);
-  await page.goto("http://localhost:3055/", {waitUntil: "domcontentloaded"});
+  await page.goto("http://localhost:3055/", {waitUntil: "networkidle0"});
   page.on("pageerror", error => {
     throw error;
   });
