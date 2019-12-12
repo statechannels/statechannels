@@ -20,8 +20,8 @@ describe("Closing a Channel", () => {
   let walletMessages: Emittery.Typed<MessageEventTypes>;
 
   beforeAll(async () => {
-    browserA = await setUpBrowser(true);
-    browserB = await setUpBrowser(true);
+    browserA = await setUpBrowser(false);
+    browserB = await setUpBrowser(false);
 
     walletA = await browserA.newPage();
     walletB = await browserB.newPage();
@@ -80,6 +80,7 @@ describe("Closing a Channel", () => {
   });
 
   afterAll(async () => {
+    walletMessages.clearListeners();
     if (browserA) {
       await browserA.close();
     }
