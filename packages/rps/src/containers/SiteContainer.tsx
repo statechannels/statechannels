@@ -33,7 +33,6 @@ class Site extends React.PureComponent<SiteProps> {
     } else if (this.props.loginError) {
       component = <LoginErrorPage error={this.props.loginError} />;
     } else if (this.props.metamaskError !== null) {
-      console.log(this.props.metamaskError);
       component = <MetamaskErrorPage error={this.props.metamaskError} />;
     } else if (this.props.walletError !== null) {
       component = <code>{JSON.stringify(this.props.walletError, null, 2)}</code>;
