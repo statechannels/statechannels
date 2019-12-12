@@ -48,7 +48,7 @@ export function initialize(
   const jointChannelInitialized = advanceChannel.initializeAdvanceChannel(sharedData, {
     privateKey,
     appDefinition,
-    ourIndex,
+    ourIndex: TwoPartyPlayerIndex.A,
     stateType: StateType.PreFundSetup,
     clearedToSend: true,
     processId,
@@ -101,7 +101,7 @@ function waitForJointChannelReducer(
   sharedData: SharedData,
   action: WalletAction
 ) {
-  const {processId, hubAddress, ourIndex, protocolLocator} = protocolState;
+  const {processId, hubAddress, protocolLocator} = protocolState;
   if (routesToAdvanceChannel(action, protocolState.protocolLocator)) {
     const result = advanceChannelReducer(protocolState.jointChannel, sharedData, action);
 
@@ -115,7 +115,7 @@ function waitForJointChannelReducer(
             processId,
             protocolLocator: makeLocator(protocolLocator, ADVANCE_CHANNEL_PROTOCOL_LOCATOR),
             channelId: jointChannelId,
-            ourIndex
+            ourIndex: TwoPartyPlayerIndex.A
           });
 
           return {

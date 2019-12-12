@@ -84,10 +84,9 @@ export type RelayableAction =
 export type ActionConstructor<T> = (p: Pick<T, Exclude<keyof T, 'type' | 'protocol'>>) => T;
 
 export interface RelayActionWithMessage {
-  type: 'WALLET.RELAY_ACTION_WITH_MESSAGE';
-  toParticipantId: string;
-  fromParticipantId: string;
-  actionToRelay: RelayableAction;
+  recipient: string;
+  sender: string;
+  data: RelayableAction;
 }
 
 export const relayActionWithMessage: ActionConstructor<RelayActionWithMessage> = p => ({
@@ -128,7 +127,14 @@ export function isStartProcessAction(a: {type: string}): a is StartProcessAction
   return a.type === 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED';
 }
 
-export function getProcessId(action: ChannelOpen) {
-  const processId = 'Funding-' + getChannelId(action.signedState.state.channel);
-  return `Funding-${processId}`;
+export function isChannelOpenAction(a: RelayableAction): a is ChannelOpen {
+  return a.type === 'Channel.Open';
+}
+
+export function getProcessId(action: ChannelOpen | SignedStatesReceived) {
+  if (isChannelOpenAction(action)) {
+    const processId = getChannelId(action.signedState.state.channel);
+    return `Funding-${processId}`;
+  }
+  return action.processId;
 }

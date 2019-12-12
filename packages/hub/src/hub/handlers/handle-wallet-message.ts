@@ -1,5 +1,4 @@
 import {
-  ConcludeInstigated,
   RelayableAction,
   RelayActionWithMessage,
   SignedStatesReceived,
@@ -10,7 +9,6 @@ import {
 import {getProcess} from '../../wallet/db/queries/walletProcess';
 import {handleNewProcessAction} from './handle-new-process-action';
 import {handleOngoingProcessAction} from './handle-ongoing-process-action';
-import {getChannelId} from '@statechannels/nitro-protocol';
 
 export async function handleWalletMessage(
   message: RelayableAction
@@ -24,12 +22,14 @@ export async function handleWalletMessage(
   }
 }
 
-async function shouldHandleAsNewProcessAction(action: ChannelOpen): Promise<boolean> {
+async function shouldHandleAsNewProcessAction(
+  action: ChannelOpen | SignedStatesReceived
+): Promise<boolean> {
   return !(await getProcess(getProcessId(action)));
 }
 
-function isNewProcessAction(action: RelayableAction): action is ChannelOpen {
-  return action.type === 'Channel.Open';
+function isNewProcessAction(action: RelayableAction): action is ChannelOpen | SignedStatesReceived {
+  return action.type === 'Channel.Open' || action.type === 'WALLET.COMMON.SIGNED_STATES_RECEIVED';
 }
 
 function isProtocolAction(

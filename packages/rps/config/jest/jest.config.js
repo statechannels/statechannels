@@ -16,7 +16,6 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/config/jest/jest.setup.js', '<rootDir>/src/setupTests.ts'],
   testMatch: ['<rootDir>/src/**/__tests__/?(*.)test.ts?(x)'],
   testEnvironment: 'jsdom',
-  testPathIgnorePatterns: ['/node_modules/'],
   testURL: 'http://localhost',
   transform: {
     '^.+\\.(js|jsx|mjs)$': '<rootDir>/../../node_modules/babel-jest',

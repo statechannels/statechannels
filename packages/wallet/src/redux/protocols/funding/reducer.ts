@@ -41,6 +41,7 @@ import {
 import * as fundingStrategyNegotiationStates from "../funding-strategy-negotiation/states";
 import {ProtocolAction} from "../../actions";
 import {apiNotImplemented} from "../../sagas/messaging/outgoing-api-actions";
+import {HUB_ADDRESS} from "../../../constants";
 
 export function initialize(
   sharedData: SharedData,
@@ -213,8 +214,7 @@ function handleFundingStrategyNegotiationComplete({
             processId,
             targetChannelId,
             ourIndex,
-            // TODO: This should be an env variable
-            hubAddress: "0x100063c326b27f78b2cBb7cd036B8ddE4d4FCa7C",
+            hubAddress: HUB_ADDRESS,
             startingOutcome: outcome,
             participants: channel.participants,
             protocolLocator: makeLocator(EmbeddedProtocol.VirtualFunding)
@@ -245,7 +245,8 @@ function handleAdvanceChannelAction(
 ): ProtocolStateWithSharedData<states.FundingState> {
   if (
     protocolState.type !== "Funding.WaitForPostFundSetup" &&
-    protocolState.type !== "Funding.WaitForLedgerFunding"
+    protocolState.type !== "Funding.WaitForLedgerFunding" &&
+    protocolState.type !== "Funding.WaitForVirtualFunding"
   ) {
     console.warn(
       `Funding reducer received advance channel action ${action.type} but is currently in state ${protocolState.type}`
@@ -359,13 +360,26 @@ function handleFundingComplete(
           protocolLocator: ADVANCE_CHANNEL_PROTOCOL_LOCATOR
         })
       ));
-      return {
-        protocolState: states.waitForPostFundSetup({
-          ...protocolState,
-          postFundSetupState
-        }),
-        sharedData
-      };
+
+      if (!advanceChannelStates.isTerminal(postFundSetupState)) {
+        return {
+          protocolState: states.waitForPostFundSetup({
+            ...protocolState,
+            postFundSetupState
+          }),
+          sharedData
+        };
+      } else if (postFundSetupState.type === "AdvanceChannel.Failure") {
+        return {
+          protocolState: states.failure({reason: "AdvanceChannelFailure"}),
+          sharedData
+        };
+      } else {
+        return {
+          protocolState: states.waitForSuccessConfirmation(protocolState),
+          sharedData
+        };
+      }
     }
     default:
       // TODO: Indirect/Virtual funding should return a proper error to pass to our failure state

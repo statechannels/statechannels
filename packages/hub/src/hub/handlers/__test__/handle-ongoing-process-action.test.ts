@@ -21,7 +21,7 @@ describe('handle-ongoing-process-action', () => {
     expect(messageReleayRequested).toHaveLength(1);
 
     const states: State[] = (messageReleayRequested[0]
-      .actionToRelay as SignedStatesReceived).signedStates.map(signedState => signedState.state);
+      .data as SignedStatesReceived).signedStates.map(signedState => signedState.state);
     expect(states).toEqual([state, stateConstructors.postfundSetup(3)]);
   });
 });
