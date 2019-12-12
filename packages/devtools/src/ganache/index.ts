@@ -8,7 +8,7 @@ import {Account} from '../types';
 import {GanacheDeployer} from './deployer';
 import {GanacheNCacheDeployer} from './deployer-with-cache';
 import {GanacheServer} from './server';
-import writeJsonFile = require('write-json-file');
+import writeJsonFile from 'write-json-file';
 
 export const ganacheIsRunning = async (port: number): Promise<boolean> => {
   const provider = new JsonRpcProvider(`http://localhost:${port}`);
