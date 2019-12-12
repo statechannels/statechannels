@@ -1,6 +1,4 @@
 import {
-  JsonRpcErrorResponse,
-  JsonRpcError,
   JsonRpcRequest,
   JsonRpcResponse,
   JsonRpcNotification
@@ -148,73 +146,3 @@ export type Request =
   | UpdateChannelRequest
   | PushMessageRequest
   | CloseChannelRequest;
-
-export enum ErrorCodes {
-  SIGNING_ADDRESS_NOT_FOUND = 1000,
-  INVALID_APP_DEFINITION = 1001,
-  INVALID_APP_DATA = 1002,
-  UNSUPPORTED_TOKEN = 1003,
-  CHANNEL_NOT_FOUND = 1004
-}
-
-export class ChannelClientError implements JsonRpcErrorResponse {
-  jsonrpc: '2.0' = '2.0';
-
-  error: JsonRpcError = {
-    code: ErrorCodes.SIGNING_ADDRESS_NOT_FOUND,
-    message: 'Something went wrong'
-  };
-
-  constructor(public readonly id: number) {}
-
-  toJSON() {
-    return {
-      jsonrpc: this.jsonrpc,
-      id: this.id,
-      error: this.error
-    };
-  }
-}
-
-export class SigningAddressNotFoundError extends ChannelClientError {
-  error: JsonRpcError = {
-    code: ErrorCodes.SIGNING_ADDRESS_NOT_FOUND,
-    message: 'Signing address not found'
-  };
-}
-
-export class InvalidAppDefinitionError extends ChannelClientError {
-  error: JsonRpcError = {
-    code: ErrorCodes.INVALID_APP_DEFINITION,
-    message: 'Invalid app definition'
-  };
-}
-
-export class InvalidAppDataError extends ChannelClientError {
-  error: JsonRpcError = {
-    code: ErrorCodes.INVALID_APP_DATA,
-    message: 'Invalid app data'
-  };
-}
-
-export class UnsupportedTokenError extends ChannelClientError {
-  error: JsonRpcError = {
-    code: ErrorCodes.UNSUPPORTED_TOKEN,
-    message: 'Unsupported token'
-  };
-}
-
-export class ChannelNotFoundError extends ChannelClientError {
-  error: JsonRpcError = {
-    code: ErrorCodes.CHANNEL_NOT_FOUND,
-    message: 'Channel not found'
-  };
-}
-
-export const ErrorCodesToObjectsMap: {[key in ErrorCodes]: typeof ChannelClientError} = {
-  [ErrorCodes.CHANNEL_NOT_FOUND]: ChannelNotFoundError,
-  [ErrorCodes.INVALID_APP_DATA]: InvalidAppDataError,
-  [ErrorCodes.INVALID_APP_DEFINITION]: InvalidAppDefinitionError,
-  [ErrorCodes.SIGNING_ADDRESS_NOT_FOUND]: SigningAddressNotFoundError,
-  [ErrorCodes.UNSUPPORTED_TOKEN]: UnsupportedTokenError
-};

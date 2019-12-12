@@ -20,6 +20,7 @@
     "postinstall": "rm -f node_modules/web3/index.d.ts",
     "prepare": "yarn patch-package && yarn build:typescript",
     "start": "node scripts/start.js",
+    "start:integration": "NODE_ENV=test node scripts/start.js",
     "storybook": "start-storybook -p 9001 -c .storybook",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
     "test:app": "npx jest -c ./config/jest/jest.config.js",

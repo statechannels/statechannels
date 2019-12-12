@@ -38,7 +38,6 @@ async function listen() {
         `The hub does not support handling application states. Received ${JSON.stringify(value)}`
       );
     } else if (queue === 'WALLET') {
-      initializeStateArraysFromFirebase(value.payload);
       process.send(value.payload);
     } else {
       throw new Error('Unknown queue');
@@ -58,20 +57,4 @@ process.on('message', (message: MessageRelayRequested) => {
 if (require.main === module) {
   console.log('Listening to firebase for hub messages');
   listen();
-}
-
-// Todo: refactor to comply with new wallet messaging
-function initializeStateArraysFromFirebase(payload) {
-  const arraysToInitialize = ['allocation'];
-  for (const arrayToInitialize of arraysToInitialize) {
-    if ('commitment' in payload && !payload.commitment[arrayToInitialize]) {
-      payload.commitment[arrayToInitialize] = [];
-    }
-  }
-
-  for (const property of Object.keys(payload)) {
-    if (typeof payload[property] === 'object') {
-      initializeStateArraysFromFirebase(payload[property]);
-    }
-  }
 }

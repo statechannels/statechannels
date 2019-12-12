@@ -1,4 +1,5 @@
-import {SignedState} from '@statechannels/nitro-protocol';
+import {SignedState, getChannelId} from '@statechannels/nitro-protocol';
+import {ChannelParticipant} from '@statechannels/wallet/lib/src/redux/channel-store';
 
 export interface BaseProcessAction {
   processId: string;
@@ -24,6 +25,18 @@ export const strategyApproved: ActionConstructor<StrategyApproved> = p => ({
 // -------
 // Actions
 // -------
+
+export interface ChannelOpen {
+  type: 'Channel.Open';
+  signedState: SignedState;
+  participants: ChannelParticipant[];
+}
+
+export interface ChannelJoined {
+  type: 'Channel.Joined';
+  signedState: SignedState;
+  participants: ChannelParticipant[];
+}
 
 export interface CloseLedgerChannel {
   type: 'WALLET.NEW_PROCESS.CLOSE_LEDGER_CHANNEL';
@@ -58,6 +71,8 @@ export interface SignedStatesReceived extends BaseProcessAction {
 }
 
 export type RelayableAction =
+  | ChannelOpen
+  | ChannelJoined
   | StrategyProposed
   | StrategyApproved
   | ConcludeInstigated
@@ -113,6 +128,7 @@ export function isStartProcessAction(a: {type: string}): a is StartProcessAction
   return a.type === 'WALLET.NEW_PROCESS.CONCLUDE_INSTIGATED';
 }
 
-export function getProcessId(action: StartProcessAction) {
-  return `${action.protocol}-${action.channelId}`;
+export function getProcessId(action: ChannelOpen) {
+  const processId = getChannelId(action.signedState.state.channel);
+  return `Funding-${processId}`;
 }
