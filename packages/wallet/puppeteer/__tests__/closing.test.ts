@@ -18,8 +18,8 @@ describe("Closing a Channel", () => {
   let walletB;
   let channelId;
   let walletMessages: Emittery.Typed<MessageEventTypes>;
-  // let notificationQueueFromA;
-  // let notificationQueueFromB;
+  let notificationQueueFromA;
+  let notificationQueueFromB;
 
   beforeAll(async () => {
     browserA = await setUpBrowser(true);
@@ -27,10 +27,10 @@ describe("Closing a Channel", () => {
 
     walletA = await browserA.newPage();
     walletB = await browserB.newPage();
-    // notificationQueueFromA = walletMessages.events(MessageType.PlayerANotification);
-    // notificationQueueFromB = walletMessages.events(MessageType.PlayerBNotification);
-    walletMessages = new Emittery.Typed<MessageEventTypes>();
 
+    walletMessages = new Emittery.Typed<MessageEventTypes>();
+    notificationQueueFromA = walletMessages.events(MessageType.PlayerANotification);
+    notificationQueueFromB = walletMessages.events(MessageType.PlayerBNotification);
     await loadWallet(walletA, createMessageHandler(walletMessages, "A"));
     await loadWallet(walletB, createMessageHandler(walletMessages, "B"));
     const fundingResult = await completeFunding(walletA, walletB, walletMessages);
@@ -56,16 +56,17 @@ describe("Closing a Channel", () => {
 
     await closeChannelButton.click();
   });
-  // it("sends a channel updated notification from player A's wallet", async () => {
-  //   let channelUpdatedEvent;
-  //   for await (const message of notificationQueueFromA) {
-  //     if (message.method === "ChannelUpdated") {
-  //       channelUpdatedEvent = message;
-  //       break;
-  //     }
-  //   }
-  //   expect(channelUpdatedEvent.params.channelId).toEqual(channelId);
-  // });
+
+  it("sends a channel updated notification from player A's wallet", async () => {
+    let channelUpdatedEvent;
+    for await (const message of notificationQueueFromA) {
+      if (message.method === "ChannelUpdated" && message.params.status === "closing") {
+        channelUpdatedEvent = message;
+        break;
+      }
+    }
+    expect(channelUpdatedEvent.params.channelId).toEqual(channelId);
+  });
 
   it("allows player B to select close Channel", async () => {
     await walletB.waitFor("button");
@@ -73,16 +74,17 @@ describe("Closing a Channel", () => {
     await closeChannelButton.click();
   });
 
-  // it("sends a channel updated event from player B's wallet", async () => {
-  //   let channelUpdatedEvent;
-  //   for await (const message of notificationQueueFromB) {
-  //     if (message.method === "ChannelUpdated") {
-  //       channelUpdatedEvent = message;
-  //       break;
-  //     }
-  //   }
-  //   expect(channelUpdatedEvent.params.channelId).toEqual(channelId);
-  // });
+  it("sends a channel updated notification from player B's wallet", async () => {
+    let channelUpdatedEvent;
+    for await (const message of notificationQueueFromB) {
+      if (message.method === "ChannelUpdated" && message.params.status === "closing") {
+        channelUpdatedEvent = message;
+        break;
+      }
+    }
+    expect(channelUpdatedEvent.params.channelId).toEqual(channelId);
+  });
+
   it("allows player A to select withdrawal", async () => {
     await walletA.waitFor("button");
     const [withdrawButton] = await walletA.$x("//button[contains(., 'Approve')]");

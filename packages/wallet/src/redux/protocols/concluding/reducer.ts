@@ -10,7 +10,8 @@ import {
   sendConcludeFailure,
   hideWallet,
   getFundingChannelId,
-  sendOpponentConcluded
+  sendOpponentConcluded,
+  sendChannelUpdatedEvent
 } from "../reducer-helpers";
 import {
   initializeAdvanceChannel,
@@ -220,6 +221,7 @@ function waitForConcludeReducer(
       sharedData = sendConcludeFailure(sharedData);
       return {protocolState: states.failure({reason: "Advance Channel Failure"}), sharedData};
     case "AdvanceChannel.Success":
+      sharedData = sendChannelUpdatedEvent(sharedData, protocolState.channelId);
       let defunding: DefundingState;
       const {processId, channelId} = protocolState;
       ({protocolState: defunding, sharedData} = initializeDefunding(
@@ -271,6 +273,9 @@ export function initialize({
     protocolLocator: makeLocator(EMPTY_LOCATOR, EmbeddedProtocol.AdvanceChannel),
     stateType: StateType.Conclude
   }));
+
+  sharedData = sendChannelUpdatedEvent(sharedData, channelId);
+
   return {
     protocolState: states.waitForConclude({channelId, processId, ledgerId, concluding}),
     sharedData

@@ -56,7 +56,7 @@ export async function loadWallet(page: puppeteer.Page, messageListener: (message
   });
   page.on("console", msg => {
     if (msg.type() === "error") {
-      throw new Error(`CONSOLE ERROR ${msg.text()}`);
+      throw new Error(`CONSOLE ERROR: ${msg.text()}`);
     }
   });
 
