@@ -41,7 +41,7 @@ $ yarn hub:watch (will rebuild app on file change)
 
 **NOTE**: it is important to define a unique `HUB_ADDRESS` if others are running the hub locally since all hub instances use the same Firebase realtime database.
 
-To play against the hub from the browser client, the hub and the browser need to:
+To connect to the `hub` from the browser `wallet`, the `hub` and the browser `wallet` need to:
 
 - Share the state-channel address of the hub. A good way to do so is to create a `.env.development.local` in the monorepo root with `HUB_ADDRESS` and `HUB_PRIVATE_KEY` defined.
 - Point to the same local Ganache server. Configure your `.env` files accordingly. This should work without any modifications.
