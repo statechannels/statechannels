@@ -78,7 +78,7 @@ export const happyPath = {
     state: waitForConclude,
     action: prependToLocator(
       advanceChannelScenarios.conclude.preSuccess.trigger,
-      EmbeddedProtocol.AdvanceChannel
+      EmbeddedProtocol.CloseLedgerChannel
     ),
     sharedData: mergeSharedData(
       advanceChannelScenarios.conclude.preSuccess.sharedData,
