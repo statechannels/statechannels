@@ -37,7 +37,7 @@ $ yarn hub:watch (will rebuild app on file change)
 
 ```
 
-### Interacting with the hub from a browser
+### Establishing a virtual channel between clients through the hub
 
 **NOTE**: Running this package makes a connection to a shared external Firebase database. So, to avoid colliding with other developers also running this package, set the environment variable `HUB_ADDRESS` to one that is likely not being used by any other developer for local development purposes.
 
