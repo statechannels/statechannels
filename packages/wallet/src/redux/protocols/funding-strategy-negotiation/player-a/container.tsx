@@ -5,11 +5,13 @@ import {connect} from "react-redux";
 import * as actions from "./actions";
 import * as states from "./states";
 
+import {FUNDING_STRATEGY} from "../../../../constants";
 import {unreachable} from "../../../../utils/reducer-utils";
 import {TwoPartyPlayerIndex} from "../../../types";
-import WaitForOtherPlayer from "../../shared-components/wait-for-other-player";
 import {ActionDispatcher} from "../../../utils";
 import ApproveX from "../../shared-components/approve-x";
+import WaitForOtherPlayer from "../../shared-components/wait-for-other-player";
+
 interface Props {
   state: states.OngoingFundingStrategyNegotiationState;
   strategyChosen: ActionDispatcher<actions.StrategyChosen>;
@@ -31,7 +33,7 @@ class FundingStrategyNegotiationContainer extends PureComponent<Props> {
             description="Do you want to fund this state channel with a virtual channel?"
             yesMessage="Fund Channel"
             noMessage="Cancel"
-            approvalAction={() => strategyChosen({processId, strategy: "VirtualFundingStrategy"})}
+            approvalAction={() => strategyChosen({processId, strategy: FUNDING_STRATEGY})}
             rejectionAction={() => cancelled({processId, by: TwoPartyPlayerIndex.A})}
           >
             <React.Fragment>
