@@ -26,12 +26,30 @@ describe('FakeChannelClient', () => {
       'proposed'
     ).build();
 
-    states[1] = ChannelResultBuilder.setStatus(states[0], 'opening');
-    states[2] = ChannelResultBuilder.setStatus(states[1], 'funding');
+    states[1] = ChannelResultBuilder.from(states[0])
+      .setStatus('opening')
+      .setTurnNum('1')
+      .build();
+
+    states[2] = ChannelResultBuilder.from(states[1])
+      .setStatus('funding')
+      .setTurnNum('2')
+      .build();
   });
 
   it('instantiates', () => {
     const client = new FakeChannelClient();
     expect(client).toBeDefined();
+  });
+
+  it('creates a channel', async () => {
+    const client = new FakeChannelClient();
+    const channelResult = await client.createChannel(
+      participants,
+      allocations,
+      APP_DEFINITION,
+      APP_DATA
+    );
+    expect(states[0]).toEqual(channelResult);
   });
 });

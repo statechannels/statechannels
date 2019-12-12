@@ -50,6 +50,17 @@ export class ChannelResultBuilder {
       .setStatus(status)
       .build();
   }
+
+  setTurnNum(turnNum: string): ChannelResultBuilder {
+    this.channelResult.turnNum = turnNum;
+    return this;
+  }
+
+  static setTurnNum(channelResult: ChannelResult, turnNum: string): ChannelResult {
+    return ChannelResultBuilder.from(channelResult)
+      .setTurnNum(turnNum)
+      .build();
+  }
 }
 
 export function buildParticipant(address: string): Participant {
