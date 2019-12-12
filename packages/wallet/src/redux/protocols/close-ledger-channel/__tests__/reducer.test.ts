@@ -18,7 +18,7 @@ describe("happy path", () => {
 
   describe("when initializing", () => {
     const {processId, channelId, sharedData} = scenario.initialize;
-    const result = initialize(processId, channelId, sharedData);
+    const result = initialize(processId, channelId, sharedData, true);
     itTransitionsTo(result, "CloseLedgerChannel.WaitForConclude");
   });
   describeScenarioStep(scenario.waitForConclude, () => {
@@ -42,7 +42,7 @@ describe("channel already concluded", () => {
 
   describe("when initializing", () => {
     const {processId, channelId, sharedData} = scenario.initialize;
-    const result = initialize(processId, channelId, sharedData);
+    const result = initialize(processId, channelId, sharedData, true);
     itTransitionsTo(result, "CloseLedgerChannel.WaitForWithdrawal");
   });
   describeScenarioStep(scenario.waitForWithdrawal, () => {
@@ -59,7 +59,7 @@ describe("channel in use failure", () => {
 
   describe("when initializing", () => {
     const {processId, channelId, sharedData} = scenario.initialize;
-    const result = initialize(processId, channelId, sharedData);
+    const result = initialize(processId, channelId, sharedData, true);
     itTransitionsTo(result, "CloseLedgerChannel.Failure");
   });
 });

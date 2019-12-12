@@ -23,13 +23,17 @@ import {routesToAdvanceChannel} from "../advance-channel/actions";
 import {DefundingState, initializeDefunding, defundingReducer} from "../defunding";
 import {routesToDefunding} from "../defunding/actions";
 import {unreachable} from "../../../utils/reducer-utils";
-import {CloseLedgerChannelState} from "../close-ledger-channel/states";
+import {
+  CloseLedgerChannelState,
+  isTerminalCloseLedgerChannelState
+} from "../close-ledger-channel/states";
 import {
   initializeCloseLedgerChannel,
   isCloseLedgerChannelAction,
   closeLedgerChannelReducer
 } from "../close-ledger-channel";
 import {StateType} from "../advance-channel/states";
+import {clearedToSend} from "../close-ledger-channel/actions";
 
 export function concludingReducer(
   protocolState: states.NonTerminalConcludingState,
@@ -89,10 +93,29 @@ function decideClosingReducer(
 ): ProtocolStateWithSharedData<ConcludingState> {
   if (
     action.type !== "WALLET.CONCLUDING.KEEP_OPEN_SELECTED" &&
-    action.type !== "WALLET.CONCLUDING.CLOSE_SELECTED"
+    action.type !== "WALLET.CONCLUDING.CLOSE_SELECTED" &&
+    !isCloseLedgerChannelAction(action)
   ) {
-    console.warn(`Expected decision action received ${action.type} instead`);
+    console.warn(
+      `Expected decision action or close ledger channel action received ${action.type} instead`
+    );
     return {protocolState, sharedData};
+  }
+
+  // Handle a close ledger channel action that arrives early
+  if (isCloseLedgerChannelAction(action)) {
+    console.log("close ledger channel received early");
+    let ledgerClosing: CloseLedgerChannelState;
+
+    ({protocolState: ledgerClosing, sharedData} = closeLedgerChannelReducer(
+      protocolState.ledgerClosing,
+      sharedData,
+      action
+    ));
+    if (isTerminalCloseLedgerChannelState(ledgerClosing)) {
+      throw new Error("Terminal Close Ledger State before cleared to send");
+    }
+    return {protocolState: {...protocolState, ledgerClosing}, sharedData};
   }
 
   switch (action.type) {
@@ -103,11 +126,16 @@ function decideClosingReducer(
     case "WALLET.CONCLUDING.CLOSE_SELECTED":
       let ledgerClosing: CloseLedgerChannelState;
 
-      ({protocolState: ledgerClosing, sharedData} = initializeCloseLedgerChannel(
-        protocolState.processId,
-        protocolState.ledgerId,
-        sharedData
+      ({protocolState: ledgerClosing, sharedData} = closeLedgerChannelReducer(
+        protocolState.ledgerClosing,
+        sharedData,
+        clearedToSend({
+          processId: protocolState.processId,
+          protocolLocator: makeLocator(EMPTY_LOCATOR, EmbeddedProtocol.CloseLedgerChannel)
+        })
       ));
+      console.log(ledgerClosing.type);
+      console.log(JSON.stringify(sharedData.outboxState));
       switch (ledgerClosing.type) {
         case "CloseLedgerChannel.Failure":
           return {
@@ -133,6 +161,8 @@ function waitForDefundReducer(
   sharedData: SharedData,
   action: ProtocolAction
 ): ProtocolStateWithSharedData<ConcludingState> {
+  console.log(protocolState.type);
+  console.log(action.type);
   if (!routesToDefunding(action, EMPTY_LOCATOR)) {
     console.warn(`Expected defunding, received ${action.type} instead`);
     return {protocolState, sharedData};
@@ -150,7 +180,20 @@ function waitForDefundReducer(
       sharedData = sendConcludeFailure(sharedData);
       return {protocolState: states.failure({reason: "Defunding Failure"}), sharedData};
     case "Defunding.Success":
-      return {protocolState: states.decideClosing(protocolState), sharedData};
+      let ledgerClosing: CloseLedgerChannelState;
+
+      ({protocolState: ledgerClosing, sharedData} = initializeCloseLedgerChannel(
+        protocolState.processId,
+        protocolState.ledgerId,
+        sharedData,
+        false,
+        makeLocator(EMPTY_LOCATOR, EmbeddedProtocol.CloseLedgerChannel)
+      ));
+      if (isTerminalCloseLedgerChannelState(ledgerClosing)) {
+        // TODO: We could probably just handle the success case
+        throw new Error("Close Ledger Channel completed immediately");
+      }
+      return {protocolState: states.decideClosing({...protocolState, ledgerClosing}), sharedData};
 
     default:
       return {
@@ -175,6 +218,7 @@ function waitForConcludeReducer(
     sharedData,
     action
   ));
+  console.log(concluding.type);
   switch (concluding.type) {
     case "AdvanceChannel.Failure":
       sharedData = sendConcludeFailure(sharedData);

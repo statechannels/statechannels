@@ -10,3 +10,4 @@ export const LEDGER_TOP_UP_PROTOCOL_LOCATOR = makeLocator(EmbeddedProtocol.Ledge
 export const FUNDING_STRATEGY_NEGOTIATION_PROTOCOL_LOCATOR = makeLocator(
   EmbeddedProtocol.FundingStrategyNegotiation
 );
+export const DEFUND_LEDGER_CHANNEL_PROTOCOL_LOCATOR = makeLocator(EmbeddedProtocol.LedgerDefunding);

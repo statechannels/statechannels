@@ -12,6 +12,7 @@ import {
 import {routesToConsensusUpdate} from "../consensus-update/actions";
 import * as consensusUpdateActions from "../consensus-update/actions";
 import {Outcome} from "@statechannels/nitro-protocol";
+import {CONSENSUS_UPDATE_PROTOCOL_LOCATOR} from "../consensus-update/reducer";
 
 export const initialize = ({
   processId,
@@ -37,7 +38,7 @@ export const initialize = ({
     proposedOutcome,
     channelId: ledgerId,
     clearedToSend: clearedToProceed,
-    protocolLocator,
+    protocolLocator: makeLocator(protocolLocator, CONSENSUS_UPDATE_PROTOCOL_LOCATOR),
     sharedData
   }));
 

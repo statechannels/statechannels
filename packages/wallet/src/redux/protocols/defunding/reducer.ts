@@ -49,7 +49,7 @@ export const initialize = (
           channelId,
           ledgerId: helpers.getFundingChannelId(channelId, sharedData),
           ledgerDefundingState,
-          protocolLocator
+          protocolLocator: makeLocator(protocolLocator, EmbeddedProtocol.LedgerDefunding)
         }),
         sharedData
       };
@@ -154,6 +154,7 @@ const handleLedgerDefundingAction = (
     sharedData,
     action
   ));
+
   switch (ledgerDefundingState.type) {
     case "LedgerDefunding.Failure":
       return {
@@ -190,5 +191,8 @@ const createLedgerDefundingState = (
     protocolLocator: makeLocator(protocolLocator, EmbeddedProtocol.LedgerDefunding)
   });
 
-  return {ledgerDefundingState: ledgerDefundingState.protocolState, sharedData};
+  return {
+    ledgerDefundingState: ledgerDefundingState.protocolState,
+    sharedData: ledgerDefundingState.sharedData
+  };
 };

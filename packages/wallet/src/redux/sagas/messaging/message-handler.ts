@@ -95,13 +95,13 @@ function* handleCloseChannelMessage(payload: RequestObject) {
     yield put(actions.protocol.concludeRequested({channelId}));
     yield fork(messageSender, outgoingMessageActions.closeChannelResponse({id, channelId}));
     // TODO: Is this right?
-    yield fork(
-      messageSender,
-      outgoingMessageActions.sendChannelUpdatedMessage({
-        channelId,
-        ...(yield getMessageParticipantIds(channelId))
-      })
-    );
+    // yield fork(
+    //   messageSender,
+    //   outgoingMessageActions.sendChannelUpdatedMessage({
+    //     channelId,
+    //     ...(yield getMessageParticipantIds(channelId))
+    //   })
+    // );
   }
 }
 
@@ -143,6 +143,7 @@ function* handlePushMessage(payload: RequestObject) {
   const {id} = payload;
   const message = payload.params as PushMessageParams;
   if (isRelayableAction(message.data)) {
+    console.log("action relay ", message.data.type);
     yield put(message.data);
     yield fork(messageSender, outgoingMessageActions.pushMessageResponse({id}));
   } else {

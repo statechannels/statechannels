@@ -44,10 +44,11 @@ export function initializedReducer(
   if (actions.isSharedDataUpdateAction(action)) {
     newState = updateSharedData(newState, action);
   }
-
+  console.log(action.type);
   if (isNewProcessAction(action)) {
     return routeToNewProcessInitializer(newState, action);
   } else if (actions.isProtocolAction(action)) {
+    console.log("routing to protocol reducer");
     return routeToProtocolReducer(newState, action);
   }
 
@@ -100,6 +101,7 @@ function routeToProtocolReducer(
         );
         return updatedState(state, appSharedData, processState, appProtocolState, action.processId);
       case ProcessProtocol.Concluding:
+        console.log(action);
         const {
           protocolState: concludingProtocolState,
           sharedData: concludingSharedData
@@ -213,7 +215,8 @@ function initializeNewProtocol(
       return closeLedgerChannelProtocol.initializeCloseLedgerChannel(
         processId,
         action.channelId,
-        incomingSharedData
+        incomingSharedData,
+        true
       );
     default:
       return unreachable(action);
