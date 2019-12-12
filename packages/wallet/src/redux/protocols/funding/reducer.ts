@@ -41,6 +41,7 @@ import {
 import * as fundingStrategyNegotiationStates from "../funding-strategy-negotiation/states";
 import {ProtocolAction} from "../../actions";
 import {apiNotImplemented} from "../../sagas/messaging/outgoing-api-actions";
+import {HUB_ADDRESS} from "../../../constants";
 
 export function initialize(
   sharedData: SharedData,
@@ -213,8 +214,7 @@ function handleFundingStrategyNegotiationComplete({
             processId,
             targetChannelId,
             ourIndex,
-            // TODO: This should be an env variable
-            hubAddress: "0x100063c326b27f78b2cBb7cd036B8ddE4d4FCa7C",
+            hubAddress: HUB_ADDRESS,
             startingOutcome: outcome,
             participants: channel.participants,
             protocolLocator: makeLocator(EmbeddedProtocol.VirtualFunding)
