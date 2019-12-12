@@ -208,8 +208,13 @@ export class GasReporter implements jest.Reporter {
       const contractStats = gasConsumed[contract];
       table.cell('Contract', contract);
       table.cell('Deployment', contractStats.deployment);
+      table.cell('Method', '*');
+      table.cell('Calls', '*');
+      table.cell('Min', '*');
+      table.cell('Avg', '*');
+      table.cell('Max', '*');
+      table.newRow();
       Object.keys(contractStats.methods).forEach(method => {
-        table.newRow();
         table.cell('Method', method);
         const methodStats = contractStats.methods[method];
         table.cell('Calls', methodStats.calls);
@@ -218,6 +223,7 @@ export class GasReporter implements jest.Reporter {
         table.cell('Max', methodStats.max);
         table.newRow();
       });
+      table.newRow();
     });
     return table;
   }
