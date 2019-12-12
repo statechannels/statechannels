@@ -1,7 +1,7 @@
 import {FakeChannelClient, CHANNEL_ID} from '../src/fake-channel-client';
-import {ChannelResult} from '../lib/src';
-import {ChannelResultBuilder, buildParticipant, buildAllocation} from './utils';
 import {PARTICIPANT_A, PARTICIPANT_B, APP_DEFINITION, APP_DATA} from './constants';
+import {ChannelResultBuilder, buildParticipant, buildAllocation} from './utils';
+import {ChannelResult} from '../src';
 
 interface StateMap {
   [stateNumber: number]: ChannelResult;
