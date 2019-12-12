@@ -37,7 +37,7 @@
     "dotenv": "6.2.0",
     "dotenv-expand": "4.2.0",
     "eslint-plugin-jest": "^23.1.1",
-    "firebase": "6.6.2",
+    "firebase": "^7.5.2",
     "fmg-core": "0.5.9",
     "knex": "0.20.3",
     "koa": "2.11.0",
