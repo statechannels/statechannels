@@ -98,9 +98,7 @@ export class GasReporter implements jest.Reporter {
       this.options.contractArtifactFolder
     );
     this.outputGasInfo(contractCalls);
-    // if (process.env.CIRCLECI) {
     await this.saveResultsToFile(process.env.CIRCLE_SHA1);
-    // }
   }
 
   async parseContractCalls(
