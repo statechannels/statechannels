@@ -36,7 +36,7 @@
     "precommit": "lint-staged --quiet"
   },
   "lint-staged": {
-    "**/*.{js,ts,tsx}": "eslint --cache --max-warnings=0",
+    "**/*.{js,ts,tsx}": "eslint --cache",
     "**/*.{json,scss}": "prettier --ignore-path '.gitignore'"
   },
   "dependencies": {

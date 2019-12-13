@@ -57,6 +57,8 @@ export async function loadWallet(page: puppeteer.Page, messageListener: (message
   page.on("console", msg => {
     if (msg.type() === "error") {
       throw new Error(`CONSOLE ERROR: ${msg.text()}`);
+    } else {
+      console.log(`CONSOLE LOG: ${msg.text()}`);
     }
   });
 
@@ -72,6 +74,34 @@ export async function loadWallet(page: puppeteer.Page, messageListener: (message
     };
   });
 }
+
+// TODO: Move to new repo?
+export async function loadRPSApp(page: puppeteer.Page) {
+  const port = process.env.GANACHE_PORT ? Number.parseInt(process.env.GANACHE_PORT) : 8560;
+  // TODO: This is kinda ugly but it works
+  // We need to instantiate a web3 for the wallet so we import the web 3 script
+  // and then assign it on the window
+  const web3JsFile = fs.readFileSync(path.resolve(__dirname, "web3/web3.min.js"), "utf8");
+  await page.evaluateOnNewDocument(web3JsFile);
+  await page.evaluateOnNewDocument(`window.web3 = new Web3("http://localhost:${port}")`);
+  await page.evaluateOnNewDocument(`window.ethereum = window.web3.currentProvider`);
+  // MetaMask has a different API for accessing network ID than web3 library does
+  await page.evaluateOnNewDocument(
+    `window.web3.version = { getNetwork: window.web3.eth.net.getId }`
+  );
+  // MetaMask has an .enable() API to unlock it / access it from the app
+  await page.evaluateOnNewDocument(`window.ethereum.enable = () => new Promise(r => r())`);
+  await page.goto("http://localhost:3000/", {waitUntil: "networkidle0"});
+  page.on("pageerror", error => {
+    throw error;
+  });
+  page.on("console", msg => {
+    if (msg.type() === "error") {
+      throw new Error(`Error was logged into the console ${msg.text()}`);
+    }
+  });
+}
+//
 
 export async function setUpBrowser(headless: boolean): Promise<puppeteer.Browser> {
   const browser = await puppeteer.launch({
@@ -216,17 +246,19 @@ export async function sendUpdateState(
 }
 
 export async function pushMessage(page: puppeteer.Page, message: any) {
-  await page.evaluate(m => {
-    window.postMessage(
-      {
-        jsonrpc: "2.0",
-        method: "PushMessage",
-        id: 10,
-        params: m
-      },
-      "*"
-    );
-  }, message);
+  if (!page.isClosed()) {
+    await page.evaluate(m => {
+      window.postMessage(
+        {
+          jsonrpc: "2.0",
+          method: "PushMessage",
+          id: 10,
+          params: m
+        },
+        "*"
+      );
+    }, message);
+  }
 }
 
 export async function completeFunding(
@@ -254,6 +286,8 @@ export async function completeFunding(
   const createChannelPromise: Promise<any> = walletMessages.once(MessageType.PlayerAResult);
   await sendCreateChannel(walletA, playerAAddress, playerBAddress);
   const channelId = (await createChannelPromise).result.channelId;
+  // Wait for the channel updated event before we attempt to join
+  await walletMessages.once(MessageType.PlayerBNotification);
 
   const joinChannelPromise: Promise<any> = walletMessages.once(MessageType.PlayerBResult);
   await sendJoinChannel(walletB, channelId);

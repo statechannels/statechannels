@@ -12,7 +12,7 @@
 /build/
 
 # Excluded as these weren't included in TSConfig project
-/puppeteer/
+/puppeteer/web3/web3.min.js
 /src/utils/contract-utils.ts
 /src/utils/nitro-converter.ts
 /src/contract-tests/transactions.test.ts
