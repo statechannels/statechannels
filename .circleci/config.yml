@@ -13,6 +13,7 @@ defaults: &defaults
         POSTGRES_USER: root
         POSTGRES_DB: hub_wallet_test
         POSTGRES_PASSWORD: ''
+        NODE_ENV: test
 
 save_dep: &save_dep
   save_cache:
@@ -46,6 +47,19 @@ commands:
       - store_artifacts:
           path: /home/circleci/<< parameters.file >>.txt
           destination: << parameters.file >>
+
+  upload_gas_report:
+    description: 'Upload gas report '
+    parameters:
+      package:
+        type: string
+    steps:
+      - store_artifacts:
+          path: /home/circleci/project/packages/<< parameters.package >>/gas.json
+          destination: << parameters.package >>-gas.json
+      - store_artifacts:
+          path: /home/circleci/project/packages/<< parameters.package >>/gas.md
+          destination: << parameters.package >>-gas.md
 
   notify_slack:
     description: 'Notify slack '
@@ -104,6 +118,10 @@ jobs:
       - upload_logs:
           file: test-stats
       - notify_slack
+      - upload_gas_report:
+          package: rps
+      - upload_gas_report:
+          package: nitro-protocol
 
   integration-test:
     <<: *defaults
