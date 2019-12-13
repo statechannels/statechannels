@@ -255,7 +255,7 @@ describe("message sender", () => {
       jsonrpc: "2.0",
       id: 1,
       result: {
-        turnNum: 10,
+        turnNum: 11,
         status: "closing",
         channelId
       }
