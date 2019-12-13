@@ -74,7 +74,7 @@ export async function loadWallet(page: puppeteer.Page, messageListener: (message
 }
 
 // TODO: Move to new repo?
-export async function loadRPSApp(page: puppeteer.Page, messageListener: (message) => void) {
+export async function loadRPSApp(page: puppeteer.Page) {
   const port = process.env.GANACHE_PORT ? Number.parseInt(process.env.GANACHE_PORT) : 8560;
   // TODO: This is kinda ugly but it works
   // We need to instantiate a web3 for the wallet so we import the web 3 script
@@ -97,18 +97,6 @@ export async function loadRPSApp(page: puppeteer.Page, messageListener: (message
     if (msg.type() === "error") {
       throw new Error(`Error was logged into the console ${msg.text()}`);
     }
-  });
-
-  // interceptMessage gets called in puppeteer's context
-  await page.exposeFunction("interceptMessage", message => {
-    messageListener(message);
-  });
-  await page.evaluate(() => {
-    // We override window.parent.postMessage with our interceptMesage
-    (window as any).parent = {
-      ...window.parent,
-      postMessage: (window as any).interceptMessage
-    };
   });
 }
 //

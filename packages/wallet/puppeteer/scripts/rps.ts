@@ -1,16 +1,4 @@
-import {Typed} from "emittery";
-import {
-  setUpBrowser,
-  loadWallet,
-  pushMessage,
-  sendGetAddress,
-  sendCreateChannel,
-  sendJoinChannel,
-  createMessageHandler,
-  MessageEventTypes,
-  MessageType,
-  loadRPSApp
-} from "../helpers";
+import {setUpBrowser, loadRPSApp} from "../helpers";
 
 // Load environment variables from .env
 require("../../config/env");
@@ -25,10 +13,8 @@ require("../../config/env");
   const rpsTabA = await browserA.newPage();
   const rpsTabB = await browserB.newPage();
 
-  const walletMessages = new Typed<MessageEventTypes>();
-
-  await loadRPSApp(rpsTabA, createMessageHandler(walletMessages, "A"));
-  await loadRPSApp(rpsTabB, createMessageHandler(walletMessages, "B"));
+  await loadRPSApp(rpsTabA);
+  await loadRPSApp(rpsTabB);
 
   await (await rpsTabA.waitFor(".homePage-loginButton")).click();
   await (await rpsTabB.waitFor(".homePage-loginButton")).click();
@@ -59,5 +45,5 @@ require("../../config/env");
 
   await (await rpsTabB.waitFor('img[src*="paper"]')).click();
 
-  await (await rpsTabB.waitForXPath('//button[contains(., "Ok!")]')).click();
+  process.exit();
 })();
