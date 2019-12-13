@@ -79,14 +79,23 @@ describe('FakeChannelClient', () => {
     expect(states[1]).toEqual(channelResult);
   });
 
-  it('updates a channel', async () => {
-    setClientStates([clientA, clientB], states[1]);
-    const channelResult = await clientA.updateChannel(
-      channelId,
-      participants,
-      allocations,
-      UPDATED_APP_DATA
-    );
-    expect(channelResult).toEqual(states[2]);
+  describe('updates a channel', () => {
+    it('the player whose turn it is can update the channel', async () => {
+      setClientStates([clientA, clientB], states[1]);
+      const channelResult = await clientA.updateChannel(
+        channelId,
+        participants,
+        allocations,
+        UPDATED_APP_DATA
+      );
+      expect(channelResult).toEqual(states[2]);
+    });
+
+    it('the player whose turn it is not cannot update the channel', async () => {
+      setClientStates([clientA, clientB], states[1]);
+      await expect(
+        clientB.updateChannel(channelId, participants, allocations, UPDATED_APP_DATA)
+      ).rejects.toBeDefined();
+    });
   });
 });
