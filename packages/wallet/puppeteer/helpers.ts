@@ -76,7 +76,7 @@ export async function loadWallet(page: puppeteer.Page, messageListener: (message
 }
 
 // TODO: Move to new repo?
-export async function loadRPSApp(page: puppeteer.Page) {
+export async function loadRPSApp(page: puppeteer.Page, ganacheAccountIndex: number) {
   const port = process.env.GANACHE_PORT ? Number.parseInt(process.env.GANACHE_PORT) : 8560;
   // TODO: This is kinda ugly but it works
   // We need to instantiate a web3 for the wallet so we import the web 3 script
@@ -91,6 +91,9 @@ export async function loadRPSApp(page: puppeteer.Page) {
   );
   // MetaMask has an .enable() API to unlock it / access it from the app
   await page.evaluateOnNewDocument(`window.ethereum.enable = () => new Promise(r => r())`);
+  await page.evaluateOnNewDocument(
+    `web3.eth.getAccounts().then(lst => web3.eth.defaultAccount = lst[${ganacheAccountIndex}])`
+  );
   await page.goto("http://localhost:3000/", {waitUntil: "networkidle0"});
   page.on("pageerror", error => {
     throw error;

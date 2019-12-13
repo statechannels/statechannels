@@ -13,8 +13,8 @@ require("../../config/env");
   const rpsTabA = await browserA.newPage();
   const rpsTabB = await browserB.newPage();
 
-  await loadRPSApp(rpsTabA);
-  await loadRPSApp(rpsTabB);
+  await loadRPSApp(rpsTabA, 0);
+  await loadRPSApp(rpsTabB, 1);
 
   await (await rpsTabA.waitForXPath('//button[contains(., "Start Playing!")]')).click();
   await (await rpsTabB.waitForXPath('//button[contains(., "Start Playing!")]')).click();
