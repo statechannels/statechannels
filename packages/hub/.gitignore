@@ -13,3 +13,5 @@
 build
 lib
 
+manual-test/message-sequence.json
+

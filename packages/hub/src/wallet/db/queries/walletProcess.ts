@@ -1,6 +1,9 @@
 import {ConcludeInstigated} from '@statechannels/wallet/lib/src/communication';
 import {ProcessProtocol} from '../../../constants';
 import WalletProcess from '../../models/WalletProcess';
+import {logger} from '../../../logger';
+
+const log = logger();
 
 export const queries = {
   getProcess
@@ -35,7 +38,7 @@ export async function startConcludeProcess({
   const processId = getProcessId(action);
   const walletProcess = await getProcess(processId);
   if (walletProcess) {
-    console.warn(`Process ${processId} already running`);
+    log.warn(`Process ${processId} already running`);
     return walletProcess;
   }
 

@@ -11,13 +11,11 @@ async function setupGanacheAndContracts() {
   process.env = {...process.env, ...deployedArtifacts};
 }
 
-setupGanacheAndContracts()
-  .then(startServer)
-  .then(removeListeners => {
-    process.on('SIGINT', () => {
-      removeListeners();
-    });
-    process.on('SIGTERM', () => {
-      removeListeners();
-    });
-  });
+async function start() {
+  await setupGanacheAndContracts();
+  await startServer();
+}
+
+if (require.main === module) {
+  start();
+}

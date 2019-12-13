@@ -5,6 +5,9 @@ import ChannelHolding from '../models/channelHoldings';
 import {addHex} from '../utilities/hex-utils';
 import {AssetHolderWatcherEvent} from './asset-holder-watcher';
 import {Blockchain} from './blockchain';
+import {logger} from '../../logger';
+
+const log = logger();
 
 function updateHoldings(
   newHolding: ChannelHolding,
@@ -49,7 +52,7 @@ export async function onDepositEvent(assetHolderEvent: AssetHolderWatcherEvent) 
   const holdings = assetHolderEvent.destinationHoldings;
 
   if (!channel) {
-    console.log(`Allocator channel ${assetHolderEvent.channelId} not in database`);
+    log.error(`Allocator channel ${assetHolderEvent.channelId} not in database`);
     return;
   }
 
@@ -89,6 +92,6 @@ export async function onDepositEvent(assetHolderEvent: AssetHolderWatcherEvent) 
     const allocationNeededFromHub = outcomeForAssetHolder.allocation[hubParticipatIndex];
     await Blockchain.fund(assetHolderEvent.channelId, holdings, allocationNeededFromHub.amount);
   } else {
-    console.log('Channel is fully funded');
+    log.info('Channel is fully funded');
   }
 }
