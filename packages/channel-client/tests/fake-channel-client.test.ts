@@ -1,5 +1,11 @@
 import {FakeChannelClient} from '../src/fake-channel-client';
-import {PARTICIPANT_A, PARTICIPANT_B, APP_DEFINITION, APP_DATA} from './constants';
+import {
+  PARTICIPANT_A,
+  PARTICIPANT_B,
+  APP_DEFINITION,
+  APP_DATA,
+  UPDATED_APP_DATA
+} from './constants';
 import {ChannelResultBuilder, buildParticipant, buildAllocation, setClientStates} from './utils';
 import {ChannelResult} from '../src';
 import {calculateChannelId} from '../src/utils';
@@ -34,11 +40,22 @@ describe('FakeChannelClient', () => {
       .setStatus('running')
       .setTurnNum('3')
       .build();
+
+    states[2] = ChannelResultBuilder.from(states[1])
+      .setAppData(UPDATED_APP_DATA)
+      .setTurnNum('4')
+      .build();
   });
 
   beforeEach(() => {
     clientA = new FakeChannelClient(participantA.participantId);
     clientB = new FakeChannelClient(participantB.participantId);
+
+    clientA.playerIndex = 0;
+    clientA.opponentAddress = participantB.participantId;
+
+    clientB.playerIndex = 1;
+    clientB.opponentAddress = participantA.participantId;
   });
 
   it('instantiates', () => {
@@ -60,5 +77,16 @@ describe('FakeChannelClient', () => {
     setClientStates([clientA, clientB], states[0]);
     const channelResult = await clientB.joinChannel(channelId);
     expect(states[1]).toEqual(channelResult);
+  });
+
+  it('updates a channel', async () => {
+    setClientStates([clientA, clientB], states[1]);
+    const channelResult = await clientA.updateChannel(
+      channelId,
+      participants,
+      allocations,
+      UPDATED_APP_DATA
+    );
+    expect(channelResult).toEqual(states[2]);
   });
 });

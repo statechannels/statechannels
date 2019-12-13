@@ -15,9 +15,9 @@ import {calculateChannelId} from './utils';
 
 export class FakeChannelClient implements ChannelClientInterface<ChannelResult> {
   playerIndex: 0 | 1;
+  opponentAddress?: string;
   protected events = new EventEmitter<EventsWithArgs>();
   protected latestState?: ChannelResult;
-  protected opponentAddress?: string;
 
   constructor(public readonly address: string) {
     this.playerIndex = 0;
@@ -84,7 +84,7 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
         );
       }
       nextState.turnNum = currentTurnNum.add(1).toString();
-      console.log(this.playerIndex + '  updated channel to turnNum:' + nextState.turnNum);
+      console.log(`Player ${this.playerIndex} updated channel to turnNum ${nextState.turnNum}`);
     }
 
     this.latestState = nextState;

@@ -68,6 +68,17 @@ export class ChannelResultBuilder {
       .setTurnNum(turnNum)
       .build();
   }
+
+  setAppData(appData: string): ChannelResultBuilder {
+    this.channelResult.appData = appData;
+    return this;
+  }
+
+  static setAppData(channelResult: ChannelResult, appData: string): ChannelResult {
+    return ChannelResultBuilder.from(channelResult)
+      .setAppData(appData)
+      .build();
+  }
 }
 
 export function buildParticipant(address: string): Participant {

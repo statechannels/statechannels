@@ -8,6 +8,9 @@ export function calculateChannelId(
   appDefinition: string,
   appData: string
 ): string {
+  // This `message` construction revolves around `hashMessage` taking in a
+  // string but since the concat of the arguments are unique to each channel
+  // the channel ID should be different as a result.
   let message = '';
   participants.forEach(p => (message += p.participantId));
   allocations.forEach((a: Allocation) => {
