@@ -73,6 +73,46 @@ export async function loadWallet(page: puppeteer.Page, messageListener: (message
   });
 }
 
+// TODO: Move to new repo?
+export async function loadRPSApp(page: puppeteer.Page, messageListener: (message) => void) {
+  const port = process.env.GANACHE_PORT ? Number.parseInt(process.env.GANACHE_PORT) : 8560;
+  // TODO: This is kinda ugly but it works
+  // We need to instantiate a web3 for the wallet so we import the web 3 script
+  // and then assign it on the window
+  const web3JsFile = fs.readFileSync(path.resolve(__dirname, "web3/web3.min.js"), "utf8");
+  await page.evaluateOnNewDocument(web3JsFile);
+  await page.evaluateOnNewDocument(`window.web3 = new Web3("http://localhost:${port}")`);
+  await page.evaluateOnNewDocument(`window.ethereum = window.web3.currentProvider`);
+  // MetaMask has a different API for accessing network ID than web3 library does
+  await page.evaluateOnNewDocument(
+    `window.web3.version = { getNetwork: window.web3.eth.net.getId }`
+  );
+  // MetaMask has an .enable() API to unlock it / access it from the app
+  await page.evaluateOnNewDocument(`window.ethereum.enable = () => new Promise(r => r())`);
+  await page.goto("http://localhost:3000/", {waitUntil: "networkidle0"});
+  page.on("pageerror", error => {
+    throw error;
+  });
+  page.on("console", msg => {
+    if (msg.type() === "error") {
+      throw new Error(`Error was logged into the console ${msg.text()}`);
+    }
+  });
+
+  // interceptMessage gets called in puppeteer's context
+  await page.exposeFunction("interceptMessage", message => {
+    messageListener(message);
+  });
+  await page.evaluate(() => {
+    // We override window.parent.postMessage with our interceptMesage
+    (window as any).parent = {
+      ...window.parent,
+      postMessage: (window as any).interceptMessage
+    };
+  });
+}
+//
+
 export async function setUpBrowser(headless: boolean): Promise<puppeteer.Browser> {
   const browser = await puppeteer.launch({
     headless,
