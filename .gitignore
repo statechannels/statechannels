@@ -50,7 +50,7 @@ junit.xml
 **/.etherlime-store/
 **/.outputParameter
 **/gas.json
-**/gas.txt
+**/gas.md
 
 
 ganache-deployments.json

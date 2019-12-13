@@ -199,28 +199,55 @@ export class GasReporter implements jest.Reporter {
       }
     }
 
-    console.log(this.objectToTable(gasConsumed).toString());
+    console.log(this.objectToEasyTable(gasConsumed, false).toString());
   }
 
-  objectToTable(gasConsumed: GasConsumed): easyTable {
+  objectToEasyTable(gasConsumed: GasConsumed, markdown: boolean): easyTable {
+    function addCell(table: easyTable, column: string, entry: string | number): void {
+      if (!markdown) {
+        table.cell(column, entry.toString());
+      } else {
+        table.cell(column + ' |', entry.toString() + ' |');
+      }
+    }
     const table = new easyTable();
+    if (markdown) {
+      addCell(table, 'Contract', 'Contract');
+      addCell(table, 'Deployment', 'Deployment');
+      addCell(table, 'Method', 'Method');
+      addCell(table, 'Calls', 'Calls');
+      addCell(table, 'Min', 'Min');
+      addCell(table, 'Avg', 'Avg');
+      addCell(table, 'Max', 'Max');
+      table.newRow();
+      addCell(table, 'Contract', '---');
+      addCell(table, 'Deployment', '---');
+      addCell(table, 'Method', '---');
+      addCell(table, 'Calls', '---');
+      addCell(table, 'Min', '---');
+      addCell(table, 'Avg', '---');
+      addCell(table, 'Max', '---');
+      table.newRow();
+    }
     Object.keys(gasConsumed).forEach(contract => {
       const contractStats = gasConsumed[contract];
-      table.cell('Contract', contract);
-      table.cell('Deployment', contractStats.deployment);
-      table.cell('Method', '*');
-      table.cell('Calls', '*');
-      table.cell('Min', '*');
-      table.cell('Avg', '*');
-      table.cell('Max', '*');
+      addCell(table, 'Contract', contract);
+      addCell(table, 'Deployment', contractStats.deployment);
+      addCell(table, 'Method', '*');
+      addCell(table, 'Calls', '*');
+      addCell(table, 'Min', '*');
+      addCell(table, 'Avg', '*');
+      addCell(table, 'Max', '*');
       table.newRow();
       Object.keys(contractStats.methods).forEach(method => {
-        table.cell('Method', method);
+        addCell(table, 'Contract', '');
+        addCell(table, 'Deployment', '');
+        addCell(table, 'Method', method);
         const methodStats = contractStats.methods[method];
-        table.cell('Calls', methodStats.calls);
-        table.cell('Min', methodStats.min);
-        table.cell('Avg', methodStats.avg);
-        table.cell('Max', methodStats.max);
+        addCell(table, 'Calls', methodStats.calls);
+        addCell(table, 'Min', methodStats.min);
+        addCell(table, 'Avg', methodStats.avg);
+        addCell(table, 'Max', methodStats.max);
         table.newRow();
       });
       table.newRow();
@@ -286,18 +313,20 @@ export class GasReporter implements jest.Reporter {
       console.log('Wrote json to gas.json');
     });
     await fs.appendFile(
-      './gas.txt',
-      '\n\n\ndate: ' +
+      './gas.md',
+      '\n\n\n# date: ' +
         Date.now() +
         '\nnetworkName: ' +
         this.provider.network.name +
         '\nrevision: ' +
         hash +
         '\n' +
-        this.objectToTable(gasConsumed).toString(),
+        this.objectToEasyTable(gasConsumed, true)
+          .print()
+          .toString(),
       err => {
         if (err) throw err;
-        console.log('Wrote table to gas.txt');
+        console.log('Wrote table to gas.md');
       }
     );
   }
