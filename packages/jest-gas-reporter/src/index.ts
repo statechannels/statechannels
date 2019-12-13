@@ -240,8 +240,8 @@ export class GasReporter implements jest.Reporter {
       addCell(table, 'Max', '*');
       table.newRow();
       Object.keys(contractStats.methods).forEach(method => {
-        addCell(table, 'Contract', '');
-        addCell(table, 'Deployment', '');
+        addCell(table, 'Contract', '*');
+        addCell(table, 'Deployment', '*');
         addCell(table, 'Method', method);
         const methodStats = contractStats.methods[method];
         addCell(table, 'Calls', methodStats.calls);
@@ -250,7 +250,6 @@ export class GasReporter implements jest.Reporter {
         addCell(table, 'Max', methodStats.max);
         table.newRow();
       });
-      table.newRow();
     });
     return table;
   }
@@ -312,10 +311,11 @@ export class GasReporter implements jest.Reporter {
       if (err) throw err;
       console.log('Wrote json to gas.json');
     });
+    const date = new Date(Date.now());
     await fs.appendFile(
       './gas.md',
       '\n\n\n# date: ' +
-        Date.now() +
+        date.toUTCString() +
         '\nnetworkName: ' +
         this.provider.network.name +
         '\nrevision: ' +
