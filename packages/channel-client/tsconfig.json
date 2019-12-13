@@ -4,8 +4,7 @@
     "baseUrl": "src",
     "module": "commonjs",
     "outDir": "lib",
-    "target": "es2015",
-    "esModuleInterop": true
+    "target": "es2015"
   },
   "references": [{"path": "../channel-provider"}]
 }
