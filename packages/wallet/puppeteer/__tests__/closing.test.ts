@@ -77,7 +77,7 @@ describe("Closing a Channel", () => {
   it("sends a channel updated notification from player B's wallet", async () => {
     let channelUpdatedEvent;
     for await (const message of notificationQueueFromB) {
-      if (message.method === "ChannelUpdated" && message.params.status === "closing") {
+      if (message.method === "ChannelUpdated" && message.params.status === "closed") {
         channelUpdatedEvent = message;
         break;
       }

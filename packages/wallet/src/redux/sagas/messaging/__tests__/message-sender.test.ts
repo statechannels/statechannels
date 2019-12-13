@@ -233,11 +233,12 @@ describe("message sender", () => {
   });
 
   it("responds with a correct response message for WALLET.CLOSE_CHANNEL_RESPONSE", async () => {
-    const state = stateHelpers.appState({turnNum: 10, isFinal: true});
+    const state1 = stateHelpers.appState({turnNum: 10, isFinal: false});
+    const state2 = stateHelpers.appState({turnNum: 11, isFinal: true});
 
     const initialState = setChannel(
       EMPTY_SHARED_DATA,
-      channelFromStates([state], stateHelpers.asAddress, stateHelpers.asPrivateKey)
+      channelFromStates([state1, state2], stateHelpers.asAddress, stateHelpers.asPrivateKey)
     );
     const channelId = stateHelpers.channelId;
     const message = closeChannelResponse({
