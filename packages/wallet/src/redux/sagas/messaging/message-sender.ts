@@ -5,7 +5,7 @@ import {validateNotification, validateResponse} from "../../../json-rpc-validati
 import {createJsonRpcAllocationsFromOutcome} from "../../../utils/json-rpc-utils";
 import {unreachable} from "../../../utils/reducer-utils";
 import {messageSent} from "../../actions";
-import {ChannelState, getLastState} from "../../channel-store";
+import {ChannelState, getLastState, getPenultimateState} from "../../channel-store";
 import {getChannelHoldings, getLastSignedStateForChannel} from "../../selectors";
 import {getChannelStatus} from "../../state";
 import {OutgoingApiAction} from "./outgoing-api-actions";
@@ -125,6 +125,7 @@ function* validate(message: any, action: OutgoingApiAction) {
 function* getChannelInfo(channelId: string) {
   const channelStatus: ChannelState = yield select(getChannelStatus, channelId);
   const state = getLastState(channelStatus);
+  const previousState = getPenultimateState(channelStatus);
 
   const {participants} = channelStatus;
   const {appData, appDefinition, turnNum} = state;
@@ -135,7 +136,7 @@ function* getChannelInfo(channelId: string) {
   if (!bigNumberify(channelHoldings).isZero()) {
     funding = [{token: "0x0", amount: channelHoldings}];
   }
-  const status = getChannelInfoStatus(state);
+  const status = getChannelInfoStatus(state, previousState);
 
   return {
     participants,
@@ -149,12 +150,19 @@ function* getChannelInfo(channelId: string) {
   };
 }
 
-function getChannelInfoStatus(state: State): "proposed" | "opening" | "running" | "closing" {
-  if (state.isFinal) {
-    return "closing";
-  } else if (state.turnNum === 0) {
+function getChannelInfoStatus(
+  currentState: State,
+  previousState: State
+): "proposed" | "opening" | "running" | "closing" | "closed" {
+  if (currentState.isFinal) {
+    if (previousState.isFinal) {
+      return "closed";
+    } else {
+      return "closing";
+    }
+  } else if (currentState.turnNum === 0) {
     return "proposed";
-  } else if (state.turnNum < state.channel.participants.length - 1) {
+  } else if (currentState.turnNum < currentState.channel.participants.length - 1) {
     return "opening";
   } else {
     return "running";
