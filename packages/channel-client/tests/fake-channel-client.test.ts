@@ -45,8 +45,8 @@ describe('FakeChannelClient', () => {
   });
 
   beforeEach(() => {
-    clientA = new FakeChannelClient();
-    clientB = new FakeChannelClient();
+    clientA = new FakeChannelClient(participantA.participantId);
+    clientB = new FakeChannelClient(participantB.participantId);
   });
 
   it('instantiates', () => {

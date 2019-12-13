@@ -19,12 +19,10 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
   playerIndex: 0 | 1;
   protected events = new EventEmitter<EventsWithArgs>();
   protected latestState?: ChannelResult;
-  protected address: string;
   protected opponentAddress?: string;
 
-  constructor() {
+  constructor(public readonly address: string) {
     this.playerIndex = 0;
-    this.address = Wallet.createRandom().address;
   }
 
   setState(state: ChannelResult): void {
