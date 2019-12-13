@@ -10,6 +10,10 @@ import {ChannelResultBuilder, buildParticipant, buildAllocation, setClientStates
 import {ChannelResult} from '../src';
 import {calculateChannelId} from '../src/utils';
 
+import log = require('loglevel');
+
+log.setDefaultLevel(log.levels.SILENT);
+
 interface StateMap {
   [channelStatus: string]: ChannelResult;
 }
