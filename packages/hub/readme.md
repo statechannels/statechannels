@@ -37,15 +37,18 @@ $ yarn hub:watch (will rebuild app on file change)
 
 ```
 
-### Interacting with the hub from a browser
+### Establishing a virtual channel between clients through the hub
 
-To play against the hub from the browser client, the hub and the browser need to:
+**NOTE**: Running this package makes a connection to a shared external Firebase database. So, to avoid colliding with other developers also running this package, set the environment variable `HUB_ADDRESS` to one that is likely not being used by any other developer for local development purposes.
 
-- Share the state-channel address of the hub. A good way to do so is to create a `.env.development.local` in the monorepo root with HUB_ADDRESS and HUB_PRIVATE_KEY defined.
-- Point to the same local Ganache server. Configure your `.env.*.local` files accordingly.
-- Point to the same contract addresses on Ganache.
+To connect to the `hub` from the browser `wallet`, the `hub` and the browser `wallet` need to:
 
-You will also need to make sure that the hub's address has funds. You can find the hub address in [constants.ts](https://github.com/statechannels/monorepo/blob/master/packages/hub/src/constants.ts)
+- Share the state-channel address of the hub. A good way to do so is to create a `.env.development.local` in the monorepo root with `HUB_ADDRESS` and `HUB_PRIVATE_KEY` defined.
+- Point to the same local Ganache server. Configure your `.env` files accordingly. This should work without any modifications.
+- Point to the same shared local Ganache server. This should work without any modifications. To see which ports are being used by the `hub` and `wallet`, and to verify they are the same, you can reference the `GANACHE_PORT` environment variable which by default is set in `.env` of each package.
+- Point to the same contract addresses on Ganache. This will be the case if the hub and the client wallet point to the same Ganache server.
+
+You will also need to make sure that the hub's blockchain address has funds. The default hub blockchain address `HUB_SIGNER_ADDRESS` is in [constants.ts](https://github.com/statechannels/monorepo/blob/master/packages/hub/src/constants.ts). This address will have funds by default. Ganache is started with [these funded private keys](https://github.com/statechannels/monorepo/blob/hub-address/packages/devtools/src/constants.ts). Consequently, feel free to substitute any of these address/private key pairs for `HUB_SIGNER_ADDRESS` and `HUB_SIGNER_PRIVATE_KEY`.
 
 ## Testing
 

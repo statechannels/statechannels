@@ -1,4 +1,4 @@
 'use strict';
 
 const {configureEnvVariables} = require('@statechannels/devtools');
-configureEnvVariables();
+configureEnvVariables(true);
