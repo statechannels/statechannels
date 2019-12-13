@@ -45,7 +45,7 @@ describe('FakeChannelClient', () => {
       .setTurnNum('3')
       .build();
 
-    states['updated'] = ChannelResultBuilder.from(states['running'])
+    states['updated_app_data'] = ChannelResultBuilder.from(states['running'])
       .setAppData(UPDATED_APP_DATA)
       .setTurnNum('4')
       .build();
@@ -97,7 +97,7 @@ describe('FakeChannelClient', () => {
         allocations,
         UPDATED_APP_DATA
       );
-      expect(channelResult).toEqual(states['updated']);
+      expect(channelResult).toEqual(states['updated_app_data']);
     });
 
     it('the player whose turn it is not cannot update the channel', async () => {
