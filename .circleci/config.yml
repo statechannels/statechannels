@@ -12,7 +12,7 @@ defaults: &defaults
       environment:
         POSTGRES_USER: root
         POSTGRES_DB: hub_wallet_test
-        POSTGRES_PASSWORD: ''
+        POSTGRES_PASSWORD: ""
         NODE_ENV: test
 
 save_dep: &save_dep
@@ -28,7 +28,7 @@ restore_dep: &restore_dep
 
 commands:
   log_stats:
-    description: 'Log stats '
+    description: "Log stats "
     parameters:
       file:
         type: string
@@ -38,7 +38,7 @@ commands:
           command: bash bin/log_memory.sh <<parameters.file>>
           background: true
   upload_logs:
-    description: 'Upload logs '
+    description: "Upload logs "
     parameters:
       file:
         type: string
@@ -48,14 +48,27 @@ commands:
           path: /home/circleci/<< parameters.file >>.txt
           destination: << parameters.file >>
 
+  upload_gas_report:
+    description: "Upload gas report "
+    parameters:
+      package:
+        type: string
+    steps:
+      - store_artifacts:
+          path: /home/circleci/packages/<< parameters.package >>./gas.json
+          destination: << parameters.package >>-gas.json
+      - store_artifacts:
+          path: /home/circleci/packages/<< parameters.package >>./gas.md
+          destination: << parameters.package >>-gas.md
+
   notify_slack:
-    description: 'Notify slack '
+    description: "Notify slack "
     steps:
       - slack/status:
-          failure_message: 'A $CIRCLE_JOB job has failed on master!'
+          failure_message: "A $CIRCLE_JOB job has failed on master!"
           fail_only: true
-          mentions: 'SRHGGRGS0' # Group ID for ActiveDevs
-          only_for_branches: 'master'
+          mentions: "SRHGGRGS0" # Group ID for ActiveDevs
+          only_for_branches: "master"
 
 jobs:
   prepare:
@@ -105,14 +118,10 @@ jobs:
       - upload_logs:
           file: test-stats
       - notify_slack
-      - store_artifacts:
-          path: /home/circleci/project/packages/rps/gas.json
-      - store_artifacts:
-          path: /home/circleci/project/packages/rps/gas.txt
-      - store_artifacts:
-          path: /home/circleci/project/packages/nitro-protocol/gas.json
-      - store_artifacts:
-          path: /home/circleci/project/packages/nitro-protocol/gas.txt
+      - upload_gas_report:
+          package: rps
+      - upload_gas_report:
+          package: nitro-protocol
 
   integration-test:
     <<: *defaults
