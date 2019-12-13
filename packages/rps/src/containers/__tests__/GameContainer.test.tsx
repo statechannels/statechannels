@@ -23,6 +23,11 @@ describe('GameContainer', () => {
         error: null,
         success: true,
       },
+      wallet: {
+        loading: false,
+        error: null,
+        success: true,
+      },
       openGames: [],
       overlay: {
         rulesVisible: false,

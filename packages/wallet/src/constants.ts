@@ -1,3 +1,4 @@
+import {FundingStrategy} from "./communication";
 import {
   getAdjudicatorContractAddress,
   getConsensusContractAddress,
@@ -18,3 +19,6 @@ export const USE_STORAGE = process.env.USE_STORAGE === "TRUE";
 // TODO: Move top ENV variable
 export const HUB_ADDRESS = "0x100063c326b27f78b2cBb7cd036B8ddE4d4FCa7C";
 export const CHALLENGE_DURATION = 0x12c; // 5 minutes
+
+export const FUNDING_STRATEGY: FundingStrategy =
+  process.env.USE_VIRTUAL_FUNDING === "TRUE" ? "VirtualFundingStrategy" : "IndirectFundingStrategy";

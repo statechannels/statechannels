@@ -3,7 +3,8 @@ import {
   RelayActionWithMessage,
   SignedStatesReceived,
   ChannelOpen,
-  getProcessId
+  getProcessId,
+  isChannelOpenAction
 } from '../../communication';
 import {HUB_ADDRESS, unreachable} from '../../constants';
 import {startFundingProcess} from '../../wallet/db/queries/walletProcess';
@@ -11,14 +12,22 @@ import * as ongoing from './handle-ongoing-process-action';
 import {signState} from '@statechannels/nitro-protocol/lib/src/signatures';
 
 export async function handleNewProcessAction(
-  action: ChannelOpen
+  action: ChannelOpen | SignedStatesReceived
 ): Promise<RelayActionWithMessage[]> {
   return handleOpenChannelReceived(action);
 }
 
-async function handleOpenChannelReceived(action: ChannelOpen): Promise<RelayActionWithMessage[]> {
+async function handleOpenChannelReceived(
+  action: ChannelOpen | SignedStatesReceived
+): Promise<RelayActionWithMessage[]> {
   const processId = getProcessId(action);
-  const {signedState} = action;
+  let signedState;
+  if (isChannelOpenAction(action)) {
+    signedState = action.signedState;
+  } else {
+    const {signedStates} = action;
+    signedState = signedStates[0];
+  }
   const {participants} = signedState.state.channel;
   const ourIndex = participants.indexOf(HUB_ADDRESS);
   const theirAddress = participants[(ourIndex + 1) % participants.length];

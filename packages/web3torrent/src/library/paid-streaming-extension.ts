@@ -46,7 +46,6 @@ export abstract class PaidStreamingExtension implements Extension {
     this.messageBus.once(event, callback);
   }
 
-  // tslint:disable-next-line: no-empty
   onHandshake(/* infoHash, peerId, extensions */) {}
 
   onExtendedHandshake(handshake: ExtendedHandshake) {
@@ -110,13 +109,11 @@ export abstract class PaidStreamingExtension implements Extension {
   }
 
   protected interceptRequests() {
-    // tslint:disable-next-line: no-string-literal
     const undecoratedOnRequestFunction = this.wire._onRequest;
     const extension = this;
     const {messageBus} = extension;
     const wire = this.wire as PaidStreamingWire;
 
-    // tslint:disable-next-line: only-arrow-functions no-string-literal
     this.wire._onRequest = function(index: number, offset: number, length: number) {
       log(`!> Incoming request for piece - index ${arguments[0]}`);
 

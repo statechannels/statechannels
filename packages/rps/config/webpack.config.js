@@ -135,6 +135,12 @@ module.exports = function(webpackEnv) {
       // require.resolve('webpack-dev-server/client') + '?/',
       // require.resolve('webpack/hot/dev-server'),
       isEnvDevelopment && require.resolve('react-dev-utils/webpackHotDevClient'),
+
+      // Adding the window.channelProvider, to mimic MetaMask
+      // This must occur before paths.appIndexJs otherwise the app might begin
+      // running without window.channelProvider being injected
+      require.resolve('@statechannels/channel-provider'),
+
       // Finally, this is your app's code:
       paths.appIndexJs,
       // We include the app code last so that if there is a runtime error during

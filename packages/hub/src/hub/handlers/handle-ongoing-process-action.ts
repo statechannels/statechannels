@@ -41,9 +41,9 @@ async function handleStrategyProposed(action: StrategyProposed) {
   const {theirAddress} = process;
   return [
     relayActionWithMessage({
-      toParticipantId: theirAddress,
-      fromParticipantId: HUB_ADDRESS,
-      actionToRelay: strategyApproved({processId, strategy})
+      recipient: theirAddress,
+      sender: HUB_ADDRESS,
+      data: strategyApproved({processId, strategy})
     })
   ];
 }
@@ -60,9 +60,9 @@ async function handleChannelOpen(action: ChannelOpen) {
     .filter((_, idx) => idx !== ourIndex)
     .map(p =>
       relayActionWithMessage({
-        toParticipantId: p,
-        fromParticipantId: HUB_ADDRESS,
-        actionToRelay: channelJoined({
+        recipient: p,
+        sender: HUB_ADDRESS,
+        data: channelJoined({
           signedState: {
             state,
             signature
@@ -98,9 +98,9 @@ async function handleSignedStatesReceived(action: SignedStatesReceived) {
     .filter((_, idx) => idx !== ourIndex)
     .map(p =>
       relayActionWithMessage({
-        toParticipantId: p,
-        fromParticipantId: HUB_ADDRESS,
-        actionToRelay: signedStatesReceived({
+        recipient: p,
+        sender: HUB_ADDRESS,
+        data: signedStatesReceived({
           processId,
           signedStates: [
             ...action.signedStates,
@@ -133,8 +133,7 @@ export const signedStatesReceived = (p: {
 });
 
 export const relayActionWithMessage: ActionConstructor<RelayActionWithMessage> = p => ({
-  ...p,
-  type: 'WALLET.RELAY_ACTION_WITH_MESSAGE'
+  ...p
 });
 
 export const strategyApproved: ActionConstructor<StrategyApproved> = p => ({
