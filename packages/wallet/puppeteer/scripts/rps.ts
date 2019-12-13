@@ -16,19 +16,19 @@ require("../../config/env");
   await loadRPSApp(rpsTabA);
   await loadRPSApp(rpsTabB);
 
-  await (await rpsTabA.waitFor(".homePage-loginButton")).click();
-  await (await rpsTabB.waitFor(".homePage-loginButton")).click();
+  await (await rpsTabA.waitForXPath('//button[contains(., "Start Playing!")]')).click();
+  await (await rpsTabB.waitForXPath('//button[contains(., "Start Playing!")]')).click();
 
   await (await rpsTabA.waitFor("#name")).type("playerA");
-  await rpsTabA.click(".form-profile button");
+  (await rpsTabA.waitForXPath('//button[contains(., "Submit")]')).click();
 
   await (await rpsTabB.waitFor("#name")).type("playerB");
-  await rpsTabB.click(".form-profile button");
+  (await rpsTabB.waitForXPath('//button[contains(., "Submit")]')).click();
 
-  await (await rpsTabA.waitFor(".lobby-new-game")).click();
-  await (await rpsTabA.waitFor(".modal-content button")).click();
+  await (await rpsTabA.waitForXPath('//button[contains(., "Create a game")]')).click();
+  await (await rpsTabA.waitForXPath('//button[contains(., "Create Game")]')).click();
 
-  await (await rpsTabB.waitFor(".ogc-join")).click();
+  await (await rpsTabB.waitForXPath('//button[contains(., "Join")]')).click();
 
   const walletIFrameA = rpsTabA.frames()[1];
   const walletIFrameB = rpsTabB.frames()[1];
