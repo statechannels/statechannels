@@ -109,10 +109,15 @@ describe('FakeChannelClient', () => {
   });
 
   describe('closes a channel', () => {
-    it('can make a valid close channel call', async () => {
+    it('player with valid turn can make a valid close channel call', async () => {
       setClientStates([clientA, clientB], states['running']);
       const channelResult = await clientA.closeChannel(channelId);
       expect(channelResult).toEqual(states['closing']);
+    });
+
+    it('player with invalid turn cannot make a valid close channel call', async () => {
+      setClientStates([clientA, clientB], states['running']);
+      await expect(clientB.closeChannel(channelId)).rejects.toBeDefined();
     });
   });
 });
