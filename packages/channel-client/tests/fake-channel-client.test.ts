@@ -1,6 +1,6 @@
 import {FakeChannelClient, CHANNEL_ID} from '../src/fake-channel-client';
 import {PARTICIPANT_A, PARTICIPANT_B, APP_DEFINITION, APP_DATA} from './constants';
-import {ChannelResultBuilder, buildParticipant, buildAllocation} from './utils';
+import {ChannelResultBuilder, buildParticipant, buildAllocation, setClientStates} from './utils';
 import {ChannelResult} from '../src';
 
 interface StateMap {
@@ -14,6 +14,8 @@ describe('FakeChannelClient', () => {
   const states: StateMap = {};
   const participants = [participantA, participantB];
   const allocations = [buildAllocation(PARTICIPANT_A, '5'), buildAllocation(PARTICIPANT_B, '5')];
+
+  let clientA: FakeChannelClient, clientB: FakeChannelClient;
 
   beforeAll(() => {
     states[0] = new ChannelResultBuilder(
@@ -35,21 +37,36 @@ describe('FakeChannelClient', () => {
       .setStatus('funding')
       .setTurnNum('2')
       .build();
+
+    states[3] = ChannelResultBuilder.from(states[1])
+      .setStatus('running')
+      .setTurnNum('3')
+      .build();
+  });
+
+  beforeEach(() => {
+    clientA = new FakeChannelClient();
+    clientB = new FakeChannelClient();
   });
 
   it('instantiates', () => {
-    const client = new FakeChannelClient();
-    expect(client).toBeDefined();
+    expect(clientA).toBeDefined();
+    expect(clientB).toBeDefined();
   });
 
   it('creates a channel', async () => {
-    const client = new FakeChannelClient();
-    const channelResult = await client.createChannel(
+    const channelResult = await clientA.createChannel(
       participants,
       allocations,
       APP_DEFINITION,
       APP_DATA
     );
     expect(states[0]).toEqual(channelResult);
+  });
+
+  it('joins a channel', async () => {
+    setClientStates([clientA, clientB], states[0]);
+    const channelResult = await clientB.joinChannel(CHANNEL_ID);
+    expect(states[3]).toEqual(channelResult);
   });
 });

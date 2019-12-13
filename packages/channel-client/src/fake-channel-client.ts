@@ -27,6 +27,10 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
     this.address = Wallet.createRandom().address;
   }
 
+  setState(state: ChannelResult): void {
+    this.latestState = state;
+  }
+
   onMessageQueued(callback: (message: Message<ChannelResult>) => void): UnsubscribeFunction {
     this.events.on('MessageQueued', message => {
       callback(message);
@@ -55,7 +59,7 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
     appData: string
   ): Promise<ChannelResult> {
     this.playerIndex = 0;
-    this.latestState = {
+    const channel: ChannelResult = {
       participants,
       allocations,
       appDefinition,
@@ -64,10 +68,12 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
       turnNum: bigNumberify(0).toString(),
       status: 'proposed'
     };
-    this.opponentAddress = this.latestState.participants[1].participantId;
-    this.notifyOpponent(this.latestState);
 
-    return this.latestState;
+    this.latestState = channel;
+    this.opponentAddress = channel.participants[1].participantId;
+    this.notifyOpponent(channel);
+
+    return channel;
   }
 
   async joinChannel(channelId: string): Promise<ChannelResult> {
@@ -75,7 +81,11 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
     const latestState = this.findChannel(channelId);
     // skip funding by setting the channel to 'running' the moment it is joined
     // [assuming we're working with 2-participant channels for the time being]
-    this.latestState = {...latestState, turnNum: bigNumberify(3).toString(), status: 'running'};
+    this.latestState = {
+      ...latestState,
+      turnNum: bigNumberify(3).toString(),
+      status: 'running'
+    };
     this.opponentAddress = this.latestState.participants[0].participantId;
     this.notifyOpponent(this.latestState);
 
