@@ -11,7 +11,7 @@ import {ChannelResult} from '../src';
 import {calculateChannelId} from '../src/utils';
 
 interface StateMap {
-  [stateNumber: number]: ChannelResult;
+  [channelStatus: string]: ChannelResult;
 }
 
 describe('FakeChannelClient', () => {
@@ -26,7 +26,7 @@ describe('FakeChannelClient', () => {
   let clientA: FakeChannelClient, clientB: FakeChannelClient;
 
   beforeAll(() => {
-    states[0] = new ChannelResultBuilder(
+    states['proposed'] = new ChannelResultBuilder(
       participants,
       allocations,
       APP_DEFINITION,
@@ -36,17 +36,17 @@ describe('FakeChannelClient', () => {
       'proposed'
     ).build();
 
-    states[1] = ChannelResultBuilder.from(states[0])
+    states['running'] = ChannelResultBuilder.from(states['proposed'])
       .setStatus('running')
       .setTurnNum('3')
       .build();
 
-    states[2] = ChannelResultBuilder.from(states[1])
+    states['updated'] = ChannelResultBuilder.from(states['running'])
       .setAppData(UPDATED_APP_DATA)
       .setTurnNum('4')
       .build();
 
-    states[3] = ChannelResultBuilder.from(states[1])
+    states['closing'] = ChannelResultBuilder.from(states['running'])
       .setStatus('closing')
       .setTurnNum('4')
       .build();
@@ -75,29 +75,29 @@ describe('FakeChannelClient', () => {
       APP_DEFINITION,
       APP_DATA
     );
-    expect(states[0]).toEqual(channelResult);
+    expect(states['proposed']).toEqual(channelResult);
   });
 
   it('joins a channel', async () => {
-    setClientStates([clientA, clientB], states[0]);
+    setClientStates([clientA, clientB], states['proposed']);
     const channelResult = await clientB.joinChannel(channelId);
-    expect(states[1]).toEqual(channelResult);
+    expect(states['running']).toEqual(channelResult);
   });
 
   describe('updates a channel', () => {
     it('the player whose turn it is can update the channel', async () => {
-      setClientStates([clientA, clientB], states[1]);
+      setClientStates([clientA, clientB], states['running']);
       const channelResult = await clientA.updateChannel(
         channelId,
         participants,
         allocations,
         UPDATED_APP_DATA
       );
-      expect(channelResult).toEqual(states[2]);
+      expect(channelResult).toEqual(states['updated']);
     });
 
     it('the player whose turn it is not cannot update the channel', async () => {
-      setClientStates([clientA, clientB], states[1]);
+      setClientStates([clientA, clientB], states['running']);
       await expect(
         clientB.updateChannel(channelId, participants, allocations, UPDATED_APP_DATA)
       ).rejects.toBeDefined();
@@ -106,9 +106,9 @@ describe('FakeChannelClient', () => {
 
   describe('closes a channel', () => {
     it('can make a valid close channel call', async () => {
-      setClientStates([clientA, clientB], states[1]);
+      setClientStates([clientA, clientB], states['running']);
       const channelResult = await clientA.closeChannel(channelId);
-      expect(channelResult).toEqual(states[3]);
+      expect(channelResult).toEqual(states['closing']);
     });
   });
 });
