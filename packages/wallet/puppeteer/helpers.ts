@@ -56,7 +56,9 @@ export async function loadWallet(page: puppeteer.Page, messageListener: (message
   });
   page.on("console", msg => {
     if (msg.type() === "error") {
-      throw new Error(`Error was logged into the console ${msg.text()}`);
+      throw new Error(`CONSOLE ERROR: ${msg.text()}`);
+    } else {
+      console.log(`CONSOLE LOG: ${msg.text()}`);
     }
   });
 
@@ -228,17 +230,19 @@ export async function sendUpdateState(
 }
 
 export async function pushMessage(page: puppeteer.Page, message: any) {
-  await page.evaluate(m => {
-    window.postMessage(
-      {
-        jsonrpc: "2.0",
-        method: "PushMessage",
-        id: 10,
-        params: m
-      },
-      "*"
-    );
-  }, message);
+  if (!page.isClosed()) {
+    await page.evaluate(m => {
+      window.postMessage(
+        {
+          jsonrpc: "2.0",
+          method: "PushMessage",
+          id: 10,
+          params: m
+        },
+        "*"
+      );
+    }, message);
+  }
 }
 
 export async function completeFunding(
@@ -266,6 +270,8 @@ export async function completeFunding(
   const createChannelPromise: Promise<any> = walletMessages.once(MessageType.PlayerAResult);
   await sendCreateChannel(walletA, playerAAddress, playerBAddress);
   const channelId = (await createChannelPromise).result.channelId;
+  // Wait for the channel updated event before we attempt to join
+  await walletMessages.once(MessageType.PlayerBNotification);
 
   const joinChannelPromise: Promise<any> = walletMessages.once(MessageType.PlayerBResult);
   await sendJoinChannel(walletB, channelId);
