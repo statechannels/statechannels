@@ -1,7 +1,8 @@
-import {FakeChannelClient, CHANNEL_ID} from '../src/fake-channel-client';
+import {FakeChannelClient} from '../src/fake-channel-client';
 import {PARTICIPANT_A, PARTICIPANT_B, APP_DEFINITION, APP_DATA} from './constants';
 import {ChannelResultBuilder, buildParticipant, buildAllocation, setClientStates} from './utils';
 import {ChannelResult} from '../src';
+import {calculateChannelId} from '../src/utils';
 
 interface StateMap {
   [stateNumber: number]: ChannelResult;
@@ -14,6 +15,7 @@ describe('FakeChannelClient', () => {
   const states: StateMap = {};
   const participants = [participantA, participantB];
   const allocations = [buildAllocation(PARTICIPANT_A, '5'), buildAllocation(PARTICIPANT_B, '5')];
+  const channelId = calculateChannelId(participants, allocations, APP_DEFINITION, APP_DATA);
 
   let clientA: FakeChannelClient, clientB: FakeChannelClient;
 
@@ -23,22 +25,12 @@ describe('FakeChannelClient', () => {
       allocations,
       APP_DEFINITION,
       APP_DATA,
-      CHANNEL_ID,
+      channelId,
       '0',
       'proposed'
     ).build();
 
     states[1] = ChannelResultBuilder.from(states[0])
-      .setStatus('opening')
-      .setTurnNum('1')
-      .build();
-
-    states[2] = ChannelResultBuilder.from(states[1])
-      .setStatus('funding')
-      .setTurnNum('2')
-      .build();
-
-    states[3] = ChannelResultBuilder.from(states[1])
       .setStatus('running')
       .setTurnNum('3')
       .build();
@@ -66,7 +58,7 @@ describe('FakeChannelClient', () => {
 
   it('joins a channel', async () => {
     setClientStates([clientA, clientB], states[0]);
-    const channelResult = await clientB.joinChannel(CHANNEL_ID);
-    expect(states[3]).toEqual(channelResult);
+    const channelResult = await clientB.joinChannel(channelId);
+    expect(states[1]).toEqual(channelResult);
   });
 });

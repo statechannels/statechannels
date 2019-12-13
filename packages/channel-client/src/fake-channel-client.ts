@@ -1,4 +1,3 @@
-import {Wallet} from 'ethers';
 import {bigNumberify} from 'ethers/utils';
 import EventEmitter = require('eventemitter3');
 
@@ -12,8 +11,7 @@ import {
   Allocation,
   PushMessageResult
 } from './types';
-
-export const CHANNEL_ID = '0x1234';
+import {calculateChannelId} from './utils';
 
 export class FakeChannelClient implements ChannelClientInterface<ChannelResult> {
   playerIndex: 0 | 1;
@@ -29,27 +27,6 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
     this.latestState = state;
   }
 
-  onMessageQueued(callback: (message: Message<ChannelResult>) => void): UnsubscribeFunction {
-    this.events.on('MessageQueued', message => {
-      callback(message);
-    });
-    return () => this.events.removeListener('MessageQueued', callback); // eslint-disable-line  @typescript-eslint/explicit-function-return-type
-  }
-
-  onChannelUpdated(callback: (result: ChannelResult) => void): UnsubscribeFunction {
-    this.events.on('ChannelUpdated', result => {
-      callback(result);
-    });
-    return () => this.events.removeListener('ChannelUpdated', callback); // eslint-disable-line  @typescript-eslint/explicit-function-return-type
-  }
-
-  onChannelProposed(callback: (result: ChannelResult) => void): UnsubscribeFunction {
-    this.events.on('ChannelProposed', result => {
-      callback(result);
-    });
-    return () => this.events.removeListener('ChannelProposed', callback); // eslint-disable-line  @typescript-eslint/explicit-function-return-type
-  }
-
   async createChannel(
     participants: Participant[],
     allocations: Allocation[],
@@ -62,7 +39,7 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
       allocations,
       appDefinition,
       appData,
-      channelId: CHANNEL_ID,
+      channelId: calculateChannelId(participants, allocations, appDefinition, appData),
       turnNum: bigNumberify(0).toString(),
       status: 'proposed'
     };
@@ -175,5 +152,26 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
       throw Error(`Channel does't exist with channelId '${channelId}'`);
     }
     return this.latestState;
+  }
+
+  onMessageQueued(callback: (message: Message<ChannelResult>) => void): UnsubscribeFunction {
+    this.events.on('MessageQueued', message => {
+      callback(message);
+    });
+    return () => this.events.removeListener('MessageQueued', callback); // eslint-disable-line  @typescript-eslint/explicit-function-return-type
+  }
+
+  onChannelUpdated(callback: (result: ChannelResult) => void): UnsubscribeFunction {
+    this.events.on('ChannelUpdated', result => {
+      callback(result);
+    });
+    return () => this.events.removeListener('ChannelUpdated', callback); // eslint-disable-line  @typescript-eslint/explicit-function-return-type
+  }
+
+  onChannelProposed(callback: (result: ChannelResult) => void): UnsubscribeFunction {
+    this.events.on('ChannelProposed', result => {
+      callback(result);
+    });
+    return () => this.events.removeListener('ChannelProposed', callback); // eslint-disable-line  @typescript-eslint/explicit-function-return-type
   }
 }
