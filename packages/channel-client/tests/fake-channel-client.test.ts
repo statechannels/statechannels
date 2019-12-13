@@ -45,6 +45,11 @@ describe('FakeChannelClient', () => {
       .setAppData(UPDATED_APP_DATA)
       .setTurnNum('4')
       .build();
+
+    states[3] = ChannelResultBuilder.from(states[1])
+      .setStatus('closing')
+      .setTurnNum('4')
+      .build();
   });
 
   beforeEach(() => {
@@ -96,6 +101,14 @@ describe('FakeChannelClient', () => {
       await expect(
         clientB.updateChannel(channelId, participants, allocations, UPDATED_APP_DATA)
       ).rejects.toBeDefined();
+    });
+  });
+
+  describe('closes a channel', () => {
+    it('can make a valid close channel call', async () => {
+      setClientStates([clientA, clientB], states[1]);
+      const channelResult = await clientA.closeChannel(channelId);
+      expect(channelResult).toEqual(states[3]);
     });
   });
 });

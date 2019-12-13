@@ -125,7 +125,7 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
     }
 
     const turnNum = currentTurnNum.add(1).toString();
-    console.log(this.playerIndex + '  updated channel to turnNum:' + turnNum);
+    console.log(`Player ${this.playerIndex} updated channel to turnNum ${turnNum}`);
 
     this.latestState = {...latestState, turnNum, status: 'closing'};
     this.notifyOpponent(this.latestState);
