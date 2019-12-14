@@ -1,10 +1,10 @@
 import {bigNumberify} from "ethers/utils";
 import jrs from "jsonrpc-lite";
-import {call, put, select} from "redux-saga/effects";
+import {call, select} from "redux-saga/effects";
 import {validateNotification, validateResponse} from "../../../json-rpc-validation/validator";
 import {createJsonRpcAllocationsFromOutcome} from "../../../utils/json-rpc-utils";
 import {unreachable} from "../../../utils/reducer-utils";
-import {messageSent} from "../../actions";
+
 import {ChannelState, getLastState, getPenultimateState} from "../../channel-store";
 import {getChannelHoldings, getLastSignedStateForChannel} from "../../selectors";
 import {getChannelStatus} from "../../state";
@@ -16,7 +16,6 @@ export function* messageSender(action: OutgoingApiAction) {
   if (message) {
     yield validate(message, action);
     yield call([window.parent, window.parent.postMessage], message, "*");
-    yield put(messageSent({}));
   }
 }
 
