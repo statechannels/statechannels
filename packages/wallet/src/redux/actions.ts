@@ -17,6 +17,7 @@ import {LedgerFundingAction} from "./protocols/ledger-funding";
 import {LOAD as LOAD_FROM_STORAGE} from "redux-storage";
 import {SignedState, State} from "@statechannels/nitro-protocol";
 import {BigNumber} from "ethers/utils";
+import {CloseLedgerChannelAction} from "./protocols/close-ledger-channel";
 export * from "./protocols/transaction-submission/actions";
 
 // -------
@@ -256,7 +257,8 @@ export type WalletAction =
   | RelayableAction
   | FundingStrategyNegotiationAction
   | FundingAction
-  | LedgerFundingAction;
+  | LedgerFundingAction
+  | CloseLedgerChannelAction;
 
 export {directFunding as funding, NewLedgerChannel, protocol, application, advanceChannel};
 

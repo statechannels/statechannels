@@ -3,14 +3,16 @@ import {take, call, apply} from 'redux-saga/effects';
 import {default as firebase, reduxSagaFirebase} from '../../gateways/firebase';
 import {RPSChannelClient} from '../../utils/rps-channel-client';
 import {Message} from '@statechannels/channel-client';
+import {buffers} from 'redux-saga';
 
 export function* firebaseInboxListener(client: RPSChannelClient) {
   const address: string = (yield call([client, 'getAddress'])).toLowerCase();
   // ^ ensure this matches the to in message-queued-listener.ts
   const channel = yield call(
-    reduxSagaFirebase.database.channel,
-    `/messages/${address}`,
-    'child_added'
+    reduxSagaFirebase.database.channel as any,
+    `/messages/${address.toLowerCase()}`,
+    'child_added',
+    buffers.fixed(100)
   );
   const disconnect = firebase
     .database()

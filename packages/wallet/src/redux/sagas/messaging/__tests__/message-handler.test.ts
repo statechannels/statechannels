@@ -184,7 +184,7 @@ describe("message listener", () => {
         type: "WALLET.PUSH_MESSAGE_RESPONSE",
         id: 1
       });
-      
+
       expect(effects.fork[1].payload.args[0]).toMatchObject({
         type: "WALLET.CHANNEL_UPDATED_EVENT",
         channelId: expect.any(String)
@@ -521,6 +521,63 @@ describe("message listener", () => {
           channelId: unknownChannelId, // <----- important part of the test
           allocations: [],
           appData: "0x"
+        }
+      };
+
+      const {effects} = await expectSaga(messageHandler, requestMessage, "localhost")
+        .withState(initialState)
+        // Mock out the fork call so we don't actually try to post the message
+        .provide([[matchers.fork.fn(messageSender), 0]])
+        .run();
+
+      expect(effects.fork[0].payload.args[0]).toMatchObject({
+        type: "WALLET.UNKNOWN_CHANNEL_ID_ERROR",
+        id: 1,
+        channelId: unknownChannelId
+      });
+    });
+  });
+
+  describe("CloseChannel", () => {
+    it("handles an close channel request", async () => {
+      const previousGameState = appState({turnNum: 20});
+      const testChannel = channelFromStates([previousGameState], asAddress, asPrivateKey);
+
+      const requestMessage = {
+        jsonrpc: "2.0",
+        method: "CloseChannel",
+        id: 1,
+        params: {
+          channelId: testChannel.channelId
+        }
+      };
+
+      const {effects} = await expectSaga(messageHandler, requestMessage, "localhost")
+        .withState({...initialState, channelStore: setChannel({}, testChannel)})
+        // Mock out the fork call so we don't actually try to post the message
+        .provide([[matchers.fork.fn(messageSender), 0]])
+        .run();
+
+      expect(effects.put[0].payload.action).toMatchObject({
+        type: "WALLET.NEW_PROCESS.CONCLUDE_REQUESTED"
+      });
+
+      expect(effects.fork[0].payload.args[0]).toMatchObject({
+        type: "WALLET.CLOSE_CHANNEL_RESPONSE",
+        id: 1,
+        channelId: stateHelpers.channelId
+      });
+    });
+
+    it("returns an error when the channelId is not known", async () => {
+      const unknownChannelId = "0xsomefakeid";
+
+      const requestMessage = {
+        jsonrpc: "2.0",
+        method: "CloseChannel",
+        id: 1,
+        params: {
+          channelId: unknownChannelId // <----- important part of the test
         }
       };
 

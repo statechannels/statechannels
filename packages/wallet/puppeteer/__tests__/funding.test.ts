@@ -44,6 +44,7 @@ describe("Funding", () => {
   });
 
   afterAll(async () => {
+    walletMessages.clearListeners();
     if (browserA) {
       await browserA.close();
     }

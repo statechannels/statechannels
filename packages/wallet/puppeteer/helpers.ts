@@ -106,7 +106,7 @@ export async function loadRPSApp(page: puppeteer.Page) {
 export async function setUpBrowser(headless: boolean): Promise<puppeteer.Browser> {
   const browser = await puppeteer.launch({
     headless,
-    devtools: headless,
+    devtools: !headless,
     // Needed to allow both windows to execute JS at the same time
     ignoreDefaultArgs: [
       "--disable-background-timer-throttling",
@@ -125,6 +125,22 @@ export async function sendJoinChannel(page: puppeteer.Page, channelId: string) {
         jsonrpc: "2.0",
         method: "JoinChannel",
         id: 4,
+        params: {
+          channelId: cId
+        }
+      },
+      "*"
+    );
+  }, channelId);
+}
+
+export async function sendCloseChannel(page: puppeteer.Page, channelId) {
+  await page.evaluate(cId => {
+    window.postMessage(
+      {
+        jsonrpc: "2.0",
+        method: "CloseChannel",
+        id: 99,
         params: {
           channelId: cId
         }

@@ -12,7 +12,7 @@ import {bigNumberify} from "ethers/utils";
 
 import {SignedState} from "@statechannels/nitro-protocol";
 import {getAllocationOutcome} from "../../utils/outcome-utils";
-import {apiNotImplemented} from "../sagas/messaging/outgoing-api-actions";
+import {apiNotImplemented, channelUpdatedEvent} from "../sagas/messaging/outgoing-api-actions";
 
 export function showWallet(sharedData: SharedData): SharedData {
   const newSharedData = {...sharedData};
@@ -59,7 +59,14 @@ export function sendOpponentConcluded(sharedData: SharedData): SharedData {
   });
   return newSharedData;
 }
-
+export function sendChannelUpdatedEvent(sharedData: SharedData, channelId: string): SharedData {
+  const newSharedData = {...sharedData};
+  newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
+    messageOutbox: channelUpdatedEvent({channelId})
+    // TODO could rename this helper function, as it covers both ways of finalizing a channel
+  });
+  return newSharedData;
+}
 export function sendStates(
   sharedData: SharedData,
   processId: string,

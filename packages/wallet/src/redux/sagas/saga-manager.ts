@@ -1,4 +1,4 @@
-import {actionChannel, cancel, fork, select, take} from "redux-saga/effects";
+import {actionChannel, cancel, fork, select, take, put} from "redux-saga/effects";
 
 import {adjudicatorWatcher} from "./adjudicator-watcher";
 import {challengeWatcher} from "./challenge-watcher";
@@ -14,7 +14,7 @@ import {displaySender} from "./messaging/display-sender";
 import {multipleActionDispatcher} from "./multiple-action-dispatcher";
 
 import {Web3Provider} from "ethers/providers";
-import {isLoadAction} from "../actions";
+import {isLoadAction, messageSent} from "../actions";
 import {adjudicatorStateUpdater} from "./adjudicator-state-updater";
 import {assetHolderStateUpdater} from "./asset-holder-state-updater";
 import {assetHoldersWatcher} from "./asset-holder-watcher";
@@ -102,6 +102,7 @@ export function* sagaManager(): IterableIterator<any> {
     if (outboxState.messageOutbox.length) {
       const messageToSend = outboxState.messageOutbox[0] as OutgoingApiAction;
       yield messageSender(messageToSend);
+      yield put(messageSent({}));
     }
     if (outboxState.displayOutbox.length) {
       const displayMessageToSend = outboxState.displayOutbox[0];

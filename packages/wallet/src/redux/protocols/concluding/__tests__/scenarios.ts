@@ -34,7 +34,8 @@ const waitForLedgerClosing = states.waitForLedgerClose({
 const decideClosing = states.decideClosing({
   processId,
   channelId,
-  ledgerId
+  ledgerId,
+  ledgerClosing: ledgerCloseScenarios.preSuccess.state
 });
 
 const waitForDefund = states.waitForDefund({

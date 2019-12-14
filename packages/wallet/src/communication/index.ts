@@ -26,7 +26,8 @@ export const enum EmbeddedProtocol {
   VirtualFunding = "VirtualFunding",
   FundingStrategyNegotiation = "FundingStrategyNegotiation",
   VirtualDefunding = "VirtualDefunding",
-  Defunding = "Defunding"
+  Defunding = "Defunding",
+  CloseLedgerChannel = "CloseLedgerChannel"
 }
 
 export type ProtocolLocator = EmbeddedProtocol[];
