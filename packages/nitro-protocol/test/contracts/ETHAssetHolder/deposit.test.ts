@@ -1,10 +1,10 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet} from 'ethers';
-import {bigNumberify, parseUnits} from 'ethers/utils';
+import {bigNumberify, parseUnits, BigNumber} from 'ethers/utils';
 // @ts-ignore
 import ETHAssetHolderArtifact from '../../../build/contracts/TestEthAssetHolder.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {getTestProvider, setupContracts} from '../../test-helpers';
+import {getTestProvider, setupContracts, writeGasConsumption} from '../../test-helpers';
 
 const provider = getTestProvider();
 let ETHAssetHolder: Contract;
@@ -40,7 +40,16 @@ describe('deposit', () => {
     ${description3} | ${3}         | ${'3'} | ${'2'}       | ${'2'} | ${'2'}   | ${'4'}          | ${undefined}
   `(
     '$description',
-    async ({channelNonce, held, expectedHeld, amount, msgValue, reasonString, heldAfterString}) => {
+    async ({
+      description,
+      channelNonce,
+      held,
+      expectedHeld,
+      amount,
+      msgValue,
+      reasonString,
+      heldAfterString,
+    }) => {
       held = parseUnits(held, 'wei');
       expectedHeld = parseUnits(expectedHeld, 'wei');
       amount = parseUnits(amount, 'wei');
@@ -72,7 +81,8 @@ describe('deposit', () => {
       if (reasonString) {
         await expectRevert(() => tx, reasonString);
       } else {
-        const {events} = await (await tx).wait();
+        const {gasUsed, events} = await (await tx).wait();
+        await writeGasConsumption('./deposit.gas.md', description, gasUsed);
         const event = getDepositedEvent(events);
         expect(event).toMatchObject({
           destination,

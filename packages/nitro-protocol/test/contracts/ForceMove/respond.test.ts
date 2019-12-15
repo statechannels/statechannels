@@ -19,6 +19,7 @@ import {
   getTestProvider,
   setupContracts,
   sign,
+  writeGasConsumption,
 } from '../../test-helpers';
 
 const provider = getTestProvider();
@@ -71,7 +72,16 @@ describe('respond', () => {
     ${description5} | ${future}   | ${false}  | ${[false, false]} | ${[0, 0]} | ${wallets[2]} | ${wallets[0]}     | ${'CountingApp: Counter must be incremented'}
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
-    async ({isFinalAB, appDatas, challenger, responder, finalizesAt, slotEmpty, reasonString}) => {
+    async ({
+      description,
+      isFinalAB,
+      appDatas,
+      challenger,
+      responder,
+      finalizesAt,
+      slotEmpty,
+      reasonString,
+    }) => {
       const channel: Channel = {chainId, channelNonce: hexlify(channelNonce), participants};
       const channelId = getChannelId(channel);
 
@@ -121,6 +131,7 @@ describe('respond', () => {
         await expectRevert(() => tx, reasonString);
       } else {
         const receipt = await (await tx).wait();
+        await writeGasConsumption('./respond.gas.md', description, receipt.gasUsed);
         const event = receipt.events.pop();
 
         expect(event.args).toMatchObject({
