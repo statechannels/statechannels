@@ -26,11 +26,17 @@ legacy["challengePath"] = legacy["forceMove"] + \
     legacy["respond"]
 
 optimized = {
+    "deployNitroAdjudicator": 3155589,
+    "deployAssetHolder": 1831942,
     "deposit": 48776,
     "concludePushOutcomeAndTransferAll": 107812,
     "forceMove": 134004,
     "respond": 86357,
 }
+
+optimized["deployment"] = optimized["deployNitroAdjudicator"] + \
+    optimized["deployAssetHolder"]
+
 optimized["happyPath"] = optimized["deposit"] + \
     optimized["concludePushOutcomeAndTransferAll"]
 
