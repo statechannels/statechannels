@@ -2,7 +2,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.ticker import EngFormatter
-
+import os
+dir_path = os.path.dirname(os.path.realpath(__file__))
 
 legacy = {
     "deposit": 46750,
@@ -66,7 +67,7 @@ autolabel(rects1)
 autolabel(rects2)
 
 fig.tight_layout()
-plt.savefig("gas-savings.svg")
-plt.savefig("gas-savings.png")
+plt.savefig(dir_path + "/gas-savings.svg")
+plt.savefig(dir_path + "/gas-savings.png")
 
 plt.show()
