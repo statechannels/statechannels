@@ -5,6 +5,14 @@ from matplotlib.ticker import EngFormatter
 import os
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
+
+usd_per_eth = 142
+eth_per_gwei = 1e-9
+gwei_per_gas = 2
+
+usd_per_1M_gas = usd_per_eth * eth_per_gwei * gwei_per_gas * 1e6
+print(usd_per_1M_gas)
+
 legacy = {
     "deposit": 46750,
     "concludeAndWithdraw": 644147,
