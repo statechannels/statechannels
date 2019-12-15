@@ -22,6 +22,12 @@ The only remaining puzzle is to get around the infeasibility of inverting the ha
 
 The tradeoffs are some extra information in the calldata, and the burden of tracking the data offchain in your client. But this is very much in the spirit of Layer 2 and doing as much of the computation off chain as possible. Having every node of the ethereum main chain store all of this data is wasteful and costly: only interested parties need to store it.
 
+The gas costs do still depend on the situation: how many states are needed to launch this challenge? How many participants are there? Does this transition confirm to the application specific rules? To get an idea of the overall savings, we concentrate on three main metrics. These are: (1) Deployment of the contract(s) (only needs to be done once, and most likely not by users); (2) Happy Path (depositing and then concluding and withdrawing funds) and (3) Challenge Path (raising a challenge and then responding to a challenge). The figure reveals the savings that we have made:
+
+![Gas Savings](./gas-savings.png)
+
+We also support ERC20 tokens. We do not support repeated entries in allocations.
+
 Future tweaks
 
 - fold holdings information into the same storage slot
@@ -29,5 +35,3 @@ Future tweaks
 More info
 
 - https://nitro-protocol.netlify.com/
-
-![Gas Savings](./gas-savings.png)
