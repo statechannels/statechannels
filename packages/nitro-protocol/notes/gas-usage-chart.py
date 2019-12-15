@@ -14,11 +14,15 @@ usd_per_1M_gas = usd_per_eth * eth_per_gwei * gwei_per_gas * 1e6
 print(usd_per_1M_gas)
 
 legacy = {
+    "deployNitroAdjudicator": 6553512,  # TEST contract
     "deposit": 46750,
     "concludeAndWithdraw": 644147,
     "forceMove": 677845,
     "respond": 336337,
 }
+
+legacy["deployment"] = legacy["deployNitroAdjudicator"]
+
 legacy["happyPath"] = legacy["deposit"] + \
     legacy["concludeAndWithdraw"]
 
@@ -43,9 +47,10 @@ optimized["happyPath"] = optimized["deposit"] + \
 optimized["challengePath"] = optimized["forceMove"] + \
     optimized["respond"]
 
-labels = ['Happy Path', 'Challenge Path']
-legacy = [legacy["happyPath"], legacy["challengePath"]]
-optimized = [optimized["happyPath"], optimized["challengePath"]]
+labels = ['Deployment', 'Happy Path', 'Challenge Path']
+legacy = [legacy["deployment"], legacy["happyPath"], legacy["challengePath"]]
+optimized = [optimized["deployment"],
+             optimized["happyPath"], optimized["challengePath"]]
 
 x = np.arange(len(labels))  # the label locations
 width = 0.35  # the width of the bars
