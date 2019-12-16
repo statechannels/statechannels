@@ -119,8 +119,8 @@ const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
     bUserId: participants[1].participantId,
     aAddress: participants[0].destination,
     bAddress: participants[1].destination,
-    aBal: allocations[0].allocationItems[0].amount.toString(),
-    bBal: allocations[0].allocationItems[1].amount.toString(),
+    aBal: bigNumberify(allocations[0].allocationItems[0].amount).toString(),
+    bBal: bigNumberify(allocations[0].allocationItems[1].amount).toString(),
   };
 };
 
