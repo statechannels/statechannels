@@ -1,10 +1,8 @@
 import React from 'react';
 import {Commitment} from 'fmg-core';
 import {Button} from 'reactstrap';
-
-import * as web3Utils from 'web3-utils';
 import {OpenGame} from '../redux/open-games/state';
-import {bigNumberify} from 'ethers/utils';
+import {bigNumberify, formatUnits} from 'ethers/utils';
 
 interface Props {
   openGame: OpenGame;
@@ -29,7 +27,7 @@ export class OpenGameEntry extends React.PureComponent<Props, Commitment> {
         <div className="ogc-stakes">
           <div className="ogc-buyin pr-3">
             <div className="ogc-stake-header">Game Buy In:</div>
-            <div className="ogc-stake-amount">{web3Utils.fromWei(buyin, 'ether')}</div>
+            <div className="ogc-stake-amount">{formatUnits(buyin, 'ether')}</div>
             <div className="ogc-stake-currency">ETH</div>
           </div>
           <svg className="ogc-divider">
@@ -37,7 +35,7 @@ export class OpenGameEntry extends React.PureComponent<Props, Commitment> {
           </svg>
           <div className="ogc-round-buyin pl-3">
             <div className="ogc-stake-header">Round Buy In:</div>
-            <div className="ogc-stake-amount">{web3Utils.fromWei(stake, 'ether')}</div>
+            <div className="ogc-stake-amount">{formatUnits(stake, 'ether')}</div>
             <div className="ogc-stake-currency">ETH</div>
           </div>
         </div>
