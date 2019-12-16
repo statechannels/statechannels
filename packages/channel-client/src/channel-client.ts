@@ -11,9 +11,7 @@ import {
 } from './types';
 
 export class ChannelClient implements ChannelClientInterface<ChannelResult> {
-  constructor(private readonly provider: ChannelProviderInterface) {
-    console.info("[INFO] ChannelClient constructor assumes provider is 'enabled'");
-  }
+  constructor(private readonly provider: ChannelProviderInterface) {}
 
   onMessageQueued(callback: (message: Message<ChannelResult>) => void): UnsubscribeFunction {
     this.provider.on('MessageQueued', callback);
