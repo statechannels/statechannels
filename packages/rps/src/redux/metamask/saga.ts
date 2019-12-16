@@ -2,10 +2,10 @@ import {call, put} from 'redux-saga/effects';
 import * as metamaskActions from './actions';
 import {MetamaskErrorType} from './actions';
 
-interface networkNameToId {
+interface NetworkNameToId {
   [name: string]: {networkId: number};
 }
-const networks: networkNameToId = {
+const networks: NetworkNameToId = {
   main: {
     networkId: 1,
   },
