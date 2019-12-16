@@ -1,12 +1,9 @@
-import {cps, delay, put} from 'redux-saga/effects';
+import {call, put} from 'redux-saga/effects';
 import * as metamaskActions from './actions';
 import {MetamaskErrorType} from './actions';
 
 export default function* checkMetamask() {
   const networks = {
-    development: {
-      networkId: '*', // match any network
-    },
     main: {
       networkId: 1,
     },
@@ -23,27 +20,23 @@ export default function* checkMetamask() {
 
   if (typeof window.ethereum !== 'undefined') {
     try {
-      yield window.ethereum.enable();
-      yield put(metamaskActions.metamaskSuccess());
-      return true;
+      yield call([window.ethereum, 'enable']);
     } catch (error) {
+      console.error(error);
       yield put(
         metamaskActions.metamaskErrorOccurred({
           errorType: MetamaskErrorType.MetamaskLocked,
         })
       );
+      return false;
     }
-  } else {
-    delay(500);
-  }
-
-  try {
     const targetNetworkName = process.env.TARGET_NETWORK;
-    const selectedNetworkId = parseInt(yield cps(window.ethereum.networkVersion), 10);
+    const selectedNetworkId = parseInt(window.ethereum.networkVersion, 10);
     // Find the network name that matches the currently selected network id
-    const selectedNetworkName = Object.keys(networks).find(
-      networkName => networks[networkName].network_id === selectedNetworkId
-    );
+    const selectedNetworkName =
+      Object.keys(networks).find(
+        networkName => networks[networkName].networkId === selectedNetworkId
+      ) || 'development';
 
     if (targetNetworkName !== selectedNetworkName) {
       yield put(
@@ -54,8 +47,14 @@ export default function* checkMetamask() {
       );
       return false;
     }
-  } catch (e) {
-    yield put(metamaskActions.metamaskErrorOccurred({errorType: MetamaskErrorType.UnknownError}));
+    yield put(metamaskActions.metamaskSuccess());
+    return true;
+  } else {
+    yield put(
+      metamaskActions.metamaskErrorOccurred({
+        errorType: MetamaskErrorType.MetamaskLocked,
+      })
+    );
+    return false;
   }
-  return false;
 }
