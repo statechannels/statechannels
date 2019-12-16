@@ -26,9 +26,7 @@ function* rootSaga() {
   const channelProviderEnabled = yield stateChannelWalletSaga();
 
   if (channelProviderEnabled) {
-    const client = new RPSChannelClient();
-
-    yield call([client, client.enable]);
+    const client = new RPSChannelClient(window.channelProvider);
     yield fork(channelUpdatedListener, client);
     yield fork(messageQueuedListener, client);
     yield fork(gameSaga, client);

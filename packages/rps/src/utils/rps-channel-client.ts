@@ -7,15 +7,18 @@ import {
 } from '@statechannels/channel-client';
 import {RPS_ADDRESS} from '../constants';
 import {bigNumberify} from 'ethers/utils';
+import {ChannelProviderInterface} from '@statechannels/channel-provider';
 
 // This class wraps the channel client converting the request/response formats to those used in the app
 
 export class RPSChannelClient {
   channelClient: ChannelClientInterface;
 
+  constructor(provider: ChannelProviderInterface) {
+    this.channelClient = new ChannelClient(provider);
+  }
   async enable() {
-    // might want to pass this in later
-    this.channelClient = new ChannelClient(window.channelProvider);
+    /* empty */
   }
 
   async createChannel(
