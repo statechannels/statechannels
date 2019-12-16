@@ -51,6 +51,6 @@ if (require.main === module) {
 
     await clickThroughRPSUI(rpsTabA, rpsTabB);
 
-    // process.exit();
+    process.exit();
   })();
 }
