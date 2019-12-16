@@ -2,22 +2,25 @@ import {call, put} from 'redux-saga/effects';
 import * as metamaskActions from './actions';
 import {MetamaskErrorType} from './actions';
 
-export default function* checkMetamask() {
-  const networks = {
-    main: {
-      networkId: 1,
-    },
-    ropsten: {
-      networkId: 3,
-    },
-    rinkeby: {
-      networkId: 4,
-    },
-    kovan: {
-      networkId: 42,
-    },
-  };
+interface networkNameToId {
+  [name: string]: {networkId: number};
+}
+const networks: networkNameToId = {
+  main: {
+    networkId: 1,
+  },
+  ropsten: {
+    networkId: 3,
+  },
+  rinkeby: {
+    networkId: 4,
+  },
+  kovan: {
+    networkId: 42,
+  },
+};
 
+export default function* checkMetamask() {
   if (typeof window.ethereum !== 'undefined') {
     try {
       yield call([window.ethereum, 'enable']);
