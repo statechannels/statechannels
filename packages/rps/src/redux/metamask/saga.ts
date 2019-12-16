@@ -60,7 +60,7 @@ export default function* checkMetamask() {
   } else {
     yield put(
       metamaskActions.metamaskErrorOccurred({
-        errorType: MetamaskErrorType.MetamaskLocked,
+        errorType: MetamaskErrorType.NoMetaMask,
       })
     );
     return false;
