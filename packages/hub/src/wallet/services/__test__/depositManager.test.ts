@@ -1,5 +1,5 @@
 import {bigNumberify} from 'ethers/utils';
-import {Address, Uint256} from 'fmg-core';
+import {Uint256} from 'fmg-core';
 import {DUMMY_ASSET_HOLDER_ADDRESS} from '../../../test/test-constants';
 import {FUNDED_CHANNEL_ID, UNFUNDED_CHANNEL_ID} from '../../../test/test-data';
 import Channel from '../../models/channel';
@@ -18,12 +18,8 @@ async function getHoldings(channelId) {
 }
 
 // Mock out Blockchain funding
-async function fundFunction(
-  channelID: Address,
-  expectedHeld: Uint256,
-  value: Uint256
-): Promise<Uint256> {
-  return new Promise<string>((resolve, reject) => resolve('a'));
+async function fundFunction(): Promise<Uint256> {
+  return new Promise<string>(resolve => resolve('a'));
 }
 const mockBlockchainFund = jest.fn().mockImplementation(fundFunction);
 Blockchain.fund = mockBlockchainFund;
