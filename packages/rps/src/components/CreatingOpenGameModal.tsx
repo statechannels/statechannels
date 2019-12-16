@@ -1,9 +1,7 @@
 import _ from 'lodash';
 import React from 'react';
-
 import {Button, Modal, ModalHeader, ModalBody} from 'reactstrap';
-
-import * as web3Utils from 'web3-utils';
+import {parseEther} from 'ethers/utils';
 
 interface Props {
   visible: boolean;
@@ -52,7 +50,7 @@ export default class CreatingOpenGameModal extends React.PureComponent<Props, St
   createOpenGameHandler(e) {
     e.preventDefault();
     if (this.state.errorMessage === '') {
-      this.props.createOpenGame(web3Utils.toWei(this.state.buyIn, 'ether'));
+      this.props.createOpenGame(parseEther(this.state.buyIn).toString());
     } else {
       this.setState({buyInChanged: true});
     }
