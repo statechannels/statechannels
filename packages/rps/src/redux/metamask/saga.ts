@@ -23,6 +23,7 @@ const networks: networkNameToId = {
 export default function* checkMetamask() {
   if (typeof window.ethereum !== 'undefined') {
     try {
+      window.ethereum.autoRefreshOnNetworkChange = false;
       yield call([window.ethereum, 'enable']);
     } catch (error) {
       console.error(error);
@@ -33,6 +34,9 @@ export default function* checkMetamask() {
       );
       return false;
     }
+    window.ethereum.on('networkChanged', function(networkId) {
+      location.reload();
+    });
     const targetNetworkName = process.env.TARGET_NETWORK;
     const selectedNetworkId = parseInt(window.ethereum.networkVersion, 10);
     // Find the network name that matches the currently selected network id
