@@ -85,15 +85,13 @@ export async function loadRPSApp(page: puppeteer.Page, ganacheAccountIndex: numb
   await page.evaluateOnNewDocument(web3JsFile);
   await page.evaluateOnNewDocument(`window.web3 = new Web3("http://localhost:${port}")`);
   await page.evaluateOnNewDocument(`window.ethereum = window.web3.currentProvider`);
-  // MetaMask has a different API for accessing network ID than web3 library does
-  await page.evaluateOnNewDocument(
-    `window.web3.version = { getNetwork: window.web3.eth.net.getId }`
-  );
   // MetaMask has an .enable() API to unlock it / access it from the app
   await page.evaluateOnNewDocument(`window.ethereum.enable = () => new Promise(r => r())`);
   await page.evaluateOnNewDocument(
     `web3.eth.getAccounts().then(lst => web3.eth.defaultAccount = lst[${ganacheAccountIndex}])`
   );
+  await page.evaluateOnNewDocument(`window.ethereum.networkVersion = 9001`);
+  await page.evaluateOnNewDocument(`window.ethereum.on = () => {}`);
   await page.goto("http://localhost:3000/", {waitUntil: "networkidle0"});
   page.on("pageerror", error => {
     throw error;
