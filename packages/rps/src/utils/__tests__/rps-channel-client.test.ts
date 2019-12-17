@@ -11,9 +11,45 @@ import {RPS_ADDRESS} from '../../constants';
 
 const MOCK_ADDRESS = '0xAddress';
 const MOCK_CHANNEL_ID = '0xChannelId';
+const participants = [
+  {participantId: aAddress, signingAddress: aAddress, destination: aAddress},
+  {participantId: bAddress, signingAddress: bAddress, destination: bAddress},
+];
+const allocations = [
+  {
+    token: '0x0',
+    allocationItems: [
+      {destination: aAddress, amount: bigNumberify(aBal).toHexString()},
+      {destination: bAddress, amount: bigNumberify(bBal).toHexString()},
+    ],
+  },
+];
+const appDefinition = RPS_ADDRESS;
 const onMessageQueuedMockReturn = () => '0xOMQReturn';
 const onChannelUpdatedMockReturn = jest.fn(() => '0xOCUReturn');
 const onChannelProposedmMockReturn = jest.fn(() => '0xOCPReturn');
+const mockChannelState: ChannelState = {
+  channelId: MOCK_CHANNEL_ID,
+  turnNum: '0',
+  status: 'opening',
+  aUserId: aAddress,
+  bUserId: bAddress,
+  aAddress: aAddress,
+  bAddress: bAddress,
+  aBal: aBal,
+  bBal: bBal,
+  appData: appData.start,
+};
+const mockChannelResult: ChannelResult = {
+  participants,
+  allocations,
+  appData: encodeAppData(appData.start),
+  appDefinition,
+  channelId: MOCK_CHANNEL_ID,
+  status: 'opening',
+  turnNum: '0',
+};
+
 class MockChannelClient implements ChannelClientInterface {
   onMessageQueued = jest.fn(function(callback) {
     return onMessageQueuedMockReturn;
@@ -36,11 +72,9 @@ class MockChannelClient implements ChannelClientInterface {
     };
     return await channelResult;
   });
-  joinChannel(channelId: string) {
-    return new Promise<ChannelResult>(() => {
-      /* */
-    });
-  }
+  joinChannel = jest.fn(async function(channelId: string) {
+    return await mockChannelResult;
+  });
   updateChannel(channelId: string, participants, allocations, appData: string) {
     return new Promise<ChannelResult>(() => {
       /* */
@@ -88,21 +122,6 @@ describe('when createChannel() is called', () => {
     result = await client.createChannel(aAddress, bAddress, aBal, bBal, appData.start);
   });
   it('calls channelClient.createChannel() with appropriately encoded data', async () => {
-    const participants = [
-      {participantId: aAddress, signingAddress: aAddress, destination: aAddress},
-      {participantId: bAddress, signingAddress: bAddress, destination: bAddress},
-    ];
-    const allocations = [
-      {
-        token: '0x0',
-        allocationItems: [
-          {destination: aAddress, amount: bigNumberify(aBal).toHexString()},
-          {destination: bAddress, amount: bigNumberify(bBal).toHexString()},
-        ],
-      },
-    ];
-    const appDefinition = RPS_ADDRESS;
-
     expect(mockChannelClient.createChannel).toHaveBeenCalledWith(
       participants,
       allocations,
@@ -124,6 +143,19 @@ describe('when createChannel() is called', () => {
       appData: appData.start,
     };
     expect(result).toEqual(channelState);
+  });
+});
+
+describe('when joinChannel() is called', () => {
+  let result;
+  beforeAll(async () => {
+    result = await client.joinChannel(MOCK_CHANNEL_ID);
+  });
+  it('calls channelClient.joinChannel() with the same channelId', async () => {
+    expect(mockChannelClient.joinChannel).toHaveBeenCalledWith(MOCK_CHANNEL_ID);
+  });
+  it('decodes and returns the result', async () => {
+    expect(result).toEqual(mockChannelState);
   });
 });
 
