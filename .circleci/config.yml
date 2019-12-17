@@ -1,4 +1,5 @@
 version: 2.1
+
 orbs:
   slack: circleci/slack@3.4.1
   puppeteer: threetreeslight/puppeteer@0.1.2
@@ -7,7 +8,7 @@ defaults: &defaults
   working_directory: /home/circleci/project
   resource_class: medium
   docker:
-    - image: counterfactual/statechannels:latest
+    - image: counterfactual/statechannels:0.5.13 # Fast contract compilation with solc installed
       environment:
         USE_NATIVE_SOLC: true
     - image: circleci/postgres:12.0-alpine
@@ -29,6 +30,7 @@ restore_dep: &restore_dep
     key: dependency-cache-{{ checksum "yarn.lock" }}
 
 commands:
+
   log_stats:
     description: 'Log stats '
     parameters:
@@ -39,6 +41,7 @@ commands:
       - run:
           command: bash bin/log_memory.sh <<parameters.file>>
           background: true
+
   upload_logs:
     description: 'Upload logs '
     parameters:
@@ -73,6 +76,7 @@ commands:
           only_for_branches: 'master'
 
 jobs:
+
   prepare:
     <<: *defaults
     steps:
@@ -126,7 +130,10 @@ jobs:
           package: nitro-protocol
 
   integration-test:
-    <<: *defaults
+    resource_class: medium
+    working_directory: /home/circleci/project
+    docker:
+      - image: circleci/node:10.16.3
     steps:
       - checkout:
           path: /home/circleci/project
