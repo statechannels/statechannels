@@ -49,6 +49,7 @@ const mockChannelResult: ChannelResult = {
   status: 'opening',
   turnNum: '0',
 };
+// ^ In the wild there will be different ChannelResults t: e.g. the status will not always be 'opening'. But we are only testing that the RPSChannelClient is wrapping the ChannelClient correctly. Getting the right data back is partly (mostly) the responsibility of the inner class instance. Therefore in this test we can reuse the same object, since it only needs to be the right type in order to be encoded and decoded properly.
 
 class MockChannelClient implements ChannelClientInterface {
   onMessageQueued = jest.fn(function(callback) {
@@ -62,29 +63,23 @@ class MockChannelClient implements ChannelClientInterface {
   });
   createChannel = jest.fn(async function(participants, allocations, appDefinition, appData) {
     const channelResult: ChannelResult = {
+      ...mockChannelResult,
       participants,
       allocations,
       appData,
       appDefinition,
-      channelId: MOCK_CHANNEL_ID,
-      status: 'opening',
-      turnNum: '0',
     };
     return await channelResult;
   });
   joinChannel = jest.fn(async function(channelId: string) {
     return await mockChannelResult;
   });
-  updateChannel(channelId: string, participants, allocations, appData: string) {
-    return new Promise<ChannelResult>(() => {
-      /* */
-    });
-  }
-  closeChannel(channelId: string) {
-    return new Promise<ChannelResult>(() => {
-      /* */
-    });
-  }
+  updateChannel = jest.fn(async function(channelId, participants, allocations, appData) {
+    return await mockChannelResult;
+  });
+  closeChannel = jest.fn(async function(channelId: string) {
+    return await mockChannelResult;
+  });
   pushMessage(message) {
     return new Promise<PushMessageResult>(() => {
       /* */
@@ -146,6 +141,43 @@ describe('when createChannel() is called', () => {
   });
 });
 
+describe('when updateChannel() is called', () => {
+  let result;
+  beforeAll(async () => {
+    result = await client.updateChannel(
+      MOCK_CHANNEL_ID,
+      aAddress,
+      bAddress,
+      aBal,
+      bBal,
+      appData.start
+    );
+  });
+  it('calls channelClient.updateChannel() with appropriately encoded data', async () => {
+    expect(mockChannelClient.updateChannel).toHaveBeenCalledWith(
+      MOCK_CHANNEL_ID,
+      participants,
+      allocations,
+      encodeAppData(appData.start)
+    );
+  });
+  it('decodes and returns the result', async () => {
+    const channelState: ChannelState = {
+      channelId: MOCK_CHANNEL_ID,
+      turnNum: '0',
+      status: 'opening',
+      aUserId: aAddress,
+      bUserId: bAddress,
+      aAddress: aAddress,
+      bAddress: bAddress,
+      aBal: aBal,
+      bBal: bBal,
+      appData: appData.start,
+    };
+    expect(result).toEqual(channelState);
+  });
+});
+
 describe('when joinChannel() is called', () => {
   let result;
   beforeAll(async () => {
@@ -153,6 +185,19 @@ describe('when joinChannel() is called', () => {
   });
   it('calls channelClient.joinChannel() with the same channelId', async () => {
     expect(mockChannelClient.joinChannel).toHaveBeenCalledWith(MOCK_CHANNEL_ID);
+  });
+  it('decodes and returns the result', async () => {
+    expect(result).toEqual(mockChannelState);
+  });
+});
+
+describe('when closeChannel() is called', () => {
+  let result;
+  beforeAll(async () => {
+    result = await client.closeChannel(MOCK_CHANNEL_ID);
+  });
+  it('calls channelClient.joinChannel() with the same channelId', async () => {
+    expect(mockChannelClient.closeChannel).toHaveBeenCalledWith(MOCK_CHANNEL_ID);
   });
   it('decodes and returns the result', async () => {
     expect(result).toEqual(mockChannelState);
