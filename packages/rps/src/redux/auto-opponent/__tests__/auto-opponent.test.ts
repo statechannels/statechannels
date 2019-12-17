@@ -8,6 +8,7 @@ import {gameReducer} from '../../game/reducer';
 import {openGamesReducer} from '../../open-games/reducer';
 import {channelUpdatedListener} from '../../message-service/channel-updated-listener';
 import {autoPlayer, autoOpponent} from '../';
+import {FakeChannelClient} from '@statechannels/channel-client';
 
 const SUFFICIENT_TIME_TO_GET_TO_TURNUM_16 = 7000; // test will take at least this long to run
 const reducer = combineReducers({
@@ -16,10 +17,10 @@ const reducer = combineReducers({
 });
 
 // TODO: Get this working with a mock for channel-client
-it.skip(
+it(
   'runs to GameOver',
   async () => {
-    const client = new RPSChannelClient();
+    const client = new RPSChannelClient(new FakeChannelClient('0xOpponent'));
     function* saga() {
       yield fork(gameSaga, client);
       yield fork(autoPlayer, 'A');
