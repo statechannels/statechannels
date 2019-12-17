@@ -11,6 +11,7 @@ RUN apt-get install -y \
     python \
     software-properties-common \
     ssh \
+    sudo \
     tar
 
 # add ethereum ppa
