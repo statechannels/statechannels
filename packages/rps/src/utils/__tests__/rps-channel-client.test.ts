@@ -1,51 +1,94 @@
 import {RPSChannelClient} from '../rps-channel-client';
 import {aAddress, bAddress, aBal, bBal, appData} from '../../redux/game/__tests__/scenarios';
-import {ChannelProviderInterface} from '@statechannels/channel-provider';
-import EventEmitter = require('eventemitter3');
+import {
+  ChannelClientInterface,
+  ChannelResult,
+  PushMessageResult,
+} from '@statechannels/channel-client';
+import {encodeAppData} from '../../core';
+import {bigNumberify} from 'ethers/utils';
+import {RPS_ADDRESS} from '../../constants';
 
-class MockChannelProvider implements ChannelProviderInterface {
-  protected readonly events: EventEmitter;
-  constructor() {
-    this.events = new EventEmitter();
-  }
-
-  enable(url?: string) {
-    return new Promise<void>(() => {
-      /*empty*/
-    });
-  }
-  send = jest.fn().mockImplementationOnce(async (method: string, params: any) => {
-    const response = await params;
-    this.events.emit('MessageQueued', '');
-    return response;
+class MockChannelClient implements ChannelClientInterface {
+  onMessageQueued = jest.fn(function(callback) {
+    return () => {
+      /* */
+    };
   });
-  on(event: string, callback) {
-    this.events.on(event, callback);
+  onChannelUpdated(callback) {
+    return () => {
+      /* */
+    };
   }
-  off(event: string, callback) {
-    this.events.off(event, callback);
+  onChannelProposed(callback) {
+    return () => {
+      /* */
+    };
   }
-  subscribe(subscriptionType: string, params?: any) {
-    return new Promise<string>(() => {
-      /*empty*/
+  createChannel = jest.fn(async function(participants, allocations, appDefinition, appData) {
+    const channelResult: ChannelResult = {
+      participants,
+      allocations,
+      appData,
+      appDefinition,
+      channelId: '0x123',
+      status: 'opening',
+      turnNum: '0',
+    };
+    return await channelResult;
+  });
+  joinChannel(channelId: string) {
+    return new Promise<ChannelResult>(() => {
+      /* */
     });
   }
-  unsubscribe(subscriptionId: string) {
-    return new Promise<boolean>(() => {
-      /*empty*/
+  updateChannel(channelId: string, participants, allocations, appData: string) {
+    return new Promise<ChannelResult>(() => {
+      /* */
+    });
+  }
+  closeChannel(channelId: string) {
+    return new Promise<ChannelResult>(() => {
+      /* */
+    });
+  }
+  pushMessage(message) {
+    return new Promise<PushMessageResult>(() => {
+      /* */
+    });
+  }
+  getAddress() {
+    return new Promise<string>(() => {
+      /* */
     });
   }
 }
 
-it('works', async () => {
-  const client = new RPSChannelClient(new MockChannelProvider());
+it('calls channelClient.createChannel with appropriately encoded date', async () => {
+  const mockChannelClient = new MockChannelClient();
+  const client = new RPSChannelClient(mockChannelClient);
 
-  const spy = jest.fn();
+  await client.createChannel(aAddress, bAddress, aBal, bBal, appData.start);
 
-  client.onMessageQueued(spy);
+  const participants = [
+    {participantId: aAddress, signingAddress: aAddress, destination: aAddress},
+    {participantId: bAddress, signingAddress: bAddress, destination: bAddress},
+  ];
+  const allocations = [
+    {
+      token: '0x0',
+      allocationItems: [
+        {destination: aAddress, amount: bigNumberify(aBal).toHexString()},
+        {destination: bAddress, amount: bigNumberify(bBal).toHexString()},
+      ],
+    },
+  ];
+  const appDefinition = RPS_ADDRESS;
 
-  const state = await client.createChannel(aAddress, bAddress, aBal, bBal, appData.start);
-
-  expect(state).toMatchObject({aAddress, bAddress, aBal, bBal, appData: appData.start});
-  expect(spy).toHaveBeenCalledTimes(1);
+  expect(mockChannelClient.createChannel).toHaveBeenCalledWith(
+    participants,
+    allocations,
+    appDefinition,
+    encodeAppData(appData.start)
+  );
 });
