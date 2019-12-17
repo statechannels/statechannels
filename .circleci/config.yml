@@ -137,11 +137,11 @@ jobs:
           command: (cd packages/wallet && yarn run start:integration)
           background: true
       - run:
-        command: (cd packages/rps && yarn run start)
-        background: true
+          command: (cd packages/rps && yarn run start)
+          background: true
       - run:
-        command: (cd packages/hub && yarn run hub:start:dev)
-        background: true
+          command: (cd packages/hub && yarn run hub:start:dev)
+          background: true
       - run: (cd packages/wallet && yarn run test:ci:integration)
       - upload_logs:
           file: integration-test-stats
