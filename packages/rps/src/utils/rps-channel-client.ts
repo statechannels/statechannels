@@ -33,7 +33,6 @@ export class RPSChannelClient {
     const appDefinition = RPS_ADDRESS;
     const appData = encodeAppData(appAttrs);
 
-    // ignore return val for now and stub out response
     const channelResult = await this.channelClient.createChannel(
       participants,
       allocations,

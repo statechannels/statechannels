@@ -14,10 +14,11 @@ class MockChannelProvider implements ChannelProviderInterface {
       /*empty*/
     });
   }
-  async send<ResultType = any>(method: string, params: any): Promise<ResultType> {
+  send = jest.fn().mockImplementationOnce(async (method: string, params: any) => {
     const response = await params;
+    this.events.emit('MessageQueued', '');
     return response;
-  }
+  });
   on(event: string, callback) {
     this.events.on(event, callback);
   }
@@ -35,9 +36,7 @@ class MockChannelProvider implements ChannelProviderInterface {
     });
   }
 }
-// TODO move this mock somewhere else
 
-// TODO: Get this working with a mock for channel-client
 it('works', async () => {
   const client = new RPSChannelClient(new MockChannelProvider());
 
