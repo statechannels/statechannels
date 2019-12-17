@@ -11,21 +11,19 @@ import {RPS_ADDRESS} from '../../constants';
 
 const MOCK_ADDRESS = '0xAddress';
 const MOCK_CHANNEL_ID = '0xChannelId';
-const ON_MESSAGE_QUEUED_MOCK_RETURN = () => '0xOMQReturn';
+const onMessageQueuedMockReturn = () => '0xOMQReturn';
+const onChannelUpdatedMockReturn = jest.fn(() => '0xOCUReturn');
+const onChannelProposedmMockReturn = jest.fn(() => '0xOCPReturn');
 class MockChannelClient implements ChannelClientInterface {
   onMessageQueued = jest.fn(function(callback) {
-    return ON_MESSAGE_QUEUED_MOCK_RETURN;
+    return onMessageQueuedMockReturn;
   });
-  onChannelUpdated(callback) {
-    return () => {
-      /* */
-    };
-  }
-  onChannelProposed(callback) {
-    return () => {
-      /* */
-    };
-  }
+  onChannelUpdated = jest.fn(function(callback) {
+    return onChannelUpdatedMockReturn;
+  });
+  onChannelProposed = jest.fn(function(callback) {
+    return onChannelProposedmMockReturn;
+  });
   createChannel = jest.fn(async function(participants, allocations, appDefinition, appData) {
     const channelResult: ChannelResult = {
       participants,
@@ -139,6 +137,24 @@ describe('when onMessageQueued is called with a callback', () => {
     expect(mockChannelClient.onMessageQueued).toHaveBeenCalledWith(callback);
   });
   it('and returns the result', async () => {
-    expect(result).toEqual(ON_MESSAGE_QUEUED_MOCK_RETURN);
+    expect(result).toEqual(onMessageQueuedMockReturn);
+  });
+});
+
+describe('when onChannelUpdated is called with an rps callback', () => {
+  let result: Function;
+  const rpsCallback = jest.fn();
+  beforeAll(async () => {
+    result = await client.onChannelUpdated(rpsCallback);
+  });
+  it('calls channelClient.onChannelUpdated() AND channelClient.onChannelProposed with a wrapper callback', async () => {
+    // TODO: somehow check the argument is a wrapper callback
+    expect(mockChannelClient.onChannelUpdated).toHaveBeenCalled();
+    expect(mockChannelClient.onChannelProposed).toHaveBeenCalled();
+  });
+  it('and returns a function that runs both returned (unsubscribe) functions', async () => {
+    result();
+    expect(onChannelUpdatedMockReturn).toHaveBeenCalled();
+    expect(onChannelProposedmMockReturn).toHaveBeenCalled();
   });
 });
