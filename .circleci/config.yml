@@ -142,7 +142,7 @@ jobs:
       - attach_workspace:
           at: /home/circleci/project
       - run:
-          command: yarn run start:shared-ganache
+          command: (cd packages/devtools && yarn run start-shared-ganache)
           background: true
       - run:
           command: (cd packages/wallet && yarn run start:integration)
