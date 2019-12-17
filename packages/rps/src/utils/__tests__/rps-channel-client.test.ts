@@ -11,11 +11,10 @@ import {RPS_ADDRESS} from '../../constants';
 
 const MOCK_ADDRESS = '0xAddress';
 const MOCK_CHANNEL_ID = '0xChannelId';
+const ON_MESSAGE_QUEUED_MOCK_RETURN = () => '0xOMQReturn';
 class MockChannelClient implements ChannelClientInterface {
   onMessageQueued = jest.fn(function(callback) {
-    return () => {
-      /* */
-    };
+    return ON_MESSAGE_QUEUED_MOCK_RETURN;
   });
   onChannelUpdated(callback) {
     return () => {
@@ -127,5 +126,19 @@ describe('when createChannel() is called', () => {
       appData: appData.start,
     };
     expect(result).toEqual(channelState);
+  });
+});
+
+describe('when onMessageQueued is called with a callback', () => {
+  let result;
+  const callback = jest.fn();
+  beforeAll(async () => {
+    result = await client.onMessageQueued(callback);
+  });
+  it('calls channelClient.onMessageQueued() with the same callback', async () => {
+    expect(mockChannelClient.onMessageQueued).toHaveBeenCalledWith(callback);
+  });
+  it('and returns the result', async () => {
+    expect(result).toEqual(ON_MESSAGE_QUEUED_MOCK_RETURN);
   });
 });
