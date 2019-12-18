@@ -17,8 +17,8 @@ import {calculateChannelId} from './utils';
 export class FakeChannelClient implements ChannelClientInterface<ChannelResult> {
   playerIndex: 0 | 1;
   opponentAddress?: string;
+  latestState?: ChannelResult;
   protected events = new EventEmitter<EventsWithArgs>();
-  protected latestState?: ChannelResult;
 
   constructor(public readonly address: string) {
     this.playerIndex = 0;

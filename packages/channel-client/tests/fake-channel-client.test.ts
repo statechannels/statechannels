@@ -1,3 +1,6 @@
+import log = require('loglevel');
+import EventEmitter = require('eventemitter3');
+
 import {FakeChannelClient} from '../src/fake-channel-client';
 import {
   PARTICIPANT_A,
@@ -7,10 +10,8 @@ import {
   UPDATED_APP_DATA
 } from './constants';
 import {ChannelResultBuilder, buildParticipant, buildAllocation, setClientStates} from './utils';
-import {ChannelResult} from '../src';
+import {ChannelResult, Message} from '../src';
 import {calculateChannelId} from '../src/utils';
-
-import log = require('loglevel');
 
 log.setDefaultLevel(log.levels.SILENT);
 
@@ -72,14 +73,21 @@ describe('FakeChannelClient', () => {
     expect(clientB).toBeDefined();
   });
 
-  it('creates a channel', async () => {
-    const channelResult = await clientA.createChannel(
-      participants,
-      allocations,
-      APP_DEFINITION,
-      APP_DATA
-    );
-    expect(states['proposed']).toEqual(channelResult);
+  describe('creates a channel', () => {
+    it('produces the right channel result', async () => {
+      const channelResult = await clientA.createChannel(
+        participants,
+        allocations,
+        APP_DEFINITION,
+        APP_DATA
+      );
+      expect(states['proposed']).toEqual(channelResult);
+    });
+
+    it('confirms client B joined the channel', () => {
+      log.info('Confirming client B joined channel');
+      log.info(clientB.latestState);
+    });
   });
 
   it('joins a channel', async () => {
