@@ -160,6 +160,7 @@ jobs:
       #     command: (cd packages/hub && yarn run wait-on ${GANACHE_CACHE_FOLDER} && yarn run hub:start:dev)
       #     background: true
       - run: (cd packages/wallet && yarn run test:ci:integration)
+      - run: (cd packages/e2e-tests && yarn test)
       - upload_logs:
           file: integration-test-stats
       - notify_slack
