@@ -1,11 +1,11 @@
 import {StyleSheet, css} from 'aphrodite';
 import React from 'react';
-import Loader from 'react-loader-spinner';
+import {Loader} from 'rimble-ui';
 
 export default function LoadingPage() {
   return (
     <div className={css(styles.loader)}>
-      <Loader type="Circles" color="grey" height={100} width={100} />
+      <Loader color="red" size="80px" />
     </div>
   );
 }
