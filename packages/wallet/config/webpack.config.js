@@ -419,18 +419,6 @@ module.exports = function(webpackEnv) {
       ]
     },
     plugins: [
-      // TODO: Figure out if we still need this
-      // new webpack.NormalModuleReplacementPlugin(/.*\/build\/contracts\/.*\.json/, function(
-      //   resource
-      // ) {
-      //   if (process.env.TARGET_NETWORK !== "development") {
-      //     resource.request = resource.request.replace(
-      //       /.*\/build\/contracts/,
-      //       paths.appPreBuiltContractArtifacts
-      //     );
-      //   }
-      // }),
-
       // Generates an `index.html` file with the <script> injected.
       new HtmlWebpackPlugin(
         Object.assign(
