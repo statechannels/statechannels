@@ -3,6 +3,7 @@ import React from 'react';
 import {Button, Navbar} from 'reactstrap';
 import {Commitment} from 'fmg-core';
 import {RulesModal} from './RulesModal';
+import NetworkIndicator from '@rimble/network-indicator';
 
 interface Props {
   showRules: boolean;
@@ -18,17 +19,34 @@ function getInitials(loginDisplayName: string): string {
 
 export default class NavigationBar extends React.PureComponent<Props, Commitment> {
   render() {
+    let currentNetwork;
+    if (window.ethereum) {
+      currentNetwork = parseInt(window.ethereum.networkVersion, 10);
+    } else {
+      currentNetwork = undefined;
+    }
     return (
       <Navbar className="navbar">
-        <Button color="link" className="navbar-button mr-auto" onClick={this.props.rulesRequest}>
-          Rules
-        </Button>
-        <div className="circle">
-          <div className="navbar-user">{getInitials(this.props.loginDisplayName)}</div>
+        <div className="align-self-start">
+          <NetworkIndicator
+            className="mr-auto"
+            currentNetwork={currentNetwork}
+            requiredNetwork={process.env.CHAIN_NETWORK_ID}
+          />
         </div>
-        <Button color="link" className="navbar-button ml-auto" onClick={this.props.logoutRequest}>
-          Sign Out
-        </Button>
+        <div className="align-self-center">
+          <div className="circle">
+            <div className="navbar-user">{getInitials(this.props.loginDisplayName)}</div>
+          </div>
+        </div>
+        <div className="align-self-end">
+          <Button color="link" className="navbar-button" onClick={this.props.rulesRequest}>
+            Rules
+          </Button>
+          <Button color="link" className="navbar-button" onClick={this.props.logoutRequest}>
+            Sign Out
+          </Button>
+        </div>
         <RulesModal visible={this.props.showRules} rulesRequest={this.props.rulesRequest} />
       </Navbar>
     );
