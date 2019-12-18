@@ -14,7 +14,12 @@ export async function clickThroughRPSUI(rpsTabA: Page, rpsTabB: Page) {
   await (await rpsTabB.waitFor("#name")).type("playerB");
   (await rpsTabB.waitForXPath('//button[contains(., "Submit")]')).click();
 
-  await (await rpsTabA.waitForXPath('//button[contains(., "Create a game")]')).click();
+  // NOTE: There is some weird scrolling issue. .click() scrolls and somehow React re-renders this
+  // button and so we get a "Node is detached from document error". Using .evaluate() fixes it.
+  // https://github.com/puppeteer/puppeteer/issues/3496
+  await (await rpsTabA.waitForXPath('//button[contains(., "Create a game")]')).evaluate(() =>
+    document.querySelector("button.lobby-new-game")!["click"]()
+  );
   await (await rpsTabA.waitForXPath('//button[contains(., "Create Game")]')).click();
 
   await (await rpsTabB.waitForXPath('//button[contains(., "Join")]')).click();
