@@ -24,6 +24,7 @@ export default function* checkMetamask() {
   if (typeof window.ethereum !== 'undefined') {
     try {
       window.ethereum.autoRefreshOnNetworkChange = false;
+      yield put(metamaskActions.metamaskEnable());
       yield call([window.ethereum, 'enable']);
     } catch (error) {
       console.error(error);
