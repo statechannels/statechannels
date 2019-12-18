@@ -1,10 +1,12 @@
 import * as firebase from 'firebase';
+import {configureEnvVariables} from '@statechannels/devtools';
+import {RelayActionWithMessage} from '../src/communication';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const messages: Array<RelayActionWithMessage> = require('./message-sequence.json');
 
-import {HUB_ADDRESS} from '../constants';
-import {RelayActionWithMessage} from '../communication';
-import {logger} from '../logger';
+const HUB_ADDRESS = '0x87e0ED760fb316eeb94Bd9cF23D1d2BE87aCe3d8';
 
-const log = logger();
+configureEnvVariables(true);
 
 const config = {
   apiKey: process.env.FIREBASE_API_KEY,
@@ -29,21 +31,20 @@ function getMessagesRef() {
   return firebaseAppInsance.database().ref('messages');
 }
 
-export async function fbListen(callback) {
-  log.info('firebase-relay: listen');
-  const hubRef = getMessagesRef().child(HUB_ADDRESS.toLowerCase());
-
-  hubRef.on('child_added', async snapshot => {
-    const key = snapshot.key;
-    const value = snapshot.val();
-    await callback(value.data);
-    hubRef.child(key).remove();
-  });
-}
-
-export function fbSend(message: RelayActionWithMessage) {
+async function sendMessage(message: RelayActionWithMessage) {
   const sanitizedPayload = JSON.parse(JSON.stringify(message));
-  return getMessagesRef()
+  await getMessagesRef()
     .child(message.recipient.toLowerCase())
     .push(sanitizedPayload);
+}
+
+async function readAndFeedMessages() {
+  await Promise.all(
+    messages.map(message => sendMessage({...message, recipient: HUB_ADDRESS.toLowerCase()}))
+  );
+  getFirebaseApp().delete();
+}
+
+if (require.main === module) {
+  readAndFeedMessages();
 }
