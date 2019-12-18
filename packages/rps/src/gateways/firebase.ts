@@ -14,7 +14,6 @@ const config = {
 };
 
 const fire = firebase.initializeApp(config);
-firebase.auth().setPersistence(firebase.auth.Auth.Persistence.NONE);
 export const reduxSagaFirebase = new ReduxSagaFirebase(fire);
 export const authProvider = new firebase.auth.GoogleAuthProvider();
 export default fire;

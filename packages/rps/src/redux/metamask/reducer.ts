@@ -8,7 +8,7 @@ export interface MetamaskState {
 }
 
 const initialState: MetamaskState = {
-  loading: false,
+  loading: true,
   error: null,
   success: false,
 };
@@ -30,13 +30,6 @@ export const metamaskReducer: Reducer<MetamaskState> = (
         success: false,
         loading: false,
         error: action.error,
-      };
-    }
-    case metamaskActions.METAMASK_ENABLE: {
-      return {
-        success: false,
-        loading: true,
-        error: null,
       };
     }
     default:

@@ -39,6 +39,7 @@ function* loginStatusWatcherSaga() {
           )
         );
       } else {
+        yield put(loginActions.initializeWalletSuccess());
         yield put(loginActions.loginSuccess(user, libraryAddress));
       }
     } else {
@@ -48,17 +49,17 @@ function* loginStatusWatcherSaga() {
 }
 
 export default function* loginRootSaga() {
+  const metaMask = yield metamaskSaga();
+
+  // If metamask is not properly set up we can halt processing and wait for the reload
+  if (!metaMask) {
+    return;
+  }
   yield fork(loginStatusWatcherSaga);
   yield all([
     takeEvery(loginActions.LOGIN_REQUEST, loginSaga),
     takeEvery(loginActions.LOGOUT_REQUEST, logoutSaga),
   ]);
-  yield take('UpdateProfile');
-  const metaMask = yield metamaskSaga();
-  // If metamask is not properly set up we can halt processing and wait for the reload
-  if (!metaMask) {
-    return;
-  }
 }
 
 function getLibraryAddress() {
