@@ -39,7 +39,6 @@ function* loginStatusWatcherSaga() {
           )
         );
       } else {
-        yield put(loginActions.initializeWalletSuccess());
         yield put(loginActions.loginSuccess(user, libraryAddress));
       }
     } else {
