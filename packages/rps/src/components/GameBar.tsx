@@ -1,6 +1,7 @@
 import React from 'react';
 import {Navbar} from 'reactstrap';
 import {bigNumberify, formatUnits} from 'ethers/utils';
+import {Blockie} from 'rimble-ui';
 
 interface Props {
   myName: string;
@@ -55,6 +56,11 @@ export default class GameBar extends React.PureComponent<Props> {
     return (
       <Navbar className="game-bar">
         <div className="container">
+          <Blockie
+            opts={{
+              seed: myName,
+            }}
+          />
           <div className="col-2 my-name text-right">{myName}</div>
           <div className="col-auto my-balance">
             <div className="text-center">{formatUnits(myBalance, 'ether')}</div>
@@ -71,6 +77,11 @@ export default class GameBar extends React.PureComponent<Props> {
             <div className="eth text-center">ETH</div>
           </div>
           <div className="col-2 opponent-name">{opponentName}</div>
+          <Blockie
+            opts={{
+              seed: opponentName,
+            }}
+          />
         </div>
       </Navbar>
     );

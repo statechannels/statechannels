@@ -52,7 +52,15 @@ const initialState: SiteState = {
     error: null,
     success: true,
   },
-  openGames: [],
+  openGames: [
+    {
+      address: '0x',
+      name: 'Player B',
+      stake: parseEther('1').toString(),
+      isPublic: true,
+      createdAt: 0,
+    },
+  ],
   overlay: {
     rulesVisible: false,
     walletVisible: false,
