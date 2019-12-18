@@ -66,6 +66,18 @@ describe('FakeChannelClient', () => {
 
     clientB.playerIndex = 1;
     clientB.opponentAddress = participantA.participantId;
+
+    // This setup simulates the message being received from A's wallet
+    // and "queued" in A's channel client (which resides on A's app side)
+    // which then is "dequeued" and sent to B's app (directly handled by
+    // B's channel client here) and pushed from B's app to B's wallet
+    clientA.onMessageQueued(async (message: Message<ChannelResult>) => {
+      await clientB.pushMessage(message);
+    });
+
+    clientB.onMessageQueued(async (message: Message<ChannelResult>) => {
+      await clientA.pushMessage(message);
+    });
   });
 
   it('instantiates', () => {
