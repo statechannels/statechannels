@@ -1,21 +1,15 @@
 import {AppData, ChannelState, encodeAppData, decodeAppData} from '../core';
-import {
-  ChannelClient,
-  ChannelResult,
-  Message,
-  ChannelClientInterface,
-} from '@statechannels/channel-client';
+import {ChannelResult, Message, ChannelClientInterface} from '@statechannels/channel-client';
 import {RPS_ADDRESS} from '../constants';
 import {bigNumberify} from 'ethers/utils';
 
 // This class wraps the channel client converting the request/response formats to those used in the app
 
 export class RPSChannelClient {
-  channelClient: ChannelClientInterface;
+  constructor(private readonly channelClient: ChannelClientInterface) {}
 
   async enable() {
-    // might want to pass this in later
-    this.channelClient = new ChannelClient(window.channelProvider);
+    /* empty */
   }
 
   async createChannel(
@@ -30,7 +24,6 @@ export class RPSChannelClient {
     const appDefinition = RPS_ADDRESS;
     const appData = encodeAppData(appAttrs);
 
-    // ignore return val for now and stub out response
     const channelResult = await this.channelClient.createChannel(
       participants,
       allocations,
@@ -116,8 +109,8 @@ const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
     bUserId: participants[1].participantId,
     aAddress: participants[0].destination,
     bAddress: participants[1].destination,
-    aBal: allocations[0].allocationItems[0].amount.toString(),
-    bBal: allocations[0].allocationItems[1].amount.toString(),
+    aBal: bigNumberify(allocations[0].allocationItems[0].amount).toString(),
+    bBal: bigNumberify(allocations[0].allocationItems[1].amount).toString(),
   };
 };
 

@@ -1,5 +1,5 @@
 import {applyMiddleware, compose, createStore} from 'redux';
-import {fork, call} from 'redux-saga/effects';
+import {fork} from 'redux-saga/effects';
 import createSagaMiddleware from 'redux-saga';
 
 import reducer from './reducer';
@@ -14,6 +14,7 @@ import {channelUpdatedListener} from './message-service/channel-updated-listener
 import {messageQueuedListener} from './message-service/message-queued-listener';
 import {gameSaga} from './game/saga';
 import {autoPlayer, autoOpponent} from './auto-opponent';
+import {ChannelClient} from '@statechannels/channel-client';
 
 const composeEnhancers = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const enhancers = composeEnhancers(applyMiddleware(sagaMiddleware));
@@ -26,9 +27,7 @@ function* rootSaga() {
   const channelProviderEnabled = yield stateChannelWalletSaga();
 
   if (channelProviderEnabled) {
-    const client = new RPSChannelClient();
-
-    yield call([client, client.enable]);
+    const client = new RPSChannelClient(new ChannelClient(window.channelProvider));
     yield fork(channelUpdatedListener, client);
     yield fork(messageQueuedListener, client);
     yield fork(gameSaga, client);
