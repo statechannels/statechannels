@@ -31,7 +31,7 @@
     "test": "run-s 'test:app --all' 'test:contracts --all'",
     "test:puppeteer": "npx jest --runInBand -c ./config/jest/jest.puppeteer.config.js",
     "puppeteer:script": "npx ts-node -O '{\"module\":\"commonjs\"}' ./puppeteer/scripts/funding.ts ",
-    "test:ci:integration": "wait-on http-get://localhost:3055/ && yarn test:puppeteer",
+    "test:ci:integration": "wait-on http-get://localhost:3055/ http-get://localhost:3000/ && yarn test:puppeteer",
     "precommit": "lint-staged --quiet"
   },
   "dependencies": {
