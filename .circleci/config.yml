@@ -145,13 +145,13 @@ jobs:
           command: (cd packages/devtools && yarn run start:shared-ganache)
           background: true
       - run:
-          command: (cd packages/wallet && yarn run start:integration)
+          command: (cd packages/wallet && yarn wait-on http://localhost:8547 && yarn run start:integration)
           background: true
       - run:
-          command: (cd packages/rps && yarn run start)
+          command: (cd packages/rps && yarn wait-on http://localhost:8547 && yarn run start)
           background: true
       - run:
-          command: (cd packages/hub && yarn run hub:start:dev)
+          command: (cd packages/hub && yarn wait-on http://localhost:8547 && yarn run hub:start:dev)
           background: true
       - run: (cd packages/wallet && yarn run test:ci:integration)
       - upload_logs:
