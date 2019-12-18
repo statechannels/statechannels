@@ -13,7 +13,7 @@ import {ChannelResultBuilder, buildParticipant, buildAllocation, setClientStates
 import {ChannelResult, Message} from '../src';
 import {calculateChannelId} from '../src/utils';
 
-log.setDefaultLevel(log.levels.SILENT);
+log.setDefaultLevel(log.levels.DEBUG);
 
 interface StateMap {
   [channelStatus: string]: ChannelResult;
@@ -68,10 +68,14 @@ describe('FakeChannelClient', () => {
     clientB.opponentAddress = participantA.participantId;
 
     // This setup simulates the message being received from A's wallet
-    // and "queued" in A's channel client (which resides on A's app side)
-    // which then is "dequeued" and sent to B's app (directly handled by
-    // B's channel client here) and pushed from B's app to B's wallet
+    // and "queued" by A's app to be sent to the opponent (handled by
+    // A's channel client, which then is "dequeued" on A's channel client
+    // and sent to B's app (handled by B's channel client here) and
+    // pushed from B's app to B's wallet.
+    // The de/queuing described above is effectively faked by explicitly passing
+    // the messages between the clients.
     clientA.onMessageQueued(async (message: Message<ChannelResult>) => {
+      log.debug(`Got message from A to B ${JSON.stringify(message, undefined, 4)}`);
       await clientB.pushMessage(message);
     });
 
@@ -128,7 +132,7 @@ describe('FakeChannelClient', () => {
     });
   });
 
-  describe('closes a channel', () => {
+  describe.only('closes a channel', () => {
     it('player with valid turn can make a valid close channel call', async () => {
       setClientStates([clientA, clientB], states['running']);
       const channelResult = await clientA.closeChannel(channelId);

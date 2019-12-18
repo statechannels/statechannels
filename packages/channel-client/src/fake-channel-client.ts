@@ -129,6 +129,7 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
     log.debug(`Player ${this.playerIndex} updated channel to turnNum ${turnNum}`);
 
     this.latestState = {...latestState, turnNum, status: 'closing'};
+    log.debug(`Latest channel status set by ${this.playerIndex} to ${this.latestState.status}`);
     this.notifyOpponent(this.latestState);
 
     return this.latestState;
