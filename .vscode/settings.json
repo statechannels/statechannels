@@ -7,6 +7,8 @@
     {"directory": "packages/hub", "changeProcessCWD": true},
     {"directory": "packages/jest-gas-reporter", "changeProcessCWD": true},
     {"directory": "packages/nitro-protocol", "changeProcessCWD": true},
-    {"directory": "packages/channel-client", "changeProcessCWD": true}
+    {"directory": "packages/channel-client", "changeProcessCWD": true},
+    {"directory": "packages/rps", "changeProcessCWD": true},
+    {"directory": "packages/wallet", "changeProcessCWD": true}
   ]
 }
