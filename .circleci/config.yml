@@ -126,13 +126,10 @@ jobs:
   integration-test:
     <<: *defaults
     environment:
-      TARGET_NETWORK: development
-      USE_VIRTUAL_FUNDING: TRUE
+      USE_VIRTUAL_FUNDING: FALSE
       USE_GANACHE_DEPLOYMENT_CACHE: true
       GANACHE_CACHE_FOLDER: ../../.ganache-deployments
       GANACHE_PORT: 8547
-      HUB_ADDRESS: 0xd4Fa489Eacc52BA59438993f37Be9fcC20090E39
-      HUB_PRIVATE_KEY: 0x2030b463177db2da82908ef90fa55ddfcef56e8183caf60db464bc398e736e6f
     steps:
       - checkout:
           path: /home/circleci/project
@@ -145,14 +142,14 @@ jobs:
           command: (cd packages/devtools && yarn run start:shared-ganache)
           background: true
       - run:
-          command: (cd packages/wallet && yarn wait-on http://localhost:8547 && yarn run start:integration)
+          command: (cd packages/wallet && yarn run wait-on ${GANACHE_CACHE_FOLDER} && yarn run start:integration)
           background: true
       - run:
-          command: (cd packages/rps && yarn wait-on http://localhost:8547 && yarn run start)
+          command: (cd packages/rps && yarn run wait-on ${GANACHE_CACHE_FOLDER} && yarn run start)
           background: true
-      - run:
-          command: (cd packages/hub && yarn wait-on http://localhost:8547 && yarn run hub:start:dev)
-          background: true
+      # - run:
+      #     command: (cd packages/hub && yarn run wait-on ${GANACHE_CACHE_FOLDER} && yarn run hub:start:dev)
+      #     background: true
       - run: (cd packages/wallet && yarn run test:ci:integration)
       - upload_logs:
           file: integration-test-stats
