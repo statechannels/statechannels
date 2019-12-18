@@ -47,6 +47,6 @@ There are a few integration tests inside the [`puppeteer`](./puppeteer) folder w
 NODE_ENV=test yarn ts-node -O '{"module":"commonjs","noUnusedLocals":false}' ./puppeteer/scripts/funding.ts
 ```
 
-You will want to call `setsetUpBrowser` with the `false` argument to use the Chromium UI on your Mac.
+You will want to call `setupBrowser` with the `false` argument to use the Chromium UI on your Mac.
 
 Also, a helpful tip, to avoid the annoying dialog that pops up on Chromium every time (i.e., "Do you want to the application Chromium.app to accept incoming network connections?"), you can follow the instructions presented in [this Github issue](https://github.com/puppeteer/puppeteer/issues/4752).
