@@ -1,7 +1,18 @@
 FROM node:10.16-slim
 
 RUN apt-get update
-RUN apt-get install -y software-properties-common git make gcc g++ ssh tar gzip ca-certificates
+RUN apt-get install -y \
+    ca-certificates \
+    g++ \
+    gcc \
+    git \
+    gzip \
+    make \
+    python \
+    software-properties-common \
+    ssh \
+    sudo \
+    tar
 
 # add ethereum ppa
 RUN add-apt-repository ppa:ethereum/ethereum
