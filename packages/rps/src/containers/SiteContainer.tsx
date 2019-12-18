@@ -9,6 +9,7 @@ import MetamaskErrorPage from '../components/MetamaskErrorPage';
 import {MetamaskError} from '../redux/metamask/actions';
 import {WalletError} from '../redux/wallet/actions';
 import LoadingPage from '../components/LoadingPage';
+import ConnectionBanner from '@rimble/connection-banner';
 
 import LoginErrorPage from '../components/LoginErrorPage';
 interface SiteProps {
@@ -28,6 +29,14 @@ class Site extends React.PureComponent<SiteProps> {
 
   render() {
     let component;
+
+    let currentNetwork;
+    if (window.ethereum) {
+      currentNetwork = parseInt(window.ethereum.networkVersion, 10);
+    } else {
+      currentNetwork = undefined;
+    }
+
     if (this.props.loading) {
       component = <LoadingPage />;
     } else if (this.props.loginError) {
@@ -46,6 +55,11 @@ class Site extends React.PureComponent<SiteProps> {
       <div className="w-100">
         <div ref={this.walletDiv} />
         {component}
+        <ConnectionBanner
+          currentNetwork={currentNetwork}
+          requiredNetwork={process.env.CHAIN_NETWORK_ID}
+          onWeb3Fallback={false}
+        />
       </div>
     );
   }
