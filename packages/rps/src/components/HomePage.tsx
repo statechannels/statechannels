@@ -22,7 +22,7 @@ const HomePage: React.SFC<Props> = ({login, metamaskState}) => {
           <Button
             className="cog-button homePage-loginButton"
             onClick={login}
-            // disabled={currentNetwork !== process.env.CHAIN_NETWORK_ID}
+            disabled={currentNetwork !== targetNetwork}
           >
             Start Playing!
           </Button>
