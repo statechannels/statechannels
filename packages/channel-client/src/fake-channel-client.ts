@@ -51,7 +51,7 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
 
     this.latestState = channel;
     this.opponentAddress = channel.participants[1].participantId;
-    this.notifyOpponent(channel);
+    this.notifyOpponent(channel, 'createChannel');
 
     return channel;
   }
@@ -67,7 +67,7 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
       status: 'running'
     };
     this.opponentAddress = this.latestState.participants[0].participantId;
-    this.notifyOpponent(this.latestState);
+    this.notifyOpponent(this.latestState, 'joinChannel');
 
     return this.latestState;
   }
@@ -94,7 +94,7 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
 
     this.latestState = nextState;
 
-    this.notifyOpponent(this.latestState);
+    this.notifyOpponent(this.latestState, 'updateChannel');
     return this.latestState;
   }
 
@@ -108,7 +108,7 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
         .add(1)
         .toString();
       this.latestState = {...this.latestState, turnNum, status: 'closed'};
-      this.notifyOpponent(this.latestState);
+      this.notifyOpponent(this.latestState, 'pushMessage');
       this.notifyApp(this.latestState);
     }
 
@@ -136,18 +136,14 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
     log.debug(
       `Player ${this.playerIndex} updated channel to status ${status} on turnNum ${turnNum}`
     );
-    this.notifyOpponent(this.latestState);
+    this.notifyOpponent(this.latestState, 'closeChannel');
 
     return this.latestState;
   }
 
-  protected notifyOpponent(data: ChannelResult): void {
+  protected notifyOpponent(data: ChannelResult, notificationType: string): void {
     log.debug(
-      `${this.playerIndex} notifying ${this.opponentIndex} with data ${JSON.stringify(
-        data,
-        undefined,
-        4
-      )}`
+      `${this.playerIndex} notifying opponent ${this.opponentIndex} about ${notificationType}`
     );
     const sender = this.address;
     const recipient = this.opponentAddress;

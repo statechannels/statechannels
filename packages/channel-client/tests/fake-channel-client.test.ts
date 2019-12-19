@@ -1,5 +1,4 @@
 import log = require('loglevel');
-import EventEmitter = require('eventemitter3');
 
 import {FakeChannelClient} from '../src/fake-channel-client';
 import {
@@ -13,7 +12,7 @@ import {ChannelResultBuilder, buildParticipant, buildAllocation, setClientStates
 import {ChannelResult, Message} from '../src';
 import {calculateChannelId} from '../src/utils';
 
-log.setDefaultLevel(log.levels.DEBUG);
+log.setDefaultLevel(log.levels.SILENT);
 
 interface StateMap {
   [channelStatus: string]: ChannelResult;
@@ -51,9 +50,9 @@ describe('FakeChannelClient', () => {
       .setTurnNum('4')
       .build();
 
-    states['closing'] = ChannelResultBuilder.from(states['running'])
-      .setStatus('closing')
-      .setTurnNum('4')
+    states['closed'] = ChannelResultBuilder.from(states['running'])
+      .setStatus('closed')
+      .setTurnNum('5')
       .build();
   });
 
@@ -79,7 +78,6 @@ describe('FakeChannelClient', () => {
     });
 
     clientB.onMessageQueued(async (message: Message<ChannelResult>) => {
-      log.debug(`Sending message from 1 to 0 ${JSON.stringify(message, undefined, 4)}`);
       await clientA.pushMessage(message);
     });
   });
@@ -132,13 +130,14 @@ describe('FakeChannelClient', () => {
     });
   });
 
-  describe.only('closes a channel', () => {
+  describe('closes a channel', () => {
     it('player with valid turn can make a valid close channel call', async () => {
       setClientStates([clientA, clientB], states['running']);
+      // Since the clients agree to a channel close, this skips the 'closing'
+      // step and the clients directly agree to have the channel 'closed'
       const channelResult = await clientA.closeChannel(channelId);
-      log.debug('Got channel result from close call');
-      log.debug(channelResult);
-      expect(channelResult).toEqual(states['closing']);
+      expect(channelResult).toEqual(states['closed']);
+      expect(clientB.latestState).toEqual(states['closed']);
     });
 
     it('player with invalid turn cannot make a valid close channel call', async () => {
