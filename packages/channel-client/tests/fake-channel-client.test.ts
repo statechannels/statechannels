@@ -29,7 +29,8 @@ describe('FakeChannelClient', () => {
   const allocations = [buildAllocation(PARTICIPANT_A, '5'), buildAllocation(PARTICIPANT_B, '5')];
   const channelId = calculateChannelId(participants, allocations, APP_DEFINITION, APP_DATA);
 
-  const clientAEventEmitter = new EventEmitter<EventsWithArgs>();
+  // This event emitter only enable easier assertions of expected
+  // events the client is listening on
   const clientBEventEmitter = new EventEmitter<EventsWithArgs>();
 
   let clientA: FakeChannelClient, clientB: FakeChannelClient;
@@ -87,9 +88,7 @@ describe('FakeChannelClient', () => {
     });
 
     clientB.onChannelProposed((result: ChannelResult) => {
-      log.debug('Client B got channel proposal');
       clientBEventEmitter.emit('ChannelProposed', result);
-      log.debug('Client B emitted event');
     });
   });
 
@@ -117,11 +116,18 @@ describe('FakeChannelClient', () => {
     });
   });
 
-  it('joins a channel', async () => {
-    setClientStates([clientA, clientB], states['proposed']);
-    const channelResult = await clientB.joinChannel(channelId);
-    expect(channelResult).toEqual(states['running']);
-    expect(clientA.latestState).toEqual(states['running']);
+  describe('joins a channel', () => {
+    it('the player whose turn it is can accept proposal to join the channel', async () => {
+      setClientStates([clientA, clientB], states['proposed']);
+      const channelResult = await clientB.joinChannel(channelId);
+      expect(channelResult).toEqual(states['running']);
+      expect(clientA.latestState).toEqual(states['running']);
+    });
+
+    it('the player whose turn it is not cannot accept a join proposal they sent', async () => {
+      setClientStates([clientA, clientB], states['proposed']);
+      await expect(clientA.joinChannel(channelId)).rejects.toBeDefined();
+    });
   });
 
   describe('updates a channel', () => {

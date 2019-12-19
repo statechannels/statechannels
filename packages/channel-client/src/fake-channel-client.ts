@@ -23,6 +23,10 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
 
   constructor(public readonly address: string) {}
 
+  async getAddress(): Promise<string> {
+    return this.address;
+  }
+
   setState(state: ChannelResult): void {
     this.latestState = state;
   }
@@ -38,7 +42,6 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
     appDefinition: string,
     appData: string
   ): Promise<ChannelResult> {
-    this.updatePlayerIndex(0);
     const channel: ChannelResult = {
       participants,
       allocations,
@@ -56,13 +59,23 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
     return channel;
   }
 
+  verifyTurnNum(): Promise<void> {
+    const currentTurnNum = bigNumberify(this.latestState!.turnNum);
+    if (currentTurnNum.mod(2).eq(this.playerIndex)) {
+      return Promise.reject(
+        `Not your turn: currentTurnNum = ${currentTurnNum}, index = ${this.playerIndex}`
+      );
+    }
+    return Promise.resolve();
+  }
+
   async joinChannel(channelId: string): Promise<ChannelResult> {
-    this.updatePlayerIndex(1);
-    const latestState = this.findChannel(channelId);
+    await this.verifyTurnNum();
+
     // skip funding by setting the channel to 'running' the moment it is joined
     // [assuming we're working with 2-participant channels for the time being]
     this.latestState = {
-      ...latestState,
+      ...this.latestState!,
       turnNum: bigNumberify(3).toString(),
       status: 'running'
     };
@@ -83,11 +96,7 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
 
     const nextState = {...latestState, participants, allocations, appData};
     if (nextState !== latestState) {
-      if (currentTurnNum.mod(2).eq(this.playerIndex)) {
-        return Promise.reject(
-          `Not your turn: currentTurnNum = ${currentTurnNum}, index = ${this.playerIndex}`
-        );
-      }
+      await this.verifyTurnNum();
       nextState.turnNum = currentTurnNum.add(1).toString();
       log.debug(`Player ${this.playerIndex} updated channel to turnNum ${nextState.turnNum}`);
     }
@@ -98,24 +107,12 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
     return this.latestState;
   }
 
-  async getAddress(): Promise<string> {
-    return this.address;
-  }
-
   async closeChannel(channelId: string): Promise<ChannelResult> {
-    const latestState = this.findChannel(channelId);
-    const currentTurnNum = bigNumberify(latestState.turnNum);
-
-    if (currentTurnNum.mod(2).eq(this.playerIndex)) {
-      return Promise.reject(
-        `Not your turn: currentTurnNum = ${currentTurnNum}, index = ${this.playerIndex}`
-      );
-    }
-
-    const turnNum = currentTurnNum.add(1).toString();
+    await this.verifyTurnNum();
+    const turnNum = this.getNextTurnNum();
     const status = 'closing';
 
-    this.latestState = {...latestState, turnNum, status};
+    this.latestState = {...this.latestState!, turnNum, status};
     log.debug(
       `Player ${this.playerIndex} updated channel to status ${status} on turnNum ${turnNum}`
     );
@@ -199,7 +196,6 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
     const turnNum = this.getNextTurnNum();
 
     switch (parameters.data.status) {
-      // auto-join if we received a proposal
       case 'proposed':
         this.events.emit('ChannelProposed', parameters.data);
         break;
