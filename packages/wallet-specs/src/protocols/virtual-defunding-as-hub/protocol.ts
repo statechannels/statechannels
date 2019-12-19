@@ -1,9 +1,9 @@
-import { assign } from 'xstate';
-import { store } from '../../';
-import { isGuarantee, isIndirectFunding } from '../../ChannelStoreEntry';
-import { checkThat } from '../../store';
+import {assign} from 'xstate';
+import {store} from '../../';
+import {isGuarantee, isIndirectFunding} from '../../ChannelStoreEntry';
+import {checkThat} from '../../store';
 import * as LedgerUpdate from '../ledger-update/protocol';
-import { defundGuarantorInLedger } from '../virtual-defunding-as-leaf/protocol';
+import {defundGuarantorInLedger} from '../virtual-defunding-as-leaf/protocol';
 
 const PROTOCOL = 'virtual-defunding-as-hub';
 
@@ -18,37 +18,30 @@ type ChannelsSet = Init & {
 };
 
 export const assignChannels = assign(
-  ({ jointChannelId }: Init): ChannelsSet => {
-    const { guarantorChannelIds } = checkThat(
-      store.getEntry(jointChannelId).funding,
-      isGuarantee
-    );
+  ({jointChannelId}: Init): ChannelsSet => {
+    const {guarantorChannelIds} = checkThat(store.getEntry(jointChannelId).funding, isGuarantee);
 
-    const { ledgerId: leftLedgerId } = checkThat(
+    const {ledgerId: leftLedgerId} = checkThat(
       store.getEntry(guarantorChannelIds[0]).funding,
       isIndirectFunding
     );
-    const { ledgerId: rightLedgerId } = checkThat(
+    const {ledgerId: rightLedgerId} = checkThat(
       store.getEntry(guarantorChannelIds[1]).funding,
       isIndirectFunding
     );
     const ledgerChannelIds: [string, string] = [leftLedgerId, rightLedgerId];
 
-    return { jointChannelId, guarantorChannelIds, ledgerChannelIds };
+    return {jointChannelId, guarantorChannelIds, ledgerChannelIds};
   }
 );
 
 function defundGuarantor(index: 0 | 1) {
-  return ({
-    guarantorChannelIds,
-    jointChannelId,
-    ledgerChannelIds,
-  }: ChannelsSet) => {
+  return ({guarantorChannelIds, jointChannelId, ledgerChannelIds}: ChannelsSet) => {
     return defundGuarantorInLedger({
       index,
       hubLedgerId: ledgerChannelIds[index],
       guarantorChannelId: guarantorChannelIds[index],
-      jointChannelId,
+      jointChannelId
     });
   };
 }
@@ -64,20 +57,20 @@ const defundGuarantors = {
     defundLeft: {
       invoke: {
         src: 'supportState',
-        data: defundLeftGuarantor.name,
+        data: defundLeftGuarantor.name
       },
-      exit: 'garbageCollectLeftGuarantor',
+      exit: 'garbageCollectLeftGuarantor'
     },
     defundRight: {
       invoke: {
         src: 'supportState',
-        data: defundRightGuarantor.name,
+        data: defundRightGuarantor.name
       },
-      exit: 'garbageCollectRightGuarantor',
-    },
+      exit: 'garbageCollectRightGuarantor'
+    }
   },
   exit: 'garbageCollectJointChannel',
-  onDone: 'success',
+  onDone: 'success'
 };
 
 export const config = {
@@ -85,6 +78,6 @@ export const config = {
   initial: 'defundGuarantors',
   states: {
     defundGuarantors,
-    success: { type: 'final' },
-  },
+    success: {type: 'final'}
+  }
 };

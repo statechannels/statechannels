@@ -1,4 +1,4 @@
-import { add, Channel, gt } from '.';
+import {add, Channel, gt} from '.';
 
 export interface ChannelManagerInterface {
   newChannel(participantIds: string[], chainId: string): Channel;
@@ -32,7 +32,7 @@ export class ChannelManager implements ChannelManagerInterface {
     this._nonces[key] = add(1, this._nonces[key] || 0);
     const channelNonce = this._nonces[key];
     this.nonceOk(participantIds, channelNonce);
-    return { participants, chainId, channelNonce };
+    return {participants, chainId, channelNonce};
   }
 
   public sync(participantIds: string[], channel: Channel): Channel {

@@ -1,10 +1,10 @@
-import { Machine, MachineConfig, send, SendAction, sendParent } from 'xstate';
-import { AdvanceChannel, Funding, JoinChannel } from '..';
-import { forwardChannelUpdated, MachineFactory, Store, success } from '../..';
-import { JsonRpcJoinChannelParams } from '../../json-rpc';
-import { ChannelUpdated } from '../../store';
-import { CloseChannel, OpenChannel } from '../../wire-protocol';
-import { OpenChannelEvent } from '../wallet/protocol';
+import {Machine, MachineConfig, send, SendAction, sendParent} from 'xstate';
+import {AdvanceChannel, Funding, JoinChannel} from '..';
+import {forwardChannelUpdated, MachineFactory, Store, success} from '../..';
+import {JsonRpcJoinChannelParams} from '../../json-rpc';
+import {ChannelUpdated} from '../../store';
+import {CloseChannel, OpenChannel} from '../../wire-protocol';
+import {OpenChannelEvent} from '../wallet/protocol';
 
 const PROTOCOL = 'join-channel';
 
@@ -18,10 +18,10 @@ const checkNonce = {
   on: {
     OPEN_CHANNEL: {
       target: 'askClient',
-      cond: 'nonceOk',
-    },
+      cond: 'nonceOk'
+    }
   },
-  exit: 'storeState',
+  exit: 'storeState'
 };
 
 const askClient = {
@@ -30,38 +30,36 @@ const askClient = {
     onDone: [
       {
         target: 'preFundSetup',
-        cond: ({}, event) => event.data === 'JOIN_CHANNEL',
+        cond: ({}, event) => event.data === 'JOIN_CHANNEL'
       },
-      { target: 'abort', cond: ({}, event) => event.data === 'CLOSE_CHANNEL' },
-    ],
-  },
+      {target: 'abort', cond: ({}, event) => event.data === 'CLOSE_CHANNEL'}
+    ]
+  }
 };
 
 const abort = {
   entry: 'sendCloseChannel',
-  type: 'final' as 'final',
+  type: 'final' as 'final'
 };
 
-const advanceChannelArgs = n => ({ channelId }: Init) => ({
+const advanceChannelArgs = n => ({channelId}: Init) => ({
   channelId,
-  targetTurnNum: n,
+  targetTurnNum: n
 });
 const preFundSetup = {
   invoke: {
     id: 'preFundSetup',
     src: 'advanceChannel',
     data: advanceChannelArgs(1),
-    onDone: 'funding',
+    onDone: 'funding'
   },
   on: {
-    CHANNEL_UPDATED: forwardChannelUpdated<Init>('preFundSetup'),
-  },
+    CHANNEL_UPDATED: forwardChannelUpdated<Init>('preFundSetup')
+  }
 };
-export const passChannelId: (c: Init) => Funding.Init = ({
-  channelId,
-}: Init) => ({
+export const passChannelId: (c: Init) => Funding.Init = ({channelId}: Init) => ({
   targetChannelId: channelId,
-  tries: 0,
+  tries: 0
 });
 
 const funding = {
@@ -69,8 +67,8 @@ const funding = {
     src: 'funding',
     data: passChannelId,
     onDone: 'postFundSetup',
-    autoForward: true,
-  },
+    autoForward: true
+  }
 };
 
 const postFundSetup = {
@@ -78,18 +76,14 @@ const postFundSetup = {
     id: 'postFundSetup',
     src: 'advanceChannel',
     data: advanceChannelArgs(3),
-    onDone: 'success',
+    onDone: 'success'
   },
   on: {
-    CHANNEL_UPDATED: forwardChannelUpdated<Init>('postFundSetup'),
-  },
+    CHANNEL_UPDATED: forwardChannelUpdated<Init>('postFundSetup')
+  }
 };
 
-export const config: MachineConfig<
-  Init,
-  any,
-  OpenChannel | CloseChannel | ChannelUpdated
-> = {
+export const config: MachineConfig<Init, any, OpenChannel | CloseChannel | ChannelUpdated> = {
   key: PROTOCOL,
   initial: 'checkNonce',
   states: {
@@ -99,15 +93,15 @@ export const config: MachineConfig<
     preFundSetup,
     funding,
     postFundSetup,
-    success: { type: 'final' as 'final', entry: sendParent('CHANNEL_JOINED') },
-  },
+    success: {type: 'final' as 'final', entry: sendParent('CHANNEL_JOINED')}
+  }
 };
 
-export const mockOptions: { guards: Guards } = {
-  guards: { nonceOk: () => true },
+export const mockOptions: {guards: Guards} = {
+  guards: {nonceOk: () => true}
 };
 export type Guards = {
-  nonceOk: ({  }: Init, event: OpenChannelEvent) => boolean;
+  nonceOk: ({}: Init, event: OpenChannelEvent) => boolean;
 };
 export type Services = {
   askClient: any;
@@ -115,40 +109,37 @@ export type Services = {
   advanceChannel: any;
 };
 export type Actions = {
-  storeState({ channelId }: Init, { signedState }: OpenChannel): void;
-  sendCloseChannel({ channelId }: Init): void;
+  storeState({channelId}: Init, {signedState}: OpenChannel): void;
+  sendCloseChannel({channelId}: Init): void;
 };
 
-export const machine: MachineFactory<Init, any> = (
-  store: Store,
-  { channelId }: JoinChannel.Init
-) => {
+export const machine: MachineFactory<Init, any> = (store: Store, {channelId}: JoinChannel.Init) => {
   const guards: Guards = {
     nonceOk: ({}, event: OpenChannelEvent) => {
-      const { channel } = event.signedState.state;
+      const {channel} = event.signedState.state;
       return store.nonceOk(channel.participants, channel.channelNonce);
-    },
+    }
   };
   const actions: Actions = {
-    storeState: ({  }: Init, { signedState }: OpenChannel) => {
+    storeState: ({}: Init, {signedState}: OpenChannel) => {
       store.receiveStates([signedState]);
     },
     sendCloseChannel: () => {
       console.log('TODO: Send close channel');
-    },
+    }
   };
 
   const services: Services = {
     askClient: async () => 'JOIN_CHANNEL',
     funding: Funding.machine(store),
-    advanceChannel: AdvanceChannel.machine(store),
+    advanceChannel: AdvanceChannel.machine(store)
   };
   const options = {
     guards,
     actions,
-    services,
+    services
   };
 
-  const context = { channelId };
+  const context = {channelId};
   return Machine(config, options).withConfig(options, context);
 };

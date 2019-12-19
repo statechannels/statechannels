@@ -1,5 +1,5 @@
-import { Channel, getChannelId, SignedState, State } from '.';
-import { Participant } from './store';
+import {Channel, getChannelId, SignedState, State} from '.';
+import {Participant} from './store';
 
 interface DirectFunding {
   type: 'Direct';
@@ -21,15 +21,9 @@ interface Guaranteed {
   guarantorChannelIds: [string, string];
 }
 
-export type Funding =
-  | DirectFunding
-  | IndirectFunding
-  | VirtualFunding
-  | Guaranteed;
+export type Funding = DirectFunding | IndirectFunding | VirtualFunding | Guaranteed;
 
-export function isIndirectFunding(
-  funding: Funding
-): funding is IndirectFunding {
+export function isIndirectFunding(funding: Funding): funding is IndirectFunding {
   return funding.type === 'Indirect';
 }
 
@@ -59,7 +53,7 @@ export class ChannelStoreEntry implements IChannelStoreEntry {
   public channel: Channel;
 
   constructor(args: Partial<IChannelStoreEntry>) {
-    const { privateKey, participants, channel } = args;
+    const {privateKey, participants, channel} = args;
     if (privateKey && participants && channel) {
       this.privateKey = privateKey;
       this.participants = participants;
@@ -79,7 +73,7 @@ export class ChannelStoreEntry implements IChannelStoreEntry {
       privateKey,
       participants,
       channel,
-      funding,
+      funding
     }: IChannelStoreEntry = this;
     return {
       supportedState,
@@ -87,14 +81,12 @@ export class ChannelStoreEntry implements IChannelStoreEntry {
       privateKey,
       participants,
       channel,
-      funding,
+      funding
     };
   }
 
   get ourIndex() {
-    return this.participants.findIndex(
-      p => p.signingAddress === this.privateKey
-    );
+    return this.participants.findIndex(p => p.signingAddress === this.privateKey);
   }
 
   get latestSupportedState(): State | undefined {
@@ -102,7 +94,7 @@ export class ChannelStoreEntry implements IChannelStoreEntry {
     if (numStates > 0) {
       return this.supportedState[numStates - 1].state;
     } else {
-      return;
+      return undefined;
     }
   }
 

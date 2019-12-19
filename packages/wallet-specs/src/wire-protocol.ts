@@ -1,4 +1,4 @@
-import { SignedState } from '.';
+import {SignedState} from '.';
 
 export type HubChoice = {
   type: 'HubChoice';
@@ -34,8 +34,8 @@ export type SendStates = {
 
 export const sendStates = (signedStates: SignedState[]): SendStates => ({
   signedStates,
-  type: 'SendStates',
+  type: 'SendStates'
 });
 
 export type Message = SendStates | ProposeIntent;
-export type AddressableMessage = Message & { to: string };
+export type AddressableMessage = Message & {to: string};

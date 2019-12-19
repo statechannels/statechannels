@@ -1,21 +1,13 @@
-import { assign } from 'xstate';
-import {
-  add,
-  AllocationItem,
-  Balance,
-  Channel,
-  getChannelId,
-  Guarantee,
-  store,
-} from '../../';
-import { Init as CreateNullChannelArgs } from '../create-null-channel/protocol';
-import { Init as SupportStateArgs } from '../support-state/protocol';
+import {assign} from 'xstate';
+import {add, AllocationItem, Balance, Channel, getChannelId, Guarantee, store} from '../../';
+import {Init as CreateNullChannelArgs} from '../create-null-channel/protocol';
+import {Init as SupportStateArgs} from '../support-state/protocol';
 
 const PROTOCOL = 'virtual-funding-as-leaf';
 
 enum Indices {
   Left = 0,
-  Right = 1,
+  Right = 1
 }
 
 export interface Init {
@@ -28,28 +20,26 @@ export interface Init {
 
 export const assignChannels = assign(
   (init: Init): ChannelsKnown => {
-    const { hubAddress, targetChannelId, index } = init;
-    const participants = store
-      .getEntry(targetChannelId)
-      .participants.map(p => p.destination);
+    const {hubAddress, targetChannelId, index} = init;
+    const participants = store.getEntry(targetChannelId).participants.map(p => p.destination);
     const jointParticipants = [participants[0], hubAddress, participants[1]];
     const jointChannel: Channel = {
       participants: jointParticipants,
       channelNonce: store.getNextNonce(jointParticipants),
-      chainId: 'TODO',
+      chainId: 'TODO'
     };
 
     const guarantorParticipants = [participants[index], hubAddress];
     const guarantorChannel: Channel = {
       participants: guarantorParticipants,
       channelNonce: store.getNextNonce(guarantorParticipants),
-      chainId: 'TODO',
+      chainId: 'TODO'
     };
 
     return {
       ...init,
       jointChannel,
-      guarantorChannel,
+      guarantorChannel
     };
   }
 );
@@ -59,60 +49,54 @@ export type ChannelsKnown = Init & {
   guarantorChannel: Channel;
 };
 const total = (balances: Balance[]) => balances.map(b => b.wei).reduce(add);
-export function jointChannelArgs({
-  balances,
-  jointChannel,
-}: ChannelsKnown): CreateNullChannelArgs {
+export function jointChannelArgs({balances, jointChannel}: ChannelsKnown): CreateNullChannelArgs {
   const allocation: (i: Indices) => AllocationItem = i => ({
     destination: balances[i].address,
-    amount: balances[i].wei,
+    amount: balances[i].wei
   });
 
   return {
     channel: jointChannel,
     outcome: [
       allocation(Indices.Left),
-      { destination: jointChannel.participants[1], amount: total(balances) },
-      allocation(Indices.Right),
-    ],
+      {destination: jointChannel.participants[1], amount: total(balances)},
+      allocation(Indices.Right)
+    ]
   };
 }
 const createJointChannel = {
   invoke: {
     src: 'createNullChannel',
-    data: 'jointChannelArgs',
-  },
+    data: 'jointChannelArgs'
+  }
 };
 
-export function guarantorChannelArgs({
-  jointChannel,
-  index,
-}: ChannelsKnown): Guarantee {
-  const { participants } = jointChannel;
+export function guarantorChannelArgs({jointChannel, index}: ChannelsKnown): Guarantee {
+  const {participants} = jointChannel;
 
   return {
     target: getChannelId(jointChannel),
     // Note that index in the joint channel is twice the index in the target channel
-    guarantee: [participants[2 * index], participants[1]],
+    guarantee: [participants[2 * index], participants[1]]
   };
 }
 
 const createGuarantorChannel = {
   invoke: {
     src: 'createNullChannel',
-    data: 'guarantorChannelArgs',
-  },
+    data: 'guarantorChannelArgs'
+  }
 };
 
 export function fundGuarantorArgs({
   guarantorChannel,
   ledgerId,
-  balances,
+  balances
 }: ChannelsKnown): SupportStateArgs {
   const amount = total(balances);
   return {
     channelId: ledgerId,
-    outcome: [{ destination: getChannelId(guarantorChannel), amount }],
+    outcome: [{destination: getChannelId(guarantorChannel), amount}]
   };
 }
 const createChannels = {
@@ -120,25 +104,25 @@ const createChannels = {
   type: 'parallel',
   states: {
     createGuarantorChannel,
-    createJointChannel,
+    createJointChannel
   },
-  onDone: 'fundGuarantor',
+  onDone: 'fundGuarantor'
 };
 
 const fundGuarantor = {
   invoke: {
     src: 'supportState',
     data: 'guarantorOutcome',
-    onDone: 'fundTarget',
-  },
+    onDone: 'fundTarget'
+  }
 };
 
 const fundTarget = {
   invoke: {
     src: 'supportState',
     data: 'jointOutcome',
-    onDone: 'success',
-  },
+    onDone: 'success'
+  }
 };
 
 // PROTOCOL DEFINITION
@@ -149,6 +133,6 @@ export const config = {
     createChannels,
     fundGuarantor,
     fundTarget,
-    success: { type: 'final' },
-  },
+    success: {type: 'final'}
+  }
 };

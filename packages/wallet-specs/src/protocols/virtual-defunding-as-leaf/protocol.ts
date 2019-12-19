@@ -1,7 +1,7 @@
-import { assign } from 'xstate';
-import { Allocation, store, Without } from '../../';
-import { isIndirectFunding, isVirtualFunding } from '../../ChannelStoreEntry';
-import { checkThat, isAllocation } from '../../store';
+import {assign} from 'xstate';
+import {Allocation, store, Without} from '../../';
+import {isIndirectFunding, isVirtualFunding} from '../../ChannelStoreEntry';
+import {checkThat, isAllocation} from '../../store';
 
 import * as LedgerUpdate from '../ledger-update/protocol';
 const PROTOCOL = 'virtual-defunding-as-leaf';
@@ -12,13 +12,13 @@ export interface Init {
 }
 
 export const assignChannels = assign(
-  ({ targetChannelId, index }: Init): ChannelsSet => {
-    const { jointChannelId, guarantorChannelId } = checkThat(
+  ({targetChannelId, index}: Init): ChannelsSet => {
+    const {jointChannelId, guarantorChannelId} = checkThat(
       store.getEntry(targetChannelId).funding,
       isVirtualFunding
     );
 
-    const { ledgerId: hubLedgerId } = checkThat(
+    const {ledgerId: hubLedgerId} = checkThat(
       store.getEntry(guarantorChannelId).funding,
       isIndirectFunding
     );
@@ -28,7 +28,7 @@ export const assignChannels = assign(
       index,
       jointChannelId,
       guarantorChannelId,
-      hubLedgerId,
+      hubLedgerId
     };
   }
 );
@@ -41,27 +41,23 @@ export type ChannelsSet = Init & {
 
 function finalJointChannelUpdate({
   jointChannelId,
-  targetChannelId,
+  targetChannelId
 }: ChannelsSet): LedgerUpdate.Init {
-  const { state: targetChannelState } = store.getLatestSupport(
-    targetChannelId
-  )[0];
+  const {state: targetChannelState} = store.getLatestSupport(targetChannelId)[0];
   if (!targetChannelState.isFinal) {
     throw new Error('Target channel not finalized');
   }
-  const { state: jointState } = store.getLatestConsensus(jointChannelId);
+  const {state: jointState} = store.getLatestConsensus(jointChannelId);
 
   const jointOutcome = checkThat(jointState.outcome, isAllocation);
-  const targetChannelIdx = jointOutcome.findIndex(
-    a => a.destination === targetChannelId
-  );
+  const targetChannelIdx = jointOutcome.findIndex(a => a.destination === targetChannelId);
   const targetOutcome = [
     ...checkThat(targetChannelState.outcome, isAllocation),
-    ...jointOutcome.splice(targetChannelIdx),
+    ...jointOutcome.splice(targetChannelIdx)
   ];
   return {
     channelId: jointChannelId,
-    targetOutcome,
+    targetOutcome
   };
 }
 const defundTarget = {
@@ -69,16 +65,16 @@ const defundTarget = {
   invoke: {
     src: 'supportState',
     data: finalJointChannelUpdate.name,
-    onDone: 'defundGuarantor',
+    onDone: 'defundGuarantor'
   },
-  exit: 'garbageCollecttargetChannel',
+  exit: 'garbageCollecttargetChannel'
 };
 
 // Without is used so that defundGuarantorInLedger can be used by the hub as well
 export function defundGuarantorInLedger({
   hubLedgerId,
   jointChannelId,
-  index,
+  index
 }: Without<ChannelsSet, 'targetChannelId'>): LedgerUpdate.Init {
   /*
   Case:
@@ -97,25 +93,25 @@ export function defundGuarantorInLedger({
   const targetOutcome: Allocation = [
     {
       destination: jointOutcome[2 * index].destination,
-      amount: jointOutcome[2 * index].amount,
+      amount: jointOutcome[2 * index].amount
     },
     {
       destination: jointOutcome[1].destination,
-      amount: jointOutcome[2 * (1 - index)].amount,
-    },
+      amount: jointOutcome[2 * (1 - index)].amount
+    }
   ];
   return {
     channelId: hubLedgerId,
-    targetOutcome,
+    targetOutcome
   };
 }
 const defundGuarantor = {
   invoke: {
     src: 'supportState',
     data: defundGuarantorInLedger.name,
-    onDone: 'success',
+    onDone: 'success'
   },
-  exit: ['garbageCollectJointChannel', 'garbageCollectGuarantorChannel'],
+  exit: ['garbageCollectJointChannel', 'garbageCollectGuarantorChannel']
 };
 
 export const config = {
@@ -124,6 +120,6 @@ export const config = {
   states: {
     defundTarget,
     defundGuarantor,
-    success: { type: 'final' },
-  },
+    success: {type: 'final'}
+  }
 };

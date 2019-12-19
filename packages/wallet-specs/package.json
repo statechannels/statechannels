@@ -4,13 +4,21 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
+    "prepare": "yarn build",
+    "build": "yarn generateConfigs",
     "generateConfigs": "yarn run ts-node bin/generateConfigs.ts && npx prettier --write src/protocols/*/protocol.config.js",
-    "test": "jest"
+    "test": "jest",
+    "lint:check": "eslint . --ext .ts --cache",
+    "lint:write": "eslint . --ext .ts --fix",
+    "precommit": "lint-staged --quiet"
+  },
+  "lint-staged": {
+    "{src,bin}/**/*.{ts}": "eslint --cache"
   },
   "dependencies": {
     "xstate": "^4.7"
   },
-  "devDependencies": {
+  "devDependencies": {  
     "@types/jest": "^24.0.23",
     "@types/node": "^12.12.7",
     "@types/prettier": "1.18.2",

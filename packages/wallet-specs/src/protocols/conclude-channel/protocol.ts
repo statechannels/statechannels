@@ -1,4 +1,4 @@
-import { State, store } from '../..';
+import {State, store} from '../..';
 import * as LedgerDefunding from '../ledger-defunding/protocol';
 import * as VirtualDefundingAsHub from '../virtual-defunding-as-hub/protocol';
 import * as VirtualDefundingAsLeaf from '../virtual-defunding-as-leaf/protocol';
@@ -9,14 +9,14 @@ export interface Init {
   channelId: string;
 }
 
-function finalState({ channelId }: Init): State {
+function finalState({channelId}: Init): State {
   // Only works for wallet channels
   // (and even doesn't really work reliably there)
   const latestState = store
     .getUnsupportedStates(channelId)
     .concat(store.getLatestConsensus(channelId))
-    .filter(({ state }) => store.signedByMe(state))
-    .sort(({ state }) => state.turnNum)
+    .filter(({state}) => store.signedByMe(state))
+    .sort(({state}) => state.turnNum)
     .pop();
 
   if (!latestState) {
@@ -26,40 +26,40 @@ function finalState({ channelId }: Init): State {
   return {
     ...latestState.state,
     turnNum: latestState.state.turnNum + 1,
-    isFinal: true,
+    isFinal: true
   };
 }
 
 const concludeTarget = {
   invoke: {
     src: 'supportState',
-    data: finalState.name,
+    data: finalState.name
   },
   onDone: [
     {
       target: 'virtualDefunding',
-      cond: 'virtuallyFunded',
+      cond: 'virtuallyFunded'
     },
     {
       target: 'success',
-      cond: 'directlyFunded',
+      cond: 'directlyFunded'
     },
     {
       target: 'ledgerDefunding',
-      cond: 'indirectlyFunded',
-    },
-  ],
+      cond: 'indirectlyFunded'
+    }
+  ]
 };
 
-function ledgerDefundingArgs({ channelId }: Init): LedgerDefunding.Init {
-  return { targetChannelId: channelId };
+function ledgerDefundingArgs({channelId}: Init): LedgerDefunding.Init {
+  return {targetChannelId: channelId};
 }
 const ledgerDefunding = {
   invoke: {
     src: 'ledgerDefunding',
     data: ledgerDefundingArgs.name,
-    onDone: 'success',
-  },
+    onDone: 'success'
+  }
 };
 
 function virtualDefundingAsLeafArgs(ctx: Init): VirtualDefundingAsLeaf.Init {
@@ -67,41 +67,38 @@ function virtualDefundingAsLeafArgs(ctx: Init): VirtualDefundingAsLeaf.Init {
   const index = 0;
   return {
     targetChannelId,
-    index,
+    index
   };
 }
 function virtualDefundingAsHubArgs(ctx: Init): VirtualDefundingAsHub.Init {
   const jointChannelId = 'joint';
-  return { jointChannelId };
+  return {jointChannelId};
 }
 const virtualDefunding = {
   initial: 'start',
   states: {
     start: {
       on: {
-        '': [
-          { target: 'asLeaf', cond: 'amLeaf' },
-          { target: 'asHub', cond: 'amHub' },
-        ],
-      },
+        '': [{target: 'asLeaf', cond: 'amLeaf'}, {target: 'asHub', cond: 'amHub'}]
+      }
     },
     asLeaf: {
       invoke: {
         src: 'virtualDefundingAsLeaf',
         data: virtualDefundingAsLeafArgs.name,
-        onDone: 'success',
-      },
+        onDone: 'success'
+      }
     },
     asHub: {
       invoke: {
         src: 'virtualDefundingAsHub',
         data: virtualDefundingAsHubArgs.name,
-        onDone: 'success',
-      },
+        onDone: 'success'
+      }
     },
-    success: { type: 'final' },
+    success: {type: 'final'}
   },
-  onDone: 'success',
+  onDone: 'success'
 };
 
 export const config = {
@@ -111,13 +108,13 @@ export const config = {
     concludeTarget,
     virtualDefunding,
     ledgerDefunding,
-    success: { type: 'final' },
-  },
+    success: {type: 'final'}
+  }
 };
 
 const guards = {
   virtuallyFunded: _ => true,
   indirectlyFunded: _ => true,
-  directlyFunded: _ => true,
+  directlyFunded: _ => true
 };
-export const mockOptions = { guards };
+export const mockOptions = {guards};

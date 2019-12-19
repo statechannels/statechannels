@@ -8,14 +8,14 @@ import {
   Outcome,
   State,
   store,
-  subtract,
+  subtract
 } from '../../';
-import { checkThat, isAllocation } from '../../store';
+import {checkThat, isAllocation} from '../../store';
 import * as LedgerUpdate from '../ledger-update/protocol';
 
 const PROTOCOL = 'direct-funding';
-const success = { type: 'final' };
-const failure = { type: 'final' };
+const success = {type: 'final'};
+const failure = {type: 'final'};
 
 export interface Init {
   channelId: string;
@@ -23,7 +23,7 @@ export interface Init {
 }
 
 function getHoldings(state: State, destination: string): string {
-  const { outcome } = state;
+  const {outcome} = state;
 
   let currentFunding = chain.holdings(getChannelId(state.channel));
   return checkThat(outcome, isAllocation)
@@ -40,17 +40,13 @@ function assertOk(minimalOutcome: Allocation): boolean {
   return uniqueDestinations(minimalOutcome).length === minimalOutcome.length;
 }
 
-function obligation(
-  state: State,
-  minimalOutcome: Allocation,
-  destination: string
-): string {
+function obligation(state: State, minimalOutcome: Allocation, destination: string): string {
   assertOk(minimalOutcome);
   const myHoldings = getHoldings(state, destination);
 
   const myTargetLevel = (
     minimalOutcome.find(item => item.destination === destination) || {
-      amount: '0',
+      amount: '0'
     }
   ).amount;
   return max(subtract(myTargetLevel, myHoldings), 0);
@@ -64,18 +60,15 @@ function uniqueDestinations(outcome: Allocation): string[] {
   return outcome.map(i => i.destination).filter(firstEntry);
 }
 
-function preDepositOutcome(
-  channelId: string,
-  minimalOutcome: Allocation
-): Outcome {
-  const { state } = store.getLatestConsensus(channelId);
+function preDepositOutcome(channelId: string, minimalOutcome: Allocation): Outcome {
+  const {state} = store.getLatestConsensus(channelId);
   const outcome = store.getLatestSupportedAllocation(channelId);
 
   const destinations = uniqueDestinations(outcome.concat(minimalOutcome));
   return outcome.concat(
     destinations.map(destination => ({
       destination,
-      amount: obligation(state, minimalOutcome, destination),
+      amount: obligation(state, minimalOutcome, destination)
     }))
   );
 }
@@ -93,7 +86,7 @@ function postDepositOutcome(channelId: string): Outcome {
     amount: outcome
       .filter(i => i.destination === destination)
       .map(amount)
-      .reduce(add),
+      .reduce(add)
   }));
 }
 
@@ -108,53 +101,53 @@ type UpdateOutcome = Base & {
 
 function preFundLedgerUpdateParams({
   targetChannelId: channelId,
-  minimalOutcome,
+  minimalOutcome
 }: UpdateOutcome): LedgerUpdate.Init {
   return {
     channelId,
-    targetOutcome: preDepositOutcome(channelId, minimalOutcome),
+    targetOutcome: preDepositOutcome(channelId, minimalOutcome)
   };
 }
 const updatePrefundOutcome = {
   on: {
-    '': { target: 'waiting', cond: 'noUpdateNeeded' },
+    '': {target: 'waiting', cond: 'noUpdateNeeded'}
   },
   invoke: {
     src: 'ledgerUpdate',
     data: preFundLedgerUpdateParams.name,
-    onDone: 'waiting',
-  },
+    onDone: 'waiting'
+  }
 };
 
 const waiting = {
   on: {
     '*': [
-      { target: 'deposit', cond: 'safeToDeposit', actions: 'deposit' },
-      { target: 'updatePostFundOutcome', cond: 'funded' },
-    ],
-  },
+      {target: 'deposit', cond: 'safeToDeposit', actions: 'deposit'},
+      {target: 'updatePostFundOutcome', cond: 'funded'}
+    ]
+  }
 };
 
 const deposit = {
   invoke: {
-    src: 'submitTransaction',
+    src: 'submitTransaction'
   },
   onDone: 'waiting',
-  onError: 'failure',
+  onError: 'failure'
 };
 
-function postFundLedgerUpdateParams({ targetChannelId }: UpdateOutcome) {
+function postFundLedgerUpdateParams({targetChannelId}: UpdateOutcome) {
   return {
     targetChannelId,
-    targetOutcome: postDepositOutcome(targetChannelId),
+    targetOutcome: postDepositOutcome(targetChannelId)
   };
 }
 const updatePostFundOutcome = {
   invoke: {
     src: 'ledgerUpdate',
     data: postFundLedgerUpdateParams.name,
-    onDone: 'success',
-  },
+    onDone: 'success'
+  }
 };
 
 export const config = {
@@ -166,13 +159,13 @@ export const config = {
     deposit,
     updatePostFundOutcome,
     success,
-    failure,
-  },
+    failure
+  }
 };
 
 const guards = {
   noUpdateNeeded: x => true,
   safeToDeposit: x => true,
-  funded: x => true,
+  funded: x => true
 };
-export const mockOptions = { guards };
+export const mockOptions = {guards};
