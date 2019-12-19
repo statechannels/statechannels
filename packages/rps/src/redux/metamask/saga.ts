@@ -22,6 +22,7 @@ function* networkChangedSaga() {
   while (true) {
     const network = yield take(networkChangedChannel);
     yield put(metamaskActions.networkChanged(network));
+    location.reload();
   }
 }
 
