@@ -107,7 +107,8 @@ describe('FakeChannelClient', () => {
   it('joins a channel', async () => {
     setClientStates([clientA, clientB], states['proposed']);
     const channelResult = await clientB.joinChannel(channelId);
-    expect(states['running']).toEqual(channelResult);
+    expect(channelResult).toEqual(states['running']);
+    expect(clientA.latestState).toEqual(states['running']);
   });
 
   describe('updates a channel', () => {
@@ -120,6 +121,7 @@ describe('FakeChannelClient', () => {
         UPDATED_APP_DATA
       );
       expect(channelResult).toEqual(states['updated_app_data']);
+      expect(clientB.latestState).toEqual(states['updated_app_data']);
     });
 
     it('the player whose turn it is not cannot update the channel', async () => {
@@ -133,8 +135,8 @@ describe('FakeChannelClient', () => {
   describe('closes a channel', () => {
     it('player with valid turn can make a valid close channel call', async () => {
       setClientStates([clientA, clientB], states['running']);
-      // Since the clients agree to a channel close, this skips the 'closing'
-      // step and the clients directly agree to have the channel 'closed'
+      // Since the clients agree to close a channel, this skips the 'closing'
+      // phase and the clients directly go to the channel 'closed' state
       const channelResult = await clientA.closeChannel(channelId);
       expect(channelResult).toEqual(states['closed']);
       expect(clientB.latestState).toEqual(states['closed']);
