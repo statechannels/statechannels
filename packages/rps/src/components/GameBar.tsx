@@ -1,9 +1,6 @@
 import React from 'react';
-
-import * as web3Utils from 'web3-utils';
-
 import {Navbar} from 'reactstrap';
-import {bigNumberify} from 'ethers/utils';
+import {bigNumberify, formatUnits} from 'ethers/utils';
 
 interface Props {
   myName: string;
@@ -60,7 +57,7 @@ export default class GameBar extends React.PureComponent<Props> {
         <div className="container">
           <div className="col-2 my-name text-right">{myName}</div>
           <div className="col-auto my-balance">
-            <div className="text-center">{web3Utils.fromWei(myBalance, 'ether')}</div>
+            <div className="text-center">{formatUnits(myBalance, 'ether')}</div>
             <div className="eth text-center">ETH</div>
           </div>
           <div className="col">
@@ -70,7 +67,7 @@ export default class GameBar extends React.PureComponent<Props> {
             </div>
           </div>
           <div className="col-auto opponent-balance">
-            <div className="text-center">{web3Utils.fromWei(opponentBalance, 'ether')}</div>
+            <div className="text-center">{formatUnits(opponentBalance, 'ether')}</div>
             <div className="eth text-center">ETH</div>
           </div>
           <div className="col-2 opponent-name">{opponentName}</div>

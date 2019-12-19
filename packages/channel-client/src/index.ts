@@ -9,3 +9,5 @@ export {
 } from './types';
 
 export {ChannelClient} from './channel-client';
+
+export {FakeChannelClient} from './fake-channel-client';

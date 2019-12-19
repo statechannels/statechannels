@@ -1,21 +1,21 @@
 import {bigNumberify} from "ethers/utils";
 import jrs from "jsonrpc-lite";
-import {call, put, select} from "redux-saga/effects";
+import {call, select} from "redux-saga/effects";
 import {validateNotification, validateResponse} from "../../../json-rpc-validation/validator";
 import {createJsonRpcAllocationsFromOutcome} from "../../../utils/json-rpc-utils";
 import {unreachable} from "../../../utils/reducer-utils";
-import {messageSent} from "../../actions";
-import {ChannelParticipant, ChannelState, getLastState} from "../../channel-store";
+
+import {ChannelState, getLastState, getPenultimateState} from "../../channel-store";
 import {getChannelHoldings, getLastSignedStateForChannel} from "../../selectors";
 import {getChannelStatus} from "../../state";
 import {OutgoingApiAction} from "./outgoing-api-actions";
+import {State} from "@statechannels/nitro-protocol";
 
 export function* messageSender(action: OutgoingApiAction) {
   const message = yield createResponseMessage(action);
   if (message) {
     yield validate(message, action);
     yield call([window.parent, window.parent.postMessage], message, "*");
-    yield put(messageSent({}));
   }
 }
 
@@ -24,6 +24,8 @@ function* createResponseMessage(action: OutgoingApiAction) {
     case "WALLET.JOIN_CHANNEL_RESPONSE":
       return jrs.success(action.id, yield getChannelInfo(action.channelId));
     case "WALLET.CREATE_CHANNEL_RESPONSE":
+      return jrs.success(action.id, yield getChannelInfo(action.channelId));
+    case "WALLET.CLOSE_CHANNEL_RESPONSE":
       return jrs.success(action.id, yield getChannelInfo(action.channelId));
     case "WALLET.UPDATE_CHANNEL_RESPONSE":
       return jrs.success(action.id, yield getChannelInfo(action.channelId));
@@ -122,6 +124,7 @@ function* validate(message: any, action: OutgoingApiAction) {
 function* getChannelInfo(channelId: string) {
   const channelStatus: ChannelState = yield select(getChannelStatus, channelId);
   const state = getLastState(channelStatus);
+  const previousState = getPenultimateState(channelStatus);
 
   const {participants} = channelStatus;
   const {appData, appDefinition, turnNum} = state;
@@ -132,7 +135,7 @@ function* getChannelInfo(channelId: string) {
   if (!bigNumberify(channelHoldings).isZero()) {
     funding = [{token: "0x0", amount: channelHoldings}];
   }
-  const status = getChannelInfoStatus(turnNum, participants);
+  const status = getChannelInfoStatus(state, previousState);
 
   return {
     participants,
@@ -147,8 +150,20 @@ function* getChannelInfo(channelId: string) {
 }
 
 function getChannelInfoStatus(
-  turnNum: number,
-  participants: ChannelParticipant[]
-): "proposed" | "opening" | "running" {
-  return turnNum === 0 ? "proposed" : turnNum < participants.length - 1 ? "opening" : "running";
+  currentState: State,
+  previousState: State
+): "proposed" | "opening" | "running" | "closing" | "closed" {
+  if (currentState.isFinal) {
+    if (previousState.isFinal) {
+      return "closed";
+    } else {
+      return "closing";
+    }
+  } else if (currentState.turnNum === 0) {
+    return "proposed";
+  } else if (currentState.turnNum < currentState.channel.participants.length - 1) {
+    return "opening";
+  } else {
+    return "running";
+  }
 }

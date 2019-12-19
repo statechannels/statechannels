@@ -31,7 +31,7 @@
     "test": "run-s 'test:app --all' 'test:contracts --all'",
     "test:puppeteer": "npx jest --runInBand -c ./config/jest/jest.puppeteer.config.js",
     "puppeteer:script": "npx ts-node -O '{\"module\":\"commonjs\"}' ./puppeteer/scripts/funding.ts ",
-    "test:ci:integration": "wait-on http-get://localhost:3055/ && yarn test:puppeteer",
+    "test:ci:integration": "wait-on http-get://localhost:3055/ http-get://localhost:3000/ && yarn test:puppeteer",
     "precommit": "lint-staged --quiet"
   },
   "dependencies": {
@@ -176,7 +176,7 @@
     "etherlime-lib": "1.1.5",
     "extract-text-webpack-plugin": "4.0.0-beta.0",
     "file-loader": "4.2.0",
-    "fork-ts-checker-webpack-plugin": "2.0.0",
+    "fork-ts-checker-webpack-plugin": "3.1.1",
     "ganache-cli": "6.7.0",
     "html-webpack-plugin": "4.0.0-beta.5",
     "jest": "24.9.0",

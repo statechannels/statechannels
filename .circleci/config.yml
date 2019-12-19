@@ -1,4 +1,5 @@
 version: 2.1
+
 orbs:
   slack: circleci/slack@3.4.1
   puppeteer: threetreeslight/puppeteer@0.1.2
@@ -7,12 +8,15 @@ defaults: &defaults
   working_directory: /home/circleci/project
   resource_class: medium
   docker:
-    - image: circleci/node:10.16.3
+    - image: counterfactual/statechannels:0.5.13 # Fast contract compilation with solc installed
+      environment:
+        USE_NATIVE_SOLC: true
     - image: circleci/postgres:12.0-alpine
       environment:
         POSTGRES_USER: root
         POSTGRES_DB: hub_wallet_test
         POSTGRES_PASSWORD: ''
+        NODE_ENV: test
 
 save_dep: &save_dep
   save_cache:
@@ -26,6 +30,7 @@ restore_dep: &restore_dep
     key: dependency-cache-{{ checksum "yarn.lock" }}
 
 commands:
+
   log_stats:
     description: 'Log stats '
     parameters:
@@ -36,6 +41,7 @@ commands:
       - run:
           command: bash bin/log_memory.sh <<parameters.file>>
           background: true
+
   upload_logs:
     description: 'Upload logs '
     parameters:
@@ -47,6 +53,19 @@ commands:
           path: /home/circleci/<< parameters.file >>.txt
           destination: << parameters.file >>
 
+  upload_gas_report:
+    description: 'Upload gas report '
+    parameters:
+      package:
+        type: string
+    steps:
+      - store_artifacts:
+          path: /home/circleci/project/packages/<< parameters.package >>/gas.json
+          destination: << parameters.package >>-gas.json
+      - store_artifacts:
+          path: /home/circleci/project/packages/<< parameters.package >>/gas.md
+          destination: << parameters.package >>-gas.md
+
   notify_slack:
     description: 'Notify slack '
     steps:
@@ -57,6 +76,7 @@ commands:
           only_for_branches: 'master'
 
 jobs:
+
   prepare:
     <<: *defaults
     steps:
@@ -104,9 +124,21 @@ jobs:
       - upload_logs:
           file: test-stats
       - notify_slack
+      - upload_gas_report:
+          package: rps
+      - upload_gas_report:
+          package: nitro-protocol
 
   integration-test:
-    <<: *defaults
+    resource_class: medium
+    working_directory: /home/circleci/project
+    docker:
+      - image: circleci/node:10.16.3
+    environment:
+      USE_VIRTUAL_FUNDING: FALSE
+      USE_GANACHE_DEPLOYMENT_CACHE: true
+      GANACHE_CACHE_FOLDER: ../../.ganache-deployments
+      GANACHE_PORT: 8547
     steps:
       - checkout:
           path: /home/circleci/project
@@ -116,9 +148,19 @@ jobs:
       - attach_workspace:
           at: /home/circleci/project
       - run:
-          command: (cd packages/wallet && yarn run start:integration)
+          command: (cd packages/devtools && yarn run start:shared-ganache)
           background: true
+      - run:
+          command: (cd packages/wallet && yarn run wait-on ${GANACHE_CACHE_FOLDER} && yarn run start:integration)
+          background: true
+      - run:
+          command: (cd packages/rps && yarn run wait-on ${GANACHE_CACHE_FOLDER} && yarn run start)
+          background: true
+      # - run:
+      #     command: (cd packages/hub && yarn run wait-on ${GANACHE_CACHE_FOLDER} && yarn run hub:start:dev)
+      #     background: true
       - run: (cd packages/wallet && yarn run test:ci:integration)
+      - run: (cd packages/e2e-tests && yarn test)
       - upload_logs:
           file: integration-test-stats
       - notify_slack

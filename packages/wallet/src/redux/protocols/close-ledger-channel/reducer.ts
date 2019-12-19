@@ -7,7 +7,7 @@ import * as selectors from "../../selectors";
 import * as actions from "./actions";
 import {isWithdrawalAction} from "../withdrawing/actions";
 import {unreachable} from "../../../utils/reducer-utils";
-import {EmbeddedProtocol} from "../../../communication";
+import {EmbeddedProtocol, ProtocolLocator} from "../../../communication";
 import {getLastState} from "../../channel-store";
 import {ProtocolAction} from "../../actions";
 import {
@@ -16,14 +16,18 @@ import {
   advanceChannelReducer
 } from "../advance-channel";
 import {WithdrawalState} from "../withdrawing/states";
-import {routesToAdvanceChannel} from "../advance-channel/actions";
+import {routesToAdvanceChannel, clearedToSend} from "../advance-channel/actions";
 import {StateType} from "../advance-channel/states";
 import {getAllocationAmountForIndex} from "../../../utils/outcome-utils";
+import {TwoPartyPlayerIndex} from "../../types";
+import * as withdrawalStates from "../withdrawing/states";
 
 export const initialize = (
   processId: string,
   channelId: string,
-  sharedData: SharedData
+  sharedData: SharedData,
+  clearedToSend: boolean,
+  protocolLocator: ProtocolLocator = EMPTY_LOCATOR
 ): ProtocolStateWithSharedData<states.CloseLedgerChannelState> => {
   if (helpers.channelFundsAnotherChannel(channelId, sharedData)) {
     return {
@@ -31,20 +35,20 @@ export const initialize = (
       sharedData
     };
   } else if (helpers.channelIsClosed(channelId, sharedData)) {
-    return createWaitForWithdrawal(sharedData, processId, channelId);
+    return createWaitForWithdrawal(sharedData, processId, channelId, protocolLocator);
   }
 
   let concluding: AdvanceChannelState;
   ({protocolState: concluding, sharedData} = initializeAdvanceChannel(sharedData, {
-    clearedToSend: true,
+    clearedToSend,
     processId,
     channelId,
     stateType: StateType.Conclude,
-    protocolLocator: makeLocator(EMPTY_LOCATOR, EmbeddedProtocol.AdvanceChannel),
+    protocolLocator: makeLocator(protocolLocator, EmbeddedProtocol.AdvanceChannel),
     ourIndex: helpers.getTwoPlayerIndex(channelId, sharedData)
   }));
   return {
-    protocolState: states.waitForConclude({processId, channelId, concluding}),
+    protocolState: states.waitForConclude({processId, channelId, concluding, protocolLocator}),
     sharedData
   };
 };
@@ -73,10 +77,17 @@ const waitForConcludeReducer = (
   sharedData: SharedData,
   action: actions.CloseLedgerChannelAction
 ) => {
-  if (!routesToAdvanceChannel(action, EMPTY_LOCATOR)) {
+  if (action.type === "WALLET.CLOSE_LEDGER_CHANNEL.CLEARED_TO_SEND") {
+    action = clearedToSend({
+      processId: action.processId,
+      protocolLocator: makeLocator(protocolState.protocolLocator, EmbeddedProtocol.AdvanceChannel)
+    });
+  }
+  if (!routesToAdvanceChannel(action, protocolState.protocolLocator)) {
     console.warn(`Expected advance channel action but received ${action.type}`);
     return {protocolState, sharedData};
   }
+
   let concluding: AdvanceChannelState;
   ({protocolState: concluding, sharedData} = advanceChannelReducer(
     protocolState.concluding,
@@ -85,7 +96,33 @@ const waitForConcludeReducer = (
   ));
   switch (concluding.type) {
     case "AdvanceChannel.Success":
-      return createWaitForWithdrawal(sharedData, protocolState.processId, protocolState.channelId);
+      // TODO: This is not very robust but should be good enough for now.
+      // We only call the `concludePushOutcome` if we're player A. Since the second call will fail.
+      // This should mostly be fine for virtual Funding (since we're always player A)
+      // but will be an issue with IndirectFunding as player B is at the mercy of player A
+      // see https://github.com/statechannels/monorepo/issues/761
+      if (
+        helpers.getTwoPlayerIndex(protocolState.channelId, sharedData) === TwoPartyPlayerIndex.A
+      ) {
+        return createWaitForWithdrawal(
+          sharedData,
+          protocolState.processId,
+          protocolState.channelId,
+          protocolState.protocolLocator
+        );
+      } else {
+        // TODO: wait until player A's transaction is submitted before moving to success
+        return {
+          protocolState: states.waitForWithdrawal({
+            ...protocolState,
+            withdrawal: withdrawalStates.waitForAcknowledgement({
+              channelId: protocolState.channelId,
+              processId: protocolState.processId
+            })
+          }),
+          sharedData
+        };
+      }
     case "AdvanceChannel.Failure":
       return {protocolState: states.failure({reason: "Advance Channel Failure"}), sharedData};
     default:
@@ -132,7 +169,12 @@ const waitForWithdrawalReducer = (
   }
 };
 
-const createWaitForWithdrawal = (sharedData: SharedData, processId: string, channelId: string) => {
+const createWaitForWithdrawal = (
+  sharedData: SharedData,
+  processId: string,
+  channelId: string,
+  protocolLocator: ProtocolLocator
+) => {
   const withdrawalAmount = getWithdrawalAmount(sharedData, channelId);
   let withdrawal: WithdrawalState;
   ({protocolState: withdrawal, sharedData} = withdrawalInitialize(
@@ -145,7 +187,8 @@ const createWaitForWithdrawal = (sharedData: SharedData, processId: string, chan
   const protocolState = states.waitForWithdrawal({
     processId,
     withdrawal,
-    channelId
+    channelId,
+    protocolLocator
   });
 
   return {protocolState, sharedData};

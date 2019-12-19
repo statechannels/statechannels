@@ -2,6 +2,9 @@ import {SignedState, State} from '@statechannels/nitro-protocol';
 import {signState} from '@statechannels/nitro-protocol/lib/src/signatures';
 import {Signature} from 'ethers/utils';
 import {HUB_PRIVATE_KEY} from '../../constants';
+import {logger} from '../../logger';
+
+const log = logger();
 
 export function isApplicationState(state: State): boolean {
   const isSetup: boolean = state.turnNum < state.channel.participants.length * 2;
@@ -9,7 +12,7 @@ export function isApplicationState(state: State): boolean {
 }
 
 export function validSignature(commitment: State, signature: Signature): boolean {
-  console.warn('Signature not validated');
+  log.warn('Signature not validated');
   return commitment && signature && true;
   // Return recover(toHex(commitment), signature) === mover(commitment);
 }

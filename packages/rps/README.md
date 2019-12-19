@@ -2,7 +2,9 @@
 Rock Paper Scissors
 </h1>
 
-This app is an example of a game built on our [ForceMove](https://magmo.com/force-move-games.pdf) protocol. You can [play](https://rps.magmo.com) against a friend or against our bots on the ropsten testnet.
+[![Netlify Status](https://api.netlify.com/api/v1/badges/3d541d58-edf8-4760-b513-4f9a11b991de/deploy-status)](https://app.netlify.com/sites/rps-statechannels/deploys)
+
+This app is an example of a game built on our [ForceMove](https://magmo.com/force-move-games.pdf) protocol. You can [play](https://rps.statechannels.org) against a friend or against our bots on the ropsten testnet.
 
 ![splash](./screens.png 'screens')
 

@@ -16,6 +16,18 @@ case $TARGET_PACKAGE in
         status=$?
         ;;
 
+    rps)
+        echo "Checking for changes across rps package..."
+        git diff --quiet origin/master HEAD -- ./packages/rps
+        status=$?
+        ;;
+
+    wallet)
+        echo "Checking for changes across wallet package..."
+        git diff --quiet origin/master HEAD -- ./packages/wallet
+        status=$?
+        ;;
+
     nitro-protocol)
         echo "Checking for changes in nitro-protocol package..."
         git diff --quiet origin/master HEAD -- ./packages/nitro-protocol

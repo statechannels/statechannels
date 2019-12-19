@@ -13,8 +13,7 @@ import LoginErrorPage from '../components/LoginErrorPage';
 import {localStatesA, localStatesB, channelStates} from '../redux/game/__tests__/scenarios';
 import {ChannelState} from '../core';
 import GameBar from '../components/GameBar';
-import {toWei} from 'web3-utils';
-import {bigNumberify} from 'ethers/utils';
+import {bigNumberify, parseEther} from 'ethers/utils';
 
 const fakeStore = state => ({
   dispatch: action => {
@@ -107,7 +106,7 @@ const balancesArray = [
   ['0.2', '0.8'],
 ]; // denominated in ETH
 balancesArray.forEach(balances => {
-  const balancesWei = balances.map(balance => toWei(balance, 'ether')); // now in Wei
+  const balancesWei = balances.map(balance => parseEther(balance).toString()); // now in Wei
   storiesOf('GameBar', module).add(balances[0] + ' ETH , ' + balances[1] + ' ETH', () => (
     <div className="w-100">
       <GameBar

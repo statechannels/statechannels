@@ -8,7 +8,7 @@ if (process.env.NODE_ENV !== 'production') {
 const {spawn} = require('child_process');
 
 const cmd = 'yarn';
-const args = ['run', 'etherlime', 'compile', '--buildDirectory=./build/contracts'];
+const args = ['run', 'etherlime', 'compile', '--buildDirectory=./build/contracts', '--runs=200'];
 
 if (process.env.USE_NATIVE_SOLC === 'true') {
   console.log('Using native solc version for compilation');

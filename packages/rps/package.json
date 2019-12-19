@@ -21,7 +21,6 @@
     "lint:write": "run-s eslint:write prettier:write",
     "eslint:check": "eslint \"**/*.{js,ts,tsx}\" --cache --max-warnings=0",
     "eslint:write": "eslint \"**/*.{js,ts,tsx}\" --fix --max-warnings=0",
-    "postinstall": "rm -f node_modules/web3/index.d.ts",
     "start": "yarn contracts:compile && node scripts/start.js",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
     "prepare": "yarn build:ci",
@@ -36,7 +35,7 @@
     "precommit": "lint-staged --quiet"
   },
   "lint-staged": {
-    "**/*.{js,ts,tsx}": "eslint --cache --max-warnings=0",
+    "**/*.{js,ts,tsx}": "eslint --cache",
     "**/*.{json,scss}": "prettier --ignore-path '.gitignore'"
   },
   "dependencies": {

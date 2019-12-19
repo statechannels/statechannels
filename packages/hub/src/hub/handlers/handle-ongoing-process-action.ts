@@ -1,20 +1,18 @@
-import {SignedState} from '@statechannels/nitro-protocol';
-import {ActionConstructor} from '@statechannels/wallet/lib/src/redux/utils';
 import {
   RelayActionWithMessage,
   SignedStatesReceived,
   StrategyProposed,
-  ProtocolLocator,
-  StrategyApproved,
   ChannelOpen,
-  ChannelJoined
+  relayActionWithMessage,
+  strategyApproved,
+  signedStatesReceived,
+  channelJoined
 } from '../../communication';
 import {HUB_ADDRESS, unreachable} from '../../constants';
 import {errors} from '../../wallet';
 import {getCurrentState} from '../../wallet/db/queries/getCurrentState';
 import {getProcess} from '../../wallet/db/queries/walletProcess';
 import {updateLedgerChannel} from '../../wallet/services';
-import {ChannelParticipant} from '@statechannels/wallet/lib/src/redux/channel-store';
 
 export async function handleOngoingProcessAction(
   action: ChannelOpen | StrategyProposed | SignedStatesReceived
@@ -114,29 +112,3 @@ async function handleSignedStatesReceived(action: SignedStatesReceived) {
       })
     );
 }
-
-// TODO: The following three helper functions are direct copy and paste from the wallet
-// https://github.com/statechannels/monorepo/blob/1ce06fdc98456e268a341c6aec19ef8b0a86a510/packages/wallet/src/communication/actions.ts
-
-export const channelJoined = (p: {
-  signedState: SignedState;
-  participants: ChannelParticipant[];
-}): ChannelJoined => ({...p, type: 'Channel.Joined'});
-
-export const signedStatesReceived = (p: {
-  protocolLocator: ProtocolLocator;
-  signedStates: SignedState[];
-  processId: string;
-}): SignedStatesReceived => ({
-  ...p,
-  type: 'WALLET.COMMON.SIGNED_STATES_RECEIVED'
-});
-
-export const relayActionWithMessage: ActionConstructor<RelayActionWithMessage> = p => ({
-  ...p
-});
-
-export const strategyApproved: ActionConstructor<StrategyApproved> = p => ({
-  ...p,
-  type: 'WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_APPROVED'
-});

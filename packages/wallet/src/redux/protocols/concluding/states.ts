@@ -34,6 +34,7 @@ export interface WaitForDefund extends BaseState {
 }
 export interface DecideClosing extends BaseState {
   type: "Concluding.DecideClosing";
+  ledgerClosing: NonTerminalCloseLedgerChannelState;
 }
 export interface WaitForLedgerClose extends BaseState {
   type: "Concluding.WaitForLedgerClose";

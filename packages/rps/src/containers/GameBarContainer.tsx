@@ -11,7 +11,7 @@ function mapStateToProps(state: SiteState) {
 
   if (isPlayerA(localState)) {
     return {
-      myName: name,
+      myName: localState.name,
       opponentName: localState.opponentName,
       myBalance: aBal,
       opponentBalance: bBal,
@@ -19,7 +19,7 @@ function mapStateToProps(state: SiteState) {
     };
   } else if (isPlayerB(localState)) {
     return {
-      myName: name,
+      myName: localState.name,
       opponentName: localState.opponentName,
       myBalance: bBal,
       opponentBalance: aBal,
@@ -27,7 +27,7 @@ function mapStateToProps(state: SiteState) {
     };
   } else {
     return {
-      myName: name,
+      myName: '',
       opponentName: undefined,
       myBalance: '0',
       opponentBalance: '0',

@@ -213,7 +213,8 @@ function initializeNewProtocol(
       return closeLedgerChannelProtocol.initializeCloseLedgerChannel(
         processId,
         action.channelId,
-        incomingSharedData
+        incomingSharedData,
+        true
       );
     default:
       return unreachable(action);

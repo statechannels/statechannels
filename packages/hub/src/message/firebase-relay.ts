@@ -2,6 +2,9 @@ import * as firebase from 'firebase';
 
 import {HUB_ADDRESS} from '../constants';
 import {RelayActionWithMessage} from '../communication';
+import {logger} from '../logger';
+
+const log = logger();
 
 const config = {
   apiKey: process.env.FIREBASE_API_KEY,
@@ -26,25 +29,21 @@ function getMessagesRef() {
   return firebaseAppInsance.database().ref('messages');
 }
 
-async function listen() {
+export async function fbListen(callback) {
+  log.info('firebase-relay: listen');
   const hubRef = getMessagesRef().child(HUB_ADDRESS.toLowerCase());
 
   hubRef.on('child_added', async snapshot => {
     const key = snapshot.key;
     const value = snapshot.val();
-    process.send(value.data);
+    await callback(value.data);
     hubRef.child(key).remove();
   });
 }
 
-process.on('message', (message: RelayActionWithMessage) => {
+export function fbSend(message: RelayActionWithMessage) {
   const sanitizedPayload = JSON.parse(JSON.stringify(message));
-  getMessagesRef()
+  return getMessagesRef()
     .child(message.recipient.toLowerCase())
     .push(sanitizedPayload);
-});
-
-if (require.main === module) {
-  console.log('Listening to firebase for hub messages');
-  listen();
 }

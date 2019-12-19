@@ -1,7 +1,9 @@
 import {ethers} from 'ethers';
 import {Address, Uint256} from 'fmg-core';
 import {ethAssetHolder as ethAssetHolderConstrutor} from '../utilities/blockchain';
-import {onDepositEvent} from './depositManager';
+import {logger} from '../../logger';
+
+const log = logger();
 
 /**
  * Todos:
@@ -24,9 +26,9 @@ export type AssetHolderEventHandler = (assetHolderEvent: AssetHolderWatcherEvent
 export type RemoveListeners = () => void;
 
 export async function assetHolderListen(
-  eventHandler: AssetHolderEventHandler = onDepositEvent
+  eventHandler: AssetHolderEventHandler
 ): Promise<RemoveListeners> {
-  console.log('asset-holder-watcher: listen');
+  log.info('asset-holder-watcher: listen');
   const ethAssetHolder: ethers.Contract = await ethAssetHolderConstrutor();
   const depositedFilter = ethAssetHolder.filters.Deposited();
   ethAssetHolder.on(depositedFilter, (channelId, amountDeposited, destinationHoldings) => {

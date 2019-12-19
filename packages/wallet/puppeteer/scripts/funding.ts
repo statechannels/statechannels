@@ -11,6 +11,9 @@ import {
   MessageType
 } from "../helpers";
 
+// Load environment variables from .env
+require("../../config/env");
+
 (async () => {
   // Unfortunately we need to use two separate windows
   // as otherwise the javascript gets paused on the non-selected tab

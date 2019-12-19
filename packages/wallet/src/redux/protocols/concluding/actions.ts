@@ -2,6 +2,7 @@ import {ActionConstructor} from "../../utils";
 import {AdvanceChannelAction, isAdvanceChannelAction} from "../advance-channel";
 import {DefundingAction, isDefundingAction} from "../defunding/actions";
 import {WalletAction} from "../../actions";
+import {CloseLedgerChannelAction} from "../close-ledger-channel";
 
 // -------
 // Actions
@@ -36,7 +37,8 @@ export type ConcludingAction =
   | KeepOpenSelected
   | CloseSelected
   | AdvanceChannelAction
-  | DefundingAction;
+  | DefundingAction
+  | CloseLedgerChannelAction;
 
 export const isConcludingAction = (action: WalletAction): action is ConcludingAction => {
   return (

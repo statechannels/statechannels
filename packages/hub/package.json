@@ -12,8 +12,9 @@
     "db:migrate": "npx knex migrate:latest --knexfile lib/db-admin/knexfile",
     "db:rollback": "npx knex migrate:rollback --knexfile lib/db-admin/knexfile",
     "db:seed": "npx knex seed:run --knexfile lib/db-admin/knexfile",
+    "db:setup:dev": "yarn db:drop && yarn db:create && yarn db:migrate",
     "hub:start:dev": "ts-node ./lib/start-dev-server.js",
-    "hub:watch": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node ./src/start-dev-server.ts",
+    "hub:watch": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node ./src/start-dev-server.ts | npx pino-pretty",
     "firebase-relay:start:sdev": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node src/message/firebase-relay",
     "chain:test": "npx jest --runInBand -c ./jest/jest.chain.config.js",
     "hub:test": "npx jest --runInBand -c ./jest/jest.config.js",
@@ -32,7 +33,6 @@
   "dependencies": {
     "@koa/cors": "2.2.3",
     "@statechannels/nitro-protocol": "0.0.1",
-    "@statechannels/wallet": "0.0.1",
     "async-lock": "1.2.2",
     "dotenv": "6.2.0",
     "dotenv-expand": "4.2.0",
@@ -45,7 +45,8 @@
     "koa-router": "7.4.0",
     "lodash": "^4.17.15",
     "objection": "1.6.11",
-    "pg": "7.12.1"
+    "pg": "7.12.1",
+    "pino": "^5.14.0"
   },
   "devDependencies": {
     "@statechannels/devtools": "0.1.21",
@@ -59,10 +60,10 @@
     "@types/koa-router": "7.0.42",
     "@types/koa__cors": "2.2.3",
     "@types/lodash": "^4.14.146",
-    "@types/node": "11.15.2",
     "@types/node-fetch": "2.5.4",
     "@types/nodemon": "1.19.0",
     "@types/pg": "7.11.2",
+    "@types/pino": "^5.20.0",
     "@types/prettier": "1.19.0",
     "@types/supertest": "2.0.8",
     "@typescript-eslint/eslint-plugin": "^2.7.0",
@@ -80,6 +81,7 @@
     "node-fetch": "2.6.0",
     "nodemon": "1.19.4",
     "npm-run-all": "4.1.5",
+    "pino-pretty": "^3.5.0",
     "prettier": "1.19.1",
     "supertest": "3.4.2",
     "ts-jest": "24.1.0",

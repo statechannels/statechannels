@@ -115,6 +115,7 @@ describe("State Updating", () => {
   });
 
   afterAll(async () => {
+    walletMessages.clearListeners();
     if (browserA) {
       await browserA.close();
     }

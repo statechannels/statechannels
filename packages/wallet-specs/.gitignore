@@ -1,0 +1,10 @@
+# dependencies
+node_modules
+
+# typescript
+lib/
+
+# misc
+.DS_Store
+.vscode
+*.log

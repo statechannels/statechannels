@@ -1,7 +1,7 @@
 import * as states from "../states";
 import * as withdrawalScenarios from "../../withdrawing/__tests__/scenarios";
 import * as testScenarios from "../../../__tests__/state-helpers";
-import {prependToLocator} from "../..";
+import {prependToLocator, makeLocator} from "../..";
 import {EmbeddedProtocol} from "../../../../communication";
 import * as advanceChannelScenarios from "../../advance-channel/__tests__";
 import {bigNumberify} from "ethers/utils";
@@ -53,12 +53,14 @@ const ledgerFundingSharedData = setChannels(EMPTY_SHARED_DATA, [
 const waitForWithdrawal = states.waitForWithdrawal({
   processId,
   channelId,
+  protocolLocator: makeLocator(EmbeddedProtocol.CloseLedgerChannel),
   withdrawal: withdrawalScenarios.happyPath.waitForAcknowledgement.state
 });
 
 const waitForConclude = states.waitForConclude({
   processId,
   channelId,
+  protocolLocator: makeLocator(EmbeddedProtocol.CloseLedgerChannel),
   concluding: prependToLocator(
     advanceChannelScenarios.conclude.preSuccess.state,
     EmbeddedProtocol.AdvanceChannel
@@ -76,7 +78,7 @@ export const happyPath = {
     state: waitForConclude,
     action: prependToLocator(
       advanceChannelScenarios.conclude.preSuccess.trigger,
-      EmbeddedProtocol.AdvanceChannel
+      EmbeddedProtocol.CloseLedgerChannel
     ),
     sharedData: mergeSharedData(
       advanceChannelScenarios.conclude.preSuccess.sharedData,

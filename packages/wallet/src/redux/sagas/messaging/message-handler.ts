@@ -4,7 +4,8 @@ import {
   JoinChannelParams,
   PushMessageParams,
   UpdateChannelParams,
-  CreateChannelParams
+  CreateChannelParams,
+  CloseChannelParams
 } from "@statechannels/client-api-schema";
 import jrs, {RequestObject} from "jsonrpc-lite";
 
@@ -57,7 +58,6 @@ export function* messageHandler(jsonRpcMessage: object, _domain: string) {
 
 function* handleMessage(payload: RequestObject) {
   const {id} = payload;
-
   switch (payload.method) {
     case "GetAddress":
       const address = yield select(getAddress);
@@ -75,6 +75,25 @@ function* handleMessage(payload: RequestObject) {
     case "JoinChannel":
       yield handleJoinChannelMessage(payload);
       break;
+    case "CloseChannel":
+      yield handleCloseChannelMessage(payload);
+      break;
+    default:
+      console.error(`No handler for method type ${payload.method}`);
+      break;
+  }
+}
+
+function* handleCloseChannelMessage(payload: RequestObject) {
+  const {id} = payload;
+  const {channelId} = payload.params as CloseChannelParams;
+  const channelExists = yield select(doesAStateExistForChannel, channelId);
+
+  if (!channelExists) {
+    yield fork(messageSender, outgoingMessageActions.unknownChannelId({id, channelId}));
+  } else {
+    yield put(actions.protocol.concludeRequested({channelId}));
+    yield fork(messageSender, outgoingMessageActions.closeChannelResponse({id, channelId}));
   }
 }
 
