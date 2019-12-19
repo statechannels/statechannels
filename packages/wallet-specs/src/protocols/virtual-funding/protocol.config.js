@@ -4,13 +4,13 @@ const config = {
   states: {
     chooseHub: {
       entry: ['assignChoice', 'sendProposal'],
-      on: { PROPOSAL_RECEIVED: { target: 'fund', cond: 'agreement' } },
+      on: { PROPOSAL_RECEIVED: { target: 'fund', cond: 'agreement' } }
     },
     fund: {
-      invoke: { src: 'virtualFundAsLeaf', data: 'virtualFundAsLeafArgs' },
+      invoke: { src: 'virtualFundAsLeaf', data: 'virtualFundAsLeafArgs' }
     },
-    success: { type: 'final' },
-  },
+    success: { type: 'final' }
+  }
 };
 const guards = {};
 const customActions = {};

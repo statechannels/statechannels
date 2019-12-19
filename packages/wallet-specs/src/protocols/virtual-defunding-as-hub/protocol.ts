@@ -1,7 +1,6 @@
 import { assign } from 'xstate';
-import { store } from '../../';
+import { store, checkThat } from '../../';
 import { isGuarantee, isIndirectFunding } from '../../ChannelStoreEntry';
-import { checkThat } from '../../store';
 import * as LedgerUpdate from '../ledger-update/protocol';
 import { defundGuarantorInLedger } from '../virtual-defunding-as-leaf/protocol';
 
@@ -19,10 +18,7 @@ type ChannelsSet = Init & {
 
 export const assignChannels = assign(
   ({ jointChannelId }: Init): ChannelsSet => {
-    const { guarantorChannelIds } = checkThat(
-      store.getEntry(jointChannelId).funding,
-      isGuarantee
-    );
+    const { guarantorChannelIds } = checkThat(store.getEntry(jointChannelId).funding, isGuarantee);
 
     const { ledgerId: leftLedgerId } = checkThat(
       store.getEntry(guarantorChannelIds[0]).funding,
@@ -39,16 +35,12 @@ export const assignChannels = assign(
 );
 
 function defundGuarantor(index: 0 | 1) {
-  return ({
-    guarantorChannelIds,
-    jointChannelId,
-    ledgerChannelIds,
-  }: ChannelsSet) => {
+  return ({ guarantorChannelIds, jointChannelId, ledgerChannelIds }: ChannelsSet) => {
     return defundGuarantorInLedger({
       index,
       hubLedgerId: ledgerChannelIds[index],
       guarantorChannelId: guarantorChannelIds[index],
-      jointChannelId,
+      jointChannelId
     });
   };
 }
@@ -64,20 +56,20 @@ const defundGuarantors = {
     defundLeft: {
       invoke: {
         src: 'supportState',
-        data: defundLeftGuarantor.name,
+        data: defundLeftGuarantor.name
       },
-      exit: 'garbageCollectLeftGuarantor',
+      exit: 'garbageCollectLeftGuarantor'
     },
     defundRight: {
       invoke: {
         src: 'supportState',
-        data: defundRightGuarantor.name,
+        data: defundRightGuarantor.name
       },
-      exit: 'garbageCollectRightGuarantor',
-    },
+      exit: 'garbageCollectRightGuarantor'
+    }
   },
   exit: 'garbageCollectJointChannel',
-  onDone: 'success',
+  onDone: 'success'
 };
 
 export const config = {
@@ -85,6 +77,6 @@ export const config = {
   initial: 'defundGuarantors',
   states: {
     defundGuarantors,
-    success: { type: 'final' },
-  },
+    success: { type: 'final' }
+  }
 };

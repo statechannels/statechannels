@@ -21,15 +21,9 @@ interface Guaranteed {
   guarantorChannelIds: [string, string];
 }
 
-export type Funding =
-  | DirectFunding
-  | IndirectFunding
-  | VirtualFunding
-  | Guaranteed;
+export type Funding = DirectFunding | IndirectFunding | VirtualFunding | Guaranteed;
 
-export function isIndirectFunding(
-  funding: Funding
-): funding is IndirectFunding {
+export function isIndirectFunding(funding: Funding): funding is IndirectFunding {
   return funding.type === 'Indirect';
 }
 
@@ -41,7 +35,7 @@ export function isGuarantee(funding: Funding): funding is Guaranteed {
   return funding.type === 'Guarantee';
 }
 
-export interface IChannelStoreEntry {
+export interface ChannelStoreEntryInterface {
   supportedState: SignedState[];
   unsupportedStates: SignedState[];
   privateKey: string;
@@ -50,7 +44,7 @@ export interface IChannelStoreEntry {
   funding?: Funding;
 }
 
-export class ChannelStoreEntry implements IChannelStoreEntry {
+export class ChannelStoreEntry implements ChannelStoreEntryInterface {
   public supportedState: SignedState[];
   public unsupportedStates: SignedState[];
   public privateKey: string;
@@ -58,7 +52,7 @@ export class ChannelStoreEntry implements IChannelStoreEntry {
   public funding?: Funding;
   public channel: Channel;
 
-  constructor(args: Partial<IChannelStoreEntry>) {
+  constructor(args: Partial<ChannelStoreEntryInterface>) {
     const { privateKey, participants, channel } = args;
     if (privateKey && participants && channel) {
       this.privateKey = privateKey;
@@ -72,29 +66,27 @@ export class ChannelStoreEntry implements IChannelStoreEntry {
     this.funding = args.funding;
   }
 
-  get args(): IChannelStoreEntry {
+  get args(): ChannelStoreEntryInterface {
     const {
       supportedState,
       unsupportedStates,
       privateKey,
       participants,
       channel,
-      funding,
-    }: IChannelStoreEntry = this;
+      funding
+    }: ChannelStoreEntryInterface = this;
     return {
       supportedState,
       unsupportedStates,
       privateKey,
       participants,
       channel,
-      funding,
+      funding
     };
   }
 
   get ourIndex() {
-    return this.participants.findIndex(
-      p => p.signingAddress === this.privateKey
-    );
+    return this.participants.findIndex(p => p.signingAddress === this.privateKey);
   }
 
   get latestSupportedState(): State | undefined {
@@ -102,7 +94,7 @@ export class ChannelStoreEntry implements IChannelStoreEntry {
     if (numStates > 0) {
       return this.supportedState[numStates - 1].state;
     } else {
-      return;
+      return undefined;
     }
   }
 

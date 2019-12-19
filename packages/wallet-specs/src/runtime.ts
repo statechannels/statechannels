@@ -17,7 +17,7 @@ const first = 'first';
 const second = 'second';
 const stores = {
   first: store(first),
-  second: store(second),
+  second: store(second)
 };
 
 const logEvents = name =>
@@ -27,15 +27,13 @@ const logEvents = name =>
           pretty({
             EVENT_LOGGED: {
               wallet: name,
-              event: event.type,
-            },
+              event: event.type
+            }
           })
         )
     : () => {};
 const logStore = name =>
-  process.env.ADD_LOGS
-    ? state => console.log(`${name}'s store: ${pretty(stores[name])}`)
-    : () => {};
+  process.env.ADD_LOGS ? () => console.log(`${name}'s store: ${pretty(stores[name])}`) : () => {};
 const wallet = (name: string) => {
   const machine = Wallet.machine(stores[name], { processes: [], id: name });
   return interpret<Wallet.Init, any, Wallet.Events>(machine)
@@ -46,7 +44,7 @@ const wallet = (name: string) => {
 
 const wallets = {
   first: wallet(first),
-  second: wallet(second),
+  second: wallet(second)
 };
 
 // This is sort of the "dispatcher"

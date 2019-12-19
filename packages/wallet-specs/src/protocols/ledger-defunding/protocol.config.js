@@ -6,11 +6,11 @@ const config = {
       invoke: {
         src: 'ledgerUpdate',
         data: 'ledgerUpdateArgs',
-        onDone: 'success',
-      },
+        onDone: 'success'
+      }
     },
-    success: { type: 'final' },
-  },
+    success: { type: 'final' }
+  }
 };
 const guards = {};
 const customActions = {};

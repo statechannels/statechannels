@@ -7,32 +7,32 @@ const config = {
       invoke: {
         src: 'ledgerUpdate',
         data: 'preFundLedgerUpdateParams',
-        onDone: 'waiting',
-      },
+        onDone: 'waiting'
+      }
     },
     waiting: {
       on: {
         '*': [
           { target: 'deposit', cond: 'safeToDeposit', actions: 'deposit' },
-          { target: 'updatePostFundOutcome', cond: 'funded' },
-        ],
-      },
+          { target: 'updatePostFundOutcome', cond: 'funded' }
+        ]
+      }
     },
     deposit: {
       invoke: { src: 'submitTransaction' },
       onDone: 'waiting',
-      onError: 'failure',
+      onError: 'failure'
     },
     updatePostFundOutcome: {
       invoke: {
         src: 'ledgerUpdate',
         data: 'postFundLedgerUpdateParams',
-        onDone: 'success',
-      },
+        onDone: 'success'
+      }
     },
     success: { type: 'final' },
-    failure: { type: 'final' },
-  },
+    failure: { type: 'final' }
+  }
 };
 const guards = {
   noUpdateNeeded: function(x) {
@@ -43,7 +43,7 @@ const guards = {
   },
   funded: function(x) {
     return true;
-  },
+  }
 };
 const customActions = {};
 const machine = Machine(config, { guards, actions: customActions });

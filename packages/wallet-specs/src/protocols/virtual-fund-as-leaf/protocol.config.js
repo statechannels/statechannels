@@ -7,26 +7,26 @@ const config = {
       type: 'parallel',
       states: {
         createGuarantorChannel: {
-          invoke: { src: 'createNullChannel', data: 'guarantorChannelArgs' },
+          invoke: { src: 'createNullChannel', data: 'guarantorChannelArgs' }
         },
         createJointChannel: {
-          invoke: { src: 'createNullChannel', data: 'jointChannelArgs' },
-        },
+          invoke: { src: 'createNullChannel', data: 'jointChannelArgs' }
+        }
       },
-      onDone: 'fundGuarantor',
+      onDone: 'fundGuarantor'
     },
     fundGuarantor: {
       invoke: {
         src: 'supportState',
         data: 'guarantorOutcome',
-        onDone: 'fundTarget',
-      },
+        onDone: 'fundTarget'
+      }
     },
     fundTarget: {
-      invoke: { src: 'supportState', data: 'jointOutcome', onDone: 'success' },
+      invoke: { src: 'supportState', data: 'jointOutcome', onDone: 'success' }
     },
-    success: { type: 'final' },
-  },
+    success: { type: 'final' }
+  }
 };
 const guards = {};
 const customActions = {};

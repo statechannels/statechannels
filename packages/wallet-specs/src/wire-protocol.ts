@@ -34,7 +34,7 @@ export type SendStates = {
 
 export const sendStates = (signedStates: SignedState[]): SendStates => ({
   signedStates,
-  type: 'SendStates',
+  type: 'SendStates'
 });
 
 export type Message = SendStates | ProposeIntent;

@@ -11,36 +11,36 @@ const config = {
             type: 'xstate.assign',
             assignment: function(ctx) {
               return __assign(__assign({}, ctx), {
-                channelId: __2.getChannelId(ctx.channel),
+                channelId: __2.getChannelId(ctx.channel)
               });
-            },
-          },
-        },
-      },
+            }
+          }
+        }
+      }
     },
     preFundSetup: {
       invoke: {
         src: 'supportState',
         data: function preFundData(_a) {
-          var channelId = _a.channelId,
+          const channelId = _a.channelId,
             outcome = _a.outcome;
           return {
             channelId: channelId,
-            outcome: outcome,
+            outcome: outcome
           };
         },
         onDone: 'success',
-        autoForward: true,
-      },
+        autoForward: true
+      }
     },
     success: {
       type: 'final',
       data: function(_a) {
-        var channelId = _a.channelId;
+        const channelId = _a.channelId;
         return { channelId: channelId };
-      },
-    },
-  },
+      }
+    }
+  }
 };
 const guards = {};
 const customActions = {};

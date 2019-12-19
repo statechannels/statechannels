@@ -7,20 +7,20 @@ const config = {
       invoke: {
         src: 'supportState',
         data: 'finalJointChannelUpdate',
-        onDone: 'defundGuarantor',
+        onDone: 'defundGuarantor'
       },
-      exit: 'garbageCollecttargetChannel',
+      exit: 'garbageCollecttargetChannel'
     },
     defundGuarantor: {
       invoke: {
         src: 'supportState',
         data: 'defundGuarantorInLedger',
-        onDone: 'success',
+        onDone: 'success'
       },
-      exit: ['garbageCollectJointChannel', 'garbageCollectGuarantorChannel'],
+      exit: ['garbageCollectJointChannel', 'garbageCollectGuarantorChannel']
     },
-    success: { type: 'final' },
-  },
+    success: { type: 'final' }
+  }
 };
 const guards = {};
 const customActions = {};

@@ -1,13 +1,6 @@
 import { assign, Machine } from 'xstate';
 import { SupportState } from '..';
-import {
-  Channel,
-  FINAL,
-  getChannelId,
-  MachineFactory,
-  Outcome,
-  SignedState,
-} from '../../';
+import { Channel, FINAL, getChannelId, MachineFactory, Outcome, SignedState } from '../../';
 import { ChannelStoreEntry } from '../../ChannelStoreEntry';
 import { Participant } from '../../store';
 
@@ -39,16 +32,16 @@ const checkChannel = {
       target: 'preFundSetup',
       actions: assign((ctx: Init) => ({
         ...ctx,
-        channelId: getChannelId(ctx.channel),
-      })),
-    },
-  },
+        channelId: getChannelId(ctx.channel)
+      }))
+    }
+  }
 };
 
 function preFundData({ channelId, outcome }: Context): SupportState.Init {
   return {
     channelId,
-    outcome,
+    outcome
   };
 }
 const preFundSetup = {
@@ -56,8 +49,8 @@ const preFundSetup = {
     src: 'supportState',
     data: preFundData,
     onDone: 'success',
-    autoForward: true,
-  },
+    autoForward: true
+  }
 };
 
 export const config = {
@@ -68,16 +61,13 @@ export const config = {
     preFundSetup,
     success: {
       type: FINAL,
-      data: ({ channelId }: Context) => ({ channelId }),
-    },
-  },
+      data: ({ channelId }: Context) => ({ channelId })
+    }
+  }
 };
 
 export const machine: MachineFactory<Init, any> = (store, context: Init) => {
-  async function checkChannelService({
-    channel,
-    outcome,
-  }: Init): Promise<boolean> {
+  async function checkChannelService({ channel, outcome }: Init): Promise<boolean> {
     // TODO: Should check that
     // - the nonce is used,
     // - that we have the private key for one of the signers, etc
@@ -86,11 +76,9 @@ export const machine: MachineFactory<Init, any> = (store, context: Init) => {
     const participants: Participant[] = channel.participants.map(p => ({
       destination: p,
       participantId: p,
-      signingAddress: p,
+      signingAddress: p
     }));
-    const privateKey = store.getPrivateKey(
-      participants.map(p => p.participantId)
-    );
+    const privateKey = store.getPrivateKey(participants.map(p => p.participantId));
     const unsupportedStates: SignedState[] = [
       {
         state: {
@@ -98,17 +86,17 @@ export const machine: MachineFactory<Init, any> = (store, context: Init) => {
           outcome,
           channel,
           isFinal: false,
-          challengeDuration: '1',
+          challengeDuration: '1'
         },
-        signatures: [],
-      },
+        signatures: []
+      }
     ];
     store.initializeChannel(
       new ChannelStoreEntry({
         channel,
         privateKey,
         participants,
-        unsupportedStates,
+        unsupportedStates
       })
     );
 
@@ -117,7 +105,7 @@ export const machine: MachineFactory<Init, any> = (store, context: Init) => {
 
   const services = {
     checkChannel: checkChannelService,
-    supportState: SupportState.machine(store),
+    supportState: SupportState.machine(store)
   };
 
   const options = { services };

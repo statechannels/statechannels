@@ -10,24 +10,24 @@ const config = {
           assignment: {
             channelId: function(_, event) {
               return event.data.channelId;
-            },
-          },
+            }
+          }
         },
-        'sendOpenChannelMessage',
-      ],
+        'sendOpenChannelMessage'
+      ]
     },
     preFundSetup: {
       invoke: {
         id: 'preFundSetup',
         src: 'advanceChannel',
         data: function(_a) {
-          var channelId = _a.channelId;
+          const channelId = _a.channelId;
           return {
             channelId: channelId,
-            targetTurnNum: i,
+            targetTurnNum: i
           };
         },
-        onDone: 'funding',
+        onDone: 'funding'
       },
       on: {
         CHANNEL_CLOSED: 'abort',
@@ -39,38 +39,38 @@ const config = {
               return event;
             },
             delay: undefined,
-            id: '',
-          },
-        },
-      },
+            id: ''
+          }
+        }
+      }
     },
     abort: { type: 'final' },
     funding: {
       invoke: {
         src: 'funding',
         data: function(_a) {
-          var channelId = _a.channelId;
+          const channelId = _a.channelId;
           return {
             targetChannelId: channelId,
-            tries: 0,
+            tries: 0
           };
         },
         onDone: 'postFundSetup',
-        autoForward: true,
-      },
+        autoForward: true
+      }
     },
     postFundSetup: {
       invoke: {
         id: 'postFundSetup',
         src: 'advanceChannel',
         data: function(_a) {
-          var channelId = _a.channelId;
+          const channelId = _a.channelId;
           return {
             channelId: channelId,
-            targetTurnNum: i,
+            targetTurnNum: i
           };
         },
-        onDone: 'success',
+        onDone: 'success'
       },
       on: {
         CHANNEL_UPDATED: {
@@ -81,10 +81,10 @@ const config = {
               return event;
             },
             delay: undefined,
-            id: '',
-          },
-        },
-      },
+            id: ''
+          }
+        }
+      }
     },
     success: {
       type: 'final',
@@ -93,10 +93,10 @@ const config = {
         type: 'xstate.send',
         event: { type: 'CHANNEL_CREATED' },
         delay: undefined,
-        id: 'CHANNEL_CREATED',
-      },
-    },
-  },
+        id: 'CHANNEL_CREATED'
+      }
+    }
+  }
 };
 const guards = {};
 const customActions = {};

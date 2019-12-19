@@ -4,7 +4,7 @@ const config = {
   states: {
     checkNonce: {
       on: { OPEN_CHANNEL: { target: 'askClient', cond: 'nonceOk' } },
-      exit: 'storeState',
+      exit: 'storeState'
     },
     askClient: {
       invoke: {
@@ -14,16 +14,16 @@ const config = {
             target: 'preFundSetup',
             cond: function(_a, event) {
               return event.data === 'JOIN_CHANNEL';
-            },
+            }
           },
           {
             target: 'abort',
             cond: function(_a, event) {
               return event.data === 'CLOSE_CHANNEL';
-            },
-          },
-        ],
-      },
+            }
+          }
+        ]
+      }
     },
     abort: { entry: 'sendCloseChannel', type: 'final' },
     preFundSetup: {
@@ -31,13 +31,13 @@ const config = {
         id: 'preFundSetup',
         src: 'advanceChannel',
         data: function(_a) {
-          var channelId = _a.channelId;
+          const channelId = _a.channelId;
           return {
             channelId: channelId,
-            targetTurnNum: n,
+            targetTurnNum: n
           };
         },
-        onDone: 'funding',
+        onDone: 'funding'
       },
       on: {
         CHANNEL_UPDATED: {
@@ -48,37 +48,37 @@ const config = {
               return event;
             },
             delay: undefined,
-            id: '',
-          },
-        },
-      },
+            id: ''
+          }
+        }
+      }
     },
     funding: {
       invoke: {
         src: 'funding',
         data: function(_a) {
-          var channelId = _a.channelId;
+          const channelId = _a.channelId;
           return {
             targetChannelId: channelId,
-            tries: 0,
+            tries: 0
           };
         },
         onDone: 'postFundSetup',
-        autoForward: true,
-      },
+        autoForward: true
+      }
     },
     postFundSetup: {
       invoke: {
         id: 'postFundSetup',
         src: 'advanceChannel',
         data: function(_a) {
-          var channelId = _a.channelId;
+          const channelId = _a.channelId;
           return {
             channelId: channelId,
-            targetTurnNum: n,
+            targetTurnNum: n
           };
         },
-        onDone: 'success',
+        onDone: 'success'
       },
       on: {
         CHANNEL_UPDATED: {
@@ -89,10 +89,10 @@ const config = {
               return event;
             },
             delay: undefined,
-            id: '',
-          },
-        },
-      },
+            id: ''
+          }
+        }
+      }
     },
     success: {
       type: 'final',
@@ -101,15 +101,15 @@ const config = {
         type: 'xstate.send',
         event: { type: 'CHANNEL_JOINED' },
         delay: undefined,
-        id: 'CHANNEL_JOINED',
-      },
-    },
-  },
+        id: 'CHANNEL_JOINED'
+      }
+    }
+  }
 };
 const guards = {
   nonceOk: function() {
     return true;
-  },
+  }
 };
 const customActions = {};
 const machine = Machine(config, { guards, actions: customActions });

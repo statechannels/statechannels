@@ -13,14 +13,14 @@ const waiting = {
     '*': [
       {
         target: 'success',
-        cond: 'consensusReached',
+        cond: 'consensusReached'
       },
       {
         target: 'failure',
-        cond: 'dissent',
-      },
-    ],
-  },
+        cond: 'dissent'
+      }
+    ]
+  }
 };
 
 export const config = {
@@ -29,13 +29,13 @@ export const config = {
   states: {
     waiting,
     success: { type: 'final' },
-    failure: { type: 'final' },
-  },
+    failure: { type: 'final' }
+  }
 };
 
 // CREATE VISUALS
 const guards = {
-  consensusReached: context => true,
-  dissent: context => false,
+  consensusReached: () => true,
+  dissent: () => false
 };
 export const mockOptions = { guards };

@@ -1,6 +1,5 @@
-import { store } from '../..';
+import { store, checkThat } from '../..';
 import { isIndirectFunding } from '../../ChannelStoreEntry';
-import { checkThat } from '../../store';
 import * as LedgerUpdate from '../ledger-update/protocol';
 
 const PROTOCOL = 'ledger-defunding';
@@ -11,10 +10,7 @@ export interface Init {
 }
 
 function ledgerUpdateArgs({ targetChannelId }: Init): LedgerUpdate.Init {
-  const { ledgerId } = checkThat(
-    store.getEntry(targetChannelId).funding,
-    isIndirectFunding
-  );
+  const { ledgerId } = checkThat(store.getEntry(targetChannelId).funding, isIndirectFunding);
   const outcome = store.getLatestSupportedAllocation(ledgerId);
   const concludedOutcome = store.getLatestSupportedAllocation(targetChannelId);
   const targetOutcome = outcome
@@ -22,15 +18,15 @@ function ledgerUpdateArgs({ targetChannelId }: Init): LedgerUpdate.Init {
     .concat(concludedOutcome);
   return {
     channelId: ledgerId,
-    targetOutcome,
+    targetOutcome
   };
 }
 const defundTarget = {
   invoke: {
     src: 'ledgerUpdate',
     data: ledgerUpdateArgs.name,
-    onDone: 'success',
-  },
+    onDone: 'success'
+  }
 };
 
 export const config = {
@@ -38,6 +34,6 @@ export const config = {
   initial: 'concludeTarget',
   states: {
     defundTarget,
-    success,
-  },
+    success
+  }
 };

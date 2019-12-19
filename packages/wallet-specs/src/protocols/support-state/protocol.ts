@@ -17,8 +17,8 @@ Do we abort? Or do we try to reach consensus on a later state?
 const waiting = {
   invoke: {
     src: 'sendState',
-    onDone: { target: 'success', cond: 'supported' },
-  },
+    onDone: { target: 'success', cond: 'supported' }
+  }
 };
 
 export const config = {
@@ -26,19 +26,19 @@ export const config = {
   initial: 'waiting',
   states: {
     waiting,
-    success: { type: 'final' as 'final' },
+    success: { type: 'final' as 'final' }
   },
   on: {
     '*': [
       {
         target: 'success',
-        cond: 'supported',
-      },
-    ],
-  },
+        cond: 'supported'
+      }
+    ]
+  }
 };
 
-const mockGuards = { supported: context => true };
+const mockGuards = { supported: () => true };
 export const mockOptions = { guards: mockGuards };
 
 type Services = {
@@ -62,12 +62,12 @@ export const machine: MachineFactory<Init, any> = (store, context: Init) => {
         store.sendState({
           ...latestState,
           turnNum: latestState.turnNum + 1,
-          outcome,
+          outcome
         });
       } else {
         store.sendState(latestState);
       }
-    },
+    }
   };
 
   const guards: Guards = {
@@ -78,7 +78,7 @@ export const machine: MachineFactory<Init, any> = (store, context: Init) => {
       }
 
       return outcomesEqual(latestSupportedState.outcome, outcome);
-    },
+    }
   };
 
   const options: Options = { services, guards };

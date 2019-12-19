@@ -26,57 +26,57 @@ type ChannelsKnown = Init & {
 
 export const assignChannels = assign(
   (init: Init): ChannelsKnown => {
-    const { leftLedgerId, rightLedgerId, targetChannelId } = init;
+    const { leftLedgerId, rightLedgerId } = init;
     const { channel: leftLedgerChannel } = store.getLatestState(leftLedgerId);
     const { channel: rightLedgerChannel } = store.getLatestState(rightLedgerId);
 
     const jointParticipants = [
       ...leftLedgerChannel.participants,
-      rightLedgerChannel.participants[1],
+      rightLedgerChannel.participants[1]
     ];
     const jointChannel: Channel = {
       participants: jointParticipants,
       channelNonce: store.getNextNonce(jointParticipants),
-      chainId: 'TODO',
+      chainId: 'TODO'
     };
 
     const leftGuarantorChannel: Channel = {
       ...leftLedgerChannel,
-      channelNonce: store.getNextNonce(leftLedgerChannel.participants),
+      channelNonce: store.getNextNonce(leftLedgerChannel.participants)
     };
 
     const rightGuarantorChannel: Channel = {
       ...rightLedgerChannel,
-      channelNonce: store.getNextNonce(rightLedgerChannel.participants),
+      channelNonce: store.getNextNonce(rightLedgerChannel.participants)
     };
 
     return {
       ...init,
       jointChannel,
       leftGuarantorChannel,
-      rightGuarantorChannel,
+      rightGuarantorChannel
     };
   }
 );
 const createJointChannel = {
   invoke: {
     src: 'createNullChannel',
-    data: 'jointChannelArgs', // import from leaf version
-  },
+    data: 'jointChannelArgs' // import from leaf version
+  }
 };
 
 const createLeftGuarantorChannel = {
   invoke: {
     src: 'createNullChannel',
-    data: 'guarantorChannelArgs',
-  },
+    data: 'guarantorChannelArgs'
+  }
 };
 
 const createRightGuarantorChannel = {
   invoke: {
     src: 'createNullChannel',
-    data: 'guarantorChannelArgs',
-  },
+    data: 'guarantorChannelArgs'
+  }
 };
 
 const createChannels = {
@@ -85,39 +85,39 @@ const createChannels = {
   states: {
     createLeftGuarantorChannel,
     createRightGuarantorChannel,
-    createJointChannel,
+    createJointChannel
   },
-  onDone: 'fundGuarantors',
+  onDone: 'fundGuarantors'
 };
 
 const fundLeftGuarantor = {
   invoke: {
     src: 'supportState',
-    data: 'guarantorOutcome',
-  },
+    data: 'guarantorOutcome'
+  }
 };
 const fundRightGuarantor = {
   invoke: {
     src: 'supportState',
-    data: 'guarantorOutcome',
-  },
+    data: 'guarantorOutcome'
+  }
 };
 
 const fundGuarantors = {
   type: 'parallel',
   states: {
     fundLeftGuarantor,
-    fundRightGuarantor,
+    fundRightGuarantor
   },
-  onDone: 'fundTarget',
+  onDone: 'fundTarget'
 };
 
 const fundTarget = {
   invoke: {
     src: 'supportState',
     data: 'jointOutcome',
-    onDone: 'success',
-  },
+    onDone: 'success'
+  }
 };
 
 // PROTOCOL DEFINITION
@@ -128,6 +128,6 @@ export const config = {
     createChannels,
     fundGuarantors,
     fundTarget,
-    success: { type: 'final' },
-  },
+    success: { type: 'final' }
+  }
 };

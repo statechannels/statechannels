@@ -1,6 +1,4 @@
-import { assign } from 'xstate';
-import { Balance, store } from '../..';
-import { checkThat, isAllocation } from '../../store';
+import { Balance, store, checkThat, isAllocation } from '../..';
 import { HubChoice } from '../../wire-protocol';
 import { Init as VirtualFundAsLeafArgs } from '../virtual-fund-as-leaf/protocol';
 
@@ -11,14 +9,11 @@ export interface Init {
   targetChannelId: string;
 }
 
-const assignChoice = assign(
-  (ctx: Init): HubKnown => ({ ...ctx, hubAddress: 'TODO' })
-);
 function sendProposal({ hubAddress, targetChannelId }: HubKnown): HubChoice {
   return {
     type: 'HubChoice',
     hubAddress,
-    targetChannelId,
+    targetChannelId
   };
 }
 function agreement(
@@ -32,20 +27,17 @@ const chooseHub = {
   on: {
     PROPOSAL_RECEIVED: {
       target: 'fund',
-      cond: agreement.name,
-    },
-  },
+      cond: agreement.name
+    }
+  }
 };
 type HubKnown = Init & { hubAddress: string };
 
-function virtualFundAsLeafArgs({
-  targetChannelId,
-  hubAddress,
-}: HubKnown): VirtualFundAsLeafArgs {
+function virtualFundAsLeafArgs({ targetChannelId, hubAddress }: HubKnown): VirtualFundAsLeafArgs {
   const { channel, outcome } = store.getLatestState(targetChannelId);
   const balances: Balance[] = checkThat(outcome, isAllocation).map(o => ({
     address: o.destination,
-    wei: o.amount,
+    wei: o.amount
   }));
   const index = store.getIndex(targetChannelId);
   const participantIds = [channel.participants[index], hubAddress];
@@ -59,14 +51,14 @@ function virtualFundAsLeafArgs({
     targetChannelId,
     hubAddress,
     ledgerId,
-    index,
+    index
   };
 }
 const fund = {
   invoke: {
     src: 'virtualFundAsLeaf',
-    data: virtualFundAsLeafArgs.name,
-  },
+    data: virtualFundAsLeafArgs.name
+  }
 };
 
 export const config = {
@@ -75,6 +67,6 @@ export const config = {
   states: {
     chooseHub,
     fund,
-    success,
-  },
+    success
+  }
 };

@@ -1,4 +1,4 @@
-import { Channel, Outcome, SignedState, State } from '.';
+import { Channel, SignedState, State } from '.';
 
 interface ChannelParticipant {
   participantId?: string;
@@ -49,9 +49,7 @@ export interface JsonRpcUpdateChannelParams {
 }
 
 // TODO: Error handling
-export function createStateFromCreateChannelParams(
-  params: JsonRpcCreateChannelParams
-): State {
+export function createStateFromCreateChannelParams(params: JsonRpcCreateChannelParams): State {
   const { appData, appDefinition } = params;
 
   // TODO: We should implement a nonce negotiation protocol once it's fully specced out
@@ -59,7 +57,7 @@ export function createStateFromCreateChannelParams(
   const channel: Channel = {
     channelNonce,
     participants: params.participants.map(p => p.signingAddress),
-    chainId: '0x01',
+    chainId: '0x01'
   };
   return {
     channel,
@@ -68,7 +66,7 @@ export function createStateFromCreateChannelParams(
     appDefinition,
     outcome: params.allocations,
     turnNum: 0,
-    isFinal: false,
+    isFinal: false
   };
 }
 
@@ -87,6 +85,6 @@ export function createStateFromUpdateChannelParams(
     ...state,
     turnNum: state.turnNum + 1,
     outcome: allocations,
-    appData,
+    appData
   };
 }

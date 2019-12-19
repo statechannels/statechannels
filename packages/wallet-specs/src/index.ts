@@ -1,7 +1,6 @@
-import { isUndefined } from 'util';
 import { EventObject, SendAction, StateMachine } from 'xstate';
 import { forwardTo } from 'xstate/lib/actions';
-import { ChannelUpdated, IStore, Store } from './store';
+import { ChannelUpdated, StoreInterface, Store } from './store';
 const store = new Store();
 export { Store, store };
 
@@ -42,7 +41,7 @@ export function nextState(state: State, opts?: Partial<VariablePart>): State {
   return {
     ...state,
     turnNum: state.turnNum + 1,
-    ...opts,
+    ...opts
   };
 }
 
@@ -51,6 +50,8 @@ export interface Channel {
   participants: Address[];
   chainId: string;
 }
+
+export { chain } from './chain';
 
 export function getChannelId(channel: Channel) {
   return channel.participants.concat(channel.channelNonce).join('+');
@@ -72,16 +73,11 @@ export interface Entry {
   type: '';
 }
 
-export { chain } from './chain';
-
 // This stuff should be replaced with some big number logic
 type numberish = string | number | undefined;
-export const add = (a: numberish, b: numberish) =>
-  (Number(a || 0) + Number(b || 0)).toString();
-export const subtract = (a: numberish, b: numberish) =>
-  (Number(a) - Number(b)).toString();
-export const max = (a: numberish, b: numberish) =>
-  Math.max(Number(a), Number(b)).toString();
+export const add = (a: numberish, b: numberish) => (Number(a || 0) + Number(b || 0)).toString();
+export const subtract = (a: numberish, b: numberish) => (Number(a) - Number(b)).toString();
+export const max = (a: numberish, b: numberish) => Math.max(Number(a), Number(b)).toString();
 export const gt = (a: numberish, b: numberish) => Number(a) > Number(b);
 
 export const success: { type: 'final' } = { type: 'final' };
@@ -102,7 +98,7 @@ export function forwardChannelUpdated<C>(id: string): Transition<C> {
 // Some machine factories require a context, and some don't
 // Sort this out.
 export type MachineFactory<I, E extends EventObject> = (
-  store: IStore,
+  store: StoreInterface,
   context?: I
 ) => StateMachine<I, any, E>;
 
@@ -126,4 +122,23 @@ export const FINAL = 'final' as 'final';
 
 export function outcomesEqual(left: Outcome, right: Outcome): boolean {
   return JSON.stringify(left) === JSON.stringify(right);
+}
+
+export function isAllocation(outcome: Outcome): outcome is Allocation {
+  // TODO: I think this might need to be isEthAllocation (sometimes?)
+  if ('target' in outcome) {
+    return false;
+  }
+  return true;
+}
+
+const throwError = (fn: (t1: any) => boolean, t) => {
+  throw new Error(`not valid, ${fn.name} failed on ${t}`);
+};
+type TypeGuard<T> = (t1: any) => t1 is T;
+export function checkThat<T>(t, isTypeT: TypeGuard<T>): T {
+  if (!isTypeT(t)) {
+    throwError(isTypeT, t);
+  }
+  return t;
 }

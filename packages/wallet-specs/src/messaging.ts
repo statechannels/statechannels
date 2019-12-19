@@ -2,18 +2,18 @@ import EventEmitter from 'events';
 import { pretty } from '.';
 import { AddressableMessage, Message } from './wire-protocol';
 
-interface IMessageService {
+interface MessageServiceInterface {
   sendMessage: (m: Message) => void;
 }
 
-class MessageService extends EventEmitter implements IMessageService {
+class MessageService extends EventEmitter implements MessageServiceInterface {
   public sendMessage(m: AddressableMessage) {
     let states;
     if ('signedStates' in m) {
       states = m.signedStates.map(({ state, signatures }) => ({
         state: state.turnNum,
         channel: state.channel.channelNonce,
-        signatures,
+        signatures
       }));
     }
     console.log(
@@ -21,8 +21,8 @@ class MessageService extends EventEmitter implements IMessageService {
         MESSAGE: {
           to: m.to,
           type: m.type,
-          states,
-        },
+          states
+        }
       })
     );
     this.emit('message', m);

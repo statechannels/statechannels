@@ -1,9 +1,4 @@
-import {
-  AnyEventObject,
-  ConditionPredicate,
-  Machine,
-  MachineConfig,
-} from 'xstate';
+import { AnyEventObject, ConditionPredicate, Machine, MachineConfig } from 'xstate';
 import { MachineFactory, Store } from '../..';
 
 const PROTOCOL = 'advance-channel';
@@ -29,19 +24,19 @@ export interface Init {
 
 const toSuccess = {
   target: 'success',
-  cond: 'advanced',
+  cond: 'advanced'
 };
 const sendingState = {
   invoke: {
     src: 'sendState',
-    onDone: 'waiting',
-  },
+    onDone: 'waiting'
+  }
 };
 const waiting = {
   on: {
     CHANNEL_UPDATED: toSuccess,
-    '': toSuccess,
-  },
+    '': toSuccess
+  }
 };
 
 export const config: MachineConfig<Init, any, AnyEventObject> = {
@@ -50,8 +45,8 @@ export const config: MachineConfig<Init, any, AnyEventObject> = {
   states: {
     sendingState,
     waiting,
-    success: { type: 'final' },
-  },
+    success: { type: 'final' }
+  }
 };
 
 export type Guards = {
@@ -64,28 +59,23 @@ export type Services = {
 };
 
 export const mockOptions = {
-  guards: { advanced: context => true },
-  services: async () => true,
+  guards: { advanced: () => true },
+  services: async () => true
 };
 
-export const machine: MachineFactory<Init, any> = (
-  store: Store,
-  context?: Init
-) => {
+export const machine: MachineFactory<Init, any> = (store: Store, context?: Init) => {
   const guards: Guards = {
-    advanced: ({ channelId, targetTurnNum }: Init, event, { state: s }) => {
+    advanced: ({ channelId, targetTurnNum }: Init) => {
       const { latestSupportedState: state } = store.getEntry(channelId);
       return !!state && state.turnNum >= targetTurnNum;
-    },
+    }
   };
 
   const actions: Actions = {};
 
   const services: Services = {
     sendState: async ({ channelId, targetTurnNum }: Init) => {
-      const { latestSupportedState, unsupportedStates } = store.getEntry(
-        channelId
-      );
+      const { latestSupportedState, unsupportedStates } = store.getEntry(channelId);
       const turnNum = targetTurnNum;
       /*
       TODO: the actual turnNum is calculated below. However, to determine whether
@@ -102,7 +92,7 @@ export const machine: MachineFactory<Init, any> = (
       } else {
         store.sendState({ ...latestSupportedState, turnNum });
       }
-    },
+    }
   };
   const options = { guards, actions, services };
   return Machine(config).withConfig(options, context);

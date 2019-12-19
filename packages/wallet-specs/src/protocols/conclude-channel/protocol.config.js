@@ -7,47 +7,44 @@ const config = {
       onDone: [
         { target: 'virtualDefunding', cond: 'virtuallyFunded' },
         { target: 'success', cond: 'directlyFunded' },
-        { target: 'ledgerDefunding', cond: 'indirectlyFunded' },
-      ],
+        { target: 'ledgerDefunding', cond: 'indirectlyFunded' }
+      ]
     },
     virtualDefunding: {
       initial: 'start',
       states: {
         start: {
           on: {
-            '': [
-              { target: 'asLeaf', cond: 'amLeaf' },
-              { target: 'asHub', cond: 'amHub' },
-            ],
-          },
+            '': [{ target: 'asLeaf', cond: 'amLeaf' }, { target: 'asHub', cond: 'amHub' }]
+          }
         },
         asLeaf: {
           invoke: {
             src: 'virtualDefundingAsLeaf',
             data: 'virtualDefundingAsLeafArgs',
-            onDone: 'success',
-          },
+            onDone: 'success'
+          }
         },
         asHub: {
           invoke: {
             src: 'virtualDefundingAsHub',
             data: 'virtualDefundingAsHubArgs',
-            onDone: 'success',
-          },
+            onDone: 'success'
+          }
         },
-        success: { type: 'final' },
+        success: { type: 'final' }
       },
-      onDone: 'success',
+      onDone: 'success'
     },
     ledgerDefunding: {
       invoke: {
         src: 'ledgerDefunding',
         data: 'ledgerDefundingArgs',
-        onDone: 'success',
-      },
+        onDone: 'success'
+      }
     },
-    success: { type: 'final' },
-  },
+    success: { type: 'final' }
+  }
 };
 const guards = {
   virtuallyFunded: function(_) {
@@ -58,7 +55,7 @@ const guards = {
   },
   directlyFunded: function(_) {
     return true;
-  },
+  }
 };
 const customActions = {};
 const machine = Machine(config, { guards, actions: customActions });

@@ -7,28 +7,28 @@ const config = {
       invoke: {
         src: 'createNullChannel',
         data: 'replacementChannelArgs',
-        onDone: 'updateOldChannelOutcome',
-      },
+        onDone: 'updateOldChannelOutcome'
+      }
     },
     updateOldChannelOutcome: {
       invoke: {
         src: 'ledgerUpdate',
         data: 'concludeOutcome',
-        onDone: 'concludeOldChannel',
-      },
+        onDone: 'concludeOldChannel'
+      }
     },
     concludeOldChannel: {
       invoke: {
         src: 'concludeChannel',
         data: 'oldChannelId',
-        onDone: 'transfer',
-      },
+        onDone: 'transfer'
+      }
     },
     transfer: {
-      invoke: { src: 'transferAll', data: 'oldChannelId', onDone: 'success' },
+      invoke: { src: 'transferAll', data: 'oldChannelId', onDone: 'success' }
     },
-    success: { type: 'final' },
-  },
+    success: { type: 'final' }
+  }
 };
 const guards = {};
 const customActions = {};

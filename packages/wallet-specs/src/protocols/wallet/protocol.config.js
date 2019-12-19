@@ -11,11 +11,11 @@ const config = {
           actions: [
             'updateStore',
             function forwardToChildren(_ctx, event, _a) {
-              var state = _a.state;
+              const state = _a.state;
               switch (event.type) {
                 case 'FUNDING_STRATEGY_PROPOSED':
                   state.context.processes.forEach(function(_a) {
-                    var ref = _a.ref;
+                    const ref = _a.ref;
                     return ref.send(event);
                   });
                   break;
@@ -26,12 +26,12 @@ const config = {
                 default:
                   __2.unreachable(event);
               }
-            },
-          ],
-        },
-      },
-    },
-  },
+            }
+          ]
+        }
+      }
+    }
+  }
 };
 const guards = {};
 const customActions = {};

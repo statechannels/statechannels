@@ -7,18 +7,18 @@ const config = {
       states: {
         defundLeft: {
           invoke: { src: 'supportState', data: 'defundLeftGuarantor' },
-          exit: 'garbageCollectLeftGuarantor',
+          exit: 'garbageCollectLeftGuarantor'
         },
         defundRight: {
           invoke: { src: 'supportState', data: 'defundRightGuarantor' },
-          exit: 'garbageCollectRightGuarantor',
-        },
+          exit: 'garbageCollectRightGuarantor'
+        }
       },
       exit: 'garbageCollectJointChannel',
-      onDone: 'success',
+      onDone: 'success'
     },
-    success: { type: 'final' },
-  },
+    success: { type: 'final' }
+  }
 };
 const guards = {};
 const customActions = {};

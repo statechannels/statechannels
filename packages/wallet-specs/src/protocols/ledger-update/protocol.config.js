@@ -7,13 +7,13 @@ const config = {
       on: {
         '*': [
           { target: 'success', cond: 'consensusReached' },
-          { target: 'failure', cond: 'dissent' },
-        ],
-      },
+          { target: 'failure', cond: 'dissent' }
+        ]
+      }
     },
     success: { type: 'final' },
-    failure: { type: 'final' },
-  },
+    failure: { type: 'final' }
+  }
 };
 const guards = {
   consensusReached: function(context) {
@@ -21,7 +21,7 @@ const guards = {
   },
   dissent: function(context) {
     return false;
-  },
+  }
 };
 const customActions = {};
 const machine = Machine(config, { guards, actions: customActions });

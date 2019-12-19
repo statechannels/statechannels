@@ -7,34 +7,34 @@ const config = {
       type: 'parallel',
       states: {
         createLeftGuarantorChannel: {
-          invoke: { src: 'createNullChannel', data: 'guarantorChannelArgs' },
+          invoke: { src: 'createNullChannel', data: 'guarantorChannelArgs' }
         },
         createRightGuarantorChannel: {
-          invoke: { src: 'createNullChannel', data: 'guarantorChannelArgs' },
+          invoke: { src: 'createNullChannel', data: 'guarantorChannelArgs' }
         },
         createJointChannel: {
-          invoke: { src: 'createNullChannel', data: 'jointChannelArgs' },
-        },
+          invoke: { src: 'createNullChannel', data: 'jointChannelArgs' }
+        }
       },
-      onDone: 'fundGuarantors',
+      onDone: 'fundGuarantors'
     },
     fundGuarantors: {
       type: 'parallel',
       states: {
         fundLeftGuarantor: {
-          invoke: { src: 'supportState', data: 'guarantorOutcome' },
+          invoke: { src: 'supportState', data: 'guarantorOutcome' }
         },
         fundRightGuarantor: {
-          invoke: { src: 'supportState', data: 'guarantorOutcome' },
-        },
+          invoke: { src: 'supportState', data: 'guarantorOutcome' }
+        }
       },
-      onDone: 'fundTarget',
+      onDone: 'fundTarget'
     },
     fundTarget: {
-      invoke: { src: 'supportState', data: 'jointOutcome', onDone: 'success' },
+      invoke: { src: 'supportState', data: 'jointOutcome', onDone: 'success' }
     },
-    success: { type: 'final' },
-  },
+    success: { type: 'final' }
+  }
 };
 const guards = {};
 const customActions = {};
