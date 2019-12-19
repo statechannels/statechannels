@@ -16,8 +16,7 @@ const reducer = combineReducers({
   openGames: openGamesReducer,
 });
 
-// TODO: Get this working with a mock for channel-client
-it.skip(
+it(
   'runs to GameOver',
   async () => {
     const client = new RPSChannelClient(new FakeChannelClient('0xOpponent'));

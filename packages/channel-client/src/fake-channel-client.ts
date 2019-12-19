@@ -36,6 +36,22 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
     this.opponentIndex = playerIndex == 1 ? 0 : 1;
   }
 
+  verifyTurnNum(turnNum: string): Promise<void> {
+    const currentTurnNum = bigNumberify(turnNum);
+    if (currentTurnNum.mod(2).eq(this.playerIndex)) {
+      return Promise.reject(
+        `Not your turn: currentTurnNum = ${currentTurnNum}, index = ${this.playerIndex}`
+      );
+    }
+    return Promise.resolve();
+  }
+
+  getNextTurnNum(latestState: ChannelResult) {
+    return bigNumberify(latestState.turnNum)
+      .add(1)
+      .toString();
+  }
+
   async createChannel(
     participants: Participant[],
     allocations: Allocation[],
@@ -51,7 +67,7 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
       turnNum: bigNumberify(0).toString(),
       status: 'proposed'
     };
-
+    this.updatePlayerIndex(0);
     this.latestState = channel;
     this.opponentAddress = channel.participants[1].participantId;
     this.notifyOpponent(channel, 'createChannel');
@@ -59,18 +75,10 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
     return channel;
   }
 
-  verifyTurnNum(): Promise<void> {
-    const currentTurnNum = bigNumberify(this.latestState!.turnNum);
-    if (currentTurnNum.mod(2).eq(this.playerIndex)) {
-      return Promise.reject(
-        `Not your turn: currentTurnNum = ${currentTurnNum}, index = ${this.playerIndex}`
-      );
-    }
-    return Promise.resolve();
-  }
-
   async joinChannel(channelId: string): Promise<ChannelResult> {
-    await this.verifyTurnNum();
+    this.updatePlayerIndex(1);
+    log.debug(`Player ${this.playerIndex} joining channel ${channelId}`);
+    await this.verifyTurnNum(this.latestState!.turnNum);
 
     // skip funding by setting the channel to 'running' the moment it is joined
     // [assuming we're working with 2-participant channels for the time being]
@@ -91,13 +99,13 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
     allocations: Allocation[],
     appData: string
   ): Promise<ChannelResult> {
+    log.debug(`Player ${this.playerIndex} updating channel ${channelId}`);
     const latestState = this.findChannel(channelId);
-    const currentTurnNum = bigNumberify(latestState.turnNum);
 
     const nextState = {...latestState, participants, allocations, appData};
     if (nextState !== latestState) {
-      await this.verifyTurnNum();
-      nextState.turnNum = currentTurnNum.add(1).toString();
+      await this.verifyTurnNum(nextState.turnNum);
+      nextState.turnNum = this.getNextTurnNum(latestState);
       log.debug(`Player ${this.playerIndex} updated channel to turnNum ${nextState.turnNum}`);
     }
 
@@ -108,8 +116,8 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
   }
 
   async closeChannel(channelId: string): Promise<ChannelResult> {
-    await this.verifyTurnNum();
-    const turnNum = this.getNextTurnNum();
+    await this.verifyTurnNum(this.latestState!.turnNum);
+    const turnNum = this.getNextTurnNum(this.latestState!);
     const status = 'closing';
 
     this.latestState = {...this.latestState!, turnNum, status};
@@ -143,16 +151,6 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
       throw Error(`Channel does't exist with channelId '${channelId}'`);
     }
     return this.latestState;
-  }
-
-  getNextTurnNum() {
-    if (!this.latestState) {
-      throw Error(`Latest state for channel not set, cannot get next turn number`);
-    }
-
-    return bigNumberify(this.latestState.turnNum)
-      .add(1)
-      .toString();
   }
 
   onMessageQueued(callback: (message: Message<ChannelResult>) => void): UnsubscribeFunction {
@@ -193,7 +191,7 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
     );
     this.latestState = parameters.data;
     this.notifyApp(this.latestState);
-    const turnNum = this.getNextTurnNum();
+    const turnNum = this.getNextTurnNum(this.latestState);
 
     switch (parameters.data.status) {
       case 'proposed':
