@@ -1,30 +1,16 @@
 import {SignedState, getChannelId} from '@statechannels/nitro-protocol';
-import {ChannelParticipant} from '@statechannels/wallet/lib/src/redux/channel-store';
+
+// todo: these definitions are duplicated from wallet and should eventually be defined elsewhere
+export interface ChannelParticipant {
+  participantId?: string;
+  signingAddress: string;
+  destination?: string;
+}
 
 export interface BaseProcessAction {
   processId: string;
   type: string;
 }
-
-// FUNDING
-
-export const signedStatesReceived = (p: {
-  protocolLocator: ProtocolLocator;
-  signedStates: SignedState[];
-  processId: string;
-}): SignedStatesReceived => ({
-  ...p,
-  type: 'WALLET.COMMON.SIGNED_STATES_RECEIVED'
-});
-
-export const strategyApproved: ActionConstructor<StrategyApproved> = p => ({
-  ...p,
-  type: 'WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_APPROVED'
-});
-
-// -------
-// Actions
-// -------
 
 export interface ChannelOpen {
   type: 'Channel.Open';
@@ -89,10 +75,29 @@ export interface RelayActionWithMessage {
   data: RelayableAction;
 }
 
+export const channelJoined = (p: {
+  signedState: SignedState;
+  participants: ChannelParticipant[];
+}): ChannelJoined => ({...p, type: 'Channel.Joined'});
+
+export const signedStatesReceived = (p: {
+  protocolLocator: ProtocolLocator;
+  signedStates: SignedState[];
+  processId: string;
+}): SignedStatesReceived => ({
+  ...p,
+  type: 'WALLET.COMMON.SIGNED_STATES_RECEIVED'
+});
+
 export const relayActionWithMessage: ActionConstructor<RelayActionWithMessage> = p => ({
   ...p,
 
   type: 'WALLET.RELAY_ACTION_WITH_MESSAGE'
+});
+
+export const strategyApproved: ActionConstructor<StrategyApproved> = p => ({
+  ...p,
+  type: 'WALLET.FUNDING_STRATEGY_NEGOTIATION.STRATEGY_APPROVED'
 });
 
 // These protocols are precisely those that run at the top-level
