@@ -15,17 +15,21 @@ import {
 import {calculateChannelId} from './utils';
 
 export class FakeChannelClient implements ChannelClientInterface<ChannelResult> {
-  playerIndex: 0 | 1;
+  playerIndex = 0 | 1;
+  opponentIndex = 0 | 1;
   opponentAddress?: string;
   latestState?: ChannelResult;
   protected events = new EventEmitter<EventsWithArgs>();
 
-  constructor(public readonly address: string) {
-    this.playerIndex = 0;
-  }
+  constructor(public readonly address: string) {}
 
   setState(state: ChannelResult): void {
     this.latestState = state;
+  }
+
+  updatePlayerIndex(playerIndex: number) {
+    this.playerIndex = playerIndex;
+    this.opponentIndex = playerIndex == 1 ? 0 : 1;
   }
 
   async createChannel(
@@ -34,7 +38,7 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
     appDefinition: string,
     appData: string
   ): Promise<ChannelResult> {
-    this.playerIndex = 0;
+    this.updatePlayerIndex(0);
     const channel: ChannelResult = {
       participants,
       allocations,
@@ -53,7 +57,7 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
   }
 
   async joinChannel(channelId: string): Promise<ChannelResult> {
-    this.playerIndex = 1;
+    this.updatePlayerIndex(1);
     const latestState = this.findChannel(channelId);
     // skip funding by setting the channel to 'running' the moment it is joined
     // [assuming we're working with 2-participant channels for the time being]
@@ -126,16 +130,25 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
     }
 
     const turnNum = currentTurnNum.add(1).toString();
-    log.debug(`Player ${this.playerIndex} updated channel to turnNum ${turnNum}`);
+    const status = 'closing';
 
-    this.latestState = {...latestState, turnNum, status: 'closing'};
-    log.debug(`Latest channel status set by ${this.playerIndex} to ${this.latestState.status}`);
+    this.latestState = {...latestState, turnNum, status};
+    log.debug(
+      `Player ${this.playerIndex} updated channel to status ${status} on turnNum ${turnNum}`
+    );
     this.notifyOpponent(this.latestState);
 
     return this.latestState;
   }
 
   protected notifyOpponent(data: ChannelResult): void {
+    log.debug(
+      `${this.playerIndex} notifying ${this.opponentIndex} with data ${JSON.stringify(
+        data,
+        undefined,
+        4
+      )}`
+    );
     const sender = this.address;
     const recipient = this.opponentAddress;
 
@@ -158,6 +171,13 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
 
   onMessageQueued(callback: (message: Message<ChannelResult>) => void): UnsubscribeFunction {
     this.events.on('MessageQueued', message => {
+      log.debug(
+        `Sending message from ${this.playerIndex} to ${this.opponentIndex}: ${JSON.stringify(
+          message,
+          undefined,
+          4
+        )}`
+      );
       callback(message);
     });
     return () => this.events.removeListener('MessageQueued', callback); // eslint-disable-line  @typescript-eslint/explicit-function-return-type

@@ -61,10 +61,10 @@ describe('FakeChannelClient', () => {
     clientA = new FakeChannelClient(participantA.participantId);
     clientB = new FakeChannelClient(participantB.participantId);
 
-    clientA.playerIndex = 0;
+    clientA.updatePlayerIndex(0);
     clientA.opponentAddress = participantB.participantId;
 
-    clientB.playerIndex = 1;
+    clientB.updatePlayerIndex(1);
     clientB.opponentAddress = participantA.participantId;
 
     // This setup simulates the message being received from A's wallet
@@ -75,11 +75,11 @@ describe('FakeChannelClient', () => {
     // The de/queuing described above is effectively faked by explicitly passing
     // the messages between the clients.
     clientA.onMessageQueued(async (message: Message<ChannelResult>) => {
-      log.debug(`Got message from A to B ${JSON.stringify(message, undefined, 4)}`);
       await clientB.pushMessage(message);
     });
 
     clientB.onMessageQueued(async (message: Message<ChannelResult>) => {
+      log.debug(`Sending message from 1 to 0 ${JSON.stringify(message, undefined, 4)}`);
       await clientA.pushMessage(message);
     });
   });
@@ -136,6 +136,8 @@ describe('FakeChannelClient', () => {
     it('player with valid turn can make a valid close channel call', async () => {
       setClientStates([clientA, clientB], states['running']);
       const channelResult = await clientA.closeChannel(channelId);
+      log.debug('Got channel result from close call');
+      log.debug(channelResult);
       expect(channelResult).toEqual(states['closing']);
     });
 
