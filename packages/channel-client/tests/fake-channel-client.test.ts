@@ -1,4 +1,5 @@
 import log = require('loglevel');
+import EventEmitter = require('eventemitter3');
 
 import {FakeChannelClient} from '../src/fake-channel-client';
 import {
@@ -11,6 +12,7 @@ import {
 import {ChannelResultBuilder, buildParticipant, buildAllocation, setClientStates} from './utils';
 import {ChannelResult, Message} from '../src';
 import {calculateChannelId} from '../src/utils';
+import {EventsWithArgs} from 'types';
 
 log.setDefaultLevel(log.levels.SILENT);
 
@@ -26,6 +28,9 @@ describe('FakeChannelClient', () => {
   const participants = [participantA, participantB];
   const allocations = [buildAllocation(PARTICIPANT_A, '5'), buildAllocation(PARTICIPANT_B, '5')];
   const channelId = calculateChannelId(participants, allocations, APP_DEFINITION, APP_DATA);
+
+  const clientAEventEmitter = new EventEmitter<EventsWithArgs>();
+  const clientBEventEmitter = new EventEmitter<EventsWithArgs>();
 
   let clientA: FakeChannelClient, clientB: FakeChannelClient;
 
@@ -80,6 +85,12 @@ describe('FakeChannelClient', () => {
     clientB.onMessageQueued(async (message: Message<ChannelResult>) => {
       await clientA.pushMessage(message);
     });
+
+    clientB.onChannelProposed((result: ChannelResult) => {
+      log.debug('Client B got channel proposal');
+      clientBEventEmitter.emit('ChannelProposed', result);
+      log.debug('Client B emitted event');
+    });
   });
 
   it('instantiates', () => {
@@ -88,19 +99,21 @@ describe('FakeChannelClient', () => {
   });
 
   describe('creates a channel', () => {
-    it('produces the right channel result', async () => {
-      const channelResult = await clientA.createChannel(
+    it('client A produces the right channel result and confirms client B got proposal', async done => {
+      expect.assertions(2);
+
+      clientBEventEmitter.once('ChannelProposed', (result: ChannelResult) => {
+        expect(clientB.latestState).toEqual(states['proposed']);
+        done();
+      });
+
+      const clientAChannelState = await clientA.createChannel(
         participants,
         allocations,
         APP_DEFINITION,
         APP_DATA
       );
-      expect(states['proposed']).toEqual(channelResult);
-    });
-
-    it('confirms client B joined the channel', () => {
-      log.info('Confirming client B joined channel');
-      log.info(clientB.latestState);
+      expect(clientAChannelState).toEqual(states['proposed']);
     });
   });
 

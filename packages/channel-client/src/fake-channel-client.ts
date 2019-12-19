@@ -98,23 +98,6 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
     return this.latestState;
   }
 
-  async pushMessage(parameters: Message<ChannelResult>): Promise<PushMessageResult> {
-    this.latestState = parameters.data;
-    this.notifyApp(this.latestState);
-
-    // auto-close, if we received a close
-    if (parameters.data.status === 'closing') {
-      const turnNum = bigNumberify(this.latestState.turnNum)
-        .add(1)
-        .toString();
-      this.latestState = {...this.latestState, turnNum, status: 'closed'};
-      this.notifyOpponent(this.latestState, 'pushMessage');
-      this.notifyApp(this.latestState);
-    }
-
-    return {success: true};
-  }
-
   async getAddress(): Promise<string> {
     return this.address;
   }
@@ -165,6 +148,16 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
     return this.latestState;
   }
 
+  getNextTurnNum() {
+    if (!this.latestState) {
+      throw Error(`Latest state for channel not set, cannot get next turn number`);
+    }
+
+    return bigNumberify(this.latestState.turnNum)
+      .add(1)
+      .toString();
+  }
+
   onMessageQueued(callback: (message: Message<ChannelResult>) => void): UnsubscribeFunction {
     this.events.on('MessageQueued', message => {
       log.debug(
@@ -191,5 +184,38 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
       callback(result);
     });
     return () => this.events.removeListener('ChannelProposed', callback); // eslint-disable-line  @typescript-eslint/explicit-function-return-type
+  }
+
+  async pushMessage(parameters: Message<ChannelResult>): Promise<PushMessageResult> {
+    log.debug(
+      `${this.playerIndex} pushing message from app to wallet: ${JSON.stringify(
+        parameters,
+        undefined,
+        4
+      )}`
+    );
+    this.latestState = parameters.data;
+    this.notifyApp(this.latestState);
+    const turnNum = this.getNextTurnNum();
+
+    switch (parameters.data.status) {
+      // auto-join if we received a proposal
+      case 'proposed':
+        this.events.emit('ChannelProposed', parameters.data);
+        break;
+      // auto-close, if we received a close
+      case 'closing':
+        log.debug(
+          `${this.playerIndex} auto-closing channel on close request from ${this.opponentIndex}`
+        );
+        this.latestState = {...this.latestState, turnNum, status: 'closed'};
+        this.notifyOpponent(this.latestState, 'pushMessage');
+        this.notifyApp(this.latestState);
+        break;
+      default:
+        break;
+    }
+
+    return {success: true};
   }
 }
