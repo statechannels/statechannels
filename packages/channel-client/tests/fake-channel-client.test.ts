@@ -11,8 +11,8 @@ import {
 } from './constants';
 import {ChannelResultBuilder, buildParticipant, buildAllocation, setClientStates} from './utils';
 import {ChannelResult, Message} from '../src';
+import {EventsWithArgs} from '../src/types';
 import {calculateChannelId} from '../src/utils';
-import {EventsWithArgs} from 'types';
 
 log.setDefaultLevel(log.levels.SILENT);
 
@@ -98,14 +98,10 @@ describe('FakeChannelClient', () => {
   });
 
   describe('creates a channel', () => {
-    it('client A produces the right channel result and confirms client B got proposal', async done => {
-      expect.assertions(2);
+    expect.assertions(2);
+    let proposalMessage: Message<ChannelResult>;
 
-      clientBEventEmitter.once('ChannelProposed', (result: ChannelResult) => {
-        expect(clientB.latestState).toEqual(states['proposed']);
-        done();
-      });
-
+    it('client A produces the right channel result', async () => {
       const clientAChannelState = await clientA.createChannel(
         participants,
         allocations,
@@ -113,6 +109,25 @@ describe('FakeChannelClient', () => {
         APP_DATA
       );
       expect(clientAChannelState).toEqual(states['proposed']);
+
+      proposalMessage = {
+        sender: clientA.address,
+        recipient: clientB.address,
+        data: clientAChannelState
+      };
+    });
+
+    it('client B gets proposal', async () => {
+      setClientStates([clientA, clientB], states['proposed']);
+
+      return new Promise(resolve => {
+        clientBEventEmitter.once('ChannelProposed', (result: ChannelResult) => {
+          expect(clientB.latestState).toEqual(states['proposed']);
+          resolve();
+        });
+
+        clientB.pushMessage(proposalMessage);
+      });
     });
   });
 

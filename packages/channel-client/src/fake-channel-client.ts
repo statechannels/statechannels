@@ -31,7 +31,7 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
     this.latestState = state;
   }
 
-  updatePlayerIndex(playerIndex: number) {
+  updatePlayerIndex(playerIndex: number): void {
     this.playerIndex = playerIndex;
     this.opponentIndex = playerIndex == 1 ? 0 : 1;
   }
