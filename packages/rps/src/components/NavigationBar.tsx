@@ -4,12 +4,14 @@ import {Button, Navbar} from 'reactstrap';
 import {Commitment} from 'fmg-core';
 import {RulesModal} from './RulesModal';
 import NetworkIndicator from '@rimble/network-indicator';
+import {MetamaskState} from 'src/redux/metamask/state';
 
 interface Props {
   showRules: boolean;
   logoutRequest: () => void;
   rulesRequest: () => void;
   loginDisplayName: string;
+  metamaskState: MetamaskState;
 }
 
 function getInitials(loginDisplayName: string): string {
@@ -19,19 +21,15 @@ function getInitials(loginDisplayName: string): string {
 
 export default class NavigationBar extends React.PureComponent<Props, Commitment> {
   render() {
-    let currentNetwork;
-    if (window.ethereum) {
-      currentNetwork = parseInt(window.ethereum.networkVersion, 10);
-    } else {
-      currentNetwork = undefined;
-    }
+    const currentNetwork = Number(this.props.metamaskState.network);
+    const targetNetwork = Number(process.env.CHAIN_NETWORK_ID);
     return (
       <Navbar className="navbar">
         <div className="align-self-start">
           <NetworkIndicator
             className="mr-auto"
             currentNetwork={currentNetwork}
-            requiredNetwork={process.env.CHAIN_NETWORK_ID}
+            requiredNetwork={targetNetwork}
           />
         </div>
         <div className="align-self-center">

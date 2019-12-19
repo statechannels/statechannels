@@ -1,7 +1,6 @@
 import {call, fork, put, take, takeEvery, all} from 'redux-saga/effects';
 import * as loginActions from './actions';
 import {reduxSagaFirebase} from '../../gateways/firebase';
-import metamaskSaga from '../metamask/saga';
 
 function* loginSaga() {
   try {
@@ -51,12 +50,6 @@ export default function* loginRootSaga() {
     takeEvery(loginActions.LOGIN_REQUEST, loginSaga),
     takeEvery(loginActions.LOGOUT_REQUEST, logoutSaga),
   ]);
-  yield take('UpdateProfile');
-  const metaMask = yield metamaskSaga();
-  // If metamask is not properly set up we can halt processing and wait for the reload
-  if (!metaMask) {
-    return;
-  }
 }
 
 function getLibraryAddress() {

@@ -137,6 +137,7 @@
     "@types/redux-saga-tester": "1.0.1",
     "@types/resolve": "0.0.8",
     "@types/storybook__react": "4.0.0",
+    "@types/styled-components": "^4.4.1",
     "@types/sw-precache-webpack-plugin": "0.11.0",
     "@types/uglifyjs-webpack-plugin": "^1.1.0",
     "@types/webpack": "4.41.0",
