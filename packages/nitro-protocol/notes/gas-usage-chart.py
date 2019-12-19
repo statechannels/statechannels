@@ -14,6 +14,7 @@ usd_per_1M_gas = usd_per_eth * eth_per_gwei * gwei_per_gas * 1e6
 print(usd_per_1M_gas)
 
 legacy = {
+    'revision': '707a3e669fe127ac5c96738039845d122feb3222'  # statechannels monorepo
     "deployNitroAdjudicator": 6553512,  # TEST contract
     "deposit": 46750,
     "concludeAndWithdraw": 644147,
@@ -30,6 +31,7 @@ legacy["challengePath"] = legacy["forceMove"] + \
     legacy["respond"]
 
 optimized = {
+    "revision": '990a3e9ca10c311b9cbd7057383696458e38fda'  # statechannels monorepo
     "deployNitroAdjudicator": 3155589,
     "deployAssetHolder": 1831942,
     "deposit": 48776,
