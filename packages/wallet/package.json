@@ -10,7 +10,6 @@
     "node": "^10.16.3"
   },
   "scripts": {
-    "build:ci": "yarn build:typescript",
     "build:typescript": "npx tsc -b",
     "build:webpack": "CI=false node scripts/build.js",
     "build": "run-s build:typescript build:webpack",
