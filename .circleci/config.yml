@@ -176,7 +176,7 @@ workflows:
 
       - test:
           requires:
-            - prepare
+            - build
 
       - integration-test:
           requires:
