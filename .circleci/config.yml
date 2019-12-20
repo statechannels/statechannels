@@ -43,7 +43,6 @@ save_lib: &save_lib
       - packages/jest-gas-reporter/lib
       - packages/channel-provider/lib
       - packages/channel-client/lib
-      - packages/engine/lib
       - packages/hub/lib
       - packages/wallet-specs/lib
 restore_lib: &restore_lib
