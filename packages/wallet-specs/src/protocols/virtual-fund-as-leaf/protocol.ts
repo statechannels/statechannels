@@ -1,13 +1,5 @@
 import { assign } from 'xstate';
-import {
-  add,
-  AllocationItem,
-  Balance,
-  Channel,
-  getChannelId,
-  Guarantee,
-  store,
-} from '../../';
+import { add, AllocationItem, Balance, Channel, getChannelId, Guarantee, store } from '../../';
 import { Init as CreateNullChannelArgs } from '../create-null-channel/protocol';
 import { Init as SupportStateArgs } from '../support-state/protocol';
 
@@ -29,9 +21,7 @@ export interface Init {
 export const assignChannels = assign(
   (init: Init): ChannelsKnown => {
     const { hubAddress, targetChannelId, index } = init;
-    const participants = store
-      .getEntry(targetChannelId)
-      .participants.map(p => p.destination);
+    const participants = store.getEntry(targetChannelId).participants.map(p => p.destination);
     const jointParticipants = [participants[0], hubAddress, participants[1]];
     const jointChannel: Channel = {
       participants: jointParticipants,
@@ -59,10 +49,7 @@ export type ChannelsKnown = Init & {
   guarantorChannel: Channel;
 };
 const total = (balances: Balance[]) => balances.map(b => b.wei).reduce(add);
-export function jointChannelArgs({
-  balances,
-  jointChannel,
-}: ChannelsKnown): CreateNullChannelArgs {
+export function jointChannelArgs({ balances, jointChannel }: ChannelsKnown): CreateNullChannelArgs {
   const allocation: (i: Indices) => AllocationItem = i => ({
     destination: balances[i].address,
     amount: balances[i].wei,
@@ -84,10 +71,7 @@ const createJointChannel = {
   },
 };
 
-export function guarantorChannelArgs({
-  jointChannel,
-  index,
-}: ChannelsKnown): Guarantee {
+export function guarantorChannelArgs({ jointChannel, index }: ChannelsKnown): Guarantee {
   const { participants } = jointChannel;
 
   return {

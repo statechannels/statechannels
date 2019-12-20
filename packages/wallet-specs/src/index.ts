@@ -76,12 +76,9 @@ export { chain } from './chain';
 
 // This stuff should be replaced with some big number logic
 type numberish = string | number | undefined;
-export const add = (a: numberish, b: numberish) =>
-  (Number(a || 0) + Number(b || 0)).toString();
-export const subtract = (a: numberish, b: numberish) =>
-  (Number(a) - Number(b)).toString();
-export const max = (a: numberish, b: numberish) =>
-  Math.max(Number(a), Number(b)).toString();
+export const add = (a: numberish, b: numberish) => (Number(a || 0) + Number(b || 0)).toString();
+export const subtract = (a: numberish, b: numberish) => (Number(a) - Number(b)).toString();
+export const max = (a: numberish, b: numberish) => Math.max(Number(a), Number(b)).toString();
 export const gt = (a: numberish, b: numberish) => Number(a) > Number(b);
 
 export const success: { type: 'final' } = { type: 'final' };

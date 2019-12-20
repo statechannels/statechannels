@@ -4,11 +4,9 @@ module.exports = {
   testEnvironment: 'node',
   testURL: 'http://localhost',
   transform: {
-    '^.+\\.tsx?$': 'ts-jest',
+    '^.+\\.tsx?$': 'ts-jest'
   },
-  transformIgnorePatterns: [
-    '[/\\\\]node_modules[/\\\\].+\\.(js|jsx|mjs|ts|tsx)$',
-  ],
+  transformIgnorePatterns: ['[/\\\\]node_modules[/\\\\].+\\.(js|jsx|mjs|ts|tsx)$'],
   moduleFileExtensions: [
     'web.ts',
     'ts',
@@ -20,6 +18,6 @@ module.exports = {
     'jsx',
     'json',
     'node',
-    'mjs',
-  ],
+    'mjs'
+  ]
 };

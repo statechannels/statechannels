@@ -40,11 +40,7 @@ function assertOk(minimalOutcome: Allocation): boolean {
   return uniqueDestinations(minimalOutcome).length === minimalOutcome.length;
 }
 
-function obligation(
-  state: State,
-  minimalOutcome: Allocation,
-  destination: string
-): string {
+function obligation(state: State, minimalOutcome: Allocation, destination: string): string {
   assertOk(minimalOutcome);
   const myHoldings = getHoldings(state, destination);
 
@@ -64,10 +60,7 @@ function uniqueDestinations(outcome: Allocation): string[] {
   return outcome.map(i => i.destination).filter(firstEntry);
 }
 
-function preDepositOutcome(
-  channelId: string,
-  minimalOutcome: Allocation
-): Outcome {
+function preDepositOutcome(channelId: string, minimalOutcome: Allocation): Outcome {
   const { state } = store.getLatestConsensus(channelId);
   const outcome = store.getLatestSupportedAllocation(channelId);
 

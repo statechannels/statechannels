@@ -57,9 +57,7 @@ const preFundSetup = {
     CHANNEL_UPDATED: forwardChannelUpdated<Init>('preFundSetup'),
   },
 };
-export const passChannelId: (c: Init) => Funding.Init = ({
-  channelId,
-}: Init) => ({
+export const passChannelId: (c: Init) => Funding.Init = ({ channelId }: Init) => ({
   targetChannelId: channelId,
   tries: 0,
 });
@@ -85,11 +83,7 @@ const postFundSetup = {
   },
 };
 
-export const config: MachineConfig<
-  Init,
-  any,
-  OpenChannel | CloseChannel | ChannelUpdated
-> = {
+export const config: MachineConfig<Init, any, OpenChannel | CloseChannel | ChannelUpdated> = {
   key: PROTOCOL,
   initial: 'checkNonce',
   states: {

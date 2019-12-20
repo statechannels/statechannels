@@ -1,13 +1,6 @@
 import { assign, Machine } from 'xstate';
 import { SupportState } from '..';
-import {
-  Channel,
-  FINAL,
-  getChannelId,
-  MachineFactory,
-  Outcome,
-  SignedState,
-} from '../../';
+import { Channel, FINAL, getChannelId, MachineFactory, Outcome, SignedState } from '../../';
 import { ChannelStoreEntry } from '../../ChannelStoreEntry';
 import { Participant } from '../../store';
 
@@ -74,10 +67,7 @@ export const config = {
 };
 
 export const machine: MachineFactory<Init, any> = (store, context: Init) => {
-  async function checkChannelService({
-    channel,
-    outcome,
-  }: Init): Promise<boolean> {
+  async function checkChannelService({ channel, outcome }: Init): Promise<boolean> {
     // TODO: Should check that
     // - the nonce is used,
     // - that we have the private key for one of the signers, etc
@@ -88,9 +78,7 @@ export const machine: MachineFactory<Init, any> = (store, context: Init) => {
       participantId: p,
       signingAddress: p,
     }));
-    const privateKey = store.getPrivateKey(
-      participants.map(p => p.participantId)
-    );
+    const privateKey = store.getPrivateKey(participants.map(p => p.participantId));
     const unsupportedStates: SignedState[] = [
       {
         state: {

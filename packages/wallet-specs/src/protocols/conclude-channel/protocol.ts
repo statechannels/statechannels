@@ -79,10 +79,7 @@ const virtualDefunding = {
   states: {
     start: {
       on: {
-        '': [
-          { target: 'asLeaf', cond: 'amLeaf' },
-          { target: 'asHub', cond: 'amHub' },
-        ],
+        '': [{ target: 'asLeaf', cond: 'amLeaf' }, { target: 'asHub', cond: 'amHub' }],
       },
     },
     asLeaf: {

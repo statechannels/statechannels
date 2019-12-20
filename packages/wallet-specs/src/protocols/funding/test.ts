@@ -7,9 +7,7 @@ const context: Init = {
 };
 
 it('gets to ledger funding', async () => {
-  const service = interpret(
-    Machine(config).withConfig(mockOptions, context)
-  ).start();
+  const service = interpret(Machine(config).withConfig(mockOptions, context)).start();
   expect(service.state.value).toMatchObject({
     determineStrategy: 'getClientChoice',
   });

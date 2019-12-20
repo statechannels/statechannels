@@ -1,13 +1,4 @@
-import {
-  add,
-  Allocation,
-  Channel,
-  getChannelId,
-  gt,
-  Outcome,
-  SignedState,
-  State,
-} from '.';
+import { add, Allocation, Channel, getChannelId, gt, Outcome, SignedState, State } from '.';
 import { ChannelStoreEntry, IChannelStoreEntry } from './ChannelStoreEntry';
 import { messageService } from './messaging';
 import { AddressableMessage, FundingStrategyProposed } from './wire-protocol';
@@ -117,6 +108,7 @@ export class Store implements IStore {
         return channelId;
       }
     }
+    return undefined;
   }
 
   public participantIds(channelId: string): string[] {
@@ -155,23 +147,15 @@ export class Store implements IStore {
 
   public signedByMe(state: State) {
     const { states } = this.getEntry(getChannelId(state.channel));
-    const signedState = states.find((s: SignedState) =>
-      Store.equals(state, s.state)
-    );
+    const signedState = states.find((s: SignedState) => Store.equals(state, s.state));
 
-    return (
-      !!signedState &&
-      !!signedState.signatures &&
-      signedState.signatures.includes('first')
-    );
+    return !!signedState && !!signedState.signatures && signedState.signatures.includes('first');
   }
 
   public initializeChannel(data: IChannelStoreEntry) {
     const entry = new ChannelStoreEntry(data);
     if (this._store[entry.channelId]) {
-      throw new Error(
-        `Channel ${JSON.stringify(entry.channel)} already initialized`
-      );
+      throw new Error(`Channel ${JSON.stringify(entry.channel)} already initialized`);
     }
 
     const { participants, channelNonce } = entry.channel;
@@ -277,10 +261,7 @@ export class Store implements IStore {
     };
   }
 
-  private updateOrCreateEntry(
-    channelId: string,
-    states: SignedState[]
-  ): ChannelStoreEntry {
+  private updateOrCreateEntry(channelId: string, states: SignedState[]): ChannelStoreEntry {
     // TODO: This currently assumes that support comes from consensus on a single state
     let supportedState: SignedState[] = [];
     let unsupportedStates: SignedState[] = [];
@@ -294,9 +275,7 @@ export class Store implements IStore {
 
     unsupportedStates = merge(unsupportedStates, states);
 
-    const nowSupported = unsupportedStates
-      .filter(supported)
-      .sort(s => -s.state.turnNum);
+    const nowSupported = unsupportedStates.filter(supported).sort(s => -s.state.turnNum);
 
     supportedState = nowSupported.length ? [nowSupported[0]] : supportedState;
     if (supportedState.length > 0) {
@@ -339,9 +318,7 @@ function merge(left: SignedState[], right: SignedState[]): SignedState[] {
     const idx = left.findIndex(s => Store.equals(s.state, rightState.state));
     const leftState = left[idx];
     if (leftState) {
-      const signatures = [
-        ...new Set(leftState.signatures.concat(rightState.signatures)),
-      ];
+      const signatures = [...new Set(leftState.signatures.concat(rightState.signatures))];
       left[idx] = { ...leftState, signatures };
     } else {
       left.push(rightState);
@@ -354,8 +331,7 @@ function merge(left: SignedState[], right: SignedState[]): SignedState[] {
 function supported(signedState: SignedState) {
   // TODO: temporarily just check the required length
   return (
-    signedState.signatures.filter(Boolean).length ===
-    signedState.state.channel.participants.length
+    signedState.signatures.filter(Boolean).length === signedState.state.channel.participants.length
   );
 }
 

@@ -8,14 +8,7 @@ import {
   sendParent,
 } from 'xstate';
 import { AdvanceChannel, Funding } from '..';
-import {
-  Channel,
-  forwardChannelUpdated,
-  MachineFactory,
-  State,
-  Store,
-  success,
-} from '../..';
+import { Channel, forwardChannelUpdated, MachineFactory, State, Store, success } from '../..';
 import { ChannelStoreEntry } from '../../ChannelStoreEntry';
 import { JsonRpcCreateChannelParams } from '../../json-rpc';
 import { passChannelId } from '../join-channel/protocol';
@@ -104,10 +97,7 @@ export const mockOptions = {
   // actions: { sendOpenChannelMessage },
 };
 
-export const machine: MachineFactory<Init, any> = (
-  store: Store,
-  init: Init
-) => {
+export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => {
   const setChannelId: InvokeCreator<any> = (ctx: Init): Promise<SetChannel> => {
     const participants = ctx.participants.map(p => p.destination);
     const channelNonce = store.getNextNonce(participants);
@@ -132,9 +122,7 @@ export const machine: MachineFactory<Init, any> = (
       channel,
       supportedState: [],
       unsupportedStates: [{ state: firstState, signatures: [] }],
-      privateKey: store.getPrivateKey(
-        ctx.participants.map(p => p.participantId)
-      ),
+      privateKey: store.getPrivateKey(ctx.participants.map(p => p.participantId)),
       participants: ctx.participants,
     });
     store.initializeChannel(entry.args);

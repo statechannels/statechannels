@@ -49,9 +49,7 @@ export interface JsonRpcUpdateChannelParams {
 }
 
 // TODO: Error handling
-export function createStateFromCreateChannelParams(
-  params: JsonRpcCreateChannelParams
-): State {
+export function createStateFromCreateChannelParams(params: JsonRpcCreateChannelParams): State {
   const { appData, appDefinition } = params;
 
   // TODO: We should implement a nonce negotiation protocol once it's fully specced out

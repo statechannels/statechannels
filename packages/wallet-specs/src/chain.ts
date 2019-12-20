@@ -1,10 +1,6 @@
 interface Chain {
   holdings: (channelId: string) => number;
-  deposit: (
-    channelId: string,
-    expectedHeld: number,
-    amount: number
-  ) => Deposited | Revert;
+  deposit: (channelId: string, expectedHeld: number, amount: number) => Deposited | Revert;
 }
 
 export const chain = (null as any) as Chain;
@@ -23,11 +19,7 @@ class ExampleChain {
     return this._holdings[channelId];
   }
 
-  public deposit(
-    channelId: string,
-    expectedHeld: number,
-    amount: number
-  ): Deposited | Revert {
+  public deposit(channelId: string, expectedHeld: number, amount: number): Deposited | Revert {
     const current = this._holdings[channelId] || 0;
     if (current >= expectedHeld) {
       this._holdings[channelId] = (this._holdings[channelId] || 0) + amount;

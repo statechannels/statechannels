@@ -1,9 +1,4 @@
-import {
-  AnyEventObject,
-  ConditionPredicate,
-  Machine,
-  MachineConfig,
-} from 'xstate';
+import { AnyEventObject, ConditionPredicate, Machine, MachineConfig } from 'xstate';
 import { MachineFactory, Store } from '../..';
 
 const PROTOCOL = 'advance-channel';
@@ -68,10 +63,7 @@ export const mockOptions = {
   services: async () => true,
 };
 
-export const machine: MachineFactory<Init, any> = (
-  store: Store,
-  context?: Init
-) => {
+export const machine: MachineFactory<Init, any> = (store: Store, context?: Init) => {
   const guards: Guards = {
     advanced: ({ channelId, targetTurnNum }: Init, event, { state: s }) => {
       const { latestSupportedState: state } = store.getEntry(channelId);
@@ -83,9 +75,7 @@ export const machine: MachineFactory<Init, any> = (
 
   const services: Services = {
     sendState: async ({ channelId, targetTurnNum }: Init) => {
-      const { latestSupportedState, unsupportedStates } = store.getEntry(
-        channelId
-      );
+      const { latestSupportedState, unsupportedStates } = store.getEntry(channelId);
       const turnNum = targetTurnNum;
       /*
       TODO: the actual turnNum is calculated below. However, to determine whether

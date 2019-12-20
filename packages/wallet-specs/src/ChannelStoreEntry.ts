@@ -21,15 +21,9 @@ interface Guaranteed {
   guarantorChannelIds: [string, string];
 }
 
-export type Funding =
-  | DirectFunding
-  | IndirectFunding
-  | VirtualFunding
-  | Guaranteed;
+export type Funding = DirectFunding | IndirectFunding | VirtualFunding | Guaranteed;
 
-export function isIndirectFunding(
-  funding: Funding
-): funding is IndirectFunding {
+export function isIndirectFunding(funding: Funding): funding is IndirectFunding {
   return funding.type === 'Indirect';
 }
 
@@ -92,9 +86,7 @@ export class ChannelStoreEntry implements IChannelStoreEntry {
   }
 
   get ourIndex() {
-    return this.participants.findIndex(
-      p => p.signingAddress === this.privateKey
-    );
+    return this.participants.findIndex(p => p.signingAddress === this.privateKey);
   }
 
   get latestSupportedState(): State | undefined {
@@ -102,7 +94,7 @@ export class ChannelStoreEntry implements IChannelStoreEntry {
     if (numStates > 0) {
       return this.supportedState[numStates - 1].state;
     } else {
-      return;
+      return undefined;
     }
   }
 

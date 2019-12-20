@@ -35,24 +35,15 @@ const getClientChoice = {
 
 const wait = {
   on: {
-    '': [
-      { target: 'success', cond: 'consensus' },
-      { target: 'retry', cond: 'disagreement' },
-    ],
-    '*': [
-      { target: 'success', cond: 'consensus' },
-      { target: 'retry', cond: 'disagreement' },
-    ],
+    '': [{ target: 'success', cond: 'consensus' }, { target: 'retry', cond: 'disagreement' }],
+    '*': [{ target: 'success', cond: 'consensus' }, { target: 'retry', cond: 'disagreement' }],
   },
 };
 
 const retry = {
   entry: 'incrementTries',
   on: {
-    '': [
-      { target: 'failure', cond: 'maxTriesExceeded' },
-      { target: 'getClientChoice' },
-    ],
+    '': [{ target: 'failure', cond: 'maxTriesExceeded' }, { target: 'getClientChoice' }],
   },
 };
 
@@ -153,8 +144,7 @@ const guards: Guards = {
     return clientChoice && peerChoice && clientChoice !== peerChoice;
   },
   directStrategyChosen: ({ clientChoice }: Init) => clientChoice === 'Direct',
-  indirectStrategyChosen: ({ clientChoice }: Init) =>
-    clientChoice === 'Indirect',
+  indirectStrategyChosen: ({ clientChoice }: Init) => clientChoice === 'Indirect',
   virtualStrategyChosen: ({ clientChoice }: Init) => clientChoice === 'Virtual',
   maxTriesExceeded: () => true,
 };
@@ -188,10 +178,7 @@ export const mockOptions: Options = {
   actions: mockActions,
 };
 
-export const machine: MachineFactory<Init, any> = (
-  store: Store,
-  context: Init
-) => {
+export const machine: MachineFactory<Init, any> = (store: Store, context: Init) => {
   function sendClientChoice(ctx: ClientChoiceKnown) {
     store.sendStrategyChoice(strategyChoice(ctx));
   }
