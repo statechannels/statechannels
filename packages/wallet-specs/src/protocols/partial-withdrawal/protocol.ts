@@ -1,11 +1,11 @@
-import {add, Allocation, Channel, store, subtract} from '../..';
-import {checkThat, isAllocation} from '../../store';
+import { add, Allocation, Channel, store, subtract } from '../..';
+import { checkThat, isAllocation } from '../../store';
 import * as ConcludeChannel from '../conclude-channel/protocol';
 import * as CreateNullChannel from '../create-null-channel/protocol';
 import * as LedgerUpdate from '../ledger-update/protocol';
 
 const PROTOCOL = 'partial-withdrawal';
-const success = {type: 'final'};
+const success = { type: 'final' };
 
 /*
 participantMapping allows participants to change their signing keys in the new channel.
@@ -24,28 +24,28 @@ interface Init {
 function replacementChannelArgs({
   ledgerId,
   newOutcome,
-  participantMapping
+  participantMapping,
 }: Init): CreateNullChannel.Init {
-  const {channel, outcome} = store.getLatestConsensus(ledgerId).state;
+  const { channel, outcome } = store.getLatestConsensus(ledgerId).state;
   const newParticipants = channel.participants
     .filter(p => newOutcome.find(allocation => allocation.destination === p))
     .map(p => participantMapping[p]);
   const newChannel: Channel = {
     chainId: channel.chainId,
     participants: newParticipants,
-    channelNonce: store.getNextNonce(newParticipants)
+    channelNonce: store.getNextNonce(newParticipants),
   };
 
   const newChannelOutcome: Allocation = checkThat(outcome, isAllocation).map(
-    ({destination, amount}) => ({
+    ({ destination, amount }) => ({
       destination: participantMapping[destination],
-      amount: subtract(outcome[destination], newOutcome[destination])
+      amount: subtract(outcome[destination], newOutcome[destination]),
     })
   );
 
   return {
     channel: newChannel,
-    outcome: newChannelOutcome
+    outcome: newChannelOutcome,
   };
 }
 const createReplacement = {
@@ -53,17 +53,17 @@ const createReplacement = {
   invoke: {
     src: 'createNullChannel',
     data: replacementChannelArgs.name,
-    onDone: 'updateOldChannelOutcome'
-  }
+    onDone: 'updateOldChannelOutcome',
+  },
 };
-type NewChannelCreated = Init & {newChannelId: string};
+type NewChannelCreated = Init & { newChannelId: string };
 
 export function concludeOutcome({
   ledgerId,
   newOutcome,
-  newChannelId
+  newChannelId,
 }: NewChannelCreated): LedgerUpdate.Init {
-  const {state} = store.getLatestConsensus(ledgerId);
+  const { state } = store.getLatestConsensus(ledgerId);
   const currentlyAllocated = checkThat(state.outcome, isAllocation)
     .map(a => a.amount)
     .reduce(add, 0);
@@ -72,39 +72,39 @@ export function concludeOutcome({
     ...newOutcome,
     {
       destination: newChannelId,
-      amount: subtract(currentlyAllocated, toBeWithdrawn)
-    }
+      amount: subtract(currentlyAllocated, toBeWithdrawn),
+    },
   ];
   return {
     channelId: ledgerId,
-    targetOutcome
+    targetOutcome,
   };
 }
 const updateOldChannelOutcome = {
   invoke: {
     src: 'ledgerUpdate',
     data: concludeOutcome.name,
-    onDone: 'concludeOldChannel'
-  }
+    onDone: 'concludeOldChannel',
+  },
 };
 
-function oldChannelId({ledgerId: channelId}: NewChannelCreated): ConcludeChannel.Init {
-  return {channelId};
+function oldChannelId({ ledgerId: channelId }: NewChannelCreated): ConcludeChannel.Init {
+  return { channelId };
 }
 const concludeOldChannel = {
   invoke: {
     src: 'concludeChannel',
     data: oldChannelId.name,
-    onDone: 'transfer'
-  }
+    onDone: 'transfer',
+  },
 };
 
 const transfer = {
   invoke: {
     src: 'transferAll',
     data: oldChannelId.name,
-    onDone: 'success'
-  }
+    onDone: 'success',
+  },
 };
 
 export const config = {
@@ -115,6 +115,6 @@ export const config = {
     updateOldChannelOutcome,
     concludeOldChannel,
     transfer,
-    success
-  }
+    success,
+  },
 };

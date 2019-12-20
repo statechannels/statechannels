@@ -1,8 +1,8 @@
-import {AnyEventObject, assign, AssignAction, Interpreter, Machine, spawn} from 'xstate';
-import {CreateChannel, JoinChannel} from '..';
-import {getChannelId, pretty, Store, unreachable} from '../..';
-import {ChannelUpdated} from '../../store';
-import {FundingStrategyProposed, OpenChannel, SendStates} from '../../wire-protocol';
+import { AnyEventObject, assign, AssignAction, Interpreter, Machine, spawn } from 'xstate';
+import { CreateChannel, JoinChannel } from '..';
+import { getChannelId, pretty, Store, unreachable } from '../..';
+import { ChannelUpdated } from '../../store';
+import { FundingStrategyProposed, OpenChannel, SendStates } from '../../wire-protocol';
 
 const PROTOCOL = 'wallet';
 export type Events = OpenChannelEvent | CreateChannelEvent | SendStates | FundingStrategyProposed;
@@ -16,10 +16,10 @@ export interface Init {
   processes: Process[];
 }
 
-function forwardToChildren(_ctx, event: Events, {state}) {
+function forwardToChildren(_ctx, event: Events, { state }) {
   switch (event.type) {
     case 'FUNDING_STRATEGY_PROPOSED':
-      state.context.processes.forEach(({ref}: Process) => ref.send(event));
+      state.context.processes.forEach(({ ref }: Process) => ref.send(event));
       break;
     case 'CREATE_CHANNEL':
     case 'OPEN_CHANNEL':
@@ -32,16 +32,16 @@ function forwardToChildren(_ctx, event: Events, {state}) {
 const config = {
   key: PROTOCOL,
   initial: 'running',
-  context: {processes: [], id: 'unknown'},
+  context: { processes: [], id: 'unknown' },
   states: {
     running: {
       on: {
-        OPEN_CHANNEL: {actions: 'spawnJoinChannel'},
-        CREATE_CHANNEL: {actions: 'spawnCreateChannel'},
-        '*': {actions: ['updateStore', forwardToChildren]}
-      }
-    }
-  }
+        OPEN_CHANNEL: { actions: 'spawnJoinChannel' },
+        CREATE_CHANNEL: { actions: 'spawnCreateChannel' },
+        '*': { actions: ['updateStore', forwardToChildren] },
+      },
+    },
+  },
 };
 
 export type OpenChannelEvent = OpenChannel;
@@ -50,7 +50,7 @@ export type CreateChannelEvent = CreateChannel.Init & {
   type: 'CREATE_CHANNEL';
 };
 
-export {config};
+export { config };
 export type Actions = {
   spawnJoinChannel: AssignAction<Init, OpenChannelEvent>;
   spawnCreateChannel: AssignAction<Init, CreateChannelEvent>;
@@ -64,7 +64,7 @@ function addLogs(walletProcess: Process, ctx): Process {
       console.log(
         pretty({
           actor: `${ctx.id}.${walletProcess.id}`,
-          TRANSITION: {state: state.value}
+          TRANSITION: { state: state.value },
         })
       )
     )
@@ -72,7 +72,7 @@ function addLogs(walletProcess: Process, ctx): Process {
       console.log(
         pretty({
           actor: `${ctx.id}.${walletProcess.id}`,
-          EVENT: {event: event.type}
+          EVENT: { event: event.type },
         })
       );
     });
@@ -82,7 +82,7 @@ function addLogs(walletProcess: Process, ctx): Process {
 
 export function machine(store: Store, context: Init) {
   const spawnCreateChannel = assign(
-    (ctx: Init, {type, ...init}: CreateChannelEvent): Init => {
+    (ctx: Init, { type, ...init }: CreateChannelEvent): Init => {
       const processId = `create-channel`;
       if (ctx.processes.find(p => p.id === processId)) {
         throw new Error('Process exists');
@@ -90,7 +90,7 @@ export function machine(store: Store, context: Init) {
 
       const walletProcess = {
         id: processId,
-        ref: spawn(CreateChannel.machine(store, init).withContext(init), processId)
+        ref: spawn(CreateChannel.machine(store, init).withContext(init), processId),
       };
       if (process.env.ADD_LOGS) {
         addLogs(walletProcess, ctx);
@@ -98,7 +98,7 @@ export function machine(store: Store, context: Init) {
 
       return {
         ...ctx,
-        processes: ctx.processes.concat([walletProcess])
+        processes: ctx.processes.concat([walletProcess]),
       };
     }
   );
@@ -109,10 +109,10 @@ export function machine(store: Store, context: Init) {
     if (ctx.processes.find(p => p.id === processId)) {
       throw new Error('Process exists');
     }
-    const joinChannelMachine = JoinChannel.machine(store, {channelId});
+    const joinChannelMachine = JoinChannel.machine(store, { channelId });
     const walletProcess: Process = {
       id: processId,
-      ref: spawn(joinChannelMachine, processId)
+      ref: spawn(joinChannelMachine, processId),
     };
     if (process.env.ADD_LOGS) {
       addLogs(walletProcess, ctx);
@@ -120,12 +120,12 @@ export function machine(store: Store, context: Init) {
     walletProcess.ref.send(event);
     return {
       ...ctx,
-      processes: ctx.processes.concat([walletProcess])
+      processes: ctx.processes.concat([walletProcess]),
     };
   });
 
   // TODO: Should this send `CHANNEL_UPDATED` to children?
-  const updateStore = (_ctx, event: Events, {state}) => {
+  const updateStore = (_ctx, event: Events, { state }) => {
     let channelId = '';
     switch (event.type) {
       case 'OPEN_CHANNEL':
@@ -146,19 +146,19 @@ export function machine(store: Store, context: Init) {
     if (channelId) {
       const channelUpdated: ChannelUpdated = {
         type: 'CHANNEL_UPDATED',
-        channelId
+        channelId,
       };
-      state.context.processes.forEach(({ref}: Process) => ref.send(channelUpdated));
+      state.context.processes.forEach(({ ref }: Process) => ref.send(channelUpdated));
     }
   };
 
-  const options: {actions: Actions} = {
+  const options: { actions: Actions } = {
     actions: {
       spawnCreateChannel,
       spawnJoinChannel,
       forwardToChildren,
-      updateStore
-    }
+      updateStore,
+    },
   };
 
   return Machine(config, options).withContext(context);

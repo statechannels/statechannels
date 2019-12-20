@@ -5,13 +5,13 @@ import {
   InvokeCreator,
   Machine,
   MachineConfig,
-  sendParent
+  sendParent,
 } from 'xstate';
-import {AdvanceChannel, Funding} from '..';
-import {Channel, forwardChannelUpdated, MachineFactory, State, Store, success} from '../..';
-import {ChannelStoreEntry} from '../../ChannelStoreEntry';
-import {JsonRpcCreateChannelParams} from '../../json-rpc';
-import {passChannelId} from '../join-channel/protocol';
+import { AdvanceChannel, Funding } from '..';
+import { Channel, forwardChannelUpdated, MachineFactory, State, Store, success } from '../..';
+import { ChannelStoreEntry } from '../../ChannelStoreEntry';
+import { JsonRpcCreateChannelParams } from '../../json-rpc';
+import { passChannelId } from '../join-channel/protocol';
 
 const PROTOCOL = 'create-channel';
 
@@ -20,25 +20,27 @@ Spawned in a new process when the app calls CreateChannel
 */
 export type Init = JsonRpcCreateChannelParams;
 
-type ChannelSet = Init & {channelId: string};
+type ChannelSet = Init & { channelId: string };
 export interface SetChannel {
   type: 'CHANNEL_INITIALIZED';
   channelId: string;
 }
 const assignChannelId: any = assign({
-  channelId: (_: Context, event: DoneInvokeEvent<any>) => event.data.channelId
+  channelId: (_: Context, event: DoneInvokeEvent<any>) => event.data.channelId,
 });
 
-export const advanceChannelArgs = (i: 1 | 3) => ({channelId}: ChannelSet): AdvanceChannel.Init => ({
+export const advanceChannelArgs = (i: 1 | 3) => ({
   channelId,
-  targetTurnNum: i
+}: ChannelSet): AdvanceChannel.Init => ({
+  channelId,
+  targetTurnNum: i,
 });
 const initializeChannel = {
   invoke: {
     src: 'setChannelId',
-    onDone: 'preFundSetup'
+    onDone: 'preFundSetup',
   },
-  exit: [assignChannelId, 'sendOpenChannelMessage']
+  exit: [assignChannelId, 'sendOpenChannelMessage'],
 };
 
 const preFundSetup = {
@@ -46,12 +48,12 @@ const preFundSetup = {
     id: 'preFundSetup',
     src: 'advanceChannel',
     data: advanceChannelArgs(1),
-    onDone: 'funding'
+    onDone: 'funding',
   },
   on: {
     CHANNEL_CLOSED: 'abort',
-    CHANNEL_UPDATED: forwardChannelUpdated<Context>('preFundSetup')
-  }
+    CHANNEL_UPDATED: forwardChannelUpdated<Context>('preFundSetup'),
+  },
 };
 
 const abort = success;
@@ -61,8 +63,8 @@ const funding = {
     src: 'funding',
     data: passChannelId,
     onDone: 'postFundSetup',
-    autoForward: true
-  }
+    autoForward: true,
+  },
 };
 
 const postFundSetup = {
@@ -70,11 +72,11 @@ const postFundSetup = {
     id: 'postFundSetup',
     src: 'advanceChannel',
     data: advanceChannelArgs(3),
-    onDone: 'success'
+    onDone: 'success',
   },
   on: {
-    CHANNEL_UPDATED: forwardChannelUpdated<Context>('postFundSetup')
-  }
+    CHANNEL_UPDATED: forwardChannelUpdated<Context>('postFundSetup'),
+  },
 };
 
 type Context = Init | ChannelSet;
@@ -87,8 +89,8 @@ export const config: MachineConfig<Context, any, any> = {
     abort,
     funding,
     postFundSetup,
-    success: {type: 'final' as 'final', entry: sendParent('CHANNEL_CREATED')}
-  }
+    success: { type: 'final' as 'final', entry: sendParent('CHANNEL_CREATED') },
+  },
 };
 
 export const mockOptions = {
@@ -102,10 +104,10 @@ export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => 
     const channel: Channel = {
       participants,
       channelNonce,
-      chainId: 'mainnet?'
+      chainId: 'mainnet?',
     };
 
-    const {allocations: outcome, appData, appDefinition} = ctx;
+    const { allocations: outcome, appData, appDefinition } = ctx;
     const firstState: State = {
       appData,
       appDefinition,
@@ -113,45 +115,45 @@ export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => 
       turnNum: 0,
       outcome,
       channel,
-      challengeDuration: 'TODO' // TODO
+      challengeDuration: 'TODO', // TODO
     };
 
     const entry = new ChannelStoreEntry({
       channel,
       supportedState: [],
-      unsupportedStates: [{state: firstState, signatures: []}],
+      unsupportedStates: [{ state: firstState, signatures: [] }],
       privateKey: store.getPrivateKey(ctx.participants.map(p => p.participantId)),
-      participants: ctx.participants
+      participants: ctx.participants,
     });
     store.initializeChannel(entry.args);
 
-    const {channelId} = entry;
+    const { channelId } = entry;
 
     return new Promise(resolve => {
-      resolve({type: 'CHANNEL_INITIALIZED', channelId});
+      resolve({ type: 'CHANNEL_INITIALIZED', channelId });
     });
   };
   const guards = {};
   const actions = {
-    sendOpenChannelMessage: ({channelId}: SetChannel) => {
+    sendOpenChannelMessage: ({ channelId }: SetChannel) => {
       const state = store.getLatestState(channelId);
       if (state.turnNum !== 0) {
         throw new Error('Wrong state');
       }
 
       store.sendOpenChannel(state);
-    }
+    },
   };
   const services = {
     setChannelId,
     funding: Funding.machine(store),
-    advanceChannel: AdvanceChannel.machine(store)
+    advanceChannel: AdvanceChannel.machine(store),
   };
 
   const options = {
     guards,
     actions,
-    services
+    services,
   };
 
   return Machine(config, options).withContext(init);

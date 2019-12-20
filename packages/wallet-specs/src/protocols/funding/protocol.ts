@@ -1,7 +1,7 @@
-import {assign, DoneInvokeEvent, Machine} from 'xstate';
-import {LedgerFunding} from '..';
-import {failure, MachineFactory, pretty, Store, success} from '../..';
-import {FundingStrategy, FundingStrategyProposed} from '../../wire-protocol';
+import { assign, DoneInvokeEvent, Machine } from 'xstate';
+import { LedgerFunding } from '..';
+import { failure, MachineFactory, pretty, Store, success } from '../..';
+import { FundingStrategy, FundingStrategyProposed } from '../../wire-protocol';
 
 const PROTOCOL = 'funding';
 
@@ -17,9 +17,9 @@ type ClientChoiceKnown = Init & {
 };
 
 const assignClientChoice = assign<ClientChoiceKnown>(
-  (ctx: Init, {data: clientChoice}: DoneInvokeEvent<FundingStrategy>) => ({
+  (ctx: Init, { data: clientChoice }: DoneInvokeEvent<FundingStrategy>) => ({
     ...ctx,
-    clientChoice
+    clientChoice,
   })
 );
 const getClientChoice = {
@@ -28,37 +28,37 @@ const getClientChoice = {
     src: 'askClient',
     onDone: {
       target: 'wait',
-      actions: ['sendClientChoice', assignClientChoice]
-    }
-  }
+      actions: ['sendClientChoice', assignClientChoice],
+    },
+  },
 };
 
 const wait = {
   on: {
-    '': [{target: 'success', cond: 'consensus'}, {target: 'retry', cond: 'disagreement'}],
-    '*': [{target: 'success', cond: 'consensus'}, {target: 'retry', cond: 'disagreement'}]
-  }
+    '': [{ target: 'success', cond: 'consensus' }, { target: 'retry', cond: 'disagreement' }],
+    '*': [{ target: 'success', cond: 'consensus' }, { target: 'retry', cond: 'disagreement' }],
+  },
 };
 
 const retry = {
   entry: 'incrementTries',
   on: {
-    '': [{target: 'failure', cond: 'maxTriesExceeded'}, {target: 'getClientChoice'}]
-  }
+    '': [{ target: 'failure', cond: 'maxTriesExceeded' }, { target: 'getClientChoice' }],
+  },
 };
 
-type PeerChoiceKnown = Init & {peerChoice: FundingStrategy};
+type PeerChoiceKnown = Init & { peerChoice: FundingStrategy };
 const assignPeerChoice = assign<PeerChoiceKnown>(
-  (ctx: Init, {choice}: FundingStrategyProposed) => ({
+  (ctx: Init, { choice }: FundingStrategyProposed) => ({
     ...ctx,
-    peerChoice: choice
+    peerChoice: choice,
   })
 );
 const determineStrategy = {
   on: {
     FUNDING_STRATEGY_PROPOSED: {
-      actions: assignPeerChoice
-    }
+      actions: assignPeerChoice,
+    },
   },
   initial: 'getClientChoice',
   states: {
@@ -66,34 +66,34 @@ const determineStrategy = {
     wait,
     success,
     retry,
-    failure
+    failure,
   },
   onDone: [
-    {target: 'fundDirectly', cond: 'directStrategyChosen'},
-    {target: 'fundIndirectly', cond: 'indirectStrategyChosen'},
-    {target: 'fundVirtually', cond: 'virtualStrategyChosen'}
-  ]
+    { target: 'fundDirectly', cond: 'directStrategyChosen' },
+    { target: 'fundIndirectly', cond: 'indirectStrategyChosen' },
+    { target: 'fundVirtually', cond: 'virtualStrategyChosen' },
+  ],
 };
 
 const fundDirectly = {
   invoke: {
     src: 'directFunding',
-    onDone: 'success'
-  }
+    onDone: 'success',
+  },
 };
 const fundVirtually = {
   invoke: {
     src: 'virtualFunding',
-    onDone: 'success'
-  }
+    onDone: 'success',
+  },
 };
 const fundIndirectly = {
   invoke: {
     src: 'ledgerFunding',
-    data: ({targetChannelId}: Init) => ({targetChannelId}),
+    data: ({ targetChannelId }: Init) => ({ targetChannelId }),
     onDone: 'success',
-    autoForward: true
-  }
+    autoForward: true,
+  },
 };
 
 export const config = {
@@ -105,8 +105,8 @@ export const config = {
     fundIndirectly,
     fundVirtually,
     success,
-    failure
-  }
+    failure,
+  },
 };
 
 export type Guards = {
@@ -137,45 +137,45 @@ export type Options = Partial<{
 }>;
 
 const guards: Guards = {
-  consensus: ({clientChoice, peerChoice}: Init) => {
+  consensus: ({ clientChoice, peerChoice }: Init) => {
     return !!clientChoice && clientChoice === peerChoice;
   },
-  disagreement: ({clientChoice, peerChoice}: Init) => {
+  disagreement: ({ clientChoice, peerChoice }: Init) => {
     return clientChoice && peerChoice && clientChoice !== peerChoice;
   },
-  directStrategyChosen: ({clientChoice}: Init) => clientChoice === 'Direct',
-  indirectStrategyChosen: ({clientChoice}: Init) => clientChoice === 'Indirect',
-  virtualStrategyChosen: ({clientChoice}: Init) => clientChoice === 'Virtual',
-  maxTriesExceeded: () => true
+  directStrategyChosen: ({ clientChoice }: Init) => clientChoice === 'Direct',
+  indirectStrategyChosen: ({ clientChoice }: Init) => clientChoice === 'Indirect',
+  virtualStrategyChosen: ({ clientChoice }: Init) => clientChoice === 'Virtual',
+  maxTriesExceeded: () => true,
 };
 
 function strategyChoice({
   clientChoice,
-  targetChannelId
+  targetChannelId,
 }: ClientChoiceKnown): FundingStrategyProposed {
   return {
     type: 'FUNDING_STRATEGY_PROPOSED',
     choice: clientChoice,
-    targetChannelId
+    targetChannelId,
   };
 }
 const mockServices: Services = {
   askClient: async () => 'Indirect',
   directFunding: async () => true,
   ledgerFunding: async () => true,
-  virtualFunding: async () => true
+  virtualFunding: async () => true,
 };
 const mockActions: Actions = {
   sendClientChoice: (ctx: ClientChoiceKnown) => {
     console.log(`Sending ${pretty(strategyChoice(ctx))}`);
   },
-  assignClientChoice
+  assignClientChoice,
 };
 
 export const mockOptions: Options = {
   guards,
   services: mockServices,
-  actions: mockActions
+  actions: mockActions,
 };
 
 export const machine: MachineFactory<Init, any> = (store: Store, context: Init) => {
@@ -188,13 +188,13 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
       askClient: async () => 'Indirect',
       directFunding: async () => true,
       ledgerFunding: LedgerFunding.machine(store),
-      virtualFunding: async () => true
+      virtualFunding: async () => true,
     },
     guards,
     actions: {
       sendClientChoice,
-      assignClientChoice
-    }
+      assignClientChoice,
+    },
   };
 
   return Machine(config, options).withContext(context);

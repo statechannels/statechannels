@@ -6,12 +6,12 @@ interface Chain {
 export const chain = (null as any) as Chain;
 
 class ExampleChain {
-  private _holdings: {[channelId: string]: number};
+  private _holdings: { [channelId: string]: number };
 
   constructor() {
     this._holdings = {
       '0xabc': 1,
-      '0x123': 2
+      '0x123': 2,
     };
   }
 
@@ -27,7 +27,7 @@ class ExampleChain {
         type: 'DEPOSITED',
         channelId,
         amount,
-        total: this._holdings[channelId]
+        total: this._holdings[channelId],
       };
     } else {
       return 'REVERT';

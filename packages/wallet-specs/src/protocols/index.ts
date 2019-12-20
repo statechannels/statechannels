@@ -27,5 +27,5 @@ export {
   SupportState,
   VirtualLeaf,
   VirtualHub,
-  Wallet
+  Wallet,
 };

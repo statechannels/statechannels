@@ -1,5 +1,5 @@
-import {CreateChannelEvent} from './protocols/wallet/protocol';
-import {AddressableMessage} from './wire-protocol';
+import { CreateChannelEvent } from './protocols/wallet/protocol';
+import { AddressableMessage } from './wire-protocol';
 
 const messagesToSecond: AddressableMessage[] = [];
 messagesToSecond.push({
@@ -10,17 +10,17 @@ messagesToSecond.push({
       appDefinition: '0x',
       isFinal: false,
       turnNum: 0,
-      outcome: [{destination: 'first', amount: '3'}, {destination: 'second', amount: '1'}],
+      outcome: [{ destination: 'first', amount: '3' }, { destination: 'second', amount: '1' }],
       channel: {
         participants: ['first', 'second'],
         channelNonce: '1',
-        chainId: 'mainnet?'
+        chainId: 'mainnet?',
       },
-      challengeDuration: 'TODO'
+      challengeDuration: 'TODO',
     },
-    signatures: ['first']
+    signatures: ['first'],
   },
-  to: 'second'
+  to: 'second',
 });
 messagesToSecond.push({
   type: 'SendStates',
@@ -31,24 +31,24 @@ messagesToSecond.push({
         appDefinition: '0x',
         isFinal: false,
         turnNum: 1,
-        outcome: [{destination: 'first', amount: '3'}, {destination: 'second', amount: '1'}],
+        outcome: [{ destination: 'first', amount: '3' }, { destination: 'second', amount: '1' }],
         channel: {
           participants: ['first', 'second'],
           channelNonce: '1',
-          chainId: 'mainnet?'
+          chainId: 'mainnet?',
         },
-        challengeDuration: 'TODO'
+        challengeDuration: 'TODO',
       },
-      signatures: ['first']
-    }
+      signatures: ['first'],
+    },
   ],
-  to: 'second'
+  to: 'second',
 });
 messagesToSecond.push({
   to: 'second',
   type: 'FUNDING_STRATEGY_PROPOSED',
   targetChannelId: 'first+second',
-  choice: 'Indirect'
+  choice: 'Indirect',
 });
 
 const messagesToFirst: AddressableMessage[] = [];
@@ -64,30 +64,30 @@ messagesToFirst.push({
         outcome: [
           {
             destination: 'first',
-            amount: '3'
+            amount: '3',
           },
           {
             destination: 'second',
-            amount: '1'
-          }
+            amount: '1',
+          },
         ],
         channel: {
           participants: ['first', 'second'],
           channelNonce: '1',
-          chainId: 'mainnet?'
+          chainId: 'mainnet?',
         },
-        challengeDuration: 'TODO'
+        challengeDuration: 'TODO',
       },
-      signatures: ['second']
-    }
+      signatures: ['second'],
+    },
   ],
-  to: 'first'
+  to: 'first',
 });
 messagesToFirst.push({
   type: 'FUNDING_STRATEGY_PROPOSED',
   choice: 'Indirect',
   targetChannelId: 'first+second+1',
-  to: 'first'
+  to: 'first',
 });
 
 const first = 'first';
@@ -98,17 +98,17 @@ export const createChannel: CreateChannelEvent = {
     {
       participantId: first,
       signingAddress: first,
-      destination: first
+      destination: first,
     },
     {
       participantId: second,
       signingAddress: second,
-      destination: second
-    }
+      destination: second,
+    },
   ],
-  allocations: [{destination: first, amount: '3'}, {destination: second, amount: '1'}],
+  allocations: [{ destination: first, amount: '3' }, { destination: second, amount: '1' }],
   appDefinition: '0x',
-  appData: '0x'
+  appData: '0x',
 };
 
-export {messagesToSecond, messagesToFirst};
+export { messagesToSecond, messagesToFirst };

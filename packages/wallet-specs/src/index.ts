@@ -1,9 +1,9 @@
-import {isUndefined} from 'util';
-import {EventObject, SendAction, StateMachine} from 'xstate';
-import {forwardTo} from 'xstate/lib/actions';
-import {ChannelUpdated, IStore, Store} from './store';
+import { isUndefined } from 'util';
+import { EventObject, SendAction, StateMachine } from 'xstate';
+import { forwardTo } from 'xstate/lib/actions';
+import { ChannelUpdated, IStore, Store } from './store';
 const store = new Store();
-export {Store, store};
+export { Store, store };
 
 export type AppData = string;
 export type Signature = string;
@@ -42,7 +42,7 @@ export function nextState(state: State, opts?: Partial<VariablePart>): State {
   return {
     ...state,
     turnNum: state.turnNum + 1,
-    ...opts
+    ...opts,
   };
 }
 
@@ -72,7 +72,7 @@ export interface Entry {
   type: '';
 }
 
-export {chain} from './chain';
+export { chain } from './chain';
 
 // This stuff should be replaced with some big number logic
 type numberish = string | number | undefined;
@@ -81,8 +81,8 @@ export const subtract = (a: numberish, b: numberish) => (Number(a) - Number(b)).
 export const max = (a: numberish, b: numberish) => Math.max(Number(a), Number(b)).toString();
 export const gt = (a: numberish, b: numberish) => Number(a) > Number(b);
 
-export const success: {type: 'final'} = {type: 'final'};
-export const failure: {type: 'final'} = {type: 'final'};
+export const success: { type: 'final' } = { type: 'final' };
+export const failure: { type: 'final' } = { type: 'final' };
 
 export type Without<T, K> = {
   [L in Exclude<keyof T, K>]: T[L];
@@ -90,9 +90,9 @@ export type Without<T, K> = {
 
 export const pretty = o => JSON.stringify(o, null, 2);
 
-type Transition<C> = {actions: SendAction<C, ChannelUpdated>};
+type Transition<C> = { actions: SendAction<C, ChannelUpdated> };
 export function forwardChannelUpdated<C>(id: string): Transition<C> {
-  return {actions: forwardTo(id)};
+  return { actions: forwardTo(id) };
 }
 
 // TODO

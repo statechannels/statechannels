@@ -1,4 +1,4 @@
-import {Outcome} from '../../';
+import { Outcome } from '../../';
 
 const PROTOCOL = 'ledger-update';
 
@@ -13,14 +13,14 @@ const waiting = {
     '*': [
       {
         target: 'success',
-        cond: 'consensusReached'
+        cond: 'consensusReached',
       },
       {
         target: 'failure',
-        cond: 'dissent'
-      }
-    ]
-  }
+        cond: 'dissent',
+      },
+    ],
+  },
 };
 
 export const config = {
@@ -28,14 +28,14 @@ export const config = {
   initial: 'waiting',
   states: {
     waiting,
-    success: {type: 'final'},
-    failure: {type: 'final'}
-  }
+    success: { type: 'final' },
+    failure: { type: 'final' },
+  },
 };
 
 // CREATE VISUALS
 const guards = {
   consensusReached: context => true,
-  dissent: context => false
+  dissent: context => false,
 };
-export const mockOptions = {guards};
+export const mockOptions = { guards };

@@ -1,5 +1,5 @@
 import * as xstate from 'xstate';
-import {pretty} from '.';
+import { pretty } from '.';
 
 export function log(cond: boolean, message: string) {
   if (!cond) {
@@ -8,13 +8,17 @@ export function log(cond: boolean, message: string) {
 }
 
 export function debugAction(id) {
-  return (ctx, event, {state}) => {
+  return (ctx, event, { state }) => {
     const saveMe = id;
     debugger;
   };
 }
 
-export function addLogs(_ctx, _event, {state: parentState}: {state: xstate.State<any, any, any>}) {
+export function addLogs(
+  _ctx,
+  _event,
+  { state: parentState }: { state: xstate.State<any, any, any> }
+) {
   const supervisorState = parentState.value;
   Object.values(parentState.children).forEach((service: xstate.Interpreter<any, any, any>) => {
     service
@@ -23,7 +27,7 @@ export function addLogs(_ctx, _event, {state: parentState}: {state: xstate.State
           pretty({
             supervisor: supervisorState,
             service: service.id,
-            TRANSITION: {state: state.value}
+            TRANSITION: { state: state.value },
           })
         )
       )
@@ -32,7 +36,7 @@ export function addLogs(_ctx, _event, {state: parentState}: {state: xstate.State
           pretty({
             supervisor: supervisorState,
             service: service.id,
-            EVENT: {event: event.type}
+            EVENT: { event: event.type },
           })
         );
       });

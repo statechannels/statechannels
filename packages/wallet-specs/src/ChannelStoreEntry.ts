@@ -1,5 +1,5 @@
-import {Channel, getChannelId, SignedState, State} from '.';
-import {Participant} from './store';
+import { Channel, getChannelId, SignedState, State } from '.';
+import { Participant } from './store';
 
 interface DirectFunding {
   type: 'Direct';
@@ -53,7 +53,7 @@ export class ChannelStoreEntry implements IChannelStoreEntry {
   public channel: Channel;
 
   constructor(args: Partial<IChannelStoreEntry>) {
-    const {privateKey, participants, channel} = args;
+    const { privateKey, participants, channel } = args;
     if (privateKey && participants && channel) {
       this.privateKey = privateKey;
       this.participants = participants;
@@ -73,7 +73,7 @@ export class ChannelStoreEntry implements IChannelStoreEntry {
       privateKey,
       participants,
       channel,
-      funding
+      funding,
     }: IChannelStoreEntry = this;
     return {
       supportedState,
@@ -81,7 +81,7 @@ export class ChannelStoreEntry implements IChannelStoreEntry {
       privateKey,
       participants,
       channel,
-      funding
+      funding,
     };
   }
 
