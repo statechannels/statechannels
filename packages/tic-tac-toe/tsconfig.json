@@ -1,0 +1,31 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "esModuleInterop": true,
+    "jsx": "react",
+    "lib": ["es6", "dom"],
+    "module": "commonjs",
+    "noImplicitAny": false,
+    "noUnusedLocals": true,
+    "outDir": "build/dist",
+    "strict": false,
+    "suppressImplicitAnyIndexErrors": true,
+    "target": "es2015"
+  },
+  "exclude": [
+    "node_modules",
+    "build",
+    "scripts",
+    "webpack",
+    "jest",
+    "src/setupTests.ts",
+    "migrations/*",
+    "test/**/*",
+    "src/contract-tests/*"
+  ]
+}

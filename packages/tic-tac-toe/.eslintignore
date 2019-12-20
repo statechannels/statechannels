@@ -1,0 +1,14 @@
+/node_modules/
+!.*
+/.vscode/
+**/*.json
+/.etherlime-store/
+/build/
+/.storybook/
+
+# Excluded as these aren't included in TSConfig project
+/scripts/
+/config/
+/jest/
+/src/setupTests.ts
+src/contract-tests/tic-tac-toe.test.ts
