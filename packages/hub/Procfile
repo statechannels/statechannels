@@ -1,1 +1,1 @@
-firebase-watcher: cd packages/hub && yarn start
+firebase-watcher: cd packages/hub && yarn hub:start:dev
