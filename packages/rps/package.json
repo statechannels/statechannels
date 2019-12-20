@@ -9,11 +9,10 @@
     "firebase/**/grpc": "^1.16.1"
   },
   "scripts": {
-    "build:ci": "run-s clearContracts build:typescript contracts:compile",
+    "build:ci": "run-s build:typescript contracts:compile",
     "build:typescript": "npx tsc -b",
     "build:webpack": "CI=false node scripts/build.js",
-    "build": "run-s clearContracts build:typescript build:webpack",
-    "clearContracts": "rm -rf ./build/contracts",
+    "build": "run-s build:typescript build:webpack",
     "contracts:compile": "node ./bin/compile.js",
     "prettier:check": "prettier --check '**/*.{scss,json}' --ignore-path '.gitignore'",
     "prettier:write": "prettier --write '**/*.{scss,json}' --ignore-path '.gitignore'",
@@ -23,7 +22,7 @@
     "eslint:write": "eslint \"**/*.{js,ts,tsx}\" --fix --max-warnings=0",
     "start": "yarn contracts:compile && node scripts/start.js",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
-    "prepare": "yarn build:ci",
+    "prepare": "yarn contracts:compile",
     "test:prepare": "yarn clearContracts && yarn contracts:compile",
     "test:app": "jest -c ./config/jest/jest.config.js",
     "test:contracts": "npx jest -c ./config/jest/jest.contracts.config.js",
