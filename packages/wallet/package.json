@@ -10,6 +10,7 @@
     "node": "^10.16.3"
   },
   "scripts": {
+    "build:ci": "yarn patch-package && yarn build:typescript",
     "build:typescript": "npx tsc -b",
     "build:webpack": "CI=false node scripts/build.js",
     "build": "run-s build:typescript build:webpack",
@@ -17,7 +18,6 @@
     "lint:write": "eslint \"src/**/*.{js,ts,tsx}\" --fix",
     "patch-package": "cd ../.. && yarn patch-package",
     "postinstall": "rm -f node_modules/web3/index.d.ts",
-    "prepare": "yarn patch-package && yarn build:typescript",
     "start": "node scripts/start.js",
     "start:integration": "NODE_ENV=test node scripts/start.js",
     "storybook": "start-storybook -p 9001 -c .storybook",
