@@ -108,6 +108,11 @@ jobs:
           at: /home/circleci/project
       - run: yarn lint:check
       - run: yarn build:ci
+      - persist_to_workspace:
+          root: /home/circleci/project
+          paths:
+            - packages/*/build
+
       - notify_slack
 
   test:
