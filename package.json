@@ -8,21 +8,21 @@
     "node": "^10.16.3"
   },
   "scripts": {
-    "prepare": "lerna run --concurrency 1 --stream prepare",
-    "build": "lerna run build",
     "build:ci": "lerna run --since $(git merge-base $CIRCLE_BRANCH origin/master) build:ci",
-    "run:w3t": "lerna run start --parallel --scope=**/web3torrent --scope=**/embedded-wallet ",
-    "run:ewt": "lerna run start --parallel --scope=**/embedded-wallet",
-    "clean": "git clean -Xdf --exclude=\"!.env\"",
+    "build": "lerna run build",
     "clean:dry": "git clean -Xdn --exclude=\"!.env\"",
-    "start:shared-ganache": "cd packages/devtools && NODE_ENV=development yarn start:shared-ganache",
-    "test": "lerna run --stream --parallel test",
-    "test:ci": "lerna run --stream --parallel test:ci --include-dependents --since $(git merge-base $(git rev-parse --abbrev-ref HEAD) origin/master) build:ci",
-    "test:w3t": "lerna run test --concurrency 1 --scope=**/web3torrent ",
+    "clean": "git clean -Xdf --exclude=\"!.env\"",
     "lint:check": "lerna run lint:check --parallel --no-bail",
     "lint:write": "lerna run lint:write --parallel --no-bail",
+    "postinstall": "patch-package && typesync",
+    "prepare": "yarn runIfChanged prepare --include-dependencies",
     "publish": "lerna publish --yes from-package patch",
-    "postinstall": "patch-package && typesync"
+    "run:w3t": "lerna run start --parallel --scope=**/web3torrent --scope=**/embedded-wallet ",
+    "runIfChanged": "lerna run --stream --parallel --since $(git merge-base $(git rev-parse --abbrev-ref HEAD) origin/master)",
+    "start:shared-ganache": "cd packages/devtools && NODE_ENV=development yarn start:shared-ganache",
+    "test:ci": " yarn runIfChanged test:ci --include-dependents",
+    "test:integration": " yarn runIfChanged test:integration:ci --include-dependents",
+    "test": "lerna run --stream --parallel test"
   },
   "keywords": [
     "ethereum",
