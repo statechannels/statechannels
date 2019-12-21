@@ -11999,7 +11999,7 @@ ethers@4.0.39, ethers@^4.0.26, ethers@^4.0.27, ethers@^4.0.39, ethers@~4.0.4:
     uuid "2.0.1"
     xmlhttprequest "1.8.0"
 
-ethers@^4.0.40:
+ethers@4.0.40, ethers@^4.0.40:
   version "4.0.40"
   resolved "https://registry.npmjs.org/ethers/-/ethers-4.0.40.tgz#6e1963d10b5d336a13cd81b519c230cc17624653"
   integrity sha512-MC9BtV7Hpq4dgFONEfanx9aU9GhhoWU270F+/wegHZXA7FR+2KXFdt36YIQYLmVY5ykUWswDxd+f9EVkIa7JOA==
@@ -23682,7 +23682,7 @@ serialize-javascript@^1.4.0, serialize-javascript@^1.7.0:
   resolved "https://registry.yarnpkg.com/serialize-javascript/-/serialize-javascript-1.9.1.tgz#cfc200aef77b600c47da9bb8149c943e798c2fdb"
   integrity sha512-0Vb/54WJ6k5v8sSWN09S0ora+Hnr+cX40r9F170nT+mSkaxltoE/7R3OrIdBSUv1OoiobH1QoWQbCnAO+e8J1A==
 
-serialize-javascript@^2.1.0:
+serialize-javascript@^2.1.0, serialize-javascript@^2.1.2:
   version "2.1.2"
   resolved "https://registry.npmjs.org/serialize-javascript/-/serialize-javascript-2.1.2.tgz#ecec53b0e0317bdc95ef76ab7074b7384785fa61"
   integrity sha512-rs9OggEUF0V4jUSecXazOYsLfu7OGK2qIn3c7IPBiffz32XniEp/TX9Xmc9LQfK2nQ2QKHvZ2oygKUGU0lG4jQ==
@@ -25281,6 +25281,21 @@ terser-webpack-plugin@1.4.1, terser-webpack-plugin@^1.1.0, terser-webpack-plugin
     webpack-sources "^1.4.0"
     worker-farm "^1.7.0"
 
+terser-webpack-plugin@^1.4.3:
+  version "1.4.3"
+  resolved "https://registry.npmjs.org/terser-webpack-plugin/-/terser-webpack-plugin-1.4.3.tgz#5ecaf2dbdc5fb99745fd06791f46fc9ddb1c9a7c"
+  integrity sha512-QMxecFz/gHQwteWwSo5nTc6UaICqN1bMedC5sMtUc7y3Ha3Q8y6ZO0iCR8pq4RJC8Hjf0FEPEHZqcMB/+DFCrA==
+  dependencies:
+    cacache "^12.0.2"
+    find-cache-dir "^2.1.0"
+    is-wsl "^1.1.0"
+    schema-utils "^1.0.0"
+    serialize-javascript "^2.1.2"
+    source-map "^0.6.1"
+    terser "^4.1.2"
+    webpack-sources "^1.4.0"
+    worker-farm "^1.7.0"
+
 terser@^4.1.2:
   version "4.3.1"
   resolved "https://registry.yarnpkg.com/terser/-/terser-4.3.1.tgz#09820bcb3398299c4b48d9a86aefc65127d0ed65"
@@ -25995,15 +26010,15 @@ typescript@3.7.2:
   resolved "https://registry.npmjs.org/typescript/-/typescript-3.7.2.tgz#27e489b95fa5909445e9fef5ee48d81697ad18fb"
   integrity sha512-ml7V7JfiN2Xwvcer+XAf2csGO1bPBdRbFCkYBczNZggrBZ9c7G3riSUeJmqEU5uOtXNPMhE3n+R4FA/3YOAWOQ==
 
+typescript@3.7.3, typescript@^3.7.2, typescript@^3.7.3:
+  version "3.7.3"
+  resolved "https://registry.npmjs.org/typescript/-/typescript-3.7.3.tgz#b36840668a16458a7025b9eabfad11b66ab85c69"
+  integrity sha512-Mcr/Qk7hXqFBXMN7p7Lusj1ktCBydylfQM/FZCk5glCNQJrCUKPkMHdo9R0MTFWsC/4kPFvDS0fDPvukfCkFsw==
+
 typescript@^3.5.1:
   version "3.6.3"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.6.3.tgz#fea942fabb20f7e1ca7164ff626f1a9f3f70b4da"
   integrity sha512-N7bceJL1CtRQ2RiG0AQME13ksR7DiuQh/QehubYcghzv20tnh+MQnQIuJddTmsbqYj+dztchykemz0zFzlvdQw==
-
-typescript@^3.7.3:
-  version "3.7.3"
-  resolved "https://registry.npmjs.org/typescript/-/typescript-3.7.3.tgz#b36840668a16458a7025b9eabfad11b66ab85c69"
-  integrity sha512-Mcr/Qk7hXqFBXMN7p7Lusj1ktCBydylfQM/FZCk5glCNQJrCUKPkMHdo9R0MTFWsC/4kPFvDS0fDPvukfCkFsw==
 
 typesync@^0.6.1:
   version "0.6.1"
@@ -27728,6 +27743,35 @@ webpack@4.40.2:
     schema-utils "^1.0.0"
     tapable "^1.1.3"
     terser-webpack-plugin "^1.4.1"
+    watchpack "^1.6.0"
+    webpack-sources "^1.4.1"
+
+webpack@4.41.3:
+  version "4.41.3"
+  resolved "https://registry.npmjs.org/webpack/-/webpack-4.41.3.tgz#cb7592c43080337dbc9be9e98fc6478eb3981026"
+  integrity sha512-EcNzP9jGoxpQAXq1VOoTet0ik7/VVU1MovIfcUSAjLowc7GhcQku/sOXALvq5nPpSei2HF6VRhibeJSC3i/Law==
+  dependencies:
+    "@webassemblyjs/ast" "1.8.5"
+    "@webassemblyjs/helper-module-context" "1.8.5"
+    "@webassemblyjs/wasm-edit" "1.8.5"
+    "@webassemblyjs/wasm-parser" "1.8.5"
+    acorn "^6.2.1"
+    ajv "^6.10.2"
+    ajv-keywords "^3.4.1"
+    chrome-trace-event "^1.0.2"
+    enhanced-resolve "^4.1.0"
+    eslint-scope "^4.0.3"
+    json-parse-better-errors "^1.0.2"
+    loader-runner "^2.4.0"
+    loader-utils "^1.2.3"
+    memory-fs "^0.4.1"
+    micromatch "^3.1.10"
+    mkdirp "^0.5.1"
+    neo-async "^2.6.1"
+    node-libs-browser "^2.2.1"
+    schema-utils "^1.0.0"
+    tapable "^1.1.3"
+    terser-webpack-plugin "^1.4.3"
     watchpack "^1.6.0"
     webpack-sources "^1.4.1"
 
