@@ -1,0 +1,33 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
+    "esModuleInterop": true,
+    "lib": ["es6", "dom"],
+    // esnext is required for TypeScript to recognize dynamic imports (which pure-evm must be)
+    // https://github.com/Microsoft/TypeScript/issues/16820
+    // This is in the default tsconfig.json, but putting it here so we remember this ^^^
+    "module": "esnext",
+    "noImplicitAny": false,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "outDir": "lib",
+    "strict": false,
+    "suppressImplicitAnyIndexErrors": true,
+    // Turning this off throws this error for an unknown reason:
+    // https://github.com/Microsoft/TypeScript/issues/26627
+    "strictNullChecks": true,
+    "target": "es2015"
+  },
+  "include": ["src/**/*", "src/**/*.json", "contracts/**/*.json"],
+  "references": [
+    {
+      "path": "../nitro-protocol"
+    },
+    {
+      "path": "../devtools"
+    }
+  ]
+}
