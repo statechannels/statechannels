@@ -9,26 +9,28 @@ import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
   * @dev The TicTacToe contract complies with the ForceMoveApp interface and implements a commit-reveal game of Tic Tac Toe (henceforth TTT).
   * The following transitions are allowed:
   *
-  * Start -> RoundProposed  [ PROPOSE ]
-  * RoundProposed -> Start  [ REJECT ]
-  * RoundProposed -> RoundAccepted [ ACCEPT ]
-  * RoundAccepted -> Reveal [ REVEAL ]
-  * Reveal -> Start [ FINISH ]
+  * Start -> XPlaying  [ START ]
+  * XPlaying -> OPlaying  [ XPLAYING ]
+  * XPlaying -> Victory  [ VICTORY ]
+  * OPlaying -> XPlaying [ OPLAYING ]
+  * OPlaying -> Victory [ VICTORY ]
+  * OPlaying -> Draw [ DRAW ]
+  * Victory -> Start [ FINISH ]
+  * Draw -> Start [ FINISH ]
   *
 */
 contract TicTacToe is ForceMoveApp {
     using SafeMath for uint256;
 
-    enum PositionType {Start, RoundProposed, RoundAccepted, Reveal}
+    enum PositionType {Start, XPlaying, OPlaying, Draw, Victory}
     enum Weapon {Rock, Paper, Scissors}
 
     struct TTTData {
         PositionType positionType;
         uint256 stake;
-        bytes32 preCommit;
-        Weapon aWeapon; // playerOneWeapon
-        Weapon bWeapon; // playerTwoWeapon
-        bytes32 salt;
+        uint256[3][3] board;
+        uint256 countXs;
+        uint256 countOs;
     }
 
     /**
@@ -64,10 +66,10 @@ contract TicTacToe is ForceMoveApp {
         // deduce action
         if (fromGameData.positionType == PositionType.Start) {
             require(
-                toGameData.positionType == PositionType.RoundProposed,
-                'Start may only transition to RoundProposed'
+                toGameData.positionType == PositionType.XPlaying,
+                'Start may only transition to XPlaying'
             );
-            requireValidPROPOSE(
+            requireValidSTARTtoXPLAYING(
                 fromPart,
                 toPart,
                 fromAllocation,
@@ -76,28 +78,40 @@ contract TicTacToe is ForceMoveApp {
                 toGameData
             );
             return true;
-        } else if (fromGameData.positionType == PositionType.RoundProposed) {
-            if (toGameData.positionType == PositionType.Start) {
-                requireValidREJECT(fromAllocation, toAllocation, fromGameData, toGameData);
+        } else if (fromGameData.positionType == PositionType.XPlaying) {
+            if (toGameData.positionType == PositionType.OPlaying) {
+                requireValidXPLAYINGtoOPLAYING(fromAllocation, toAllocation, fromGameData, toGameData);
                 return true;
-            } else if (toGameData.positionType == PositionType.RoundAccepted) {
-                requireValidACCEPT(fromAllocation, toAllocation, fromGameData, toGameData);
+            } else if (toGameData.positionType == PositionType.Victory) {
+                requireValidXPLAYINGtoVICTORY(fromAllocation, toAllocation, fromGameData, toGameData);
                 return true;
             }
-            revert('Proposed may only transition to Start or RoundAccepted');
-        } else if (fromGameData.positionType == PositionType.RoundAccepted) {
-            require(
-                toGameData.positionType == PositionType.Reveal,
-                'RoundAccepted may only transition to Reveal'
-            );
-            requireValidREVEAL(fromAllocation, toAllocation, fromGameData, toGameData);
-            return true;
-        } else if (fromGameData.positionType == PositionType.Reveal) {
+            revert('XPlaying may only transition to OPlaying or Victory');
+        } else if (fromGameData.positionType == PositionType.OPlaying) {
+            if (toGameData.positionType == PositionType.XPlaying) {
+                requireValidOPLAYINGtoXPLAYING(fromAllocation, toAllocation, fromGameData, toGameData);
+                return true;
+            } else if (toGameData.positionType == PositionType.Victory) {
+                requireValidOPLAYINGtoVICTORY(fromAllocation, toAllocation, fromGameData, toGameData);
+                return true;
+            } else if (toGameData.positionType == PositionType.Draw) {
+                requireValidOPLAYINGtoDRAW(fromAllocation, toAllocation, fromGameData, toGameData);
+                return true;
+            }
+            revert('OPlaying may only transition to XPlaying or Victory or Draw');
+        } else if (fromGameData.positionType == PositionType.Draw) {
             require(
                 toGameData.positionType == PositionType.Start,
-                'Reveal may only transition to Start'
+                'Draw may only transition to Start'
             );
-            requireValidFINISH(fromAllocation, toAllocation, fromGameData, toGameData);
+            requireValidDRAWtoSTART(fromAllocation, toAllocation, fromGameData, toGameData);
+            return true;
+        } else if (fromGameData.positionType == PositionType.Victory) {
+            require(
+                toGameData.positionType == PositionType.Start,
+                'Victory may only transition to Start'
+            );
+            requireValidVICTORYtoSTART(fromAllocation, toAllocation, fromGameData, toGameData);
             return true;
         }
         revert('No valid transition found');
@@ -105,7 +119,7 @@ contract TicTacToe is ForceMoveApp {
 
     // action requirements
 
-    function requireValidPROPOSE(
+    function requireValidSTARTtoXPLAYING(
         VariablePart memory fromPart,
         VariablePart memory toPart,
         Outcome.AllocationItem[] memory fromAllocation,
@@ -118,9 +132,13 @@ contract TicTacToe is ForceMoveApp {
         outcomeUnchanged(fromPart, toPart)
         stakeUnchanged(fromGameData, toGameData)
         allocationsNotLessThanStake(fromAllocation, toAllocation, fromGameData, toGameData)
-    {}
+    {
+        require(toGameData.countOs == 0, "No Os on board");
+        require(toGameData.countXs == 1, "One X placed");
+        // Check that only one play was made
+    }
 
-    function requireValidREJECT(
+    function requireValidXPLAYINGtoOPLAYING(
         Outcome.AllocationItem[] memory fromAllocation,
         Outcome.AllocationItem[] memory toAllocation,
         TTTData memory fromGameData,
@@ -130,50 +148,46 @@ contract TicTacToe is ForceMoveApp {
         pure
         allocationUnchanged(fromAllocation, toAllocation)
         stakeUnchanged(fromGameData, toGameData)
-    {}
+    {
+        require(toGameData.countOs == fromGameData.countOs + 1, "One O placed");
+        require(toGameData.countXs == fromGameData.countXs, "No Xs placed");
+        // Check that only one play was made
+        // Check that play doesn't overwrite old board
+    }
 
-    function requireValidACCEPT(
+    function requireValidOPLAYINGtoXPLAYING(
+        Outcome.AllocationItem[] memory fromAllocation,
+        Outcome.AllocationItem[] memory toAllocation,
+        TTTData memory fromGameData,
+        TTTData memory toGameData
+    )
+        private
+        pure
+        allocationUnchanged(fromAllocation, toAllocation)
+        stakeUnchanged(fromGameData, toGameData)
+    {
+        require(toGameData.countXs == fromGameData.countXs + 1, "One X placed");
+        require(toGameData.countOs == fromGameData.countOs, "No Os placed");
+        // Check that only one play was made
+        // Check that play doesn't overwrite old board
+    }
+
+    function requireValidXPLAYINGtoVICTORY(
         Outcome.AllocationItem[] memory fromAllocation,
         Outcome.AllocationItem[] memory toAllocation,
         TTTData memory fromGameData,
         TTTData memory toGameData
     ) private pure stakeUnchanged(fromGameData, toGameData) {
-        require(fromGameData.preCommit == toGameData.preCommit, 'Precommit should be the same.');
+        require(toGameData.countXs == fromGameData.countXs + 1, "One X placed");
+        require(toGameData.countOs == fromGameData.countOs, "No Os placed");
+        // Check that only one play was made
+        // Check that X has won
 
-        // a will have to reveal, so remove the stake beforehand
-        require(
-            toAllocation[0].amount == fromAllocation[0].amount.sub(toGameData.stake),
-            'Allocation for player A should be decremented by 1x stake'
-        );
-        require(
-            toAllocation[1].amount == fromAllocation[1].amount.add(toGameData.stake),
-            'Allocation for player B should be incremented by 1x stake.'
-        );
-
-    }
-
-    function requireValidREVEAL(
-        Outcome.AllocationItem[] memory fromAllocation,
-        Outcome.AllocationItem[] memory toAllocation,
-        TTTData memory fromGameData,
-        TTTData memory toGameData
-    ) private pure {
         uint256 playerAWinnings; // playerOneWinnings
         uint256 playerBWinnings; // playerTwoWinnings
-        require(
-            toGameData.bWeapon == fromGameData.bWeapon,
-            "Player Second's weapon should be the same between commitments."
-        );
-
-        // check hash matches
-        // need to convert Weapon -> uint256 to get hash to work
-        bytes32 hashed = keccak256(abi.encode(uint256(toGameData.aWeapon), toGameData.salt));
-        require(hashed == fromGameData.preCommit, 'The hash needs to match the precommit');
-
         // calculate winnings
         (playerAWinnings, playerBWinnings) = winnings(
-            toGameData.aWeapon,
-            toGameData.bWeapon,
+            toGameData.board,
             toGameData.stake
         );
 
@@ -188,7 +202,73 @@ contract TicTacToe is ForceMoveApp {
         );
     }
 
-    function requireValidFINISH(
+    function requireValidOPLAYINGtoVICTORY(
+        VariablePart memory fromPart,
+        VariablePart memory toPart,
+        Outcome.AllocationItem[] memory fromAllocation,
+        Outcome.AllocationItem[] memory toAllocation,
+        TTTData memory fromGameData,
+        TTTData memory toGameData
+    )
+        private
+        pure
+        outcomeUnchanged(fromPart, toPart)
+        stakeUnchanged(fromGameData, toGameData)
+        allocationsNotLessThanStake(fromAllocation, toAllocation, fromGameData, toGameData)
+    {
+        require(toGameData.countOs == fromGameData.countOs + 1, "One O placed");
+        require(toGameData.countXs == fromGameData.countXs, "No Xs placed");
+        // Check that only one play was made
+        // Check that O has won
+
+        uint256 playerAWinnings; // playerOneWinnings
+        uint256 playerBWinnings; // playerTwoWinnings
+        // calculate winnings
+        (playerAWinnings, playerBWinnings) = winnings(
+            toGameData.board,
+            toGameData.stake
+        );
+
+        require(
+            toAllocation[0].amount == fromAllocation[0].amount.add(playerAWinnings),
+            "Player A's allocation should be updated with the winnings."
+        );
+        require(
+            toAllocation[1].amount ==
+                fromAllocation[1].amount.sub(fromGameData.stake.mul(2)).add(playerBWinnings),
+            "Player B's allocation should be updated with the winnings."
+        );
+    }
+
+    function requireValidOPLAYINGtoDRAW(
+        Outcome.AllocationItem[] memory fromAllocation,
+        Outcome.AllocationItem[] memory toAllocation,
+        TTTData memory fromGameData,
+        TTTData memory toGameData
+    )
+        private
+        pure
+        allocationUnchanged(fromAllocation, toAllocation)
+        stakeUnchanged(fromGameData, toGameData)
+    {
+        require(toGameData.countOs == fromGameData.countOs + 1, "One O placed");
+        require(toGameData.countXs == fromGameData.countXs, "No Xs placed");
+        //Check that this is draw. Board is full
+    }
+
+    function requireValidDRAWtoSTART(
+        Outcome.AllocationItem[] memory fromAllocation,
+        Outcome.AllocationItem[] memory toAllocation,
+        TTTData memory fromGameData,
+        TTTData memory toGameData
+    )
+        private
+        pure
+        allocationUnchanged(fromAllocation, toAllocation)
+        stakeUnchanged(fromGameData, toGameData)
+    {}
+
+    function requireValidVICTORYtoSTART(
         Outcome.AllocationItem[] memory fromAllocation,
         Outcome.AllocationItem[] memory toAllocation,
         TTTData memory fromGameData,
