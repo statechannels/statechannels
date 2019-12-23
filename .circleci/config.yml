@@ -189,7 +189,10 @@ jobs:
     docker:
       - image: circleci/node:10.16.3
     environment:
+      NODE_ENV: development
       USE_VIRTUAL_FUNDING: TRUE
+      FIREBASE_PROJECT: rock-paper-scissors-dev-4ff8d
+      FIREBASE_API_KEY: AIzaSyAOvhDzJir_El3O6SJ2xQlrpOisnObq6zw
       USE_GANACHE_DEPLOYMENT_CACHE: true
       GANACHE_CACHE_FOLDER: ../../.ganache-deployments
       GANACHE_PORT: 8547
