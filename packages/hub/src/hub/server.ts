@@ -9,6 +9,8 @@ import {fbListen, fbSend} from '../message/firebase-relay';
 const log = logger();
 
 export async function startServer(): Promise<any> {
+  console.log(process.env.FIREBASE_PROJECT);
+  console.log('=====================');
   const fbMessageCallback = async (message: RelayableAction) => {
     log.info({message}, 'Received message from firebase');
 
@@ -30,5 +32,8 @@ export async function startServer(): Promise<any> {
 }
 
 if (require.main === module) {
+  require('../../env'); // Note: importing this module has the side effect of modifying env vars
+  console.log(process.env.FIREBASE_PROJECT);
+  console.log('=====================');
   startServer();
 }

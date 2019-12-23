@@ -1,0 +1,14 @@
+version: "3"
+
+services:
+
+  hub:
+    build: .
+    working_dir: /statechannels/packages/hub
+    environment: 
+      - NODE_ENV=staging
+    command: node ./lib/hub/server.js
+    volumes:
+      - ./node_modules:/statechannels/node_modules
+      - ./packages/hub/node_modules:/statechannels/packages/hub/node_modules
+      - ./packages/nitro-protocol/node_modules:/statechannels/packages/nitro-protocol/node_modules
