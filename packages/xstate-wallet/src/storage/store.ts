@@ -1,11 +1,30 @@
-import {State} from '@statechannels/wallet-protocols';
-import {getChannelId, SignedState, Outcome} from '@statechannels/nitro-protocol/src';
+import {
+  IStore,
+  ChannelStore,
+  Constructor,
+  checkThat,
+  isAllocation,
+  merge,
+  supported
+} from '@statechannels/wallet-protocols/lib/src/store';
+import {
+  ChannelStoreEntry,
+  IChannelStoreEntry
+} from '@statechannels/wallet-protocols/lib/src/ChannelStoreEntry';
+import {
+  State,
+  SignedState,
+  getChannelId,
+  add,
+  gt,
+  Allocation
+} from '@statechannels/wallet-protocols';
 import {
   AddressableMessage,
   FundingStrategyProposed
-} from '@statechannels/wallet-protocols/lib/wire-protocol';
-import {ChannelStoreEntry} from './channel-store-entry';
-import {Participant, IStore} from '@statechannels/wallet-protocols/lib/store';
+} from '@statechannels/wallet-protocols/lib/src/wire-protocol';
+
+import jrs from 'jsonrpc-lite';
 
 export class Store implements IStore {
   public static equals(left: any, right: any) {
@@ -16,8 +35,8 @@ export class Store implements IStore {
   private _privateKeys: Record<string, string>;
   private _nonces: Record<string, string> = {};
 
-  constructor(args?) {
-    const {store, privateKeys, nonces} = args || {};
+  constructor(args?: Constructor) {
+    const {store, privateKeys} = args || {};
     this._store = store || {};
     this._privateKeys = privateKeys || {};
   }
@@ -65,6 +84,7 @@ export class Store implements IStore {
         return channelId;
       }
     }
+    return undefined;
   }
 
   public participantIds(channelId: string): string[] {
@@ -171,9 +191,15 @@ export class Store implements IStore {
   }
 
   private sendMessage(message: any, recipients: string[]) {
-    recipients.forEach(to => messageService.sendMessage({...message, to}));
+    recipients.forEach(recipient => {
+      const notification = jrs.notification('MessageQueued', {
+        recipient,
+        sender: 'TODO',
+        data: message
+      });
+      window.parent.postMessage(notification, '*');
+    });
   }
-
   public receiveStates(signedStates: SignedState[]): void {
     const {channel} = signedStates[0].state;
     const channelId = getChannelId(channel);
@@ -245,7 +271,7 @@ export class Store implements IStore {
     } else {
       const {channel} = states[0].state;
       const {participants} = channel;
-      const entryParticipants: Participant[] = participants.map(p => ({
+      const entryParticipants = participants.map(p => ({
         destination: p,
         signingAddress: p,
         participantId: p
@@ -262,60 +288,4 @@ export class Store implements IStore {
 
     return new ChannelStoreEntry(this._store[channelId]);
   }
-}
-
-function merge(left: SignedState[], right: SignedState[]): SignedState[] {
-  // TODO this is horribly inefficient
-  right.map(rightState => {
-    const idx = left.findIndex(s => Store.equals(s.state, rightState.state));
-    const leftState = left[idx];
-    if (leftState) {
-      const signatures = [...new Set(leftState.signatures.concat(rightState.signatures))];
-      left[idx] = {...leftState, signatures};
-    } else {
-      left.push(rightState);
-    }
-  });
-
-  return left;
-}
-
-function supported(signedState: SignedState) {
-  // TODO: temporarily just check the required length
-  return (
-    signedState.signatures.filter(Boolean).length === signedState.state.channel.participants.length
-  );
-}
-
-// The store would send this action whenever the channel is updated
-export interface ChannelUpdated {
-  type: 'CHANNEL_UPDATED';
-  channelId: string;
-}
-
-export interface Deposit {
-  type: 'DEPOSIT';
-  channelId: string;
-  currentAmount: number;
-}
-
-export type StoreEvent = ChannelUpdated | Deposit;
-
-export function isAllocation(outcome: Outcome): outcome is Allocation {
-  // TODO: I think this might need to be isEthAllocation (sometimes?)
-  if ('target' in outcome) {
-    return false;
-  }
-  return true;
-}
-
-const throwError = (fn: (t1: any) => boolean, t) => {
-  throw new Error(`not valid, ${fn.name} failed on ${t}`);
-};
-type TypeGuard<T> = (t1: any) => t1 is T;
-export function checkThat<T>(t, isTypeT: TypeGuard<T>): T {
-  if (!isTypeT(t)) {
-    throwError(isTypeT, t);
-  }
-  return t;
 }
