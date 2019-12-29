@@ -2,6 +2,7 @@ import { add, Allocation, Channel, getChannelId, gt, Outcome, SignedState, State
 import { ChannelStoreEntry, IChannelStoreEntry } from './ChannelStoreEntry';
 import { messageService } from './messaging';
 import { AddressableMessage, FundingStrategyProposed } from './wire-protocol';
+
 export interface IStore {
   getLatestState: (channelId: string) => State;
   getLatestConsensus: (channelId: string) => SignedState; // Used for null channels, whose support must be a single state
@@ -40,12 +41,11 @@ export interface Participant {
   signingAddress: string;
   destination: string;
 }
-
-interface ChannelStore {
+export interface ChannelStore {
   [channelId: string]: IChannelStoreEntry;
 }
 
-type Constructor = Partial<{
+export type Constructor = Partial<{
   store: ChannelStore;
   privateKeys: Record<string, string>;
   nonces: Record<string, string>;
@@ -312,7 +312,7 @@ export class Store implements IStore {
   }
 }
 
-function merge(left: SignedState[], right: SignedState[]): SignedState[] {
+export function merge(left: SignedState[], right: SignedState[]): SignedState[] {
   // TODO this is horribly inefficient
   right.map(rightState => {
     const idx = left.findIndex(s => Store.equals(s.state, rightState.state));
@@ -328,7 +328,7 @@ function merge(left: SignedState[], right: SignedState[]): SignedState[] {
   return left;
 }
 
-function supported(signedState: SignedState) {
+export function supported(signedState: SignedState) {
   // TODO: temporarily just check the required length
   return (
     signedState.signatures.filter(Boolean).length === signedState.state.channel.participants.length
