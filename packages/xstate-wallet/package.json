@@ -1,7 +1,7 @@
 {
   "name": "xstate-wallet",
   "version": "0.0.1",
-  "description": "Atate channel wallet using xstate.",
+  "description": "State channel wallet using xstate.",
   "main": "index.js",
   "author": "Alex Gap",
   "license": "MIT",
@@ -10,11 +10,13 @@
     "node": "^10.16.3"
   },
   "dependencies": {
-    "ethers": "4.0.40",
-    "typescript": "3.7.3",
     "@statechannels/client-api-schema": "0.0.1",
     "@statechannels/nitro-protocol": "0.0.1",
-    "@statechannels/wallet-protocols": "1.0.0"
+    "@statechannels/wallet-protocols": "1.0.0",
+    "ethers": "4.0.40",
+    "jsonrpc-lite": "2.1.0",
+    "typescript": "3.7.3",
+    "xstate": "4.7.3"
   },
   "devDependencies": {
     "@statechannels/devtools": "0.1.21",

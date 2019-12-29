@@ -16,6 +16,7 @@
     "outDir": "lib",
     "strict": false,
     "suppressImplicitAnyIndexErrors": true,
+    "sourceMap": true,
     // Turning this off throws this error for an unknown reason:
     // https://github.com/Microsoft/TypeScript/issues/26627
     "strictNullChecks": true,
