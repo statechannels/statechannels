@@ -93,7 +93,6 @@ describe('FakeChannelClient', () => {
   });
 
   describe('creates a channel', () => {
-    expect.assertions(2);
     let proposalMessage: Message<ChannelResult>;
 
     it('client A produces the right channel result', async () => {
@@ -128,7 +127,8 @@ describe('FakeChannelClient', () => {
 
   describe('joins a channel', () => {
     it('the player whose turn it is can accept proposal to join the channel', async () => {
-      setClientStates([clientA, clientB], states['proposed']);
+      setClientStates([clientA], states['running']);
+      setClientStates([clientB], states['proposed']);
       const channelResult = await clientB.joinChannel(channelId);
       expect(channelResult).toEqual(states['running']);
       expect(clientA.latestState).toEqual(states['running']);
