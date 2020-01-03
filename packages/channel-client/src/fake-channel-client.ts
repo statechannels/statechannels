@@ -63,7 +63,7 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
       allocations,
       appDefinition,
       appData,
-      channelId: calculateChannelId(participants, allocations, appDefinition, appData),
+      channelId: calculateChannelId(participants, appDefinition),
       turnNum: bigNumberify(0).toString(),
       status: 'proposed'
     };

@@ -27,7 +27,7 @@ describe('FakeChannelClient', () => {
   const states: StateMap = {};
   const participants = [participantA, participantB];
   const allocations = [buildAllocation(PARTICIPANT_A, '5'), buildAllocation(PARTICIPANT_B, '5')];
-  const channelId = calculateChannelId(participants, allocations, APP_DEFINITION, APP_DATA);
+  const channelId = calculateChannelId(participants, APP_DEFINITION);
 
   // This event emitter only enable easier assertions of expected
   // events the client is listening on
