@@ -7,6 +7,7 @@
     "prepare": "yarn build",
     "precommit": "lint-staged --quiet",
     "test": "jest",
+    "test:ci": "jest",
     "build": "yarn build:typescript",
     "build:typescript": "tsc -b .",
     "lint:check": "eslint {src,tests}/**/*.ts",
