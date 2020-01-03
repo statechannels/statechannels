@@ -16,7 +16,6 @@ const reducer = combineReducers({
   openGames: openGamesReducer,
 });
 
-// TODO: Get this working with a mock for channel-client
 it(
   'runs to GameOver',
   async () => {
