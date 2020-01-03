@@ -1,26 +1,11 @@
-import {
-  AnyEventObject,
-  assign,
-  AssignAction,
-  Interpreter,
-  Machine,
-  spawn,
-} from 'xstate';
+import { AnyEventObject, assign, AssignAction, Interpreter, Machine, spawn } from 'xstate';
 import { CreateChannel, JoinChannel } from '..';
 import { getChannelId, pretty, Store, unreachable } from '../..';
 import { ChannelUpdated } from '../../store';
-import {
-  FundingStrategyProposed,
-  OpenChannel,
-  SendStates,
-} from '../../wire-protocol';
+import { FundingStrategyProposed, OpenChannel, SendStates } from '../../wire-protocol';
 
 const PROTOCOL = 'wallet';
-export type Events =
-  | OpenChannelEvent
-  | CreateChannelEvent
-  | SendStates
-  | FundingStrategyProposed;
+export type Events = OpenChannelEvent | CreateChannelEvent | SendStates | FundingStrategyProposed;
 export type Process = {
   id: string;
   ref: Interpreter<any, any, any>;
@@ -105,10 +90,7 @@ export function machine(store: Store, context: Init) {
 
       const walletProcess = {
         id: processId,
-        ref: spawn(
-          CreateChannel.machine(store, init).withContext(init),
-          processId
-        ),
+        ref: spawn(CreateChannel.machine(store, init).withContext(init), processId),
       };
       if (process.env.ADD_LOGS) {
         addLogs(walletProcess, ctx);
@@ -144,7 +126,7 @@ export function machine(store: Store, context: Init) {
 
   // TODO: Should this send `CHANNEL_UPDATED` to children?
   const updateStore = (_ctx, event: Events, { state }) => {
-    let channelId: string = '';
+    let channelId = '';
     switch (event.type) {
       case 'OPEN_CHANNEL':
         store.receiveStates([event.signedState]);
@@ -166,9 +148,7 @@ export function machine(store: Store, context: Init) {
         type: 'CHANNEL_UPDATED',
         channelId,
       };
-      state.context.processes.forEach(({ ref }: Process) =>
-        ref.send(channelUpdated)
-      );
+      state.context.processes.forEach(({ ref }: Process) => ref.send(channelUpdated));
     }
   };
 

@@ -11,10 +11,7 @@ export interface Init {
 }
 
 function ledgerUpdateArgs({ targetChannelId }: Init): LedgerUpdate.Init {
-  const { ledgerId } = checkThat(
-    store.getEntry(targetChannelId).funding,
-    isIndirectFunding
-  );
+  const { ledgerId } = checkThat(store.getEntry(targetChannelId).funding, isIndirectFunding);
   const outcome = store.getLatestSupportedAllocation(ledgerId);
   const concludedOutcome = store.getLatestSupportedAllocation(targetChannelId);
   const targetOutcome = outcome

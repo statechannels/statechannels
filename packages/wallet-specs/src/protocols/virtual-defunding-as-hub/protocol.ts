@@ -19,10 +19,7 @@ type ChannelsSet = Init & {
 
 export const assignChannels = assign(
   ({ jointChannelId }: Init): ChannelsSet => {
-    const { guarantorChannelIds } = checkThat(
-      store.getEntry(jointChannelId).funding,
-      isGuarantee
-    );
+    const { guarantorChannelIds } = checkThat(store.getEntry(jointChannelId).funding, isGuarantee);
 
     const { ledgerId: leftLedgerId } = checkThat(
       store.getEntry(guarantorChannelIds[0]).funding,
@@ -39,11 +36,7 @@ export const assignChannels = assign(
 );
 
 function defundGuarantor(index: 0 | 1) {
-  return ({
-    guarantorChannelIds,
-    jointChannelId,
-    ledgerChannelIds,
-  }: ChannelsSet) => {
+  return ({ guarantorChannelIds, jointChannelId, ledgerChannelIds }: ChannelsSet) => {
     return defundGuarantorInLedger({
       index,
       hubLedgerId: ledgerChannelIds[index],

@@ -11,9 +11,7 @@ export interface Init {
   targetChannelId: string;
 }
 
-const assignChoice = assign(
-  (ctx: Init): HubKnown => ({ ...ctx, hubAddress: 'TODO' })
-);
+const assignChoice = assign((ctx: Init): HubKnown => ({ ...ctx, hubAddress: 'TODO' }));
 function sendProposal({ hubAddress, targetChannelId }: HubKnown): HubChoice {
   return {
     type: 'HubChoice',
@@ -38,10 +36,7 @@ const chooseHub = {
 };
 type HubKnown = Init & { hubAddress: string };
 
-function virtualFundAsLeafArgs({
-  targetChannelId,
-  hubAddress,
-}: HubKnown): VirtualFundAsLeafArgs {
+function virtualFundAsLeafArgs({ targetChannelId, hubAddress }: HubKnown): VirtualFundAsLeafArgs {
   const { channel, outcome } = store.getLatestState(targetChannelId);
   const balances: Balance[] = checkThat(outcome, isAllocation).map(o => ({
     address: o.destination,

@@ -8,3 +8,6 @@ lib/
 .DS_Store
 .vscode
 *.log
+
+# generated configs
+protocol.config.js

@@ -10,10 +10,7 @@ messagesToSecond.push({
       appDefinition: '0x',
       isFinal: false,
       turnNum: 0,
-      outcome: [
-        { destination: 'first', amount: '3' },
-        { destination: 'second', amount: '1' },
-      ],
+      outcome: [{ destination: 'first', amount: '3' }, { destination: 'second', amount: '1' }],
       channel: {
         participants: ['first', 'second'],
         channelNonce: '1',
@@ -34,10 +31,7 @@ messagesToSecond.push({
         appDefinition: '0x',
         isFinal: false,
         turnNum: 1,
-        outcome: [
-          { destination: 'first', amount: '3' },
-          { destination: 'second', amount: '1' },
-        ],
+        outcome: [{ destination: 'first', amount: '3' }, { destination: 'second', amount: '1' }],
         channel: {
           participants: ['first', 'second'],
           channelNonce: '1',
@@ -112,10 +106,7 @@ export const createChannel: CreateChannelEvent = {
       destination: second,
     },
   ],
-  allocations: [
-    { destination: first, amount: '3' },
-    { destination: second, amount: '1' },
-  ],
+  allocations: [{ destination: first, amount: '3' }, { destination: second, amount: '1' }],
   appDefinition: '0x',
   appData: '0x',
 };

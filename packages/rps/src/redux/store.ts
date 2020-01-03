@@ -14,7 +14,7 @@ import {channelUpdatedListener} from './message-service/channel-updated-listener
 import {messageQueuedListener} from './message-service/message-queued-listener';
 import {gameSaga} from './game/saga';
 import {autoPlayer, autoOpponent} from './auto-opponent';
-import {ChannelClient} from '@statechannels/channel-client';
+import {ChannelClient, FakeChannelClient} from '@statechannels/channel-client';
 
 const composeEnhancers = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const enhancers = composeEnhancers(applyMiddleware(sagaMiddleware));
@@ -24,28 +24,32 @@ const store = createStore(reducer, enhancers);
 function* rootSaga() {
   yield fork(loginSaga);
 
-  const channelProviderEnabled = yield stateChannelWalletSaga();
-
-  if (channelProviderEnabled) {
-    const client = new RPSChannelClient(new ChannelClient(window.channelProvider));
-    yield fork(channelUpdatedListener, client);
+  let client;
+  if (process.env.AUTO_OPPONENT === 'A' || process.env.AUTO_OPPONENT === 'B') {
+    console.info('Bypassing state channel wallet');
+    client = new RPSChannelClient(new FakeChannelClient('0xOpponent'));
+  } else {
+    client = new RPSChannelClient(new ChannelClient(window.channelProvider));
+    yield stateChannelWalletSaga();
     yield fork(messageQueuedListener, client);
-    yield fork(gameSaga, client);
+  }
 
-    if (process.env.AUTO_PLAYER === 'A') {
-      yield fork(autoPlayer, 'A');
-    } else if (process.env.AUTO_PLAYER === 'B') {
-      yield fork(autoPlayer, 'B');
-    }
+  yield fork(gameSaga, client);
+  yield fork(channelUpdatedListener, client);
 
-    if (process.env.AUTO_OPPONENT === 'A') {
-      yield fork(autoOpponent, 'A', client);
-    } else if (process.env.AUTO_OPPONENT === 'B') {
-      yield fork(autoOpponent, 'B', client);
-    } else {
-      yield fork(firebaseInboxListener, client);
-      yield fork(openGameSaga);
-    }
+  if (process.env.AUTO_PLAYER === 'A') {
+    yield fork(autoPlayer, 'A');
+  } else if (process.env.AUTO_PLAYER === 'B') {
+    yield fork(autoPlayer, 'B');
+  }
+
+  if (process.env.AUTO_OPPONENT === 'A') {
+    yield fork(autoOpponent, 'A', client);
+  } else if (process.env.AUTO_OPPONENT === 'B') {
+    yield fork(autoOpponent, 'B', client);
+  } else {
+    yield fork(firebaseInboxListener, client);
+    yield fork(openGameSaga);
   }
 }
 

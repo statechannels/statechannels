@@ -6,7 +6,7 @@ function saveConfig(
   config: any,
   dirName = '/null', // TODO: make this required
   { guards, actions }: { guards?: any; actions?: any }
-) {
+): void {
   const filename = `${dirName}/protocol.config.js`;
   console.log(`Saving ${filename}`);
 
@@ -27,10 +27,8 @@ const protocols = fs.readdirSync(protocolsDir).filter(f => !f.endsWith('.ts'));
 
 for (const protocol of protocols) {
   const protocolDir = path.join(protocolsDir, protocol);
-  const { config, mockOptions } = require(path.join(
-    protocolDir,
-    'protocol.ts'
-  ));
+  // eslint-disable-next-line
+  const {config, mockOptions} = require(path.join(protocolDir, 'protocol.ts'));
 
   saveConfig(config, protocolDir, mockOptions || {});
 }
