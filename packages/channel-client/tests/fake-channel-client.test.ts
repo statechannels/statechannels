@@ -92,11 +92,6 @@ describe('FakeChannelClient', () => {
     });
   });
 
-  it('instantiates', () => {
-    expect(clientA).toBeDefined();
-    expect(clientB).toBeDefined();
-  });
-
   describe('creates a channel', () => {
     expect.assertions(2);
     let proposalMessage: Message<ChannelResult>;

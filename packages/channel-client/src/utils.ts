@@ -1,6 +1,6 @@
 import {hashMessage} from 'ethers/utils';
 
-import {AllocationItem, Allocation, Participant} from './types';
+import {Participant} from './types';
 
 /*
  This channel ID calculation revolves around `hashMessage` taking in a
