@@ -76,18 +76,19 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
   }
 
   async joinChannel(channelId: string): Promise<ChannelResult> {
+    const latestState = this.findChannel(channelId);
     this.updatePlayerIndex(1);
     log.debug(`Player ${this.playerIndex} joining channel ${channelId}`);
-    await this.verifyTurnNum(this.latestState!.turnNum);
+    await this.verifyTurnNum(latestState.turnNum);
 
     // skip funding by setting the channel to 'running' the moment it is joined
     // [assuming we're working with 2-participant channels for the time being]
     this.latestState = {
-      ...this.latestState!,
+      ...latestState,
       turnNum: bigNumberify(3).toString(),
       status: 'running'
     };
-    this.opponentAddress = this.latestState.participants[0].participantId;
+    this.opponentAddress = latestState.participants[0].participantId;
     this.notifyOpponent(this.latestState, 'joinChannel');
 
     return this.latestState;
@@ -116,11 +117,12 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
   }
 
   async closeChannel(channelId: string): Promise<ChannelResult> {
-    await this.verifyTurnNum(this.latestState!.turnNum);
-    const turnNum = this.getNextTurnNum(this.latestState!);
+    const latestState = this.findChannel(channelId);
+    await this.verifyTurnNum(latestState.turnNum);
+    const turnNum = this.getNextTurnNum(latestState);
     const status = 'closing';
 
-    this.latestState = {...this.latestState!, turnNum, status};
+    this.latestState = {...latestState, turnNum, status};
     log.debug(
       `Player ${this.playerIndex} updated channel to status ${status} on turnNum ${turnNum}`
     );
