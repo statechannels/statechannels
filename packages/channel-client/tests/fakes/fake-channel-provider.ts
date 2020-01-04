@@ -2,9 +2,19 @@ import {ChannelProviderInterface} from '@statechannels/channel-provider/src';
 import log = require('loglevel');
 import {bigNumberify} from 'ethers/utils';
 import {EventEmitter, ListenerFn} from 'eventemitter3';
-import {ChannelResult, CreateChannelParameters, NotificationType} from '../../src/types';
-import {calculateChannelId} from 'utils';
+import {
+  ChannelResult,
+  CreateChannelParameters,
+  NotificationType,
+  Message,
+  PushMessageResult
+} from '../../src/types';
+import {calculateChannelId} from '../../src/utils';
 
+/*
+ This fake provider becomes the stateful object which handles the calls
+ coming from a non-fake `ChannelClient`.
+ */
 export class FakeChannelProvider implements ChannelProviderInterface {
   private events = new EventEmitter();
   protected url = '';
@@ -22,17 +32,13 @@ export class FakeChannelProvider implements ChannelProviderInterface {
   send<ResultType = any>(method: string, params?: any): Promise<any> {
     switch (method) {
       case 'CreateChannel':
-        if (this.events.listenerCount('ChannelProposed') === 0) {
-          return Promise.reject(`No callback available for proposing a channel`);
-        }
         return this.createChannel(params);
 
       case 'PushMessage':
-        if (this.events.listenerCount('MessageQueued') === 0) {
-          return Promise.reject(`No callback available for sending the message`);
-        }
-        this.events.emit('MessageQueued', params);
-        break;
+        return this.pushMessage(params);
+
+      case 'GetAddress':
+        return this.getAddress();
 
       case 'JoinChannel':
       case 'UpdateChannel':
@@ -66,6 +72,27 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     return Promise.resolve(true);
   }
 
+  setState(state: ChannelResult): void {
+    this.latestState = state;
+  }
+
+  setAddress(address: string): void {
+    this.address = address;
+  }
+
+  private async getAddress(): Promise<string> {
+    if (this.address === undefined) {
+      throw Error('No address has been set yet');
+    }
+    return this.address;
+  }
+
+  private getNextTurnNum(latestState: ChannelResult) {
+    return bigNumberify(latestState.turnNum)
+      .add(1)
+      .toString();
+  }
+
   private updatePlayerIndex(playerIndex: number): void {
     this.playerIndex = playerIndex;
     this.opponentIndex = playerIndex == 1 ? 0 : 1;
@@ -90,15 +117,13 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     this.latestState = channel;
     this.address = channel.participants[0].participantId;
     this.opponentAddress = channel.participants[1].participantId;
-    this.notifyOpponent(channel, 'ChannelProposed');
+    this.notifyOpponent(channel);
 
     return channel;
   }
 
-  private notifyOpponent(data: ChannelResult, notificationType: NotificationType): void {
-    log.debug(
-      `${this.playerIndex} notifying opponent ${this.opponentIndex} about ${notificationType}`
-    );
+  private notifyOpponent(data: ChannelResult): void {
+    log.debug(`${this.playerIndex} notifying opponent ${this.opponentIndex}`);
     const sender = this.address;
     const recipient = this.opponentAddress;
 
@@ -106,6 +131,28 @@ export class FakeChannelProvider implements ChannelProviderInterface {
       throw Error(`Cannot notify opponent - opponent address not set`);
     }
 
-    this.events.emit(notificationType, {sender, recipient, data});
+    this.events.emit('MessageQueued', {sender, recipient, data});
+  }
+
+  private async pushMessage(params: Message<ChannelResult>): Promise<PushMessageResult> {
+    this.latestState = params.data;
+    // this.notifyApp(this.latestState);
+    const turnNum = this.getNextTurnNum(this.latestState);
+
+    switch (params.data.status) {
+      case 'proposed':
+        this.events.emit('ChannelProposed', {params});
+        break;
+      // auto-close, if we received a close
+      case 'closing':
+        this.latestState = {...this.latestState, turnNum, status: 'closed'};
+        this.notifyOpponent(this.latestState);
+        // this.notifyApp(this.latestState);
+        break;
+      default:
+        break;
+    }
+
+    return {success: true};
   }
 }
