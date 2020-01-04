@@ -8,23 +8,21 @@ import {
   APP_DATA,
   UPDATED_APP_DATA
 } from './constants';
-import {
-  ChannelResultBuilder,
-  buildParticipant,
-  buildAllocation,
-  setClientStates,
-  setProviderStates
-} from './utils';
+import {ChannelResultBuilder, buildParticipant, buildAllocation, setProviderStates} from './utils';
 import {ChannelResult, Message, ChannelClient} from '../src';
 import {EventsWithArgs} from '../src/types';
 import {calculateChannelId} from '../src/utils';
-import {FakeChannelClient} from './fakes/fake-channel-client';
 import {FakeChannelProvider} from './fakes/fake-channel-provider';
 
 log.setDefaultLevel(log.levels.SILENT);
 
 interface StateMap {
   [channelStatus: string]: ChannelResult;
+}
+
+interface Addresses {
+  self: string;
+  opponent: string;
 }
 
 describe('ChannelClient with FakeChannelProvider', () => {
@@ -70,12 +68,24 @@ describe('ChannelClient with FakeChannelProvider', () => {
       .build();
   });
 
+  function setupProvider(provider: FakeChannelProvider, playerIndex: number, addresses: Addresses) {
+    provider.setAddress(addresses.self);
+    provider.updatePlayerIndex(playerIndex);
+    provider.opponentAddress = addresses.opponent;
+  }
+
   beforeEach(() => {
     providerA = new FakeChannelProvider();
-    providerA.setAddress(participantA.participantId);
+    setupProvider(providerA, 0, {
+      self: participantA.participantId,
+      opponent: participantB.participantId
+    });
 
     providerB = new FakeChannelProvider();
-    providerB.setAddress(participantB.participantId);
+    setupProvider(providerB, 1, {
+      self: participantB.participantId,
+      opponent: participantA.participantId
+    });
 
     clientA = new ChannelClient(providerA);
     clientB = new ChannelClient(providerB);
@@ -130,6 +140,21 @@ describe('ChannelClient with FakeChannelProvider', () => {
 
         clientB.pushMessage(proposalMessage);
       });
+    });
+  });
+
+  describe('joins a channel', () => {
+    it('the player whose turn it is can accept proposal to join the channel', async () => {
+      setProviderStates([providerA], states['running']);
+      setProviderStates([providerB], states['proposed']);
+      const channelResult = await clientB.joinChannel(channelId);
+      expect(channelResult).toEqual(states['running']);
+      expect(providerA.latestState).toEqual(states['running']);
+    });
+
+    it('the player whose turn it is not cannot accept a join proposal they sent', async () => {
+      setProviderStates([providerA, providerB], states['proposed']);
+      await expect(clientA.joinChannel(channelId)).rejects.toBeDefined();
     });
   });
 });
