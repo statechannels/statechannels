@@ -1,7 +1,6 @@
 import log = require('loglevel');
 import EventEmitter = require('eventemitter3');
 
-import {FakeChannelClient} from '../src/fake-channel-client';
 import {
   PARTICIPANT_A,
   PARTICIPANT_B,
@@ -13,6 +12,7 @@ import {ChannelResultBuilder, buildParticipant, buildAllocation, setClientStates
 import {ChannelResult, Message} from '../src';
 import {EventsWithArgs} from '../src/types';
 import {calculateChannelId} from '../src/utils';
+import {FakeChannelClient} from './fakes/fake-channel-client';
 
 log.setDefaultLevel(log.levels.SILENT);
 

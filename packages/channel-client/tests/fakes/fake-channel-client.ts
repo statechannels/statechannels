@@ -11,8 +11,8 @@ import {
   Participant,
   Allocation,
   PushMessageResult
-} from './types';
-import {calculateChannelId} from './utils';
+} from '../../src/types';
+import {calculateChannelId} from '../../src/utils';
 
 export class FakeChannelClient implements ChannelClientInterface<ChannelResult> {
   playerIndex?: number;

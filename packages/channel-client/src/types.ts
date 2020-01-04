@@ -89,14 +89,14 @@ export interface EventsWithArgs {
 
 type UnsubscribeFunction = () => void;
 
-interface CreateChannelParameters {
+export interface CreateChannelParameters {
   participants: Participant[];
   allocations: Allocation[];
   appDefinition: string;
   appData: string;
 }
 
-interface UpdateChannelParameters {
+export interface UpdateChannelParameters {
   channelId: string;
   participants: Participant[];
   allocations: Allocation[];
@@ -154,3 +154,5 @@ export type Request =
   | UpdateChannelRequest
   | PushMessageRequest
   | CloseChannelRequest;
+
+export type NotificationType = 'ChannelProposed' | 'ChannelUpdate' | 'MessageQueued';

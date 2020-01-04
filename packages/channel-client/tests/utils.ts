@@ -1,4 +1,4 @@
-import {FakeChannelClient} from '../src/fake-channel-client';
+import {FakeChannelClient} from './fakes/fake-channel-client';
 import {Participant, Allocation, ChannelStatus, ChannelResult} from '../src/types';
 import {ETH_TOKEN_ADDRESS} from './constants';
 
