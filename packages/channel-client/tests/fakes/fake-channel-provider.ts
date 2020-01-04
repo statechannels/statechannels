@@ -10,7 +10,9 @@ import {
   PushMessageResult,
   Participant,
   Allocation,
-  UpdateChannelParameters
+  UpdateChannelParameters,
+  JoinChannelParameters,
+  CloseChannelParameters
 } from '../../src/types';
 import {calculateChannelId} from '../../src/utils';
 
@@ -50,18 +52,11 @@ export class FakeChannelProvider implements ChannelProviderInterface {
         return this.updateChannel(params);
 
       case 'CloseChannel':
-        if (this.events.listenerCount('ChannelUpdated') === 0) {
-          return Promise.reject(`No callback available for ${method}`);
-        }
-        this.events.emit('ChannelUpdated', params);
-        break;
+        return this.closeChannel(params);
 
       default:
         return Promise.reject(`No callback available for ${method}`);
     }
-
-    const result: any = {};
-    return Promise.resolve(result);
   }
 
   on(event: string, callback: ListenerFn): void {
@@ -162,7 +157,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     return channel;
   }
 
-  private async joinChannel(params: {channelId: string}): Promise<ChannelResult> {
+  private async joinChannel(params: JoinChannelParameters): Promise<ChannelResult> {
     const latestState = this.findChannel(params.channelId);
     this.updatePlayerIndex(1);
     log.debug(`Player ${this.getPlayerIndex()} joining channel ${params.channelId}`);
@@ -181,7 +176,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     return this.latestState;
   }
 
-  async updateChannel(params: UpdateChannelParameters): Promise<ChannelResult> {
+  private async updateChannel(params: UpdateChannelParameters): Promise<ChannelResult> {
     const channelId = params.channelId;
     const participants = params.participants;
     const allocations = params.allocations;
@@ -203,6 +198,21 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     return this.latestState;
   }
 
+  private async closeChannel(params: CloseChannelParameters): Promise<ChannelResult> {
+    const latestState = this.findChannel(params.channelId);
+    await this.verifyTurnNum(latestState.turnNum);
+    const turnNum = this.getNextTurnNum(latestState);
+    const status = 'closing';
+
+    this.latestState = {...latestState, turnNum, status};
+    log.debug(
+      `Player ${this.getPlayerIndex()} updated channel to status ${status} on turnNum ${turnNum}`
+    );
+    this.notifyOpponent(this.latestState, 'ChannelUpdate');
+
+    return this.latestState;
+  }
+
   private notifyOpponent(data: ChannelResult, notificationType: NotificationType): void {
     log.debug(
       `${this.getPlayerIndex()} notifying opponent ${this.getOpponentIndex()} about ${notificationType}`
@@ -219,7 +229,6 @@ export class FakeChannelProvider implements ChannelProviderInterface {
 
   private async pushMessage(params: Message<ChannelResult>): Promise<PushMessageResult> {
     this.latestState = params.data;
-    // this.notifyApp(this.latestState);
     const turnNum = this.getNextTurnNum(this.latestState);
 
     switch (params.data.status) {
@@ -230,7 +239,6 @@ export class FakeChannelProvider implements ChannelProviderInterface {
       case 'closing':
         this.latestState = {...this.latestState, turnNum, status: 'closed'};
         this.notifyOpponent(this.latestState, 'ChannelUpdate');
-        // this.notifyApp(this.latestState);
         break;
       default:
         break;

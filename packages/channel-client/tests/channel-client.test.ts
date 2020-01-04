@@ -76,19 +76,20 @@ describe('ChannelClient with FakeChannelProvider', () => {
 
   beforeEach(() => {
     providerA = new FakeChannelProvider();
+    providerB = new FakeChannelProvider();
+
+    clientA = new ChannelClient(providerA);
+    clientB = new ChannelClient(providerB);
+
     setupProvider(providerA, 0, {
       self: participantA.participantId,
       opponent: participantB.participantId
     });
 
-    providerB = new FakeChannelProvider();
     setupProvider(providerB, 1, {
       self: participantB.participantId,
       opponent: participantA.participantId
     });
-
-    clientA = new ChannelClient(providerA);
-    clientB = new ChannelClient(providerB);
 
     // This setup simulates the message being received from A's wallet
     // and "queued" by A's app to be sent to the opponent (handled by
@@ -176,6 +177,22 @@ describe('ChannelClient with FakeChannelProvider', () => {
       await expect(
         clientB.updateChannel(channelId, participants, allocations, UPDATED_APP_DATA)
       ).rejects.toBeDefined();
+    });
+  });
+
+  describe('closes a channel', () => {
+    it('player with valid turn can make a valid close channel call', async () => {
+      setProviderStates([providerA, providerB], states['running']);
+      // Since the clients agree to close a channel, this skips the 'closing'
+      // phase and the clients directly go to the channel 'closed' state
+      const channelResult = await clientA.closeChannel(channelId);
+      expect(channelResult).toEqual(states['closed']);
+      expect(providerB.latestState).toEqual(states['closed']);
+    });
+
+    it('player with invalid turn cannot make a valid close channel call', async () => {
+      setProviderStates([providerA, providerB], states['running']);
+      await expect(clientB.closeChannel(channelId)).rejects.toBeDefined();
     });
   });
 });
