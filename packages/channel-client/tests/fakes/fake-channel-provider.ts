@@ -8,8 +8,6 @@ import {
   Message,
   NotificationType,
   PushMessageResult,
-  Participant,
-  Allocation,
   UpdateChannelParameters,
   JoinChannelParameters,
   CloseChannelParameters
@@ -63,14 +61,14 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     this.events.on(event, callback);
   }
 
-  off(event: string, callback?: ListenerFn): void {
+  off(event: string): void {
     this.events.off(event);
   }
 
-  subscribe(subscriptionType: string): Promise<string> {
+  subscribe(): Promise<string> {
     return Promise.resolve('success');
   }
-  unsubscribe(subscriptionId: string): Promise<boolean> {
+  unsubscribe(): Promise<boolean> {
     return Promise.resolve(true);
   }
 
@@ -120,7 +118,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     return Promise.resolve();
   }
 
-  private getNextTurnNum(latestState: ChannelResult) {
+  private getNextTurnNum(latestState: ChannelResult): string {
     return bigNumberify(latestState.turnNum)
       .add(1)
       .toString();

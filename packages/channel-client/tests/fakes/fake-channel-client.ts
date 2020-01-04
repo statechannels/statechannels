@@ -62,7 +62,7 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
     return this.opponentIndex;
   }
 
-  getNextTurnNum(latestState: ChannelResult) {
+  getNextTurnNum(latestState: ChannelResult): string {
     return bigNumberify(latestState.turnNum)
       .add(1)
       .toString();
