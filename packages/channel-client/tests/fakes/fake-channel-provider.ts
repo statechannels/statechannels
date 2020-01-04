@@ -7,7 +7,10 @@ import {
   CreateChannelParameters,
   Message,
   NotificationType,
-  PushMessageResult
+  PushMessageResult,
+  Participant,
+  Allocation,
+  UpdateChannelParameters
 } from '../../src/types';
 import {calculateChannelId} from '../../src/utils';
 
@@ -44,6 +47,8 @@ export class FakeChannelProvider implements ChannelProviderInterface {
         return this.joinChannel(params);
 
       case 'UpdateChannel':
+        return this.updateChannel(params);
+
       case 'CloseChannel':
         if (this.events.listenerCount('ChannelUpdated') === 0) {
           return Promise.reject(`No callback available for ${method}`);
@@ -173,6 +178,28 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     this.opponentAddress = latestState.participants[0].participantId;
     this.notifyOpponent(this.latestState, 'MessageQueued');
 
+    return this.latestState;
+  }
+
+  async updateChannel(params: UpdateChannelParameters): Promise<ChannelResult> {
+    const channelId = params.channelId;
+    const participants = params.participants;
+    const allocations = params.allocations;
+    const appData = params.appData;
+
+    log.debug(`Player ${this.getPlayerIndex()} updating channel ${channelId}`);
+    const latestState = this.findChannel(channelId);
+
+    const nextState = {...latestState, participants, allocations, appData};
+    if (nextState !== latestState) {
+      await this.verifyTurnNum(nextState.turnNum);
+      nextState.turnNum = this.getNextTurnNum(latestState);
+      log.debug(`Player ${this.getPlayerIndex()} updated channel to turnNum ${nextState.turnNum}`);
+    }
+
+    this.latestState = nextState;
+
+    this.notifyOpponent(this.latestState, 'ChannelUpdate');
     return this.latestState;
   }
 
