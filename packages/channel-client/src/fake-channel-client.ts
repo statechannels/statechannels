@@ -200,13 +200,6 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
   }
 
   async pushMessage(parameters: Message<ChannelResult>): Promise<PushMessageResult> {
-    log.debug(
-      `${this.getPlayerIndex()} pushing message from app to wallet: ${JSON.stringify(
-        parameters,
-        undefined,
-        4
-      )}`
-    );
     this.latestState = parameters.data;
     this.notifyApp(this.latestState);
     const turnNum = this.getNextTurnNum(this.latestState);
