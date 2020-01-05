@@ -11,10 +11,10 @@
     "guid-typescript": "1.0.9"
   },
   "scripts": {
-    "prepare": "yarn build:typescript",
     "prepublish": "webpack",
     "build": "webpack",
     "build:typescript": "tsc -b .",
+    "prepare": "yarn build",
     "test": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:ci": "CI=true jest --runInBand --ci --all --detectOpenHandles",
