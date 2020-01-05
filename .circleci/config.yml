@@ -20,17 +20,37 @@ defaults: &defaults
 
 save_dep: &save_dep
   save_cache:
-    key: dependency-cache-{{ checksum "yarn.lock" }}
+    key: v1-dependency-cache-{{ checksum "yarn.lock" }}
     paths:
       - node_modules
-      - packages/*/node_modules
-
 restore_dep: &restore_dep
   restore_cache:
-    key: dependency-cache-{{ checksum "yarn.lock" }}
+    key: v1-dependency-cache-{{ checksum "yarn.lock" }}
+
+save_lib: &save_lib
+  save_cache:
+    # Force a new cache on each build
+    key: v1-lib-cache-{{ epoch }}
+    paths:
+      - packages/nitro-protocol/lib
+      - packages/rps/lib
+      - packages/client-api-schema/lib
+      - packages/e2e-tests/lib
+      - packages/web3torrent/lib
+      - packages/embedded-wallet/lib
+      - packages/devtools/lib
+      - packages/wallet/lib
+      - packages/jest-gas-reporter/lib
+      - packages/channel-provider/lib
+      - packages/channel-client/lib
+      - packages/hub/lib
+      - packages/wallet-specs/lib
+restore_lib: &restore_lib
+  restore_cache:
+    # Restore from the most recently cached version of lib, using a partial key match
+    key: v1-lib-cache-
 
 commands:
-
   log_stats:
     description: 'Log stats '
     parameters:
@@ -76,7 +96,6 @@ commands:
           only_for_branches: 'master'
 
 jobs:
-
   prepare:
     <<: *defaults
     steps:
@@ -84,8 +103,10 @@ jobs:
       - log_stats:
           file: prepare-stats
       - <<: *restore_dep
+      - <<: *restore_lib
       - run: yarn --frozen-lockfile
       - <<: *save_dep
+      - <<: *save_lib
 
       - persist_to_workspace:
           root: /home/circleci/project
