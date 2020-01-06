@@ -100,7 +100,7 @@ export class ChannelStoreEntry implements IChannelStoreEntry {
     if (!this.latestSupportedState) {
       return [];
     } else {
-      return this.states.slice(this.states.map(s => s.state).indexOf(this.latestSupportedState));
+      return this.states.slice(this.states.map(s => s.state).indexOf(this.latestSupportedState) + 1);
     }
   }
 
