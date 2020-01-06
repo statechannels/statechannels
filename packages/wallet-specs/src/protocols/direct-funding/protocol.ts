@@ -61,7 +61,7 @@ function uniqueDestinations(outcome: Allocation): string[] {
 }
 
 function preDepositOutcome(channelId: string, minimalOutcome: Allocation): Outcome {
-  const { state } = store.getLatestConsensus(channelId);
+  const state = store.getEntry(channelId).latestSupportedState;
   const outcome = store.getLatestSupportedAllocation(channelId);
 
   const destinations = uniqueDestinations(outcome.concat(minimalOutcome));

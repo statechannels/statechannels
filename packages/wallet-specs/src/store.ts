@@ -3,7 +3,6 @@ import { ChannelStoreEntry, IChannelStoreEntry } from './ChannelStoreEntry';
 import { messageService } from './messaging';
 import { AddressableMessage, FundingStrategyProposed } from './wire-protocol';
 export interface IStore {
-  getLatestConsensus: (channelId: string) => SignedState; // Used for null channels, whose support must be a single state
   getLatestSupportedAllocation: (channelId: string) => Allocation;
   getEntry: (channelId: string) => ChannelStoreEntry;
   getIndex: (channelId: string) => 0 | 1;
@@ -117,10 +116,6 @@ export class Store implements IStore {
     // TODO: Check the use of this. (Sometimes you want the latest outcome)
     const { outcome } = this.getEntry(channelId).latestState;
     return checkThat(outcome, isAllocation);
-  }
-
-  public getLatestConsensus(channelId: string) {
-    return { state: this.getEntry(channelId).latestSupportedState, signatures: [] };
   }
 
   public getUnsupportedStates(channelId: string) {

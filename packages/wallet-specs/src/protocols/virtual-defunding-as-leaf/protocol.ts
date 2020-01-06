@@ -47,7 +47,7 @@ function finalJointChannelUpdate({
   if (!targetChannelState || !targetChannelState.isFinal) {
     throw new Error('Target channel not finalized');
   }
-  const { state: jointState } = store.getLatestConsensus(jointChannelId);
+  const jointState = store.getEntry(jointChannelId).latestSupportedState;
 
   const jointOutcome = checkThat(jointState.outcome, isAllocation);
   const targetChannelIdx = jointOutcome.findIndex(a => a.destination === targetChannelId);
