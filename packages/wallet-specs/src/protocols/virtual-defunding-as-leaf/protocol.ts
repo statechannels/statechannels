@@ -43,8 +43,8 @@ function finalJointChannelUpdate({
   jointChannelId,
   targetChannelId,
 }: ChannelsSet): LedgerUpdate.Init {
-  const { state: targetChannelState } = store.getLatestSupport(targetChannelId)[0];
-  if (!targetChannelState.isFinal) {
+  const targetChannelState = store.getEntry(targetChannelId).latestSupportedState;
+  if (!targetChannelState || !targetChannelState.isFinal) {
     throw new Error('Target channel not finalized');
   }
   const { state: jointState } = store.getLatestConsensus(jointChannelId);

@@ -4,7 +4,6 @@ import { messageService } from './messaging';
 import { AddressableMessage, FundingStrategyProposed } from './wire-protocol';
 export interface IStore {
   getLatestConsensus: (channelId: string) => SignedState; // Used for null channels, whose support must be a single state
-  getLatestSupport: (channelId: string) => SignedState[]; //  Used for application channels, which would typically have multiple states in its support
   getLatestSupportedAllocation: (channelId: string) => Allocation;
   getEntry: (channelId: string) => ChannelStoreEntry;
   getIndex: (channelId: string) => 0 | 1;
@@ -128,9 +127,6 @@ export class Store implements IStore {
     return supportedState[0];
   }
 
-  public getLatestSupport(channelId: string) {
-    return this.getEntry(channelId).supportedState;
-  }
   public getUnsupportedStates(channelId: string) {
     return this.getEntry(channelId).unsupportedStates;
   }
