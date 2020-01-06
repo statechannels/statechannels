@@ -195,13 +195,10 @@ jobs:
           POSTGRES_PASSWORD: ''
           NODE_ENV: test
     environment:
-      NODE_ENV: development
       USE_VIRTUAL_FUNDING: TRUE
-      FIREBASE_PROJECT: rock-paper-scissors-dev-4ff8d
-      FIREBASE_API_KEY: AIzaSyAOvhDzJir_El3O6SJ2xQlrpOisnObq6zw
-      USE_GANACHE_DEPLOYMENT_CACHE: true
-      GANACHE_CACHE_FOLDER: ../../.ganache-deployments
-      GANACHE_PORT: 8547
+      # The development environment mimics integration environment
+      NODE_ENV: development
+      # This account is granted tons of ETH because devtools/ganache uses it (index 1 in ETHERLIME_ACCOUNTS)
       HUB_ADDRESS: 0xd4Fa489Eacc52BA59438993f37Be9fcC20090E39
       HUB_PRIVATE_KEY: 0x2030b463177db2da82908ef90fa55ddfcef56e8183caf60db464bc398e736e6f
 
@@ -223,7 +220,7 @@ jobs:
           command: (cd packages/rps && yarn run wait-on ${GANACHE_CACHE_FOLDER} && yarn run start)
           background: true
       - run:
-          command: (cd packages/hub && yarn run wait-on ${GANACHE_CACHE_FOLDER} && yarn run hub:start:dev)
+          command: (cd packages/hub && yarn run wait-on ${GANACHE_CACHE_FOLDER} && NODE_ENV=development yarn run hub:start:dev)
           background: true
       - run: (cd packages/e2e-tests && yarn test)
       - upload_logs:
