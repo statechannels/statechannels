@@ -1,4 +1,4 @@
-import { add, Allocation, Channel, getChannelId, gt, Outcome, SignedState, State } from '.';
+import { add, Allocation, getChannelId, gt, Outcome, SignedState, State } from '.';
 import { ChannelStoreEntry, IChannelStoreEntry } from './ChannelStoreEntry';
 import { messageService } from './messaging';
 import { AddressableMessage, FundingStrategyProposed } from './wire-protocol';
@@ -99,7 +99,7 @@ export class Store implements IStore {
     for (const channelId in this._store) {
       const entry = this.getEntry(channelId);
       if (
-        entry.supportedState[0].state.appDefinition === undefined &&
+        entry.latestSupportedState.appDefinition === undefined &&
         // TODO: correct array equality
         this.participantIds(channelId) === participantIds
       ) {
@@ -120,11 +120,7 @@ export class Store implements IStore {
   }
 
   public getLatestConsensus(channelId: string) {
-    const { supportedState } = this.getEntry(channelId);
-    if (supportedState.length !== 1) {
-      throw new Error('Support contains multiple states');
-    }
-    return supportedState[0];
+    return { state: this.getEntry(channelId).latestSupportedState, signatures: [] };
   }
 
   public getUnsupportedStates(channelId: string) {
@@ -249,36 +245,15 @@ export class Store implements IStore {
 
   private updateOrCreateEntry(channelId: string, states: SignedState[]): ChannelStoreEntry {
     // TODO: This currently assumes that support comes from consensus on a single state
-    let supportedState: SignedState[] = [];
-    let unsupportedStates: SignedState[] = [];
     const entry = this.maybeGetEntry(channelId);
     if (entry) {
-      ({ supportedState, unsupportedStates } = entry);
+      states = merge(states, entry.states);
+      this._store[channelId] = { ...this._store[channelId], states };
     } else {
       const { participants, channelNonce } = states[0].state.channel;
       this.useNonce(participants, channelNonce);
-    }
 
-    unsupportedStates = merge(unsupportedStates, states);
-
-    const nowSupported = unsupportedStates.filter(supported).sort(s => -s.state.turnNum);
-
-    supportedState = nowSupported.length ? [nowSupported[0]] : supportedState;
-    if (supportedState.length > 0) {
-      unsupportedStates = unsupportedStates.filter(
-        s => s.state.turnNum > supportedState[0].state.turnNum
-      );
-    }
-
-    if (entry) {
-      this._store[channelId] = {
-        ...this._store[channelId],
-        supportedState,
-        unsupportedStates,
-      };
-    } else {
       const { channel } = states[0].state;
-      const { participants } = channel;
       const entryParticipants: Participant[] = participants.map(p => ({
         destination: p,
         signingAddress: p,
@@ -286,8 +261,7 @@ export class Store implements IStore {
       }));
       const privateKey = this.getPrivateKey(participants);
       this._store[channelId] = {
-        supportedState,
-        unsupportedStates,
+        states,
         privateKey,
         participants: entryParticipants,
         channel,
@@ -312,13 +286,6 @@ function merge(left: SignedState[], right: SignedState[]): SignedState[] {
   });
 
   return left;
-}
-
-function supported(signedState: SignedState) {
-  // TODO: temporarily just check the required length
-  return (
-    signedState.signatures.filter(Boolean).length === signedState.state.channel.participants.length
-  );
 }
 
 // The store would send this action whenever the channel is updated

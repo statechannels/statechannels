@@ -120,8 +120,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => 
 
     const entry = new ChannelStoreEntry({
       channel,
-      supportedState: [],
-      unsupportedStates: [{ state: firstState, signatures: [] }],
+      states: [{ state: firstState, signatures: [] }],
       privateKey: store.getPrivateKey(ctx.participants.map(p => p.participantId)),
       participants: ctx.participants,
     });
