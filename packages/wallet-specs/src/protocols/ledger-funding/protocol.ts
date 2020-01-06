@@ -131,7 +131,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
   function directFundingArgs(ctx: LedgerExists): DirectFunding.Init {
     return {
       channelId: ctx.ledgerChannelId,
-      minimalOutcome: store.getLatestState(ctx.targetChannelId).outcome,
+      minimalOutcome: store.getEntry(ctx.targetChannelId).latestState.outcome,
     };
   }
 

@@ -37,7 +37,7 @@ const chooseHub = {
 type HubKnown = Init & { hubAddress: string };
 
 function virtualFundAsLeafArgs({ targetChannelId, hubAddress }: HubKnown): VirtualFundAsLeafArgs {
-  const { channel, outcome } = store.getLatestState(targetChannelId);
+  const { channel, outcome } = store.getEntry(targetChannelId).latestState;
   const balances: Balance[] = checkThat(outcome, isAllocation).map(o => ({
     address: o.destination,
     wei: o.amount,
