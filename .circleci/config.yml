@@ -156,6 +156,8 @@ jobs:
     docker:
       - image: circleci/node:10.16.3
     environment:
+      # The development environment mimics integration environment
+      NODE_ENV: development
       USE_VIRTUAL_FUNDING: FALSE
     steps:
       - checkout:
