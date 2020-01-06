@@ -88,7 +88,7 @@ export function defundGuarantorInLedger({
   Goal: targetOutcome == [(B, b), (H, a)]
   */
 
-  const jointOutcome = store.getLatestSupportedAllocation(jointChannelId);
+  const { outcome: jointOutcome } = store.getEntry(jointChannelId).latestSupportedState;
 
   const targetOutcome: Allocation = [
     {

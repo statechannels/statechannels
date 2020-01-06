@@ -1,6 +1,6 @@
 import { store } from '../..';
 import { isIndirectFunding } from '../../ChannelStoreEntry';
-import { checkThat } from '../../store';
+import { checkThat, isAllocation } from '../../store';
 import * as LedgerUpdate from '../ledger-update/protocol';
 
 const PROTOCOL = 'ledger-defunding';
@@ -12,11 +12,11 @@ export interface Init {
 
 function ledgerUpdateArgs({ targetChannelId }: Init): LedgerUpdate.Init {
   const { ledgerId } = checkThat(store.getEntry(targetChannelId).funding, isIndirectFunding);
-  const outcome = store.getLatestSupportedAllocation(ledgerId);
-  const concludedOutcome = store.getLatestSupportedAllocation(targetChannelId);
-  const targetOutcome = outcome
+  const { outcome } = store.getEntry(ledgerId).latestSupportedState;
+  const { outcome: concludedOutcome } = store.getEntry(targetChannelId).latestSupportedState;
+  const targetOutcome = checkThat(outcome, isAllocation)
     .filter(item => item.destination !== targetChannelId)
-    .concat(concludedOutcome);
+    .concat(checkThat(concludedOutcome, isAllocation));
   return {
     channelId: ledgerId,
     targetOutcome,

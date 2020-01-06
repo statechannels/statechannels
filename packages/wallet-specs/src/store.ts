@@ -3,7 +3,6 @@ import { ChannelStoreEntry, IChannelStoreEntry } from './ChannelStoreEntry';
 import { messageService } from './messaging';
 import { AddressableMessage, FundingStrategyProposed } from './wire-protocol';
 export interface IStore {
-  getLatestSupportedAllocation: (channelId: string) => Allocation;
   getEntry: (channelId: string) => ChannelStoreEntry;
   getIndex: (channelId: string) => 0 | 1;
 
@@ -110,12 +109,6 @@ export class Store implements IStore {
 
   public participantIds(channelId: string): string[] {
     return this.getEntry(channelId).participants.map(p => p.participantId);
-  }
-
-  public getLatestSupportedAllocation(channelId): Allocation {
-    // TODO: Check the use of this. (Sometimes you want the latest outcome)
-    const { outcome } = this.getEntry(channelId).latestState;
-    return checkThat(outcome, isAllocation);
   }
 
   public getUnsupportedStates(channelId: string) {

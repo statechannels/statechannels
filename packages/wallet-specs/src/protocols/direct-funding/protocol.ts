@@ -62,7 +62,7 @@ function uniqueDestinations(outcome: Allocation): string[] {
 
 function preDepositOutcome(channelId: string, minimalOutcome: Allocation): Outcome {
   const state = store.getEntry(channelId).latestSupportedState;
-  const outcome = store.getLatestSupportedAllocation(channelId);
+  const outcome = checkThat(store.getEntry(channelId).latestSupportedState.outcome, isAllocation);
 
   const destinations = uniqueDestinations(outcome.concat(minimalOutcome));
   return outcome.concat(
@@ -78,7 +78,7 @@ function amount(item: AllocationItem): string {
 }
 
 function postDepositOutcome(channelId: string): Outcome {
-  const outcome = store.getLatestSupportedAllocation(channelId);
+  const outcome = checkThat(store.getEntry(channelId).latestSupportedState.outcome, isAllocation);
   const destinations = uniqueDestinations(outcome);
 
   return destinations.map(destination => ({
