@@ -157,9 +157,6 @@ jobs:
       - image: circleci/node:10.16.3
     environment:
       USE_VIRTUAL_FUNDING: FALSE
-      USE_GANACHE_DEPLOYMENT_CACHE: true
-      GANACHE_CACHE_FOLDER: ../../.ganache-deployments
-      GANACHE_PORT: 8547
     steps:
       - checkout:
           path: /home/circleci/project
@@ -172,10 +169,10 @@ jobs:
           command: (cd packages/devtools && yarn run start:shared-ganache)
           background: true
       - run:
-          command: (cd packages/wallet && yarn run wait-on ${GANACHE_CACHE_FOLDER} && yarn run start:integration)
+          command: (cd packages/wallet && yarn run wait-on ../../.ganache-deployments && yarn run start:integration)
           background: true
       - run:
-          command: (cd packages/rps && yarn run wait-on ${GANACHE_CACHE_FOLDER} && yarn run start)
+          command: (cd packages/rps && yarn run wait-on ../../.ganache-deployments && yarn run start)
           background: true
       - run: (cd packages/wallet && yarn run test:ci:integration)
       - run: (cd packages/e2e-tests && yarn test)
