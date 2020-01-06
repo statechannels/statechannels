@@ -136,7 +136,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => 
   const guards = {};
   const actions = {
     sendOpenChannelMessage: ({ channelId }: SetChannel) => {
-      const state = store.getLatestState(channelId);
+      const state = store.getEntry(channelId).latestState;
       if (state.turnNum !== 0) {
         throw new Error('Wrong state');
       }
