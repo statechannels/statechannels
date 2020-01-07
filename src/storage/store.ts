@@ -16,6 +16,7 @@ import {
 } from '@statechannels/wallet-protocols/lib/src/wire-protocol';
 
 import jrs from 'jsonrpc-lite';
+import {dispatchChannelUpdatedMessage} from '..';
 
 export class Store implements IStore {
   public static equals(left: any, right: any) {
@@ -164,7 +165,7 @@ export class Store implements IStore {
       window.parent.postMessage(notification, '*');
     });
   }
-  public receiveStates(signedStates: SignedState[]): void {
+  public receiveStates(signedStates: SignedState[]) {
     const {channel} = signedStates[0].state;
     const channelId = getChannelId(channel);
 
@@ -227,7 +228,7 @@ export class Store implements IStore {
         channel
       };
     }
-
+    dispatchChannelUpdatedMessage(channelId);
     return new ChannelStoreEntry(this._store[channelId]);
   }
 }
