@@ -27,8 +27,8 @@ type ChannelsKnown = Init & {
 export const assignChannels = assign(
   (init: Init): ChannelsKnown => {
     const { leftLedgerId, rightLedgerId, targetChannelId } = init;
-    const { channel: leftLedgerChannel } = store.getLatestState(leftLedgerId);
-    const { channel: rightLedgerChannel } = store.getLatestState(rightLedgerId);
+    const { channel: leftLedgerChannel } = store.getEntry(leftLedgerId).latestState;
+    const { channel: rightLedgerChannel } = store.getEntry(rightLedgerId).latestState;
 
     const jointParticipants = [
       ...leftLedgerChannel.participants,

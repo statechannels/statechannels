@@ -43,11 +43,11 @@ function finalJointChannelUpdate({
   jointChannelId,
   targetChannelId,
 }: ChannelsSet): LedgerUpdate.Init {
-  const { state: targetChannelState } = store.getLatestSupport(targetChannelId)[0];
-  if (!targetChannelState.isFinal) {
+  const targetChannelState = store.getEntry(targetChannelId).latestSupportedState;
+  if (!targetChannelState || !targetChannelState.isFinal) {
     throw new Error('Target channel not finalized');
   }
-  const { state: jointState } = store.getLatestConsensus(jointChannelId);
+  const jointState = store.getEntry(jointChannelId).latestSupportedState;
 
   const jointOutcome = checkThat(jointState.outcome, isAllocation);
   const targetChannelIdx = jointOutcome.findIndex(a => a.destination === targetChannelId);
@@ -88,7 +88,7 @@ export function defundGuarantorInLedger({
   Goal: targetOutcome == [(B, b), (H, a)]
   */
 
-  const jointOutcome = store.getLatestSupportedAllocation(jointChannelId);
+  const { outcome: jointOutcome } = store.getEntry(jointChannelId).latestSupportedState;
 
   const targetOutcome: Allocation = [
     {

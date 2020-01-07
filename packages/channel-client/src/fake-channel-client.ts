@@ -1,6 +1,6 @@
-import {Wallet} from 'ethers';
 import {bigNumberify} from 'ethers/utils';
 import EventEmitter = require('eventemitter3');
+import log = require('loglevel');
 
 import {
   ChannelClientInterface,
@@ -12,25 +12,174 @@ import {
   Allocation,
   PushMessageResult
 } from './types';
-import {sleep} from './utils';
-
-const FAKE_DELAY = 100; // ms
+import {calculateChannelId} from './utils';
 
 export class FakeChannelClient implements ChannelClientInterface<ChannelResult> {
-  playerIndex: 0 | 1;
+  playerIndex?: number;
+  opponentIndex?: number;
+  opponentAddress?: string;
+  latestState?: ChannelResult;
   protected events = new EventEmitter<EventsWithArgs>();
-  protected latestState?: ChannelResult;
-  protected address: string;
-  protected opponentAddress: string;
 
-  constructor(opponentAddress: string) {
-    this.playerIndex = 0;
-    this.address = Wallet.createRandom().address;
-    this.opponentAddress = opponentAddress;
+  constructor(public readonly address: string) {}
+
+  async getAddress(): Promise<string> {
+    return this.address;
+  }
+
+  setState(state: ChannelResult): void {
+    this.latestState = state;
+  }
+
+  updatePlayerIndex(playerIndex: number): void {
+    if (this.playerIndex === undefined) {
+      this.playerIndex = playerIndex;
+      this.opponentIndex = playerIndex == 1 ? 0 : 1;
+    }
+  }
+
+  verifyTurnNum(turnNum: string): Promise<void> {
+    const currentTurnNum = bigNumberify(turnNum);
+    if (currentTurnNum.mod(2).eq(this.getPlayerIndex())) {
+      return Promise.reject(
+        `Not your turn: currentTurnNum = ${currentTurnNum}, index = ${this.playerIndex}`
+      );
+    }
+    return Promise.resolve();
+  }
+
+  getPlayerIndex(): number {
+    if (this.playerIndex === undefined) {
+      throw Error(`This client does not have its player index set yet`);
+    }
+    return this.playerIndex;
+  }
+
+  getOpponentIndex(): number {
+    if (this.opponentIndex === undefined) {
+      throw Error(`This client does not have its opponent player index set yet`);
+    }
+    return this.opponentIndex;
+  }
+
+  getNextTurnNum(latestState: ChannelResult) {
+    return bigNumberify(latestState.turnNum)
+      .add(1)
+      .toString();
+  }
+
+  async createChannel(
+    participants: Participant[],
+    allocations: Allocation[],
+    appDefinition: string,
+    appData: string
+  ): Promise<ChannelResult> {
+    const channel: ChannelResult = {
+      participants,
+      allocations,
+      appDefinition,
+      appData,
+      channelId: calculateChannelId(participants, appDefinition),
+      turnNum: bigNumberify(0).toString(),
+      status: 'proposed'
+    };
+    this.updatePlayerIndex(0);
+    this.latestState = channel;
+    this.opponentAddress = channel.participants[1].participantId;
+    this.notifyOpponent(channel, 'createChannel');
+
+    return channel;
+  }
+
+  async joinChannel(channelId: string): Promise<ChannelResult> {
+    const latestState = this.findChannel(channelId);
+    this.updatePlayerIndex(1);
+    log.debug(`Player ${this.getPlayerIndex()} joining channel ${channelId}`);
+    await this.verifyTurnNum(latestState.turnNum);
+
+    // skip funding by setting the channel to 'running' the moment it is joined
+    // [assuming we're working with 2-participant channels for the time being]
+    this.latestState = {
+      ...latestState,
+      turnNum: bigNumberify(3).toString(),
+      status: 'running'
+    };
+    this.opponentAddress = latestState.participants[0].participantId;
+    this.notifyOpponent(this.latestState, 'joinChannel');
+
+    return this.latestState;
+  }
+
+  async updateChannel(
+    channelId: string,
+    participants: Participant[],
+    allocations: Allocation[],
+    appData: string
+  ): Promise<ChannelResult> {
+    log.debug(`Player ${this.getPlayerIndex()} updating channel ${channelId}`);
+    const latestState = this.findChannel(channelId);
+
+    const nextState = {...latestState, participants, allocations, appData};
+    if (nextState !== latestState) {
+      await this.verifyTurnNum(nextState.turnNum);
+      nextState.turnNum = this.getNextTurnNum(latestState);
+      log.debug(`Player ${this.getPlayerIndex()} updated channel to turnNum ${nextState.turnNum}`);
+    }
+
+    this.latestState = nextState;
+
+    this.notifyOpponent(this.latestState, 'updateChannel');
+    return this.latestState;
+  }
+
+  async closeChannel(channelId: string): Promise<ChannelResult> {
+    const latestState = this.findChannel(channelId);
+    await this.verifyTurnNum(latestState.turnNum);
+    const turnNum = this.getNextTurnNum(latestState);
+    const status = 'closing';
+
+    this.latestState = {...latestState, turnNum, status};
+    log.debug(
+      `Player ${this.getPlayerIndex()} updated channel to status ${status} on turnNum ${turnNum}`
+    );
+    this.notifyOpponent(this.latestState, 'closeChannel');
+
+    return this.latestState;
+  }
+
+  protected notifyOpponent(data: ChannelResult, notificationType: string): void {
+    log.debug(
+      `${this.getPlayerIndex()} notifying opponent ${this.getOpponentIndex()} about ${notificationType}`
+    );
+    const sender = this.address;
+    const recipient = this.opponentAddress;
+
+    if (!recipient) {
+      throw Error(`Cannot notify opponent - opponent address not set`);
+    }
+    this.events.emit('MessageQueued', {sender, recipient, data});
+  }
+
+  protected notifyApp(data: ChannelResult): void {
+    this.events.emit('ChannelUpdated', data);
+  }
+
+  protected findChannel(channelId: string): ChannelResult {
+    if (!(this.latestState && this.latestState.channelId === channelId)) {
+      throw Error(`Channel does't exist with channelId '${channelId}'`);
+    }
+    return this.latestState;
   }
 
   onMessageQueued(callback: (message: Message<ChannelResult>) => void): UnsubscribeFunction {
     this.events.on('MessageQueued', message => {
+      log.debug(
+        `Sending message from ${this.getPlayerIndex()} to ${this.getOpponentIndex()}: ${JSON.stringify(
+          message,
+          undefined,
+          4
+        )}`
+      );
       callback(message);
     });
     return () => this.events.removeListener('MessageQueued', callback); // eslint-disable-line  @typescript-eslint/explicit-function-return-type
@@ -50,124 +199,28 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
     return () => this.events.removeListener('ChannelProposed', callback); // eslint-disable-line  @typescript-eslint/explicit-function-return-type
   }
 
-  async createChannel(
-    participants: Participant[],
-    allocations: Allocation[],
-    appDefinition: string,
-    appData: string
-  ): Promise<ChannelResult> {
-    this.playerIndex = 0;
-    this.latestState = {
-      participants,
-      allocations,
-      appDefinition,
-      appData,
-      channelId: '0xabc234',
-      turnNum: bigNumberify(0).toString(),
-      status: 'proposed'
-    };
-    this.opponentAddress = this.latestState.participants[1].participantId;
-    // [assuming we're working with 2-participant channels for the time being]
-    await sleep(FAKE_DELAY);
-    this.notifyOpponent(this.latestState);
-
-    return this.latestState;
-  }
-
-  async joinChannel(channelId: string): Promise<ChannelResult> {
-    this.playerIndex = 1;
-    const latestState = this.findChannel(channelId);
-    // skip funding by setting the channel to 'running' the moment it is joined
-    // [assuming we're working with 2-participant channels for the time being]
-    this.latestState = {...latestState, turnNum: bigNumberify(3).toString(), status: 'running'};
-    this.opponentAddress = this.latestState.participants[0].participantId;
-    await sleep(FAKE_DELAY);
-    this.notifyOpponent(this.latestState);
-
-    return this.latestState;
-  }
-
-  async updateChannel(
-    channelId: string,
-    participants: Participant[],
-    allocations: Allocation[],
-    appData: string
-  ): Promise<ChannelResult> {
-    const latestState = this.findChannel(channelId);
-    const currentTurnNum = bigNumberify(latestState.turnNum);
-
-    const nextState = {...latestState, participants, allocations, appData};
-    if (nextState !== latestState) {
-      if (currentTurnNum.mod(2).eq(this.playerIndex)) {
-        return Promise.reject(
-          `Not your turn: currentTurnNum = ${currentTurnNum}, index = ${this.playerIndex}`
-        );
-      }
-      nextState.turnNum = currentTurnNum.add(1).toString();
-      console.log(this.playerIndex + '  updated channel to turnNum:' + nextState.turnNum);
-    }
-
-    this.latestState = nextState;
-
-    this.notifyOpponent(this.latestState);
-    return this.latestState;
-  }
-
   async pushMessage(parameters: Message<ChannelResult>): Promise<PushMessageResult> {
     this.latestState = parameters.data;
     this.notifyApp(this.latestState);
+    const turnNum = this.getNextTurnNum(this.latestState);
 
-    // auto-close, if we received a close
-    if (parameters.data.status === 'closing') {
-      const turnNum = bigNumberify(this.latestState.turnNum)
-        .add(1)
-        .toString();
-      this.latestState = {...this.latestState, turnNum, status: 'closed'};
-      this.notifyOpponent(this.latestState);
-      this.notifyApp(this.latestState);
+    switch (parameters.data.status) {
+      case 'proposed':
+        this.events.emit('ChannelProposed', parameters.data);
+        break;
+      // auto-close, if we received a close
+      case 'closing':
+        log.debug(
+          `${this.getPlayerIndex()} auto-closing channel on close request from ${this.getOpponentIndex()}`
+        );
+        this.latestState = {...this.latestState, turnNum, status: 'closed'};
+        this.notifyOpponent(this.latestState, 'pushMessage');
+        this.notifyApp(this.latestState);
+        break;
+      default:
+        break;
     }
 
     return {success: true};
-  }
-
-  async getAddress(): Promise<string> {
-    return this.address;
-  }
-
-  async closeChannel(channelId: string): Promise<ChannelResult> {
-    const latestState = this.findChannel(channelId);
-    const currentTurnNum = bigNumberify(latestState.turnNum);
-
-    if (currentTurnNum.mod(2).eq(this.playerIndex)) {
-      return Promise.reject(
-        `Not your turn: currentTurnNum = ${currentTurnNum}, index = ${this.playerIndex}`
-      );
-    }
-
-    const turnNum = currentTurnNum.add(1).toString();
-    console.log(this.playerIndex + '  updated channel to turnNum:' + turnNum);
-
-    this.latestState = {...latestState, turnNum, status: 'closing'};
-    this.notifyOpponent(this.latestState);
-
-    return this.latestState;
-  }
-
-  protected notifyOpponent(data: ChannelResult): void {
-    const sender = this.address;
-    const recipient = this.opponentAddress;
-
-    this.events.emit('MessageQueued', {sender, recipient, data});
-  }
-
-  protected notifyApp(data: ChannelResult): void {
-    this.events.emit('ChannelUpdated', data);
-  }
-
-  protected findChannel(channelId: string): ChannelResult {
-    if (!(this.latestState && this.latestState.channelId === channelId)) {
-      throw Error(`Channel does't exist with channelId '${channelId}'`);
-    }
-    return this.latestState;
   }
 }

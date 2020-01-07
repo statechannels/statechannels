@@ -1,4 +1,4 @@
-import { AnyEventObject, assign, AssignAction, Interpreter, Machine, spawn } from 'xstate';
+import { assign, AssignAction, Interpreter, Machine, spawn } from 'xstate';
 import { CreateChannel, JoinChannel } from '..';
 import { getChannelId, pretty, unreachable } from '../..';
 import { ChannelUpdated, IStore } from '../../store';
