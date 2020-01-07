@@ -34,7 +34,7 @@ describe('ChannelClient with FakeChannelProvider', () => {
   const allocations = [buildAllocation(PARTICIPANT_A, '5'), buildAllocation(PARTICIPANT_B, '5')];
   const channelId = calculateChannelId(participants, APP_DEFINITION);
 
-  // This event emitter only enable easier assertions of expected
+  // This event emitter enables easier assertions of expected
   // events the client is listening on
   const clientBEventEmitter = new EventEmitter<EventsWithArgs>();
 
