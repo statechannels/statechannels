@@ -158,7 +158,7 @@ jobs:
     environment:
       # The development environment mimics integration environment
       NODE_ENV: development
-      USE_VIRTUAL_FUNDING: FALSE
+      USE_VIRTUAL_FUNDING: 'FALSE'
     steps:
       - checkout:
           path: /home/circleci/project
@@ -194,7 +194,7 @@ jobs:
           POSTGRES_PASSWORD: ''
           NODE_ENV: test
     environment:
-      USE_VIRTUAL_FUNDING: TRUE
+      USE_VIRTUAL_FUNDING: 'TRUE'
       # The development environment mimics integration environment
       NODE_ENV: development
       # This account is granted tons of ETH because devtools/ganache uses it (index 1 in ETHERLIME_ACCOUNTS)
