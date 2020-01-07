@@ -26,7 +26,7 @@ function replacementChannelArgs({
   newOutcome,
   participantMapping,
 }: Init): CreateNullChannel.Init {
-  const { channel, outcome } = store.getLatestConsensus(ledgerId).state;
+  const { channel, outcome } = store.getEntry(ledgerId).latestSupportedState;
   const newParticipants = channel.participants
     .filter(p => newOutcome.find(allocation => allocation.destination === p))
     .map(p => participantMapping[p]);
@@ -63,7 +63,7 @@ export function concludeOutcome({
   newOutcome,
   newChannelId,
 }: NewChannelCreated): LedgerUpdate.Init {
-  const { state } = store.getLatestConsensus(ledgerId);
+  const state = store.getEntry(ledgerId).latestSupportedState;
   const currentlyAllocated = checkThat(state.outcome, isAllocation)
     .map(a => a.amount)
     .reduce(add, 0);
