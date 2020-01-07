@@ -7,6 +7,9 @@ import * as jrs from 'jsonrpc-lite';
 import {validateRequest} from './json-rpc-validation/validator';
 import {IStore} from '@statechannels/wallet-protocols/lib/src/store';
 import {CreateChannelEvent} from '@statechannels/wallet-protocols/lib/src/protocols/wallet/protocol';
+import {UpdateChannelParams} from '@statechannels/client-api-schema/types/update-channel';
+import {createStateFromUpdateChannelParams} from './utils/json-rpc-utils';
+
 const ethersWallet = ethers.Wallet.createRandom();
 const store: IStore = new Store({privateKeys: {[ethersWallet.address]: ethersWallet.privateKey}});
 
@@ -43,6 +46,9 @@ window.addEventListener('message', async event => {
           case 'CreateChannel':
             await handleCreateChannelMessage(parsedMessage.payload, machine, store, ethersWallet);
             break;
+          case 'UpdateChannel':
+            await handleUpdateChannel(parsedMessage.payload, machine, store, ethersWallet);
+            break;
           case 'PushMessage':
             await handlePushMessage(parsedMessage.payload, machine, store, ethersWallet);
         }
@@ -50,16 +56,23 @@ window.addEventListener('message', async event => {
     }
   }
 });
-// TODO: Probably should be async and the store should have async methods
-export function dispatchChannelUpdatedMessage(channelId: string) {
-  getChannelInfo(channelId, store).then(channelInfo => {
-    // TODO: Right now we assume anything that is not a null channel is an app channel
-    if (!!channelInfo.appData) {
-      const notification = jrs.notification('ChannelUpdated', channelInfo);
-      window.parent.postMessage(notification, '*');
-    }
-  });
+
+async function handleUpdateChannel(
+  payload: jrs.RequestObject,
+  machine: Interpreter<Wallet.Init, any, Wallet.Events>,
+  store: IStore,
+  ethersWallet: ethers.Wallet
+) {
+  const params = payload.params as UpdateChannelParams;
+  const entry = store.getEntry(params.channelId);
+  const {latestState} = entry;
+
+  const state = createStateFromUpdateChannelParams(latestState, params);
+  store.receiveStates([{state, signatures: ['FAKE']}]);
+  window.parent.postMessage(jrs.success(payload.id, {success: true}), '*');
+  dispatchChannelUpdatedMessage(params.channelId);
 }
+
 async function handlePushMessage(
   payload: jrs.RequestObject,
   machine: Interpreter<Wallet.Init, any, Wallet.Events>,
@@ -128,4 +141,15 @@ async function getChannelInfo(channelId: string, store: IStore) {
     turnNum,
     channelId
   };
+}
+
+// TODO: Probably should be async and the store should have async methods
+export function dispatchChannelUpdatedMessage(channelId: string) {
+  getChannelInfo(channelId, store).then(channelInfo => {
+    // TODO: Right now we assume anything that is not a null channel is an app channel
+    if (!!channelInfo.appData) {
+      const notification = jrs.notification('ChannelUpdated', channelInfo);
+      window.parent.postMessage(notification, '*');
+    }
+  });
 }
