@@ -209,11 +209,6 @@ jobs:
           file: integration-test-stats
       - attach_workspace:
           at: /home/circleci/project
-      - run: |
-          sudo apt-get install postgresql-client
-          createdb -U root -h 0.0.0.0 hub_wallet_test
-          (cd packages/hub && yarn db:migrate && yarn db:seed)
-          cd /home/circleci/project
       - run:
           command: (cd packages/devtools && yarn run start:shared-ganache)
           background: true
