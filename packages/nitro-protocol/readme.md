@@ -8,7 +8,7 @@ Nitro Protocol
 This repository contains the smart contracts that define a state channel framework capable of running 3rd-party
 'applications' that conform to a simple state-machine interface, and allow for large-scale state-channel networks. This repository also includes helper functions written in TypeScript, to allow clients to more easily interact with the contracts.
 
-There is an accompanying documentation [website](https://angry-villani-ad8c15.netlify.com/).
+There is an accompanying documentation [website](https://nitro-protocol.netlify.com/).
 
 # ForceMove
 
