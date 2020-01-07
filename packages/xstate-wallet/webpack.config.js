@@ -9,6 +9,11 @@ module.exports = {
   module: {
     rules: [
       {
+        test: /\.js$/,
+        use: ['source-map-loader'],
+        enforce: 'pre'
+      },
+      {
         test: /\.tsx?$/,
         loader: 'ts-loader',
         exclude: /node_modules/

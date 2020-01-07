@@ -21,6 +21,7 @@
   "devDependencies": {
     "@statechannels/devtools": "0.1.21",
     "@types/webpack": "4.41.0",
+    "source-map-loader": "0.2.4",
     "webpack": "4.41.3"
   },
   "scripts": {
