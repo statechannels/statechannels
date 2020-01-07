@@ -11,8 +11,8 @@ import {
   Participant,
   Allocation,
   PushMessageResult
-} from './types';
-import {calculateChannelId} from './utils';
+} from '../../src/types';
+import {calculateChannelId} from '../../src/utils';
 
 export class FakeChannelClient implements ChannelClientInterface<ChannelResult> {
   playerIndex?: number;
@@ -62,7 +62,7 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
     return this.opponentIndex;
   }
 
-  getNextTurnNum(latestState: ChannelResult) {
+  getNextTurnNum(latestState: ChannelResult): string {
     return bigNumberify(latestState.turnNum)
       .add(1)
       .toString();
