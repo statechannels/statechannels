@@ -212,7 +212,7 @@ jobs:
       - attach_workspace:
           at: /home/circleci/project
       - run: |
-          apt-get install postgresql-client
+          sudo apt-get install postgresql-client
           (cd packages/hub && yarn db:migrate && yarn db:seed)
           cd /home/circleci/project
       - run:
