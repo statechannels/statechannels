@@ -50,7 +50,16 @@ window.addEventListener('message', async event => {
     }
   }
 });
-
+// TODO: Probably should be async and the store should have async methods
+export function dispatchChannelUpdatedMessage(channelId: string) {
+  getChannelInfo(channelId, store).then(channelInfo => {
+    // TODO: Right now we assume anything that is not a null channel is an app channel
+    if (!!channelInfo.appData) {
+      const notification = jrs.notification('ChannelUpdated', channelInfo);
+      window.parent.postMessage(notification, '*');
+    }
+  });
+}
 async function handlePushMessage(
   payload: jrs.RequestObject,
   machine: Interpreter<Wallet.Init, any, Wallet.Events>,
@@ -107,7 +116,7 @@ async function getChannelInfo(channelId: string, store: IStore) {
 
   // TODO: Status and funding
   const funding = [];
-  const status = 'opening';
+  const status = turnNum === 0 ? 'opening' : 'running';
 
   return {
     participants,
