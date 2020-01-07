@@ -197,9 +197,10 @@ jobs:
       USE_VIRTUAL_FUNDING: 'TRUE'
       # The development environment mimics integration environment
       NODE_ENV: development
-      # This account is granted tons of ETH because devtools/ganache uses it (index 1 in ETHERLIME_ACCOUNTS)
-      HUB_ADDRESS: '0xd4Fa489Eacc52BA59438993f37Be9fcC20090E39'
-      HUB_PRIVATE_KEY: '0x2030b463177db2da82908ef90fa55ddfcef56e8183caf60db464bc398e736e6f'
+      # This account is granted tons of ETH because devtools/ganache uses it (index 2 in ETHERLIME_ACCOUNTS)
+      # NOTE: This MUST be unique for the CircleCI environment, otherwise messages might overlap on Firebase.
+      HUB_ADDRESS: '0x760bf27cd45036a6C486802D30B5D90CfFBE31FE'
+      HUB_PRIVATE_KEY: '0x62ecd49c4ccb41a70ad46532aed63cf815de15864bc415c87d507afd6a5e8da2'
 
     steps:
       - checkout:
