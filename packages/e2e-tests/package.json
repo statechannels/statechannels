@@ -4,7 +4,7 @@
   "description": "Container package for end to end tests, from contracts to browser apps",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
+    "test": "wait-on http://localhost:3000 http://localhost:3055 && jest",
     "lint:check": "eslint */**/*.{ts,js} --cache",
     "lint:write": "eslint */**/*.{ts,js} --fix",
     "precommit": "lint-staged --quiet"
@@ -15,6 +15,7 @@
     "@types/jest": "24.0.18",
     "@types/node": "12.7.7",
     "@types/prettier": "1.19.0",
+    "@types/wait-on": "3.2.0",
     "@typescript-eslint/eslint-plugin": "^2.7.0",
     "@typescript-eslint/parser": "^2.8.0",
     "eslint": "^6.6.0",
@@ -26,7 +27,8 @@
     "lint-staged": "9.4.0",
     "prettier": "1.19.1",
     "ts-jest": "24.1.0",
-    "typescript": "3.7.2"
+    "typescript": "3.7.2",
+    "wait-on": "3.3.0"
   },
   "lint-staged": {
     "*/**/*.{ts,js}": "eslint --cache"
