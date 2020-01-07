@@ -1,6 +1,6 @@
 import {Contract} from 'ethers';
-import {TransactionRequest} from 'ethers/providers';
-import {Signature} from 'ethers/utils';
+import {providers} from 'ethers';
+import {utils} from 'ethers';
 import {State} from './contract/state';
 import * as forceMoveTrans from './contract/transaction-creators/force-move';
 import * as nitroAdjudicatorTrans from './contract/transaction-creators/nitro-adjudicator';
@@ -19,7 +19,7 @@ export async function getData(provider, contractAddress: string, channelId: stri
 export function createForceMoveTransaction(
   signedStates: SignedState[],
   challengePrivateKey: string
-): TransactionRequest {
+): providers.TransactionRequest {
   const {states, signatures, whoSignedWhat} = createSignatureArguments(signedStates);
 
   return forceMoveTrans.createForceMoveTransaction(
@@ -33,7 +33,7 @@ export function createForceMoveTransaction(
 export function createRespondTransaction(
   challengeState: State,
   response: SignedState
-): TransactionRequest {
+): providers.TransactionRequest {
   if (!challengeState) {
     throw new Error('No active challenge in challenge state');
   }
@@ -44,7 +44,9 @@ export function createRespondTransaction(
   });
 }
 
-export function createCheckpointTransaction(signedStates: SignedState[]): TransactionRequest {
+export function createCheckpointTransaction(
+  signedStates: SignedState[]
+): providers.TransactionRequest {
   const {states, signatures, whoSignedWhat} = createSignatureArguments(signedStates);
   return forceMoveTrans.createCheckpointTransaction({
     states,
@@ -55,7 +57,7 @@ export function createCheckpointTransaction(signedStates: SignedState[]): Transa
 
 export function createConcludePushOutcomeAndTransferAllTransaction(
   signedStates: SignedState[]
-): TransactionRequest {
+): providers.TransactionRequest {
   const {states, signatures, whoSignedWhat} = createSignatureArguments(signedStates);
   return nitroAdjudicatorTrans.createConcludePushOutcomeAndTransferAllTransaction(
     states,
@@ -64,7 +66,9 @@ export function createConcludePushOutcomeAndTransferAllTransaction(
   );
 }
 
-export function createConcludeTransaction(conclusionProof: SignedState[]): TransactionRequest {
+export function createConcludeTransaction(
+  conclusionProof: SignedState[]
+): providers.TransactionRequest {
   const {states, signatures, whoSignedWhat} = createSignatureArguments(conclusionProof);
   return forceMoveTrans.createConcludeTransaction(states, signatures, whoSignedWhat);
 }
@@ -73,7 +77,7 @@ export function createConcludeTransaction(conclusionProof: SignedState[]): Trans
 // So if multiple participants sign a state we expect a SignedState for each participant
 function createSignatureArguments(
   signedStates: SignedState[]
-): {states: State[]; signatures: Signature[]; whoSignedWhat: number[]} {
+): {states: State[]; signatures: utils.Signature[]; whoSignedWhat: number[]} {
   const {participants} = signedStates[0].state.channel;
 
   // Get a list of all unique states.

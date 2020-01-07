@@ -1,15 +1,7 @@
 import {Contract, ethers, Wallet} from 'ethers';
-import {AddressZero, HashZero} from 'ethers/constants';
-import {TransactionReceipt, TransactionRequest} from 'ethers/providers';
-import {
-  arrayify,
-  bigNumberify,
-  BigNumberish,
-  defaultAbiCoder,
-  keccak256,
-  Signature,
-  splitSignature,
-} from 'ethers/utils';
+import {constants} from 'ethers';
+import {providers} from 'ethers';
+import {utils} from 'ethers';
 
 import {hashChannelStorage} from '../src/contract/channel-storage';
 import {
@@ -27,7 +19,7 @@ import {hashState, State} from '../src/contract/state';
 
 // E.g. {ALICE:2, BOB:3}
 export interface AssetOutcomeShortHand {
-  [destination: string]: BigNumberish;
+  [destination: string]: utils.BigNumberish;
 }
 
 // E.g. {ETH: {ALICE:2, BOB:3}, DAI: {ALICE:1, BOB:4}}
@@ -65,7 +57,7 @@ export function getPlaceHolderContractAddress(): string {
 export async function sign(wallet: ethers.Wallet, msgHash: string | Uint8Array) {
   // MsgHash is a hex string
   // Returns an object with v, r, and s properties.
-  return splitSignature(await wallet.signMessage(arrayify(msgHash)));
+  return utils.splitSignature(await wallet.signMessage(utils.arrayify(msgHash)));
 }
 
 export const nonParticipant = ethers.Wallet.createRandom();
@@ -80,7 +72,7 @@ export const ongoingChallengeHash = (turnNumRecord = 5) =>
   hashChannelStorage({
     turnNumRecord,
     finalizesAt: 1e12,
-    challengerAddress: AddressZero,
+    challengerAddress: constants.AddressZero,
     outcome: [],
   });
 
@@ -185,8 +177,11 @@ export function randomChannelId(channelNonce = 0) {
     participants[i] = ethers.Wallet.createRandom().address;
   }
   // Compute channelId
-  const channelId = keccak256(
-    defaultAbiCoder.encode(['uint256', 'address[]', 'uint256'], [1234, participants, channelNonce])
+  const channelId = utils.keccak256(
+    utils.defaultAbiCoder.encode(
+      ['uint256', 'address[]', 'uint256'],
+      [1234, participants, channelNonce]
+    )
   );
   return channelId;
 }
@@ -201,8 +196,8 @@ export const randomExternalDestination = () =>
 export async function sendTransaction(
   provider: ethers.providers.JsonRpcProvider,
   contractAddress: string,
-  transaction: TransactionRequest
-): Promise<TransactionReceipt> {
+  transaction: providers.TransactionRequest
+): Promise<providers.TransactionReceipt> {
   const signer = provider.getSigner();
   const response = await signer.sendTransaction({to: contractAddress, ...transaction});
   return await response.wait();
@@ -212,7 +207,7 @@ export function allocationToParams(allocation: Allocation) {
   const allocationBytes = encodeAllocation(allocation);
   let assetOutcomeHash;
   if (allocation.length === 0) {
-    assetOutcomeHash = HashZero;
+    assetOutcomeHash = constants.HashZero;
   } else {
     assetOutcomeHash = hashAssetOutcome(allocation);
   }
@@ -230,7 +225,7 @@ export async function signStates(
   states: State[],
   wallets: Wallet[],
   whoSignedWhat: number[]
-): Promise<Signature[]> {
+): Promise<utils.Signature[]> {
   const stateHashes = states.map(s => hashState(s));
   const promises = wallets.map(async (w, i) => await sign(w, stateHashes[whoSignedWhat[i]]));
   return Promise.all(promises);
@@ -249,7 +244,7 @@ export function replaceAddressesAndBigNumberify(
       newObject[addresses[key]] = replaceAddressesAndBigNumberify(object[key], addresses);
     }
     if (typeof object[key] === 'number') {
-      newObject[addresses[key]] = bigNumberify(object[key]);
+      newObject[addresses[key]] = utils.bigNumberify(object[key]);
     }
   });
   return newObject;
@@ -322,7 +317,7 @@ export function computeOutcome(outcomeShortHand: OutcomeShortHand): AllocationAs
     Object.keys(outcomeShortHand[assetHolder]).forEach(destination =>
       allocation.push({
         destination,
-        amount: bigNumberify(outcomeShortHand[assetHolder][destination]).toHexString(),
+        amount: utils.bigNumberify(outcomeShortHand[assetHolder][destination]).toHexString(),
       })
     );
     const assetOutcome: AllocationAssetOutcome = {
@@ -341,7 +336,10 @@ export function assetTransferredEventsFromPayouts(
 ) {
   const assetTransferredEvents = [];
   Object.keys(singleAssetPayouts).forEach(destination => {
-    if (singleAssetPayouts[destination] && bigNumberify(singleAssetPayouts[destination]).gt(0)) {
+    if (
+      singleAssetPayouts[destination] &&
+      utils.bigNumberify(singleAssetPayouts[destination]).gt(0)
+    ) {
       assetTransferredEvents.push({
         contract: assetHolder,
         name: 'AssetTransferred',

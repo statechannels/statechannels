@@ -1,10 +1,10 @@
-import {Interface} from 'ethers/utils';
+import {utils} from 'ethers';
 
 import {Contract} from 'ethers';
 import ForceMoveAppArtifact from '../../build/contracts/ForceMoveApp.json';
 import {State, getVariablePart} from '../contract/state';
 
-export const ForceMoveAppContractInterface = new Interface(ForceMoveAppArtifact.abi);
+export const ForceMoveAppContractInterface = new utils.Interface(ForceMoveAppArtifact.abi);
 
 export async function validTransition(
   fromState: State,
