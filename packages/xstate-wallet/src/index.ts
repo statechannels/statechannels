@@ -100,7 +100,7 @@ async function handleCreateChannelMessage(
 }
 
 async function getChannelInfo(channelId: string, store: IStore) {
-  const latestState = store.getLatestState(channelId);
+  const {latestState} = store.getEntry(channelId);
   const channelEntry = store.getEntry(channelId);
   const {participants} = channelEntry;
   const {appData, appDefinition, turnNum} = latestState;
