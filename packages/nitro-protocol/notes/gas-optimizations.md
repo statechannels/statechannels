@@ -25,6 +25,8 @@ The main trick to reducing this was to reduce all storage to the theoretical min
 
 The answer lies in the magic of cryptographic hash functions, which are a core primitive of blockchains. Cryptographic has functions accept variable length input, are infeasible to invert, and produce fixed length output. By storing only the keccak256 **hash** of the outcome data, we ensure that only one slot gets used, regardless of the application. Previously it was several slots, and the number of slots would grow with the complexity of the application data.
 
+![Optimization](./optimization.png)
+
 The only remaining puzzle is to get around the infeasibility of inverting the hash function to rehydrate the outcome data -- there is no point in storing the data if the EVM is unable to properly interpret it and act accordingly (e.g. by slashing the deposit of a participant or paying out prize winnings). Remember that we are not using a hash for privacy reasons; that is just a side effect. The answer is for all the public methods to accept the hydrated data as input. This input is then rehashed and checked against storage before any further execution is allowed: and the hydrated data supplied in the CALLDATA can be used in any necessary computations. So the effect is the same as having the hydrated data in storage, only with a lower cost.
 
 The tradeoffs are some extra information in the calldata, and the burden of tracking the data offchain in your client. But this is very much in the spirit of Layer 2 and doing as much of the computation off chain as possible. Having every node of the ethereum main chain store all of this data is wasteful and costly: only interested parties need to store it.
