@@ -156,9 +156,10 @@ jobs:
     docker:
       - image: circleci/node:10.16.3
     environment:
-      # The development environment mimics integration environment
-      NODE_ENV: development
       USE_VIRTUAL_FUNDING: 'FALSE'
+      USE_GANACHE_DEPLOYMENT_CACHE: true
+      GANACHE_CACHE_FOLDER: ../../.ganache-deployments
+      GANACHE_PORT: 8547
     steps:
       - checkout:
           path: /home/circleci/project
