@@ -8,6 +8,8 @@ WORKDIR /statechannels/hub
 # - That ./packages/hub has been built, so a lib directory exists
 # - That ./packages/nitro-protocol has been built, so the .json artifacts exist
 
+# TODO: Add package.json first, then do dependencies, then do rest of code
+
 COPY ./packages/hub /statechannels/hub
 COPY ./packages/nitro-protocol /statechannels/nitro-protocol
 
@@ -29,6 +31,8 @@ RUN yarn add dotenv dotenv-expand
 RUN mkdir ./node_modules/@statechannels && \
     mv /statechannels/nitro-protocol ./node_modules/@statechannels
 
-# Run hub
-ENV NODE_ENV=staging 
-ENTRYPOINT ["node", "./lib/hub/server.js"]
+# Set entrypoint to basic shell for ease-of-use on Heroku
+ENTRYPOINT ["/bin/sh", "-c"]
+
+# Main hub startup
+CMD ["node", "./lib/hub/server.js"]
