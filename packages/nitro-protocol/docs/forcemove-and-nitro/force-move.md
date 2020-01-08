@@ -13,6 +13,7 @@ ForceMove is a state channel execution framework. It:
 This page documents our reference implementation in `ForceMove.sol`: please also see the [API](../natspec/ForceMove).
 
 ---
+
 ## State Format
 
 A specified format of _state_ is vital, since it constitutes much of the interface between the on- and off- chain behavior of the state channel network.
@@ -151,7 +152,7 @@ A later [check for support](#support-proofs) for the submitted states implies (i
 
 ### App-specific `validTransition`
 
-In addition to the core `validTransition` rules, there are application-specific rules. These are left open to application developers, who must specify these rules in a single function conforming to the [ForceMoveApp interface](../interfaces/ForceMoveApp) below.
+In addition to the core `validTransition` rules, there are application-specific rules. These are left open to application developers, who must specify these rules in a single function conforming to the [ForceMoveApp interface](../natspec/ForceMoveApp) below.
 
 For example, one can implement a simple counting application
 
@@ -215,6 +216,7 @@ ForceMove also allows an optimization where a state can be supported by `n` sign
 In the extreme, this allows a single state signed by all `n` parties to be accepted by the chain.
 
 ### `_stateSupportedBy`
+
 ```solidity
     function _stateSupportedBy(
         uint256 largestTurnNum,
@@ -234,6 +236,7 @@ Implementation:
 - If checks pass, returns the final element in the `stateHashes` array.
 
 ### `_validSignatures`
+
 Given an array of state hashes, checks the validity of the supplied signatures.
 
 :::warning
@@ -294,6 +297,7 @@ In order for signatures to be valid, we need that:
 So the signatures are valid in this case
 
 ### `_acceptableWhoSignedWhat`
+
 ```solidity
     function _acceptableWhoSignedWhat(
         uint8[] memory whoSignedWhat,
@@ -403,7 +407,7 @@ When the adjudicator needs to verify the exact state or outcome, the data is pro
 
 **Why include the `outcomeHash`?**
 
-Although the `outcome` is included in the `state`, we include the `outcomeHash` at the top level of the `channelStorageHash` to make it easier for the [`pushOutcome`](./push-outcome) method to prove what the outcome of the channel was. The tradeoff here is that the methods need to make sure they have the data to calculate it - which adds at most a `bytes32` to their `calldata`.
+Although the `outcome` is included in the `state`, we include the `outcomeHash` at the top level of the `channelStorageHash` to make it easier for the [`pushOutcome`](./nitro-adjudicator#push-utcome) method to prove what the outcome of the channel was. The tradeoff here is that the methods need to make sure they have the data to calculate it - which adds at most a `bytes32` to their `calldata`.
 
 ---
 
@@ -413,7 +417,7 @@ Although the `outcome` is included in the `state`, we include the `outcomeHash` 
 
 The `forceMove` function allows anyone holding the appropriate off-chain state to register a challenge on chain, and gives the framework its name. It is designed to ensure that a state channel can progress or be finalized in the event of inactivity on behalf of a participant (e.g. the current mover).
 
-The off-chain state is submitted (in an optimized format), and once relevant checks have passed, an `outcome` is registered against the `channelId`, with a finalization time set at some delay after the transaction is processed. This delay allows the challenge to be cleared by a timely and well-formed [respond](./respond)or [checkpoint](./checkpoint) transaction. If no such transaction is forthcoming, the challenge will time out, allowing the `outcome` registered to be finalized. A finalized outcome can then be used to extract funds from the channel.
+The off-chain state is submitted (in an optimized format), and once relevant checks have passed, an `outcome` is registered against the `channelId`, with a finalization time set at some delay after the transaction is processed. This delay allows the challenge to be cleared by a timely and well-formed [respond](#respond) or [checkpoint](#checkpoint) transaction. If no such transaction is forthcoming, the challenge will time out, allowing the `outcome` registered to be finalized. A finalized outcome can then be used to extract funds from the channel.
 
 ```solidity
     function forceMove(
@@ -454,6 +458,7 @@ in order to form `challengerSig`. This signals their intent to forceMove this ch
 :::
 
 ### `respond`
+
 The respond method allows anyone with the appropriate, single off-chain state (usually the current mover) to clear an existing challenge stored against a `channelId`.
 
 The off-chain state is submitted (in an optimized format), and once relevant checks have passed, the existing challenge is cleared and the `turnNumRecord` is incremented by one.
@@ -491,13 +496,14 @@ Implementation:
 - Check `validTransition(nParticipants, isFinalAB, variablePartAB, appDefiintion)`
 - Set channelStorage:
   - `turnNumRecord += 1`
-  - Other fields set to their null values (see [Channel Storage](./channel-storage)).
+  - Other fields set to their null values (see [Channel Storage](./force-move#channel-storage)).
 
 ### `conclude`
+
 If a participant signs a state with `isFinal = true`, then in a cooperative channel-closing procedure the other players can countersign that state and broadcast it. Once a full set of `n` such signatures exists \(this set is known as a **finalization proof**\) anyone in possession may use it to finalize the channel on-chain. They would do this by calling `conclude` on the adjudicator.
 
 :::tip
-In Nitro, the existence of this possibility can be relied on \(counterfactually\) to [close a channel off-chain](../auxiliary-protocols#closing-off-chain).
+In Nitro, the existence of this possibility can be relied on \(counterfactually\) to [close a channel off-chain](../client-specification/auxiliary-protocols#closing-off-chain).
 :::
 
 The conclude methods allow anyone with sufficient off-chain state to immediately finalize an outcome for a channel without having to wait for a challenge to expire.
@@ -522,6 +528,7 @@ Effects:
 - Clears `challengerAddress`
 
 ### `checkpoint`
+
 The `checkpoint` method allows anyone with a supported off-chain state to establish a new and higher `turnNumRecord` and leave the resulting channel in the "Open" mode.
 
 The off-chain state is submitted (in an optimized format), and once relevant checks have passed, the `turnNumRecord` is updated, and a challenge, if exists is cleared.

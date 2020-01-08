@@ -3,12 +3,11 @@ id: asset-holder
 title: AssetHolder.sol
 ---
 
-
 The asset-holder contracts describe how ETH and/or tokens are held on-chain for any given channel, and how to interpret the channel outcomes in order to determine and execute any payouts that are due.
 
 In Nitro a payout is of one of two types: it is either a payout to a channel participant or it is a payout to another channel. It is this second type of payout that allows channels to fund one another in Nitro, enabling the virtual channels that are used to build state channel networks.
 
-Nitro is implemented in `AssetHolder.sol`, which conforms to the [`IAssetHolder`](../interfaces/IAssetHolder) interface and
+Nitro is implemented in `AssetHolder.sol`, which conforms to the [`IAssetHolder`](../natspec/IAssetHolder) interface and
 
 1. Interprets final outcomes supplied by adjudicator contracts
 2. Allows escrowed assets to be transferred from channels to their beneficiaries
@@ -16,16 +15,18 @@ Nitro is implemented in `AssetHolder.sol`, which conforms to the [`IAssetHolder`
 This contract is only used as a base contract, and is extended by `ETHAssetHolder.sol` and `ERC20AssetHolder.sol` which additionally:
 
 3. Stipulate how assets are deposited and paid out to external destinations.
+
 ---
 
 ## Outcomes
+
 ForceMove specifies that a state should have a default `outcome` but does not specify the format of that `outcome`, and simply treats it as an unstructured `bytes` field. In this section we look at the outcome formats needed for Nitro.
 
 Nitro supports multiple different assets (e.g. ETH and one or more ERC20s) being held in the same channel.
 
 The outcome is stored in two places: first, as a single hash in the adjudicator contract; second, in multiple hashes across multiple asset holder contracts.
 
-The adjudicator stores (the hash of) an encoded `outcome` for each finalized channel. As a part of the process triggered by [`pushOutcome`](./adjudicator/push-outcome), a decoded outcome will be stored across multiple asset holder contracts in a number of hashes. A decoded `outcome` is an array of `OutcomeItems`. These individual `OutcomeItems` contain a pointer to the asset holder contract in question, as well as some `bytes` that encode a `AssetOutcome`. The `AssetOutcomes` are each stored (abi encoded and hashed) by the asset holder contract specified. This data structure contains some more `bytes` encoding either an allocation or a guarantee, as well as the `AssetOutcomeType`: an integer which indicates which.
+The adjudicator stores (the hash of) an encoded `outcome` for each finalized channel. As a part of the process triggered by [`pushOutcome`](./nitro-adjudicator#pushoutcome), a decoded outcome will be stored across multiple asset holder contracts in a number of hashes. A decoded `outcome` is an array of `OutcomeItems`. These individual `OutcomeItems` contain a pointer to the asset holder contract in question, as well as some `bytes` that encode a `AssetOutcome`. The `AssetOutcomes` are each stored (abi encoded and hashed) by the asset holder contract specified. This data structure contains some more `bytes` encoding either an allocation or a guarantee, as well as the `AssetOutcomeType`: an integer which indicates which.
 
 In `Outcome.sol`:
 
@@ -71,12 +72,12 @@ library Outcome {
 
 ### Example
 
-| >                                                                                               | 0xETHAssetHolder                                 | 0                                                                                                     | 0xDestA | 5   | 0xDestB | 2   | 0xDAIAssetHolder | ... |
-| ----------------------------------------------------------------------------------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------- | ------- | --- | ----- | --- | ---------------- | --- |
-|                                                                                                 |                                                  | | Destination  | Amount | Destination | Amount | | | 
-|                                                                                                 |                                                  | <td colspan="2" align="center">AllocationItem</td> <td colspan="2" align="center">AllocationItem</td> | | | 
-|                                                                                                 |                                                  | <td colspan="4" align="center">Allocation</td>                                                        |         |     |
-|                                                                                                 | <td colspan="5" align="center">AssetOutcome</td> |                                                                                                       |         |
+| >                                                                                               | 0xETHAssetHolder                                 | 0                                                                                                     | 0xDestA     | 5      | 0xDestB     | 2      | 0xDAIAssetHolder | ... |
+| ----------------------------------------------------------------------------------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------- | ----------- | ------ | ----------- | ------ | ---------------- | --- |
+|                                                                                                 |                                                  |                                                                                                       | Destination | Amount | Destination | Amount |                  |     |
+|                                                                                                 |                                                  | <td colspan="2" align="center">AllocationItem</td> <td colspan="2" align="center">AllocationItem</td> |             |        |
+|                                                                                                 |                                                  | <td colspan="4" align="center">Allocation</td>                                                        |             |        |
+|                                                                                                 | <td colspan="5" align="center">AssetOutcome</td> |                                                                                                       |             |
 | <td colspan="6" align="center">OutcomeItem</td> <td colspan="6" align="center">OutcomeItem</td> |
 | <td colspan="8" align="center">Outcome</td>                                                     |
 
@@ -84,15 +85,16 @@ library Outcome {
 
 A `Destination` is a `bytes32` and either:
 
-1. A `ChannelId` (see the article on [state format](../adjudicator/state-format#channelid)), or
+1. A `ChannelId` (see the section on [channelId](./force-move#channelid)), or
 2. An `ExternalDestination`, which is an ethereum address left-padded with zeros.
-
 
 :::tip
 In JavaScript, the `ExternalDestination` corresponding to `address` may be computed as
+
 ```
 '0x' + address.padStart(64, '0')
 ```
+
 :::
 
 ---
@@ -110,7 +112,6 @@ mapping(bytes32 => bytes32) public assetOutcomeHashes; // asset outcomes stored 
 
 ```
 
-
 ## `deposit`
 
 The deposit method allows ETH or ERC20 tokens to be escrowed against a channel.
@@ -123,7 +124,7 @@ function deposit(bytes32 destination, uint256 expectedHeld, uint256 amount) publ
 
 Checks:
 
-- `destination` must be an [external destination](./outcomes#destinations).
+- `destination` must be an [external destination](#destinations).
 - The holdings for `destination` must be greater than or equal to `expectedHeld`.
 - The holdings for `destination` must be less than the sum of the amount expected to be held and the amount declared in the deposit.
 
@@ -136,7 +137,6 @@ The transaction must be accompanied by exactly `amount` wei.
 `ERC20AssetHolder.sol` includes an interface to a particular ERC20 Token with an address baked in at deploy-time.
 
 This contract must be able to successfully call `transferFrom` on that ERC20 Token contract, with the Token account being `msg.sender` with a sufficient number of tokens specified.
-
 
 ```solidity
 // ...
@@ -166,9 +166,9 @@ You may only deposit to a channel address. This is currently enforced at the con
 Depositing ahead of those with higher precedence is not safe (they can steal your funds). Always ensure that the channel is funded up to and including all players with higher precedence, before making a deposit.
 :::
 
-
 ## `setAssetOutcomeHash`
-The `setAssetOutcomeHash` method allows an outcome (more strictly, an `outcomeHash`) to be registered against a channel. 
+
+The `setAssetOutcomeHash` method allows an outcome (more strictly, an `outcomeHash`) to be registered against a channel.
 
 ```solidity
     function setAssetOutcomeHash(bytes32 channelId, bytes32 assetOutcomeHash)
@@ -176,6 +176,7 @@ The `setAssetOutcomeHash` method allows an outcome (more strictly, an `outcomeHa
         AdjudicatorOnly
         returns (bool success)
 ```
+
 It may only be called by the Nitro Adjudicator.
 
 ### Permissions
@@ -200,7 +201,6 @@ Effects:
 
 ---
 
-
 ## `transferAll`
 
 The transferAll method takes the funds escrowed against a channel, and attempts to transfer them to the beneficiaries of that channel. The transfers are attempted in priority order, so that beneficiaries of underfunded channels may not receive a transfer, depending on their priority. Surplus funds remain in escrow against the channel. Full or partial transfers to a beneficiary results in deletion or reduction of that beneficiary's allocation (respectively). A transfer to another channel results in explicit escrow of funds against that channel. A transfer to an external destination results in ETH or ERC20 tokens being transferred out of the AssetHolder contract.
@@ -211,7 +211,6 @@ function transferAll(bytes32 channelId, bytes calldata allocationBytes) external
 
 This algorithm works by counting the number of `AllocationItems` that are to be completely converted into payouts. The remaining `AllocationItems` will be stored in a new `Allocation` and the storage mapping updated. There can be at most a single item that is a partial payout -- in this case the appropriately modified `AllocationItem` is also preserved. This is called the 'overlap' case.
 
-
 ---
 
 ## `claimAll`
@@ -219,7 +218,6 @@ This algorithm works by counting the number of `AllocationItems` that are to be 
 The claimAll method takes the funds escrowed against a guarantor channel, and attempts to transfer them to the beneficiaries of the target channel specified by the guarantor. The transfers are first attempted in a nonstandard priority order given by the guarantor, so that beneficiaries of underfunded channels may not receive a transfer, depending on their nonstandard priority. Full or partial transfers to a beneficiary results in deletion or reduction of that beneficiary's allocation (respectively). Surplus funds are then subject to another attempt to transfer them to the beneficiaries of the target channel, but this time with the standard priority order given by the target channel. Any funds that still remain after this step remain in escrow against the guarantor.
 
 As with `transferAll`, a transfer to another channel results in explicit escrow of funds against that channel. A transfer to an external destination results in ETH or ERC20 tokens being transferred out of the AssetHolder contract.
-
 
 ```solidity
    function claimAll(
@@ -237,13 +235,18 @@ Finally, update the holdings, compute the new allocation and update the storage,
 
 ## `_transferAsset`
 
-This internal method executes transfers of assets external to the Nitro network. 
+This internal method executes transfers of assets external to the Nitro network.
+
 ```solidity
 function _transferAsset(address payable destination, uint256 amount) internal {}
 ```
-The behavior is slightly different depending on the asset that has been escrowed: 
+
+The behavior is slightly different depending on the asset that has been escrowed:
+
 ### `ETHAssetHolder` transfer
+
 Executes an ethereum `transfer` of `amount` to `destination`.
 
 ### `ERC20AssetHolder` transfer
+
 Calls `transfer(destination,amount)` on the specified Token contract.
