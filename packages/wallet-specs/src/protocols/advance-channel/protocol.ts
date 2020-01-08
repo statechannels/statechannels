@@ -66,6 +66,10 @@ export const mockOptions = {
 export const machine: MachineFactory<Init, any> = (store: Store, context?: Init) => {
   const guards: Guards = {
     advanced: ({ channelId, targetTurnNum }: Init, event, { state: s }) => {
+      const latestEntry = store.getEntry(channelId);
+      if (!latestEntry.hasSupportedState) {
+        return false;
+      }
       const { latestSupportedState: state } = store.getEntry(channelId);
       return !!state && state.turnNum >= targetTurnNum;
     },
