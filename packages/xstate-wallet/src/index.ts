@@ -9,6 +9,7 @@ import {IStore} from '@statechannels/wallet-protocols/lib/src/store';
 import {CreateChannelEvent} from '@statechannels/wallet-protocols/lib/src/protocols/wallet/protocol';
 import {UpdateChannelParams} from '@statechannels/client-api-schema/types/update-channel';
 import {createStateFromUpdateChannelParams} from './utils/json-rpc-utils';
+import {CloseChannelParams} from '@statechannels/client-api-schema/types/close-channel';
 
 const ethersWallet = ethers.Wallet.createRandom();
 const store: IStore = new Store({privateKeys: {[ethersWallet.address]: ethersWallet.privateKey}});
@@ -51,11 +52,27 @@ window.addEventListener('message', async event => {
             break;
           case 'PushMessage':
             await handlePushMessage(parsedMessage.payload, machine, store, ethersWallet);
+            break;
+          case 'CloseChannel':
+            await handleCloseChannel(parsedMessage.payload, machine, store, ethersWallet);
+            break;
         }
         break;
     }
   }
 });
+
+async function handleCloseChannel(
+  payload: jrs.RequestObject,
+  machine: Interpreter<Wallet.Init, any, Wallet.Events>,
+  store: IStore,
+  ethersWallet: ethers.Wallet
+) {
+  const {id} = payload;
+  const {channelId} = payload.params as CloseChannelParams;
+  const result = jrs.success(id, await getChannelInfo(channelId, store));
+  window.parent.postMessage(result, '*');
+}
 
 async function handleUpdateChannel(
   payload: jrs.RequestObject,
