@@ -3,7 +3,6 @@ import {
   chain,
   getChannelId,
   max,
-  State,
   store,
   subtract,
   ethAllocationOutcome,
@@ -15,6 +14,7 @@ import {
   isAllocationOutcome,
   Outcome,
   AllocationItem,
+  State,
 } from '@statechannels/nitro-protocol';
 
 const PROTOCOL = 'direct-funding';

@@ -4,7 +4,6 @@ import {
   Channel,
   forwardChannelUpdated,
   MachineFactory,
-  State,
   Store,
   success,
   ethAllocationOutcome,
@@ -12,6 +11,7 @@ import {
 import { ChannelStoreEntry } from '../../ChannelStoreEntry';
 import { JsonRpcCreateChannelParams } from '../../json-rpc';
 import { passChannelId } from '../join-channel/protocol';
+import { State } from '@statechannels/nitro-protocol';
 
 const PROTOCOL = 'create-channel';
 
@@ -115,7 +115,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => 
       turnNum: 0,
       outcome: ethAllocationOutcome(allocations),
       channel,
-      challengeDuration: 'TODO', // TODO
+      challengeDuration: 1, // TODO
     };
 
     const entry = new ChannelStoreEntry({

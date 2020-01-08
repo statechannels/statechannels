@@ -1,8 +1,8 @@
-import { add, getChannelId, gt, SignedState, State } from '.';
+import { add, getChannelId, gt, SignedState } from '.';
 import { ChannelStoreEntry, IChannelStoreEntry } from './ChannelStoreEntry';
 import { messageService } from './messaging';
 import { AddressableMessage, FundingStrategyProposed } from './wire-protocol';
-
+import { State } from '@statechannels/nitro-protocol';
 export interface IStore {
   getEntry: (channelId: string) => ChannelStoreEntry;
   getIndex: (channelId: string) => 0 | 1;

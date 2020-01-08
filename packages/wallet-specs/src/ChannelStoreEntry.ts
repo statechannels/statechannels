@@ -1,5 +1,6 @@
-import { Channel, getChannelId, SignedState, State } from '.';
+import { Channel, getChannelId, SignedState } from '.';
 import { Participant } from './store';
+import { State } from '@statechannels/nitro-protocol';
 
 interface DirectFunding {
   type: 'Direct';

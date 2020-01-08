@@ -1,5 +1,5 @@
 import { EventObject, SendAction, StateMachine, forwardTo } from 'xstate';
-import { Outcome, Allocation } from '@statechannels/nitro-protocol';
+import { Outcome, Allocation, State } from '@statechannels/nitro-protocol';
 import { ChannelUpdated, IStore, Store } from './store';
 import {
   AllocationAssetOutcome,
@@ -42,13 +42,6 @@ interface VariablePart {
   outcome: Outcome;
   isFinal: boolean;
 }
-
-export type State = VariablePart & {
-  appData?: AppData;
-  appDefinition?: string;
-  channel: Channel;
-  challengeDuration: string;
-};
 
 export function nextState(state: State, opts?: Partial<VariablePart>): State {
   return {
