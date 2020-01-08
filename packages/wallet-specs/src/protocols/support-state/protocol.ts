@@ -1,5 +1,6 @@
 import { Machine } from 'xstate';
-import { MachineFactory, Outcome, outcomesEqual, State } from '../..';
+import { MachineFactory, outcomesEqual, State } from '../..';
+import { Outcome } from '@statechannels/nitro-protocol';
 
 const PROTOCOL = 'support-state';
 

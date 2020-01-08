@@ -1,7 +1,8 @@
-import { store } from '../..';
+import { store, ethAllocationOutcome } from '../..';
 import { isIndirectFunding } from '../../ChannelStoreEntry';
-import { checkThat, isAllocation } from '../../store';
+import { checkThat } from '../../store';
 import * as LedgerUpdate from '../ledger-update/protocol';
+import { isAllocationOutcome } from '@statechannels/nitro-protocol';
 
 const PROTOCOL = 'ledger-defunding';
 const success = { type: 'final' };
@@ -14,12 +15,12 @@ function ledgerUpdateArgs({ targetChannelId }: Init): LedgerUpdate.Init {
   const { ledgerId } = checkThat(store.getEntry(targetChannelId).funding, isIndirectFunding);
   const { outcome } = store.getEntry(ledgerId).latestSupportedState;
   const { outcome: concludedOutcome } = store.getEntry(targetChannelId).latestSupportedState;
-  const targetOutcome = checkThat(outcome, isAllocation)
-    .filter(item => item.destination !== targetChannelId)
-    .concat(checkThat(concludedOutcome, isAllocation));
+  const targetAllocation = checkThat(outcome[0], isAllocationOutcome)
+    .allocation.filter(item => item.destination !== targetChannelId)
+    .concat(checkThat(concludedOutcome[0], isAllocationOutcome).allocation);
   return {
     channelId: ledgerId,
-    targetOutcome,
+    targetOutcome: ethAllocationOutcome(targetAllocation),
   };
 }
 const defundTarget = {

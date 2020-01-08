@@ -1,4 +1,4 @@
-import { add, Allocation, getChannelId, gt, Outcome, SignedState, State } from '.';
+import { add, getChannelId, gt, SignedState, State } from '.';
 import { ChannelStoreEntry, IChannelStoreEntry } from './ChannelStoreEntry';
 import { messageService } from './messaging';
 import { AddressableMessage, FundingStrategyProposed } from './wire-protocol';
@@ -289,14 +289,6 @@ export interface Deposit {
 }
 
 export type StoreEvent = ChannelUpdated | Deposit;
-
-export function isAllocation(outcome: Outcome): outcome is Allocation {
-  // TODO: I think this might need to be isEthAllocation (sometimes?)
-  if ('target' in outcome) {
-    return false;
-  }
-  return true;
-}
 
 const throwError = (fn: (t1: any) => boolean, t) => {
   throw new Error(`not valid, ${fn.name} failed on ${t}`);

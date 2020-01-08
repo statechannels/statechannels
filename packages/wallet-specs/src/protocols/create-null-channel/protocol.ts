@@ -1,8 +1,9 @@
 import { assign, Machine } from 'xstate';
 import { SupportState } from '..';
-import { Channel, FINAL, getChannelId, MachineFactory, Outcome, SignedState } from '../../';
+import { Channel, FINAL, getChannelId, MachineFactory, SignedState } from '../../';
 import { ChannelStoreEntry } from '../../ChannelStoreEntry';
 import { Participant } from '../../store';
+import { Outcome } from '@statechannels/nitro-protocol';
 
 const PROTOCOL = 'create-null-channel';
 /*

@@ -1,29 +1,41 @@
-import { isUndefined } from 'util';
-import { EventObject, SendAction, StateMachine } from 'xstate';
-import { forwardTo } from 'xstate/lib/actions';
+import { EventObject, SendAction, StateMachine, forwardTo } from 'xstate';
+import { Outcome, Allocation } from '@statechannels/nitro-protocol';
 import { ChannelUpdated, IStore, Store } from './store';
+import {
+  AllocationAssetOutcome,
+  Guarantee,
+  GuaranteeAssetOutcome,
+} from '@statechannels/nitro-protocol/lib/src/contract/outcome';
 const store = new Store();
 export { Store, store };
 
 export type AppData = string;
 export type Signature = string;
 export type Recipient = any;
-export interface AllocationItem {
-  destination: string;
-  amount: string;
-}
-export type Allocation = AllocationItem[];
 export interface Balance {
   address: string;
   wei: string;
 }
-export interface Guarantee {
-  target: string;
-  guarantee: string[];
-}
-export type Outcome = Allocation | Guarantee;
 export type Address = string;
 export type PrivateKey = string;
+
+export function ethAllocationOutcome(allocation: Allocation): AllocationAssetOutcome[] {
+  return [
+    {
+      assetHolderAddress: '0x',
+      allocation,
+    },
+  ];
+}
+
+export function ethGuaranteeOutcome(guarantee: Guarantee): GuaranteeAssetOutcome[] {
+  return [
+    {
+      assetHolderAddress: '0x',
+      guarantee,
+    },
+  ];
+}
 
 interface VariablePart {
   turnNum: number;

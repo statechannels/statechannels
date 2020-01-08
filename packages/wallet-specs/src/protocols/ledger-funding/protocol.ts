@@ -1,6 +1,8 @@
 import { assign, DoneInvokeEvent, Machine } from 'xstate';
 import { CreateNullChannel, DirectFunding, SupportState } from '..';
-import { Allocation, Channel, ensureExists, MachineFactory, Store, success } from '../..';
+import { Channel, ensureExists, MachineFactory, Store, success, ethAllocationOutcome } from '../..';
+import { Outcome, Allocation, isAllocationOutcome } from '@statechannels/nitro-protocol';
+import { checkThat } from '../../store';
 
 const PROTOCOL = 'ledger-funding';
 
@@ -87,7 +89,7 @@ const fundTarget = {
     ledgerUpdate: {
       invoke: {
         src: 'supportState',
-        data: (ctx: LedgerExists, { data }: DoneInvokeEvent<{ outcome: Allocation }>) => ({
+        data: (ctx: LedgerExists, { data }: DoneInvokeEvent<{ outcome: Outcome }>) => ({
           channelId: ctx.ledgerChannelId,
           outcome: data.outcome,
         }),
@@ -129,9 +131,14 @@ export const guards = {
 
 export const machine: MachineFactory<Init, any> = (store: Store, context: Init) => {
   function directFundingArgs(ctx: LedgerExists): DirectFunding.Init {
+    const minimalAllocation = checkThat(
+      store.getEntry(ctx.targetChannelId).latestState.outcome[0],
+      isAllocationOutcome
+    ).allocation;
+
     return {
       channelId: ctx.ledgerChannelId,
-      minimalOutcome: store.getEntry(ctx.targetChannelId).latestState.outcome,
+      minimalAllocation,
     };
   }
 
@@ -159,7 +166,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
     // const { latestState: ledgerState } = store.getEntry(ledgerChannelId);
     // const { latestState: targetChannelState } = store.getEntry(targetChannelId);
 
-    const outcome: Allocation = [
+    const allocation: Allocation = [
       {
         destination: targetChannelId,
         amount: 'TODO', // TODO
@@ -167,7 +174,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
     ];
     return {
       channelId: ledgerChannelId,
-      outcome,
+      outcome: ethAllocationOutcome(allocation),
     };
   }
 

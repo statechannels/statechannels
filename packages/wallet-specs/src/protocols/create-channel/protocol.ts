@@ -1,14 +1,14 @@
-import {
-  AnyEventObject,
-  assign,
-  DoneInvokeEvent,
-  InvokeCreator,
-  Machine,
-  MachineConfig,
-  sendParent,
-} from 'xstate';
+import { assign, DoneInvokeEvent, InvokeCreator, Machine, MachineConfig, sendParent } from 'xstate';
 import { AdvanceChannel, Funding } from '..';
-import { Channel, forwardChannelUpdated, MachineFactory, State, Store, success } from '../..';
+import {
+  Channel,
+  forwardChannelUpdated,
+  MachineFactory,
+  State,
+  Store,
+  success,
+  ethAllocationOutcome,
+} from '../..';
 import { ChannelStoreEntry } from '../../ChannelStoreEntry';
 import { JsonRpcCreateChannelParams } from '../../json-rpc';
 import { passChannelId } from '../join-channel/protocol';
@@ -107,13 +107,13 @@ export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => 
       chainId: 'mainnet?',
     };
 
-    const { allocations: outcome, appData, appDefinition } = ctx;
+    const { allocations, appData, appDefinition } = ctx;
     const firstState: State = {
       appData,
       appDefinition,
       isFinal: false,
       turnNum: 0,
-      outcome,
+      outcome: ethAllocationOutcome(allocations),
       channel,
       challengeDuration: 'TODO', // TODO
     };
