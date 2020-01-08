@@ -1,7 +1,2 @@
 packages/**/node_modules
 node_modules
-**/build
-**/dist
-**/lib
-.etherlime-store
-.eslintcache
