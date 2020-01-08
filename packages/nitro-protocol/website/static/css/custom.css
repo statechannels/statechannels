@@ -15,7 +15,9 @@
 @media only screen and (min-width: 1500px) {
 }
 
-h,
+h1,
+h2,
+small,
 a,
 p {
   font-family: Chivo;
