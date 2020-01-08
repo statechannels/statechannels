@@ -2,7 +2,7 @@ import React from "react";
 import {PureComponent} from "react";
 import {connect} from "react-redux";
 
-import {FUNDING_STRATEGY} from "../../../../constants";
+import {FUNDING_STRATEGY, FUNDING_SOURCE} from "../../../../constants";
 import {unreachable} from "../../../../utils/reducer-utils";
 import {TwoPartyPlayerIndex} from "../../../types";
 import {ActionDispatcher} from "../../../utils";
@@ -22,6 +22,7 @@ class FundingStrategyNegotiationContainer extends PureComponent<Props> {
   render() {
     const {state, strategyApproved, cancelled} = this.props;
     const {processId} = state;
+    const fundingSource = FUNDING_SOURCE[FUNDING_STRATEGY];
 
     switch (state.type) {
       case "FundingStrategyNegotiation.PlayerB.WaitForStrategyProposal":
@@ -35,7 +36,7 @@ class FundingStrategyNegotiationContainer extends PureComponent<Props> {
         return (
           <ApproveX
             title="Funding channel"
-            description="Do you want to fund this state channel with a re-usable ledger channel?"
+            description={"Do you want to fund this state channel with " + fundingSource + "?"}
             yesMessage="Fund Channel"
             noMessage="Cancel"
             approvalAction={() => strategyApproved({processId, strategy: FUNDING_STRATEGY})}
