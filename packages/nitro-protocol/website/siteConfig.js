@@ -54,8 +54,8 @@ const siteConfig = {
 
   /* Colors for website */
   colors: {
-    primaryColor: '#BA2B2B',
-    secondaryColor: '#3a141f',
+    primaryColor: '#2728e2',
+    secondaryColor: '#46A5D0',
   },
 
   markdownPlugins: [
@@ -64,18 +64,10 @@ const siteConfig = {
   ],
 
   /* Custom fonts for website */
-  /*
+
   fonts: {
-    myFont: [
-      "Times New Roman",
-      "Serif"
-    ],
-    myOtherFont: [
-      "-apple-system",
-      "system-ui"
-    ]
+    myFont: ['Chivo', 'sans-serif'],
   },
-  */
 
   // This copyright info is used in /core/Footer.js and blog RSS/Atom feeds.
   copyright: `Copyright © ${new Date().getFullYear()}`,
@@ -94,6 +86,8 @@ const siteConfig = {
     'https://buttons.github.io/buttons.js',
     'https://unpkg.com/mermaid@8.4.0/dist/mermaid.min.js',
   ],
+
+  stylesheets: ['https://fonts.googleapis.com/css?family=Chivo&display=swap'],
 
   // On page navigation for the current documentation page.
   onPageNav: 'separate',
