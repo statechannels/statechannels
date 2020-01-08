@@ -2,9 +2,11 @@ import {Account} from './types';
 
 export const ETHERLIME_ACCOUNTS: Account[] = [
   {
+    // This is used by Mike and Liam both on their local environments
     privateKey: '0x7ab741b57e8d94dd7e1a29055646bafde7010f38a900f55bbd7647880faa6ee8'
   },
   {
+    // This is used by CircleCI
     privateKey: '0x2030b463177db2da82908ef90fa55ddfcef56e8183caf60db464bc398e736e6f'
   },
   {
@@ -29,6 +31,7 @@ export const ETHERLIME_ACCOUNTS: Account[] = [
     privateKey: '0x6ca40ba4cca775643398385022264c0c414da1abd21d08d9e7136796a520a543'
   },
   {
+    // This is used by the Staging hub on Heroku
     privateKey: '0xfac0bc9325ad342033afe956e83f0bf8f1e863c1c3e956bc75d66961fe4cd186'
   }
 ];
