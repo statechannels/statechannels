@@ -56,3 +56,4 @@ junit.xml
 ganache-deployments.json
 ganache-deployments*.json
 .ganache-deployment-cache/
+*.code-workspace
