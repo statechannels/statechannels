@@ -71,7 +71,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context?: Init)
         return false;
       }
       const { latestSupportedState: state } = store.getEntry(channelId);
-      return !!state && state.turnNum >= targetTurnNum;
+      return state.turnNum >= targetTurnNum;
     },
   };
 
