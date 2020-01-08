@@ -31,7 +31,7 @@ export const ETHERLIME_ACCOUNTS: Account[] = [
     privateKey: '0x6ca40ba4cca775643398385022264c0c414da1abd21d08d9e7136796a520a543'
   },
   {
-    // This is used by the Staging hub on Heroku
+    // This is used by the hub on Heroku
     privateKey: '0xfac0bc9325ad342033afe956e83f0bf8f1e863c1c3e956bc75d66961fe4cd186'
   }
 ];
