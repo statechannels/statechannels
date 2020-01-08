@@ -1,8 +1,15 @@
 import { assign, DoneInvokeEvent, Machine } from 'xstate';
 import { CreateNullChannel, DirectFunding, SupportState } from '..';
-import { Channel, ensureExists, MachineFactory, Store, success, ethAllocationOutcome } from '../..';
+import {
+  Channel,
+  ensureExists,
+  MachineFactory,
+  Store,
+  success,
+  ethAllocationOutcome,
+  checkThat,
+} from '../..';
 import { Outcome, Allocation, isAllocationOutcome } from '@statechannels/nitro-protocol';
-import { checkThat } from '../../store';
 
 const PROTOCOL = 'ledger-funding';
 

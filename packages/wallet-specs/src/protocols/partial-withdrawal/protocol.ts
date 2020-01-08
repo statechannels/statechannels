@@ -1,5 +1,4 @@
-import { add, Channel, store, subtract, ethAllocationOutcome } from '../..';
-import { checkThat } from '../../store';
+import { add, Channel, store, subtract, ethAllocationOutcome, checkThat } from '../..';
 import * as ConcludeChannel from '../conclude-channel/protocol';
 import * as CreateNullChannel from '../create-null-channel/protocol';
 import * as LedgerUpdate from '../ledger-update/protocol';

@@ -1,7 +1,6 @@
 import { assign } from 'xstate';
-import { store, Without, ethAllocationOutcome } from '../../';
+import { store, Without, ethAllocationOutcome, checkThat } from '../../';
 import { isIndirectFunding, isVirtualFunding } from '../../ChannelStoreEntry';
-import { checkThat } from '../../store';
 
 import * as LedgerUpdate from '../ledger-update/protocol';
 import { isAllocationOutcome, Allocation } from '@statechannels/nitro-protocol';

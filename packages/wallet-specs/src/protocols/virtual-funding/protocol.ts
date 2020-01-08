@@ -1,6 +1,5 @@
 import { assign } from 'xstate';
-import { Balance, store } from '../..';
-import { checkThat } from '../../store';
+import { Balance, checkThat, store } from '../..';
 import { HubChoice } from '../../wire-protocol';
 import { Init as VirtualFundAsLeafArgs } from '../virtual-fund-as-leaf/protocol';
 import { isAllocationOutcome } from '@statechannels/nitro-protocol';

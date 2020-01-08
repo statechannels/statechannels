@@ -7,8 +7,8 @@ import {
   store,
   subtract,
   ethAllocationOutcome,
+  checkThat,
 } from '../../';
-import { checkThat } from '../../store';
 import * as LedgerUpdate from '../ledger-update/protocol';
 import {
   Allocation,

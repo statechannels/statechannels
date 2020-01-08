@@ -1,6 +1,5 @@
-import { store, ethAllocationOutcome } from '../..';
+import { store, ethAllocationOutcome, checkThat } from '../..';
 import { isIndirectFunding } from '../../ChannelStoreEntry';
-import { checkThat } from '../../store';
 import * as LedgerUpdate from '../ledger-update/protocol';
 import { isAllocationOutcome } from '@statechannels/nitro-protocol';
 
