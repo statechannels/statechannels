@@ -88,7 +88,7 @@ export function machine(store: IStore, context: Init) {
         throw new Error('Process exists');
       }
 
-      const walletProcess = {
+      const walletProcess: Process = {
         id: processId,
         ref: spawn(CreateChannel.machine(store, init).withContext(init), processId),
       };
