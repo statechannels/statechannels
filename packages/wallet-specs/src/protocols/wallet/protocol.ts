@@ -3,6 +3,7 @@ import { CreateChannel, JoinChannel } from '..';
 import { getChannelId, pretty, unreachable } from '../..';
 import { ChannelUpdated, IStore } from '../../store';
 import { FundingStrategyProposed, OpenChannel, SendStates } from '../../wire-protocol';
+import { JsonRpcCreateChannelParams } from '../../json-rpc';
 
 const PROTOCOL = 'wallet';
 export type Events = OpenChannelEvent | CreateChannelEvent | SendStates | FundingStrategyProposed;
@@ -90,7 +91,10 @@ export function machine(store: IStore, context: Init) {
 
       const walletProcess: Process = {
         id: processId,
-        ref: spawn(CreateChannel.machine(store, init).withContext(init), processId),
+        ref: spawn<JsonRpcCreateChannelParams, any>(
+          CreateChannel.machine(store, init).withContext(init),
+          processId
+        ),
       };
       if (process.env.ADD_LOGS) {
         addLogs(walletProcess, ctx);
