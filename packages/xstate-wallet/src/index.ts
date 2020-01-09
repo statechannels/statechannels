@@ -7,6 +7,7 @@ import {interpret} from 'xstate';
 import ReactDOM from 'react-dom';
 import WalletUi from './ui/Wallet';
 import React from 'react';
+import {ProcessManagement} from './process-management';
 
 const ourWallet = ethers.Wallet.createRandom();
 const store: IStore = new Store({privateKeys: {[ourWallet.address]: ourWallet.privateKey}});
@@ -18,8 +19,18 @@ const walletMachine = interpret<Wallet.Init, any, Wallet.Events>(
   .onEvent(console.log)
   .start();
 
+const processManagement = new ProcessManagement(walletMachine);
+
 window.addEventListener('message', async event => {
-  await handleMessage(event, walletMachine, store, ourWallet);
+  await handleMessage(event, walletMachine, store, ourWallet, processManagement);
 });
 
-ReactDOM.render(React.createElement(WalletUi), document.getElementById('root'));
+walletMachine.onChange(() => {
+  ReactDOM.render(
+    React.createElement(WalletUi, {
+      currentProcess: processManagement.currentProcess,
+      currentState: processManagement.currentProcessMachine?.state
+    }),
+    document.getElementById('root')
+  );
+});

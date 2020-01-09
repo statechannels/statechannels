@@ -9,12 +9,14 @@ import {CreateChannelEvent} from '@statechannels/wallet-protocols/lib/src/protoc
 import {UpdateChannelParams} from '@statechannels/client-api-schema/types/update-channel';
 import {createStateFromUpdateChannelParams} from './utils/json-rpc-utils';
 import {CloseChannelParams} from '@statechannels/client-api-schema/types/close-channel';
+import {ProcessManagement} from './process-management';
 
 export async function handleMessage(
   event,
   walletMachine: Interpreter<Wallet.Init, any, Wallet.Events>,
   store: IStore,
-  ourWallet: ethers.Wallet
+  ourWallet: ethers.Wallet,
+  processManagement: ProcessManagement
 ) {
   if (event.data && event.data.jsonrpc && event.data.jsonrpc === '2.0') {
     const jsonRpcMessage = event.data;
@@ -39,6 +41,9 @@ export async function handleMessage(
             window.parent.postMessage(jrs.success(id, address), '*');
             break;
           case 'CreateChannel':
+            processManagement.currentProcess = 'create-channel';
+
+            sendDisplayMessage('Show');
             await handleCreateChannelMessage(
               parsedMessage.payload,
               walletMachine,
@@ -156,4 +161,10 @@ export function dispatchChannelUpdatedMessage(channelId: string, store: IStore) 
       window.parent.postMessage(notification, '*');
     }
   });
+}
+
+export function sendDisplayMessage(displayMessage: 'Show' | 'Hide') {
+  const showWallet = displayMessage === 'Show';
+  const message = jrs.notification('UIUpdate', {showWallet});
+  window.parent.postMessage(message, '*');
 }
