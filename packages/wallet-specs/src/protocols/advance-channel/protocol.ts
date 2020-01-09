@@ -70,7 +70,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context?: Init)
       if (!latestEntry.hasSupportedState) {
         return false;
       }
-      return state.turnNum >= targetTurnNum;
+      return latestEntry.latestSupportedState.turnNum >= targetTurnNum;
     },
   };
 
