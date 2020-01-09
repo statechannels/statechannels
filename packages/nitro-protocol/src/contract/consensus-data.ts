@@ -1,4 +1,4 @@
-import {defaultAbiCoder} from 'ethers/utils';
+import {utils} from 'ethers';
 import {decodeOutcome, encodeOutcome, Outcome} from './outcome';
 
 export interface ConsensusData {
@@ -8,14 +8,14 @@ export interface ConsensusData {
 
 export function encodeConsensusData(consensusData: ConsensusData): string {
   const proposedOutcome = encodeOutcome(consensusData.proposedOutcome);
-  return defaultAbiCoder.encode(
+  return utils.defaultAbiCoder.encode(
     ['tuple(uint32 furtherVotesRequired, bytes proposedOutcome)'],
     [[consensusData.furtherVotesRequired, proposedOutcome]]
   );
 }
 
 export function decodeConsensusData(appData: string): ConsensusData {
-  const {furtherVotesRequired, proposedOutcome} = defaultAbiCoder.decode(
+  const {furtherVotesRequired, proposedOutcome} = utils.defaultAbiCoder.decode(
     ['tuple(uint32 furtherVotesRequired, bytes proposedOutcome)'],
     appData
   )[0];

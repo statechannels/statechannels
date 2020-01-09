@@ -1,6 +1,6 @@
 // @ts-ignore
 import {TransactionRequest} from 'ethers/providers';
-import {Interface} from 'ethers/utils';
+import {utils} from 'ethers';
 import EthAssetHolderArtifact from '../../../build/contracts/ETHAssetHolder.json';
 import {Allocation, Guarantee, Outcome} from '../outcome';
 import * as assetHolderTransactionCreator from './asset-holder';
@@ -10,7 +10,7 @@ import * as assetHolderTransactionCreator from './asset-holder';
 // If we don't set a gas limit some transactions will fail
 const GAS_LIMIT = 3000000;
 
-const EthAssetHolderContractInterface = new Interface(EthAssetHolderArtifact.abi);
+const EthAssetHolderContractInterface = new utils.Interface(EthAssetHolderArtifact.abi);
 
 export function createTransferAllTransaction(
   channelId: string,

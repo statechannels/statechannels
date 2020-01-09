@@ -1,51 +1,23 @@
-import { add, Allocation, getChannelId, gt, Outcome, SignedState, State } from '.';
-import { ChannelStoreEntry, IChannelStoreEntry } from './ChannelStoreEntry';
-import { messageService } from './messaging';
-import { AddressableMessage, FundingStrategyProposed } from './wire-protocol';
+import {
+  IStore,
+  ChannelStore,
+  Constructor,
+  merge,
+  Participant
+} from '@statechannels/wallet-protocols/lib/src/store';
+import {
+  ChannelStoreEntry,
+  IChannelStoreEntry
+} from '@statechannels/wallet-protocols/lib/src/ChannelStoreEntry';
+import {State, SignedState, getChannelId, add, gt} from '@statechannels/wallet-protocols';
+import {
+  AddressableMessage,
+  FundingStrategyProposed
+} from '@statechannels/wallet-protocols/lib/src/wire-protocol';
 
-export interface IStore {
-  getEntry: (channelId: string) => ChannelStoreEntry;
-  getIndex: (channelId: string) => 0 | 1;
+import jrs from 'jsonrpc-lite';
+import {dispatchChannelUpdatedMessage} from '../messaging';
 
-  // The channel store should garbage collect stale states on CHANNEL_UPDATED events.
-  // If a greater state becomes supported on such an event, it should replace the latest
-  // supported state, and remove any lesser, unsupported states.
-  getUnsupportedStates: (channelId: string) => SignedState[];
-
-  findLedgerChannelId: (participants: string[]) => string | undefined;
-  signedByMe: (state: State) => boolean;
-  getPrivateKey: (participantIds: string[]) => string;
-
-  /*
-  Store modifiers
-  */
-  initializeChannel: (entry: ChannelStoreEntry) => void;
-  sendState: (state: State) => void;
-  sendOpenChannel: (state: State) => void;
-  receiveStates: (signedStates: SignedState[]) => void;
-
-  // TODO: set funding
-  // setFunding(channelId: string, funding: Funding): void;
-
-  getNextNonce(participants: string[]): string;
-  useNonce(participants: string[], nonce): void;
-  nonceOk(participants: string[], nonce: string): boolean;
-}
-
-export interface Participant {
-  participantId: string;
-  signingAddress: string;
-  destination: string;
-}
-export interface ChannelStore {
-  [channelId: string]: IChannelStoreEntry;
-}
-
-export type Constructor = Partial<{
-  store: ChannelStore;
-  privateKeys: Record<string, string>;
-  nonces: Record<string, string>;
-}>;
 export class Store implements IStore {
   public static equals(left: any, right: any) {
     return JSON.stringify(left) === JSON.stringify(right);
@@ -56,7 +28,7 @@ export class Store implements IStore {
   private _nonces: Record<string, string> = {};
 
   constructor(args?: Constructor) {
-    const { store, privateKeys, nonces } = args || {};
+    const {store, privateKeys} = args || {};
     this._store = store || {};
     this._privateKeys = privateKeys || {};
   }
@@ -84,7 +56,7 @@ export class Store implements IStore {
 
   public getIndex(channelId: string): 0 | 1 {
     const entry = this.getEntry(channelId);
-    const { participants } = entry.states[0].state.channel;
+    const {participants} = entry.states[0].state.channel;
     if (participants.length !== 2) {
       throw new Error('Assumes two participants');
     }
@@ -106,7 +78,6 @@ export class Store implements IStore {
     }
     return undefined;
   }
-
   public participantIds(channelId: string): string[] {
     return this.getEntry(channelId).participants.map(p => p.participantId);
   }
@@ -116,7 +87,7 @@ export class Store implements IStore {
   }
 
   public signedByMe(state: State) {
-    const { states } = this.getEntry(getChannelId(state.channel));
+    const {states} = this.getEntry(getChannelId(state.channel));
     const signedState = states.find((s: SignedState) => Store.equals(state, s.state));
 
     return !!signedState && !!signedState.signatures && signedState.signatures.includes('first');
@@ -128,7 +99,7 @@ export class Store implements IStore {
       throw new Error(`Channel ${JSON.stringify(entry.channel)} already initialized`);
     }
 
-    const { participants, channelNonce } = entry.channel;
+    const {participants, channelNonce} = entry.channel;
     if (this.nonceOk(participants, channelNonce)) {
       this._store[entry.channelId] = entry.args;
       this.useNonce(participants, channelNonce);
@@ -150,7 +121,7 @@ export class Store implements IStore {
     const message: AddressableMessage = {
       type: 'SendStates',
       signedStates,
-      to: 'BLANK',
+      to: 'BLANK'
     };
     this.sendMessage(message, this.recipients(state));
   }
@@ -168,14 +139,14 @@ export class Store implements IStore {
     const message: AddressableMessage = {
       type: 'OPEN_CHANNEL',
       signedState,
-      to: 'BLANK',
+      to: 'BLANK'
     };
 
     this.sendMessage(message, newEntry.recipients);
   }
 
   public sendStrategyChoice(message: FundingStrategyProposed) {
-    const { recipients } = this.getEntry(message.targetChannelId);
+    const {recipients} = this.getEntry(message.targetChannelId);
     this.sendMessage(message, recipients);
   }
 
@@ -185,19 +156,21 @@ export class Store implements IStore {
   }
 
   private sendMessage(message: any, recipients: string[]) {
-    recipients.forEach(to => messageService.sendMessage({ ...message, to }));
+    recipients.forEach(recipient => {
+      const notification = jrs.notification('MessageQueued', {
+        recipient,
+        sender: 'TODO',
+        data: message
+      });
+      window.parent.postMessage(notification, '*');
+    });
   }
+  public receiveStates(signedStates: SignedState[]) {
+    const {channel} = signedStates[0].state;
+    const channelId = getChannelId(channel);
 
-  public receiveStates(signedStates: SignedState[]): void {
-    try {
-      const { channel } = signedStates[0].state;
-      const channelId = getChannelId(channel);
-
-      // TODO: validate transition
-      this.updateOrCreateEntry(channelId, signedStates);
-    } catch (e) {
-      throw e;
-    }
+    // TODO: validate transition
+    this.updateOrCreateEntry(channelId, signedStates);
   }
 
   // Nonce management
@@ -227,7 +200,7 @@ export class Store implements IStore {
   private signState(state: State): SignedState {
     return {
       state,
-      signatures: [this.getEntry(getChannelId(state.channel)).privateKey],
+      signatures: [this.getEntry(getChannelId(state.channel)).privateKey]
     };
   }
 
@@ -236,75 +209,26 @@ export class Store implements IStore {
     const entry = this.maybeGetEntry(channelId);
     if (entry) {
       states = merge(states, entry.states);
-      this._store[channelId] = { ...this._store[channelId], states };
+      this._store[channelId] = {...this._store[channelId], states};
     } else {
-      const { participants, channelNonce } = states[0].state.channel;
+      const {participants, channelNonce} = states[0].state.channel;
       this.useNonce(participants, channelNonce);
 
-      const { channel } = states[0].state;
+      const {channel} = states[0].state;
       const entryParticipants: Participant[] = participants.map(p => ({
         destination: p,
         signingAddress: p,
-        participantId: p,
+        participantId: p
       }));
       const privateKey = this.getPrivateKey(participants);
       this._store[channelId] = {
         states,
         privateKey,
         participants: entryParticipants,
-        channel,
+        channel
       };
     }
-
+    dispatchChannelUpdatedMessage(channelId, this);
     return new ChannelStoreEntry(this._store[channelId]);
   }
-}
-
-export function merge(left: SignedState[], right: SignedState[]): SignedState[] {
-  // TODO this is horribly inefficient
-  right.map(rightState => {
-    const idx = left.findIndex(s => Store.equals(s.state, rightState.state));
-    const leftState = left[idx];
-    if (leftState) {
-      const signatures = [...new Set(leftState.signatures.concat(rightState.signatures))];
-      left[idx] = { ...leftState, signatures };
-    } else {
-      left.push(rightState);
-    }
-  });
-
-  return left;
-}
-
-// The store would send this action whenever the channel is updated
-export interface ChannelUpdated {
-  type: 'CHANNEL_UPDATED';
-  channelId: string;
-}
-
-export interface Deposit {
-  type: 'DEPOSIT';
-  channelId: string;
-  currentAmount: number;
-}
-
-export type StoreEvent = ChannelUpdated | Deposit;
-
-export function isAllocation(outcome: Outcome): outcome is Allocation {
-  // TODO: I think this might need to be isEthAllocation (sometimes?)
-  if ('target' in outcome) {
-    return false;
-  }
-  return true;
-}
-
-const throwError = (fn: (t1: any) => boolean, t) => {
-  throw new Error(`not valid, ${fn.name} failed on ${t}`);
-};
-type TypeGuard<T> = (t1: any) => t1 is T;
-export function checkThat<T>(t, isTypeT: TypeGuard<T>): T {
-  if (!isTypeT(t)) {
-    throwError(isTypeT, t);
-  }
-  return t;
 }

@@ -1,7 +1,7 @@
 import { assign, AssignAction, Interpreter, Machine, spawn } from 'xstate';
 import { CreateChannel, JoinChannel } from '..';
-import { getChannelId, pretty, Store, unreachable } from '../..';
-import { ChannelUpdated } from '../../store';
+import { getChannelId, pretty, unreachable } from '../..';
+import { ChannelUpdated, IStore } from '../../store';
 import { FundingStrategyProposed, OpenChannel, SendStates } from '../../wire-protocol';
 
 const PROTOCOL = 'wallet';
@@ -80,7 +80,7 @@ function addLogs(walletProcess: Process, ctx): Process {
   return walletProcess;
 }
 
-export function machine(store: Store, context: Init) {
+export function machine(store: IStore, context: Init) {
   const spawnCreateChannel = assign(
     (ctx: Init, { type, ...init }: CreateChannelEvent): Init => {
       const processId = `create-channel`;
