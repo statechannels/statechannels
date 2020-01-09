@@ -43,7 +43,7 @@ It is important to remember that we are building the infrastructure for _general
 
 ![Gas Savings](./gas-savings.png)
 
-As you can see, we have achieved a more than 4x improvement in the Happy Path and the Challenge Path that users may tread. As a bonus, the deployment costs are also significantly reduced due to some refactoring and tweaks performed in tandem with the optimization strategy.
+As you can see, we have achieved a more than 4x improvement in the Happy Path and the Challenge Path that users may tread. As a bonus, the deployment costs are also significantly reduced (~6.5M down to ~4.9M) due to some refactoring and tweaks performed in tandem with the optimization strategy.
 
 Furthermore, we have also upgraded our contracts to allow for a channel to be backed by a combination of ETH and any number of ERC20 tokens. The opportunities that this opens up will be discussed in a future blog post.
 

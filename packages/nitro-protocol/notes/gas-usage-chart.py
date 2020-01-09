@@ -49,10 +49,10 @@ optimized["happyPath"] = optimized["deposit"] + \
 optimized["challengePath"] = optimized["forceMove"] + \
     optimized["respond"]
 
-labels = ['Deployment', 'Happy Path', 'Challenge Path']
-legacy = [legacy["deployment"], legacy["happyPath"], legacy["challengePath"]]
-optimized = [optimized["deployment"],
-             optimized["happyPath"], optimized["challengePath"]]
+labels = ['Happy Path', 'Challenge Path']
+legacy = [legacy["happyPath"], legacy["challengePath"]]
+optimized = [
+    optimized["happyPath"], optimized["challengePath"]]
 
 x = np.arange(len(labels))  # the label locations
 width = 0.35  # the width of the bars
