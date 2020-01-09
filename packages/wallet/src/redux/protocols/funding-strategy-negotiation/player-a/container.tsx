@@ -11,6 +11,7 @@ import {TwoPartyPlayerIndex} from "../../../types";
 import {ActionDispatcher} from "../../../utils";
 import ApproveX from "../../shared-components/approve-x";
 import WaitForOtherPlayer from "../../shared-components/wait-for-other-player";
+import {FundingStrategy} from "src/communication";
 
 interface Props {
   state: states.OngoingFundingStrategyNegotiationState;
@@ -24,13 +25,18 @@ class FundingStrategyNegotiationContainer extends PureComponent<Props> {
   render() {
     const {state, strategyChosen, cancelled} = this.props;
     const {processId} = state;
+    const FUNDING_STRATEGY_DESCRIPTIVE_NAME: {[key in FundingStrategy]: string} = {
+      VirtualFundingStrategy: "a virtual channel",
+      IndirectFundingStrategy: "a re-usable ledger channel"
+    };
+    const fundingSource = FUNDING_STRATEGY_DESCRIPTIVE_NAME[FUNDING_STRATEGY];
 
     switch (state.type) {
       case "FundingStrategyNegotiation.PlayerA.WaitForStrategyChoice":
         return (
           <ApproveX
             title="Funding channel"
-            description="Do you want to fund this state channel with a virtual channel?"
+            description={"Do you want to fund this state channel with " + fundingSource + "?"}
             yesMessage="Fund Channel"
             noMessage="Cancel"
             approvalAction={() => strategyChosen({processId, strategy: FUNDING_STRATEGY})}
