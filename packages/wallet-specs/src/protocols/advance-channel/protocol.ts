@@ -70,7 +70,6 @@ export const machine: MachineFactory<Init, any> = (store: Store, context?: Init)
       if (!latestEntry.hasSupportedState) {
         return false;
       }
-      const { latestSupportedState: state } = store.getEntry(channelId);
       return state.turnNum >= targetTurnNum;
     },
   };
