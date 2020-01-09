@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "@babel/core": "^7.6.2",
+    "@openzeppelin/contracts": "2.3.0",
     "@statechannels/channel-client": "0.0.1",
     "@statechannels/nitro-protocol": "0.0.1",
     "aphrodite": "^2.2.2",

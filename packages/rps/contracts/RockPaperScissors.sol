@@ -3,7 +3,7 @@ pragma experimental ABIEncoderV2;
 
 import '@statechannels/nitro-protocol/contracts/interfaces/ForceMoveApp.sol';
 import '@statechannels/nitro-protocol/contracts/Outcome.sol';
-import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
+import '@openzeppelin/contracts/math/SafeMath.sol';
 
 /**
   * @dev The RockPaperScissors contract complies with the ForceMoveApp interface and implements a commit-reveal game of Rock Paper Scissors (henceforth RPS).
