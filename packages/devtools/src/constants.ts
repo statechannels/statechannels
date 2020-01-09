@@ -6,10 +6,10 @@ export const ETHERLIME_ACCOUNTS: Account[] = [
     privateKey: '0x7ab741b57e8d94dd7e1a29055646bafde7010f38a900f55bbd7647880faa6ee8'
   },
   {
-    // This is used by CircleCI
     privateKey: '0x2030b463177db2da82908ef90fa55ddfcef56e8183caf60db464bc398e736e6f'
   },
   {
+    // This is used by CircleCI
     privateKey: '0x62ecd49c4ccb41a70ad46532aed63cf815de15864bc415c87d507afd6a5e8da2'
   },
   {
