@@ -79,6 +79,10 @@ export class ChannelStoreEntry implements IChannelStoreEntry {
     return this.participants.findIndex(p => p.signingAddress === this.privateKey);
   }
 
+  get hasSupportedState(): boolean {
+    return this.states.some(supported);
+  }
+
   get latestSupportedState(): State {
     const signedState = this.states.find(supported);
     if (!signedState) {
@@ -100,7 +104,9 @@ export class ChannelStoreEntry implements IChannelStoreEntry {
     if (!this.latestSupportedState) {
       return [];
     } else {
-      return this.states.slice(this.states.map(s => s.state).indexOf(this.latestSupportedState) + 1);
+      return this.states.slice(
+        this.states.map(s => s.state).indexOf(this.latestSupportedState) + 1
+      );
     }
   }
 
