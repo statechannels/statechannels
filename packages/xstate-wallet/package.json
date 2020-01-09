@@ -17,6 +17,7 @@
     "jsonrpc-lite": "2.1.0",
     "react": "16.12.0",
     "react-dom": "16.12.0",
+    "tinyqueue": "2.0.3",
     "typescript": "3.7.3",
     "xstate": "4.7.3"
   },

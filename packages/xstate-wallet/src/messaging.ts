@@ -9,14 +9,14 @@ import {CreateChannelEvent} from '@statechannels/wallet-protocols/lib/src/protoc
 import {UpdateChannelParams} from '@statechannels/client-api-schema/types/update-channel';
 import {createStateFromUpdateChannelParams} from './utils/json-rpc-utils';
 import {CloseChannelParams} from '@statechannels/client-api-schema/types/close-channel';
-import {ProcessManagement} from './process-management';
+import {ProcessManager} from './process-manager';
 
 export async function handleMessage(
   event,
   walletMachine: Interpreter<Wallet.Init, any, Wallet.Events>,
   store: IStore,
   ourWallet: ethers.Wallet,
-  processManagement: ProcessManagement
+  processManager: ProcessManager
 ) {
   if (event.data && event.data.jsonrpc && event.data.jsonrpc === '2.0') {
     const jsonRpcMessage = event.data;
@@ -41,7 +41,7 @@ export async function handleMessage(
             window.parent.postMessage(jrs.success(id, address), '*');
             break;
           case 'CreateChannel':
-            processManagement.currentProcess = 'create-channel';
+            processManager.addProcess('create-channel');
 
             sendDisplayMessage('Show');
             await handleCreateChannelMessage(
