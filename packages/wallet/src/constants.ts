@@ -22,8 +22,3 @@ export const CHALLENGE_DURATION = 0x12c; // 5 minutes
 
 export const FUNDING_STRATEGY: FundingStrategy =
   process.env.USE_VIRTUAL_FUNDING === "TRUE" ? "VirtualFundingStrategy" : "IndirectFundingStrategy";
-
-export const FUNDING_SOURCE: {[key in FundingStrategy]: string} = {
-  VirtualFundingStrategy: "a virtual channel",
-  IndirectFundingStrategy: "a re-usable ledger channel"
-};

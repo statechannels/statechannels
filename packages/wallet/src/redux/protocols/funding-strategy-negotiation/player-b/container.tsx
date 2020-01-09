@@ -2,7 +2,7 @@ import React from "react";
 import {PureComponent} from "react";
 import {connect} from "react-redux";
 
-import {FUNDING_STRATEGY, FUNDING_SOURCE} from "../../../../constants";
+import {FUNDING_STRATEGY} from "../../../../constants";
 import {unreachable} from "../../../../utils/reducer-utils";
 import {TwoPartyPlayerIndex} from "../../../types";
 import {ActionDispatcher} from "../../../utils";
@@ -10,6 +10,7 @@ import ApproveX from "../../shared-components/approve-x";
 import WaitForOtherPlayer from "../../shared-components/wait-for-other-player";
 import * as actions from "./actions";
 import * as states from "./states";
+import {FundingStrategy} from "src/communication";
 
 interface Props {
   state: states.OngoingFundingStrategyNegotiationState;
@@ -22,7 +23,11 @@ class FundingStrategyNegotiationContainer extends PureComponent<Props> {
   render() {
     const {state, strategyApproved, cancelled} = this.props;
     const {processId} = state;
-    const fundingSource = FUNDING_SOURCE[FUNDING_STRATEGY];
+    const FUNDING_STRATEGY_DESCRIPTIVE_NAME: {[key in FundingStrategy]: string} = {
+      VirtualFundingStrategy: "a virtual channel",
+      IndirectFundingStrategy: "a re-usable ledger channel"
+    };
+    const fundingSource = FUNDING_STRATEGY_DESCRIPTIVE_NAME[FUNDING_STRATEGY];
 
     switch (state.type) {
       case "FundingStrategyNegotiation.PlayerB.WaitForStrategyProposal":
