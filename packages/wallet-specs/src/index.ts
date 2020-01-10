@@ -1,5 +1,5 @@
 import { EventObject, SendAction, StateMachine, forwardTo } from 'xstate';
-import { Outcome, Allocation, State, Channel } from '@statechannels/nitro-protocol';
+import { Outcome, Allocation, State } from '@statechannels/nitro-protocol';
 import { ChannelUpdated, IStore, Store } from './store';
 import {
   AllocationAssetOutcome,
@@ -9,15 +9,11 @@ import {
 const store = new Store();
 export { Store, store };
 
-export type AppData = string;
 export type Signature = string;
-export type Recipient = any;
 export interface Balance {
   address: string;
   wei: string;
 }
-export type Address = string;
-export type PrivateKey = string;
 
 export function ethAllocationOutcome(allocation: Allocation): AllocationAssetOutcome[] {
   return [
