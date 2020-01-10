@@ -31,11 +31,15 @@ const logEvents = name =>
             },
           })
         )
-    : () => {};
+    : () => {
+        /* empty */
+      };
 const logStore = name =>
   process.env.ADD_LOGS
     ? state => console.log(`${name}'s store: ${pretty(stores[name])}`)
-    : () => {};
+    : () => {
+        /* empty */
+      };
 const wallet = (name: string) => {
   const machine = Wallet.machine(stores[name], { processes: [], id: name });
   return interpret<Wallet.Init, any, Wallet.Events>(machine)

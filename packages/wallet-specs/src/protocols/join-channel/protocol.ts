@@ -101,7 +101,7 @@ export const mockOptions: { guards: Guards } = {
   guards: { nonceOk: () => true },
 };
 export type Guards = {
-  nonceOk: ({  }: Init, event: OpenChannelEvent) => boolean;
+  nonceOk: ({}: Init, event: OpenChannelEvent) => boolean;
 };
 export type Services = {
   askClient: any;
@@ -124,7 +124,7 @@ export const machine: MachineFactory<Init, any> = (
     },
   };
   const actions: Actions = {
-    storeState: ({  }: Init, { signedState }: OpenChannel) => {
+    storeState: ({}: Init, { signedState }: OpenChannel) => {
       store.receiveStates([signedState]);
     },
     sendCloseChannel: () => {
