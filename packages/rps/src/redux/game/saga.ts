@@ -64,7 +64,8 @@ function* gameSagaRun(client: RPSChannelClient) {
   switch (localState.type) {
     case 'Setup.NeedAddress':
       const address: string = yield call([client, 'getAddress']);
-      yield put(a.gotAddressFromWallet(address));
+      const outcomeAddress: string = window.ethereum.selectedAddress;
+      yield put(a.gotAddressFromWallet(address, outcomeAddress));
       break;
     case 'A.GameChosen':
       if (cs.isEmpty(channelState)) {
@@ -145,7 +146,9 @@ function* createChannel(localState: ls.A.GameChosen, client: RPSChannelClient) {
     localState.opponentAddress,
     openingBalance.toString(),
     openingBalance.toString(),
-    startState
+    startState,
+    localState.outcomeAddress,
+    localState.opponentOutcomeAddress
   );
   yield put(a.updateChannelState(newChannelState));
 }

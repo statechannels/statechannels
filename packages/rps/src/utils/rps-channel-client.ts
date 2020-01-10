@@ -17,10 +17,12 @@ export class RPSChannelClient {
     bAddress: string,
     aBal: string,
     bBal: string,
-    appAttrs: AppData
+    appAttrs: AppData,
+    aOutcomeAddress: string = aAddress,
+    bOutcomeAddress: string = bAddress
   ): Promise<ChannelState> {
     const participants = formatParticipants(aAddress, bAddress);
-    const allocations = formatAllocations(aAddress, bAddress, aBal, bBal);
+    const allocations = formatAllocations(aOutcomeAddress, bOutcomeAddress, aBal, bBal);
     const appDefinition = RPS_ADDRESS;
     const appData = encodeAppData(appAttrs);
 

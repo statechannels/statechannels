@@ -60,6 +60,7 @@ export default function* openGameSaga() {
 
           myOpenGame = {
             address,
+            outcomeAddress: localState.outcomeAddress,
             name: localState.name,
             stake: localState.roundBuyIn.toString(),
             createdAt: new Date().getTime(),

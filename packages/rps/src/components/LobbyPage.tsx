@@ -10,7 +10,12 @@ import CreatingOpenGameContainer from '../containers/CreatingOpenGameContainer';
 
 interface Props {
   openGames: OpenGame[];
-  joinOpenGame: (opponentName: string, opponentAddress: string, roundBuyIn: string) => void;
+  joinOpenGame: (
+    opponentName: string,
+    opponentAddress: string,
+    opponentOutcomeAddress: string,
+    roundBuyIn: string
+  ) => void;
   newOpenGame: () => void;
 }
 

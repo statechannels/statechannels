@@ -75,11 +75,13 @@ export const channelStates = {
 const propsA = {
   name: aName,
   address: aAddress,
+  outcomeAddress: aAddress,
   opponentName: bName,
   roundBuyIn,
   myWeapon: playerAWeapon,
   theirWeapon: playerBWeapon,
   opponentAddress: bAddress,
+  opponentOutcomeAddress: bAddress,
   salt,
 };
 
@@ -101,6 +103,7 @@ export const localStatesA = {
 const propsB = {
   name: bName,
   address: bAddress,
+  outcomeAddress: bAddress,
   opponentName: aName,
   roundBuyIn,
   myWeapon: playerBWeapon,
