@@ -1,5 +1,5 @@
 {
-  "name": "@statechannels/wallet-protocols",
+  "name": "@statechannels/wallet-specs",
   "version": "1.0.0",
   "main": "lib/src/index.js",
   "files": [
