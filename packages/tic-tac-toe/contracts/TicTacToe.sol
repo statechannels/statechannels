@@ -4,9 +4,10 @@ pragma experimental ABIEncoderV2;
 import '@statechannels/nitro-protocol/contracts/interfaces/ForceMoveApp.sol';
 import '@statechannels/nitro-protocol/contracts/Outcome.sol';
 import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
+import {TicTacToeHelpers} from './TicTacToeHelpers.sol';
 
 /**
-  * @dev The TicTacToe contract complies with the ForceMoveApp interface and implements a commit-reveal game of Tic Tac Toe (henceforth TTT).
+  * @dev The TicTacToe contract complies with the ForceMoveApp interface and implements a game of Tic Tac Toe (henceforth TTT).
   * The following transitions are allowed:
   *
   * Start -> XPlaying  [ START ]
@@ -15,22 +16,21 @@ import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
   * OPlaying -> XPlaying [ OPLAYING ]
   * OPlaying -> Victory [ VICTORY ]
   * OPlaying -> Draw [ DRAW ]
-  * Victory -> Start [ FINISH ]
-  * Draw -> Start [ FINISH ]
+  * Victory -> Switching [ SWITCH ] // Not implemented yet
+  * Draw -> Switching [ SWITCH ] // Not implemented yet
+  * Switching -> Start [ FINISH ] // Not implemented yet
   *
 */
 contract TicTacToe is ForceMoveApp {
     using SafeMath for uint256;
 
     enum PositionType {Start, XPlaying, OPlaying, Draw, Victory}
-    enum Weapon {Rock, Paper, Scissors}
 
     struct TTTData {
         PositionType positionType;
         uint256 stake;
-        uint256[3][3] board;
-        uint256 countXs;
-        uint256 countOs;
+        uint16 Xs; // 110000000
+        uint16 Os; // 001100000
     }
 
     /**
@@ -48,13 +48,15 @@ contract TicTacToe is ForceMoveApp {
     * @dev Encodes the TTT update rules.
     * @param fromPart State being transitioned from.
     * @param toPart State being transitioned to.
+    * @param turnNumB Used to calculate current turnTaker % nParticipants.
+    * @param nParticipants Amount of players. Should be 2?
     * @return true if the transition conforms to the rules, false otherwise.
     */
     function validTransition(
         VariablePart memory fromPart,
         VariablePart memory toPart,
-        uint256, /* turnNumB */
-        uint256  /* nParticipants */
+        uint256 turnNumB, // Used to calculate current turnTaker % nParticipants
+        uint256 nParticipants
     ) public pure returns (bool) {
         Outcome.AllocationItem[] memory fromAllocation = extractAllocation(fromPart);
         Outcome.AllocationItem[] memory toAllocation = extractAllocation(toPart);
@@ -80,19 +82,41 @@ contract TicTacToe is ForceMoveApp {
             return true;
         } else if (fromGameData.positionType == PositionType.XPlaying) {
             if (toGameData.positionType == PositionType.OPlaying) {
-                requireValidXPLAYINGtoOPLAYING(fromAllocation, toAllocation, fromGameData, toGameData);
+                requireValidXPLAYINGtoOPLAYING(
+                    fromAllocation,
+                    toAllocation,
+                    fromGameData,
+                    toGameData
+                );
                 return true;
             } else if (toGameData.positionType == PositionType.Victory) {
-                requireValidXPLAYINGtoVICTORY(fromAllocation, toAllocation, fromGameData, toGameData);
+                requireValidXPLAYINGtoVICTORY(
+                    fromAllocation,
+                    toAllocation,
+                    fromGameData,
+                    toGameData
+                );
                 return true;
             }
             revert('XPlaying may only transition to OPlaying or Victory');
         } else if (fromGameData.positionType == PositionType.OPlaying) {
             if (toGameData.positionType == PositionType.XPlaying) {
-                requireValidOPLAYINGtoXPLAYING(fromAllocation, toAllocation, fromGameData, toGameData);
+                requireValidOPLAYINGtoXPLAYING(
+                    fromAllocation,
+                    toAllocation,
+                    fromGameData,
+                    toGameData
+                );
                 return true;
             } else if (toGameData.positionType == PositionType.Victory) {
-                requireValidOPLAYINGtoVICTORY(fromAllocation, toAllocation, fromGameData, toGameData);
+                requireValidOPLAYINGtoVICTORY(
+                    fromPart,
+                    toPart,
+                    fromAllocation,
+                    toAllocation,
+                    fromGameData,
+                    toGameData
+                );
                 return true;
             } else if (toGameData.positionType == PositionType.Draw) {
                 requireValidOPLAYINGtoDRAW(fromAllocation, toAllocation, fromGameData, toGameData);
@@ -117,8 +141,6 @@ contract TicTacToe is ForceMoveApp {
         revert('No valid transition found');
     }
 
-    // action requirements
-
     function requireValidSTARTtoXPLAYING(
         VariablePart memory fromPart,
         VariablePart memory toPart,
@@ -129,13 +151,33 @@ contract TicTacToe is ForceMoveApp {
     )
         private
         pure
+        noDisjointMoves(toGameData)
         outcomeUnchanged(fromPart, toPart)
         stakeUnchanged(fromGameData, toGameData)
         allocationsNotLessThanStake(fromAllocation, toAllocation, fromGameData, toGameData)
     {
-        require(toGameData.countOs == 0, "No Os on board");
-        require(toGameData.countXs == 1, "One X placed");
-        // Check that only one play was made
+        require(toGameData.Os == 0, 'No Os on board');
+        require(TicTacToeHelpers.madeStrictlyOneMark(toGameData.Xs, 0), 'One X placed');
+
+        // Old TTTMago code
+        // if (State.indexOfMover(_new) == 0) { // mover is A
+        //     require(_new.aResolution() == _old.aResolution() + _new.stake());
+        //     require(_new.bResolution() == _old.bResolution() - _new.stake());
+        // } else if (State.indexOfMover(_new) == 1) { // mover is B
+        //     require(_new.aResolution() == _old.aResolution() - _new.stake());
+        //     require(_new.bResolution() == _old.bResolution() + _new.stake());
+        // }
+
+        // Current X Player should get all the stake. This is to decrease griefing.
+        // require(
+        //     toAllocation[0].amount == fromAllocation[0].amount.sub(toGameData.stake),
+        //     'Allocation for player A should be decremented by 1x stake'
+        // );
+        // require(
+        //     toAllocation[1].amount == fromAllocation[1].amount.add(toGameData.stake),
+        //     'Allocation for player B should be incremented by 1x stake.'
+        // );
+
     }
 
     function requireValidXPLAYINGtoOPLAYING(
@@ -146,13 +188,28 @@ contract TicTacToe is ForceMoveApp {
     )
         private
         pure
+        noDisjointMoves(toGameData)
         allocationUnchanged(fromAllocation, toAllocation)
         stakeUnchanged(fromGameData, toGameData)
     {
-        require(toGameData.countOs == fromGameData.countOs + 1, "One O placed");
-        require(toGameData.countXs == fromGameData.countXs, "No Xs placed");
-        // Check that only one play was made
-        // Check that play doesn't overwrite old board
+        require(toGameData.Xs == fromGameData.Xs, 'No Xs added to board');
+        require(
+            TicTacToeHelpers.madeStrictlyOneMark(toGameData.Os, fromGameData.Os),
+            'One O placed'
+        );
+
+        // Old TTTMagmo code
+        // if (State.indexOfMover(_new) == 0) {
+        //     // mover is A
+        //     require(_new.aResolution() == _old.aResolution() + 2 * _new.stake());
+        //     require(_new.bResolution() == _old.bResolution() - 2 * _new.stake());
+        // } else if (State.indexOfMover(_new) == 1) {
+        //     // mover is B
+        //     require(_new.aResolution() == _old.aResolution() - 2 * _new.stake());
+        //     require(_new.bResolution() == _old.bResolution() + 2 * _new.stake());
+        //     // note factor of 2 to swing fully to other player
+        // }
+
     }
 
     function requireValidOPLAYINGtoXPLAYING(
@@ -163,13 +220,25 @@ contract TicTacToe is ForceMoveApp {
     )
         private
         pure
+        noDisjointMoves(toGameData)
         allocationUnchanged(fromAllocation, toAllocation)
         stakeUnchanged(fromGameData, toGameData)
     {
-        require(toGameData.countXs == fromGameData.countXs + 1, "One X placed");
-        require(toGameData.countOs == fromGameData.countOs, "No Os placed");
-        // Check that only one play was made
-        // Check that play doesn't overwrite old board
+        require(toGameData.Os == fromGameData.Os, 'No Os added to board');
+        require(
+            TicTacToeHelpers.madeStrictlyOneMark(toGameData.Xs, fromGameData.Xs),
+            'One X placed'
+        );
+
+        // Old TTTMagmo code
+        // if (State.indexOfMover(_new) == 0) { // mover is A
+        //     require(_new.aResolution() == _old.aResolution() + 2 * _new.stake()); // note extra factor of 2 to swing fully to other player
+        //     require(_new.bResolution() == _old.bResolution() - 2 * _new.stake());
+        // } else if (State.indexOfMover(_new) == 1) { // mover is B
+        //     require(_new.aResolution() == _old.aResolution() - 2 * _new.stake());
+        //     require(_new.bResolution() == _old.bResolution() + 2 * _new.stake());
+        // } // mover gets to claim stakes: note factor of 2 to swing fully to other player
+
     }
 
     function requireValidXPLAYINGtoVICTORY(
@@ -177,19 +246,20 @@ contract TicTacToe is ForceMoveApp {
         Outcome.AllocationItem[] memory toAllocation,
         TTTData memory fromGameData,
         TTTData memory toGameData
-    ) private pure stakeUnchanged(fromGameData, toGameData) {
-        require(toGameData.countXs == fromGameData.countXs + 1, "One X placed");
-        require(toGameData.countOs == fromGameData.countOs, "No Os placed");
-        // Check that only one play was made
-        // Check that X has won
+    ) private pure noDisjointMoves(toGameData) stakeUnchanged(fromGameData, toGameData) {
+        require(toGameData.Xs == fromGameData.Xs, 'No Xs added to board');
+        require(
+            TicTacToeHelpers.madeStrictlyOneMark(toGameData.Os, fromGameData.Os),
+            'One O placed'
+        );
+        require(TicTacToeHelpers.hasWon(toGameData.Os), 'O has won');
+
+        uint256 currentOsPlayer = 0; // Need to calculate this
 
         uint256 playerAWinnings; // playerOneWinnings
         uint256 playerBWinnings; // playerTwoWinnings
         // calculate winnings
-        (playerAWinnings, playerBWinnings) = winnings(
-            toGameData.board,
-            toGameData.stake
-        );
+        (playerAWinnings, playerBWinnings) = winnings(currentOsPlayer, toGameData.stake);
 
         require(
             toAllocation[0].amount == fromAllocation[0].amount.add(playerAWinnings),
@@ -200,6 +270,18 @@ contract TicTacToe is ForceMoveApp {
                 fromAllocation[1].amount.sub(fromGameData.stake.mul(2)).add(playerBWinnings),
             "Player B's allocation should be updated with the winnings."
         );
+
+        // Old TTTMagmo code
+        // if (State.indexOfMover(_new) == 0) {
+        //     // mover is A
+        //     require(_new.aResolution() == _old.aResolution() + 2 * _new.stake());
+        //     require(_new.bResolution() == _old.bResolution() - 2 * _new.stake());
+        // } else if (State.indexOfMover(_new) == 1) {
+        //     // mover is B
+        //     require(_new.aResolution() == _old.aResolution() - 2 * _new.stake());
+        //     require(_new.bResolution() == _old.bResolution() + 2 * _new.stake());
+        // } // mover gets to claim stakes
+
     }
 
     function requireValidOPLAYINGtoVICTORY(
@@ -212,32 +294,35 @@ contract TicTacToe is ForceMoveApp {
     )
         private
         pure
+        noDisjointMoves(toGameData)
         outcomeUnchanged(fromPart, toPart)
         stakeUnchanged(fromGameData, toGameData)
         allocationsNotLessThanStake(fromAllocation, toAllocation, fromGameData, toGameData)
     {
-        require(toGameData.countOs == fromGameData.countOs + 1, "One O placed");
-        require(toGameData.countXs == fromGameData.countXs, "No Xs placed");
-        // Check that only one play was made
-        // Check that O has won
+        require(toGameData.Os == fromGameData.Os, 'No Os added to board');
+        require(
+            TicTacToeHelpers.madeStrictlyOneMark(toGameData.Xs, fromGameData.Xs),
+            'One X placed'
+        );
+        require(TicTacToeHelpers.hasWon(toGameData.Xs), 'X has won');
+
+        uint256 currentXsPlayer = 1; // Need to calculate this
 
         uint256 playerAWinnings; // playerOneWinnings
         uint256 playerBWinnings; // playerTwoWinnings
         // calculate winnings
-        (playerAWinnings, playerBWinnings) = winnings(
-            toGameData.board,
-            toGameData.stake
-        );
+        (playerAWinnings, playerBWinnings) = winnings(currentXsPlayer, toGameData.stake);
 
-        require(
-            toAllocation[0].amount == fromAllocation[0].amount.add(playerAWinnings),
-            "Player A's allocation should be updated with the winnings."
-        );
-        require(
-            toAllocation[1].amount ==
-                fromAllocation[1].amount.sub(fromGameData.stake.mul(2)).add(playerBWinnings),
-            "Player B's allocation should be updated with the winnings."
-        );
+        // Got Stack too deep
+        // require(
+        //     toAllocation[0].amount == fromAllocation[0].amount.add(playerAWinnings),
+        //     "Player A's allocation should be updated with the winnings."
+        // );
+        // require(
+        //     toAllocation[1].amount ==
+        //         fromAllocation[1].amount.sub(fromGameData.stake.mul(2)).add(playerBWinnings),
+        //     "Player B's allocation should be updated with the winnings."
+        // );
     }
 
     function requireValidOPLAYINGtoDRAW(
@@ -248,12 +333,24 @@ contract TicTacToe is ForceMoveApp {
     )
         private
         pure
+        noDisjointMoves(toGameData)
         allocationUnchanged(fromAllocation, toAllocation)
         stakeUnchanged(fromGameData, toGameData)
     {
-        require(toGameData.countOs == fromGameData.countOs + 1, "One O placed");
-        require(toGameData.countXs == fromGameData.countXs, "No Xs placed");
-        //Check that this is draw. Board is full
+        require(TicTacToeHelpers.isDraw(toGameData.Os, toGameData.Xs)); // check if board full.
+        require(TicTacToeHelpers.madeStrictlyOneMark(toGameData.Xs, fromGameData.Xs));
+        require(toGameData.Os == fromGameData.Os, 'No Os added to board');
+
+        // Old TTTMagmo code
+        // crosses always plays first move and always plays the move that completes the board
+        // if (State.indexOfMover(_new) == 0) {
+        //     require(_new.aResolution() == _old.aResolution() + 2 * _new.stake()); // no extra factor of 2, restoring to parity
+        //     require(_new.bResolution() == _old.bResolution() - 2 * _new.stake());
+        // } else if (State.indexOfMover(_new) == 1) {
+        //     require(_new.aResolution() == _old.aResolution() - 2 * _new.stake());
+        //     require(_new.bResolution() == _old.bResolution() + 2 * _new.stake());
+        // } // mover gets to restore parity to the winnings
+
     }
 
     function requireValidDRAWtoSTART(
@@ -311,19 +408,20 @@ contract TicTacToe is ForceMoveApp {
         return allocation;
     }
 
-    function winnings(Weapon aWeapon, Weapon bWeapon, uint256 stake)
+    function winnings(uint256 currentWinnerPlayer, uint256 stake)
         private
         pure
         returns (uint256, uint256)
     {
-        if (aWeapon == bWeapon) {
-            return (stake, stake);
-        } else if ((aWeapon == Weapon.Rock && bWeapon == Weapon.Scissors) || (aWeapon > bWeapon)) {
+        if (currentWinnerPlayer == 0) {
             // first player won
             return (2 * stake, 0);
-        } else {
+        } else if (currentWinnerPlayer == 1) {
             // second player won
             return (0, 2 * stake);
+        } else {
+            // Draw
+            return (stake, stake);
         }
     }
 
@@ -343,9 +441,14 @@ contract TicTacToe is ForceMoveApp {
 
     // modifiers
     modifier outcomeUnchanged(VariablePart memory a, VariablePart memory b) {
+        require(keccak256(b.outcome) == keccak256(a.outcome), 'TicTacToe: Outcome must not change');
+        _;
+    }
+
+    modifier noDisjointMoves(TTTData memory toGameData) {
         require(
-            keccak256(b.outcome) == keccak256(a.outcome),
-            'TicTacToe: Outcome must not change'
+            TicTacToeHelpers.areDisjoint(toGameData.Xs, toGameData.Os),
+            'TicTacToe: No Disjoint Moves'
         );
         _;
     }
