@@ -16,10 +16,6 @@ const jestViolations = {
   'jest/no-standalone-expect': 'off'
 };
 
-const emberRules = {
-  'ember/no-jquery': 'error'
-};
-
 module.exports = {
   parser: 'babel-eslint',
   parserOptions: {
@@ -33,47 +29,15 @@ module.exports = {
     browser: true,
     es6: true
   },
-  plugins: ['jest', 'ember'],
+  plugins: ['jest'],
   extends: [
     'eslint:recommended',
     'plugin:jest/recommended',
     'plugin:jest/style',
-    'plugin:ember/recommended',
     'plugin:prettier/recommended'
   ],
   rules: {
     ...generalRules,
     ...jestViolations,
-    ...emberRules
-  },
-  overrides: [
-    // node files
-    {
-      files: [
-        '.eslintrc.js',
-        '.template-lintrc.js',
-        'ember-cli-build.js',
-        'testem.js',
-        'blueprints/*/index.js',
-        'config/**/*.js',
-        'lib/*/index.js',
-        'server/**/*.js'
-      ],
-      parserOptions: {
-        sourceType: 'script'
-      },
-      env: {
-        browser: false,
-        node: true
-      },
-      plugins: ['node'],
-      rules: Object.assign({}, require('eslint-plugin-node').configs.recommended.rules, {
-        // add your custom rules and overrides for node files here
-
-        // this can be removed once the following is fixed
-        // https://github.com/mysticatea/eslint-plugin-node/issues/77
-        'node/no-unpublished-require': 'off'
-      })
-    }
-  ]
+  }
 };
