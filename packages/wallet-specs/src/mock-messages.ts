@@ -8,6 +8,8 @@ const two = '0x0000000000000000000000000000000000000000000000000000000000000001'
 const first = new ethers.Wallet(one).address;
 const second = new ethers.Wallet(two).address;
 
+const signatures = [];
+
 const messagesToSecond: AddressableMessage[] = [];
 messagesToSecond.push({
   type: 'OPEN_CHANNEL',
@@ -28,7 +30,7 @@ messagesToSecond.push({
       },
       challengeDuration: 1,
     },
-    signatures: [first],
+    signatures: [],
   },
   to: second,
 });
@@ -52,7 +54,7 @@ messagesToSecond.push({
         },
         challengeDuration: 1,
       },
-      signatures: [first],
+      signatures: [],
     },
   ],
   to: second,
@@ -91,7 +93,7 @@ messagesToFirst.push({
         },
         challengeDuration: 1,
       },
-      signatures: [second],
+      signatures: [],
     },
   ],
   to: first,

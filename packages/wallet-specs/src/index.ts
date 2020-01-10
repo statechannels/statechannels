@@ -8,10 +8,10 @@ import {
   isAllocationOutcome,
   AssetOutcome,
 } from '@statechannels/nitro-protocol/lib/src/contract/outcome';
+import { Signature } from 'ethers/utils';
 const store = new Store();
 export { Store, store };
 
-export type Signature = string;
 export interface Balance {
   address: string;
   wei: string;
