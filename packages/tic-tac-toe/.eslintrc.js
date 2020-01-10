@@ -16,28 +16,51 @@ const jestViolations = {
   'jest/no-standalone-expect': 'off'
 };
 
+const importRules = {
+  // Could not get this rule to work properly
+  'import/no-unresolved': 'off',
+  'import/no-duplicates': 'off',
+  // NOTE: There is some error with eslint-plugin-import treating redux-saga/effects wrongly
+  // https://github.com/benmosher/eslint-plugin-import/issues/793#issuecomment-314088164
+  'import/named': 'off'
+};
+
 module.exports = {
-  parser: 'babel-eslint',
-  parserOptions: {
-    ecmaVersion: 2018,
-    sourceType: 'module',
-    ecmaFeatures: {
-      legacyDecorators: true
-    }
-  },
+  parser: '@typescript-eslint/parser',
   env: {
     browser: true,
     es6: true
   },
-  plugins: ['jest'],
+  plugins: ['@typescript-eslint', 'jest', 'prettier'],
   extends: [
     'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
     'plugin:jest/recommended',
     'plugin:jest/style',
     'plugin:prettier/recommended'
   ],
   rules: {
     ...generalRules,
-    ...jestViolations,
-  }
+    ...importRules,
+    ...jestViolations
+  },
+  overrides: [
+    {
+      files: ['**/*.js'],
+      parser: 'babel-eslint',
+      parserOptions: {
+        ecmaVersion: 2018,
+        sourceType: 'module',
+        ecmaFeatures: {
+          legacyDecorators: true
+        }
+      },
+      rules: {
+        '@typescript-eslint/no-var-requires': 'off'
+      },
+      env: {
+        node: true
+      }
+    }
+  ]
 };
