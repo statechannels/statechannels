@@ -6,16 +6,10 @@ import {
   store,
   subtract,
   ethAllocationOutcome,
-  checkThat,
+  getEthAllocation,
 } from '../../';
 import * as LedgerUpdate from '../ledger-update/protocol';
-import {
-  Allocation,
-  isAllocationOutcome,
-  Outcome,
-  AllocationItem,
-  State,
-} from '@statechannels/nitro-protocol';
+import { Allocation, Outcome, AllocationItem, State } from '@statechannels/nitro-protocol';
 
 const PROTOCOL = 'direct-funding';
 const success = { type: 'final' };
@@ -30,8 +24,8 @@ function getHoldings(state: State, destination: string): string {
   const { outcome } = state;
 
   let currentFunding = chain.holdings(getChannelId(state.channel));
-  return checkThat(outcome[0], isAllocationOutcome)
-    .allocation.filter(item => item.destination === destination)
+  return getEthAllocation(outcome)
+    .filter(item => item.destination === destination)
     .map(item => {
       const payout = Math.min(currentFunding, Number(item.amount));
       currentFunding -= payout;
@@ -66,10 +60,7 @@ function uniqueDestinations(outcome: Allocation): string[] {
 
 function preDepositOutcome(channelId: string, minimalAllocation: Allocation): Outcome {
   const state = store.getEntry(channelId).latestSupportedState;
-  const { allocation } = checkThat(
-    store.getEntry(channelId).latestSupportedState.outcome[0],
-    isAllocationOutcome
-  );
+  const allocation = getEthAllocation(store.getEntry(channelId).latestSupportedState.outcome);
 
   const destinations = uniqueDestinations(allocation.concat(minimalAllocation));
   const preDepositAllocation = allocation.concat(
@@ -87,10 +78,7 @@ function amount(item: AllocationItem): string {
 }
 
 function postDepositOutcome(channelId: string): Outcome {
-  const { allocation } = checkThat(
-    store.getEntry(channelId).latestSupportedState.outcome[0],
-    isAllocationOutcome
-  );
+  const allocation = getEthAllocation(store.getEntry(channelId).latestSupportedState.outcome);
   const destinations = uniqueDestinations(allocation);
 
   const postDepositAllocation = destinations.map(destination => ({

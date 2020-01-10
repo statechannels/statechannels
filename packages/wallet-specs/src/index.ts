@@ -5,6 +5,8 @@ import {
   AllocationAssetOutcome,
   Guarantee,
   GuaranteeAssetOutcome,
+  isAllocationOutcome,
+  AssetOutcome,
 } from '@statechannels/nitro-protocol/lib/src/contract/outcome';
 const store = new Store();
 export { Store, store };
@@ -13,6 +15,11 @@ export type Signature = string;
 export interface Balance {
   address: string;
   wei: string;
+}
+
+export function getEthAllocation(outcome: Outcome): Allocation {
+  const ethOutcome: AssetOutcome | undefined = outcome.find(o => o.assetHolderAddress === '0x');
+  return checkThat(ethOutcome, isAllocationOutcome).allocation;
 }
 
 export function ethAllocationOutcome(allocation: Allocation): AllocationAssetOutcome[] {

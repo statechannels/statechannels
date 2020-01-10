@@ -1,5 +1,5 @@
 import { assign } from 'xstate';
-import { Balance, checkThat, store } from '../..';
+import { Balance, checkThat, store, getEthAllocation } from '../..';
 import { HubChoice } from '../../wire-protocol';
 import { Init as VirtualFundAsLeafArgs } from '../virtual-fund-as-leaf/protocol';
 import { isAllocationOutcome } from '@statechannels/nitro-protocol';
@@ -38,7 +38,7 @@ type HubKnown = Init & { hubAddress: string };
 
 function virtualFundAsLeafArgs({ targetChannelId, hubAddress }: HubKnown): VirtualFundAsLeafArgs {
   const { channel, outcome } = store.getEntry(targetChannelId).latestState;
-  const balances: Balance[] = checkThat(outcome[0], isAllocationOutcome).allocation.map(o => ({
+  const balances: Balance[] = getEthAllocation(outcome).map(o => ({
     address: o.destination,
     wei: o.amount,
   }));

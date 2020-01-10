@@ -1,5 +1,5 @@
 import { assign } from 'xstate';
-import { store, Without, ethAllocationOutcome, checkThat } from '../../';
+import { store, Without, ethAllocationOutcome, checkThat, getEthAllocation } from '../../';
 import { isIndirectFunding, isVirtualFunding } from '../../ChannelStoreEntry';
 
 import * as LedgerUpdate from '../ledger-update/protocol';
@@ -49,13 +49,11 @@ function finalJointChannelUpdate({
   }
   const jointState = store.getEntry(jointChannelId).latestSupportedState;
 
-  const jointOutcome = checkThat(jointState.outcome[0], isAllocationOutcome);
-  const targetChannelIdx = jointOutcome.allocation.findIndex(
-    a => a.destination === targetChannelId
-  );
+  const jointAllocation = getEthAllocation(jointState.outcome);
+  const targetChannelIdx = jointAllocation.findIndex(a => a.destination === targetChannelId);
   const targetAllocation: Allocation = [
-    ...checkThat(targetChannelState.outcome[0], isAllocationOutcome).allocation,
-    ...jointOutcome.allocation.splice(targetChannelIdx),
+    ...getEthAllocation(targetChannelState.outcome),
+    ...jointAllocation.splice(targetChannelIdx),
   ];
   return {
     channelId: jointChannelId,
@@ -90,8 +88,9 @@ export function defundGuarantorInLedger({
   Goal: targetOutcome == [(B, b), (H, a)]
   */
 
-  const { outcome: jointOutcome } = store.getEntry(jointChannelId).latestSupportedState;
-  const jointAllocation = checkThat(jointOutcome[0], isAllocationOutcome).allocation;
+  const jointAllocation = getEthAllocation(
+    store.getEntry(jointChannelId).latestSupportedState.outcome
+  );
 
   const targetAllocation: Allocation = [
     {

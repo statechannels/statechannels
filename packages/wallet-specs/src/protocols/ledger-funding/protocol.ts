@@ -7,9 +7,9 @@ import {
   Store,
   success,
   ethAllocationOutcome,
-  checkThat,
+  getEthAllocation,
 } from '../..';
-import { Outcome, Allocation, isAllocationOutcome } from '@statechannels/nitro-protocol';
+import { Outcome, Allocation } from '@statechannels/nitro-protocol';
 
 const PROTOCOL = 'ledger-funding';
 
@@ -138,10 +138,9 @@ export const guards = {
 
 export const machine: MachineFactory<Init, any> = (store: Store, context: Init) => {
   function directFundingArgs(ctx: LedgerExists): DirectFunding.Init {
-    const minimalAllocation = checkThat(
-      store.getEntry(ctx.targetChannelId).latestState.outcome[0],
-      isAllocationOutcome
-    ).allocation;
+    const minimalAllocation = getEthAllocation(
+      store.getEntry(ctx.targetChannelId).latestState.outcome
+    );
 
     return {
       channelId: ctx.ledgerChannelId,
