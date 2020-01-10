@@ -58,8 +58,10 @@ x = np.arange(len(labels))  # the label locations
 width = 0.35  # the width of the bars
 
 fig, ax = plt.subplots()
-rects1 = ax.bar(x - width/2, legacy, width, label='Legacy')
-rects2 = ax.bar(x + width/2, optimized, width, label='Optimized')
+rects1 = ax.bar(x - width/2, legacy, width,
+                label='Legacy', color="#FFF2CC", edgecolor="black")  # FFF2CC
+rects2 = ax.bar(x + width/2, optimized, width,
+                label='Optimized', color="#D5E8D4", edgecolor="black")  # D5E8D4
 
 # Add some text for labels, title and custom x-axis tick labels, etc.
 ax.set_ylabel('Gas')
