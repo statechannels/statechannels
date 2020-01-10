@@ -1,6 +1,12 @@
 import { CreateChannelEvent } from './protocols/wallet/protocol';
 import { AddressableMessage } from './wire-protocol';
 import { ethAllocationOutcome } from '.';
+import { ethers } from 'ethers';
+
+const one = '0x0000000000000000000000000000000000000000000000000000000000000001';
+const two = '0x0000000000000000000000000000000000000000000000000000000000000001';
+const first = new ethers.Wallet(one).address;
+const second = new ethers.Wallet(two).address;
 
 const messagesToSecond: AddressableMessage[] = [];
 messagesToSecond.push({
@@ -12,19 +18,19 @@ messagesToSecond.push({
       isFinal: false,
       turnNum: 0,
       outcome: ethAllocationOutcome([
-        { destination: 'first', amount: '3' },
-        { destination: 'second', amount: '1' },
+        { destination: first, amount: '3' },
+        { destination: second, amount: '1' },
       ]),
       channel: {
-        participants: ['first', 'second'],
+        participants: [first, second],
         channelNonce: '1',
-        chainId: 'mainnet?',
+        chainId: '0x42',
       },
       challengeDuration: 1,
     },
-    signatures: ['first'],
+    signatures: [first],
   },
-  to: 'second',
+  to: second,
 });
 messagesToSecond.push({
   type: 'SendStates',
@@ -36,23 +42,23 @@ messagesToSecond.push({
         isFinal: false,
         turnNum: 1,
         outcome: ethAllocationOutcome([
-          { destination: 'first', amount: '3' },
-          { destination: 'second', amount: '1' },
+          { destination: first, amount: '3' },
+          { destination: second, amount: '1' },
         ]),
         channel: {
-          participants: ['first', 'second'],
+          participants: [first, second],
           channelNonce: '1',
-          chainId: 'mainnet?',
+          chainId: '0x42',
         },
         challengeDuration: 1,
       },
-      signatures: ['first'],
+      signatures: [first],
     },
   ],
-  to: 'second',
+  to: second,
 });
 messagesToSecond.push({
-  to: 'second',
+  to: second,
   type: 'FUNDING_STRATEGY_PROPOSED',
   targetChannelId: 'first+second',
   choice: 'Indirect',
@@ -70,35 +76,33 @@ messagesToFirst.push({
         turnNum: 1,
         outcome: ethAllocationOutcome([
           {
-            destination: 'first',
+            destination: first,
             amount: '3',
           },
           {
-            destination: 'second',
+            destination: second,
             amount: '1',
           },
         ]),
         channel: {
-          participants: ['first', 'second'],
+          participants: [first, second],
           channelNonce: '1',
-          chainId: 'mainnet?',
+          chainId: '0x42',
         },
         challengeDuration: 1,
       },
-      signatures: ['second'],
+      signatures: [second],
     },
   ],
-  to: 'first',
+  to: first,
 });
 messagesToFirst.push({
   type: 'FUNDING_STRATEGY_PROPOSED',
   choice: 'Indirect',
   targetChannelId: 'first+second+1',
-  to: 'first',
+  to: first,
 });
 
-const first = 'first';
-const second = 'second';
 export const createChannel: CreateChannelEvent = {
   type: 'CREATE_CHANNEL',
   participants: [

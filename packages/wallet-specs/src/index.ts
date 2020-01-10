@@ -1,5 +1,5 @@
 import { EventObject, SendAction, StateMachine, forwardTo } from 'xstate';
-import { Outcome, Allocation, State } from '@statechannels/nitro-protocol';
+import { Outcome, Allocation, State, Channel } from '@statechannels/nitro-protocol';
 import { ChannelUpdated, IStore, Store } from './store';
 import {
   AllocationAssetOutcome,
@@ -51,15 +51,7 @@ export function nextState(state: State, opts?: Partial<VariablePart>): State {
   };
 }
 
-export interface Channel {
-  channelNonce: string;
-  participants: Address[];
-  chainId: string;
-}
-
-export function getChannelId(channel: Channel) {
-  return channel.participants.concat(channel.channelNonce).join('+');
-}
+export { Channel, getChannelId } from '@statechannels/nitro-protocol';
 
 export interface SignedState {
   state: State;

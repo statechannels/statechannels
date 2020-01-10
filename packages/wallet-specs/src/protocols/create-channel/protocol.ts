@@ -104,7 +104,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => 
     const channel: Channel = {
       participants,
       channelNonce,
-      chainId: 'mainnet?',
+      chainId: '0x42', // TODO: determine chain Id
     };
 
     const { allocations, appData, appDefinition } = ctx;
