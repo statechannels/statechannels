@@ -13,6 +13,8 @@ const args = ['run', 'etherlime', 'compile', '--buildDirectory=./build/contracts
 if (process.env.USE_NATIVE_SOLC === 'true') {
   console.log('Using native solc version for compilation');
   args.push('--solcVersion=native');
+} else {
+  args.push('--solcVersion=0.5.13');
 }
 
 const compile = spawn(cmd, args);
