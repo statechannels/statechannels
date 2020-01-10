@@ -12,7 +12,7 @@
   "dependencies": {
     "@statechannels/client-api-schema": "0.0.1",
     "@statechannels/nitro-protocol": "0.0.1",
-    "@statechannels/wallet-protocols": "1.0.0",
+    "@statechannels/wallet-specs": "1.0.0",
     "ethers": "4.0.40",
     "jsonrpc-lite": "2.1.0",
     "xstate": "4.7.3"
