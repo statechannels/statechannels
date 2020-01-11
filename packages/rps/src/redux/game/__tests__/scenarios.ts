@@ -44,6 +44,8 @@ function channelState(
     bUserId,
     aAddress,
     bAddress,
+    aOutcomeAddress: aAddress,
+    bOutcomeAddress: bAddress,
     aBal: WeiPerEther.mul(balances[0]).toString(),
     bBal: WeiPerEther.mul(balances[1]).toString(),
     appData: appDataParam,
