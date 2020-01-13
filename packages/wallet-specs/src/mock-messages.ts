@@ -1,35 +1,39 @@
 import { CreateChannelEvent } from './protocols/wallet/protocol';
 import { AddressableMessage } from './wire-protocol';
-import { ethAllocationOutcome } from '.';
+import { ethAllocationOutcome, Channel } from '.';
 import { ethers } from 'ethers';
+import { State } from '@statechannels/nitro-protocol';
+import { HashZero, AddressZero } from 'ethers/constants';
 
-const one = '0x0000000000000000000000000000000000000000000000000000000000000001';
-const two = '0x0000000000000000000000000000000000000000000000000000000000000001';
-const first = new ethers.Wallet(one).address;
-const second = new ethers.Wallet(two).address;
+const one = new ethers.Wallet('0x0000000000000000000000000000000000000000000000000000000000000001');
+const two = new ethers.Wallet('0x0000000000000000000000000000000000000000000000000000000000000002');
+const first = one.address;
+const second = two.address;
 
-const signatures = [];
+const channel: Channel = {
+  participants: [first, second],
+  channelNonce: '1',
+  chainId: '0x42',
+};
+
+const state: State = {
+  appData: HashZero,
+  appDefinition: AddressZero,
+  isFinal: false,
+  turnNum: 0,
+  outcome: ethAllocationOutcome([
+    { destination: first, amount: '3' },
+    { destination: second, amount: '1' },
+  ]),
+  channel,
+  challengeDuration: 1,
+};
 
 const messagesToSecond: AddressableMessage[] = [];
 messagesToSecond.push({
   type: 'OPEN_CHANNEL',
   signedState: {
-    state: {
-      appData: '0x',
-      appDefinition: '0x',
-      isFinal: false,
-      turnNum: 0,
-      outcome: ethAllocationOutcome([
-        { destination: first, amount: '3' },
-        { destination: second, amount: '1' },
-      ]),
-      channel: {
-        participants: [first, second],
-        channelNonce: '1',
-        chainId: '0x42',
-      },
-      challengeDuration: 1,
-    },
+    state,
     signatures: [],
   },
   to: second,
@@ -39,20 +43,8 @@ messagesToSecond.push({
   signedStates: [
     {
       state: {
-        appData: '0x',
-        appDefinition: '0x',
-        isFinal: false,
+        ...state,
         turnNum: 1,
-        outcome: ethAllocationOutcome([
-          { destination: first, amount: '3' },
-          { destination: second, amount: '1' },
-        ]),
-        channel: {
-          participants: [first, second],
-          channelNonce: '1',
-          chainId: '0x42',
-        },
-        challengeDuration: 1,
       },
       signatures: [],
     },
@@ -71,28 +63,7 @@ messagesToFirst.push({
   type: 'SendStates',
   signedStates: [
     {
-      state: {
-        appData: '0x',
-        appDefinition: '0x',
-        isFinal: false,
-        turnNum: 1,
-        outcome: ethAllocationOutcome([
-          {
-            destination: first,
-            amount: '3',
-          },
-          {
-            destination: second,
-            amount: '1',
-          },
-        ]),
-        channel: {
-          participants: [first, second],
-          channelNonce: '1',
-          chainId: '0x42',
-        },
-        challengeDuration: 1,
-      },
+      state: { ...state, turnNum: 1 },
       signatures: [],
     },
   ],
@@ -123,8 +94,8 @@ export const createChannel: CreateChannelEvent = {
     { destination: first, amount: '3' },
     { destination: second, amount: '1' },
   ],
-  appDefinition: '0x',
-  appData: '0x',
+  appDefinition: AddressZero,
+  appData: HashZero,
 };
 
 export { messagesToSecond, messagesToFirst };

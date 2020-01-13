@@ -8,7 +8,8 @@ import {
   isAllocationOutcome,
   AssetOutcome,
 } from '@statechannels/nitro-protocol/lib/src/contract/outcome';
-import { Signature } from 'ethers/utils';
+import { Signature, hexZeroPad } from 'ethers/utils';
+import { AddressZero } from 'ethers/constants';
 const store = new Store();
 export { Store, store };
 
@@ -25,8 +26,8 @@ export function getEthAllocation(outcome: Outcome): Allocation {
 export function ethAllocationOutcome(allocation: Allocation): AllocationAssetOutcome[] {
   return [
     {
-      assetHolderAddress: '0x',
-      allocation,
+      assetHolderAddress: AddressZero,
+      allocation: allocation.map(a => ({ ...a, destination: hexZeroPad(a.destination, 32) })),
     },
   ];
 }
@@ -34,7 +35,7 @@ export function ethAllocationOutcome(allocation: Allocation): AllocationAssetOut
 export function ethGuaranteeOutcome(guarantee: Guarantee): GuaranteeAssetOutcome[] {
   return [
     {
-      assetHolderAddress: '0x',
+      assetHolderAddress: AddressZero,
       guarantee,
     },
   ];

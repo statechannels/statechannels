@@ -172,10 +172,18 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
     // const { latestState: ledgerState } = store.getEntry(ledgerChannelId);
     // const { latestState: targetChannelState } = store.getEntry(targetChannelId);
 
+    /*
+    TODO
+    1. Match ledger destinations to target channel destinations
+    2. Deduct from ledger destination
+    3. Allocate total deducted to target
+    */
+
     const allocation: Allocation = [
       {
         destination: targetChannelId,
-        amount: 'TODO', // TODO
+        // TODO: This needs to account for the existing allocation
+        amount: '0x01',
       },
     ];
     return {

@@ -4,6 +4,7 @@ import { Channel, FINAL, getChannelId, MachineFactory, SignedState } from '../..
 import { ChannelStoreEntry } from '../../ChannelStoreEntry';
 import { Participant } from '../../store';
 import { Outcome } from '@statechannels/nitro-protocol';
+import { HashZero, AddressZero } from 'ethers/constants';
 
 const PROTOCOL = 'create-null-channel';
 /*
@@ -88,8 +89,8 @@ export const machine: MachineFactory<Init, any> = (store, context: Init) => {
           channel,
           isFinal: false,
           challengeDuration: 1,
-          appData: '0x0',
-          appDefinition: '0x0',
+          appData: HashZero,
+          appDefinition: AddressZero,
         },
         signatures: [],
       },

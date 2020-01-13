@@ -57,7 +57,7 @@ export class Store implements IStore {
   private _nonces: Record<string, string> = {};
 
   constructor(args?: Constructor) {
-    const { store, privateKeys, nonces } = args || {};
+    const { store, privateKeys } = args || {};
     this._store = store || {};
     this._privateKeys = privateKeys || {};
   }
