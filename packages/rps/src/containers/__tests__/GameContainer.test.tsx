@@ -37,6 +37,9 @@ describe('GameContainer', () => {
         localState: localStatesA.gameChosen,
         channelState: null,
       },
+      autoPlayer: {
+        enabled: false,
+      },
     };
     const store = mockStore(initialState);
     const component = mount(<GameContainer />, {context: {store}});

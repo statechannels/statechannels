@@ -61,6 +61,9 @@ const initialState: SiteState = {
     localState: {type: 'Setup.Empty'},
     channelState: null,
   },
+  autoPlayer: {
+    enabled: false,
+  },
 };
 
 export function siteStateFromLocalState<T extends states.LocalState>(
