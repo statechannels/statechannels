@@ -1,2 +1,2 @@
 export {autoOpponent} from './auto-opponent';
-export {main} from './auto-player';
+export {main, autoPlayer} from './auto-player';
