@@ -1,4 +1,4 @@
-import {put, takeEvery, select} from 'redux-saga/effects';
+import {put, takeEvery, select, take, cancel, fork} from 'redux-saga/effects';
 import {GameState} from '../game/state';
 import {
   createGame,
@@ -29,6 +29,19 @@ import {WeiPerEther} from 'ethers/constants';
 // you, not _against_ you - if you want someone to play against you, you
 // need to run the auto-opponent.
 //
+
+export function* main() {
+  while (yield take('StartAutoPlayer')) {
+    // starts the task in the background
+    const bgTask = yield fork(autoPlayer, 'A'); // get from action
+    // wait for the user stop action
+    yield take('StopAutoPlayer');
+    // user clicked stop. cancel the background task
+    // this will cause the forked bgSync task to jump into its finally block
+    yield cancel(bgTask);
+  }
+}
+
 export function* autoPlayer(player: 'A' | 'B') {
   switch (player) {
     case 'A':
