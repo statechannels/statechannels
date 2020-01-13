@@ -1,13 +1,18 @@
 import React from 'react';
 import Switch from 'react-switch';
 import {Button, Navbar} from 'reactstrap';
-import {Commitment} from 'fmg-core';
 import {RulesModal} from './RulesModal';
 
 interface Props {
   showRules: boolean;
+  autoPlayerA: boolean;
+  autoPlayerB: boolean;
   logoutRequest: () => void;
   rulesRequest: () => void;
+  enableAutoPlayerA: () => void;
+  enableAutoPlayerB: () => void;
+  disableAutoPlayerA: () => void;
+  disableAutoPlayerB: () => void;
   loginDisplayName: string;
 }
 
@@ -16,7 +21,21 @@ function getInitials(loginDisplayName: string): string {
   return userDisplayName.map(name => name.charAt(0)).join('');
 }
 
-export default class NavigationBar extends React.PureComponent<Props, Commitment> {
+export default class NavigationBar extends React.Component<Props> {
+  handleAchange = (checked, event, id) => {
+    if (checked) {
+      this.props.enableAutoPlayerA();
+    } else {
+      this.props.disableAutoPlayerA();
+    }
+  };
+  handleBchange = (checked, event, id) => {
+    if (checked) {
+      this.props.enableAutoPlayerB();
+    } else {
+      this.props.disableAutoPlayerB();
+    }
+  };
   render() {
     return (
       <Navbar className="navbar">
@@ -26,10 +45,8 @@ export default class NavigationBar extends React.PureComponent<Props, Commitment
           </span>
           <Switch
             className="react-switch ml-auto"
-            onChange={() => {
-              /* */
-            }}
-            checked={false}
+            onChange={this.handleAchange}
+            checked={this.props.autoPlayerA}
             disabled={false}
             height={15}
             width={28}
@@ -40,10 +57,8 @@ export default class NavigationBar extends React.PureComponent<Props, Commitment
           </span>
           <Switch
             className="react-switch ml-auto"
-            onChange={() => {
-              /* */
-            }}
-            checked={false}
+            onChange={this.handleBchange}
+            checked={this.props.autoPlayerB}
             disabled={false}
             height={15}
             width={28}
