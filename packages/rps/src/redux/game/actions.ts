@@ -154,10 +154,7 @@ export const joinOpenGame = (
   roundBuyIn,
 });
 
-export const gameJoined = (
-  opponentName: string,
-  opponentAddress: string
-): GameJoined => ({
+export const gameJoined = (opponentName: string, opponentAddress: string): GameJoined => ({
   type: 'GameJoined',
   opponentName,
   opponentAddress,
