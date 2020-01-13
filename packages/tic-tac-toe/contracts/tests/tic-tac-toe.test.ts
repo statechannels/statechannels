@@ -75,45 +75,80 @@ beforeAll(async () => {
 });
 
 /* 
-    ${true}  | ${'RoundProposed'} | ${'RoundAccepted'} | ${{from: 1, to: 1}} | ${'Rock'} | ${'Rock'}     | ${{A: 5, B: 5}} | ${{A: 4, B: 6}} | ${''}
-    ${true}  | ${'RoundAccepted'} | ${'Reveal'}        | ${{from: 1, to: 1}} | ${'Rock'} | ${'Paper'}    | ${{A: 4, B: 6}} | ${{A: 4, B: 6}} | ${'B won'}
-    ${true}  | ${'RoundAccepted'} | ${'Reveal'}        | ${{from: 1, to: 1}} | ${'Rock'} | ${'Scissors'} | ${{A: 4, B: 6}} | ${{A: 6, B: 4}} | ${'A won'}
-    ${true}  | ${'RoundAccepted'} | ${'Reveal'}        | ${{from: 1, to: 1}} | ${'Rock'} | ${'Rock'}     | ${{A: 4, B: 6}} | ${{A: 5, B: 5}} | ${'Draw'}
-    ${true}  | ${'Reveal'}        | ${'Start'}         | ${{from: 1, to: 1}} | ${'Rock'} | ${'Rock'}     | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${''}
-    ${false} | ${'Reveal'}        | ${'Start'}         | ${{from: 1, to: 2}} | ${'Rock'} | ${'Rock'}     | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${'Disallows stake change'}
-    ${false} | ${'Start'}         | ${'RoundProposed'} | ${{from: 1, to: 1}} | ${'Rock'} | ${'Rock'}     | ${{A: 5, B: 5}} | ${{A: 6, B: 4}} | ${'Disallows allocations change '}
-    ${false} | ${'RoundProposed'} | ${'RoundAccepted'} | ${{from: 1, to: 1}} | ${'Rock'} | ${'Rock'}     | ${{A: 6, B: 4}} | ${{B: 6, A: 4}} | ${'Disallows destination swap'}
-    ${false} | ${'Start'}         | ${'RoundProposed'} | ${{from: 1, to: 6}} | ${'Rock'} | ${'Rock'}     | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${'Disallows a stake that is too large'}
+    ${true}  | ${'RoundProposed'} | ${'RoundAccepted'} | ${[1,1}} | ${'Rock'} | ${'Rock'}     | ${[{A: 5, B: 5},{A: 5, B: 5}]} | ${[{A: 4, B: 6}} | ${''}
+    ${true}  | ${'RoundAccepted'} | ${'Reveal'}        | ${[1,1}} | ${'Rock'} | ${'Paper'}    | ${[{A: 4, B: 6}} | ${[{A: 4, B: 6}} | ${'B won'}
+    ${true}  | ${'RoundAccepted'} | ${'Reveal'}        | ${[1,1}} | ${'Rock'} | ${'Scissors'} | ${[{A: 4, B: 6}} | ${[{A: 6, B: 4}} | ${'A won'}
+    ${true}  | ${'RoundAccepted'} | ${'Reveal'}        | ${[1,1}} | ${'Rock'} | ${'Rock'}     | ${[{A: 4, B: 6}} | ${[{A: 5, B: 5},{A: 5, B: 5}]} | ${'Draw'}
+    ${true}  | ${'Reveal'}        | ${'Start'}         | ${[1,1}} | ${'Rock'} | ${'Rock'}     | ${[{A: 5, B: 5},{A: 5, B: 5}]} | ${[{A: 5, B: 5},{A: 5, B: 5}]} | ${''}
+    ${false} | ${'Reveal'}        | ${'Start'}         | ${[1,2}} | ${'Rock'} | ${'Rock'}     | ${[{A: 5, B: 5},{A: 5, B: 5}]} | ${[{A: 5, B: 5},{A: 5, B: 5}]} | ${'Disallows stake change'}
+    ${false} | ${'Start'}         | ${'RoundProposed'} | ${[1,1}} | ${'Rock'} | ${'Rock'}     | ${[{A: 5, B: 5},{A: 5, B: 5}]} | ${[{A: 6, B: 4}} | ${'Disallows allocations change '}
+    ${false} | ${'RoundProposed'} | ${'RoundAccepted'} | ${[1,1}} | ${'Rock'} | ${'Rock'}     | ${[{A: 6, B: 4}} | ${{B: 6, A: 4}} | ${'Disallows destination swap'}
+    ${false} | ${'Start'}         | ${'RoundProposed'} | ${[1,6}} | ${'Rock'} | ${'Rock'}     | ${[{A: 5, B: 5},{A: 5, B: 5}]} | ${[{A: 5, B: 5},{A: 5, B: 5}]} | ${'Disallows a stake that is too large'}
 */
+
+const zero = 0b000000000;
+const one = 0b000000001;
+const two = 0b000000010;
+const three = 0b000000011;
+const five = 0b000000101;
+const six = 0b000000110;
+const seven = 0b000000111;
+
+const balanceStart = [
+  {A: 5, B: 5},
+  {A: 5, B: 5}
+];
+
+const startToXPlaying = ['Start', 'XPlaying'];
+const xPlayingToOPlaying = ['XPlaying', 'OPlaying'];
+const oPlayingToXPlaying = ['OPlaying', 'XPlaying'];
+
 describe('validTransition', () => {
   it.each`
-    isValid  | fromPositionType | toPositionType | stake               | Xs             | Os             | fromBalances    | toBalances      | description
-    ${true}  | ${'Start'}       | ${'XPlaying'}  | ${{from: 1, to: 1}} | ${0b000000001} | ${0}           | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${''}
-    ${false} | ${'Start'}       | ${'XPlaying'}  | ${{from: 1, to: 1}} | ${0b000000000} | ${0}           | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${"X doesn't make a move"}
-    ${false} | ${'Start'}       | ${'XPlaying'}  | ${{from: 1, to: 1}} | ${0b000000001} | ${0b000000010} | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${'X changes Os'}
+    isValid  | positionType          | stake     | Xs               | Os              | balances        | description
+    ${true}  | ${startToXPlaying}    | ${[1, 1]} | ${[zero, one]}   | ${[zero, zero]} | ${balanceStart} | ${'X can start a game'}
+    ${false} | ${startToXPlaying}    | ${[1, 1]} | ${[zero, zero]}  | ${[zero, zero]} | ${balanceStart} | ${"X doesn't make a move"}
+    ${false} | ${startToXPlaying}    | ${[1, 1]} | ${[zero, one]}   | ${[zero, two]}  | ${balanceStart} | ${'O changed during X move'}
+    ${false} | ${startToXPlaying}    | ${[1, 1]} | ${[zero, three]} | ${[zero, zero]} | ${balanceStart} | ${'X starts with two marks'}
+    ${true}  | ${xPlayingToOPlaying} | ${[1, 1]} | ${[one, one]}    | ${[zero, two]}  | ${balanceStart} | ${'O can make a move'}
+    ${false} | ${xPlayingToOPlaying} | ${[1, 1]} | ${[zero, one]}   | ${[zero, two]}  | ${balanceStart} | ${'X changed during O move'}
+    ${false} | ${xPlayingToOPlaying} | ${[1, 1]} | ${[one, one]}    | ${[zero, one]}  | ${balanceStart} | ${'O cant override a mark'}
+    ${false} | ${xPlayingToOPlaying} | ${[1, 1]} | ${[one, one]}    | ${[zero, five]} | ${balanceStart} | ${'O cant make two marks'}
+    ${true}  | ${oPlayingToXPlaying} | ${[1, 1]} | ${[one, five]}   | ${[two, two]}   | ${balanceStart} | ${'X can make a move'}
+    ${false} | ${oPlayingToXPlaying} | ${[1, 1]} | ${[one, five]}   | ${[two, six]}   | ${balanceStart} | ${'O changed during X move'}
+    ${false} | ${oPlayingToXPlaying} | ${[1, 1]} | ${[one, three]}  | ${[two, two]}   | ${balanceStart} | ${'X cant override a mark'}
+    ${false} | ${oPlayingToXPlaying} | ${[1, 1]} | ${[one, seven]}  | ${[two, two]}   | ${balanceStart} | ${'X cant make two marks'}
   `(
-    `Returns $isValid on $fromPositionType -> $toPositionType; $description`,
+    `Returns $isValid on $positionType; $description`,
     async ({
       isValid,
-      fromPositionType,
-      toPositionType,
+      positionType,
       stake,
       Xs,
       Os,
-      fromBalances,
-      toBalances
+      balances
     }: {
       isValid: boolean;
-      fromPositionType: string;
-      toPositionType: string;
-      stake;
-      Xs: number;
-      Os: number;
-      fromBalances: AssetOutcomeShortHand;
-      toBalances: AssetOutcomeShortHand;
+      positionType: string[];
+      stake: number[];
+      Xs: number[];
+      Os: number[];
+      balances: AssetOutcomeShortHand[];
     }) => {
-      fromBalances = replaceAddressesAndBigNumberify(fromBalances, addresses);
-      toBalances = replaceAddressesAndBigNumberify(toBalances, addresses);
+      const fromBalances = replaceAddressesAndBigNumberify(balances[0], addresses);
+      const toBalances = replaceAddressesAndBigNumberify(balances[1], addresses);
+
+      const fromPositionType = positionType[0];
+      const toPositionType = positionType[1];
+
+      const fromStake = stake[0];
+      const toStake = stake[1];
+
+      const fromXs = Xs[0];
+      const toXs = Xs[1];
+
+      const fromOs = Os[0];
+      const toOs = Os[1];
 
       const fromAllocation: Allocation = [];
       const toAllocation: Allocation = [];
@@ -130,15 +165,15 @@ describe('validTransition', () => {
 
       const fromAppData: TTTData = {
         positionType: PositionIndex[fromPositionType],
-        stake: bigNumberify(stake.from).toString(),
-        Xs,
-        Os
+        stake: bigNumberify(fromStake).toString(),
+        Xs: fromXs,
+        Os: fromOs
       };
       const toAppData: TTTData = {
         positionType: PositionIndex[toPositionType],
-        stake: bigNumberify(stake.to).toString(),
-        Xs,
-        Os
+        stake: bigNumberify(toStake).toString(),
+        Xs: toXs,
+        Os: toOs
       };
 
       const [fromAppDataBytes, toAppDataBytes] = [fromAppData, toAppData].map(encodeTTTData);
@@ -180,7 +215,6 @@ describe('validTransition', () => {
           )
         );
       }
-      return isValid || fromVariablePart || toVariablePart;
     }
   );
 });
