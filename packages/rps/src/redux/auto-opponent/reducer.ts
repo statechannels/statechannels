@@ -15,5 +15,7 @@ export const autoPlayerReducer: Reducer<AutoPlayerState> = (
       return {...state, enabled: true, player: action.player};
     case 'StopAutoPlayer':
       return {...state, enabled: false, player: action.player};
+    default:
+      return state;
   }
 };
