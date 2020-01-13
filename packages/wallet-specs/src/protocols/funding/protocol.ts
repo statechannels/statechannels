@@ -35,8 +35,14 @@ const getClientChoice = {
 
 const wait = {
   on: {
-    '': [{ target: 'success', cond: 'consensus' }, { target: 'retry', cond: 'disagreement' }],
-    '*': [{ target: 'success', cond: 'consensus' }, { target: 'retry', cond: 'disagreement' }],
+    '': [
+      { target: 'success', cond: 'consensus' },
+      { target: 'retry', cond: 'disagreement' },
+    ],
+    '*': [
+      { target: 'success', cond: 'consensus' },
+      { target: 'retry', cond: 'disagreement' },
+    ],
   },
 };
 
