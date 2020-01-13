@@ -9,6 +9,8 @@ import {OverlayState} from './global/state';
 import {GameState} from './game/state';
 import {gameReducer} from './game/reducer';
 import {WalletState, walletReducer} from './wallet/reducer';
+import {AutoPlayerState} from './auto-opponent/state';
+import {autoPlayerReducer} from './auto-opponent/reducer';
 
 export interface SiteState {
   login: LoginState;
@@ -17,6 +19,7 @@ export interface SiteState {
   openGames: OpenGameState;
   game: GameState;
   overlay: OverlayState;
+  autoPlayer: AutoPlayerState;
 }
 
 export default combineReducers<SiteState>({
@@ -26,4 +29,5 @@ export default combineReducers<SiteState>({
   openGames: openGamesReducer,
   game: gameReducer,
   overlay: overlayReducer,
+  autoPlayer: autoPlayerReducer,
 });
