@@ -11,7 +11,9 @@ export const rpsChannelClientMocks = (client: RPSChannelClient) => {
       state.bAddress,
       state.aBal,
       state.bBal,
-      state.appData
+      state.appData,
+      state.aAddress,
+      state.bAddress
     ),
     Promise.resolve(state),
   ];
@@ -29,7 +31,9 @@ export const rpsChannelClientMocks = (client: RPSChannelClient) => {
       state.bAddress,
       state.aBal,
       state.bBal,
-      state.appData
+      state.appData,
+      state.aAddress,
+      state.bAddress
     ),
     Promise.resolve(state),
   ];
