@@ -3,7 +3,7 @@ import {Browser, Page, launch} from 'puppeteer';
 import * as fs from 'fs';
 import * as path from 'path';
 
-export async function loadRPSApp(page: Page, ganacheAccountIndex: number) {
+export async function loadRPSApp(page: Page, ganacheAccountIndex: number): Promise<void> {
   // TODO: This is kinda ugly but it works
   // We need to instantiate a web3 for the wallet so we import the web 3 script
   // and then assign it on the window
