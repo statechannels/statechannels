@@ -3,7 +3,7 @@ import {connect} from 'react-redux';
 import NavigationBar from '../components/NavigationBar';
 import * as loginActions from '../redux/login/actions';
 import * as globalActions from '../redux/global/actions';
-import * as autoPlayerActions from '../redux/auto-opponent/actions';
+import * as autoPlayerActions from '../redux/auto-player/actions';
 
 import {SiteState} from '../redux/reducer';
 

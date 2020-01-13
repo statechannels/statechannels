@@ -7,7 +7,7 @@ import {combineReducers} from 'redux';
 import {gameReducer} from '../../game/reducer';
 import {openGamesReducer} from '../../open-games/reducer';
 import {channelUpdatedListener} from '../../message-service/channel-updated-listener';
-import {autoPlayer, autoOpponent} from '../';
+import {autoPlayer, autoOpponent} from '..';
 import {FakeChannelClient} from '@statechannels/channel-client';
 
 const SUFFICIENT_TIME_TO_GET_TO_TURNUM_16 = 7000; // test will take at least this long to run

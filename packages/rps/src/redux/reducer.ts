@@ -9,8 +9,8 @@ import {OverlayState} from './global/state';
 import {GameState} from './game/state';
 import {gameReducer} from './game/reducer';
 import {WalletState, walletReducer} from './wallet/reducer';
-import {AutoPlayerState} from './auto-opponent/state';
-import {autoPlayerReducer} from './auto-opponent/reducer';
+import {AutoPlayerState} from './auto-player/state';
+import {autoPlayerReducer} from './auto-player/reducer';
 
 export interface SiteState {
   login: LoginState;

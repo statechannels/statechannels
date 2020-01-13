@@ -13,7 +13,7 @@ import {RPSChannelClient} from '../utils/rps-channel-client';
 import {channelUpdatedListener} from './message-service/channel-updated-listener';
 import {messageQueuedListener} from './message-service/message-queued-listener';
 import {gameSaga} from './game/saga';
-import {autoPlayer, autoOpponent} from './auto-opponent';
+import {autoPlayer, autoOpponent} from './auto-player';
 import {ChannelClient, FakeChannelClient} from '@statechannels/channel-client';
 
 const composeEnhancers = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
