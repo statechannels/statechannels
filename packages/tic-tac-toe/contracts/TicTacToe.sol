@@ -192,10 +192,7 @@ contract TicTacToe is ForceMoveApp {
         stakeUnchanged(fromGameData, toGameData)
     {
         require(toGameData.Xs == fromGameData.Xs, 'No Xs added to board');
-        require(
-            madeStrictlyOneMark(toGameData.Os, fromGameData.Os),
-            'One O placed'
-        );
+        require(madeStrictlyOneMark(toGameData.Os, fromGameData.Os), 'One O placed');
 
         // Old TTTMagmo code
         // if (State.indexOfMover(_new) == 0) {
@@ -224,10 +221,7 @@ contract TicTacToe is ForceMoveApp {
         stakeUnchanged(fromGameData, toGameData)
     {
         require(toGameData.Os == fromGameData.Os, 'No Os added to board');
-        require(
-            madeStrictlyOneMark(toGameData.Xs, fromGameData.Xs),
-            'One X placed'
-        );
+        require(madeStrictlyOneMark(toGameData.Xs, fromGameData.Xs), 'One X placed');
 
         // Old TTTMagmo code
         // if (State.indexOfMover(_new) == 0) { // mover is A
@@ -245,29 +239,32 @@ contract TicTacToe is ForceMoveApp {
         Outcome.AllocationItem[] memory toAllocation,
         TTTData memory fromGameData,
         TTTData memory toGameData
-    ) private pure noDisjointMoves(toGameData) stakeUnchanged(fromGameData, toGameData) {
+    )
+        private
+        pure
+        noDisjointMoves(toGameData)
+        stakeUnchanged(fromGameData, toGameData)
+    {
         require(toGameData.Xs == fromGameData.Xs, 'No Xs added to board');
-        require(
-            madeStrictlyOneMark(toGameData.Os, fromGameData.Os),
-            'One O placed'
-        );
+        require(madeStrictlyOneMark(toGameData.Os, fromGameData.Os), 'One O placed');
         require(hasWon(toGameData.Os), 'O has won');
 
-        uint256 currentOsPlayer = 0; // Need to calculate this
+        uint256 currentOsPlayer = 1; // Need to calculate this
 
         uint256 playerAWinnings; // playerOneWinnings
         uint256 playerBWinnings; // playerTwoWinnings
         // calculate winnings
         (playerAWinnings, playerBWinnings) = winnings(currentOsPlayer, toGameData.stake);
 
+        // TODO This logic will only work if PlayerA is Xs and PlayerB is Os
         require(
-            toAllocation[0].amount == fromAllocation[0].amount.add(playerAWinnings),
-            "Player A's allocation should be updated with the winnings."
+            toAllocation[1].amount == fromAllocation[1].amount.add(playerBWinnings),
+            "Player B's allocation should be updated with the winnings."
         );
         require(
-            toAllocation[1].amount ==
-                fromAllocation[1].amount.sub(fromGameData.stake.mul(2)).add(playerBWinnings),
-            "Player B's allocation should be updated with the winnings."
+            toAllocation[0].amount ==
+                fromAllocation[0].amount.sub(fromGameData.stake.mul(2)).add(playerAWinnings),
+            "Player A's allocation should be updated with the winnings."
         );
 
         // Old TTTMagmo code
@@ -294,34 +291,30 @@ contract TicTacToe is ForceMoveApp {
         private
         pure
         noDisjointMoves(toGameData)
-        outcomeUnchanged(fromPart, toPart)
         stakeUnchanged(fromGameData, toGameData)
-        allocationsNotLessThanStake(fromAllocation, toAllocation, fromGameData, toGameData)
     {
         require(toGameData.Os == fromGameData.Os, 'No Os added to board');
-        require(
-            madeStrictlyOneMark(toGameData.Xs, fromGameData.Xs),
-            'One X placed'
-        );
+        require(madeStrictlyOneMark(toGameData.Xs, fromGameData.Xs), 'One X placed');
         require(hasWon(toGameData.Xs), 'X has won');
 
-        uint256 currentXsPlayer = 1; // Need to calculate this
+        uint256 currentXsPlayer = 0; // Need to calculate this
 
         uint256 playerAWinnings; // playerOneWinnings
         uint256 playerBWinnings; // playerTwoWinnings
         // calculate winnings
         (playerAWinnings, playerBWinnings) = winnings(currentXsPlayer, toGameData.stake);
 
-        // Got Stack too deep
-        // require(
-        //     toAllocation[0].amount == fromAllocation[0].amount.add(playerAWinnings),
-        //     "Player A's allocation should be updated with the winnings."
-        // );
-        // require(
-        //     toAllocation[1].amount ==
-        //         fromAllocation[1].amount.sub(fromGameData.stake.mul(2)).add(playerBWinnings),
-        //     "Player B's allocation should be updated with the winnings."
-        // );
+        // TODO This logic will only work if PlayerA is Xs and PlayerB is Os
+        require(
+            toAllocation[0].amount == fromAllocation[0].amount.add(playerAWinnings),
+            "Player A's allocation should be updated with the winnings."
+        );
+        require(
+            toAllocation[1].amount ==
+                fromAllocation[1].amount.sub(fromGameData.stake.mul(2)).add(playerBWinnings),
+            "Player B's allocation should be updated with the winnings."
+        );
+
     }
 
     function requireValidOPLAYINGtoDRAW(
@@ -445,10 +438,7 @@ contract TicTacToe is ForceMoveApp {
     }
 
     modifier noDisjointMoves(TTTData memory toGameData) {
-        require(
-            areDisjoint(toGameData.Xs, toGameData.Os),
-            'TicTacToe: No Disjoint Moves'
-        );
+        require(areDisjoint(toGameData.Xs, toGameData.Os), 'TicTacToe: No Disjoint Moves');
         _;
     }
 
