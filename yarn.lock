@@ -12747,20 +12747,6 @@ flush-write-stream@^1.0.0:
     inherits "^2.0.3"
     readable-stream "^2.3.6"
 
-fmg-core@0.5.6:
-  version "0.5.6"
-  resolved "https://registry.yarnpkg.com/fmg-core/-/fmg-core-0.5.6.tgz#2a895b10f8fc6fe75bdd6ab320e1c97e483a92d2"
-  integrity sha512-aHWDk73c23X5n2T5LzCCDDX1ker2JVlR3wmdqN/nAgCLeNEeGUPH8fYYFAQv3wxXDXEBk8boeS5KWiVBjlgjpA==
-  dependencies:
-    bn.js "^4.11.8"
-    ethers "^4.0.26"
-    sha3 "^1.2.2"
-    web3 "1.0.0-beta.37"
-    web3-eth-abi "1.0.0-beta.37"
-    web3-eth-accounts "1.0.0-beta.37"
-    web3-utils "1.0.0-beta.37"
-    websocket "^1.0.28"
-
 fmg-core@0.5.9:
   version "0.5.9"
   resolved "https://registry.yarnpkg.com/fmg-core/-/fmg-core-0.5.9.tgz#9feee0ce880d2cb6d59985116d01acc9eab90a95"
@@ -17181,15 +17167,6 @@ magic-string@^0.22.4:
   integrity sha512-oreip9rJZkzvA8Qzk9HFs8fZGF/u7H/gtrE8EN6RjKJ9kh2HlC+yQ2QezifqTZfGyiuAV0dRv5a+y/8gBb1m9w==
   dependencies:
     vlq "^0.2.2"
-
-magmo-wallet-client@0.0.3:
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/magmo-wallet-client/-/magmo-wallet-client-0.0.3.tgz#4ebc0de83fbceb11dae37f7275717c4f3d7acb15"
-  integrity sha512-tCxj/diU5++y1ICEJk3PkAHErsm1Q0SLWPELkzXpoIZaziszpvMvyhUEEHeewmnadEVsJY2vDFDwFvGvsg1YFw==
-  dependencies:
-    bn.js "4.11.8"
-    eventemitter2 "5.0.1"
-    fmg-core "0.5.6"
 
 magnet-uri@^5.1.3:
   version "5.2.4"
