@@ -1,3 +1,5 @@
+require('../env');
+
 export const NAME = 'Neo Bot';
 
 // This account is provided eth in magmo-devtools/utils/startGanache.js

@@ -62,7 +62,23 @@ yarn test:ci
 
 ## Deploying
 
-Heroku is configured to automatically deploy from the watched `deploy` branch.
+Heroku runs a production version of the build `Dockerfile.hub.staging` in the root of the repo. To create a deployment you must:
+
+**Build the Dockerfile locally, by running**
+```bash
+docker build Dockerfile.hub.staging -t statechannels-hub
+```
+
+**Push the container to the Heroku Container Registry**
+```bash
+heroku container:push -a statechannels-hub statechannels-hub
+```
+
+**Release the container on Heroku (a.k.a., trigger the dyno to update)**
+```bash
+heroku container:release -a statechannels-hub statechannels-hub
+```
+
 To run a test deploy, run
 
 ```

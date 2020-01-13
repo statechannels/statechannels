@@ -10,6 +10,7 @@
     "esModuleInterop": true,
     "strict": false
   },
+  "references": [{"path": "../devtools"}],
   "include": ["src/**/*"],
   "exclude": ["**/*test_data.ts", "**/__mocks__/*"]
 }
