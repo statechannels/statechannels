@@ -92,7 +92,6 @@ function* autoPlayerARun() {
       const openGame = yield select(getOpenGame);
       if (openGame) {
         const {address, name, stake} = openGame;
-        // FIXME: (liam) Add metamask address?
         yield put(joinOpenGame(name, address, address, stake));
       }
       break;
