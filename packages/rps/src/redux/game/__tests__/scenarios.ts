@@ -44,6 +44,8 @@ function channelState(
     bUserId,
     aAddress,
     bAddress,
+    aOutcomeAddress: aAddress,
+    bOutcomeAddress: bAddress,
     aBal: WeiPerEther.mul(balances[0]).toString(),
     bBal: WeiPerEther.mul(balances[1]).toString(),
     appData: appDataParam,
@@ -75,11 +77,13 @@ export const channelStates = {
 const propsA = {
   name: aName,
   address: aAddress,
+  outcomeAddress: aAddress,
   opponentName: bName,
   roundBuyIn,
   myWeapon: playerAWeapon,
   theirWeapon: playerBWeapon,
   opponentAddress: bAddress,
+  opponentOutcomeAddress: bAddress,
   salt,
 };
 
@@ -101,6 +105,7 @@ export const localStatesA = {
 const propsB = {
   name: bName,
   address: bAddress,
+  outcomeAddress: bAddress,
   opponentName: aName,
   roundBuyIn,
   myWeapon: playerBWeapon,

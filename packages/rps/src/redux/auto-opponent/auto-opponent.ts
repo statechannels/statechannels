@@ -34,7 +34,7 @@ import {FakeChannelClient} from '@statechannels/channel-client';
 export function* autoOpponent(player: 'A' | 'B', externalClient: RPSChannelClient) {
   let internalStoreState = {
     game: {
-      localState: Setup.lobby({name: 'AutoBot', address: 'blah'}),
+      localState: Setup.lobby({name: 'AutoBot', address: 'blah', outcomeAddress: 'blah'}),
       channelState: null,
     } as GameState,
     openGames: [],
@@ -86,6 +86,7 @@ export function* autoOpponent(player: 'A' | 'B', externalClient: RPSChannelClien
         syncOpenGames([
           {
             address: 'todo: regular-player-address',
+            outcomeAddress: 'todo: regular-player-outcome-address',
             name: 'regular-player',
             stake: gameCreated.roundBuyIn,
             createdAt: new Date().getTime(),
@@ -102,6 +103,7 @@ export function* autoOpponent(player: 'A' | 'B', externalClient: RPSChannelClien
         syncOpenGames([
           {
             address: 'todo: autoPlayerAddress',
+            outcomeAddress: 'todo: autoPlayerOutcomeAddress',
             name: 'AutoPlayer',
             stake: WeiPerEther.toString(),
             createdAt: new Date().getTime(),
