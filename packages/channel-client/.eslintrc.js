@@ -1,10 +1,13 @@
+const baseConfig = require('../../.eslintrc.js');
+
 module.exports = {
+  ...baseConfig,
   env: {
     browser: true,
     es6: true
   },
   parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint', 'prettier', 'jest', 'import'],
+  plugins: [...baseConfig.plugins, '@typescript-eslint', 'prettier', 'jest', 'import'],
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
@@ -16,6 +19,7 @@ module.exports = {
     'plugin:prettier/recommended'
   ],
   rules: {
-    'prettier/prettier': ['warn']
+    'prettier/prettier': ['warn'],
+    '@typescript-eslint/no-explicit-any': 'off'
   }
 };
