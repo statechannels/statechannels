@@ -31,14 +31,37 @@ import {WeiPerEther} from 'ethers/constants';
 //
 
 export function* main() {
-  while (yield take('StartAutoPlayer')) {
-    // starts the task in the background
-    const bgTask = yield fork(autoPlayer, 'A'); // get from action
-    // wait for the user stop action
-    yield take('StopAutoPlayer');
-    // user clicked stop. cancel the background task
-    // this will cause the forked bgSync task to jump into its finally block
-    yield cancel(bgTask);
+  const tasks = {A: undefined, B: undefined};
+  yield fork(starter);
+  yield fork(stopper);
+  function* starter() {
+    while (true) {
+      const action = yield take('StartAutoPlayer');
+      // starts the task in the background
+      if (tasks.A && action.player == 'B') {
+        yield cancel(tasks.A);
+        tasks.A = undefined;
+        console.log('AutoPlayer A stopped');
+      }
+      if (tasks.B && action.player == 'A') {
+        yield cancel(tasks.B);
+        tasks.B = undefined;
+        console.log('AutoPlayer B stopped');
+      }
+      tasks[action.player] = yield fork(autoPlayer, action.player); // get from action
+      console.log('AutoPlayer ' + action.player + ' started');
+    }
+  }
+
+  function* stopper() {
+    while (true) {
+      // wait for the user stop action
+      const action = yield take('StopAutoPlayer');
+      // user clicked stop. cancel the background task
+      // this will cause the forked task to jump into its finally block
+      yield cancel(tasks[action.player]);
+      console.log('AutoPlayer ' + action.player + ' stopped');
+    }
   }
 }
 

@@ -13,7 +13,7 @@ import {RPSChannelClient} from '../utils/rps-channel-client';
 import {channelUpdatedListener} from './message-service/channel-updated-listener';
 import {messageQueuedListener} from './message-service/message-queued-listener';
 import {gameSaga} from './game/saga';
-import {autoPlayer, autoOpponent} from './auto-player';
+import {main as autoPlayer, autoOpponent} from './auto-player';
 import {ChannelClient, FakeChannelClient} from '@statechannels/channel-client';
 
 const composeEnhancers = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
@@ -23,7 +23,7 @@ const store = createStore(reducer, enhancers);
 
 function* rootSaga() {
   yield fork(loginSaga);
-
+  yield fork(autoPlayer);
   let client;
   if (process.env.AUTO_OPPONENT === 'A' || process.env.AUTO_OPPONENT === 'B') {
     console.info('Bypassing state channel wallet');
@@ -36,12 +36,6 @@ function* rootSaga() {
 
   yield fork(gameSaga, client);
   yield fork(channelUpdatedListener, client);
-
-  if (process.env.AUTO_PLAYER === 'A') {
-    yield fork(autoPlayer, 'A');
-  } else if (process.env.AUTO_PLAYER === 'B') {
-    yield fork(autoPlayer, 'B');
-  }
 
   if (process.env.AUTO_OPPONENT === 'A') {
     yield fork(autoOpponent, 'A', client);

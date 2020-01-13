@@ -16,5 +16,5 @@ export function stopAutoPlayerA() {
 }
 
 export function stopAutoPlayerB() {
-  return {type: 'StartAutoPlayer', player: 'B'};
+  return {type: 'StopAutoPlayer', player: 'B'};
 }
