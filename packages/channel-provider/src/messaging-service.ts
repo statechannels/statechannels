@@ -9,7 +9,7 @@ export interface MessagingServiceOptions {
 }
 
 export class MessagingService {
-  protected timeoutListener?: NodeJS.Timeout;
+  protected timeoutListenerId?: number;
   protected attempts = 0;
   protected url = '';
 
@@ -34,7 +34,7 @@ export class MessagingService {
     target.postMessage(message, corsUrl);
     log('Sent message: %o', message);
 
-    this.timeoutListener = setTimeout(() => {
+    this.timeoutListenerId = setTimeout(() => {
       if (this.attempts < this.maxRetries) {
         log('Request %o timed out after %o ms, retrying', message, this.timeoutMs);
         this.send(target, message, corsUrl);
@@ -73,8 +73,8 @@ export class MessagingService {
   acknowledge() {
     log('ACK signal received');
 
-    if (this.timeoutListener) {
-      clearTimeout(this.timeoutListener);
+    if (this.timeoutListenerId) {
+      clearTimeout(this.timeoutListenerId);
     }
 
     this.attempts = 0;
