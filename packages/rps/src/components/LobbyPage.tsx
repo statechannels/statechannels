@@ -10,7 +10,12 @@ import CreatingOpenGameContainer from '../containers/CreatingOpenGameContainer';
 
 interface Props {
   openGames: OpenGame[];
-  joinOpenGame: (opponentName: string, opponentAddress: string, roundBuyIn: string) => void;
+  joinOpenGame: (
+    opponentName: string,
+    opponentAddress: string,
+    opponentOutcomeAddress: string,
+    roundBuyIn: string
+  ) => void;
   newOpenGame: () => void;
 }
 
@@ -36,13 +41,24 @@ export default class LobbyPage extends React.PureComponent<Props, State> {
           </div>
           <div className="mt-5">
             <div className="lobby-ogc-container">
-              {openGames.map(openGame => (
-                <OpenGameEntry
-                  key={openGame.address}
-                  openGame={openGame}
-                  joinOpenGame={joinOpenGame}
-                />
-              ))}
+              {openGames.length > 0 ? (
+                openGames.map(openGame => (
+                  <OpenGameEntry
+                    key={openGame.address}
+                    openGame={openGame}
+                    joinOpenGame={joinOpenGame}
+                  />
+                ))
+              ) : (
+                <div className="card card-body">
+                  <h3>ℹ️ Try playing against yourself!</h3>
+                  <p>
+                    If you open a new window or tab, you can simulate two users playing this game
+                    against each other. By clicking <b>Create a game</b> above, you can start a game
+                    that your second browser window or tab can then join.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>

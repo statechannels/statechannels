@@ -58,6 +58,7 @@ export type LocalState = Setup | A | B | EndGame;
 export interface Playing {
   name: string;
   address: string;
+  outcomeAddress: string;
   opponentName: string;
   roundBuyIn: string;
 }
@@ -66,6 +67,7 @@ function extractPlayingFromParams(params: Playing & Anything) {
   return {
     name: params.name,
     address: params.address,
+    outcomeAddress: params.outcomeAddress,
     opponentName: params.opponentName,
     roundBuyIn: params.roundBuyIn,
   };
@@ -101,11 +103,13 @@ export namespace Setup {
     type: 'Setup.Lobby';
     name: string;
     address: string;
+    outcomeAddress: string;
   }
   export const lobby: StateConstructor<Lobby> = params => {
     return {
       name: params.name,
       address: params.address,
+      outcomeAddress: params.outcomeAddress,
       type: 'Setup.Lobby',
     };
   };
@@ -117,11 +121,13 @@ export namespace A {
   export interface GameChosen extends Playing {
     type: 'A.GameChosen';
     opponentAddress: string; // need to keep opponentAddress until we have opened the channel
+    opponentOutcomeAddress: string;
   }
   export const gameChosen: StateConstructor<GameChosen> = params => {
     return {
       ...extractPlayingFromParams(params),
       opponentAddress: params.opponentAddress,
+      opponentOutcomeAddress: params.opponentOutcomeAddress,
       type: 'A.GameChosen',
     };
   };
@@ -227,21 +233,29 @@ export namespace B {
     type: 'B.CreatingOpenGame';
     name: string;
     address: string;
+    outcomeAddress: string;
     // libraryAddress: string; // TODO
   }
   export const creatingOpenGame: StateConstructor<CreatingOpenGame> = params => {
-    return {name: params.name, address: params.address, type: 'B.CreatingOpenGame'};
+    return {
+      name: params.name,
+      address: params.address,
+      outcomeAddress: params.outcomeAddress,
+      type: 'B.CreatingOpenGame',
+    };
   };
   export interface WaitingRoom {
     type: 'B.WaitingRoom';
     name: string;
     address: string;
+    outcomeAddress: string;
     roundBuyIn: string;
   }
   export const waitingRoom: StateConstructor<WaitingRoom> = params => {
     return {
       name: params.name,
       address: params.address,
+      outcomeAddress: params.outcomeAddress,
       roundBuyIn: params.roundBuyIn,
       type: 'B.WaitingRoom',
     };
@@ -341,8 +355,14 @@ export namespace EndGame {
     type: 'EndGame.GameOver';
     name: string;
     address: string;
+    outcomeAddress: string;
   }
   export const gameOver: StateConstructor<GameOver> = params => {
-    return {name: params.name, address: params.address, type: 'EndGame.GameOver'};
+    return {
+      name: params.name,
+      address: params.address,
+      outcomeAddress: params.outcomeAddress,
+      type: 'EndGame.GameOver',
+    };
   };
 }

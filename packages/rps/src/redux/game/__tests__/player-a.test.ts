@@ -36,7 +36,7 @@ const gameState = (localState, channelState?: ChannelState) => ({
 describe('when joining an open game', () => {
   it('calls createChannel and transitions to GameChosen', async () => {
     const initialState = gameState(localStatesA.lobby);
-    const action = joinOpenGame(bName, bAddress, stake);
+    const action = joinOpenGame(bName, bAddress, bAddress, stake);
 
     const {storeState} = await expectSaga(gameSaga as any, client)
       .withReducer(reducer, initialState)

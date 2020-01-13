@@ -92,7 +92,7 @@ function* autoPlayerARun() {
       const openGame = yield select(getOpenGame);
       if (openGame) {
         const {address, name, stake} = openGame;
-        yield put(joinOpenGame(name, address, stake));
+        yield put(joinOpenGame(name, address, address, stake));
       }
       break;
     case 'A.ChooseWeapon':
