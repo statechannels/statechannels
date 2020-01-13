@@ -79,6 +79,7 @@
     "react-loader-spinner": "^2.0.6",
     "react-modal": "^3.5.1",
     "react-redux": "^5.0.7",
+    "react-switch": "^5.0.1",
     "react-test-renderer": "^16.4.1",
     "reactstrap": "^6.4.0",
     "redux": "^4.0.0",
