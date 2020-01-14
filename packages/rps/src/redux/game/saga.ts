@@ -64,7 +64,7 @@ function* gameSagaRun(client: RPSChannelClient) {
   switch (localState.type) {
     case 'Setup.NeedAddress':
       const address: string = yield call([client, 'getAddress']);
-      const outcomeAddress: string = address; // FIXME: Should be window.ethereum.selectedAddress
+      const outcomeAddress: string = window.ethereum.selectedAddress;
       yield put(a.gotAddressFromWallet(address, outcomeAddress));
       break;
     case 'A.GameChosen':

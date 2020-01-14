@@ -131,7 +131,7 @@ function waitForJointChannelReducer(
           const ourAddress = new Wallet(privateKey).address;
           const appDefinition = CONSENSUS_LIBRARY_ADDRESS;
 
-          const destinations = [targetChannelId, ourAddress, hubAddress];
+          const destinations = [targetChannelId, window.ethereum.selectedAddress, hubAddress];
           const outcome = createGuaranteeOutcome(destinations, jointChannelId);
 
           const guarantorChannelResult = advanceChannel.initializeAdvanceChannel(
@@ -223,7 +223,7 @@ function waitForGuarantorChannelReducer(
         case StateType.PostFundSetup:
           const outcome = calculateLedgerOutcome(
             startingOutcome,
-            participants[ourIndex],
+            window.ethereum.selectedAddress,
             hubAddress
           );
 
