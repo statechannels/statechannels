@@ -48,13 +48,13 @@ export function initialize(
   const jointChannelInitialized = advanceChannel.initializeAdvanceChannel(sharedData, {
     privateKey,
     appDefinition,
-    ourIndex: TwoPartyPlayerIndex.A,
+    ourIndex,
     stateType: StateType.PreFundSetup,
     clearedToSend: true,
     processId,
     protocolLocator: makeLocator(protocolLocator, ADVANCE_CHANNEL_PROTOCOL_LOCATOR),
     outcome,
-    participants: [participants[ourIndex], hubAddress],
+    participants: participants.concat(hubAddress),
     appData: getInitialAppData()
   });
 
@@ -115,7 +115,7 @@ function waitForJointChannelReducer(
             processId,
             protocolLocator: makeLocator(protocolLocator, ADVANCE_CHANNEL_PROTOCOL_LOCATOR),
             channelId: jointChannelId,
-            ourIndex: TwoPartyPlayerIndex.A
+            ourIndex: protocolState.ourIndex
           });
 
           return {
