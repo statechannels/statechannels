@@ -1,5 +1,7 @@
 import {Config} from 'knex';
 
+import '../env';
+
 export const dbCofig: Config = {
   client: 'pg',
   connection: process.env.DATABASE_URL || {

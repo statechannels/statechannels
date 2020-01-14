@@ -14,7 +14,9 @@ export default class Acknowledge extends React.PureComponent<Props> {
       <Fragment>
         <h2>{title}</h2>
         <p>{description}</p>
-        <Button onClick={acknowledge}>Ok</Button>
+        <Button color="primary" onClick={acknowledge}>
+          Ok
+        </Button>
       </Fragment>
     );
   }

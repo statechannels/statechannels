@@ -31,4 +31,18 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+
+  img {
+    opacity: 0.5;
+    filter: gray; /* IE6-9 */
+    -webkit-filter: grayscale(1); /* Google Chrome, Safari 6+ & Opera 15+ */
+    filter: grayscale(1); /* Microsoft Edge and Firefox 35+ */
+  }
+
+  /* Disable grayscale on hover */
+  img:hover {
+    opacity: 1;
+    -webkit-filter: grayscale(0);
+    filter: none;
+  }
 }

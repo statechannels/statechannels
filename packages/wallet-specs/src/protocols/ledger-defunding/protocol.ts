@@ -1,6 +1,5 @@
-import { store } from '../..';
+import { store, ethAllocationOutcome, checkThat, getEthAllocation } from '../..';
 import { isIndirectFunding } from '../../ChannelStoreEntry';
-import { checkThat, isAllocation } from '../../store';
 import * as LedgerUpdate from '../ledger-update/protocol';
 
 const PROTOCOL = 'ledger-defunding';
@@ -14,12 +13,12 @@ function ledgerUpdateArgs({ targetChannelId }: Init): LedgerUpdate.Init {
   const { ledgerId } = checkThat(store.getEntry(targetChannelId).funding, isIndirectFunding);
   const { outcome } = store.getEntry(ledgerId).latestSupportedState;
   const { outcome: concludedOutcome } = store.getEntry(targetChannelId).latestSupportedState;
-  const targetOutcome = checkThat(outcome, isAllocation)
+  const targetAllocation = getEthAllocation(outcome)
     .filter(item => item.destination !== targetChannelId)
-    .concat(checkThat(concludedOutcome, isAllocation));
+    .concat(getEthAllocation(concludedOutcome));
   return {
     channelId: ledgerId,
-    targetOutcome,
+    targetOutcome: ethAllocationOutcome(targetAllocation),
   };
 }
 const defundTarget = {

@@ -2,8 +2,6 @@ import {call, fork, put, take, takeEvery, all} from 'redux-saga/effects';
 import * as loginActions from './actions';
 import {reduxSagaFirebase} from '../../gateways/firebase';
 import metamaskSaga from '../metamask/saga';
-// import {initializeWallet} from 'magmo-wallet-client'; TODO:WALLET_SCRUBBED_OUT eventually connect to the channelClient
-// import {WALLET_IFRAME_ID} from '../../constants'; TODO:WALLET_SCRUBBED_OUT
 
 function* loginSaga() {
   try {

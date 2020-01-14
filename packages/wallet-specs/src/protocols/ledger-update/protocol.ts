@@ -1,4 +1,4 @@
-import { Outcome } from '../../';
+import { Outcome } from '@statechannels/nitro-protocol';
 
 const PROTOCOL = 'ledger-update';
 

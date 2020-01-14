@@ -1,8 +1,9 @@
-import { add, Allocation, getChannelId, gt, Outcome, SignedState, State } from '.';
+import { add, getChannelId, gt, SignedState } from '.';
 import { ChannelStoreEntry, IChannelStoreEntry } from './ChannelStoreEntry';
 import { messageService } from './messaging';
 import { AddressableMessage, FundingStrategyProposed } from './wire-protocol';
-
+import { State } from '@statechannels/nitro-protocol';
+import { getStateSignerAddress, signState } from '@statechannels/nitro-protocol/lib/src/signatures';
 export interface IStore {
   getEntry: (channelId: string) => ChannelStoreEntry;
   getIndex: (channelId: string) => 0 | 1;
@@ -56,7 +57,7 @@ export class Store implements IStore {
   private _nonces: Record<string, string> = {};
 
   constructor(args?: Constructor) {
-    const { store, privateKeys, nonces } = args || {};
+    const { store, privateKeys } = args || {};
     this._store = store || {};
     this._privateKeys = privateKeys || {};
   }
@@ -116,10 +117,12 @@ export class Store implements IStore {
   }
 
   public signedByMe(state: State) {
-    const { states } = this.getEntry(getChannelId(state.channel));
+    const { states, ourAddress } = this.getEntry(getChannelId(state.channel));
     const signedState = states.find((s: SignedState) => Store.equals(state, s.state));
 
-    return !!signedState && !!signedState.signatures && signedState.signatures.includes('first');
+    return !!signedState?.signatures.find(
+      signature => getStateSignerAddress({ ...signedState, signature }) === ourAddress
+    );
   }
 
   public initializeChannel(data: IChannelStoreEntry) {
@@ -225,9 +228,11 @@ export class Store implements IStore {
   // PRIVATE
 
   private signState(state: State): SignedState {
+    const { privateKey } = this.getEntry(getChannelId(state.channel));
+
     return {
       state,
-      signatures: [this.getEntry(getChannelId(state.channel)).privateKey],
+      signatures: [signState(state, privateKey).signature],
     };
   }
 
@@ -289,22 +294,3 @@ export interface Deposit {
 }
 
 export type StoreEvent = ChannelUpdated | Deposit;
-
-export function isAllocation(outcome: Outcome): outcome is Allocation {
-  // TODO: I think this might need to be isEthAllocation (sometimes?)
-  if ('target' in outcome) {
-    return false;
-  }
-  return true;
-}
-
-const throwError = (fn: (t1: any) => boolean, t) => {
-  throw new Error(`not valid, ${fn.name} failed on ${t}`);
-};
-type TypeGuard<T> = (t1: any) => t1 is T;
-export function checkThat<T>(t, isTypeT: TypeGuard<T>): T {
-  if (!isTypeT(t)) {
-    throwError(isTypeT, t);
-  }
-  return t;
-}
