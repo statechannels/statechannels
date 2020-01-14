@@ -14,7 +14,10 @@ export async function loadRPSApp(page: Page, ganacheAccountIndex: number) {
   // MetaMask has an .enable() API to unlock it / access it from the app
   await page.evaluateOnNewDocument(`window.ethereum.enable = () => new Promise(r => r())`);
   await page.evaluateOnNewDocument(
-    `web3.eth.getAccounts().then(lst => web3.eth.defaultAccount = lst[${ganacheAccountIndex}])`
+    `web3.eth.getAccounts().then(lst => {
+      web3.eth.defaultAccount = lst[${ganacheAccountIndex}];
+      window.ethereum.selectedAddress = web3.eth.defaultAccount;
+    });`
   );
   await page.evaluateOnNewDocument(`window.ethereum.networkVersion = 9001`);
   await page.evaluateOnNewDocument(`window.ethereum.on = () => {}`);
