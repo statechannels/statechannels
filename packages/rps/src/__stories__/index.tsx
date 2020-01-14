@@ -53,6 +53,7 @@ const initialState: SiteState = {
   openGames: [
     {
       address: '0x',
+      outcomeAddress: '0xabc',
       name: 'Player B',
       stake: parseEther('1').toString(),
       isPublic: true,
