@@ -18,7 +18,7 @@ const PROTOCOL = 'create-channel';
 /*
 Spawned in a new process when the app calls CreateChannel
 */
-export type Init = JsonRpcCreateChannelParams;
+export type Init = JsonRpcCreateChannelParams & { chainId: string; challengeDuration: number };
 
 type ChannelSet = Init & { channelId: string };
 export interface SetChannel {
@@ -104,7 +104,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => 
     const channel: Channel = {
       participants,
       channelNonce,
-      chainId: '0x42', // TODO: determine chain Id
+      chainId: ctx.chainId,
     };
 
     const { allocations, appData, appDefinition } = ctx;
@@ -115,7 +115,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => 
       turnNum: 0,
       outcome: ethAllocationOutcome(allocations),
       channel,
-      challengeDuration: 1, // TODO
+      challengeDuration: ctx.challengeDuration,
     };
 
     const entry = new ChannelStoreEntry({

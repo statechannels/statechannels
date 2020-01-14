@@ -78,6 +78,8 @@ messagesToFirst.push({
 
 export const createChannel: CreateChannelEvent = {
   type: 'CREATE_CHANNEL',
+  chainId: '0x01',
+  challengeDuration: 1,
   participants: [
     {
       participantId: first,
