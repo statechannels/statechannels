@@ -66,17 +66,17 @@ Heroku runs a production version of the build `Dockerfile.hub.staging` in the ro
 
 **Build the Dockerfile locally, by running**
 ```bash
-docker build Dockerfile.hub.staging -t statechannels-hub
+docker build -t registry.heroku.com/statechannels-hub-staging/statechannels-hub -f Dockerfile.hub.staging .
 ```
 
 **Push the container to the Heroku Container Registry**
 ```bash
-heroku container:push -a statechannels-hub statechannels-hub
+docker push registry.heroku.com/statechannels-hub-staging/statechannels-hub
 ```
 
 **Release the container on Heroku (a.k.a., trigger the dyno to update)**
 ```bash
-heroku container:release -a statechannels-hub statechannels-hub
+heroku container:release -a statechannels-hub-staging statechannels-hub
 ```
 
 To run a test deploy, run
