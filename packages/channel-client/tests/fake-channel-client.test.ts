@@ -115,7 +115,7 @@ describe('FakeChannelClient', () => {
       setClientStates([clientA, clientB], states['proposed']);
 
       return new Promise(resolve => {
-        clientBEventEmitter.once('ChannelProposed', (result: ChannelResult) => {
+        clientBEventEmitter.once('ChannelProposed', () => {
           expect(clientB.latestState).toEqual(states['proposed']);
           resolve();
         });
