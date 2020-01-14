@@ -74,7 +74,8 @@ async function handleUpdateChannel(payload: jrs.RequestObject, store: IStore) {
   const {latestState} = entry;
 
   const state = createStateFromUpdateChannelParams(latestState, params);
-  store.receiveStates([{state, signatures: ['FAKE']}]);
+  const signedState = store.signState(state);
+  store.receiveStates([signedState]);
   window.parent.postMessage(jrs.success(payload.id, {success: true}), '*');
   dispatchChannelUpdatedMessage(params.channelId, store);
 }
@@ -108,14 +109,16 @@ async function handleCreateChannelMessage(
       participants: params.participants,
       allocations: params.allocations[0].allocationItems,
       appDefinition: params.appDefinition,
-      appData: params.appData
+      appData: params.appData,
+      chainId: process.env.NETWORK_CHAIN_ID || '0',
+      challengeDuration: 500
     };
 
     // TODO: Nonce management / setting the chainID correctly (state machines)
     const channel: Channel = {
       participants: params.participants.map(p => p.signingAddress),
       channelNonce: '1',
-      chainId: 'mainnet?'
+      chainId: process.env.NETWORK_CHAIN_ID || '0'
     };
     machine.send(createChannel);
 

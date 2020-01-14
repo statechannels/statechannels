@@ -1,4 +1,9 @@
-import {Outcome, isAllocationOutcome, convertBytes32ToAddress} from '@statechannels/nitro-protocol';
+import {
+  Outcome,
+  isAllocationOutcome,
+  convertBytes32ToAddress,
+  State
+} from '@statechannels/nitro-protocol';
 import {utils} from 'ethers';
 import {NETWORK_ID, CHALLENGE_DURATION} from '../constants';
 import {
@@ -6,7 +11,7 @@ import {
   Allocations,
   CreateChannelParams
 } from '@statechannels/client-api-schema/types';
-import {Channel, State} from '@statechannels/wallet-protocols';
+import {Channel} from '@statechannels/wallet-protocols';
 
 // function createAllocationOutcomeFromParams(params: Allocations): Outcome {
 //   return params.map(p => {
@@ -51,7 +56,7 @@ export function createStateFromCreateChannelParams(params: CreateChannelParams):
   };
   return {
     channel,
-    challengeDuration: CHALLENGE_DURATION.toString(),
+    challengeDuration: CHALLENGE_DURATION,
     appData,
     appDefinition,
     outcome: [], //createAllocationOutcomeFromParams(params.allocations),
