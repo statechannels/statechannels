@@ -12,9 +12,6 @@ export default class LandingPage extends React.PureComponent {
         <p>
           <a href="https://rps.statechannels.org">Rock Paper Scissors</a>
         </p>
-        {/* <p>
-          <a href="https://ttt.magmo.com">Tic Tac Toe</a>
-        </p> */}
       </div>
     );
   }
