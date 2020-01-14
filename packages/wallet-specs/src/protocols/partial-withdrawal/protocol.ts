@@ -1,8 +1,16 @@
-import { add, Allocation, Channel, store, subtract } from '../..';
-import { checkThat, isAllocation } from '../../store';
+import {
+  add,
+  Channel,
+  store,
+  subtract,
+  ethAllocationOutcome,
+  checkThat,
+  getEthAllocation,
+} from '../..';
 import * as ConcludeChannel from '../conclude-channel/protocol';
 import * as CreateNullChannel from '../create-null-channel/protocol';
 import * as LedgerUpdate from '../ledger-update/protocol';
+import { isAllocationOutcome, Allocation, Outcome } from '@statechannels/nitro-protocol';
 
 const PROTOCOL = 'partial-withdrawal';
 const success = { type: 'final' };
@@ -17,7 +25,7 @@ This would have to be negotiated in a different, undetermined protocol.
 */
 interface Init {
   ledgerId: string;
-  newOutcome: Allocation;
+  newOutcome: Outcome;
   participantMapping: Record<string, string>;
 }
 
@@ -28,7 +36,7 @@ function replacementChannelArgs({
 }: Init): CreateNullChannel.Init {
   const { channel, outcome } = store.getEntry(ledgerId).latestSupportedState;
   const newParticipants = channel.participants
-    .filter(p => newOutcome.find(allocation => allocation.destination === p))
+    .filter(p => getEthAllocation(newOutcome).find(allocation => allocation.destination === p))
     .map(p => participantMapping[p]);
   const newChannel: Channel = {
     chainId: channel.chainId,
@@ -36,7 +44,7 @@ function replacementChannelArgs({
     channelNonce: store.getNextNonce(newParticipants),
   };
 
-  const newChannelOutcome: Allocation = checkThat(outcome, isAllocation).map(
+  const newChannelAllocation: Allocation = getEthAllocation(outcome).map(
     ({ destination, amount }) => ({
       destination: participantMapping[destination],
       amount: subtract(outcome[destination], newOutcome[destination]),
@@ -45,7 +53,7 @@ function replacementChannelArgs({
 
   return {
     channel: newChannel,
-    outcome: newChannelOutcome,
+    outcome: ethAllocationOutcome(newChannelAllocation),
   };
 }
 const createReplacement = {
@@ -64,12 +72,14 @@ export function concludeOutcome({
   newChannelId,
 }: NewChannelCreated): LedgerUpdate.Init {
   const state = store.getEntry(ledgerId).latestSupportedState;
-  const currentlyAllocated = checkThat(state.outcome, isAllocation)
+  const currentlyAllocated = getEthAllocation(state.outcome)
     .map(a => a.amount)
     .reduce(add, 0);
-  const toBeWithdrawn = newOutcome.map(a => a.amount).reduce(add, 0);
-  const targetOutcome = [
-    ...newOutcome,
+  const toBeWithdrawn = getEthAllocation(newOutcome)
+    .map(a => a.amount)
+    .reduce(add, 0);
+  const targetAllocation = [
+    ...getEthAllocation(newOutcome),
     {
       destination: newChannelId,
       amount: subtract(currentlyAllocated, toBeWithdrawn),
@@ -77,7 +87,7 @@ export function concludeOutcome({
   ];
   return {
     channelId: ledgerId,
-    targetOutcome,
+    targetOutcome: ethAllocationOutcome(targetAllocation),
   };
 }
 const updateOldChannelOutcome = {

@@ -19,6 +19,8 @@
     "{src,bin}/**/*.{ts}": "eslint --cache"
   },
   "dependencies": {
+    "@statechannels/nitro-protocol": "0.0.1",
+    "ethers": "^4.0.42",
     "xstate": "^4.7"
   },
   "devDependencies": {

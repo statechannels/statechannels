@@ -1,6 +1,15 @@
 import { assign, DoneInvokeEvent, Machine } from 'xstate';
 import { CreateNullChannel, DirectFunding, SupportState } from '..';
-import { Allocation, Channel, ensureExists, MachineFactory, Store, success } from '../..';
+import {
+  Channel,
+  ensureExists,
+  MachineFactory,
+  Store,
+  success,
+  ethAllocationOutcome,
+  getEthAllocation,
+} from '../..';
+import { Outcome, Allocation } from '@statechannels/nitro-protocol';
 
 const PROTOCOL = 'ledger-funding';
 
@@ -87,7 +96,7 @@ const fundTarget = {
     ledgerUpdate: {
       invoke: {
         src: 'supportState',
-        data: (ctx: LedgerExists, { data }: DoneInvokeEvent<{ outcome: Allocation }>) => ({
+        data: (ctx: LedgerExists, { data }: DoneInvokeEvent<{ outcome: Outcome }>) => ({
           channelId: ctx.ledgerChannelId,
           outcome: data.outcome,
         }),
@@ -129,9 +138,13 @@ export const guards = {
 
 export const machine: MachineFactory<Init, any> = (store: Store, context: Init) => {
   function directFundingArgs(ctx: LedgerExists): DirectFunding.Init {
+    const minimalAllocation = getEthAllocation(
+      store.getEntry(ctx.targetChannelId).latestState.outcome
+    );
+
     return {
       channelId: ctx.ledgerChannelId,
-      minimalOutcome: store.getEntry(ctx.targetChannelId).latestState.outcome,
+      minimalAllocation,
     };
   }
 
@@ -159,15 +172,23 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
     // const { latestState: ledgerState } = store.getEntry(ledgerChannelId);
     // const { latestState: targetChannelState } = store.getEntry(targetChannelId);
 
-    const outcome: Allocation = [
+    /*
+    TODO
+    1. Match ledger destinations to target channel destinations
+    2. Deduct from ledger destination
+    3. Allocate total deducted to target
+    */
+
+    const allocation: Allocation = [
       {
         destination: targetChannelId,
-        amount: 'TODO', // TODO
+        // TODO: This needs to account for the existing allocation
+        amount: '0x01',
       },
     ];
     return {
       channelId: ledgerChannelId,
-      outcome,
+      outcome: ethAllocationOutcome(allocation),
     };
   }
 

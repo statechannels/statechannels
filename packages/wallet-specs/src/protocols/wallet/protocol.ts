@@ -91,7 +91,7 @@ export function machine(store: IStore, context: Init) {
 
       const walletProcess: Process = {
         id: processId,
-        ref: spawn<JsonRpcCreateChannelParams, any>(
+        ref: spawn<CreateChannel.Init, any>(
           CreateChannel.machine(store, init).withContext(init),
           processId
         ),
