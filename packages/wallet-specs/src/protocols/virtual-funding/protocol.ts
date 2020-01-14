@@ -1,9 +1,9 @@
 import { assign } from 'xstate';
-import { Balance, checkThat, store, getEthAllocation } from '../..';
+import { Balance, checkThat, getEthAllocation } from '../..';
 import { HubChoice } from '../../wire-protocol';
 import { Init as VirtualFundAsLeafArgs } from '../virtual-fund-as-leaf/protocol';
 import { isAllocationOutcome } from '@statechannels/nitro-protocol';
-
+import { store } from '../../temp-store';
 const PROTOCOL = 'virtual-funding';
 const success = { type: 'final' };
 

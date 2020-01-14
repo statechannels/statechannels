@@ -3,14 +3,13 @@ import {
   chain,
   getChannelId,
   max,
-  store,
   subtract,
   ethAllocationOutcome,
   getEthAllocation,
 } from '../../';
 import * as LedgerUpdate from '../ledger-update/protocol';
 import { Allocation, Outcome, AllocationItem, State } from '@statechannels/nitro-protocol';
-
+import { store } from '../../temp-store';
 const PROTOCOL = 'direct-funding';
 const success = { type: 'final' };
 const failure = { type: 'final' };
