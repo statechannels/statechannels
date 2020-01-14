@@ -5,9 +5,11 @@ import {Blockie} from 'rimble-ui';
 
 interface Props {
   myName: string;
+  outcomeAddress: string;
   opponentName: string;
   myBalance: string;
   opponentBalance: string;
+  opponentOutcomeAddress: string;
   roundBuyIn: string;
 }
 
@@ -40,7 +42,15 @@ export default class GameBar extends React.PureComponent<Props> {
     ));
 
   render() {
-    const {myName, opponentName, roundBuyIn, myBalance, opponentBalance} = this.props;
+    const {
+      myName,
+      opponentName,
+      roundBuyIn,
+      myBalance,
+      opponentBalance,
+      outcomeAddress,
+      opponentOutcomeAddress,
+    } = this.props;
 
     const myGameCount = Math.round(
       bigNumberify(myBalance)
@@ -58,7 +68,7 @@ export default class GameBar extends React.PureComponent<Props> {
         <div className="container">
           <Blockie
             opts={{
-              seed: myName,
+              seed: outcomeAddress.toLowerCase(),
             }}
           />
           <div className="col-2 my-name text-right">{myName}</div>
@@ -79,7 +89,7 @@ export default class GameBar extends React.PureComponent<Props> {
           <div className="col-2 opponent-name">{opponentName}</div>
           <Blockie
             opts={{
-              seed: opponentName,
+              seed: opponentOutcomeAddress.toLowerCase(),
             }}
           />
         </div>

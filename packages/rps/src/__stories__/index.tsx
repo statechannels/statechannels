@@ -117,7 +117,9 @@ balancesArray.forEach(balances => {
     <div className="w-100">
       <GameBar
         myName={'Michael'}
+        outcomeAddress="0x0"
         opponentName={'Janet'}
+        opponentOutcomeAddress="0x0"
         myBalance={balancesWei[0]}
         opponentBalance={balancesWei[1]}
         roundBuyIn={bigNumberify(balancesWei[0])

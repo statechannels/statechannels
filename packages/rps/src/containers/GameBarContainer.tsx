@@ -12,25 +12,31 @@ function mapStateToProps(state: SiteState) {
   if (isPlayerA(localState)) {
     return {
       myName: localState.name,
+      outcomeAddress: localState.outcomeAddress,
       opponentName: localState.opponentName,
       myBalance: aBal,
       opponentBalance: bBal,
+      opponentOutcomeAddress: localState.opponentOutcomeAddress,
       roundBuyIn: localState.roundBuyIn,
     };
   } else if (isPlayerB(localState)) {
     return {
       myName: localState.name,
+      outcomeAddress: localState.outcomeAddress,
       opponentName: localState.opponentName,
       myBalance: bBal,
       opponentBalance: aBal,
+      opponentOutcomeAddress: localState.opponentOutcomeAddress,
       roundBuyIn: localState.roundBuyIn,
     };
   } else {
     return {
       myName: '',
       opponentName: undefined,
+      outcomeAddress: undefined,
       myBalance: '0',
       opponentBalance: '0',
+      opponentOutcomeAddress: undefined,
       roundBuyIn: '1',
     };
   }

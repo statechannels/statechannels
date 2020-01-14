@@ -57,6 +57,7 @@ export interface GameJoined {
   type: 'GameJoined';
   opponentName: string;
   opponentAddress: string;
+  opponentOutcomeAddress: string;
 }
 
 export interface ChooseWeapon {
@@ -154,10 +155,15 @@ export const joinOpenGame = (
   roundBuyIn,
 });
 
-export const gameJoined = (opponentName: string, opponentAddress: string): GameJoined => ({
+export const gameJoined = (
+  opponentName: string,
+  opponentAddress: string,
+  opponentOutcomeAddress: string
+): GameJoined => ({
   type: 'GameJoined',
   opponentName,
   opponentAddress,
+  opponentOutcomeAddress,
 });
 
 export const resultArrived = (

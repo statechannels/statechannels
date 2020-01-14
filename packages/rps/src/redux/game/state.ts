@@ -61,6 +61,8 @@ export interface Playing {
   outcomeAddress: string;
   opponentName: string;
   roundBuyIn: string;
+  opponentAddress: string;
+  opponentOutcomeAddress: string;
 }
 
 function extractPlayingFromParams(params: Playing & Anything) {
@@ -70,6 +72,8 @@ function extractPlayingFromParams(params: Playing & Anything) {
     outcomeAddress: params.outcomeAddress,
     opponentName: params.opponentName,
     roundBuyIn: params.roundBuyIn,
+    opponentAddress: params.opponentAddress,
+    opponentOutcomeAddress: params.opponentOutcomeAddress,
   };
 }
 
@@ -120,14 +124,10 @@ export namespace Setup {
 export namespace A {
   export interface GameChosen extends Playing {
     type: 'A.GameChosen';
-    opponentAddress: string; // need to keep opponentAddress until we have opened the channel
-    opponentOutcomeAddress: string;
   }
   export const gameChosen: StateConstructor<GameChosen> = params => {
     return {
       ...extractPlayingFromParams(params),
-      opponentAddress: params.opponentAddress,
-      opponentOutcomeAddress: params.opponentOutcomeAddress,
       type: 'A.GameChosen',
     };
   };
