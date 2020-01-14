@@ -68,7 +68,11 @@ describe('ChannelClient with FakeChannelProvider', () => {
       .build();
   });
 
-  function setupProvider(provider: FakeChannelProvider, playerIndex: number, addresses: Addresses) {
+  function setupProvider(
+    provider: FakeChannelProvider,
+    playerIndex: number,
+    addresses: Addresses
+  ): void {
     provider.setAddress(addresses.self);
     provider.updatePlayerIndex(playerIndex);
     provider.opponentAddress = addresses.opponent;
@@ -134,7 +138,7 @@ describe('ChannelClient with FakeChannelProvider', () => {
       setProviderStates([providerA, providerB], states['proposed']);
 
       return new Promise(resolve => {
-        clientBEventEmitter.once('ChannelProposed', (result: ChannelResult) => {
+        clientBEventEmitter.once('ChannelProposed', () => {
           expect(providerB.latestState).toEqual(states['proposed']);
           resolve();
         });

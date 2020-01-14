@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "wait-on http://localhost:3000 http://localhost:3055 && jest",
-    "lint:check": "eslint */**/*.{ts,js} --cache",
-    "lint:write": "eslint */**/*.{ts,js} --fix",
+    "lint:check": "eslint \"**/*.ts\" --cache",
+    "lint:write": "eslint \"**/*.ts\" --fix",
     "precommit": "lint-staged --quiet"
   },
   "devDependencies": {
