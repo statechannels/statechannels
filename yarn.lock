@@ -4155,7 +4155,7 @@
   resolved "https://registry.yarnpkg.com/@types/history/-/history-4.7.3.tgz#856c99cdc1551d22c22b18b5402719affec9839a"
   integrity sha512-cS5owqtwzLN5kY+l+KgKdRJ/Cee8tlmQoGQuIE9tWnSmS3JMKzmxo2HIAk2wODMifGwO20d62xZQLYz+RLfXmw==
 
-"@types/hoist-non-react-statics@^3.3.0":
+"@types/hoist-non-react-statics@*", "@types/hoist-non-react-statics@^3.3.0":
   version "3.3.1"
   resolved "https://registry.yarnpkg.com/@types/hoist-non-react-statics/-/hoist-non-react-statics-3.3.1.tgz#1124aafe5118cb591977aeb1ceaaed1070eb039f"
   integrity sha512-iMIqiko6ooLrTh1joXodJK5X9xeEALT1kM5G3ZLhD3hszxBdIEd5C75U834D9mLcINgD4OyZf5uQXjkuYydWvA==
@@ -4607,6 +4607,14 @@
   dependencies:
     "@types/react" "*"
 
+"@types/react-native@*":
+  version "0.60.30"
+  resolved "https://registry.npmjs.org/@types/react-native/-/react-native-0.60.30.tgz#33ab525194142a5e3b428e60f0e77e0d1dbd253d"
+  integrity sha512-Ho41o+6NBlv1K5q2Z+NREST3UsGahXn4V1to2D2U4bcn1hO5MGjzOdkruzsnN10WiP8hW33jvQE6eERClgwvJg==
+  dependencies:
+    "@types/prop-types" "*"
+    "@types/react" "*"
+
 "@types/react-redux@^7.0.0":
   version "7.1.4"
   resolved "https://registry.yarnpkg.com/@types/react-redux/-/react-redux-7.1.4.tgz#e0d02a073e730b8b58a6341bddca2ea692ff0bce"
@@ -4768,6 +4776,16 @@
   dependencies:
     "@types/react" "*"
     "@types/webpack-env" "*"
+
+"@types/styled-components@^4.4.1":
+  version "4.4.2"
+  resolved "https://registry.npmjs.org/@types/styled-components/-/styled-components-4.4.2.tgz#709fa7afd7dc0963b8316a0159240f0fe19a026d"
+  integrity sha512-dngFx2PuGoy0MGE68eHayAmJvLSqWrnTe9w+DnQruu8PS+waWEsKmoBRhkzL2h2pK1OJhzJhVfuiz+oZa4etpA==
+  dependencies:
+    "@types/hoist-non-react-statics" "*"
+    "@types/react" "*"
+    "@types/react-native" "*"
+    csstype "^2.2.0"
 
 "@types/supports-color@5.3.0":
   version "5.3.0"
@@ -24971,6 +24989,16 @@ stylehacks@^4.0.0:
     browserslist "^4.0.0"
     postcss "^7.0.0"
     postcss-selector-parser "^3.0.0"
+
+stylis-rule-sheet@^0.0.10:
+  version "0.0.10"
+  resolved "https://registry.npmjs.org/stylis-rule-sheet/-/stylis-rule-sheet-0.0.10.tgz#44e64a2b076643f4b52e5ff71efc04d8c3c4a430"
+  integrity sha512-nTbZoaqoBnmK+ptANthb10ZRZOGC+EmTLLUxeYIuHNkEKcmKgXX1XWKkUBT2Ac4es3NybooPe0SmvKdhKJZAuw==
+
+stylis@^3.5.0:
+  version "3.5.4"
+  resolved "https://registry.npmjs.org/stylis/-/stylis-3.5.4.tgz#f665f25f5e299cf3d64654ab949a57c768b73fbe"
+  integrity sha512-8/3pSmthWM7lsPBKv7NXkzn2Uc9W7NotcwGNpJaa3k7WMM1XDCA4MgT5k/8BIexd5ydZdboXtU90XH9Ec4Bv/Q==
 
 supports-color@5.4.0:
   version "5.4.0"
