@@ -1,5 +1,3 @@
-const baseConfig = require();
-
 // From the tslint.json we used previously
 const leftoverTsLintRules = {
   '@typescript-eslint/no-explicit-any': 'off',
