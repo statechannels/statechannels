@@ -28,6 +28,7 @@ import {
   resetMultipleHoldings,
   setupContracts,
   signStates,
+  writeGasConsumption,
 } from '../../test-helpers';
 
 const provider = getTestProvider();
@@ -97,6 +98,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
+      description,
       outcomeShortHand,
       heldBefore,
       heldAfter,
@@ -104,6 +106,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
       payouts,
       reasonString,
     }: {
+      description: string;
       outcomeShortHand: OutcomeShortHand;
       initialChannelStorageHash;
       heldBefore: OutcomeShortHand;
@@ -172,6 +175,11 @@ describe('concludePushOutcomeAndTransferAll', () => {
         await expectRevert(() => tx, reasonString);
       } else {
         const receipt = await (await tx).wait();
+        await writeGasConsumption(
+          './concludePushOutcomeAndTransferAll.gas.md',
+          description,
+          receipt.gasUsed
+        );
 
         // Compute expected ChannelStorageHash
         const blockTimestamp = (await provider.getBlock(receipt.blockNumber)).timestamp;

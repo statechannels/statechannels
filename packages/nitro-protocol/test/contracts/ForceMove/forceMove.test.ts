@@ -24,6 +24,7 @@ import {
   ongoingChallengeHash,
   setupContracts,
   signStates,
+  writeGasConsumption,
 } from '../../test-helpers';
 
 const provider = getTestProvider();
@@ -112,7 +113,13 @@ describe('forceMove', () => {
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
 
-    async ({initialChannelStorageHash, stateData, challengeSignature, reasonString}) => {
+    async ({
+      description,
+      initialChannelStorageHash,
+      stateData,
+      challengeSignature,
+      reasonString,
+    }) => {
       const {appDatas, whoSignedWhat} = stateData;
       const channel: Channel = {
         chainId,
@@ -158,6 +165,7 @@ describe('forceMove', () => {
         await expectRevert(() => tx, reasonString);
       } else {
         const receipt = await (await tx).wait();
+        await writeGasConsumption('./forceMove.gas.md', description, receipt.gasUsed);
         const event = receipt.events.pop();
 
         // Catch ForceMove event
