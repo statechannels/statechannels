@@ -22,5 +22,13 @@ module.exports = {
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js']
+  },
+  node: {
+    dgram: 'empty',
+    fs: 'empty',
+    net: 'empty',
+    tls: 'empty',
+    // eslint-disable-next-line @typescript-eslint/camelcase
+    child_process: 'empty'
   }
 };
