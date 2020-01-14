@@ -37,7 +37,7 @@ export default class GameFooter extends React.PureComponent<Props> {
             </Button>
             <div className="ml-auto">
               <div className="footer-logo-container">
-                <img src={PROJECT_LOGO} />
+                <img width="150" src={PROJECT_LOGO} />
                 <small className="text-muted">
                   Something not working? Email us at{' '}
                   <a href="mailto:oops@statechannels.org">oops@statechannels.org</a>
