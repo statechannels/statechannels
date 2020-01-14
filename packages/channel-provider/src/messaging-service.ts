@@ -9,7 +9,7 @@ export interface MessagingServiceOptions {
 }
 
 export class MessagingService {
-  protected timeoutListener?: number;
+  protected timeoutListener?: NodeJS.Timeout;
   protected attempts = 0;
   protected url = '';
 
