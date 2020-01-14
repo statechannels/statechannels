@@ -19,7 +19,9 @@ export interface Balance {
 }
 
 export function getEthAllocation(outcome: Outcome): Allocation {
-  const ethOutcome: AssetOutcome | undefined = outcome.find(o => o.assetHolderAddress === '0x');
+  const ethOutcome: AssetOutcome | undefined = outcome.find(
+    o => o.assetHolderAddress === AddressZero
+  );
   return checkThat(ethOutcome, isAllocationOutcome).allocation;
 }
 
