@@ -1,14 +1,12 @@
-const baseConfig = require('../../.eslintrc.js');
-
 module.exports = {
-  ...baseConfig,
   env: {
     browser: true,
     es6: true
   },
   parser: '@typescript-eslint/parser',
-  plugins: [...baseConfig.plugins, '@typescript-eslint', 'prettier', 'jest', 'import'],
+  plugins: ['@typescript-eslint', 'prettier', 'jest', 'import'],
   extends: [
+    '../../.eslintrc.js',
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:jest/recommended',

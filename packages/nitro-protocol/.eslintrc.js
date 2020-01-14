@@ -1,4 +1,4 @@
-const baseConfig = require('../../.eslintrc.js');
+const baseConfig = require();
 
 // From the tslint.json we used previously
 const leftoverTsLintRules = {
@@ -11,7 +11,6 @@ const leftoverTsLintRules = {
 };
 
 module.exports = {
-  ...baseConfig,
   env: {
     // We need both `node` and `browser` because `nitro-protocol` is used in both environments;
     // so for example, `process` and `window` are both valid global variables.
@@ -19,10 +18,9 @@ module.exports = {
     browser: true,
     es6: true,
   },
-  plugins: [...baseConfig.plugins, 'jest'],
-  extends: [...baseConfig.extends, 'plugin:jest/recommended', 'plugin:jest/style'],
+  plugins: ['jest'],
+  extends: ['../../.eslintrc.js', 'plugin:jest/recommended', 'plugin:jest/style'],
   rules: {
-    ...baseConfig.rules,
     ...leftoverTsLintRules,
   },
 };
