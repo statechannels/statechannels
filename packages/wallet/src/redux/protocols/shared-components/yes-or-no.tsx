@@ -16,7 +16,9 @@ export default class YesOrNo extends React.Component<Props> {
       <Fragment>
         <div className={css(styles.buttonContainer)}>
           <span className={css(styles.button)}>
-            <Button onClick={yesAction}>{yesMessage}</Button>
+            <Button color="primary" onClick={yesAction}>
+              {yesMessage}
+            </Button>
           </span>
           <span className={css(styles.button)}>
             <Button onClick={noAction} color="link">

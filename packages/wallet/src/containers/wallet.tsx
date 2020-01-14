@@ -13,7 +13,11 @@ interface WalletProps {
 class WalletContainer extends PureComponent<WalletProps> {
   render() {
     const {state} = this.props;
-    return <WalletInitializedContainer state={state} />;
+    return (
+      <div className={"wallet-container"}>
+        <WalletInitializedContainer state={state} />
+      </div>
+    );
   }
 }
 
