@@ -10,7 +10,7 @@
     "test:ci": "jest",
     "build": "yarn build:typescript",
     "build:typescript": "tsc -b .",
-    "lint:check": "eslint {src,tests}/**/*.ts",
+    "lint:check": "eslint \"{src,tests}/**/*.ts\"",
     "lint:write": "yarn lint:check --fix"
   },
   "repository": {
