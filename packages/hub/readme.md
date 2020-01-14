@@ -87,3 +87,11 @@ $ NODE_ENV=production yarn db:create
 // Starts a local server serving the app
 $ NODE_ENV=production heroku local
 ```
+
+### Heroku Migrations
+
+The first time you deploy to Heroku, you'll need to run migrations. To do this, you need to run the migrations _locally_ with the remote database URL from Heroku. Here is a command that should do that for you:
+
+```bash
+DATABASE_URL=$(heroku config:get DATABASE_URL -a statechannels-hub-staging)?ssl=true yarn db:migrate
+```
