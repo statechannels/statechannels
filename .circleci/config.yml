@@ -238,7 +238,7 @@ jobs:
       - attach_workspace:
           at: /home/circle/project
       - run:
-          command: yarn deploy:netlify
+          command: yarn release:netlify
 
 workflows:
   statechannels:
