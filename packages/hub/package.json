@@ -31,9 +31,10 @@
     "precommit": "lint-staged --quiet"
   },
   "dependencies": {
+    "@firebase/app": "^0.5.1",
+    "@firebase/database": "^0.5.18",
     "@statechannels/nitro-protocol": "0.0.1",
     "async-lock": "1.2.2",
-    "firebase": "^7.5.2",
     "fmg-core": "0.5.9",
     "knex": "0.20.3",
     "objection": "1.6.11",
