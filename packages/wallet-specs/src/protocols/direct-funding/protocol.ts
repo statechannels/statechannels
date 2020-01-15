@@ -48,52 +48,26 @@ const updateOutcome = (src: 'getPrefundOutcome' | 'getPostfundOutcome') => {
   };
 };
 
-const waiting = {
-  on: {
-    '*': [
-      { target: 'deposit', cond: 'safeToDeposit', actions: 'deposit' },
-      { target: 'updatePostFundOutcome', cond: 'funded' },
-    ],
-  },
-};
-
-const deposit = {
-  invoke: { src: 'depositService' },
-  onDone: 'waiting',
-  onError: 'failure',
-};
-
 export const config = {
   key: PROTOCOL,
   initial: 'updatePrefundOutcome',
   states: {
-    updatePrefundOutcome: { ...updateOutcome('getPrefundOutcome'), onDone: 'waiting' },
-    waiting,
-    deposit,
+    updatePrefundOutcome: { ...updateOutcome('getPrefundOutcome'), onDone: 'funding' },
+    funding: { invoke: { src: 'fundingService' }, onDone: 'updatePostfundOutcome' },
     updatePostfundOutcome: { ...updateOutcome('getPostfundOutcome'), onDone: 'success' },
     success,
     failure,
   },
 };
 
-type Guards = {
-  safeToDeposit: (x) => boolean;
-  funded: (x) => boolean;
-};
 type Services = {
   getPrefundOutcome: any;
   getPostfundOutcome: any;
-  depositService: any;
+  fundingService: any;
   supportState: any;
 };
 
-type Options = { guards: Guards; services: Services };
-const guards = {
-  safeToDeposit: x => true,
-  funded: x => true,
-};
-
-export const mockOptions: Partial<Options> = { guards };
+type Options = { services: Services };
 
 export const machine: MachineFactory<Init, any> = (store: Store, context: Init) => {
   async function getPrefundOutcome({ channelId, minimalAllocation }: Init): Promise<Outcome> {
@@ -112,10 +86,11 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
   const services: Services = {
     getPrefundOutcome,
     supportState: SupportState.machine(store),
-    depositService: async () => true,
+    fundingService: async () => true,
     getPostfundOutcome,
   };
-  const options: Options = { guards, services };
+
+  const options: Options = { services };
   return Machine(config).withConfig(options, context);
 };
 
