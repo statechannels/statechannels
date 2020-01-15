@@ -28,6 +28,8 @@ export interface IStore {
   // TODO: set funding
   // setFunding(channelId: string, funding: Funding): void;
 
+  getHoldings(channelId: string): Promise<string>;
+
   signState(state: State): SignedState;
 
   getNextNonce(participants: string[]): string;
@@ -211,6 +213,10 @@ export class Store implements IStore {
     } catch (e) {
       throw e;
     }
+  }
+
+  public async getHoldings(channelId: string): Promise<string> {
+    return '0x0';
   }
 
   // Nonce management

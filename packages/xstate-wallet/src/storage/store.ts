@@ -6,6 +6,7 @@ import {
 import {Store as BaseStore} from '@statechannels/wallet-protocols/src/store';
 import {SignedState} from '@statechannels/wallet-protocols';
 import {ChannelStoreEntry} from '@statechannels/wallet-protocols/src/ChannelStoreEntry';
+import * as contract from '../contract';
 
 type Constructor = BaseConstructor &
   Partial<{
@@ -36,5 +37,8 @@ export class Store extends BaseStore implements IStore {
     recipients.forEach(recipient => {
       this._messageSender(recipient, message);
     });
+  }
+  public getHoldings(channelId: string): Promise<string> {
+    return contract.getHoldings(channelId);
   }
 }
