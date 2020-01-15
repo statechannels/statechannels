@@ -51,7 +51,7 @@
     "test:ci:app": "yarn test:app --all --ci --runInBand --bail",
     "website:deploy": "yarn contract:compile && yarn docgen && cd website && yarn install && yarn build",
     "build:netlify": "yarn website:deploy",
-    "release:netlify": "netlify deploy --site $NITRO_PROTOCOL_NETLIFY_ID --prod --dir=website/build/nitro-spec --message $(git rev-parse --short HEAD)"
+    "release:netlify": "netlify deploy --site $NITRO_PROTOCOL_NETLIFY_ID --dir=website/build/nitro-spec --message $(git rev-parse --short HEAD)"
   },
   "dependencies": {
     "@counterfactual/cf-adjudicator-contracts": "0.0.11",
