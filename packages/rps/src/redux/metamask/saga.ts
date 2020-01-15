@@ -1,68 +1,52 @@
-import {call, put} from 'redux-saga/effects';
+import {call, put, take, fork} from 'redux-saga/effects';
 import * as metamaskActions from './actions';
-import {MetamaskErrorType} from './actions';
+import {eventChannel} from 'redux-saga';
 
-interface NetworkNameToId {
-  [name: string]: {networkId: number};
+function* enableSaga() {
+  while (true) {
+    yield take('UpdateProfile');
+    yield put(metamaskActions.enable());
+    yield call([window.ethereum, 'enable']);
+  }
 }
-const networks: NetworkNameToId = {
-  main: {
-    networkId: 1,
-  },
-  ropsten: {
-    networkId: 3,
-  },
-  rinkeby: {
-    networkId: 4,
-  },
-  kovan: {
-    networkId: 42,
-  },
-};
 
-export default function* checkMetamask() {
-  if (typeof window.ethereum !== 'undefined') {
-    try {
-      window.ethereum.autoRefreshOnNetworkChange = false;
-      yield put(metamaskActions.metamaskEnable());
-      yield call([window.ethereum, 'enable']);
-    } catch (error) {
-      console.error(error);
-      yield put(
-        metamaskActions.metamaskErrorOccurred({
-          errorType: MetamaskErrorType.MetamaskLocked,
-        })
-      );
-      return false;
-    }
+function* networkChangedSaga() {
+  const networkChangedChannel = eventChannel(emit => {
     window.ethereum.on('networkChanged', function(networkId) {
-      location.reload();
+      emit(networkId);
     });
-    const targetNetworkName = process.env.TARGET_NETWORK;
-    const selectedNetworkId = parseInt(window.ethereum.networkVersion, 10);
-    // Find the network name that matches the currently selected network id
-    const selectedNetworkName =
-      Object.keys(networks).find(
-        networkName => networks[networkName].networkId === selectedNetworkId
-      ) || 'development';
+    return () => {
+      /* */
+    };
+  });
+  while (true) {
+    const network = yield take(networkChangedChannel);
+    yield put(metamaskActions.networkChanged(network));
+  }
+}
 
-    if (!selectedNetworkId || targetNetworkName !== selectedNetworkName) {
-      yield put(
-        metamaskActions.metamaskErrorOccurred({
-          errorType: MetamaskErrorType.WrongNetwork,
-          networkName: process.env.TARGET_NETWORK,
-        })
-      );
-      return false;
-    }
-    yield put(metamaskActions.metamaskSuccess());
-    return true;
-  } else {
-    yield put(
-      metamaskActions.metamaskErrorOccurred({
-        errorType: MetamaskErrorType.NoMetaMask,
-      })
-    );
-    return false;
+function* accountsChangedSaga() {
+  const accountsChangedChannel = eventChannel(emit => {
+    window.ethereum.on('accountsChanged', function(accounts) {
+      emit(accounts);
+    });
+    return () => {
+      /* */
+    };
+  });
+  while (true) {
+    const accounts = yield take(accountsChangedChannel);
+    yield put(metamaskActions.accountsChanged(accounts));
+  }
+}
+
+export default function* metamaskSaga() {
+  if (window.ethereum) {
+    window.ethereum.autoRefreshOnNetworkChange = false;
+    yield put(metamaskActions.networkChanged(window.ethereum.networkVersion));
+    yield put(metamaskActions.accountsChanged([window.ethereum.selectedAddress]));
+    yield fork(accountsChangedSaga);
+    yield fork(networkChangedSaga);
+    yield fork(enableSaga);
   }
 }

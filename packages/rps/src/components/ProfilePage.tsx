@@ -3,6 +3,7 @@ import React from 'react';
 
 import {Button, Form, FormGroup, Label, Input} from 'reactstrap';
 import {Modal, ModalBody} from 'reactstrap';
+import {MetaMaskButton} from 'rimble-ui';
 
 interface Props {
   updateProfile: (name: string, twitterHandle?: string) => void;
@@ -71,9 +72,9 @@ export default class ProfilePage extends React.PureComponent<Props, State> {
                 <small className="form-text text-muted">This will display to other players.</small>
                 <small className="form-text text-danger">{this.state.nameErrorMessage}</small>
               </FormGroup>
-              <Button className="profile-button" disabled={!submitEnabled}>
-                Submit
-              </Button>
+              <MetaMaskButton.Outline disabled={!submitEnabled}>
+                Connect with MetaMask
+              </MetaMaskButton.Outline>
             </Form>
           </ModalBody>
         </div>

@@ -1,43 +1,32 @@
 import {Reducer} from 'redux';
-import * as metamaskActions from './actions';
-
-export interface MetamaskState {
-  loading: boolean;
-  error: metamaskActions.MetamaskError | null;
-  success: boolean;
-}
+import {MetamaskAction} from './actions';
+import {MetamaskState} from './state';
 
 const initialState: MetamaskState = {
   loading: false,
-  error: null,
-  success: false,
+  accounts: [],
 };
 
 export const metamaskReducer: Reducer<MetamaskState> = (
-  state = initialState,
-  action: metamaskActions.MetamaskResponse
+  state: MetamaskState = initialState,
+  action: MetamaskAction
 ) => {
+  const accountsExistsFromState = state.accounts[0];
+
   switch (action.type) {
-    case metamaskActions.METAMASK_SUCCESS: {
+    case 'NetworkChanged': {
+      return {...state, network: action.network};
+    }
+    case 'AccountsChanged': {
+      const accountsExistsFromAction = action.accounts[0];
       return {
-        success: true,
-        loading: false,
-        error: null,
+        ...state,
+        accounts: action.accounts,
+        loading: accountsExistsFromAction ? false : state.loading,
       };
     }
-    case metamaskActions.METAMASK_ERROR: {
-      return {
-        success: false,
-        loading: false,
-        error: action.error,
-      };
-    }
-    case metamaskActions.METAMASK_ENABLE: {
-      return {
-        success: false,
-        loading: true,
-        error: null,
-      };
+    case 'Enable': {
+      return {...state, loading: accountsExistsFromState ? false : true};
     }
     default:
       return state;

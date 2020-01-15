@@ -110,6 +110,8 @@ const propsB = {
   roundBuyIn,
   myWeapon: playerBWeapon,
   theirWeapon: playerAWeapon,
+  opponentAddress: aAddress,
+  opponentOutcomeAddress: aAddress,
 };
 
 export const localStatesB = {

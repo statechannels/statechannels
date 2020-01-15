@@ -10,7 +10,8 @@
     "esModuleInterop": true,
     "downlevelIteration": true,
     "declaration": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "types": ["react", "jest", "node"]
   },
   "include": ["src", "bin/utils.ts"]
 }

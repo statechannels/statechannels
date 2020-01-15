@@ -1,7 +1,8 @@
 import {combineReducers} from 'redux';
 
 import {loginReducer, LoginState} from './login/reducer';
-import {MetamaskState, metamaskReducer} from './metamask/reducer';
+import {metamaskReducer} from './metamask/reducer';
+import {MetamaskState} from './metamask/state';
 import {OpenGameState} from './open-games/state';
 import {openGamesReducer} from './open-games/reducer';
 import {overlayReducer} from './global/reducer';

@@ -6,10 +6,10 @@ export async function clickThroughRPSUI(rpsTabA: Page, rpsTabB: Page): Promise<v
   await (await rpsTabB.waitForXPath('//button[contains(., "Start Playing!")]')).click();
 
   await (await rpsTabA.waitFor('#name')).type('playerA');
-  (await rpsTabA.waitForXPath('//button[contains(., "Submit")]')).click();
+  (await rpsTabA.waitForXPath('//button[contains(., "Connect with MetaMask")]')).click();
 
   await (await rpsTabB.waitFor('#name')).type('playerB');
-  (await rpsTabB.waitForXPath('//button[contains(., "Submit")]')).click();
+  (await rpsTabB.waitForXPath('//button[contains(., "Connect with MetaMask")]')).click();
 
   // NOTE: There is some weird scrolling issue. .click() scrolls and somehow React re-renders this
   // button and so we get a "Node is detached from document error". Using .evaluate() fixes it.

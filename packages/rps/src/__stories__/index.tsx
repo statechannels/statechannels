@@ -7,8 +7,6 @@ import '../index.scss';
 import {SiteState} from '../redux/reducer';
 import HomePage from '../components/HomePage';
 import LoadingPage from '../components/LoadingPage';
-import MetamaskErrorPage from '../components/MetamaskErrorPage';
-import {MetamaskErrorType} from '../redux/metamask/actions';
 import LoginErrorPage from '../components/LoginErrorPage';
 import {localStatesA, localStatesB, channelStates} from '../redux/game/__tests__/scenarios';
 import {ChannelState} from '../core';
@@ -44,15 +42,24 @@ const initialState: SiteState = {
   },
   metamask: {
     loading: false,
-    error: null,
-    success: true,
+    network: 0,
+    accounts: [],
   },
   wallet: {
     loading: false,
     error: null,
     success: true,
   },
-  openGames: [],
+  openGames: [
+    {
+      address: '0x',
+      outcomeAddress: '0xabc',
+      name: 'Player B',
+      stake: parseEther('1').toString(),
+      isPublic: true,
+      createdAt: 0,
+    },
+  ],
   overlay: {
     rulesVisible: false,
     walletVisible: false,
@@ -79,10 +86,9 @@ export function siteStateFromLocalState<T extends states.LocalState>(
 storiesOf('Setup', module)
   .add('Loading Page', () => <LoadingPage />)
   .add('Login Error Page', () => <LoginErrorPage error="Login error message" />)
-  .add('MetaMask Error Page', () => (
-    <MetamaskErrorPage error={{errorType: MetamaskErrorType.WrongNetwork}} />
+  .add('Home Page', () => (
+    <HomePage login={() => alert('login')} metamaskState={initialState.metamask} />
   ))
-  .add('Home Page', () => <HomePage login={() => alert('login')} />)
   .add('Profile Modal', testState(initialState));
 
 Object.keys(localStatesA).forEach(key => {
@@ -111,7 +117,9 @@ balancesArray.forEach(balances => {
     <div className="w-100">
       <GameBar
         myName={'Michael'}
+        outcomeAddress="0x0"
         opponentName={'Janet'}
+        opponentOutcomeAddress="0x0"
         myBalance={balancesWei[0]}
         opponentBalance={balancesWei[1]}
         roundBuyIn={bigNumberify(balancesWei[0])

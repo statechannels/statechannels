@@ -80,7 +80,7 @@ export function* autoOpponent(player: 'A' | 'B', externalClient: RPSChannelClien
     if (incomingMessage) {
       internalClient.pushMessage(incomingMessage);
     } else if (gameJoined) {
-      saga.dispatch(gameJoinedAction('regular-player', 'some-address'));
+      saga.dispatch(gameJoinedAction('regular-player', 'some-address', 'some-EOA'));
     } else if (gameCreated) {
       saga.dispatch(
         syncOpenGames([
@@ -112,7 +112,7 @@ export function* autoOpponent(player: 'A' | 'B', externalClient: RPSChannelClien
         ])
       );
     } else if (internalStoreState.game.localState.type === 'A.GameChosen') {
-      yield put(gameJoinedAction('AutoPlayer', 'some-address'));
+      yield put(gameJoinedAction('AutoPlayer', 'some-address', 'some-EOA'));
     }
   }
 }
