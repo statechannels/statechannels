@@ -33,7 +33,6 @@
     "storybook": "start-storybook -p 9001 -c .storybook",
     "precommit": "lint-staged --quiet",
     "release:netlify": "NODE_ENV=production yarn build:webpack && netlify deploy --site $RPS_NETLIFY_ID --prod --dir=build --message $(git rev-parse --short HEAD)"
-
   },
   "lint-staged": {
     "**/*.{js,ts,tsx}": "eslint --cache",
