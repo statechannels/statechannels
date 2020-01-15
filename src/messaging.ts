@@ -7,8 +7,12 @@ import {validateRequest} from './json-rpc-validation/validator';
 import {IStore} from '@statechannels/wallet-protocols/lib/src/store';
 import {CreateChannelEvent} from '@statechannels/wallet-protocols/lib/src/protocols/wallet/protocol';
 import {UpdateChannelParams} from '@statechannels/client-api-schema/types/update-channel';
-import {createStateFromUpdateChannelParams} from './utils/json-rpc-utils';
+import {
+  createStateFromUpdateChannelParams,
+  createJsonRpcAllocationsFromOutcome
+} from './utils/json-rpc-utils';
 import {CloseChannelParams} from '@statechannels/client-api-schema/types/close-channel';
+import {bigNumberify} from 'ethers/utils';
 
 export async function handleMessage(
   event,
@@ -76,7 +80,10 @@ async function handleUpdateChannel(payload: jrs.RequestObject, store: IStore) {
   const state = createStateFromUpdateChannelParams(latestState, params);
   const signedState = store.signState(state);
   store.receiveStates([signedState]);
-  window.parent.postMessage(jrs.success(payload.id, {success: true}), '*');
+  window.parent.postMessage(
+    jrs.success(payload.id, await getChannelInfo(params.channelId, store)),
+    '*'
+  );
   dispatchChannelUpdatedMessage(params.channelId, store);
 }
 
@@ -140,7 +147,7 @@ async function getChannelInfo(channelId: string, store: IStore) {
 
   return {
     participants,
-    allocations: [{token: '0x0', allocationItems: latestState.outcome}],
+    allocations: createJsonRpcAllocationsFromOutcome(latestState.outcome),
     appDefinition,
     appData,
     status,
@@ -154,7 +161,7 @@ async function getChannelInfo(channelId: string, store: IStore) {
 export function dispatchChannelUpdatedMessage(channelId: string, store: IStore) {
   getChannelInfo(channelId, store).then(channelInfo => {
     // TODO: Right now we assume anything that is not a null channel is an app channel
-    if (!!channelInfo.appData) {
+    if (!!channelInfo.appData && !bigNumberify(channelInfo.appData).isZero()) {
       const notification = jrs.notification('ChannelUpdated', channelInfo);
       window.parent.postMessage(notification, '*');
     }
