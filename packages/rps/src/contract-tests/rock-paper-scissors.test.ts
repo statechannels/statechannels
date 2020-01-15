@@ -73,7 +73,8 @@ describe('validTransition', () => {
     ${false} | ${'Reveal'}        | ${'Start'}         | ${{from: 1, to: 2}} | ${'Rock'} | ${'Rock'}     | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${'Disallows stake change'}
     ${false} | ${'Start'}         | ${'RoundProposed'} | ${{from: 1, to: 1}} | ${'Rock'} | ${'Rock'}     | ${{A: 5, B: 5}} | ${{A: 6, B: 4}} | ${'Disallows allocations change '}
     ${false} | ${'RoundProposed'} | ${'RoundAccepted'} | ${{from: 1, to: 1}} | ${'Rock'} | ${'Rock'}     | ${{A: 6, B: 4}} | ${{B: 6, A: 4}} | ${'Disallows destination swap'}
-    ${false} | ${'Start'}         | ${'RoundProposed'} | ${{from: 1, to: 6}} | ${'Rock'} | ${'Rock'}     | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${'Disallows a stake that is too large'}
+    ${false} | ${'Start'}         | ${'RoundProposed'} | ${{from: 1, to: 6}} | ${'Rock'} | ${'Rock'}     | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${'Disallows a stake that changes'}
+    ${false} | ${'RoundAccepted'} | ${'Reveal'}        | ${{from: 1, to: 2}} | ${'Rock'} | ${'Scissors'} | ${{A: 4, B: 6}} | ${{A: 8, B: 4}} | ${'Disallows a stake that changes'}
   `(
     `Returns $isValid on $fromPositionType -> $toPositionType; $description`,
     async ({
@@ -156,12 +157,9 @@ describe('validTransition', () => {
           ...transaction,
         });
 
+        const descriptor = `Returns ${isValid} on ${fromPositionType} -> ${toPositionType}; ${description}`;
         const receipt = await (await response).wait();
-        await writeGasConsumption(
-          './RockPaperScissors.gas.md',
-          `Returns $isValid on $fromPositionType -> $toPositionType; $description`,
-          receipt.gasUsed
-        );
+        await writeGasConsumption('./RockPaperScissors.gas.md', descriptor, receipt.gasUsed);
 
         const isValidFromCall = await RockPaperScissors.validTransition(
           fromVariablePart,
