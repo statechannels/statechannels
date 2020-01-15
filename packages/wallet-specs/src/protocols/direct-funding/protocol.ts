@@ -12,7 +12,8 @@ import {
 } from '../../';
 import * as LedgerUpdate from '../ledger-update/protocol';
 import { Allocation, Outcome, AllocationItem, State } from '@statechannels/nitro-protocol';
-import { Machine } from 'xstate';
+import { Machine, DoneInvokeEvent } from 'xstate';
+import { SupportState } from '..';
 
 const PROTOCOL = 'direct-funding';
 const success = { type: FINAL };
@@ -23,23 +24,29 @@ export interface Init {
   minimalAllocation: Allocation;
 }
 
-interface Base {
-  targetChannelId: string;
-  minimalOutcome: Allocation;
-}
-
-type UpdateOutcome = Base & {
-  targetOutcome: Outcome;
-};
-
-const updatePrefundOutcome = {
-  on: {
-    '': { target: 'waiting', cond: 'noUpdateNeeded' },
-  },
-  invoke: {
-    src: 'ledgerUpdate',
-    onDone: 'waiting',
-  },
+/*
+Since the machine doesn't have sync access to a store, we invoke a promise to get the
+desired outcome; that outcome can then be forwarded to the supportState service.
+TODO: extract this pattern to other protocols.
+*/
+const updateOutcome = (src: 'getPrefundOutcome' | 'getPostfundOutcome') => {
+  return {
+    initial: 'getOutcome',
+    states: {
+      getOutcome: { invoke: { src, onDone: 'updateOutcome' } },
+      updateOutcome: {
+        invoke: {
+          src: 'supportState',
+          data: ({ channelId }: Init, { data }: DoneInvokeEvent<Outcome>): SupportState.Init => ({
+            channelId,
+            outcome: data,
+          }),
+          onDone: 'done',
+        },
+      },
+      done: { type: FINAL },
+    },
+  };
 };
 
 const waiting = {
@@ -59,18 +66,14 @@ const deposit = {
   onError: 'failure',
 };
 
-const updatePostFundOutcome = {
-  invoke: { src: 'ledgerUpdate', onDone: 'success' },
-};
-
 export const config = {
   key: PROTOCOL,
   initial: 'updatePrefundOutcome',
   states: {
-    updatePrefundOutcome,
+    updatePrefundOutcome: { ...updateOutcome('getPrefundOutcome'), onDone: 'waiting' },
     waiting,
     deposit,
-    updatePostFundOutcome,
+    updatePostfundOutcome: { ...updateOutcome('getPostfundOutcome'), onDone: 'success' },
     success,
     failure,
   },
@@ -130,13 +133,13 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
   function preFundLedgerUpdateParams({
     targetChannelId: channelId,
     minimalOutcome,
-  }: UpdateOutcome): LedgerUpdate.Init {
+  }): LedgerUpdate.Init {
     return {
       channelId,
       targetOutcome: preDepositOutcome(channelId, minimalOutcome),
     };
   }
-  function postFundLedgerUpdateParams({ targetChannelId }: UpdateOutcome) {
+  function postFundLedgerUpdateParams({ targetChannelId }) {
     return {
       targetChannelId,
       targetOutcome: postDepositOutcome(targetChannelId),
