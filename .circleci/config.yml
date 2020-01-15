@@ -236,7 +236,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: /home/circle/project
+          at: /home/circleci/project
       - run: yarn build:netlify
       - run: yarn release:netlify
 
