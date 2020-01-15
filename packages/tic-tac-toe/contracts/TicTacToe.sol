@@ -345,12 +345,23 @@ contract TicTacToe is ForceMoveApp {
         private
         pure
         noDisjointMoves(toGameData)
-        allocationUnchanged(fromAllocation, toAllocation)
         stakeUnchanged(fromGameData, toGameData)
     {
-        require(isDraw(toGameData.Os, toGameData.Xs)); // check if board full.
-        require(madeStrictlyOneMark(toGameData.Xs, fromGameData.Xs));
+        require(isDraw(toGameData.Os, toGameData.Xs), "Draw - Board is full"); // check if board full.
+        require(madeStrictlyOneMark(toGameData.Xs, fromGameData.Xs), "One X placed");
         require(toGameData.Os == fromGameData.Os, 'No Os added to board');
+
+        // TODO This logic will only work if PlayerA is Xs and PlayerB is Os
+        require(
+            toAllocation[0].amount == fromAllocation[0].amount.add(toGameData.stake),
+            "Player A's allocation should be updated with the winnings."
+        );
+        require(
+            toAllocation[1].amount ==
+                fromAllocation[1].amount.sub(toGameData.stake),
+            "Player B's allocation should be updated with the winnings."
+        );
+
 
         // Old TTTMagmo code
         // crosses always plays first move and always plays the move that completes the board
