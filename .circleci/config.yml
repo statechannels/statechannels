@@ -161,8 +161,7 @@ jobs:
       GANACHE_CACHE_FOLDER: ../../.ganache-deployments
       GANACHE_PORT: 8547
     steps:
-      - checkout:
-          path: /home/circleci/project
+      - checkout
       - puppeteer/install
       - log_stats:
           file: integration-test-stats
@@ -205,8 +204,7 @@ jobs:
       HUB_PRIVATE_KEY: '0x8bf18c8953c7b41aac4cc3351dc179cda6831fcca852cbf71e4b0a75daf464ae'
 
     steps:
-      - checkout:
-          path: /home/circleci/project
+      - checkout
       - puppeteer/install
       - log_stats:
           file: integration-test-stats
@@ -233,6 +231,15 @@ jobs:
           file: integration-test-stats
       - notify_slack
 
+  release:
+    <<: *defaults
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /home/circle/project
+      - run:
+          command: yarn deploy:netlify
+
 workflows:
   statechannels:
     jobs:
@@ -251,5 +258,9 @@ workflows:
             - prepare
 
       - integration-test-with-hub:
+          requires:
+            - prepare
+
+      - release:
           requires:
             - prepare
