@@ -385,7 +385,10 @@ contract TicTacToe is ForceMoveApp {
         pure
         allocationUnchanged(fromAllocation, toAllocation)
         stakeUnchanged(fromGameData, toGameData)
-    {}
+    {
+        require(toGameData.Os == 0, 'Os reset to 0');
+        require(toGameData.Xs == 0, 'Xs reset to 0');
+    }
 
     function requireValidVICTORYtoSTART(
         Outcome.AllocationItem[] memory fromAllocation,
@@ -397,7 +400,11 @@ contract TicTacToe is ForceMoveApp {
         pure
         allocationUnchanged(fromAllocation, toAllocation)
         stakeUnchanged(fromGameData, toGameData)
-    {}
+    {
+        require(toGameData.Os == 0, 'Os reset to 0');
+        require(toGameData.Xs == 0, 'Xs reset to 0');
+
+    }
 
     function extractAllocation(VariablePart memory variablePart)
         private
