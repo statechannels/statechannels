@@ -151,12 +151,21 @@ contract TicTacToe is ForceMoveApp {
         private
         pure
         noDisjointMoves(toGameData)
-        outcomeUnchanged(fromPart, toPart)
         stakeUnchanged(fromGameData, toGameData)
         allocationsNotLessThanStake(fromAllocation, toAllocation, fromGameData, toGameData)
     {
         require(toGameData.Os == 0, 'No Os on board');
         require(madeStrictlyOneMark(toGameData.Xs, 0), 'One X placed');
+
+        // Current X Player should get all the stake. This is to decrease griefing. We assume that X Player is Player A
+        require(
+            toAllocation[0].amount == fromAllocation[0].amount.add(toGameData.stake),
+            'Allocation for player A should be incremented by 1x stake'
+        );
+        require(
+            toAllocation[1].amount == fromAllocation[1].amount.sub(toGameData.stake),
+            'Allocation for player B should be decremented by 1x stake.'
+        );
 
         // Old TTTMago code
         // if (State.indexOfMover(_new) == 0) { // mover is A
@@ -166,16 +175,6 @@ contract TicTacToe is ForceMoveApp {
         //     require(_new.aResolution() == _old.aResolution() - _new.stake());
         //     require(_new.bResolution() == _old.bResolution() + _new.stake());
         // }
-
-        // Current X Player should get all the stake. This is to decrease griefing.
-        // require(
-        //     toAllocation[0].amount == fromAllocation[0].amount.sub(toGameData.stake),
-        //     'Allocation for player A should be decremented by 1x stake'
-        // );
-        // require(
-        //     toAllocation[1].amount == fromAllocation[1].amount.add(toGameData.stake),
-        //     'Allocation for player B should be incremented by 1x stake.'
-        // );
 
     }
 
@@ -188,11 +187,21 @@ contract TicTacToe is ForceMoveApp {
         private
         pure
         noDisjointMoves(toGameData)
-        allocationUnchanged(fromAllocation, toAllocation)
         stakeUnchanged(fromGameData, toGameData)
+        allocationsNotLessThanStake(fromAllocation, toAllocation, fromGameData, toGameData)
     {
         require(toGameData.Xs == fromGameData.Xs, 'No Xs added to board');
         require(madeStrictlyOneMark(toGameData.Os, fromGameData.Os), 'One O placed');
+
+        // Current O Player should get all the stake. This is to decrease griefing. We assume that O Player is Player B
+        require(
+            toAllocation[0].amount == fromAllocation[0].amount.sub(toGameData.stake*2),
+            'Allocation for player A should be decremented by 1x stake'
+        );
+        require(
+            toAllocation[1].amount == fromAllocation[1].amount.add(toGameData.stake*2),
+            'Allocation for player B should be incremented by 1x stake.'
+        );
 
         // Old TTTMagmo code
         // if (State.indexOfMover(_new) == 0) {
@@ -217,12 +226,22 @@ contract TicTacToe is ForceMoveApp {
         private
         pure
         noDisjointMoves(toGameData)
-        allocationUnchanged(fromAllocation, toAllocation)
         stakeUnchanged(fromGameData, toGameData)
+        allocationsNotLessThanStake(fromAllocation, toAllocation, fromGameData, toGameData)
     {
         require(toGameData.Os == fromGameData.Os, 'No Os added to board');
         require(madeStrictlyOneMark(toGameData.Xs, fromGameData.Xs), 'One X placed');
 
+        // Current X Player should get all the stake. This is to decrease griefing. We assume that X Player is Player A
+        require(
+            toAllocation[0].amount == fromAllocation[0].amount.add(toGameData.stake*2),
+            'Allocation for player A should be incremented by 1x stake'
+        );
+        require(
+            toAllocation[1].amount == fromAllocation[1].amount.sub(toGameData.stake*2),
+            'Allocation for player B should be decremented by 1x stake.'
+        );
+        
         // Old TTTMagmo code
         // if (State.indexOfMover(_new) == 0) { // mover is A
         //     require(_new.aResolution() == _old.aResolution() + 2 * _new.stake()); // note extra factor of 2 to swing fully to other player

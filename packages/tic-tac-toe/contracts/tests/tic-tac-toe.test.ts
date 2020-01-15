@@ -91,19 +91,20 @@ const b = {
 
 // const x = 0b000011000;
 
-const balanceStart = [
+const startToAWins = [
   {A: 5, B: 5},
-  {A: 5, B: 5}
+  {A: 6, B: 4}
 ];
 
-const balanceAWins = [
-  {A: 5, B: 5},
-  {A: 7, B: 3}
+const bWinsToAWins = [
+  {A: 4, B: 6},
+  {A: 6, B: 4}
 ];
 
-const balanceBWins = [
-  {A: 5, B: 5},
-  {A: 3, B: 7}
+const aWinsToBWins = [
+  {A: 6, B: 4},
+  {A: 4, B: 6}
+];
 ];
 
 const startToXPlaying = ['Start', 'XPlaying'];
@@ -115,22 +116,22 @@ const oPlayingToVictory = ['OPlaying', 'Victory'];
 describe('validTransition', () => {
   it.each`
     isValid  | positionType          | stake     | Xs                | Os                | balances        | description
-    ${true}  | ${startToXPlaying}    | ${[1, 1]} | ${[b[0], b[1]]}   | ${[b[0], b[0]]}   | ${balanceStart} | ${'X can start a game'}
-    ${false} | ${startToXPlaying}    | ${[1, 1]} | ${[b[0], b[0]]}   | ${[b[0], b[0]]}   | ${balanceStart} | ${"X doesn't make a move"}
-    ${false} | ${startToXPlaying}    | ${[1, 1]} | ${[b[0], b[1]]}   | ${[b[0], b[2]]}   | ${balanceStart} | ${'O changed during X move'}
-    ${false} | ${startToXPlaying}    | ${[1, 1]} | ${[b[0], b[3]]}   | ${[b[0], b[0]]}   | ${balanceStart} | ${'X cant start with 2 marks'}
-    ${true}  | ${xPlayingToOPlaying} | ${[1, 1]} | ${[b[1], b[1]]}   | ${[b[0], b[2]]}   | ${balanceStart} | ${'O can make a move'}
-    ${false} | ${xPlayingToOPlaying} | ${[1, 1]} | ${[b[1], b[1]]}   | ${[b[0], b[0]]}   | ${balanceStart} | ${'O doesnt move'}
-    ${false} | ${xPlayingToOPlaying} | ${[1, 1]} | ${[b[0], b[1]]}   | ${[b[0], b[2]]}   | ${balanceStart} | ${'X changed during O move'}
-    ${false} | ${xPlayingToOPlaying} | ${[1, 1]} | ${[b[1], b[1]]}   | ${[b[0], b[1]]}   | ${balanceStart} | ${'O cant override a mark'}
-    ${false} | ${xPlayingToOPlaying} | ${[1, 1]} | ${[b[1], b[1]]}   | ${[b[0], b[5]]}   | ${balanceStart} | ${'O cant make 2 marks'}
-    ${true}  | ${oPlayingToXPlaying} | ${[1, 1]} | ${[b[1], b[5]]}   | ${[b[2], b[2]]}   | ${balanceStart} | ${'X can make a move'}
-    ${false} | ${oPlayingToXPlaying} | ${[1, 1]} | ${[b[1], b[1]]}   | ${[b[2], b[2]]}   | ${balanceStart} | ${'X doesnt move'}
-    ${false} | ${oPlayingToXPlaying} | ${[1, 1]} | ${[b[1], b[5]]}   | ${[b[2], b[6]]}   | ${balanceStart} | ${'O changed during X move'}
-    ${false} | ${oPlayingToXPlaying} | ${[1, 1]} | ${[b[1], b[3]]}   | ${[b[2], b[2]]}   | ${balanceStart} | ${'X cant override a mark'}
-    ${false} | ${oPlayingToXPlaying} | ${[1, 1]} | ${[b[1], b[11]]}  | ${[b[2], b[2]]}   | ${balanceStart} | ${'X cant make 2 marks'}
-    ${true}  | ${oPlayingToVictory}  | ${[1, 1]} | ${[b[3], b[7]]}   | ${[b[24], b[24]]} | ${balanceAWins} | ${'X can win'}
-    ${true}  | ${xPlayingToVictory}  | ${[1, 1]} | ${[b[24], b[24]]} | ${[b[3], b[7]]}   | ${balanceBWins} | ${'O can win'}
+    ${true}  | ${startToXPlaying}    | ${[1, 1]} | ${[b[0], b[1]]}   | ${[b[0], b[0]]}   | ${startToAWins} | ${'X can start a game'}
+    ${false} | ${startToXPlaying}    | ${[1, 1]} | ${[b[0], b[0]]}   | ${[b[0], b[0]]}   | ${startToAWins} | ${`X doesn't make a move`}
+    ${false} | ${startToXPlaying}    | ${[1, 1]} | ${[b[0], b[1]]}   | ${[b[0], b[2]]}   | ${startToAWins} | ${'O changed during X move'}
+    ${false} | ${startToXPlaying}    | ${[1, 1]} | ${[b[0], b[3]]}   | ${[b[0], b[0]]}   | ${startToAWins} | ${`X can't start with 2 marks`}
+    ${true}  | ${xPlayingToOPlaying} | ${[1, 1]} | ${[b[1], b[1]]}   | ${[b[0], b[2]]}   | ${aWinsToBWins} | ${'O can make a move'}
+    ${false} | ${xPlayingToOPlaying} | ${[1, 1]} | ${[b[1], b[1]]}   | ${[b[0], b[0]]}   | ${aWinsToBWins} | ${`O doesn't move`}
+    ${false} | ${xPlayingToOPlaying} | ${[1, 1]} | ${[b[0], b[1]]}   | ${[b[0], b[2]]}   | ${aWinsToBWins} | ${'X changed during O move'}
+    ${false} | ${xPlayingToOPlaying} | ${[1, 1]} | ${[b[1], b[1]]}   | ${[b[0], b[1]]}   | ${aWinsToBWins} | ${`O can't override a mark`}
+    ${false} | ${xPlayingToOPlaying} | ${[1, 1]} | ${[b[1], b[1]]}   | ${[b[0], b[5]]}   | ${aWinsToBWins} | ${`O can't make 2 marks`}
+    ${true}  | ${oPlayingToXPlaying} | ${[1, 1]} | ${[b[1], b[5]]}   | ${[b[2], b[2]]}   | ${bWinsToAWins} | ${'X can make a move'}
+    ${false} | ${oPlayingToXPlaying} | ${[1, 1]} | ${[b[1], b[1]]}   | ${[b[2], b[2]]}   | ${bWinsToAWins} | ${`X doesn't move`}
+    ${false} | ${oPlayingToXPlaying} | ${[1, 1]} | ${[b[1], b[5]]}   | ${[b[2], b[6]]}   | ${bWinsToAWins} | ${'O changed during X move'}
+    ${false} | ${oPlayingToXPlaying} | ${[1, 1]} | ${[b[1], b[3]]}   | ${[b[2], b[2]]}   | ${bWinsToAWins} | ${`X can't override a mark`}
+    ${false} | ${oPlayingToXPlaying} | ${[1, 1]} | ${[b[1], b[11]]}  | ${[b[2], b[2]]}   | ${bWinsToAWins} | ${`X can't make 2 marks`}
+    ${true}  | ${oPlayingToVictory}  | ${[1, 1]} | ${[b[3], b[7]]}   | ${[b[24], b[24]]} | ${bWinsToAWins} | ${'X can win'}
+    ${true}  | ${xPlayingToVictory}  | ${[1, 1]} | ${[b[24], b[24]]} | ${[b[3], b[7]]}   | ${aWinsToBWins} | ${'O can win'}
   `(
     `Returns $isValid on $positionType; $description`,
     async ({
