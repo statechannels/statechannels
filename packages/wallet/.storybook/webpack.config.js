@@ -1,5 +1,6 @@
 const path = require("path");
-module.exports = (baseConfig, env, config) => {
+
+module.exports = async ({config, mode}) => {
   config.module.rules.push({
     test: /\.(ts|tsx)$/,
     loader: require.resolve("awesome-typescript-loader")
@@ -29,10 +30,9 @@ module.exports = (baseConfig, env, config) => {
   });
   config.resolve.extensions.push(".ts", ".tsx", ".scss");
   config.resolve.alias = {
-    ...baseConfig.resolve.alias,
+    ...config.resolve.alias,
     fs: path.resolve(__dirname, "mock.js"),
     child_process: path.resolve(__dirname, "mock.js")
   };
-
   return config;
 };

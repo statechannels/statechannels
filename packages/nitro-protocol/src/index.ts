@@ -33,6 +33,7 @@ import {
   isAllocationOutcome,
   isGuaranteeOutcome,
   GuaranteeAssetOutcome,
+  AllocationAssetOutcome,
 } from './contract/outcome';
 
 import {State, VariablePart, getVariablePart} from './contract/state';
@@ -76,6 +77,7 @@ export {
   encodeOutcome,
   Outcome,
   AllocationItem,
+  AllocationAssetOutcome,
   getChannelId,
   Channel,
   getAssetTransferredEvent,
@@ -105,3 +107,6 @@ export const ContractArtifacts = {
   TokenArtifact,
   ConsensusAppArtifact,
 };
+
+// types
+export {Uint256} from './contract/types';

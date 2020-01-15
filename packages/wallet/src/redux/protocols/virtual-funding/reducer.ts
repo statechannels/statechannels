@@ -26,7 +26,7 @@ import {
   isAllocationOutcome,
   convertAddressToBytes32
 } from "@statechannels/nitro-protocol";
-import {AllocationAssetOutcome} from "@statechannels/nitro-protocol/src/contract/outcome";
+import {AllocationAssetOutcome} from "@statechannels/nitro-protocol";
 
 export function initialize(
   sharedData: SharedData,
