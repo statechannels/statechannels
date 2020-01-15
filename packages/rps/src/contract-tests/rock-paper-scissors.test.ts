@@ -1,12 +1,10 @@
 import {expectRevert} from '@statechannels/devtools';
 import RockPaperScissorsArtifact from '../../build/contracts/RockPaperScissors.json';
 import * as ethers from 'ethers';
-import {Contract} from 'ethers';
-import {defaultAbiCoder, bigNumberify, keccak256, Interface} from 'ethers/utils';
+import {defaultAbiCoder, bigNumberify, keccak256, Interface, BigNumberish} from 'ethers/utils';
 import dotEnvExtended from 'dotenv-extended';
 import path from 'path';
 import {AddressZero} from 'ethers/constants';
-import {TransactionRequest} from 'ethers/providers';
 import {
   Allocation,
   encodeOutcome,
@@ -21,6 +19,7 @@ import {Weapon} from '../core/weapons';
 import loadJsonFile from 'load-json-file';
 
 import {randomHex} from '../utils/randomHex';
+import fs from 'fs';
 
 dotEnvExtended.load();
 
@@ -43,7 +42,7 @@ const WeaponIndex = {
   Scissors: Weapon.Scissors,
 };
 
-let RockPaperScissors: Contract;
+let RockPaperScissors: ethers.Contract;
 
 const numParticipants = 3;
 const addresses = {
@@ -74,7 +73,8 @@ describe('validTransition', () => {
     ${false} | ${'Reveal'}        | ${'Start'}         | ${{from: 1, to: 2}} | ${'Rock'} | ${'Rock'}     | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${'Disallows stake change'}
     ${false} | ${'Start'}         | ${'RoundProposed'} | ${{from: 1, to: 1}} | ${'Rock'} | ${'Rock'}     | ${{A: 5, B: 5}} | ${{A: 6, B: 4}} | ${'Disallows allocations change '}
     ${false} | ${'RoundProposed'} | ${'RoundAccepted'} | ${{from: 1, to: 1}} | ${'Rock'} | ${'Rock'}     | ${{A: 6, B: 4}} | ${{B: 6, A: 4}} | ${'Disallows destination swap'}
-    ${false} | ${'Start'}         | ${'RoundProposed'} | ${{from: 1, to: 6}} | ${'Rock'} | ${'Rock'}     | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${'Disallows a stake that is too large'}
+    ${false} | ${'Start'}         | ${'RoundProposed'} | ${{from: 1, to: 6}} | ${'Rock'} | ${'Rock'}     | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${'Disallows a stake that changes'}
+    ${false} | ${'RoundAccepted'} | ${'Reveal'}        | ${{from: 1, to: 2}} | ${'Rock'} | ${'Scissors'} | ${{A: 4, B: 6}} | ${{A: 8, B: 4}} | ${'Disallows a stake that changes'}
   `(
     `Returns $isValid on $fromPositionType -> $toPositionType; $description`,
     async ({
@@ -86,6 +86,7 @@ describe('validTransition', () => {
       BWeapon,
       fromBalances,
       toBalances,
+      description,
     }: {
       isValid: boolean;
       fromPositionType: string;
@@ -95,6 +96,7 @@ describe('validTransition', () => {
       BWeapon: string;
       fromBalances: AssetOutcomeShortHand;
       toBalances: AssetOutcomeShortHand;
+      description: string;
     }) => {
       fromBalances = replaceAddressesAndBigNumberify(fromBalances, addresses);
       toBalances = replaceAddressesAndBigNumberify(toBalances, addresses);
@@ -148,8 +150,16 @@ describe('validTransition', () => {
           1,
           numParticipants,
         ]);
+        const signer = testProvider.getSigner();
+        const transaction = {data, gasLimit: 3000000};
+        const response = await signer.sendTransaction({
+          to: RockPaperScissors.address,
+          ...transaction,
+        });
 
-        await sendTransaction(RockPaperScissors.address, {data, gasLimit: 3000000});
+        const descriptor = `Returns ${isValid} on ${fromPositionType} -> ${toPositionType}; ${description}`;
+        const receipt = await (await response).wait();
+        await writeGasConsumption('./RockPaperScissors.gas.md', descriptor, receipt.gasUsed);
 
         const isValidFromCall = await RockPaperScissors.validTransition(
           fromVariablePart,
@@ -199,9 +209,13 @@ export function hashPreCommit(weapon: Weapon, salt: string) {
   return keccak256(defaultAbiCoder.encode(['uint256', 'bytes32'], [weapon, salt]));
 }
 
-async function sendTransaction(contractAddress: string, transaction: TransactionRequest) {
-  // move to devtools
-  const signer = testProvider.getSigner();
-  const response = await signer.sendTransaction({to: contractAddress, ...transaction});
-  await response.wait();
+export async function writeGasConsumption(
+  filename: string,
+  description: string,
+  gas: BigNumberish
+): Promise<void> {
+  await fs.appendFile(filename, description + ':\n' + gas.toString() + ' gas\n\n', err => {
+    if (err) throw err;
+    console.log('Wrote gas info to ' + filename);
+  });
 }

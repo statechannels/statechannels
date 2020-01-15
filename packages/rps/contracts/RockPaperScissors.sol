@@ -24,7 +24,7 @@ contract RockPaperScissors is ForceMoveApp {
 
     struct RPSData {
         PositionType positionType;
-        uint256 stake;
+        uint256 stake; // this is contributed by each player. If you win, you get your stake back as well as the stake of the other player. If you lose, you lose your stake.
         bytes32 preCommit;
         Weapon aWeapon; // playerOneWeapon
         Weapon bWeapon; // playerTwoWeapon
@@ -140,7 +140,10 @@ contract RockPaperScissors is ForceMoveApp {
     ) private pure stakeUnchanged(fromGameData, toGameData) {
         require(fromGameData.preCommit == toGameData.preCommit, 'Precommit should be the same.');
 
-        // a will have to reveal, so remove the stake beforehand
+        // Since Player A has the unique privilege of knowing the result of the game after receiving this 'to' state,
+        // Player B should modify the allocations as if they had won the game and Player A had lost.
+        // This is to incentivize Player A to continue with the REVEAL (rather than disconnecting) 
+        // in the case where Player A knows they have lost.
         require(
             toAllocation[0].amount == fromAllocation[0].amount.sub(toGameData.stake),
             'Allocation for player A should be decremented by 1x stake'
@@ -157,9 +160,7 @@ contract RockPaperScissors is ForceMoveApp {
         Outcome.AllocationItem[] memory toAllocation,
         RPSData memory fromGameData,
         RPSData memory toGameData
-    ) private pure {
-        uint256 playerAWinnings; // playerOneWinnings
-        uint256 playerBWinnings; // playerTwoWinnings
+    ) private pure stakeUnchanged(fromGameData, toGameData) {
         require(
             toGameData.bWeapon == fromGameData.bWeapon,
             "Player Second's weapon should be the same between commitments."
@@ -170,21 +171,31 @@ contract RockPaperScissors is ForceMoveApp {
         bytes32 hashed = keccak256(abi.encode(uint256(toGameData.aWeapon), toGameData.salt));
         require(hashed == fromGameData.preCommit, 'The hash needs to match the precommit');
 
-        // calculate winnings
-        (playerAWinnings, playerBWinnings) = winnings(
-            toGameData.aWeapon,
-            toGameData.bWeapon,
-            toGameData.stake
-        );
+        // Recall that on the 'from' state, the allocations are as if Player A has lost.
+        // First, undo this
+        uint256 correctAmountA = fromAllocation[0].amount.add(fromGameData.stake);
+        uint256 correctAmountB = fromAllocation[1].amount.sub(fromGameData.stake);
+    
+        // Next, transfer one "stake" from Loser to Winner     
+        if (toGameData.aWeapon == toGameData.bWeapon) {
+            // a draw
+        } else if ((toGameData.aWeapon == Weapon.Rock && toGameData.bWeapon == Weapon.Scissors) || (toGameData.aWeapon > toGameData.bWeapon)) {
+            // player A won
+            correctAmountA = correctAmountA.add(fromGameData.stake);
+            correctAmountB = correctAmountB.sub(fromGameData.stake);
+        } else {
+            // player B won
+            correctAmountA = correctAmountA.sub(fromGameData.stake);
+            correctAmountB = correctAmountB.add(fromGameData.stake);
+        }
 
         require(
-            toAllocation[0].amount == fromAllocation[0].amount.add(playerAWinnings),
-            "Player A's allocation should be updated with the winnings."
+            toAllocation[0].amount == correctAmountA,
+            "Player A's allocation should reflect the result of the game."
         );
         require(
-            toAllocation[1].amount ==
-                fromAllocation[1].amount.sub(fromGameData.stake.mul(2)).add(playerBWinnings),
-            "Player B's allocation should be updated with the winnings."
+            toAllocation[1].amount == correctAmountB,
+            "Player B's allocation should reflect the result of the game."
         );
     }
 
@@ -229,22 +240,6 @@ contract RockPaperScissors is ForceMoveApp {
         );
 
         return allocation;
-    }
-
-    function winnings(Weapon aWeapon, Weapon bWeapon, uint256 stake)
-        private
-        pure
-        returns (uint256, uint256)
-    {
-        if (aWeapon == bWeapon) {
-            return (stake, stake);
-        } else if ((aWeapon == Weapon.Rock && bWeapon == Weapon.Scissors) || (aWeapon > bWeapon)) {
-            // first player won
-            return (2 * stake, 0);
-        } else {
-            // second player won
-            return (0, 2 * stake);
-        }
     }
 
     function _requireDestinationsUnchanged(
