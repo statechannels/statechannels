@@ -105,3 +105,6 @@ export const ContractArtifacts = {
   TokenArtifact,
   ConsensusAppArtifact,
 };
+export const ContractAbis = {
+  EthAssetHolder: ContractArtifacts.EthAssetHolderArtifact.abi,
+};
