@@ -1,3 +1,5 @@
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const webpack = require('webpack');
 module.exports = {
   mode: 'development',
   entry: './src/index.ts',
@@ -20,6 +22,11 @@ module.exports = {
       }
     ]
   },
+  // TODO: Generate a proper collection of allowed env variables
+  plugins: [
+    new webpack.EnvironmentPlugin(['ETH_ASSET_HOLDER_ADDRESS', 'HUB_ADDRESS', 'CHAIN_NETWORK_ID'])
+  ],
+
   resolve: {
     extensions: ['.tsx', '.ts', '.js']
   },
