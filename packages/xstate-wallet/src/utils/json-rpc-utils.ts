@@ -2,10 +2,11 @@ import {
   Outcome,
   isAllocationOutcome,
   convertBytes32ToAddress,
-  State
+  State,
+  convertAddressToBytes32
 } from '@statechannels/nitro-protocol';
 import {utils} from 'ethers';
-import {NETWORK_ID, CHALLENGE_DURATION} from '../constants';
+import {NETWORK_ID, CHALLENGE_DURATION, ETH_ASSET_HOLDER_ADDRESS} from '../constants';
 import {
   UpdateChannelParams,
   Allocations,
@@ -13,20 +14,20 @@ import {
 } from '@statechannels/client-api-schema/types';
 import {Channel} from '@statechannels/wallet-protocols';
 
-// function createAllocationOutcomeFromParams(params: Allocations): Outcome {
-//   return params.map(p => {
-//     return {
-//       // TODO: Need to look up the the asset holder for the token
-//       assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
-//       allocation: p.allocationItems.map(a => {
-//         return {
-//           destination: convertAddressToBytes32(a.destination),
-//           amount: a.amount
-//         };
-//       })
-//     };
-//   });
-// }
+function createAllocationOutcomeFromParams(params: Allocations): Outcome {
+  return params.map(p => {
+    return {
+      // TODO: Need to look up the the asset holder for the token
+      assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
+      allocation: p.allocationItems.map(a => {
+        return {
+          destination: convertAddressToBytes32(a.destination),
+          amount: a.amount
+        };
+      })
+    };
+  });
+}
 
 export function createJsonRpcAllocationsFromOutcome(outcome: Outcome): Allocations {
   return outcome.map(o => {
@@ -34,7 +35,7 @@ export function createJsonRpcAllocationsFromOutcome(outcome: Outcome): Allocatio
       throw new Error('Attempted to convert non allocation outcome to an allocation');
     }
     return {
-      token: o.assetHolderAddress,
+      token: '0x0',
       allocationItems: o.allocation.map(a => ({
         amount: a.amount,
         destination: convertBytes32ToAddress(a.destination)
@@ -59,7 +60,7 @@ export function createStateFromCreateChannelParams(params: CreateChannelParams):
     challengeDuration: CHALLENGE_DURATION,
     appData,
     appDefinition,
-    outcome: [], //createAllocationOutcomeFromParams(params.allocations),
+    outcome: createAllocationOutcomeFromParams(params.allocations),
     turnNum: 0,
     isFinal: false
   };
@@ -70,7 +71,7 @@ export function createStateFromUpdateChannelParams(
   state: State,
   params: UpdateChannelParams
 ): State {
-  const {appData} = params;
+  const {appData, allocations} = params;
 
   // TODO: check for valid transition using EVM library
 
@@ -79,7 +80,7 @@ export function createStateFromUpdateChannelParams(
   return {
     ...state,
     turnNum: state.turnNum + 1,
-    outcome: [], // createAllocationOutcomeFromParams(allocations)[0],
+    outcome: createAllocationOutcomeFromParams(allocations),
     appData
   };
 }
