@@ -10,8 +10,7 @@ import {
   Store,
   MachineFactory,
 } from '../../';
-import * as LedgerUpdate from '../ledger-update/protocol';
-import { Allocation, Outcome, AllocationItem, State } from '@statechannels/nitro-protocol';
+import { Allocation, Outcome, State } from '@statechannels/nitro-protocol';
 import { Machine, DoneInvokeEvent } from 'xstate';
 import { SupportState } from '..';
 
@@ -59,9 +58,7 @@ const waiting = {
 };
 
 const deposit = {
-  invoke: {
-    src: 'submitTransaction',
-  },
+  invoke: { src: 'depositService' },
   onDone: 'waiting',
   onError: 'failure',
 };
@@ -79,79 +76,53 @@ export const config = {
   },
 };
 
+type Guards = {
+  safeToDeposit: (x) => boolean;
+  funded: (x) => boolean;
+};
+type Services = {
+  getPrefundOutcome: any;
+  getPostfundOutcome: any;
+  depositService: any;
+  supportState: any;
+};
+
+type Options = { guards: Guards; services: Services };
 const guards = {
-  noUpdateNeeded: x => true,
   safeToDeposit: x => true,
   funded: x => true,
 };
-export const mockOptions = { guards };
+
+export const mockOptions: Partial<Options> = { guards };
 
 export const machine: MachineFactory<Init, any> = (store: Store, context: Init) => {
-  function getHoldings(state: State, destination: string): string {
-    const { outcome } = state;
-
-    let currentFunding = chain.holdings(getChannelId(state.channel));
-
-    return getEthAllocation(outcome)
-      .filter(item => item.destination === destination)
-      .map(item => {
-        const payout = Math.min(currentFunding, Number(item.amount));
-        currentFunding -= payout;
-        return payout.toString();
-      })
-      .reduce(add);
-  }
-
-  function preDepositOutcome(channelId: string, minimalAllocation: Allocation): Outcome {
+  async function getPrefundOutcome({ channelId, minimalAllocation }: Init): Promise<Outcome> {
     const state = store.getEntry(channelId).latestSupportedState;
-    const allocation = getEthAllocation(store.getEntry(channelId).latestSupportedState.outcome);
+    const holdings = getHoldings(state, channelId);
 
-    const destinations = uniqueDestinations(allocation.concat(minimalAllocation));
-    const preDepositAllocation = allocation.concat(
-      destinations.map(destination => ({
-        destination,
-        amount: obligation(state, minimalAllocation, destination),
-      }))
-    );
-
-    return ethAllocationOutcome(preDepositAllocation);
-  }
-  function postDepositOutcome(channelId: string): Outcome {
-    const allocation = getEthAllocation(store.getEntry(channelId).latestSupportedState.outcome);
-    const destinations = uniqueDestinations(allocation);
-
-    const postDepositAllocation = destinations.map(destination => ({
-      destination,
-      amount: allocation
-        .filter(i => i.destination === destination)
-        .map(amount)
-        .reduce(add),
-    }));
-
-    return ethAllocationOutcome(postDepositAllocation);
-  }
-  function preFundLedgerUpdateParams({
-    targetChannelId: channelId,
-    minimalOutcome,
-  }): LedgerUpdate.Init {
-    return {
-      channelId,
-      targetOutcome: preDepositOutcome(channelId, minimalOutcome),
-    };
-  }
-  function postFundLedgerUpdateParams({ targetChannelId }) {
-    return {
-      targetChannelId,
-      targetOutcome: postDepositOutcome(targetChannelId),
-    };
+    return minimalOutcome(state.outcome, minimalAllocation, holdings);
   }
 
-  return Machine(config);
+  async function getPostfundOutcome({ channelId }: Init): Promise<Outcome> {
+    const { outcome } = store.getEntry(channelId).latestSupportedState;
+
+    return flattenOutcome(outcome);
+  }
+
+  const services: Services = {
+    getPrefundOutcome,
+    supportState: SupportState.machine(store),
+    depositService: async () => true,
+    getPostfundOutcome,
+  };
+  const options: Options = { guards, services };
+  return Machine(config).withConfig(options, context);
 };
 
 function getHoldings(state: State, destination: string): string {
   const { outcome } = state;
 
+  // TODO: Remove use of `chain`
   let currentFunding = chain.holdings(getChannelId(state.channel));
   return getEthAllocation(outcome)
     .filter(item => item.destination === destination)
@@ -163,22 +134,6 @@ function getHoldings(state: State, destination: string): string {
     .reduce(add);
 }
 
-function assertOk(minimalOutcome: Allocation): boolean {
-  return uniqueDestinations(minimalOutcome).length === minimalOutcome.length;
-}
-
-function obligation(state: State, minimalOutcome: Allocation, destination: string): string {
-  assertOk(minimalOutcome);
-  const myHoldings = getHoldings(state, destination);
-
-  const myTargetLevel = (
-    minimalOutcome.find(item => item.destination === destination) || {
-      amount: '0',
-    }
-  ).amount;
-  return max(subtract(myTargetLevel, myHoldings), 0);
-}
-
 function uniqueDestinations(outcome: Allocation): string[] {
   const firstEntry = (value, index, self) => {
     return self.indexOf(value) === index;
@@ -187,6 +142,45 @@ function uniqueDestinations(outcome: Allocation): string[] {
   return outcome.map(i => i.destination).filter(firstEntry);
 }
 
-function amount(item: AllocationItem): string {
-  return item.amount;
+function minimalOutcome(
+  currentOutcome: Outcome,
+  minimalEthAllocation: Allocation,
+  currentHoldings: string
+): Outcome {
+  if (uniqueDestinations(minimalEthAllocation).length !== minimalEthAllocation.length) {
+    throw new Error('Duplicate destination in minimal allocation');
+  }
+
+  const allocation = getEthAllocation(currentOutcome);
+  const destinations = uniqueDestinations(allocation.concat(minimalEthAllocation));
+
+  const preDepositAllocation = allocation.concat(
+    destinations.map(destination => {
+      const myTargetLevel = (
+        minimalEthAllocation.find(item => item.destination === destination) || {
+          amount: '0',
+        }
+      ).amount;
+      const amount = max(subtract(myTargetLevel, currentHoldings), 0);
+
+      return { destination, amount };
+    })
+  );
+
+  return ethAllocationOutcome(preDepositAllocation);
+}
+
+function flattenOutcome(outcome: Outcome): Outcome {
+  const allocation = getEthAllocation(outcome);
+  const destinations = uniqueDestinations(allocation);
+
+  const postDepositAllocation = destinations.map(destination => ({
+    destination,
+    amount: allocation
+      .filter(i => i.destination === destination)
+      .map(i => i.amount)
+      .reduce(add),
+  }));
+
+  return ethAllocationOutcome(postDepositAllocation);
 }
