@@ -16,7 +16,7 @@ Many companies today use their own, private accounting system to reduce the need
 
 If starting from scratch, state channels require at least one transaction to set up (e.g. to escrow some ETH), and one transaction to tear down (e.g. to payout the ETH), with all other state updates (e.g. transferring a portion of that ETH between the participants) being off-chain and therefore fast and free.
 
-## Residual gas costs
+## Residual gas costs for state channels
 
 With our state channel network protocol [Nitro](https://magmo.com/nitro-protocol.pdf), however, users will likely only ever need to setup a _single_ channel known as a "hub connection", and administer it periodically (say once a month). A hub connection can be bootstrapped to _virtually_ setup and teardown state channels without any Ethereuym transactions. This means that the setup and teardown costs of that single hub connection channel are less critical. They remain a pain point for end users, however, and therefore a barrier to mainstream adoption for Ethereum: the costs need to be reduced as much as possible.
 
