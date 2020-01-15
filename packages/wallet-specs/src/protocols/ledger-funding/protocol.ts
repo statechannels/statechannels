@@ -1,15 +1,8 @@
 import { assign, DoneInvokeEvent, Machine } from 'xstate';
 import { CreateNullChannel, DirectFunding, SupportState } from '..';
-import {
-  Channel,
-  ensureExists,
-  MachineFactory,
-  Store,
-  success,
-  ethAllocationOutcome,
-  getEthAllocation,
-} from '../..';
-import { Outcome, Allocation } from '@statechannels/nitro-protocol';
+import { allocateToTarget } from '../../calculations';
+import { Channel, ensureExists, MachineFactory, Store, success, getEthAllocation } from '../..';
+import { Outcome } from '@statechannels/nitro-protocol';
 
 const PROTOCOL = 'ledger-funding';
 
@@ -169,26 +162,15 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
     targetChannelId,
     ledgerChannelId,
   }: LedgerExists): Promise<SupportState.Init> {
-    // const { latestState: ledgerState } = store.getEntry(ledgerChannelId);
-    // const { latestState: targetChannelState } = store.getEntry(targetChannelId);
+    const { latestState: ledgerState } = store.getEntry(ledgerChannelId);
+    const { latestState: targetChannelState } = store.getEntry(targetChannelId);
 
-    /*
-    TODO
-    1. Match ledger destinations to target channel destinations
-    2. Deduct from ledger destination
-    3. Allocate total deducted to target
-    */
+    const ledgerAllocation = getEthAllocation(ledgerState.outcome);
+    const targetAllocation = getEthAllocation(targetChannelState.outcome);
 
-    const allocation: Allocation = [
-      {
-        destination: targetChannelId,
-        // TODO: This needs to account for the existing allocation
-        amount: '0x01',
-      },
-    ];
     return {
       channelId: ledgerChannelId,
-      outcome: ethAllocationOutcome(allocation),
+      outcome: allocateToTarget(targetAllocation, ledgerAllocation, targetChannelId),
     };
   }
 
