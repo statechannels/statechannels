@@ -37,6 +37,28 @@ export async function clickThroughRPSUI(rpsTabA: Page, rpsTabB: Page): Promise<v
   await (await rpsTabB.waitFor('img[src*="paper"]')).click();
 }
 
+export async function clickThroughResignationUI(rpsTabA: Page, rpsTabB: Page): Promise<void> {
+  (await rpsTabA.waitForXPath('//button[contains(., "Resign")]')).click();
+
+  const walletIFrameA = rpsTabA.frames()[1];
+  const walletIFrameB = rpsTabB.frames()[1];
+
+  await (await walletIFrameB.waitForXPath('//button[contains(., "Close Channel")]')).click();
+
+  await (await walletIFrameA.waitForXPath('//button[contains(., "Close Channel")]')).click();
+
+  await (await walletIFrameB.waitForXPath('//button[contains(., "Approve")]')).click();
+
+  await (await walletIFrameB.waitForXPath('//button[contains(., "Ok")]')).click();
+
+  (await rpsTabB.waitForXPath('//button[contains(., "OK")]')).click();
+
+  (await rpsTabB.waitForXPath('//button[contains(., "Exit")]')).click();
+
+  // TODO: Implement some logic so this can be called in both the ledger or virtual channel case
+  //       (in the virtual case, both UIs show "Approve" but in the ledger case, only one does)
+}
+
 if (require.main === module) {
   (async (): Promise<void> => {
     // Unfortunately we need to use two separate windows
@@ -52,6 +74,8 @@ if (require.main === module) {
     await loadRPSApp(rpsTabB, 1);
 
     await clickThroughRPSUI(rpsTabA, rpsTabB);
+
+    await clickThroughResignationUI(rpsTabA, rpsTabB);
 
     process.exit();
   })();

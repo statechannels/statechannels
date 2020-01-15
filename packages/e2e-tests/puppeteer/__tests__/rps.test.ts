@@ -1,5 +1,5 @@
 import {setUpBrowser, loadRPSApp} from '../helpers';
-import {clickThroughRPSUI} from '../scripts/rps';
+import {clickThroughRPSUI, clickThroughResignationUI} from '../scripts/rps';
 import {Page, Browser} from 'puppeteer';
 
 jest.setTimeout(60000);
@@ -38,5 +38,12 @@ describe('Playing a game of RPS', () => {
     expect(await (await rpsTabB.waitFor('h1.mb-5')).evaluate(el => el.textContent)).toMatch(
       'You won!'
     );
+  });
+
+  it('can then withdraw funds', async () => {
+    await clickThroughResignationUI(rpsTabA, rpsTabB);
+
+    // Should be on the homepage
+    expect(await rpsTabB.waitForXPath('//button[contains(., "Create a game")]')).toBeDefined();
   });
 });
