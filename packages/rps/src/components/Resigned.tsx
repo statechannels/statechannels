@@ -22,7 +22,7 @@ export default class Resigned extends React.PureComponent<Props> {
             onClick={this.props.action}
             disabled={!this.props.channelClosed}
           >
-            {'Withdraw'}
+            {'OK'}
           </Button>
           <br />
           {!this.props.channelClosed && 'Waiting for your opponent...'}
