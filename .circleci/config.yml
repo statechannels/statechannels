@@ -237,8 +237,8 @@ jobs:
       - checkout
       - attach_workspace:
           at: /home/circleci/project
-      - run: yarn build:netlify
-      - run: yarn release:netlify
+      - run: yarn build:netlify:ci
+      - run: yarn release:netlify:ci
 
 workflows:
   statechannels:
