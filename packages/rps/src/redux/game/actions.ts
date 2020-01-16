@@ -26,6 +26,7 @@ export interface UpdateProfile {
 export interface GotAddressFromWallet {
   type: 'GotAddressFromWallet';
   address: string;
+  outcomeAddress: string;
 }
 export interface UpdateChannelState {
   type: 'UpdateChannelState';
@@ -48,6 +49,7 @@ export interface JoinOpenGame {
   type: 'JoinOpenGame';
   opponentName: string;
   opponentAddress: string;
+  opponentOutcomeAddress: string;
   roundBuyIn: string;
 }
 
@@ -55,6 +57,7 @@ export interface GameJoined {
   type: 'GameJoined';
   opponentName: string;
   opponentAddress: string;
+  opponentOutcomeAddress: string;
 }
 
 export interface ChooseWeapon {
@@ -105,9 +108,13 @@ export const updateProfile = (name: string, twitterHandle: string): UpdateProfil
   twitterHandle,
 });
 
-export const gotAddressFromWallet = (address: string): GotAddressFromWallet => ({
+export const gotAddressFromWallet = (
+  address: string,
+  outcomeAddress: string
+): GotAddressFromWallet => ({
   type: 'GotAddressFromWallet',
   address,
+  outcomeAddress,
 });
 
 export const updateChannelState = (channelState: ChannelState): UpdateChannelState => ({
@@ -138,18 +145,25 @@ export const chooseSalt = (salt: string): ChooseSalt => ({type: 'ChooseSalt', sa
 export const joinOpenGame = (
   opponentName: string,
   opponentAddress: string,
+  opponentOutcomeAddress: string,
   roundBuyIn: string
 ): JoinOpenGame => ({
   type: 'JoinOpenGame',
   opponentName,
   opponentAddress,
+  opponentOutcomeAddress,
   roundBuyIn,
 });
 
-export const gameJoined = (opponentName: string, opponentAddress: string): GameJoined => ({
+export const gameJoined = (
+  opponentName: string,
+  opponentAddress: string,
+  opponentOutcomeAddress: string
+): GameJoined => ({
   type: 'GameJoined',
   opponentName,
   opponentAddress,
+  opponentOutcomeAddress,
 });
 
 export const resultArrived = (

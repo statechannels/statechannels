@@ -4,7 +4,8 @@
     "baseUrl": "src",
     "module": "commonjs",
     "outDir": "lib",
-    "target": "es2015"
+    "target": "es2015",
+    "types": ["react", "jest", "node"]
   },
   "references": [{"path": "../channel-provider"}]
 }

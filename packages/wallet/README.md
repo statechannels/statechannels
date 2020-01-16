@@ -1,6 +1,5 @@
 <h1 align="center">
-<div><img src="../../magmo-fireball.svg"> </div>
-The Magmo Wallet
+The State Channels Wallet
 </h1>
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/0e22fa3e-d6a0-4308-8043-5ada4017eee0/deploy-status)](https://app.netlify.com/sites/wallet-statechannels/deploys)

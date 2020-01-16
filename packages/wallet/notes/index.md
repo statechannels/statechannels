@@ -1,4 +1,4 @@
-# Magmo wallet developer docs
+# Wallet developer docs
 
 - [Wallet architecture](./structuring-the-wallet.md)
 - [Action routing](./action-routing.md)

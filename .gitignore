@@ -51,6 +51,7 @@ junit.xml
 **/.outputParameter
 **/gas.json
 **/gas.md
+**/*.gas.md
 
 
 ganache-deployments.json

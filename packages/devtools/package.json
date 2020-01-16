@@ -2,7 +2,7 @@
   "name": "@statechannels/devtools",
   "private": true,
   "version": "0.1.21",
-  "description": "Scripts used for Magmo development processes",
+  "description": "Scripts used for our team development processes",
   "main": "lib/src/index.js",
   "bin": {
     "start-shared-ganache": "lib/src/ganache/start-ganache-script.js"
@@ -54,7 +54,6 @@
     "prettier": "1.19.1",
     "tcp-port-used": "1.0.1",
     "tree-kill": "1.2.1",
-    "truffle": "5.0.37",
     "typescript": "3.7.2"
   },
   "lint-staged": {

@@ -1,7 +1,5 @@
 import {Contract, ethers, Wallet} from 'ethers';
-import {constants} from 'ethers';
-import {providers} from 'ethers';
-import {utils} from 'ethers';
+import {constants, providers, utils} from 'ethers';
 
 import {hashChannelStorage} from '../src/contract/channel-storage';
 import {
@@ -14,6 +12,7 @@ import {
   Outcome,
 } from '../src/contract/outcome';
 import {hashState, State} from '../src/contract/state';
+import fs from 'fs';
 
 // Interfaces
 
@@ -360,4 +359,15 @@ export function compileEventsFromLogs(logs: any[], contractsArray: Contract[]) {
     });
   });
   return events;
+}
+
+export async function writeGasConsumption(
+  filename: string,
+  description: string,
+  gas: utils.BigNumberish
+): Promise<void> {
+  await fs.appendFile(filename, description + ':\n' + gas.toString() + ' gas\n\n', err => {
+    if (err) throw err;
+    console.log('Wrote gas info to ' + filename);
+  });
 }

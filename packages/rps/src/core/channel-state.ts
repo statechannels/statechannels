@@ -10,6 +10,8 @@ export interface ChannelState<T = AppData> {
   bUserId: string;
   aAddress: string;
   bAddress: string;
+  aOutcomeAddress: string;
+  bOutcomeAddress: string;
   aBal: string;
   bBal: string;
   appData: T;

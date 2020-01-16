@@ -56,7 +56,7 @@ export default class InsufficientFunds extends React.PureComponent<Props> {
             </div>
           </div>
           <Button className="cog-button" onClick={action}>
-            {'Withdraw'}
+            {'Ok'}
           </Button>
         </div>
         )

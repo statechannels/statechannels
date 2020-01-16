@@ -28,7 +28,7 @@ it(
     }
     const initialState = {
       game: {
-        localState: Setup.lobby({name: 'Player A', address: 'blah'}),
+        localState: Setup.lobby({name: 'Player A', address: 'blah', outcomeAddress: 'blah'}),
         channelState: null,
       },
       openGames: [],

@@ -8,4 +8,5 @@
 /website/
 /.etherlime-store/
 /lib/
+/build/
 /jest/

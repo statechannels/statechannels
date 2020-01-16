@@ -17,7 +17,7 @@ export default class StatusBarLayout extends React.PureComponent<Props> {
           className="d-flex flex-row justify-content-end"
           style={{borderTop: "1px solid rgba(0, 0, 0, 0.1)"}}
         >
-          <div style={{color: "rgba(0, 0, 0, 0.3)"}}>Magmo wallet v0.0.1</div>
+          <div style={{color: "rgba(0, 0, 0, 0.3)"}}>State Channels wallet v0.0.1</div>
         </div>
       </div>
     );

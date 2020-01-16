@@ -1,6 +1,6 @@
 import React from 'react';
 import {Button} from 'reactstrap';
-import MAGMO_LOGO from '../images/magmo_logo.svg';
+import PROJECT_LOGO from '../images/horizontal_logo.svg';
 
 interface Props {
   createBlockchainChallenge: () => void;
@@ -37,10 +37,10 @@ export default class GameFooter extends React.PureComponent<Props> {
             </Button>
             <div className="ml-auto">
               <div className="footer-logo-container">
-                <img src={MAGMO_LOGO} />
+                <img width="150" src={PROJECT_LOGO} />
                 <small className="text-muted">
                   Something not working? Email us at{' '}
-                  <a href="mailto:oops@magmo.com">oops@magmo.com</a>
+                  <a href="mailto:oops@statechannels.org">oops@statechannels.org</a>
                 </small>
               </div>
             </div>

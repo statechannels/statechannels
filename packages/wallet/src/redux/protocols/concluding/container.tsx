@@ -27,10 +27,10 @@ class ConcludingContainer extends PureComponent<Props> {
         const {processId} = state;
         return (
           <ApproveX
-            title="Close Channel with Hub?"
+            title="Close Channel?"
             yesMessage="Close Channel"
             noMessage="Keep Open"
-            description="Do you want to close your channel with the hub?"
+            description="Do you want to close your channel?"
             approvalAction={() => closeSelected({processId})}
             rejectionAction={() => keepOpenSelected({processId})}
           />

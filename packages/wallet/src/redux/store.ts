@@ -15,7 +15,7 @@ const composeEnhancers = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ ||
 let store;
 if (USE_STORAGE) {
   // We currently whitelist the values that we store/load.
-  const storageWallet = filter(createWallet("magmo-wallet"), [
+  const storageWallet = filter(createWallet("statechannels-wallet"), [
     "whitelisted-key",
     ["address"],
     ["privateKey"],

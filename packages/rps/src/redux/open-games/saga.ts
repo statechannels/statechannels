@@ -42,6 +42,7 @@ export default function* openGameSaga() {
       const taggedOpenGame = {
         isPublic: false,
         playerAName: localState.name,
+        playerAOutcomeAddress: localState.outcomeAddress,
       };
       yield call(reduxSagaFirebase.database.patch, openGameKey, taggedOpenGame);
       joinedAGame = true;
@@ -60,11 +61,13 @@ export default function* openGameSaga() {
 
           myOpenGame = {
             address,
+            outcomeAddress: localState.outcomeAddress || address,
             name: localState.name,
             stake: localState.roundBuyIn.toString(),
             createdAt: new Date().getTime(),
             isPublic: true,
             playerAName: 'unknown',
+            playerAOutcomeAddress: 'unknown',
           };
 
           const disconnect = firebase
@@ -79,7 +82,13 @@ export default function* openGameSaga() {
           const storeObj = yield select();
           myOpenGame = getOpenGame(storeObj, myOpenGameKey);
           if (myOpenGame && !myOpenGame.isPublic) {
-            yield put(gameJoined(myOpenGame.playerAName, myOpenGame.opponentAddress));
+            yield put(
+              gameJoined(
+                myOpenGame.playerAName,
+                myOpenGame.opponentAddress,
+                myOpenGame.playerAOutcomeAddress
+              )
+            );
             yield call(reduxSagaFirebase.database.delete, myOpenGameKey);
             myGameIsOnFirebase = false;
           }

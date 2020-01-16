@@ -2,7 +2,7 @@
 @import './dimensions';
 
 .navbar {
-  background-color: $rps-dark-blue;
+  background-color: $rps-white;
   height: $navbar-height;
 }
 
@@ -13,7 +13,7 @@
   font-stretch: normal;
   line-height: normal;
   letter-spacing: normal;
-  color: $rps-light-grey;
+  color: $rps-footer-grey;
 }
 
 .circle {

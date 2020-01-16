@@ -17,7 +17,9 @@ export default class WaitForApproval extends React.PureComponent<Props> {
         <div>
           <p>You have been challenged! </p>
           <p> If you don't respond by {expiryDate}, the channel will be closed.</p>
-          <Button onClick={approve}>Respond</Button>
+          <Button color="primary" onClick={approve}>
+            Respond
+          </Button>
         </div>
       </Fragment>
     );
