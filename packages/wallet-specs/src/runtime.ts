@@ -47,7 +47,8 @@ function logState(actor: Actor, level = 0) {
     });
   }
 }
-const logProcessStates = process.env.ADD_LOGS
+
+export const logProcessStates = process.env.ADD_LOGS
   ? state => {
       console.log(`WALLET: ${state.context.id}`);
       state.context.processes.forEach((p: Process) => {
@@ -67,14 +68,21 @@ const wallet = (wallet): any => {
     .start();
 };
 
-const wallets = {
-  [first.address]: wallet(first),
-  [second.address]: wallet(second),
-};
+export async function runtime() {
+  const wallets = {
+    [first.address]: wallet(first),
+    [second.address]: wallet(second),
+  };
 
-// This is sort of the "dispatcher"
-messageService.on('message', ({ to, ...event }: AddressableMessage) => {
-  wallets[to].send(event);
-});
+  // This is sort of the "dispatcher"
+  messageService.on('message', ({ to, ...event }: AddressableMessage) => {
+    wallets[to].send(event);
+  });
 
-wallets[first.address].send(createChannel);
+  await wallets[first.address].send(createChannel);
+
+  return wallets;
+}
+
+// If you want to debug, uncomment the following
+// runtime().then(wallets => { debugger; });
