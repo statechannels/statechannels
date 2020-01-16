@@ -2,6 +2,7 @@ import {faCircle} from "@fortawesome/free-regular-svg-icons";
 import {faCheckCircle, faSpinner} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import React from "react";
+import {Progress} from "rimble-ui";
 
 const completeIcon = (
   <span className="fa-li">
@@ -70,14 +71,16 @@ export class Checklist extends React.PureComponent<Props> {
     return (
       <div>
         <h2 className="bp-2">{title}</h2>
-        <ul className="fa-ul">
+        {/* <ul className="fa-ul">
           {this.props.stepMessages.map((step, stepIndex) => (
             <li key={stepIndex}>
               {icon(stepIndex, currentStep)}
               {message(stepMessages[stepIndex], stepIndex, currentStep)}
             </li>
           ))}
-        </ul>
+        </ul> */}
+        <Progress value={currentStep / stepMessages.length} />
+        <p>{stepMessages[currentStep].step}</p>
         <div className="pb-2">{children}</div>
       </div>
     );
