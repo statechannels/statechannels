@@ -19,3 +19,5 @@ export * from './update-channel';
 export * from './close-channel';
 // @ts-ignore
 export * from './channel-result';
+// @ts-ignore
+export * from './challenge-channel';

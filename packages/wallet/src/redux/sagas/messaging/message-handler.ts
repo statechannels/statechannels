@@ -5,7 +5,8 @@ import {
   PushMessageParams,
   UpdateChannelParams,
   CreateChannelParams,
-  CloseChannelParams
+  CloseChannelParams,
+  ChallengeChannelParams
 } from "@statechannels/client-api-schema";
 import jrs, {RequestObject} from "jsonrpc-lite";
 
@@ -78,9 +79,33 @@ function* handleMessage(payload: RequestObject) {
     case "CloseChannel":
       yield handleCloseChannelMessage(payload);
       break;
+    case "ChallengeChannel":
+      yield handleChallengeChannelMessage(payload);
+      break;
     default:
       console.error(`No handler for method type ${payload.method}`);
       break;
+  }
+}
+
+function* handleChallengeChannelMessage(payload: RequestObject) {
+  const {id} = payload;
+  const {channelId} = payload.params as ChallengeChannelParams;
+  const channelExists = yield select(doesAStateExistForChannel, channelId);
+
+  if (!channelExists) {
+    yield fork(messageSender, outgoingMessageActions.unknownChannelId({id, channelId}));
+  } else {
+    const lastState: State = yield select(getLastStateForChannel, channelId);
+    yield put(
+      actions.application.challengeRequested({
+        channelId,
+        processId: "Application",
+        state: lastState
+      })
+    );
+    // TODO: Figure out API response
+    // yield fork(messageSender, outgoingMessageActions.closeChannelResponse({id, channelId}));
   }
 }
 
