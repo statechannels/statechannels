@@ -22,4 +22,4 @@ export * from './challenge-channel';
 // @ts-ignore
 export * from './channel-result';
 // @ts-ignore
-export * from './challenge-channel';
+export * from './channel-result';
