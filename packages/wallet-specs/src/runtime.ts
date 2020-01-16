@@ -1,4 +1,4 @@
-import { interpret } from 'xstate';
+import { interpret, Actor } from 'xstate';
 import { pretty } from '.';
 import { messageService } from './messaging';
 import { createChannel } from './mock-messages';
@@ -6,6 +6,7 @@ import { Wallet } from './protocols';
 import { Store } from './store';
 import { AddressableMessage } from './wire-protocol';
 import { ethers } from 'ethers';
+import { Process } from './protocols/wallet/protocol';
 
 const store = (wallet: ethers.Wallet) => {
   const privateKeys = { [wallet.address]: wallet.privateKey };
@@ -36,14 +37,33 @@ const logEvents = name =>
         )
     : () => {};
 const logStore = name =>
-  process.env.ADD_LOGS
-    ? state => console.log(`${name}'s store: ${pretty(stores[name])}`)
-    : () => {};
+  process.env.ADD_LOGS ? state => console.log(`${pretty(stores[name])}`) : () => {};
+
+function logState(actor: Actor, level = 0) {
+  if (actor.state) {
+    console.log(`${' '.repeat(level)}${JSON.stringify(actor.state.value)}`);
+    Object.values(actor.state.children).map((child: Actor) => {
+      logState(child, level + 2);
+    });
+  }
+}
+const logProcessStates = process.env.ADD_LOGS
+  ? state => {
+      console.log(`WALLET: ${state.context.id}`);
+      state.context.processes.forEach((p: Process) => {
+        console.log(`  PROCESS: ${p.id}`);
+        Object.values(p.ref.state.children).map(child => {
+          logState(child, 4);
+        });
+      });
+    }
+  : () => {};
+
 const wallet = (wallet): any => {
   const machine = Wallet.machine(stores[wallet.address], { processes: [], id: wallet.address });
   return interpret<Wallet.Init, any, Wallet.Events>(machine)
     .onEvent(logEvents(wallet.address))
-    .onTransition(logStore(wallet.address))
+    .onTransition(logProcessStates)
     .start();
 };
 
