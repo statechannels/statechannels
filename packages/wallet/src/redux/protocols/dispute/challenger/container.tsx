@@ -43,7 +43,6 @@ class ChallengerContainer extends PureComponent<Props> {
           <TransactionSubmission transactionName="challenge" state={state.transactionSubmission} />
         );
       case "Challenging.WaitForResponseOrTimeout":
-        // todo: get expiration time
         return <WaitForResponseOrTimeout expirationTime={state.expiryTime} />;
       case "Challenging.AcknowledgeResponse":
         return (

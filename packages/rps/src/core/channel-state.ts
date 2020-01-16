@@ -1,6 +1,14 @@
 import {AppData, RoundProposed, RoundAccepted, Reveal, Start} from './app-data';
 
-export type ChannelStatus = 'proposed' | 'opening' | 'funding' | 'running' | 'closing' | 'closed';
+export type ChannelStatus =
+  | 'proposed'
+  | 'opening'
+  | 'funding'
+  | 'running'
+  | 'challenging'
+  | 'responding'
+  | 'closing'
+  | 'closed';
 
 export interface ChannelState<T = AppData> {
   channelId: string;
@@ -18,6 +26,12 @@ export interface ChannelState<T = AppData> {
 }
 
 export type MaybeChannelState = ChannelState | null;
+
+export const isChallenging = (state: MaybeChannelState): state is ChannelState =>
+  (state && state.status === 'challenging') || false;
+
+export const isResponding = (state: MaybeChannelState): state is ChannelState =>
+  (state && state.status === 'responding') || false;
 
 export const isClosing = (state: MaybeChannelState): state is ChannelState =>
   (state && state.status === 'closing') || false;

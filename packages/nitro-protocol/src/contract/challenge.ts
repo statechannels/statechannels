@@ -1,8 +1,10 @@
+import NitroAdjudicatorArtifact from '../../build/contracts/NitroAdjudicator.json';
 import {utils} from 'ethers';
 import {decodeOutcome} from './outcome';
 import {FixedPart, hashState, State, VariablePart} from './state';
 import {Address, Bytes32, Uint256, Uint8} from './types';
 import {Channel, SignedState} from '..';
+import {Transaction, Interface, bigNumberify} from 'ethers/utils';
 
 export function hashChallengeMessage(challengeState: State): Bytes32 {
   return utils.keccak256(
@@ -68,4 +70,60 @@ export function getChallengeRegisteredEvent(eventResult): ChallengeRegisteredEve
     return {state, signature};
   });
   return {challengeStates, finalizesAt, challengerAddress: challenger};
+}
+
+export interface ChallengeClearedEvent {
+  kind: 'respond' | 'checkpoint';
+  newStates: SignedState[];
+}
+export interface ChallengeClearedStruct {
+  channelId: string;
+  newTurnNumRecord: string;
+}
+export interface RespondTransactionArguments {
+  challenger: string;
+  isFinalAb: [boolean, boolean];
+  fixedPart: FixedPart;
+  variablePartAB: [VariablePart, VariablePart];
+  sig: utils.Signature;
+}
+export function getChallengeClearedEvent(tx: Transaction, eventResult): ChallengeClearedEvent {
+  const {newTurnNumRecord}: ChallengeClearedStruct = eventResult.slice(-1)[0].args;
+
+  const decodedTransaction = new Interface(NitroAdjudicatorArtifact.abi).parseTransaction(tx);
+
+  if (decodedTransaction.name === 'respond') {
+    // NOTE: args value is an array of the inputted arguments, not an object with labelled keys
+    // ethers.js should change this, and when it does, we can use the commented out type
+    const args /* RespondTransactionArguments */ = decodedTransaction.args;
+    const [chainId, participants, channelNonce, appDefinition, challengeDuration] = args[2];
+    const isFinal = args[1][1];
+    const outcome = decodeOutcome(args[3][1][0]);
+    const appData = args[3][1][1];
+    const signature = {v: args[4][0], r: args[4][1], s: args[4][2]};
+
+    const signedState: SignedState = {
+      signature,
+      state: {
+        challengeDuration,
+        appDefinition,
+        isFinal,
+        outcome,
+        appData,
+        channel: {chainId, channelNonce, participants},
+        turnNum: bigNumberify(newTurnNumRecord).toNumber(),
+      },
+    };
+
+    return {
+      kind: 'respond',
+      newStates: [signedState],
+    };
+  } else if (decodedTransaction === 'checkpoint') {
+    throw new Error('UnimplementedError');
+  } else {
+    throw new Error(
+      'Unexpected call to getChallengeClearedEvent with invalid or unrelated transaction data'
+    );
+  }
 }

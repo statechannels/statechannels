@@ -16,7 +16,8 @@ import {
   getAddress,
   getLastStateForChannel,
   doesAStateExistForChannel,
-  getParticipants
+  getParticipants,
+  getProtocolState
 } from "../../selectors";
 import {messageSender} from "./message-sender";
 import {APPLICATION_PROCESS_ID} from "../../protocols/application/reducer";
@@ -33,6 +34,8 @@ import {TwoPartyPlayerIndex} from "../../types";
 import {isRelayableAction} from "../../../communication";
 import {bigNumberify} from "ethers/utils";
 import {Web3Provider} from "ethers/providers";
+import {responseProvided} from "../../protocols/dispute/responder/actions";
+import {isResponderState} from "../../protocols/dispute/responder/states";
 
 export function* messageHandler(jsonRpcMessage: object, _domain: string) {
   const parsedMessage = jrs.parseObject(jsonRpcMessage);
@@ -104,8 +107,7 @@ function* handleChallengeChannelMessage(payload: RequestObject) {
         state: lastState
       })
     );
-    // TODO: Figure out API response
-    // yield fork(messageSender, outgoingMessageActions.closeChannelResponse({id, channelId}));
+    yield fork(messageSender, outgoingMessageActions.challengeChannelResponse({id, channelId}));
   }
 }
 
@@ -273,14 +275,31 @@ function* handleUpdateChannelMessage(payload: RequestObject) {
       params as UpdateChannelParams
     );
 
-    yield put(
-      actions.application.ownStateReceived({
-        state: newState,
-        processId: APPLICATION_PROCESS_ID
-      })
-    );
+    // TODO: This only works with one channel at a time
+    const protocolState = yield select(getProtocolState, "Application");
+    if (typeof protocolState.disputeState! !== "undefined") {
+      if (isResponderState(protocolState.disputeState)) {
+        yield put(
+          responseProvided({
+            processId: "Application",
+            state: newState
+          })
+        );
+      }
+    } else {
+      // NOTE: We only call ownStateReceived if _not_ in dispute because this action
+      // has a reducer which returns the protocol state to Application.Ongoing, but we
+      // want it to stay as Application.WaitForDispute
+      yield put(
+        actions.application.ownStateReceived({
+          state: newState,
+          processId: APPLICATION_PROCESS_ID
+        })
+      );
+    }
 
     yield fork(messageSender, outgoingMessageActions.updateChannelResponse({id, channelId}));
+
     yield fork(
       messageSender,
       outgoingMessageActions.sendChannelUpdatedMessage({

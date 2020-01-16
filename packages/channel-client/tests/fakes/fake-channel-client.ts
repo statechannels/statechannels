@@ -132,6 +132,11 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
     return this.latestState;
   }
 
+  async challengeChannel(/* channelId: string */): Promise<ChannelResult> {
+    console.error('TODO: Implement');
+    throw new Error('UnimplementedError: ChallengeChannel not implemented on FakeChannelClient');
+  }
+
   async closeChannel(channelId: string): Promise<ChannelResult> {
     const latestState = this.findChannel(channelId);
     await this.verifyTurnNum(latestState.turnNum);

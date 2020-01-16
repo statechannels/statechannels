@@ -75,15 +75,15 @@ export function signAndStore(store: ChannelStore, state: State, bytecode: string
   const channelId = getChannelId(state.channel);
   let channel = getChannel(store, channelId);
 
-  const signedState = Signatures.signState(state, channel.privateKey);
-
   if (!validTransition(channel, state)) {
     return {isSuccess: false, reason: "TransitionUnsafe"};
   }
 
-  if (!validAppTransition(channel, signedState.state, bytecode)) {
+  if (!validAppTransition(channel, state, bytecode)) {
     return {isSuccess: false, reason: "TransitionUnsafe"};
   }
+
+  const signedState = Signatures.signState(state, channel.privateKey);
 
   channel = pushState(channel, signedState);
   store = setChannel(store, channel);

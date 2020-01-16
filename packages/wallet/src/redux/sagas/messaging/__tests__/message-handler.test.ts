@@ -536,6 +536,11 @@ describe("message listener", () => {
         channelId: unknownChannelId
       });
     });
+
+    // TODO: Implement
+    it.skip("can trigger responses to challenges if it needs to", () => {
+      return;
+    });
   });
 
   describe("CloseChannel", () => {
@@ -665,7 +670,7 @@ describe("message listener", () => {
     });
   });
 
-  describe.only("ChallengeChannel", () => {
+  describe("ChallengeChannel", () => {
     it("handles a challenge channel request", async () => {
       const existingState = appState({turnNum: 0});
       const testChannel = channelFromStates([existingState], asAddress, asPrivateKey);
@@ -688,6 +693,12 @@ describe("message listener", () => {
       expect(effects.put[0].payload.action).toMatchObject({
         type: "WALLET.APPLICATION.CHALLENGE_REQUESTED",
         state: existingState.state,
+        channelId: testChannel.channelId
+      });
+
+      expect(effects.fork[0].payload.args[0]).toMatchObject({
+        type: "WALLET.CHALLENGE_CHANNEL_RESPONSE",
+        id: 1,
         channelId: testChannel.channelId
       });
     });

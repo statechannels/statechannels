@@ -83,7 +83,7 @@ export interface ChallengeExpirySetEvent {
   processId: string;
   protocolLocator: ProtocolLocator;
   channelId: string;
-  expiryTime;
+  expiryTime: number;
 }
 
 export interface ChallengeCreatedEvent {

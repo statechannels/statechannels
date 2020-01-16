@@ -19,9 +19,7 @@ function mapStateToProps(state: SiteState) {
 }
 const mapDispatchToProps = {
   resign: gameActions.resign,
-  createBlockchainChallenge: () => {
-    /* TODO */
-  },
+  createBlockchainChallenge: gameActions.challenge,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(GameFooter);

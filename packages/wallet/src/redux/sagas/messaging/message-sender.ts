@@ -6,10 +6,15 @@ import {createJsonRpcAllocationsFromOutcome} from "../../../utils/json-rpc-utils
 import {unreachable} from "../../../utils/reducer-utils";
 
 import {ChannelState, getLastState, getPenultimateState} from "../../channel-store";
-import {getChannelHoldings, getLastSignedStateForChannel} from "../../selectors";
+import {getChannelHoldings, getLastSignedStateForChannel, getProtocolState} from "../../selectors";
 import {getChannelStatus} from "../../state";
 import {OutgoingApiAction} from "./outgoing-api-actions";
 import {State} from "@statechannels/nitro-protocol";
+import {ChannelStatus} from "@statechannels/client-api-schema";
+
+import {isResponderState} from "../../protocols/dispute/responder/states";
+import {isChallengerState} from "../../protocols/dispute/challenger/states";
+import {ProtocolState} from "src/redux/protocols";
 
 export function* messageSender(action: OutgoingApiAction) {
   const message = yield createResponseMessage(action);
@@ -28,6 +33,8 @@ function* createResponseMessage(action: OutgoingApiAction) {
     case "WALLET.CLOSE_CHANNEL_RESPONSE":
       return jrs.success(action.id, yield getChannelInfo(action.channelId));
     case "WALLET.UPDATE_CHANNEL_RESPONSE":
+      return jrs.success(action.id, yield getChannelInfo(action.channelId));
+    case "WALLET.CHALLENGE_CHANNEL_RESPONSE":
       return jrs.success(action.id, yield getChannelInfo(action.channelId));
     case "WALLET.ADDRESS_RESPONSE":
       return jrs.success(action.id, action.address);
@@ -131,11 +138,13 @@ function* getChannelInfo(channelId: string) {
 
   const channelHoldings = yield select(getChannelHoldings, channelId);
   let funding: any[] = [];
+
   // TODO: For now we assume ETH
   if (!bigNumberify(channelHoldings).isZero()) {
     funding = [{token: "0x0", amount: channelHoldings}];
   }
-  const status = getChannelInfoStatus(state, previousState);
+
+  const status: ChannelStatus = yield getChannelInfoStatus(state, previousState);
 
   return {
     participants,
@@ -149,10 +158,7 @@ function* getChannelInfo(channelId: string) {
   };
 }
 
-function getChannelInfoStatus(
-  currentState: State,
-  previousState: State
-): "proposed" | "opening" | "running" | "closing" | "closed" {
+function* getChannelInfoStatus(currentState: State, previousState: State) {
   if (currentState.isFinal) {
     if (previousState.isFinal) {
       return "closed";
@@ -163,7 +169,21 @@ function getChannelInfoStatus(
     return "proposed";
   } else if (currentState.turnNum < currentState.channel.participants.length - 1) {
     return "opening";
-  } else {
-    return "running";
   }
+
+  // TODO: This only works for a single process at a time...
+  const protocolState: ProtocolState = yield select(getProtocolState, "Application");
+
+  if (
+    protocolState.type === "Application.WaitForDispute" &&
+    typeof protocolState.disputeState !== "undefined"
+  ) {
+    if (isChallengerState(protocolState.disputeState)) {
+      return "challenging";
+    } else if (isResponderState(protocolState.disputeState)) {
+      return "responding";
+    }
+  }
+
+  return "running";
 }

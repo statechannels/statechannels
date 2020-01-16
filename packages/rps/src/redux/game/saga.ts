@@ -139,6 +139,17 @@ function* gameSagaRun(client: RPSChannelClient) {
         yield put(a.updateChannelState(null));
       }
       break;
+    case 'A.Challenged':
+    case 'B.Challenged':
+      if (
+        channelState &&
+        !cs.isChallenging(channelState) &&
+        !cs.isResponding(channelState) &&
+        !isPlayersTurnNext(localState, channelState)
+      ) {
+        yield* challengeChannel(channelState, client);
+      }
+      break;
   }
 }
 
@@ -337,9 +348,15 @@ function* sendStartAndStartRound(channelState: ChannelState<Reveal>, client: RPS
   yield put(a.updateChannelState(state));
   yield put(a.startRound());
 }
+
 function* closeChannel(channelState: ChannelState, client: RPSChannelClient) {
   const closingChannelState = yield call([client, 'closeChannel'], channelState.channelId);
   yield put(a.updateChannelState(closingChannelState));
+}
+
+function* challengeChannel(channelState: ChannelState, client: RPSChannelClient) {
+  const challengeChannelState = yield call([client, 'challengeChannel'], channelState.channelId);
+  yield put(a.updateChannelState(challengeChannelState));
 }
 
 const calculateFundingSituation = (
