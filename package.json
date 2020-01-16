@@ -24,7 +24,7 @@
     "publish": "lerna publish --yes from-package patch",
     "postinstall": "patch-package",
     "build:netlify": "lerna run --stream --parallel build:netlify",
-    "release:netlify": "lerna run --stream --parallel release:netlify -- --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD) $(case $(git rev-parse --abbrev-ref HEAD) in (master) echo --prod;; esac)"
+    "release:netlify": "lerna run --stream --parallel release:netlify -- --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD) $([[ $(git rev-parse --abbrev-ref HEAD) == master ]] && echo --prod)"
   },
   "keywords": [
     "ethereum",
