@@ -18,7 +18,7 @@ If starting from scratch, state channels require at least one transaction to set
 
 ## Residual gas costs for state channels
 
-With our state channel network protocol [Nitro](https://magmo.com/nitro-protocol.pdf), however, users will likely only ever need to setup a _single_ channel known as a "hub connection", and administer it periodically (say once a month). A hub connection can be bootstrapped to _virtually_ setup and teardown state channels without any Ethereuym transactions. This means that the setup and teardown costs of that single hub connection channel are less critical. They remain a pain point for end users, however, and therefore a barrier to mainstream adoption for Ethereum: the costs need to be reduced as much as possible.
+With our state channel network protocol [Nitro](https://magmo.com/nitro-protocol.pdf), the situation is much improved: users will likely only ever need to setup a _single_ channel known as a "hub connection", and administer it periodically (say once a month). A hub connection can be bootstrapped to _virtually_ setup and teardown state channels without any Ethereuym transactions. This means that the setup and teardown costs of that single hub connection channel are less critical. They remain a pain point for end users, however, and therefore a barrier to mainstream adoption for Ethereum: the costs need to be reduced as much as possible.
 
 Additionally, settling state channel _disputes_ on chain will always involve Ethereum transactions, even if in an ideal (and hopefully also in a typical) world they are never used. The _possibility_ of having disputes settled lends strong guarantees about fair extraction of any escrowed assets, however: the gas consumed during settlement therefore remains an important consideration. If the associated costs were prohibitive, or if they outweighed the assets staked in the channel, it might mean that challenges would never be used and the security guarantees would be effectively void.
 
@@ -38,7 +38,7 @@ The major costs in the legacy contracts were incurred due to storing a relativel
 
 The main trick to reducing residual gas consumption is to reduce all storage to a minimum: a single `bytes32` storage slot. But how to do this, when the outcome data is application specific and surely longer than 32 bytes?
 
-The answer lies in the magic of cryptographic hash functions, which are a core primitive of blockchains. Cryptographic hash functions accept variable length input, are infeasible to invert, and produce fixed length output. By storing only the keccak256 **hash** of the outcome data, we ensure that only one slot gets used, regardless of the application. Previously, the number of slots required would grow with the complexity of the application data.
+The answer lies in the magic of cryptographic hash functions, which are a core primitive of blockchains. Cryptographic hash functions accept variable length input, are infeasible to invert, and produce fixed length output. By storing only the `keccak256` **hash** of the outcome data, we ensure that only one slot gets used, regardless of the application. Previously, the number of slots required would grow with the complexity of the application data.
 
 ![Optimization](./optimization.svg)
 
