@@ -1,4 +1,4 @@
-import { interpret, Interpreter, Actor } from 'xstate';
+import { interpret, Actor } from 'xstate';
 import { pretty } from '.';
 import { messageService } from './messaging';
 import { createChannel } from './mock-messages';
@@ -7,7 +7,6 @@ import { Store } from './store';
 import { AddressableMessage } from './wire-protocol';
 import { ethers } from 'ethers';
 import { Process } from './protocols/wallet/protocol';
-import { assign } from 'xstate/lib/actionTypes';
 
 const store = (wallet: ethers.Wallet) => {
   const privateKeys = { [wallet.address]: wallet.privateKey };
