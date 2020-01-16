@@ -7,7 +7,8 @@ export function getProvider(): Web3Provider {
   return new Web3Provider(window.web3.currentProvider);
 }
 
-export async function getEthAssetHolderContract(provider: Web3Provider) {
+export async function getEthAssetHolderContract() {
+  const provider = await getProvider();
   return new Contract(
     process.env.ETH_ASSET_HOLDER_ADDRESS || '0x0',
     getETHAssetHolderInterface(),

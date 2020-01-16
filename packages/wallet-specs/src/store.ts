@@ -4,6 +4,7 @@ import { messageService } from './messaging';
 import { AddressableMessage, FundingStrategyProposed } from './wire-protocol';
 import { State } from '@statechannels/nitro-protocol';
 import { getStateSignerAddress, signState } from '@statechannels/nitro-protocol/lib/src/signatures';
+import { ethers } from 'ethers';
 export interface IStore {
   getEntry: (channelId: string) => ChannelStoreEntry;
   getIndex: (channelId: string) => 0 | 1;
@@ -35,7 +36,7 @@ export interface IStore {
 
   onDepositEvent(
     listener: (amount: string, channelId: string, holdings: string) => void
-  ): Promise<void>;
+  ): () => void;
   getNextNonce(participants: string[]): string;
   useNonce(participants: string[], nonce): void;
   nonceOk(participants: string[], nonce: string): boolean;
@@ -73,10 +74,8 @@ export class Store implements IStore {
   public async deposit(channelId: string, amount: string, expectedHeld: string): Promise<void> {
     // NO OP
   }
-  public async onDepositEvent(
-    listener: (amount: string, channelId: string, holdings: string) => void
-  ) {
-    // NO OP
+  public onDepositEvent(listener: (amount: string, channelId: string, holdings: string) => void) {
+    return () => {};
   }
 
   public getEntry(channelId: string): ChannelStoreEntry {
@@ -209,7 +208,8 @@ export class Store implements IStore {
 
   private recipients(state: State): string[] {
     const privateKey = this.getPrivateKey(state.channel.participants);
-    return state.channel.participants.filter(p => p !== privateKey);
+    const { address } = new ethers.Wallet(privateKey);
+    return state.channel.participants.filter(p => p !== address);
   }
 
   protected sendMessage(message: any, recipients: string[]) {

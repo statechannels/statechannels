@@ -1,6 +1,7 @@
 import { Participant } from './store';
 import { Channel, getChannelId, State } from '@statechannels/nitro-protocol';
 import { SignedState } from '.';
+import { ethers } from 'ethers';
 
 interface DirectFunding {
   type: 'Direct';
@@ -77,7 +78,8 @@ export class ChannelStoreEntry implements IChannelStoreEntry {
   }
 
   get ourIndex() {
-    return this.participants.findIndex(p => p.signingAddress === this.privateKey);
+    const wallet = new ethers.Wallet(this.privateKey);
+    return this.participants.findIndex(p => p.signingAddress === wallet.address);
   }
 
   get hasSupportedState(): boolean {

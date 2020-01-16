@@ -81,7 +81,7 @@ type LedgerExists = Init & { ledgerChannelId: string };
 const fundLedger = {
   initial: 'getTargetAllocation',
   states: {
-    getTargetAllocation: { invoke: { src: 'getTargetAllocation' }, onDone: 'directFunding' },
+    getTargetAllocation: { invoke: { src: 'getTargetAllocation', onDone: 'directFunding' } },
     directFunding: {
       invoke: {
         src: 'directFunding',
