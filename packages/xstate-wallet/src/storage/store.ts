@@ -6,7 +6,8 @@ import {
 import {Store as BaseStore} from '@statechannels/wallet-protocols/src/store';
 import {SignedState} from '@statechannels/wallet-protocols';
 import {ChannelStoreEntry} from '@statechannels/wallet-protocols/src/ChannelStoreEntry';
-import * as contract from '../contract';
+import * as ethAssetHolder from '../eth-asset-holder';
+import {getEthAssetHolderContract, getProvider} from '../utils/contract-utils';
 
 type Constructor = BaseConstructor &
   Partial<{
@@ -39,6 +40,15 @@ export class Store extends BaseStore implements IStore {
     });
   }
   public getHoldings(channelId: string): Promise<string> {
-    return contract.getHoldings(channelId);
+    return ethAssetHolder.getHoldings(channelId);
+  }
+  public async onDepositEvent(
+    listener: (amount: string, channelId: string, holdings: string) => void
+  ) {
+    const contract = await getEthAssetHolderContract(await getProvider());
+    contract.on('Deposited', listener);
+  }
+  public deposit(channelId: string, amount: string, expectedHeld: string): Promise<void> {
+    return ethAssetHolder.deposit(channelId, amount, expectedHeld);
   }
 }

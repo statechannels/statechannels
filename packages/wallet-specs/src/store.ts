@@ -28,10 +28,14 @@ export interface IStore {
   // TODO: set funding
   // setFunding(channelId: string, funding: Funding): void;
 
-  getHoldings(channelId: string): Promise<string>;
-
   signState(state: State): SignedState;
 
+  deposit(channelId: string, amount: string, expectedHeld: string): Promise<void>;
+  getHoldings(channelId: string): Promise<string>;
+
+  onDepositEvent(
+    listener: (amount: string, channelId: string, holdings: string) => void
+  ): Promise<void>;
   getNextNonce(participants: string[]): string;
   useNonce(participants: string[], nonce): void;
   nonceOk(participants: string[], nonce: string): boolean;
@@ -64,6 +68,15 @@ export class Store implements IStore {
     const { store, privateKeys } = args || {};
     this._store = store || {};
     this._privateKeys = privateKeys || {};
+  }
+
+  public async deposit(channelId: string, amount: string, expectedHeld: string): Promise<void> {
+    // NO OP
+  }
+  public async onDepositEvent(
+    listener: (amount: string, channelId: string, holdings: string) => void
+  ) {
+    // NO OP
   }
 
   public getEntry(channelId: string): ChannelStoreEntry {
