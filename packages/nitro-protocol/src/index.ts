@@ -32,6 +32,7 @@ import {
   Allocation,
   isAllocationOutcome,
   isGuaranteeOutcome,
+  AssetOutcome,
   GuaranteeAssetOutcome,
   AllocationAssetOutcome,
 } from './contract/outcome';
@@ -90,6 +91,7 @@ export {
   validTransition,
   VariablePart,
   // Test helpers -- TODO move these to devtools package
+  AssetOutcome,
   AssetOutcomeShortHand,
   OutcomeShortHand,
   getTestProvider,
