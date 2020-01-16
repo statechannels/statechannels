@@ -1,7 +1,7 @@
 import { assign, DoneInvokeEvent, Machine } from 'xstate';
 import { CreateNullChannel, DirectFunding, SupportState } from '..';
 import { allocateToTarget } from '../../calculations';
-import { Channel, ensureExists, MachineFactory, Store, success, getEthAllocation } from '../..';
+import { Channel, ensureExists, MachineFactory, IStore, success, getEthAllocation } from '../..';
 import { Outcome } from '@statechannels/nitro-protocol';
 
 const PROTOCOL = 'ledger-funding';
@@ -129,7 +129,7 @@ export const guards = {
     data.type === 'FOUND',
 };
 
-export const machine: MachineFactory<Init, any> = (store: Store, context: Init) => {
+export const machine: MachineFactory<Init, any> = (store: IStore, context: Init) => {
   function directFundingArgs(ctx: LedgerExists): DirectFunding.Init {
     const minimalAllocation = getEthAllocation(
       store.getEntry(ctx.targetChannelId).latestState.outcome

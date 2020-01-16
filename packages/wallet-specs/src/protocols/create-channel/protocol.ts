@@ -4,7 +4,7 @@ import {
   Channel,
   forwardChannelUpdated,
   MachineFactory,
-  Store,
+  IStore,
   success,
   ethAllocationOutcome,
 } from '../..';
@@ -97,7 +97,7 @@ export const mockOptions = {
   // actions: { sendOpenChannelMessage },
 };
 
-export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => {
+export const machine: MachineFactory<Init, any> = (store: IStore, init: Init) => {
   const setChannelId: InvokeCreator<any> = (ctx: Init): Promise<SetChannel> => {
     const participants = ctx.participants.map(p => p.destination);
     const channelNonce = store.getNextNonce(participants);

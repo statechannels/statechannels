@@ -1,6 +1,6 @@
-import { Machine, MachineConfig, send, SendAction, sendParent } from 'xstate';
+import { Machine, MachineConfig, sendParent } from 'xstate';
 import { AdvanceChannel, Funding, JoinChannel } from '..';
-import { forwardChannelUpdated, MachineFactory, Store, success } from '../..';
+import { forwardChannelUpdated, MachineFactory, IStore } from '../..';
 import { JsonRpcJoinChannelParams } from '../../json-rpc';
 import { ChannelUpdated } from '../../store';
 import { CloseChannel, OpenChannel } from '../../wire-protocol';
@@ -114,7 +114,7 @@ export type Actions = {
 };
 
 export const machine: MachineFactory<Init, any> = (
-  store: Store,
+  store: IStore,
   { channelId }: JoinChannel.Init
 ) => {
   const guards: Guards = {

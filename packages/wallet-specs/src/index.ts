@@ -10,7 +10,7 @@ import {
 } from '@statechannels/nitro-protocol/lib/src/contract/outcome';
 import { Signature, hexZeroPad } from 'ethers/utils';
 import { AddressZero } from 'ethers/constants';
-export { Store } from './store';
+export { Store, IStore } from './store';
 export interface Balance {
   address: string;
   wei: string;

@@ -1,6 +1,6 @@
 import { assign, DoneInvokeEvent, Machine } from 'xstate';
 import { LedgerFunding } from '..';
-import { failure, MachineFactory, pretty, Store, success } from '../..';
+import { failure, MachineFactory, pretty, IStore, success } from '../..';
 import { FundingStrategy, FundingStrategyProposed } from '../../wire-protocol';
 
 const PROTOCOL = 'funding';
@@ -184,7 +184,7 @@ export const mockOptions: Options = {
   actions: mockActions,
 };
 
-export const machine: MachineFactory<Init, any> = (store: Store, context: Init) => {
+export const machine: MachineFactory<Init, any> = (store: IStore, context: Init) => {
   function sendClientChoice(ctx: ClientChoiceKnown) {
     store.sendStrategyChoice(strategyChoice(ctx));
   }

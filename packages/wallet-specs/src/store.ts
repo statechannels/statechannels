@@ -20,18 +20,19 @@ export interface IStore {
   /*
   Store modifiers
   */
-  initializeChannel: (entry: ChannelStoreEntry) => void;
+  initializeChannel: (entry: IChannelStoreEntry) => void;
   sendState: (state: State) => void;
   sendOpenChannel: (state: State) => void;
   receiveStates: (signedStates: SignedState[]) => void;
+  useNonce(participants: string[], nonce): void;
 
   // TODO: set funding
   // setFunding(channelId: string, funding: Funding): void;
 
   signState(state: State): SignedState;
+  sendStrategyChoice(message: FundingStrategyProposed): void;
 
   getNextNonce(participants: string[]): string;
-  useNonce(participants: string[], nonce): void;
   nonceOk(participants: string[], nonce: string): boolean;
 }
 
@@ -183,6 +184,7 @@ export class Store implements IStore {
     const { recipients } = this.getEntry(message.targetChannelId);
     this.sendMessage(message, recipients);
   }
+
   public signState(state: State): SignedState {
     const { privateKey } = this.getEntry(getChannelId(state.channel));
 
