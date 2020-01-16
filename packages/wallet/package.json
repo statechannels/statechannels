@@ -32,7 +32,9 @@
     "test:puppeteer": "npx jest --runInBand -c ./config/jest/jest.puppeteer.config.js",
     "puppeteer:script": "npx ts-node -O '{\"module\":\"commonjs\"}' ./puppeteer/scripts/funding.ts ",
     "test:ci:integration": "wait-on http-get://localhost:3055/ http-get://localhost:3000/ && yarn test:puppeteer",
-    "precommit": "lint-staged --quiet"
+    "precommit": "lint-staged --quiet",
+    "build:netlify": "NODE_ENV=production yarn build:webpack",
+    "release:netlify": "netlify deploy --site $WALLET_NETLIFY_ID --dir=build"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.4",

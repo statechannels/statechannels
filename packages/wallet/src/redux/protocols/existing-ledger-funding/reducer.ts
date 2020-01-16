@@ -34,7 +34,7 @@ import {
   outcomeContainsId,
   getAllocationTotal
 } from "../../../utils/outcome-utils";
-import {AllocationAssetOutcome} from "@statechannels/nitro-protocol/src/contract/outcome";
+import {AllocationAssetOutcome} from "@statechannels/nitro-protocol";
 export {EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR} from "../../../communication/protocol-locator";
 
 export const initialize = ({
