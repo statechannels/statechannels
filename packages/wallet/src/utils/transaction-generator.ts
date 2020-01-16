@@ -9,7 +9,7 @@ import {
   State,
   convertAddressToBytes32
 } from "@statechannels/nitro-protocol";
-import {Allocation, AllocationItem} from "@statechannels/nitro-protocol/src/contract/outcome";
+import {Allocation, AllocationItem} from "@statechannels/nitro-protocol";
 import {TransactionRequestWithTarget} from "../redux/outbox/state";
 import {
   ADJUDICATOR_ADDRESS,

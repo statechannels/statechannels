@@ -32,7 +32,9 @@ import {
   Allocation,
   isAllocationOutcome,
   isGuaranteeOutcome,
+  AssetOutcome,
   GuaranteeAssetOutcome,
+  AllocationAssetOutcome,
 } from './contract/outcome';
 
 import {State, VariablePart, getVariablePart} from './contract/state';
@@ -76,6 +78,7 @@ export {
   encodeOutcome,
   Outcome,
   AllocationItem,
+  AllocationAssetOutcome,
   getChannelId,
   Channel,
   getAssetTransferredEvent,
@@ -88,6 +91,7 @@ export {
   validTransition,
   VariablePart,
   // Test helpers -- TODO move these to devtools package
+  AssetOutcome,
   AssetOutcomeShortHand,
   OutcomeShortHand,
   getTestProvider,
@@ -105,3 +109,6 @@ export const ContractArtifacts = {
   TokenArtifact,
   ConsensusAppArtifact,
 };
+
+// types
+export {Uint256} from './contract/types';

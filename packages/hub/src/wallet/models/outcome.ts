@@ -1,8 +1,5 @@
 import {AllocationAssetOutcome} from '@statechannels/nitro-protocol/lib/src/contract/outcome';
-import {
-  AssetOutcome,
-  GuaranteeAssetOutcome
-} from '@statechannels/nitro-protocol/src/contract/outcome';
+import {AssetOutcome, GuaranteeAssetOutcome} from '@statechannels/nitro-protocol';
 import {Address} from 'fmg-core';
 import {Model, snakeCaseMappers} from 'objection';
 import Allocation from './allocation';
