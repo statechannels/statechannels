@@ -1,7 +1,7 @@
-import { store, ethAllocationOutcome, checkThat, getEthAllocation } from '../..';
+import { ethAllocationOutcome, checkThat, getEthAllocation } from '../..';
 import { isIndirectFunding } from '../../ChannelStoreEntry';
 import * as LedgerUpdate from '../ledger-update/protocol';
-
+import { store } from '../../temp-store';
 const PROTOCOL = 'ledger-defunding';
 const success = { type: 'final' };
 

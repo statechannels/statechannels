@@ -5,7 +5,7 @@ interface Chain {
 
 export const chain = (null as any) as Chain;
 
-class ExampleChain {
+export class ExampleChain {
   private _holdings: { [channelId: string]: number };
 
   constructor() {

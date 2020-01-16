@@ -1,6 +1,6 @@
 import { EventObject, SendAction, StateMachine, forwardTo } from 'xstate';
 import { Outcome, Allocation, State } from '@statechannels/nitro-protocol';
-import { ChannelUpdated, IStore, Store } from './store';
+import { ChannelUpdated, IStore } from './store';
 import {
   AllocationAssetOutcome,
   Guarantee,
@@ -10,9 +10,7 @@ import {
 } from '@statechannels/nitro-protocol/lib/src/contract/outcome';
 import { Signature, hexZeroPad } from 'ethers/utils';
 import { AddressZero } from 'ethers/constants';
-const store = new Store();
-export { Store, store };
-
+export { Store } from './store';
 export interface Balance {
   address: string;
   wei: string;

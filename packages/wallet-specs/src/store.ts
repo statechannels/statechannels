@@ -28,6 +28,8 @@ export interface IStore {
   // TODO: set funding
   // setFunding(channelId: string, funding: Funding): void;
 
+  signState(state: State): SignedState;
+
   getNextNonce(participants: string[]): string;
   useNonce(participants: string[], nonce): void;
   nonceOk(participants: string[], nonce: string): boolean;
@@ -181,13 +183,21 @@ export class Store implements IStore {
     const { recipients } = this.getEntry(message.targetChannelId);
     this.sendMessage(message, recipients);
   }
+  public signState(state: State): SignedState {
+    const { privateKey } = this.getEntry(getChannelId(state.channel));
+
+    return {
+      state,
+      signatures: [signState(state, privateKey).signature],
+    };
+  }
 
   private recipients(state: State): string[] {
     const privateKey = this.getPrivateKey(state.channel.participants);
     return state.channel.participants.filter(p => p !== privateKey);
   }
 
-  private sendMessage(message: any, recipients: string[]) {
+  protected sendMessage(message: any, recipients: string[]) {
     recipients.forEach(to => messageService.sendMessage({ ...message, to }));
   }
 
@@ -225,18 +235,8 @@ export class Store implements IStore {
   public nonceOk(participants: string[], nonce: string): boolean {
     return gt(nonce, this._nonces[this.key(participants)] || -1);
   }
-  // PRIVATE
 
-  private signState(state: State): SignedState {
-    const { privateKey } = this.getEntry(getChannelId(state.channel));
-
-    return {
-      state,
-      signatures: [signState(state, privateKey).signature],
-    };
-  }
-
-  private updateOrCreateEntry(channelId: string, states: SignedState[]): ChannelStoreEntry {
+  protected updateOrCreateEntry(channelId: string, states: SignedState[]): ChannelStoreEntry {
     // TODO: This currently assumes that support comes from consensus on a single state
     const entry = this.maybeGetEntry(channelId);
     if (entry) {

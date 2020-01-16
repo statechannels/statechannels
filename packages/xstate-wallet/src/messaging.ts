@@ -7,8 +7,13 @@ import {validateRequest} from './json-rpc-validation/validator';
 import {IStore} from '@statechannels/wallet-protocols/lib/src/store';
 import {CreateChannelEvent} from '@statechannels/wallet-protocols/lib/src/protocols/wallet/protocol';
 import {UpdateChannelParams} from '@statechannels/client-api-schema/types/update-channel';
-import {createStateFromUpdateChannelParams} from './utils/json-rpc-utils';
+import {
+  createStateFromUpdateChannelParams,
+  createJsonRpcAllocationsFromOutcome
+} from './utils/json-rpc-utils';
 import {CloseChannelParams} from '@statechannels/client-api-schema/types/close-channel';
+import {bigNumberify} from 'ethers/utils';
+import {ChannelStoreEntry} from '@statechannels/wallet-protocols/lib/src/ChannelStoreEntry';
 
 export async function handleMessage(
   event,
@@ -64,7 +69,7 @@ export async function handleMessage(
 async function handleCloseChannel(payload: jrs.RequestObject, store: IStore) {
   const {id} = payload;
   const {channelId} = payload.params as CloseChannelParams;
-  const result = jrs.success(id, await getChannelInfo(channelId, store));
+  const result = jrs.success(id, await getChannelInfo(channelId, store.getEntry(channelId)));
   window.parent.postMessage(result, '*');
 }
 
@@ -74,9 +79,16 @@ async function handleUpdateChannel(payload: jrs.RequestObject, store: IStore) {
   const {latestState} = entry;
 
   const state = createStateFromUpdateChannelParams(latestState, params);
-  store.receiveStates([{state, signatures: ['FAKE']}]);
-  window.parent.postMessage(jrs.success(payload.id, {success: true}), '*');
-  dispatchChannelUpdatedMessage(params.channelId, store);
+  const signedState = store.signState(state);
+  store.receiveStates([signedState]);
+  window.parent.postMessage(
+    jrs.success(
+      payload.id,
+      await getChannelInfo(params.channelId, store.getEntry(params.channelId))
+    ),
+    '*'
+  );
+  dispatchChannelUpdatedMessage(params.channelId, store.getEntry(params.channelId));
 }
 
 async function handlePushMessage(
@@ -108,27 +120,30 @@ async function handleCreateChannelMessage(
       participants: params.participants,
       allocations: params.allocations[0].allocationItems,
       appDefinition: params.appDefinition,
-      appData: params.appData
+      appData: params.appData,
+      chainId: process.env.NETWORK_CHAIN_ID || '0',
+      challengeDuration: 500
     };
 
     // TODO: Nonce management / setting the chainID correctly (state machines)
     const channel: Channel = {
       participants: params.participants.map(p => p.signingAddress),
       channelNonce: '1',
-      chainId: 'mainnet?'
+      chainId: process.env.NETWORK_CHAIN_ID || '0'
     };
     machine.send(createChannel);
 
     const channelId = getChannelId(channel);
-    const response = jrs.success(payload.id, await getChannelInfo(channelId, store));
+    const response = jrs.success(
+      payload.id,
+      await getChannelInfo(channelId, store.getEntry(channelId))
+    );
     window.parent.postMessage(response, '*');
   }
 }
 
-async function getChannelInfo(channelId: string, store: IStore) {
-  const {latestState} = store.getEntry(channelId);
-  const channelEntry = store.getEntry(channelId);
-  const {participants} = channelEntry;
+async function getChannelInfo(channelId: string, channelEntry: ChannelStoreEntry) {
+  const {participants, latestState} = channelEntry;
   const {appData, appDefinition, turnNum} = latestState;
 
   // TODO: Status and funding
@@ -137,7 +152,7 @@ async function getChannelInfo(channelId: string, store: IStore) {
 
   return {
     participants,
-    allocations: [{token: '0x0', allocationItems: latestState.outcome}],
+    allocations: createJsonRpcAllocationsFromOutcome(latestState.outcome),
     appDefinition,
     appData,
     status,
@@ -148,12 +163,21 @@ async function getChannelInfo(channelId: string, store: IStore) {
 }
 
 // TODO: Probably should be async and the store should have async methods
-export function dispatchChannelUpdatedMessage(channelId: string, store: IStore) {
-  getChannelInfo(channelId, store).then(channelInfo => {
+export function dispatchChannelUpdatedMessage(channelId: string, channelEntry: ChannelStoreEntry) {
+  getChannelInfo(channelId, channelEntry).then(channelInfo => {
     // TODO: Right now we assume anything that is not a null channel is an app channel
-    if (!!channelInfo.appData) {
+    if (!!channelInfo.appData && !bigNumberify(channelInfo.appData).isZero()) {
       const notification = jrs.notification('ChannelUpdated', channelInfo);
       window.parent.postMessage(notification, '*');
     }
   });
+}
+
+export function sendMessage(recipient: string, message: any) {
+  const notification = jrs.notification('MessageQueued', {
+    recipient,
+    sender: 'TODO',
+    data: message
+  });
+  window.parent.postMessage(notification, '*');
 }
