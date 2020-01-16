@@ -7,7 +7,10 @@ import {SiteState} from '../redux/reducer';
 function mapStateToProps(state: SiteState) {
   const localState = state.game.localState;
   const localStateName = localState.type;
-  const canChallenge = localStateName === 'A.ChooseWeapon'; // TODO revisit this
+  const canChallenge =
+    ['B.WeaponChosen', 'A.WeaponAndSaltChosen', 'A.WaitForRestart', 'B.WaitForRestart'].indexOf(
+      localStateName
+    ) > -1;
   const challengeOngoing = false; // TODO revisit this
   return {
     canChallenge,
