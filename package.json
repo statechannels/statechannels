@@ -23,8 +23,8 @@
     "lint:write": "lerna run lint:write --parallel --no-bail",
     "publish": "lerna publish --yes from-package patch",
     "postinstall": "patch-package",
-    "build:netlify:ci": "lerna run --stream --parallel --since $(git merge-base $(git rev-parse --abbrev-ref HEAD) origin/master) build:netlify",
-    "release:netlify": "lerna run --stream --parallel --since $(git merge-base $(git rev-parse --abbrev-ref HEAD) origin/master) release:netlify --",
+    "build:netlify:ci": "lerna run --stream --parallel build:netlify",
+    "release:netlify": "lerna run --stream --parallel release:netlify --",
     "release:netlify:ci": "yarn release:netlify --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD) $([[ $(git rev-parse --abbrev-ref HEAD) == master ]] && echo --prod)"
   },
   "keywords": [
