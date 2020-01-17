@@ -47,16 +47,17 @@ contract TicTacToe is ForceMoveApp {
     * @dev Encodes the TTT update rules.
     * @param fromPart State being transitioned from.
     * @param toPart State being transitioned to.
-    * @param turnNumB Used to calculate current turnTaker % nParticipants.
-    * @param nParticipants Amount of players. Should be 2?
+    * @param turnNumB Used to calculate current turnTaker % nParticipants. Not implemented
+    * @param nParticipants Amount of players. Must be 2
     * @return true if the transition conforms to the rules, false otherwise.
     */
     function validTransition(
         VariablePart memory fromPart,
         VariablePart memory toPart,
-        uint256 turnNumB, // Used to calculate current turnTaker % nParticipants
+        uint256, // turnNumB, (Not implemented)
         uint256 nParticipants
     ) public pure returns (bool) {
+        require(nParticipants == 2, 'There should be 2 participants');
         Outcome.AllocationItem[] memory fromAllocation = extractAllocation(fromPart);
         Outcome.AllocationItem[] memory toAllocation = extractAllocation(toPart);
         _requireDestinationsUnchanged(fromAllocation, toAllocation);
@@ -71,8 +72,6 @@ contract TicTacToe is ForceMoveApp {
                 'Start may only transition to XPlaying'
             );
             requireValidSTARTtoXPLAYING(
-                fromPart,
-                toPart,
                 fromAllocation,
                 toAllocation,
                 fromGameData,
@@ -109,8 +108,6 @@ contract TicTacToe is ForceMoveApp {
                 return true;
             } else if (toGameData.positionType == PositionType.Victory) {
                 requireValidOPLAYINGtoVICTORY(
-                    fromPart,
-                    toPart,
                     fromAllocation,
                     toAllocation,
                     fromGameData,
@@ -141,8 +138,6 @@ contract TicTacToe is ForceMoveApp {
     }
 
     function requireValidSTARTtoXPLAYING(
-        VariablePart memory fromPart,
-        VariablePart memory toPart,
         Outcome.AllocationItem[] memory fromAllocation,
         Outcome.AllocationItem[] memory toAllocation,
         TTTData memory fromGameData,
@@ -300,8 +295,6 @@ contract TicTacToe is ForceMoveApp {
     }
 
     function requireValidOPLAYINGtoVICTORY(
-        VariablePart memory fromPart,
-        VariablePart memory toPart,
         Outcome.AllocationItem[] memory fromAllocation,
         Outcome.AllocationItem[] memory toAllocation,
         TTTData memory fromGameData,
