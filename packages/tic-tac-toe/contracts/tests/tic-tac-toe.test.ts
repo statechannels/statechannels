@@ -86,25 +86,25 @@ beforeAll(async () => {
 //   +-----------------+
 //      O3  |  X6  |  X8
 
-const drawX = 0b101100011;
-const drawO = 0b010011100;
+// const drawX = 0b101100011;
+// const drawO = 0b010011100;
 
 // Binary representations of numbers
-const b = {
-  0: 0b000000000,
-  1: 0b000000001,
-  2: 0b000000010,
-  3: 0b000000011,
-  5: 0b000000101,
-  6: 0b000000110,
-  7: 0b000000111,
-  8: 0b000001011,
-  11: 0b000001011,
-  24: 0b000011000,
-  156: drawO,
-  354: 0b101100010,
-  355: drawX
-};
+// const b = {
+//   0: 0b000000000,
+//   1: 0b000000001,
+//   2: 0b000000010,
+//   3: 0b000000011,
+//   5: 0b000000101,
+//   6: 0b000000110,
+//   7: 0b000000111,
+//   8: 0b000001011,
+//   11: 0b000001011,
+//   24: 0b000011000,
+//   156: drawO,
+//   354: 0b101100010,
+//   355: drawX
+// };
 
 const balanceStartToAWins = [
   {A: 5, B: 5},
@@ -203,11 +203,11 @@ describe('validTransition', () => {
       const fromStake = stake[0];
       const toStake = stake[1];
 
-      const fromXs = b[Xs[0]];
-      const toXs = b[Xs[1]];
+      const fromXs = Xs[0];
+      const toXs = Xs[1];
 
-      const fromOs = b[Os[0]];
-      const toOs = b[Os[1]];
+      const fromOs = Os[0];
+      const toOs = Os[1];
 
       const fromAllocation: Allocation = [];
       const toAllocation: Allocation = [];
