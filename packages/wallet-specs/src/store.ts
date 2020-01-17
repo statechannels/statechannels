@@ -7,11 +7,6 @@ import { getStateSignerAddress, signState } from '@statechannels/nitro-protocol/
 export interface IStore {
   getEntry: (channelId: string) => ChannelStoreEntry;
 
-  // The channel store should garbage collect stale states on CHANNEL_UPDATED events.
-  // If a greater state becomes supported on such an event, it should replace the latest
-  // supported state, and remove any lesser, unsupported states.
-  getUnsupportedStates: (channelId: string) => SignedState[];
-
   findLedgerChannelId: (participants: string[]) => string | undefined;
   signedByMe: (state: State) => boolean;
   getPrivateKey: (participantIds: string[]) => string;
@@ -90,20 +85,12 @@ export class Store implements IStore {
       if (
         entry.latestSupportedState.appDefinition === undefined &&
         // TODO: correct array equality
-        this.participantIds(channelId) === participantIds
+        entry.participants.map(p => p.participantId) === participantIds
       ) {
         return channelId;
       }
     }
     return undefined;
-  }
-
-  public participantIds(channelId: string): string[] {
-    return this.getEntry(channelId).participants.map(p => p.participantId);
-  }
-
-  public getUnsupportedStates(channelId: string) {
-    return this.getEntry(channelId).unsupportedStates;
   }
 
   public signedByMe(state: State) {
