@@ -74,13 +74,16 @@ beforeAll(async () => {
   );
 });
 
+// Shows the binary representation of each cell on the board
 //      0  |  1  |  2
 //   +-----------------+
 //      3  |  4  |  5
 //   +-----------------+
 //      6  |  7  |  8
 
-// Draw
+// Shows the path of an example game that ends in a draw
+// Each cell shows the Player and the turn that was taken
+// This is used for the `draw` states below
 //      X0  |  O5  |  X4
 //   +-----------------+
 //      X2  |  O1  |  O7
