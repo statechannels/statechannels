@@ -1,4 +1,5 @@
 import { SignedState } from '.';
+import { Participant } from './store';
 
 export type HubChoice = {
   type: 'HubChoice';
@@ -17,6 +18,7 @@ export type FundingStrategyProposed = {
 
 export type OpenChannel = {
   type: 'OPEN_CHANNEL';
+  participants: Participant[];
   signedState: SignedState;
 };
 

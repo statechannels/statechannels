@@ -3,7 +3,6 @@ import { CreateChannel, JoinChannel } from '..';
 import { getChannelId, pretty, unreachable } from '../..';
 import { ChannelUpdated, IStore } from '../../store';
 import { FundingStrategyProposed, OpenChannel, SendStates } from '../../wire-protocol';
-import { JsonRpcCreateChannelParams } from '../../json-rpc';
 
 const PROTOCOL = 'wallet';
 export type Events = OpenChannelEvent | CreateChannelEvent | SendStates | FundingStrategyProposed;
@@ -113,6 +112,8 @@ export function machine(store: IStore, context: Init) {
     if (ctx.processes.find(p => p.id === processId)) {
       throw new Error('Process exists');
     }
+
+    event.participants.map(p => store.setParticipant(p));
     const joinChannelMachine = JoinChannel.machine(store, { channelId });
     const walletProcess: Process = {
       id: processId,
