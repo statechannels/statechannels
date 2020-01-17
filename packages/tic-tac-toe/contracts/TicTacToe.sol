@@ -27,7 +27,7 @@ contract TicTacToe is ForceMoveApp {
 
     struct TTTData {
         PositionType positionType;
-        uint256 stake;
+        uint256 stake; // this is contributed by each player. If you win, you get your stake back as well as the stake of the other player. If you lose, you lose your stake.
         uint16 Xs; // e.g. 110000000
         uint16 Os; // e.g. 001100000
     }
@@ -47,7 +47,6 @@ contract TicTacToe is ForceMoveApp {
     * @dev Encodes the TTT update rules.
     * @param fromPart State being transitioned from.
     * @param toPart State being transitioned to.
-    * @param turnNumB Used to calculate current turnTaker % nParticipants. Not implemented
     * @param nParticipants Amount of players. Must be 2
     * @return true if the transition conforms to the rules, false otherwise.
     */
@@ -152,7 +151,8 @@ contract TicTacToe is ForceMoveApp {
         require(toGameData.Os == 0, 'There should be no Os on board');
         require(madeStrictlyOneMark(toGameData.Xs, 0), 'There should be one X placed');
 
-        // Current X Player should get all the stake. This is to decrease griefing. We assume that X Player is Player A
+        // Current X Player should get all the stake. This is to decrease griefing.
+        // We assume that X Player is Player A
         require(
             toAllocation[0].amount == fromAllocation[0].amount.add(toGameData.stake),
             'Allocation for player A should be incremented by 1x stake'
@@ -232,20 +232,28 @@ contract TicTacToe is ForceMoveApp {
 
         uint256 currentOsPlayer = 1; // Need to calculate this
 
-        uint256 playerAWinnings; // playerOneWinnings
-        uint256 playerBWinnings; // playerTwoWinnings
-        // calculate winnings
-        (playerAWinnings, playerBWinnings) = winnings(currentOsPlayer, toGameData.stake);
+        // Recall that in the past state, the allocations are as if Player B has lost.
+        // First, undo this
+        uint256 correctAmountA = fromAllocation[0].amount.sub(fromGameData.stake);
+        uint256 correctAmountB = fromAllocation[1].amount.add(fromGameData.stake);
+    
+        if (currentOsPlayer == 0) {
+            // player A won
+            correctAmountA = correctAmountA.add(fromGameData.stake);
+            correctAmountB = correctAmountB.sub(fromGameData.stake);
+        } else {
+            // player B won
+            correctAmountA = correctAmountA.sub(fromGameData.stake);
+            correctAmountB = correctAmountB.add(fromGameData.stake);
+        }
 
-        // TODO This logic will only work if PlayerA is Xs and PlayerB is Os
         require(
-            toAllocation[1].amount == fromAllocation[1].amount.add(playerBWinnings),
-            "Player B's allocation should be updated with the winnings."
+            toAllocation[0].amount == correctAmountA,
+            "Player A's allocation should reflect the result of the game."
         );
         require(
-            toAllocation[0].amount ==
-                fromAllocation[0].amount.sub(fromGameData.stake.mul(2)).add(playerAWinnings),
-            "Player A's allocation should be updated with the winnings."
+            toAllocation[1].amount == correctAmountB,
+            "Player B's allocation should reflect the result of the game."
         );
     }
 
@@ -266,22 +274,29 @@ contract TicTacToe is ForceMoveApp {
 
         uint256 currentXsPlayer = 0; // Need to calculate this
 
-        uint256 playerAWinnings; // playerOneWinnings
-        uint256 playerBWinnings; // playerTwoWinnings
-        // calculate winnings
-        (playerAWinnings, playerBWinnings) = winnings(currentXsPlayer, toGameData.stake);
+        // Recall that in the past state, the allocations are as if Player A has lost.
+        // First, undo this
+        uint256 correctAmountA = fromAllocation[0].amount.add(fromGameData.stake);
+        uint256 correctAmountB = fromAllocation[1].amount.sub(fromGameData.stake);
+    
+        if (currentXsPlayer == 0) {
+            // player A won
+            correctAmountA = correctAmountA.add(fromGameData.stake);
+            correctAmountB = correctAmountB.sub(fromGameData.stake);
+        } else {
+            // player B won
+            correctAmountA = correctAmountA.sub(fromGameData.stake);
+            correctAmountB = correctAmountB.add(fromGameData.stake);
+        }
 
-        // TODO This logic will only work if PlayerA is Xs and PlayerB is Os
         require(
-            toAllocation[0].amount == fromAllocation[0].amount.add(playerAWinnings),
-            "Player A's allocation should be updated with the winnings."
+            toAllocation[0].amount == correctAmountA,
+            "Player A's allocation should reflect the result of the game."
         );
         require(
-            toAllocation[1].amount ==
-                fromAllocation[1].amount.sub(fromGameData.stake.mul(2)).add(playerBWinnings),
-            "Player B's allocation should be updated with the winnings."
+            toAllocation[1].amount == correctAmountB,
+            "Player B's allocation should reflect the result of the game."
         );
-
     }
 
     function requireValidOPLAYINGtoDRAW(
@@ -299,15 +314,16 @@ contract TicTacToe is ForceMoveApp {
         require(toGameData.Os == fromGameData.Os, 'There should be no new Os added to board');
         require(madeStrictlyOneMark(toGameData.Xs, fromGameData.Xs), "There should be one new X placed");
 
+        // Recall that in the past state, the allocations are as if Player A has lost.
         // TODO This logic will only work if PlayerA is Xs and PlayerB is Os
         require(
             toAllocation[0].amount == fromAllocation[0].amount.add(toGameData.stake),
-            "Player A's allocation should be updated with the winnings."
+            "Player A's allocation should reflect the result of the game."
         );
         require(
             toAllocation[1].amount ==
                 fromAllocation[1].amount.sub(toGameData.stake),
-            "Player B's allocation should be updated with the winnings."
+            "Player B's allocation should reflect the result of the game."
         );
     }
 
@@ -370,23 +386,6 @@ contract TicTacToe is ForceMoveApp {
         );
 
         return allocation;
-    }
-
-    function winnings(uint256 currentWinnerPlayer, uint256 stake)
-        private
-        pure
-        returns (uint256, uint256)
-    {
-        if (currentWinnerPlayer == 0) {
-            // first player won
-            return (2 * stake, 0);
-        } else if (currentWinnerPlayer == 1) {
-            // second player won
-            return (0, 2 * stake);
-        } else {
-            // Draw
-            return (stake, stake);
-        }
     }
 
     function _requireDestinationsUnchanged(
