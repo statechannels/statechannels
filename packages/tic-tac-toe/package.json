@@ -21,6 +21,7 @@
     "eslint:write": "eslint \"**/*.{js,ts}\" --fix --max-warnings=0",
     "start": "yarn contracts:compile",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
+    "prepare": "yarn build:ci",
     "test:prepare": "yarn clearContracts && yarn contracts:compile",
     "test:contracts": "npx jest -c ./config/jest/jest.contracts.config.js",
     "test": "yarn test:contracts",
