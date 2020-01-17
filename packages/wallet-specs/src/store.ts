@@ -138,6 +138,7 @@ export class Store implements IStore {
 
     const { participants, channelNonce } = entry.channel;
     if (this.nonceOk(participants, channelNonce)) {
+      data.participants.map(p => this.setParticipant(p));
       this._store[entry.channelId] = entry.args;
       this.useNonce(participants, channelNonce);
     } else {
