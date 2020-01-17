@@ -86,26 +86,6 @@ beforeAll(async () => {
 //   +-----------------+
 //      O3  |  X6  |  X8
 
-// const drawX = 0b101100011;
-// const drawO = 0b010011100;
-
-// Binary representations of numbers
-// const b = {
-//   0: 0b000000000,
-//   1: 0b000000001,
-//   2: 0b000000010,
-//   3: 0b000000011,
-//   5: 0b000000101,
-//   6: 0b000000110,
-//   7: 0b000000111,
-//   8: 0b000001011,
-//   11: 0b000001011,
-//   24: 0b000011000,
-//   156: drawO,
-//   354: 0b101100010,
-//   355: drawX
-// };
-
 const balanceStartToAWins = [
   {A: 5, B: 5},
   {A: 6, B: 4}
@@ -152,31 +132,31 @@ const victoryToStart = ['Victory', 'Start'];
 
 describe('validTransition', () => {
   it.each`
-    isValid  | positionType          | stake     | Xs            | Os            | balances               | description
-    ${true}  | ${xPlayingToOPlaying} | ${[1, 1]} | ${[1, 1]}     | ${[0, 2]}     | ${balanceAWinsToBWins} | ${'O can make a move'}
-    ${true}  | ${oPlayingToXPlaying} | ${[1, 1]} | ${[1, 5]}     | ${[2, 2]}     | ${balanceBWinsToAWins} | ${'X can make a move'}
-    ${true}  | ${oPlayingToVictory}  | ${[1, 1]} | ${[3, 7]}     | ${[24, 24]}   | ${balanceBWinsToAWins} | ${'X can win'}
-    ${true}  | ${xPlayingToVictory}  | ${[1, 1]} | ${[24, 24]}   | ${[3, 7]}     | ${balanceAWinsToBWins} | ${'O can win'}
-    ${true}  | ${oPlayingToDraw}     | ${[1, 1]} | ${[354, 355]} | ${[156, 156]} | ${balanceBWinsToDraw}  | ${'X can draw'}
-    ${true}  | ${drawToStart}        | ${[1, 1]} | ${[0, 0]}     | ${[0, 0]}     | ${balanceDrawToStart}  | ${'Draw can restart'}
-    ${true}  | ${victoryToStart}     | ${[1, 1]} | ${[0, 0]}     | ${[0, 0]}     | ${balanceAWinsToStart} | ${'X Victory can restart'}
-    ${true}  | ${victoryToStart}     | ${[1, 1]} | ${[0, 0]}     | ${[0, 0]}     | ${balanceBWinsToStart} | ${'O Victory can restart'}
-    ${false} | ${startToXPlaying}    | ${[1, 1]} | ${[0, 0]}     | ${[0, 0]}     | ${balanceStartToAWins} | ${`X doesn't make a move`}
-    ${false} | ${startToXPlaying}    | ${[1, 2]} | ${[0, 0]}     | ${[0, 0]}     | ${balanceStartToAWins} | ${`Stake can't change`}
-    ${false} | ${startToXPlaying}    | ${[1, 1]} | ${[0, 1]}     | ${[0, 2]}     | ${balanceStartToAWins} | ${'O changed during X move'}
-    ${false} | ${startToXPlaying}    | ${[1, 1]} | ${[0, 3]}     | ${[0, 0]}     | ${balanceStartToAWins} | ${`X can't start with 2 marks`}
-    ${false} | ${xPlayingToOPlaying} | ${[1, 1]} | ${[1, 1]}     | ${[0, 0]}     | ${balanceAWinsToBWins} | ${`O doesn't move`}
-    ${false} | ${xPlayingToOPlaying} | ${[1, 1]} | ${[0, 1]}     | ${[0, 2]}     | ${balanceAWinsToBWins} | ${'X changed during O move'}
-    ${false} | ${xPlayingToOPlaying} | ${[1, 1]} | ${[1, 1]}     | ${[0, 1]}     | ${balanceAWinsToBWins} | ${`O can't override a mark`}
-    ${false} | ${xPlayingToOPlaying} | ${[1, 1]} | ${[1, 1]}     | ${[0, 5]}     | ${balanceAWinsToBWins} | ${`O can't make 2 marks`}
-    ${false} | ${oPlayingToXPlaying} | ${[1, 1]} | ${[1, 1]}     | ${[2, 2]}     | ${balanceBWinsToAWins} | ${`X doesn't move`}
-    ${false} | ${oPlayingToXPlaying} | ${[1, 1]} | ${[1, 5]}     | ${[2, 6]}     | ${balanceBWinsToAWins} | ${'O changed during X move'}
-    ${false} | ${oPlayingToXPlaying} | ${[1, 1]} | ${[1, 3]}     | ${[2, 2]}     | ${balanceBWinsToAWins} | ${`X can't override a mark`}
-    ${true}  | ${startToXPlaying}    | ${[1, 1]} | ${[0, 1]}     | ${[0, 0]}     | ${balanceStartToAWins} | ${'X can start a game'}
-    ${false} | ${oPlayingToXPlaying} | ${[1, 1]} | ${[1, 11]}    | ${[2, 2]}     | ${balanceBWinsToAWins} | ${`X can't make 2 marks`}
-    ${false} | ${drawToStart}        | ${[1, 1]} | ${[354, 355]} | ${[156, 156]} | ${balanceDrawToStart}  | ${`Draw can't restart with marks`}
-    ${false} | ${victoryToStart}     | ${[1, 1]} | ${[354, 355]} | ${[156, 156]} | ${balanceAWinsToStart} | ${`X Victory cant restart with marks`}
-    ${false} | ${victoryToStart}     | ${[1, 1]} | ${[354, 355]} | ${[156, 156]} | ${balanceBWinsToStart} | ${'O Victory cant restart with marks'}
+    isValid  | positionType          | stake     | Xs                            | Os                            | balances               | description
+    ${true}  | ${startToXPlaying}    | ${[1, 1]} | ${[0b000000000, 0b000000001]} | ${[0b000000000, 0b000000000]} | ${balanceStartToAWins} | ${'X can start a game'}
+    ${true}  | ${xPlayingToOPlaying} | ${[1, 1]} | ${[0b000000001, 0b000000001]} | ${[0b000000000, 0b000000010]} | ${balanceAWinsToBWins} | ${'O can make a move'}
+    ${true}  | ${oPlayingToXPlaying} | ${[1, 1]} | ${[0b000000001, 0b000000101]} | ${[0b000000010, 0b000000010]} | ${balanceBWinsToAWins} | ${'X can make a move'}
+    ${true}  | ${oPlayingToVictory}  | ${[1, 1]} | ${[0b000000011, 0b000000111]} | ${[0b000011000, 0b000011000]} | ${balanceBWinsToAWins} | ${'X can win'}
+    ${true}  | ${xPlayingToVictory}  | ${[1, 1]} | ${[0b000011000, 0b000011000]} | ${[0b000000011, 0b000000111]} | ${balanceAWinsToBWins} | ${'O can win'}
+    ${true}  | ${oPlayingToDraw}     | ${[1, 1]} | ${[0b101100010, 0b101100011]} | ${[0b010011100, 0b010011100]} | ${balanceBWinsToDraw}  | ${'X can draw'}
+    ${true}  | ${drawToStart}        | ${[1, 1]} | ${[0b000000000, 0b000000000]} | ${[0b000000000, 0b000000000]} | ${balanceDrawToStart}  | ${'Draw can restart'}
+    ${true}  | ${victoryToStart}     | ${[1, 1]} | ${[0b000000000, 0b000000000]} | ${[0b000000000, 0b000000000]} | ${balanceAWinsToStart} | ${'X Victory can restart'}
+    ${true}  | ${victoryToStart}     | ${[1, 1]} | ${[0b000000000, 0b000000000]} | ${[0b000000000, 0b000000000]} | ${balanceBWinsToStart} | ${'O Victory can restart'}
+    ${false} | ${startToXPlaying}    | ${[1, 1]} | ${[0b000000000, 0b000000000]} | ${[0b000000000, 0b000000000]} | ${balanceStartToAWins} | ${`X doesn't make a move`}
+    ${false} | ${startToXPlaying}    | ${[1, 2]} | ${[0b000000000, 0b000000000]} | ${[0b000000000, 0b000000000]} | ${balanceStartToAWins} | ${`Stake can't change`}
+    ${false} | ${startToXPlaying}    | ${[1, 1]} | ${[0b000000000, 0b000000001]} | ${[0b000000000, 0b000000010]} | ${balanceStartToAWins} | ${'O changed during X move'}
+    ${false} | ${startToXPlaying}    | ${[1, 1]} | ${[0b000000000, 0b000000011]} | ${[0b000000000, 0b000000000]} | ${balanceStartToAWins} | ${`X can't start with 2 marks`}
+    ${false} | ${xPlayingToOPlaying} | ${[1, 1]} | ${[0b000000001, 0b000000001]} | ${[0b000000000, 0b000000000]} | ${balanceAWinsToBWins} | ${`O doesn't move`}
+    ${false} | ${xPlayingToOPlaying} | ${[1, 1]} | ${[0b000000000, 0b000000001]} | ${[0b000000000, 0b000000010]} | ${balanceAWinsToBWins} | ${'X changed during O move'}
+    ${false} | ${xPlayingToOPlaying} | ${[1, 1]} | ${[0b000000001, 0b000000001]} | ${[0b000000000, 0b000000001]} | ${balanceAWinsToBWins} | ${`O can't override a mark`}
+    ${false} | ${xPlayingToOPlaying} | ${[1, 1]} | ${[0b000000001, 0b000000001]} | ${[0b000000000, 0b000000101]} | ${balanceAWinsToBWins} | ${`O can't make 2 marks`}
+    ${false} | ${oPlayingToXPlaying} | ${[1, 1]} | ${[0b000000001, 0b000000001]} | ${[0b000000010, 0b000000010]} | ${balanceBWinsToAWins} | ${`X doesn't move`}
+    ${false} | ${oPlayingToXPlaying} | ${[1, 1]} | ${[0b000000001, 0b000000101]} | ${[0b000000010, 0b000000110]} | ${balanceBWinsToAWins} | ${'O changed during X move'}
+    ${false} | ${oPlayingToXPlaying} | ${[1, 1]} | ${[0b000000001, 0b000000011]} | ${[0b000000010, 0b000000010]} | ${balanceBWinsToAWins} | ${`X can't override a mark`}
+    ${false} | ${oPlayingToXPlaying} | ${[1, 1]} | ${[0b000000001, 0b000001011]} | ${[0b000000010, 0b000000010]} | ${balanceBWinsToAWins} | ${`X can't make 2 marks`}
+    ${false} | ${drawToStart}        | ${[1, 1]} | ${[0b101100010, 0b101100011]} | ${[0b010011100, 0b010011100]} | ${balanceDrawToStart}  | ${`Draw can't restart with marks`}
+    ${false} | ${victoryToStart}     | ${[1, 1]} | ${[0b101100010, 0b101100011]} | ${[0b010011100, 0b010011100]} | ${balanceAWinsToStart} | ${`X Victory cant restart with marks`}
+    ${false} | ${victoryToStart}     | ${[1, 1]} | ${[0b101100010, 0b101100011]} | ${[0b010011100, 0b010011100]} | ${balanceBWinsToStart} | ${'O Victory cant restart with marks'}
   `(
     `Returns $isValid on $positionType; $description`,
     async ({
