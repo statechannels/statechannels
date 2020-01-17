@@ -135,7 +135,9 @@ function* gameSagaRun(client: RPSChannelClient) {
       }
       break;
     case 'EndGame.GameOver':
-      yield* clearChannelState();
+      if (channelState) {
+        yield put(a.updateChannelState(null));
+      }
       break;
   }
 }
@@ -338,9 +340,6 @@ function* sendStartAndStartRound(channelState: ChannelState<Reveal>, client: RPS
 function* closeChannel(channelState: ChannelState, client: RPSChannelClient) {
   const closingChannelState = yield call([client, 'closeChannel'], channelState.channelId);
   yield put(a.updateChannelState(closingChannelState));
-}
-function* clearChannelState() {
-  yield put(a.updateChannelState(null));
 }
 
 const calculateFundingSituation = (
