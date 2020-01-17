@@ -170,16 +170,17 @@ export class Store implements IStore {
 
     // 2. Sign & store the state
     const signedState: SignedState = this.signState(state);
-    const newEntry = this.updateOrCreateEntry(channelId, [signedState]);
+    const { recipients, participants } = this.updateOrCreateEntry(channelId, [signedState]);
 
     // 3. Send the message
     const message: AddressableMessage = {
       type: 'OPEN_CHANNEL',
       signedState,
+      participants,
       to: 'BLANK',
     };
 
-    this.sendMessage(message, newEntry.recipients);
+    this.sendMessage(message, recipients);
   }
 
   public sendStrategyChoice(message: FundingStrategyProposed) {

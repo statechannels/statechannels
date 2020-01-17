@@ -27,6 +27,8 @@ const second: Participant = {
   participantId: 'second',
 };
 
+const participants = [first, second];
+
 const channel: Channel = {
   participants: [first.signingAddress, second.signingAddress],
   channelNonce: '1',
@@ -49,6 +51,7 @@ const state: State = {
 const messagesToSecond: AddressableMessage[] = [];
 messagesToSecond.push({
   type: 'OPEN_CHANNEL',
+  participants,
   signedState: {
     state,
     signatures: [],
@@ -97,7 +100,7 @@ export const createChannel: CreateChannelEvent = {
   type: 'CREATE_CHANNEL',
   chainId: '0x01',
   challengeDuration: 1,
-  participants: [first, second],
+  participants,
   allocations: [
     { destination: first.destination, amount: '3' },
     { destination: second.destination, amount: '1' },
