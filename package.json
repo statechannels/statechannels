@@ -25,7 +25,7 @@
     "postinstall": "patch-package",
     "build:netlify:ci": "lerna run --stream --parallel build:netlify",
     "release:netlify": "lerna run --stream --parallel release:netlify --",
-    "release:netlify:ci": "yarn release:netlify --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD) $([[ $(git rev-parse --abbrev-ref HEAD) == master ]] && echo --prod)"
+    "release:netlify:ci": "yarn release:netlify --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD) $([ $(git rev-parse --abbrev-ref HEAD) = master ] && echo --prod)"
   },
   "keywords": [
     "ethereum",
