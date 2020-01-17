@@ -5,21 +5,21 @@ import { AddressableMessage, FundingStrategyProposed } from './wire-protocol';
 import { State } from '@statechannels/nitro-protocol';
 import { getStateSignerAddress, signState } from '@statechannels/nitro-protocol/lib/src/signatures';
 export interface IStore {
-  getEntry: (channelId: string) => ChannelStoreEntry;
   getParticipant(signingAddress: string): Participant;
+  getEntry(channelId: string): ChannelStoreEntry;
 
-  findLedgerChannelId: (participants: string[]) => string | undefined;
-  signedByMe: (state: State) => boolean;
-  getPrivateKey: (participantIds: string[]) => string;
+  findLedgerChannelId(participants: string[]): string | undefined;
+  signedByMe(state: State): boolean;
+  getPrivateKey(signingAddresses: string[]): string;
 
   /*
   Store modifiers
   */
-  initializeChannel: (entry: ChannelStoreEntry) => void;
-  sendState: (state: State) => void;
-  sendOpenChannel: (state: State) => void;
-  receiveStates: (signedStates: SignedState[]) => void;
   setParticipant(participant: Participant): void;
+  initializeChannel(entry: ChannelStoreEntry): void;
+  sendState(state: State): void;
+  sendOpenChannel(state: State): void;
+  receiveStates(signedStates: SignedState[]): void;
 
   // TODO: set funding
   // setFunding(channelId: string, funding: Funding): void;
