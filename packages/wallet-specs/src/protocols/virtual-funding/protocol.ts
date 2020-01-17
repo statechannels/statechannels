@@ -1,8 +1,7 @@
 import { assign } from 'xstate';
-import { Balance, checkThat, getEthAllocation } from '../..';
+import { Balance, getEthAllocation } from '../..';
 import { HubChoice } from '../../wire-protocol';
 import { Init as VirtualFundAsLeafArgs } from '../virtual-fund-as-leaf/protocol';
-import { isAllocationOutcome } from '@statechannels/nitro-protocol';
 import { store } from '../../temp-store';
 const PROTOCOL = 'virtual-funding';
 const success = { type: 'final' };
@@ -37,12 +36,12 @@ const chooseHub = {
 type HubKnown = Init & { hubAddress: string };
 
 function virtualFundAsLeafArgs({ targetChannelId, hubAddress }: HubKnown): VirtualFundAsLeafArgs {
-  const { channel, outcome } = store.getEntry(targetChannelId).latestState;
+  const { latestState, ourIndex: index } = store.getEntry(targetChannelId);
+  const { channel, outcome } = latestState;
   const balances: Balance[] = getEthAllocation(outcome).map(o => ({
     address: o.destination,
     wei: o.amount,
   }));
-  const index = store.getIndex(targetChannelId);
   const participantIds = [channel.participants[index], hubAddress];
   const ledgerId = store.findLedgerChannelId(participantIds);
   if (!ledgerId) {

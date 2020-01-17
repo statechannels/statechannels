@@ -6,7 +6,6 @@ import { State } from '@statechannels/nitro-protocol';
 import { getStateSignerAddress, signState } from '@statechannels/nitro-protocol/lib/src/signatures';
 export interface IStore {
   getEntry: (channelId: string) => ChannelStoreEntry;
-  getIndex: (channelId: string) => 0 | 1;
 
   // The channel store should garbage collect stale states on CHANNEL_UPDATED events.
   // If a greater state becomes supported on such an event, it should replace the latest
@@ -83,17 +82,6 @@ export class Store implements IStore {
       throw new Error(`No private key found for ${myAddress}`);
     }
     return this._privateKeys[myAddress];
-  }
-
-  public getIndex(channelId: string): 0 | 1 {
-    const entry = this.getEntry(channelId);
-    const { participants } = entry.states[0].state.channel;
-    if (participants.length !== 2) {
-      throw new Error('Assumes two participants');
-    }
-
-    const ourAddress = `addressFrom${entry.privateKey}`;
-    return participants.indexOf(ourAddress) as 0 | 1;
   }
 
   public findLedgerChannelId(participantIds: string[]): string | undefined {
