@@ -180,11 +180,11 @@ contract TicTacToe is ForceMoveApp {
 
         // Current O Player should get all the stake. This is to decrease griefing. We assume that O Player is Player B
         require(
-            toAllocation[0].amount == fromAllocation[0].amount.sub(toGameData.stake*2),
+            toAllocation[0].amount == fromAllocation[0].amount.sub(toGameData.stake.mul(2)),
             'Allocation for player A should be decremented by 1x stake'
         );
         require(
-            toAllocation[1].amount == fromAllocation[1].amount.add(toGameData.stake*2),
+            toAllocation[1].amount == fromAllocation[1].amount.add(toGameData.stake.mul(2)),
             'Allocation for player B should be incremented by 1x stake.'
         );
     }
