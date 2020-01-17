@@ -23,11 +23,13 @@ export interface XPlaying {
   type: 'xPlaying';
   stake: string;
   Xs: number;
+  Os: number;
 }
 
 export interface OPlaying {
   type: 'oPlaying';
   stake: string;
+  Xs: number;
   Os: number;
 }
 
@@ -89,7 +91,7 @@ export function encodeAppData(appData: AppData): string {
 
 export function decodeAppData(appDataBytes: string): AppData {
   const parameters = defaultAbiCoder.decode(
-    ['tuple(uint8 positionType, uint256 stake, uint16 Xs, uint8 Os)'],
+    ['tuple(uint8 positionType, uint256 stake, uint16 Xs, uint16 Os)'],
     appDataBytes
   )[0];
 
@@ -110,13 +112,15 @@ export function decodeAppData(appDataBytes: string): AppData {
       appData = {
         type: 'xPlaying',
         stake,
-        Xs
+        Xs,
+        Os
       } as XPlaying;
       return appData;
     case PositionType.OPlaying:
       appData = {
         type: 'oPlaying',
         stake,
+        Xs,
         Os
       } as OPlaying;
       return appData;
