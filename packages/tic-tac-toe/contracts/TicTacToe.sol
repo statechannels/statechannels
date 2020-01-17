@@ -28,8 +28,8 @@ contract TicTacToe is ForceMoveApp {
     struct TTTData {
         PositionType positionType;
         uint256 stake;
-        uint16 Xs; // 110000000
-        uint16 Os; // 001100000
+        uint16 Xs; // e.g. 110000000
+        uint16 Os; // e.g. 001100000
     }
 
     /**
