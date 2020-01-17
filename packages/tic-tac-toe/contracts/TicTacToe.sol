@@ -161,16 +161,6 @@ contract TicTacToe is ForceMoveApp {
             toAllocation[1].amount == fromAllocation[1].amount.sub(toGameData.stake),
             'Allocation for player B should be decremented by 1x stake.'
         );
-
-        // Old TTTMago code
-        // if (State.indexOfMover(_new) == 0) { // mover is A
-        //     require(_new.aResolution() == _old.aResolution() + _new.stake());
-        //     require(_new.bResolution() == _old.bResolution() - _new.stake());
-        // } else if (State.indexOfMover(_new) == 1) { // mover is B
-        //     require(_new.aResolution() == _old.aResolution() - _new.stake());
-        //     require(_new.bResolution() == _old.bResolution() + _new.stake());
-        // }
-
     }
 
     function requireValidXPLAYINGtoOPLAYING(
@@ -197,19 +187,6 @@ contract TicTacToe is ForceMoveApp {
             toAllocation[1].amount == fromAllocation[1].amount.add(toGameData.stake*2),
             'Allocation for player B should be incremented by 1x stake.'
         );
-
-        // Old TTTMagmo code
-        // if (State.indexOfMover(_new) == 0) {
-        //     // mover is A
-        //     require(_new.aResolution() == _old.aResolution() + 2 * _new.stake());
-        //     require(_new.bResolution() == _old.bResolution() - 2 * _new.stake());
-        // } else if (State.indexOfMover(_new) == 1) {
-        //     // mover is B
-        //     require(_new.aResolution() == _old.aResolution() - 2 * _new.stake());
-        //     require(_new.bResolution() == _old.bResolution() + 2 * _new.stake());
-        //     // note factor of 2 to swing fully to other player
-        // }
-
     }
 
     function requireValidOPLAYINGtoXPLAYING(
@@ -236,16 +213,6 @@ contract TicTacToe is ForceMoveApp {
             toAllocation[1].amount == fromAllocation[1].amount.sub(toGameData.stake*2),
             'Allocation for player B should be decremented by 1x stake.'
         );
-        
-        // Old TTTMagmo code
-        // if (State.indexOfMover(_new) == 0) { // mover is A
-        //     require(_new.aResolution() == _old.aResolution() + 2 * _new.stake()); // note extra factor of 2 to swing fully to other player
-        //     require(_new.bResolution() == _old.bResolution() - 2 * _new.stake());
-        // } else if (State.indexOfMover(_new) == 1) { // mover is B
-        //     require(_new.aResolution() == _old.aResolution() - 2 * _new.stake());
-        //     require(_new.bResolution() == _old.bResolution() + 2 * _new.stake());
-        // } // mover gets to claim stakes: note factor of 2 to swing fully to other player
-
     }
 
     function requireValidXPLAYINGtoVICTORY(
@@ -280,18 +247,6 @@ contract TicTacToe is ForceMoveApp {
                 fromAllocation[0].amount.sub(fromGameData.stake.mul(2)).add(playerAWinnings),
             "Player A's allocation should be updated with the winnings."
         );
-
-        // Old TTTMagmo code
-        // if (State.indexOfMover(_new) == 0) {
-        //     // mover is A
-        //     require(_new.aResolution() == _old.aResolution() + 2 * _new.stake());
-        //     require(_new.bResolution() == _old.bResolution() - 2 * _new.stake());
-        // } else if (State.indexOfMover(_new) == 1) {
-        //     // mover is B
-        //     require(_new.aResolution() == _old.aResolution() - 2 * _new.stake());
-        //     require(_new.bResolution() == _old.bResolution() + 2 * _new.stake());
-        // } // mover gets to claim stakes
-
     }
 
     function requireValidOPLAYINGtoVICTORY(
@@ -354,18 +309,6 @@ contract TicTacToe is ForceMoveApp {
                 fromAllocation[1].amount.sub(toGameData.stake),
             "Player B's allocation should be updated with the winnings."
         );
-
-
-        // Old TTTMagmo code
-        // crosses always plays first move and always plays the move that completes the board
-        // if (State.indexOfMover(_new) == 0) {
-        //     require(_new.aResolution() == _old.aResolution() + 2 * _new.stake()); // no extra factor of 2, restoring to parity
-        //     require(_new.bResolution() == _old.bResolution() - 2 * _new.stake());
-        // } else if (State.indexOfMover(_new) == 1) {
-        //     require(_new.aResolution() == _old.aResolution() - 2 * _new.stake());
-        //     require(_new.bResolution() == _old.bResolution() + 2 * _new.stake());
-        // } // mover gets to restore parity to the winnings
-
     }
 
     function requireValidDRAWtoSTART(
