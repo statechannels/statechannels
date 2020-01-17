@@ -16,7 +16,6 @@ const reducer = combineReducers({
   openGames: openGamesReducer,
 });
 
-// TODO: Get this working with a mock for channel-client
 it(
   'runs to GameOver',
   async () => {
@@ -29,7 +28,7 @@ it(
     }
     const initialState = {
       game: {
-        localState: Setup.lobby({name: 'Player A', address: 'blah'}),
+        localState: Setup.lobby({name: 'Player A', address: 'blah', outcomeAddress: 'blah'}),
         channelState: null,
       },
       openGames: [],

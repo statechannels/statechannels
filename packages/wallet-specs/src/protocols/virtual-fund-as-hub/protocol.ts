@@ -1,6 +1,6 @@
 import { assign } from 'xstate';
-import { Balance, Channel, store } from '../../';
-
+import { Balance, Channel } from '../../';
+import { store } from '../../temp-store';
 const PROTOCOL = 'virtual-funding-as-hub';
 
 /*
@@ -27,8 +27,8 @@ type ChannelsKnown = Init & {
 export const assignChannels = assign(
   (init: Init): ChannelsKnown => {
     const { leftLedgerId, rightLedgerId, targetChannelId } = init;
-    const { channel: leftLedgerChannel } = store.getLatestState(leftLedgerId);
-    const { channel: rightLedgerChannel } = store.getLatestState(rightLedgerId);
+    const { channel: leftLedgerChannel } = store.getEntry(leftLedgerId).latestState;
+    const { channel: rightLedgerChannel } = store.getEntry(rightLedgerId).latestState;
 
     const jointParticipants = [
       ...leftLedgerChannel.participants,

@@ -3,6 +3,7 @@ import React from 'react';
 
 import {Button, Form, FormGroup, Label, Input} from 'reactstrap';
 import {Modal, ModalBody} from 'reactstrap';
+import {MetaMaskButton} from 'rimble-ui';
 
 interface Props {
   updateProfile: (name: string, twitterHandle?: string) => void;
@@ -11,18 +12,16 @@ interface Props {
 
 interface State {
   name: string;
-  twitterHandle: string;
-  twitterErrorMessage: string;
+
   nameErrorMessage: string;
 }
 
 export default class ProfilePage extends React.PureComponent<Props, State> {
   constructor(props) {
     super(props);
-    this.state = {name: '', twitterHandle: '', twitterErrorMessage: '', nameErrorMessage: ''};
+    this.state = {name: '', nameErrorMessage: ''};
     this.updateProfileHandler = this.updateProfileHandler.bind(this);
     this.handleNameChange = this.handleNameChange.bind(this);
-    this.handleTwitterChange = this.handleTwitterChange.bind(this);
   }
 
   handleNameChange(e) {
@@ -40,27 +39,15 @@ export default class ProfilePage extends React.PureComponent<Props, State> {
     this.setState({name, nameErrorMessage});
   }
 
-  handleTwitterChange(e) {
-    const twitterHandle = e.target.value;
-    let twitterErrorMessage = '';
-    if (!/^[a-zA-Z0-9_]{1,15}$/.test(twitterHandle) && twitterHandle !== '') {
-      twitterErrorMessage = `${twitterHandle} is not a valid twitter handle`;
-    }
-    this.setState({twitterErrorMessage, twitterHandle: e.target.value});
-  }
-
   updateProfileHandler(e) {
     e.preventDefault();
-    if (this.state.nameErrorMessage === '' && this.state.twitterErrorMessage === '') {
-      this.props.updateProfile(this.state.name, this.state.twitterHandle);
+    if (this.state.nameErrorMessage === '') {
+      this.props.updateProfile(this.state.name);
     }
   }
 
   render() {
-    const submitEnabled =
-      this.state.nameErrorMessage === '' &&
-      this.state.twitterErrorMessage === '' &&
-      this.state.name !== '';
+    const submitEnabled = this.state.nameErrorMessage === '' && this.state.name !== '';
     return (
       <Modal className="cog-container" isOpen={true} centered={true}>
         <div className="modal-content">
@@ -85,23 +72,9 @@ export default class ProfilePage extends React.PureComponent<Props, State> {
                 <small className="form-text text-muted">This will display to other players.</small>
                 <small className="form-text text-danger">{this.state.nameErrorMessage}</small>
               </FormGroup>
-              <FormGroup>
-                <Label for="twitterHandle">Twitter handle [optional]</Label>
-                <Input
-                  type="text"
-                  name="twitterHandle"
-                  id="twitterHandle"
-                  value={this.state.twitterHandle}
-                  onChange={e => this.handleTwitterChange(e)}
-                />
-                <small className="form-text text-muted">
-                  This will be used for your twitter shout-out if you beat the psychic bot.
-                </small>
-                <small className="form-text text-danger">{this.state.twitterErrorMessage}</small>
-              </FormGroup>
-              <Button className="profile-button" disabled={!submitEnabled}>
-                Submit
-              </Button>
+              <MetaMaskButton.Outline disabled={!submitEnabled}>
+                Connect with MetaMask
+              </MetaMaskButton.Outline>
             </Form>
           </ModalBody>
         </div>

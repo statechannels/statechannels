@@ -8,7 +8,10 @@
     "strict": false,
     "strictNullChecks": true,
     "esModuleInterop": true,
-    "downlevelIteration": true
+    "downlevelIteration": true,
+    "declaration": true,
+    "sourceMap": true,
+    "types": ["react", "jest", "node"]
   },
   "include": ["src", "bin/utils.ts"]
 }

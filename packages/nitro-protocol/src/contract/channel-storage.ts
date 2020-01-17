@@ -1,13 +1,5 @@
-import {AddressZero, HashZero} from 'ethers/constants';
-import {
-  bigNumberify,
-  defaultAbiCoder,
-  hexDataSlice,
-  hexlify,
-  hexZeroPad,
-  isHexString,
-  keccak256,
-} from 'ethers/utils';
+import {constants} from 'ethers';
+import {utils} from 'ethers';
 import {hashOutcome, Outcome} from './outcome';
 import {hashState, State} from './state';
 import {Address, Bytes, Bytes32, Uint48} from './types';
@@ -42,13 +34,13 @@ const CHANNEL_STORAGE_LITE_TYPE = `tuple(
 
 export function hashChannelStorage(channelStorage: ChannelStorage): Bytes32 {
   const {turnNumRecord, finalizesAt} = channelStorage;
-  const hash = keccak256(encodeChannelStorage(channelStorage));
-  const fingerprint = hexDataSlice(hash, 12);
+  const hash = utils.keccak256(encodeChannelStorage(channelStorage));
+  const fingerprint = utils.hexDataSlice(hash, 12);
 
   const storage =
     '0x' +
-    hexZeroPad(hexlify(turnNumRecord), 6).slice(2) +
-    hexZeroPad(hexlify(finalizesAt), 6).slice(2) +
+    utils.hexZeroPad(utils.hexlify(turnNumRecord), 6).slice(2) +
+    utils.hexZeroPad(utils.hexlify(finalizesAt), 6).slice(2) +
     fingerprint.slice(2);
 
   return storage;
@@ -71,7 +63,7 @@ export function parseChannelStorageHash(
     fingerprint,
   };
 }
-const asNumber: (s: string) => number = s => bigNumberify(s).toNumber();
+const asNumber: (s: string) => number = s => utils.bigNumberify(s).toNumber();
 
 export function channelStorageStruct({
   finalizesAt,
@@ -94,15 +86,15 @@ export function channelStorageStruct({
     );
   }
 
-  const stateHash = isOpen || !state ? HashZero : hashState(state);
-  const outcomeHash = isOpen || !outcome ? HashZero : hashOutcome(outcome);
-  challengerAddress = challengerAddress || AddressZero;
+  const stateHash = isOpen || !state ? constants.HashZero : hashState(state);
+  const outcomeHash = isOpen || !outcome ? constants.HashZero : hashOutcome(outcome);
+  challengerAddress = challengerAddress || constants.AddressZero;
 
   return {turnNumRecord, finalizesAt, stateHash, challengerAddress, outcomeHash};
 }
 
 export function encodeChannelStorage(storage: ChannelStorage): Bytes {
-  return defaultAbiCoder.encode([CHANNEL_STORAGE_TYPE], [channelStorageStruct(storage)]);
+  return utils.defaultAbiCoder.encode([CHANNEL_STORAGE_TYPE], [channelStorageStruct(storage)]);
 }
 
 export function channelStorageLiteStruct({
@@ -114,20 +106,20 @@ export function channelStorageLiteStruct({
   return {
     finalizesAt,
     challengerAddress,
-    stateHash: state ? hashState(state) : HashZero,
-    outcomeHash: outcome ? hashOutcome(outcome) : HashZero,
+    stateHash: state ? hashState(state) : constants.HashZero,
+    outcomeHash: outcome ? hashOutcome(outcome) : constants.HashZero,
   };
 }
 
 export function encodeChannelStorageLite(channelStorageLite: ChannelStorageLite): Bytes {
-  return defaultAbiCoder.encode(
+  return utils.defaultAbiCoder.encode(
     [CHANNEL_STORAGE_LITE_TYPE],
     [channelStorageLiteStruct(channelStorageLite)]
   );
 }
 
 function validateHexString(hexString) {
-  if (!isHexString(hexString)) {
+  if (!utils.isHexString(hexString)) {
     throw new Error(`Not a hex string: ${hexString}`);
   }
   if (hexString.length !== 66) {

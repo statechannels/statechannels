@@ -1,24 +1,24 @@
-import {
-  AnyEventObject,
-  assign,
-  DoneInvokeEvent,
-  InvokeCreator,
-  Machine,
-  MachineConfig,
-  sendParent,
-} from 'xstate';
+import { assign, DoneInvokeEvent, InvokeCreator, Machine, MachineConfig, sendParent } from 'xstate';
 import { AdvanceChannel, Funding } from '..';
-import { Channel, forwardChannelUpdated, MachineFactory, State, Store, success } from '../..';
+import {
+  Channel,
+  forwardChannelUpdated,
+  MachineFactory,
+  Store,
+  success,
+  ethAllocationOutcome,
+} from '../..';
 import { ChannelStoreEntry } from '../../ChannelStoreEntry';
 import { JsonRpcCreateChannelParams } from '../../json-rpc';
 import { passChannelId } from '../join-channel/protocol';
+import { State } from '@statechannels/nitro-protocol';
 
 const PROTOCOL = 'create-channel';
 
 /*
 Spawned in a new process when the app calls CreateChannel
 */
-export type Init = JsonRpcCreateChannelParams;
+export type Init = JsonRpcCreateChannelParams & { chainId: string; challengeDuration: number };
 
 type ChannelSet = Init & { channelId: string };
 export interface SetChannel {
@@ -104,24 +104,23 @@ export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => 
     const channel: Channel = {
       participants,
       channelNonce,
-      chainId: 'mainnet?',
+      chainId: ctx.chainId,
     };
 
-    const { allocations: outcome, appData, appDefinition } = ctx;
+    const { allocations, appData, appDefinition } = ctx;
     const firstState: State = {
       appData,
       appDefinition,
       isFinal: false,
       turnNum: 0,
-      outcome,
+      outcome: ethAllocationOutcome(allocations),
       channel,
-      challengeDuration: 'TODO', // TODO
+      challengeDuration: ctx.challengeDuration,
     };
 
     const entry = new ChannelStoreEntry({
       channel,
-      supportedState: [],
-      unsupportedStates: [{ state: firstState, signatures: [] }],
+      states: [{ state: firstState, signatures: [] }],
       privateKey: store.getPrivateKey(ctx.participants.map(p => p.participantId)),
       participants: ctx.participants,
     });
@@ -136,7 +135,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => 
   const guards = {};
   const actions = {
     sendOpenChannelMessage: ({ channelId }: SetChannel) => {
-      const state = store.getLatestState(channelId);
+      const state = store.getEntry(channelId).latestState;
       if (state.turnNum !== 0) {
         throw new Error('Wrong state');
       }

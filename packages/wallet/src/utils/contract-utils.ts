@@ -1,6 +1,5 @@
-import {Contract} from "ethers";
+import {Contract, providers} from "ethers";
 import log from "loglevel";
-import {Web3Provider} from "ethers/providers";
 import {Interface} from "ethers/utils";
 import {ContractArtifacts} from "@statechannels/nitro-protocol";
 
@@ -15,21 +14,21 @@ function getContractAddress(name: string): string {
   throw new Error(`Could not find ${name} in environment`);
 }
 
-export function getProvider(): Web3Provider {
-  return new Web3Provider(window.web3.currentProvider);
+export function getProvider(): providers.Web3Provider {
+  return new providers.Web3Provider(window.web3.currentProvider);
 }
 
-export async function getAdjudicatorContract(provider: Web3Provider) {
+export async function getAdjudicatorContract(provider: providers.Web3Provider) {
   const contractAddress = getAdjudicatorContractAddress();
   return new Contract(contractAddress, getAdjudicatorInterface(), provider);
 }
 
-export async function getETHAssetHolderContract(provider: Web3Provider) {
+export async function getETHAssetHolderContract(provider: providers.Web3Provider) {
   const contractAddress = getETHAssetHolderAddress();
   return new Contract(contractAddress, getETHAssetHolderInterface(), provider);
 }
 
-export async function getERC20AssetHolderContract(provider: Web3Provider) {
+export async function getERC20AssetHolderContract(provider: providers.Web3Provider) {
   const contractAddress = getERC20AssetHolderAddress();
   return new Contract(contractAddress, getERC20AssetHolderInterface(), provider);
 }
@@ -97,17 +96,26 @@ export function isDevelopmentNetwork(): boolean {
   );
 }
 
-export async function getAdjudicatorChannelStorageHash(provider: Web3Provider, channelId: string) {
+export async function getAdjudicatorChannelStorageHash(
+  provider: providers.Web3Provider,
+  channelId: string
+) {
   const contract = await getAdjudicatorContract(provider);
   return await contract.channelStorageHashes(channelId);
 }
 
-export async function getETHAssetHolderHoldings(provider: Web3Provider, channelId: string) {
+export async function getETHAssetHolderHoldings(
+  provider: providers.Web3Provider,
+  channelId: string
+) {
   const contract = await getETHAssetHolderContract(provider);
   return await contract.functions.holdings(channelId);
 }
 
-export async function getERC20AssetHolderHoldings(provider: Web3Provider, channelId: string) {
+export async function getERC20AssetHolderHoldings(
+  provider: providers.Web3Provider,
+  channelId: string
+) {
   const contract = await getERC20AssetHolderContract(provider);
   return await contract.functions.holdings(channelId);
 }

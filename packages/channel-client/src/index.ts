@@ -10,4 +10,4 @@ export {
 
 export {ChannelClient} from './channel-client';
 
-export {FakeChannelClient} from './fake-channel-client';
+export {FakeChannelClient} from '../tests/fakes/fake-channel-client';

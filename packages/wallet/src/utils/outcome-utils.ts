@@ -4,7 +4,7 @@ import {
   AllocationItem,
   convertAddressToBytes32
 } from "@statechannels/nitro-protocol";
-import {AllocationAssetOutcome} from "@statechannels/nitro-protocol/src/contract/outcome";
+import {AllocationAssetOutcome} from "@statechannels/nitro-protocol";
 import {addHex} from "./hex-utils";
 
 export function getAllocationAmountForIndex(outcome: Outcome, index: number): string {

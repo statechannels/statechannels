@@ -8,10 +8,10 @@
     "node": "^10.16.3"
   },
   "scripts": {
-    "prepare": "lerna run --concurrency 1 --stream prepare",
+    "prepare": "typesync && lerna run --concurrency 8 --stream prepare",
     "build": "lerna run build",
     "build:ci": "lerna run --since $(git merge-base $CIRCLE_BRANCH origin/master) build:ci",
-    "run:w3t": "lerna run start --parallel --scope=**/web3torrent --scope=**/embedded-wallet ",
+    "run:w3t": "lerna run start --parallel --scope=**/web3torrent --scope=**/embedded-wallet",
     "run:ewt": "lerna run start --parallel --scope=**/embedded-wallet",
     "clean": "git clean -Xdf --exclude=\"!.env\"",
     "clean:dry": "git clean -Xdn --exclude=\"!.env\"",
@@ -19,21 +19,28 @@
     "test": "lerna run --stream --parallel test",
     "test:ci": "lerna run --stream --parallel test:ci --include-dependents --since $(git merge-base $(git rev-parse --abbrev-ref HEAD) origin/master) build:ci",
     "test:w3t": "lerna run test --concurrency 1 --scope=**/web3torrent ",
-    "lint:check": "lerna run lint:check --parallel --no-bail",
+    "lint:check": "lerna run lint:check --parallel --no-bail -- --max-warnings=0",
     "lint:write": "lerna run lint:write --parallel --no-bail",
     "publish": "lerna publish --yes from-package patch",
-    "postinstall": "patch-package && typesync"
+    "postinstall": "patch-package",
+    "build:netlify:ci": "lerna run --stream --parallel build:netlify",
+    "release:netlify": "lerna run --stream --parallel release:netlify --",
+    "release:netlify:ci": "yarn release:netlify --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD) $([[ $(git rev-parse --abbrev-ref HEAD) == master ]] && echo --prod)"
   },
   "keywords": [
     "ethereum",
     "state channels"
   ],
+  "dependencies": {
+    "patch-package": "6.2.0"
+  },
   "devDependencies": {
     "@statechannels/devtools": "0.1.21",
     "@types/prettier": "1.19.0",
     "husky": "3.0.7",
     "lerna": "3.16.4",
-    "patch-package": "6.2.0",
+    "netlify-cli": "^2.30.0",
+    "npm-normalize-package-bin": "^1.0.1",
     "postinstall-postinstall": "2.0.0",
     "prettier": "1.19.1",
     "typescript": "3.7.2",
@@ -41,7 +48,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lerna run --parallel --stream precommit --since HEAD"
+      "pre-commit": "lerna run --parallel --stream precommit --since HEAD --max-warnings=0"
     }
   }
 }

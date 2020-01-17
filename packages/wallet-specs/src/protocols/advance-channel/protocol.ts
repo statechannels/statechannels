@@ -66,8 +66,11 @@ export const mockOptions = {
 export const machine: MachineFactory<Init, any> = (store: Store, context?: Init) => {
   const guards: Guards = {
     advanced: ({ channelId, targetTurnNum }: Init, event, { state: s }) => {
-      const { latestSupportedState: state } = store.getEntry(channelId);
-      return !!state && state.turnNum >= targetTurnNum;
+      const latestEntry = store.getEntry(channelId);
+      if (!latestEntry.hasSupportedState) {
+        return false;
+      }
+      return latestEntry.latestSupportedState.turnNum >= targetTurnNum;
     },
   };
 
@@ -75,7 +78,6 @@ export const machine: MachineFactory<Init, any> = (store: Store, context?: Init)
 
   const services: Services = {
     sendState: async ({ channelId, targetTurnNum }: Init) => {
-      const { latestSupportedState, unsupportedStates } = store.getEntry(channelId);
       const turnNum = targetTurnNum;
       /*
       TODO: the actual turnNum is calculated below. However, to determine whether
@@ -83,14 +85,16 @@ export const machine: MachineFactory<Init, any> = (store: Store, context?: Init)
       const turnNum =
         targetTurnNum - channel.participants.length + ourIndex + 1;
       */
-      if (!latestSupportedState) {
-        store.sendState({ ...unsupportedStates[0].state, turnNum });
-        return;
-      }
-      if (latestSupportedState.turnNum >= targetTurnNum) {
-        return;
-      } else {
-        store.sendState({ ...latestSupportedState, turnNum });
+
+      try {
+        const { latestSupportedState } = store.getEntry(channelId);
+        if (latestSupportedState.turnNum < targetTurnNum) {
+          store.sendState({ ...latestSupportedState, turnNum });
+        }
+      } catch (e) {
+        // TODO: Check error
+        const { latestState } = store.getEntry(channelId);
+        store.sendState({ ...latestState, turnNum });
       }
     },
   };

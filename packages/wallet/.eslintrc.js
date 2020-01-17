@@ -1,5 +1,3 @@
-const baseConfig = require("../../.eslintrc.js");
-
 const generalRules = {
   "no-var": "off",
   "no-async-promise-executor": "off",
@@ -47,19 +45,18 @@ const reactRules = {
 };
 
 module.exports = {
-  ...baseConfig,
   env: {
     browser: true,
     es6: true
   },
-  plugins: [...baseConfig.plugins, "jest", "react"],
+  plugins: ["jest", "react"],
   settings: {
     react: {
       version: "detect"
     }
   },
   extends: [
-    ...baseConfig.extends,
+    "../../.eslintrc.js",
     "plugin:jest/recommended",
     "plugin:jest/style",
     "plugin:import/errors",
@@ -68,8 +65,6 @@ module.exports = {
     "plugin:react/recommended"
   ],
   rules: {
-    ...baseConfig.rules,
-
     // @typescript-eslint/no-unused-vars overrides this
     "no-unused-vars": "off",
 

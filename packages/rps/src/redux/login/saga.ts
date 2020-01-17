@@ -1,9 +1,6 @@
 import {call, fork, put, take, takeEvery, all} from 'redux-saga/effects';
 import * as loginActions from './actions';
 import {reduxSagaFirebase} from '../../gateways/firebase';
-import metamaskSaga from '../metamask/saga';
-// import {initializeWallet} from 'magmo-wallet-client'; TODO:WALLET_SCRUBBED_OUT eventually connect to the channelClient
-// import {WALLET_IFRAME_ID} from '../../constants'; TODO:WALLET_SCRUBBED_OUT
 
 function* loginSaga() {
   try {
@@ -53,12 +50,6 @@ export default function* loginRootSaga() {
     takeEvery(loginActions.LOGIN_REQUEST, loginSaga),
     takeEvery(loginActions.LOGOUT_REQUEST, logoutSaga),
   ]);
-  yield take('UpdateProfile');
-  const metaMask = yield metamaskSaga();
-  // If metamask is not properly set up we can halt processing and wait for the reload
-  if (!metaMask) {
-    return;
-  }
 }
 
 function getLibraryAddress() {

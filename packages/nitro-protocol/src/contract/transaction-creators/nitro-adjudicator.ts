@@ -1,6 +1,6 @@
 // @ts-ignore
-import {TransactionRequest} from 'ethers/providers';
-import {Interface, Signature} from 'ethers/utils';
+import {providers} from 'ethers';
+import {utils} from 'ethers';
 import NitroAdjudicatorArtifact from '../../../build/contracts/NitroAdjudicator.json';
 import {getChannelId} from '../channel';
 import {encodeOutcome, Outcome} from '../outcome';
@@ -11,14 +11,14 @@ import {getFixedPart, hashAppPart, hashState, State} from '../state';
 // If we don't set a gas limit some transactions will fail
 const GAS_LIMIT = 3000000;
 
-const NitroAdjudicatorContractInterface = new Interface(NitroAdjudicatorArtifact.abi);
+const NitroAdjudicatorContractInterface = new utils.Interface(NitroAdjudicatorArtifact.abi);
 
 export function createPushOutcomeTransaction(
   turnNumRecord: number,
   finalizesAt: number,
   state: State,
   outcome: Outcome
-): TransactionRequest {
+): providers.TransactionRequest {
   const channelId = getChannelId(state.channel);
   const stateHash = hashState(state);
   const {participants} = state.channel;
@@ -39,7 +39,7 @@ export function createPushOutcomeTransaction(
 
 export function concludePushOutcomeAndTransferAllArgs(
   states: State[],
-  signatures: Signature[],
+  signatures: utils.Signature[],
   whoSignedWhat: number[]
 ): any[] {
   // Sanity checks on expected lengths
@@ -75,9 +75,9 @@ export function concludePushOutcomeAndTransferAllArgs(
 
 export function createConcludePushOutcomeAndTransferAllTransaction(
   states: State[],
-  signatures: Signature[],
+  signatures: utils.Signature[],
   whoSignedWhat: number[]
-): TransactionRequest {
+): providers.TransactionRequest {
   return {
     data: NitroAdjudicatorContractInterface.functions.concludePushOutcomeAndTransferAll.encode(
       concludePushOutcomeAndTransferAllArgs(states, signatures, whoSignedWhat)

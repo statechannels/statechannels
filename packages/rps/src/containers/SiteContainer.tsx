@@ -3,17 +3,13 @@ import React from 'react';
 import ApplicationContainer from './ApplicationContainer';
 import HomePageContainer from './HomePageContainer';
 import {connect} from 'react-redux';
-
 import {SiteState} from '../redux/reducer';
-import MetamaskErrorPage from '../components/MetamaskErrorPage';
-import {MetamaskError} from '../redux/metamask/actions';
 import {WalletError} from '../redux/wallet/actions';
 import LoadingPage from '../components/LoadingPage';
 
 import LoginErrorPage from '../components/LoginErrorPage';
 interface SiteProps {
   isAuthenticated: boolean;
-  metamaskError: MetamaskError | null;
   walletError: WalletError | null;
   loginError: string | undefined;
   loading: boolean;
@@ -28,12 +24,11 @@ class Site extends React.PureComponent<SiteProps> {
 
   render() {
     let component;
+
     if (this.props.loading) {
       component = <LoadingPage />;
     } else if (this.props.loginError) {
       component = <LoginErrorPage error={this.props.loginError} />;
-    } else if (this.props.metamaskError !== null) {
-      component = <MetamaskErrorPage error={this.props.metamaskError} />;
     } else if (this.props.walletError !== null) {
       component = <code>{JSON.stringify(this.props.walletError, null, 2)}</code>;
     } else if (this.props.isAuthenticated) {
@@ -55,7 +50,6 @@ const mapStateToProps = (state: SiteState) => {
   return {
     isAuthenticated: state.login && state.login.loggedIn,
     loading: state.metamask.loading,
-    metamaskError: state.metamask.error,
     walletError: state.wallet.error,
     walletVisible: state.overlay.walletVisible,
     loginError: state.login.error,

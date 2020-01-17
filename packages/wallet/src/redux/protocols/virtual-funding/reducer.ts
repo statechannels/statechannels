@@ -26,7 +26,7 @@ import {
   isAllocationOutcome,
   convertAddressToBytes32
 } from "@statechannels/nitro-protocol";
-import {AllocationAssetOutcome} from "@statechannels/nitro-protocol/src/contract/outcome";
+import {AllocationAssetOutcome} from "@statechannels/nitro-protocol";
 
 export function initialize(
   sharedData: SharedData,
@@ -48,13 +48,13 @@ export function initialize(
   const jointChannelInitialized = advanceChannel.initializeAdvanceChannel(sharedData, {
     privateKey,
     appDefinition,
-    ourIndex: TwoPartyPlayerIndex.A,
+    ourIndex,
     stateType: StateType.PreFundSetup,
     clearedToSend: true,
     processId,
     protocolLocator: makeLocator(protocolLocator, ADVANCE_CHANNEL_PROTOCOL_LOCATOR),
     outcome,
-    participants: [participants[ourIndex], hubAddress],
+    participants: participants.concat(hubAddress),
     appData: getInitialAppData()
   });
 
@@ -115,7 +115,7 @@ function waitForJointChannelReducer(
             processId,
             protocolLocator: makeLocator(protocolLocator, ADVANCE_CHANNEL_PROTOCOL_LOCATOR),
             channelId: jointChannelId,
-            ourIndex: TwoPartyPlayerIndex.A
+            ourIndex: protocolState.ourIndex
           });
 
           return {
@@ -131,7 +131,11 @@ function waitForJointChannelReducer(
           const ourAddress = new Wallet(privateKey).address;
           const appDefinition = CONSENSUS_LIBRARY_ADDRESS;
 
-          const destinations = [targetChannelId, ourAddress, hubAddress];
+          const destinations = [
+            targetChannelId,
+            window.ethereum ? window.ethereum.selectedAddress : ourAddress,
+            hubAddress
+          ];
           const outcome = createGuaranteeOutcome(destinations, jointChannelId);
 
           const guarantorChannelResult = advanceChannel.initializeAdvanceChannel(
@@ -223,7 +227,7 @@ function waitForGuarantorChannelReducer(
         case StateType.PostFundSetup:
           const outcome = calculateLedgerOutcome(
             startingOutcome,
-            participants[ourIndex],
+            window.ethereum ? window.ethereum.selectedAddress : participants[ourIndex],
             hubAddress
           );
 

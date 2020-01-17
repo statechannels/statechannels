@@ -1,6 +1,6 @@
 import {Zero} from "ethers/constants";
 import {BigNumber, bigNumberify} from "ethers/utils";
-import {Uint256} from "@statechannels/nitro-protocol/src/contract/types";
+import {Uint256} from "@statechannels/nitro-protocol";
 
 export interface AssetHoldersState {
   [assetHolderAddress: string]: AssetHolderState;

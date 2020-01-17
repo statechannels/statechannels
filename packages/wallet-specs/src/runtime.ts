@@ -1,23 +1,27 @@
-import { interpret } from 'xstate';
+import { interpret, Actor } from 'xstate';
 import { pretty } from '.';
 import { messageService } from './messaging';
 import { createChannel } from './mock-messages';
 import { Wallet } from './protocols';
 import { Store } from './store';
 import { AddressableMessage } from './wire-protocol';
+import { ethers } from 'ethers';
+import { Process } from './protocols/wallet/protocol';
 
-const store = name => {
-  const privateKeys = { [name]: name };
+const store = (wallet: ethers.Wallet) => {
+  const privateKeys = { [wallet.address]: wallet.privateKey };
   const _store = new Store({ privateKeys });
 
   return _store;
 };
 
-const first = 'first';
-const second = 'second';
+const one = '0x0000000000000000000000000000000000000000000000000000000000000001';
+const two = '0x0000000000000000000000000000000000000000000000000000000000000002';
+const first = new ethers.Wallet(one);
+const second = new ethers.Wallet(two);
 const stores = {
-  first: store(first),
-  second: store(second),
+  [first.address]: store(first),
+  [second.address]: store(second),
 };
 
 const logEvents = name =>
@@ -33,25 +37,52 @@ const logEvents = name =>
         )
     : () => {};
 const logStore = name =>
-  process.env.ADD_LOGS
-    ? state => console.log(`${name}'s store: ${pretty(stores[name])}`)
-    : () => {};
-const wallet = (name: string) => {
-  const machine = Wallet.machine(stores[name], { processes: [], id: name });
+  process.env.ADD_LOGS ? state => console.log(`${pretty(stores[name])}`) : () => {};
+
+function logState(actor: Actor, level = 0) {
+  if (actor.state) {
+    console.log(`${' '.repeat(level)}${JSON.stringify(actor.state.value)}`);
+    Object.values(actor.state.children).map((child: Actor) => {
+      logState(child, level + 2);
+    });
+  }
+}
+
+export const logProcessStates = process.env.ADD_LOGS
+  ? state => {
+      console.log(`WALLET: ${state.context.id}`);
+      state.context.processes.forEach((p: Process) => {
+        console.log(`  PROCESS: ${p.id}`);
+        Object.values(p.ref.state.children).map(child => {
+          logState(child, 4);
+        });
+      });
+    }
+  : () => {};
+
+const wallet = (wallet): any => {
+  const machine = Wallet.machine(stores[wallet.address], { processes: [], id: wallet.address });
   return interpret<Wallet.Init, any, Wallet.Events>(machine)
-    .onEvent(logEvents(name))
-    .onTransition(logStore(name))
+    .onEvent(logEvents(wallet.address))
+    .onTransition(logProcessStates)
     .start();
 };
 
-const wallets = {
-  first: wallet(first),
-  second: wallet(second),
-};
+export async function runtime() {
+  const wallets = {
+    [first.address]: wallet(first),
+    [second.address]: wallet(second),
+  };
 
-// This is sort of the "dispatcher"
-messageService.on('message', ({ to, ...event }: AddressableMessage) => {
-  wallets[to].send(event);
-});
+  // This is sort of the "dispatcher"
+  messageService.on('message', ({ to, ...event }: AddressableMessage) => {
+    wallets[to].send(event);
+  });
 
-wallets[first].send(createChannel);
+  await wallets[first.address].send(createChannel);
+
+  return wallets;
+}
+
+// If you want to debug, uncomment the following
+// runtime().then(wallets => { debugger; });

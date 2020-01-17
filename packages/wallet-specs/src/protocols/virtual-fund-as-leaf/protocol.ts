@@ -1,7 +1,10 @@
 import { assign } from 'xstate';
-import { add, AllocationItem, Balance, Channel, getChannelId, Guarantee, store } from '../../';
+import { add, Balance, Channel, getChannelId, ethAllocationOutcome } from '../../';
 import { Init as CreateNullChannelArgs } from '../create-null-channel/protocol';
 import { Init as SupportStateArgs } from '../support-state/protocol';
+import { AllocationItem } from '@statechannels/nitro-protocol';
+import { Guarantee } from '@statechannels/nitro-protocol/lib/src/contract/outcome';
+import { store } from '../../temp-store';
 
 const PROTOCOL = 'virtual-funding-as-leaf';
 
@@ -57,11 +60,11 @@ export function jointChannelArgs({ balances, jointChannel }: ChannelsKnown): Cre
 
   return {
     channel: jointChannel,
-    outcome: [
+    outcome: ethAllocationOutcome([
       allocation(Indices.Left),
       { destination: jointChannel.participants[1], amount: total(balances) },
       allocation(Indices.Right),
-    ],
+    ]),
   };
 }
 const createJointChannel = {
@@ -75,9 +78,9 @@ export function guarantorChannelArgs({ jointChannel, index }: ChannelsKnown): Gu
   const { participants } = jointChannel;
 
   return {
-    target: getChannelId(jointChannel),
+    targetChannelId: getChannelId(jointChannel),
     // Note that index in the joint channel is twice the index in the target channel
-    guarantee: [participants[2 * index], participants[1]],
+    destinations: [participants[2 * index], participants[1]],
   };
 }
 
@@ -96,7 +99,7 @@ export function fundGuarantorArgs({
   const amount = total(balances);
   return {
     channelId: ledgerId,
-    outcome: [{ destination: getChannelId(guarantorChannel), amount }],
+    outcome: ethAllocationOutcome([{ destination: getChannelId(guarantorChannel), amount }]),
   };
 }
 const createChannels = {

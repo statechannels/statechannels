@@ -11,6 +11,7 @@ const mapStateToProps = (state: SiteState) => {
   return {
     showRules: state.overlay.rulesVisible,
     loginDisplayName: name,
+    metamaskState: state.metamask,
   };
 };
 

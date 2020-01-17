@@ -49,7 +49,9 @@
     "test:ci": "yarn test:ci:contracts && yarn test:ci:app",
     "test:ci:contracts": "yarn test:contracts --all --ci --runInBand --bail",
     "test:ci:app": "yarn test:app --all --ci --runInBand --bail",
-    "website:deploy": "yarn contract:compile && yarn docgen && cd website && yarn install && yarn build"
+    "website:deploy": "yarn contract:compile && yarn docgen && cd website && yarn install && yarn build",
+    "build:netlify": "yarn website:deploy",
+    "release:netlify": "netlify deploy --site $NITRO_PROTOCOL_NETLIFY_ID --dir=website/build/nitro-spec"
   },
   "dependencies": {
     "@counterfactual/cf-adjudicator-contracts": "0.0.11",
@@ -92,7 +94,6 @@
     "server-destroy": "1.0.1",
     "solc": "0.5.13",
     "solidoc": "https://github.com/statechannels/solidoc.git",
-    "truffle": "5.0.37",
     "ts-jest": "24.1.0",
     "ts-node": "8.4.1",
     "typescript": "3.7.2",

@@ -7,6 +7,7 @@ const sagaMiddleware = createSagaMiddleware();
 import stateChannelWalletSaga from './wallet/saga';
 
 import loginSaga from './login/saga';
+import metamaskSaga from './metamask/saga';
 import openGameSaga from './open-games/saga';
 import {firebaseInboxListener} from './message-service/firebase-inbox-listener';
 import {RPSChannelClient} from '../utils/rps-channel-client';
@@ -22,6 +23,7 @@ const enhancers = composeEnhancers(applyMiddleware(sagaMiddleware));
 const store = createStore(reducer, enhancers);
 
 function* rootSaga() {
+  yield fork(metamaskSaga);
   yield fork(loginSaga);
 
   let client;

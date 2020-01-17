@@ -1,11 +1,14 @@
 {
-  "name": "wallet-protocols",
+  "name": "@statechannels/wallet-protocols",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "lib/src/index.js",
+  "files": [
+    "lib/*"
+  ],
   "license": "MIT",
   "scripts": {
     "prepare": "yarn build",
-    "build": "yarn generateConfigs",
+    "build": "npx tsc && yarn generateConfigs",
     "generateConfigs": "yarn run ts-node bin/generateConfigs.ts && npx prettier --write src/protocols/*/protocol.config.js",
     "test": "jest",
     "lint:check": "eslint . --ext .ts --cache",
@@ -16,6 +19,8 @@
     "{src,bin}/**/*.{ts}": "eslint --cache"
   },
   "dependencies": {
+    "@statechannels/nitro-protocol": "0.0.1",
+    "ethers": "^4.0.42",
     "xstate": "^4.7"
   },
   "devDependencies": {

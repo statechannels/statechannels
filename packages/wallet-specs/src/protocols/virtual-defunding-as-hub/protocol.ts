@@ -1,7 +1,3 @@
-import { assign } from 'xstate';
-import { store } from '../../';
-import { isGuarantee, isIndirectFunding } from '../../ChannelStoreEntry';
-import { checkThat } from '../../store';
 import * as LedgerUpdate from '../ledger-update/protocol';
 import { defundGuarantorInLedger } from '../virtual-defunding-as-leaf/protocol';
 
@@ -17,23 +13,24 @@ type ChannelsSet = Init & {
   ledgerChannelIds: IDs;
 };
 
-export const assignChannels = assign(
-  ({ jointChannelId }: Init): ChannelsSet => {
-    const { guarantorChannelIds } = checkThat(store.getEntry(jointChannelId).funding, isGuarantee);
+// TODO: Use this in machine factory
+// export const assignChannels = assign(
+//   ({ jointChannelId }: Init): ChannelsSet => {
+//     const { guarantorChannelIds } = checkThat(store.getEntry(jointChannelId).funding, isGuarantee);
 
-    const { ledgerId: leftLedgerId } = checkThat(
-      store.getEntry(guarantorChannelIds[0]).funding,
-      isIndirectFunding
-    );
-    const { ledgerId: rightLedgerId } = checkThat(
-      store.getEntry(guarantorChannelIds[1]).funding,
-      isIndirectFunding
-    );
-    const ledgerChannelIds: [string, string] = [leftLedgerId, rightLedgerId];
+//     const { ledgerId: leftLedgerId } = checkThat(
+//       store.getEntry(guarantorChannelIds[0]).funding,
+//       isIndirectFunding
+//     );
+//     const { ledgerId: rightLedgerId } = checkThat(
+//       store.getEntry(guarantorChannelIds[1]).funding,
+//       isIndirectFunding
+//     );
+//     const ledgerChannelIds: [string, string] = [leftLedgerId, rightLedgerId];
 
-    return { jointChannelId, guarantorChannelIds, ledgerChannelIds };
-  }
-);
+//     return { jointChannelId, guarantorChannelIds, ledgerChannelIds };
+//   }
+// );
 
 function defundGuarantor(index: 0 | 1) {
   return ({ guarantorChannelIds, jointChannelId, ledgerChannelIds }: ChannelsSet) => {

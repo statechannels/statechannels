@@ -51,9 +51,18 @@ export type UnsubscribeFunction = () => void;
 // to be able to specify the Payload type for the FakeChannelClient, as we'll be
 // manipulating it within the client.
 export interface ChannelClientInterface<Payload = object> {
+  /*
+    Queuing a message is meant for when the app receives messages from
+    the wallet meant for the opponent's app (and hence the opponent's wallet).
+  */
   onMessageQueued: (callback: (message: Message<Payload>) => void) => UnsubscribeFunction;
   onChannelUpdated: (callback: (result: ChannelResult) => void) => UnsubscribeFunction;
   onChannelProposed: (callback: (result: ChannelResult) => void) => UnsubscribeFunction;
+  /*
+    Pushing a message is meant for when the app receives a message from
+    the opponent's app meant for the wallet.
+  */
+  pushMessage: (message: Message<Payload>) => Promise<PushMessageResult>;
   createChannel: (
     participants: Participant[],
     allocations: Allocation[],
@@ -68,7 +77,6 @@ export interface ChannelClientInterface<Payload = object> {
     appData: string
   ) => Promise<ChannelResult>;
   closeChannel: (channelId: string) => Promise<ChannelResult>;
-  pushMessage: (message: Message<Payload>) => Promise<PushMessageResult>;
   getAddress: () => Promise<string>;
 }
 
@@ -81,14 +89,14 @@ export interface EventsWithArgs {
 
 type UnsubscribeFunction = () => void;
 
-interface CreateChannelParameters {
+export interface CreateChannelParameters {
   participants: Participant[];
   allocations: Allocation[];
   appDefinition: string;
   appData: string;
 }
 
-interface UpdateChannelParameters {
+export interface UpdateChannelParameters {
   channelId: string;
   participants: Participant[];
   allocations: Allocation[];
@@ -146,3 +154,5 @@ export type Request =
   | UpdateChannelRequest
   | PushMessageRequest
   | CloseChannelRequest;
+
+export type NotificationType = 'ChannelProposed' | 'ChannelUpdate' | 'MessageQueued';

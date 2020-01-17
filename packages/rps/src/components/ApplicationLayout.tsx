@@ -1,7 +1,7 @@
 import React from 'react';
 import NavigationBarContainer from '../containers/NavigationBarContainer';
 
-import MAGMO_LOGO from '../images/magmo_logo.svg';
+import PROJECT_LOGO from '../images/horizontal_logo.svg';
 
 export const ApplicationLayout = props => {
   return (
@@ -14,10 +14,10 @@ export const ApplicationLayout = props => {
         <div className="container">
           <div className="ml-auto">
             <div className="footer-logo-container">
-              <img src={MAGMO_LOGO} />
+              <img src={PROJECT_LOGO} width="150" />
               <small className="text-muted">
                 Something not working? Email us at{' '}
-                <a href="mailto:oops@magmo.com">oops@magmo.com</a>
+                <a href="mailto:oops@statechannels.org">oops@statechannels.org</a>
               </small>
             </div>
           </div>

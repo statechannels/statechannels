@@ -3,17 +3,24 @@ import {Commitment} from 'fmg-core';
 import {Button} from 'reactstrap';
 import {OpenGame} from '../redux/open-games/state';
 import {bigNumberify, formatUnits} from 'ethers/utils';
+import {Blockie} from 'rimble-ui';
 
 interface Props {
   openGame: OpenGame;
-  joinOpenGame: (opponentName: string, opponentAddress: string, roundBuyIn: string) => void;
+  joinOpenGame: (
+    opponentName: string,
+    opponentAddress: string,
+    opponentOutcomeAddress: string,
+    roundBuyIn: string
+  ) => void;
 }
 
 export class OpenGameEntry extends React.PureComponent<Props, Commitment> {
   render() {
     // Generate a random number from 0 to MaxInt
     const {openGame, joinOpenGame} = this.props;
-    const joinThisGame = () => joinOpenGame(openGame.name, openGame.address, openGame.stake);
+    const joinThisGame = () =>
+      joinOpenGame(openGame.name, openGame.address, openGame.outcomeAddress, openGame.stake);
 
     const stake = openGame.stake;
     const buyin = bigNumberify(openGame.stake)
@@ -24,6 +31,11 @@ export class OpenGameEntry extends React.PureComponent<Props, Commitment> {
         <div className="ogc-header">
           <div className="ogc-vs">vs</div> <div className="ogc-opponent-name">{openGame.name}</div>
         </div>
+        <Blockie
+          opts={{
+            seed: openGame.outcomeAddress.toLowerCase(),
+          }}
+        />
         <div className="ogc-stakes">
           <div className="ogc-buyin pr-3">
             <div className="ogc-stake-header">Game Buy In:</div>

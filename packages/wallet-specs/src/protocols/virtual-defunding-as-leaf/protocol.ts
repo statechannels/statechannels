@@ -1,9 +1,9 @@
 import { assign } from 'xstate';
-import { Allocation, store, Without } from '../../';
+import { Without, ethAllocationOutcome, checkThat, getEthAllocation } from '../../';
 import { isIndirectFunding, isVirtualFunding } from '../../ChannelStoreEntry';
-import { checkThat, isAllocation } from '../../store';
-
+import { store } from '../../temp-store';
 import * as LedgerUpdate from '../ledger-update/protocol';
+import { isAllocationOutcome, Allocation } from '@statechannels/nitro-protocol';
 const PROTOCOL = 'virtual-defunding-as-leaf';
 
 export interface Init {
@@ -43,21 +43,21 @@ function finalJointChannelUpdate({
   jointChannelId,
   targetChannelId,
 }: ChannelsSet): LedgerUpdate.Init {
-  const { state: targetChannelState } = store.getLatestSupport(targetChannelId)[0];
-  if (!targetChannelState.isFinal) {
+  const targetChannelState = store.getEntry(targetChannelId).latestSupportedState;
+  if (!targetChannelState || !targetChannelState.isFinal) {
     throw new Error('Target channel not finalized');
   }
-  const { state: jointState } = store.getLatestConsensus(jointChannelId);
+  const jointState = store.getEntry(jointChannelId).latestSupportedState;
 
-  const jointOutcome = checkThat(jointState.outcome, isAllocation);
-  const targetChannelIdx = jointOutcome.findIndex(a => a.destination === targetChannelId);
-  const targetOutcome = [
-    ...checkThat(targetChannelState.outcome, isAllocation),
-    ...jointOutcome.splice(targetChannelIdx),
+  const jointAllocation = getEthAllocation(jointState.outcome);
+  const targetChannelIdx = jointAllocation.findIndex(a => a.destination === targetChannelId);
+  const targetAllocation: Allocation = [
+    ...getEthAllocation(targetChannelState.outcome),
+    ...jointAllocation.splice(targetChannelIdx),
   ];
   return {
     channelId: jointChannelId,
-    targetOutcome,
+    targetOutcome: ethAllocationOutcome(targetAllocation),
   };
 }
 const defundTarget = {
@@ -88,21 +88,23 @@ export function defundGuarantorInLedger({
   Goal: targetOutcome == [(B, b), (H, a)]
   */
 
-  const jointOutcome = store.getLatestSupportedAllocation(jointChannelId);
+  const jointAllocation = getEthAllocation(
+    store.getEntry(jointChannelId).latestSupportedState.outcome
+  );
 
-  const targetOutcome: Allocation = [
+  const targetAllocation: Allocation = [
     {
-      destination: jointOutcome[2 * index].destination,
-      amount: jointOutcome[2 * index].amount,
+      destination: jointAllocation[2 * index].destination,
+      amount: jointAllocation[2 * index].amount,
     },
     {
-      destination: jointOutcome[1].destination,
-      amount: jointOutcome[2 * (1 - index)].amount,
+      destination: jointAllocation[1].destination,
+      amount: jointAllocation[2 * (1 - index)].amount,
     },
   ];
   return {
     channelId: hubLedgerId,
-    targetOutcome,
+    targetOutcome: ethAllocationOutcome(targetAllocation),
   };
 }
 const defundGuarantor = {

@@ -7,9 +7,10 @@
     "prepare": "yarn build",
     "precommit": "lint-staged --quiet",
     "test": "jest",
+    "test:ci": "jest",
     "build": "yarn build:typescript",
     "build:typescript": "tsc -b .",
-    "lint:check": "eslint {src,tests}/**/*.ts",
+    "lint:check": "eslint \"{src,tests}/**/*.ts\"",
     "lint:write": "yarn lint:check --fix"
   },
   "repository": {
@@ -25,6 +26,7 @@
   "devDependencies": {
     "@types/eslint": "^6.1.3",
     "@types/eslint-plugin-prettier": "^2.2.0",
+    "@types/node": "^13.1.6",
     "@types/prettier": "^1.19.0",
     "@typescript-eslint/eslint-plugin": "^2.10.0",
     "@typescript-eslint/parser": "^2.10.0",
@@ -38,8 +40,8 @@
     "typescript": "^3.7.3"
   },
   "dependencies": {
-    "@statechannels/client-api-schema": "0.0.1",
     "@statechannels/channel-provider": "^0.0.3",
+    "@statechannels/client-api-schema": "0.0.1",
     "ethers": "^4.0.40"
   },
   "lint-staged": {

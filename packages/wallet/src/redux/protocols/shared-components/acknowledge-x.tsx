@@ -19,7 +19,9 @@ export default class AcknowledgeX extends React.PureComponent<Props> {
         <div className="challenge-expired-button-container">
           <div className={css(styles.buttonContainer)}>
             <span className={css(styles.button)}>
-              <Button onClick={action}>{actionTitle}</Button>
+              <Button color="primary" onClick={action}>
+                {actionTitle}
+              </Button>
             </span>
           </div>
         </div>

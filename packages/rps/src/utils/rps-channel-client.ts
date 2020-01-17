@@ -17,10 +17,12 @@ export class RPSChannelClient {
     bAddress: string,
     aBal: string,
     bBal: string,
-    appAttrs: AppData
+    appAttrs: AppData,
+    aOutcomeAddress: string = aAddress,
+    bOutcomeAddress: string = bAddress
   ): Promise<ChannelState> {
-    const participants = formatParticipants(aAddress, bAddress);
-    const allocations = formatAllocations(aAddress, bAddress, aBal, bBal);
+    const participants = formatParticipants(aAddress, bAddress, aOutcomeAddress, bOutcomeAddress);
+    const allocations = formatAllocations(aOutcomeAddress, bOutcomeAddress, aBal, bBal);
     const appDefinition = RPS_ADDRESS;
     const appData = encodeAppData(appAttrs);
 
@@ -75,10 +77,12 @@ export class RPSChannelClient {
     bAddress: string,
     aBal: string,
     bBal: string,
-    appAttrs: AppData
+    appAttrs: AppData,
+    aOutcomeAddress: string = aAddress,
+    bOutcomeAddress: string = bAddress
   ) {
-    const allocations = formatAllocations(aAddress, bAddress, aBal, bBal);
-    const participants = formatParticipants(aAddress, bAddress);
+    const allocations = formatAllocations(aOutcomeAddress, bOutcomeAddress, aBal, bBal);
+    const participants = formatParticipants(aAddress, bAddress, aOutcomeAddress, bOutcomeAddress);
 
     const appData = encodeAppData(appAttrs);
 
@@ -109,14 +113,21 @@ const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
     bUserId: participants[1].participantId,
     aAddress: participants[0].destination,
     bAddress: participants[1].destination,
+    aOutcomeAddress: participants[0].destination,
+    bOutcomeAddress: participants[1].destination,
     aBal: bigNumberify(allocations[0].allocationItems[0].amount).toString(),
     bBal: bigNumberify(allocations[0].allocationItems[1].amount).toString(),
   };
 };
 
-const formatParticipants = (aAddress: string, bAddress: string) => [
-  {participantId: aAddress, signingAddress: aAddress, destination: aAddress},
-  {participantId: bAddress, signingAddress: bAddress, destination: bAddress},
+const formatParticipants = (
+  aAddress: string,
+  bAddress: string,
+  aOutcomeAddress: string = aAddress,
+  bOutcomeAddress: string = bAddress
+) => [
+  {participantId: aAddress, signingAddress: aAddress, destination: aOutcomeAddress},
+  {participantId: bAddress, signingAddress: bAddress, destination: bOutcomeAddress},
 ];
 
 const formatAllocations = (aAddress: string, bAddress: string, aBal: string, bBal: string) => {

@@ -34,12 +34,10 @@ process.env.NODE_PATH = (process.env.NODE_PATH || "")
 // Grab NODE_ENV and REACT_APP_* environment variables and prepare them to be
 // injected into the application via DefinePlugin in Webpack configuration.
 const REACT_APP = /^REACT_APP_/i;
-// These are Magmo specific values that should be injected into the application
-const MAGMO_VALUES = [
+// These are wallet configuration values that should be injected into the application
+const WALLET_CONFIGS = [
   "TARGET_NETWORK",
   "CHAIN_NETWORK_ID",
-  "FIREBASE_PROJECT",
-  "FIREBASE_API_KEY",
   "GANACHE_PORT",
   "USE_STORAGE",
   "USE_VIRTUAL_FUNDING"
@@ -50,7 +48,7 @@ const CONTRACT_ADDRESSES = /_ADDRESS$/i;
 function getClientEnvironment(publicUrl) {
   const raw = Object.keys(process.env)
     .filter(key => {
-      return REACT_APP.test(key) || CONTRACT_ADDRESSES.test(key) || MAGMO_VALUES.indexOf(key) > -1;
+      return REACT_APP.test(key) || CONTRACT_ADDRESSES.test(key) || WALLET_CONFIGS.indexOf(key) > -1;
     })
     .reduce(
       (env, key) => {

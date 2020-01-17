@@ -34,7 +34,7 @@ import {FakeChannelClient} from '@statechannels/channel-client';
 export function* autoOpponent(player: 'A' | 'B', externalClient: RPSChannelClient) {
   let internalStoreState = {
     game: {
-      localState: Setup.lobby({name: 'AutoBot', address: 'blah'}),
+      localState: Setup.lobby({name: 'AutoBot', address: 'blah', outcomeAddress: 'blah'}),
       channelState: null,
     } as GameState,
     openGames: [],
@@ -80,12 +80,13 @@ export function* autoOpponent(player: 'A' | 'B', externalClient: RPSChannelClien
     if (incomingMessage) {
       internalClient.pushMessage(incomingMessage);
     } else if (gameJoined) {
-      saga.dispatch(gameJoinedAction('regular-player', 'some-address'));
+      saga.dispatch(gameJoinedAction('regular-player', 'some-address', 'some-EOA'));
     } else if (gameCreated) {
       saga.dispatch(
         syncOpenGames([
           {
             address: 'todo: regular-player-address',
+            outcomeAddress: 'todo: regular-player-outcome-address',
             name: 'regular-player',
             stake: gameCreated.roundBuyIn,
             createdAt: new Date().getTime(),
@@ -102,6 +103,7 @@ export function* autoOpponent(player: 'A' | 'B', externalClient: RPSChannelClien
         syncOpenGames([
           {
             address: 'todo: autoPlayerAddress',
+            outcomeAddress: 'todo: autoPlayerOutcomeAddress',
             name: 'AutoPlayer',
             stake: WeiPerEther.toString(),
             createdAt: new Date().getTime(),
@@ -110,7 +112,7 @@ export function* autoOpponent(player: 'A' | 'B', externalClient: RPSChannelClien
         ])
       );
     } else if (internalStoreState.game.localState.type === 'A.GameChosen') {
-      yield put(gameJoinedAction('AutoPlayer', 'some-address'));
+      yield put(gameJoinedAction('AutoPlayer', 'some-address', 'some-EOA'));
     }
   }
 }

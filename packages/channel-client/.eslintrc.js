@@ -6,6 +6,7 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   plugins: ['@typescript-eslint', 'prettier', 'jest', 'import'],
   extends: [
+    '../../.eslintrc.js',
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:jest/recommended',
@@ -16,6 +17,7 @@ module.exports = {
     'plugin:prettier/recommended'
   ],
   rules: {
-    'prettier/prettier': ['warn']
+    'prettier/prettier': ['warn'],
+    '@typescript-eslint/no-explicit-any': 'off'
   }
 };

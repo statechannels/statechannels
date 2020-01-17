@@ -1,10 +1,10 @@
-import {setUpBrowser, loadRPSApp} from "../helpers";
-import {clickThroughRPSUI} from "../scripts/rps";
-import {Page, Browser} from "puppeteer";
+import {setUpBrowser, loadRPSApp} from '../helpers';
+import {clickThroughRPSUI, clickThroughResignationUI} from '../scripts/rps';
+import {Page, Browser} from 'puppeteer';
 
 jest.setTimeout(60000);
 
-describe("Playing a game of RPS", () => {
+describe('Playing a game of RPS', () => {
   let browserA: Browser;
   let browserB: Browser;
   let rpsTabA: Page;
@@ -30,13 +30,20 @@ describe("Playing a game of RPS", () => {
     }
   });
 
-  it("can play a game end to end", async () => {
+  it('can play a game end to end', async () => {
     await clickThroughRPSUI(rpsTabA, rpsTabB);
-    expect(await (await rpsTabA.waitFor("h1.mb-5")).evaluate(el => el.textContent)).toMatch(
-      "You lost"
+    expect(await (await rpsTabA.waitFor('h1.mb-5')).evaluate(el => el.textContent)).toMatch(
+      'You lost'
     );
-    expect(await (await rpsTabB.waitFor("h1.mb-5")).evaluate(el => el.textContent)).toMatch(
-      "You won!"
+    expect(await (await rpsTabB.waitFor('h1.mb-5')).evaluate(el => el.textContent)).toMatch(
+      'You won!'
     );
+  });
+
+  it('can then withdraw funds', async () => {
+    await clickThroughResignationUI(rpsTabA, rpsTabB);
+
+    // Should be on the homepage
+    expect(await rpsTabB.waitForXPath('//button[contains(., "Create a game")]')).toBeDefined();
   });
 });

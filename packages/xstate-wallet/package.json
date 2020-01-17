@@ -1,0 +1,30 @@
+{
+  "name": "xstate-wallet",
+  "version": "0.0.1",
+  "description": "State channel wallet using xstate.",
+  "main": "index.js",
+  "author": "Alex Gap",
+  "license": "MIT",
+  "private": true,
+  "engines": {
+    "node": "^10.16.3"
+  },
+  "dependencies": {
+    "@statechannels/client-api-schema": "0.0.1",
+    "@statechannels/nitro-protocol": "0.0.1",
+    "@statechannels/wallet-protocols": "1.0.0",
+    "ethers": "4.0.40",
+    "jsonrpc-lite": "2.1.0",
+    "xstate": "4.7.3"
+  },
+  "devDependencies": {
+    "@statechannels/devtools": "0.1.21",
+    "@types/webpack": "4.41.0",
+    "source-map-loader": "0.2.4",
+    "typescript": "3.7.4",
+    "webpack": "4.41.3"
+  },
+  "scripts": {
+    "start": "node scripts/start.js"
+  }
+}

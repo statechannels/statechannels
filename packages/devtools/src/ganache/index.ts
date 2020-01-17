@@ -53,7 +53,7 @@ async function startOwnGanache(p: Partial<Params> = {}): Promise<GanacheServer> 
   process.on('exit', () => server && server.close());
   process.on('unhandledRejection', () => server && server.close());
 
-  say(`Starting a ganche server on http://localhost:${port}`);
+  say(`Starting a ganache server on http://localhost:${port}`);
 
   await server.ready();
   return server;
