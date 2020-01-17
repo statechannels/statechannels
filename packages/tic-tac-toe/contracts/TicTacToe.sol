@@ -149,8 +149,8 @@ contract TicTacToe is ForceMoveApp {
         stakeUnchanged(fromGameData, toGameData)
         allocationsNotLessThanStake(fromAllocation, toAllocation, fromGameData, toGameData)
     {
-        require(toGameData.Os == 0, 'No Os on board');
-        require(madeStrictlyOneMark(toGameData.Xs, 0), 'One X placed');
+        require(toGameData.Os == 0, 'There should be no Os on board');
+        require(madeStrictlyOneMark(toGameData.Xs, 0), 'There should be one X placed');
 
         // Current X Player should get all the stake. This is to decrease griefing. We assume that X Player is Player A
         require(
@@ -175,8 +175,8 @@ contract TicTacToe is ForceMoveApp {
         stakeUnchanged(fromGameData, toGameData)
         allocationsNotLessThanStake(fromAllocation, toAllocation, fromGameData, toGameData)
     {
-        require(toGameData.Xs == fromGameData.Xs, 'No Xs added to board');
-        require(madeStrictlyOneMark(toGameData.Os, fromGameData.Os), 'One O placed');
+        require(toGameData.Xs == fromGameData.Xs, 'There should be no new Xs added to board');
+        require(madeStrictlyOneMark(toGameData.Os, fromGameData.Os), 'There should be one new O placed');
 
         // Current O Player should get all the stake. This is to decrease griefing. We assume that O Player is Player B
         require(
@@ -201,8 +201,8 @@ contract TicTacToe is ForceMoveApp {
         stakeUnchanged(fromGameData, toGameData)
         allocationsNotLessThanStake(fromAllocation, toAllocation, fromGameData, toGameData)
     {
-        require(toGameData.Os == fromGameData.Os, 'No Os added to board');
-        require(madeStrictlyOneMark(toGameData.Xs, fromGameData.Xs), 'One X placed');
+        require(toGameData.Os == fromGameData.Os, 'There should be no new Os added to board');
+        require(madeStrictlyOneMark(toGameData.Xs, fromGameData.Xs), 'There should be one new X placed');
 
         // Current X Player should get all the stake. This is to decrease griefing. We assume that X Player is Player A
         require(
@@ -226,9 +226,9 @@ contract TicTacToe is ForceMoveApp {
         noDisjointMoves(toGameData)
         stakeUnchanged(fromGameData, toGameData)
     {
-        require(toGameData.Xs == fromGameData.Xs, 'No Xs added to board');
-        require(madeStrictlyOneMark(toGameData.Os, fromGameData.Os), 'One O placed');
-        require(hasWon(toGameData.Os), 'O has won');
+        require(toGameData.Xs == fromGameData.Xs, 'There should be no new Xs added to board');
+        require(madeStrictlyOneMark(toGameData.Os, fromGameData.Os), 'There should be one new O placed');
+        require(hasWon(toGameData.Os), 'The move should result in O winning');
 
         uint256 currentOsPlayer = 1; // Need to calculate this
 
@@ -260,9 +260,9 @@ contract TicTacToe is ForceMoveApp {
         noDisjointMoves(toGameData)
         stakeUnchanged(fromGameData, toGameData)
     {
-        require(toGameData.Os == fromGameData.Os, 'No Os added to board');
-        require(madeStrictlyOneMark(toGameData.Xs, fromGameData.Xs), 'One X placed');
-        require(hasWon(toGameData.Xs), 'X has won');
+        require(toGameData.Os == fromGameData.Os, 'There should be no new Os added to board');
+        require(madeStrictlyOneMark(toGameData.Xs, fromGameData.Xs), 'There should be one new X placed');
+        require(hasWon(toGameData.Xs), 'The move should result in X winning');
 
         uint256 currentXsPlayer = 0; // Need to calculate this
 
@@ -295,9 +295,9 @@ contract TicTacToe is ForceMoveApp {
         noDisjointMoves(toGameData)
         stakeUnchanged(fromGameData, toGameData)
     {
-        require(isDraw(toGameData.Os, toGameData.Xs), "Draw - Board is full"); // check if board full.
-        require(madeStrictlyOneMark(toGameData.Xs, fromGameData.Xs), "One X placed");
-        require(toGameData.Os == fromGameData.Os, 'No Os added to board');
+        require(isDraw(toGameData.Os, toGameData.Xs), "The board should be full and result in a draw");
+        require(toGameData.Os == fromGameData.Os, 'There should be no new Os added to board');
+        require(madeStrictlyOneMark(toGameData.Xs, fromGameData.Xs), "There should be one new X placed");
 
         // TODO This logic will only work if PlayerA is Xs and PlayerB is Os
         require(
@@ -322,8 +322,8 @@ contract TicTacToe is ForceMoveApp {
         allocationUnchanged(fromAllocation, toAllocation)
         stakeUnchanged(fromGameData, toGameData)
     {
-        require(toGameData.Os == 0, 'Os reset to 0');
-        require(toGameData.Xs == 0, 'Xs reset to 0');
+        require(toGameData.Os == 0, 'The Os should be reset to 0');
+        require(toGameData.Xs == 0, 'The Xs should be reset to 0');
     }
 
     function requireValidVICTORYtoSTART(
@@ -337,9 +337,8 @@ contract TicTacToe is ForceMoveApp {
         allocationUnchanged(fromAllocation, toAllocation)
         stakeUnchanged(fromGameData, toGameData)
     {
-        require(toGameData.Os == 0, 'Os reset to 0');
-        require(toGameData.Xs == 0, 'Xs reset to 0');
-
+        require(toGameData.Os == 0, 'The Os should be reset to 0');
+        require(toGameData.Xs == 0, 'The Xs should be reset to 0');
     }
 
     function extractAllocation(VariablePart memory variablePart)
