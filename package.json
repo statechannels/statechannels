@@ -18,7 +18,7 @@
     "clean:dry": "git clean -Xdn --exclude=\"!.env\"",
     "start:shared-ganache": "cd packages/devtools && NODE_ENV=development yarn start:shared-ganache",
     "test": "lerna run --stream --parallel test",
-    "test:ci:incremental": "yarn test:ci --since $(git merge-base $(git rev-parse --abbrev-ref HEAD) origin/master)",
+    "test:ci:incremental": "yarn test:ci --since $(git merge-base $CIRCLE_BRANCH origin/master)",
     "test:ci": "lerna run  test:ci --stream --parallel --include-dependents",
     "test:w3t": "lerna run test --concurrency 1 --scope=**/web3torrent ",
     "lint:check": "lerna run lint:check --parallel --no-bail -- --max-warnings=0",
@@ -26,9 +26,9 @@
     "publish": "lerna publish --yes from-package patch",
     "postinstall": "patch-package",
     "build:netlify:incremental": "yarn build:netlify --since $(git merge-base $CIRCLE_BRANCH origin/master)",
-    "build:netlify": "lerna run --stream --parallel build:netlify",
-    "release:netlify:incremental": "lerna run --stream --parallel  --since $(git merge-base $CIRCLE_BRANCH origin/master) release:netlify -- --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD)",
-    "release:netlify": "lerna run --stream --parallel release:netlify -- --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD) $([ $(git rev-parse --abbrev-ref HEAD) = master ] && echo --prod)"
+    "build:netlify": "lerna run  build:netlify --stream --parallel",
+    "release:netlify:incremental": "lerna run release:netlify --stream --parallel --since $(git merge-base $CIRCLE_BRANCH origin/master) -- --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD)",
+    "release:netlify": "lerna run release:netlify --stream --parallel -- --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD) $([ $(git rev-parse --abbrev-ref HEAD) = master ] && echo --prod)"
   },
   "keywords": [
     "ethereum",

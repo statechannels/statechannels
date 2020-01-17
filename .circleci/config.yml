@@ -128,13 +128,15 @@ jobs:
       - attach_workspace:
           at: /home/circleci/project
       - run: yarn lint:check
-      - run: |
-          if [ "${CIRCLE_BRANCH}" == "master" ]
-          then
-              yarn build:ci
-          else
-              yarn build:ci:incremental
-          fi
+      - run:
+          name: build
+          command: |
+            if [ "${CIRCLE_BRANCH}" = "master" ]
+            then
+                yarn build:ci
+            else
+                yarn build:ci:incremental
+            fi
       - notify_slack
 
   test:
@@ -146,8 +148,9 @@ jobs:
       - attach_workspace:
           at: /home/circleci/project
       - run:
+          name: test
           command: |
-            if [ "${CIRCLE_BRANCH}" == "master" ]
+            if [ "${CIRCLE_BRANCH}" = "master" ]
             then
               yarn test:ci
             else
