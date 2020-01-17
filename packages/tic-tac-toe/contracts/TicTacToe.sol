@@ -453,11 +453,11 @@ contract TicTacToe is ForceMoveApp {
     ) private pure {
         require(
             toAllocation[0].destination == fromAllocation[0].destination,
-            'TicTacToe: Destimation playerA may not change'
+            'TicTacToe: Destination playerA may not change'
         );
         require(
             toAllocation[1].destination == fromAllocation[1].destination,
-            'TicTacToe: Destimation playerB may not change'
+            'TicTacToe: Destination playerB may not change'
         );
     }
 
@@ -503,11 +503,11 @@ contract TicTacToe is ForceMoveApp {
     ) {
         require(
             toAllocation[0].destination == fromAllocation[0].destination,
-            'TicTacToe: Destimation playerA may not change'
+            'TicTacToe: Destination playerA may not change'
         );
         require(
             toAllocation[1].destination == fromAllocation[1].destination,
-            'TicTacToe: Destimation playerB may not change'
+            'TicTacToe: Destination playerB may not change'
         );
         require(
             toAllocation[0].amount == fromAllocation[0].amount,
