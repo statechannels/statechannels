@@ -65,7 +65,9 @@ function* gameSagaRun(client: RPSChannelClient) {
     case 'Setup.NeedAddress':
       const address: string = yield call([client, 'getAddress']);
       const outcomeAddress: string = window.ethereum.selectedAddress;
-      yield put(a.gotAddressFromWallet(address, outcomeAddress));
+      if (outcomeAddress) {
+        yield put(a.gotAddressFromWallet(address, outcomeAddress));
+      }
       break;
     case 'A.GameChosen':
       if (cs.isEmpty(channelState)) {
@@ -131,6 +133,9 @@ function* gameSagaRun(client: RPSChannelClient) {
       ) {
         yield* closeChannel(channelState, client);
       }
+      break;
+    case 'EndGame.GameOver':
+      yield* clearChannelState();
       break;
   }
 }
@@ -333,6 +338,9 @@ function* sendStartAndStartRound(channelState: ChannelState<Reveal>, client: RPS
 function* closeChannel(channelState: ChannelState, client: RPSChannelClient) {
   const closingChannelState = yield call([client, 'closeChannel'], channelState.channelId);
   yield put(a.updateChannelState(closingChannelState));
+}
+function* clearChannelState() {
+  yield put(a.updateChannelState(null));
 }
 
 const calculateFundingSituation = (
