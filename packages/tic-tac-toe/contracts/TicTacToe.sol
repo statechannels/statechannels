@@ -145,7 +145,7 @@ contract TicTacToe is ForceMoveApp {
     )
         private
         pure
-        noDisjointMoves(toGameData)
+        disjointMarks(toGameData)
         stakeUnchanged(fromGameData, toGameData)
         allocationsNotLessThanStake(fromAllocation, toAllocation, fromGameData, toGameData)
     {
@@ -171,7 +171,7 @@ contract TicTacToe is ForceMoveApp {
     )
         private
         pure
-        noDisjointMoves(toGameData)
+        disjointMarks(toGameData)
         stakeUnchanged(fromGameData, toGameData)
         allocationsNotLessThanStake(fromAllocation, toAllocation, fromGameData, toGameData)
     {
@@ -197,7 +197,7 @@ contract TicTacToe is ForceMoveApp {
     )
         private
         pure
-        noDisjointMoves(toGameData)
+        disjointMarks(toGameData)
         stakeUnchanged(fromGameData, toGameData)
         allocationsNotLessThanStake(fromAllocation, toAllocation, fromGameData, toGameData)
     {
@@ -223,7 +223,7 @@ contract TicTacToe is ForceMoveApp {
     )
         private
         pure
-        noDisjointMoves(toGameData)
+        disjointMarks(toGameData)
         stakeUnchanged(fromGameData, toGameData)
     {
         require(toGameData.Xs == fromGameData.Xs, 'There should be no new Xs added to board');
@@ -257,7 +257,7 @@ contract TicTacToe is ForceMoveApp {
     )
         private
         pure
-        noDisjointMoves(toGameData)
+        disjointMarks(toGameData)
         stakeUnchanged(fromGameData, toGameData)
     {
         require(toGameData.Os == fromGameData.Os, 'There should be no new Os added to board');
@@ -292,7 +292,7 @@ contract TicTacToe is ForceMoveApp {
     )
         private
         pure
-        noDisjointMoves(toGameData)
+        disjointMarks(toGameData)
         stakeUnchanged(fromGameData, toGameData)
     {
         require(isDraw(toGameData.Os, toGameData.Xs), "The board should be full and result in a draw");
@@ -409,7 +409,7 @@ contract TicTacToe is ForceMoveApp {
         _;
     }
 
-    modifier noDisjointMoves(TTTData memory toGameData) {
+    modifier disjointMarks(TTTData memory toGameData) {
         require(areDisjoint(toGameData.Xs, toGameData.Os), 'TicTacToe: No Disjoint Moves');
         _;
     }
