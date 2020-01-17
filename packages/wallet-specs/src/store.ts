@@ -77,12 +77,12 @@ export class Store implements IStore {
     return !!entry && new ChannelStoreEntry(entry);
   }
 
-  public getPrivateKey(participantIds: string[]): string {
-    const myId = participantIds.find(id => this._privateKeys[id]);
-    if (!myId) {
-      throw new Error(`No private key found for ${myId}`);
+  public getPrivateKey(signingAddresses: string[]): string {
+    const myAddress = signingAddresses.find(id => this._privateKeys[id]);
+    if (!myAddress) {
+      throw new Error(`No private key found for ${myAddress}`);
     }
-    return this._privateKeys[myId];
+    return this._privateKeys[myAddress];
   }
 
   public getIndex(channelId: string): 0 | 1 {
