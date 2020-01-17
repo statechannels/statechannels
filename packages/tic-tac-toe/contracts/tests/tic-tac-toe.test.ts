@@ -4,7 +4,6 @@ import * as ethers from 'ethers';
 import {Contract} from 'ethers';
 import {bigNumberify, Interface} from 'ethers/utils';
 import dotEnvExtended from 'dotenv-extended';
-import path from 'path';
 import {AddressZero} from 'ethers/constants';
 import {TransactionRequest} from 'ethers/providers';
 import {
@@ -16,9 +15,6 @@ import {
 } from '@statechannels/nitro-protocol';
 import {VariablePart} from '@statechannels/nitro-protocol';
 import {TTTData, PositionType, encodeTTTData} from './types/app-data';
-
-import loadJsonFile from 'load-json-file';
-import {JsonValue} from 'type-fest';
 
 dotEnvExtended.load();
 
@@ -281,15 +277,3 @@ describe('validTransition', () => {
     }
   );
 });
-
-export const getNetworkMap = async (): Promise<JsonValue> => {
-  try {
-    return await loadJsonFile(path.join(__dirname, '../../deployment/network-map.json'));
-  } catch (err) {
-    if (err.message.match('ENOENT: no such file or directory')) {
-      return {};
-    } else {
-      throw err;
-    }
-  }
-};
