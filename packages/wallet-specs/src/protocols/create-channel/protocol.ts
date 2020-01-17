@@ -99,7 +99,7 @@ export const mockOptions = {
 
 export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => {
   const setChannelId: InvokeCreator<any> = (ctx: Init): Promise<SetChannel> => {
-    const participants = ctx.participants.map(p => p.destination);
+    const participants = ctx.participants.map(p => p.signingAddress);
     const channelNonce = store.getNextNonce(participants);
     const channel: Channel = {
       participants,
@@ -121,7 +121,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => 
     const entry = new ChannelStoreEntry({
       channel,
       states: [{ state: firstState, signatures: [] }],
-      privateKey: store.getPrivateKey(ctx.participants.map(p => p.participantId)),
+      privateKey: store.getPrivateKey(participants),
       participants: ctx.participants,
     });
     store.initializeChannel(entry.args);

@@ -5,25 +5,21 @@ import { AddressableMessage, FundingStrategyProposed } from './wire-protocol';
 import { State } from '@statechannels/nitro-protocol';
 import { getStateSignerAddress, signState } from '@statechannels/nitro-protocol/lib/src/signatures';
 export interface IStore {
-  getEntry: (channelId: string) => ChannelStoreEntry;
-  getIndex: (channelId: string) => 0 | 1;
+  getParticipant(signingAddress: string): Participant;
+  getEntry(channelId: string): ChannelStoreEntry;
 
-  // The channel store should garbage collect stale states on CHANNEL_UPDATED events.
-  // If a greater state becomes supported on such an event, it should replace the latest
-  // supported state, and remove any lesser, unsupported states.
-  getUnsupportedStates: (channelId: string) => SignedState[];
-
-  findLedgerChannelId: (participants: string[]) => string | undefined;
-  signedByMe: (state: State) => boolean;
-  getPrivateKey: (participantIds: string[]) => string;
+  findLedgerChannelId(participants: string[]): string | undefined;
+  signedByMe(state: State): boolean;
+  getPrivateKey(signingAddresses: string[]): string;
 
   /*
   Store modifiers
   */
-  initializeChannel: (entry: ChannelStoreEntry) => void;
-  sendState: (state: State) => void;
-  sendOpenChannel: (state: State) => void;
-  receiveStates: (signedStates: SignedState[]) => void;
+  setParticipant(participant: Participant): void;
+  initializeChannel(entry: ChannelStoreEntry): void;
+  sendState(state: State): void;
+  sendOpenChannel(state: State): void;
+  receiveStates(signedStates: SignedState[]): void;
 
   // TODO: set funding
   // setFunding(channelId: string, funding: Funding): void;
@@ -57,11 +53,37 @@ export class Store implements IStore {
   private _store: ChannelStore;
   private _privateKeys: Record<string, string>;
   private _nonces: Record<string, string> = {};
+  private _participants: Record<string, Participant> = {};
 
   constructor(args?: Constructor) {
     const { store, privateKeys } = args || {};
     this._store = store || {};
     this._privateKeys = privateKeys || {};
+  }
+
+  public setParticipant(participant: Participant) {
+    /*
+    TODO: There is a security flaw around naively setting participants like so: if Eve learn's
+    Alice's participant ID, then Eve can coerce Bob's wallet to store
+    {
+      participantId: 'alice',
+      signingAddress: aliceWallet.signingAddress,
+      destination: eveWallet.destination
+    }
+    */
+    if (this._participants[participant.signingAddress]) {
+      console.warn(`Participant already exists with signing address ${participant.signingAddress}`);
+      return;
+    }
+
+    this._participants[participant.signingAddress] = participant;
+  }
+
+  public getParticipant(signingAddress: string): Participant {
+    if (!this._participants[signingAddress]) {
+      throw new Error(`Participant not found for ${signingAddress}`);
+    }
+    return this._participants[signingAddress];
   }
 
   public getEntry(channelId: string): ChannelStoreEntry {
@@ -77,23 +99,12 @@ export class Store implements IStore {
     return !!entry && new ChannelStoreEntry(entry);
   }
 
-  public getPrivateKey(participantIds: string[]): string {
-    const myId = participantIds.find(id => this._privateKeys[id]);
-    if (!myId) {
-      throw new Error(`No private key found for ${myId}`);
+  public getPrivateKey(signingAddresses: string[]): string {
+    const myAddress = signingAddresses.find(id => this._privateKeys[id]);
+    if (!myAddress) {
+      throw new Error(`No private key found for ${myAddress}`);
     }
-    return this._privateKeys[myId];
-  }
-
-  public getIndex(channelId: string): 0 | 1 {
-    const entry = this.getEntry(channelId);
-    const { participants } = entry.states[0].state.channel;
-    if (participants.length !== 2) {
-      throw new Error('Assumes two participants');
-    }
-
-    const ourAddress = `addressFrom${entry.privateKey}`;
-    return participants.indexOf(ourAddress) as 0 | 1;
+    return this._privateKeys[myAddress];
   }
 
   public findLedgerChannelId(participantIds: string[]): string | undefined {
@@ -102,20 +113,12 @@ export class Store implements IStore {
       if (
         entry.latestSupportedState.appDefinition === undefined &&
         // TODO: correct array equality
-        this.participantIds(channelId) === participantIds
+        entry.participants.map(p => p.participantId) === participantIds
       ) {
         return channelId;
       }
     }
     return undefined;
-  }
-
-  public participantIds(channelId: string): string[] {
-    return this.getEntry(channelId).participants.map(p => p.participantId);
-  }
-
-  public getUnsupportedStates(channelId: string) {
-    return this.getEntry(channelId).unsupportedStates;
   }
 
   public signedByMe(state: State) {
@@ -135,6 +138,7 @@ export class Store implements IStore {
 
     const { participants, channelNonce } = entry.channel;
     if (this.nonceOk(participants, channelNonce)) {
+      data.participants.map(p => this.setParticipant(p));
       this._store[entry.channelId] = entry.args;
       this.useNonce(participants, channelNonce);
     } else {
@@ -167,16 +171,17 @@ export class Store implements IStore {
 
     // 2. Sign & store the state
     const signedState: SignedState = this.signState(state);
-    const newEntry = this.updateOrCreateEntry(channelId, [signedState]);
+    const { recipients, participants } = this.updateOrCreateEntry(channelId, [signedState]);
 
     // 3. Send the message
     const message: AddressableMessage = {
       type: 'OPEN_CHANNEL',
       signedState,
+      participants,
       to: 'BLANK',
     };
 
-    this.sendMessage(message, newEntry.recipients);
+    this.sendMessage(message, recipients);
   }
 
   public sendStrategyChoice(message: FundingStrategyProposed) {
@@ -247,11 +252,9 @@ export class Store implements IStore {
       this.useNonce(participants, channelNonce);
 
       const { channel } = states[0].state;
-      const entryParticipants: Participant[] = participants.map(p => ({
-        destination: p,
-        signingAddress: p,
-        participantId: p,
-      }));
+      const entryParticipants: Participant[] = participants.map(signingAddress =>
+        this.getParticipant(signingAddress)
+      );
       const privateKey = this.getPrivateKey(participants);
       this._store[channelId] = {
         states,
