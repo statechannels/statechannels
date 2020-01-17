@@ -417,7 +417,7 @@ contract TicTacToe is ForceMoveApp {
     modifier stakeUnchanged(TTTData memory fromGameData, TTTData memory toGameData) {
         require(
             fromGameData.stake == toGameData.stake,
-            'The stake should be the same between commitments'
+            'The stake should be the same'
         );
         _;
     }
