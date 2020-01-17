@@ -84,10 +84,7 @@ const fundLedger = {
     directFunding: {
       invoke: {
         src: 'directFunding',
-        data: (
-          { ledgerChannelId }: LedgerExists,
-          event: DoneInvokeEvent<Allocation>
-        ): DirectFunding.Init => ({ channelId: ledgerChannelId, minimalAllocation: event.data }),
+        data: (event: DoneInvokeEvent<DirectFunding.Init>): DirectFunding.Init => event.data,
         onDone: 'done',
         autoForward: true,
       },
