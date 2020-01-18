@@ -86,26 +86,6 @@ beforeAll(async () => {
 //   +-----------------+
 //      O3  |  X6  |  X8
 
-const drawX = 0b101100011;
-const drawO = 0b010011100;
-
-// Binary representations of numbers
-const b = {
-  0: 0b000000000,
-  1: 0b000000001,
-  2: 0b000000010,
-  3: 0b000000011,
-  5: 0b000000101,
-  6: 0b000000110,
-  7: 0b000000111,
-  8: 0b000001011,
-  11: 0b000001011,
-  24: 0b000011000,
-  156: drawO,
-  354: 0b101100010,
-  355: drawX
-};
-
 const balanceStartToAWins = [
   {A: 5, B: 5},
   {A: 6, B: 4}
@@ -150,130 +130,142 @@ const oPlayingToDraw = ['OPlaying', 'Draw'];
 const drawToStart = ['Draw', 'Start'];
 const victoryToStart = ['Victory', 'Start'];
 
+async function validTransition({
+  isValid,
+  positionType,
+  stake,
+  Xs,
+  Os,
+  balances
+}: {
+  isValid: boolean;
+  positionType: string[];
+  stake: number[];
+  Xs: number[];
+  Os: number[];
+  balances: AssetOutcomeShortHand[];
+}): Promise<void> {
+  const fromBalances = replaceAddressesAndBigNumberify(balances[0], addresses);
+  const toBalances = replaceAddressesAndBigNumberify(balances[1], addresses);
+  const fromPositionType = positionType[0];
+  const toPositionType = positionType[1];
+  const fromStake = stake[0];
+  const toStake = stake[1];
+  const fromXs = Xs[0];
+  const toXs = Xs[1];
+  const fromOs = Os[0];
+  const toOs = Os[1];
+  const fromAllocation: Allocation = [];
+  const toAllocation: Allocation = [];
+  Object.keys(fromBalances).forEach(key =>
+    fromAllocation.push({destination: key, amount: fromBalances[key] as string})
+  );
+  Object.keys(toBalances).forEach(key =>
+    toAllocation.push({destination: key, amount: toBalances[key] as string})
+  );
+  const fromOutcome = [{assetHolderAddress: AddressZero, allocation: fromAllocation}];
+  const toOutcome = [{assetHolderAddress: AddressZero, allocation: toAllocation}];
+  const fromAppData: TTTData = {
+    positionType: PositionIndex[fromPositionType],
+    stake: bigNumberify(fromStake).toString(),
+    Xs: fromXs,
+    Os: fromOs
+  };
+  const toAppData: TTTData = {
+    positionType: PositionIndex[toPositionType],
+    stake: bigNumberify(toStake).toString(),
+    Xs: toXs,
+    Os: toOs
+  };
+  const [fromAppDataBytes, toAppDataBytes] = [fromAppData, toAppData].map(encodeTTTData);
+  const fromVariablePart: VariablePart = {
+    outcome: encodeOutcome(fromOutcome),
+    appData: fromAppDataBytes
+  };
+  const toVariablePart: VariablePart = {
+    outcome: encodeOutcome(toOutcome),
+    appData: toAppDataBytes
+  };
+  if (isValid) {
+    const TicTacToeContractInterface = new Interface(TicTacToeArtifact.abi);
+    const data = TicTacToeContractInterface.functions.validTransition.encode([
+      fromVariablePart,
+      toVariablePart,
+      1,
+      numParticipants
+    ]);
+    await sendTransaction(TicTacToe.address, {data, gasLimit: 3000000});
+    const isValidFromCall = await TicTacToe.validTransition(
+      fromVariablePart,
+      toVariablePart,
+      1, // unused
+      numParticipants
+    );
+    expect(isValidFromCall).toBe(true);
+  } else {
+    await expectRevert(() =>
+      TicTacToe.validTransition(
+        fromVariablePart,
+        toVariablePart,
+        1, // unused
+        numParticipants
+      )
+    );
+  }
+}
+
 describe('validTransition', () => {
   it.each`
-    isValid  | positionType          | stake     | Xs                  | Os                  | balances               | description
-    ${true}  | ${startToXPlaying}    | ${[1, 1]} | ${[b[0], b[1]]}     | ${[b[0], b[0]]}     | ${balanceStartToAWins} | ${'X can start a game'}
-    ${true}  | ${xPlayingToOPlaying} | ${[1, 1]} | ${[b[1], b[1]]}     | ${[b[0], b[2]]}     | ${balanceAWinsToBWins} | ${'O can make a move'}
-    ${true}  | ${oPlayingToXPlaying} | ${[1, 1]} | ${[b[1], b[5]]}     | ${[b[2], b[2]]}     | ${balanceBWinsToAWins} | ${'X can make a move'}
-    ${true}  | ${oPlayingToVictory}  | ${[1, 1]} | ${[b[3], b[7]]}     | ${[b[24], b[24]]}   | ${balanceBWinsToAWins} | ${'X can win'}
-    ${true}  | ${xPlayingToVictory}  | ${[1, 1]} | ${[b[24], b[24]]}   | ${[b[3], b[7]]}     | ${balanceAWinsToBWins} | ${'O can win'}
-    ${true}  | ${oPlayingToDraw}     | ${[1, 1]} | ${[b[354], b[355]]} | ${[b[156], b[156]]} | ${balanceBWinsToDraw}  | ${'X can draw'}
-    ${true}  | ${drawToStart}        | ${[1, 1]} | ${[b[0], b[0]]}     | ${[b[0], b[0]]}     | ${balanceDrawToStart}  | ${'Draw can restart'}
-    ${true}  | ${victoryToStart}     | ${[1, 1]} | ${[b[0], b[0]]}     | ${[b[0], b[0]]}     | ${balanceAWinsToStart} | ${'X Victory can restart'}
-    ${true}  | ${victoryToStart}     | ${[1, 1]} | ${[b[0], b[0]]}     | ${[b[0], b[0]]}     | ${balanceBWinsToStart} | ${'O Victory can restart'}
-    ${false} | ${startToXPlaying}    | ${[1, 1]} | ${[b[0], b[0]]}     | ${[b[0], b[0]]}     | ${balanceStartToAWins} | ${`X doesn't make a move`}
-    ${false} | ${startToXPlaying}    | ${[1, 2]} | ${[b[0], b[0]]}     | ${[b[0], b[0]]}     | ${balanceStartToAWins} | ${`Stake can't change`}
-    ${false} | ${startToXPlaying}    | ${[1, 1]} | ${[b[0], b[1]]}     | ${[b[0], b[2]]}     | ${balanceStartToAWins} | ${'O changed during X move'}
-    ${false} | ${startToXPlaying}    | ${[1, 1]} | ${[b[0], b[3]]}     | ${[b[0], b[0]]}     | ${balanceStartToAWins} | ${`X can't start with 2 marks`}
-    ${false} | ${xPlayingToOPlaying} | ${[1, 1]} | ${[b[1], b[1]]}     | ${[b[0], b[0]]}     | ${balanceAWinsToBWins} | ${`O doesn't move`}
-    ${false} | ${xPlayingToOPlaying} | ${[1, 1]} | ${[b[0], b[1]]}     | ${[b[0], b[2]]}     | ${balanceAWinsToBWins} | ${'X changed during O move'}
-    ${false} | ${xPlayingToOPlaying} | ${[1, 1]} | ${[b[1], b[1]]}     | ${[b[0], b[1]]}     | ${balanceAWinsToBWins} | ${`O can't override a mark`}
-    ${false} | ${xPlayingToOPlaying} | ${[1, 1]} | ${[b[1], b[1]]}     | ${[b[0], b[5]]}     | ${balanceAWinsToBWins} | ${`O can't make 2 marks`}
-    ${false} | ${oPlayingToXPlaying} | ${[1, 1]} | ${[b[1], b[1]]}     | ${[b[2], b[2]]}     | ${balanceBWinsToAWins} | ${`X doesn't move`}
-    ${false} | ${oPlayingToXPlaying} | ${[1, 1]} | ${[b[1], b[5]]}     | ${[b[2], b[6]]}     | ${balanceBWinsToAWins} | ${'O changed during X move'}
-    ${false} | ${oPlayingToXPlaying} | ${[1, 1]} | ${[b[1], b[3]]}     | ${[b[2], b[2]]}     | ${balanceBWinsToAWins} | ${`X can't override a mark`}
-    ${false} | ${oPlayingToXPlaying} | ${[1, 1]} | ${[b[1], b[11]]}    | ${[b[2], b[2]]}     | ${balanceBWinsToAWins} | ${`X can't make 2 marks`}
-    ${false} | ${drawToStart}        | ${[1, 1]} | ${[b[354], b[355]]} | ${[b[156], b[156]]} | ${balanceDrawToStart}  | ${`Draw can't restart with marks`}
-    ${false} | ${victoryToStart}     | ${[1, 1]} | ${[b[354], b[355]]} | ${[b[156], b[156]]} | ${balanceAWinsToStart} | ${`X Victory cant restart with marks`}
-    ${false} | ${victoryToStart}     | ${[1, 1]} | ${[b[354], b[355]]} | ${[b[156], b[156]]} | ${balanceBWinsToStart} | ${'O Victory cant restart with marks'}
+    isValid  | positionType          | Xs                            | Os                            | balances               | description
+    ${true}  | ${startToXPlaying}    | ${[0b000000000, 0b000000001]} | ${[0b000000000, 0b000000000]} | ${balanceStartToAWins} | ${'X can start a game'}
+    ${true}  | ${xPlayingToOPlaying} | ${[0b000000001, 0b000000001]} | ${[0b000000000, 0b000000010]} | ${balanceAWinsToBWins} | ${'O can make a move'}
+    ${true}  | ${oPlayingToXPlaying} | ${[0b000000001, 0b000000101]} | ${[0b000000010, 0b000000010]} | ${balanceBWinsToAWins} | ${'X can make a move'}
+    ${true}  | ${oPlayingToVictory}  | ${[0b000000011, 0b000000111]} | ${[0b000011000, 0b000011000]} | ${balanceBWinsToAWins} | ${'X can win'}
+    ${true}  | ${xPlayingToVictory}  | ${[0b000011000, 0b000011000]} | ${[0b000000011, 0b000000111]} | ${balanceAWinsToBWins} | ${'O can win'}
+    ${true}  | ${oPlayingToDraw}     | ${[0b101100010, 0b101100011]} | ${[0b010011100, 0b010011100]} | ${balanceBWinsToDraw}  | ${'X can draw'}
+    ${true}  | ${drawToStart}        | ${[0b000000000, 0b000000000]} | ${[0b000000000, 0b000000000]} | ${balanceDrawToStart}  | ${'Draw can restart'}
+    ${true}  | ${victoryToStart}     | ${[0b000000000, 0b000000000]} | ${[0b000000000, 0b000000000]} | ${balanceAWinsToStart} | ${'X Victory can restart'}
+    ${true}  | ${victoryToStart}     | ${[0b000000000, 0b000000000]} | ${[0b000000000, 0b000000000]} | ${balanceBWinsToStart} | ${'O Victory can restart'}
+    ${false} | ${startToXPlaying}    | ${[0b000000000, 0b000000000]} | ${[0b000000000, 0b000000000]} | ${balanceStartToAWins} | ${`X doesn't make a move`}
+    ${false} | ${startToXPlaying}    | ${[0b000000000, 0b000000001]} | ${[0b000000000, 0b000000010]} | ${balanceStartToAWins} | ${'O changed during X move'}
+    ${false} | ${startToXPlaying}    | ${[0b000000000, 0b000000011]} | ${[0b000000000, 0b000000000]} | ${balanceStartToAWins} | ${`X can't start with 2 marks`}
+    ${false} | ${xPlayingToOPlaying} | ${[0b000000001, 0b000000001]} | ${[0b000000000, 0b000000000]} | ${balanceAWinsToBWins} | ${`O doesn't move`}
+    ${false} | ${xPlayingToOPlaying} | ${[0b000000000, 0b000000001]} | ${[0b000000000, 0b000000010]} | ${balanceAWinsToBWins} | ${'X changed during O move'}
+    ${false} | ${xPlayingToOPlaying} | ${[0b000000001, 0b000000001]} | ${[0b000000000, 0b000000001]} | ${balanceAWinsToBWins} | ${`O can't override a mark`}
+    ${false} | ${xPlayingToOPlaying} | ${[0b000000001, 0b000000001]} | ${[0b000000000, 0b000000101]} | ${balanceAWinsToBWins} | ${`O can't make 2 marks`}
+    ${false} | ${oPlayingToXPlaying} | ${[0b000000001, 0b000000001]} | ${[0b000000010, 0b000000010]} | ${balanceBWinsToAWins} | ${`X doesn't move`}
+    ${false} | ${oPlayingToXPlaying} | ${[0b000000001, 0b000000101]} | ${[0b000000010, 0b000000110]} | ${balanceBWinsToAWins} | ${'O changed during X move'}
+    ${false} | ${oPlayingToXPlaying} | ${[0b000000001, 0b000000011]} | ${[0b000000010, 0b000000010]} | ${balanceBWinsToAWins} | ${`X can't override a mark`}
+    ${false} | ${oPlayingToXPlaying} | ${[0b000000001, 0b000001011]} | ${[0b000000010, 0b000000010]} | ${balanceBWinsToAWins} | ${`X can't make 2 marks`}
+    ${false} | ${drawToStart}        | ${[0b101100010, 0b101100011]} | ${[0b010011100, 0b010011100]} | ${balanceDrawToStart}  | ${`Draw can't restart with marks`}
+    ${false} | ${victoryToStart}     | ${[0b101100010, 0b101100011]} | ${[0b010011100, 0b010011100]} | ${balanceAWinsToStart} | ${`X Victory cant restart with marks`}
+    ${false} | ${victoryToStart}     | ${[0b101100010, 0b101100011]} | ${[0b010011100, 0b010011100]} | ${balanceBWinsToStart} | ${'O Victory cant restart with marks'}
   `(
     `Returns $isValid on $positionType; $description`,
     async ({
       isValid,
       positionType,
-      stake,
       Xs,
       Os,
       balances
     }: {
       isValid: boolean;
       positionType: string[];
-      stake: number[];
       Xs: number[];
       Os: number[];
       balances: AssetOutcomeShortHand[];
     }) => {
-      const fromBalances = replaceAddressesAndBigNumberify(balances[0], addresses);
-      const toBalances = replaceAddressesAndBigNumberify(balances[1], addresses);
-
-      const fromPositionType = positionType[0];
-      const toPositionType = positionType[1];
-
-      const fromStake = stake[0];
-      const toStake = stake[1];
-
-      const fromXs = Xs[0];
-      const toXs = Xs[1];
-
-      const fromOs = Os[0];
-      const toOs = Os[1];
-
-      const fromAllocation: Allocation = [];
-      const toAllocation: Allocation = [];
-
-      Object.keys(fromBalances).forEach(key =>
-        fromAllocation.push({destination: key, amount: fromBalances[key] as string})
-      );
-      Object.keys(toBalances).forEach(key =>
-        toAllocation.push({destination: key, amount: toBalances[key] as string})
-      );
-
-      const fromOutcome = [{assetHolderAddress: AddressZero, allocation: fromAllocation}];
-      const toOutcome = [{assetHolderAddress: AddressZero, allocation: toAllocation}];
-
-      const fromAppData: TTTData = {
-        positionType: PositionIndex[fromPositionType],
-        stake: bigNumberify(fromStake).toString(),
-        Xs: fromXs,
-        Os: fromOs
-      };
-      const toAppData: TTTData = {
-        positionType: PositionIndex[toPositionType],
-        stake: bigNumberify(toStake).toString(),
-        Xs: toXs,
-        Os: toOs
-      };
-
-      const [fromAppDataBytes, toAppDataBytes] = [fromAppData, toAppData].map(encodeTTTData);
-
-      const fromVariablePart: VariablePart = {
-        outcome: encodeOutcome(fromOutcome),
-        appData: fromAppDataBytes
-      };
-      const toVariablePart: VariablePart = {
-        outcome: encodeOutcome(toOutcome),
-        appData: toAppDataBytes
-      };
-
-      if (isValid) {
-        const TicTacToeContractInterface = new Interface(TicTacToeArtifact.abi);
-        const data = TicTacToeContractInterface.functions.validTransition.encode([
-          fromVariablePart,
-          toVariablePart,
-          1,
-          numParticipants
-        ]);
-
-        await sendTransaction(TicTacToe.address, {data, gasLimit: 3000000});
-
-        const isValidFromCall = await TicTacToe.validTransition(
-          fromVariablePart,
-          toVariablePart,
-          1, // unused
-          numParticipants
-        );
-        expect(isValidFromCall).toBe(true);
-      } else {
-        await expectRevert(() =>
-          TicTacToe.validTransition(
-            fromVariablePart,
-            toVariablePart,
-            1, // unused
-            numParticipants
-          )
-        );
-      }
+      const validStake = [1, 1];
+      await validTransition({isValid, positionType, Xs, Os, balances, stake: validStake});
     }
   );
+  it(`stake can't change during a game`, async () => {
+    const isValid = false;
+    const balances = balanceStartToAWins;
+    const positionType = startToXPlaying;
+    const Xs = [0b000000000, 0b000000000];
+    const Os = [0b000000000, 0b000000000];
+    const invalidStake = [1, 2];
+    await validTransition({isValid, positionType, Xs, Os, balances, stake: invalidStake});
+  });
 });
