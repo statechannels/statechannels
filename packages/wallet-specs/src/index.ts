@@ -27,9 +27,7 @@ export function ethAllocationOutcome(allocation: Allocation): AllocationAssetOut
   return [
     {
       assetHolderAddress: AddressZero,
-      allocation: allocation
-        .map(a => ({ ...a, destination: hexZeroPad(a.destination, 32) }))
-        .filter(({ amount }) => gt(amount, 0)),
+      allocation: allocation.map(a => ({ ...a, destination: hexZeroPad(a.destination, 32) })),
     },
   ];
 }
