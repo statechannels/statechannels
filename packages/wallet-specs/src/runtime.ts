@@ -39,7 +39,7 @@ const logEvents = name =>
 const logStore = name =>
   process.env.ADD_LOGS ? state => console.log(`${pretty(stores[name])}`) : () => {};
 
-function logState(actor: Actor, level = 0) {
+export function logState(actor: Actor, level = 0) {
   if (actor.state) {
     console.log(`${' '.repeat(level)}${JSON.stringify(actor.state.value)}`);
     Object.values(actor.state.children).map((child: Actor) => {
