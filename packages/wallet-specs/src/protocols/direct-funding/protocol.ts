@@ -12,7 +12,7 @@ import {
 } from '../../';
 import { Allocation, Outcome } from '@statechannels/nitro-protocol';
 import { Machine, DoneInvokeEvent } from 'xstate';
-import { SupportState } from '..';
+import { SupportState, Depositing } from '..';
 import _ from 'lodash';
 
 const PROTOCOL = 'direct-funding';
@@ -149,7 +149,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
     checkCurrentLevel,
     getPrefundOutcome,
     supportState: SupportState.machine(store),
-    fundingService: async () => true,
+    fundingService: Depositing.machine(store),
     getPostfundOutcome,
   };
 

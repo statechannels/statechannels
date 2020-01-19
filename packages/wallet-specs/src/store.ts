@@ -48,7 +48,7 @@ export type Constructor = Partial<{
   store: ChannelStore;
   privateKeys: Record<string, string>;
   nonces: Record<string, string>;
-  chain: Chain;
+  chain: IChain;
 }>;
 export class Store implements IStore {
   public static equals(left: any, right: any) {
@@ -58,7 +58,7 @@ export class Store implements IStore {
   private _store: ChannelStore;
   private _privateKeys: Record<string, string>;
   private _nonces: Record<string, string> = {};
-  private _participants: Record<string, Participant> = {};
+
   private _chain: IChain;
 
   constructor(args?: Constructor) {
