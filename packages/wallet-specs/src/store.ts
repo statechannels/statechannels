@@ -1,5 +1,5 @@
 import { add, getChannelId, gt, SignedState } from '.';
-import { ChannelStoreEntry, IChannelStoreEntry } from './ChannelStoreEntry';
+import { ChannelStoreEntry, IChannelStoreEntry, supported } from './ChannelStoreEntry';
 import { messageService } from './messaging';
 import { AddressableMessage, FundingStrategyProposed } from './wire-protocol';
 import { State } from '@statechannels/nitro-protocol';
@@ -252,7 +252,10 @@ export function merge(left: SignedState[], right: SignedState[]): SignedState[] 
     }
   });
 
-  return left;
+  const latestSupportedTurnNum =
+    left.filter(supported).sort(s => -s.state.turnNum)[0]?.state?.turnNum || 0;
+
+  return left.filter(s => s.state.turnNum >= latestSupportedTurnNum);
 }
 
 // The store would send this action whenever the channel is updated

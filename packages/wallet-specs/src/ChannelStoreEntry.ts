@@ -46,7 +46,7 @@ export interface IChannelStoreEntry {
   funding?: Funding;
 }
 
-function supported(signedState: SignedState) {
+export function supported(signedState: SignedState) {
   // TODO: temporarily just check the required length
   return (
     signedState.signatures.filter(Boolean).length === signedState.state.channel.participants.length
