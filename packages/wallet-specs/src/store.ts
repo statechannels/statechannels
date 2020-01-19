@@ -6,9 +6,11 @@ import { State } from '@statechannels/nitro-protocol';
 import { getStateSignerAddress, signState } from '@statechannels/nitro-protocol/lib/src/signatures';
 import _ from 'lodash';
 
+import { Chain, IChain } from './chain';
 export interface IStore {
   getEntry(channelId: string): ChannelStoreEntry;
   getParticipant(signingAddress: string): Participant;
+  getHoldings: IChain['getHoldings'];
 
   findLedgerChannelId(participants: string[]): string | undefined;
   signedByMe(state: State): boolean;
@@ -17,6 +19,7 @@ export interface IStore {
   /*
   Store modifiers
   */
+  deposit: IChain['deposit'];
   initializeChannel(entry: ChannelStoreEntry): void;
   sendState(state: State): void;
   sendOpenChannel(state: State): void;
@@ -45,6 +48,7 @@ export type Constructor = Partial<{
   store: ChannelStore;
   privateKeys: Record<string, string>;
   nonces: Record<string, string>;
+  chain: Chain;
 }>;
 export class Store implements IStore {
   public static equals(left: any, right: any) {
@@ -54,11 +58,23 @@ export class Store implements IStore {
   private _store: ChannelStore;
   private _privateKeys: Record<string, string>;
   private _nonces: Record<string, string> = {};
+  private _participants: Record<string, Participant> = {};
+  private _chain: IChain;
 
   constructor(args?: Constructor) {
     const { store, privateKeys } = args || {};
     this._store = store || {};
     this._privateKeys = privateKeys || {};
+
+    this._chain = args?.chain || new Chain();
+  }
+
+  public async getHoldings(channelId: string) {
+    return await this._chain.getHoldings(channelId);
+  }
+
+  public async deposit(channelId: string, expectedHeld: string, amount: string) {
+    return await this._chain.deposit(channelId, expectedHeld, amount);
   }
 
   public getEntry(channelId: string): ChannelStoreEntry {

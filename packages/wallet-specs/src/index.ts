@@ -73,8 +73,6 @@ export interface Entry {
   type: '';
 }
 
-export { chain } from './chain';
-
 // This stuff should be replaced with some big number logic
 type numberish = string | number | undefined;
 type MathOp = (a: numberish, b: numberish) => string;

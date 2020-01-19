@@ -1,6 +1,5 @@
 import {
   add,
-  chain,
   getChannelId,
   max,
   subtract,
@@ -97,8 +96,8 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
 function getHoldings(state: State, destination: string): string {
   const { outcome } = state;
 
-  // TODO: Remove use of `chain`
-  let currentFunding = chain.holdings(getChannelId(state.channel));
+  // TODO
+  let currentFunding = 10;
   return getEthAllocation(outcome)
     .filter(item => item.destination === destination)
     .map(item => {
