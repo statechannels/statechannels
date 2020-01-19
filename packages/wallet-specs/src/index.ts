@@ -7,6 +7,7 @@ import {
   GuaranteeAssetOutcome,
   isAllocationOutcome,
   AssetOutcome,
+  hashOutcome,
 } from '@statechannels/nitro-protocol/lib/src/contract/outcome';
 import { Signature, hexZeroPad } from 'ethers/utils';
 import { AddressZero } from 'ethers/constants';
@@ -91,6 +92,7 @@ export const subtract: MathOp = (a: numberish, b: numberish) => {
 export const max: MathOp = (a: numberish, b: numberish) =>
   Math.max(Number(a), Number(b)).toString();
 export const gt = (a: numberish, b: numberish) => Number(a) > Number(b);
+export const eq = (a: numberish, b: numberish) => Number(a) === Number(b);
 
 export const success: { type: 'final' } = { type: 'final' };
 export const failure: { type: 'final' } = { type: 'final' };
@@ -133,7 +135,7 @@ export function isDefined<T>(t: T | undefined): t is T {
 export const FINAL = 'final' as 'final';
 
 export function outcomesEqual(left: Outcome, right: Outcome): boolean {
-  return JSON.stringify(left) === JSON.stringify(right);
+  return hashOutcome(left) === hashOutcome(right);
 }
 
 const throwError = (fn: (t1: any) => boolean, t) => {

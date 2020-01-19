@@ -92,10 +92,14 @@ export class ChannelStoreEntry implements IChannelStoreEntry {
     return this.states.some(supported);
   }
 
+  get hasState(): boolean {
+    return this.states.length > 0;
+  }
+
   get latestSupportedState(): State {
     const signedState = this.states.find(supported);
     if (!signedState) {
-      throw 'No supported state found';
+      throw new Error('No supported state found');
     }
 
     return signedState.state;
