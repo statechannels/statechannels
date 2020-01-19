@@ -1,40 +1,14 @@
-import { Init, machine, CreateChannelEvent, Process } from '../protocol';
+import { Init, machine, CreateChannelEvent } from '../protocol';
 import { ethers } from 'ethers';
 import { Store, Participant } from '../../../store';
 import waitForExpect from 'wait-for-expect';
-import { interpret, Actor } from 'xstate';
+import { interpret } from 'xstate';
 import { messageService } from '../../../messaging';
 import { AddressableMessage } from '../../../wire-protocol';
 import { AddressZero, HashZero } from 'ethers/constants';
-
-function invokedState(actor: Actor, prefix = '    '): string {
-  if (actor.state) {
-    const childState = Object.values(actor.state.children).map((child: Actor) =>
-      invokedState(child, prefix.concat('  '))
-    );
-
-    return [`${prefix}${JSON.stringify(actor.state.value)}\n`].concat(childState).join('\n');
-  } else {
-    return `${prefix}${actor.id}\n`;
-  }
-}
+import { processStates } from '../../../utils';
 
 const logProcessStates = process.env ? state => console.log(processStates(state)) : () => {};
-
-function processStates(state): string {
-  const vals = state.context.processes.map((p: Process) => {
-    return [`  PROCESS: ${p.id}`]
-      .concat([`  STATE: ${JSON.stringify(p.ref.state.value)}`])
-      .concat(
-        Object.values(p.ref.state.children).map(child => {
-          return invokedState(child);
-        })
-      )
-      .join('\n');
-  });
-
-  return `WALLET: ${state.context.id}\n${vals}`;
-}
 
 const wallet1 = new ethers.Wallet(
   '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318'
@@ -78,9 +52,9 @@ const connect = (wallet: ethers.Wallet) => {
     id: participantId,
     processes: [],
   };
-  const service = interpret<any, any, any>(machine(store, context)).onTransition(state =>
-    logProcessStates(state)
-  );
+  const service = interpret<any, any, any>(machine(store, context));
+
+  service.onTransition(state => logProcessStates(state));
 
   messageService.on('message', ({ to, ...event }: AddressableMessage) => {
     if (to === context.id) {
