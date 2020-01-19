@@ -1,27 +1,38 @@
-import { Machine, MachineConfig, send, SendAction, sendParent } from 'xstate';
+import { Machine, MachineConfig, sendParent, assign, DoneInvokeEvent } from 'xstate';
 import { AdvanceChannel, Funding, JoinChannel } from '..';
-import { forwardChannelUpdated, MachineFactory, Store, success } from '../..';
-import { JsonRpcJoinChannelParams } from '../../json-rpc';
+import { forwardChannelUpdated, MachineFactory, Store } from '../..';
 import { ChannelUpdated } from '../../store';
 import { CloseChannel, OpenChannel } from '../../wire-protocol';
 import { OpenChannelEvent } from '../wallet/protocol';
+import { getChannelId } from '@statechannels/nitro-protocol';
 
 const PROTOCOL = 'join-channel';
 
 /*
 Spawned in a new process when the app calls JoinChannel
 */
-export type Init = JsonRpcJoinChannelParams;
+export type Init = OpenChannelEvent;
+type Context = Init & { channelId: string };
 
 // I should ask my channel store if the channel nonce is ok
 const checkNonce = {
-  on: {
-    OPEN_CHANNEL: {
-      target: 'askClient',
-      cond: 'nonceOk',
-    },
+  invoke: {
+    src: 'checkNonce',
+    onDone: [
+      {
+        target: 'askClient',
+        cond: (_, { data }: DoneInvokeEvent<boolean>) => data,
+      },
+    ],
   },
-  exit: 'storeState',
+  exit: [
+    assign(
+      (ctx: Init): Context => ({
+        ...ctx,
+        channelId: getChannelId(ctx.signedState.state.channel),
+      })
+    ),
+  ],
 };
 
 const askClient = {
@@ -42,7 +53,7 @@ const abort = {
   type: 'final' as 'final',
 };
 
-const advanceChannelArgs = n => ({ channelId }: Init) => ({
+const advanceChannelArgs = n => ({ channelId }: Context) => ({
   channelId,
   targetTurnNum: n,
 });
@@ -57,7 +68,7 @@ const preFundSetup = {
     CHANNEL_UPDATED: forwardChannelUpdated<Init>('preFundSetup'),
   },
 };
-export const passChannelId: (c: Init) => Funding.Init = ({ channelId }: Init) => ({
+export const passChannelId: (c: Init) => Funding.Init = ({ channelId }: Context) => ({
   targetChannelId: channelId,
   tries: 0,
 });
@@ -97,52 +108,43 @@ export const config: MachineConfig<Init, any, OpenChannel | CloseChannel | Chann
   },
 };
 
-export const mockOptions: { guards: Guards } = {
-  guards: { nonceOk: () => true },
-};
-export type Guards = {
-  nonceOk: ({}: Init, event: OpenChannelEvent) => boolean;
-};
 export type Services = {
+  checkNonce({}: Init, event: OpenChannelEvent): Promise<boolean>;
   askClient: any;
   funding: any;
   advanceChannel: any;
 };
 export type Actions = {
-  storeState({ channelId }: Init, { signedState }: OpenChannel): void;
-  sendCloseChannel({ channelId }: Init): void;
+  sendCloseChannel({ channelId }: Context): void;
 };
 
-export const machine: MachineFactory<Init, any> = (
-  store: Store,
-  { channelId }: JoinChannel.Init
-) => {
-  const guards: Guards = {
-    nonceOk: ({}, event: OpenChannelEvent) => {
-      const { channel } = event.signedState.state;
-      return store.nonceOk(channel.participants, channel.channelNonce);
-    },
-  };
+export const machine: MachineFactory<Init, any> = (store: Store, ctx: Init) => {
   const actions: Actions = {
-    storeState: ({}: Init, { signedState }: OpenChannel) => {
-      store.receiveStates([signedState]);
-    },
     sendCloseChannel: () => {
       console.log('TODO: Send close channel');
     },
   };
 
   const services: Services = {
+    checkNonce: async ({ signedState, participants }: Init) => {
+      const { channel } = signedState.state;
+      if (store.nonceOk(channel.participants, channel.channelNonce)) {
+        const privateKey = store.getPrivateKey(participants.map(p => p.signingAddress));
+        store.initializeChannel({ participants, privateKey, states: [signedState], channel });
+        return true;
+      } else {
+        return false;
+      }
+    },
+
     askClient: async () => 'JOIN_CHANNEL',
     funding: Funding.machine(store),
     advanceChannel: AdvanceChannel.machine(store),
   };
   const options = {
-    guards,
     actions,
     services,
   };
 
-  const context = { channelId };
-  return Machine(config, options).withConfig(options, context);
+  return Machine(config, options).withConfig(options, ctx);
 };

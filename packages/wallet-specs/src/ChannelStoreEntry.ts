@@ -2,6 +2,7 @@ import { Participant } from './store';
 import { Channel, getChannelId, State } from '@statechannels/nitro-protocol';
 import { SignedState } from '.';
 import { ethers } from 'ethers';
+import _ from 'lodash';
 
 interface DirectFunding {
   type: 'Direct';
@@ -45,7 +46,7 @@ export interface IChannelStoreEntry {
   funding?: Funding;
 }
 
-function supported(signedState: SignedState) {
+export function supported(signedState: SignedState) {
   // TODO: temporarily just check the required length
   return (
     signedState.signatures.filter(Boolean).length === signedState.state.channel.participants.length
@@ -78,18 +79,27 @@ export class ChannelStoreEntry implements IChannelStoreEntry {
   }
 
   get ourIndex() {
-    const wallet = new ethers.Wallet(this.privateKey);
-    return this.participants.findIndex(p => p.signingAddress === wallet.address);
+    const idx = this.participants.findIndex(
+      p => p.signingAddress === new ethers.Wallet(this.privateKey).address
+    );
+    if (idx === -1) {
+      throw 'Not found';
+    }
+    return idx;
   }
 
   get hasSupportedState(): boolean {
     return this.states.some(supported);
   }
 
+  get hasState(): boolean {
+    return this.states.length > 0;
+  }
+
   get latestSupportedState(): State {
     const signedState = this.states.find(supported);
     if (!signedState) {
-      throw 'No supported state found';
+      throw new Error('No supported state found');
     }
 
     return signedState.state;
@@ -120,7 +130,14 @@ export class ChannelStoreEntry implements IChannelStoreEntry {
     return this.states.sort(s => -s.state.turnNum)[0].state;
   }
 
+  get participantId(): string {
+    return this.participants[this.ourIndex].participantId;
+  }
+
   get recipients(): string[] {
-    return this.channel.participants.filter(p => p !== this.ourAddress);
+    return _.without(
+      this.participants.map(p => p.participantId),
+      this.participantId
+    );
   }
 }

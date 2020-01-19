@@ -1,8 +1,9 @@
 import { FINAL } from '../..';
 
-type Guards = {
-  safeToDeposit: (x) => boolean;
-  funded: (x) => boolean;
+export type Init = {
+  channelId: string;
+  depositAt: string;
+  depositTo: string;
 };
 
 export const config = {
@@ -16,12 +17,17 @@ export const config = {
         ],
       },
     },
-    deposit: {
-      invoke: { src: 'depositService' },
+    submitting: {
+      invoke: { src: 'submitDepositTransaction' },
       onDone: 'waiting',
       onError: 'failure',
     },
     done: { type: FINAL },
+    failure: {
+      entry: () => {
+        throw 'Deposit failed ';
+      },
+    },
   },
   onDone: 'updatePostFundOutcome',
 };

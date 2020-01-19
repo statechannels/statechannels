@@ -1,13 +1,16 @@
 import { add, getChannelId, gt, SignedState } from '.';
-import { ChannelStoreEntry, IChannelStoreEntry } from './ChannelStoreEntry';
+import { ChannelStoreEntry, IChannelStoreEntry, supported } from './ChannelStoreEntry';
 import { messageService } from './messaging';
 import { AddressableMessage, FundingStrategyProposed } from './wire-protocol';
 import { State } from '@statechannels/nitro-protocol';
 import { getStateSignerAddress, signState } from '@statechannels/nitro-protocol/lib/src/signatures';
-import { ethers } from 'ethers';
+import _ from 'lodash';
+
+import { Chain, IChain } from './chain';
 export interface IStore {
-  getParticipant(signingAddress: string): Participant;
   getEntry(channelId: string): ChannelStoreEntry;
+  getParticipant(signingAddress: string): Participant;
+  getHoldings: IChain['getHoldings'];
 
   findLedgerChannelId(participants: string[]): string | undefined;
   signedByMe(state: State): boolean;
@@ -16,7 +19,7 @@ export interface IStore {
   /*
   Store modifiers
   */
-  setParticipant(participant: Participant): void;
+  deposit: IChain['deposit'];
   initializeChannel(entry: ChannelStoreEntry): void;
   sendState(state: State): void;
   sendOpenChannel(state: State): void;
@@ -27,12 +30,6 @@ export interface IStore {
 
   signState(state: State): SignedState;
 
-  deposit(channelId: string, amount: string, expectedHeld: string): Promise<void>;
-  getHoldings(channelId: string): Promise<string>;
-
-  onDepositEvent(
-    listener: (amount: string, channelId: string, holdings: string) => void
-  ): () => void;
   getNextNonce(participants: string[]): string;
   useNonce(participants: string[], nonce): void;
   nonceOk(participants: string[], nonce: string): boolean;
@@ -51,53 +48,33 @@ export type Constructor = Partial<{
   store: ChannelStore;
   privateKeys: Record<string, string>;
   nonces: Record<string, string>;
+  chain: Chain;
 }>;
 export class Store implements IStore {
   public static equals(left: any, right: any) {
-    return JSON.stringify(left) === JSON.stringify(right);
+    return _.isEqual(left, right);
   }
 
   private _store: ChannelStore;
   private _privateKeys: Record<string, string>;
   private _nonces: Record<string, string> = {};
   private _participants: Record<string, Participant> = {};
+  private _chain: IChain;
 
   constructor(args?: Constructor) {
     const { store, privateKeys } = args || {};
     this._store = store || {};
     this._privateKeys = privateKeys || {};
+
+    this._chain = args?.chain || new Chain();
   }
 
-  public async deposit(channelId: string, amount: string, expectedHeld: string): Promise<void> {
-    // NO OP
-  }
-  public onDepositEvent(listener: (amount: string, channelId: string, holdings: string) => void) {
-    return () => {};
+  public async getHoldings(channelId: string) {
+    return await this._chain.getHoldings(channelId);
   }
 
-  public setParticipant(participant: Participant) {
-    /*
-    TODO: There is a security flaw around naively setting participants like so: if Eve learn's
-    Alice's participant ID, then Eve can coerce Bob's wallet to store
-    {
-      participantId: 'alice',
-      signingAddress: aliceWallet.signingAddress,
-      destination: eveWallet.destination
-    }
-    */
-    if (this._participants[participant.signingAddress]) {
-      console.warn(`Participant already exists with signing address ${participant.signingAddress}`);
-      return;
-    }
-
-    this._participants[participant.signingAddress] = participant;
-  }
-
-  public getParticipant(signingAddress: string): Participant {
-    if (!this._participants[signingAddress]) {
-      throw new Error(`Participant not found for ${signingAddress}`);
-    }
-    return this._participants[signingAddress];
+  public async deposit(channelId: string, expectedHeld: string, amount: string) {
+    return await this._chain.deposit(channelId, expectedHeld, amount);
   }
 
   public getEntry(channelId: string): ChannelStoreEntry {
@@ -108,9 +85,14 @@ export class Store implements IStore {
     return new ChannelStoreEntry(this._store[channelId]);
   }
 
-  public maybeGetEntry(channelId: string): ChannelStoreEntry | false {
-    const entry = this._store[channelId];
-    return !!entry && new ChannelStoreEntry(entry);
+  public getParticipant(signingAddress: string): Participant {
+    const p = _.flatten(Object.values(this._store).map(e => e.participants)).find(
+      p => p.signingAddress === signingAddress
+    );
+    if (!p) {
+      throw 'No participant found';
+    }
+    return p;
   }
 
   public getPrivateKey(signingAddresses: string[]): string {
@@ -152,7 +134,6 @@ export class Store implements IStore {
 
     const { participants, channelNonce } = entry.channel;
     if (this.nonceOk(participants, channelNonce)) {
-      data.participants.map(p => this.setParticipant(p));
       this._store[entry.channelId] = entry.args;
       this.useNonce(participants, channelNonce);
     } else {
@@ -166,16 +147,15 @@ export class Store implements IStore {
     const channelId = getChannelId(state.channel);
 
     // 2. Sign & store the state
-    const signedStates: SignedState[] = [this.signState(state)];
-    this.updateOrCreateEntry(channelId, signedStates);
+    const { recipients, states } = this.updateEntry(channelId, [this.signState(state)]);
 
     // 3. Send the message
     const message: AddressableMessage = {
       type: 'SendStates',
-      signedStates,
+      signedStates: states,
       to: 'BLANK',
     };
-    this.sendMessage(message, this.recipients(state));
+    this.sendMessage(message, recipients);
   }
 
   public sendOpenChannel(state: State) {
@@ -185,7 +165,7 @@ export class Store implements IStore {
 
     // 2. Sign & store the state
     const signedState: SignedState = this.signState(state);
-    const { recipients, participants } = this.updateOrCreateEntry(channelId, [signedState]);
+    const { recipients, participants } = this.updateEntry(channelId, [signedState]);
 
     // 3. Send the message
     const message: AddressableMessage = {
@@ -211,12 +191,6 @@ export class Store implements IStore {
     };
   }
 
-  private recipients(state: State): string[] {
-    const privateKey = this.getPrivateKey(state.channel.participants);
-    const { address } = new ethers.Wallet(privateKey);
-    return state.channel.participants.filter(p => p !== address);
-  }
-
   protected sendMessage(message: any, recipients: string[]) {
     recipients.forEach(to => messageService.sendMessage({ ...message, to }));
   }
@@ -227,14 +201,10 @@ export class Store implements IStore {
       const channelId = getChannelId(channel);
 
       // TODO: validate transition
-      this.updateOrCreateEntry(channelId, signedStates);
+      this.updateEntry(channelId, signedStates);
     } catch (e) {
       throw e;
     }
-  }
-
-  public async getHoldings(channelId: string): Promise<string> {
-    return '0x0';
   }
 
   // Nonce management
@@ -260,28 +230,9 @@ export class Store implements IStore {
     return gt(nonce, this._nonces[this.key(participants)] || -1);
   }
 
-  protected updateOrCreateEntry(channelId: string, states: SignedState[]): ChannelStoreEntry {
-    // TODO: This currently assumes that support comes from consensus on a single state
-    const entry = this.maybeGetEntry(channelId);
-    if (entry) {
-      states = merge(states, entry.states);
-      this._store[channelId] = { ...this._store[channelId], states };
-    } else {
-      const { participants, channelNonce } = states[0].state.channel;
-      this.useNonce(participants, channelNonce);
-
-      const { channel } = states[0].state;
-      const entryParticipants: Participant[] = participants.map(signingAddress =>
-        this.getParticipant(signingAddress)
-      );
-      const privateKey = this.getPrivateKey(participants);
-      this._store[channelId] = {
-        states,
-        privateKey,
-        participants: entryParticipants,
-        channel,
-      };
-    }
+  protected updateEntry(channelId: string, states: SignedState[]): ChannelStoreEntry {
+    const entry = this.getEntry(channelId);
+    this._store[channelId] = { ...entry, states: merge(states, entry.states) };
 
     return new ChannelStoreEntry(this._store[channelId]);
   }
@@ -300,7 +251,10 @@ export function merge(left: SignedState[], right: SignedState[]): SignedState[] 
     }
   });
 
-  return left;
+  const latestSupportedTurnNum =
+    left.filter(supported).sort(s => -s.state.turnNum)[0]?.state?.turnNum || 0;
+
+  return left.filter(s => s.state.turnNum >= latestSupportedTurnNum);
 }
 
 // The store would send this action whenever the channel is updated

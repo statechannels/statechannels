@@ -57,10 +57,7 @@ const determineLedgerChannel = {
 const createNewLedger = {
   invoke: {
     src: 'createNullChannel',
-    data: (_, { data }: DoneInvokeEvent<CreateNullChannel.Init>) => ({
-      channel: data.channel,
-      outcome: data.outcome,
-    }),
+    data: (_, { data }: DoneInvokeEvent<CreateNullChannel.Init>) => data,
     onDone: { target: 'success', actions: assignLedgerChannelId },
     autoForward: true,
   },
@@ -85,10 +82,7 @@ const fundLedger = {
     directFunding: {
       invoke: {
         src: 'directFunding',
-        data: (
-          { ledgerChannelId }: LedgerExists,
-          event: DoneInvokeEvent<Allocation>
-        ): DirectFunding.Init => ({ channelId: ledgerChannelId, minimalAllocation: event.data }),
+        data: (_, { data }: DoneInvokeEvent<DirectFunding.Init>): DirectFunding.Init => data,
         onDone: 'done',
         autoForward: true,
       },

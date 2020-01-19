@@ -1,5 +1,7 @@
 import * as xstate from 'xstate';
 import { pretty } from '.';
+import { Actor } from 'xstate';
+import { Process } from './protocols/wallet/protocol';
 
 export function log(cond: boolean, message: string) {
   if (!cond) {
@@ -27,7 +29,7 @@ export function addLogs(
           pretty({
             supervisor: supervisorState,
             service: service.id,
-            TRANSITION: { state: state.value },
+            state: invokedState({ state } as any),
           })
         )
       )
@@ -43,4 +45,30 @@ export function addLogs(
   });
 
   return process;
+}
+
+export function processStates(state): string {
+  const vals = state.context.processes.map((p: Process) => {
+    return [`  PROCESS: ${p.id}`]
+      .concat([`  STATE: ${JSON.stringify(p.ref.state.value)}`])
+      .concat(
+        Object.values(p.ref.state.children).map(child => {
+          return invokedState(child);
+        })
+      )
+      .join('\n');
+  });
+
+  return `WALLET: ${state.context.id}\n${vals}`;
+}
+export function invokedState(actor: Actor, prefix = '    '): string {
+  if (actor.state) {
+    const childState = Object.values(actor.state.children).map((child: Actor) =>
+      invokedState(child, prefix.concat('  '))
+    );
+
+    return [`${prefix}${JSON.stringify(actor.state.value)}\n`].concat(childState).join('\n');
+  } else {
+    return `${prefix}${actor.id}\n`;
+  }
 }
