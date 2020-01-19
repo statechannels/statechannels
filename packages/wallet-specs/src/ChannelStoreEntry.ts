@@ -119,6 +119,6 @@ export class ChannelStoreEntry implements IChannelStoreEntry {
   }
 
   get recipients(): string[] {
-    return this.channel.participants.filter(p => p !== this.ourAddress);
+    return this.participants.slice(this.ourIndex, this.ourIndex + 1).map(p => p.participantId);
   }
 }

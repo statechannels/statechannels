@@ -113,7 +113,6 @@ export function machine(store: IStore, context: Init) {
       throw new Error('Process exists');
     }
 
-    event.participants.map(p => store.setParticipant(p));
     const joinChannelMachine = JoinChannel.machine(store, { channelId });
     const walletProcess: Process = {
       id: processId,

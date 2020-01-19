@@ -5,7 +5,6 @@ import { AddressableMessage, FundingStrategyProposed } from './wire-protocol';
 import { State } from '@statechannels/nitro-protocol';
 import { getStateSignerAddress, signState } from '@statechannels/nitro-protocol/lib/src/signatures';
 export interface IStore {
-  getParticipant(signingAddress: string): Participant;
   getEntry(channelId: string): ChannelStoreEntry;
 
   findLedgerChannelId(participants: string[]): string | undefined;
@@ -15,7 +14,6 @@ export interface IStore {
   /*
   Store modifiers
   */
-  setParticipant(participant: Participant): void;
   initializeChannel(entry: ChannelStoreEntry): void;
   sendState(state: State): void;
   sendOpenChannel(state: State): void;
@@ -53,37 +51,11 @@ export class Store implements IStore {
   private _store: ChannelStore;
   private _privateKeys: Record<string, string>;
   private _nonces: Record<string, string> = {};
-  private _participants: Record<string, Participant> = {};
 
   constructor(args?: Constructor) {
     const { store, privateKeys } = args || {};
     this._store = store || {};
     this._privateKeys = privateKeys || {};
-  }
-
-  public setParticipant(participant: Participant) {
-    /*
-    TODO: There is a security flaw around naively setting participants like so: if Eve learn's
-    Alice's participant ID, then Eve can coerce Bob's wallet to store
-    {
-      participantId: 'alice',
-      signingAddress: aliceWallet.signingAddress,
-      destination: eveWallet.destination
-    }
-    */
-    if (this._participants[participant.signingAddress]) {
-      console.warn(`Participant already exists with signing address ${participant.signingAddress}`);
-      return;
-    }
-
-    this._participants[participant.signingAddress] = participant;
-  }
-
-  public getParticipant(signingAddress: string): Participant {
-    if (!this._participants[signingAddress]) {
-      throw new Error(`Participant not found for ${signingAddress}`);
-    }
-    return this._participants[signingAddress];
   }
 
   public getEntry(channelId: string): ChannelStoreEntry {
@@ -138,7 +110,6 @@ export class Store implements IStore {
 
     const { participants, channelNonce } = entry.channel;
     if (this.nonceOk(participants, channelNonce)) {
-      data.participants.map(p => this.setParticipant(p));
       this._store[entry.channelId] = entry.args;
       this.useNonce(participants, channelNonce);
     } else {
