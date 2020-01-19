@@ -66,11 +66,6 @@ export class Store implements IStore {
     return new ChannelStoreEntry(this._store[channelId]);
   }
 
-  public maybeGetEntry(channelId: string): ChannelStoreEntry | false {
-    const entry = this._store[channelId];
-    return !!entry && new ChannelStoreEntry(entry);
-  }
-
   public getPrivateKey(signingAddresses: string[]): string {
     const myAddress = signingAddresses.find(id => this._privateKeys[id]);
     if (!myAddress) {
@@ -124,7 +119,7 @@ export class Store implements IStore {
 
     // 2. Sign & store the state
     const signedStates: SignedState[] = [this.signState(state)];
-    this.updateOrCreateEntry(channelId, signedStates);
+    this.updateEntry(channelId, signedStates);
 
     // 3. Send the message
     const message: AddressableMessage = {
@@ -142,7 +137,7 @@ export class Store implements IStore {
 
     // 2. Sign & store the state
     const signedState: SignedState = this.signState(state);
-    const { recipients, participants } = this.updateOrCreateEntry(channelId, [signedState]);
+    const { recipients, participants } = this.updateEntry(channelId, [signedState]);
 
     // 3. Send the message
     const message: AddressableMessage = {
@@ -183,7 +178,7 @@ export class Store implements IStore {
       const channelId = getChannelId(channel);
 
       // TODO: validate transition
-      this.updateOrCreateEntry(channelId, signedStates);
+      this.updateEntry(channelId, signedStates);
     } catch (e) {
       throw e;
     }
@@ -212,28 +207,9 @@ export class Store implements IStore {
     return gt(nonce, this._nonces[this.key(participants)] || -1);
   }
 
-  protected updateOrCreateEntry(channelId: string, states: SignedState[]): ChannelStoreEntry {
-    // TODO: This currently assumes that support comes from consensus on a single state
-    const entry = this.maybeGetEntry(channelId);
-    if (entry) {
-      states = merge(states, entry.states);
-      this._store[channelId] = { ...this._store[channelId], states };
-    } else {
-      const { participants, channelNonce } = states[0].state.channel;
-      this.useNonce(participants, channelNonce);
-
-      const { channel } = states[0].state;
-      const entryParticipants: Participant[] = participants.map(signingAddress =>
-        this.getParticipant(signingAddress)
-      );
-      const privateKey = this.getPrivateKey(participants);
-      this._store[channelId] = {
-        states,
-        privateKey,
-        participants: entryParticipants,
-        channel,
-      };
-    }
+  protected updateEntry(channelId: string, states: SignedState[]): ChannelStoreEntry {
+    const entry = this.getEntry(channelId);
+    this._store[channelId] = { ...entry, states: merge(states, entry.states) };
 
     return new ChannelStoreEntry(this._store[channelId]);
   }
