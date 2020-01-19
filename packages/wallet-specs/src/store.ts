@@ -4,6 +4,8 @@ import { messageService } from './messaging';
 import { AddressableMessage, FundingStrategyProposed } from './wire-protocol';
 import { State } from '@statechannels/nitro-protocol';
 import { getStateSignerAddress, signState } from '@statechannels/nitro-protocol/lib/src/signatures';
+import _ from 'lodash';
+
 export interface IStore {
   getEntry(channelId: string): ChannelStoreEntry;
 
@@ -45,7 +47,7 @@ export type Constructor = Partial<{
 }>;
 export class Store implements IStore {
   public static equals(left: any, right: any) {
-    return JSON.stringify(left) === JSON.stringify(right);
+    return _.isEqual(left, right);
   }
 
   private _store: ChannelStore;
