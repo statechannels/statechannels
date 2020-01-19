@@ -1,4 +1,4 @@
-import { assign, DoneInvokeEvent, InvokeCreator, Machine, MachineConfig, sendParent } from 'xstate';
+import { assign, DoneInvokeEvent, Machine, MachineConfig, sendParent } from 'xstate';
 import { AdvanceChannel, Funding } from '..';
 import {
   Channel,
@@ -37,10 +37,17 @@ export const advanceChannelArgs = (i: 1 | 3) => ({
 });
 const initializeChannel = {
   invoke: {
-    src: 'setChannelId',
+    src: 'initializeChannel',
+    onDone: 'sendOpenChannelMessage',
+  },
+  exit: assignChannelId,
+};
+
+const sendOpenChannelMessage = {
+  invoke: {
+    src: 'sendOpenChannelMessage',
     onDone: 'preFundSetup',
   },
-  exit: [assignChannelId, 'sendOpenChannelMessage'],
 };
 
 const preFundSetup = {
@@ -85,6 +92,7 @@ export const config: MachineConfig<Context, any, any> = {
   initial: 'initializeChannel',
   states: {
     initializeChannel,
+    sendOpenChannelMessage,
     preFundSetup,
     abort,
     funding,
@@ -93,12 +101,8 @@ export const config: MachineConfig<Context, any, any> = {
   },
 };
 
-export const mockOptions = {
-  // actions: { sendOpenChannelMessage },
-};
-
 export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => {
-  const setChannelId: InvokeCreator<any> = (ctx: Init): Promise<SetChannel> => {
+  async function initializeChannel(ctx: Init): Promise<SetChannel> {
     const participants = ctx.participants.map(p => p.signingAddress);
     const channelNonce = store.getNextNonce(participants);
     const channel: Channel = {
@@ -128,32 +132,29 @@ export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => 
 
     const { channelId } = entry;
 
-    return new Promise(resolve => {
-      resolve({ type: 'CHANNEL_INITIALIZED', channelId });
-    });
-  };
-  const guards = {};
-  const actions = {
-    sendOpenChannelMessage: ({ channelId }: SetChannel) => {
-      const state = store.getEntry(channelId).latestState;
-      if (state.turnNum !== 0) {
-        throw new Error('Wrong state');
-      }
+    return {
+      type: 'CHANNEL_INITIALIZED',
+      channelId,
+    };
+  }
 
-      store.sendOpenChannel(state);
-    },
+  const sendOpenChannelMessage = async ({ channelId }: ChannelSet) => {
+    const state = store.getEntry(channelId).latestState;
+    if (state.turnNum !== 0) {
+      throw new Error('Wrong state');
+    }
+
+    store.sendOpenChannel(state);
   };
+
   const services = {
-    setChannelId,
+    initializeChannel,
+    sendOpenChannelMessage,
     funding: Funding.machine(store),
     advanceChannel: AdvanceChannel.machine(store),
   };
 
-  const options = {
-    guards,
-    actions,
-    services,
-  };
+  const options = { services };
 
-  return Machine(config, options).withContext(init);
+  return Machine(config).withConfig(options, init);
 };
