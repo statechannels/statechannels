@@ -121,7 +121,7 @@ export class Store implements IStore {
 
     // 2. Sign & store the state
     const signedStates: SignedState[] = [this.signState(state)];
-    this.updateEntry(channelId, signedStates);
+    const { recipients } = this.updateEntry(channelId, signedStates);
 
     // 3. Send the message
     const message: AddressableMessage = {
@@ -129,7 +129,7 @@ export class Store implements IStore {
       signedStates,
       to: 'BLANK',
     };
-    this.sendMessage(message, this.recipients(state));
+    this.sendMessage(message, recipients);
   }
 
   public sendOpenChannel(state: State) {
@@ -163,11 +163,6 @@ export class Store implements IStore {
       state,
       signatures: [signState(state, privateKey).signature],
     };
-  }
-
-  private recipients(state: State): string[] {
-    const privateKey = this.getPrivateKey(state.channel.participants);
-    return state.channel.participants.filter(p => p !== privateKey);
   }
 
   protected sendMessage(message: any, recipients: string[]) {
