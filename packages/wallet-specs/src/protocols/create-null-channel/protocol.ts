@@ -74,13 +74,9 @@ export const machine: MachineFactory<Init, any> = (store, context: Init) => {
     // - the nonce is used,
     // - that we have the private key for one of the signers, etc
 
-    // TODO: Use the correct participant ids
-    const participants: Participant[] = channel.participants.map(p => ({
-      destination: p,
-      participantId: p,
-      signingAddress: p,
-    }));
-    const privateKey = store.getPrivateKey(participants.map(p => p.participantId));
+    // TODO: Determine how participants should be managed
+    const participants: Participant[] = channel.participants.map(p => store.getParticipant(p));
+    const privateKey = store.getPrivateKey(participants.map(p => p.signingAddress));
     const states: SignedState[] = [
       {
         state: {

@@ -8,6 +8,7 @@ import _ from 'lodash';
 
 export interface IStore {
   getEntry(channelId: string): ChannelStoreEntry;
+  getParticipant(signingAddress: string): Participant;
 
   findLedgerChannelId(participants: string[]): string | undefined;
   signedByMe(state: State): boolean;
@@ -66,6 +67,16 @@ export class Store implements IStore {
     }
 
     return new ChannelStoreEntry(this._store[channelId]);
+  }
+
+  public getParticipant(signingAddress: string): Participant {
+    const p = _.flatten(Object.values(this._store).map(e => e.participants)).find(
+      p => p.signingAddress === signingAddress
+    );
+    if (!p) {
+      throw 'No participant found';
+    }
+    return p;
   }
 
   public getPrivateKey(signingAddresses: string[]): string {
