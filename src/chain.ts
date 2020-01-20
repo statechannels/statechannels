@@ -2,11 +2,22 @@ import {ContractAbis, createETHDepositTransaction} from '@statechannels/nitro-pr
 import {getProvider} from './utils/contract-utils';
 import {ethers} from 'ethers';
 import {ETH_ASSET_HOLDER_ADDRESS} from './constants';
-import {IChain, ChainEvent} from '@statechannels/wallet-protocols/src/chain';
+import {
+  IChain,
+  ChainEvent,
+  ChainEventType,
+  ChainEventListener
+} from '@statechannels/wallet-protocols/src/chain';
 import {bigNumberify} from 'ethers/utils';
 
 const EthAssetHolderInterface = new ethers.utils.Interface(ContractAbis.EthAssetHolder);
 export class ChainWatcher implements IChain {
+  private _contract: ethers.Contract | undefined;
+  public async initialize() {
+    const provider = getProvider();
+    const signer = provider.getSigner();
+    this._contract = new ethers.Contract(ETH_ASSET_HOLDER_ADDRESS, EthAssetHolderInterface, signer);
+  }
   public async deposit(
     channelId: string,
     expectedHeld: string,
@@ -39,6 +50,28 @@ export class ChainWatcher implements IChain {
     );
     const amount: ethers.utils.BigNumber = await contract.holdings(channelId);
     return amount.toHexString();
+  }
+  public on(eventType: ChainEventType, listener: ChainEventListener) {
+    if (eventType !== 'DEPOSITED') {
+      throw new Error(`No support for ${eventType}`);
+    }
+    if (!this._contract) {
+      throw new Error('Chain must be initialized before being used');
+    } else {
+      const contractListener = event => {
+        const chainEvent: ChainEvent = {
+          type: 'DEPOSITED',
+          channelId: event.destination,
+          amount: event.amountDeposited,
+          total: event.destinationHoldings
+        };
+        listener(chainEvent);
+      };
+      this._contract.on('Deposited', contractListener);
+      return () => {
+        this._contract?.removeListener('Deposited', contractListener);
+      };
+    }
   }
 }
 
