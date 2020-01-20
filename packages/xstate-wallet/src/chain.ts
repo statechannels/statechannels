@@ -58,12 +58,12 @@ export class ChainWatcher implements IChain {
     if (!this._contract) {
       throw new Error('Chain must be initialized before being used');
     } else {
-      const contractListener = event => {
+      const contractListener = (fromAddress, toAddress, value, event) => {
         const chainEvent: ChainEvent = {
           type: 'DEPOSITED',
-          channelId: event.destination,
-          amount: event.amountDeposited,
-          total: event.destinationHoldings
+          channelId: event.args.destination,
+          amount: event.args.amountDeposited,
+          total: event.args.destinationHoldings
         };
         listener(chainEvent);
       };

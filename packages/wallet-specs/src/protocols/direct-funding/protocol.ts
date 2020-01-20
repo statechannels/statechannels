@@ -132,7 +132,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
       const allocation = minimalAllocation[i];
       if (entry.ourIndex === i) {
         return {
-          channelId: allocation.destination,
+          channelId,
           depositAt: totalBeforeDeposit,
           totalAfterDeposit: bigNumberify(totalBeforeDeposit)
             .add(allocation.amount)
