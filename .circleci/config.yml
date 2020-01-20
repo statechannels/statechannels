@@ -140,6 +140,7 @@ jobs:
       - notify_slack
 
   test:
+    resource_class: large
     <<: *defaults
     steps:
       - checkout
@@ -298,4 +299,3 @@ workflows:
           filters:
             branches:
               only: master
-
