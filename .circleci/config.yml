@@ -128,7 +128,15 @@ jobs:
       - attach_workspace:
           at: /home/circleci/project
       - run: yarn lint:check
-      - run: yarn build:ci
+      - run:
+          name: build
+          command: |
+            if [ "${CIRCLE_BRANCH}" = "master" ]
+            then
+                yarn build:ci
+            else
+                yarn build:ci:incremental
+            fi
       - notify_slack
 
   test:
@@ -140,7 +148,14 @@ jobs:
       - attach_workspace:
           at: /home/circleci/project
       - run:
-          command: yarn test:ci
+          name: test
+          command: |
+            if [ "${CIRCLE_BRANCH}" = "master" ]
+            then
+              yarn test:ci
+            else
+              yarn test:ci:incremental
+            fi
           no_output_timeout: 30m
       - upload_logs:
           file: test-stats
@@ -231,14 +246,23 @@ jobs:
           file: integration-test-stats
       - notify_slack
 
+  release-incremental:
+    <<: *defaults
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /home/circleci/project
+      - run: yarn build:netlify:incremental
+      - run: yarn release:netlify:incremental
+
   release:
     <<: *defaults
     steps:
       - checkout
       - attach_workspace:
           at: /home/circleci/project
-      - run: yarn build:netlify:ci
-      - run: yarn release:netlify:ci
+      - run: yarn build:netlify
+      - run: yarn release:netlify
 
 workflows:
   statechannels:
@@ -261,6 +285,17 @@ workflows:
           requires:
             - prepare
 
+      - release-incremental:
+          requires:
+            - prepare
+          filters:
+            branches:
+              ignore: master
+
       - release:
           requires:
             - prepare
+          filters:
+            branches:
+              only: master
+
