@@ -144,12 +144,16 @@ async function handleCreateChannelMessage(
 
 async function getChannelInfo(channelId: string, channelEntry: ChannelStoreEntry) {
   const {participants, latestState} = channelEntry;
-  const {appData, appDefinition, turnNum} = latestState;
+  const {appData, appDefinition, turnNum, channel} = latestState;
 
   // TODO: Status and funding
   const funding = [];
-  const status = turnNum === 0 ? 'opening' : 'running';
-
+  let status = 'running';
+  if (turnNum === 0) {
+    status = 'proposed';
+  } else if (turnNum < channel.participants.length - 1) {
+    status = 'opening';
+  }
   return {
     participants,
     allocations: createJsonRpcAllocationsFromOutcome(latestState.outcome),
