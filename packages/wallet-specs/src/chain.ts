@@ -1,13 +1,17 @@
 import { add } from '.';
 export type ChainEventListener = (event: ChainEvent) => void;
-type ChainEventType = ChainEvent['type'];
+export type ChainEventType = ChainEvent['type'];
 export interface IChain {
+  initialize(): Promise<void>;
   getHoldings: (channelId: string) => Promise<string>;
   deposit: (channelId: string, expectedHeld: string, amount: string) => Promise<Deposited | Revert>;
   on: (chainEventType: ChainEventType, listener: ChainEventListener) => () => void;
 }
 
 export class Chain implements IChain {
+  public async initialize(): Promise<void> {
+    // Do nothing
+  }
   protected _holdings: { [channelId: string]: string };
 
   constructor(holdings?) {

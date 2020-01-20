@@ -37,13 +37,4 @@ export class Store extends BaseStore implements IStore {
       this._messageSender(recipient, message);
     });
   }
-
-  // public onDepositEvent(
-  //   listener: (amount: string, channelId: string, holdings: string) => void
-  // ): () => void {
-  //   getEthAssetHolderContract().then(contract => {
-  //     contract.on('Deposited', listener);
-  //   });
-  //   return () => {};
-  // }
 }
