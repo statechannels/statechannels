@@ -11,6 +11,7 @@ import {
 } from '@statechannels/nitro-protocol/lib/src/contract/outcome';
 import { Signature, hexZeroPad } from 'ethers/utils';
 import { AddressZero } from 'ethers/constants';
+import { bigNumberify } from 'ethers/utils';
 export { Store } from './store';
 export interface Balance {
   address: string;
@@ -78,15 +79,17 @@ export interface Entry {
 type numberish = string | number | undefined;
 type MathOp = (a: numberish, b: numberish) => string;
 export const add: MathOp = (a: numberish, b: numberish) =>
-  (Number(a || 0) + Number(b || 0)).toString();
+  bigNumberify(a || 0)
+    .add(b || 0)
+    .toHexString();
 export const subtract: MathOp = (a: numberish, b: numberish) => {
-  const numA = Number(a);
-  const numB = Number(b);
+  const numA = bigNumberify(a || 0);
+  const numB = bigNumberify(b || 0);
 
-  if (numB > numA) {
+  if (numB.gt(numA)) {
     throw new Error('Unsafe subtraction');
   }
-  return (numA - numB).toString();
+  return numA.sub(numB).toHexString();
 };
 
 export const max: MathOp = (a: numberish, b: numberish) =>

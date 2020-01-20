@@ -125,7 +125,7 @@ export const machine: MachineFactory<Init, any> = (store: IStore, context: Init)
     const currentHoldings = await store.getHoldings(context.channelId);
     const amount = bigNumberify(context.totalAfterDeposit).sub(currentHoldings);
     if (amount.gt(0)) {
-      await store.deposit(context.channelId, amount.toHexString(), currentHoldings);
+      await store.deposit(context.channelId, currentHoldings, amount.toHexString());
     }
   };
   const safeToDeposit = (context: CurrentHoldingsSet) => {

@@ -11,9 +11,10 @@ import {
   eq,
 } from '../../';
 import { Allocation, Outcome } from '@statechannels/nitro-protocol';
-import { Machine, DoneInvokeEvent } from 'xstate';
+import { Machine, DoneInvokeEvent, MachineConfig } from 'xstate';
 import { SupportState, Depositing } from '..';
 import _ from 'lodash';
+import { bigNumberify } from 'ethers/utils';
 
 const PROTOCOL = 'direct-funding';
 const success = { type: FINAL };
@@ -79,13 +80,13 @@ function getDetaAndInvoke<T>(data: string, src: string, onDone: string) {
   };
 }
 
-export const config = {
+export const config: MachineConfig<any, any, any> = {
   key: PROTOCOL,
   initial: 'checkCurrentLevel',
   states: {
     checkCurrentLevel,
     updatePrefundOutcome: getDetaAndInvoke('getPrefundOutcome', 'supportState', 'funding'),
-    funding: { invoke: { src: 'fundingService', onDone: 'updatePostfundOutcome' } },
+    funding: getDetaAndInvoke('getDepositingInfo', 'fundingService', 'updatePostfundOutcome'),
     updatePostfundOutcome: getDetaAndInvoke('getPostfundOutcome', 'supportState', 'success'),
     success,
     failure,
@@ -96,6 +97,7 @@ type Services = {
   checkCurrentLevel(ctx: Init): Promise<void>;
   getPrefundOutcome(ctx: Init): Promise<SupportState.Init>;
   getPostfundOutcome(ctx: Init): Promise<SupportState.Init>;
+  getDepositingInfo(ctx: Init): Promise<Depositing.Init>;
   fundingService: any;
   supportState: any;
 };
@@ -120,7 +122,31 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
       throw new Error('Channel underfunded');
     }
   }
+  async function getDepositingInfo({
+    minimalAllocation,
+    channelId,
+  }: Init): Promise<Depositing.Init> {
+    const entry = store.getEntry(channelId);
+    let totalBeforeDeposit = '0x0';
+    for (let i = 0; i < minimalAllocation.length; i++) {
+      const allocation = minimalAllocation[i];
+      if (entry.ourIndex === i) {
+        return {
+          channelId: allocation.destination,
+          depositAt: totalBeforeDeposit,
+          totalAfterDeposit: bigNumberify(totalBeforeDeposit)
+            .add(allocation.amount)
+            .toHexString(),
+        };
+      } else {
+        totalBeforeDeposit = bigNumberify(allocation.amount)
+          .add(totalBeforeDeposit)
+          .toHexString();
+      }
+    }
 
+    throw Error(`Could not find an allocation for participant id ${entry.ourIndex}`);
+  }
   async function getPrefundOutcome({
     channelId,
     minimalAllocation,
@@ -151,6 +177,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
     supportState: SupportState.machine(store),
     fundingService: Depositing.machine(store),
     getPostfundOutcome,
+    getDepositingInfo,
   };
 
   const options: Options = { services };
@@ -167,7 +194,10 @@ function minimalOutcome(currentOutcome: Outcome, minimalEthAllocation: Allocatio
         .map(i => i.amount)
         .reduce(add, '0');
 
-      return { destination, amount: max(subtract(amount, currentlyAllocated), '0') };
+      const amountLeft = bigNumberify(amount).gt(currentlyAllocated)
+        ? subtract(amount, currentlyAllocated)
+        : '0';
+      return { destination, amount: amountLeft };
     })
   );
 
