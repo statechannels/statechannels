@@ -98,6 +98,7 @@ commands:
 jobs:
   prepare:
     <<: *defaults
+    resource_class: large
     steps:
       - checkout
       - log_stats:
@@ -140,8 +141,8 @@ jobs:
       - notify_slack
 
   test:
-    resource_class: large
     <<: *defaults
+    resource_class: large
     steps:
       - checkout
       - log_stats:
