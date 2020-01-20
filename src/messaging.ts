@@ -151,7 +151,7 @@ async function getChannelInfo(channelId: string, channelEntry: ChannelStoreEntry
   let status = 'running';
   if (turnNum === 0) {
     status = 'proposed';
-  } else if (turnNum < channel.participants.length - 1) {
+  } else if (turnNum < 2 * channel.participants.length - 1) {
     status = 'opening';
   }
   return {
