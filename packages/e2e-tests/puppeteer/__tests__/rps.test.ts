@@ -11,8 +11,8 @@ describe('Playing a game of RPS', () => {
   let rpsTabB: Page;
 
   beforeAll(async () => {
-    browserA = await setUpBrowser(true);
-    browserB = await setUpBrowser(true);
+    browserA = await setUpBrowser(false);
+    browserB = await setUpBrowser(false);
 
     rpsTabA = (await browserA.pages())[0];
     rpsTabB = (await browserB.pages())[0];
@@ -31,7 +31,7 @@ describe('Playing a game of RPS', () => {
     }
   });
 
-  it('can play a game end to end', async () => {
+  it('can play a game end to end, and start a second game', async () => {
     await clickThroughRPSUI(rpsTabA, rpsTabB);
     expect(await (await rpsTabA.waitFor('h1.mb-5')).evaluate(el => el.textContent)).toMatch(
       'You lost'
@@ -39,17 +39,13 @@ describe('Playing a game of RPS', () => {
     expect(await (await rpsTabB.waitFor('h1.mb-5')).evaluate(el => el.textContent)).toMatch(
       'You won!'
     );
-  });
 
-  it('can then withdraw funds', async () => {
     await clickThroughResignationUI(rpsTabA, rpsTabB);
 
     // Should be in the lobby
     expect(await rpsTabB.waitForXPath('//button[contains(., "Create a game")]')).toBeDefined();
     expect(await rpsTabA.waitForXPath('//button[contains(., "Create a game")]')).toBeDefined();
-  });
 
-  it('can play a second game', async () => {
     await clickThroughRPSUI(rpsTabA, rpsTabB);
     expect(await (await rpsTabA.waitFor('h1.mb-5')).evaluate(el => el.textContent)).toMatch(
       'You lost'
