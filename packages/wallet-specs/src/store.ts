@@ -27,7 +27,7 @@ export interface IStore {
 
   // TODO: set funding
   // setFunding(channelId: string, funding: Funding): void;
-
+  on: IChain['on'];
   signState(state: State): SignedState;
 
   getNextNonce(participants: string[]): string;
@@ -59,7 +59,7 @@ export class Store implements IStore {
   private _privateKeys: Record<string, string>;
   private _nonces: Record<string, string> = {};
 
-  private _chain: IChain;
+  protected _chain: IChain;
 
   constructor(args?: Constructor) {
     const { store, privateKeys } = args || {};
@@ -71,6 +71,9 @@ export class Store implements IStore {
 
   public async getHoldings(channelId: string) {
     return await this._chain.getHoldings(channelId);
+  }
+  public on(chainEventType, listener) {
+    return this._chain.on(chainEventType, listener);
   }
 
   public async deposit(channelId: string, expectedHeld: string, amount: string) {
