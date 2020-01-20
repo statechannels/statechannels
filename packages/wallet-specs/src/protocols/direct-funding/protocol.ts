@@ -1,6 +1,5 @@
 import {
   add,
-  max,
   subtract,
   ethAllocationOutcome,
   getEthAllocation,
@@ -8,7 +7,6 @@ import {
   Store,
   MachineFactory,
   gt,
-  eq,
 } from '../../';
 import { Allocation, Outcome } from '@statechannels/nitro-protocol';
 import { Machine, DoneInvokeEvent, MachineConfig } from 'xstate';
@@ -131,12 +129,16 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
     for (let i = 0; i < minimalAllocation.length; i++) {
       const allocation = minimalAllocation[i];
       if (entry.ourIndex === i) {
+        const fundedAt = getEthAllocation(entry.latestSupportedState.outcome)
+          .map(a => a.amount)
+          .reduce(add);
         return {
           channelId,
           depositAt: totalBeforeDeposit,
           totalAfterDeposit: bigNumberify(totalBeforeDeposit)
             .add(allocation.amount)
             .toHexString(),
+          fundedAt,
         };
       } else {
         totalBeforeDeposit = bigNumberify(allocation.amount)
@@ -147,6 +149,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
 
     throw Error(`Could not find an allocation for participant id ${entry.ourIndex}`);
   }
+
   async function getPrefundOutcome({
     channelId,
     minimalAllocation,

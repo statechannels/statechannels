@@ -9,11 +9,8 @@ export function log(cond: boolean, message: string) {
   }
 }
 
-export function debugAction(id) {
-  return (ctx, event, { state }) => {
-    const saveMe = id;
-    debugger;
-  };
+export function debugAction(ctx, event, { state }) {
+  debugger;
 }
 
 export function addLogs(

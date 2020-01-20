@@ -7,8 +7,11 @@ import { messageService } from '../../../messaging';
 import { AddressableMessage } from '../../../wire-protocol';
 import { AddressZero, HashZero } from 'ethers/constants';
 import { processStates } from '../../../utils';
+import { Chain } from '../../../chain';
 
-const logProcessStates = process.env ? state => console.log(processStates(state)) : () => {};
+const logProcessStates = state => {
+  console.log(processStates(state));
+};
 
 const wallet1 = new ethers.Wallet(
   '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318'
@@ -41,9 +44,12 @@ const createChannel: CreateChannelEvent = {
   appData: HashZero,
 };
 
+const chain = new Chain();
+
 const connect = (wallet: ethers.Wallet) => {
   const store = new Store({
     privateKeys: { [wallet.address]: wallet.privateKey },
+    chain,
   });
   const participantId =
     wallet.address === first.signingAddress ? first.participantId : second.participantId;
@@ -54,7 +60,9 @@ const connect = (wallet: ethers.Wallet) => {
   };
   const service = interpret<any, any, any>(machine(store, context));
 
-  service.onTransition(state => logProcessStates(state));
+  service.onTransition(state => {
+    setTimeout(() => logProcessStates(state), 100);
+  });
 
   messageService.on('message', ({ to, ...event }: AddressableMessage) => {
     if (to === context.id) {

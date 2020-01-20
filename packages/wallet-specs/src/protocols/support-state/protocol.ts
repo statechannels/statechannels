@@ -1,6 +1,7 @@
 import { Machine } from 'xstate';
 import { MachineFactory, outcomesEqual } from '../..';
 import { Outcome, State } from '@statechannels/nitro-protocol';
+import { debugAction } from '../../utils';
 
 const PROTOCOL = 'support-state';
 
@@ -16,9 +17,9 @@ What happens if sendState fails
 Do we abort? Or do we try to reach consensus on a later state?
 */
 const waiting = {
-  invoke: {
-    src: 'sendState',
-    onDone: { target: 'success', cond: 'supported' },
+  invoke: { src: 'sendState' },
+  on: {
+    '*': [{ target: 'success', cond: 'supported' }, { actions: debugAction }],
   },
 };
 
@@ -46,7 +47,7 @@ type Services = {
   sendState(ctx: Init): any;
 };
 type Guards = {
-  supported(ctx: Init): boolean;
+  supported(ctx: Init, e: any): boolean;
 };
 
 type Options = {
@@ -72,7 +73,7 @@ export const machine: MachineFactory<Init, any> = (store, context: Init) => {
   };
 
   const guards: Guards = {
-    supported: ({ channelId, outcome }: Init) => {
+    supported: ({ channelId, outcome }: Init, e: any) => {
       const latestEntry = store.getEntry(channelId);
       if (!latestEntry.hasSupportedState) {
         return false;

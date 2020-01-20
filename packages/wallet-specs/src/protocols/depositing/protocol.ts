@@ -1,12 +1,14 @@
-import { FINAL, MachineFactory, add } from '../..';
+import { FINAL, MachineFactory } from '../..';
 import { IStore } from '../../store';
 import { bigNumberify } from 'ethers/utils';
-import { Machine, send, assign, MachineConfig, sendParent } from 'xstate';
+import { Machine, assign, MachineConfig } from 'xstate';
+import { ChainEvent } from '../../chain';
 
 export type Init = {
   channelId: string;
   depositAt: string;
   totalAfterDeposit: string;
+  fundedAt: string;
 };
 
 enum DepositingEventType {
@@ -24,33 +26,23 @@ const watcher: MachineConfig<Init | CurrentHoldingsSet, any, any> = {
   id: MachineId.ChainWatcher,
   initial: 'watching',
   states: {
-    watching: {
-      invoke: {
-        src: 'subscribeDepositEvent',
-        onDone: {
-          actions: send(DepositingEventType.DEPOSITED, { to: MachineId.Depositor }),
-          target: 'watching',
-        },
-      },
-      on: {
-        STOP: { target: 'done' },
-      },
-    },
-    done: {
-      type: FINAL,
-    },
+    watching: { invoke: { src: 'subscribeDepositEvent' } },
+    done: { type: FINAL },
   },
+  on: { FUNDED: '.done' },
 };
 
 export const config: MachineConfig<Init | CurrentHoldingsSet, any, any> = {
   id: MachineId.Parent,
   type: 'parallel',
-
   states: {
     watcher,
     depositor: {
       initial: 'getCurrentHoldings',
-
+      on: {
+        DEPOSITED: '.getCurrentHoldings',
+        FUNDED: { target: '.done' },
+      },
       states: {
         getCurrentHoldings: {
           invoke: {
@@ -65,31 +57,15 @@ export const config: MachineConfig<Init | CurrentHoldingsSet, any, any> = {
               }),
             },
           },
-          on: {
-            DEPOSITED: { target: 'getCurrentHoldings' },
-          },
         },
         checkHoldings: {
           on: {
-            DEPOSITED: { target: 'getCurrentHoldings' },
-            '': [
-              {
-                target: 'done',
-                cond: 'funded',
-                actions: send(DepositingEventType.STOP),
-              },
-              { target: 'submitting', cond: 'safeToDeposit' },
-              { target: 'waiting' },
-            ],
+            '': [{ target: 'submitting', cond: 'safeToDeposit' }, { target: 'waiting' }],
           },
         },
-        waiting: {
-          on: {
-            '*': 'getCurrentHoldings',
-          },
-        },
+        waiting: {},
         submitting: {
-          invoke: { src: 'submitDepositTransaction', onDone: 'waiting', onError: 'failure' },
+          invoke: { src: 'submitDepositTransaction', onDone: 'done', onError: 'failure' },
         },
         done: { type: FINAL },
         failure: {
@@ -110,17 +86,21 @@ type Services = {
 
 type Guards = {
   safeToDeposit: (context: Init) => boolean;
-  funded: (context: Init) => boolean;
 };
 type Options = { services: Services; guards: Guards };
 export const machine: MachineFactory<Init, any> = (store: IStore, context: Init) => {
   const subscribeDepositEvent = (context: Init) => callback => {
-    return store.on('DEPOSITED', event => {
+    return store.on('DEPOSITED', (event: ChainEvent) => {
       if (event.type === 'DEPOSITED' && event.channelId === context.channelId) {
-        callback('DEPOSITED');
+        if (bigNumberify(event.total).gte(context.fundedAt)) {
+          callback('FUNDED');
+        } else {
+          callback(event);
+        }
       }
     });
   };
+
   const submitDepositTransaction = async (context: Init) => {
     const currentHoldings = await store.getHoldings(context.channelId);
     const amount = bigNumberify(context.totalAfterDeposit).sub(currentHoldings);
@@ -128,14 +108,12 @@ export const machine: MachineFactory<Init, any> = (store: IStore, context: Init)
       await store.deposit(context.channelId, currentHoldings, amount.toHexString());
     }
   };
+
   const safeToDeposit = (context: CurrentHoldingsSet) => {
     return bigNumberify(context.currentHoldings).gte(context.depositAt);
   };
-  const funded = (context: CurrentHoldingsSet) => {
-    return bigNumberify(context.currentHoldings).gte(context.totalAfterDeposit);
-  };
 
-  const getHoldings = (context: Init) => {
+  const getHoldings = async (context: Init) => {
     return store.getHoldings(context.channelId);
   };
 
@@ -144,7 +122,7 @@ export const machine: MachineFactory<Init, any> = (store: IStore, context: Init)
     getHoldings,
     subscribeDepositEvent,
   };
-  const guards: Guards = { safeToDeposit, funded };
+  const guards: Guards = { safeToDeposit };
   const options: Options = { services, guards };
   return Machine(config).withConfig(options, context);
 };
