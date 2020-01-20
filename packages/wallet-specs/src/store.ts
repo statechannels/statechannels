@@ -67,6 +67,8 @@ export class Store implements IStore {
     this._privateKeys = privateKeys || {};
 
     this._chain = args?.chain || new Chain();
+    // TODO: Bad form to call an async method in the constructor?
+    this._chain.initialize();
   }
 
   public async getHoldings(channelId: string) {
