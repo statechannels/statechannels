@@ -245,11 +245,12 @@ export class Store implements IStore {
 
 export function merge(left: SignedState[], right: SignedState[]): SignedState[] {
   // TODO this is horribly inefficient
+
   right.map(rightState => {
     const idx = left.findIndex(s => Store.equals(s.state, rightState.state));
     const leftState = left[idx];
     if (leftState) {
-      const signatures = [...new Set(leftState.signatures.concat(rightState.signatures))];
+      const signatures = _.uniqBy(leftState.signatures.concat(rightState.signatures), s => s.r);
       left[idx] = { ...leftState, signatures };
     } else {
       left.push(rightState);
