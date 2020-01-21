@@ -43,9 +43,9 @@ const askClient = {
     onDone: [
       {
         target: 'preFundSetup',
-        cond: ({}, event) => event.data === 'JOIN_CHANNEL',
+        cond: (_, event) => event.data === 'JOIN_CHANNEL',
       },
-      { target: 'abort', cond: ({}, event) => event.data === 'CLOSE_CHANNEL' },
+      { target: 'abort', cond: (_, event) => event.data === 'CLOSE_CHANNEL' },
     ],
   },
 };
@@ -111,7 +111,7 @@ export const config: MachineConfig<Init, any, OpenChannel | CloseChannel | Chann
 };
 
 export type Services = {
-  checkNonce({}: Init, event: OpenChannelEvent): Promise<boolean>;
+  checkNonce(_: Init, event: OpenChannelEvent): Promise<boolean>;
   askClient: any;
   funding: any;
   advanceChannel: any;

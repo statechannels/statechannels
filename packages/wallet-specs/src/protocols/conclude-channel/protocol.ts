@@ -1,9 +1,12 @@
 import { State } from '@statechannels/nitro-protocol';
+import { Machine } from 'xstate';
 
 import { store } from '../../temp-store';
 import * as LedgerDefunding from '../ledger-defunding/protocol';
 import * as VirtualDefundingAsHub from '../virtual-defunding-as-hub/protocol';
 import * as VirtualDefundingAsLeaf from '../virtual-defunding-as-leaf/protocol';
+import { MachineFactory, FINAL } from '../..';
+import { IStore } from '../../store';
 
 const PROTOCOL = 'conclude-channel';
 
@@ -34,7 +37,6 @@ function finalState({ channelId }: Init): State {
 const concludeTarget = {
   invoke: {
     src: 'supportState',
-    data: finalState.name,
   },
   onDone: [
     {
@@ -58,7 +60,6 @@ function ledgerDefundingArgs({ channelId }: Init): LedgerDefunding.Init {
 const ledgerDefunding = {
   invoke: {
     src: 'ledgerDefunding',
-    data: ledgerDefundingArgs.name,
     onDone: 'success',
   },
 };
@@ -89,18 +90,16 @@ const virtualDefunding = {
     asLeaf: {
       invoke: {
         src: 'virtualDefundingAsLeaf',
-        data: virtualDefundingAsLeafArgs.name,
         onDone: 'success',
       },
     },
     asHub: {
       invoke: {
         src: 'virtualDefundingAsHub',
-        data: virtualDefundingAsHubArgs.name,
         onDone: 'success',
       },
     },
-    success: { type: 'final' },
+    success: { type: FINAL },
   },
   onDone: 'success',
 };
@@ -112,7 +111,7 @@ export const config = {
     concludeTarget,
     virtualDefunding,
     ledgerDefunding,
-    success: { type: 'final' },
+    success: { type: FINAL },
   },
 };
 
@@ -122,3 +121,7 @@ const guards = {
   directlyFunded: _ => true,
 };
 export const mockOptions = { guards };
+
+export const machine: MachineFactory<Init, any> = (_: IStore, ctx: Init) => {
+  return Machine(config).withConfig({}, ctx);
+};

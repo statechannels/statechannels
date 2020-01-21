@@ -46,6 +46,7 @@ const config: MachineConfig<Init, any, Events> = {
     running: {
       on: {
         CREATE_CHANNEL: { actions: 'spawnCreateChannel' },
+        CONCLUDE_CHANNEL: { actions: 'spawnConcludeChannel' },
         OPEN_CHANNEL: { actions: 'spawnJoinChannel' },
         SendStates: { actions: ['updateStore', forwardToChildren] },
         FUNDING_STRATEGY_PROPOSED: { actions: forwardToChildren },
@@ -68,6 +69,7 @@ export { config };
 export type Actions = {
   spawnJoinChannel: AssignAction<Init, OpenChannelEvent>;
   spawnCreateChannel: AssignAction<Init, CreateChannelEvent>;
+  spawnConcludeChannel: AssignAction<Init, ConcludeChannelEvent>;
   forwardToChildren: typeof forwardToChildren;
   updateStore: any; // TODO
 };
@@ -113,6 +115,23 @@ export function machine(store: IStore, context: Init) {
     };
   });
 
+  const spawnConcludeChannel = assign((ctx: Init, { channelId }: ConcludeChannelEvent) => {
+    const processId = `conclude-${channelId}`;
+    if (ctx.processes.find(p => p.id === processId)) {
+      throw new Error('Process exists');
+    }
+
+    const concludeChannelMachine = ConcludeChannel.machine(store, { channelId });
+    const walletProcess: Process = {
+      id: processId,
+      ref: spawn(concludeChannelMachine, processId),
+    };
+    return {
+      ...ctx,
+      processes: ctx.processes.concat([walletProcess]),
+    };
+  });
+
   // TODO: Should this send `CHANNEL_UPDATED` to children?
   const updateStore = (_ctx, event: SendStates, { state }) => {
     store.receiveStates(event.signedStates);
@@ -128,6 +147,7 @@ export function machine(store: IStore, context: Init) {
     actions: {
       spawnCreateChannel,
       spawnJoinChannel,
+      spawnConcludeChannel,
       forwardToChildren,
       updateStore,
     },
