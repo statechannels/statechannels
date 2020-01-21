@@ -1,6 +1,8 @@
 import * as xstate from 'xstate';
-import { pretty } from '..';
+
 import { Process } from '../protocols/wallet/protocol';
+
+import { pretty } from '..';
 
 export const debugAction = store => (ctx, event, { state }) => {
   // Trigger this action if you'd like to breakpoint on entry into some state, for instance.

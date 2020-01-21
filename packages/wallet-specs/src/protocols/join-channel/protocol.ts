@@ -1,10 +1,12 @@
 import { Machine, MachineConfig, sendParent, assign, DoneInvokeEvent } from 'xstate';
-import { AdvanceChannel, Funding, JoinChannel } from '..';
+import { getChannelId } from '@statechannels/nitro-protocol';
+
 import { forwardChannelUpdated, MachineFactory, Store } from '../..';
 import { ChannelUpdated } from '../../store';
 import { CloseChannel, OpenChannel } from '../../wire-protocol';
 import { OpenChannelEvent } from '../wallet/protocol';
-import { getChannelId } from '@statechannels/nitro-protocol';
+
+import { AdvanceChannel, Funding, JoinChannel } from '..';
 
 const PROTOCOL = 'join-channel';
 

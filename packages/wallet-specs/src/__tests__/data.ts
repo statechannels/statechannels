@@ -1,4 +1,5 @@
 import { ethers } from 'ethers';
+
 import { Participant } from '../store';
 
 export const wallet1 = new ethers.Wallet(

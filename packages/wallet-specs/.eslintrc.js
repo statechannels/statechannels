@@ -21,5 +21,7 @@ module.exports = {
     'no-debugger': 'off',
     'no-useless-catch': 'off',
     'no-empty-pattern': 'off',
+    'import/first': 2,
+    'import/order': [2, { 'newlines-between': 'always' }],
   },
 };

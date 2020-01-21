@@ -1,8 +1,10 @@
 import { assign, AssignAction, Interpreter, Machine, spawn, MachineConfig } from 'xstate';
-import { CreateChannel, JoinChannel } from '..';
+
 import { getChannelId, unreachable } from '../..';
 import { ChannelUpdated, IStore } from '../../store';
 import { FundingStrategyProposed, OpenChannel, SendStates } from '../../wire-protocol';
+
+import { CreateChannel, JoinChannel } from '..';
 
 const PROTOCOL = 'wallet';
 export type Events = OpenChannelEvent | CreateChannelEvent | SendStates | FundingStrategyProposed;

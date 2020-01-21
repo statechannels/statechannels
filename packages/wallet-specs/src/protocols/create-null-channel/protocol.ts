@@ -1,9 +1,11 @@
 import { assign, Machine } from 'xstate';
-import { SupportState } from '..';
+import { HashZero, AddressZero } from 'ethers/constants';
+
 import { Channel, FINAL, getChannelId, MachineFactory, SignedState } from '../../';
 import { ChannelStoreEntry } from '../../ChannelStoreEntry';
 import { Participant } from '../../store';
-import { HashZero, AddressZero } from 'ethers/constants';
+
+import { SupportState } from '..';
 
 const PROTOCOL = 'create-null-channel';
 /*

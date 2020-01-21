@@ -1,7 +1,8 @@
-import { FINAL, MachineFactory } from '../..';
-import { IStore } from '../../store';
 import { bigNumberify } from 'ethers/utils';
 import { Machine, assign, MachineConfig } from 'xstate';
+
+import { FINAL, MachineFactory } from '../..';
+import { IStore } from '../../store';
 import { ChainEvent } from '../../chain';
 
 export type Init = {

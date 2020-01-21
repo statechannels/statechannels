@@ -1,4 +1,5 @@
 import { interpret, Machine } from 'xstate';
+
 import { FundingStrategyProposed } from '../../../wire-protocol';
 import { config, Init, mockOptions } from '../protocol';
 const context: Init = {

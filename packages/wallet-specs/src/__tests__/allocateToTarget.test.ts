@@ -1,5 +1,7 @@
-import { allocateToTarget, Errors } from '../calculations';
 import { Allocation } from '@statechannels/nitro-protocol';
+
+import { allocateToTarget, Errors } from '../calculations';
+
 import { ethAllocationOutcome } from '..';
 
 const left = '0x01';

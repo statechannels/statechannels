@@ -1,14 +1,16 @@
-import { Init, machine, CreateChannelEvent } from '../protocols/wallet/protocol';
 import { ethers } from 'ethers';
-import { Store } from '../store';
 import waitForExpect from 'wait-for-expect';
 import { interpret } from 'xstate';
+import { AddressZero, HashZero } from 'ethers/constants';
+
+import { Init, machine, CreateChannelEvent } from '../protocols/wallet/protocol';
+import { Store } from '../store';
 import { messageService } from '../messaging';
 import { AddressableMessage } from '../wire-protocol';
-import { AddressZero, HashZero } from 'ethers/constants';
 import { log } from '../utils';
-import { processStates } from './utils';
 import { Chain } from '../chain';
+
+import { processStates } from './utils';
 import { first, second, wallet1, wallet2, participants } from './data';
 
 const logProcessStates = state => {
