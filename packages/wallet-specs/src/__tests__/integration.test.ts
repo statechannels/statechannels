@@ -6,7 +6,8 @@ import { interpret } from 'xstate';
 import { messageService } from '../messaging';
 import { AddressableMessage } from '../wire-protocol';
 import { AddressZero, HashZero } from 'ethers/constants';
-import { processStates, log } from '../utils';
+import { log } from '../utils';
+import { processStates } from './utils';
 import { Chain } from '../chain';
 import { first, second, wallet1, wallet2, participants } from './data';
 
