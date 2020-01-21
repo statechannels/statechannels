@@ -11,7 +11,8 @@ export function log(message: any) {
 }
 
 export const debugAction = store => (ctx, event, { state }) => {
-  store;
+  // Trigger this action if you'd like to breakpoint on entry into some state, for instance.
+  store; // Put a reference to the store in the action's closure
   debugger;
 };
 
