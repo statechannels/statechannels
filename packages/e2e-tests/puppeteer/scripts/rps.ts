@@ -2,37 +2,43 @@ import {setUpBrowser, loadRPSApp, waitForAndClickButton} from '../helpers';
 import {Page} from 'puppeteer';
 
 export async function setupRPS(rpsTabA: Page, rpsTabB: Page): Promise<void> {
-  await waitForAndClickButton(rpsTabA, 'Start Playing!');
-  await waitForAndClickButton(rpsTabB, 'Start Playing!');
+  async function tabA(): Promise<void> {
+    await waitForAndClickButton(rpsTabA, 'Start Playing!');
+    await (await rpsTabA.waitFor('#name')).type('playerA');
+    await waitForAndClickButton(rpsTabA, 'Connect with MetaMask');
+  }
+  async function tabB(): Promise<void> {
+    await waitForAndClickButton(rpsTabB, 'Start Playing!');
+    await (await rpsTabB.waitFor('#name')).type('playerB');
+    await waitForAndClickButton(rpsTabB, 'Connect with MetaMask');
+  }
 
-  await (await rpsTabA.waitFor('#name')).type('playerA');
-  await waitForAndClickButton(rpsTabA, 'Connect with MetaMask');
-
-  await (await rpsTabB.waitFor('#name')).type('playerB');
-  await waitForAndClickButton(rpsTabB, 'Connect with MetaMask');
+  await Promise.all([tabA(), tabB()]);
 }
 
 export async function clickThroughRPSUI(rpsTabA: Page, rpsTabB: Page): Promise<void> {
-  // NOTE: There is some weird scrolling issue. .click() scrolls and somehow React re-renders this
-  // button and so we get a "Node is detached from document error". Using .evaluate() fixes it.
-  // https://github.com/puppeteer/puppeteer/issues/3496
-  await (await rpsTabA.waitForXPath('//button[contains(., "Create a game")]')).evaluate(
-    'document.querySelector("button.lobby-new-game").click()'
-  ); // TODO this is actually Player B. Consider permuting A and B throughout this script.
+  async function tabA(): Promise<void> {
+    const walletIFrameA = rpsTabA.frames()[1];
+    // NOTE: There is some weird scrolling issue. .click() scrolls and somehow React re-renders this
+    // button and so we get a "Node is detached from document error". Using .evaluate() fixes it.
+    // https://github.com/puppeteer/puppeteer/issues/3496
+    await (await rpsTabA.waitForXPath('//button[contains(., "Create a game")]')).evaluate(
+      'document.querySelector("button.lobby-new-game").click()'
+    ); // TODO this is actually Player B. Consider permuting A and B throughout this script.
+    await waitForAndClickButton(rpsTabA, 'Create Game');
+    await waitForAndClickButton(walletIFrameA, 'Fund Channel');
+    await waitForAndClickButton(walletIFrameA, 'Ok!');
+    await (await rpsTabA.waitFor('img[src*="rock"]')).click();
+  }
+  async function tabB(): Promise<void> {
+    const walletIFrameB = rpsTabB.frames()[1];
+    await waitForAndClickButton(rpsTabB, 'Join');
+    await waitForAndClickButton(walletIFrameB, 'Fund Channel');
+    await waitForAndClickButton(walletIFrameB, 'Ok!');
+    await (await rpsTabB.waitFor('img[src*="paper"]')).click();
+  }
 
-  await waitForAndClickButton(rpsTabA, 'Create Game');
-  await waitForAndClickButton(rpsTabB, 'Join');
-
-  const walletIFrameA = rpsTabA.frames()[1];
-  const walletIFrameB = rpsTabB.frames()[1];
-
-  await waitForAndClickButton(walletIFrameB, 'Fund Channel');
-  await waitForAndClickButton(walletIFrameA, 'Fund Channel');
-  await waitForAndClickButton(walletIFrameB, 'Ok!');
-  await waitForAndClickButton(walletIFrameA, 'Ok!');
-
-  await (await rpsTabA.waitFor('img[src*="rock"]')).click();
-  await (await rpsTabB.waitFor('img[src*="paper"]')).click();
+  await Promise.all([tabA(), tabB()]);
 }
 
 export async function clickThroughResignationUI(rpsTabA: Page, rpsTabB: Page): Promise<void> {
@@ -60,9 +66,7 @@ export async function clickThroughResignationUI(rpsTabA: Page, rpsTabB: Page): P
     await waitForAndClickButton(rpsTabB, 'Exit');
   }
 
-  const tabAcomplete = tabA();
-  const tabBcomplete = tabB();
-  await Promise.all([tabAcomplete, tabBcomplete]);
+  await Promise.all([tabA(), tabB()]);
 }
 
 if (require.main === module) {

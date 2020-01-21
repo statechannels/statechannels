@@ -1,5 +1,5 @@
 import {setUpBrowser, loadRPSApp} from '../helpers';
-import {clickThroughRPSUI, clickThroughResignationUI, setupRPS} from '../scripts/rps;
+import {clickThroughRPSUI, clickThroughResignationUI, setupRPS} from '../scripts/rps';
 import {Page, Browser} from 'puppeteer';
 
 jest.setTimeout(60000);
