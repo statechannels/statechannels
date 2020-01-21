@@ -6,11 +6,11 @@ import { interpret } from 'xstate';
 import { messageService } from '../../../messaging';
 import { AddressableMessage } from '../../../wire-protocol';
 import { AddressZero, HashZero } from 'ethers/constants';
-import { processStates } from '../../../utils';
+import { processStates, log } from '../../../utils';
 import { Chain } from '../../../chain';
 
 const logProcessStates = state => {
-  console.log(processStates(state));
+  log(processStates(state));
 };
 
 const wallet1 = new ethers.Wallet(

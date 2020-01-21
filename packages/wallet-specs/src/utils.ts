@@ -2,9 +2,10 @@ import * as xstate from 'xstate';
 import { pretty } from '.';
 import { Actor } from 'xstate';
 import { Process } from './protocols/wallet/protocol';
+import { ADD_LOGS } from './constants';
 
-export function log(cond: boolean, message: string) {
-  if (!cond) {
+export function log(message: string) {
+  if (ADD_LOGS) {
     console.log(message);
   }
 }
