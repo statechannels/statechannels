@@ -505,7 +505,7 @@ contract ForceMove is IForceMove {
                 !isFinalAB[0],
                 'InvalidTransitionError: Cannot move from a final state to a non final state'
             );
-            if (turnNumB <= 2 * nParticipants) {
+            if (turnNumB < 2 * nParticipants) {
                 require(
                     _bytesEqual(ab[1].outcome, ab[0].outcome),
                     'InvalidTransitionError: Cannot change the default outcome during setup phase'

@@ -58,23 +58,29 @@ const description5 =
   'It reverts a respond tx if the response state is not a validTransition from the challenge state';
 
 describe('respond', () => {
-  const turnNumRecord = 8;
   let channelNonce = 1000;
   const future = 1e12;
   const past = 1;
   beforeEach(() => (channelNonce += 1));
   it.each`
-    description     | finalizesAt | slotEmpty | isFinalAB         | appDatas  | challenger    | responder         | reasonString
-    ${description1} | ${future}   | ${false}  | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]}     | ${undefined}
-    ${description2} | ${past}     | ${false}  | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]}     | ${NO_ONGOING_CHALLENGE}
-    ${description3} | ${future}   | ${true}   | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${wallets[0]}     | ${WRONG_CHANNEL_STORAGE}
-    ${description4} | ${future}   | ${false}  | ${[false, false]} | ${[0, 1]} | ${wallets[2]} | ${nonParticipant} | ${RESPONSE_UNAUTHORIZED}
-    ${description5} | ${future}   | ${false}  | ${[false, false]} | ${[0, 0]} | ${wallets[2]} | ${wallets[0]}     | ${'CountingApp: Counter must be incremented'}
+    description     | finalizesAt | slotEmpty | isFinalAB         | turnNumRecord | appDatas  | challenger    | responder         | reasonString
+    ${description1} | ${future}   | ${false}  | ${[false, false]} | ${0}          | ${[0, 0]} | ${wallets[0]} | ${wallets[1]}     | ${undefined}
+    ${description1} | ${future}   | ${false}  | ${[false, false]} | ${1}          | ${[0, 0]} | ${wallets[1]} | ${wallets[2]}     | ${undefined}
+    ${description1} | ${future}   | ${false}  | ${[false, false]} | ${2}          | ${[0, 0]} | ${wallets[2]} | ${wallets[0]}     | ${undefined}
+    ${description1} | ${future}   | ${false}  | ${[false, false]} | ${3}          | ${[0, 0]} | ${wallets[0]} | ${wallets[1]}     | ${undefined}
+    ${description1} | ${future}   | ${false}  | ${[false, false]} | ${4}          | ${[0, 0]} | ${wallets[1]} | ${wallets[2]}     | ${undefined}
+    ${description1} | ${future}   | ${false}  | ${[false, false]} | ${5}          | ${[0, 1]} | ${wallets[2]} | ${wallets[0]}     | ${undefined}
+    ${description1} | ${future}   | ${false}  | ${[false, false]} | ${6}          | ${[1, 2]} | ${wallets[0]} | ${wallets[1]}     | ${undefined}
+    ${description2} | ${past}     | ${false}  | ${[false, false]} | ${8}          | ${[0, 1]} | ${wallets[2]} | ${wallets[0]}     | ${NO_ONGOING_CHALLENGE}
+    ${description3} | ${future}   | ${true}   | ${[false, false]} | ${8}          | ${[0, 1]} | ${wallets[2]} | ${wallets[0]}     | ${WRONG_CHANNEL_STORAGE}
+    ${description4} | ${future}   | ${false}  | ${[false, false]} | ${8}          | ${[0, 1]} | ${wallets[2]} | ${nonParticipant} | ${RESPONSE_UNAUTHORIZED}
+    ${description5} | ${future}   | ${false}  | ${[false, false]} | ${8}          | ${[0, 0]} | ${wallets[2]} | ${wallets[0]}     | ${'CountingApp: Counter must be incremented'}
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
       description,
       isFinalAB,
+      turnNumRecord,
       appDatas,
       challenger,
       responder,
