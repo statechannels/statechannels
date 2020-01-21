@@ -36,6 +36,9 @@ export async function waitForAndClickButton(page: Page | Frame, button: string):
   return (await page.waitForXPath('//button[contains(., "' + button + '")]')).click();
 }
 
+export async function waitForHeading(page: Page | Frame): Promise<string | null> {
+  return (await page.waitFor('h1.mb-5')).evaluate(el => el.textContent);
+}
 export async function setUpBrowser(headless: boolean, slowMo?: number): Promise<Browser> {
   const browser = await launch({
     headless,

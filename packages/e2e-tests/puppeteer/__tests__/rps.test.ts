@@ -1,4 +1,4 @@
-import {setUpBrowser, loadRPSApp} from '../helpers';
+import {setUpBrowser, loadRPSApp, waitForHeading} from '../helpers';
 import {clickThroughRPSUI, clickThroughResignationUI, setupRPS} from '../scripts/rps';
 import {Page, Browser} from 'puppeteer';
 
@@ -33,12 +33,8 @@ describe('Playing a game of RPS', () => {
 
   it('can play a game end to end, and start a second game', async () => {
     await clickThroughRPSUI(rpsTabA, rpsTabB);
-    expect(await (await rpsTabA.waitFor('h1.mb-5')).evaluate(el => el.textContent)).toMatch(
-      'You lost'
-    );
-    expect(await (await rpsTabB.waitFor('h1.mb-5')).evaluate(el => el.textContent)).toMatch(
-      'You won!'
-    );
+    expect(await waitForHeading(rpsTabA)).toMatch('You lost');
+    expect(await waitForHeading(rpsTabB)).toMatch('You won!');
 
     await clickThroughResignationUI(rpsTabA, rpsTabB);
 
@@ -47,11 +43,7 @@ describe('Playing a game of RPS', () => {
     expect(await rpsTabA.waitForXPath('//button[contains(., "Create a game")]')).toBeDefined();
 
     await clickThroughRPSUI(rpsTabA, rpsTabB);
-    expect(await (await rpsTabA.waitFor('h1.mb-5')).evaluate(el => el.textContent)).toMatch(
-      'You lost'
-    );
-    expect(await (await rpsTabB.waitFor('h1.mb-5')).evaluate(el => el.textContent)).toMatch(
-      'You won!'
-    );
+    expect(await waitForHeading(rpsTabA)).toMatch('You lost');
+    expect(await waitForHeading(rpsTabB)).toMatch('You won!');
   });
 });
