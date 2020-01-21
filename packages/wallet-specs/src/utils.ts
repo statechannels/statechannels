@@ -4,7 +4,7 @@ import { Actor } from 'xstate';
 import { Process } from './protocols/wallet/protocol';
 import { ADD_LOGS } from './constants';
 
-export function log(message: string) {
+export function log(message: any) {
   if (ADD_LOGS) {
     console.log(message);
   }

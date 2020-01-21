@@ -4,6 +4,7 @@ import { machine, Init } from './protocol';
 import { ethers } from 'ethers';
 import { Chain } from '../../chain';
 import waitForExpect from 'wait-for-expect';
+import { log } from '../../utils';
 
 jest.setTimeout(50000);
 it('handles the basic case', async () => {
@@ -18,7 +19,7 @@ it('handles the basic case', async () => {
   };
   const service = interpret<any, any, any>(machine(store, context));
   service.onTransition(state => {
-    console.log(state.value);
+    log(state.value);
   });
   service.start();
   await waitForExpect(() => {
@@ -28,7 +29,7 @@ it('handles the basic case', async () => {
   await chain.deposit(channelId, '0x00', '1');
 
   await waitForExpect(() => {
-    expect(service.state.value).toMatchObject({ depositor: 'done', watcher: 'waiting' });
+    expect(service.state.value).toMatchObject({ depositor: 'done', watcher: 'watching' });
   }, 200);
 
   // TODO: Find a good way of capturing transaction submission
