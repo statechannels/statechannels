@@ -9,54 +9,54 @@ const targetChannelId = '0x04';
 
 describe('allocateToTarget with valid input', () => {
   const target1: Allocation = [
-    { destination: left, amount: '1' },
-    { destination: right, amount: '1' },
+    { destination: left, amount: '0x01' },
+    { destination: right, amount: '0x01' },
   ];
   const ledger1: Allocation = [...target1];
-  const expected1 = [{ destination: targetChannelId, amount: '2' }];
+  const expected1 = [{ destination: targetChannelId, amount: '0x02' }];
 
   const target2: Allocation = [
-    { destination: left, amount: '1' },
-    { destination: right, amount: '2' },
+    { destination: left, amount: '0x01' },
+    { destination: right, amount: '0x02' },
   ];
   const ledger2: Allocation = [
-    { destination: left, amount: '3' },
-    { destination: right, amount: '3' },
+    { destination: left, amount: '0x03' },
+    { destination: right, amount: '0x03' },
   ];
   const expected2: Allocation = [
-    { destination: left, amount: '2' },
-    { destination: right, amount: '1' },
-    { destination: targetChannelId, amount: '3' },
+    { destination: left, amount: '0x02' },
+    { destination: right, amount: '0x01' },
+    { destination: targetChannelId, amount: '0x03' },
   ];
 
   const target3: Allocation = [
-    { destination: left, amount: '1' },
-    { destination: right, amount: '2' },
+    { destination: left, amount: '0x01' },
+    { destination: right, amount: '0x02' },
   ];
   const ledger3: Allocation = [
-    { destination: right, amount: '3' },
-    { destination: left, amount: '3' },
+    { destination: right, amount: '0x03' },
+    { destination: left, amount: '0x03' },
   ];
   const expected3: Allocation = [
-    { destination: right, amount: '1' },
-    { destination: left, amount: '2' },
-    { destination: targetChannelId, amount: '3' },
+    { destination: right, amount: '0x01' },
+    { destination: left, amount: '0x02' },
+    { destination: targetChannelId, amount: '0x03' },
   ];
 
   const target4: Allocation = [
-    { destination: left, amount: '1' },
-    { destination: right, amount: '2' },
+    { destination: left, amount: '0x01' },
+    { destination: right, amount: '0x02' },
   ];
   const ledger4: Allocation = [
-    { destination: left, amount: '3' },
-    { destination: middle, amount: '3' },
-    { destination: right, amount: '3' },
+    { destination: left, amount: '0x03' },
+    { destination: middle, amount: '0x03' },
+    { destination: right, amount: '0x03' },
   ];
   const expected4: Allocation = [
-    { destination: left, amount: '2' },
-    { destination: middle, amount: '3' },
-    { destination: right, amount: '1' },
-    { destination: targetChannelId, amount: '3' },
+    { destination: left, amount: '0x02' },
+    { destination: middle, amount: '0x03' },
+    { destination: right, amount: '0x01' },
+    { destination: targetChannelId, amount: '0x03' },
   ];
   it.each`
     description | targetAllocation | ledgerAllocation | expectedAllocation
@@ -76,22 +76,22 @@ describe('allocateToTarget with valid input', () => {
 
 describe('allocateToTarget with invalid input', () => {
   const target1: Allocation = [
-    { destination: left, amount: '1' },
-    { destination: middle, amount: '1' },
+    { destination: left, amount: '0x01' },
+    { destination: middle, amount: '0x01' },
   ];
   const ledger1: Allocation = [
-    { destination: left, amount: '1' },
-    { destination: right, amount: '1' },
+    { destination: left, amount: '0x01' },
+    { destination: right, amount: '0x01' },
   ];
   const error1 = Errors.DestinationMissing;
 
   const target2: Allocation = [
-    { destination: left, amount: '3' },
-    { destination: right, amount: '3' },
+    { destination: left, amount: '0x03' },
+    { destination: right, amount: '0x03' },
   ];
   const ledger2: Allocation = [
-    { destination: left, amount: '1' },
-    { destination: right, amount: '2' },
+    { destination: left, amount: '0x01' },
+    { destination: right, amount: '0x02' },
   ];
   const error2 = Errors.InsufficientFunds;
 
