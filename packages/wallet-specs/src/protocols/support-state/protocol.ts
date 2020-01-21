@@ -1,7 +1,6 @@
 import { Machine } from 'xstate';
 import { MachineFactory, outcomesEqual } from '../..';
 import { Outcome, State } from '@statechannels/nitro-protocol';
-import { debugAction } from '../../utils';
 
 const PROTOCOL = 'support-state';
 
@@ -16,27 +15,23 @@ export type SendState = Init & { state: State };
 What happens if sendState fails
 Do we abort? Or do we try to reach consensus on a later state?
 */
+const sendState = {
+  invoke: { src: 'sendState', onDone: 'waiting' },
+};
 const waiting = {
-  invoke: { src: 'sendState' },
   on: {
-    '*': [{ target: 'success', cond: 'supported' }, { actions: debugAction }],
+    '': { target: 'success', cond: 'supported' },
+    '*': { target: 'success', cond: 'supported ' },
   },
 };
 
 export const config = {
   key: PROTOCOL,
-  initial: 'waiting',
+  initial: 'sendState',
   states: {
+    sendState,
     waiting,
     success: { type: 'final' as 'final' },
-  },
-  on: {
-    '*': [
-      {
-        target: 'success',
-        cond: 'supported',
-      },
-    ],
   },
 };
 
@@ -57,7 +52,7 @@ type Options = {
 
 export const machine: MachineFactory<Init, any> = (store, context: Init) => {
   const services: Services = {
-    sendState: ({ channelId, outcome }: Init) => {
+    sendState: async ({ channelId, outcome }: Init) => {
       const { latestState } = store.getEntry(channelId);
       // TODO: Make this safe?
       if (!outcomesEqual(latestState.outcome, outcome)) {
@@ -78,7 +73,6 @@ export const machine: MachineFactory<Init, any> = (store, context: Init) => {
       if (!latestEntry.hasSupportedState) {
         return false;
       }
-
       return outcomesEqual(latestEntry.latestSupportedState.outcome, outcome);
     },
   };
