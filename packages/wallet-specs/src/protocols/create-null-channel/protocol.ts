@@ -3,7 +3,6 @@ import { SupportState } from '..';
 import { Channel, FINAL, getChannelId, MachineFactory, SignedState } from '../../';
 import { ChannelStoreEntry } from '../../ChannelStoreEntry';
 import { Participant } from '../../store';
-import { Outcome } from '@statechannels/nitro-protocol';
 import { HashZero, AddressZero } from 'ethers/constants';
 
 const PROTOCOL = 'create-null-channel';
@@ -21,7 +20,6 @@ These differences allow create-null-channel to be fully-determined.
 
 export interface Init {
   channel: Channel;
-  outcome: Outcome;
 }
 
 // For convenience, assign the channel id
@@ -40,10 +38,10 @@ const checkChannel = {
   },
 };
 
-function preFundData({ channelId, outcome }: Context): SupportState.Init {
+function preFundData({ channelId }: Context): SupportState.Init {
   return {
     channelId,
-    outcome,
+    outcome: [],
   };
 }
 const preFundSetup = {
@@ -69,7 +67,7 @@ export const config = {
 };
 
 export const machine: MachineFactory<Init, any> = (store, context: Init) => {
-  async function checkChannelService({ channel, outcome }: Init): Promise<boolean> {
+  async function checkChannelService({ channel }: Init): Promise<boolean> {
     // TODO: Should check that
     // - the nonce is used,
     // - that we have the private key for one of the signers, etc
@@ -81,7 +79,7 @@ export const machine: MachineFactory<Init, any> = (store, context: Init) => {
       {
         state: {
           turnNum: 0,
-          outcome,
+          outcome: [],
           channel,
           isFinal: false,
           challengeDuration: 1,

@@ -156,7 +156,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
   }
 
   async function getNullChannelArgs({ targetChannelId }: Init): Promise<CreateNullChannel.Init> {
-    const { channel: targetChannel, latestSupportedState } = store.getEntry(targetChannelId);
+    const { channel: targetChannel } = store.getEntry(targetChannelId);
 
     const channel: Channel = {
       ...targetChannel,
@@ -164,12 +164,8 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
     };
 
     // TODO: check that the latest supported state is the last prefund setup state?
-    const { outcome } = ensureExists(latestSupportedState);
 
-    return {
-      channel,
-      outcome,
-    };
+    return { channel };
   }
 
   async function getTargetOutcome({

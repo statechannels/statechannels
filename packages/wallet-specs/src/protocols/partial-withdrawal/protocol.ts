@@ -45,7 +45,6 @@ function replacementChannelArgs({
 
   return {
     channel: newChannel,
-    outcome: ethAllocationOutcome(newChannelAllocation),
   };
 }
 const createReplacement = {

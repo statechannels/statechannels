@@ -61,10 +61,10 @@ TODO: extract this pattern to other protocols.
 
 function getDetaAndInvoke<T>(data: string, src: string, onDone: string) {
   return {
-    initial: 'getData',
+    initial: data,
     states: {
-      getData: { invoke: { src: data, onDone: 'invokeService' } },
-      invokeService: {
+      [data]: { invoke: { src: data, onDone: src } },
+      [src]: {
         invoke: {
           src,
           data: (_, { data }: DoneInvokeEvent<T>) => data,
@@ -106,20 +106,17 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
   async function checkCurrentLevel(ctx: Init) {
     const { latestSupportedState } = store.getEntry(ctx.channelId);
     const { outcome } = latestSupportedState;
+
     const allocated = getEthAllocation(outcome)
       .map(i => i.amount)
       .reduce(add, '0');
     const holdings = await store.getHoldings(ctx.channelId);
 
-    if (eq(holdings, 0) && latestSupportedState.turnNum === 0) {
-      // This is the only acceptable time to be underfunded
-      return;
-    }
-
     if (gt(allocated, holdings)) {
       throw new Error('Channel underfunded');
     }
   }
+
   async function getDepositingInfo({
     minimalAllocation,
     channelId,

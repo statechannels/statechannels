@@ -53,19 +53,7 @@ export type ChannelsKnown = Init & {
 };
 const total = (balances: Balance[]) => balances.map(b => b.wei).reduce(add);
 export function jointChannelArgs({ balances, jointChannel }: ChannelsKnown): CreateNullChannelArgs {
-  const allocation: (i: Indices) => AllocationItem = i => ({
-    destination: balances[i].address,
-    amount: balances[i].wei,
-  });
-
-  return {
-    channel: jointChannel,
-    outcome: ethAllocationOutcome([
-      allocation(Indices.Left),
-      { destination: jointChannel.participants[1], amount: total(balances) },
-      allocation(Indices.Right),
-    ]),
-  };
+  return { channel: jointChannel };
 }
 const createJointChannel = {
   invoke: {
