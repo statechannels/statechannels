@@ -83,6 +83,6 @@ it('works', async () => {
 
   await waitForExpect(() => {
     const process = left.state.context.processes[0];
-    expect(process && process.ref.state.value).toEqual('foo');
+    expect(process && process.ref.state.value).toEqual('success');
   }, 2000);
 });
