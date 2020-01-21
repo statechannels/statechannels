@@ -1,5 +1,6 @@
 import { assign, DoneInvokeEvent, Machine } from 'xstate';
 import { CreateNullChannel, DirectFunding, SupportState } from '..';
+
 import { allocateToTarget } from '../../calculations';
 import {
   Channel,

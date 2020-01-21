@@ -1,12 +1,18 @@
 import { add } from '.';
-
+export type ChainEventListener = (event: ChainEvent) => void;
+export type ChainEventType = ChainEvent['type'];
 export interface IChain {
+  initialize(): Promise<void>;
   getHoldings: (channelId: string) => Promise<string>;
   deposit: (channelId: string, expectedHeld: string, amount: string) => Promise<Deposited | Revert>;
+  on: (chainEventType: ChainEventType, listener: ChainEventListener) => () => void;
 }
 
 export class Chain implements IChain {
-  private _holdings: { [channelId: string]: string };
+  public async initialize(): Promise<void> {
+    // Do nothing
+  }
+  protected _holdings: { [channelId: string]: string };
 
   constructor(holdings?) {
     this._holdings = holdings || {};
@@ -14,6 +20,14 @@ export class Chain implements IChain {
 
   public async getHoldings(channelId) {
     return this._holdings[channelId] || '0';
+  }
+
+  public on(chainEventType: ChainEvent['type'], listener: ChainEventListener) {
+    if (chainEventType !== 'DEPOSITED') {
+      throw new Error(`No support for ${chainEventType} events yet.`);
+    }
+
+    return () => {};
   }
 
   public async deposit(
@@ -31,7 +45,7 @@ export class Chain implements IChain {
         total: this._holdings[channelId],
       };
     } else {
-      return 'REVERT';
+      return { type: 'REVERT' };
     }
   }
 }
@@ -44,6 +58,8 @@ export interface Deposited {
   total: string;
 }
 
-export type Revert = 'REVERT';
+export interface Revert {
+  type: 'REVERT';
+}
 
 export type ChainEvent = Deposited | Revert;
