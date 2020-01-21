@@ -33,9 +33,10 @@ export async function loadRPSApp(page: Page, ganacheAccountIndex: number): Promi
 }
 //
 
-export async function setUpBrowser(headless: boolean): Promise<Browser> {
+export async function setUpBrowser(headless: boolean, slowMo?: number): Promise<Browser> {
   const browser = await launch({
     headless,
+    slowMo,
     devtools: !headless,
     // Needed to allow both windows to execute JS at the same time
     ignoreDefaultArgs: [

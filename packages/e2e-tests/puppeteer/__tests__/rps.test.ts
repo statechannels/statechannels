@@ -11,8 +11,8 @@ describe('Playing a game of RPS', () => {
   let rpsTabB: Page;
 
   beforeAll(async () => {
-    browserA = await setUpBrowser(false);
-    browserB = await setUpBrowser(false);
+    browserA = await setUpBrowser(false, 10);
+    browserB = await setUpBrowser(false, 10);
 
     rpsTabA = (await browserA.pages())[0];
     rpsTabB = (await browserB.pages())[0];
