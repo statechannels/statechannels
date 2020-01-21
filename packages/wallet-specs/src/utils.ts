@@ -9,9 +9,10 @@ export function log(cond: boolean, message: string) {
   }
 }
 
-export function debugAction(ctx, event, { state }) {
+export const debugAction = store => (ctx, event, { state }) => {
+  store;
   debugger;
-}
+};
 
 export function addLogs(
   _ctx,
