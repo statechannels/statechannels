@@ -10,7 +10,6 @@ import {getChannelHoldings, getLastSignedStateForChannel, getProtocolState} from
 import {getChannelStatus} from "../../state";
 import {OutgoingApiAction} from "./outgoing-api-actions";
 import {State} from "@statechannels/nitro-protocol";
-import {ChannelStatus} from "@statechannels/client-api-schema";
 
 import {isResponderState} from "../../protocols/dispute/responder/states";
 import {isChallengerState} from "../../protocols/dispute/challenger/states";
@@ -144,7 +143,7 @@ function* getChannelInfo(channelId: string) {
     funding = [{token: "0x0", amount: channelHoldings}];
   }
 
-  const status: ChannelStatus = yield getChannelInfoStatus(state, previousState);
+  const {status, challengeExpirationTime} = yield getChannelInfoStatus(state, previousState);
 
   return {
     participants,
@@ -154,21 +153,22 @@ function* getChannelInfo(channelId: string) {
     status,
     funding,
     turnNum,
-    channelId
+    channelId,
+    challengeExpirationTime
   };
 }
 
 function* getChannelInfoStatus(currentState: State, previousState: State) {
   if (currentState.isFinal) {
     if (previousState.isFinal) {
-      return "closed";
+      return {status: "closed"};
     } else {
-      return "closing";
+      return {status: "closing"};
     }
   } else if (currentState.turnNum === 0) {
-    return "proposed";
+    return {status: "proposed"};
   } else if (currentState.turnNum < currentState.channel.participants.length - 1) {
-    return "opening";
+    return {status: "opening"};
   }
 
   // TODO: This only works for a single process at a time...
@@ -179,11 +179,17 @@ function* getChannelInfoStatus(currentState: State, previousState: State) {
     typeof protocolState.disputeState !== "undefined"
   ) {
     if (isChallengerState(protocolState.disputeState)) {
-      return "challenging";
+      return {
+        status: "challenging",
+        challengeExpirationTime: (protocolState.disputeState as any).expiryTime
+      };
     } else if (isResponderState(protocolState.disputeState)) {
-      return "responding";
+      return {
+        status: "responding",
+        challengeExpirationTime: (protocolState.disputeState as any).expiryTime
+      };
     }
   }
 
-  return "running";
+  return {status: "running"};
 }

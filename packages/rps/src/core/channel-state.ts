@@ -23,6 +23,7 @@ export interface ChannelState<T = AppData> {
   aBal: string;
   bBal: string;
   appData: T;
+  challengeExpirationTime?: number;
 }
 
 export type MaybeChannelState = ChannelState | null;

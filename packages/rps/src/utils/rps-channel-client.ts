@@ -108,11 +108,20 @@ export class RPSChannelClient {
 }
 
 const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
-  const {turnNum, channelId, status, participants, allocations, appData} = channelResult;
+  const {
+    turnNum,
+    channelId,
+    status,
+    participants,
+    allocations,
+    appData,
+    challengeExpirationTime,
+  } = channelResult;
   return {
     channelId,
     turnNum,
     status,
+    challengeExpirationTime,
     appData: decodeAppData(appData),
     aUserId: participants[0].participantId,
     bUserId: participants[1].participantId,

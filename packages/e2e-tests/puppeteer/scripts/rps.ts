@@ -1,5 +1,6 @@
-import {setUpBrowser, loadRPSApp, waitForAndClickButton} from '../helpers';
 import {Page} from 'puppeteer';
+
+import {setUpBrowser, loadRPSApp, waitForAndClickButton} from '../helpers';
 
 export async function setupRPS(rpsTabA: Page, rpsTabB: Page): Promise<void> {
   async function playerA(page: Page): Promise<void> {
@@ -28,14 +29,12 @@ export async function clickThroughRPSUI(rpsTabA: Page, rpsTabB: Page): Promise<v
     await waitForAndClickButton(page, 'Create Game');
     await waitForAndClickButton(walletIFrame, 'Fund Channel');
     await waitForAndClickButton(walletIFrame, 'Ok!');
-    await (await page.waitFor('img[src*="paper"]')).click();
   }
   async function playerA(page: Page): Promise<void> {
     const walletIFrame = page.frames()[1];
     await waitForAndClickButton(page, 'Join');
     await waitForAndClickButton(walletIFrame, 'Fund Channel');
     await waitForAndClickButton(walletIFrame, 'Ok!');
-    await (await page.waitFor('img[src*="rock"]')).click();
   }
 
   await Promise.all([playerA(rpsTabA), playerB(rpsTabB)]);
@@ -59,6 +58,7 @@ export async function clickThroughResignationUI(rpsTabA: Page, rpsTabB: Page): P
       await waitForAndClickButton(page, 'OK');
       await waitForAndClickButton(page, 'Exit');
     }
+
     await Promise.race([virtualFunding(), ledgerFunding()]);
   }
 
@@ -88,10 +88,17 @@ if (require.main === module) {
     await loadRPSApp(rpsTabA, 0);
     await loadRPSApp(rpsTabB, 1);
 
-    await clickThroughRPSUI(rpsTabA, rpsTabB);
+    await setupRPS(rpsTabA, rpsTabB);
 
-    await clickThroughResignationUI(rpsTabA, rpsTabB);
+    await startAndFundRPSGame(rpsTabA, rpsTabB);
 
-    process.exit();
+    await clickThroughRPSUIWithChallengeByPlayerA(rpsTabA, rpsTabB);
+
+    // await playMove(rpsTabA, 'rock');
+    // await playMove(rpsTabB, 'paper');
+
+    // await clickThroughResignationUI(rpsTabA, rpsTabB);
+
+    // process.exit();
   })();
 }

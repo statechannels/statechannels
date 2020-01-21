@@ -11,6 +11,7 @@ import {Signature, Interface} from 'ethers/utils';
 // If we don't set a gas limit some transactions will fail
 const GAS_LIMIT = 3000000;
 
+// @ts-ignore
 const NitroAdjudicatorContractInterface = new Interface(NitroAdjudicatorArtifact.abi);
 
 export function createPushOutcomeTransaction(

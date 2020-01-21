@@ -1,5 +1,11 @@
 import {setUpBrowser, loadRPSApp, waitForHeading} from '../helpers';
-import {clickThroughRPSUI, clickThroughResignationUI, setupRPS} from '../scripts/rps';
+import {
+  startAndFundRPSGame,
+  clickThroughResignationUI,
+  setupRPS,
+  playMove,
+  clickThroughRPSUIWithChallengeByPlayerA
+} from '../scripts/rps';
 import {Page, Browser} from 'puppeteer';
 import {configureEnvVariables, getEnvBool} from '@statechannels/devtools';
 
@@ -18,11 +24,13 @@ describe('Playing a game of RPS', () => {
     browserA = await setUpBrowser(HEADLESS, 10); // 10ms delay seems to prevent certain errors
     browserB = await setUpBrowser(HEADLESS, 10); // 10ms delay seems to prevent certain errors
 
+  beforeEach(async () => {
     rpsTabA = (await browserA.pages())[0];
     rpsTabB = (await browserB.pages())[0];
 
     await loadRPSApp(rpsTabA, 0);
     await loadRPSApp(rpsTabB, 1);
+
     await setupRPS(rpsTabA, rpsTabB);
   });
 
@@ -35,8 +43,12 @@ describe('Playing a game of RPS', () => {
     }
   });
 
-  it('can play a game end to end, and start a second game', async () => {
-    await clickThroughRPSUI(rpsTabA, rpsTabB);
+  it('can play two games end to end in one session', async () => {
+    await startAndFundRPSGame(rpsTabA, rpsTabB);
+
+    await playMove(rpsTabA, 'rock');
+    await playMove(rpsTabB, 'paper');
+
     expect(await waitForHeading(rpsTabA)).toMatch('You lost');
     expect(await waitForHeading(rpsTabB)).toMatch('You won!');
 
@@ -46,8 +58,25 @@ describe('Playing a game of RPS', () => {
     expect(await rpsTabB.waitForXPath('//button[contains(., "Create a game")]')).toBeDefined();
     expect(await rpsTabA.waitForXPath('//button[contains(., "Create a game")]')).toBeDefined();
 
-    await clickThroughRPSUI(rpsTabA, rpsTabB);
+    await startAndFundRPSGame(rpsTabA, rpsTabB);
+
+    await playMove(rpsTabA, 'rock');
+    await playMove(rpsTabB, 'paper');
+
     expect(await waitForHeading(rpsTabA)).toMatch('You lost');
     expect(await waitForHeading(rpsTabB)).toMatch('You won!');
+
+    await clickThroughResignationUI(rpsTabA, rpsTabB);
+  });
+
+  // eslint-disable-next-line
+  it.only('can allow Player A to challenge Player B to move', async () => {
+    await startAndFundRPSGame(rpsTabA, rpsTabB);
+
+    await clickThroughRPSUIWithChallengeByPlayerA(rpsTabA, rpsTabB);
+
+    // TODO: Fix these once RPS UI is updated
+    expect(await waitForHeading(rpsTabA)).toMatch('You challenged');
+    expect(await waitForHeading(rpsTabB)).toMatch('Move chosen!');
   });
 });

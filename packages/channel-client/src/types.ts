@@ -53,6 +53,7 @@ export interface ChannelResult {
   status: ChannelStatus;
   // funding: Funds[]; // do we even need this?
   turnNum: string;
+  challengeExpirationTime?: number;
 }
 
 export type UnsubscribeFunction = () => void;
