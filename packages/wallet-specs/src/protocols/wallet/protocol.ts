@@ -4,10 +4,16 @@ import { getChannelId, unreachable } from '../..';
 import { ChannelUpdated, IStore } from '../../store';
 import { FundingStrategyProposed, OpenChannel, SendStates } from '../../wire-protocol';
 
-import { CreateChannel, JoinChannel } from '..';
+import { CreateChannel, JoinChannel, ConcludeChannel } from '..';
 
 const PROTOCOL = 'wallet';
-export type Events = OpenChannelEvent | CreateChannelEvent | SendStates | FundingStrategyProposed;
+export type Events =
+  | OpenChannelEvent
+  | CreateChannelEvent
+  | ConcludeChannelEvent
+  | SendStates
+  | FundingStrategyProposed;
+
 export type Process = {
   id: string;
   ref: Interpreter<any, any, any>;
@@ -26,6 +32,7 @@ function forwardToChildren(_ctx, event: Events, { state }) {
     case 'CREATE_CHANNEL':
     case 'OPEN_CHANNEL':
     case 'SendStates':
+    case 'CONCLUDE_CHANNEL':
       break;
     default:
       unreachable(event);
@@ -51,6 +58,10 @@ export type OpenChannelEvent = OpenChannel;
 
 export type CreateChannelEvent = CreateChannel.Init & {
   type: 'CREATE_CHANNEL';
+};
+
+export type ConcludeChannelEvent = ConcludeChannel.Init & {
+  type: 'CONCLUDE_CHANNEL';
 };
 
 export { config };
