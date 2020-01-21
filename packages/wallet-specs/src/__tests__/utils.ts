@@ -1,6 +1,5 @@
 import * as xstate from 'xstate';
 import { pretty } from '..';
-import { Actor } from 'xstate';
 import { Process } from '../protocols/wallet/protocol';
 
 export const debugAction = store => (ctx, event, { state }) => {
@@ -54,9 +53,9 @@ export function processStates(state): string {
 
   return `WALLET: ${state.context.id}\n${vals}`;
 }
-export function invokedState(actor: Actor, prefix = '    '): string {
+export function invokedState(actor: xstate.Actor, prefix = '    '): string {
   if (actor.state) {
-    const childState = Object.values(actor.state.children).map((child: Actor) =>
+    const childState = Object.values(actor.state.children).map((child: xstate.Actor) =>
       invokedState(child, prefix.concat('  '))
     );
 

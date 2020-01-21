@@ -4,7 +4,14 @@ module.exports = {
     es6: true,
   },
   plugins: ['jest'],
-  extends: ['../../.eslintrc.js', 'plugin:jest/recommended', 'plugin:jest/style'],
+  extends: [
+    '../../.eslintrc.js',
+    'plugin:jest/recommended',
+    'plugin:jest/style',
+    'plugin:import/errors',
+    'plugin:import/warnings',
+    'plugin:import/typescript',
+  ],
   rules: {
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/no-unused-vars': 'off',

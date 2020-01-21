@@ -9,9 +9,9 @@ import {
   AssetOutcome,
   hashOutcome,
 } from '@statechannels/nitro-protocol/lib/src/contract/outcome';
-import { Signature, hexZeroPad } from 'ethers/utils';
+import { Signature, hexZeroPad, bigNumberify } from 'ethers/utils';
 import { AddressZero } from 'ethers/constants';
-import { bigNumberify } from 'ethers/utils';
+
 export { Store } from './store';
 export interface Balance {
   address: string;
