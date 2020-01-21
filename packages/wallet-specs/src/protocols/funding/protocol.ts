@@ -2,6 +2,7 @@ import { assign, DoneInvokeEvent, Machine } from 'xstate';
 import { LedgerFunding } from '..';
 import { failure, MachineFactory, pretty, Store, success } from '../..';
 import { FundingStrategy, FundingStrategyProposed } from '../../wire-protocol';
+import { log } from '../../utils';
 
 const PROTOCOL = 'funding';
 
@@ -173,7 +174,7 @@ const mockServices: Services = {
 };
 const mockActions: Actions = {
   sendClientChoice: (ctx: ClientChoiceKnown) => {
-    console.log(`Sending ${pretty(strategyChoice(ctx))}`);
+    log(`Sending ${pretty(strategyChoice(ctx))}`);
   },
   assignClientChoice,
 };

@@ -54,14 +54,16 @@ export function supported(signedState: SignedState) {
 }
 
 export class ChannelStoreEntry implements IChannelStoreEntry {
-  public states: SignedState[] = [];
-  public privateKey: string;
-  public participants: Participant[];
-  public funding?: Funding;
-  public channel: Channel;
+  public readonly states: SignedState[] = [];
+  public readonly privateKey: string;
+  public readonly participants: Participant[];
+  public readonly funding?: Funding;
+  public readonly channel: Channel;
 
   constructor(args: Partial<IChannelStoreEntry>) {
-    const { privateKey, participants, channel } = args;
+    args = _.cloneDeep(args);
+
+    const { privateKey, participants, channel, states, funding } = args;
     if (privateKey && participants && channel) {
       this.privateKey = privateKey;
       this.participants = participants;
@@ -69,8 +71,8 @@ export class ChannelStoreEntry implements IChannelStoreEntry {
     } else {
       throw new Error('Required arguments missing');
     }
-    this.states = args.states || [];
-    this.funding = args.funding;
+    this.states = states || [];
+    this.funding = funding;
   }
 
   get args(): IChannelStoreEntry {

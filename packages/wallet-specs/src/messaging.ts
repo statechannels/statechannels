@@ -1,6 +1,7 @@
 import EventEmitter from 'events';
 import { pretty } from '.';
 import { AddressableMessage, Message } from './wire-protocol';
+import { log } from './utils';
 
 interface IMessageService {
   sendMessage: (m: Message) => void;
@@ -16,7 +17,7 @@ class MessageService extends EventEmitter implements IMessageService {
         signatures,
       }));
     }
-    console.log(
+    log(
       pretty({
         MESSAGE: {
           to: m.to,
@@ -25,6 +26,7 @@ class MessageService extends EventEmitter implements IMessageService {
         },
       })
     );
+
     this.emit('message', m);
   }
 }

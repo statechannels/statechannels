@@ -4,7 +4,7 @@ export type ChainEventType = ChainEvent['type'];
 export interface IChain {
   initialize(): Promise<void>;
   getHoldings: (channelId: string) => Promise<string>;
-  deposit: (channelId: string, expectedHeld: string, amount: string) => Promise<Deposited | Revert>;
+  deposit: (channelId: string, expectedHeld: string, amount: string) => Promise<void>;
   on: (chainEventType: ChainEventType, listener: ChainEventListener) => () => void;
 }
 
@@ -22,31 +22,39 @@ export class Chain implements IChain {
     return this._holdings[channelId] || '0';
   }
 
-  public on(chainEventType: ChainEvent['type'], listener: ChainEventListener) {
-    if (chainEventType !== 'DEPOSITED') {
-      throw new Error(`No support for ${chainEventType} events yet.`);
-    }
-
-    return () => {};
-  }
-
-  public async deposit(
-    channelId: string,
-    expectedHeld: string,
-    amount: string
-  ): Promise<ChainEvent> {
+  public async deposit(channelId: string, expectedHeld: string, amount: string): Promise<void> {
     const current = this._holdings[channelId] || 0;
     if (current >= expectedHeld) {
       this._holdings[channelId] = add(this._holdings[channelId] || 0, amount);
-      return {
+      this.triggerEvent({
         type: 'DEPOSITED',
         channelId,
         amount,
         total: this._holdings[channelId],
-      };
+      });
     } else {
-      return { type: 'REVERT' };
+      this.triggerEvent({ type: 'REVERT' });
     }
+  }
+
+  public triggerEvent(chainEvent: ChainEvent) {
+    if (this._listeners) {
+      this._listeners.map(listener => listener(chainEvent));
+    }
+  }
+  private _listeners: ChainEventListener[] = [];
+
+  public on(_, listener) {
+    this._listeners.push(listener);
+
+    return () => {
+      // TODO: Just remove the one listener
+      this._listeners = [];
+    };
+  }
+
+  public setHoldings(channelId, amount) {
+    this._holdings[channelId] = amount;
   }
 }
 

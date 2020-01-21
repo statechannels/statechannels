@@ -2,19 +2,18 @@ import * as xstate from 'xstate';
 import { pretty } from '.';
 import { Actor } from 'xstate';
 import { Process } from './protocols/wallet/protocol';
+import { ADD_LOGS } from './constants';
 
-export function log(cond: boolean, message: string) {
-  if (!cond) {
+export function log(message: any) {
+  if (ADD_LOGS) {
     console.log(message);
   }
 }
 
-export function debugAction(id) {
-  return (ctx, event, { state }) => {
-    const saveMe = id;
-    debugger;
-  };
-}
+export const debugAction = store => (ctx, event, { state }) => {
+  store;
+  debugger;
+};
 
 export function addLogs(
   _ctx,

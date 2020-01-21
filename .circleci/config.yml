@@ -235,10 +235,14 @@ jobs:
     <<: *defaults
     steps:
       - checkout
+      - log_stats:
+          file: netlify-stats
       - attach_workspace:
           at: /home/circleci/project
       - run: yarn build:netlify:ci
       - run: yarn release:netlify:ci
+      - upload_logs:
+          file: netlify-stats
 
 workflows:
   statechannels:

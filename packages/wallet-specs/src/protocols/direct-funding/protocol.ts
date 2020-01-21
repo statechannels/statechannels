@@ -1,6 +1,5 @@
 import {
   add,
-  max,
   subtract,
   ethAllocationOutcome,
   getEthAllocation,
@@ -8,7 +7,6 @@ import {
   Store,
   MachineFactory,
   gt,
-  eq,
 } from '../../';
 import { Allocation, Outcome } from '@statechannels/nitro-protocol';
 import { Machine, DoneInvokeEvent, MachineConfig } from 'xstate';
@@ -63,10 +61,10 @@ TODO: extract this pattern to other protocols.
 
 function getDetaAndInvoke<T>(data: string, src: string, onDone: string) {
   return {
-    initial: 'getData',
+    initial: data,
     states: {
-      getData: { invoke: { src: data, onDone: 'invokeService' } },
-      invokeService: {
+      [data]: { invoke: { src: data, onDone: src } },
+      [src]: {
         invoke: {
           src,
           data: (_, { data }: DoneInvokeEvent<T>) => data,
@@ -108,20 +106,17 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
   async function checkCurrentLevel(ctx: Init) {
     const { latestSupportedState } = store.getEntry(ctx.channelId);
     const { outcome } = latestSupportedState;
+
     const allocated = getEthAllocation(outcome)
       .map(i => i.amount)
       .reduce(add, '0');
     const holdings = await store.getHoldings(ctx.channelId);
 
-    if (eq(holdings, 0) && latestSupportedState.turnNum === 0) {
-      // This is the only acceptable time to be underfunded
-      return;
-    }
-
     if (gt(allocated, holdings)) {
       throw new Error('Channel underfunded');
     }
   }
+
   async function getDepositingInfo({
     minimalAllocation,
     channelId,
@@ -131,12 +126,16 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
     for (let i = 0; i < minimalAllocation.length; i++) {
       const allocation = minimalAllocation[i];
       if (entry.ourIndex === i) {
+        const fundedAt = getEthAllocation(entry.latestSupportedState.outcome)
+          .map(a => a.amount)
+          .reduce(add);
         return {
           channelId,
           depositAt: totalBeforeDeposit,
           totalAfterDeposit: bigNumberify(totalBeforeDeposit)
             .add(allocation.amount)
             .toHexString(),
+          fundedAt,
         };
       } else {
         totalBeforeDeposit = bigNumberify(allocation.amount)
@@ -147,6 +146,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
 
     throw Error(`Could not find an allocation for participant id ${entry.ourIndex}`);
   }
+
   async function getPrefundOutcome({
     channelId,
     minimalAllocation,

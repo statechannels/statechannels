@@ -22,7 +22,7 @@ export function getEthAllocation(outcome: Outcome): Allocation {
   const ethOutcome: AssetOutcome | undefined = outcome.find(
     o => o.assetHolderAddress === AddressZero
   );
-  return checkThat(ethOutcome, isAllocationOutcome).allocation;
+  return ethOutcome ? checkThat(ethOutcome, isAllocationOutcome).allocation : [];
 }
 
 export function ethAllocationOutcome(allocation: Allocation): AllocationAssetOutcome[] {
