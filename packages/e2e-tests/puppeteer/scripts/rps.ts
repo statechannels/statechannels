@@ -47,14 +47,19 @@ export async function clickThroughResignationUI(rpsTabA: Page, rpsTabB: Page): P
     await waitForAndClickButton(rpsTabA, 'Resign');
     await waitForAndClickButton(walletIFrameA, 'Close Channel');
 
-    const button = await Promise.race([
-      walletIFrameA.waitForXPath('//button[contains(., "Approve")]'), // virtual funding
-      walletIFrameA.waitForXPath('//button[contains(., "Ok")]') // ledger funding NOTE CASE SENSITIVE Ok not OK
-    ]);
+    async function virtualFunding(): Promise<void> {
+      await waitForAndClickButton(walletIFrameA, 'Approve');
+      await waitForAndClickButton(walletIFrameA, 'Ok');
+      await waitForAndClickButton(rpsTabA, 'OK');
+      await waitForAndClickButton(rpsTabA, 'Exit');
+    }
 
-    await button.click();
-    await waitForAndClickButton(rpsTabA, 'OK');
-    await waitForAndClickButton(rpsTabA, 'Exit');
+    async function ledgerFunding(): Promise<void> {
+      await waitForAndClickButton(walletIFrameA, 'Ok');
+      await waitForAndClickButton(rpsTabA, 'OK');
+      await waitForAndClickButton(rpsTabA, 'Exit');
+    }
+    await Promise.race([virtualFunding(), ledgerFunding()]);
   }
 
   async function tabB(): Promise<void> {
