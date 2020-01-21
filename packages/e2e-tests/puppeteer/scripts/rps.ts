@@ -1,15 +1,15 @@
-import {setUpBrowser, loadRPSApp} from '../helpers';
+import {setUpBrowser, loadRPSApp, waitForAndClickButton} from '../helpers';
 import {Page} from 'puppeteer';
 
 export async function setupRPS(rpsTabA: Page, rpsTabB: Page): Promise<void> {
-  await (await rpsTabA.waitForXPath('//button[contains(., "Start Playing!")]')).click();
-  await (await rpsTabB.waitForXPath('//button[contains(., "Start Playing!")]')).click();
+  await waitForAndClickButton(rpsTabA, 'Start Playing!');
+  await waitForAndClickButton(rpsTabB, 'Start Playing!');
 
   await (await rpsTabA.waitFor('#name')).type('playerA');
-  (await rpsTabA.waitForXPath('//button[contains(., "Connect with MetaMask")]')).click();
+  await waitForAndClickButton(rpsTabA, 'Connect with MetaMask');
 
   await (await rpsTabB.waitFor('#name')).type('playerB');
-  (await rpsTabB.waitForXPath('//button[contains(., "Connect with MetaMask")]')).click();
+  await waitForAndClickButton(rpsTabB, 'Connect with MetaMask');
 }
 
 export async function clickThroughRPSUI(rpsTabA: Page, rpsTabB: Page): Promise<void> {
@@ -20,16 +20,17 @@ export async function clickThroughRPSUI(rpsTabA: Page, rpsTabB: Page): Promise<v
     'document.querySelector("button.lobby-new-game").click()'
   ); // TODO this is actually Player B. Consider permuting A and B throughout this script.
 
-  await (await rpsTabA.waitForXPath('//button[contains(., "Create Game")]')).click();
-  await (await rpsTabB.waitForXPath('//button[contains(., "Join")]')).click();
+  await waitForAndClickButton(rpsTabA, 'Create Game');
+  await waitForAndClickButton(rpsTabB, 'Join');
 
   const walletIFrameA = rpsTabA.frames()[1];
   const walletIFrameB = rpsTabB.frames()[1];
 
-  await (await walletIFrameB.waitForXPath('//button[contains(., "Fund Channel")]')).click();
-  await (await walletIFrameA.waitForXPath('//button[contains(., "Fund Channel")]')).click();
-  await (await walletIFrameB.waitForXPath('//button[contains(., "Ok!")]')).click();
-  await (await walletIFrameA.waitForXPath('//button[contains(., "Ok!")]')).click();
+  await waitForAndClickButton(walletIFrameB, 'Fund Channel');
+  await waitForAndClickButton(walletIFrameA, 'Fund Channel');
+  await waitForAndClickButton(walletIFrameB, 'Ok!');
+  await waitForAndClickButton(walletIFrameA, 'Ok!');
+
   await (await rpsTabA.waitFor('img[src*="rock"]')).click();
   await (await rpsTabB.waitFor('img[src*="paper"]')).click();
 }
@@ -37,28 +38,26 @@ export async function clickThroughRPSUI(rpsTabA: Page, rpsTabB: Page): Promise<v
 export async function clickThroughResignationUI(rpsTabA: Page, rpsTabB: Page): Promise<void> {
   async function tabA(): Promise<void> {
     const walletIFrameA = rpsTabA.frames()[1];
+    await waitForAndClickButton(rpsTabA, 'Resign');
+    await waitForAndClickButton(walletIFrameA, 'Close Channel');
 
-    await (await rpsTabA.waitForXPath('//button[contains(., "Resign")]')).click();
-    await (await walletIFrameA.waitForXPath('//button[contains(., "Close Channel")]')).click();
     const button = await Promise.race([
       walletIFrameA.waitForXPath('//button[contains(., "Approve")]'), // virtual funding
       walletIFrameA.waitForXPath('//button[contains(., "Ok")]') // ledger funding NOTE CASE SENSITIVE Ok not OK
     ]);
+
     await button.click();
-    await (await rpsTabA.waitForXPath('//button[contains(., "OK")]')).click();
-    await (await rpsTabA.waitForXPath('//button[contains(., "Exit")]')).click();
-    return;
+    await waitForAndClickButton(rpsTabA, 'OK');
+    await waitForAndClickButton(rpsTabA, 'Exit');
   }
 
   async function tabB(): Promise<void> {
     const walletIFrameB = rpsTabB.frames()[1];
-
-    await (await walletIFrameB.waitForXPath('//button[contains(., "Close Channel")]')).click();
-    await (await walletIFrameB.waitForXPath('//button[contains(., "Approve")]')).click();
-    await (await walletIFrameB.waitForXPath('//button[contains(., "Ok")]')).click();
-    await (await rpsTabB.waitForXPath('//button[contains(., "OK")]')).click();
-    await (await rpsTabB.waitForXPath('//button[contains(., "Exit")]')).click();
-    return;
+    await waitForAndClickButton(walletIFrameB, 'Close Channel');
+    await waitForAndClickButton(walletIFrameB, 'Approve');
+    await waitForAndClickButton(walletIFrameB, 'Ok');
+    await waitForAndClickButton(rpsTabB, 'OK');
+    await waitForAndClickButton(rpsTabB, 'Exit');
   }
 
   const tabAcomplete = tabA();

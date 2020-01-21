@@ -1,4 +1,4 @@
-import {Browser, Page, launch} from 'puppeteer';
+import {Browser, Page, Frame, launch} from 'puppeteer';
 
 import * as fs from 'fs';
 import * as path from 'path';
@@ -31,7 +31,10 @@ export async function loadRPSApp(page: Page, ganacheAccountIndex: number): Promi
     }
   });
 }
-//
+
+export async function waitForAndClickButton(page: Page | Frame, button: string): Promise<void> {
+  return (await page.waitForXPath('//button[contains(., "' + button + '")]')).click();
+}
 
 export async function setUpBrowser(headless: boolean, slowMo?: number): Promise<Browser> {
   const browser = await launch({
