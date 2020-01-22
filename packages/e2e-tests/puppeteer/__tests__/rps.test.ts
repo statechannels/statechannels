@@ -24,6 +24,7 @@ describe('Playing a game of RPS', () => {
   beforeAll(async () => {
     browserA = await setUpBrowser(HEADLESS, 10); // 10ms delay seems to prevent certain errors
     browserB = await setUpBrowser(HEADLESS, 10); // 10ms delay seems to prevent certain errors
+  });
 
   beforeEach(async () => {
     rpsTabA = (await browserA.pages())[0];
