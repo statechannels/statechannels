@@ -166,7 +166,6 @@ function handleDisputeAction(
     newDisputeState.protocolState.type === "Challenging.Failure" ||
     newDisputeState.protocolState.type === "Responding.Success"
   ) {
-    // delete protocolState.disputeState; // TODO: @alex does this look right
     return {
       protocolState: states.ongoing({...protocolState}),
       sharedData: newDisputeState.sharedData
