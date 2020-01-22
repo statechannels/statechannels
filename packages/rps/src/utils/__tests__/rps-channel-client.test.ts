@@ -218,10 +218,6 @@ describe('when challengeChannel() is called', () => {
   beforeAll(async () => {
     result = await client.challengeChannel(MOCK_CHANNEL_ID);
   });
-  // TODO: Need tests
-  // it('calls channelClient.joinChannel() with the same channelId', async () => {
-  //   expect(mockChannelClient.challengeChannel).toHaveBeenCalledWith(MOCK_CHANNEL_ID);
-  // });
   it('decodes and returns the result', async () => {
     expect(result).toEqual(mockChannelState);
   });

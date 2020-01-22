@@ -123,6 +123,7 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
     if (nextState !== latestState) {
       await this.verifyTurnNum(nextState.turnNum);
       nextState.turnNum = this.getNextTurnNum(latestState);
+      nextState.status = 'running';
       log.debug(`Player ${this.getPlayerIndex()} updated channel to turnNum ${nextState.turnNum}`);
     }
 
@@ -132,9 +133,11 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
     return this.latestState;
   }
 
-  async challengeChannel(/* channelId: string */): Promise<ChannelResult> {
-    console.error('TODO: Implement');
-    throw new Error('UnimplementedError: ChallengeChannel not implemented on FakeChannelClient');
+  async challengeChannel(channelId: string): Promise<ChannelResult> {
+    log.debug(`Player ${this.getPlayerIndex()} challenging channel ${channelId}`);
+    const latestState = this.findChannel(channelId);
+    this.latestState = {...latestState, status: 'challenging'};
+    return this.latestState;
   }
 
   async closeChannel(channelId: string): Promise<ChannelResult> {
