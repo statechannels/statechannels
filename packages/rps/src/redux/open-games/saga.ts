@@ -18,10 +18,9 @@ export default function* openGameSaga() {
   // this is more robust though, so stick to watching all actions for the time being
   let openGameSyncerProcess: any = null;
   let myGameIsOnFirebase = false;
-  let joinedAGame = false;
 
   while (true) {
-    yield take('*');
+    const action = yield take('*');
 
     const localState: LocalState = yield select(getLocalState);
 
@@ -37,7 +36,7 @@ export default function* openGameSaga() {
       }
     }
 
-    if (localState.type === 'A.GameChosen' && !joinedAGame) {
+    if (action.type === 'JoinOpenGame' && localState.type === 'A.GameChosen') {
       const openGameKey = `/challenges/${localState.opponentAddress}`;
       const taggedOpenGame = {
         isPublic: false,
@@ -45,7 +44,6 @@ export default function* openGameSaga() {
         playerAOutcomeAddress: localState.outcomeAddress,
       };
       yield call(reduxSagaFirebase.database.patch, openGameKey, taggedOpenGame);
-      joinedAGame = true;
     }
 
     if (localState.type === 'B.WaitingRoom') {
