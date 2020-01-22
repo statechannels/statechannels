@@ -1,8 +1,9 @@
 import { Allocation, Outcome } from '@statechannels/nitro-protocol';
-import { Machine, DoneInvokeEvent, MachineConfig } from 'xstate';
+import { Machine, MachineConfig } from 'xstate';
 import _ from 'lodash';
 import { bigNumberify } from 'ethers/utils';
 
+import { getDetaAndInvoke } from '../../machine-utils';
 import {
   add,
   subtract,
@@ -60,25 +61,6 @@ Since the machine doesn't have sync access to a store, we invoke a promise to ge
 desired outcome; that outcome can then be forwarded to the invoked service service.
 TODO: extract this pattern to other protocols.
 */
-
-function getDetaAndInvoke<T>(data: string, src: string, onDone: string) {
-  return {
-    initial: data,
-    states: {
-      [data]: { invoke: { src: data, onDone: src } },
-      [src]: {
-        invoke: {
-          src,
-          data: (_, { data }: DoneInvokeEvent<T>) => data,
-          onDone: 'done',
-          autoForward: true,
-        },
-      },
-      done: { type: FINAL },
-    },
-    onDone,
-  };
-}
 
 export const config: MachineConfig<any, any, any> = {
   key: PROTOCOL,
