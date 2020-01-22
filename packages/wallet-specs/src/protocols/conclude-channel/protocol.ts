@@ -8,50 +8,19 @@ import * as VirtualDefundingAsLeaf from '../virtual-defunding-as-leaf/protocol';
 import { MachineFactory, FINAL } from '../..';
 import { IStore } from '../../store';
 
+import { SupportState } from '..';
+
 const PROTOCOL = 'conclude-channel';
 
 export interface Init {
   channelId: string;
 }
 
-function finalState({ channelId }: Init): State {
-  // Only works for wallet channels
-  // (and even doesn't really work reliably there)
-  const latestState = store
-    .getEntry(channelId)
-    .states.filter(({ state }) => store.signedByMe(state))
-    .sort(({ state }) => state.turnNum)
-    .pop();
-
-  if (!latestState) {
-    throw new Error('No state');
-  }
-
-  return {
-    ...latestState.state,
-    turnNum: latestState.state.turnNum + 1,
-    isFinal: true,
-  };
-}
-
 const concludeTarget = {
   invoke: {
     src: 'supportState',
+    onDone: 'success',
   },
-  onDone: [
-    {
-      target: 'virtualDefunding',
-      cond: 'virtuallyFunded',
-    },
-    {
-      target: 'success',
-      cond: 'directlyFunded',
-    },
-    {
-      target: 'ledgerDefunding',
-      cond: 'indirectlyFunded',
-    },
-  ],
 };
 
 function ledgerDefundingArgs({ channelId }: Init): LedgerDefunding.Init {
@@ -115,13 +84,37 @@ export const config = {
   },
 };
 
-const guards = {
-  virtuallyFunded: _ => true,
-  indirectlyFunded: _ => true,
-  directlyFunded: _ => true,
+export const mockOptions = {
+  guards: {
+    virtuallyFunded: _ => true,
+    indirectlyFunded: _ => true,
+    directlyFunded: _ => true,
+  },
 };
-export const mockOptions = { guards };
 
 export const machine: MachineFactory<Init, any> = (_: IStore, ctx: Init) => {
+  const services = {
+    supportState: SupportState.machine(store),
+  };
   return Machine(config).withConfig({}, ctx);
 };
+
+function finalState({ channelId }: Init): State {
+  // Only works for wallet channels
+  // (and even doesn't really work reliably there)
+  const latestState = store
+    .getEntry(channelId)
+    .states.filter(({ state }) => store.signedByMe(state))
+    .sort(({ state }) => state.turnNum)
+    .pop();
+
+  if (!latestState) {
+    throw new Error('No state');
+  }
+
+  return {
+    ...latestState.state,
+    turnNum: latestState.state.turnNum + 1,
+    isFinal: true,
+  };
+}
