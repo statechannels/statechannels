@@ -73,7 +73,10 @@ export async function clickThroughRPSUIWithChallengeByPlayerA(
 export async function clickThroughResignationUI(rpsTabA: Page, rpsTabB: Page): Promise<void> {
   async function playerB(page: Page): Promise<void> {
     const walletIFrame = page.frames()[1];
-    await waitForAndClickButton(page, 'Resign');
+
+    await (await page.waitForXPath('//button[contains(., "Resign")]')).evaluate(
+      'document.querySelector("button.footer-resign").click()'
+    );
     await waitForAndClickButton(walletIFrame, 'Close Channel');
 
     async function virtualFunding(): Promise<void> {
@@ -115,8 +118,8 @@ if (require.main === module) {
     const rpsTabA = await browserA.newPage();
     const rpsTabB = await browserB.newPage();
 
-    await loadRPSApp(rpsTabA, 0);
-    await loadRPSApp(rpsTabB, 1);
+    await loadRPSApp(rpsTabA, 3);
+    await loadRPSApp(rpsTabB, 4);
 
     await setupRPS(rpsTabA, rpsTabB);
 

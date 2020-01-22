@@ -32,8 +32,21 @@ export async function loadRPSApp(page: Page, ganacheAccountIndex: number): Promi
   });
 }
 
+/** */
 export async function waitForAndClickButton(page: Page | Frame, button: string): Promise<void> {
-  return (await page.waitForXPath('//button[contains(., "' + button + '")]')).click();
+  let retryAttempts = 0;
+  let error;
+  while (retryAttempts < 3) {
+    try {
+      return (await page.waitForXPath('//button[contains(., "' + button + '")]')).click();
+    } catch (e) {
+      console.error(`Could not click on ${button}`);
+      error = e;
+      await new Promise(r => setTimeout(r, 250));
+      retryAttempts += 1;
+    }
+  }
+  throw error;
 }
 
 export async function waitForHeading(page: Page | Frame): Promise<string | null> {
