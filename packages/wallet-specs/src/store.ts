@@ -201,15 +201,11 @@ export class Store implements IStore {
   }
 
   public receiveStates(signedStates: SignedState[]): void {
-    try {
-      const { channel } = signedStates[0].state;
-      const channelId = getChannelId(channel);
+    const { channel } = signedStates[0].state;
+    const channelId = getChannelId(channel);
 
-      // TODO: validate transition
-      this.updateEntry(channelId, signedStates);
-    } catch (e) {
-      throw e;
-    }
+    // TODO: validate transition
+    this.updateEntry(channelId, signedStates);
   }
 
   // Nonce management
