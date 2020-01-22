@@ -51,7 +51,6 @@ export interface ChannelResult {
   appDefinition: string;
   channelId: string;
   status: ChannelStatus;
-  // funding: Funds[]; // do we even need this?
   turnNum: string;
   challengeExpirationTime?: number;
 }
