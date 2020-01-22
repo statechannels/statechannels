@@ -1,8 +1,10 @@
 import { Channel, getChannelId, State } from '@statechannels/nitro-protocol';
 import { ethers } from 'ethers';
 import _ from 'lodash';
+import { getStateSignerAddress } from '@statechannels/nitro-protocol/lib/src/signatures';
 
-import { Participant } from './store';
+import { Participant, Store } from './store';
+import { store } from './temp-store';
 
 import { SignedState } from '.';
 
@@ -107,6 +109,18 @@ export class ChannelStoreEntry implements IChannelStoreEntry {
     }
 
     return signedState.state;
+  }
+
+  private signedByMe(state: State): boolean {
+    return !!this.states
+      .find(s => Store.equals(s.state, state))
+      ?.signatures.find(
+        signature => getStateSignerAddress({ state, signature }) === this.ourAddress
+      );
+  }
+
+  get latestStateSupportedByMe(): State | undefined {
+    return this.states.map(s => s.state).find(state => this.signedByMe(state));
   }
 
   get ourAddress(): string {

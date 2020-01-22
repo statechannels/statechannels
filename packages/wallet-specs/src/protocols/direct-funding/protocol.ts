@@ -2,6 +2,7 @@ import { Allocation, Outcome } from '@statechannels/nitro-protocol';
 import { Machine, MachineConfig } from 'xstate';
 import _ from 'lodash';
 import { bigNumberify } from 'ethers/utils';
+import { HashZero, AddressZero } from 'ethers/constants';
 
 import { getDetaAndInvoke } from '../../machine-utils';
 import {
@@ -55,12 +56,6 @@ const checkCurrentLevel = {
     onDone: 'updatePrefundOutcome',
   },
 };
-
-/*
-Since the machine doesn't have sync access to a store, we invoke a promise to get the
-desired outcome; that outcome can then be forwarded to the invoked service service.
-TODO: extract this pattern to other protocols.
-*/
 
 export const config: MachineConfig<any, any, any> = {
   key: PROTOCOL,
@@ -135,24 +130,48 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
     channelId,
     minimalAllocation,
   }: Init): Promise<SupportState.Init> {
-    const state = store.getEntry(channelId).latestSupportedState;
-    const { channel } = state;
+    const entry = store.getEntry(channelId);
+    const { channel } = entry;
 
     if (minimalAllocation.length !== channel.participants.length) {
       throw new Error('Must be exactly one allocation item per participant');
     }
 
-    const outcome = minimalOutcome(state.outcome, minimalAllocation);
-    return {
-      channelId,
-      outcome,
-    };
+    // TODO: Safety checks?
+    if (entry.hasSupportedState) {
+      const outcome = minimalOutcome(entry.latestSupportedState.outcome, minimalAllocation);
+      return {
+        state: {
+          ...entry.latestSupportedState,
+          outcome,
+          turnNum: entry.latestSupportedState.turnNum + 1,
+        },
+      };
+    } else {
+      return {
+        state: {
+          channel,
+          challengeDuration: 1,
+          isFinal: false,
+          turnNum: 0,
+          outcome: minimalOutcome([], minimalAllocation),
+          appData: HashZero,
+          appDefinition: AddressZero,
+        },
+      };
+    }
   }
 
   async function getPostfundOutcome({ channelId }: Init): Promise<SupportState.Init> {
-    const { outcome } = store.getEntry(channelId).latestSupportedState;
+    const { latestSupportedState } = store.getEntry(channelId);
 
-    return { channelId, outcome: mergeDestinations(outcome) };
+    return {
+      state: {
+        ...latestSupportedState,
+        turnNum: latestSupportedState.turnNum + 1,
+        outcome: mergeDestinations(latestSupportedState.outcome),
+      },
+    };
   }
 
   const services: Services = {

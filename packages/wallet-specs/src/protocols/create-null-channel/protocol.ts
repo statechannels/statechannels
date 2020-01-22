@@ -40,10 +40,17 @@ const checkChannel = {
   },
 };
 
-function preFundData({ channelId }: Context): SupportState.Init {
+function preFundData({ channel }: Context): SupportState.Init {
   return {
-    channelId,
-    outcome: [],
+    state: {
+      turnNum: 0,
+      outcome: [],
+      channel,
+      isFinal: false,
+      challengeDuration: 1,
+      appData: HashZero,
+      appDefinition: AddressZero,
+    },
   };
 }
 const preFundSetup = {
@@ -77,20 +84,7 @@ export const machine: MachineFactory<Init, any> = (store, context: Init) => {
     // TODO: Determine how participants should be managed
     const participants: Participant[] = channel.participants.map(p => store.getParticipant(p));
     const privateKey = store.getPrivateKey(participants.map(p => p.signingAddress));
-    const states: SignedState[] = [
-      {
-        state: {
-          turnNum: 0,
-          outcome: [],
-          channel,
-          isFinal: false,
-          challengeDuration: 1,
-          appData: HashZero,
-          appDefinition: AddressZero,
-        },
-        signatures: [],
-      },
-    ];
+    const states: SignedState[] = [];
     store.initializeChannel(
       new ChannelStoreEntry({
         channel,

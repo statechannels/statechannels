@@ -1,16 +1,8 @@
 import { assign, DoneInvokeEvent, Machine } from 'xstate';
-import { Outcome, Allocation } from '@statechannels/nitro-protocol';
+import { Outcome } from '@statechannels/nitro-protocol';
 
 import { allocateToTarget } from '../../calculations';
-import {
-  Channel,
-  ensureExists,
-  MachineFactory,
-  Store,
-  success,
-  getEthAllocation,
-  FINAL,
-} from '../..';
+import { Channel, MachineFactory, Store, success, getEthAllocation, FINAL } from '../..';
 
 import { CreateNullChannel, DirectFunding, SupportState } from '..';
 
@@ -105,10 +97,7 @@ const fundTarget = {
     ledgerUpdate: {
       invoke: {
         src: 'supportState',
-        data: (ctx: LedgerExists, { data }: DoneInvokeEvent<{ outcome: Outcome }>) => ({
-          channelId: ctx.ledgerChannelId,
-          outcome: data.outcome,
-        }),
+        data: (_, { data }: DoneInvokeEvent<SupportState.Init>) => data,
         autoForward: true,
         onDone: 'success',
       },
@@ -180,8 +169,11 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
     const targetAllocation = getEthAllocation(targetChannelState.outcome);
 
     return {
-      channelId: ledgerChannelId,
-      outcome: allocateToTarget(targetAllocation, ledgerAllocation, targetChannelId),
+      state: {
+        ...ledgerState,
+        turnNum: ledgerState.turnNum + 1,
+        outcome: allocateToTarget(targetAllocation, ledgerAllocation, targetChannelId),
+      },
     };
   }
 
