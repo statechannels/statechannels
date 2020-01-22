@@ -56,6 +56,7 @@ type Options = {
   guards: Guards;
 };
 
+export type machine = typeof machine;
 export const machine: MachineFactory<Init, any> = (store, context: Init) => {
   const services: Services = {
     sendState: async ({ state }: Init) => {
