@@ -1,4 +1,5 @@
 import { assign } from 'xstate';
+
 import { Balance, Channel } from '../../';
 import { store } from '../../temp-store';
 const PROTOCOL = 'virtual-funding-as-hub';

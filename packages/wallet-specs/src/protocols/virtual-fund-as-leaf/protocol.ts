@@ -1,9 +1,10 @@
 import { assign } from 'xstate';
+import { AllocationItem } from '@statechannels/nitro-protocol';
+import { Guarantee } from '@statechannels/nitro-protocol/lib/src/contract/outcome';
+
 import { add, Balance, Channel, getChannelId, ethAllocationOutcome } from '../../';
 import { Init as CreateNullChannelArgs } from '../create-null-channel/protocol';
 import { Init as SupportStateArgs } from '../support-state/protocol';
-import { AllocationItem } from '@statechannels/nitro-protocol';
-import { Guarantee } from '@statechannels/nitro-protocol/lib/src/contract/outcome';
 import { store } from '../../temp-store';
 
 const PROTOCOL = 'virtual-funding-as-leaf';

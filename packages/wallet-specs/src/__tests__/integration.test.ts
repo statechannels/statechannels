@@ -1,35 +1,21 @@
-import { Init, machine, CreateChannelEvent } from '../protocol';
 import { ethers } from 'ethers';
-import { Store, Participant } from '../../../store';
 import waitForExpect from 'wait-for-expect';
 import { interpret } from 'xstate';
-import { messageService } from '../../../messaging';
-import { AddressableMessage } from '../../../wire-protocol';
 import { AddressZero, HashZero } from 'ethers/constants';
-import { processStates, log } from '../../../utils';
-import { Chain } from '../../../chain';
+
+import { Init, machine, CreateChannelEvent } from '../protocols/wallet/protocol';
+import { Store } from '../store';
+import { messageService } from '../messaging';
+import { AddressableMessage } from '../wire-protocol';
+import { log } from '../utils';
+import { Chain } from '../chain';
+
+import { processStates } from './utils';
+import { first, second, wallet1, wallet2, participants } from './data';
 
 const logProcessStates = state => {
   log(processStates(state));
 };
-
-const wallet1 = new ethers.Wallet(
-  '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318'
-); // 0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf
-const wallet2 = new ethers.Wallet(
-  '0xb3ab7b031311fe1764b657a6ae7133f19bac97acd1d7edca9409daa35892e727'
-); // 0x2222E21c8019b14dA16235319D34b5Dd83E644A9
-const first: Participant = {
-  signingAddress: wallet1.address,
-  destination: '0x0000000000000000000000000000000000000000000000000000000000000001',
-  participantId: 'first',
-};
-const second: Participant = {
-  signingAddress: wallet2.address,
-  destination: '0x0000000000000000000000000000000000000000000000000000000000000002',
-  participantId: 'second',
-};
-const participants = [first, second];
 
 const createChannel: CreateChannelEvent = {
   type: 'CREATE_CHANNEL',
@@ -75,7 +61,7 @@ const connect = (wallet: ethers.Wallet) => {
   return [service, store] as [typeof service, typeof store];
 };
 
-it('works', async () => {
+test('opening a channel', async () => {
   const [left] = connect(wallet1);
   connect(wallet2);
 

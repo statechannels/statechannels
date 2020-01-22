@@ -1,9 +1,10 @@
 import { assign, AssignAction, Interpreter, Machine, spawn, MachineConfig } from 'xstate';
-import { CreateChannel, JoinChannel } from '..';
-import { getChannelId, pretty, unreachable } from '../..';
+
+import { getChannelId, unreachable } from '../..';
 import { ChannelUpdated, IStore } from '../../store';
 import { FundingStrategyProposed, OpenChannel, SendStates } from '../../wire-protocol';
-import { invokedState } from '../../utils';
+
+import { CreateChannel, JoinChannel } from '..';
 
 const PROTOCOL = 'wallet';
 export type Events = OpenChannelEvent | CreateChannelEvent | SendStates | FundingStrategyProposed;
@@ -60,23 +61,6 @@ export type Actions = {
   updateStore: any; // TODO
 };
 
-function addLogs(walletProcess: Process, ctx): Process {
-  walletProcess.ref
-    .onTransition(state =>
-      console.log(` TRANSITION: { ${walletProcess.id}: ${invokedState({ state } as any)} },`)
-    )
-    .onEvent(event => {
-      console.log(
-        pretty({
-          actor: `${ctx.id}.${walletProcess.id}`,
-          EVENT: { event: event.type },
-        })
-      );
-    });
-
-  return walletProcess;
-}
-
 export function machine(store: IStore, context: Init) {
   const spawnCreateChannel = assign(
     (ctx: Init, { type, ...init }: CreateChannelEvent): Init => {
@@ -92,9 +76,6 @@ export function machine(store: IStore, context: Init) {
           processId
         ),
       };
-      if (process.env.ADD_LOGS) {
-        addLogs(walletProcess, ctx);
-      }
 
       return {
         ...ctx,
@@ -115,9 +96,6 @@ export function machine(store: IStore, context: Init) {
       id: processId,
       ref: spawn(joinChannelMachine, processId),
     };
-    if (process.env.ADD_LOGS) {
-      addLogs(walletProcess, ctx);
-    }
     return {
       ...ctx,
       processes: ctx.processes.concat([walletProcess]),

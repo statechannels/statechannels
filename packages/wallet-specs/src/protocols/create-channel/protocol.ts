@@ -1,5 +1,6 @@
 import { assign, DoneInvokeEvent, Machine, MachineConfig, sendParent } from 'xstate';
-import { AdvanceChannel, Funding } from '..';
+import { State } from '@statechannels/nitro-protocol';
+
 import {
   Channel,
   forwardChannelUpdated,
@@ -11,7 +12,8 @@ import {
 import { ChannelStoreEntry } from '../../ChannelStoreEntry';
 import { JsonRpcCreateChannelParams } from '../../json-rpc';
 import { passChannelId } from '../join-channel/protocol';
-import { State } from '@statechannels/nitro-protocol';
+
+import { AdvanceChannel, Funding } from '..';
 
 const PROTOCOL = 'create-channel';
 
