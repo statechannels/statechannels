@@ -40,12 +40,12 @@ export async function waitForAndClickButton(page: Page | Frame, button: string):
     try {
       return (await page.waitForXPath('//button[contains(., "' + button + '")]')).click();
     } catch (e) {
-      console.error(`Could not click on ${button}`);
       error = e;
       await new Promise(r => setTimeout(r, 250));
       retryAttempts += 1;
     }
   }
+  console.error(`Could not click on ${button}`);
   throw error;
 }
 

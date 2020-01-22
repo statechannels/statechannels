@@ -7,7 +7,8 @@ import {
   clickThroughResignationUI,
   setupRPS,
   playMove,
-  clickThroughRPSUIWithChallengeByPlayerA
+  clickThroughRPSUIWithChallengeByPlayerA,
+  clickThroughRPSUIWithChallengeByPlayerB
 } from '../scripts/rps';
 
 jest.setTimeout(60000);
@@ -71,7 +72,6 @@ describe('Playing a game of RPS', () => {
     await clickThroughResignationUI(rpsTabA, rpsTabB);
   });
 
-  // eslint-disable-next-line
   it('can allow Player A to challenge Player B to move', async () => {
     await startAndFundRPSGame(rpsTabA, rpsTabB);
 
@@ -79,5 +79,14 @@ describe('Playing a game of RPS', () => {
 
     expect(await waitForHeading(rpsTabA)).toMatch('You lost');
     expect(await waitForHeading(rpsTabB)).toMatch('You won!');
+  });
+
+  it('can allow Player B to challenge Player A to move', async () => {
+    await startAndFundRPSGame(rpsTabA, rpsTabB);
+
+    await clickThroughRPSUIWithChallengeByPlayerB(rpsTabA, rpsTabB);
+
+    expect(await waitForHeading(rpsTabA)).toMatch('You won!');
+    expect(await waitForHeading(rpsTabB)).toMatch('You lost');
   });
 });

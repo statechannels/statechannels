@@ -37,6 +37,7 @@ export async function startAndFundRPSGame(rpsTabA: Page, rpsTabB: Page): Promise
   }
   async function playerA(page: Page): Promise<void> {
     const walletIFrame = page.frames()[1];
+    await new Promise(r => setTimeout(r, 500));
     await waitForAndClickButton(page, 'Join');
     await waitForAndClickButton(walletIFrame, 'Fund Channel');
     await waitForAndClickButton(walletIFrame, 'Ok!');
@@ -64,6 +65,27 @@ export async function clickThroughRPSUIWithChallengeByPlayerA(
     const walletIFrame = page.frames()[1];
     await waitForAndClickButton(walletIFrame, 'Respond');
     await playMove(page, 'paper');
+    await waitForAndClickButton(walletIFrame, 'Ok');
+  }
+
+  await Promise.all([playerA(rpsTabA), playerB(rpsTabB)]);
+}
+
+export async function clickThroughRPSUIWithChallengeByPlayerB(
+  rpsTabA: Page,
+  rpsTabB: Page
+): Promise<void> {
+  async function playerA(page: Page): Promise<void> {
+    const walletIFrame = page.frames()[1];
+    await waitForAndClickButton(walletIFrame, 'Respond');
+    await playMove(page, 'paper');
+    await waitForAndClickButton(walletIFrame, 'Ok');
+  }
+  async function playerB(page: Page): Promise<void> {
+    const walletIFrame = page.frames()[1];
+    await playMove(page, 'rock');
+    await waitForAndClickButton(page, 'Challenge on-chain');
+    await waitForAndClickButton(walletIFrame, 'Approve');
     await waitForAndClickButton(walletIFrame, 'Ok');
   }
 
@@ -112,8 +134,8 @@ if (require.main === module) {
     // Unfortunately we need to use two separate windows
     // as otherwise the javascript gets paused on the non-selected tab
     // see https://github.com/puppeteer/puppeteer/issues/3339
-    const browserA = await setUpBrowser(false, 10);
-    const browserB = await setUpBrowser(false, 10);
+    const browserA = await setUpBrowser(false, 15);
+    const browserB = await setUpBrowser(false, 15);
 
     const rpsTabA = await browserA.newPage();
     const rpsTabB = await browserB.newPage();
