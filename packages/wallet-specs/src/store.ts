@@ -2,7 +2,7 @@ import { State } from '@statechannels/nitro-protocol';
 import { getStateSignerAddress, signState } from '@statechannels/nitro-protocol/lib/src/signatures';
 import _ from 'lodash';
 
-import { ChannelStoreEntry, IChannelStoreEntry, supported } from './ChannelStoreEntry';
+import { ChannelStoreEntry, IChannelStoreEntry, supported, Funding } from './ChannelStoreEntry';
 import { messageService } from './messaging';
 import { AddressableMessage, FundingStrategyProposed } from './wire-protocol';
 import { Chain, IChain } from './chain';
@@ -25,6 +25,7 @@ export interface IStore {
   sendState(state: State): void;
   sendOpenChannel(state: State): void;
   receiveStates(signedStates: SignedState[]): void;
+  setFunding(channelId: string, funding: Funding): Promise<void>;
 
   // TODO: set funding
   // setFunding(channelId: string, funding: Funding): void;
@@ -81,6 +82,12 @@ export class Store implements IStore {
 
   public async deposit(channelId: string, expectedHeld: string, amount: string) {
     return await this._chain.deposit(channelId, expectedHeld, amount);
+  }
+
+  public async setFunding(channelId, funding: Funding) {
+    const entry = this.getEntry(channelId);
+    if (entry.funding) throw `Channel ${channelId} already funded`;
+    this._store[channelId] = { ...entry.args, funding };
   }
 
   public getEntry(channelId: string): ChannelStoreEntry {
