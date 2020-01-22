@@ -26,9 +26,9 @@
     "publish": "lerna publish --yes from-package patch",
     "postinstall": "patch-package",
     "build:netlify:incremental": "yarn build:netlify --since $(git merge-base $CIRCLE_BRANCH origin/master)",
-    "build:netlify": "lerna run  build:netlify --stream --parallel",
-    "release:netlify:incremental": "lerna run release:netlify --stream --parallel --since $(git merge-base $CIRCLE_BRANCH origin/master) -- --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD)",
-    "release:netlify": "lerna run release:netlify --stream --parallel -- --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD) $([ $(git rev-parse --abbrev-ref HEAD) = master ] && echo --prod)"
+    "build:netlify": "lerna run  build:netlify --stream --concurrency 4",
+    "release:netlify:incremental": "lerna run release:netlify --stream --concurrency 4 --since $(git merge-base $CIRCLE_BRANCH origin/master) -- --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD)",
+    "release:netlify": "lerna run release:netlify --stream --concurrency 4 -- --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD) $([ $(git rev-parse --abbrev-ref HEAD) = master ] && echo --prod)"
   },
   "keywords": [
     "ethereum",

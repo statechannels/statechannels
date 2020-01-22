@@ -1,8 +1,9 @@
+import { isAllocationOutcome, Allocation, Outcome } from '@statechannels/nitro-protocol';
+
 import { add, Channel, subtract, ethAllocationOutcome, checkThat, getEthAllocation } from '../..';
 import * as ConcludeChannel from '../conclude-channel/protocol';
 import * as CreateNullChannel from '../create-null-channel/protocol';
 import * as LedgerUpdate from '../ledger-update/protocol';
-import { isAllocationOutcome, Allocation, Outcome } from '@statechannels/nitro-protocol';
 import { store } from '../../temp-store';
 const PROTOCOL = 'partial-withdrawal';
 const success = { type: 'final' };
@@ -45,7 +46,6 @@ function replacementChannelArgs({
 
   return {
     channel: newChannel,
-    outcome: ethAllocationOutcome(newChannelAllocation),
   };
 }
 const createReplacement = {

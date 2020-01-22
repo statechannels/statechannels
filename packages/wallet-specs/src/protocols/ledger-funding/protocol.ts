@@ -1,5 +1,6 @@
 import { assign, DoneInvokeEvent, Machine } from 'xstate';
-import { CreateNullChannel, DirectFunding, SupportState } from '..';
+import { Outcome, Allocation } from '@statechannels/nitro-protocol';
+
 import { allocateToTarget } from '../../calculations';
 import {
   Channel,
@@ -10,7 +11,8 @@ import {
   getEthAllocation,
   FINAL,
 } from '../..';
-import { Outcome, Allocation } from '@statechannels/nitro-protocol';
+
+import { CreateNullChannel, DirectFunding, SupportState } from '..';
 
 const PROTOCOL = 'ledger-funding';
 
@@ -56,10 +58,7 @@ const determineLedgerChannel = {
 const createNewLedger = {
   invoke: {
     src: 'createNullChannel',
-    data: (_, { data }: DoneInvokeEvent<CreateNullChannel.Init>) => ({
-      channel: data.channel,
-      outcome: data.outcome,
-    }),
+    data: (_, { data }: DoneInvokeEvent<CreateNullChannel.Init>) => data,
     onDone: { target: 'success', actions: assignLedgerChannelId },
     autoForward: true,
   },
@@ -84,10 +83,7 @@ const fundLedger = {
     directFunding: {
       invoke: {
         src: 'directFunding',
-        data: (
-          { ledgerChannelId }: LedgerExists,
-          event: DoneInvokeEvent<Allocation>
-        ): DirectFunding.Init => ({ channelId: ledgerChannelId, minimalAllocation: event.data }),
+        data: (_, { data }: DoneInvokeEvent<DirectFunding.Init>): DirectFunding.Init => data,
         onDone: 'done',
         autoForward: true,
       },
@@ -161,7 +157,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
   }
 
   async function getNullChannelArgs({ targetChannelId }: Init): Promise<CreateNullChannel.Init> {
-    const { channel: targetChannel, latestSupportedState } = store.getEntry(targetChannelId);
+    const { channel: targetChannel } = store.getEntry(targetChannelId);
 
     const channel: Channel = {
       ...targetChannel,
@@ -169,12 +165,8 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
     };
 
     // TODO: check that the latest supported state is the last prefund setup state?
-    const { outcome } = ensureExists(latestSupportedState);
 
-    return {
-      channel,
-      outcome,
-    };
+    return { channel };
   }
 
   async function getTargetOutcome({

@@ -109,6 +109,9 @@ export const ContractArtifacts = {
   TokenArtifact,
   ConsensusAppArtifact,
 };
+export const ContractAbis = {
+  EthAssetHolder: ContractArtifacts.EthAssetHolderArtifact.abi,
+};
 
 // types
 export {Uint256} from './contract/types';

@@ -1,5 +1,9 @@
-import { Participant } from './store';
 import { Channel, getChannelId, State } from '@statechannels/nitro-protocol';
+import { ethers } from 'ethers';
+import _ from 'lodash';
+
+import { Participant } from './store';
+
 import { SignedState } from '.';
 
 interface DirectFunding {
@@ -44,7 +48,7 @@ export interface IChannelStoreEntry {
   funding?: Funding;
 }
 
-function supported(signedState: SignedState) {
+export function supported(signedState: SignedState) {
   // TODO: temporarily just check the required length
   return (
     signedState.signatures.filter(Boolean).length === signedState.state.channel.participants.length
@@ -52,14 +56,16 @@ function supported(signedState: SignedState) {
 }
 
 export class ChannelStoreEntry implements IChannelStoreEntry {
-  public states: SignedState[] = [];
-  public privateKey: string;
-  public participants: Participant[];
-  public funding?: Funding;
-  public channel: Channel;
+  public readonly states: SignedState[] = [];
+  public readonly privateKey: string;
+  public readonly participants: Participant[];
+  public readonly funding?: Funding;
+  public readonly channel: Channel;
 
   constructor(args: Partial<IChannelStoreEntry>) {
-    const { privateKey, participants, channel } = args;
+    args = _.cloneDeep(args);
+
+    const { privateKey, participants, channel, states, funding } = args;
     if (privateKey && participants && channel) {
       this.privateKey = privateKey;
       this.participants = participants;
@@ -67,8 +73,8 @@ export class ChannelStoreEntry implements IChannelStoreEntry {
     } else {
       throw new Error('Required arguments missing');
     }
-    this.states = args.states || [];
-    this.funding = args.funding;
+    this.states = states || [];
+    this.funding = funding;
   }
 
   get args(): IChannelStoreEntry {
@@ -77,17 +83,27 @@ export class ChannelStoreEntry implements IChannelStoreEntry {
   }
 
   get ourIndex() {
-    return this.participants.findIndex(p => p.signingAddress === this.privateKey);
+    const idx = this.participants.findIndex(
+      p => p.signingAddress === new ethers.Wallet(this.privateKey).address
+    );
+    if (idx === -1) {
+      throw 'Not found';
+    }
+    return idx;
   }
 
   get hasSupportedState(): boolean {
     return this.states.some(supported);
   }
 
+  get hasState(): boolean {
+    return this.states.length > 0;
+  }
+
   get latestSupportedState(): State {
     const signedState = this.states.find(supported);
     if (!signedState) {
-      throw 'No supported state found';
+      throw new Error('No supported state found');
     }
 
     return signedState.state;
@@ -118,7 +134,14 @@ export class ChannelStoreEntry implements IChannelStoreEntry {
     return this.states.sort(s => -s.state.turnNum)[0].state;
   }
 
+  get participantId(): string {
+    return this.participants[this.ourIndex].participantId;
+  }
+
   get recipients(): string[] {
-    return this.channel.participants.filter(p => p !== this.ourAddress);
+    return _.without(
+      this.participants.map(p => p.participantId),
+      this.participantId
+    );
   }
 }

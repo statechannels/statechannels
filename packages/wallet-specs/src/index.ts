@@ -1,15 +1,18 @@
 import { EventObject, SendAction, StateMachine, forwardTo } from 'xstate';
 import { Outcome, Allocation, State } from '@statechannels/nitro-protocol';
-import { ChannelUpdated, IStore } from './store';
 import {
   AllocationAssetOutcome,
   Guarantee,
   GuaranteeAssetOutcome,
   isAllocationOutcome,
   AssetOutcome,
+  hashOutcome,
 } from '@statechannels/nitro-protocol/lib/src/contract/outcome';
-import { Signature, hexZeroPad } from 'ethers/utils';
+import { Signature, hexZeroPad, bigNumberify } from 'ethers/utils';
 import { AddressZero } from 'ethers/constants';
+
+import { ChannelUpdated, IStore } from './store';
+
 export { Store } from './store';
 export interface Balance {
   address: string;
@@ -20,16 +23,14 @@ export function getEthAllocation(outcome: Outcome): Allocation {
   const ethOutcome: AssetOutcome | undefined = outcome.find(
     o => o.assetHolderAddress === AddressZero
   );
-  return checkThat(ethOutcome, isAllocationOutcome).allocation;
+  return ethOutcome ? checkThat(ethOutcome, isAllocationOutcome).allocation : [];
 }
 
 export function ethAllocationOutcome(allocation: Allocation): AllocationAssetOutcome[] {
   return [
     {
       assetHolderAddress: AddressZero,
-      allocation: allocation
-        .map(a => ({ ...a, destination: hexZeroPad(a.destination, 32) }))
-        .filter(({ amount }) => gt(amount, 0)),
+      allocation: allocation.map(a => ({ ...a, destination: hexZeroPad(a.destination, 32) })),
     },
   ];
 }
@@ -75,26 +76,27 @@ export interface Entry {
   type: '';
 }
 
-export { chain } from './chain';
-
 // This stuff should be replaced with some big number logic
 type numberish = string | number | undefined;
 type MathOp = (a: numberish, b: numberish) => string;
 export const add: MathOp = (a: numberish, b: numberish) =>
-  (Number(a || 0) + Number(b || 0)).toString();
+  bigNumberify(a || 0)
+    .add(b || 0)
+    .toHexString();
 export const subtract: MathOp = (a: numberish, b: numberish) => {
-  const numA = Number(a);
-  const numB = Number(b);
+  const numA = bigNumberify(a || 0);
+  const numB = bigNumberify(b || 0);
 
-  if (numB > numA) {
+  if (numB.gt(numA)) {
     throw new Error('Unsafe subtraction');
   }
-  return (numA - numB).toString();
+  return numA.sub(numB).toHexString();
 };
 
 export const max: MathOp = (a: numberish, b: numberish) =>
   Math.max(Number(a), Number(b)).toString();
 export const gt = (a: numberish, b: numberish) => Number(a) > Number(b);
+export const eq = (a: numberish, b: numberish) => Number(a) === Number(b);
 
 export const success: { type: 'final' } = { type: 'final' };
 export const failure: { type: 'final' } = { type: 'final' };
@@ -137,7 +139,7 @@ export function isDefined<T>(t: T | undefined): t is T {
 export const FINAL = 'final' as 'final';
 
 export function outcomesEqual(left: Outcome, right: Outcome): boolean {
-  return JSON.stringify(left) === JSON.stringify(right);
+  return hashOutcome(left) === hashOutcome(right);
 }
 
 const throwError = (fn: (t1: any) => boolean, t) => {

@@ -1,37 +1,60 @@
-interface Chain {
-  holdings: (channelId: string) => number;
-  deposit: (channelId: string, expectedHeld: number, amount: number) => Deposited | Revert;
+import { add } from '.';
+export type ChainEventListener = (event: ChainEvent) => void;
+export type ChainEventType = ChainEvent['type'];
+export interface IChain {
+  initialize(): Promise<void>;
+  getHoldings: (channelId: string) => Promise<string>;
+  deposit: (channelId: string, expectedHeld: string, amount: string) => Promise<void>;
+  on: (chainEventType: ChainEventType, listener: ChainEventListener) => () => void;
 }
 
-export const chain = (null as any) as Chain;
+export class Chain implements IChain {
+  public async initialize(): Promise<void> {
+    // Do nothing
+  }
+  protected _holdings: { [channelId: string]: string };
 
-export class ExampleChain {
-  private _holdings: { [channelId: string]: number };
-
-  constructor() {
-    this._holdings = {
-      '0xabc': 1,
-      '0x123': 2,
-    };
+  constructor(holdings?) {
+    this._holdings = holdings || {};
   }
 
-  public holdings(channelId) {
-    return this._holdings[channelId];
+  public async getHoldings(channelId) {
+    return this._holdings[channelId] || '0';
   }
 
-  public deposit(channelId: string, expectedHeld: number, amount: number): Deposited | Revert {
+  public async deposit(channelId: string, expectedHeld: string, amount: string): Promise<void> {
     const current = this._holdings[channelId] || 0;
     if (current >= expectedHeld) {
-      this._holdings[channelId] = (this._holdings[channelId] || 0) + amount;
-      return {
+      this._holdings[channelId] = add(this._holdings[channelId] || 0, amount);
+      this.triggerEvent({
         type: 'DEPOSITED',
         channelId,
         amount,
         total: this._holdings[channelId],
-      };
+      });
     } else {
-      return 'REVERT';
+      this.triggerEvent({ type: 'REVERT' });
     }
+  }
+
+  public triggerEvent(chainEvent: ChainEvent) {
+    if (this._listeners) {
+      this._listeners.map(listener => listener(chainEvent));
+    }
+  }
+  private _listeners: ChainEventListener[] = [];
+
+  public on(_, listener) {
+    this._listeners.push(listener);
+
+    return () => {
+      // TODO: Just remove the one listener
+      this._listeners = [];
+    };
+  }
+
+  public setHoldings(channelId, amount) {
+    this._holdings[channelId] = amount;
   }
 }
 
@@ -39,10 +62,12 @@ export class ExampleChain {
 export interface Deposited {
   type: 'DEPOSITED';
   channelId: string;
-  amount: number;
-  total: number;
+  amount: string;
+  total: string;
 }
 
-export type Revert = 'REVERT';
+export interface Revert {
+  type: 'REVERT';
+}
 
 export type ChainEvent = Deposited | Revert;

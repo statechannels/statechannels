@@ -22,10 +22,12 @@ export class Store extends BaseStore implements IStore {
     super(args);
     this._channelUpdateListener = args?.channelUpdateListener;
     this._messageSender = args.messageSender;
+    // TODO: Bad form to call an async method in the constructor?
+    this._chain.initialize();
   }
 
-  protected updateOrCreateEntry(channelId: string, states: SignedState[]): ChannelStoreEntry {
-    const entry = super.updateOrCreateEntry(channelId, states);
+  protected updateEntry(channelId: string, states: SignedState[]): ChannelStoreEntry {
+    const entry = super.updateEntry(channelId, states);
     if (this._channelUpdateListener) {
       this._channelUpdateListener(channelId, entry);
     }

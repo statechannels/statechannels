@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import path from 'path';
+
 import serialize from 'serialize-javascript';
 
 function saveConfig(

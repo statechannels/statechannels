@@ -1,10 +1,11 @@
 import { assign, Machine } from 'xstate';
-import { SupportState } from '..';
+import { HashZero, AddressZero } from 'ethers/constants';
+
 import { Channel, FINAL, getChannelId, MachineFactory, SignedState } from '../../';
 import { ChannelStoreEntry } from '../../ChannelStoreEntry';
 import { Participant } from '../../store';
-import { Outcome } from '@statechannels/nitro-protocol';
-import { HashZero, AddressZero } from 'ethers/constants';
+
+import { SupportState } from '..';
 
 const PROTOCOL = 'create-null-channel';
 /*
@@ -21,7 +22,6 @@ These differences allow create-null-channel to be fully-determined.
 
 export interface Init {
   channel: Channel;
-  outcome: Outcome;
 }
 
 // For convenience, assign the channel id
@@ -40,10 +40,10 @@ const checkChannel = {
   },
 };
 
-function preFundData({ channelId, outcome }: Context): SupportState.Init {
+function preFundData({ channelId }: Context): SupportState.Init {
   return {
     channelId,
-    outcome,
+    outcome: [],
   };
 }
 const preFundSetup = {
@@ -69,23 +69,19 @@ export const config = {
 };
 
 export const machine: MachineFactory<Init, any> = (store, context: Init) => {
-  async function checkChannelService({ channel, outcome }: Init): Promise<boolean> {
+  async function checkChannelService({ channel }: Init): Promise<boolean> {
     // TODO: Should check that
     // - the nonce is used,
     // - that we have the private key for one of the signers, etc
 
-    // TODO: Use the correct participant ids
-    const participants: Participant[] = channel.participants.map(p => ({
-      destination: p,
-      participantId: p,
-      signingAddress: p,
-    }));
-    const privateKey = store.getPrivateKey(participants.map(p => p.participantId));
+    // TODO: Determine how participants should be managed
+    const participants: Participant[] = channel.participants.map(p => store.getParticipant(p));
+    const privateKey = store.getPrivateKey(participants.map(p => p.signingAddress));
     const states: SignedState[] = [
       {
         state: {
           turnNum: 0,
-          outcome,
+          outcome: [],
           channel,
           isFinal: false,
           challengeDuration: 1,

@@ -1,3 +1,7 @@
+# Getting started
+
+Run `yarn`
+
 # Protocols
 
 `protocol.ts` is used to specify the configuration of a machine, which describes how a machine operates, and what it does. Each protocol should export the following objects:
@@ -12,11 +16,10 @@
 # Visualization
 
 After updating `protocol.ts`, run `yarn generateConfigs` to update `protocol.config.js`.
-Configs (`protocol.config.json`) are used to generate the visualizations using https://xstate.js.org/viz/.
-There is currently no way to automatically generate the visualization from the `config.js` file (this is apparently in the works for the new year).
-The best so far is to copy/paste `protocol.config.js` into `@xstate/viz`, and screenshot the visualization.
+Configs (`protocol.config.json`) can be visualized using https://xstate.js.org/viz/.
 
-# Runtime
+(An upcoming update to the visualizer should allow CLI generation of the configurations!)
 
-`runtime.ts` creates two wallets connected to the message service. The first wallet is sent a `CREATE_CHANNEL` event.
-This should trigger a `JoinChannel` protocol in the second protocol.
+# Tests
+
+Run `yarn test` to run tests.

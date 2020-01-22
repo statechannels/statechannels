@@ -1,9 +1,10 @@
 import { assign } from 'xstate';
+import { isAllocationOutcome, Allocation } from '@statechannels/nitro-protocol';
+
 import { Without, ethAllocationOutcome, checkThat, getEthAllocation } from '../../';
 import { isIndirectFunding, isVirtualFunding } from '../../ChannelStoreEntry';
 import { store } from '../../temp-store';
 import * as LedgerUpdate from '../ledger-update/protocol';
-import { isAllocationOutcome, Allocation } from '@statechannels/nitro-protocol';
 const PROTOCOL = 'virtual-defunding-as-leaf';
 
 export interface Init {
