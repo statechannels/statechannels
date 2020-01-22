@@ -36,6 +36,7 @@ import {bigNumberify} from "ethers/utils";
 import {Web3Provider} from "ethers/providers";
 import {responseProvided} from "../../protocols/dispute/responder/actions";
 import {isResponderState} from "../../protocols/dispute/responder/states";
+import {ProtocolState} from "src/redux/protocols";
 
 export function* messageHandler(jsonRpcMessage: object, _domain: string) {
   const parsedMessage = jrs.parseObject(jsonRpcMessage);
@@ -276,8 +277,11 @@ function* handleUpdateChannelMessage(payload: RequestObject) {
     );
 
     // TODO: This only works with one channel at a time
-    const protocolState = yield select(getProtocolState, "Application");
-    if (typeof protocolState.disputeState! !== "undefined") {
+    const protocolState: ProtocolState = yield select(getProtocolState, "Application");
+    if (
+      protocolState.type === "Application.WaitForDispute" &&
+      typeof protocolState.disputeState! !== "undefined"
+    ) {
       if (isResponderState(protocolState.disputeState)) {
         yield put(
           responseProvided({
@@ -296,17 +300,17 @@ function* handleUpdateChannelMessage(payload: RequestObject) {
           processId: APPLICATION_PROCESS_ID
         })
       );
+
+      yield fork(
+        messageSender,
+        outgoingMessageActions.sendChannelUpdatedMessage({
+          channelId,
+          ...(yield getMessageParticipantIds(channelId))
+        })
+      );
     }
 
     yield fork(messageSender, outgoingMessageActions.updateChannelResponse({id, channelId}));
-
-    yield fork(
-      messageSender,
-      outgoingMessageActions.sendChannelUpdatedMessage({
-        channelId,
-        ...(yield getMessageParticipantIds(channelId))
-      })
-    );
   }
 }
 

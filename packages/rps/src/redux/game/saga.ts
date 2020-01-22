@@ -39,7 +39,14 @@ const isPlayersTurnNext = (
 export function* gameSaga(client: RPSChannelClient) {
   const channel = yield actionChannel('*', buffers.fixed(10));
   while (true) {
-    yield take(channel);
+    const action = yield take(channel);
+
+    // TODO: @george @tom is this the right place for this?
+    if (action.type === 'Challenge') {
+      const {channelState} = yield select(getGameState);
+      yield challengeChannel(channelState, client);
+    }
+
     yield* gameSagaRun(client);
   }
 }
@@ -138,18 +145,20 @@ function* gameSagaRun(client: RPSChannelClient) {
       if (channelState) {
         yield put(a.updateChannelState(null));
       }
+      // eslint-disable-next-line
+      opponentResigned = false;
       break;
-    case 'A.Challenged':
-    case 'B.Challenged':
-      if (
-        channelState &&
-        !cs.isChallenging(channelState) &&
-        !cs.isResponding(channelState) &&
-        !isPlayersTurnNext(localState, channelState)
-      ) {
-        yield* challengeChannel(channelState, client);
-      }
-      break;
+    // case 'A.Challenged':
+    // case 'B.Challenged':
+    //   if (
+    //     channelState &&
+    //     !cs.isChallenging(channelState) &&
+    //     !cs.isResponding(channelState) &&
+    //     !isPlayersTurnNext(localState, channelState)
+    //   ) {
+    //     yield* challengeChannel(channelState, client);
+    //   }
+    //   break;
   }
 }
 

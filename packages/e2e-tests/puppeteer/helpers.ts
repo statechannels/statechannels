@@ -37,7 +37,7 @@ export async function waitForAndClickButton(page: Page | Frame, button: string):
 }
 
 export async function waitForHeading(page: Page | Frame): Promise<string | null> {
-  return (await page.waitFor('h1.mb-5')).evaluate(el => el.textContent);
+  return (await page.waitFor('h1.mb-5.win-loss-title')).evaluate(el => el.textContent);
 }
 
 export async function setUpBrowser(headless: boolean, slowMo?: number): Promise<Browser> {
@@ -45,11 +45,16 @@ export async function setUpBrowser(headless: boolean, slowMo?: number): Promise<
     headless,
     slowMo,
     devtools: !headless,
-    // Needed to allow both windows to execute JS at the same time
+    args: [
+      '--disable-extensions-except=/Users/liam/Downloads/firefox',
+      '--load-extension=/Users/liam/Downloads/firefox'
+    ],
+    //, Needed to allow both windows to execute JS at the same time
     ignoreDefaultArgs: [
       '--disable-background-timer-throttling',
       '--disable-backgrounding-occluded-windows',
-      '--disable-renderer-backgrounding'
+      '--disable-renderer-backgrounding',
+      '--disable-extensions'
     ]
   });
 

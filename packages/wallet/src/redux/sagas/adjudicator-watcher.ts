@@ -1,5 +1,5 @@
 import {getAdjudicatorContract} from "../../utils/contract-utils";
-import {call, take, put, select, fork} from "redux-saga/effects";
+import {call, take, put, select, fork, delay} from "redux-saga/effects";
 import {eventChannel} from "redux-saga";
 import * as actions from "../actions";
 import {getAdjudicatorWatcherSubscribersForChannel} from "../selectors";
@@ -114,6 +114,7 @@ function* dispatchProcessEventAction(
           signedResponseState: responseEvent.newStates[0]
         })
       );
+      yield delay(1000); // TODO: I want to ensure the event on the line below triggers only once the challenge has been removed
       yield fork(messageSender, channelUpdatedEvent({channelId})); // @alex does it make sense to trigger a notification here?
       break;
     case AdjudicatorEventType.Concluded:

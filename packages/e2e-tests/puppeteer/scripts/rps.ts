@@ -1,6 +1,11 @@
 import {Page} from 'puppeteer';
 
-import {setUpBrowser, loadRPSApp, waitForAndClickButton} from '../helpers';
+import {
+  setUpBrowser,
+  loadRPSApp,
+  waitForAndClickButton,
+  waitForHeading as waitForWinLossUIHeader
+} from '../helpers';
 
 export async function setupRPS(rpsTabA: Page, rpsTabB: Page): Promise<void> {
   async function playerA(page: Page): Promise<void> {
@@ -17,7 +22,7 @@ export async function setupRPS(rpsTabA: Page, rpsTabB: Page): Promise<void> {
   await Promise.all([playerA(rpsTabA), playerB(rpsTabB)]);
 }
 
-export async function clickThroughRPSUI(rpsTabA: Page, rpsTabB: Page): Promise<void> {
+export async function startAndFundRPSGame(rpsTabA: Page, rpsTabB: Page): Promise<void> {
   async function playerB(page: Page): Promise<void> {
     const walletIFrame = page.frames()[1];
     // NOTE: There is some weird scrolling issue. .click() scrolls and somehow React re-renders this
@@ -35,6 +40,31 @@ export async function clickThroughRPSUI(rpsTabA: Page, rpsTabB: Page): Promise<v
     await waitForAndClickButton(page, 'Join');
     await waitForAndClickButton(walletIFrame, 'Fund Channel');
     await waitForAndClickButton(walletIFrame, 'Ok!');
+  }
+
+  await Promise.all([playerA(rpsTabA), playerB(rpsTabB)]);
+}
+
+export async function playMove(rpsTab: Page, move: 'rock' | 'paper' | 'scissors'): Promise<void> {
+  await (await rpsTab.waitFor(`img[src*="${move}"]`)).click();
+}
+
+export async function clickThroughRPSUIWithChallengeByPlayerA(
+  rpsTabA: Page,
+  rpsTabB: Page
+): Promise<void> {
+  async function playerA(page: Page): Promise<void> {
+    const walletIFrame = page.frames()[1];
+    await playMove(page, 'rock');
+    await waitForAndClickButton(page, 'Challenge on-chain');
+    await waitForAndClickButton(walletIFrame, 'Approve');
+    await waitForAndClickButton(walletIFrame, 'Ok');
+  }
+  async function playerB(page: Page): Promise<void> {
+    const walletIFrame = page.frames()[1];
+    await waitForAndClickButton(walletIFrame, 'Respond');
+    await playMove(page, 'paper');
+    await waitForAndClickButton(walletIFrame, 'Ok');
   }
 
   await Promise.all([playerA(rpsTabA), playerB(rpsTabB)]);
@@ -92,13 +122,32 @@ if (require.main === module) {
 
     await startAndFundRPSGame(rpsTabA, rpsTabB);
 
+    await playMove(rpsTabA, 'rock');
+    await playMove(rpsTabB, 'paper');
+
+    await waitForWinLossUIHeader(rpsTabA);
+    await waitForWinLossUIHeader(rpsTabB);
+
+    await clickThroughResignationUI(rpsTabA, rpsTabB);
+
+    // Should be in the lobby
+
+    await startAndFundRPSGame(rpsTabA, rpsTabB);
+
+    await playMove(rpsTabA, 'rock');
+    await playMove(rpsTabB, 'paper');
+
+    await waitForWinLossUIHeader(rpsTabA);
+    await waitForWinLossUIHeader(rpsTabB);
+
+    await clickThroughResignationUI(rpsTabA, rpsTabB);
+
+    await startAndFundRPSGame(rpsTabA, rpsTabB);
+
     await clickThroughRPSUIWithChallengeByPlayerA(rpsTabA, rpsTabB);
 
-    // await playMove(rpsTabA, 'rock');
-    // await playMove(rpsTabB, 'paper');
+    await clickThroughResignationUI(rpsTabA, rpsTabB);
 
-    // await clickThroughResignationUI(rpsTabA, rpsTabB);
-
-    // process.exit();
+    process.exit();
   })();
 }

@@ -1,3 +1,6 @@
+import {Page, Browser} from 'puppeteer';
+import {configureEnvVariables, getEnvBool} from '@statechannels/devtools';
+
 import {setUpBrowser, loadRPSApp, waitForHeading} from '../helpers';
 import {
   startAndFundRPSGame,
@@ -6,8 +9,6 @@ import {
   playMove,
   clickThroughRPSUIWithChallengeByPlayerA
 } from '../scripts/rps';
-import {Page, Browser} from 'puppeteer';
-import {configureEnvVariables, getEnvBool} from '@statechannels/devtools';
 
 jest.setTimeout(60000);
 
@@ -43,7 +44,7 @@ describe('Playing a game of RPS', () => {
     }
   });
 
-  it('can play two games end to end in one session', async () => {
+  it('can play two games end to end in one tab session', async () => {
     await startAndFundRPSGame(rpsTabA, rpsTabB);
 
     await playMove(rpsTabA, 'rock');
@@ -70,13 +71,12 @@ describe('Playing a game of RPS', () => {
   });
 
   // eslint-disable-next-line
-  it.only('can allow Player A to challenge Player B to move', async () => {
+  it('can allow Player A to challenge Player B to move', async () => {
     await startAndFundRPSGame(rpsTabA, rpsTabB);
 
     await clickThroughRPSUIWithChallengeByPlayerA(rpsTabA, rpsTabB);
 
-    // TODO: Fix these once RPS UI is updated
-    expect(await waitForHeading(rpsTabA)).toMatch('You challenged');
-    expect(await waitForHeading(rpsTabB)).toMatch('Move chosen!');
+    expect(await waitForHeading(rpsTabA)).toMatch('You lost');
+    expect(await waitForHeading(rpsTabB)).toMatch('You won!');
   });
 });

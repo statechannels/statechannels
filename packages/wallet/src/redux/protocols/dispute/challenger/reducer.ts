@@ -240,9 +240,13 @@ function challengeResponseReceived(
   sharedData = sendChallengeStateReceived(sharedData);
 
   const checkResult = checkAndStore(sharedData, signedChallengeState);
+
   if (checkResult.isSuccess) {
     return {state, sharedData: checkResult.store};
   }
+
+  if (checkResult.reason)
+    console.error(`Could not checkAndStore challenge response because: ${checkResult.reason}`);
 
   return {state, sharedData};
 }

@@ -110,7 +110,11 @@ export function getChallengeClearedEvent(tx: Transaction, eventResult): Challeng
         isFinal,
         outcome,
         appData,
-        channel: {chainId, channelNonce, participants},
+        channel: {
+          chainId: bigNumberify(chainId).toHexString(),
+          channelNonce: bigNumberify(channelNonce).toHexString(),
+          participants,
+        },
         turnNum: bigNumberify(newTurnNumRecord).toNumber(),
       },
     };
