@@ -1,8 +1,10 @@
-import { Participant } from './store';
 import { Channel, getChannelId, State } from '@statechannels/nitro-protocol';
-import { SignedState } from '.';
 import { ethers } from 'ethers';
 import _ from 'lodash';
+
+import { Participant } from './store';
+
+import { SignedState } from '.';
 
 interface DirectFunding {
   type: 'Direct';

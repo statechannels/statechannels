@@ -1,4 +1,5 @@
 import { AnyEventObject, ConditionPredicate, Machine, MachineConfig } from 'xstate';
+
 import { MachineFactory, Store } from '../..';
 
 const PROTOCOL = 'advance-channel';

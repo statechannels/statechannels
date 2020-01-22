@@ -1,3 +1,8 @@
+import { Allocation, Outcome } from '@statechannels/nitro-protocol';
+import { Machine, DoneInvokeEvent, MachineConfig } from 'xstate';
+import _ from 'lodash';
+import { bigNumberify } from 'ethers/utils';
+
 import {
   add,
   subtract,
@@ -8,11 +13,8 @@ import {
   MachineFactory,
   gt,
 } from '../../';
-import { Allocation, Outcome } from '@statechannels/nitro-protocol';
-import { Machine, DoneInvokeEvent, MachineConfig } from 'xstate';
+
 import { SupportState, Depositing } from '..';
-import _ from 'lodash';
-import { bigNumberify } from 'ethers/utils';
 
 const PROTOCOL = 'direct-funding';
 const success = { type: FINAL };

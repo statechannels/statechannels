@@ -65,7 +65,9 @@ function* gameSagaRun(client: RPSChannelClient) {
     case 'Setup.NeedAddress':
       const address: string = yield call([client, 'getAddress']);
       const outcomeAddress: string = window.ethereum.selectedAddress;
-      yield put(a.gotAddressFromWallet(address, outcomeAddress));
+      if (outcomeAddress) {
+        yield put(a.gotAddressFromWallet(address, outcomeAddress));
+      }
       break;
     case 'A.GameChosen':
       if (cs.isEmpty(channelState)) {
@@ -130,6 +132,11 @@ function* gameSagaRun(client: RPSChannelClient) {
         isPlayersTurnNext(localState, channelState)
       ) {
         yield* closeChannel(channelState, client);
+      }
+      break;
+    case 'EndGame.GameOver':
+      if (channelState) {
+        yield put(a.updateChannelState(null));
       }
       break;
   }

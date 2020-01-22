@@ -1,8 +1,9 @@
+import { State } from '@statechannels/nitro-protocol';
+
 import { store } from '../../temp-store';
 import * as LedgerDefunding from '../ledger-defunding/protocol';
 import * as VirtualDefundingAsHub from '../virtual-defunding-as-hub/protocol';
 import * as VirtualDefundingAsLeaf from '../virtual-defunding-as-leaf/protocol';
-import { State } from '@statechannels/nitro-protocol';
 
 const PROTOCOL = 'conclude-channel';
 

@@ -1,5 +1,5 @@
-import {setUpBrowser, loadRPSApp} from '../helpers';
-import {clickThroughRPSUI, clickThroughResignationUI} from '../scripts/rps';
+import {setUpBrowser, loadRPSApp, waitForHeading} from '../helpers';
+import {clickThroughRPSUI, clickThroughResignationUI, setupRPS} from '../scripts/rps';
 import {Page, Browser} from 'puppeteer';
 
 jest.setTimeout(60000);
@@ -11,14 +11,15 @@ describe('Playing a game of RPS', () => {
   let rpsTabB: Page;
 
   beforeAll(async () => {
-    browserA = await setUpBrowser(true);
-    browserB = await setUpBrowser(true);
+    browserA = await setUpBrowser(true, 10); // 10ms delay seems to prevent certain errors
+    browserB = await setUpBrowser(true, 10); // 10ms delay seems to prevent certain errors
 
-    rpsTabA = await browserA.newPage();
-    rpsTabB = await browserB.newPage();
+    rpsTabA = (await browserA.pages())[0];
+    rpsTabB = (await browserB.pages())[0];
 
     await loadRPSApp(rpsTabA, 0);
     await loadRPSApp(rpsTabB, 1);
+    await setupRPS(rpsTabA, rpsTabB);
   });
 
   afterAll(async () => {
@@ -30,20 +31,19 @@ describe('Playing a game of RPS', () => {
     }
   });
 
-  it('can play a game end to end', async () => {
+  it('can play a game end to end, and start a second game', async () => {
     await clickThroughRPSUI(rpsTabA, rpsTabB);
-    expect(await (await rpsTabA.waitFor('h1.mb-5')).evaluate(el => el.textContent)).toMatch(
-      'You lost'
-    );
-    expect(await (await rpsTabB.waitFor('h1.mb-5')).evaluate(el => el.textContent)).toMatch(
-      'You won!'
-    );
-  });
+    expect(await waitForHeading(rpsTabA)).toMatch('You lost');
+    expect(await waitForHeading(rpsTabB)).toMatch('You won!');
 
-  it('can then withdraw funds', async () => {
     await clickThroughResignationUI(rpsTabA, rpsTabB);
 
-    // Should be on the homepage
+    // Should be in the lobby
     expect(await rpsTabB.waitForXPath('//button[contains(., "Create a game")]')).toBeDefined();
+    expect(await rpsTabA.waitForXPath('//button[contains(., "Create a game")]')).toBeDefined();
+
+    await clickThroughRPSUI(rpsTabA, rpsTabB);
+    expect(await waitForHeading(rpsTabA)).toMatch('You lost');
+    expect(await waitForHeading(rpsTabB)).toMatch('You won!');
   });
 });

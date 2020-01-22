@@ -219,8 +219,6 @@ describe('when in Resigned and user clicks on button', () => {
       .dispatch(action)
       .run({silenceTimeout: true});
 
-    expect(storeState).toEqual(
-      gameState(localStatesA.gameOver, channelStates.concludeFromProposed)
-    );
+    expect(storeState).toEqual(gameState(localStatesA.gameOver, null));
   });
 });

@@ -122,7 +122,7 @@ function validTransition(a, b) <=>
   b.signer == b.mover
   if b.isFinal
      b.defaultOutcome == a.defaultOutcome
-  else if b.turnNum <= 2n
+  else if b.turnNum < 2n
      a.isFinal == False
      b.defaultOutcome == a.defaultOutcome
      b.appData == a.appData

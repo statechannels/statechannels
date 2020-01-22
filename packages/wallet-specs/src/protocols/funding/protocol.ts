@@ -1,8 +1,10 @@
 import { assign, DoneInvokeEvent, Machine } from 'xstate';
-import { LedgerFunding } from '..';
+
 import { failure, MachineFactory, pretty, Store, success } from '../..';
 import { FundingStrategy, FundingStrategyProposed } from '../../wire-protocol';
 import { log } from '../../utils';
+
+import { LedgerFunding } from '..';
 
 const PROTOCOL = 'funding';
 

@@ -38,7 +38,6 @@ it(
       .withReducer(reducer, initialState)
       .silentRun(SUFFICIENT_TIME_TO_GET_TO_TURNUM_16); // Kill the saga after (hopefully) enough time. Brittle.
     expect(storeState.game.localState.type).toEqual('EndGame.GameOver');
-    expect(storeState.game.channelState.turnNum).toEqual('16');
   },
   SUFFICIENT_TIME_TO_GET_TO_TURNUM_16 + 1000
 ); // We don't want jest to timeout

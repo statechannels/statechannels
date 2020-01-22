@@ -1,10 +1,12 @@
-import { Store } from '../..';
 import { interpret } from 'xstate';
-import { machine, Init } from './protocol';
 import { ethers } from 'ethers';
-import { Chain } from '../../chain';
 import waitForExpect from 'wait-for-expect';
+
+import { Chain } from '../../chain';
+import { Store } from '../..';
 import { log } from '../../utils';
+
+import { machine, Init } from './protocol';
 
 jest.setTimeout(50000);
 it('handles the basic case', async () => {

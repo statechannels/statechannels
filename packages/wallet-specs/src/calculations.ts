@@ -1,4 +1,5 @@
 import { Outcome, Allocation } from '@statechannels/nitro-protocol';
+
 import { ethAllocationOutcome, add, subtract, gt } from '.';
 export enum Errors {
   DestinationMissing = 'Destination missing from ledger channel',
