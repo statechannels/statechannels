@@ -55,7 +55,7 @@ export function getChallengeRegisteredEvent(eventResult): ChallengeRegisteredEve
   const channel: Channel = {chainId, channelNonce, participants};
   const challengeStates: SignedState[] = variableParts.map((v, i) => {
     const turnNum = utils.bigNumberify(turnNumRecord).sub(variableParts.length - i - 1);
-    const signature = sigs[whoSignedWhat[channel.participants.indexOf(challenger)]];
+    const signature = sigs[i];
     const state: State = {
       turnNum: turnNum.toNumber(), // TODO: this is unsafe is uin256 is > 53 bits
       channel,
