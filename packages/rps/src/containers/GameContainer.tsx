@@ -20,7 +20,6 @@ import {
   InsufficientFunds,
   GameOverPage,
   Resigned,
-  // Challenged,
 } from '../components';
 import {unreachable} from '../utils/unreachable';
 
@@ -112,15 +111,6 @@ function RenderGame(props: GameProps) {
           channelClosed={isClosed(channelState)}
         />
       );
-    // case 'A.Challenged':
-    // case 'B.Challenged':
-    //   return (
-    //     <Challenged
-    //       iChallenged={localState.iChallenged}
-    //       action={props.gameOver}
-    //       channelClosed={isClosed(channelState)}
-    //     />
-    //   );
     case 'A.InsufficientFunds':
     case 'B.InsufficientFunds':
       return (

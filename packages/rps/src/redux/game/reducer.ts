@@ -30,8 +30,6 @@ const localReducer: Reducer<LocalState> = (
     state.type !== 'B.WaitingRoom' &&
     state.type !== 'A.Resigned' &&
     state.type !== 'B.Resigned' &&
-    // state.type !== 'A.Challenged' &&
-    // state.type !== 'B.Challenged' &&
     state.type !== 'EndGame.GameOver'
   ) {
     if (isPlayerA(state)) {
@@ -87,9 +85,6 @@ const localReducer: Reducer<LocalState> = (
           newState = A.insufficientFunds({...state, ...action});
         }
       }
-      //  else if (action.type === 'Challenge') {
-      //   newState = A.challenged({...state, ...action});
-      // }
       break;
     case 'A.ResultPlayAgain':
       if (action.type === 'PlayAgain') {
@@ -133,12 +128,7 @@ const localReducer: Reducer<LocalState> = (
           newState = B.insufficientFunds({...state, ...action});
         }
       }
-      // else if (action.type === 'Challenge') {
-      //   newState = B.challenged({...state, ...action});
-      // }
       break;
-    // case 'A.Challenged':
-    // case 'B.Challenged':
     case 'A.Resigned':
     case 'B.Resigned':
     case 'A.InsufficientFunds':

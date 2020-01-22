@@ -14,7 +14,6 @@ export type A =
   | A.ResultPlayAgain
   | A.WaitForRestart
   | A.Resigned
-  // | A.Challenged
   | A.InsufficientFunds;
 
 export function isPlayerA(state: LocalState): state is A {
@@ -26,7 +25,6 @@ export function isPlayerA(state: LocalState): state is A {
     state.type === 'A.ResultPlayAgain' ||
     state.type === 'A.WaitForRestart' ||
     state.type === 'A.Resigned' ||
-    // state.type === 'A.Challenged' ||
     state.type === 'A.InsufficientFunds'
   );
 }
@@ -39,7 +37,6 @@ export type B =
   | B.ResultPlayAgain
   | B.WaitForRestart
   | B.Resigned
-  // | B.Challenged
   | B.InsufficientFunds;
 
 export function isPlayerB(state: LocalState): state is A {
@@ -52,7 +49,6 @@ export function isPlayerB(state: LocalState): state is A {
     state.type === 'B.ResultPlayAgain' ||
     state.type === 'B.WaitForRestart' ||
     state.type === 'B.Resigned' ||
-    // state.type === 'B.Challenged' ||
     state.type === 'B.InsufficientFunds'
   );
 }
@@ -212,18 +208,6 @@ export namespace A {
     };
   };
 
-  // export interface Challenged extends Playing {
-  //   type: 'A.Challenged';
-  //   iChallenged: boolean;
-  // }
-  // export const challenged: StateConstructor<Challenged> = params => {
-  //   return {
-  //     ...extractPlayingFromParams(params),
-  //     iChallenged: params.iChallenged,
-  //     type: 'A.Challenged',
-  //   };
-  // };
-
   export interface InsufficientFunds extends Playing {
     type: 'A.InsufficientFunds';
     myWeapon: Weapon;
@@ -346,19 +330,6 @@ export namespace B {
       type: 'B.Resigned',
     };
   };
-
-  // export interface Challenged extends Playing {
-  //   type: 'B.Challenged';
-  //   iChallenged: boolean;
-  // }
-  // export const challenged: StateConstructor<Challenged> = params => {
-  //   return {
-  //     ...extractPlayingFromParams(params),
-  //     iChallenged: params.iChallenged,
-  //     type: 'B.Challenged',
-  //   };
-  // };
-
   export interface InsufficientFunds extends Playing {
     type: 'B.InsufficientFunds';
     myWeapon: Weapon;

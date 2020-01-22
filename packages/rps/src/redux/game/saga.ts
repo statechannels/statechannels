@@ -149,17 +149,6 @@ function* gameSagaRun(client: RPSChannelClient) {
       // eslint-disable-next-line
       opponentResigned = false;
       break;
-    // case 'A.Challenged':
-    // case 'B.Challenged':
-    //   if (
-    //     channelState &&
-    //     !cs.isChallenging(channelState) &&
-    //     !cs.isResponding(channelState) &&
-    //     !isPlayersTurnNext(localState, channelState)
-    //   ) {
-    //     yield* challengeChannel(channelState, client);
-    //   }
-    //   break;
   }
 }
 
