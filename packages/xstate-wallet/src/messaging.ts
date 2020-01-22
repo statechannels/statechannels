@@ -1,7 +1,5 @@
 import {getChannelId, Channel} from '@statechannels/wallet-protocols';
 import * as ethers from 'ethers';
-import {Interpreter} from 'xstate';
-import {Wallet} from '@statechannels/wallet-protocols/lib/src/protocols';
 import * as jrs from 'jsonrpc-lite';
 import {validateRequest} from './json-rpc-validation/validator';
 import {IStore} from '@statechannels/wallet-protocols/lib/src/store';
@@ -14,10 +12,13 @@ import {
 import {CloseChannelParams} from '@statechannels/client-api-schema/types/close-channel';
 import {bigNumberify} from 'ethers/utils';
 import {ChannelStoreEntry} from '@statechannels/wallet-protocols/lib/src/ChannelStoreEntry';
+import {CreateChannelParams} from '@statechannels/client-api-schema/types/create-channel';
+import {PushMessageParams} from '@statechannels/client-api-schema/types/push-message';
+import {WorkflowManager} from '.';
 
 export async function handleMessage(
   event,
-  walletMachine: Interpreter<Wallet.Init, any, Wallet.Events>,
+  workflowManager: WorkflowManager,
   store: IStore,
   ourWallet: ethers.Wallet
 ) {
@@ -46,7 +47,7 @@ export async function handleMessage(
           case 'CreateChannel':
             await handleCreateChannelMessage(
               parsedMessage.payload,
-              walletMachine,
+              workflowManager,
               store,
               ourWallet
             );
@@ -55,7 +56,7 @@ export async function handleMessage(
             await handleUpdateChannel(parsedMessage.payload, store);
             break;
           case 'PushMessage':
-            await handlePushMessage(parsedMessage.payload, walletMachine);
+            await handlePushMessage(parsedMessage.payload, workflowManager);
             break;
           case 'CloseChannel':
             await handleCloseChannel(parsedMessage.payload, store);
@@ -91,22 +92,21 @@ async function handleUpdateChannel(payload: jrs.RequestObject, store: IStore) {
   dispatchChannelUpdatedMessage(params.channelId, store.getEntry(params.channelId));
 }
 
-async function handlePushMessage(
-  payload: jrs.RequestObject,
-  machine: Interpreter<Wallet.Init, any, Wallet.Events>
-) {
-  machine.send((payload.params as any).data as any);
+async function handlePushMessage(payload: jrs.RequestObject, workflowManager: WorkflowManager) {
+  const {data: event} = payload.params as PushMessageParams;
+
+  workflowManager.dispatchToWorkflows(event);
 
   window.parent.postMessage(jrs.success(payload.id, {success: true}), '*');
 }
 
 async function handleCreateChannelMessage(
   payload: jrs.RequestObject,
-  machine: Interpreter<Wallet.Init, any, Wallet.Events>,
+  workflowManager: WorkflowManager,
   store: IStore,
   ethersWallet: ethers.Wallet
 ) {
-  const params = payload.params as any;
+  const params = payload.params as CreateChannelParams;
   const {participants} = payload.params as any;
 
   const address = ethersWallet.address;
@@ -125,15 +125,14 @@ async function handleCreateChannelMessage(
       challengeDuration: 500
     };
 
-    // TODO: Nonce management / setting the chainID correctly (state machines)
     const channel: Channel = {
       participants: params.participants.map(p => p.signingAddress),
       channelNonce: '1',
       chainId: process.env.NETWORK_CHAIN_ID || '0'
     };
-    machine.send(createChannel);
-
     const channelId = getChannelId(channel);
+    workflowManager.dispatchToWorkflows(createChannel);
+
     const response = jrs.success(
       payload.id,
       await getChannelInfo(channelId, store.getEntry(channelId))
@@ -154,9 +153,13 @@ async function getChannelInfo(channelId: string, channelEntry: ChannelStoreEntry
   } else if (turnNum < 2 * channel.participants.length - 1) {
     status = 'opening';
   }
+
   return {
     participants,
-    allocations: createJsonRpcAllocationsFromOutcome(latestState.outcome),
+    //TODO: Somewhere the outcome is getting malformed
+    allocations: createJsonRpcAllocationsFromOutcome(
+      Array.isArray(latestState.outcome) ? latestState.outcome : [latestState.outcome]
+    ),
     appDefinition,
     appData,
     status,
