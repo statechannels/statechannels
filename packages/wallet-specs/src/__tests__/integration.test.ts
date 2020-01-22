@@ -92,8 +92,15 @@ test('opening and closing a channel', async () => {
     channelNonce: '0x01',
     chainId,
   });
-  const { latestSupportedState } = stores[first.participantId].getEntry(channelId);
-  expect(latestSupportedState.turnNum).toEqual(3);
+
+  {
+    const { latestSupportedState } = stores[first.participantId].getEntry(channelId);
+    expect(latestSupportedState.turnNum).toEqual(3);
+  }
+  {
+    const { latestSupportedState } = stores[second.participantId].getEntry(channelId);
+    expect(latestSupportedState.turnNum).toEqual(3);
+  }
 
   const concludeChannel: ConcludeChannelEvent = {
     type: 'CONCLUDE_CHANNEL',
@@ -101,6 +108,8 @@ test('opening and closing a channel', async () => {
   };
 
   left.send(concludeChannel);
+  // TODO: Should the right wallet spin up a conclude-channel process on receiving a final state?
+  right.send(concludeChannel);
 
   await waitForExpect(() => {
     const concludeChannelProcess = left.state.context.processes.find(p => /conclude/.test(p.id));
