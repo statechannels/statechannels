@@ -41,10 +41,11 @@ export function* gameSaga(client: RPSChannelClient) {
   while (true) {
     const action = yield take(channel);
 
-    // TODO: @george @tom is this the right place for this?
     if (action.type === 'Challenge') {
-      const {channelState} = yield select(getGameState);
-      yield challengeChannel(channelState, client);
+      const {
+        channelState: {channelId},
+      } = yield select(getGameState);
+      yield challengeChannel(channelId, client);
     }
 
     yield* gameSagaRun(client);
@@ -363,9 +364,8 @@ function* closeChannel(channelState: ChannelState, client: RPSChannelClient) {
   yield put(a.updateChannelState(closingChannelState));
 }
 
-function* challengeChannel(channelState: ChannelState, client: RPSChannelClient) {
-  const challengeChannelState = yield call([client, 'challengeChannel'], channelState.channelId);
-  yield put(a.updateChannelState(challengeChannelState));
+function* challengeChannel(channelId: string, client: RPSChannelClient) {
+  yield call([client, 'challengeChannel'], channelId);
 }
 
 const calculateFundingSituation = (
