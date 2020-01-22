@@ -11,10 +11,10 @@ import {
   ethAllocationOutcome,
   getEthAllocation,
   FINAL,
-  Store,
   MachineFactory,
   gt,
 } from '../../';
+import { IStore } from '../../store';
 
 import { SupportState, Depositing } from '..';
 
@@ -81,18 +81,28 @@ type Services = {
 
 type Options = { services: Services };
 
-export const machine: MachineFactory<Init, any> = (store: Store, context: Init) => {
+export const machine: MachineFactory<Init, any> = (store: IStore, context: Init) => {
   async function checkCurrentLevel(ctx: Init) {
-    const { latestSupportedState } = store.getEntry(ctx.channelId);
-    const { outcome } = latestSupportedState;
+    const entry = store.getEntry(ctx.channelId);
 
-    const allocated = getEthAllocation(outcome)
-      .map(i => i.amount)
-      .reduce(add, '0');
-    const holdings = await store.getHoldings(ctx.channelId);
+    try {
+      const { outcome } = entry.latestSupportedState;
 
-    if (gt(allocated, holdings)) {
-      throw new Error('Channel underfunded');
+      const allocated = getEthAllocation(outcome)
+        .map(i => i.amount)
+        .reduce(add, '0');
+      const holdings = await store.getHoldings(ctx.channelId);
+
+      if (gt(allocated, holdings)) {
+        throw new Error('Channel underfunded');
+      }
+    } catch (e) {
+      if (/No supported state found/.test(e.message)) {
+        // TODO: Should we do some additional checks around whether we've supported a state?
+        return;
+      }
+
+      throw e;
     }
   }
 
