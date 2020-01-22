@@ -11,8 +11,8 @@ describe('Playing a game of RPS', () => {
   let rpsTabB: Page;
 
   beforeAll(async () => {
-    browserA = await setUpBrowser(true, 10);
-    browserB = await setUpBrowser(true, 10);
+    browserA = await setUpBrowser(true, 10); // 10ms delay seems to prevent certain errors
+    browserB = await setUpBrowser(true, 10); // 10ms delay seems to prevent certain errors
 
     rpsTabA = (await browserA.pages())[0];
     rpsTabB = (await browserB.pages())[0];
