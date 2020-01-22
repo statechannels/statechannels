@@ -1,12 +1,12 @@
 import { State } from '@statechannels/nitro-protocol';
 import { Machine } from 'xstate';
 
-import { store } from '../../temp-store';
 import * as LedgerDefunding from '../ledger-defunding/protocol';
 import * as VirtualDefundingAsHub from '../virtual-defunding-as-hub/protocol';
 import * as VirtualDefundingAsLeaf from '../virtual-defunding-as-leaf/protocol';
 import { MachineFactory, FINAL } from '../..';
 import { IStore } from '../../store';
+import { getDetaAndInvoke } from '../../machine-utils';
 
 import { SupportState } from '..';
 
@@ -16,12 +16,7 @@ export interface Init {
   channelId: string;
 }
 
-const concludeTarget = {
-  invoke: {
-    src: 'supportState',
-    onDone: 'success',
-  },
-};
+const concludeTarget = getDetaAndInvoke('getFinalState', 'supportState', 'success');
 
 function ledgerDefundingArgs({ channelId }: Init): LedgerDefunding.Init {
   return { targetChannelId: channelId };
@@ -92,29 +87,28 @@ export const mockOptions = {
   },
 };
 
-export const machine: MachineFactory<Init, any> = (_: IStore, ctx: Init) => {
-  const services = {
-    supportState: SupportState.machine(store),
-  };
-  return Machine(config).withConfig({}, ctx);
-};
+export const machine: MachineFactory<Init, any> = (store: IStore, ctx: Init) => {
+  async function getFinalState({ channelId }: Init): Promise<SupportState.Init> {
+    const latestState = store.getEntry(channelId).latestStateSupportedByMe;
 
-function finalState({ channelId }: Init): State {
-  // Only works for wallet channels
-  // (and even doesn't really work reliably there)
-  const latestState = store
-    .getEntry(channelId)
-    .states.filter(({ state }) => store.signedByMe(state))
-    .sort(({ state }) => state.turnNum)
-    .pop();
+    if (!latestState) {
+      throw new Error('No state');
+    }
 
-  if (!latestState) {
-    throw new Error('No state');
+    return {
+      state: {
+        ...latestState,
+        turnNum: latestState.turnNum + 1,
+        isFinal: true,
+      },
+    };
   }
 
-  return {
-    ...latestState.state,
-    turnNum: latestState.state.turnNum + 1,
-    isFinal: true,
+  const services = {
+    getFinalState,
+    supportState: SupportState.machine(store),
   };
-}
+
+  const options = { services };
+  return Machine(config).withConfig(options, ctx);
+};
