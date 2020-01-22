@@ -12,7 +12,8 @@
     "noImplicitAny": false,
     "noImplicitReturns": true,
     "noImplicitThis": true,
-    "noUnusedLocals": true,
+    // TODO: Right now we're actually building wallet-specs
+    //"noUnusedLocals": true,
     "outDir": "lib",
     "strict": false,
     "suppressImplicitAnyIndexErrors": true,
