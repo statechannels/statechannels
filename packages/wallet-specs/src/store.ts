@@ -54,6 +54,7 @@ export type Constructor = Partial<{
 }>;
 export class Store implements IStore {
   public static equals(left: any, right: any) {
+    // TODO: Delete this; we should use statesEqual and outcomesEqual
     return _.isEqual(left, right);
   }
 

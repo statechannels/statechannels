@@ -1,8 +1,7 @@
 import { Machine } from 'xstate';
 import { State, getChannelId } from '@statechannels/nitro-protocol';
 
-import { MachineFactory, outcomesEqual, FINAL } from '../..';
-import { Store } from '../../store';
+import { MachineFactory, FINAL, statesEqual } from '../..';
 
 const PROTOCOL = 'support-state';
 
@@ -67,10 +66,10 @@ export const machine: MachineFactory<Init, any> = (store, context: Init) => {
         // If we've haven't already signed a state, there's no harm in supporting one.
         !latestStateSupportedByMe ||
         // If we've already supported this state, we might as well re-send it.
-        Store.equals(latestStateSupportedByMe, state) ||
+        statesEqual(latestStateSupportedByMe, state) ||
         // Otherwise, we only send it if we haven't signed any new states.
         (hasSupportedState &&
-          Store.equals(entry.latestSupportedState, latestStateSupportedByMe) &&
+          statesEqual(entry.latestSupportedState, latestStateSupportedByMe) &&
           entry.latestSupportedState.turnNum < state.turnNum)
       ) {
         await store.sendState(state);
@@ -87,7 +86,7 @@ export const machine: MachineFactory<Init, any> = (store, context: Init) => {
         return false;
       }
 
-      return Store.equals(entry.latestSupportedState, state);
+      return statesEqual(entry.latestSupportedState, state);
     },
   };
 
