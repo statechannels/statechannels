@@ -81,12 +81,13 @@ export const machine: MachineFactory<Init, any> = (store, context: Init) => {
   };
 
   const guards: Guards = {
-    supported: ({ state }: Init, e: any) => {
+    supported: ({ state }: Init) => {
       const entry = store.getEntry(getChannelId(state.channel));
       if (!entry.hasSupportedState) {
         return false;
       }
-      return outcomesEqual(entry.latestSupportedState.outcome, state.outcome);
+
+      return Store.equals(entry.latestSupportedState, state);
     },
   };
 
