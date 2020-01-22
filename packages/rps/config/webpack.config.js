@@ -282,6 +282,11 @@ module.exports = function(webpackEnv) {
     module: {
       strictExportPresence: true,
       rules: [
+        {
+          test: /\.js$/,
+          use: ['source-map-loader'],
+          enforce: 'pre',
+        },
         // Disable require.ensure as it's not a standard language feature.
         {
           parser: {
