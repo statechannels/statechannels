@@ -10,6 +10,7 @@
     "prepare": "yarn build",
     "build": "npx tsc -b",
     "generateConfigs": "yarn run ts-node bin/generateConfigs.ts && npx prettier --write src/protocols/*/protocol.config.js",
+    "uploadConfig": "bin/uploadConfig.sh",
     "test": "jest",
     "test:ci": "jest --runInBand",
     "lint:check": "eslint . --ext .ts --cache",
