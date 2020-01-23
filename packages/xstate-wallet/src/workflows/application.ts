@@ -25,13 +25,7 @@ interface ApplicationContext {
 }
 // States
 const initializing = {on: {CREATE_CHANNEL: 'funding', OPEN_CHANNEL: 'funding'}};
-const sendChannelUpdated = send((context, event: any) => {
-  const channelId = getChannelId(event.signedStates[0].state.channel);
-  return {
-    type: 'CHANNEL_UPDATED',
-    channelId
-  };
-});
+
 const funding = {
   invoke: {
     id: 'openMachine',
@@ -40,18 +34,18 @@ const funding = {
     onDone: 'running',
     autoForward: true
   },
-  on: {SendStates: {actions: ['updateStore', sendChannelUpdated]}}
+  on: {SendStates: {actions: ['updateStore', 'sendChannelUpdated']}}
 };
 const running = {
   on: {
     PLAYER_STATE_UPDATE: {target: 'running', actions: ['sendToOpponent']},
-    SendStates: {target: 'running', actions: ['updateStore', sendChannelUpdated]}
+    SendStates: {target: 'running', actions: ['updateStore', 'sendChannelUpdated']}
   }
 };
 const closing = {};
 const done = {type: FINAL};
 
-const config: MachineConfig<any, any, any> = {
+export const config: MachineConfig<any, any, any> = {
   initial: 'initializing',
 
   states: {initializing, funding, running, closing, done}
@@ -78,10 +72,23 @@ export const applicationWorkflow: MachineFactory<ApplicationContext, any> = (
   const sendToOpponent = (context, event: PlayerStateUpdate) => {
     store.sendState(event.state);
   };
-
+  const sendChannelUpdated = send((context, event: any) => {
+    const channelId = getChannelId(event.signedStates[0].state.channel);
+    return {
+      type: 'CHANNEL_UPDATED',
+      channelId
+    };
+  });
   const options = {
     services: {invokeOpeningMachine},
-    actions: {sendToOpponent, updateStore}
+    actions: {sendToOpponent, updateStore, sendChannelUpdated}
   };
   return Machine(config).withConfig(options, context);
 };
+
+const mockServices = {invokeOpeningMachine: () => {}};
+const mockActions = {
+  sendToOpponent: () => {},
+  updateStore: () => {}
+};
+export const mockOptions = {services: mockServices, actions: mockActions};
