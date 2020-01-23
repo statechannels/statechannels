@@ -24,6 +24,9 @@
   },
   "devDependencies": {
     "@statechannels/devtools": "0.1.21",
+    "@types/html-webpack-plugin": "3.2.0",
+    "@types/react": "16.9.19",
+    "@types/react-dom": "16.9.5",
     "@types/webpack": "4.41.0",
     "source-map-loader": "0.2.4",
     "typescript": "3.7.4",

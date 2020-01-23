@@ -2,6 +2,8 @@
 const webpack = require('webpack');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const path = require('path');
 module.exports = {
   mode: 'development',
   entry: './src/index.ts',
@@ -31,7 +33,13 @@ module.exports = {
   ],
 
   resolve: {
-    extensions: ['.tsx', '.ts', '.js']
+    extensions: ['.tsx', '.ts', '.js'],
+    // This is needed otherwise react hooks won't work
+    // due to having multiple versions of react installed
+    // see https://github.com/facebook/react/issues/13991
+    alias: {
+      react: path.resolve('./node_modules/react')
+    }
   },
 
   node: {

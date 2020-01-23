@@ -4816,6 +4816,15 @@
     "@types/tapable" "*"
     "@types/webpack" "*"
 
+"@types/html-webpack-plugin@3.2.0":
+  version "3.2.0"
+  resolved "https://registry.npmjs.org/@types/html-webpack-plugin/-/html-webpack-plugin-3.2.0.tgz#26b20854124bbcccbc22ccec715a1ba74583526c"
+  integrity sha512-in9rViBsTRB4ZApndZ12It68nGzSMHVK30JD7c49iLIHMFeTPbP7I7wevzMv7re2o0k5TlU6Ry/beyrmgWX7Bg==
+  dependencies:
+    "@types/html-minifier" "*"
+    "@types/tapable" "*"
+    "@types/webpack" "*"
+
 "@types/http-assert@*":
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/@types/http-assert/-/http-assert-1.5.1.tgz#d775e93630c2469c2f980fc27e3143240335db3b"
@@ -5257,6 +5266,13 @@
   dependencies:
     "@types/react" "*"
 
+"@types/react-dom@16.9.5":
+  version "16.9.5"
+  resolved "https://registry.npmjs.org/@types/react-dom/-/react-dom-16.9.5.tgz#5de610b04a35d07ffd8f44edad93a71032d9aaa7"
+  integrity sha512-BX6RQ8s9D+2/gDhxrj8OW+YD4R+8hj7FEM/OJHGNR0KipE1h1mSsf39YeyC81qafkq+N3rU3h3RFbLSwE5VqUg==
+  dependencies:
+    "@types/react" "*"
+
 "@types/react-loader-spinner@^3.1.0":
   version "3.1.0"
   resolved "https://registry.npmjs.org/@types/react-loader-spinner/-/react-loader-spinner-3.1.0.tgz#87100b00f9052395dfd27ec762713c32dd7e6f9e"
@@ -5340,6 +5356,14 @@
   version "16.9.2"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-16.9.2.tgz#6d1765431a1ad1877979013906731aae373de268"
   integrity sha512-jYP2LWwlh+FTqGd9v7ynUKZzjj98T8x7Yclz479QdRhHfuW9yQ+0jjnD31eXSXutmBpppj5PYNLYLRfnZJvcfg==
+  dependencies:
+    "@types/prop-types" "*"
+    csstype "^2.2.0"
+
+"@types/react@16.9.19":
+  version "16.9.19"
+  resolved "https://registry.npmjs.org/@types/react/-/react-16.9.19.tgz#c842aa83ea490007d29938146ff2e4d9e4360c40"
+  integrity sha512-LJV97//H+zqKWMms0kvxaKYJDG05U2TtQB3chRLF8MPNs+MQh/H1aGlyDUxjaHvu08EAGerdX2z4LTBc7ns77A==
   dependencies:
     "@types/prop-types" "*"
     csstype "^2.2.0"
