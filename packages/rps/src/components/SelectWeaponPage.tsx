@@ -32,8 +32,11 @@ export default class SelectWeaponStep extends React.PureComponent<Props> {
 
           {challengeExpirationDate && (
             <h2>
-              Challenge detected, respond in the next $
-              {new Date(challengeExpirationDate).getMinutes()} minutes.
+              Challenge detected, respond in the next{' '}
+              {Math.abs(
+                (new Date(challengeExpirationDate).getTime() - new Date().getTime()) / 60000
+              )}{' '}
+              minutes.
             </h2>
           )}
 
