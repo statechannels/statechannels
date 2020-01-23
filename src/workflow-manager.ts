@@ -38,7 +38,7 @@ export class WorkflowManager {
     this.workflows = [];
     this.store = store;
   }
-  private renderWallet(machine) {
+  private renderUI(machine) {
     ReactDOM.render(
       React.createElement(WalletUi, {workflow: machine}),
       document.getElementById('root')
@@ -53,8 +53,10 @@ export class WorkflowManager {
           logState({state});
         })
         .start();
+
       // TODO: Find a better place to do this
-      this.renderWallet(machine);
+      this.renderUI(machine);
+
       this.workflows.push({machine, domain: ''});
     }
     this.workflows.forEach(w => w.machine.send(event));
