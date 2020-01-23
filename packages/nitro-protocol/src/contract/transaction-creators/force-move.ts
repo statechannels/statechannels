@@ -28,8 +28,8 @@ export function createGetDataTransaction(channelId: string): TransactionRequest 
 }
 
 export function createForceMoveTransaction(
-  states: State[],
-  signatures: Signature[],
+  states: State[], // in turnNum order [..,state-with-largestTurnNum]
+  signatures: Signature[], // in participant order: [sig-from-p0, sig-from-p1, ...]
   whoSignedWhat: number[],
   challengerPrivateKey: string
 ): TransactionRequest {
@@ -50,8 +50,10 @@ export function createForceMoveTransaction(
   // Get the largest turn number from the states
   const largestTurnNum = Math.max(...states.map(s => s.turnNum));
   const isFinalCount = states.filter(s => s.isFinal === true).length;
-  // TODO: Is there a reason why createForceMoveTransaction accepts a State[] and a Signature[]
+  // Q: Is there a reason why createForceMoveTransaction accepts a State[] and a Signature[]
   // Argument rather than a SignedState[] argument?
+  // A: Yes, because the signatures must be passed in participant order: [sig-from-p0, sig-from-p1, ...]
+  // and SignedStates[] won't comply with that in general. This function accetps the re-ordered sigs.
   const signedStates = states.map(s => ({state: s, signature: {v: 0, r: '', s: ''}}));
   const challengerSignature = signChallengeMessage(signedStates, challengerPrivateKey);
 
