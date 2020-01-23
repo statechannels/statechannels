@@ -23,22 +23,25 @@ it('handles the basic case', async () => {
   service.onTransition(state => {
     log(state.value);
   });
+
   service.start();
   await waitForExpect(() => {
-    expect(service.state.value).toEqual({ depositor: 'waiting', watcher: 'watching' });
+    expect(service.state.value).toEqual({ depositor: 'idle', watcher: 'watching' });
   }, 2000);
 
   await chain.deposit(channelId, '0x00', '1');
 
-  await waitForExpect(() => {
+  await waitForExpect(async () => {
     expect(service.state.value).toMatchObject({ depositor: 'done', watcher: 'watching' });
+    expect(await chain.getHoldings(channelId)).toEqual(context.totalAfterDeposit);
   }, 200);
 
   // TODO: Find a good way of capturing transaction submission
 
   await chain.deposit(channelId, '0x05', '0x02');
 
-  await waitForExpect(() => {
+  await waitForExpect(async () => {
     expect(service.state.done).toBe(true);
+    expect(await chain.getHoldings(channelId)).toEqual(context.fundedAt);
   }, 200);
 });
