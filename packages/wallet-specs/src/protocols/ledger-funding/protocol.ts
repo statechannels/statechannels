@@ -1,16 +1,9 @@
-import { assign, DoneInvokeEvent, Machine } from 'xstate';
-import { Outcome, Allocation } from '@statechannels/nitro-protocol';
+import { assign, DoneInvokeEvent, Machine, MachineConfig } from 'xstate';
 
 import { allocateToTarget } from '../../calculations';
-import {
-  Channel,
-  ensureExists,
-  MachineFactory,
-  Store,
-  success,
-  getEthAllocation,
-  FINAL,
-} from '../..';
+import { Channel, MachineFactory, Store, success, getEthAllocation, FINAL } from '../..';
+import { getDetaAndInvoke } from '../../machine-utils';
+import { Funding } from '../../ChannelStoreEntry';
 
 import { CreateNullChannel, DirectFunding, SupportState } from '..';
 
@@ -76,55 +69,23 @@ const waitForChannel = {
 };
 
 type LedgerExists = Init & { ledgerChannelId: string };
-const fundLedger = {
-  initial: 'getTargetAllocation',
-  states: {
-    getTargetAllocation: { invoke: { src: 'getTargetAllocation', onDone: 'directFunding' } },
-    directFunding: {
-      invoke: {
-        src: 'directFunding',
-        data: (_, { data }: DoneInvokeEvent<DirectFunding.Init>): DirectFunding.Init => data,
-        onDone: 'done',
-        autoForward: true,
-      },
-    },
-    done: { type: FINAL },
+const fundLedger = getDetaAndInvoke('getTargetAllocation', 'directFunding', 'fundTarget');
+const fundTarget = getDetaAndInvoke('getTargetOutcome', 'supportState', 'updateFunding');
+const updateFunding = {
+  invoke: {
+    src: 'updateFunding',
+    onDone: 'success',
   },
-  onDone: 'fundTarget',
 };
 
-const fundTarget = {
-  initial: 'getTargetOutcome',
-  states: {
-    getTargetOutcome: {
-      invoke: {
-        src: 'getTargetOutcome',
-        onDone: 'ledgerUpdate',
-      },
-    },
-    ledgerUpdate: {
-      invoke: {
-        src: 'supportState',
-        data: (ctx: LedgerExists, { data }: DoneInvokeEvent<{ outcome: Outcome }>) => ({
-          channelId: ctx.ledgerChannelId,
-          outcome: data.outcome,
-        }),
-        autoForward: true,
-        onDone: 'success',
-      },
-    },
-    success,
-  },
-  onDone: 'success',
-};
-
-export const config = {
+export const config: MachineConfig<any, any, any> = {
   key: PROTOCOL,
   initial: 'waitForChannel',
   states: {
     waitForChannel,
     fundLedger,
     fundTarget,
+    updateFunding,
     success,
   },
 };
@@ -137,7 +98,8 @@ export type Services = {
   getTargetAllocation(ctx: LedgerExists): Promise<DirectFunding.Init>;
   directFunding: any;
   getTargetOutcome(ctx: LedgerExists): Promise<SupportState.Init>;
-  supportState: any;
+  updateFunding(ctx: LedgerExists): Promise<void>;
+  supportState: ReturnType<SupportState.machine>;
 };
 
 export const guards = {
@@ -180,9 +142,17 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
     const targetAllocation = getEthAllocation(targetChannelState.outcome);
 
     return {
-      channelId: ledgerChannelId,
-      outcome: allocateToTarget(targetAllocation, ledgerAllocation, targetChannelId),
+      state: {
+        ...ledgerState,
+        turnNum: ledgerState.turnNum + 1,
+        outcome: allocateToTarget(targetAllocation, ledgerAllocation, targetChannelId),
+      },
     };
+  }
+
+  async function updateFunding({ targetChannelId, ledgerChannelId }: LedgerExists) {
+    const funding: Funding = { type: 'Indirect', ledgerId: ledgerChannelId };
+    await store.setFunding(targetChannelId, funding);
   }
 
   const services: Services = {
@@ -192,6 +162,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
     getTargetAllocation,
     directFunding: DirectFunding.machine(store),
     getTargetOutcome,
+    updateFunding,
     supportState: SupportState.machine(store),
   };
 

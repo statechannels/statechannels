@@ -1,18 +1,20 @@
 import { Allocation, Outcome } from '@statechannels/nitro-protocol';
-import { Machine, DoneInvokeEvent, MachineConfig } from 'xstate';
+import { Machine, MachineConfig } from 'xstate';
 import _ from 'lodash';
 import { bigNumberify } from 'ethers/utils';
+import { HashZero, AddressZero } from 'ethers/constants';
 
+import { getDetaAndInvoke } from '../../machine-utils';
 import {
   add,
   subtract,
   ethAllocationOutcome,
   getEthAllocation,
   FINAL,
-  Store,
   MachineFactory,
   gt,
 } from '../../';
+import { IStore } from '../../store';
 
 import { SupportState, Depositing } from '..';
 
@@ -55,31 +57,6 @@ const checkCurrentLevel = {
   },
 };
 
-/*
-Since the machine doesn't have sync access to a store, we invoke a promise to get the
-desired outcome; that outcome can then be forwarded to the invoked service service.
-TODO: extract this pattern to other protocols.
-*/
-
-function getDetaAndInvoke<T>(data: string, src: string, onDone: string) {
-  return {
-    initial: data,
-    states: {
-      [data]: { invoke: { src: data, onDone: src } },
-      [src]: {
-        invoke: {
-          src,
-          data: (_, { data }: DoneInvokeEvent<T>) => data,
-          onDone: 'done',
-          autoForward: true,
-        },
-      },
-      done: { type: FINAL },
-    },
-    onDone,
-  };
-}
-
 export const config: MachineConfig<any, any, any> = {
   key: PROTOCOL,
   initial: 'checkCurrentLevel',
@@ -104,19 +81,23 @@ type Services = {
 
 type Options = { services: Services };
 
-export const machine: MachineFactory<Init, any> = (store: Store, context: Init) => {
+export const machine: MachineFactory<Init, any> = (store: IStore, context: Init) => {
   async function checkCurrentLevel(ctx: Init) {
-    const { latestSupportedState } = store.getEntry(ctx.channelId);
-    const { outcome } = latestSupportedState;
+    const entry = store.getEntry(ctx.channelId);
+
+    if (entry.latestStateSupportedByMe && !entry.hasSupportedState) {
+      // TODO figure out what to do here.
+      throw new Error('Unsafe channel state');
+    }
+
+    const { outcome } = entry.latestSupportedState;
 
     const allocated = getEthAllocation(outcome)
       .map(i => i.amount)
       .reduce(add, '0');
     const holdings = await store.getHoldings(ctx.channelId);
 
-    if (gt(allocated, holdings)) {
-      throw new Error('Channel underfunded');
-    }
+    if (gt(allocated, holdings)) throw new Error('Channel underfunded');
   }
 
   async function getDepositingInfo({
@@ -153,24 +134,48 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
     channelId,
     minimalAllocation,
   }: Init): Promise<SupportState.Init> {
-    const state = store.getEntry(channelId).latestSupportedState;
-    const { channel } = state;
+    const entry = store.getEntry(channelId);
+    const { channel } = entry;
 
     if (minimalAllocation.length !== channel.participants.length) {
       throw new Error('Must be exactly one allocation item per participant');
     }
 
-    const outcome = minimalOutcome(state.outcome, minimalAllocation);
-    return {
-      channelId,
-      outcome,
-    };
+    // TODO: Safety checks?
+    if (entry.hasSupportedState) {
+      const outcome = minimalOutcome(entry.latestSupportedState.outcome, minimalAllocation);
+      return {
+        state: {
+          ...entry.latestSupportedState,
+          outcome,
+          turnNum: entry.latestSupportedState.turnNum + 1,
+        },
+      };
+    } else {
+      return {
+        state: {
+          channel,
+          challengeDuration: 1,
+          isFinal: false,
+          turnNum: 0,
+          outcome: minimalOutcome([], minimalAllocation),
+          appData: HashZero,
+          appDefinition: AddressZero,
+        },
+      };
+    }
   }
 
   async function getPostfundOutcome({ channelId }: Init): Promise<SupportState.Init> {
-    const { outcome } = store.getEntry(channelId).latestSupportedState;
+    const { latestSupportedState } = store.getEntry(channelId);
 
-    return { channelId, outcome: mergeDestinations(outcome) };
+    return {
+      state: {
+        ...latestSupportedState,
+        turnNum: latestSupportedState.turnNum + 1,
+        outcome: mergeDestinations(latestSupportedState.outcome),
+      },
+    };
   }
 
   const services: Services = {

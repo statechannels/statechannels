@@ -1,5 +1,4 @@
 import { assign } from 'xstate';
-import { AllocationItem } from '@statechannels/nitro-protocol';
 import { Guarantee } from '@statechannels/nitro-protocol/lib/src/contract/outcome';
 
 import { add, Balance, Channel, getChannelId, ethAllocationOutcome } from '../../';
@@ -80,11 +79,7 @@ const createGuarantorChannel = {
   },
 };
 
-export function fundGuarantorArgs({
-  guarantorChannel,
-  ledgerId,
-  balances,
-}: ChannelsKnown): SupportStateArgs {
+function fundGuarantorArgs({ guarantorChannel, ledgerId, balances }: ChannelsKnown) {
   const amount = total(balances);
   return {
     channelId: ledgerId,

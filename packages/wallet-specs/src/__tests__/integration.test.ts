@@ -2,9 +2,15 @@ import { ethers } from 'ethers';
 import waitForExpect from 'wait-for-expect';
 import { interpret } from 'xstate';
 import { AddressZero, HashZero } from 'ethers/constants';
+import { getChannelId } from '@statechannels/nitro-protocol';
 
-import { Init, machine, CreateChannelEvent } from '../protocols/wallet/protocol';
-import { Store } from '../store';
+import {
+  Init,
+  machine,
+  CreateChannelEvent,
+  ConcludeChannelEvent,
+} from '../protocols/wallet/protocol';
+import { Store, IStore } from '../store';
 import { messageService } from '../messaging';
 import { AddressableMessage } from '../wire-protocol';
 import { log } from '../utils';
@@ -13,13 +19,16 @@ import { Chain } from '../chain';
 import { processStates } from './utils';
 import { first, second, wallet1, wallet2, participants } from './data';
 
+jest.setTimeout(10000);
+
 const logProcessStates = state => {
   log(processStates(state));
 };
 
+const chainId = '0x01';
 const createChannel: CreateChannelEvent = {
   type: 'CREATE_CHANNEL',
-  chainId: '0x01',
+  chainId,
   challengeDuration: 1,
   participants,
   allocations: [
@@ -31,6 +40,8 @@ const createChannel: CreateChannelEvent = {
 };
 
 const chain = new Chain();
+
+const stores: Record<string, IStore> = {};
 
 const connect = (wallet: ethers.Wallet) => {
   const store = new Store({
@@ -44,6 +55,7 @@ const connect = (wallet: ethers.Wallet) => {
     id: participantId,
     processes: [],
   };
+  stores[participantId] = store;
   const service = interpret<any, any, any>(machine(store, context));
 
   service.onTransition(state => {
@@ -61,14 +73,47 @@ const connect = (wallet: ethers.Wallet) => {
   return [service, store] as [typeof service, typeof store];
 };
 
-test('opening a channel', async () => {
+test('opening and closing a channel', async () => {
   const [left] = connect(wallet1);
-  connect(wallet2);
+  const [right] = connect(wallet2);
 
   left.send(createChannel);
 
   await waitForExpect(() => {
-    const process = left.state.context.processes[0];
-    expect(process && process.ref.state.value).toEqual('success');
-  }, 2000);
+    const createChannelProcess = left.state.context.processes.find(p => /create/.test(p.id));
+    const joinChannelProcess = right.state.context.processes.find(p => /join/.test(p.id));
+
+    expect(createChannelProcess && createChannelProcess.ref.state.value).toEqual('success');
+    expect(joinChannelProcess && joinChannelProcess.ref.state.value).toEqual('success');
+  }, 200);
+
+  const channelId = getChannelId({
+    participants: participants.map(p => p.signingAddress),
+    channelNonce: '0x01',
+    chainId,
+  });
+
+  {
+    const { latestSupportedState } = stores[first.participantId].getEntry(channelId);
+    expect(latestSupportedState.turnNum).toEqual(3);
+  }
+  {
+    const { latestSupportedState } = stores[second.participantId].getEntry(channelId);
+    expect(latestSupportedState.turnNum).toEqual(3);
+  }
+
+  const concludeChannel: ConcludeChannelEvent = {
+    type: 'CONCLUDE_CHANNEL',
+    channelId,
+  };
+
+  left.send(concludeChannel);
+  // TODO: Should the right wallet spin up a conclude-channel process on receiving a final state?
+  right.send(concludeChannel);
+
+  await waitForExpect(() => {
+    const concludeChannelProcess = left.state.context.processes.find(p => /conclude/.test(p.id));
+
+    expect(concludeChannelProcess && concludeChannelProcess.ref.state.value).toEqual('success');
+  }, 200);
 });

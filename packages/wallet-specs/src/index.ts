@@ -10,6 +10,7 @@ import {
 } from '@statechannels/nitro-protocol/lib/src/contract/outcome';
 import { Signature, hexZeroPad, bigNumberify } from 'ethers/utils';
 import { AddressZero } from 'ethers/constants';
+import { hashState } from '@statechannels/nitro-protocol/lib/src/contract/state';
 
 import { ChannelUpdated, IStore } from './store';
 
@@ -140,6 +141,9 @@ export const FINAL = 'final' as 'final';
 
 export function outcomesEqual(left: Outcome, right: Outcome): boolean {
   return hashOutcome(left) === hashOutcome(right);
+}
+export function statesEqual(left: State, right: State): boolean {
+  return hashState(left) === hashState(right);
 }
 
 const throwError = (fn: (t1: any) => boolean, t) => {
