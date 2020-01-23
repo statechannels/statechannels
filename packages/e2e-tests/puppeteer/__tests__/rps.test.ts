@@ -1,8 +1,12 @@
 import {setUpBrowser, loadRPSApp, waitForHeading} from '../helpers';
 import {clickThroughRPSUI, clickThroughResignationUI, setupRPS} from '../scripts/rps';
 import {Page, Browser} from 'puppeteer';
+import {configureEnvVariables, getEnvBool} from '@statechannels/devtools';
 
 jest.setTimeout(60000);
+
+configureEnvVariables();
+const HEADLESS = getEnvBool('HEADLESS');
 
 describe('Playing a game of RPS', () => {
   let browserA: Browser;
@@ -11,8 +15,8 @@ describe('Playing a game of RPS', () => {
   let rpsTabB: Page;
 
   beforeAll(async () => {
-    browserA = await setUpBrowser(true, 10); // 10ms delay seems to prevent certain errors
-    browserB = await setUpBrowser(true, 10); // 10ms delay seems to prevent certain errors
+    browserA = await setUpBrowser(HEADLESS, 10); // 10ms delay seems to prevent certain errors
+    browserB = await setUpBrowser(HEADLESS, 10); // 10ms delay seems to prevent certain errors
 
     rpsTabA = (await browserA.pages())[0];
     rpsTabB = (await browserB.pages())[0];
