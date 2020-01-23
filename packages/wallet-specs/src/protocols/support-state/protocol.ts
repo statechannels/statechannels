@@ -2,6 +2,7 @@ import { Machine } from 'xstate';
 import { State, getChannelId } from '@statechannels/nitro-protocol';
 
 import { MachineFactory, FINAL, statesEqual } from '../..';
+import { IStore } from '../../store';
 
 const PROTOCOL = 'support-state';
 
@@ -56,7 +57,7 @@ type Options = {
 };
 
 export type machine = typeof machine;
-export const machine: MachineFactory<Init, any> = (store, context: Init) => {
+export const machine: MachineFactory<Init, any> = (store: IStore, context: Init) => {
   const services: Services = {
     sendState: async ({ state }: Init) => {
       const entry = store.getEntry(getChannelId(state.channel));

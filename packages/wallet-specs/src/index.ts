@@ -14,7 +14,7 @@ import { hashState } from '@statechannels/nitro-protocol/lib/src/contract/state'
 
 import { ChannelUpdated, IStore } from './store';
 
-export { Store } from './store';
+export { Store, IStore } from './store';
 export interface Balance {
   address: string;
   wei: string;
