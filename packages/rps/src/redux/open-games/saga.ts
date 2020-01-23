@@ -12,7 +12,7 @@ import * as actions from './actions';
 import {LocalState} from '../game/state';
 import {bigNumberify} from 'ethers/utils';
 import {gameJoined} from '../game/actions';
-import {RPS_ADDRESS} from '../../constants';
+import {FIREBASE_PREFIX} from '../../constants';
 
 export default function* openGameSaga() {
   // could be more efficient by only watching actions that could change the state
@@ -38,7 +38,7 @@ export default function* openGameSaga() {
     }
 
     if (action.type === 'JoinOpenGame' && localState.type === 'A.GameChosen') {
-      const openGameKey = `${RPS_ADDRESS}/challenges/${localState.opponentAddress}`;
+      const openGameKey = `${FIREBASE_PREFIX}/challenges/${localState.opponentAddress}`;
       const taggedOpenGame = {
         isPublic: false,
         playerAName: localState.name,
@@ -52,7 +52,7 @@ export default function* openGameSaga() {
       const {address} = localState;
       let myOpenGame;
       if (address) {
-        const myOpenGameKey = `${RPS_ADDRESS}/challenges/${address}`;
+        const myOpenGameKey = `${FIREBASE_PREFIX}/challenges/${address}`;
 
         if (!myGameIsOnFirebase) {
           // my game isn't on firebase (as far as the app knows)
@@ -96,7 +96,7 @@ export default function* openGameSaga() {
     }
     if (localState.type === 'Setup.Lobby' && myGameIsOnFirebase && localState.address) {
       // we cancelled our game
-      const myOpenGameKey = `${RPS_ADDRESS}/challenges/${localState.address}`;
+      const myOpenGameKey = `${FIREBASE_PREFIX}/challenges/${localState.address}`;
       yield call(reduxSagaFirebase.database.delete, myOpenGameKey);
       myGameIsOnFirebase = false;
     }

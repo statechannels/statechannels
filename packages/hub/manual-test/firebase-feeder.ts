@@ -1,6 +1,8 @@
 import * as firebase from 'firebase';
 import {configureEnvVariables} from '@statechannels/devtools';
 import {RelayActionWithMessage} from '../src/communication';
+import {FIREBASE_PREFIX} from '../src/constants';
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const messages: Array<RelayActionWithMessage> = require('./message-sequence.json');
 
@@ -28,7 +30,7 @@ function getFirebaseApp() {
 
 function getMessagesRef() {
   const firebaseAppInsance = getFirebaseApp();
-  return firebaseAppInsance.database().ref('messages');
+  return firebaseAppInsance.database().ref(`${FIREBASE_PREFIX}/messages`);
 }
 
 async function sendMessage(message: RelayActionWithMessage) {
