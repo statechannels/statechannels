@@ -44,7 +44,7 @@ const funding = {
 };
 const running = {
   on: {
-    OUR_STATE_UPDATE: {target: 'running', actions: ['sendToOpponent']},
+    PLAYER_STATE_UPDATE: {target: 'running', actions: ['sendToOpponent']},
     SendStates: {target: 'running', actions: ['updateStore', sendChannelUpdated]}
   }
 };
