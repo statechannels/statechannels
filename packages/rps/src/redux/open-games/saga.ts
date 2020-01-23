@@ -38,7 +38,7 @@ export default function* openGameSaga() {
     }
 
     if (action.type === 'JoinOpenGame' && localState.type === 'A.GameChosen') {
-      const openGameKey = `${FIREBASE_PREFIX}/challenges/${localState.opponentAddress}`;
+      const openGameKey = `/${FIREBASE_PREFIX}/challenges/${localState.opponentAddress}`;
       const taggedOpenGame = {
         isPublic: false,
         playerAName: localState.name,
@@ -52,7 +52,7 @@ export default function* openGameSaga() {
       const {address} = localState;
       let myOpenGame;
       if (address) {
-        const myOpenGameKey = `${FIREBASE_PREFIX}/challenges/${address}`;
+        const myOpenGameKey = `/${FIREBASE_PREFIX}/challenges/${address}`;
 
         if (!myGameIsOnFirebase) {
           // my game isn't on firebase (as far as the app knows)
@@ -96,7 +96,7 @@ export default function* openGameSaga() {
     }
     if (localState.type === 'Setup.Lobby' && myGameIsOnFirebase && localState.address) {
       // we cancelled our game
-      const myOpenGameKey = `${FIREBASE_PREFIX}/challenges/${localState.address}`;
+      const myOpenGameKey = `/${FIREBASE_PREFIX}/challenges/${localState.address}`;
       yield call(reduxSagaFirebase.database.delete, myOpenGameKey);
       myGameIsOnFirebase = false;
     }
@@ -119,7 +119,7 @@ const openGameTransformer = dict => {
 function* openGameSyncer() {
   yield fork(
     reduxSagaFirebase.database.sync,
-    `${FIREBASE_PREFIX}/challenges`,
+    `/${FIREBASE_PREFIX}/challenges`,
     {
       successActionCreator: actions.syncOpenGames,
       transform: openGameTransformer,
