@@ -6,12 +6,13 @@ import {
   RoundAccepted,
   Start,
 } from '../app-data';
-import {HashZero} from 'ethers/constants';
+import {HashZero, Zero} from 'ethers/constants';
 import {Weapon} from '../weapons';
 import {bigNumberify} from 'ethers/utils';
 
 const testStart: Start = {
   type: 'start',
+  stake: Zero.toHexString(),
 };
 
 const testReveal: Reveal = {
@@ -19,6 +20,7 @@ const testReveal: Reveal = {
   playerAWeapon: Weapon.Paper,
   playerBWeapon: Weapon.Rock,
   salt: HashZero,
+  stake: Zero.toHexString(),
 };
 
 const testRoundProposed: RoundProposed = {

@@ -156,7 +156,7 @@ function* createChannel(localState: ls.A.GameChosen, client: RPSChannelClient) {
   const openingBalance = bigNumberify(localState.roundBuyIn)
     .mul(5)
     .toString();
-  const startState: AppData = {type: 'start'};
+  const startState: AppData = {type: 'start', stake: localState.roundBuyIn};
   const newChannelState = yield call(
     [client, 'createChannel'],
     localState.address,
@@ -286,6 +286,7 @@ function* calculateResultAndSendReveal(
   const reveal: AppData = {
     type: 'reveal',
     salt,
+    stake,
     playerAWeapon: myWeapon,
     playerBWeapon: theirWeapon,
   };
@@ -332,7 +333,7 @@ function* sendStartAndStartRound(channelState: ChannelState<Reveal>, client: RPS
     aOutcomeAddress,
     bOutcomeAddress,
   } = channelState;
-  const start: AppData = {type: 'start'};
+  const start: AppData = {type: 'start', stake: channelState.appData.stake};
   const state = yield call(
     [client, 'updateChannel'],
     channelId,

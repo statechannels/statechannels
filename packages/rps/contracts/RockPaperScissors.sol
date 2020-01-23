@@ -116,9 +116,7 @@ contract RockPaperScissors is ForceMoveApp {
         private
         pure
         outcomeUnchanged(fromPart, toPart)
-        // TODO: question (by @liam to @george) this is wrong right? the stake _will_ change
-        // because we are proposing a new round, so this line of code below should not be here?
-        // stakeUnchanged(fromGameData, toGameData)
+        stakeUnchanged(fromGameData, toGameData)
         allocationsNotLessThanStake(fromAllocation, toAllocation, fromGameData, toGameData)
     {}
 
