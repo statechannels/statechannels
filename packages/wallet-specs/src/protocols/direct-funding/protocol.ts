@@ -85,25 +85,19 @@ export const machine: MachineFactory<Init, any> = (store: IStore, context: Init)
   async function checkCurrentLevel(ctx: Init) {
     const entry = store.getEntry(ctx.channelId);
 
-    try {
-      const { outcome } = entry.latestSupportedState;
-
-      const allocated = getEthAllocation(outcome)
-        .map(i => i.amount)
-        .reduce(add, '0');
-      const holdings = await store.getHoldings(ctx.channelId);
-
-      if (gt(allocated, holdings)) {
-        throw new Error('Channel underfunded');
-      }
-    } catch (e) {
-      if (/No supported state found/.test(e.message)) {
-        // TODO: Should we do some additional checks around whether we've supported a state?
-        return;
-      }
-
-      throw e;
+    if (entry.latestStateSupportedByMe && !entry.hasSupportedState) {
+      // TODO figure out what to do here.
+      throw new Error('Unsafe channel state');
     }
+
+    const { outcome } = entry.latestSupportedState;
+
+    const allocated = getEthAllocation(outcome)
+      .map(i => i.amount)
+      .reduce(add, '0');
+    const holdings = await store.getHoldings(ctx.channelId);
+
+    if (gt(allocated, holdings)) throw new Error('Channel underfunded');
   }
 
   async function getDepositingInfo({
