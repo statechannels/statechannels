@@ -2,6 +2,7 @@ import {take, fork} from 'redux-saga/effects';
 import {buffers, eventChannel} from 'redux-saga';
 import {reduxSagaFirebase} from '../../gateways/firebase';
 import {RPSChannelClient} from '../../utils/rps-channel-client';
+import {RPS_ADDRESS} from '../../constants';
 
 export function* messageQueuedListener(client: RPSChannelClient) {
   const subscribe = emit => client.onMessageQueued(emit);
@@ -13,7 +14,7 @@ export function* messageQueuedListener(client: RPSChannelClient) {
     // ^ ensure this matches the address in firebase-inbox-listener.ts
     yield fork(
       reduxSagaFirebase.database.create,
-      `/messages/${to}`,
+      `/${RPS_ADDRESS}/messages/${to}`,
       sanitizeMessageForFirebase(notification.params)
     );
   }
