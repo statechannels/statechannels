@@ -14,7 +14,7 @@ import {bigNumberify} from 'ethers/utils';
 import {ChannelStoreEntry} from '@statechannels/wallet-protocols/lib/src/ChannelStoreEntry';
 import {CreateChannelParams} from '@statechannels/client-api-schema/types/create-channel';
 import {PushMessageParams} from '@statechannels/client-api-schema/types/push-message';
-import {WorkflowManager} from '.';
+import {WorkflowManager} from './workflow-manager';
 
 export async function handleMessage(
   event,
@@ -53,7 +53,7 @@ export async function handleMessage(
             );
             break;
           case 'UpdateChannel':
-            await handleUpdateChannel(parsedMessage.payload, store);
+            await handleUpdateChannel(parsedMessage.payload, workflowManager, store);
             break;
           case 'PushMessage':
             await handlePushMessage(parsedMessage.payload, workflowManager);
@@ -74,14 +74,17 @@ async function handleCloseChannel(payload: jrs.RequestObject, store: IStore) {
   window.parent.postMessage(result, '*');
 }
 
-async function handleUpdateChannel(payload: jrs.RequestObject, store: IStore) {
+async function handleUpdateChannel(
+  payload: jrs.RequestObject,
+  workflowManager: WorkflowManager,
+  store: IStore
+) {
   const params = payload.params as UpdateChannelParams;
   const entry = store.getEntry(params.channelId);
   const {latestState} = entry;
 
   const state = createStateFromUpdateChannelParams(latestState, params);
-  const signedState = store.signState(state);
-  store.receiveStates([signedState]);
+  workflowManager.dispatchToWorkflows({type: 'PLAYER_STATE_UPDATE', state});
   window.parent.postMessage(
     jrs.success(
       payload.id,
@@ -94,10 +97,15 @@ async function handleUpdateChannel(payload: jrs.RequestObject, store: IStore) {
 
 async function handlePushMessage(payload: jrs.RequestObject, workflowManager: WorkflowManager) {
   const {data: event} = payload.params as PushMessageParams;
+  // TODO WE Should probably verify that the data is an event
+  workflowManager.dispatchToWorkflows(event as any);
 
-  workflowManager.dispatchToWorkflows(event);
-
-  window.parent.postMessage(jrs.success(payload.id, {success: true}), '*');
+  window.parent.postMessage(
+    jrs.success(payload.id, {
+      success: true
+    }),
+    '*'
+  );
 }
 
 async function handleCreateChannelMessage(
@@ -171,12 +179,13 @@ async function getChannelInfo(channelId: string, channelEntry: ChannelStoreEntry
 
 // TODO: Probably should be async and the store should have async methods
 export function dispatchChannelUpdatedMessage(channelId: string, channelEntry: ChannelStoreEntry) {
+  // TODO: Right now we assume anything that is not a null channel is an app channel
+  if (bigNumberify(channelEntry.latestState.appDefinition).isZero()) {
+    return;
+  }
   getChannelInfo(channelId, channelEntry).then(channelInfo => {
-    // TODO: Right now we assume anything that is not a null channel is an app channel
-    if (!!channelInfo.appData && !bigNumberify(channelInfo.appData).isZero()) {
-      const notification = jrs.notification('ChannelUpdated', channelInfo);
-      window.parent.postMessage(notification, '*');
-    }
+    const notification = jrs.notification('ChannelUpdated', channelInfo);
+    window.parent.postMessage(notification, '*');
   });
 }
 
