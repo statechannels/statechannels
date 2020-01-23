@@ -19,7 +19,8 @@ import { Chain } from '../chain';
 import { processStates } from './utils';
 import { first, second, wallet1, wallet2, participants, storeWithFundedChannel } from './data';
 
-jest.setTimeout(10000);
+const EXPECTATION_TIMEOUT = 10000;
+jest.setTimeout(60000);
 
 const logProcessStates = state => {
   log(processStates(state));
@@ -93,7 +94,7 @@ test('opening a channel', async () => {
 
     expect(createChannelProcess && createChannelProcess.ref.state.value).toEqual('success');
     expect(joinChannelProcess && joinChannelProcess.ref.state.value).toEqual('success');
-  }, 200);
+  }, EXPECTATION_TIMEOUT);
 
   {
     const { latestSupportedState } = stores[first.participantId].getEntry(channelId);
@@ -138,5 +139,5 @@ test('concluding a channel', async () => {
     const concludeChannelProcess = left.state.context.processes.find(p => /conclude/.test(p.id));
 
     expect(concludeChannelProcess && concludeChannelProcess.ref.state.value).toEqual('success');
-  }, 200);
+  }, EXPECTATION_TIMEOUT);
 });
