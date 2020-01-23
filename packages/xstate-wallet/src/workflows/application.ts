@@ -8,6 +8,7 @@ import {CreateChannel, JoinChannel} from '@statechannels/wallet-protocols/lib/sr
 import {IStore} from '@statechannels/wallet-protocols/src/store';
 import {State, getChannelId} from '@statechannels/nitro-protocol';
 import {SendStates} from '@statechannels/wallet-protocols/src/wire-protocol';
+import {sendDisplayMessage} from '../messaging';
 
 // Events
 type OpenEvent = CreateChannelEvent | OpenChannelEvent;
@@ -27,11 +28,12 @@ interface ApplicationContext {
 const initializing = {on: {CREATE_CHANNEL: 'funding', OPEN_CHANNEL: 'funding'}};
 
 const funding = {
+  entry: ['displayUi'],
   invoke: {
     id: 'openMachine',
     src: 'invokeOpeningMachine',
     data: (context, event) => event,
-    onDone: 'running',
+    onDone: {target: 'running', actions: ['hideUi']},
     autoForward: true
   },
   on: {SendStates: {actions: ['updateStore', 'sendChannelUpdated']}}
@@ -79,9 +81,16 @@ export const applicationWorkflow: MachineFactory<ApplicationContext, any> = (
       channelId
     };
   });
+  const displayUi = (context, event) => {
+    sendDisplayMessage('Show');
+  };
+  const hideUi = (context, event) => {
+    sendDisplayMessage('Hide');
+  };
+  const actions = {sendToOpponent, updateStore, sendChannelUpdated, hideUi, displayUi};
   const options = {
     services: {invokeOpeningMachine},
-    actions: {sendToOpponent, updateStore, sendChannelUpdated}
+    actions
   };
   return Machine(config).withConfig(options, context);
 };
@@ -89,6 +98,9 @@ export const applicationWorkflow: MachineFactory<ApplicationContext, any> = (
 const mockServices = {invokeOpeningMachine: () => {}};
 const mockActions = {
   sendToOpponent: () => {},
-  updateStore: () => {}
+  updateStore: () => {},
+  sendChannelUpdated: () => {},
+  hideUi: () => {},
+  displayUi: () => {}
 };
 export const mockOptions = {services: mockServices, actions: mockActions};
