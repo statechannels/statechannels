@@ -65,7 +65,7 @@ export async function handleMessage(
             await handlePushMessage(parsedMessage.payload, workflowManager);
             break;
           case 'CloseChannel':
-            await handleCloseChannel(parsedMessage.payload, store);
+            await handleCloseChannel(parsedMessage.payload, workflowManager, store);
             break;
         }
         break;
@@ -73,9 +73,14 @@ export async function handleMessage(
   }
 }
 
-async function handleCloseChannel(payload: jrs.RequestObject, store: IStore) {
+async function handleCloseChannel(
+  payload: jrs.RequestObject,
+  workflowManager: WorkflowManager,
+  store: IStore
+) {
   const {id} = payload;
   const {channelId} = payload.params as CloseChannelParams;
+  workflowManager.dispatchToWorkflows({type: 'PLAYER_REQUEST_CONCLUDE', channelId});
   const result = jrs.success(id, await getChannelInfo(channelId, store.getEntry(channelId)));
   window.parent.postMessage(result, '*');
 }
