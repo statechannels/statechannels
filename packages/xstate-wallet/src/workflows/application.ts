@@ -68,13 +68,20 @@ export const applicationWorkflow: MachineFactory<ApplicationContext, any> = (
       return JoinChannel.machine(store, event);
     }
   };
+  const updateStore = (context, event: SendStates) => {
+    store.receiveStates(
+      // TODO: The outcome can get removed when going over the wire if it's empty
+      // For now we just add it back here
+      event.signedStates.map(ss => ({state: {outcome: [], ...ss.state}, signatures: ss.signatures}))
+    );
+  };
   const sendToOpponent = (context, event: PlayerStateUpdate) => {
     store.sendState(event.state);
   };
-  const actions = {sendToOpponent};
+
   const options = {
     services: {invokeOpeningMachine},
-    actions
+    actions: {sendToOpponent, updateStore}
   };
   return Machine(config).withConfig(options, context);
 };
