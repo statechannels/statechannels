@@ -1,4 +1,4 @@
-import {MachineConfig, Machine, StateMachine} from 'xstate';
+import {MachineConfig, Machine, StateMachine, send} from 'xstate';
 import {FINAL, MachineFactory} from '@statechannels/wallet-protocols';
 import {
   CreateChannelEvent,
@@ -6,26 +6,48 @@ import {
 } from '@statechannels/wallet-protocols/src/protocols/wallet/protocol';
 import {CreateChannel, JoinChannel} from '@statechannels/wallet-protocols/lib/src/protocols';
 import {IStore} from '@statechannels/wallet-protocols/src/store';
+import {State, getChannelId} from '@statechannels/nitro-protocol';
+import {SendStates} from '@statechannels/wallet-protocols/src/wire-protocol';
+
+// Events
 type OpenEvent = CreateChannelEvent | OpenChannelEvent;
 
+interface PlayerStateUpdate {
+  type: 'PLAYER_STATE_UPDATE';
+  state: State;
+}
+
+export type ApplicationWorkflowEvent = PlayerStateUpdate | SendStates | OpenEvent;
+
+// Context
 interface ApplicationContext {
   channelId: string;
 }
-
-// The application protocol is responsible for running a channel for an application
-// Initially it will be based on RPS have follow this roughly: ChannelInit->Funding->Running->ChannelClosed
-
 // States
 const initializing = {on: {CREATE_CHANNEL: 'funding', OPEN_CHANNEL: 'funding'}};
+const sendChannelUpdated = send((context, event: any) => {
+  const channelId = getChannelId(event.signedStates[0].state.channel);
+  return {
+    type: 'CHANNEL_UPDATED',
+    channelId
+  };
+});
 const funding = {
   invoke: {
+    id: 'openMachine',
     src: 'invokeOpeningMachine',
     data: (context, event) => event,
     onDone: 'running',
     autoForward: true
+  },
+  on: {SendStates: {actions: ['updateStore', sendChannelUpdated]}}
+};
+const running = {
+  on: {
+    OUR_STATE_UPDATE: {target: 'running', actions: ['sendToOpponent']},
+    SendStates: {target: 'running', actions: ['updateStore', sendChannelUpdated]}
   }
 };
-const running = {};
 const closing = {};
 const done = {type: FINAL};
 
@@ -46,8 +68,13 @@ export const applicationWorkflow: MachineFactory<ApplicationContext, any> = (
       return JoinChannel.machine(store, event);
     }
   };
+  const sendToOpponent = (context, event: PlayerStateUpdate) => {
+    store.sendState(event.state);
+  };
+  const actions = {sendToOpponent};
   const options = {
-    services: {invokeOpeningMachine}
+    services: {invokeOpeningMachine},
+    actions
   };
   return Machine(config).withConfig(options, context);
 };
