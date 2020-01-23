@@ -6,7 +6,7 @@ interface Props {
   workflow: Interpreter<any, any, any>;
 }
 export const Wallet = (props: Props) => {
-  // TODO: Use @xstate/react
+  const [current, send] = useService(props.workflow);
   return (
     <div
       style={{
@@ -14,7 +14,7 @@ export const Wallet = (props: Props) => {
         textAlign: 'center'
       }}
     >
-      <div>{props.workflow.state.value}</div>
+      <div>{current.value}</div>
     </div>
   );
 };
