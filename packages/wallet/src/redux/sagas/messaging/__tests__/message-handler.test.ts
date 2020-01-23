@@ -498,13 +498,13 @@ describe("message listener", () => {
         state
       });
 
-      expect(effects.fork[0].payload.args[0]).toMatchObject({
+      expect(effects.fork[1].payload.args[0]).toMatchObject({
         type: "WALLET.UPDATE_CHANNEL_RESPONSE",
         id: 1,
         channelId: stateHelpers.channelId
       });
 
-      expect(effects.fork[1].payload.args[0]).toMatchObject({
+      expect(effects.fork[0].payload.args[0]).toMatchObject({
         type: "WALLET.SEND_CHANNEL_UPDATED_MESSAGE",
         channelId: stateHelpers.channelId
       });
