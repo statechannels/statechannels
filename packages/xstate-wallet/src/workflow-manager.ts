@@ -4,7 +4,7 @@ import {
   CreateChannelEvent,
   OpenChannelEvent
 } from '@statechannels/wallet-protocols/src/protocols/wallet/protocol';
-import {applicationWorkflow, ApplicationWorkflowEvent} from './workflows/application.workflow';
+import {applicationWorkflow, ApplicationWorkflowEvent} from './workflows/application';
 import {SendStates} from '@statechannels/wallet-protocols/src/wire-protocol';
 
 // TODO: We should standardize logging with wallet-specs
