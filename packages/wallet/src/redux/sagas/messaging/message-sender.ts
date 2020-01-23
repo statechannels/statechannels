@@ -172,9 +172,10 @@ function* getChannelInfoStatus(currentState: State, previousState: State) {
   }
 
   // TODO: This only works for a single process at a time...
-  const protocolState: ProtocolState = yield select(getProtocolState, "Application");
+  const protocolState: ProtocolState | undefined = yield select(getProtocolState, "Application");
 
   if (
+    protocolState &&
     protocolState.type === "Application.WaitForDispute" &&
     typeof protocolState.disputeState !== "undefined"
   ) {
