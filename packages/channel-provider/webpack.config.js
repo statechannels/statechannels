@@ -39,4 +39,4 @@ const cdnDebugConfig = {
   }
 };
 
-module.exports = [cdnConfig, cdnDebugConfig];
+module.exports = [cdnDebugConfig];

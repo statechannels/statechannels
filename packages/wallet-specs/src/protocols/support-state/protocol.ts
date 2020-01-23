@@ -21,7 +21,7 @@ const sendState = {
 const waiting = {
   on: {
     '': { target: 'success', cond: 'supported' },
-    '*': { target: 'success', cond: 'supported ' },
+    '*': { target: 'success', cond: 'supported' },
   },
 };
 
