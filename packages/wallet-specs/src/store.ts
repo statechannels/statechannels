@@ -21,12 +21,12 @@ export interface IStore {
   Store modifiers
   */
   deposit: IChain['deposit'];
-  initializeChannel(entry: ChannelStoreEntry): void;
+  initializeChannel(entry: IChannelStoreEntry): void;
   sendState(state: State): void;
   sendOpenChannel(state: State): void;
   receiveStates(signedStates: SignedState[]): void;
   setFunding(channelId: string, funding: Funding): Promise<void>;
-
+  sendStrategyChoice(message: FundingStrategyProposed);
   // TODO: set funding
   // setFunding(channelId: string, funding: Funding): void;
   on: IChain['on'];

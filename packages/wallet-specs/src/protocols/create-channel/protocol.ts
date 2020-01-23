@@ -5,7 +5,7 @@ import {
   Channel,
   forwardChannelUpdated,
   MachineFactory,
-  Store,
+  IStore,
   success,
   ethAllocationOutcome,
 } from '../..';
@@ -103,7 +103,7 @@ export const config: MachineConfig<Context, any, any> = {
   },
 };
 
-export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => {
+export const machine: MachineFactory<Init, any> = (store: IStore, init: Init) => {
   async function initializeChannel(ctx: Init): Promise<SetChannel> {
     const participants = ctx.participants.map(p => p.signingAddress);
     const channelNonce = store.getNextNonce(participants);
