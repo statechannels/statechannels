@@ -1,5 +1,5 @@
 import {getAdjudicatorContract} from "../../utils/contract-utils";
-import {call, take, put, select, fork, putResolve} from "redux-saga/effects";
+import {call, take, put, select, fork, putResolve, delay} from "redux-saga/effects";
 import {eventChannel} from "redux-saga";
 import * as actions from "../actions";
 import {getAdjudicatorWatcherSubscribersForChannel} from "../selectors";
@@ -114,6 +114,7 @@ function* dispatchProcessEventAction(
           signedResponseState: responseEvent.newStates[0]
         })
       );
+      yield delay(1000); // TODO: Figure out why this is needed for rps to work in e2e test
       yield fork(messageSender, channelUpdatedEvent({channelId})); // @alex does it make sense to trigger a notification here?
       break;
     case AdjudicatorEventType.Concluded:

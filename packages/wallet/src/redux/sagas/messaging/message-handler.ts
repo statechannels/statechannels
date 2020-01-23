@@ -278,7 +278,9 @@ function* handleUpdateChannelMessage(payload: RequestObject) {
 
     // TODO: This only works with one channel at a time
     const protocolState: ProtocolState = yield select(getProtocolState, "Application");
+
     if (
+      protocolState &&
       protocolState.type === "Application.WaitForDispute" &&
       typeof protocolState.disputeState! !== "undefined"
     ) {
