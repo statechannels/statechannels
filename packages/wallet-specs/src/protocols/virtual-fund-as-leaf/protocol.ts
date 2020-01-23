@@ -79,17 +79,13 @@ const createGuarantorChannel = {
   },
 };
 
-// function fundGuarantorArgs({
-//   guarantorChannel,
-//   ledgerId,
-//   balances,
-// }: ChannelsKnown): SupportStateArgs {
-//   const amount = total(balances);
-//   return {
-//     channelId: ledgerId,
-//     outcome: ethAllocationOutcome([{ destination: getChannelId(guarantorChannel), amount }]),
-//   };
-// }
+function fundGuarantorArgs({ guarantorChannel, ledgerId, balances }: ChannelsKnown) {
+  const amount = total(balances);
+  return {
+    channelId: ledgerId,
+    outcome: ethAllocationOutcome([{ destination: getChannelId(guarantorChannel), amount }]),
+  };
+}
 const createChannels = {
   entry: 'assignChannels',
   type: 'parallel',
