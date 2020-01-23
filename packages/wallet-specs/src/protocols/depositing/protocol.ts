@@ -1,5 +1,5 @@
 import { bigNumberify } from 'ethers/utils';
-import { Machine, MachineConfig, InvokeCallback } from 'xstate';
+import { Machine, MachineConfig, assign, spawn, Action, EventObject } from 'xstate';
 
 import { FINAL, MachineFactory } from '../..';
 import { IStore } from '../../store';
@@ -12,53 +12,40 @@ export type Init = {
   fundedAt: string;
 };
 
-const watcher: MachineConfig<Init, any, any> = {
-  initial: 'watching',
-  states: {
-    watching: { invoke: { src: 'subscribeDepositEvent' } },
-    done: { type: FINAL },
-  },
-  on: { FUNDED: '.done' },
-};
-
 export const config: MachineConfig<Init, any, any> = {
-  type: 'parallel',
+  initial: 'start',
+  on: { FUNDED: 'done' },
   states: {
-    watcher,
-    depositor: {
-      initial: 'idle',
-      on: { FUNDED: '.done' },
-      states: {
-        idle: { on: { SAFE_TO_DEPOSIT: 'submit' } },
-        submit: {
-          invoke: { src: 'submitDepositTransaction', onDone: 'done', onError: 'failure' },
-        },
-        done: { type: FINAL },
-        failure: {
-          entry: () => {
-            throw `Deposit failed`;
-          },
-        },
+    start: { entry: 'spawnDepositWatcher', on: { '': 'idle' } },
+    idle: { on: { SAFE_TO_DEPOSIT: 'submit' } },
+    submit: {
+      invoke: { src: 'submitDepositTransaction', onDone: 'done', onError: 'failure' },
+    },
+    done: { type: FINAL },
+    failure: {
+      entry: () => {
+        throw `Deposit failed`;
       },
     },
   },
 };
 
+type SpawnedWatcher = Init & { depositWatcher: any };
 type Services = {
   submitDepositTransaction: (context: Init) => Promise<void>;
-  subscribeDepositEvent: (context: Init) => InvokeCallback;
 };
+type Actions = { spawnDepositWatcher: Action<SpawnedWatcher, EventObject> };
+type Options = { services: Services; actions: Actions };
 
-type Options = { services: Services };
 export const machine: MachineFactory<Init, any> = (store: IStore, context: Init) => {
-  const subscribeDepositEvent = (ctx: Init): InvokeCallback => cb => {
+  const depositWatcher = cb => {
     return store.on('DEPOSITED', async (event: ChainEvent) => {
-      if (event.type === 'DEPOSITED' && event.channelId === ctx.channelId) {
-        const currentHoldings = bigNumberify(await store.getHoldings(ctx.channelId));
+      if (event.type === 'DEPOSITED' && event.channelId === context.channelId) {
+        const currentHoldings = bigNumberify(await store.getHoldings(context.channelId));
 
-        if (currentHoldings.gte(ctx.fundedAt)) {
+        if (currentHoldings.gte(context.fundedAt)) {
           cb('FUNDED');
-        } else if (currentHoldings.gte(ctx.depositAt)) {
+        } else if (currentHoldings.gte(context.depositAt)) {
           cb('SAFE_TO_DEPOSIT');
         } else {
           cb('NOT_SAFE_TO_DEPOSIT');
@@ -75,10 +62,11 @@ export const machine: MachineFactory<Init, any> = (store: IStore, context: Init)
     }
   };
 
-  const services: Services = {
-    submitDepositTransaction,
-    subscribeDepositEvent,
+  const services: Services = { submitDepositTransaction };
+  const actions: Actions = {
+    spawnDepositWatcher: assign({ depositWatcher: () => spawn(depositWatcher) }),
   };
-  const options: Options = { services };
-  return Machine(config).withConfig(options, context);
+
+  const options: Options = { services, actions };
+  return Machine(config).withConfig(options as any, context);
 };
