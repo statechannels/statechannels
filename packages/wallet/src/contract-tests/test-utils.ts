@@ -19,7 +19,6 @@ import {getTrivialAppAddress} from "../utils/contract-utils";
 import {State, getChannelId as getNitroChannelId, Channel} from "@statechannels/nitro-protocol";
 import {Signatures} from "@statechannels/nitro-protocol";
 import {convertBalanceToOutcome} from "../redux/__tests__/state-helpers";
-import { AddressZero } from "ethers/constants";
 
 export const fiveFive = (asAddress, bsAddress) => [
   {address: asAddress, wei: bigNumberify(5).toHexString()},
@@ -32,32 +31,6 @@ export const createWatcherState = (
   processId: string,
   ...channelIds: string[]
 ): walletStates.Initialized => {
-  // FIXME: This is messy, we just set _some_ value for the ChannelStore, so the getChannelInfo
-  // call does not throw an error when triggered inside an AdjudicatorWatcher saga (post-ChallengeCleared)
-  const libraryAddress = getTrivialAppAddress();
-  const channel: Channel = {
-    channelNonce: bigNumberify(0).toHexString(),
-    chainId: bigNumberify(NETWORK_ID).toHexString(),
-    participants: [AddressZero, AddressZero]
-  };
-  const state: State = {
-    channel,
-    appDefinition: libraryAddress,
-    turnNum: 6,
-    outcome: convertBalanceToOutcome(fiveFive(AddressZero, AddressZero)),
-    isFinal: false,
-    challengeDuration: CHALLENGE_DURATION,
-    appData: "0x00"
-  };
-  const channelStore = {};
-  for (const channelId of channelIds) {
-    channelStore[channelId] = {
-      state,
-      signature: {v:0, r: '', s:''}
-    }
-  }
-  // END FIXME
-
   const channelSubscriptions: walletStates.ChannelSubscriptions = {};
   for (const channelId of channelIds) {
     channelSubscriptions[channelId] = channelSubscriptions[channelId] || [];
@@ -68,7 +41,6 @@ export const createWatcherState = (
     ...walletStates.EMPTY_SHARED_DATA,
     
     processStore: {},
-    channelStore,
     channelSubscriptions,
     address: "",
     privateKey: ""
