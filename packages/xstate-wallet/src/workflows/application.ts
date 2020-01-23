@@ -6,6 +6,7 @@ import {
   OpenChannelEvent,
   CreateChannel,
   JoinChannel,
+  ConcludeChannel,
   IStore,
   SendStates,
   ChannelUpdated,
@@ -23,8 +24,15 @@ interface PlayerStateUpdate {
   type: 'PLAYER_STATE_UPDATE';
   state: State;
 }
-
-export type ApplicationWorkflowEvent = PlayerStateUpdate | SendStates | OpenEvent;
+interface PlayerRequestConclude {
+  type: 'PLAYER_REQUEST_CONCLUDE';
+  channelId: string;
+}
+export type ApplicationWorkflowEvent =
+  | PlayerRequestConclude
+  | PlayerStateUpdate
+  | SendStates
+  | OpenEvent;
 
 // Context
 interface ApplicationContext {
@@ -50,11 +58,23 @@ const funding = {
 const running = {
   on: {
     PLAYER_STATE_UPDATE: {target: 'running', actions: ['sendToOpponent']},
-    SendStates: {target: 'running', actions: ['updateStore']},
-    CHANNEL_UPDATED: {target: 'running', actions: 'sendChannelUpdatedNotification'}
+    CHANNEL_UPDATED: {target: 'running', actions: 'sendChannelUpdatedNotification'},
+    SendStates: [
+      {cond: 'channelOpen', target: 'running', actions: ['updateStore', 'sendChannelUpdated']},
+      {cond: 'channelClosing', target: 'closing', actions: ['updateStore', 'sendChannelUpdated']}
+    ],
+    PLAYER_REQUEST_CONCLUDE: {target: 'closing'}
   }
 };
-const closing = {};
+const closing = {
+  invoke: {
+    id: 'closingMachine',
+    src: 'invokeClosingMachine',
+    data: (context, event) => context
+  },
+  on: {SendStates: {actions: ['updateStore', 'sendChannelUpdated']}},
+  onDone: 'done'
+};
 const done = {type: FINAL};
 
 export const config: MachineConfig<any, any, any> = {
@@ -97,14 +117,28 @@ export const applicationWorkflow: MachineFactory<ApplicationContext, any> = (
     sendDisplayMessage('Hide');
   };
   const actions = {sendToOpponent, updateStore, sendChannelUpdatedNotification, hideUi, displayUi};
+  const invokeClosingMachine = (context: ApplicationContext) =>
+    ConcludeChannel.machine(store, context);
+
+  const channelOpen = (context: ApplicationContext, event: SendStates) => {
+    return event.signedStates.every(ss => {
+      context.channelId === getChannelId(ss.state.channel) && !ss.state.isFinal;
+    });
+  };
+  const channelClosing = (context: ApplicationContext, event: SendStates) =>
+    !channelOpen(context, event);
+
+  const guards = {channelOpen, channelClosing};
+  const services = {invokeClosingMachine, invokeOpeningMachine};
   const options = {
-    services: {invokeOpeningMachine},
-    actions
+    services,
+    actions,
+    guards
   };
   return Machine(config).withConfig(options, context);
 };
 
-const mockServices = {invokeOpeningMachine: () => {}};
+const mockServices = {invokeOpeningMachine: () => {}, invokeClosingMachine: () => {}};
 const mockActions = {
   sendToOpponent: () => {},
   updateStore: () => {},
@@ -112,4 +146,5 @@ const mockActions = {
   hideUi: () => {},
   displayUi: () => {}
 };
-export const mockOptions = {services: mockServices, actions: mockActions};
+const mockGuards = {channelOpen: () => true, channelClosing: () => true};
+export const mockOptions = {services: mockServices, actions: mockActions, guards: mockGuards};
