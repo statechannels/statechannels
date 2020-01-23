@@ -1,5 +1,5 @@
 import { bigNumberify } from 'ethers/utils';
-import { Machine, MachineConfig, assign, spawn, Action, EventObject } from 'xstate';
+import { Machine, MachineConfig, assign, spawn, EventObject, AnyAssignAction } from 'xstate';
 
 import { FINAL, MachineFactory } from '../..';
 import { IStore } from '../../store';
@@ -34,7 +34,7 @@ type SpawnedWatcher = Init & { depositWatcher: any };
 type Services = {
   submitDepositTransaction: (context: Init) => Promise<void>;
 };
-type Actions = { spawnDepositWatcher: Action<SpawnedWatcher, EventObject> };
+type Actions = { spawnDepositWatcher: AnyAssignAction<SpawnedWatcher, EventObject> };
 type Options = { services: Services; actions: Actions };
 
 export const machine: MachineFactory<Init, any> = (store: IStore, context: Init) => {
