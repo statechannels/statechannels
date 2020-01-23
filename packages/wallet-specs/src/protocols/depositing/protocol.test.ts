@@ -20,15 +20,19 @@ it('handles the basic case', async () => {
     fundedAt: '0x07',
   };
   const service = interpret<any, any, any>(machine(store, context));
-  service.onTransition(state => log(state.value));
+  service.onTransition(state => {
+    log(state.value);
+  });
 
   service.start();
-  await waitForExpect(() => expect(service.state.value).toEqual('idle'), 2000);
+  await waitForExpect(() => {
+    expect(service.state.value).toEqual({ depositor: 'idle', watcher: 'watching' });
+  }, 2000);
 
   await chain.deposit(channelId, '0x00', '1');
 
   await waitForExpect(async () => {
-    expect(service.state.value).toEqual('done');
+    expect(service.state.value).toMatchObject({ depositor: 'done', watcher: 'watching' });
     expect(await chain.getHoldings(channelId)).toEqual(context.totalAfterDeposit);
   }, 200);
 
