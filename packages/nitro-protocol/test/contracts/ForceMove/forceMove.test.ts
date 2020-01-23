@@ -14,7 +14,7 @@ import {
   TURN_NUM_RECORD_NOT_INCREASED,
 } from '../../../src/contract/transaction-creators/revert-reasons';
 import {SignedState} from '../../../src/index';
-import {signChallengeMessage} from '../../../src/signatures';
+import {signChallengeMessage, signState} from '../../../src/signatures';
 import {COUNTING_APP_INVALID_TRANSITION} from '../../revert-reasons';
 import {
   clearedChallengeHash,
@@ -26,6 +26,8 @@ import {
   signStates,
   writeGasConsumption,
 } from '../../test-helpers';
+import {createForceMoveTransaction} from '../../../src/transactions';
+import {TransactionRequest} from 'ethers/providers';
 
 const provider = getTestProvider();
 
@@ -38,12 +40,21 @@ const challengeDuration = 0x1;
 const outcome = [{allocation: [], assetHolderAddress: Wallet.createRandom().address}];
 
 let appDefinition;
+let signedState0: SignedState;
+let signedState1: SignedState;
+let signedState2: SignedState;
 
 // Populate wallets and participants array
 for (let i = 0; i < 3; i++) {
   wallets[i] = Wallet.createRandom();
   participants[i] = wallets[i].address;
 }
+
+const channel: Channel = {
+  chainId: '0x1',
+  channelNonce: '0x1',
+  participants: [wallets[0].address, wallets[1].address],
+};
 
 beforeAll(async () => {
   ForceMove = await setupContracts(
@@ -52,6 +63,43 @@ beforeAll(async () => {
     process.env.TEST_FORCE_MOVE_ADDRESS
   );
   appDefinition = getPlaceHolderContractAddress();
+
+  signedState0 = await signState(
+    {
+      turnNum: 0,
+      isFinal: false,
+      appDefinition: getPlaceHolderContractAddress(),
+      appData: defaultAbiCoder.encode(['uint256'], [0]),
+      outcome: [],
+      channel,
+      challengeDuration: 0xfff,
+    },
+    wallets[0].privateKey
+  );
+  signedState1 = await signState(
+    {
+      turnNum: 1,
+      isFinal: false,
+      appDefinition: getPlaceHolderContractAddress(),
+      appData: defaultAbiCoder.encode(['uint256'], [0]),
+      outcome: [],
+      channel,
+      challengeDuration: 0xfff,
+    },
+    wallets[1].privateKey
+  );
+  signedState2 = await signState(
+    {
+      turnNum: 2,
+      isFinal: false,
+      appDefinition: getPlaceHolderContractAddress(),
+      appData: defaultAbiCoder.encode(['uint256'], [0]),
+      outcome: [],
+      channel,
+      challengeDuration: 0xfff,
+    },
+    wallets[0].privateKey
+  );
 });
 
 // Scenarios are synonymous with channelNonce:
@@ -210,4 +258,50 @@ describe('forceMove', () => {
       }
     }
   );
+});
+
+describe('forceMove with transaction generator', () => {
+  it('creates a valid forceMove(0,1) transaction', async () => {
+    const provider = getTestProvider();
+    const ForceMove = await setupContracts(
+      provider,
+      ForceMoveArtifact,
+      process.env.TEST_FORCE_MOVE_ADDRESS
+    );
+    const transactionRequest: TransactionRequest = createForceMoveTransaction(
+      [signedState0, signedState1],
+      wallets[1].privateKey
+    );
+
+    const signer = provider.getSigner();
+    const transaction = {data: transactionRequest.data, gasLimit: 3000000};
+    const response = await signer.sendTransaction({
+      to: ForceMove.address,
+      ...transaction,
+    });
+    expect(response).toBeDefined();
+    getChannelId(channel);
+    await (await ForceMove.setChannelStorageHash(getChannelId(channel), HashZero)).wait(); // clean up
+  });
+
+  it('creates a valid forcMove(1,2) transaction', async () => {
+    const provider = getTestProvider();
+    const ForceMove = await setupContracts(
+      provider,
+      ForceMoveArtifact,
+      process.env.TEST_FORCE_MOVE_ADDRESS
+    );
+    const transactionRequest: TransactionRequest = createForceMoveTransaction(
+      [signedState1, signedState2],
+      wallets[0].privateKey
+    );
+
+    const signer = provider.getSigner();
+    const transaction = {data: transactionRequest.data, gasLimit: 3000000};
+    const response = await signer.sendTransaction({
+      to: ForceMove.address,
+      ...transaction,
+    });
+    expect(response).toBeDefined();
+  });
 });
