@@ -39,10 +39,7 @@ const wallets = new Array(3);
 const challengeDuration = 0x1;
 const outcome = [{allocation: [], assetHolderAddress: Wallet.createRandom().address}];
 
-let appDefinition;
-let signedState0: SignedState;
-let signedState1: SignedState;
-let signedState2: SignedState;
+const appDefinition = getPlaceHolderContractAddress();
 
 // Populate wallets and participants array
 for (let i = 0; i < 3; i++) {
@@ -50,55 +47,37 @@ for (let i = 0; i < 3; i++) {
   participants[i] = wallets[i].address;
 }
 
-const channel: Channel = {
+const twoPartyChannel1: Channel = {
   chainId: '0x1',
   channelNonce: '0x1',
   participants: [wallets[0].address, wallets[1].address],
 };
 
+const twoPartyChannel2: Channel = {
+  chainId: '0x1',
+  channelNonce: '0x2',
+  participants: [wallets[0].address, wallets[1].address],
+};
+
+async function createSignedCountingAppState(channel: Channel, appData: number, turnNum: number) {
+  return await signState(
+    {
+      turnNum,
+      isFinal: false,
+      appDefinition: getPlaceHolderContractAddress(),
+      appData: defaultAbiCoder.encode(['uint256'], [appData]),
+      outcome: [],
+      channel,
+      challengeDuration: 0xfff,
+    },
+    wallets[turnNum % channel.participants.length].privateKey
+  );
+}
 beforeAll(async () => {
   ForceMove = await setupContracts(
     provider,
     ForceMoveArtifact,
     process.env.TEST_FORCE_MOVE_ADDRESS
-  );
-  appDefinition = getPlaceHolderContractAddress();
-
-  signedState0 = await signState(
-    {
-      turnNum: 0,
-      isFinal: false,
-      appDefinition: getPlaceHolderContractAddress(),
-      appData: defaultAbiCoder.encode(['uint256'], [0]),
-      outcome: [],
-      channel,
-      challengeDuration: 0xfff,
-    },
-    wallets[0].privateKey
-  );
-  signedState1 = await signState(
-    {
-      turnNum: 1,
-      isFinal: false,
-      appDefinition: getPlaceHolderContractAddress(),
-      appData: defaultAbiCoder.encode(['uint256'], [0]),
-      outcome: [],
-      channel,
-      challengeDuration: 0xfff,
-    },
-    wallets[1].privateKey
-  );
-  signedState2 = await signState(
-    {
-      turnNum: 2,
-      isFinal: false,
-      appDefinition: getPlaceHolderContractAddress(),
-      appData: defaultAbiCoder.encode(['uint256'], [0]),
-      outcome: [],
-      channel,
-      challengeDuration: 0xfff,
-    },
-    wallets[0].privateKey
   );
 });
 
@@ -262,14 +241,11 @@ describe('forceMove', () => {
 
 describe('forceMove with transaction generator', () => {
   it('creates a valid forceMove(0,1) transaction', async () => {
-    const provider = getTestProvider();
-    const ForceMove = await setupContracts(
-      provider,
-      ForceMoveArtifact,
-      process.env.TEST_FORCE_MOVE_ADDRESS
-    );
     const transactionRequest: TransactionRequest = createForceMoveTransaction(
-      [signedState0, signedState1],
+      [
+        await createSignedCountingAppState(twoPartyChannel1, 0, 0),
+        await createSignedCountingAppState(twoPartyChannel1, 0, 1),
+      ],
       wallets[1].privateKey
     );
 
@@ -280,19 +256,15 @@ describe('forceMove with transaction generator', () => {
       ...transaction,
     });
     expect(response).toBeDefined();
-    getChannelId(channel);
-    await (await ForceMove.setChannelStorageHash(getChannelId(channel), HashZero)).wait(); // clean up
+    await (await ForceMove.setChannelStorageHash(getChannelId(twoPartyChannel1), HashZero)).wait(); // clean up
   });
 
   it('creates a valid forcMove(1,2) transaction', async () => {
-    const provider = getTestProvider();
-    const ForceMove = await setupContracts(
-      provider,
-      ForceMoveArtifact,
-      process.env.TEST_FORCE_MOVE_ADDRESS
-    );
     const transactionRequest: TransactionRequest = createForceMoveTransaction(
-      [signedState1, signedState2],
+      [
+        await createSignedCountingAppState(twoPartyChannel2, 0, 1),
+        await createSignedCountingAppState(twoPartyChannel2, 0, 2),
+      ],
       wallets[0].privateKey
     );
 
@@ -303,5 +275,6 @@ describe('forceMove with transaction generator', () => {
       ...transaction,
     });
     expect(response).toBeDefined();
+    await (await ForceMove.setChannelStorageHash(getChannelId(twoPartyChannel1), HashZero)).wait(); // clean up
   });
 });
