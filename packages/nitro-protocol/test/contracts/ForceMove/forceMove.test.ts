@@ -244,24 +244,20 @@ describe('forceMove with transaction generator', () => {
     description                  | appData   | turnNums  | challenger
     ${'forceMove(0,1) accepted'} | ${[0, 0]} | ${[0, 1]} | ${1}
     ${'forceMove(1,2) accepted'} | ${[0, 0]} | ${[1, 2]} | ${0}
-  `(
-    '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
-
-    async ({description, appData, turnNums, challenger}) => {
-      const transactionRequest: TransactionRequest = createForceMoveTransaction(
-        [
-          await createSignedCountingAppState(twoPartyChannel, appData[0], turnNums[0]),
-          await createSignedCountingAppState(twoPartyChannel, appData[1], turnNums[1]),
-        ],
-        wallets[challenger].privateKey
-      );
-      const signer = provider.getSigner();
-      const transaction = {data: transactionRequest.data, gasLimit: 3000000};
-      const response = await signer.sendTransaction({
-        to: ForceMove.address,
-        ...transaction,
-      });
-      expect(response).toBeDefined();
-    }
-  );
+  `('$description', async ({description, appData, turnNums, challenger}) => {
+    const transactionRequest: TransactionRequest = createForceMoveTransaction(
+      [
+        await createSignedCountingAppState(twoPartyChannel, appData[0], turnNums[0]),
+        await createSignedCountingAppState(twoPartyChannel, appData[1], turnNums[1]),
+      ],
+      wallets[challenger].privateKey
+    );
+    const signer = provider.getSigner();
+    const transaction = {data: transactionRequest.data, gasLimit: 3000000};
+    const response = await signer.sendTransaction({
+      to: ForceMove.address,
+      ...transaction,
+    });
+    expect(response).toBeDefined();
+  });
 });
