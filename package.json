@@ -25,6 +25,7 @@
     "webpack": "4.41.3"
   },
   "scripts": {
-    "start": "node scripts/start.js"
+    "start": "node scripts/start.js",
+    "generateConfigs": "yarn run ts-node bin/generateConfigs.ts "
   }
 }
