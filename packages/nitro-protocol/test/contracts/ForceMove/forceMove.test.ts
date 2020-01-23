@@ -47,15 +47,9 @@ for (let i = 0; i < 3; i++) {
   participants[i] = wallets[i].address;
 }
 
-const twoPartyChannel1: Channel = {
+const twoPartyChannel: Channel = {
   chainId: '0x1',
   channelNonce: '0x1',
-  participants: [wallets[0].address, wallets[1].address],
-};
-
-const twoPartyChannel2: Channel = {
-  chainId: '0x1',
-  channelNonce: '0x2',
   participants: [wallets[0].address, wallets[1].address],
 };
 
@@ -240,41 +234,34 @@ describe('forceMove', () => {
 });
 
 describe('forceMove with transaction generator', () => {
-  it('creates a valid forceMove(0,1) transaction', async () => {
-    const transactionRequest: TransactionRequest = createForceMoveTransaction(
-      [
-        await createSignedCountingAppState(twoPartyChannel1, 0, 0),
-        await createSignedCountingAppState(twoPartyChannel1, 0, 1),
-      ],
-      wallets[1].privateKey
-    );
-
-    const signer = provider.getSigner();
-    const transaction = {data: transactionRequest.data, gasLimit: 3000000};
-    const response = await signer.sendTransaction({
-      to: ForceMove.address,
-      ...transaction,
-    });
-    expect(response).toBeDefined();
-    await (await ForceMove.setChannelStorageHash(getChannelId(twoPartyChannel1), HashZero)).wait(); // clean up
+  beforeEach(async () => {
+    await (await ForceMove.setChannelStorageHash(getChannelId(twoPartyChannel), HashZero)).wait();
   });
-
-  it('creates a valid forcMove(1,2) transaction', async () => {
-    const transactionRequest: TransactionRequest = createForceMoveTransaction(
-      [
-        await createSignedCountingAppState(twoPartyChannel2, 0, 1),
-        await createSignedCountingAppState(twoPartyChannel2, 0, 2),
-      ],
-      wallets[0].privateKey
-    );
-
-    const signer = provider.getSigner();
-    const transaction = {data: transactionRequest.data, gasLimit: 3000000};
-    const response = await signer.sendTransaction({
-      to: ForceMove.address,
-      ...transaction,
-    });
-    expect(response).toBeDefined();
-    await (await ForceMove.setChannelStorageHash(getChannelId(twoPartyChannel1), HashZero)).wait(); // clean up
+  afterEach(async () => {
+    await (await ForceMove.setChannelStorageHash(getChannelId(twoPartyChannel), HashZero)).wait();
   });
+  it.each`
+    description                  | appData   | turnNums  | challenger
+    ${'forceMove(0,1) accepted'} | ${[0, 0]} | ${[0, 1]} | ${1}
+    ${'forceMove(1,2) accepted'} | ${[0, 0]} | ${[1, 2]} | ${0}
+  `(
+    '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
+
+    async ({description, appData, turnNums, challenger}) => {
+      const transactionRequest: TransactionRequest = createForceMoveTransaction(
+        [
+          await createSignedCountingAppState(twoPartyChannel, appData[0], turnNums[0]),
+          await createSignedCountingAppState(twoPartyChannel, appData[1], turnNums[1]),
+        ],
+        wallets[challenger].privateKey
+      );
+      const signer = provider.getSigner();
+      const transaction = {data: transactionRequest.data, gasLimit: 3000000};
+      const response = await signer.sendTransaction({
+        to: ForceMove.address,
+        ...transaction,
+      });
+      expect(response).toBeDefined();
+    }
+  );
 });
