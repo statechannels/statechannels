@@ -69,12 +69,18 @@ describe('Playing a game of RPS', () => {
 
     await clickThroughResignationUI(rpsTabA, rpsTabB);
 
+    // Should be in the lobby
+    expect(await rpsTabB.waitForXPath('//button[contains(., "Create a game")]')).toBeDefined();
+    expect(await rpsTabA.waitForXPath('//button[contains(., "Create a game")]')).toBeDefined();
+
     await startAndFundRPSGame(rpsTabA, rpsTabB);
 
     await clickThroughRPSUIWithChallengeByPlayerA(rpsTabA, rpsTabB);
 
     expect(await waitForHeading(rpsTabA)).toMatch('You lost');
     expect(await waitForHeading(rpsTabB)).toMatch('You won!');
+
+    await clickThroughResignationUI(rpsTabA, rpsTabB);
 
     await startAndFundRPSGame(rpsTabA, rpsTabB);
 
