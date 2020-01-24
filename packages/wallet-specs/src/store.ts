@@ -9,7 +9,7 @@ import { messageService, IMessageService } from './messaging';
 import { AddressableMessage, FundingStrategyProposed } from './wire-protocol';
 import { Chain, IChain, ChainEventType, ChainEvent } from './chain';
 
-import { add, getChannelId, gt, SignedState } from '.';
+import { add, getChannelId, gt, SignedState, unreachable } from '.';
 
 export interface ChannelUpdated {
   type: 'CHANNEL_UPDATED';
@@ -95,13 +95,17 @@ export class Store implements IStore {
     return await this._chain.getHoldings(channelId);
   }
   public on(eventType: StoreEventType, listener: StoreEventListener) {
-    if (eventType === 'CHANNEL_UPDATED') {
-      this._eventEmitter.addListener(eventType, listener);
-      return () => {
-        this._eventEmitter.removeListener(eventType, listener);
-      };
-    } else {
-      return this._chain.on(eventType, listener);
+    switch (eventType) {
+      case 'CHANNEL_UPDATED':
+        this._eventEmitter.addListener(eventType, listener);
+        return () => {
+          this._eventEmitter.removeListener(eventType, listener);
+        };
+      case 'DEPOSITED':
+      case 'REVERT':
+        return this._chain.on(eventType, listener);
+      default:
+        return unreachable(eventType);
     }
   }
 
