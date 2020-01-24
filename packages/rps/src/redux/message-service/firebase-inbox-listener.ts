@@ -11,7 +11,7 @@ export function* firebaseInboxListener(client: RPSChannelClient) {
   // ^ ensure this matches the to in message-queued-listener.ts
   const channel = yield call(
     reduxSagaFirebase.database.channel as any,
-    `/messages/${address.toLowerCase()}`,
+    `${FIREBASE_PREFIX}/messages/${address.toLowerCase()}`,
     'child_added',
     buffers.fixed(100)
   );
