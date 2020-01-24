@@ -1,4 +1,4 @@
-import {MachineConfig, Machine, StateMachine, send} from 'xstate';
+import {MachineConfig, Machine, StateMachine, send, assign} from 'xstate';
 import {
   FINAL,
   MachineFactory,
@@ -8,7 +8,8 @@ import {
   JoinChannel,
   ConcludeChannel,
   IStore,
-  SendStates
+  SendStates,
+  ChannelUpdated
 } from '@statechannels/wallet-protocols';
 
 import {State, getChannelId} from '@statechannels/nitro-protocol';
@@ -34,7 +35,7 @@ export type ApplicationWorkflowEvent =
 
 // Context
 interface ApplicationContext {
-  channelId: string;
+  channelId?: string;
 }
 // States
 const initializing = {on: {CREATE_CHANNEL: 'funding', OPEN_CHANNEL: 'funding'}};
@@ -48,7 +49,11 @@ const funding = {
     onDone: {target: 'running', actions: ['hideUi']},
     autoForward: true
   },
-  on: {SendStates: {actions: ['updateStore', 'sendChannelUpdated']}}
+  on: {
+    SendStates: {actions: ['updateStore', 'sendChannelUpdated']},
+    // TODO: This is temporary until we split opening into joining/creating
+    CHANNEL_UPDATED: {actions: 'assignChannelId'}
+  }
 };
 const running = {
   on: {
@@ -64,7 +69,9 @@ const closing = {
   invoke: {
     id: 'closingMachine',
     src: 'invokeClosingMachine',
-    data: (context, event) => context
+    data: (context, event) => context,
+    autoForward: true,
+    onDone: 'done'
   },
   on: {SendStates: {actions: ['updateStore', 'sendChannelUpdated']}},
   onDone: 'done'
@@ -111,20 +118,51 @@ export const applicationWorkflow: MachineFactory<ApplicationContext, any> = (
   const hideUi = (context, event) => {
     sendDisplayMessage('Hide');
   };
-  const invokeClosingMachine = (context: ApplicationContext) =>
-    ConcludeChannel.machine(store, context);
 
-  const channelOpen = (context: ApplicationContext, event: SendStates) => {
-    return event.signedStates.every(ss => {
-      context.channelId === getChannelId(ss.state.channel) && !ss.state.isFinal;
-    });
+  const invokeClosingMachine = (context: ApplicationContext) => {
+    if (!context.channelId) {
+      throw new Error('No channel id');
+    }
+    return ConcludeChannel.machine(store, {channelId: context.channelId});
   };
-  const channelClosing = (context: ApplicationContext, event: SendStates) =>
-    !channelOpen(context, event);
+
+  const channelOpen = (context: ApplicationContext, event: SendStates): boolean => {
+    return !channelClosing(context, event);
+  };
+  const channelClosing = (context: ApplicationContext, event: SendStates): boolean => {
+    return event.signedStates
+      .filter(ss => context.channelId === getChannelId(ss.state.channel))
+      .some(ss => ss.state.isFinal);
+  };
+
+  const assignChannelId = assign({
+    channelId: (
+      context: ApplicationContext,
+      event: ChannelUpdated | SendStates | PlayerStateUpdate
+    ) => {
+      if (!context.channelId) {
+        if (event.type === 'CHANNEL_UPDATED') {
+          return event.channelId;
+        } else if (event.type === 'PLAYER_STATE_UPDATE') {
+          return getChannelId(event.state.channel);
+        } else {
+          return getChannelId(event.signedStates[0].state.channel);
+        }
+      }
+      return context.channelId;
+    }
+  });
 
   const guards = {channelOpen, channelClosing};
   const services = {invokeClosingMachine, invokeOpeningMachine};
-  const actions = {sendToOpponent, updateStore, sendChannelUpdated, displayUi, hideUi};
+  const actions = {
+    sendToOpponent,
+    updateStore,
+    sendChannelUpdated,
+    assignChannelId,
+    displayUi,
+    hideUi
+  };
   const options = {
     services,
     actions,
@@ -139,7 +177,8 @@ const mockActions = {
   updateStore: () => {},
   sendChannelUpdated: () => {},
   hideUi: () => {},
-  displayUi: () => {}
+  displayUi: () => {},
+  assignChannelId: () => {}
 };
 const mockGuards = {channelOpen: () => true, channelClosing: () => true};
 export const mockOptions = {services: mockServices, actions: mockActions, guards: mockGuards};

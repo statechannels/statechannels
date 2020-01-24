@@ -8,7 +8,7 @@ import {
 } from '@statechannels/wallet-protocols';
 
 import {applicationWorkflow, ApplicationWorkflowEvent} from './workflows/application';
-
+import {Guid} from 'guid-typescript';
 import WalletUi from './ui/wallet';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -30,6 +30,7 @@ export type Event =
   | ChannelUpdated
   | ApplicationWorkflowEvent;
 export interface Workflow {
+  id: string;
   machine: Interpreter<any, any, any>;
   domain: string; // TODO: Is this useful?
 }
@@ -37,6 +38,7 @@ export interface Workflow {
 export class WorkflowManager {
   workflows: Workflow[];
   store: IStore;
+  tempMachine;
   constructor(store: IStore) {
     this.workflows = [];
     this.store = store;
@@ -50,18 +52,20 @@ export class WorkflowManager {
   }
 
   private startWorkflow(event: Event): void {
+    const id = Guid.create().toString();
     const machine = interpret<any, any, any>(applicationWorkflow(this.store), {
       devTools: true
     })
       .onTransition(state => {
         logState({state});
       })
+      .onDone(() => (this.workflows = this.workflows.filter(w => w.id !== id)))
       .start();
     // TODO: Figure out how to resolve rendering prioities
     this.renderUI(machine);
     // Register for ChannelUpdated events
     this.store.on('CHANNEL_UPDATED', (event: ChannelUpdated) => machine.send(event));
-    this.workflows.push({machine, domain: 'TODO'});
+    this.workflows.push({id, machine, domain: 'TODO'});
   }
 
   dispatchToWorkflows(event: Event) {
