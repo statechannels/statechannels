@@ -7,15 +7,6 @@ import {getTestProvider, setupContracts, sign} from '../../test-helpers';
 const provider = getTestProvider();
 let ForceMove: Contract;
 
-const participants = ['', '', ''];
-const wallets = new Array(3);
-
-// Populate wallets and participants array
-for (let i = 0; i < 3; i++) {
-  wallets[i] = Wallet.createRandom();
-  participants[i] = wallets[i].address;
-}
-
 beforeAll(async () => {
   ForceMove = await setupContracts(
     provider,
@@ -24,55 +15,95 @@ beforeAll(async () => {
   );
 });
 
-// TODO use .each to improve readability and reduce boilerplate
-describe('_validSignatures', () => {
-  let sig;
-  let sigs;
-  let whoSignedWhat;
-  let stateHashes;
-  let addresses;
-  let stateHash;
-  let wallet;
-  beforeEach(() => {
-    sigs = new Array(3);
-    whoSignedWhat = new Array(3);
-    stateHashes = new Array(3);
-    addresses = new Array(3);
-  });
+describe('_validSignatures (participants sign only their own states)', () => {
+  it.each`
+    nParticipants | largestTurnNum
+    ${2}          | ${1}
+    ${2}          | ${2}
+    ${2}          | ${3}
+    ${2}          | ${4}
+    ${2}          | ${5}
+    ${2}          | ${6}
+    ${2}          | ${7}
+    ${3}          | ${2}
+    ${3}          | ${3}
+    ${3}          | ${4}
+    ${3}          | ${5}
+  `(
+    'works for, largestTurnNum = $largestTurnNum, nParticipants = $nParticipants',
+    async ({nParticipants, largestTurnNum}) => {
+      const nStates = nParticipants;
+      const addresses = [];
+      const sigs = [];
+      const stateHashes = [];
+      const whoSignedWhat = [];
+      for (let i = 0; i < nStates; i++) {
+        const turnNum = largestTurnNum - nStates + i;
+        stateHashes[i] = id('state-data' + turnNum);
+      }
+      for (let i = 0; i < nParticipants; i++) {
+        const wallet = Wallet.createRandom();
+        addresses[i] = wallet.address;
+        const offset = (largestTurnNum + nParticipants - i) % nParticipants; // distance to owner of largestTurnNum
+        whoSignedWhat[i] = nStates - 1 - offset;
+        const sig = await sign(wallet, stateHashes[whoSignedWhat[i]]);
+        sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
+      }
+      expect(
+        await ForceMove.validSignatures(largestTurnNum, addresses, stateHashes, sigs, whoSignedWhat)
+      ).toBe(true);
+      const brokenSigs = sigs.reverse();
+      expect(
+        await ForceMove.validSignatures(
+          largestTurnNum,
+          addresses,
+          stateHashes,
+          brokenSigs,
+          whoSignedWhat
+        )
+      ).toBe(false);
+    }
+  );
+});
 
-  it('returns true (false) for a correct (incorrect) set of signatures on n states', async () => {
-    for (let i = 0; i < 3; i++) {
-      wallet = Wallet.createRandom();
-      addresses[i] = wallet.address;
-      stateHash = id('Commitment' + i);
-      stateHashes[i] = stateHash;
-      sig = await sign(wallet, stateHash);
-      sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
-      whoSignedWhat[i] = i;
+describe('_validSignatures (participants all sign a single state)', () => {
+  it.each`
+    nParticipants | largestTurnNum
+    ${2}          | ${1}
+    ${2}          | ${2}
+    ${2}          | ${3}
+    ${2}          | ${4}
+    ${2}          | ${5}
+    ${2}          | ${6}
+    ${2}          | ${7}
+  `(
+    'works for, largestTurnNum = $largestTurnNum, nParticipants = $nParticipants',
+    async ({nParticipants, largestTurnNum}) => {
+      // const nStates = 1
+      const addresses = [];
+      const sigs = [];
+      const stateHashes = [id('state-data' + largestTurnNum)];
+      const whoSignedWhat = [];
+      for (let i = 0; i < nParticipants; i++) {
+        const wallet = Wallet.createRandom();
+        addresses[i] = wallet.address;
+        whoSignedWhat[i] = 0;
+        const sig = await sign(wallet, stateHashes[whoSignedWhat[i]]);
+        sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
+      }
+      expect(
+        await ForceMove.validSignatures(largestTurnNum, addresses, stateHashes, sigs, whoSignedWhat)
+      ).toBe(true);
+      const brokenSigs = sigs.reverse();
+      expect(
+        await ForceMove.validSignatures(
+          largestTurnNum,
+          addresses,
+          stateHashes,
+          brokenSigs,
+          whoSignedWhat
+        )
+      ).toBe(false);
     }
-    expect(await ForceMove.validSignatures(8, addresses, stateHashes, sigs, whoSignedWhat)).toBe(
-      true
-    );
-    const brokenSigs = sigs.reverse();
-    expect(
-      await ForceMove.validSignatures(8, addresses, stateHashes, brokenSigs, whoSignedWhat)
-    ).toBe(false);
-  });
-  it('returns true (false) for a correct (incorrect) set of signatures on 1 state', async () => {
-    stateHash = id('Commitment' + 8);
-    for (let i = 0; i < 3; i++) {
-      wallet = Wallet.createRandom();
-      addresses[i] = wallet.address;
-      sig = await sign(wallet, stateHash);
-      sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
-      whoSignedWhat[i] = 0;
-    }
-    expect(await ForceMove.validSignatures(8, addresses, [stateHash], sigs, whoSignedWhat)).toBe(
-      true
-    );
-    const brokenSigs = sigs.reverse();
-    expect(
-      await ForceMove.validSignatures(8, addresses, [stateHash], brokenSigs, whoSignedWhat)
-    ).toBe(false);
-  });
+  );
 });

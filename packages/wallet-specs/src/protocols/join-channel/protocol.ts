@@ -1,7 +1,7 @@
 import { Machine, MachineConfig, sendParent, assign, DoneInvokeEvent } from 'xstate';
 import { getChannelId } from '@statechannels/nitro-protocol';
 
-import { forwardChannelUpdated, MachineFactory, Store } from '../..';
+import { forwardChannelUpdated, MachineFactory, IStore } from '../..';
 import { ChannelUpdated } from '../../store';
 import { CloseChannel, OpenChannel } from '../../wire-protocol';
 import { OpenChannelEvent } from '../wallet/protocol';
@@ -120,7 +120,7 @@ export type Actions = {
   sendCloseChannel({ channelId }: Context): void;
 };
 
-export const machine: MachineFactory<Init, any> = (store: Store, ctx: Init) => {
+export const machine: MachineFactory<Init, any> = (store: IStore, ctx: Init) => {
   const actions: Actions = {
     sendCloseChannel: () => {
       console.log('TODO: Send close channel');

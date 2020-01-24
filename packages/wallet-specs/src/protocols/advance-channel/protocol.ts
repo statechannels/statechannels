@@ -1,6 +1,6 @@
 import { AnyEventObject, ConditionPredicate, Machine, MachineConfig } from 'xstate';
 
-import { MachineFactory, Store } from '../..';
+import { MachineFactory, IStore } from '../..';
 
 const PROTOCOL = 'advance-channel';
 /*
@@ -64,7 +64,7 @@ export const mockOptions = {
   services: async () => true,
 };
 
-export const machine: MachineFactory<Init, any> = (store: Store, context?: Init) => {
+export const machine: MachineFactory<Init, any> = (store: IStore, context?: Init) => {
   const guards: Guards = {
     advanced: ({ channelId, targetTurnNum }: Init, event, { state: s }) => {
       const latestEntry = store.getEntry(channelId);

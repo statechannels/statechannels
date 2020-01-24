@@ -21,12 +21,12 @@ export interface IStore {
   Store modifiers
   */
   deposit: IChain['deposit'];
-  initializeChannel(entry: ChannelStoreEntry): void;
+  initializeChannel(entry: IChannelStoreEntry): void;
   sendState(state: State): void;
   sendOpenChannel(state: State): void;
   receiveStates(signedStates: SignedState[]): void;
   setFunding(channelId: string, funding: Funding): Promise<void>;
-
+  sendStrategyChoice(message: FundingStrategyProposed);
   // TODO: set funding
   // setFunding(channelId: string, funding: Funding): void;
   on: IChain['on'];
@@ -210,15 +210,11 @@ export class Store implements IStore {
   }
 
   public receiveStates(signedStates: SignedState[]): void {
-    try {
-      const { channel } = signedStates[0].state;
-      const channelId = getChannelId(channel);
+    const { channel } = signedStates[0].state;
+    const channelId = getChannelId(channel);
 
-      // TODO: validate transition
-      this.updateEntry(channelId, signedStates);
-    } catch (e) {
-      throw e;
-    }
+    // TODO: validate transition
+    this.updateEntry(channelId, signedStates);
   }
 
   // Nonce management

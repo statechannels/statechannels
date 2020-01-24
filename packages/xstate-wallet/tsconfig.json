@@ -5,13 +5,11 @@
     "baseUrl": ".",
     "esModuleInterop": true,
     "lib": ["es6", "dom"],
-    // esnext is required for TypeScript to recognize dynamic imports (which pure-evm must be)
-    // https://github.com/Microsoft/TypeScript/issues/16820
-    // This is in the default tsconfig.json, but putting it here so we remember this ^^^
-    "module": "esnext",
+    "module": "commonjs",
     "noImplicitAny": false,
     "noImplicitReturns": true,
     "noImplicitThis": true,
+
     "noUnusedLocals": true,
     "outDir": "lib",
     "strict": false,
@@ -21,15 +19,19 @@
     // https://github.com/Microsoft/TypeScript/issues/26627
     "strictNullChecks": true,
     "target": "es2015",
+    "jsx": "react",
     "types": ["react", "jest", "node"]
   },
-  "include": ["src/**/*", "src/**/*.json", "contracts/**/*.json"],
+  "include": ["./src"],
   "references": [
     {
       "path": "../nitro-protocol"
     },
     {
       "path": "../devtools"
+    },
+    {
+      "path": "../wallet-specs"
     }
   ]
 }

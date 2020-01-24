@@ -1,6 +1,25 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
+export function getEnvBool(name: string, throwIfMissing = true): boolean {
+  const val = process.env[name];
+
+  if (throwIfMissing && val === undefined) {
+    throw Error(`Environment variable ${name} is not set.`);
+  }
+
+  switch (process.env[name]) {
+    case undefined:
+    case null:
+    case 'null':
+    case 'false':
+    case '0':
+      return false;
+    default:
+      return true;
+  }
+}
+
 export function configureEnvVariables(monorepo = true): void {
   const NODE_ENV = process.env.NODE_ENV;
   if (!NODE_ENV) {
