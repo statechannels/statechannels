@@ -142,10 +142,10 @@ export class ChannelStoreEntry implements IChannelStoreEntry {
   }
 
   get latestState(): State {
-    if (!this.states.length) {
-      throw new Error('No states found');
-    }
-    return this.states.sort(s => s.state.turnNum)[0].state;
+    const state = _.maxBy(this.states, s => s.state.turnNum)?.state;
+    if (!state) throw new Error('No states found');
+
+    return state;
   }
 
   get participantId(): string {
