@@ -4,7 +4,7 @@
   "description": "Container package for end to end tests, from contracts to browser apps",
   "main": "index.js",
   "scripts": {
-    "test": "wait-on http://localhost:3000 http://localhost:3055 && jest",
+    "test": "wait-on http://localhost:3000 http://localhost:3055 && jest --runInBand",
     "test:show": "HEADLESS=false yarn run test",
     "lint:check": "eslint \"**/*.ts\" --cache",
     "lint:write": "eslint \"**/*.ts\" --fix",
