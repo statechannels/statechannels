@@ -173,6 +173,7 @@ jobs:
     docker:
       - image: circleci/node:10.16.3
     environment:
+      FIREBASE_PREFIX: << pipeline.git.branch >>-1
       USE_VIRTUAL_FUNDING: 'FALSE'
       USE_GANACHE_DEPLOYMENT_CACHE: true
       GANACHE_CACHE_FOLDER: ../../.ganache-deployments
@@ -212,6 +213,7 @@ jobs:
           POSTGRES_PASSWORD: ''
           NODE_ENV: test
     environment:
+      FIREBASE_PREFIX: << pipeline.git.branch >>-2
       USE_VIRTUAL_FUNDING: 'TRUE'
       HUB_DB_NAME: hub_wallet_development
       # The development environment mimics integration environment

@@ -11,7 +11,7 @@ import {
   clickThroughRPSUIWithChallengeByPlayerB
 } from '../scripts/rps';
 
-jest.setTimeout(60000);
+jest.setTimeout(120_000);
 
 configureEnvVariables();
 const HEADLESS = getEnvBool('HEADLESS');
@@ -23,11 +23,9 @@ describe('Playing a game of RPS', () => {
   let rpsTabB: Page;
 
   beforeAll(async () => {
-    browserA = await setUpBrowser(HEADLESS, 10); // 10ms delay seems to prevent certain errors
-    browserB = await setUpBrowser(HEADLESS, 10); // 10ms delay seems to prevent certain errors
-  });
+    browserA = await setUpBrowser(HEADLESS);
+    browserB = await setUpBrowser(HEADLESS);
 
-  beforeEach(async () => {
     rpsTabA = (await browserA.pages())[0];
     rpsTabB = (await browserB.pages())[0];
 
@@ -70,18 +68,20 @@ describe('Playing a game of RPS', () => {
     expect(await waitForHeading(rpsTabB)).toMatch('You won!');
 
     await clickThroughResignationUI(rpsTabA, rpsTabB);
-  });
 
-  it('can allow Player A to challenge Player B to move', async () => {
+    // Should be in the lobby
+    expect(await rpsTabB.waitForXPath('//button[contains(., "Create a game")]')).toBeDefined();
+    expect(await rpsTabA.waitForXPath('//button[contains(., "Create a game")]')).toBeDefined();
+
     await startAndFundRPSGame(rpsTabA, rpsTabB);
 
     await clickThroughRPSUIWithChallengeByPlayerA(rpsTabA, rpsTabB);
 
     expect(await waitForHeading(rpsTabA)).toMatch('You lost');
     expect(await waitForHeading(rpsTabB)).toMatch('You won!');
-  });
 
-  it('can allow Player B to challenge Player A to move', async () => {
+    await clickThroughResignationUI(rpsTabA, rpsTabB);
+
     await startAndFundRPSGame(rpsTabA, rpsTabB);
 
     await clickThroughRPSUIWithChallengeByPlayerB(rpsTabA, rpsTabB);

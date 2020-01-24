@@ -134,8 +134,8 @@ if (require.main === module) {
     // Unfortunately we need to use two separate windows
     // as otherwise the javascript gets paused on the non-selected tab
     // see https://github.com/puppeteer/puppeteer/issues/3339
-    const browserA = await setUpBrowser(false, 15);
-    const browserB = await setUpBrowser(false, 15);
+    const browserA = await setUpBrowser(false);
+    const browserB = await setUpBrowser(false);
 
     const rpsTabA = await browserA.newPage();
     const rpsTabB = await browserB.newPage();
