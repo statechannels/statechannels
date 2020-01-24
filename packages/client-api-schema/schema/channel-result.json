@@ -41,8 +41,11 @@
           "title": "appData"
         },
         "status": {
-          "type": "string",
-          "enum": ["proposed", "opening", "funding", "running", "closing", "closed"]
+          "$ref": "#/definitions/ChannelStatus"
+        },
+        "challengeExpirationTime": {
+          "type": "integer",
+          "title": "challengeExpirationTime"
         },
         "turnNum": {
           "type": "integer"
@@ -57,6 +60,10 @@
         "status",
         "turnNum"
       ]
+    },
+    "ChannelStatus": {
+      "type": "string",
+      "enum": ["proposed", "opening", "funding", "running", "challenging", "responding", "closing", "closed"]
     }
   }
 }

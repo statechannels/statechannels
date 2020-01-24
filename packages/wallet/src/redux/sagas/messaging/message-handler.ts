@@ -5,7 +5,8 @@ import {
   PushMessageParams,
   UpdateChannelParams,
   CreateChannelParams,
-  CloseChannelParams
+  CloseChannelParams,
+  ChallengeChannelParams
 } from "@statechannels/client-api-schema";
 import jrs, {RequestObject} from "jsonrpc-lite";
 
@@ -15,7 +16,8 @@ import {
   getAddress,
   getLastStateForChannel,
   doesAStateExistForChannel,
-  getParticipants
+  getParticipants,
+  getProtocolState
 } from "../../selectors";
 import {messageSender} from "./message-sender";
 import {APPLICATION_PROCESS_ID} from "../../protocols/application/reducer";
@@ -32,6 +34,9 @@ import {TwoPartyPlayerIndex} from "../../types";
 import {isRelayableAction} from "../../../communication";
 import {bigNumberify} from "ethers/utils";
 import {Web3Provider} from "ethers/providers";
+import {responseProvided} from "../../protocols/dispute/responder/actions";
+import {isResponderState} from "../../protocols/dispute/responder/states";
+import {ProtocolState} from "src/redux/protocols";
 
 export function* messageHandler(jsonRpcMessage: object, _domain: string) {
   const parsedMessage = jrs.parseObject(jsonRpcMessage);
@@ -78,9 +83,32 @@ function* handleMessage(payload: RequestObject) {
     case "CloseChannel":
       yield handleCloseChannelMessage(payload);
       break;
+    case "ChallengeChannel":
+      yield handleChallengeChannelMessage(payload);
+      break;
     default:
       console.error(`No handler for method type ${payload.method}`);
       break;
+  }
+}
+
+function* handleChallengeChannelMessage(payload: RequestObject) {
+  const {id} = payload;
+  const {channelId} = payload.params as ChallengeChannelParams;
+  const channelExists = yield select(doesAStateExistForChannel, channelId);
+
+  if (!channelExists) {
+    yield fork(messageSender, outgoingMessageActions.unknownChannelId({id, channelId}));
+  } else {
+    const lastState: State = yield select(getLastStateForChannel, channelId);
+    yield put(
+      actions.application.challengeRequested({
+        channelId,
+        processId: "Application",
+        state: lastState
+      })
+    );
+    yield fork(messageSender, outgoingMessageActions.challengeChannelResponse({id, channelId}));
   }
 }
 
@@ -248,21 +276,43 @@ function* handleUpdateChannelMessage(payload: RequestObject) {
       params as UpdateChannelParams
     );
 
-    yield put(
-      actions.application.ownStateReceived({
-        state: newState,
-        processId: APPLICATION_PROCESS_ID
-      })
-    );
+    // TODO: This only works with one channel at a time
+    const protocolState: ProtocolState = yield select(getProtocolState, "Application");
+
+    if (
+      protocolState &&
+      protocolState.type === "Application.WaitForDispute" &&
+      typeof protocolState.disputeState! !== "undefined"
+    ) {
+      if (isResponderState(protocolState.disputeState)) {
+        yield put(
+          responseProvided({
+            processId: "Application",
+            state: newState
+          })
+        );
+      }
+    } else {
+      // NOTE: We only call ownStateReceived if _not_ in dispute because this action
+      // has a reducer which returns the protocol state to Application.Ongoing, but we
+      // want it to stay as Application.WaitForDispute
+      yield put(
+        actions.application.ownStateReceived({
+          state: newState,
+          processId: APPLICATION_PROCESS_ID
+        })
+      );
+
+      yield fork(
+        messageSender,
+        outgoingMessageActions.sendChannelUpdatedMessage({
+          channelId,
+          ...(yield getMessageParticipantIds(channelId))
+        })
+      );
+    }
 
     yield fork(messageSender, outgoingMessageActions.updateChannelResponse({id, channelId}));
-    yield fork(
-      messageSender,
-      outgoingMessageActions.sendChannelUpdatedMessage({
-        channelId,
-        ...(yield getMessageParticipantIds(channelId))
-      })
-    );
   }
 }
 

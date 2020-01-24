@@ -12,6 +12,7 @@ import {bigNumberify} from 'ethers/utils';
 
 const testStart: Start = {
   type: 'start',
+  stake: '0',
 };
 
 const testReveal: Reveal = {
@@ -19,6 +20,7 @@ const testReveal: Reveal = {
   playerAWeapon: Weapon.Paper,
   playerBWeapon: Weapon.Rock,
   salt: HashZero,
+  stake: '0',
 };
 
 const testRoundProposed: RoundProposed = {

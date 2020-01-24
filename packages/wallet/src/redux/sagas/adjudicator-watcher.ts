@@ -1,14 +1,16 @@
 import {getAdjudicatorContract} from "../../utils/contract-utils";
-import {call, take, put, select} from "redux-saga/effects";
+import {call, take, put, select, fork, putResolve, delay} from "redux-saga/effects";
 import {eventChannel} from "redux-saga";
 import * as actions from "../actions";
 import {getAdjudicatorWatcherSubscribersForChannel} from "../selectors";
 import {ChannelSubscriber} from "../state";
 import {ProtocolLocator} from "../../communication";
-import {getChallengeRegisteredEvent} from "@statechannels/nitro-protocol";
+import {getChallengeRegisteredEvent, getChallengeClearedEvent} from "@statechannels/nitro-protocol";
 import {bigNumberify} from "ethers/utils";
-import {Contract} from "ethers";
-import {Web3Provider} from "ethers/providers";
+import {Contract, Event} from "ethers";
+import {Web3Provider, TransactionResponse} from "ethers/providers";
+import {messageSender} from "./messaging/message-sender";
+import {channelUpdatedEvent} from "./messaging/outgoing-api-actions";
 
 enum AdjudicatorEventType {
   ChallengeRegistered,
@@ -78,31 +80,49 @@ function* dispatchEventAction(event: AdjudicatorEvent) {
 }
 
 function* dispatchProcessEventAction(
-  event: AdjudicatorEvent,
+  adjudicatorEvent: AdjudicatorEvent,
   processId: string,
   protocolLocator: ProtocolLocator
 ) {
-  const {channelId} = event;
-  switch (event.eventType) {
+  const {channelId} = adjudicatorEvent;
+  switch (adjudicatorEvent.eventType) {
     case AdjudicatorEventType.ChallengeRegistered:
-      const {finalizedAt} = event.eventArgs;
+      const {finalizesAt} = getChallengeRegisteredEvent(adjudicatorEvent.eventArgs);
       yield put(
         actions.challengeExpirySetEvent({
           processId,
           protocolLocator,
           channelId,
-          expiryTime: finalizedAt * 1000
+          expiryTime: bigNumberify(finalizesAt)
+            .mul(1000)
+            .toNumber()
         })
       );
       break;
     case AdjudicatorEventType.ChallengeCleared:
+      // NOTE: ethers does not have typings for this API call
+      // See https://docs.ethers.io/ethers.js/html/api-contract.html#event-object for documentation
+      const event: Event = adjudicatorEvent.eventArgs.slice(-1)[0];
+      const tx: TransactionResponse = yield call([event, event.getTransaction]);
+      // TODO: This could also be a checkpoint event, handle that too
+      const responseEvent = getChallengeClearedEvent(tx, adjudicatorEvent.eventArgs);
+      yield putResolve(
+        actions.respondWithMoveEvent({
+          processId,
+          protocolLocator,
+          channelId,
+          signedResponseState: responseEvent.newStates[0]
+        })
+      );
+      yield delay(1000); // TODO: Figure out why this is needed for rps to work in e2e test
+      yield fork(messageSender, channelUpdatedEvent({channelId})); // @alex does it make sense to trigger a notification here?
       break;
     case AdjudicatorEventType.Concluded:
       break;
     default:
       throw new Error(
         `Event is not a known adjudicator event. Cannot dispatch process event action: ${JSON.stringify(
-          event
+          adjudicatorEvent
         )}`
       );
   }
