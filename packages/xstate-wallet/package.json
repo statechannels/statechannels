@@ -30,11 +30,13 @@
     "@types/webpack": "4.41.0",
     "source-map-loader": "0.2.4",
     "typescript": "3.7.4",
-    "webpack": "4.41.3"
+    "webpack": "4.41.3",
+    "webpack-merge": "4.2.2"
   },
   "scripts": {
     "start": "node scripts/start.js",
     "build": "npx webpack --config ./webpack-build.config.js",
-    "generateConfigs": "yarn run ts-node bin/generateConfigs.ts "
+    "generateConfigs": "yarn run ts-node bin/generateConfigs.ts ",
+    "build:ci": "yarn build"
   }
 }
