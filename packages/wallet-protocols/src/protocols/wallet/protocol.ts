@@ -24,10 +24,12 @@ export interface Init {
   processes: Process[];
 }
 
+const running = (p: Process) => !p.ref.state.done;
+
 function forwardToChildren(_ctx, event: Events, { state }) {
   switch (event.type) {
     case 'FUNDING_STRATEGY_PROPOSED':
-      state.context.processes.forEach(({ ref }: Process) => ref.send(event));
+      state.context.processes.filter(running).forEach(({ ref }: Process) => ref.send(event));
       break;
     case 'CREATE_CHANNEL':
     case 'OPEN_CHANNEL':
@@ -38,6 +40,7 @@ function forwardToChildren(_ctx, event: Events, { state }) {
       unreachable(event);
   }
 }
+
 const config: MachineConfig<Init, any, Events> = {
   key: PROTOCOL,
   initial: 'running',
@@ -141,7 +144,7 @@ export function machine(store: IStore, context: Init) {
       channelId,
       entry: store.getEntry(channelId),
     };
-    state.context.processes.forEach(({ ref }: Process) => ref.send(channelUpdated));
+    state.context.processes.filter(running).forEach(({ ref }: Process) => ref.send(channelUpdated));
   };
 
   const options: { actions: Actions } = {

@@ -1,6 +1,7 @@
-import { AnyEventObject, ConditionPredicate, Machine, MachineConfig } from 'xstate';
+import { send, Machine, MachineConfig, AnyEventObject } from 'xstate';
 
-import { MachineFactory, IStore } from '../..';
+import { IStore, MachineFactory, ChannelStoreEntry } from '../..';
+import { ChannelUpdated } from '../../store';
 
 const PROTOCOL = 'advance-channel';
 /*
@@ -23,82 +24,82 @@ export interface Init {
   targetTurnNum: number; // should either be numParticipants-1 or 2*numParticipants-1
 }
 
-const toSuccess = {
-  target: 'success',
-  cond: 'advanced',
-};
-const sendingState = {
-  invoke: {
-    src: 'sendState',
-    onDone: 'waiting',
-  },
-};
-const waiting = {
-  on: {
-    CHANNEL_UPDATED: toSuccess,
-    '': toSuccess,
-  },
-};
-
 export const config: MachineConfig<Init, any, AnyEventObject> = {
   key: PROTOCOL,
-  initial: 'sendingState',
+  type: 'parallel',
   states: {
-    sendingState,
-    waiting,
-    success: { type: 'final' },
+    watchStore: {
+      initial: 'watching',
+      states: {
+        watching: { invoke: { id: 'store-watcher', src: 'watchStore', onDone: 'done' } },
+        done: { type: 'final' },
+      },
+    },
+    sendState: {
+      initial: 'sendingState',
+      states: {
+        sendingState: { invoke: { src: 'sendState', onDone: 'success' } },
+        success: { entry: send('DONE'), type: 'final' },
+      },
+    },
   },
 };
 
-export type Guards = {
-  advanced: ConditionPredicate<Init, AnyEventObject>;
-};
-
-export type Actions = {};
 export type Services = {
   sendState(ctx: Init): Promise<void>;
+  watchStore(ctx: Init): any; // TODO: add callback type
 };
 
-export const mockOptions = {
-  guards: { advanced: context => true },
-  services: async () => true,
+function advanced(entry: ChannelStoreEntry, targetTurnNum: number): boolean {
+  return entry.hasSupportedState && entry.latestSupportedState.turnNum >= targetTurnNum;
+}
+
+const watchStore = (store: IStore) => async ({
+  channelId,
+  targetTurnNum,
+}: Init): Promise<undefined> => {
+  return new Promise(resolve => {
+    const entry = store.getEntry(channelId);
+    if (advanced(entry, targetTurnNum)) resolve();
+    store.on('CHANNEL_UPDATED', async (event: ChannelUpdated) => {
+      if (
+        channelId === event.channelId &&
+        advanced(await store.getEntry(channelId), targetTurnNum)
+      ) {
+        resolve();
+      }
+    });
+  });
 };
+
+const sendState = (store: IStore) => async ({ channelId, targetTurnNum }: Init) => {
+  const turnNum = targetTurnNum;
+  /*
+  TODO: the actual turnNum is calculated below. However, to determine whether
+  a state is supported requires us to implement signature checking.
+  const turnNum =
+    targetTurnNum - channel.participants.length + ourIndex + 1;
+  */
+
+  try {
+    const { latestSupportedState } = store.getEntry(channelId);
+    if (latestSupportedState.turnNum < targetTurnNum) {
+      store.sendState({ ...latestSupportedState, turnNum });
+    }
+  } catch (e) {
+    // TODO: Check error
+    const { latestState } = store.getEntry(channelId);
+    store.sendState({ ...latestState, turnNum });
+  }
+};
+
+export const options = (store: IStore) => ({
+  services: {
+    watchStore: watchStore(store),
+    sendState: sendState(store),
+  },
+});
 
 export const machine: MachineFactory<Init, any> = (store: IStore, context?: Init) => {
-  const guards: Guards = {
-    advanced: ({ channelId, targetTurnNum }: Init, event, { state: s }) => {
-      const latestEntry = store.getEntry(channelId);
-      if (!latestEntry.hasSupportedState) {
-        return false;
-      }
-      return latestEntry.latestSupportedState.turnNum >= targetTurnNum;
-    },
-  };
-
-  const actions: Actions = {};
-
-  const services: Services = {
-    sendState: async ({ channelId, targetTurnNum }: Init) => {
-      const turnNum = targetTurnNum;
-      /*
-      TODO: the actual turnNum is calculated below. However, to determine whether
-      a state is supported requires us to implement signature checking.
-      const turnNum =
-        targetTurnNum - channel.participants.length + ourIndex + 1;
-      */
-
-      try {
-        const { latestSupportedState } = store.getEntry(channelId);
-        if (latestSupportedState.turnNum < targetTurnNum) {
-          store.sendState({ ...latestSupportedState, turnNum });
-        }
-      } catch (e) {
-        // TODO: Check error
-        const { latestState } = store.getEntry(channelId);
-        store.sendState({ ...latestState, turnNum });
-      }
-    },
-  };
-  const options = { guards, actions, services };
-  return Machine(config).withConfig(options, context);
+  return Machine(config).withConfig(options(store), context);
 };
