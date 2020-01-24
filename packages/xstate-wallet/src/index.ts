@@ -1,8 +1,8 @@
-import {handleMessage, sendMessage, dispatchChannelUpdatedMessage} from './messaging';
+import {handleMessage, sendMessage} from './messaging';
 
-import {IStore} from '@statechannels/wallet-protocols/';
+import {IStore, Store} from '@statechannels/wallet-protocols/';
 import {ethers} from 'ethers';
-import {Store} from './storage/store';
+
 import {ChainWatcher} from './chain';
 import {WorkflowManager} from './workflow-manager';
 
@@ -15,9 +15,9 @@ const store: IStore = new Store({
   privateKeys: {
     [ourWallet.address]: ourWallet.privateKey
   },
-  messageSender: sendMessage,
-  channelUpdateListener: dispatchChannelUpdatedMessage
+  messagingService: {sendMessage}
 });
+
 const workflowManager = new WorkflowManager(store);
 
 window.addEventListener('message', async event => {

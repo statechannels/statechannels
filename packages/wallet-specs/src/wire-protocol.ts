@@ -40,4 +40,5 @@ export const sendStates = (signedStates: SignedState[]): SendStates => ({
 });
 
 export type Message = SendStates | ProposeIntent;
+// TODO: Include from?
 export type AddressableMessage = Message & { to: string };

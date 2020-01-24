@@ -3,7 +3,8 @@ import {
   Channel,
   IStore,
   CreateChannelEvent,
-  ChannelStoreEntry
+  ChannelStoreEntry,
+  AddressableMessage
 } from '@statechannels/wallet-protocols';
 import * as ethers from 'ethers';
 import * as jrs from 'jsonrpc-lite';
@@ -194,9 +195,9 @@ export function dispatchChannelUpdatedMessage(channelId: string, channelEntry: C
   });
 }
 
-export function sendMessage(recipient: string, message: any) {
+export function sendMessage(message: AddressableMessage) {
   const notification = jrs.notification('MessageQueued', {
-    recipient,
+    recipient: message.to,
     sender: 'TODO',
     data: message
   });

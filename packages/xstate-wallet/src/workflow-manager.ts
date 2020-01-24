@@ -41,27 +41,34 @@ export class WorkflowManager {
     this.workflows = [];
     this.store = store;
   }
+
   private renderUI(machine) {
     ReactDOM.render(
       React.createElement(WalletUi, {workflow: machine}),
       document.getElementById('root')
     );
   }
+
+  private startWorkflow(event: Event): void {
+    const machine = interpret<any, any, any>(applicationWorkflow(this.store), {
+      devTools: true
+    })
+      .onTransition(state => {
+        logState({state});
+      })
+      .start();
+    // TODO: Figure out how to resolve rendering prioities
+    this.renderUI(machine);
+    // Register for ChannelUpdated events
+    this.store.on('CHANNEL_UPDATED', (event: ChannelUpdated) => machine.send(event));
+    this.workflows.push({machine, domain: 'TODO'});
+  }
+
   dispatchToWorkflows(event: Event) {
     if (event.type && (event.type === 'CREATE_CHANNEL' || event.type === 'OPEN_CHANNEL')) {
-      const machine = interpret<any, any, any>(applicationWorkflow(this.store), {
-        devTools: true
-      })
-        .onTransition(state => {
-          logState({state});
-        })
-        .start();
-
-      // TODO: Find a better place to do this
-      this.renderUI(machine);
-
-      this.workflows.push({machine, domain: ''});
+      this.startWorkflow(event);
     }
+
     this.workflows.forEach(w => w.machine.send(event));
   }
 }

@@ -1,15 +1,26 @@
+import { EventEmitter } from 'events';
+
 import { State } from '@statechannels/nitro-protocol';
 import { getStateSignerAddress, signState } from '@statechannels/nitro-protocol/lib/src/signatures';
 import _ from 'lodash';
 
-import { add, gt } from './mathOps';
-import { SignedState } from './types';
 import { ChannelStoreEntry, IChannelStoreEntry, supported, Funding } from './ChannelStoreEntry';
-import { messageService } from './messaging';
+import { messageService, IMessageService } from './messaging';
 import { AddressableMessage, FundingStrategyProposed } from './wire-protocol';
-import { Chain, IChain } from './chain';
+import { Chain, IChain, ChainEventType, ChainEvent } from './chain';
+import { add, gt } from './mathOps';
 
-import { getChannelId } from '.';
+import { getChannelId, SignedState, unreachable } from '.';
+
+export interface ChannelUpdated {
+  type: 'CHANNEL_UPDATED';
+  channelId: string;
+  entry: IChannelStoreEntry;
+}
+export type StoreEvent = ChainEvent | ChannelUpdated;
+export type StoreEventType = ChainEventType | ChannelUpdated['type'];
+export type StoreEventListener = (event: StoreEvent) => void;
+
 export interface IStore {
   getEntry(channelId: string): ChannelStoreEntry;
   getParticipant(signingAddress: string): Participant;
@@ -31,7 +42,7 @@ export interface IStore {
   sendStrategyChoice(message: FundingStrategyProposed);
   // TODO: set funding
   // setFunding(channelId: string, funding: Funding): void;
-  on: IChain['on'];
+  on: (eventType: StoreEventType, listener: StoreEventListener) => () => void;
   signState(state: State): SignedState;
 
   getNextNonce(participants: string[]): string;
@@ -53,6 +64,7 @@ export type Constructor = Partial<{
   privateKeys: Record<string, string>;
   nonces: Record<string, string>;
   chain: IChain;
+  messagingService: IMessageService;
 }>;
 export class Store implements IStore {
   public static equals(left: any, right: any) {
@@ -63,24 +75,39 @@ export class Store implements IStore {
   private _store: ChannelStore;
   private _privateKeys: Record<string, string>;
   private _nonces: Record<string, string> = {};
-
+  private _eventEmitter = new EventEmitter();
   protected _chain: IChain;
+  protected _messagingService: IMessageService;
 
   constructor(args?: Constructor) {
     const { store, privateKeys } = args || {};
     this._store = store || {};
     this._privateKeys = privateKeys || {};
 
+    // TODO: We probably shouldn't default to test implementations
     this._chain = args?.chain || new Chain();
-    // TODO: Bad form to call an async method in the constructor?
-    this._chain.initialize();
+    this._messagingService = args?.messagingService || messageService;
+
+    this._chain // TODO: Bad form to call an async method in the constructor?
+      .initialize();
   }
 
   public async getHoldings(channelId: string) {
     return await this._chain.getHoldings(channelId);
   }
-  public on(chainEventType, listener) {
-    return this._chain.on(chainEventType, listener);
+  public on(eventType: StoreEventType, listener: StoreEventListener) {
+    switch (eventType) {
+      case 'CHANNEL_UPDATED':
+        this._eventEmitter.addListener(eventType, listener);
+        return () => {
+          this._eventEmitter.removeListener(eventType, listener);
+        };
+      case 'DEPOSITED':
+      case 'REVERT':
+        return this._chain.on(eventType, listener);
+      default:
+        return unreachable(eventType);
+    }
   }
 
   public async deposit(channelId: string, expectedHeld: string, amount: string) {
@@ -208,7 +235,7 @@ export class Store implements IStore {
   }
 
   protected sendMessage(message: any, recipients: string[]) {
-    recipients.forEach(to => messageService.sendMessage({ ...message, to }));
+    recipients.forEach(to => this._messagingService.sendMessage({ ...message, to }));
   }
 
   public receiveStates(signedStates: SignedState[]): void {
@@ -245,7 +272,14 @@ export class Store implements IStore {
   protected updateEntry(channelId: string, states: SignedState[]): ChannelStoreEntry {
     const entry = this.getEntry(channelId);
     this._store[channelId] = { ...entry, states: merge(states, entry.states) };
-
+    if (!Store.equals(states, entry.states)) {
+      const channelUpdated: ChannelUpdated = {
+        type: 'CHANNEL_UPDATED',
+        channelId,
+        entry,
+      };
+      this._eventEmitter.emit(channelUpdated.type, channelUpdated);
+    }
     return new ChannelStoreEntry(this._store[channelId]);
   }
 }
@@ -268,17 +302,3 @@ export function merge(left: SignedState[], right: SignedState[]): SignedState[] 
     s => s.state.turnNum >= Math.max(...left.filter(supported).map(s => s.state.turnNum))
   );
 }
-
-// The store would send this action whenever the channel is updated
-export interface ChannelUpdated {
-  type: 'CHANNEL_UPDATED';
-  channelId: string;
-}
-
-export interface Deposit {
-  type: 'DEPOSIT';
-  channelId: string;
-  currentAmount: number;
-}
-
-export type StoreEvent = ChannelUpdated | Deposit;

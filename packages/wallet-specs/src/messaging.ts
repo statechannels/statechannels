@@ -5,8 +5,8 @@ import { log } from './utils';
 
 import { pretty } from '.';
 
-interface IMessageService {
-  sendMessage: (m: Message) => void;
+export interface IMessageService {
+  sendMessage: (m: AddressableMessage) => void;
 }
 
 class MessageService extends EventEmitter implements IMessageService {
