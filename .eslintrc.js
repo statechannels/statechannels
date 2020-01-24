@@ -77,6 +77,12 @@ module.exports = {
     ...leftoverTsLintRules,
     ...importRules,
     ...jestViolations,
-    ...reactRules
+    ...reactRules,
+    'no-restricted-imports': [
+      'error',
+      {
+        patterns: ['**/lib/**', '**/src/**']
+      }
+    ]
   }
 };
