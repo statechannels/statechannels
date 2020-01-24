@@ -2,13 +2,14 @@ import { State } from '@statechannels/nitro-protocol';
 import { getStateSignerAddress, signState } from '@statechannels/nitro-protocol/lib/src/signatures';
 import _ from 'lodash';
 
+import { add, gt } from './mathOps';
 import { SignedState } from './types';
 import { ChannelStoreEntry, IChannelStoreEntry, supported, Funding } from './ChannelStoreEntry';
 import { messageService } from './messaging';
 import { AddressableMessage, FundingStrategyProposed } from './wire-protocol';
 import { Chain, IChain } from './chain';
 
-import { add, getChannelId, gt } from '.';
+import { getChannelId } from '.';
 export interface IStore {
   getEntry(channelId: string): ChannelStoreEntry;
   getParticipant(signingAddress: string): Participant;

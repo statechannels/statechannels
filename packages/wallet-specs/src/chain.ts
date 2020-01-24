@@ -1,4 +1,4 @@
-import { add } from '.';
+import { add } from './mathOps';
 export type ChainEventListener = (event: ChainEvent) => void;
 export type ChainEventType = ChainEvent['type'];
 export interface IChain {

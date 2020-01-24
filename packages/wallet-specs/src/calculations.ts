@@ -10,7 +10,9 @@ import { hexZeroPad } from 'ethers/utils';
 import { AddressZero } from 'ethers/constants';
 import { Guarantee } from '@statechannels/nitro-protocol/lib/src/contract/outcome';
 
-import { add, subtract, gt, checkThat } from '.';
+import { add, subtract, gt } from './mathOps';
+
+import { checkThat } from '.';
 
 export enum Errors {
   DestinationMissing = 'Destination missing from ledger channel',

@@ -5,7 +5,8 @@ import { bigNumberify } from 'ethers/utils';
 import { HashZero, AddressZero } from 'ethers/constants';
 
 import { getDetaAndInvoke } from '../../machine-utils';
-import { add, subtract, FINAL, MachineFactory, gt } from '../../';
+import { FINAL, MachineFactory } from '../../';
+import { add, subtract, gt } from '../../mathOps';
 import { IStore } from '../../store';
 import { getEthAllocation, ethAllocationOutcome } from '../../calculations';
 

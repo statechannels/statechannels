@@ -1,7 +1,8 @@
 import { assign } from 'xstate';
 import { Guarantee } from '@statechannels/nitro-protocol/lib/src/contract/outcome';
 
-import { add, Channel, getChannelId } from '../../';
+import { Channel, getChannelId } from '../../';
+import { add } from '../../mathOps';
 import { Balance } from '../../types';
 import { Init as CreateNullChannelArgs } from '../create-null-channel/protocol';
 import { store } from '../../temp-store';

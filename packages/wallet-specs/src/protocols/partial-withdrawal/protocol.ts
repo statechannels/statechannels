@@ -1,6 +1,7 @@
 import { Allocation, Outcome } from '@statechannels/nitro-protocol';
 
-import { add, Channel, subtract } from '../..';
+import { Channel } from '../..';
+import { add, subtract } from '../../mathOps';
 import * as ConcludeChannel from '../conclude-channel/protocol';
 import * as CreateNullChannel from '../create-null-channel/protocol';
 import * as LedgerUpdate from '../ledger-update/protocol';
