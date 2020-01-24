@@ -230,7 +230,7 @@ export class Store implements IStore {
   }
 
   protected sendMessage(message: any, recipients: string[]) {
-    recipients.forEach(to => messageService.sendMessage({ ...message, to }));
+    recipients.forEach(to => this._messagingService.sendMessage({ ...message, to }));
   }
 
   public receiveStates(signedStates: SignedState[]): void {
