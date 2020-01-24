@@ -31,7 +31,7 @@
       "path": "../devtools"
     },
     {
-      "path": "../wallet-specs"
+      "path": "../wallet-protocols"
     }
   ]
 }
