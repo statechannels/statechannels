@@ -267,9 +267,17 @@ export function merge(left: SignedState[], right: SignedState[]): SignedState[] 
   });
 
   const latestSupportedTurnNum =
-    left.filter(supported).sort(s => -s.state.turnNum)[0]?.state?.turnNum || 0;
+    left
+      .filter(supported)
+      .map(s => s.state.turnNum)
+      .sort(i => i)[0] || 0;
 
-  return left.filter(s => s.state.turnNum >= latestSupportedTurnNum);
+  left = left.filter(s => s.state.turnNum >= latestSupportedTurnNum);
+  if (left.filter(supported).length > 1) {
+    throw 'Mistaken calculation';
+  }
+
+  return left;
 }
 
 // The store would send this action whenever the channel is updated

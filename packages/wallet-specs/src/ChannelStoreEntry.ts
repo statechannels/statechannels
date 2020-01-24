@@ -145,7 +145,7 @@ export class ChannelStoreEntry implements IChannelStoreEntry {
     if (!this.states.length) {
       throw new Error('No states found');
     }
-    return this.states.sort(s => -s.state.turnNum)[0].state;
+    return this.states.sort(s => s.state.turnNum)[0].state;
   }
 
   get participantId(): string {
