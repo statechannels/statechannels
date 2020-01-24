@@ -8,6 +8,7 @@ import updateChannelSchema from "@statechannels/client-api-schema/schema/update-
 import definitionsSchema from "@statechannels/client-api-schema/schema/definitions.json";
 import channelResultSchema from "@statechannels/client-api-schema/schema/channel-result.json";
 import closeChannelSchema from "@statechannels/client-api-schema/schema/close-channel.json";
+import challengeChannelSchema from "@statechannels/client-api-schema/schema/challenge-channel.json";
 import pushMessageSchema from "@statechannels/client-api-schema/schema/push-message.json";
 import notifSchema from "@statechannels/client-api-schema/schema/notification.json";
 
@@ -27,6 +28,7 @@ export async function validateRequest(jsonRpcRequest: object): Promise<Validatio
     .addSchema(updateChannelSchema)
     .addSchema(pushMessageSchema)
     .addSchema(closeChannelSchema)
+    .addSchema(challengeChannelSchema)
     .compile(requestSchema);
   const isValid = await validate(jsonRpcRequest);
 
@@ -44,6 +46,7 @@ export async function validateResponse(jsonRpcResponse: object): Promise<Validat
     .addSchema(updateChannelSchema)
     .addSchema(pushMessageSchema)
     .addSchema(closeChannelSchema)
+    .addSchema(challengeChannelSchema)
     .compile(responseSchema);
   const isValid = await validate(jsonRpcResponse);
 
@@ -63,6 +66,7 @@ export async function validateNotification(jsonRpcNotification: object): Promise
     .addSchema(requestSchema)
     .addSchema(responseSchema)
     .addSchema(closeChannelSchema)
+    .addSchema(challengeChannelSchema)
     .compile(notifSchema);
   const isValid = await validate(jsonRpcNotification);
 

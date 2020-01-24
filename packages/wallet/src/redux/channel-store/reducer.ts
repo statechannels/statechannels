@@ -75,15 +75,15 @@ export function signAndStore(store: ChannelStore, state: State, bytecode: string
   const channelId = getChannelId(state.channel);
   let channel = getChannel(store, channelId);
 
-  const signedState = Signatures.signState(state, channel.privateKey);
-
   if (!validTransition(channel, state)) {
     return {isSuccess: false, reason: "TransitionUnsafe"};
   }
 
-  if (!validAppTransition(channel, signedState.state, bytecode)) {
+  if (!validAppTransition(channel, state, bytecode)) {
     return {isSuccess: false, reason: "TransitionUnsafe"};
   }
+
+  const signedState = Signatures.signState(state, channel.privateKey);
 
   channel = pushState(channel, signedState);
   store = setChannel(store, channel);
@@ -98,10 +98,12 @@ export function signAndStore(store: ChannelStore, state: State, bytecode: string
 interface CheckSuccess {
   isSuccess: true;
   store: ChannelStore;
+  reason?: string;
 }
 
 interface CheckFailure {
   isSuccess: false;
+  reason?: string;
 }
 
 type CheckResult = CheckSuccess | CheckFailure;
@@ -114,20 +116,24 @@ export function checkAndStore(
 ): CheckResult {
   if (!hasValidSignature(signedState)) {
     console.log("Failed to validate state signature");
-    return {isSuccess: false};
+    return {isSuccess: false, reason: "Failed to validate state signature"};
   }
+
   const channelId = getChannelId(signedState.state.channel);
-  let channel = getChannel(store, channelId);
-  if (!validTransition(channel, signedState.state)) {
-    return {isSuccess: false};
+
+  let channelState = getChannel(store, channelId);
+
+  if (!validTransition(channelState, signedState.state)) {
+    return {isSuccess: false, reason: "Invalid force move framework state transition"};
   }
 
-  if (bytecode && !validAppTransition(channel, signedState.state, bytecode)) {
-    return {isSuccess: false};
+  if (bytecode && !validAppTransition(channelState, signedState.state, bytecode)) {
+    return {isSuccess: false, reason: "Invalid app-specific state transition"};
   }
 
-  channel = pushState(channel, signedState);
-  store = setChannel(store, channel);
+  channelState = pushState(channelState, signedState);
+
+  store = setChannel(store, channelState);
 
   return {isSuccess: true, store};
 }

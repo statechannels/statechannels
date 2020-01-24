@@ -60,6 +60,12 @@ export class ChannelClient implements ChannelClientInterface<ChannelResult> {
     });
   }
 
+  async challengeChannel(channelId: string): Promise<ChannelResult> {
+    return this.provider.send('ChallengeChannel', {
+      channelId
+    });
+  }
+
   async closeChannel(channelId: string): Promise<ChannelResult> {
     return this.provider.send('CloseChannel', {channelId});
   }

@@ -123,12 +123,20 @@ export class FakeChannelClient implements ChannelClientInterface<ChannelResult> 
     if (nextState !== latestState) {
       await this.verifyTurnNum(nextState.turnNum);
       nextState.turnNum = this.getNextTurnNum(latestState);
+      nextState.status = 'running';
       log.debug(`Player ${this.getPlayerIndex()} updated channel to turnNum ${nextState.turnNum}`);
     }
 
     this.latestState = nextState;
 
     this.notifyOpponent(this.latestState, 'updateChannel');
+    return this.latestState;
+  }
+
+  async challengeChannel(channelId: string): Promise<ChannelResult> {
+    log.debug(`Player ${this.getPlayerIndex()} challenging channel ${channelId}`);
+    const latestState = this.findChannel(channelId);
+    this.latestState = {...latestState, status: 'challenging'};
     return this.latestState;
   }
 

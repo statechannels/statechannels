@@ -1,13 +1,17 @@
 import {MachineConfig, Machine, StateMachine, send} from 'xstate';
-import {FINAL, MachineFactory} from '@statechannels/wallet-protocols';
 import {
+  FINAL,
+  MachineFactory,
   CreateChannelEvent,
-  OpenChannelEvent
-} from '@statechannels/wallet-protocols/src/protocols/wallet/protocol';
-import {CreateChannel, JoinChannel} from '@statechannels/wallet-protocols/lib/src/protocols';
-import {IStore} from '@statechannels/wallet-protocols/src/store';
+  OpenChannelEvent,
+  CreateChannel,
+  JoinChannel,
+  IStore,
+  SendStates
+} from '@statechannels/wallet-protocols';
+
 import {State, getChannelId} from '@statechannels/nitro-protocol';
-import {SendStates} from '@statechannels/wallet-protocols/src/wire-protocol';
+
 import {sendDisplayMessage} from '../messaging';
 
 // Events

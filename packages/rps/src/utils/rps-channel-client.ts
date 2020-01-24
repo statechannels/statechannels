@@ -71,6 +71,11 @@ export class RPSChannelClient {
     return convertToChannelState(channelResult);
   }
 
+  async challengeChannel(channelId: string): Promise<ChannelState> {
+    const channelResult = await this.channelClient.challengeChannel(channelId);
+    return convertToChannelState(channelResult);
+  }
+
   async updateChannel(
     channelId: string,
     aAddress: string,
@@ -103,11 +108,20 @@ export class RPSChannelClient {
 }
 
 const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
-  const {turnNum, channelId, status, participants, allocations, appData} = channelResult;
+  const {
+    turnNum,
+    channelId,
+    status,
+    participants,
+    allocations,
+    appData,
+    challengeExpirationTime,
+  } = channelResult;
   return {
     channelId,
     turnNum,
     status,
+    challengeExpirationTime,
     appData: decodeAppData(appData),
     aUserId: participants[0].participantId,
     bUserId: participants[1].participantId,

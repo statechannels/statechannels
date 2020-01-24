@@ -1,8 +1,10 @@
 import {ChallengeCreatedEvent} from "../actions";
-import {take, select, put} from "redux-saga/effects";
+import {take, select, put, fork} from "redux-saga/effects";
 import * as selectors from "../selectors";
 import {challengeDetected} from "../protocols/application/actions";
 import {APPLICATION_PROCESS_ID} from "../protocols/application/reducer";
+import {channelUpdatedEvent} from "./messaging/outgoing-api-actions";
+import {messageSender} from "./messaging/message-sender";
 
 /**
  * A simple saga that determines if a challenge created event requires the wallet to initialize a respond protocol
@@ -26,6 +28,8 @@ export function* challengeResponseInitiator() {
           expiresAt
         })
       );
+
+      yield fork(messageSender, channelUpdatedEvent({channelId}));
     }
   }
 }

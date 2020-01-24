@@ -28,6 +28,14 @@ export const updateChannelResponse: ActionConstructor<UpdateChannelResponse> = p
   ...p,
   type: "WALLET.UPDATE_CHANNEL_RESPONSE"
 });
+export interface ChallengeChannelResponse extends ApiResponseAction {
+  type: "WALLET.CHALLENGE_CHANNEL_RESPONSE";
+  channelId: string;
+}
+export const challengeChannelResponse: ActionConstructor<ChallengeChannelResponse> = p => ({
+  ...p,
+  type: "WALLET.CHALLENGE_CHANNEL_RESPONSE"
+});
 
 export interface AddressResponse extends ApiResponseAction {
   type: "WALLET.ADDRESS_RESPONSE";
@@ -178,6 +186,7 @@ export type OutgoingApiAction =
   | AddressResponse
   | CreateChannelResponse
   | UpdateChannelResponse
+  | ChallengeChannelResponse
   | UnknownSigningAddress
   | NoContractError
   | SendChannelProposedMessage

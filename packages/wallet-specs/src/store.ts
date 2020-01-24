@@ -8,8 +8,9 @@ import { ChannelStoreEntry, IChannelStoreEntry, supported, Funding } from './Cha
 import { messageService, IMessageService } from './messaging';
 import { AddressableMessage, FundingStrategyProposed } from './wire-protocol';
 import { Chain, IChain, ChainEventType, ChainEvent } from './chain';
+import { add, gt } from './mathOps';
 
-import { add, getChannelId, gt, SignedState, unreachable } from '.';
+import { getChannelId, SignedState, unreachable } from '.';
 
 export interface ChannelUpdated {
   type: 'CHANNEL_UPDATED';
@@ -297,8 +298,7 @@ export function merge(left: SignedState[], right: SignedState[]): SignedState[] 
     }
   });
 
-  const latestSupportedTurnNum =
-    left.filter(supported).sort(s => -s.state.turnNum)[0]?.state?.turnNum || 0;
-
-  return left.filter(s => s.state.turnNum >= latestSupportedTurnNum);
+  return left.filter(
+    s => s.state.turnNum >= Math.max(...left.filter(supported).map(s => s.state.turnNum))
+  );
 }

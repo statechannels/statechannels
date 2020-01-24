@@ -1,5 +1,5 @@
 import { bigNumberify } from 'ethers/utils';
-import { Machine, assign, MachineConfig } from 'xstate';
+import { Machine, MachineConfig, InvokeCallback } from 'xstate';
 
 import { FINAL, MachineFactory } from '../..';
 import { IStore } from '../../store';
@@ -12,19 +12,7 @@ export type Init = {
   fundedAt: string;
 };
 
-enum DepositingEventType {
-  DEPOSITED = 'DEPOSITED',
-  STOP = 'STOP',
-}
-enum MachineId {
-  Parent = 'depositing',
-  ChainWatcher = 'watcher',
-  Depositor = 'depositor',
-}
-
-export type CurrentHoldingsSet = Init & { currentHoldings: string };
-const watcher: MachineConfig<Init | CurrentHoldingsSet, any, any> = {
-  id: MachineId.ChainWatcher,
+const watcher: MachineConfig<Init, any, any> = {
   initial: 'watching',
   states: {
     watching: { invoke: { src: 'subscribeDepositEvent' } },
@@ -33,45 +21,22 @@ const watcher: MachineConfig<Init | CurrentHoldingsSet, any, any> = {
   on: { FUNDED: '.done' },
 };
 
-export const config: MachineConfig<Init | CurrentHoldingsSet, any, any> = {
-  id: MachineId.Parent,
+export const config: MachineConfig<Init, any, any> = {
   type: 'parallel',
   states: {
     watcher,
     depositor: {
-      initial: 'getCurrentHoldings',
-      on: {
-        DEPOSITED: '.getCurrentHoldings',
-        FUNDED: { target: '.done' },
-      },
+      initial: 'idle',
+      on: { FUNDED: '.done' },
       states: {
-        getCurrentHoldings: {
-          invoke: {
-            src: 'getHoldings',
-            onDone: {
-              target: 'checkHoldings',
-              actions: assign((context: Init, event: any) => {
-                return {
-                  ...context,
-                  currentHoldings: event.data,
-                };
-              }),
-            },
-          },
-        },
-        checkHoldings: {
-          on: {
-            '': [{ target: 'submitting', cond: 'safeToDeposit' }, { target: 'waiting' }],
-          },
-        },
-        waiting: {},
-        submitting: {
+        idle: { on: { SAFE_TO_DEPOSIT: 'submit' } },
+        submit: {
           invoke: { src: 'submitDepositTransaction', onDone: 'done', onError: 'failure' },
         },
         done: { type: FINAL },
         failure: {
           entry: () => {
-            throw 'Deposit failed ';
+            throw `Deposit failed`;
           },
         },
       },
@@ -80,50 +45,42 @@ export const config: MachineConfig<Init | CurrentHoldingsSet, any, any> = {
 };
 
 type Services = {
-  submitDepositTransaction: (context: CurrentHoldingsSet) => Promise<void>;
-  getHoldings: (context: Init) => Promise<string>;
-  subscribeDepositEvent: (context: Init) => (callback) => () => void;
+  submitDepositTransaction: (context: Init) => Promise<void>;
+  subscribeDepositEvent: (context: Init) => InvokeCallback;
 };
 
-type Guards = {
-  safeToDeposit: (context: Init) => boolean;
-};
-type Options = { services: Services; guards: Guards };
+type Options = { services: Services };
 export const machine: MachineFactory<Init, any> = (store: IStore, context: Init) => {
-  const subscribeDepositEvent = (context: Init) => callback => {
-    return store.on('DEPOSITED', (event: ChainEvent) => {
-      if (event.type === 'DEPOSITED' && event.channelId === context.channelId) {
-        if (bigNumberify(event.total).gte(context.fundedAt)) {
-          callback('FUNDED');
+  const subscribeDepositEvent = (ctx: Init): InvokeCallback => cb => {
+    if (bigNumberify(ctx.depositAt).eq(0)) cb('SAFE_TO_DEPOSIT');
+
+    return store.on('DEPOSITED', async (event: ChainEvent) => {
+      if (event.type === 'DEPOSITED' && event.channelId === ctx.channelId) {
+        const currentHoldings = bigNumberify(await store.getHoldings(ctx.channelId));
+
+        if (currentHoldings.gte(ctx.fundedAt)) {
+          cb('FUNDED');
+        } else if (currentHoldings.gte(ctx.depositAt)) {
+          cb('SAFE_TO_DEPOSIT');
         } else {
-          callback(event);
+          cb('NOT_SAFE_TO_DEPOSIT');
         }
       }
     });
   };
 
-  const submitDepositTransaction = async (context: Init) => {
-    const currentHoldings = await store.getHoldings(context.channelId);
-    const amount = bigNumberify(context.totalAfterDeposit).sub(currentHoldings);
+  const submitDepositTransaction = async (ctx: Init) => {
+    const currentHoldings = bigNumberify(await store.getHoldings(ctx.channelId));
+    const amount = bigNumberify(ctx.totalAfterDeposit).sub(currentHoldings);
     if (amount.gt(0)) {
-      await store.deposit(context.channelId, currentHoldings, amount.toHexString());
+      await store.deposit(ctx.channelId, currentHoldings.toHexString(), amount.toHexString());
     }
-  };
-
-  const safeToDeposit = (context: CurrentHoldingsSet) => {
-    return bigNumberify(context.currentHoldings).gte(context.depositAt);
-  };
-
-  const getHoldings = async (context: Init) => {
-    return store.getHoldings(context.channelId);
   };
 
   const services: Services = {
     submitDepositTransaction,
-    getHoldings,
     subscribeDepositEvent,
   };
-  const guards: Guards = { safeToDeposit };
-  const options: Options = { services, guards };
+  const options: Options = { services };
   return Machine(config).withConfig(options, context);
 };

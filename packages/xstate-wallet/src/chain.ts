@@ -7,7 +7,7 @@ import {
   ChainEvent,
   ChainEventType,
   ChainEventListener
-} from '@statechannels/wallet-protocols/src/chain';
+} from '@statechannels/wallet-protocols';
 
 const EthAssetHolderInterface = new ethers.utils.Interface(ContractAbis.EthAssetHolder);
 export class ChainWatcher implements IChain {

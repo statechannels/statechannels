@@ -3,7 +3,7 @@ import {Button} from 'reactstrap';
 import PROJECT_LOGO from '../images/horizontal_logo.svg';
 
 interface Props {
-  createBlockchainChallenge: () => void;
+  createBlockchainChallenge: (iChallenged: boolean) => void;
   resign: (iResigned: boolean) => void;
   canChallenge: boolean;
   challengeOngoing: boolean;
@@ -30,7 +30,7 @@ export default class GameFooter extends React.PureComponent<Props> {
             <Button
               className="footer-challenge"
               outline={true}
-              onClick={createBlockchainChallenge}
+              onClick={() => createBlockchainChallenge(true)}
               disabled={!canChallenge}
             >
               {canChallenge ? 'Challenge on-chain' : "Can't challenge"}

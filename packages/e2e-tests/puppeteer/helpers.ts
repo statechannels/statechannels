@@ -32,23 +32,42 @@ export async function loadRPSApp(page: Page, ganacheAccountIndex: number): Promi
   });
 }
 
+/** */
 export async function waitForAndClickButton(page: Page | Frame, button: string): Promise<void> {
-  return (await page.waitForXPath('//button[contains(., "' + button + '")]')).click();
+  let retryAttempts = 0;
+  let error;
+  while (retryAttempts < 3) {
+    try {
+      return (await page.waitForXPath('//button[contains(., "' + button + '")]')).click();
+    } catch (e) {
+      error = e;
+      await new Promise(r => setTimeout(r, 250));
+      retryAttempts += 1;
+    }
+  }
+  console.error(`Could not click on ${button}`);
+  throw error;
 }
 
 export async function waitForHeading(page: Page | Frame): Promise<string | null> {
-  return (await page.waitFor('h1.mb-5')).evaluate(el => el.textContent);
+  return (await page.waitFor('h1.mb-5.win-loss-title')).evaluate(el => el.textContent);
 }
+
 export async function setUpBrowser(headless: boolean, slowMo?: number): Promise<Browser> {
   const browser = await launch({
     headless,
     slowMo,
     devtools: !headless,
-    // Needed to allow both windows to execute JS at the same time
+    args: [
+      '--disable-extensions-except=/Users/liam/Downloads/redux-dev-tools',
+      '--load-extension=/Users/liam/Downloads/redux-dev-tools'
+    ],
+    //, Needed to allow both windows to execute JS at the same time
     ignoreDefaultArgs: [
       '--disable-background-timer-throttling',
       '--disable-backgrounding-occluded-windows',
-      '--disable-renderer-backgrounding'
+      '--disable-renderer-backgrounding',
+      '--disable-extensions'
     ]
   });
 

@@ -4,9 +4,9 @@ import { Process } from '../protocols/wallet/protocol';
 
 import { pretty } from '..';
 
-export const debugAction = store => (ctx, event, { state }) => {
+export const debugAction = (val?) => (ctx, event, { state }) => {
   // Trigger this action if you'd like to breakpoint on entry into some state, for instance.
-  store; // Put a reference to the store in the action's closure
+  val; // Put a reference to some value in the action's closure
   debugger;
 };
 

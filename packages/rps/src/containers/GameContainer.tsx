@@ -65,7 +65,12 @@ function RenderGame(props: GameProps) {
       );
     case 'A.ChooseWeapon':
     case 'B.ChooseWeapon':
-      return <SelectWeaponPage chooseWeapon={props.chooseWeapon} />;
+      return (
+        <SelectWeaponPage
+          chooseWeapon={props.chooseWeapon}
+          challengeExpirationDate={channelState.challengeExpirationTime}
+        />
+      );
     case 'A.WeaponChosen':
     case 'A.WeaponAndSaltChosen':
     case 'B.WeaponChosen':

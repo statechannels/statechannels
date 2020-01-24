@@ -96,7 +96,21 @@ describe("adjudicator listener", () => {
 
     const challenge = await createChallenge(signer, channelNonce, participantA, participantB);
 
-    const sagaTester = new SagaTester({initialState: createWatcherState(processId, channelId)});
+    const sagaTester = new SagaTester({
+      initialState: {
+        ...createWatcherState(processId, channelId),
+        // channelStore and processStore needed so ChannelUpdated can trigger,
+        channelStore: {[channelId]: {signedStates: [{state: challenge}]}},
+        processStore: {
+          Application: {
+            protocolState: {
+              type: "Application.WaitForDispute",
+              disputeState: {type: "Challenging.WaitForResponseOrTimeout"}
+            }
+          }
+        }
+      }
+    });
     sagaTester.start(adjudicatorWatcher, provider);
 
     const response = await respond(signer, channelNonce, participantA, participantB, challenge);

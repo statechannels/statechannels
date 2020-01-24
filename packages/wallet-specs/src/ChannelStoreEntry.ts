@@ -3,10 +3,8 @@ import { ethers } from 'ethers';
 import _ from 'lodash';
 import { getStateSignerAddress } from '@statechannels/nitro-protocol/lib/src/signatures';
 
+import { SignedState } from './types';
 import { Participant, Store } from './store';
-import { store } from './temp-store';
-
-import { SignedState } from '.';
 
 interface DirectFunding {
   type: 'Direct';
@@ -142,10 +140,10 @@ export class ChannelStoreEntry implements IChannelStoreEntry {
   }
 
   get latestState(): State {
-    if (!this.states.length) {
-      throw new Error('No states found');
-    }
-    return this.states.sort(s => -s.state.turnNum)[0].state;
+    const state = _.maxBy(this.states, s => s.state.turnNum)?.state;
+    if (!state) throw new Error('No states found');
+
+    return state;
   }
 
   get participantId(): string {

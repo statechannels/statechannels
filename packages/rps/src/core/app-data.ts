@@ -20,6 +20,7 @@ export interface RPSData {
 }
 export interface Start {
   type: 'start';
+  stake: string;
 }
 export interface RoundProposed {
   type: 'roundProposed';
@@ -38,6 +39,7 @@ export interface Reveal {
   type: 'reveal';
   playerAWeapon: Weapon;
   playerBWeapon: Weapon;
+  stake: string;
   salt;
 }
 export type AppData = Start | RoundProposed | RoundAccepted | Reveal;
@@ -102,6 +104,7 @@ export function decodeAppData(appDataBytes: string): AppData {
     case PositionType.Start: // TODO replace these with functions that project out the desired fields
       const start: Start = {
         type: 'start',
+        stake,
       };
       return start;
     case PositionType.RoundProposed:
@@ -125,6 +128,7 @@ export function decodeAppData(appDataBytes: string): AppData {
         playerAWeapon,
         playerBWeapon,
         salt,
+        stake,
       };
       return reveal;
     default:

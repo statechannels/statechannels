@@ -1,6 +1,5 @@
+import { SignedState } from './types';
 import { Participant } from './store';
-
-import { SignedState } from '.';
 
 export type HubChoice = {
   type: 'HubChoice';
