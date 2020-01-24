@@ -2,17 +2,12 @@ import { Machine } from 'xstate';
 
 import * as VirtualDefundingAsHub from '../virtual-defunding-as-hub/protocol';
 import * as VirtualDefundingAsLeaf from '../virtual-defunding-as-leaf/protocol';
-import {
-  MachineFactory,
-  FINAL,
-  checkThat,
-  getEthAllocation,
-  ethAllocationOutcome,
-  add,
-} from '../..';
+import { MachineFactory, FINAL, checkThat } from '../..';
+import { add } from '../../mathOps';
 import { IStore } from '../../store';
 import { getDetaAndInvoke } from '../../machine-utils';
 import { isIndirectFunding } from '../../ChannelStoreEntry';
+import { getEthAllocation, ethAllocationOutcome } from '../../calculations';
 
 import { SupportState } from '..';
 

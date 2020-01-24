@@ -1,14 +1,8 @@
 import { assign, DoneInvokeEvent, Machine, MachineConfig, sendParent } from 'xstate';
 import { State } from '@statechannels/nitro-protocol';
 
-import {
-  Channel,
-  forwardChannelUpdated,
-  MachineFactory,
-  IStore,
-  success,
-  ethAllocationOutcome,
-} from '../..';
+import { Channel, forwardChannelUpdated, MachineFactory, IStore, success } from '../..';
+import { ethAllocationOutcome } from '../../calculations';
 import { ChannelStoreEntry } from '../../ChannelStoreEntry';
 import { JsonRpcCreateChannelParams } from '../../json-rpc';
 import { passChannelId } from '../join-channel/protocol';

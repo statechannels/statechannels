@@ -1,9 +1,10 @@
 import { assign } from 'xstate';
 
-import { Balance, getEthAllocation } from '../..';
+import { Balance } from '../../types';
 import { HubChoice } from '../../wire-protocol';
 import { Init as VirtualFundAsLeafArgs } from '../virtual-fund-as-leaf/protocol';
 import { store } from '../../temp-store';
+import { getEthAllocation } from '../../calculations';
 const PROTOCOL = 'virtual-funding';
 const success = { type: 'final' };
 

@@ -8,9 +8,10 @@ import updateChannelSchema from '@statechannels/client-api-schema/schema/update-
 import definitionsSchema from '@statechannels/client-api-schema/schema/definitions.json';
 import channelResultSchema from '@statechannels/client-api-schema/schema/channel-result.json';
 import closeChannelSchema from '@statechannels/client-api-schema/schema/close-channel.json';
-import challengeChannelSchema from '@statechannels/client-api-schema/schema/challenge-channel.json';
 import pushMessageSchema from '@statechannels/client-api-schema/schema/push-message.json';
 import notifSchema from '@statechannels/client-api-schema/schema/notification.json';
+
+import challengeChannelSchema from '@statechannels/client-api-schema/schema/challenge-channel.json';
 
 export interface ValidationResult {
   isValid: boolean;

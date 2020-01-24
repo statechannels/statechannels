@@ -1,4 +1,6 @@
-import { add, Channel, gt } from '.';
+import { add, gt } from './mathOps';
+
+import { Channel } from '.';
 
 export interface ChannelManagerInterface {
   newChannel(participantIds: string[], chainId: string): Channel;
