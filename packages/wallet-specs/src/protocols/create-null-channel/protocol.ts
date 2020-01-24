@@ -1,7 +1,8 @@
 import { assign, Machine } from 'xstate';
 import { HashZero, AddressZero } from 'ethers/constants';
 
-import { Channel, FINAL, getChannelId, MachineFactory, SignedState } from '../../';
+import { Channel, FINAL, getChannelId, MachineFactory } from '../../';
+import { SignedState } from '../../types';
 import { ChannelStoreEntry } from '../../ChannelStoreEntry';
 import { Participant } from '../../store';
 

@@ -1,22 +1,13 @@
 import { EventObject, SendAction, StateMachine, forwardTo } from 'xstate';
 import { Outcome, State } from '@statechannels/nitro-protocol';
 import { hashOutcome } from '@statechannels/nitro-protocol/lib/src/contract/outcome';
-import { Signature, bigNumberify } from 'ethers/utils';
+import { bigNumberify } from 'ethers/utils';
 import { hashState } from '@statechannels/nitro-protocol/lib/src/contract/state';
 
 import { ChannelUpdated, IStore } from './store';
+import { VariablePart } from './types';
 
 export { Store, IStore } from './store';
-export interface Balance {
-  address: string;
-  wei: string;
-}
-
-interface VariablePart {
-  turnNum: number;
-  outcome: Outcome;
-  isFinal: boolean;
-}
 
 export function nextState(state: State, opts?: Partial<VariablePart>): State {
   return {
@@ -27,22 +18,6 @@ export function nextState(state: State, opts?: Partial<VariablePart>): State {
 }
 
 export { Channel, getChannelId } from '@statechannels/nitro-protocol';
-
-export interface SignedState {
-  state: State;
-  signatures: Signature[];
-}
-
-export interface Failure {
-  value: 'failure';
-  context: {
-    reason: string;
-  };
-}
-
-export interface Entry {
-  type: '';
-}
 
 // This stuff should be replaced with some big number logic
 type numberish = string | number | undefined;

@@ -3,10 +3,8 @@ import { ethers } from 'ethers';
 import _ from 'lodash';
 import { getStateSignerAddress } from '@statechannels/nitro-protocol/lib/src/signatures';
 
+import { SignedState } from './types';
 import { Participant, Store } from './store';
-import { store } from './temp-store';
-
-import { SignedState } from '.';
 
 interface DirectFunding {
   type: 'Direct';
