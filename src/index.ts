@@ -1,6 +1,6 @@
 import {handleMessage, sendMessage, dispatchChannelUpdatedMessage} from './messaging';
 
-import {IStore} from '@statechannels/wallet-protocols/lib/src/store';
+import {IStore} from '@statechannels/wallet-protocols/';
 import {ethers} from 'ethers';
 import {Store} from './storage/store';
 import {ChainWatcher} from './chain';

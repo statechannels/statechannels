@@ -1,11 +1,8 @@
 import {Actor, Interpreter, interpret} from 'xstate';
-import {IStore, ChannelUpdated} from '@statechannels/wallet-protocols/src/store';
-import {
-  CreateChannelEvent,
-  OpenChannelEvent
-} from '@statechannels/wallet-protocols/src/protocols/wallet/protocol';
+import {IStore, ChannelUpdated} from '@statechannels/wallet-protocols';
+import {CreateChannelEvent, OpenChannelEvent} from '@statechannels/wallet-protocols';
 import {applicationWorkflow, ApplicationWorkflowEvent} from './workflows/application';
-import {SendStates} from '@statechannels/wallet-protocols/src/wire-protocol';
+import {SendStates} from '@statechannels/wallet-protocols';
 import WalletUi from './ui/wallet';
 import React from 'react';
 import ReactDOM from 'react-dom';
