@@ -5,11 +5,6 @@ import { hashState } from '@statechannels/nitro-protocol/lib/src/contract/state'
 
 import { ChannelUpdated, IStore } from './store';
 
-export { Store, IStore } from './store';
-export { SignedState } from './types';
-
-export { Channel, getChannelId } from '@statechannels/nitro-protocol';
-
 export const success: { type: 'final' } = { type: 'final' };
 export const failure: { type: 'final' } = { type: 'final' };
 
@@ -69,3 +64,12 @@ export function checkThat<T, S>(t: T | S, isTypeT: TypeGuard<T, S>): T {
   }
   return t;
 }
+
+export { Store, IStore, Constructor, ChannelUpdated } from './store';
+export { IChain, ChainEvent, ChainEventType, ChainEventListener } from './chain';
+export { ChannelStoreEntry } from './ChannelStoreEntry';
+export { SignedState } from './types';
+export * from './protocols';
+export * from './wire-protocol';
+export { CreateChannelEvent, OpenChannelEvent } from './protocols/wallet/protocol';
+export { Channel, getChannelId } from '@statechannels/nitro-protocol';
