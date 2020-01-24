@@ -197,3 +197,9 @@ export function sendMessage(recipient: string, message: any) {
   });
   window.parent.postMessage(notification, '*');
 }
+
+export function sendDisplayMessage(displayMessage: 'Show' | 'Hide') {
+  const showWallet = displayMessage === 'Show';
+  const message = jrs.notification('UIUpdate', {showWallet});
+  window.parent.postMessage(message, '*');
+}
