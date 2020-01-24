@@ -3,7 +3,8 @@ import {
   Channel,
   IStore,
   CreateChannelEvent,
-  ChannelStoreEntry
+  ChannelStoreEntry,
+  AddressableMessage
 } from '@statechannels/wallet-protocols';
 import * as ethers from 'ethers';
 import * as jrs from 'jsonrpc-lite';
@@ -20,7 +21,6 @@ import {bigNumberify} from 'ethers/utils';
 import {CreateChannelParams} from '@statechannels/client-api-schema/types/create-channel';
 import {PushMessageParams} from '@statechannels/client-api-schema/types/push-message';
 import {WorkflowManager} from './workflow-manager';
-import {AddressableMessage} from '@statechannels/wallet-protocols/src/wire-protocol';
 
 export async function handleMessage(
   event,
