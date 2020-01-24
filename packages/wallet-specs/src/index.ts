@@ -7,6 +7,7 @@ import { hashState } from '@statechannels/nitro-protocol/lib/src/contract/state'
 import { ChannelUpdated, IStore } from './store';
 
 export { Store, IStore } from './store';
+export { SignedState } from './types';
 
 export { Channel, getChannelId } from '@statechannels/nitro-protocol';
 
