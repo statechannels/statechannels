@@ -2,8 +2,8 @@ import {getChannelId, Channel} from '@statechannels/wallet-protocols';
 import * as ethers from 'ethers';
 import * as jrs from 'jsonrpc-lite';
 import {validateRequest} from './json-rpc-validation/validator';
-import {IStore} from '@statechannels/wallet-protocols/lib/src/store';
-import {CreateChannelEvent} from '@statechannels/wallet-protocols/lib/src/protocols/wallet/protocol';
+import {IStore} from '@statechannels/wallet-protocols';
+import {CreateChannelEvent} from '@statechannels/wallet-protocols';
 import {UpdateChannelParams} from '@statechannels/client-api-schema/types/update-channel';
 import {
   createStateFromUpdateChannelParams,
@@ -11,7 +11,7 @@ import {
 } from './utils/json-rpc-utils';
 import {CloseChannelParams} from '@statechannels/client-api-schema/types/close-channel';
 import {bigNumberify} from 'ethers/utils';
-import {ChannelStoreEntry} from '@statechannels/wallet-protocols/lib/src/ChannelStoreEntry';
+import {ChannelStoreEntry} from '@statechannels/wallet-protocols';
 import {CreateChannelParams} from '@statechannels/client-api-schema/types/create-channel';
 import {PushMessageParams} from '@statechannels/client-api-schema/types/push-message';
 import {WorkflowManager} from './workflow-manager';

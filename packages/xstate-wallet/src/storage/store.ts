@@ -1,11 +1,8 @@
-import {
-  IStore,
-  Constructor as BaseConstructor
-} from '@statechannels/wallet-protocols/lib/src/store';
+import {IStore, Constructor as BaseConstructor} from '@statechannels/wallet-protocols';
 
-import {Store as BaseStore} from '@statechannels/wallet-protocols/src/store';
+import {Store as BaseStore} from '@statechannels/wallet-protocols';
 import {SignedState} from '@statechannels/wallet-protocols';
-import {ChannelStoreEntry} from '@statechannels/wallet-protocols/src/ChannelStoreEntry';
+import {ChannelStoreEntry} from '@statechannels/wallet-protocols';
 
 type Constructor = BaseConstructor &
   Partial<{
