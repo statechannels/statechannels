@@ -46,11 +46,9 @@ export class Chain implements IChain {
 
   public on(_, listener) {
     this._listeners.push(listener);
+    const idx = this._listeners.length - 1;
 
-    return () => {
-      // TODO: Just remove the one listener
-      this._listeners = [];
-    };
+    return () => this._listeners.splice(idx, 1);
   }
 
   public setHoldings(channelId, amount) {
