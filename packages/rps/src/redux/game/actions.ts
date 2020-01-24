@@ -7,6 +7,7 @@ export type GameAction =
   | JoinOpenGame
   | GameJoined
   | CreateGame
+  | Challenge
   | CancelGame
   | ChooseWeapon
   | ChooseSalt
@@ -89,6 +90,11 @@ export interface StartRound {
 export interface Resign {
   type: 'Resign';
   iResigned: boolean;
+}
+
+export interface Challenge {
+  type: 'Challenge';
+  iChallenged: boolean;
 }
 
 export interface GameOver {
@@ -182,6 +188,10 @@ export const startRound = (): StartRound => ({type: 'StartRound'});
 export const resign = (iResigned: boolean): Resign => ({
   type: 'Resign',
   iResigned,
+});
+export const challenge = (iChallenged: boolean): Challenge => ({
+  type: 'Challenge',
+  iChallenged,
 });
 export const gameOver = (): GameOver => ({type: 'GameOver'});
 export const exitToLobby = (): ExitToLobby => ({type: 'ExitToLobby'});

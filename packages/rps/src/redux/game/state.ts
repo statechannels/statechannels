@@ -330,7 +330,6 @@ export namespace B {
       type: 'B.Resigned',
     };
   };
-
   export interface InsufficientFunds extends Playing {
     type: 'B.InsufficientFunds';
     myWeapon: Weapon;

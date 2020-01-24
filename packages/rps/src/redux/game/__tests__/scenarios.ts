@@ -24,10 +24,10 @@ export const bWeapon = Weapon.Scissors;
 const playerBWeapon = bWeapon;
 
 export const appData: Record<AppData['type'], AppData> = {
-  start: {type: 'start'},
+  start: {type: 'start', stake},
   roundProposed: {type: 'roundProposed', stake, preCommit},
   roundAccepted: {type: 'roundAccepted', stake, preCommit, playerBWeapon},
-  reveal: {type: 'reveal', playerAWeapon, playerBWeapon, salt},
+  reveal: {type: 'reveal', stake, playerAWeapon, playerBWeapon, salt},
 };
 
 function channelState(
