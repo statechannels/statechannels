@@ -15,6 +15,7 @@ import {ChannelStoreEntry} from '@statechannels/wallet-protocols/lib/src/Channel
 import {CreateChannelParams} from '@statechannels/client-api-schema/types/create-channel';
 import {PushMessageParams} from '@statechannels/client-api-schema/types/push-message';
 import {WorkflowManager} from './workflow-manager';
+import {AddressableMessage} from '@statechannels/wallet-protocols/src/wire-protocol';
 
 export async function handleMessage(
   event,
@@ -189,9 +190,9 @@ export function dispatchChannelUpdatedMessage(channelId: string, channelEntry: C
   });
 }
 
-export function sendMessage(recipient: string, message: any) {
+export function sendMessage(message: AddressableMessage) {
   const notification = jrs.notification('MessageQueued', {
-    recipient,
+    recipient: message.to,
     sender: 'TODO',
     data: message
   });

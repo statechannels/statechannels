@@ -5,7 +5,7 @@ import { getStateSignerAddress, signState } from '@statechannels/nitro-protocol/
 import _ from 'lodash';
 
 import { ChannelStoreEntry, IChannelStoreEntry, supported, Funding } from './ChannelStoreEntry';
-import { messageService } from './messaging';
+import { messageService, IMessageService } from './messaging';
 import { AddressableMessage, FundingStrategyProposed } from './wire-protocol';
 import { Chain, IChain, ChainEventType, ChainEvent } from './chain';
 
@@ -14,6 +14,7 @@ import { add, getChannelId, gt, SignedState } from '.';
 export interface ChannelUpdated {
   type: 'CHANNEL_UPDATED';
   channelId: string;
+  entry: IChannelStoreEntry;
 }
 export type StoreEvent = ChainEvent | ChannelUpdated;
 export type StoreEventType = ChainEventType | ChannelUpdated['type'];
@@ -62,6 +63,7 @@ export type Constructor = Partial<{
   privateKeys: Record<string, string>;
   nonces: Record<string, string>;
   chain: IChain;
+  messagingService: IMessageService;
 }>;
 export class Store implements IStore {
   public static equals(left: any, right: any) {
@@ -74,15 +76,19 @@ export class Store implements IStore {
   private _nonces: Record<string, string> = {};
   private _eventEmitter = new EventEmitter();
   protected _chain: IChain;
+  protected _messagingService: IMessageService;
 
   constructor(args?: Constructor) {
     const { store, privateKeys } = args || {};
     this._store = store || {};
     this._privateKeys = privateKeys || {};
 
+    // TODO: We probably shouldn't default to test implementations
     this._chain = args?.chain || new Chain();
-    // TODO: Bad form to call an async method in the constructor?
-    this._chain.initialize();
+    this._messagingService = args?.messagingService || messageService;
+
+    this._chain // TODO: Bad form to call an async method in the constructor?
+      .initialize();
   }
 
   public async getHoldings(channelId: string) {
@@ -261,10 +267,12 @@ export class Store implements IStore {
   protected updateEntry(channelId: string, states: SignedState[]): ChannelStoreEntry {
     const entry = this.getEntry(channelId);
     this._store[channelId] = { ...entry, states: merge(states, entry.states) };
-    if (!_.isEqual(entry, this._store[channelId])) {
+    // TODO: Does this comparison work as expected?
+    if (!Store.equals(states, entry.states)) {
       const channelUpdated: ChannelUpdated = {
         type: 'CHANNEL_UPDATED',
         channelId,
+        entry,
       };
       this._eventEmitter.emit(channelUpdated.type, channelUpdated);
     }
