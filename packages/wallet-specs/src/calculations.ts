@@ -1,6 +1,17 @@
-import { Outcome, Allocation } from '@statechannels/nitro-protocol';
+import {
+  Outcome,
+  Allocation,
+  AssetOutcome,
+  isAllocationOutcome,
+  AllocationAssetOutcome,
+  GuaranteeAssetOutcome,
+} from '@statechannels/nitro-protocol';
+import { hexZeroPad } from 'ethers/utils';
+import { AddressZero } from 'ethers/constants';
+import { Guarantee } from '@statechannels/nitro-protocol/lib/src/contract/outcome';
 
-import { ethAllocationOutcome, add, subtract, gt } from '.';
+import { add, subtract, gt, checkThat } from '.';
+
 export enum Errors {
   DestinationMissing = 'Destination missing from ledger channel',
   InsufficientFunds = 'Insufficient funds in ledger channel',
@@ -42,4 +53,29 @@ export function allocateToTarget(
   });
   ledgerAllocation.push({ destination: targetChannelId, amount: total });
   return ethAllocationOutcome(ledgerAllocation);
+}
+
+export function getEthAllocation(outcome: Outcome): Allocation {
+  const ethOutcome: AssetOutcome | undefined = outcome.find(
+    o => o.assetHolderAddress === AddressZero
+  );
+  return ethOutcome ? checkThat(ethOutcome, isAllocationOutcome).allocation : [];
+}
+
+export function ethAllocationOutcome(allocation: Allocation): AllocationAssetOutcome[] {
+  return [
+    {
+      assetHolderAddress: AddressZero,
+      allocation: allocation.map(a => ({ ...a, destination: hexZeroPad(a.destination, 32) })),
+    },
+  ];
+}
+
+export function ethGuaranteeOutcome(guarantee: Guarantee): GuaranteeAssetOutcome[] {
+  return [
+    {
+      assetHolderAddress: AddressZero,
+      guarantee,
+    },
+  ];
 }

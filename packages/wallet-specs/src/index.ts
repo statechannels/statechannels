@@ -1,15 +1,7 @@
 import { EventObject, SendAction, StateMachine, forwardTo } from 'xstate';
-import { Outcome, Allocation, State } from '@statechannels/nitro-protocol';
-import {
-  AllocationAssetOutcome,
-  Guarantee,
-  GuaranteeAssetOutcome,
-  isAllocationOutcome,
-  AssetOutcome,
-  hashOutcome,
-} from '@statechannels/nitro-protocol/lib/src/contract/outcome';
-import { Signature, hexZeroPad, bigNumberify } from 'ethers/utils';
-import { AddressZero } from 'ethers/constants';
+import { Outcome, State } from '@statechannels/nitro-protocol';
+import { hashOutcome } from '@statechannels/nitro-protocol/lib/src/contract/outcome';
+import { Signature, bigNumberify } from 'ethers/utils';
 import { hashState } from '@statechannels/nitro-protocol/lib/src/contract/state';
 
 import { ChannelUpdated, IStore } from './store';
@@ -18,31 +10,6 @@ export { Store, IStore } from './store';
 export interface Balance {
   address: string;
   wei: string;
-}
-
-export function getEthAllocation(outcome: Outcome): Allocation {
-  const ethOutcome: AssetOutcome | undefined = outcome.find(
-    o => o.assetHolderAddress === AddressZero
-  );
-  return ethOutcome ? checkThat(ethOutcome, isAllocationOutcome).allocation : [];
-}
-
-export function ethAllocationOutcome(allocation: Allocation): AllocationAssetOutcome[] {
-  return [
-    {
-      assetHolderAddress: AddressZero,
-      allocation: allocation.map(a => ({ ...a, destination: hexZeroPad(a.destination, 32) })),
-    },
-  ];
-}
-
-export function ethGuaranteeOutcome(guarantee: Guarantee): GuaranteeAssetOutcome[] {
-  return [
-    {
-      assetHolderAddress: AddressZero,
-      guarantee,
-    },
-  ];
 }
 
 interface VariablePart {

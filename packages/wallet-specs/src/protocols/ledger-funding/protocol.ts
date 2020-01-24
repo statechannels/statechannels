@@ -1,7 +1,7 @@
 import { assign, DoneInvokeEvent, Machine, MachineConfig } from 'xstate';
 
-import { allocateToTarget } from '../../calculations';
-import { Channel, MachineFactory, IStore, success, getEthAllocation, FINAL } from '../..';
+import { allocateToTarget, getEthAllocation } from '../../calculations';
+import { Channel, MachineFactory, IStore, success } from '../..';
 import { getDetaAndInvoke } from '../../machine-utils';
 import { Funding } from '../../ChannelStoreEntry';
 

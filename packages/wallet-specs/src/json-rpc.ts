@@ -1,6 +1,8 @@
 import { State } from '@statechannels/nitro-protocol';
 
-import { Channel, SignedState, ethAllocationOutcome } from '.';
+import { ethAllocationOutcome } from './calculations';
+
+import { Channel, SignedState } from '.';
 
 interface ChannelParticipant {
   participantId?: string;

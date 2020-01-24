@@ -1,10 +1,11 @@
-import { isAllocationOutcome, Allocation, Outcome } from '@statechannels/nitro-protocol';
+import { Allocation, Outcome } from '@statechannels/nitro-protocol';
 
-import { add, Channel, subtract, ethAllocationOutcome, checkThat, getEthAllocation } from '../..';
+import { add, Channel, subtract } from '../..';
 import * as ConcludeChannel from '../conclude-channel/protocol';
 import * as CreateNullChannel from '../create-null-channel/protocol';
 import * as LedgerUpdate from '../ledger-update/protocol';
 import { store } from '../../temp-store';
+import { getEthAllocation, ethAllocationOutcome } from '../../calculations';
 const PROTOCOL = 'partial-withdrawal';
 const success = { type: 'final' };
 
