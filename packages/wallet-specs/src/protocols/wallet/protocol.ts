@@ -139,7 +139,7 @@ export function machine(store: IStore, context: Init) {
     const channelUpdated: ChannelUpdated = {
       type: 'CHANNEL_UPDATED',
       channelId,
-      entry:store.getEntry(channelId), 
+      entry: store.getEntry(channelId),
     };
     state.context.processes.forEach(({ ref }: Process) => ref.send(channelUpdated));
   };
