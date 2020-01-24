@@ -13,7 +13,7 @@ import WalletUi from './ui/wallet';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-// TODO: We should standardize logging with wallet-specs
+// TODO: We should standardize logging with wallet-protocols
 function logState(actor, level = 0) {
   if (actor.state) {
     console.log(`${' '.repeat(level)}${JSON.stringify(actor.state.value)}`);
