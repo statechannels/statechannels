@@ -5,17 +5,8 @@ import { bigNumberify } from 'ethers/utils';
 import { hashState } from '@statechannels/nitro-protocol/lib/src/contract/state';
 
 import { ChannelUpdated, IStore } from './store';
-import { VariablePart } from './types';
 
 export { Store, IStore } from './store';
-
-export function nextState(state: State, opts?: Partial<VariablePart>): State {
-  return {
-    ...state,
-    turnNum: state.turnNum + 1,
-    ...opts,
-  };
-}
 
 export { Channel, getChannelId } from '@statechannels/nitro-protocol';
 
