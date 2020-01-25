@@ -6,8 +6,8 @@ import {ChannelState, ChannelStore} from "../../../channel-store";
 
 import {Wallet} from "ethers";
 import {EMPTY_SHARED_DATA, SharedData} from "../../../state";
-import * as web3Utils from "web3-utils";
 import * as testScenarios from "../../../__tests__/state-helpers";
+import {parseEther} from "ethers/utils";
 
 // ---------
 // Test data
@@ -63,7 +63,7 @@ const transaction = {};
 const withdrawalAddress = Wallet.createRandom().address;
 const processId = "process-id.123";
 const sharedData: SharedData = {...EMPTY_SHARED_DATA, channelStore, bytecodeStorage};
-const withdrawalAmount = web3Utils.toWei("5");
+const withdrawalAmount = parseEther("5").toString();
 const transactionSubmissionState = transactionScenarios.preSuccessState;
 const props = {
   transaction,

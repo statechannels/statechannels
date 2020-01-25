@@ -1,5 +1,5 @@
 import {getChannelId, State} from '@statechannels/nitro-protocol';
-import {Uint256} from 'fmg-core';
+import {Uint256} from '../../../types';
 import errors from '../../errors';
 import Channel from '../../models/channel';
 import {outcomeObjectToModel} from '../../utilities/outcome';
