@@ -18,7 +18,8 @@ Run `yarn`
 After updating `protocol.ts`, run `yarn generateConfigs` to update `protocol.config.js`.
 Configs (`protocol.config.json`) can be visualized using https://xstate.js.org/viz/.
 
-(An upcoming update to the visualizer should allow CLI generation of the configurations!)
+Install [gist](https://github.com/defunkt/gist) and run `yarn uploadConfig $PROTOCOL_NAME` to save the current configuration file living in `src/protocols/$PROTOCOL_NAME/protocol.config.js`.
+Make sure to run `yarn generateConfigs` prior to uploading.
 
 # Tests
 
