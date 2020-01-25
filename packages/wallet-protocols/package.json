@@ -23,6 +23,7 @@
   "dependencies": {
     "@statechannels/nitro-protocol": "0.0.1",
     "ethers": "^4.0.42",
+    "rxjs": "^6.5.4",
     "xstate": "^4.7"
   },
   "devDependencies": {
