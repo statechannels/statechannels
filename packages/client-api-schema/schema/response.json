@@ -30,7 +30,8 @@
             {"$ref": "push-message.json#/definitions/PushMessageResult"},
             {"$ref": "get-address.json#/definitions/GetAddressResult"},
             {"$ref": "update-channel.json#/definitions/UpdateChannelResult"},
-            {"$ref": "close-channel.json#/definitions/CloseChannelResult"}
+            {"$ref": "close-channel.json#/definitions/CloseChannelResult"},
+            {"$ref": "challenge-channel.json#/definitions/ChallengeChannelResult"}
           ]
         }
       }

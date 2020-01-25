@@ -1,6 +1,6 @@
 import * as firebase from 'firebase';
 
-import {HUB_ADDRESS} from '../constants';
+import {HUB_ADDRESS, FIREBASE_PREFIX} from '../constants';
 import {RelayActionWithMessage} from '../communication';
 import {logger} from '../logger';
 
@@ -26,7 +26,7 @@ function getFirebaseApp() {
 
 function getMessagesRef() {
   const firebaseAppInsance = getFirebaseApp();
-  return firebaseAppInsance.database().ref('messages');
+  return firebaseAppInsance.database().ref(`${FIREBASE_PREFIX}/messages`);
 }
 
 export async function fbListen(callback) {

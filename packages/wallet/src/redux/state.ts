@@ -329,9 +329,11 @@ type CheckResult = CheckSuccess | CheckFailure;
 interface CheckSuccess {
   isSuccess: true;
   store: SharedData;
+  reason?: string;
 }
 interface CheckFailure {
   isSuccess: false;
+  reason?: string;
 }
 
 export function signAndStore(sharedDataState: SharedData, state: State): SignResult {

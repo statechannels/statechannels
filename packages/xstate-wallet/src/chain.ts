@@ -7,8 +7,7 @@ import {
   ChainEvent,
   ChainEventType,
   ChainEventListener
-} from '@statechannels/wallet-protocols/src/chain';
-import {bigNumberify} from 'ethers/utils';
+} from '@statechannels/wallet-protocols';
 
 const EthAssetHolderInterface = new ethers.utils.Interface(ContractAbis.EthAssetHolder);
 export class ChainWatcher implements IChain {
@@ -18,11 +17,7 @@ export class ChainWatcher implements IChain {
     const signer = provider.getSigner();
     this._contract = new ethers.Contract(ETH_ASSET_HOLDER_ADDRESS, EthAssetHolderInterface, signer);
   }
-  public async deposit(
-    channelId: string,
-    expectedHeld: string,
-    amount: string
-  ): Promise<ChainEvent> {
+  public async deposit(channelId: string, expectedHeld: string, amount: string): Promise<void> {
     const provider = getProvider();
     const signer = provider.getSigner();
     const transactionRequest = {
@@ -32,14 +27,6 @@ export class ChainWatcher implements IChain {
     };
     const response = await signer.sendTransaction(transactionRequest);
     await response.wait();
-    return {
-      type: 'DEPOSITED',
-      channelId,
-      amount,
-      total: bigNumberify(amount)
-        .add(expectedHeld)
-        .toHexString()
-    };
   }
   public async getHoldings(channelId: string): Promise<string> {
     const provider = getProvider();

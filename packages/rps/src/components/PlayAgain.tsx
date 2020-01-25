@@ -35,7 +35,7 @@ export default class Playagain extends React.PureComponent<Props> {
     return (
       <GameLayout>
         <div className="w-100 text-center">
-          <h1 className="mb-5">{this.renderResultText()}</h1>
+          <h1 className="mb-5 win-loss-title">{this.renderResultText()}</h1>
           <div className="row">
             <div className="col-sm-6">
               <p className="lead">

@@ -82,6 +82,9 @@ class MockChannelClient implements ChannelClientInterface {
   closeChannel = jest.fn(async function(channelId: string) {
     return await mockChannelResult;
   });
+  challengeChannel = jest.fn(async function(channelId: string) {
+    return await mockChannelResult;
+  });
   pushMessage(message) {
     return new Promise<PushMessageResult>(() => {
       /* */
@@ -204,6 +207,16 @@ describe('when closeChannel() is called', () => {
   });
   it('calls channelClient.joinChannel() with the same channelId', async () => {
     expect(mockChannelClient.closeChannel).toHaveBeenCalledWith(MOCK_CHANNEL_ID);
+  });
+  it('decodes and returns the result', async () => {
+    expect(result).toEqual(mockChannelState);
+  });
+});
+
+describe('when challengeChannel() is called', () => {
+  let result;
+  beforeAll(async () => {
+    result = await client.challengeChannel(MOCK_CHANNEL_ID);
   });
   it('decodes and returns the result', async () => {
     expect(result).toEqual(mockChannelState);

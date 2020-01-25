@@ -1,15 +1,17 @@
-import Ajv, {ErrorObject} from "ajv";
-import requestSchema from "@statechannels/client-api-schema/schema/request.json";
-import responseSchema from "@statechannels/client-api-schema/schema/response.json";
-import createChannelSchema from "@statechannels/client-api-schema/schema/create-channel.json";
-import getAddressSchema from "@statechannels/client-api-schema/schema/get-address.json";
-import joinChannelSchema from "@statechannels/client-api-schema/schema/join-channel.json";
-import updateChannelSchema from "@statechannels/client-api-schema/schema/update-channel.json";
-import definitionsSchema from "@statechannels/client-api-schema/schema/definitions.json";
-import channelResultSchema from "@statechannels/client-api-schema/schema/channel-result.json";
-import closeChannelSchema from "@statechannels/client-api-schema/schema/close-channel.json";
-import pushMessageSchema from "@statechannels/client-api-schema/schema/push-message.json";
-import notifSchema from "@statechannels/client-api-schema/schema/notification.json";
+import Ajv, {ErrorObject} from 'ajv';
+import requestSchema from '@statechannels/client-api-schema/schema/request.json';
+import responseSchema from '@statechannels/client-api-schema/schema/response.json';
+import createChannelSchema from '@statechannels/client-api-schema/schema/create-channel.json';
+import getAddressSchema from '@statechannels/client-api-schema/schema/get-address.json';
+import joinChannelSchema from '@statechannels/client-api-schema/schema/join-channel.json';
+import updateChannelSchema from '@statechannels/client-api-schema/schema/update-channel.json';
+import definitionsSchema from '@statechannels/client-api-schema/schema/definitions.json';
+import channelResultSchema from '@statechannels/client-api-schema/schema/channel-result.json';
+import closeChannelSchema from '@statechannels/client-api-schema/schema/close-channel.json';
+import pushMessageSchema from '@statechannels/client-api-schema/schema/push-message.json';
+import notifSchema from '@statechannels/client-api-schema/schema/notification.json';
+
+import challengeChannelSchema from '@statechannels/client-api-schema/schema/challenge-channel.json';
 
 export interface ValidationResult {
   isValid: boolean;
@@ -27,6 +29,7 @@ export async function validateRequest(jsonRpcRequest: object): Promise<Validatio
     .addSchema(updateChannelSchema)
     .addSchema(pushMessageSchema)
     .addSchema(closeChannelSchema)
+    .addSchema(challengeChannelSchema)
     .compile(requestSchema);
   const isValid = await validate(jsonRpcRequest);
 
@@ -44,6 +47,7 @@ export async function validateResponse(jsonRpcResponse: object): Promise<Validat
     .addSchema(updateChannelSchema)
     .addSchema(pushMessageSchema)
     .addSchema(closeChannelSchema)
+    .addSchema(challengeChannelSchema)
     .compile(responseSchema);
   const isValid = await validate(jsonRpcResponse);
 
@@ -63,6 +67,7 @@ export async function validateNotification(jsonRpcNotification: object): Promise
     .addSchema(requestSchema)
     .addSchema(responseSchema)
     .addSchema(closeChannelSchema)
+    .addSchema(challengeChannelSchema)
     .compile(notifSchema);
   const isValid = await validate(jsonRpcNotification);
 

@@ -498,13 +498,13 @@ describe("message listener", () => {
         state
       });
 
-      expect(effects.fork[0].payload.args[0]).toMatchObject({
+      expect(effects.fork[1].payload.args[0]).toMatchObject({
         type: "WALLET.UPDATE_CHANNEL_RESPONSE",
         id: 1,
         channelId: stateHelpers.channelId
       });
 
-      expect(effects.fork[1].payload.args[0]).toMatchObject({
+      expect(effects.fork[0].payload.args[0]).toMatchObject({
         type: "WALLET.SEND_CHANNEL_UPDATED_MESSAGE",
         channelId: stateHelpers.channelId
       });
@@ -535,6 +535,11 @@ describe("message listener", () => {
         id: 1,
         channelId: unknownChannelId
       });
+    });
+
+    // TODO: Implement
+    it.skip("can trigger responses to challenges if it needs to", () => {
+      return;
     });
   });
 
@@ -645,6 +650,65 @@ describe("message listener", () => {
       const requestMessage = {
         jsonrpc: "2.0",
         method: "JoinChannel",
+        id: 1,
+        params: {
+          channelId: unknownChannelId
+        }
+      };
+
+      const {effects} = await expectSaga(messageHandler, requestMessage, "localhost")
+        .withState(initialState)
+        // Mock out the fork call so we don't actually try to post the message
+        .provide([[matchers.fork.fn(messageSender), 0]])
+        .run();
+
+      expect(effects.fork[0].payload.args[0]).toMatchObject({
+        type: "WALLET.UNKNOWN_CHANNEL_ID_ERROR",
+        id: 1,
+        channelId: unknownChannelId
+      });
+    });
+  });
+
+  describe("ChallengeChannel", () => {
+    it("handles a challenge channel request", async () => {
+      const existingState = appState({turnNum: 0});
+      const testChannel = channelFromStates([existingState], asAddress, asPrivateKey);
+
+      const requestMessage = {
+        jsonrpc: "2.0",
+        method: "ChallengeChannel",
+        id: 1,
+        params: {
+          channelId: testChannel.channelId
+        }
+      };
+
+      const {effects} = await expectSaga(messageHandler, requestMessage, "localhost")
+        .withState({...initialState, channelStore: setChannel({}, testChannel)})
+        // Mock out the fork call so we don't actually try to post the message
+        .provide([[matchers.fork.fn(messageSender), 0]])
+        .run();
+
+      expect(effects.put[0].payload.action).toMatchObject({
+        type: "WALLET.APPLICATION.CHALLENGE_REQUESTED",
+        state: existingState.state,
+        channelId: testChannel.channelId
+      });
+
+      expect(effects.fork[0].payload.args[0]).toMatchObject({
+        type: "WALLET.CHALLENGE_CHANNEL_RESPONSE",
+        id: 1,
+        channelId: testChannel.channelId
+      });
+    });
+
+    it("returns an error when the channelId is not known", async () => {
+      const unknownChannelId = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+
+      const requestMessage = {
+        jsonrpc: "2.0",
+        method: "ChallengeChannel",
         id: 1,
         params: {
           channelId: unknownChannelId

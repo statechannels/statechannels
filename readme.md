@@ -1,10 +1,6 @@
 <h1 align="center">
   <br>
-  <a href="https://statechannels.org"><img src="./logo.png" alt="State Channels" width="150"></a>
-  <br>
-  State Channels
-  <br>
-  <br>
+  <a href="https://statechannels.org"><img src="./logo.svg" alt="State Channels" width="350"></a>
 </h1>
 
 <h4 align="center">Simple off-chain applications framework for Ethereum.</h4>

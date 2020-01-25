@@ -1,17 +1,18 @@
 // @ts-ignore
 import {providers} from 'ethers';
-import {utils} from 'ethers';
 import NitroAdjudicatorArtifact from '../../../build/contracts/NitroAdjudicator.json';
 import {getChannelId} from '../channel';
 import {encodeOutcome, Outcome} from '../outcome';
 import {getFixedPart, hashAppPart, hashState, State} from '../state';
+import {Signature, Interface} from 'ethers/utils';
 
 // TODO: Currently we are setting some arbitrary gas limit
 // To avoid issues with Ganache sendTransaction and parsing BN.js
 // If we don't set a gas limit some transactions will fail
 const GAS_LIMIT = 3000000;
 
-const NitroAdjudicatorContractInterface = new utils.Interface(NitroAdjudicatorArtifact.abi);
+// @ts-ignore
+const NitroAdjudicatorContractInterface = new Interface(NitroAdjudicatorArtifact.abi);
 
 export function createPushOutcomeTransaction(
   turnNumRecord: number,
@@ -39,7 +40,7 @@ export function createPushOutcomeTransaction(
 
 export function concludePushOutcomeAndTransferAllArgs(
   states: State[],
-  signatures: utils.Signature[],
+  signatures: Signature[],
   whoSignedWhat: number[]
 ): any[] {
   // Sanity checks on expected lengths
@@ -75,7 +76,7 @@ export function concludePushOutcomeAndTransferAllArgs(
 
 export function createConcludePushOutcomeAndTransferAllTransaction(
   states: State[],
-  signatures: utils.Signature[],
+  signatures: Signature[],
   whoSignedWhat: number[]
 ): providers.TransactionRequest {
   return {

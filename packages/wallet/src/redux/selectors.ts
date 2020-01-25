@@ -132,7 +132,11 @@ export const getProtocolForProcessId = (
 };
 
 export const getProtocolState = (state: walletStates.Initialized, processId: string) => {
-  return state.processStore[processId].protocolState;
+  if (state.processStore && state.processStore[processId]) {
+    return state.processStore[processId].protocolState;
+  } else {
+    return undefined;
+  }
 };
 
 export const getNextNonce = (
