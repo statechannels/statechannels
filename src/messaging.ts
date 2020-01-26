@@ -183,6 +183,10 @@ async function getChannelInfo(channelId: string, channelEntry: ChannelStoreEntry
     status = 'proposed';
   } else if (turnNum < 2 * channel.participants.length - 1) {
     status = 'opening';
+  } else if (channelEntry.hasSupportedState && channelEntry.latestSupportedState.isFinal) {
+    status = 'closed';
+  } else if (latestState && latestState.isFinal) {
+    status = 'closing';
   }
 
   return {
