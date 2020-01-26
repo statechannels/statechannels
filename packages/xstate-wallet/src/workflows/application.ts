@@ -68,6 +68,7 @@ const running = {
   }
 };
 const closing = {
+  entry: ['displayUi'],
   invoke: {
     id: 'closingMachine',
     src: 'invokeClosingMachine',
