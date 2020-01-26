@@ -20,7 +20,7 @@ import {
   convertBytes32ToAddress,
   convertAddressToBytes32,
 } from './contract/asset-holder';
-import {getChallengeRegisteredEvent} from './contract/challenge';
+import {getChallengeRegisteredEvent, getChallengeClearedEvent} from './contract/challenge';
 import {Channel, getChannelId} from './contract/channel';
 import {encodeConsensusData} from './contract/consensus-data';
 import {validTransition, ForceMoveAppContractInterface} from './contract/force-move-app';
@@ -83,6 +83,7 @@ export {
   Channel,
   getAssetTransferredEvent,
   getChallengeRegisteredEvent,
+  getChallengeClearedEvent,
   getDepositedEvent,
   getVariablePart,
   GuaranteeAssetOutcome,
@@ -108,6 +109,9 @@ export const ContractArtifacts = {
   EthAssetHolderArtifact,
   TokenArtifact,
   ConsensusAppArtifact,
+};
+export const ContractAbis = {
+  EthAssetHolder: ContractArtifacts.EthAssetHolderArtifact.abi,
 };
 
 // types

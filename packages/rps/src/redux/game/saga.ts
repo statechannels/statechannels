@@ -39,7 +39,15 @@ const isPlayersTurnNext = (
 export function* gameSaga(client: RPSChannelClient) {
   const channel = yield actionChannel('*', buffers.fixed(10));
   while (true) {
-    yield take(channel);
+    const action = yield take(channel);
+
+    if (action.type === 'Challenge') {
+      const {
+        channelState: {channelId},
+      } = yield select(getGameState);
+      yield challengeChannel(channelId, client);
+    }
+
     yield* gameSagaRun(client);
   }
 }
@@ -65,7 +73,9 @@ function* gameSagaRun(client: RPSChannelClient) {
     case 'Setup.NeedAddress':
       const address: string = yield call([client, 'getAddress']);
       const outcomeAddress: string = window.ethereum.selectedAddress;
-      yield put(a.gotAddressFromWallet(address, outcomeAddress));
+      if (outcomeAddress) {
+        yield put(a.gotAddressFromWallet(address, outcomeAddress));
+      }
       break;
     case 'A.GameChosen':
       if (cs.isEmpty(channelState)) {
@@ -132,6 +142,13 @@ function* gameSagaRun(client: RPSChannelClient) {
         yield* closeChannel(channelState, client);
       }
       break;
+    case 'EndGame.GameOver':
+      if (channelState) {
+        yield put(a.updateChannelState(null));
+      }
+      // eslint-disable-next-line
+      opponentResigned = false;
+      break;
   }
 }
 
@@ -139,7 +156,7 @@ function* createChannel(localState: ls.A.GameChosen, client: RPSChannelClient) {
   const openingBalance = bigNumberify(localState.roundBuyIn)
     .mul(5)
     .toString();
-  const startState: AppData = {type: 'start'};
+  const startState: AppData = {type: 'start', stake: localState.roundBuyIn};
   const newChannelState = yield call(
     [client, 'createChannel'],
     localState.address,
@@ -269,6 +286,7 @@ function* calculateResultAndSendReveal(
   const reveal: AppData = {
     type: 'reveal',
     salt,
+    stake,
     playerAWeapon: myWeapon,
     playerBWeapon: theirWeapon,
   };
@@ -315,7 +333,7 @@ function* sendStartAndStartRound(channelState: ChannelState<Reveal>, client: RPS
     aOutcomeAddress,
     bOutcomeAddress,
   } = channelState;
-  const start: AppData = {type: 'start'};
+  const start: AppData = {type: 'start', stake: channelState.appData.stake};
   const state = yield call(
     [client, 'updateChannel'],
     channelId,
@@ -330,9 +348,14 @@ function* sendStartAndStartRound(channelState: ChannelState<Reveal>, client: RPS
   yield put(a.updateChannelState(state));
   yield put(a.startRound());
 }
+
 function* closeChannel(channelState: ChannelState, client: RPSChannelClient) {
   const closingChannelState = yield call([client, 'closeChannel'], channelState.channelId);
   yield put(a.updateChannelState(closingChannelState));
+}
+
+function* challengeChannel(channelId: string, client: RPSChannelClient) {
+  yield call([client, 'challengeChannel'], channelId);
 }
 
 const calculateFundingSituation = (

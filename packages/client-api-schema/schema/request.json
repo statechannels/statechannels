@@ -26,7 +26,8 @@
             "GetAddress",
             "PushMessage",
             "UpdateChannel",
-            "CloseChannel"
+            "CloseChannel",
+            "ChallengeChannel"
           ]
         },
         "id": {
@@ -83,6 +84,14 @@
           },
           "then": {
             "params": {"$ref": "close-channel.json#/definitions/CloseChannelParams"}
+          }
+        },
+        {
+          "if": {
+            "properties": {"method": {"const": "ChallengeChannel"}}
+          },
+          "then": {
+            "params": {"$ref": "challenge-channel.json#/definitions/ChallengeChannelParams"}
           }
         }
       ]

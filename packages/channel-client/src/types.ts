@@ -4,7 +4,17 @@ import {
   JsonRpcNotification
 } from '@statechannels/channel-provider';
 
-export type ChannelStatus = 'proposed' | 'opening' | 'funding' | 'running' | 'closing' | 'closed';
+// TODO: Several of these types are duplicates of those in @statechannels/client-api-schema
+
+export type ChannelStatus =
+  | 'proposed'
+  | 'opening'
+  | 'funding'
+  | 'running'
+  | 'challenging'
+  | 'responding'
+  | 'closing'
+  | 'closed';
 
 export interface Participant {
   participantId: string; // App allocated id, used for relaying messages to the participant
@@ -41,8 +51,8 @@ export interface ChannelResult {
   appDefinition: string;
   channelId: string;
   status: ChannelStatus;
-  // funding: Funds[]; // do we even need this?
   turnNum: string;
+  challengeExpirationTime?: number;
 }
 
 export type UnsubscribeFunction = () => void;
@@ -76,6 +86,7 @@ export interface ChannelClientInterface<Payload = object> {
     allocations: Allocation[],
     appData: string
   ) => Promise<ChannelResult>;
+  challengeChannel: (channelId: string) => Promise<ChannelResult>;
   closeChannel: (channelId: string) => Promise<ChannelResult>;
   getAddress: () => Promise<string>;
 }

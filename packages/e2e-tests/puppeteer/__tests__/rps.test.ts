@@ -1,8 +1,20 @@
-import {setUpBrowser, loadRPSApp} from '../helpers';
-import {clickThroughRPSUI, clickThroughResignationUI} from '../scripts/rps';
 import {Page, Browser} from 'puppeteer';
+import {configureEnvVariables, getEnvBool} from '@statechannels/devtools';
 
-jest.setTimeout(60000);
+import {setUpBrowser, loadRPSApp, waitForHeading} from '../helpers';
+import {
+  startAndFundRPSGame,
+  clickThroughResignationUI,
+  setupRPS,
+  playMove,
+  clickThroughRPSUIWithChallengeByPlayerA,
+  clickThroughRPSUIWithChallengeByPlayerB
+} from '../scripts/rps';
+
+jest.setTimeout(120_000);
+
+configureEnvVariables();
+const HEADLESS = getEnvBool('HEADLESS');
 
 describe('Playing a game of RPS', () => {
   let browserA: Browser;
@@ -11,14 +23,16 @@ describe('Playing a game of RPS', () => {
   let rpsTabB: Page;
 
   beforeAll(async () => {
-    browserA = await setUpBrowser(true);
-    browserB = await setUpBrowser(true);
+    browserA = await setUpBrowser(HEADLESS);
+    browserB = await setUpBrowser(HEADLESS);
 
-    rpsTabA = await browserA.newPage();
-    rpsTabB = await browserB.newPage();
+    rpsTabA = (await browserA.pages())[0];
+    rpsTabB = (await browserB.pages())[0];
 
     await loadRPSApp(rpsTabA, 0);
     await loadRPSApp(rpsTabB, 1);
+
+    await setupRPS(rpsTabA, rpsTabB);
   });
 
   afterAll(async () => {
@@ -30,20 +44,49 @@ describe('Playing a game of RPS', () => {
     }
   });
 
-  it('can play a game end to end', async () => {
-    await clickThroughRPSUI(rpsTabA, rpsTabB);
-    expect(await (await rpsTabA.waitFor('h1.mb-5')).evaluate(el => el.textContent)).toMatch(
-      'You lost'
-    );
-    expect(await (await rpsTabB.waitFor('h1.mb-5')).evaluate(el => el.textContent)).toMatch(
-      'You won!'
-    );
-  });
+  it('can play two games end to end in one tab session', async () => {
+    await startAndFundRPSGame(rpsTabA, rpsTabB);
 
-  it('can then withdraw funds', async () => {
+    await playMove(rpsTabA, 'rock');
+    await playMove(rpsTabB, 'paper');
+
+    expect(await waitForHeading(rpsTabA)).toMatch('You lost');
+    expect(await waitForHeading(rpsTabB)).toMatch('You won!');
+
     await clickThroughResignationUI(rpsTabA, rpsTabB);
 
-    // Should be on the homepage
+    // Should be in the lobby
     expect(await rpsTabB.waitForXPath('//button[contains(., "Create a game")]')).toBeDefined();
+    expect(await rpsTabA.waitForXPath('//button[contains(., "Create a game")]')).toBeDefined();
+
+    await startAndFundRPSGame(rpsTabA, rpsTabB);
+
+    await playMove(rpsTabA, 'rock');
+    await playMove(rpsTabB, 'paper');
+
+    expect(await waitForHeading(rpsTabA)).toMatch('You lost');
+    expect(await waitForHeading(rpsTabB)).toMatch('You won!');
+
+    await clickThroughResignationUI(rpsTabA, rpsTabB);
+
+    // Should be in the lobby
+    expect(await rpsTabB.waitForXPath('//button[contains(., "Create a game")]')).toBeDefined();
+    expect(await rpsTabA.waitForXPath('//button[contains(., "Create a game")]')).toBeDefined();
+
+    await startAndFundRPSGame(rpsTabA, rpsTabB);
+
+    await clickThroughRPSUIWithChallengeByPlayerA(rpsTabA, rpsTabB);
+
+    expect(await waitForHeading(rpsTabA)).toMatch('You lost');
+    expect(await waitForHeading(rpsTabB)).toMatch('You won!');
+
+    await clickThroughResignationUI(rpsTabA, rpsTabB);
+
+    await startAndFundRPSGame(rpsTabA, rpsTabB);
+
+    await clickThroughRPSUIWithChallengeByPlayerB(rpsTabA, rpsTabB);
+
+    expect(await waitForHeading(rpsTabA)).toMatch('You won!');
+    expect(await waitForHeading(rpsTabB)).toMatch('You lost');
   });
 });

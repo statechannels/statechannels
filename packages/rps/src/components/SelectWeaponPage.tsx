@@ -25,12 +25,21 @@ export default class SelectWeaponStep extends React.PureComponent<Props> {
       <GameLayout>
         <div className="w-100 text-center mb-5">
           <h1 className="mb-5">
-            {challengeExpirationDate &&
-              `Challenge detected, respond by ${new Date(challengeExpirationDate).toString()}`}
             {afterOpponent
               ? 'Your opponent has chosen a move, now choose yours:'
               : 'Choose your move:'}
           </h1>
+
+          {challengeExpirationDate && (
+            <h2>
+              Challenge detected, respond in the next{' '}
+              {Math.abs(
+                (new Date(challengeExpirationDate).getTime() - new Date().getTime()) / 60000
+              )}{' '}
+              minutes.
+            </h2>
+          )}
+
           <div className="row w-100">
             <div className="col-sm-4">{renderChooseButton(chooseWeapon, Weapon.Rock, 'Rock')}</div>
             <div className="col-sm-4">

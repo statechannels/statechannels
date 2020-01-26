@@ -13,18 +13,32 @@
     "@statechannels/client-api-schema": "0.0.1",
     "@statechannels/nitro-protocol": "0.0.1",
     "@statechannels/wallet-protocols": "1.0.0",
-    "ethers": "4.0.40",
+    "@xstate/react": "0.8.1",
+    "ethers": "4.0.39",
+    "eventemitter3": "4.0.0",
+    "html-webpack-plugin": "3.2.0",
     "jsonrpc-lite": "2.1.0",
-    "xstate": "4.7.3"
+    "react": "16.12.0",
+    "react-dom": "16.12.0",
+    "xstate": "^4.7"
   },
   "devDependencies": {
     "@statechannels/devtools": "0.1.21",
+    "@types/html-webpack-plugin": "3.2.0",
+    "@types/react": "16.9.19",
+    "@types/react-dom": "16.9.5",
     "@types/webpack": "4.41.0",
     "source-map-loader": "0.2.4",
     "typescript": "3.7.4",
-    "webpack": "4.41.3"
+    "webpack": "4.41.3",
+    "webpack-merge": "4.2.2"
   },
   "scripts": {
-    "start": "node scripts/start.js"
+    "start": "node scripts/start.js",
+    "build": "npx webpack --config ./webpack-build.config.js",
+    "build:ci": "yarn build",
+    "lint:check": "eslint . --ext .ts --cache",
+    "lint:write": "eslint . --ext .ts --fix",
+    "generateConfigs": "yarn run ts-node bin/generateConfigs.ts "
   }
 }
