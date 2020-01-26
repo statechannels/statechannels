@@ -276,9 +276,12 @@ export class Store implements IStore {
 
   protected updateEntry(channelId: string, states: SignedState[]): ChannelStoreEntry {
     const entry = this.getEntry(channelId);
-    const updatedEntry: IChannelStoreEntry = { ...entry.args, states: merge(states, entry.states) };
+    const currentStates = _.cloneDeep(entry.states);
+
+    const updatedEntry: IChannelStoreEntry = { ...entry, states: merge(states, entry.states) };
     this._store[channelId] = updatedEntry;
-    if (!_.isEqual(states, updatedEntry.states)) {
+
+    if (!_.isEqual(currentStates, updatedEntry.states)) {
       const channelUpdated: ChannelUpdated = {
         type: 'CHANNEL_UPDATED',
         channelId,
