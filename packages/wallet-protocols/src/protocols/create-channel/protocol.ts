@@ -96,7 +96,7 @@ export const config: MachineConfig<Context, any, any> = {
       type: 'final' as 'final',
 
       entry: sendParent({ type: 'CHANNEL_CREATED' }),
-      data: (context: ChannelSet, event) => context.channelId,
+      data: { channelId: (context: ChannelSet, event) => context.channelId },
     },
   },
 };

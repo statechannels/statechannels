@@ -89,7 +89,10 @@ const closing = {
     autoForward: true,
     onDone: 'done'
   },
-  on: {SendStates: {actions: ['updateStore', 'sendChannelUpdated']}},
+  on: {
+    SendStates: {actions: ['updateStore']},
+    CHANNEL_UPDATED: {actions: ['sendChannelUpdatedNotification']}
+  },
   onDone: 'done'
 };
 const done = {type: FINAL};
@@ -164,14 +167,13 @@ export const applicationWorkflow: MachineFactory<ApplicationContext, any> = (
       context: ApplicationContext,
       event: any // TODO Proper typing
     ) => {
-      console.log(event);
       if (!context.channelId) {
         if (event.type === 'PLAYER_STATE_UPDATE') {
           return {channelId: getChannelId(event.state.channel)};
         } else if (event.type === 'OPEN_CHANNEL') {
           return {channelId: getChannelId(event.signedState.state.channel)};
         } else if (event.type === 'done.invoke.createMachine') {
-          return {channelId: event.data};
+          return event.data;
         }
         return {};
       }
