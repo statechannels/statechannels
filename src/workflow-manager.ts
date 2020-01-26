@@ -58,7 +58,9 @@ export class WorkflowManager {
     })
       .onTransition(state => {
         logState({state});
+        console.log(JSON.stringify(state.context));
       })
+      .onEvent(console.log)
       .onDone(() => (this.workflows = this.workflows.filter(w => w.id !== id)))
       .start();
     // TODO: Figure out how to resolve rendering priorities
