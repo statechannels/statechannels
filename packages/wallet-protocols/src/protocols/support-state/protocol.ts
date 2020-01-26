@@ -1,4 +1,4 @@
-import { Machine, MachineConfig, AnyEventObject } from 'xstate';
+import { Machine, MachineConfig, AnyEventObject, AssignAction, assign, spawn } from 'xstate';
 import { State, getChannelId } from '@statechannels/nitro-protocol';
 import { map, filter } from 'rxjs/operators';
 
@@ -16,37 +16,24 @@ TODO
 What happens if sendState fails?
 Do we abort? Or do we try to reach consensus on a later state?
 */
-
 export const config: MachineConfig<Init, any, AnyEventObject> = {
   key: PROTOCOL,
-  type: 'parallel',
+  initial: 'sendState',
   states: {
-    checkIfSupported: {
-      on: { SUPPORTED: '.success' },
-      initial: 'watching',
-      states: {
-        watching: { invoke: { src: 'notifyWhenSupported' } },
-        success: { type: 'final' },
-      },
-    },
     sendState: {
-      on: { SUPPORTED: '.success' },
-      initial: 'sendingState',
-      states: {
-        sendingState: { invoke: { src: 'sendState', onDone: 'success' } },
-        success: { type: 'final' },
-      },
+      entry: 'spawnObserver',
+      invoke: { src: 'sendState' },
+      on: { SUPPORTED: 'success' },
     },
+    success: { type: 'final' },
   },
 };
 
-type Services = {
-  sendState(ctx: Init): any;
-  notifyWhenSupported(ctx: Init): any;
-};
+type Services = { sendState(ctx: Init): any };
 
 type Options = {
   services: Services;
+  actions: { spawnObserver: AssignAction<Init, any> };
 };
 
 const sendState = (store: IStore) => async ({ state }: Init) => {
@@ -77,13 +64,18 @@ const notifyWhenSupported = (store: IStore) => ({ state }: Init) => {
   );
 };
 
+const options = (store: IStore): Options => ({
+  services: {
+    sendState: sendState(store),
+  },
+  actions: {
+    spawnObserver: assign<Init & { observer: any }>({
+      observer: (ctx: Init) => spawn(notifyWhenSupported(store)(ctx)),
+    }),
+  },
+});
+
 export type machine = typeof machine;
 export const machine: MachineFactory<Init, any> = (store: IStore, context: Init) => {
-  const services: Services = {
-    sendState: sendState(store),
-    notifyWhenSupported: notifyWhenSupported(store),
-  };
-
-  const options: Options = { services };
-  return Machine(config, options).withContext(context);
+  return Machine(config, options(store)).withContext(context);
 };
