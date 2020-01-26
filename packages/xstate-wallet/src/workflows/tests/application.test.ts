@@ -9,17 +9,16 @@ import {
   getChannelId,
   OpenChannelEvent,
   Channel,
-  JoinChannel
+  JoinChannel,
+  CreateChannel
 } from '@statechannels/wallet-protocols';
 import {applicationWorkflow} from '../application';
 import {AddressZero} from 'ethers/constants';
-import {
-  findCalledActions,
-  generateParticipant,
-  generateAllocations
-} from '../../utils/test-helpers';
+import {findCalledActions} from '../../utils/test-helpers';
+
 let closingMachineMock;
 let joinMachineMock;
+let createChannelMock;
 beforeEach(() => {
   // TODO: Is this the best way to mock
   closingMachineMock = jest.fn().mockReturnValue(new Promise(() => {}));
@@ -31,21 +30,27 @@ beforeEach(() => {
   Object.defineProperty(JoinChannel, 'machine', {
     value: joinMachineMock
   });
+  createChannelMock = jest.fn().mockReturnValue(
+    new Promise(resolve => {
+      resolve('0xabc');
+    })
+  );
+  Object.defineProperty(CreateChannel, 'machine', {
+    value: createChannelMock
+  });
 });
 
 jest.setTimeout(50000);
 
 it('initializes and starts the create channel machine', async () => {
-  const walletA = ethers.Wallet.createRandom();
-  const walletB = ethers.Wallet.createRandom();
-  const store = new Store({privateKeys: {[walletA.address]: walletA.privateKey}});
+  const store = new Store();
   const event: CreateChannelEvent = {
     type: 'CREATE_CHANNEL',
     chainId: '0x0',
     appData: '0x0',
     appDefinition: ethers.constants.AddressZero,
-    participants: [generateParticipant(walletA), generateParticipant(walletB)],
-    allocations: generateAllocations(walletA, walletB),
+    participants: [],
+    allocations: [],
     challengeDuration: 500
   };
   const service = interpret<any, any, any>(applicationWorkflow(store, undefined));
@@ -59,11 +64,16 @@ it('initializes and starts the create channel machine', async () => {
   service.send(event);
 
   await waitForExpect(async () => {
-    expect(service.state.value).toEqual('create');
-    expect(service.state.children.createMachine).toBeDefined();
-    expect(service.state.actions.map(a => a.type)).toContain('displayUi');
+    expect(service.state.value).toEqual('running');
+    expect(createChannelMock).toHaveBeenCalled();
+    expect(findCalledActions(service.state)).toContainEqual({
+      actionType: 'displayUi',
+      stateType: 'create'
+    });
+    expect(service.state.context).toMatchObject({channelId: '0xabc'});
   }, 2000);
 });
+
 it('initializes and starts the join channel machine', async () => {
   const store = new Store();
   const channel: Channel = {chainId: '0x0', channelNonce: '0x0', participants: []};
@@ -100,6 +110,10 @@ it('initializes and starts the join channel machine', async () => {
       actionType: 'displayUi',
       stateType: 'join'
     });
+  }, 2000);
+
+  await waitForExpect(async () => {
+    expect(service.state.context).toBeDefined();
     expect(service.state.context.channelId).toEqual(getChannelId(channel));
   }, 2000);
 });
