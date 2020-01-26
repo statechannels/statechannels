@@ -65,6 +65,10 @@ export function getEthAllocation(outcome: Outcome): Allocation {
 }
 
 export function ethAllocationOutcome(allocation: Allocation): AllocationAssetOutcome[] {
+  // If there are allocations then we use a blank outcomes
+  if (allocation.length === 0) {
+    return [];
+  }
   return [
     {
       assetHolderAddress: AddressZero,
