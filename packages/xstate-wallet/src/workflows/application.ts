@@ -1,4 +1,4 @@
-import {MachineConfig, Machine, StateMachine, send} from 'xstate';
+import {MachineConfig, Machine, StateMachine} from 'xstate';
 import {
   FINAL,
   MachineFactory,
@@ -7,12 +7,14 @@ import {
   CreateChannel,
   JoinChannel,
   IStore,
-  SendStates
+  SendStates,
+  ChannelUpdated,
+  ChannelStoreEntry
 } from '@statechannels/wallet-protocols';
 
 import {State, getChannelId} from '@statechannels/nitro-protocol';
 
-import {sendDisplayMessage} from '../messaging';
+import {sendDisplayMessage, dispatchChannelUpdatedMessage} from '../messaging';
 
 // Events
 type OpenEvent = CreateChannelEvent | OpenChannelEvent;
@@ -40,12 +42,16 @@ const funding = {
     onDone: {target: 'running', actions: ['hideUi']},
     autoForward: true
   },
-  on: {SendStates: {actions: ['updateStore', 'sendChannelUpdated']}}
+  on: {
+    SendStates: {actions: ['updateStore']},
+    CHANNEL_UPDATED: {actions: 'sendChannelUpdatedNotification'}
+  }
 };
 const running = {
   on: {
     PLAYER_STATE_UPDATE: {target: 'running', actions: ['sendToOpponent']},
-    SendStates: {target: 'running', actions: ['updateStore', 'sendChannelUpdated']}
+    SendStates: {target: 'running', actions: ['updateStore']},
+    CHANNEL_UPDATED: {target: 'running', actions: 'sendChannelUpdatedNotification'}
   }
 };
 const closing = {};
@@ -53,7 +59,6 @@ const done = {type: FINAL};
 
 export const config: MachineConfig<any, any, any> = {
   initial: 'initializing',
-
   states: {initializing, funding, running, closing, done}
 };
 
@@ -78,20 +83,20 @@ export const applicationWorkflow: MachineFactory<ApplicationContext, any> = (
   const sendToOpponent = (context, event: PlayerStateUpdate) => {
     store.sendState(event.state);
   };
-  const sendChannelUpdated = send((context, event: any) => {
-    const channelId = getChannelId(event.signedStates[0].state.channel);
-    return {
-      type: 'CHANNEL_UPDATED',
-      channelId
-    };
-  });
+  const sendChannelUpdatedNotification = (context, event: ChannelUpdated) => {
+    if (event.entry.states.length > 0) {
+      const channelId = getChannelId(event.entry.states[0].state.channel);
+      // TODO: We should filter by context.channelId but that is not being set currently
+      dispatchChannelUpdatedMessage(channelId, new ChannelStoreEntry(event.entry));
+    }
+  };
   const displayUi = (context, event) => {
     sendDisplayMessage('Show');
   };
   const hideUi = (context, event) => {
     sendDisplayMessage('Hide');
   };
-  const actions = {sendToOpponent, updateStore, sendChannelUpdated, hideUi, displayUi};
+  const actions = {sendToOpponent, updateStore, sendChannelUpdatedNotification, hideUi, displayUi};
   const options = {
     services: {invokeOpeningMachine},
     actions
@@ -103,7 +108,7 @@ const mockServices = {invokeOpeningMachine: () => {}};
 const mockActions = {
   sendToOpponent: () => {},
   updateStore: () => {},
-  sendChannelUpdated: () => {},
+  sendChannelUpdatedNotification: () => {},
   hideUi: () => {},
   displayUi: () => {}
 };
