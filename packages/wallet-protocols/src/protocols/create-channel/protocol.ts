@@ -15,8 +15,7 @@ const PROTOCOL = 'create-channel';
 Spawned in a new process when the app calls CreateChannel
 */
 export type Init = JsonRpcCreateChannelParams & { chainId: string; challengeDuration: number };
-
-type ChannelSet = Init & { channelId: string };
+export type ChannelSet = Init & { channelId: string };
 export interface SetChannel {
   type: 'CHANNEL_INITIALIZED';
   channelId: string;
@@ -93,7 +92,12 @@ export const config: MachineConfig<Context, any, any> = {
     abort,
     funding,
     postFundSetup,
-    success: { type: 'final' as 'final', entry: sendParent('CHANNEL_CREATED') },
+    success: {
+      type: 'final' as 'final',
+
+      entry: sendParent({ type: 'CHANNEL_CREATED' }),
+      data: (context: ChannelSet, event) => context.channelId,
+    },
   },
 };
 

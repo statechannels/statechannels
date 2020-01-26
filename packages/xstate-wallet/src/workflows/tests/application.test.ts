@@ -6,7 +6,10 @@ import {
   CreateChannelEvent,
   ConcludeChannel,
   SendStates,
-  getChannelId
+  getChannelId,
+  OpenChannelEvent,
+  Channel,
+  JoinChannel
 } from '@statechannels/wallet-protocols';
 import {applicationWorkflow} from '../application';
 import {AddressZero} from 'ethers/constants';
@@ -16,11 +19,17 @@ import {
   generateAllocations
 } from '../../utils/test-helpers';
 let closingMachineMock;
+let joinMachineMock;
 beforeEach(() => {
   // TODO: Is this the best way to mock
   closingMachineMock = jest.fn().mockReturnValue(new Promise(() => {}));
   Object.defineProperty(ConcludeChannel, 'machine', {
     value: closingMachineMock
+  });
+
+  joinMachineMock = jest.fn().mockReturnValue(new Promise(() => {}));
+  Object.defineProperty(JoinChannel, 'machine', {
+    value: joinMachineMock
   });
 });
 
@@ -41,7 +50,40 @@ it('initializes and starts the create channel machine', async () => {
   };
   const service = interpret<any, any, any>(applicationWorkflow(store, undefined));
 
-  //service.onTransition(state => console.log(state.value));
+  service.start();
+
+  await waitForExpect(async () => {
+    expect(service.state.value).toEqual('initializing');
+  }, 2000);
+
+  service.send(event);
+
+  await waitForExpect(async () => {
+    expect(service.state.value).toEqual('create');
+    expect(service.state.children.createMachine).toBeDefined();
+    expect(service.state.actions.map(a => a.type)).toContain('displayUi');
+  }, 2000);
+});
+it('initializes and starts the join channel machine', async () => {
+  const store = new Store();
+  const channel: Channel = {chainId: '0x0', channelNonce: '0x0', participants: []};
+  const event: OpenChannelEvent = {
+    type: 'OPEN_CHANNEL',
+    participants: [],
+    signedState: {
+      state: {
+        turnNum: 0,
+        appData: '0x0',
+        appDefinition: '0x0',
+        outcome: [],
+        isFinal: false,
+        channel,
+        challengeDuration: 500
+      },
+      signatures: []
+    }
+  };
+  const service = interpret<any, any, any>(applicationWorkflow(store, undefined));
 
   service.start();
 
@@ -52,9 +94,13 @@ it('initializes and starts the create channel machine', async () => {
   service.send(event);
 
   await waitForExpect(async () => {
-    expect(service.state.value).toEqual('funding');
-    expect(service.state.children.openMachine).toBeDefined();
-    expect(service.state.actions.map(a => a.type)).toContain('displayUi');
+    expect(service.state.value).toEqual('join');
+    expect(joinMachineMock).toHaveBeenCalled();
+    expect(findCalledActions(service.state)).toContainEqual({
+      actionType: 'displayUi',
+      stateType: 'join'
+    });
+    expect(service.state.context.channelId).toEqual(getChannelId(channel));
   }, 2000);
 });
 it('starts concluding when requested', async () => {
