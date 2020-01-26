@@ -1,4 +1,4 @@
-import { Machine, MachineConfig, AnyEventObject } from 'xstate';
+import { assign, Machine, MachineConfig, AnyEventObject, spawn } from 'xstate';
 import { map, filter } from 'rxjs/operators';
 
 import { IStore, observeChannel } from '../../store';
@@ -27,24 +27,14 @@ export interface Init {
 
 export const config: MachineConfig<Init, any, AnyEventObject> = {
   key: PROTOCOL,
-  type: 'parallel',
+  initial: 'sendState',
   states: {
-    checkIfAdvanced: {
-      on: { ADVANCED: '.success' },
-      initial: 'watching',
-      states: {
-        watching: { invoke: { src: 'notifyWhenAdvanced' } },
-        success: { type: 'final' },
-      },
-    },
     sendState: {
-      on: { ADVANCED: '.success' },
-      initial: 'sendingState',
-      states: {
-        sendingState: { invoke: { src: 'sendState', onDone: 'success' } },
-        success: { type: 'final' },
-      },
+      entry: 'spawnObserver',
+      invoke: { src: 'sendState' },
+      on: { ADVANCED: 'success' },
     },
+    success: { type: 'final' },
   },
 };
 
@@ -83,10 +73,15 @@ const sendState = (store: IStore) => async ({ channelId, targetTurnNum }: Init) 
   }
 };
 
-export const options = (store: IStore) => ({
+const options = (store: IStore) => ({
   services: {
     notifyWhenAdvanced: notifyWhenAdvanced(store),
     sendState: sendState(store),
+  },
+  actions: {
+    spawnObserver: assign<Init & { observer: any }>({
+      observer: (ctx: Init) => spawn(notifyWhenAdvanced(store)(ctx)),
+    }),
   },
 });
 
