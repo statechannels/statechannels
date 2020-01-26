@@ -32,7 +32,7 @@ beforeEach(() => {
   });
   createChannelMock = jest.fn().mockReturnValue(
     new Promise(resolve => {
-      resolve('0xabc');
+      resolve({channelId: '0xabc'});
     })
   );
   Object.defineProperty(CreateChannel, 'machine', {
