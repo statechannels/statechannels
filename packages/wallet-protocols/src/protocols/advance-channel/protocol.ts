@@ -1,7 +1,8 @@
-import { send, Machine, MachineConfig, AnyEventObject } from 'xstate';
+import { Machine, MachineConfig, AnyEventObject } from 'xstate';
+import { map, filter } from 'rxjs/operators';
 
-import { IStore, MachineFactory, ChannelStoreEntry } from '../..';
-import { ChannelUpdated } from '../../store';
+import { IStore, observeChannel } from '../../store';
+import { MachineFactory } from '../..';
 
 const PROTOCOL = 'advance-channel';
 /*
@@ -28,18 +29,20 @@ export const config: MachineConfig<Init, any, AnyEventObject> = {
   key: PROTOCOL,
   type: 'parallel',
   states: {
-    watchStore: {
+    checkIfAdvanced: {
+      on: { ADVANCED: '.success' },
       initial: 'watching',
       states: {
-        watching: { invoke: { id: 'store-watcher', src: 'watchStore', onDone: 'done' } },
-        done: { type: 'final' },
+        watching: { invoke: { src: 'notifyWhenAdvanced' } },
+        success: { type: 'final' },
       },
     },
     sendState: {
+      on: { ADVANCED: '.success' },
       initial: 'sendingState',
       states: {
         sendingState: { invoke: { src: 'sendState', onDone: 'success' } },
-        success: { entry: send('DONE'), type: 'final' },
+        success: { type: 'final' },
       },
     },
   },
@@ -47,29 +50,16 @@ export const config: MachineConfig<Init, any, AnyEventObject> = {
 
 export type Services = {
   sendState(ctx: Init): Promise<void>;
-  watchStore(ctx: Init): any; // TODO: add callback type
 };
 
-function advanced(entry: ChannelStoreEntry, targetTurnNum: number): boolean {
-  return entry.hasSupportedState && entry.latestSupportedState.turnNum >= targetTurnNum;
-}
-
-const watchStore = (store: IStore) => async ({
-  channelId,
-  targetTurnNum,
-}: Init): Promise<undefined> => {
-  return new Promise(resolve => {
-    const entry = store.getEntry(channelId);
-    if (advanced(entry, targetTurnNum)) resolve();
-    store.on('CHANNEL_UPDATED', async (event: ChannelUpdated) => {
-      if (
-        channelId === event.channelId &&
-        advanced(await store.getEntry(channelId), targetTurnNum)
-      ) {
-        resolve();
-      }
-    });
-  });
+const notifyWhenAdvanced = (store: IStore) => (ctx: Init) => {
+  return observeChannel(store, ctx.channelId).pipe(
+    map(event => event.entry),
+    filter(e => {
+      return e.hasSupportedState && e.latestSupportedState.turnNum >= ctx.targetTurnNum;
+    }),
+    map(() => 'ADVANCED')
+  );
 };
 
 const sendState = (store: IStore) => async ({ channelId, targetTurnNum }: Init) => {
@@ -95,7 +85,7 @@ const sendState = (store: IStore) => async ({ channelId, targetTurnNum }: Init) 
 
 export const options = (store: IStore) => ({
   services: {
-    watchStore: watchStore(store),
+    notifyWhenAdvanced: notifyWhenAdvanced(store),
     sendState: sendState(store),
   },
 });
