@@ -15,12 +15,14 @@
     "@statechannels/wallet-protocols": "1.0.0",
     "@xstate/react": "0.8.1",
     "ethers": "4.0.39",
-    "guid-typescript": "1.0.9",
     "eventemitter3": "4.0.0",
+    "guid-typescript": "1.0.9",
     "html-webpack-plugin": "3.2.0",
+    "jest": "25.1.0",
     "jsonrpc-lite": "2.1.0",
     "react": "16.12.0",
     "react-dom": "16.12.0",
+    "ts-jest": "25.0.0",
     "xstate": "^4.7"
   },
   "devDependencies": {
@@ -41,6 +43,8 @@
     "build:ci": "yarn build",
     "lint:check": "eslint . --ext .ts --cache",
     "lint:write": "eslint . --ext .ts --fix",
-    "generateConfigs": "yarn run ts-node bin/generateConfigs.ts "
+    "generateConfigs": "yarn run ts-node bin/generateConfigs.ts ",
+    "test": "npx jest",
+    "test:ci": "yarn test --ci --runInBand"
   }
 }
