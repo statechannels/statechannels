@@ -53,7 +53,6 @@ const createNewLedger = {
     src: 'createNullChannel',
     data: (_, { data }: DoneInvokeEvent<CreateNullChannel.Init>) => data,
     onDone: { target: 'success', actions: assignLedgerChannelId },
-    autoForward: true,
   },
 };
 

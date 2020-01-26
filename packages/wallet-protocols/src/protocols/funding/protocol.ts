@@ -57,18 +57,12 @@ const retry = {
 };
 
 type PeerChoiceKnown = Init & { peerChoice: FundingStrategy };
-const assignPeerChoice = assign<PeerChoiceKnown>(
-  (ctx: Init, { choice }: FundingStrategyProposed) => ({
-    ...ctx,
-    peerChoice: choice,
-  })
-);
+const assignPeerChoice = assign<PeerChoiceKnown>((ctx: Init, {}: FundingStrategyProposed) => ({
+  ...ctx,
+  peerChoice: 'Indirect',
+}));
 const determineStrategy = {
-  on: {
-    FUNDING_STRATEGY_PROPOSED: {
-      actions: assignPeerChoice,
-    },
-  },
+  entry: assignPeerChoice as any,
   initial: 'getClientChoice',
   states: {
     getClientChoice,
@@ -101,7 +95,6 @@ const fundIndirectly = {
     src: 'ledgerFunding',
     data: ({ targetChannelId }: Init) => ({ targetChannelId }),
     onDone: 'success',
-    autoForward: true,
   },
 };
 

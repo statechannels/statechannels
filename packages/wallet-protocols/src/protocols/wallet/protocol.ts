@@ -1,6 +1,6 @@
 import { assign, AssignAction, Interpreter, Machine, spawn, MachineConfig } from 'xstate';
 
-import { getChannelId, unreachable } from '../..';
+import { getChannelId } from '../..';
 import { ChannelUpdated, IStore } from '../../store';
 import { FundingStrategyProposed, OpenChannel, SendStates } from '../../wire-protocol';
 
@@ -26,21 +26,6 @@ export interface Init {
 
 const running = (p: Process) => !p.ref.state.done;
 
-function forwardToChildren(_ctx, event: Events, { state }) {
-  switch (event.type) {
-    case 'FUNDING_STRATEGY_PROPOSED':
-      state.context.processes.filter(running).forEach(({ ref }: Process) => ref.send(event));
-      break;
-    case 'CREATE_CHANNEL':
-    case 'OPEN_CHANNEL':
-    case 'SendStates':
-    case 'CONCLUDE_CHANNEL':
-      break;
-    default:
-      unreachable(event);
-  }
-}
-
 const config: MachineConfig<Init, any, Events> = {
   key: PROTOCOL,
   initial: 'running',
@@ -51,8 +36,7 @@ const config: MachineConfig<Init, any, Events> = {
         CREATE_CHANNEL: { actions: 'spawnCreateChannel' },
         CONCLUDE_CHANNEL: { actions: 'spawnConcludeChannel' },
         OPEN_CHANNEL: { actions: 'spawnJoinChannel' },
-        SendStates: { actions: ['updateStore', forwardToChildren] },
-        FUNDING_STRATEGY_PROPOSED: { actions: forwardToChildren },
+        SendStates: { actions: ['updateStore'] },
       },
     },
   },
@@ -73,7 +57,6 @@ export type Actions = {
   spawnJoinChannel: AssignAction<Init, OpenChannelEvent>;
   spawnCreateChannel: AssignAction<Init, CreateChannelEvent>;
   spawnConcludeChannel: AssignAction<Init, ConcludeChannelEvent>;
-  forwardToChildren: typeof forwardToChildren;
   updateStore: any; // TODO
 };
 
@@ -152,7 +135,6 @@ export function machine(store: IStore, context: Init) {
       spawnCreateChannel,
       spawnJoinChannel,
       spawnConcludeChannel,
-      forwardToChildren,
       updateStore,
     },
   };
