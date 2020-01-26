@@ -39,23 +39,36 @@ interface ApplicationContext {
   channelId?: string;
 }
 // States
-const initializing = {on: {CREATE_CHANNEL: 'funding', OPEN_CHANNEL: 'funding'}};
-
-const funding = {
-  entry: ['displayUi'],
+const initializing = {on: {CREATE_CHANNEL: 'create', OPEN_CHANNEL: 'join'}};
+const join = {
+  entry: ['assignChannelId', 'displayUi'],
   invoke: {
-    id: 'openMachine',
-    src: 'invokeOpeningMachine',
+    id: 'joinMachine',
+    src: 'invokeJoinMachine',
     data: (context, event) => event,
     onDone: {target: 'running', actions: ['hideUi']},
     autoForward: true
   },
   on: {
-    SendStates: {actions: ['updateStore', 'sendChannelUpdated']},
-    // TODO: This is temporary until we split opening into joining/creating
-    CHANNEL_UPDATED: {actions: 'assignChannelId'}
+    SendStates: {actions: ['updateStore']},
+    CHANNEL_UPDATED: {actions: ['sendChannelUpdatedNotification']}
   }
 };
+const create = {
+  entry: ['displayUi'],
+  invoke: {
+    id: 'createMachine',
+    src: 'invokeCreateMachine',
+    data: (context, event) => event,
+    onDone: {target: 'running', actions: ['hideUi', 'assignChannelId']},
+    autoForward: true
+  },
+  on: {
+    SendStates: {actions: ['updateStore']},
+    CHANNEL_UPDATED: {actions: ['sendChannelUpdatedNotification']}
+  }
+};
+
 const running = {
   on: {
     PLAYER_STATE_UPDATE: {target: 'running', actions: ['sendToOpponent']},
@@ -83,19 +96,28 @@ const done = {type: FINAL};
 
 export const config: MachineConfig<any, any, any> = {
   initial: 'initializing',
-  states: {initializing, funding, running, closing, done}
+  states: {initializing, join, create, running, closing, done}
 };
 
 export const applicationWorkflow: MachineFactory<ApplicationContext, any> = (
   store: IStore,
   context: ApplicationContext
 ) => {
-  const invokeOpeningMachine = (context, event: OpenEvent): StateMachine<any, any, any, any> => {
-    if (event.type === 'CREATE_CHANNEL') {
-      return CreateChannel.machine(store);
-    } else {
-      return JoinChannel.machine(store, event);
-    }
+  // Always use an empty context instead of undefined
+  if (!context) {
+    context = {};
+  }
+  const invokeJoinMachine = (
+    context,
+    event: OpenChannelEvent
+  ): StateMachine<any, any, any, any> => {
+    return JoinChannel.machine(store, event);
+  };
+  const invokeCreateMachine = (
+    context,
+    event: CreateChannelEvent
+  ): StateMachine<any, any, any, any> => {
+    return CreateChannel.machine(store);
   };
   const updateStore = (context, event: SendStates) => {
     store.receiveStates(
@@ -137,26 +159,26 @@ export const applicationWorkflow: MachineFactory<ApplicationContext, any> = (
       .some(ss => ss.state.isFinal);
   };
 
-  const assignChannelId = assign({
-    channelId: (
+  const assignChannelId = assign(
+    (
       context: ApplicationContext,
-      event: ChannelUpdated | SendStates | PlayerStateUpdate
+      event: any // TODO Proper typing
     ) => {
       if (!context.channelId) {
-        if (event.type === 'CHANNEL_UPDATED') {
-          return event.channelId;
-        } else if (event.type === 'PLAYER_STATE_UPDATE') {
-          return getChannelId(event.state.channel);
+        if (event.type === 'PLAYER_STATE_UPDATE') {
+          return {channelId: getChannelId(event.state.channel)};
+        } else if (event.type === 'OPEN_CHANNEL') {
+          return {channelId: getChannelId(event.signedState.state.channel)};
         } else {
-          return getChannelId(event.signedStates[0].state.channel);
+          return {channelId: event.data};
         }
       }
-      return context.channelId;
+      return context;
     }
-  });
+  );
 
   const guards = {channelOpen, channelClosing};
-  const services = {invokeClosingMachine, invokeOpeningMachine};
+  const services = {invokeClosingMachine, invokeCreateMachine, invokeJoinMachine};
   const actions = {
     sendToOpponent,
     updateStore,
@@ -173,7 +195,11 @@ export const applicationWorkflow: MachineFactory<ApplicationContext, any> = (
   return Machine(config).withConfig(options, context);
 };
 
-const mockServices = {invokeOpeningMachine: () => {}, invokeClosingMachine: () => {}};
+const mockServices = {
+  invokeCreateMachine: () => {},
+  invokeJoinMachine: () => {},
+  invokeClosingMachine: () => {}
+};
 const mockActions = {
   sendToOpponent: () => {},
   updateStore: () => {},
