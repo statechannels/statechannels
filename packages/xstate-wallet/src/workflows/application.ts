@@ -82,18 +82,20 @@ const running = {
 };
 const closing = {
   entry: ['displayUi'],
+  exit: ['hideUi'],
   invoke: {
     id: 'closingMachine',
     src: 'invokeClosingMachine',
     data: (context, event) => context,
-    autoForward: true,
-    onDone: 'done'
+    autoForward: true
   },
   on: {
     SendStates: {actions: ['updateStore']},
-    CHANNEL_UPDATED: {actions: ['sendChannelUpdatedNotification']}
-  },
-  onDone: 'done'
+    CHANNEL_UPDATED: [
+      {cond: 'channelClosed', target: 'done', actions: ['sendChannelUpdatedNotification']},
+      {target: 'closing', actions: ['sendChannelUpdatedNotification']}
+    ]
+  }
 };
 const done = {type: FINAL};
 
@@ -162,6 +164,14 @@ export const applicationWorkflow: MachineFactory<ApplicationContext, any> = (
       .some(ss => ss.state.isFinal);
   };
 
+  const channelClosed = (context: ApplicationContext, event: ChannelUpdated): boolean => {
+    if (!context || !context.channelId) {
+      return false;
+    }
+    const channelStoreEntry = new ChannelStoreEntry(event.entry);
+    return channelStoreEntry.hasSupportedState && channelStoreEntry.latestSupportedState.isFinal;
+  };
+
   const assignChannelId = assign(
     (
       context: ApplicationContext,
@@ -181,7 +191,7 @@ export const applicationWorkflow: MachineFactory<ApplicationContext, any> = (
     }
   );
 
-  const guards = {channelOpen, channelClosing};
+  const guards = {channelOpen, channelClosing, channelClosed};
   const services = {invokeClosingMachine, invokeCreateMachine, invokeJoinMachine};
   const actions = {
     sendToOpponent,
