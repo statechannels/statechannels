@@ -74,7 +74,10 @@ export const machine: MachineFactory<Init, any> = (store: IStore, ctx: Init) => 
     if (!latestState) {
       throw new Error('No state');
     }
-
+    // Only progress our turnNum if the state is not final
+    if (latestState.isFinal) {
+      return { state: latestState };
+    }
     return {
       state: {
         ...latestState,
