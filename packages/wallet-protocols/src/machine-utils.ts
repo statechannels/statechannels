@@ -7,7 +7,7 @@ Since machines typically  don't have sync access to a store, we invoke a promise
 desired outcome; that outcome can then be forwarded to the invoked service.
 */
 
-export function getDetaAndInvoke<T>(
+export function getDataAndInvoke<T>(
   data: string,
   src: string,
   onDone: string,
