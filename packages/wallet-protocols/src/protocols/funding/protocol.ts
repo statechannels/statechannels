@@ -1,6 +1,7 @@
 import { assign, DoneInvokeEvent, Machine } from 'xstate';
 
-import { failure, MachineFactory, pretty, Store, success } from '../..';
+import { failure, pretty, Store, success } from '../..';
+import { MachineFactory } from '../../machine-utils';
 import { FundingStrategy, FundingStrategyProposed } from '../../wire-protocol';
 import { log } from '../../utils';
 
