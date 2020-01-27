@@ -1,4 +1,4 @@
-import { EventObject, SendAction, StateMachine, forwardTo } from 'xstate';
+import { SendAction, forwardTo } from 'xstate';
 import { Outcome, State, hashOutcome, hashState } from '@statechannels/nitro-protocol';
 
 import { ChannelUpdated, Store } from './store';
@@ -16,15 +16,6 @@ type Transition<C> = { actions: SendAction<C, ChannelUpdated> };
 export function forwardChannelUpdated<C>(id: string): Transition<C> {
   return { actions: forwardTo(id) };
 }
-
-// TODO
-// Some machine factories require a context, and some don't
-// Sort this out.
-export type MachineFactory<I, E extends EventObject> = (
-  store: Store,
-  context?: I
-) => StateMachine<I, any, E>;
-
 export function unreachable(x: never) {
   return x;
 }

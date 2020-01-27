@@ -1,8 +1,8 @@
 import { assign, DoneInvokeEvent, Machine, MachineConfig } from 'xstate';
 
 import { allocateToTarget, getEthAllocation } from '../../calculations';
-import { Channel, MachineFactory, Store, success } from '../..';
-import { getDataAndInvoke } from '../../machine-utils';
+import { Store, Channel, success } from '../..';
+import { MachineFactory, getDataAndInvoke } from '../../machine-utils';
 import { Funding } from '../../ChannelStoreEntry';
 
 import { CreateNullChannel, DirectFunding, SupportState } from '..';
@@ -98,7 +98,7 @@ export type Services = {
   directFunding: any;
   getTargetOutcome(ctx: LedgerExists): Promise<SupportState.Init>;
   updateFunding(ctx: LedgerExists): Promise<void>;
-  supportState: ReturnType<SupportState.machine>;
+  supportState: ReturnType<typeof SupportState.machine>;
 };
 
 export const guards = {

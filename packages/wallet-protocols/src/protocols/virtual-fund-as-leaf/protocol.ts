@@ -1,13 +1,13 @@
 import { assign } from 'xstate';
-import { Guarantee } from '@statechannels/nitro-protocol/lib/src/contract/outcome';
 import { AddressZero } from 'ethers/constants';
+import { Guarantee } from '@statechannels/nitro-protocol';
 
 import { Channel, getChannelId } from '../../';
 import { add } from '../../mathOps';
 import { Balance } from '../../types';
 import { Init as CreateNullChannelArgs } from '../create-null-channel/protocol';
-import { store } from '../../temp-store';
 import { ethAllocationOutcome } from '../../calculations';
+const store = {} as any;
 
 const PROTOCOL = 'virtual-funding-as-leaf';
 
