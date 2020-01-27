@@ -2,7 +2,7 @@ import { assign, DoneInvokeEvent, Machine, MachineConfig } from 'xstate';
 
 import { allocateToTarget, getEthAllocation } from '../../calculations';
 import { Channel, MachineFactory, IStore, success } from '../..';
-import { getDetaAndInvoke } from '../../machine-utils';
+import { getDataAndInvoke } from '../../machine-utils';
 import { Funding } from '../../ChannelStoreEntry';
 
 import { CreateNullChannel, DirectFunding, SupportState } from '..';
@@ -53,7 +53,6 @@ const createNewLedger = {
     src: 'createNullChannel',
     data: (_, { data }: DoneInvokeEvent<CreateNullChannel.Init>) => data,
     onDone: { target: 'success', actions: assignLedgerChannelId },
-    autoForward: true,
   },
 };
 
@@ -69,8 +68,8 @@ const waitForChannel = {
 };
 
 type LedgerExists = Init & { ledgerChannelId: string };
-const fundLedger = getDetaAndInvoke('getTargetAllocation', 'directFunding', 'fundTarget');
-const fundTarget = getDetaAndInvoke('getTargetOutcome', 'supportState', 'updateFunding');
+const fundLedger = getDataAndInvoke('getTargetAllocation', 'directFunding', 'fundTarget');
+const fundTarget = getDataAndInvoke('getTargetOutcome', 'supportState', 'updateFunding');
 const updateFunding = {
   invoke: {
     src: 'updateFunding',

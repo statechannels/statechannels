@@ -59,7 +59,6 @@ const preFundSetup = {
     src: 'supportState',
     data: preFundData,
     onDone: 'success',
-    autoForward: true,
   },
 };
 

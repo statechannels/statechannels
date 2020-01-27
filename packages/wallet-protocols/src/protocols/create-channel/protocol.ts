@@ -1,7 +1,7 @@
 import { assign, DoneInvokeEvent, Machine, MachineConfig, sendParent } from 'xstate';
-import { State } from '@statechannels/nitro-protocol';
+import { State, Channel } from '@statechannels/nitro-protocol';
 
-import { Channel, forwardChannelUpdated, MachineFactory, IStore, success } from '../..';
+import { MachineFactory, success, IStore } from '../..';
 import { ethAllocationOutcome } from '../../calculations';
 import { ChannelStoreEntry } from '../../ChannelStoreEntry';
 import { JsonRpcCreateChannelParams } from '../../json-rpc';
@@ -53,10 +53,7 @@ const preFundSetup = {
     data: advanceChannelArgs(1),
     onDone: 'funding',
   },
-  on: {
-    CHANNEL_CLOSED: 'abort',
-    CHANNEL_UPDATED: forwardChannelUpdated<Context>('preFundSetup'),
-  },
+  on: { CHANNEL_CLOSED: 'abort' },
 };
 
 const abort = success;
@@ -66,7 +63,6 @@ const funding = {
     src: 'funding',
     data: passChannelId,
     onDone: 'postFundSetup',
-    autoForward: true,
   },
 };
 
@@ -76,9 +72,6 @@ const postFundSetup = {
     src: 'advanceChannel',
     data: advanceChannelArgs(3),
     onDone: 'success',
-  },
-  on: {
-    CHANNEL_UPDATED: forwardChannelUpdated<Context>('postFundSetup'),
   },
 };
 
