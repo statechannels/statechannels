@@ -21,6 +21,7 @@ import {bigNumberify} from 'ethers/utils';
 import {CreateChannelParams} from '@statechannels/client-api-schema/types/create-channel';
 import {PushMessageParams} from '@statechannels/client-api-schema/types/push-message';
 import {WorkflowManager} from './workflow-manager';
+import {JoinChannelParams} from '@statechannels/client-api-schema';
 
 export async function handleMessage(
   event,
@@ -67,10 +68,21 @@ export async function handleMessage(
           case 'CloseChannel':
             await handleCloseChannel(parsedMessage.payload, store);
             break;
+          case 'JoinChannel':
+            await handleJoinChannel(parsedMessage.payload as any, store);
+            break;
         }
         break;
     }
   }
+}
+
+async function handleJoinChannel(payload: {id: jrs.ID; params: JoinChannelParams}, store: IStore) {
+  // TODO: The application workflow should be updated to wait until we get a  join channel from the client
+  const {id} = payload;
+  const {channelId} = payload.params;
+  const result = jrs.success(id, await getChannelInfo(channelId, store.getEntry(channelId)));
+  window.parent.postMessage(result, '*');
 }
 
 async function handleCloseChannel(payload: jrs.RequestObject, store: IStore) {
@@ -186,7 +198,10 @@ async function getChannelInfo(channelId: string, channelEntry: ChannelStoreEntry
 // TODO: Probably should be async and the store should have async methods
 export function dispatchChannelUpdatedMessage(channelId: string, channelEntry: ChannelStoreEntry) {
   // TODO: Right now we assume anything that is not a null channel is an app channel
-  if (bigNumberify(channelEntry.latestState.appDefinition).isZero()) {
+  if (
+    channelEntry.states.length === 0 ||
+    bigNumberify(channelEntry.latestState.appDefinition).isZero()
+  ) {
     return;
   }
   getChannelInfo(channelId, channelEntry).then(channelInfo => {
