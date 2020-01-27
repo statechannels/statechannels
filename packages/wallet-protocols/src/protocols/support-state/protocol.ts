@@ -1,7 +1,7 @@
 import { Machine } from 'xstate';
 import { State, getChannelId } from '@statechannels/nitro-protocol';
 
-import { MachineFactory, FINAL, statesEqual } from '../..';
+import { MachineFactory, FINAL, statesEqual, outcomesEqual } from '../..';
 import { IStore } from '../../store';
 
 const PROTOCOL = 'support-state';
@@ -71,7 +71,9 @@ export const machine: MachineFactory<Init, any> = (store: IStore, context: Init)
         // Otherwise, we only send it if we haven't signed any new states.
         (hasSupportedState &&
           statesEqual(entry.latestSupportedState, latestStateSupportedByMe) &&
-          entry.latestSupportedState.turnNum < state.turnNum)
+          entry.latestSupportedState.turnNum < state.turnNum) ||
+        // We always support a final state if it matches the outcome that we have signed
+        (state.isFinal && outcomesEqual(state.outcome, latestStateSupportedByMe.outcome))
       ) {
         await store.sendState(state);
       } else {
