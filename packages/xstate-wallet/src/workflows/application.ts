@@ -72,11 +72,11 @@ const create = {
 const running = {
   on: {
     PLAYER_STATE_UPDATE: {target: 'running', actions: ['sendToOpponent']},
-    CHANNEL_UPDATED: {target: 'running', actions: 'sendChannelUpdatedNotification'},
-    SendStates: [
-      {cond: 'channelOpen', target: 'running', actions: ['updateStore']},
-      {cond: 'channelClosing', target: 'closing', actions: ['updateStore']}
+    CHANNEL_UPDATED: [
+      {cond: 'channelOpen', target: 'running', actions: ['sendChannelUpdatedNotification']},
+      {cond: 'channelClosing', target: 'closing', actions: ['sendChannelUpdatedNotification']}
     ],
+    SendStates: [{target: 'running', actions: ['updateStore']}],
     PLAYER_REQUEST_CONCLUDE: {target: 'closing'}
   }
 };
@@ -155,17 +155,25 @@ export const applicationWorkflow: MachineFactory<ApplicationContext, any> = (
     return ConcludeChannel.machine(store, {channelId: context.channelId});
   };
 
-  const channelOpen = (context: ApplicationContext, event: SendStates): boolean => {
+  const channelOpen = (context: ApplicationContext, event: ChannelUpdated): boolean => {
     return !channelClosing(context, event);
   };
-  const channelClosing = (context: ApplicationContext, event: SendStates): boolean => {
-    return event.signedStates
-      .filter(ss => context.channelId === getChannelId(ss.state.channel))
-      .some(ss => ss.state.isFinal);
+  const channelClosing = (context: ApplicationContext, event: ChannelUpdated): boolean => {
+    if (!context || !context.channelId) {
+      return false;
+    }
+    if (event.channelId !== context.channelId) {
+      return false;
+    }
+    const channelStoreEntry = new ChannelStoreEntry(event.entry);
+    return channelStoreEntry.latestState.isFinal;
   };
 
   const channelClosed = (context: ApplicationContext, event: ChannelUpdated): boolean => {
     if (!context || !context.channelId) {
+      return false;
+    }
+    if (event.channelId !== context.channelId) {
       return false;
     }
     const channelStoreEntry = new ChannelStoreEntry(event.entry);
