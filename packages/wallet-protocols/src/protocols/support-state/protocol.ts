@@ -31,6 +31,7 @@ export const config: MachineConfig<Init, any, AnyEventObject> = {
 
 type Services = { sendState(ctx: Init): any };
 
+type HasObserver = Init & { observer: any };
 type Options = {
   services: Services;
   actions: { spawnObserver: AssignAction<Init, any> };
@@ -69,9 +70,10 @@ const options = (store: IStore): Options => ({
     sendState: sendState(store),
   },
   actions: {
-    spawnObserver: assign<Init & { observer: any }>({
-      observer: (ctx: Init) => spawn(notifyWhenSupported(store, ctx)),
-    }),
+    spawnObserver: assign<Init>((ctx: Init) => ({
+      ...ctx,
+      observer: spawn(notifyWhenSupported(store, ctx)),
+    })),
   },
 });
 

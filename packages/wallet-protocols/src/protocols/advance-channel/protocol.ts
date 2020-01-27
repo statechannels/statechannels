@@ -78,9 +78,10 @@ const options = (store: IStore) => ({
     sendState: sendState(store),
   },
   actions: {
-    spawnObserver: assign<Init & { observer: any }>({
-      observer: (ctx: Init) => spawn(notifyWhenAdvanced(store, ctx)),
-    }),
+    spawnObserver: assign<Init>((ctx: Init) => ({
+      ...ctx,
+      observer: spawn(notifyWhenAdvanced(store, ctx)),
+    })),
   },
 });
 
