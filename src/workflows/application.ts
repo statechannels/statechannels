@@ -74,8 +74,8 @@ const running = {
     PLAYER_STATE_UPDATE: {target: 'running', actions: ['sendToOpponent']},
     CHANNEL_UPDATED: {target: 'running', actions: 'sendChannelUpdatedNotification'},
     SendStates: [
-      {cond: 'channelOpen', target: 'running', actions: ['updateStore', 'sendChannelUpdated']},
-      {cond: 'channelClosing', target: 'closing', actions: ['updateStore', 'sendChannelUpdated']}
+      {cond: 'channelOpen', target: 'running', actions: ['updateStore']},
+      {cond: 'channelClosing', target: 'closing', actions: ['updateStore']}
     ],
     PLAYER_REQUEST_CONCLUDE: {target: 'closing'}
   }
@@ -134,7 +134,7 @@ export const applicationWorkflow: MachineFactory<ApplicationContext, any> = (
   const sendToOpponent = (context, event: PlayerStateUpdate) => {
     store.sendState(event.state);
   };
-  const sendChannelUpdated = (context, event: ChannelUpdated) => {
+  const sendChannelUpdatedNotification = (context, event: ChannelUpdated) => {
     if (event.entry.states.length > 0) {
       const channelId = getChannelId(event.entry.states[0].state.channel);
       // TODO: We should filter by context.channelId but that is not being set currently
@@ -196,7 +196,7 @@ export const applicationWorkflow: MachineFactory<ApplicationContext, any> = (
   const actions = {
     sendToOpponent,
     updateStore,
-    sendChannelUpdated,
+    sendChannelUpdated: sendChannelUpdatedNotification,
     assignChannelId,
     displayUi,
     hideUi
