@@ -1,7 +1,6 @@
-import { Channel, getChannelId, State } from '@statechannels/nitro-protocol';
+import { Channel, getChannelId, State, getStateSignerAddress } from '@statechannels/nitro-protocol';
 import { ethers } from 'ethers';
 import _ from 'lodash';
-import { getStateSignerAddress } from '@statechannels/nitro-protocol/lib/src/signatures';
 
 import { SignedState } from './types';
 import { Participant, Store } from './store';

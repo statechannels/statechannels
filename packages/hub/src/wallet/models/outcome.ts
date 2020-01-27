@@ -1,4 +1,4 @@
-import {AllocationAssetOutcome} from '@statechannels/nitro-protocol/lib/src/contract/outcome';
+import {AllocationAssetOutcome} from '@statechannels/nitro-protocol';
 import {AssetOutcome, GuaranteeAssetOutcome} from '@statechannels/nitro-protocol';
 import {Address} from '../../types';
 import {Model, snakeCaseMappers} from 'objection';

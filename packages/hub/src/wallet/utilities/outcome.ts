@@ -1,8 +1,9 @@
-import {isAllocationOutcome, Outcome} from '@statechannels/nitro-protocol';
 import {
+  isAllocationOutcome,
+  Outcome,
   AssetOutcome,
   isGuaranteeOutcome
-} from '@statechannels/nitro-protocol/lib/src/contract/outcome';
+} from '@statechannels/nitro-protocol';
 import {unreachable} from '../../constants';
 
 function assetOutcomeObjectToModel(assetOutcome: AssetOutcome) {

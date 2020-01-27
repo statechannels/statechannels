@@ -1,5 +1,5 @@
 import {Channel, encodeConsensusData, getChannelId, State} from '@statechannels/nitro-protocol';
-import {ConsensusData} from '@statechannels/nitro-protocol/lib/src/contract/consensus-data';
+import {ConsensusData} from '@statechannels/nitro-protocol';
 import {
   allocationOutcome2,
   allocationOutcome3,
