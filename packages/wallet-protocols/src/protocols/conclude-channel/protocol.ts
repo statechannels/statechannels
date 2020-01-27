@@ -74,16 +74,18 @@ export const machine: MachineFactory<Init, any> = (store: IStore, ctx: Init) => 
     if (!latestStateSupportedByMe) {
       throw new Error('No state');
     }
-    if (latestStateSupportedByMe.isFinal) {
-      return { state: latestStateSupportedByMe };
-    }
+    // If we've received a new final state that matches our outcome we support that
     if (
       latestState.isFinal &&
       outcomesEqual(latestStateSupportedByMe.outcome, latestState.outcome)
     ) {
       return { state: latestState };
     }
-
+    // Otherwise send out our final state that we support
+    if (latestStateSupportedByMe.isFinal) {
+      return { state: latestStateSupportedByMe };
+    }
+    // Otherwise create a new final state
     return {
       state: {
         ...latestStateSupportedByMe,
