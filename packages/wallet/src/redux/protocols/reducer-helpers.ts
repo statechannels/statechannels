@@ -134,10 +134,10 @@ export function sendChallengeStateReceived(sharedData: SharedData) {
 }
 
 // TODO 'Complete' here means the challenge was successfully responded to
-export function sendChallengeComplete(sharedData: SharedData) {
+export function sendChallengeComplete(sharedData: SharedData, channelId: string) {
   const newSharedData = {...sharedData};
   newSharedData.outboxState = accumulateSideEffects(newSharedData.outboxState, {
-    messageOutbox: apiNotImplemented({apiMethod: "ChallengeComplete"})
+    messageOutbox: channelUpdatedEvent({channelId})
   });
   return newSharedData;
 }

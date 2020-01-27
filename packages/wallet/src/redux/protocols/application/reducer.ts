@@ -84,7 +84,10 @@ function ownStateReceivedReducer(
     const updatedSharedData = {...sharedData, channelStore: signResult.store};
     return {
       sharedData: updatedSharedData,
-      protocolState: states.ongoing(protocolState)
+      protocolState:
+        protocolState.type === "Application.WaitForDispute"
+          ? protocolState
+          : states.ongoing(protocolState)
     };
   }
 }
@@ -107,7 +110,10 @@ function opponentStateReceivedReducer(
     const updatedSharedData = {...sharedData, channelStore: validateResult.store};
     return {
       sharedData: updatedSharedData,
-      protocolState: states.ongoing(protocolState)
+      protocolState:
+        protocolState.type === "Application.WaitForDispute"
+          ? protocolState
+          : states.ongoing(protocolState)
     };
   }
 }
@@ -197,7 +203,10 @@ const validateAndUpdate = (
       protocolState.participants,
       getAppDefinitionBytecode(sharedData, signedState.state.appDefinition)
     );
-  } else if (protocolState.type === "Application.Ongoing") {
+  } else if (
+    protocolState.type === "Application.Ongoing" ||
+    protocolState.type === "Application.WaitForDispute"
+  ) {
     return checkAndStore(
       sharedData.channelStore,
       signedState,

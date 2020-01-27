@@ -6,7 +6,10 @@ import * as TransactionGenerator from "../../../../../utils/transaction-generato
 import {itSendsThisDisplayEventType, itSendsThisMessage} from "../../../../__tests__/helpers";
 import {describeScenarioStep} from "../../../../__tests__/helpers";
 import {State} from "@statechannels/nitro-protocol";
-import {apiNotImplemented} from "../../../../sagas/messaging/outgoing-api-actions";
+import {
+  apiNotImplemented,
+  channelUpdatedEvent
+} from "../../../../sagas/messaging/outgoing-api-actions";
 
 // Mocks
 const mockTransaction = {to: "0xabc"};
@@ -168,7 +171,7 @@ describe("REQUIRE RESPONSE HAPPY-PATH ", () => {
     const {state, action} = scenario.waitForAcknowledgement;
     const result = responderReducer(state, sharedData, action);
     itSendsThisDisplayEventType(result.sharedData, "Hide");
-    itSendsThisMessage(result.sharedData, apiNotImplemented({apiMethod: "ChallengeComplete"}));
+    itSendsThisMessage(result.sharedData, channelUpdatedEvent({channelId}));
     itTransitionsTo(result, "Responding.Success");
   });
 });
