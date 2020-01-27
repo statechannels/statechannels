@@ -1,5 +1,4 @@
-import {SignedState, State} from '@statechannels/nitro-protocol';
-import {signState} from '@statechannels/nitro-protocol/lib/src/signatures';
+import {SignedState, State, signState} from '@statechannels/nitro-protocol';
 import {Signature} from 'ethers/utils';
 import {HUB_PRIVATE_KEY} from '../../constants';
 import {logger} from '../../logger';

@@ -1,7 +1,6 @@
 import { EventEmitter } from 'events';
 
-import { State } from '@statechannels/nitro-protocol';
-import { getStateSignerAddress, signState } from '@statechannels/nitro-protocol/lib/src/signatures';
+import { State, getStateSignerAddress, signState } from '@statechannels/nitro-protocol';
 import _ from 'lodash';
 
 import { ChannelStoreEntry, IChannelStoreEntry, supported, Funding } from './ChannelStoreEntry';

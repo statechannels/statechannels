@@ -1,4 +1,4 @@
-import EthAssetHolderArtifact from '@statechannels/nitro-protocol/build/contracts/ETHAssetHolder.json';
+import {ContractArtifacts} from '@statechannels/nitro-protocol';
 
 import {ContractFactory, ethers, providers} from 'ethers';
 import {HUB_SIGNER_PRIVATE_KEY} from '../../constants';
@@ -11,7 +11,7 @@ export async function ethAssetHolder() {
   let ethAssetHolderFactory;
   try {
     ethAssetHolderFactory = await ContractFactory.fromSolidity(
-      EthAssetHolderArtifact,
+      ContractArtifacts.EthAssetHolderArtifact,
       walletWithProvider
     );
   } catch (err) {

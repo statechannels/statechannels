@@ -1,7 +1,5 @@
 import { EventObject, SendAction, StateMachine, forwardTo } from 'xstate';
-import { Outcome, State } from '@statechannels/nitro-protocol';
-import { hashOutcome } from '@statechannels/nitro-protocol/lib/src/contract/outcome';
-import { hashState } from '@statechannels/nitro-protocol/lib/src/contract/state';
+import { Outcome, State, hashOutcome, hashState } from '@statechannels/nitro-protocol';
 
 import { ChannelUpdated, IStore } from './store';
 
