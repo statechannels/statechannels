@@ -131,7 +131,7 @@ export function getChallengeClearedEvent(tx: Transaction, eventResult): Challeng
       kind: 'respond',
       newStates: [signedState],
     };
-  } else if (decodedTransaction === 'checkpoint') {
+  } else if (decodedTransaction.name === 'checkpoint') {
     throw new Error('UnimplementedError');
   } else {
     throw new Error(

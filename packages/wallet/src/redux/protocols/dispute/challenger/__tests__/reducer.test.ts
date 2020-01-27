@@ -12,7 +12,10 @@ import {
   describeScenarioStep,
   itStoresThisState
 } from "../../../../__tests__/helpers";
-import {apiNotImplemented} from "../../../../sagas/messaging/outgoing-api-actions";
+import {
+  apiNotImplemented,
+  channelUpdatedEvent
+} from "../../../../sagas/messaging/outgoing-api-actions";
 
 describe("OPPONENT RESPONDS", () => {
   const scenario = scenarios.opponentResponds;
@@ -56,6 +59,7 @@ describe("OPPONENT RESPONDS", () => {
       expect((result.state as WaitForResponseOrTimeout).expiryTime).toEqual(action1.expiryTime);
     });
   });
+
   describeScenarioStep(scenario.waitForResponseOrTimeoutReceiveResponse, () => {
     const {state, action, signedState} = scenario.waitForResponseOrTimeoutReceiveResponse;
     const result = challengerReducer(state, sharedData, action);
@@ -71,7 +75,7 @@ describe("OPPONENT RESPONDS", () => {
     const result = challengerReducer(state, sharedData, action);
 
     itTransitionsTo(result, "Challenging.SuccessOpen");
-    itSendsThisMessage(result.sharedData, apiNotImplemented({apiMethod: "ChallengeComplete"}));
+    itSendsThisMessage(result.sharedData, channelUpdatedEvent({channelId}));
     itSendsThisDisplayEventType(result.sharedData, "Hide");
   });
 });

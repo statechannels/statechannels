@@ -34,6 +34,9 @@ export const isChallenging = (state: MaybeChannelState): state is ChannelState =
 export const isResponding = (state: MaybeChannelState): state is ChannelState =>
   (state && state.status === 'responding') || false;
 
+export const isChallengingOrResponding = (state: MaybeChannelState): state is ChannelState =>
+  isChallenging(state) || isResponding(state);
+
 export const isClosing = (state: MaybeChannelState): state is ChannelState =>
   (state && state.status === 'closing') || false;
 

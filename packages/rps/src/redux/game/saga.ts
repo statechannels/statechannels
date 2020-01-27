@@ -106,7 +106,7 @@ function* gameSagaRun(client: RPSChannelClient) {
       }
       break;
     case 'A.WeaponAndSaltChosen':
-      if (cs.inRoundAccepted(channelState)) {
+      if (cs.inRoundAccepted(channelState) && !cs.isChallengingOrResponding(channelState)) {
         yield* calculateResultAndSendReveal(localState, channelState, client);
       }
       break;

@@ -156,7 +156,7 @@ const waitForAcknowledgementReducer = (
     case "WALLET.DISPUTE.RESPONDER.ACKNOWLEDGED":
       return {
         protocolState: states.success({}),
-        sharedData: sendChallengeComplete(hideWallet(sharedData))
+        sharedData: sendChallengeComplete(hideWallet(sharedData), protocolState.channelId)
       };
     default:
       return {protocolState, sharedData};
