@@ -63,8 +63,6 @@ const resolveModule = (resolveFn, filePath) => {
 
 // config after eject: we're in ./config/
 module.exports = {
-  appContracts: resolveApp("contracts"),
-  buildContracts: resolveApp("build/contracts"),
   appPath: resolveApp("."),
   appBuild: resolveApp("build"),
   appPublic: resolveApp("public"),
