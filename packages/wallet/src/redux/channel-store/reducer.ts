@@ -1,6 +1,6 @@
 import {ChannelStore, getChannel, setChannel} from "./state";
 import {pushState, initializeChannel, ChannelParticipant} from "./channel-state/states";
-import {State, SignedState, getChannelId} from "@statechannels/nitro-protocol";
+import {State, SignedState, getChannelId, hashState} from "@statechannels/nitro-protocol";
 import {Signatures} from "@statechannels/nitro-protocol";
 import {validTransition, validAppTransition} from "./channel-state/valid-transition";
 import {hasValidSignature} from "../../utils/signing-utils";
@@ -114,14 +114,28 @@ export function checkAndStore(
   signedState: SignedState,
   bytecode?: string
 ): CheckResult {
+  const channelId = getChannelId(signedState.state.channel);
+
+  let channelState = getChannel(store, channelId);
+
+  if (channelState.turnNum === signedState.state.turnNum) {
+    if (
+      hashState(channelState.signedStates[channelState.signedStates.length - 1].state) ===
+      hashState(signedState.state)
+    ) {
+      return {isSuccess: true, store};
+    } else {
+      return {
+        isSuccess: false,
+        reason: "Invalid state: received non-identical state with same turnNum"
+      };
+    }
+  }
+
   if (!hasValidSignature(signedState)) {
     console.log("Failed to validate state signature");
     return {isSuccess: false, reason: "Failed to validate state signature"};
   }
-
-  const channelId = getChannelId(signedState.state.channel);
-
-  let channelState = getChannel(store, channelId);
 
   if (!validTransition(channelState, signedState.state)) {
     return {isSuccess: false, reason: "Invalid force move framework state transition"};

@@ -98,6 +98,7 @@
   },
   "devDependencies": {
     "@babel/runtime": "^7.0.0-beta.53",
+    "@sentry/browser": "^5.11.1",
     "@statechannels/devtools": "0.1.21",
     "@statechannels/jest-gas-reporter": "0.0.2",
     "@storybook/react": "5.2.6",

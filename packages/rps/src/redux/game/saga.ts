@@ -1,4 +1,4 @@
-import {select, call, put, take, actionChannel} from 'redux-saga/effects';
+import {select, call, put, putResolve, take, actionChannel} from 'redux-saga/effects';
 import {RPSChannelClient} from '../../utils/rps-channel-client';
 import {
   AppData,
@@ -106,7 +106,7 @@ function* gameSagaRun(client: RPSChannelClient) {
       }
       break;
     case 'A.WeaponAndSaltChosen':
-      if (cs.inRoundAccepted(channelState)) {
+      if (cs.inRoundAccepted(channelState) && !cs.isChallengingOrResponding(channelState)) {
         yield* calculateResultAndSendReveal(localState, channelState, client);
       }
       break;
@@ -302,7 +302,7 @@ function* calculateResultAndSendReveal(
     aOutcomeAddress,
     bOutcomeAddress
   );
-  yield put(a.updateChannelState(updatedChannelState));
+  yield putResolve(a.updateChannelState(updatedChannelState));
   yield put(a.resultArrived(theirWeapon, result, fundingSituation));
 }
 
@@ -355,7 +355,8 @@ function* closeChannel(channelState: ChannelState, client: RPSChannelClient) {
 }
 
 function* challengeChannel(channelId: string, client: RPSChannelClient) {
-  yield call([client, 'challengeChannel'], channelId);
+  const challengeState = yield call([client, 'challengeChannel'], channelId);
+  yield put(a.updateChannelState(challengeState));
 }
 
 const calculateFundingSituation = (

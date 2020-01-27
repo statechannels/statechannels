@@ -1,12 +1,13 @@
 import { EventEmitter } from 'events';
 
-import { State } from '@statechannels/nitro-protocol';
-import { getStateSignerAddress, signState } from '@statechannels/nitro-protocol/lib/src/signatures';
+import * as rxjs from 'rxjs';
+import { State, getStateSignerAddress, signState } from '@statechannels/nitro-protocol';
 import _ from 'lodash';
 import { AddressZero } from 'ethers/constants';
 import { hashState } from '@statechannels/nitro-protocol/lib/src/contract/state';
+import { map, filter } from 'rxjs/operators';
 
-import { ChannelStoreEntry, IChannelStoreEntry, supported, Funding } from './ChannelStoreEntry';
+import { ChannelStoreEntry, IChannelStoreEntry, Funding, supported } from './ChannelStoreEntry';
 import { messageService, IMessageService } from './messaging';
 import { AddressableMessage, FundingStrategyProposed } from './wire-protocol';
 import { Chain, IChain, ChainEventType, ChainEvent } from './chain';
@@ -45,7 +46,10 @@ export interface IStore {
   sendStrategyChoice(message: FundingStrategyProposed);
   // TODO: set funding
   // setFunding(channelId: string, funding: Funding): void;
-  on: (eventType: StoreEventType, listener: StoreEventListener) => () => void;
+  on: (
+    eventType: StoreEventType,
+    listener: StoreEventListener
+  ) => <T extends StoreEvent>(event: T) => void;
   signState(state: State): SignedState;
 
   getNextNonce(participants: string[]): string;
@@ -293,6 +297,36 @@ export class Store implements IStore {
     }
     return new ChannelStoreEntry(newEntry);
   }
+}
+
+// For subscriber convenience, construct a ChannelStoreEntry
+type T = { type: ChannelUpdated['type']; channelId: string; entry: ChannelStoreEntry };
+export function observeChannel(store: IStore, channelId: string): rxjs.Observable<T> {
+  const firstEntry: Promise<ChannelUpdated | { type: 'NOT_FOUND' }> = new Promise(resolve => {
+    try {
+      const entry = store.getEntry(channelId);
+      resolve({ type: 'CHANNEL_UPDATED', channelId: entry.channelId, entry });
+    } catch (e) {
+      resolve({ type: 'NOT_FOUND' });
+    }
+  });
+
+  const currentState = rxjs
+    .from(firstEntry)
+    .pipe(filter((e): e is T => e.type === 'CHANNEL_UPDATED'));
+
+  const updates = new rxjs.Observable(observer => {
+    store.on('CHANNEL_UPDATED', val => observer.next(val));
+  }).pipe(
+    // TODO: How do we corretcly type `store.on` so that the piped values are the correct type?
+    map((e: ChannelUpdated) => ({
+      ...e,
+      entry: new ChannelStoreEntry(e.entry),
+    })),
+    filter(e => e.channelId === channelId)
+  );
+
+  return rxjs.merge(currentState, updates);
 }
 
 export function merge(left: SignedState[], right: SignedState[]): SignedState[] {

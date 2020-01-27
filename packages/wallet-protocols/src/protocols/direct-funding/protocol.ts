@@ -4,7 +4,7 @@ import _ from 'lodash';
 import { bigNumberify } from 'ethers/utils';
 import { HashZero, AddressZero } from 'ethers/constants';
 
-import { getDetaAndInvoke } from '../../machine-utils';
+import { getDataAndInvoke } from '../../machine-utils';
 import { FINAL, MachineFactory } from '../../';
 import { add, subtract, gt } from '../../mathOps';
 import { IStore } from '../../store';
@@ -56,9 +56,9 @@ export const config: MachineConfig<any, any, any> = {
   initial: 'checkCurrentLevel',
   states: {
     checkCurrentLevel,
-    updatePrefundOutcome: getDetaAndInvoke('getPrefundOutcome', 'supportState', 'funding'),
-    funding: getDetaAndInvoke('getDepositingInfo', 'fundingService', 'updatePostfundOutcome'),
-    updatePostfundOutcome: getDetaAndInvoke('getPostfundOutcome', 'supportState', 'success'),
+    updatePrefundOutcome: getDataAndInvoke('getPrefundOutcome', 'supportState', 'funding'),
+    funding: getDataAndInvoke('getDepositingInfo', 'fundingService', 'updatePostfundOutcome'),
+    updatePostfundOutcome: getDataAndInvoke('getPostfundOutcome', 'supportState', 'success'),
     success,
     failure,
   },
