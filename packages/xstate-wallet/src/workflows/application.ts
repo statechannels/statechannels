@@ -196,7 +196,7 @@ export const applicationWorkflow: MachineFactory<ApplicationContext, any> = (
   const actions = {
     sendToOpponent,
     updateStore,
-    sendChannelUpdated: sendChannelUpdatedNotification,
+    sendChannelUpdatedNotification,
     assignChannelId,
     displayUi,
     hideUi
