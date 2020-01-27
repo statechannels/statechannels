@@ -24,7 +24,7 @@ const machine = Machine(config, {guards, actions: customActions})
 }
 
 const workflowsDir = path.join(__dirname, '..', 'src', 'workflows');
-const workflows = fs.readdirSync(workflowsDir).filter(f => !f.endsWith('.js'));
+const workflows = fs.readdirSync(workflowsDir).filter(f => f.endsWith('.ts'));
 
 for (const workflow of workflows) {
   const workflowPath = path.join(workflowsDir, workflow);
