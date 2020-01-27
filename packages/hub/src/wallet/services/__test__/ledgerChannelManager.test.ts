@@ -1,5 +1,4 @@
-import {State} from '@statechannels/nitro-protocol';
-import {signState} from '@statechannels/nitro-protocol';
+import {signState, State} from '@statechannels/nitro-protocol';
 import {Signature} from 'ethers/utils';
 import {
   DUMMY_CHAIN_ID,
