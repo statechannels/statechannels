@@ -2,7 +2,7 @@ import { Machine } from 'xstate';
 
 import * as VirtualDefundingAsHub from '../virtual-defunding-as-hub/protocol';
 import * as VirtualDefundingAsLeaf from '../virtual-defunding-as-leaf/protocol';
-import { MachineFactory, FINAL, checkThat } from '../..';
+import { MachineFactory, FINAL, checkThat, statesEqual, outcomesEqual } from '../..';
 import { add } from '../../mathOps';
 import { IStore } from '../../store';
 import { getDetaAndInvoke } from '../../machine-utils';
@@ -17,7 +17,11 @@ export interface Init {
   channelId: string;
 }
 
-const concludeTarget = getDetaAndInvoke('getFinalState', 'supportState', 'ledgerDefunding');
+const concludeTarget = {
+  ...getDetaAndInvoke('getFinalState', 'supportState', 'ledgerDefunding'),
+  // If a new state comes in we restart our support state machine
+  on: { CHANNEL_UPDATED: { target: 'concludeTarget' } },
+};
 const ledgerDefunding = getDetaAndInvoke('getDefundedLedgerState', 'supportState', 'success');
 
 const virtualDefunding = {
@@ -69,19 +73,25 @@ export const mockOptions = {
 
 export const machine: MachineFactory<Init, any> = (store: IStore, ctx: Init) => {
   async function getFinalState({ channelId }: Init): Promise<SupportState.Init> {
-    const latestState = store.getEntry(channelId).latestStateSupportedByMe;
+    const { latestStateSupportedByMe, latestState } = store.getEntry(channelId);
 
-    if (!latestState) {
+    if (!latestStateSupportedByMe) {
       throw new Error('No state');
     }
-    // Only progress our turnNum if the state is not final
-    if (latestState.isFinal) {
+    if (latestStateSupportedByMe.isFinal) {
+      return { state: latestStateSupportedByMe };
+    }
+    if (
+      latestState.isFinal &&
+      outcomesEqual(latestStateSupportedByMe.outcome, latestState.outcome)
+    ) {
       return { state: latestState };
     }
+
     return {
       state: {
-        ...latestState,
-        turnNum: latestState.turnNum + 1,
+        ...latestStateSupportedByMe,
+        turnNum: latestStateSupportedByMe.turnNum + 1,
         isFinal: true,
       },
     };
