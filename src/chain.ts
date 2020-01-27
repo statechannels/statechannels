@@ -1,4 +1,4 @@
-import {EthAssetHolderArtifact, createETHDepositTransaction} from '@statechannels/nitro-protocol';
+import {ContractArtifacts, createETHDepositTransaction} from '@statechannels/nitro-protocol';
 import {getProvider} from './utils/contract-utils';
 import {ethers} from 'ethers';
 import {ETH_ASSET_HOLDER_ADDRESS} from './constants';
@@ -9,7 +9,9 @@ import {
   ChainEventListener
 } from '@statechannels/wallet-protocols';
 
-const EthAssetHolderInterface = new ethers.utils.Interface(EthAssetHolderArtifact.abi);
+const EthAssetHolderInterface = new ethers.utils.Interface(
+  ContractArtifacts.Erc20AssetHolderArtifact.abi
+);
 export class ChainWatcher implements IChain {
   private _contract: ethers.Contract | undefined;
   public async initialize() {
