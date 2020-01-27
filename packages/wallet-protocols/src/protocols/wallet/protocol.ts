@@ -1,7 +1,7 @@
 import { assign, AssignAction, Interpreter, Machine, spawn, MachineConfig } from 'xstate';
 
 import { getChannelId } from '../..';
-import { ChannelUpdated, IStore } from '../../store';
+import { IStore } from '../../store';
 import { FundingStrategyProposed, OpenChannel, SendStates } from '../../wire-protocol';
 
 import { CreateChannel, JoinChannel, ConcludeChannel } from '..';
@@ -23,8 +23,6 @@ export interface Init {
   id: string;
   processes: Process[];
 }
-
-const running = (p: Process) => !p.ref.state.done;
 
 const config: MachineConfig<Init, any, Events> = {
   key: PROTOCOL,
@@ -118,17 +116,7 @@ export function machine(store: IStore, context: Init) {
     };
   });
 
-  // TODO: Should this send `CHANNEL_UPDATED` to children?
-  const updateStore = (_ctx, event: SendStates, { state }) => {
-    store.receiveStates(event.signedStates);
-    const channelId = getChannelId(event.signedStates[0].state.channel);
-    const channelUpdated: ChannelUpdated = {
-      type: 'CHANNEL_UPDATED',
-      channelId,
-      entry: store.getEntry(channelId),
-    };
-    state.context.processes.filter(running).forEach(({ ref }: Process) => ref.send(channelUpdated));
-  };
+  const updateStore = (_, { signedStates }: SendStates) => store.receiveStates(signedStates);
 
   const options: { actions: Actions } = {
     actions: {
