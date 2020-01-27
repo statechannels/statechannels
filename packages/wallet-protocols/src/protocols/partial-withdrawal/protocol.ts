@@ -31,7 +31,11 @@ function replacementChannelArgs({
 }: Init): CreateNullChannel.Init {
   const { channel, outcome } = store.getEntry(ledgerId).latestSupportedState;
   const newParticipants = channel.participants
-    .filter(p => getEthAllocation(newOutcome).find(allocation => allocation.destination === p))
+    .filter(p =>
+      getEthAllocation(newOutcome, store.ethAssetHolderAddress).find(
+        allocation => allocation.destination === p
+      )
+    )
     .map(p => participantMapping[p]);
   const newChannel: Channel = {
     chainId: channel.chainId,
@@ -39,12 +43,13 @@ function replacementChannelArgs({
     channelNonce: store.getNextNonce(newParticipants),
   };
 
-  const newChannelAllocation: Allocation = getEthAllocation(outcome).map(
-    ({ destination, amount }) => ({
-      destination: participantMapping[destination],
-      amount: subtract(outcome[destination], newOutcome[destination]),
-    })
-  );
+  const newChannelAllocation: Allocation = getEthAllocation(
+    outcome,
+    store.ethAssetHolderAddress
+  ).map(({ destination, amount }) => ({
+    destination: participantMapping[destination],
+    amount: subtract(outcome[destination], newOutcome[destination]),
+  }));
 
   return {
     channel: newChannel,
@@ -66,14 +71,14 @@ export function concludeOutcome({
   newChannelId,
 }: NewChannelCreated): LedgerUpdate.Init {
   const state = store.getEntry(ledgerId).latestSupportedState;
-  const currentlyAllocated = getEthAllocation(state.outcome)
+  const currentlyAllocated = getEthAllocation(state.outcome, store.ethAssetHolderAddress)
     .map(a => a.amount)
     .reduce(add, 0);
-  const toBeWithdrawn = getEthAllocation(newOutcome)
+  const toBeWithdrawn = getEthAllocation(newOutcome, store.ethAssetHolderAddress)
     .map(a => a.amount)
     .reduce(add, 0);
   const targetAllocation = [
-    ...getEthAllocation(newOutcome),
+    ...getEthAllocation(newOutcome, store.ethAssetHolderAddress),
     {
       destination: newChannelId,
       amount: subtract(currentlyAllocated, toBeWithdrawn),

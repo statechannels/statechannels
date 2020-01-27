@@ -86,7 +86,7 @@ export const machine: MachineFactory<Init, any> = (store: IStore, context: Init)
 
     const { outcome } = entry.latestSupportedState;
 
-    const allocated = getEthAllocation(outcome)
+    const allocated = getEthAllocation(outcome, store.ethAssetHolderAddress)
       .map(i => i.amount)
       .reduce(add, '0');
     const holdings = await store.getHoldings(ctx.channelId);
@@ -94,7 +94,7 @@ export const machine: MachineFactory<Init, any> = (store: IStore, context: Init)
     if (gt(allocated, holdings)) throw new Error('Channel underfunded');
   }
   function minimalOutcome(currentOutcome: Outcome, minimalEthAllocation: Allocation): Outcome {
-    const allocation = getEthAllocation(currentOutcome);
+    const allocation = getEthAllocation(currentOutcome, store.ethAssetHolderAddress);
 
     const preDepositAllocation = allocation.concat(
       minimalEthAllocation.map(({ destination, amount }) => {
@@ -114,7 +114,7 @@ export const machine: MachineFactory<Init, any> = (store: IStore, context: Init)
   }
 
   function mergeDestinations(outcome: Outcome): Outcome {
-    const allocation = getEthAllocation(outcome);
+    const allocation = getEthAllocation(outcome, store.ethAssetHolderAddress);
     const destinations = _.uniq(allocation.map(i => i.destination));
 
     const postDepositAllocation = destinations.map(destination => ({
@@ -137,7 +137,10 @@ export const machine: MachineFactory<Init, any> = (store: IStore, context: Init)
     for (let i = 0; i < minimalAllocation.length; i++) {
       const allocation = minimalAllocation[i];
       if (entry.ourIndex === i) {
-        const fundedAt = getEthAllocation(entry.latestSupportedState.outcome)
+        const fundedAt = getEthAllocation(
+          entry.latestSupportedState.outcome,
+          store.ethAssetHolderAddress
+        )
           .map(a => a.amount)
           .reduce(add);
         return {

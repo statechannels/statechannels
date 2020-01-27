@@ -100,12 +100,12 @@ export const machine: MachineFactory<Init, any> = (store: IStore, ctx: Init) => 
     if (!isFinal) throw 'Target channel not finalized';
 
     const { latestSupportedState } = store.getEntry(funding.ledgerId);
-    const allocation = getEthAllocation(latestSupportedState.outcome);
+    const allocation = getEthAllocation(latestSupportedState.outcome, store.ethAssetHolderAddress);
     const idx = allocation.findIndex(({ destination }) => destination === channelId);
 
     if (
       allocation[idx]?.amount !==
-      getEthAllocation(concludedOutcome)
+      getEthAllocation(concludedOutcome, store.ethAssetHolderAddress)
         .map(a => a.amount)
         .reduce(add)
     ) {
@@ -113,7 +113,9 @@ export const machine: MachineFactory<Init, any> = (store: IStore, ctx: Init) => 
       throw 'Target channel underfunded';
     }
 
-    allocation.splice(idx, 1).push(...getEthAllocation(concludedOutcome));
+    allocation
+      .splice(idx, 1)
+      .push(...getEthAllocation(concludedOutcome, store.ethAssetHolderAddress));
 
     return {
       state: {

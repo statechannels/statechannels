@@ -108,7 +108,8 @@ export const guards = {
 export const machine: MachineFactory<Init, any> = (store: IStore, context: Init) => {
   async function getTargetAllocation(ctx: LedgerExists): Promise<DirectFunding.Init> {
     const minimalAllocation = getEthAllocation(
-      store.getEntry(ctx.targetChannelId).latestState.outcome
+      store.getEntry(ctx.targetChannelId).latestState.outcome,
+      store.ethAssetHolderAddress
     );
 
     return {
@@ -137,8 +138,11 @@ export const machine: MachineFactory<Init, any> = (store: IStore, context: Init)
     const { latestState: ledgerState } = store.getEntry(ledgerChannelId);
     const { latestState: targetChannelState } = store.getEntry(targetChannelId);
 
-    const ledgerAllocation = getEthAllocation(ledgerState.outcome);
-    const targetAllocation = getEthAllocation(targetChannelState.outcome);
+    const ledgerAllocation = getEthAllocation(ledgerState.outcome, store.ethAssetHolderAddress);
+    const targetAllocation = getEthAllocation(
+      targetChannelState.outcome,
+      store.ethAssetHolderAddress
+    );
 
     return {
       state: {

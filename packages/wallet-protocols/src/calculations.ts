@@ -58,9 +58,9 @@ export function allocateToTarget(
   return ethAllocationOutcome(ledgerAllocation, ethAssetHolderAddress);
 }
 
-export function getEthAllocation(outcome: Outcome): Allocation {
+export function getEthAllocation(outcome: Outcome, ethAssetHolderAddress: string): Allocation {
   const ethOutcome: AssetOutcome | undefined = outcome.find(
-    o => o.assetHolderAddress === AddressZero
+    o => o.assetHolderAddress === ethAssetHolderAddress
   );
   return ethOutcome ? checkThat(ethOutcome, isAllocationOutcome).allocation : [];
 }

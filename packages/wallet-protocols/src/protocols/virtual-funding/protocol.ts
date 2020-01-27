@@ -40,7 +40,7 @@ type HubKnown = Init & { hubAddress: string };
 function virtualFundAsLeafArgs({ targetChannelId, hubAddress }: HubKnown): VirtualFundAsLeafArgs {
   const { latestState, ourIndex: index } = store.getEntry(targetChannelId);
   const { channel, outcome } = latestState;
-  const balances: Balance[] = getEthAllocation(outcome).map(o => ({
+  const balances: Balance[] = getEthAllocation(outcome, store.ethAssetHolderAddress).map(o => ({
     address: o.destination,
     wei: o.amount,
   }));
