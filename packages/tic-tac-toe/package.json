@@ -9,8 +9,7 @@
   },
   "scripts": {
     "build:ci": "run-s clearContracts contracts:compile",
-    "build:webpack": "CI=false node scripts/build.js",
-    "build": "run-s clearContracts build:webpack",
+    "build": "run-s clearContracts contracts:compile",
     "clearContracts": "rm -rf ./build/contracts",
     "contracts:compile": "node ./bin/compile.js",
     "prettier:check": "prettier --check '**/*.{scss,json}' --ignore-path '.gitignore'",
