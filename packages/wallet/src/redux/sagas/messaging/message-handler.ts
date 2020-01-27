@@ -282,7 +282,7 @@ function* handleUpdateChannelMessage(payload: RequestObject) {
     if (
       protocolState &&
       protocolState.type === "Application.WaitForDispute" &&
-      typeof protocolState.disputeState! !== "undefined"
+      typeof protocolState.disputeState !== "undefined"
     ) {
       if (isResponderState(protocolState.disputeState)) {
         yield put(
