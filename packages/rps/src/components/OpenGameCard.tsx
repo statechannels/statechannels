@@ -1,5 +1,4 @@
 import React from 'react';
-import {Commitment} from 'fmg-core';
 import {Button} from 'reactstrap';
 import {OpenGame} from '../redux/open-games/state';
 import {bigNumberify, formatUnits} from 'ethers/utils';
@@ -15,7 +14,7 @@ interface Props {
   ) => void;
 }
 
-export class OpenGameEntry extends React.PureComponent<Props, Commitment> {
+export class OpenGameEntry extends React.PureComponent<Props> {
   render() {
     // Generate a random number from 0 to MaxInt
     const {openGame, joinOpenGame} = this.props;

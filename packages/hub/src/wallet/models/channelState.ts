@@ -1,5 +1,5 @@
 import {State} from '@statechannels/nitro-protocol';
-import {Uint32} from 'fmg-core';
+import {Uint32} from '../../types';
 import {Model, snakeCaseMappers} from 'objection';
 import Channel from './channel';
 import Outcome from './outcome';

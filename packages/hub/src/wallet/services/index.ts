@@ -1,5 +1,5 @@
 import {SignedState, State} from '@statechannels/nitro-protocol';
-import {Address, Uint256} from 'fmg-core';
+import {Address, Uint256} from '../../types';
 import {Blockchain} from './blockchain';
 import * as LedgerChannelManager from './ledgerChannelManager';
 

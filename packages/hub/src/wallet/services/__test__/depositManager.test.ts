@@ -1,5 +1,5 @@
 import {bigNumberify} from 'ethers/utils';
-import {Uint256} from 'fmg-core';
+import {Uint256} from '../../../types';
 import {DUMMY_ASSET_HOLDER_ADDRESS} from '../../../test/test-constants';
 import {FUNDED_CHANNEL_ID, UNFUNDED_CHANNEL_ID} from '../../../test/test-data';
 import Channel from '../../models/channel';

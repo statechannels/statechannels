@@ -1,7 +1,6 @@
 import React from 'react';
 
 import {Button, Navbar} from 'reactstrap';
-import {Commitment} from 'fmg-core';
 import {RulesModal} from './RulesModal';
 import NetworkIndicator from '@rimble/network-indicator';
 import {MetamaskState} from 'src/redux/metamask/state';
@@ -19,7 +18,7 @@ function getInitials(loginDisplayName: string): string {
   return userDisplayName.map(name => name.charAt(0)).join('');
 }
 
-export default class NavigationBar extends React.PureComponent<Props, Commitment> {
+export default class NavigationBar extends React.PureComponent<Props> {
   render() {
     const currentNetwork = Number(this.props.metamaskState.network);
     const targetNetwork = Number(process.env.CHAIN_NETWORK_ID);
