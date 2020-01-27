@@ -58,16 +58,11 @@ export async function setUpBrowser(headless: boolean, slowMo?: number): Promise<
     headless,
     slowMo,
     devtools: !headless,
-    args: [
-      '--disable-extensions-except=/Users/liam/Downloads/redux-dev-tools',
-      '--load-extension=/Users/liam/Downloads/redux-dev-tools'
-    ],
     //, Needed to allow both windows to execute JS at the same time
     ignoreDefaultArgs: [
       '--disable-background-timer-throttling',
       '--disable-backgrounding-occluded-windows',
-      '--disable-renderer-backgrounding',
-      '--disable-extensions'
+      '--disable-renderer-backgrounding'
     ]
   });
 
