@@ -1,5 +1,5 @@
 import {Bytes32} from '@statechannels/nitro-protocol/lib/src/contract/types';
-import {Uint256, Uint32} from 'fmg-core';
+import {Uint256, Uint32} from '../../types';
 import {Model, snakeCaseMappers} from 'objection';
 import Outcome from './outcome';
 

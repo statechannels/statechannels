@@ -1,5 +1,5 @@
 import {ethers} from 'ethers';
-import {Address, Uint256} from 'fmg-core';
+import {Address, Uint256} from '../../types';
 import {ethAssetHolder as ethAssetHolderConstrutor} from '../utilities/blockchain';
 import {logger} from '../../logger';
 
