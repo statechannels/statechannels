@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 import { State } from '@statechannels/nitro-protocol';
 
-import { Participant } from '../store';
+import { Participant, EphemeralStore } from '../store';
 
 export const wallet1 = new ethers.Wallet(
   '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318'
@@ -23,11 +23,11 @@ export const second: Participant = {
 };
 export const participants = [first, second];
 
-const appState: State = {
+export const appState: (n: number) => State = turnNum => ({
   appData: '0x0000000000000000000000000000000000000000000000000000000000000000',
   appDefinition: '0x0000000000000000000000000000000000000000',
   isFinal: false,
-  turnNum: 3,
+  turnNum,
   outcome: [
     {
       assetHolderAddress: '0x0000000000000000000000000000000000000000',
@@ -52,9 +52,9 @@ const appState: State = {
     chainId: '0x01',
   },
   challengeDuration: 1,
-};
+});
 
-const ledgerState: State = {
+export const ledgerState: State = {
   turnNum: 3,
   outcome: [
     {
@@ -81,6 +81,32 @@ const ledgerState: State = {
   appDefinition: '0x0000000000000000000000000000000000000000',
 };
 
+export const storeWithKey = (chain, privateKey) =>
+  new EphemeralStore({
+    privateKeys: {
+      [new ethers.Wallet(privateKey).address]: privateKey,
+    },
+    chain,
+  });
+
+export const storeWithInitializedAppChannel = (chain, privateKey) => {
+  const store = storeWithKey(chain, privateKey);
+  store.initializeChannel({
+    participants,
+    states: [],
+    privateKey,
+    channel: appState(0).channel,
+  });
+
+  return store;
+};
+
+export const storeWithUnfundedChannel = (chain, privateKey) => {
+  const store = storeWithInitializedAppChannel(chain, privateKey);
+  store.receiveStates([{ state: appState(1), signatures: ['first' as any, 'second' as any] }]);
+  return store;
+};
+
 export const storeWithFundedChannel = privateKey => ({
   _nonces: {
     '["0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf","0x2222E21c8019b14dA16235319D34b5Dd83E644A9"]':
@@ -90,7 +116,7 @@ export const storeWithFundedChannel = privateKey => ({
     '0xb9500857552943ae5ef6c2a046e311560c296c474aa47a3d13614d1ac98bd1a6': {
       states: [
         {
-          state: appState,
+          state: appState(3),
           signatures: [
             {
               r: '0x5f8db15d8dfd24d53a0ebb1089eca2aee5bbb5ba18a288b25c767c846a34bd83',
@@ -109,7 +135,7 @@ export const storeWithFundedChannel = privateKey => ({
       ],
       privateKey,
       participants,
-      channel: appState.channel,
+      channel: appState(3).channel,
       funding: {
         type: 'Indirect' as 'Indirect',
         ledgerId: '0x3dc8e97155e1d74f9ba973780ced196d0d0974a2c387e20db58871b39641a136',

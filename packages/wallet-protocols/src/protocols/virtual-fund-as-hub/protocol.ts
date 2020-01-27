@@ -136,4 +136,4 @@ const options = (store: Store) => ({
   },
 });
 
-export const machine = connectToStore(config, options);
+export const machine = connectToStore<any>(config, options);
