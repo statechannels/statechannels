@@ -1,5 +1,5 @@
 import {Channel as ChannelObject} from '@statechannels/nitro-protocol';
-import {Uint256} from 'fmg-core';
+import {Uint256} from '../../types';
 import {Model, snakeCaseMappers} from 'objection';
 import ChannelHolding from './channelHoldings';
 import ChannelParticipant from './channelParticipants';

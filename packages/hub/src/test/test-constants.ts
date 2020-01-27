@@ -6,7 +6,7 @@ import {
 } from '@statechannels/nitro-protocol';
 import {ethers} from 'ethers';
 import {bigNumberify} from 'ethers/utils';
-import {Address, Uint256} from 'fmg-core';
+import {Address, Uint256} from '../types';
 import {HUB_ADDRESS} from '../constants';
 
 export const PARTICIPANT_1_PRIVATE_KEY =

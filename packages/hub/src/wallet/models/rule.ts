@@ -1,4 +1,4 @@
-import {Address} from 'fmg-core';
+import {Address} from '../../types';
 import {Model} from 'objection';
 import Channel from './channel';
 

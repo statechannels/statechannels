@@ -1,5 +1,5 @@
 import AsyncLock from 'async-lock';
-import {Address, Uint256} from 'fmg-core';
+import {Address, Uint256} from '../../types';
 import {ethAssetHolder} from '../utilities/blockchain';
 
 const lock = new AsyncLock();

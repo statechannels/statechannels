@@ -1,6 +1,5 @@
-import {Uint256} from 'fmg-core';
+import {Uint256, Address} from '../../types';
 import {Model, snakeCaseMappers} from 'objection';
-import {Address} from '../../types';
 
 export default class ChannelHolding extends Model {
   static tableName = 'channel_holdings';
