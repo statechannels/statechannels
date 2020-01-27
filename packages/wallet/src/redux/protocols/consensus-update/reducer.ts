@@ -7,12 +7,14 @@ import * as helpers from "../reducer-helpers";
 import {SignedStatesReceived, ProtocolLocator} from "../../../communication";
 import {unreachable} from "../../../utils/reducer-utils";
 import {ChannelState} from "../../channel-store";
-import {Outcome, State, encodeOutcome} from "@statechannels/nitro-protocol";
 import {
+  Outcome,
+  State,
+  encodeOutcome,
   decodeConsensusData,
   encodeConsensusData,
   ConsensusData
-} from "@statechannels/nitro-protocol/lib/src/contract/consensus-data";
+} from "@statechannels/nitro-protocol";
 
 export {CONSENSUS_UPDATE_PROTOCOL_LOCATOR} from "../../../communication/protocol-locator";
 

@@ -22,7 +22,7 @@ import {
 } from './contract/asset-holder';
 import {getChallengeRegisteredEvent, getChallengeClearedEvent} from './contract/challenge';
 import {Channel, getChannelId} from './contract/channel';
-import {encodeConsensusData} from './contract/consensus-data';
+import {encodeConsensusData, decodeConsensusData, ConsensusData} from './contract/consensus-data';
 import {validTransition, ForceMoveAppContractInterface} from './contract/force-move-app';
 import {
   AllocationItem,
@@ -74,6 +74,8 @@ export {
   State,
   ForceMoveAppContractInterface,
   encodeConsensusData,
+  decodeConsensusData,
+  ConsensusData,
   encodeAllocation,
   encodeOutcome,
   Outcome,
