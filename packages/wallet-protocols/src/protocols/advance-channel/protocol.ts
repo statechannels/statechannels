@@ -42,7 +42,7 @@ export type Services = {
   sendState(ctx: Init): Promise<void>;
 };
 
-const notifyWhenAdvanced = (store: IStore) => (ctx: Init) => {
+const notifyWhenAdvanced = (store: IStore, ctx: Init) => {
   return observeChannel(store, ctx.channelId).pipe(
     map(event => event.entry),
     filter(e => {
@@ -75,12 +75,11 @@ const sendState = (store: IStore) => async ({ channelId, targetTurnNum }: Init) 
 
 const options = (store: IStore) => ({
   services: {
-    notifyWhenAdvanced: notifyWhenAdvanced(store),
     sendState: sendState(store),
   },
   actions: {
     spawnObserver: assign<Init & { observer: any }>({
-      observer: (ctx: Init) => spawn(notifyWhenAdvanced(store)(ctx)),
+      observer: (ctx: Init) => spawn(notifyWhenAdvanced(store, ctx)),
     }),
   },
 });

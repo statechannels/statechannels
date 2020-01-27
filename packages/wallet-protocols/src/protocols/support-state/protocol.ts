@@ -56,7 +56,7 @@ const sendState = (store: IStore) => async ({ state }: Init) => {
   }
 };
 
-const notifyWhenSupported = (store: IStore) => ({ state }: Init) => {
+const notifyWhenSupported = (store: IStore, { state }: Init) => {
   return observeChannel(store, getChannelId(state.channel)).pipe(
     map(event => event.entry),
     filter(e => e.hasSupportedState && statesEqual(e.latestSupportedState, state)),
@@ -70,7 +70,7 @@ const options = (store: IStore): Options => ({
   },
   actions: {
     spawnObserver: assign<Init & { observer: any }>({
-      observer: (ctx: Init) => spawn(notifyWhenSupported(store)(ctx)),
+      observer: (ctx: Init) => spawn(notifyWhenSupported(store, ctx)),
     }),
   },
 });
