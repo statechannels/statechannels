@@ -93,6 +93,40 @@ export const machine: MachineFactory<Init, any> = (store: IStore, context: Init)
 
     if (gt(allocated, holdings)) throw new Error('Channel underfunded');
   }
+  function minimalOutcome(currentOutcome: Outcome, minimalEthAllocation: Allocation): Outcome {
+    const allocation = getEthAllocation(currentOutcome);
+
+    const preDepositAllocation = allocation.concat(
+      minimalEthAllocation.map(({ destination, amount }) => {
+        const currentlyAllocated = allocation
+          .filter(i => i.destination === destination)
+          .map(i => i.amount)
+          .reduce(add, '0');
+
+        const amountLeft = bigNumberify(amount).gt(currentlyAllocated)
+          ? subtract(amount, currentlyAllocated)
+          : '0';
+        return { destination, amount: amountLeft };
+      })
+    );
+
+    return ethAllocationOutcome(preDepositAllocation, store.ethAssetHolderAddress);
+  }
+
+  function mergeDestinations(outcome: Outcome): Outcome {
+    const allocation = getEthAllocation(outcome);
+    const destinations = _.uniq(allocation.map(i => i.destination));
+
+    const postDepositAllocation = destinations.map(destination => ({
+      destination,
+      amount: allocation
+        .filter(i => i.destination === destination)
+        .map(i => i.amount)
+        .reduce(add),
+    }));
+
+    return ethAllocationOutcome(postDepositAllocation, store.ethAssetHolderAddress);
+  }
 
   async function getDepositingInfo({
     minimalAllocation,
@@ -184,38 +218,3 @@ export const machine: MachineFactory<Init, any> = (store: IStore, context: Init)
   const options: Options = { services };
   return Machine(config).withConfig(options, context);
 };
-
-function minimalOutcome(currentOutcome: Outcome, minimalEthAllocation: Allocation): Outcome {
-  const allocation = getEthAllocation(currentOutcome);
-
-  const preDepositAllocation = allocation.concat(
-    minimalEthAllocation.map(({ destination, amount }) => {
-      const currentlyAllocated = allocation
-        .filter(i => i.destination === destination)
-        .map(i => i.amount)
-        .reduce(add, '0');
-
-      const amountLeft = bigNumberify(amount).gt(currentlyAllocated)
-        ? subtract(amount, currentlyAllocated)
-        : '0';
-      return { destination, amount: amountLeft };
-    })
-  );
-
-  return ethAllocationOutcome(preDepositAllocation);
-}
-
-function mergeDestinations(outcome: Outcome): Outcome {
-  const allocation = getEthAllocation(outcome);
-  const destinations = _.uniq(allocation.map(i => i.destination));
-
-  const postDepositAllocation = destinations.map(destination => ({
-    destination,
-    amount: allocation
-      .filter(i => i.destination === destination)
-      .map(i => i.amount)
-      .reduce(add),
-  }));
-
-  return ethAllocationOutcome(postDepositAllocation);
-}

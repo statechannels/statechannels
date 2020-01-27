@@ -1,5 +1,6 @@
 import { assign } from 'xstate';
 import { Allocation } from '@statechannels/nitro-protocol';
+import { AddressZero } from 'ethers/constants';
 
 import { Without, checkThat } from '../../';
 import { isIndirectFunding, isVirtualFunding } from '../../ChannelStoreEntry';
@@ -59,7 +60,10 @@ function finalJointChannelUpdate({
   ];
   return {
     channelId: jointChannelId,
-    targetOutcome: ethAllocationOutcome(targetAllocation),
+    targetOutcome: ethAllocationOutcome(
+      targetAllocation,
+      AddressZero /* TODO: should be store.ethAssetHolderAddress */
+    ),
   };
 }
 const defundTarget = {
@@ -106,7 +110,10 @@ export function defundGuarantorInLedger({
   ];
   return {
     channelId: hubLedgerId,
-    targetOutcome: ethAllocationOutcome(targetAllocation),
+    targetOutcome: ethAllocationOutcome(
+      targetAllocation,
+      AddressZero /* TODO: Should be store.ethAssetHolderAdress */
+    ),
   };
 }
 const defundGuarantor = {

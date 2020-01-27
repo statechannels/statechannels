@@ -81,7 +81,7 @@ export function concludeOutcome({
   ];
   return {
     channelId: ledgerId,
-    targetOutcome: ethAllocationOutcome(targetAllocation),
+    targetOutcome: ethAllocationOutcome(targetAllocation, store.ethAssetHolderAddress),
   };
 }
 const updateOldChannelOutcome = {

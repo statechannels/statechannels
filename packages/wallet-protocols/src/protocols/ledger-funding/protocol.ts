@@ -145,7 +145,12 @@ export const machine: MachineFactory<Init, any> = (store: IStore, context: Init)
       state: {
         ...ledgerState,
         turnNum: ledgerState.turnNum + 1,
-        outcome: allocateToTarget(targetAllocation, ledgerAllocation, targetChannelId),
+        outcome: allocateToTarget(
+          targetAllocation,
+          ledgerAllocation,
+          targetChannelId,
+          store.ethAssetHolderAddress
+        ),
       },
     };
   }

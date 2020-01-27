@@ -1,5 +1,6 @@
 import { assign } from 'xstate';
 import { Guarantee } from '@statechannels/nitro-protocol/lib/src/contract/outcome';
+import { AddressZero } from 'ethers/constants';
 
 import { Channel, getChannelId } from '../../';
 import { add } from '../../mathOps';
@@ -85,7 +86,10 @@ function fundGuarantorArgs({ guarantorChannel, ledgerId, balances }: ChannelsKno
   const amount = total(balances);
   return {
     channelId: ledgerId,
-    outcome: ethAllocationOutcome([{ destination: getChannelId(guarantorChannel), amount }]),
+    outcome: ethAllocationOutcome(
+      [{ destination: getChannelId(guarantorChannel), amount }],
+      AddressZero /* TODO: Should be store.ethassetholderaddress */
+    ),
   };
 }
 const createChannels = {

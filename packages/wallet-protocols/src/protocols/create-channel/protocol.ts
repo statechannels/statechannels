@@ -117,7 +117,7 @@ export const machine: MachineFactory<Init, any> = (store: IStore, init: Init) =>
       appDefinition,
       isFinal: false,
       turnNum: 0,
-      outcome: ethAllocationOutcome(allocations),
+      outcome: ethAllocationOutcome(allocations, store.ethAssetHolderAddress),
       channel,
       challengeDuration: ctx.challengeDuration,
     };

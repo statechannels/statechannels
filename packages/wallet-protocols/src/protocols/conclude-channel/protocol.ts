@@ -113,7 +113,7 @@ export const machine: MachineFactory<Init, any> = (store: IStore, ctx: Init) => 
       state: {
         ...latestSupportedState,
         turnNum: latestSupportedState.turnNum + 1,
-        outcome: ethAllocationOutcome(allocation),
+        outcome: ethAllocationOutcome(allocation, store.ethAssetHolderAddress),
       },
     };
   }

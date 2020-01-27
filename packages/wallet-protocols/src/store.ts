@@ -3,6 +3,8 @@ import { EventEmitter } from 'events';
 import { State } from '@statechannels/nitro-protocol';
 import { getStateSignerAddress, signState } from '@statechannels/nitro-protocol/lib/src/signatures';
 import _ from 'lodash';
+import { AddressZero } from 'ethers/constants';
+import { hashState } from '@statechannels/nitro-protocol/lib/src/contract/state';
 
 import { ChannelStoreEntry, IChannelStoreEntry, supported, Funding } from './ChannelStoreEntry';
 import { messageService, IMessageService } from './messaging';
@@ -10,7 +12,7 @@ import { AddressableMessage, FundingStrategyProposed } from './wire-protocol';
 import { Chain, IChain, ChainEventType, ChainEvent } from './chain';
 import { add, gt } from './mathOps';
 
-import { getChannelId, SignedState, unreachable } from '.';
+import { getChannelId, SignedState, unreachable, statesEqual } from '.';
 
 export interface ChannelUpdated {
   type: 'CHANNEL_UPDATED';
@@ -29,7 +31,8 @@ export interface IStore {
   findLedgerChannelId(participants: string[]): string | undefined;
   signedByMe(state: State): boolean;
   getPrivateKey(signingAddresses: string[]): string;
-
+  // TODO: Temporary until we figure a better way of dealing with assetholderaddress
+  readonly ethAssetHolderAddress: string;
   /*
   Store modifiers
   */
@@ -65,11 +68,15 @@ export type Constructor = Partial<{
   nonces: Record<string, string>;
   chain: IChain;
   messagingService: IMessageService;
+  ethAssetHolderAddress: string;
 }>;
 export class Store implements IStore {
-  public static equals(left: any, right: any) {
+  public static equals(left: SignedState[], right: SignedState[]) {
     // TODO: Delete this; we should use statesEqual and outcomesEqual
-    return _.isEqual(left, right);
+    return _.isEqual(
+      _.sortBy(left, s => hashState(s.state)),
+      _.sortBy(right, s => hashState(s.state))
+    );
   }
 
   private _store: ChannelStore;
@@ -78,6 +85,7 @@ export class Store implements IStore {
   private _eventEmitter = new EventEmitter();
   protected _chain: IChain;
   protected _messagingService: IMessageService;
+  private _ethAssetHolderAddress: string;
 
   constructor(args?: Constructor) {
     const { store, privateKeys } = args || {};
@@ -87,11 +95,13 @@ export class Store implements IStore {
     // TODO: We probably shouldn't default to test implementations
     this._chain = args?.chain || new Chain();
     this._messagingService = args?.messagingService || messageService;
-
+    this._ethAssetHolderAddress = args?.ethAssetHolderAddress || AddressZero;
     this._chain // TODO: Bad form to call an async method in the constructor?
       .initialize();
   }
-
+  public get ethAssetHolderAddress() {
+    return this._ethAssetHolderAddress;
+  }
   public async getHoldings(channelId: string) {
     return await this._chain.getHoldings(channelId);
   }
@@ -162,7 +172,7 @@ export class Store implements IStore {
 
   public signedByMe(state: State) {
     const { states, ourAddress } = this.getEntry(getChannelId(state.channel));
-    const signedState = states.find((s: SignedState) => Store.equals(state, s.state));
+    const signedState = states.find((s: SignedState) => statesEqual(state, s.state));
 
     return !!signedState?.signatures.find(
       signature => getStateSignerAddress({ ...signedState, signature }) === ourAddress
@@ -289,7 +299,7 @@ export function merge(left: SignedState[], right: SignedState[]): SignedState[] 
   // TODO this is horribly inefficient
 
   right.map(rightState => {
-    const idx = left.findIndex(s => Store.equals(s.state, rightState.state));
+    const idx = left.findIndex(s => statesEqual(s.state, rightState.state));
     const leftState = left[idx];
     if (leftState) {
       const signatures = _.uniqBy(leftState.signatures.concat(rightState.signatures), s => s.r);

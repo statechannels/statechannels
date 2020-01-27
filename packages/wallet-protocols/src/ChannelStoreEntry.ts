@@ -4,7 +4,9 @@ import _ from 'lodash';
 import { getStateSignerAddress } from '@statechannels/nitro-protocol/lib/src/signatures';
 
 import { SignedState } from './types';
-import { Participant, Store } from './store';
+import { Participant } from './store';
+
+import { statesEqual } from '.';
 
 interface DirectFunding {
   type: 'Direct';
@@ -111,7 +113,7 @@ export class ChannelStoreEntry implements IChannelStoreEntry {
 
   private signedByMe(state: State): boolean {
     return !!this.states
-      .find(s => Store.equals(s.state, state))
+      .find(s => statesEqual(s.state, state))
       ?.signatures.find(
         signature => getStateSignerAddress({ state, signature }) === this.ourAddress
       );
