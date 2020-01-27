@@ -1,9 +1,10 @@
-import {SignedState, State} from '@statechannels/nitro-protocol';
 import {
+  SignedState,
+  State,
   ConsensusData,
   decodeConsensusData,
   encodeConsensusData
-} from '@statechannels/nitro-protocol/lib/src/contract/consensus-data';
+} from '@statechannels/nitro-protocol';
 import {HUB_ADDRESS} from '../../constants';
 import {queries} from '../db/queries/channels';
 import errors from '../errors';

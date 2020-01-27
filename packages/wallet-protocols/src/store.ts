@@ -1,8 +1,7 @@
 import { EventEmitter } from 'events';
 
 import * as rxjs from 'rxjs';
-import { State } from '@statechannels/nitro-protocol';
-import { getStateSignerAddress, signState } from '@statechannels/nitro-protocol/lib/src/signatures';
+import { State, getStateSignerAddress, signState } from '@statechannels/nitro-protocol';
 import _ from 'lodash';
 import { map, filter } from 'rxjs/operators';
 
