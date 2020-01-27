@@ -5,12 +5,13 @@ import {
   Store,
   CreateChannelEvent,
   ConcludeChannel,
-  SendStates,
   getChannelId,
   OpenChannelEvent,
   Channel,
   JoinChannel,
-  CreateChannel
+  CreateChannel,
+  ChannelUpdated,
+  SignedState
 } from '@statechannels/wallet-protocols';
 import {applicationWorkflow} from '../application';
 import {AddressZero} from 'ethers/constants';
@@ -132,32 +133,33 @@ it('starts concluding when requested', async () => {
 
 it('starts concluding when receiving a final state', async () => {
   const store = new Store();
-  const sendStates: SendStates = {
-    type: 'SendStates',
-    signedStates: [
-      {
-        state: {
-          isFinal: true,
-          appDefinition: AddressZero,
-          appData: '0x0',
-          outcome: [],
-          turnNum: 55,
-          challengeDuration: 500,
-          channel: {chainId: '0x0', channelNonce: '0x0', participants: []}
-        },
-        signatures: []
-      }
-    ]
+  const states: SignedState[] = [
+    {
+      state: {
+        isFinal: true,
+        appDefinition: AddressZero,
+        appData: '0x0',
+        outcome: [],
+        turnNum: 55,
+        challengeDuration: 500,
+        channel: {chainId: '0x0', channelNonce: '0x0', participants: []}
+      },
+      signatures: []
+    }
+  ];
+  const channelId = getChannelId(states[0].state.channel);
+  const channelUpdate: ChannelUpdated = {
+    type: 'CHANNEL_UPDATED',
+    channelId,
+    entry: {states, channel: states[0].state.channel, privateKey: '0x0', participants: []}
   };
-  store.receiveStates = jest.fn();
-  const channelId = getChannelId(sendStates.signedStates[0].state.channel);
+
   const service = interpret<any, any, any>(applicationWorkflow(store, {channelId}));
   service.start('running');
 
-  service.send(sendStates);
+  service.send(channelUpdate);
 
   await waitForExpect(async () => {
-    expect(store.receiveStates).toHaveBeenCalled();
     expect(service.state.value).toEqual('closing');
     expect(closingMachineMock).toHaveBeenCalled();
     expect(findCalledActions(service.state)).toContainEqual({
