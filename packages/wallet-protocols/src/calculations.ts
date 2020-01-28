@@ -22,7 +22,8 @@ export enum Errors {
 export function allocateToTarget(
   targetAllocation: Allocation,
   ledgerAllocation: Allocation,
-  targetChannelId: string
+  targetChannelId: string,
+  ethAssetHolderAddress: string
 ): Outcome {
   let total = '0';
 
@@ -54,33 +55,39 @@ export function allocateToTarget(
     }
   });
   ledgerAllocation.push({ destination: targetChannelId, amount: total });
-  return ethAllocationOutcome(ledgerAllocation);
+  return ethAllocationOutcome(ledgerAllocation, ethAssetHolderAddress);
 }
 
-export function getEthAllocation(outcome: Outcome): Allocation {
+export function getEthAllocation(outcome: Outcome, ethAssetHolderAddress: string): Allocation {
   const ethOutcome: AssetOutcome | undefined = outcome.find(
-    o => o.assetHolderAddress === AddressZero
+    o => o.assetHolderAddress === ethAssetHolderAddress
   );
   return ethOutcome ? checkThat(ethOutcome, isAllocationOutcome).allocation : [];
 }
 
-export function ethAllocationOutcome(allocation: Allocation): AllocationAssetOutcome[] {
+export function ethAllocationOutcome(
+  allocation: Allocation,
+  ethAssetHolderAddress: string
+): AllocationAssetOutcome[] {
   // If there are allocations then we use a blank outcomes
   if (allocation.length === 0) {
     return [];
   }
   return [
     {
-      assetHolderAddress: AddressZero,
+      assetHolderAddress: ethAssetHolderAddress,
       allocation: allocation.map(a => ({ ...a, destination: hexZeroPad(a.destination, 32) })),
     },
   ];
 }
 
-export function ethGuaranteeOutcome(guarantee: Guarantee): GuaranteeAssetOutcome[] {
+export function ethGuaranteeOutcome(
+  guarantee: Guarantee,
+  ethAssetHolderAddress: string
+): GuaranteeAssetOutcome[] {
   return [
     {
-      assetHolderAddress: AddressZero,
+      assetHolderAddress: ethAssetHolderAddress,
       guarantee,
     },
   ];

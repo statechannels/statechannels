@@ -1,5 +1,6 @@
 import { assign } from 'xstate';
 import { Allocation } from '@statechannels/nitro-protocol';
+import { AddressZero } from 'ethers/constants';
 
 import { Without, checkThat } from '../../';
 import { isIndirectFunding, isVirtualFunding } from '../../ChannelStoreEntry';
@@ -51,15 +52,18 @@ function finalJointChannelUpdate({
   }
   const jointState = store.getEntry(jointChannelId).latestSupportedState;
 
-  const jointAllocation = getEthAllocation(jointState.outcome);
+  const jointAllocation = getEthAllocation(jointState.outcome, store.ethAssetHolderAddress);
   const targetChannelIdx = jointAllocation.findIndex(a => a.destination === targetChannelId);
   const targetAllocation: Allocation = [
-    ...getEthAllocation(targetChannelState.outcome),
+    ...getEthAllocation(targetChannelState.outcome, store.ethAssetHolderAddress),
     ...jointAllocation.splice(targetChannelIdx),
   ];
   return {
     channelId: jointChannelId,
-    targetOutcome: ethAllocationOutcome(targetAllocation),
+    targetOutcome: ethAllocationOutcome(
+      targetAllocation,
+      AddressZero /* TODO: should be store.ethAssetHolderAddress */
+    ),
   };
 }
 const defundTarget = {
@@ -91,7 +95,8 @@ export function defundGuarantorInLedger({
   */
 
   const jointAllocation = getEthAllocation(
-    store.getEntry(jointChannelId).latestSupportedState.outcome
+    store.getEntry(jointChannelId).latestSupportedState.outcome,
+    store.ethAssetHolderAddress
   );
 
   const targetAllocation: Allocation = [
@@ -106,7 +111,10 @@ export function defundGuarantorInLedger({
   ];
   return {
     channelId: hubLedgerId,
-    targetOutcome: ethAllocationOutcome(targetAllocation),
+    targetOutcome: ethAllocationOutcome(
+      targetAllocation,
+      AddressZero /* TODO: Should be store.ethAssetHolderAdress */
+    ),
   };
 }
 const defundGuarantor = {

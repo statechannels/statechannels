@@ -2,7 +2,7 @@ import { Machine, MachineConfig, AnyEventObject, AssignAction, assign, spawn } f
 import { State, getChannelId } from '@statechannels/nitro-protocol';
 import { map, filter } from 'rxjs/operators';
 
-import { MachineFactory, statesEqual } from '../..';
+import { MachineFactory, FINAL, statesEqual, outcomesEqual } from '../..';
 import { IStore, observeChannel } from '../../store';
 
 const PROTOCOL = 'support-state';
@@ -49,7 +49,9 @@ const sendState = (store: IStore) => async ({ state }: Init) => {
     // Otherwise, we only send it if we haven't signed any new states.
     (hasSupportedState &&
       statesEqual(entry.latestSupportedState, latestStateSupportedByMe) &&
-      entry.latestSupportedState.turnNum < state.turnNum)
+      entry.latestSupportedState.turnNum < state.turnNum) ||
+    // We always support a final state if it matches the outcome that we have signed
+    (state.isFinal && outcomesEqual(state.outcome, latestStateSupportedByMe.outcome))
   ) {
     await store.sendState(state);
   } else {

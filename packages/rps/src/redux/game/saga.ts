@@ -56,7 +56,6 @@ function* gameSagaRun(client: RPSChannelClient) {
   const {localState, channelState}: ls.GameState = yield select(getGameState);
 
   if (
-    !isPlayersTurnNext(localState, channelState) &&
     cs.isClosed(channelState) &&
     localState.type !== 'A.InsufficientFunds' &&
     localState.type !== 'B.InsufficientFunds' &&

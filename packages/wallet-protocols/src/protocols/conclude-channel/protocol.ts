@@ -2,7 +2,7 @@ import { Machine } from 'xstate';
 
 import * as VirtualDefundingAsHub from '../virtual-defunding-as-hub/protocol';
 import * as VirtualDefundingAsLeaf from '../virtual-defunding-as-leaf/protocol';
-import { MachineFactory, FINAL, checkThat } from '../..';
+import { MachineFactory, FINAL, checkThat, statesEqual, outcomesEqual } from '../..';
 import { add } from '../../mathOps';
 import { IStore } from '../../store';
 import { getDataAndInvoke } from '../../machine-utils';
@@ -69,19 +69,27 @@ export const mockOptions = {
 
 export const machine: MachineFactory<Init, any> = (store: IStore, ctx: Init) => {
   async function getFinalState({ channelId }: Init): Promise<SupportState.Init> {
-    const latestState = store.getEntry(channelId).latestStateSupportedByMe;
+    const { latestStateSupportedByMe, latestState } = store.getEntry(channelId);
 
-    if (!latestState) {
+    if (!latestStateSupportedByMe) {
       throw new Error('No state');
     }
-    // Only progress our turnNum if the state is not final
-    if (latestState.isFinal) {
+    // If we've received a new final state that matches our outcome we support that
+    if (
+      latestState.isFinal &&
+      outcomesEqual(latestStateSupportedByMe.outcome, latestState.outcome)
+    ) {
       return { state: latestState };
     }
+    // Otherwise send out our final state that we support
+    if (latestStateSupportedByMe.isFinal) {
+      return { state: latestStateSupportedByMe };
+    }
+    // Otherwise create a new final state
     return {
       state: {
-        ...latestState,
-        turnNum: latestState.turnNum + 1,
+        ...latestStateSupportedByMe,
+        turnNum: latestStateSupportedByMe.turnNum + 1,
         isFinal: true,
       },
     };
@@ -94,12 +102,12 @@ export const machine: MachineFactory<Init, any> = (store: IStore, ctx: Init) => 
     if (!isFinal) throw 'Target channel not finalized';
 
     const { latestSupportedState } = store.getEntry(funding.ledgerId);
-    const allocation = getEthAllocation(latestSupportedState.outcome);
+    const allocation = getEthAllocation(latestSupportedState.outcome, store.ethAssetHolderAddress);
     const idx = allocation.findIndex(({ destination }) => destination === channelId);
 
     if (
       allocation[idx]?.amount !==
-      getEthAllocation(concludedOutcome)
+      getEthAllocation(concludedOutcome, store.ethAssetHolderAddress)
         .map(a => a.amount)
         .reduce(add)
     ) {
@@ -107,13 +115,15 @@ export const machine: MachineFactory<Init, any> = (store: IStore, ctx: Init) => 
       throw 'Target channel underfunded';
     }
 
-    allocation.splice(idx, 1).push(...getEthAllocation(concludedOutcome));
+    allocation
+      .splice(idx, 1)
+      .push(...getEthAllocation(concludedOutcome, store.ethAssetHolderAddress));
 
     return {
       state: {
         ...latestSupportedState,
         turnNum: latestSupportedState.turnNum + 1,
-        outcome: ethAllocationOutcome(allocation),
+        outcome: ethAllocationOutcome(allocation, store.ethAssetHolderAddress),
       },
     };
   }

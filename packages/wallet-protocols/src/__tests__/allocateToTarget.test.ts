@@ -1,4 +1,5 @@
 import { Allocation } from '@statechannels/nitro-protocol';
+import { AddressZero } from 'ethers/constants';
 
 import { allocateToTarget, Errors, ethAllocationOutcome } from '../calculations';
 
@@ -67,9 +68,9 @@ describe('allocateToTarget with valid input', () => {
   `(
     'Test $description',
     ({ description, targetAllocation, ledgerAllocation, expectedAllocation }) => {
-      expect(allocateToTarget(targetAllocation, ledgerAllocation, targetChannelId)).toMatchObject(
-        ethAllocationOutcome(expectedAllocation)
-      );
+      expect(
+        allocateToTarget(targetAllocation, ledgerAllocation, targetChannelId, AddressZero)
+      ).toMatchObject(ethAllocationOutcome(expectedAllocation, AddressZero));
     }
   );
 });
@@ -100,8 +101,8 @@ describe('allocateToTarget with invalid input', () => {
     ${'one'}    | ${target1}       | ${ledger1}       | ${error1}
     ${'two'}    | ${target2}       | ${ledger2}       | ${error2}
   `('Test $description', ({ targetAllocation, ledgerAllocation, error }) => {
-    expect(() => allocateToTarget(targetAllocation, ledgerAllocation, targetChannelId)).toThrow(
-      error
-    );
+    expect(() =>
+      allocateToTarget(targetAllocation, ledgerAllocation, targetChannelId, AddressZero)
+    ).toThrow(error);
   });
 });
