@@ -5,7 +5,7 @@ import * as VirtualDefundingAsLeaf from '../virtual-defunding-as-leaf/protocol';
 import { MachineFactory, FINAL, checkThat } from '../..';
 import { add } from '../../mathOps';
 import { IStore } from '../../store';
-import { getDetaAndInvoke } from '../../machine-utils';
+import { getDataAndInvoke } from '../../machine-utils';
 import { isIndirectFunding } from '../../ChannelStoreEntry';
 import { getEthAllocation, ethAllocationOutcome } from '../../calculations';
 
@@ -17,8 +17,8 @@ export interface Init {
   channelId: string;
 }
 
-const concludeTarget = getDetaAndInvoke('getFinalState', 'supportState', 'ledgerDefunding');
-const ledgerDefunding = getDetaAndInvoke('getDefundedLedgerState', 'supportState', 'success');
+const concludeTarget = getDataAndInvoke('getFinalState', 'supportState', 'ledgerDefunding');
+const ledgerDefunding = getDataAndInvoke('getDefundedLedgerState', 'supportState', 'success');
 
 const virtualDefunding = {
   initial: 'start',

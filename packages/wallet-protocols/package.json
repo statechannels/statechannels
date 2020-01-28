@@ -8,7 +8,7 @@
   "license": "MIT",
   "scripts": {
     "prepare": "yarn build",
-    "build": "npx tsc -b",
+    "build": "yarn tsc -b",
     "generateConfigs": "yarn run ts-node bin/generateConfigs.ts && npx prettier --write src/protocols/*/protocol.config.js",
     "uploadConfig": "bin/uploadConfig.sh",
     "test": "jest",
@@ -23,6 +23,7 @@
   "dependencies": {
     "@statechannels/nitro-protocol": "0.0.1",
     "ethers": "^4.0.42",
+    "rxjs": "^6.5.4",
     "xstate": "^4.7"
   },
   "devDependencies": {

@@ -58,6 +58,13 @@ export async function setUpBrowser(headless: boolean, slowMo?: number): Promise<
     headless,
     slowMo,
     devtools: !headless,
+    // Keep code here for convenience... if you want to use redux-dev-tools
+    // then download and unzip the release from Github and specify the location.
+    // Github URL: https://github.com/zalmoxisus/redux-devtools-extension/releases
+    // args: [
+    //   '--disable-extensions-except=/Users/liam/Downloads/redux-dev-tools',
+    //   '--load-extension=/Users/liam/Downloads/redux-dev-tools'
+    // ],
     //, Needed to allow both windows to execute JS at the same time
     ignoreDefaultArgs: [
       '--disable-background-timer-throttling',

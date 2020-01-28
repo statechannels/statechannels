@@ -1,7 +1,7 @@
 import { assign, AssignAction, Interpreter, Machine, spawn, MachineConfig } from 'xstate';
 
-import { getChannelId, unreachable } from '../..';
-import { ChannelUpdated, IStore } from '../../store';
+import { getChannelId } from '../..';
+import { IStore } from '../../store';
 import { FundingStrategyProposed, OpenChannel, SendStates } from '../../wire-protocol';
 
 import { CreateChannel, JoinChannel, ConcludeChannel } from '..';
@@ -24,20 +24,6 @@ export interface Init {
   processes: Process[];
 }
 
-function forwardToChildren(_ctx, event: Events, { state }) {
-  switch (event.type) {
-    case 'FUNDING_STRATEGY_PROPOSED':
-      state.context.processes.forEach(({ ref }: Process) => ref.send(event));
-      break;
-    case 'CREATE_CHANNEL':
-    case 'OPEN_CHANNEL':
-    case 'SendStates':
-    case 'CONCLUDE_CHANNEL':
-      break;
-    default:
-      unreachable(event);
-  }
-}
 const config: MachineConfig<Init, any, Events> = {
   key: PROTOCOL,
   initial: 'running',
@@ -48,8 +34,7 @@ const config: MachineConfig<Init, any, Events> = {
         CREATE_CHANNEL: { actions: 'spawnCreateChannel' },
         CONCLUDE_CHANNEL: { actions: 'spawnConcludeChannel' },
         OPEN_CHANNEL: { actions: 'spawnJoinChannel' },
-        SendStates: { actions: ['updateStore', forwardToChildren] },
-        FUNDING_STRATEGY_PROPOSED: { actions: forwardToChildren },
+        SendStates: { actions: ['updateStore'] },
       },
     },
   },
@@ -70,7 +55,6 @@ export type Actions = {
   spawnJoinChannel: AssignAction<Init, OpenChannelEvent>;
   spawnCreateChannel: AssignAction<Init, CreateChannelEvent>;
   spawnConcludeChannel: AssignAction<Init, ConcludeChannelEvent>;
-  forwardToChildren: typeof forwardToChildren;
   updateStore: any; // TODO
 };
 
@@ -132,24 +116,13 @@ export function machine(store: IStore, context: Init) {
     };
   });
 
-  // TODO: Should this send `CHANNEL_UPDATED` to children?
-  const updateStore = (_ctx, event: SendStates, { state }) => {
-    store.receiveStates(event.signedStates);
-    const channelId = getChannelId(event.signedStates[0].state.channel);
-    const channelUpdated: ChannelUpdated = {
-      type: 'CHANNEL_UPDATED',
-      channelId,
-      entry: store.getEntry(channelId),
-    };
-    state.context.processes.forEach(({ ref }: Process) => ref.send(channelUpdated));
-  };
+  const updateStore = (_, { signedStates }: SendStates) => store.receiveStates(signedStates);
 
   const options: { actions: Actions } = {
     actions: {
       spawnCreateChannel,
       spawnJoinChannel,
       spawnConcludeChannel,
-      forwardToChildren,
       updateStore,
     },
   };

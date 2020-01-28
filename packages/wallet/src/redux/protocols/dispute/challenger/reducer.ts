@@ -74,7 +74,7 @@ export function challengerReducer(
     case "WALLET.DISPUTE.CHALLENGER.ACKNOWLEDGED":
       switch (state.type) {
         case "Challenging.AcknowledgeResponse":
-          return challengeResponseAcknowledged(state, sharedData);
+          return challengeResponseAcknowledged(state, sharedData, state.channelId);
         case "Challenging.AcknowledgeFailure":
           return challengeFailureAcknowledged(state, sharedData);
         case "Challenging.AcknowledgeTimeout":
@@ -264,12 +264,13 @@ function challengeTimedOut(state: NonTerminalCState, sharedData: SharedData): Re
 
 function challengeResponseAcknowledged(
   state: NonTerminalCState,
-  sharedData: SharedData
+  sharedData: SharedData,
+  channelId: string
 ): ReturnVal {
   if (state.type !== "Challenging.AcknowledgeResponse") {
     return {state, sharedData};
   }
-  sharedData = sendChallengeComplete(hideWallet(sharedData));
+  sharedData = sendChallengeComplete(hideWallet(sharedData), channelId);
   return {state: successOpen({}), sharedData};
 }
 

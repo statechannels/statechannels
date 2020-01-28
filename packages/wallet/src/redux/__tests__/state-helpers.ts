@@ -1,9 +1,4 @@
 import {bigNumberify} from "ethers/utils";
-
-import {
-  ConsensusData,
-  encodeConsensusData
-} from "@statechannels/nitro-protocol/lib/src/contract/consensus-data";
 import {
   Outcome,
   State,
@@ -11,7 +6,9 @@ import {
   getChannelId,
   Signatures,
   SignedState,
-  convertAddressToBytes32
+  convertAddressToBytes32,
+  ConsensusData,
+  encodeConsensusData
 } from "@statechannels/nitro-protocol";
 import {NETWORK_ID, ETH_ASSET_HOLDER_ADDRESS, CONSENSUS_LIBRARY_ADDRESS} from "../../constants";
 import {TwoPartyPlayerIndex, ThreePartyPlayerIndex} from "../types";

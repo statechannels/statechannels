@@ -1,4 +1,4 @@
-import {select, fork, put, call} from "redux-saga/effects";
+import {select, fork, put, putResolve, call} from "redux-saga/effects";
 import {getChannelId, State} from "@statechannels/nitro-protocol";
 import {
   JoinChannelParams,
@@ -282,21 +282,20 @@ function* handleUpdateChannelMessage(payload: RequestObject) {
     if (
       protocolState &&
       protocolState.type === "Application.WaitForDispute" &&
-      typeof protocolState.disputeState! !== "undefined"
+      typeof protocolState.disputeState !== "undefined" &&
+      isResponderState(protocolState.disputeState)
     ) {
-      if (isResponderState(protocolState.disputeState)) {
-        yield put(
-          responseProvided({
-            processId: "Application",
-            state: newState
-          })
-        );
-      }
+      yield putResolve(
+        responseProvided({
+          processId: "Application",
+          state: newState
+        })
+      );
     } else {
       // NOTE: We only call ownStateReceived if _not_ in dispute because this action
       // has a reducer which returns the protocol state to Application.Ongoing, but we
       // want it to stay as Application.WaitForDispute
-      yield put(
+      yield putResolve(
         actions.application.ownStateReceived({
           state: newState,
           processId: APPLICATION_PROCESS_ID

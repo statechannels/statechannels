@@ -1,5 +1,4 @@
-import {State} from '@statechannels/nitro-protocol';
-import {signState} from '@statechannels/nitro-protocol/lib/src/signatures';
+import {signState, State} from '@statechannels/nitro-protocol';
 
 import {SignedStatesReceived} from '../../../communication';
 import {EmbeddedProtocol} from '../../../constants';

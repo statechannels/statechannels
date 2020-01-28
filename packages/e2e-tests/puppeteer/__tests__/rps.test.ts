@@ -44,7 +44,7 @@ describe('Playing a game of RPS', () => {
     }
   });
 
-  it('can play two games end to end in one tab session', async () => {
+  it('can play four games end to end in one tab session, two with challenges', async () => {
     await startAndFundRPSGame(rpsTabA, rpsTabB);
 
     await playMove(rpsTabA, 'rock');

@@ -1,5 +1,5 @@
 import { assign } from 'xstate';
-import { Guarantee } from '@statechannels/nitro-protocol/lib/src/contract/outcome';
+import { Guarantee } from '@statechannels/nitro-protocol';
 
 import { Channel, getChannelId } from '../../';
 import { add } from '../../mathOps';
