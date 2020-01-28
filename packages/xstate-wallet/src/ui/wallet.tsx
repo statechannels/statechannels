@@ -1,12 +1,12 @@
-import * as React from 'react';
+import React from 'react';
 import {Interpreter} from 'xstate';
-import {useService, useMachine} from '@xstate/react';
-import {WorkflowManager} from '../workflow-manager';
+import {useService} from '@xstate/react';
+
 interface Props {
   workflow: Interpreter<any, any, any>;
 }
 export const Wallet = (props: Props) => {
-  const [current, send] = useService(props.workflow);
+  const [current] = useService(props.workflow);
   return (
     <div
       style={{

@@ -34,13 +34,13 @@ module.exports = {
   ],
 
   resolve: {
-    extensions: ['.tsx', '.ts', '.js'],
-    // This is needed otherwise react hooks won't work
+    extensions: ['.tsx', '.ts', '.js']
+    // This may be needed: react hooks may not work
     // due to having multiple versions of react installed
     // see https://github.com/facebook/react/issues/13991
-    alias: {
-      react: path.resolve('./node_modules/react')
-    }
+    // alias: {
+    //   react: path.resolve('./node_modules/react')
+    // }
   },
 
   node: {
