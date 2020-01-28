@@ -1,15 +1,20 @@
 import { assign } from 'xstate';
-import { Guarantee } from '@statechannels/nitro-protocol';
+import { Guarantee, Allocation, Outcome, AllocationItem } from '@statechannels/nitro-protocol';
 
 import { Channel, getChannelId } from '../../';
 import { add } from '../../mathOps';
 import { Balance } from '../../types';
-import { ethAllocationOutcome, ethGuaranteeOutcome } from '../../calculations';
+import {
+  allocateToTarget,
+  ethAllocationOutcome,
+  ethGuaranteeOutcome,
+  getEthAllocation,
+} from '../../calculations';
 import { Store } from '../../store';
 import { CHAIN_ID } from '../../constants';
 import { connectToStore } from '../../machine-utils';
 
-import { CreateNullChannel } from '..';
+import { CreateNullChannel, SupportState } from '..';
 
 const PROTOCOL = 'virtual-funding-as-leaf';
 
@@ -26,13 +31,27 @@ export interface Init {
   index: Indices.Left | Indices.Right;
 }
 
+const allocationItem = (balance: Balance): AllocationItem => ({
+  destination: balance.address,
+  amount: balance.wei,
+});
 type ChannelsKnown = Init & {
   jointChannel: Channel;
   guarantorChannel: Channel;
 };
-const total = (balances: Balance[]) => balances.map(b => b.wei).reduce(add);
-function jointChannelArgs({ jointChannel }: ChannelsKnown): CreateNullChannel.Init {
-  return { channel: jointChannel };
+function jointChannelArgs({
+  jointChannel,
+  balances,
+  hubAddress,
+}: ChannelsKnown): CreateNullChannel.Init {
+  const total = balances.map(b => b.wei).reduce(add);
+  const allocation = [
+    allocationItem(balances[0]),
+    { destination: hubAddress, amount: total },
+    allocationItem(balances[1]),
+  ];
+
+  return { channel: jointChannel, outcome: ethAllocationOutcome(allocation, 'TODO') };
 }
 const createJointChannel = {
   invoke: {
@@ -73,21 +92,37 @@ const createChannels = {
   onDone: 'fundGuarantor',
 };
 
-function fundGuarantorArgs({ guarantorChannel, ledgerId, balances }: ChannelsKnown) {
-  const amount = total(balances);
+function fundGuarantorArgs(store: Store) {
+  return async ({
+    guarantorChannel,
+    ledgerId,
+    balances,
+  }: ChannelsKnown): Promise<SupportState.Init> => {
+    const targetAllocation: Allocation = balances.map(b => ({
+      destination: b.address,
+      amount: b.wei,
+    }));
+    const { latestSupportedState } = await store.getEntry(ledgerId);
+    const ledgerAllocation = getEthAllocation(latestSupportedState.outcome, 'TODO');
+    const targetChannelId = getChannelId(guarantorChannel);
 
-  return {
-    channelId: ledgerId,
-    outcome: ethAllocationOutcome(
-      [{ destination: getChannelId(guarantorChannel), amount }],
-      'TODO'
-    ),
+    return {
+      state: {
+        ...latestSupportedState,
+        turnNum: latestSupportedState.turnNum + 1,
+        outcome: allocateToTarget(
+          targetAllocation,
+          ledgerAllocation,
+          targetChannelId,
+          store.ethAssetHolderAddress
+        ),
+      },
+    };
   };
 }
 const fundGuarantor = {
   invoke: {
     src: 'supportState',
-    data: fundGuarantorArgs,
     onDone: 'fundTarget',
   },
 };
@@ -137,6 +172,11 @@ const assignChannels = (store: Store) =>
     }
   );
 
-const options = (store: Store) => ({ actions: { assignChannels: assignChannels(store) } });
+const options = (store: Store) => ({
+  actions: { assignChannels: assignChannels(store) },
+  services: fundGuarantorArgs(store),
+  createNullChannel: CreateNullChannel.machine(store),
+  supportState: SupportState.machine(store),
+});
 
 export const machine = connectToStore(config, options);
