@@ -9,8 +9,8 @@ Run `yarn`
 - `config`: the machine's configuration
 - `mockOptions`: (optional) mock options used by the xstate visualizer
 - `Init`: A type indicating the initial context required by the machine
-- `machine: (store: IStore, context?: Init) => StateMachine<Init, any, any>`
-  - Most of the behaviour of machines depend in some way on a data store. `src/store.ts` contains `Istore`, a "rough draft" of the interface of a store. The `machine` factory hooks the protocol up to an implementation `store` of `IStore`. It also configures invoked services (child machines)
+- `machine: (store: Store, context?: Init) => StateMachine<Init, any, any>`
+  - Most of the behaviour of machines depend in some way on a data store. `src/store.ts` contains `Store`, a "rough draft" of the interface of a store. The `machine` factory hooks the protocol up to an implementation `store` of `Store`. It also configures invoked services (child machines)
 - `Guards`, `Actions`, `Services`, `Options`: (optional) types indicating what options are required.
 
 # Visualization

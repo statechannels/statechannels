@@ -1,7 +1,7 @@
 import { assign, Machine, MachineConfig, AnyEventObject, spawn } from 'xstate';
 import { map, filter } from 'rxjs/operators';
 
-import { IStore, observeChannel } from '../../store';
+import { Store, observeChannel } from '../../store';
 import { MachineFactory } from '../..';
 
 const PROTOCOL = 'advance-channel';
@@ -42,7 +42,7 @@ export type Services = {
   sendState(ctx: Init): Promise<void>;
 };
 
-const notifyWhenAdvanced = (store: IStore, ctx: Init) => {
+const notifyWhenAdvanced = (store: Store, ctx: Init) => {
   return observeChannel(store, ctx.channelId).pipe(
     map(event => event.entry),
     filter(e => {
@@ -52,7 +52,7 @@ const notifyWhenAdvanced = (store: IStore, ctx: Init) => {
   );
 };
 
-const sendState = (store: IStore) => async ({ channelId, targetTurnNum }: Init) => {
+const sendState = (store: Store) => async ({ channelId, targetTurnNum }: Init) => {
   const turnNum = targetTurnNum;
   /*
   TODO: the actual turnNum is calculated below. However, to determine whether
@@ -73,7 +73,7 @@ const sendState = (store: IStore) => async ({ channelId, targetTurnNum }: Init) 
   }
 };
 
-const options = (store: IStore) => ({
+const options = (store: Store) => ({
   services: {
     sendState: sendState(store),
   },
@@ -85,6 +85,6 @@ const options = (store: IStore) => ({
   },
 });
 
-export const machine: MachineFactory<Init, any> = (store: IStore, context?: Init) => {
+export const machine: MachineFactory<Init, any> = (store: Store, context?: Init) => {
   return Machine(config).withConfig(options(store), context);
 };

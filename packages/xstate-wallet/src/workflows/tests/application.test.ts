@@ -2,7 +2,7 @@ import {interpret} from 'xstate';
 import {ethers} from 'ethers';
 import waitForExpect from 'wait-for-expect';
 import {
-  Store,
+  EphemeralStore,
   CreateChannelEvent,
   ConcludeChannel,
   getChannelId,
@@ -44,7 +44,7 @@ beforeEach(() => {
 jest.setTimeout(50000);
 
 it('initializes and starts the create channel machine', async () => {
-  const store = new Store();
+  const store = new EphemeralStore();
   const event: CreateChannelEvent = {
     type: 'CREATE_CHANNEL',
     chainId: '0x0',
@@ -76,7 +76,7 @@ it('initializes and starts the create channel machine', async () => {
 });
 
 it('initializes and starts the join channel machine', async () => {
-  const store = new Store();
+  const store = new EphemeralStore();
   const channel: Channel = {chainId: '0x0', channelNonce: '0x0', participants: []};
   const event: OpenChannelEvent = {
     type: 'OPEN_CHANNEL',
@@ -119,7 +119,7 @@ it('initializes and starts the join channel machine', async () => {
   }, 2000);
 });
 it('starts concluding when requested', async () => {
-  const store = new Store();
+  const store = new EphemeralStore();
   const channelId = ethers.utils.id('channel');
   const service = interpret<any, any, any>(applicationWorkflow(store, {channelId}));
   service.start('running');
@@ -132,7 +132,7 @@ it('starts concluding when requested', async () => {
 });
 
 it('starts concluding when receiving a final state', async () => {
-  const store = new Store();
+  const store = new EphemeralStore();
   const states: SignedState[] = [
     {
       state: {

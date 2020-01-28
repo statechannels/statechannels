@@ -1,7 +1,7 @@
 import { EventObject, SendAction, StateMachine, forwardTo } from 'xstate';
 import { Outcome, State, hashOutcome, hashState } from '@statechannels/nitro-protocol';
 
-import { ChannelUpdated, IStore } from './store';
+import { ChannelUpdated, Store } from './store';
 
 export const success: { type: 'final' } = { type: 'final' };
 export const failure: { type: 'final' } = { type: 'final' };
@@ -21,7 +21,7 @@ export function forwardChannelUpdated<C>(id: string): Transition<C> {
 // Some machine factories require a context, and some don't
 // Sort this out.
 export type MachineFactory<I, E extends EventObject> = (
-  store: IStore,
+  store: Store,
   context?: I
 ) => StateMachine<I, any, E>;
 
@@ -63,7 +63,7 @@ export function checkThat<T, S>(t: T | S, isTypeT: TypeGuard<T, S>): T {
   return t;
 }
 
-export { Store, IStore, Constructor, ChannelUpdated } from './store';
+export { EphemeralStore, Store, Constructor, ChannelUpdated } from './store';
 export { IChain, ChainEvent, ChainEventType, ChainEventListener } from './chain';
 export { ChannelStoreEntry } from './ChannelStoreEntry';
 export { SignedState } from './types';

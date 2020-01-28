@@ -7,7 +7,7 @@ import {
   CreateChannel,
   JoinChannel,
   ConcludeChannel,
-  IStore,
+  Store,
   SendStates,
   ChannelUpdated,
   ChannelStoreEntry
@@ -105,7 +105,7 @@ export const config: MachineConfig<any, any, any> = {
 };
 
 export const applicationWorkflow: MachineFactory<ApplicationContext, any> = (
-  store: IStore,
+  store: Store,
   context: ApplicationContext
 ) => {
   // Always use an empty context instead of undefined

@@ -1,7 +1,7 @@
 import { assign, DoneInvokeEvent, Machine, MachineConfig } from 'xstate';
 
 import { allocateToTarget, getEthAllocation } from '../../calculations';
-import { Channel, MachineFactory, IStore, success } from '../..';
+import { Channel, MachineFactory, Store, success } from '../..';
 import { getDataAndInvoke } from '../../machine-utils';
 import { Funding } from '../../ChannelStoreEntry';
 
@@ -105,7 +105,7 @@ export const guards = {
   channelFound: (_, { data }: DoneInvokeEvent<LedgerLookup>) => data.type === 'FOUND',
 };
 
-export const machine: MachineFactory<Init, any> = (store: IStore, context: Init) => {
+export const machine: MachineFactory<Init, any> = (store: Store, context: Init) => {
   async function getTargetAllocation(ctx: LedgerExists): Promise<DirectFunding.Init> {
     const minimalAllocation = getEthAllocation(
       store.getEntry(ctx.targetChannelId).latestState.outcome,

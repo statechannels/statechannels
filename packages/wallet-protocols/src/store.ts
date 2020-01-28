@@ -24,7 +24,7 @@ export type StoreEvent = ChainEvent | ChannelUpdated;
 export type StoreEventType = ChainEventType | ChannelUpdated['type'];
 export type StoreEventListener = (event: StoreEvent) => void;
 
-export interface IStore {
+export interface Store {
   getEntry(channelId: string): ChannelStoreEntry;
   getParticipant(signingAddress: string): Participant;
   getHoldings: IChain['getHoldings'];
@@ -74,7 +74,7 @@ export type Constructor = Partial<{
   messagingService: IMessageService;
   ethAssetHolderAddress: string;
 }>;
-export class Store implements IStore {
+export class EphemeralStore implements Store {
   public static equals(left: SignedState[], right: SignedState[]) {
     // TODO: Delete this; we should use statesEqual and outcomesEqual
     return _.isEqual(
@@ -287,7 +287,7 @@ export class Store implements IStore {
     const entry = this.getEntry(channelId);
     const newEntry = { ...entry, states: merge(states, entry.states) };
     this._store[channelId] = newEntry;
-    if (!Store.equals(entry.states, newEntry.states)) {
+    if (!EphemeralStore.equals(entry.states, newEntry.states)) {
       const channelUpdated: ChannelUpdated = {
         type: 'CHANNEL_UPDATED',
         channelId,
@@ -301,7 +301,7 @@ export class Store implements IStore {
 
 // For subscriber convenience, construct a ChannelStoreEntry
 type T = { type: ChannelUpdated['type']; channelId: string; entry: ChannelStoreEntry };
-export function observeChannel(store: IStore, channelId: string): rxjs.Observable<T> {
+export function observeChannel(store: Store, channelId: string): rxjs.Observable<T> {
   const firstEntry: Promise<ChannelUpdated | { type: 'NOT_FOUND' }> = new Promise(resolve => {
     try {
       const entry = store.getEntry(channelId);

@@ -1,7 +1,7 @@
 import {
   getChannelId,
   Channel,
-  IStore,
+  Store,
   CreateChannelEvent,
   ChannelStoreEntry,
   AddressableMessage
@@ -26,7 +26,7 @@ import {JoinChannelParams} from '@statechannels/client-api-schema';
 export async function handleMessage(
   event,
   workflowManager: WorkflowManager,
-  store: IStore,
+  store: Store,
   ourWallet: ethers.Wallet
 ) {
   if (event.data && event.data.jsonrpc && event.data.jsonrpc === '2.0') {
@@ -77,7 +77,7 @@ export async function handleMessage(
   }
 }
 
-async function handleJoinChannel(payload: {id: jrs.ID; params: JoinChannelParams}, store: IStore) {
+async function handleJoinChannel(payload: {id: jrs.ID; params: JoinChannelParams}, store: Store) {
   // TODO: The application workflow should be updated to wait until we get a  join channel from the client
   const {id} = payload;
   const {channelId} = payload.params;
@@ -88,7 +88,7 @@ async function handleJoinChannel(payload: {id: jrs.ID; params: JoinChannelParams
 async function handleCloseChannel(
   payload: jrs.RequestObject,
   workflowManager: WorkflowManager,
-  store: IStore
+  store: Store
 ) {
   const {id} = payload;
   const {channelId} = payload.params as CloseChannelParams;
@@ -100,7 +100,7 @@ async function handleCloseChannel(
 async function handleUpdateChannel(
   payload: jrs.RequestObject,
   workflowManager: WorkflowManager,
-  store: IStore
+  store: Store
 ) {
   const params = payload.params as UpdateChannelParams;
   const entry = store.getEntry(params.channelId);
@@ -134,7 +134,7 @@ async function handlePushMessage(payload: jrs.RequestObject, workflowManager: Wo
 async function handleCreateChannelMessage(
   payload: jrs.RequestObject,
   workflowManager: WorkflowManager,
-  store: IStore,
+  store: Store,
   ethersWallet: ethers.Wallet
 ) {
   const params = payload.params as CreateChannelParams;

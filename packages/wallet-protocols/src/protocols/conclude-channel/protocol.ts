@@ -4,7 +4,7 @@ import * as VirtualDefundingAsHub from '../virtual-defunding-as-hub/protocol';
 import * as VirtualDefundingAsLeaf from '../virtual-defunding-as-leaf/protocol';
 import { MachineFactory, FINAL, checkThat, statesEqual, outcomesEqual } from '../..';
 import { add } from '../../mathOps';
-import { IStore } from '../../store';
+import { Store } from '../../store';
 import { getDataAndInvoke } from '../../machine-utils';
 import { isIndirectFunding } from '../../ChannelStoreEntry';
 import { getEthAllocation, ethAllocationOutcome } from '../../calculations';
@@ -67,7 +67,7 @@ export const mockOptions = {
   },
 };
 
-export const machine: MachineFactory<Init, any> = (store: IStore, ctx: Init) => {
+export const machine: MachineFactory<Init, any> = (store: Store, ctx: Init) => {
   async function getFinalState({ channelId }: Init): Promise<SupportState.Init> {
     const { latestStateSupportedByMe, latestState } = store.getEntry(channelId);
 

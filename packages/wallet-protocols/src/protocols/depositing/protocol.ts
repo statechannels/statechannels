@@ -2,7 +2,7 @@ import { bigNumberify } from 'ethers/utils';
 import { Machine, MachineConfig, InvokeCallback } from 'xstate';
 
 import { FINAL, MachineFactory } from '../..';
-import { IStore } from '../../store';
+import { Store } from '../../store';
 import { ChainEvent } from '../../chain';
 
 export type Init = {
@@ -50,7 +50,7 @@ type Services = {
 };
 
 type Options = { services: Services };
-export const machine: MachineFactory<Init, any> = (store: IStore, context: Init) => {
+export const machine: MachineFactory<Init, any> = (store: Store, context: Init) => {
   const subscribeDepositEvent = (ctx: Init): InvokeCallback => cb => {
     if (bigNumberify(ctx.depositAt).eq(0)) cb('SAFE_TO_DEPOSIT');
 
