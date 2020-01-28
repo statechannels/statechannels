@@ -1,6 +1,7 @@
 import React from 'react';
 import Wallet from '../src/ui/wallet';
 import {applicationWorkflow, config} from '../src/workflows/application';
+
 export default {title: 'X-state wallet'};
 import {storiesOf} from '@storybook/react';
 
@@ -29,9 +30,7 @@ function renderWalletInFrontOfApp(machine) {
   function renderFunction() {
     return (
       <div className={'app-in-background'}>
-        <div className={'wallet-container'}>
-          <Wallet workflow={machine} />
-        </div>
+        <Wallet workflow={machine} />
       </div>
     );
   }
