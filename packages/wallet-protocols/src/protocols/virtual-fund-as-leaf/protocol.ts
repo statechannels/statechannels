@@ -1,13 +1,13 @@
 import { assign } from 'xstate';
-import { AddressZero } from 'ethers/constants';
 import { Guarantee } from '@statechannels/nitro-protocol';
 
-import { Channel, getChannelId } from '../../';
+import { Channel, getChannelId, Store } from '../../';
 import { add } from '../../mathOps';
 import { Balance } from '../../types';
 import { Init as CreateNullChannelArgs } from '../create-null-channel/protocol';
 import { ethAllocationOutcome } from '../../calculations';
-const store = {} as any;
+import { CHAIN_ID } from '../../constants';
+import { connectToStore } from '../../machine-utils';
 
 const PROTOCOL = 'virtual-funding-as-leaf';
 
@@ -24,48 +24,22 @@ export interface Init {
   index: Indices.Left | Indices.Right;
 }
 
-export const assignChannels = assign(
-  (init: Init): ChannelsKnown => {
-    const { hubAddress, targetChannelId, index } = init;
-    const participants = store.getEntry(targetChannelId).participants.map(p => p.destination);
-    const jointParticipants = [participants[0], hubAddress, participants[1]];
-    const jointChannel: Channel = {
-      participants: jointParticipants,
-      channelNonce: store.getNextNonce(jointParticipants),
-      chainId: 'TODO',
-    };
-
-    const guarantorParticipants = [participants[index], hubAddress];
-    const guarantorChannel: Channel = {
-      participants: guarantorParticipants,
-      channelNonce: store.getNextNonce(guarantorParticipants),
-      chainId: 'TODO',
-    };
-
-    return {
-      ...init,
-      jointChannel,
-      guarantorChannel,
-    };
-  }
-);
-
-export type ChannelsKnown = Init & {
+type ChannelsKnown = Init & {
   jointChannel: Channel;
   guarantorChannel: Channel;
 };
 const total = (balances: Balance[]) => balances.map(b => b.wei).reduce(add);
-export function jointChannelArgs({ balances, jointChannel }: ChannelsKnown): CreateNullChannelArgs {
+function jointChannelArgs({ jointChannel }: ChannelsKnown): CreateNullChannelArgs {
   return { channel: jointChannel };
 }
 const createJointChannel = {
   invoke: {
     src: 'createNullChannel',
-    data: 'jointChannelArgs',
+    data: jointChannelArgs,
   },
 };
 
-export function guarantorChannelArgs({ jointChannel, index }: ChannelsKnown): Guarantee {
+function guarantorChannelArgs({ jointChannel, index }: ChannelsKnown): Guarantee {
   const { participants } = jointChannel;
 
   return {
@@ -74,12 +48,21 @@ export function guarantorChannelArgs({ jointChannel, index }: ChannelsKnown): Gu
     destinations: [participants[2 * index], participants[1]],
   };
 }
-
 const createGuarantorChannel = {
   invoke: {
     src: 'createNullChannel',
-    data: 'guarantorChannelArgs',
+    data: guarantorChannelArgs,
   },
+};
+
+const createChannels = {
+  entry: 'assignChannels',
+  type: 'parallel' as 'parallel',
+  states: {
+    createGuarantorChannel,
+    createJointChannel,
+  },
+  onDone: 'fundGuarantor',
 };
 
 function fundGuarantorArgs({ guarantorChannel, ledgerId, balances }: ChannelsKnown) {
@@ -88,24 +71,14 @@ function fundGuarantorArgs({ guarantorChannel, ledgerId, balances }: ChannelsKno
     channelId: ledgerId,
     outcome: ethAllocationOutcome(
       [{ destination: getChannelId(guarantorChannel), amount }],
-      AddressZero /* TODO: Should be store.ethassetholderaddress */
+      'TODO'
     ),
   };
 }
-const createChannels = {
-  entry: 'assignChannels',
-  type: 'parallel',
-  states: {
-    createGuarantorChannel,
-    createJointChannel,
-  },
-  onDone: 'fundGuarantor',
-};
-
 const fundGuarantor = {
   invoke: {
     src: 'supportState',
-    data: 'guarantorOutcome',
+    data: fundGuarantorArgs,
     onDone: 'fundTarget',
   },
 };
@@ -113,7 +86,6 @@ const fundGuarantor = {
 const fundTarget = {
   invoke: {
     src: 'supportState',
-    data: 'jointOutcome',
     onDone: 'success',
   },
 };
@@ -126,6 +98,37 @@ export const config = {
     createChannels,
     fundGuarantor,
     fundTarget,
-    success: { type: 'final' },
+    success: { type: 'final' as 'final' },
   },
 };
+
+const assignChannels = (store: Store) =>
+  assign(
+    (init: Init): ChannelsKnown => {
+      const { hubAddress, targetChannelId, index } = init;
+      const participants = store.getEntry(targetChannelId).participants.map(p => p.destination);
+      const jointParticipants = [participants[0], hubAddress, participants[1]];
+      const jointChannel: Channel = {
+        participants: jointParticipants,
+        channelNonce: store.getNextNonce(jointParticipants),
+        chainId: CHAIN_ID,
+      };
+
+      const guarantorParticipants = [participants[index], hubAddress];
+      const guarantorChannel: Channel = {
+        participants: guarantorParticipants,
+        channelNonce: store.getNextNonce(guarantorParticipants),
+        chainId: CHAIN_ID,
+      };
+
+      return {
+        ...init,
+        jointChannel,
+        guarantorChannel,
+      };
+    }
+  );
+
+const options = (store: Store) => ({ actions: { assignChannels: assignChannels(store) } });
+
+export const machine = connectToStore(config, options);

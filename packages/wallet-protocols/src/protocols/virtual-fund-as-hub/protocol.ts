@@ -3,6 +3,7 @@ import { assign } from 'xstate';
 import { Channel } from '../../';
 import { Balance } from '../../types';
 import { store } from '../../temp-store';
+import { connectToStore } from '../../machine-utils';
 const PROTOCOL = 'virtual-funding-as-hub';
 
 /*
@@ -133,3 +134,5 @@ export const config = {
     success: { type: 'final' },
   },
 };
+
+export const machine = connectToStore(config, {});
