@@ -1,13 +1,15 @@
 import { assign } from 'xstate';
 import { Guarantee } from '@statechannels/nitro-protocol';
 
-import { Channel, getChannelId, Store } from '../../';
+import { Channel, getChannelId } from '../../';
 import { add } from '../../mathOps';
 import { Balance } from '../../types';
-import { Init as CreateNullChannelArgs } from '../create-null-channel/protocol';
-import { ethAllocationOutcome } from '../../calculations';
+import { ethAllocationOutcome, ethGuaranteeOutcome } from '../../calculations';
+import { Store } from '../../store';
 import { CHAIN_ID } from '../../constants';
 import { connectToStore } from '../../machine-utils';
+
+import { CreateNullChannel } from '..';
 
 const PROTOCOL = 'virtual-funding-as-leaf';
 
@@ -29,7 +31,7 @@ type ChannelsKnown = Init & {
   guarantorChannel: Channel;
 };
 const total = (balances: Balance[]) => balances.map(b => b.wei).reduce(add);
-function jointChannelArgs({ jointChannel }: ChannelsKnown): CreateNullChannelArgs {
+function jointChannelArgs({ jointChannel }: ChannelsKnown): CreateNullChannel.Init {
   return { channel: jointChannel };
 }
 const createJointChannel = {
@@ -39,14 +41,20 @@ const createJointChannel = {
   },
 };
 
-function guarantorChannelArgs({ jointChannel, index }: ChannelsKnown): Guarantee {
+function guarantorChannelArgs({
+  jointChannel,
+  index,
+  guarantorChannel,
+}: ChannelsKnown): CreateNullChannel.Init {
   const { participants } = jointChannel;
 
-  return {
+  const guarantee: Guarantee = {
     targetChannelId: getChannelId(jointChannel),
     // Note that index in the joint channel is twice the index in the target channel
     destinations: [participants[2 * index], participants[1]],
   };
+
+  return { channel: guarantorChannel, outcome: ethGuaranteeOutcome(guarantee, 'TODO') };
 }
 const createGuarantorChannel = {
   invoke: {
@@ -67,6 +75,7 @@ const createChannels = {
 
 function fundGuarantorArgs({ guarantorChannel, ledgerId, balances }: ChannelsKnown) {
   const amount = total(balances);
+
   return {
     channelId: ledgerId,
     outcome: ethAllocationOutcome(
@@ -101,7 +110,6 @@ export const config = {
     success: { type: 'final' as 'final' },
   },
 };
-
 const assignChannels = (store: Store) =>
   assign(
     (init: Init): ChannelsKnown => {

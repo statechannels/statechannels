@@ -8,7 +8,6 @@ import {
   Guarantee,
 } from '@statechannels/nitro-protocol';
 import { hexZeroPad } from 'ethers/utils';
-import { AddressZero } from 'ethers/constants';
 
 import { add, subtract, gt } from './mathOps';
 

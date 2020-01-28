@@ -9,7 +9,7 @@ import { CreateNullChannel, DirectFunding, SupportState } from '..';
 
 const PROTOCOL = 'ledger-funding';
 
-interface Init {
+export interface Init {
   targetChannelId: string;
 }
 
