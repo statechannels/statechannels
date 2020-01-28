@@ -1,10 +1,9 @@
 import { EventEmitter } from 'events';
 
 import * as rxjs from 'rxjs';
-import { State, getStateSignerAddress, signState } from '@statechannels/nitro-protocol';
+import { State, getStateSignerAddress, signState, hashState } from '@statechannels/nitro-protocol';
 import _ from 'lodash';
 import { AddressZero } from 'ethers/constants';
-import { hashState } from '@statechannels/nitro-protocol/lib/src/contract/state';
 import { map, filter } from 'rxjs/operators';
 
 import { ChannelStoreEntry, IChannelStoreEntry, Funding, supported } from './ChannelStoreEntry';

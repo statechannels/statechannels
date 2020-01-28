@@ -1,6 +1,6 @@
 import {handleMessage, sendMessage} from './messaging';
 
-import {Store, EphemeralStore} from '@statechannels/wallet-protocols/';
+import {Store, EphemeralStore} from '@statechannels/wallet-protocols';
 import {ethers} from 'ethers';
 
 import {ChainWatcher} from './chain';

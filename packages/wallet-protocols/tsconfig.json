@@ -1,9 +1,8 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "noEmit": true,
-    "target": "es5",
     "outDir": "lib",
+    "target": "es5",
     "strict": false,
     "strictNullChecks": true,
     "esModuleInterop": true,
