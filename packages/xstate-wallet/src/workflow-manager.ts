@@ -38,6 +38,7 @@ export interface Workflow {
 export class WorkflowManager {
   workflows: Workflow[];
   store: IStore;
+  tempMachine;
   constructor(store: IStore) {
     this.workflows = [];
     this.store = store;
@@ -52,10 +53,14 @@ export class WorkflowManager {
 
   private startWorkflow(event: Event): void {
     const id = Guid.create().toString();
-    const machine = interpret<any, any, any>(applicationWorkflow(this.store))
+    const machine = interpret<any, any, any>(applicationWorkflow(this.store), {
+      devTools: true
+    })
       .onTransition(state => {
         logState({state});
+        console.log(JSON.stringify(state.context));
       })
+      .onEvent(console.log)
       .onDone(() => (this.workflows = this.workflows.filter(w => w.id !== id)))
       .start();
     // TODO: Figure out how to resolve rendering priorities

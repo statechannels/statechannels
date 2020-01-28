@@ -1,4 +1,4 @@
-import {MachineConfig, Machine, StateMachine} from 'xstate';
+import {MachineConfig, Machine, StateMachine, assign} from 'xstate';
 import {
   FINAL,
   MachineFactory,
@@ -6,6 +6,7 @@ import {
   OpenChannelEvent,
   CreateChannel,
   JoinChannel,
+  ConcludeChannel,
   IStore,
   SendStates,
   ChannelUpdated,
@@ -23,55 +24,105 @@ interface PlayerStateUpdate {
   type: 'PLAYER_STATE_UPDATE';
   state: State;
 }
-
-export type ApplicationWorkflowEvent = PlayerStateUpdate | SendStates | OpenEvent;
+interface PlayerRequestConclude {
+  type: 'PLAYER_REQUEST_CONCLUDE';
+  channelId: string;
+}
+export type ApplicationWorkflowEvent =
+  | PlayerRequestConclude
+  | PlayerStateUpdate
+  | SendStates
+  | OpenEvent;
 
 // Context
 interface ApplicationContext {
-  channelId: string;
+  channelId?: string;
 }
 // States
-const initializing = {on: {CREATE_CHANNEL: 'funding', OPEN_CHANNEL: 'funding'}};
-
-const funding = {
-  entry: ['displayUi'],
+const initializing = {on: {CREATE_CHANNEL: 'create', OPEN_CHANNEL: 'join'}};
+const join = {
+  entry: ['assignChannelId', 'displayUi'],
   invoke: {
-    id: 'openMachine',
-    src: 'invokeOpeningMachine',
+    id: 'joinMachine',
+    src: 'invokeJoinMachine',
     data: (context, event) => event,
     onDone: {target: 'running', actions: ['hideUi']},
     autoForward: true
   },
   on: {
     SendStates: {actions: ['updateStore']},
-    CHANNEL_UPDATED: {actions: 'sendChannelUpdatedNotification'}
+    CHANNEL_UPDATED: {actions: ['sendChannelUpdatedNotification']}
   }
 };
+const create = {
+  entry: ['displayUi'],
+  invoke: {
+    id: 'createMachine',
+    src: 'invokeCreateMachine',
+    data: (context, event) => event,
+    onDone: {target: 'running', actions: ['hideUi', 'assignChannelId']},
+    autoForward: true
+  },
+  on: {
+    SendStates: {actions: ['updateStore']},
+    CHANNEL_UPDATED: {actions: ['sendChannelUpdatedNotification']}
+  }
+};
+
 const running = {
   on: {
     PLAYER_STATE_UPDATE: {target: 'running', actions: ['sendToOpponent']},
-    SendStates: {target: 'running', actions: ['updateStore']},
-    CHANNEL_UPDATED: {target: 'running', actions: 'sendChannelUpdatedNotification'}
+    CHANNEL_UPDATED: [
+      {cond: 'channelOpen', target: 'running', actions: ['sendChannelUpdatedNotification']},
+      {cond: 'channelClosing', target: 'closing', actions: ['sendChannelUpdatedNotification']}
+    ],
+    SendStates: [{target: 'running', actions: ['updateStore']}],
+    PLAYER_REQUEST_CONCLUDE: {target: 'closing'}
   }
 };
-const closing = {};
+const closing = {
+  entry: ['displayUi'],
+  exit: ['hideUi'],
+  invoke: {
+    id: 'closingMachine',
+    src: 'invokeClosingMachine',
+    data: (context, event) => context,
+    autoForward: true
+  },
+  on: {
+    SendStates: {actions: ['updateStore']},
+    CHANNEL_UPDATED: [
+      {cond: 'channelClosed', target: 'done', actions: ['sendChannelUpdatedNotification']},
+      {target: 'closing', actions: ['sendChannelUpdatedNotification']}
+    ]
+  }
+};
 const done = {type: FINAL};
 
 export const config: MachineConfig<any, any, any> = {
   initial: 'initializing',
-  states: {initializing, funding, running, closing, done}
+  states: {initializing, join, create, running, closing, done}
 };
 
 export const applicationWorkflow: MachineFactory<ApplicationContext, any> = (
   store: IStore,
   context: ApplicationContext
 ) => {
-  const invokeOpeningMachine = (context, event: OpenEvent): StateMachine<any, any, any, any> => {
-    if (event.type === 'CREATE_CHANNEL') {
-      return CreateChannel.machine(store);
-    } else {
-      return JoinChannel.machine(store, event);
-    }
+  // Always use an empty context instead of undefined
+  if (!context) {
+    context = {};
+  }
+  const invokeJoinMachine = (
+    context,
+    event: OpenChannelEvent
+  ): StateMachine<any, any, any, any> => {
+    return JoinChannel.machine(store, event);
+  };
+  const invokeCreateMachine = (
+    context,
+    event: CreateChannelEvent
+  ): StateMachine<any, any, any, any> => {
+    return CreateChannel.machine(store);
   };
   const updateStore = (context, event: SendStates) => {
     store.receiveStates(
@@ -96,20 +147,88 @@ export const applicationWorkflow: MachineFactory<ApplicationContext, any> = (
   const hideUi = (context, event) => {
     sendDisplayMessage('Hide');
   };
-  const actions = {sendToOpponent, updateStore, sendChannelUpdatedNotification, hideUi, displayUi};
+
+  const invokeClosingMachine = (context: ApplicationContext) => {
+    if (!context.channelId) {
+      throw new Error('No channel id');
+    }
+    return ConcludeChannel.machine(store, {channelId: context.channelId});
+  };
+
+  const channelOpen = (context: ApplicationContext, event: ChannelUpdated): boolean => {
+    return !channelClosing(context, event);
+  };
+  const channelClosing = (context: ApplicationContext, event: ChannelUpdated): boolean => {
+    if (!context || !context.channelId) {
+      return false;
+    }
+    if (event.channelId !== context.channelId) {
+      return false;
+    }
+    const channelStoreEntry = new ChannelStoreEntry(event.entry);
+    return channelStoreEntry.latestState.isFinal;
+  };
+
+  const channelClosed = (context: ApplicationContext, event: ChannelUpdated): boolean => {
+    if (!context || !context.channelId) {
+      return false;
+    }
+    if (event.channelId !== context.channelId) {
+      return false;
+    }
+    const channelStoreEntry = new ChannelStoreEntry(event.entry);
+    return channelStoreEntry.hasSupportedState && channelStoreEntry.latestSupportedState.isFinal;
+  };
+
+  const assignChannelId = assign(
+    (
+      context: ApplicationContext,
+      event: any // TODO Proper typing
+    ) => {
+      if (!context.channelId) {
+        if (event.type === 'PLAYER_STATE_UPDATE') {
+          return {channelId: getChannelId(event.state.channel)};
+        } else if (event.type === 'OPEN_CHANNEL') {
+          return {channelId: getChannelId(event.signedState.state.channel)};
+        } else if (event.type === 'done.invoke.createMachine') {
+          return event.data;
+        }
+        return {};
+      }
+      return {};
+    }
+  );
+
+  const guards = {channelOpen, channelClosing, channelClosed};
+  const services = {invokeClosingMachine, invokeCreateMachine, invokeJoinMachine};
+  const actions = {
+    sendToOpponent,
+    updateStore,
+    sendChannelUpdatedNotification,
+    assignChannelId,
+    displayUi,
+    hideUi
+  };
   const options = {
-    services: {invokeOpeningMachine},
-    actions
+    services,
+    actions,
+    guards
   };
   return Machine(config).withConfig(options, context);
 };
 
-const mockServices = {invokeOpeningMachine: () => {}};
+const mockServices = {
+  invokeCreateMachine: () => {},
+  invokeJoinMachine: () => {},
+  invokeClosingMachine: () => {}
+};
 const mockActions = {
   sendToOpponent: () => {},
   updateStore: () => {},
   sendChannelUpdatedNotification: () => {},
   hideUi: () => {},
-  displayUi: () => {}
+  displayUi: () => {},
+  assignChannelId: () => {}
 };
-export const mockOptions = {services: mockServices, actions: mockActions};
+const mockGuards = {channelOpen: () => true, channelClosing: () => true};
+export const mockOptions = {services: mockServices, actions: mockActions, guards: mockGuards};

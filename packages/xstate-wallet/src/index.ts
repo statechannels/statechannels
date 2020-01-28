@@ -5,6 +5,7 @@ import {ethers} from 'ethers';
 
 import {ChainWatcher} from './chain';
 import {WorkflowManager} from './workflow-manager';
+import {ETH_ASSET_HOLDER_ADDRESS} from './constants';
 
 const ourWallet = ethers.Wallet.createRandom();
 
@@ -15,7 +16,8 @@ const store: IStore = new Store({
   privateKeys: {
     [ourWallet.address]: ourWallet.privateKey
   },
-  messagingService: {sendMessage}
+  messagingService: {sendMessage},
+  ethAssetHolderAddress: ETH_ASSET_HOLDER_ADDRESS
 });
 
 const workflowManager = new WorkflowManager(store);
