@@ -1,7 +1,7 @@
 import { assign, DoneInvokeEvent, Machine, MachineConfig, sendParent } from 'xstate';
 import { State, Channel } from '@statechannels/nitro-protocol';
 
-import { MachineFactory, success, IStore } from '../..';
+import { MachineFactory, success, Store } from '../..';
 import { ethAllocationOutcome } from '../../calculations';
 import { ChannelStoreEntry } from '../../ChannelStoreEntry';
 import { JsonRpcCreateChannelParams } from '../../json-rpc';
@@ -94,7 +94,7 @@ export const config: MachineConfig<Context, any, any> = {
   },
 };
 
-export const machine: MachineFactory<Init, any> = (store: IStore, init: Init) => {
+export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => {
   async function initializeChannel(ctx: Init): Promise<SetChannel> {
     const participants = ctx.participants.map(p => p.signingAddress);
     const channelNonce = store.getNextNonce(participants);

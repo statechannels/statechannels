@@ -1,7 +1,7 @@
 import { assign, AssignAction, Interpreter, Machine, spawn, MachineConfig } from 'xstate';
 
 import { getChannelId } from '../..';
-import { IStore } from '../../store';
+import { Store } from '../../store';
 import { FundingStrategyProposed, OpenChannel, SendStates } from '../../wire-protocol';
 
 import { CreateChannel, JoinChannel, ConcludeChannel } from '..';
@@ -58,7 +58,7 @@ export type Actions = {
   updateStore: any; // TODO
 };
 
-export function machine(store: IStore, context: Init) {
+export function machine(store: Store, context: Init) {
   const spawnCreateChannel = assign(
     (ctx: Init, { type, ...init }: CreateChannelEvent): Init => {
       const processId = `create-channel`;

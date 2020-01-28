@@ -10,7 +10,7 @@ import {
   CreateChannelEvent,
   ConcludeChannelEvent,
 } from '../protocols/wallet/protocol';
-import { Store, IStore } from '../store';
+import { EphemeralStore, Store } from '../store';
 import { messageService } from '../messaging';
 import { AddressableMessage } from '../wire-protocol';
 import { log } from '../utils';
@@ -42,12 +42,12 @@ const createChannel: CreateChannelEvent = {
 
 const chain = new Chain();
 
-const stores: Record<string, IStore> = {};
+const stores: Record<string, Store> = {};
 
 const connect = (wallet: ethers.Wallet, store?) => {
   store =
     store ||
-    new Store({
+    new EphemeralStore({
       privateKeys: { [wallet.address]: wallet.privateKey },
       chain,
     });
@@ -111,14 +111,14 @@ test('opening a channel', async () => {
 
 test('concluding a channel', async () => {
   const data1 = storeWithFundedChannel(wallet1.privateKey);
-  const firstStore = new Store({
+  const firstStore = new EphemeralStore({
     nonces: data1._nonces,
     privateKeys: data1._privateKeys,
     store: data1._store,
   });
 
   const data2 = storeWithFundedChannel(wallet2.privateKey);
-  const secondStore = new Store({
+  const secondStore = new EphemeralStore({
     nonces: data2._nonces,
     privateKeys: data2._privateKeys,
     store: data2._store,
