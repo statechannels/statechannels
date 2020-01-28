@@ -20,7 +20,20 @@ if (config.states) {
       devTools: true
     }); // start a new interpreted machine for each story
     machine.start(state);
-    storiesOf('Wallet', module).add(state.toString(), () => <Wallet workflow={machine} />);
+    storiesOf('Wallet', module).add(state.toString(), renderWalletInFrontOfApp(machine));
     machine.stop();
   });
+}
+
+function renderWalletInFrontOfApp(machine) {
+  function renderFunction() {
+    return (
+      <div className={'app-in-background'}>
+        <div className={'wallet-container'}>
+          <Wallet workflow={machine} />
+        </div>
+      </div>
+    );
+  }
+  return renderFunction;
 }
