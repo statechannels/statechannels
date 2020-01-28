@@ -1,6 +1,7 @@
 import React from 'react';
 import {Interpreter} from 'xstate';
 import {useService} from '@xstate/react';
+import './wallet.scss';
 
 interface Props {
   workflow: Interpreter<any, any, any>;
