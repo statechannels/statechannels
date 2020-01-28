@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {Interpreter} from 'xstate';
-import {useService, useMachine} from '@xstate/react';
-import {WorkflowManager} from '../workflow-manager';
+import {useService} from '@xstate/react';
+
 interface Props {
   workflow: Interpreter<any, any, any>;
 }
