@@ -13,7 +13,7 @@ import { CreateNullChannel, SupportState, LedgerFunding } from '..';
 
 const PROTOCOL = 'virtual-funding-as-leaf';
 
-enum Indices {
+export enum Indices {
   Left = 0,
   Right = 1,
 }
@@ -34,11 +34,11 @@ type ChannelsKnown = Init & {
   jointChannel: Channel;
   guarantorChannel: Channel;
 };
-function jointChannelArgs({
+export function jointChannelArgs({
   jointChannel,
   balances,
   hubAddress,
-}: ChannelsKnown): CreateNullChannel.Init {
+}: Pick<ChannelsKnown, 'jointChannel' | 'balances' | 'hubAddress'>): CreateNullChannel.Init {
   const allocation = jointChannelAllocation(balances, hubAddress);
 
   return { channel: jointChannel, outcome: ethAllocationOutcome(allocation, 'TODO') };
@@ -60,11 +60,11 @@ function jointChannelAllocation(balances: Balance[], hubAddress: string) {
   return allocation;
 }
 
-function guarantorChannelArgs({
+export function guarantorChannelArgs({
   jointChannel,
   index,
   guarantorChannel,
-}: ChannelsKnown): CreateNullChannel.Init {
+}: Pick<ChannelsKnown, 'jointChannel' | 'index' | 'guarantorChannel'>): CreateNullChannel.Init {
   const { participants } = jointChannel;
 
   const guarantee: Guarantee = {
@@ -112,14 +112,11 @@ const assignChannels = (store: Store) =>
 const createChannels = {
   entry: 'assignChannels',
   type: 'parallel' as 'parallel',
-  states: {
-    createGuarantorChannel,
-    createJointChannel,
-  },
+  states: { createGuarantorChannel, createJointChannel },
   onDone: 'fundGuarantor',
 };
 
-function fundGuarantorArgs(_: Store) {
+export function fundGuarantorArgs(_: Store) {
   return async ({}: ChannelsKnown): Promise<LedgerFunding.Init> => {
     // TODO: We might need to change ledger-funding a little to
     // accept arguments compatible with funding a guarantor channel.
@@ -132,7 +129,7 @@ function fundGuarantorArgs(_: Store) {
 }
 const fundGuarantor = getDataAndInvoke('fundGuarantorArgs', 'ledgerFunding', 'fundTarget');
 
-function fundTargetArgs(store: Store) {
+export function fundTargetArgs(store: Store) {
   return async ({
     jointChannel,
     balances,
