@@ -7,7 +7,7 @@
   ],
   "license": "MIT",
   "scripts": {
-    "prepare": "yarn build",
+    "prepare": "echo 'No prepare step for wallet-protocols'",
     "build": "yarn tsc -b",
     "generateConfigs": "yarn run ts-node bin/generateConfigs.ts && npx prettier --write src/protocols/*/protocol.config.js",
     "uploadConfig": "bin/uploadConfig.sh",
