@@ -135,4 +135,4 @@ export const config = {
   },
 };
 
-export const machine = connectToStore(config, {});
+export const machine = connectToStore(config, () => {});
