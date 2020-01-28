@@ -57,6 +57,7 @@ function preFundData({ channel, outcome }: Context): SupportState.Init {
     },
   };
 }
+
 const preFundSetup = {
   invoke: {
     src: 'supportState',
