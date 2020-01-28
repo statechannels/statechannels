@@ -2,7 +2,8 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "lib",
-    "target": "es5",
+    "target": "es2020",
+    "module": "commonjs",
     "strict": false,
     "strictNullChecks": true,
     "esModuleInterop": true,

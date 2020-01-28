@@ -1,9 +1,9 @@
 {
   "name": "@statechannels/wallet-protocols",
   "version": "0.0.1",
-  "main": "src/index.ts",
+  "main": "lib/src/index.js",
   "files": [
-    "src/*"
+    "lib/*"
   ],
   "license": "MIT",
   "scripts": {
