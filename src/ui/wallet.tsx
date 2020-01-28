@@ -6,7 +6,7 @@ interface Props {
   workflow: Interpreter<any, any, any>;
 }
 export const Wallet = (props: Props) => {
-  const [current, send] = useService(props.workflow);
+  const [current] = useService(props.workflow);
   return (
     <div
       style={{
