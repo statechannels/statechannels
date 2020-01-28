@@ -8,7 +8,7 @@
     "node": "^10.16.3"
   },
   "scripts": {
-    "prepare": "typesync && lerna run --concurrency 8 --stream prepare",
+    "prepare": "typesync && yarn install --ignore-scripts && lerna run --concurrency 8 --stream prepare",
     "build": "lerna run build",
     "build:ci:incremental": "yarn build:ci --since $(git merge-base $CIRCLE_BRANCH origin/master)",
     "build:ci": "lerna run build:ci",
