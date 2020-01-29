@@ -12,7 +12,7 @@ const log = logger();
 export async function startServer(): Promise<any> {
   Sentry.init({
     dsn: 'https://5b818f025d1a4259a8cf086377b67025@sentry.io/2047255',
-    environment: process.env.NODE_ENV
+    environment: process.env.RUNTIME_ENV || 'development'
   });
   const fbMessageCallback = async (message: RelayableAction) => {
     log.info({message}, 'Received message from firebase');
