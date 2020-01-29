@@ -101,14 +101,14 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     return this.playerIndex;
   }
 
-  private getOpponentIndex(): number {
+  public getOpponentIndex(): number {
     if (this.opponentIndex === undefined) {
       throw Error(`This client does not have its opponent player index set yet`);
     }
     return this.opponentIndex;
   }
 
-  private verifyTurnNum(turnNum: string): Promise<void> {
+  public verifyTurnNum(turnNum: string): Promise<void> {
     const currentTurnNum = bigNumberify(turnNum);
     if (currentTurnNum.mod(2).eq(this.getPlayerIndex())) {
       return Promise.reject(
@@ -118,13 +118,13 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     return Promise.resolve();
   }
 
-  private getNextTurnNum(latestState: ChannelResult): string {
+  public getNextTurnNum(latestState: ChannelResult): string {
     return bigNumberify(latestState.turnNum)
       .add(1)
       .toString();
   }
 
-  protected findChannel(channelId: string): ChannelResult {
+  public findChannel(channelId: string): ChannelResult {
     if (!(this.latestState && this.latestState.channelId === channelId)) {
       throw Error(`Channel does't exist with channelId '${JSON.stringify(channelId, null, 4)}'`);
     }

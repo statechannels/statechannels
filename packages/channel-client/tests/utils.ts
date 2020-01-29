@@ -1,17 +1,10 @@
-import {FakeChannelClient} from './fakes/fake-channel-client';
 import {Participant, Allocation, ChannelStatus, ChannelResult} from '../src/types';
 import {ETH_TOKEN_ADDRESS} from './constants';
 import {FakeChannelProvider} from './fakes/fake-channel-provider';
 
-export function setClientStates(clients: FakeChannelClient[], state: ChannelResult): void {
-  clients.forEach(client => {
-    client.setState(state);
-  });
-}
-
-export function setProviderStates(clients: FakeChannelProvider[], state: ChannelResult): void {
-  clients.forEach(client => {
-    client.setState(state);
+export function setProviderStates(providers: FakeChannelProvider[], state: ChannelResult): void {
+  providers.forEach(provider => {
+    provider.setState(state);
   });
 }
 

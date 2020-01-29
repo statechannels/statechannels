@@ -9,5 +9,3 @@ export {
 } from './types';
 
 export {ChannelClient} from './channel-client';
-
-export {FakeChannelClient} from '../tests/fakes/fake-channel-client';
