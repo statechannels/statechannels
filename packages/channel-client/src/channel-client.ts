@@ -7,7 +7,8 @@ import {
   Message,
   Participant,
   Allocation,
-  PushMessageResult
+  PushMessageResult,
+  SiteBudget
 } from './types';
 
 export class ChannelClient implements ChannelClientInterface<ChannelResult> {
@@ -77,4 +78,32 @@ export class ChannelClient implements ChannelClientInterface<ChannelResult> {
   async getAddress(): Promise<string> {
     return this.provider.send('GetAddress', {});
   }
+  async approveBudgetAndFund(
+    playerAmount: string,
+    hubAmount: string,
+    playerDestinationAddress: string,
+    hubAddress: string,
+    hubDestinationAddress: string
+  ): Promise<SiteBudget> {
+    return this.provider.send('ApproveBudgetAndFund', {
+      playerAmount,
+      hubAmount,
+      playerDestinationAddress,
+      hubAddress,
+      hubDestinationAddress
+    });
+  }
+
+  async getBudget(hubAddress: string): Promise<SiteBudget> {
+    return this.provider.send('GetBudget', {hubAddress});
+  }
+
+  onBudgetUpdated(callback: (result: SiteBudget) => void): UnsubscribeFunction {
+    this.provider.on('BudgetUpdated', result => callback(result.params));
+    return this.provider.off.bind(this, 'BudgetUpdated', callback);
+  }
+  async CloseAndWithdraw(hubAddress: string): Promise<SiteBudget> {
+    return this.provider.send('CloseAndWithdraw', {hubAddress});
+  }
+  // async Withdraw(playerAmount: string, hubAmount: string, hubAddress: string) {
 }

@@ -90,10 +90,22 @@ export interface ChannelClientInterface<Payload = object> {
   closeChannel: (channelId: string) => Promise<ChannelResult>;
   getAddress: () => Promise<string>;
 }
-
+interface Balance {
+  playerAmount: string;
+  hubAmount: string;
+}
+export interface SiteBudget {
+  site: string;
+  hub: string;
+  pending: Balance;
+  free: Balance;
+  inUse: Balance;
+  direct: Balance;
+}
 export interface EventsWithArgs {
   MessageQueued: [Message<ChannelResult>];
   ChannelUpdated: [ChannelResult];
+  BudgetUpdated: [SiteBudget];
   // TODO: Is `ChannelResult` the right type to use here?
   ChannelProposed: [ChannelResult];
 }
