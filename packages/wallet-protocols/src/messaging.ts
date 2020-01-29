@@ -1,4 +1,4 @@
-import EventEmitter from 'events';
+import { EventEmitter } from 'events';
 
 import { AddressableMessage, Message } from './wire-protocol';
 import { log } from './utils';
