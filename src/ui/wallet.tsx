@@ -3,11 +3,13 @@ import {Interpreter} from 'xstate';
 import {useService} from '@xstate/react';
 import './wallet.scss';
 import logo from '../images/logo.svg';
-import {Modal, Card, Flex, Blockie, Image} from 'rimble-ui';
+import {Modal, Card, Flex, Image} from 'rimble-ui';
+import {ChannelId} from './channel-id';
 
 interface Props {
   workflow: Interpreter<any, any, any>;
 }
+
 export const Wallet = (props: Props) => {
   const [current] = useService(props.workflow);
   return (
@@ -23,17 +25,7 @@ export const Wallet = (props: Props) => {
           }}
         >
           <h1>{current.value}</h1>
-          <Blockie // TODO extend this class to make a visual rep of a channelId (which is longer than an ethereum address anyway)
-            opts={{
-              seed: current.context.channelId,
-              color: '#dfe',
-              bgcolor: '#a71',
-              size: 15,
-              scale: 3,
-              spotcolor: '#000',
-              borderRadius: 5
-            }}
-          />
+          <ChannelId channelId={current.context.channelId} />
         </div>
       </Card>
     </Modal>
