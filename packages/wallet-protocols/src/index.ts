@@ -1,7 +1,7 @@
 import { SendAction, forwardTo } from 'xstate';
 import { Outcome, State, hashOutcome, hashState } from '@statechannels/nitro-protocol';
 
-import { ChannelUpdated, Store } from './store';
+import { ChannelUpdated } from './store';
 
 export const success: { type: 'final' } = { type: 'final' };
 export const failure: { type: 'final' } = { type: 'final' };
@@ -62,3 +62,4 @@ export * from './protocols';
 export * from './wire-protocol';
 export { CreateChannelEvent, OpenChannelEvent } from './protocols/wallet/protocol';
 export { Channel, getChannelId } from '@statechannels/nitro-protocol';
+export { MachineFactory } from './machine-utils';
