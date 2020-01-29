@@ -3,7 +3,7 @@ import {Interpreter} from 'xstate';
 import {useService} from '@xstate/react';
 import './wallet.scss';
 import logo from '../images/logo.svg';
-import {Modal, Card, Flex, Image} from 'rimble-ui';
+import {Modal, Card, Flex, Image, Progress} from 'rimble-ui';
 import {ChannelId} from './channel-id';
 
 interface Props {
@@ -37,6 +37,21 @@ export const Wallet = (props: Props) => {
           <Flex px={3} height={3} mt={'0.8'} mx={'0.4'}>
             <ChannelId channelId={current.context.channelId} />
           </Flex>
+          {/* {JSON.stringify(current.children.createMachine.state)} */}
+          {current.children &&
+            current.children.createMachine &&
+            current.children.createMachine.state && (
+              <Progress
+                value={progressThroughCreateMachine[current.children.createMachine.state.value]}
+              />
+            )}
+          {current.children &&
+            current.children.joinMachine &&
+            current.children.joinMachine.state && (
+              <Progress
+                value={progressThroughJoinMachine[current.children.joinMachine.state.value]}
+              />
+            )}
         </div>
       </Card>
     </Modal>
@@ -44,3 +59,21 @@ export const Wallet = (props: Props) => {
 };
 
 export default Wallet;
+
+const progressThroughCreateMachine = {
+  initializeChannel: 0.15,
+  sendOpenChannelMessage: 0.3,
+  preFundSetup: 0.45,
+  funding: 0.6,
+  postFundSetup: 0.75,
+  success: 0.9
+};
+
+const progressThroughJoinMachine = {
+  checkNonce: 0.15,
+  askClient: 0.3,
+  preFundSetup: 0.45,
+  funding: 0.6,
+  postFundSetup: 0.75,
+  success: 0.9
+};
