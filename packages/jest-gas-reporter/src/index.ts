@@ -1,4 +1,4 @@
-import {Interface, ParamType} from 'ethers/utils';
+import {Interface, FunctionFragment, EventFragment} from 'ethers/utils';
 import {JsonRpcProvider} from 'ethers/providers';
 import fs from 'fs';
 import linker from 'solc/linker';
@@ -30,7 +30,7 @@ interface Options {
 }
 
 interface ParsedArtifact {
-  abi: ParamType[];
+  abi: (string | FunctionFragment | EventFragment)[];
   deployedBytecode: object;
   contractName: string;
   networks: {[networkName: string]: {address: string}};

@@ -5376,14 +5376,6 @@
     "@types/prop-types" "*"
     csstype "^2.2.0"
 
-"@types/react@16.9.2":
-  version "16.9.2"
-  resolved "https://registry.npmjs.org/@types/react/-/react-16.9.2.tgz#6d1765431a1ad1877979013906731aae373de268"
-  integrity sha512-jYP2LWwlh+FTqGd9v7ynUKZzjj98T8x7Yclz479QdRhHfuW9yQ+0jjnD31eXSXutmBpppj5PYNLYLRfnZJvcfg==
-  dependencies:
-    "@types/prop-types" "*"
-    csstype "^2.2.0"
-
 "@types/reactstrap@^8.0.0", "@types/reactstrap@^8.4.1":
   version "8.4.1"
   resolved "https://registry.npmjs.org/@types/reactstrap/-/reactstrap-8.4.1.tgz#6dff4d1fdf59233877925e3caec406272050b632"

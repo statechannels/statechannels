@@ -1,11 +1,12 @@
-// @ts-ignore
 import {TransactionRequest} from 'ethers/providers';
-import {utils} from 'ethers';
+import {Interface} from 'ethers/utils';
+
 import Erc20AssetHolderArtifact from '../../../build/contracts/ERC20AssetHolder.json';
 import {Allocation, Guarantee, Outcome} from '../outcome';
 import * as assetHolderTransactionCreator from './asset-holder';
 
-const Erc20AssetHolderContractInterface = new utils.Interface(Erc20AssetHolderArtifact.abi);
+// @ts-ignore
+const Erc20AssetHolderContractInterface = new Interface(Erc20AssetHolderArtifact.abi);
 
 // TODO: Currently we are setting some arbitrary gas limit
 // To avoid issues with Ganache sendTransaction and parsing BN.js
