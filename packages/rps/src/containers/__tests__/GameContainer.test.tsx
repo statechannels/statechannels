@@ -5,6 +5,7 @@ import configureStore from 'redux-mock-store';
 import GameProposed from '../../components/GameProposedPage';
 import {SiteState} from '../../redux/reducer';
 import {localStatesA} from '../../redux/game/__tests__/scenarios';
+import {Provider} from 'react-redux';
 
 const mockStore = configureStore();
 
@@ -38,7 +39,11 @@ describe('GameContainer', () => {
       },
     };
     const store = mockStore(initialState);
-    const component = mount(<GameContainer />, {context: {store}});
+    const component = mount(
+      <Provider store={store}>
+        <GameContainer />
+      </Provider>
+    );
     expect(component.find(GameProposed)).toHaveLength(1);
   });
 });
