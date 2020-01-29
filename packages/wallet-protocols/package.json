@@ -3,10 +3,10 @@
   "version": "0.0.1",
   "dependencies": {
     "@statechannels/nitro-protocol": "0.0.1",
-    "ethers": "^4.0.42",
+    "ethers": "^4.0.43",
     "lodash": "^4.17.15",
     "rxjs": "^6.5.4",
-    "xstate": "^4.7"
+    "xstate": "^4.7.7"
   },
   "devDependencies": {
     "@types/eslint": "^6.1.3",

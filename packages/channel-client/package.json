@@ -6,7 +6,7 @@
   "dependencies": {
     "@statechannels/channel-provider": "^0.0.3",
     "@statechannels/client-api-schema": "0.0.1",
-    "ethers": "^4.0.40"
+    "ethers": "^4.0.43"
   },
   "devDependencies": {
     "@types/eslint": "^6.1.3",

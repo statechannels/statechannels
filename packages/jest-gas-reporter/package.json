@@ -6,10 +6,10 @@
   "dependencies": {
     "@statechannels/devtools": "0.1.21",
     "easy-table": "1.1.1",
-    "ethers": "4.0.39",
+    "ethers": "4.0.43",
     "path": "0.12.7",
-    "solc": "0.5.13",
-    "typescript": "3.7.2"
+    "solc": "0.6.2",
+    "typescript": "3.7.5"
   },
   "devDependencies": {
     "@types/easy-table": "0.0.32",

@@ -14,13 +14,13 @@
     "debug": "4.1.1",
     "eventemitter3": "4.0.0",
     "jszip": "^3.2.2",
-    "node-sass": "^4.12.0",
+    "node-sass": "^4.13.1",
     "prettier-bytes": "^1.0.4",
-    "react": "16.9.0",
-    "react-dom": "16.9.0",
-    "react-router-dom": "^5.1.0",
-    "react-scripts": "3.1.2",
-    "webtorrent": "0.107.16"
+    "react": "16.12.0",
+    "react-dom": "16.12.0",
+    "react-router-dom": "^5.1.2",
+    "react-scripts": "3.3.0",
+    "webtorrent": "0.107.17"
   },
   "devDependencies": {
     "@storybook/addon-actions": "^5.2.5",

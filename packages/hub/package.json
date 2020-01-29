@@ -4,16 +4,16 @@
   "version": "0.0.1",
   "author": "",
   "dependencies": {
-    "@firebase/app": "^0.5.1",
-    "@firebase/database": "^0.5.18",
+    "@firebase/app": "^0.5.2",
+    "@firebase/database": "^0.5.19",
     "@sentry/node": "5.11.1",
     "@statechannels/nitro-protocol": "0.0.1",
     "async-lock": "1.2.2",
     "firebase": "^7.7.0",
-    "knex": "0.20.3",
-    "objection": "1.6.11",
-    "pg": "7.12.1",
-    "pino": "^5.14.0"
+    "knex": "0.20.8",
+    "objection": "2.1.2",
+    "pg": "7.17.1",
+    "pino": "^5.16.0"
   },
   "devDependencies": {
     "@statechannels/devtools": "0.1.21",
