@@ -6,18 +6,16 @@
   padding: 20px;
   width: 300px;
 }
-.channel-address {
-  max-width: 100px;
+.channel-id {
   font-style: italic;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  text-align: center;
+  font-family: 'WoodfordBourne';
 }
 
-.channel-address:hover {
-  overflow: visible;
-  max-width: 320px;
-}
+// .channel-address:hover {
+//   overflow: visible;
+//   max-width: 320px;
+// }
 
 .fa-ul > li {
   padding: 0.7em 1em;
