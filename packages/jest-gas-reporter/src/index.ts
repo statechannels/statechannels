@@ -1,5 +1,8 @@
 import {Interface, FunctionFragment, EventFragment} from 'ethers/utils';
 import {JsonRpcProvider} from 'ethers/providers';
+import {Config} from '@jest/types';
+import {Reporter} from '@jest/reporters';
+
 import fs from 'fs';
 import linker from 'solc/linker';
 import path from 'path';
@@ -57,16 +60,28 @@ const gasConsumed: GasConsumed = {};
  - Organize and clean up
 */
 
-export class GasReporter implements jest.Reporter {
+export class GasReporter implements Reporter {
   options: Options;
   provider: JsonRpcProvider;
-  globalConfig: jest.GlobalConfig;
+  globalConfig: Config.GlobalConfig;
   startBlockNum = 0;
 
-  constructor(globalConfig: jest.GlobalConfig, options: Options) {
+  constructor(globalConfig: Config.GlobalConfig, options: Options) {
     this.globalConfig = globalConfig;
     this.options = options;
     this.provider = new JsonRpcProvider(`http://localhost:${process.env.GANACHE_PORT || 8545}`);
+  }
+
+  onTestStart(): void {
+    /* empty */
+  }
+
+  getLastError(): void {
+    /* empty */
+  }
+
+  onTestResult(): void {
+    /* empty */
   }
 
   onRunStart(): void {
