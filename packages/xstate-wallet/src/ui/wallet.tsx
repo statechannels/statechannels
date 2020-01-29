@@ -12,6 +12,15 @@ interface Props {
 
 export const Wallet = (props: Props) => {
   const [current] = useService(props.workflow);
+  const messages = {
+    initializing: 'Initializing...',
+    join: 'Joining channel...',
+    opening: 'Opening channel...',
+    create: 'Creating channel...',
+    running: 'Running channel...',
+    closing: 'Closing channel...',
+    done: 'Channel closed'
+  };
   return (
     <Modal isOpen={true}>
       <Card width={'320px'} height={'450px'}>
@@ -24,7 +33,7 @@ export const Wallet = (props: Props) => {
             textAlign: 'center'
           }}
         >
-          <h1>{current.value}</h1>
+          <h1>{messages[current.value.toString()]}</h1>
           <Flex px={3} height={3} mt={'0.8'} mx={'0.4'}>
             <ChannelId channelId={current.context.channelId} />
           </Flex>
