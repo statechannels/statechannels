@@ -24,9 +24,15 @@ export class ChannelClient implements ChannelClientInterface<ChannelResult> {
     return this.provider.off.bind(this, 'ChannelUpdated', callback);
   }
 
+  // TODO: Currently not in use in the xstate wallet
   onChannelProposed(callback: (result: ChannelResult) => void): UnsubscribeFunction {
     this.provider.on('ChannelProposed', result => callback(result.params));
     return this.provider.off.bind(this, 'ChannelProposed', callback);
+  }
+
+  onBudgetUpdated(callback: (result: SiteBudget) => void): UnsubscribeFunction {
+    this.provider.on('BudgetUpdated', result => callback(result.params));
+    return this.provider.off.bind(this, 'BudgetUpdated', callback);
   }
 
   async createChannel(
@@ -98,12 +104,9 @@ export class ChannelClient implements ChannelClientInterface<ChannelResult> {
     return this.provider.send('GetBudget', {hubAddress});
   }
 
-  onBudgetUpdated(callback: (result: SiteBudget) => void): UnsubscribeFunction {
-    this.provider.on('BudgetUpdated', result => callback(result.params));
-    return this.provider.off.bind(this, 'BudgetUpdated', callback);
-  }
   async CloseAndWithdraw(hubAddress: string): Promise<SiteBudget> {
     return this.provider.send('CloseAndWithdraw', {hubAddress});
   }
+  // TODO: Implement this?
   // async Withdraw(playerAmount: string, hubAmount: string, hubAddress: string) {
 }

@@ -10,7 +10,8 @@ import {
   PushMessageResult,
   UpdateChannelParameters,
   JoinChannelParameters,
-  CloseChannelParameters
+  CloseChannelParameters,
+  SiteBudget
 } from '../../src/types';
 import {calculateChannelId} from '../../src/utils';
 
@@ -51,7 +52,10 @@ export class FakeChannelProvider implements ChannelProviderInterface {
 
       case 'CloseChannel':
         return this.closeChannel(params);
-
+      case 'ApproveBudgetAndFund':
+        return this.approveBudgetAndFund(params);
+      case 'CloseAndWithdraw':
+        return this.CloseAndWithdraw(params);
       default:
         return Promise.reject(`No callback available for ${method}`);
     }
@@ -211,6 +215,13 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     return this.latestState;
   }
 
+  protected notifyAppChannelUpdated(data: ChannelResult): void {
+    this.events.emit('ChannelUpdated', data);
+  }
+  protected notifyAppBudgetUpdated(data: SiteBudget): void {
+    this.events.emit('BudgetUpdated', data);
+  }
+
   private notifyOpponent(data: ChannelResult, notificationType: NotificationType): void {
     log.debug(
       `${this.getPlayerIndex()} notifying opponent ${this.getOpponentIndex()} about ${notificationType}`
@@ -243,5 +254,61 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     }
 
     return {success: true};
+  }
+
+  private async approveBudgetAndFund(params: {
+    playerAmount: string;
+    hubAmount: string;
+    playerDestinationAddress: string;
+    hubAddress: string;
+    hubDestinationAddress: string;
+  }): Promise<SiteBudget> {
+    const {hubAddress, playerAmount, hubAmount} = params;
+    // TODO: Does this need to be delayed?
+    this.notifyAppBudgetUpdated({
+      hub: hubAddress,
+      site: 'fakehub.com',
+      inUse: {playerAmount: '0x0', hubAmount: '0x0'},
+      free: {playerAmount, hubAmount},
+      pending: {playerAmount: '0x0', hubAmount: '0x0'},
+      direct: {playerAmount: '0x0', hubAmount: '0x0'}
+    });
+    return {
+      hub: hubAddress,
+      site: 'fakehub.com',
+      pending: {playerAmount, hubAmount},
+      free: {playerAmount: '0x0', hubAmount: '0x0'},
+      inUse: {playerAmount: '0x0', hubAmount: '0x0'},
+      direct: {playerAmount: '0x0', hubAmount: '0x0'}
+    };
+  }
+  private async CloseAndWithdraw(params: {
+    playerAmount: string;
+    hubAmount: string;
+    hubAddress: string;
+  }): Promise<SiteBudget> {
+    const {hubAddress, playerAmount, hubAmount} = params;
+    const budget = {
+      hub: hubAddress,
+      site: 'fakehub.com',
+      pending: {playerAmount, hubAmount},
+      free: {playerAmount: '0x0', hubAmount: '0x0'},
+      inUse: {playerAmount: '0x0', hubAmount: '0x0'},
+      direct: {playerAmount: '0x0', hubAmount: '0x0'}
+    };
+
+    // TODO: Does this need to be delayed?
+
+    this.notifyAppBudgetUpdated({
+      hub: hubAddress,
+      site: 'fakehub.com',
+      inUse: {playerAmount: '0x0', hubAmount: '0x0'},
+      free: {playerAmount: '0x0', hubAmount: '0x0'},
+      pending: {playerAmount: '0x0', hubAmount: '0x0'},
+      direct: {playerAmount: '0x0', hubAmount: '0x0'}
+    });
+
+    // TODO: Does th);
+    return budget;
   }
 }
