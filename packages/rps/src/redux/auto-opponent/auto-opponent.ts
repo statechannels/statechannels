@@ -12,7 +12,7 @@ import {combineReducers} from 'redux';
 import {gameReducer} from '../game/reducer';
 import {openGamesReducer} from '../open-games/reducer';
 import {WeiPerEther} from 'ethers/constants';
-import {FakeChannelClient} from '@statechannels/channel-client';
+import {FakeChannelProvider, ChannelClient} from '@statechannels/channel-client';
 
 // The auto-opponent simulates the actions of the opponent in an RPS game.
 //
@@ -39,7 +39,7 @@ export function* autoOpponent(player: 'A' | 'B', externalClient: RPSChannelClien
     } as GameState,
     openGames: [],
   };
-  const internalClient = new RPSChannelClient(new FakeChannelClient('0xDoesNotMatter'));
+  const internalClient = new RPSChannelClient(new ChannelClient(new FakeChannelProvider()));
   function* internalSaga() {
     yield fork(gameSaga, internalClient);
     yield fork(autoPlayer, player);

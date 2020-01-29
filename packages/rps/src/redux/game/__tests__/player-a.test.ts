@@ -16,14 +16,14 @@ import * as match from 'redux-saga-test-plan/matchers';
 import {RPSChannelClient} from '../../../utils/rps-channel-client';
 import {randomHex} from '../../../utils/randomHex';
 import {rpsChannelClientMocks} from './helpers';
-import {FakeChannelClient} from '@statechannels/channel-client';
+import {FakeChannelProvider, ChannelClient} from '@statechannels/channel-client';
 
 // need to get the same shape, so that selecting state in the saga works
 const reducer = combineReducers({
   game: gameReducer,
 });
 
-const client = new RPSChannelClient(new FakeChannelClient('0xOpponent'));
+const client = new RPSChannelClient(new ChannelClient(new FakeChannelProvider()));
 const {callCreateChannel, callUpdateChannel, callCloseChannel} = rpsChannelClientMocks(client);
 
 const gameState = (localState, channelState?: ChannelState) => ({

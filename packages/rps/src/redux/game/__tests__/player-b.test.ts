@@ -17,14 +17,14 @@ import {
 import {ChannelState} from '../../../core';
 import {RPSChannelClient} from '../../../utils/rps-channel-client';
 import {rpsChannelClientMocks} from './helpers';
-import {FakeChannelClient} from '@statechannels/channel-client';
+import {FakeChannelProvider, ChannelClient} from '@statechannels/channel-client';
 
 // need to get the same shape, so that selecting state in the saga works
 const reducer = combineReducers({
   game: gameReducer,
 });
 
-const client = new RPSChannelClient(new FakeChannelClient('0xOpponent'));
+const client = new RPSChannelClient(new ChannelClient(new FakeChannelProvider()));
 const {callJoinChannel, callUpdateChannel, callCloseChannel} = rpsChannelClientMocks(client);
 
 const gameState = (localState, channelState?: ChannelState) => ({
