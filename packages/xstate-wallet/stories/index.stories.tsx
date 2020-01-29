@@ -4,7 +4,8 @@ import {applicationWorkflow, config} from '../src/workflows/application';
 import {ChannelId} from '../src/ui/channel-id';
 export default {title: 'X-state wallet'};
 import {storiesOf} from '@storybook/react';
-
+import {Image} from 'rimble-ui';
+import fakeApp from '../src/images/fake-app.png';
 import {interpret} from 'xstate';
 import {Store} from '@statechannels/wallet-protocols';
 
@@ -33,7 +34,8 @@ if (config.states) {
 function renderWalletInFrontOfApp(machine) {
   function renderFunction() {
     return (
-      <div className={'app-in-background'}>
+      <div>
+        <Image src={fakeApp} />
         <Wallet workflow={machine} />
       </div>
     );
