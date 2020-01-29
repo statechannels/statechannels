@@ -7,12 +7,7 @@ Since machines typically  don't have sync access to a store, we invoke a promise
 desired outcome; that outcome can then be forwarded to the invoked service.
 */
 
-export function getDataAndInvoke<T>(
-  data: string,
-  src: string,
-  onDone: string,
-  autoForward = false
-) {
+export function getDataAndInvoke<T>(data: string, src: string, onDone?: string) {
   return {
     initial: data,
     states: {
@@ -22,7 +17,6 @@ export function getDataAndInvoke<T>(
           src,
           data: (_, { data }: DoneInvokeEvent<T>) => data,
           onDone: 'done',
-          autoForward,
         },
       },
       done: { type: FINAL },
