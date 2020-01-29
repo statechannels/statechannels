@@ -10,6 +10,7 @@ import {
 } from '@statechannels/wallet-protocols';
 
 const EthAssetHolderInterface = new ethers.utils.Interface(
+  // @ts-ignore https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
   ContractArtifacts.Erc20AssetHolderArtifact.abi
 );
 export class ChainWatcher implements IChain {
