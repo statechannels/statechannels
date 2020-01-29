@@ -25,7 +25,9 @@ export const Wallet = (props: Props) => {
           }}
         >
           <h1>{current.value}</h1>
-          <ChannelId channelId={current.context.channelId} />
+          <Flex px={3} height={3} mt={'0.8'} mx={'0.4'}>
+            <ChannelId channelId={current.context.channelId} />
+          </Flex>
         </div>
       </Card>
     </Modal>
