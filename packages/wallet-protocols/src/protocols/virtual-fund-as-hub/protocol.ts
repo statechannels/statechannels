@@ -5,6 +5,7 @@ import { Store } from '../../store';
 import { Balance } from '../../types';
 import { connectToStore, getDataAndInvoke } from '../../machine-utils';
 import { VirtualLeaf, CreateNullChannel, SupportState } from '../';
+import { FINAL } from '../..';
 const PROTOCOL = 'virtual-funding-as-hub';
 
 export interface Init {
@@ -85,17 +86,18 @@ export const assignChannels = (store: Store) =>
       };
     }
   );
+const parallel = 'parallel' as 'parallel';
 const createChannels = {
   entry: 'assignChannels',
-  type: 'parallel',
+  type: parallel,
   states: { createLeftGuarantorChannel, createRightGuarantorChannel, createJointChannel },
   onDone: 'fundGuarantors',
 };
 
-const fundLeftGuarantor = { invoke: { src: 'ledgerFunding', data: 'TODO' } };
-const fundRightGuarantor = { invoke: { src: 'ledgerFunding', data: 'TODO' } };
+const fundLeftGuarantor = { invoke: { src: 'ledgerFunding' } };
+const fundRightGuarantor = { invoke: { src: 'ledgerFunding' } };
 const fundGuarantors = {
-  type: 'parallel',
+  type: parallel,
   states: { fundLeftGuarantor, fundRightGuarantor },
   onDone: 'fundTarget',
 };
@@ -106,7 +108,7 @@ const fundTarget = getDataAndInvoke('fundTargetArgs', 'supportState', 'success')
 export const config = {
   key: PROTOCOL,
   initial: 'createChannels',
-  states: { createChannels, fundGuarantors, fundTarget, success: { type: 'final' } },
+  states: { createChannels, fundGuarantors, fundTarget, success: { type: FINAL } },
 };
 
 const options = (store: Store) => ({
