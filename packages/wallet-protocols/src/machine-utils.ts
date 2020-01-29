@@ -39,9 +39,13 @@ export type MachineFactory<I, E extends EventObject> = (
   context?: I
 ) => StateMachine<I, any, E>;
 
-export const connectToStore: <T>(config, options) => MachineFactory<T, any> = <T>(
-  options,
-  config: MachineConfig<T, any, any>
+type Options = (store: Store) => any;
+type Config<T> = MachineConfig<T, any, any>;
+export const connectToStore: <T>(config: Config<T>, options: Options) => MachineFactory<T, any> = <
+  T
+>(
+  config: Config<T>,
+  options: Options
 ) => (store: Store, context?: T | undefined) => {
   return Machine(config).withConfig(options(store), context);
 };
