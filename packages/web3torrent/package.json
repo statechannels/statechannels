@@ -1,64 +1,13 @@
 {
   "name": "@statechannels/web3torrent",
-  "version": "0.0.1",
   "description": "A paid streaming extension implementation using state channels for the WebTorrent protocol.",
-  "keywords": [
-    "webtorrent",
-    "state-channels",
-    "webtorrent extension"
+  "version": "0.0.1",
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
   ],
-  "engines": {
-    "node": "^10.16.3"
-  },
-  "license": "MIT",
-  "scripts": {
-    "precommit": "lint-staged --quiet",
-    "start": "react-scripts start",
-    "start:alt": "PORT=3333 react-scripts start",
-    "storybook": "start-storybook -s ./public -p 4568",
-    "build": "react-scripts build",
-    "build:typescript": "tsc -b .",
-    "build:ci": "react-scripts build",
-    "eject": "react-scripts eject",
-    "test": "TRACKER_URL=http://localhost:4242/announce react-scripts test",
-    "test:ci": "CI=true yarn test --runInBand --ci --all --forceExit",
-    "test:coverage": "yarn test --coverage",
-    "lint:check": "run-s eslint:check prettier:check",
-    "lint:write": "run-s eslint:write prettier:write",
-    "eslint:check": "eslint \"**/*.{js,ts,tsx}\" --cache --max-warnings=0",
-    "eslint:write": "eslint \"**/*.{js,ts,tsx}\" --fix --max-warnings=0",
-    "prettier:check": "prettier --check '**/*.{scss,json}' --ignore-path '.eslintignore'",
-    "prettier:write": "prettier --write '**/*.{scss,json}' --ignore-path '.eslintignore'"
-  },
-  "jest": {
-    "collectCoverageFrom": [
-      "./src/**/*.ts*",
-      "!./src/**/index.ts*",
-      "!./src/routes.ts*",
-      "!./src/library/testing/*.ts*",
-      "!./src/library/time-based-leeching/*.ts*",
-      "!./src/utils/copy-to-clipboard.ts",
-      "!./src/utils/test-utils.ts",
-      "!./src/components/form/form-input/**",
-      "!./src/utils/useInterval.ts",
-      "!./src/**/react-app-env.d.ts",
-      "!./src/**/types.ts",
-      "!./src/**/constants.ts",
-      "!./test/utils.ts"
-    ],
-    "globalSetup": "./src/library/testing/setup.js",
-    "globalTeardown": "./src/library/testing/teardown.js",
-    "transform": {
-      "^.+\\.tsx?$": "ts-jest"
-    },
-    "moduleNameMapper": {
-      "\\.(css|less|scss|sass)$": "identity-obj-proxy"
-    }
-  },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
-  "main": "src/index.js",
   "dependencies": {
     "@statechannels/channel-provider": "*",
     "bencode": "2.0.1",
@@ -114,13 +63,64 @@
     "typescript": "3.7.2",
     "webtorrent-fixtures": "1.7.3"
   },
+  "engines": {
+    "node": "^10.16.3"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "./src/**/*.ts*",
+      "!./src/**/index.ts*",
+      "!./src/routes.ts*",
+      "!./src/library/testing/*.ts*",
+      "!./src/library/time-based-leeching/*.ts*",
+      "!./src/utils/copy-to-clipboard.ts",
+      "!./src/utils/test-utils.ts",
+      "!./src/components/form/form-input/**",
+      "!./src/utils/useInterval.ts",
+      "!./src/**/react-app-env.d.ts",
+      "!./src/**/types.ts",
+      "!./src/**/constants.ts",
+      "!./test/utils.ts"
+    ],
+    "globalSetup": "./src/library/testing/setup.js",
+    "globalTeardown": "./src/library/testing/teardown.js",
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "moduleNameMapper": {
+      "\\.(css|less|scss|sass)$": "identity-obj-proxy"
+    }
+  },
+  "keywords": [
+    "state-channels",
+    "webtorrent",
+    "webtorrent extension"
+  ],
+  "license": "MIT",
   "lint-staged": {
     "src/**/*.ts*": "yarn lint:check"
   },
-  "browserslist": [
-    ">0.2%",
-    "not dead",
-    "not ie <= 11",
-    "not op_mini all"
-  ]
+  "main": "src/index.js",
+  "scripts": {
+    "build": "react-scripts build",
+    "build:ci": "react-scripts build",
+    "build:typescript": "tsc -b .",
+    "eject": "react-scripts eject",
+    "eslint:check": "eslint \"**/*.{js,ts,tsx}\" --cache --max-warnings=0",
+    "eslint:write": "eslint \"**/*.{js,ts,tsx}\" --fix --max-warnings=0",
+    "lint:check": "run-s eslint:check prettier:check",
+    "lint:write": "run-s eslint:write prettier:write",
+    "precommit": "lint-staged --quiet",
+    "prettier:check": "prettier --check '**/*.{scss,json}' --ignore-path '.eslintignore'",
+    "prettier:write": "prettier --write '**/*.{scss,json}' --ignore-path '.eslintignore'",
+    "start": "react-scripts start",
+    "start:alt": "PORT=3333 react-scripts start",
+    "storybook": "start-storybook -s ./public -p 4568",
+    "test": "TRACKER_URL=http://localhost:4242/announce react-scripts test",
+    "test:ci": "CI=true yarn test --runInBand --ci --all --forceExit",
+    "test:coverage": "yarn test --coverage"
+  }
 }

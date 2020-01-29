@@ -1,58 +1,9 @@
 {
   "name": "@statechannels/nitro-protocol",
-  "version": "0.0.1",
   "description": "A protocol for state channel networks",
-  "main": "lib/src/index.js",
-  "types": "lib/src/index.d.ts",
-  "files": [
-    "lib/*",
-    "contracts/*"
-  ],
-  "engines": {
-    "yarn": "^1.17.0",
-    "node": "^10.16.3"
-  },
-  "directories": {
-    "test": "test"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/statechannels/monorepo.git"
-  },
-  "keywords": [
-    "state",
-    "channel",
-    "ethereum",
-    "network"
-  ],
+  "version": "0.0.1",
   "author": "George Knee",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/statechannels/nitro-protocol/"
-  },
-  "homepage": "https://github.com/statechannels/nitro-protocol/",
-  "scripts": {
-    "precommit": "lint-staged --quiet",
-    "build": "run-s contract:compile build:typescript",
-    "build:typescript": "tsc -b .",
-    "contract:compile": "node ./bin/compile.js",
-    "lint:check": "eslint \"*/**/*.ts\" --cache",
-    "lint:write": "eslint \"*/**/*.ts\" --fix",
-    "prepare": "yarn patch-package && yarn build",
-    "docgen": "npx solidoc",
-    "patch-package": "cd ../.. && yarn patch-package",
-    "prettier:check": "npx prettier --check '{contracts,src,test}/**/*.{ts,tsx,sol}'",
-    "prettier:write": "npx prettier --write '{contracts,src,test}/**/*.{ts,tsx,sol}'",
-    "test:app": "jest -c ./config/jest/jest.config.js",
-    "test:contracts": "npx jest -c ./config/jest/jest.contracts.config.js",
-    "test": "run-s test:contracts 'test:app --all'",
-    "test:ci": "yarn test:ci:contracts && yarn test:ci:app",
-    "test:ci:contracts": "yarn test:contracts --all --ci --runInBand --bail",
-    "test:ci:app": "yarn test:app --all --ci --runInBand --bail",
-    "website:deploy": "yarn contract:compile && yarn docgen && cd website && yarn install && yarn build",
-    "build:netlify": "yarn website:deploy",
-    "release:netlify": "netlify deploy --site $NITRO_PROTOCOL_NETLIFY_ID --dir=website/build/nitro-spec"
-  },
+  "bugs": "https://github.com/statechannels/nitro-protocol/",
   "dependencies": {
     "@counterfactual/cf-adjudicator-contracts": "0.0.11",
     "@openzeppelin/contracts": "2.3.0",
@@ -99,7 +50,51 @@
     "typescript": "3.7.2",
     "write-json-file": "4.2.0"
   },
+  "directories": {
+    "test": "test"
+  },
+  "engines": {
+    "yarn": "^1.17.0",
+    "node": "^10.16.3"
+  },
+  "files": [
+    "contracts/*",
+    "lib/*"
+  ],
+  "homepage": "https://github.com/statechannels/nitro-protocol/",
+  "keywords": [
+    "channel",
+    "ethereum",
+    "network",
+    "state"
+  ],
+  "license": "MIT",
   "lint-staged": {
     "{src,test}/**/*.{ts,tsx}": "eslint"
-  }
+  },
+  "main": "lib/src/index.js",
+  "repository": "statechannels/monorepo.git",
+  "scripts": {
+    "build": "run-s contract:compile build:typescript",
+    "build:netlify": "yarn website:deploy",
+    "build:typescript": "tsc -b .",
+    "contract:compile": "node ./bin/compile.js",
+    "docgen": "npx solidoc",
+    "lint:check": "eslint \"*/**/*.ts\" --cache",
+    "lint:write": "eslint \"*/**/*.ts\" --fix",
+    "patch-package": "cd ../.. && yarn patch-package",
+    "precommit": "lint-staged --quiet",
+    "prepare": "yarn patch-package && yarn build",
+    "prettier:check": "npx prettier --check '{contracts,src,test}/**/*.{ts,tsx,sol}'",
+    "prettier:write": "npx prettier --write '{contracts,src,test}/**/*.{ts,tsx,sol}'",
+    "release:netlify": "netlify deploy --site $NITRO_PROTOCOL_NETLIFY_ID --dir=website/build/nitro-spec",
+    "test": "run-s test:contracts 'test:app --all'",
+    "test:app": "jest -c ./config/jest/jest.config.js",
+    "test:ci": "yarn test:ci:contracts && yarn test:ci:app",
+    "test:ci:app": "yarn test:app --all --ci --runInBand --bail",
+    "test:ci:contracts": "yarn test:contracts --all --ci --runInBand --bail",
+    "test:contracts": "npx jest -c ./config/jest/jest.contracts.config.js",
+    "website:deploy": "yarn contract:compile && yarn docgen && cd website && yarn install && yarn build"
+  },
+  "types": "lib/src/index.d.ts"
 }

@@ -1,41 +1,6 @@
 {
   "name": "@statechannels/embedded-wallet",
-  "license": "MIT",
   "version": "0.0.1",
-  "dependencies": {
-    "@statechannels/channel-provider": "*",
-    "debug": "4.1.1",
-    "react": "16.9.0",
-    "react-dom": "16.9.0",
-    "react-router-dom": "5.1.0",
-    "react-scripts": "3.1.2"
-  },
-  "scripts": {
-    "precommit": "lint-staged --quiet",
-    "start": "cp ../../node_modules/@statechannels/channel-provider/dist/*.js ./public/ && react-scripts start",
-    "build": "react-scripts build && cp -r ../../node_modules/@statechannels/channel-provider/dist/* ./build/",
-    "build:typescript": "tsc -b .",
-    "test": "react-scripts test",
-    "test:ci": "react-scripts test --runInBand",
-    "test:coverage": "react-scripts test --coverage --watchAll=false",
-    "eject": "react-scripts eject",
-    "lint:check": "eslint \"*/**/*.{js,ts,tsx}\" --cache",
-    "lint:write": "eslint \"*/**/*.{js,ts,tsx}\" --fix"
-  },
-  "jest": {
-    "collectCoverageFrom": [
-      "./src/**/*.ts*",
-      "!./src/**/index.ts*",
-      "!./src/**/*.d.ts",
-      "!./src/test-utils/**"
-    ],
-    "moduleNameMapper": {
-      "\\.css$": "identity-obj-proxy"
-    }
-  },
-  "lint-staged": {
-    "src/**/*.{ts,tsx}": "eslint"
-  },
   "browserslist": {
     "production": [
       ">0.2%",
@@ -47,6 +12,14 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "dependencies": {
+    "@statechannels/channel-provider": "*",
+    "debug": "4.1.1",
+    "react": "16.9.0",
+    "react-dom": "16.9.0",
+    "react-router-dom": "5.1.0",
+    "react-scripts": "3.1.2"
   },
   "devDependencies": {
     "@types/debug": "4.1.1",
@@ -72,5 +45,32 @@
     "lint-staged": "9.4.0",
     "prettier": "1.19.1",
     "typescript": "3.7.2"
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "./src/**/*.ts*",
+      "!./src/**/index.ts*",
+      "!./src/**/*.d.ts",
+      "!./src/test-utils/**"
+    ],
+    "moduleNameMapper": {
+      "\\.css$": "identity-obj-proxy"
+    }
+  },
+  "license": "MIT",
+  "lint-staged": {
+    "src/**/*.{ts,tsx}": "eslint"
+  },
+  "scripts": {
+    "build": "react-scripts build && cp -r ../../node_modules/@statechannels/channel-provider/dist/* ./build/",
+    "build:typescript": "tsc -b .",
+    "eject": "react-scripts eject",
+    "lint:check": "eslint \"*/**/*.{js,ts,tsx}\" --cache",
+    "lint:write": "eslint \"*/**/*.{js,ts,tsx}\" --fix",
+    "precommit": "lint-staged --quiet",
+    "start": "cp ../../node_modules/@statechannels/channel-provider/dist/*.js ./public/ && react-scripts start",
+    "test": "react-scripts test",
+    "test:ci": "react-scripts test --runInBand",
+    "test:coverage": "react-scripts test --coverage --watchAll=false"
   }
 }

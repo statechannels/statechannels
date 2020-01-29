@@ -1,41 +1,6 @@
 {
   "name": "@statechannels/wallet",
   "version": "0.0.1",
-  "license": "MIT",
-  "main": "lib/index.js",
-  "resolutions": {
-    "firebase/**/grpc": "^1.16.1"
-  },
-  "engines": {
-    "node": "^10.16.3"
-  },
-  "scripts": {
-    "build:ci": "yarn build:typescript",
-    "build:typescript": "npx tsc -b",
-    "build:webpack": "CI=false node scripts/build.js",
-    "build": "run-s build:typescript build:webpack",
-    "lint:check": "eslint \"src/**/*.{js,ts,tsx}\" --cache",
-    "lint:write": "eslint \"src/**/*.{js,ts,tsx}\" --fix",
-    "patch-package": "cd ../.. && yarn patch-package",
-    "postinstall": "rm -f node_modules/web3/index.d.ts",
-    "prepare": "yarn patch-package",
-    "start": "node scripts/start.js",
-    "start:integration": "node scripts/start.js",
-    "storybook": "start-storybook -p 9001 -c .storybook",
-    "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
-    "test:app": "npx jest -c ./config/jest/jest.config.js",
-    "test:ci:app": "yarn test:app --all --ci --runInBand",
-    "test:ci:contracts": "yarn test:contracts --all --ci",
-    "test:ci": "yarn test:ci:contracts && yarn test:ci:app",
-    "test:contracts": "npx jest --runInBand -c ./config/jest/jest.contracts.config.js --detectOpenHandles",
-    "test": "run-s 'test:app --all' 'test:contracts --all'",
-    "test:puppeteer": "npx jest --runInBand -c ./config/jest/jest.puppeteer.config.js",
-    "puppeteer:script": "npx ts-node -O '{\"module\":\"commonjs\"}' ./puppeteer/scripts/funding.ts ",
-    "test:ci:integration": "wait-on http-get://localhost:3055/ http-get://localhost:3000/ && yarn test:puppeteer",
-    "precommit": "lint-staged --quiet",
-    "build:netlify": "NODE_ENV=production yarn build:webpack",
-    "release:netlify": "netlify deploy --site $WALLET_NETLIFY_ID --dir=build"
-  },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.4",
     "@fortawesome/free-regular-svg-icons": "^5.7.1",
@@ -186,7 +151,42 @@
     "wait-on": "3.3.0",
     "workbox-webpack-plugin": "4.3.1"
   },
+  "engines": {
+    "node": "^10.16.3"
+  },
+  "license": "MIT",
   "lint-staged": {
     "{src,test}/**/*.{ts,tsx}": "eslint"
+  },
+  "main": "lib/index.js",
+  "resolutions": {
+    "firebase/**/grpc": "^1.16.1"
+  },
+  "scripts": {
+    "build": "run-s build:typescript build:webpack",
+    "build:ci": "yarn build:typescript",
+    "build:netlify": "NODE_ENV=production yarn build:webpack",
+    "build:typescript": "npx tsc -b",
+    "build:webpack": "CI=false node scripts/build.js",
+    "lint:check": "eslint \"src/**/*.{js,ts,tsx}\" --cache",
+    "lint:write": "eslint \"src/**/*.{js,ts,tsx}\" --fix",
+    "patch-package": "cd ../.. && yarn patch-package",
+    "postinstall": "rm -f node_modules/web3/index.d.ts",
+    "precommit": "lint-staged --quiet",
+    "prepare": "yarn patch-package",
+    "puppeteer:script": "npx ts-node -O '{\"module\":\"commonjs\"}' ./puppeteer/scripts/funding.ts ",
+    "release:netlify": "netlify deploy --site $WALLET_NETLIFY_ID --dir=build",
+    "start": "node scripts/start.js",
+    "start:integration": "node scripts/start.js",
+    "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
+    "storybook": "start-storybook -p 9001 -c .storybook",
+    "test": "run-s 'test:app --all' 'test:contracts --all'",
+    "test:app": "npx jest -c ./config/jest/jest.config.js",
+    "test:ci": "yarn test:ci:contracts && yarn test:ci:app",
+    "test:ci:app": "yarn test:app --all --ci --runInBand",
+    "test:ci:contracts": "yarn test:contracts --all --ci",
+    "test:ci:integration": "wait-on http-get://localhost:3055/ http-get://localhost:3000/ && yarn test:puppeteer",
+    "test:contracts": "npx jest --runInBand -c ./config/jest/jest.contracts.config.js --detectOpenHandles",
+    "test:puppeteer": "npx jest --runInBand -c ./config/jest/jest.puppeteer.config.js"
   }
 }
