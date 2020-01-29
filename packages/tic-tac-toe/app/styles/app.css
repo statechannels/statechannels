@@ -1,3 +1,17 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body:not(#test-body) {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  @apply bg-bg;
+}
+
+html:not(#test-html) {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
