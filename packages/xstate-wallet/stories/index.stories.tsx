@@ -47,3 +47,17 @@ storiesOf('ChannelId', module).add('empty', () => <ChannelId channelId={undefine
 storiesOf('ChannelId', module).add('not empty', () => (
   <ChannelId channelId={testContext.channelId} />
 ));
+
+if (config.states) {
+  ['CREATE_CHANNEL', 'OPEN_CHANNEL'].forEach(event => {
+    const machineWithChildren = interpret<any, any, any>(
+      applicationWorkflow(store).withContext(testContext)
+    ).start(); // start a new interpreted machine for each story
+    machineWithChildren.send(event);
+    storiesOf('Wallet with invoked children', module).add(
+      'Init + ' + event,
+      renderWalletInFrontOfApp(machineWithChildren)
+    );
+    machineWithChildren.stop();
+  });
+}
