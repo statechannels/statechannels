@@ -34,21 +34,20 @@ type ChannelsKnown = Init & {
   jointChannel: Channel;
   guarantorChannel: Channel;
 };
-export function jointChannelArgs({
+
+export const jointChannelArgs = (store: Store) => ({
   jointChannel,
   balances,
   hubAddress,
-}: Pick<ChannelsKnown, 'jointChannel' | 'balances' | 'hubAddress'>): CreateNullChannel.Init {
+}: Pick<ChannelsKnown, 'jointChannel' | 'balances' | 'hubAddress'>): CreateNullChannel.Init => {
   const allocation = jointChannelAllocation(balances, hubAddress);
 
-  return { channel: jointChannel, outcome: ethAllocationOutcome(allocation, 'TODO') };
-}
-const createJointChannel = {
-  invoke: {
-    src: 'createNullChannel',
-    data: jointChannelArgs,
-  },
+  return {
+    channel: jointChannel,
+    outcome: ethAllocationOutcome(allocation, store.ethAssetHolderAddress),
+  };
 };
+const createJointChannel = getDataAndInvoke('jointChannelArgs', 'createNullChannel');
 
 function jointChannelAllocation(balances: Balance[], hubAddress: string) {
   const total = balances.map(b => b.wei).reduce(add);
@@ -60,11 +59,11 @@ function jointChannelAllocation(balances: Balance[], hubAddress: string) {
   return allocation;
 }
 
-export function guarantorChannelArgs({
+export const guarantorChannelArgs = (store: Store) => ({
   jointChannel,
   index,
   guarantorChannel,
-}: Pick<ChannelsKnown, 'jointChannel' | 'index' | 'guarantorChannel'>): CreateNullChannel.Init {
+}: Pick<ChannelsKnown, 'jointChannel' | 'index' | 'guarantorChannel'>): CreateNullChannel.Init => {
   const { participants } = jointChannel;
 
   const guarantee: Guarantee = {
@@ -74,14 +73,12 @@ export function guarantorChannelArgs({
     destinations: [participants[2 * index], participants[1]],
   };
 
-  return { channel: guarantorChannel, outcome: ethGuaranteeOutcome(guarantee, 'TODO') };
-}
-const createGuarantorChannel = {
-  invoke: {
-    src: 'createNullChannel',
-    data: guarantorChannelArgs,
-  },
+  return {
+    channel: guarantorChannel,
+    outcome: ethGuaranteeOutcome(guarantee, store.ethAssetHolderAddress),
+  };
 };
+const createGuarantorChannel = getDataAndInvoke('guarantorChannelArgs', 'createNullChannel');
 
 const assignChannels = (store: Store) =>
   assign(

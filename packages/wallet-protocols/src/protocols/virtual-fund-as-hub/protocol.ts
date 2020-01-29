@@ -21,41 +21,34 @@ type ChannelsKnown = Init & {
   rightGuarantorChannel: Channel;
 };
 
-const createJointChannel = {
-  invoke: {
-    src: 'createNullChannel',
-    data: ({ jointChannel, balances }: ChannelsKnown): CreateNullChannel.Init =>
-      VirtualLeaf.jointChannelArgs({
-        jointChannel: jointChannel,
-        balances: balances,
-        hubAddress: jointChannel.participants[1],
-      }),
-  },
-};
+const jointChannelArgs = (store: Store) => ({
+  jointChannel,
+  balances,
+}: ChannelsKnown): CreateNullChannel.Init =>
+  VirtualLeaf.jointChannelArgs(store)({
+    jointChannel: jointChannel,
+    balances: balances,
+    hubAddress: jointChannel.participants[1],
+  });
 
-const createLeftGuarantorChannel = {
-  invoke: {
-    src: 'createNullChannel',
-    data: ({ jointChannel, leftGuarantorChannel }: ChannelsKnown): CreateNullChannel.Init =>
-      VirtualLeaf.guarantorChannelArgs({
-        jointChannel,
-        guarantorChannel: leftGuarantorChannel,
-        index: VirtualLeaf.Indices.Left,
-      }),
-  },
-};
+const createJointChannel = getDataAndInvoke('jointChannelArgs', 'createNullChannel');
 
-const createRightGuarantorChannel = {
-  invoke: {
-    src: 'createNullChannel',
-    data: ({ jointChannel, rightGuarantorChannel }: ChannelsKnown): CreateNullChannel.Init =>
-      VirtualLeaf.guarantorChannelArgs({
-        jointChannel,
-        guarantorChannel: rightGuarantorChannel,
-        index: VirtualLeaf.Indices.Right,
-      }),
-  },
-};
+const guarantorArgs = (index: VirtualLeaf.Indices) => (store: Store) => ({
+  jointChannel,
+  leftGuarantorChannel,
+  rightGuarantorChannel,
+}: ChannelsKnown): CreateNullChannel.Init =>
+  VirtualLeaf.guarantorChannelArgs(store)({
+    jointChannel,
+    guarantorChannel: [leftGuarantorChannel, rightGuarantorChannel][index],
+    index,
+  });
+
+const leftGuarantorArgs = guarantorArgs(0);
+const createLeftGuarantorChannel = getDataAndInvoke('leftGuarantorArgs', 'createNullChannel');
+
+const rightGuarantorArgs = guarantorArgs(1);
+const createRightGuarantorChannel = getDataAndInvoke('rightGuarantorArgs', 'createNullChannel');
 
 export const assignChannels = (store: Store) =>
   assign(
@@ -71,7 +64,7 @@ export const assignChannels = (store: Store) =>
       const jointChannel: Channel = {
         participants: jointParticipants,
         channelNonce: store.getNextNonce(jointParticipants),
-        chainId: 'TODO',
+        chainId: leftLedgerChannel.chainId,
       };
 
       const leftGuarantorChannel: Channel = {
@@ -122,6 +115,9 @@ const options = (store: Store) => ({
     fundTargetArgs: VirtualLeaf.fundTargetArgs(store),
     createNullChannel: CreateNullChannel.machine(store),
     supportState: SupportState.machine(store),
+    jointChannelArgs: jointChannelArgs(store),
+    leftGuarantorArgs: leftGuarantorArgs(store),
+    rightGuarantorArgs: rightGuarantorArgs(store),
   },
 });
 
