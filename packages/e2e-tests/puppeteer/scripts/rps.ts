@@ -107,7 +107,7 @@ export async function clickThroughResignationUI(rpsTabA: Page, rpsTabB: Page): P
     await waitForAndClickButton(walletIFrame, '#yes');
 
     async function virtualFunding(): Promise<void> {
-      await waitForAndClickButton(walletIFrame, '#yes');
+      await waitForAndClickButton(walletIFrame, '#approve-withdraw');
       await waitForAndClickButton(walletIFrame, '#ok');
       await waitForAndClickButton(page, '#resigned-ok');
       await waitForAndClickButton(page, '#exit');
