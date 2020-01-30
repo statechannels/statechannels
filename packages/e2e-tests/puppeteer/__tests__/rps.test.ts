@@ -1,20 +1,19 @@
-/* eslint-disable */
+/* eslint-disable jest/expect-expect */
 
 // you do not always need to assert something
 import {Page, Browser} from 'puppeteer';
 import {configureEnvVariables, getEnvBool} from '@statechannels/devtools';
 
-import {setUpBrowser, loadRPSApp, waitForHeading, waitForWinLossHeading} from '../helpers';
+import {setUpBrowser, loadRPSApp} from '../helpers';
 import {
-  startAndFundRPSGame,
-  clickThroughResignationUI,
-  setupRPS,
-  playMove,
-  clickThroughRPSUIWithChallengeByPlayerA,
-  clickThroughRPSUIWithChallengeByPlayerB
+  login,
+  aChallenges,
+  bChallenges,
+  bResigns,
+  startFundAndPlaySingleMove
 } from '../scripts/rps';
 
-jest.setTimeout(120_000);
+jest.setTimeout(200_000);
 
 configureEnvVariables();
 const HEADLESS = getEnvBool('HEADLESS');
@@ -24,10 +23,10 @@ let browserB: Browser;
 let rpsTabA: Page;
 let rpsTabB: Page;
 
-describe('plays game 1 (resignation) and game 2 (challenge by each player)', () => {
+describe('plays game 1 (challenge by A, challenge by B) and game 2 (resignation by B)', () => {
   beforeAll(async () => {
-    browserA = await setUpBrowser(HEADLESS, 100);
-    browserB = await setUpBrowser(HEADLESS, 100);
+    browserA = await setUpBrowser(HEADLESS, 100); // 100ms sloMo avoids some undiagnosed race conditions
+    browserB = await setUpBrowser(HEADLESS, 100); // 100ms sloMo avoids some undiagnosed race conditions
 
     rpsTabA = (await browserA.pages())[0];
     rpsTabB = (await browserB.pages())[0];
@@ -35,7 +34,7 @@ describe('plays game 1 (resignation) and game 2 (challenge by each player)', () 
     await loadRPSApp(rpsTabA, 0);
     await loadRPSApp(rpsTabB, 1);
 
-    await setupRPS(rpsTabA, rpsTabB);
+    await login(rpsTabA, rpsTabB);
   });
 
   afterAll(async () => {
@@ -49,14 +48,14 @@ describe('plays game 1 (resignation) and game 2 (challenge by each player)', () 
 
   it('works', async () => {
     console.log('starting first game...');
-    await startAndFundRPSGame(rpsTabA, rpsTabB);
+    await startFundAndPlaySingleMove(rpsTabA, rpsTabB);
     console.log('A challenging...');
-    await clickThroughRPSUIWithChallengeByPlayerA(rpsTabA, rpsTabB);
+    await aChallenges(rpsTabA, rpsTabB);
     console.log('B challenging...');
-    await clickThroughRPSUIWithChallengeByPlayerB(rpsTabA, rpsTabB);
+    await bChallenges(rpsTabA, rpsTabB);
     console.log('B resigning...');
-    await clickThroughResignationUI(rpsTabA, rpsTabB);
+    await bResigns(rpsTabA, rpsTabB);
     console.log('starting second game...');
-    return await startAndFundRPSGame(rpsTabA, rpsTabB);
+    return await startFundAndPlaySingleMove(rpsTabA, rpsTabB);
   });
 });

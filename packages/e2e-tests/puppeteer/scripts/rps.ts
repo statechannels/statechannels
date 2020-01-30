@@ -2,7 +2,7 @@ import {Page} from 'puppeteer';
 
 import {waitForAndClickButton} from '../helpers';
 
-export async function setupRPS(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
+export async function login(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
   async function playerA(page: Page): Promise<void> {
     await waitForAndClickButton(page, '#start-playing');
     await (await page.waitFor('#name')).type('A');
@@ -25,7 +25,7 @@ export async function playMove(page: Page, move: 'rock' | 'paper' | 'scissors'):
   return waitForAndClickButton(page, selector);
 }
 
-export async function startAndFundRPSGame(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
+export async function startFundAndPlaySingleMove(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
   async function playerA(page: Page): Promise<void> {
     const walletIFrame = page.frames()[1];
     await waitForAndClickButton(page, '#join');
@@ -50,10 +50,7 @@ export async function startAndFundRPSGame(rpsTabA: Page, rpsTabB: Page): Promise
   return true;
 }
 
-export async function clickThroughRPSUIWithChallengeByPlayerA(
-  rpsTabA: Page,
-  rpsTabB: Page
-): Promise<boolean> {
+export async function aChallenges(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
   async function playerA(page: Page): Promise<void> {
     const walletIFrame = page.frames()[1];
     await playMove(page, 'paper');
@@ -76,10 +73,7 @@ export async function clickThroughRPSUIWithChallengeByPlayerA(
   return true;
 }
 
-export async function clickThroughRPSUIWithChallengeByPlayerB(
-  rpsTabA: Page,
-  rpsTabB: Page
-): Promise<boolean> {
+export async function bChallenges(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
   async function playerA(page: Page): Promise<void> {
     const walletIFrame = page.frames()[1];
     await waitForAndClickButton(walletIFrame, '#respond');
@@ -102,7 +96,7 @@ export async function clickThroughRPSUIWithChallengeByPlayerB(
   return true;
 }
 
-export async function clickThroughResignationUI(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
+export async function bResigns(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
   async function playerB(page: Page): Promise<void> {
     const walletIFrame = page.frames()[1];
 
