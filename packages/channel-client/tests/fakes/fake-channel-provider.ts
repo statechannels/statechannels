@@ -6,7 +6,6 @@ import {
   ChannelResult,
   CreateChannelParameters,
   Message,
-  NotificationType,
   PushMessageResult,
   UpdateChannelParameters,
   JoinChannelParameters,
@@ -154,15 +153,16 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     this.latestState = channel;
     this.address = channel.participants[0].participantId;
     this.opponentAddress = channel.participants[1].participantId;
-    this.notifyOpponent(channel, 'ChannelProposed');
+    this.notifyOpponent(channel, 'CreateChannel');
 
     return channel;
   }
 
   private async joinChannel(params: JoinChannelParameters): Promise<ChannelResult> {
-    const latestState = this.findChannel(params.channelId);
+    const {channelId} = params;
+    const latestState = this.findChannel(channelId);
     this.updatePlayerIndex(1);
-    log.debug(`Player ${this.getPlayerIndex()} joining channel ${params.channelId}`);
+    log.debug(`Player ${this.getPlayerIndex()} joining channel ${channelId}`);
     await this.verifyTurnNum(latestState.turnNum);
 
     // skip funding by setting the channel to 'running' the moment it is joined
@@ -173,7 +173,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
       status: 'running'
     };
     this.opponentAddress = latestState.participants[0].participantId;
-    this.notifyOpponent(this.latestState, 'MessageQueued');
+    this.notifyOpponent(this.latestState, 'joinChannel');
 
     return this.latestState;
   }
@@ -215,14 +215,15 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     return this.latestState;
   }
 
+  // TODO: Craft a full message
   protected notifyAppChannelUpdated(data: ChannelResult): void {
-    this.events.emit('ChannelUpdated', data);
+    this.events.emit('ChannelUpdated', {params: data});
   }
   protected notifyAppBudgetUpdated(data: SiteBudget): void {
-    this.events.emit('BudgetUpdated', data);
+    this.events.emit('BudgetUpdated', {params: data});
   }
 
-  private notifyOpponent(data: ChannelResult, notificationType: NotificationType): void {
+  protected notifyOpponent(data: ChannelResult, notificationType: string): void {
     log.debug(
       `${this.getPlayerIndex()} notifying opponent ${this.getOpponentIndex()} about ${notificationType}`
     );
@@ -232,22 +233,23 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     if (!recipient) {
       throw Error(`Cannot notify opponent - opponent address not set`);
     }
-
     this.events.emit('MessageQueued', {sender, recipient, data});
   }
 
   private async pushMessage(params: Message<ChannelResult>): Promise<PushMessageResult> {
     this.latestState = params.data;
+    this.notifyAppChannelUpdated(this.latestState);
     const turnNum = this.getNextTurnNum(this.latestState);
 
     switch (params.data.status) {
       case 'proposed':
-        this.events.emit('ChannelProposed', {params});
+        this.events.emit('ChannelProposed', {params: params.data});
         break;
       // auto-close, if we received a close
       case 'closing':
         this.latestState = {...this.latestState, turnNum, status: 'closed'};
         this.notifyOpponent(this.latestState, 'ChannelUpdate');
+        this.notifyAppChannelUpdated(this.latestState);
         break;
       default:
         break;
@@ -308,7 +310,6 @@ export class FakeChannelProvider implements ChannelProviderInterface {
       direct: {playerAmount: '0x0', hubAmount: '0x0'}
     });
 
-    // TODO: Does th);
     return budget;
   }
 }
