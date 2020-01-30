@@ -8,7 +8,8 @@
     "node": "^10.16.3"
   },
   "scripts": {
-    "prepare": "typesync && lerna run --concurrency 8 --stream prepare",
+    "preinstall": "npx typesync",
+    "prepare": "lerna run --concurrency 8 --stream prepare",
     "build": "lerna run build",
     "build:ci:incremental": "yarn build:ci --since $(git merge-base $CIRCLE_BRANCH origin/master)",
     "build:ci": "lerna run build:ci",
@@ -46,8 +47,7 @@
     "npm-normalize-package-bin": "^1.0.1",
     "postinstall-postinstall": "2.0.0",
     "prettier": "1.19.1",
-    "typescript": "3.7.2",
-    "typesync": "^0.6.1"
+    "typescript": "3.7.2"
   },
   "husky": {
     "hooks": {
