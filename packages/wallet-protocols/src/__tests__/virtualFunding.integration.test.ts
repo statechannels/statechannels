@@ -80,6 +80,7 @@ test('virtually funding a channel', async () => {
       channel.participants.find(addr => addr === p.signingAddress)
     ),
     privateKey: store.getPrivateKey(channel.participants),
+    states: [],
   });
 
   const leafContext = (index: VirtualLeaf.Indices): VirtualLeaf.Init => ({
