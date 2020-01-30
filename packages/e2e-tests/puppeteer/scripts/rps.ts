@@ -1,11 +1,6 @@
 import {Page} from 'puppeteer';
 
-import {
-  setUpBrowser,
-  loadRPSApp,
-  waitForAndClickButton,
-  waitForHeading as waitForWinLossUIHeader
-} from '../helpers';
+import {waitForAndClickButton} from '../helpers';
 
 export async function setupRPS(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
   async function playerA(page: Page): Promise<void> {
