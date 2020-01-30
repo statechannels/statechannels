@@ -1,7 +1,8 @@
 import { bigNumberify } from 'ethers/utils';
 import { Machine, MachineConfig, InvokeCallback } from 'xstate';
 
-import { FINAL, MachineFactory } from '../..';
+import { FINAL } from '../..';
+import { MachineFactory } from '../../machine-utils';
 import { Store } from '../../store';
 import { ChainEvent } from '../../chain';
 

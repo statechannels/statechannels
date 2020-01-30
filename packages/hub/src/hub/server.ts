@@ -5,10 +5,15 @@ import {handleWalletMessage} from './handlers/handle-wallet-message';
 import {logger} from '../logger';
 import {onDepositEvent} from '../wallet/services/depositManager';
 import {fbListen, fbSend} from '../message/firebase-relay';
+import * as Sentry from '@sentry/node';
 
 const log = logger();
 
 export async function startServer(): Promise<any> {
+  Sentry.init({
+    dsn: 'https://5b818f025d1a4259a8cf086377b67025@sentry.io/2047255',
+    environment: process.env.RUNTIME_ENV || 'development'
+  });
   const fbMessageCallback = async (message: RelayableAction) => {
     log.info({message}, 'Received message from firebase');
 
@@ -22,6 +27,7 @@ export async function startServer(): Promise<any> {
       );
     } catch (reason) {
       log.error(reason);
+      throw reason;
     }
   };
 

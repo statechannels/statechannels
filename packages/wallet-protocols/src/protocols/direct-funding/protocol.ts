@@ -4,8 +4,8 @@ import _ from 'lodash';
 import { bigNumberify } from 'ethers/utils';
 import { HashZero, AddressZero } from 'ethers/constants';
 
-import { getDataAndInvoke } from '../../machine-utils';
-import { FINAL, MachineFactory } from '../../';
+import { getDataAndInvoke, MachineFactory } from '../../machine-utils';
+import { FINAL } from '../../';
 import { add, subtract, gt } from '../../mathOps';
 import { Store } from '../../store';
 import { getEthAllocation, ethAllocationOutcome } from '../../calculations';

@@ -23,5 +23,6 @@ module.exports = {
     'no-empty-pattern': 'off',
     'import/first': 2,
     'import/order': [2, { 'newlines-between': 'always' }],
+    'no-restricted-imports': ['error', { patterns: ['**/lib/**', '**/src/**'] }],
   },
 };

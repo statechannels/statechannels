@@ -1,7 +1,7 @@
-import { EventObject, SendAction, StateMachine, forwardTo } from 'xstate';
+import { SendAction, forwardTo } from 'xstate';
 import { Outcome, State, hashOutcome, hashState } from '@statechannels/nitro-protocol';
 
-import { ChannelUpdated, Store } from './store';
+import { ChannelUpdated } from './store';
 
 export const success: { type: 'final' } = { type: 'final' };
 export const failure: { type: 'final' } = { type: 'final' };
@@ -16,15 +16,6 @@ type Transition<C> = { actions: SendAction<C, ChannelUpdated> };
 export function forwardChannelUpdated<C>(id: string): Transition<C> {
   return { actions: forwardTo(id) };
 }
-
-// TODO
-// Some machine factories require a context, and some don't
-// Sort this out.
-export type MachineFactory<I, E extends EventObject> = (
-  store: Store,
-  context?: I
-) => StateMachine<I, any, E>;
-
 export function unreachable(x: never) {
   return x;
 }
@@ -71,3 +62,4 @@ export * from './protocols';
 export * from './wire-protocol';
 export { CreateChannelEvent, OpenChannelEvent } from './protocols/wallet/protocol';
 export { Channel, getChannelId } from '@statechannels/nitro-protocol';
+export { MachineFactory } from './machine-utils';

@@ -1,6 +1,6 @@
-import { DoneInvokeEvent } from 'xstate';
+import { DoneInvokeEvent, EventObject, StateMachine, MachineConfig, Machine } from 'xstate';
 
-import { FINAL } from '.';
+import { FINAL, Store } from '.';
 
 /*
 Since machines typically  don't have sync access to a store, we invoke a promise to get the
@@ -30,3 +30,22 @@ export function getDataAndInvoke<T>(
     onDone,
   };
 }
+
+// TODO
+// Some machine factories require a context, and some don't
+// Sort this out.
+export type MachineFactory<I, E extends EventObject> = (
+  store: Store,
+  context?: I
+) => StateMachine<I, any, E>;
+
+type Options = (store: Store) => any;
+type Config<T> = MachineConfig<T, any, any>;
+export const connectToStore: <T>(config: Config<T>, options: Options) => MachineFactory<T, any> = <
+  T
+>(
+  config: Config<T>,
+  options: Options
+) => (store: Store, context?: T | undefined) => {
+  return Machine(config).withConfig(options(store), context);
+};

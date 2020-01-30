@@ -18,7 +18,8 @@
     "lint-staged": "9.4.0"
   },
   "files": [
-    "schema"
+    "schema",
+    "types"
   ],
   "keywords": [
     "client api",
@@ -30,6 +31,7 @@
   "lint-staged": {
     "index.ts": "yarn lint:check --max-warnings=0"
   },
+  "main": "types/index.d.ts",
   "repository": "statechannels/monorepo/blob/master/packages/client-api-schema",
   "scripts": {
     "build": "ts-node index.ts",
