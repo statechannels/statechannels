@@ -3,7 +3,7 @@ import waitForExpect from 'wait-for-expect';
 import { interpret } from 'xstate';
 import { Channel } from '@statechannels/nitro-protocol';
 
-import { Store, Participant } from '../store';
+import { Store, Participant, EphemeralStore } from '../store';
 import { messageService } from '../messaging';
 import { AddressableMessage } from '../wire-protocol';
 import { Chain } from '../chain';
@@ -11,14 +11,11 @@ import { VirtualLeaf, VirtualHub } from '../protocols';
 import { MachineFactory } from '../machine-utils';
 import { Balance } from '../types';
 import { CHAIN_ID } from '../constants';
+import { log } from '../utils';
+import { IChannelStoreEntry } from '../ChannelStoreEntry';
 
-import {
-  wallet1,
-  wallet2,
-  wallet3,
-  threeParticipants as participants,
-  storeWithUnfundedChannel,
-} from './data';
+import { wallet1, wallet2, wallet3, threeParticipants as participants } from './data';
+import { invokedState } from './utils';
 
 jest.setTimeout(10000);
 
@@ -32,7 +29,7 @@ function connect<T>(
   machineConstructor: MachineFactory<T, any>,
   { participantId }: Participant
 ) {
-  const store = storeWithUnfundedChannel(chain, wallet.privateKey);
+  const store = new EphemeralStore({ chain, privateKeys: { [wallet.address]: wallet.privateKey } });
 
   stores[participantId] = store;
   const service = interpret<any, any, any>(machineConstructor(store, context));
@@ -44,7 +41,8 @@ function connect<T>(
     }
   });
 
-  service.start();
+  service.onTransition(state => log(`${participantId} -- ${invokedState({ state } as any)}`));
+
   return service;
 }
 
@@ -75,6 +73,14 @@ test('virtually funding a channel', async () => {
     channelNonce: '0xaa',
   };
 
+  const entry: (store: Store, channel: Channel) => IChannelStoreEntry = (store, channel) => ({
+    channel,
+    participants: participants.filter(p =>
+      channel.participants.find(addr => addr === p.signingAddress)
+    ),
+    privateKey: store.getPrivateKey(channel.participants),
+  });
+
   const leafContext = (index: VirtualLeaf.Indices): VirtualLeaf.Init => ({
     balances,
     hubAddress,
@@ -91,13 +97,36 @@ test('virtually funding a channel', async () => {
     guarantorChannels,
     jointChannel,
   };
+
   const left = connect(wallet1, leafContext(0), VirtualLeaf.machine, participants[0]);
   const right = connect(wallet2, leafContext(1), VirtualLeaf.machine, participants[1]);
   const hub = connect(wallet3, hubContext, VirtualHub.machine, participants[2]);
 
+  {
+    const store = stores.first;
+    store.initializeChannel(entry(store, jointChannel));
+    store.initializeChannel(entry(store, guarantorChannels[0]));
+  }
+  {
+    const store = stores.second;
+    store.initializeChannel(entry(store, jointChannel));
+    store.initializeChannel(entry(store, guarantorChannels[1]));
+  }
+  {
+    const store = stores.third;
+    store.initializeChannel(entry(store, jointChannel));
+    store.initializeChannel(entry(store, guarantorChannels[0]));
+    store.initializeChannel(entry(store, guarantorChannels[1]));
+  }
+
+  [left, right, hub].map(service => service.start());
+
   await waitForExpect(() => {
+    stores;
+    debugger;
+
     expect(left.state.value).toEqual('success');
     expect(hub.state.value).toEqual('success');
     expect(right.state.value).toEqual('success');
-  }, 200);
+  }, 500);
 });
