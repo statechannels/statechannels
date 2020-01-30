@@ -1,10 +1,12 @@
 import { assign, Machine } from 'xstate';
 import { HashZero, AddressZero } from 'ethers/constants';
+import { Outcome } from '@statechannels/nitro-protocol';
 
-import { Channel, FINAL, getChannelId, MachineFactory } from '../../';
+import { Channel, FINAL, getChannelId } from '../../';
 import { SignedState } from '../../types';
 import { ChannelStoreEntry } from '../../ChannelStoreEntry';
 import { Participant } from '../../store';
+import { MachineFactory } from '../../machine-utils';
 
 import { SupportState } from '..';
 

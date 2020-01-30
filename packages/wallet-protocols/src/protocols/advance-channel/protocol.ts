@@ -1,8 +1,8 @@
-import { assign, Machine, MachineConfig, AnyEventObject, spawn } from 'xstate';
+import { assign, MachineConfig, AnyEventObject, spawn } from 'xstate';
 import { map, filter } from 'rxjs/operators';
 
 import { Store, observeChannel } from '../../store';
-import { MachineFactory } from '../..';
+import { connectToStore } from '../../machine-utils';
 
 const PROTOCOL = 'advance-channel';
 /*
@@ -85,6 +85,4 @@ const options = (store: Store) => ({
   },
 });
 
-export const machine: MachineFactory<Init, any> = (store: Store, context?: Init) => {
-  return Machine(config).withConfig(options(store), context);
-};
+export const machine = connectToStore(config, options);
