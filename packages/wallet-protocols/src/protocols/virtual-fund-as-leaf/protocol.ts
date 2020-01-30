@@ -18,7 +18,6 @@ export enum Indices {
 
 export interface Init {
   balances: Balance[];
-  ledgerId: string;
   targetChannelId: string;
   hubAddress: string;
   guarantorChannel: Channel;

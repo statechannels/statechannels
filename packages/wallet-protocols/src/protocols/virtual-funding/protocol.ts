@@ -29,7 +29,6 @@ function virtualFundAsLeafArgs({ targetChannelId, hubAddress }: Init): VirtualFu
     balances,
     targetChannelId,
     hubAddress,
-    ledgerId,
     index,
   } as VirtualLeaf.Init; // TODO: determine channels
 }
