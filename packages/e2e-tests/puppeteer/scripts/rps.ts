@@ -9,14 +9,14 @@ import {
 
 export async function setupRPS(rpsTabA: Page, rpsTabB: Page): Promise<void> {
   async function playerA(page: Page): Promise<void> {
-    await waitForAndClickButton(page, 'Start Playing!');
-    await (await page.waitFor('#name')).type('playerA');
-    await waitForAndClickButton(page, 'Connect with MetaMask');
+    await waitForAndClickButton(page, '#start-playing');
+    await (await page.waitFor('#name')).type('A');
+    await waitForAndClickButton(page, '#connect-with-metamask');
   }
   async function playerB(page: Page): Promise<void> {
-    await waitForAndClickButton(page, 'Start Playing!');
-    await (await page.waitFor('#name')).type('playerB');
-    await waitForAndClickButton(page, 'Connect with MetaMask');
+    await waitForAndClickButton(page, '#start-playing');
+    await (await page.waitFor('#name')).type('B');
+    await waitForAndClickButton(page, '#connect-with-metamask');
   }
 
   await Promise.all([playerA(rpsTabA), playerB(rpsTabB)]);
@@ -25,22 +25,16 @@ export async function setupRPS(rpsTabA: Page, rpsTabB: Page): Promise<void> {
 export async function startAndFundRPSGame(rpsTabA: Page, rpsTabB: Page): Promise<void> {
   async function playerB(page: Page): Promise<void> {
     const walletIFrame = page.frames()[1];
-    // NOTE: There is some weird scrolling issue. .click() scrolls and somehow React re-renders this
-    // button and so we get a "Node is detached from document error". Using .evaluate() fixes it.
-    // https://github.com/puppeteer/puppeteer/issues/3496
-    await (await page.waitForXPath('//button[contains(., "Create a game")]')).evaluate(
-      'document.querySelector("button.lobby-new-game").click()'
-    );
-    await waitForAndClickButton(page, 'Create Game');
-    await waitForAndClickButton(walletIFrame, 'Fund Channel');
-    await waitForAndClickButton(walletIFrame, 'Ok!');
+    await waitForAndClickButton(page, '#create-a-game');
+    await waitForAndClickButton(page, '#create-game');
+    await waitForAndClickButton(walletIFrame, '#yes');
+    await waitForAndClickButton(walletIFrame, '#ok');
   }
   async function playerA(page: Page): Promise<void> {
     const walletIFrame = page.frames()[1];
-    await new Promise(r => setTimeout(r, 500));
-    await waitForAndClickButton(page, 'Join');
-    await waitForAndClickButton(walletIFrame, 'Fund Channel');
-    await waitForAndClickButton(walletIFrame, 'Ok!');
+    await waitForAndClickButton(page, '#join');
+    await waitForAndClickButton(walletIFrame, '#yes');
+    await waitForAndClickButton(walletIFrame, '#ok');
   }
 
   await Promise.all([playerA(rpsTabA), playerB(rpsTabB)]);
@@ -57,15 +51,17 @@ export async function clickThroughRPSUIWithChallengeByPlayerA(
   async function playerA(page: Page): Promise<void> {
     const walletIFrame = page.frames()[1];
     await playMove(page, 'rock');
-    await waitForAndClickButton(page, 'Challenge on-chain');
-    await waitForAndClickButton(walletIFrame, 'Approve');
-    await waitForAndClickButton(walletIFrame, 'Ok');
+    await waitForAndClickButton(page, '#challenge');
+    await waitForAndClickButton(walletIFrame, '#yes');
+    await waitForAndClickButton(walletIFrame, '#ok');
+    await waitForAndClickButton(page, '#play-again');
   }
   async function playerB(page: Page): Promise<void> {
     const walletIFrame = page.frames()[1];
-    await waitForAndClickButton(walletIFrame, 'Respond');
+    await waitForAndClickButton(walletIFrame, '#respond');
     await playMove(page, 'paper');
-    await waitForAndClickButton(walletIFrame, 'Ok');
+    await waitForAndClickButton(walletIFrame, '#ok');
+    await waitForAndClickButton(page, '#play-again');
   }
 
   await Promise.all([playerA(rpsTabA), playerB(rpsTabB)]);
@@ -77,16 +73,18 @@ export async function clickThroughRPSUIWithChallengeByPlayerB(
 ): Promise<void> {
   async function playerA(page: Page): Promise<void> {
     const walletIFrame = page.frames()[1];
-    await waitForAndClickButton(walletIFrame, 'Respond');
+    await waitForAndClickButton(walletIFrame, '#respond');
     await playMove(page, 'paper');
-    await waitForAndClickButton(walletIFrame, 'Ok');
+    await waitForAndClickButton(walletIFrame, '#ok');
+    await waitForAndClickButton(page, '#play-again');
   }
   async function playerB(page: Page): Promise<void> {
     const walletIFrame = page.frames()[1];
     await playMove(page, 'rock');
-    await waitForAndClickButton(page, 'Challenge on-chain');
-    await waitForAndClickButton(walletIFrame, 'Approve');
-    await waitForAndClickButton(walletIFrame, 'Ok');
+    await waitForAndClickButton(page, '#challenge');
+    await waitForAndClickButton(walletIFrame, '#yes');
+    await waitForAndClickButton(walletIFrame, '#ok');
+    await waitForAndClickButton(page, '#play-again');
   }
 
   await Promise.all([playerA(rpsTabA), playerB(rpsTabB)]);
@@ -99,19 +97,20 @@ export async function clickThroughResignationUI(rpsTabA: Page, rpsTabB: Page): P
     await (await page.waitForXPath('//button[contains(., "Resign")]')).evaluate(
       'document.querySelector("button.footer-resign").click()'
     );
-    await waitForAndClickButton(walletIFrame, 'Close Channel');
+    await waitForAndClickButton(walletIFrame, '#resign');
+    await waitForAndClickButton(walletIFrame, '#yes');
 
     async function virtualFunding(): Promise<void> {
-      await waitForAndClickButton(walletIFrame, 'Approve');
-      await waitForAndClickButton(walletIFrame, 'Ok');
-      await waitForAndClickButton(page, 'OK');
-      await waitForAndClickButton(page, 'Exit');
+      await waitForAndClickButton(walletIFrame, '#yes');
+      await waitForAndClickButton(walletIFrame, '#ok');
+      await waitForAndClickButton(page, '#resigned-ok');
+      await waitForAndClickButton(page, '#exit');
     }
 
     async function ledgerFunding(): Promise<void> {
-      await waitForAndClickButton(walletIFrame, 'Ok');
-      await waitForAndClickButton(page, 'OK');
-      await waitForAndClickButton(page, 'Exit');
+      await waitForAndClickButton(walletIFrame, '#ok');
+      await waitForAndClickButton(page, '#resigned-ok');
+      await waitForAndClickButton(page, '#exit');
     }
 
     await Promise.race([virtualFunding(), ledgerFunding()]);
@@ -119,11 +118,11 @@ export async function clickThroughResignationUI(rpsTabA: Page, rpsTabB: Page): P
 
   async function playerA(page: Page): Promise<void> {
     const walletIFrame = page.frames()[1];
-    await waitForAndClickButton(walletIFrame, 'Close Channel');
-    await waitForAndClickButton(walletIFrame, 'Approve');
-    await waitForAndClickButton(walletIFrame, 'Ok');
-    await waitForAndClickButton(page, 'OK');
-    await waitForAndClickButton(page, 'Exit');
+    await waitForAndClickButton(walletIFrame, '#yes');
+    await waitForAndClickButton(walletIFrame, '#yes');
+    await waitForAndClickButton(walletIFrame, '#ok');
+    await waitForAndClickButton(page, '#resigned-ok');
+    await waitForAndClickButton(page, '#exit');
   }
 
   await Promise.all([playerA(rpsTabA), playerB(rpsTabB)]);

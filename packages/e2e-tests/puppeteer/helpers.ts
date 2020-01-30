@@ -33,20 +33,9 @@ export async function loadRPSApp(page: Page, ganacheAccountIndex: number): Promi
 }
 
 /** */
-export async function waitForAndClickButton(page: Page | Frame, button: string): Promise<void> {
-  let retryAttempts = 0;
-  let error;
-  while (retryAttempts < 3) {
-    try {
-      return (await page.waitForXPath('//button[contains(., "' + button + '")]')).click();
-    } catch (e) {
-      error = e;
-      await new Promise(r => setTimeout(r, 250));
-      retryAttempts += 1;
-    }
-  }
-  console.error(`Could not click on ${button}`);
-  throw error;
+export async function waitForAndClickButton(page: Page | Frame, selector: string): Promise<void> {
+  await page.waitForSelector(selector);
+  return page.click(selector);
 }
 
 export async function waitForHeading(page: Page | Frame): Promise<string | null> {
