@@ -25,7 +25,12 @@ const jointChannelArgs = (store: Store) => async ({
     hubAddress: jointChannel.participants[1],
   });
 
-const createJointChannel = getDataAndInvoke('jointChannelArgs', 'createNullChannel');
+const createJointChannel = getDataAndInvoke(
+  'jointChannelArgs',
+  'createNullChannel',
+  undefined,
+  'joint'
+);
 
 const guarantorArgs = (index: VirtualLeaf.Indices) => (store: Store) => async ({
   jointChannel,
@@ -38,10 +43,20 @@ const guarantorArgs = (index: VirtualLeaf.Indices) => (store: Store) => async ({
   });
 
 const leftGuarantorArgs = guarantorArgs(0);
-const createLeftGuarantorChannel = getDataAndInvoke('leftGuarantorArgs', 'createNullChannel');
+const createLeftGuarantorChannel = getDataAndInvoke(
+  'leftGuarantorArgs',
+  'createNullChannel',
+  undefined,
+  'left'
+);
 
 const rightGuarantorArgs = guarantorArgs(1);
-const createRightGuarantorChannel = getDataAndInvoke('rightGuarantorArgs', 'createNullChannel');
+const createRightGuarantorChannel = getDataAndInvoke(
+  'rightGuarantorArgs',
+  'createNullChannel',
+  undefined,
+  'right'
+);
 
 const parallel = 'parallel' as 'parallel';
 const createChannels = {
@@ -61,15 +76,25 @@ const fundGuarantorArgs = (index: VirtualLeaf.Indices) => ({
     balances,
     hubAddress,
   });
+const fundGuarantor = index => ({
+  initial: 'fund',
+  states: {
+    fund: {
+      invoke: {
+        id: `fundGuarantor-${index}`,
+        src: 'ledgerFunding',
+        data: fundGuarantorArgs(index),
+        onDone: 'done',
+      },
+    },
+    done: { type: FINAL },
+  },
+});
 const fundGuarantors = {
   type: parallel,
   states: {
-    fundLeftGuarantor: {
-      invoke: { src: 'ledgerFunding', data: fundGuarantorArgs(VirtualLeaf.Indices.Left) },
-    },
-    fundRightGuarantor: {
-      invoke: { src: 'ledgerFunding', data: fundGuarantorArgs(VirtualLeaf.Indices.Right) },
-    },
+    fundLeftGuarantor: fundGuarantor(0),
+    fundRightGuarantor: fundGuarantor(1),
   },
   onDone: 'fundTarget',
 };

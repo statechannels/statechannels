@@ -44,7 +44,12 @@ export const jointChannelArgs = (store: Store) => async ({
     outcome: ethAllocationOutcome(allocation, store.ethAssetHolderAddress),
   };
 };
-const createJointChannel = getDataAndInvoke('jointChannelArgs', 'createNullChannel');
+const createJointChannel = getDataAndInvoke(
+  'jointChannelArgs',
+  'createNullChannel',
+  undefined,
+  'createJointChannel'
+);
 
 function jointChannelAllocation(balances: Balance[], hubAddress: string) {
   const total = balances.map(b => b.wei).reduce(add);
@@ -75,7 +80,12 @@ export const guarantorChannelArgs = (store: Store) => async ({
     outcome: ethGuaranteeOutcome(guarantee, store.ethAssetHolderAddress),
   };
 };
-const createGuarantorChannel = getDataAndInvoke('guarantorChannelArgs', 'createNullChannel');
+const createGuarantorChannel = getDataAndInvoke(
+  'guarantorChannelArgs',
+  'createNullChannel',
+  undefined,
+  'createGuarantorChannel'
+);
 
 const createChannels = {
   type: 'parallel' as 'parallel',
@@ -95,7 +105,9 @@ export const fundGuarantorArgs = ({
   return { targetChannelId: getChannelId(guarantorChannel), deductions };
 };
 
-const fundGuarantor = { invoke: { src: 'ledgerFunding', data: fundGuarantorArgs } };
+const fundGuarantor = {
+  invoke: { src: 'ledgerFunding', data: fundGuarantorArgs, onDone: 'fundTarget' },
+};
 
 export function fundTargetArgs(store: Store) {
   return async ({
