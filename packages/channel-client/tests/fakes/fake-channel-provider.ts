@@ -3,7 +3,6 @@ import log = require('loglevel');
 import {bigNumberify} from 'ethers/utils';
 import {EventEmitter, ListenerFn} from 'eventemitter3';
 import {
-  Response,
   CreateChannelResult,
   CreateChannelParams,
   PushMessageResult,
@@ -11,22 +10,11 @@ import {
   UpdateChannelParams,
   Notification,
   CloseChannelParams,
-  CloseChannelResult
+  CloseChannelResult,
+  GetAddressResult
 } from '@statechannels/client-api-schema/types';
 import {ChannelResult, Message, SiteBudget} from '../../src/types';
 import {calculateChannelId} from '../../src/utils';
-
-const wrapResponse = (
-  method: string,
-  result: any
-): {jsonrpc: '2.0'; id: number; method: string; result: any} => {
-  return {
-    jsonrpc: '2.0',
-    id: Date.now(),
-    method,
-    result
-  };
-};
 
 /*
  This fake provider becomes the stateful object which handles the calls
@@ -46,28 +34,32 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     this.url = url || '';
   }
 
-  async send(method: string, params: any): Promise<Response> {
+  async send(
+    method: string,
+    params: any
+  ): Promise<ChannelResult | SiteBudget | GetAddressResult | PushMessageResult> {
     switch (method) {
       case 'CreateChannel':
-        return wrapResponse('CreateChannel', await this.createChannel(params));
+        return this.createChannel(params);
+
       case 'PushMessage':
-        return wrapResponse('PushMessage', await this.pushMessage(params));
+        return this.pushMessage(params);
 
       case 'GetAddress':
-        return wrapResponse('GetAddress', await this.getAddress());
+        return this.getAddress();
 
       case 'JoinChannel':
-        return wrapResponse('JoinChannel', await this.joinChannel(params));
+        return this.joinChannel(params);
 
       case 'UpdateChannel':
-        return wrapResponse('UpdateChannel', await this.updateChannel(params));
+        return this.updateChannel(params);
 
       case 'CloseChannel':
-        return wrapResponse('CloseChannel', await this.updateChannel(params));
+        return this.closeChannel(params);
       case 'ApproveBudgetAndFund':
-        return wrapResponse('CloseAndWithdraw', await this.approveBudgetAndFund(params));
+        return this.approveBudgetAndFund(params);
       case 'CloseAndWithdraw':
-        return wrapResponse('CloseAndWithdraw', await this.CloseAndWithdraw(params));
+        return this.CloseAndWithdraw(params);
       default:
         return Promise.reject(`No callback available for ${method}`);
     }

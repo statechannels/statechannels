@@ -1,4 +1,13 @@
 import {ListenerFn} from 'eventemitter3';
+import {
+  CreateChannelResult,
+  CloseChannelResult,
+  UpdateChannelResult,
+  PushMessageResult,
+  JoinChannelResult,
+  GetAddressResult,
+  ChallengeChannelResult
+} from '@statechannels/client-api-schema/types';
 
 export interface JsonRpcRequest<MethodName = string, RequestParams = any> {
   id?: number;
@@ -44,10 +53,24 @@ export interface JsonRpcErrorResponse {
 export function isJsonRpcErrorResponse(message: any): message is JsonRpcErrorResponse {
   return 'error' in message;
 }
+// TODO: This probably should live in client-api-schema?
+type MethodType = {
+  CreateChannel: CreateChannelResult;
+  UpdateChannel: UpdateChannelResult;
+  PushMessage: PushMessageResult;
+  CloseChannel: CloseChannelResult;
+  JoinChannel: JoinChannelResult;
+  GetAddress: GetAddressResult;
+  ChallengeChannel: ChallengeChannelResult;
+  // TODO: Create schema
+  ApproveBudgetAndFund: any;
+  GetBudget: any;
+  CloseAndWithdraw: any;
+};
 
 export interface ChannelProviderInterface {
   enable(url?: string): Promise<void>;
-  send(method: string, params?: any): Promise<any>;
+  send<K extends keyof MethodType>(method: K, params?: any): Promise<MethodType[K]>;
   on(event: string, callback: ListenerFn): void;
   off(event: string, callback?: ListenerFn): void;
   subscribe(subscriptionType: string, params?: any): Promise<string>;
