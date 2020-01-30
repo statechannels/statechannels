@@ -43,23 +43,23 @@ describe('FakeChannelClient', () => {
       APP_DEFINITION,
       APP_DATA,
       channelId,
-      '0',
+      0,
       'proposed'
     ).build();
 
     states['running'] = ChannelResultBuilder.from(states['proposed'])
       .setStatus('running')
-      .setTurnNum('3')
+      .setTurnNum(3)
       .build();
 
     states['updated_app_data'] = ChannelResultBuilder.from(states['running'])
       .setAppData(UPDATED_APP_DATA)
-      .setTurnNum('4')
+      .setTurnNum(4)
       .build();
 
     states['closed'] = ChannelResultBuilder.from(states['running'])
       .setStatus('closed')
-      .setTurnNum('5')
+      .setTurnNum(5)
       .build();
   });
 

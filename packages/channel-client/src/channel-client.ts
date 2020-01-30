@@ -5,11 +5,9 @@ import {
   ChannelResult,
   UnsubscribeFunction,
   Message,
-  Participant,
-  Allocation,
-  PushMessageResult,
   SiteBudget
 } from './types';
+import {PushMessageResult, Allocation, Participant} from '@statechannels/client-api-schema/types';
 
 export class ChannelClient implements ChannelClientInterface<ChannelResult> {
   constructor(private readonly provider: ChannelProviderInterface) {}
@@ -107,6 +105,4 @@ export class ChannelClient implements ChannelClientInterface<ChannelResult> {
   async CloseAndWithdraw(hubAddress: string): Promise<SiteBudget> {
     return this.provider.send('CloseAndWithdraw', {hubAddress});
   }
-  // TODO: Implement this?
-  // async Withdraw(playerAmount: string, hubAmount: string, hubAddress: string) {
 }
