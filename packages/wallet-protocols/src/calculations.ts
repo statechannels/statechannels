@@ -19,14 +19,14 @@ export enum Errors {
 }
 
 export function allocateToTarget(
-  targetAllocation: Allocation,
   ledgerAllocation: Allocation,
+  deductions: Allocation,
   targetChannelId: string,
   ethAssetHolderAddress: string
 ): Outcome {
   let total = '0';
 
-  targetAllocation.forEach(targetItem => {
+  deductions.forEach(targetItem => {
     const ledgerIdx = ledgerAllocation.findIndex(
       ledgerItem => ledgerItem.destination === targetItem.destination
     );
