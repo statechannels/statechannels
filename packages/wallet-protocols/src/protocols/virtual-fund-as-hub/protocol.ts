@@ -15,10 +15,10 @@ export interface Init {
   guarantorChannels: [Channel, Channel];
 }
 
-const jointChannelArgs = (store: Store) => ({
+const jointChannelArgs = (store: Store) => async ({
   jointChannel,
   balances,
-}: Init): CreateNullChannel.Init =>
+}: Init): Promise<CreateNullChannel.Init> =>
   VirtualLeaf.jointChannelArgs(store)({
     jointChannel: jointChannel,
     balances: balances,
@@ -27,10 +27,10 @@ const jointChannelArgs = (store: Store) => ({
 
 const createJointChannel = getDataAndInvoke('jointChannelArgs', 'createNullChannel');
 
-const guarantorArgs = (index: VirtualLeaf.Indices) => (store: Store) => ({
+const guarantorArgs = (index: VirtualLeaf.Indices) => (store: Store) => async ({
   jointChannel,
   guarantorChannels,
-}: Init): CreateNullChannel.Init =>
+}: Init): Promise<CreateNullChannel.Init> =>
   VirtualLeaf.guarantorChannelArgs(store)({
     jointChannel,
     guarantorChannel: guarantorChannels[index],
@@ -88,6 +88,7 @@ const options = (store: Store) => ({
     fundTargetArgs: VirtualLeaf.fundTargetArgs(store),
     createNullChannel: CreateNullChannel.machine(store),
     supportState: SupportState.machine(store),
+    ledgerFunding: LedgerFunding.machine(store),
     jointChannelArgs: jointChannelArgs(store),
     leftGuarantorArgs: leftGuarantorArgs(store),
     rightGuarantorArgs: rightGuarantorArgs(store),

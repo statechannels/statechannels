@@ -1,5 +1,6 @@
 import { Guarantee, AllocationItem, Allocation } from '@statechannels/nitro-protocol';
 import _ from 'lodash';
+import { hexZeroPad } from 'ethers/utils';
 
 import { Channel, getChannelId, outcomesEqual } from '../../';
 import { add } from '../../mathOps';
@@ -25,16 +26,17 @@ export interface Init {
   index: Indices.Left | Indices.Right;
 }
 
+const makeDestination = s => hexZeroPad(s, 32);
 const allocationItem = (balance: Balance): AllocationItem => ({
-  destination: balance.address,
+  destination: makeDestination(balance.address),
   amount: balance.wei,
 });
 
-export const jointChannelArgs = (store: Store) => ({
+export const jointChannelArgs = (store: Store) => async ({
   jointChannel,
   balances,
   hubAddress,
-}: Pick<Init, 'jointChannel' | 'balances' | 'hubAddress'>): CreateNullChannel.Init => {
+}: Pick<Init, 'jointChannel' | 'balances' | 'hubAddress'>): Promise<CreateNullChannel.Init> => {
   const allocation = jointChannelAllocation(balances, hubAddress);
 
   return {
@@ -48,24 +50,24 @@ function jointChannelAllocation(balances: Balance[], hubAddress: string) {
   const total = balances.map(b => b.wei).reduce(add);
   const allocation = [
     allocationItem(balances[0]),
-    { destination: hubAddress, amount: total },
+    { destination: makeDestination(hubAddress), amount: total },
     allocationItem(balances[1]),
   ];
   return allocation;
 }
 
-export const guarantorChannelArgs = (store: Store) => ({
+export const guarantorChannelArgs = (store: Store) => async ({
   jointChannel,
   index,
   guarantorChannel,
-}: Pick<Init, 'jointChannel' | 'index' | 'guarantorChannel'>): CreateNullChannel.Init => {
+}: Pick<Init, 'jointChannel' | 'index' | 'guarantorChannel'>): Promise<CreateNullChannel.Init> => {
   const { participants } = jointChannel;
 
   const guarantee: Guarantee = {
     targetChannelId: getChannelId(jointChannel),
     // Note that index in the joint channel is twice the index in the target channel
     // This is easier to generalize to n-participant virtual channels
-    destinations: [participants[2 * index], participants[1]],
+    destinations: [participants[2 * index], participants[1]].map(makeDestination),
   };
 
   return {
@@ -87,13 +89,13 @@ export const fundGuarantorArgs = ({
   index,
   hubAddress,
 }: Pick<Init, 'guarantorChannel' | 'balances' | 'hubAddress' | 'index'>): LedgerFunding.Init => {
-  const deductions: Allocation = balances.map(b => ({ destination: b.address, amount: b.wei }));
-  deductions[1 - index].destination = hubAddress;
+  const deductions: Allocation = balances.map(allocationItem);
+  deductions[1 - index].destination = makeDestination(hubAddress);
 
   return { targetChannelId: getChannelId(guarantorChannel), deductions };
 };
 
-const fundGuarantor = getDataAndInvoke('fundGuarantorArgs', 'ledgerFunding', 'fundTarget');
+const fundGuarantor = { invoke: { src: 'ledgerFunding', data: fundGuarantorArgs } };
 
 export function fundTargetArgs(store: Store) {
   return async ({
@@ -121,7 +123,7 @@ export function fundTargetArgs(store: Store) {
         outcome: ethAllocationOutcome(
           [
             { destination: targetChannelId, amount },
-            { destination: hubAddress, amount },
+            { destination: makeDestination(hubAddress), amount },
           ],
           store.ethAssetHolderAddress
         ),
@@ -142,7 +144,10 @@ const options = (store: Store) => ({
   services: {
     fundGuarantorArgs,
     fundTargetArgs: fundTargetArgs(store),
+    guarantorChannelArgs: guarantorChannelArgs(store),
+    jointChannelArgs: jointChannelArgs(store),
     createNullChannel: CreateNullChannel.machine(store),
+    ledgerFunding: LedgerFunding.machine(store),
     supportState: SupportState.machine(store),
   },
 });
