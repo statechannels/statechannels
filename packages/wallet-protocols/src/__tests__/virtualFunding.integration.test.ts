@@ -1,43 +1,41 @@
 import { ethers } from 'ethers';
 import waitForExpect from 'wait-for-expect';
 import { interpret } from 'xstate';
+import { Channel } from '@statechannels/nitro-protocol';
 
 import { Store, Participant } from '../store';
 import { messageService } from '../messaging';
 import { AddressableMessage } from '../wire-protocol';
-import { log } from '../utils';
 import { Chain } from '../chain';
 import { VirtualLeaf, VirtualHub } from '../protocols';
 import { MachineFactory } from '../machine-utils';
+import { Balance } from '../types';
+import { CHAIN_ID } from '../constants';
 
-import { processStates } from './utils';
-import { wallet1, wallet2, participants, storeWithUnfundedChannel } from './data';
+import {
+  wallet1,
+  wallet2,
+  wallet3,
+  threeParticipants as participants,
+  storeWithUnfundedChannel,
+} from './data';
 
 jest.setTimeout(10000);
-
-const logProcessStates = state => {
-  log(processStates(state));
-};
 
 const chain = new Chain();
 
 const stores: Record<string, Store> = {};
 
-type T = VirtualLeaf.Init;
-function connect(
+function connect<T>(
   wallet: ethers.Wallet,
+  context: T,
   machineConstructor: MachineFactory<T, any>,
   { participantId }: Participant
 ) {
   const store = storeWithUnfundedChannel(chain, wallet.privateKey);
 
-  const context: T = {} as T;
   stores[participantId] = store;
   const service = interpret<any, any, any>(machineConstructor(store, context));
-
-  service.onTransition(state => {
-    setTimeout(() => logProcessStates(state), 100);
-  });
 
   stores[participantId] = store;
   messageService.on('message', ({ to, ...event }: AddressableMessage) => {
@@ -51,16 +49,51 @@ function connect(
 }
 
 test('virtually funding a channel', async () => {
-  const wallet3: any = {};
-  const left = connect(wallet1, VirtualLeaf.machine, participants[0]);
-  const hub = connect(wallet2, VirtualHub.machine, participants[1]);
-  const right = connect(wallet3, VirtualLeaf.machine, participants[2]);
+  const balances: Balance[] = [
+    { address: wallet1.address, wei: '0x35' },
+    { address: wallet2.address, wei: '0x11' },
+  ];
+  const targetChannelId = '0xabc';
+  const targetParticipants = participants.map(p => p.signingAddress);
+  const hubAddress = wallet3.address;
+  const guarantorChannels: [Channel, Channel] = [
+    {
+      chainId: CHAIN_ID,
+      participants: [targetParticipants[0], hubAddress],
+      channelNonce: '0x01',
+    },
+    {
+      chainId: CHAIN_ID,
+      participants: [targetParticipants[1], hubAddress],
+      channelNonce: '0x02',
+    },
+  ];
 
-  // TODO
-  let virtualFundAppChannel;
+  const jointChannel: Channel = {
+    chainId: CHAIN_ID,
+    participants: [targetParticipants[0], hubAddress, targetParticipants[1]],
+    channelNonce: '0xaa',
+  };
 
-  left.send(virtualFundAppChannel);
-  // left should send right a message, so this should be enough
+  const leafContext = (index: VirtualLeaf.Indices): VirtualLeaf.Init => ({
+    balances,
+    hubAddress,
+    index,
+    targetChannelId,
+    guarantorChannel: guarantorChannels[index],
+    jointChannel,
+  });
+
+  const hubContext: VirtualHub.Init = {
+    balances,
+    hubAddress,
+    targetChannelId,
+    guarantorChannels,
+    jointChannel,
+  };
+  const left = connect(wallet1, leafContext(0), VirtualLeaf.machine, participants[0]);
+  const right = connect(wallet2, leafContext(1), VirtualLeaf.machine, participants[1]);
+  const hub = connect(wallet3, hubContext, VirtualHub.machine, participants[2]);
 
   await waitForExpect(() => {
     expect(left.state.value).toEqual('success');
