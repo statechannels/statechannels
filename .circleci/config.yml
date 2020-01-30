@@ -277,13 +277,13 @@ workflows:
     jobs:
       - prepare
 
-      - build:
-          requires:
-            - prepare
+      # - build:
+      #     requires:
+      #       - prepare
 
-      - test:
-          requires:
-            - prepare
+      # - test:
+      #     requires:
+      #       - prepare
 
       - integration-test:
           requires:
@@ -292,17 +292,15 @@ workflows:
       - integration-test-with-hub:
           requires:
             - prepare
-
-      - release-incremental:
-          requires:
-            - prepare
-          filters:
-            branches:
-              ignore: master
-
-      - release:
-          requires:
-            - prepare
-          filters:
-            branches:
-              only: master
+      # - release-incremental:
+      #     requires:
+      #       - prepare
+      #     filters:
+      #       branches:
+      #         ignore: master
+      # - release:
+      #     requires:
+      #       - prepare
+      #     filters:
+      #       branches:
+      #         only: master
