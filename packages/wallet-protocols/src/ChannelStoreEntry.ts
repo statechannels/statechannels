@@ -42,7 +42,7 @@ export function isGuarantee(funding: Funding): funding is Guaranteed {
 }
 
 export interface IChannelStoreEntry {
-  states?: SignedState[];
+  states: SignedState[];
   privateKey: string;
   participants: Participant[];
   channel: Channel;
