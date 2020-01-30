@@ -23,7 +23,7 @@ let browserB: Browser;
 let rpsTabA: Page;
 let rpsTabB: Page;
 
-describe('plays game 1 (challenge by A, challenge by B) and game 2 (resignation by B)', () => {
+describe('completes game 1 (challenge by A, challenge by B, resign by B) and begins game 2 ', () => {
   beforeAll(async () => {
     browserA = await setUpBrowser(HEADLESS, 100); // 100ms sloMo avoids some undiagnosed race conditions
     browserB = await setUpBrowser(HEADLESS, 100); // 100ms sloMo avoids some undiagnosed race conditions
