@@ -50,6 +50,10 @@ export async function waitForAndClickButton(page: Page | Frame, button: string):
 }
 
 export async function waitForHeading(page: Page | Frame): Promise<string | null> {
+  return (await page.waitFor('h1.mb-5')).evaluate(el => el.textContent);
+}
+
+export async function waitForWinLossHeading(page: Page | Frame): Promise<string | null> {
   return (await page.waitFor('h1.mb-5.win-loss-title')).evaluate(el => el.textContent);
 }
 
