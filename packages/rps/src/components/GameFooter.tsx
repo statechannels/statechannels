@@ -24,6 +24,7 @@ export default class GameFooter extends React.PureComponent<Props> {
               outline={true}
               onClick={() => resign(true)}
               disabled={false}
+              id="resign"
             >
               Resign
             </Button>
@@ -32,6 +33,7 @@ export default class GameFooter extends React.PureComponent<Props> {
               outline={true}
               onClick={() => createBlockchainChallenge(true)}
               disabled={!canChallenge}
+              id="challenge"
             >
               {canChallenge ? 'Challenge on-chain' : "Can't challenge"}
             </Button>

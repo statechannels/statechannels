@@ -21,6 +21,7 @@ export default class Challenged extends React.PureComponent<Props> {
             className="cog-button"
             onClick={this.props.action}
             disabled={!this.props.channelClosed}
+            id="challenge-ok"
           >
             {'OK'}
           </Button>

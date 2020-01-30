@@ -55,7 +55,7 @@ export default class Playagain extends React.PureComponent<Props> {
             </div>
           </div>
 
-          <Button className="cog-button" onClick={playAgain}>
+          <Button className="cog-button" onClick={playAgain} id="play-again">
             Play again
           </Button>
           <div> Waiting for opponent to suggest a new game </div>

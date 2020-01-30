@@ -50,7 +50,7 @@ export class OpenGameEntry extends React.PureComponent<Props> {
             <div className="ogc-stake-currency">ETH</div>
           </div>
         </div>
-        <Button className="ogc-join" onClick={joinThisGame}>
+        <Button className="ogc-join" onClick={joinThisGame} id="join">
           Join
         </Button>
       </div>
