@@ -2,6 +2,8 @@ import { Balance } from '../../types';
 import { Init as VirtualFundAsLeafArgs } from '../virtual-fund-as-leaf/protocol';
 import { store } from '../../temp-store';
 import { getEthAllocation } from '../../calculations';
+
+import { VirtualLeaf } from '..';
 const PROTOCOL = 'virtual-funding';
 const success = { type: 'final' };
 
@@ -29,7 +31,7 @@ function virtualFundAsLeafArgs({ targetChannelId, hubAddress }: Init): VirtualFu
     hubAddress,
     ledgerId,
     index,
-  };
+  } as VirtualLeaf.Init; // TODO: determine channels
 }
 const fund = {
   invoke: {
