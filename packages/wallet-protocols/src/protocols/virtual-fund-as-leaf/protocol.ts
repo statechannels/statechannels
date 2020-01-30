@@ -1,5 +1,6 @@
 import { assign } from 'xstate';
-import { Guarantee, AllocationItem } from '@statechannels/nitro-protocol';
+import { Guarantee, AllocationItem, Allocation } from '@statechannels/nitro-protocol';
+import _ from 'lodash';
 
 import { Channel, getChannelId, outcomesEqual } from '../../';
 import { add } from '../../mathOps';
@@ -113,17 +114,21 @@ const createChannels = {
   onDone: 'fundGuarantor',
 };
 
-export function fundGuarantorArgs(_: Store) {
-  return async ({}: ChannelsKnown): Promise<LedgerFunding.Init> => {
-    // TODO: We might need to change ledger-funding a little to
-    // accept arguments compatible with funding a guarantor channel.
-    // This is easy if you skip the "lok ledger channel" step, and just pass
-    // - the ledger channel
-    // - the target channel
-    // - balances to fund the target with
-    throw 'Unimplemented';
-  };
-}
+export const fundGuarantorArgs = ({
+  guarantorChannel,
+  balances,
+  index,
+  hubAddress,
+}: Pick<
+  ChannelsKnown,
+  'guarantorChannel' | 'balances' | 'hubAddress' | 'index'
+>): LedgerFunding.Init => {
+  const deductions: Allocation = balances.map(b => ({ destination: b.address, amount: b.wei }));
+  deductions[1 - index].destination = hubAddress;
+
+  return { targetChannelId: getChannelId(guarantorChannel), deductions };
+};
+
 const fundGuarantor = getDataAndInvoke('fundGuarantorArgs', 'ledgerFunding', 'fundTarget');
 
 export function fundTargetArgs(store: Store) {
@@ -172,7 +177,7 @@ export const config = {
 const options = (store: Store) => ({
   actions: { assignChannels: assignChannels(store) },
   services: {
-    fundGuarantorArgs: fundGuarantorArgs(store),
+    fundGuarantorArgs,
     fundTargetArgs: fundTargetArgs(store),
     createNullChannel: CreateNullChannel.machine(store),
     supportState: SupportState.machine(store),

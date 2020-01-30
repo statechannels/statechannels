@@ -4,7 +4,7 @@ import { Channel } from '@statechannels/nitro-protocol';
 import { Store } from '../../store';
 import { Balance } from '../../types';
 import { connectToStore, getDataAndInvoke } from '../../machine-utils';
-import { VirtualLeaf, CreateNullChannel, SupportState } from '../';
+import { VirtualLeaf, CreateNullChannel, SupportState, LedgerFunding } from '../';
 import { FINAL } from '../..';
 const PROTOCOL = 'virtual-funding-as-hub';
 
@@ -18,8 +18,7 @@ export interface Init {
 
 type ChannelsKnown = Init & {
   jointChannel: Channel;
-  leftGuarantorChannel: Channel;
-  rightGuarantorChannel: Channel;
+  guarantorChannels: [Channel, Channel];
 };
 
 const jointChannelArgs = (store: Store) => ({
@@ -36,12 +35,11 @@ const createJointChannel = getDataAndInvoke('jointChannelArgs', 'createNullChann
 
 const guarantorArgs = (index: VirtualLeaf.Indices) => (store: Store) => ({
   jointChannel,
-  leftGuarantorChannel,
-  rightGuarantorChannel,
+  guarantorChannels,
 }: ChannelsKnown): CreateNullChannel.Init =>
   VirtualLeaf.guarantorChannelArgs(store)({
     jointChannel,
-    guarantorChannel: [leftGuarantorChannel, rightGuarantorChannel][index],
+    guarantorChannel: guarantorChannels[index],
     index,
   });
 
@@ -81,8 +79,7 @@ export const assignChannels = (store: Store) =>
       return {
         ...ctx,
         jointChannel,
-        leftGuarantorChannel,
-        rightGuarantorChannel,
+        guarantorChannels: [leftGuarantorChannel, rightGuarantorChannel],
       };
     }
   );
@@ -94,11 +91,27 @@ const createChannels = {
   onDone: 'fundGuarantors',
 };
 
-const fundLeftGuarantor = { invoke: { src: 'ledgerFunding' } };
-const fundRightGuarantor = { invoke: { src: 'ledgerFunding' } };
+const fundGuarantorArgs = (index: VirtualLeaf.Indices) => ({
+  guarantorChannels,
+  balances,
+  hubAddress,
+}: ChannelsKnown): LedgerFunding.Init =>
+  VirtualLeaf.fundGuarantorArgs({
+    guarantorChannel: guarantorChannels[index],
+    index,
+    balances,
+    hubAddress,
+  });
 const fundGuarantors = {
   type: parallel,
-  states: { fundLeftGuarantor, fundRightGuarantor },
+  states: {
+    fundLeftGuarantor: {
+      invoke: { src: 'ledgerFunding', data: fundGuarantorArgs(VirtualLeaf.Indices.Left) },
+    },
+    fundRightGuarantor: {
+      invoke: { src: 'ledgerFunding', data: fundGuarantorArgs(VirtualLeaf.Indices.Right) },
+    },
+  },
   onDone: 'fundTarget',
 };
 
