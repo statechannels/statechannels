@@ -104,6 +104,9 @@
     "src/**/*.ts*": "yarn lint:check"
   },
   "main": "src/index.js",
+  "resolutions": {
+    "end-of-stream": "1.4.1"
+  },
   "scripts": {
     "build": "react-scripts build",
     "build:ci": "react-scripts build",
