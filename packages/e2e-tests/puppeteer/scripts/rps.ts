@@ -7,11 +7,13 @@ export async function setupRPS(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
     await waitForAndClickButton(page, '#start-playing');
     await (await page.waitFor('#name')).type('A');
     await waitForAndClickButton(page, '#connect-with-metamask');
+    // App & Wallet left in a 'clean' no-game state
   }
   async function playerB(page: Page): Promise<void> {
     await waitForAndClickButton(page, '#start-playing');
     await (await page.waitFor('#name')).type('B');
     await waitForAndClickButton(page, '#connect-with-metamask');
+    // App & Wallet left in a 'clean' no-game state
   }
 
   await Promise.all([playerA(rpsTabA), playerB(rpsTabB)]);
@@ -31,6 +33,7 @@ export async function startAndFundRPSGame(rpsTabA: Page, rpsTabB: Page): Promise
     await waitForAndClickButton(walletIFrame, '#ok');
     await playMove(page, 'paper');
     await waitForAndClickButton(page, '#play-again');
+    // App & Wallet left in a 'clean' mid-game state
   }
   async function playerB(page: Page): Promise<void> {
     const walletIFrame = page.frames()[1];
@@ -40,6 +43,7 @@ export async function startAndFundRPSGame(rpsTabA: Page, rpsTabB: Page): Promise
     await waitForAndClickButton(walletIFrame, '#ok');
     await playMove(page, 'rock');
     await waitForAndClickButton(page, '#play-again');
+    // App & Wallet left in a 'clean' mid-game state
   }
 
   await Promise.all([playerA(rpsTabA), playerB(rpsTabB)]);
@@ -57,6 +61,7 @@ export async function clickThroughRPSUIWithChallengeByPlayerA(
     await waitForAndClickButton(walletIFrame, '#yes');
     await waitForAndClickButton(walletIFrame, '#ok');
     await waitForAndClickButton(page, '#play-again');
+    // App & Wallet left in a 'clean' mid-game state
   }
   async function playerB(page: Page): Promise<void> {
     const walletIFrame = page.frames()[1];
@@ -64,6 +69,7 @@ export async function clickThroughRPSUIWithChallengeByPlayerA(
     await playMove(page, 'rock');
     await waitForAndClickButton(walletIFrame, '#ok');
     await waitForAndClickButton(page, '#play-again');
+    // App & Wallet left in a 'clean' mid-game state
   }
 
   await Promise.all([playerA(rpsTabA), playerB(rpsTabB)]);
@@ -80,6 +86,7 @@ export async function clickThroughRPSUIWithChallengeByPlayerB(
     await playMove(page, 'paper');
     await waitForAndClickButton(walletIFrame, '#ok');
     await waitForAndClickButton(page, '#play-again');
+    // App & Wallet left in a 'clean' mid-game state
   }
   async function playerB(page: Page): Promise<void> {
     const walletIFrame = page.frames()[1];
@@ -88,6 +95,7 @@ export async function clickThroughRPSUIWithChallengeByPlayerB(
     await waitForAndClickButton(walletIFrame, '#yes');
     await waitForAndClickButton(walletIFrame, '#ok');
     await waitForAndClickButton(page, '#play-again');
+    // App & Wallet left in a 'clean' mid-game state
   }
 
   await Promise.all([playerA(rpsTabA), playerB(rpsTabB)]);
@@ -106,12 +114,14 @@ export async function clickThroughResignationUI(rpsTabA: Page, rpsTabB: Page): P
       await waitForAndClickButton(walletIFrame, '#ok');
       await waitForAndClickButton(page, '#resigned-ok');
       await waitForAndClickButton(page, '#exit');
+      // App & Wallet left in a 'clean' no-game state
     }
 
     async function ledgerFunding(): Promise<void> {
       await waitForAndClickButton(walletIFrame, '#ok');
       await waitForAndClickButton(page, '#resigned-ok');
       await waitForAndClickButton(page, '#exit');
+      // App & Wallet left in a 'clean' no-game state
     }
 
     await Promise.race([virtualFunding(), ledgerFunding()]);
@@ -125,6 +135,7 @@ export async function clickThroughResignationUI(rpsTabA: Page, rpsTabB: Page): P
     await waitForAndClickButton(walletIFrame, '#ok');
     await waitForAndClickButton(page, '#resigned-ok');
     await waitForAndClickButton(page, '#exit');
+    // App & Wallet left in a 'clean' no-game state
   }
 
   await Promise.all([playerA(rpsTabA), playerB(rpsTabB)]);
