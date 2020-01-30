@@ -9,8 +9,8 @@
     "xstate": "4.7.7"
   },
   "devDependencies": {
-    "@types/eslint-plugin-prettier": "2.2.0",
     "@types/eslint": "6.1.7",
+    "@types/eslint-plugin-prettier": "2.2.0",
     "@types/jest": "25.1.0",
     "@types/lodash": "^4.14.149",
     "@types/node": "13.5.1",
@@ -18,11 +18,11 @@
     "@types/serialize-javascript": "1.5.0",
     "@typescript-eslint/eslint-plugin": "2.18.0",
     "@typescript-eslint/parser": "2.18.0",
+    "eslint": "6.8.0",
     "eslint-config-prettier": "6.10.0",
     "eslint-plugin-import": "2.20.0",
     "eslint-plugin-jest": "23.6.0",
     "eslint-plugin-prettier": "3.1.2",
-    "eslint": "6.8.0",
     "fs": "0.0.1-security",
     "jest": "25.1.0",
     "lint-staged": "9.4.0",
@@ -30,9 +30,9 @@
     "serialize-javascript": "2.1.0",
     "ts-jest": "25.0.0",
     "ts-node": "8.6.2",
+    "tslint": "5.20.0",
     "tslint-config-prettier": "1.18.0",
     "tslint-plugin-prettier": "2.0.1",
-<<<<<<< HEAD
     "typescript": "3.7.2",
     "wait-for-expect": "^3.0.1"
   },
@@ -54,13 +54,5 @@
     "test": "jest",
     "test:ci": "jest --runInBand",
     "uploadConfig": "bin/uploadConfig.sh"
-||||||| merged common ancestors
-    "typescript": "3.7.2",
-    "wait-for-expect": "^3.0.1"
-=======
-    "tslint": "5.20.0",
-    "typescript": "3.7.5",
-    "wait-for-expect": "3.0.1"
->>>>>>> Fix all version mismatches
   }
 }
