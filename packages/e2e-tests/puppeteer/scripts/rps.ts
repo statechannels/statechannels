@@ -7,7 +7,7 @@ import {
   waitForHeading as waitForWinLossUIHeader
 } from '../helpers';
 
-export async function setupRPS(rpsTabA: Page, rpsTabB: Page): Promise<void> {
+export async function setupRPS(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
   async function playerA(page: Page): Promise<void> {
     await waitForAndClickButton(page, '#start-playing');
     await (await page.waitFor('#name')).type('A');
@@ -20,37 +20,44 @@ export async function setupRPS(rpsTabA: Page, rpsTabB: Page): Promise<void> {
   }
 
   await Promise.all([playerA(rpsTabA), playerB(rpsTabB)]);
+  return true;
 }
 
-export async function startAndFundRPSGame(rpsTabA: Page, rpsTabB: Page): Promise<void> {
+export async function playMove(page: Page, move: 'rock' | 'paper' | 'scissors'): Promise<void> {
+  const selector = `img[src*="${move}"]`;
+  return waitForAndClickButton(page, selector);
+}
+
+export async function startAndFundRPSGame(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
+  async function playerA(page: Page): Promise<void> {
+    const walletIFrame = page.frames()[1];
+    await waitForAndClickButton(page, '#join');
+    await waitForAndClickButton(walletIFrame, '#yes');
+    await waitForAndClickButton(walletIFrame, '#ok');
+    await playMove(page, 'paper');
+    await waitForAndClickButton(page, '#play-again');
+  }
   async function playerB(page: Page): Promise<void> {
     const walletIFrame = page.frames()[1];
     await waitForAndClickButton(page, '#create-a-game');
     await waitForAndClickButton(page, '#create-game');
     await waitForAndClickButton(walletIFrame, '#yes');
     await waitForAndClickButton(walletIFrame, '#ok');
-  }
-  async function playerA(page: Page): Promise<void> {
-    const walletIFrame = page.frames()[1];
-    await waitForAndClickButton(page, '#join');
-    await waitForAndClickButton(walletIFrame, '#yes');
-    await waitForAndClickButton(walletIFrame, '#ok');
+    await playMove(page, 'rock');
+    await waitForAndClickButton(page, '#play-again');
   }
 
   await Promise.all([playerA(rpsTabA), playerB(rpsTabB)]);
-}
-
-export async function playMove(rpsTab: Page, move: 'rock' | 'paper' | 'scissors'): Promise<void> {
-  await (await rpsTab.waitFor(`img[src*="${move}"]`)).click();
+  return true;
 }
 
 export async function clickThroughRPSUIWithChallengeByPlayerA(
   rpsTabA: Page,
   rpsTabB: Page
-): Promise<void> {
+): Promise<boolean> {
   async function playerA(page: Page): Promise<void> {
     const walletIFrame = page.frames()[1];
-    await playMove(page, 'rock');
+    await playMove(page, 'paper');
     await waitForAndClickButton(page, '#challenge');
     await waitForAndClickButton(walletIFrame, '#yes');
     await waitForAndClickButton(walletIFrame, '#ok');
@@ -59,18 +66,19 @@ export async function clickThroughRPSUIWithChallengeByPlayerA(
   async function playerB(page: Page): Promise<void> {
     const walletIFrame = page.frames()[1];
     await waitForAndClickButton(walletIFrame, '#respond');
-    await playMove(page, 'paper');
+    await playMove(page, 'rock');
     await waitForAndClickButton(walletIFrame, '#ok');
     await waitForAndClickButton(page, '#play-again');
   }
 
   await Promise.all([playerA(rpsTabA), playerB(rpsTabB)]);
+  return true;
 }
 
 export async function clickThroughRPSUIWithChallengeByPlayerB(
   rpsTabA: Page,
   rpsTabB: Page
-): Promise<void> {
+): Promise<boolean> {
   async function playerA(page: Page): Promise<void> {
     const walletIFrame = page.frames()[1];
     await waitForAndClickButton(walletIFrame, '#respond');
@@ -88,16 +96,14 @@ export async function clickThroughRPSUIWithChallengeByPlayerB(
   }
 
   await Promise.all([playerA(rpsTabA), playerB(rpsTabB)]);
+  return true;
 }
 
-export async function clickThroughResignationUI(rpsTabA: Page, rpsTabB: Page): Promise<void> {
+export async function clickThroughResignationUI(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
   async function playerB(page: Page): Promise<void> {
     const walletIFrame = page.frames()[1];
 
-    await (await page.waitForXPath('//button[contains(., "Resign")]')).evaluate(
-      'document.querySelector("button.footer-resign").click()'
-    );
-    await waitForAndClickButton(walletIFrame, '#resign');
+    await waitForAndClickButton(page, '#resign');
     await waitForAndClickButton(walletIFrame, '#yes');
 
     async function virtualFunding(): Promise<void> {
@@ -117,15 +123,17 @@ export async function clickThroughResignationUI(rpsTabA: Page, rpsTabB: Page): P
   }
 
   async function playerA(page: Page): Promise<void> {
+    await playMove(page, 'rock');
     const walletIFrame = page.frames()[1];
     await waitForAndClickButton(walletIFrame, '#yes');
-    await waitForAndClickButton(walletIFrame, '#yes');
+    await waitForAndClickButton(walletIFrame, '#approve-withdraw');
     await waitForAndClickButton(walletIFrame, '#ok');
     await waitForAndClickButton(page, '#resigned-ok');
     await waitForAndClickButton(page, '#exit');
   }
 
   await Promise.all([playerA(rpsTabA), playerB(rpsTabB)]);
+  return true;
 }
 
 if (require.main === module) {
