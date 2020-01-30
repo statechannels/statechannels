@@ -18,6 +18,7 @@ import { wallet1, wallet2, wallet3, threeParticipants as participants } from './
 import { invokedState } from './utils';
 
 jest.setTimeout(10000);
+const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 
 const chain = new Chain();
 
@@ -128,5 +129,5 @@ test('virtually funding a channel', async () => {
     expect(left.state.value).toEqual('success');
     expect(hub.state.value).toEqual('success');
     expect(right.state.value).toEqual('success');
-  }, 500);
+  }, EXPECT_TIMEOUT);
 });
