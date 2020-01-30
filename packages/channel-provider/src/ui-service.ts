@@ -15,14 +15,12 @@ export const cssStyles = `iframe#${UIElementNames.IFrame} {
   right: 0;
   margin-left: auto;
   margin-right: auto;
-  width: 320px;
-  height: 450px;
-  top: 50%;
-  margin-top: -250px;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  margin-top: 0;
   overflow: hidden;
   z-index: 1;
-  border-radius: 4px;
-  box-shadow: 2px 2px rgba(0, 0, 0, 0.32);
 }
 div#${UIElementNames.Container} {
   position: absolute;

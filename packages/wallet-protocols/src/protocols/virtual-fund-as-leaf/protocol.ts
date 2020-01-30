@@ -4,7 +4,7 @@ import { Guarantee, AllocationItem } from '@statechannels/nitro-protocol';
 import { Channel, getChannelId, outcomesEqual } from '../../';
 import { add } from '../../mathOps';
 import { Balance } from '../../types';
-import { ethAllocationOutcome, ethGuaranteeOutcome } from '../../calculations';
+import { ethGuaranteeOutcome, ethAllocationOutcome } from '../../calculations';
 import { Store } from '../../store';
 import { CHAIN_ID } from '../../constants';
 import { connectToStore, getDataAndInvoke } from '../../machine-utils';

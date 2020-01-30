@@ -24,6 +24,28 @@ module.exports = {
         loader: 'ts-loader',
         exclude: /node_modules/,
         options: {projectReferences: true}
+      },
+      {
+        test: /\.s[ac]ss$/i,
+        use: [
+          // Creates `style` nodes from JS strings
+          'style-loader',
+          // Translates CSS into CommonJS
+          'css-loader',
+          // Compiles Sass to CSS
+          'sass-loader'
+        ]
+      },
+      {
+        loader: require.resolve('file-loader'),
+        // Exclude `js` files to keep "css" loader working as it injects
+        // its runtime that would otherwise be processed through "file" loader.
+        // Also exclude `html` and `json` extensions so they get processed
+        // by webpacks internal loaders.
+        exclude: [/\.(js|mjs|jsx|ts|tsx)$/, /\.html$/, /\.json$/, /\.s[ac]ss$/i],
+        options: {
+          name: 'static/media/[name].[hash:8].[ext]'
+        }
       }
     ]
   },

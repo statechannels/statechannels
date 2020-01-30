@@ -33,7 +33,6 @@ export type MachineFactory<I, E extends EventObject> = (
   context?: I
 ) => StateMachine<I, any, E>;
 
-
 type Options = (store: Store) => any;
 type Config<T> = MachineConfig<T, any, any>;
 export const connectToStore: <T>(config: Config<T>, options: Options) => MachineFactory<T, any> = <
