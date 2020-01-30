@@ -1,6 +1,4 @@
 /* eslint-disable jest/expect-expect */
-
-// you do not always need to assert something
 import {Page, Browser} from 'puppeteer';
 import {configureEnvVariables, getEnvBool} from '@statechannels/devtools';
 
@@ -57,5 +55,7 @@ describe('completes game 1 (challenge by A, challenge by B, resign by B) and beg
     await bResigns(rpsTabA, rpsTabB);
     console.log('starting second game...');
     return await startFundAndPlaySingleMove(rpsTabA, rpsTabB);
+    // (ultimate and intermediate) test success implied by promises resolving
+    // therefore no assertions needed in this test
   });
 });
