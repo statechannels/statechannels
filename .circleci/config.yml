@@ -15,7 +15,7 @@ defaults: &defaults
       environment:
         POSTGRES_USER: root
         POSTGRES_DB: hub_wallet_test
-        POSTGRES_PASSWORD: ""
+        POSTGRES_PASSWORD: ''
         NODE_ENV: test
 
 save_dep: &save_dep
@@ -52,7 +52,7 @@ restore_lib: &restore_lib
 
 commands:
   log_stats:
-    description: "Log stats "
+    description: 'Log stats '
     parameters:
       file:
         type: string
@@ -63,7 +63,7 @@ commands:
           background: true
 
   upload_logs:
-    description: "Upload logs "
+    description: 'Upload logs '
     parameters:
       file:
         type: string
@@ -74,7 +74,7 @@ commands:
           destination: << parameters.file >>
 
   upload_gas_report:
-    description: "Upload gas report "
+    description: 'Upload gas report '
     parameters:
       package:
         type: string
@@ -87,13 +87,13 @@ commands:
           destination: << parameters.package >>-gas.md
 
   notify_slack:
-    description: "Notify slack "
+    description: 'Notify slack '
     steps:
       - slack/status:
-          failure_message: "A $CIRCLE_JOB job has failed on master!"
+          failure_message: 'A $CIRCLE_JOB job has failed on master!'
           fail_only: true
-          mentions: "SRHGGRGS0" # Group ID for ActiveDevs
-          only_for_branches: "master"
+          mentions: 'SRHGGRGS0' # Group ID for ActiveDevs
+          only_for_branches: 'master'
 
 jobs:
   prepare:
@@ -174,7 +174,7 @@ jobs:
       - image: circleci/node:10.16.3
     environment:
       FIREBASE_PREFIX: << pipeline.git.branch >>-1
-      USE_VIRTUAL_FUNDING: "FALSE"
+      USE_VIRTUAL_FUNDING: 'FALSE'
       USE_GANACHE_DEPLOYMENT_CACHE: true
       GANACHE_CACHE_FOLDER: ../../.ganache-deployments
       GANACHE_PORT: 8547
@@ -210,17 +210,17 @@ jobs:
           POSTGRES_USER: root
           # Note that the DB is hub_wallet_${NODE_ENV} and we use development for this job
           POSTGRES_DB: hub_wallet_development
-          POSTGRES_PASSWORD: ""
+          POSTGRES_PASSWORD: ''
           NODE_ENV: test
     environment:
       FIREBASE_PREFIX: << pipeline.git.branch >>-2
-      USE_VIRTUAL_FUNDING: "TRUE"
+      USE_VIRTUAL_FUNDING: 'TRUE'
       HUB_DB_NAME: hub_wallet_development
       # The development environment mimics integration environment
       NODE_ENV: development
       # NOTE: This MUST be unique for the CircleCI environment, otherwise messages might overlap on Firebase.
-      HUB_ADDRESS: "0x24170308A71bc41d0dE9B7CEF74c0EeCc8033521"
-      HUB_PRIVATE_KEY: "0x8bf18c8953c7b41aac4cc3351dc179cda6831fcca852cbf71e4b0a75daf464ae"
+      HUB_ADDRESS: '0x24170308A71bc41d0dE9B7CEF74c0EeCc8033521'
+      HUB_PRIVATE_KEY: '0x8bf18c8953c7b41aac4cc3351dc179cda6831fcca852cbf71e4b0a75daf464ae'
 
     steps:
       - checkout
@@ -277,13 +277,13 @@ workflows:
     jobs:
       - prepare
 
-      # - build:
-      #     requires:
-      #       - prepare
+      - build:
+          requires:
+            - prepare
 
-      # - test:
-      #     requires:
-      #       - prepare
+      - test:
+          requires:
+            - prepare
 
       - integration-test:
           requires:
@@ -292,15 +292,17 @@ workflows:
       - integration-test-with-hub:
           requires:
             - prepare
-      # - release-incremental:
-      #     requires:
-      #       - prepare
-      #     filters:
-      #       branches:
-      #         ignore: master
-      # - release:
-      #     requires:
-      #       - prepare
-      #     filters:
-      #       branches:
-      #         only: master
+
+      - release-incremental:
+          requires:
+            - prepare
+          filters:
+            branches:
+              ignore: master
+
+      - release:
+          requires:
+            - prepare
+          filters:
+            branches:
+              only: master
