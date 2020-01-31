@@ -28,7 +28,7 @@ export interface Store {
   getParticipant(signingAddress: string): Participant;
   getHoldings: IChain['getHoldings'];
 
-  findLedgerChannelId(participants: string[]): string | undefined;
+  findLedgerChannelId(participantIds: string[]): string | undefined;
   signedByMe(state: State): boolean;
   getPrivateKey(signingAddresses: string[]): string;
   // TODO: Temporary until we figure a better way of dealing with assetholderaddress
@@ -164,9 +164,11 @@ export class EphemeralStore implements Store {
     for (const channelId in this._store) {
       const entry = this.getEntry(channelId);
       if (
-        entry.latestSupportedState.appDefinition === undefined &&
-        // TODO: correct array equality
-        entry.participants.map(p => p.participantId) === participantIds
+        _.isEqual(
+          _.sortBy(entry.participants.map(p => p.participantId)),
+          _.sortBy(participantIds)
+        ) &&
+        entry.funding?.type === 'Direct'
       ) {
         return channelId;
       }
