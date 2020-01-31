@@ -1,8 +1,8 @@
 import { assign, DoneInvokeEvent } from 'xstate';
 
 import { Participant, Store } from '../../store';
-import { connectToStore } from '../../machine-utils';
-import { Channel } from '../..';
+import { connectToStore, getDataAndInvoke } from '../../machine-utils';
+import { Channel, outcomesEqual } from '../..';
 import { CHAIN_ID } from '../../constants';
 
 import { CreateNullChannel } from '..';
@@ -35,33 +35,22 @@ const lookForExistingChannel = {
         cond: 'channelFound',
         actions: assignLedgerChannelId,
       },
-      { target: 'determineLedgerChannel' },
+      { target: 'createNewLedger' },
     ],
   },
 };
 
-const determineLedgerChannel = {
-  invoke: {
-    src: 'getNullChannelArgs',
-    onDone: 'createNewLedger',
-  },
-};
+const createNewLedger = getDataAndInvoke('getNullChannelArgs', 'createNullChannel', {
+  target: 'success',
+  actions: assignLedgerChannelId,
+});
 
-const createNewLedger = {
-  invoke: {
-    src: 'createNullChannel',
-    data: (_, { data }: DoneInvokeEvent<CreateNullChannel.Init>) => data,
-    onDone: { target: 'success', actions: assignLedgerChannelId },
-  },
-};
 type LedgerExists = Init & { ledgerChannelId: string };
-
 export type DoneData = { ledgerChannelId: string };
 const config = {
   initial: 'lookForExistingChannel',
   states: {
     lookForExistingChannel,
-    determineLedgerChannel,
     createNewLedger,
     success: {
       type: 'final' as 'final',
@@ -75,6 +64,13 @@ const guards = {
   channelFound: (_, { data }: DoneInvokeEvent<LedgerLookup>) => data.type === 'FOUND',
 };
 
+const findLedgerChannelId = (store: Store) => async ({
+  participants,
+}: Init): Promise<LedgerLookup> => {
+  const channelId = await store.findLedgerChannelId(participants.map(p => p.participantId));
+  return channelId ? { type: 'FOUND', channelId } : { type: 'NOT_FOUND' };
+};
+
 const getNullChannelArgs = (store: Store) => async ({
   participants,
 }: Init): Promise<CreateNullChannel.Init> => {
@@ -84,13 +80,13 @@ const getNullChannelArgs = (store: Store) => async ({
     chainId: CHAIN_ID,
   };
 
-  return { channel };
+  return { channel, participants };
 };
 
 const options = (store: Store) => ({
   services: {
     createNullChannel: CreateNullChannel.machine(store),
-    findLedgerChannelId: () => Promise.resolve('NOT_FOUND'),
+    findLedgerChannelId: findLedgerChannelId(store),
     getNullChannelArgs: getNullChannelArgs(store),
   },
   guards,
