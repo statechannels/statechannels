@@ -20,7 +20,7 @@
     "css-loader": "3.4.2",
     "dotenv-extended": "2.7.1",
     "enum": "2.5.0",
-    "ethers": "4.0.43",
+    "ethers": "4.0.44",
     "firebase": "7.7.0",
     "fs-extra": "8.1.0",
     "key-mirror": "1.0.1",
