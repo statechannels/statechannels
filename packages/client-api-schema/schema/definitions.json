@@ -70,6 +70,14 @@
         }
       },
       "required": ["allocationItems", "token"]
+    },
+    "Balance": {
+      "title": "Balance",
+      "type": "object",
+      "properties": {
+        "playerAmount": {"$ref": "#/definitions/Amount"},
+        "hubAmount": {"$ref": "#/definitions/Amount"}
+      }
     }
   }
 }

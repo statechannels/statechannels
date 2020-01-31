@@ -1,4 +1,4 @@
-import {ChannelProviderInterface} from '@statechannels/channel-provider/src';
+import {ChannelProviderInterface, MethodType} from '@statechannels/channel-provider/src';
 import log = require('loglevel');
 import {bigNumberify} from 'ethers/utils';
 import {EventEmitter, ListenerFn} from 'eventemitter3';
@@ -10,8 +10,7 @@ import {
   UpdateChannelParams,
   Notification,
   CloseChannelParams,
-  CloseChannelResult,
-  GetAddressResult
+  CloseChannelResult
 } from '@statechannels/client-api-schema/types';
 import {ChannelResult, Message, SiteBudget} from '../../src/types';
 import {calculateChannelId} from '../../src/utils';
@@ -34,32 +33,29 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     this.url = url || '';
   }
 
-  async send(
-    method: string,
-    params: any
-  ): Promise<ChannelResult | SiteBudget | GetAddressResult | PushMessageResult> {
+  async send<K extends keyof MethodType>(method: K, params?: any): Promise<MethodType[K]> {
     switch (method) {
       case 'CreateChannel':
-        return this.createChannel(params);
+        return this.createChannel(params) as Promise<MethodType[K]>;
 
       case 'PushMessage':
-        return this.pushMessage(params);
+        return this.pushMessage(params) as Promise<MethodType[K]>;
 
       case 'GetAddress':
-        return this.getAddress();
+        return this.getAddress() as Promise<MethodType[K]>;
 
       case 'JoinChannel':
-        return this.joinChannel(params);
+        return this.joinChannel(params) as Promise<MethodType[K]>;
 
       case 'UpdateChannel':
-        return this.updateChannel(params);
+        return this.updateChannel(params) as Promise<MethodType[K]>;
 
       case 'CloseChannel':
-        return this.closeChannel(params);
+        return this.closeChannel(params) as Promise<MethodType[K]>;
       case 'ApproveBudgetAndFund':
-        return this.approveBudgetAndFund(params);
+        return this.approveBudgetAndFund(params) as Promise<MethodType[K]>;
       case 'CloseAndWithdraw':
-        return this.CloseAndWithdraw(params);
+        return this.CloseAndWithdraw(params) as Promise<MethodType[K]>;
       default:
         return Promise.reject(`No callback available for ${method}`);
     }

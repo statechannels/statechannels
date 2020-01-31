@@ -20,7 +20,7 @@
       "properties": {
         "jsonrpc": {"enum": ["2.0"]},
         "method": {
-          "enum": ["MessageQueued", "ChannelProposed", "ChannelUpdated"]
+          "enum": ["MessageQueued", "ChannelProposed", "ChannelUpdated", "BudgetUpdated"]
         },
         "id": {
           "type": ["string", "number"]
@@ -70,6 +70,14 @@
           },
           "then": {
             "params": {"$ref": "update-channel.json#/definitions/UpdateChannelParams"}
+          }
+        },
+        {
+          "if": {
+            "properties": {"method": {"enum": ["BudgetUpdated"]}}
+          },
+          "then": {
+            "params": {"$ref": "budget-result.json#/definitions/BudgetResult"}
           }
         }
       ]

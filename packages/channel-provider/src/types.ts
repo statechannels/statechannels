@@ -6,7 +6,8 @@ import {
   PushMessageResult,
   JoinChannelResult,
   GetAddressResult,
-  ChallengeChannelResult
+  ChallengeChannelResult,
+  BudgetResult1 as BudgetResult
 } from '@statechannels/client-api-schema/types';
 
 export interface JsonRpcRequest<MethodName = string, RequestParams = any> {
@@ -54,7 +55,7 @@ export function isJsonRpcErrorResponse(message: any): message is JsonRpcErrorRes
   return 'error' in message;
 }
 // TODO: This probably should live in client-api-schema?
-type MethodType = {
+export type MethodType = {
   CreateChannel: CreateChannelResult;
   UpdateChannel: UpdateChannelResult;
   PushMessage: PushMessageResult;
@@ -62,10 +63,9 @@ type MethodType = {
   JoinChannel: JoinChannelResult;
   GetAddress: GetAddressResult;
   ChallengeChannel: ChallengeChannelResult;
-  // TODO: Create schema
-  ApproveBudgetAndFund: any;
-  GetBudget: any;
-  CloseAndWithdraw: any;
+  ApproveBudgetAndFund: BudgetResult;
+  GetBudget: BudgetResult;
+  CloseAndWithdraw: BudgetResult;
 };
 
 export interface ChannelProviderInterface {
