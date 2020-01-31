@@ -25,7 +25,7 @@
     "eslint-plugin-prettier": "3.1.2",
     "fs": "0.0.1-security",
     "jest": "25.1.0",
-    "lint-staged": "9.4.0",
+    "lint-staged": "10.0.4",
     "prettier": "1.19.1",
     "serialize-javascript": "2.1.0",
     "ts-jest": "25.0.0",
@@ -33,7 +33,7 @@
     "tslint": "5.20.0",
     "tslint-config-prettier": "1.18.0",
     "tslint-plugin-prettier": "2.0.1",
-    "typescript": "3.7.2",
+    "typescript": "3.7.5",
     "wait-for-expect": "3.0.1"
   },
   "files": [
