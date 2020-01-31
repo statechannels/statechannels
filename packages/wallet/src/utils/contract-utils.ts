@@ -34,15 +34,24 @@ export async function getERC20AssetHolderContract(provider: providers.Web3Provid
 }
 
 export function getAdjudicatorInterface(): Interface {
-  return new Interface(ContractArtifacts.NitroAdjudicatorArtifact["abi"]);
+  return new Interface(
+    // @ts-ignore https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
+    ContractArtifacts.NitroAdjudicatorArtifact["abi"]
+  );
 }
 
 export function getETHAssetHolderInterface(): Interface {
-  return new Interface(ContractArtifacts.EthAssetHolderArtifact["abi"]);
+  return new Interface(
+    // @ts-ignore https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
+    ContractArtifacts.EthAssetHolderArtifact["abi"]
+  );
 }
 
 export function getERC20AssetHolderInterface(): Interface {
-  return new Interface(ContractArtifacts.Erc20AssetHolderArtifact["abi"]);
+  return new Interface(
+    // @ts-ignore https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
+    ContractArtifacts.Erc20AssetHolderArtifact["abi"]
+  );
 }
 
 // FIXME: The tests ought to be able to run even without contracts having been built which
