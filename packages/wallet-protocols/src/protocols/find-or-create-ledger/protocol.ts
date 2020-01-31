@@ -2,7 +2,7 @@ import { assign, DoneInvokeEvent } from 'xstate';
 
 import { Participant, Store } from '../../store';
 import { connectToStore, getDataAndInvoke } from '../../machine-utils';
-import { Channel, outcomesEqual } from '../..';
+import { Channel } from '../..';
 import { CHAIN_ID } from '../../constants';
 
 import { CreateNullChannel } from '..';

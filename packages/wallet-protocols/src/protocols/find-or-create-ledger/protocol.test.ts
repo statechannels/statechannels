@@ -87,5 +87,10 @@ it('Finds a directly funded ledger channel when it exists', async () => {
 
   service.start();
 
-  await waitForExpect(async () => expect(service.state.value).toEqual('success'), 2000);
+  await waitForExpect(async () => {
+    expect(service.state.value).toEqual('success');
+    expect(service.state.context).toMatchObject({
+      ledgerChannelId: getChannelId(ledgerState.channel),
+    });
+  }, 2000);
 });
