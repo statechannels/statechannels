@@ -56,6 +56,7 @@ export interface Store {
   nonceOk(participants: string[], nonce: string): boolean;
 }
 
+// TODO: Move to types
 export interface Participant {
   participantId: string;
   signingAddress: string;

@@ -102,7 +102,7 @@ export const fundGuarantorArgs = ({
   const deductions: Allocation = balances.map(allocationItem);
   deductions[1 - index].destination = makeDestination(hubAddress);
 
-  return { targetChannelId: getChannelId(guarantorChannel), deductions };
+  return { targetChannelId: getChannelId(guarantorChannel), deductions, ledgerChannelId: 'TODO' };
 };
 
 const fundGuarantor = {

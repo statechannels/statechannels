@@ -104,6 +104,7 @@ const getTargetAllocation = (store: Store) => async ({
   return {
     deductions,
     targetChannelId,
+    ledgerChannelId: 'TODO',
   };
 };
 const fundIndirectly = getDataAndInvoke(getTargetAllocation.name, 'ledgerFunding', 'success');
