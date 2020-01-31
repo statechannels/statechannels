@@ -1,4 +1,11 @@
-import { DoneInvokeEvent, EventObject, StateMachine, MachineConfig, Machine } from 'xstate';
+import {
+  DoneInvokeEvent,
+  EventObject,
+  StateMachine,
+  MachineConfig,
+  Machine,
+  TransitionConfig,
+} from 'xstate';
 
 import { FINAL, Store } from '.';
 
@@ -7,7 +14,12 @@ Since machines typically  don't have sync access to a store, we invoke a promise
 desired outcome; that outcome can then be forwarded to the invoked service.
 */
 
-export function getDataAndInvoke<T>(data: string, src: string, onDone?: string, id?: string) {
+export function getDataAndInvoke<T>(
+  data: string,
+  src: string,
+  onDone?: string | TransitionConfig<T, DoneInvokeEvent<any>>,
+  id?: string
+) {
   return {
     initial: data,
     states: {
