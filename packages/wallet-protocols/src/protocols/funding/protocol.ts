@@ -1,12 +1,11 @@
 import { assign, DoneInvokeEvent, Machine } from 'xstate';
 
-import { failure, pretty, Store, success } from '../..';
+import { failure, Store, success, FINAL } from '../..';
 import { MachineFactory, getDataAndInvoke } from '../../machine-utils';
 import { FundingStrategy, FundingStrategyProposed } from '../../wire-protocol';
-import { log } from '../../utils';
 import { getEthAllocation } from '../../calculations';
 
-import { LedgerFunding } from '..';
+import { LedgerFunding, FindLedger } from '..';
 
 const PROTOCOL = 'funding';
 
@@ -93,9 +92,18 @@ const fundVirtually = {
   },
 };
 
-const getTargetAllocation = (store: Store) => async ({
+const getParticipants = (store: Store) => async ({
   targetChannelId,
-}: Init): Promise<LedgerFunding.Init> => {
+}: Init): Promise<FindLedger.Init> => {
+  const { participants } = store.getEntry(targetChannelId);
+
+  return { participants };
+};
+
+const getTargetAllocation = (store: Store) => async (
+  { targetChannelId }: Init,
+  { data }: DoneInvokeEvent<FindLedger.DoneData>
+): Promise<LedgerFunding.Init> => {
   const deductions = getEthAllocation(
     await store.getEntry(targetChannelId).latestState.outcome,
     store.ethAssetHolderAddress
@@ -104,10 +112,18 @@ const getTargetAllocation = (store: Store) => async ({
   return {
     deductions,
     targetChannelId,
-    ledgerChannelId: 'TODO',
+    ledgerChannelId: data.ledgerChannelId,
   };
 };
-const fundIndirectly = getDataAndInvoke(getTargetAllocation.name, 'ledgerFunding', 'success');
+const fundIndirectly = {
+  initial: 'getLedger',
+  states: {
+    getLedger: getDataAndInvoke(getParticipants.name, 'findOrCreateLedger', 'fund'),
+    fund: getDataAndInvoke(getTargetAllocation.name, 'ledgerFunding', 'success'),
+    success: { type: FINAL },
+  },
+  onDone: 'success',
+};
 
 export const config = {
   key: PROTOCOL,
@@ -138,10 +154,12 @@ export type Actions = {
 
 export type Services = {
   askClient(): Promise<FundingStrategy>;
-  getTargetAllocation(ctx: Init): Promise<LedgerFunding.Init>;
+  getParticipants(ctx: Init): Promise<FindLedger.Init>;
+  getTargetAllocation(ctx: Init, e): Promise<LedgerFunding.Init>;
   directFunding: any;
   virtualFunding: any;
   ledgerFunding: any;
+  findOrCreateLedger: any;
 };
 
 export type Options = Partial<{
@@ -186,6 +204,8 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
       directFunding: async () => true,
       ledgerFunding: LedgerFunding.machine(store),
       getTargetAllocation: getTargetAllocation(store),
+      getParticipants: getParticipants(store),
+      findOrCreateLedger: FindLedger.machine(store),
       virtualFunding: async () => true,
     },
     guards,

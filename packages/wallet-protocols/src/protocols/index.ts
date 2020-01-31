@@ -12,6 +12,7 @@ import * as VirtualLeaf from './virtual-fund-as-leaf/protocol';
 import * as VirtualHub from './virtual-fund-as-hub/protocol';
 import * as Wallet from './wallet/protocol';
 import * as Depositing from './depositing/protocol';
+import * as FindLedger from './find-or-create-ledger/protocol';
 
 export {
   AdvanceChannel,
@@ -28,4 +29,5 @@ export {
   VirtualHub,
   Wallet,
   Depositing,
+  FindLedger,
 };
