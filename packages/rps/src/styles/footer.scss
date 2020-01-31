@@ -7,7 +7,7 @@
   height: 40px;
   border-radius: 40px;
   border: solid 1px $rps-lobby-border-off-white;
-  background-color: $white;
+  background-color: $rps-white;
 }
 
 .footer-challenge {
@@ -25,6 +25,10 @@
 
 .navbar.footer-bar {
   background-color: $rps-background;
+}
+
+.navbar.fixed-bottom {
+  z-index: 0; /* This is needed to override bootstrap, otherwise the footer shows on top of the wallet */
 }
 
 .footer-logo-container {
