@@ -1,8 +1,8 @@
-import { DoneInvokeEvent, Machine, MachineConfig } from 'xstate';
+import { Machine, MachineConfig } from 'xstate';
 import { Allocation } from '@statechannels/nitro-protocol';
 
 import { allocateToTarget, getEthAllocation } from '../../calculations';
-import { Store, Channel, success } from '../..';
+import { Store, success } from '../..';
 import { MachineFactory, getDataAndInvoke } from '../../machine-utils';
 import { Funding } from '../../ChannelStoreEntry';
 
@@ -36,7 +36,7 @@ const updateFunding = {
 
 export const config: MachineConfig<any, any, any> = {
   key: PROTOCOL,
-  initial: 'waitForChannel',
+  initial: 'fundLedger',
   states: {
     fundLedger,
     fundTarget,
@@ -45,10 +45,7 @@ export const config: MachineConfig<any, any, any> = {
   },
 };
 
-type LedgerLookup = { type: 'FOUND'; channelId: string } | { type: 'NOT_FOUND' };
 export type Services = {
-  findLedgerChannelId(ctx: Init): Promise<LedgerLookup>;
-  getNullChannelArgs(ctx: Init): Promise<CreateNullChannel.Init>;
   createNullChannel: any;
   directFunding: any;
   getTargetOutcome(ctx: Init): Promise<SupportState.Init>;
@@ -56,24 +53,7 @@ export type Services = {
   supportState: ReturnType<typeof SupportState.machine>;
 };
 
-export const guards = {
-  channelFound: (_, { data }: DoneInvokeEvent<LedgerLookup>) => data.type === 'FOUND',
-};
-
 export const machine: MachineFactory<Init, any> = (store: Store, context: Init) => {
-  async function getNullChannelArgs({ targetChannelId }: Init): Promise<CreateNullChannel.Init> {
-    const { channel: targetChannel } = store.getEntry(targetChannelId);
-
-    const channel: Channel = {
-      ...targetChannel,
-      channelNonce: store.getNextNonce(targetChannel.participants),
-    };
-
-    // TODO: check that the latest supported state is the last prefund setup state?
-
-    return { channel };
-  }
-
   async function getTargetOutcome({
     targetChannelId,
     ledgerChannelId,
@@ -103,8 +83,6 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
   }
 
   const services: Services = {
-    findLedgerChannelId: async () => ({ type: 'NOT_FOUND' }), // TODO
-    getNullChannelArgs,
     createNullChannel: CreateNullChannel.machine(store),
     directFunding: DirectFunding.machine(store),
     getTargetOutcome,
@@ -112,7 +90,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
     supportState: SupportState.machine(store),
   };
 
-  const options = { services, guards };
+  const options = { services };
 
   return Machine(config).withConfig(options, context);
 };

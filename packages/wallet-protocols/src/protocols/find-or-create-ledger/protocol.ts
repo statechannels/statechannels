@@ -1,7 +1,9 @@
 import { assign, DoneInvokeEvent } from 'xstate';
 
-import { Participant } from '../../store';
+import { Participant, Store } from '../../store';
 import { connectToStore } from '../../machine-utils';
+import { Channel } from '../..';
+import { CHAIN_ID } from '../../constants';
 
 import { CreateNullChannel } from '..';
 
@@ -10,9 +12,9 @@ export interface Init {
 }
 
 const assignLedgerChannelId = assign(
-  (ctx: Init, event: DoneInvokeEvent<{ channelId: string }>) => ({
+  (ctx: Init, { data }: DoneInvokeEvent<{ channelId: string }>) => ({
     ...ctx,
-    ledgerChannelId: event.data.channelId,
+    ledgerChannelId: data.channelId,
   })
 );
 
@@ -54,6 +56,7 @@ const createNewLedger = {
 };
 type LedgerExists = Init & { ledgerChannelId: string };
 
+export type DoneData = { ledgerChannelId: string };
 const config = {
   initial: 'lookForExistingChannel',
   states: {
@@ -62,9 +65,34 @@ const config = {
     createNewLedger,
     success: {
       type: 'final' as 'final',
-      data: ({ ledgerChannelId }: LedgerExists) => ledgerChannelId,
+      data: ({ ledgerChannelId }: LedgerExists): DoneData => ({ ledgerChannelId }),
     },
   },
 };
 
-export const machine = connectToStore(config, () => {});
+type LedgerLookup = { type: 'FOUND'; channelId: string } | { type: 'NOT_FOUND' };
+const guards = {
+  channelFound: (_, { data }: DoneInvokeEvent<LedgerLookup>) => data.type === 'FOUND',
+};
+
+const getNullChannelArgs = (store: Store) => async ({
+  participants,
+}: Init): Promise<CreateNullChannel.Init> => {
+  const channel: Channel = {
+    participants: participants.map(p => p.signingAddress),
+    channelNonce: store.getNextNonce(participants.map(p => p.signingAddress)),
+    chainId: CHAIN_ID,
+  };
+
+  return { channel };
+};
+
+const options = (store: Store) => ({
+  services: {
+    createNullChannel: CreateNullChannel.machine(store),
+    findLedgerChannelId: () => Promise.resolve('NOT_FOUND'),
+    getNullChannelArgs: getNullChannelArgs(store),
+  },
+  guards,
+});
+export const machine = connectToStore(config, options);
