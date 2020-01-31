@@ -1,6 +1,6 @@
 import {Page} from 'puppeteer';
 
-import {waitForAndClickButton} from '../helpers';
+import {waitForAndClickButton, setUpBrowser, loadRPSApp} from '../helpers';
 
 export async function login(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
   async function playerA(page: Page): Promise<void> {
@@ -135,3 +135,25 @@ export async function bResigns(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
   await Promise.all([playerA(rpsTabA), playerB(rpsTabB)]);
   return true;
 }
+
+/**
+ * Useful for local testing. Run with:
+ *
+ * yarn puppeteer:dev
+ *
+ * It opens two windows ready for you to manually use.
+ */
+(async (): Promise<void> => {
+  if (require.main === module) {
+    const browserA = await setUpBrowser(false);
+    const browserB = await setUpBrowser(false);
+
+    const rpsTabA = (await browserA.pages())[0];
+    const rpsTabB = (await browserB.pages())[0];
+
+    await loadRPSApp(rpsTabA, 0);
+    await loadRPSApp(rpsTabB, 1);
+
+    await login(rpsTabA, rpsTabB);
+  }
+})();
