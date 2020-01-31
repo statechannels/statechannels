@@ -20,17 +20,17 @@ defaults: &defaults
 
 save_dep: &save_dep
   save_cache:
-    key: v1-dependency-cache-{{ checksum "yarn.lock" }}
+    key: v3-dependency-cache-{{ checksum "yarn.lock" }}
     paths:
       - node_modules
 restore_dep: &restore_dep
   restore_cache:
-    key: v1-dependency-cache-{{ checksum "yarn.lock" }}
+    key: v3-dependency-cache-{{ checksum "yarn.lock" }}
 
 save_lib: &save_lib
   save_cache:
     # Force a new cache on each build
-    key: v1-lib-cache-{{ epoch }}
+    key: v3-lib-cache-{{ epoch }}
     paths:
       - packages/nitro-protocol/lib
       - packages/rps/lib
@@ -48,7 +48,7 @@ save_lib: &save_lib
 restore_lib: &restore_lib
   restore_cache:
     # Restore from the most recently cached version of lib, using a partial key match
-    key: v1-lib-cache-
+    key: v3-lib-cache-
 
 commands:
   log_stats:
@@ -306,3 +306,4 @@ workflows:
           filters:
             branches:
               only: master
+

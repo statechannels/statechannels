@@ -51,6 +51,7 @@
   "private": true,
   "scripts": {
     "build": "tsc -b .",
+    "build:ci": "yarn build",
     "build:typescript": "tsc -b .",
     "chain:test": "npx jest --runInBand -c ./jest/jest.chain.config.js",
     "db:create": "createdb hub_wallet_${NODE_ENV}",
