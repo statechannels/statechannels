@@ -145,8 +145,8 @@ export async function bResigns(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
  */
 (async (): Promise<void> => {
   if (require.main === module) {
-    const browserA = await setUpBrowser(false, 100);
-    const browserB = await setUpBrowser(false, 100);
+    const browserA = await setUpBrowser(false);
+    const browserB = await setUpBrowser(false);
 
     const rpsTabA = (await browserA.pages())[0];
     const rpsTabB = (await browserB.pages())[0];
