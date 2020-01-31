@@ -1,14 +1,8 @@
 {
   "name": "xstate-wallet",
-  "version": "0.0.1",
   "description": "State channel wallet using xstate.",
-  "main": "index.js",
+  "version": "0.0.1",
   "author": "Alex Gap",
-  "license": "MIT",
-  "private": true,
-  "engines": {
-    "node": "^10.16.3"
-  },
   "dependencies": {
     "@statechannels/client-api-schema": "0.0.1",
     "@statechannels/nitro-protocol": "0.0.1",
@@ -56,16 +50,22 @@
     "webpack": "4.41.3",
     "webpack-merge": "4.2.2"
   },
+  "engines": {
+    "node": "^10.16.3"
+  },
+  "license": "MIT",
+  "main": "index.js",
+  "private": true,
   "scripts": {
-    "start": "node scripts/start.js",
     "build": "npx webpack --config ./webpack-build.config.js",
+    "build-storybook": "build-storybook",
     "build:ci": "yarn build",
+    "generateConfigs": "yarn run ts-node bin/generateConfigs.ts ",
     "lint:check": "eslint . --ext .ts --cache",
     "lint:write": "eslint . --ext .ts --fix",
-    "generateConfigs": "yarn run ts-node bin/generateConfigs.ts ",
-    "test": "npx jest",
-    "test:ci": "yarn test --ci --runInBand",
+    "start": "node scripts/start.js",
     "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook"
+    "test": "npx jest",
+    "test:ci": "yarn test --ci --runInBand"
   }
 }

@@ -1,15 +1,8 @@
 {
   "name": "@statechannels/e2e-tests",
-  "version": "0.0.1",
   "description": "Container package for end to end tests, from contracts to browser apps",
-  "main": "index.js",
-  "scripts": {
-    "test": "wait-on http://localhost:3000 http://localhost:3055 && jest --runInBand",
-    "test:show": "HEADLESS=false yarn run test",
-    "lint:check": "eslint \"**/*.ts\" --cache",
-    "lint:write": "eslint \"**/*.ts\" --fix",
-    "precommit": "lint-staged --quiet"
-  },
+  "version": "0.0.1",
+  "author": "snario <liam@l4v.io>",
   "devDependencies": {
     "@statechannels/devtools": "0.1.21",
     "@types/eslint": "^6.1.3",
@@ -32,13 +25,17 @@
     "typescript": "3.7.2",
     "wait-on": "3.3.0"
   },
+  "license": "MIT",
   "lint-staged": {
     "*/**/*.{ts,js}": "eslint --cache"
   },
-  "repository": {
-    "type": "git",
-    "url": "http://github.com/statechannels/monorepo/blob/master/packages/e2e-tests"
-  },
-  "author": "snario <liam@l4v.io>",
-  "license": "MIT"
+  "main": "index.js",
+  "repository": "statechannels/monorepo/blob/master/packages/e2e-tests",
+  "scripts": {
+    "lint:check": "eslint \"**/*.ts\" --cache",
+    "lint:write": "eslint \"**/*.ts\" --fix",
+    "precommit": "lint-staged --quiet",
+    "test": "wait-on http://localhost:3000 http://localhost:3055 && jest --runInBand",
+    "test:show": "HEADLESS=false yarn run test"
+  }
 }

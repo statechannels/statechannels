@@ -1,37 +1,6 @@
 {
   "name": "@statechannels/tic-tac-toe",
   "version": "0.0.1",
-  "private": true,
-  "license": "MIT",
-  "directories": {
-    "doc": "doc",
-    "test": "tests"
-  },
-  "scripts": {
-    "build:ci": "run-s clearContracts contracts:compile",
-    "build": "run-s clearContracts contracts:compile",
-    "clearContracts": "rm -rf ./build/contracts",
-    "contracts:compile": "node ./bin/compile.js",
-    "prettier:check": "prettier --check '**/*.{scss,json}' --ignore-path '.gitignore'",
-    "prettier:write": "prettier --write '**/*.{scss,json}' --ignore-path '.gitignore'",
-    "lint:check": "run-s eslint:check prettier:check",
-    "lint:write": "run-s eslint:write prettier:write",
-    "eslint:check": "eslint \"**/*.{js,ts}\" --cache --max-warnings=0",
-    "eslint:write": "eslint \"**/*.{js,ts}\" --fix --max-warnings=0",
-    "start": "yarn contracts:compile",
-    "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
-    "prepare": "yarn build:ci",
-    "test:prepare": "yarn clearContracts && yarn contracts:compile",
-    "test:contracts": "npx jest -c ./config/jest/jest.contracts.config.js",
-    "test": "yarn test:contracts",
-    "test:ci": "yarn test:ci:contracts",
-    "test:ci:contracts": "yarn test:contracts --all --ci --runInBand --bail",
-    "precommit": "lint-staged --quiet"
-  },
-  "lint-staged": {
-    "**/*.{js,ts}": "eslint --cache",
-    "**/*.{json,scss}": "prettier --ignore-path '.gitignore'"
-  },
   "dependencies": {
     "@babel/core": "^7.6.2",
     "@firebase/app-types": "^0.3.2",
@@ -120,7 +89,38 @@
     "prettier": "^1.19.1",
     "yargs": "12.0.5"
   },
+  "directories": {
+    "doc": "doc",
+    "test": "tests"
+  },
   "engines": {
     "node": "8.* || >= 10.*"
+  },
+  "license": "MIT",
+  "lint-staged": {
+    "**/*.{js,ts}": "eslint --cache",
+    "**/*.{json,scss}": "prettier --ignore-path '.gitignore'"
+  },
+  "private": true,
+  "scripts": {
+    "build": "run-s clearContracts contracts:compile",
+    "build:ci": "run-s clearContracts contracts:compile",
+    "clearContracts": "rm -rf ./build/contracts",
+    "contracts:compile": "node ./bin/compile.js",
+    "eslint:check": "eslint \"**/*.{js,ts}\" --cache --max-warnings=0",
+    "eslint:write": "eslint \"**/*.{js,ts}\" --fix --max-warnings=0",
+    "lint:check": "run-s eslint:check prettier:check",
+    "lint:write": "run-s eslint:write prettier:write",
+    "precommit": "lint-staged --quiet",
+    "prepare": "yarn build:ci",
+    "prettier:check": "prettier --check '**/*.{scss,json}' --ignore-path '.gitignore'",
+    "prettier:write": "prettier --write '**/*.{scss,json}' --ignore-path '.gitignore'",
+    "start": "yarn contracts:compile",
+    "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
+    "test": "yarn test:contracts",
+    "test:ci": "yarn test:ci:contracts",
+    "test:ci:contracts": "yarn test:contracts --all --ci --runInBand --bail",
+    "test:contracts": "npx jest -c ./config/jest/jest.contracts.config.js",
+    "test:prepare": "yarn clearContracts && yarn contracts:compile"
   }
 }

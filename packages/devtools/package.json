@@ -1,25 +1,10 @@
 {
   "name": "@statechannels/devtools",
-  "private": true,
-  "version": "0.1.21",
   "description": "Scripts used for our team development processes",
-  "main": "lib/src/index.js",
+  "version": "0.1.21",
+  "author": "Andrew Stewart",
   "bin": {
     "start-shared-ganache": "lib/src/ganache/start-ganache-script.js"
-  },
-  "scripts": {
-    "prepare": "yarn build:typescript",
-    "build:typescript": "npx tsc -b",
-    "start:shared-ganache": "node lib/src/ganache/start-ganache-script.js",
-    "lint:check": "eslint \"*/**/*.ts\" --cache",
-    "lint:write": "eslint \"*/**/*.ts\" --fix",
-    "precommit": "lint-staged --quiet"
-  },
-  "author": "Andrew Stewart",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/statechannels/monorepo.git"
   },
   "dependencies": {
     "chai": "4.2.0",
@@ -56,7 +41,19 @@
     "tree-kill": "1.2.1",
     "typescript": "3.7.2"
   },
+  "license": "MIT",
   "lint-staged": {
     "src/**/*.ts": "eslint"
+  },
+  "main": "lib/src/index.js",
+  "private": true,
+  "repository": "statechannels/monorepo.git",
+  "scripts": {
+    "build:typescript": "npx tsc -b",
+    "lint:check": "eslint \"*/**/*.ts\" --cache",
+    "lint:write": "eslint \"*/**/*.ts\" --fix",
+    "precommit": "lint-staged --quiet",
+    "prepare": "yarn build:typescript",
+    "start:shared-ganache": "node lib/src/ganache/start-ganache-script.js"
   }
 }

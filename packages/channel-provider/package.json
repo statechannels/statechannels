@@ -1,44 +1,7 @@
 {
   "name": "@statechannels/channel-provider",
-  "license": "MIT",
   "version": "0.0.3",
-  "main": "dist/channel-provider.js",
   "browser": "dist/channel-provider.min.js",
-  "types": "dist/src/index.d.ts",
-  "dependencies": {
-    "debug": "4.1.1",
-    "eventemitter3": "4.0.0",
-    "guid-typescript": "1.0.9"
-  },
-  "scripts": {
-    "prepublish": "webpack",
-    "build": "webpack",
-    "build:typescript": "tsc -b .",
-    "prepare": "yarn build",
-    "test": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "test:ci": "CI=true jest --runInBand --ci --all --detectOpenHandles",
-    "precommit": "lint-staged --quiet",
-    "lint:check": "eslint \"*/**/*.ts\" --cache",
-    "lint:write": "eslint \"*/**/*.ts\" --fix"
-  },
-  "jest": {
-    "roots": [
-      "./src",
-      "./tests"
-    ],
-    "transform": {
-      "^.+\\.ts$": "ts-jest"
-    },
-    "collectCoverageFrom": [
-      "./src/**/*.ts",
-      "!./src/**/index.ts",
-      "!./src/**/*.d.ts"
-    ]
-  },
-  "lint-staged": {
-    "{src,test}/**/*.ts": "eslint"
-  },
   "browserslist": {
     "production": [
       ">0.2%",
@@ -50,6 +13,11 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "dependencies": {
+    "debug": "4.1.1",
+    "eventemitter3": "4.0.0",
+    "guid-typescript": "1.0.9"
   },
   "devDependencies": {
     "@types/debug": "4.1.1",
@@ -72,5 +40,37 @@
     "ts-loader": "6.2.1",
     "typescript": "3.7.2",
     "webpack-cli": "3.3.9"
-  }
+  },
+  "jest": {
+    "roots": [
+      "./src",
+      "./tests"
+    ],
+    "transform": {
+      "^.+\\.ts$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "./src/**/*.ts",
+      "!./src/**/index.ts",
+      "!./src/**/*.d.ts"
+    ]
+  },
+  "license": "MIT",
+  "lint-staged": {
+    "{src,test}/**/*.ts": "eslint"
+  },
+  "main": "dist/channel-provider.js",
+  "scripts": {
+    "build": "webpack",
+    "build:typescript": "tsc -b .",
+    "lint:check": "eslint \"*/**/*.ts\" --cache",
+    "lint:write": "eslint \"*/**/*.ts\" --fix",
+    "precommit": "lint-staged --quiet",
+    "prepare": "yarn build",
+    "prepublish": "webpack",
+    "test": "jest --watch",
+    "test:ci": "CI=true jest --runInBand --ci --all --detectOpenHandles",
+    "test:coverage": "jest --coverage"
+  },
+  "types": "dist/src/index.d.ts"
 }

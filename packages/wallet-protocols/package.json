@@ -1,25 +1,6 @@
 {
   "name": "@statechannels/wallet-protocols",
   "version": "0.0.1",
-  "main": "lib/src/index.js",
-  "files": [
-    "lib/*"
-  ],
-  "license": "MIT",
-  "scripts": {
-    "prepare": "yarn build",
-    "build": "yarn tsc -b",
-    "generateConfigs": "yarn run ts-node bin/generateConfigs.ts && npx prettier --write src/protocols/*/protocol.config.js",
-    "uploadConfig": "bin/uploadConfig.sh",
-    "test": "jest",
-    "test:ci": "jest --runInBand",
-    "lint:check": "eslint . --ext .ts --cache",
-    "lint:write": "eslint . --ext .ts --fix",
-    "precommit": "lint-staged --quiet"
-  },
-  "lint-staged": {
-    "{src,bin}/**/*.{ts}": "eslint --cache"
-  },
   "dependencies": {
     "@statechannels/nitro-protocol": "0.0.1",
     "ethers": "^4.0.42",
@@ -53,5 +34,24 @@
     "tslint-plugin-prettier": "2.0.1",
     "typescript": "3.7.2",
     "wait-for-expect": "^3.0.1"
+  },
+  "files": [
+    "lib/*"
+  ],
+  "license": "MIT",
+  "lint-staged": {
+    "{src,bin}/**/*.{ts}": "eslint --cache"
+  },
+  "main": "lib/src/index.js",
+  "scripts": {
+    "build": "yarn tsc -b",
+    "generateConfigs": "yarn run ts-node bin/generateConfigs.ts && npx prettier --write src/protocols/*/protocol.config.js",
+    "lint:check": "eslint . --ext .ts --cache",
+    "lint:write": "eslint . --ext .ts --fix",
+    "precommit": "lint-staged --quiet",
+    "prepare": "yarn build",
+    "test": "jest",
+    "test:ci": "jest --runInBand",
+    "uploadConfig": "bin/uploadConfig.sh"
   }
 }
