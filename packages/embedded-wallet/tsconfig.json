@@ -9,8 +9,6 @@
     "noEmit": true,
     "strict": false,
     "allowSyntheticDefaultImports": true,
-
-    // react-script injects these fields when you run the test script
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
