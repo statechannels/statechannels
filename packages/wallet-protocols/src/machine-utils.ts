@@ -5,6 +5,8 @@ import {
   MachineConfig,
   Machine,
   TransitionConfig,
+  DoneEventObject,
+  StateNodeConfig,
 } from 'xstate';
 
 import { FINAL, Store } from '.';
@@ -17,9 +19,9 @@ desired outcome; that outcome can then be forwarded to the invoked service.
 export function getDataAndInvoke<T>(
   data: string,
   src: string,
-  onDone?: string | TransitionConfig<T, DoneInvokeEvent<any>>,
+  onDone?: string | TransitionConfig<T, DoneEventObject>,
   id?: string
-) {
+): StateNodeConfig<T, any, any> {
   return {
     initial: data,
     states: {

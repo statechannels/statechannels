@@ -1,4 +1,4 @@
-import { Machine } from 'xstate';
+import { Machine, MachineConfig } from 'xstate';
 
 import * as VirtualDefundingAsHub from '../virtual-defunding-as-hub/protocol';
 import * as VirtualDefundingAsLeaf from '../virtual-defunding-as-leaf/protocol';
@@ -17,8 +17,8 @@ export interface Init {
   channelId: string;
 }
 
-const concludeTarget = getDataAndInvoke('getFinalState', 'supportState', 'ledgerDefunding');
-const ledgerDefunding = getDataAndInvoke('getDefundedLedgerState', 'supportState', 'success');
+const concludeTarget = getDataAndInvoke<Init>('getFinalState', 'supportState', 'ledgerDefunding');
+const ledgerDefunding = getDataAndInvoke<Init>('getDefundedLedgerState', 'supportState', 'success');
 
 const virtualDefunding = {
   initial: 'start',
@@ -48,7 +48,7 @@ const virtualDefunding = {
   onDone: 'success',
 };
 
-export const config = {
+export const config: MachineConfig<Init, any, any> = {
   key: PROTOCOL,
   initial: 'concludeTarget',
   states: {
