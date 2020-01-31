@@ -1,43 +1,18 @@
-import { assign } from 'xstate';
-
 import { Balance } from '../../types';
-import { HubChoice } from '../../wire-protocol';
 import { Init as VirtualFundAsLeafArgs } from '../virtual-fund-as-leaf/protocol';
 import { store } from '../../temp-store';
 import { getEthAllocation } from '../../calculations';
+
+import { VirtualLeaf } from '..';
 const PROTOCOL = 'virtual-funding';
 const success = { type: 'final' };
 
 export interface Init {
   targetChannelId: string;
+  hubAddress: string;
 }
 
-const assignChoice = assign((ctx: Init): HubKnown => ({ ...ctx, hubAddress: 'TODO' }));
-function sendProposal({ hubAddress, targetChannelId }: HubKnown): HubChoice {
-  return {
-    type: 'HubChoice',
-    hubAddress,
-    targetChannelId,
-  };
-}
-function agreement(
-  { hubAddress: ourChoice }: HubKnown,
-  { hubAddress: theirChoice }: HubChoice
-): boolean {
-  return ourChoice === theirChoice;
-}
-const chooseHub = {
-  entry: ['assignChoice', sendProposal.name],
-  on: {
-    PROPOSAL_RECEIVED: {
-      target: 'fund',
-      cond: agreement.name,
-    },
-  },
-};
-type HubKnown = Init & { hubAddress: string };
-
-function virtualFundAsLeafArgs({ targetChannelId, hubAddress }: HubKnown): VirtualFundAsLeafArgs {
+function virtualFundAsLeafArgs({ targetChannelId, hubAddress }: Init): VirtualFundAsLeafArgs {
   const { latestState, ourIndex: index } = store.getEntry(targetChannelId);
   const { channel, outcome } = latestState;
   const balances: Balance[] = getEthAllocation(outcome, store.ethAssetHolderAddress).map(o => ({
@@ -54,9 +29,8 @@ function virtualFundAsLeafArgs({ targetChannelId, hubAddress }: HubKnown): Virtu
     balances,
     targetChannelId,
     hubAddress,
-    ledgerId,
     index,
-  };
+  } as VirtualLeaf.Init; // TODO: determine channels
 }
 const fund = {
   invoke: {
@@ -69,7 +43,6 @@ export const config = {
   key: PROTOCOL,
   initial: 'chooseHub',
   states: {
-    chooseHub,
     fund,
     success,
   },
