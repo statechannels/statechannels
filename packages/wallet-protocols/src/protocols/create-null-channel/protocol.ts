@@ -1,6 +1,7 @@
 import { assign, Machine } from 'xstate';
 import { HashZero, AddressZero } from 'ethers/constants';
 import { Outcome } from '@statechannels/nitro-protocol';
+import _ from 'lodash';
 
 import { Channel, FINAL, getChannelId } from '../../';
 import { SignedState } from '../../types';
@@ -25,6 +26,7 @@ These differences allow create-null-channel to be fully-determined.
 
 export interface Init {
   channel: Channel;
+  participants?: Participant[];
   outcome?: Outcome;
 }
 
@@ -80,13 +82,22 @@ export const config = {
 };
 
 export const machine: MachineFactory<Init, any> = (store, context: Init) => {
-  async function checkChannelService({ channel }: Init): Promise<boolean> {
+  async function checkChannelService({ channel, participants }: Init): Promise<boolean> {
     // TODO: Should check that
     // - the nonce is used,
     // - that we have the private key for one of the signers, etc
 
     // TODO: Determine how participants should be managed
-    const participants: Participant[] = channel.participants.map(p => store.getParticipant(p));
+    participants = participants ?? channel.participants.map(p => store.getParticipant(p));
+    if (
+      !_.isEqual(
+        participants.map(p => p.signingAddress),
+        channel.participants
+      )
+    ) {
+      throw 'Invalid participants';
+    }
+
     const privateKey = store.getPrivateKey(participants.map(p => p.signingAddress));
     const states: SignedState[] = [];
     store.initializeChannel(
