@@ -139,7 +139,7 @@ export async function bResigns(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
 /**
  * Useful for local testing. Run with:
  *
- * yarn ts-node -O '{"module":"commonjs","noUnusedLocals":false}' ./puppeteer/scripts/rps.ts
+ * yarn puppeteer:dev
  *
  * It opens two windows ready for you to manually use.
  */
