@@ -22,12 +22,20 @@ let joinMachineMock;
 let createChannelMock;
 beforeEach(() => {
   // TODO: Is this the best way to mock
-  closingMachineMock = jest.fn().mockReturnValue(new Promise(() => {}));
+  closingMachineMock = jest.fn().mockReturnValue(
+    new Promise(() => {
+      /* mock, do nothing */
+    })
+  );
   Object.defineProperty(ConcludeChannel, 'machine', {
     value: closingMachineMock
   });
 
-  joinMachineMock = jest.fn().mockReturnValue(new Promise(() => {}));
+  joinMachineMock = jest.fn().mockReturnValue(
+    new Promise(() => {
+      /* mock, do nothing */
+    })
+  );
   Object.defineProperty(JoinChannel, 'machine', {
     value: joinMachineMock
   });

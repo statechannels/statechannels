@@ -227,9 +227,15 @@ export const applicationWorkflow: MachineFactory<Context, any> = (
 };
 
 const mockServices = {
-  invokeCreateMachine: () => {},
-  invokeJoinMachine: () => {},
-  invokeClosingMachine: () => {}
+  invokeCreateMachine: () => {
+    /* mock, do nothing  */
+  },
+  invokeJoinMachine: () => {
+    /* mock, do nothing  */
+  },
+  invokeClosingMachine: () => {
+    /* mock, do nothing  */
+  }
 };
 const mockActions: Actions = {
   sendToOpponent: 'sendToOpponent',
