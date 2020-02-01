@@ -6,5 +6,5 @@ export default class Router extends EmberRouter {
   rootURL = config.rootURL;
 }
 
-Router.map(function() {
-});
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+Router.map(function() {});
