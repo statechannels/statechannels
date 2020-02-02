@@ -41,9 +41,9 @@
     "scripts",
     "webpack",
     "jest",
-    "src/setupTests.ts",
     "migrations/*",
     "test/**/*",
-    "src/contract-tests/*"
+    "src/contract-tests/*",
+    "blueprints/**/*"
   ]
 }
