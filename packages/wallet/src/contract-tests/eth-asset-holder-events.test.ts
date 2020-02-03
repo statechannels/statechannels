@@ -173,5 +173,5 @@ async function transferAll(channelId: string, allocation: string, signer: Signer
   const assetHolderAddress = getETHAssetHolderAddress();
   const assetHolder = new Contract(assetHolderAddress, assetHolderInterface, signer);
 
-  assetHolder.functions.transferAll(channelId, allocation);
+  assetHolder.functions.transferAll(channelId, allocation, {gasLimit: 3e6});
 }

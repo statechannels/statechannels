@@ -113,6 +113,7 @@ export default class CreatingOpenGameModal extends React.PureComponent<Props, St
               type="submit"
               disabled={this.state.errorMessage !== '' || !this.state.buyInChanged}
               block={true}
+              id="create-game"
             >
               Create Game
             </Button>

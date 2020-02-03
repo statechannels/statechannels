@@ -60,7 +60,7 @@ export default class WaitForApproval extends React.PureComponent<Props, State> {
             defaultValue={this.state.withdrawAddress}
           />
         </div>
-        <Button color="primary" onClick={this.handleApprove}>
+        <Button color="primary" onClick={this.handleApprove} id="approve-withdraw">
           Approve
         </Button>
         <Button onClick={deny}>Deny</Button>

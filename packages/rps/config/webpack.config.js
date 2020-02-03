@@ -22,7 +22,6 @@ const paths = require('./paths');
 const getClientEnvironment = require('./env');
 const ModuleNotFoundPlugin = require('react-dev-utils/ModuleNotFoundPlugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
-const typescriptFormatter = require('react-dev-utils/typescriptFormatter');
 
 // Source maps are resource heavy and can cause out of memory issue for large source files.
 const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP !== 'false';
@@ -210,7 +209,7 @@ module.exports = function(webpackEnv) {
           },
           // Use multi-process parallel running to improve the build speed
           // Default number of concurrent runs: os.cpus().length - 1
-          parallel: true,
+          parallel: !process.env.CI,
           // Enable file caching
           cache: true,
           sourceMap: shouldUseSourceMap,
@@ -520,7 +519,6 @@ module.exports = function(webpackEnv) {
           eslint: true,
           compilerOptions: {
             module: 'esnext',
-            moduleResolution: 'node',
             resolveJsonModule: true,
             isolatedModules: true,
             noEmit: true,
@@ -535,8 +533,7 @@ module.exports = function(webpackEnv) {
             '!**/src/setupTests.*',
           ],
           watch: paths.appSrc,
-          silent: true,
-          formatter: typescriptFormatter,
+          silent: true
         }),
     ].filter(Boolean),
     // Some libraries import Node modules but don't use them in the browser.

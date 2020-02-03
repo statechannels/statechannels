@@ -1,30 +1,30 @@
+/* eslint-disable jest/expect-expect */
 import {Page, Browser} from 'puppeteer';
 import {configureEnvVariables, getEnvBool} from '@statechannels/devtools';
 
-import {setUpBrowser, loadRPSApp, waitForHeading} from '../helpers';
+import {setUpBrowser, loadRPSApp} from '../helpers';
 import {
-  startAndFundRPSGame,
-  clickThroughResignationUI,
-  setupRPS,
-  playMove,
-  clickThroughRPSUIWithChallengeByPlayerA,
-  clickThroughRPSUIWithChallengeByPlayerB
+  login,
+  aChallenges,
+  bChallenges,
+  bResigns,
+  startFundAndPlaySingleMove
 } from '../scripts/rps';
 
-jest.setTimeout(120_000);
+jest.setTimeout(200_000);
 
 configureEnvVariables();
 const HEADLESS = getEnvBool('HEADLESS');
 
-describe('Playing a game of RPS', () => {
-  let browserA: Browser;
-  let browserB: Browser;
-  let rpsTabA: Page;
-  let rpsTabB: Page;
+let browserA: Browser;
+let browserB: Browser;
+let rpsTabA: Page;
+let rpsTabB: Page;
 
+describe('completes game 1 (challenge by A, challenge by B, resign by B) and begins game 2 ', () => {
   beforeAll(async () => {
-    browserA = await setUpBrowser(HEADLESS);
-    browserB = await setUpBrowser(HEADLESS);
+    browserA = await setUpBrowser(HEADLESS, 100); // 100ms sloMo avoids some undiagnosed race conditions
+    browserB = await setUpBrowser(HEADLESS, 100); // 100ms sloMo avoids some undiagnosed race conditions
 
     rpsTabA = (await browserA.pages())[0];
     rpsTabB = (await browserB.pages())[0];
@@ -32,7 +32,7 @@ describe('Playing a game of RPS', () => {
     await loadRPSApp(rpsTabA, 0);
     await loadRPSApp(rpsTabB, 1);
 
-    await setupRPS(rpsTabA, rpsTabB);
+    await login(rpsTabA, rpsTabB);
   });
 
   afterAll(async () => {
@@ -44,49 +44,18 @@ describe('Playing a game of RPS', () => {
     }
   });
 
-  it('can play four games end to end in one tab session, two with challenges', async () => {
-    await startAndFundRPSGame(rpsTabA, rpsTabB);
-
-    await playMove(rpsTabA, 'rock');
-    await playMove(rpsTabB, 'paper');
-
-    expect(await waitForHeading(rpsTabA)).toMatch('You lost');
-    expect(await waitForHeading(rpsTabB)).toMatch('You won!');
-
-    await clickThroughResignationUI(rpsTabA, rpsTabB);
-
-    // Should be in the lobby
-    expect(await rpsTabB.waitForXPath('//button[contains(., "Create a game")]')).toBeDefined();
-    expect(await rpsTabA.waitForXPath('//button[contains(., "Create a game")]')).toBeDefined();
-
-    await startAndFundRPSGame(rpsTabA, rpsTabB);
-
-    await playMove(rpsTabA, 'rock');
-    await playMove(rpsTabB, 'paper');
-
-    expect(await waitForHeading(rpsTabA)).toMatch('You lost');
-    expect(await waitForHeading(rpsTabB)).toMatch('You won!');
-
-    await clickThroughResignationUI(rpsTabA, rpsTabB);
-
-    // Should be in the lobby
-    expect(await rpsTabB.waitForXPath('//button[contains(., "Create a game")]')).toBeDefined();
-    expect(await rpsTabA.waitForXPath('//button[contains(., "Create a game")]')).toBeDefined();
-
-    await startAndFundRPSGame(rpsTabA, rpsTabB);
-
-    await clickThroughRPSUIWithChallengeByPlayerA(rpsTabA, rpsTabB);
-
-    expect(await waitForHeading(rpsTabA)).toMatch('You lost');
-    expect(await waitForHeading(rpsTabB)).toMatch('You won!');
-
-    await clickThroughResignationUI(rpsTabA, rpsTabB);
-
-    await startAndFundRPSGame(rpsTabA, rpsTabB);
-
-    await clickThroughRPSUIWithChallengeByPlayerB(rpsTabA, rpsTabB);
-
-    expect(await waitForHeading(rpsTabA)).toMatch('You won!');
-    expect(await waitForHeading(rpsTabB)).toMatch('You lost');
+  it('works', async () => {
+    console.log('starting first game...');
+    await startFundAndPlaySingleMove(rpsTabA, rpsTabB);
+    console.log('A challenging...');
+    await aChallenges(rpsTabA, rpsTabB);
+    console.log('B challenging...');
+    await bChallenges(rpsTabA, rpsTabB);
+    console.log('B resigning...');
+    await bResigns(rpsTabA, rpsTabB);
+    console.log('starting second game...');
+    return await startFundAndPlaySingleMove(rpsTabA, rpsTabB);
+    // (ultimate and intermediate) test success implied by promises resolving
+    // therefore no assertions needed in this test
   });
 });

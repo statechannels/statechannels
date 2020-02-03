@@ -32,25 +32,14 @@ export async function loadRPSApp(page: Page, ganacheAccountIndex: number): Promi
   });
 }
 
-/** */
-export async function waitForAndClickButton(page: Page | Frame, button: string): Promise<void> {
-  let retryAttempts = 0;
-  let error;
-  while (retryAttempts < 3) {
-    try {
-      return (await page.waitForXPath('//button[contains(., "' + button + '")]')).click();
-    } catch (e) {
-      error = e;
-      await new Promise(r => setTimeout(r, 250));
-      retryAttempts += 1;
-    }
-  }
-  console.error(`Could not click on ${button}`);
-  throw error;
-}
-
-export async function waitForHeading(page: Page | Frame): Promise<string | null> {
-  return (await page.waitFor('h1.mb-5.win-loss-title')).evaluate(el => el.textContent);
+// waiting for a css selector, and then clicking that selector is more robust than waiting for
+// an XPath and then calling .click() on the resolved handle. We do not use the return value from the
+// waitForSelector promise, so we avoid any errors where that return value loses its meaning
+// https://github.com/puppeteer/puppeteer/issues/3496
+// https://github.com/puppeteer/puppeteer/issues/2977
+export async function waitForAndClickButton(page: Page | Frame, selector: string): Promise<void> {
+  await page.waitForSelector(selector);
+  return page.click(selector);
 }
 
 export async function setUpBrowser(headless: boolean, slowMo?: number): Promise<Browser> {

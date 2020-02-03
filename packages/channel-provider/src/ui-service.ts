@@ -10,7 +10,7 @@ export enum UIElementNames {
 // TODO: Border radius shouldn't be set here it should be set in the wallet
 export const cssStyles = `iframe#${UIElementNames.IFrame} {
   border: 0;
-  position: absolute;
+  position: fixed;
   left: 0;
   right: 0;
   margin-left: auto;

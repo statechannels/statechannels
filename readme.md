@@ -30,7 +30,8 @@ You can learn more about what state channels are by reading [one](https://l4.ven
 
 This repository is a monorepo, and contains the following packages maintained with [lerna](https://github.com/lerna/lerna) and [yarn workspaces](https://yarnpkg.com/lang/en/docs/workspaces/):
 
-- [channel-provider](.packages/channel-provider) : A browser-based loader for the Embedded Wallet.
+- [channel-provider](./packages/channel-provider) : A browser-based loader for the Embedded Wallet.
+- [client-api-schema](./packages/client-api-schema) : JSON-RPC based schema definitions for the Client API with TypeScript typings
 - [devtools](./packages/devtools) : Developer tooling
 - [embedded-wallet](./packages/embedded-wallet) : Allows DApps to integrate with statechannels system
 - [ganache-deployer](./packages/ganache-deployer) : Manages cross-package contract deployment and a consistent network context

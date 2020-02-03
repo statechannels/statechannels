@@ -38,7 +38,7 @@
       "allOf": [
         {
           "if": {
-            "properties": {"method": {"const": "CreateChannel"}}
+            "properties": {"method": {"enum": ["CreateChannel"]}}
           },
           "then": {
             "properties": {
@@ -48,7 +48,7 @@
         },
         {
           "if": {
-            "properties": {"method": {"const": "JoinChannel"}}
+            "properties": {"method": {"enum": ["JoinChannel"]}}
           },
           "then": {
             "params": {"$ref": "join-channel.json#/definitions/JoinChannelParams"}
@@ -56,7 +56,7 @@
         },
         {
           "if": {
-            "properties": {"method": {"const": "GetAddress"}}
+            "properties": {"method": {"enum": ["GetAddress"]}}
           },
           "then": {
             "params": {"$ref": "get-address.json#/definitions/GetAddressParams"}
@@ -64,7 +64,7 @@
         },
         {
           "if": {
-            "properties": {"method": {"const": "PushMessage"}}
+            "properties": {"method": {"enum": ["PushMessage"]}}
           },
           "then": {
             "params": {"$ref": "push-message.json#/definitions/PushMessageParams"}
@@ -72,7 +72,7 @@
         },
         {
           "if": {
-            "properties": {"method": {"const": "UpdateChannel"}}
+            "properties": {"method": {"enum": ["UpdateChannel"]}}
           },
           "then": {
             "params": {"$ref": "update-channel.json#/definitions/UpdateChannelParams"}
@@ -80,7 +80,7 @@
         },
         {
           "if": {
-            "properties": {"method": {"const": "CloseChannel"}}
+            "properties": {"method": {"enum": ["CloseChannel"]}}
           },
           "then": {
             "params": {"$ref": "close-channel.json#/definitions/CloseChannelParams"}
@@ -88,7 +88,7 @@
         },
         {
           "if": {
-            "properties": {"method": {"const": "ChallengeChannel"}}
+            "properties": {"method": {"enum": ["ChallengeChannel"]}}
           },
           "then": {
             "params": {"$ref": "challenge-channel.json#/definitions/ChallengeChannelParams"}

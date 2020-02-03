@@ -210,7 +210,7 @@ module.exports = function(webpackEnv) {
           },
           // Use multi-process parallel running to improve the build speed
           // Default number of concurrent runs: os.cpus().length - 1
-          parallel: true,
+          parallel: !process.env.CI,
           // Enable file caching
           cache: true,
           sourceMap: shouldUseSourceMap,

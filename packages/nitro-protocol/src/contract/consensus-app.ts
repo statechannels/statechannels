@@ -5,6 +5,7 @@ import {ConsensusData, encodeConsensusData} from './consensus-data';
 import {encodeOutcome, Outcome} from './outcome';
 import {VariablePart} from './state';
 
+// @ts-ignore https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
 const ConsensusAppContractInterface = new Interface(ConsensusAppArtifact.abi);
 
 export function getVariablePart(consensusData: ConsensusData, outcome: Outcome): VariablePart {

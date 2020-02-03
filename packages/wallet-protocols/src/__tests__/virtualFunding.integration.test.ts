@@ -14,7 +14,7 @@ import { CHAIN_ID } from '../constants';
 import { log } from '../utils';
 import { IChannelStoreEntry } from '../ChannelStoreEntry';
 
-import { wallet1, wallet2, wallet3, threeParticipants as participants } from './data';
+import { wallet1, wallet2, wallet3, threeParticipants as participants, storeWithKey } from './data';
 import { invokedState } from './utils';
 
 jest.setTimeout(10000);
@@ -30,7 +30,7 @@ function connect<T>(
   machineConstructor: MachineFactory<T, any>,
   { participantId }: Participant
 ) {
-  const store = new EphemeralStore({ chain, privateKeys: { [wallet.address]: wallet.privateKey } });
+  const store = storeWithKey(chain, wallet.privateKey);
 
   stores[participantId] = store;
   const service = interpret<any, any, any>(machineConstructor(store, context));
@@ -124,9 +124,6 @@ test('virtually funding a channel', async () => {
   [left, right, hub].map(service => service.start());
 
   await waitForExpect(() => {
-    stores;
-    debugger;
-
     expect(left.state.value).toEqual('success');
     expect(hub.state.value).toEqual('success');
     expect(right.state.value).toEqual('success');

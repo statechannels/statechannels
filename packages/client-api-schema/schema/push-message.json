@@ -4,7 +4,7 @@
   "definitions": {
     "PushMessageResult": {
       "properties": {
-        "success": {"const": true}
+        "success": {"enum": [true]}
       },
       "required": ["success"]
     },
