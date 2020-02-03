@@ -28,6 +28,6 @@
     "types": ["react", "jest"]
   },
   "include": ["src/**/*", "src/**/*.json", "types/globals.d.ts", "contracts/**/*.json"],
-  "references": [{"path": "../nitro-protocol"}, {"path": "../devtools"}, {"path": "../client-api-schema"}],
+  "references": [{"path": "../nitro-protocol"}, {"path": "../devtools"}],
   "exclude": ["src/setupTests.ts"]
 }

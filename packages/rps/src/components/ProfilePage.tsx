@@ -72,7 +72,7 @@ export default class ProfilePage extends React.PureComponent<Props, State> {
                 <small className="form-text text-muted">This will display to other players.</small>
                 <small className="form-text text-danger">{this.state.nameErrorMessage}</small>
               </FormGroup>
-              <MetaMaskButton.Outline disabled={!submitEnabled}>
+              <MetaMaskButton.Outline disabled={!submitEnabled} id="connect-with-metamask">
                 Connect with MetaMask
               </MetaMaskButton.Outline>
             </Form>

@@ -56,7 +56,7 @@ export default class WaitForRestingA extends React.PureComponent<Props> {
           </div>
 
           {!waitForOpponent && (
-            <Button className="cog-button" onClick={playAgain}>
+            <Button className="cog-button" onClick={playAgain} id="play-again">
               Play again
             </Button>
           )}

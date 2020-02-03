@@ -47,3 +47,7 @@ You'll see a screen like this in your browser:
 
 - On the left-side panel, you'll see each a page for each component. Click through those links to navigate.
 - The **Knobs** tab, displayed on the bottom panel, allows you to play with the component's properties. Use the different options to see how the component changes.
+
+### Dev Notes
+
+Because of [this issue](https://github.com/webtorrent/webtorrent/issues/1757) we require `end-of-stream` to be fixed at `1.4.1`.

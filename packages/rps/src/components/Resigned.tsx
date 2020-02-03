@@ -21,6 +21,7 @@ export default class Resigned extends React.PureComponent<Props> {
             className="cog-button"
             onClick={this.props.action}
             disabled={!this.props.channelClosed}
+            id="resigned-ok"
           >
             {'OK'}
           </Button>

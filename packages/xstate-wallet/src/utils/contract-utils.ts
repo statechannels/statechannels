@@ -17,5 +17,8 @@ export async function getEthAssetHolderContract() {
 }
 
 export function getETHAssetHolderInterface(): Interface {
-  return new Interface(ContractArtifacts.EthAssetHolderArtifact['abi']);
+  return new Interface(
+    // @ts-ignore https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
+    ContractArtifacts.EthAssetHolderArtifact['abi']
+  );
 }

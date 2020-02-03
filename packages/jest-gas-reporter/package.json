@@ -1,46 +1,43 @@
 {
   "name": "@statechannels/jest-gas-reporter",
-  "version": "0.0.2",
   "description": "A jest reporter that reports the gas used by various calls to ethereum contracts.",
-  "main": "lib/src/index.js",
-  "types": "lib/src/index.d.ts",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/statechannels/monorepo.git"
-  },
+  "version": "0.0.2",
   "author": "Alex Gap <alex@magmo.com>",
-  "license": "MIT",
-  "scripts": {
-    "precommit": "lint-staged --quiet",
-    "prepare": "yarn build",
-    "build": "yarn lint:check && tsc -b",
-    "build:typescript": "tsc -b",
-    "lint:check": "eslint \"src/**/*.ts\" --cache",
-    "lint:write": "eslint \"src/**/*.ts\" --fix"
-  },
-  "lint-staged": {
-    "src/*.ts": "eslint --max-warnings=0"
-  },
-  "devDependencies": {
-    "@types/easy-table": "0.0.32",
-    "@types/eslint": "^6.1.3",
-    "@types/eslint-plugin-prettier": "^2.2.0",
-    "@types/jest": "24.0.18",
-    "@types/prettier": "1.19.0",
-    "@typescript-eslint/eslint-plugin": "^2.7.0",
-    "@typescript-eslint/parser": "^2.8.0",
-    "eslint": "^6.6.0",
-    "eslint-config-prettier": "^6.7.0",
-    "eslint-plugin-prettier": "^3.1.0",
-    "lint-staged": "9.4.0",
-    "prettier": "1.19.1"
-  },
   "dependencies": {
     "@statechannels/devtools": "0.1.21",
     "easy-table": "1.1.1",
-    "ethers": "4.0.39",
+    "ethers": "4.0.44",
     "path": "0.12.7",
-    "solc": "0.5.13",
-    "typescript": "3.7.2"
-  }
+    "solc": "0.6.2",
+    "typescript": "3.7.5"
+  },
+  "devDependencies": {
+    "@types/easy-table": "0.0.32",
+    "@types/eslint": "6.1.7",
+    "@types/eslint-plugin-prettier": "2.2.0",
+    "@types/jest": "25.1.0",
+    "@types/prettier": "1.19.0",
+    "@typescript-eslint/eslint-plugin": "2.18.0",
+    "@typescript-eslint/parser": "2.18.0",
+    "eslint": "6.8.0",
+    "eslint-config-prettier": "6.10.0",
+    "eslint-plugin-prettier": "3.1.2",
+    "lint-staged": "10.0.4",
+    "prettier": "1.19.1"
+  },
+  "license": "MIT",
+  "lint-staged": {
+    "src/*.ts": "eslint --max-warnings=0"
+  },
+  "main": "lib/src/index.js",
+  "repository": "statechannels/monorepo.git",
+  "scripts": {
+    "build": "yarn lint:check && tsc -b",
+    "build:typescript": "tsc -b",
+    "lint:check": "eslint \"src/**/*.ts\" --cache",
+    "lint:write": "eslint \"src/**/*.ts\" --fix",
+    "precommit": "lint-staged --quiet",
+    "prepare": "yarn build"
+  },
+  "types": "lib/src/index.d.ts"
 }

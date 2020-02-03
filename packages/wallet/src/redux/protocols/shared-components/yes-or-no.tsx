@@ -16,12 +16,12 @@ export default class YesOrNo extends React.Component<Props> {
       <Fragment>
         <div className={css(styles.buttonContainer)}>
           <span className={css(styles.button)}>
-            <Button color="primary" onClick={yesAction}>
+            <Button color="primary" onClick={yesAction} id="yes">
               {yesMessage}
             </Button>
           </span>
           <span className={css(styles.button)}>
-            <Button onClick={noAction} color="link">
+            <Button onClick={noAction} color="link" id="no">
               {noMessage}
             </Button>
           </span>
