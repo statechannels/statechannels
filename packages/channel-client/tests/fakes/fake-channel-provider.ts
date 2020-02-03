@@ -11,7 +11,7 @@ import {
   Notification,
   CloseChannelParams,
   CloseChannelResult
-} from '@statechannels/client-api-schema/types';
+} from '@statechannels/client-api-schema';
 import {ChannelResult, Message, SiteBudget} from '../../src/types';
 import {calculateChannelId} from '../../src/utils';
 
