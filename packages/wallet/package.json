@@ -188,7 +188,7 @@
     "test:ci": "yarn test:ci:contracts && yarn test:ci:app",
     "test:ci:app": "yarn test:app --all --ci --runInBand",
     "test:ci:contracts": "yarn test:contracts --all --ci",
-    "test:ci:integration": "wait-on http-get://localhost:3055/ http-get://localhost:3000/ && yarn test:puppeteer",
+    "test:ci:integration": "wait-on http://localhost:3055/ && yarn test:puppeteer",
     "test:contracts": "npx jest --runInBand -c ./config/jest/jest.contracts.config.js --detectOpenHandles",
     "test:puppeteer": "npx jest --runInBand -c ./config/jest/jest.puppeteer.config.js"
   }

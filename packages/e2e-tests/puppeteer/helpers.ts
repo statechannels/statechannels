@@ -21,7 +21,7 @@ export async function loadRPSApp(page: Page, ganacheAccountIndex: number): Promi
   );
   await page.evaluateOnNewDocument(`window.ethereum.networkVersion = 9001`);
   await page.evaluateOnNewDocument(`window.ethereum.on = () => {}`);
-  await page.goto('http://localhost:3000/', {waitUntil: 'networkidle0'});
+  await page.goto('http://localhost:3000/', {waitUntil: 'load'});
   page.on('pageerror', error => {
     throw error;
   });

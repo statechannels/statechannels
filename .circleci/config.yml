@@ -294,6 +294,7 @@ workflows:
       - integration-test-with-hub:
           requires:
             - prepare
+            - integration-test
 
       - release-incremental:
           requires:
@@ -308,4 +309,3 @@ workflows:
           filters:
             branches:
               only: master
-
