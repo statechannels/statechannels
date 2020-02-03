@@ -25,7 +25,7 @@ RUN yarn --production --prefer-offline
 
 # Run added dependnencies because of configureEnvVariables
 # Estimate 16 seconds
-RUN yarn add dotenv dotenv-expand
+RUN yarn add --ignore-scripts dotenv dotenv-expand
 
 # Copy nitro-protocol into dependencies of hub manually
 RUN mkdir ./node_modules/@statechannels && \
