@@ -15,7 +15,7 @@ import {channelUpdatedListener} from './message-service/channel-updated-listener
 import {messageQueuedListener} from './message-service/message-queued-listener';
 import {gameSaga} from './game/saga';
 import {autoPlayer, autoOpponent} from './auto-opponent';
-import {ChannelClient, FakeChannelClient} from '@statechannels/channel-client';
+import {ChannelClient, FakeChannelProvider} from '@statechannels/channel-client';
 
 const composeEnhancers = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const enhancers = composeEnhancers(applyMiddleware(sagaMiddleware));
@@ -29,7 +29,7 @@ function* rootSaga() {
   let client;
   if (process.env.AUTO_OPPONENT === 'A' || process.env.AUTO_OPPONENT === 'B') {
     console.info('Bypassing state channel wallet');
-    client = new RPSChannelClient(new FakeChannelClient('0xOpponent'));
+    client = new RPSChannelClient(new ChannelClient(new FakeChannelProvider()));
   } else {
     client = new RPSChannelClient(new ChannelClient(window.channelProvider));
     yield stateChannelWalletSaga();

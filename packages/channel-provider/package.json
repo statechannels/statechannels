@@ -39,7 +39,8 @@
     "ts-jest": "25.0.0",
     "ts-loader": "6.2.1",
     "typescript": "3.7.5",
-    "webpack-cli": "3.3.9"
+    "webpack-cli": "3.3.9",
+    "@statechannels/client-api-schema": "0.0.1"
   },
   "jest": {
     "roots": [

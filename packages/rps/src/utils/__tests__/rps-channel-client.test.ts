@@ -1,10 +1,6 @@
 import {RPSChannelClient} from '../rps-channel-client';
 import {aAddress, bAddress, aBal, bBal, appData} from '../../redux/game/__tests__/scenarios';
-import {
-  ChannelClientInterface,
-  ChannelResult,
-  PushMessageResult,
-} from '@statechannels/channel-client';
+import {ChannelClientInterface, ChannelResult} from '@statechannels/channel-client';
 import {encodeAppData, ChannelState} from '../../core';
 import {bigNumberify} from 'ethers/utils';
 import {RPS_ADDRESS} from '../../constants';
@@ -49,7 +45,8 @@ const mockChannelResult: ChannelResult = {
   appDefinition,
   channelId: MOCK_CHANNEL_ID,
   status: 'opening',
-  turnNum: '0',
+  turnNum: 0,
+  funding: [],
 };
 // ^ In the wild there will be different ChannelResults t: e.g. the status will not always be 'opening'. But we are only testing that the RPSChannelClient is wrapping the ChannelClient correctly. Getting the right data back is partly (mostly) the responsibility of the inner class instance. Therefore in this test we can reuse the same object, since it only needs to be the right type in order to be encoded and decoded properly.
 
@@ -86,7 +83,7 @@ class MockChannelClient implements ChannelClientInterface {
     return await mockChannelResult;
   });
   pushMessage(message) {
-    return new Promise<PushMessageResult>(() => {
+    return new Promise<any>(() => {
       /* */
     });
   }

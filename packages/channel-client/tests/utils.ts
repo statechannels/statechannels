@@ -1,17 +1,11 @@
-import {FakeChannelClient} from './fakes/fake-channel-client';
-import {Participant, Allocation, ChannelStatus, ChannelResult} from '../src/types';
+import {ChannelStatus, ChannelResult} from '../src/types';
+import {Participant, Allocation} from '@statechannels/client-api-schema/types';
 import {ETH_TOKEN_ADDRESS} from './constants';
 import {FakeChannelProvider} from './fakes/fake-channel-provider';
 
-export function setClientStates(clients: FakeChannelClient[], state: ChannelResult): void {
-  clients.forEach(client => {
-    client.setState(state);
-  });
-}
-
-export function setProviderStates(clients: FakeChannelProvider[], state: ChannelResult): void {
-  clients.forEach(client => {
-    client.setState(state);
+export function setProviderStates(providers: FakeChannelProvider[], state: ChannelResult): void {
+  providers.forEach(provider => {
+    provider.setState(state);
   });
 }
 
@@ -24,7 +18,7 @@ export class ChannelResultBuilder {
     appDefinition: string,
     appData: string,
     channelId: string,
-    turnNum: string,
+    turnNum: number,
     status: ChannelStatus
   ) {
     this.channelResult = {
@@ -34,7 +28,8 @@ export class ChannelResultBuilder {
       appData,
       channelId,
       turnNum,
-      status
+      status,
+      funding: []
     };
   }
 
@@ -65,12 +60,12 @@ export class ChannelResultBuilder {
       .build();
   }
 
-  setTurnNum(turnNum: string): ChannelResultBuilder {
+  setTurnNum(turnNum: number): ChannelResultBuilder {
     this.channelResult.turnNum = turnNum;
     return this;
   }
 
-  static setTurnNum(channelResult: ChannelResult, turnNum: string): ChannelResult {
+  static setTurnNum(channelResult: ChannelResult, turnNum: number): ChannelResult {
     return ChannelResultBuilder.from(channelResult)
       .setTurnNum(turnNum)
       .build();
