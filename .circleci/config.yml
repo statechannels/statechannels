@@ -161,11 +161,11 @@ jobs:
           no_output_timeout: 30m
       - upload_logs:
           file: test-stats
-      - notify_slack
       - upload_gas_report:
           package: rps
       - upload_gas_report:
           package: nitro-protocol
+      - notify_slack
 
   integration-test:
     resource_class: medium
@@ -258,6 +258,7 @@ jobs:
           at: /home/circleci/project
       - run: yarn build:netlify:incremental
       - run: yarn release:netlify:incremental
+      - notify_slack
 
   release:
     <<: *defaults
@@ -271,6 +272,7 @@ jobs:
       - run: yarn release:netlify
       - upload_logs:
           file: netlify-stats
+      - notify_slack
 
 workflows:
   statechannels:
