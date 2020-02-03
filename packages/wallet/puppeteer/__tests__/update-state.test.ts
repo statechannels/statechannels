@@ -25,8 +25,8 @@ describe("State Updating", () => {
   let notificationQueueFromA;
   let notificationQueueFromB;
   beforeAll(async () => {
-    browserA = await setUpBrowser(false);
-    browserB = await setUpBrowser(false);
+    browserA = await setUpBrowser(true);
+    browserB = await setUpBrowser(true);
 
     walletA = (await browserA.pages())[0];
     walletB = (await browserB.pages())[0];
