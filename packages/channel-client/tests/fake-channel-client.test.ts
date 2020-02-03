@@ -8,11 +8,11 @@ import {
   APP_DATA,
   UPDATED_APP_DATA
 } from './constants';
-import {ChannelResultBuilder, buildParticipant, buildAllocation, setClientStates} from './utils';
-import {ChannelResult, Message} from '../src';
+import {ChannelResultBuilder, buildParticipant, buildAllocation, setProviderStates} from './utils';
+import {ChannelResult, Message, ChannelClient} from '../src';
 import {EventsWithArgs} from '../src/types';
 import {calculateChannelId} from '../src/utils';
-import {FakeChannelClient} from './fakes/fake-channel-client';
+import {FakeChannelProvider} from './fakes/fake-channel-provider';
 
 log.setDefaultLevel(log.levels.SILENT);
 
@@ -33,7 +33,8 @@ describe('FakeChannelClient', () => {
   // events the client is listening on
   const clientBEventEmitter = new EventEmitter<EventsWithArgs>();
 
-  let clientA: FakeChannelClient, clientB: FakeChannelClient;
+  let clientA: ChannelClient, clientB: ChannelClient;
+  let providerA: FakeChannelProvider, providerB: FakeChannelProvider;
 
   beforeAll(() => {
     states['proposed'] = new ChannelResultBuilder(
@@ -42,35 +43,39 @@ describe('FakeChannelClient', () => {
       APP_DEFINITION,
       APP_DATA,
       channelId,
-      '0',
+      0,
       'proposed'
     ).build();
 
     states['running'] = ChannelResultBuilder.from(states['proposed'])
       .setStatus('running')
-      .setTurnNum('3')
+      .setTurnNum(3)
       .build();
 
     states['updated_app_data'] = ChannelResultBuilder.from(states['running'])
       .setAppData(UPDATED_APP_DATA)
-      .setTurnNum('4')
+      .setTurnNum(4)
       .build();
 
     states['closed'] = ChannelResultBuilder.from(states['running'])
       .setStatus('closed')
-      .setTurnNum('5')
+      .setTurnNum(5)
       .build();
   });
 
   beforeEach(() => {
-    clientA = new FakeChannelClient(participantA.participantId);
-    clientB = new FakeChannelClient(participantB.participantId);
+    providerA = new FakeChannelProvider();
+    providerA.address = participantA.signingAddress;
+    providerB = new FakeChannelProvider();
+    providerB.address = participantB.signingAddress;
+    clientA = new ChannelClient(providerA);
+    clientB = new ChannelClient(providerB);
 
-    clientA.updatePlayerIndex(0);
-    clientA.opponentAddress = participantB.participantId;
+    providerA.updatePlayerIndex(0);
+    providerA.opponentAddress = participantB.participantId;
 
-    clientB.updatePlayerIndex(1);
-    clientB.opponentAddress = participantA.participantId;
+    providerB.updatePlayerIndex(1);
+    providerB.opponentAddress = participantA.participantId;
 
     // This setup simulates the message being received from A's wallet
     // and "queued" by A's app to be sent to the opponent (handled by
@@ -105,18 +110,18 @@ describe('FakeChannelClient', () => {
       expect(clientAChannelState).toEqual(states['proposed']);
 
       proposalMessage = {
-        sender: clientA.address,
-        recipient: clientB.address,
+        sender: participantA.participantId,
+        recipient: participantB.participantId,
         data: clientAChannelState
       };
     });
 
     it('client B gets proposal', async () => {
-      setClientStates([clientA, clientB], states['proposed']);
+      setProviderStates([providerA, providerB], states['proposed']);
 
       return new Promise(resolve => {
         clientBEventEmitter.once('ChannelProposed', () => {
-          expect(clientB.latestState).toEqual(states['proposed']);
+          expect(providerB.latestState).toEqual(states['proposed']);
           resolve();
         });
 
@@ -127,22 +132,22 @@ describe('FakeChannelClient', () => {
 
   describe('joins a channel', () => {
     it('the player whose turn it is can accept proposal to join the channel', async () => {
-      setClientStates([clientA], states['running']);
-      setClientStates([clientB], states['proposed']);
+      setProviderStates([providerA], states['running']);
+      setProviderStates([providerB], states['proposed']);
       const channelResult = await clientB.joinChannel(channelId);
       expect(channelResult).toEqual(states['running']);
-      expect(clientA.latestState).toEqual(states['running']);
+      expect(providerA.latestState).toEqual(states['running']);
     });
 
     it('the player whose turn it is not cannot accept a join proposal they sent', async () => {
-      setClientStates([clientA, clientB], states['proposed']);
+      setProviderStates([providerA, providerB], states['proposed']);
       await expect(clientA.joinChannel(channelId)).rejects.toBeDefined();
     });
   });
 
   describe('updates a channel', () => {
     it('the player whose turn it is can update the channel', async () => {
-      setClientStates([clientA, clientB], states['running']);
+      setProviderStates([providerA, providerB], states['running']);
       const channelResult = await clientA.updateChannel(
         channelId,
         participants,
@@ -150,11 +155,11 @@ describe('FakeChannelClient', () => {
         UPDATED_APP_DATA
       );
       expect(channelResult).toEqual(states['updated_app_data']);
-      expect(clientB.latestState).toEqual(states['updated_app_data']);
+      expect(providerB.latestState).toEqual(states['updated_app_data']);
     });
 
     it('the player whose turn it is not cannot update the channel', async () => {
-      setClientStates([clientA, clientB], states['running']);
+      setProviderStates([providerA, providerB], states['running']);
       await expect(
         clientB.updateChannel(channelId, participants, allocations, UPDATED_APP_DATA)
       ).rejects.toBeDefined();
@@ -163,16 +168,16 @@ describe('FakeChannelClient', () => {
 
   describe('closes a channel', () => {
     it('player with valid turn can make a valid close channel call', async () => {
-      setClientStates([clientA, clientB], states['running']);
+      setProviderStates([providerA, providerB], states['running']);
       // Since the clients agree to close a channel, this skips the 'closing'
       // phase and the clients directly go to the channel 'closed' state
       const channelResult = await clientA.closeChannel(channelId);
       expect(channelResult).toEqual(states['closed']);
-      expect(clientB.latestState).toEqual(states['closed']);
+      expect(providerB.latestState).toEqual(states['closed']);
     });
 
     it('player with invalid turn cannot make a valid close channel call', async () => {
-      setClientStates([clientA, clientB], states['running']);
+      setProviderStates([providerA, providerB], states['running']);
       await expect(clientB.closeChannel(channelId)).rejects.toBeDefined();
     });
   });

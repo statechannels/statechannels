@@ -28,8 +28,8 @@ describe("State Updating", () => {
     browserA = await setUpBrowser(true);
     browserB = await setUpBrowser(true);
 
-    walletA = await browserA.newPage();
-    walletB = await browserB.newPage();
+    walletA = (await browserA.pages())[0];
+    walletB = (await browserB.pages())[0];
 
     walletMessages = new Emittery.Typed<MessageEventTypes>();
     messageQueueFromA = walletMessages.events(MessageType.PlayerAMessage);

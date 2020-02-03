@@ -119,7 +119,7 @@ const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
   } = channelResult;
   return {
     channelId,
-    turnNum,
+    turnNum: turnNum.toString(), // TODO: turnNum should be switched to a number (or be a string everywhere),
     status,
     challengeExpirationTime,
     appData: decodeAppData(appData),

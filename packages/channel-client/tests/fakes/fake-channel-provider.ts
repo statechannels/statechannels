@@ -1,17 +1,18 @@
-import {ChannelProviderInterface} from '@statechannels/channel-provider/src';
+import {ChannelProviderInterface, MethodType} from '@statechannels/channel-provider/src';
 import log = require('loglevel');
 import {bigNumberify} from 'ethers/utils';
 import {EventEmitter, ListenerFn} from 'eventemitter3';
 import {
-  ChannelResult,
-  CreateChannelParameters,
-  Message,
-  NotificationType,
+  CreateChannelResult,
+  CreateChannelParams,
   PushMessageResult,
-  UpdateChannelParameters,
-  JoinChannelParameters,
-  CloseChannelParameters
-} from '../../src/types';
+  JoinChannelParams,
+  UpdateChannelParams,
+  Notification,
+  CloseChannelParams,
+  CloseChannelResult
+} from '@statechannels/client-api-schema';
+import {ChannelResult, Message, SiteBudget} from '../../src/types';
 import {calculateChannelId} from '../../src/utils';
 
 /*
@@ -32,26 +33,29 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     this.url = url || '';
   }
 
-  send<ResultType = any>(method: string, params?: any): Promise<any> {
+  async send<K extends keyof MethodType>(method: K, params?: any): Promise<MethodType[K]> {
     switch (method) {
       case 'CreateChannel':
-        return this.createChannel(params);
+        return this.createChannel(params) as Promise<MethodType[K]>;
 
       case 'PushMessage':
-        return this.pushMessage(params);
+        return this.pushMessage(params) as Promise<MethodType[K]>;
 
       case 'GetAddress':
-        return this.getAddress();
+        return this.getAddress() as Promise<MethodType[K]>;
 
       case 'JoinChannel':
-        return this.joinChannel(params);
+        return this.joinChannel(params) as Promise<MethodType[K]>;
 
       case 'UpdateChannel':
-        return this.updateChannel(params);
+        return this.updateChannel(params) as Promise<MethodType[K]>;
 
       case 'CloseChannel':
-        return this.closeChannel(params);
-
+        return this.closeChannel(params) as Promise<MethodType[K]>;
+      case 'ApproveBudgetAndFund':
+        return this.approveBudgetAndFund(params) as Promise<MethodType[K]>;
+      case 'CloseAndWithdraw':
+        return this.CloseAndWithdraw(params) as Promise<MethodType[K]>;
       default:
         return Promise.reject(`No callback available for ${method}`);
     }
@@ -101,14 +105,14 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     return this.playerIndex;
   }
 
-  private getOpponentIndex(): number {
+  public getOpponentIndex(): number {
     if (this.opponentIndex === undefined) {
       throw Error(`This client does not have its opponent player index set yet`);
     }
     return this.opponentIndex;
   }
 
-  private verifyTurnNum(turnNum: string): Promise<void> {
+  public verifyTurnNum(turnNum: number): Promise<void> {
     const currentTurnNum = bigNumberify(turnNum);
     if (currentTurnNum.mod(2).eq(this.getPlayerIndex())) {
       return Promise.reject(
@@ -118,20 +122,14 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     return Promise.resolve();
   }
 
-  private getNextTurnNum(latestState: ChannelResult): string {
-    return bigNumberify(latestState.turnNum)
-      .add(1)
-      .toString();
-  }
-
-  protected findChannel(channelId: string): ChannelResult {
+  public findChannel(channelId: string): ChannelResult {
     if (!(this.latestState && this.latestState.channelId === channelId)) {
       throw Error(`Channel does't exist with channelId '${JSON.stringify(channelId, null, 4)}'`);
     }
     return this.latestState;
   }
 
-  private async createChannel(params: CreateChannelParameters): Promise<ChannelResult> {
+  private async createChannel(params: CreateChannelParams): Promise<CreateChannelResult> {
     const participants = params.participants;
     const allocations = params.allocations;
     const appDefinition = params.appDefinition;
@@ -142,39 +140,41 @@ export class FakeChannelProvider implements ChannelProviderInterface {
       allocations,
       appDefinition,
       appData,
+      funding: [],
       channelId: calculateChannelId(participants, appDefinition),
-      turnNum: bigNumberify(0).toString(),
+      turnNum: 0,
       status: 'proposed'
     };
     this.updatePlayerIndex(0);
     this.latestState = channel;
     this.address = channel.participants[0].participantId;
     this.opponentAddress = channel.participants[1].participantId;
-    this.notifyOpponent(channel, 'ChannelProposed');
+    this.notifyOpponent(channel, 'CreateChannel');
 
     return channel;
   }
 
-  private async joinChannel(params: JoinChannelParameters): Promise<ChannelResult> {
-    const latestState = this.findChannel(params.channelId);
+  private async joinChannel(params: JoinChannelParams): Promise<ChannelResult> {
+    const {channelId} = params;
+    const latestState = this.findChannel(channelId);
     this.updatePlayerIndex(1);
-    log.debug(`Player ${this.getPlayerIndex()} joining channel ${params.channelId}`);
+    log.debug(`Player ${this.getPlayerIndex()} joining channel ${channelId}`);
     await this.verifyTurnNum(latestState.turnNum);
 
     // skip funding by setting the channel to 'running' the moment it is joined
     // [assuming we're working with 2-participant channels for the time being]
     this.latestState = {
       ...latestState,
-      turnNum: bigNumberify(3).toString(),
+      turnNum: 3,
       status: 'running'
     };
     this.opponentAddress = latestState.participants[0].participantId;
-    this.notifyOpponent(this.latestState, 'MessageQueued');
+    this.notifyOpponent(this.latestState, 'joinChannel');
 
     return this.latestState;
   }
 
-  private async updateChannel(params: UpdateChannelParameters): Promise<ChannelResult> {
+  private async updateChannel(params: UpdateChannelParams): Promise<ChannelResult> {
     const channelId = params.channelId;
     const participants = params.participants;
     const allocations = params.allocations;
@@ -186,7 +186,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     const nextState = {...latestState, participants, allocations, appData};
     if (nextState !== latestState) {
       await this.verifyTurnNum(nextState.turnNum);
-      nextState.turnNum = this.getNextTurnNum(latestState);
+      nextState.turnNum = latestState.turnNum + 1;
       log.debug(`Player ${this.getPlayerIndex()} updated channel to turnNum ${nextState.turnNum}`);
     }
 
@@ -196,10 +196,10 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     return this.latestState;
   }
 
-  private async closeChannel(params: CloseChannelParameters): Promise<ChannelResult> {
+  private async closeChannel(params: CloseChannelParams): Promise<CloseChannelResult> {
     const latestState = this.findChannel(params.channelId);
     await this.verifyTurnNum(latestState.turnNum);
-    const turnNum = this.getNextTurnNum(latestState);
+    const turnNum = latestState.turnNum + 1;
     const status = 'closing';
 
     this.latestState = {...latestState, turnNum, status};
@@ -211,7 +211,26 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     return this.latestState;
   }
 
-  private notifyOpponent(data: ChannelResult, notificationType: NotificationType): void {
+  // TODO: Craft a full message
+  protected notifyAppChannelUpdated(data: ChannelResult): void {
+    const message: Notification = {
+      jsonrpc: '2.0',
+      method: 'ChannelUpdated',
+      params: data
+    };
+    this.events.emit('ChannelUpdated', message);
+  }
+  protected notifyAppBudgetUpdated(data: SiteBudget): void {
+    // TODO: Define budget type in the json-rpc types
+    const message: Notification = {
+      jsonrpc: '2.0',
+      method: 'BudgetUpdated',
+      params: data
+    };
+    this.events.emit('BudgetUpdated', message);
+  }
+
+  protected notifyOpponent(data: ChannelResult, notificationType: string): void {
     log.debug(
       `${this.getPlayerIndex()} notifying opponent ${this.getOpponentIndex()} about ${notificationType}`
     );
@@ -221,27 +240,83 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     if (!recipient) {
       throw Error(`Cannot notify opponent - opponent address not set`);
     }
-
     this.events.emit('MessageQueued', {sender, recipient, data});
   }
 
   private async pushMessage(params: Message<ChannelResult>): Promise<PushMessageResult> {
     this.latestState = params.data;
-    const turnNum = this.getNextTurnNum(this.latestState);
+    this.notifyAppChannelUpdated(this.latestState);
+    const turnNum = this.latestState.turnNum + 1;
 
     switch (params.data.status) {
       case 'proposed':
-        this.events.emit('ChannelProposed', {params});
+        this.events.emit('ChannelProposed', {params: params.data});
         break;
       // auto-close, if we received a close
       case 'closing':
         this.latestState = {...this.latestState, turnNum, status: 'closed'};
         this.notifyOpponent(this.latestState, 'ChannelUpdate');
+        this.notifyAppChannelUpdated(this.latestState);
         break;
       default:
         break;
     }
 
     return {success: true};
+  }
+
+  private async approveBudgetAndFund(params: {
+    playerAmount: string;
+    hubAmount: string;
+    playerDestinationAddress: string;
+    hubAddress: string;
+    hubDestinationAddress: string;
+  }): Promise<SiteBudget> {
+    const {hubAddress, playerAmount, hubAmount} = params;
+    // TODO: Does this need to be delayed?
+    this.notifyAppBudgetUpdated({
+      hub: hubAddress,
+      site: 'fakehub.com',
+      inUse: {playerAmount: '0x0', hubAmount: '0x0'},
+      free: {playerAmount, hubAmount},
+      pending: {playerAmount: '0x0', hubAmount: '0x0'},
+      direct: {playerAmount: '0x0', hubAmount: '0x0'}
+    });
+    return {
+      hub: hubAddress,
+      site: 'fakehub.com',
+      pending: {playerAmount, hubAmount},
+      free: {playerAmount: '0x0', hubAmount: '0x0'},
+      inUse: {playerAmount: '0x0', hubAmount: '0x0'},
+      direct: {playerAmount: '0x0', hubAmount: '0x0'}
+    };
+  }
+  private async CloseAndWithdraw(params: {
+    playerAmount: string;
+    hubAmount: string;
+    hubAddress: string;
+  }): Promise<SiteBudget> {
+    const {hubAddress, playerAmount, hubAmount} = params;
+    const budget = {
+      hub: hubAddress,
+      site: 'fakehub.com',
+      pending: {playerAmount, hubAmount},
+      free: {playerAmount: '0x0', hubAmount: '0x0'},
+      inUse: {playerAmount: '0x0', hubAmount: '0x0'},
+      direct: {playerAmount: '0x0', hubAmount: '0x0'}
+    };
+
+    // TODO: Does this need to be delayed?
+
+    this.notifyAppBudgetUpdated({
+      hub: hubAddress,
+      site: 'fakehub.com',
+      inUse: {playerAmount: '0x0', hubAmount: '0x0'},
+      free: {playerAmount: '0x0', hubAmount: '0x0'},
+      pending: {playerAmount: '0x0', hubAmount: '0x0'},
+      direct: {playerAmount: '0x0', hubAmount: '0x0'}
+    });
+
+    return budget;
   }
 }
