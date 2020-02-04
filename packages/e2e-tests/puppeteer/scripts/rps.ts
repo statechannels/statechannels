@@ -1,6 +1,7 @@
 import {Page} from 'puppeteer';
 
 import {waitForAndClickButton, setUpBrowser, loadRPSApp} from '../helpers';
+import {getEnvBool} from '@statechannels/devtools';
 
 export async function login(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
   async function playerA(page: Page): Promise<void> {
@@ -97,6 +98,7 @@ export async function bChallenges(rpsTabA: Page, rpsTabB: Page): Promise<boolean
 }
 
 export async function bResigns(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
+  const virtual = getEnvBool('USE_VIRTUAL_FUNDING', false);
   async function playerB(page: Page): Promise<void> {
     const walletIFrame = page.frames()[1];
 
@@ -117,8 +119,7 @@ export async function bResigns(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
       await waitForAndClickButton(page, '#exit');
       // App & Wallet left in a 'clean' no-game state
     }
-
-    await Promise.race([virtualFunding(), ledgerFunding()]);
+    virtual ? await virtualFunding() : await ledgerFunding();
   }
 
   async function playerA(page: Page): Promise<void> {
