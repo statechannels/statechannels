@@ -1,5 +1,5 @@
-import { assign, Machine } from 'xstate';
-import { HashZero, AddressZero } from 'ethers/constants';
+import { Machine, assign } from 'xstate';
+import { AddressZero, HashZero } from 'ethers/constants';
 import { Outcome } from '@statechannels/nitro-protocol';
 
 import { Channel, FINAL, getChannelId } from '../../';

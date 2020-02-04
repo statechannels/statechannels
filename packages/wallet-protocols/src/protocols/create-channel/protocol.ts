@@ -1,7 +1,7 @@
-import { assign, DoneInvokeEvent, Machine, MachineConfig, sendParent } from 'xstate';
-import { State, Channel } from '@statechannels/nitro-protocol';
+import { DoneInvokeEvent, Machine, MachineConfig, assign, sendParent } from 'xstate';
+import { Channel, State } from '@statechannels/nitro-protocol';
 
-import { success, Store } from '../..';
+import { Store, success } from '../..';
 import { MachineFactory } from '../../machine-utils';
 import { ethAllocationOutcome } from '../../calculations';
 import { ChannelStoreEntry } from '../../ChannelStoreEntry';

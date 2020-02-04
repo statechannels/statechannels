@@ -1,4 +1,4 @@
-import { DoneInvokeEvent, EventObject, StateMachine, MachineConfig, Machine } from 'xstate';
+import { DoneInvokeEvent, EventObject, Machine, MachineConfig, StateMachine } from 'xstate';
 
 import { FINAL, Store } from '.';
 

@@ -1,5 +1,5 @@
 import { bigNumberify } from 'ethers/utils';
-import { Machine, MachineConfig, InvokeCallback } from 'xstate';
+import { InvokeCallback, Machine, MachineConfig } from 'xstate';
 
 import { FINAL } from '../..';
 import { MachineFactory } from '../../machine-utils';

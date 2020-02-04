@@ -2,15 +2,15 @@ import { Allocation, Outcome } from '@statechannels/nitro-protocol';
 import { Machine, MachineConfig } from 'xstate';
 import _ from 'lodash';
 import { bigNumberify } from 'ethers/utils';
-import { HashZero, AddressZero } from 'ethers/constants';
+import { AddressZero, HashZero } from 'ethers/constants';
 
-import { getDataAndInvoke, MachineFactory } from '../../machine-utils';
+import { MachineFactory, getDataAndInvoke } from '../../machine-utils';
 import { FINAL } from '../../';
-import { add, subtract, gt } from '../../mathOps';
+import { add, gt, subtract } from '../../mathOps';
 import { Store } from '../../store';
-import { getEthAllocation, ethAllocationOutcome } from '../../calculations';
+import { ethAllocationOutcome, getEthAllocation } from '../../calculations';
 
-import { SupportState, Depositing } from '..';
+import { Depositing, SupportState } from '..';
 
 const PROTOCOL = 'direct-funding';
 const success = { type: FINAL };

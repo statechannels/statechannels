@@ -6,7 +6,7 @@ import { Without, checkThat } from '../../';
 import { isIndirectFunding, isVirtualFunding } from '../../ChannelStoreEntry';
 import { store } from '../../temp-store';
 import * as LedgerUpdate from '../ledger-update/protocol';
-import { getEthAllocation, ethAllocationOutcome } from '../../calculations';
+import { ethAllocationOutcome, getEthAllocation } from '../../calculations';
 const PROTOCOL = 'virtual-defunding-as-leaf';
 
 export interface Init {
