@@ -105,21 +105,18 @@ export async function bResigns(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
     await waitForAndClickButton(page, page.mainFrame(), '#resign');
     await waitForAndClickButton(page, walletIFrame, '#yes');
 
-    async function virtualFunding(): Promise<void> {
+    if (virtual) {
       await waitForAndClickButton(page, walletIFrame, '#approve-withdraw');
       await waitForAndClickButton(page, walletIFrame, '#ok');
       await waitForAndClickButton(page, page.mainFrame(), '#resigned-ok');
       await waitForAndClickButton(page, page.mainFrame(), '#exit');
       // App & Wallet left in a 'clean' no-game state
-    }
-
-    async function ledgerFunding(): Promise<void> {
+    } else {
       await waitForAndClickButton(page, walletIFrame, '#ok');
       await waitForAndClickButton(page, page.mainFrame(), '#resigned-ok');
       await waitForAndClickButton(page, page.mainFrame(), '#exit');
       // App & Wallet left in a 'clean' no-game state
     }
-    virtual ? await virtualFunding() : await ledgerFunding();
   }
 
   async function playerA(page: Page): Promise<void> {
