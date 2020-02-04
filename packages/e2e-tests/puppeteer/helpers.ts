@@ -37,27 +37,25 @@ export async function loadRPSApp(page: Page, ganacheAccountIndex: number): Promi
 // waitForSelector promise, so we avoid any errors where that return value loses its meaning
 // https://github.com/puppeteer/puppeteer/issues/3496
 // https://github.com/puppeteer/puppeteer/issues/2977
-export async function waitForAndClickButton(page: Page | Frame, selector: string): Promise<void> {
+export async function waitForAndClickButton(
+  page: Page,
+  frame: Frame,
+  selector: string
+): Promise<void> {
   try {
-    await page.waitForSelector(selector);
+    await frame.waitForSelector(selector);
   } catch (error) {
     console.error(
-      'page.waitForSelector(' + selector + ') failed on page ' + JSON.stringify(await page.title())
+      'frame.waitForSelector(' + selector + ') failed on frame ' + (await frame.title())
     );
-    if ('screenshot' in page) {
-      await page.screenshot({path: 'e2e-wait-error.png'}); // TODO move this to catch block
-    }
+    await page.screenshot({path: 'e2e-wait.error.png'});
     throw error;
   }
   try {
-    return await page.click(selector);
+    return await frame.click(selector);
   } catch (error) {
-    console.error(
-      'page.click(' + selector + ') failed on page ' + JSON.stringify(await page.title())
-    );
-    if ('screenshot' in page) {
-      await page.screenshot({path: 'e2e-click-error.png'}); // TODO move this to catch block
-    }
+    console.error('frame.click(' + selector + ') failed on frame ' + (await frame.title()));
+    await page.screenshot({path: 'e2e-click.error.png'});
     throw error;
   }
 }
