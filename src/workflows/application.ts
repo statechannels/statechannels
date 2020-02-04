@@ -1,4 +1,4 @@
-import {MachineConfig, Machine, StateMachine, assign, Action} from 'xstate';
+import {MachineConfig, Machine, StateMachine, assign, Action, AssignAction, spawn} from 'xstate';
 import {
   FINAL,
   MachineFactory,
@@ -15,11 +15,20 @@ import {
 
 import {State, getChannelId} from '@statechannels/nitro-protocol';
 
-import {sendDisplayMessage, dispatchChannelUpdatedMessage} from '../messaging';
+import {
+  sendDisplayMessage,
+  dispatchChannelUpdatedMessage,
+  observeUpdateChannel
+} from '../messaging';
+import {map} from 'rxjs/operators';
 
 interface Context {
   channelId?: string;
+  observer?: any;
 }
+
+type ChannelIdExists = Context & {channelId: string};
+
 interface Actions {
   sendToOpponent: Action<Context, PlayerStateUpdate>;
   updateStore: Action<Context, SendStates>;
@@ -27,6 +36,7 @@ interface Actions {
   displayUi: Action<Context, any>;
   assignChannelId: Action<Context, any>;
   sendChannelUpdatedNotification: Action<Context, ChannelUpdated>;
+  spawnObserver: AssignAction<ChannelIdExists, any>;
 }
 
 // a config isn't all wired up
@@ -129,7 +139,19 @@ export const applicationWorkflow: MachineFactory<Context, any> = (
     context = {};
   }
 
+  const notifyWhenChannelUpdated = ({channelId}: ChannelIdExists) => {
+    return observeUpdateChannel(channelId).pipe(
+      map(params => {
+        params;
+      })
+    );
+  };
+
   const actions: Actions = {
+    spawnObserver: assign<ChannelIdExists>(context => ({
+      ...context,
+      observer: spawn(notifyWhenChannelUpdated(context))
+    })),
     updateStore: (context, event) => {
       store.receiveStates(
         // TODO: The outcome can get removed when going over the wire if it's empty
@@ -244,7 +266,8 @@ const mockActions: Actions = {
   sendChannelUpdatedNotification: 'sendChannelUpdatedNotification',
   hideUi: 'hideUi',
   displayUi: 'displayUi',
-  assignChannelId: 'assignChannelId'
+  assignChannelId: 'assignChannelId',
+  spawnObserver: 'spawnObserver' as any
 };
 
 export const config = generateConfig(mockActions);
