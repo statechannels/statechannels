@@ -1,12 +1,4 @@
-import {
-  MachineConfig,
-  Action,
-  DefaultGuardType,
-  GuardPredicate,
-  ConditionPredicate,
-  StateSchema,
-  Machine
-} from 'xstate';
+import {MachineConfig, Action, DefaultGuardType, StateSchema, Machine, Condition} from 'xstate';
 import {Allocations, Participant} from '@statechannels/client-api-schema';
 import {MachineFactory, Store} from '@statechannels/wallet-protocols';
 import {sendDisplayMessage} from '../messaging';
@@ -16,9 +8,7 @@ interface WorkflowActions {
   displayUi: Action<WorkflowContext, any>;
 }
 interface WorkflowGuards {
-  noBudget:
-    | GuardPredicate<WorkflowContext, WorkflowEvent>
-    | ConditionPredicate<WorkflowContext, WorkflowEvent>;
+  noBudget: Condition<WorkflowContext, WorkflowEvent>;
 }
 // While this context info may not be used by the workflow
 // it may be used when displaying a UI
@@ -91,7 +81,7 @@ const mockGuards = {
     // We should probably find a better way of doing this or not bother typing guards
     type: 'xstate.guard' as DefaultGuardType,
     name: 'noBudget',
-    predicate: (context, event) => true
+    predicate: () => true
   }
 };
 export const mockOptions = {actions: mockActions, guards: mockGuards};
@@ -102,13 +92,13 @@ export const confirmChannelCreationWorkflow: MachineFactory<WorkflowContext, Wor
   context: WorkflowContext
 ) => {
   // TODO: Once budgets are a thing this should check for a budget
-  const guards = {noBudget: (context, event) => true};
+  const guards = {noBudget: () => true};
   const actions = {
     // TODO: We should probably set up some standard actions for all workflows
-    displayUi: (context, event) => {
+    displayUi: () => {
       sendDisplayMessage('Show');
     },
-    hideUi: (context, event) => {
+    hideUi: () => {
       sendDisplayMessage('Hide');
     }
   };

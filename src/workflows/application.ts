@@ -1,4 +1,13 @@
-import {MachineConfig, Machine, StateMachine, assign, Action, AssignAction, spawn} from 'xstate';
+import {
+  MachineConfig,
+  Machine,
+  StateMachine,
+  assign,
+  Action,
+  AssignAction,
+  spawn,
+  Condition
+} from 'xstate';
 import {
   FINAL,
   MachineFactory,
@@ -25,6 +34,12 @@ import {map} from 'rxjs/operators';
 interface Context {
   channelId?: string;
   observer?: any;
+}
+
+interface WorkflowGuards {
+  channelOpen: Condition<Context, Event>;
+  channelClosing: Condition<Context, Event>;
+  channelClosed: Condition<Context, Event>;
 }
 
 type ChannelIdExists = Context & {channelId: string};
@@ -57,7 +72,10 @@ type Event = PlayerRequestConclude | PlayerStateUpdate | SendStates | OpenEvent 
 
 export type ApplicationWorkflowEvent = Event;
 
-const generateConfig = (actions: Actions): MachineConfig<Context, any, Event> => ({
+const generateConfig = (
+  actions: Actions,
+  guards: WorkflowGuards
+): MachineConfig<Context, any, Event> => ({
   id: 'application-workflow',
   initial: 'initializing',
   states: {
@@ -95,12 +113,12 @@ const generateConfig = (actions: Actions): MachineConfig<Context, any, Event> =>
         PLAYER_STATE_UPDATE: {target: 'running', actions: [actions.sendToOpponent]},
         CHANNEL_UPDATED: [
           {
-            cond: 'channelOpen',
+            cond: guards.channelOpen,
             target: 'running',
             actions: [actions.sendChannelUpdatedNotification]
           },
           {
-            cond: 'channelClosing',
+            cond: guards.channelClosing,
             target: 'closing',
             actions: [actions.sendChannelUpdatedNotification]
           }
@@ -121,7 +139,11 @@ const generateConfig = (actions: Actions): MachineConfig<Context, any, Event> =>
       on: {
         SendStates: {actions: actions.updateStore},
         CHANNEL_UPDATED: [
-          {cond: 'channelClosed', target: 'done', actions: actions.sendChannelUpdatedNotification},
+          {
+            cond: guards.channelClosed,
+            target: 'done',
+            actions: actions.sendChannelUpdatedNotification
+          },
           {target: 'closing', actions: actions.sendChannelUpdatedNotification}
         ]
       }
@@ -192,8 +214,22 @@ export const applicationWorkflow: MachineFactory<Context, any> = (
       return {};
     })
   };
+  const guards: WorkflowGuards = {
+    channelOpen: (context: ChannelIdExists, event: ChannelUpdated): boolean => {
+      const channelStoreEntry = new ChannelStoreEntry(event.entry);
+      return !channelStoreEntry.latestState.isFinal;
+    },
+    channelClosing: (context: ChannelIdExists, event: ChannelUpdated): boolean => {
+      const channelStoreEntry = new ChannelStoreEntry(event.entry);
+      return channelStoreEntry.latestState.isFinal;
+    },
 
-  const config = generateConfig(actions);
+    channelClosed: (context: ChannelIdExists, event: ChannelUpdated): boolean => {
+      const channelStoreEntry = new ChannelStoreEntry(event.entry);
+      return channelStoreEntry.hasSupportedState && channelStoreEntry.latestSupportedState.isFinal;
+    }
+  };
+  const config = generateConfig(actions, guards);
 
   const invokeJoinMachine = (
     context,
@@ -208,45 +244,13 @@ export const applicationWorkflow: MachineFactory<Context, any> = (
     return CreateChannel.machine(store);
   };
 
-  const invokeClosingMachine = (context: Context) => {
-    if (!context.channelId) {
-      throw new Error('No channel id');
-    }
+  const invokeClosingMachine = (context: ChannelIdExists) => {
     return ConcludeChannel.machine(store, {channelId: context.channelId});
   };
 
-  const channelOpen = (context: Context, event: ChannelUpdated): boolean => {
-    return !channelClosing(context, event);
-  };
-  const channelClosing = (context: Context, event: ChannelUpdated): boolean => {
-    if (!context || !context.channelId) {
-      return false;
-    }
-    if (event.channelId !== context.channelId) {
-      return false;
-    }
-    const channelStoreEntry = new ChannelStoreEntry(event.entry);
-    return channelStoreEntry.latestState.isFinal;
-  };
-
-  const channelClosed = (context: Context, event: ChannelUpdated): boolean => {
-    if (!context || !context.channelId) {
-      return false;
-    }
-    if (event.channelId !== context.channelId) {
-      return false;
-    }
-    const channelStoreEntry = new ChannelStoreEntry(event.entry);
-    return channelStoreEntry.hasSupportedState && channelStoreEntry.latestSupportedState.isFinal;
-  };
-
-  const guards = {channelOpen, channelClosing, channelClosed};
   const services = {invokeClosingMachine, invokeCreateMachine, invokeJoinMachine};
-  const options = {
-    services,
-    guards
-  };
-  return Machine(config).withConfig(options, context);
+
+  return Machine(config).withConfig({services}, context);
 };
 
 const mockServices = {
@@ -269,7 +273,6 @@ const mockActions: Actions = {
   assignChannelId: 'assignChannelId',
   spawnObserver: 'spawnObserver' as any
 };
-
-export const config = generateConfig(mockActions);
-const mockGuards = {channelOpen: () => true, channelClosing: () => true};
+const mockGuards = {channelOpen: () => true, channelClosing: () => true, channelClosed: () => true};
+export const config = generateConfig(mockActions, mockGuards);
 export const mockOptions = {services: mockServices, actions: mockActions, guards: mockGuards};
