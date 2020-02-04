@@ -1,15 +1,18 @@
 import React from "react";
 import {PureComponent} from "react";
 import {connect} from "react-redux";
-import {NonTerminalTransactionSubmissionState} from "./states";
+
 import {unreachable} from "../../../utils/reducer-utils";
 
 import {NETWORK_ID} from "../../../constants";
-import * as actions from "./actions";
+
 import {ActionConstructor} from "../../utils";
 import SubmitX from "../shared-components/submit-x";
 import WaitForXConfirmation from "../shared-components/wait-for-x-confirmation";
 import ApproveX from "../shared-components/approve-x";
+
+import * as actions from "./actions";
+import {NonTerminalTransactionSubmissionState} from "./states";
 
 interface Props {
   state: NonTerminalTransactionSubmissionState;

@@ -1,17 +1,21 @@
-import * as states from "./states";
-import * as actions from "./actions";
 import {PureComponent} from "react";
 import React from "react";
-import {unreachable} from "../../../../utils/reducer-utils";
-import Acknowledge from "../../shared-components/acknowledge";
-import WaitForApproval from "./components/wait-for-approval";
-import {TransactionSubmission} from "../../transaction-submission/container";
 
 import {connect} from "react-redux";
+
+import {TransactionSubmission} from "../../transaction-submission/container";
+
+import Acknowledge from "../../shared-components/acknowledge";
+import {unreachable} from "../../../../utils/reducer-utils";
 import {ActionDispatcher} from "../../../utils";
 import {closeLedgerChannel} from "../../actions";
 import {multipleWalletActions} from "../../../../redux/actions";
 import ApproveX from "../../shared-components/approve-x";
+
+import WaitForApproval from "./components/wait-for-approval";
+
+import * as actions from "./actions";
+import * as states from "./states";
 
 interface Props {
   state: states.NonTerminalResponderState;

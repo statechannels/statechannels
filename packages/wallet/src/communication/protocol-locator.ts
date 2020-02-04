@@ -1,4 +1,5 @@
 import {makeLocator} from "../redux/protocols";
+
 import {EmbeddedProtocol} from ".";
 
 export const ADVANCE_CHANNEL_PROTOCOL_LOCATOR = makeLocator(EmbeddedProtocol.AdvanceChannel);

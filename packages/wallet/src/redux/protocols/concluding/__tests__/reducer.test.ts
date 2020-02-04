@@ -1,6 +1,5 @@
 import {ConcludingStateType} from "../states";
-import * as scenarios from "./scenarios";
-import {initialize} from "..";
+
 import {
   describeScenarioStep,
   itSendsThisDisplayEventType,
@@ -8,6 +7,10 @@ import {
 } from "../../../__tests__/helpers";
 import {concludingReducer} from "../reducer";
 import {concludeInstigated} from "../../../../communication";
+
+import * as scenarios from "./scenarios";
+
+import {initialize} from "..";
 
 describe("Opponent Concluded Happy Path", () => {
   const scenario = scenarios.opponentConcludedHappyPath;

@@ -1,10 +1,12 @@
 import {storiesOf} from "@storybook/react";
 import React from "react";
 import {Provider} from "react-redux";
+
 import "../index.scss";
+import Modal from "react-modal";
+
 import WalletContainer from "../containers/wallet";
 import {ProtocolState} from "../redux/protocols";
-import Modal from "react-modal";
 import StatusBarLayout from "../components/status-bar-layout";
 
 const walletStateRender = state => () => {

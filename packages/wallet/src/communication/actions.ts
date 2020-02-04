@@ -1,9 +1,13 @@
+import {SignedState} from "@statechannels/nitro-protocol";
+
 import {WalletAction} from "../redux/actions";
+
+import {ActionConstructor} from "../redux/utils";
+
+import {CloseLedgerChannel} from "../redux/protocols/actions";
+
 import {FundingStrategy, ProtocolLocator, EmbeddedProtocol} from "./index";
 import {ProcessProtocol} from ".";
-import {ActionConstructor} from "../redux/utils";
-import {CloseLedgerChannel} from "../redux/protocols/actions";
-import {SignedState} from "@statechannels/nitro-protocol";
 
 export interface MultipleRelayableActions {
   type: "WALLET.MULTIPLE_RELAYABLE_ACTIONS";

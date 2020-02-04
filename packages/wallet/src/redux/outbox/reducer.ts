@@ -1,5 +1,6 @@
-import {OutboxState} from "./state";
 import * as actions from "../actions";
+
+import {OutboxState} from "./state";
 
 export function clearOutbox(state: OutboxState, action: actions.WalletAction): OutboxState {
   const nextOutbox = {...state};

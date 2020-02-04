@@ -1,4 +1,3 @@
-import * as scenarios from "./scenarios";
 import {initialize, consensusUpdateReducer} from "../reducer";
 import * as states from "../states";
 import {ProtocolStateWithSharedData} from "../..";
@@ -7,6 +6,8 @@ import {
   itSendsNoMessage,
   itSendsTheseStates
 } from "../../../__tests__/helpers";
+
+import * as scenarios from "./scenarios";
 
 describe("Two Players", () => {
   describe("Player A Happy Path", () => {

@@ -1,6 +1,7 @@
-import {displaySender} from "../display-sender";
 import * as matchers from "redux-saga-test-plan/matchers";
 import {expectSaga} from "redux-saga-test-plan";
+
+import {displaySender} from "../display-sender";
 
 describe("display sender", () => {
   it("sends a notification for displaying the wallet", async () => {

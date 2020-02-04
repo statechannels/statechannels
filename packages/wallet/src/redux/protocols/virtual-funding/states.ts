@@ -1,10 +1,13 @@
-import {ProtocolState} from "..";
+import {Outcome} from "@statechannels/nitro-protocol";
+
 import {StateConstructor} from "../../utils";
+
 import {AdvanceChannelState} from "../advance-channel";
 import {ConsensusUpdateState} from "../consensus-update";
 import {NonTerminalLedgerFundingState} from "../ledger-funding";
 import {ProtocolLocator} from "../../../communication";
-import {Outcome} from "@statechannels/nitro-protocol";
+
+import {ProtocolState} from "..";
 
 // -------
 // States

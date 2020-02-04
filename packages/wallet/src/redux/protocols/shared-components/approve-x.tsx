@@ -1,4 +1,5 @@
 import React from "react";
+
 // import walletIcon from '../../images/wallet-iconn.svg';
 import YesOrNo from "./yes-or-no";
 

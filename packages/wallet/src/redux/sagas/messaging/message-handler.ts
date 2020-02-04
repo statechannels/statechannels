@@ -10,16 +10,14 @@ import {
 } from "@statechannels/client-api-schema";
 import jrs, {RequestObject} from "jsonrpc-lite";
 
-import * as outgoingMessageActions from "./outgoing-api-actions";
-import * as actions from "../../actions";
-import {
-  getAddress,
-  getLastStateForChannel,
-  doesAStateExistForChannel,
-  getParticipants,
-  getProtocolState
-} from "../../selectors";
-import {messageSender} from "./message-sender";
+import {AddressZero} from "ethers/constants";
+
+import {bigNumberify} from "ethers/utils";
+
+import {Web3Provider} from "ethers/providers";
+
+import {ProtocolState} from "src/redux/protocols";
+
 import {APPLICATION_PROCESS_ID} from "../../protocols/application/reducer";
 import {
   createStateFromCreateChannelParams,
@@ -27,16 +25,26 @@ import {
 } from "../../../utils/json-rpc-utils";
 
 import {getProvider} from "../../../utils/contract-utils";
-import {AddressZero} from "ethers/constants";
 import {validateRequest} from "../../../json-rpc-validation/validator";
 import {fundingRequested} from "../../protocols/actions";
 import {TwoPartyPlayerIndex} from "../../types";
 import {isRelayableAction} from "../../../communication";
-import {bigNumberify} from "ethers/utils";
-import {Web3Provider} from "ethers/providers";
+
 import {responseProvided} from "../../protocols/dispute/responder/actions";
 import {isResponderState} from "../../protocols/dispute/responder/states";
-import {ProtocolState} from "src/redux/protocols";
+
+import {
+  getAddress,
+  getLastStateForChannel,
+  doesAStateExistForChannel,
+  getParticipants,
+  getProtocolState
+} from "../../selectors";
+import * as actions from "../../actions";
+
+import {messageSender} from "./message-sender";
+
+import * as outgoingMessageActions from "./outgoing-api-actions";
 
 export function* messageHandler(jsonRpcMessage: object, _domain: string) {
   const parsedMessage = jrs.parseObject(jsonRpcMessage);

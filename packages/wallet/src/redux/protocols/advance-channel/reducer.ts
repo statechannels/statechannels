@@ -1,13 +1,7 @@
-import * as states from "./states";
-import {
-  SharedData,
-  registerChannelToMonitor,
-  getExistingChannel,
-  signAndStore,
-  signAndInitialize,
-  checkAndInitialize
-} from "../../state";
-import {ProtocolStateWithSharedData, ProtocolReducer} from "..";
+import {State, Channel, getChannelId} from "@statechannels/nitro-protocol";
+
+import {bigNumberify} from "ethers/utils";
+
 import {
   getChannel,
   ChannelState,
@@ -18,13 +12,26 @@ import {
 import {WalletAction} from "../../actions";
 import * as selectors from "../../selectors";
 import {SignedStatesReceived} from "../../../communication";
-import {isAdvanceChannelAction} from "./actions";
+
 import {unreachable} from "../../../utils/reducer-utils";
 import {Properties} from "../../utils";
 import * as helpers from "../reducer-helpers";
-import {State, Channel, getChannelId} from "@statechannels/nitro-protocol";
-import {bigNumberify} from "ethers/utils";
+
+import {
+  SharedData,
+  registerChannelToMonitor,
+  getExistingChannel,
+  signAndStore,
+  signAndInitialize,
+  checkAndInitialize
+} from "../../state";
 import {NETWORK_ID, CHALLENGE_DURATION} from "../../../constants";
+
+import {isAdvanceChannelAction} from "./actions";
+
+import * as states from "./states";
+
+import {ProtocolStateWithSharedData, ProtocolReducer} from "..";
 
 export {ADVANCE_CHANNEL_PROTOCOL_LOCATOR} from "../../../communication/protocol-locator";
 

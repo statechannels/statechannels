@@ -1,6 +1,7 @@
-import * as states from "../redux/state";
 import React, {PureComponent} from "react";
 import {connect} from "react-redux";
+
+import * as states from "../redux/state";
 interface Props {
   state: states.WalletState;
 }

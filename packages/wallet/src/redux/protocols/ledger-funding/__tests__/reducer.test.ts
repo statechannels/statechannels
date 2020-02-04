@@ -1,7 +1,8 @@
-import * as scenarios from "./scenarios";
 import {initialize, ledgerFundingReducer} from "../reducer";
 import {LedgerFundingState, LedgerFundingStateType} from "../states";
 import {describeScenarioStep} from "../../../__tests__/helpers";
+
+import * as scenarios from "./scenarios";
 
 describe("existing ledger funding happy path", () => {
   const scenario = scenarios.existingLedgerFundingHappyPath;

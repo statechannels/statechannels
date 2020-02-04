@@ -3,6 +3,7 @@ import {FundingStrategyNegotiationState as PlayerBState} from "./player-b/states
 
 import * as playerA from "./player-a/states";
 import * as playerB from "./player-b/states";
+
 import {ProtocolState} from "..";
 
 // -------

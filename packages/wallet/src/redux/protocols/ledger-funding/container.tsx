@@ -1,10 +1,12 @@
-import * as states from "./states";
 import {PureComponent} from "react";
 import React from "react";
 
 import {connect} from "react-redux";
+
 import {ExistingLedgerFunding} from "../existing-ledger-funding/container";
 import {NewLedgerChannel} from "../new-ledger-channel/container";
+
+import * as states from "./states";
 
 interface Props {
   state: states.NonTerminalLedgerFundingState;

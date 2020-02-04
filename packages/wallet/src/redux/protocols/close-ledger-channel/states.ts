@@ -1,8 +1,10 @@
 import {WithdrawalState} from "../withdrawing/states";
 import {AdvanceChannelState} from "../advance-channel";
 import {StateConstructor} from "../../utils";
-import {ProtocolState} from "..";
+
 import {ProtocolLocator} from "../../../communication";
+
+import {ProtocolState} from "..";
 
 export interface WaitForWithdrawal {
   type: "CloseLedgerChannel.WaitForWithdrawal";

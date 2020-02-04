@@ -1,10 +1,10 @@
-import {ProtocolState} from "..";
-
 import {StateConstructor} from "../../utils";
 import {NonTerminalLedgerFundingState} from "../ledger-funding";
 import {AdvanceChannelState} from "../advance-channel";
 import {NonTerminalVirtualFundingState} from "../virtual-funding/states";
 import {OngoingFundingStrategyNegotiationState} from "../funding-strategy-negotiation";
+
+import {ProtocolState} from "..";
 
 // -------
 // States

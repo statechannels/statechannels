@@ -1,10 +1,11 @@
-import * as scenarios from "./scenarios";
 import {NewLedgerChannelReducer, initialize} from "../reducer";
 import {ProtocolStateWithSharedData} from "../..";
 import {NewLedgerChannelState, WaitForDirectFunding} from "../states";
 
 import {describeScenarioStep, itSendsAMessage} from "../../../__tests__/helpers";
 import * as selectors from "../../../selectors";
+
+import * as scenarios from "./scenarios";
 
 // Mocks
 const getNextNonceMock = jest.fn().mockReturnValue(0);

@@ -1,7 +1,10 @@
-import {StateConstructor} from "../../utils";
-import {ProtocolState} from "..";
-import {ProtocolLocator} from "../../../communication";
 import {Outcome} from "@statechannels/nitro-protocol";
+
+import {StateConstructor} from "../../utils";
+
+import {ProtocolLocator} from "../../../communication";
+
+import {ProtocolState} from "..";
 
 // -------
 // States

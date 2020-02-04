@@ -1,8 +1,9 @@
-import * as scenarios from "./scenarios";
 import {initialize, existingLedgerFundingReducer} from "../reducer";
 import * as states from "../states";
 import {ProtocolStateWithSharedData} from "../..";
 import {describeScenarioStep, itSendsTheseStates} from "../../../__tests__/helpers";
+
+import * as scenarios from "./scenarios";
 
 describe("player A happy path", () => {
   const scenario = scenarios.playerAFullyFundedHappyPath;

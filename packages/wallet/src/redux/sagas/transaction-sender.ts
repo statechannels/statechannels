@@ -1,7 +1,9 @@
 import {call, put} from "redux-saga/effects";
+
+import {TransactionResponse, JsonRpcProvider} from "ethers/providers";
+
 import * as actions from "../actions";
 import {getProvider} from "../../utils/contract-utils";
-import {TransactionResponse, JsonRpcProvider} from "ethers/providers";
 import {QueuedTransaction} from "../outbox";
 
 export function* transactionSender(transaction: QueuedTransaction) {

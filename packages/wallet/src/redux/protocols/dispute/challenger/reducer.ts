@@ -1,20 +1,9 @@
-import {
-  ChallengerState as CState,
-  NonTerminalChallengerState as NonTerminalCState,
-  approveChallenge,
-  waitForResponseOrTimeout,
-  acknowledgeFailure as acknowledgeFailureState,
-  FailureReason,
-  waitForTransaction,
-  acknowledgeResponse,
-  acknowledgeTimeout,
-  successOpen,
-  failure,
-  successClosed
-} from "./states";
+import {SignedState} from "@statechannels/nitro-protocol";
+
 import {unreachable} from "../../../../utils/reducer-utils";
+
 import {SharedData, registerChannelToMonitor, getPrivatekey, checkAndStore} from "../../../state";
-import * as actions from "./actions";
+
 import {TransactionAction} from "../../transaction-submission/actions";
 import {isTransactionAction, ProtocolAction} from "../../../actions";
 import {
@@ -32,7 +21,22 @@ import {
   sendChallengeComplete,
   sendConcludeSuccess
 } from "../../reducer-helpers";
-import {SignedState} from "@statechannels/nitro-protocol";
+
+import * as actions from "./actions";
+import {
+  ChallengerState as CState,
+  NonTerminalChallengerState as NonTerminalCState,
+  approveChallenge,
+  waitForResponseOrTimeout,
+  acknowledgeFailure as acknowledgeFailureState,
+  FailureReason,
+  waitForTransaction,
+  acknowledgeResponse,
+  acknowledgeTimeout,
+  successOpen,
+  failure,
+  successClosed
+} from "./states";
 
 const CHALLENGE_TIMEOUT = 5 * 60000;
 

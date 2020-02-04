@@ -1,7 +1,7 @@
-import {ProtocolStateWithSharedData, makeLocator} from "..";
+import {Outcome} from "@statechannels/nitro-protocol";
+
 import {SharedData} from "../../state";
-import * as states from "./states";
-import {LedgerDefundingAction} from "./actions";
+
 import {unreachable} from "../../../utils/reducer-utils";
 import {ProtocolLocator, EmbeddedProtocol} from "../../../communication";
 import {
@@ -11,8 +11,12 @@ import {
 } from "../consensus-update";
 import {routesToConsensusUpdate} from "../consensus-update/actions";
 import * as consensusUpdateActions from "../consensus-update/actions";
-import {Outcome} from "@statechannels/nitro-protocol";
 import {CONSENSUS_UPDATE_PROTOCOL_LOCATOR} from "../consensus-update/reducer";
+
+import {LedgerDefundingAction} from "./actions";
+import * as states from "./states";
+
+import {ProtocolStateWithSharedData, makeLocator} from "..";
 
 export const initialize = ({
   processId,

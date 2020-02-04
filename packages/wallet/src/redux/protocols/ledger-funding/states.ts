@@ -1,8 +1,9 @@
+import {Outcome} from "@statechannels/nitro-protocol";
+
 import {NonTerminalExistingLedgerFundingState} from "../existing-ledger-funding";
 import {StateConstructor} from "../../utils";
 import {NonTerminalNewLedgerChannelState} from "../new-ledger-channel/states";
 import {ProtocolLocator} from "../../../communication";
-import {Outcome} from "@statechannels/nitro-protocol";
 
 interface Base {
   processId: string;

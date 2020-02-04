@@ -2,9 +2,6 @@ import React from "react";
 import {PureComponent} from "react";
 import {connect} from "react-redux";
 
-import * as actions from "./actions";
-import * as states from "./states";
-
 import {unreachable} from "../../../utils/reducer-utils";
 import WaitForOtherPlayer from "../shared-components/wait-for-other-player";
 import AcknowledgeX from "../shared-components/acknowledge-x";
@@ -12,6 +9,9 @@ import {ActionDispatcher} from "../../utils";
 import {LedgerFunding} from "../ledger-funding/container";
 import {FundingStrategyNegotiation} from "../funding-strategy-negotiation/container";
 import {VirtualFunding} from "../virtual-funding/container";
+
+import * as states from "./states";
+import * as actions from "./actions";
 
 interface Props {
   state: states.OngoingFundingState;

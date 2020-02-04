@@ -1,10 +1,13 @@
 import {PureComponent} from "react";
-import {isChallengerState, NonTerminalChallengerState} from "./challenger/states";
+
 import React from "react";
+
+import {connect} from "react-redux";
+
+import {isChallengerState, NonTerminalChallengerState} from "./challenger/states";
 import {Challenger} from "./challenger/container";
 import {NonTerminalResponderState} from "./responder/states";
 import {Responder} from "./responder/container";
-import {connect} from "react-redux";
 
 interface Props {
   state: NonTerminalResponderState | NonTerminalChallengerState;

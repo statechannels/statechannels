@@ -1,4 +1,5 @@
 import {bigNumberify} from "ethers/utils";
+
 import {unreachable} from "../../../utils/reducer-utils";
 import {
   createETHDepositTransaction,
@@ -13,11 +14,13 @@ import {
   transactionReducer
 } from "../transaction-submission/reducer";
 import {isTerminal, isSuccess} from "../transaction-submission/states";
-import * as states from "./states";
+
 import {TwoPartyPlayerIndex} from "../../types";
 import {ProtocolLocator} from "../../../communication";
 import {ETH_ASSET_HOLDER_ADDRESS, ERC20_ASSET_HOLDER_ADDRESS} from "../../../constants";
 import {TransactionRequestWithTarget} from "../../outbox/state";
+
+import * as states from "./states";
 
 type DFReducer = ProtocolReducer<states.DirectFundingState>;
 

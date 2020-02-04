@@ -1,12 +1,3 @@
-import {SharedData, getExistingChannel, signAndStore} from "../../state";
-import * as states from "./states";
-import {ProtocolStateWithSharedData} from "..";
-import {ConsensusUpdateAction} from "./actions";
-import * as helpers from "../reducer-helpers";
-
-import {SignedStatesReceived, ProtocolLocator} from "../../../communication";
-import {unreachable} from "../../../utils/reducer-utils";
-import {ChannelState} from "../../channel-store";
 import {
   Outcome,
   State,
@@ -15,6 +6,19 @@ import {
   encodeConsensusData,
   ConsensusData
 } from "@statechannels/nitro-protocol";
+
+import {SharedData, getExistingChannel, signAndStore} from "../../state";
+
+import * as helpers from "../reducer-helpers";
+
+import {SignedStatesReceived, ProtocolLocator} from "../../../communication";
+import {unreachable} from "../../../utils/reducer-utils";
+import {ChannelState} from "../../channel-store";
+
+import {ConsensusUpdateAction} from "./actions";
+import * as states from "./states";
+
+import {ProtocolStateWithSharedData} from "..";
 
 export {CONSENSUS_UPDATE_PROTOCOL_LOCATOR} from "../../../communication/protocol-locator";
 

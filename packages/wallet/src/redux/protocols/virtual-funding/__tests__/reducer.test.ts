@@ -1,7 +1,10 @@
 import {convertAddressToBytes32} from "@statechannels/nitro-protocol";
+
+import {bigNumberify} from "ethers/utils";
+
 import * as states from "../states";
 import {initialize, reducer} from "../reducer";
-import * as scenarios from "./scenarios";
+
 import {
   scenarioStepDescription,
   itSendsNoMessage,
@@ -14,8 +17,9 @@ import {
   bsAddress,
   convertBalanceToOutcome
 } from "../../../__tests__/state-helpers";
-import {bigNumberify} from "ethers/utils";
 import {ETH_ASSET_HOLDER_ADDRESS} from "../../../../constants";
+
+import * as scenarios from "./scenarios";
 
 const itTransitionsTo = (
   result: states.VirtualFundingState,

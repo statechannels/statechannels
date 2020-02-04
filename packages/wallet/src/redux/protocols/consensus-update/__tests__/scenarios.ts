@@ -1,3 +1,7 @@
+import {bigNumberify} from "ethers/utils";
+
+import {SignedState} from "@statechannels/nitro-protocol";
+
 import {
   asAddress,
   bsAddress,
@@ -8,7 +12,6 @@ import {
   threeWayLedgerState,
   convertBalanceToOutcome
 } from "../../../__tests__/state-helpers";
-import {bigNumberify} from "ethers/utils";
 import {setChannels, EMPTY_SHARED_DATA} from "../../../state";
 import {channelFromStates} from "../../../channel-store/channel-state/__tests__";
 import * as states from "../states";
@@ -16,7 +19,6 @@ import {signedStatesReceived} from "../../../../communication";
 import {ThreePartyPlayerIndex, TwoPartyPlayerIndex} from "../../../types";
 import {clearedToSend} from "../actions";
 import {unreachable} from "../../../../utils/reducer-utils";
-import {SignedState} from "@statechannels/nitro-protocol";
 
 const protocolLocator = [];
 

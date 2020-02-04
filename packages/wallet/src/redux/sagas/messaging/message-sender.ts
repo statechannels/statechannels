@@ -1,6 +1,11 @@
 import {bigNumberify} from "ethers/utils";
 import jrs from "jsonrpc-lite";
 import {call, select} from "redux-saga/effects";
+
+import {State} from "@statechannels/nitro-protocol";
+
+import {ProtocolState} from "src/redux/protocols";
+
 import {validateNotification, validateResponse} from "../../../json-rpc-validation/validator";
 import {createJsonRpcAllocationsFromOutcome} from "../../../utils/json-rpc-utils";
 import {unreachable} from "../../../utils/reducer-utils";
@@ -8,12 +13,11 @@ import {unreachable} from "../../../utils/reducer-utils";
 import {ChannelState, getLastState, getPenultimateState} from "../../channel-store";
 import {getChannelHoldings, getLastSignedStateForChannel, getProtocolState} from "../../selectors";
 import {getChannelStatus} from "../../state";
-import {OutgoingApiAction} from "./outgoing-api-actions";
-import {State} from "@statechannels/nitro-protocol";
 
 import {isResponderState} from "../../protocols/dispute/responder/states";
 import {isChallengerState} from "../../protocols/dispute/challenger/states";
-import {ProtocolState} from "src/redux/protocols";
+
+import {OutgoingApiAction} from "./outgoing-api-actions";
 
 export function* messageSender(action: OutgoingApiAction) {
   const message = yield createResponseMessage(action);

@@ -1,14 +1,17 @@
+import {bigNumberify} from "ethers/utils/bignumber";
+
+import _ from "lodash";
+
 import {
   asAddress,
   bsAddress,
   channelId,
   convertBalanceToOutcome
 } from "../../../__tests__/state-helpers";
-import {bigNumberify} from "ethers/utils/bignumber";
 import {waitForLedgerUpdate} from "../states";
 import * as ledgerUpdateScenarios from "../../consensus-update/__tests__";
 import * as advanceChannelScenarios from "../../advance-channel/__tests__";
-import _ from "lodash";
+
 const processId = "processId";
 const protocolLocator = [];
 

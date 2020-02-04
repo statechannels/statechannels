@@ -1,11 +1,13 @@
 import React from "react";
 import {PureComponent} from "react";
 import {connect} from "react-redux";
+
 import {Dispute} from "../dispute/container";
-import * as states from "./states";
 
 import {unreachable} from "../../../utils/reducer-utils";
 import {isNonTerminalDisputeState} from "../dispute/state";
+
+import * as states from "./states";
 
 interface Props {
   state: states.ApplicationState;

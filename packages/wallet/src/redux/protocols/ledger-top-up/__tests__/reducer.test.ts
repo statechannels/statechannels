@@ -1,17 +1,20 @@
-import * as scenarios from "./scenarios";
-import {initialize, ledgerTopUpReducer} from "../reducer";
-import {LedgerTopUpState, LedgerTopUpStateType} from "../states";
-import {ProtocolStateWithSharedData} from "../..";
-import {describeScenarioStep} from "../../../__tests__/helpers";
-import {bsAddress, asAddress} from "../../../__tests__/state-helpers";
-import {isTerminal} from "../../consensus-update";
 import {
   AllocationItem,
   Outcome,
   isAllocationOutcome,
   convertAddressToBytes32
 } from "@statechannels/nitro-protocol";
+
 import _ from "lodash";
+
+import {initialize, ledgerTopUpReducer} from "../reducer";
+import {LedgerTopUpState, LedgerTopUpStateType} from "../states";
+import {ProtocolStateWithSharedData} from "../..";
+import {describeScenarioStep} from "../../../__tests__/helpers";
+import {bsAddress, asAddress} from "../../../__tests__/state-helpers";
+import {isTerminal} from "../../consensus-update";
+
+import * as scenarios from "./scenarios";
 
 const asAddressPadded = convertAddressToBytes32(asAddress);
 const bsAddressPadded = convertAddressToBytes32(bsAddress);

@@ -1,6 +1,3 @@
-import {ProtocolStateWithSharedData} from "..";
-import * as states from "./states";
-import {WithdrawalAction} from "./actions";
 import * as selectors from "../../selectors";
 import {
   createConcludePushOutcomeAndTransferAllTransaction as nitroCreateConcludePushOutcomeAndTransferAllTransaction,
@@ -16,6 +13,11 @@ import {unreachable} from "../../../utils/reducer-utils";
 import {SharedData} from "../../state";
 import {TransactionRequestWithTarget} from "../../outbox/state";
 import {ADJUDICATOR_ADDRESS} from "../../../constants";
+
+import {WithdrawalAction} from "./actions";
+import * as states from "./states";
+
+import {ProtocolStateWithSharedData} from "..";
 
 export const initialize = (
   withdrawalAmount: string,

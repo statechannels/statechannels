@@ -1,3 +1,9 @@
+import {SignedState, State} from "@statechannels/nitro-protocol";
+
+import {ProcessProtocol, ProtocolLocator, RelayableAction} from "../communication";
+
+import {CONSENSUS_LIBRARY_ADDRESS, CONSENSUS_LIBRARY_BYTECODE} from "../constants";
+
 import {
   OutboxState,
   emptyDisplayOutboxState,
@@ -24,7 +30,6 @@ import {Properties} from "./utils";
 import * as NewLedgerChannel from "./protocols/new-ledger-channel/states";
 import {accumulateSideEffects} from "./outbox";
 import {AdjudicatorState} from "./adjudicator-state/state";
-import {ProcessProtocol, ProtocolLocator, RelayableAction} from "../communication";
 import {
   TerminalApplicationState,
   isTerminalApplicationState,
@@ -46,8 +51,7 @@ import {
   isConcludingState,
   isTerminalConcludingState
 } from "./protocols/concluding/states";
-import {SignedState, State} from "@statechannels/nitro-protocol";
-import {CONSENSUS_LIBRARY_ADDRESS, CONSENSUS_LIBRARY_BYTECODE} from "../constants";
+
 import {getAppDefinitionBytecode} from "./selectors";
 import {AssetHoldersState} from "./asset-holders-state/state";
 import {relayActionWithMessage, OutgoingApiAction} from "./sagas/messaging/outgoing-api-actions";

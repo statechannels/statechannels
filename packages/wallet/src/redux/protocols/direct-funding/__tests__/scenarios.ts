@@ -1,3 +1,5 @@
+import {bigNumberify} from "ethers/utils";
+
 import {addHex} from "../../../../utils/hex-utils";
 import * as globalActions from "../../../actions";
 
@@ -7,7 +9,6 @@ import * as advanceChannelScenarios from "../../advance-channel/__tests__";
 import * as states from "../states";
 import {SharedData} from "../../../state";
 import {ETH_ASSET_HOLDER_ADDRESS} from "../../../../constants";
-import {bigNumberify} from "ethers/utils";
 
 const {threeWayLedgerId: channelId, twoThree} = scenarios;
 export const assetHolderAddress = ETH_ASSET_HOLDER_ADDRESS;

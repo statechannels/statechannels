@@ -1,15 +1,17 @@
-import * as scenarios from "./scenarios";
+import {State} from "@statechannels/nitro-protocol";
+
 import {initialize, responderReducer} from "../reducer";
 
 import * as states from "../states";
 import * as TransactionGenerator from "../../../../../utils/transaction-generator";
 import {itSendsThisDisplayEventType, itSendsThisMessage} from "../../../../__tests__/helpers";
 import {describeScenarioStep} from "../../../../__tests__/helpers";
-import {State} from "@statechannels/nitro-protocol";
 import {
   apiNotImplemented,
   channelUpdatedEvent
 } from "../../../../sagas/messaging/outgoing-api-actions";
+
+import * as scenarios from "./scenarios";
 
 // Mocks
 const mockTransaction = {to: "0xabc"};

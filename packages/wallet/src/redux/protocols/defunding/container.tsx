@@ -1,12 +1,15 @@
-import * as states from "./states";
 import {PureComponent} from "react";
 import React from "react";
+
+import {connect} from "react-redux";
+
 import Failure from "../shared-components/failure";
 import Success from "../shared-components/success";
-import {connect} from "react-redux";
 import {LedgerDefunding} from "../ledger-defunding/container";
 import {unreachable} from "../../../utils/reducer-utils";
 import {VirtualDefunding} from "../virtual-defunding/container";
+
+import * as states from "./states";
 
 interface Props {
   state: states.DefundingState;

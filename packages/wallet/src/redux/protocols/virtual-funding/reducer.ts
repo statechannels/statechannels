@@ -1,25 +1,4 @@
-import * as states from "./states";
-import {SharedData, getPrivatekey, setFundingState} from "../../state";
-import {ProtocolStateWithSharedData, ProtocolReducer, makeLocator} from "..";
-import {WalletAction, advanceChannel} from "../../actions";
-import {VirtualFundingAction} from "./actions";
-import {unreachable} from "../../../utils/reducer-utils";
-import {CONSENSUS_LIBRARY_ADDRESS, ETH_ASSET_HOLDER_ADDRESS} from "../../../constants";
-import {advanceChannelReducer} from "../advance-channel";
-import * as consensusUpdate from "../consensus-update";
-import * as ledgerFunding from "../ledger-funding";
-import {addHex} from "../../../utils/hex-utils";
-import {ADVANCE_CHANNEL_PROTOCOL_LOCATOR} from "../advance-channel/reducer";
-import {routesToAdvanceChannel} from "../advance-channel/actions";
-import {routesToLedgerFunding} from "../ledger-funding/actions";
-import {routesToConsensusUpdate, clearedToSend} from "../consensus-update/actions";
-import {EmbeddedProtocol} from "../../../communication";
-
-export const VIRTUAL_FUNDING_PROTOCOL_LOCATOR = "VirtualFunding";
-import {CONSENSUS_UPDATE_PROTOCOL_LOCATOR} from "../consensus-update/reducer";
-import {TwoPartyPlayerIndex} from "../../types";
 import {Wallet} from "ethers";
-import {StateType} from "../advance-channel/states";
 import {
   encodeConsensusData,
   Outcome,
@@ -27,6 +6,32 @@ import {
   convertAddressToBytes32
 } from "@statechannels/nitro-protocol";
 import {AllocationAssetOutcome} from "@statechannels/nitro-protocol";
+
+import {SharedData, getPrivatekey, setFundingState} from "../../state";
+
+import {StateType} from "../advance-channel/states";
+import {TwoPartyPlayerIndex} from "../../types";
+import {CONSENSUS_UPDATE_PROTOCOL_LOCATOR} from "../consensus-update/reducer";
+import {EmbeddedProtocol} from "../../../communication";
+import {routesToConsensusUpdate, clearedToSend} from "../consensus-update/actions";
+import {routesToLedgerFunding} from "../ledger-funding/actions";
+import {routesToAdvanceChannel} from "../advance-channel/actions";
+import {ADVANCE_CHANNEL_PROTOCOL_LOCATOR} from "../advance-channel/reducer";
+import {addHex} from "../../../utils/hex-utils";
+import * as ledgerFunding from "../ledger-funding";
+import * as consensusUpdate from "../consensus-update";
+import {advanceChannelReducer} from "../advance-channel";
+import {CONSENSUS_LIBRARY_ADDRESS, ETH_ASSET_HOLDER_ADDRESS} from "../../../constants";
+import {unreachable} from "../../../utils/reducer-utils";
+import {WalletAction, advanceChannel} from "../../actions";
+
+import * as states from "./states";
+
+import {VirtualFundingAction} from "./actions";
+
+import {ProtocolStateWithSharedData, ProtocolReducer, makeLocator} from "..";
+
+export const VIRTUAL_FUNDING_PROTOCOL_LOCATOR = "VirtualFunding";
 
 export function initialize(
   sharedData: SharedData,

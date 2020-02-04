@@ -1,12 +1,15 @@
 import {SharedData} from "../../state";
-import {ProtocolStateWithSharedData} from "..";
+
+import {ProtocolAction} from "../../actions";
+
 import {DisputeState, isTerminal} from "./state";
 import {responderReducer} from "./responder/reducer";
 import {challengerReducer} from "./challenger/reducer";
 import {isNonTerminalResponderState} from "./responder/states";
 import {isResponderAction} from "./responder/actions";
-import {ProtocolAction} from "../../actions";
 import {isChallengerAction} from "./challenger/actions";
+
+import {ProtocolStateWithSharedData} from "..";
 
 export const disputeReducer = (
   protocolState: DisputeState,

@@ -1,5 +1,6 @@
 import {StateConstructor} from "../../utils";
 import {NonTerminalTransactionSubmissionState as NonTerminalTSState} from "../transaction-submission/states";
+
 import {ProtocolState} from "..";
 
 // -------
