@@ -23,7 +23,7 @@ module.exports = {
     'no-empty-pattern': 'off',
     'import/first': 2,
     "import/order": ["error", {
-      "groups": ["builtin", "external", "internal",  "parent", , "sibling", "index"],
+      "groups": ["builtin", "external", "internal",  "parent", "sibling", "index"],
       "newlines-between": "always-and-inside-groups"
     }],
     'no-restricted-imports': ['error', { patterns: ['**/lib/**', '**/src/**'] }],
