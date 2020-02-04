@@ -1,6 +1,3 @@
-import * as states from "./states";
-import * as actions from "./actions";
-
 import {SharedData, queueRelayableActionMessage} from "../../../state";
 import {ProtocolStateWithSharedData} from "../..";
 import {unreachable} from "../../../../utils/reducer-utils";
@@ -9,6 +6,9 @@ import {showWallet} from "../../reducer-helpers";
 
 import * as comms from "../../../../communication";
 import {getParticipantIdForAddress} from "../../../selectors";
+
+import * as actions from "./actions";
+import * as states from "./states";
 
 export function initialize({
   sharedData,

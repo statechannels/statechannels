@@ -1,7 +1,6 @@
-import {walletReducer, getProcessId} from "../reducer";
+import {Wallet} from "ethers";
 
-import * as states from "./../state";
-import * as actions from "./../actions";
+import {walletReducer, getProcessId} from "../reducer";
 
 import {TwoPartyPlayerIndex} from "../types";
 import * as fundProtocol from "../protocols/funding";
@@ -9,7 +8,9 @@ import {fundingRequested} from "../protocols/actions";
 import * as adjudicatorState from "../adjudicator-state/reducer";
 import {ProcessProtocol, strategyApproved} from "../../communication";
 import {channelId} from "../__tests__/state-helpers";
-import {Wallet} from "ethers";
+
+import * as actions from "./../actions";
+import * as states from "./../state";
 
 const wallet = Wallet.createRandom();
 const defaults = {

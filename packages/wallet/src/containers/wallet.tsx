@@ -4,6 +4,7 @@ import {connect} from "react-redux";
 import {Modal, Card} from "rimble-ui";
 
 import * as states from "../redux/state";
+
 import WalletInitializedContainer from "./initialized";
 
 interface WalletProps {

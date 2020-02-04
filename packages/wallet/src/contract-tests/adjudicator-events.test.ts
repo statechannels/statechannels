@@ -1,7 +1,16 @@
 import {getChannelId as nitroGetChannelId} from "@statechannels/nitro-protocol";
-import {adjudicatorWatcher} from "../redux/sagas/adjudicator-watcher";
+
 import SagaTester from "redux-saga-tester";
+
+import {getGanacheProvider} from "@statechannels/devtools";
+
+import {Wallet} from "ethers";
+
+import {adjudicatorWatcher} from "../redux/sagas/adjudicator-watcher";
 import * as actions from "../redux/actions";
+
+import * as walletStates from "../redux/state";
+
 import {
   depositIntoETHAssetHolder,
   createChallenge,
@@ -10,9 +19,6 @@ import {
   respond,
   getChannelId
 } from "./test-utils";
-import * as walletStates from "../redux/state";
-import {getGanacheProvider} from "@statechannels/devtools";
-import {Wallet} from "ethers";
 
 jest.setTimeout(60000);
 

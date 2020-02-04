@@ -1,6 +1,7 @@
-import {ProtocolStateWithSharedData} from "../..";
-import * as states from "./states";
-import * as actions from "./actions";
+import * as _ from "lodash";
+
+import {State, getChannelId, SignedState} from "@statechannels/nitro-protocol";
+
 import {unreachable} from "../../../../utils/reducer-utils";
 import * as selectors from "../../../selectors";
 import * as TransactionGenerator from "../../../../utils/transaction-generator";
@@ -25,10 +26,13 @@ import {
   sendOpponentConcluded
 } from "../../reducer-helpers";
 import {ProtocolAction} from "../../../actions";
-import * as _ from "lodash";
-import {State, getChannelId, SignedState} from "@statechannels/nitro-protocol";
+
+import {ProtocolStateWithSharedData} from "../..";
 import {TransactionRequestWithTarget} from "../../../outbox/state";
 import {ADJUDICATOR_ADDRESS} from "../../../../constants";
+
+import * as actions from "./actions";
+import * as states from "./states";
 export const initialize = (
   processId: string,
   channelId: string,

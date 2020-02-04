@@ -2,15 +2,17 @@ import React from "react";
 import {PureComponent} from "react";
 import {connect} from "react-redux";
 
+import {FundingStrategy} from "src/communication";
+
 import {FUNDING_STRATEGY} from "../../../../constants";
 import {unreachable} from "../../../../utils/reducer-utils";
 import {TwoPartyPlayerIndex} from "../../../types";
 import {ActionDispatcher} from "../../../utils";
 import ApproveX from "../../shared-components/approve-x";
 import WaitForOtherPlayer from "../../shared-components/wait-for-other-player";
+
 import * as actions from "./actions";
 import * as states from "./states";
-import {FundingStrategy} from "src/communication";
 
 interface Props {
   state: states.OngoingFundingStrategyNegotiationState;

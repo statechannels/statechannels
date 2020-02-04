@@ -1,10 +1,11 @@
+import {bigNumberify} from "ethers/utils";
+
 import * as testScenarios from "../../../__tests__/state-helpers";
 import * as defundingScenarios from "../../defunding/__tests__";
 import * as advanceChannelScenarios from "../../advance-channel/__tests__";
 
 import * as states from "../states";
 import {EMPTY_SHARED_DATA, setChannels, setFundingState} from "../../../state";
-import {bigNumberify} from "ethers/utils";
 import {channelFromStates} from "../../../channel-store/channel-state/__tests__";
 import {mergeSharedData} from "../../../__tests__/helpers";
 import {prependToLocator} from "../../../protocols";

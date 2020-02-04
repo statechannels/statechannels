@@ -1,8 +1,11 @@
-import {SharedData, ChannelFundingState, setFundingState} from "../../state";
-import * as states from "./states";
-import {ProtocolStateWithSharedData, makeLocator} from "..";
-import {ExistingLedgerFundingAction} from "./actions";
 import {bigNumberify} from "ethers/utils";
+
+import {Outcome, State} from "@statechannels/nitro-protocol";
+
+import {AllocationAssetOutcome} from "@statechannels/nitro-protocol";
+
+import {SharedData, ChannelFundingState, setFundingState} from "../../state";
+
 import {ProtocolLocator} from "../../../communication";
 import {
   initialize as initializeLedgerTopUp,
@@ -26,7 +29,7 @@ import {
   ConsensusUpdateState
 } from "../consensus-update/states";
 import {LedgerTopUpState} from "../ledger-top-up/states";
-import {Outcome, State} from "@statechannels/nitro-protocol";
+
 import {getLatestState} from "../reducer-helpers";
 import {
   getAllocationOutcome,
@@ -34,7 +37,12 @@ import {
   outcomeContainsId,
   getAllocationTotal
 } from "../../../utils/outcome-utils";
-import {AllocationAssetOutcome} from "@statechannels/nitro-protocol";
+
+import {ExistingLedgerFundingAction} from "./actions";
+import * as states from "./states";
+
+import {ProtocolStateWithSharedData, makeLocator} from "..";
+
 export {EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR} from "../../../communication/protocol-locator";
 
 export const initialize = ({

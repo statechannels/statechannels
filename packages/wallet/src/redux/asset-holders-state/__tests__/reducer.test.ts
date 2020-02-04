@@ -1,6 +1,7 @@
+import {One} from "ethers/constants";
+
 import * as actions from "../../actions";
 import {assetHolderStateReducer} from "../reducer";
-import {One} from "ethers/constants";
 
 const assetHolderAddress = "0x0";
 const destination = "0x01";

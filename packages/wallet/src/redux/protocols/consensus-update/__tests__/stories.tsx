@@ -1,6 +1,7 @@
-import * as scenarios from "./scenarios";
 import {addStoriesFromScenario as addStories} from "../../../../__stories__";
 import {ConsensusUpdate} from "../container";
+
+import * as scenarios from "./scenarios";
 
 addStories(
   scenarios.twoPlayerAHappyPath,

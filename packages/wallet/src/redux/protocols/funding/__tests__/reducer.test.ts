@@ -1,4 +1,3 @@
-import * as scenarios from "./scenarios";
 import * as states from "../states";
 import {fundingReducer as reducer} from "../reducer";
 import {ProtocolStateWithSharedData} from "../..";
@@ -8,6 +7,8 @@ import {
   describeScenarioStep
 } from "../../../__tests__/helpers";
 import {apiNotImplemented} from "../../../sagas/messaging/outgoing-api-actions";
+
+import * as scenarios from "./scenarios";
 
 describe("ledger funding", () => {
   const scenario = scenarios.ledgerFunding;

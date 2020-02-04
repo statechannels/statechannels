@@ -1,17 +1,24 @@
 import {PureComponent} from "react";
-import {ProtocolState} from ".";
+
+import React from "react";
+
+import {connect} from "react-redux";
+
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+
+import {faSpinner} from "@fortawesome/free-solid-svg-icons";
+
 import * as fundingStates from "./funding/states";
 import * as ApplicationStates from "./application/states";
 import * as concludingStates from "./concluding/states";
-import React from "react";
 import {Funding} from "./funding/container";
 import {Concluding} from "./concluding/container";
-import {connect} from "react-redux";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faSpinner} from "@fortawesome/free-solid-svg-icons";
+
 import {isDefundingState} from "./defunding/states";
 import {Defunding} from "./defunding";
 import {Application} from "./application/container";
+
+import {ProtocolState} from ".";
 
 interface Props {
   protocolState: ProtocolState;

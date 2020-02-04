@@ -1,6 +1,8 @@
 import {addStoriesFromScenario as addStories} from "../../../../__stories__";
-import * as scenarios from "./scenarios";
+
 import {ExistingLedgerFunding} from "../container";
+
+import * as scenarios from "./scenarios";
 
 addStories(
   scenarios.playerAFullyFundedHappyPath,

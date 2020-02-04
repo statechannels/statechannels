@@ -1,10 +1,17 @@
+import {LOAD as LOAD_FROM_STORAGE} from "redux-storage";
+
+import {SignedState, State} from "@statechannels/nitro-protocol";
+
+import {BigNumber} from "ethers/utils";
+
+import {RelayableAction, ProtocolLocator} from "../communication";
+
 import * as directFunding from "./protocols/direct-funding/actions";
 import * as NewLedgerChannel from "./protocols/new-ledger-channel/actions";
 import * as application from "./protocols/application/actions";
 import * as protocol from "./protocols/actions";
 import * as advanceChannel from "./protocols/advance-channel";
 import {FundingAction, isFundingAction} from "./protocols/funding/actions";
-import {RelayableAction, ProtocolLocator} from "../communication";
 
 import {ConcludingAction, isConcludingAction} from "./protocols/concluding";
 import {ApplicationAction} from "./protocols/application/actions";
@@ -14,9 +21,6 @@ import {AdvanceChannelAction} from "./protocols/advance-channel/actions";
 import {FundingStrategyNegotiationAction} from "./protocols/funding-strategy-negotiation/actions";
 import {LedgerFundingAction} from "./protocols/ledger-funding";
 
-import {LOAD as LOAD_FROM_STORAGE} from "redux-storage";
-import {SignedState, State} from "@statechannels/nitro-protocol";
-import {BigNumber} from "ethers/utils";
 import {CloseLedgerChannelAction} from "./protocols/close-ledger-channel";
 export * from "./protocols/transaction-submission/actions";
 

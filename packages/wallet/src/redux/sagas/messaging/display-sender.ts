@@ -1,6 +1,8 @@
 import {put, call} from "redux-saga/effects";
-import {displayMessageSent} from "../../actions";
+
 import jrs from "jsonrpc-lite";
+
+import {displayMessageSent} from "../../actions";
 import {validateNotification} from "../../../json-rpc-validation/validator";
 
 export function* displaySender(displayMessage: "Show" | "Hide") {

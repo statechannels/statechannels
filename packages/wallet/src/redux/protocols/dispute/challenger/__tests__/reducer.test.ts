@@ -1,4 +1,3 @@
-import * as scenarios from "./scenarios";
 import {challengerReducer, initialize, ReturnVal} from "../reducer";
 import {
   FailureReason,
@@ -16,6 +15,8 @@ import {
   apiNotImplemented,
   channelUpdatedEvent
 } from "../../../../sagas/messaging/outgoing-api-actions";
+
+import * as scenarios from "./scenarios";
 
 describe("OPPONENT RESPONDS", () => {
   const scenario = scenarios.opponentResponds;

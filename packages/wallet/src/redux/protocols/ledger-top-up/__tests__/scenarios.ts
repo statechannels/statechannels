@@ -1,4 +1,7 @@
 import {bigNumberify} from "ethers/utils";
+
+import {SignedState} from "@statechannels/nitro-protocol";
+
 import * as states from "../states";
 import {preSuccessA, preSuccessB} from "../../direct-funding/__tests__";
 import {
@@ -16,7 +19,6 @@ import {setChannels} from "../../../state";
 import {channelFromStates} from "../../../channel-store/channel-state/__tests__";
 import {makeLocator} from "../..";
 import {EmbeddedProtocol} from "../../../../communication";
-import {SignedState} from "@statechannels/nitro-protocol";
 
 const protocolLocator = makeLocator(EmbeddedProtocol.LedgerTopUp);
 // ---------

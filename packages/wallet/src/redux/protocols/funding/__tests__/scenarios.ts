@@ -1,3 +1,5 @@
+import {bigNumberify} from "ethers/utils";
+
 import * as states from "../states";
 import * as actions from "../actions";
 
@@ -12,7 +14,6 @@ import {
 import {preSuccess as ledgerFundingPreSuccess} from "../../ledger-funding/__tests__";
 import {preSuccess as virtualFundingPreSuccess} from "../../virtual-funding/__tests__";
 import {preSuccess as advanceChannelPreSuccess} from "../../advance-channel/__tests__";
-import {bigNumberify} from "ethers/utils";
 import {channelFromStates} from "../../../channel-store/channel-state/__tests__";
 import {prependToLocator} from "../..";
 import {EmbeddedProtocol} from "../../../../communication";

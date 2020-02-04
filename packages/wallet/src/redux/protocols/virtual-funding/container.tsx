@@ -1,12 +1,14 @@
-import * as states from "./states";
 import {PureComponent} from "react";
 import React from "react";
 
 import {connect} from "react-redux";
+
 import {LedgerFunding} from "../ledger-funding/container";
 import {ConsensusUpdate} from "../consensus-update/container";
 import {AdvanceChannel} from "../advance-channel/container";
 import {unreachable} from "../../../utils/reducer-utils";
+
+import * as states from "./states";
 
 interface Props {
   state: states.NonTerminalVirtualFundingState;

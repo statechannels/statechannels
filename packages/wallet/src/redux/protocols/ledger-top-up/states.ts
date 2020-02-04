@@ -1,8 +1,9 @@
+import {Outcome} from "@statechannels/nitro-protocol";
+
 import {DirectFundingState} from "../direct-funding/states";
 import {StateConstructor} from "../../utils";
 import {ConsensusUpdateState} from "../consensus-update";
 import {ProtocolLocator} from "../../../communication";
-import {Outcome} from "@statechannels/nitro-protocol";
 
 export interface WaitForDirectFundingForA {
   type: "LedgerTopUp.WaitForDirectFundingForA";

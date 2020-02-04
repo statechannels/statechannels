@@ -1,9 +1,12 @@
+import {Outcome} from "@statechannels/nitro-protocol";
+
 import {StateConstructor} from "../../utils";
-import {ProtocolState} from "..";
+
 import {ProtocolLocator} from "../../../communication";
 import {ConsensusUpdateState} from "../consensus-update";
 import {LedgerTopUpState} from "../ledger-top-up/states";
-import {Outcome} from "@statechannels/nitro-protocol";
+
+import {ProtocolState} from "..";
 
 export type FailureReason =
   | "ReceivedInvalidState"

@@ -1,4 +1,9 @@
 import {SharedData} from "../state";
+
+import {ProtocolLocator, EmbeddedProtocol} from "../../communication";
+
+import {WalletAction} from "../actions";
+
 import {ChallengerState} from "./dispute/challenger/states";
 
 import {DirectFundingState} from "./direct-funding/states";
@@ -17,8 +22,7 @@ import {ConsensusUpdateState} from "./consensus-update/states";
 import {AdvanceChannelState} from "./advance-channel";
 import {VirtualFundingState} from "./virtual-funding/states";
 import {LedgerFundingState} from "./ledger-funding/states";
-import {ProtocolLocator, EmbeddedProtocol} from "../../communication";
-import {WalletAction} from "../actions";
+
 import {FundingStrategyNegotiationState} from "./funding-strategy-negotiation/states";
 import {VirtualDefundingState} from "./virtual-defunding/states";
 import {CloseLedgerChannelState} from "./close-ledger-channel/states";

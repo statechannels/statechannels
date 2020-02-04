@@ -1,10 +1,13 @@
+import {Interface} from "ethers/utils";
+
 import {directFundingStateReducer, initialize} from "../reducer";
 import * as states from "../states";
-import * as scenarios from "./scenarios";
+
 import {ProtocolStateWithSharedData} from "../..";
 import {itSendsATransaction, itSendsThisTransaction} from "../../../__tests__/helpers";
 import {describeScenarioStep} from "../../../__tests__/helpers";
-import {Interface} from "ethers/utils";
+
+import * as scenarios from "./scenarios";
 
 describe("Player A Happy path", () => {
   const scenario = scenarios.aHappyPath;

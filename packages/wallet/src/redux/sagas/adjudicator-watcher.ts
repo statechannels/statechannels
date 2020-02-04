@@ -1,14 +1,21 @@
-import {getAdjudicatorContract} from "../../utils/contract-utils";
 import {call, take, put, select, fork, putResolve, delay} from "redux-saga/effects";
 import {eventChannel} from "redux-saga";
+
+import {getChallengeRegisteredEvent, getChallengeClearedEvent} from "@statechannels/nitro-protocol";
+
+import {bigNumberify} from "ethers/utils";
+
+import {Contract, Event} from "ethers";
+
+import {Web3Provider, TransactionResponse} from "ethers/providers";
+
 import * as actions from "../actions";
 import {getAdjudicatorWatcherSubscribersForChannel} from "../selectors";
 import {ChannelSubscriber} from "../state";
 import {ProtocolLocator} from "../../communication";
-import {getChallengeRegisteredEvent, getChallengeClearedEvent} from "@statechannels/nitro-protocol";
-import {bigNumberify} from "ethers/utils";
-import {Contract, Event} from "ethers";
-import {Web3Provider, TransactionResponse} from "ethers/providers";
+
+import {getAdjudicatorContract} from "../../utils/contract-utils";
+
 import {messageSender} from "./messaging/message-sender";
 import {channelUpdatedEvent} from "./messaging/outgoing-api-actions";
 

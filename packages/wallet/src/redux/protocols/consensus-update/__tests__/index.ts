@@ -1,3 +1,6 @@
+import {prependToScenarioLocator} from "../../__tests__";
+import {EmbeddedProtocol} from "../../../../communication";
+
 import {
   twoPlayerAHappyPath,
   twoPlayerBHappyPath,
@@ -5,8 +8,6 @@ import {
   threePlayerBHappyPath,
   threePlayerHubHappyPath
 } from "./scenarios";
-import {prependToScenarioLocator} from "../../__tests__";
-import {EmbeddedProtocol} from "../../../../communication";
 
 export const twoPlayerPreSuccessA = prependToScenarioLocator(
   twoPlayerAHappyPath.stateSent,

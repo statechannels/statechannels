@@ -1,4 +1,13 @@
+import _ from "lodash";
+
+import {Wallet} from "ethers";
+
 import {unreachable} from "../utils/reducer-utils";
+
+import {isStartProcessAction, ProcessProtocol} from "../communication";
+
+import * as communication from "../communication";
+
 import * as actions from "./actions";
 
 import {clearOutbox} from "./outbox/reducer";
@@ -10,11 +19,9 @@ import * as fundProtocol from "./protocols/funding";
 import * as states from "./state";
 import {APPLICATION_PROCESS_ID} from "./protocols/application/reducer";
 import {adjudicatorStateReducer} from "./adjudicator-state/reducer";
-import {isStartProcessAction, ProcessProtocol} from "../communication";
-import * as communication from "../communication";
+
 import * as closeLedgerChannelProtocol from "./protocols/close-ledger-channel";
-import _ from "lodash";
-import {Wallet} from "ethers";
+
 import {assetHolderStateReducer} from "./asset-holders-state/reducer";
 
 // If we're generating the initial state then we need to create a new key for the user

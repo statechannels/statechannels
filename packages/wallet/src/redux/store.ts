@@ -5,11 +5,13 @@ import {call} from "redux-saga/effects";
 import * as storage from "redux-storage";
 const sagaMiddleware = createSagaMiddleware();
 
-import {walletReducer} from "./reducer";
-import {sagaManager} from "./sagas/saga-manager";
 import filter from "redux-storage-decorator-filter";
 import createWallet from "redux-storage-engine-indexed-db";
+
 import {USE_STORAGE} from "../constants";
+
+import {sagaManager} from "./sagas/saga-manager";
+import {walletReducer} from "./reducer";
 
 const composeEnhancers = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 let store;

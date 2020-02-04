@@ -1,7 +1,7 @@
-import * as states from "./states";
-import {NewLedgerChannelState, failure} from "./states";
+import {encodeConsensusData, Outcome} from "@statechannels/nitro-protocol";
+
 import {SharedData, ChannelFundingState, setFundingState} from "../../state";
-import {ProtocolStateWithSharedData, makeLocator} from "..";
+
 import {CONSENSUS_LIBRARY_ADDRESS} from "../../../constants";
 import {getChannel} from "../../channel-store";
 import {DirectFundingAction} from "../direct-funding";
@@ -11,7 +11,7 @@ import {
   initialize as initializeDirectFunding
 } from "../direct-funding/reducer";
 import {unreachable} from "../../../utils/reducer-utils";
-import {NewLedgerChannelAction} from "./actions";
+
 import {EmbeddedProtocol, ProtocolLocator} from "../../../communication";
 import * as advanceChannelState from "../advance-channel/states";
 import {
@@ -26,12 +26,18 @@ import {
 import {isFirstPlayer, getTwoPlayerIndex, getLatestState} from "../reducer-helpers";
 import {ADVANCE_CHANNEL_PROTOCOL_LOCATOR} from "../advance-channel/reducer";
 import {TwoPartyPlayerIndex} from "../../types";
-import {encodeConsensusData, Outcome} from "@statechannels/nitro-protocol";
+
 import {
   getAllocationTotal,
   getAllocationAmountForIndex,
   getAllocationOutcome
 } from "../../../utils/outcome-utils";
+
+import {NewLedgerChannelAction} from "./actions";
+import {NewLedgerChannelState, failure} from "./states";
+import * as states from "./states";
+
+import {ProtocolStateWithSharedData, makeLocator} from "..";
 
 type ReturnVal = ProtocolStateWithSharedData<NewLedgerChannelState>;
 type IDFAction = NewLedgerChannelAction;

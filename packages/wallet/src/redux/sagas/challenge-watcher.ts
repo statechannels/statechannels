@@ -1,9 +1,12 @@
+import {take, select, put} from "redux-saga/effects";
+
+import {eventChannel} from "redux-saga";
+
 import * as actions from "../actions";
 import * as selectors from "../selectors";
-import {take, select, put} from "redux-saga/effects";
 import {AdjudicatorState, getAdjudicatorChannelState} from "../adjudicator-state/state";
 import {getProvider} from "../../utils/contract-utils";
-import {eventChannel} from "redux-saga";
+
 import {ChannelSubscriber} from "../state";
 
 export function* challengeWatcher() {

@@ -1,7 +1,9 @@
 import * as states from "../states";
 import {initialize, defundingReducer} from "../reducer";
-import * as scenarios from "./scenarios";
+
 import {describeScenarioStep} from "../../../__tests__/helpers";
+
+import * as scenarios from "./scenarios";
 
 const itTransitionsTo = (
   result: {protocolState: states.DefundingState},

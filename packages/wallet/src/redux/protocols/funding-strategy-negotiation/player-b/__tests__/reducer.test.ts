@@ -1,10 +1,11 @@
-import * as scenarios from "./scenarios";
 import * as states from "../states";
 import {fundingStrategyNegotiationReducer as reducer} from "../reducer";
 import {ProtocolStateWithSharedData} from "../../..";
 import {describeScenarioStep, itRelaysThisAction} from "../../../../__tests__/helpers";
 import {FundingStrategyNegotiationStateType} from "../../states";
 import * as commActions from "../../../../../communication/actions";
+
+import * as scenarios from "./scenarios";
 
 describe("indirect funding strategy chosen", () => {
   const scenario = scenarios.indirectStrategyChosen;

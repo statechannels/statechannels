@@ -1,13 +1,18 @@
+import _ from "lodash";
+
+import {State, SignedState, getChannelId} from "@statechannels/nitro-protocol";
+
+import {Signature} from "ethers/utils";
+
+import {Wallet, utils} from "ethers";
+
 import {ChannelState, ChannelStore} from "../channel-store";
 import {StateWithSideEffects} from "../utils";
 import {QueuedTransaction, OutboxState, MessageOutbox} from "../outbox/state";
 import {SharedData, EMPTY_SHARED_DATA} from "../state";
 import {ProtocolStateWithSharedData} from "../protocols";
 import {ProtocolLocator, RelayableAction} from "../../communication";
-import _ from "lodash";
-import {State, SignedState, getChannelId} from "@statechannels/nitro-protocol";
-import {Signature} from "ethers/utils";
-import {Wallet, utils} from "ethers";
+
 import {OutgoingApiAction} from "../sagas/messaging/outgoing-api-actions";
 
 type SideEffectState =

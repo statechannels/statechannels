@@ -1,8 +1,9 @@
-import {ProtocolState} from "..";
 import {StateConstructor} from "../../utils";
 import {DirectFundingState} from "../direct-funding/states";
 import {AdvanceChannelState} from "../advance-channel";
 import {ProtocolLocator} from "../../../communication";
+
+import {ProtocolState} from "..";
 
 // -------
 // States

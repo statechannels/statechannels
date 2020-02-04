@@ -37,7 +37,14 @@ const importRules = {
   "import/no-duplicates": "off",
   // NOTE: There is some error with eslint-plugin-import treating redux-saga/effects wrongly
   // https://github.com/benmosher/eslint-plugin-import/issues/793#issuecomment-314088164
-  "import/named": "off"
+  "import/named": "off",
+  "import/order": [
+    "error",
+    {
+      groups: ["builtin", "external", "internal", "parent", "sibling", "index"],
+      "newlines-between": "always-and-inside-groups"
+    }
+  ]
 };
 
 const reactRules = {

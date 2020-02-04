@@ -1,4 +1,5 @@
 import React from "react";
+
 import {Checklist, MessagesForStep, messagesForStep} from "../../shared-components/checklist";
 import {NonTerminalNewLedgerChannelState} from "../states";
 import {unreachable} from "../../../../utils/reducer-utils";

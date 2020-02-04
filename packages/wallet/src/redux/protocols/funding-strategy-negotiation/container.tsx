@@ -1,9 +1,13 @@
-import * as states from "./states";
 import {PureComponent} from "react";
+
 import React from "react";
+
+import {connect} from "react-redux";
+
+import * as states from "./states";
+
 import {FundingStrategyNegotiation as PlayerA} from "./player-a";
 import {FundingStrategyNegotiation as PlayerB} from "./player-b";
-import {connect} from "react-redux";
 
 interface Props {
   state:

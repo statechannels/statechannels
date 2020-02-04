@@ -1,8 +1,10 @@
-import {ChallengeCreatedEvent} from "../actions";
 import {take, select, put, fork} from "redux-saga/effects";
+
+import {ChallengeCreatedEvent} from "../actions";
 import * as selectors from "../selectors";
 import {challengeDetected} from "../protocols/application/actions";
 import {APPLICATION_PROCESS_ID} from "../protocols/application/reducer";
+
 import {channelUpdatedEvent} from "./messaging/outgoing-api-actions";
 import {messageSender} from "./messaging/message-sender";
 

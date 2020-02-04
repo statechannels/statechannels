@@ -1,4 +1,7 @@
-import {TransactionAction} from "./actions";
+import {unreachable} from "../../../utils/reducer-utils";
+import {queueTransaction, SharedData} from "../../state";
+import {TransactionRequestWithTarget} from "../../outbox/state";
+
 import {
   TransactionSubmissionState as TSState,
   NonTerminalTransactionSubmissionState as NonTerminalTSState,
@@ -9,9 +12,7 @@ import {
   waitForSend,
   failure
 } from "./states";
-import {unreachable} from "../../../utils/reducer-utils";
-import {queueTransaction, SharedData} from "../../state";
-import {TransactionRequestWithTarget} from "../../outbox/state";
+import {TransactionAction} from "./actions";
 
 type Storage = SharedData;
 

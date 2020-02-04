@@ -1,3 +1,13 @@
+import {bigNumberify} from "ethers/utils";
+
+import {State, SignedState} from "@statechannels/nitro-protocol";
+
+import {AddressZero} from "ethers/constants";
+
+import {ProcessProtocol} from "../communication";
+
+import {CONSENSUS_LIBRARY_ADDRESS, ETH_ASSET_HOLDER_ADDRESS, HUB_ADDRESS} from "../constants";
+
 import {
   OpenChannelState,
   ChannelState,
@@ -7,11 +17,6 @@ import {
 } from "./channel-store";
 import * as walletStates from "./state";
 import {SharedData, FundingState} from "./state";
-import {ProcessProtocol} from "../communication";
-import {CONSENSUS_LIBRARY_ADDRESS, ETH_ASSET_HOLDER_ADDRESS, HUB_ADDRESS} from "../constants";
-import {bigNumberify} from "ethers/utils";
-import {State, SignedState} from "@statechannels/nitro-protocol";
-import {AddressZero} from "ethers/constants";
 
 export const getOpenedChannelState = (state: SharedData, channelId: string): OpenChannelState => {
   const channelStatus = getChannelState(state, channelId);

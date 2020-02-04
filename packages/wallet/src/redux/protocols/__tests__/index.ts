@@ -1,8 +1,10 @@
+import {SignedState} from "@statechannels/nitro-protocol";
+
 import {ProtocolLocator, EmbeddedProtocol} from "../../../communication";
 import {WalletAction} from "../../actions";
 import {SharedData} from "../../state";
+
 import {prependToLocator} from "..";
-import {SignedState} from "@statechannels/nitro-protocol";
 
 interface BaseScenario<T, S> {
   action: T;

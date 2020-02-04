@@ -1,7 +1,8 @@
-import * as scenarios from "./scenarios";
 import {LedgerDefundingState, LedgerDefundingStateType} from "../states";
 import {ProtocolStateWithSharedData} from "../..";
 import {initialize, ledgerDefundingReducer} from "../reducer";
+
+import * as scenarios from "./scenarios";
 
 describe("Cleared To Send happy path", () => {
   const scenario = scenarios.clearedToSendHappyPath;

@@ -1,7 +1,9 @@
-import * as scenarios from "./scenarios";
-import {transactionReducer as reducer, initialize, ReturnVal} from "../reducer";
 import {TransactionRequest} from "ethers/providers";
+
+import {transactionReducer as reducer, initialize, ReturnVal} from "../reducer";
 import * as states from "../states";
+
+import * as scenarios from "./scenarios";
 
 describe("happy-path scenario", () => {
   const scenario = scenarios.happyPath;

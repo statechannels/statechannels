@@ -1,10 +1,11 @@
+import {bigNumberify} from "ethers/utils";
+
 import * as states from "../states";
 import * as withdrawalScenarios from "../../withdrawing/__tests__/scenarios";
 import * as testScenarios from "../../../__tests__/state-helpers";
 import {prependToLocator, makeLocator} from "../..";
 import {EmbeddedProtocol} from "../../../../communication";
 import * as advanceChannelScenarios from "../../advance-channel/__tests__";
-import {bigNumberify} from "ethers/utils";
 import {EMPTY_SHARED_DATA, setChannels} from "../../../state";
 import {channelFromStates} from "../../../channel-store/channel-state/__tests__";
 import {mergeSharedData} from "../../../__tests__/helpers";

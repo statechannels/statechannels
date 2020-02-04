@@ -1,7 +1,9 @@
 import {StateConstructor} from "../../utils";
-import {ProtocolState} from "..";
+
 import {ConsensusUpdateState} from "../consensus-update/states";
 import {ProtocolLocator} from "../../../communication";
+
+import {ProtocolState} from "..";
 // -------
 // States
 // -------

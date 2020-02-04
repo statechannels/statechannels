@@ -1,5 +1,6 @@
 import {JsonRpcProvider} from "ethers/providers";
 import {call, delay} from "redux-saga/effects";
+
 import {getProvider} from "../../utils/contract-utils";
 
 export function* ganacheMiner() {

@@ -1,8 +1,10 @@
 import {StateConstructor} from "../../utils";
-import {ProtocolState} from "..";
+
 import {AdvanceChannelState} from "../advance-channel";
 import {DefundingState} from "../defunding/states";
 import {NonTerminalCloseLedgerChannelState} from "../close-ledger-channel/states";
+
+import {ProtocolState} from "..";
 
 // -------
 // States

@@ -1,15 +1,21 @@
+import _ from "lodash";
+
+import {bigNumberify} from "ethers/utils/bignumber";
+
+import {ethers} from "ethers";
+
+import {encodeConsensusData, convertAddressToBytes32} from "@statechannels/nitro-protocol";
+
 import {channelFromStates} from "../../../channel-store/channel-state/__tests__";
 import * as scenarios from "../../../__tests__/state-helpers";
 import * as states from "../states";
 import {setChannel, EMPTY_SHARED_DATA, setFundingState} from "../../../state";
-import _ from "lodash";
-import {bigNumberify} from "ethers/utils/bignumber";
+
 import {EmbeddedProtocol, signedStatesReceived} from "../../../../communication";
 import {makeLocator} from "../..";
 import * as consensusStates from "../../consensus-update/states";
 import {HUB_ADDRESS, ETH_ASSET_HOLDER_ADDRESS} from "../../../../constants";
-import {ethers} from "ethers";
-import {encodeConsensusData, convertAddressToBytes32} from "@statechannels/nitro-protocol";
+
 import {bsAddress} from "../../../__tests__/state-helpers";
 import {TwoPartyPlayerIndex} from "../../../types";
 

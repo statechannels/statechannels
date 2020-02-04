@@ -1,8 +1,7 @@
 import {SharedData, getChannel} from "../../state";
-import {ProtocolStateWithSharedData, makeLocator} from "..";
-import * as states from "./states";
+
 import * as helpers from "../reducer-helpers";
-import * as actions from "./actions";
+
 import {unreachable} from "../../../utils/reducer-utils";
 import {
   ledgerDefundingReducer,
@@ -16,6 +15,11 @@ import {VirtualDefundingState} from "../virtual-defunding/states";
 import {initializeVirtualDefunding, virtualDefundingReducer} from "../virtual-defunding";
 import {routesToVirtualDefunding} from "../virtual-defunding/actions";
 import * as ledgerDefundingActions from "../ledger-defunding/actions";
+
+import * as actions from "./actions";
+import * as states from "./states";
+
+import {ProtocolStateWithSharedData, makeLocator} from "..";
 
 export const initialize = (
   processId: string,

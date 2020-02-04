@@ -1,6 +1,7 @@
 import {Wallet} from "ethers";
 import {expectSaga} from "redux-saga-test-plan";
 import * as matchers from "redux-saga-test-plan/matchers";
+
 import {strategyApproved} from "../../../../communication";
 import {ETH_ASSET_HOLDER_ADDRESS} from "../../../../constants";
 import * as stateHelpers from "../../../__tests__/state-helpers";

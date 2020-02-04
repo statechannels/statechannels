@@ -1,12 +1,16 @@
 import React from "react";
 import {PureComponent} from "react";
 import {connect} from "react-redux";
-import {NonTerminalConcludingState} from ".";
+
 import WaitForOtherPlayer from "../shared-components/wait-for-other-player";
 import {unreachable} from "../../../utils/reducer-utils";
 import ApproveX from "../shared-components/approve-x";
-import * as actions from "./actions";
+
 import {CloseLedgerChannel} from "../close-ledger-channel/container";
+
+import * as actions from "./actions";
+
+import {NonTerminalConcludingState} from ".";
 interface Props {
   state: NonTerminalConcludingState;
   keepOpenSelected: typeof actions.keepOpenSelected;
