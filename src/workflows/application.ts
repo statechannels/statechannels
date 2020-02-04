@@ -31,26 +31,26 @@ import {
 } from '../messaging';
 import {map} from 'rxjs/operators';
 
-interface Context {
+interface WorkflowContext {
   channelId?: string;
   observer?: any;
 }
 
 interface WorkflowGuards {
-  channelOpen: Condition<Context, Event>;
-  channelClosing: Condition<Context, Event>;
-  channelClosed: Condition<Context, Event>;
+  channelOpen: Condition<WorkflowContext, WorkflowEvent>;
+  channelClosing: Condition<WorkflowContext, WorkflowEvent>;
+  channelClosed: Condition<WorkflowContext, WorkflowEvent>;
 }
 
-type ChannelIdExists = Context & {channelId: string};
+type ChannelIdExists = WorkflowContext & {channelId: string};
 
-interface Actions {
-  sendToOpponent: Action<Context, PlayerStateUpdate>;
-  updateStore: Action<Context, SendStates>;
-  hideUi: Action<Context, any>;
-  displayUi: Action<Context, any>;
-  assignChannelId: Action<Context, any>;
-  sendChannelUpdatedNotification: Action<Context, ChannelUpdated>;
+interface WorkflowActions {
+  sendToOpponent: Action<WorkflowContext, PlayerStateUpdate>;
+  updateStore: Action<WorkflowContext, SendStates>;
+  hideUi: Action<WorkflowContext, any>;
+  displayUi: Action<WorkflowContext, any>;
+  assignChannelId: Action<WorkflowContext, any>;
+  sendChannelUpdatedNotification: Action<WorkflowContext, ChannelUpdated>;
   spawnObserver: AssignAction<ChannelIdExists, any>;
 }
 
@@ -68,14 +68,19 @@ interface PlayerRequestConclude {
   type: 'PLAYER_REQUEST_CONCLUDE';
   channelId: string;
 }
-type Event = PlayerRequestConclude | PlayerStateUpdate | SendStates | OpenEvent | ChannelUpdated;
+type WorkflowEvent =
+  | PlayerRequestConclude
+  | PlayerStateUpdate
+  | SendStates
+  | OpenEvent
+  | ChannelUpdated;
 
-export type ApplicationWorkflowEvent = Event;
+export type ApplicationWorkflowEvent = WorkflowEvent;
 
 const generateConfig = (
-  actions: Actions,
+  actions: WorkflowActions,
   guards: WorkflowGuards
-): MachineConfig<Context, any, Event> => ({
+): MachineConfig<WorkflowContext, any, WorkflowEvent> => ({
   id: 'application-workflow',
   initial: 'initializing',
   states: {
@@ -152,9 +157,9 @@ const generateConfig = (
   }
 });
 
-export const applicationWorkflow: MachineFactory<Context, any> = (
+export const applicationWorkflow: MachineFactory<WorkflowContext, any> = (
   store: Store,
-  context: Context
+  context: WorkflowContext
 ) => {
   // Always use an empty context instead of undefined
   if (!context) {
@@ -169,7 +174,7 @@ export const applicationWorkflow: MachineFactory<Context, any> = (
     );
   };
 
-  const actions: Actions = {
+  const actions: WorkflowActions = {
     spawnObserver: assign<ChannelIdExists>(context => ({
       ...context,
       observer: spawn(notifyWhenChannelUpdated(context))
@@ -264,7 +269,7 @@ const mockServices = {
     /* mock, do nothing  */
   }
 };
-const mockActions: Actions = {
+const mockActions: WorkflowActions = {
   sendToOpponent: 'sendToOpponent',
   updateStore: 'updateStore',
   sendChannelUpdatedNotification: 'sendChannelUpdatedNotification',
