@@ -112,7 +112,6 @@ export const confirmChannelCreationWorkflow: MachineFactory<WorkflowContext, Wor
     }
   };
 
-  const options = {guards, actions};
   const config = generateConfig(actions, guards);
-  return Machine(config).withConfig(options, context);
+  return Machine(config).withConfig({}, context);
 };
