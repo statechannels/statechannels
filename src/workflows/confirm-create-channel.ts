@@ -4,9 +4,12 @@ import {
   DefaultGuardType,
   GuardPredicate,
   ConditionPredicate,
-  StateSchema
+  StateSchema,
+  Machine
 } from 'xstate';
 import {Allocations, Participant} from '@statechannels/client-api-schema';
+import {MachineFactory, Store} from '@statechannels/wallet-protocols/src';
+import {sendDisplayMessage} from '../messaging';
 
 interface WorkflowActions {
   hideUi: Action<WorkflowContext, any>;
@@ -17,7 +20,6 @@ interface WorkflowGuards {
     | GuardPredicate<WorkflowContext, WorkflowEvent>
     | ConditionPredicate<WorkflowContext, WorkflowEvent>;
 }
-
 // While this context info may not be used by the workflow
 // it may be used when displaying a UI
 interface WorkflowContext {
@@ -38,6 +40,7 @@ interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
     failure: {};
   };
 }
+
 interface UserApproves {
   type: 'USER_APPROVES';
 }
@@ -45,6 +48,7 @@ interface UserRejects {
   type: 'USER_REJECTS';
 }
 type WorkflowEvent = UserApproves | UserRejects;
+
 const generateConfig = (
   actions: WorkflowActions,
   guards: WorkflowGuards
@@ -82,8 +86,7 @@ const mockActions: WorkflowActions = {
 };
 const mockGuards = {
   noBudget: {
-    // TODO: Using a guard predicate type allows for the name to be displayed
-    // on the visualizer for the condition
+    // TODO: Using a guard predicate type allows for the name to be displayed in the visualizer
     // We should probably find a better way of doing this or not bother typing guards
     type: 'xstate.guard' as DefaultGuardType,
     name: 'noBudget',
@@ -92,3 +95,24 @@ const mockGuards = {
 };
 export const mockOptions = {actions: mockActions, guards: mockGuards};
 export const config = generateConfig(mockActions, mockGuards);
+
+export const confirmChannelCreationWorkflow: MachineFactory<WorkflowContext, WorkflowEvent> = (
+  _store: Store,
+  context: WorkflowContext
+) => {
+  // TODO: Once budgets are a thing this should check for a budget
+  const guards = {noBudget: (context, event) => true};
+  const actions = {
+    // TODO: We should probably set up some standard actions for all workflows
+    displayUi: (context, event) => {
+      sendDisplayMessage('Show');
+    },
+    hideUi: (context, event) => {
+      sendDisplayMessage('Hide');
+    }
+  };
+
+  const options = {guards, actions};
+  const config = generateConfig(actions, guards);
+  return Machine(config).withConfig(options, context);
+};
