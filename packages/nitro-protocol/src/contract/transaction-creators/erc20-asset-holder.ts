@@ -2,7 +2,7 @@ import {TransactionRequest} from 'ethers/providers';
 import {Interface} from 'ethers/utils';
 
 import Erc20AssetHolderArtifact from '../../../build/contracts/ERC20AssetHolder.json';
-import {Allocation, Guarantee, Outcome} from '../outcome';
+import {NitroAllocation, Guarantee, Outcome} from '../outcome';
 import * as assetHolderTransactionCreator from './asset-holder';
 
 // @ts-ignore
@@ -15,7 +15,7 @@ const GAS_LIMIT = 3000000;
 
 export function createTransferAllTransaction(
   channelId: string,
-  allocation: Allocation
+  allocation: NitroAllocation
 ): TransactionRequest {
   return assetHolderTransactionCreator.createTransferAllTransaction(
     Erc20AssetHolderContractInterface,
@@ -27,7 +27,7 @@ export function createTransferAllTransaction(
 export function createClaimAllTransaction(
   channelId: string,
   guarantee: Guarantee,
-  allocation: Allocation
+  allocation: NitroAllocation
 ): TransactionRequest {
   return assetHolderTransactionCreator.createClaimAllTransaction(
     Erc20AssetHolderContractInterface,

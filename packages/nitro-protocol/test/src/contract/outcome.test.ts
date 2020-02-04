@@ -1,7 +1,6 @@
 import {Wallet} from 'ethers';
 import {id} from 'ethers/utils';
 import {
-  Allocation,
   decodeAllocation,
   decodeGuarantee,
   decodeOutcome,
@@ -10,6 +9,7 @@ import {
   encodeOutcome,
   Guarantee,
 } from '../../../src/contract/outcome';
+import {AllocationItem} from '@statechannels/client-api-schema';
 
 const destination = id('d');
 const targetChannelId = id('t');
@@ -20,7 +20,7 @@ const guarantee: Guarantee = {
   targetChannelId,
   destinations,
 };
-const allocation: Allocation = [{destination, amount: '0x05'}];
+const allocation: AllocationItem[] = [{destination, amount: '0x05'}];
 
 const outcome = [
   {assetHolderAddress, allocation},

@@ -2,7 +2,7 @@ import {TransactionRequest} from 'ethers/providers';
 import {Interface} from 'ethers/utils';
 
 import EthAssetHolderArtifact from '../../../build/contracts/ETHAssetHolder.json';
-import {Allocation, Guarantee, Outcome} from '../outcome';
+import {NitroAllocation, Guarantee, Outcome} from '../outcome';
 import * as assetHolderTransactionCreator from './asset-holder';
 
 // TODO: Currently we are setting some arbitrary gas limit
@@ -15,7 +15,7 @@ const EthAssetHolderContractInterface = new Interface(EthAssetHolderArtifact.abi
 
 export function createTransferAllTransaction(
   channelId: string,
-  allocation: Allocation
+  allocation: NitroAllocation
 ): TransactionRequest {
   return assetHolderTransactionCreator.createTransferAllTransaction(
     EthAssetHolderContractInterface,
@@ -27,7 +27,7 @@ export function createTransferAllTransaction(
 export function createClaimAllTransaction(
   channelId: string,
   guarantee: Guarantee,
-  allocation: Allocation
+  allocation: NitroAllocation
 ): TransactionRequest {
   return assetHolderTransactionCreator.createClaimAllTransaction(
     EthAssetHolderContractInterface,

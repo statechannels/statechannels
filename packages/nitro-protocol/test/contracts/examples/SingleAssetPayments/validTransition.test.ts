@@ -3,7 +3,7 @@ import {expectRevert} from '@statechannels/devtools';
 import {Contract} from 'ethers';
 import {AddressZero, HashZero} from 'ethers/constants';
 import SingleAssetPaymentsArtifact from '../../../../build/contracts/SingleAssetPayments.json';
-import {Allocation, encodeOutcome} from '../../../../src/contract/outcome';
+import {NitroAllocation, encodeOutcome} from '../../../../src/contract/outcome';
 import {VariablePart} from '../../../../src/contract/state';
 import {
   getTestProvider,
@@ -64,7 +64,7 @@ describe('validTransition', () => {
       balancesB: any;
     }) => {
       balancesA = replaceAddressesAndBigNumberify(balancesA, addresses);
-      const allocationA: Allocation = [];
+      const allocationA: NitroAllocation = [];
       Object.keys(balancesA).forEach(key =>
         allocationA.push({destination: key, amount: balancesA[key]})
       );
@@ -89,7 +89,7 @@ describe('validTransition', () => {
       };
 
       balancesB = replaceAddressesAndBigNumberify(balancesB, addresses);
-      const allocationB: Allocation = [];
+      const allocationB: NitroAllocation = [];
 
       Object.keys(balancesB).forEach(key =>
         allocationB.push({destination: key, amount: balancesB[key]})

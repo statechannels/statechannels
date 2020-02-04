@@ -1,7 +1,7 @@
 import {TransactionRequest} from 'ethers/providers';
 import {Interface} from 'ethers/utils';
 import {
-  Allocation,
+  NitroAllocation,
   encodeAllocation,
   encodeGuarantee,
   Guarantee,
@@ -17,7 +17,7 @@ const GAS_LIMIT = 3000000;
 export function createTransferAllTransaction(
   assetHolderContractInterface: Interface,
   channelId: string,
-  allocation: Allocation
+  allocation: NitroAllocation
 ): TransactionRequest {
   const data = assetHolderContractInterface.functions.transferAll.encode([
     channelId,
@@ -29,7 +29,7 @@ export function createTransferAllTransaction(
 export function claimAllArgs(
   channelId: string,
   guarantee: Guarantee,
-  allocation: Allocation
+  allocation: NitroAllocation
 ): any[] {
   return [channelId, encodeGuarantee(guarantee), encodeAllocation(allocation)];
 }
@@ -38,7 +38,7 @@ export function createClaimAllTransaction(
   assetHolderContractInterface: Interface,
   channelId: string,
   guarantee: Guarantee,
-  allocation: Allocation
+  allocation: NitroAllocation
 ): TransactionRequest {
   const data = assetHolderContractInterface.functions.claimAll.encode(
     claimAllArgs(channelId, guarantee, allocation)

@@ -74,6 +74,7 @@ export function ethAllocationOutcome(
   }
   return [
     {
+      // FIXME: Fix hard-coded asset holder address
       assetHolderAddress: ethAssetHolderAddress,
       allocation: allocation.map(a => ({ ...a, destination: hexZeroPad(a.destination, 32) })),
     },
@@ -86,6 +87,7 @@ export function ethGuaranteeOutcome(
 ): GuaranteeAssetOutcome[] {
   return [
     {
+      // FIXME: Fix hard-coded asset holder address
       assetHolderAddress: ethAssetHolderAddress,
       guarantee,
     },

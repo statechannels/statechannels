@@ -10,6 +10,7 @@
     "ethers": "4.0.44"
   },
   "devDependencies": {
+    "@statechannels/client-api-schema": "0.0.1",
     "@statechannels/devtools": "0.1.21",
     "@statechannels/jest-gas-reporter": "0.0.2",
     "@types/eslint": "6.1.7",

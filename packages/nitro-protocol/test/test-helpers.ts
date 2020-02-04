@@ -3,16 +3,17 @@ import {constants, providers, utils} from 'ethers';
 
 import {hashChannelStorage} from '../src/contract/channel-storage';
 import {
-  Allocation,
   AllocationAssetOutcome,
   encodeAllocation,
   encodeGuarantee,
   Guarantee,
   hashAssetOutcome,
   Outcome,
+  NitroAllocation,
 } from '../src/contract/outcome';
 import {hashState, State} from '../src/contract/state';
 import fs from 'fs';
+import {AllocationItem} from '@statechannels/client-api-schema';
 
 // Interfaces
 
@@ -202,7 +203,7 @@ export async function sendTransaction(
   return await response.wait();
 }
 
-export function allocationToParams(allocation: Allocation) {
+export function allocationToParams(allocation: AllocationItem[]) {
   const allocationBytes = encodeAllocation(allocation);
   let assetOutcomeHash;
   if (allocation.length === 0) {
@@ -312,7 +313,7 @@ export function checkMultipleAssetOutcomeHashes(
 export function computeOutcome(outcomeShortHand: OutcomeShortHand): AllocationAssetOutcome[] {
   const outcome: AllocationAssetOutcome[] = [];
   Object.keys(outcomeShortHand).forEach(assetHolder => {
-    const allocation: Allocation = [];
+    const allocation: NitroAllocation = [];
     Object.keys(outcomeShortHand[assetHolder]).forEach(destination =>
       allocation.push({
         destination,

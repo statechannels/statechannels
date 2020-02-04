@@ -33,8 +33,13 @@ const createChannel: CreateChannelEvent = {
   challengeDuration: 1,
   participants,
   allocations: [
-    { destination: first.destination, amount: '3' },
-    { destination: second.destination, amount: '1' },
+    {
+      token: '0x',
+      allocationItems: [
+        { destination: first.destination, amount: '3' },
+        { destination: second.destination, amount: '1' },
+      ],
+    },
   ],
   appDefinition: AddressZero,
   appData: HashZero,
