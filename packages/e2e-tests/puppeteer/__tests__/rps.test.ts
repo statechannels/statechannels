@@ -24,7 +24,7 @@ let rpsTabB: Page;
 describe('completes game 1 (challenge by A, challenge by B, resign by B) and begins game 2 ', () => {
   beforeAll(async () => {
     browserA = await setUpBrowser(HEADLESS, 100); // 100ms sloMo avoids some undiagnosed race conditions
-    browserB = await setUpBrowser(HEADLESS, 100); // 100ms sloMo avoids some undiagnosed race conditions
+    browserB = await setUpBrowser(HEADLESS, 100); // 100ms sloMo avoids some undiagnosed race conditions. TODO: remove sloMo and address underlying problem
 
     rpsTabA = (await browserA.pages())[0];
     rpsTabB = (await browserB.pages())[0];
