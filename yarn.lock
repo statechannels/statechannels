@@ -14204,6 +14204,13 @@ ember-router-generator@^2.0.0:
     "@babel/traverse" "^7.4.5"
     recast "^0.18.1"
 
+ember-simple-set-helper@^0.1.0:
+  version "0.1.1"
+  resolved "https://registry.npmjs.org/ember-simple-set-helper/-/ember-simple-set-helper-0.1.1.tgz#b8d93b8e3cc8b7c1ea17e9eed2659c87b75809a2"
+  integrity sha512-ODQC34hQdDVfY2xDdoO498DhRbZ2AWrsuZlCS6Iom42dBn1AlGdtOgxwfCVqcwDgoO9zlM++UVWuFEskXKFV7g==
+  dependencies:
+    ember-cli-babel "^7.7.3"
+
 ember-source-channel-url@^2.0.1:
   version "2.0.1"
   resolved "https://registry.npmjs.org/ember-source-channel-url/-/ember-source-channel-url-2.0.1.tgz#18b88f8a00b7746e7a456b3551abb3aea18729cc"

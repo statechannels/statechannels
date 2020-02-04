@@ -138,6 +138,7 @@
     "ember-maybe-import-regenerator": "^0.1.6",
     "ember-qunit": "^4.6.0",
     "ember-resolver": "^7.0.0",
+    "ember-simple-set-helper": "^0.1.0",
     "ember-source": "~3.15.0",
     "ember-template-lint": "^1.13.2",
     "eslint-plugin-ember": "^7.7.1",
