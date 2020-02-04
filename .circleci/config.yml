@@ -86,6 +86,19 @@ commands:
           path: /home/circleci/project/packages/<< parameters.package >>/gas.md
           destination: << parameters.package >>-gas.md
 
+  upload_e2e_screenshots:
+    description: 'Upload e2e error screengrab '
+    parameters:
+      job:
+        type: string
+    steps:
+      - store_artifacts:
+          path: /home/circleci/project/packages/e2e/e2e-wait.error.png
+          destination: << parameters.job >>-wait.error.png
+      - store_artifacts:
+          path: /home/circleci/project/packages/e2e/e2e-click.error.png
+          destination: << parameters.job >>-click.error.png
+
   notify_slack:
     description: 'Notify slack '
     steps:
@@ -198,6 +211,8 @@ jobs:
       - run: (cd packages/e2e-tests && yarn test)
       - upload_logs:
           file: integration-test-stats
+      - upload_e2e_screenshots:
+          job: integration-test
       - notify_slack
 
   integration-test-with-hub:
@@ -248,6 +263,8 @@ jobs:
       - run: (cd packages/e2e-tests && yarn test)
       - upload_logs:
           file: integration-test-stats
+      - upload_e2e_screenshots:
+          job: integration-test-with-hub
       - notify_slack
 
   release-incremental:
@@ -279,13 +296,13 @@ workflows:
     jobs:
       - prepare
 
-      - build:
-          requires:
-            - prepare
+      # - build:
+      #     requires:
+      #       - prepare
 
-      - test:
-          requires:
-            - prepare
+      # - test:
+      #     requires:
+      #       - prepare
 
       - integration-test:
           requires:
@@ -295,17 +312,15 @@ workflows:
           requires:
             - prepare
             - integration-test
-
-      - release-incremental:
-          requires:
-            - prepare
-          filters:
-            branches:
-              ignore: master
-
-      - release:
-          requires:
-            - prepare
-          filters:
-            branches:
-              only: master
+      # - release-incremental:
+      #     requires:
+      #       - prepare
+      #     filters:
+      #       branches:
+      #         ignore: master
+      # - release:
+      #     requires:
+      #       - prepare
+      #     filters:
+      #       branches:
+      #         only: master
