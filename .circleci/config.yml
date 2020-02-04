@@ -93,10 +93,10 @@ commands:
         type: string
     steps:
       - store_artifacts:
-          path: /home/circleci/project/packages/e2e/e2e-wait.error.png
+          path: /home/circleci/project/packages/e2e-tests/e2e-wait.error.png
           destination: << parameters.job >>-wait.error.png
       - store_artifacts:
-          path: /home/circleci/project/packages/e2e/e2e-click.error.png
+          path: /home/circleci/project/packages/e2e-tests/e2e-click.error.png
           destination: << parameters.job >>-click.error.png
 
   notify_slack:
@@ -213,7 +213,6 @@ jobs:
           file: integration-test-stats
       - upload_e2e_screenshots:
           job: integration-test
-      - notify_slack
 
   integration-test-with-hub:
     resource_class: medium
@@ -265,7 +264,6 @@ jobs:
           file: integration-test-stats
       - upload_e2e_screenshots:
           job: integration-test-with-hub
-      - notify_slack
 
   release-incremental:
     <<: *defaults
