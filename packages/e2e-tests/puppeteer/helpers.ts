@@ -38,8 +38,28 @@ export async function loadRPSApp(page: Page, ganacheAccountIndex: number): Promi
 // https://github.com/puppeteer/puppeteer/issues/3496
 // https://github.com/puppeteer/puppeteer/issues/2977
 export async function waitForAndClickButton(page: Page | Frame, selector: string): Promise<void> {
-  await page.waitForSelector(selector);
-  return page.click(selector);
+  try {
+    await page.waitForSelector(selector);
+  } catch (error) {
+    console.error(
+      'page.waitForSelector(' + selector + ') failed on page ' + JSON.stringify(await page.title())
+    );
+    if ('screenshot' in page) {
+      await page.screenshot({path: 'e2e-wait-error.png'}); // TODO move this to catch block
+    }
+    throw error;
+  }
+  try {
+    return await page.click(selector);
+  } catch (error) {
+    console.error(
+      'page.click(' + selector + ') failed on page ' + JSON.stringify(await page.title())
+    );
+    if ('screenshot' in page) {
+      await page.screenshot({path: 'e2e-click-error.png'}); // TODO move this to catch block
+    }
+    throw error;
+  }
 }
 
 export async function setUpBrowser(headless: boolean, slowMo?: number): Promise<Browser> {
