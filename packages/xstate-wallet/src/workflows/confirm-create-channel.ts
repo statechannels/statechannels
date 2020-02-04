@@ -8,7 +8,7 @@ import {
   Machine
 } from 'xstate';
 import {Allocations, Participant} from '@statechannels/client-api-schema';
-import {MachineFactory, Store} from '@statechannels/wallet-protocols/src';
+import {MachineFactory, Store} from '@statechannels/wallet-protocols';
 import {sendDisplayMessage} from '../messaging';
 
 interface WorkflowActions {
