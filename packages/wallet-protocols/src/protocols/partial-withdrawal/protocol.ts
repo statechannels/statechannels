@@ -6,7 +6,7 @@ import * as ConcludeChannel from '../conclude-channel/protocol';
 import * as CreateNullChannel from '../create-null-channel/protocol';
 import * as LedgerUpdate from '../ledger-update/protocol';
 import { store } from '../../temp-store';
-import { getEthAllocation, ethAllocationOutcome } from '../../calculations';
+import { ethAllocationOutcome, getEthAllocation } from '../../calculations';
 const PROTOCOL = 'partial-withdrawal';
 const success = { type: 'final' };
 

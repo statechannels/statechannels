@@ -1,16 +1,16 @@
 import {
-  Outcome,
   Allocation,
-  AssetOutcome,
-  isAllocationOutcome,
   AllocationAssetOutcome,
-  GuaranteeAssetOutcome,
+  AssetOutcome,
   Guarantee,
+  GuaranteeAssetOutcome,
+  Outcome,
+  isAllocationOutcome,
 } from '@statechannels/nitro-protocol';
 import { hexZeroPad } from 'ethers/utils';
 import { AddressZero } from 'ethers/constants';
 
-import { add, subtract, gt } from './mathOps';
+import { add, gt, subtract } from './mathOps';
 
 import { checkThat } from '.';
 

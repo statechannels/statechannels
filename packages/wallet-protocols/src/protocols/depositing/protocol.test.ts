@@ -6,7 +6,7 @@ import { Chain } from '../../chain';
 import { EphemeralStore } from '../..';
 import { log } from '../../utils';
 
-import { machine, Init } from './protocol';
+import { Init, machine } from './protocol';
 
 jest.setTimeout(50000);
 

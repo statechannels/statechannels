@@ -22,7 +22,10 @@ module.exports = {
     'no-useless-catch': 'off',
     'no-empty-pattern': 'off',
     'import/first': 2,
-    'import/order': [2, { 'newlines-between': 'always' }],
+    "import/order": ["error", {
+      "groups": ["builtin", "external", "internal",  "parent", "sibling", "index"],
+      "newlines-between": "always-and-inside-groups"
+    }],
     'no-restricted-imports': ['error', { patterns: ['**/lib/**', '**/src/**'] }],
   },
 };
