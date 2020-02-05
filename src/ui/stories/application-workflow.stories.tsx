@@ -4,7 +4,6 @@ import {
   applicationWorkflow,
   config as applicationWorkflowConfig
 } from '../../workflows/application';
-import {ChannelId} from '../channel-id';
 export default {title: 'X-state wallet'};
 import {storiesOf} from '@storybook/react';
 import {Image} from 'rimble-ui';
@@ -49,19 +48,14 @@ function renderWalletInFrontOfApp(machine) {
   return renderFunction;
 }
 
-storiesOf('ChannelId', module).add('empty', () => <ChannelId channelId={undefined} />);
-storiesOf('ChannelId', module).add('not empty', () => (
-  <ChannelId channelId={testContext.channelId} />
-));
-
 if (applicationWorkflowConfig.states) {
   ['CREATE_CHANNEL', 'OPEN_CHANNEL'].forEach(event => {
     const machineWithChildren = interpret<any, any, any>(
       applicationWorkflow(store).withContext(testContext)
     ).start(); // start a new interpreted machine for each story
     machineWithChildren.send(event);
-    storiesOf('Wallet with invoked children', module).add(
-      'Init + ' + event,
+    storiesOf('Application Workflow', module).add(
+      'Initialising + ' + event,
       renderWalletInFrontOfApp(machineWithChildren)
     );
     machineWithChildren.stop();
