@@ -53,6 +53,7 @@ const generateConfig = (
   actions: WorkflowActions,
   guards: WorkflowGuards
 ): MachineConfig<WorkflowContext, WorkflowStateSchema, WorkflowEvent> => ({
+  id: 'confirm-create-channel',
   initial: 'needUserConfirmation',
   states: {
     needUserConfirmation: {
