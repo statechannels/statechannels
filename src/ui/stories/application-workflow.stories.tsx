@@ -1,15 +1,12 @@
-import React from 'react';
-import {Wallet} from '../wallet';
 import {
   applicationWorkflow,
   config as applicationWorkflowConfig
 } from '../../workflows/application';
 export default {title: 'X-state wallet'};
 import {storiesOf} from '@storybook/react';
-import {Image} from 'rimble-ui';
-import fakeApp from '../../images/fake-app.png';
 import {interpret} from 'xstate';
 import {EphemeralStore} from '@statechannels/wallet-protocols';
+import {renderWalletInFrontOfApp} from './helpers';
 
 const store = new EphemeralStore({
   privateKeys: {
@@ -28,24 +25,12 @@ if (applicationWorkflowConfig.states) {
       devTools: true
     }); // start a new interpreted machine for each story
     machine.start(state);
-    storiesOf('Application Workflow', module).add(
+    storiesOf('Workflows / Application', module).add(
       state.toString(),
       renderWalletInFrontOfApp(machine)
     );
     machine.stop();
   });
-}
-
-function renderWalletInFrontOfApp(machine) {
-  function renderFunction() {
-    return (
-      <div>
-        <Image src={fakeApp} />
-        <Wallet workflow={machine} />
-      </div>
-    );
-  }
-  return renderFunction;
 }
 
 if (applicationWorkflowConfig.states) {
@@ -54,7 +39,7 @@ if (applicationWorkflowConfig.states) {
       applicationWorkflow(store).withContext(testContext)
     ).start(); // start a new interpreted machine for each story
     machineWithChildren.send(event);
-    storiesOf('Application Workflow', module).add(
+    storiesOf('Workflows / Application', module).add(
       'Initialising + ' + event,
       renderWalletInFrontOfApp(machineWithChildren)
     );
