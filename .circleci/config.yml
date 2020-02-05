@@ -86,6 +86,19 @@ commands:
           path: /home/circleci/project/packages/<< parameters.package >>/gas.md
           destination: << parameters.package >>-gas.md
 
+  upload_e2e_screenshots:
+    description: 'Upload e2e error screengrab '
+    parameters:
+      job:
+        type: string
+    steps:
+      - store_artifacts:
+          path: /home/circleci/project/packages/e2e-tests/e2e-wait.error.png
+          destination: << parameters.job >>-wait.error.png
+      - store_artifacts:
+          path: /home/circleci/project/packages/e2e-tests/e2e-click.error.png
+          destination: << parameters.job >>-click.error.png
+
   notify_slack:
     description: 'Notify slack '
     steps:
@@ -195,10 +208,11 @@ jobs:
           command: (cd packages/rps && yarn run wait-on ../../.ganache-deployments && yarn run start)
           background: true
       - run: (cd packages/wallet && yarn run test:ci:integration)
-      - run: (cd packages/e2e-tests && yarn test)
+      - run: (cd packages/e2e-tests && USE_VIRTUAL_FUNDING=false yarn test)
       - upload_logs:
           file: integration-test-stats
-      - notify_slack
+      - upload_e2e_screenshots:
+          job: integration-test
 
   integration-test-with-hub:
     resource_class: medium
@@ -245,10 +259,11 @@ jobs:
       - run:
           command: (cd packages/hub && yarn run wait-on ../../.ganache-deployments && yarn run hub:start:dev)
           background: true
-      - run: (cd packages/e2e-tests && yarn test)
+      - run: (cd packages/e2e-tests && USE_VIRTUAL_FUNDING=true yarn test)
       - upload_logs:
           file: integration-test-stats
-      - notify_slack
+      - upload_e2e_screenshots:
+          job: integration-test-with-hub
 
   release-incremental:
     <<: *defaults
@@ -295,14 +310,12 @@ workflows:
           requires:
             - prepare
             - integration-test
-
       - release-incremental:
           requires:
             - prepare
           filters:
             branches:
               ignore: master
-
       - release:
           requires:
             - prepare

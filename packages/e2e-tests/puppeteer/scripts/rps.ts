@@ -1,18 +1,19 @@
 import {Page} from 'puppeteer';
 
 import {waitForAndClickButton, setUpBrowser, loadRPSApp} from '../helpers';
+import {getEnvBool} from '@statechannels/devtools';
 
 export async function login(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
   async function playerA(page: Page): Promise<void> {
-    await waitForAndClickButton(page, '#start-playing');
+    await waitForAndClickButton(page, page.mainFrame(), '#start-playing');
     await (await page.waitFor('#name')).type('A');
-    await waitForAndClickButton(page, '#connect-with-metamask');
+    await waitForAndClickButton(page, page.mainFrame(), '#connect-with-metamask');
     // App & Wallet left in a 'clean' no-game state
   }
   async function playerB(page: Page): Promise<void> {
-    await waitForAndClickButton(page, '#start-playing');
+    await waitForAndClickButton(page, page.mainFrame(), '#start-playing');
     await (await page.waitFor('#name')).type('B');
-    await waitForAndClickButton(page, '#connect-with-metamask');
+    await waitForAndClickButton(page, page.mainFrame(), '#connect-with-metamask');
     // App & Wallet left in a 'clean' no-game state
   }
 
@@ -22,27 +23,27 @@ export async function login(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
 
 export async function playMove(page: Page, move: 'rock' | 'paper' | 'scissors'): Promise<void> {
   const selector = `img[src*="${move}"]`;
-  return waitForAndClickButton(page, selector);
+  return waitForAndClickButton(page, page.mainFrame(), selector);
 }
 
 export async function startFundAndPlaySingleMove(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
   async function playerA(page: Page): Promise<void> {
     const walletIFrame = page.frames()[1];
-    await waitForAndClickButton(page, '#join');
-    await waitForAndClickButton(walletIFrame, '#yes');
-    await waitForAndClickButton(walletIFrame, '#ok');
+    await waitForAndClickButton(page, page.mainFrame(), '#join');
+    await waitForAndClickButton(page, walletIFrame, '#yes');
+    await waitForAndClickButton(page, walletIFrame, '#ok');
     await playMove(page, 'paper');
-    await waitForAndClickButton(page, '#play-again');
+    await waitForAndClickButton(page, page.mainFrame(), '#play-again');
     // App & Wallet left in a 'clean' mid-game state
   }
   async function playerB(page: Page): Promise<void> {
     const walletIFrame = page.frames()[1];
-    await waitForAndClickButton(page, '#create-a-game');
-    await waitForAndClickButton(page, '#create-game');
-    await waitForAndClickButton(walletIFrame, '#yes');
-    await waitForAndClickButton(walletIFrame, '#ok');
+    await waitForAndClickButton(page, page.mainFrame(), '#create-a-game');
+    await waitForAndClickButton(page, page.mainFrame(), '#create-game');
+    await waitForAndClickButton(page, walletIFrame, '#yes');
+    await waitForAndClickButton(page, walletIFrame, '#ok');
     await playMove(page, 'rock');
-    await waitForAndClickButton(page, '#play-again');
+    await waitForAndClickButton(page, page.mainFrame(), '#play-again');
     // App & Wallet left in a 'clean' mid-game state
   }
 
@@ -54,18 +55,18 @@ export async function aChallenges(rpsTabA: Page, rpsTabB: Page): Promise<boolean
   async function playerA(page: Page): Promise<void> {
     const walletIFrame = page.frames()[1];
     await playMove(page, 'paper');
-    await waitForAndClickButton(page, '#challenge');
-    await waitForAndClickButton(walletIFrame, '#yes');
-    await waitForAndClickButton(walletIFrame, '#ok');
-    await waitForAndClickButton(page, '#play-again');
+    await waitForAndClickButton(page, page.mainFrame(), '#challenge');
+    await waitForAndClickButton(page, walletIFrame, '#yes');
+    await waitForAndClickButton(page, walletIFrame, '#ok');
+    await waitForAndClickButton(page, page.mainFrame(), '#play-again');
     // App & Wallet left in a 'clean' mid-game state
   }
   async function playerB(page: Page): Promise<void> {
     const walletIFrame = page.frames()[1];
-    await waitForAndClickButton(walletIFrame, '#respond');
+    await waitForAndClickButton(page, walletIFrame, '#respond');
     await playMove(page, 'rock');
-    await waitForAndClickButton(walletIFrame, '#ok');
-    await waitForAndClickButton(page, '#play-again');
+    await waitForAndClickButton(page, walletIFrame, '#ok');
+    await waitForAndClickButton(page, page.mainFrame(), '#play-again');
     // App & Wallet left in a 'clean' mid-game state
   }
 
@@ -76,19 +77,19 @@ export async function aChallenges(rpsTabA: Page, rpsTabB: Page): Promise<boolean
 export async function bChallenges(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
   async function playerA(page: Page): Promise<void> {
     const walletIFrame = page.frames()[1];
-    await waitForAndClickButton(walletIFrame, '#respond');
+    await waitForAndClickButton(page, walletIFrame, '#respond');
     await playMove(page, 'paper');
-    await waitForAndClickButton(walletIFrame, '#ok');
-    await waitForAndClickButton(page, '#play-again');
+    await waitForAndClickButton(page, walletIFrame, '#ok');
+    await waitForAndClickButton(page, page.mainFrame(), '#play-again');
     // App & Wallet left in a 'clean' mid-game state
   }
   async function playerB(page: Page): Promise<void> {
     const walletIFrame = page.frames()[1];
     await playMove(page, 'rock');
-    await waitForAndClickButton(page, '#challenge');
-    await waitForAndClickButton(walletIFrame, '#yes');
-    await waitForAndClickButton(walletIFrame, '#ok');
-    await waitForAndClickButton(page, '#play-again');
+    await waitForAndClickButton(page, page.mainFrame(), '#challenge');
+    await waitForAndClickButton(page, walletIFrame, '#yes');
+    await waitForAndClickButton(page, walletIFrame, '#ok');
+    await waitForAndClickButton(page, page.mainFrame(), '#play-again');
     // App & Wallet left in a 'clean' mid-game state
   }
 
@@ -97,38 +98,35 @@ export async function bChallenges(rpsTabA: Page, rpsTabB: Page): Promise<boolean
 }
 
 export async function bResigns(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
+  const virtual = getEnvBool('USE_VIRTUAL_FUNDING', false);
   async function playerB(page: Page): Promise<void> {
     const walletIFrame = page.frames()[1];
 
-    await waitForAndClickButton(page, '#resign');
-    await waitForAndClickButton(walletIFrame, '#yes');
+    await waitForAndClickButton(page, page.mainFrame(), '#resign');
+    await waitForAndClickButton(page, walletIFrame, '#yes');
 
-    async function virtualFunding(): Promise<void> {
-      await waitForAndClickButton(walletIFrame, '#approve-withdraw');
-      await waitForAndClickButton(walletIFrame, '#ok');
-      await waitForAndClickButton(page, '#resigned-ok');
-      await waitForAndClickButton(page, '#exit');
+    if (virtual) {
+      await waitForAndClickButton(page, walletIFrame, '#approve-withdraw');
+      await waitForAndClickButton(page, walletIFrame, '#ok');
+      await waitForAndClickButton(page, page.mainFrame(), '#resigned-ok');
+      await waitForAndClickButton(page, page.mainFrame(), '#exit');
+      // App & Wallet left in a 'clean' no-game state
+    } else {
+      await waitForAndClickButton(page, walletIFrame, '#ok');
+      await waitForAndClickButton(page, page.mainFrame(), '#resigned-ok');
+      await waitForAndClickButton(page, page.mainFrame(), '#exit');
       // App & Wallet left in a 'clean' no-game state
     }
-
-    async function ledgerFunding(): Promise<void> {
-      await waitForAndClickButton(walletIFrame, '#ok');
-      await waitForAndClickButton(page, '#resigned-ok');
-      await waitForAndClickButton(page, '#exit');
-      // App & Wallet left in a 'clean' no-game state
-    }
-
-    await Promise.race([virtualFunding(), ledgerFunding()]);
   }
 
   async function playerA(page: Page): Promise<void> {
     await playMove(page, 'rock');
     const walletIFrame = page.frames()[1];
-    await waitForAndClickButton(walletIFrame, '#yes');
-    await waitForAndClickButton(walletIFrame, '#approve-withdraw');
-    await waitForAndClickButton(walletIFrame, '#ok');
-    await waitForAndClickButton(page, '#resigned-ok');
-    await waitForAndClickButton(page, '#exit');
+    await waitForAndClickButton(page, walletIFrame, '#yes');
+    await waitForAndClickButton(page, walletIFrame, '#approve-withdraw');
+    await waitForAndClickButton(page, walletIFrame, '#ok');
+    await waitForAndClickButton(page, page.mainFrame(), '#resigned-ok');
+    await waitForAndClickButton(page, page.mainFrame(), '#exit');
     // App & Wallet left in a 'clean' no-game state
   }
 

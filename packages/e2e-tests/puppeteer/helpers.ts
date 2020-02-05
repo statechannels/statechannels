@@ -37,9 +37,27 @@ export async function loadRPSApp(page: Page, ganacheAccountIndex: number): Promi
 // waitForSelector promise, so we avoid any errors where that return value loses its meaning
 // https://github.com/puppeteer/puppeteer/issues/3496
 // https://github.com/puppeteer/puppeteer/issues/2977
-export async function waitForAndClickButton(page: Page | Frame, selector: string): Promise<void> {
-  await page.waitForSelector(selector);
-  return page.click(selector);
+export async function waitForAndClickButton(
+  page: Page,
+  frame: Frame,
+  selector: string
+): Promise<void> {
+  try {
+    await frame.waitForSelector(selector);
+  } catch (error) {
+    console.error(
+      'frame.waitForSelector(' + selector + ') failed on frame ' + (await frame.title())
+    );
+    await page.screenshot({path: 'e2e-wait.error.png'});
+    throw error;
+  }
+  try {
+    return await frame.click(selector);
+  } catch (error) {
+    console.error('frame.click(' + selector + ') failed on frame ' + (await frame.title()));
+    await page.screenshot({path: 'e2e-click.error.png'});
+    throw error;
+  }
 }
 
 export async function setUpBrowser(headless: boolean, slowMo?: number): Promise<Browser> {
