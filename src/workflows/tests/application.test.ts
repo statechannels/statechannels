@@ -8,18 +8,16 @@ import {
   getChannelId,
   OpenChannelEvent,
   Channel,
-  JoinChannel,
-  CreateChannel,
   ChannelUpdated,
   SignedState
 } from '@statechannels/wallet-protocols';
 import {applicationWorkflow} from '../application';
 import {AddressZero} from 'ethers/constants';
 import {findCalledActions} from '../../utils/test-helpers';
-
+import * as CCC from '../confirm-create-channel';
 let closingMachineMock;
-let joinMachineMock;
-let createChannelMock;
+
+let channelConfirmationMock;
 beforeEach(() => {
   // TODO: Is this the best way to mock
   closingMachineMock = jest.fn().mockReturnValue(
@@ -31,55 +29,55 @@ beforeEach(() => {
     value: closingMachineMock
   });
 
-  joinMachineMock = jest.fn().mockReturnValue(
+  channelConfirmationMock = jest.fn().mockReturnValue(
     new Promise(() => {
-      /* mock, do nothing */
+      /* mock */
     })
   );
-  Object.defineProperty(JoinChannel, 'machine', {
-    value: joinMachineMock
-  });
-  createChannelMock = jest.fn().mockReturnValue(
-    new Promise(resolve => {
-      resolve({channelId: '0xabc'});
-    })
-  );
-  Object.defineProperty(CreateChannel, 'machine', {
-    value: createChannelMock
+  Object.defineProperty(CCC, 'confirmChannelCreationWorkflow', {
+    value: channelConfirmationMock
   });
 });
 
 jest.setTimeout(50000);
-
-it('initializes and starts the create channel machine', async () => {
+const createChannelEvent: CreateChannelEvent = {
+  type: 'CREATE_CHANNEL',
+  chainId: '0x0',
+  appData: '0x0',
+  appDefinition: ethers.constants.AddressZero,
+  participants: [],
+  allocations: [],
+  challengeDuration: 500
+};
+it('initializes and starts confirmCreateChannelWorkflow', async () => {
   const store = new EphemeralStore();
-  const event: CreateChannelEvent = {
-    type: 'CREATE_CHANNEL',
-    chainId: '0x0',
-    appData: '0x0',
-    appDefinition: ethers.constants.AddressZero,
-    participants: [],
-    allocations: [],
-    challengeDuration: 500
-  };
+
   const service = interpret<any, any, any>(applicationWorkflow(store, undefined));
-
   service.start();
-
+  service.send(createChannelEvent);
   await waitForExpect(async () => {
-    expect(service.state.value).toEqual('initializing');
+    expect(service.state.value).toEqual('confirmCreateChannelWorkflow');
+    expect(channelConfirmationMock).toHaveBeenCalled();
   }, 2000);
+});
 
-  service.send(event);
+it.only('handles confirmCreateChannel workflow finishing', async () => {
+  const store = new EphemeralStore();
+
+  const service = interpret<any, any, any>(applicationWorkflow(store, undefined));
+  service.start('confirmCreateChannelWorkflow');
+
+  service.send({
+    type: 'done.invoke.invokeCreateChannelConfirmation'
+  });
 
   await waitForExpect(async () => {
-    expect(service.state.value).toEqual('running');
-    expect(createChannelMock).toHaveBeenCalled();
-    expect(findCalledActions(service.state)).toContainEqual({
-      actionType: 'displayUi',
-      stateType: 'create'
-    });
-    expect(service.state.context).toMatchObject({channelId: '0xabc'});
+    expect(service.state.value).toEqual('openChannelAndDirectFund');
+    // TODO: Are actions working?
+    // expect(findCalledActions(service.state)).toContainEqual({
+    //   actionType: 'spawnObserver',
+    //   stateType: 'confirmCreateChannelWorkflow'
+    // });
   }, 2000);
 });
 
@@ -113,11 +111,11 @@ it('initializes and starts the join channel machine', async () => {
   service.send(event);
 
   await waitForExpect(async () => {
-    expect(service.state.value).toEqual('join');
-    expect(joinMachineMock).toHaveBeenCalled();
+    expect(service.state.value).toEqual('waitForJoin');
+
     expect(findCalledActions(service.state)).toContainEqual({
       actionType: 'displayUi',
-      stateType: 'join'
+      stateType: 'waitForJoin'
     });
   }, 2000);
 

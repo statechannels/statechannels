@@ -68,7 +68,7 @@ const generateConfig = (
         USER_REJECTS: {target: 'failure', actions: [actions.hideUi]}
       }
     },
-    done: {type: 'final'},
+    done: {type: 'final', data: context => context},
     failure: {type: 'final'}
   }
 });
