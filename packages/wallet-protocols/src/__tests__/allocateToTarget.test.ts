@@ -60,19 +60,16 @@ describe('allocateToTarget with valid input', () => {
     { destination: targetChannelId, amount: '0x03' },
   ];
   it.each`
-    description | targetAllocation | ledgerAllocation | expectedAllocation
-    ${'one'}    | ${target1}       | ${ledger1}       | ${expected1}
-    ${'two'}    | ${target2}       | ${ledger2}       | ${expected2}
-    ${'three'}  | ${target3}       | ${ledger3}       | ${expected3}
-    ${'four'}   | ${target4}       | ${ledger4}       | ${expected4}
-  `(
-    'Test $description',
-    ({ description, targetAllocation, ledgerAllocation, expectedAllocation }) => {
-      expect(
-        allocateToTarget(targetAllocation, ledgerAllocation, targetChannelId, AddressZero)
-      ).toMatchObject(ethAllocationOutcome(expectedAllocation, AddressZero));
-    }
-  );
+    description | deductions | ledgerAllocation | expectedAllocation
+    ${'one'}    | ${target1} | ${ledger1}       | ${expected1}
+    ${'two'}    | ${target2} | ${ledger2}       | ${expected2}
+    ${'three'}  | ${target3} | ${ledger3}       | ${expected3}
+    ${'four'}   | ${target4} | ${ledger4}       | ${expected4}
+  `('Test $description', ({ deductions, ledgerAllocation, expectedAllocation }) => {
+    expect(
+      allocateToTarget(ledgerAllocation, deductions, targetChannelId, AddressZero)
+    ).toMatchObject(ethAllocationOutcome(expectedAllocation, AddressZero));
+  });
 });
 
 describe('allocateToTarget with invalid input', () => {
@@ -97,12 +94,12 @@ describe('allocateToTarget with invalid input', () => {
   const error2 = Errors.InsufficientFunds;
 
   it.each`
-    description | targetAllocation | ledgerAllocation | error
-    ${'one'}    | ${target1}       | ${ledger1}       | ${error1}
-    ${'two'}    | ${target2}       | ${ledger2}       | ${error2}
-  `('Test $description', ({ targetAllocation, ledgerAllocation, error }) => {
+    description | deductions | ledgerAllocation | error
+    ${'one'}    | ${target1} | ${ledger1}       | ${error1}
+    ${'two'}    | ${target2} | ${ledger2}       | ${error2}
+  `('Test $description', ({ deductions, ledgerAllocation, error }) => {
     expect(() =>
-      allocateToTarget(targetAllocation, ledgerAllocation, targetChannelId, AddressZero)
+      allocateToTarget(ledgerAllocation, deductions, targetChannelId, AddressZero)
     ).toThrow(error);
   });
 });

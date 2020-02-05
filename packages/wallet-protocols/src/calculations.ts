@@ -8,7 +8,6 @@ import {
   isAllocationOutcome,
 } from '@statechannels/nitro-protocol';
 import { hexZeroPad } from 'ethers/utils';
-import { AddressZero } from 'ethers/constants';
 
 import { add, gt, subtract } from './mathOps';
 
@@ -20,14 +19,14 @@ export enum Errors {
 }
 
 export function allocateToTarget(
-  targetAllocation: Allocation,
   ledgerAllocation: Allocation,
+  deductions: Allocation,
   targetChannelId: string,
   ethAssetHolderAddress: string
 ): Outcome {
   let total = '0';
 
-  targetAllocation.forEach(targetItem => {
+  deductions.forEach(targetItem => {
     const ledgerIdx = ledgerAllocation.findIndex(
       ledgerItem => ledgerItem.destination === targetItem.destination
     );

@@ -186,7 +186,8 @@ export class EphemeralStore implements Store {
   public initializeChannel(data: IChannelStoreEntry) {
     const entry = new ChannelStoreEntry(data);
     if (this._store[entry.channelId]) {
-      throw new Error(`Channel ${JSON.stringify(entry.channel)} already initialized`);
+      console.warn(`Channel ${JSON.stringify(entry.channel)} already initialized`);
+      return;
     }
 
     const { participants, channelNonce } = entry.channel;

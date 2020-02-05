@@ -1,135 +1,123 @@
-import { assign } from 'xstate';
+import { Channel } from '@statechannels/nitro-protocol';
 
-import { Channel } from '../../';
+import { Store } from '../../store';
 import { Balance } from '../../types';
-import { store } from '../../temp-store';
+import { connectToStore, getDataAndInvoke } from '../../machine-utils';
+import { VirtualLeaf, CreateNullChannel, SupportState, LedgerFunding } from '../';
+import { FINAL } from '../..';
 const PROTOCOL = 'virtual-funding-as-hub';
 
-/*
-Since this protocol requires communication from the "customers",
-they might as well inform the hub what the target channel is.
-
-TODO: We will probably later have a more passive hub protocol which simply agrees to any
-update in the joint channel that's hub-neutral. At that point, we can remove `targetChannelId` from
-the args here.
-*/
 export interface Init {
   balances: Balance[];
   targetChannelId: string;
-  leftLedgerId: string;
-  rightLedgerId: string;
+  hubAddress: string;
+  jointChannel: Channel;
+  guarantorChannels: [Channel, Channel];
 }
 
-type ChannelsKnown = Init & {
-  jointChannel: Channel;
-  leftGuarantorChannel: Channel;
-  rightGuarantorChannel: Channel;
-};
+const jointChannelArgs = (store: Store) => async ({
+  jointChannel,
+  balances,
+}: Init): Promise<CreateNullChannel.Init> =>
+  VirtualLeaf.jointChannelArgs(store)({
+    jointChannel: jointChannel,
+    balances: balances,
+    hubAddress: jointChannel.participants[1],
+  });
 
-export const assignChannels = assign(
-  (init: Init): ChannelsKnown => {
-    const { leftLedgerId, rightLedgerId, targetChannelId } = init;
-    const { channel: leftLedgerChannel } = store.getEntry(leftLedgerId).latestState;
-    const { channel: rightLedgerChannel } = store.getEntry(rightLedgerId).latestState;
-
-    const jointParticipants = [
-      ...leftLedgerChannel.participants,
-      rightLedgerChannel.participants[1],
-    ];
-    const jointChannel: Channel = {
-      participants: jointParticipants,
-      channelNonce: store.getNextNonce(jointParticipants),
-      chainId: 'TODO',
-    };
-
-    const leftGuarantorChannel: Channel = {
-      ...leftLedgerChannel,
-      channelNonce: store.getNextNonce(leftLedgerChannel.participants),
-    };
-
-    const rightGuarantorChannel: Channel = {
-      ...rightLedgerChannel,
-      channelNonce: store.getNextNonce(rightLedgerChannel.participants),
-    };
-
-    return {
-      ...init,
-      jointChannel,
-      leftGuarantorChannel,
-      rightGuarantorChannel,
-    };
-  }
+const createJointChannel = getDataAndInvoke(
+  'jointChannelArgs',
+  'createNullChannel',
+  undefined,
+  'joint'
 );
-const createJointChannel = {
-  invoke: {
-    src: 'createNullChannel',
-    data: 'jointChannelArgs', // import from leaf version
-  },
-};
 
-const createLeftGuarantorChannel = {
-  invoke: {
-    src: 'createNullChannel',
-    data: 'guarantorChannelArgs',
-  },
-};
+const guarantorArgs = (index: VirtualLeaf.Indices) => (store: Store) => async ({
+  jointChannel,
+  guarantorChannels,
+}: Init): Promise<CreateNullChannel.Init> =>
+  VirtualLeaf.guarantorChannelArgs(store)({
+    jointChannel,
+    guarantorChannel: guarantorChannels[index],
+    index,
+  });
 
-const createRightGuarantorChannel = {
-  invoke: {
-    src: 'createNullChannel',
-    data: 'guarantorChannelArgs',
-  },
-};
+const leftGuarantorArgs = guarantorArgs(0);
+const createLeftGuarantorChannel = getDataAndInvoke(
+  'leftGuarantorArgs',
+  'createNullChannel',
+  undefined,
+  'left'
+);
 
+const rightGuarantorArgs = guarantorArgs(1);
+const createRightGuarantorChannel = getDataAndInvoke(
+  'rightGuarantorArgs',
+  'createNullChannel',
+  undefined,
+  'right'
+);
+
+const parallel = 'parallel' as 'parallel';
 const createChannels = {
-  entry: 'assignChannels',
-  type: 'parallel',
-  states: {
-    createLeftGuarantorChannel,
-    createRightGuarantorChannel,
-    createJointChannel,
-  },
+  type: parallel,
+  states: { createLeftGuarantorChannel, createRightGuarantorChannel, createJointChannel },
   onDone: 'fundGuarantors',
 };
 
-const fundLeftGuarantor = {
-  invoke: {
-    src: 'supportState',
-    data: 'guarantorOutcome',
-  },
-};
-const fundRightGuarantor = {
-  invoke: {
-    src: 'supportState',
-    data: 'guarantorOutcome',
-  },
-};
-
-const fundGuarantors = {
-  type: 'parallel',
+const fundGuarantorArgs = (index: VirtualLeaf.Indices) => ({
+  guarantorChannels,
+  balances,
+  hubAddress,
+}: Init): LedgerFunding.Init =>
+  VirtualLeaf.fundGuarantorArgs({
+    guarantorChannel: guarantorChannels[index],
+    index,
+    balances,
+    hubAddress,
+  });
+const fundGuarantor = index => ({
+  initial: 'fund',
   states: {
-    fundLeftGuarantor,
-    fundRightGuarantor,
+    fund: {
+      invoke: {
+        id: `fundGuarantor-${index}`,
+        src: 'ledgerFunding',
+        data: fundGuarantorArgs(index),
+        onDone: 'done',
+      },
+    },
+    done: { type: FINAL },
+  },
+});
+const fundGuarantors = {
+  type: parallel,
+  states: {
+    fundLeftGuarantor: fundGuarantor(0),
+    fundRightGuarantor: fundGuarantor(1),
   },
   onDone: 'fundTarget',
 };
 
-const fundTarget = {
-  invoke: {
-    src: 'supportState',
-    data: 'jointOutcome',
-    onDone: 'success',
-  },
-};
+const fundTarget = getDataAndInvoke('fundTargetArgs', 'supportState', 'success');
 
 // PROTOCOL DEFINITION
 export const config = {
   key: PROTOCOL,
   initial: 'createChannels',
-  states: {
-    createChannels,
-    fundGuarantors,
-    fundTarget,
-    success: { type: 'final' },
-  },
+  states: { createChannels, fundGuarantors, fundTarget, success: { type: FINAL } },
 };
+
+const options = (store: Store) => ({
+  services: {
+    fundTargetArgs: VirtualLeaf.fundTargetArgs(store),
+    createNullChannel: CreateNullChannel.machine(store),
+    supportState: SupportState.machine(store),
+    ledgerFunding: LedgerFunding.machine(store),
+    jointChannelArgs: jointChannelArgs(store),
+    leftGuarantorArgs: leftGuarantorArgs(store),
+    rightGuarantorArgs: rightGuarantorArgs(store),
+  },
+});
+
+export const machine = connectToStore<any>(config, options);

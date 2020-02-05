@@ -25,6 +25,7 @@ These differences allow create-null-channel to be fully-determined.
 
 export interface Init {
   channel: Channel;
+  outcome?: Outcome;
 }
 
 // For convenience, assign the channel id
@@ -43,11 +44,11 @@ const checkChannel = {
   },
 };
 
-function preFundData({ channel }: Context): SupportState.Init {
+function preFundData({ channel, outcome }: Context): SupportState.Init {
   return {
     state: {
       turnNum: 0,
-      outcome: [],
+      outcome: outcome || [],
       channel,
       isFinal: false,
       challengeDuration: 1,
@@ -56,6 +57,7 @@ function preFundData({ channel }: Context): SupportState.Init {
     },
   };
 }
+
 const preFundSetup = {
   invoke: {
     src: 'supportState',
