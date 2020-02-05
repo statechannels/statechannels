@@ -53,8 +53,8 @@
       },
       "required": ["amount", "destination"]
     },
-    "Allocation": {
-      "title": "Allocation",
+    "AllocationAssetOutcome": {
+      "title": "AllocationAssetOutcome",
       "type": "object",
       "properties": {
         "token": {

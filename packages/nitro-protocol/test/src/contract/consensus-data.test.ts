@@ -22,14 +22,14 @@ describe('consensus-data', () => {
     const proposedOutcome: Outcome = [
       {
         assetHolderAddress,
-        allocation: destinations.map((d, i) => ({amount: '0x1', destination: d})),
+        allocationItems: destinations.map((d, i) => ({amount: '0x1', destination: d})),
       },
     ];
 
     const currentOutcome: Outcome = [
       {
         assetHolderAddress,
-        allocation: destinations.map((d, i) => ({amount: '0x0', destination: d})),
+        allocationItems: destinations.map((d, i) => ({amount: '0x0', destination: d})),
       },
     ];
 
@@ -54,7 +54,7 @@ describe('consensus-data', () => {
   describe('encoding and decoding', () => {
     const consensusData: ConsensusData = {
       furtherVotesRequired: 5,
-      proposedOutcome: [{assetHolderAddress: AddressZero, allocation: []}],
+      proposedOutcome: [{assetHolderAddress: AddressZero, allocationItems: []}],
     };
     const emptyConsensusData = {furtherVotesRequired: 0, proposedOutcome: []};
 

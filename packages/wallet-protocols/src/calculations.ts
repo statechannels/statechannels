@@ -61,7 +61,7 @@ export function getEthAllocation(outcome: Outcome, ethAssetHolderAddress: string
   const ethOutcome: AssetOutcome | undefined = outcome.find(
     o => o.assetHolderAddress === ethAssetHolderAddress
   );
-  return ethOutcome ? checkThat(ethOutcome, isAllocationOutcome).allocation : [];
+  return ethOutcome ? checkThat(ethOutcome, isAllocationOutcome).allocationItems : [];
 }
 
 export function ethAllocationOutcome(
@@ -76,7 +76,7 @@ export function ethAllocationOutcome(
     {
       // FIXME: Fix hard-coded asset holder address
       assetHolderAddress: ethAssetHolderAddress,
-      allocation: allocation.map(a => ({ ...a, destination: hexZeroPad(a.destination, 32) })),
+      allocationItems: allocation.map(a => ({ ...a, destination: hexZeroPad(a.destination, 32) })),
     },
   ];
 }

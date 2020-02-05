@@ -452,7 +452,9 @@ function calculateLedgerOutcome(outcome: Outcome, ourAddress: string, hubAddress
   // TODO: Move convertAddressToBytes32 out of nitro converter
 
   const ourConvertedAddress = convertAddressToBytes32(ourAddress);
-  const ourAllocation = assetOutcome.allocation.find(a => a.destination === ourConvertedAddress);
+  const ourAllocation = assetOutcome.allocationItems.find(
+    a => a.destination === ourConvertedAddress
+  );
   if (!ourAllocation) {
     throw new Error(`Could not find an allocation with destination ${ourConvertedAddress}`);
   }
@@ -466,7 +468,7 @@ function calculateLedgerOutcome(outcome: Outcome, ourAddress: string, hubAddress
   return [
     {
       assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
-      allocation
+      allocationItems: allocation
     }
   ];
 }
@@ -481,7 +483,7 @@ function calculateAllocationTotal(outcome: Outcome): string {
   if (!isAllocationOutcome(assetOutcome)) {
     throw new Error("Expected an allocation outcome, not a guarantee outcome");
   }
-  return assetOutcome.allocation.map(a => a.amount).reduce(addHex);
+  return assetOutcome.allocationItems.map(a => a.amount).reduce(addHex);
 }
 
 function getAllocationAssetOutcome(outcome: Outcome): AllocationAssetOutcome {
@@ -504,7 +506,7 @@ function calculateJointProposedOutcome(
   return [
     {
       assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
-      allocation: [
+      allocationItems: [
         {destination: targetChannelId, amount: calculateAllocationTotal(startingOutcome)},
         {
           destination: convertAddressToBytes32(hubAddress),
@@ -519,13 +521,13 @@ function calculateInitialJointOutcome(startingOutcome: Outcome, hubAddress: stri
   const total = calculateAllocationTotal(startingOutcome);
   const assetOutcome = getAllocationAssetOutcome(startingOutcome);
   const updatedAllocation = [
-    ...assetOutcome.allocation,
+    ...assetOutcome.allocationItems,
     {destination: convertAddressToBytes32(hubAddress), amount: total}
   ];
   return [
     {
       assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
-      allocation: updatedAllocation
+      allocationItems: updatedAllocation
     }
   ];
 }

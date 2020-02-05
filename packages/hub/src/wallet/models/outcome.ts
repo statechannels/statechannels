@@ -53,7 +53,7 @@ export default class Outcome extends Model {
     } else {
       const allocationAssetOutcome: AllocationAssetOutcome = {
         assetHolderAddress: this.assetHolderAddress,
-        allocation: this.allocation.map(allocation => ({
+        allocationItems: this.allocation.map(allocation => ({
           destination: allocation.destination,
           amount: allocation.amount
         }))

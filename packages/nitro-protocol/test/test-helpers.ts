@@ -10,6 +10,7 @@ import {
   hashAssetOutcome,
   Outcome,
   Allocation,
+  AllocationItem,
 } from '../src/contract/outcome';
 import {hashState, State} from '../src/contract/state';
 import fs from 'fs';
@@ -321,7 +322,7 @@ export function computeOutcome(outcomeShortHand: OutcomeShortHand): AllocationAs
     );
     const assetOutcome: AllocationAssetOutcome = {
       assetHolderAddress: assetHolder,
-      allocation,
+      allocationItems: allocation,
     }; // TODO handle gurantee outcomes
     outcome.push(assetOutcome);
   });

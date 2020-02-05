@@ -175,12 +175,14 @@ function waitForLedgerChannelUpdateReducer(
 
 function createJointChannelProposedOutcome(appOutcome: Outcome, hubAddress: string): Outcome {
   const allocationOutcome = getAllocationOutcome(appOutcome);
-  const newAllocation = [...allocationOutcome.allocation];
+  const newAllocation = [...allocationOutcome.allocationItems];
   newAllocation.push({
     destination: convertAddressToBytes32(hubAddress),
     amount: getAllocationTotal(appOutcome)
   });
-  return [{assetHolderAddress: allocationOutcome.assetHolderAddress, allocation: newAllocation}];
+  return [
+    {assetHolderAddress: allocationOutcome.assetHolderAddress, allocationItems: newAllocation}
+  ];
 }
 function createLedgerChannelProposedOutcome(
   appOutcome: Outcome,
@@ -197,5 +199,7 @@ function createLedgerChannelProposedOutcome(
       amount: theirAmount
     }
   ];
-  return [{assetHolderAddress: allocationOutcome.assetHolderAddress, allocation: newAllocation}];
+  return [
+    {assetHolderAddress: allocationOutcome.assetHolderAddress, allocationItems: newAllocation}
+  ];
 }

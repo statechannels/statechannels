@@ -40,7 +40,7 @@ export const appState: (n: number) => State = turnNum => ({
   outcome: [
     {
       assetHolderAddress: '0x0000000000000000000000000000000000000000',
-      allocation: [
+      allocationItems: [
         {
           destination: '0x0000000000000000000000000000000000000000000000000000000000000001',
           amount: '3',
@@ -68,7 +68,7 @@ export const ledgerState: State = {
   outcome: [
     {
       assetHolderAddress: '0x0000000000000000000000000000000000000000',
-      allocation: [
+      allocationItems: [
         {
           destination: '0xb9500857552943ae5ef6c2a046e311560c296c474aa47a3d13614d1ac98bd1a6',
           amount: '0x04',

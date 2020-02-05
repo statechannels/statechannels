@@ -1,10 +1,10 @@
 import {
+  AllocationAssetOutcome,
   Outcome,
   isAllocationOutcome,
   AllocationItem,
   convertAddressToBytes32
 } from "@statechannels/nitro-protocol";
-import {AllocationAssetOutcome} from "@statechannels/nitro-protocol";
 
 import {addHex} from "./hex-utils";
 
@@ -31,7 +31,7 @@ export function getAllocationOutcome(outcome: Outcome): AllocationAssetOutcome {
 
 export function getAllocationTotal(outcome: Outcome): string {
   const allocationOutcome = getAllocationOutcome(outcome);
-  const {allocation} = allocationOutcome;
+  const {allocationItems: allocation} = allocationOutcome;
   return allocation.map(a => a.amount).reduce(addHex);
 }
 
@@ -41,7 +41,7 @@ export function getAllocationItem(outcome: Outcome, addressOrChannelId: string):
       ? convertAddressToBytes32(addressOrChannelId)
       : addressOrChannelId;
   const allocationOutcome = getAllocationOutcome(outcome);
-  const {allocation} = allocationOutcome;
+  const {allocationItems: allocation} = allocationOutcome;
   const allocationItem = allocation.find(a => a.destination === paddedId);
   if (!allocationItem) {
     throw new Error(`Could not find an allocation for ${paddedId}`);
@@ -51,10 +51,10 @@ export function getAllocationItem(outcome: Outcome, addressOrChannelId: string):
 
 export function getAllocationItemAtIndex(outcome: Outcome, index: number): AllocationItem {
   const allocationOutcome = getAllocationOutcome(outcome);
-  const {allocation} = allocationOutcome;
+  const {allocationItems: allocation} = allocationOutcome;
   if (allocation.length < index) {
     throw new Error(
-      `Attempting to get the allocation item at ${index} but allocation is only ${allocationOutcome.allocation.length} long.`
+      `Attempting to get the allocation item at ${index} but allocation is only ${allocationOutcome.allocationItems.length} long.`
     );
   }
   return allocation[index];
@@ -66,6 +66,6 @@ export function outcomeContainsId(outcome: Outcome, addressOrChannelId: string):
       ? convertAddressToBytes32(addressOrChannelId)
       : addressOrChannelId;
   const allocationOutcome = getAllocationOutcome(outcome);
-  const {allocation} = allocationOutcome;
+  const {allocationItems: allocation} = allocationOutcome;
   return allocation.some(a => a.destination === paddedId);
 }

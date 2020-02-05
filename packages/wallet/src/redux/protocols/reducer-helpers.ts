@@ -162,7 +162,7 @@ export const channelIsClosed = (channelId: string, sharedData: SharedData): bool
 
 export const channelFundsAnotherChannel = (channelId: string, sharedData: SharedData): boolean => {
   const latestState = getLatestState(channelId, sharedData);
-  const {allocation} = getAllocationOutcome(latestState.outcome);
+  const {allocationItems: allocation} = getAllocationOutcome(latestState.outcome);
   return (
     _.intersection(
       selectors.getChannelIds(sharedData),

@@ -60,14 +60,14 @@ export const allocation: AllocationItem[] = [
 export const allocationOutcome2: Outcome = [
   {
     assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS,
-    allocation: allocation.slice(0, 2)
+    allocationItems: allocation.slice(0, 2)
   }
 ];
 
 export const allocationOutcome3: Outcome = [
   {
     assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS,
-    allocation: allocation.slice(0, 3)
+    allocationItems: allocation.slice(0, 3)
   }
 ];
 

@@ -77,12 +77,12 @@ export function isGuaranteeOutcome(
 // Allocation outcome and functions
 export interface AllocationAssetOutcome {
   assetHolderAddress: Address;
-  allocation: AllocationItem[];
+  allocationItems: AllocationItem[];
 }
 export function isAllocationOutcome(
   assetOutcome: AssetOutcome
 ): assetOutcome is AllocationAssetOutcome {
-  return 'allocation' in assetOutcome;
+  return 'allocationItems' in assetOutcome;
 }
 
 // Asset outcome functions
@@ -106,7 +106,7 @@ export function decodeOutcomeItem(
   )[0];
   switch (outcomeType) {
     case AssetOutcomeType.AllocationOutcomeType:
-      return {assetHolderAddress, allocation: decodeAllocation(allocationOrGuarantee)};
+      return {assetHolderAddress, allocationItems: decodeAllocation(allocationOrGuarantee)};
     case AssetOutcomeType.GuaranteeOutcomeType:
       return {assetHolderAddress, guarantee: decodeGuarantee(allocationOrGuarantee)};
     default:
@@ -155,7 +155,7 @@ export function encodeOutcome(outcome: Outcome): Bytes32 {
     let encodedData;
     let outcomeType;
     if (isAllocationOutcome(o)) {
-      encodedData = encodeAllocation(o.allocation);
+      encodedData = encodeAllocation(o.allocationItems);
       outcomeType = AssetOutcomeType.AllocationOutcomeType;
     } else {
       encodedData = encodeGuarantee(o.guarantee);

@@ -11,7 +11,7 @@ import {
   UpdateChannelParams,
   Allocations,
   CreateChannelParams
-} from '@statechannels/client-api-schema/types';
+} from '@statechannels/client-api-schema';
 import {Channel} from '@statechannels/wallet-protocols';
 
 function createAllocationOutcomeFromParams(params: Allocations): Outcome {
@@ -19,7 +19,7 @@ function createAllocationOutcomeFromParams(params: Allocations): Outcome {
     return {
       // TODO: Need to look up the the asset holder for the token
       assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
-      allocation: p.allocationItems.map(a => {
+      allocationItems: p.allocationItems.map(a => {
         return {
           destination: convertAddressToBytes32(a.destination),
           amount: a.amount
@@ -36,7 +36,7 @@ export function createJsonRpcAllocationsFromOutcome(outcome: Outcome): Allocatio
     }
     return {
       token: '0x0',
-      allocationItems: o.allocation.map(a => ({
+      allocationItems: o.allocationItems.map(a => ({
         amount: a.amount,
         destination: convertBytes32ToAddress(a.destination)
       }))

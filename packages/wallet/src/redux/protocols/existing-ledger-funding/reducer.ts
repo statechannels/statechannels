@@ -1,8 +1,6 @@
 import {bigNumberify} from "ethers/utils";
 
-import {Outcome, State} from "@statechannels/nitro-protocol";
-
-import {AllocationAssetOutcome} from "@statechannels/nitro-protocol";
+import {AllocationAssetOutcome, Outcome, State} from "@statechannels/nitro-protocol";
 
 import {SharedData, ChannelFundingState, setFundingState} from "../../state";
 
@@ -249,7 +247,7 @@ function ledgerChannelNeedsTopUp(latestState: State, proposedOutcome: Outcome) {
   }
 
   const currentOutcome = latestState.outcome;
-  const proposedAllocation = getAllocationOutcome(proposedOutcome).allocation;
+  const proposedAllocation = getAllocationOutcome(proposedOutcome).allocationItems;
 
   return proposedAllocation.some(p => {
     if (!outcomeContainsId(currentOutcome, p.destination)) {
@@ -277,20 +275,23 @@ function craftAppFunding(
   // TODO: Currently assuming ETH, this should be updated to handle any asset
   const newAllocation: AllocationAssetOutcome = {
     assetHolderAddress: startingAllocation.assetHolderAddress,
-    allocation: []
+    allocationItems: []
   };
 
-  newAllocation.allocation.push({destination: appChannelId, amount: appTotal});
+  newAllocation.allocationItems.push({destination: appChannelId, amount: appTotal});
 
-  ledgerAllocation.allocation.forEach(a => {
-    const startingAllocationItem = startingAllocation.allocation.find(
+  ledgerAllocation.allocationItems.forEach(a => {
+    const startingAllocationItem = startingAllocation.allocationItems.find(
       s => s.destination === a.destination
     );
     const difference = !startingAllocationItem
       ? bigNumberify(0)
       : bigNumberify(a.amount).sub(startingAllocationItem.amount);
     if (difference.gt(0)) {
-      newAllocation.allocation.push({destination: a.destination, amount: difference.toHexString()});
+      newAllocation.allocationItems.push({
+        destination: a.destination,
+        amount: difference.toHexString()
+      });
     }
   });
 

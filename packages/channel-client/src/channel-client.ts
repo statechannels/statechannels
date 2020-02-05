@@ -9,10 +9,10 @@ import {
 } from './types';
 import {
   PushMessageResult,
-  Allocation,
+  AllocationAssetOutcome,
   Participant,
   BudgetResult
-} from '@statechannels/client-api-schema/types';
+} from '@statechannels/client-api-schema';
 
 export class ChannelClient implements ChannelClientInterface<ChannelResult> {
   constructor(private readonly provider: ChannelProviderInterface) {}
@@ -40,7 +40,7 @@ export class ChannelClient implements ChannelClientInterface<ChannelResult> {
 
   async createChannel(
     participants: Participant[],
-    allocations: Allocation[],
+    allocations: AllocationAssetOutcome[],
     appDefinition: string,
     appData: string
   ): Promise<ChannelResult> {
@@ -59,7 +59,7 @@ export class ChannelClient implements ChannelClientInterface<ChannelResult> {
   async updateChannel(
     channelId: string,
     participants: Participant[],
-    allocations: Allocation[],
+    allocations: AllocationAssetOutcome[],
     appData: string
   ): Promise<ChannelResult> {
     return this.provider.send('UpdateChannel', {

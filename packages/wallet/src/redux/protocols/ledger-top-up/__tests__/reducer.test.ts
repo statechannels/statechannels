@@ -242,5 +242,5 @@ function expectOutcomeToContain(outcome: Outcome, items: AllocationItem[]) {
   if (!isAllocationOutcome(assetOutcome)) {
     throw new Error("Not an allocation outcome.");
   }
-  expect(assetOutcome.allocation).toEqual(expect.arrayContaining(items));
+  expect(assetOutcome.allocationItems).toEqual(expect.arrayContaining(items));
 }

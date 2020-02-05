@@ -38,6 +38,7 @@ export {
   encodeOutcome,
   Outcome,
   Allocation,
+  AllocationItem,
   Guarantee,
   isAllocationOutcome,
   isGuaranteeOutcome,
