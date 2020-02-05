@@ -20,6 +20,7 @@
     "guid-typescript": "1.0.9"
   },
   "devDependencies": {
+    "@statechannels/client-api-schema": "0.0.1",
     "@types/debug": "4.1.5",
     "@types/eslint": "6.1.7",
     "@types/eslint-plugin-prettier": "2.2.0",
@@ -39,8 +40,7 @@
     "ts-jest": "25.0.0",
     "ts-loader": "6.2.1",
     "typescript": "3.7.5",
-    "webpack-cli": "3.3.9",
-    "@statechannels/client-api-schema": "0.0.1"
+    "webpack-cli": "3.3.9"
   },
   "jest": {
     "roots": [

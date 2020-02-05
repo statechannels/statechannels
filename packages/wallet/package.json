@@ -174,7 +174,6 @@
     "lint:check": "eslint \"src/**/*.{js,ts,tsx}\" --cache",
     "lint:write": "eslint \"src/**/*.{js,ts,tsx}\" --fix",
     "patch-package": "cd ../.. && yarn patch-package",
-    "postinstall": "rm -f node_modules/web3/index.d.ts",
     "precommit": "lint-staged --quiet",
     "prepare": "yarn patch-package",
     "puppeteer:script": "npx ts-node -O '{\"module\":\"commonjs\"}' ./puppeteer/scripts/funding.ts ",
