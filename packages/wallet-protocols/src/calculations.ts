@@ -6,6 +6,7 @@ import {
   GuaranteeAssetOutcome,
   Outcome,
   isAllocationOutcome,
+  isGuaranteeOutcome,
 } from '@statechannels/nitro-protocol';
 import { hexZeroPad } from 'ethers/utils';
 
@@ -62,6 +63,13 @@ export function getEthAllocation(outcome: Outcome, ethAssetHolderAddress: string
     o => o.assetHolderAddress === ethAssetHolderAddress
   );
   return ethOutcome ? checkThat(ethOutcome, isAllocationOutcome).allocation : [];
+}
+
+export function getEthGuarantee(outcome: Outcome, ethAssetHolderAddress: string): Guarantee {
+  const ethOutcome: AssetOutcome | undefined = outcome.find(
+    o => o.assetHolderAddress === ethAssetHolderAddress
+  );
+  return checkThat(ethOutcome, isGuaranteeOutcome).guarantee;
 }
 
 export function ethAllocationOutcome(
