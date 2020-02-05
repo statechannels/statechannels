@@ -8,8 +8,8 @@ import {
   encodeGuarantee,
   encodeOutcome,
   Guarantee,
+  AllocationItem,
 } from '../../../src/contract/outcome';
-import {AllocationItem} from '@statechannels/client-api-schema';
 
 const destination = id('d');
 const targetChannelId = id('t');

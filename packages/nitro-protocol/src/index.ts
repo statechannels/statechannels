@@ -37,7 +37,7 @@ export {
   encodeAllocation,
   encodeOutcome,
   Outcome,
-  NitroAllocation as Allocation,
+  Allocation,
   Guarantee,
   isAllocationOutcome,
   isGuaranteeOutcome,

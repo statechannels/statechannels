@@ -1,6 +1,5 @@
 import {utils} from 'ethers';
 import {Address, Bytes, Bytes32, Uint256} from './types';
-import {AllocationItem} from '@statechannels/client-api-schema';
 
 export enum AssetOutcomeType {
   AllocationOutcomeType = 0,
@@ -30,25 +29,26 @@ export function decodeGuarantee(encodedGuarantee: Bytes): Guarantee {
 }
 
 export function isGuarantee(
-  allocationOrGuarantee: NitroAllocation | Guarantee
+  allocationOrGuarantee: Allocation | Guarantee
 ): allocationOrGuarantee is Guarantee {
   return !isAllocation(allocationOrGuarantee);
 }
 
 // Allocation and functions
+export type Allocation = AllocationItem[];
+export interface AllocationItem {
+  destination: Bytes32;
+  amount: Uint256;
+}
 
-// Note that a NitroAllocation is as defined in Outcome.sol, but an Allocation, used in
-// other parts of the codebase refers to what is used in the client-api-schema JSON-RPC
-export type NitroAllocation = AllocationItem[];
-
-export function encodeAllocation(allocation: NitroAllocation): Bytes32 {
+export function encodeAllocation(allocation: Allocation): Bytes32 {
   return utils.defaultAbiCoder.encode(
     ['tuple(bytes32 destination, uint256 amount)[]'],
     [allocation]
   );
 }
 
-export function decodeAllocation(encodedAllocation: Bytes): NitroAllocation {
+export function decodeAllocation(encodedAllocation: Bytes): Allocation {
   const allocationItems = utils.defaultAbiCoder.decode(
     ['tuple(bytes32 destination, uint256 amount)[]'],
     encodedAllocation
@@ -58,8 +58,8 @@ export function decodeAllocation(encodedAllocation: Bytes): NitroAllocation {
 }
 
 export function isAllocation(
-  allocationOrGuarantee: NitroAllocation | Guarantee
-): allocationOrGuarantee is NitroAllocation {
+  allocationOrGuarantee: Allocation | Guarantee
+): allocationOrGuarantee is Allocation {
   return Array.isArray(allocationOrGuarantee);
 }
 
@@ -115,10 +115,10 @@ export function decodeOutcomeItem(
 }
 
 // Asset outcome functions
-export function hashAssetOutcome(allocationOrGuarantee: NitroAllocation | Guarantee): Bytes32 {
+export function hashAssetOutcome(allocationOrGuarantee: Allocation | Guarantee): Bytes32 {
   return utils.keccak256(encodeAssetOutcome(allocationOrGuarantee));
 }
-export function encodeAssetOutcome(allocationOrGuarantee: NitroAllocation | Guarantee): Bytes32 {
+export function encodeAssetOutcome(allocationOrGuarantee: Allocation | Guarantee): Bytes32 {
   let encodedData;
   let outcomeType;
   if (isAllocation(allocationOrGuarantee)) {

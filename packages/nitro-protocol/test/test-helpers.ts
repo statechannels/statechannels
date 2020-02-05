@@ -9,11 +9,10 @@ import {
   Guarantee,
   hashAssetOutcome,
   Outcome,
-  NitroAllocation,
+  Allocation,
 } from '../src/contract/outcome';
 import {hashState, State} from '../src/contract/state';
 import fs from 'fs';
-import {AllocationItem} from '@statechannels/client-api-schema';
 
 // Interfaces
 
@@ -313,7 +312,7 @@ export function checkMultipleAssetOutcomeHashes(
 export function computeOutcome(outcomeShortHand: OutcomeShortHand): AllocationAssetOutcome[] {
   const outcome: AllocationAssetOutcome[] = [];
   Object.keys(outcomeShortHand).forEach(assetHolder => {
-    const allocation: NitroAllocation = [];
+    const allocation: Allocation = [];
     Object.keys(outcomeShortHand[assetHolder]).forEach(destination =>
       allocation.push({
         destination,
