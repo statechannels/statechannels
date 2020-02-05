@@ -27,7 +27,9 @@ import {fromEvent, Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {filterByPromise} from 'filter-async-rxjs-pipe';
 
-export function observeUpdateChannel(channelId: string): Observable<UpdateChannelParams> {
+export function observeRequests(
+  channelId: string
+): Observable<JoinChannelParams | CloseChannelParams | UpdateChannelParams> {
   return fromEvent(window, 'message').pipe(
     filterByPromise(async (e: MessageEvent) => {
       if (!e || !e.data.jsonrpc || e.data.jsonrpc !== '2.0') {
@@ -39,15 +41,21 @@ export function observeUpdateChannel(channelId: string): Observable<UpdateChanne
       }
       const validationResult = await validateRequest(e.data);
       if (!validationResult.isValid) {
-        throw Error('Validation Failure');
-      }
-      if (parsedMessage.payload.method !== 'UpdateState') {
+        console.error(validationResult);
         return false;
       }
-      const params = parsedMessage.payload.params as UpdateChannelParams;
-      return params.channelId === channelId;
+      if (
+        e.data.type !== 'UpdateChannel' &&
+        e.data.type !== 'CloseChannel' &&
+        e.data.type !== 'JoinChannel'
+      ) {
+        return false;
+      }
+      return e.data.params.channelId === channelId;
     }),
-    map(e => e.data.payload.params as UpdateChannelParams)
+    map((e: MessageEvent) => {
+      return e.data.params;
+    })
   );
 }
 
