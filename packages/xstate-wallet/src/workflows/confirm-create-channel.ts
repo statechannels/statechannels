@@ -22,7 +22,7 @@ interface WorkflowGuards {
 }
 // While this context info may not be used by the workflow
 // it may be used when displaying a UI
-interface WorkflowContext {
+export interface WorkflowContext {
   participants: Participant[];
   allocations: Allocations;
   appDefinition: string;
@@ -53,6 +53,7 @@ const generateConfig = (
   actions: WorkflowActions,
   guards: WorkflowGuards
 ): MachineConfig<WorkflowContext, WorkflowStateSchema, WorkflowEvent> => ({
+  id: 'confirm-create-channel',
   initial: 'needUserConfirmation',
   states: {
     needUserConfirmation: {

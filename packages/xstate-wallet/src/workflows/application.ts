@@ -48,6 +48,7 @@ type Event = PlayerRequestConclude | PlayerStateUpdate | SendStates | OpenEvent 
 export type ApplicationWorkflowEvent = Event;
 
 const generateConfig = (actions: Actions): MachineConfig<Context, any, Event> => ({
+  id: 'application-workflow',
   initial: 'initializing',
   states: {
     initializing: {on: {CREATE_CHANNEL: 'create', OPEN_CHANNEL: 'join'}},
