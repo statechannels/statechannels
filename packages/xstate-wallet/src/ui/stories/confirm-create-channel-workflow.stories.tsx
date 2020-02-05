@@ -46,25 +46,11 @@ if (config.states) {
         devTools: true
       }
     ); // start a new interpreted machine for each story
-    machine.start(state);
-    storiesOf('Workflows / Confirm Channel Creation', module).add(
+    machine.onEvent(event => console.log(event.type)).start(state);
+    storiesOf('Workflows / Confirm Create Channel', module).add(
       state.toString(),
       renderWalletInFrontOfApp(machine)
     );
-    machine.stop();
+    machine.stop(); // the machine will be stopped before it can be transitioned. This means the console.log on L49 throws a warning that we sent an event to a stopped machine.
   });
 }
-
-// if (config.states) {
-//   ['CREATE_CHANNEL', 'OPEN_CHANNEL'].forEach(event => {
-//     const machineWithChildren = interpret<any, any, any>(
-//       confirmChannelCreationWorkflow(store).withContext(testContext)
-//     ).start(); // start a new interpreted machine for each story
-//     machineWithChildren.send(event);
-//     storiesOf('Application Workflow', module).add(
-//       'Initialising + ' + event,
-//       renderWalletInFrontOfApp(machineWithChildren)
-//     );
-//     machineWithChildren.stop();
-//   });
-// }
