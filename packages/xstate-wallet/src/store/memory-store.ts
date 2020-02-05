@@ -98,13 +98,13 @@ export class MemoryStore {
     this._protocols = [];
   }
 
-  statesReceived(channelId: string): Observable<State> {
+  public stateReceivedFeed(channelId: string): Observable<State> {
     return fromEvent<State>(this._eventEmitter, 'stateReceived').pipe(
       filter(e => e.channelId === channelId)
     );
   }
 
-  newProtocols(): Observable<Protocol> {
+  public newProtocolFeed(): Observable<Protocol> {
     return fromEvent(this._eventEmitter, 'newProtocol');
   }
 
