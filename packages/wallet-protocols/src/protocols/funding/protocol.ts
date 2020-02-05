@@ -4,7 +4,6 @@ import { failure, Store, success } from '../..';
 import { MachineFactory, getDataAndInvoke } from '../../machine-utils';
 
 import { FundingStrategy, FundingStrategyProposed } from '../../wire-protocol';
-import { log } from '../../utils';
 import { getEthAllocation } from '../../calculations';
 
 import { LedgerFunding } from '..';

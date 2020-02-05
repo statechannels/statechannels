@@ -53,6 +53,7 @@ function replacementChannelArgs({
 
   return {
     channel: newChannel,
+    outcome: ethAllocationOutcome(newChannelAllocation, store.ethAssetHolderAddress),
   };
 }
 const createReplacement = {

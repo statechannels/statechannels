@@ -1,7 +1,5 @@
 import { Machine } from 'xstate';
 
-import * as VirtualDefundingAsHub from '../virtual-defunding-as-hub/protocol';
-import * as VirtualDefundingAsLeaf from '../virtual-defunding-as-leaf/protocol';
 import { FINAL, checkThat, outcomesEqual } from '../..';
 import { MachineFactory, getDataAndInvoke } from '../../machine-utils';
 import { add } from '../../mathOps';
@@ -137,16 +135,3 @@ export const machine: MachineFactory<Init, any> = (store: Store, ctx: Init) => {
   const options = { services };
   return Machine(config).withConfig(options, ctx);
 };
-
-function virtualDefundingAsLeafArgs(ctx: Init): VirtualDefundingAsLeaf.Init {
-  const targetChannelId = 'target';
-  const index = 0;
-  return {
-    targetChannelId,
-    index,
-  };
-}
-function virtualDefundingAsHubArgs(ctx: Init): VirtualDefundingAsHub.Init {
-  const jointChannelId = 'joint';
-  return { jointChannelId };
-}

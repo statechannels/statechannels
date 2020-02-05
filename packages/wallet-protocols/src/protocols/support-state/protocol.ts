@@ -4,7 +4,7 @@ import { filter, map } from 'rxjs/operators';
 
 import { outcomesEqual, statesEqual } from '../..';
 import { Store, observeChannel } from '../../store';
-import { MachineFactory, connectToStore } from '../../machine-utils';
+import { connectToStore } from '../../machine-utils';
 
 const PROTOCOL = 'support-state';
 
@@ -30,7 +30,6 @@ export const config: MachineConfig<Init, any, AnyEventObject> = {
 
 type Services = { sendState(ctx: Init): any };
 
-type HasObserver = Init & { observer: any };
 type Options = {
   services: Services;
   actions: { spawnObserver: AssignAction<Init, any> };

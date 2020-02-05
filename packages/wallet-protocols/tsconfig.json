@@ -1,17 +1,20 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "lib",
-    "target": "es2020",
+    "downlevelIteration": true,
+    "esModuleInterop": true,
     "module": "commonjs",
+    "noUnusedLocals": true,
+    "outDir": "lib",
     "strict": false,
     "strictNullChecks": true,
-    "esModuleInterop": true,
-    "downlevelIteration": true,
+    "target": "es2020",
     "types": ["react", "jest", "node"]
   },
-  "references": [{
-    "path": "../nitro-protocol"
-  }],
+  "references": [
+    {
+      "path": "../nitro-protocol"
+    }
+  ],
   "include": ["src"]
 }
