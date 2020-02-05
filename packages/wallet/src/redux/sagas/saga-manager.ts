@@ -1,27 +1,32 @@
 import {actionChannel, cancel, fork, select, take, put} from "redux-saga/effects";
 
+import {Web3Provider} from "ethers/providers";
+
+import {getProvider, isDevelopmentNetwork} from "../../utils/contract-utils";
+
+import {WalletState} from "../state";
+
+import {WALLET_INITIALIZED} from "../state";
+
+import {isLoadAction, messageSent} from "../actions";
+
+import {USE_STORAGE} from "../../constants";
+
 import {adjudicatorWatcher} from "./adjudicator-watcher";
 import {challengeWatcher} from "./challenge-watcher";
 import {transactionSender} from "./transaction-sender";
 
-import {getProvider, isDevelopmentNetwork} from "../../utils/contract-utils";
-import {WalletState} from "../state";
-
-import {WALLET_INITIALIZED} from "../state";
 import {challengeResponseInitiator} from "./challenge-response-initiator";
 import {ganacheMiner} from "./ganache-miner";
 import {displaySender} from "./messaging/display-sender";
 import {multipleActionDispatcher} from "./multiple-action-dispatcher";
 
-import {Web3Provider} from "ethers/providers";
-import {isLoadAction, messageSent} from "../actions";
 import {adjudicatorStateUpdater} from "./adjudicator-state-updater";
 import {assetHolderStateUpdater} from "./asset-holder-state-updater";
 import {assetHoldersWatcher} from "./asset-holder-watcher";
 import {messageSender} from "./messaging/message-sender";
 import {OutgoingApiAction} from "./messaging/outgoing-api-actions";
 import {postMessageListener} from "./messaging/post-message-listener";
-import {USE_STORAGE} from "../../constants";
 
 export function* sagaManager(): IterableIterator<any> {
   // If we are using storage we want to wait until storage is loaded before handling anything

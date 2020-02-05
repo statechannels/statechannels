@@ -1,4 +1,4 @@
-import { Machine, MachineConfig, sendParent, assign, DoneInvokeEvent } from 'xstate';
+import { DoneInvokeEvent, Machine, MachineConfig, assign, sendParent } from 'xstate';
 import { getChannelId } from '@statechannels/nitro-protocol';
 
 import { MachineFactory } from '../../machine-utils';

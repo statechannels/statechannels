@@ -1,11 +1,14 @@
 import {PureComponent} from "react";
 import {connect} from "react-redux";
 
-import {unreachable} from "../../../utils/reducer-utils";
-import {NonTerminalCloseLedgerChannelState} from "./states";
-import WaitForOtherPlayer from "../shared-components/wait-for-other-player";
 import React from "react";
+
+import {unreachable} from "../../../utils/reducer-utils";
+
+import WaitForOtherPlayer from "../shared-components/wait-for-other-player";
 import {Withdrawal} from "../withdrawing/container";
+
+import {NonTerminalCloseLedgerChannelState} from "./states";
 
 interface Props {
   state: NonTerminalCloseLedgerChannelState;

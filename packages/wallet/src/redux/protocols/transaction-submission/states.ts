@@ -1,6 +1,8 @@
 import {StateConstructor} from "../../utils";
-import {ProtocolState} from "..";
+
 import {TransactionRequestWithTarget} from "../../outbox/state";
+
+import {ProtocolState} from "..";
 
 // -------
 // States

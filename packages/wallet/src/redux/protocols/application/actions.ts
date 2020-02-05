@@ -1,7 +1,8 @@
+import {State, SignedState} from "@statechannels/nitro-protocol";
+
 import {WalletAction} from "../../actions";
 import {ActionConstructor} from "../../utils";
 import {DisputeAction, isDisputeAction} from "../dispute";
-import {State, SignedState} from "@statechannels/nitro-protocol";
 
 // -------
 // Actions

@@ -1,3 +1,5 @@
+import {bigNumberify} from "ethers/utils/bignumber";
+
 import {
   asAddress,
   bsAddress,
@@ -9,7 +11,6 @@ import {
   ledgerState,
   convertBalanceToOutcome
 } from "../../../__tests__/state-helpers";
-import {bigNumberify} from "ethers/utils/bignumber";
 import {SharedData, EMPTY_SHARED_DATA, setChannels} from "../../../state";
 import {channelFromStates} from "../../../channel-store/channel-state/__tests__";
 import * as states from "../states";

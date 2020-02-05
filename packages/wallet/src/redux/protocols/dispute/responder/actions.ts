@@ -1,3 +1,5 @@
+import {State} from "@statechannels/nitro-protocol";
+
 import {BaseProcessAction} from "../../actions";
 import {TransactionAction} from "../../transaction-submission/actions";
 import {
@@ -7,7 +9,6 @@ import {
   WalletAction
 } from "../../../actions";
 import {ActionConstructor} from "../../../utils";
-import {State} from "@statechannels/nitro-protocol";
 
 // -------
 // Actions

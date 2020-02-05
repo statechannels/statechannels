@@ -1,3 +1,5 @@
+import {bigNumberify} from "ethers/utils";
+
 import * as states from "../states";
 import {ThreePartyPlayerIndex as PlayerIndex} from "../../../types";
 
@@ -7,7 +9,6 @@ import * as scenarios from "../../../__tests__/state-helpers";
 import {EmbeddedProtocol, signedStatesReceived} from "../../../../communication";
 import {StateType} from "../states";
 import {clearedToSend} from "../actions";
-import {bigNumberify} from "ethers/utils";
 import {CONSENSUS_LIBRARY_ADDRESS, CONSENSUS_LIBRARY_BYTECODE} from "../../../../constants";
 import {makeLocator} from "../..";
 import {createSharedDataFromParticipants} from "../../../__tests__/helpers";

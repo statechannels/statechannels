@@ -3,12 +3,13 @@ import {call, put, take, select} from "redux-saga/effects";
 import {Contract} from "ethers";
 import {getDepositedEvent, getAssetTransferredEvent} from "@statechannels/nitro-protocol";
 
+import {Web3Provider} from "ethers/providers";
+
 import * as actions from "../actions";
 import {getETHAssetHolderContract, getERC20AssetHolderContract} from "../../utils/contract-utils";
 import {getAssetHolderWatcherSubscribersForChannel} from "../selectors";
 import {ChannelSubscriber} from "../state";
 import {ProtocolLocator} from "../../communication";
-import {Web3Provider} from "ethers/providers";
 
 enum AssetHolderEventType {
   AssetTransferred,

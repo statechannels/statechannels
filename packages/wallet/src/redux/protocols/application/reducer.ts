@@ -1,7 +1,7 @@
+import {State, SignedState} from "@statechannels/nitro-protocol";
+
 import {SharedData, registerChannelToMonitor} from "../../state";
-import * as states from "./states";
-import * as actions from "./actions";
-import {ProtocolStateWithSharedData} from "..";
+
 import {unreachable} from "../../../utils/reducer-utils";
 import {
   checkAndInitialize,
@@ -12,9 +12,13 @@ import {
 import {ProtocolAction} from "../../actions";
 import * as dispute from "../dispute";
 import {disputeReducer} from "../dispute/reducer";
-import {State, SignedState} from "@statechannels/nitro-protocol";
 import {ChannelParticipant} from "../../channel-store";
 import {getAppDefinitionBytecode} from "../../../redux/selectors";
+
+import * as actions from "./actions";
+import * as states from "./states";
+
+import {ProtocolStateWithSharedData} from "..";
 
 // TODO: Right now we're using a fixed application ID
 // since we're not too concerned with handling multiple running app channels.

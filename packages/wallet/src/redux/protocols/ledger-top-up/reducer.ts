@@ -1,13 +1,7 @@
-import {SharedData, registerChannelToMonitor} from "../../state";
-import * as states from "./states";
-import {ProtocolStateWithSharedData, ProtocolReducer, makeLocator} from "..";
-import * as helpers from "../reducer-helpers";
-import {TwoPartyPlayerIndex} from "../../types";
-import {
-  initialize as initializeDirectFunding,
-  directFundingStateReducer
-} from "../direct-funding/reducer";
-import {LedgerTopUpAction} from "./actions";
+import {bigNumberify} from "ethers/utils";
+
+import {Outcome} from "@statechannels/nitro-protocol";
+
 import {isDirectFundingAction} from "../direct-funding/actions";
 import {addHex, subHex} from "../../../utils/hex-utils";
 import {
@@ -16,18 +10,30 @@ import {
   consensusUpdateReducer,
   ConsensusUpdateState
 } from "../consensus-update";
-import {bigNumberify} from "ethers/utils";
 import {ProtocolLocator, EmbeddedProtocol} from "../../../communication";
 import {CONSENSUS_UPDATE_PROTOCOL_LOCATOR} from "../consensus-update/reducer";
 import {DirectFundingState} from "../direct-funding/states";
 import {clearedToSend} from "../consensus-update/actions";
-import {Outcome} from "@statechannels/nitro-protocol";
+
+import {
+  initialize as initializeDirectFunding,
+  directFundingStateReducer
+} from "../direct-funding/reducer";
+import {TwoPartyPlayerIndex} from "../../types";
+import * as helpers from "../reducer-helpers";
+import {SharedData, registerChannelToMonitor} from "../../state";
 import {ETH_ASSET_HOLDER_ADDRESS} from "../../../constants";
 import {
   getAllocationAmountForIndex,
   getAllocationItemAtIndex,
   getAllocationOutcome
 } from "../../../utils/outcome-utils";
+
+import {LedgerTopUpAction} from "./actions";
+
+import * as states from "./states";
+
+import {ProtocolStateWithSharedData, ProtocolReducer, makeLocator} from "..";
 export {LEDGER_TOP_UP_PROTOCOL_LOCATOR} from "../../../communication/protocol-locator";
 export function initialize({
   processId,

@@ -1,4 +1,5 @@
 import React from "react";
+
 import walletIcon from "../images/blue-logo.svg";
 
 export default class LandingPage extends React.PureComponent {

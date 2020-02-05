@@ -1,6 +1,7 @@
-import {AdjudicatorState, clearChallenge, markAsFinalized, setChallenge} from "./state";
 import * as actions from "../actions";
 import {unreachable} from "../../utils/reducer-utils";
+
+import {AdjudicatorState, clearChallenge, markAsFinalized, setChallenge} from "./state";
 
 export const adjudicatorStateReducer = (
   state: AdjudicatorState,

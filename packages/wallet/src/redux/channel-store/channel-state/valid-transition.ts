@@ -1,4 +1,3 @@
-import {ChannelState} from "./states";
 import {
   getChannelId,
   State,
@@ -6,8 +5,12 @@ import {
   getVariablePart,
   ForceMoveAppContractInterface
 } from "@statechannels/nitro-protocol";
-import {hasValidSignature} from "../../../utils/signing-utils";
+
 import {defaultAbiCoder, Interface, bigNumberify} from "ethers/utils";
+
+import {hasValidSignature} from "../../../utils/signing-utils";
+
+import {ChannelState} from "./states";
 
 export function validTransition(channelState: ChannelState, state: State): boolean {
   const channelNonce = state.channel.channelNonce;

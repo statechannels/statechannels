@@ -1,13 +1,15 @@
+import {Wallet} from "ethers";
+
+import {parseEther} from "ethers/utils";
+
 import * as states from "../states";
 import * as actions from "../actions";
 import * as transactionActions from "../../transaction-submission/actions";
 import * as transactionScenarios from "../../transaction-submission/__tests__";
 import {ChannelState, ChannelStore} from "../../../channel-store";
 
-import {Wallet} from "ethers";
 import {EMPTY_SHARED_DATA, SharedData} from "../../../state";
 import * as testScenarios from "../../../__tests__/state-helpers";
-import {parseEther} from "ethers/utils";
 
 // ---------
 // Test data

@@ -1,10 +1,12 @@
-import * as states from "./states";
 import {PureComponent} from "react";
 import React from "react";
 
 import {connect} from "react-redux";
-import {FundingStep} from "./components/funding-step";
+
 import {unreachable} from "../../../utils/reducer-utils";
+
+import {FundingStep} from "./components/funding-step";
+import * as states from "./states";
 
 interface Props {
   state: states.NonTerminalNewLedgerChannelState;

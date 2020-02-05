@@ -1,4 +1,5 @@
 import React from "react";
+
 import NetworkStatus from "./network-status";
 
 interface Props {

@@ -1,5 +1,5 @@
-import { assign, MachineConfig, AnyEventObject, spawn } from 'xstate';
-import { map, filter } from 'rxjs/operators';
+import { AnyEventObject, MachineConfig, assign, spawn } from 'xstate';
+import { filter, map } from 'rxjs/operators';
 
 import { Store, observeChannel } from '../../store';
 import { connectToStore } from '../../machine-utils';

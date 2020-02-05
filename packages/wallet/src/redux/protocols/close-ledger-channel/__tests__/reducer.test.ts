@@ -1,8 +1,9 @@
-import * as scenarios from "./scenarios";
 import {describeScenarioStep, itSendsThisDisplayEventType} from "../../../__tests__/helpers";
 import {closeLedgerChannelReducer, initialize} from "../reducer";
 
 import * as states from "../states";
+
+import * as scenarios from "./scenarios";
 
 const itTransitionsTo = (
   result: {protocolState: states.CloseLedgerChannelState},

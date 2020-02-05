@@ -1,9 +1,11 @@
-import * as actions from "../../actions";
-import * as testScenarios from "../../__tests__/state-helpers";
-const {channelId} = testScenarios;
-import {adjudicatorStateReducer} from "../reducer";
 import {SignedState} from "@statechannels/nitro-protocol";
 import {Wallet} from "ethers";
+
+import * as actions from "../../actions";
+import * as testScenarios from "../../__tests__/state-helpers";
+import {adjudicatorStateReducer} from "../reducer";
+
+const {channelId} = testScenarios;
 
 const challengeState: SignedState = {
   state: {

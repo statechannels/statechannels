@@ -1,7 +1,8 @@
-import * as scenarios from "./scenarios";
 import {initialize, reducer} from "../reducer";
 import * as states from "../states";
 import {scenarioStepDescription, itSendsTheseStates} from "../../../__tests__/helpers";
+
+import * as scenarios from "./scenarios";
 
 const itTransitionsTo = (
   result: states.VirtualDefundingState,

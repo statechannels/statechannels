@@ -10,6 +10,7 @@ import {
   ConsensusData,
   encodeConsensusData
 } from "@statechannels/nitro-protocol";
+
 import {NETWORK_ID, ETH_ASSET_HOLDER_ADDRESS, CONSENSUS_LIBRARY_ADDRESS} from "../../constants";
 import {TwoPartyPlayerIndex, ThreePartyPlayerIndex} from "../types";
 import {unreachable} from "../../utils/reducer-utils";

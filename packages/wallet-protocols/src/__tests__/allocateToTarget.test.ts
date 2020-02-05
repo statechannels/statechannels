@@ -1,7 +1,7 @@
 import { Allocation } from '@statechannels/nitro-protocol';
 import { AddressZero } from 'ethers/constants';
 
-import { allocateToTarget, Errors, ethAllocationOutcome } from '../calculations';
+import { Errors, allocateToTarget, ethAllocationOutcome } from '../calculations';
 
 const left = '0x01';
 const right = '0x02';

@@ -1,8 +1,8 @@
-import { interpret, Machine } from 'xstate';
+import { Machine, interpret } from 'xstate';
 
 import { FundingStrategyProposed } from '../../wire-protocol';
 
-import { config, Init, mockOptions } from './protocol';
+import { Init, config, mockOptions } from './protocol';
 const context: Init = {
   targetChannelId: 'foo',
   tries: 0,

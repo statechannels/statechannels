@@ -1,4 +1,7 @@
 import {bigNumberify} from "ethers/utils";
+
+import * as _ from "lodash";
+
 import * as states from "../states";
 import {channelFromStates} from "../../../channel-store/channel-state/__tests__";
 import {EMPTY_SHARED_DATA, setChannels, SharedData} from "../../../state";
@@ -19,7 +22,6 @@ import {
   convertBalanceToOutcome
 } from "../../../__tests__/state-helpers";
 import {success} from "../../ledger-defunding/states";
-import * as _ from "lodash";
 import {NEW_LEDGER_FUNDING_PROTOCOL_LOCATOR} from "../reducer";
 import {prependToLocator} from "../..";
 import {TwoPartyPlayerIndex} from "../../../types";

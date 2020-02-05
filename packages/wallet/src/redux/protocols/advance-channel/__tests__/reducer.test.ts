@@ -1,12 +1,14 @@
 import * as acStates from "../states";
 import {initialize, reducer} from "../reducer";
-import * as scenarios from "./scenarios";
+
 import {
   itSendsTheseStates,
   itStoresThisState,
   itRegistersThisChannel,
   itSendsNoMessage
 } from "../../../__tests__/helpers";
+
+import * as scenarios from "./scenarios";
 
 const itTransitionsTo = (
   result: acStates.AdvanceChannelState,

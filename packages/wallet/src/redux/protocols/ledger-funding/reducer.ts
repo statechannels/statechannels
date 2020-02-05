@@ -1,5 +1,7 @@
+import {Outcome} from "@statechannels/nitro-protocol";
+
 import {SharedData, getPrivatekey} from "../../state";
-import {ProtocolStateWithSharedData, makeLocator} from "..";
+
 import * as selectors from "../../selectors";
 import {ChannelState, getLastState} from "../../channel-store/channel-state";
 import {isExistingLedgerFundingAction} from "../existing-ledger-funding";
@@ -8,7 +10,7 @@ import {
   initialize as initializeExistingLedgerFunding,
   existingLedgerFundingReducer
 } from "../existing-ledger-funding/reducer";
-import * as states from "./states";
+
 import {isNewLedgerChannelAction, NewLedgerChannelReducer} from "../new-ledger-channel";
 import {unreachable} from "../../../utils/reducer-utils";
 import {WalletAction} from "../../actions";
@@ -16,7 +18,10 @@ import {ProtocolLocator, EmbeddedProtocol} from "../../../communication";
 import * as newLedgerChannel from "../new-ledger-channel";
 import {EXISTING_LEDGER_FUNDING_PROTOCOL_LOCATOR} from "../existing-ledger-funding/reducer";
 import {getTwoPlayerIndex} from "../reducer-helpers";
-import {Outcome} from "@statechannels/nitro-protocol";
+
+import * as states from "./states";
+
+import {ProtocolStateWithSharedData, makeLocator} from "..";
 
 export const LEDGER_FUNDING_PROTOCOL_LOCATOR = makeLocator(EmbeddedProtocol.LedgerFunding);
 

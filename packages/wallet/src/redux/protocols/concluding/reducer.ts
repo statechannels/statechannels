@@ -1,7 +1,7 @@
 import {ConcludingState} from "../concluding/states";
 import {SharedData} from "../../state";
 import {ProtocolAction} from "../../actions";
-import {ProtocolStateWithSharedData, makeLocator, EMPTY_LOCATOR} from "..";
+
 import {
   sendConcludeInstigated,
   getTwoPlayerIndex,
@@ -19,7 +19,7 @@ import {
   advanceChannelReducer
 } from "../advance-channel";
 import {EmbeddedProtocol} from "../../../communication";
-import * as states from "./states";
+
 import {routesToAdvanceChannel} from "../advance-channel/actions";
 import {DefundingState, initializeDefunding, defundingReducer} from "../defunding";
 import {routesToDefunding} from "../defunding/actions";
@@ -35,6 +35,10 @@ import {
 } from "../close-ledger-channel";
 import {StateType} from "../advance-channel/states";
 import {clearedToSend} from "../close-ledger-channel/actions";
+
+import * as states from "./states";
+
+import {ProtocolStateWithSharedData, makeLocator, EMPTY_LOCATOR} from "..";
 
 export function concludingReducer(
   protocolState: states.NonTerminalConcludingState,

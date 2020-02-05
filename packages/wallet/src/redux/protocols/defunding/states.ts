@@ -1,8 +1,10 @@
 import {StateConstructor} from "../../utils";
 import {LedgerDefundingState} from "../ledger-defunding/states";
-import {ProtocolState} from "..";
+
 import {NonTerminalVirtualDefundingState} from "../virtual-defunding/states";
 import {ProtocolLocator} from "../../../communication";
+
+import {ProtocolState} from "..";
 
 // -------
 // States

@@ -1,12 +1,16 @@
-import * as selectors from "../selectors";
 import {select, call} from "redux-saga/effects";
+
+import {BigNumber} from "ethers/utils";
+
+import * as selectors from "../selectors";
 import {
   getProvider,
   getETHAssetHolderHoldings,
   getERC20AssetHolderHoldings
 } from "../../utils/contract-utils";
+
 // import {channelUpdate} from "../actions";
-import {BigNumber} from "ethers/utils";
+
 import {ETH_ASSET_HOLDER_ADDRESS, ERC20_ASSET_HOLDER_ADDRESS} from "../../constants";
 
 // A simple saga that runs and dispatches update actions to load the latest adjudicator state

@@ -1,9 +1,13 @@
+import {State, SignedState, getChannelId, hashState} from "@statechannels/nitro-protocol";
+
+import {Signatures} from "@statechannels/nitro-protocol";
+
+import {hasValidSignature} from "../../utils/signing-utils";
+
 import {ChannelStore, getChannel, setChannel} from "./state";
 import {pushState, initializeChannel, ChannelParticipant} from "./channel-state/states";
-import {State, SignedState, getChannelId, hashState} from "@statechannels/nitro-protocol";
-import {Signatures} from "@statechannels/nitro-protocol";
+
 import {validTransition, validAppTransition} from "./channel-state/valid-transition";
-import {hasValidSignature} from "../../utils/signing-utils";
 
 // -----------------
 // NEW FUNCTIONALITY

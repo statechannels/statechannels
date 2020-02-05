@@ -1,10 +1,9 @@
 import {SharedData} from "../../state";
-import {ProtocolStateWithSharedData, makeLocator, EMPTY_LOCATOR} from "..";
-import * as states from "./states";
+
 import * as helpers from "../reducer-helpers";
 import {withdrawalReducer, initialize as withdrawalInitialize} from "../withdrawing/reducer";
 import * as selectors from "../../selectors";
-import * as actions from "./actions";
+
 import {isWithdrawalAction} from "../withdrawing/actions";
 import {unreachable} from "../../../utils/reducer-utils";
 import {EmbeddedProtocol, ProtocolLocator} from "../../../communication";
@@ -21,6 +20,11 @@ import {StateType} from "../advance-channel/states";
 import {getAllocationAmountForIndex} from "../../../utils/outcome-utils";
 import {TwoPartyPlayerIndex} from "../../types";
 import * as withdrawalStates from "../withdrawing/states";
+
+import * as actions from "./actions";
+import * as states from "./states";
+
+import {ProtocolStateWithSharedData, makeLocator, EMPTY_LOCATOR} from "..";
 
 export const initialize = (
   processId: string,

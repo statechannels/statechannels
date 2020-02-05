@@ -1,7 +1,9 @@
 import {StateConstructor} from "../../utils";
 import {DisputeState} from "../dispute/state";
-import {ProtocolState} from "..";
+
 import {ChannelParticipant} from "../../channel-store";
+
+import {ProtocolState} from "..";
 
 // -------
 // States

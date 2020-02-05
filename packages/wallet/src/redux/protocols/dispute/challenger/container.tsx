@@ -1,16 +1,20 @@
 import React from "react";
 import {PureComponent} from "react";
 import {connect} from "react-redux";
-import {NonTerminalChallengerState, FailureReason} from "./states";
+
 import {unreachable} from "../../../../utils/reducer-utils";
-import * as actions from "./actions";
+
 import {TransactionSubmission} from "../../transaction-submission";
 import Acknowledge from "../../shared-components/acknowledge";
-import WaitForResponseOrTimeout from "./components/wait-for-response-or-timeout";
+
 import {ActionDispatcher} from "../../../utils";
 import {closeLedgerChannel} from "../../actions";
 import {multipleWalletActions} from "../../../../redux/actions";
 import ApproveX from "../../shared-components/approve-x";
+
+import WaitForResponseOrTimeout from "./components/wait-for-response-or-timeout";
+import * as actions from "./actions";
+import {NonTerminalChallengerState, FailureReason} from "./states";
 
 interface Props {
   state: NonTerminalChallengerState;

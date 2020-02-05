@@ -7,12 +7,14 @@ import {
   convertAddressToBytes32
 } from "@statechannels/nitro-protocol";
 import {bigNumberify, randomBytes} from "ethers/utils";
-import {NETWORK_ID, CHALLENGE_DURATION, ETH_ASSET_HOLDER_ADDRESS} from "../constants";
+
 import {
   UpdateChannelParams,
   Allocations,
   CreateChannelParams
 } from "@statechannels/client-api-schema";
+
+import {NETWORK_ID, CHALLENGE_DURATION, ETH_ASSET_HOLDER_ADDRESS} from "../constants";
 
 // TODO: Figure out how these should have been used
 // interface OpenChannel {

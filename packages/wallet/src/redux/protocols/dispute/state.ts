@@ -12,6 +12,7 @@ import {
   isChallengerState,
   NonTerminalChallengerState
 } from "./challenger/states";
+
 import {ProtocolState} from "..";
 
 export type DisputeState = ResponderState | ChallengerState;

@@ -1,11 +1,16 @@
-import * as states from "./states";
 import {PureComponent} from "react";
+
+import React from "react";
+
+import {connect} from "react-redux";
+
 import Failure from "../shared-components/failure";
 import Success from "../shared-components/success";
-import React from "react";
-import {connect} from "react-redux";
+
 import WaitForOtherPlayer from "../shared-components/wait-for-other-player";
 import {unreachable} from "../../../utils/reducer-utils";
+
+import * as states from "./states";
 
 interface Props {
   state: states.ConsensusUpdateState;

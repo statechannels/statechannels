@@ -1,4 +1,4 @@
-import { Channel, getChannelId, State, getStateSignerAddress } from '@statechannels/nitro-protocol';
+import { Channel, State, getChannelId, getStateSignerAddress } from '@statechannels/nitro-protocol';
 import { ethers } from 'ethers';
 import _ from 'lodash';
 

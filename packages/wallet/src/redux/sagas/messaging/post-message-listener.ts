@@ -1,5 +1,6 @@
 import {eventChannel, buffers} from "redux-saga";
 import {take} from "redux-saga/effects";
+
 import {messageHandler} from "./message-handler";
 
 export function* postMessageListener() {

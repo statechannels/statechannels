@@ -1,8 +1,9 @@
-import * as scenarios from "./scenarios";
 import * as states from "../states";
 import {ProtocolStateWithSharedData} from "../..";
 import {describeScenarioStep} from "../../../__tests__/helpers";
 import {initialize, applicationReducer} from "../reducer";
+
+import * as scenarios from "./scenarios";
 
 function whenIn(state) {
   return `when in ${state}`;

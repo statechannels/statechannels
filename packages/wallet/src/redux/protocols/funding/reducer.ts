@@ -1,8 +1,7 @@
-import * as states from "./states";
 import * as helpers from "../reducer-helpers";
 
 import {SharedData, queueApiMessage} from "../../state";
-import {ProtocolStateWithSharedData, makeLocator, EMPTY_LOCATOR} from "..";
+
 import {unreachable} from "../../../utils/reducer-utils";
 
 import {showWallet, hideWallet} from "../reducer-helpers";
@@ -42,6 +41,10 @@ import * as fundingStrategyNegotiationStates from "../funding-strategy-negotiati
 import {ProtocolAction} from "../../actions";
 import {apiNotImplemented} from "../../sagas/messaging/outgoing-api-actions";
 import {HUB_ADDRESS} from "../../../constants";
+
+import * as states from "./states";
+
+import {ProtocolStateWithSharedData, makeLocator, EMPTY_LOCATOR} from "..";
 
 export function initialize(
   sharedData: SharedData,

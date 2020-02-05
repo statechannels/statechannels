@@ -1,6 +1,7 @@
 import {ProtocolLocator} from "../../../communication";
 import {ConsensusUpdateState} from "../consensus-update";
 import {StateConstructor} from "../../utils";
+
 import {ProtocolState} from "..";
 
 interface Base {

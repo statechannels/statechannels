@@ -1,6 +1,9 @@
-import * as actions from "./actions";
 import {SharedData} from "../../state";
-import {ProtocolStateWithSharedData, ProtocolReducer} from "..";
+
+import {isFirstPlayer} from "../reducer-helpers";
+
+import {ProtocolLocator} from "../../../communication";
+
 import * as states from "./states";
 import {
   initialize as initializeA,
@@ -11,8 +14,10 @@ import {
   fundingStrategyNegotiationReducer as playerBReducer
 } from "./player-b/reducer";
 import * as playerAStates from "./player-a/states";
-import {isFirstPlayer} from "../reducer-helpers";
-import {ProtocolLocator} from "../../../communication";
+
+import * as actions from "./actions";
+
+import {ProtocolStateWithSharedData, ProtocolReducer} from "..";
 
 export function initialize({
   sharedData,

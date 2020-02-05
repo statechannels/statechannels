@@ -1,3 +1,7 @@
+import _ from "lodash";
+
+import {encodeConsensusData} from "@statechannels/nitro-protocol";
+
 import * as states from "../states";
 
 import {setChannel} from "../../../state";
@@ -14,9 +18,8 @@ import {CONSENSUS_LIBRARY_ADDRESS} from "../../../../constants";
 import {prependToLocator} from "../..";
 import {EmbeddedProtocol} from "../../../../communication";
 import {ADVANCE_CHANNEL_PROTOCOL_LOCATOR} from "../../advance-channel/reducer";
-import _ from "lodash";
 import {StateType} from "../../advance-channel/states";
-import {encodeConsensusData} from "@statechannels/nitro-protocol";
+
 import {TwoPartyPlayerIndex} from "../../../types";
 import {createSharedDataFromParticipants} from "../../../__tests__/helpers";
 

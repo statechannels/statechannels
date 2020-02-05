@@ -1,3 +1,9 @@
+import _ from "lodash";
+
+import {bigNumberify} from "ethers/utils";
+
+import {SignedState} from "@statechannels/nitro-protocol";
+
 import {accumulateSideEffects} from "../outbox";
 import {SharedData, queueRelayableActionMessage, getExistingChannel, checkAndStore} from "../state";
 import * as selectors from "../selectors";
@@ -7,10 +13,7 @@ import {getLastState, nextParticipant} from "../channel-store";
 import {ProtocolLocator} from "../../communication";
 import * as comms from "../../communication";
 import {ourTurn as ourTurnOnChannel} from "../channel-store";
-import _ from "lodash";
-import {bigNumberify} from "ethers/utils";
 
-import {SignedState} from "@statechannels/nitro-protocol";
 import {getAllocationOutcome} from "../../utils/outcome-utils";
 import {apiNotImplemented, channelUpdatedEvent} from "../sagas/messaging/outgoing-api-actions";
 

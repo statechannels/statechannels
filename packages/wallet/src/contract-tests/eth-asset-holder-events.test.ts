@@ -6,13 +6,14 @@ import {
   Transactions as nitroTrans
 } from "@statechannels/nitro-protocol";
 import SagaTester from "redux-saga-tester";
-import {DepositedEvent} from "../redux/actions";
-import {adjudicatorWatcher} from "../redux/sagas/adjudicator-watcher";
-import {assetHoldersWatcher} from "../redux/sagas/asset-holder-watcher";
-import {depositIntoETHAssetHolder, createWatcherState, concludeGame, fiveFive} from "./test-utils";
+
 import {getGanacheProvider} from "@statechannels/devtools";
 import {bigNumberify} from "ethers/utils";
 import {HashZero, AddressZero} from "ethers/constants";
+
+import {assetHoldersWatcher} from "../redux/sagas/asset-holder-watcher";
+import {adjudicatorWatcher} from "../redux/sagas/adjudicator-watcher";
+import {DepositedEvent} from "../redux/actions";
 import {
   getAdjudicatorInterface,
   getAdjudicatorContractAddress,
@@ -22,6 +23,8 @@ import {
 
 import {getAllocationOutcome} from "../utils/outcome-utils";
 import {convertBalanceToOutcome} from "../redux/__tests__/state-helpers";
+
+import {depositIntoETHAssetHolder, createWatcherState, concludeGame, fiveFive} from "./test-utils";
 jest.setTimeout(60000);
 
 describe("ETHAssetHolder listener", () => {

@@ -1,10 +1,10 @@
-import { MachineConfig, AnyEventObject, AssignAction, assign, spawn } from 'xstate';
+import { AnyEventObject, AssignAction, MachineConfig, assign, spawn } from 'xstate';
 import { State, getChannelId } from '@statechannels/nitro-protocol';
-import { map, filter } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 
 import { outcomesEqual, statesEqual } from '../..';
 import { Store, observeChannel } from '../../store';
-import { connectToStore, MachineFactory } from '../../machine-utils';
+import { MachineFactory, connectToStore } from '../../machine-utils';
 
 const PROTOCOL = 'support-state';
 

@@ -1,7 +1,8 @@
+import {State} from "@statechannels/nitro-protocol";
+
 import {NonTerminalTransactionSubmissionState as NonTerminalTSState} from "../../transaction-submission/states";
 import {ProtocolState} from "../..";
 import {StateConstructor} from "../../../utils";
-import {State} from "@statechannels/nitro-protocol";
 
 // -------
 // States

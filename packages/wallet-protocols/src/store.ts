@@ -1,18 +1,19 @@
 import { EventEmitter } from 'events';
 
-import * as rxjs from 'rxjs';
-import { State, getStateSignerAddress, signState, hashState } from '@statechannels/nitro-protocol';
-import _ from 'lodash';
 import { AddressZero } from 'ethers/constants';
-import { map, filter } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
+import { State, getStateSignerAddress, hashState, signState } from '@statechannels/nitro-protocol';
+import * as rxjs from 'rxjs';
+import _ from 'lodash';
 
-import { ChannelStoreEntry, IChannelStoreEntry, Funding, supported } from './ChannelStoreEntry';
-import { messageService, IMessageService } from './messaging';
 import { AddressableMessage, FundingStrategyProposed } from './wire-protocol';
-import { Chain, IChain, ChainEventType, ChainEvent } from './chain';
+import { Chain, ChainEvent, ChainEventType, IChain } from './chain';
+import { ChannelStoreEntry, Funding, IChannelStoreEntry, supported } from './ChannelStoreEntry';
+import { IMessageService, messageService } from './messaging';
+
 import { add, gt } from './mathOps';
 
-import { getChannelId, SignedState, unreachable, statesEqual } from '.';
+import { SignedState, getChannelId, statesEqual, unreachable } from '.';
 
 export interface ChannelUpdated {
   type: 'CHANNEL_UPDATED';

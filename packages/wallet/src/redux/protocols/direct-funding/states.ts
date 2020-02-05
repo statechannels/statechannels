@@ -1,8 +1,10 @@
 import {NonTerminalTransactionSubmissionState} from "../transaction-submission/states";
 import {Properties, StateConstructor} from "../../utils";
-import {ProtocolState} from "..";
+
 import {TwoPartyPlayerIndex} from "../../types";
 import {ProtocolLocator} from "../../../communication";
+
+import {ProtocolState} from "..";
 
 // -------
 // States

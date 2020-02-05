@@ -1,4 +1,3 @@
-import {getAdjudicatorInterface} from "./contract-utils";
 import {splitSignature} from "ethers/utils";
 import {
   createETHDepositTransaction as createNitroETHDepositTransaction,
@@ -10,12 +9,15 @@ import {
   convertAddressToBytes32
 } from "@statechannels/nitro-protocol";
 import {Allocation, AllocationItem} from "@statechannels/nitro-protocol";
+
 import {TransactionRequestWithTarget} from "../redux/outbox/state";
 import {
   ADJUDICATOR_ADDRESS,
   ETH_ASSET_HOLDER_ADDRESS,
   ERC20_ASSET_HOLDER_ADDRESS
 } from "../constants";
+
+import {getAdjudicatorInterface} from "./contract-utils";
 
 export function createForceMoveTransaction(
   fromState: SignedState,
