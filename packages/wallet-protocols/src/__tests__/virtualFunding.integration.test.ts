@@ -3,7 +3,7 @@ import waitForExpect from 'wait-for-expect';
 import { interpret } from 'xstate';
 import { Channel } from '@statechannels/nitro-protocol';
 
-import { Store, Participant, EphemeralStore } from '../store';
+import { Store, Participant } from '../store';
 import { messageService } from '../messaging';
 import { AddressableMessage } from '../wire-protocol';
 import { Chain } from '../chain';
