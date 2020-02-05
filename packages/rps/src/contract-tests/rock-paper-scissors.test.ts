@@ -111,8 +111,8 @@ describe('validTransition', () => {
         toAllocation.push({destination: key, amount: toBalances[key] as string})
       );
 
-      const fromOutcome = [{assetHolderAddress: AddressZero, allocation: fromAllocation}];
-      const toOutcome = [{assetHolderAddress: AddressZero, allocation: toAllocation}];
+      const fromOutcome = [{assetHolderAddress: AddressZero, allocationItems: fromAllocation}];
+      const toOutcome = [{assetHolderAddress: AddressZero, allocationItems: toAllocation}];
 
       const fromAppData: RPSData = {
         positionType: PositionIndex[fromPositionType],
