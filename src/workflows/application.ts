@@ -18,10 +18,8 @@ import {sendDisplayMessage, dispatchChannelUpdatedMessage, observeRequests} from
 import {map} from 'rxjs/operators';
 import * as CCC from './confirm-create-channel';
 import {JoinChannelParams} from '@statechannels/client-api-schema';
-// eslint-disable-next-line no-restricted-imports
-import {getEthAllocation} from '@statechannels/wallet-protocols/src/calculations';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
-import {createMockGuard} from './utils';
+import {createMockGuard, getEthAllocation} from './utils';
 
 interface WorkflowContext {
   channelId?: string;
