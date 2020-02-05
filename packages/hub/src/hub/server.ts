@@ -1,9 +1,11 @@
 import * as Sentry from '@sentry/node';
 
-Sentry.init({
-  dsn: 'https://5b818f025d1a4259a8cf086377b67025@sentry.io/2047255',
-  environment: process.env.RUNTIME_ENV || 'development'
-});
+if (process.env.RUNTIME_ENV) {
+  Sentry.init({
+    dsn: 'https://5b818f025d1a4259a8cf086377b67025@sentry.io/2047255',
+    environment: process.env.RUNTIME_ENV
+  });
+}
 
 import {RelayableAction} from '../communication';
 import '../wallet/db/connection';
