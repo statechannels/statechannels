@@ -9,7 +9,7 @@ describe('stateReceived', () => {
     const store = new MemoryStore();
 
     const outputs: State[] = [];
-    store.statesReceived(channelId).subscribe(x => outputs.push(x));
+    store.stateReceivedFeed(channelId).subscribe(x => outputs.push(x));
     store.pushMessage({signedStates: [signedState]});
 
     expect(outputs).toEqual([state]);
@@ -23,7 +23,7 @@ describe('stateReceived', () => {
     const store = new MemoryStore();
 
     const outputs: State[] = [];
-    store.statesReceived('a-different-channel-id').subscribe(x => outputs.push(x));
+    store.stateReceivedFeed('a-different-channel-id').subscribe(x => outputs.push(x));
     store.pushMessage({signedStates: [signedState]});
 
     expect(outputs).toEqual([]);
@@ -36,7 +36,7 @@ test('new-protocols', () => {
   const store = new MemoryStore();
 
   const outputs: Protocol[] = [];
-  store.newProtocols().subscribe(x => outputs.push(x));
+  store.newProtocolFeed().subscribe(x => outputs.push(x));
 
   store.pushMessage({protocols: [protocol]});
   expect(outputs).toEqual([protocol]);
