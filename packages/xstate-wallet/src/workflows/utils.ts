@@ -3,8 +3,11 @@ import {
   Outcome,
   AssetOutcome,
   isAllocationOutcome,
-  Allocation
+  Allocation,
+  AllocationAssetOutcome
 } from '@statechannels/nitro-protocol';
+
+import {hexZeroPad} from 'ethers/utils';
 
 export function createMockGuard(guardName: string): GuardPredicate<any, any> {
   return {
@@ -32,3 +35,19 @@ export function checkThat<T, S>(t: T | S, isTypeT: TypeGuard<T, S>): T {
 const throwError = (fn: (t1: any) => boolean, t) => {
   throw new Error(`not valid, ${fn.name} failed on ${t}`);
 };
+
+export function ethAllocationOutcome(
+  allocation: Allocation,
+  ethAssetHolderAddress: string
+): AllocationAssetOutcome[] {
+  // If there are allocations then we use a blank outcomes
+  if (allocation.length === 0) {
+    return [];
+  }
+  return [
+    {
+      assetHolderAddress: ethAssetHolderAddress,
+      allocation: allocation.map(a => ({...a, destination: hexZeroPad(a.destination, 32)}))
+    }
+  ];
+}
