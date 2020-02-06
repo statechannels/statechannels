@@ -6,6 +6,7 @@ import {State} from './store/types';
 import {Observable, fromEvent, from, concat} from 'rxjs';
 import {filter, map} from 'rxjs/operators';
 import {ETH_ASSET_HOLDER_ADDRESS, NITRO_ADJUDICATOR_ADDRESS} from './constants';
+import {ChainEvent} from '@statechannels/wallet-protocols';
 
 const EthAssetHolderInterface = new ethers.utils.Interface(
   // https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
@@ -64,6 +65,8 @@ export class ChainWatcher implements Chain {
       NitroAdjudicatorInterface,
       signer
     );
+    // TODO remove this
+    console.log(this._adjudicator);
   }
 
   public async deposit(channelId: string, expectedHeld: string, amount: string): Promise<void> {
@@ -109,4 +112,27 @@ export class ChainWatcher implements Chain {
     );
     return concat(first, updates);
   }
+  public fundingFeed(channelId: string): Observable<any> {
+    const assetHolder = this._assetHolders[0];
+    const observable = Observable.create(function(observer) {
+      const contractListener = (fromAddress, toAddress, value, event) => {
+        const chainEvent: ChainEvent = {
+          type: 'DEPOSITED',
+          channelId: event.args.destination,
+          amount: event.args.amountDeposited,
+          total: event.args.destinationHoldings
+        };
+        if (event.args.destination === channelId) {
+          observer.next(chainEvent);
+        }
+      };
+      assetHolder.on('Deposited', contractListener);
+    });
+    return observable;
+  }
+
+  // public watchAdjudicator(channelId: string); // TODO
+  // public watchAssetHolder(asset: string, channelId: string); // TODO
+  // public fundingRevertedFeed // TODO
+  // public challengeFeed; // TODO
 }
