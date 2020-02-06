@@ -53,6 +53,9 @@ test('newProtocolFeed', () => {
 describe('createChannel', () => {
   it('returns a channelId', async () => {
     const store = new MemoryStore();
+    const myAddress = store.getAddress();
+    participants[0].signingAddress = myAddress;
+
     const channelId = await store.createChannel(participants);
 
     expect(channelId).toMatch(/0x/);
@@ -62,7 +65,14 @@ describe('createChannel', () => {
     expect(channelId2).toMatch(/0x/);
     expect(channelId2).not.toEqual(channelId);
   });
-  it("fails if the wallet doesn't hold the private key for any participant");
+
+  it("fails if the wallet doesn't hold the private key for any participant", async () => {
+    const store = new MemoryStore();
+
+    await expect(store.createChannel(participants)).rejects.toMatchObject({
+      message: "Couldn't find the signing key for any participant in wallet."
+    });
+  });
 });
 
 describe('getAddress', () => {

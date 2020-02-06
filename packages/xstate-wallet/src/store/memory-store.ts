@@ -120,17 +120,16 @@ export class MemoryStore {
     return fromEvent(this._eventEmitter, 'sendMessage');
   }
 
-  // in channel, we should store
-  // 1. myIndex
-  // 2. participants, including contact details
-  // 3. latest outcome(?)
-  // 4. states -
-
-  public createChannel(participants: Participant[]): Promise<string> {
+  public async createChannel(participants: Participant[]): Promise<string> {
     // check that I hold the private key for one of the participants
     // calculate my index
-
     const addresses = participants.map(x => x.signingAddress);
+
+    const myIndex = addresses.findIndex(address => !!this._privateKeys[address]);
+    if (myIndex === -1) {
+      throw new Error("Couldn't find the signing key for any participant in wallet.");
+    }
+
     const currentNonce = this.getNonce(addresses);
     const newNonce = currentNonce ? currentNonce.add(1) : bigNumberify(0);
     this.setNonce(addresses, newNonce);
@@ -155,6 +154,11 @@ export class MemoryStore {
 
   private nonceKeyFromAddresses = (addresses: string[]): string => addresses.join('::');
 
+  // in channel, we should store
+  // 1. myIndex
+  // 2. participants, including contact details
+  // 3. latest outcome(?)
+  // 4. states -
   addState(channelId: string, state: State) {
     // find channel
     // pull out my key
