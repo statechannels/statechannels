@@ -1,5 +1,7 @@
 import { bigNumberify } from 'ethers/utils';
-import { InvokeCallback, Machine, MachineConfig } from 'xstate';
+import { Machine, MachineConfig } from 'xstate';
+
+import { map } from 'rxjs/operators';
 
 import { FINAL } from '../..';
 import { MachineFactory } from '../../machine-utils';
@@ -16,7 +18,7 @@ export type Init = {
 const watcher: MachineConfig<Init, any, any> = {
   initial: 'watching',
   states: {
-    watching: { invoke: { src: 'subscribeDepositEvent' } },
+    watching: { invoke: { src: 'subscribeToFundingFeed' } },
     done: { type: FINAL },
   },
   on: { FUNDED: '.done' },
@@ -47,29 +49,27 @@ export const config: MachineConfig<Init, any, any> = {
 
 type Services = {
   submitDepositTransaction: (context: Init) => Promise<void>;
-  subscribeDepositEvent: (context: Init) => InvokeCallback;
+  subscribeToFundingFeed: (context: Init, event: any) => any; // Is there an InvokeObservable type?
 };
 
 type Options = { services: Services };
 export const machine: MachineFactory<Init, any> = (store: ObsoleteStore, context: Init) => {
-  const subscribeDepositEvent = (ctx: Init): InvokeCallback => cb => {
-    if (bigNumberify(ctx.depositAt).eq(0)) cb('SAFE_TO_DEPOSIT');
-
-    return store.on('DEPOSITED', async (event: ChainEvent) => {
-      if (event.type === 'DEPOSITED' && event.channelId === ctx.channelId) {
-        const currentHoldings = bigNumberify(await store.getHoldings(ctx.channelId));
-
-        if (currentHoldings.gte(ctx.fundedAt)) {
-          cb('FUNDED');
-        } else if (currentHoldings.gte(ctx.depositAt)) {
-          cb('SAFE_TO_DEPOSIT');
-        } else {
-          cb('NOT_SAFE_TO_DEPOSIT');
-        }
-      }
-    });
+  const subscribeToFundingFeed = (context: Init, event: any) => {
+    store.fundingFeed(context.channelId).pipe(
+      map(async (event: ChainEvent) => {
+        if (event.type === 'DEPOSITED') {
+          const currentHoldings = bigNumberify(await store.getHoldings(context.channelId));
+          if (currentHoldings.gte(context.fundedAt)) {
+            return 'FUNDED';
+          } else if (currentHoldings.gte(context.depositAt)) {
+            return 'SAFE_TO_DEPOSIT';
+          } else {
+            return 'NOT_SAFE_TO_DEPOSIT';
+          }
+        } else return;
+      })
+    );
   };
-
   const submitDepositTransaction = async (ctx: Init) => {
     const currentHoldings = bigNumberify(await store.getHoldings(ctx.channelId));
     const amount = bigNumberify(ctx.totalAfterDeposit).sub(currentHoldings);
@@ -80,7 +80,7 @@ export const machine: MachineFactory<Init, any> = (store: ObsoleteStore, context
 
   const services: Services = {
     submitDepositTransaction,
-    subscribeDepositEvent,
+    subscribeToFundingFeed,
   };
   const options: Options = { services };
   return Machine(config).withConfig(options, context);
