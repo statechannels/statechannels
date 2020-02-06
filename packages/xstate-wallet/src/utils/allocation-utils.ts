@@ -1,21 +1,14 @@
-import {GuardPredicate} from 'xstate';
 import {
   Outcome,
   AssetOutcome,
   isAllocationOutcome,
   AllocationAssetOutcome
-} from '@statechannels/nitro-protocol';
+} from '@statechannels/nitro-protocol/src';
 
 import {TokenAllocations} from '@statechannels/client-api-schema';
+
 import {ETH_TOKEN} from '../constants';
 
-export function createMockGuard(guardName: string): GuardPredicate<any, any> {
-  return {
-    name: guardName,
-    predicate: () => true,
-    type: 'xstate.guard'
-  };
-}
 // TODO: Merge wallet-protocols/xstate-wallet so these are shared
 export function getEthAllocation(
   outcome: Outcome,
