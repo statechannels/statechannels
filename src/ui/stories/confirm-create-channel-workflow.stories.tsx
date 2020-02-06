@@ -41,7 +41,7 @@ const testContext: WorkflowContext = {
 if (config.states) {
   Object.keys(config.states).forEach(state => {
     const machine = interpret<any, any, any>(
-      confirmChannelCreationWorkflow(store).withContext(testContext),
+      confirmChannelCreationWorkflow(store, testContext).withContext(testContext),
       {
         devTools: true
       }
