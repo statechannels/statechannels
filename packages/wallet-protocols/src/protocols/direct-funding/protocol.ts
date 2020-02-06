@@ -89,10 +89,12 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
     const allocated = getEthAllocation(outcome, store.ethAssetHolderAddress)
       .map(i => i.amount)
       .reduce(add, '0');
+
     const holdings = await store.getHoldings(ctx.channelId);
 
     if (gt(allocated, holdings)) throw new Error('Channel underfunded');
   }
+
   function minimalOutcome(currentOutcome: Outcome, minimalEthAllocation: Allocation): Outcome {
     const allocation = getEthAllocation(currentOutcome, store.ethAssetHolderAddress);
 

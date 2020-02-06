@@ -80,7 +80,7 @@ const options = (store: Store) => ({
   actions: {
     spawnObserver: assign<Init>((ctx: Init) => ({
       ...ctx,
-      observer: spawn(notifyWhenAdvanced(store, ctx)),
+      observer: spawn(notifyWhenAdvanced(store, ctx)), // spawn = dynamic invoke
     })),
   },
 });

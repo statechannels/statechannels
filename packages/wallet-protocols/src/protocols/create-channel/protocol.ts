@@ -130,6 +130,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => 
       privateKey: store.getPrivateKey(participants),
       participants: ctx.participants,
     });
+
     store.initializeChannel(entry.args);
 
     const { channelId } = entry;
