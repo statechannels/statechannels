@@ -385,7 +385,9 @@ function initializeConsensusState(
     channelId: ledgerId,
     clearedToSend: true,
     // This will need to change when we start supporting multiple assets
-    proposedOutcome: [{assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS, allocation: newAllocation}],
+    proposedOutcome: [
+      {assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS, allocationItems: newAllocation}
+    ],
     protocolLocator: makeLocator(protocolLocator, CONSENSUS_UPDATE_PROTOCOL_LOCATOR),
     sharedData
   });

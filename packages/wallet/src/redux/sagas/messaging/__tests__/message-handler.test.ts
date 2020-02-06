@@ -301,7 +301,7 @@ describe("message listener", () => {
           outcome: [
             {
               assetHolderAddress: AddressZero,
-              allocation: [
+              allocationItems: [
                 {destination: convertAddressToBytes32(destinationA), amount: "0x12"},
                 {destination: convertAddressToBytes32(destinationB), amount: "0x12"}
               ]
@@ -490,7 +490,7 @@ describe("message listener", () => {
         turnNum: 1,
         outcome: [
           {
-            allocation: allocations[0].allocationItems.map(a => {
+            allocationItems: allocations[0].allocationItems.map(a => {
               return {
                 amount: a.amount,
                 destination: convertAddressToBytes32(a.destination)

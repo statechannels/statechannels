@@ -66,5 +66,5 @@ async function updateChannel(stateRound: State[], hubState: State) {
 
   return Channel.query()
     .upsertGraphAndFetch(upserts)
-    .eager('[participants, holdings, states.[outcome.[allocation]]]');
+    .eager('[participants, holdings, states.[outcome.[allocationItems]]]');
 }

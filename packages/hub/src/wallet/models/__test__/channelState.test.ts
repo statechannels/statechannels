@@ -24,7 +24,7 @@ async function getChannelStates(channelId): Promise<State> {
       channel_id: channel.id,
       turn_num: 0
     })
-    .eager('[channel.[participants], outcome.[allocation]]')
+    .eager('[channel.[participants], outcome.[allocationItems]]')
     .select();
   return channelState.asStateObject();
 }

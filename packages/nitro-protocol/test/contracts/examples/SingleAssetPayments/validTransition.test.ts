@@ -70,7 +70,7 @@ describe('validTransition', () => {
       );
       let outcomeA;
       if (isAllocation[0]) {
-        outcomeA = [{assetHolderAddress: AddressZero, allocation: allocationA}];
+        outcomeA = [{assetHolderAddress: AddressZero, allocationItems: allocationA}];
       } else {
         outcomeA = [
           {
@@ -97,7 +97,7 @@ describe('validTransition', () => {
 
       let outcomeB;
       if (isAllocation[1]) {
-        outcomeB = [{assetHolderAddress: AddressZero, allocation: allocationB}];
+        outcomeB = [{assetHolderAddress: AddressZero, allocationItems: allocationB}];
       } else {
         outcomeB = [{assetHolderAddress: AddressZero, guarantee}];
       }

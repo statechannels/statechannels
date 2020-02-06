@@ -1,5 +1,4 @@
 import {
-  AllocationItem,
   convertAddressToBytes32,
   GuaranteeAssetOutcome,
   Outcome
@@ -8,6 +7,7 @@ import {ethers} from 'ethers';
 import {bigNumberify} from 'ethers/utils';
 import {Address, Uint256} from '../types';
 import {HUB_ADDRESS} from '../constants';
+import {AllocationItem} from '@statechannels/client-api-schema';
 
 export const PARTICIPANT_1_PRIVATE_KEY =
   '0xa205281c09d630f6639c3505b63d57013996ba037bdbe4d2979eb8bd5bed5b1b';
@@ -60,14 +60,14 @@ export const allocation: AllocationItem[] = [
 export const allocationOutcome2: Outcome = [
   {
     assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS,
-    allocation: allocation.slice(0, 2)
+    allocationItems: allocation.slice(0, 2)
   }
 ];
 
 export const allocationOutcome3: Outcome = [
   {
     assetHolderAddress: DUMMY_ASSET_HOLDER_ADDRESS,
-    allocation: allocation.slice(0, 3)
+    allocationItems: allocation.slice(0, 3)
   }
 ];
 

@@ -187,7 +187,7 @@ export const happyPath = {
       proposedOutcome: [
         {
           assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
-          allocation: [
+          allocationItems: [
             {destination: paddedAsAddress, amount: bigNumberify(1).toHexString()},
             {destination: paddedBsAddress, amount: bigNumberify(3).toHexString()},
             {destination: paddedHubAddress, amount: bigNumberify(4).toHexString()}
@@ -207,7 +207,7 @@ export const happyPath = {
       proposedOutcome: [
         {
           assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
-          allocation: [
+          allocationItems: [
             {destination: paddedAsAddress, amount: bigNumberify(1).toHexString()},
             {destination: paddedHubAddress, amount: bigNumberify(3).toHexString()}
           ]

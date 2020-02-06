@@ -9,7 +9,7 @@
         "outcome": [
           {
             "assetHolderAddress": "0x0116090EfeC8A6c176A094d3094c58811a7eA39c",
-            "allocation": [
+            "allocationItems": [
               {
                 "destination": "0x00000000000000000000000056b990ed93fba609dcdf6dd6909683d3d029f224",
                 "amount": "0x1"
@@ -47,7 +47,7 @@
         "outcome": [
           {
             "assetHolderAddress": "0x0116090EfeC8A6c176A094d3094c58811a7eA39c",
-            "allocation": [
+            "allocationItems": [
               {
                 "destination": "0x00000000000000000000000056b990ed93fba609dcdf6dd6909683d3d029f224",
                 "amount": "0x1"
@@ -85,7 +85,7 @@
         "outcome": [
           {
             "assetHolderAddress": "0x0116090EfeC8A6c176A094d3094c58811a7eA39c",
-            "allocation": [
+            "allocationItems": [
               {
                 "destination": "0x87578605eeb0ba31a2ccbb02a703a547440e6126b3546b177e04bdad7c648f8a",
                 "amount": "0x02"

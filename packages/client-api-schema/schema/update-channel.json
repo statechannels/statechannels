@@ -11,7 +11,7 @@
         "allocations": {
           "type": "array",
           "items": {
-            "$ref": "definitions.json#/definitions/Allocation"
+            "$ref": "definitions.json#/definitions/AllocationAssetOutcome"
           },
           "title": "allocations"
         },

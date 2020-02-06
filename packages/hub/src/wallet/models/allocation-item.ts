@@ -3,8 +3,8 @@ import {Uint256, Uint32} from '../../types';
 import {Model, snakeCaseMappers} from 'objection';
 import Outcome from './outcome';
 
-export default class Allocation extends Model {
-  static tableName = 'allocations';
+export default class AllocationItem extends Model {
+  static tableName = 'allocation_items';
 
   static get columnNameMappers() {
     return snakeCaseMappers();
@@ -15,7 +15,7 @@ export default class Allocation extends Model {
       relation: Model.BelongsToOneRelation,
       modelClass: Outcome,
       join: {
-        from: 'allocations.outcome_id',
+        from: 'allocation_items.outcome_id',
         to: 'outcomes.id'
       }
     }

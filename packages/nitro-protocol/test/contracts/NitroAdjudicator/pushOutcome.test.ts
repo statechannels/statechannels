@@ -96,14 +96,14 @@ describe('pushOutcome', () => {
       const outcome: AllocationAssetOutcome[] = [
         {
           assetHolderAddress: ETHAssetHolder.address,
-          allocation: [
+          allocationItems: [
             {destination: A, amount: '1'},
             {destination: B, amount: '2'},
           ],
         },
         {
           assetHolderAddress: ERC20AssetHolder.address,
-          allocation: [
+          allocationItems: [
             {destination: C, amount: '3'},
             {destination: D, amount: '4'},
           ],
@@ -164,10 +164,10 @@ describe('pushOutcome', () => {
         await sendTransaction(provider, TestNitroAdjudicator.address, transactionRequest);
         // Check 2x AssetHolder storage against the expected value
         expect(await ETHAssetHolder.assetOutcomeHashes(channelId)).toEqual(
-          hashAssetOutcome(outcome[0].allocation)
+          hashAssetOutcome(outcome[0].allocationItems)
         );
         expect(await ERC20AssetHolder.assetOutcomeHashes(channelId)).toEqual(
-          hashAssetOutcome(outcome[1].allocation)
+          hashAssetOutcome(outcome[1].allocationItems)
         );
       }
     }

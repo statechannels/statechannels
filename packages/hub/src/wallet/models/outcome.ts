@@ -5,7 +5,7 @@ import {
 } from '@statechannels/nitro-protocol';
 import {Address} from '../../types';
 import {Model, snakeCaseMappers} from 'objection';
-import Allocation from './allocation';
+import AllocationItem from './allocation-item';
 import ChannelState from './channelState';
 
 export default class Outcome extends Model {
@@ -24,12 +24,12 @@ export default class Outcome extends Model {
         to: 'channel_states.id'
       }
     },
-    allocation: {
+    allocationItems: {
       relation: Model.HasManyRelation,
-      modelClass: Allocation,
+      modelClass: AllocationItem,
       join: {
         from: 'outcomes.id',
-        to: 'allocations.outcome_id'
+        to: 'allocation_items.outcome_id'
       }
     }
   };
@@ -37,7 +37,7 @@ export default class Outcome extends Model {
   readonly id!: number;
   state!: ChannelState;
   assetHolderAddress!: Address;
-  allocation!: Allocation[];
+  allocationItems!: AllocationItem[];
   targetChannelId: string;
 
   get asOutcomeObject(): AssetOutcome {
@@ -46,16 +46,16 @@ export default class Outcome extends Model {
         assetHolderAddress: this.assetHolderAddress,
         guarantee: {
           targetChannelId: this.targetChannelId,
-          destinations: this.allocation.map(allocation => allocation.destination)
+          destinations: this.allocationItems.map(allocationItem => allocationItem.destination)
         }
       };
       return guaranteeAssetOutcome;
     } else {
       const allocationAssetOutcome: AllocationAssetOutcome = {
         assetHolderAddress: this.assetHolderAddress,
-        allocation: this.allocation.map(allocation => ({
-          destination: allocation.destination,
-          amount: allocation.amount
+        allocationItems: this.allocationItems.map(allocationItem => ({
+          destination: allocationItem.destination,
+          amount: allocationItem.amount
         }))
       };
       return allocationAssetOutcome;

@@ -3,13 +3,14 @@ import {constants, providers, utils} from 'ethers';
 
 import {hashChannelStorage} from '../src/contract/channel-storage';
 import {
-  Allocation,
   AllocationAssetOutcome,
   encodeAllocation,
   encodeGuarantee,
   Guarantee,
   hashAssetOutcome,
   Outcome,
+  Allocation,
+  AllocationItem,
 } from '../src/contract/outcome';
 import {hashState, State} from '../src/contract/state';
 import fs from 'fs';
@@ -202,7 +203,7 @@ export async function sendTransaction(
   return await response.wait();
 }
 
-export function allocationToParams(allocation: Allocation) {
+export function allocationToParams(allocation: AllocationItem[]) {
   const allocationBytes = encodeAllocation(allocation);
   let assetOutcomeHash;
   if (allocation.length === 0) {
@@ -321,7 +322,7 @@ export function computeOutcome(outcomeShortHand: OutcomeShortHand): AllocationAs
     );
     const assetOutcome: AllocationAssetOutcome = {
       assetHolderAddress: assetHolder,
-      allocation,
+      allocationItems: allocation,
     }; // TODO handle gurantee outcomes
     outcome.push(assetOutcome);
   });

@@ -8,11 +8,11 @@ import {unreachable} from '../../constants';
 
 function assetOutcomeObjectToModel(assetOutcome: AssetOutcome) {
   if (isAllocationOutcome(assetOutcome)) {
-    const allocationsWithPriorities = assetOutcome.allocation.map((allocationItem, index) => ({
+    const allocationsWithPriorities = assetOutcome.allocationItems.map((allocationItem, index) => ({
       ...allocationItem,
       priority: index
     }));
-    return {...assetOutcome, allocation: allocationsWithPriorities};
+    return {...assetOutcome, allocationItems: allocationsWithPriorities};
   } else if (isGuaranteeOutcome(assetOutcome)) {
     const guaranteeWithPriorities = assetOutcome.guarantee.destinations.map(
       (destination, index) => ({destination, priority: index})
@@ -20,7 +20,7 @@ function assetOutcomeObjectToModel(assetOutcome: AssetOutcome) {
     return {
       assetHolderAddress: assetOutcome.assetHolderAddress,
       targetChannelId: assetOutcome.guarantee.targetChannelId,
-      allocation: guaranteeWithPriorities
+      allocationItems: guaranteeWithPriorities
     };
   } else {
     return unreachable(assetOutcome);

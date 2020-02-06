@@ -100,7 +100,7 @@ function createOutcome(amount: string): Outcome {
   return [
     {
       assetHolderAddress: AddressZero,
-      allocation: [{destination: HashZero, amount}],
+      allocationItems: [{destination: HashZero, amount}],
     },
   ];
 }

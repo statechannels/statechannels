@@ -110,7 +110,7 @@ describe("ETHAssetHolder listener", () => {
       signer
     );
 
-    const allocation = getAllocationOutcome(outcome).allocation;
+    const allocation = getAllocationOutcome(outcome).allocationItems;
     const processId = ethers.Wallet.createRandom().address;
     const sagaTester = new SagaTester({initialState: createWatcherState(processId, channelId)});
     sagaTester.start(assetHoldersWatcher, provider);

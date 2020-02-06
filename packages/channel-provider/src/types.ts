@@ -8,7 +8,7 @@ import {
   GetAddressResult,
   ChallengeChannelResult,
   BudgetResult1 as BudgetResult
-} from '@statechannels/client-api-schema/types';
+} from '@statechannels/client-api-schema';
 
 export interface JsonRpcRequest<MethodName = string, RequestParams = any> {
   id?: number;

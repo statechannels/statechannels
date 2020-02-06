@@ -34,11 +34,11 @@ export {Channel, getChannelId} from './contract/channel';
 export {encodeConsensusData, decodeConsensusData, ConsensusData} from './contract/consensus-data';
 export {validTransition, ForceMoveAppContractInterface} from './contract/force-move-app';
 export {
-  AllocationItem,
   encodeAllocation,
   encodeOutcome,
   Outcome,
   Allocation,
+  AllocationItem,
   Guarantee,
   isAllocationOutcome,
   isGuaranteeOutcome,
