@@ -4,7 +4,7 @@ import {Interface} from 'ethers/utils';
 import {ContractArtifacts} from '@statechannels/nitro-protocol';
 
 export function getProvider(): Web3Provider {
-  return new Web3Provider(window.web3.currentProvider);
+  return new Web3Provider(window.ethereum);
 }
 
 export async function getEthAssetHolderContract() {
