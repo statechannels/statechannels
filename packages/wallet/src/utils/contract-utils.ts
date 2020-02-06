@@ -15,7 +15,7 @@ function getContractAddress(name: string): string {
 }
 
 export function getProvider(): providers.Web3Provider {
-  return new providers.Web3Provider(window.web3.currentProvider);
+  return new providers.Web3Provider(window.ethereum);
 }
 
 export async function getAdjudicatorContract(provider: providers.Web3Provider) {

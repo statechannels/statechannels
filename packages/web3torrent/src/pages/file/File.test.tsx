@@ -4,7 +4,6 @@ import {createMemoryHistory} from 'history';
 import React from 'react';
 import {act} from 'react-dom/test-utils';
 import {MemoryRouter as Router, RouteComponentProps} from 'react-router-dom';
-import {JsonRPCResponse} from 'web3/providers';
 import {EmptyTorrent} from '../../constants';
 import {WebTorrentAddInput} from '../../library/types';
 import {Status, Torrent} from '../../types';
@@ -13,11 +12,12 @@ import * as TorrentStatus from '../../utils/torrent-status-checker';
 import * as EmbeddedWalletClient from './../../clients/embedded-wallet-client';
 import * as Web3TorrentClient from './../../clients/web3torrent-client';
 import File from './File';
+import {JsonRpcResponse} from '@statechannels/channel-provider';
 
 const mockFileURL =
   '/file/#magnet:?xt=urn%3Abtih%3A148c62a7f7845c91e7d16ca9be85de6fbaed3a1f&dn=test.zip&xl=1398978&cost=0';
 
-const mockResponse: JsonRPCResponse = {jsonrpc: '2.0', id: 123};
+const mockResponse: JsonRpcResponse = {jsonrpc: '2.0', id: 123, result: ''};
 
 Enzyme.configure({adapter: new Adapter()});
 
@@ -53,7 +53,7 @@ function setup() {
 
 describe('<File />', () => {
   let component: Enzyme.ReactWrapper;
-  let askForFunds: jest.SpyInstance<Promise<JsonRPCResponse>, []>;
+  let askForFunds: jest.SpyInstance<Promise<JsonRpcResponse>, []>;
   let torrentFile: jest.SpyInstance<Promise<Torrent>, [WebTorrentAddInput]>;
 
   beforeEach(() => {

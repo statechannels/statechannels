@@ -1,5 +1,5 @@
-import {JsonRPCRequest, JsonRPCResponse} from 'web3/providers';
 import {askForFunds, connectToWallet, makeWalletRequest} from './embedded-wallet-client';
+import {JsonRpcRequest, JsonRpcResponse} from '@statechannels/channel-provider';
 
 describe('Embedded Wallet Client', () => {
   let send: jest.Mock;
@@ -37,14 +37,14 @@ describe('Embedded Wallet Client', () => {
 
   describe('makeWalletRequest()', () => {
     it('should be able to send a message to the wallet', async () => {
-      const mockRequest: JsonRPCRequest = {
+      const mockRequest: JsonRpcRequest = {
         jsonrpc: '2.0',
         method: 'chan_foo',
         id: 123,
         params: ['bar', 'foo', false, 5]
       };
 
-      const mockResponse: JsonRPCResponse = {
+      const mockResponse: JsonRpcResponse = {
         jsonrpc: '2.0',
         id: 123,
         result: {foo: true}
@@ -65,7 +65,7 @@ describe('Embedded Wallet Client', () => {
         'If you are seeing this error in a test, do not worry; we are testing that the wallet client can report that something went wrong'
       );
 
-      const mockRequest: JsonRPCRequest = {
+      const mockRequest: JsonRpcRequest = {
         jsonrpc: '2.0',
         method: 'chan_foo',
         id: 123,

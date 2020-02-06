@@ -1,3 +1,5 @@
+import Emittery from "emittery";
+
 import {
   loadWallet,
   setUpBrowser,
@@ -7,7 +9,6 @@ import {
   sendUpdateState,
   MessageType
 } from "../helpers";
-import Emittery from "emittery";
 
 jest.setTimeout(60000);
 

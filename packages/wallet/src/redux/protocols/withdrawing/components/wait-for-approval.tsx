@@ -15,7 +15,7 @@ export default class WaitForApproval extends React.PureComponent<Props, State> {
   interval: any;
   constructor(props) {
     super(props);
-    const currentAddress = window.web3.eth.defaultAccount;
+    const currentAddress = window.ethereum.selectedAddress;
     this.state = {withdrawAddress: currentAddress};
 
     this.handleApprove = this.handleApprove.bind(this);
@@ -27,8 +27,8 @@ export default class WaitForApproval extends React.PureComponent<Props, State> {
       });
     } else {
       this.interval = setInterval(() => {
-        if (window.web3.eth.defaultAccount !== this.state.withdrawAddress) {
-          this.setState({withdrawAddress: window.web3.eth.defaultAccount});
+        if (window.ethereum.selectedAddress !== this.state.withdrawAddress) {
+          this.setState({withdrawAddress: window.ethereum.selectedAddress});
         }
       }, 100);
     }
