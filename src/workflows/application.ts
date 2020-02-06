@@ -234,11 +234,9 @@ export const applicationWorkflow = (store: Store, context?: WorkflowContext) => 
       store.sendState(event.state);
     },
     sendChannelUpdatedNotification: (context, event) => {
-      if (event.entry.states.length > 0) {
-        const channelId = getChannelId(event.entry.states[0].state.channel);
-        // TODO: We should filter by context.channelId but that is not being set currently
-        dispatchChannelUpdatedMessage(channelId, new ChannelStoreEntry(event.entry));
-      }
+      const entry = store.getEntry(event.channelId);
+      // TODO: We should filter by context.channelId but that is not being set currently
+      dispatchChannelUpdatedMessage(event.channelId, new ChannelStoreEntry(entry));
     },
     displayUi: () => {
       sendDisplayMessage('Show');
