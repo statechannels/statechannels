@@ -1,6 +1,6 @@
-import {MachineConfig, Action, StateSchema, Machine, Condition} from 'xstate';
+import {MachineConfig, Action, StateSchema, Machine, Condition, StateMachine} from 'xstate';
 import {Participant, TokenAllocations} from '@statechannels/client-api-schema';
-import {MachineFactory, Store} from '@statechannels/wallet-protocols';
+import {Store} from '@statechannels/wallet-protocols';
 import {sendDisplayMessage} from '../messaging';
 import {createMockGuard} from './utils';
 
@@ -93,11 +93,14 @@ const actions = {
   }
 };
 export const config = generateConfig(actions, guards);
-export const confirmChannelCreationWorkflow: MachineFactory<WorkflowContext, WorkflowEvent> = (
+export const confirmChannelCreationWorkflow = (
   _store: Store,
   context: WorkflowContext
-) => {
+): WorkflowMachine => {
   // TODO: Once budgets are a thing this should check for a budget
-
-  return Machine(config).withConfig({}, context);
+  // TODO: We shouldn't need to cast this but some xstate typing is not lining up around stateSchema
+  return Machine(config).withConfig({}, context) as WorkflowMachine;
 };
+
+// TODO: We should be
+export type WorkflowMachine = StateMachine<WorkflowContext, StateSchema, WorkflowEvent, any>;
