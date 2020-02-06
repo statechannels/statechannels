@@ -5,16 +5,13 @@ import {
   EphemeralStore,
   CreateChannelEvent,
   ConcludeChannel,
+  SignedState,
   getChannelId,
-  OpenChannelEvent,
-  Channel,
-  ChannelUpdated,
-  SignedState
+  ChannelUpdated
 } from '@statechannels/wallet-protocols';
-import {applicationWorkflow} from '../application';
-import {AddressZero} from 'ethers/constants';
-import {findCalledActions} from '../../utils/test-helpers';
+import {applicationWorkflow, OpenChannelEvent} from '../application';
 import * as CCC from '../confirm-create-channel';
+import {AddressZero} from 'ethers/constants';
 let closingMachineMock;
 
 let channelConfirmationMock;
@@ -52,7 +49,7 @@ const createChannelEvent: CreateChannelEvent = {
 it('initializes and starts confirmCreateChannelWorkflow', async () => {
   const store = new EphemeralStore();
 
-  const service = interpret<any, any, any>(applicationWorkflow(store, undefined));
+  const service = interpret<any, any, any>(applicationWorkflow(store));
   service.start();
   service.send(createChannelEvent);
   await waitForExpect(async () => {
@@ -61,46 +58,34 @@ it('initializes and starts confirmCreateChannelWorkflow', async () => {
   }, 2000);
 });
 
-it.only('handles confirmCreateChannel workflow finishing', async () => {
+it('handles confirmCreateChannel workflow finishing', async () => {
   const store = new EphemeralStore();
-
-  const service = interpret<any, any, any>(applicationWorkflow(store, undefined));
+  const mockOptions = {
+    services: {
+      createChannel: jest.fn().mockReturnValue(Promise.resolve('0xb1ab1a'))
+    }
+  };
+  const service = interpret<any, any, any>(applicationWorkflow(store).withConfig(mockOptions));
   service.start('confirmCreateChannelWorkflow');
 
   service.send({
-    type: 'done.invoke.invokeCreateChannelConfirmation'
+    type: 'done.invoke.invokeCreateChannelConfirmation',
+    data: createChannelEvent
   });
 
   await waitForExpect(async () => {
     expect(service.state.value).toEqual('openChannelAndDirectFund');
-    // TODO: Are actions working?
-    // expect(findCalledActions(service.state)).toContainEqual({
-    //   actionType: 'spawnObserver',
-    //   stateType: 'confirmCreateChannelWorkflow'
-    // });
+    expect(service.state.context).toMatchObject({channelId: '0xb1ab1a'});
   }, 2000);
 });
 
 it('initializes and starts the join channel machine', async () => {
   const store = new EphemeralStore();
-  const channel: Channel = {chainId: '0x0', channelNonce: '0x0', participants: []};
   const event: OpenChannelEvent = {
     type: 'OPEN_CHANNEL',
-    participants: [],
-    signedState: {
-      state: {
-        turnNum: 0,
-        appData: '0x0',
-        appDefinition: '0x0',
-        outcome: [],
-        isFinal: false,
-        channel,
-        challengeDuration: 500
-      },
-      signatures: []
-    }
+    channelId: '0xabc'
   };
-  const service = interpret<any, any, any>(applicationWorkflow(store, undefined));
+  const service = interpret<any, any, any>(applicationWorkflow(store));
 
   service.start();
 
@@ -112,22 +97,15 @@ it('initializes and starts the join channel machine', async () => {
 
   await waitForExpect(async () => {
     expect(service.state.value).toEqual('waitForJoin');
-
-    expect(findCalledActions(service.state)).toContainEqual({
-      actionType: 'displayUi',
-      stateType: 'waitForJoin'
-    });
-  }, 2000);
-
-  await waitForExpect(async () => {
     expect(service.state.context).toBeDefined();
-    expect(service.state.context.channelId).toEqual(getChannelId(channel));
+    expect(service.state.context.channelId).toEqual('0xabc');
   }, 2000);
 });
+
 it('starts concluding when requested', async () => {
   const store = new EphemeralStore();
   const channelId = ethers.utils.id('channel');
-  const service = interpret<any, any, any>(applicationWorkflow(store, {channelId}));
+  const service = interpret<any, any, any>(applicationWorkflow(store));
   service.start('running');
   service.send({type: 'PLAYER_REQUEST_CONCLUDE', channelId});
   await waitForExpect(async () => {
@@ -168,9 +146,5 @@ it('starts concluding when receiving a final state', async () => {
   await waitForExpect(async () => {
     expect(service.state.value).toEqual('closing');
     expect(closingMachineMock).toHaveBeenCalled();
-    expect(findCalledActions(service.state)).toContainEqual({
-      actionType: 'displayUi',
-      stateType: 'closing'
-    });
-  }, 2000);
+  });
 });

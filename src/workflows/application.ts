@@ -10,7 +10,6 @@ import {
 } from 'xstate';
 import {
   FINAL,
-  MachineFactory,
   ConcludeChannel,
   Store,
   SendStates,
@@ -24,12 +23,7 @@ import {State, getChannelId, Channel} from '@statechannels/nitro-protocol';
 import {sendDisplayMessage, dispatchChannelUpdatedMessage, observeRequests} from '../messaging';
 import {map} from 'rxjs/operators';
 import * as CCC from './confirm-create-channel';
-import {
-  JoinChannelParams,
-  AllocationItems,
-  Participant,
-  Allocations
-} from '@statechannels/client-api-schema';
+import {JoinChannelParams, AllocationItems, Participant} from '@statechannels/client-api-schema';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
 import {createMockGuard, getEthAllocation, ethAllocationOutcome} from './utils';
 
@@ -64,8 +58,6 @@ interface WorkflowActions {
   spawnObserver: AssignAction<ChannelIdExists, any>;
 }
 
-// a config isn't all wired up
-// a machine is something that's all wired up
 export interface OpenChannelEvent {
   type: 'OPEN_CHANNEL';
   channelId: string;
@@ -76,7 +68,7 @@ type OpenEvent = CreateChannelEvent | OpenChannelEvent;
 export interface CreateChannelEvent {
   type: 'CREATE_CHANNEL';
   participants: Participant[];
-  allocations: Allocations; // TODO: standardize on allocation typing
+  allocations: AllocationItems; // TODO: standardize on allocation typing
   appDefinition: string;
   appData: string;
   challengeDuration: number;
@@ -105,9 +97,8 @@ type WorkflowEvent =
   | DoneInvokeEvent<string>;
 
 export type ApplicationWorkflowEvent = WorkflowEvent;
-
 const generateConfig = (
-  actions: WorkflowActions,
+  actions,
   guards: WorkflowGuards
 ): MachineConfig<WorkflowContext, any, WorkflowEvent> => ({
   id: 'application-workflow',
@@ -117,7 +108,7 @@ const generateConfig = (
     initializing: {
       on: {
         CREATE_CHANNEL: 'confirmCreateChannelWorkflow',
-        OPEN_CHANNEL: 'waitForJoin'
+        OPEN_CHANNEL: {target: 'waitForJoin', actions: [actions.assignChannelId]}
       }
     },
     waitForJoin: {
@@ -129,7 +120,7 @@ const generateConfig = (
       invoke: {
         src: 'invokeCreateChannelConfirmation',
         onDone: {
-          target: 'createChannel'
+          target: 'createChannelInStore'
         }
       }
     },
@@ -142,8 +133,9 @@ const generateConfig = (
         }
       }
     },
-    createChannel: {
+    createChannelInStore: {
       invoke: {
+        data: (context, event) => event.data,
         src: 'createChannel',
         onDone: {
           target: 'openChannelAndDirectFund',
@@ -197,15 +189,7 @@ const generateConfig = (
   }
 });
 
-export const applicationWorkflow: MachineFactory<WorkflowContext, any> = (
-  store: Store,
-  context: WorkflowContext
-) => {
-  // Always use an empty context instead of undefined
-  if (!context) {
-    context = {};
-  }
-
+export const applicationWorkflow = (store: Store, context?: WorkflowContext) => {
   const notifyOnChannelMessage = ({channelId}: ChannelIdExists) => {
     return observeRequests(channelId).pipe(
       map(params => {
@@ -242,9 +226,9 @@ export const applicationWorkflow: MachineFactory<WorkflowContext, any> = (
         if (event.type === 'PLAYER_STATE_UPDATE') {
           return {channelId: getChannelId(event.state.channel)};
         } else if (event.type === 'OPEN_CHANNEL') {
-          return {channelId: getChannelId(event.signedState.state.channel)};
+          return {channelId: event.channelId};
         } else if (event.type === 'done.invoke.createChannel') {
-          return event.data;
+          return {channelId: event.data};
         }
         return {};
       }
@@ -306,7 +290,7 @@ export const applicationWorkflow: MachineFactory<WorkflowContext, any> = (
     }
   };
 
-  return Machine(config).withConfig({services}, context);
+  return Machine(config).withConfig({services}, context || {});
 };
 
 const mockServices = {
