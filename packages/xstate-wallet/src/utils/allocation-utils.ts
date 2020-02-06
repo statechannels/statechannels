@@ -3,7 +3,7 @@ import {
   AssetOutcome,
   isAllocationOutcome,
   AllocationAssetOutcome
-} from '@statechannels/nitro-protocol/src';
+} from '@statechannels/nitro-protocol';
 
 import {TokenAllocations} from '@statechannels/client-api-schema';
 
