@@ -26,11 +26,8 @@
           }
         },
         "allocations": {
-          "type": "array",
-          "items": {
-            "$ref": "definitions.json#/definitions/AllocationAssetOutcome"
-          },
-          "title": "allocations"
+          "title": "allocations",
+          "$ref": "definitions.json#/definitions/TokenAllocations"
         },
         "appDefinition": {
           "$ref": "definitions.json#/definitions/Address",
@@ -63,7 +60,16 @@
     },
     "ChannelStatus": {
       "type": "string",
-      "enum": ["proposed", "opening", "funding", "running", "challenging", "responding", "closing", "closed"]
+      "enum": [
+        "proposed",
+        "opening",
+        "funding",
+        "running",
+        "challenging",
+        "responding",
+        "closing",
+        "closed"
+      ]
     }
   }
 }

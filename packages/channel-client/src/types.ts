@@ -5,7 +5,7 @@ import {
   UpdateChannelResult,
   CloseChannelResult,
   Participant,
-  AllocationAssetOutcome
+  TokenAllocations
 } from '@statechannels/client-api-schema';
 
 // TODO: Several of these types are duplicates of those in @statechannels/client-api-schema
@@ -58,7 +58,7 @@ export interface ChannelClientInterface<Payload = object> {
   pushMessage: (message: Message<Payload>) => Promise<PushMessageResult>;
   createChannel: (
     participants: Participant[],
-    allocations: AllocationAssetOutcome[],
+    allocations: TokenAllocations,
     appDefinition: string,
     appData: string
   ) => Promise<ChannelResult>;
@@ -66,7 +66,7 @@ export interface ChannelClientInterface<Payload = object> {
   updateChannel: (
     channelId: string,
     participants: Participant[],
-    allocations: AllocationAssetOutcome[],
+    allocations: TokenAllocations,
     appData: string
   ) => Promise<ChannelResult>;
   challengeChannel: (channelId: string) => Promise<ChannelResult>;

@@ -1,5 +1,5 @@
 import {ChannelStatus, ChannelResult} from '../src/types';
-import {Participant, AllocationAssetOutcome} from '@statechannels/client-api-schema';
+import {Participant, TokenAllocations, TokenAllocation} from '@statechannels/client-api-schema';
 import {ETH_TOKEN_ADDRESS} from './constants';
 import {FakeChannelProvider} from './fakes/fake-channel-provider';
 
@@ -14,7 +14,7 @@ export class ChannelResultBuilder {
 
   constructor(
     participants: Participant[],
-    allocations: AllocationAssetOutcome[],
+    allocations: TokenAllocations,
     appDefinition: string,
     appData: string,
     channelId: string,
@@ -95,7 +95,7 @@ export function buildAllocation(
   destination: string,
   amount: string,
   token: string = ETH_TOKEN_ADDRESS
-): AllocationAssetOutcome {
+): TokenAllocation {
   return {
     token,
     allocationItems: [
