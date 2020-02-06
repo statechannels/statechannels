@@ -4,6 +4,7 @@ import {Wallet} from 'ethers';
 
 const channelId = 'abc123';
 const state = {channelId, turnNum: bigNumberify(3)};
+const stateWithoutChannelId = {turnNum: bigNumberify(4)};
 const signature = {r: 'r', s: 's'};
 const signedState = {state, signatures: [signature]};
 const aWallet = Wallet.createRandom();
@@ -56,11 +57,11 @@ describe('createChannel', () => {
     const myAddress = store.getAddress();
     participants[0].signingAddress = myAddress;
 
-    const channelId = await store.createChannel(participants);
+    const channelId = await store.createChannel(participants, stateWithoutChannelId);
 
     expect(channelId).toMatch(/0x/);
 
-    const channelId2 = await store.createChannel(participants);
+    const channelId2 = await store.createChannel(participants, stateWithoutChannelId);
 
     expect(channelId2).toMatch(/0x/);
     expect(channelId2).not.toEqual(channelId);
@@ -69,7 +70,7 @@ describe('createChannel', () => {
   it("fails if the wallet doesn't hold the private key for any participant", async () => {
     const store = new MemoryStore();
 
-    await expect(store.createChannel(participants)).rejects.toMatchObject({
+    await expect(store.createChannel(participants, stateWithoutChannelId)).rejects.toMatchObject({
       message: "Couldn't find the signing key for any participant in wallet."
     });
   });
