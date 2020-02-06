@@ -37,7 +37,6 @@ const constructFirstState = {
   invoke: {
     id: 'constructFirstState',
     src: 'constructFirstState',
-    // data: (ctx: Init) => ctx,
     onDone: 'preFundSetup',
   },
 };
@@ -90,9 +89,6 @@ export const config: MachineConfig<Context, any, any> = {
     postFundSetup,
     success: {
       type: 'final' as 'final',
-
-      // entry: sendParent({ type: 'CHANNEL_CREATED' }),
-      // data: { channelId: (context: FirstStateConstructed, event) => context.channelId },
     },
   },
 };

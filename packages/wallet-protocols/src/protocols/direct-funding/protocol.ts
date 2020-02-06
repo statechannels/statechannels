@@ -92,7 +92,8 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
 
     const holdings = await store.getHoldings(ctx.channelId);
 
-    if (gt(allocated, holdings)) throw new Error('Channel underfunded');
+    if (gt(allocated, holdings))
+      throw new Error('DirectFunding: Channel outcome is already underfunded; aborting');
   }
 
   function minimalOutcome(currentOutcome: Outcome, minimalEthAllocation: Allocation): Outcome {
