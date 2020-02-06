@@ -1,7 +1,7 @@
-import puppeteer from "puppeteer";
-
 import fs from "fs";
 import path from "path";
+
+import puppeteer from "puppeteer";
 import Emittery from "emittery";
 
 export const enum MessageType {
@@ -50,6 +50,16 @@ export async function loadWallet(page: puppeteer.Page, messageListener: (message
   const web3JsFile = fs.readFileSync(path.resolve(__dirname, "web3/web3.min.js"), "utf8");
   await page.evaluateOnNewDocument(web3JsFile);
   await page.evaluateOnNewDocument(`window.web3 = new Web3("http://localhost:${port}")`);
+  await page.evaluateOnNewDocument(`window.ethereum = window.web3.currentProvider`);
+  // MetaMask has an .enable() API to unlock it / access it from the app
+  await page.evaluateOnNewDocument(`window.ethereum.enable = () => new Promise(r => r())`);
+  await page.evaluateOnNewDocument(
+    `web3.eth.getAccounts().then(lst => {
+      window.ethereum.selectedAddress = lst[0];
+    });`
+  );
+  await page.evaluateOnNewDocument(`window.ethereum.networkVersion = 9001`);
+  await page.evaluateOnNewDocument(`window.ethereum.on = () => {}`);
   await page.goto("http://localhost:3055/", {waitUntil: "load"});
   page.on("pageerror", error => {
     throw error;
