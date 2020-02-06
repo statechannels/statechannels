@@ -11,8 +11,6 @@ import {
 import {
   FINAL,
   MachineFactory,
-  CreateChannelEvent,
-  OpenChannelEvent,
   ConcludeChannel,
   Store,
   SendStates,
@@ -26,7 +24,12 @@ import {State, getChannelId, Channel} from '@statechannels/nitro-protocol';
 import {sendDisplayMessage, dispatchChannelUpdatedMessage, observeRequests} from '../messaging';
 import {map} from 'rxjs/operators';
 import * as CCC from './confirm-create-channel';
-import {JoinChannelParams, AllocationItems, Participant} from '@statechannels/client-api-schema';
+import {
+  JoinChannelParams,
+  AllocationItems,
+  Participant,
+  Allocations
+} from '@statechannels/client-api-schema';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
 import {createMockGuard, getEthAllocation, ethAllocationOutcome} from './utils';
 
@@ -63,9 +66,22 @@ interface WorkflowActions {
 
 // a config isn't all wired up
 // a machine is something that's all wired up
-
+export interface OpenChannelEvent {
+  type: 'OPEN_CHANNEL';
+  channelId: string;
+}
 // Events
 type OpenEvent = CreateChannelEvent | OpenChannelEvent;
+
+export interface CreateChannelEvent {
+  type: 'CREATE_CHANNEL';
+  participants: Participant[];
+  allocations: Allocations; // TODO: standardize on allocation typing
+  appDefinition: string;
+  appData: string;
+  challengeDuration: number;
+  chainId: string;
+}
 
 interface JoinChannelEvent {
   type: 'JoinChannel';
@@ -101,10 +117,7 @@ const generateConfig = (
     initializing: {
       on: {
         CREATE_CHANNEL: 'confirmCreateChannelWorkflow',
-        OPEN_CHANNEL: {
-          target: 'waitForJoin',
-          actions: [actions.assignChannelId, actions.spawnObserver]
-        }
+        OPEN_CHANNEL: 'waitForJoin'
       }
     },
     waitForJoin: {
@@ -116,16 +129,7 @@ const generateConfig = (
       invoke: {
         src: 'invokeCreateChannelConfirmation',
         onDone: {
-          target: 'openChannelAndDirectFund'
-        }
-      }
-    },
-    registerChannel: {
-      invoke: {
-        src: 'registerChannel',
-        onDone: {
-          target: 'openChannelAndDirectFund',
-          actions: [actions.assignChannelId, actions.spawnObserver]
+          target: 'createChannel'
         }
       }
     },
@@ -133,10 +137,21 @@ const generateConfig = (
       invoke: {
         src: 'invokeCreateChannelConfirmation',
         onDone: {
-          target: 'openChannelAndDirectFund'
+          target: 'openChannelAndDirectFund',
+          actions: [actions.assignChannelId, actions.spawnObserver]
         }
       }
     },
+    createChannel: {
+      invoke: {
+        src: 'createChannel',
+        onDone: {
+          target: 'openChannelAndDirectFund',
+          actions: [actions.assignChannelId, actions.spawnObserver]
+        }
+      }
+    },
+
     openChannelAndDirectFund: {
       invoke: {
         src: 'invokeOpenChannelAndDirectFundProtocol',
@@ -202,6 +217,7 @@ export const applicationWorkflow: MachineFactory<WorkflowContext, any> = (
   const actions: WorkflowActions = {
     spawnObserver: assign<ChannelIdExists>(context => ({
       ...context,
+      // TODO: Do protocols register themselves against the store for state updates? Or do we need to handle them
       observer: spawn(notifyOnChannelMessage(context))
     })),
 
@@ -222,13 +238,12 @@ export const applicationWorkflow: MachineFactory<WorkflowContext, any> = (
       sendDisplayMessage('Hide');
     },
     assignChannelId: assign((context, event) => {
-      console.log('help');
       if (!context.channelId) {
         if (event.type === 'PLAYER_STATE_UPDATE') {
           return {channelId: getChannelId(event.state.channel)};
         } else if (event.type === 'OPEN_CHANNEL') {
           return {channelId: getChannelId(event.signedState.state.channel)};
-        } else if (event.type === 'done.invoke.registerChannel') {
+        } else if (event.type === 'done.invoke.createChannel') {
           return event.data;
         }
         return {};
@@ -253,15 +268,15 @@ export const applicationWorkflow: MachineFactory<WorkflowContext, any> = (
   };
   const config = generateConfig(actions, guards);
   const services = {
-    registerChannel: (context: ChannelParamsExist, event: WorkflowEvent) => {
-      return registerChannel(context.channelParams, store);
+    createChannel: (context: ChannelParamsExist) => {
+      return initChannel(context.channelParams, store);
     },
     invokeClosingMachine: (context: ChannelIdExists) => {
       return ConcludeChannel.machine(store, {channelId: context.channelId});
     },
-    invokeOpenChannelAndDirectFundProtocol: (context: WorkflowContext, event: WorkflowEvent) => {
+    invokeOpenChannelAndDirectFundProtocol: () => {
       return new Promise(() => {
-        /* TODO: Hook up to protocol when exists */
+        /* TODO: This must start the protocol and sync it to the store if necessary */
       });
     },
     invokeCreateChannelConfirmation: (
@@ -321,8 +336,8 @@ const mockGuards = {
 export const config = generateConfig(mockActions, mockGuards);
 export const mockOptions = {services: mockServices, actions: mockActions, guards: mockGuards};
 
-// TODO: This can probably go when the store is updated
-async function registerChannel(context: CCC.WorkflowContext, store: Store): Promise<string> {
+// TODO: This will go when the store is updated
+async function initChannel(context: CCC.WorkflowContext, store: Store): Promise<string> {
   const participants = context.participants.map(p => p.signingAddress);
   const channelNonce = store.getNextNonce(participants);
   const channel: Channel = {
