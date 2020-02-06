@@ -1,5 +1,5 @@
 import {MachineConfig, Action, StateSchema, Machine, Condition} from 'xstate';
-import {Participant, AllocationItems} from '@statechannels/client-api-schema';
+import {Participant, TokenAllocations} from '@statechannels/client-api-schema';
 import {MachineFactory, Store} from '@statechannels/wallet-protocols';
 import {sendDisplayMessage} from '../messaging';
 import {createMockGuard} from './utils';
@@ -16,7 +16,7 @@ interface WorkflowGuards {
 export interface WorkflowContext {
   participants: Participant[];
 
-  allocations: AllocationItems;
+  allocations: TokenAllocations;
   appDefinition: string;
   appData: string;
   chainId: string;

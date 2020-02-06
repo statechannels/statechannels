@@ -3,11 +3,11 @@ import {
   Outcome,
   AssetOutcome,
   isAllocationOutcome,
-  Allocation,
   AllocationAssetOutcome
 } from '@statechannels/nitro-protocol';
 
-import {hexZeroPad} from 'ethers/utils';
+import {TokenAllocations} from '@statechannels/client-api-schema';
+import {ETH_TOKEN} from '../constants';
 
 export function createMockGuard(guardName: string): GuardPredicate<any, any> {
   return {
@@ -17,17 +17,29 @@ export function createMockGuard(guardName: string): GuardPredicate<any, any> {
   };
 }
 // TODO: Merge wallet-protocols/xstate-wallet so these are shared
-export function getEthAllocation(outcome: Outcome, ethAssetHolderAddress: string): Allocation {
+export function getEthAllocation(
+  outcome: Outcome,
+  ethAssetHolderAddress: string
+): TokenAllocations {
   const ethOutcome: AssetOutcome | undefined = outcome.find(
     o => o.assetHolderAddress === ethAssetHolderAddress
   );
-  return ethOutcome ? checkThat(ethOutcome, isAllocationOutcome).allocation : [];
+  if (!ethOutcome) {
+    return [];
+  }
+  return [
+    {
+      token: ETH_TOKEN,
+      allocationItems: checkThat(ethOutcome, isAllocationOutcome).allocationItems
+    }
+  ];
 }
+
 type TypeGuard<T, S> = (t1: T | S) => t1 is T;
 export function checkThat<T, S>(t: T | S, isTypeT: TypeGuard<T, S>): T {
   if (!isTypeT(t)) {
     throwError(isTypeT, t);
-    // Typescrypt doesn't know that throwError throws an error.
+    // Typescript doesn't know that throwError throws an error.
     throw 'Unreachable';
   }
   return t;
@@ -37,17 +49,17 @@ const throwError = (fn: (t1: any) => boolean, t) => {
 };
 
 export function ethAllocationOutcome(
-  allocation: Allocation,
+  allocations: TokenAllocations,
   ethAssetHolderAddress: string
 ): AllocationAssetOutcome[] {
-  // If there are allocations then we use a blank outcomes
-  if (allocation.length === 0) {
+  const ethAllocation = allocations.find(e => e.token === ETH_TOKEN);
+  if (!ethAllocation) {
     return [];
   }
   return [
     {
       assetHolderAddress: ethAssetHolderAddress,
-      allocation: allocation.map(a => ({...a, destination: hexZeroPad(a.destination, 32)}))
+      allocationItems: ethAllocation.allocationItems
     }
   ];
 }
