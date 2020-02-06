@@ -5,6 +5,7 @@ import * as _ from 'lodash';
 import {getChannelId} from '@statechannels/nitro-protocol';
 
 import {Signature, BigNumber, bigNumberify} from 'ethers/utils';
+import {Wallet} from 'ethers';
 type Bytes32 = string;
 type Uint256 = string;
 
@@ -97,7 +98,13 @@ export class MemoryStore {
   private _protocols: Protocol[] = [];
   private _nonces: Record<string, BigNumber> = {};
   private _eventEmitter = new EventEmitter<InternalEvents>();
+  private _privateKeys: Record<string, string> = {};
   // private _channels: Record<string, any> = {};
+
+  constructor() {
+    const wallet = Wallet.createRandom();
+    this._privateKeys[wallet.address] = wallet.privateKey;
+  }
 
   public stateReceivedFeed(channelId: string): Observable<State> {
     return fromEvent<State>(this._eventEmitter, 'stateReceived').pipe(
@@ -113,7 +120,16 @@ export class MemoryStore {
     return fromEvent(this._eventEmitter, 'sendMessage');
   }
 
+  // in channel, we should store
+  // 1. myIndex
+  // 2. participants, including contact details
+  // 3. latest outcome(?)
+  // 4. states -
+
   public createChannel(participants: Participant[]): Promise<string> {
+    // check that I hold the private key for one of the participants
+    // calculate my index
+
     const addresses = participants.map(x => x.signingAddress);
     const currentNonce = this.getNonce(addresses);
     const newNonce = currentNonce ? currentNonce.add(1) : bigNumberify(0);
@@ -139,12 +155,15 @@ export class MemoryStore {
 
   private nonceKeyFromAddresses = (addresses: string[]): string => addresses.join('::');
 
-  private(participants: Participant[]): string {
-    return participants.map(p => p.signingAddress).join('::');
+  addState(channelId: string, state: State) {
+    // find channel
+    // pull out my key
+    // sign state
+    // add to channel
   }
 
-  addState(channelId: string, state: State) {
-    /*todo*/
+  public getAddress(): string {
+    return Object.keys(this._privateKeys)[0];
   }
 
   pushMessage(message: Message) {

@@ -62,4 +62,14 @@ describe('createChannel', () => {
     expect(channelId2).toMatch(/0x/);
     expect(channelId2).not.toEqual(channelId);
   });
+  it("fails if the wallet doesn't hold the private key for any participant");
+});
+
+describe('getAddress', () => {
+  it('returns an address', () => {
+    const store = new MemoryStore();
+    const address = store.getAddress();
+
+    expect(address).toMatch(/0x/);
+  });
 });
