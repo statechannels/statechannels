@@ -57,6 +57,25 @@ it('initializes and starts confirmCreateChannelWorkflow', async () => {
     expect(channelConfirmationMock).toHaveBeenCalled();
   }, 2000);
 });
+it('raises an channel updated action when the channel is updated', async () => {
+  const store = new EphemeralStore();
+  const mockOptions = {
+    actions: {
+      sendChannelUpdatedNotification: jest.fn()
+    }
+  };
+  const service = interpret<any, any, any>(applicationWorkflow(store).withConfig(mockOptions));
+  service.start();
+
+  service.send({
+    type: 'CHANNEL_UPDATED',
+    channelId: '0x0'
+  });
+
+  await waitForExpect(async () => {
+    expect(mockOptions.actions.sendChannelUpdatedNotification).toHaveBeenCalled();
+  }, 2000);
+});
 
 it('handles confirmCreateChannel workflow finishing', async () => {
   const store = new EphemeralStore();
