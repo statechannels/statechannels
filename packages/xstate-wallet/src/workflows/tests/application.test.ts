@@ -74,7 +74,7 @@ it('handles confirmCreateChannel workflow finishing', async () => {
   });
 
   await waitForExpect(async () => {
-    expect(service.state.value).toEqual('openChannelAndDirectFund');
+    expect(service.state.value).toEqual('openChannelAndDirectFundProtocol');
     expect(service.state.context).toMatchObject({channelId: '0xb1ab1a'});
   }, 2000);
 });
