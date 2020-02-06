@@ -1,15 +1,18 @@
 import {ContractArtifacts, createETHDepositTransaction} from '@statechannels/nitro-protocol';
 import {getProvider} from './utils/contract-utils';
 import {ethers} from 'ethers';
-import {ETH_ASSET_HOLDER_ADDRESS} from './constants';
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {State} from './store/types';
 import {Observable, fromEvent, from, concat} from 'rxjs';
 import {filter, map} from 'rxjs/operators';
+import {ETH_ASSET_HOLDER_ADDRESS, NITRO_ADJUDICATOR_ADDRESS} from './constants';
 
 const EthAssetHolderInterface = new ethers.utils.Interface(
-  // @ts-ignore https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
-  ContractArtifacts.Erc20AssetHolderArtifact.abi
+  // https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
+  ContractArtifacts.EthAssetHolderArtifact.abi
+);
+const NitroAdjudicatorInterface = new ethers.utils.Interface(
+  ContractArtifacts.NitroAdjudicatorArtifact.abi
 );
 
 export interface ChannelChainInfo {
@@ -47,12 +50,22 @@ export class FakeChain implements Chain {
   }
 }
 export class ChainWatcher implements Chain {
-  private _contract: ethers.Contract | undefined;
+  private _adjudicator?: ethers.Contract;
+  private _assetHolders: ethers.Contract[];
+
   public async initialize() {
     const provider = getProvider();
     const signer = provider.getSigner();
-    this._contract = new ethers.Contract(ETH_ASSET_HOLDER_ADDRESS, EthAssetHolderInterface, signer);
+    this._assetHolders = [
+      new ethers.Contract(ETH_ASSET_HOLDER_ADDRESS, EthAssetHolderInterface, signer)
+    ]; // TODO allow for other asset holders, for now we use slot 0 only
+    this._adjudicator = new ethers.Contract(
+      NITRO_ADJUDICATOR_ADDRESS,
+      NitroAdjudicatorInterface,
+      signer
+    );
   }
+
   public async deposit(channelId: string, expectedHeld: string, amount: string): Promise<void> {
     const provider = getProvider();
     const signer = provider.getSigner();
@@ -80,13 +93,13 @@ export class ChainWatcher implements Chain {
     };
   }
   public chainUpdatedFeed(channelId: string): Observable<ChannelChainInfo> {
-    if (!this._contract) {
-      throw new Error('Not connected to contract');
+    if (!this._assetHolders[0] && !this._adjudicator) {
+      throw new Error('Not connected to contracts');
     }
 
     const first = from(this.getChainInfo(channelId));
 
-    const updates = fromEvent(this._contract, 'DEPOSITED').pipe(
+    const updates = fromEvent(this._assetHolders[0], 'DEPOSITED').pipe(
       filter((event: {toAddress: string; amount: BigNumber}) => {
         return event.toAddress === channelId;
       }),
