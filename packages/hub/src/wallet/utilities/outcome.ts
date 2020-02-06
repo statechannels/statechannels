@@ -12,7 +12,7 @@ function assetOutcomeObjectToModel(assetOutcome: AssetOutcome) {
       ...allocationItem,
       priority: index
     }));
-    return {...assetOutcome, allocation: allocationsWithPriorities};
+    return {...assetOutcome, allocationItems: allocationsWithPriorities};
   } else if (isGuaranteeOutcome(assetOutcome)) {
     const guaranteeWithPriorities = assetOutcome.guarantee.destinations.map(
       (destination, index) => ({destination, priority: index})
@@ -20,7 +20,7 @@ function assetOutcomeObjectToModel(assetOutcome: AssetOutcome) {
     return {
       assetHolderAddress: assetOutcome.assetHolderAddress,
       targetChannelId: assetOutcome.guarantee.targetChannelId,
-      allocation: guaranteeWithPriorities
+      allocationItems: guaranteeWithPriorities
     };
   } else {
     return unreachable(assetOutcome);

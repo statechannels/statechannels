@@ -30,7 +30,7 @@ describe('updateChannel', () => {
       expect(await knex('channels').select('*')).toHaveLength(SEEDED_CHANNELS + 1);
       expect(await knex('channel_states').select('*')).toHaveLength(SEEDED_STATES + 2);
 
-      expect(await knex('allocations').select('*')).toHaveLength(SEEDED_ALLOCATIONS + 4);
+      expect(await knex('allocation_items').select('*')).toHaveLength(SEEDED_ALLOCATIONS + 4);
 
       expect(await knex('channel_participants').select('*')).toHaveLength(SEEDED_PARTICIPANTS + 2);
     });
@@ -51,7 +51,7 @@ describe('updateChannel', () => {
       const {channelNonce} = testDataConstructors.postfundSetup(2).channel;
       const existingAllocatorChannel = await Channel.query()
         .findOne({channel_nonce: channelNonce})
-        .eager('[states.[outcome.[allocation]], participants, holdings]');
+        .eager('[states.[outcome.[allocationItems]], participants, holdings]');
 
       expect(existingAllocatorChannel).toMatchObject(seeds.fundedChannelWithStates);
 
@@ -75,7 +75,7 @@ describe('updateChannel', () => {
           .select('*')
       ).toHaveLength(2);
 
-      expect(await knex('allocations').select('*')).toHaveLength(SEEDED_ALLOCATIONS);
+      expect(await knex('allocation_items').select('*')).toHaveLength(SEEDED_ALLOCATIONS);
 
       expect(await knex('channel_participants').select('*')).toHaveLength(SEEDED_PARTICIPANTS);
     });

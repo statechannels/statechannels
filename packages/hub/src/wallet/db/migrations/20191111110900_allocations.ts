@@ -1,7 +1,7 @@
 import * as Knex from 'knex';
 import {addBytesCheck} from '../utils';
 
-const TABLE_NAME = 'allocations';
+const TABLE_NAME = 'allocation_items';
 
 exports.up = (knex: Knex) =>
   knex.schema
