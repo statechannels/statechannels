@@ -2,13 +2,15 @@ import {Observable, fromEvent} from 'rxjs';
 import {filter} from 'rxjs/operators';
 import {EventEmitter} from 'eventemitter3';
 import * as _ from 'lodash';
+import {getChannelId} from '@statechannels/nitro-protocol';
 
-import {Signature} from 'ethers/utils';
+import {Signature, BigNumber, bigNumberify} from 'ethers/utils';
 type Bytes32 = string;
 type Uint256 = string;
 
 export interface State {
   channelId: Bytes32;
+  turnNum: BigNumber;
 }
 
 interface DirectFunding {
@@ -87,16 +89,15 @@ export interface StoreV2 {
 interface InternalEvents {
   stateReceived: [State];
   newProtocol: [Protocol];
+  sendMessage: [Message];
 }
 
 export class MemoryStore {
   // private _channels: Record<string, any>;
-  private _protocols: Protocol[];
+  private _protocols: Protocol[] = [];
+  private _nonces: Record<string, BigNumber> = {};
   private _eventEmitter = new EventEmitter<InternalEvents>();
-
-  constructor() {
-    this._protocols = [];
-  }
+  // private _channels: Record<string, any> = {};
 
   public stateReceivedFeed(channelId: string): Observable<State> {
     return fromEvent<State>(this._eventEmitter, 'stateReceived').pipe(
@@ -106,6 +107,44 @@ export class MemoryStore {
 
   public newProtocolFeed(): Observable<Protocol> {
     return fromEvent(this._eventEmitter, 'newProtocol');
+  }
+
+  public messageFeed(): Observable<Message> {
+    return fromEvent(this._eventEmitter, 'sendMessage');
+  }
+
+  public createChannel(participants: Participant[]): Promise<string> {
+    const addresses = participants.map(x => x.signingAddress);
+    const currentNonce = this.getNonce(addresses);
+    const newNonce = currentNonce ? currentNonce.add(1) : bigNumberify(0);
+    this.setNonce(addresses, newNonce);
+    const chainId = '1';
+
+    const channelId = getChannelId({
+      chainId,
+      channelNonce: newNonce.toString(),
+      participants: addresses
+    });
+
+    return Promise.resolve(channelId);
+  }
+
+  private getNonce(addresses: string[]): BigNumber | undefined {
+    return this._nonces[this.nonceKeyFromAddresses(addresses)];
+  }
+
+  private setNonce(addresses: string[], value: BigNumber) {
+    this._nonces[this.nonceKeyFromAddresses(addresses)] = value;
+  }
+
+  private nonceKeyFromAddresses = (addresses: string[]): string => addresses.join('::');
+
+  private(participants: Participant[]): string {
+    return participants.map(p => p.signingAddress).join('::');
+  }
+
+  addState(channelId: string, state: State) {
+    /*todo*/
   }
 
   pushMessage(message: Message) {
