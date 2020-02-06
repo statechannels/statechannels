@@ -150,7 +150,7 @@ async function handleCreateChannelMessage(
     const createChannel: CreateChannelEvent = {
       type: 'CREATE_CHANNEL',
       participants: params.participants,
-      allocations: params.allocations[0].allocationItems,
+      allocations: params.allocations,
       appDefinition: params.appDefinition,
       appData: params.appData,
       chainId: process.env.NETWORK_CHAIN_ID || '0',
