@@ -23,7 +23,7 @@ import {State, getChannelId, Channel} from '@statechannels/nitro-protocol';
 import {sendDisplayMessage, dispatchChannelUpdatedMessage, observeRequests} from '../messaging';
 import {map} from 'rxjs/operators';
 import * as CCC from './confirm-create-channel';
-import {JoinChannelParams, AllocationItems, Participant} from '@statechannels/client-api-schema';
+import {JoinChannelParams, Participant, TokenAllocations} from '@statechannels/client-api-schema';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
 import {createMockGuard, getEthAllocation, ethAllocationOutcome} from './utils';
 
@@ -33,7 +33,7 @@ interface WorkflowContext {
   channelParams?: {
     participants: Participant[];
 
-    allocations: AllocationItems;
+    allocations: TokenAllocations;
     appDefinition: string;
     appData: string;
     chainId: string;
@@ -68,7 +68,7 @@ type OpenEvent = CreateChannelEvent | OpenChannelEvent;
 export interface CreateChannelEvent {
   type: 'CREATE_CHANNEL';
   participants: Participant[];
-  allocations: AllocationItems; // TODO: standardize on allocation typing
+  allocations: TokenAllocations;
   appDefinition: string;
   appData: string;
   challengeDuration: number;
