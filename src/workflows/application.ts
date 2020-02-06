@@ -28,7 +28,8 @@ import {map} from 'rxjs/operators';
 import * as CCC from './confirm-create-channel';
 import {JoinChannelParams, Participant, TokenAllocations} from '@statechannels/client-api-schema';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
-import {createMockGuard, getEthAllocation} from './utils';
+import {createMockGuard} from '../utils/workflow-utils';
+import {getEthAllocation} from '../utils/allocation-utils';
 
 interface WorkflowContext {
   channelId?: string;

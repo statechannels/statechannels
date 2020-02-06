@@ -2,7 +2,7 @@ import {MachineConfig, Action, StateSchema, Machine, Condition, StateMachine} fr
 import {Participant, TokenAllocations} from '@statechannels/client-api-schema';
 import {Store} from '@statechannels/wallet-protocols';
 import {sendDisplayMessage} from '../messaging';
-import {createMockGuard} from './utils';
+import {createMockGuard} from '../utils/workflow-utils';
 
 interface WorkflowActions {
   hideUi: Action<WorkflowContext, any>;
