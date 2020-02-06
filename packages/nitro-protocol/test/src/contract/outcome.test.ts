@@ -20,10 +20,10 @@ const guarantee: Guarantee = {
   targetChannelId,
   destinations,
 };
-const allocation: AllocationItem[] = [{destination, amount: '0x05'}];
+const allocationItems: AllocationItem[] = [{destination, amount: '0x05'}];
 
 const outcome = [
-  {assetHolderAddress, allocation},
+  {assetHolderAddress, allocationItems},
   {assetHolderAddress, guarantee},
 ];
 const emptyOutcome = [];
@@ -38,7 +38,7 @@ describe('outcome', () => {
     it.each`
       description     | encodeFunction      | decodeFunction      | data
       ${description0} | ${encodeGuarantee}  | ${decodeGuarantee}  | ${guarantee}
-      ${description1} | ${encodeAllocation} | ${decodeAllocation} | ${allocation}
+      ${description1} | ${encodeAllocation} | ${decodeAllocation} | ${allocationItems}
       ${description2} | ${encodeOutcome}    | ${decodeOutcome}    | ${outcome}
       ${description3} | ${encodeOutcome}    | ${decodeOutcome}    | ${emptyOutcome}
     `('$description', ({encodeFunction, decodeFunction, data}) => {
