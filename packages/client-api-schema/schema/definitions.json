@@ -53,8 +53,8 @@
       },
       "required": ["amount", "destination"]
     },
-    "AllocationAssetOutcome": {
-      "title": "AllocationAssetOutcome",
+    "TokenAllocation": {
+      "title": "TokenAllocation",
       "type": "object",
       "properties": {
         "token": {
@@ -70,6 +70,13 @@
         }
       },
       "required": ["allocationItems", "token"]
+    },
+    "TokenAllocations": {
+      "title": "TokenAllocations",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/TokenAllocation"
+      }
     },
     "Balance": {
       "title": "Balance",

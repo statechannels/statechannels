@@ -16,11 +16,8 @@
           "title": "participants"
         },
         "allocations": {
-          "type": "array",
-          "items": {
-            "$ref": "definitions.json#/definitions/AllocationAssetOutcome"
-          },
-          "title": "allocations"
+          "title": "allocations",
+          "$ref": "definitions.json#/definitions/TokenAllocations"
         },
         "appDefinition": {
           "$ref": "definitions.json#/definitions/Address",
