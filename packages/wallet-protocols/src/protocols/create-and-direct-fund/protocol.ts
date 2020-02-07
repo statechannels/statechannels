@@ -2,10 +2,14 @@ import { Machine, MachineConfig } from 'xstate';
 
 import { AllocationAssetOutcome } from '@statechannels/nitro-protocol';
 
+import { AddressZero } from 'ethers/constants';
+
 import { MachineFactory } from '../../machine-utils';
 import { Store, success } from '../..';
 
 import { Participant } from '../../store';
+
+import { getEthAllocation } from '../../calculations';
 
 import { AdvanceChannel, DirectFunding } from '..';
 
@@ -60,8 +64,8 @@ const directFunding = {
     data: ({ allocations, channelId }: FirstStateConstructed): DirectFunding.Init => {
       return {
         channelId,
-        // TODO: Error handling on non-0 case ... also multi-asset
-        minimalAllocation: allocations[0].allocationItems,
+        // TODO: Get eth asset holder address
+        minimalAllocation: getEthAllocation(allocations, AddressZero),
       };
     },
     onDone: 'postFundSetup',
