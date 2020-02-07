@@ -21,11 +21,13 @@ export default function* openGameSaga(address: string) {
   let myGameIsOnFirebase = false;
 
   while (true) {
-    const action = yield take('*');
-
     const localState: LocalState = yield select(getLocalState);
 
-    if (localState.type === 'Setup.Lobby' || localState.type === 'B.WaitingRoom') {
+    if (
+      localState.type === 'Setup.Lobby' ||
+      localState.type === 'Setup.NeedAddress' ||
+      localState.type === 'B.WaitingRoom'
+    ) {
       // if we're in the lobby we need to sync openGames
       if (!openGameSyncerProcess || !openGameSyncerProcess.isRunning()) {
         openGameSyncerProcess = yield fork(openGameSyncer);
@@ -36,6 +38,7 @@ export default function* openGameSaga(address: string) {
         yield cancel(openGameSyncerProcess);
       }
     }
+    const action = yield take('*');
 
     if (action.type === 'JoinOpenGame' && localState.type === 'A.GameChosen') {
       const openGameKey = `/${FIREBASE_PREFIX}/challenges/${localState.opponentAddress}`;
