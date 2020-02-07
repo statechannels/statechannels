@@ -75,6 +75,10 @@ function* handleMessage(payload: RequestObject) {
     case "GetAddress":
       const address = yield select(getAddress);
       yield fork(messageSender, outgoingMessageActions.addressResponse({id, address}));
+      if (window.ethereum.selectedAddress === null) {
+        //  ask metamask permission to access accounts
+        yield call([window.ethereum, "enable"]);
+      }
       break;
     case "CreateChannel":
       yield handleCreateChannelMessage(payload);
