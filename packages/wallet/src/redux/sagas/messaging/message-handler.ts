@@ -18,6 +18,8 @@ import {Web3Provider} from "ethers/providers";
 
 import {ProtocolState} from "src/redux/protocols";
 
+import {eventChannel} from "redux-saga";
+
 import {APPLICATION_PROCESS_ID} from "../../protocols/application/reducer";
 import {
   createStateFromCreateChannelParams,
@@ -45,7 +47,6 @@ import * as actions from "../../actions";
 import {messageSender} from "./message-sender";
 
 import * as outgoingMessageActions from "./outgoing-api-actions";
-import {eventChannel} from "redux-saga";
 
 export function* messageHandler(jsonRpcMessage: object, _domain: string) {
   const parsedMessage = jrs.parseObject(jsonRpcMessage);
