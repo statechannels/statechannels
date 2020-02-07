@@ -30,7 +30,6 @@ export type Init = {
   index: Indices;
 };
 
-export type FirstStateConstructed = Init & { type: 'FIRST_STATE_CONSTRUCTED' };
 
 export const advanceChannelArgs = (i: 1 | 3) => ({ channelId }: Init): AdvanceChannel.Init => ({
   channelId,
@@ -39,7 +38,6 @@ export const advanceChannelArgs = (i: 1 | 3) => ({ channelId }: Init): AdvanceCh
 
 const constructFirstState = {
   invoke: {
-    id: 'constructFirstState',
     src: 'constructFirstState',
     onDone: 'preFundSetup',
   },
@@ -56,7 +54,6 @@ const preFundSetup = {
 };
 
 // FIXME: Abort should not be success
-const abort = success;
 
 const directFunding = {
   invoke: {
@@ -98,7 +95,7 @@ export const config: MachineConfig<Context, any, any> = {
 };
 
 export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => {
-  async function constructFirstState(ctx: Init): Promise<FirstStateConstructed> {
+  async function constructFirstState(ctx: Init): Promise<void> {
     const { appData, appDefinition, channelId, challengeDuration } = ctx;
 
     store.sendState({
@@ -111,7 +108,6 @@ export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => 
       challengeDuration,
     });
 
-    return { ...ctx, type: 'FIRST_STATE_CONSTRUCTED' };
   }
 
   const services = {
