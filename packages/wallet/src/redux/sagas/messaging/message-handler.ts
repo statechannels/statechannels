@@ -18,6 +18,8 @@ import {Web3Provider} from "ethers/providers";
 
 import {ProtocolState} from "src/redux/protocols";
 
+import {eventChannel} from "redux-saga";
+
 import {APPLICATION_PROCESS_ID} from "../../protocols/application/reducer";
 import {
   createStateFromCreateChannelParams,
@@ -75,10 +77,8 @@ function* handleMessage(payload: RequestObject) {
     case "GetAddress":
       const address = yield select(getAddress);
       yield fork(messageSender, outgoingMessageActions.addressResponse({id, address}));
-      if (window.ethereum.selectedAddress === null) {
-        //  ask metamask permission to access accounts
-        yield call([window.ethereum, "enable"]);
-      }
+      //  ask metamask permission to access accounts
+      yield call([window.ethereum, "enable"]);
       break;
     case "CreateChannel":
       yield handleCreateChannelMessage(payload);

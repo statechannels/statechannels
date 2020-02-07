@@ -42,6 +42,20 @@ describe("message listener", () => {
       params: {}
     };
 
+    async function enable() {
+      return new Promise(r => r());
+    }
+
+    const ethereum = {
+      enable
+    };
+
+    // mock out window.ethereum.enable
+    Object.defineProperty(window, "ethereum", {
+      enumerable: true,
+      value: ethereum
+    });
+
     return (
       expectSaga(messageHandler, requestMessage, "localhost")
         .withState(initialState)
