@@ -1,5 +1,5 @@
 import {applyMiddleware, compose, createStore} from 'redux';
-import {fork} from 'redux-saga/effects';
+import {fork, take} from 'redux-saga/effects';
 import createSagaMiddleware from 'redux-saga';
 
 import reducer from './reducer';
@@ -16,6 +16,7 @@ import {messageQueuedListener} from './message-service/message-queued-listener';
 import {gameSaga} from './game/saga';
 import {autoPlayer, autoOpponent} from './auto-opponent';
 import {ChannelClient, FakeChannelProvider} from '@statechannels/channel-client';
+import {GotAddressFromWallet} from './game/actions';
 
 const composeEnhancers = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const enhancers = composeEnhancers(applyMiddleware(sagaMiddleware));
@@ -50,8 +51,12 @@ function* rootSaga() {
   } else if (process.env.AUTO_OPPONENT === 'B') {
     yield fork(autoOpponent, 'B', client);
   } else {
-    yield fork(firebaseInboxListener, client);
-    yield fork(openGameSaga);
+    // wait for the address from wallet before starting firebase sagas
+    const action: GotAddressFromWallet = yield take('GotAddressFromWallet');
+    yield fork(firebaseInboxListener, client, action.address);
+    console.log('firebaseinboxlistener started with address' + action.address);
+    yield fork(openGameSaga, action.address);
+    console.log('opengamesafa started with address' + action.address);
   }
 }
 
@@ -64,5 +69,6 @@ export const getWalletState = (storeObj: any) => storeObj.wallet;
 export const getUser = (storeObj: any) => storeObj.login.user;
 export const getProfile = (storeObj: any) => storeObj.login.profile;
 export const getGameState = (storeObj: any) => storeObj.game.gameState;
+export const getLocalState = (storeObj: any) => storeObj.game.gameState;
 export const getGameStateName = (storeObj: any) => storeObj.game.gameState.name;
 export const getMessageState = (storeObj: any) => storeObj.game.messageState;
