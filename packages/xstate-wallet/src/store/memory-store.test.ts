@@ -29,7 +29,7 @@ class SimpleOutcomeHelper {
       const item = {destination, amount: bigNumberify(args[2 * i + 1]).toString()};
       allocationItems.push(item);
     }
-    return [{assetHolderAddress: this.assetHolderAddress, allocation: allocationItems}];
+    return [{assetHolderAddress: this.assetHolderAddress, allocationItems}];
   }
 }
 
