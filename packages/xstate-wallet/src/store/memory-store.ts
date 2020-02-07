@@ -11,9 +11,8 @@ import {
   getStateSignerAddress
 } from '@statechannels/nitro-protocol';
 
-import {Signature, BigNumber, bigNumberify} from 'ethers/utils';
+import {BigNumber, bigNumberify, splitSignature, joinSignature} from 'ethers/utils';
 import {Wallet} from 'ethers';
-type Uint256 = string;
 
 interface StateVariables {
   outcome: Outcome;
@@ -28,6 +27,10 @@ interface ChannelConstants {
   channelNonce: BigNumber;
   appDefinition: string;
   challengeDuration: BigNumber;
+}
+
+export interface State extends ChannelConstants, StateVariables {
+  channelId: string;
 }
 
 interface ChannelStorage {
@@ -66,16 +69,7 @@ export interface Participant {
 }
 interface SignedState {
   state: State;
-  signatures: Signature[];
-}
-
-export interface ChannelStoreEntry {
-  states: SignedState[];
-  privateKey: string;
-  participants: Participant[];
-  channelNonce: Uint256;
-  chainId: Uint256;
-  funding?: Funding;
+  signatures: string[];
 }
 
 interface CreateAndDirectFund {
@@ -110,14 +104,29 @@ class MemoryChannelStorage implements ChannelStorage {
     this.signatures = {};
   }
 
-  addState(stateVars: StateVariables, signature: Signature) {
-    const state = this.toState(stateVars);
+  get participants(): Participant[] {
+    return this.channelConstants.participants;
+  }
+
+  signAndAdd(stateVars: StateVariables, privateKey: string) {
+    const state = this.toNitroState(stateVars);
+
+    const {signature} = signState(state, privateKey);
+    const signatureString = joinSignature(signature);
+
+    this.addState(stateVars, signatureString);
+
+    return {signatureString};
+  }
+
+  addState(stateVars: StateVariables, signature: string) {
+    const state = this.toNitroState(stateVars);
     const stateHash = hashState(state);
     this.stateVariables[stateHash] = stateVars;
     const {participants} = this.channelConstants;
 
     // check the signature
-    const signer = getStateSignerAddress({state, signature});
+    const signer = getStateSignerAddress({state, signature: splitSignature(signature)});
     const signerIndex = participants.findIndex(p => p.signingAddress === signer);
 
     if (signerIndex === -1) {
@@ -128,14 +137,14 @@ class MemoryChannelStorage implements ChannelStorage {
       this.signatures[stateHash] = new Array(this.nParticipants());
     }
 
-    this.signatures[signerIndex] = signature;
+    this.signatures[stateHash][signerIndex] = signature;
   }
   private nParticipants(): number {
     return this.channelConstants.participants.length;
   }
 
   // Converts to the legacy State format expected by the Nitro protocol state
-  private toState(stateVars: StateVariables): NitroState {
+  private toNitroState(stateVars: StateVariables): NitroState {
     const {
       challengeDuration,
       appDefinition,
@@ -167,9 +176,18 @@ export class MemoryStore {
   private _privateKeys: Record<string, string> = {};
   // private _channels: Record<string, any> = {};
 
-  constructor() {
-    const wallet = Wallet.createRandom();
-    this._privateKeys[wallet.address] = wallet.privateKey;
+  constructor(privateKeys?: string[]) {
+    if (privateKeys && privateKeys.length > 0) {
+      // load existing keys
+      privateKeys.forEach(key => {
+        const wallet = new Wallet(key);
+        this._privateKeys[wallet.address] = wallet.privateKey;
+      });
+    } else {
+      // generate a new key
+      const wallet = Wallet.createRandom();
+      this._privateKeys[wallet.address] = wallet.privateKey;
+    }
   }
 
   public stateReceivedFeed(channelId: string): Observable<State> {
@@ -188,6 +206,8 @@ export class MemoryStore {
 
   public async createChannel(
     participants: Participant[],
+    appDefinition: string,
+    challengeDuration: BigNumber,
     stateVars: StateVariables
   ): Promise<string> {
     const addresses = participants.map(x => x.signingAddress);
@@ -201,8 +221,6 @@ export class MemoryStore {
     const channelNonce = currentNonce ? currentNonce.add(1) : bigNumberify(0);
     this.setNonce(addresses, channelNonce);
     const chainId = '1';
-    const appDefinition = 'todo';
-    const challengeDuration = bigNumberify(1000);
 
     const channelId = getChannelId({
       chainId,
@@ -251,9 +269,8 @@ export class MemoryStore {
       throw new Error('No longer have private key');
     }
 
+    channelStorage.signAndAdd(stateVars, privateKey);
     // sign state
-    const {signature} = signState(state, privateKey);
-    const stateHash = hashState(state);
 
     // how to identify states? probably we should store the state hash
 
