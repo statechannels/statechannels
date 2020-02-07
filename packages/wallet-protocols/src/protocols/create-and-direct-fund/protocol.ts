@@ -5,7 +5,7 @@ import { AllocationAssetOutcome } from '@statechannels/nitro-protocol';
 import { AddressZero } from 'ethers/constants';
 
 import { MachineFactory } from '../../machine-utils';
-import { Store, success } from '../..';
+import { Store } from '../..';
 
 import { Participant } from '../../store';
 
@@ -30,7 +30,6 @@ export type Init = {
   index: Indices;
 };
 
-
 export const advanceChannelArgs = (i: 1 | 3) => ({ channelId }: Init): AdvanceChannel.Init => ({
   channelId,
   targetTurnNum: i,
@@ -50,7 +49,6 @@ const preFundSetup = {
     data: advanceChannelArgs(1),
     onDone: 'directFunding',
   },
-  on: { CHANNEL_CLOSED: 'abort' },
 };
 
 // FIXME: Abort should not be success
@@ -58,7 +56,7 @@ const preFundSetup = {
 const directFunding = {
   invoke: {
     src: 'directFunding',
-    data: ({ allocations, channelId }: FirstStateConstructed): DirectFunding.Init => {
+    data: ({ allocations, channelId }: Init): DirectFunding.Init => {
       return {
         channelId,
         // TODO: Get eth asset holder address
@@ -85,7 +83,6 @@ export const config: MachineConfig<Context, any, any> = {
   states: {
     constructFirstState,
     preFundSetup,
-    abort,
     directFunding,
     postFundSetup,
     success: {
@@ -107,7 +104,6 @@ export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => 
       outcome: [],
       challengeDuration,
     });
-
   }
 
   const services = {
