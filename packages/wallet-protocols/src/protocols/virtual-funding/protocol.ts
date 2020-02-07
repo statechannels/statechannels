@@ -1,4 +1,4 @@
-import { Machine, MachineConfig, assign, spawn, DoneInvokeEvent, Actor } from 'xstate';
+import { Machine, MachineConfig, assign, spawn, DoneInvokeEvent } from 'xstate';
 import { map, filter, take } from 'rxjs/operators';
 import { Observable, forkJoin } from 'rxjs';
 import _ from 'lodash';
@@ -131,8 +131,6 @@ type Services = {
   fundingArgs(ctx: Init): Promise<SupportState.Init>;
 };
 
-type HasWatcher = Init & { watcher: Actor<Watcher> };
-
 export const config: MachineConfig<Init, StateSchema, any> = {
   key: PROTOCOL,
   initial: 'preFundSetup',
@@ -143,7 +141,7 @@ export const config: MachineConfig<Init, StateSchema, any> = {
       states: {
         getWatcher: { invoke: { src: 'getWatcher', onDone: 'waitForGuarantee' } },
         waitForGuarantee: {
-          entry: assign<HasWatcher>({
+          entry: assign<any>({
             watcher: (_, event: DoneInvokeEvent<Watcher>) => spawn(event.data),
           }),
           on: { JOINT_CHANNEL_FUNDED: 'funding' },
