@@ -1,4 +1,4 @@
-import {select, fork, put, putResolve, call} from "redux-saga/effects";
+import {select, fork, put, putResolve, call, take} from "redux-saga/effects";
 import {getChannelId, State} from "@statechannels/nitro-protocol";
 import {
   JoinChannelParams,
@@ -45,6 +45,7 @@ import * as actions from "../../actions";
 import {messageSender} from "./message-sender";
 
 import * as outgoingMessageActions from "./outgoing-api-actions";
+import {eventChannel} from "redux-saga";
 
 export function* messageHandler(jsonRpcMessage: object, _domain: string) {
   const parsedMessage = jrs.parseObject(jsonRpcMessage);
@@ -69,14 +70,35 @@ export function* messageHandler(jsonRpcMessage: object, _domain: string) {
   }
 }
 
+function* accountsChangedSaga() {
+  const accountsChangedChannel = eventChannel(emit => {
+    window.ethereum.on("accountsChanged", function(accounts) {
+      emit(accounts);
+    });
+    return () => {
+      /* */
+    };
+  });
+  while (true) {
+    const accounts = yield take(accountsChangedChannel);
+    if (accounts.length > 0) {
+      break; // saga completes when metamask unlocked
+    } else {
+      throw new Error("Metamask enable rejected");
+    }
+  }
+}
+
 function* handleMessage(payload: RequestObject) {
   const {id} = payload;
   switch (payload.method) {
     case "GetAddress":
-      const address = yield select(getAddress);
-      yield fork(messageSender, outgoingMessageActions.addressResponse({id, address}));
       //  ask metamask permission to access accounts
       yield call([window.ethereum, "enable"]);
+      yield accountsChangedSaga;
+      const address = yield select(getAddress);
+      yield fork(messageSender, outgoingMessageActions.addressResponse({id, address}));
+
       break;
     case "CreateChannel":
       yield handleCreateChannelMessage(payload);

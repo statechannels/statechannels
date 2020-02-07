@@ -8,6 +8,7 @@ import {OpenGame} from '../redux/open-games/state';
 
 const mapStateToProps = (state: SiteState) => ({
   openGames: state.openGames as OpenGame[],
+  createAGameButtonDisabled: 'address' in state.game.localState ? false : true,
 });
 
 const mapDispatchToProps = {

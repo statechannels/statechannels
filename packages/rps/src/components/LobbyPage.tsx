@@ -9,6 +9,7 @@ import {OpenGameEntry} from './OpenGameCard';
 import CreatingOpenGameContainer from '../containers/CreatingOpenGameContainer';
 
 interface Props {
+  createAGameButtonDisabled: boolean;
   openGames: OpenGame[];
   joinOpenGame: (
     opponentName: string,
@@ -40,8 +41,9 @@ export default class LobbyPage extends React.PureComponent<Props, State> {
               outline={true}
               onClick={newOpenGame}
               id="create-a-game"
+              disabled={this.props.createAGameButtonDisabled}
             >
-              Create a game
+              {this.props.createAGameButtonDisabled ? 'Unlock Metamask' : 'Create a game'}
             </Button>
           </div>
           <div className="mt-5">
