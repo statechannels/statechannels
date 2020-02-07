@@ -1,0 +1,29 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Jest @statechannels/wallet-protocols",
+      "type": "node",
+      "request": "launch",
+      "address": "localhost",
+      "protocol": "inspector",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/lerna",
+      "runtimeArgs": [
+          "exec",
+          "--scope",
+          "@statechannels/wallet-protocols",
+          "--",
+          "node"
+      ],
+      "args": [
+          "${workspaceRoot}/node_modules/jest/bin/jest.js",
+          "--env=node",
+          "--runInBand",
+          "--no-cache",
+          "${relativeFile}"
+      ]
+    }
+  ]
+}
