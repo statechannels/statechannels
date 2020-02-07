@@ -54,6 +54,7 @@ export default class LobbyPage extends React.PureComponent<Props, State> {
                     key={openGame.address}
                     openGame={openGame}
                     joinOpenGame={joinOpenGame}
+                    joinGameButtonDisabled={this.props.createAGameButtonDisabled}
                   />
                 ))
               ) : (

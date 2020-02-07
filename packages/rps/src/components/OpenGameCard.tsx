@@ -5,6 +5,7 @@ import {bigNumberify, formatUnits} from 'ethers/utils';
 import {Blockie} from 'rimble-ui';
 
 interface Props {
+  joinGameButtonDisabled: boolean;
   openGame: OpenGame;
   joinOpenGame: (
     opponentName: string,
@@ -50,8 +51,13 @@ export class OpenGameEntry extends React.PureComponent<Props> {
             <div className="ogc-stake-currency">ETH</div>
           </div>
         </div>
-        <Button className="ogc-join" onClick={joinThisGame} id="join">
-          Join
+        <Button
+          className="ogc-join"
+          onClick={joinThisGame}
+          id="join"
+          disabled={this.props.joinGameButtonDisabled}
+        >
+          {this.props.joinGameButtonDisabled ? 'Unlock Metamask' : 'Join'}
         </Button>
       </div>
     );
