@@ -36,7 +36,7 @@ export const third: Participant = {
   participantId: 'third',
 };
 export const participants: [Participant, Participant] = [first, second];
-export const threeParticipants: [Participant, Participant, Participant] = [first, second, third];
+export const threeParticipants: [Participant, Participant, Participant] = [first, third, second];
 
 export const appState: (n: number) => State = turnNum => ({
   appData: '0x0000000000000000000000000000000000000000000000000000000000000000',
