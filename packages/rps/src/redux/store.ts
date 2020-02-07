@@ -54,9 +54,7 @@ function* rootSaga() {
     // wait for the address from wallet before starting firebase sagas
     const action: GotAddressFromWallet = yield take('GotAddressFromWallet');
     yield fork(firebaseInboxListener, client, action.address);
-    console.log('firebaseinboxlistener started with address' + action.address);
     yield fork(openGameSaga, action.address);
-    console.log('opengamesafa started with address' + action.address);
   }
 }
 
