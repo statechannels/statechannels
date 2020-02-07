@@ -1,5 +1,6 @@
 import * as AdvanceChannel from './advance-channel/protocol';
 import * as ConcludeChannel from './conclude-channel/protocol';
+import * as CreateAndDirectFund from './create-and-direct-fund/protocol';
 import * as CreateChannel from './create-channel/protocol';
 import * as CreateNullChannel from './create-null-channel/protocol';
 import * as DirectFunding from './direct-funding/protocol';
@@ -16,6 +17,7 @@ import * as Depositing from './depositing/protocol';
 export {
   AdvanceChannel,
   ConcludeChannel,
+  CreateAndDirectFund,
   CreateChannel,
   CreateNullChannel,
   JoinChannel,
