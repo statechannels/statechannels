@@ -14,6 +14,12 @@ export const wallet3 = new ethers.Wallet(
   '0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29'
 ); // 0xaaaacfD9F7b033804ee4f01e5DfB1cd586858490
 
+export const wallets = {
+  [wallet1.address]: wallet1,
+  [wallet2.address]: wallet2,
+  [wallet3.address]: wallet3,
+};
+
 export const first: Participant = {
   signingAddress: wallet1.address,
   destination: '0x0000000000000000000000000000000000000000000000000000000000000001',
