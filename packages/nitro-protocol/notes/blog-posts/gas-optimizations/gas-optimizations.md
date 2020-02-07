@@ -58,4 +58,4 @@ As you can see, we have achieved a more than 4x improvement in the Happy Path an
 
 Furthermore, we have also upgraded our contracts to allow for a channel to be backed by a combination of ETH and any number of ERC20 tokens. The opportunities that this opens up will be discussed in a future blog post.
 
-For more information about how our contracts work, and to explore the source code, visit https://nitro-protocol.netlify.com/. Otherwise feel free to check out our [research forum](https://research.statechannels.org/), or reach out on [twitter](https://twitter.com/statechannels).
+For more information about how our contracts work, and to explore the source code, visit https://protocol.statechannels.org/. Otherwise feel free to check out our [research forum](https://research.statechannels.org/), or reach out on [twitter](https://twitter.com/statechannels).
