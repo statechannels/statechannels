@@ -30,6 +30,7 @@ You can learn more about what state channels are by reading [one](https://l4.ven
 
 This repository is a monorepo, and contains the following packages maintained with [lerna](https://github.com/lerna/lerna) and [yarn workspaces](https://yarnpkg.com/lang/en/docs/workspaces/):
 
+- [app-wallet-interface](./packages/app-wallet-interface) : API docs for the interface betwen a state channel Dapp and the wallet
 - [channel-provider](./packages/channel-provider) : A browser-based loader for the Embedded Wallet.
 - [client-api-schema](./packages/client-api-schema) : JSON-RPC based schema definitions for the Client API with TypeScript typings
 - [devtools](./packages/devtools) : Developer tooling
@@ -38,10 +39,11 @@ This repository is a monorepo, and contains the following packages maintained wi
 - [hub](./packages/hub) : Server wallet for mediating virtual channels
 - [jest-gas-reporter](./packages/jest-gas-reporter) : Reports the gas used by various calls to ethereum contracts
 - [nitro-protocol](./packages/nitro-protocol) : Smart contracts and documentation website
-- [app-wallet-interface](./packages/app-wallet-interface) : API docs for the interface betwen a state channel Dapp and the wallet
 - [rps](./packages/rps) : Rock paper scissors DApp
 - [wallet](./packages/wallet) : Core wallet logic that follows ForceMove and Nitro protocols
 - [web3torrent](./packages/web3torrent) : DApp extension of webtorrent including micropayments
+- [wallet-protocols](./packages/wallet-protocols) : Core protocols written using [`xstate`](https://xstate.js.org/)
+- [xstate-wallet](./packages/xstate-wallet) : A wallet written on top of [wallet-protocols](./packages/wallet-protocols)
 
 ## Contributing
 
