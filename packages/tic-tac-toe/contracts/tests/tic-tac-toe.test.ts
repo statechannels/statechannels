@@ -140,8 +140,11 @@ async function validTransition({
   const fromBalances: AssetOutcomeShortHand = replaceAddressesAndBigNumberify(
     balances[0],
     addresses
-  );
-  const toBalances: AssetOutcomeShortHand = replaceAddressesAndBigNumberify(balances[1], addresses);
+  ) as AssetOutcomeShortHand;
+  const toBalances: AssetOutcomeShortHand = replaceAddressesAndBigNumberify(
+    balances[1],
+    addresses
+  ) as AssetOutcomeShortHand;
   const fromPositionType = positionType[0];
   const toPositionType = positionType[1];
   const fromStake = stake[0];
