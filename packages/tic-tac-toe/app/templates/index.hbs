@@ -1,6 +1,10 @@
 <section class="flex flex-col items-center">
   {{svg-jar "logo" class="w-40 h-40"}}
-  <button type="button" class="w-56 h-12 mt-10 text-xl rounded-full bg-primary text-secondary" {{on "click" (set this.showNameModal true)}}>
+  <button
+    type="button"
+    class="w-56 h-12 mt-10 text-xl rounded-full bg-primary text-secondary"
+    {{on "click" (set this.showNameModal true)}}
+  >
     Start Playing!
   </button>
 </section>
@@ -15,7 +19,11 @@
     </small>
   </label>
   <div class="flex justify-center pt-2">
-    <button type="button" class="flex items-center px-4 bg-indigo-500 p-3 rounded-lg text-white hover:bg-indigo-400" {{on "click" this.connectWithMetaMask}}>
+    <button
+      type="button"
+      class="flex items-center px-4 bg-indigo-500 p-3 rounded-lg text-white hover:bg-indigo-400"
+      {{on "click" this.connectWithMetaMask}}
+    >
       {{svg-jar "metamask-icon" class="mr-4 h-6 w-6"}}
       Connect With MetaMask
     </button>
