@@ -262,8 +262,9 @@ jobs:
       - run: (cd packages/e2e-tests && USE_VIRTUAL_FUNDING=true yarn test)
       - upload_logs:
           file: integration-test-stats
-      - upload_e2e_screenshots:
-          job: integration-test-with-hub
+      # TODO: Enable once the test runs reliably
+      #- upload_e2e_screenshots:
+      #    job: integration-test-with-hub
 
   release-incremental:
     <<: *defaults
