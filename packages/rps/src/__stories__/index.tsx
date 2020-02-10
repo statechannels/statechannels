@@ -41,9 +41,7 @@ const initialState: SiteState = {
     error: undefined,
   },
   metamask: {
-    loading: false,
     network: 0,
-    accounts: [],
   },
   wallet: {
     loading: false,

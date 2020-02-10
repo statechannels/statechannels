@@ -87,6 +87,11 @@ export class ChannelClient implements ChannelClientInterface<ChannelResult> {
   async getAddress(): Promise<string> {
     return this.provider.send('GetAddress', {});
   }
+
+  async getEthereumSelectedAddress(): Promise<string> {
+    return this.provider.send('GetEthereumSelectedAddress', {});
+  }
+
   async approveBudgetAndFund(
     playerAmount: string,
     hubAmount: string,

@@ -10,7 +10,7 @@ export function* messageQueuedListener(client: RPSChannelClient) {
 
   while (true) {
     const notification = yield take(channel);
-    const to = notification.params.recipient.toLowerCase();
+    const to = notification.params.recipient;
     // ^ ensure this matches the address in firebase-inbox-listener.ts
     yield fork(
       reduxSagaFirebase.database.create,

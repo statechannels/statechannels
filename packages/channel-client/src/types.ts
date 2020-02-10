@@ -72,6 +72,7 @@ export interface ChannelClientInterface<Payload = object> {
   challengeChannel: (channelId: string) => Promise<ChannelResult>;
   closeChannel: (channelId: string) => Promise<ChannelResult>;
   getAddress: () => Promise<string>;
+  getEthereumSelectedAddress: () => Promise<string>;
 }
 interface Balance {
   playerAmount: string;

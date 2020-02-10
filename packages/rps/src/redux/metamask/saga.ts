@@ -1,14 +1,6 @@
-import {call, put, take, fork} from 'redux-saga/effects';
+import {put, take, fork} from 'redux-saga/effects';
 import * as metamaskActions from './actions';
 import {eventChannel} from 'redux-saga';
-
-function* enableSaga() {
-  while (true) {
-    yield take('UpdateProfile');
-    yield put(metamaskActions.enable());
-    yield call([window.ethereum, 'enable']);
-  }
-}
 
 function* networkChangedSaga() {
   const networkChangedChannel = eventChannel(emit => {
@@ -25,28 +17,10 @@ function* networkChangedSaga() {
   }
 }
 
-function* accountsChangedSaga() {
-  const accountsChangedChannel = eventChannel(emit => {
-    window.ethereum.on('accountsChanged', function(accounts) {
-      emit(accounts);
-    });
-    return () => {
-      /* */
-    };
-  });
-  while (true) {
-    const accounts = yield take(accountsChangedChannel);
-    yield put(metamaskActions.accountsChanged(accounts));
-  }
-}
-
 export default function* metamaskSaga() {
   if (window.ethereum) {
     window.ethereum.autoRefreshOnNetworkChange = false;
     yield put(metamaskActions.networkChanged(window.ethereum.networkVersion));
-    yield put(metamaskActions.accountsChanged([window.ethereum.selectedAddress]));
-    yield fork(accountsChangedSaga);
     yield fork(networkChangedSaga);
-    yield fork(enableSaga);
   }
 }

@@ -19,10 +19,7 @@ describe('GameContainer', () => {
         user: null,
         error: undefined,
       },
-      metamask: {
-        loading: false,
-        accounts: [],
-      },
+      metamask: {},
       wallet: {
         loading: false,
         error: null,

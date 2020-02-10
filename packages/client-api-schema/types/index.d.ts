@@ -7,6 +7,7 @@ export * from './create-channel';
 //@ts-ignore
 export * from './definitions';
 export * from './get-address';
+export * from './get-ethereum-selected-address';
 //@ts-ignore
 export * from './join-channel';
 export * from './notification';

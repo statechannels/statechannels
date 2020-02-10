@@ -6,12 +6,10 @@ import {Message} from '@statechannels/channel-client';
 import {buffers} from 'redux-saga';
 import {FIREBASE_PREFIX} from '../../constants';
 
-export function* firebaseInboxListener(client: RPSChannelClient) {
-  const address: string = (yield call([client, 'getAddress'])).toLowerCase();
-  // ^ ensure this matches the to in message-queued-listener.ts
+export function* firebaseInboxListener(client: RPSChannelClient, address: string) {
   const channel = yield call(
     reduxSagaFirebase.database.channel as any,
-    `${FIREBASE_PREFIX}/messages/${address.toLowerCase()}`,
+    `${FIREBASE_PREFIX}/messages/${address}`,
     'child_added',
     buffers.fixed(100)
   );

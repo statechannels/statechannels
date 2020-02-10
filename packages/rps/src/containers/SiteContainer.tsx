@@ -5,14 +5,12 @@ import HomePageContainer from './HomePageContainer';
 import {connect} from 'react-redux';
 import {SiteState} from '../redux/reducer';
 import {WalletError} from '../redux/wallet/actions';
-import LoadingPage from '../components/LoadingPage';
 
 import LoginErrorPage from '../components/LoginErrorPage';
 interface SiteProps {
   isAuthenticated: boolean;
   walletError: WalletError | null;
   loginError: string | undefined;
-  loading: boolean;
 }
 
 class Site extends React.PureComponent<SiteProps> {
@@ -25,9 +23,7 @@ class Site extends React.PureComponent<SiteProps> {
   render() {
     let component;
 
-    if (this.props.loading) {
-      component = <LoadingPage />;
-    } else if (this.props.loginError) {
+    if (this.props.loginError) {
       component = <LoginErrorPage error={this.props.loginError} />;
     } else if (this.props.walletError !== null) {
       component = <code>{JSON.stringify(this.props.walletError, null, 2)}</code>;
@@ -49,7 +45,6 @@ class Site extends React.PureComponent<SiteProps> {
 const mapStateToProps = (state: SiteState) => {
   return {
     isAuthenticated: state.login && state.login.loggedIn,
-    loading: state.metamask.loading,
     walletError: state.wallet.error,
     walletVisible: state.overlay.walletVisible,
     loginError: state.login.error,

@@ -6,6 +6,7 @@ import {
   PushMessageResult,
   JoinChannelResult,
   GetAddressResult,
+  GetEthereumSelectedAddressResult,
   ChallengeChannelResult,
   BudgetResult1 as BudgetResult
 } from '@statechannels/client-api-schema';
@@ -62,6 +63,7 @@ export type MethodType = {
   CloseChannel: CloseChannelResult;
   JoinChannel: JoinChannelResult;
   GetAddress: GetAddressResult;
+  GetEthereumSelectedAddress: GetEthereumSelectedAddressResult;
   ChallengeChannel: ChallengeChannelResult;
   ApproveBudgetAndFund: BudgetResult;
   GetBudget: BudgetResult;

@@ -1,4 +1,4 @@
-import {fork, take, select, cancel, call, apply, put} from 'redux-saga/effects';
+import {fork, take, select, call, apply, put} from 'redux-saga/effects';
 
 export const getLocalState = (storeObj: any) => storeObj.game.localState;
 function getOpenGame(storObj: any, address: string) {
@@ -14,89 +14,35 @@ import {bigNumberify} from 'ethers/utils';
 import {gameJoined} from '../game/actions';
 import {FIREBASE_PREFIX} from '../../constants';
 
-export default function* openGameSaga() {
-  // could be more efficient by only watching actions that could change the state
-  // this is more robust though, so stick to watching all actions for the time being
-  let openGameSyncerProcess: any = null;
+export default function* openGameSaga(address: string) {
   let myGameIsOnFirebase = false;
+  const localState: LocalState = yield select(getLocalState);
+  const myOpenGameKey = `/${FIREBASE_PREFIX}/challenges/${address}`;
 
+  yield fork(openGameSyncer); // both Players
+  yield fork(joinGameSaga); // player A
+
+  // player B
   while (true) {
     const action = yield take('*');
-
-    const localState: LocalState = yield select(getLocalState);
-
-    if (localState.type === 'Setup.Lobby' || localState.type === 'B.WaitingRoom') {
-      // if we're in the lobby we need to sync openGames
-      if (!openGameSyncerProcess || !openGameSyncerProcess.isRunning()) {
-        openGameSyncerProcess = yield fork(openGameSyncer);
-      }
-    } else {
-      // if we're not in the lobby, we shouldn't be syncing openGames
-      if (openGameSyncerProcess) {
-        yield cancel(openGameSyncerProcess);
-      }
-    }
-
-    if (action.type === 'JoinOpenGame' && localState.type === 'A.GameChosen') {
-      const openGameKey = `/${FIREBASE_PREFIX}/challenges/${localState.opponentAddress}`;
-      const taggedOpenGame = {
-        isPublic: false,
-        playerAName: localState.name,
-        playerAOutcomeAddress: localState.outcomeAddress,
+    if (myGameIsOnFirebase) {
+      myGameIsOnFirebase = yield deleteGameIfJoined(myOpenGameKey); // false if success
+    } else if (action.type === 'CreateGame' && 'outcomeAddress' in localState) {
+      const myPublicOpenGame = {
+        address,
+        outcomeAddress: localState.outcomeAddress,
+        name: localState.name,
+        stake: action.roundBuyIn.toString(),
+        createdAt: new Date().getTime(),
+        isPublic: true,
+        playerAName: 'unknown',
+        playerAOutcomeAddress: 'unknown',
       };
-      yield call(reduxSagaFirebase.database.patch, openGameKey, taggedOpenGame);
+      myGameIsOnFirebase = yield putGameOnFirebase(myOpenGameKey, myPublicOpenGame); // true if success
     }
 
-    if (localState.type === 'B.WaitingRoom') {
-      // if we don't have a wallet address, something's gone very wrong
-      const {address} = localState;
-      let myOpenGame;
-      if (address) {
-        const myOpenGameKey = `/${FIREBASE_PREFIX}/challenges/${address}`;
-
-        if (!myGameIsOnFirebase) {
-          // my game isn't on firebase (as far as the app knows)
-          // attempt to put the game on firebase - will be a no-op if already there
-
-          myOpenGame = {
-            address,
-            outcomeAddress: localState.outcomeAddress || address,
-            name: localState.name,
-            stake: localState.roundBuyIn.toString(),
-            createdAt: new Date().getTime(),
-            isPublic: true,
-            playerAName: 'unknown',
-            playerAOutcomeAddress: 'unknown',
-          };
-
-          const disconnect = firebase
-            .database()
-            .ref(myOpenGameKey)
-            .onDisconnect();
-          yield apply(disconnect, disconnect.remove, []);
-          // use update to allow us to pick our own key
-          yield call(reduxSagaFirebase.database.update, myOpenGameKey, myOpenGame);
-          myGameIsOnFirebase = true;
-        } else {
-          const storeObj = yield select();
-          myOpenGame = getOpenGame(storeObj, myOpenGameKey);
-          if (myOpenGame && !myOpenGame.isPublic) {
-            yield put(
-              gameJoined(
-                myOpenGame.playerAName,
-                myOpenGame.opponentAddress,
-                myOpenGame.playerAOutcomeAddress
-              )
-            );
-            yield call(reduxSagaFirebase.database.delete, myOpenGameKey);
-            myGameIsOnFirebase = false;
-          }
-        }
-      }
-    }
-    if (localState.type === 'Setup.Lobby' && myGameIsOnFirebase && localState.address) {
+    if (action.type === 'CancelGame') {
       // we cancelled our game
-      const myOpenGameKey = `/${FIREBASE_PREFIX}/challenges/${localState.address}`;
       yield call(reduxSagaFirebase.database.delete, myOpenGameKey);
       myGameIsOnFirebase = false;
     }
@@ -126,4 +72,48 @@ function* openGameSyncer() {
     },
     'value'
   );
+}
+
+function* joinGameSaga() {
+  while (true) {
+    const action = yield take('JoinOpenGame');
+    const localState: LocalState = yield select(getLocalState);
+    if ('name' in localState && 'outcomeAddress' in localState) {
+      const openGameKey = `/${FIREBASE_PREFIX}/challenges/${action.opponentAddress}`;
+      const taggedOpenGame = {
+        isPublic: false,
+        playerAName: localState.name,
+        playerAOutcomeAddress: localState.outcomeAddress,
+      };
+      yield call(reduxSagaFirebase.database.patch, openGameKey, taggedOpenGame);
+    }
+  }
+}
+
+function* putGameOnFirebase(myOpenGameKey: string, myOpenGame: any) {
+  const disconnect = firebase
+    .database()
+    .ref(myOpenGameKey)
+    .onDisconnect();
+  yield apply(disconnect, disconnect.remove, []);
+  // use update to allow us to pick our own key
+  yield call(reduxSagaFirebase.database.update, myOpenGameKey, myOpenGame);
+  return true; // myGmeIsOnFirebase mutex
+}
+
+function* deleteGameIfJoined(myOpenGameKey: string) {
+  const storeObj = yield select();
+  const myOpenGame = getOpenGame(storeObj, myOpenGameKey);
+  if (myOpenGame && !myOpenGame.isPublic) {
+    yield put(
+      gameJoined(
+        myOpenGame.playerAName,
+        myOpenGame.opponentAddress,
+        myOpenGame.playerAOutcomeAddress
+      )
+    );
+    yield call(reduxSagaFirebase.database.delete, myOpenGameKey);
+    return false; // myGameIsOnFirebase mutex
+  }
+  return true;
 }
