@@ -1,4 +1,4 @@
-import {ChannelConstants, StateVariables, SignedState, Participant} from './types';
+import {ChannelConstants, StateVariables, SignedState, Participant, State} from './types';
 import {
   getChannelId,
   signState,
@@ -6,13 +6,16 @@ import {
   hashState,
   getStateSignerAddress
 } from '@statechannels/nitro-protocol';
-import {joinSignature, splitSignature} from 'ethers/utils';
+import {splitSignature, joinSignature} from 'ethers/utils';
 
-interface ChannelStorage {
-  myIndex: number;
-  channelConstants: ChannelConstants;
-  stateVariables: Record<string, StateVariables>;
-  signatures: Record<string, (string | undefined)[]>;
+export interface ChannelStorage {
+  readonly channelId: string;
+  readonly myIndex: number;
+  readonly latestSupported: State | undefined;
+  readonly latestSupportedByMe: State | undefined;
+  readonly channelConstants: ChannelConstants;
+  readonly stateVariables: Record<string, StateVariables>;
+  readonly signatures: Record<string, (string | undefined)[]>;
 }
 
 export class MemoryChannelStorage implements ChannelStorage {
@@ -26,6 +29,15 @@ export class MemoryChannelStorage implements ChannelStorage {
     this.myIndex = myIndex;
     this.stateVariables = {};
     this.signatures = {};
+  }
+
+  get latestSupported() {
+    // TODO: Find latest supported state
+    return undefined;
+  }
+  get latestSupportedByMe() {
+    // TODO: Find latest supported by me state
+    return undefined;
   }
 
   get channelId(): string {
@@ -99,6 +111,7 @@ export class MemoryChannelStorage implements ChannelStorage {
 
     return {
       ...stateVars,
+      outcome: [], // TODO: Convert to nitro outcome
       challengeDuration: challengeDuration.toNumber(),
       appDefinition,
       channel,

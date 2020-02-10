@@ -1,45 +1,20 @@
-import {MemoryStore, Protocol} from './memory-store';
-import {State} from './types';
-import {bigNumberify} from 'ethers/utils';
+import {MemoryStore, Objective} from './memory-store';
+import {State, SimpleEthAllocation} from './types';
+import {bigNumberify, BigNumber} from 'ethers/utils';
 import {Wallet} from 'ethers';
-import {Outcome, AllocationItem} from '@statechannels/nitro-protocol';
-import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
-
-class SimpleOutcomeHelper {
-  assetHolderAddress: string;
-  constructor(assetHolderAddress: string) {
-    this.assetHolderAddress = assetHolderAddress;
-  }
-
-  // e.g. allocationOutcome('0xabc...', 5, '0x123 ...', '6')
-  public allocationOutcome(...args: any[]): Outcome {
-    const nArgs = args.length;
-    if (nArgs % 2 == 1) {
-      throw new Error('must pass an even number of args');
-    }
-    const allocationItems: AllocationItem[] = [];
-    for (let i = 0; i < nArgs / 2; i++) {
-      let destination = args[2 * i];
-      if (destination.length === 2 + 40) {
-        // destination is an address
-        destination = `0x${destination
-          .slice(2, 42)
-          .padStart(64, '0')
-          .toLowerCase()}`;
-      }
-      const item = {destination, amount: bigNumberify(args[2 * i + 1]).toString()};
-      allocationItems.push(item);
-    }
-    return [{assetHolderAddress: this.assetHolderAddress, allocationItems}];
-  }
-}
 
 const {address: aAddress, privateKey: aPrivateKey} = Wallet.createRandom();
 // const {address: bAddress, privateKey: bPrivateKey} = Wallet.createRandom();
 const {address: bAddress} = Wallet.createRandom();
 const [aDestination, bDestination] = [aAddress, bAddress]; // for convenience
-const ethOutcomeHelper = new SimpleOutcomeHelper(ETH_ASSET_HOLDER_ADDRESS);
-const outcome = ethOutcomeHelper.allocationOutcome(aDestination, 5, bDestination, 6);
+
+const outcome: SimpleEthAllocation = {
+  type: 'SimpleEthAllocation',
+  allocationItems: [
+    {destination: aDestination, amount: new BigNumber(5)},
+    {destination: bDestination, amount: new BigNumber(6)}
+  ]
+};
 const turnNum = bigNumberify(4);
 const appData = '0xabc';
 const isFinal = false;
@@ -88,20 +63,20 @@ describe('stateReceivedFeed', () => {
   });
 });
 
-test('newProtocolFeed', () => {
-  const protocol: Protocol = {name: 'CreateAndDirectFund', participants: []};
+test('newObjectiveFeed', () => {
+  const objective: Objective = {name: 'Something', participants: [], data: 'foo'};
 
   const store = new MemoryStore();
 
-  const outputs: Protocol[] = [];
-  store.newProtocolFeed().subscribe(x => outputs.push(x));
+  const outputs: Objective[] = [];
+  store.newObjectiveFeed().subscribe(x => outputs.push(x));
 
-  store.pushMessage({protocols: [protocol]});
-  expect(outputs).toEqual([protocol]);
+  store.pushMessage({objectives: [objective]});
+  expect(outputs).toEqual([objective]);
 
   // doing it twice doesn't change anything
-  store.pushMessage({protocols: [protocol]});
-  expect(outputs).toEqual([protocol]);
+  store.pushMessage({objectives: [objective]});
+  expect(outputs).toEqual([objective]);
 });
 
 describe('createChannel', () => {
