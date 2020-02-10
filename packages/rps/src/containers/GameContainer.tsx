@@ -22,6 +22,7 @@ import {
   Resigned,
 } from '../components';
 import {unreachable} from '../utils/unreachable';
+import LoadingPage from '../components/LoadingPage';
 
 interface GameProps {
   localState: LocalState;
@@ -44,6 +45,7 @@ function RenderGame(props: GameProps) {
     case 'Setup.Empty':
       return <ProfileContainer />;
     case 'Setup.NeedAddress':
+      return <LoadingPage />;
     case 'Setup.Lobby':
     case 'B.CreatingOpenGame':
       return <LobbyContainer />;

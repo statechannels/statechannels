@@ -40,6 +40,10 @@ export class RPSChannelClient {
     return this.channelClient.getAddress();
   }
 
+  async getEthereumSelectedAddress() {
+    return this.channelClient.getEthereumSelectedAddress();
+  }
+
   onMessageQueued(callback: (message: Message) => void) {
     return this.channelClient.onMessageQueued(callback);
   }
