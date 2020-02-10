@@ -33,6 +33,10 @@ export interface State extends ChannelConstants, StateVariables {
   channelId: string;
 }
 
+export interface SignedState extends State {
+  signature: string;
+}
+
 interface ChannelStorage {
   myIndex: number;
   channelConstants: ChannelConstants;
@@ -67,10 +71,6 @@ export interface Participant {
   signingAddress: string;
   destination: string;
 }
-interface SignedState {
-  state: State;
-  signatures: string[];
-}
 
 interface CreateAndDirectFund {
   name: 'CreateAndDirectFund';
@@ -104,11 +104,21 @@ class MemoryChannelStorage implements ChannelStorage {
     this.signatures = {};
   }
 
+  get channelId(): string {
+    const {chainId, channelNonce, participants} = this.channelConstants;
+    const addresses = participants.map(p => p.signingAddress);
+    return getChannelId({
+      chainId,
+      channelNonce: channelNonce.toString(),
+      participants: addresses
+    });
+  }
+
   get participants(): Participant[] {
     return this.channelConstants.participants;
   }
 
-  signAndAdd(stateVars: StateVariables, privateKey: string) {
+  signAndAdd(stateVars: StateVariables, privateKey: string): SignedState {
     const state = this.toNitroState(stateVars);
 
     const {signature} = signState(state, privateKey);
@@ -116,7 +126,12 @@ class MemoryChannelStorage implements ChannelStorage {
 
     this.addState(stateVars, signatureString);
 
-    return {signatureString};
+    return {
+      channelId: this.channelId,
+      ...stateVars,
+      ...this.channelConstants,
+      signature: signatureString
+    };
   }
 
   addState(stateVars: StateVariables, signature: string) {
@@ -269,12 +284,9 @@ export class MemoryStore {
       throw new Error('No longer have private key');
     }
 
-    channelStorage.signAndAdd(stateVars, privateKey);
-    // sign state
+    const signedState = channelStorage.signAndAdd(stateVars, privateKey);
 
-    // how to identify states? probably we should store the state hash
-
-    // add to channel
+    this._eventEmitter.emit('sendMessage', {signedStates: [signedState]});
   }
 
   public getAddress(): string {
@@ -287,7 +299,10 @@ export class MemoryStore {
     if (signedStates) {
       // todo: check sig
       // todo: check the channel involves me
-      signedStates.forEach(sstate => this._eventEmitter.emit('stateReceived', sstate.state));
+      signedStates.forEach(signedState => {
+        const {signature, ...state} = signedState;
+        this._eventEmitter.emit('stateReceived', state);
+      });
     }
 
     if (protocols) {

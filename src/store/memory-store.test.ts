@@ -55,7 +55,7 @@ const challengeDuration = bigNumberify(60);
 const channelConstants = {chainId, participants, channelNonce, appDefinition, challengeDuration};
 const state: State = {channelId, ...stateVars, ...channelConstants};
 const signature = '0x123';
-const signedState = {state, signatures: [signature]};
+const signedState = {...state, signature};
 
 describe('getAddress', () => {
   it('returns an address', () => {
