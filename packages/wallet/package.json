@@ -177,7 +177,6 @@
     "precommit": "lint-staged --quiet",
     "prepare": "yarn patch-package",
     "puppeteer:script": "npx ts-node -O '{\"module\":\"commonjs\"}' ./puppeteer/scripts/funding.ts ",
-    "release:netlify": "netlify deploy --site $WALLET_NETLIFY_ID --dir=build",
     "start": "node scripts/start.js",
     "start:integration": "node scripts/start.js",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
