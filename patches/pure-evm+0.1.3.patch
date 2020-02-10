@@ -1,0 +1,12 @@
+diff --git a/node_modules/pure-evm/pure-evm.js b/node_modules/pure-evm/pure-evm.js
+index df996ce..ade38d0 100644
+--- a/node_modules/pure-evm/pure-evm.js
++++ b/node_modules/pure-evm/pure-evm.js
+@@ -11,7 +11,6 @@ function getUint8Memory() {
+ let WASM_VECTOR_LEN = 0;
+ 
+ function passArray8ToWasm(arg) {
+-    console.log(wasm)
+     const ptr = wasm.__wbindgen_malloc(arg.length * 1);
+     getUint8Memory().set(arg, ptr / 1);
+     WASM_VECTOR_LEN = arg.length;
