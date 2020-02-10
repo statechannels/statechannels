@@ -73,7 +73,6 @@ export function* messageHandler(jsonRpcMessage: object, _domain: string) {
 
 function* accountsChangedSaga() {
   if (window.ethereum.selectedAddress !== null) {
-    console.log(yield window.ethereum.selectedAddress);
     return yield window.ethereum.selectedAddress;
     // saga completes if metamask unlocked
   }

@@ -37,8 +37,8 @@ function* rootSaga() {
     yield fork(messageQueuedListener, client);
   }
 
-  yield fork(gameSaga, client);
   yield fork(channelUpdatedListener, client);
+  yield fork(gameSaga, client);
 
   if (process.env.AUTO_PLAYER === 'A') {
     yield fork(autoPlayer, 'A');
