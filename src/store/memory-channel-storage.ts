@@ -1,4 +1,4 @@
-import {ChannelConstants, StateVariables, SignedState, Participant, State} from './types';
+import {ChannelConstants, StateVariables, SignedState, Participant} from './types';
 import {
   getChannelId,
   signState,
@@ -11,11 +11,13 @@ import {splitSignature, joinSignature} from 'ethers/utils';
 export interface ChannelStorage {
   readonly channelId: string;
   readonly myIndex: number;
-  readonly latestSupported: State | undefined;
-  readonly latestSupportedByMe: State | undefined;
+  readonly latest: StateVariables | undefined; // TODO: Should this always be defined?
+  readonly latestSupported: StateVariables | undefined;
+  readonly latestSupportedByMe: StateVariables | undefined;
   readonly channelConstants: ChannelConstants;
-  readonly stateVariables: Record<string, StateVariables>;
-  readonly signatures: Record<string, (string | undefined)[]>;
+
+  readonly stateVariables: Record<string, StateVariables>; // TODO: Should we even expose this?
+  readonly signatures: Record<string, (string | undefined)[]>; // TODO: Should we even expose this?
 }
 
 export class MemoryChannelStorage implements ChannelStorage {
@@ -37,6 +39,9 @@ export class MemoryChannelStorage implements ChannelStorage {
   }
   get latestSupportedByMe() {
     // TODO: Find latest supported by me state
+    return undefined;
+  }
+  get latest() {
     return undefined;
   }
 
