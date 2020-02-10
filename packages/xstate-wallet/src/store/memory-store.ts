@@ -7,7 +7,7 @@ import {getChannelId} from '@statechannels/nitro-protocol';
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {Wallet} from 'ethers';
 
-import {State, SignedState, Participant, StateVariables} from './types';
+import {State, SignedState, Participant, StateVariables, ChannelConstants} from './types';
 import {MemoryChannelStorage} from './memory-channel-storage';
 
 interface DirectFunding {
@@ -48,7 +48,7 @@ export type Protocol = CreateAndDirectFund;
 interface InternalEvents {
   stateReceived: [State];
   newProtocol: [Protocol];
-  sendMessage: [Message];
+  addToOutbox: [Message];
 }
 
 export class MemoryStore {
@@ -73,18 +73,25 @@ export class MemoryStore {
     }
   }
 
+  public signingAddresses(channelId: string): string[] {
+    return this._channels[channelId].channelConstants.participants.map(p => p.signingAddress);
+  }
+
   public stateReceivedFeed(channelId: string): Observable<State> {
     return fromEvent<State>(this._eventEmitter, 'stateReceived').pipe(
       filter(e => e.channelId === channelId)
     );
   }
 
+  // for short-term backwards compatibility
+  public channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry> {}
+
   public newProtocolFeed(): Observable<Protocol> {
     return fromEvent(this._eventEmitter, 'newProtocol');
   }
 
-  public messageFeed(): Observable<Message> {
-    return fromEvent(this._eventEmitter, 'sendMessage');
+  public outboxFeed(): Observable<Message> {
+    return fromEvent(this._eventEmitter, 'addToOutbox');
   }
 
   public async createChannel(
@@ -146,7 +153,7 @@ export class MemoryStore {
 
     const signedState = channelStorage.signAndAdd(stateVars, privateKey);
 
-    this._eventEmitter.emit('sendMessage', {signedStates: [signedState]});
+    this._eventEmitter.emit('addToOutbox', {signedStates: [signedState]});
   }
 
   public getAddress(): string {
