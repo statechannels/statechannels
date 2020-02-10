@@ -196,7 +196,6 @@
     "prepare": "yarn contracts:compile",
     "prettier:check": "prettier --check '**/*.{scss,json}' --ignore-path '.gitignore'",
     "prettier:write": "prettier --write '**/*.{scss,json}' --ignore-path '.gitignore'",
-    "release:netlify": "netlify deploy --site $RPS_NETLIFY_ID --dir=build",
     "start": "yarn contracts:compile && node scripts/start.js",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
     "storybook": "start-storybook -p 9001 -c .storybook",
