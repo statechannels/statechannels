@@ -41,9 +41,20 @@ export interface AddressResponse extends ApiResponseAction {
   type: "WALLET.ADDRESS_RESPONSE";
   address: string;
 }
+
 export const addressResponse: ActionConstructor<AddressResponse> = p => ({
   ...p,
   type: "WALLET.ADDRESS_RESPONSE"
+});
+
+export interface EthereumAddressResponse extends ApiResponseAction {
+  type: "WALLET.ETHEREUM_ADDRESS_RESPONSE";
+  ethereumSelectedAddress: string;
+}
+
+export const ethereumAddressResponse: ActionConstructor<EthereumAddressResponse> = p => ({
+  ...p,
+  type: "WALLET.ETHEREUM_ADDRESS_RESPONSE"
 });
 
 export interface UnknownSigningAddress extends ApiResponseAction {
@@ -184,6 +195,7 @@ export const closeChannelResponse: ActionConstructor<CloseChannelResponse> = p =
 
 export type OutgoingApiAction =
   | AddressResponse
+  | EthereumAddressResponse
   | CreateChannelResponse
   | UpdateChannelResponse
   | ChallengeChannelResponse

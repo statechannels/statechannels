@@ -3,6 +3,7 @@ import requestSchema from "@statechannels/client-api-schema/schema/request.json"
 import responseSchema from "@statechannels/client-api-schema/schema/response.json";
 import createChannelSchema from "@statechannels/client-api-schema/schema/create-channel.json";
 import getAddressSchema from "@statechannels/client-api-schema/schema/get-address.json";
+import getEthereumSelectedAddressSchema from "@statechannels/client-api-schema/schema/get-ethereum-selected-address.json";
 import joinChannelSchema from "@statechannels/client-api-schema/schema/join-channel.json";
 import updateChannelSchema from "@statechannels/client-api-schema/schema/update-channel.json";
 import definitionsSchema from "@statechannels/client-api-schema/schema/definitions.json";
@@ -24,6 +25,7 @@ export async function validateRequest(jsonRpcRequest: object): Promise<Validatio
     .addSchema(channelResultSchema)
     .addSchema(createChannelSchema)
     .addSchema(getAddressSchema)
+    .addSchema(getEthereumSelectedAddressSchema)
     .addSchema(joinChannelSchema)
     .addSchema(updateChannelSchema)
     .addSchema(pushMessageSchema)
@@ -42,6 +44,7 @@ export async function validateResponse(jsonRpcResponse: object): Promise<Validat
     .addSchema(channelResultSchema)
     .addSchema(createChannelSchema)
     .addSchema(getAddressSchema)
+    .addSchema(getEthereumSelectedAddressSchema)
     .addSchema(joinChannelSchema)
     .addSchema(updateChannelSchema)
     .addSchema(pushMessageSchema)
@@ -60,6 +63,7 @@ export async function validateNotification(jsonRpcNotification: object): Promise
     .addSchema(channelResultSchema)
     .addSchema(createChannelSchema)
     .addSchema(getAddressSchema)
+    .addSchema(getEthereumSelectedAddressSchema)
     .addSchema(joinChannelSchema)
     .addSchema(updateChannelSchema)
     .addSchema(pushMessageSchema)

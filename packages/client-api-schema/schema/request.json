@@ -24,6 +24,7 @@
             "CreateChannel",
             "JoinChannel",
             "GetAddress",
+            "GetEthereumSelectedAddress",
             "PushMessage",
             "UpdateChannel",
             "CloseChannel",
