@@ -1,5 +1,4 @@
 import {BigNumber} from 'ethers/utils';
-import {Outcome} from '@statechannels/nitro-protocol';
 
 export const a = 1;
 
@@ -17,17 +16,19 @@ export interface StateVariables {
   isFinal: boolean;
 }
 
-// lookup outcome based on token address
-
-interface SimpleEthAllocation {
+interface AllocationItem {
+  destination: string;
+  amount: BigNumber;
+}
+export interface SimpleEthAllocation {
   type: 'SimpleEthAllocation';
-  allocationItems: [string, BigNumber][];
+  allocationItems: AllocationItem[];
 }
 
-interface SimpleTokenAllocation {
+export interface SimpleTokenAllocation {
   type: 'SimpleTokenAllocation';
   tokenAddress: string;
-  allocationItems: [string, BigNumber][];
+  allocationItems: AllocationItem[];
 }
 
 interface SimpleEthGuarantee {
@@ -35,24 +36,25 @@ interface SimpleEthGuarantee {
   guarantorAddress: string;
   destinations: string[];
 }
-interface SimpleTokenGuarantee {
+export interface SimpleTokenGuarantee {
   type: 'SimpleTokenGuarantee';
   tokenAddress: string;
   guarantorAddress: string;
   destinations: string[];
 }
 
-interface MixedAllocation {
+export interface MixedAllocation {
   type: 'MixedAllocation';
   ethAllocation?: SimpleEthAllocation;
   tokenAllocations?: SimpleTokenAllocation[];
 }
-export type Outcome2 =
+// TODO: Better name?
+export type AuxillaryChannelOutcome =
   | SimpleEthAllocation
   | SimpleTokenAllocation
   | SimpleEthGuarantee
-  | SimpleTokenGuarantee
-  | MixedAllocation;
+  | SimpleTokenGuarantee;
+export type Outcome = AuxillaryChannelOutcome | MixedAllocation;
 
 export interface ChannelConstants {
   chainId: string;
