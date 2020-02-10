@@ -1,7 +1,8 @@
-import {MemoryStore, Protocol, State} from './memory-store';
+import {MemoryStore, Protocol} from './memory-store';
+import {State} from './types';
 import {bigNumberify} from 'ethers/utils';
 import {Wallet} from 'ethers';
-import {Outcome, AllocationItem} from '@statechannels/nitro-protocol/src';
+import {Outcome, AllocationItem} from '@statechannels/nitro-protocol';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
 
 class SimpleOutcomeHelper {

@@ -2,47 +2,13 @@ import {Observable, fromEvent} from 'rxjs';
 import {filter} from 'rxjs/operators';
 import {EventEmitter} from 'eventemitter3';
 import * as _ from 'lodash';
-import {
-  getChannelId,
-  Outcome,
-  signState,
-  hashState,
-  State as NitroState,
-  getStateSignerAddress
-} from '@statechannels/nitro-protocol';
+import {getChannelId} from '@statechannels/nitro-protocol';
 
-import {BigNumber, bigNumberify, splitSignature, joinSignature} from 'ethers/utils';
+import {BigNumber, bigNumberify} from 'ethers/utils';
 import {Wallet} from 'ethers';
 
-interface StateVariables {
-  outcome: Outcome;
-  turnNum: BigNumber;
-  appData: string;
-  isFinal: boolean;
-}
-
-interface ChannelConstants {
-  chainId: string;
-  participants: Participant[];
-  channelNonce: BigNumber;
-  appDefinition: string;
-  challengeDuration: BigNumber;
-}
-
-export interface State extends ChannelConstants, StateVariables {
-  channelId: string;
-}
-
-export interface SignedState extends State {
-  signature: string;
-}
-
-interface ChannelStorage {
-  myIndex: number;
-  channelConstants: ChannelConstants;
-  stateVariables: Record<string, StateVariables>;
-  signatures: Record<string, (string | undefined)[]>;
-}
+import {State, SignedState, Participant, StateVariables} from './types';
+import {MemoryChannelStorage} from './memory-channel-storage';
 
 interface DirectFunding {
   type: 'Direct';
@@ -66,12 +32,6 @@ interface Guaranteed {
 
 export type Funding = DirectFunding | IndirectFunding | VirtualFunding | Guaranteed;
 
-export interface Participant {
-  participantId: string;
-  signingAddress: string;
-  destination: string;
-}
-
 interface CreateAndDirectFund {
   name: 'CreateAndDirectFund';
   participants: Participant[];
@@ -89,98 +49,6 @@ interface InternalEvents {
   stateReceived: [State];
   newProtocol: [Protocol];
   sendMessage: [Message];
-}
-
-class MemoryChannelStorage implements ChannelStorage {
-  public channelConstants: ChannelConstants;
-  public stateVariables: Record<string, StateVariables>;
-  public signatures: Record<string, string[]>;
-  public myIndex: number;
-
-  constructor(channelConstants: ChannelConstants, myIndex: number) {
-    this.channelConstants = channelConstants;
-    this.myIndex = myIndex;
-    this.stateVariables = {};
-    this.signatures = {};
-  }
-
-  get channelId(): string {
-    const {chainId, channelNonce, participants} = this.channelConstants;
-    const addresses = participants.map(p => p.signingAddress);
-    return getChannelId({
-      chainId,
-      channelNonce: channelNonce.toString(),
-      participants: addresses
-    });
-  }
-
-  get participants(): Participant[] {
-    return this.channelConstants.participants;
-  }
-
-  signAndAdd(stateVars: StateVariables, privateKey: string): SignedState {
-    const state = this.toNitroState(stateVars);
-
-    const {signature} = signState(state, privateKey);
-    const signatureString = joinSignature(signature);
-
-    this.addState(stateVars, signatureString);
-
-    return {
-      channelId: this.channelId,
-      ...stateVars,
-      ...this.channelConstants,
-      signature: signatureString
-    };
-  }
-
-  addState(stateVars: StateVariables, signature: string) {
-    const state = this.toNitroState(stateVars);
-    const stateHash = hashState(state);
-    this.stateVariables[stateHash] = stateVars;
-    const {participants} = this.channelConstants;
-
-    // check the signature
-    const signer = getStateSignerAddress({state, signature: splitSignature(signature)});
-    const signerIndex = participants.findIndex(p => p.signingAddress === signer);
-
-    if (signerIndex === -1) {
-      throw new Error('State not signed by a particant of this channel');
-    }
-
-    if (!this.signatures[stateHash]) {
-      this.signatures[stateHash] = new Array(this.nParticipants());
-    }
-
-    this.signatures[stateHash][signerIndex] = signature;
-  }
-  private nParticipants(): number {
-    return this.channelConstants.participants.length;
-  }
-
-  // Converts to the legacy State format expected by the Nitro protocol state
-  private toNitroState(stateVars: StateVariables): NitroState {
-    const {
-      challengeDuration,
-      appDefinition,
-      channelNonce,
-      participants,
-      chainId
-    } = this.channelConstants;
-    const channel = {
-      channelNonce: channelNonce.toString(),
-      chainId,
-      participants: participants.map(x => x.signingAddress)
-    };
-
-    return {
-      ...stateVars,
-      challengeDuration: challengeDuration.toNumber(),
-      appDefinition,
-      channel,
-      turnNum: stateVars.turnNum.toNumber()
-    };
-  }
 }
 
 export class MemoryStore {
@@ -263,14 +131,6 @@ export class MemoryStore {
 
   private nonceKeyFromAddresses = (addresses: string[]): string => addresses.join('::');
 
-  // in channel, we should store
-  // 1. myIndex
-  // 2. participants, including contact details
-  // 3. latest outcome(?)
-  // 4. states -
-
-  // outcome, turnNum, appData, isFinal
-  // channel defines: participant, nonce, chainId, challengeDuration, appDefinition
   addState(channelId: string, stateVars: StateVariables) {
     const channelStorage = this._channels[channelId];
 
