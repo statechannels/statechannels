@@ -19,7 +19,7 @@ RUN sed -ie "/@statechannels\/nitro-protocol/d" package.json
 # Remove the devtools devDependency from @statechannels/hub (avoid resolution)
 RUN sed -ie "/@statechannels\/devtools/d" package.json
 
-# Remove the devtools devDependency from @statechannels/hub (avoid resolution)
+# Remove the client-api-schema devDependency from @statechannels/hub (avoid resolution)
 RUN sed -ie "/@statechannels\/client-api-schema/d" package.json
 
 # Install production dependencies for hub
