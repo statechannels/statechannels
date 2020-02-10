@@ -36,14 +36,12 @@ function getMessagesRef() {
 async function sendMessage(message: RelayActionWithMessage) {
   const sanitizedPayload = JSON.parse(JSON.stringify(message));
   await getMessagesRef()
-    .child(message.recipient.toLowerCase())
+    .child(message.recipient)
     .push(sanitizedPayload);
 }
 
 async function readAndFeedMessages() {
-  await Promise.all(
-    messages.map(message => sendMessage({...message, recipient: HUB_ADDRESS.toLowerCase()}))
-  );
+  await Promise.all(messages.map(message => sendMessage({...message, recipient: HUB_ADDRESS})));
   getFirebaseApp().delete();
 }
 

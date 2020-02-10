@@ -31,7 +31,7 @@ function getMessagesRef() {
 
 export async function fbListen(callback) {
   log.info('firebase-relay: listen');
-  const hubRef = getMessagesRef().child(HUB_ADDRESS.toLowerCase());
+  const hubRef = getMessagesRef().child(HUB_ADDRESS);
 
   hubRef.on('child_added', async snapshot => {
     const key = snapshot.key;
@@ -44,6 +44,6 @@ export async function fbListen(callback) {
 export function fbSend(message: RelayActionWithMessage) {
   const sanitizedPayload = JSON.parse(JSON.stringify(message));
   return getMessagesRef()
-    .child(message.recipient.toLowerCase())
+    .child(message.recipient)
     .push(sanitizedPayload);
 }
