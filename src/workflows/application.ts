@@ -18,6 +18,7 @@ import {
   SendStates,
   ChannelUpdated,
   ChannelStoreEntry,
+  CreateAndDirectFund,
   unreachable
 } from '@statechannels/wallet-protocols';
 
@@ -29,7 +30,7 @@ import * as CCC from './confirm-create-channel';
 import {JoinChannelParams, Participant, TokenAllocations} from '@statechannels/client-api-schema';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
 import {createMockGuard} from '../utils/workflow-utils';
-import {getEthAllocation} from '../utils/allocation-utils';
+import {getEthAllocation, ethAllocationOutcome} from '../utils/allocation-utils';
 
 interface WorkflowContext {
   channelId?: string;
@@ -101,7 +102,9 @@ export interface WorkflowServices extends Record<string, ServiceConfig<WorkflowC
     context: ChannelIdExists
   ) => StateMachine<ConcludeChannel.Init, any, any, any>;
 
-  invokeOpenChannelAndDirectFundProtocol: () => StateMachine<any, any, any, any>;
+  invokeCreateChannelAndDirectFundProtocol: (
+    context: ChannelIdExists & ChannelParamsExist
+  ) => StateMachine<any, any, any, any>;
   invokeCreateChannelConfirmation: (
     context: ChannelParamsExist,
     event: CreateChannelEvent | JoinChannelEvent
@@ -171,7 +174,7 @@ const generateConfig = (
 
     openChannelAndDirectFundProtocol: {
       invoke: {
-        src: 'invokeOpenChannelAndDirectFundProtocol',
+        src: 'invokeCreateChannelAndDirectFundProtocol',
         onDone: {
           target: 'running'
         }
@@ -285,10 +288,18 @@ export const applicationWorkflow = (store: Store, context?: WorkflowContext) => 
     invokeClosingProtocol: (context: ChannelIdExists) => {
       return ConcludeChannel.machine(store, {channelId: context.channelId});
     },
-    invokeOpenChannelAndDirectFundProtocol: () => {
-      return new Promise(() => {
-        /* TODO: This must start the protocol and sync it to the store if necessary */
-      }) as any;
+    invokeCreateChannelAndDirectFundProtocol: (context: ChannelParamsExist & ChannelIdExists) => {
+      const ourIndex = 0; // TODO:  get from store?
+      return CreateAndDirectFund.machine(store, {
+        ...context.channelParams,
+        // TODO: We should never have a context without this
+        // Right now this is left in for a test
+        allocations: context?.channelParams?.allocations
+          ? ethAllocationOutcome(context.channelParams.allocations, ETH_ASSET_HOLDER_ADDRESS)
+          : [],
+        channelId: context.channelId,
+        index: ourIndex
+      });
     },
     invokeCreateChannelConfirmation: (
       context: WorkflowContext,
@@ -332,9 +343,9 @@ const mockServices: WorkflowServices = {
       /* Mock call */
     }) as any;
   },
-  invokeOpenChannelAndDirectFundProtocol: () => {
+  invokeCreateChannelAndDirectFundProtocol: context => {
     return new Promise(() => {
-      /* TODO: This must start the protocol and sync it to the store if necessary */
+      /* mock*/
     }) as any;
   },
   invokeCreateChannelConfirmation: () => {
