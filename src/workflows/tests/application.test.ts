@@ -4,37 +4,12 @@ import waitForExpect from 'wait-for-expect';
 import {
   EphemeralStore,
   CreateChannelEvent,
-  ConcludeChannel,
   SignedState,
   getChannelId,
   ChannelUpdated
 } from '@statechannels/wallet-protocols';
-import {applicationWorkflow, OpenChannelEvent} from '../application';
-import * as CCC from '../confirm-create-channel';
+import {applicationWorkflow, OpenChannelEvent, WorkflowServices} from '../application';
 import {AddressZero} from 'ethers/constants';
-let closingMachineMock;
-
-let channelConfirmationMock;
-beforeEach(() => {
-  // TODO: Is this the best way to mock
-  closingMachineMock = jest.fn().mockReturnValue(
-    new Promise(() => {
-      /* mock, do nothing */
-    })
-  );
-  Object.defineProperty(ConcludeChannel, 'machine', {
-    value: closingMachineMock
-  });
-
-  channelConfirmationMock = jest.fn().mockReturnValue(
-    new Promise(() => {
-      /* mock */
-    })
-  );
-  Object.defineProperty(CCC, 'confirmChannelCreationWorkflow', {
-    value: channelConfirmationMock
-  });
-});
 
 jest.setTimeout(50000);
 const createChannelEvent: CreateChannelEvent = {
@@ -46,15 +21,25 @@ const createChannelEvent: CreateChannelEvent = {
   allocations: [],
   challengeDuration: 500
 };
+
 it('initializes and starts confirmCreateChannelWorkflow', async () => {
   const store = new EphemeralStore();
+  const services: Partial<WorkflowServices> = {
+    invokeCreateChannelConfirmation: jest.fn().mockReturnValue(
+      new Promise(() => {
+        /* mock */
+      })
+    )
+  };
 
-  const service = interpret<any, any, any>(applicationWorkflow(store));
+  const service = interpret<any, any, any>(
+    applicationWorkflow(store).withConfig({services} as any) // TODO: We shouldn't need to cast
+  );
   service.start();
   service.send(createChannelEvent);
   await waitForExpect(async () => {
     expect(service.state.value).toEqual('confirmCreateChannelWorkflow');
-    expect(channelConfirmationMock).toHaveBeenCalled();
+    expect(services.invokeCreateChannelConfirmation).toHaveBeenCalled();
   }, 2000);
 });
 it('raises an channel updated action when the channel is updated', async () => {
@@ -124,12 +109,21 @@ it('initializes and starts the join channel machine', async () => {
 it('starts concluding when requested', async () => {
   const store = new EphemeralStore();
   const channelId = ethers.utils.id('channel');
-  const service = interpret<any, any, any>(applicationWorkflow(store));
+  const services: Partial<WorkflowServices> = {
+    invokeClosingProtocol: jest.fn().mockReturnValue(
+      new Promise(() => {
+        /* mock */
+      })
+    )
+  };
+  const service = interpret<any, any, any>(
+    applicationWorkflow(store).withConfig({services} as any)
+  ); // TODO: Casting
   service.start('running');
   service.send({type: 'PLAYER_REQUEST_CONCLUDE', channelId});
   await waitForExpect(async () => {
     expect(service.state.value).toEqual('closing');
-    expect(closingMachineMock).toHaveBeenCalled();
+    expect(services.invokeClosingProtocol).toHaveBeenCalled();
     expect(service.state.actions.map(a => a.type)).toContain('displayUi');
   }, 2000);
 });
@@ -150,6 +144,13 @@ it('starts concluding when receiving a final state', async () => {
       signatures: []
     }
   ];
+  const services: Partial<WorkflowServices> = {
+    invokeClosingProtocol: jest.fn().mockReturnValue(
+      new Promise(() => {
+        /* mock */
+      })
+    )
+  };
   const channelId = getChannelId(states[0].state.channel);
   const channelUpdate: ChannelUpdated = {
     type: 'CHANNEL_UPDATED',
@@ -157,13 +158,15 @@ it('starts concluding when receiving a final state', async () => {
     entry: {states, channel: states[0].state.channel, privateKey: '0x0', participants: []}
   };
 
-  const service = interpret<any, any, any>(applicationWorkflow(store, {channelId}));
+  const service = interpret<any, any, any>(
+    applicationWorkflow(store, {channelId}).withConfig({services} as any)
+  ); //TODO: Casting
   service.start('running');
 
   service.send(channelUpdate);
 
   await waitForExpect(async () => {
     expect(service.state.value).toEqual('closing');
-    expect(closingMachineMock).toHaveBeenCalled();
+    expect(services.invokeClosingProtocol).toHaveBeenCalled();
   });
 });

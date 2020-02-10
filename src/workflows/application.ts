@@ -95,7 +95,7 @@ type WorkflowEvent =
 export type ApplicationWorkflowEvent = WorkflowEvent;
 
 // TODO: Is this all that useful?
-interface WorkflowServices extends Record<string, ServiceConfig<WorkflowContext>> {
+export interface WorkflowServices extends Record<string, ServiceConfig<WorkflowContext>> {
   createChannel: (context: WorkflowContext, event: WorkflowEvent) => Promise<void>;
   invokeClosingProtocol: (
     context: ChannelIdExists
