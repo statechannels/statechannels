@@ -9,7 +9,7 @@ import {FIREBASE_PREFIX} from '../../constants';
 export function* firebaseInboxListener(client: RPSChannelClient, address: string) {
   const channel = yield call(
     reduxSagaFirebase.database.channel as any,
-    `${FIREBASE_PREFIX}/messages/${address.toLowerCase()}`,
+    `${FIREBASE_PREFIX}/messages/${address}`,
     'child_added',
     buffers.fixed(100)
   );
