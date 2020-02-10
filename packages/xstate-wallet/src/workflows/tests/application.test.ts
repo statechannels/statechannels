@@ -42,6 +42,34 @@ it('initializes and starts confirmCreateChannelWorkflow', async () => {
     expect(services.invokeCreateChannelConfirmation).toHaveBeenCalled();
   }, 2000);
 });
+
+it('invokes the createChannelAndFund protocol', async () => {
+  const store = new EphemeralStore();
+  const services: Partial<WorkflowServices> = {
+    invokeCreateChannelAndDirectFundProtocol: jest.fn().mockReturnValue(
+      new Promise(() => {
+        /* mock */
+      })
+    )
+  };
+
+  const service = interpret<any, any, any>(
+    applicationWorkflow(store).withConfig({services} as any) // TODO: We shouldn't need to cast
+  );
+
+  const channelId = '0xabc';
+  service.start('createChannelInStore');
+
+  service.send({type: 'done.invoke.createChannel', data: channelId});
+  await waitForExpect(async () => {
+    expect(service.state.value).toEqual('openChannelAndDirectFundProtocol');
+    expect(services.invokeCreateChannelAndDirectFundProtocol).toHaveBeenCalledWith(
+      expect.objectContaining({channelId}),
+      expect.any(Object)
+    );
+  }, 2000);
+});
+
 it('raises an channel updated action when the channel is updated', async () => {
   const store = new EphemeralStore();
   const mockOptions = {
@@ -64,12 +92,18 @@ it('raises an channel updated action when the channel is updated', async () => {
 
 it('handles confirmCreateChannel workflow finishing', async () => {
   const store = new EphemeralStore();
-  const mockOptions = {
-    services: {
-      createChannel: jest.fn().mockReturnValue(Promise.resolve('0xb1ab1a'))
-    }
+  const services: Partial<WorkflowServices> = {
+    createChannel: jest.fn().mockReturnValue(Promise.resolve('0xb1ab1a')),
+    invokeCreateChannelAndDirectFundProtocol: jest.fn().mockReturnValue(
+      new Promise(() => {
+        /*mock*/
+      })
+    )
   };
-  const service = interpret<any, any, any>(applicationWorkflow(store).withConfig(mockOptions));
+
+  const service = interpret<any, any, any>(
+    applicationWorkflow(store).withConfig({services} as any)
+  ); //TODO: Casting
   service.start('confirmCreateChannelWorkflow');
 
   service.send({
