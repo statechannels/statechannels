@@ -90,6 +90,9 @@ class MockChannelClient implements ChannelClientInterface {
   getAddress = jest.fn(async function() {
     return await MOCK_ADDRESS;
   });
+  getEthereumSelectedAddress = jest.fn(async function() {
+    return await MOCK_ADDRESS;
+  });
 }
 
 let mockChannelClient;
