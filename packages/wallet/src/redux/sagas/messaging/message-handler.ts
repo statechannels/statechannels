@@ -1,4 +1,4 @@
-import {select, fork, put, putResolve, call} from "redux-saga/effects";
+import {select, fork, put, putResolve, call, take} from "redux-saga/effects";
 import {getChannelId, State} from "@statechannels/nitro-protocol";
 import {
   JoinChannelParams,
@@ -71,19 +71,47 @@ export function* messageHandler(jsonRpcMessage: object, _domain: string) {
   }
 }
 
+function* accountsChangedSaga() {
+  if (window.ethereum.selectedAddress !== null) {
+    console.log(yield window.ethereum.selectedAddress);
+    return yield window.ethereum.selectedAddress;
+    // saga completes if metamask unlocked
+  }
+  const accountsChangedChannel = eventChannel(emit => {
+    window.ethereum.on("accountsChanged", function(accounts) {
+      emit(accounts);
+    });
+    return () => {
+      /* empty */
+    };
+  });
+  while (true) {
+    const accounts = yield take(accountsChangedChannel);
+    if (accounts.length > 0) {
+      return window.ethereum.selectedAddress; // saga completes when metamask unlocked
+    } else {
+      throw new Error("Metamask enable rejected");
+    }
+  }
+}
+
 function* handleMessage(payload: RequestObject) {
   const {id} = payload;
   switch (payload.method) {
     case "GetAddress":
+      const address = yield select(getAddress);
+      yield fork(messageSender, outgoingMessageActions.addressResponse({id, address}));
+      break;
+    case "GetEthereumSelectedAddress":
       //  ask metamask permission to access accounts
       yield call([window.ethereum, "enable"]);
       //  block until accounts changed
       //  (indicating user acceptance)
-      yield accountsChangedSaga;
-      const address = yield select(getAddress);
-      yield fork(messageSender, outgoingMessageActions.addressResponse({id, address}));
-      //  ask metamask permission to access accounts
-      yield call([window.ethereum, "enable"]);
+      const ethereumSelectedAddress = yield accountsChangedSaga();
+      yield fork(
+        messageSender,
+        outgoingMessageActions.ethereumAddressResponse({id, ethereumSelectedAddress})
+      );
       break;
     case "CreateChannel":
       yield handleCreateChannelMessage(payload);
