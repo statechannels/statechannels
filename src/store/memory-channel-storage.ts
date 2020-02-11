@@ -8,11 +8,11 @@ import {
 } from '@statechannels/nitro-protocol';
 import {splitSignature, joinSignature} from 'ethers/utils';
 
-export interface ChannelStorage {
+export interface ChannelStoreEntry {
   readonly channelId: string;
   readonly myIndex: number;
-  readonly latest: StateVariables | undefined; // TODO: Should this always be defined?
-  readonly latestSupported: StateVariables | undefined;
+  readonly latest: StateVariables;
+  readonly supported: StateVariables | undefined;
   readonly latestSupportedByMe: StateVariables | undefined;
   readonly channelConstants: ChannelConstants;
 
@@ -20,7 +20,7 @@ export interface ChannelStorage {
   readonly signatures: Record<string, (string | undefined)[]>; // TODO: Should we even expose this?
 }
 
-export class MemoryChannelStorage implements ChannelStorage {
+export class MemoryChannelStoreEntry implements ChannelStoreEntry {
   public channelConstants: ChannelConstants;
   public stateVariables: Record<string, StateVariables>;
   public signatures: Record<string, string[]>;
@@ -33,7 +33,7 @@ export class MemoryChannelStorage implements ChannelStorage {
     this.signatures = {};
   }
 
-  get latestSupported() {
+  get supported() {
     // TODO: Find latest supported state
     return undefined;
   }
@@ -41,8 +41,9 @@ export class MemoryChannelStorage implements ChannelStorage {
     // TODO: Find latest supported by me state
     return undefined;
   }
-  get latest() {
-    return undefined;
+  get latest(): StateVariables {
+    // TODO: get latest state
+    throw new Error('TODO: Implement Me');
   }
 
   get channelId(): string {
