@@ -14,7 +14,7 @@ import {
 import {
   FINAL,
   ConcludeChannel,
-  Store,
+  ObsoleteStore,
   SendStates,
   ChannelUpdated,
   ChannelStoreEntry,
@@ -217,7 +217,7 @@ const generateConfig = (
   }
 });
 
-export const applicationWorkflow = (store: Store, context?: WorkflowContext) => {
+export const applicationWorkflow = (store: ObsoleteStore, context?: WorkflowContext) => {
   const notifyOnChannelMessage = ({channelId}: ChannelIdExists) => {
     return observeRequests(channelId).pipe(
       map(params => {

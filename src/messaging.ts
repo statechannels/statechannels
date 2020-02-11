@@ -8,7 +8,7 @@ import {
 import {
   getChannelId,
   Channel,
-  Store,
+  ObsoleteStore,
   CreateChannelEvent,
   ChannelStoreEntry,
   AddressableMessage
@@ -76,7 +76,7 @@ async function metamaskUnlocked(): Promise<string> {
 export async function handleMessage(
   event,
   workflowManager: WorkflowManager,
-  store: Store,
+  store: ObsoleteStore,
   ourWallet: ethers.Wallet
 ) {
   if (event.data && event.data.jsonrpc && event.data.jsonrpc === '2.0') {
@@ -135,7 +135,10 @@ export async function handleMessage(
   }
 }
 
-async function handleJoinChannel(payload: {id: jrs.ID; params: JoinChannelParams}, store: Store) {
+async function handleJoinChannel(
+  payload: {id: jrs.ID; params: JoinChannelParams},
+  store: ObsoleteStore
+) {
   // TODO: The application workflow should be updated to wait until we get a  join channel from the client
   const {id} = payload;
   const {channelId} = payload.params;
@@ -146,7 +149,7 @@ async function handleJoinChannel(payload: {id: jrs.ID; params: JoinChannelParams
 async function handleCloseChannel(
   payload: jrs.RequestObject,
   workflowManager: WorkflowManager,
-  store: Store
+  store: ObsoleteStore
 ) {
   const {id} = payload;
   const {channelId} = payload.params as CloseChannelParams;
@@ -158,7 +161,7 @@ async function handleCloseChannel(
 async function handleUpdateChannel(
   payload: jrs.RequestObject,
   workflowManager: WorkflowManager,
-  store: Store
+  store: ObsoleteStore
 ) {
   const params = payload.params as UpdateChannelParams;
   const entry = store.getEntry(params.channelId);
@@ -192,7 +195,7 @@ async function handlePushMessage(payload: jrs.RequestObject, workflowManager: Wo
 async function handleCreateChannelMessage(
   payload: jrs.RequestObject,
   workflowManager: WorkflowManager,
-  store: Store,
+  store: ObsoleteStore,
   ethersWallet: ethers.Wallet
 ) {
   const params = payload.params as CreateChannelParams;
