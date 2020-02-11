@@ -69,7 +69,8 @@
     "start": "node scripts/start.js",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
     "storybook": "start-storybook -p 6006",
-    "test": "npx jest",
+    "test": "npx jest -c ./config/jest/jest.config.js",
+    "test:with-chain": "npx jest --runInBand -c ./config/jest/jest.with-chain.config.js --detectOpenHandles",
     "test:ci": "yarn test --ci --runInBand"
   }
 }
