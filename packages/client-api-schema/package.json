@@ -1,22 +1,7 @@
 {
   "name": "@statechannels/client-api-schema",
   "description": "JSON-RPC Schema and TypeScript typings for the State Channels Client API",
-  "version": "0.0.1",
-  "author": "snario <liam@l4v.io>",
-  "contributors": [
-    "Alex Gap <alex.gap@consensys.net>",
-    "Liam Horne <liam@l4v.io>"
-  ],
-  "devDependencies": {
-    "@types/eslint": "6.1.7",
-    "@types/eslint-plugin-prettier": "2.2.0",
-    "@typescript-eslint/eslint-plugin": "2.18.0",
-    "@typescript-eslint/parser": "2.18.0",
-    "eslint": "6.8.0",
-    "eslint-plugin-prettier": "3.1.2",
-    "json-schema-to-typescript": "8.0.0",
-    "lint-staged": "10.0.4"
-  },
+  "main": "lib/src/index.js",
   "files": [
     "schema",
     "types"
@@ -31,15 +16,33 @@
   "lint-staged": {
     "index.ts": "yarn lint:check --max-warnings=0"
   },
-  "main": "types/index.d.ts",
-  "repository": "statechannels/monorepo/blob/master/packages/client-api-schema",
   "scripts": {
-    "build": "ts-node index.ts",
-    "build:ci": "ts-node index.ts",
-    "lint:check": "eslint index.ts",
-    "lint:write": "eslint index.ts --fix",
+    "build": "yarn build:generate-types && yarn build:typescript",
+    "build:generate-types": "ts-node build.ts",
+    "build:typescript": "npx tsc -b",
+    "build:ci": "ts-node build.ts",
+    "lint:check": "eslint \"*/**/*.ts\" --cache",
+    "lint:write": "eslint \"*/**/*.ts\" --fix",
     "precommit": "lint-staged --quiet",
     "prepare": "yarn build"
   },
-  "types": "types/index.d.ts"
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/statechannels/monorepo/blob/master/packages/client-api-schema"
+  },
+  "author": "snario <liam@l4v.io>",
+  "contributors": [
+    "Liam Horne <liam@l4v.io>",
+    "Alex Gap <alex.gap@consensys.net>"
+  ],
+  "devDependencies": {
+    "@types/eslint": "^6.1.3",
+    "@types/eslint-plugin-prettier": "^2.2.0",
+    "@typescript-eslint/eslint-plugin": "^2.10.0",
+    "@typescript-eslint/parser": "^2.10.0",
+    "eslint": "^6.7.2",
+    "eslint-plugin-prettier": "^3.1.1",
+    "json-schema-to-typescript": "^8.0.0",
+    "lint-staged": "9.4.0"
+  },
 }
