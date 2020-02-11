@@ -8,10 +8,12 @@ import {
   DoneInvokeEvent,
   ServiceConfig
 } from 'xstate';
+import {filter, map, take} from 'rxjs/operators';
 
 import {Store} from '../store/memory-store';
-import {toNitroState} from '../store/state-utils';
-import {SupportState} from '@statechannels/wallet-protocols/src';
+import {State} from '../store/types';
+import {SupportState} from '.';
+import {ChannelStoreEntry} from '../store/memory-channel-storage';
 
 export const enum Role {
   A,
@@ -22,7 +24,6 @@ export const enum Role {
 export type Init = {
   targetChannelId: string;
   jointChannelId: string;
-  role: Role;
 };
 
 function waitThenRunObjective<Objective extends string = string>(
@@ -75,7 +76,7 @@ const enum States {
 }
 
 const enum Services {
-  startingJointState = 'startingJointState',
+  waitForFirsttJointState = 'waitForFirstJointState',
   supportState = 'supportState',
   indirectFunding = 'indirectFunding'
 }
@@ -114,7 +115,7 @@ const generateConfig = (role: Role): MachineConfig<Init, any, any> => ({
   initial: States.setupJointChannel,
   states: {
     [States.setupJointChannel]: getDataAndInvoke<Init>(
-      Services.startingJointState,
+      Services.waitForFirsttJointState,
       Services.supportState,
       States.fundJointChannel
     ),
@@ -125,12 +126,18 @@ const generateConfig = (role: Role): MachineConfig<Init, any, any> => ({
 });
 
 export const config = generateConfig(Role.Hub);
-export const startingJointState = (store: Store) => async ({
+const waitForFirstJointState = (store: Store) => ({
   jointChannelId
-}: Init): Promise<SupportState.Init> => {
-  const {latest, channelConstants} = await store.getEntry(jointChannelId);
-  return {state: toNitroState({...latest, ...channelConstants})};
-};
+}: Init): Promise<SupportState.Init> =>
+  store
+    .channelUpdatedFeed(jointChannelId)
+    .pipe(
+      map((e: ChannelStoreEntry): State => ({...e.latest, ...e.channelConstants})),
+      filter(s => s.turnNum.eq(0)),
+      map(s => ({state: s})),
+      take(1)
+    )
+    .toPromise();
 
 export const options = (store: Store): Partial<MachineOptions<Init, TEvent>> => {
   const actions: Record<Actions, any> = {
@@ -143,7 +150,7 @@ export const options = (store: Store): Partial<MachineOptions<Init, TEvent>> => 
   const services: Record<Services, ServiceConfig<Init>> = {
     supportState: SupportState.machine(store as any),
     indirectFunding: async () => true,
-    startingJointState: startingJointState(store)
+    waitForFirstJointState: waitForFirstJointState(store)
   };
 
   return {actions, services};

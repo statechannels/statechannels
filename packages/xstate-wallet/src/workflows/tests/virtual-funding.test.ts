@@ -9,7 +9,8 @@ import {MemoryStore} from '../../store/memory-store';
 import {ethers} from 'ethers';
 import {joinSignature} from 'ethers/utils';
 import _ from 'lodash';
-import {toNitroState} from '../../store/state-utils';
+import {toNitroState, firstState} from '../../store/state-utils';
+import {ChannelConstants, Outcome} from '../../store/types';
 
 const wallet1 = new ethers.Wallet(
   '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318'
@@ -30,14 +31,21 @@ const wallets = {
 jest.setTimeout(10000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 test('Virtual funding as A', async () => {
-  const channel: Channel = {
+  const targetChannel: Channel = {
     participants: [wallet1.address, wallet2.address],
     chainId: '0x1',
     channelNonce: '0x11'
   };
-  const targetChannelId = getChannelId(channel);
-  const context: Init = {targetChannelId, role: Role.A, jointChannelId: 'TODO'};
+  const targetChannelId = getChannelId(targetChannel);
 
+  const jointChannel: Channel = {
+    participants: [wallet1.address, wallet3.address, wallet2.address],
+    chainId: '0x1',
+    channelNonce: '0x11'
+  };
+  const jointChannelId = getChannelId(jointChannel);
+
+  const context: Init = {targetChannelId, jointChannelId};
   const store = new MemoryStore([wallet1.privateKey]);
   const service = interpret(machine(store, context, Role.A));
 
@@ -66,9 +74,17 @@ test('Virtual funding as A', async () => {
   service.start();
 
   await waitForExpect(
-    () => expect(service.state.value).toEqual('setupJointChannel'),
+    () => expect(service.state.value).toMatchObject({setupJointChannel: 'waitForFirstJointState'}),
     EXPECT_TIMEOUT
   );
+
+  const outcome: Outcome = [] as any;
+  const channelConstants: ChannelConstants = {} as any;
+  const signature = '';
+  const state = firstState(outcome, channelConstants);
+  store.pushMessage({
+    signedStates: [{...state, signature}]
+  });
 
   await waitForExpect(() => expect(service.state.value).toEqual('success'), EXPECT_TIMEOUT);
 });
