@@ -1,13 +1,5 @@
 import {ChannelConstants, StateVariables, SignedState, Participant} from './types';
-import {
-  getChannelId,
-  signState,
-  State as NitroState,
-  hashState,
-  getStateSignerAddress
-} from '@statechannels/nitro-protocol';
-import {splitSignature, joinSignature} from 'ethers/utils';
-import {convertToNitroOutcome} from './outcome-utils';
+import {signState, hashState, getSignerAddress, calculateChannelId} from './state-utils';
 
 export interface ChannelStoreEntry {
   readonly channelId: string;
@@ -22,23 +14,16 @@ export interface ChannelStoreEntry {
 }
 
 export class MemoryChannelStoreEntry implements ChannelStoreEntry {
-  public channelConstants: ChannelConstants;
-  public stateVariables: Record<string, StateVariables>;
-  public signatures: Record<string, string[]>;
-  public myIndex: number;
-
-  constructor(channelConstants: ChannelConstants, myIndex: number) {
-    this.channelConstants = channelConstants;
-    this.myIndex = myIndex;
-    this.stateVariables = {};
-    this.signatures = {};
-  }
+  constructor(
+    public readonly channelConstants: ChannelConstants,
+    public readonly myIndex: number,
+    public stateVariables: Record<string, StateVariables> = {},
+    public signatures: Record<string, string[]> = {}
+  ) {}
 
   private mySignature(stateVars: StateVariables, signatures: string[]): boolean {
-    const state = this.toNitroState(stateVars);
-    return signatures.some(
-      sig => getStateSignerAddress({state, signature: splitSignature(sig)}) === this.myAddress
-    );
+    const state = {...stateVars, ...this.channelConstants};
+    return signatures.some(sig => getSignerAddress(state, sig) === this.myAddress);
   }
 
   private get myAddress(): string {
@@ -66,13 +51,7 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
   }
 
   get channelId(): string {
-    const {chainId, channelNonce, participants} = this.channelConstants;
-    const addresses = participants.map(p => p.signingAddress);
-    return getChannelId({
-      chainId,
-      channelNonce: channelNonce.toString(),
-      participants: addresses
-    });
+    return calculateChannelId(this.channelConstants);
   }
 
   get participants(): Participant[] {
@@ -80,10 +59,9 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
   }
 
   signAndAdd(stateVars: StateVariables, privateKey: string): SignedState {
-    const state = this.toNitroState(stateVars);
+    const state = {...stateVars, ...this.channelConstants};
 
-    const {signature} = signState(state, privateKey);
-    const signatureString = joinSignature(signature);
+    const signatureString = signState(state, privateKey);
 
     this.addState(stateVars, signatureString);
 
@@ -96,13 +74,13 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
   }
 
   addState(stateVars: StateVariables, signature: string) {
-    const state = this.toNitroState(stateVars);
+    const state = {...stateVars, ...this.channelConstants};
     const stateHash = hashState(state);
     this.stateVariables[stateHash] = stateVars;
     const {participants} = this.channelConstants;
 
     // check the signature
-    const signer = getStateSignerAddress({state, signature: splitSignature(signature)});
+    const signer = getSignerAddress(state, signature);
     const signerIndex = participants.findIndex(p => p.signingAddress === signer);
 
     if (signerIndex === -1) {
@@ -117,30 +95,5 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
   }
   private nParticipants(): number {
     return this.channelConstants.participants.length;
-  }
-
-  // Converts to the legacy State format expected by the Nitro protocol state
-  private toNitroState(stateVars: StateVariables): NitroState {
-    const {
-      challengeDuration,
-      appDefinition,
-      channelNonce,
-      participants,
-      chainId
-    } = this.channelConstants;
-    const channel = {
-      channelNonce: channelNonce.toString(),
-      chainId,
-      participants: participants.map(x => x.signingAddress)
-    };
-
-    return {
-      ...stateVars,
-      outcome: convertToNitroOutcome(stateVars.outcome),
-      challengeDuration: challengeDuration.toNumber(),
-      appDefinition,
-      channel,
-      turnNum: stateVars.turnNum.toNumber()
-    };
   }
 }

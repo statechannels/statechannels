@@ -74,7 +74,7 @@ test('newObjectiveFeed', () => {
   const store = new MemoryStore();
 
   const outputs: Objective[] = [];
-  store.newObjectiveFeed().subscribe(x => outputs.push(x));
+  store.newObjectiveFeed.subscribe(x => outputs.push(x));
 
   store.pushMessage({objectives: [objective]});
   expect(outputs).toEqual([objective]);
