@@ -11,6 +11,9 @@ export interface ChannelStoreEntry {
 
   readonly stateVariables: Record<string, StateVariables>; // TODO: Should we even expose this?
   readonly signatures: Record<string, (string | undefined)[]>; // TODO: Should we even expose this?
+
+  // TEMPORARY
+  toNitroState(stateVariables: StateVariables): NitroState;
 }
 
 export class MemoryChannelStoreEntry implements ChannelStoreEntry {
