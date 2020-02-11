@@ -33,6 +33,12 @@ interface Guaranteed {
 }
 
 export type Funding = DirectFunding | IndirectFunding | VirtualFunding | Guaranteed;
+interface ChannelChainInfo {
+  readonly challenge?: {state: State; challengeExpiry: BigNumber};
+  readonly amount: BigNumber;
+  // TODO: This is the same as challengeExpiry < now
+  readonly finalized: boolean;
+}
 
 // get it so that when you add a state to a channel, it sends that state to all participant
 
@@ -47,7 +53,7 @@ export interface Store {
   outboxFeed: Observable<Message>;
   pushMessage: (message: Message) => void;
   channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry>;
-
+  chainUpdatedFeed(channelId: string): Observable<ChannelChainInfo>;
   getAddress(): string;
   addState(channelId: string, stateVars: StateVariables);
   createChannel(
@@ -60,6 +66,11 @@ export interface Store {
 }
 
 export class MemoryStore implements Store {
+  chainUpdatedFeed(_channelId: string): Observable<ChannelChainInfo> {
+    // TODO: Implement this
+    return new Observable<ChannelChainInfo>();
+  }
+
   private _channels: Record<string, MemoryChannelStoreEntry> = {};
   private _objectives: Objective[] = [];
   private _nonces: Record<string, BigNumber> = {};
