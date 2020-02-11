@@ -59,6 +59,20 @@ export function observeRequests(
   );
 }
 
+async function metamaskUnlocked(): Promise<string> {
+  return new Promise(function(resolve, reject) {
+    function ifSelectedAddressThenResolve() {
+      if (typeof window.ethereum.selectedAddress === 'string') {
+        resolve(window.ethereum.selectedAddress);
+      }
+    }
+    ifSelectedAddressThenResolve();
+    window.ethereum.on('accountsChanged', function() {
+      ifSelectedAddressThenResolve();
+    });
+  });
+}
+
 export async function handleMessage(
   event,
   workflowManager: WorkflowManager,
@@ -86,6 +100,14 @@ export async function handleMessage(
           case 'GetAddress':
             const address = ourWallet.address;
             window.parent.postMessage(jrs.success(id, address), '*');
+            break;
+          case 'GetEthereumSelectedAddress':
+            //  ask metamask permission to access accounts
+            await window.ethereum.enable();
+            //  block until accounts changed
+            //  (indicating user acceptance)
+            const ethereumSelectedAddress: string = await metamaskUnlocked();
+            window.parent.postMessage(jrs.success(id, ethereumSelectedAddress), '*');
             break;
           case 'CreateChannel':
             await handleCreateChannelMessage(
