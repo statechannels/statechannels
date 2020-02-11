@@ -1,4 +1,4 @@
-import {StateWithoutChannelId, ChannelConstants} from './types';
+import {StateWithoutChannelId, ChannelConstants, Outcome, StateVariables} from './types';
 import {convertToNitroOutcome} from './outcome-utils';
 import {
   State as NitroState,
@@ -51,4 +51,16 @@ export function hashState(state: StateWithoutChannelId): string {
 export function getSignerAddress(state: StateWithoutChannelId, signature: string): string {
   const nitroState = toNitroState(state);
   return getNitroSignerAddress({state: nitroState, signature: splitSignature(signature)});
+}
+
+export function statesEqual(
+  constants: ChannelConstants,
+  left: StateVariables,
+  right?: StateVariables
+): boolean {
+  return right ? hashState({...left, ...constants}) === hashState({...right, ...constants}) : false;
+}
+
+export function outcomesEqual(left: Outcome, right?: Outcome) {
+  throw 'unimplemented';
 }
