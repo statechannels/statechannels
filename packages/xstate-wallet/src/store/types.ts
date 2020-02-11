@@ -60,12 +60,12 @@ export function isMixedAllocation(outcome: Outcome): outcome is MixedAllocation 
 }
 
 // TODO: Better name?
-export type AuxillaryChannelOutcome =
+export type SimpleOutcome =
   | SimpleEthAllocation
   | SimpleTokenAllocation
   | SimpleEthGuarantee
   | SimpleTokenGuarantee;
-export type Outcome = AuxillaryChannelOutcome | MixedAllocation;
+export type Outcome = SimpleOutcome | MixedAllocation;
 
 export interface ChannelConstants {
   chainId: string;

@@ -85,18 +85,18 @@ describe('createChannel', () => {
 
     const channelId = await store.createChannel(
       participants,
-      appDefinition,
       challengeDuration,
-      stateVars
+      stateVars,
+      appDefinition
     );
 
     expect(channelId).toMatch(/0x/);
 
     const channelId2 = await store.createChannel(
       participants,
-      appDefinition,
       challengeDuration,
-      stateVars
+      stateVars,
+      appDefinition
     );
 
     expect(channelId2).toMatch(/0x/);
@@ -107,7 +107,7 @@ describe('createChannel', () => {
     const store = new MemoryStore();
 
     await expect(
-      store.createChannel(participants, appDefinition, challengeDuration, stateVars)
+      store.createChannel(participants, challengeDuration, stateVars, appDefinition)
     ).rejects.toMatchObject({
       message: "Couldn't find the signing key for any participant in wallet."
     });

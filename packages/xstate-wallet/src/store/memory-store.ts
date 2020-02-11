@@ -8,7 +8,8 @@ import {BigNumber, bigNumberify} from 'ethers/utils';
 import {Wallet} from 'ethers';
 
 import {State, SignedState, Participant, StateVariables} from './types';
-import {MemoryChannelStorage, ChannelStorage} from './memory-channel-storage';
+import {MemoryChannelStoreEntry, ChannelStoreEntry} from './memory-channel-storage';
+import {AddressZero} from 'ethers/constants';
 
 interface DirectFunding {
   type: 'Direct';
@@ -53,7 +54,7 @@ interface InternalEvents {
 }
 
 export interface Store {
-  channelUpdatedFeed(channelId: string): Observable<ChannelStorage>;
+  channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry>;
   newObjectiveFeed(): Observable<Objective>;
 
   pushMessage: (message: Message) => void;
@@ -63,14 +64,14 @@ export interface Store {
   addState(channelId: string, stateVars: StateVariables);
   createChannel(
     participants: Participant[],
-    appDefinition: string,
     challengeDuration: BigNumber,
-    stateVars: StateVariables
+    stateVars: StateVariables,
+    appDefinition?: string
   ): Promise<string>;
 }
 
 export class MemoryStore {
-  private _channels: Record<string, MemoryChannelStorage> = {};
+  private _channels: Record<string, MemoryChannelStoreEntry> = {};
   private _objectives: Objective[] = [];
   private _nonces: Record<string, BigNumber> = {};
   private _eventEmitter = new EventEmitter<InternalEvents>();
@@ -98,8 +99,8 @@ export class MemoryStore {
   }
 
   // for short-term backwards compatibility
-  public channelUpdatedFeed(channelId: string): Observable<ChannelStorage> {
-    return fromEvent<ChannelStorage>(this._eventEmitter, 'channelUpdated').pipe(
+  public channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry> {
+    return fromEvent<ChannelStoreEntry>(this._eventEmitter, 'channelUpdated').pipe(
       filter(cs => cs.channelId === channelId)
     );
   }
@@ -114,9 +115,9 @@ export class MemoryStore {
 
   public async createChannel(
     participants: Participant[],
-    appDefinition: string,
     challengeDuration: BigNumber,
-    stateVars: StateVariables
+    stateVars: StateVariables,
+    appDefinition = AddressZero
   ): Promise<string> {
     const addresses = participants.map(x => x.signingAddress);
 
@@ -135,7 +136,7 @@ export class MemoryStore {
       channelNonce: channelNonce.toString(),
       participants: addresses
     });
-    this._channels[channelId] = new MemoryChannelStorage(
+    this._channels[channelId] = new MemoryChannelStoreEntry(
       {channelNonce, chainId, participants, appDefinition, challengeDuration},
       myIndex
     );
@@ -190,13 +191,11 @@ export class MemoryStore {
       });
     }
 
-    if (objectives) {
-      objectives.forEach(objective => {
-        if (!this._objectives.find(p => _.isEqual(p, objective))) {
-          this._objectives.push(objective);
-          this._eventEmitter.emit('newObjective', objective);
-        }
-      });
-    }
+    objectives?.forEach(objective => {
+      if (!this._objectives.find(p => _.isEqual(p, objective))) {
+        this._objectives.push(objective);
+        this._eventEmitter.emit('newObjective', objective);
+      }
+    });
   }
 }
