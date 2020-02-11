@@ -67,6 +67,7 @@
     "lint:check": "eslint . --ext .ts --cache",
     "lint:write": "eslint . --ext .ts --fix",
     "start": "node scripts/start.js",
+    "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
     "storybook": "start-storybook -p 6006",
     "test": "npx jest",
     "test:ci": "yarn test --ci --runInBand"
