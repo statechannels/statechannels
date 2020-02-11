@@ -25,13 +25,13 @@ import {
 import {WorkflowManager} from './workflow-manager';
 import {fromEvent, Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
-import {filterAsync} from './utils';
+import {filterByPromise} from 'filter-async-rxjs-pipe';
 
 export function observeRequests(
   channelId: string
 ): Observable<JoinChannelParams | CloseChannelParams | UpdateChannelParams> {
   return fromEvent(window, 'message').pipe(
-    filterAsync(async (e: MessageEvent) => {
+    filterByPromise(async (e: MessageEvent) => {
       if (!e || !e.data.jsonrpc || e.data.jsonrpc !== '2.0') {
         return false;
       }
