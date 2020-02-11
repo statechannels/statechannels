@@ -8,7 +8,8 @@ import {BigNumber, bigNumberify} from 'ethers/utils';
 import {Wallet} from 'ethers';
 
 import {State, SignedState, Participant, StateVariables} from './types';
-import {MemoryChannelStorage} from './memory-channel-storage';
+import {MemoryChannelStoreEntry, ChannelStoreEntry} from './memory-channel-storage';
+import {AddressZero} from 'ethers/constants';
 
 interface DirectFunding {
   type: 'Direct';
@@ -32,28 +33,46 @@ interface Guaranteed {
 
 export type Funding = DirectFunding | IndirectFunding | VirtualFunding | Guaranteed;
 
-interface CreateAndDirectFund {
-  name: 'CreateAndDirectFund';
-  participants: Participant[];
-}
 interface Message {
   signedStates?: SignedState[];
-  protocols?: Protocol[];
+  objectives?: Objective[];
 }
 
-export type Protocol = CreateAndDirectFund;
+// TODO: What should this look like exactly?
+export interface Objective {
+  name: string;
+  participants: Participant[];
+  data: any;
+}
 
 // get it so that when you add a state to a channel, it sends that state to all participant
 
 interface InternalEvents {
   stateReceived: [State];
-  newProtocol: [Protocol];
-  sendMessage: [Message];
+  newObjective: [Objective];
+  addToOutbox: [Message];
+}
+
+export interface Store {
+  channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry>;
+  newObjectiveFeed(): Observable<Objective>;
+
+  pushMessage: (message: Message) => void;
+  outboxFeed: Observable<Message>;
+
+  getAddress(): string;
+  addState(channelId: string, stateVars: StateVariables);
+  createChannel(
+    participants: Participant[],
+    challengeDuration: BigNumber,
+    stateVars: StateVariables,
+    appDefinition?: string
+  ): Promise<string>;
 }
 
 export class MemoryStore {
-  private _channels: Record<string, MemoryChannelStorage> = {};
-  private _protocols: Protocol[] = [];
+  private _channels: Record<string, MemoryChannelStoreEntry> = {};
+  private _objectives: Objective[] = [];
   private _nonces: Record<string, BigNumber> = {};
   private _eventEmitter = new EventEmitter<InternalEvents>();
   private _privateKeys: Record<string, string> = {};
@@ -79,19 +98,26 @@ export class MemoryStore {
     );
   }
 
-  public newProtocolFeed(): Observable<Protocol> {
-    return fromEvent(this._eventEmitter, 'newProtocol');
+  // for short-term backwards compatibility
+  public channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry> {
+    return fromEvent<ChannelStoreEntry>(this._eventEmitter, 'channelUpdated').pipe(
+      filter(cs => cs.channelId === channelId)
+    );
   }
 
-  public messageFeed(): Observable<Message> {
-    return fromEvent(this._eventEmitter, 'sendMessage');
+  public newObjectiveFeed(): Observable<Objective> {
+    return fromEvent(this._eventEmitter, 'newObjective');
+  }
+
+  public outboxFeed(): Observable<Message> {
+    return fromEvent(this._eventEmitter, 'addToOutbox');
   }
 
   public async createChannel(
     participants: Participant[],
-    appDefinition: string,
     challengeDuration: BigNumber,
-    stateVars: StateVariables
+    stateVars: StateVariables,
+    appDefinition = AddressZero
   ): Promise<string> {
     const addresses = participants.map(x => x.signingAddress);
 
@@ -110,7 +136,7 @@ export class MemoryStore {
       channelNonce: channelNonce.toString(),
       participants: addresses
     });
-    this._channels[channelId] = new MemoryChannelStorage(
+    this._channels[channelId] = new MemoryChannelStoreEntry(
       {channelNonce, chainId, participants, appDefinition, challengeDuration},
       myIndex
     );
@@ -146,7 +172,7 @@ export class MemoryStore {
 
     const signedState = channelStorage.signAndAdd(stateVars, privateKey);
 
-    this._eventEmitter.emit('sendMessage', {signedStates: [signedState]});
+    this._eventEmitter.emit('addToOutbox', {signedStates: [signedState]});
   }
 
   public getAddress(): string {
@@ -154,7 +180,7 @@ export class MemoryStore {
   }
 
   pushMessage(message: Message) {
-    const {signedStates, protocols} = message;
+    const {signedStates, objectives} = message;
 
     if (signedStates) {
       // todo: check sig
@@ -165,13 +191,11 @@ export class MemoryStore {
       });
     }
 
-    if (protocols) {
-      protocols.forEach(protocol => {
-        if (!this._protocols.find(p => _.isEqual(p, protocol))) {
-          this._protocols.push(protocol);
-          this._eventEmitter.emit('newProtocol', protocol);
-        }
-      });
-    }
+    objectives?.forEach(objective => {
+      if (!this._objectives.find(p => _.isEqual(p, objective))) {
+        this._objectives.push(objective);
+        this._eventEmitter.emit('newObjective', objective);
+      }
+    });
   }
 }
