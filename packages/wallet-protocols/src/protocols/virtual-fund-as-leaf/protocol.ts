@@ -6,7 +6,7 @@ import { Channel, getChannelId, outcomesEqual } from '../../';
 import { add } from '../../mathOps';
 import { Balance } from '../../types';
 import { ethGuaranteeOutcome, ethAllocationOutcome } from '../../calculations';
-import { Store } from '../../store';
+import { ObsoleteStore } from '../../store';
 import { connectToStore, getDataAndInvoke } from '../../machine-utils';
 
 import { CreateNullChannel, SupportState, LedgerFunding } from '..';
@@ -32,7 +32,7 @@ const allocationItem = (balance: Balance): AllocationItem => ({
   amount: balance.wei,
 });
 
-export const jointChannelArgs = (store: Store) => async ({
+export const jointChannelArgs = (store: ObsoleteStore) => async ({
   jointChannel,
   balances,
   hubAddress,
@@ -61,7 +61,7 @@ function jointChannelAllocation(balances: Balance[], hubAddress: string) {
   return allocation;
 }
 
-export const guarantorChannelArgs = (store: Store) => async ({
+export const guarantorChannelArgs = (store: ObsoleteStore) => async ({
   jointChannel,
   index,
   guarantorChannel,
@@ -109,7 +109,7 @@ const fundGuarantor = {
   invoke: { src: 'ledgerFunding', data: fundGuarantorArgs, onDone: 'fundTarget' },
 };
 
-export function fundTargetArgs(store: Store) {
+export function fundTargetArgs(store: ObsoleteStore) {
   return async ({
     jointChannel,
     balances,
@@ -152,7 +152,7 @@ export const config = {
   states: { createChannels, fundGuarantor, fundTarget, success: { type: 'final' as 'final' } },
 };
 
-const options = (store: Store) => ({
+const options = (store: ObsoleteStore) => ({
   services: {
     fundGuarantorArgs,
     fundTargetArgs: fundTargetArgs(store),

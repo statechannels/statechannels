@@ -1,7 +1,7 @@
 import { AnyEventObject, MachineConfig, assign, spawn } from 'xstate';
 import { filter, map } from 'rxjs/operators';
 
-import { Store, observeChannel } from '../../store';
+import { ObsoleteStore, observeChannel } from '../../store';
 import { connectToStore } from '../../machine-utils';
 
 const PROTOCOL = 'advance-channel';
@@ -42,7 +42,7 @@ export type Services = {
   sendState(ctx: Init): Promise<void>;
 };
 
-const notifyWhenAdvanced = (store: Store, ctx: Init) => {
+const notifyWhenAdvanced = (store: ObsoleteStore, ctx: Init) => {
   return observeChannel(store, ctx.channelId).pipe(
     map(event => event.entry),
     filter(e => {
@@ -52,7 +52,7 @@ const notifyWhenAdvanced = (store: Store, ctx: Init) => {
   );
 };
 
-const sendState = (store: Store) => async ({ channelId, targetTurnNum }: Init) => {
+const sendState = (store: ObsoleteStore) => async ({ channelId, targetTurnNum }: Init) => {
   const turnNum = targetTurnNum;
   /*
   TODO: the actual turnNum is calculated below. However, to determine whether
@@ -73,7 +73,7 @@ const sendState = (store: Store) => async ({ channelId, targetTurnNum }: Init) =
   }
 };
 
-const options = (store: Store) => ({
+const options = (store: ObsoleteStore) => ({
   services: {
     sendState: sendState(store),
   },

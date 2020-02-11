@@ -5,7 +5,7 @@ import { AllocationAssetOutcome } from '@statechannels/nitro-protocol';
 import { AddressZero } from 'ethers/constants';
 
 import { MachineFactory } from '../../machine-utils';
-import { Store } from '../..';
+import { ObsoleteStore } from '../..';
 
 import { Participant } from '../../store';
 
@@ -91,7 +91,7 @@ export const config: MachineConfig<Context, any, any> = {
   },
 };
 
-export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => {
+export const machine: MachineFactory<Init, any> = (store: ObsoleteStore, init: Init) => {
   async function constructFirstState(ctx: Init): Promise<void> {
     const { appData, appDefinition, channelId, challengeDuration } = ctx;
 

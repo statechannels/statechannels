@@ -54,7 +54,7 @@ export function checkThat<T, S>(t: T | S, isTypeT: TypeGuard<T, S>): T {
   return t;
 }
 
-export { EphemeralStore, Store, Constructor, ChannelUpdated } from './store';
+export { EphemeralObsoleteStore, ObsoleteStore, Constructor, ChannelUpdated } from './store';
 export { IChain, ChainEvent, ChainEventType, ChainEventListener } from './chain';
 export { ChannelStoreEntry } from './ChannelStoreEntry';
 export { SignedState } from './types';

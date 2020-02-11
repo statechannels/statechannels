@@ -2,7 +2,7 @@ import { assign, DoneInvokeEvent, Machine, MachineConfig } from 'xstate';
 import { Allocation } from '@statechannels/nitro-protocol';
 
 import { allocateToTarget, getEthAllocation } from '../../calculations';
-import { Channel, Store, success } from '../..';
+import { Channel, ObsoleteStore, success } from '../..';
 import { MachineFactory, getDataAndInvoke } from '../../machine-utils';
 import { Funding } from '../../ChannelStoreEntry';
 
@@ -116,7 +116,7 @@ export const guards = {
   channelFound: (_, { data }: DoneInvokeEvent<LedgerLookup>) => data.type === 'FOUND',
 };
 
-export const machine: MachineFactory<Init, any> = (store: Store, context: Init) => {
+export const machine: MachineFactory<Init, any> = (store: ObsoleteStore, context: Init) => {
   async function getNullChannelArgs({ targetChannelId }: Init): Promise<CreateNullChannel.Init> {
     const { channel: targetChannel } = store.getEntry(targetChannelId);
 

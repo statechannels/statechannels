@@ -1,6 +1,6 @@
 import { Channel } from '@statechannels/nitro-protocol';
 
-import { Store } from '../../store';
+import { ObsoleteStore } from '../../store';
 import { Balance } from '../../types';
 import { connectToStore, getDataAndInvoke } from '../../machine-utils';
 import { VirtualLeaf, CreateNullChannel, SupportState, LedgerFunding } from '../';
@@ -15,7 +15,7 @@ export interface Init {
   guarantorChannels: [Channel, Channel];
 }
 
-const jointChannelArgs = (store: Store) => async ({
+const jointChannelArgs = (store: ObsoleteStore) => async ({
   jointChannel,
   balances,
 }: Init): Promise<CreateNullChannel.Init> =>
@@ -32,7 +32,7 @@ const createJointChannel = getDataAndInvoke(
   'joint'
 );
 
-const guarantorArgs = (index: VirtualLeaf.Indices) => (store: Store) => async ({
+const guarantorArgs = (index: VirtualLeaf.Indices) => (store: ObsoleteStore) => async ({
   jointChannel,
   guarantorChannels,
 }: Init): Promise<CreateNullChannel.Init> =>
@@ -108,7 +108,7 @@ export const config = {
   states: { createChannels, fundGuarantors, fundTarget, success: { type: FINAL } },
 };
 
-const options = (store: Store) => ({
+const options = (store: ObsoleteStore) => ({
   services: {
     fundTargetArgs: VirtualLeaf.fundTargetArgs(store),
     createNullChannel: CreateNullChannel.machine(store),

@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 import waitForExpect from 'wait-for-expect';
 
 import { Chain } from '../../chain';
-import { EphemeralStore } from '../..';
+import { EphemeralObsoleteStore } from '../..';
 import { log } from '../../utils';
 
 import { Init, machine } from './protocol';
@@ -12,7 +12,7 @@ jest.setTimeout(50000);
 
 it('handles the basic case going first', async () => {
   const chain = new Chain();
-  const store = new EphemeralStore({ chain });
+  const store = new EphemeralObsoleteStore({ chain });
   const channelId = ethers.utils.id('channel');
   const context: Init = {
     channelId: ethers.utils.id('channel'),
@@ -40,7 +40,7 @@ it('handles the basic case going first', async () => {
 
 it('handles the basic case', async () => {
   const chain = new Chain();
-  const store = new EphemeralStore({ chain });
+  const store = new EphemeralObsoleteStore({ chain });
   const channelId = ethers.utils.id('channel');
   const context: Init = {
     channelId: ethers.utils.id('channel'),

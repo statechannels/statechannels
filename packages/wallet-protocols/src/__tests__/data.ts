@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 import { State } from '@statechannels/nitro-protocol';
 
-import { Participant, EphemeralStore } from '../store';
+import { Participant, EphemeralObsoleteStore } from '../store';
 
 export const wallet1 = new ethers.Wallet(
   '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318'
@@ -91,7 +91,7 @@ export const ledgerState: State = {
 };
 
 export const storeWithKey = (chain, privateKey) =>
-  new EphemeralStore({
+  new EphemeralObsoleteStore({
     privateKeys: {
       [new ethers.Wallet(privateKey).address]: privateKey,
     },
