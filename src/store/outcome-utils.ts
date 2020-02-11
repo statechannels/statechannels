@@ -1,7 +1,8 @@
 import {
   Outcome as NitroOutcome,
   isAllocationOutcome,
-  AllocationItem as NitroAllocationItem
+  AllocationItem as NitroAllocationItem,
+  convertAddressToBytes32
 } from '@statechannels/nitro-protocol';
 import {Outcome, AllocationItem, SimpleEthAllocation, SimpleTokenAllocation} from './types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
@@ -66,7 +67,7 @@ function convertFromNitroAllocationItems(allocationItems: NitroAllocationItem[])
 function convertToNitroAllocationItems(allocationItems: AllocationItem[]): NitroAllocationItem[] {
   return allocationItems.map(a => ({
     amount: a.amount.toHexString(),
-    destination: a.destination
+    destination: convertAddressToBytes32(a.destination)
   }));
 }
 
@@ -90,14 +91,20 @@ export function convertToNitroOutcome(outcome: Outcome): NitroOutcome {
       return [
         {
           assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
-          guarantee: {targetChannelId: outcome.guarantorAddress, destinations: outcome.destinations}
+          guarantee: {
+            targetChannelId: outcome.guarantorAddress,
+            destinations: outcome.destinations.map(convertAddressToBytes32)
+          }
         }
       ];
     case 'SimpleTokenGuarantee':
       return [
         {
           assetHolderAddress: outcome.tokenAddress, // TODO: Map to assetholder address,
-          guarantee: {targetChannelId: outcome.guarantorAddress, destinations: outcome.destinations}
+          guarantee: {
+            targetChannelId: outcome.guarantorAddress,
+            destinations: outcome.destinations.map(convertAddressToBytes32)
+          }
         }
       ];
     case 'MixedAllocation':
