@@ -11845,7 +11845,7 @@ es6-map@^0.1.5:
     es6-symbol "~3.1.1"
     event-emitter "~0.3.5"
 
-es6-promise@^4.0.3, es6-promise@^4.0.5:
+es6-promise@^4.0.3, es6-promise@^4.0.5, es6-promise@^4.2.6:
   version "4.2.8"
   resolved "https://registry.npmjs.org/es6-promise/-/es6-promise-4.2.8.tgz#4eb21594c972bc40553d276e510539143db53e0a"
   integrity sha512-HJDGx5daxeIvxdBxvG2cb9g4tEvwIk3i8+nhX0yGrYmZUzbkdg8QbDevheDB8gd0//uPj4c1EQua8Q+MViT0/w==
@@ -13660,6 +13660,14 @@ fill-range@^7.0.1:
   integrity sha512-qOo9F+dMUmC2Lcb4BbVvnKJxTPjCm+RRpe4gDuGrzkL7mEVl/djYSu2OdQ2Pa302N4oqkSg9ir6jaLWJ2USVpQ==
   dependencies:
     to-regex-range "^5.0.1"
+
+filter-async-rxjs-pipe@0.1.5:
+  version "0.1.5"
+  resolved "https://registry.npmjs.org/filter-async-rxjs-pipe/-/filter-async-rxjs-pipe-0.1.5.tgz#d4700a4555bf0b5c7f09f91db9d3fe1e70c5ebd5"
+  integrity sha512-e3S9qKNm1UuFaZ4qdt9CXSW7qVYSXXh1aG5f8+059i06esq390NI/eXQ+lVrK+cM7+XVukDQcIZTBwoLgGL+Tw==
+  dependencies:
+    es6-promise "^4.2.6"
+    rxjs "^6.4.0"
 
 filter-obj@^2.0.1:
   version "2.0.1"
