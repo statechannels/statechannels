@@ -1,26 +1,19 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="75px" height="75px" viewBox="0 0 75 75" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 51.3 (57544) - http://www.bohemiancoding.com/sketch -->
-    <title>#UI / Components / Icons / Circle</title>
-    <desc>Created with Sketch.</desc>
-    <defs>
-        <path d="M29.5999982,58.7999965 C13.4732845,58.7999965 0.399999976,45.726712 0.399999976,29.5999982 C0.399999976,13.4732845 13.4732845,0.399999976 29.5999982,0.399999976 C45.726712,0.399999976 58.7999965,13.4732845 58.7999965,29.5999982 C58.7999965,45.726712 45.726712,58.7999965 29.5999982,58.7999965 Z M29.5999982,53.1999968 C42.6339176,53.1999968 53.1999968,42.6339176 53.1999968,29.5999982 C53.1999968,16.5660789 42.6339176,5.99999964 29.5999982,5.99999964 C16.5660789,5.99999964 5.99999964,16.5660789 5.99999964,29.5999982 C5.99999964,42.6339176 16.5660789,53.1999968 29.5999982,53.1999968 Z" id="path-1"></path>
-    </defs>
-    <g id="UI" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="Your-Turn" transform="translate(-123.000000, -253.000000)">
-            <g id="#UI-/-Components-/-Icons-/-Circle" transform="translate(132.000000, 255.000000)">
-                <g id="#UI-/-🎨Color-/-White" transform="translate(-0.800000, -0.800000)">
-                    <mask id="mask-2" fill="white">
-                        <use xlink:href="#path-1"></use>
-                    </mask>
-                    <use id="Mask" fill="#979797" fill-rule="nonzero" xlink:href="#path-1"></use>
-                    <g mask="url(#mask-2)" fill="#FFFFFF" id="Icon-Shade">
-                        <g transform="translate(-3.200000, -4.000000)">
-                            <rect x="0" y="0" width="65.5448237" height="65.5448237"></rect>
-                        </g>
-                    </g>
-                </g>
-            </g>
-        </g>
-    </g>
+<svg width="74" height="74" viewBox="0 0 74 74" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M0.5 37C0.5 57.1584 16.8416 73.5 37 73.5C57.1584 73.5 73.5 57.1584 73.5 37C73.5 16.8416 57.1584 0.5 37 0.5C16.8416 0.5 0.5 16.8416 0.5 37ZM66.5 37C66.5 53.2924 53.2924 66.5 37 66.5C20.7076 66.5 7.5 53.2924 7.5 37C7.5 20.7076 20.7076 7.5 37 7.5C53.2924 7.5 66.5 20.7076 66.5 37Z"
+    fill="#979797"
+  />
+  <mask id="mask0" mask-type="alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="74" height="74">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M0.5 37C0.5 57.1584 16.8416 73.5 37 73.5C57.1584 73.5 73.5 57.1584 73.5 37C73.5 16.8416 57.1584 0.5 37 0.5C16.8416 0.5 0.5 16.8416 0.5 37ZM66.5 37C66.5 53.2924 53.2924 66.5 37 66.5C20.7076 66.5 7.5 53.2924 7.5 37C7.5 20.7076 20.7076 7.5 37 7.5C53.2924 7.5 66.5 20.7076 66.5 37Z"
+      fill="white"
+    />
+  </mask>
+  <g mask="url(#mask0)">
+    <rect x="-4" y="-5" width="83" height="83" fill="#4DCDEF" />
+  </g>
 </svg>
