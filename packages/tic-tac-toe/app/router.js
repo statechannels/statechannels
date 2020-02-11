@@ -8,5 +8,8 @@ export default class Router extends EmberRouter {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 Router.map(function() {
-  this.route('games', function() {});
+  this.route('games', function() {
+    this.route('waiting');
+  });
+  this.route('game');
 });

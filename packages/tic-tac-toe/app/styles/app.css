@@ -7,6 +7,7 @@ body:not(#test-body) {
   flex: 1;
   flex-direction: column;
   align-items: center;
+  height: 100%;
   @apply bg-bg;
 }
 
@@ -14,4 +15,5 @@ html:not(#test-html) {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  height: 100%;
 }
