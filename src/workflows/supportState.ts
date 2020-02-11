@@ -1,12 +1,12 @@
 import {AnyEventObject, AssignAction, MachineConfig, assign, spawn, Machine} from 'xstate';
 import {filter, map} from 'rxjs/operators';
 import {Store} from '../store';
-import {State} from '../store/types';
+import {StateRenamed} from '../store/types';
 import {statesEqual, outcomesEqual} from '../store/state-utils';
 
 const WORKFLOW = 'support-state';
 
-export type Init = {state: State};
+export type Init = {state: StateRenamed};
 
 /*
 TODO

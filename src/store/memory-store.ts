@@ -7,7 +7,7 @@ import {getChannelId} from '@statechannels/nitro-protocol';
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {Wallet} from 'ethers';
 
-import {State, Participant, StateVariables} from './types';
+import {StateRenamed, Participant, StateVariables} from './types';
 import {MemoryChannelStoreEntry, ChannelStoreEntry} from './memory-channel-storage';
 import {AddressZero} from 'ethers/constants';
 import {Objective, Message} from './wire-protocol';
@@ -37,7 +37,7 @@ export type Funding = DirectFunding | IndirectFunding | VirtualFunding | Guarant
 // get it so that when you add a state to a channel, it sends that state to all participant
 
 interface InternalEvents {
-  stateReceived: [State];
+  stateReceived: [StateRenamed];
   newObjective: [Objective];
   addToOutbox: [Message];
 }
@@ -81,8 +81,8 @@ export class MemoryStore implements Store {
     }
   }
 
-  public stateReceivedFeed(channelId: string): Observable<State> {
-    return fromEvent<State>(this._eventEmitter, 'stateReceived').pipe(
+  public stateReceivedFeed(channelId: string): Observable<StateRenamed> {
+    return fromEvent<StateRenamed>(this._eventEmitter, 'stateReceived').pipe(
       filter(e => e.channelId === channelId)
     );
   }

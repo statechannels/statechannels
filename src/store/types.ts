@@ -77,10 +77,10 @@ export interface ChannelConstants {
 
 export interface StateWithoutChannelId extends ChannelConstants, StateVariables {}
 
-export interface State extends ChannelConstants, StateVariables {
+export interface StateRenamed extends ChannelConstants, StateVariables {
   channelId: string;
 }
 
-export interface SignedState extends State {
+export interface SignedState extends StateRenamed {
   signature: string;
 }
