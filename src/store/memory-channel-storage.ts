@@ -11,23 +11,15 @@ export interface ChannelStoreEntry {
 
   readonly stateVariables: Record<string, StateVariables>; // TODO: Should we even expose this?
   readonly signatures: Record<string, (string | undefined)[]>; // TODO: Should we even expose this?
-
-  // TEMPORARY
-  toNitroState(stateVariables: StateVariables): NitroState;
 }
 
 export class MemoryChannelStoreEntry implements ChannelStoreEntry {
-  public channelConstants: ChannelConstants;
-  public stateVariables: Record<string, StateVariables>;
-  public signatures: Record<string, string[]>;
-  public myIndex: number;
-
-  constructor(channelConstants: ChannelConstants, myIndex: number) {
-    this.channelConstants = channelConstants;
-    this.myIndex = myIndex;
-    this.stateVariables = {};
-    this.signatures = {};
-  }
+  constructor(
+    public readonly channelConstants: ChannelConstants,
+    public readonly myIndex: number,
+    public stateVariables: Record<string, StateVariables> = {},
+    public signatures: Record<string, string[]> = {}
+  ) {}
 
   private mySignature(stateVars: StateVariables, signatures: string[]): boolean {
     const state = {...stateVars, ...this.channelConstants};
