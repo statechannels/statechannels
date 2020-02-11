@@ -14,7 +14,7 @@ export interface StateVariables {
   isFinal: boolean;
 }
 
-interface AllocationItem {
+export interface AllocationItem {
   destination: string;
   amount: BigNumber;
 }
