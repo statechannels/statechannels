@@ -1,4 +1,4 @@
-import {StateWithoutChannelId, ChannelConstants, Outcome, StateVariables} from './types';
+import {State, ChannelConstants, Outcome, StateVariables} from './types';
 import {convertToNitroOutcome} from './outcome-utils';
 import {
   State as NitroState,
@@ -9,7 +9,7 @@ import {
 } from '@statechannels/nitro-protocol';
 import {joinSignature, splitSignature} from 'ethers/utils';
 
-export function toNitroState(state: StateWithoutChannelId): NitroState {
+export function toNitroState(state: State): NitroState {
   const {challengeDuration, appDefinition, channelNonce, participants, chainId} = state;
   const channel = {
     channelNonce: channelNonce.toString(),
@@ -37,18 +37,18 @@ export function calculateChannelId(channelConstants: ChannelConstants): string {
   });
 }
 
-export function signState(state: StateWithoutChannelId, privateKey: string): string {
+export function signState(state: State, privateKey: string): string {
   const nitroState = toNitroState(state);
   const {signature} = signNitroState(nitroState, privateKey);
   return joinSignature(signature);
 }
 
-export function hashState(state: StateWithoutChannelId): string {
+export function hashState(state: State): string {
   const nitroState = toNitroState(state);
   return hashNitroState(nitroState);
 }
 
-export function getSignerAddress(state: StateWithoutChannelId, signature: string): string {
+export function getSignerAddress(state: State, signature: string): string {
   const nitroState = toNitroState(state);
   return getNitroSignerAddress({state: nitroState, signature: splitSignature(signature)});
 }
