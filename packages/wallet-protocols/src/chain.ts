@@ -1,3 +1,5 @@
+import { Observable } from 'rxjs';
+
 import { add } from './mathOps';
 export type ChainEventListener = (event: ChainEvent) => void;
 export type ChainEventType = ChainEvent['type'];
@@ -5,6 +7,9 @@ export interface IChain {
   initialize(): Promise<void>;
   getHoldings: (channelId: string) => Promise<string>;
   deposit: (channelId: string, expectedHeld: string, amount: string) => Promise<void>;
+  // TODO make fundingFeed non-optional
+  fundingFeed?: (channelId: string) => Observable<any>;
+  // TODO delete 'on'
   on: (chainEventType: ChainEventType, listener: ChainEventListener) => () => void;
 }
 

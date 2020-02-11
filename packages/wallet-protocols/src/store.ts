@@ -37,6 +37,7 @@ export interface ObsoleteStore {
   /*
   Store modifiers
   */
+  chain: IChain;
   deposit: IChain['deposit'];
   initializeChannel(entry: IChannelStoreEntry): void;
   sendState(state: State): void;
@@ -87,7 +88,7 @@ export class EphemeralObsoleteStore implements ObsoleteStore {
   private _privateKeys: Record<string, string>;
   private _nonces: Record<string, string> = {};
   private _eventEmitter = new EventEmitter();
-  protected _chain: IChain;
+
   protected _messagingService: IMessageService;
   private _ethAssetHolderAddress: string;
 
@@ -97,17 +98,20 @@ export class EphemeralObsoleteStore implements ObsoleteStore {
     this._privateKeys = privateKeys || {};
 
     // TODO: We probably shouldn't default to test implementations
-    this._chain = args?.chain || new Chain();
+    this.chain = args?.chain || new Chain();
     this._messagingService = args?.messagingService || messageService;
     this._ethAssetHolderAddress = args?.ethAssetHolderAddress || AddressZero;
-    this._chain // TODO: Bad form to call an async method in the constructor?
+    this.chain // TODO: Bad form to call an async method in the constructor?
       .initialize();
   }
+
+  public chain: IChain;
+
   public get ethAssetHolderAddress() {
     return this._ethAssetHolderAddress;
   }
   public async getHoldings(channelId: string) {
-    return await this._chain.getHoldings(channelId);
+    return await this.chain.getHoldings(channelId);
   }
   public on(eventType: StoreEventType, listener: StoreEventListener) {
     switch (eventType) {
@@ -118,14 +122,14 @@ export class EphemeralObsoleteStore implements ObsoleteStore {
         };
       case 'DEPOSITED':
       case 'REVERT':
-        return this._chain.on(eventType, listener);
+        return this.chain.on(eventType, listener);
       default:
         return unreachable(eventType);
     }
   }
 
   public async deposit(channelId: string, expectedHeld: string, amount: string) {
-    return await this._chain.deposit(channelId, expectedHeld, amount);
+    return await this.chain.deposit(channelId, expectedHeld, amount);
   }
 
   public async setFunding(channelId, funding: Funding) {

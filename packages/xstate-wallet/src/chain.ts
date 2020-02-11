@@ -6,7 +6,7 @@ import {State} from './store/types';
 import {Observable, fromEvent, from, concat} from 'rxjs';
 import {filter, map} from 'rxjs/operators';
 import {ETH_ASSET_HOLDER_ADDRESS, NITRO_ADJUDICATOR_ADDRESS} from './constants';
-import {ChainEvent} from '@statechannels/wallet-protocols';
+import {ChainEventType, ChainEventListener, ChainEvent} from '@statechannels/wallet-protocols';
 
 const EthAssetHolderInterface = new ethers.utils.Interface(
   // https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
@@ -65,8 +65,6 @@ export class ChainWatcher implements Chain {
       NitroAdjudicatorInterface,
       signer
     );
-    // TODO remove this
-    console.log(this._adjudicator);
   }
 
   public async deposit(channelId: string, expectedHeld: string, amount: string): Promise<void> {
@@ -111,6 +109,29 @@ export class ChainWatcher implements Chain {
       })
     );
     return concat(first, updates);
+  }
+  // TOFO remove 'on'
+  public on(eventType: ChainEventType, listener: ChainEventListener) {
+    if (eventType !== 'DEPOSITED') {
+      throw new Error(`No support for ${eventType}`);
+    }
+    if (!this._adjudicator) {
+      throw new Error('Chain must be initialized before being used');
+    } else {
+      const contractListener = (fromAddress, toAddress, value, event) => {
+        const chainEvent: ChainEvent = {
+          type: 'DEPOSITED',
+          channelId: event.args.destination,
+          amount: event.args.amountDeposited,
+          total: event.args.destinationHoldings
+        };
+        listener(chainEvent);
+      };
+      this._assetHolders[0].on('Deposited', contractListener);
+      return () => {
+        this._assetHolders[0]?.removeListener('Deposited', contractListener);
+      };
+    }
   }
   public fundingFeed(channelId: string): Observable<any> {
     const assetHolder = this._assetHolders[0];
