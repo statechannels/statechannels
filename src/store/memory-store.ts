@@ -67,7 +67,8 @@ export interface Store {
 
 export class MemoryStore implements Store {
   chainUpdatedFeed(_channelId: string): Observable<ChannelChainInfo> {
-    throw new Error('TODO: Method not implemented.');
+    // TODO: Implement this
+    return new Observable<ChannelChainInfo>();
   }
 
   private _channels: Record<string, MemoryChannelStoreEntry> = {};
