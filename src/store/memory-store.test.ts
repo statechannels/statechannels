@@ -1,6 +1,6 @@
 import {MemoryStore} from './memory-store';
 import {Objective} from './wire-protocol';
-import {StateRenamed, SimpleEthAllocation} from './types';
+import {SimpleEthAllocation, State} from './types';
 import {bigNumberify, BigNumber} from 'ethers/utils';
 import {Wallet} from 'ethers';
 
@@ -30,7 +30,7 @@ const channelNonce = bigNumberify(0);
 const appDefinition = '0x5409ED021D9299bf6814279A6A1411A7e866A631';
 const challengeDuration = bigNumberify(60);
 const channelConstants = {chainId, participants, channelNonce, appDefinition, challengeDuration};
-const state: StateRenamed = {channelId, ...stateVars, ...channelConstants};
+const state: State = {...stateVars, ...channelConstants};
 const signature = '0x123';
 const signedState = {...state, signature};
 
@@ -46,7 +46,7 @@ describe('getAddress', () => {
 describe('stateReceivedFeed', () => {
   test('it fires when a state with the correct channel id is received', () => {
     const store = new MemoryStore();
-    const outputs: StateRenamed[] = [];
+    const outputs: State[] = [];
     store.stateReceivedFeed(channelId).subscribe(x => outputs.push(x));
     store.pushMessage({signedStates: [signedState]});
 
@@ -56,7 +56,7 @@ describe('stateReceivedFeed', () => {
   test("it doesn't fire if the channelId doesn't match", () => {
     const store = new MemoryStore();
 
-    const outputs: StateRenamed[] = [];
+    const outputs: State[] = [];
     store.stateReceivedFeed('a-different-channel-id').subscribe(x => outputs.push(x));
     store.pushMessage({signedStates: [signedState]});
 

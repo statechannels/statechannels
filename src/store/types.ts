@@ -75,12 +75,8 @@ export interface ChannelConstants {
   challengeDuration: BigNumber;
 }
 
-export interface StateWithoutChannelId extends ChannelConstants, StateVariables {}
+export interface State extends ChannelConstants, StateVariables {}
 
-export interface StateRenamed extends ChannelConstants, StateVariables {
-  channelId: string;
-}
-
-export interface SignedState extends StateRenamed {
+export interface SignedState extends State {
   signature: string;
 }
