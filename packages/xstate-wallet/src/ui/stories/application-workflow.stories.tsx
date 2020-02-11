@@ -5,15 +5,10 @@ import {
 export default {title: 'X-state wallet'};
 import {storiesOf} from '@storybook/react';
 import {interpret} from 'xstate';
-import {EphemeralObsoleteStore} from '@statechannels/wallet-protocols';
 import {renderWalletInFrontOfApp} from './helpers';
+import {MemoryStore} from '../../store/memory-store';
 
-const store = new EphemeralObsoleteStore({
-  privateKeys: {
-    ['0xaddress']: '0xkey'
-  },
-  ethAssetHolderAddress: '0xassetholder'
-});
+const store = new MemoryStore(['0xkey']);
 
 const testContext = {
   channelId: '0x697ecf681033a2514ed19c90299a67ae8677f3c78b5877fe4550c4f0960e87b7'
