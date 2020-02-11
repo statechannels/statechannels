@@ -33,17 +33,35 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     this.signatures = {};
   }
 
-  get supported() {
-    // TODO: Find latest supported state
-    return undefined;
+  private mySignature(stateVars: StateVariables, signatures: string[]): boolean {
+    const state = this.toNitroState(stateVars);
+    return signatures.some(
+      sig => getStateSignerAddress({state, signature: splitSignature(sig)}) === this.myAddress
+    );
   }
+
+  private get myAddress(): string {
+    return this.participants[this.myIndex].signingAddress;
+  }
+
+  private get sortedByTurnNum(): Array<StateVariables & {signatures: string[]}> {
+    return Object.keys(this.stateVariables)
+      .map(k => {
+        return {...this.stateVariables[k], signatures: this.signatures[k]};
+      })
+      .sort((a, b) => a.turnNum.sub(b.turnNum).toNumber());
+  }
+
+  get supported() {
+    // TODO: proper check
+    return this.sortedByTurnNum.find(s => s.signatures.length === this.participants.length);
+  }
+
   get latestSupportedByMe() {
-    // TODO: Find latest supported by me state
-    return undefined;
+    return this.sortedByTurnNum.find(s => this.mySignature(s, s.signatures));
   }
   get latest(): StateVariables {
-    // TODO: get latest state
-    throw new Error('TODO: Implement Me');
+    return this.sortedByTurnNum[0];
   }
 
   get channelId(): string {
@@ -87,7 +105,7 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     const signerIndex = participants.findIndex(p => p.signingAddress === signer);
 
     if (signerIndex === -1) {
-      throw new Error('State not signed by a particant of this channel');
+      throw new Error('State not signed by a participant of this channel');
     }
 
     if (!this.signatures[stateHash]) {
