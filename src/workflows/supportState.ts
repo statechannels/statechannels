@@ -4,7 +4,7 @@ import {Store} from '../store';
 import {State} from '../store/types';
 import {statesEqual, outcomesEqual} from '../store/state-utils';
 
-const PROTOCOL = 'support-state';
+const WORKFLOW = 'support-state';
 
 export type Init = {state: State};
 
@@ -14,7 +14,7 @@ What happens if sendState fails?
 Do we abort? Or do we try to reach consensus on a later state?
 */
 export const config: MachineConfig<Init, any, AnyEventObject> = {
-  key: PROTOCOL,
+  key: WORKFLOW,
   initial: 'sendState',
   states: {
     sendState: {
