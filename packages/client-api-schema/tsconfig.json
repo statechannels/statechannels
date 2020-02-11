@@ -8,5 +8,5 @@
     "target": "es2015",
     "types": ["node", "jest"],
   },
-  "include": ["src/**/*", "types/**/*"]
+  "include": ["src/**/*"]
 }

@@ -17,7 +17,7 @@
     "index.ts": "yarn lint:check --max-warnings=0"
   },
   "scripts": {
-    "build": "yarn build:generate-types && yarn build:typescript",
+    "build": "yarn build:typescript",
     "build:generate-types": "ts-node build.ts",
     "build:typescript": "npx tsc -b",
     "build:ci": "ts-node build.ts",
@@ -44,5 +44,5 @@
     "eslint-plugin-prettier": "^3.1.1",
     "json-schema-to-typescript": "^8.0.0",
     "lint-staged": "9.4.0"
-  },
+  }
 }
