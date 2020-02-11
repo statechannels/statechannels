@@ -7,9 +7,10 @@ import {getChannelId} from '@statechannels/nitro-protocol';
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {Wallet} from 'ethers';
 
-import {State, SignedState, Participant, StateVariables} from './types';
+import {State, Participant, StateVariables} from './types';
 import {MemoryChannelStoreEntry, ChannelStoreEntry} from './memory-channel-storage';
 import {AddressZero} from 'ethers/constants';
+import {Objective, Message} from './wire-protocol';
 
 interface DirectFunding {
   type: 'Direct';
@@ -32,18 +33,6 @@ interface Guaranteed {
 }
 
 export type Funding = DirectFunding | IndirectFunding | VirtualFunding | Guaranteed;
-
-interface Message {
-  signedStates?: SignedState[];
-  objectives?: Objective[];
-}
-
-// TODO: What should this look like exactly?
-export interface Objective {
-  name: string;
-  participants: Participant[];
-  data: any;
-}
 
 // get it so that when you add a state to a channel, it sends that state to all participant
 
