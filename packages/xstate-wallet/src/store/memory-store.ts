@@ -43,11 +43,10 @@ interface InternalEvents {
 }
 
 export interface Store {
-  channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry>;
-  newObjectiveFeed(): Observable<Objective>;
-
-  pushMessage: (message: Message) => void;
+  newObjectiveFeed: Observable<Objective>;
   outboxFeed: Observable<Message>;
+  pushMessage: (message: Message) => void;
+  channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry>;
 
   getAddress(): string;
   addState(channelId: string, stateVars: StateVariables);
@@ -57,9 +56,10 @@ export interface Store {
     stateVars: StateVariables,
     appDefinition?: string
   ): Promise<string>;
+  getEntry(channelId): Promise<ChannelStoreEntry>;
 }
 
-export class MemoryStore {
+export class MemoryStore implements Store {
   private _channels: Record<string, MemoryChannelStoreEntry> = {};
   private _objectives: Objective[] = [];
   private _nonces: Record<string, BigNumber> = {};
@@ -94,11 +94,11 @@ export class MemoryStore {
     );
   }
 
-  public newObjectiveFeed(): Observable<Objective> {
+  get newObjectiveFeed(): Observable<Objective> {
     return fromEvent(this._eventEmitter, 'newObjective');
   }
 
-  public outboxFeed(): Observable<Message> {
+  get outboxFeed(): Observable<Message> {
     return fromEvent(this._eventEmitter, 'addToOutbox');
   }
 
@@ -186,5 +186,15 @@ export class MemoryStore {
         this._eventEmitter.emit('newObjective', objective);
       }
     });
+  }
+
+  public async getEntry(channelId: string): Promise<ChannelStoreEntry> {
+    const entry = this._channels[channelId];
+    return new MemoryChannelStoreEntry(
+      entry.channelConstants,
+      entry.myIndex,
+      entry.stateVariables,
+      entry.signatures
+    );
   }
 }
