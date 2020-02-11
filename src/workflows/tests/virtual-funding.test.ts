@@ -30,11 +30,15 @@ const wallets = {
 jest.setTimeout(10000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 test('Virtual funding as A', async () => {
-  const channel: Channel = {} as any;
+  const channel: Channel = {
+    participants: [wallet1.address, wallet2.address],
+    chainId: '0x1',
+    channelNonce: '0x11'
+  };
   const targetChannelId = getChannelId(channel);
   const context: Init = {targetChannelId, role: Role.A, jointChannelId: 'TODO'};
 
-  const store: MemoryStore = {} as any;
+  const store = new MemoryStore([wallet1.privateKey]);
   const service = interpret(machine(store, context, Role.A));
 
   store.outboxFeed.subscribe(e => {
@@ -62,13 +66,7 @@ test('Virtual funding as A', async () => {
   service.start();
 
   await waitForExpect(
-    () =>
-      expect(service.state.value).toMatchObject({
-        preparation: {
-          prepareJointChannel: 'runTask',
-          prepareTargetChannel: 'runTask'
-        }
-      }),
+    () => expect(service.state.value).toEqual('setupJointChannel'),
     EXPECT_TIMEOUT
   );
 

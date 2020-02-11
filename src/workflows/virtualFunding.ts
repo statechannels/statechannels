@@ -4,12 +4,14 @@ import {
   assign,
   Machine,
   MachineOptions,
-  AnyEventObject
+  AnyEventObject,
+  DoneInvokeEvent,
+  ServiceConfig
 } from 'xstate';
 
-import {MemoryStore, Store} from '../store/memory-store';
-import {SupportState} from '@statechannels/wallet-protocols';
+import {Store} from '../store/memory-store';
 import {toNitroState} from '../store/state-utils';
+import {SupportState} from '@statechannels/wallet-protocols/src';
 
 export const enum Role {
   A,
@@ -36,6 +38,29 @@ function waitThenRunObjective<Objective extends string = string>(
     }
   };
 }
+function getDataAndInvoke<T>(
+  data: string,
+  src: string,
+  onDone?: string,
+  id?: string
+): StateNodeConfig<T, any, DoneInvokeEvent<T>> {
+  return {
+    initial: data,
+    states: {
+      [data]: {invoke: {src: data, onDone: src}},
+      [src]: {
+        invoke: {
+          id,
+          src,
+          data: (_, {data}: DoneInvokeEvent<T>) => data,
+          onDone: 'done'
+        }
+      },
+      done: {type: 'final'}
+    },
+    onDone
+  };
+}
 
 type TEvent = AnyEventObject;
 type Objective = 'FundGuarantorAH' | 'FundGuarantorBH';
@@ -49,22 +74,34 @@ const enum States {
   fundTargetChannel = 'fundTargetChannel'
 }
 
+const enum Services {
+  startingJointState = 'startingJointState',
+  supportState = 'supportState',
+  indirectFunding = 'indirectFunding'
+}
+
 const fundJointChannel = (role: Role): StateNodeConfig<Init, any, TEvent> => {
   let config;
   switch (role) {
     case Role.A:
-      config = waitThenRunObjective<Objective>('FundGuarantorAH', 'indirectFunding');
+      config = waitThenRunObjective<Objective>('FundGuarantorAH', Services.indirectFunding);
       break;
     case Role.B:
-      config = waitThenRunObjective<Objective>('FundGuarantorBH', 'indirectFunding');
+      config = waitThenRunObjective<Objective>('FundGuarantorBH', Services.indirectFunding);
       break;
     case Role.Hub:
       config = {
         type: 'parallel',
         entry: Actions.triggerGuarantorObjectives,
         states: {
-          fundGuarantorAH: waitThenRunObjective<Objective>('FundGuarantorAH', 'indirectFunding'),
-          fundGuarantorBH: waitThenRunObjective<Objective>('FundGuarantorBH', 'indirectFunding')
+          fundGuarantorAH: waitThenRunObjective<Objective>(
+            'FundGuarantorAH',
+            Services.indirectFunding
+          ),
+          fundGuarantorBH: waitThenRunObjective<Objective>(
+            'FundGuarantorBH',
+            Services.indirectFunding
+          )
         }
       };
   }
@@ -76,10 +113,11 @@ const generateConfig = (role: Role): MachineConfig<Init, any, any> => ({
   key: 'virtual-funding',
   initial: States.setupJointChannel,
   states: {
-    [States.setupJointChannel]: {
-      invoke: {src: 'supportState'},
-      onDone: 'fundJointChannel'
-    },
+    [States.setupJointChannel]: getDataAndInvoke<Init>(
+      Services.startingJointState,
+      Services.supportState,
+      States.fundJointChannel
+    ),
     [States.fundJointChannel]: fundJointChannel(role),
     [States.fundTargetChannel]: {invoke: {src: 'supportState'}, onDone: 'success'},
     success: {type: 'final'}
@@ -94,7 +132,7 @@ export const startingJointState = (store: Store) => async ({
   return {state: toNitroState({...latest, ...channelConstants})};
 };
 
-export const options = (store: MemoryStore): Partial<MachineOptions<Init, TEvent>> => {
+export const options = (store: Store): Partial<MachineOptions<Init, TEvent>> => {
   const actions: Record<Actions, any> = {
     [Actions.spawnFundLedgerChannelObserver]: assign<any>({
       ledgerObjectiveWatcher: 'TODO'
@@ -102,8 +140,14 @@ export const options = (store: MemoryStore): Partial<MachineOptions<Init, TEvent
     [Actions.triggerGuarantorObjectives]: () => 'TODO'
   };
 
-  return {actions};
+  const services: Record<Services, ServiceConfig<Init>> = {
+    supportState: SupportState.machine(store as any),
+    indirectFunding: async () => true,
+    startingJointState: startingJointState(store)
+  };
+
+  return {actions, services};
 };
 
-export const machine = (store: MemoryStore, context: Init, role: Role) =>
+export const machine = (store: Store, context: Init, role: Role) =>
   Machine(generateConfig(role), options(store)).withContext(context);
