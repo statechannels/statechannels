@@ -1,4 +1,5 @@
-import {MemoryStore, Objective} from './memory-store';
+import {MemoryStore} from './memory-store';
+import {Objective} from './wire-protocol';
 import {State, SimpleEthAllocation} from './types';
 import {bigNumberify, BigNumber} from 'ethers/utils';
 import {Wallet} from 'ethers';
@@ -64,7 +65,11 @@ describe('stateReceivedFeed', () => {
 });
 
 test('newObjectiveFeed', () => {
-  const objective: Objective = {name: 'Something', participants: [], data: 'foo'};
+  const objective: Objective = {
+    name: 'OpenChannel',
+    participants: [],
+    data: {targetChannelId: 'foo'}
+  };
 
   const store = new MemoryStore();
 
