@@ -1,24 +1,14 @@
-import {handleMessage, sendMessage} from './messaging';
+import {handleMessage} from './messaging';
 
-import {ObsoleteStore, EphemeralObsoleteStore} from '@statechannels/wallet-protocols';
 import {ethers} from 'ethers';
 
-import {ChainWatcher} from './chain';
+// TODO import {ChainWatcher} from './chain';
 import {WorkflowManager} from './workflow-manager';
-import {ETH_ASSET_HOLDER_ADDRESS} from './constants';
+import {MemoryStore, Store} from './store/memory-store';
 
 const ourWallet = ethers.Wallet.createRandom();
 
-const chain = new ChainWatcher();
-
-const store: ObsoleteStore = new EphemeralObsoleteStore({
-  chain,
-  privateKeys: {
-    [ourWallet.address]: ourWallet.privateKey
-  },
-  messagingService: {sendMessage},
-  ethAssetHolderAddress: ETH_ASSET_HOLDER_ADDRESS
-});
+const store: Store = new MemoryStore([ourWallet.privateKey]);
 
 const workflowManager = new WorkflowManager(store);
 

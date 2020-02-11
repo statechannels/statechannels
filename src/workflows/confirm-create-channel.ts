@@ -1,8 +1,8 @@
 import {MachineConfig, Action, StateSchema, Machine, Condition, StateMachine} from 'xstate';
 import {Participant, TokenAllocations} from '@statechannels/client-api-schema';
-import {ObsoleteStore} from '@statechannels/wallet-protocols';
 import {sendDisplayMessage} from '../messaging';
 import {createMockGuard} from '../utils/workflow-utils';
+import {Store} from '../store/memory-store';
 
 interface WorkflowActions {
   hideUi: Action<WorkflowContext, any>;
@@ -94,7 +94,7 @@ const actions = {
 };
 export const config = generateConfig(actions, guards);
 export const confirmChannelCreationWorkflow = (
-  _store: ObsoleteStore,
+  _store: Store,
   context: WorkflowContext
 ): WorkflowMachine => {
   // TODO: Once budgets are a thing this should check for a budget

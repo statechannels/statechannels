@@ -6,16 +6,11 @@ import {
 export default {title: 'X-state wallet'};
 import {storiesOf} from '@storybook/react';
 import {interpret} from 'xstate';
-import {EphemeralObsoleteStore} from '@statechannels/wallet-protocols';
 import {Participant} from '@statechannels/client-api-schema/types/definitions';
 import {renderWalletInFrontOfApp} from './helpers';
+import {MemoryStore} from '../../store/memory-store';
 
-const store = new EphemeralObsoleteStore({
-  privateKeys: {
-    ['0xaddress']: '0xkey'
-  },
-  ethAssetHolderAddress: '0xassetholder'
-});
+const store = new MemoryStore(['0xkey']);
 
 const alice: Participant = {
   participantId: 'a',

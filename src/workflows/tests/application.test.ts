@@ -2,7 +2,6 @@ import {interpret} from 'xstate';
 import {ethers} from 'ethers';
 import waitForExpect from 'wait-for-expect';
 import {
-  EphemeralObsoleteStore,
   CreateChannelEvent,
   SignedState,
   getChannelId,
@@ -10,6 +9,7 @@ import {
 } from '@statechannels/wallet-protocols';
 import {applicationWorkflow, OpenChannelEvent, WorkflowServices} from '../application';
 import {AddressZero} from 'ethers/constants';
+import {MemoryStore, Store} from '../../store/memory-store';
 
 jest.setTimeout(50000);
 const createChannelEvent: CreateChannelEvent = {
@@ -23,7 +23,7 @@ const createChannelEvent: CreateChannelEvent = {
 };
 
 it('initializes and starts confirmCreateChannelWorkflow', async () => {
-  const store = new EphemeralObsoleteStore();
+  const store = new MemoryStore();
   const services: Partial<WorkflowServices> = {
     invokeCreateChannelConfirmation: jest.fn().mockReturnValue(
       new Promise(() => {
@@ -44,7 +44,7 @@ it('initializes and starts confirmCreateChannelWorkflow', async () => {
 });
 
 it('invokes the createChannelAndFund protocol', async () => {
-  const store = new EphemeralObsoleteStore();
+  const store = new MemoryStore();
   const services: Partial<WorkflowServices> = {
     invokeCreateChannelAndDirectFundProtocol: jest.fn().mockReturnValue(
       new Promise(() => {
@@ -71,7 +71,7 @@ it('invokes the createChannelAndFund protocol', async () => {
 });
 
 it('raises an channel updated action when the channel is updated', async () => {
-  const store = new EphemeralObsoleteStore();
+  const store = new MemoryStore();
   const mockOptions = {
     actions: {
       sendChannelUpdatedNotification: jest.fn()
@@ -91,7 +91,7 @@ it('raises an channel updated action when the channel is updated', async () => {
 });
 
 it('handles confirmCreateChannel workflow finishing', async () => {
-  const store = new EphemeralObsoleteStore();
+  const store = new MemoryStore();
   const services: Partial<WorkflowServices> = {
     createChannel: jest.fn().mockReturnValue(Promise.resolve('0xb1ab1a')),
     invokeCreateChannelAndDirectFundProtocol: jest.fn().mockReturnValue(
@@ -118,7 +118,7 @@ it('handles confirmCreateChannel workflow finishing', async () => {
 });
 
 it('initializes and starts the join channel machine', async () => {
-  const store = new EphemeralObsoleteStore();
+  const store = new MemoryStore();
   const event: OpenChannelEvent = {
     type: 'OPEN_CHANNEL',
     channelId: '0xabc'
@@ -141,7 +141,7 @@ it('initializes and starts the join channel machine', async () => {
 });
 
 it('starts concluding when requested', async () => {
-  const store = new EphemeralObsoleteStore();
+  const store: Store = new MemoryStore();
   const channelId = ethers.utils.id('channel');
   const services: Partial<WorkflowServices> = {
     invokeClosingProtocol: jest.fn().mockReturnValue(
@@ -163,7 +163,7 @@ it('starts concluding when requested', async () => {
 });
 
 it('starts concluding when receiving a final state', async () => {
-  const store = new EphemeralObsoleteStore();
+  const store = new MemoryStore();
   const states: SignedState[] = [
     {
       state: {

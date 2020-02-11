@@ -1,6 +1,5 @@
 import {Actor, Interpreter, interpret} from 'xstate';
 import {
-  ObsoleteStore,
   ChannelUpdated,
   CreateChannelEvent,
   OpenChannelEvent,
@@ -12,6 +11,7 @@ import {Guid} from 'guid-typescript';
 import WalletUi from './ui/wallet';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import {Store} from './store/memory-store';
 
 // TODO: We should standardize logging with wallet-protocols
 function logState(actor, level = 0) {
@@ -37,9 +37,9 @@ export interface Workflow {
 
 export class WorkflowManager {
   workflows: Workflow[];
-  store: ObsoleteStore;
+  store: Store;
   tempMachine;
-  constructor(store: ObsoleteStore) {
+  constructor(store: Store) {
     this.workflows = [];
     this.store = store;
   }
@@ -65,8 +65,7 @@ export class WorkflowManager {
       .start();
     // TODO: Figure out how to resolve rendering priorities
     this.renderUI(machine);
-    // Register for ChannelUpdated events
-    this.store.on('CHANNEL_UPDATED', (event: ChannelUpdated) => machine.send(event));
+
     this.workflows.push({id, machine, domain: 'TODO'});
   }
 
