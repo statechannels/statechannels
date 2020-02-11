@@ -7,6 +7,7 @@ import {
   getStateSignerAddress
 } from '@statechannels/nitro-protocol';
 import {splitSignature, joinSignature} from 'ethers/utils';
+import {convertToNitroOutcome} from './outcome-utils';
 
 export interface ChannelStoreEntry {
   readonly channelId: string;
@@ -135,7 +136,7 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
 
     return {
       ...stateVars,
-      outcome: [], // TODO: Convert to nitro outcome
+      outcome: convertToNitroOutcome(stateVars.outcome),
       challengeDuration: challengeDuration.toNumber(),
       appDefinition,
       channel,
