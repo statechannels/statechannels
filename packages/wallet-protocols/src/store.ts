@@ -23,8 +23,8 @@ export interface ChannelUpdated {
 export type StoreEvent = ChainEvent | ChannelUpdated;
 export type StoreEventType = ChainEventType | ChannelUpdated['type'];
 export type StoreEventListener = (event: StoreEvent) => void;
-
-export interface Store {
+// TODO: This store is obsolete and should be removed when everything is migrated to the new store
+export interface ObsoleteStore {
   getEntry(channelId: string): ChannelStoreEntry;
   getParticipant(signingAddress: string): Participant;
   getHoldings: IChain['getHoldings'];
@@ -74,7 +74,7 @@ export type Constructor = Partial<{
   messagingService: IMessageService;
   ethAssetHolderAddress: string;
 }>;
-export class EphemeralStore implements Store {
+export class EphemeralObsoleteStore implements ObsoleteStore {
   public static equals(left: SignedState[], right: SignedState[]) {
     // TODO: Delete this; we should use statesEqual and outcomesEqual
     return _.isEqual(
@@ -288,7 +288,7 @@ export class EphemeralStore implements Store {
     const entry = this.getEntry(channelId);
     const newEntry = { ...entry, states: merge(states, entry.states) };
     this._store[channelId] = newEntry;
-    if (!EphemeralStore.equals(entry.states, newEntry.states)) {
+    if (!EphemeralObsoleteStore.equals(entry.states, newEntry.states)) {
       const channelUpdated: ChannelUpdated = {
         type: 'CHANNEL_UPDATED',
         channelId,
@@ -302,7 +302,7 @@ export class EphemeralStore implements Store {
 
 // For subscriber convenience, construct a ChannelStoreEntry
 type T = { type: ChannelUpdated['type']; channelId: string; entry: ChannelStoreEntry };
-export function observeChannel(store: Store, channelId: string): rxjs.Observable<T> {
+export function observeChannel(store: ObsoleteStore, channelId: string): rxjs.Observable<T> {
   const firstEntry: Promise<ChannelUpdated | { type: 'NOT_FOUND' }> = new Promise(resolve => {
     try {
       const entry = store.getEntry(channelId);

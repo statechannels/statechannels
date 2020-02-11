@@ -1,6 +1,6 @@
 import {Actor, Interpreter, interpret} from 'xstate';
 import {
-  Store,
+  ObsoleteStore,
   ChannelUpdated,
   CreateChannelEvent,
   OpenChannelEvent,
@@ -37,9 +37,9 @@ export interface Workflow {
 
 export class WorkflowManager {
   workflows: Workflow[];
-  store: Store;
+  store: ObsoleteStore;
   tempMachine;
-  constructor(store: Store) {
+  constructor(store: ObsoleteStore) {
     this.workflows = [];
     this.store = store;
   }

@@ -2,7 +2,7 @@ import { DoneInvokeEvent, Machine, MachineConfig, assign, sendParent } from 'xst
 import { Channel, State } from '@statechannels/nitro-protocol';
 import { CreateChannelParams, AllocationItem } from '@statechannels/client-api-schema';
 
-import { Store, success } from '../..';
+import { ObsoleteStore, success } from '../..';
 import { MachineFactory } from '../../machine-utils';
 import { ethAllocationOutcome } from '../../calculations';
 import { ChannelStoreEntry } from '../../ChannelStoreEntry';
@@ -95,7 +95,7 @@ export const config: MachineConfig<Context, any, any> = {
   },
 };
 
-export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => {
+export const machine: MachineFactory<Init, any> = (store: ObsoleteStore, init: Init) => {
   async function initializeChannel(ctx: Init): Promise<SetChannel> {
     const participants = ctx.participants.map(p => p.signingAddress);
     const channelNonce = store.getNextNonce(participants);

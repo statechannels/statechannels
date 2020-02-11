@@ -18,7 +18,7 @@ import { IChannelStoreEntry } from '../ChannelStoreEntry';
 import { log } from '../utils';
 import { MachineFactory } from '../machine-utils';
 import { messageService } from '../messaging';
-import { Store, Participant } from '../store';
+import { ObsoleteStore, Participant } from '../store';
 
 import { wallet1, wallet2, participants, storeWithKey } from './data';
 import { invokedState } from './utils';
@@ -29,7 +29,7 @@ const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 
 const chain = new Chain();
 
-const stores: Record<string, Store> = {};
+const stores: Record<string, ObsoleteStore> = {};
 
 function connect<T>(
   wallet: Wallet,
@@ -65,7 +65,10 @@ test('directly funding a channel', async () => {
     },
   ];
 
-  const entry: (store: Store, channel: Channel) => IChannelStoreEntry = (store, channel) => ({
+  const entry: (store: ObsoleteStore, channel: Channel) => IChannelStoreEntry = (
+    store,
+    channel
+  ) => ({
     channel,
     participants: participants.filter(p =>
       channel.participants.find(addr => addr === p.signingAddress)
