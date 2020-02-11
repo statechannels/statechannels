@@ -23,6 +23,41 @@ import {
   createJsonRpcAllocationsFromOutcome
 } from './utils/json-rpc-utils';
 import {WorkflowManager} from './workflow-manager';
+import {fromEvent, Observable} from 'rxjs';
+import {map} from 'rxjs/operators';
+import {filterByPromise} from 'filter-async-rxjs-pipe';
+
+export function observeRequests(
+  channelId: string
+): Observable<JoinChannelParams | CloseChannelParams | UpdateChannelParams> {
+  return fromEvent(window, 'message').pipe(
+    filterByPromise(async (e: MessageEvent) => {
+      if (!e || !e.data.jsonrpc || e.data.jsonrpc !== '2.0') {
+        return false;
+      }
+      const parsedMessage = jrs.parseObject(e.data);
+      if (parsedMessage.type !== 'request') {
+        return false;
+      }
+      const validationResult = await validateRequest(e.data);
+      if (!validationResult.isValid) {
+        console.error(validationResult);
+        return false;
+      }
+      if (
+        e.data.type !== 'UpdateChannel' &&
+        e.data.type !== 'CloseChannel' &&
+        e.data.type !== 'JoinChannel'
+      ) {
+        return false;
+      }
+      return e.data.params.channelId === channelId;
+    }),
+    map((e: MessageEvent) => {
+      return e.data.params;
+    })
+  );
+}
 
 export async function handleMessage(
   event,
