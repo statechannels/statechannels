@@ -11,7 +11,7 @@ import {State, Participant, StateVariables} from './types';
 import {MemoryChannelStoreEntry, ChannelStoreEntry} from './memory-channel-storage';
 import {AddressZero} from 'ethers/constants';
 import {Objective, Message} from './wire-protocol';
-import {Chain, ChainWatcher, FakeChain} from '../chain';
+import {Chain, FakeChain} from '../chain';
 
 interface DirectFunding {
   type: 'Direct';
