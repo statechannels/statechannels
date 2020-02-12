@@ -187,14 +187,14 @@ export class MemoryStore implements Store {
   pushMessage(message: Message) {
     const {signedStates, objectives} = message;
 
+    signedStates?.forEach(async signedState => {
+      const {signature, ...state} = signedState;
+      await this.addState(signedState);
+      this._eventEmitter.emit('stateReceived', state);
+    });
     if (signedStates) {
       // todo: check sig
       // todo: check the channel involves me
-      signedStates.forEach(signedState => {
-        const {signature, ...state} = signedState;
-        this.addState(signedState);
-        this._eventEmitter.emit('stateReceived', state);
-      });
     }
 
     objectives?.forEach(objective => {
