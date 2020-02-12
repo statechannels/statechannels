@@ -69,7 +69,7 @@ export class MemoryStore implements Store {
   protected _chain: Chain;
   private _channels: Record<string, MemoryChannelStoreEntry | undefined> = {};
   private _objectives: Objective[] = [];
-  private _nonces: Record<string, BigNumber> = {};
+  private _nonces: Record<string, BigNumber | undefined> = {};
   private _eventEmitter = new EventEmitter<InternalEvents>();
   private _privateKeys: Record<string, string> = {};
   // private _channels: Record<string, any> = {};
@@ -127,7 +127,7 @@ export class MemoryStore implements Store {
     const channelId = calculateChannelId(channelConstants);
 
     // TODO: There could be concurrency problems which lead to entries potentially being overwritten.
-    this.checkNonce(addresses, channelConstants.channelNonce);
+    this.setNonce(addresses, channelConstants.channelNonce);
     const entry =
       this._channels[channelId] || new MemoryChannelStoreEntry(channelConstants, myIndex);
 
@@ -148,9 +148,7 @@ export class MemoryStore implements Store {
       throw new Error("Couldn't find the signing key for any participant in wallet.");
     }
 
-    const currentNonce = this.getNonce(addresses);
-    const channelNonce = currentNonce ? currentNonce.add(1) : bigNumberify(0);
-    this.setNonce(addresses, channelNonce);
+    const channelNonce = this.getNonce(addresses).add(1);
     const chainId = '1';
 
     const entry = await this.initializeChannel({
@@ -167,17 +165,13 @@ export class MemoryStore implements Store {
     return Promise.resolve(entry);
   }
 
-  private getNonce(addresses: string[]): BigNumber | undefined {
-    return this._nonces[this.nonceKeyFromAddresses(addresses)];
-  }
-
-  private checkNonce(addresses: string[], nonce: BigNumber): void {
-    if (nonce.lte(this._nonces[this.nonceKeyFromAddresses(addresses)])) {
-      throw 'Invalid nonce';
-    }
+  private getNonce(addresses: string[]): BigNumber {
+    return this._nonces[this.nonceKeyFromAddresses(addresses)] || bigNumberify(-1);
   }
 
   private setNonce(addresses: string[], value: BigNumber) {
+    if (value.lte(this.getNonce(addresses))) throw 'Invalid nonce';
+
     this._nonces[this.nonceKeyFromAddresses(addresses)] = value;
   }
 
