@@ -6,7 +6,6 @@ import { map } from 'rxjs/operators';
 import { FINAL } from '../..';
 import { MachineFactory } from '../../machine-utils';
 import { ObsoleteStore } from '../../store';
-import { ChainEvent } from '../../chain';
 
 export type Init = {
   channelId: string;
