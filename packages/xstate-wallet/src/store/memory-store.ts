@@ -7,11 +7,12 @@ import {getChannelId} from '@statechannels/nitro-protocol';
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {Wallet} from 'ethers';
 
-import {State, Participant, StateVariables} from './types';
+import {Participant, StateVariables, State} from './types';
 import {MemoryChannelStoreEntry, ChannelStoreEntry} from './memory-channel-storage';
 import {AddressZero} from 'ethers/constants';
 import {Objective, Message} from './wire-protocol';
 import {Chain, FakeChain} from '../chain';
+import {calculateChannelId} from './state-utils';
 
 interface DirectFunding {
   type: 'Direct';
@@ -95,7 +96,7 @@ export class MemoryStore implements Store {
 
   public stateReceivedFeed(channelId: string): Observable<State> {
     return fromEvent<State>(this._eventEmitter, 'stateReceived').pipe(
-      filter(e => e.channelId === channelId)
+      filter(state => calculateChannelId(state) === channelId)
     );
   }
 
