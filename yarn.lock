@@ -26194,10 +26194,10 @@ socks@~2.3.2:
     ip "1.1.5"
     smart-buffer "^4.1.0"
 
-solc@0.6.2:
-  version "0.6.2"
-  resolved "https://registry.npmjs.org/solc/-/solc-0.6.2.tgz#0340520782caef3e8230af6785aba17625415c73"
-  integrity sha512-PIFb/i7HSQXXfsXHlGDR+B2BCaQ+Bx7gpZ7bz+zLz2rPePyxkIJgLmb4rgRKYxEnIp5dKilcjKRPbrz8GNlIHQ==
+solc@0.5.13:
+  version "0.5.13"
+  resolved "https://registry.npmjs.org/solc/-/solc-0.5.13.tgz#2a5ba2b7681898c6293759441e0a768fb6955def"
+  integrity sha512-osybDVPGjAqcmSKLU3vh5iHuxbhGlJjQI5ZvI7nRDR0fgblQqYte4MGvNjbew8DPvCrmoH0ZBiz/KBBLlPxfMg==
   dependencies:
     command-exists "^1.2.8"
     commander "3.0.2"

@@ -1,10 +1,10 @@
 diff --git a/node_modules/@counterfactual/cf-adjudicator-contracts/contracts/interfaces/CounterfactualApp.sol b/node_modules/@counterfactual/cf-adjudicator-contracts/contracts/interfaces/CounterfactualApp.sol
-index 5ba3e0e..5f684e1 100644
+index d823033..31595b9 100644
 --- a/node_modules/@counterfactual/cf-adjudicator-contracts/contracts/interfaces/CounterfactualApp.sol
 +++ b/node_modules/@counterfactual/cf-adjudicator-contracts/contracts/interfaces/CounterfactualApp.sol
 @@ -1,4 +1,4 @@
 -pragma solidity 0.5.12;
-+pragma solidity 0.5.13;
++pragma solidity ^0.5.13;
  pragma experimental "ABIEncoderV2";
  
  
