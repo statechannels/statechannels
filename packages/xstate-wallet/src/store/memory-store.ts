@@ -11,6 +11,7 @@ import {State, Participant, StateVariables} from './types';
 import {MemoryChannelStoreEntry, ChannelStoreEntry} from './memory-channel-storage';
 import {AddressZero} from 'ethers/constants';
 import {Objective, Message} from './wire-protocol';
+import {Chain, ChainWatcher, FakeChain} from '../chain';
 
 interface DirectFunding {
   type: 'Direct';
@@ -33,12 +34,6 @@ interface Guaranteed {
 }
 
 export type Funding = DirectFunding | IndirectFunding | VirtualFunding | Guaranteed;
-interface ChannelChainInfo {
-  readonly challenge?: {state: State; challengeExpiry: BigNumber};
-  readonly amount: BigNumber;
-  // TODO: This is the same as challengeExpiry < now
-  readonly finalized: boolean;
-}
 
 // get it so that when you add a state to a channel, it sends that state to all participant
 
@@ -53,7 +48,7 @@ export interface Store {
   outboxFeed: Observable<Message>;
   pushMessage: (message: Message) => void;
   channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry>;
-  chainUpdatedFeed(channelId: string): Observable<ChannelChainInfo>;
+
   getAddress(): string;
   addState(channelId: string, stateVars: StateVariables);
   createChannel(
@@ -63,14 +58,15 @@ export interface Store {
     appDefinition?: string
   ): Promise<string>;
   getEntry(channelId): Promise<ChannelStoreEntry>;
+
+  // TODO: Shoud this be part of the store?
+  getChainInfo: Chain['getChainInfo'];
+  chainUpdatedFeed: Chain['chainUpdatedFeed'];
+  deposit: Chain['deposit'];
 }
 
 export class MemoryStore implements Store {
-  chainUpdatedFeed(_channelId: string): Observable<ChannelChainInfo> {
-    // TODO: Implement this
-    return new Observable<ChannelChainInfo>();
-  }
-
+  protected _chain: Chain;
   private _channels: Record<string, MemoryChannelStoreEntry> = {};
   private _objectives: Objective[] = [];
   private _nonces: Record<string, BigNumber> = {};
@@ -78,7 +74,12 @@ export class MemoryStore implements Store {
   private _privateKeys: Record<string, string> = {};
   // private _channels: Record<string, any> = {};
 
-  constructor(privateKeys?: string[]) {
+  constructor(privateKeys?: string[], chain?: Chain) {
+    // TODO: We shouldn't default to a fake chain
+    // but I didn't feel like updating all the constructor calls
+    this._chain = chain || new FakeChain();
+    this._chain.initialize();
+
     if (privateKeys && privateKeys.length > 0) {
       // load existing keys
       privateKeys.forEach(key => {
@@ -207,5 +208,17 @@ export class MemoryStore implements Store {
       entry.stateVariables,
       entry.signatures
     );
+  }
+
+  chainUpdatedFeed(channelId: string) {
+    // TODO: Implement this
+    return this._chain.chainUpdatedFeed(channelId);
+  }
+
+  deposit(channelId: string, expectedHeld: string, amount: string) {
+    return this._chain.deposit(channelId, expectedHeld, amount);
+  }
+  getChainInfo(channelId: string) {
+    return this._chain.getChainInfo(channelId);
   }
 }
