@@ -8,6 +8,7 @@ import {
   getChannelId
 } from '@statechannels/nitro-protocol';
 import {joinSignature, splitSignature} from 'ethers/utils';
+import _ from 'lodash';
 
 export function toNitroState(state: State): NitroState {
   const {challengeDuration, appDefinition, channelNonce, participants, chainId} = state;
@@ -62,5 +63,6 @@ export function statesEqual(
 }
 
 export function outcomesEqual(left: Outcome, right?: Outcome) {
-  throw 'unimplemented';
+  // TODO: do we need a more detailed check?
+  return _.isEqual(left, right);
 }
