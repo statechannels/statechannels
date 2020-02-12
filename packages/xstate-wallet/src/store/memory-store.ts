@@ -56,7 +56,7 @@ export interface Store {
     challengeDuration: BigNumber,
     stateVars: StateVariables,
     appDefinition?: string
-  ): Promise<string>;
+  ): Promise<ChannelStoreEntry>;
   getEntry(channelId): Promise<ChannelStoreEntry>;
 }
 
@@ -108,7 +108,7 @@ export class MemoryStore implements Store {
     challengeDuration: BigNumber,
     stateVars: StateVariables,
     appDefinition = AddressZero
-  ): Promise<string> {
+  ): Promise<ChannelStoreEntry> {
     const addresses = participants.map(x => x.signingAddress);
 
     const myIndex = addresses.findIndex(address => !!this._privateKeys[address]);
@@ -134,7 +134,7 @@ export class MemoryStore implements Store {
     // sign the state, store the channel
     this.signState(channelId, stateVars);
 
-    return Promise.resolve(channelId);
+    return Promise.resolve(this._channels[channelId]);
   }
 
   private getNonce(addresses: string[]): BigNumber | undefined {

@@ -91,24 +91,23 @@ describe('createChannel', () => {
   it('returns a ChannelStoreEntry', async () => {
     const store = aStore();
 
-    const channelId = await store.createChannel(
+    const firstEntry = await store.createChannel(
       participants,
       challengeDuration,
       stateVars,
       appDefinition
     );
 
-    expect(channelId).toMatch(/0x/);
+    expect(firstEntry.channelId).toMatch(/0x/);
 
-    const channelId2 = await store.createChannel(
+    const secondEntry = await store.createChannel(
       participants,
       challengeDuration,
       stateVars,
       appDefinition
     );
 
-    expect(channelId2).toMatch(/0x/);
-    expect(channelId2).not.toEqual(channelId);
+    expect(firstEntry.channelId).not.toEqual(secondEntry.channelId);
   });
 
   it("fails if the wallet doesn't hold the private key for any participant", async () => {
