@@ -232,7 +232,7 @@ async function getChannelInfo(channelEntry: ChannelStoreEntry) {
     status = 'proposed';
   } else if (turnNum.lt(2 * participants.length - 1)) {
     status = 'opening';
-  } else if (!!channelEntry.supported && channelEntry.supported.isFinal) {
+  } else if (channelEntry.supported?.isFinal) {
     status = 'closed';
   } else if (latest?.isFinal) {
     status = 'closing';
