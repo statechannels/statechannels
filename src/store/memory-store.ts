@@ -201,12 +201,6 @@ export class MemoryStore implements Store {
   }
 
   public async getEntry(channelId: string): Promise<ChannelStoreEntry> {
-    const entry = this._channels[channelId];
-    return new MemoryChannelStoreEntry(
-      entry.channelConstants,
-      entry.myIndex,
-      entry.stateVariables,
-      entry.signatures
-    );
+    return this._channels[channelId];
   }
 }

@@ -8,17 +8,14 @@ export interface ChannelStoreEntry {
   readonly supported: StateVariables | undefined;
   readonly latestSupportedByMe: StateVariables | undefined;
   readonly channelConstants: ChannelConstants;
-
-  readonly stateVariables: Record<string, StateVariables>; // TODO: Should we even expose this?
-  readonly signatures: Record<string, (string | undefined)[]>; // TODO: Should we even expose this?
 }
 
 export class MemoryChannelStoreEntry implements ChannelStoreEntry {
   constructor(
     public readonly channelConstants: ChannelConstants,
     public readonly myIndex: number,
-    public stateVariables: Record<string, StateVariables> = {},
-    public signatures: Record<string, string[]> = {}
+    private stateVariables: Record<string, StateVariables> = {},
+    private signatures: Record<string, string[]> = {}
   ) {}
 
   private mySignature(stateVars: StateVariables, signatures: string[]): boolean {
