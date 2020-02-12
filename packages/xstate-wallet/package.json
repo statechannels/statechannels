@@ -71,6 +71,6 @@
     "storybook": "start-storybook -p 6006",
     "test": "npx jest -c ./config/jest/jest.config.js",
     "test:with-chain": "npx jest --runInBand -c ./config/jest/jest.with-chain.config.js --detectOpenHandles",
-    "test:ci": "yarn test --ci --runInBand"
+    "test:ci": "yarn test --ci --runInBand && yarn test:with-chain"
   }
 }
