@@ -46,7 +46,7 @@ interface InternalEvents {
 export interface Store {
   newObjectiveFeed: Observable<Objective>;
   outboxFeed: Observable<Message>;
-  pushMessage: (message: Message) => void;
+  pushMessage: (message: Message) => Promise<void>;
   channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry>;
 
   getAddress(): string;
@@ -184,21 +184,23 @@ export class MemoryStore implements Store {
     return Object.keys(this._privateKeys)[0];
   }
 
-  pushMessage(message: Message) {
+  async pushMessage(message: Message) {
     const {signedStates, objectives} = message;
 
-    signedStates?.forEach(async signedState => {
-      const {signature, ...state} = signedState;
-      await this.addState(signedState);
-      this._eventEmitter.emit('stateReceived', state);
-    });
     if (signedStates) {
       // todo: check sig
       // todo: check the channel involves me
+      await Promise.all(
+        signedStates.map(async signedState => {
+          const {signature, ...state} = signedState;
+          await this.addState(signedState);
+          this._eventEmitter.emit('stateReceived', state);
+        })
+      );
     }
 
     objectives?.forEach(objective => {
-      if (!this._objectives.find(p => _.isEqual(p, objective))) {
+      if (!_.includes(this._objectives, objective)) {
         this._objectives.push(objective);
         this._eventEmitter.emit('newObjective', objective);
       }
