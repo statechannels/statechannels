@@ -10,7 +10,7 @@ import {Store} from '../store';
 import {Outcome, SimpleEthAllocation} from '../store/types';
 import {add} from '../utils/math-utils';
 
-const PROTOCOL = 'direct-funding';
+const WORKFLOW = 'direct-funding';
 
 /*
 Direct funding currently works like this:
@@ -48,7 +48,7 @@ const checkCurrentLevel = {
 };
 
 export const config: MachineConfig<any, any, any> = {
-  key: PROTOCOL,
+  key: WORKFLOW,
   initial: 'checkCurrentLevel',
   states: {
     checkCurrentLevel,
