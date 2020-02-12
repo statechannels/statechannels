@@ -5,7 +5,7 @@ import * as AdvanceChannel from './advance-channel';
 import * as DirectFunding from './direct-funding';
 import {MachineFactory} from '../utils/workflow-utils';
 import {Store} from '../store';
-import {bigNumberify} from 'ethers/utils';
+import {bigNumberify, BigNumber} from 'ethers/utils';
 ``;
 
 const PROTOCOL = 'create-and-direct-fund';
@@ -21,7 +21,7 @@ export type Init = {
   appDefinition: string;
   appData: string;
   channelId: string;
-  challengeDuration: number;
+  challengeDuration: BigNumber;
   index: Indices;
 };
 

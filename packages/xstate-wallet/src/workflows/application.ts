@@ -9,29 +9,22 @@ import {
   DoneInvokeEvent,
   StateSchema,
   ServiceConfig,
-  StateMachine
+  StateMachine,
+  StateNodeConfig
 } from 'xstate';
-import {
-  FINAL,
-  ConcludeChannel,
-  SendStates,
-  CreateAndDirectFund,
-  unreachable
-} from '@statechannels/wallet-protocols';
+import {FINAL, ConcludeChannel, SendStates, unreachable} from '@statechannels/wallet-protocols';
 
 import {getChannelId} from '@statechannels/nitro-protocol';
-
+import * as CreateAndDirectFund from './create-and-direct-fund';
 import {sendDisplayMessage, dispatchChannelUpdatedMessage, observeRequests} from '../messaging';
 import {map} from 'rxjs/operators';
 import * as CCC from './confirm-create-channel';
 import {JoinChannelParams, Participant} from '@statechannels/client-api-schema';
-import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
-import {createMockGuard} from '../utils/workflow-utils';
-import {ethAllocationOutcome} from '../utils/allocation-utils';
+import {createMockGuard, getDataAndInvoke} from '../utils/workflow-utils';
 import {Store} from '../store/memory-store';
-import {StateVariables, Outcome} from '../store/types';
+import {StateVariables, SimpleEthAllocation} from '../store/types';
 import {ChannelStoreEntry} from '../store/memory-channel-storage';
-import {bigNumberify} from 'ethers/utils';
+import {bigNumberify, BigNumber} from 'ethers/utils';
 
 interface WorkflowContext {
   channelId?: string;
@@ -66,10 +59,10 @@ type OpenEvent = CreateChannelEvent | OpenChannelEvent;
 export interface CreateChannelEvent {
   type: 'CREATE_CHANNEL';
   participants: Participant[];
-  outcome: Outcome;
+  outcome: SimpleEthAllocation;
   appDefinition: string;
   appData: string;
-  challengeDuration: number;
+  challengeDuration: BigNumber;
   chainId: string;
 }
 
@@ -113,8 +106,12 @@ export interface WorkflowServices extends Record<string, ServiceConfig<WorkflowC
   ) => StateMachine<any, any, any, any>;
   invokeCreateChannelConfirmation: (
     context: ChannelParamsExist,
-    event: CreateChannelEvent | JoinChannelEvent
+    event: DoneInvokeEvent<CCC.WorkflowContext>
   ) => CCC.WorkflowMachine;
+  getDataForCreateChannelConfirmation: (
+    context: WorkflowContext,
+    event: CreateChannelEvent | JoinChannelEvent
+  ) => Promise<CCC.WorkflowContext>;
 }
 interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
   states: {
@@ -150,21 +147,19 @@ const generateConfig = (
         JoinChannel: {target: 'confirmJoinChannelWorkflow'}
       }
     },
-    confirmCreateChannelWorkflow: {
-      invoke: {
-        src: 'invokeCreateChannelConfirmation',
-        onDone: {
-          target: 'createChannelInStore'
-        }
-      }
-    },
+    confirmCreateChannelWorkflow: getDataAndInvoke(
+      'getDataForCreateChannelConfirmation',
+      'invokeCreateChannelConfirmation',
+      'createChannelInStore'
+    ),
     confirmJoinChannelWorkflow: {
-      invoke: {
-        src: 'invokeCreateChannelConfirmation',
-        onDone: {
-          target: 'openChannelAndDirectFundProtocol',
-          actions: [actions.assignChannelId, actions.spawnObserver]
-        }
+      ...(getDataAndInvoke(
+        'getDataForCreateChannelConfirmation',
+        'invokeCreateChannelConfirmation'
+      ) as StateNodeConfig<WorkflowContext, {}, WorkflowEvent>),
+      onDone: {
+        target: 'openChannelAndDirectFundProtocol',
+        actions: [actions.assignChannelId, actions.spawnObserver]
       }
     },
     createChannelInStore: {
@@ -312,31 +307,28 @@ export const applicationWorkflow = (store: Store, context?: WorkflowContext) => 
     },
     invokeCreateChannelAndDirectFundProtocol: (context: ChannelParamsExist & ChannelIdExists) => {
       const ourIndex = 0; // TODO:  get from store?
-      return CreateAndDirectFund.machine(
-        store as any, // TODO Update protocol to accept new store
-        {
-          ...context.channelParams,
-          // TODO: We should never have a context without this
-          // Right now this is left in for a test
-          allocations: context?.channelParams?.allocations
-            ? ethAllocationOutcome(context.channelParams.allocations, ETH_ASSET_HOLDER_ADDRESS)
-            : [],
-          channelId: context.channelId,
-          index: ourIndex
-        }
-      );
+      return CreateAndDirectFund.machine(store, {
+        ...context.channelParams,
+        channelId: context.channelId,
+        index: ourIndex
+      });
     },
-    invokeCreateChannelConfirmation: (
+    invokeCreateChannelConfirmation: (context, event: DoneInvokeEvent<CCC.WorkflowContext>) =>
+      CCC.confirmChannelCreationWorkflow(store, event.data),
+    getDataForCreateChannelConfirmation: async (
       context: WorkflowContext,
       event: CreateChannelEvent | JoinChannelEvent
-    ) => {
+    ): Promise<CCC.WorkflowContext> => {
       switch (event.type) {
         case 'CREATE_CHANNEL':
-          // TODO: Migrate protocol
-          return CCC.confirmChannelCreationWorkflow(store as any, event as any);
+          return event;
         case 'JoinChannel':
-          // TODO: Migrate protocol
-          return CCC.confirmChannelCreationWorkflow(store as any, {} as any);
+          const entry = await store.getEntry(event.params.channelId);
+          return {
+            ...entry.latest,
+            ...entry.channelConstants,
+            outcome: entry.latest.outcome as SimpleEthAllocation
+          };
         default:
           return unreachable(event);
       }
@@ -364,6 +356,11 @@ const mockServices: WorkflowServices = {
     }) as any;
   },
   invokeCreateChannelConfirmation: () => {
+    return new Promise(() => {
+      /* Mock call */
+    }) as any;
+  },
+  getDataForCreateChannelConfirmation: () => {
     return new Promise(() => {
       /* Mock call */
     }) as any;
