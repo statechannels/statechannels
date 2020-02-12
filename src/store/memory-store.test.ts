@@ -95,22 +95,12 @@ describe('createChannel', () => {
   it('returns a ChannelStoreEntry', async () => {
     const store = aStore();
 
-    const firstEntry = await store.createChannel(
-      participants,
-      challengeDuration,
-      stateVars,
-      appDefinition
-    );
+    const firstEntry = await store.createChannel(participants, challengeDuration, appDefinition);
 
     expect(firstEntry.channelId).toMatch(/0x/);
     expect(firstEntry.latestSupportedByMe).toBeUndefined();
 
-    const secondEntry = await store.createChannel(
-      participants,
-      challengeDuration,
-      stateVars,
-      appDefinition
-    );
+    const secondEntry = await store.createChannel(participants, challengeDuration, appDefinition);
 
     expect(firstEntry.channelId).not.toEqual(secondEntry.channelId);
   });
@@ -119,7 +109,7 @@ describe('createChannel', () => {
     const store = new MemoryStore();
 
     await expect(
-      store.createChannel(participants, challengeDuration, stateVars, appDefinition)
+      store.createChannel(participants, challengeDuration, appDefinition)
     ).rejects.toMatchObject({
       message: "Couldn't find the signing key for any participant in wallet."
     });
@@ -132,7 +122,6 @@ describe('pushMessage', () => {
     await store.createChannel(
       signedState.participants,
       signedState.challengeDuration,
-      signedState,
       signedState.appDefinition
     );
 
