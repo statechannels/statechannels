@@ -90,11 +90,17 @@ export const machine: MachineFactory<Init, any> = (store: Store, ctx: Init) => {
 
   async function getDefundedLedgerState({channelId}: Init): Promise<SupportState.Init> {
     const funding = checkThat((await store.getEntry(channelId)).funding, isIndirectFunding);
-
-    const {outcome: concludedOutcome, isFinal} = (await store.getEntry(channelId)).supported;
+    const {supported: targetChannelSupported} = await store.getEntry(channelId);
+    if (!targetChannelSupported) {
+      throw new Error('No supported state for target channel');
+    }
+    const {outcome: concludedOutcome, isFinal} = targetChannelSupported;
     if (!isFinal) throw 'Target channel not finalized';
 
     const {supported, channelConstants} = await store.getEntry(funding.ledgerId);
+    if (!supported) {
+      throw new Error('No supported state for ledger channel');
+    }
     if (
       supported.outcome.type !== 'SimpleEthAllocation' ||
       concludedOutcome.type !== 'SimpleEthAllocation'
