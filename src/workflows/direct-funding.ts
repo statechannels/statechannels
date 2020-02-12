@@ -181,16 +181,13 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
           ...entry.latest,
           ...entry.channelConstants,
           outcome,
-          turnNum: entry.latest.turnNum.add(1),
-          channelId: entry.channelId
+          turnNum: entry.latest.turnNum.add(1)
         }
       };
     } else {
       return {
         state: {
           ...entry.channelConstants,
-          channelId: entry.channelId,
-
           challengeDuration: bigNumberify(1),
           isFinal: false,
           turnNum: bigNumberify(0),
@@ -214,7 +211,6 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
       state: {
         ...supported,
         ...channelConstants,
-        channelId,
         turnNum: supported.turnNum.add(1),
         outcome: mergeDestinations(supported.outcome as SimpleEthAllocation)
       }
