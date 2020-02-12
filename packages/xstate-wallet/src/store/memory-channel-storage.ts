@@ -1,5 +1,6 @@
 import {ChannelConstants, StateVariables, SignedState, Participant} from './types';
 import {signState, hashState, getSignerAddress, calculateChannelId} from './state-utils';
+import _ from 'lodash';
 
 export interface ChannelStoreEntry {
   readonly channelId: string;
@@ -88,7 +89,28 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     }
 
     this.signatures[stateHash][signerIndex] = signature;
+
+    // Garbage collect stale states
+    Object.keys(this.stateVariables).forEach(key => {
+      if (
+        this.supported &&
+        this.stateVariables[key].turnNum.lte(this.supported.turnNum) &&
+        !this.inSupport(key)
+      ) {
+        this.stateVariables = _.omit(this.stateVariables, key);
+        this.signatures = _.omit(this.signatures, key);
+      }
+    });
   }
+
+  private inSupport(key): boolean {
+    const supportKeys = this.supported
+      ? // TODO get the proper keys
+        [hashState({...this.supported, ...this.channelConstants})]
+      : [];
+    return supportKeys.indexOf(key) !== -1;
+  }
+
   private nParticipants(): number {
     return this.channelConstants.participants.length;
   }
