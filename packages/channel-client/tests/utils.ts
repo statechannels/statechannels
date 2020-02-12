@@ -1,7 +1,12 @@
-import {ChannelStatus, ChannelResult} from '../src/types';
-import {Participant, TokenAllocations, TokenAllocation} from '@statechannels/client-api-schema';
+import {
+  Participant,
+  Allocation,
+  ChannelStatus,
+  ChannelResult
+} from '@statechannels/client-api-schema';
 import {ETH_TOKEN_ADDRESS} from './constants';
 import {FakeChannelProvider} from './fakes/fake-channel-provider';
+import {bigNumberify, BigNumberish} from 'ethers/utils';
 
 export function setProviderStates(providers: FakeChannelProvider[], state: ChannelResult): void {
   providers.forEach(provider => {
@@ -14,11 +19,11 @@ export class ChannelResultBuilder {
 
   constructor(
     participants: Participant[],
-    allocations: TokenAllocations,
+    allocations: Allocation[],
     appDefinition: string,
     appData: string,
     channelId: string,
-    turnNum: number,
+    turnNum: BigNumberish,
     status: ChannelStatus
   ) {
     this.channelResult = {
@@ -27,9 +32,8 @@ export class ChannelResultBuilder {
       appDefinition,
       appData,
       channelId,
-      turnNum,
-      status,
-      funding: []
+      turnNum: bigNumberify(turnNum).toString(),
+      status
     };
   }
 
@@ -61,7 +65,7 @@ export class ChannelResultBuilder {
   }
 
   setTurnNum(turnNum: number): ChannelResultBuilder {
-    this.channelResult.turnNum = turnNum;
+    this.channelResult.turnNum = bigNumberify(turnNum).toString();
     return this;
   }
 
@@ -95,7 +99,7 @@ export function buildAllocation(
   destination: string,
   amount: string,
   token: string = ETH_TOKEN_ADDRESS
-): TokenAllocation {
+): Allocation {
   return {
     token,
     allocationItems: [

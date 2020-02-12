@@ -29,9 +29,6 @@
     "state channels"
   ],
   "license": "MIT",
-  "lint-staged": {
-    "src/**/*.ts": "eslint"
-  },
   "main": "lib/src/index.js",
   "repository": "statechannels/monorepo/blob/master/packages/channel-client",
   "scripts": {

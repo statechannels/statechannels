@@ -57,9 +57,6 @@
     ]
   },
   "license": "MIT",
-  "lint-staged": {
-    "{src,test}/**/*.ts": "eslint"
-  },
   "main": "dist/channel-provider.js",
   "scripts": {
     "build": "webpack",

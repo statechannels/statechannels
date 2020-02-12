@@ -1,14 +1,14 @@
 import {ListenerFn} from 'eventemitter3';
 import {
-  CreateChannelResult,
-  CloseChannelResult,
-  UpdateChannelResult,
-  PushMessageResult,
-  JoinChannelResult,
-  GetAddressResult,
-  GetEthereumSelectedAddressResult,
-  ChallengeChannelResult,
-  BudgetResult1 as BudgetResult
+  CreateChannelResponse,
+  CloseChannelResponse,
+  UpdateChannelResponse,
+  PushMessageResponse,
+  JoinChannelResponse,
+  GetAddressResponse,
+  GetEthereumSelectedAddressResponse,
+  ChallengeChannelResponse,
+  GetBudgetResponse
 } from '@statechannels/client-api-schema';
 
 export interface JsonRpcRequest<MethodName = string, RequestParams = any> {
@@ -18,10 +18,10 @@ export interface JsonRpcRequest<MethodName = string, RequestParams = any> {
   params: RequestParams;
 }
 
-export interface JsonRpcResponse<ResultType = any> {
+export interface JsonRpcResponse<ResponseType = any> {
   id: number;
   jsonrpc: '2.0';
-  result: ResultType;
+  result: ResponseType;
 }
 
 export function isJsonRpcResponse(message: any): message is JsonRpcResponse {
@@ -57,17 +57,17 @@ export function isJsonRpcErrorResponse(message: any): message is JsonRpcErrorRes
 }
 // TODO: This probably should live in client-api-schema?
 export type MethodType = {
-  CreateChannel: CreateChannelResult;
-  UpdateChannel: UpdateChannelResult;
-  PushMessage: PushMessageResult;
-  CloseChannel: CloseChannelResult;
-  JoinChannel: JoinChannelResult;
-  GetAddress: GetAddressResult;
-  GetEthereumSelectedAddress: GetEthereumSelectedAddressResult;
-  ChallengeChannel: ChallengeChannelResult;
-  ApproveBudgetAndFund: BudgetResult;
-  GetBudget: BudgetResult;
-  CloseAndWithdraw: BudgetResult;
+  CreateChannel: CreateChannelResponse['result'];
+  UpdateChannel: UpdateChannelResponse['result'];
+  PushMessage: PushMessageResponse['result'];
+  CloseChannel: CloseChannelResponse['result'];
+  JoinChannel: JoinChannelResponse['result'];
+  GetAddress: GetAddressResponse['result'];
+  GetEthereumSelectedAddress: GetEthereumSelectedAddressResponse['result'];
+  ChallengeChannel: ChallengeChannelResponse['result'];
+  ApproveBudgetAndFund: GetBudgetResponse['result'];
+  GetBudget: GetBudgetResponse['result'];
+  CloseAndWithdraw: GetBudgetResponse['result'];
 };
 
 export interface ChannelProviderInterface {

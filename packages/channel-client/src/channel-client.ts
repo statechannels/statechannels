@@ -1,18 +1,15 @@
 import {ChannelProviderInterface} from '@statechannels/channel-provider';
 
-import {
-  ChannelClientInterface,
-  ChannelResult,
-  UnsubscribeFunction,
-  Message,
-  SiteBudget
-} from './types';
+import {ChannelClientInterface, UnsubscribeFunction, Message} from './types';
 import {
   PushMessageResult,
-  TokenAllocations,
+  ChannelResult,
+  Allocation,
   Participant,
-  BudgetResult
+  SiteBudget
 } from '@statechannels/client-api-schema';
+
+type TokenAllocations = Allocation[];
 
 export class ChannelClient implements ChannelClientInterface<ChannelResult> {
   constructor(private readonly provider: ChannelProviderInterface) {}
@@ -98,7 +95,7 @@ export class ChannelClient implements ChannelClientInterface<ChannelResult> {
     playerDestinationAddress: string,
     hubAddress: string,
     hubDestinationAddress: string
-  ): Promise<BudgetResult> {
+  ): Promise<SiteBudget> {
     return this.provider.send('ApproveBudgetAndFund', {
       playerAmount,
       hubAmount,
@@ -108,11 +105,11 @@ export class ChannelClient implements ChannelClientInterface<ChannelResult> {
     });
   }
 
-  async getBudget(hubAddress: string): Promise<BudgetResult> {
+  async getBudget(hubAddress: string): Promise<SiteBudget> {
     return this.provider.send('GetBudget', {hubAddress});
   }
 
-  async CloseAndWithdraw(hubAddress: string): Promise<BudgetResult> {
+  async CloseAndWithdraw(hubAddress: string): Promise<SiteBudget> {
     return this.provider.send('CloseAndWithdraw', {hubAddress});
   }
 }

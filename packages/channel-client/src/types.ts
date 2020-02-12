@@ -1,24 +1,10 @@
 import {
   PushMessageResult,
-  CreateChannelResult,
-  JoinChannelResult,
-  UpdateChannelResult,
-  CloseChannelResult,
+  ChannelResult,
   Participant,
-  TokenAllocations
+  Allocation,
+  SiteBudget
 } from '@statechannels/client-api-schema';
-
-// TODO: Several of these types are duplicates of those in @statechannels/client-api-schema
-
-export type ChannelStatus =
-  | 'proposed'
-  | 'opening'
-  | 'funding'
-  | 'running'
-  | 'challenging'
-  | 'responding'
-  | 'closing'
-  | 'closed';
 
 export interface Message<T = object> {
   recipient: string; // Identifier of user that the message should be relayed to
@@ -26,17 +12,6 @@ export interface Message<T = object> {
   data: T; // Message payload. Format defined by wallet and opaque to app.
   // But useful to be able to specify, for the purposes of the fake-client
 }
-
-export interface Funds {
-  token: string;
-  amount: string;
-}
-
-export type ChannelResult =
-  | CreateChannelResult
-  | JoinChannelResult
-  | UpdateChannelResult
-  | CloseChannelResult;
 
 export type UnsubscribeFunction = () => void;
 
@@ -58,7 +33,7 @@ export interface ChannelClientInterface<Payload = object> {
   pushMessage: (message: Message<Payload>) => Promise<PushMessageResult>;
   createChannel: (
     participants: Participant[],
-    allocations: TokenAllocations,
+    allocations: Allocation[],
     appDefinition: string,
     appData: string
   ) => Promise<ChannelResult>;
@@ -66,25 +41,13 @@ export interface ChannelClientInterface<Payload = object> {
   updateChannel: (
     channelId: string,
     participants: Participant[],
-    allocations: TokenAllocations,
+    allocations: Allocation[],
     appData: string
   ) => Promise<ChannelResult>;
   challengeChannel: (channelId: string) => Promise<ChannelResult>;
   closeChannel: (channelId: string) => Promise<ChannelResult>;
   getAddress: () => Promise<string>;
   getEthereumSelectedAddress: () => Promise<string>;
-}
-interface Balance {
-  playerAmount: string;
-  hubAmount: string;
-}
-export interface SiteBudget {
-  site: string;
-  hub: string;
-  pending: Balance;
-  free: Balance;
-  inUse: Balance;
-  direct: Balance;
 }
 export interface EventsWithArgs {
   MessageQueued: [Message<ChannelResult>];

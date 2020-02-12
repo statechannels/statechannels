@@ -3,16 +3,16 @@ import log = require('loglevel');
 import {bigNumberify} from 'ethers/utils';
 import {EventEmitter, ListenerFn} from 'eventemitter3';
 import {
-  CreateChannelResult,
+  ChannelResult,
+  SiteBudget,
   CreateChannelParams,
   PushMessageResult,
   JoinChannelParams,
   UpdateChannelParams,
   Notification,
-  CloseChannelParams,
-  CloseChannelResult
+  CloseChannelParams
 } from '@statechannels/client-api-schema';
-import {ChannelResult, Message, SiteBudget} from '../../src/types';
+import {Message} from '../../src/types';
 import {calculateChannelId} from '../../src/utils';
 
 /*
@@ -112,7 +112,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     return this.opponentIndex;
   }
 
-  public verifyTurnNum(turnNum: number): Promise<void> {
+  public verifyTurnNum(turnNum: string): Promise<void> {
     const currentTurnNum = bigNumberify(turnNum);
     if (currentTurnNum.mod(2).eq(this.getPlayerIndex())) {
       return Promise.reject(
@@ -129,7 +129,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     return this.latestState;
   }
 
-  private async createChannel(params: CreateChannelParams): Promise<CreateChannelResult> {
+  private async createChannel(params: CreateChannelParams): Promise<ChannelResult> {
     const participants = params.participants;
     const allocations = params.allocations;
     const appDefinition = params.appDefinition;
@@ -140,9 +140,8 @@ export class FakeChannelProvider implements ChannelProviderInterface {
       allocations,
       appDefinition,
       appData,
-      funding: [],
       channelId: calculateChannelId(participants, appDefinition),
-      turnNum: 0,
+      turnNum: bigNumberify(0).toString(),
       status: 'proposed'
     };
     this.updatePlayerIndex(0);
@@ -165,7 +164,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     // [assuming we're working with 2-participant channels for the time being]
     this.latestState = {
       ...latestState,
-      turnNum: 3,
+      turnNum: bigNumberify(3).toString(),
       status: 'running'
     };
     this.opponentAddress = latestState.participants[0].participantId;
@@ -196,7 +195,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     return this.latestState;
   }
 
-  private async closeChannel(params: CloseChannelParams): Promise<CloseChannelResult> {
+  private async closeChannel(params: CloseChannelParams): Promise<ChannelResult> {
     const latestState = this.findChannel(params.channelId);
     await this.verifyTurnNum(latestState.turnNum);
     const turnNum = latestState.turnNum + 1;
