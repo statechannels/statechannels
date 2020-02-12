@@ -65,6 +65,9 @@ export class ChainWatcher implements Chain {
       NitroAdjudicatorInterface,
       signer
     );
+    // this._assetHolders[0].on('Deposited', (fromAddress, toAddress, value, event) =>
+    //   console.log(event)
+    // );
   }
 
   public async deposit(channelId: string, expectedHeld: string, amount: string): Promise<void> {
@@ -119,6 +122,7 @@ export class ChainWatcher implements Chain {
       throw new Error('Chain must be initialized before being used');
     } else {
       const contractListener = (fromAddress, toAddress, value, event) => {
+        console.log('event caught in on contractListener');
         const chainEvent: ChainEvent = {
           type: 'DEPOSITED',
           channelId: event.args.destination,
@@ -133,12 +137,10 @@ export class ChainWatcher implements Chain {
       };
     }
   }
-  public fundingFeed(channelId: string): Observable<any> {
-    console.log('chain.fundingFeed called');
+  public fundingFeed(channelId: string): Observable<ChainEvent> {
     const assetHolder = this._assetHolders[0];
-    const observable = Observable.create(function(observer) {
+    const observable = new Observable<ChainEvent>(function(observer) {
       const contractListener = (fromAddress, toAddress, value, event) => {
-        console.log('event caught in fundingfeed contractListener');
         const chainEvent: ChainEvent = {
           type: 'DEPOSITED',
           channelId: event.args.destination,
@@ -150,6 +152,8 @@ export class ChainWatcher implements Chain {
         }
       };
       assetHolder.on('Deposited', contractListener);
+      const unsubscribe = () => assetHolder.removeListener('Deposited', contractListener);
+      observer.add(unsubscribe); // tear down called when observer unsubscribes
     });
     return observable;
   }
