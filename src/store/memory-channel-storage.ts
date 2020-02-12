@@ -16,7 +16,7 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     public readonly channelConstants: ChannelConstants,
     public readonly myIndex: number,
     private states: Record<string, StateVariables | undefined> = {},
-    private signatures: Record<string, string[]> = {}
+    private signatures: Record<string, string[] | undefined> = {}
   ) {}
 
   private mySignature(stateVars: StateVariables, signatures: string[]): boolean {
@@ -34,12 +34,18 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     return vars;
   }
 
+  private getSignatures(k): string[] {
+    return this.signatures[k] || [];
+  }
+
+  private get signedStates(): Array<StateVariables & {signatures: string[]}> {
+    return Object.keys(this.states).map(k => {
+      return {...this.getStateVariables(k), signatures: this.getSignatures(k)};
+    });
+  }
+
   private get sortedByTurnNum(): Array<StateVariables & {signatures: string[]}> {
-    return Object.keys(this.states)
-      .map(k => {
-        return {...this.getStateVariables(k), signatures: this.signatures[k]};
-      })
-      .sort((a, b) => a.turnNum.sub(b.turnNum).toNumber());
+    return this.signedStates.sort((a, b) => a.turnNum.sub(b.turnNum).toNumber());
   }
 
   get supported() {
@@ -90,11 +96,9 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
       throw new Error('State not signed by a participant of this channel');
     }
 
-    if (!this.signatures[stateHash]) {
-      this.signatures[stateHash] = new Array(this.nParticipants());
-    }
-
-    this.signatures[stateHash][signerIndex] = signature;
+    const signatures = this.signatures[stateHash] ?? new Array(this.nParticipants());
+    signatures[signerIndex] = signature;
+    this.signatures[stateHash] = signatures;
 
     // Garbage collect stale states
     Object.keys(this.states).forEach(key => {
