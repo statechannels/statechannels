@@ -9,7 +9,9 @@ const {address: aAddress, privateKey: aPrivateKey} = new Wallet(
   '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318'
 ); // 0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf
 
-const {address: bAddress} = Wallet.createRandom();
+const {address: bAddress} = new Wallet(
+  '0xb3ab7b031311fe1764b657a6ae7133f19bac97acd1d7edca9409daa35892e727'
+); // 0x2222E21c8019b14dA16235319D34b5Dd83E644A9
 const [aDestination, bDestination] = [aAddress, bAddress]; // for convenience
 
 const outcome: SimpleEthAllocation = {
@@ -25,7 +27,7 @@ const isFinal = false;
 const chainId = '1';
 const participants = [
   {participantId: 'a', destination: aDestination, signingAddress: aAddress},
-  {participantId: 'b', destination: aDestination, signingAddress: bAddress}
+  {participantId: 'b', destination: bDestination, signingAddress: bAddress}
 ];
 const stateVars = {outcome, turnNum, appData, isFinal};
 const channelNonce = bigNumberify(0);
@@ -49,27 +51,27 @@ describe('getAddress', () => {
 const aStore = () => new MemoryStore([aPrivateKey]);
 
 describe('stateReceivedFeed', () => {
-  test('it fires when a state with the correct channel id is received', () => {
+  test('it fires when a state with the correct channel id is received', async () => {
     const store = aStore();
     const outputs: State[] = [];
     store.stateReceivedFeed(channelId).subscribe(x => outputs.push(x));
-    store.pushMessage({signedStates});
+    await store.pushMessage({signedStates});
 
     expect(outputs).toEqual([state]);
   });
 
-  test("it doesn't fire if the channelId doesn't match", () => {
+  test("it doesn't fire if the channelId doesn't match", async () => {
     const store = aStore();
 
     const outputs: State[] = [];
     store.stateReceivedFeed('a-different-channel-id').subscribe(x => outputs.push(x));
-    store.pushMessage({signedStates});
+    await store.pushMessage({signedStates});
 
     expect(outputs).toEqual([]);
   });
 });
 
-test('newObjectiveFeed', () => {
+test('newObjectiveFeed', async () => {
   const objective: Objective = {
     name: 'OpenChannel',
     participants: [],
@@ -81,11 +83,11 @@ test('newObjectiveFeed', () => {
   const outputs: Objective[] = [];
   store.newObjectiveFeed.subscribe(x => outputs.push(x));
 
-  store.pushMessage({objectives: [objective]});
+  await store.pushMessage({objectives: [objective]});
   expect(outputs).toEqual([objective]);
 
   // doing it twice doesn't change anything
-  store.pushMessage({objectives: [objective]});
+  await store.pushMessage({objectives: [objective]});
   expect(outputs).toEqual([objective]);
 });
 
@@ -127,7 +129,12 @@ describe('createChannel', () => {
 describe('pushMessage', () => {
   it('stores states', async () => {
     const store = new MemoryStore([aPrivateKey]);
-    await store.createChannel(signedState.participants, signedState.challengeDuration, signedState);
+    await store.createChannel(
+      signedState.participants,
+      signedState.challengeDuration,
+      signedState,
+      signedState.appDefinition
+    );
 
     expect((await store.getEntry(channelId)).latest).toBeUndefined();
     await store.pushMessage({signedStates});
