@@ -31,8 +31,10 @@ const appDefinition = '0x5409ED021D9299bf6814279A6A1411A7e866A631';
 const challengeDuration = bigNumberify(60);
 const channelConstants = {chainId, participants, channelNonce, appDefinition, challengeDuration};
 const state: State = {...stateVars, ...channelConstants};
+const channelId = calculateChannelId(channelConstants);
 const signature = '0x123';
 const signedState = {...state, signature};
+const signedStates = [signedState];
 
 describe('getAddress', () => {
   it('returns an address', () => {
@@ -42,23 +44,24 @@ describe('getAddress', () => {
     expect(address).toEqual(aAddress);
   });
 });
+const aStore = () => new MemoryStore([aPrivateKey]);
 
 describe('stateReceivedFeed', () => {
   test('it fires when a state with the correct channel id is received', () => {
-    const store = new MemoryStore();
+    const store = aStore();
     const outputs: State[] = [];
-    store.stateReceivedFeed(calculateChannelId(signedState)).subscribe(x => outputs.push(x));
-    store.pushMessage({signedStates: [signedState]});
+    store.stateReceivedFeed(channelId).subscribe(x => outputs.push(x));
+    store.pushMessage({signedStates});
 
     expect(outputs).toEqual([state]);
   });
 
   test("it doesn't fire if the channelId doesn't match", () => {
-    const store = new MemoryStore();
+    const store = aStore();
 
     const outputs: State[] = [];
     store.stateReceivedFeed('a-different-channel-id').subscribe(x => outputs.push(x));
-    store.pushMessage({signedStates: [signedState]});
+    store.pushMessage({signedStates});
 
     expect(outputs).toEqual([]);
   });
@@ -71,7 +74,7 @@ test('newObjectiveFeed', () => {
     data: {targetChannelId: 'foo'}
   };
 
-  const store = new MemoryStore();
+  const store = aStore();
 
   const outputs: Objective[] = [];
   store.newObjectiveFeed.subscribe(x => outputs.push(x));
@@ -85,8 +88,8 @@ test('newObjectiveFeed', () => {
 });
 
 describe('createChannel', () => {
-  it('returns a channelId', async () => {
-    const store = new MemoryStore([aPrivateKey]);
+  it('returns a ChannelStoreEntry', async () => {
+    const store = aStore();
 
     const channelId = await store.createChannel(
       participants,
