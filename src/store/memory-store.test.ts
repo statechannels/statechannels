@@ -99,6 +99,7 @@ describe('createChannel', () => {
     );
 
     expect(firstEntry.channelId).toMatch(/0x/);
+    expect(firstEntry.latestSupportedByMe).toBeUndefined();
 
     const secondEntry = await store.createChannel(
       participants,
