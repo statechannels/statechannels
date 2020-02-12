@@ -52,7 +52,7 @@ const sendState = (store: Store) => async ({state, channelId}: HasChannelId) => 
     // We always support a final state if it matches the outcome that we have signed
     (state.isFinal && outcomesEqual(state.outcome, latestSupportedByMe.outcome))
   ) {
-    await store.addState(channelId, state);
+    await store.signState(channelId, state);
   } else {
     throw 'Not safe to send';
   }
