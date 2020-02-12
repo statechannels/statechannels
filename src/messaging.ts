@@ -8,9 +8,7 @@ import {
 import {
   getChannelId,
   Channel,
-  ObsoleteStore,
   CreateChannelEvent,
-  ChannelStoreEntry,
   AddressableMessage
 } from '@statechannels/wallet-protocols';
 import * as ethers from 'ethers';
@@ -19,13 +17,15 @@ import * as jrs from 'jsonrpc-lite';
 
 import {validateRequest} from './json-rpc-validation/validator';
 import {
-  createStateFromUpdateChannelParams,
+  createStateVarsFromUpdateChannelParams,
   createJsonRpcAllocationsFromOutcome
 } from './utils/json-rpc-utils';
 import {WorkflowManager} from './workflow-manager';
 import {fromEvent, Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {filterByPromise} from 'filter-async-rxjs-pipe';
+import {Store} from './store';
+import {ChannelStoreEntry} from './store/memory-channel-storage';
 
 export function observeRequests(
   channelId: string
@@ -76,7 +76,7 @@ async function metamaskUnlocked(): Promise<string> {
 export async function handleMessage(
   event,
   workflowManager: WorkflowManager,
-  store: ObsoleteStore,
+  store: Store,
   ourWallet: ethers.Wallet
 ) {
   if (event.data && event.data.jsonrpc && event.data.jsonrpc === '2.0') {
@@ -135,48 +135,39 @@ export async function handleMessage(
   }
 }
 
-async function handleJoinChannel(
-  payload: {id: jrs.ID; params: JoinChannelParams},
-  store: ObsoleteStore
-) {
+async function handleJoinChannel(payload: {id: jrs.ID; params: JoinChannelParams}, store: Store) {
   // TODO: The application workflow should be updated to wait until we get a  join channel from the client
   const {id} = payload;
   const {channelId} = payload.params;
-  const result = jrs.success(id, await getChannelInfo(channelId, store.getEntry(channelId)));
+  const result = jrs.success(id, await getChannelInfo(await store.getEntry(channelId)));
   window.parent.postMessage(result, '*');
 }
 
 async function handleCloseChannel(
   payload: jrs.RequestObject,
   workflowManager: WorkflowManager,
-  store: ObsoleteStore
+  store: Store
 ) {
   const {id} = payload;
   const {channelId} = payload.params as CloseChannelParams;
   workflowManager.dispatchToWorkflows({type: 'PLAYER_REQUEST_CONCLUDE', channelId});
-  const result = jrs.success(id, await getChannelInfo(channelId, store.getEntry(channelId)));
+  const result = jrs.success(id, await getChannelInfo(await store.getEntry(channelId)));
   window.parent.postMessage(result, '*');
 }
 
 async function handleUpdateChannel(
   payload: jrs.RequestObject,
   workflowManager: WorkflowManager,
-  store: ObsoleteStore
+  store: Store
 ) {
   const params = payload.params as UpdateChannelParams;
-  const entry = store.getEntry(params.channelId);
-  const {latestState} = entry;
+  const entry = await store.getEntry(params.channelId);
+  const {latest} = entry;
 
-  const state = createStateFromUpdateChannelParams(latestState, params);
+  const state = createStateVarsFromUpdateChannelParams(latest, params);
   workflowManager.dispatchToWorkflows({type: 'PLAYER_STATE_UPDATE', state});
-  window.parent.postMessage(
-    jrs.success(
-      payload.id,
-      await getChannelInfo(params.channelId, store.getEntry(params.channelId))
-    ),
-    '*'
-  );
-  dispatchChannelUpdatedMessage(params.channelId, store.getEntry(params.channelId));
+  window.parent.postMessage(jrs.success(payload.id, await getChannelInfo(entry)), '*');
+  dispatchChannelUpdatedMessage(entry);
 }
 
 async function handlePushMessage(payload: jrs.RequestObject, workflowManager: WorkflowManager) {
@@ -195,7 +186,7 @@ async function handlePushMessage(payload: jrs.RequestObject, workflowManager: Wo
 async function handleCreateChannelMessage(
   payload: jrs.RequestObject,
   workflowManager: WorkflowManager,
-  store: ObsoleteStore,
+  store: Store,
   ethersWallet: ethers.Wallet
 ) {
   const params = payload.params as CreateChannelParams;
@@ -225,37 +216,32 @@ async function handleCreateChannelMessage(
     const channelId = getChannelId(channel);
     workflowManager.dispatchToWorkflows(createChannel);
 
-    const response = jrs.success(
-      payload.id,
-      await getChannelInfo(channelId, store.getEntry(channelId))
-    );
+    const response = jrs.success(payload.id, await getChannelInfo(await store.getEntry(channelId)));
     window.parent.postMessage(response, '*');
   }
 }
 
-async function getChannelInfo(channelId: string, channelEntry: ChannelStoreEntry) {
-  const {participants, latestState} = channelEntry;
-  const {appData, appDefinition, turnNum, channel} = latestState;
-
+async function getChannelInfo(channelEntry: ChannelStoreEntry) {
+  const {latest, channelId} = channelEntry;
+  const {appData, turnNum} = latest;
+  const {participants, appDefinition} = channelEntry.channelConstants;
   // TODO: Status and funding
   const funding = [];
   let status = 'running';
-  if (turnNum === 0) {
+  if (turnNum.eq(0)) {
     status = 'proposed';
-  } else if (turnNum < 2 * channel.participants.length - 1) {
+  } else if (turnNum.lt(2 * participants.length - 1)) {
     status = 'opening';
-  } else if (channelEntry.hasSupportedState && channelEntry.latestSupportedState.isFinal) {
+  } else if (channelEntry.supported?.isFinal) {
     status = 'closed';
-  } else if (latestState && latestState.isFinal) {
+  } else if (latest?.isFinal) {
     status = 'closing';
   }
 
   return {
     participants,
-    //TODO: Somewhere the outcome is getting malformed
-    allocations: createJsonRpcAllocationsFromOutcome(
-      Array.isArray(latestState.outcome) ? latestState.outcome : [latestState.outcome]
-    ),
+
+    allocations: createJsonRpcAllocationsFromOutcome(latest.outcome),
     appDefinition,
     appData,
     status,
@@ -266,15 +252,12 @@ async function getChannelInfo(channelId: string, channelEntry: ChannelStoreEntry
 }
 
 // TODO: Probably should be async and the store should have async methods
-export function dispatchChannelUpdatedMessage(channelId: string, channelEntry: ChannelStoreEntry) {
+export function dispatchChannelUpdatedMessage(channelEntry: ChannelStoreEntry) {
   // TODO: Right now we assume anything that is not a null channel is an app channel
-  if (
-    channelEntry.states.length === 0 ||
-    bigNumberify(channelEntry.latestState.appDefinition).isZero()
-  ) {
+  if (bigNumberify(channelEntry.channelConstants.appDefinition).isZero()) {
     return;
   }
-  getChannelInfo(channelId, channelEntry).then(channelInfo => {
+  getChannelInfo(channelEntry).then(channelInfo => {
     const notification = jrs.notification('ChannelUpdated', channelInfo);
     window.parent.postMessage(notification, '*');
   });

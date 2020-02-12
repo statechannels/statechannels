@@ -11,6 +11,7 @@ import {Participant, StateVariables, State, SignedState} from './types';
 import {MemoryChannelStoreEntry, ChannelStoreEntry} from './memory-channel-storage';
 import {AddressZero} from 'ethers/constants';
 import {Objective, Message} from './wire-protocol';
+import {Chain, FakeChain} from '../chain';
 import {calculateChannelId} from './state-utils';
 
 interface DirectFunding {
@@ -58,9 +59,15 @@ export interface Store {
     appDefinition?: string
   ): Promise<ChannelStoreEntry>;
   getEntry(channelId): Promise<ChannelStoreEntry>;
+
+  // TODO: Shoud this be part of the store?
+  getChainInfo: Chain['getChainInfo'];
+  chainUpdatedFeed: Chain['chainUpdatedFeed'];
+  deposit: Chain['deposit'];
 }
 
 export class MemoryStore implements Store {
+  protected _chain: Chain;
   private _channels: Record<string, MemoryChannelStoreEntry> = {};
   private _objectives: Objective[] = [];
   private _nonces: Record<string, BigNumber> = {};
@@ -68,7 +75,12 @@ export class MemoryStore implements Store {
   private _privateKeys: Record<string, string> = {};
   // private _channels: Record<string, any> = {};
 
-  constructor(privateKeys?: string[]) {
+  constructor(privateKeys?: string[], chain?: Chain) {
+    // TODO: We shouldn't default to a fake chain
+    // but I didn't feel like updating all the constructor calls
+    this._chain = chain || new FakeChain();
+    this._chain.initialize();
+
     if (privateKeys && privateKeys.length > 0) {
       // load existing keys
       privateKeys.forEach(key => {
@@ -202,5 +214,17 @@ export class MemoryStore implements Store {
 
   public async getEntry(channelId: string): Promise<ChannelStoreEntry> {
     return this._channels[channelId];
+  }
+
+  chainUpdatedFeed(channelId: string) {
+    // TODO: Implement this
+    return this._chain.chainUpdatedFeed(channelId);
+  }
+
+  deposit(channelId: string, expectedHeld: string, amount: string) {
+    return this._chain.deposit(channelId, expectedHeld, amount);
+  }
+  getChainInfo(channelId: string) {
+    return this._chain.getChainInfo(channelId);
   }
 }
