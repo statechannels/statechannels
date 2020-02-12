@@ -43,7 +43,10 @@ export interface Allocation {
   allocationItems: AllocationItem[]; // A list of allocations (how much funds will each destination address get).
 }
 
-export interface Message<T = object> {
+export type Allocations = Allocation[]; // included for backwards compatibility
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface Message<T = any> {
   recipient: string; // Identifier of user that the message should be relayed to
   sender: string; // Identifier of user that the message is from
   data: T; // Message payload. Format defined by wallet and opaque to app.
@@ -107,6 +110,7 @@ export type UpdateChannelRequest = JsonRpcRequest<'UpdateChannel', UpdateChannel
 export type UpdateChannelResponse = JsonRpcResponse<ChannelResult>;
 
 // PushMessage
+export type PushMessageParams = PushMessageRequest['params']; // included for backwards compatibility
 export type PushMessageResult = {success: boolean};
 export type PushMessageRequest = JsonRpcRequest<'PushMessage', Message>;
 export type PushMessageResponse = JsonRpcResponse<PushMessageResult>;
@@ -119,6 +123,7 @@ export type CloseChannelRequest = JsonRpcRequest<'CloseChannel', CloseChannelPar
 export type CloseChannelResponse = JsonRpcResponse<ChannelResult>;
 
 // ChallengeChannel
+export type ChallengeChannelParams = ChallengeChannelRequest['params']; // for backwards compatibility
 export type ChallengeChannelRequest = JsonRpcRequest<'ChallengeChannel', {channelId: string}>;
 export type ChallengeChannelResponse = JsonRpcResponse<ChannelResult>;
 
