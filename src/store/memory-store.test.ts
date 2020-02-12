@@ -1,8 +1,9 @@
 import {MemoryStore} from './memory-store';
 import {Objective} from './wire-protocol';
-import {State, SimpleEthAllocation} from './types';
+import {SimpleEthAllocation, State} from './types';
 import {bigNumberify, BigNumber} from 'ethers/utils';
 import {Wallet} from 'ethers';
+import {calculateChannelId} from './state-utils';
 
 const {address: aAddress, privateKey: aPrivateKey} = Wallet.createRandom();
 // const {address: bAddress, privateKey: bPrivateKey} = Wallet.createRandom();
@@ -19,7 +20,6 @@ const outcome: SimpleEthAllocation = {
 const turnNum = bigNumberify(4);
 const appData = '0xabc';
 const isFinal = false;
-const channelId = 'abc123';
 const chainId = '1';
 const participants = [
   {participantId: 'a', destination: aDestination, signingAddress: aAddress},
@@ -30,7 +30,7 @@ const channelNonce = bigNumberify(0);
 const appDefinition = '0x5409ED021D9299bf6814279A6A1411A7e866A631';
 const challengeDuration = bigNumberify(60);
 const channelConstants = {chainId, participants, channelNonce, appDefinition, challengeDuration};
-const state: State = {channelId, ...stateVars, ...channelConstants};
+const state: State = {...stateVars, ...channelConstants};
 const signature = '0x123';
 const signedState = {...state, signature};
 
@@ -47,7 +47,7 @@ describe('stateReceivedFeed', () => {
   test('it fires when a state with the correct channel id is received', () => {
     const store = new MemoryStore();
     const outputs: State[] = [];
-    store.stateReceivedFeed(channelId).subscribe(x => outputs.push(x));
+    store.stateReceivedFeed(calculateChannelId(signedState)).subscribe(x => outputs.push(x));
     store.pushMessage({signedStates: [signedState]});
 
     expect(outputs).toEqual([state]);

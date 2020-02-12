@@ -1,24 +1,28 @@
 import {AnyEventObject, AssignAction, MachineConfig, assign, spawn, Machine} from 'xstate';
 import {filter, map} from 'rxjs/operators';
 import {Store} from '../store';
+import {statesEqual, outcomesEqual, calculateChannelId} from '../store/state-utils';
 import {State} from '../store/types';
-import {statesEqual, outcomesEqual} from '../store/state-utils';
 
 const WORKFLOW = 'support-state';
 
 export type Init = {state: State};
+type HasChannelId = Init & {channelId: string};
 
 /*
 TODO
 What happens if sendState fails?
 Do we abort? Or do we try to reach consensus on a later state?
 */
-export const config: MachineConfig<Init, any, AnyEventObject> = {
+export const config: MachineConfig<HasChannelId, any, AnyEventObject> = {
   key: WORKFLOW,
   initial: 'sendState',
   states: {
     sendState: {
-      entry: 'spawnObserver',
+      entry: [
+        assign<HasChannelId>({channelId: ({state}) => calculateChannelId(state)}),
+        'spawnObserver'
+      ],
       invoke: {src: 'sendState'},
       on: {SUPPORTED: 'success'}
     },
@@ -26,15 +30,15 @@ export const config: MachineConfig<Init, any, AnyEventObject> = {
   }
 };
 
-type Services = {sendState(ctx: Init): any};
+type Services = {sendState(ctx: HasChannelId): any};
 
 type Options = {
   services: Services;
-  actions: {spawnObserver: AssignAction<Init, any>};
+  actions: {spawnObserver: AssignAction<HasChannelId, any>};
 };
 
-const sendState = (store: Store) => async ({state}: Init) => {
-  const entry = await store.getEntry(state.channelId);
+const sendState = (store: Store) => async ({state, channelId}: HasChannelId) => {
+  const entry = await store.getEntry(channelId);
   const {latestSupportedByMe, supported, channelConstants} = entry;
   // TODO: Should these safety checks be performed in the store?
   if (
@@ -48,14 +52,14 @@ const sendState = (store: Store) => async ({state}: Init) => {
     // We always support a final state if it matches the outcome that we have signed
     (state.isFinal && outcomesEqual(state.outcome, latestSupportedByMe.outcome))
   ) {
-    await store.addState(state.channelId, state);
+    await store.addState(channelId, state);
   } else {
     throw 'Not safe to send';
   }
 };
 
-const notifyWhenSupported = (store: Store, {state}: Init) => {
-  return store.channelUpdatedFeed(state.channelId).pipe(
+const notifyWhenSupported = (store: Store, {state, channelId}: HasChannelId) => {
+  return store.channelUpdatedFeed(channelId).pipe(
     filter(({supported, channelConstants}) => statesEqual(channelConstants, state, supported)),
     map(() => 'SUPPORTED')
   );
@@ -66,7 +70,7 @@ const options = (store: Store): Options => ({
     sendState: sendState(store)
   },
   actions: {
-    spawnObserver: assign<Init>((ctx: Init) => ({
+    spawnObserver: assign<HasChannelId>((ctx: HasChannelId) => ({
       ...ctx,
       observer: spawn(notifyWhenSupported(store, ctx))
     }))

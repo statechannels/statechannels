@@ -66,7 +66,6 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     this.addState(stateVars, signatureString);
 
     return {
-      channelId: this.channelId,
       ...stateVars,
       ...this.channelConstants,
       signature: signatureString
