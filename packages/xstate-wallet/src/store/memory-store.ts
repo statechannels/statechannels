@@ -168,7 +168,12 @@ export class MemoryStore implements Store {
     let channelStorage = this._channels[channelId];
 
     if (!channelStorage) {
-      await this.createChannel(state.participants, state.challengeDuration, state);
+      await this.createChannel(
+        state.participants,
+        state.challengeDuration,
+        state,
+        state.appDefinition
+      );
       channelStorage = this._channels[channelId];
     }
 
