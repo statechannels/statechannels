@@ -235,7 +235,7 @@ export const applicationWorkflow = (store: Store, context?: WorkflowContext) => 
     })),
 
     sendToOpponent: (context: ChannelIdExists, event) => {
-      store.addState(context.channelId, event.state);
+      store.signState(context.channelId, event.state);
     },
     sendChannelUpdatedNotification: (
       context: ChannelIdExists,
@@ -280,7 +280,7 @@ export const applicationWorkflow = (store: Store, context?: WorkflowContext) => 
   };
 
   const services: WorkflowServices = {
-    createChannel: (context: ChannelParamsExist) => {
+    createChannel: async (context: ChannelParamsExist) => {
       const {
         participants,
         challengeDuration,
@@ -288,18 +288,19 @@ export const applicationWorkflow = (store: Store, context?: WorkflowContext) => 
         appData,
         appDefinition
       } = context.channelParams;
+      const {channelId} = await store.createChannel(
+        participants,
+        bigNumberify(challengeDuration),
+        appDefinition
+      );
       const stateVars: StateVariables = {
         outcome,
         appData,
         turnNum: bigNumberify(0),
         isFinal: false
       };
-      return store.createChannel(
-        participants,
-        bigNumberify(challengeDuration),
-        stateVars,
-        appDefinition
-      );
+      store.signState(channelId, stateVars);
+      return channelId;
     },
     invokeClosingProtocol: (context: ChannelIdExists) => {
       // TODO: Close machine needs to accept new store

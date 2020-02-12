@@ -90,7 +90,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => 
   async function constructFirstState(ctx: Init): Promise<void> {
     const {appData, channelId, outcome} = ctx;
 
-    store.addState(channelId, {
+    store.signState(channelId, {
       appData,
       isFinal: false,
       turnNum: bigNumberify(0),
