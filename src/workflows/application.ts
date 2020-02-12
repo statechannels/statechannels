@@ -288,18 +288,18 @@ export const applicationWorkflow = (store: Store, context?: WorkflowContext) => 
         appData,
         appDefinition
       } = context.channelParams;
-      const {channelId} = await store.createChannel(
-        participants,
-        bigNumberify(challengeDuration),
-        appDefinition
-      );
       const stateVars: StateVariables = {
         outcome,
         appData,
         turnNum: bigNumberify(0),
         isFinal: false
       };
-      store.signState(channelId, stateVars);
+      const {channelId} = await store.createChannel(
+        participants,
+        bigNumberify(challengeDuration),
+        stateVars,
+        appDefinition
+      );
       return channelId;
     },
     invokeClosingProtocol: (context: ChannelIdExists) => {

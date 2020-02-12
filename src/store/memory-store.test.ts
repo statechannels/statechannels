@@ -9,7 +9,7 @@ const {address: aAddress, privateKey: aPrivateKey} = new Wallet(
   '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318'
 ); // 0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf
 
-const {address: bAddress} = new Wallet(
+const {address: bAddress, privateKey: bPrivateKey} = new Wallet(
   '0xb3ab7b031311fe1764b657a6ae7133f19bac97acd1d7edca9409daa35892e727'
 ); // 0x2222E21c8019b14dA16235319D34b5Dd83E644A9
 const [aDestination, bDestination] = [aAddress, bAddress]; // for convenience
@@ -95,12 +95,21 @@ describe('createChannel', () => {
   it('returns a ChannelStoreEntry', async () => {
     const store = aStore();
 
-    const firstEntry = await store.createChannel(participants, challengeDuration, appDefinition);
+    const firstEntry = await store.createChannel(
+      participants,
+      challengeDuration,
+      stateVars,
+      appDefinition
+    );
 
     expect(firstEntry.channelId).toMatch(/0x/);
-    expect(firstEntry.latestSupportedByMe).toBeUndefined();
 
-    const secondEntry = await store.createChannel(participants, challengeDuration, appDefinition);
+    const secondEntry = await store.createChannel(
+      participants,
+      challengeDuration,
+      stateVars,
+      appDefinition
+    );
 
     expect(firstEntry.channelId).not.toEqual(secondEntry.channelId);
   });
@@ -109,7 +118,7 @@ describe('createChannel', () => {
     const store = new MemoryStore();
 
     await expect(
-      store.createChannel(participants, challengeDuration, appDefinition)
+      store.createChannel(participants, challengeDuration, stateVars, appDefinition)
     ).rejects.toMatchObject({
       message: "Couldn't find the signing key for any participant in wallet."
     });
@@ -122,12 +131,15 @@ describe('pushMessage', () => {
     await store.createChannel(
       signedState.participants,
       signedState.challengeDuration,
+      signedState,
       signedState.appDefinition
     );
 
-    expect((await store.getEntry(channelId)).latest).toBeUndefined();
-    await store.pushMessage({signedStates});
-    expect((await store.getEntry(channelId)).latest).toMatchObject(signedState);
+    const nextState = {...state, turnNum: bigNumberify(1)};
+    await store.pushMessage({
+      signedStates: [{...nextState, signature: signState(nextState, bPrivateKey)}]
+    });
+    expect((await store.getEntry(channelId)).latest).toMatchObject(nextState);
   });
 
   it('creates a channel if it receives states for a new channel', async () => {
