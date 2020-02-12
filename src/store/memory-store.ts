@@ -50,7 +50,7 @@ export interface Store {
   channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry>;
 
   getAddress(): string;
-  signState(channelId: string, stateVars: StateVariables);
+  signAndAddState(channelId: string, stateVars: StateVariables);
   createChannel(
     participants: Participant[],
     challengeDuration: BigNumber,
@@ -159,7 +159,7 @@ export class MemoryStore implements Store {
     });
 
     // sign the state, store the channel
-    this.signState(entry.channelId, stateVars);
+    this.signAndAddState(entry.channelId, stateVars);
 
     return Promise.resolve(entry);
   }
@@ -176,7 +176,7 @@ export class MemoryStore implements Store {
 
   private nonceKeyFromAddresses = (addresses: string[]): string => addresses.join('::');
 
-  signState(channelId: string, stateVars: StateVariables) {
+  signAndAddState(channelId: string, stateVars: StateVariables) {
     const channelStorage = this._channels[channelId];
 
     if (!channelStorage) {
