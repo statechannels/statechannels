@@ -1,6 +1,6 @@
 import {handleMessage, sendMessage} from './messaging';
 
-import {Store, EphemeralStore} from '@statechannels/wallet-protocols';
+import {ObsoleteStore, EphemeralObsoleteStore} from '@statechannels/wallet-protocols';
 import {ethers} from 'ethers';
 
 import {ChainWatcher} from './chain';
@@ -11,7 +11,7 @@ const ourWallet = ethers.Wallet.createRandom();
 
 const chain = new ChainWatcher();
 
-const store: Store = new EphemeralStore({
+const store: ObsoleteStore = new EphemeralObsoleteStore({
   chain,
   privateKeys: {
     [ourWallet.address]: ourWallet.privateKey

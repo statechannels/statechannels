@@ -8,7 +8,7 @@ import {
 import {
   getChannelId,
   Channel,
-  Store,
+  ObsoleteStore,
   CreateChannelEvent,
   ChannelStoreEntry,
   AddressableMessage
@@ -23,11 +23,60 @@ import {
   createJsonRpcAllocationsFromOutcome
 } from './utils/json-rpc-utils';
 import {WorkflowManager} from './workflow-manager';
+import {fromEvent, Observable} from 'rxjs';
+import {map} from 'rxjs/operators';
+import {filterByPromise} from 'filter-async-rxjs-pipe';
+
+export function observeRequests(
+  channelId: string
+): Observable<JoinChannelParams | CloseChannelParams | UpdateChannelParams> {
+  return fromEvent(window, 'message').pipe(
+    filterByPromise(async (e: MessageEvent) => {
+      if (!e || !e.data.jsonrpc || e.data.jsonrpc !== '2.0') {
+        return false;
+      }
+      const parsedMessage = jrs.parseObject(e.data);
+      if (parsedMessage.type !== 'request') {
+        return false;
+      }
+      const validationResult = await validateRequest(e.data);
+      if (!validationResult.isValid) {
+        console.error(validationResult);
+        return false;
+      }
+      if (
+        e.data.type !== 'UpdateChannel' &&
+        e.data.type !== 'CloseChannel' &&
+        e.data.type !== 'JoinChannel'
+      ) {
+        return false;
+      }
+      return e.data.params.channelId === channelId;
+    }),
+    map((e: MessageEvent) => {
+      return e.data.params;
+    })
+  );
+}
+
+async function metamaskUnlocked(): Promise<string> {
+  return new Promise(function(resolve, reject) {
+    function ifSelectedAddressThenResolve() {
+      if (typeof window.ethereum.selectedAddress === 'string') {
+        resolve(window.ethereum.selectedAddress);
+      }
+    }
+    ifSelectedAddressThenResolve();
+    window.ethereum.on('accountsChanged', function() {
+      ifSelectedAddressThenResolve();
+    });
+  });
+}
 
 export async function handleMessage(
   event,
   workflowManager: WorkflowManager,
-  store: Store,
+  store: ObsoleteStore,
   ourWallet: ethers.Wallet
 ) {
   if (event.data && event.data.jsonrpc && event.data.jsonrpc === '2.0') {
@@ -51,6 +100,14 @@ export async function handleMessage(
           case 'GetAddress':
             const address = ourWallet.address;
             window.parent.postMessage(jrs.success(id, address), '*');
+            break;
+          case 'GetEthereumSelectedAddress':
+            //  ask metamask permission to access accounts
+            await window.ethereum.enable();
+            //  block until accounts changed
+            //  (indicating user acceptance)
+            const ethereumSelectedAddress: string = await metamaskUnlocked();
+            window.parent.postMessage(jrs.success(id, ethereumSelectedAddress), '*');
             break;
           case 'CreateChannel':
             await handleCreateChannelMessage(
@@ -78,7 +135,10 @@ export async function handleMessage(
   }
 }
 
-async function handleJoinChannel(payload: {id: jrs.ID; params: JoinChannelParams}, store: Store) {
+async function handleJoinChannel(
+  payload: {id: jrs.ID; params: JoinChannelParams},
+  store: ObsoleteStore
+) {
   // TODO: The application workflow should be updated to wait until we get a  join channel from the client
   const {id} = payload;
   const {channelId} = payload.params;
@@ -89,7 +149,7 @@ async function handleJoinChannel(payload: {id: jrs.ID; params: JoinChannelParams
 async function handleCloseChannel(
   payload: jrs.RequestObject,
   workflowManager: WorkflowManager,
-  store: Store
+  store: ObsoleteStore
 ) {
   const {id} = payload;
   const {channelId} = payload.params as CloseChannelParams;
@@ -101,7 +161,7 @@ async function handleCloseChannel(
 async function handleUpdateChannel(
   payload: jrs.RequestObject,
   workflowManager: WorkflowManager,
-  store: Store
+  store: ObsoleteStore
 ) {
   const params = payload.params as UpdateChannelParams;
   const entry = store.getEntry(params.channelId);
@@ -135,7 +195,7 @@ async function handlePushMessage(payload: jrs.RequestObject, workflowManager: Wo
 async function handleCreateChannelMessage(
   payload: jrs.RequestObject,
   workflowManager: WorkflowManager,
-  store: Store,
+  store: ObsoleteStore,
   ethersWallet: ethers.Wallet
 ) {
   const params = payload.params as CreateChannelParams;

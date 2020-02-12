@@ -109,9 +109,9 @@ Note: we don't return the state of the channel, as messages are not necessarily 
 | ---- | ----------------- | -------------------------------------------- |
 | 900  | Wrong Participant | The message is not addressed to this wallet. |
 
-## Get addresses
+## GetAddress
 
-Returns the signing address(es) for the current domain.
+Returns the signing address for the current domain.
 
 ```json
 {
@@ -129,6 +129,29 @@ Returns the signing address(es) for the current domain.
   "jsonrpc": "2.0",
   "id": 1,
   "result": ["0x123..."]
+}
+```
+
+## GetEthereumSelectedAddress
+
+Returns the ethereum address selected in metamask. Typically used as the `destination`.
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "GetEthereumSelectedAddress",
+  "id": 1,
+  "params": {}
+}
+```
+
+> Example response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": ["0xabc..."]
 }
 ```
 
@@ -462,9 +485,9 @@ Possible response to a `Channel Proposed` event.
 
 ### Errors
 
-| Code | Message            | Meaning                                                                               |
-| ---- | ------------------ | ------------------------------------------------------------------------------------- |
-|      | Channel not found  | The wallet can't find the channel corresponding to the channelId                      |
+| Code | Message           | Meaning                                                          |
+| ---- | ----------------- | ---------------------------------------------------------------- |
+|      | Channel not found | The wallet can't find the channel corresponding to the channelId |
 
 # Events
 

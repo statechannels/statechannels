@@ -7,7 +7,7 @@ import { AddressZero, HashZero } from 'ethers/constants';
 import { MachineFactory, getDataAndInvoke } from '../../machine-utils';
 import { FINAL } from '../../';
 import { add, gt, subtract } from '../../mathOps';
-import { Store } from '../../store';
+import { ObsoleteStore } from '../../store';
 import { ethAllocationOutcome, getEthAllocation } from '../../calculations';
 
 import { Depositing, SupportState } from '..';
@@ -75,7 +75,7 @@ type Services = {
 
 type Options = { services: Services };
 
-export const machine: MachineFactory<Init, any> = (store: Store, context: Init) => {
+export const machine: MachineFactory<Init, any> = (store: ObsoleteStore, context: Init) => {
   async function checkCurrentLevel(ctx: Init) {
     const entry = store.getEntry(ctx.channelId);
 

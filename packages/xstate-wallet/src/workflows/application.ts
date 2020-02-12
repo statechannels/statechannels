@@ -1,40 +1,81 @@
-import {MachineConfig, Machine, StateMachine, assign, Action} from 'xstate';
+import {
+  MachineConfig,
+  Machine,
+  assign,
+  Action,
+  AssignAction,
+  spawn,
+  Condition,
+  DoneInvokeEvent,
+  StateSchema,
+  ServiceConfig,
+  StateMachine
+} from 'xstate';
 import {
   FINAL,
-  MachineFactory,
-  CreateChannelEvent,
-  OpenChannelEvent,
-  CreateChannel,
-  JoinChannel,
   ConcludeChannel,
-  Store,
+  ObsoleteStore,
   SendStates,
   ChannelUpdated,
-  ChannelStoreEntry
+  ChannelStoreEntry,
+  CreateAndDirectFund,
+  unreachable
 } from '@statechannels/wallet-protocols';
 
 import {State, getChannelId} from '@statechannels/nitro-protocol';
 
-import {sendDisplayMessage, dispatchChannelUpdatedMessage} from '../messaging';
+import {sendDisplayMessage, dispatchChannelUpdatedMessage, observeRequests} from '../messaging';
+import {map} from 'rxjs/operators';
+import * as CCC from './confirm-create-channel';
+import {JoinChannelParams, Participant, TokenAllocations} from '@statechannels/client-api-schema';
+import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
+import {createMockGuard} from '../utils/workflow-utils';
+import {getEthAllocation, ethAllocationOutcome} from '../utils/allocation-utils';
 
-interface Context {
+interface WorkflowContext {
   channelId?: string;
+  observer?: any;
+  channelParams?: Omit<CreateChannelEvent, 'type'>;
 }
-interface Actions {
-  sendToOpponent: Action<Context, PlayerStateUpdate>;
-  updateStore: Action<Context, SendStates>;
-  hideUi: Action<Context, any>;
-  displayUi: Action<Context, any>;
-  assignChannelId: Action<Context, any>;
-  sendChannelUpdatedNotification: Action<Context, ChannelUpdated>;
+type ChannelParamsExist = WorkflowContext & {channelParams: CCC.WorkflowContext};
+type ChannelIdExists = WorkflowContext & {channelId: string};
+
+interface WorkflowGuards {
+  channelOpen: Condition<WorkflowContext, WorkflowEvent>;
+  channelClosing: Condition<WorkflowContext, WorkflowEvent>;
+  channelClosed: Condition<WorkflowContext, WorkflowEvent>;
 }
 
-// a config isn't all wired up
-// a machine is something that's all wired up
+interface WorkflowActions {
+  sendToOpponent: Action<WorkflowContext, PlayerStateUpdate>;
+  assignChannelId: Action<WorkflowContext, any>;
+  displayUi: Action<WorkflowContext, any>;
+  hideUi: Action<WorkflowContext, any>;
+  sendChannelUpdatedNotification: Action<WorkflowContext, any>;
+  spawnObserver: AssignAction<ChannelIdExists, any>;
+}
 
+export interface OpenChannelEvent {
+  type: 'OPEN_CHANNEL';
+  channelId: string;
+}
 // Events
 type OpenEvent = CreateChannelEvent | OpenChannelEvent;
 
+export interface CreateChannelEvent {
+  type: 'CREATE_CHANNEL';
+  participants: Participant[];
+  allocations: TokenAllocations;
+  appDefinition: string;
+  appData: string;
+  challengeDuration: number;
+  chainId: string;
+}
+
+interface JoinChannelEvent {
+  type: 'JoinChannel';
+  params: JoinChannelParams;
+}
 interface PlayerStateUpdate {
   type: 'PLAYER_STATE_UPDATE';
   state: State;
@@ -43,41 +84,100 @@ interface PlayerRequestConclude {
   type: 'PLAYER_REQUEST_CONCLUDE';
   channelId: string;
 }
-type Event = PlayerRequestConclude | PlayerStateUpdate | SendStates | OpenEvent | ChannelUpdated;
+type WorkflowEvent =
+  | PlayerRequestConclude
+  | PlayerStateUpdate
+  | SendStates
+  | OpenEvent
+  | ChannelUpdated
+  | JoinChannelEvent
+  | DoneInvokeEvent<string>;
 
-export type ApplicationWorkflowEvent = Event;
+export type ApplicationWorkflowEvent = WorkflowEvent;
 
-const generateConfig = (actions: Actions): MachineConfig<Context, any, Event> => ({
+// TODO: Is this all that useful?
+export interface WorkflowServices extends Record<string, ServiceConfig<WorkflowContext>> {
+  createChannel: (context: WorkflowContext, event: WorkflowEvent) => Promise<void>;
+  invokeClosingProtocol: (
+    context: ChannelIdExists
+  ) => StateMachine<ConcludeChannel.Init, any, any, any>;
+
+  invokeCreateChannelAndDirectFundProtocol: (
+    context: ChannelIdExists & ChannelParamsExist
+  ) => StateMachine<any, any, any, any>;
+  invokeCreateChannelConfirmation: (
+    context: ChannelParamsExist,
+    event: CreateChannelEvent | JoinChannelEvent
+  ) => CCC.WorkflowMachine;
+}
+interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
+  states: {
+    initializing: {};
+    confirmCreateChannelWorkflow: {};
+    waitForJoin: {};
+    confirmJoinChannelWorkflow: {};
+    openChannelAndDirectFundProtocol: {};
+    createChannelInStore: {};
+    running: {};
+    closing: {};
+    // TODO: Is it possible to type these as type:'final' ?
+    done: {};
+  };
+}
+
+const generateConfig = (
+  actions,
+  guards: WorkflowGuards
+): MachineConfig<WorkflowContext, WorkflowStateSchema, WorkflowEvent> => ({
   id: 'application-workflow',
   initial: 'initializing',
+  on: {CHANNEL_UPDATED: {actions: [actions.sendChannelUpdatedNotification]}},
   states: {
-    initializing: {on: {CREATE_CHANNEL: 'create', OPEN_CHANNEL: 'join'}},
-    join: {
-      entry: [actions.assignChannelId, actions.displayUi],
-      invoke: {
-        id: 'joinMachine',
-        src: 'invokeJoinMachine',
-        data: (context, event) => event,
-        onDone: {target: 'running', actions: [actions.hideUi]},
-        autoForward: true
-      },
+    initializing: {
       on: {
-        SendStates: {actions: [actions.updateStore]},
-        CHANNEL_UPDATED: {actions: [actions.sendChannelUpdatedNotification]}
+        CREATE_CHANNEL: 'confirmCreateChannelWorkflow',
+        OPEN_CHANNEL: {target: 'waitForJoin', actions: [actions.assignChannelId]}
       }
     },
-    create: {
-      entry: [actions.displayUi],
-      invoke: {
-        id: 'createMachine',
-        src: 'invokeCreateMachine',
-        data: (context, event) => event,
-        onDone: {target: 'running', actions: [actions.hideUi, actions.assignChannelId]},
-        autoForward: true
-      },
+    waitForJoin: {
       on: {
-        SendStates: {actions: [actions.updateStore]},
-        CHANNEL_UPDATED: {actions: [actions.sendChannelUpdatedNotification]}
+        JoinChannel: {target: 'confirmJoinChannelWorkflow'}
+      }
+    },
+    confirmCreateChannelWorkflow: {
+      invoke: {
+        src: 'invokeCreateChannelConfirmation',
+        onDone: {
+          target: 'createChannelInStore'
+        }
+      }
+    },
+    confirmJoinChannelWorkflow: {
+      invoke: {
+        src: 'invokeCreateChannelConfirmation',
+        onDone: {
+          target: 'openChannelAndDirectFundProtocol',
+          actions: [actions.assignChannelId, actions.spawnObserver]
+        }
+      }
+    },
+    createChannelInStore: {
+      invoke: {
+        data: (context, event) => event.data,
+        src: 'createChannel',
+        onDone: {
+          target: 'openChannelAndDirectFundProtocol',
+          actions: [actions.assignChannelId, actions.spawnObserver]
+        }
+      }
+    },
+
+    openChannelAndDirectFundProtocol: {
+      invoke: {
+        src: 'invokeCreateChannelAndDirectFundProtocol',
+        onDone: {
+          target: 'running'
+        }
       }
     },
     running: {
@@ -85,34 +185,31 @@ const generateConfig = (actions: Actions): MachineConfig<Context, any, Event> =>
         PLAYER_STATE_UPDATE: {target: 'running', actions: [actions.sendToOpponent]},
         CHANNEL_UPDATED: [
           {
-            cond: 'channelOpen',
-            target: 'running',
-            actions: [actions.sendChannelUpdatedNotification]
-          },
-          {
-            cond: 'channelClosing',
-            target: 'closing',
-            actions: [actions.sendChannelUpdatedNotification]
+            cond: guards.channelClosing,
+            target: 'closing'
           }
         ],
-        SendStates: [{target: 'running', actions: [actions.updateStore]}],
+
         PLAYER_REQUEST_CONCLUDE: {target: 'closing'}
       }
     },
+    //This could handled by another workflow instead of the application workflow
     closing: {
       entry: actions.displayUi,
       exit: actions.hideUi,
       invoke: {
-        id: 'closingMachine',
-        src: 'invokeClosingMachine',
-        data: (context, event) => context,
+        id: 'closing-protocol',
+        src: 'invokeClosingProtocol',
+        data: context => context,
         autoForward: true
       },
       on: {
-        SendStates: {actions: actions.updateStore},
         CHANNEL_UPDATED: [
-          {cond: 'channelClosed', target: 'done', actions: actions.sendChannelUpdatedNotification},
-          {target: 'closing', actions: actions.sendChannelUpdatedNotification}
+          {
+            cond: guards.channelClosed,
+            target: 'done'
+          },
+          'closing'
         ]
       }
     },
@@ -120,40 +217,34 @@ const generateConfig = (actions: Actions): MachineConfig<Context, any, Event> =>
   }
 });
 
-export const applicationWorkflow: MachineFactory<Context, any> = (
-  store: Store,
-  context: Context
-) => {
-  // Always use an empty context instead of undefined
-  if (!context) {
-    context = {};
-  }
+export const applicationWorkflow = (store: ObsoleteStore, context?: WorkflowContext) => {
+  const notifyOnChannelMessage = ({channelId}: ChannelIdExists) => {
+    return observeRequests(channelId).pipe(
+      map(params => {
+        params;
+      })
+    );
+  };
 
-  const actions: Actions = {
-    updateStore: (context, event) => {
-      store.receiveStates(
-        // TODO: The outcome can get removed when going over the wire if it's empty
-        // For now we just add it back here
-        event.signedStates.map(ss => ({
-          state: {outcome: [], ...ss.state},
-          signatures: ss.signatures
-        }))
-      );
-    },
+  const actions: WorkflowActions = {
+    spawnObserver: assign<ChannelIdExists>(context => ({
+      ...context,
+      // TODO: Do protocols register themselves against the store for state updates? Or do we need to handle them
+      observer: spawn(notifyOnChannelMessage(context))
+    })),
+
     sendToOpponent: (context, event) => {
       store.sendState(event.state);
     },
     sendChannelUpdatedNotification: (context, event) => {
-      if (event.entry.states.length > 0) {
-        const channelId = getChannelId(event.entry.states[0].state.channel);
-        // TODO: We should filter by context.channelId but that is not being set currently
-        dispatchChannelUpdatedMessage(channelId, new ChannelStoreEntry(event.entry));
-      }
+      const entry = store.getEntry(event.channelId);
+      // TODO: We should filter by context.channelId but that is not being set currently
+      dispatchChannelUpdatedMessage(event.channelId, new ChannelStoreEntry(entry));
     },
-    displayUi: (context, event) => {
+    displayUi: () => {
       sendDisplayMessage('Show');
     },
-    hideUi: (context, event) => {
+    hideUi: () => {
       sendDisplayMessage('Hide');
     },
     assignChannelId: assign((context, event) => {
@@ -161,9 +252,9 @@ export const applicationWorkflow: MachineFactory<Context, any> = (
         if (event.type === 'PLAYER_STATE_UPDATE') {
           return {channelId: getChannelId(event.state.channel)};
         } else if (event.type === 'OPEN_CHANNEL') {
-          return {channelId: getChannelId(event.signedState.state.channel)};
-        } else if (event.type === 'done.invoke.createMachine') {
-          return event.data;
+          return {channelId: event.channelId};
+        } else if (event.type === 'done.invoke.createChannel') {
+          return {channelId: event.data};
         }
         return {};
       }
@@ -171,82 +262,110 @@ export const applicationWorkflow: MachineFactory<Context, any> = (
     })
   };
 
-  const config = generateConfig(actions);
+  const guards: WorkflowGuards = {
+    channelOpen: (context: ChannelIdExists, event: ChannelUpdated): boolean => {
+      const channelStoreEntry = new ChannelStoreEntry(event.entry);
+      return !channelStoreEntry.latestState.isFinal;
+    },
+    channelClosing: (context: ChannelIdExists, event: ChannelUpdated): boolean => {
+      const channelStoreEntry = new ChannelStoreEntry(event.entry);
+      return channelStoreEntry.latestState.isFinal;
+    },
 
-  const invokeJoinMachine = (
-    context,
-    event: OpenChannelEvent
-  ): StateMachine<any, any, any, any> => {
-    return JoinChannel.machine(store, event);
-  };
-  const invokeCreateMachine = (
-    context,
-    event: CreateChannelEvent
-  ): StateMachine<any, any, any, any> => {
-    return CreateChannel.machine(store);
-  };
-
-  const invokeClosingMachine = (context: Context) => {
-    if (!context.channelId) {
-      throw new Error('No channel id');
+    channelClosed: (context: ChannelIdExists, event: ChannelUpdated): boolean => {
+      const channelStoreEntry = new ChannelStoreEntry(event.entry);
+      return channelStoreEntry.hasSupportedState && channelStoreEntry.latestSupportedState.isFinal;
     }
-    return ConcludeChannel.machine(store, {channelId: context.channelId});
   };
 
-  const channelOpen = (context: Context, event: ChannelUpdated): boolean => {
-    return !channelClosing(context, event);
-  };
-  const channelClosing = (context: Context, event: ChannelUpdated): boolean => {
-    if (!context || !context.channelId) {
-      return false;
+  const services: WorkflowServices = {
+    createChannel: () => {
+      // TODO: call createChannel on Store
+      return new Promise(() => {
+        /* TODO: This must start the protocol and sync it to the store if necessary */
+      });
+    },
+    invokeClosingProtocol: (context: ChannelIdExists) => {
+      return ConcludeChannel.machine(store, {channelId: context.channelId});
+    },
+    invokeCreateChannelAndDirectFundProtocol: (context: ChannelParamsExist & ChannelIdExists) => {
+      const ourIndex = 0; // TODO:  get from store?
+      return CreateAndDirectFund.machine(store, {
+        ...context.channelParams,
+        // TODO: We should never have a context without this
+        // Right now this is left in for a test
+        allocations: context?.channelParams?.allocations
+          ? ethAllocationOutcome(context.channelParams.allocations, ETH_ASSET_HOLDER_ADDRESS)
+          : [],
+        channelId: context.channelId,
+        index: ourIndex
+      });
+    },
+    invokeCreateChannelConfirmation: (
+      context: WorkflowContext,
+      event: CreateChannelEvent | JoinChannelEvent
+    ) => {
+      switch (event.type) {
+        case 'CREATE_CHANNEL':
+          return CCC.confirmChannelCreationWorkflow(store, event);
+        case 'JoinChannel':
+          const entry = store.getEntry(event.params.channelId);
+          // TODO: Standardize on how/where we handle conversion from json-rpc allocations to outcomes
+          const {outcome, appData, appDefinition, channel, challengeDuration} = entry.latestState;
+
+          const context = {
+            allocations: getEthAllocation(outcome, ETH_ASSET_HOLDER_ADDRESS),
+            appData,
+            appDefinition,
+            challengeDuration,
+            chainId: channel.chainId,
+            participants: entry.participants
+          };
+          return CCC.confirmChannelCreationWorkflow(store, context);
+        default:
+          return unreachable(event);
+      }
     }
-    if (event.channelId !== context.channelId) {
-      return false;
-    }
-    const channelStoreEntry = new ChannelStoreEntry(event.entry);
-    return channelStoreEntry.latestState.isFinal;
   };
 
-  const channelClosed = (context: Context, event: ChannelUpdated): boolean => {
-    if (!context || !context.channelId) {
-      return false;
-    }
-    if (event.channelId !== context.channelId) {
-      return false;
-    }
-    const channelStoreEntry = new ChannelStoreEntry(event.entry);
-    return channelStoreEntry.hasSupportedState && channelStoreEntry.latestSupportedState.isFinal;
-  };
-
-  const guards = {channelOpen, channelClosing, channelClosed};
-  const services = {invokeClosingMachine, invokeCreateMachine, invokeJoinMachine};
-  const options = {
-    services,
-    guards
-  };
-  return Machine(config).withConfig(options, context);
+  const config = generateConfig(actions, guards);
+  return Machine(config).withConfig({services}, context || {});
 };
 
-const mockServices = {
-  invokeCreateMachine: () => {
-    /* mock, do nothing  */
+const mockServices: WorkflowServices = {
+  createChannel: () => {
+    return new Promise(() => {
+      /* Mock call */
+    }) as any;
   },
-  invokeJoinMachine: () => {
-    /* mock, do nothing  */
+  invokeClosingProtocol: () => {
+    return new Promise(() => {
+      /* Mock call */
+    }) as any;
   },
-  invokeClosingMachine: () => {
-    /* mock, do nothing  */
+  invokeCreateChannelAndDirectFundProtocol: context => {
+    return new Promise(() => {
+      /* mock*/
+    }) as any;
+  },
+  invokeCreateChannelConfirmation: () => {
+    return new Promise(() => {
+      /* Mock call */
+    }) as any;
   }
 };
-const mockActions: Actions = {
+const mockActions: WorkflowActions = {
   sendToOpponent: 'sendToOpponent',
-  updateStore: 'updateStore',
   sendChannelUpdatedNotification: 'sendChannelUpdatedNotification',
   hideUi: 'hideUi',
   displayUi: 'displayUi',
-  assignChannelId: 'assignChannelId'
+  assignChannelId: 'assignChannelId',
+  spawnObserver: 'spawnObserver' as any
 };
-
-export const config = generateConfig(mockActions);
-const mockGuards = {channelOpen: () => true, channelClosing: () => true};
+const mockGuards: WorkflowGuards = {
+  channelOpen: createMockGuard('channelOpen'),
+  channelClosing: createMockGuard('channelClosing'),
+  channelClosed: createMockGuard('channelClosed')
+};
+export const config = generateConfig(mockActions, mockGuards);
 export const mockOptions = {services: mockServices, actions: mockActions, guards: mockGuards};

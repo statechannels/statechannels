@@ -1,6 +1,6 @@
 import { DoneInvokeEvent, Machine, assign } from 'xstate';
 
-import { failure, Store, success } from '../..';
+import { failure, ObsoleteStore, success } from '../..';
 import { MachineFactory, getDataAndInvoke } from '../../machine-utils';
 
 import { FundingStrategy, FundingStrategyProposed } from '../../wire-protocol';
@@ -93,7 +93,7 @@ const fundVirtually = {
   },
 };
 
-const getTargetAllocation = (store: Store) => async ({
+const getTargetAllocation = (store: ObsoleteStore) => async ({
   targetChannelId,
 }: Init): Promise<LedgerFunding.Init> => {
   const deductions = getEthAllocation(
@@ -174,7 +174,7 @@ function strategyChoice({
 }
 export const mockOptions: Partial<Options> = { guards };
 
-export const machine: MachineFactory<Init, any> = (store: Store, context: Init) => {
+export const machine: MachineFactory<Init, any> = (store: ObsoleteStore, context: Init) => {
   function sendClientChoice(ctx: ClientChoiceKnown) {
     store.sendStrategyChoice(strategyChoice(ctx));
   }

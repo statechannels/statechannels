@@ -25,7 +25,7 @@ const siteConfig = {
   title: 'Nitro protocol', // Title for your website.
   tagline: 'A smart-contract protocol for state channel networks',
   url: 'https://protocol.statechannels.org', // Your website URL
-  baseUrl: '', // Base URL for your project */
+  baseUrl: '/', // Base URL for your project */
   // For github.io type URLs, you would set the url and baseUrl like:
   //   url: 'https://facebook.github.io',
   //   baseUrl: '/test-site/',

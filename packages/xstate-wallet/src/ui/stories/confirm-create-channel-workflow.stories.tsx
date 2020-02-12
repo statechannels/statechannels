@@ -6,11 +6,11 @@ import {
 export default {title: 'X-state wallet'};
 import {storiesOf} from '@storybook/react';
 import {interpret} from 'xstate';
-import {EphemeralStore} from '@statechannels/wallet-protocols';
+import {EphemeralObsoleteStore} from '@statechannels/wallet-protocols';
 import {Participant} from '@statechannels/client-api-schema/types/definitions';
 import {renderWalletInFrontOfApp} from './helpers';
 
-const store = new EphemeralStore({
+const store = new EphemeralObsoleteStore({
   privateKeys: {
     ['0xaddress']: '0xkey'
   },
@@ -41,7 +41,7 @@ const testContext: WorkflowContext = {
 if (config.states) {
   Object.keys(config.states).forEach(state => {
     const machine = interpret<any, any, any>(
-      confirmChannelCreationWorkflow(store).withContext(testContext),
+      confirmChannelCreationWorkflow(store, testContext).withContext(testContext),
       {
         devTools: true
       }

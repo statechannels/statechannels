@@ -1,3 +1,6 @@
+import * as Sentry from "@sentry/browser";
+Sentry.init({dsn: "https://c93116ce4875422c99f5bb877839af3b@sentry.io/2438199"});
+
 import * as React from "react";
 import {render} from "react-dom";
 import {Provider} from "react-redux";

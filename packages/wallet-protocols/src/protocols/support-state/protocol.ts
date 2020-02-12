@@ -3,7 +3,7 @@ import { State, getChannelId } from '@statechannels/nitro-protocol';
 import { filter, map } from 'rxjs/operators';
 
 import { outcomesEqual, statesEqual } from '../..';
-import { Store, observeChannel } from '../../store';
+import { ObsoleteStore, observeChannel } from '../../store';
 import { connectToStore } from '../../machine-utils';
 
 const PROTOCOL = 'support-state';
@@ -35,7 +35,7 @@ type Options = {
   actions: { spawnObserver: AssignAction<Init, any> };
 };
 
-const sendState = (store: Store) => async ({ state }: Init) => {
+const sendState = (store: ObsoleteStore) => async ({ state }: Init) => {
   const entry = store.getEntry(getChannelId(state.channel));
   const { latestStateSupportedByMe, hasSupportedState } = entry;
   // TODO: Should these safety checks be performed in the store?
@@ -57,7 +57,7 @@ const sendState = (store: Store) => async ({ state }: Init) => {
   }
 };
 
-const notifyWhenSupported = (store: Store, { state }: Init) => {
+const notifyWhenSupported = (store: ObsoleteStore, { state }: Init) => {
   return observeChannel(store, getChannelId(state.channel)).pipe(
     map(event => event.entry),
     filter(e => e.hasSupportedState && statesEqual(e.latestSupportedState, state)),
@@ -65,7 +65,7 @@ const notifyWhenSupported = (store: Store, { state }: Init) => {
   );
 };
 
-const options = (store: Store): Options => ({
+const options = (store: ObsoleteStore): Options => ({
   services: {
     sendState: sendState(store),
   },

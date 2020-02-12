@@ -5,10 +5,10 @@ import {
 export default {title: 'X-state wallet'};
 import {storiesOf} from '@storybook/react';
 import {interpret} from 'xstate';
-import {EphemeralStore} from '@statechannels/wallet-protocols';
+import {EphemeralObsoleteStore} from '@statechannels/wallet-protocols';
 import {renderWalletInFrontOfApp} from './helpers';
 
-const store = new EphemeralStore({
+const store = new EphemeralObsoleteStore({
   privateKeys: {
     ['0xaddress']: '0xkey'
   },

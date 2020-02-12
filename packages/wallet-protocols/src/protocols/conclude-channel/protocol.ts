@@ -3,7 +3,7 @@ import { Machine } from 'xstate';
 import { FINAL, checkThat, outcomesEqual } from '../..';
 import { MachineFactory, getDataAndInvoke } from '../../machine-utils';
 import { add } from '../../mathOps';
-import { Store } from '../../store';
+import { ObsoleteStore } from '../../store';
 import { isIndirectFunding } from '../../ChannelStoreEntry';
 import { ethAllocationOutcome, getEthAllocation } from '../../calculations';
 
@@ -65,7 +65,7 @@ export const mockOptions = {
   },
 };
 
-export const machine: MachineFactory<Init, any> = (store: Store, ctx: Init) => {
+export const machine: MachineFactory<Init, any> = (store: ObsoleteStore, ctx: Init) => {
   async function getFinalState({ channelId }: Init): Promise<SupportState.Init> {
     const { latestStateSupportedByMe, latestState } = store.getEntry(channelId);
 

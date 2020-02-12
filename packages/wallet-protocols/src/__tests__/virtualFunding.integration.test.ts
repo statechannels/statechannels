@@ -3,7 +3,7 @@ import waitForExpect from 'wait-for-expect';
 import { interpret } from 'xstate';
 import { Channel } from '@statechannels/nitro-protocol';
 
-import { Store, Participant } from '../store';
+import { ObsoleteStore, Participant } from '../store';
 import { messageService } from '../messaging';
 import { AddressableMessage } from '../wire-protocol';
 import { Chain } from '../chain';
@@ -22,7 +22,7 @@ const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 
 const chain = new Chain();
 
-const stores: Record<string, Store> = {};
+const stores: Record<string, ObsoleteStore> = {};
 
 function connect<T>(
   wallet: ethers.Wallet,
@@ -74,7 +74,10 @@ test('virtually funding a channel', async () => {
     channelNonce: '0xaa',
   };
 
-  const entry: (store: Store, channel: Channel) => IChannelStoreEntry = (store, channel) => ({
+  const entry: (store: ObsoleteStore, channel: Channel) => IChannelStoreEntry = (
+    store,
+    channel
+  ) => ({
     channel,
     participants: participants.filter(p =>
       channel.participants.find(addr => addr === p.signingAddress)
