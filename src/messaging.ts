@@ -234,7 +234,7 @@ async function getChannelInfo(channelEntry: ChannelStoreEntry) {
     status = 'opening';
   } else if (!!channelEntry.supported && channelEntry.supported.isFinal) {
     status = 'closed';
-  } else if (latest && latest.isFinal) {
+  } else if (latest?.isFinal) {
     status = 'closing';
   }
 
