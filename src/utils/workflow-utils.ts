@@ -4,7 +4,8 @@ import {
   EventObject,
   MachineConfig,
   Machine,
-  DoneInvokeEvent
+  DoneInvokeEvent,
+  StateNodeConfig
 } from 'xstate';
 import {Store} from '../store';
 
@@ -39,7 +40,12 @@ export const connectToStore: <T>(config: Config<T>, options: Options) => Machine
 Since machines typically  don't have sync access to a store, we invoke a promise to get the
 desired outcome; that outcome can then be forwarded to the invoked service.
 */
-export function getDataAndInvoke<T>(data: string, src: string, onDone?: string, id?: string) {
+export function getDataAndInvoke<T>(
+  data: string,
+  src: string,
+  onDone?: string,
+  id?: string
+): StateNodeConfig<any, any, any> {
   return {
     initial: data,
     states: {

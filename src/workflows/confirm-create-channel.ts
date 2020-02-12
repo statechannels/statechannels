@@ -1,8 +1,10 @@
 import {MachineConfig, Action, StateSchema, Machine, Condition, StateMachine} from 'xstate';
-import {Participant, TokenAllocations} from '@statechannels/client-api-schema';
+import {Participant} from '@statechannels/client-api-schema';
 import {sendDisplayMessage} from '../messaging';
 import {createMockGuard} from '../utils/workflow-utils';
 import {Store} from '../store/memory-store';
+import {SimpleEthAllocation} from '../store/types';
+import {BigNumber} from 'ethers/utils';
 
 interface WorkflowActions {
   hideUi: Action<WorkflowContext, any>;
@@ -15,12 +17,11 @@ interface WorkflowGuards {
 // it may be used when displaying a UI
 export interface WorkflowContext {
   participants: Participant[];
-
-  allocations: TokenAllocations;
+  outcome: SimpleEthAllocation;
   appDefinition: string;
   appData: string;
   chainId: string;
-  challengeDuration: number;
+  challengeDuration: BigNumber;
 }
 
 interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
