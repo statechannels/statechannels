@@ -12,7 +12,7 @@ import {
   StateMachine,
   StateNodeConfig
 } from 'xstate';
-import {FINAL, ConcludeChannel, SendStates, unreachable} from '@statechannels/wallet-protocols';
+import {unreachable} from '@statechannels/wallet-protocols';
 
 import {getChannelId} from '@statechannels/nitro-protocol';
 import * as CreateAndDirectFund from './create-and-direct-fund';
@@ -25,6 +25,7 @@ import {Store} from '../store/memory-store';
 import {StateVariables, SimpleEthAllocation} from '../store/types';
 import {ChannelStoreEntry} from '../store/memory-channel-storage';
 import {bigNumberify, BigNumber} from 'ethers/utils';
+import * as ConcludeChannel from './conclude-channel';
 
 interface WorkflowContext {
   channelId?: string;
@@ -86,7 +87,6 @@ interface PlayerRequestConclude {
 type WorkflowEvent =
   | PlayerRequestConclude
   | PlayerStateUpdate
-  | SendStates
   | OpenEvent
   | ChannelUpdated
   | JoinChannelEvent
@@ -214,7 +214,7 @@ const generateConfig = (
         ]
       }
     },
-    done: {type: FINAL}
+    done: {type: 'final'}
   }
 });
 
@@ -304,7 +304,7 @@ export const applicationWorkflow = (store: Store, context?: WorkflowContext) => 
     },
     invokeClosingProtocol: (context: ChannelIdExists) => {
       // TODO: Close machine needs to accept new store
-      return ConcludeChannel.machine(store as any, {channelId: context.channelId});
+      return ConcludeChannel.machine(store, {channelId: context.channelId});
     },
     invokeCreateChannelAndDirectFundProtocol: (context: ChannelParamsExist & ChannelIdExists) => {
       const ourIndex = 0; // TODO:  get from store?
