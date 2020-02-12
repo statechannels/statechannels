@@ -55,6 +55,7 @@ export interface Store {
   createChannel(
     participants: Participant[],
     challengeDuration: BigNumber,
+    stateVars: StateVariables,
     appDefinition?: string
   ): Promise<ChannelStoreEntry>;
   getEntry(channelId): Promise<ChannelStoreEntry>;
@@ -117,6 +118,7 @@ export class MemoryStore implements Store {
   public async createChannel(
     participants: Participant[],
     challengeDuration: BigNumber,
+    stateVars: StateVariables,
     appDefinition = AddressZero
   ): Promise<ChannelStoreEntry> {
     const addresses = participants.map(x => x.signingAddress);
@@ -140,6 +142,9 @@ export class MemoryStore implements Store {
       {channelNonce, chainId, participants, appDefinition, challengeDuration},
       myIndex
     );
+
+    // sign the state, store the channel
+    this.signState(channelId, stateVars);
 
     return Promise.resolve(this._channels[channelId]);
   }
@@ -177,7 +182,12 @@ export class MemoryStore implements Store {
     let channelStorage = this._channels[channelId];
 
     if (!channelStorage) {
-      await this.createChannel(state.participants, state.challengeDuration, state.appDefinition);
+      await this.createChannel(
+        state.participants,
+        state.challengeDuration,
+        state,
+        state.appDefinition
+      );
       channelStorage = this._channels[channelId];
     }
 
