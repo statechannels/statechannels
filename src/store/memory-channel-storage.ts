@@ -15,7 +15,7 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
   constructor(
     public readonly channelConstants: ChannelConstants,
     public readonly myIndex: number,
-    private stateVariables: Record<string, StateVariables> = {},
+    private states: Record<string, StateVariables | undefined> = {},
     private signatures: Record<string, string[]> = {}
   ) {}
 
@@ -28,10 +28,16 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     return this.participants[this.myIndex].signingAddress;
   }
 
+  private getStateVariables(k): StateVariables {
+    const vars = this.states[k];
+    if (!vars) throw 'No variable found';
+    return vars;
+  }
+
   private get sortedByTurnNum(): Array<StateVariables & {signatures: string[]}> {
-    return Object.keys(this.stateVariables)
+    return Object.keys(this.states)
       .map(k => {
-        return {...this.stateVariables[k], signatures: this.signatures[k]};
+        return {...this.getStateVariables(k), signatures: this.signatures[k]};
       })
       .sort((a, b) => a.turnNum.sub(b.turnNum).toNumber());
   }
@@ -73,7 +79,7 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
   addState(stateVars: StateVariables, signature: string) {
     const state = {...stateVars, ...this.channelConstants};
     const stateHash = hashState(state);
-    this.stateVariables[stateHash] = stateVars;
+    this.states[stateHash] = stateVars;
     const {participants} = this.channelConstants;
 
     // check the signature
@@ -91,13 +97,13 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     this.signatures[stateHash][signerIndex] = signature;
 
     // Garbage collect stale states
-    Object.keys(this.stateVariables).forEach(key => {
+    Object.keys(this.states).forEach(key => {
       if (
         this.supported &&
-        this.stateVariables[key].turnNum.lte(this.supported.turnNum) &&
+        this.getStateVariables(key).turnNum.lte(this.supported.turnNum) &&
         !this.inSupport(key)
       ) {
-        this.stateVariables = _.omit(this.stateVariables, key);
+        this.states = _.omit(this.states, key);
         this.signatures = _.omit(this.signatures, key);
       }
     });

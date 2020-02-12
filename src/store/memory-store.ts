@@ -72,7 +72,6 @@ export class MemoryStore implements Store {
   private _nonces: Record<string, BigNumber | undefined> = {};
   private _eventEmitter = new EventEmitter<InternalEvents>();
   private _privateKeys: Record<string, string | undefined> = {};
-  // private _channels: Record<string, any> = {};
 
   constructor(privateKeys?: string[], chain?: Chain) {
     // TODO: We shouldn't default to a fake chain
