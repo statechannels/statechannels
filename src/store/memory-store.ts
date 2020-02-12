@@ -67,7 +67,7 @@ export interface Store {
 
 export class MemoryStore implements Store {
   protected _chain: Chain;
-  private _channels: Record<string, MemoryChannelStoreEntry> = {};
+  private _channels: Record<string, MemoryChannelStoreEntry | undefined> = {};
   private _objectives: Objective[] = [];
   private _nonces: Record<string, BigNumber> = {};
   private _eventEmitter = new EventEmitter<InternalEvents>();
@@ -114,7 +114,9 @@ export class MemoryStore implements Store {
     return fromEvent(this._eventEmitter, 'addToOutbox');
   }
 
-  private async initializeChannel(channelConstants: ChannelConstants): Promise<ChannelStoreEntry> {
+  private async initializeChannel(
+    channelConstants: ChannelConstants
+  ): Promise<MemoryChannelStoreEntry> {
     const addresses = channelConstants.participants.map(x => x.signingAddress);
 
     const myIndex = addresses.findIndex(address => !!this._privateKeys[address]);
@@ -126,10 +128,11 @@ export class MemoryStore implements Store {
 
     // TODO: There could be concurrency problems which lead to entries potentially being overwritten.
     this.checkNonce(addresses, channelConstants.channelNonce);
-    this._channels[channelId] =
+    const entry =
       this._channels[channelId] || new MemoryChannelStoreEntry(channelConstants, myIndex);
 
-    return Promise.resolve(this._channels[channelId]);
+    this._channels[channelId] = entry;
+    return Promise.resolve(entry);
   }
 
   public async createChannel(
@@ -150,7 +153,7 @@ export class MemoryStore implements Store {
     this.setNonce(addresses, channelNonce);
     const chainId = '1';
 
-    const {channelId} = await this.initializeChannel({
+    const entry = await this.initializeChannel({
       chainId,
       challengeDuration,
       channelNonce,
@@ -159,9 +162,9 @@ export class MemoryStore implements Store {
     });
 
     // sign the state, store the channel
-    this.signState(channelId, stateVars);
+    this.signState(entry.channelId, stateVars);
 
-    return Promise.resolve(this._channels[channelId]);
+    return Promise.resolve(entry);
   }
 
   private getNonce(addresses: string[]): BigNumber | undefined {
@@ -200,17 +203,7 @@ export class MemoryStore implements Store {
 
   async addState(state: SignedState) {
     const channelId = calculateChannelId(state);
-    let channelStorage = this._channels[channelId];
-
-    if (!channelStorage) {
-      await this.createChannel(
-        state.participants,
-        state.challengeDuration,
-        state,
-        state.appDefinition
-      );
-      channelStorage = this._channels[channelId];
-    }
+    const channelStorage = this._channels[channelId] || (await this.initializeChannel(state));
 
     channelStorage.addState(state, state.signature);
   }
@@ -243,7 +236,10 @@ export class MemoryStore implements Store {
   }
 
   public async getEntry(channelId: string): Promise<ChannelStoreEntry> {
-    return this._channels[channelId];
+    const entry = this._channels[channelId];
+    if (!entry) throw 'Channel id not found';
+
+    return entry;
   }
 
   chainUpdatedFeed(channelId: string) {
