@@ -235,7 +235,7 @@ export const applicationWorkflow = (store: Store, context?: WorkflowContext) => 
     })),
 
     sendToOpponent: (context: ChannelIdExists, event) => {
-      store.signState(context.channelId, event.state);
+      store.signAndAddState(context.channelId, event.state);
     },
     sendChannelUpdatedNotification: (
       context: ChannelIdExists,
