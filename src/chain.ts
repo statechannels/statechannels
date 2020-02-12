@@ -2,7 +2,7 @@ import {ContractArtifacts, createETHDepositTransaction} from '@statechannels/nit
 import {getProvider} from './utils/contract-utils';
 import {ethers} from 'ethers';
 import {ETH_ASSET_HOLDER_ADDRESS} from './constants';
-import {BigNumber} from 'ethers/utils';
+import {BigNumber, bigNumberify} from 'ethers/utils';
 import {State} from './store/types';
 import {Observable, fromEvent, from, race} from 'rxjs';
 import {filter, map} from 'rxjs/operators';
@@ -26,6 +26,26 @@ export interface Chain {
   deposit: (channelId: string, expectedHeld: string, amount: string) => Promise<void>;
 }
 
+// TODO: This chain should be fleshed out enough so it mimics basic chain behavior
+export class FakeChain implements Chain {
+  public async initialize() {
+    /* NOOP */
+  }
+  public async deposit(channelId: string, expectedHeld: string, amount: string): Promise<void> {
+    /*TODO: record the amount */
+  }
+  public async getChainInfo(channelId: string): Promise<ChannelChainInfo> {
+    // TODO: Get the recorded amount
+    return {amount: bigNumberify(0), finalized: false};
+  }
+  public chainUpdatedFeed(channelId: string): Observable<ChannelChainInfo> {
+    // TODO: Get the recorded amount
+    return Observable.create({
+      amount: bigNumberify(0),
+      finalized: false
+    });
+  }
+}
 export class ChainWatcher implements Chain {
   private _contract: ethers.Contract | undefined;
   public async initialize() {
