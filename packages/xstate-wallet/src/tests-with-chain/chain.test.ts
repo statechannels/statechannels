@@ -1,16 +1,16 @@
 import {ChainWatcher} from '../chain';
 import {bigNumberify, parseUnits} from 'ethers/utils';
-import {map} from 'rxjs/operators';
 import {Contract, providers} from 'ethers';
-import {ContractArtifacts, getDepositedEvent, randomChannelId} from '@statechannels/nitro-protocol';
+import {ContractArtifacts, randomChannelId} from '@statechannels/nitro-protocol';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
 import {Machine, interpret, Interpreter} from 'xstate';
+import {Observable} from 'rxjs';
+import {map} from 'rxjs/operators';
 
 const chain = new ChainWatcher();
 
 const store = {
-  chain,
-  getHoldings: (channelId: string) => '10'
+  chain
 };
 
 const mockContext = {
@@ -24,12 +24,14 @@ let ETHAssetHolder: Contract;
 let service: Interpreter<any, any, any, any>;
 
 // this service to be invoked by a protocol xstate machine
-const subscribeToFundingFeed = (context: any, event: any) => {
+const subscribeToFundingFeed = (
+  context: any,
+  event: any
+): Observable<'FUNDED' | 'SAFE_TO_DEPOSIT' | 'NOT_SAFE_TO_DEPOSIT' | undefined> => {
   return store.chain.fundingFeed(context.channelId).pipe(
-    map(async event => {
-      console.log(event);
+    map(event => {
       if (event.type === 'DEPOSITED') {
-        const currentHoldings = bigNumberify(await store.getHoldings(context.channelId));
+        const currentHoldings = bigNumberify(event.total);
         if (currentHoldings.gte(context.fundedAt)) {
           return 'FUNDED';
         } else if (currentHoldings.gte(context.depositAt)) {
@@ -63,24 +65,35 @@ const mockMachine = Machine({
   }
 });
 
-beforeAll(async () => {
+beforeEach(async () => {
+  const signer = await provider.getSigner();
   ETHAssetHolder = new Contract(
     ETH_ASSET_HOLDER_ADDRESS,
     ContractArtifacts.EthAssetHolderArtifact.abi,
-    await provider.getSigner()
+    signer
   );
   await store.chain.initialize();
-  service = interpret(mockMachine).onTransition(state => {
-    console.log(state.value); // observable should be subscribed to on entering initial state
-  });
-  service.start();
+  service = interpret(mockMachine).start(); // observable should be subscribed to on entering initial state
 });
 
-afterAll(() => {
+afterEach(() => {
   service.stop();
 });
 
-it('subscribes to funding Feed', async () => {
+it('subscribes to funding feed, and sends correct event to xstate machine after a deposit', async () => {
+  // const ethDepositedFilter = ETHAssetHolder.filters.Deposited();
+
+  const depositEvent = new Promise((resolve, reject) => {
+    ETHAssetHolder.on('Deposited', (from, to, amount, event) => {
+      event.removeListener();
+      resolve();
+    });
+
+    setTimeout(() => {
+      reject(new Error('timeout'));
+    }, 60000);
+  });
+
   const tx = ETHAssetHolder.deposit(
     mockContext.channelId, // destination
     parseUnits('0', 'wei'), // expectedHeld
@@ -90,8 +103,7 @@ it('subscribes to funding Feed', async () => {
     }
   );
 
-  const {events} = await (await tx).wait();
-  const event = getDepositedEvent(events);
-  console.log(event);
-  // expect(fundedEventSent).toHaveBeenCalled();
+  await (await tx).wait(); // wait for tx to be mined
+  await depositEvent; // wait for this test to detect the event being fired
+  expect(fundedEventSent).toHaveBeenCalled();
 });
