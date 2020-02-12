@@ -3,10 +3,12 @@ import {Objective} from './wire-protocol';
 import {SimpleEthAllocation, State} from './types';
 import {bigNumberify, BigNumber} from 'ethers/utils';
 import {Wallet} from 'ethers';
-import {calculateChannelId} from './state-utils';
+import {calculateChannelId, signState} from './state-utils';
 
-const {address: aAddress, privateKey: aPrivateKey} = Wallet.createRandom();
-// const {address: bAddress, privateKey: bPrivateKey} = Wallet.createRandom();
+const {address: aAddress, privateKey: aPrivateKey} = new Wallet(
+  '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318'
+); // 0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf
+
 const {address: bAddress} = Wallet.createRandom();
 const [aDestination, bDestination] = [aAddress, bAddress]; // for convenience
 
@@ -32,7 +34,7 @@ const challengeDuration = bigNumberify(60);
 const channelConstants = {chainId, participants, channelNonce, appDefinition, challengeDuration};
 const state: State = {...stateVars, ...channelConstants};
 const channelId = calculateChannelId(channelConstants);
-const signature = '0x123';
+const signature = signState(state, aPrivateKey);
 const signedState = {...state, signature};
 const signedStates = [signedState];
 
