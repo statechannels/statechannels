@@ -7,7 +7,7 @@ import {getChannelId} from '@statechannels/nitro-protocol';
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {Wallet} from 'ethers';
 
-import {Participant, StateVariables, State} from './types';
+import {Participant, StateVariables, State, SignedState} from './types';
 import {MemoryChannelStoreEntry, ChannelStoreEntry} from './memory-channel-storage';
 import {AddressZero} from 'ethers/constants';
 import {Objective, Message} from './wire-protocol';
@@ -51,6 +51,7 @@ export interface Store {
 
   getAddress(): string;
   signState(channelId: string, stateVars: StateVariables);
+  addState(state: SignedState);
   createChannel(
     participants: Participant[],
     challengeDuration: BigNumber,
@@ -162,6 +163,18 @@ export class MemoryStore implements Store {
     this._eventEmitter.emit('addToOutbox', {signedStates: [signedState]});
   }
 
+  async addState(state: SignedState) {
+    const channelId = calculateChannelId(state);
+    let channelStorage = this._channels[channelId];
+
+    if (!channelStorage) {
+      await this.createChannel(state.participants, state.challengeDuration, state);
+      channelStorage = this._channels[channelId];
+    }
+
+    channelStorage.addState(state, state.signature);
+  }
+
   public getAddress(): string {
     return Object.keys(this._privateKeys)[0];
   }
@@ -174,6 +187,7 @@ export class MemoryStore implements Store {
       // todo: check the channel involves me
       signedStates.forEach(signedState => {
         const {signature, ...state} = signedState;
+        this.addState(signedState);
         this._eventEmitter.emit('stateReceived', state);
       });
     }

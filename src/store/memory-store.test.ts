@@ -121,3 +121,20 @@ describe('createChannel', () => {
     });
   });
 });
+
+describe('pushMessage', () => {
+  it('stores states', async () => {
+    const store = new MemoryStore([aPrivateKey]);
+    await store.createChannel(signedState.participants, signedState.challengeDuration, signedState);
+
+    expect((await store.getEntry(channelId)).latest).toBeUndefined();
+    await store.pushMessage({signedStates});
+    expect((await store.getEntry(channelId)).latest).toMatchObject(signedState);
+  });
+
+  it('creates a channel if it receives states for a new channel', async () => {
+    const store = new MemoryStore([aPrivateKey]);
+    await store.pushMessage({signedStates});
+    expect(await store.getEntry(channelId)).not.toBeUndefined();
+  });
+});
