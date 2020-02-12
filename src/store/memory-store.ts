@@ -7,7 +7,7 @@ import {getChannelId} from '@statechannels/nitro-protocol';
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {Wallet} from 'ethers';
 
-import {Participant, StateVariables, State, SignedState} from './types';
+import {Participant, StateVariables, State} from './types';
 import {MemoryChannelStoreEntry, ChannelStoreEntry} from './memory-channel-storage';
 import {AddressZero} from 'ethers/constants';
 import {Objective, Message} from './wire-protocol';
@@ -47,17 +47,17 @@ interface InternalEvents {
 export interface Store {
   newObjectiveFeed: Observable<Objective>;
   outboxFeed: Observable<Message>;
-  pushMessage: (message: Message) => Promise<void>;
+  pushMessage: (message: Message) => void;
   channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry>;
 
   getAddress(): string;
-  signState(channelId: string, stateVars: StateVariables);
-  addState(state: SignedState);
+  addState(channelId: string, stateVars: StateVariables);
   createChannel(
     participants: Participant[],
     challengeDuration: BigNumber,
+    stateVars: StateVariables,
     appDefinition?: string
-  ): Promise<ChannelStoreEntry>;
+  ): Promise<string>;
   getEntry(channelId): Promise<ChannelStoreEntry>;
 
   // TODO: Shoud this be part of the store?
@@ -118,8 +118,9 @@ export class MemoryStore implements Store {
   public async createChannel(
     participants: Participant[],
     challengeDuration: BigNumber,
+    stateVars: StateVariables,
     appDefinition = AddressZero
-  ): Promise<ChannelStoreEntry> {
+  ): Promise<string> {
     const addresses = participants.map(x => x.signingAddress);
 
     const myIndex = addresses.findIndex(address => !!this._privateKeys[address]);
@@ -142,7 +143,10 @@ export class MemoryStore implements Store {
       myIndex
     );
 
-    return Promise.resolve(this._channels[channelId]);
+    // sign the state, store the channel
+    this.addState(channelId, stateVars);
+
+    return Promise.resolve(channelId);
   }
 
   private getNonce(addresses: string[]): BigNumber | undefined {
@@ -155,7 +159,7 @@ export class MemoryStore implements Store {
 
   private nonceKeyFromAddresses = (addresses: string[]): string => addresses.join('::');
 
-  signState(channelId: string, stateVars: StateVariables) {
+  addState(channelId: string, stateVars: StateVariables) {
     const channelStorage = this._channels[channelId];
 
     if (!channelStorage) {
@@ -173,39 +177,24 @@ export class MemoryStore implements Store {
     this._eventEmitter.emit('addToOutbox', {signedStates: [signedState]});
   }
 
-  async addState(state: SignedState) {
-    const channelId = calculateChannelId(state);
-    let channelStorage = this._channels[channelId];
-
-    if (!channelStorage) {
-      await this.createChannel(state.participants, state.challengeDuration, state.appDefinition);
-      channelStorage = this._channels[channelId];
-    }
-
-    channelStorage.addState(state, state.signature);
-  }
-
   public getAddress(): string {
     return Object.keys(this._privateKeys)[0];
   }
 
-  async pushMessage(message: Message) {
+  pushMessage(message: Message) {
     const {signedStates, objectives} = message;
 
     if (signedStates) {
       // todo: check sig
       // todo: check the channel involves me
-      await Promise.all(
-        signedStates.map(async signedState => {
-          const {signature, ...state} = signedState;
-          await this.addState(signedState);
-          this._eventEmitter.emit('stateReceived', state);
-        })
-      );
+      signedStates.forEach(signedState => {
+        const {signature, ...state} = signedState;
+        this._eventEmitter.emit('stateReceived', state);
+      });
     }
 
     objectives?.forEach(objective => {
-      if (!_.includes(this._objectives, objective)) {
+      if (!this._objectives.find(p => _.isEqual(p, objective))) {
         this._objectives.push(objective);
         this._eventEmitter.emit('newObjective', objective);
       }
@@ -213,7 +202,13 @@ export class MemoryStore implements Store {
   }
 
   public async getEntry(channelId: string): Promise<ChannelStoreEntry> {
-    return this._channels[channelId];
+    const entry = this._channels[channelId];
+    return new MemoryChannelStoreEntry(
+      entry.channelConstants,
+      entry.myIndex,
+      entry.stateVariables,
+      entry.signatures
+    );
   }
 
   chainUpdatedFeed(channelId: string) {
