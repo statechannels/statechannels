@@ -5,7 +5,7 @@ import {
   AllocationAssetOutcome
 } from '@statechannels/nitro-protocol';
 
-import {TokenAllocations} from '@statechannels/client-api-schema';
+import {Allocations as TokenAllocations} from '@statechannels/client-api-schema';
 
 import {ETH_TOKEN} from '../constants';
 
