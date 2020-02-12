@@ -110,7 +110,7 @@ export class ChainWatcher implements Chain {
     );
     return concat(first, updates);
   }
-  // TOFO remove 'on'
+  // TODO remove 'on'
   public on(eventType: ChainEventType, listener: ChainEventListener) {
     if (eventType !== 'DEPOSITED') {
       throw new Error(`No support for ${eventType}`);
@@ -134,9 +134,11 @@ export class ChainWatcher implements Chain {
     }
   }
   public fundingFeed(channelId: string): Observable<any> {
+    console.log('chain.fundingFeed called');
     const assetHolder = this._assetHolders[0];
     const observable = Observable.create(function(observer) {
       const contractListener = (fromAddress, toAddress, value, event) => {
+        console.log('event caught in fundingfeed contractListener');
         const chainEvent: ChainEvent = {
           type: 'DEPOSITED',
           channelId: event.args.destination,

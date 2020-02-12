@@ -18,6 +18,7 @@ export {
   AssetOutcomeShortHand,
   getTestProvider,
   OutcomeShortHand,
+  randomChannelId,
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
   setupContracts,

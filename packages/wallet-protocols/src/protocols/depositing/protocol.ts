@@ -56,8 +56,8 @@ type Options = { services: Services };
 export const machine: MachineFactory<Init, any> = (store: ObsoleteStore, context: Init) => {
   const subscribeToFundingFeed = (context: Init, event: any) => {
     if (store.chain.fundingFeed) {
-      store.chain.fundingFeed(context.channelId).pipe(
-        map(async (event: ChainEvent) => {
+      return store.chain.fundingFeed(context.channelId).pipe(
+        map(async event => {
           if (event.type === 'DEPOSITED') {
             const currentHoldings = bigNumberify(await store.getHoldings(context.channelId));
             if (currentHoldings.gte(context.fundedAt)) {
@@ -70,7 +70,7 @@ export const machine: MachineFactory<Init, any> = (store: ObsoleteStore, context
           } else return;
         })
       );
-    }
+    } else return null;
   };
   const submitDepositTransaction = async (ctx: Init) => {
     const currentHoldings = bigNumberify(await store.getHoldings(ctx.channelId));
