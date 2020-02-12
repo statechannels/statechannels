@@ -52,7 +52,6 @@ export interface Store {
 
   getAddress(): string;
   signState(channelId: string, stateVars: StateVariables);
-  addState(state: SignedState);
   createChannel(
     participants: Participant[],
     challengeDuration: BigNumber,

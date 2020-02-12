@@ -63,10 +63,10 @@ const sendState = (store: Store) => async ({channelId, targetTurnNum}: Init) => 
   const {supported} = await store.getEntry(channelId);
 
   if (!!supported && supported.turnNum.lt(targetTurnNum)) {
-    store.addState(channelId, {...supported, turnNum});
+    store.signState(channelId, {...supported, turnNum});
   } else if (!supported) {
     const {latest} = await store.getEntry(channelId);
-    store.addState(channelId, {...latest, turnNum});
+    store.signState(channelId, {...latest, turnNum});
   }
 };
 
