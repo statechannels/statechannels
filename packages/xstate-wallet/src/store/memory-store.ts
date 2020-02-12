@@ -131,9 +131,6 @@ export class MemoryStore implements Store {
       myIndex
     );
 
-    // sign the state, store the channel
-    this.signState(channelId, stateVars);
-
     return Promise.resolve(this._channels[channelId]);
   }
 
