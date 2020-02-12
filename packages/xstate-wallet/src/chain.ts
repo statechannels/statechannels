@@ -4,7 +4,7 @@ import {ethers} from 'ethers';
 import {ETH_ASSET_HOLDER_ADDRESS} from './constants';
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {State} from './store/types';
-import {Observable, fromEvent, from, race} from 'rxjs';
+import {Observable, fromEvent, from, concat} from 'rxjs';
 import {filter, map} from 'rxjs/operators';
 
 const EthAssetHolderInterface = new ethers.utils.Interface(
@@ -94,6 +94,6 @@ export class ChainWatcher implements Chain {
         return {amount: event.amount, finalized: false};
       })
     );
-    return race(first, updates);
+    return concat(first, updates);
   }
 }
