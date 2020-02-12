@@ -2,12 +2,11 @@ import {Observable, fromEvent} from 'rxjs';
 import {filter} from 'rxjs/operators';
 import {EventEmitter} from 'eventemitter3';
 import * as _ from 'lodash';
-import {getChannelId} from '@statechannels/nitro-protocol';
 
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {Wallet} from 'ethers';
 
-import {Participant, StateVariables, State, SignedState} from './types';
+import {Participant, StateVariables, State, SignedState, ChannelConstants} from './types';
 import {MemoryChannelStoreEntry, ChannelStoreEntry} from './memory-channel-storage';
 import {AddressZero} from 'ethers/constants';
 import {Objective, Message} from './wire-protocol';
@@ -115,6 +114,24 @@ export class MemoryStore implements Store {
     return fromEvent(this._eventEmitter, 'addToOutbox');
   }
 
+  private async initializeChannel(channelConstants: ChannelConstants): Promise<ChannelStoreEntry> {
+    const addresses = channelConstants.participants.map(x => x.signingAddress);
+
+    const myIndex = addresses.findIndex(address => !!this._privateKeys[address]);
+    if (myIndex === -1) {
+      throw new Error("Couldn't find the signing key for any participant in wallet.");
+    }
+
+    const channelId = calculateChannelId(channelConstants);
+
+    // TODO: There could be concurrency problems which lead to entries potentially being overwritten.
+    this.checkNonce(addresses, channelConstants.channelNonce);
+    this._channels[channelId] =
+      this._channels[channelId] || new MemoryChannelStoreEntry(channelConstants, myIndex);
+
+    return Promise.resolve(this._channels[channelId]);
+  }
+
   public async createChannel(
     participants: Participant[],
     challengeDuration: BigNumber,
@@ -133,15 +150,13 @@ export class MemoryStore implements Store {
     this.setNonce(addresses, channelNonce);
     const chainId = '1';
 
-    const channelId = getChannelId({
+    const {channelId} = await this.initializeChannel({
       chainId,
-      channelNonce: channelNonce.toString(),
-      participants: addresses
+      challengeDuration,
+      channelNonce,
+      participants,
+      appDefinition
     });
-    this._channels[channelId] = new MemoryChannelStoreEntry(
-      {channelNonce, chainId, participants, appDefinition, challengeDuration},
-      myIndex
-    );
 
     // sign the state, store the channel
     this.signState(channelId, stateVars);
@@ -151,6 +166,12 @@ export class MemoryStore implements Store {
 
   private getNonce(addresses: string[]): BigNumber | undefined {
     return this._nonces[this.nonceKeyFromAddresses(addresses)];
+  }
+
+  private checkNonce(addresses: string[], nonce: BigNumber): void {
+    if (nonce.lte(this._nonces[this.nonceKeyFromAddresses(addresses)])) {
+      throw 'Invalid nonce';
+    }
   }
 
   private setNonce(addresses: string[], value: BigNumber) {
