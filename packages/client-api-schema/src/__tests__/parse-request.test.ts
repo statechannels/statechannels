@@ -5,7 +5,8 @@ import {
   getEthSelectedAddress,
   createChannel,
   pushMessage2
-} from './sample_requests';
+} from './good_sample_requests';
+import * as bad from './bad_sample_requests';
 
 describe('validateRequest', () => {
   it('works', () => {
@@ -15,6 +16,7 @@ describe('validateRequest', () => {
     expect(validateRequest(pushMessage)).toBe(true);
     expect(validateRequest(createChannel)).toBe(true);
     expect(validateRequest(pushMessage2)).toBe(true);
+    expect(validateRequest(bad.createChannel)).toBe(false);
   });
 });
 
