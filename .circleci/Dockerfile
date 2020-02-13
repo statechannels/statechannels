@@ -9,10 +9,12 @@ RUN apt-get install -y \
     gzip \
     make \
     python \
+    ruby-full \
     software-properties-common \
     ssh \
     sudo \
-    tar
+    tar \
+    zlib1g-dev
 
 # add ethereum ppa
 RUN add-apt-repository ppa:ethereum/ethereum

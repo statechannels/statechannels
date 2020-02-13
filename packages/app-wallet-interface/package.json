@@ -1,0 +1,11 @@
+{
+  "name": "@statechannels/app-wallet-interface",
+  "description": "Interface between app and wallet",
+  "version": "0.0.1",
+  "license": "MIT",
+  "repository": "statechannels/monorepo/blob/master/packages/app-wallet-interface",
+  "scripts": {
+    "build:netlify": "gem install bundler:2.0.2 && bundle update --bundler && bundle exec middleman build --clean",
+    "release:netlify": "netlify deploy --site $APP_WALLET_INTERFACE_NETLIFY_ID --dir=build"
+  }
+}
