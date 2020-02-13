@@ -112,6 +112,7 @@
         }
       },
       "required": [
+        "id",
         "jsonrpc",
         "method",
         "params"
@@ -312,6 +313,7 @@
         }
       },
       "required": [
+        "id",
         "jsonrpc",
         "method",
         "params"
@@ -394,6 +396,7 @@
         }
       },
       "required": [
+        "id",
         "jsonrpc",
         "method",
         "params"
@@ -463,6 +466,7 @@
         }
       },
       "required": [
+        "id",
         "jsonrpc",
         "method",
         "params"
@@ -524,6 +528,7 @@
         }
       },
       "required": [
+        "id",
         "jsonrpc",
         "method",
         "params"
@@ -577,6 +582,7 @@
         }
       },
       "required": [
+        "id",
         "jsonrpc",
         "method",
         "params"
@@ -641,6 +647,7 @@
         }
       },
       "required": [
+        "id",
         "jsonrpc",
         "method",
         "params"
@@ -780,6 +787,7 @@
         }
       },
       "required": [
+        "id",
         "jsonrpc",
         "method",
         "params"
@@ -1020,6 +1028,7 @@
         }
       },
       "required": [
+        "id",
         "jsonrpc",
         "method",
         "params"
