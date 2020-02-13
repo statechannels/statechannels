@@ -1,17 +1,34 @@
-export interface JsonRpcRequest<MethodName, RequestParams> {
-  id?: number;
+/**
+ * Ethereum Address
+ * @pattern  ^0x([a-fA-F0-9]{40})|0$
+ */
+export type Address = string;
+
+/**
+ * Nitro ChannelId
+ * @pattern  ^0x([a-fA-F0-9]{64})$
+ */
+export type ChannelId = string;
+
+/**
+ * Nitro ChannelId
+ * @pattern  ^0x(0{24})([a-fA-F0-9]{40})$
+ */
+export type ExternalDestination = string; // currently unused in this schema
+
+interface JsonRpcRequest<MethodName, RequestParams> {
+  id: number; // in the json-rpc spec this is optional, but we require it for all our requests
   jsonrpc: '2.0';
   method: MethodName;
   params: RequestParams;
 }
-
-export interface JsonRpcResponse<ResultType> {
+interface JsonRpcResponse<ResultType> {
   id: number;
   jsonrpc: '2.0';
   result: ResultType;
 }
 
-export interface JsonRpcNotification<NotificationName, NotificationParams> {
+interface JsonRpcNotification<NotificationName, NotificationParams> {
   jsonrpc: '2.0';
   method: NotificationName;
   params: NotificationParams;
@@ -29,17 +46,17 @@ export type ChannelStatus =
 
 export interface Participant {
   participantId: string; // App allocated id, used for relaying messages to the participant
-  signingAddress: string; // Address used to sign channel updates
-  destination: string; // Address of EOA to receive channel proceeds (the account that'll get the funds).
+  signingAddress: Address; // Address used to sign channel updates
+  destination: Address; // Address of EOA to receive channel proceeds (the account that'll get the funds).
 }
 
 export interface AllocationItem {
-  destination: string; // Address of EOA to receive channel proceeds.
+  destination: Address; // Address of EOA to receive channel proceeds.
   amount: string; // How much funds will be transferred to the destination address.
 }
 
 export interface Allocation {
-  token: string; // The token's contract address.
+  token: Address; // The token's contract address.
   allocationItems: AllocationItem[]; // A list of allocations (how much funds will each destination address get).
 }
 
@@ -54,7 +71,7 @@ export interface Message<T = any> {
 }
 
 export interface Funds {
-  token: string;
+  token: Address;
   amount: string;
 }
 
@@ -62,8 +79,8 @@ export interface ChannelResult {
   participants: Participant[];
   allocations: Allocation[];
   appData: string;
-  appDefinition: string;
-  channelId: string;
+  appDefinition: Address;
+  channelId: ChannelId;
   status: ChannelStatus;
   turnNum: string;
   challengeExpirationTime?: number;
@@ -76,17 +93,17 @@ interface Balance {
 
 // GetAddress
 export type GetAddressRequest = JsonRpcRequest<'GetAddress', {}>; // todo: what are params
-export type GetAddressResponse = JsonRpcResponse<string>;
+export type GetAddressResponse = JsonRpcResponse<Address>;
 
 // GetEthereumSelectedAddress
 export type GetEthereumSelectedAddressRequest = JsonRpcRequest<'GetEthereumSelectedAddress', {}>; // todo: what are params
-export type GetEthereumSelectedAddressResponse = JsonRpcResponse<string>;
+export type GetEthereumSelectedAddressResponse = JsonRpcResponse<Address>;
 
 // CreateChannel
 export interface CreateChannelParams {
   participants: Participant[];
   allocations: Allocation[];
-  appDefinition: string;
+  appDefinition: Address;
   appData: string;
 }
 export type CreateChannelRequest = JsonRpcRequest<'CreateChannel', CreateChannelParams>;
@@ -94,14 +111,14 @@ export type CreateChannelResponse = JsonRpcResponse<ChannelResult>;
 
 // JoinChannel
 export interface JoinChannelParams {
-  channelId: string;
+  channelId: ChannelId;
 }
 export type JoinChannelRequest = JsonRpcRequest<'JoinChannel', JoinChannelParams>;
 export type JoinChannelResponse = JsonRpcResponse<ChannelResult>;
 
 // UpdateChannel
 export interface UpdateChannelParams {
-  channelId: string;
+  channelId: ChannelId;
   participants: Participant[];
   allocations: Allocation[];
   appData: string;
@@ -117,14 +134,14 @@ export type PushMessageResponse = JsonRpcResponse<PushMessageResult>;
 
 // CloseChannel
 export interface CloseChannelParams {
-  channelId: string;
+  channelId: ChannelId;
 }
 export type CloseChannelRequest = JsonRpcRequest<'CloseChannel', CloseChannelParams>;
 export type CloseChannelResponse = JsonRpcResponse<ChannelResult>;
 
 // ChallengeChannel
 export type ChallengeChannelParams = ChallengeChannelRequest['params']; // for backwards compatibility
-export type ChallengeChannelRequest = JsonRpcRequest<'ChallengeChannel', {channelId: string}>;
+export type ChallengeChannelRequest = JsonRpcRequest<'ChallengeChannel', {channelId: ChannelId}>;
 export type ChallengeChannelResponse = JsonRpcResponse<ChannelResult>;
 
 // Budget
@@ -136,7 +153,7 @@ export interface SiteBudget {
   inUse: Balance;
   direct: Balance;
 }
-export type GetBudgetRequest = JsonRpcRequest<'GetBudget', {hubAddress: string}>;
+export type GetBudgetRequest = JsonRpcRequest<'GetBudget', {hubAddress: Address}>;
 export type GetBudgetResponse = JsonRpcResponse<SiteBudget>;
 
 // Notifications
