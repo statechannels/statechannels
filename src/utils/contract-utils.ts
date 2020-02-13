@@ -1,10 +1,14 @@
-import {Contract} from 'ethers';
-import {Web3Provider} from 'ethers/providers';
+import {Contract, providers} from 'ethers';
+import {Web3Provider, JsonRpcProvider} from 'ethers/providers';
 import {Interface} from 'ethers/utils';
 import {ContractArtifacts} from '@statechannels/nitro-protocol';
 
-export function getProvider(): Web3Provider {
-  return new Web3Provider(window.ethereum);
+export function getProvider(): Web3Provider | JsonRpcProvider {
+  if (window.ethereum) {
+    return new Web3Provider(window.ethereum);
+  } else {
+    return new providers.JsonRpcProvider(`http://localhost:${process.env.GANACHE_PORT}`);
+  }
 }
 
 export async function getEthAssetHolderContract() {
