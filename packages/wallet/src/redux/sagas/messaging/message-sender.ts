@@ -6,7 +6,6 @@ import {State} from "@statechannels/nitro-protocol";
 
 import {ProtocolState} from "src/redux/protocols";
 
-import {validateNotification, validateResponse} from "../../../json-rpc-validation/validator";
 import {createJsonRpcAllocationsFromOutcome} from "../../../utils/json-rpc-utils";
 import {unreachable} from "../../../utils/reducer-utils";
 
@@ -116,21 +115,22 @@ function* createResponseMessage(action: OutgoingApiAction) {
 }
 
 function* validate(message: any, action: OutgoingApiAction) {
-  if (!("error" in message)) {
-    let result;
-    if ("id" in message) {
-      result = yield validateResponse(message);
-    } else {
-      result = yield validateNotification(message);
-    }
-    if (!result.isValid) {
-      console.error(`Outgoing message validation failed.`);
-      console.error(`Action\n${JSON.stringify(action, null, 2)}`);
-      console.error(`Message\n${JSON.stringify(message, null, 2)}`);
-      console.error(`Validation Errors\n${JSON.stringify(result.errors, null, 2)}`);
-      throw new Error("Validation Failed");
-    }
-  }
+  // TODO: add back validation with the new schema
+  // if (!("error" in message)) {
+  //   let result;
+  //   if ("id" in message) {
+  //     result = yield validateResponse(message);
+  //   } else {
+  //     result = yield validateNotification(message);
+  //   }
+  //   if (!result.isValid) {
+  //     console.error(`Outgoing message validation failed.`);
+  //     console.error(`Action\n${JSON.stringify(action, null, 2)}`);
+  //     console.error(`Message\n${JSON.stringify(message, null, 2)}`);
+  //     console.error(`Validation Errors\n${JSON.stringify(result.errors, null, 2)}`);
+  //     throw new Error("Validation Failed");
+  //   }
+  // }
 }
 
 function* getChannelInfo(channelId: string) {
