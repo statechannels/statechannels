@@ -1,5 +1,5 @@
 interface JsonRpcRequest<MethodName, RequestParams> {
-  id?: number;
+  id: number; // in the json-rpc spec this is optional, but we require it for all our requests
   jsonrpc: '2.0';
   method: MethodName;
   params: RequestParams;
