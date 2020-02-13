@@ -21,7 +21,6 @@ import * as ethers from 'ethers';
 import {bigNumberify} from 'ethers/utils';
 import * as jrs from 'jsonrpc-lite';
 
-import {validateRequest} from './json-rpc-validation/validator';
 import {
   createStateVarsFromUpdateChannelParams,
   createJsonRpcAllocationsFromOutcome
@@ -45,19 +44,15 @@ export function observeRequests(
       if (parsedMessage.type !== 'request') {
         return false;
       }
-      const validationResult = await validateRequest(e.data);
-      if (!validationResult.isValid) {
-        console.error(validationResult);
-        return false;
-      }
+      const request = parseRequest(e.data);
       if (
-        e.data.type !== 'UpdateChannel' &&
-        e.data.type !== 'CloseChannel' &&
-        e.data.type !== 'JoinChannel'
+        request.method !== 'UpdateChannel' &&
+        request.method !== 'CloseChannel' &&
+        request.method !== 'JoinChannel'
       ) {
         return false;
       }
-      return e.data.params.channelId === channelId;
+      return request.params.channelId === channelId;
     }),
     map((e: MessageEvent) => {
       return e.data.params;
