@@ -185,7 +185,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     const nextState = {...latestState, participants, allocations, appData};
     if (nextState !== latestState) {
       await this.verifyTurnNum(nextState.turnNum);
-      nextState.turnNum = latestState.turnNum + 1;
+      nextState.turnNum = bigNumberify(latestState.turnNum).add(1).toString();
       log.debug(`Player ${this.getPlayerIndex()} updated channel to turnNum ${nextState.turnNum}`);
     }
 
@@ -198,7 +198,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
   private async closeChannel(params: CloseChannelParams): Promise<ChannelResult> {
     const latestState = this.findChannel(params.channelId);
     await this.verifyTurnNum(latestState.turnNum);
-    const turnNum = latestState.turnNum + 1;
+    const turnNum = bigNumberify(latestState.turnNum).add(1).toString();
     const status = 'closing';
 
     this.latestState = {...latestState, turnNum, status};
@@ -245,7 +245,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
   private async pushMessage(params: Message<ChannelResult>): Promise<PushMessageResult> {
     this.latestState = params.data;
     this.notifyAppChannelUpdated(this.latestState);
-    const turnNum = this.latestState.turnNum + 1;
+    const turnNum = bigNumberify(this.latestState.turnNum).add(1).toString();
 
     switch (params.data.status) {
       case 'proposed':
