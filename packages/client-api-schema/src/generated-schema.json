@@ -1,0 +1,1053 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "Allocation": {
+      "additionalProperties": false,
+      "properties": {
+        "allocationItems": {
+          "items": {
+            "$ref": "#/definitions/AllocationItem"
+          },
+          "type": "array"
+        },
+        "token": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "token",
+        "allocationItems"
+      ],
+      "type": "object"
+    },
+    "AllocationItem": {
+      "additionalProperties": false,
+      "properties": {
+        "amount": {
+          "type": "string"
+        },
+        "destination": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "destination",
+        "amount"
+      ],
+      "type": "object"
+    },
+    "Allocations": {
+      "items": {
+        "$ref": "#/definitions/Allocation"
+      },
+      "type": "array"
+    },
+    "BudgetUpdatedNotification": {
+      "additionalProperties": false,
+      "properties": {
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "BudgetUpdated"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/SiteBudget"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "ChallengeChannelParams": {
+      "additionalProperties": false,
+      "properties": {
+        "channelId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "channelId"
+      ],
+      "type": "object"
+    },
+    "ChallengeChannelRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "ChallengeChannel"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": false,
+          "properties": {
+            "channelId": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "channelId"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "ChallengeChannelResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "result": {
+          "$ref": "#/definitions/ChannelResult"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
+      "type": "object"
+    },
+    "ChannelClosingNotification": {
+      "additionalProperties": false,
+      "properties": {
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "ChannelClosed"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/ChannelResult"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "ChannelProposedNotification": {
+      "additionalProperties": false,
+      "properties": {
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "ChannelProposed"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/ChannelResult"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "ChannelResult": {
+      "additionalProperties": false,
+      "properties": {
+        "allocations": {
+          "items": {
+            "$ref": "#/definitions/Allocation"
+          },
+          "type": "array"
+        },
+        "appData": {
+          "type": "string"
+        },
+        "appDefinition": {
+          "type": "string"
+        },
+        "challengeExpirationTime": {
+          "type": "number"
+        },
+        "channelId": {
+          "type": "string"
+        },
+        "participants": {
+          "items": {
+            "$ref": "#/definitions/Participant"
+          },
+          "type": "array"
+        },
+        "status": {
+          "$ref": "#/definitions/ChannelStatus"
+        },
+        "turnNum": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "participants",
+        "allocations",
+        "appData",
+        "appDefinition",
+        "channelId",
+        "status",
+        "turnNum"
+      ],
+      "type": "object"
+    },
+    "ChannelStatus": {
+      "enum": [
+        "proposed",
+        "opening",
+        "funding",
+        "running",
+        "challenging",
+        "responding",
+        "closing",
+        "closed"
+      ],
+      "type": "string"
+    },
+    "ChannelUpdatedNotification": {
+      "additionalProperties": false,
+      "properties": {
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "ChannelUpdated"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/ChannelResult"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "CloseChannelParams": {
+      "additionalProperties": false,
+      "properties": {
+        "channelId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "channelId"
+      ],
+      "type": "object"
+    },
+    "CloseChannelRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "CloseChannel"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/CloseChannelParams"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "CloseChannelResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "result": {
+          "$ref": "#/definitions/ChannelResult"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
+      "type": "object"
+    },
+    "CreateChannelParams": {
+      "additionalProperties": false,
+      "properties": {
+        "allocations": {
+          "items": {
+            "$ref": "#/definitions/Allocation"
+          },
+          "type": "array"
+        },
+        "appData": {
+          "type": "string"
+        },
+        "appDefinition": {
+          "type": "string"
+        },
+        "participants": {
+          "items": {
+            "$ref": "#/definitions/Participant"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "participants",
+        "allocations",
+        "appDefinition",
+        "appData"
+      ],
+      "type": "object"
+    },
+    "CreateChannelRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "CreateChannel"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/CreateChannelParams"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "CreateChannelResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "result": {
+          "$ref": "#/definitions/ChannelResult"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
+      "type": "object"
+    },
+    "Funds": {
+      "additionalProperties": false,
+      "properties": {
+        "amount": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "token",
+        "amount"
+      ],
+      "type": "object"
+    },
+    "GetAddressRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "GetAddress"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": false,
+          "type": "object"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "GetAddressResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "result": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
+      "type": "object"
+    },
+    "GetBudgetRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "GetBudget"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": false,
+          "properties": {
+            "hubAddress": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "hubAddress"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "GetBudgetResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "result": {
+          "$ref": "#/definitions/SiteBudget"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
+      "type": "object"
+    },
+    "GetEthereumSelectedAddressRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "GetEthereumSelectedAddress"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": false,
+          "type": "object"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "GetEthereumSelectedAddressResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "result": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
+      "type": "object"
+    },
+    "JoinChannelParams": {
+      "additionalProperties": false,
+      "properties": {
+        "channelId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "channelId"
+      ],
+      "type": "object"
+    },
+    "JoinChannelRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "JoinChannel"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/JoinChannelParams"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "JoinChannelResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "result": {
+          "$ref": "#/definitions/ChannelResult"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
+      "type": "object"
+    },
+    "Message": {
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+        },
+        "recipient": {
+          "type": "string"
+        },
+        "sender": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "recipient",
+        "sender",
+        "data"
+      ],
+      "type": "object"
+    },
+    "MessageQueuedNotification": {
+      "additionalProperties": false,
+      "properties": {
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "MessageQueued"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/Message"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "Notification": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/ChannelProposedNotification"
+        },
+        {
+          "$ref": "#/definitions/ChannelUpdatedNotification"
+        },
+        {
+          "$ref": "#/definitions/ChannelClosingNotification"
+        },
+        {
+          "$ref": "#/definitions/BudgetUpdatedNotification"
+        },
+        {
+          "$ref": "#/definitions/MessageQueuedNotification"
+        }
+      ]
+    },
+    "Participant": {
+      "additionalProperties": false,
+      "properties": {
+        "destination": {
+          "type": "string"
+        },
+        "participantId": {
+          "type": "string"
+        },
+        "signingAddress": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "participantId",
+        "signingAddress",
+        "destination"
+      ],
+      "type": "object"
+    },
+    "PushMessageParams": {
+      "$ref": "#/definitions/Message"
+    },
+    "PushMessageRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "PushMessage"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/Message"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "PushMessageResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "result": {
+          "$ref": "#/definitions/PushMessageResult"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
+      "type": "object"
+    },
+    "PushMessageResult": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "success"
+      ],
+      "type": "object"
+    },
+    "Request": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/GetAddressRequest"
+        },
+        {
+          "$ref": "#/definitions/GetEthereumSelectedAddressRequest"
+        },
+        {
+          "$ref": "#/definitions/CreateChannelRequest"
+        },
+        {
+          "$ref": "#/definitions/JoinChannelRequest"
+        },
+        {
+          "$ref": "#/definitions/UpdateChannelRequest"
+        },
+        {
+          "$ref": "#/definitions/PushMessageRequest"
+        },
+        {
+          "$ref": "#/definitions/ChallengeChannelRequest"
+        },
+        {
+          "$ref": "#/definitions/GetBudgetRequest"
+        },
+        {
+          "$ref": "#/definitions/CloseChannelRequest"
+        }
+      ]
+    },
+    "Response": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/GetAddressResponse"
+        },
+        {
+          "$ref": "#/definitions/GetEthereumSelectedAddressResponse"
+        },
+        {
+          "$ref": "#/definitions/CreateChannelResponse"
+        },
+        {
+          "$ref": "#/definitions/JoinChannelResponse"
+        },
+        {
+          "$ref": "#/definitions/UpdateChannelResponse"
+        },
+        {
+          "$ref": "#/definitions/PushMessageResponse"
+        },
+        {
+          "$ref": "#/definitions/ChallengeChannelResponse"
+        },
+        {
+          "$ref": "#/definitions/GetBudgetResponse"
+        },
+        {
+          "$ref": "#/definitions/CloseChannelResponse"
+        }
+      ]
+    },
+    "SiteBudget": {
+      "additionalProperties": false,
+      "properties": {
+        "direct": {
+          "additionalProperties": false,
+          "properties": {
+            "hubAmount": {
+              "type": "string"
+            },
+            "playerAmount": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "playerAmount",
+            "hubAmount"
+          ],
+          "type": "object"
+        },
+        "free": {
+          "additionalProperties": false,
+          "properties": {
+            "hubAmount": {
+              "type": "string"
+            },
+            "playerAmount": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "playerAmount",
+            "hubAmount"
+          ],
+          "type": "object"
+        },
+        "hub": {
+          "type": "string"
+        },
+        "inUse": {
+          "additionalProperties": false,
+          "properties": {
+            "hubAmount": {
+              "type": "string"
+            },
+            "playerAmount": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "playerAmount",
+            "hubAmount"
+          ],
+          "type": "object"
+        },
+        "pending": {
+          "additionalProperties": false,
+          "properties": {
+            "hubAmount": {
+              "type": "string"
+            },
+            "playerAmount": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "playerAmount",
+            "hubAmount"
+          ],
+          "type": "object"
+        },
+        "site": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "site",
+        "hub",
+        "pending",
+        "free",
+        "inUse",
+        "direct"
+      ],
+      "type": "object"
+    },
+    "UpdateChannelParams": {
+      "additionalProperties": false,
+      "properties": {
+        "allocations": {
+          "items": {
+            "$ref": "#/definitions/Allocation"
+          },
+          "type": "array"
+        },
+        "appData": {
+          "type": "string"
+        },
+        "channelId": {
+          "type": "string"
+        },
+        "participants": {
+          "items": {
+            "$ref": "#/definitions/Participant"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "channelId",
+        "participants",
+        "allocations",
+        "appData"
+      ],
+      "type": "object"
+    },
+    "UpdateChannelRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "UpdateChannel"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/UpdateChannelParams"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "UpdateChannelResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "result": {
+          "$ref": "#/definitions/ChannelResult"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
+      "type": "object"
+    }
+  }
+}
