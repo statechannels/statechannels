@@ -34,7 +34,17 @@ interface Guaranteed {
 }
 
 export type Funding = DirectFunding | IndirectFunding | VirtualFunding | Guaranteed;
+export function isIndirectFunding(funding: Funding): funding is IndirectFunding {
+  return funding.type === 'Indirect';
+}
 
+export function isVirtualFunding(funding: Funding): funding is VirtualFunding {
+  return funding.type === 'Virtual';
+}
+
+export function isGuarantee(funding: Funding): funding is Guaranteed {
+  return funding.type === 'Guarantee';
+}
 // get it so that when you add a state to a channel, it sends that state to all participant
 
 interface InternalEvents {
@@ -58,8 +68,10 @@ export interface Store {
     appDefinition?: string
   ): Promise<ChannelStoreEntry>;
   getEntry(channelId): Promise<ChannelStoreEntry>;
+  // TODO: This is awkward. Might be better to set the funding on create/initialize channel?
+  setFunding(channelId: string, funding: Funding): Promise<void>;
 
-  // TODO: Shoud this be part of the store?
+  // TODO: Should this be part of the store?
   getChainInfo: Chain['getChainInfo'];
   chainUpdatedFeed: Chain['chainUpdatedFeed'];
   deposit: Chain['deposit'];
@@ -132,6 +144,17 @@ export class MemoryStore implements Store {
 
     this._channels[channelId] = entry;
     return Promise.resolve(entry);
+  }
+
+  public async setFunding(channelId: string, funding: Funding): Promise<void> {
+    const channelEntry = this._channels[channelId];
+    if (!channelEntry) {
+      throw new Error(`No channel for ${channelId}`);
+    }
+    if (channelEntry.funding) {
+      throw `Channel ${channelId} already funded`;
+    }
+    channelEntry.setFunding(funding);
   }
 
   public async createChannel(

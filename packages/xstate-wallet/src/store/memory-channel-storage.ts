@@ -1,6 +1,7 @@
 import {ChannelConstants, StateVariables, SignedState, Participant} from './types';
 import {signState, hashState, getSignerAddress, calculateChannelId} from './state-utils';
 import _ from 'lodash';
+import {Funding} from './memory-store';
 
 export interface ChannelStoreEntry {
   readonly channelId: string;
@@ -9,6 +10,7 @@ export interface ChannelStoreEntry {
   readonly supported: StateVariables | undefined;
   readonly latestSupportedByMe: StateVariables | undefined;
   readonly channelConstants: ChannelConstants;
+  readonly funding?: Funding;
 }
 
 export class MemoryChannelStoreEntry implements ChannelStoreEntry {
@@ -16,9 +18,13 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     public readonly channelConstants: ChannelConstants,
     public readonly myIndex: number,
     private states: Record<string, StateVariables | undefined> = {},
-    private signatures: Record<string, string[] | undefined> = {}
+    private signatures: Record<string, string[] | undefined> = {},
+    public funding: Funding | undefined = undefined
   ) {}
 
+  public setFunding(funding: Funding) {
+    this.funding = funding;
+  }
   private mySignature(stateVars: StateVariables, signatures: string[]): boolean {
     const state = {...stateVars, ...this.channelConstants};
     return signatures.some(sig => getSignerAddress(state, sig) === this.myAddress);
