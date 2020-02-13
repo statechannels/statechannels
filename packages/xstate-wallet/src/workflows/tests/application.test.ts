@@ -134,7 +134,8 @@ it('initializes and starts the join channel machine', async () => {
   const messagingService: MessagingServiceInterface = new MessagingService(store);
   const event: JoinChannelEvent = {
     type: 'JOIN_CHANNEL',
-    channelId: '0xabc'
+    channelId: '0xabc',
+    requestId: 5
   };
 
   const services: Partial<WorkflowServices> = {
@@ -216,6 +217,7 @@ it('starts concluding when receiving a final state', async () => {
   const channelId = getChannelId(states[0].state.channel);
   const channelUpdate: ChannelUpdated = {
     type: 'CHANNEL_UPDATED',
+    requestId: 5,
     storeEntry: {
       latestSupportedByMe: {isFinal: true} as StateVariables
     } as ChannelStoreEntry
