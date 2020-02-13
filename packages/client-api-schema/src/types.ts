@@ -10,6 +10,12 @@ export type Address = string;
  */
 export type ChannelId = string;
 
+/**
+ * Nitro ChannelId
+ * @pattern  ^0x(0{24})([a-fA-F0-9]{40})$
+ */
+export type ExternalDestination = string; // currently unused in this schema
+
 interface JsonRpcRequest<MethodName, RequestParams> {
   id: number; // in the json-rpc spec this is optional, but we require it for all our requests
   jsonrpc: '2.0';
