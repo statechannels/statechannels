@@ -11,6 +11,6 @@ const channelWallet = new ChannelWallet(store);
 
 // Communicate via postMessage
 window.addEventListener('message', async event => {
-  channelWallet.pushMessage(event);
+  channelWallet.pushMessage(event.data);
 });
 channelWallet.onSendMessage(m => window.parent.postMessage(m, '*'));
