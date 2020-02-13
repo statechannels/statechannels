@@ -164,3 +164,12 @@ export const pushMessage2 = {
     sender: '0x590A3Bd8D4A3b78411B3bDFb481E44e85C7345c0'
   }
 };
+
+export const closeChannel = {
+  jsonrpc: '2.0',
+  id: 1581594323759,
+  method: 'CloseChannel',
+  params: {
+    channelId: '0x697ecf681033a2514ed19c90299a67ae8677f3c78b5877fe4550c4f0960e87b7'
+  }
+};

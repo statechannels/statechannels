@@ -1,6 +1,11 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
+    "Address": {
+      "description": "Ethereum Address",
+      "pattern": "^0x([a-fA-F0-9]{40})|0$",
+      "type": "string"
+    },
     "Allocation": {
       "additionalProperties": false,
       "properties": {
@@ -11,9 +16,7 @@
           "type": "array"
         },
         "token": {
-          "description": "Ethereum Address",
-          "pattern": "^0x([a-fA-F0-9]{40})|0$",
-          "type": "string"
+          "$ref": "#/definitions/Address"
         }
       },
       "required": ["token", "allocationItems"],
@@ -26,9 +29,7 @@
           "type": "string"
         },
         "destination": {
-          "description": "Ethereum Address",
-          "pattern": "^0x([a-fA-F0-9]{40})|0$",
-          "type": "string"
+          "$ref": "#/definitions/Address"
         }
       },
       "required": ["destination", "amount"],
@@ -62,7 +63,7 @@
       "additionalProperties": false,
       "properties": {
         "channelId": {
-          "type": "string"
+          "$ref": "#/definitions/ChannelId"
         }
       },
       "required": ["channelId"],
@@ -86,7 +87,7 @@
           "additionalProperties": false,
           "properties": {
             "channelId": {
-              "type": "string"
+              "$ref": "#/definitions/ChannelId"
             }
           },
           "required": ["channelId"],
@@ -131,6 +132,11 @@
       "required": ["jsonrpc", "method", "params"],
       "type": "object"
     },
+    "ChannelId": {
+      "description": "Nitro ChannelId",
+      "pattern": "^0x([a-fA-F0-9]{64})$",
+      "type": "string"
+    },
     "ChannelProposedNotification": {
       "additionalProperties": false,
       "properties": {
@@ -162,15 +168,13 @@
           "type": "string"
         },
         "appDefinition": {
-          "description": "Ethereum Address",
-          "pattern": "^0x([a-fA-F0-9]{40})|0$",
-          "type": "string"
+          "$ref": "#/definitions/Address"
         },
         "challengeExpirationTime": {
           "type": "number"
         },
         "channelId": {
-          "type": "string"
+          "$ref": "#/definitions/ChannelId"
         },
         "participants": {
           "items": {
@@ -231,7 +235,7 @@
       "additionalProperties": false,
       "properties": {
         "channelId": {
-          "type": "string"
+          "$ref": "#/definitions/ChannelId"
         }
       },
       "required": ["channelId"],
@@ -288,9 +292,7 @@
           "type": "string"
         },
         "appDefinition": {
-          "description": "Ethereum Address",
-          "pattern": "^0x([a-fA-F0-9]{40})|0$",
-          "type": "string"
+          "$ref": "#/definitions/Address"
         },
         "participants": {
           "items": {
@@ -347,9 +349,7 @@
           "type": "string"
         },
         "token": {
-          "description": "Ethereum Address",
-          "pattern": "^0x([a-fA-F0-9]{40})|0$",
-          "type": "string"
+          "$ref": "#/definitions/Address"
         }
       },
       "required": ["token", "amount"],
@@ -388,9 +388,7 @@
           "type": "string"
         },
         "result": {
-          "description": "Ethereum Address",
-          "pattern": "^0x([a-fA-F0-9]{40})|0$",
-          "type": "string"
+          "$ref": "#/definitions/Address"
         }
       },
       "required": ["id", "jsonrpc", "result"],
@@ -414,9 +412,7 @@
           "additionalProperties": false,
           "properties": {
             "hubAddress": {
-              "description": "Ethereum Address",
-              "pattern": "^0x([a-fA-F0-9]{40})|0$",
-              "type": "string"
+              "$ref": "#/definitions/Address"
             }
           },
           "required": ["hubAddress"],
@@ -476,9 +472,7 @@
           "type": "string"
         },
         "result": {
-          "description": "Ethereum Address",
-          "pattern": "^0x([a-fA-F0-9]{40})|0$",
-          "type": "string"
+          "$ref": "#/definitions/Address"
         }
       },
       "required": ["id", "jsonrpc", "result"],
@@ -488,7 +482,7 @@
       "additionalProperties": false,
       "properties": {
         "channelId": {
-          "type": "string"
+          "$ref": "#/definitions/ChannelId"
         }
       },
       "required": ["channelId"],
@@ -587,17 +581,13 @@
       "additionalProperties": false,
       "properties": {
         "destination": {
-          "description": "Ethereum Address",
-          "pattern": "^0x([a-fA-F0-9]{40})|0$",
-          "type": "string"
+          "$ref": "#/definitions/Address"
         },
         "participantId": {
           "type": "string"
         },
         "signingAddress": {
-          "description": "Ethereum Address",
-          "pattern": "^0x([a-fA-F0-9]{40})|0$",
-          "type": "string"
+          "$ref": "#/definitions/Address"
         }
       },
       "required": ["participantId", "signingAddress", "destination"],
@@ -794,7 +784,7 @@
           "type": "string"
         },
         "channelId": {
-          "type": "string"
+          "$ref": "#/definitions/ChannelId"
         },
         "participants": {
           "items": {
