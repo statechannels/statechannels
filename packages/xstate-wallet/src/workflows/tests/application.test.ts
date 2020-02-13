@@ -29,9 +29,9 @@ it('initializes and starts confirmCreateChannelWorkflow', async () => {
   const store = new MemoryStore();
   const messagingService: MessagingServiceInterface = new MessagingService(store);
   const services: Partial<WorkflowServices> = {
-    invokeCreateChannelConfirmation: jest.fn().mockReturnValue(
+    getDataForCreateChannelConfirmation: jest.fn().mockReturnValue(
       new Promise(() => {
-        /* mock */
+        /*mock*/
       })
     )
   };
@@ -43,9 +43,9 @@ it('initializes and starts confirmCreateChannelWorkflow', async () => {
   service.send(createChannelEvent);
   await waitForExpect(async () => {
     expect(service.state.value).toEqual({
-      confirmCreateChannelWorkflow: 'invokeCreateChannelConfirmation'
+      confirmCreateChannelWorkflow: 'getDataForCreateChannelConfirmation'
     });
-    expect(services.invokeCreateChannelConfirmation).toHaveBeenCalled();
+    expect(services.getDataForCreateChannelConfirmation).toHaveBeenCalled();
   }, 2000);
 });
 
@@ -136,7 +136,18 @@ it('initializes and starts the join channel machine', async () => {
     type: 'JOIN_CHANNEL',
     channelId: '0xabc'
   };
-  const service = interpret<any, any, any>(applicationWorkflow(store, messagingService));
+
+  const services: Partial<WorkflowServices> = {
+    getDataForCreateChannelConfirmation: jest.fn().mockReturnValue(
+      new Promise(() => {
+        /*mock*/
+      })
+    )
+  };
+
+  const service = interpret<any, any, any>(
+    applicationWorkflow(store, messagingService).withConfig({services} as any)
+  );
 
   service.start();
 
@@ -147,7 +158,9 @@ it('initializes and starts the join channel machine', async () => {
   service.send(event);
 
   await waitForExpect(async () => {
-    expect(service.state.value).toEqual('waitForJoin');
+    expect(service.state.value).toEqual({
+      confirmJoinChannelWorkflow: 'getDataForCreateChannelConfirmation'
+    });
     expect(service.state.context).toBeDefined();
     expect(service.state.context.channelId).toEqual('0xabc');
   }, 2000);
