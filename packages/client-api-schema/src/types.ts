@@ -1,17 +1,16 @@
-export interface JsonRpcRequest<MethodName, RequestParams> {
+interface JsonRpcRequest<MethodName, RequestParams> {
   id?: number;
   jsonrpc: '2.0';
   method: MethodName;
   params: RequestParams;
 }
-
-export interface JsonRpcResponse<ResultType> {
+interface JsonRpcResponse<ResultType> {
   id: number;
   jsonrpc: '2.0';
   result: ResultType;
 }
 
-export interface JsonRpcNotification<NotificationName, NotificationParams> {
+interface JsonRpcNotification<NotificationName, NotificationParams> {
   jsonrpc: '2.0';
   method: NotificationName;
   params: NotificationParams;
