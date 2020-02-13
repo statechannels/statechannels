@@ -8,11 +8,20 @@
       "name": "Jest Current",
       "type": "node",
       "request": "launch",
-      "args": ["node_modules/.bin/jest", "--runInBand", "--env=jsdom", "${relativeFile}"],
+      "args": [
+        "node_modules/.bin/jest",
+        "--config=${workspaceRoot}/config/jest/jest.config.js",
+        "--runInBand",
+        "--env=jsdom",
+
+        "${relativeFile}"
+      ],
+      "skipFiles": ["<node_internals>/**/*.js"],
       "cwd": "${workspaceRoot}",
       "protocol": "inspector",
       "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen"
+      "internalConsoleOptions": "neverOpen",
+      "smartStep": true
     }
   ]
 }
