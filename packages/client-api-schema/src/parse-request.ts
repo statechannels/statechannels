@@ -1,6 +1,7 @@
 import Ajv from 'ajv';
 
-import apiSchema from './generated-schema.json';
+// eslint-disable-next-line
+const apiSchema = require('./generated-schema.json'); // because https://github.com/TypeStrong/ts-loader/issues/905
 import {Request} from './types.js';
 
 const ajv = new Ajv();
