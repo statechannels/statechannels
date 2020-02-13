@@ -17,6 +17,7 @@ export class ChannelWallet {
   private workflows: Workflow[];
 
   constructor(private store: Store, private messagingService: MessagingServiceInterface) {
+    this.workflows = [];
     this.messagingService.requestFeed.subscribe(r => {
       if (r.method === 'CreateChannel' || r.method === 'JoinChannel') {
         const workflow = this.startApplicationWorkflow();
@@ -43,10 +44,12 @@ export class ChannelWallet {
   }
 
   private renderUI(machine) {
-    ReactDOM.render(
-      React.createElement(WalletUi, {workflow: machine}),
-      document.getElementById('root')
-    );
+    if (document.getElementById('root')) {
+      ReactDOM.render(
+        React.createElement(WalletUi, {workflow: machine}),
+        document.getElementById('root')
+      );
+    }
   }
 
   public async pushMessage(message) {
