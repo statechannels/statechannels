@@ -2,7 +2,13 @@
  * Ethereum Address
  * @pattern  ^0x([a-fA-F0-9]{40})|0$
  */
-type Address = string;
+export type Address = string;
+
+/**
+ * Nitro ChannelId
+ * @pattern  ^0x([a-fA-F0-9]{64})$
+ */
+export type ChannelId = string;
 
 interface JsonRpcRequest<MethodName, RequestParams> {
   id: number; // in the json-rpc spec this is optional, but we require it for all our requests
@@ -68,7 +74,7 @@ export interface ChannelResult {
   allocations: Allocation[];
   appData: string;
   appDefinition: Address;
-  channelId: string;
+  channelId: ChannelId;
   status: ChannelStatus;
   turnNum: string;
   challengeExpirationTime?: number;
@@ -99,14 +105,14 @@ export type CreateChannelResponse = JsonRpcResponse<ChannelResult>;
 
 // JoinChannel
 export interface JoinChannelParams {
-  channelId: string;
+  channelId: ChannelId;
 }
 export type JoinChannelRequest = JsonRpcRequest<'JoinChannel', JoinChannelParams>;
 export type JoinChannelResponse = JsonRpcResponse<ChannelResult>;
 
 // UpdateChannel
 export interface UpdateChannelParams {
-  channelId: string;
+  channelId: ChannelId;
   participants: Participant[];
   allocations: Allocation[];
   appData: string;
@@ -122,14 +128,14 @@ export type PushMessageResponse = JsonRpcResponse<PushMessageResult>;
 
 // CloseChannel
 export interface CloseChannelParams {
-  channelId: string;
+  channelId: ChannelId;
 }
 export type CloseChannelRequest = JsonRpcRequest<'CloseChannel', CloseChannelParams>;
 export type CloseChannelResponse = JsonRpcResponse<ChannelResult>;
 
 // ChallengeChannel
 export type ChallengeChannelParams = ChallengeChannelRequest['params']; // for backwards compatibility
-export type ChallengeChannelRequest = JsonRpcRequest<'ChallengeChannel', {channelId: string}>;
+export type ChallengeChannelRequest = JsonRpcRequest<'ChallengeChannel', {channelId: ChannelId}>;
 export type ChallengeChannelResponse = JsonRpcResponse<ChannelResult>;
 
 // Budget
