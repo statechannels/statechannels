@@ -50,6 +50,7 @@ export function isGuarantee(funding: Funding): funding is Guaranteed {
 
 interface InternalEvents {
   stateReceived: [State];
+  channelUpdated: [ChannelStoreEntry];
   newObjective: [Objective];
   addToOutbox: [Message];
 }
@@ -218,11 +219,12 @@ export class MemoryStore implements Store {
     this._eventEmitter.emit('addToOutbox', {signedStates: [signedState]});
   }
 
-  async addState(state: SignedState) {
+  async addState(state: SignedState): Promise<ChannelStoreEntry> {
     const channelId = calculateChannelId(state);
     const channelStorage = this._channels[channelId] || (await this.initializeChannel(state));
 
     channelStorage.addState(state, state.signature);
+    return channelStorage;
   }
 
   public getAddress(): string {
@@ -238,8 +240,9 @@ export class MemoryStore implements Store {
       await Promise.all(
         signedStates.map(async signedState => {
           const {signature, ...state} = signedState;
-          await this.addState(signedState);
+          const entry = await this.addState(signedState);
           this._eventEmitter.emit('stateReceived', state);
+          this._eventEmitter.emit('channelUpdated', entry);
         })
       );
     }
