@@ -8,6 +8,10 @@ import {
   StateNodeConfig
 } from 'xstate';
 import {Store} from '../store';
+import {createAllocationOutcomeFromParams} from './json-rpc-utils';
+import {CreateChannelRequest, JoinChannelRequest} from '@statechannels/client-api-schema';
+import {NETWORK_ID, CHALLENGE_DURATION} from '../constants';
+import {bigNumberify} from 'ethers/utils';
 
 export function createMockGuard(guardName: string): GuardPredicate<any, any> {
   return {
@@ -62,4 +66,18 @@ export function getDataAndInvoke<T>(
     },
     onDone
   };
+}
+
+export function convertToOpenEvent(request: CreateChannelRequest | JoinChannelRequest) {
+  if (request.method === 'CreateChannel') {
+    return {
+      type: 'CREATE_CHANNEL',
+      ...request.params,
+      outcome: createAllocationOutcomeFromParams(request.params.allocations),
+      challengeDuration: bigNumberify(CHALLENGE_DURATION),
+      chainId: NETWORK_ID
+    };
+  } else {
+    return {type: 'JOIN_CHANNEL', ...request.params};
+  }
 }
