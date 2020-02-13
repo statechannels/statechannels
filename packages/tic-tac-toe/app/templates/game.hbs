@@ -15,9 +15,9 @@
     {{#each this.board as |item index|}}
       <button type="button" class={{item.class}} {{on "click" (fn this.setTile index)}}>
         {{#if (eq item.status "x")}}
-          {{svg-jar "x"}}
+          {{svg-jar "x" class="absolute"}}
         {{else if (eq item.status "o")}}
-          {{svg-jar "o"}}
+          {{svg-jar "o" class="absolute"}}
         {{/if}}
       </button>
     {{/each}}
