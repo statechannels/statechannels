@@ -74,18 +74,13 @@ async function metamaskUnlocked(): Promise<string> {
   });
 }
 
-export async function handleMessage(
-  event,
-  workflowManager: WorkflowManager,
-  store: Store,
-  ourWallet: ethers.Wallet
-) {
+export async function handleMessage(event, workflowManager: WorkflowManager, store: Store) {
   const request = parseRequest(event.data);
   const {id} = request;
 
   switch (request.method) {
     case 'GetAddress':
-      const address = ourWallet.address;
+      const address = store.getAddress();
       window.parent.postMessage(jrs.success(id, address), '*');
       break;
     case 'GetEthereumSelectedAddress':
@@ -97,7 +92,7 @@ export async function handleMessage(
       window.parent.postMessage(jrs.success(id, ethereumSelectedAddress), '*');
       break;
     case 'CreateChannel':
-      await handleCreateChannelMessage(request, workflowManager, store, ourWallet);
+      await handleCreateChannelMessage(request, workflowManager, store);
       break;
     case 'UpdateChannel':
       await handleUpdateChannel(request, workflowManager, store);
@@ -171,13 +166,12 @@ async function handlePushMessage(payload: PushMessageRequest, workflowManager: W
 async function handleCreateChannelMessage(
   payload: CreateChannelRequest,
   workflowManager: WorkflowManager,
-  store: Store,
-  ethersWallet: ethers.Wallet
+  store: Store
 ) {
   const params = payload.params as CreateChannelParams;
   const {participants} = payload.params as any;
 
-  const address = ethersWallet.address;
+  const address = store.getAddress();
   const addressMatches = participants[0].signingAddress === address;
 
   if (!addressMatches) {
