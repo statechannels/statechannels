@@ -1,5 +1,3 @@
-import {getChannelId, Channel, signState} from '@statechannels/nitro-protocol';
-
 import {interpret} from 'xstate';
 import waitForExpect from 'wait-for-expect';
 
@@ -7,10 +5,11 @@ import {Init, machine, Role} from '../virtualFunding';
 
 import {MemoryStore} from '../../store/memory-store';
 import {ethers} from 'ethers';
-import {joinSignature} from 'ethers/utils';
+import {bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
-import {toNitroState, firstState} from '../../store/state-utils';
-import {ChannelConstants, Outcome} from '../../store/types';
+import {firstState, signState, calculateChannelId} from '../../store/state-utils';
+import {ChannelConstants, Outcome, Participant} from '../../store/types';
+import {AddressZero} from 'ethers/constants';
 
 const wallet1 = new ethers.Wallet(
   '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318'
@@ -27,23 +26,59 @@ const wallets = {
   [wallet2.address]: wallet2,
   [wallet3.address]: wallet3
 };
+const targetParticipants: Participant[] = [
+  {
+    destination: wallet1.address,
+    signingAddress: wallet1.address,
+    participantId: 'a'
+  },
+  {
+    destination: wallet2.address,
+    signingAddress: wallet2.address,
+    participantId: 'b'
+  }
+];
+const jointParticipants: Participant[] = [
+  {
+    destination: wallet1.address,
+    signingAddress: wallet1.address,
+    participantId: 'a'
+  },
+  {
+    destination: wallet3.address,
+    signingAddress: wallet3.address,
+    participantId: 'hub'
+  },
+  {
+    destination: wallet2.address,
+    signingAddress: wallet2.address,
+    participantId: 'b'
+  }
+];
 
 jest.setTimeout(10000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 test('Virtual funding as A', async () => {
-  const targetChannel: Channel = {
-    participants: [wallet1.address, wallet2.address],
-    chainId: '0x1',
-    channelNonce: '0x11'
-  };
-  const targetChannelId = getChannelId(targetChannel);
+  const chainId = '0x01';
+  const challengeDuration = bigNumberify(10);
+  const appDefinition = AddressZero;
 
-  const jointChannel: Channel = {
-    participants: [wallet1.address, wallet3.address, wallet2.address],
-    chainId: '0x1',
-    channelNonce: '0x11'
+  const targetChannel: ChannelConstants = {
+    channelNonce: bigNumberify(0),
+    chainId,
+    challengeDuration,
+    participants: targetParticipants,
+    appDefinition
   };
-  const jointChannelId = getChannelId(jointChannel);
+  const targetChannelId = calculateChannelId(targetChannel);
+  const jointChannel: ChannelConstants = {
+    channelNonce: bigNumberify(0),
+    chainId,
+    challengeDuration,
+    participants: jointParticipants,
+    appDefinition
+  };
+  const jointChannelId = calculateChannelId(jointChannel);
 
   const context: Init = {targetChannelId, jointChannelId};
   const store = new MemoryStore([wallet1.privateKey]);
@@ -55,9 +90,7 @@ test('Virtual funding as A', async () => {
       store.pushMessage({
         signedStates: state.participants.map(p => ({
           ...state,
-          signature: joinSignature(
-            signState(toNitroState(state), wallets[p.signingAddress].privateKey).signature
-          )
+          signature: signState(state, wallets[p.signingAddress].privateKey)
         }))
       });
     });
@@ -78,13 +111,14 @@ test('Virtual funding as A', async () => {
     EXPECT_TIMEOUT
   );
 
-  const outcome: Outcome = [] as any;
-  const channelConstants: ChannelConstants = {} as any;
-  const signature = '';
-  const state = firstState(outcome, channelConstants);
-  store.pushMessage({
-    signedStates: [{...state, signature}]
-  });
+  const outcome: Outcome = {
+    type: 'SimpleEthAllocation',
+    allocationItems: []
+  };
+
+  const state = firstState(outcome, jointChannel);
+  const signature = signState(state, wallet1.privateKey);
+  store.pushMessage({signedStates: [{...state, signature}]});
 
   await waitForExpect(() => expect(service.state.value).toEqual('success'), EXPECT_TIMEOUT);
 });
