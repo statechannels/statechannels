@@ -1,4 +1,6 @@
-import Ajv from 'ajv';
+// need to use this syntax, because ajv uses export= style exports
+// otherwise we force all consumers of the package to set esModuleInterop to true
+import Ajv = require('ajv');
 
 // eslint-disable-next-line
 const apiSchema = require('./generated-schema.json'); // because https://github.com/TypeStrong/ts-loader/issues/905
