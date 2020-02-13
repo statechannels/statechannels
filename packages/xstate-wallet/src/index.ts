@@ -4,10 +4,12 @@ import {ethers} from 'ethers';
 import {MemoryStore} from './store/memory-store';
 
 import {ChannelWallet} from './channel-wallet';
+import {MessagingService} from './messaging';
 
-const ethWallet = ethers.Wallet.createRandom();
-const store = new MemoryStore([ethWallet.privateKey]);
-const channelWallet = new ChannelWallet(store);
+const {privateKey} = ethers.Wallet.createRandom();
+const store = new MemoryStore([privateKey]);
+const messagingService = new MessagingService(store);
+const channelWallet = new ChannelWallet(store, messagingService);
 
 // Communicate via postMessage
 window.addEventListener('message', async event => {

@@ -16,10 +16,14 @@ import {unreachable} from '@statechannels/wallet-protocols';
 
 import {getChannelId} from '@statechannels/nitro-protocol';
 import * as CreateAndDirectFund from './create-and-direct-fund';
-import {sendDisplayMessage, dispatchChannelUpdatedMessage, observeRequests} from '../messaging';
-import {map} from 'rxjs/operators';
+import {
+  sendDisplayMessage,
+  dispatchChannelUpdatedMessage,
+  MessagingServiceInterface
+} from '../messaging';
+import {filter} from 'rxjs/operators';
 import * as CCC from './confirm-create-channel';
-import {JoinChannelParams, Participant} from '@statechannels/client-api-schema';
+import {Participant} from '@statechannels/client-api-schema';
 import {createMockGuard, getDataAndInvoke} from '../utils/workflow-utils';
 import {Store} from '../store/memory-store';
 import {StateVariables, SimpleEthAllocation} from '../store/types';
@@ -50,12 +54,12 @@ interface WorkflowActions {
   spawnObserver: AssignAction<ChannelIdExists, any>;
 }
 
-export interface OpenChannelEvent {
-  type: 'OPEN_CHANNEL';
+export interface JoinChannelEvent {
+  type: 'JOIN_CHANNEL';
   channelId: string;
 }
 // Events
-type OpenEvent = CreateChannelEvent | OpenChannelEvent;
+export type OpenEvent = CreateChannelEvent | JoinChannelEvent;
 
 export interface CreateChannelEvent {
   type: 'CREATE_CHANNEL';
@@ -72,10 +76,6 @@ export interface ChannelUpdated {
   storeEntry: ChannelStoreEntry;
 }
 
-interface JoinChannelEvent {
-  type: 'JoinChannel';
-  params: JoinChannelParams;
-}
 interface PlayerStateUpdate {
   type: 'PLAYER_STATE_UPDATE';
   state: StateVariables;
@@ -117,7 +117,6 @@ interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
   states: {
     initializing: {};
     confirmCreateChannelWorkflow: {};
-    waitForJoin: {};
     confirmJoinChannelWorkflow: {};
     openChannelAndDirectFundProtocol: {};
     createChannelInStore: {};
@@ -139,12 +138,7 @@ const generateConfig = (
     initializing: {
       on: {
         CREATE_CHANNEL: 'confirmCreateChannelWorkflow',
-        OPEN_CHANNEL: {target: 'waitForJoin', actions: [actions.assignChannelId]}
-      }
-    },
-    waitForJoin: {
-      on: {
-        JoinChannel: {target: 'confirmJoinChannelWorkflow'}
+        JOIN_CHANNEL: {target: 'confirmJoinChannelWorkflow', actions: [actions.assignChannelId]}
       }
     },
     confirmCreateChannelWorkflow: getDataAndInvoke(
@@ -218,12 +212,18 @@ const generateConfig = (
   }
 });
 
-export const applicationWorkflow = (store: Store, context?: WorkflowContext) => {
+export const applicationWorkflow = (
+  store: Store,
+  messagingService: MessagingServiceInterface,
+  context?: WorkflowContext
+) => {
   const notifyOnChannelMessage = ({channelId}: ChannelIdExists) => {
-    return observeRequests(channelId).pipe(
-      map(params => {
-        params;
-      })
+    return messagingService.requestFeed.pipe(
+      filter(
+        r =>
+          (r.method === 'UpdateChannel' || r.method === 'CloseChannel') &&
+          r.params.channelId === channelId
+      )
     );
   };
 
@@ -323,8 +323,8 @@ export const applicationWorkflow = (store: Store, context?: WorkflowContext) => 
       switch (event.type) {
         case 'CREATE_CHANNEL':
           return event;
-        case 'JoinChannel':
-          const entry = await store.getEntry(event.params.channelId);
+        case 'JOIN_CHANNEL':
+          const entry = await store.getEntry(event.channelId);
           return {
             ...entry.latest,
             ...entry.channelConstants,

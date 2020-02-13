@@ -4,9 +4,17 @@ import {
   AllocationItem as NitroAllocationItem,
   convertAddressToBytes32
 } from '@statechannels/nitro-protocol';
-import {Outcome, AllocationItem, SimpleEthAllocation, SimpleTokenAllocation} from './types';
+import {
+  Outcome,
+  AllocationItem,
+  SimpleEthAllocation,
+  SimpleTokenAllocation,
+  MixedAllocation
+} from './types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
 import {bigNumberify} from 'ethers/utils';
+import {Allocation} from '@statechannels/client-api-schema';
+import {AddressZero} from 'ethers/constants';
 
 export function convertFromNitroOutcome(outcome: NitroOutcome): Outcome {
   if (outcome.length === 0) {
@@ -116,4 +124,40 @@ export function convertToNitroOutcome(outcome: Outcome): NitroOutcome {
         outcome.tokenAllocations?.map(a => convertToNitroOutcome(a)[0]) || []
       );
   }
+}
+
+export function convertAllocationsToOutcome(
+  allocations: Allocation[]
+): MixedAllocation | SimpleEthAllocation | SimpleTokenAllocation | undefined {
+  if (allocations.length === 0) {
+    return undefined;
+  }
+  if (allocations.length === 1) {
+    return convertAllocationToOutcome(allocations[0]);
+  } else {
+    const ethAllocation = allocations.find(a => a.token === AddressZero);
+    const tokenAllocations = allocations.filter(a => a.token !== AddressZero);
+    return {
+      type: 'MixedAllocation',
+      ethAllocation: ethAllocation
+        ? (convertAllocationToOutcome(ethAllocation) as SimpleEthAllocation)
+        : undefined,
+      tokenAllocations: tokenAllocations
+        ? (tokenAllocations.map(a => convertAllocationToOutcome(a)) as SimpleTokenAllocation[])
+        : undefined
+    };
+  }
+}
+
+function convertAllocationToOutcome(
+  allocation: Allocation
+): SimpleEthAllocation | SimpleTokenAllocation {
+  return {
+    type: allocation.token ? 'SimpleTokenAllocation' : 'SimpleEthAllocation',
+    tokenAddress: allocation.token,
+    allocationItems: allocation.allocationItems.map(a => ({
+      amount: bigNumberify(a.amount),
+      destination: a.destination
+    }))
+  };
 }
