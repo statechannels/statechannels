@@ -1,2 +1,2 @@
-types/*.d.ts
-!types/index.d.ts
+types
+lib

@@ -1,7 +1,12 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "module": "commonjs", // Because we use ts-node which cant' understand ES Modules
-    "noEmit": true // Because we don't care about the output, we just use TS for the script
-  }
+    "baseUrl": ".",
+    "lib": ["es6"],
+    "module": "commonjs",
+    "outDir": "lib",
+    "target": "es2015",
+    "types": ["node", "jest"],
+  },
+  "include": ["src/**/*"]
 }

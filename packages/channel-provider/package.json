@@ -57,16 +57,12 @@
     ]
   },
   "license": "MIT",
-  "lint-staged": {
-    "{src,test}/**/*.ts": "eslint"
-  },
   "main": "dist/channel-provider.js",
   "scripts": {
     "build": "webpack",
     "build:typescript": "tsc -b .",
     "lint:check": "eslint \"*/**/*.ts\" --cache",
     "lint:write": "eslint \"*/**/*.ts\" --fix",
-    "precommit": "lint-staged --quiet",
     "prepare": "yarn build",
     "prepublish": "webpack",
     "test": "jest --watch",

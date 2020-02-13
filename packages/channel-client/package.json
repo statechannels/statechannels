@@ -29,9 +29,6 @@
     "state channels"
   ],
   "license": "MIT",
-  "lint-staged": {
-    "src/**/*.ts": "eslint"
-  },
   "main": "lib/src/index.js",
   "repository": "statechannels/monorepo/blob/master/packages/channel-client",
   "scripts": {
@@ -39,7 +36,6 @@
     "build:typescript": "tsc -b .",
     "lint:check": "eslint \"{src,tests}/**/*.ts\"",
     "lint:write": "yarn lint:check --fix",
-    "precommit": "lint-staged --quiet",
     "prepare": "yarn build",
     "test": "jest",
     "test:ci": "jest"

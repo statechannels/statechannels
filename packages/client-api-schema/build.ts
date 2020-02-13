@@ -10,6 +10,6 @@ const typesFolder = `./types`;
       cwd: schemaFolder,
       unreachableDefinitions: true
     });
-    fs.writeFileSync(`${typesFolder}/${jsonSchemaFilepath.split('.json')[0]}.d.ts`, t);
+    fs.writeFileSync(`${typesFolder}/${jsonSchemaFilepath.split('.json')[0]}.ts`, t);
   }
 })();
