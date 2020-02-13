@@ -2,12 +2,11 @@ import {Observable, fromEvent} from 'rxjs';
 import {filter} from 'rxjs/operators';
 import {EventEmitter} from 'eventemitter3';
 import * as _ from 'lodash';
-import {getChannelId} from '@statechannels/nitro-protocol';
 
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {Wallet} from 'ethers';
 
-import {Participant, StateVariables, State} from './types';
+import {Participant, StateVariables, State, SignedState, ChannelConstants} from './types';
 import {MemoryChannelStoreEntry, ChannelStoreEntry} from './memory-channel-storage';
 import {AddressZero} from 'ethers/constants';
 import {Objective, Message} from './wire-protocol';
@@ -47,17 +46,17 @@ interface InternalEvents {
 export interface Store {
   newObjectiveFeed: Observable<Objective>;
   outboxFeed: Observable<Message>;
-  pushMessage: (message: Message) => void;
+  pushMessage: (message: Message) => Promise<void>;
   channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry>;
 
   getAddress(): string;
-  addState(channelId: string, stateVars: StateVariables);
+  signAndAddState(channelId: string, stateVars: StateVariables);
   createChannel(
     participants: Participant[],
     challengeDuration: BigNumber,
     stateVars: StateVariables,
     appDefinition?: string
-  ): Promise<string>;
+  ): Promise<ChannelStoreEntry>;
   getEntry(channelId): Promise<ChannelStoreEntry>;
 
   // TODO: Shoud this be part of the store?
@@ -68,12 +67,11 @@ export interface Store {
 
 export class MemoryStore implements Store {
   protected _chain: Chain;
-  private _channels: Record<string, MemoryChannelStoreEntry> = {};
+  private _channels: Record<string, MemoryChannelStoreEntry | undefined> = {};
   private _objectives: Objective[] = [];
-  private _nonces: Record<string, BigNumber> = {};
+  private _nonces: Record<string, BigNumber | undefined> = {};
   private _eventEmitter = new EventEmitter<InternalEvents>();
-  private _privateKeys: Record<string, string> = {};
-  // private _channels: Record<string, any> = {};
+  private _privateKeys: Record<string, string | undefined> = {};
 
   constructor(privateKeys?: string[], chain?: Chain) {
     // TODO: We shouldn't default to a fake chain
@@ -115,12 +113,33 @@ export class MemoryStore implements Store {
     return fromEvent(this._eventEmitter, 'addToOutbox');
   }
 
+  private async initializeChannel(
+    channelConstants: ChannelConstants
+  ): Promise<MemoryChannelStoreEntry> {
+    const addresses = channelConstants.participants.map(x => x.signingAddress);
+
+    const myIndex = addresses.findIndex(address => !!this._privateKeys[address]);
+    if (myIndex === -1) {
+      throw new Error("Couldn't find the signing key for any participant in wallet.");
+    }
+
+    const channelId = calculateChannelId(channelConstants);
+
+    // TODO: There could be concurrency problems which lead to entries potentially being overwritten.
+    this.setNonce(addresses, channelConstants.channelNonce);
+    const entry =
+      this._channels[channelId] || new MemoryChannelStoreEntry(channelConstants, myIndex);
+
+    this._channels[channelId] = entry;
+    return Promise.resolve(entry);
+  }
+
   public async createChannel(
     participants: Participant[],
     challengeDuration: BigNumber,
     stateVars: StateVariables,
     appDefinition = AddressZero
-  ): Promise<string> {
+  ): Promise<ChannelStoreEntry> {
     const addresses = participants.map(x => x.signingAddress);
 
     const myIndex = addresses.findIndex(address => !!this._privateKeys[address]);
@@ -128,38 +147,36 @@ export class MemoryStore implements Store {
       throw new Error("Couldn't find the signing key for any participant in wallet.");
     }
 
-    const currentNonce = this.getNonce(addresses);
-    const channelNonce = currentNonce ? currentNonce.add(1) : bigNumberify(0);
-    this.setNonce(addresses, channelNonce);
+    const channelNonce = this.getNonce(addresses).add(1);
     const chainId = '1';
 
-    const channelId = getChannelId({
+    const entry = await this.initializeChannel({
       chainId,
-      channelNonce: channelNonce.toString(),
-      participants: addresses
+      challengeDuration,
+      channelNonce,
+      participants,
+      appDefinition
     });
-    this._channels[channelId] = new MemoryChannelStoreEntry(
-      {channelNonce, chainId, participants, appDefinition, challengeDuration},
-      myIndex
-    );
 
     // sign the state, store the channel
-    this.addState(channelId, stateVars);
+    this.signAndAddState(entry.channelId, stateVars);
 
-    return Promise.resolve(channelId);
+    return Promise.resolve(entry);
   }
 
-  private getNonce(addresses: string[]): BigNumber | undefined {
-    return this._nonces[this.nonceKeyFromAddresses(addresses)];
+  private getNonce(addresses: string[]): BigNumber {
+    return this._nonces[this.nonceKeyFromAddresses(addresses)] || bigNumberify(-1);
   }
 
   private setNonce(addresses: string[], value: BigNumber) {
+    if (value.lte(this.getNonce(addresses))) throw 'Invalid nonce';
+
     this._nonces[this.nonceKeyFromAddresses(addresses)] = value;
   }
 
   private nonceKeyFromAddresses = (addresses: string[]): string => addresses.join('::');
 
-  addState(channelId: string, stateVars: StateVariables) {
+  signAndAddState(channelId: string, stateVars: StateVariables) {
     const channelStorage = this._channels[channelId];
 
     if (!channelStorage) {
@@ -177,24 +194,34 @@ export class MemoryStore implements Store {
     this._eventEmitter.emit('addToOutbox', {signedStates: [signedState]});
   }
 
+  async addState(state: SignedState) {
+    const channelId = calculateChannelId(state);
+    const channelStorage = this._channels[channelId] || (await this.initializeChannel(state));
+
+    channelStorage.addState(state, state.signature);
+  }
+
   public getAddress(): string {
     return Object.keys(this._privateKeys)[0];
   }
 
-  pushMessage(message: Message) {
+  async pushMessage(message: Message) {
     const {signedStates, objectives} = message;
 
     if (signedStates) {
       // todo: check sig
       // todo: check the channel involves me
-      signedStates.forEach(signedState => {
-        const {signature, ...state} = signedState;
-        this._eventEmitter.emit('stateReceived', state);
-      });
+      await Promise.all(
+        signedStates.map(async signedState => {
+          const {signature, ...state} = signedState;
+          await this.addState(signedState);
+          this._eventEmitter.emit('stateReceived', state);
+        })
+      );
     }
 
     objectives?.forEach(objective => {
-      if (!this._objectives.find(p => _.isEqual(p, objective))) {
+      if (!_.includes(this._objectives, objective)) {
         this._objectives.push(objective);
         this._eventEmitter.emit('newObjective', objective);
       }
@@ -203,12 +230,9 @@ export class MemoryStore implements Store {
 
   public async getEntry(channelId: string): Promise<ChannelStoreEntry> {
     const entry = this._channels[channelId];
-    return new MemoryChannelStoreEntry(
-      entry.channelConstants,
-      entry.myIndex,
-      entry.stateVariables,
-      entry.signatures
-    );
+    if (!entry) throw 'Channel id not found';
+
+    return entry;
   }
 
   chainUpdatedFeed(channelId: string) {
