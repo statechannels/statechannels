@@ -3,13 +3,19 @@ import {
   CloseChannelParams,
   CreateChannelParams,
   PushMessageParams,
-  JoinChannelParams
+  JoinChannelParams,
+  parseRequest,
+  CreateChannelRequest,
+  UpdateChannelRequest,
+  PushMessageRequest,
+  CloseChannelRequest
 } from '@statechannels/client-api-schema';
 import {
   getChannelId,
   Channel,
   CreateChannelEvent,
-  AddressableMessage
+  AddressableMessage,
+  unreachable
 } from '@statechannels/wallet-protocols';
 import * as ethers from 'ethers';
 import {bigNumberify} from 'ethers/utils';
@@ -79,59 +85,43 @@ export async function handleMessage(
   store: Store,
   ourWallet: ethers.Wallet
 ) {
-  if (event.data && event.data.jsonrpc && event.data.jsonrpc === '2.0') {
-    const jsonRpcMessage = event.data;
-    const parsedMessage = jrs.parseObject(event.data);
-    switch (parsedMessage.type) {
-      case 'notification':
-      case 'success':
-        console.warn(`Received unexpected JSON-RPC message ${JSON.stringify(jsonRpcMessage)}`);
-        break;
-      case 'error':
-        throw new Error('TODO: Respond with error message');
+  const request = parseRequest(event.data);
+  const {id} = request;
 
-      case 'request':
-        const validationResult = await validateRequest(jsonRpcMessage);
-        if (!validationResult.isValid) {
-          throw Error('Validation Failure');
-        }
-        const {id} = parsedMessage.payload;
-        switch (parsedMessage.payload.method) {
-          case 'GetAddress':
-            const address = ourWallet.address;
-            window.parent.postMessage(jrs.success(id, address), '*');
-            break;
-          case 'GetEthereumSelectedAddress':
-            //  ask metamask permission to access accounts
-            await window.ethereum.enable();
-            //  block until accounts changed
-            //  (indicating user acceptance)
-            const ethereumSelectedAddress: string = await metamaskUnlocked();
-            window.parent.postMessage(jrs.success(id, ethereumSelectedAddress), '*');
-            break;
-          case 'CreateChannel':
-            await handleCreateChannelMessage(
-              parsedMessage.payload,
-              workflowManager,
-              store,
-              ourWallet
-            );
-            break;
-          case 'UpdateChannel':
-            await handleUpdateChannel(parsedMessage.payload, workflowManager, store);
-            break;
-          case 'PushMessage':
-            await handlePushMessage(parsedMessage.payload, workflowManager);
-            break;
-          case 'CloseChannel':
-            await handleCloseChannel(parsedMessage.payload, workflowManager, store);
-            break;
-          case 'JoinChannel':
-            await handleJoinChannel(parsedMessage.payload as any, store);
-            break;
-        }
-        break;
-    }
+  switch (request.method) {
+    case 'GetAddress':
+      const address = ourWallet.address;
+      window.parent.postMessage(jrs.success(id, address), '*');
+      break;
+    case 'GetEthereumSelectedAddress':
+      //  ask metamask permission to access accounts
+      await window.ethereum.enable();
+      //  block until accounts changed
+      //  (indicating user acceptance)
+      const ethereumSelectedAddress: string = await metamaskUnlocked();
+      window.parent.postMessage(jrs.success(id, ethereumSelectedAddress), '*');
+      break;
+    case 'CreateChannel':
+      await handleCreateChannelMessage(request, workflowManager, store, ourWallet);
+      break;
+    case 'UpdateChannel':
+      await handleUpdateChannel(request, workflowManager, store);
+      break;
+    case 'PushMessage':
+      await handlePushMessage(request, workflowManager);
+      break;
+    case 'CloseChannel':
+      await handleCloseChannel(request, workflowManager, store);
+      break;
+    case 'JoinChannel':
+      await handleJoinChannel(request, store);
+      break;
+    case 'GetBudget':
+    case 'ChallengeChannel':
+      // TODO: handle these requests
+      break;
+    default:
+      unreachable(request);
   }
 }
 
@@ -144,7 +134,7 @@ async function handleJoinChannel(payload: {id: jrs.ID; params: JoinChannelParams
 }
 
 async function handleCloseChannel(
-  payload: jrs.RequestObject,
+  payload: CloseChannelRequest,
   workflowManager: WorkflowManager,
   store: Store
 ) {
@@ -156,7 +146,7 @@ async function handleCloseChannel(
 }
 
 async function handleUpdateChannel(
-  payload: jrs.RequestObject,
+  payload: UpdateChannelRequest,
   workflowManager: WorkflowManager,
   store: Store
 ) {
@@ -170,7 +160,7 @@ async function handleUpdateChannel(
   dispatchChannelUpdatedMessage(entry);
 }
 
-async function handlePushMessage(payload: jrs.RequestObject, workflowManager: WorkflowManager) {
+async function handlePushMessage(payload: PushMessageRequest, workflowManager: WorkflowManager) {
   const {data: event} = payload.params as PushMessageParams;
   // TODO WE Should probably verify that the data is an event
   workflowManager.dispatchToWorkflows(event as any);
@@ -184,7 +174,7 @@ async function handlePushMessage(payload: jrs.RequestObject, workflowManager: Wo
 }
 
 async function handleCreateChannelMessage(
-  payload: jrs.RequestObject,
+  payload: CreateChannelRequest,
   workflowManager: WorkflowManager,
   store: Store,
   ethersWallet: ethers.Wallet
