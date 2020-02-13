@@ -131,7 +131,7 @@ interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
 }
 
 const generateConfig = (
-  actions,
+  actions: WorkflowActions,
   guards: WorkflowGuards
 ): MachineConfig<WorkflowContext, WorkflowStateSchema, WorkflowEvent> => ({
   id: 'application-workflow',
@@ -144,18 +144,22 @@ const generateConfig = (
         JOIN_CHANNEL: {target: 'confirmJoinChannelWorkflow', actions: [actions.assignChannelId]}
       }
     },
-    confirmCreateChannelWorkflow: getDataAndInvoke(
-      'getDataForCreateChannelConfirmation',
-      'invokeCreateChannelConfirmation',
-      'createChannelInStore'
-    ),
+    confirmCreateChannelWorkflow: {
+      ...(getDataAndInvoke(
+        'getDataForCreateChannelConfirmation',
+        'invokeCreateChannelConfirmation',
+        'createChannelInStore'
+      ) as StateNodeConfig<WorkflowContext, {}, WorkflowEvent>),
+      exit: [actions.sendCreateChannelResponse]
+    },
     confirmJoinChannelWorkflow: {
       ...(getDataAndInvoke(
         'getDataForCreateChannelConfirmation',
         'invokeCreateChannelConfirmation',
         'openChannelAndDirectFundProtocol'
       ) as StateNodeConfig<WorkflowContext, {}, WorkflowEvent>),
-      entry: [actions.assignChannelId, actions.spawnObserver]
+      entry: [actions.assignChannelId, actions.spawnObserver],
+      exit: [actions.sendJoinChannelResponse]
     },
     createChannelInStore: {
       invoke: {
