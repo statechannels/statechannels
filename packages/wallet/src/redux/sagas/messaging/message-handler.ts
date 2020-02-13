@@ -27,7 +27,6 @@ import {
 } from "../../../utils/json-rpc-utils";
 
 import {getProvider} from "../../../utils/contract-utils";
-import {validateRequest} from "../../../json-rpc-validation/validator";
 import {fundingRequested} from "../../protocols/actions";
 import {TwoPartyPlayerIndex} from "../../types";
 import {isRelayableAction} from "../../../communication";
@@ -58,14 +57,6 @@ export function* messageHandler(jsonRpcMessage: object, _domain: string) {
     case "error":
       throw new Error("TODO: Respond with error message");
     case "request":
-      const validationResult = yield validateRequest(jsonRpcMessage);
-      if (!validationResult.isValid) {
-        console.error(validationResult.errors);
-        yield fork(
-          messageSender,
-          outgoingMessageActions.validationError({id: parsedMessage.payload.id})
-        );
-      }
       yield handleMessage(parsedMessage.payload as RequestObject);
       break;
   }

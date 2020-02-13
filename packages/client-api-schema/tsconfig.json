@@ -4,10 +4,11 @@
     "baseUrl": ".",
     "lib": ["es6"],
     "esModuleInterop": true,
+    "resolveJsonModule": true,
     "module": "commonjs",
     "outDir": "lib",
     "target": "es2015",
-    "types": ["node", "jest"],
+    "types": ["node", "jest"]
   },
-  "include": ["./src"]
+  "include": ["./src", "./src/generated-schema.json"]
 }
