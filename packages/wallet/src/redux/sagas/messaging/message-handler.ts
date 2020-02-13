@@ -6,8 +6,7 @@ import {
   UpdateChannelParams,
   CreateChannelParams,
   CloseChannelParams,
-  ChallengeChannelParams,
-  parseRequest
+  ChallengeChannelParams
 } from "@statechannels/client-api-schema";
 import jrs, {RequestObject} from "jsonrpc-lite";
 
@@ -58,16 +57,6 @@ export function* messageHandler(jsonRpcMessage: object, _domain: string) {
     case "error":
       throw new Error("TODO: Respond with error message");
     case "request":
-      try {
-        // new style validation
-        parseRequest(jsonRpcMessage);
-      } catch (e) {
-        console.error(e.message);
-        yield fork(
-          messageSender,
-          outgoingMessageActions.validationError({id: parsedMessage.payload.id})
-        );
-      }
       yield handleMessage(parsedMessage.payload as RequestObject);
       break;
   }
