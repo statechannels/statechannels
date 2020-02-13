@@ -149,12 +149,10 @@ const generateConfig = (
     confirmJoinChannelWorkflow: {
       ...(getDataAndInvoke(
         'getDataForCreateChannelConfirmation',
-        'invokeCreateChannelConfirmation'
+        'invokeCreateChannelConfirmation',
+        'openChannelAndDirectFundProtocol'
       ) as StateNodeConfig<WorkflowContext, {}, WorkflowEvent>),
-      onDone: {
-        target: 'openChannelAndDirectFundProtocol',
-        actions: [actions.assignChannelId, actions.spawnObserver]
-      }
+      entry: [actions.assignChannelId, actions.spawnObserver]
     },
     createChannelInStore: {
       invoke: {
@@ -255,7 +253,7 @@ export const applicationWorkflow = (
       if (!context.channelId) {
         if (event.type === 'PLAYER_STATE_UPDATE') {
           return {channelId: getChannelId(event.state.channel)};
-        } else if (event.type === 'OPEN_CHANNEL') {
+        } else if (event.type === 'JOIN_CHANNEL') {
           return {channelId: event.channelId};
         } else if (event.type === 'done.invoke.createChannel') {
           return {channelId: event.data};
