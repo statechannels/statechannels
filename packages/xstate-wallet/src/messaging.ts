@@ -5,14 +5,17 @@ import {
   UpdateChannelRequest,
   CloseChannelRequest,
   JoinChannelRequest,
-  Response
+  Response,
+  ChannelResult,
+  ChannelStatus,
+  Notification,
+  ChannelClosingNotification,
+  ChannelUpdatedNotification
 } from '@statechannels/client-api-schema';
-import {AddressableMessage, unreachable} from '@statechannels/wallet-protocols';
-import {bigNumberify} from 'ethers/utils';
+import {unreachable} from '@statechannels/wallet-protocols';
 import * as jrs from 'jsonrpc-lite';
 
 import {fromEvent, Observable} from 'rxjs';
-import {map, filter} from 'rxjs/operators';
 import {Store} from './store';
 import {ChannelStoreEntry} from './store/memory-channel-storage';
 import {Message} from './store/wire-protocol';
@@ -27,14 +30,17 @@ type ChannelRequest =
 interface InternalEvents {
   ChannelRequest: [ChannelRequest];
   CreateChannelRequest: [CreateChannelRequest];
-  SendResponse: [Response];
+  SendMessage: [Response | Notification];
 }
 
 export interface MessagingServiceInterface {
   readonly outboxFeed: Observable<Response>;
   receiveMessage(message: any): Promise<void>;
   readonly requestFeed: Observable<ChannelRequest>;
-  channelUpdatedFeed(channelId: string): Observable<UpdateChannelRequest | CloseChannelRequest>;
+  sendChannelNotification(
+    method: ChannelClosingNotification['method'] | ChannelUpdatedNotification['method'],
+    notificationData: ChannelResult
+  );
   sendResponse(id: number, result: Response['result']): Promise<void>;
 }
 
@@ -46,27 +52,24 @@ export class MessagingService implements MessagingServiceInterface {
   }
 
   public get outboxFeed(): Observable<Response> {
-    return fromEvent(this.eventEmitter, 'SendResponse');
+    return fromEvent(this.eventEmitter, 'SendMessage');
   }
 
-  public channelUpdatedFeed(channelId: string) {
-    return this.requestFeed.pipe(
-      filter(req => {
-        return (
-          (req.method === 'UpdateChannel' || req.method === 'CloseChannel') &&
-          req.params.channelId === channelId
-        );
-      }),
-      map(req => req as CloseChannelRequest | UpdateChannelRequest)
-    );
-  }
   get requestFeed(): Observable<ChannelRequest> {
     return fromEvent<ChannelRequest>(this.eventEmitter, 'ChannelRequest');
   }
 
   public async sendResponse(id: number, result: Response['result']) {
     const response = {id, jsonrpc: '2.0', result} as Response; // typescript can't handle this otherwise
-    this.eventEmitter.emit('SendResponse', response);
+    this.eventEmitter.emit('SendMessage', response);
+  }
+
+  public async sendChannelNotification(
+    method: ChannelClosingNotification['method'] | ChannelUpdatedNotification['method'],
+    notificationData: ChannelResult
+  ) {
+    const notification = {jsonrpc: '2.0', method, params: notificationData} as Notification; // typescript can't handle this otherwise
+    this.eventEmitter.emit('SendMessage', notification);
   }
 
   public async receiveMessage(message) {
@@ -87,8 +90,6 @@ export class MessagingService implements MessagingServiceInterface {
         window.parent.postMessage(jrs.success(id, ethereumSelectedAddress), '*');
         break;
       case 'CreateChannel':
-        this.eventEmitter.emit('CreateChannelRequest', request);
-        break;
       case 'UpdateChannel':
       case 'CloseChannel':
       case 'JoinChannel':
@@ -123,13 +124,14 @@ async function metamaskUnlocked(): Promise<string> {
   });
 }
 
-async function getChannelInfo(channelEntry: ChannelStoreEntry) {
+export async function convertToChannelResult(
+  channelEntry: ChannelStoreEntry
+): Promise<ChannelResult> {
   const {latest, channelId} = channelEntry;
   const {appData, turnNum} = latest;
   const {participants, appDefinition} = channelEntry.channelConstants;
-  // TODO: Status and funding
-  const funding = [];
-  let status = 'running';
+
+  let status: ChannelStatus = 'running';
   if (turnNum.eq(0)) {
     status = 'proposed';
   } else if (turnNum.lt(2 * participants.length - 1)) {
@@ -146,33 +148,12 @@ async function getChannelInfo(channelEntry: ChannelStoreEntry) {
     appDefinition,
     appData,
     status,
-    funding,
-    turnNum,
+    turnNum: turnNum.toHexString(),
     channelId
   };
 }
 
-// TODO: Clean this up
-export function dispatchChannelUpdatedMessage(channelEntry: ChannelStoreEntry) {
-  // TODO: Right now we assume anything that is not a null channel is an app channel
-  if (bigNumberify(channelEntry.channelConstants.appDefinition).isZero()) {
-    return;
-  }
-  getChannelInfo(channelEntry).then(channelInfo => {
-    const notification = jrs.notification('ChannelUpdated', channelInfo);
-    window.parent.postMessage(notification, '*');
-  });
-}
-
-export function sendMessage(message: AddressableMessage) {
-  const notification = jrs.notification('MessageQueued', {
-    recipient: message.to,
-    sender: 'TODO',
-    data: message
-  });
-  window.parent.postMessage(notification, '*');
-}
-
+// TODO: Should be handled by messaging service?
 export function sendDisplayMessage(displayMessage: 'Show' | 'Hide') {
   const showWallet = displayMessage === 'Show';
   const message = jrs.notification('UIUpdate', {showWallet});
