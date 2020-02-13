@@ -1,17 +1,16 @@
-import {handleMessage} from './messaging';
-
 import {ethers} from 'ethers';
 
 // TODO import {ChainWatcher} from './chain';
-import {WorkflowManager} from './workflow-manager';
-import {MemoryStore, Store} from './store/memory-store';
+import {MemoryStore} from './store/memory-store';
 
-const ourWallet = ethers.Wallet.createRandom();
+import {ChannelWallet} from './channel-wallet';
 
-const store: Store = new MemoryStore([ourWallet.privateKey]);
+const ethWallet = ethers.Wallet.createRandom();
+const store = new MemoryStore([ethWallet.privateKey]);
+const channelWallet = new ChannelWallet(store);
 
-const workflowManager = new WorkflowManager(store);
-
+// Communicate via postMessage
 window.addEventListener('message', async event => {
-  await handleMessage(event, workflowManager, store, ourWallet);
+  channelWallet.pushMessage(event);
 });
+channelWallet.onSendMessage(m => window.parent.postMessage(m, '*'));
