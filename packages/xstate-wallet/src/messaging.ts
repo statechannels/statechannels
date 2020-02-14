@@ -13,7 +13,7 @@ import {
   ChannelUpdatedNotification,
   Message
 } from '@statechannels/client-api-schema';
-import {unreachable} from '@statechannels/wallet-protocols';
+
 import * as jrs from 'jsonrpc-lite';
 
 import {fromEvent, Observable} from 'rxjs';
@@ -21,6 +21,7 @@ import {Store} from './store';
 import {ChannelStoreEntry} from './store/memory-channel-storage';
 import {Message as WireMessage} from './store/wire-protocol';
 import {createJsonRpcAllocationsFromOutcome} from './utils/json-rpc-utils';
+import {unreachable} from './utils';
 
 type ChannelRequest =
   | CreateChannelRequest

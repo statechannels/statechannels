@@ -12,7 +12,6 @@ import {
   StateMachine,
   StateNodeConfig
 } from 'xstate';
-import {unreachable} from '@statechannels/wallet-protocols';
 
 import {getChannelId} from '@statechannels/nitro-protocol';
 import * as CreateAndDirectFund from './create-and-direct-fund';
@@ -26,6 +25,7 @@ import {StateVariables, SimpleEthAllocation} from '../store/types';
 import {ChannelStoreEntry} from '../store/memory-channel-storage';
 import {bigNumberify, BigNumber} from 'ethers/utils';
 import * as ConcludeChannel from './conclude-channel';
+import {unreachable} from '../utils';
 
 interface WorkflowContext {
   channelId?: string;
