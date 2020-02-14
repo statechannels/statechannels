@@ -12,6 +12,7 @@ import {AddressZero} from 'ethers/constants';
 import {Objective, Message} from './wire-protocol';
 import {Chain, FakeChain} from '../chain';
 import {calculateChannelId} from './state-utils';
+import {NETWORK_ID} from '../constants';
 
 interface DirectFunding {
   type: 'Direct';
@@ -171,7 +172,7 @@ export class MemoryStore implements Store {
     }
 
     const channelNonce = this.getNonce(addresses).add(1);
-    const chainId = '1';
+    const chainId = NETWORK_ID;
 
     const entry = await this.initializeChannel({
       chainId,
