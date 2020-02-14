@@ -12,6 +12,7 @@ import {createAllocationOutcomeFromParams} from './json-rpc-utils';
 import {CreateChannelRequest, JoinChannelRequest} from '@statechannels/client-api-schema';
 import {NETWORK_ID, CHALLENGE_DURATION} from '../constants';
 import {bigNumberify} from 'ethers/utils';
+import {OpenEvent} from '../workflows/application';
 
 export function createMockGuard(guardName: string): GuardPredicate<any, any> {
   return {
@@ -59,7 +60,8 @@ export function getDataAndInvoke<T>(
           id,
           src,
           data: (_, {data}: DoneInvokeEvent<T>) => data,
-          onDone: 'done'
+          onDone: 'done',
+          autoForward: true
         }
       },
       done: {type: 'final' as 'final'}
@@ -68,16 +70,17 @@ export function getDataAndInvoke<T>(
   };
 }
 
-export function convertToOpenEvent(request: CreateChannelRequest | JoinChannelRequest) {
+export function convertToOpenEvent(request: CreateChannelRequest | JoinChannelRequest): OpenEvent {
   if (request.method === 'CreateChannel') {
     return {
       type: 'CREATE_CHANNEL',
       ...request.params,
       outcome: createAllocationOutcomeFromParams(request.params.allocations),
       challengeDuration: bigNumberify(CHALLENGE_DURATION),
-      chainId: NETWORK_ID
+      chainId: NETWORK_ID,
+      requestId: request.id
     };
   } else {
-    return {type: 'JOIN_CHANNEL', ...request.params};
+    return {type: 'JOIN_CHANNEL', ...request.params, requestId: request.id};
   }
 }
