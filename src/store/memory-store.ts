@@ -6,7 +6,7 @@ import * as _ from 'lodash';
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {Wallet} from 'ethers';
 
-import {Participant, StateVariables, State, SignedState} from './types';
+import {Participant, StateVariables, SignedState, ChannelConstants} from './types';
 import {MemoryChannelStoreEntry, ChannelStoreEntry} from './memory-channel-storage';
 import {AddressZero} from 'ethers/constants';
 import {Objective, Message} from './wire-protocol';
@@ -50,7 +50,6 @@ export function isGuarantee(funding: Funding): funding is Guaranteed {
 // get it so that when you add a state to a channel, it sends that state to all participant
 
 interface InternalEvents {
-  stateReceived: [State];
   channelUpdated: [ChannelStoreEntry];
   newObjective: [Objective];
   addToOutbox: [Message];
@@ -109,12 +108,6 @@ export class MemoryStore implements Store {
       const wallet = Wallet.createRandom();
       this._privateKeys[wallet.address] = wallet.privateKey;
     }
-  }
-
-  public stateReceivedFeed(channelId: string): Observable<State> {
-    return fromEvent<State>(this._eventEmitter, 'stateReceived').pipe(
-      filter(state => calculateChannelId(state) === channelId)
-    );
   }
 
   // for short-term backwards compatibility
@@ -261,12 +254,11 @@ export class MemoryStore implements Store {
     if (signedStates) {
       // todo: check sig
       // todo: check the channel involves me
+      const channelId = calculateChannelId(signedStates[0]);
       await Promise.all(
         signedStates.map(async signedState => {
-          const {signature, ...state} = signedState;
-          const entry = await this.addState(signedState);
-          this._eventEmitter.emit('stateReceived', state);
-          this._eventEmitter.emit('channelUpdated', entry);
+          await this.addState(signedState);
+          this._eventEmitter.emit('channelUpdated', await this.getEntry(channelId));
         })
       );
     }
