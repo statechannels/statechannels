@@ -148,15 +148,12 @@ const generateConfig = (
         JOIN_CHANNEL: {target: 'confirmJoinChannelWorkflow', actions: [actions.assignChannelId]}
       }
     },
-    confirmCreateChannelWorkflow: {
-      ...(getDataAndInvoke(
-        'getDataForCreateChannelConfirmation',
-        'invokeCreateChannelConfirmation',
-        'createChannelInStore'
-      ) as StateNodeConfig<WorkflowContext, {}, WorkflowEvent>),
+    confirmCreateChannelWorkflow: getDataAndInvoke(
+      'getDataForCreateChannelConfirmation',
+      'invokeCreateChannelConfirmation',
+      'createChannelInStore'
+    ),
 
-      exit: [actions.sendCreateChannelResponse]
-    },
     confirmJoinChannelWorkflow: {
       ...(getDataAndInvoke(
         'getDataForCreateChannelConfirmation',
@@ -172,7 +169,11 @@ const generateConfig = (
         src: 'createChannel',
         onDone: {
           target: 'openChannelAndDirectFundProtocol',
-          actions: [actions.assignChannelId, actions.spawnObserver]
+          actions: [
+            actions.assignChannelId,
+            actions.spawnObserver,
+            actions.sendCreateChannelResponse
+          ]
         }
       }
     },
@@ -272,10 +273,14 @@ export const applicationWorkflow = (
       sendDisplayMessage('Hide');
     },
     assignChannelParams: assign(
-      (context: WorkflowContext, event: CreateChannelEvent): ChannelParamsExist => {
+      (
+        context: WorkflowContext,
+        event: CreateChannelEvent
+      ): ChannelParamsExist & RequestIdExists => {
         return {
           ...context,
-          channelParams: event
+          channelParams: event,
+          requestId: event.requestId
         };
       }
     ),
