@@ -15,8 +15,9 @@ export interface ChannelStoreEntry {
 }
 
 export class MemoryChannelStoreEntry implements ChannelStoreEntry {
+  public readonly channelConstants: ChannelConstants;
   constructor(
-    public readonly channelConstants: ChannelConstants,
+    constants: ChannelConstants,
     public readonly myIndex: number,
     private stateVariables: Record<string, StateVariables> = {},
     private signatures: Record<string, string[] | undefined> = {},
@@ -105,7 +106,7 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     return {
       ...stateVars,
       ...this.channelConstants,
-      signature: signatureString
+      signatures: this.signatures[hashState(state)] || []
     };
   }
 

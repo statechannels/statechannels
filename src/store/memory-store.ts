@@ -62,7 +62,7 @@ export interface Store {
   channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry>;
 
   getAddress(): string;
-  signAndAddState(channelId: string, stateVars: StateVariables);
+  signAndAddState(channelId: string, stateVars: StateVariables): void;
   createChannel(
     participants: Participant[],
     challengeDuration: BigNumber,
@@ -238,10 +238,8 @@ export class MemoryStore implements Store {
   async addState(state: SignedState): Promise<ChannelStoreEntry> {
     const channelId = calculateChannelId(state);
     const channelStorage = this._channels[channelId] || (await this.initializeChannel(state));
-
-    channelStorage.addState(state, state.signature);
-
-    return channelStorage;
+    // TODO: This is kind of awkward
+    state.signatures.forEach(sig => channelStorage.addState(state, sig));
   }
 
   public getAddress(): string {
