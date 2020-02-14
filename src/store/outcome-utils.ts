@@ -75,7 +75,8 @@ function convertFromNitroAllocationItems(allocationItems: NitroAllocationItem[])
 function convertToNitroAllocationItems(allocationItems: AllocationItem[]): NitroAllocationItem[] {
   return allocationItems.map(a => ({
     amount: a.amount.toHexString(),
-    destination: convertAddressToBytes32(a.destination)
+    destination:
+      a.destination.length === 42 ? convertAddressToBytes32(a.destination) : a.destination
   }));
 }
 

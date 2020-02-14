@@ -48,6 +48,7 @@ interface WorkflowActions {
   sendJoinChannelResponse: Action<RequestIdExists & ChannelIdExists, any>;
   sendToOpponent: Action<WorkflowContext, PlayerStateUpdate>;
   assignChannelId: Action<WorkflowContext, any>;
+  assignChannelParams: Action<WorkflowContext, CreateChannelEvent>;
   displayUi: Action<WorkflowContext, any>;
   hideUi: Action<WorkflowContext, any>;
   sendChannelUpdatedNotification: Action<WorkflowContext, any>;
@@ -140,7 +141,10 @@ const generateConfig = (
   states: {
     initializing: {
       on: {
-        CREATE_CHANNEL: 'confirmCreateChannelWorkflow',
+        CREATE_CHANNEL: {
+          target: 'confirmCreateChannelWorkflow',
+          actions: [actions.assignChannelParams]
+        },
         JOIN_CHANNEL: {target: 'confirmJoinChannelWorkflow', actions: [actions.assignChannelId]}
       }
     },
@@ -150,6 +154,7 @@ const generateConfig = (
         'invokeCreateChannelConfirmation',
         'createChannelInStore'
       ) as StateNodeConfig<WorkflowContext, {}, WorkflowEvent>),
+
       exit: [actions.sendCreateChannelResponse]
     },
     confirmJoinChannelWorkflow: {
@@ -266,6 +271,14 @@ export const applicationWorkflow = (
     hideUi: () => {
       sendDisplayMessage('Hide');
     },
+    assignChannelParams: assign(
+      (context: WorkflowContext, event: CreateChannelEvent): ChannelParamsExist => {
+        return {
+          ...context,
+          channelParams: event
+        };
+      }
+    ),
     assignChannelId: assign((context, event) => {
       if (!context.channelId) {
         if (event.type === 'PLAYER_STATE_UPDATE') {
@@ -383,6 +396,7 @@ const mockServices: WorkflowServices = {
   }
 };
 const mockActions: WorkflowActions = {
+  assignChannelParams: 'assignChannelParams',
   sendCreateChannelResponse: 'sendCreateChannelResponse',
   sendJoinChannelResponse: 'sendJoinChannelResponse',
   sendToOpponent: 'sendToOpponent',
