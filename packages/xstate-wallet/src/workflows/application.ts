@@ -43,7 +43,7 @@ interface WorkflowGuards {
   channelClosed: Condition<WorkflowContext, WorkflowEvent>;
 }
 
-interface WorkflowActions {
+export interface WorkflowActions {
   sendCreateChannelResponse: Action<RequestIdExists & ChannelIdExists, any>;
   sendJoinChannelResponse: Action<RequestIdExists & ChannelIdExists, any>;
   sendToOpponent: Action<WorkflowContext, PlayerStateUpdate>;
