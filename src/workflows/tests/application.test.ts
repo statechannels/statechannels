@@ -6,7 +6,8 @@ import {
   applicationWorkflow,
   JoinChannelEvent,
   WorkflowServices,
-  ChannelUpdated
+  ChannelUpdated,
+  WorkflowActions
 } from '../application';
 import {AddressZero} from 'ethers/constants';
 import {MemoryStore, Store} from '../../store/memory-store';
@@ -59,9 +60,16 @@ it('invokes the createChannelAndFund protocol', async () => {
       })
     )
   };
+  const actions: Partial<WorkflowActions> = {
+    sendCreateChannelResponse: jest.fn().mockReturnValue(
+      new Promise(() => {
+        /* mock */
+      })
+    )
+  };
 
   const service = interpret<any, any, any>(
-    applicationWorkflow(store, messagingService).withConfig({services} as any) // TODO: We shouldn't need to cast
+    applicationWorkflow(store, messagingService).withConfig({services, actions} as any) // TODO: We shouldn't need to cast
   );
 
   const channelId = '0xabc';
