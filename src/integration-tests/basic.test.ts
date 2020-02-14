@@ -112,7 +112,7 @@ it('works', async () => {
   );
 
   await playerB.messagingService.receiveMessage(joinEvent);
-  playerA.channelWallet.workflows[0].machine.send({type: 'USER_APPROVES'});
+  playerB.channelWallet.workflows[0].machine.send({type: 'USER_APPROVES'});
   const playerBResponse: JoinChannelResponse = await playerBResponsePromise;
   expect(playerBResponse.result).toBeDefined();
 });
