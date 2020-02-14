@@ -63,5 +63,5 @@ export interface ChannelConstants {
 export interface State extends ChannelConstants, StateVariables {}
 
 export interface SignedState extends State {
-  signature: string;
+  signatures: string[];
 }

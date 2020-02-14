@@ -40,7 +40,7 @@ const channelConstants = {chainId, participants, channelNonce, appDefinition, ch
 const state: State = {...stateVars, ...channelConstants};
 const channelId = calculateChannelId(channelConstants);
 const signature = signState(state, aPrivateKey);
-const signedState = {...state, signature};
+const signedState = {...state, signatures: [signature]};
 const signedStates = [signedState];
 
 describe('getAddress', () => {
@@ -142,7 +142,7 @@ describe('pushMessage', () => {
 
     const nextState = {...state, turnNum: state.turnNum.add(2)};
     await store.pushMessage({
-      signedStates: [{...nextState, signature: signState(nextState, bPrivateKey)}]
+      signedStates: [{...nextState, signatures: [signState(nextState, bPrivateKey)]}]
     });
     expect((await store.getEntry(channelId)).latest).toMatchObject(nextState);
   });
