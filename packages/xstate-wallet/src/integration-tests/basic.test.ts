@@ -2,13 +2,41 @@ import {Participant} from '../store/types';
 import {MessagingService, MessagingServiceInterface} from '../messaging';
 import {MemoryStore, Store} from '../store/memory-store';
 import {Wallet} from 'ethers';
-import {filter} from 'rxjs/operators';
 import {ChannelWallet} from '../channel-wallet';
+
+import {
+  CreateChannelRequest,
+  isNotification,
+  PushMessageRequest,
+  CreateChannelResponse,
+  JoinChannelRequest,
+  JoinChannelResponse
+} from '@statechannels/client-api-schema';
+import {filter, map} from 'rxjs/operators';
+import {Observable} from 'rxjs';
+
 jest.setTimeout(50000);
-function createChannel(playerA: Participant, playerB: Participant) {
+
+function generatePushMessage(data: any, recipient: string, sender: string): PushMessageRequest {
   return {
     jsonrpc: '2.0',
-    id: 1581594378830,
+    id: 111111111,
+    method: 'PushMessage',
+    params: {data, recipient, sender}
+  };
+}
+
+function generateJoinChannelRequest(channelId: string): JoinChannelRequest {
+  return {id: 222222222, method: 'JoinChannel', jsonrpc: '2.0', params: {channelId}};
+}
+
+function generateCreateChannelRequest(
+  playerA: Participant,
+  playerB: Participant
+): CreateChannelRequest {
+  return {
+    jsonrpc: '2.0',
+    id: 3333333333,
     method: 'CreateChannel',
     params: {
       participants: [playerA, playerB],
@@ -37,16 +65,56 @@ it('works', async () => {
   const playerA = new Player('0x275a2e2cd9314f53b42246694034a80119963097e3adf495fbf6d821dc8b6c8e');
   const playerB = new Player('0x3341c348ea8ade1ba7c3b6f071bfe9635c544b7fb5501797eaa2f673169a7d0d');
 
-  const createEvent = createChannel(playerA.participant, playerB.participant);
-  const playerAResponse = playerA.messagingService.outboxFeed.pipe(
-    filter(r => r.id === createEvent.id)
+  playerA.channelWallet.onSendMessage(message => {
+    if (isNotification(message) && message.method === 'MessageQueued') {
+      const pushMessageRequest = generatePushMessage(
+        message.params,
+        playerB.participantId,
+        playerA.participantId
+      );
+      playerB.channelWallet.pushMessage(pushMessageRequest);
+    }
+  });
+  playerB.channelWallet.onSendMessage(message => {
+    if (isNotification(message) && message.method === 'MessageQueued') {
+      const pushMessageRequest = generatePushMessage(
+        message.params,
+        playerA.participantId,
+        playerB.participantId
+      );
+      playerA.channelWallet.pushMessage(pushMessageRequest);
+    }
+  });
+
+  const createEvent = generateCreateChannelRequest(playerA.participant, playerB.participant);
+
+  const playerAResponsePromise = createPromise(
+    playerA.messagingService.outboxFeed.pipe(
+      filter(m => 'id' in m && m.id === createEvent.id),
+      map(m => m as CreateChannelResponse)
+    )
   );
 
   await playerA.messagingService.receiveMessage(createEvent);
 
   playerA.channelWallet.workflows[0].machine.send({type: 'USER_APPROVES'});
-  const response = await playerAResponse.toPromise();
-  expect(response).toMatchObject({});
+
+  const response = await playerAResponsePromise;
+  expect(response.result).toBeDefined();
+  const {channelId} = response.result;
+
+  const joinEvent: JoinChannelRequest = generateJoinChannelRequest(channelId);
+  const playerBResponsePromise = createPromise(
+    playerB.messagingService.outboxFeed.pipe(
+      filter(r => 'id' in r && r.id === joinEvent.id),
+      map(r => r as JoinChannelResponse)
+    )
+  );
+
+  await playerB.messagingService.receiveMessage(joinEvent);
+  playerA.channelWallet.workflows[0].machine.send({type: 'USER_APPROVES'});
+  const playerBResponse: JoinChannelResponse = await playerBResponsePromise;
+  expect(playerBResponse.result).toBeDefined();
 });
 
 class Player {
@@ -67,10 +135,21 @@ class Player {
       signingAddress: this.signingAddress
     };
   }
+  get participantId(): string {
+    return this.signingAddress;
+  }
   constructor(privateKey: string) {
     this.privateKey = privateKey;
     this.store = new MemoryStore([this.privateKey]);
     this.messagingService = new MessagingService(this.store);
     this.channelWallet = new ChannelWallet(this.store, this.messagingService);
   }
+}
+
+function createPromise<T>(observable: Observable<T>): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    observable.subscribe(o => {
+      resolve(o);
+    });
+  });
 }
