@@ -5,6 +5,7 @@ import {bigNumberify, BigNumber} from 'ethers/utils';
 import {Wallet} from 'ethers';
 import {calculateChannelId, signState} from './state-utils';
 import {NETWORK_ID, CHALLENGE_DURATION} from '../constants';
+import {ChannelStoreEntry} from './memory-channel-storage';
 
 const {address: aAddress, privateKey: aPrivateKey} = new Wallet(
   '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318'
@@ -55,8 +56,8 @@ const aStore = () => new MemoryStore([aPrivateKey]);
 describe('stateReceivedFeed', () => {
   test('it fires when a state with the correct channel id is received', async () => {
     const store = aStore();
-    const outputs: State[] = [];
-    store.stateReceivedFeed(channelId).subscribe(x => outputs.push(x));
+    const outputs: ChannelStoreEntry[] = [];
+    store.channelUpdatedFeed(channelId).subscribe(x => outputs.push(x));
     await store.pushMessage({signedStates});
 
     expect(outputs).toEqual([state]);
@@ -65,8 +66,8 @@ describe('stateReceivedFeed', () => {
   test("it doesn't fire if the channelId doesn't match", async () => {
     const store = aStore();
 
-    const outputs: State[] = [];
-    store.stateReceivedFeed('a-different-channel-id').subscribe(x => outputs.push(x));
+    const outputs: ChannelStoreEntry[] = [];
+    store.channelUpdatedFeed('a-different-channel-id').subscribe(x => outputs.push(x));
     await store.pushMessage({signedStates});
 
     expect(outputs).toEqual([]);

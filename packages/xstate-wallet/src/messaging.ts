@@ -10,7 +10,8 @@ import {
   ChannelStatus,
   Notification,
   ChannelClosingNotification,
-  ChannelUpdatedNotification
+  ChannelUpdatedNotification,
+  Message
 } from '@statechannels/client-api-schema';
 import {unreachable} from '@statechannels/wallet-protocols';
 import * as jrs from 'jsonrpc-lite';
@@ -18,7 +19,7 @@ import * as jrs from 'jsonrpc-lite';
 import {fromEvent, Observable} from 'rxjs';
 import {Store} from './store';
 import {ChannelStoreEntry} from './store/memory-channel-storage';
-import {Message} from './store/wire-protocol';
+import {Message as WireMessage} from './store/wire-protocol';
 import {createJsonRpcAllocationsFromOutcome} from './utils/json-rpc-utils';
 
 type ChannelRequest =
@@ -34,13 +35,16 @@ interface InternalEvents {
 }
 
 export interface MessagingServiceInterface {
-  readonly outboxFeed: Observable<Response>;
-  receiveMessage(message: any): Promise<void>;
+  readonly outboxFeed: Observable<Response | Notification>;
   readonly requestFeed: Observable<ChannelRequest>;
+
+  receiveMessage(jsonRpcMessage: any): Promise<void>;
+
   sendChannelNotification(
     method: ChannelClosingNotification['method'] | ChannelUpdatedNotification['method'],
     notificationData: ChannelResult
   );
+  sendMessageNotification(message: WireMessage): Promise<void>;
   sendResponse(id: number, result: Response['result']): Promise<void>;
 }
 
@@ -72,6 +76,11 @@ export class MessagingService implements MessagingServiceInterface {
     this.eventEmitter.emit('SendMessage', notification);
   }
 
+  public async sendMessageNotification(message) {
+    const notification = {jsonrpc: '2.0', method: 'MessageQueued', params: message} as Notification; // typescript can't handle this otherwise
+    this.eventEmitter.emit('SendMessage', notification);
+  }
+
   public async receiveMessage(message) {
     const request = parseRequest(message);
     const {id} = request;
@@ -97,8 +106,11 @@ export class MessagingService implements MessagingServiceInterface {
         break;
       case 'PushMessage':
         // todo: should verify message format here
-        const message = request.params as Message;
-        this.store.pushMessage(message);
+        const message = request.params as Message<WireMessage>;
+        if (message.recipient !== this.store.getAddress()) {
+          throw new Error(`Received message not addressed to us ${JSON.stringify(message)}`);
+        }
+        this.store.pushMessage(message.data);
         break;
       case 'GetBudget':
       case 'ChallengeChannel':

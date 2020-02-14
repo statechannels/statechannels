@@ -8,7 +8,7 @@ import WalletUi from './ui/wallet';
 import {interpret, Interpreter, State} from 'xstate';
 import {Guid} from 'guid-typescript';
 import {convertToOpenEvent} from './utils/workflow-utils';
-
+import {Notification, Response} from '@statechannels/client-api-schema';
 export interface Workflow {
   id: string;
   machine: Interpreter<any, any, any>;
@@ -19,6 +19,9 @@ export class ChannelWallet {
 
   constructor(private store: Store, private messagingService: MessagingServiceInterface) {
     this.workflows = [];
+    // Whenever the store wants to send something call sendMessage
+    store.outboxFeed.subscribe(m => this.messagingService.sendMessageNotification(m));
+
     this.messagingService.requestFeed.subscribe(r => {
       if (r.method === 'CreateChannel' || r.method === 'JoinChannel') {
         const workflow = this.startApplicationWorkflow();
@@ -56,14 +59,12 @@ export class ChannelWallet {
     }
   }
 
-  public async pushMessage(message) {
-    // Update the store first
-    await this.store.pushMessage(message);
+  public async pushMessage(jsonRpcMessage) {
     // Update any workflows waiting on an observable
-    await this.messagingService.receiveMessage(message);
+    await this.messagingService.receiveMessage(jsonRpcMessage);
   }
 
-  public onSendMessage(callback: (message) => void) {
+  public onSendMessage(callback: (jsonRpcMessage: Notification | Response) => void) {
     this.messagingService.outboxFeed.subscribe(m => callback(m));
   }
 }
