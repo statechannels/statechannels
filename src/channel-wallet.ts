@@ -9,6 +9,7 @@ import {interpret, Interpreter, State} from 'xstate';
 import {Guid} from 'guid-typescript';
 import {convertToOpenEvent} from './utils/workflow-utils';
 import {Notification, Response} from '@statechannels/client-api-schema';
+
 export interface Workflow {
   id: string;
   machine: Interpreter<any, any, any>;
@@ -40,8 +41,7 @@ export class ChannelWallet {
         devTools: true
       }
     )
-      .onTransition(logState)
-      .onEvent(logEvent)
+      .onTransition(logTransition)
       .onDone(() => (this.workflows = this.workflows.filter(w => w.id !== workflowId)))
       .start();
     // TODO: Figure out how to resolve rendering priorities
@@ -69,16 +69,10 @@ export class ChannelWallet {
   }
 }
 
-// TODO: We should standardize logging with wallet-protocols
-function logState(state: State<any, any, any, any>, event, logger = console): void {
-  logger.log(`TRANSITION`);
-  logger.log(`TO STATE`);
-  logger.log(`${JSON.stringify(state.value, null, 1)}`);
-  logger.log(`WITH EVENT `);
-  logger.log(JSON.stringify(event, null, 1));
-}
+function logTransition(state: State<any, any, any, any>, event, logger = console): void {
+  const from = state.history ? JSON.stringify(state.history.value) : 'N/A';
+  const to = JSON.stringify(state.value);
+  const eventType = JSON.stringify(event.type ? event.type : event);
 
-function logEvent(event, logger = console) {
-  logger.log('EVENT RECEIVED');
-  logger.log(JSON.stringify(event, null, 1));
+  logger.log(`TRANSITION FROM ${from} EVENT ${eventType} TO  ${to}`);
 }
