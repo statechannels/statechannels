@@ -2,7 +2,7 @@ import {Participant} from '../store/types';
 import {MessagingService, MessagingServiceInterface} from '../messaging';
 import {MemoryStore, Store} from '../store/memory-store';
 import {Wallet} from 'ethers';
-import {ChannelWallet} from '../channel-wallet';
+import {ChannelWallet, Workflow} from '../channel-wallet';
 
 import {
   CreateChannelRequest,
@@ -14,8 +14,9 @@ import {
 } from '@statechannels/client-api-schema';
 import {filter, map} from 'rxjs/operators';
 import {Observable} from 'rxjs';
+import waitForExpect from 'wait-for-expect';
 
-jest.setTimeout(50000);
+jest.setTimeout(30000);
 
 function generatePushMessage(data: any, recipient: string, sender: string): PushMessageRequest {
   return {
@@ -104,6 +105,7 @@ it('works', async () => {
   const {channelId} = response.result;
 
   const joinEvent: JoinChannelRequest = generateJoinChannelRequest(channelId);
+
   const playerBResponsePromise = createPromise(
     playerB.messagingService.outboxFeed.pipe(
       filter(r => 'id' in r && r.id === joinEvent.id),
@@ -112,7 +114,16 @@ it('works', async () => {
   );
 
   await playerB.messagingService.receiveMessage(joinEvent);
+
+  // Wait for the create channel service to start
+  await waitForExpect(async () => {
+    expect(playerB.workflow?.machine.state.value).toMatchObject({
+      confirmJoinChannelWorkflow: 'invokeCreateChannelConfirmation'
+    });
+  }, 3000);
+
   playerB.channelWallet.workflows[0].machine.send({type: 'USER_APPROVES'});
+
   const playerBResponse: JoinChannelResponse = await playerBResponsePromise;
   expect(playerBResponse.result).toBeDefined();
 });
@@ -125,6 +136,10 @@ class Player {
   store: Store;
   messagingService: MessagingServiceInterface;
   channelWallet: ChannelWallet;
+
+  get workflow(): Workflow | undefined {
+    return this.channelWallet.workflows.length > 0 ? this.channelWallet.workflows[0] : undefined;
+  }
   get destination() {
     return '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7';
   }
