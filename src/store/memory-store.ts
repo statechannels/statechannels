@@ -273,7 +273,9 @@ export class MemoryStore implements Store {
 
   public async getEntry(channelId: string): Promise<ChannelStoreEntry> {
     const entry = this._channels[channelId];
-    if (!entry) throw 'Channel id not found';
+    if (!entry) {
+      throw new Error('Channel id not found');
+    }
 
     return entry;
   }

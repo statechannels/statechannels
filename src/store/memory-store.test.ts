@@ -53,14 +53,16 @@ describe('getAddress', () => {
 });
 const aStore = () => new MemoryStore([aPrivateKey]);
 
-describe('stateReceivedFeed', () => {
+describe('channelUpdatedFeed', () => {
   test('it fires when a state with the correct channel id is received', async () => {
     const store = aStore();
     const outputs: ChannelStoreEntry[] = [];
-    store.channelUpdatedFeed(channelId).subscribe(x => outputs.push(x));
+    store.channelUpdatedFeed(channelId).subscribe(x => {
+      outputs.push(x);
+    });
     await store.pushMessage({signedStates});
 
-    expect(outputs).toEqual([state]);
+    expect(outputs[0].latest).toMatchObject(state);
   });
 
   test("it doesn't fire if the channelId doesn't match", async () => {
