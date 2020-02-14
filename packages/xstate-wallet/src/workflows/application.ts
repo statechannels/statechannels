@@ -289,7 +289,8 @@ export const applicationWorkflow = (
         if (event.type === 'PLAYER_STATE_UPDATE') {
           return {channelId: getChannelId(event.state.channel)};
         } else if (event.type === 'JOIN_CHANNEL') {
-          return {channelId: event.channelId};
+          // TODO: Might be better to split set request Id in it's own action
+          return {channelId: event.channelId, requestId: event.requestId};
         } else if (event.type === 'done.invoke.createChannel') {
           return {channelId: event.data};
         }
@@ -347,8 +348,9 @@ export const applicationWorkflow = (
         index: ourIndex
       });
     },
-    invokeCreateChannelConfirmation: (context, event: DoneInvokeEvent<CCC.WorkflowContext>) =>
-      CCC.confirmChannelCreationWorkflow(store, event.data),
+    invokeCreateChannelConfirmation: (context, event: DoneInvokeEvent<CCC.WorkflowContext>) => {
+      return CCC.confirmChannelCreationWorkflow(store, event.data);
+    },
     getDataForCreateChannelConfirmation: async (
       context: WorkflowContext,
       event: CreateChannelEvent | JoinChannelEvent

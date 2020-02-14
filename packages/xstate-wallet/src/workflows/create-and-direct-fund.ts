@@ -5,8 +5,7 @@ import * as AdvanceChannel from './advance-channel';
 import * as DirectFunding from './direct-funding';
 import {MachineFactory} from '../utils/workflow-utils';
 import {Store} from '../store';
-import {bigNumberify, BigNumber} from 'ethers/utils';
-``;
+import {BigNumber} from 'ethers/utils';
 
 const PROTOCOL = 'create-and-direct-fund';
 
@@ -29,13 +28,6 @@ export const advanceChannelArgs = (i: 1 | 3) => ({channelId}: Init): AdvanceChan
   channelId,
   targetTurnNum: i
 });
-
-const constructFirstState = {
-  invoke: {
-    src: 'constructFirstState',
-    onDone: 'preFundSetup'
-  }
-};
 
 const preFundSetup = {
   invoke: {
@@ -74,9 +66,8 @@ const postFundSetup = {
 type Context = Init;
 export const config: MachineConfig<Context, any, any> = {
   key: PROTOCOL,
-  initial: 'constructFirstState',
+  initial: 'preFundSetup',
   states: {
-    constructFirstState,
     preFundSetup,
     directFunding,
     postFundSetup,
@@ -87,19 +78,7 @@ export const config: MachineConfig<Context, any, any> = {
 };
 
 export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => {
-  async function constructFirstState(ctx: Init): Promise<void> {
-    const {appData, channelId, outcome} = ctx;
-
-    store.signAndAddState(channelId, {
-      appData,
-      isFinal: false,
-      turnNum: bigNumberify(0),
-      outcome
-    });
-  }
-
   const services = {
-    constructFirstState,
     directFunding: DirectFunding.machine(store),
     advanceChannel: AdvanceChannel.machine(store)
   };
