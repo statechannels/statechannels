@@ -75,7 +75,7 @@ describe('stateReceivedFeed', () => {
 
 test('newObjectiveFeed', async () => {
   const objective: Objective = {
-    name: 'OpenChannel',
+    type: 'OpenChannel',
     participants: [],
     data: {targetChannelId: 'foo'}
   };
