@@ -6,14 +6,16 @@ import {
   MachineOptions,
   AnyEventObject,
   DoneInvokeEvent,
-  ServiceConfig
+  ServiceConfig,
+  spawn
 } from 'xstate';
 import {filter, map, take} from 'rxjs/operators';
 
-import {Store} from '../store/memory-store';
+import {Store, supportedStateFeed} from '../store/memory-store';
 import {State} from '../store/types';
 import {SupportState} from '.';
 import {ChannelStoreEntry} from '../store/memory-channel-storage';
+import {isFundGuarantor} from '../store/wire-protocol';
 
 export const enum Role {
   A,
@@ -64,19 +66,26 @@ function getDataAndInvoke<T>(
 }
 
 type TEvent = AnyEventObject;
-type Objective = 'FundGuarantorAH' | 'FundGuarantorBH';
+const enum Objective {
+  FundGuarantorAH = 'FundGuarantorAH',
+  FundGuarantorBH = 'FundGuarantorBH'
+}
 const enum Actions {
   spawnFundLedgerChannelObserver = 'spawnFundLedgerChannelObserver',
+  spawnFundGuarantorAHObserver = 'spawnFundGuarantorAHObserver',
+  spawnFundGuarantorBHObserver = 'spawnFundGuarantorBHObserver',
   triggerGuarantorObjectives = 'triggerGuarantorObjectives'
 }
 const enum States {
   setupJointChannel = 'setupJointChannel',
   fundJointChannel = 'fundJointChannel',
-  fundTargetChannel = 'fundTargetChannel'
+  fundTargetChannel = 'fundTargetChannel',
+  success = 'success'
 }
 
 const enum Services {
-  waitForFirsttJointState = 'waitForFirstJointState',
+  waitForFirstJointState = 'waitForFirstJointState',
+  jointChannelUpdate = 'jointChannelUpdate',
   supportState = 'supportState',
   indirectFunding = 'indirectFunding'
 }
@@ -85,10 +94,10 @@ const fundJointChannel = (role: Role): StateNodeConfig<Init, any, TEvent> => {
   let config;
   switch (role) {
     case Role.A:
-      config = waitThenRunObjective<Objective>('FundGuarantorAH', Services.indirectFunding);
+      config = waitThenRunObjective<Objective>(Objective.FundGuarantorAH, Services.indirectFunding);
       break;
     case Role.B:
-      config = waitThenRunObjective<Objective>('FundGuarantorBH', Services.indirectFunding);
+      config = waitThenRunObjective<Objective>(Objective.FundGuarantorBH, Services.indirectFunding);
       break;
     case Role.Hub:
       config = {
@@ -96,11 +105,11 @@ const fundJointChannel = (role: Role): StateNodeConfig<Init, any, TEvent> => {
         entry: Actions.triggerGuarantorObjectives,
         states: {
           fundGuarantorAH: waitThenRunObjective<Objective>(
-            'FundGuarantorAH',
+            Objective.FundGuarantorAH,
             Services.indirectFunding
           ),
           fundGuarantorBH: waitThenRunObjective<Objective>(
-            'FundGuarantorBH',
+            Objective.FundGuarantorBH,
             Services.indirectFunding
           )
         }
@@ -115,12 +124,16 @@ const generateConfig = (role: Role): MachineConfig<Init, any, any> => ({
   initial: States.setupJointChannel,
   states: {
     [States.setupJointChannel]: getDataAndInvoke<Init>(
-      Services.waitForFirsttJointState,
+      Services.waitForFirstJointState,
       Services.supportState,
       States.fundJointChannel
     ),
     [States.fundJointChannel]: fundJointChannel(role),
-    [States.fundTargetChannel]: {invoke: {src: 'supportState'}, onDone: 'success'},
+    [States.fundTargetChannel]: getDataAndInvoke(
+      Services.jointChannelUpdate,
+      Services.supportState,
+      States.success
+    ),
     success: {type: 'final'}
   }
 });
@@ -133,16 +146,56 @@ const waitForFirstJointState = (store: Store) => ({
     .channelUpdatedFeed(jointChannelId)
     .pipe(
       map((e: ChannelStoreEntry): State => ({...e.latest, ...e.channelConstants})),
+      // TODO: This should also check that the first state is properly formed.
+      // I think it's better to include the target allocation in the virtual-funding
+      // init args, so that everyone can check the first state here.
       filter(s => s.turnNum.eq(0)),
       map(s => ({state: s})),
       take(1)
     )
     .toPromise();
 
+const spawnFundGuarantorAHObserver = (store: Store) => ({jointChannelId}: Init) =>
+  spawn(
+    store.newObjectiveFeed.pipe(
+      filter(isFundGuarantor),
+      filter(o => o.data.jointChannelId === jointChannelId),
+      map(o => ({...o, type: 'FundGuarantorAH'})),
+      take(1)
+    )
+  );
+
+const spawnFundGuarantorBHObserver = (store: Store) => ({jointChannelId}: Init) =>
+  spawn(
+    store.newObjectiveFeed.pipe(
+      filter(isFundGuarantor),
+      filter(o => o.data.jointChannelId === jointChannelId),
+      map(o => ({...o, type: 'FundGuarantorBH'})),
+      take(1)
+    )
+  );
+
+const jointChannelUpdate = (store: Store) => ({jointChannelId}: Init): Promise<SupportState.Init> =>
+  supportedStateFeed(store, jointChannelId)
+    .pipe(
+      filter(({state}) => state.turnNum.eq(0)),
+      map(({state}) => ({
+        state: {...state, turnNum: state.turnNum.add(1)}
+      })),
+      take(1)
+    )
+    .toPromise();
+
 export const options = (store: Store): Partial<MachineOptions<Init, TEvent>> => {
   const actions: Record<Actions, any> = {
-    [Actions.spawnFundLedgerChannelObserver]: assign<any>({
-      ledgerObjectiveWatcher: 'TODO'
+    [Actions.spawnFundLedgerChannelObserver]: () => {
+      throw 'unimplemented';
+    },
+    [Actions.spawnFundGuarantorAHObserver]: assign<any>({
+      guarantorAHObserver: spawnFundGuarantorAHObserver(store)
+    }),
+    [Actions.spawnFundGuarantorBHObserver]: assign<any>({
+      guarantorBHObserver: spawnFundGuarantorBHObserver(store)
     }),
     [Actions.triggerGuarantorObjectives]: () => 'TODO'
   };
@@ -150,7 +203,8 @@ export const options = (store: Store): Partial<MachineOptions<Init, TEvent>> => 
   const services: Record<Services, ServiceConfig<Init>> = {
     supportState: SupportState.machine(store as any),
     indirectFunding: async () => true,
-    waitForFirstJointState: waitForFirstJointState(store)
+    waitForFirstJointState: waitForFirstJointState(store),
+    jointChannelUpdate: jointChannelUpdate(store)
   };
 
   return {actions, services};
