@@ -99,7 +99,17 @@ test('Virtual funding as A', async () => {
   service.onTransition(state => {
     if (_.isEqual(state.value, {fundJointChannel: 'waitForObjective'})) {
       store.pushMessage({
-        objectives: [] // TODO
+        objectives: [
+          {
+            type: 'FundGuarantor',
+            data: {
+              jointChannelId,
+              ledgerId: 'foo',
+              guarantorId: 'bar'
+            },
+            participants: [jointParticipants[2], jointParticipants[1]]
+          }
+        ]
       });
     }
   });
