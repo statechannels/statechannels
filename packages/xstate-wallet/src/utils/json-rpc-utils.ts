@@ -1,9 +1,9 @@
 import {convertBytes32ToAddress, convertAddressToBytes32} from '@statechannels/nitro-protocol';
 import {UpdateChannelParams, Allocations} from '@statechannels/client-api-schema';
-import {Outcome, StateVariables} from '../store/types';
+import {Outcome, StateVariables, SimpleEthAllocation} from '../store/types';
 import {bigNumberify} from 'ethers/utils';
 
-function createAllocationOutcomeFromParams(params: Allocations): Outcome {
+export function createAllocationOutcomeFromParams(params: Allocations): SimpleEthAllocation {
   // TODO: Support all outcomes
   return {
     type: 'SimpleEthAllocation',

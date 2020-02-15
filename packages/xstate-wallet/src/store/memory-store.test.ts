@@ -4,6 +4,7 @@ import {SimpleEthAllocation, State} from './types';
 import {bigNumberify, BigNumber} from 'ethers/utils';
 import {Wallet} from 'ethers';
 import {calculateChannelId, signState} from './state-utils';
+import {NETWORK_ID, CHALLENGE_DURATION} from '../constants';
 
 const {address: aAddress, privateKey: aPrivateKey} = new Wallet(
   '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318'
@@ -24,7 +25,7 @@ const outcome: SimpleEthAllocation = {
 const turnNum = bigNumberify(4);
 const appData = '0xabc';
 const isFinal = false;
-const chainId = '1';
+const chainId = NETWORK_ID;
 const participants = [
   {participantId: 'a', destination: aDestination, signingAddress: aAddress},
   {participantId: 'b', destination: bDestination, signingAddress: bAddress}
@@ -32,7 +33,8 @@ const participants = [
 const stateVars = {outcome, turnNum, appData, isFinal};
 const channelNonce = bigNumberify(0);
 const appDefinition = '0x5409ED021D9299bf6814279A6A1411A7e866A631';
-const challengeDuration = bigNumberify(60);
+
+const challengeDuration = bigNumberify(CHALLENGE_DURATION);
 const channelConstants = {chainId, participants, channelNonce, appDefinition, challengeDuration};
 const state: State = {...stateVars, ...channelConstants};
 const channelId = calculateChannelId(channelConstants);

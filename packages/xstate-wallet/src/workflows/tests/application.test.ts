@@ -4,14 +4,16 @@ import waitForExpect from 'wait-for-expect';
 import {CreateChannelEvent, SignedState, getChannelId} from '@statechannels/wallet-protocols';
 import {
   applicationWorkflow,
-  OpenChannelEvent,
+  JoinChannelEvent,
   WorkflowServices,
-  ChannelUpdated
+  ChannelUpdated,
+  WorkflowActions
 } from '../application';
 import {AddressZero} from 'ethers/constants';
 import {MemoryStore, Store} from '../../store/memory-store';
 import {StateVariables} from '../../store/types';
 import {ChannelStoreEntry} from '../../store/memory-channel-storage';
+import {MessagingService, MessagingServiceInterface} from '../../messaging';
 
 jest.setTimeout(50000);
 const createChannelEvent: CreateChannelEvent = {
@@ -26,29 +28,31 @@ const createChannelEvent: CreateChannelEvent = {
 
 it('initializes and starts confirmCreateChannelWorkflow', async () => {
   const store = new MemoryStore();
+  const messagingService: MessagingServiceInterface = new MessagingService(store);
   const services: Partial<WorkflowServices> = {
-    invokeCreateChannelConfirmation: jest.fn().mockReturnValue(
+    getDataForCreateChannelConfirmation: jest.fn().mockReturnValue(
       new Promise(() => {
-        /* mock */
+        /*mock*/
       })
     )
   };
 
   const service = interpret<any, any, any>(
-    applicationWorkflow(store).withConfig({services} as any) // TODO: We shouldn't need to cast
+    applicationWorkflow(store, messagingService).withConfig({services} as any) // TODO: We shouldn't need to cast
   );
   service.start();
   service.send(createChannelEvent);
   await waitForExpect(async () => {
     expect(service.state.value).toEqual({
-      confirmCreateChannelWorkflow: 'invokeCreateChannelConfirmation'
+      confirmCreateChannelWorkflow: 'getDataForCreateChannelConfirmation'
     });
-    expect(services.invokeCreateChannelConfirmation).toHaveBeenCalled();
+    expect(services.getDataForCreateChannelConfirmation).toHaveBeenCalled();
   }, 2000);
 });
 
 it('invokes the createChannelAndFund protocol', async () => {
   const store = new MemoryStore();
+  const messagingService: MessagingServiceInterface = new MessagingService(store);
   const services: Partial<WorkflowServices> = {
     invokeCreateChannelAndDirectFundProtocol: jest.fn().mockReturnValue(
       new Promise(() => {
@@ -56,9 +60,16 @@ it('invokes the createChannelAndFund protocol', async () => {
       })
     )
   };
+  const actions: Partial<WorkflowActions> = {
+    sendCreateChannelResponse: jest.fn().mockReturnValue(
+      new Promise(() => {
+        /* mock */
+      })
+    )
+  };
 
   const service = interpret<any, any, any>(
-    applicationWorkflow(store).withConfig({services} as any) // TODO: We shouldn't need to cast
+    applicationWorkflow(store, messagingService).withConfig({services, actions} as any) // TODO: We shouldn't need to cast
   );
 
   const channelId = '0xabc';
@@ -76,12 +87,15 @@ it('invokes the createChannelAndFund protocol', async () => {
 
 it('raises an channel updated action when the channel is updated', async () => {
   const store = new MemoryStore();
+  const messagingService: MessagingServiceInterface = new MessagingService(store);
   const mockOptions = {
     actions: {
       sendChannelUpdatedNotification: jest.fn()
     }
   };
-  const service = interpret<any, any, any>(applicationWorkflow(store).withConfig(mockOptions));
+  const service = interpret<any, any, any>(
+    applicationWorkflow(store, messagingService).withConfig(mockOptions)
+  );
   service.start();
 
   service.send({
@@ -97,6 +111,7 @@ it('raises an channel updated action when the channel is updated', async () => {
 // eslint-disable-next-line jest/no-disabled-tests
 it.skip('handles confirmCreateChannel workflow finishing', async () => {
   const store = new MemoryStore();
+  const messagingService: MessagingServiceInterface = new MessagingService(store);
   const services: Partial<WorkflowServices> = {
     createChannel: jest.fn().mockReturnValue(Promise.resolve('0xb1ab1a')),
     invokeCreateChannelAndDirectFundProtocol: jest.fn().mockReturnValue(
@@ -107,7 +122,7 @@ it.skip('handles confirmCreateChannel workflow finishing', async () => {
   };
 
   const service = interpret<any, any, any>(
-    applicationWorkflow(store).withConfig({services} as any)
+    applicationWorkflow(store, messagingService).withConfig({services} as any)
   ); //TODO: Casting
   service.start('confirmCreateChannelWorkflow');
 
@@ -124,11 +139,24 @@ it.skip('handles confirmCreateChannel workflow finishing', async () => {
 
 it('initializes and starts the join channel machine', async () => {
   const store = new MemoryStore();
-  const event: OpenChannelEvent = {
-    type: 'OPEN_CHANNEL',
-    channelId: '0xabc'
+  const messagingService: MessagingServiceInterface = new MessagingService(store);
+  const event: JoinChannelEvent = {
+    type: 'JOIN_CHANNEL',
+    channelId: '0xabc',
+    requestId: 5
   };
-  const service = interpret<any, any, any>(applicationWorkflow(store));
+
+  const services: Partial<WorkflowServices> = {
+    getDataForCreateChannelConfirmation: jest.fn().mockReturnValue(
+      new Promise(() => {
+        /*mock*/
+      })
+    )
+  };
+
+  const service = interpret<any, any, any>(
+    applicationWorkflow(store, messagingService).withConfig({services} as any)
+  );
 
   service.start();
 
@@ -139,7 +167,9 @@ it('initializes and starts the join channel machine', async () => {
   service.send(event);
 
   await waitForExpect(async () => {
-    expect(service.state.value).toEqual('waitForJoin');
+    expect(service.state.value).toEqual({
+      confirmJoinChannelWorkflow: 'getDataForCreateChannelConfirmation'
+    });
     expect(service.state.context).toBeDefined();
     expect(service.state.context.channelId).toEqual('0xabc');
   }, 2000);
@@ -147,6 +177,7 @@ it('initializes and starts the join channel machine', async () => {
 
 it('starts concluding when requested', async () => {
   const store: Store = new MemoryStore();
+  const messagingService: MessagingServiceInterface = new MessagingService(store);
   const channelId = ethers.utils.id('channel');
   const services: Partial<WorkflowServices> = {
     invokeClosingProtocol: jest.fn().mockReturnValue(
@@ -156,7 +187,7 @@ it('starts concluding when requested', async () => {
     )
   };
   const service = interpret<any, any, any>(
-    applicationWorkflow(store).withConfig({services} as any)
+    applicationWorkflow(store, messagingService).withConfig({services} as any)
   ); // TODO: Casting
   service.start('running');
   service.send({type: 'PLAYER_REQUEST_CONCLUDE', channelId});
@@ -169,6 +200,7 @@ it('starts concluding when requested', async () => {
 
 it('starts concluding when receiving a final state', async () => {
   const store = new MemoryStore();
+  const messagingService: MessagingServiceInterface = new MessagingService(store);
   const states: SignedState[] = [
     {
       state: {
@@ -193,13 +225,14 @@ it('starts concluding when receiving a final state', async () => {
   const channelId = getChannelId(states[0].state.channel);
   const channelUpdate: ChannelUpdated = {
     type: 'CHANNEL_UPDATED',
+    requestId: 5,
     storeEntry: {
       latestSupportedByMe: {isFinal: true} as StateVariables
     } as ChannelStoreEntry
   };
 
   const service = interpret<any, any, any>(
-    applicationWorkflow(store, {channelId}).withConfig({services} as any)
+    applicationWorkflow(store, messagingService, {channelId}).withConfig({services} as any)
   ); //TODO: Casting
   service.start('running');
 
