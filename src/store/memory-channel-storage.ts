@@ -74,20 +74,22 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     });
   }
 
-  private get sortedByTurnNum(): Array<StateVariables & {signatures: string[]}> {
-    return this.signedStates.sort((a, b) => a.turnNum.sub(b.turnNum).toNumber());
+  private get sortedByDescendingTurnNum(): Array<StateVariables & {signatures: string[]}> {
+    return this.signedStates.sort((a, b) => b.turnNum.sub(a.turnNum).toNumber());
   }
 
   get supported() {
     // TODO: proper check
-    return this.sortedByTurnNum.find(s => s.signatures.length === this.participants.length);
+    return this.sortedByDescendingTurnNum.find(
+      s => s.signatures.length === this.participants.length
+    );
   }
 
   get latestSupportedByMe() {
-    return this.sortedByTurnNum.find(s => this.mySignature(s, s.signatures));
+    return this.sortedByDescendingTurnNum.find(s => this.mySignature(s, s.signatures));
   }
   get latest(): StateVariables {
-    return this.sortedByTurnNum[0];
+    return this.sortedByDescendingTurnNum[0];
   }
 
   get channelId(): string {
