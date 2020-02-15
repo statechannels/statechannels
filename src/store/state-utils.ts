@@ -59,7 +59,7 @@ export function statesEqual(
   left: StateVariables,
   right?: StateVariables
 ): boolean {
-  return right ? hashState({...left, ...constants}) === hashState({...right, ...constants}) : false;
+  return right ? hashState({...constants, ...left}) === hashState({...constants, ...right}) : false;
 }
 
 export function outcomesEqual(left: Outcome, right?: Outcome) {
