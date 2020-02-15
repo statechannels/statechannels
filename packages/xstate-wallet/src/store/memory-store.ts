@@ -1,5 +1,5 @@
 import {Observable, fromEvent, merge, from} from 'rxjs';
-import {filter, catchError} from 'rxjs/operators';
+import {filter, catchError, map} from 'rxjs/operators';
 import {EventEmitter} from 'eventemitter3';
 import * as _ from 'lodash';
 
@@ -13,6 +13,7 @@ import {Objective, Message} from './wire-protocol';
 import {Chain, FakeChain} from '../chain';
 import {calculateChannelId} from './state-utils';
 import {NETWORK_ID} from '../constants';
+import {checkThat, exists} from '../utils';
 
 interface DirectFunding {
   type: 'Direct';
@@ -288,4 +289,12 @@ export class MemoryStore implements Store {
   getChainInfo(channelId: string) {
     return this._chain.getChainInfo(channelId);
   }
+}
+
+export function supportedStateFeed(store: Store, channelId: string) {
+  return store.channelUpdatedFeed(channelId).pipe(
+    map(e => ({
+      state: {...checkThat<StateVariables>(e.supported, exists), ...e.channelConstants}
+    }))
+  );
 }
