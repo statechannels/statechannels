@@ -197,7 +197,7 @@ export class MemoryStore implements Store {
     });
 
     // sign the state, store the channel
-    this.signAndAddState(entry.channelId, stateVars);
+    this.signAndAddState(entry.channelId, sanitizeStateVars(stateVars));
 
     return Promise.resolve(entry);
   }
@@ -226,7 +226,7 @@ export class MemoryStore implements Store {
       throw new Error('No longer have private key');
     }
 
-    const signedState = channelStorage.signAndAdd(stateVars, privateKey);
+    const signedState = channelStorage.signAndAdd(sanitizeStateVars(stateVars), privateKey);
 
     this._eventEmitter.emit('addToOutbox', {signedStates: [signedState]});
   }
