@@ -136,7 +136,7 @@ describe('pushMessage', () => {
     await store.createChannel(
       signedState.participants,
       signedState.challengeDuration,
-      signedState,
+      {...signedState, turnNum: bigNumberify(0)},
       signedState.appDefinition
     );
 
