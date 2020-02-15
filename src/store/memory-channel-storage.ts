@@ -20,7 +20,31 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     private states: Record<string, StateVariables | undefined> = {},
     private signatures: Record<string, string[] | undefined> = {},
     public funding: Funding | undefined = undefined
-  ) {}
+  ) {
+    const {
+      challengeDuration,
+      chainId,
+      channelNonce,
+      appDefinition,
+      participants
+    } = this.channelConstants;
+    this.channelConstants = {
+      challengeDuration,
+      chainId,
+      channelNonce,
+      appDefinition,
+      participants
+    };
+    Object.keys(this.states).forEach(key => {
+      const {turnNum, outcome, appData, isFinal} = this.states[key] as StateVariables;
+      this.states[key] = {
+        turnNum,
+        outcome,
+        appData,
+        isFinal
+      };
+    });
+  }
 
   public setFunding(funding: Funding) {
     this.funding = funding;
