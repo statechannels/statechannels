@@ -15,12 +15,12 @@ import {Store, supportedStateFeed} from '../store/memory-store';
 import {State} from '../store/types';
 import {SupportState} from '.';
 import {ChannelStoreEntry} from '../store/memory-channel-storage';
-import {isFundGuarantor} from '../store/wire-protocol';
+import {isFundGuarantor, FundGuarantor} from '../store/wire-protocol';
 
 export const enum Role {
-  A,
-  Hub,
-  B
+  A = 0,
+  Hub = 1,
+  B = 2
 }
 
 export type Init = {
@@ -28,8 +28,47 @@ export type Init = {
   jointChannelId: string;
 };
 
-function waitThenRunObjective<Objective extends string = string>(
-  objective: Objective,
+const getObjective = (store: Store, peer: Role.A | Role.B) => async ({
+  jointChannelId
+}: Init): Promise<FundGuarantor> => {
+  const entry = await store.getEntry(jointChannelId);
+  const {participants: jointParticipants} = entry.channelConstants;
+  const participants = [jointParticipants[peer], jointParticipants[Role.Hub]];
+
+  const ledgerId = 'foo';
+  const guarantorId = 'bar';
+  return {
+    type: 'FundGuarantor',
+    participants,
+    data: {jointChannelId, ledgerId, guarantorId}
+  };
+};
+function triggerThenRunObjective(peer: Role.A | Role.B) {
+  const enum States {
+    getObjective = 'getObjective',
+    runObjective = 'runObjective'
+  }
+  const objective = peer === Role.A ? Services.fundGuarantorAH : Services.fundGuarantorBH;
+
+  const config: StateNodeConfig<any, any, any> = {
+    initial: States.getObjective,
+    states: {
+      [States.getObjective]: {invoke: {src: objective, onDone: States.runObjective}},
+      [States.runObjective]: {
+        invoke: {
+          src: Services.indirectFunding,
+          data: (_, {data}: DoneInvokeEvent<FundGuarantor>) => data,
+          onDone: 'done'
+        }
+      },
+      done: {type: 'final'}
+    }
+  };
+  return config;
+}
+
+function waitThenRunObjective<O extends string = string>(
+  objective: O,
   src: string
 ): StateNodeConfig<any, any, any> {
   return {
@@ -66,7 +105,7 @@ function getDataAndInvoke<T>(
 }
 
 type TEvent = AnyEventObject;
-const enum Objective {
+const enum VFObjective {
   FundGuarantorAH = 'FundGuarantorAH',
   FundGuarantorBH = 'FundGuarantorBH'
 }
@@ -87,31 +126,33 @@ const enum Services {
   waitForFirstJointState = 'waitForFirstJointState',
   jointChannelUpdate = 'jointChannelUpdate',
   supportState = 'supportState',
-  indirectFunding = 'indirectFunding'
+  indirectFunding = 'indirectFunding',
+  fundGuarantorAH = 'fundGuarantorAH',
+  fundGuarantorBH = 'fundGuarantorBH'
 }
 
 const fundJointChannel = (role: Role): StateNodeConfig<Init, any, TEvent> => {
   let config;
   switch (role) {
     case Role.A:
-      config = waitThenRunObjective<Objective>(Objective.FundGuarantorAH, Services.indirectFunding);
+      config = waitThenRunObjective<VFObjective>(
+        VFObjective.FundGuarantorAH,
+        Services.indirectFunding
+      );
       break;
     case Role.B:
-      config = waitThenRunObjective<Objective>(Objective.FundGuarantorBH, Services.indirectFunding);
+      config = waitThenRunObjective<VFObjective>(
+        VFObjective.FundGuarantorBH,
+        Services.indirectFunding
+      );
       break;
     case Role.Hub:
       config = {
         type: 'parallel',
         entry: Actions.triggerGuarantorObjectives,
         states: {
-          fundGuarantorAH: waitThenRunObjective<Objective>(
-            Objective.FundGuarantorAH,
-            Services.indirectFunding
-          ),
-          fundGuarantorBH: waitThenRunObjective<Objective>(
-            Objective.FundGuarantorBH,
-            Services.indirectFunding
-          )
+          fundGuarantorAH: triggerThenRunObjective(Role.A),
+          fundGuarantorBH: triggerThenRunObjective(Role.B)
         }
       };
   }
@@ -204,7 +245,9 @@ export const options = (store: Store): Partial<MachineOptions<Init, TEvent>> => 
     supportState: SupportState.machine(store as any),
     indirectFunding: async () => true,
     waitForFirstJointState: waitForFirstJointState(store),
-    jointChannelUpdate: jointChannelUpdate(store)
+    jointChannelUpdate: jointChannelUpdate(store),
+    fundGuarantorAH: getObjective(store, Role.A),
+    fundGuarantorBH: getObjective(store, Role.B)
   };
 
   return {actions, services};
