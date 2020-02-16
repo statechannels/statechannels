@@ -58,29 +58,30 @@ const jointParticipants: Participant[] = [
 
 jest.setTimeout(10000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
+const chainId = '0x01';
+const challengeDuration = bigNumberify(10);
+const appDefinition = AddressZero;
+
+const targetChannel: ChannelConstants = {
+  channelNonce: bigNumberify(0),
+  chainId,
+  challengeDuration,
+  participants: targetParticipants,
+  appDefinition
+};
+const targetChannelId = calculateChannelId(targetChannel);
+const jointChannel: ChannelConstants = {
+  channelNonce: bigNumberify(0),
+  chainId,
+  challengeDuration,
+  participants: jointParticipants,
+  appDefinition
+};
+const jointChannelId = calculateChannelId(jointChannel);
+
+const context: Init = {targetChannelId, jointChannelId};
+
 test('Virtual funding as A', async () => {
-  const chainId = '0x01';
-  const challengeDuration = bigNumberify(10);
-  const appDefinition = AddressZero;
-
-  const targetChannel: ChannelConstants = {
-    channelNonce: bigNumberify(0),
-    chainId,
-    challengeDuration,
-    participants: targetParticipants,
-    appDefinition
-  };
-  const targetChannelId = calculateChannelId(targetChannel);
-  const jointChannel: ChannelConstants = {
-    channelNonce: bigNumberify(0),
-    chainId,
-    challengeDuration,
-    participants: jointParticipants,
-    appDefinition
-  };
-  const jointChannelId = calculateChannelId(jointChannel);
-
-  const context: Init = {targetChannelId, jointChannelId};
   const store = new MemoryStore([wallet1.privateKey]);
   const service = interpret(machine(store, context, Role.A));
 
@@ -121,6 +122,37 @@ test('Virtual funding as A', async () => {
       }
     ]
   });
+
+  await waitForExpect(() => expect(service.state.value).toEqual('success'), EXPECT_TIMEOUT);
+});
+
+test('Virtual funding as Hub', async () => {
+  const store = new MemoryStore([wallet3.privateKey]);
+  const service = interpret(machine(store, context, Role.Hub));
+
+  store.outboxFeed.subscribe(e => {
+    e.signedStates?.forEach(state => {
+      state.participants.map(p => store.pushMessage({signedStates: []}));
+      store.pushMessage({
+        signedStates: state.participants.map(p => ({
+          ...state,
+          signature: signState(state, wallets[p.signingAddress].privateKey)
+        }))
+      });
+    });
+  });
+
+  service.start();
+
+  await waitForExpect(
+    () => expect(service.state.value).toMatchObject({setupJointChannel: 'waitForFirstJointState'}),
+    EXPECT_TIMEOUT
+  );
+
+  const outcome: Outcome = {type: 'SimpleEthAllocation', allocationItems: []};
+  const state = firstState(outcome, jointChannel);
+  const signature = signState(state, wallet1.privateKey);
+  store.pushMessage({signedStates: [{...state, signature}]});
 
   await waitForExpect(() => expect(service.state.value).toEqual('success'), EXPECT_TIMEOUT);
 });
