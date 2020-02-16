@@ -96,24 +96,6 @@ test('Virtual funding as A', async () => {
     });
   });
 
-  service.onTransition(state => {
-    if (_.isEqual(state.value, {fundJointChannel: 'waitForObjective'})) {
-      store.pushMessage({
-        objectives: [
-          {
-            type: 'FundGuarantor',
-            data: {
-              jointChannelId,
-              ledgerId: 'foo',
-              guarantorId: 'bar'
-            },
-            participants: [jointParticipants[2], jointParticipants[1]]
-          }
-        ]
-      });
-    }
-  });
-
   service.start();
 
   await waitForExpect(
@@ -121,14 +103,24 @@ test('Virtual funding as A', async () => {
     EXPECT_TIMEOUT
   );
 
-  const outcome: Outcome = {
-    type: 'SimpleEthAllocation',
-    allocationItems: []
-  };
-
+  const outcome: Outcome = {type: 'SimpleEthAllocation', allocationItems: []};
   const state = firstState(outcome, jointChannel);
   const signature = signState(state, wallet1.privateKey);
   store.pushMessage({signedStates: [{...state, signature}]});
+
+  await waitForExpect(
+    () => expect(service.state.value).toMatchObject({fundJointChannel: 'waitForObjective'}),
+    EXPECT_TIMEOUT
+  );
+  store.pushMessage({
+    objectives: [
+      {
+        type: 'FundGuarantor',
+        data: {jointChannelId, ledgerId: 'foo', guarantorId: 'bar'},
+        participants: [jointParticipants[2], jointParticipants[1]]
+      }
+    ]
+  });
 
   await waitForExpect(() => expect(service.state.value).toEqual('success'), EXPECT_TIMEOUT);
 });
