@@ -29,7 +29,7 @@ window.channelProvider.enable('http://sc-embedded-wallet.netlify.com');
 | --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | `enable(url?: string)`                                                      | Configures the dApp to be able to send/receive JSON-RPC messages.                                                 |
 | `send<ResultType>(method: string, params?: any[]`): Promise<ResultType>     | Sends a message to the wallet using JSON-RPC and returns the result, if any.                                      |
-| `on(eventNameOrSubscriptionId: string, callback?: Function): void`          | Allows to to register for events or subscriptions received from the wallet.                                       |
+| `on(eventNameOrSubscriptionId: string, callback?: Function): void`          | Allows to register for events or subscriptions received from the wallet.                                       |
 | `off(eventNameOrSubscriptionId: string, callback?: Function): void`         | Allows to un-register for events or subscriptions received from the wallet.                                       |
 | `subscribe(subscriptionType: string, callback?: Function): Promise<string>` | Allows to subscribe to an event feed, returns a `subscriptionId` that can be used later with `.on()` or `.off()`. |
 | `unsubscribe(subscriptionId: string)`                                       | Removes all event listeners tied to a given `subscriptionId` and stops listening events on the requested feed.    |
