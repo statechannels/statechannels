@@ -68,6 +68,6 @@ graph TD
 
     classDef TopLevelProtocol stroke:#333,stroke-width:4px,color:#ffff,fill:#333;
     classDef OrphanProtocol stroke:#333,stroke-width:4px,fill:#0000;
-    class A,F,Co,CLC, TopLevelProtocol
+    class A,F,Co,CLC TopLevelProtocol
 
 ```
