@@ -2,17 +2,17 @@ import {Observable, fromEvent} from 'rxjs';
 import {filter} from 'rxjs/operators';
 import {EventEmitter} from 'eventemitter3';
 import * as _ from 'lodash';
-
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {Wallet} from 'ethers';
+import {AddressZero} from 'ethers/constants';
+
+import {Chain, FakeChain} from '../chain';
+import {NETWORK_ID} from '../constants';
 
 import {Participant, StateVariables, State, SignedState, ChannelConstants} from './types';
 import {MemoryChannelStoreEntry, ChannelStoreEntry} from './memory-channel-storage';
-import {AddressZero} from 'ethers/constants';
 import {Objective, Message} from './wire-protocol';
-import {Chain, FakeChain} from '../chain';
 import {calculateChannelId} from './state-utils';
-import {NETWORK_ID} from '../constants';
 
 interface DirectFunding {
   type: 'Direct';

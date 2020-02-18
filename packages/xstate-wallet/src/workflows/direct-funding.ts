@@ -3,12 +3,13 @@ import _ from 'lodash';
 import {bigNumberify} from 'ethers/utils';
 import {AddressZero, HashZero} from 'ethers/constants';
 
-import * as Depositing from './depositing';
-import * as SupportState from './support-state';
 import {getDataAndInvoke, MachineFactory} from '../utils/workflow-utils';
 import {Store} from '../store';
 import {Outcome, SimpleEthAllocation} from '../store/types';
 import {add} from '../utils/math-utils';
+
+import * as SupportState from './support-state';
+import * as Depositing from './depositing';
 
 const WORKFLOW = 'direct-funding';
 

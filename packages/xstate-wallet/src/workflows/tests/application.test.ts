@@ -2,6 +2,8 @@ import {interpret} from 'xstate';
 import {ethers} from 'ethers';
 import waitForExpect from 'wait-for-expect';
 import {CreateChannelEvent, SignedState, getChannelId} from '@statechannels/wallet-protocols';
+import {AddressZero} from 'ethers/constants';
+
 import {
   applicationWorkflow,
   JoinChannelEvent,
@@ -9,7 +11,6 @@ import {
   ChannelUpdated,
   WorkflowActions
 } from '../application';
-import {AddressZero} from 'ethers/constants';
 import {MemoryStore, Store} from '../../store/memory-store';
 import {StateVariables} from '../../store/types';
 import {ChannelStoreEntry} from '../../store/memory-channel-storage';

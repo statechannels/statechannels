@@ -1,9 +1,10 @@
 import {bigNumberify, BigNumber} from 'ethers/utils';
 import {Machine, MachineConfig} from 'xstate';
-import {Store} from '../store';
 import {map} from 'rxjs/operators';
-import {MachineFactory} from '../utils/workflow-utils';
 import {Observable} from 'rxjs';
+
+import {Store} from '../store';
+import {MachineFactory} from '../utils/workflow-utils';
 
 export type Init = {
   channelId: string;

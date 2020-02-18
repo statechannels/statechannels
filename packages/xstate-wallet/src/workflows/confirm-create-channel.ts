@@ -1,10 +1,11 @@
 import {MachineConfig, Action, StateSchema, Machine, Condition, StateMachine} from 'xstate';
 import {Participant} from '@statechannels/client-api-schema';
+import {BigNumber} from 'ethers/utils';
+
 import {sendDisplayMessage} from '../messaging';
 import {createMockGuard} from '../utils/workflow-utils';
 import {Store} from '../store/memory-store';
 import {SimpleEthAllocation} from '../store/types';
-import {BigNumber} from 'ethers/utils';
 
 interface WorkflowActions {
   hideUi: Action<WorkflowContext, any>;

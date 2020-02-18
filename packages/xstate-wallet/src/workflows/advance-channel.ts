@@ -1,7 +1,8 @@
 import {AnyEventObject, MachineConfig, assign, spawn} from 'xstate';
 import {filter, map} from 'rxjs/operators';
-import {Store} from '../store';
 import {bigNumberify} from 'ethers/utils';
+
+import {Store} from '../store';
 import {connectToStore} from '../utils/workflow-utils';
 
 const WORKFLOW = 'advance-channel';

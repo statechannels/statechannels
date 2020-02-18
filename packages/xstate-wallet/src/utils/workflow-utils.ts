@@ -7,12 +7,14 @@ import {
   DoneInvokeEvent,
   StateNodeConfig
 } from 'xstate';
-import {Store} from '../store';
-import {createAllocationOutcomeFromParams} from './json-rpc-utils';
 import {CreateChannelRequest, JoinChannelRequest} from '@statechannels/client-api-schema';
-import {NETWORK_ID, CHALLENGE_DURATION} from '../constants';
 import {bigNumberify} from 'ethers/utils';
+
+import {NETWORK_ID, CHALLENGE_DURATION} from '../constants';
+import {Store} from '../store';
 import {OpenEvent} from '../workflows/application';
+
+import {createAllocationOutcomeFromParams} from './json-rpc-utils';
 
 export function createMockGuard(guardName: string): GuardPredicate<any, any> {
   return {

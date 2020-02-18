@@ -1,11 +1,12 @@
 import {Machine, MachineConfig} from 'xstate';
+import {bigNumberify, BigNumber} from 'ethers/utils';
 
 import {Participant, SimpleEthAllocation} from '../store/types';
-import * as AdvanceChannel from './advance-channel';
-import * as DirectFunding from './direct-funding';
 import {MachineFactory} from '../utils/workflow-utils';
 import {Store} from '../store';
-import {bigNumberify, BigNumber} from 'ethers/utils';
+
+import * as AdvanceChannel from './advance-channel';
+import * as DirectFunding from './direct-funding';
 ``;
 
 const PROTOCOL = 'create-and-direct-fund';

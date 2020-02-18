@@ -13,18 +13,19 @@ import {
   StateNodeConfig
 } from 'xstate';
 import {unreachable} from '@statechannels/wallet-protocols';
-
 import {getChannelId} from '@statechannels/nitro-protocol';
-import * as CreateAndDirectFund from './create-and-direct-fund';
-import {sendDisplayMessage, MessagingServiceInterface, convertToChannelResult} from '../messaging';
 import {filter} from 'rxjs/operators';
-import * as CCC from './confirm-create-channel';
 import {Participant} from '@statechannels/client-api-schema';
+import {bigNumberify, BigNumber} from 'ethers/utils';
+
 import {createMockGuard, getDataAndInvoke} from '../utils/workflow-utils';
 import {Store} from '../store/memory-store';
 import {StateVariables, SimpleEthAllocation} from '../store/types';
 import {ChannelStoreEntry} from '../store/memory-channel-storage';
-import {bigNumberify, BigNumber} from 'ethers/utils';
+import {sendDisplayMessage, MessagingServiceInterface, convertToChannelResult} from '../messaging';
+
+import * as CCC from './confirm-create-channel';
+import * as CreateAndDirectFund from './create-and-direct-fund';
 import * as ConcludeChannel from './conclude-channel';
 
 interface WorkflowContext {

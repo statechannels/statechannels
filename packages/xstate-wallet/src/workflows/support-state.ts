@@ -1,5 +1,6 @@
 import {AnyEventObject, AssignAction, MachineConfig, assign, spawn, Machine} from 'xstate';
 import {filter, map} from 'rxjs/operators';
+
 import {Store} from '../store';
 import {statesEqual, outcomesEqual, calculateChannelId} from '../store/state-utils';
 import {State} from '../store/types';

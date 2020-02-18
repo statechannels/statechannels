@@ -1,10 +1,12 @@
+import {bigNumberify, BigNumber} from 'ethers/utils';
+import {Wallet} from 'ethers';
+
+import {NETWORK_ID, CHALLENGE_DURATION} from '../constants';
+
 import {MemoryStore} from './memory-store';
 import {Objective} from './wire-protocol';
 import {SimpleEthAllocation, State} from './types';
-import {bigNumberify, BigNumber} from 'ethers/utils';
-import {Wallet} from 'ethers';
 import {calculateChannelId, signState} from './state-utils';
-import {NETWORK_ID, CHALLENGE_DURATION} from '../constants';
 
 const {address: aAddress, privateKey: aPrivateKey} = new Wallet(
   '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318'

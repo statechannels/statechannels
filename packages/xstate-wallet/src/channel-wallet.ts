@@ -1,13 +1,14 @@
-import {Store} from './store/memory-store';
-import {MessagingServiceInterface} from './messaging';
-
-import {applicationWorkflow} from './workflows/application';
 import ReactDOM from 'react-dom';
 import React from 'react';
-import WalletUi from './ui/wallet';
 import {interpret, Interpreter} from 'xstate';
 import {Guid} from 'guid-typescript';
+
+import {Store} from './store/memory-store';
+import {MessagingServiceInterface} from './messaging';
+import {applicationWorkflow} from './workflows/application';
+import WalletUi from './ui/wallet';
 import {convertToOpenEvent} from './utils/workflow-utils';
+
 export interface Workflow {
   id: string;
   machine: Interpreter<any, any, any>;

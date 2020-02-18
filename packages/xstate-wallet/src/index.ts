@@ -2,7 +2,6 @@ import {ethers} from 'ethers';
 
 // TODO import {ChainWatcher} from './chain';
 import {MemoryStore} from './store/memory-store';
-
 import {ChannelWallet} from './channel-wallet';
 import {MessagingService} from './messaging';
 

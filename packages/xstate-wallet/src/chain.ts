@@ -1,10 +1,11 @@
 import {ContractArtifacts, createETHDepositTransaction} from '@statechannels/nitro-protocol';
-import {getProvider} from './utils/contract-utils';
 import {ethers} from 'ethers';
 import {BigNumber, bigNumberify} from 'ethers/utils';
-import {State} from './store/types';
 import {Observable, fromEvent, from, concat} from 'rxjs';
 import {filter, map} from 'rxjs/operators';
+
+import {State} from './store/types';
+import {getProvider} from './utils/contract-utils';
 import {ETH_ASSET_HOLDER_ADDRESS, NITRO_ADJUDICATOR_ADDRESS} from './constants';
 
 const EthAssetHolderInterface = new ethers.utils.Interface(

@@ -1,5 +1,3 @@
-import {State, ChannelConstants, Outcome, StateVariables} from './types';
-import {convertToNitroOutcome} from './outcome-utils';
 import {
   State as NitroState,
   signState as signNitroState,
@@ -9,6 +7,9 @@ import {
 } from '@statechannels/nitro-protocol';
 import {joinSignature, splitSignature} from 'ethers/utils';
 import _ from 'lodash';
+
+import {convertToNitroOutcome} from './outcome-utils';
+import {State, ChannelConstants, Outcome, StateVariables} from './types';
 
 export function toNitroState(state: State): NitroState {
   const {challengeDuration, appDefinition, channelNonce, participants, chainId} = state;

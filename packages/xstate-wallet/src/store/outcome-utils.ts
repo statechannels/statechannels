@@ -4,6 +4,12 @@ import {
   AllocationItem as NitroAllocationItem,
   convertAddressToBytes32
 } from '@statechannels/nitro-protocol';
+import {bigNumberify} from 'ethers/utils';
+import {Allocation} from '@statechannels/client-api-schema';
+import {AddressZero} from 'ethers/constants';
+
+import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
+
 import {
   Outcome,
   AllocationItem,
@@ -11,10 +17,6 @@ import {
   SimpleTokenAllocation,
   MixedAllocation
 } from './types';
-import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
-import {bigNumberify} from 'ethers/utils';
-import {Allocation} from '@statechannels/client-api-schema';
-import {AddressZero} from 'ethers/constants';
 
 export function convertFromNitroOutcome(outcome: NitroOutcome): Outcome {
   if (outcome.length === 0) {

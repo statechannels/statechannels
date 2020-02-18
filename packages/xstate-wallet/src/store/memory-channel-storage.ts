@@ -1,6 +1,7 @@
+import _ from 'lodash';
+
 import {ChannelConstants, StateVariables, SignedState, Participant} from './types';
 import {signState, hashState, getSignerAddress, calculateChannelId} from './state-utils';
-import _ from 'lodash';
 import {Funding} from './memory-store';
 
 export interface ChannelStoreEntry {
