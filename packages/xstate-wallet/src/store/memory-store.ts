@@ -6,12 +6,12 @@ import * as _ from 'lodash';
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {Wallet} from 'ethers';
 
-import {Participant, StateVariables, State, SignedState, ChannelConstants} from './types';
+import {Participant, StateVariables, State, SignedState} from './types';
 import {MemoryChannelStoreEntry, ChannelStoreEntry} from './memory-channel-storage';
 import {AddressZero} from 'ethers/constants';
 import {Objective, Message} from './wire-protocol';
 import {Chain, FakeChain} from '../chain';
-import {calculateChannelId} from './state-utils';
+import {calculateChannelId, hashState} from './state-utils';
 import {NETWORK_ID} from '../constants';
 import {checkThat, exists} from '../utils';
 
@@ -143,22 +143,21 @@ export class MemoryStore implements Store {
     return fromEvent(this._eventEmitter, 'addToOutbox');
   }
 
-  private async initializeChannel(
-    channelConstants: ChannelConstants
-  ): Promise<MemoryChannelStoreEntry> {
-    const addresses = channelConstants.participants.map(x => x.signingAddress);
+  private async initializeChannel(state: State): Promise<MemoryChannelStoreEntry> {
+    const addresses = state.participants.map(x => x.signingAddress);
 
     const myIndex = addresses.findIndex(address => !!this._privateKeys[address]);
     if (myIndex === -1) {
       throw new Error("Couldn't find the signing key for any participant in wallet.");
     }
 
-    const channelId = calculateChannelId(channelConstants);
+    const channelId = calculateChannelId(state);
 
     // TODO: There could be concurrency problems which lead to entries potentially being overwritten.
-    this.setNonce(addresses, channelConstants.channelNonce);
+    this.setNonce(addresses, state.channelNonce);
+    const key = hashState(state);
     const entry =
-      this._channels[channelId] || new MemoryChannelStoreEntry(channelConstants, myIndex);
+      this._channels[channelId] || new MemoryChannelStoreEntry(state, myIndex, {[key]: state});
 
     this._channels[channelId] = entry;
     return Promise.resolve(entry);
@@ -196,7 +195,8 @@ export class MemoryStore implements Store {
       challengeDuration,
       channelNonce,
       participants,
-      appDefinition
+      appDefinition,
+      ...stateVars
     });
 
     // sign the state, store the channel
@@ -204,7 +204,6 @@ export class MemoryStore implements Store {
 
     return Promise.resolve(entry);
   }
-
   private getNonce(addresses: string[]): BigNumber {
     return this._nonces[this.nonceKeyFromAddresses(addresses)] || bigNumberify(-1);
   }
