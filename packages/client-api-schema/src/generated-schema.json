@@ -19,7 +19,10 @@
           "$ref": "#/definitions/Address"
         }
       },
-      "required": ["token", "allocationItems"],
+      "required": [
+        "token",
+        "allocationItems"
+      ],
       "type": "object"
     },
     "AllocationItem": {
@@ -32,7 +35,10 @@
           "$ref": "#/definitions/Address"
         }
       },
-      "required": ["destination", "amount"],
+      "required": [
+        "destination",
+        "amount"
+      ],
       "type": "object"
     },
     "Allocations": {
@@ -45,18 +51,26 @@
       "additionalProperties": false,
       "properties": {
         "jsonrpc": {
-          "enum": ["2.0"],
+          "enum": [
+            "2.0"
+          ],
           "type": "string"
         },
         "method": {
-          "enum": ["BudgetUpdated"],
+          "enum": [
+            "BudgetUpdated"
+          ],
           "type": "string"
         },
         "params": {
           "$ref": "#/definitions/SiteBudget"
         }
       },
-      "required": ["jsonrpc", "method", "params"],
+      "required": [
+        "jsonrpc",
+        "method",
+        "params"
+      ],
       "type": "object"
     },
     "ChallengeChannelParams": {
@@ -66,7 +80,9 @@
           "$ref": "#/definitions/ChannelId"
         }
       },
-      "required": ["channelId"],
+      "required": [
+        "channelId"
+      ],
       "type": "object"
     },
     "ChallengeChannelRequest": {
@@ -76,11 +92,15 @@
           "type": "number"
         },
         "jsonrpc": {
-          "enum": ["2.0"],
+          "enum": [
+            "2.0"
+          ],
           "type": "string"
         },
         "method": {
-          "enum": ["ChallengeChannel"],
+          "enum": [
+            "ChallengeChannel"
+          ],
           "type": "string"
         },
         "params": {
@@ -90,11 +110,18 @@
               "$ref": "#/definitions/ChannelId"
             }
           },
-          "required": ["channelId"],
+          "required": [
+            "channelId"
+          ],
           "type": "object"
         }
       },
-      "required": ["id", "jsonrpc", "method", "params"],
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
       "type": "object"
     },
     "ChallengeChannelResponse": {
@@ -104,32 +131,46 @@
           "type": "number"
         },
         "jsonrpc": {
-          "enum": ["2.0"],
+          "enum": [
+            "2.0"
+          ],
           "type": "string"
         },
         "result": {
           "$ref": "#/definitions/ChannelResult"
         }
       },
-      "required": ["id", "jsonrpc", "result"],
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
       "type": "object"
     },
     "ChannelClosingNotification": {
       "additionalProperties": false,
       "properties": {
         "jsonrpc": {
-          "enum": ["2.0"],
+          "enum": [
+            "2.0"
+          ],
           "type": "string"
         },
         "method": {
-          "enum": ["ChannelClosed"],
+          "enum": [
+            "ChannelClosed"
+          ],
           "type": "string"
         },
         "params": {
           "$ref": "#/definitions/ChannelResult"
         }
       },
-      "required": ["jsonrpc", "method", "params"],
+      "required": [
+        "jsonrpc",
+        "method",
+        "params"
+      ],
       "type": "object"
     },
     "ChannelId": {
@@ -141,18 +182,26 @@
       "additionalProperties": false,
       "properties": {
         "jsonrpc": {
-          "enum": ["2.0"],
+          "enum": [
+            "2.0"
+          ],
           "type": "string"
         },
         "method": {
-          "enum": ["ChannelProposed"],
+          "enum": [
+            "ChannelProposed"
+          ],
           "type": "string"
         },
         "params": {
           "$ref": "#/definitions/ChannelResult"
         }
       },
-      "required": ["jsonrpc", "method", "params"],
+      "required": [
+        "jsonrpc",
+        "method",
+        "params"
+      ],
       "type": "object"
     },
     "ChannelResult": {
@@ -217,18 +266,26 @@
       "additionalProperties": false,
       "properties": {
         "jsonrpc": {
-          "enum": ["2.0"],
+          "enum": [
+            "2.0"
+          ],
           "type": "string"
         },
         "method": {
-          "enum": ["ChannelUpdated"],
+          "enum": [
+            "ChannelUpdated"
+          ],
           "type": "string"
         },
         "params": {
           "$ref": "#/definitions/ChannelResult"
         }
       },
-      "required": ["jsonrpc", "method", "params"],
+      "required": [
+        "jsonrpc",
+        "method",
+        "params"
+      ],
       "type": "object"
     },
     "CloseChannelParams": {
@@ -238,7 +295,9 @@
           "$ref": "#/definitions/ChannelId"
         }
       },
-      "required": ["channelId"],
+      "required": [
+        "channelId"
+      ],
       "type": "object"
     },
     "CloseChannelRequest": {
@@ -248,18 +307,27 @@
           "type": "number"
         },
         "jsonrpc": {
-          "enum": ["2.0"],
+          "enum": [
+            "2.0"
+          ],
           "type": "string"
         },
         "method": {
-          "enum": ["CloseChannel"],
+          "enum": [
+            "CloseChannel"
+          ],
           "type": "string"
         },
         "params": {
           "$ref": "#/definitions/CloseChannelParams"
         }
       },
-      "required": ["id", "jsonrpc", "method", "params"],
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
       "type": "object"
     },
     "CloseChannelResponse": {
@@ -269,14 +337,20 @@
           "type": "number"
         },
         "jsonrpc": {
-          "enum": ["2.0"],
+          "enum": [
+            "2.0"
+          ],
           "type": "string"
         },
         "result": {
           "$ref": "#/definitions/ChannelResult"
         }
       },
-      "required": ["id", "jsonrpc", "result"],
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
       "type": "object"
     },
     "CreateChannelParams": {
@@ -301,7 +375,12 @@
           "type": "array"
         }
       },
-      "required": ["participants", "allocations", "appDefinition", "appData"],
+      "required": [
+        "participants",
+        "allocations",
+        "appDefinition",
+        "appData"
+      ],
       "type": "object"
     },
     "CreateChannelRequest": {
@@ -311,18 +390,27 @@
           "type": "number"
         },
         "jsonrpc": {
-          "enum": ["2.0"],
+          "enum": [
+            "2.0"
+          ],
           "type": "string"
         },
         "method": {
-          "enum": ["CreateChannel"],
+          "enum": [
+            "CreateChannel"
+          ],
           "type": "string"
         },
         "params": {
           "$ref": "#/definitions/CreateChannelParams"
         }
       },
-      "required": ["id", "jsonrpc", "method", "params"],
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
       "type": "object"
     },
     "CreateChannelResponse": {
@@ -332,15 +420,26 @@
           "type": "number"
         },
         "jsonrpc": {
-          "enum": ["2.0"],
+          "enum": [
+            "2.0"
+          ],
           "type": "string"
         },
         "result": {
           "$ref": "#/definitions/ChannelResult"
         }
       },
-      "required": ["id", "jsonrpc", "result"],
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
       "type": "object"
+    },
+    "ExternalDestination": {
+      "description": "Nitro ChannelId",
+      "pattern": "^0x(0{24})([a-fA-F0-9]{40})$",
+      "type": "string"
     },
     "Funds": {
       "additionalProperties": false,
@@ -352,7 +451,10 @@
           "$ref": "#/definitions/Address"
         }
       },
-      "required": ["token", "amount"],
+      "required": [
+        "token",
+        "amount"
+      ],
       "type": "object"
     },
     "GetAddressRequest": {
@@ -362,11 +464,15 @@
           "type": "number"
         },
         "jsonrpc": {
-          "enum": ["2.0"],
+          "enum": [
+            "2.0"
+          ],
           "type": "string"
         },
         "method": {
-          "enum": ["GetAddress"],
+          "enum": [
+            "GetAddress"
+          ],
           "type": "string"
         },
         "params": {
@@ -374,7 +480,12 @@
           "type": "object"
         }
       },
-      "required": ["id", "jsonrpc", "method", "params"],
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
       "type": "object"
     },
     "GetAddressResponse": {
@@ -384,14 +495,20 @@
           "type": "number"
         },
         "jsonrpc": {
-          "enum": ["2.0"],
+          "enum": [
+            "2.0"
+          ],
           "type": "string"
         },
         "result": {
           "$ref": "#/definitions/Address"
         }
       },
-      "required": ["id", "jsonrpc", "result"],
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
       "type": "object"
     },
     "GetBudgetRequest": {
@@ -401,11 +518,15 @@
           "type": "number"
         },
         "jsonrpc": {
-          "enum": ["2.0"],
+          "enum": [
+            "2.0"
+          ],
           "type": "string"
         },
         "method": {
-          "enum": ["GetBudget"],
+          "enum": [
+            "GetBudget"
+          ],
           "type": "string"
         },
         "params": {
@@ -415,11 +536,18 @@
               "$ref": "#/definitions/Address"
             }
           },
-          "required": ["hubAddress"],
+          "required": [
+            "hubAddress"
+          ],
           "type": "object"
         }
       },
-      "required": ["id", "jsonrpc", "method", "params"],
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
       "type": "object"
     },
     "GetBudgetResponse": {
@@ -429,14 +557,20 @@
           "type": "number"
         },
         "jsonrpc": {
-          "enum": ["2.0"],
+          "enum": [
+            "2.0"
+          ],
           "type": "string"
         },
         "result": {
           "$ref": "#/definitions/SiteBudget"
         }
       },
-      "required": ["id", "jsonrpc", "result"],
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
       "type": "object"
     },
     "GetEthereumSelectedAddressRequest": {
@@ -446,11 +580,15 @@
           "type": "number"
         },
         "jsonrpc": {
-          "enum": ["2.0"],
+          "enum": [
+            "2.0"
+          ],
           "type": "string"
         },
         "method": {
-          "enum": ["GetEthereumSelectedAddress"],
+          "enum": [
+            "GetEthereumSelectedAddress"
+          ],
           "type": "string"
         },
         "params": {
@@ -458,7 +596,12 @@
           "type": "object"
         }
       },
-      "required": ["id", "jsonrpc", "method", "params"],
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
       "type": "object"
     },
     "GetEthereumSelectedAddressResponse": {
@@ -468,14 +611,20 @@
           "type": "number"
         },
         "jsonrpc": {
-          "enum": ["2.0"],
+          "enum": [
+            "2.0"
+          ],
           "type": "string"
         },
         "result": {
           "$ref": "#/definitions/Address"
         }
       },
-      "required": ["id", "jsonrpc", "result"],
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
       "type": "object"
     },
     "JoinChannelParams": {
@@ -485,7 +634,9 @@
           "$ref": "#/definitions/ChannelId"
         }
       },
-      "required": ["channelId"],
+      "required": [
+        "channelId"
+      ],
       "type": "object"
     },
     "JoinChannelRequest": {
@@ -495,18 +646,27 @@
           "type": "number"
         },
         "jsonrpc": {
-          "enum": ["2.0"],
+          "enum": [
+            "2.0"
+          ],
           "type": "string"
         },
         "method": {
-          "enum": ["JoinChannel"],
+          "enum": [
+            "JoinChannel"
+          ],
           "type": "string"
         },
         "params": {
           "$ref": "#/definitions/JoinChannelParams"
         }
       },
-      "required": ["id", "jsonrpc", "method", "params"],
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
       "type": "object"
     },
     "JoinChannelResponse": {
@@ -516,20 +676,27 @@
           "type": "number"
         },
         "jsonrpc": {
-          "enum": ["2.0"],
+          "enum": [
+            "2.0"
+          ],
           "type": "string"
         },
         "result": {
           "$ref": "#/definitions/ChannelResult"
         }
       },
-      "required": ["id", "jsonrpc", "result"],
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
       "type": "object"
     },
     "Message": {
       "additionalProperties": false,
       "properties": {
-        "data": {},
+        "data": {
+        },
         "recipient": {
           "type": "string"
         },
@@ -537,25 +704,37 @@
           "type": "string"
         }
       },
-      "required": ["recipient", "sender", "data"],
+      "required": [
+        "recipient",
+        "sender",
+        "data"
+      ],
       "type": "object"
     },
     "MessageQueuedNotification": {
       "additionalProperties": false,
       "properties": {
         "jsonrpc": {
-          "enum": ["2.0"],
+          "enum": [
+            "2.0"
+          ],
           "type": "string"
         },
         "method": {
-          "enum": ["MessageQueued"],
+          "enum": [
+            "MessageQueued"
+          ],
           "type": "string"
         },
         "params": {
           "$ref": "#/definitions/Message"
         }
       },
-      "required": ["jsonrpc", "method", "params"],
+      "required": [
+        "jsonrpc",
+        "method",
+        "params"
+      ],
       "type": "object"
     },
     "Notification": {
@@ -590,7 +769,11 @@
           "$ref": "#/definitions/Address"
         }
       },
-      "required": ["participantId", "signingAddress", "destination"],
+      "required": [
+        "participantId",
+        "signingAddress",
+        "destination"
+      ],
       "type": "object"
     },
     "PushMessageParams": {
@@ -603,18 +786,27 @@
           "type": "number"
         },
         "jsonrpc": {
-          "enum": ["2.0"],
+          "enum": [
+            "2.0"
+          ],
           "type": "string"
         },
         "method": {
-          "enum": ["PushMessage"],
+          "enum": [
+            "PushMessage"
+          ],
           "type": "string"
         },
         "params": {
           "$ref": "#/definitions/Message"
         }
       },
-      "required": ["id", "jsonrpc", "method", "params"],
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
       "type": "object"
     },
     "PushMessageResponse": {
@@ -624,14 +816,20 @@
           "type": "number"
         },
         "jsonrpc": {
-          "enum": ["2.0"],
+          "enum": [
+            "2.0"
+          ],
           "type": "string"
         },
         "result": {
           "$ref": "#/definitions/PushMessageResult"
         }
       },
-      "required": ["id", "jsonrpc", "result"],
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
       "type": "object"
     },
     "PushMessageResult": {
@@ -641,7 +839,9 @@
           "type": "boolean"
         }
       },
-      "required": ["success"],
+      "required": [
+        "success"
+      ],
       "type": "object"
     },
     "Request": {
@@ -719,7 +919,10 @@
               "type": "string"
             }
           },
-          "required": ["playerAmount", "hubAmount"],
+          "required": [
+            "playerAmount",
+            "hubAmount"
+          ],
           "type": "object"
         },
         "free": {
@@ -732,7 +935,10 @@
               "type": "string"
             }
           },
-          "required": ["playerAmount", "hubAmount"],
+          "required": [
+            "playerAmount",
+            "hubAmount"
+          ],
           "type": "object"
         },
         "hub": {
@@ -748,7 +954,10 @@
               "type": "string"
             }
           },
-          "required": ["playerAmount", "hubAmount"],
+          "required": [
+            "playerAmount",
+            "hubAmount"
+          ],
           "type": "object"
         },
         "pending": {
@@ -761,14 +970,24 @@
               "type": "string"
             }
           },
-          "required": ["playerAmount", "hubAmount"],
+          "required": [
+            "playerAmount",
+            "hubAmount"
+          ],
           "type": "object"
         },
         "site": {
           "type": "string"
         }
       },
-      "required": ["site", "hub", "pending", "free", "inUse", "direct"],
+      "required": [
+        "site",
+        "hub",
+        "pending",
+        "free",
+        "inUse",
+        "direct"
+      ],
       "type": "object"
     },
     "UpdateChannelParams": {
@@ -793,7 +1012,12 @@
           "type": "array"
         }
       },
-      "required": ["channelId", "participants", "allocations", "appData"],
+      "required": [
+        "channelId",
+        "participants",
+        "allocations",
+        "appData"
+      ],
       "type": "object"
     },
     "UpdateChannelRequest": {
@@ -803,18 +1027,27 @@
           "type": "number"
         },
         "jsonrpc": {
-          "enum": ["2.0"],
+          "enum": [
+            "2.0"
+          ],
           "type": "string"
         },
         "method": {
-          "enum": ["UpdateChannel"],
+          "enum": [
+            "UpdateChannel"
+          ],
           "type": "string"
         },
         "params": {
           "$ref": "#/definitions/UpdateChannelParams"
         }
       },
-      "required": ["id", "jsonrpc", "method", "params"],
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
       "type": "object"
     },
     "UpdateChannelResponse": {
@@ -824,14 +1057,20 @@
           "type": "number"
         },
         "jsonrpc": {
-          "enum": ["2.0"],
+          "enum": [
+            "2.0"
+          ],
           "type": "string"
         },
         "result": {
           "$ref": "#/definitions/ChannelResult"
         }
       },
-      "required": ["id", "jsonrpc", "result"],
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
       "type": "object"
     }
   }
