@@ -37,52 +37,9 @@ const getObjective = (store: Store, peer: Role.A | Role.B) => async ({
 
   const ledgerId = 'foo';
   const guarantorId = 'bar';
-  return {
-    type: 'FundGuarantor',
-    participants,
-    data: {jointChannelId, ledgerId, guarantorId}
-  };
+  return {type: 'FundGuarantor', participants, data: {jointChannelId, ledgerId, guarantorId}};
 };
-function triggerThenRunObjective(peer: Role.A | Role.B) {
-  const enum States {
-    getObjective = 'getObjective',
-    runObjective = 'runObjective'
-  }
-  const objective = peer === Role.A ? Services.fundGuarantorAH : Services.fundGuarantorBH;
 
-  const config: StateNodeConfig<any, any, any> = {
-    initial: States.getObjective,
-    states: {
-      [States.getObjective]: {
-        invoke: {src: objective, onDone: States.runObjective}
-      },
-      [States.runObjective]: {
-        entry: Actions.triggerGuarantorObjective,
-        invoke: {
-          src: Services.indirectFunding,
-          data: (_, {data}: DoneInvokeEvent<FundGuarantor>) => data,
-          onDone: 'done'
-        }
-      },
-      done: {type: 'final'}
-    }
-  };
-  return config;
-}
-
-function waitThenRunObjective<O extends string = string>(
-  objective: O,
-  src: string
-): StateNodeConfig<any, any, any> {
-  return {
-    initial: 'waitForObjective',
-    states: {
-      waitForObjective: {entry: `spawn${objective}Observer`, on: {[objective]: 'runObjective'}},
-      runObjective: {invoke: {src, data: (_, {init}) => init, onDone: 'done'}},
-      done: {type: 'final'}
-    }
-  };
-}
 function getDataAndInvoke<T>(
   data: string,
   src: string,
@@ -108,14 +65,8 @@ function getDataAndInvoke<T>(
 }
 
 type TEvent = AnyEventObject;
-const enum VFObjective {
-  FundGuarantorAH = 'FundGuarantorAH',
-  FundGuarantorBH = 'FundGuarantorBH'
-}
 const enum Actions {
-  spawnFundLedgerChannelObserver = 'spawnFundLedgerChannelObserver',
-  spawnFundGuarantorAHObserver = 'spawnFundGuarantorAHObserver',
-  spawnFundGuarantorBHObserver = 'spawnFundGuarantorBHObserver',
+  spawnFundGuarantorObserver = 'spawnFundGuarantorObserver',
   triggerGuarantorObjective = 'triggerGuarantorObjective'
 }
 const enum States {
@@ -138,23 +89,43 @@ const fundJointChannel = (role: Role): StateNodeConfig<Init, any, TEvent> => {
   let config;
   switch (role) {
     case Role.A:
-      config = waitThenRunObjective<VFObjective>(
-        VFObjective.FundGuarantorAH,
-        Services.indirectFunding
-      );
-      break;
     case Role.B:
-      config = waitThenRunObjective<VFObjective>(
-        VFObjective.FundGuarantorBH,
-        Services.indirectFunding
-      );
+      config = {
+        initial: 'waitForObjective',
+        states: {
+          waitForObjective: {
+            entry: Actions.spawnFundGuarantorObserver,
+            on: {FundGuarantor: 'runObjective'}
+          },
+          runObjective: {
+            invoke: {src: Services.indirectFunding, data: (_, {init}) => init, onDone: 'done'}
+          },
+          done: {type: 'final'}
+        }
+      };
       break;
     case Role.Hub:
+      const fundGuarantor = (objective: Services.fundGuarantorAH | Services.fundGuarantorBH) => ({
+        initial: 'getObjective',
+        states: {
+          getObjective: {invoke: {src: objective, onDone: 'runObjective'}},
+          runObjective: {
+            entry: Actions.triggerGuarantorObjective,
+            invoke: {
+              src: Services.indirectFunding,
+              data: (_, {data}: DoneInvokeEvent<FundGuarantor>) => data,
+              onDone: 'done'
+            }
+          },
+          done: {type: 'final'}
+        }
+      });
+
       config = {
         type: 'parallel',
         states: {
-          fundGuarantorAH: triggerThenRunObjective(Role.A),
-          fundGuarantorBH: triggerThenRunObjective(Role.B)
+          fundGuarantorAH: fundGuarantor(Services.fundGuarantorAH),
+          fundGuarantorBH: fundGuarantor(Services.fundGuarantorBH)
         }
       };
   }
@@ -199,22 +170,11 @@ const waitForFirstJointState = (store: Store) => ({
     )
     .toPromise();
 
-const spawnFundGuarantorAHObserver = (store: Store) => ({jointChannelId}: Init) =>
+const spawnFundGuarantorObserver = (store: Store) => ({jointChannelId}: Init) =>
   spawn(
     store.newObjectiveFeed.pipe(
       filter(isFundGuarantor),
       filter(o => o.data.jointChannelId === jointChannelId),
-      map(o => ({...o, type: 'FundGuarantorAH'})),
-      take(1)
-    )
-  );
-
-const spawnFundGuarantorBHObserver = (store: Store) => ({jointChannelId}: Init) =>
-  spawn(
-    store.newObjectiveFeed.pipe(
-      filter(isFundGuarantor),
-      filter(o => o.data.jointChannelId === jointChannelId),
-      map(o => ({...o, type: 'FundGuarantorBH'})),
       take(1)
     )
   );
@@ -232,14 +192,8 @@ const jointChannelUpdate = (store: Store) => ({jointChannelId}: Init): Promise<S
 
 export const options = (store: Store): Partial<MachineOptions<Init, TEvent>> => {
   const actions: Record<Actions, any> = {
-    [Actions.spawnFundLedgerChannelObserver]: () => {
-      throw 'unimplemented';
-    },
-    [Actions.spawnFundGuarantorAHObserver]: assign<any>({
-      guarantorAHObserver: spawnFundGuarantorAHObserver(store)
-    }),
-    [Actions.spawnFundGuarantorBHObserver]: assign<any>({
-      guarantorBHObserver: spawnFundGuarantorBHObserver(store)
+    [Actions.spawnFundGuarantorObserver]: assign<any>({
+      guarantorObserver: spawnFundGuarantorObserver(store)
     }),
     [Actions.triggerGuarantorObjective]: (_, {data}: DoneInvokeEvent<FundGuarantor>) => {
       store.sendMessage({objectives: [data]});
