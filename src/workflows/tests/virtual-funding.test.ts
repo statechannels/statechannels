@@ -3,7 +3,7 @@ import waitForExpect from 'wait-for-expect';
 
 import {Init, machine, Role} from '../virtualFunding';
 
-import {MemoryStore} from '../../store/memory-store';
+import {MemoryStore, Store} from '../../store/memory-store';
 import {ethers} from 'ethers';
 import {bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
@@ -26,6 +26,7 @@ const wallets = {
   [wallet2.address]: wallet2,
   [wallet3.address]: wallet3
 };
+
 const targetParticipants: Participant[] = [
   {
     destination: wallet1.address,
@@ -155,4 +156,37 @@ test('Virtual funding as Hub', async () => {
   store.pushMessage({signedStates: [{...state, signature}]});
 
   await waitForExpect(() => expect(service.state.value).toEqual('success'), EXPECT_TIMEOUT);
+});
+
+test('multiple workflows', async () => {
+  const hubStore = new MemoryStore([wallet3.privateKey]);
+  const aStore = new MemoryStore([wallet1.privateKey]);
+  const bStore = new MemoryStore([wallet2.privateKey]);
+  const stores = [aStore, hubStore, bStore];
+
+  const hubService = interpret(machine(hubStore, context, Role.Hub));
+  const aService = interpret(machine(aStore, context, Role.A));
+  const bService = interpret(machine(bStore, context, Role.B));
+  const services = [aService, hubService, bService];
+
+  const outcome: Outcome = {type: 'SimpleEthAllocation', allocationItems: []};
+  const state = firstState(outcome, jointChannel);
+  const signature = signState(state, wallet1.privateKey);
+  const message = {signedStates: [{...state, signature}]};
+
+  stores.forEach((store: Store) => {
+    store.pushMessage(message);
+    store.outboxFeed.subscribe(message =>
+      stores.forEach(s => {
+        s.pushMessage(message);
+      })
+    );
+  });
+  services.forEach(service => service.start());
+
+  await waitForExpect(() => {
+    expect(bService.state.value).toEqual('success');
+    expect(hubService.state.value).toEqual('success');
+    expect(aService.state.value).toEqual('success');
+  }, EXPECT_TIMEOUT);
 });
