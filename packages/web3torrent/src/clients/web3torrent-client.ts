@@ -2,6 +2,7 @@ import React from 'react';
 import {ClientEvents, WebTorrentAddInput, WebTorrentSeedInput} from '../library/types';
 import WebTorrentPaidStreamingClient from '../library/web3torrent-lib';
 import {Status, Torrent} from '../types';
+
 export const web3torrent = new WebTorrentPaidStreamingClient();
 export const WebTorrentContext = React.createContext(web3torrent);
 
