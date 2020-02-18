@@ -74,6 +74,10 @@ export interface Store {
   // TODO: This is awkward. Might be better to set the funding on create/initialize channel?
   setFunding(channelId: string, funding: Funding): Promise<void>;
 
+  // TODO: I don't know how the store is mean to send outgoing messages.
+  // But I need one, in order to implement virtual funding.
+  sendMessage(message: Message): void;
+
   // TODO: Should this be part of the store?
   getChainInfo: Chain['getChainInfo'];
   chainUpdatedFeed: Chain['chainUpdatedFeed'];
@@ -234,11 +238,16 @@ export class MemoryStore implements Store {
     this._eventEmitter.emit('addToOutbox', {signedStates: [signedState]});
   }
 
+  sendMessage(message: Message) {
+    this._eventEmitter.emit('addToOutbox', message);
+  }
+
   async addState(state: SignedState): Promise<ChannelStoreEntry> {
     const channelId = calculateChannelId(state);
     const channelStorage = this._channels[channelId] || (await this.initializeChannel(state));
 
     channelStorage.addState(state, state.signature);
+
     return channelStorage;
   }
 

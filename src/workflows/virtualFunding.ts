@@ -53,8 +53,11 @@ function triggerThenRunObjective(peer: Role.A | Role.B) {
   const config: StateNodeConfig<any, any, any> = {
     initial: States.getObjective,
     states: {
-      [States.getObjective]: {invoke: {src: objective, onDone: States.runObjective}},
+      [States.getObjective]: {
+        invoke: {src: objective, onDone: States.runObjective}
+      },
       [States.runObjective]: {
+        entry: Actions.triggerGuarantorObjective,
         invoke: {
           src: Services.indirectFunding,
           data: (_, {data}: DoneInvokeEvent<FundGuarantor>) => data,
@@ -113,7 +116,7 @@ const enum Actions {
   spawnFundLedgerChannelObserver = 'spawnFundLedgerChannelObserver',
   spawnFundGuarantorAHObserver = 'spawnFundGuarantorAHObserver',
   spawnFundGuarantorBHObserver = 'spawnFundGuarantorBHObserver',
-  triggerGuarantorObjectives = 'triggerGuarantorObjectives'
+  triggerGuarantorObjective = 'triggerGuarantorObjective'
 }
 const enum States {
   setupJointChannel = 'setupJointChannel',
@@ -149,7 +152,6 @@ const fundJointChannel = (role: Role): StateNodeConfig<Init, any, TEvent> => {
     case Role.Hub:
       config = {
         type: 'parallel',
-        entry: Actions.triggerGuarantorObjectives,
         states: {
           fundGuarantorAH: triggerThenRunObjective(Role.A),
           fundGuarantorBH: triggerThenRunObjective(Role.B)
@@ -180,6 +182,7 @@ const generateConfig = (role: Role): MachineConfig<Init, any, any> => ({
 });
 
 export const config = generateConfig(Role.Hub);
+
 const waitForFirstJointState = (store: Store) => ({
   jointChannelId
 }: Init): Promise<SupportState.Init> =>
@@ -238,7 +241,9 @@ export const options = (store: Store): Partial<MachineOptions<Init, TEvent>> => 
     [Actions.spawnFundGuarantorBHObserver]: assign<any>({
       guarantorBHObserver: spawnFundGuarantorBHObserver(store)
     }),
-    [Actions.triggerGuarantorObjectives]: () => 'TODO'
+    [Actions.triggerGuarantorObjective]: (_, {data}: DoneInvokeEvent<FundGuarantor>) => {
+      store.sendMessage({objectives: [data]});
+    }
   };
 
   const services: Record<Services, ServiceConfig<Init>> = {
