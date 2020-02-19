@@ -11,6 +11,7 @@ import {firstState, signState, calculateChannelId} from '../../store/state-utils
 import {ChannelConstants, Outcome, Participant, State} from '../../store/types';
 import {AddressZero} from 'ethers/constants';
 import {add} from '../../utils/math-utils';
+import {simpleEthAllocation} from '../../utils/outcome';
 
 const wallet1 = new ethers.Wallet(
   '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318'
@@ -58,7 +59,7 @@ const jointParticipants: Participant[] = [
   }
 ];
 
-jest.setTimeout(10000);
+jest.setTimeout(20000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 const chainId = '0x01';
 const challengeDuration = bigNumberify(10);
@@ -197,10 +198,20 @@ test('multiple workflows', async () => {
   });
   services.forEach(service => service.start());
 
-  await waitForExpect(() => {
+  await waitForExpect(async () => {
     expect(bService.state.value).toEqual('success');
     expect(hubService.state.value).toEqual('success');
     expect(aService.state.value).toEqual('success');
+
+    const {supported} = await aStore.getEntry(jointChannelId);
+    const outcome = supported?.outcome;
+    const amount = bigNumberify(5);
+    expect(outcome).toMatchObject(
+      simpleEthAllocation(
+        {destination: targetChannelId, amount},
+        {destination: jointParticipants[1].destination, amount}
+      )
+    );
   }, EXPECT_TIMEOUT);
 });
 
