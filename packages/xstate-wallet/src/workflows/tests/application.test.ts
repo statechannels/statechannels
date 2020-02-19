@@ -57,6 +57,7 @@ it('invokes the createChannelAndFund protocol', async () => {
   const store = new MemoryStore();
   const messagingService: MessagingServiceInterface = new MessagingService(store);
   const services: Partial<WorkflowServices> = {
+    getDataForCreateChannelAndDirectFund: jest.fn().mockReturnValue(Promise.resolve('foo')),
     invokeCreateChannelAndDirectFundProtocol: jest.fn().mockReturnValue(
       new Promise(() => {
         /* mock */
@@ -80,7 +81,9 @@ it('invokes the createChannelAndFund protocol', async () => {
 
   service.send({type: 'done.invoke.createChannel', data: channelId});
   await waitForExpect(async () => {
-    expect(service.state.value).toEqual('openChannelAndDirectFundProtocol');
+    expect(service.state.value).toEqual({
+      openChannelAndDirectFundProtocol: 'invokeCreateChannelAndDirectFundProtocol'
+    });
     expect(services.invokeCreateChannelAndDirectFundProtocol).toHaveBeenCalledWith(
       expect.objectContaining({channelId}),
       expect.any(Object)
