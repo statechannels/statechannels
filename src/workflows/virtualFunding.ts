@@ -9,13 +9,13 @@ import {
   ServiceConfig,
   spawn
 } from 'xstate';
-import {filter, map, take} from 'rxjs/operators';
+import {filter, map, take, flatMap, tap} from 'rxjs/operators';
 
 import {Store, supportedStateFeed} from '../store/memory-store';
-import {State} from '../store/types';
+import {isSimpleEthAllocation} from '../store/types';
 import {SupportState} from '.';
-import {ChannelStoreEntry} from '../store/memory-channel-storage';
 import {isFundGuarantor, FundGuarantor} from '../store/wire-protocol';
+import {checkThat} from '../utils';
 
 export const enum Role {
   A = 0,
@@ -49,7 +49,7 @@ function getDataAndInvoke<T>(
   return {
     initial: data,
     states: {
-      [data]: {invoke: {src: data, onDone: src}},
+      [data]: {invoke: {src: data, onDone: src, onError: {target: States.failure}}},
       [src]: {
         invoke: {
           id,
@@ -73,6 +73,7 @@ const enum States {
   setupJointChannel = 'setupJointChannel',
   fundJointChannel = 'fundJointChannel',
   fundTargetChannel = 'fundTargetChannel',
+  failure = '#workflow.failure',
   success = 'success'
 }
 
@@ -135,6 +136,7 @@ const fundJointChannel = (role: Role): StateNodeConfig<Init, any, TEvent> => {
 
 const generateConfig = (role: Role): MachineConfig<Init, any, any> => ({
   key: 'virtual-funding',
+  id: 'workflow',
   initial: States.setupJointChannel,
   states: {
     [States.setupJointChannel]: getDataAndInvoke<Init>(
@@ -148,7 +150,8 @@ const generateConfig = (role: Role): MachineConfig<Init, any, any> => ({
       Services.supportState,
       States.success
     ),
-    success: {type: 'final'}
+    success: {type: 'final'},
+    failure: {}
   }
 });
 
@@ -160,11 +163,22 @@ const waitForFirstJointState = (store: Store) => ({
   store
     .channelUpdatedFeed(jointChannelId)
     .pipe(
-      map((e: ChannelStoreEntry): State => ({...e.latest, ...e.channelConstants})),
-      // TODO: This should also check that the first state is properly formed.
-      // I think it's better to include the target allocation in the virtual-funding
-      // init args, so that everyone can check the first state here.
-      filter(s => s.turnNum.eq(0)),
+      flatMap(e => e.states),
+      filter(({turnNum}) => turnNum.eq(0)),
+      tap(({outcome, participants}) => {
+        const {allocationItems} = checkThat(outcome, isSimpleEthAllocation);
+        const destinations = allocationItems.map(i => i.destination);
+        const amounts = allocationItems.map(i => i.amount);
+
+        if (
+          destinations[0] === participants[0].destination &&
+          destinations[1] === participants[2].destination &&
+          destinations[2] === participants[1].destination &&
+          amounts[0].add(amounts[1]).eq(amounts[2])
+        ) {
+          return;
+        } else throw 'Invalid first state';
+      }),
       map(s => ({state: s})),
       take(1)
     )

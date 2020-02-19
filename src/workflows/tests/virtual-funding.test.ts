@@ -8,8 +8,9 @@ import {ethers} from 'ethers';
 import {bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
 import {firstState, signState, calculateChannelId} from '../../store/state-utils';
-import {ChannelConstants, Outcome, Participant} from '../../store/types';
+import {ChannelConstants, Outcome, Participant, State} from '../../store/types';
 import {AddressZero} from 'ethers/constants';
+import {add} from '../../utils/math-utils';
 
 const wallet1 = new ethers.Wallet(
   '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318'
@@ -80,6 +81,27 @@ const jointChannel: ChannelConstants = {
 };
 const jointChannelId = calculateChannelId(jointChannel);
 
+const amounts = [bigNumberify(2), bigNumberify(3)];
+const outcome: Outcome = {
+  type: 'SimpleEthAllocation',
+  allocationItems: [
+    {
+      destination: jointParticipants[0].destination,
+      amount: amounts[0]
+    },
+    {
+      destination: jointParticipants[2].destination,
+      amount: amounts[1]
+    },
+    {
+      destination: jointParticipants[1].destination,
+      amount: amounts.reduce(add)
+    }
+  ]
+};
+const state = firstState(outcome, jointChannel);
+const signature = signState(state, wallet1.privateKey);
+
 const context: Init = {targetChannelId, jointChannelId};
 
 test('Virtual funding as A', async () => {
@@ -105,9 +127,6 @@ test('Virtual funding as A', async () => {
     EXPECT_TIMEOUT
   );
 
-  const outcome: Outcome = {type: 'SimpleEthAllocation', allocationItems: []};
-  const state = firstState(outcome, jointChannel);
-  const signature = signState(state, wallet1.privateKey);
   store.pushMessage({signedStates: [{...state, signature}]});
 
   await waitForExpect(
@@ -150,9 +169,6 @@ test('Virtual funding as Hub', async () => {
     EXPECT_TIMEOUT
   );
 
-  const outcome: Outcome = {type: 'SimpleEthAllocation', allocationItems: []};
-  const state = firstState(outcome, jointChannel);
-  const signature = signState(state, wallet1.privateKey);
   store.pushMessage({signedStates: [{...state, signature}]});
 
   await waitForExpect(() => expect(service.state.value).toEqual('success'), EXPECT_TIMEOUT);
@@ -169,9 +185,6 @@ test('multiple workflows', async () => {
   const bService = interpret(machine(bStore, context, Role.B));
   const services = [aService, hubService, bService];
 
-  const outcome: Outcome = {type: 'SimpleEthAllocation', allocationItems: []};
-  const state = firstState(outcome, jointChannel);
-  const signature = signState(state, wallet1.privateKey);
   const message = {signedStates: [{...state, signature}]};
 
   stores.forEach((store: Store) => {
@@ -189,4 +202,20 @@ test('multiple workflows', async () => {
     expect(hubService.state.value).toEqual('success');
     expect(aService.state.value).toEqual('success');
   }, EXPECT_TIMEOUT);
+});
+
+test('invalid joint state', async () => {
+  const store = new MemoryStore([wallet1.privateKey]);
+  const service = interpret(machine(store, context, Role.A)).start();
+
+  const invalidState: State = {
+    ...state,
+    outcome: {type: 'SimpleEthAllocation', allocationItems: []}
+  };
+
+  store.pushMessage({
+    signedStates: [{...invalidState, signature: signState(invalidState, wallet1.privateKey)}]
+  });
+
+  await waitForExpect(() => expect(service.state.value).toEqual('failure'), EXPECT_TIMEOUT);
 });
