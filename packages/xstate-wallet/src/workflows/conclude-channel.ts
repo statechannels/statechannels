@@ -1,11 +1,11 @@
 import {Machine} from 'xstate';
 import * as SupportState from './support-state';
 import {getDataAndInvoke, MachineFactory} from '../utils/workflow-utils';
-import {checkThat} from '../utils/allocation-utils';
 import {Store} from '../store';
 import {outcomesEqual} from '../store/state-utils';
 import {isIndirectFunding} from '../store/memory-store';
 import {add} from '../utils/math-utils';
+import {checkThat} from '../utils';
 const WORKFLOW = 'conclude-channel';
 
 export interface Init {
