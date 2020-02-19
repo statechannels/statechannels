@@ -1,4 +1,4 @@
-import {ChannelConstants, StateVariables, SignedState, Participant} from './types';
+import {ChannelConstants, StateVariables, SignedState, Participant, State} from './types';
 import {signState, hashState, getSignerAddress, calculateChannelId} from './state-utils';
 import _ from 'lodash';
 import {Funding} from './memory-store';
@@ -11,13 +11,14 @@ export interface ChannelStoreEntry {
   readonly latestSupportedByMe: StateVariables | undefined;
   readonly channelConstants: ChannelConstants;
   readonly funding?: Funding;
+  readonly states: State[];
 }
 
 export class MemoryChannelStoreEntry implements ChannelStoreEntry {
   constructor(
     public readonly channelConstants: ChannelConstants,
     public readonly myIndex: number,
-    private states: Record<string, StateVariables | undefined> = {},
+    private stateVariables: Record<string, StateVariables | undefined> = {},
     private signatures: Record<string, string[] | undefined> = {},
     public funding: Funding | undefined = undefined
   ) {
@@ -35,9 +36,9 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
       appDefinition,
       participants
     };
-    Object.keys(this.states).forEach(key => {
-      const {turnNum, outcome, appData, isFinal} = this.states[key] as StateVariables;
-      this.states[key] = {
+    Object.keys(this.stateVariables).forEach(key => {
+      const {turnNum, outcome, appData, isFinal} = this.stateVariables[key] as StateVariables;
+      this.stateVariables[key] = {
         turnNum,
         outcome,
         appData,
@@ -49,6 +50,11 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
   public setFunding(funding: Funding) {
     this.funding = funding;
   }
+
+  public get states() {
+    return this.sortedByDescendingTurnNum.map(s => ({...this.channelConstants, ...s}));
+  }
+
   private mySignature(stateVars: StateVariables, signatures: string[]): boolean {
     const state = {...stateVars, ...this.channelConstants};
     return signatures.some(sig => getSignerAddress(state, sig) === this.myAddress);
@@ -59,7 +65,7 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
   }
 
   private getStateVariables(k): StateVariables {
-    const vars = this.states[k];
+    const vars = this.stateVariables[k];
     if (!vars) throw 'No variable found';
     return vars;
   }
@@ -69,7 +75,7 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
   }
 
   private get signedStates(): Array<StateVariables & {signatures: string[]}> {
-    return Object.keys(this.states).map(k => {
+    return Object.keys(this.stateVariables).map(k => {
       return {...this.getStateVariables(k), signatures: this.getSignatures(k)};
     });
   }
@@ -117,7 +123,7 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
   addState(stateVars: StateVariables, signature: string) {
     const state = {...stateVars, ...this.channelConstants};
     const stateHash = hashState(state);
-    this.states[stateHash] = stateVars;
+    this.stateVariables[stateHash] = stateVars;
     const {participants} = this.channelConstants;
 
     // check the signature
@@ -133,13 +139,13 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     this.signatures[stateHash] = signatures;
 
     // Garbage collect stale states
-    Object.keys(this.states).forEach(key => {
+    Object.keys(this.stateVariables).forEach(key => {
       if (
         this.supported &&
         this.getStateVariables(key).turnNum.lte(this.supported.turnNum) &&
         !this.inSupport(key)
       ) {
-        this.states = _.omit(this.states, key);
+        this.stateVariables = _.omit(this.stateVariables, key);
         this.signatures = _.omit(this.signatures, key);
       }
     });
