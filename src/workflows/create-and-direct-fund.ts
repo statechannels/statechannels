@@ -16,7 +16,7 @@ export enum Indices {
 
 export type Init = {
   participants: Participant[];
-  outcome: SimpleEthAllocation;
+  allocation: SimpleEthAllocation;
   appDefinition: string;
   appData: string;
   channelId: string;
@@ -43,11 +43,11 @@ const preFundSetup = {
 const directFunding = {
   invoke: {
     src: 'directFunding',
-    data: ({outcome, channelId}: Init): DirectFunding.Init => {
+    data: ({allocation, channelId}: Init): DirectFunding.Init => {
       return {
         channelId,
 
-        minimalAllocation: outcome
+        minimalAllocation: allocation
       };
     },
     onDone: 'postFundSetup'

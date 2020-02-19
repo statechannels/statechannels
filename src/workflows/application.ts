@@ -106,7 +106,8 @@ export interface WorkflowServices extends Record<string, ServiceConfig<WorkflowC
   ) => StateMachine<ConcludeChannel.Init, any, any, any>;
 
   invokeCreateChannelAndDirectFundProtocol: (
-    context: ChannelIdExists & ChannelParamsExist
+    context,
+    event: DoneInvokeEvent<CreateAndDirectFund.Init>
   ) => StateMachine<any, any, any, any>;
   invokeCreateChannelConfirmation: (
     context: ChannelParamsExist,
@@ -178,14 +179,11 @@ const generateConfig = (
       }
     },
 
-    openChannelAndDirectFundProtocol: {
-      invoke: {
-        src: 'invokeCreateChannelAndDirectFundProtocol',
-        onDone: {
-          target: 'running'
-        }
-      }
-    },
+    openChannelAndDirectFundProtocol: getDataAndInvoke(
+      'getDataForCreateChannelAndDirectFund',
+      'invokeCreateChannelAndDirectFundProtocol',
+      'running'
+    ),
     running: {
       on: {
         PLAYER_STATE_UPDATE: {target: 'running', actions: [actions.sendToOpponent]},
@@ -340,16 +338,31 @@ export const applicationWorkflow = (
       // TODO: Close machine needs to accept new store
       return ConcludeChannel.machine(store, {channelId: context.channelId});
     },
-    invokeCreateChannelAndDirectFundProtocol: (context: ChannelParamsExist & ChannelIdExists) => {
-      const ourIndex = 0; // TODO:  get from store?
-      return CreateAndDirectFund.machine(store, {
-        ...context.channelParams,
-        channelId: context.channelId,
-        index: ourIndex
-      });
+    invokeCreateChannelAndDirectFundProtocol: (
+      context,
+      event: DoneInvokeEvent<CreateAndDirectFund.Init>
+    ) => {
+      return CreateAndDirectFund.machine(store, event.data);
     },
     invokeCreateChannelConfirmation: (context, event: DoneInvokeEvent<CCC.WorkflowContext>) => {
       return CCC.confirmChannelCreationWorkflow(store, event.data);
+    },
+    getDataForCreateChannelAndDirectFund: async (
+      context: WorkflowContext,
+      event
+    ): Promise<CreateAndDirectFund.Init> => {
+      const entry = await store.getEntry(context.channelId);
+      const {outcome} = entry.latest;
+      if (outcome.type !== 'SimpleEthAllocation') {
+        throw new Error('TODO');
+      }
+      return {
+        channelId: entry.channelId,
+        ...entry.channelConstants,
+        allocation: outcome,
+        index: entry.myIndex,
+        ...entry.latest
+      };
     },
     getDataForCreateChannelConfirmation: async (
       context: WorkflowContext,

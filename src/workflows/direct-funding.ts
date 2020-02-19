@@ -84,15 +84,18 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
     if (outcome.type !== 'SimpleEthAllocation') {
       throw new Error('Only support SimpleEthAllocation');
     }
-    const allocated = outcome.allocationItems
-      .map(a => a.amount)
-      .reduce((a, b) => {
-        return a.add(b);
-      }, bigNumberify(0));
-    const chainInfo = await store.getChainInfo(ctx.channelId);
+    // TODO This prevents us from funding an app channel
+    // const allocated = outcome.allocationItems
+    //   .map(a => a.amount)
+    //   .reduce((a, b) => {
+    //     return a.add(b);
+    //   }, bigNumberify(0));
+    // const chainInfo = await store.getChainInfo(
+    //   ctx.channelId
+    // );
 
-    if (allocated.gt(chainInfo.amount))
-      throw new Error('DirectFunding: Channel outcome is already underfunded; aborting');
+    // if (allocated.gt(chainInfo.amount))
+    //   throw new Error('DirectFunding: Channel outcome is already underfunded; aborting');
   }
 
   function minimalOutcome(
