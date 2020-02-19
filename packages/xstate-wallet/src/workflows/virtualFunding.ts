@@ -12,10 +12,10 @@ import {
 import {filter, map, take, flatMap, tap} from 'rxjs/operators';
 
 import {Store, supportedStateFeed} from '../store/memory-store';
-import {isSimpleEthAllocation} from '../store/types';
 import {SupportState} from '.';
 import {isFundGuarantor, FundGuarantor} from '../store/wire-protocol';
 import {checkThat} from '../utils';
+import {isSimpleEthAllocation} from '../utils/outcome';
 
 export const enum Role {
   A = 0,
