@@ -15,7 +15,8 @@ import {Store, supportedStateFeed} from '../store/memory-store';
 import {SupportState} from '.';
 import {isFundGuarantor, FundGuarantor} from '../store/wire-protocol';
 import {checkThat} from '../utils';
-import {isSimpleEthAllocation} from '../utils/outcome';
+import {isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
+import {bigNumberify} from 'ethers/utils';
 
 export const enum Role {
   A = 0,
@@ -193,13 +194,22 @@ const spawnFundGuarantorObserver = (store: Store) => ({jointChannelId}: Init) =>
     )
   );
 
-const jointChannelUpdate = (store: Store) => ({jointChannelId}: Init): Promise<SupportState.Init> =>
+const jointChannelUpdate = (store: Store) => ({
+  jointChannelId,
+  targetChannelId
+}: Init): Promise<SupportState.Init> =>
   supportedStateFeed(store, jointChannelId)
     .pipe(
       filter(({state}) => state.turnNum.eq(0)),
-      map(({state}) => ({
-        state: {...state, turnNum: state.turnNum.add(1)}
-      })),
+      map(({state}) => {
+        const oldOutcome = checkThat(state.outcome, isSimpleEthAllocation);
+        const amount = oldOutcome.allocationItems[2].amount;
+        const outcome = simpleEthAllocation(
+          {destination: targetChannelId, amount},
+          {destination: state.participants[Role.Hub].destination, amount}
+        );
+        return {state: {...state, turnNum: bigNumberify(1), outcome}};
+      }),
       take(1)
     )
     .toPromise();
