@@ -154,6 +154,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     wire.paidStreamingExtension.once(PaidStreamingExtensionEvents.REQUEST, () => {
       const peerAccount = wire.paidStreamingExtension && wire.paidStreamingExtension.peerAccount;
       log(`SEEDER > wire first_request of ${peerAccount}`);
+      // [ George ] Here we could call channelClient.joinChannel()
       wire.emit(PaidStreamingExtensionEvents.REQUEST, peerAccount);
     });
 
@@ -163,11 +164,19 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   }
 
   protected loadFunds(infoHash: string, peerId: string, paymentHash: string) {
+    // [ George ] Here the seeder can countersign the state update by an appropriate channelClient.updateChannel(), and pull the updated state channel balance off the ChannelResult before updating this.allowedPeers[infoHash][peerId].funds accordingly.
+
+    // [ George ] If web3torrent is to run the Single Asset Payments ForceMoveApp, and the payments are going to be unidirectional we could wrap the channelClient in a web3tChannelClient which offers a countersign() convenience method. This allows the seeder to immediately accept the payment and for the leecher to be ready to send another one as quickly as possible.
+
+    // [ George ] NB all channel client methods are async so we would want to await them before continuing. That means a bunch of methods in this class will also need to be aysnc.
+
     const {funds} = this.allowedPeers[infoHash][peerId];
     this.allowedPeers[infoHash][peerId].funds = (Number(funds) + Number(paymentHash)).toString();
   }
 
   protected transferFunds(wire: PaidStreamingWire) {
+    // [ George ] I think this is where the leecher could call channelClient.updateChannel(). A first iteration might just do this without any UI or checks.
+
     // INFO: Assumed payment. This could emit an event on the UI to ask for more funds, or be automatic. Dunno.
     setTimeout(() => {
       wire.paidStreamingExtension.payment('50');
@@ -194,6 +203,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           this.transferFunds(wire);
           break;
         case PaidStreamingExtensionNotices.START:
+          // [ George ] Here we can call channelClient.createChannel()
           wire.paidStreamingExtension.ack();
           this.jumpStart(torrent, wire);
           break;
@@ -208,6 +218,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     });
 
     torrent.on(TorrentEvents.DONE, () => this.emit(ClientEvents.TORRENT_DONE, {torrent}));
+    // [ George ] Here we can call channelClient.closeChannel()
 
     torrent.on(TorrentEvents.ERROR, err => {
       log('ERROR: > ', err);
