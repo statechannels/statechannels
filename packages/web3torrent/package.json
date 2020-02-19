@@ -23,7 +23,7 @@
     "webtorrent": "0.107.16"
   },
   "devDependencies": {
-    "@statechannels/channel-provider": "*",
+    "@statechannels/channel-provider": "0.0.3",
     "@storybook/addon-actions": "5.3.9",
     "@storybook/addon-knobs": "5.2.5",
     "@storybook/addon-notes": "5.2.5",
