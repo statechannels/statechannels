@@ -14,7 +14,7 @@ import {filter, map, take, flatMap, tap} from 'rxjs/operators';
 import {Store, supportedStateFeed} from '../store/memory-store';
 import {SupportState} from '.';
 import {isFundGuarantor, FundGuarantor} from '../store/wire-protocol';
-import {checkThat} from '../utils';
+import {checkThat, getDataAndInvoke} from '../utils';
 import {isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
 import {bigNumberify} from 'ethers/utils';
 
@@ -40,30 +40,6 @@ const getObjective = (store: Store, peer: Role.A | Role.B) => async ({
   const guarantorId = 'bar';
   return {type: 'FundGuarantor', participants, data: {jointChannelId, ledgerId, guarantorId}};
 };
-
-function getDataAndInvoke<T>(
-  data: string,
-  src: string,
-  onDone?: string,
-  id?: string
-): StateNodeConfig<T, any, DoneInvokeEvent<T>> {
-  return {
-    initial: data,
-    states: {
-      [data]: {invoke: {src: data, onDone: src, onError: {target: States.failure}}},
-      [src]: {
-        invoke: {
-          id,
-          src,
-          data: (_, {data}: DoneInvokeEvent<T>) => data,
-          onDone: 'done'
-        }
-      },
-      done: {type: 'final'}
-    },
-    onDone
-  };
-}
 
 type TEvent = AnyEventObject;
 const enum Actions {
@@ -140,15 +116,15 @@ const generateConfig = (role: Role): MachineConfig<Init, any, any> => ({
   id: 'workflow',
   initial: States.setupJointChannel,
   states: {
-    [States.setupJointChannel]: getDataAndInvoke<Init>(
-      Services.waitForFirstJointState,
-      Services.supportState,
+    [States.setupJointChannel]: getDataAndInvoke<Init, Services>(
+      {src: Services.waitForFirstJointState, opts: {onError: '#workflow.failure'}},
+      {src: Services.supportState},
       States.fundJointChannel
     ),
     [States.fundJointChannel]: fundJointChannel(role),
     [States.fundTargetChannel]: getDataAndInvoke(
-      Services.jointChannelUpdate,
-      Services.supportState,
+      {src: Services.jointChannelUpdate},
+      {src: Services.supportState},
       States.success
     ),
     success: {type: 'final'},
