@@ -22,6 +22,14 @@
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "smartStep": true
+    },
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "Attach by Process ID",
+      "processId": "${command:PickProcess}",
+      "skipFiles": ["<node_internals>/**"],
+      "sourceMaps": true
     }
   ]
 }

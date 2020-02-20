@@ -1,4 +1,4 @@
-import {ChannelConstants, StateVariables, SignedState, Participant} from './types';
+import {ChannelConstants, StateVariables, SignedState, Participant, State} from './types';
 import {signState, hashState, getSignerAddress, calculateChannelId} from './state-utils';
 import _ from 'lodash';
 import {Funding} from './memory-store';
@@ -11,20 +11,39 @@ export interface ChannelStoreEntry {
   readonly latestSupportedByMe: StateVariables | undefined;
   readonly channelConstants: ChannelConstants;
   readonly funding?: Funding;
+  readonly states: State[];
 }
 
 export class MemoryChannelStoreEntry implements ChannelStoreEntry {
   constructor(
     public readonly channelConstants: ChannelConstants,
     public readonly myIndex: number,
-    private states: Record<string, StateVariables | undefined> = {},
+    private stateVariables: Record<string, StateVariables> = {},
     private signatures: Record<string, string[] | undefined> = {},
     public funding: Funding | undefined = undefined
-  ) {}
+  ) {
+    this.channelConstants = _.pick(
+      this.channelConstants,
+      'chainId',
+      'participants',
+      'channelNonce',
+      'appDefinition',
+      'challengeDuration'
+    );
+
+    this.stateVariables = _.transform(this.stateVariables, (result, stateVariables, stateHash) => {
+      result[stateHash] = _.pick(stateVariables, 'turnNum', 'outcome', 'appData', 'isFinal');
+    });
+  }
 
   public setFunding(funding: Funding) {
     this.funding = funding;
   }
+
+  public get states() {
+    return this.sortedByDescendingTurnNum.map(s => ({...this.channelConstants, ...s}));
+  }
+
   private mySignature(stateVars: StateVariables, signatures: string[]): boolean {
     const state = {...stateVars, ...this.channelConstants};
     return signatures.some(sig => getSignerAddress(state, sig) === this.myAddress);
@@ -35,7 +54,7 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
   }
 
   private getStateVariables(k): StateVariables {
-    const vars = this.states[k];
+    const vars = this.stateVariables[k];
     if (!vars) throw 'No variable found';
     return vars;
   }
@@ -45,25 +64,27 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
   }
 
   private get signedStates(): Array<StateVariables & {signatures: string[]}> {
-    return Object.keys(this.states).map(k => {
+    return Object.keys(this.stateVariables).map(k => {
       return {...this.getStateVariables(k), signatures: this.getSignatures(k)};
     });
   }
 
-  private get sortedByTurnNum(): Array<StateVariables & {signatures: string[]}> {
-    return this.signedStates.sort((a, b) => a.turnNum.sub(b.turnNum).toNumber());
+  private get sortedByDescendingTurnNum(): Array<StateVariables & {signatures: string[]}> {
+    return this.signedStates.sort((a, b) => b.turnNum.sub(a.turnNum).toNumber());
   }
 
   get supported() {
     // TODO: proper check
-    return this.sortedByTurnNum.find(s => s.signatures.length === this.participants.length);
+    return this.sortedByDescendingTurnNum.find(
+      s => s.signatures.length === this.participants.length
+    );
   }
 
   get latestSupportedByMe() {
-    return this.sortedByTurnNum.find(s => this.mySignature(s, s.signatures));
+    return this.sortedByDescendingTurnNum.find(s => this.mySignature(s, s.signatures));
   }
   get latest(): StateVariables {
-    return this.sortedByTurnNum[0];
+    return this.sortedByDescendingTurnNum[0];
   }
 
   get channelId(): string {
@@ -91,7 +112,7 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
   addState(stateVars: StateVariables, signature: string) {
     const state = {...stateVars, ...this.channelConstants};
     const stateHash = hashState(state);
-    this.states[stateHash] = stateVars;
+    this.stateVariables[stateHash] = stateVars;
     const {participants} = this.channelConstants;
 
     // check the signature
@@ -107,15 +128,14 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     this.signatures[stateHash] = signatures;
 
     // Garbage collect stale states
-    Object.keys(this.states).forEach(key => {
+    // TODO: Examine the safety here
+    this.stateVariables = _.transform(this.stateVariables, (result, stateVars, stateHash) => {
       if (
-        this.supported &&
-        this.getStateVariables(key).turnNum.lte(this.supported.turnNum) &&
-        !this.inSupport(key)
-      ) {
-        this.states = _.omit(this.states, key);
-        this.signatures = _.omit(this.signatures, key);
-      }
+        !this.supported ||
+        this.inSupport(stateHash) ||
+        stateVars.turnNum.gt(this.supported.turnNum)
+      )
+        result[stateHash] = stateVars;
     });
   }
 
