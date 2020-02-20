@@ -219,9 +219,8 @@ export const options = (store: Store): Partial<MachineOptions<Init, TEvent>> => 
     [Actions.spawnFundGuarantorObserver]: assign<any>({
       guarantorObserver: spawnFundGuarantorObserver(store)
     }),
-    [Actions.triggerGuarantorObjective]: (_, {data}: DoneInvokeEvent<FundGuarantor>) => {
-      store.sendMessage({objectives: [data]});
-    }
+    [Actions.triggerGuarantorObjective]: (_, {data}: DoneInvokeEvent<FundGuarantor>) =>
+      store.addObjective(data)
   };
 
   const services: Record<Services, ServiceConfig<Init>> = {

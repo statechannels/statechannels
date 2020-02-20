@@ -76,7 +76,7 @@ export interface Store {
 
   // TODO: I don't know how the store is mean to send outgoing messages.
   // But I need one, in order to implement virtual funding.
-  sendMessage(message: Message): void;
+  addObjective(objective: Objective): void;
 
   // TODO: Should this be part of the store?
   getChainInfo: Chain['getChainInfo'];
@@ -238,8 +238,8 @@ export class MemoryStore implements Store {
     this._eventEmitter.emit('addToOutbox', {signedStates: [signedState]});
   }
 
-  sendMessage(message: Message) {
-    this._eventEmitter.emit('addToOutbox', message);
+  addObjective(objective: Objective) {
+    this._eventEmitter.emit('addToOutbox', {objectives: [objective]});
   }
 
   async addState(state: SignedState): Promise<ChannelStoreEntry> {
