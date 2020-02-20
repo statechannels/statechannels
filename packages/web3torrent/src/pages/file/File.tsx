@@ -52,6 +52,10 @@ const File: React.FC<RouteComponentProps> = () => {
           <FormButton
             name="download"
             spinner={loading}
+            disabled={
+              parseInt(window.ethereum.chainId, 16) !==
+              Number(process.env.REACT_APP_CHAIN_NETWORK_ID)
+            }
             onClick={async () => {
               setLoading(true);
               setErrorLabel('');

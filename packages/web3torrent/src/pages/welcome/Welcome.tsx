@@ -30,7 +30,14 @@ const Welcome: React.FC<RouteComponentProps> = ({history}) => {
       <h2>Download a sample file</h2>
       <ShareList torrents={mockTorrents} history={history} />
       <h2>Or share a file</h2>
-      <FormButton name="upload" block={true} onClick={() => history.push(RoutePath.Upload)}>
+      <FormButton
+        name="upload"
+        block={true}
+        disabled={
+          parseInt(window.ethereum.chainId, 16) !== Number(process.env.REACT_APP_CHAIN_NETWORK_ID)
+        }
+        onClick={() => history.push(RoutePath.Upload)}
+      >
         Upload
       </FormButton>
     </section>
