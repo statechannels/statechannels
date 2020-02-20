@@ -9,7 +9,7 @@ import {ethers} from 'ethers';
 import {bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
 import {firstState, signState, calculateChannelId} from '../../store/state-utils';
-import {ChannelConstants, Outcome, Participant, SignedState} from '../../store/types';
+import {ChannelConstants, Outcome, Participant, State} from '../../store/types';
 import {AddressZero} from 'ethers/constants';
 import {createDestination, checkThat} from '../../utils';
 import {isSimpleEthAllocation} from '../../utils/outcome';
@@ -46,9 +46,17 @@ const chainId = '0x01';
 const challengeDuration = bigNumberify(10);
 const appDefinition = AddressZero;
 
-const targetChannelId = createDestination('0xabcdabcd');
-const ledgerChannel: ChannelConstants = {
+const targetChannel: ChannelConstants = {
   channelNonce: bigNumberify(0),
+  chainId,
+  challengeDuration,
+  participants,
+  appDefinition
+};
+const targetChannelId = calculateChannelId(targetChannel);
+
+const ledgerChannel: ChannelConstants = {
+  channelNonce: bigNumberify(1),
   chainId,
   challengeDuration,
   participants,
@@ -71,13 +79,6 @@ const deductions = [0, 1].map(i => ({
   amount: deductionAmounts[i]
 }));
 
-const state = firstState(outcome, ledgerChannel);
-const supportedLedgerState: SignedState = {
-  ...state,
-  signatures: [wallet1, wallet2].map(({privateKey}) => signState(state, privateKey))
-};
-const message = {signedStates: [supportedLedgerState]};
-
 const context: Init = {targetChannelId, ledgerChannelId, deductions};
 
 let chain: Chain;
@@ -97,7 +98,18 @@ function autosignMessages(store) {
   });
 }
 
+const allSignState = (state: State) => ({
+  ...state,
+  signatures: [wallet1, wallet2].map(({privateKey}) => signState(state, privateKey))
+});
+
 beforeEach(() => {
+  const message = {
+    signedStates: [
+      allSignState(firstState(outcome, targetChannel)),
+      allSignState(firstState(outcome, ledgerChannel))
+    ]
+  };
   const _chain = new FakeChain();
   _chain.depositSync(ledgerChannelId, '0', '12');
   chain = _chain;
@@ -105,9 +117,11 @@ beforeEach(() => {
   aStore = new MemoryStore([wallet1.privateKey], chain);
   bStore = new MemoryStore([wallet2.privateKey], chain);
   const stores = [aStore, bStore];
+
   stores.forEach((store: Store) => {
     store.pushMessage(message);
     autosignMessages(store);
+    store.outboxFeed.subscribe(m => stores.forEach(s => s.pushMessage(m)));
   });
 });
 
@@ -130,6 +144,11 @@ test('Indirect funding as A', async () => {
         }))
         .concat([{destination: targetChannelId, amount: deductionAmounts.reduce(add)}])
     );
+
+    expect((await store.getEntry(targetChannelId)).funding).toMatchObject({
+      type: 'Indirect',
+      ledgerId: ledgerChannelId
+    });
   }, EXPECT_TIMEOUT);
 });
 

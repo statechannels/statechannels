@@ -5,6 +5,7 @@ import {Store} from '../store';
 import {allocateToTarget} from '../utils/outcome';
 import {AllocationItem} from '../store/types';
 import {getDataAndInvoke} from '../utils';
+import {Funding} from '../store/memory-store';
 
 const WORKFLOW = 'ledger-funding';
 
@@ -70,10 +71,15 @@ export const machine = (store: Store, context: Init) => {
     };
   }
 
+  async function updateFunding({targetChannelId, ledgerChannelId}: Init) {
+    const funding: Funding = {type: 'Indirect', ledgerId: ledgerChannelId};
+    await store.setFunding(targetChannelId, funding);
+  }
+
   const services: Record<Services, ServiceConfig<Init>> = {
     directFunding: DirectFunding.machine(store),
     getTargetOutcome,
-    updateFunding: () => Promise.resolve(), // TODO
+    updateFunding,
     supportState: SupportState.machine(store)
   };
 
