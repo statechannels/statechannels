@@ -18,14 +18,16 @@ export interface AllocationItem {
   destination: string;
   amount: BigNumber;
 }
+
+export type Allocation = AllocationItem[];
 export interface SimpleEthAllocation {
   type: 'SimpleEthAllocation';
-  allocationItems: AllocationItem[];
+  allocationItems: Allocation;
 }
 export interface SimpleTokenAllocation {
   type: 'SimpleTokenAllocation';
   tokenAddress: string;
-  allocationItems: AllocationItem[];
+  allocationItems: Allocation;
 }
 export interface SimpleEthGuarantee {
   type: 'SimpleEthGuarantee';

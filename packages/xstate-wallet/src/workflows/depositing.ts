@@ -56,13 +56,9 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
   const subscribeDepositEvent = (ctx: Init) => {
     return store.chain.chainUpdatedFeed(ctx.channelId).pipe(
       map((chainInfo): 'FUNDED' | 'SAFE_TO_DEPOSIT' | 'NOT_SAFE_TO_DEPOSIT' => {
-        if (chainInfo.amount.gte(ctx.fundedAt)) {
-          return 'FUNDED';
-        } else if (chainInfo.amount.gte(ctx.depositAt)) {
-          return 'SAFE_TO_DEPOSIT';
-        } else {
-          return 'NOT_SAFE_TO_DEPOSIT';
-        }
+        if (chainInfo.amount.gte(ctx.fundedAt)) return 'FUNDED';
+        else if (chainInfo.amount.gte(ctx.depositAt)) return 'SAFE_TO_DEPOSIT';
+        else return 'NOT_SAFE_TO_DEPOSIT';
       })
     );
   };
