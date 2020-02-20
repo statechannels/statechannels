@@ -27,7 +27,6 @@ interface IndirectFunding {
 interface VirtualFunding {
   type: 'Virtual';
   jointChannelId: string;
-  guarantorChannelId: string;
 }
 
 interface Guaranteed {

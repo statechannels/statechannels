@@ -87,9 +87,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
     // TODO This prevents us from funding an app channel
     const allocated = outcome.allocationItems
       .map(a => a.amount)
-      .reduce((a, b) => {
-        return a.add(b);
-      }, bigNumberify(0));
+      .reduce((a, b) => a.add(b), bigNumberify(0));
     const chainInfo = await store.chain.getChainInfo(ctx.channelId);
 
     if (allocated.gt(chainInfo.amount))
