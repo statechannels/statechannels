@@ -2,6 +2,7 @@
   "name": "@statechannels/app-wallet-interface",
   "description": "Interface between app and wallet",
   "version": "0.0.1",
+  "devDependencies": {},
   "license": "MIT",
   "repository": "statechannels/monorepo/blob/master/packages/app-wallet-interface",
   "scripts": {

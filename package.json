@@ -1,41 +1,4 @@
 {
-  "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
-  "engines": {
-    "yarn": "^1.17.0",
-    "node": "^10.16.3"
-  },
-  "scripts": {
-    "preinstall": "npx typesync",
-    "prepare": "lerna run --concurrency 8 --stream prepare",
-    "build": "lerna run build",
-    "build:ci:incremental": "yarn build:ci --since $(git merge-base $CIRCLE_BRANCH origin/master)",
-    "build:typescript": "lerna run build:typescript",
-    "build:ci": "lerna run build:ci",
-    "run:w3t": "lerna run start --scope=**/web3torrent --scope=**/embedded-wallet",
-    "run:ewt": "lerna run start --scope=**/embedded-wallet",
-    "clean": "git clean -Xdf --exclude=\"!.env.*\"",
-    "clean:dry": "git clean -Xdn --exclude=\"!.env.*\"",
-    "start:shared-ganache": "cd packages/devtools && NODE_ENV=development yarn start:shared-ganache",
-    "test": "lerna run --stream --concurrency 8 test",
-    "test:ci:incremental": "yarn test:ci --since $(git merge-base $CIRCLE_BRANCH origin/master)",
-    "test:ci": "lerna run  test:ci --stream --no-sort --include-dependents",
-    "test:w3t": "lerna run test --concurrency 1 --scope=**/web3torrent ",
-    "lint:check": "lerna run lint:check --no-sort --no-bail -- --max-warnings=0",
-    "lint:write": "lerna run lint:write --no-sort --no-bail",
-    "publish": "lerna publish --yes from-package patch",
-    "postinstall": "patch-package",
-    "build:netlify:incremental": "yarn build:netlify --since $(git merge-base $CIRCLE_BRANCH origin/master)",
-    "build:netlify": "lerna run build:netlify --stream",
-    "release:netlify:incremental": "lerna run release:netlify --stream --since $(git merge-base $CIRCLE_BRANCH origin/master) -- --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD)",
-    "release:netlify": "lerna run release:netlify --stream -- --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD) $([ $(git rev-parse --abbrev-ref HEAD) = master ] && echo --prod)"
-  },
-  "keywords": [
-    "ethereum",
-    "state channels"
-  ],
   "dependencies": {
     "patch-package": "6.2.0"
   },
@@ -44,15 +7,52 @@
     "@types/prettier": "1.19.0",
     "husky": "3.0.7",
     "lerna": "3.16.4",
-    "netlify-cli": "^2.30.0",
-    "npm-normalize-package-bin": "^1.0.1",
+    "netlify-cli": "2.30.0",
+    "npm-normalize-package-bin": "1.0.1",
     "postinstall-postinstall": "2.0.0",
     "prettier": "1.19.1",
-    "typescript": "3.7.2"
+    "typescript": "3.7.5"
+  },
+  "engines": {
+    "yarn": "^1.17.0",
+    "node": "^10.16.3"
   },
   "husky": {
     "hooks": {
       "pre-commit": "lerna run --parallel --stream precommit --since HEAD --max-warnings=0"
     }
-  }
+  },
+  "keywords": [
+    "ethereum",
+    "state channels"
+  ],
+  "private": true,
+  "scripts": {
+    "build": "lerna run build",
+    "build:ci": "lerna run build:ci",
+    "build:ci:incremental": "yarn build:ci --since $(git merge-base $CIRCLE_BRANCH origin/master)",
+    "build:netlify": "lerna run build:netlify --stream",
+    "build:netlify:incremental": "yarn build:netlify --since $(git merge-base $CIRCLE_BRANCH origin/master)",
+    "build:typescript": "lerna run build:typescript",
+    "clean": "git clean -Xdf --exclude=\"!.env.*\"",
+    "clean:dry": "git clean -Xdn --exclude=\"!.env.*\"",
+    "lint:check": "lerna run lint:check --no-sort --no-bail -- --max-warnings=0",
+    "lint:write": "lerna run lint:write --no-sort --no-bail",
+    "postinstall": "patch-package",
+    "preinstall": "npx typesync",
+    "prepare": "lerna run --concurrency 8 --stream prepare",
+    "publish": "lerna publish --yes from-package patch",
+    "release:netlify": "lerna run release:netlify --stream -- --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD) $([ $(git rev-parse --abbrev-ref HEAD) = master ] && echo --prod)",
+    "release:netlify:incremental": "lerna run release:netlify --stream --since $(git merge-base $CIRCLE_BRANCH origin/master) -- --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD)",
+    "run:ewt": "lerna run start --scope=**/embedded-wallet",
+    "run:w3t": "lerna run start --scope=**/web3torrent --scope=**/embedded-wallet",
+    "start:shared-ganache": "cd packages/devtools && NODE_ENV=development yarn start:shared-ganache",
+    "test": "lerna run --stream --concurrency 8 test",
+    "test:ci": "lerna run  test:ci --stream --no-sort --include-dependents",
+    "test:ci:incremental": "yarn test:ci --since $(git merge-base $CIRCLE_BRANCH origin/master)",
+    "test:w3t": "lerna run test --concurrency 1 --scope=**/web3torrent "
+  },
+  "workspaces": [
+    "packages/*"
+  ]
 }
