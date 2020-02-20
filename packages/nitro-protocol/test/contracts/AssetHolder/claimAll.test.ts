@@ -99,7 +99,7 @@ describe('claimAll', () => {
         tOutcomeAfter,
         heldAfter,
         payouts,
-      ].map(object => replaceAddressesAndBigNumberify(object, addresses));
+      ].map(object => replaceAddressesAndBigNumberify(object, addresses) as AssetOutcomeShortHand);
       guaranteeDestinations = guaranteeDestinations.map(x => addresses[x]);
 
       // Set holdings (only works on test contract)
