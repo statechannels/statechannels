@@ -52,7 +52,9 @@ export function hookUpMessaging(playerA: Player, playerB: Player) {
         playerB.participantId,
         playerA.participantId
       );
-      console.log(`MESSAGE A->B: ${JSON.stringify(pushMessageRequest)}`);
+      if (process.env.ADD_LOGS) {
+        console.log(`MESSAGE A->B: ${JSON.stringify(pushMessageRequest)}`);
+      }
       playerB.channelWallet.pushMessage(pushMessageRequest);
     }
   });
@@ -64,7 +66,9 @@ export function hookUpMessaging(playerA: Player, playerB: Player) {
         playerA.participantId,
         playerB.participantId
       );
-      console.log(`MESSAGE B->A: ${JSON.stringify(pushMessageRequest)}`);
+      if (process.env.ADD_LOGS) {
+        console.log(`MESSAGE B->A: ${JSON.stringify(pushMessageRequest)}`);
+      }
       playerA.channelWallet.pushMessage(pushMessageRequest);
     }
   });

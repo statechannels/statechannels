@@ -45,7 +45,7 @@ export class ChannelWallet {
         devTools: true
       }
     )
-      .onTransition((state, event) => logTransition(state, event, this.id))
+      .onTransition((state, event) => process.env.ADD_LOGS && logTransition(state, event, this.id))
 
       .onDone(() => (this.workflows = this.workflows.filter(w => w.id !== workflowId)))
       .start();
