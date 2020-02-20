@@ -22,9 +22,6 @@ export type Torrent = ExtendedTorrent & {
 
 declare global {
   interface Window {
-    channelProvider: {
-      send: (method: string, params: Array<string | number | boolean>) => Promise<any>;
-      enable: (url?: string) => Promise<void>;
-    };
+    channelProvider: import('@statechannels/channel-provider').ChannelProviderInterface;
   }
 }

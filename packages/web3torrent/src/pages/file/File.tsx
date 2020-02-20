@@ -1,6 +1,7 @@
+import {ChannelClient} from '@statechannels/channel-client';
 import React, {useEffect, useState} from 'react';
 import {RouteComponentProps, useLocation} from 'react-router-dom';
-import {askForFunds, getUserFriendlyError} from '../../clients/embedded-wallet-client';
+
 import {download, getTorrentPeers} from '../../clients/web3torrent-client';
 import {FormButton} from '../../components/form';
 import {TorrentInfo} from '../../components/torrent-info/TorrentInfo';
@@ -29,6 +30,8 @@ const File: React.FC<RouteComponentProps> = () => {
   const [errorLabel, setErrorLabel] = useState('');
   const getLiveData = getTorrentAndPeersData(setTorrent, setPeers);
 
+  const channelClient = new ChannelClient(window.channelProvider);
+
   useEffect(() => {
     if (torrent.infoHash) {
       getLiveData(torrent);
@@ -54,10 +57,15 @@ const File: React.FC<RouteComponentProps> = () => {
               setErrorLabel('');
               setButtonLabel('Preparing Download...');
               try {
-                await askForFunds();
+                // TODO: Put real values here
+                await channelClient.approveBudgetAndFund('', '', '', '', '');
                 setTorrent({...torrent, ...(await download(torrent.magnetURI))});
               } catch (error) {
-                setErrorLabel(getUserFriendlyError(error.code));
+                setErrorLabel(
+                  // FIXME: 'put human readable error here'
+                  error.toString()
+                  // getUserFriendlyError(error.code)
+                );
               }
               setLoading(false);
               setButtonLabel('Start Download');
