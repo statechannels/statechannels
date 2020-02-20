@@ -8,7 +8,7 @@
     "module": "commonjs",
     "outDir": "lib",
     "target": "es2015",
-    "types": ["node", "jest"],
+    "types": ["node", "jest"]
   },
   "include": ["./src", "./src/generated-schema.json"]
 }
