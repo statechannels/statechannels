@@ -93,9 +93,8 @@ const File: React.FC<RouteComponentProps> = () => {
                 State Channels
               </a>
               , a technique that reduces fees for blockchain users, allowing them to transact with
-              each other on faster-than-on-chain operating times. Through
-              counterfactually-instantiated contracts, this technology enables a private, efficient
-              and secure environment for transactions.
+              each other on faster-than-on-chain operating times. This technology enables a private,
+              efficient and secure environment for transactions.
             </p>
           </div>
         </>
