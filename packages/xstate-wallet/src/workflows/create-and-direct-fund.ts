@@ -83,7 +83,7 @@ export const config: MachineConfig<Init, any, any> = {
 
 export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => {
   const constructFirstStateService = async ({appData, channelId, outcome}: Init): Promise<void> =>
-    store.signAndAddState(channelId, {
+    await store.signAndAddState(channelId, {
       appData,
       isFinal: false,
       turnNum: bigNumberify(0),
