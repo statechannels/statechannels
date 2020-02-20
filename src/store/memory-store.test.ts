@@ -75,7 +75,7 @@ describe('stateReceivedFeed', () => {
 
 test('newObjectiveFeed', async () => {
   const objective: Objective = {
-    name: 'OpenChannel',
+    type: 'OpenChannel',
     participants: [],
     data: {targetChannelId: 'foo'}
   };
@@ -137,7 +137,7 @@ describe('pushMessage', () => {
       signedState.appDefinition
     );
 
-    const nextState = {...state, turnNum: bigNumberify(1)};
+    const nextState = {...state, turnNum: state.turnNum.add(2)};
     await store.pushMessage({
       signedStates: [{...nextState, signature: signState(nextState, bPrivateKey)}]
     });

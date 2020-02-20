@@ -7,7 +7,7 @@ import {
   getStateSignerAddress as getNitroSignerAddress,
   getChannelId
 } from '@statechannels/nitro-protocol';
-import {joinSignature, splitSignature} from 'ethers/utils';
+import {joinSignature, splitSignature, bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
 
 export function toNitroState(state: State): NitroState {
@@ -59,10 +59,26 @@ export function statesEqual(
   left: StateVariables,
   right?: StateVariables
 ): boolean {
-  return right ? hashState({...left, ...constants}) === hashState({...right, ...constants}) : false;
+  return right ? hashState({...constants, ...left}) === hashState({...constants, ...right}) : false;
 }
 
 export function outcomesEqual(left: Outcome, right?: Outcome) {
   // TODO: do we need a more detailed check?
   return _.isEqual(left, right);
 }
+
+export const firstState = (
+  outcome: Outcome,
+  {channelNonce, chainId, challengeDuration, appDefinition, participants}: ChannelConstants,
+  appData?: string
+): State => ({
+  appData: appData || '0x',
+  isFinal: false,
+  turnNum: bigNumberify(0),
+  chainId: chainId || '0x01',
+  channelNonce,
+  challengeDuration,
+  appDefinition,
+  participants,
+  outcome: outcome || {type: 'SimpleEthAllocation', allocationItems: []}
+});
