@@ -1,4 +1,4 @@
-pragma solidity ^0.5.13;
+pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import './ForceMoveApp.sol';
@@ -6,7 +6,7 @@ import './ForceMoveApp.sol';
 /**
   * @dev The IForceMove contract abstraction defines the interface that an implementation of ForceMove should implement. ForceMove protocol allows state channels to be adjudicated and finalized.
 */
-contract IForceMove {
+abstract contract IForceMove {
     struct Signature {
         uint8 v;
         bytes32 r;
@@ -65,7 +65,7 @@ contract IForceMove {
         Signature[] memory sigs,
         uint8[] memory whoSignedWhat,
         Signature memory challengerSig
-    ) public;
+    ) public virtual;
 
     /**
     * @notice Repsonds to an ongoing challenge registered against a state channel.
@@ -84,7 +84,7 @@ contract IForceMove {
         // variablePartAB[0] = challengeVariablePart
         // variablePartAB[1] = responseVariablePart
         Signature memory sig
-    ) public;
+    ) public virtual;
 
     /**
     * @notice Overwrites the `turnNumRecord` stored against a channel by providing a state with higher turn number, supported by a signature from each participant.
@@ -103,7 +103,7 @@ contract IForceMove {
         uint8 isFinalCount, // how many of the states are final
         Signature[] memory sigs,
         uint8[] memory whoSignedWhat
-    ) public;
+    ) public virtual;
 
     /**
     * @notice Finalizes a channel by providing a finalization proof.
@@ -124,7 +124,7 @@ contract IForceMove {
         uint8 numStates,
         uint8[] memory whoSignedWhat,
         Signature[] memory sigs
-    ) public;
+    ) public virtual;
 
     // events
 

@@ -6,7 +6,7 @@
   "bugs": "https://github.com/statechannels/nitro-protocol/",
   "dependencies": {
     "@counterfactual/cf-adjudicator-contracts": "0.0.11",
-    "@openzeppelin/contracts": "2.4.0",
+    "@openzeppelin/contracts": "3.0.0",
     "ethers": "4.0.44"
   },
   "devDependencies": {
@@ -29,7 +29,7 @@
     "eslint-plugin-import": "2.20.0",
     "eslint-plugin-jest": "23.6.0",
     "eslint-plugin-prettier": "3.1.2",
-    "etherlime": "2.2.4",
+    "etherlime": "2.2.6",
     "etherlime-lib": "1.1.5",
     "ganache-cli": "6.8.2",
     "ganache-core": "2.8.0",
@@ -42,7 +42,7 @@
     "prettier": "1.19.1",
     "prettier-plugin-solidity": "1.0.0-alpha.34",
     "server-destroy": "1.0.1",
-    "solc": "0.5.13",
+    "solc": "0.6.0",
     "solidoc": "https://github.com/statechannels/solidoc.git",
     "ts-jest": "25.0.0",
     "ts-node": "8.6.2",

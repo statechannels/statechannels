@@ -1,4 +1,4 @@
-pragma solidity ^0.5.13;
+pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import './interfaces/ForceMoveApp.sol';
@@ -18,7 +18,7 @@ contract TrivialApp is ForceMoveApp {
         VariablePart memory, // b
         uint256, // turnNumB
         uint256 // nParticipants
-    ) public pure returns (bool) {
+    ) public pure override returns (bool) {
         return true;
     }
 }

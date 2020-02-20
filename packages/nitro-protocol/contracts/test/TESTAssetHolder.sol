@@ -1,4 +1,4 @@
-pragma solidity ^0.5.13;
+pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 import '../AssetHolder.sol';
 
@@ -6,8 +6,6 @@ import '../AssetHolder.sol';
   * @dev This contract extends the AssetHolder contract to enable it to be more easily unit-tested. It exposes public or external functions that set storage variables or wrap otherwise internal functions. It should not be deployed in a production environment.
 */
 contract TESTAssetHolder is AssetHolder {
-    address AdjudicatorAddress;
-
     /**
     * @notice Constructor function storing the AdjudicatorAddress.
     * @dev Constructor function storing the AdjudicatorAddress.
@@ -15,11 +13,6 @@ contract TESTAssetHolder is AssetHolder {
     */
     constructor(address _AdjudicatorAddress) public {
         AdjudicatorAddress = _AdjudicatorAddress;
-    }
-
-    modifier AdjudicatorOnly {
-        require(msg.sender == AdjudicatorAddress, 'Only the NitroAdjudicator is authorized');
-        _;
     }
 
     // Public wrappers for internal methods:
@@ -52,7 +45,7 @@ contract TESTAssetHolder is AssetHolder {
     * @param channelId Unique identifier for a state channel.
     * @param allocationBytes The abi.encode of AssetOutcome.Allocation
     */
-    function transferAllAdjudicatorOnly(bytes32 channelId, bytes calldata allocationBytes) external {
+    function transferAllAdjudicatorOnly(bytes32 channelId, bytes calldata allocationBytes) external override {
         _transferAll(channelId, allocationBytes);
     }
 

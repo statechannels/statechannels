@@ -31,7 +31,7 @@ The adjudicator stores (the hash of) an encoded `outcome` for each finalized cha
 In `Outcome.sol`:
 
 ```solidity
-pragma solidity ^0.5.13;
+pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 library Outcome {
