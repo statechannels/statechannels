@@ -1,4 +1,5 @@
 import {StateNodeConfig, DoneInvokeEvent} from 'xstate';
+import {hexZeroPad} from 'ethers/utils';
 
 export function unreachable(x: never) {
   return x;
@@ -41,4 +42,8 @@ export function getDataAndInvoke<T, Services extends string = string>(
     },
     onDone
   };
+}
+
+export function createDestination(address: string): string {
+  return hexZeroPad(address, 32);
 }
