@@ -18,32 +18,21 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
   constructor(
     public readonly channelConstants: ChannelConstants,
     public readonly myIndex: number,
-    private stateVariables: Record<string, StateVariables | undefined> = {},
+    private stateVariables: Record<string, StateVariables> = {},
     private signatures: Record<string, string[] | undefined> = {},
     public funding: Funding | undefined = undefined
   ) {
-    const {
-      challengeDuration,
-      chainId,
-      channelNonce,
-      appDefinition,
-      participants
-    } = this.channelConstants;
-    this.channelConstants = {
-      challengeDuration,
-      chainId,
-      channelNonce,
-      appDefinition,
-      participants
-    };
-    Object.keys(this.stateVariables).forEach(key => {
-      const {turnNum, outcome, appData, isFinal} = this.stateVariables[key] as StateVariables;
-      this.stateVariables[key] = {
-        turnNum,
-        outcome,
-        appData,
-        isFinal
-      };
+    this.channelConstants = _.pick(
+      this.channelConstants,
+      'chainId',
+      'participants',
+      'channelNonce',
+      'appDefinition',
+      'challengeDuration'
+    );
+
+    this.stateVariables = _.transform(this.stateVariables, (result, stateVariables, stateHash) => {
+      result[stateHash] = _.pick(stateVariables, 'turnNum', 'outcome', 'appData', 'isFinal');
     });
   }
 
@@ -139,15 +128,14 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     this.signatures[stateHash] = signatures;
 
     // Garbage collect stale states
-    Object.keys(this.stateVariables).forEach(key => {
+    // TODO: Examine the safety here
+    this.stateVariables = _.transform(this.stateVariables, (result, stateVars, stateHash) => {
       if (
-        this.supported &&
-        this.getStateVariables(key).turnNum.lte(this.supported.turnNum) &&
-        !this.inSupport(key)
-      ) {
-        this.stateVariables = _.omit(this.stateVariables, key);
-        this.signatures = _.omit(this.signatures, key);
-      }
+        !this.supported ||
+        this.inSupport(stateHash) ||
+        stateVars.turnNum.gt(this.supported.turnNum)
+      )
+        result[stateHash] = stateVars;
     });
   }
 
