@@ -68,6 +68,7 @@
     "@sentry/browser": "5.12.1",
     "@statechannels/devtools": "0.1.21",
     "@statechannels/jest-gas-reporter": "0.0.2",
+    "@statechannels/channel-provider": "0.0.3",
     "@storybook/react": "5.3.9",
     "@types/autoprefixer": "9.6.1",
     "@types/babel__core": "7.1.3",
