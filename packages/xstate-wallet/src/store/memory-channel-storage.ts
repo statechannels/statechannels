@@ -77,7 +77,7 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
   get supported() {
     // TODO: proper check
     return this.sortedByDescendingTurnNum.find(
-      s => s.signatures.length === this.participants.length
+      s => s.signatures.filter(sig => !!sig).length === this.participants.length
     );
   }
 
