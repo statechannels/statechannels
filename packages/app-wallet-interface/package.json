@@ -7,5 +7,6 @@
   "scripts": {
     "build:netlify": "gem install bundler:2.0.2 && bundle update --bundler && bundle exec middleman build --clean",
     "release:netlify": "netlify deploy --site $APP_WALLET_INTERFACE_NETLIFY_ID --dir=build"
-  }
+  },
+  "devDependencies": {}
 }
