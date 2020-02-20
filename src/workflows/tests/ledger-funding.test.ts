@@ -71,30 +71,34 @@ const deductions = [0, 1].map(i => ({
 }));
 
 const state = firstState(outcome, ledgerChannel);
-const signature = signState(state, wallet1.privateKey);
-const supportedLedgerState: SignedState = {...state, signature};
+const supportedLedgerState: SignedState = {
+  ...state,
+  signatures: [wallet1, wallet2].map(({privateKey}) => signState(state, privateKey))
+};
 
 const context: Init = {targetChannelId, ledgerChannelId, deductions};
 
-test('Indirect funding as A', async () => {
-  const store = new MemoryStore([wallet1.privateKey]);
-  await store.pushMessage({signedStates: [supportedLedgerState]});
-
-  const service = interpret(machine(store, context));
-
+function autosignMessages(store) {
   store.outboxFeed.subscribe(e => {
     e.signedStates?.forEach(state => {
-      state.participants.map(p => store.pushMessage({signedStates: []}));
-      store.pushMessage({
-        signedStates: state.participants.map(p => ({
-          ...state,
-          signature: signState(state, wallets[p.signingAddress].privateKey)
-        }))
+      state.participants.map(p => {
+        const signatures = state.participants.map(p =>
+          signState(state, wallets[p.signingAddress].privateKey)
+        );
+        store.pushMessage({signedStates: [{...state, signatures}]});
       });
     });
   });
+}
 
-  service.start();
+const message = {signedStates: [supportedLedgerState]};
+test('Indirect funding as A', async () => {
+  const store = new MemoryStore([wallet1.privateKey]);
+  await store.pushMessage(message);
+
+  autosignMessages(store);
+
+  const service = interpret(machine(store, context)).start();
 
   await waitForExpect(async () => {
     expect(service.state.value).toEqual('success');
@@ -118,17 +122,13 @@ test('multiple workflows', async () => {
   const bStore = new MemoryStore([wallet2.privateKey]);
   const stores = [aStore, bStore];
 
-  const aService = interpret(machine(aStore, context));
-  const bService = interpret(machine(bStore, context));
-  const services = [aService, bService];
-
-  const message = {signedStates: [{...state, signature}]};
+  const aService = interpret(machine(aStore, context)).start();
+  const bService = interpret(machine(bStore, context)).start();
 
   stores.forEach((store: Store) => {
     store.pushMessage(message);
     store.outboxFeed.subscribe(m => stores.forEach(s => s.pushMessage(m)));
   });
-  services.forEach(service => service.start());
 
   await waitForExpect(async () => {
     expect(bService.state.value).toEqual('success');
