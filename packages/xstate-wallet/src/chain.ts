@@ -33,11 +33,14 @@ export interface Chain {
 // TODO: This should handle amounts for each channel
 export class FakeChain implements Chain {
   private totalAmount = bigNumberify(0);
-  private depositEmitter = new EventEmitter();
-  public async initialize() {}
+  public depositEmitter = new EventEmitter();
+  public async initialize() {
+    /* NOOP */
+  }
   public async deposit(channelId: string, expectedHeld: string, amount: string): Promise<void> {
     this.totalAmount = this.totalAmount.add(amount);
     this.depositEmitter.emit('DEPOSIT', this.totalAmount);
+    return Promise.resolve();
   }
   public async getChainInfo(channelId: string): Promise<ChannelChainInfo> {
     return {amount: bigNumberify(this.totalAmount), finalized: false};
@@ -49,7 +52,7 @@ export class FakeChain implements Chain {
         finalized: false
       }))
     );
-    const first = from(Promise.resolve({amount: bigNumberify(0), finalized: false}));
+    const first = from(Promise.resolve({amount: bigNumberify(this.totalAmount), finalized: false}));
     return merge(first, updated);
   }
 }
