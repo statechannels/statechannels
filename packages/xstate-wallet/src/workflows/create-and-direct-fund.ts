@@ -2,11 +2,12 @@ import {Machine, MachineConfig} from 'xstate';
 
 import {Participant, SimpleEthAllocation} from '../store/types';
 import * as AdvanceChannel from './advance-channel';
-import * as DirectFunding from './direct-funding';
-import {MachineFactory} from '../utils/workflow-utils';
-import {Store} from '../store';
-import {BigNumber} from 'ethers/utils';
 
+import {MachineFactory, getDataAndInvoke} from '../utils/workflow-utils';
+import {Store} from '../store';
+import {BigNumber, bigNumberify} from 'ethers/utils';
+import * as Depositing from './depositing';
+import {add} from '../utils/math-utils';
 const PROTOCOL = 'create-and-direct-fund';
 
 export enum Indices {
@@ -34,25 +35,13 @@ const preFundSetup = {
     id: 'preFundSetup',
     src: 'advanceChannel',
     data: advanceChannelArgs(1),
-    onDone: 'directFunding'
+    onDone: 'depositing'
   }
 };
 
 // FIXME: Abort should not be success
 
-const directFunding = {
-  invoke: {
-    src: 'directFunding',
-    data: ({allocation, channelId}: Init): DirectFunding.Init => {
-      return {
-        channelId,
-
-        minimalAllocation: allocation
-      };
-    },
-    onDone: 'postFundSetup'
-  }
-};
+const depositing = getDataAndInvoke('getDepositingInfo', 'invokeDepositing', 'postFundSetup');
 
 const postFundSetup = {
   invoke: {
@@ -69,7 +58,7 @@ export const config: MachineConfig<Context, any, any> = {
   initial: 'preFundSetup',
   states: {
     preFundSetup,
-    directFunding,
+    depositing,
     postFundSetup,
     success: {
       type: 'final' as 'final'
@@ -78,12 +67,43 @@ export const config: MachineConfig<Context, any, any> = {
 };
 
 export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => {
+  async function getDepositingInfo({
+    allocation: minimalAllocation,
+    channelId
+  }: Init): Promise<Depositing.Init> {
+    const entry = await store.getEntry(channelId);
+    if (!entry.supported) {
+      throw new Error('Unsupported state');
+    }
+    if (entry.supported.outcome.type !== 'SimpleEthAllocation') {
+      throw new Error('Unsupported outcome');
+    }
+    let totalBeforeDeposit = bigNumberify(0);
+    for (let i = 0; i < minimalAllocation.allocationItems.length; i++) {
+      const allocation = minimalAllocation.allocationItems[i];
+      if (entry.myIndex === i) {
+        const fundedAt = entry.supported.outcome.allocationItems.map(a => a.amount).reduce(add);
+
+        return {
+          channelId,
+          depositAt: totalBeforeDeposit,
+          totalAfterDeposit: bigNumberify(totalBeforeDeposit).add(allocation.amount),
+
+          fundedAt
+        };
+      } else {
+        totalBeforeDeposit = bigNumberify(allocation.amount).add(totalBeforeDeposit);
+      }
+    }
+
+    throw Error(`Could not find an allocation for participant id ${entry.myIndex}`);
+  }
   const services = {
-    directFunding: DirectFunding.machine(store),
-    advanceChannel: AdvanceChannel.machine(store)
+    invokeDepositing: Depositing.machine(store),
+    advanceChannel: AdvanceChannel.machine(store),
+    getDepositingInfo
   };
 
   const options = {services};
-
   return Machine(config).withConfig(options, init);
 };
