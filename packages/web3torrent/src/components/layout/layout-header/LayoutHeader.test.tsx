@@ -44,9 +44,4 @@ describe('<LayoutHeader />', () => {
     expect(component.find('.header-content > .actions-container')).not.toBeNull();
     expect(component.find('.header-content > .actions-container .button')).not.toBeNull();
   });
-
-  it('should re-route to Upload screen upon Upload Button click', () => {
-    component.find(testSelector('upload-button')).simulate('click');
-    expect(props.history.location.pathname).toBe(RoutePath.Upload);
-  });
 });
