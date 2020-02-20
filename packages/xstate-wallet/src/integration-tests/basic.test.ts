@@ -63,7 +63,7 @@ function generateCreateChannelRequest(
   };
 }
 
-it('works', async () => {
+it('allows for two wallets to fund an app', async () => {
   const fakeChain = new FakeChain();
   const playerA = new Player(
     '0x275a2e2cd9314f53b42246694034a80119963097e3adf495fbf6d821dc8b6c8e',
