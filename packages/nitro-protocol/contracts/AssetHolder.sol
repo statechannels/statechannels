@@ -1,4 +1,4 @@
-pragma solidity ^0.5.13;
+pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 import './Outcome.sol';
 import '@openzeppelin/contracts/math/SafeMath.sol';
@@ -113,7 +113,7 @@ contract AssetHolder is IAssetHolder {
     * @param channelId Unique identifier for a state channel.
     * @param allocationBytes The abi.encode of AssetOutcome.Allocation
     */
-    function transferAll(bytes32 channelId, bytes memory allocationBytes) public {
+    function transferAll(bytes32 channelId, bytes memory allocationBytes) public override {
         // checks
         require(
             assetOutcomeHashes[channelId] ==
@@ -136,7 +136,7 @@ contract AssetHolder is IAssetHolder {
     * @param channelId Unique identifier for a state channel.
     * @param allocationBytes The abi.encode of AssetOutcome.Allocation
     */
-    function transferAllAdjudicatorOnly(bytes32 channelId, bytes calldata allocationBytes) external AdjudicatorOnly {
+    function transferAllAdjudicatorOnly(bytes32 channelId, bytes calldata allocationBytes) external AdjudicatorOnly virtual {
         _transferAll(channelId, allocationBytes);
     }
 
@@ -151,7 +151,7 @@ contract AssetHolder is IAssetHolder {
         bytes32 guarantorChannelId,
         bytes memory guaranteeBytes,
         bytes memory allocationBytes
-    ) public {
+    ) public override {
         // checks
 
         require(
@@ -333,7 +333,7 @@ contract AssetHolder is IAssetHolder {
     * @param destination ethereum address to be credited.
     * @param amount Quantity of assets to be transferred.
     */
-    function _transferAsset(address payable destination, uint256 amount) internal {}
+    function _transferAsset(address payable destination, uint256 amount) internal virtual {}
 
     /**
     * @notice Checks if a given destination is external (and can therefore have assets transferred to it) or not.

@@ -1,4 +1,4 @@
-pragma solidity ^0.5.13;
+pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 import './AssetHolder.sol';
 
@@ -6,8 +6,6 @@ import './AssetHolder.sol';
   * @dev Ther ETHAssetHolder contract extends the AssetHolder contract, and adds the following functionality: it allows ETH to be escrowed against a state channelId and to be transferred to external destinations.
 */
 contract ETHAssetHolder is AssetHolder {
-    address AdjudicatorAddress;
-
     /**
     * @notice Constructor function storing the AdjudicatorAddress.
     * @dev Constructor function storing the AdjudicatorAddress.
@@ -15,11 +13,6 @@ contract ETHAssetHolder is AssetHolder {
     */
     constructor(address _AdjudicatorAddress) public {
         AdjudicatorAddress = _AdjudicatorAddress;
-    }
-
-    modifier AdjudicatorOnly {
-        require(msg.sender == AdjudicatorAddress, 'Only the NitroAdjudicator is authorized');
-        _;
     }
 
     /**
@@ -64,7 +57,7 @@ contract ETHAssetHolder is AssetHolder {
     * @param destination Ethereum address to be credited.
     * @param amount Quantity of wei to be transferred.
     */
-    function _transferAsset(address payable destination, uint256 amount) internal {
+    function _transferAsset(address payable destination, uint256 amount) internal override {
         destination.transfer(amount);
     }
 

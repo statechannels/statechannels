@@ -1,4 +1,4 @@
-pragma solidity ^0.5.13;
+pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import './interfaces/IForceMove.sol';
@@ -16,7 +16,9 @@ contract ForceMove is IForceMove {
     * @notice Unpacks turnNumRecord, finalizesAt and fingerprint from the channelStorageHash of a particular channel.
     * @dev Unpacks turnNumRecord, finalizesAt and fingerprint from the channelStorageHash of a particular channel.
     * @param channelId Unique identifier for a state channel.
-    * @return (turnNumRecord, finalizesAt, fingerprint) -  A turnNum that (the adjudicator knows) is supported by a signature from each participant; The unix timestamp when `channelId` will finalize; Unique identifier for the channel's current state, up to hash collisions.
+    * @return turnNumRecord A turnNum that (the adjudicator knows) is supported by a signature from each participant.
+    * @return finalizesAt The unix timestamp when `channelId` will finalize.
+    * @return fingerprint Unique identifier for the channel's current state, up to hash collisions.
     */
     function getData(bytes32 channelId)
         public
@@ -45,7 +47,7 @@ contract ForceMove is IForceMove {
         Signature[] memory sigs,
         uint8[] memory whoSignedWhat,
         Signature memory challengerSig
-    ) public {
+    ) public override {
         bytes32 channelId = _getChannelId(fixedPart);
 
         if (_mode(channelId) == ChannelMode.Open) {
@@ -114,7 +116,7 @@ contract ForceMove is IForceMove {
         // variablePartAB[0] = challengeVariablePart
         // variablePartAB[1] = responseVariablePart
         Signature memory sig
-    ) public {
+    ) public override {
         bytes32 channelId = _getChannelId(fixedPart);
         (uint48 turnNumRecord, uint48 finalizesAt, ) = _getData(channelId);
 
@@ -186,7 +188,7 @@ contract ForceMove is IForceMove {
         uint8 isFinalCount, // how many of the states are final
         Signature[] memory sigs,
         uint8[] memory whoSignedWhat
-    ) public {
+    ) public override {
         bytes32 channelId = _getChannelId(fixedPart);
 
         // checks
@@ -226,7 +228,7 @@ contract ForceMove is IForceMove {
         uint8 numStates,
         uint8[] memory whoSignedWhat,
         Signature[] memory sigs
-    ) public {
+    ) public override {
         bytes32 channelId = _getChannelId(fixedPart);
         _requireChannelNotFinalized(channelId);
 
@@ -688,7 +690,9 @@ contract ForceMove is IForceMove {
     * @notice Unpacks turnNumRecord, finalizesAt and fingerprint from the channelStorageHash of a particular channel.
     * @dev Unpacks turnNumRecord, finalizesAt and fingerprint from the channelStorageHash of a particular channel.
     * @param channelId Unique identifier for a state channel.
-    * @return (turnNumRecord, finalizesAt, fingerprint) -  A turnNum that (the adjudicator knows) is supported by a signature from each participant; The unix timestamp when `channelId` will finalize; Unique identifier for the channel's current state, up to hash collisions.
+    * @return turnNumRecord A turnNum that (the adjudicator knows) is supported by a signature from each participant.
+    * @return finalizesAt The unix timestamp when `channelId` will finalize.
+    * @return fingerprint Unique identifier for the channel's current state, up to hash collisions.
     */
     function _getData(bytes32 channelId)
         internal
@@ -765,7 +769,7 @@ contract ForceMove is IForceMove {
     * @notice Computes the unique id of a channel.
     * @dev Computes the unique id of a channel.
     * @param fixedPart Part of the state that does not change
-    * @return The channelId
+    * @return channelId
     */
     function _getChannelId(FixedPart memory fixedPart) internal pure returns (bytes32 channelId) {
         channelId = keccak256(

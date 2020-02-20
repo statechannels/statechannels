@@ -1,4 +1,4 @@
-pragma solidity ^0.5.13;
+pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import '@counterfactual/cf-adjudicator-contracts/contracts/interfaces/CounterfactualApp.sol';
@@ -22,7 +22,7 @@ contract CounterfactualAdapterApp is ForceMoveApp {
         VariablePart memory b,
         uint256, // turnNumB
         uint256 // nParticipants
-    ) public pure returns (bool) {
+    ) public pure override returns (bool) {
         CounterfactualAdapterAppData memory prevState = appData(a.appData);
         CounterfactualAdapterAppData memory nextState = appData(b.appData);
         require(

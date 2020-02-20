@@ -1,4 +1,4 @@
-pragma solidity ^0.5.13;
+pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import './interfaces/Adjudicator.sol';
@@ -27,7 +27,7 @@ contract NitroAdjudicator is Adjudicator, ForceMove {
         bytes32 stateHash,
         address challengerAddress,
         bytes memory outcomeBytes
-    ) public {
+    ) public override {
         // requirements
         _requireChannelFinalized(channelId);
 

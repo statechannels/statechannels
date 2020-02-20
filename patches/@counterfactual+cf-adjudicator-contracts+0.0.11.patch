@@ -4,7 +4,7 @@ index d823033..31595b9 100644
 +++ b/node_modules/@counterfactual/cf-adjudicator-contracts/contracts/interfaces/CounterfactualApp.sol
 @@ -1,4 +1,4 @@
 -pragma solidity 0.5.12;
-+pragma solidity ^0.5.13;
++pragma solidity ^0.6.0;
  pragma experimental "ABIEncoderV2";
  
  
