@@ -1,6 +1,6 @@
 import {Machine, MachineConfig, ServiceConfig} from 'xstate';
 
-import {SupportState} from '.';
+import {SupportState, DirectFunding} from '.';
 import {Store} from '../store';
 import {allocateToTarget} from '../utils/outcome';
 import {AllocationItem} from '../store/types';
@@ -14,11 +14,10 @@ export interface Init {
   deductions: AllocationItem[];
 }
 
-type TODO = any; // TODO
 const fundLedger = {
   invoke: {
     src: 'directFunding',
-    data: ({ledgerChannelId, deductions}: Init): TODO => ({
+    data: ({ledgerChannelId, deductions}: Init): DirectFunding.Init => ({
       channelId: ledgerChannelId,
       minimalAllocation: deductions
     }),
@@ -72,7 +71,7 @@ export const machine = (store: Store, context: Init) => {
   }
 
   const services: Record<Services, ServiceConfig<Init>> = {
-    directFunding: () => Promise.resolve(), // TODO
+    directFunding: DirectFunding.machine(store),
     getTargetOutcome,
     updateFunding: () => Promise.resolve(), // TODO
     supportState: SupportState.machine(store)

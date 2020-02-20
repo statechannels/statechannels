@@ -43,6 +43,10 @@ export class FakeChain implements Chain {
   }
 
   public async deposit(channelId: string, expectedHeld: string, amount: string): Promise<void> {
+    this.depositSync(channelId, expectedHeld, amount);
+  }
+
+  public depositSync(channelId: string, expectedHeld: string, amount: string) {
     const current = this.holdings[channelId] || bigNumberify(0);
 
     if (current.gte(expectedHeld)) {
