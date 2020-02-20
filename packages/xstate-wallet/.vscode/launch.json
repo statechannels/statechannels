@@ -16,12 +16,11 @@
 
         "${relativeFile}"
       ],
-      "skipFiles": ["<node_internals>/**/*.js"],
+      "skipFiles": ["<node_internals>/**/*.js", "node_modules"],
       "cwd": "${workspaceRoot}",
       "protocol": "inspector",
       "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen",
-      "smartStep": true
+      "internalConsoleOptions": "neverOpen"
     },
     {
       "type": "node",
