@@ -61,7 +61,7 @@ export interface Store {
   channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry>;
 
   getAddress(): string;
-  signAndAddState(channelId: string, stateVars: StateVariables);
+  signAndAddState(channelId: string, stateVars: StateVariables): void;
   createChannel(
     participants: Participant[],
     challengeDuration: BigNumber,

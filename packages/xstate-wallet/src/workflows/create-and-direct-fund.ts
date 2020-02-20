@@ -6,7 +6,6 @@ import * as DirectFunding from './direct-funding';
 import {MachineFactory} from '../utils/workflow-utils';
 import {Store} from '../store';
 import {bigNumberify, BigNumber} from 'ethers/utils';
-``;
 
 const PROTOCOL = 'create-and-direct-fund';
 
@@ -32,7 +31,7 @@ export const advanceChannelArgs = (i: 1 | 3) => ({channelId}: Init): AdvanceChan
 
 const constructFirstState = {
   invoke: {
-    src: 'constructFirstState',
+    src: 'constructFirstStateService',
     onDone: 'preFundSetup'
   }
 };
@@ -46,15 +45,12 @@ const preFundSetup = {
   }
 };
 
-// FIXME: Abort should not be success
-
 const directFunding = {
   invoke: {
     src: 'directFunding',
     data: ({outcome, channelId}: Init): DirectFunding.Init => {
       return {
         channelId,
-
         minimalAllocation: outcome
       };
     },
@@ -71,8 +67,7 @@ const postFundSetup = {
   }
 };
 
-type Context = Init;
-export const config: MachineConfig<Context, any, any> = {
+export const config: MachineConfig<Init, any, any> = {
   key: PROTOCOL,
   initial: 'constructFirstState',
   states: {
@@ -87,24 +82,22 @@ export const config: MachineConfig<Context, any, any> = {
 };
 
 export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => {
-  async function constructFirstState(ctx: Init): Promise<void> {
-    const {appData, channelId, outcome} = ctx;
-
+  const constructFirstStateService = async ({appData, channelId, outcome}: Init): Promise<void> =>
     store.signAndAddState(channelId, {
       appData,
       isFinal: false,
       turnNum: bigNumberify(0),
       outcome
     });
-  }
 
-  const services = {
-    constructFirstState,
-    directFunding: DirectFunding.machine(store),
-    advanceChannel: AdvanceChannel.machine(store)
-  };
-
-  const options = {services};
-
-  return Machine(config).withConfig(options, init);
+  return Machine(config).withConfig(
+    {
+      services: {
+        constructFirstStateService,
+        directFunding: DirectFunding.machine(store),
+        advanceChannel: AdvanceChannel.machine(store)
+      }
+    },
+    init
+  );
 };
