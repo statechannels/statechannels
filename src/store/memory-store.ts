@@ -62,7 +62,7 @@ export interface Store {
   channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry>;
 
   getAddress(): string;
-  signAndAddState(channelId: string, stateVars: StateVariables): void;
+  signAndAddState(channelId: string, stateVars: StateVariables): Promise<void>;
   createChannel(
     participants: Participant[],
     challengeDuration: BigNumber,
@@ -213,7 +213,7 @@ export class MemoryStore implements Store {
 
   private nonceKeyFromAddresses = (addresses: string[]): string => addresses.join('::');
 
-  signAndAddState(channelId: string, stateVars: StateVariables) {
+  async signAndAddState(channelId: string, stateVars: StateVariables) {
     const channelStorage = this._channels[channelId];
 
     if (!channelStorage) {
@@ -227,7 +227,7 @@ export class MemoryStore implements Store {
     }
 
     const signedState = channelStorage.signAndAdd(sanitizeStateVars(stateVars), privateKey);
-
+    this._eventEmitter.emit('channelUpdated', await this.getEntry(channelId));
     this._eventEmitter.emit('addToOutbox', {signedStates: [signedState]});
   }
 
@@ -240,6 +240,7 @@ export class MemoryStore implements Store {
     const channelStorage = this._channels[channelId] || (await this.initializeChannel(state));
     // TODO: This is kind of awkward
     state.signatures.forEach(sig => channelStorage.addState(state, sig));
+    this._eventEmitter.emit('channelUpdated', await this.getEntry(channelId));
   }
 
   public getAddress(): string {
@@ -252,11 +253,9 @@ export class MemoryStore implements Store {
     if (signedStates) {
       // todo: check sig
       // todo: check the channel involves me
-      const channelId = calculateChannelId(signedStates[0]);
       await Promise.all(
         signedStates.map(async signedState => {
           await this.addState(signedState);
-          this._eventEmitter.emit('channelUpdated', await this.getEntry(channelId));
         })
       );
     }

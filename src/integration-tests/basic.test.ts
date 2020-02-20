@@ -141,8 +141,9 @@ it('works', async () => {
 
   // Wait for the create channel service to start
   await waitForExpect(async () => {
-    expect(playerA.workflow?.machine.state.value).toMatchObject('running');
-  }, 9999999999);
+    expect(playerA.workflow?.machine.state.value).toEqual('running');
+    expect(playerB.workflow?.machine.state.value).toEqual('running');
+  }, 3000);
 });
 
 class Player {
