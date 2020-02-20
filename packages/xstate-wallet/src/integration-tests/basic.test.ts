@@ -15,6 +15,7 @@ import {
 import {filter, map} from 'rxjs/operators';
 import {Observable} from 'rxjs';
 import waitForExpect from 'wait-for-expect';
+import {FakeChain, Chain} from '../chain';
 
 jest.setTimeout(30000);
 
@@ -63,8 +64,17 @@ function generateCreateChannelRequest(
 }
 
 it('works', async () => {
-  const playerA = new Player('0x275a2e2cd9314f53b42246694034a80119963097e3adf495fbf6d821dc8b6c8e');
-  const playerB = new Player('0x3341c348ea8ade1ba7c3b6f071bfe9635c544b7fb5501797eaa2f673169a7d0d');
+  const fakeChain = new FakeChain();
+  const playerA = new Player(
+    '0x275a2e2cd9314f53b42246694034a80119963097e3adf495fbf6d821dc8b6c8e',
+    'PlayerA',
+    fakeChain
+  );
+  const playerB = new Player(
+    '0x3341c348ea8ade1ba7c3b6f071bfe9635c544b7fb5501797eaa2f673169a7d0d',
+    'PlayerB',
+    fakeChain
+  );
 
   playerA.channelWallet.onSendMessage(message => {
     if (isNotification(message) && message.method === 'MessageQueued') {
@@ -73,6 +83,7 @@ it('works', async () => {
         playerB.participantId,
         playerA.participantId
       );
+      console.log(`MESSAGE A->B: ${JSON.stringify(pushMessageRequest)}`);
       playerB.channelWallet.pushMessage(pushMessageRequest);
     }
   });
@@ -83,6 +94,7 @@ it('works', async () => {
         playerA.participantId,
         playerB.participantId
       );
+      console.log(`MESSAGE B->A: ${JSON.stringify(pushMessageRequest)}`);
       playerA.channelWallet.pushMessage(pushMessageRequest);
     }
   });
@@ -126,6 +138,11 @@ it('works', async () => {
 
   const playerBResponse: JoinChannelResponse = await playerBResponsePromise;
   expect(playerBResponse.result).toBeDefined();
+
+  // Wait for the create channel service to start
+  await waitForExpect(async () => {
+    expect(playerA.workflow?.machine.state.value).toMatchObject('running');
+  }, 9999999999);
 });
 
 class Player {
@@ -153,11 +170,11 @@ class Player {
   get participantId(): string {
     return this.signingAddress;
   }
-  constructor(privateKey: string) {
+  constructor(privateKey: string, id: string, chain: Chain) {
     this.privateKey = privateKey;
-    this.store = new MemoryStore([this.privateKey]);
+    this.store = new MemoryStore([this.privateKey], chain);
     this.messagingService = new MessagingService(this.store);
-    this.channelWallet = new ChannelWallet(this.store, this.messagingService);
+    this.channelWallet = new ChannelWallet(this.store, this.messagingService, id);
   }
 }
 

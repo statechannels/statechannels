@@ -18,7 +18,11 @@ export interface Workflow {
 export class ChannelWallet {
   public workflows: Workflow[];
 
-  constructor(private store: Store, private messagingService: MessagingServiceInterface) {
+  constructor(
+    private store: Store,
+    private messagingService: MessagingServiceInterface,
+    public id?: string
+  ) {
     this.workflows = [];
     // Whenever the store wants to send something call sendMessage
     store.outboxFeed.subscribe(m => this.messagingService.sendMessageNotification(m));
@@ -41,7 +45,8 @@ export class ChannelWallet {
         devTools: true
       }
     )
-      .onTransition(logTransition)
+      .onTransition((state, event) => logTransition(state, event, this.id))
+
       .onDone(() => (this.workflows = this.workflows.filter(w => w.id !== workflowId)))
       .start();
     // TODO: Figure out how to resolve rendering priorities
@@ -69,10 +74,29 @@ export class ChannelWallet {
   }
 }
 
-function logTransition(state: State<any, any, any, any>, event, logger = console): void {
-  const from = state.history ? JSON.stringify(state.history.value) : 'N/A';
+function logTransition(
+  state: State<any, any, any, any>,
+  event,
+  id?: string,
+  logger = console
+): void {
   const to = JSON.stringify(state.value);
-  const eventType = JSON.stringify(event.type ? event.type : event);
+  if (!state.history) {
+    logger.log(`${id || ''} - STARTED ${state.configuration[0].id} TRANSITIONED TO ${to}`);
+  } else {
+    const from = JSON.stringify(state.history.value);
+    const eventType = JSON.stringify(event.type ? event.type : event);
 
-  logger.log(`TRANSITION FROM ${from} EVENT ${eventType} TO  ${to}`);
+    logger.log(`${id || ''} - TRANSITION FROM ${from} EVENT ${eventType} TO  ${to}`);
+  }
+  Object.keys(state.children).forEach(k => {
+    const child = state.children[k];
+
+    if (child.state && 'onTransition' in child) {
+      const subId = (child as any).state.configuration[0].id;
+      (child as any).onTransition((state, event) =>
+        logTransition(state, event, `${id} - ${subId}`)
+      );
+    }
+  });
 }
