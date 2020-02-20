@@ -23,7 +23,8 @@
     "prettier": "1.19.1",
     "ts-jest": "25.0.0",
     "typescript": "3.7.5",
-    "wait-on": "4.0.0"
+    "wait-on": "4.0.0",
+    "puppeteer": "2.1.1"
   },
   "license": "MIT",
   "lint-staged": {
