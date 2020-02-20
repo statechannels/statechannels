@@ -9,6 +9,7 @@
     "not op_mini all"
   ],
   "dependencies": {
+    "@rimble/connection-banner": "^1.2.3",
     "@statechannels/channel-client": "0.0.1",
     "bencode": "2.0.1",
     "debug": "4.1.1",

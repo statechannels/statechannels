@@ -23,5 +23,6 @@ export type Torrent = ExtendedTorrent & {
 declare global {
   interface Window {
     channelProvider: import('@statechannels/channel-provider').ChannelProviderInterface;
+    ethereum: any;
   }
 }
