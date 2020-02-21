@@ -105,23 +105,23 @@ const signature = signState(state, wallet1.privateKey);
 
 const context: Init = {targetChannelId, jointChannelId};
 
-// TODO: This fails when supported actually checks the amount of signatures
-// eslint-disable-next-line jest/no-disabled-tests
-test.skip('Virtual funding as A', async () => {
-  const store = new MemoryStore([wallet1.privateKey]);
-  const service = interpret(machine(store, context, Role.A));
-
+function autosignMessages(store) {
   store.outboxFeed.subscribe(e => {
     e.signedStates?.forEach(state => {
-      state.participants.map(p => store.pushMessage({signedStates: []}));
-      store.pushMessage({
-        signedStates: state.participants.map(p => ({
-          ...state,
-          signature: signState(state, wallets[p.signingAddress].privateKey)
-        }))
+      state.participants.map(p => {
+        const signatures = state.participants.map(p =>
+          signState(state, wallets[p.signingAddress].privateKey)
+        );
+        store.pushMessage({signedStates: [{...state, signatures}]});
       });
     });
   });
+}
+
+test('Virtual funding as A', async () => {
+  const store = new MemoryStore([wallet1.privateKey]);
+  const service = interpret(machine(store, context, Role.A));
+  autosignMessages(store);
 
   service.start();
 
@@ -149,24 +149,11 @@ test.skip('Virtual funding as A', async () => {
   await waitForExpect(() => expect(service.state.value).toEqual('success'), EXPECT_TIMEOUT);
 });
 
-// TODO: This fails when supported actually checks the amount of signatures
-// eslint-disable-next-line jest/no-disabled-tests
-test.skip('Virtual funding as Hub', async () => {
+test('Virtual funding as Hub', async () => {
   const store = new MemoryStore([wallet3.privateKey]);
   const service = interpret(machine(store, context, Role.Hub));
 
-  store.outboxFeed.subscribe(e => {
-    e.signedStates?.forEach(state => {
-      state.participants.map(p => store.pushMessage({signedStates: []}));
-      store.pushMessage({
-        signedStates: state.participants.map(p => ({
-          ...state,
-          signature: signState(state, wallets[p.signingAddress].privateKey)
-        }))
-      });
-    });
-  });
-
+  autosignMessages(store);
   service.start();
 
   await waitForExpect(
