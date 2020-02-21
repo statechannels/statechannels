@@ -23,6 +23,8 @@ export type TorrentCallback = (torrent: Torrent) => any;
 
 export * from './types';
 
+export const REQUEST_RATE = 10;
+
 export default class WebTorrentPaidStreamingClient extends WebTorrent {
   allowedPeers: PeersByTorrent;
   pseAccount: string;
@@ -122,20 +124,30 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
     wire.on(WireEvents.REQUEST, () => {
       const peerAccount = wire.paidStreamingExtension.peerAccount as string;
-      const knownPeerAccount = peerAccount in this.allowedPeers[torrent.infoHash];
+      const knownPeerAccount = this.allowedPeers[torrent.infoHash][peerAccount];
 
-      if (knownPeerAccount && !this.allowedPeers[torrent.infoHash][peerAccount].allowed) {
-        this.blockPeer(torrent.infoHash, wire, peerAccount);
-      } else if (!knownPeerAccount) {
-        this.allowedPeers[torrent.infoHash][peerAccount] = {id: peerAccount, wire, allowed: false};
+      if (!knownPeerAccount) {
+        this.allowedPeers[torrent.infoHash][peerAccount] = {
+          id: peerAccount,
+          wire,
+          funds: '0',
+          allowed: false
+        };
         this.blockPeer(torrent.infoHash, wire, peerAccount);
         this.emit(ClientEvents.PEER_STATUS_CHANGED, {
           torrentPeers: this.allowedPeers[torrent.infoHash],
           torrentInfoHash: torrent.infoHash,
           peerAccount
         });
+      } else if (!knownPeerAccount.allowed || Number(knownPeerAccount.funds) < REQUEST_RATE) {
+        this.blockPeer(torrent.infoHash, wire, peerAccount);
       } else {
-        this.allowedPeers[torrent.infoHash][peerAccount] = {id: peerAccount, wire, allowed: true};
+        this.allowedPeers[torrent.infoHash][peerAccount] = {
+          id: peerAccount,
+          wire,
+          funds: (Number(knownPeerAccount.funds) - 10).toString(),
+          allowed: true
+        };
       }
     });
 
@@ -148,6 +160,18 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     wire.paidStreamingExtension.on(PaidStreamingExtensionEvents.NOTICE, notice =>
       torrent.emit(PaidStreamingExtensionEvents.NOTICE, wire, notice)
     );
+  }
+
+  protected loadFunds(infoHash: string, peerId: string, paymentHash: string) {
+    const {funds} = this.allowedPeers[infoHash][peerId];
+    this.allowedPeers[infoHash][peerId].funds = (Number(funds) + Number(paymentHash)).toString();
+  }
+
+  protected transferFunds(wire: PaidStreamingWire) {
+    // INFO: Assumed payment. This could emit an event on the UI to ask for more funds, or be automatic. Dunno.
+    setTimeout(() => {
+      wire.paidStreamingExtension.payment('50');
+    }, 500);
   }
 
   protected setupTorrent(torrent: PaidStreamingTorrent) {
@@ -167,10 +191,15 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         case PaidStreamingExtensionNotices.STOP:
           wire.paidStreamingExtension.ack();
           wire.choke();
+          this.transferFunds(wire);
           break;
         case PaidStreamingExtensionNotices.START:
           wire.paidStreamingExtension.ack();
           this.jumpStart(torrent, wire);
+          break;
+        case PaidStreamingExtensionNotices.PAYMENT:
+          this.loadFunds(torrent.infoHash, wire.peerExtendedHandshake.pseAccount, data.hash);
+          this.unblockPeer(torrent.infoHash, wire, wire.peerExtendedHandshake.pseAccount);
           break;
         default:
           break;
