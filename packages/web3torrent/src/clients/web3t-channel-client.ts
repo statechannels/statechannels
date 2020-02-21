@@ -1,4 +1,4 @@
-import {ChannelResult, Message, ChannelClientInterface} from '@statechannels/channel-client';
+import {ChannelResult, Message, ChannelClient} from '@statechannels/channel-client';
 import {bigNumberify} from 'ethers/utils';
 
 interface ChannelState {
@@ -18,7 +18,7 @@ interface ChannelState {
 // This class wraps the channel client converting the request/response formats to those used in the app
 
 export class Web3TorrentChannelClient {
-  constructor(private readonly channelClient: ChannelClientInterface) {}
+  constructor(private readonly channelClient: ChannelClient) {}
 
   mySigningAddress?: string;
   myEthereumSelectedAddress?: string; // this state can be inspected to infer whether we need to get the user to "Connect With MetaMask" or not.
