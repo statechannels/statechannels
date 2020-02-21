@@ -15,11 +15,6 @@ interface Props {
 const LayoutHeader: React.FC<RouteComponentProps & Props> = props => {
   return (
     <header className="header">
-      <ConnectionBanner
-        currentNetwork={props.currentNetwork}
-        requiredNetwork={props.requiredNetwork}
-        onWeb3Fallback={false}
-      />
       <nav className="header-content">
         <Link className="header-logo" to={RoutePath.Root}>
           <span className="header-logo-hidden">Web3Torrent Logo - Go to Home</span>
@@ -30,6 +25,11 @@ const LayoutHeader: React.FC<RouteComponentProps & Props> = props => {
           </FormButton>
         </div>
       </nav>
+      <ConnectionBanner
+        currentNetwork={props.currentNetwork}
+        requiredNetwork={props.requiredNetwork}
+        onWeb3Fallback={false}
+      />
     </header>
   );
 };
