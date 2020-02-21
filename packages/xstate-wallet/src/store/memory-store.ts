@@ -264,10 +264,6 @@ export class MemoryStore implements Store {
       await Promise.all(
         signedStates.map(async signedState => {
           await this.addState(signedState);
-          this._eventEmitter.emit(
-            'channelUpdated',
-            await this.getEntry(calculateChannelId(signedState))
-          );
         })
       );
     }
