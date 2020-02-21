@@ -123,8 +123,8 @@ export class MemoryStore implements Store {
 
     return merge(currentEntry, newEntries).pipe(
       catchError(e => {
+        // TODO: This seems fragile
         if (e === 'Channel id not found') {
-          console.log(e);
           return newEntries;
         } else {
           throw e;
@@ -283,7 +283,7 @@ export class MemoryStore implements Store {
   public async getEntry(channelId: string): Promise<ChannelStoreEntry> {
     const entry = this._channels[channelId];
     if (!entry) {
-      throw new Error('Channel id not found');
+      throw 'Channel id not found';
     }
 
     return entry;
