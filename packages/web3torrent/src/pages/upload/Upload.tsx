@@ -4,7 +4,13 @@ import {upload} from '../../clients/web3torrent-client';
 import {generateMagnetURL} from '../../utils/magnet';
 import './Upload.scss';
 
-const Upload: React.FC<RouteComponentProps> = ({history}) => {
+interface Props {
+  currentNetwork: number;
+  requiredNetwork: number;
+}
+
+const Upload: React.FC<RouteComponentProps & Props> = props => {
+  const {history} = props;
   return (
     <section className="section fill">
       <div className="jumbotron-upload">
@@ -17,6 +23,7 @@ const Upload: React.FC<RouteComponentProps> = ({history}) => {
           name="file"
           id="file"
           multiple={true}
+          disabled={props.currentNetwork !== props.requiredNetwork}
           className="inputfile"
           onChange={async event => {
             if (event.target.files && event.target.files[0]) {

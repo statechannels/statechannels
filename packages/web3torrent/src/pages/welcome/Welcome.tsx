@@ -6,7 +6,13 @@ import {mockTorrents} from '../../constants';
 import {RoutePath} from '../../routes';
 import './Welcome.scss';
 
-const Welcome: React.FC<RouteComponentProps> = ({history}) => {
+interface Props {
+  currentNetwork: number;
+  requiredNetwork: number;
+}
+
+const Welcome: React.FC<RouteComponentProps & Props> = props => {
+  const {history} = props;
   return (
     <section className="section fill">
       <div className="jumbotron">
@@ -33,9 +39,7 @@ const Welcome: React.FC<RouteComponentProps> = ({history}) => {
       <FormButton
         name="upload"
         block={true}
-        disabled={
-          parseInt(window.ethereum.chainId, 16) !== Number(process.env.REACT_APP_CHAIN_NETWORK_ID)
-        }
+        disabled={props.currentNetwork !== props.requiredNetwork}
         onClick={() => history.push(RoutePath.Upload)}
       >
         Upload
