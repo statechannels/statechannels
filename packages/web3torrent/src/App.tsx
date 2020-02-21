@@ -21,7 +21,9 @@ class App extends React.Component {
       this.setState({...this.state, currentNetwork: parseInt(chainId, 16)});
     });
   }
+
   render() {
+    const {currentNetwork, requiredNetwork} = this.state;
     return (
       <Router history={history}>
         <main>
@@ -30,8 +32,8 @@ class App extends React.Component {
             render={props => (
               <LayoutHeader
                 {...props}
-                currentNetwork={this.state.currentNetwork}
-                requiredNetwork={this.state.requiredNetwork}
+                currentNetwork={currentNetwork}
+                requiredNetwork={requiredNetwork}
               />
             )}
           />
@@ -42,8 +44,8 @@ class App extends React.Component {
               render={props => (
                 <Welcome
                   {...props}
-                  currentNetwork={this.state.currentNetwork}
-                  requiredNetwork={this.state.requiredNetwork}
+                  currentNetwork={currentNetwork}
+                  requiredNetwork={requiredNetwork}
                 />
               )}
             />
@@ -53,8 +55,8 @@ class App extends React.Component {
               render={props => (
                 <File
                   {...props}
-                  currentNetwork={this.state.currentNetwork}
-                  requiredNetwork={this.state.requiredNetwork}
+                  currentNetwork={currentNetwork}
+                  requiredNetwork={requiredNetwork}
                 />
               )}
             />
@@ -64,8 +66,8 @@ class App extends React.Component {
               render={props => (
                 <Upload
                   {...props}
-                  currentNetwork={this.state.currentNetwork}
-                  requiredNetwork={this.state.requiredNetwork}
+                  currentNetwork={currentNetwork}
+                  requiredNetwork={requiredNetwork}
                 />
               )}
             />
