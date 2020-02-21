@@ -63,10 +63,10 @@ export class Web3TorrentChannelClient {
     return this.channelClient.onMessageQueued(callback);
   }
 
-  // Accepts an rps-friendly callback, performs the necessary encoding, and subscribes to the channelClient with an appropriate, API-compliant callback
-  onChannelUpdated(rpsCallback: (channelState: ChannelState) => any) {
+  // Accepts an web3t-friendly callback, performs the necessary encoding, and subscribes to the channelClient with an appropriate, API-compliant callback
+  onChannelUpdated(web3tCallback: (channelState: ChannelState) => any) {
     function callback(channelResult: ChannelResult): any {
-      rpsCallback(convertToChannelState(channelResult));
+      web3tCallback(convertToChannelState(channelResult));
     }
     // These are two distinct events from the channel client
     // but for our purposes we can treat them the same
@@ -132,7 +132,7 @@ export class Web3TorrentChannelClient {
     this.updateChannel(channelId, aAddress, bAddress, aBal, bBal, aOutcomeAddress, bOutcomeAddress);
   }
 
-  async pushMessage(message: Message) {
+  async pushMessage(message: Message<ChannelResult>) {
     await this.channelClient.pushMessage(message);
   }
 
