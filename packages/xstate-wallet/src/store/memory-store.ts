@@ -6,7 +6,7 @@ import * as _ from 'lodash';
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {Wallet} from 'ethers';
 
-import {Participant, StateVariables, State, SignedState} from './types';
+import {Participant, StateVariables, SignedState, State} from './types';
 import {MemoryChannelStoreEntry, ChannelStoreEntry} from './memory-channel-storage';
 import {AddressZero} from 'ethers/constants';
 import {Objective, Message} from './wire-protocol';
@@ -50,7 +50,6 @@ export function isGuarantee(funding: Funding): funding is Guaranteed {
 // get it so that when you add a state to a channel, it sends that state to all participant
 
 interface InternalEvents {
-  stateReceived: [State];
   channelUpdated: [ChannelStoreEntry];
   newObjective: [Objective];
   addToOutbox: [Message];
@@ -63,7 +62,7 @@ export interface Store {
   channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry>;
 
   getAddress(): string;
-  signAndAddState(channelId: string, stateVars: StateVariables);
+  signAndAddState(channelId: string, stateVars: StateVariables): Promise<void>;
   createChannel(
     participants: Participant[],
     challengeDuration: BigNumber,
@@ -111,12 +110,6 @@ export class MemoryStore implements Store {
     }
   }
 
-  public stateReceivedFeed(channelId: string): Observable<State> {
-    return fromEvent<State>(this._eventEmitter, 'stateReceived').pipe(
-      filter(state => calculateChannelId(state) === channelId)
-    );
-  }
-
   // for short-term backwards compatibility
   public channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry> {
     // TODO: The following line is not actually type safe.
@@ -130,6 +123,7 @@ export class MemoryStore implements Store {
 
     return merge(currentEntry, newEntries).pipe(
       catchError(e => {
+        // TODO: This seems fragile
         if (e === 'Channel id not found') {
           return newEntries;
         } else {
@@ -204,7 +198,10 @@ export class MemoryStore implements Store {
     });
 
     // sign the state, store the channel
-    this.signAndAddState(entry.channelId, stateVars);
+    this.signAndAddState(
+      entry.channelId,
+      _.pick(stateVars, 'outcome', 'turnNum', 'appData', 'isFinal')
+    );
 
     return Promise.resolve(entry);
   }
@@ -220,7 +217,7 @@ export class MemoryStore implements Store {
 
   private nonceKeyFromAddresses = (addresses: string[]): string => addresses.join('::');
 
-  signAndAddState(channelId: string, stateVars: StateVariables) {
+  async signAndAddState(channelId: string, stateVars: StateVariables) {
     const channelStorage = this._channels[channelId];
 
     if (!channelStorage) {
@@ -233,8 +230,11 @@ export class MemoryStore implements Store {
       throw new Error('No longer have private key');
     }
 
-    const signedState = channelStorage.signAndAdd(stateVars, privateKey);
-
+    const signedState = channelStorage.signAndAdd(
+      _.pick(stateVars, 'outcome', 'turnNum', 'appData', 'isFinal'),
+      privateKey
+    );
+    this._eventEmitter.emit('channelUpdated', await this.getEntry(channelId));
     this._eventEmitter.emit('addToOutbox', {signedStates: [signedState]});
   }
 
@@ -245,10 +245,10 @@ export class MemoryStore implements Store {
   async addState(state: SignedState): Promise<ChannelStoreEntry> {
     const channelId = calculateChannelId(state);
     const channelStorage = this._channels[channelId] || (await this.initializeChannel(state));
-
-    channelStorage.addState(state, state.signature);
-
-    return channelStorage;
+    // TODO: This is kind of awkward
+    state.signatures.forEach(sig => channelStorage.addState(state, sig));
+    this._eventEmitter.emit('channelUpdated', await this.getEntry(channelId));
+    return this.getEntry(channelId);
   }
 
   public getAddress(): string {
@@ -263,10 +263,7 @@ export class MemoryStore implements Store {
       // todo: check the channel involves me
       await Promise.all(
         signedStates.map(async signedState => {
-          const {signature, ...state} = signedState;
-          const entry = await this.addState(signedState);
-          this._eventEmitter.emit('stateReceived', state);
-          this._eventEmitter.emit('channelUpdated', entry);
+          await this.addState(signedState);
         })
       );
     }
@@ -281,7 +278,9 @@ export class MemoryStore implements Store {
 
   public async getEntry(channelId: string): Promise<ChannelStoreEntry> {
     const entry = this._channels[channelId];
-    if (!entry) throw 'Channel id not found';
+    if (!entry) {
+      throw 'Channel id not found';
+    }
 
     return entry;
   }

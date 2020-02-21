@@ -19,7 +19,8 @@ export function toNitroState(state: State): NitroState {
   };
 
   return {
-    ...state,
+    appData: state.appData,
+    isFinal: state.isFinal,
     outcome: convertToNitroOutcome(state.outcome),
     challengeDuration: challengeDuration.toNumber(),
     appDefinition,

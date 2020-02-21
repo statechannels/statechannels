@@ -105,21 +105,23 @@ const signature = signState(state, wallet1.privateKey);
 
 const context: Init = {targetChannelId, jointChannelId};
 
-test('Virtual funding as A', async () => {
-  const store = new MemoryStore([wallet1.privateKey]);
-  const service = interpret(machine(store, context, Role.A));
-
+function autosignMessages(store) {
   store.outboxFeed.subscribe(e => {
     e.signedStates?.forEach(state => {
-      state.participants.map(p => store.pushMessage({signedStates: []}));
-      store.pushMessage({
-        signedStates: state.participants.map(p => ({
-          ...state,
-          signature: signState(state, wallets[p.signingAddress].privateKey)
-        }))
+      state.participants.map(p => {
+        const signatures = state.participants.map(p =>
+          signState(state, wallets[p.signingAddress].privateKey)
+        );
+        store.pushMessage({signedStates: [{...state, signatures}]});
       });
     });
   });
+}
+
+test('Virtual funding as A', async () => {
+  const store = new MemoryStore([wallet1.privateKey]);
+  const service = interpret(machine(store, context, Role.A));
+  autosignMessages(store);
 
   service.start();
 
@@ -128,7 +130,7 @@ test('Virtual funding as A', async () => {
     EXPECT_TIMEOUT
   );
 
-  store.pushMessage({signedStates: [{...state, signature}]});
+  store.pushMessage({signedStates: [{...state, signatures: [signature]}]});
 
   await waitForExpect(
     () => expect(service.state.value).toMatchObject({fundJointChannel: 'waitForObjective'}),
@@ -151,18 +153,7 @@ test('Virtual funding as Hub', async () => {
   const store = new MemoryStore([wallet3.privateKey]);
   const service = interpret(machine(store, context, Role.Hub));
 
-  store.outboxFeed.subscribe(e => {
-    e.signedStates?.forEach(state => {
-      state.participants.map(p => store.pushMessage({signedStates: []}));
-      store.pushMessage({
-        signedStates: state.participants.map(p => ({
-          ...state,
-          signature: signState(state, wallets[p.signingAddress].privateKey)
-        }))
-      });
-    });
-  });
-
+  autosignMessages(store);
   service.start();
 
   await waitForExpect(
@@ -170,7 +161,7 @@ test('Virtual funding as Hub', async () => {
     EXPECT_TIMEOUT
   );
 
-  store.pushMessage({signedStates: [{...state, signature}]});
+  store.pushMessage({signedStates: [{...state, signatures: [signature]}]});
 
   await waitForExpect(() => expect(service.state.value).toEqual('success'), EXPECT_TIMEOUT);
 });
@@ -186,7 +177,7 @@ test('multiple workflows', async () => {
   const bService = interpret(machine(bStore, context, Role.B));
   const services = [aService, hubService, bService];
 
-  const message = {signedStates: [{...state, signature}]};
+  const message = {signedStates: [{...state, signatures: [signature]}]};
 
   stores.forEach((store: Store) => {
     store.pushMessage(message);
@@ -225,7 +216,7 @@ test('invalid joint state', async () => {
   };
 
   store.pushMessage({
-    signedStates: [{...invalidState, signature: signState(invalidState, wallet1.privateKey)}]
+    signedStates: [{...invalidState, signatures: [signState(invalidState, wallet1.privateKey)]}]
   });
 
   await waitForExpect(() => expect(service.state.value).toEqual('failure'), EXPECT_TIMEOUT);

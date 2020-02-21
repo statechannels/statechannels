@@ -1,19 +1,21 @@
 import {interpret} from 'xstate';
 import {ethers} from 'ethers';
 import waitForExpect from 'wait-for-expect';
-import {CreateChannelEvent, SignedState, getChannelId} from '@statechannels/wallet-protocols';
 import {
   applicationWorkflow,
   JoinChannelEvent,
   WorkflowServices,
   ChannelUpdated,
+  CreateChannelEvent,
   WorkflowActions
 } from '../application';
 import {AddressZero} from 'ethers/constants';
 import {MemoryStore, Store} from '../../store/memory-store';
-import {StateVariables} from '../../store/types';
+import {StateVariables, SignedState} from '../../store/types';
 import {ChannelStoreEntry} from '../../store/memory-channel-storage';
 import {MessagingService, MessagingServiceInterface} from '../../messaging';
+import {bigNumberify} from 'ethers/utils';
+import {calculateChannelId} from '../../store/state-utils';
 
 jest.setTimeout(50000);
 const createChannelEvent: CreateChannelEvent = {
@@ -22,8 +24,9 @@ const createChannelEvent: CreateChannelEvent = {
   appData: '0x0',
   appDefinition: ethers.constants.AddressZero,
   participants: [],
-  allocations: [],
-  challengeDuration: 500
+  outcome: {type: 'SimpleEthAllocation', allocationItems: []},
+  challengeDuration: bigNumberify(500),
+  requestId: 5
 };
 
 it('initializes and starts confirmCreateChannelWorkflow', async () => {
@@ -54,6 +57,7 @@ it('invokes the createChannelAndFund protocol', async () => {
   const store = new MemoryStore();
   const messagingService: MessagingServiceInterface = new MessagingService(store);
   const services: Partial<WorkflowServices> = {
+    getDataForCreateChannelAndDirectFund: jest.fn().mockReturnValue(Promise.resolve('foo')),
     invokeCreateChannelAndDirectFundProtocol: jest.fn().mockReturnValue(
       new Promise(() => {
         /* mock */
@@ -77,7 +81,9 @@ it('invokes the createChannelAndFund protocol', async () => {
 
   service.send({type: 'done.invoke.createChannel', data: channelId});
   await waitForExpect(async () => {
-    expect(service.state.value).toEqual('openChannelAndDirectFundProtocol');
+    expect(service.state.value).toEqual({
+      openChannelAndDirectFundProtocol: 'invokeCreateChannelAndDirectFundProtocol'
+    });
     expect(services.invokeCreateChannelAndDirectFundProtocol).toHaveBeenCalledWith(
       expect.objectContaining({channelId}),
       expect.any(Object)
@@ -203,16 +209,16 @@ it('starts concluding when receiving a final state', async () => {
   const messagingService: MessagingServiceInterface = new MessagingService(store);
   const states: SignedState[] = [
     {
-      state: {
-        isFinal: true,
-        appDefinition: AddressZero,
-        appData: '0x0',
-        outcome: [],
-        turnNum: 55,
-        challengeDuration: 500,
-        channel: {chainId: '0x0', channelNonce: '0x0', participants: []}
-      },
-      signatures: []
+      isFinal: true,
+      appDefinition: AddressZero,
+      appData: '0x0',
+      outcome: {type: 'SimpleEthAllocation', allocationItems: []},
+      turnNum: bigNumberify(55),
+      challengeDuration: bigNumberify(500),
+      chainId: '0x0',
+      channelNonce: bigNumberify('0x0'),
+      participants: [],
+      signatures: ['0x0']
     }
   ];
   const services: Partial<WorkflowServices> = {
@@ -222,7 +228,7 @@ it('starts concluding when receiving a final state', async () => {
       })
     )
   };
-  const channelId = getChannelId(states[0].state.channel);
+  const channelId = calculateChannelId(states[0]);
   const channelUpdate: ChannelUpdated = {
     type: 'CHANNEL_UPDATED',
     requestId: 5,

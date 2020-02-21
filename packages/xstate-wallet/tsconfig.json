@@ -24,9 +24,6 @@
   "include": ["./src"],
   "references": [
     {
-      "path": "../wallet-protocols"
-    },
-    {
       "path": "../nitro-protocol"
     },
     {

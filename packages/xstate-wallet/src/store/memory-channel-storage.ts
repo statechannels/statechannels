@@ -15,15 +15,16 @@ export interface ChannelStoreEntry {
 }
 
 export class MemoryChannelStoreEntry implements ChannelStoreEntry {
+  public readonly channelConstants: ChannelConstants;
   constructor(
-    public readonly channelConstants: ChannelConstants,
+    constants: ChannelConstants,
     public readonly myIndex: number,
     private stateVariables: Record<string, StateVariables> = {},
     private signatures: Record<string, string[] | undefined> = {},
     public funding: Funding | undefined = undefined
   ) {
     this.channelConstants = _.pick(
-      this.channelConstants,
+      constants,
       'chainId',
       'participants',
       'channelNonce',
@@ -76,7 +77,7 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
   get supported() {
     // TODO: proper check
     return this.sortedByDescendingTurnNum.find(
-      s => s.signatures.length === this.participants.length
+      s => s.signatures.filter(sig => !!sig).length === this.participants.length
     );
   }
 
@@ -105,7 +106,7 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     return {
       ...stateVars,
       ...this.channelConstants,
-      signature: signatureString
+      signatures: this.signatures[hashState(state)] || []
     };
   }
 

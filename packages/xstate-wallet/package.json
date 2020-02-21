@@ -6,7 +6,6 @@
   "dependencies": {
     "@statechannels/client-api-schema": "0.0.1",
     "@statechannels/nitro-protocol": "0.0.1",
-    "@statechannels/wallet-protocols": "0.0.1",
     "@xstate/react": "0.8.1",
     "ethers": "4.0.44",
     "eventemitter3": "4.0.0",
