@@ -24,7 +24,7 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     public funding: Funding | undefined = undefined
   ) {
     this.channelConstants = _.pick(
-      this.channelConstants,
+      constants,
       'chainId',
       'participants',
       'channelNonce',

@@ -6,7 +6,7 @@ import * as _ from 'lodash';
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {Wallet} from 'ethers';
 
-import {Participant, StateVariables, SignedState, ChannelConstants} from './types';
+import {Participant, StateVariables, SignedState, State} from './types';
 import {MemoryChannelStoreEntry, ChannelStoreEntry} from './memory-channel-storage';
 import {AddressZero} from 'ethers/constants';
 import {Objective, Message} from './wire-protocol';
@@ -124,6 +124,7 @@ export class MemoryStore implements Store {
     return merge(currentEntry, newEntries).pipe(
       catchError(e => {
         if (e === 'Channel id not found') {
+          console.log(e);
           return newEntries;
         } else {
           throw e;
@@ -197,7 +198,10 @@ export class MemoryStore implements Store {
     });
 
     // sign the state, store the channel
-    this.signAndAddState(entry.channelId, sanitizeStateVars(stateVars));
+    this.signAndAddState(
+      entry.channelId,
+      _.pick(stateVars, 'outcome', 'turnNum', 'appData', 'isFinal')
+    );
 
     return Promise.resolve(entry);
   }
@@ -226,7 +230,10 @@ export class MemoryStore implements Store {
       throw new Error('No longer have private key');
     }
 
-    const signedState = channelStorage.signAndAdd(sanitizeStateVars(stateVars), privateKey);
+    const signedState = channelStorage.signAndAdd(
+      _.pick(stateVars, 'outcome', 'turnNum', 'appData', 'isFinal'),
+      privateKey
+    );
     this._eventEmitter.emit('channelUpdated', await this.getEntry(channelId));
     this._eventEmitter.emit('addToOutbox', {signedStates: [signedState]});
   }
@@ -241,6 +248,7 @@ export class MemoryStore implements Store {
     // TODO: This is kind of awkward
     state.signatures.forEach(sig => channelStorage.addState(state, sig));
     this._eventEmitter.emit('channelUpdated', await this.getEntry(channelId));
+    return this.getEntry(channelId);
   }
 
   public getAddress(): string {
@@ -256,6 +264,10 @@ export class MemoryStore implements Store {
       await Promise.all(
         signedStates.map(async signedState => {
           await this.addState(signedState);
+          this._eventEmitter.emit(
+            'channelUpdated',
+            await this.getEntry(calculateChannelId(signedState))
+          );
         })
       );
     }
