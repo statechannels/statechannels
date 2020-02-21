@@ -6,7 +6,6 @@ export default class Router extends EmberRouter {
   rootURL = config.rootURL;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-function
 Router.map(function() {
   this.route('games', function() {
     this.route('waiting');
