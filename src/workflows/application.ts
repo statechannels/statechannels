@@ -353,7 +353,7 @@ export const applicationWorkflow = (
       return ConcludeChannel.machine(store, {channelId: context.channelId});
     },
     invokeCreateChannelAndDirectFundProtocol: (
-      context,
+      _,
       event: DoneInvokeEvent<CreateAndDirectFund.Init>
     ) => {
       return CreateAndDirectFund.machine(store, event.data);
@@ -362,24 +362,17 @@ export const applicationWorkflow = (
       return CCC.confirmChannelCreationWorkflow(store, event.data);
     },
     getDataForCreateChannelAndDirectFund: async (
-      context: WorkflowContext,
-      event
+      context: WorkflowContext
     ): Promise<CreateAndDirectFund.Init> => {
-      const entry = await store.getEntry(context.channelId);
-      const {outcome} = entry.latest;
+      const {latest, channelId} = await store.getEntry(context.channelId);
+      const {outcome} = latest;
       if (outcome.type !== 'SimpleEthAllocation') {
         throw new Error('TODO');
       }
-      return {
-        channelId: entry.channelId,
-        ...entry.channelConstants,
-        allocation: outcome,
-        index: entry.myIndex,
-        ...entry.latest
-      };
+      return {channelId: channelId, allocation: outcome};
     },
     getDataForCreateChannelConfirmation: async (
-      context: WorkflowContext,
+      _: WorkflowContext,
       event: CreateChannelEvent | JoinChannelEvent
     ): Promise<CCC.WorkflowContext> => {
       switch (event.type) {
