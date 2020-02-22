@@ -52,7 +52,7 @@ const enum Services {
   supportState = 'supportState'
 }
 
-export const machine = (store: Store, context: Init) => {
+export const machine = (store: Store) => {
   async function getTargetOutcome({
     targetChannelId,
     ledgerChannelId,
@@ -83,5 +83,5 @@ export const machine = (store: Store, context: Init) => {
     supportState: SupportState.machine(store)
   };
 
-  return Machine(config).withConfig({services}, context);
+  return Machine(config, {services});
 };

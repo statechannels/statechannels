@@ -15,6 +15,9 @@ import {createDestination, checkThat} from '../../utils';
 import {isSimpleEthAllocation} from '../../utils/outcome';
 import {FakeChain, Chain} from '../../chain';
 
+jest.setTimeout(20000);
+const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
+
 const wallet1 = new ethers.Wallet(
   '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318'
 ); // 0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf
@@ -40,8 +43,6 @@ const participants: Participant[] = [
   }
 ];
 
-jest.setTimeout(20000);
-const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 const chainId = '0x01';
 const challengeDuration = bigNumberify(10);
 const appDefinition = AddressZero;
@@ -128,7 +129,7 @@ beforeEach(() => {
 test('Indirect funding as A', async () => {
   const store = aStore;
 
-  const service = interpret(machine(store, context)).start();
+  const service = interpret(machine(store).withContext(context)).start();
 
   await waitForExpect(async () => {
     expect(service.state.value).toEqual('success');
@@ -153,8 +154,8 @@ test('Indirect funding as A', async () => {
 });
 
 test('multiple workflows', async () => {
-  const aService = interpret(machine(aStore, context));
-  const bService = interpret(machine(bStore, context));
+  const aService = interpret(machine(aStore).withContext(context));
+  const bService = interpret(machine(bStore).withContext(context));
   [aService, bService].map(s => s.start());
 
   await waitForExpect(async () => {
