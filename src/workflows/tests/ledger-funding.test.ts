@@ -25,11 +25,6 @@ const wallet2 = new ethers.Wallet(
   '0xb3ab7b031311fe1764b657a6ae7133f19bac97acd1d7edca9409daa35892e727'
 ); // 0x2222E21c8019b14dA16235319D34b5Dd83E644A9
 
-const wallets = {
-  [wallet1.address]: wallet1,
-  [wallet2.address]: wallet2
-};
-
 const participants: Participant[] = [
   {
     destination: createDestination(wallet1.address),
@@ -86,19 +81,6 @@ let chain: Chain;
 let aStore: Store;
 let bStore: Store;
 
-function autosignMessages(store) {
-  store.outboxFeed.subscribe(e => {
-    e.signedStates?.forEach(state => {
-      state.participants.map(p => {
-        const signatures = state.participants.map(p =>
-          signState(state, wallets[p.signingAddress].privateKey)
-        );
-        store.pushMessage({signedStates: [{...state, signatures}]});
-      });
-    });
-  });
-}
-
 const allSignState = (state: State) => ({
   ...state,
   signatures: [wallet1, wallet2].map(({privateKey}) => signState(state, privateKey))
@@ -117,24 +99,22 @@ beforeEach(() => {
 
   aStore = new MemoryStore([wallet1.privateKey], chain);
   bStore = new MemoryStore([wallet2.privateKey], chain);
-  const stores = [aStore, bStore];
 
-  stores.forEach((store: Store) => {
-    store.pushMessage(message);
-    autosignMessages(store);
-    store.outboxFeed.subscribe(m => stores.forEach(s => s.pushMessage(m)));
-  });
+  [aStore, bStore].forEach((store: Store) => store.pushMessage(message));
+  aStore.outboxFeed.subscribe(m => bStore.pushMessage(m));
+  bStore.outboxFeed.subscribe(m => aStore.pushMessage(m));
 });
 
-test('Indirect funding as A', async () => {
-  const store = aStore;
-
-  const service = interpret(machine(store).withContext(context)).start();
+test('multiple workflows', async () => {
+  const aService = interpret(machine(aStore).withContext(context));
+  const bService = interpret(machine(bStore).withContext(context));
+  [aService, bService].map(s => s.start());
 
   await waitForExpect(async () => {
-    expect(service.state.value).toEqual('success');
+    expect(bService.state.value).toEqual('success');
+    expect(aService.state.value).toEqual('success');
 
-    const {supported} = await store.getEntry(ledgerChannelId);
+    const {supported} = await aStore.getEntry(ledgerChannelId);
     const outcome = checkThat(supported?.outcome, isSimpleEthAllocation);
 
     expect(outcome.allocationItems).toMatchObject(
@@ -146,20 +126,9 @@ test('Indirect funding as A', async () => {
         .concat([{destination: targetChannelId, amount: deductionAmounts.reduce(add)}])
     );
 
-    expect((await store.getEntry(targetChannelId)).funding).toMatchObject({
+    expect((await aStore.getEntry(targetChannelId)).funding).toMatchObject({
       type: 'Indirect',
       ledgerId: ledgerChannelId
     });
-  }, EXPECT_TIMEOUT);
-});
-
-test('multiple workflows', async () => {
-  const aService = interpret(machine(aStore).withContext(context));
-  const bService = interpret(machine(bStore).withContext(context));
-  [aService, bService].map(s => s.start());
-
-  await waitForExpect(async () => {
-    expect(bService.state.value).toEqual('success');
-    expect(aService.state.value).toEqual('success');
   }, EXPECT_TIMEOUT);
 });
