@@ -8,10 +8,11 @@ import {
   isNotification,
   PushMessageRequest,
   JoinChannelRequest,
-  CreateChannelRequest
+  CreateChannelRequest,
+  UpdateChannelRequest
 } from '@statechannels/client-api-schema';
 import {interpret} from 'xstate';
-import {applicationWorkflow} from '../workflows/application';
+import {applicationWorkflow, WorkflowContext} from '../workflows/application';
 import {Guid} from 'guid-typescript';
 
 export class Player {
@@ -23,10 +24,10 @@ export class Player {
   messagingService: MessagingServiceInterface;
   channelWallet: ChannelWallet;
 
-  startAppWorkflow(startingState: string) {
+  startAppWorkflow(startingState: string, context?: WorkflowContext) {
     const workflowId = Guid.create().toString();
     const machine = interpret<any, any, any>(
-      applicationWorkflow(this.store, this.messagingService),
+      applicationWorkflow(this.store, this.messagingService, context),
       {
         devTools: true
       }
@@ -101,6 +102,38 @@ function generatePushMessage(data: any, recipient: string, sender: string): Push
   };
 }
 
+export function generatePlayerUpdate(
+  channelId: string,
+  playerA: Participant,
+  playerB: Participant
+): UpdateChannelRequest {
+  return {
+    id: 555555555,
+    method: 'UpdateChannel',
+    jsonrpc: '2.0',
+    params: {
+      channelId,
+      participants: [playerA, playerB],
+      appData: '0x0',
+      allocations: [
+        {
+          token: '0x0',
+          allocationItems: [
+            {
+              destination: playerA.destination,
+              amount: '0x06f05b59d3b20000'
+            },
+            {
+              destination: playerB.destination,
+              amount: '0x06f05b59d3b20000'
+            }
+          ]
+        }
+      ]
+    }
+  };
+}
+
 export function generateJoinChannelRequest(channelId: string): JoinChannelRequest {
   return {id: 222222222, method: 'JoinChannel', jsonrpc: '2.0', params: {channelId}};
 }
@@ -124,7 +157,7 @@ export function generateCreateChannelRequest(
               amount: '0x06f05b59d3b20000'
             },
             {
-              destination: playerA.destination,
+              destination: playerB.destination,
               amount: '0x06f05b59d3b20000'
             }
           ]

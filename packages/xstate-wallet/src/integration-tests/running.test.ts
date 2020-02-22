@@ -1,5 +1,5 @@
 import {FakeChain} from '../chain';
-import {Player, hookUpMessaging} from './helpers';
+import {Player, hookUpMessaging, generatePlayerUpdate} from './helpers';
 import {SimpleEthAllocation} from '../store/types';
 import {bigNumberify} from 'ethers/utils';
 import waitForExpect from 'wait-for-expect';
@@ -34,31 +34,40 @@ test('accepts states when running', async () => {
   hookUpMessaging(playerA, playerB);
   const stateVars = {
     outcome,
-    turnNum: bigNumberify(5),
+    turnNum: bigNumberify(4),
     appData: '0x0',
     isFinal: false
   };
   playerA.store.createChannel(
     [playerA.participant, playerB.participant],
-    bigNumberify(5),
+    bigNumberify(4),
     stateVars
   );
-
-  playerA.startAppWorkflow('running');
-  playerB.startAppWorkflow('running');
-  playerA.store.signAndAddState(
-    '0x1823994d6d3b53b82f499c1aca2095b94108ba3ff59f55c6e765da1e24874ab2',
-    stateVars
+  const channelId = '0x1823994d6d3b53b82f499c1aca2095b94108ba3ff59f55c6e765da1e24874ab2';
+  playerA.startAppWorkflow('running', {channelId});
+  playerB.startAppWorkflow('running', {channelId});
+  await playerA.messagingService.receiveMessage(
+    generatePlayerUpdate(channelId, playerA.participant, playerB.participant)
   );
 
   await waitForExpect(async () => {
     expect(playerA.workflowState).toEqual('running');
     expect(playerB.workflowState).toEqual('running');
-    const playerBTurnNum = (
-      await playerB.store.getEntry(
-        '0x1823994d6d3b53b82f499c1aca2095b94108ba3ff59f55c6e765da1e24874ab2'
-      )
-    ).latest.turnNum.toNumber();
+    const playerATurnNum = (await playerA.store.getEntry(channelId)).latest.turnNum.toNumber();
+    expect(playerATurnNum).toBe(5);
+    const playerBTurnNum = (await playerB.store.getEntry(channelId)).latest.turnNum.toNumber();
     expect(playerBTurnNum).toBe(5);
+  }, 3000);
+
+  await playerB.messagingService.receiveMessage(
+    generatePlayerUpdate(channelId, playerA.participant, playerB.participant)
+  );
+  await waitForExpect(async () => {
+    expect(playerA.workflowState).toEqual('running');
+    expect(playerB.workflowState).toEqual('running');
+    const playerATurnNum = (await playerA.store.getEntry(channelId)).latest.turnNum.toNumber();
+    expect(playerATurnNum).toBe(6);
+    const playerBTurnNum = (await playerB.store.getEntry(channelId)).latest.turnNum.toNumber();
+    expect(playerBTurnNum).toBe(6);
   }, 3000);
 });
