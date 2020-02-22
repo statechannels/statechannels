@@ -1,11 +1,11 @@
 import {Machine, MachineConfig} from 'xstate';
 
-import {Participant, SimpleEthAllocation} from '../store/types';
+import {SimpleEthAllocation} from '../store/types';
 import * as AdvanceChannel from './advance-channel';
 
 import {MachineFactory, getDataAndInvoke} from '../utils/workflow-utils';
 import {Store} from '../store';
-import {BigNumber, bigNumberify} from 'ethers/utils';
+import {bigNumberify} from 'ethers/utils';
 import * as Depositing from './depositing';
 import {add} from '../utils/math-utils';
 const PROTOCOL = 'create-and-direct-fund';
@@ -16,13 +16,8 @@ export enum Indices {
 }
 
 export type Init = {
-  participants: Participant[];
   allocation: SimpleEthAllocation;
-  appDefinition: string;
-  appData: string;
   channelId: string;
-  challengeDuration: BigNumber;
-  index: Indices;
 };
 
 export const advanceChannelArgs = (i: 1 | 3) => ({channelId}: Init): AdvanceChannel.Init => ({
