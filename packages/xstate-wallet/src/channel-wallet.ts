@@ -74,7 +74,7 @@ export class ChannelWallet {
   }
 }
 
-function logTransition(
+export function logTransition(
   state: State<any, any, any, any>,
   event,
   id?: string,
