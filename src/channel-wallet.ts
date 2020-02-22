@@ -7,7 +7,7 @@ import React from 'react';
 import WalletUi from './ui/wallet';
 import {interpret, Interpreter, State} from 'xstate';
 import {Guid} from 'guid-typescript';
-import {convertToOpenEvent} from './utils/workflow-utils';
+import {convertToOpenEvent, convertToPlayerStateUpdateEvent} from './utils/workflow-utils';
 import {Notification, Response} from '@statechannels/client-api-schema';
 
 export interface Workflow {
@@ -33,6 +33,11 @@ export class ChannelWallet {
         this.workflows.push(workflow);
 
         workflow.machine.send(convertToOpenEvent(r));
+      } else if (r.method === 'UpdateChannel') {
+        const update = convertToPlayerStateUpdateEvent(r);
+        this.workflows.forEach(w => {
+          w.machine.send(update);
+        });
       }
     });
   }
