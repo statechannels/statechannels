@@ -154,14 +154,7 @@ export class Web3TorrentChannelClient {
 }
 
 const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
-  const {
-    turnNum,
-    channelId,
-    status,
-    participants,
-    allocations,
-    challengeExpirationTime
-  } = channelResult;
+  const {turnNum, channelId, participants, allocations, challengeExpirationTime} = channelResult;
   return {
     channelId,
     turnNum: turnNum.toString(), // TODO: turnNum should be switched to a number (or be a string everywhere),
