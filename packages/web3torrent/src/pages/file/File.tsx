@@ -11,6 +11,7 @@ import {parseMagnetURL} from '../../utils/magnet';
 import torrentStatusChecker from '../../utils/torrent-status-checker';
 import {useInterval} from '../../utils/useInterval';
 import './File.scss';
+import {Web3TorrentChannelClient} from '../../clients/web3t-channel-client';
 
 const getTorrentAndPeersData: (
   setTorrent: React.Dispatch<React.SetStateAction<Torrent>>,
@@ -30,7 +31,8 @@ const File: React.FC<RouteComponentProps> = () => {
   const [errorLabel, setErrorLabel] = useState('');
   const getLiveData = getTorrentAndPeersData(setTorrent, setPeers);
 
-  const channelClient = new ChannelClient(window.channelProvider);
+  // TODO move this to a more abvious place (we may need it in other components)
+  const channelClient = new Web3TorrentChannelClient(new ChannelClient(window.channelProvider));
 
   useEffect(() => {
     if (torrent.infoHash) {
