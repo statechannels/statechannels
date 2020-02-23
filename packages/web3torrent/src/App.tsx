@@ -9,6 +9,8 @@ import File from './pages/file/File';
 import Upload from './pages/upload/Upload';
 import {RoutePath} from './routes';
 
+// [ George ] Here we could insert a new landing page, with a Rimble connection banner and "Connect with Metamask + State Channels" button. We then await calls to channelClient.getAddress() and channelClient.getEthereumSelectedAddress() before progressing to the Welcome page.
+
 const App: React.FC = () => {
   const history = createBrowserHistory();
   return (
