@@ -115,7 +115,7 @@ export class Web3TorrentChannelClient {
   }
 
   // seeder may use this method to accept payments
-  async counterSign(channelState: ChannelState) {
+  async acceptPayment(channelState: ChannelState) {
     const {
       channelId,
       aAddress,
