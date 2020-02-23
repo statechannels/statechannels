@@ -47,6 +47,10 @@ module.exports = function(defaults) {
   // along with the exports of each module as its value.
 
   app.import('node_modules/@statechannels/channel-provider/dist/channel-provider.js');
+  app.import({
+    development: 'node_modules/ethers/dist/ethers.js',
+    production: 'node_modules/ethers/dist/ethers.min.js'
+  });
 
   return app.toTree();
 };

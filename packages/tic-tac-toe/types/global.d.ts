@@ -4,3 +4,6 @@ declare module '@statechannels/tic-tac-toe/templates/*' {
   const tmpl: TemplateFactory;
   export default tmpl;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+declare const ethers: any;
