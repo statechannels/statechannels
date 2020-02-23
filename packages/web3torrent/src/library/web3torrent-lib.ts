@@ -1,3 +1,4 @@
+import {FakeChannelProvider} from '@statechannels/channel-client';
 import debug from 'debug';
 import WebTorrent, {Torrent, TorrentOptions} from 'webtorrent';
 import paidStreamingExtension, {PaidStreamingExtensionOptions} from './pse-middleware';
@@ -15,6 +16,9 @@ import {
   WebTorrentSeedInput,
   WireEvents
 } from './types';
+import {Web3TorrentChannelClient} from '../clients/web3t-channel-client';
+import {ChannelClient} from '@statechannels/channel-client';
+
 const log = debug('web3torrent:library');
 
 export type WebTorrentPaidStreamingClientOptions = WebTorrent.Options &
@@ -25,13 +29,26 @@ export * from './types';
 
 export const REQUEST_RATE = 10;
 
+if (process.env.REACT_APP_FAKE_CHANNEL_PROVIDER === 'true') {
+  window.channelProvider = new FakeChannelProvider();
+} else {
+  // TODO: Replace with injection via other means than direct app import
+  // NOTE: This adds `channelProvider` to the `Window` object
+  require('@statechannels/channel-provider');
+}
+
+// TODO: Put inside better place than here where app can handle error case
+window.channelProvider.enable(process.env.REACT_APP_WALLET_URL);
+
 export default class WebTorrentPaidStreamingClient extends WebTorrent {
   allowedPeers: PeersByTorrent;
   pseAccount: string;
   torrents: PaidStreamingTorrent[] = [];
+  client: Web3TorrentChannelClient;
 
   constructor(opts: WebTorrentPaidStreamingClientOptions = {}) {
     super(opts);
+    this.client = new Web3TorrentChannelClient(new ChannelClient(window.channelProvider));
     this.allowedPeers = {};
     this.pseAccount = opts.pseAccount || Math.floor(Math.random() * 99999999999999999).toString();
     log('ACCOUNT ID: ', this.pseAccount);
@@ -174,13 +191,33 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     this.allowedPeers[infoHash][peerId].funds = (Number(funds) + Number(paymentHash)).toString();
   }
 
-  protected transferFunds(wire: PaidStreamingWire) {
+  protected async transferFunds(wire: PaidStreamingWire) {
     // [ George ] I think this is where the leecher could call channelClient.updateChannel(). A first iteration might just do this without any UI or checks.
 
-    // INFO: Assumed payment. This could emit an event on the UI to ask for more funds, or be automatic. Dunno.
-    setTimeout(() => {
-      wire.paidStreamingExtension.payment('50');
-    }, 500);
+    const channel = await this.client.createChannel(
+      '0x0000000000000000000000000000000000000000',
+      '0x0000000000000000000000000000000000000000',
+      '0x00',
+      '0x00',
+      '0x0000000000000000000000000000000000000000',
+      '0x0000000000000000000000000000000000000000'
+    );
+
+    (window.channelProvider as FakeChannelProvider).playerIndex = 1;
+
+    this.client.onMessageQueued(({sender, recipient, data}) => {
+      wire.paidStreamingExtension.payment(JSON.stringify(data));
+    });
+
+    await this.client.updateChannel(
+      channel.channelId, // channelId,
+      '0x0000000000000000000000000000000000000000', // seeder,
+      '0x0000000000000000000000000000000000000000', // leecher,
+      '0x00', // seederBalance,
+      '0x00', // leecherBalance,
+      '0x0000000000000000000000000000000000000000', // seederOutcomeAddress,
+      '0x0000000000000000000000000000000000000000' // leecherOutcomeAddress
+    );
   }
 
   protected setupTorrent(torrent: PaidStreamingTorrent) {
@@ -194,13 +231,13 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       this.setupWire(torrent, wire);
     });
 
-    torrent.on(TorrentEvents.NOTICE, (wire, {command, data}) => {
+    torrent.on(TorrentEvents.NOTICE, async (wire, {command, data}) => {
       log(`< ${command} received from ${wire.peerExtendedHandshake.pseAccount}`, data);
       switch (command) {
         case PaidStreamingExtensionNotices.STOP:
           wire.paidStreamingExtension.ack();
           wire.choke();
-          this.transferFunds(wire);
+          await this.transferFunds(wire);
           break;
         case PaidStreamingExtensionNotices.START:
           // [ George ] Here we can call channelClient.createChannel()
@@ -208,7 +245,12 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           this.jumpStart(torrent, wire);
           break;
         case PaidStreamingExtensionNotices.PAYMENT:
-          this.loadFunds(torrent.infoHash, wire.peerExtendedHandshake.pseAccount, data.hash);
+          this.client.pushMessage(JSON.parse(data.message));
+          this.loadFunds(
+            torrent.infoHash,
+            wire.peerExtendedHandshake.pseAccount,
+            JSON.parse(data.message)
+          );
           this.unblockPeer(torrent.infoHash, wire, wire.peerExtendedHandshake.pseAccount);
           break;
         default:
