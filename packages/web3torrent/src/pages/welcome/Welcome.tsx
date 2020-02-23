@@ -6,7 +6,13 @@ import {mockTorrents} from '../../constants';
 import {RoutePath} from '../../routes';
 import './Welcome.scss';
 
-const Welcome: React.FC<RouteComponentProps> = ({history}) => {
+interface Props {
+  currentNetwork: number;
+  requiredNetwork: number;
+}
+
+const Welcome: React.FC<RouteComponentProps & Props> = props => {
+  const {history} = props;
   return (
     <section className="section fill">
       <div className="jumbotron">
@@ -30,7 +36,12 @@ const Welcome: React.FC<RouteComponentProps> = ({history}) => {
       <h2>Download a sample file</h2>
       <ShareList torrents={mockTorrents} history={history} />
       <h2>Or share a file</h2>
-      <FormButton name="upload" block={true} onClick={() => history.push(RoutePath.Upload)}>
+      <FormButton
+        name="upload"
+        block={true}
+        disabled={props.currentNetwork !== props.requiredNetwork}
+        onClick={() => history.push(RoutePath.Upload)}
+      >
         Upload
       </FormButton>
     </section>

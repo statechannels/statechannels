@@ -23,7 +23,12 @@ const getTorrentAndPeersData: (
   setPeers(livePeers);
 };
 
-const File: React.FC<RouteComponentProps> = () => {
+interface Props {
+  currentNetwork: number;
+  requiredNetwork: number;
+}
+
+const File: React.FC<RouteComponentProps & Props> = props => {
   const [torrent, setTorrent] = useState(parseMagnetURL(useLocation().hash));
   const [peers, setPeers] = useState({});
   const [loading, setLoading] = useState(false);
@@ -54,6 +59,7 @@ const File: React.FC<RouteComponentProps> = () => {
           <FormButton
             name="download"
             spinner={loading}
+            disabled={props.currentNetwork !== props.requiredNetwork}
             onClick={async () => {
               setLoading(true);
               setErrorLabel('');

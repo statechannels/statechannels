@@ -9,22 +9,74 @@ import File from './pages/file/File';
 import Upload from './pages/upload/Upload';
 import {RoutePath} from './routes';
 
-// [ George ] Here we could insert a new landing page, with a Rimble connection banner and "Connect with Metamask + State Channels" button. We then await calls to channelClient.getAddress() and channelClient.getEthereumSelectedAddress() before progressing to the Welcome page.
+const history = createBrowserHistory();
+class App extends React.Component {
+  state = {
+    currentNetwork: parseInt(window.ethereum.chainId, 16),
+    requiredNetwork: Number(process.env.REACT_APP_CHAIN_NETWORK_ID)
+  };
 
-const App: React.FC = () => {
-  const history = createBrowserHistory();
-  return (
-    <Router history={history}>
-      <main>
-        <Route path={RoutePath.Root} component={LayoutHeader} />
-        <Switch>
-          <Route exact path={RoutePath.Root} component={Welcome} />
-          <Route exact path={RoutePath.File} component={File} />
-          <Route exact path={RoutePath.Upload} component={Upload} />
-        </Switch>
-      </main>
-      <Route path={RoutePath.Root} component={LayoutFooter} />
-    </Router>
-  );
-};
+  componentDidMount() {
+    window.ethereum.on('networkChanged', chainId => {
+      this.setState({...this.state, currentNetwork: parseInt(chainId, 16)});
+    });
+  }
+
+  render() {
+    const {currentNetwork, requiredNetwork} = this.state;
+    return (
+      <Router history={history}>
+        <main>
+          <Route
+            path={RoutePath.Root}
+            render={props => (
+              <LayoutHeader
+                {...props}
+                currentNetwork={currentNetwork}
+                requiredNetwork={requiredNetwork}
+              />
+            )}
+          />
+          <Switch>
+            <Route
+              exact
+              path={RoutePath.Root}
+              render={props => (
+                <Welcome
+                  {...props}
+                  currentNetwork={currentNetwork}
+                  requiredNetwork={requiredNetwork}
+                />
+              )}
+            />
+            <Route
+              exact
+              path={RoutePath.File}
+              render={props => (
+                <File
+                  {...props}
+                  currentNetwork={currentNetwork}
+                  requiredNetwork={requiredNetwork}
+                />
+              )}
+            />
+            <Route
+              exact
+              path={RoutePath.Upload}
+              render={props => (
+                <Upload
+                  {...props}
+                  currentNetwork={currentNetwork}
+                  requiredNetwork={requiredNetwork}
+                />
+              )}
+            />
+          </Switch>
+        </main>
+        <Route path={RoutePath.Root} component={LayoutFooter} />
+      </Router>
+    );
+  }
+}
+
 export default App;
