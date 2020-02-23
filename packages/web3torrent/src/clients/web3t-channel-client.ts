@@ -23,10 +23,6 @@ export class Web3TorrentChannelClient {
   mySigningAddress?: string;
   myEthereumSelectedAddress?: string; // this state can be inspected to infer whether we need to get the user to "Connect With MetaMask" or not.
 
-  async enable() {
-    /* empty */
-  }
-
   async createChannel(
     aAddress: string,
     bAddress: string,
