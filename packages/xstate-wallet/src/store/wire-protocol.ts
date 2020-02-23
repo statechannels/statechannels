@@ -2,7 +2,7 @@ import {SignedState, Participant} from './types';
 
 type _Objective<Name, Data> = {
   participants: Participant[];
-  name: Name;
+  type: Name;
   data: Data;
 };
 export type OpenChannel = _Objective<
@@ -29,8 +29,8 @@ export type FundGuarantor = _Objective<
 
 export type Objective = OpenChannel | VirtuallyFund | FundGuarantor;
 
-const guard = <T extends Objective>(name: Objective['name']) => (o: Objective): o is T =>
-  o.name === name;
+const guard = <T extends Objective>(name: Objective['type']) => (o: Objective): o is T =>
+  o.type === name;
 export const isOpenChannel = guard<OpenChannel>('OpenChannel');
 export const isVirtuallyFund = guard<VirtuallyFund>('VirtuallyFund');
 export const isFundGuarantor = guard<FundGuarantor>('FundGuarantor');

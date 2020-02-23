@@ -11,6 +11,7 @@ import {parseMagnetURL} from '../../utils/magnet';
 import torrentStatusChecker from '../../utils/torrent-status-checker';
 import {useInterval} from '../../utils/useInterval';
 import './File.scss';
+import {Web3TorrentChannelClient} from '../../clients/web3t-channel-client';
 
 const getTorrentAndPeersData: (
   setTorrent: React.Dispatch<React.SetStateAction<Torrent>>,
@@ -35,7 +36,8 @@ const File: React.FC<RouteComponentProps & Props> = props => {
   const [errorLabel, setErrorLabel] = useState('');
   const getLiveData = getTorrentAndPeersData(setTorrent, setPeers);
 
-  const channelClient = new ChannelClient(window.channelProvider);
+  // TODO move this to a more abvious place (we may need it in other components)
+  const channelClient = new Web3TorrentChannelClient(new ChannelClient(window.channelProvider));
 
   useEffect(() => {
     if (torrent.infoHash) {
@@ -99,9 +101,8 @@ const File: React.FC<RouteComponentProps & Props> = props => {
                 State Channels
               </a>
               , a technique that reduces fees for blockchain users, allowing them to transact with
-              each other on faster-than-on-chain operating times. Through
-              counterfactually-instantiated contracts, this technology enables a private, efficient
-              and secure environment for transactions.
+              each other on faster-than-on-chain operating times. This technology enables a private,
+              efficient and secure environment for transactions.
             </p>
           </div>
         </>

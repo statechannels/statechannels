@@ -51,7 +51,12 @@ module.exports = {
   },
   // TODO: Generate a proper collection of allowed env variables
   plugins: [
-    new webpack.EnvironmentPlugin(['ETH_ASSET_HOLDER_ADDRESS', 'HUB_ADDRESS', 'CHAIN_NETWORK_ID']),
+    new webpack.EnvironmentPlugin([
+      'ETH_ASSET_HOLDER_ADDRESS',
+      'HUB_ADDRESS',
+      'CHAIN_NETWORK_ID',
+      'ADD_LOGS'
+    ]),
     new HtmlWebpackPlugin({template: './index-template.html'})
   ],
 

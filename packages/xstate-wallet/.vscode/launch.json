@@ -16,12 +16,19 @@
 
         "${relativeFile}"
       ],
-      "skipFiles": ["<node_internals>/**/*.js"],
+      "skipFiles": ["<node_internals>/**/*.js", "node_modules"],
       "cwd": "${workspaceRoot}",
       "protocol": "inspector",
       "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen",
-      "smartStep": true
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "Attach by Process ID",
+      "processId": "${command:PickProcess}",
+      "skipFiles": ["<node_internals>/**"],
+      "sourceMaps": true
     }
   ]
 }

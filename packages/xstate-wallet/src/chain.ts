@@ -3,9 +3,10 @@ import {getProvider} from './utils/contract-utils';
 import {ethers} from 'ethers';
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {State} from './store/types';
-import {Observable, fromEvent, from, concat} from 'rxjs';
+import {Observable, fromEvent, from, concat, merge} from 'rxjs';
 import {filter, map} from 'rxjs/operators';
 import {ETH_ASSET_HOLDER_ADDRESS, NITRO_ADJUDICATOR_ADDRESS} from './constants';
+import EventEmitter = require('eventemitter3');
 
 const EthAssetHolderInterface = new ethers.utils.Interface(
   // https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
@@ -29,24 +30,30 @@ export interface Chain {
   deposit: (channelId: string, expectedHeld: string, amount: string) => Promise<void>;
 }
 
-// TODO: This chain should be fleshed out enough so it mimics basic chain behavior
+// TODO: This should handle amounts for each channel
 export class FakeChain implements Chain {
+  private totalAmount = bigNumberify(0);
+  public depositEmitter = new EventEmitter();
   public async initialize() {
     /* NOOP */
   }
   public async deposit(channelId: string, expectedHeld: string, amount: string): Promise<void> {
-    /*TODO: record the amount */
+    this.totalAmount = this.totalAmount.add(amount);
+    this.depositEmitter.emit('DEPOSIT', this.totalAmount);
+    return Promise.resolve();
   }
   public async getChainInfo(channelId: string): Promise<ChannelChainInfo> {
-    // TODO: Get the recorded amount
-    return {amount: bigNumberify(0), finalized: false};
+    return {amount: bigNumberify(this.totalAmount), finalized: false};
   }
   public chainUpdatedFeed(channelId: string): Observable<ChannelChainInfo> {
-    // TODO: Get the recorded amount
-    return Observable.create({
-      amount: bigNumberify(0),
-      finalized: false
-    });
+    const updated = fromEvent<BigNumber>(this.depositEmitter, 'DEPOSIT').pipe(
+      map(a => ({
+        amount: a,
+        finalized: false
+      }))
+    );
+    const first = from(Promise.resolve({amount: bigNumberify(this.totalAmount), finalized: false}));
+    return merge(first, updated);
   }
 }
 export class ChainWatcher implements Chain {

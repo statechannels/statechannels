@@ -84,6 +84,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
     if (outcome.type !== 'SimpleEthAllocation') {
       throw new Error('Only support SimpleEthAllocation');
     }
+    // TODO This prevents us from funding an app channel
     const allocated = outcome.allocationItems
       .map(a => a.amount)
       .reduce((a, b) => {

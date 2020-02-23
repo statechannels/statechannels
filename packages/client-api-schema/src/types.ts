@@ -191,3 +191,16 @@ export type Response =
   | ChallengeChannelResponse
   | GetBudgetResponse
   | CloseChannelResponse;
+
+export function isResponse(message: Response | Request | Notification): message is Response {
+  return 'id' in message && 'result' in message;
+}
+
+export function isNotification(
+  message: Response | Request | Notification
+): message is Notification {
+  return !('id' in message);
+}
+export function isRequest(message: Response | Request | Notification): message is Request {
+  return 'id' in message && 'params' in message;
+}
