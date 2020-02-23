@@ -31,20 +31,29 @@ module.exports = {
     browser: true,
     es6: true
   },
-  plugins: ['@typescript-eslint', 'jest', 'prettier'],
+  plugins: ['@typescript-eslint', 'prettier'],
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
-    'plugin:jest/recommended',
-    'plugin:jest/style',
     'plugin:prettier/recommended'
   ],
   rules: {
     ...generalRules,
-    ...importRules,
-    ...jestViolations
+    ...importRules
   },
   overrides: [
+    {
+      files: ['contracts/tests/tic-tac-toe.test.ts'],
+      parser: '@typescript-eslint/parser',
+      env: {
+        node: true
+      },
+      plugins: ['jest'],
+      extends: ['plugin:jest/recommended', 'plugin:jest/style'],
+      rules: {
+        ...jestViolations
+      }
+    },
     {
       files: ['app/**/*.js'],
       parser: 'babel-eslint',
