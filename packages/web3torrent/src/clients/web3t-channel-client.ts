@@ -5,14 +5,12 @@ interface ChannelState {
   channelId: string;
   turnNum: string;
   challengeExpirationTime;
-  aUserId: string;
-  bUserId: string;
-  aAddress: string;
-  bAddress: string;
-  aOutcomeAddress: string;
-  bOutcomeAddress: string;
-  aBal: string;
-  bBal: string;
+  seeder: string;
+  leecher: string;
+  seederOutcomeAddress: string;
+  leecherOutcomeAddress: string;
+  seederBalance: string;
+  leecherBalance: string;
 }
 
 // This class wraps the channel client converting the request/response formats to those used in the app
@@ -93,15 +91,25 @@ export class Web3TorrentChannelClient {
 
   async updateChannel(
     channelId: string,
-    aAddress: string,
-    bAddress: string,
-    aBal: string,
-    bBal: string,
-    aOutcomeAddress: string = aAddress,
-    bOutcomeAddress: string = bAddress
+    seeder: string,
+    leecher: string,
+    seederBalance: string,
+    leecherBalance: string,
+    seederOutcomeAddress: string,
+    leecherOutcomeAddress: string
   ) {
-    const allocations = formatAllocations(aOutcomeAddress, bOutcomeAddress, aBal, bBal);
-    const participants = formatParticipants(aAddress, bAddress, aOutcomeAddress, bOutcomeAddress);
+    const allocations = formatAllocations(
+      leecherOutcomeAddress,
+      seederOutcomeAddress,
+      leecherBalance,
+      seederBalance
+    );
+    const participants = formatParticipants(
+      leecher,
+      seeder,
+      leecherOutcomeAddress,
+      seederOutcomeAddress
+    );
 
     // ignore return val for now and stub out response
     const channelResult = await this.channelClient.updateChannel(
@@ -118,14 +126,22 @@ export class Web3TorrentChannelClient {
   async acceptPayment(channelState: ChannelState) {
     const {
       channelId,
-      aAddress,
-      bAddress,
-      aBal,
-      bBal,
-      aOutcomeAddress,
-      bOutcomeAddress
+      seeder,
+      leecher,
+      seederBalance,
+      leecherBalance,
+      seederOutcomeAddress,
+      leecherOutcomeAddress
     } = channelState;
-    this.updateChannel(channelId, aAddress, bAddress, aBal, bBal, aOutcomeAddress, bOutcomeAddress);
+    this.updateChannel(
+      channelId,
+      seeder,
+      leecher,
+      seederBalance,
+      leecherBalance,
+      seederOutcomeAddress,
+      leecherOutcomeAddress
+    );
   }
 
   async pushMessage(message: Message<ChannelResult>) {
@@ -155,14 +171,12 @@ const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
     channelId,
     turnNum: turnNum.toString(), // TODO: turnNum should be switched to a number (or be a string everywhere),
     challengeExpirationTime,
-    aUserId: participants[0].participantId,
-    bUserId: participants[1].participantId,
-    aAddress: participants[0].destination,
-    bAddress: participants[1].destination,
-    aOutcomeAddress: participants[0].destination,
-    bOutcomeAddress: participants[1].destination,
-    aBal: bigNumberify(allocations[0].allocationItems[0].amount).toString(),
-    bBal: bigNumberify(allocations[0].allocationItems[1].amount).toString()
+    leecher: participants[0].participantId,
+    seeder: participants[1].participantId,
+    leecherOutcomeAddress: participants[0].destination,
+    seederOutcomeAddress: participants[1].destination,
+    leecherBalance: bigNumberify(allocations[0].allocationItems[0].amount).toString(),
+    seederBalance: bigNumberify(allocations[0].allocationItems[1].amount).toString()
   };
 };
 
