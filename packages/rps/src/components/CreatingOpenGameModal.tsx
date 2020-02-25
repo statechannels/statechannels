@@ -22,7 +22,7 @@ export default class CreatingOpenGameModal extends React.PureComponent<Props, St
   constructor(props) {
     super(props);
     this.buyInInput = React.createRef();
-    this.state = {errorMessage: '', buyIn: '0.1', buyInChanged: true};
+    this.state = {errorMessage: '', buyIn: '0.01', buyInChanged: true};
     this.createOpenGameHandler = this.createOpenGameHandler.bind(this);
     this.handleBuyInChange = this.handleBuyInChange.bind(this);
     this.modalClosed = this.modalClosed.bind(this);
