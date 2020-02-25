@@ -1,4 +1,4 @@
-pragma solidity ^0.5.11;
+pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import '@statechannels/nitro-protocol/contracts/interfaces/ForceMoveApp.sol';
@@ -55,7 +55,7 @@ contract TicTacToe is ForceMoveApp {
         VariablePart memory toPart,
         uint256, // turnNumB, (Not implemented)
         uint256 nParticipants
-    ) public pure returns (bool) {
+    ) public pure override returns (bool) {
         require(nParticipants == 2, 'There should be 2 participants');
         Outcome.AllocationItem[] memory fromAllocation = extractAllocation(fromPart);
         Outcome.AllocationItem[] memory toAllocation = extractAllocation(toPart);
