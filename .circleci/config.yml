@@ -189,6 +189,7 @@ jobs:
       USE_GANACHE_DEPLOYMENT_CACHE: true
       GANACHE_CACHE_FOLDER: ../../.ganache-deployments
       GANACHE_PORT: 8547
+      NODE_ENV: test
     steps:
       - checkout
       - puppeteer/install
