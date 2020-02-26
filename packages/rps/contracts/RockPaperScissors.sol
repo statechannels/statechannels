@@ -1,4 +1,4 @@
-pragma solidity ^0.5.11;
+pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
 import '@statechannels/nitro-protocol/contracts/interfaces/ForceMoveApp.sol';
@@ -53,7 +53,7 @@ contract RockPaperScissors is ForceMoveApp {
         VariablePart memory toPart,
         uint256, /* turnNumB */
         uint256  /* nParticipants */
-    ) public pure returns (bool) {
+    ) public pure override returns (bool) {
         Outcome.AllocationItem[] memory fromAllocation = extractAllocation(fromPart);
         Outcome.AllocationItem[] memory toAllocation = extractAllocation(toPart);
         _requireDestinationsUnchanged(fromAllocation, toAllocation);
