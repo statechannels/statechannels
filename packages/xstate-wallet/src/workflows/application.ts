@@ -27,7 +27,7 @@ import {bigNumberify, BigNumber} from 'ethers/utils';
 import * as ConcludeChannel from './conclude-channel';
 import {unreachable} from '../utils';
 
-interface WorkflowContext {
+export interface WorkflowContext {
   channelId?: string;
   observer?: any;
   requestId?: number;
@@ -46,13 +46,13 @@ interface WorkflowGuards {
 export interface WorkflowActions {
   sendCreateChannelResponse: Action<RequestIdExists & ChannelIdExists, any>;
   sendJoinChannelResponse: Action<RequestIdExists & ChannelIdExists, any>;
-  sendToOpponent: Action<WorkflowContext, PlayerStateUpdate>;
   assignChannelId: Action<WorkflowContext, any>;
   assignChannelParams: Action<WorkflowContext, CreateChannelEvent>;
   displayUi: Action<WorkflowContext, any>;
   hideUi: Action<WorkflowContext, any>;
   sendChannelUpdatedNotification: Action<WorkflowContext, any>;
   spawnObserver: AssignAction<ChannelIdExists, any>;
+  updateStoreWithPlayerState: Action<WorkflowContext, PlayerStateUpdate>;
 }
 
 export interface JoinChannelEvent {
@@ -80,9 +80,11 @@ export interface ChannelUpdated {
   requestId: number;
 }
 
-interface PlayerStateUpdate {
+export interface PlayerStateUpdate {
   type: 'PLAYER_STATE_UPDATE';
-  state: StateVariables;
+  outcome: SimpleEthAllocation;
+  channelId: string;
+  appData: string;
 }
 interface PlayerRequestConclude {
   type: 'PLAYER_REQUEST_CONCLUDE';
@@ -186,7 +188,10 @@ const generateConfig = (
     ),
     running: {
       on: {
-        PLAYER_STATE_UPDATE: {target: 'running', actions: [actions.sendToOpponent]},
+        PLAYER_STATE_UPDATE: {
+          target: 'running',
+          actions: [actions.updateStoreWithPlayerState]
+        },
         CHANNEL_UPDATED: [
           {
             cond: guards.channelClosing,
@@ -250,9 +255,6 @@ export const applicationWorkflow = (
       observer: spawn(notifyOnChannelMessage(context))
     })),
 
-    sendToOpponent: (context: ChannelIdExists, event) => {
-      store.signAndAddState(context.channelId, event.state);
-    },
     sendChannelUpdatedNotification: async (
       context: ChannelIdExists,
       event: {storeEntry: ChannelStoreEntry}
@@ -295,7 +297,19 @@ export const applicationWorkflow = (
         return {};
       }
       return {};
-    })
+    }),
+    updateStoreWithPlayerState: async (context: ChannelIdExists, event: PlayerStateUpdate) => {
+      if (context.channelId === event.channelId) {
+        const existingState = await (await store.getEntry(event.channelId)).latest;
+        const newState = {
+          ...existingState,
+          turnNum: existingState.turnNum.add(1),
+          appData: event.appData,
+          outcome: event.outcome
+        };
+        store.signAndAddState(event.channelId, newState);
+      }
+    }
   };
 
   const guards: WorkflowGuards = {
@@ -419,12 +433,12 @@ const mockActions: WorkflowActions = {
   assignChannelParams: 'assignChannelParams',
   sendCreateChannelResponse: 'sendCreateChannelResponse',
   sendJoinChannelResponse: 'sendJoinChannelResponse',
-  sendToOpponent: 'sendToOpponent',
   sendChannelUpdatedNotification: 'sendChannelUpdatedNotification',
   hideUi: 'hideUi',
   displayUi: 'displayUi',
   assignChannelId: 'assignChannelId',
-  spawnObserver: 'spawnObserver' as any
+  spawnObserver: 'spawnObserver' as any,
+  updateStoreWithPlayerState: 'updateStoreWithPlayerState'
 };
 const mockGuards: WorkflowGuards = {
   channelOpen: createMockGuard('channelOpen'),
