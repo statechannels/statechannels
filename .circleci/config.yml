@@ -9,6 +9,7 @@ default_env_vars: &default_env_vars
   HUB_DB_PORT: 5432
   HUB_DB_USER: root
   NODE_ENV: test
+  USE_NATIVE_SOLC: true
 
 postgres_env_vars: &postgres_env_vars
   POSTGRES_USER: root
