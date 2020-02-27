@@ -41,6 +41,9 @@ export class FakeChannelProvider implements ChannelProviderInterface {
       case 'PushMessage':
         return this.pushMessage(params) as Promise<MethodType[K]>;
 
+      case 'GetEthereumSelectedAddress':
+        return new Promise(() => '0xEthereumSelectedAddress') as Promise<MethodType[K]>;
+
       case 'GetAddress':
         return this.getAddress() as Promise<MethodType[K]>;
 
