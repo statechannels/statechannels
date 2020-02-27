@@ -10,7 +10,8 @@ import {
   StateSchema,
   ServiceConfig,
   StateMachine,
-  StateNodeConfig
+  StateNodeConfig,
+  State
 } from 'xstate';
 
 import {getChannelId} from '@statechannels/nitro-protocol';
@@ -134,6 +135,9 @@ interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
     done: {};
   };
 }
+export type StateValue = keyof WorkflowStateSchema['states'];
+
+export type WorkflowState = State<WorkflowContext, WorkflowEvent, WorkflowStateSchema, any>;
 
 const generateConfig = (
   actions: WorkflowActions,

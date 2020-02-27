@@ -1,4 +1,4 @@
-import {MachineConfig, Action, StateSchema, Machine, Condition, StateMachine} from 'xstate';
+import {MachineConfig, Action, StateSchema, Machine, Condition, StateMachine, State} from 'xstate';
 import {Participant} from '@statechannels/client-api-schema';
 import {sendDisplayMessage} from '../messaging';
 import {createMockGuard} from '../utils/workflow-utils';
@@ -33,6 +33,10 @@ interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
     failure: {};
   };
 }
+
+export type StateValue = keyof WorkflowStateSchema['states'];
+
+export type WorkflowState = State<WorkflowContext, WorkflowEvent, WorkflowStateSchema, any>;
 
 interface UserApproves {
   type: 'USER_APPROVES';
