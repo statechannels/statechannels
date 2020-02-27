@@ -13,6 +13,8 @@ const channelWallet = new ChannelWallet(store, messagingService);
 
 // Communicate via postMessage
 window.addEventListener('message', async event => {
-  channelWallet.pushMessage(event.data);
+  if (event.data && event.data.jsonrpc && event.data.jsonrpc === '2.0') {
+    channelWallet.pushMessage(event.data);
+  }
 });
 channelWallet.onSendMessage(m => window.parent.postMessage(m, '*'));
