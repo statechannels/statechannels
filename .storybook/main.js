@@ -32,6 +32,7 @@ module.exports = {
     config.resolve.extensions.push('.ts', '.tsx');
     config.resolve.alias = {
       fs: path.resolve(__dirname, 'mock.js'),
+      net: path.resolve(__dirname, 'mock.js'),
       child_process: path.resolve(__dirname, 'mock.js')
     };
     return config;
