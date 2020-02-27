@@ -20,7 +20,7 @@ defaults: &defaults
   environment:
     <<: *default_env_vars
   working_directory: /home/circleci/project
-  resource_class: medium
+  resource_class: large
   docker:
     - image: counterfactual/statechannels:0.6.1 # Fast contract compilation with solc installed
     - image: circleci/postgres:12.0-alpine
@@ -120,7 +120,6 @@ commands:
 jobs:
   prepare:
     <<: *defaults
-    resource_class: large
     steps:
       - checkout
       - log_stats:
@@ -164,7 +163,6 @@ jobs:
 
   test:
     <<: *defaults
-    resource_class: large
     steps:
       - checkout
       - log_stats:
@@ -276,6 +274,7 @@ jobs:
 
   release-incremental:
     <<: *defaults
+    resource_class: medium
     steps:
       - checkout
       - attach_workspace:
@@ -286,6 +285,7 @@ jobs:
 
   release:
     <<: *defaults
+    resource_class: medium
     steps:
       - checkout
       - log_stats:
