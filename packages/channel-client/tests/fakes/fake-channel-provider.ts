@@ -25,7 +25,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
 
   playerIndex?: number;
   opponentIndex?: number;
-  address?: string;
+  address?: string = '0xfakeaddress';
   opponentAddress?: string;
   latestState?: ChannelResult;
 

@@ -1,9 +1,4 @@
-import {
-  ChannelResult,
-  Message,
-  ChannelClient,
-  ChannelClientInterface
-} from '@statechannels/channel-client';
+import {ChannelResult, Message, ChannelClientInterface} from '@statechannels/channel-client';
 import {bigNumberify} from 'ethers/utils';
 
 export interface ChannelState {
