@@ -178,6 +178,11 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     wire.paidStreamingExtension.on(PaidStreamingExtensionEvents.NOTICE, notice =>
       torrent.emit(PaidStreamingExtensionEvents.NOTICE, wire, notice)
     );
+
+    // If the waller queues a message, send it across the wire
+    this.channelClient.onMessageQueued(({sender, recipient, data}) => {
+      wire.paidStreamingExtension.payment(JSON.stringify(data)); // TODO don't use 'payment' since the messages are mor general than that
+    });
   }
 
   protected loadFunds(infoHash: string, peerId: string, paymentHash: string) {
@@ -204,10 +209,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     );
 
     (window.channelProvider as FakeChannelProvider).playerIndex = 1;
-
-    this.channelClient.onMessageQueued(({sender, recipient, data}) => {
-      wire.paidStreamingExtension.payment(JSON.stringify(data));
-    });
 
     await this.channelClient.updateChannel(
       channel.channelId, // channelId,
