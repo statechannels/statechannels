@@ -58,6 +58,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
   async enable() {
     this.pseAccount = await this.channelClient.getAddress();
+    log('set pseAccount to sc-wallet signing address');
   }
 
   seed(
