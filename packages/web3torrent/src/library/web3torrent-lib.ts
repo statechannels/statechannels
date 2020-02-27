@@ -1,4 +1,4 @@
-import {FakeChannelProvider} from '@statechannels/channel-channelClient';
+import {FakeChannelProvider} from '@statechannels/channel-client';
 import debug from 'debug';
 import WebTorrent, {Torrent, TorrentOptions} from 'webtorrent';
 import paidStreamingExtension, {PaidStreamingExtensionOptions} from './pse-middleware';
@@ -16,8 +16,9 @@ import {
   WebTorrentSeedInput,
   WireEvents
 } from './types';
-import {Web3TorrentChannelClient} from '../clients/web3t-channel-channelClient';
-import {ChannelClient} from '@statechannels/channel-channelClient';
+import {Web3TorrentChannelClient} from '../clients/web3t-channel-client';
+import {ChannelClient} from '@statechannels/channel-client';
+import {Web3TorrentChannelClientInterface} from '../clients/web3t-channel-client';
 
 const log = debug('web3torrent:library');
 
@@ -44,7 +45,8 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   allowedPeers: PeersByTorrent;
   pseAccount: string;
   torrents: PaidStreamingTorrent[] = [];
-  channelClient: Web3TorrentChannelClient;
+  channelClient: Web3TorrentChannelClientInterface;
+  amSeeder: boolean = false;
 
   constructor(opts: WebTorrentPaidStreamingClientOptions = {}) {
     super(opts);
@@ -52,6 +54,10 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     this.allowedPeers = {};
     this.pseAccount = opts.pseAccount || Math.floor(Math.random() * 99999999999999999).toString();
     log('ACCOUNT ID: ', this.pseAccount);
+  }
+
+  async enable() {
+    this.pseAccount = await this.channelClient.getAddress();
   }
 
   seed(
@@ -71,6 +77,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       torrent = super.seed(input, optionsOrCallback, callback) as PaidStreamingTorrent;
     }
 
+    this.amSeeder = true;
     this.setupTorrent(torrent);
     log('torrent seed created');
     return torrent;
@@ -175,11 +182,27 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       wire.emit(PaidStreamingExtensionEvents.REQUEST, peerAccount);
     });
 
+    wire.paidStreamingExtension.once(PaidStreamingExtensionEvents.PSE_HANDSHAKE, async () => {
+      const peerAccount = wire.paidStreamingExtension && wire.paidStreamingExtension.peerAccount;
+      const pseAccount = wire.paidStreamingExtension && wire.paidStreamingExtension.pseAccount;
+
+      if (this.amSeeder) {
+        this.channelClient.createChannel(
+          peerAccount, // seeder
+          pseAccount, // leecher
+          '0', // seederBalance
+          '50', // leecherBalance,
+          await this.channelClient.getEthereumSelectedAddress(), // seederOutcomeAddress,
+          '0x0' // leecherOutcomeAddress
+        );
+      }
+    });
+
     wire.paidStreamingExtension.on(PaidStreamingExtensionEvents.NOTICE, notice =>
       torrent.emit(PaidStreamingExtensionEvents.NOTICE, wire, notice)
     );
 
-    // If the waller queues a message, send it across the wire
+    // If the wallet queues a message, send it across the wire
     this.channelClient.onMessageQueued(({sender, recipient, data}) => {
       wire.paidStreamingExtension.payment(JSON.stringify(data)); // TODO don't use 'payment' since the messages are mor general than that
     });
@@ -241,7 +264,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           await this.transferFunds(wire);
           break;
         case PaidStreamingExtensionNotices.START:
-          // [ George ] Here we can call channelClient.createChannel()
           wire.paidStreamingExtension.ack();
           this.jumpStart(torrent, wire);
           break;
