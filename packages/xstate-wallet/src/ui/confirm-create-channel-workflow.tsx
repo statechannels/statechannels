@@ -1,11 +1,12 @@
 import React from 'react';
-import {State, EventData} from 'xstate';
+import {EventData} from 'xstate';
 import './wallet.scss';
 import {Button} from 'rimble-ui';
+import {WorkflowState} from '../workflows/confirm-create-channel';
 
 interface Props {
-  current: State<any, any, any, any>;
-  send: (event: any, payload?: EventData | undefined) => State<any, any, any, any>;
+  current: WorkflowState;
+  send: (event: any, payload?: EventData | undefined) => WorkflowState;
 }
 
 export const ConfirmCreateChannel = (props: Props) => {
