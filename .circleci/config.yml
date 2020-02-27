@@ -4,17 +4,28 @@ orbs:
   slack: circleci/slack@3.4.1
   puppeteer: threetreeslight/puppeteer@0.1.2
 
+default_env_vars: &default_env_vars
+  HUB_DB_HOST: localhost
+  HUB_DB_PORT: 5432
+  HUB_DB_USER: root
+  NODE_ENV: test
+  USE_NATIVE_SOLC: true
+
+postgres_env_vars: &postgres_env_vars
+  POSTGRES_USER: root
+  POSTGRES_DB: hub_wallet_test
+  POSTGRES_PASSWORD: ''
+
 defaults: &defaults
+  environment:
+    <<: *default_env_vars
   working_directory: /home/circleci/project
   resource_class: medium
   docker:
     - image: counterfactual/statechannels:0.6.1 # Fast contract compilation with solc installed
     - image: circleci/postgres:12.0-alpine
       environment:
-        POSTGRES_USER: root
-        POSTGRES_DB: hub_wallet_test
-        POSTGRES_PASSWORD: ''
-        NODE_ENV: test
+        <<: *postgres_env_vars
 
 save_dep: &save_dep
   save_cache:
@@ -220,11 +231,9 @@ jobs:
       - image: circleci/node:10.16.3
       - image: circleci/postgres:12.0-alpine
         environment:
-          POSTGRES_USER: root
+          <<: *postgres_env_vars
           # Note that the DB is hub_wallet_${NODE_ENV} and we use development for this job
           POSTGRES_DB: hub_wallet_development
-          POSTGRES_PASSWORD: ''
-          NODE_ENV: test
     environment:
       FIREBASE_PREFIX: << pipeline.git.branch >>-2
       USE_VIRTUAL_FUNDING: 'TRUE'
