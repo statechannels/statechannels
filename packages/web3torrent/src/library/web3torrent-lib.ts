@@ -187,7 +187,8 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       const peerAccount = wire.paidStreamingExtension && wire.paidStreamingExtension.peerAccount;
       const pseAccount = wire.paidStreamingExtension && wire.paidStreamingExtension.pseAccount;
 
-      if (this.amSeeder) {
+      if (!this.amSeeder) {
+        // leecher is participants[0], seeder is participants[1]
         this.channelClient.createChannel(
           peerAccount, // seeder
           pseAccount, // leecher
