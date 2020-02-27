@@ -1,6 +1,6 @@
 import {Machine, MachineConfig, ServiceConfig} from 'xstate';
 
-import {SupportState, DirectFunding} from '.';
+import {SupportState} from '.';
 import {Store} from '../store';
 import {allocateToTarget} from '../utils/outcome';
 import {AllocationItem} from '../store/types';
@@ -15,15 +15,8 @@ export interface Init {
   deductions: AllocationItem[];
 }
 
-const fundLedger = {
-  invoke: {
-    src: 'directFunding',
-    data: ({ledgerChannelId, deductions}: Init): DirectFunding.Init => ({
-      channelId: ledgerChannelId,
-      minimalAllocation: deductions
-    }),
-    onDone: 'fundTarget'
-  }
+const checkLedger = {
+  invoke: {src: 'checkLedger', onDone: 'fundTarget'}
 };
 const FAILURE = `#${WORKFLOW}.failure`;
 const fundTarget = getDataAndInvoke(
@@ -35,9 +28,9 @@ const updateFunding = {invoke: {src: 'updateFunding', onDone: 'success'}};
 
 export const config: MachineConfig<any, any, any> = {
   key: WORKFLOW,
-  initial: 'fundLedger',
+  initial: 'checkLedger',
   states: {
-    fundLedger,
+    checkLedger,
     fundTarget,
     updateFunding,
     success: {type: 'final'},
@@ -46,7 +39,7 @@ export const config: MachineConfig<any, any, any> = {
 };
 
 const enum Services {
-  directFunding = 'directFunding',
+  checkLedger = 'checkLedger',
   getTargetOutcome = 'getTargetOutcome',
   updateFunding = 'updateFunding',
   supportState = 'supportState'
@@ -77,7 +70,7 @@ export const machine = (store: Store) => {
   }
 
   const services: Record<Services, ServiceConfig<Init>> = {
-    directFunding: DirectFunding.machine(store),
+    checkLedger: () => Promise.resolve(), // TODO
     getTargetOutcome,
     updateFunding,
     supportState: SupportState.machine(store)
