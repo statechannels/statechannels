@@ -1,4 +1,9 @@
-import {ChannelResult, Message, ChannelClient} from '@statechannels/channel-client';
+import {
+  ChannelResult,
+  Message,
+  ChannelClient,
+  ChannelClientInterface
+} from '@statechannels/channel-client';
 import {bigNumberify} from 'ethers/utils';
 
 export interface ChannelState {
@@ -13,24 +18,71 @@ export interface ChannelState {
   leecherBalance: string;
 }
 
-// This class wraps the channel client converting the request/response formats to those used in the app
+// This class wraps the channel client converting the
+// request/response formats to those used in the app
 
-export class Web3TorrentChannelClient {
-  constructor(private readonly channelClient: ChannelClient) {}
+export interface Web3TorrentChannelClientInterface {
+  createChannel(
+    seeder: string,
+    leecher: string,
+    seederBalance: string,
+    leecherBalance: string,
+    seederOutcomeAddress: string,
+    leecherOutcomeAddress: string
+  ): Promise<ChannelState>;
+  getAddress(): Promise<string>;
+  getEthereumSelectedAddress(): Promise<string>;
+  onMessageQueued(callback: (message: Message) => void);
+  onChannelUpdated(web3tCallback: (channelState: ChannelState) => any);
+  joinChannel(channelId: string);
+  closeChannel(channelId: string): Promise<ChannelState>;
+  challengeChannel(channelId: string): Promise<ChannelState>;
+  updateChannel(
+    channelId: string,
+    seeder: string,
+    leecher: string,
+    seederBalance: string,
+    leecherBalance: string,
+    seederOutcomeAddress: string,
+    leecherOutcomeAddress: string
+  );
+  acceptPayment(channelState: ChannelState);
+  pushMessage(message: Message<ChannelResult>);
+  approveBudgetAndFund(
+    playerAmount: string,
+    hubAmount: string,
+    playerDestinationAddress: string,
+    hubAddress: string,
+    hubDestinationAddress: string
+  );
+}
+
+export class Web3TorrentChannelClient implements Web3TorrentChannelClientInterface {
+  constructor(private readonly channelClient: ChannelClientInterface) {}
 
   mySigningAddress?: string;
   myEthereumSelectedAddress?: string; // this state can be inspected to infer whether we need to get the user to "Connect With MetaMask" or not.
 
   async createChannel(
-    aAddress: string,
-    bAddress: string,
-    aBal: string,
-    bBal: string,
-    aOutcomeAddress: string = aAddress,
-    bOutcomeAddress: string = bAddress
+    seeder: string,
+    leecher: string,
+    seederBalance: string,
+    leecherBalance: string,
+    seederOutcomeAddress: string,
+    leecherOutcomeAddress: string
   ): Promise<ChannelState> {
-    const participants = formatParticipants(aAddress, bAddress, aOutcomeAddress, bOutcomeAddress);
-    const allocations = formatAllocations(aOutcomeAddress, bOutcomeAddress, aBal, bBal);
+    const participants = formatParticipants(
+      leecher,
+      seeder,
+      leecherOutcomeAddress,
+      seederOutcomeAddress
+    );
+    const allocations = formatAllocations(
+      leecherOutcomeAddress,
+      seederOutcomeAddress,
+      leecherBalance,
+      seederBalance
+    );
     const appDefinition = '0x0'; // TODO SingleAssetPayments address
 
     const channelResult = await this.channelClient.createChannel(
