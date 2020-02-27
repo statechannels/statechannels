@@ -1,4 +1,4 @@
-import {FakeChannelProvider} from '@statechannels/channel-client';
+import {FakeChannelProvider} from '@statechannels/channel-channelClient';
 import debug from 'debug';
 import WebTorrent, {Torrent, TorrentOptions} from 'webtorrent';
 import paidStreamingExtension, {PaidStreamingExtensionOptions} from './pse-middleware';
@@ -16,8 +16,8 @@ import {
   WebTorrentSeedInput,
   WireEvents
 } from './types';
-import {Web3TorrentChannelClient} from '../clients/web3t-channel-client';
-import {ChannelClient} from '@statechannels/channel-client';
+import {Web3TorrentChannelClient} from '../clients/web3t-channel-channelClient';
+import {ChannelClient} from '@statechannels/channel-channelClient';
 
 const log = debug('web3torrent:library');
 
@@ -44,11 +44,11 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   allowedPeers: PeersByTorrent;
   pseAccount: string;
   torrents: PaidStreamingTorrent[] = [];
-  client: Web3TorrentChannelClient;
+  channelClient: Web3TorrentChannelClient;
 
   constructor(opts: WebTorrentPaidStreamingClientOptions = {}) {
     super(opts);
-    this.client = new Web3TorrentChannelClient(new ChannelClient(window.channelProvider));
+    this.channelClient = new Web3TorrentChannelClient(new ChannelClient(window.channelProvider));
     this.allowedPeers = {};
     this.pseAccount = opts.pseAccount || Math.floor(Math.random() * 99999999999999999).toString();
     log('ACCOUNT ID: ', this.pseAccount);
@@ -185,7 +185,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
     // [ George ] If web3torrent is to run the Single Asset Payments ForceMoveApp, and the payments are going to be unidirectional we could wrap the channelClient in a web3tChannelClient which offers a countersign() convenience method. This allows the seeder to immediately accept the payment and for the leecher to be ready to send another one as quickly as possible.
 
-    // [ George ] NB all channel client methods are async so we would want to await them before continuing. That means a bunch of methods in this class will also need to be aysnc.
+    // [ George ] NB all channel channelClient methods are async so we would want to await them before continuing. That means a bunch of methods in this class will also need to be aysnc.
 
     const {funds} = this.allowedPeers[infoHash][peerId];
     this.allowedPeers[infoHash][peerId].funds = (Number(funds) + Number(paymentHash)).toString();
@@ -194,7 +194,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   protected async transferFunds(wire: PaidStreamingWire) {
     // [ George ] I think this is where the leecher could call channelClient.updateChannel(). A first iteration might just do this without any UI or checks.
 
-    const channel = await this.client.createChannel(
+    const channel = await this.channelClient.createChannel(
       '0x0000000000000000000000000000000000000000',
       '0x0000000000000000000000000000000000000000',
       '0x00',
@@ -205,11 +205,11 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
     (window.channelProvider as FakeChannelProvider).playerIndex = 1;
 
-    this.client.onMessageQueued(({sender, recipient, data}) => {
+    this.channelClient.onMessageQueued(({sender, recipient, data}) => {
       wire.paidStreamingExtension.payment(JSON.stringify(data));
     });
 
-    await this.client.updateChannel(
+    await this.channelClient.updateChannel(
       channel.channelId, // channelId,
       '0x0000000000000000000000000000000000000000', // seeder,
       '0x0000000000000000000000000000000000000000', // leecher,
@@ -245,7 +245,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           this.jumpStart(torrent, wire);
           break;
         case PaidStreamingExtensionNotices.PAYMENT:
-          this.client.pushMessage(JSON.parse(data.message));
+          this.channelClient.pushMessage(JSON.parse(data.message));
           this.loadFunds(
             torrent.infoHash,
             wire.peerExtendedHandshake.pseAccount,
