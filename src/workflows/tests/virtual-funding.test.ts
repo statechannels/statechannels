@@ -19,6 +19,7 @@ import {
   participants as targetParticipants,
   threeParticipants as jointParticipants
 } from './data';
+import {subscribeToMessages} from './message-service';
 
 jest.setTimeout(20000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
@@ -69,11 +70,12 @@ test('virtual funding', async () => {
 
   const message = {signedStates: [{...state, signatures: [signature]}]};
 
-  stores.forEach((store: Store) => {
-    store.pushMessage(message);
-    store.outboxFeed.subscribe(m => _.without(stores, store).forEach(s => s.pushMessage(m)));
+  subscribeToMessages({
+    [jointParticipants[0].participantId]: aStore,
+    [jointParticipants[1].participantId]: hubStore,
+    [jointParticipants[2].participantId]: bStore
   });
-
+  stores.forEach((store: Store) => store.pushMessage(message));
   services.forEach(service => service.start());
 
   await waitForExpect(async () => {
