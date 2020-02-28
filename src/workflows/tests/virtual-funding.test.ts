@@ -3,7 +3,7 @@ import waitForExpect from 'wait-for-expect';
 
 import {Init, machine, Role} from '../virtualFunding';
 
-import {MemoryStore, Store} from '../../store/memory-store';
+import {MemoryStore} from '../../store/memory-store';
 import {bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
 import {firstState, signState, calculateChannelId} from '../../store/state-utils';
@@ -17,9 +17,14 @@ import {
   wallet2,
   wallet3,
   participants as targetParticipants,
-  threeParticipants as jointParticipants
+  threeParticipants as jointParticipants,
+  ledgerState,
+  first,
+  second,
+  third
 } from './data';
 import {subscribeToMessages} from './message-service';
+import {MemoryChannelStoreEntry} from '../../store/memory-channel-storage';
 
 jest.setTimeout(20000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
@@ -53,29 +58,47 @@ const outcome: Outcome = {
     {destination: jointParticipants[1].destination, amount: amounts.reduce(add)}
   ]
 };
-const state = firstState(outcome, jointChannel);
-const signature = signState(state, wallet1.privateKey);
 const context: Init = {targetChannelId, jointChannelId};
 
 test('virtual funding', async () => {
   const hubStore = new MemoryStore([wallet3.privateKey]);
   const aStore = new MemoryStore([wallet1.privateKey]);
   const bStore = new MemoryStore([wallet2.privateKey]);
-  const stores = [aStore, hubStore, bStore];
 
   const hubService = interpret(machine(hubStore, context, Role.Hub));
   const aService = interpret(machine(aStore, context, Role.A));
   const bService = interpret(machine(bStore, context, Role.B));
   const services = [aService, hubService, bService];
 
-  const message = {signedStates: [{...state, signatures: [signature]}]};
+  [aStore, hubStore, bStore].forEach((store: MemoryStore) => {
+    const state = firstState(outcome, jointChannel);
+    store.pushMessage({
+      signedStates: [{...state, signatures: [signState(state, wallet1.privateKey)]}]
+    });
+  });
+  await Promise.all(
+    [aStore, hubStore].map(async (store: MemoryStore) => {
+      const state = ledgerState([first, third], [1, 3]);
+      const signatures = [wallet1, wallet3].map(({privateKey}) => signState(state, privateKey));
+      store.pushMessage({signedStates: [{...state, signatures}]});
+      store.setLedger((await store.getEntry(calculateChannelId(state))) as MemoryChannelStoreEntry);
+    })
+  );
+  await Promise.all(
+    [bStore, hubStore].map(async (store: MemoryStore) => {
+      const state = ledgerState([second, third], [1, 3]);
+      const signatures = [wallet2, wallet3].map(({privateKey}) => signState(state, privateKey));
+      store.pushMessage({signedStates: [{...state, signatures}]});
+      store.setLedger((await store.getEntry(calculateChannelId(state))) as MemoryChannelStoreEntry);
+    })
+  );
 
   subscribeToMessages({
     [jointParticipants[0].participantId]: aStore,
     [jointParticipants[1].participantId]: hubStore,
     [jointParticipants[2].participantId]: bStore
   });
-  stores.forEach((store: Store) => store.pushMessage(message));
+
   services.forEach(service => service.start());
 
   await waitForExpect(async () => {
@@ -99,6 +122,7 @@ test('invalid joint state', async () => {
   const store = new MemoryStore([wallet1.privateKey]);
   const service = interpret(machine(store, context, Role.A)).start();
 
+  const state = firstState(outcome, jointChannel);
   const invalidState: State = {
     ...state,
     outcome: {type: 'SimpleEthAllocation', allocationItems: []}
