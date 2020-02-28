@@ -12,7 +12,7 @@ import {
 import {filter, map, take, flatMap, tap} from 'rxjs/operators';
 
 import {Store, supportedStateFeed} from '../store/memory-store';
-import {SupportState} from '.';
+import {SupportState, LedgerFunding} from '.';
 import {isFundGuarantor, FundGuarantor} from '../store/wire-protocol';
 import {checkThat, getDataAndInvoke} from '../utils';
 import {isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
@@ -36,9 +36,9 @@ const getObjective = (store: Store, peer: Role.A | Role.B) => async ({
   const {participants: jointParticipants} = entry.channelConstants;
   const participants = [jointParticipants[peer], jointParticipants[Role.Hub]];
 
-  const ledgerId = 'foo';
+  const ledgerChannelId = 'foo';
   const guarantorId = 'bar';
-  return {type: 'FundGuarantor', participants, data: {jointChannelId, ledgerId, guarantorId}};
+  return {type: 'FundGuarantor', participants, jointChannelId, ledgerChannelId, guarantorId};
 };
 
 type TEvent = AnyEventObject;
@@ -58,7 +58,7 @@ const enum Services {
   waitForFirstJointState = 'waitForFirstJointState',
   jointChannelUpdate = 'jointChannelUpdate',
   supportState = 'supportState',
-  indirectFunding = 'indirectFunding',
+  ledgerFunding = 'ledgerFunding',
   fundGuarantorAH = 'fundGuarantorAH',
   fundGuarantorBH = 'fundGuarantorBH'
 }
@@ -76,7 +76,15 @@ const fundJointChannel = (role: Role): StateNodeConfig<Init, any, TEvent> => {
             on: {FundGuarantor: 'runObjective'}
           },
           runObjective: {
-            invoke: {src: Services.indirectFunding, data: (_, {init}) => init, onDone: 'done'}
+            invoke: {
+              src: Services.ledgerFunding,
+              data: (_, {guarantorId, ledgerChannelId}: FundGuarantor): LedgerFunding.Init => ({
+                targetChannelId: guarantorId,
+                ledgerChannelId,
+                deductions: []
+              }),
+              onDone: 'done'
+            }
           },
           done: {type: 'final'}
         }
@@ -90,8 +98,12 @@ const fundJointChannel = (role: Role): StateNodeConfig<Init, any, TEvent> => {
           runObjective: {
             entry: Actions.triggerGuarantorObjective,
             invoke: {
-              src: Services.indirectFunding,
-              data: (_, {data}: DoneInvokeEvent<FundGuarantor>) => data,
+              src: Services.ledgerFunding,
+              data: (_, {data}: DoneInvokeEvent<FundGuarantor>): LedgerFunding.Init => ({
+                targetChannelId: data.guarantorId,
+                ledgerChannelId: data.ledgerChannelId,
+                deductions: []
+              }),
               onDone: 'done'
             }
           },
@@ -201,7 +213,7 @@ export const options = (store: Store): Partial<MachineOptions<Init, TEvent>> => 
 
   const services: Record<Services, ServiceConfig<Init>> = {
     supportState: SupportState.machine(store as any),
-    indirectFunding: async () => true,
+    ledgerFunding: LedgerFunding.machine(store),
     waitForFirstJointState: waitForFirstJointState(store),
     jointChannelUpdate: jointChannelUpdate(store),
     fundGuarantorAH: getObjective(store, Role.A),
