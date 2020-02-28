@@ -11,7 +11,7 @@ export type VirtuallyFund = _Objective<
 >;
 export type FundGuarantor = _Objective<
   'FundGuarantor',
-  {jointChannelId: string; ledgerId: string; guarantorId: string}
+  {jointChannelId: string; ledgerChannelId: string; guarantorId: string}
 >;
 
 export type Objective = OpenChannel | VirtuallyFund | FundGuarantor;
