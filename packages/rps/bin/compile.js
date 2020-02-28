@@ -20,7 +20,7 @@ compile.stdout.on('data', data => {
 });
 
 compile.stderr.on('data', data => {
-  console.log(data.toString());
+  throw data.toString();
 });
 
 compile.on('close', code => {
