@@ -1,3 +1,5 @@
+/// <reference types="../src/global" />
+
 import * as fs from 'fs';
 import path from 'path';
 
@@ -19,7 +21,9 @@ const guards = ${serialize(guards || {})}
 const customActions = ${serialize(actions || {})}
 const machine = Machine(config, {guards, actions: customActions})
     `,
-    console.error
+    err => {
+      if (err) throw err;
+    }
   );
 }
 
