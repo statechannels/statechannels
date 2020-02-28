@@ -4,54 +4,21 @@ import waitForExpect from 'wait-for-expect';
 import {Init, machine, Role} from '../virtualFunding';
 
 import {MemoryStore, Store} from '../../store/memory-store';
-import {ethers} from 'ethers';
 import {bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
 import {firstState, signState, calculateChannelId} from '../../store/state-utils';
-import {ChannelConstants, Outcome, Participant, State} from '../../store/types';
+import {ChannelConstants, Outcome, State} from '../../store/types';
 import {AddressZero} from 'ethers/constants';
 import {add} from '../../utils/math-utils';
 import {simpleEthAllocation} from '../../utils/outcome';
 
-const wallet1 = new ethers.Wallet(
-  '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318'
-); // 0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf
-const wallet2 = new ethers.Wallet(
-  '0xb3ab7b031311fe1764b657a6ae7133f19bac97acd1d7edca9409daa35892e727'
-); // 0x2222E21c8019b14dA16235319D34b5Dd83E644A9
-const wallet3 = new ethers.Wallet(
-  '0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29'
-); // 0xaaaacfD9F7b033804ee4f01e5DfB1cd586858490
-
-const targetParticipants: Participant[] = [
-  {
-    destination: wallet1.address,
-    signingAddress: wallet1.address,
-    participantId: 'a'
-  },
-  {
-    destination: wallet2.address,
-    signingAddress: wallet2.address,
-    participantId: 'b'
-  }
-];
-const jointParticipants: Participant[] = [
-  {
-    destination: wallet1.address,
-    signingAddress: wallet1.address,
-    participantId: 'a'
-  },
-  {
-    destination: wallet3.address,
-    signingAddress: wallet3.address,
-    participantId: 'hub'
-  },
-  {
-    destination: wallet2.address,
-    signingAddress: wallet2.address,
-    participantId: 'b'
-  }
-];
+import {
+  wallet1,
+  wallet2,
+  wallet3,
+  participants as targetParticipants,
+  threeParticipants as jointParticipants
+} from './data';
 
 jest.setTimeout(20000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
@@ -80,18 +47,9 @@ const amounts = [2, 3].map(bigNumberify);
 const outcome: Outcome = {
   type: 'SimpleEthAllocation',
   allocationItems: [
-    {
-      destination: jointParticipants[0].destination,
-      amount: amounts[0]
-    },
-    {
-      destination: jointParticipants[2].destination,
-      amount: amounts[1]
-    },
-    {
-      destination: jointParticipants[1].destination,
-      amount: amounts.reduce(add)
-    }
+    {destination: jointParticipants[0].destination, amount: amounts[0]},
+    {destination: jointParticipants[2].destination, amount: amounts[1]},
+    {destination: jointParticipants[1].destination, amount: amounts.reduce(add)}
   ]
 };
 const state = firstState(outcome, jointChannel);
