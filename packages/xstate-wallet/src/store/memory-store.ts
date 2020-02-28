@@ -51,13 +51,13 @@ export function isGuarantee(funding: Funding): funding is Guaranteed {
 interface InternalEvents {
   channelUpdated: [ChannelStoreEntry];
   newObjective: [Objective];
-  addToOutbox: [Message];
+  addToOutbox: [MessagePayload];
 }
 
 export interface Store {
   newObjectiveFeed: Observable<Objective>;
-  outboxFeed: Observable<Message>;
-  pushMessage: (message: Message) => Promise<void>;
+  outboxFeed: Observable<MessagePayload>;
+  pushMessage: (message: MessagePayload) => Promise<void>;
   channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry>;
 
   getAddress(): string;
@@ -134,7 +134,7 @@ export class MemoryStore implements Store {
     return fromEvent(this._eventEmitter, 'newObjective');
   }
 
-  get outboxFeed(): Observable<Message> {
+  get outboxFeed(): Observable<MessagePayload> {
     return fromEvent(this._eventEmitter, 'addToOutbox');
   }
 
@@ -220,7 +220,8 @@ export class MemoryStore implements Store {
     if (!channelStorage) {
       throw new Error('Channel not found');
     }
-    const myAddress = channelStorage.participants[channelStorage.myIndex].signingAddress;
+    const {participants} = channelStorage;
+    const myAddress = participants[channelStorage.myIndex].signingAddress;
     const privateKey = this._privateKeys[myAddress];
 
     if (!privateKey) {
@@ -252,7 +253,7 @@ export class MemoryStore implements Store {
     return Object.keys(this._privateKeys)[0];
   }
 
-  async pushMessage(message: Message) {
+  async pushMessage(message: MessagePayload) {
     const {signedStates, objectives} = message;
 
     if (signedStates) {

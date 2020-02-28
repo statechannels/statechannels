@@ -350,6 +350,12 @@ export const applicationWorkflow = (
         stateVars,
         appDefinition
       );
+      // Create a open channel objective so we can coordinate with all participants
+      await store.addObjective({
+        type: 'OpenChannel',
+        data: {targetChannelId: channelId},
+        participants
+      });
       return channelId;
     },
     invokeClosingProtocol: (context: ChannelIdExists) =>
