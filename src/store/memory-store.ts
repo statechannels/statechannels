@@ -82,7 +82,7 @@ export interface Store {
 }
 
 export class MemoryStore implements Store {
-  public chain: Chain;
+  readonly chain: Chain;
   private _channels: Record<string, MemoryChannelStoreEntry | undefined> = {};
   private _objectives: Objective[] = [];
   private _nonces: Record<string, BigNumber | undefined> = {};
