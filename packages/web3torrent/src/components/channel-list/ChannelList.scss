@@ -1,0 +1,16 @@
+@import '../../styles/variables';
+
+table.channel-list {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+
+  font-size: 18px;
+  line-height: 24px;
+}
+
+td.channel-header {
+    font-weight: bold;
+    text-align: center;
+    padding-bottom: 10px;
+}
