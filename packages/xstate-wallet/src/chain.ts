@@ -29,8 +29,8 @@ export interface Chain {
   chainUpdatedFeed: (channelId: string) => Observable<ChannelChainInfo>;
   deposit: (channelId: string, expectedHeld: string, amount: string) => Promise<void>;
   ethereumEnable: () => Promise<void>;
-  ethereumIsEnabled: () => boolean;
-  getSelectedDestination: () => string;
+  ethereumIsEnabled: boolean;
+  selectedDestination: string;
 }
 
 // TODO: This chain should be fleshed out enough so it mimics basic chain behavior
@@ -89,11 +89,11 @@ export class FakeChain implements Chain {
     return Promise.resolve();
   }
 
-  public ethereumIsEnabled() {
+  public get ethereumIsEnabled() {
     return true;
   }
 
-  public getSelectedDestination() {
+  public get selectedDestination() {
     return '0x123';
   }
 }
@@ -123,7 +123,7 @@ export class ChainWatcher implements Chain {
     }
   }
 
-  public ethereumIsEnabled(): boolean {
+  public get ethereumIsEnabled(): boolean {
     if (window.ethereum) {
       return !!window.ethereum.selectedAddress;
     } else {
@@ -131,7 +131,7 @@ export class ChainWatcher implements Chain {
     }
   }
 
-  public getSelectedDestination(): string {
+  public get selectedDestination(): string {
     if (window.ethereum) {
       const destination = window.ethereum.selectedAddress;
       if (destination) {
