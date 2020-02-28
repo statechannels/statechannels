@@ -98,8 +98,8 @@ describe('validTransition', () => {
       toBalances: AssetOutcomeShortHand;
       description: string;
     }) => {
-      fromBalances = replaceAddressesAndBigNumberify(fromBalances, addresses);
-      toBalances = replaceAddressesAndBigNumberify(toBalances, addresses);
+      fromBalances = replaceAddressesAndBigNumberify(fromBalances, addresses) as AssetOutcomeShortHand;
+      toBalances = replaceAddressesAndBigNumberify(toBalances, addresses) as AssetOutcomeShortHand;
 
       const fromAllocation: Allocation = [];
       const toAllocation: Allocation = [];
