@@ -19,7 +19,7 @@ export const ConfirmCreateChannel = (props: Props) => {
       }}
     >
       <h1>Do you wish to create a channel?</h1>
-      <Button onClick={() => props.send('USER_APPROVED')}>Yes</Button>
+      <Button onClick={() => props.send('USER_APPROVES')}>Yes</Button>
       <Button.Text onClick={() => props.send('USER_REJECTS')}>No</Button.Text>
     </div>
   );
