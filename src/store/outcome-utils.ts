@@ -90,32 +90,19 @@ export function convertToNitroOutcome(outcome: Outcome): NitroOutcome {
         }
       ];
     case 'SimpleTokenAllocation':
-      return [
-        {
-          assetHolderAddress: outcome.tokenAddress, // TODO: Map to assetholder address
-          allocationItems: convertToNitroAllocationItems(outcome.allocationItems)
-        }
-      ];
+      throw 'Unimplemented';
     case 'SimpleEthGuarantee':
       return [
         {
           assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
           guarantee: {
             targetChannelId: outcome.guarantorAddress,
-            destinations: outcome.destinations.map(convertAddressToBytes32)
+            destinations: outcome.destinations
           }
         }
       ];
     case 'SimpleTokenGuarantee':
-      return [
-        {
-          assetHolderAddress: outcome.tokenAddress, // TODO: Map to assetholder address,
-          guarantee: {
-            targetChannelId: outcome.guarantorAddress,
-            destinations: outcome.destinations.map(convertAddressToBytes32)
-          }
-        }
-      ];
+      throw 'Unimmplemented';
     case 'MixedAllocation':
       const nitroOutcome: NitroOutcome = [];
       if (outcome.ethAllocation) {
