@@ -62,7 +62,7 @@
   "scripts": {
     "build": "npx webpack --config ./webpack-build.config.js",
     "build:ci": "yarn build",
-    "generateConfigs": "yarn run ts-node bin/generateConfigs.ts ",
+    "generateConfigs": "yarn run ts-node bin/generateConfigs.ts",
     "lint:check": "eslint . --ext .ts --cache",
     "lint:write": "eslint . --ext .ts --fix",
     "start": "node scripts/start.js",
