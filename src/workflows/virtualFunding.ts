@@ -15,8 +15,10 @@ import {Store, supportedStateFeed} from '../store/memory-store';
 import {SupportState, LedgerFunding} from '.';
 import {isFundGuarantor, FundGuarantor} from '../store/wire-protocol';
 import {checkThat, getDataAndInvoke} from '../utils';
-import {isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
+import {isSimpleEthAllocation, simpleEthAllocation, simpleEthGuarantee} from '../utils/outcome';
 import {bigNumberify} from 'ethers/utils';
+import {CHALLENGE_DURATION} from '../constants';
+import _ from 'lodash';
 
 export const enum Role {
   A = 0,
@@ -37,15 +39,23 @@ const getObjective = (store: Store, peer: Role.A | Role.B) => async ({
   const participants = [jointParticipants[peer], jointParticipants[Role.Hub]];
 
   const ledgerChannelId = 'foo';
-  const guarantorId = 'bar';
+
+  const {channelId: guarantorId} = await store.createChannel(participants, CHALLENGE_DURATION, {
+    turnNum: bigNumberify(0),
+    appData: '0x',
+    isFinal: false,
+    outcome: simpleEthGuarantee(jointChannelId, ...participants.map(p => p.destination))
+  });
   return {type: 'FundGuarantor', participants, jointChannelId, ledgerChannelId, guarantorId};
 };
 
 type TEvent = AnyEventObject;
+
 const enum Actions {
   spawnFundGuarantorObserver = 'spawnFundGuarantorObserver',
   triggerGuarantorObjective = 'triggerGuarantorObjective'
 }
+
 const enum States {
   setupJointChannel = 'setupJointChannel',
   fundJointChannel = 'fundJointChannel',
