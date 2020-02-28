@@ -30,7 +30,7 @@ let service: Interpreter<any, any, any, any>;
 
 // this service to be invoked by a protocol xstate machine
 const subscribeDepositEvent = (ctx: Init) => {
-  return store.chainUpdatedFeed(ctx.channelId).pipe(
+  return store.chain.chainUpdatedFeed(ctx.channelId).pipe(
     map((chainInfo: ChannelChainInfo) => {
       if (chainInfo.amount.gte(ctx.fundedAt)) {
         return 'FUNDED';

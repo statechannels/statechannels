@@ -54,7 +54,7 @@ type Services = {
 type Options = {services: Services};
 export const machine: MachineFactory<Init, any> = (store: Store, context: Init) => {
   const subscribeDepositEvent = (ctx: Init) => {
-    return store.chainUpdatedFeed(ctx.channelId).pipe(
+    return store.chain.chainUpdatedFeed(ctx.channelId).pipe(
       map((chainInfo): 'FUNDED' | 'SAFE_TO_DEPOSIT' | 'NOT_SAFE_TO_DEPOSIT' => {
         if (chainInfo.amount.gte(ctx.fundedAt)) {
           return 'FUNDED';
@@ -68,10 +68,10 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
   };
 
   const submitDepositTransaction = async (ctx: Init) => {
-    const currentHoldings = (await store.getChainInfo(ctx.channelId)).amount;
+    const currentHoldings = (await store.chain.getChainInfo(ctx.channelId)).amount;
     const amount = bigNumberify(ctx.totalAfterDeposit).sub(currentHoldings);
     if (amount.gt(0)) {
-      await store.deposit(ctx.channelId, currentHoldings.toHexString(), amount.toHexString());
+      await store.chain.deposit(ctx.channelId, currentHoldings.toHexString(), amount.toHexString());
     }
   };
 
