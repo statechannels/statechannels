@@ -165,7 +165,7 @@ const spawnFundGuarantorObserver = (store: Store) => ({jointChannelId}: Init) =>
   spawn(
     store.newObjectiveFeed.pipe(
       filter(isFundGuarantor),
-      filter(o => o.data.jointChannelId === jointChannelId),
+      filter(o => o.jointChannelId === jointChannelId),
       take(1)
     )
   );

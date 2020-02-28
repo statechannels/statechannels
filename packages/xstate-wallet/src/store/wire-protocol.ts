@@ -3,28 +3,15 @@ import {SignedState, Participant} from './types';
 type _Objective<Name, Data> = {
   participants: Participant[];
   type: Name;
-  data: Data;
-};
-export type OpenChannel = _Objective<
-  'OpenChannel',
-  {
-    targetChannelId: string;
-  }
->;
+} & Data;
+export type OpenChannel = _Objective<'OpenChannel', {targetChannelId: string}>;
 export type VirtuallyFund = _Objective<
   'VirtuallyFund',
-  {
-    targetChannelId: string;
-    jointChannelId: string;
-  }
+  {targetChannelId: string; jointChannelId: string}
 >;
 export type FundGuarantor = _Objective<
   'FundGuarantor',
-  {
-    jointChannelId: string;
-    ledgerId: string;
-    guarantorId: string;
-  }
+  {jointChannelId: string; ledgerId: string; guarantorId: string}
 >;
 
 export type Objective = OpenChannel | VirtuallyFund | FundGuarantor;
