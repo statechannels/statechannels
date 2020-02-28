@@ -15,7 +15,8 @@ function getApplicationStateValue(applicationWorkflowState: AppWorkflowState): A
 export function getConfirmCreateChannelState(
   applicationWorkflowState: AppWorkflowState
 ): CCCWorkflowState {
-  return applicationWorkflowState.children[0].state as CCCWorkflowState;
+  return applicationWorkflowState.children[Object.keys(applicationWorkflowState.children)[0]]
+    .state as CCCWorkflowState;
 }
 
 // TODO:Ideally this should be a type guard
