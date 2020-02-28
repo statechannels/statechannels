@@ -5,38 +5,19 @@ import {add} from '../../utils/math-utils';
 import {Init, machine} from '../ledger-funding';
 
 import {MemoryStore, Store} from '../../store/memory-store';
-import {ethers} from 'ethers';
 import {bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
 import {firstState, signState, calculateChannelId} from '../../store/state-utils';
-import {ChannelConstants, Outcome, Participant, State} from '../../store/types';
+import {ChannelConstants, Outcome, State} from '../../store/types';
 import {AddressZero} from 'ethers/constants';
-import {createDestination, checkThat} from '../../utils';
+import {checkThat} from '../../utils';
 import {isSimpleEthAllocation} from '../../utils/outcome';
 import {FakeChain, Chain} from '../../chain';
+import {wallet1, wallet2, participants} from './data';
+import {subscribeToMessages} from './message-service';
 
 jest.setTimeout(20000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
-
-const wallet1 = new ethers.Wallet(
-  '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318'
-); // 0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf
-const wallet2 = new ethers.Wallet(
-  '0xb3ab7b031311fe1764b657a6ae7133f19bac97acd1d7edca9409daa35892e727'
-); // 0x2222E21c8019b14dA16235319D34b5Dd83E644A9
-
-const participants: Participant[] = [
-  {
-    destination: createDestination(wallet1.address),
-    signingAddress: wallet1.address,
-    participantId: 'a'
-  },
-  {
-    destination: createDestination(wallet2.address),
-    signingAddress: wallet2.address,
-    participantId: 'b'
-  }
-];
 
 const chainId = '0x01';
 const challengeDuration = bigNumberify(10);
@@ -101,8 +82,10 @@ beforeEach(() => {
   bStore = new MemoryStore([wallet2.privateKey], chain);
 
   [aStore, bStore].forEach((store: Store) => store.pushMessage(message));
-  aStore.outboxFeed.subscribe(m => bStore.pushMessage(m));
-  bStore.outboxFeed.subscribe(m => aStore.pushMessage(m));
+  subscribeToMessages({
+    [participants[0].participantId]: aStore,
+    [participants[1].participantId]: bStore
+  });
 });
 
 test('multiple workflows', async () => {
