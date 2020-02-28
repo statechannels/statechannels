@@ -38,8 +38,7 @@ const getObjective = (store: Store, peer: Role.A | Role.B) => async ({
   const {participants: jointParticipants} = entry.channelConstants;
   const participants = [jointParticipants[peer], jointParticipants[Role.Hub]];
 
-  const ledgerChannelId = 'foo';
-
+  const {channelId: ledgerChannelId} = await store.getLedger(jointParticipants[peer].participantId);
   const {channelId: guarantorId} = await store.createChannel(participants, CHALLENGE_DURATION, {
     turnNum: bigNumberify(0),
     appData: '0x',
