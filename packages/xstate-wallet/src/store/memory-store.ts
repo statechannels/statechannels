@@ -77,14 +77,12 @@ export interface Store {
   // But I need one, in order to implement virtual funding.
   addObjective(objective: Objective): void;
 
-  // TODO: Should this be part of the store?
-  getChainInfo: Chain['getChainInfo'];
-  chainUpdatedFeed: Chain['chainUpdatedFeed'];
-  deposit: Chain['deposit'];
+  // TODO: should this be exposed via the Store?
+  chain: Chain;
 }
 
 export class MemoryStore implements Store {
-  protected _chain: Chain;
+  readonly chain: Chain;
   private _channels: Record<string, MemoryChannelStoreEntry | undefined> = {};
   private _objectives: Objective[] = [];
   private _nonces: Record<string, BigNumber | undefined> = {};
@@ -94,8 +92,8 @@ export class MemoryStore implements Store {
   constructor(privateKeys?: string[], chain?: Chain) {
     // TODO: We shouldn't default to a fake chain
     // but I didn't feel like updating all the constructor calls
-    this._chain = chain || new FakeChain();
-    this._chain.initialize();
+    this.chain = chain || new FakeChain();
+    this.chain.initialize();
 
     if (privateKeys && privateKeys.length > 0) {
       // load existing keys
@@ -283,18 +281,6 @@ export class MemoryStore implements Store {
     }
 
     return entry;
-  }
-
-  chainUpdatedFeed(channelId: string) {
-    // TODO: Implement this
-    return this._chain.chainUpdatedFeed(channelId);
-  }
-
-  deposit(channelId: string, expectedHeld: string, amount: string) {
-    return this._chain.deposit(channelId, expectedHeld, amount);
-  }
-  getChainInfo(channelId: string) {
-    return this._chain.getChainInfo(channelId);
   }
 }
 
