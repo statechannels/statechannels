@@ -3,8 +3,7 @@ import {Participant} from '@statechannels/client-api-schema';
 import {sendDisplayMessage} from '../messaging';
 import {createMockGuard} from '../utils/workflow-utils';
 import {Store} from '../store/memory-store';
-import {SimpleEthAllocation} from '../store/types';
-import {BigNumber} from 'ethers/utils';
+import {SimpleEthAllocation, HexNumberString} from '../store/types';
 
 interface WorkflowActions {
   hideUi: Action<WorkflowContext, any>;
@@ -21,7 +20,7 @@ export interface WorkflowContext {
   appDefinition: string;
   appData: string;
   chainId: string;
-  challengeDuration: BigNumber;
+  challengeDuration: HexNumberString;
 }
 
 interface WorkflowStateSchema extends StateSchema<WorkflowContext> {

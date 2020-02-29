@@ -1,8 +1,8 @@
 import {AnyEventObject, MachineConfig, assign, spawn} from 'xstate';
 import {filter, map} from 'rxjs/operators';
 import {Store} from '../store';
-import {bigNumberify} from 'ethers/utils';
 import {connectToStore} from '../utils/workflow-utils';
+import {toHex, gte, lt} from '../utils/hex-number-utils';
 
 const WORKFLOW = 'advance-channel';
 /*
@@ -45,14 +45,14 @@ export type Services = {
 const notifyWhenAdvanced = (store: Store, ctx: Init) => {
   return store.channelUpdatedFeed(ctx.channelId).pipe(
     filter(e => {
-      return !!e.supported && e.supported.turnNum.gte(ctx.targetTurnNum);
+      return !!e.supported && gte(e.supported.turnNum, ctx.targetTurnNum);
     }),
     map(() => 'ADVANCED')
   );
 };
 
 const sendState = (store: Store) => async ({channelId, targetTurnNum}: Init) => {
-  const turnNum = bigNumberify(targetTurnNum);
+  const turnNum = toHex(targetTurnNum);
   /*
   TODO: the actual turnNum is calculated below. However, to determine whether
   a state is supported requires us to implement signature checking.
@@ -62,7 +62,7 @@ const sendState = (store: Store) => async ({channelId, targetTurnNum}: Init) => 
 
   const {supported} = await store.getEntry(channelId);
 
-  if (!!supported && supported.turnNum.lt(targetTurnNum)) {
+  if (!!supported && lt(supported.turnNum, targetTurnNum)) {
     store.signAndAddState(channelId, {...supported, turnNum});
   } else if (!supported) {
     const {latest} = await store.getEntry(channelId);

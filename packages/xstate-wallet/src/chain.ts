@@ -1,12 +1,13 @@
 import {ContractArtifacts, createETHDepositTransaction} from '@statechannels/nitro-protocol';
 import {getProvider} from './utils/contract-utils';
 import {ethers} from 'ethers';
-import {BigNumber, bigNumberify} from 'ethers/utils';
-import {State} from './store/types';
+import {State, HexNumberString} from './store/types';
 import {Observable, fromEvent, from, concat, merge} from 'rxjs';
 import {filter, map} from 'rxjs/operators';
 import {ETH_ASSET_HOLDER_ADDRESS, NITRO_ADJUDICATOR_ADDRESS} from './constants';
 import EventEmitter = require('eventemitter3');
+import {toHex, add} from './utils/hex-number-utils';
+import {BigNumber} from 'ethers/utils';
 
 const EthAssetHolderInterface = new ethers.utils.Interface(
   // https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
@@ -17,8 +18,8 @@ const NitroAdjudicatorInterface = new ethers.utils.Interface(
 );
 
 export interface ChannelChainInfo {
-  readonly challenge?: {state: State; challengeExpiry: BigNumber};
-  readonly amount: BigNumber;
+  readonly challenge?: {state: State; challengeExpiry: HexNumberString};
+  readonly amount: HexNumberString;
   // TODO: This is the same as challengeExpiry < now
   readonly finalized: boolean;
 }
@@ -32,27 +33,27 @@ export interface Chain {
 
 // TODO: This should handle amounts for each channel
 export class FakeChain implements Chain {
-  private totalAmount = bigNumberify(0);
+  private totalAmount = toHex(0);
   public depositEmitter = new EventEmitter();
   public async initialize() {
     /* NOOP */
   }
   public async deposit(channelId: string, expectedHeld: string, amount: string): Promise<void> {
-    this.totalAmount = this.totalAmount.add(amount);
+    this.totalAmount = add(this.totalAmount, amount);
     this.depositEmitter.emit('DEPOSIT', this.totalAmount);
     return Promise.resolve();
   }
   public async getChainInfo(channelId: string): Promise<ChannelChainInfo> {
-    return {amount: bigNumberify(this.totalAmount), finalized: false};
+    return {amount: toHex(this.totalAmount), finalized: false};
   }
   public chainUpdatedFeed(channelId: string): Observable<ChannelChainInfo> {
-    const updated = fromEvent<BigNumber>(this.depositEmitter, 'DEPOSIT').pipe(
+    const updated = fromEvent<HexNumberString>(this.depositEmitter, 'DEPOSIT').pipe(
       map(a => ({
         amount: a,
         finalized: false
       }))
     );
-    const first = from(Promise.resolve({amount: bigNumberify(this.totalAmount), finalized: false}));
+    const first = from(Promise.resolve({amount: toHex(this.totalAmount), finalized: false}));
     return merge(first, updated);
   }
 }
@@ -92,7 +93,7 @@ export class ChainWatcher implements Chain {
       EthAssetHolderInterface,
       provider
     );
-    const amount: ethers.utils.BigNumber = await contract.holdings(channelId);
+    const amount = toHex(await contract.holdings(channelId));
     // TODO: Fetch other info
     return {
       amount,
@@ -111,7 +112,7 @@ export class ChainWatcher implements Chain {
         return event.toAddress === channelId;
       }),
       map(event => {
-        return {amount: event.amount, finalized: false};
+        return {amount: toHex(event.amount), finalized: false};
       })
     );
     return concat(first, updates);

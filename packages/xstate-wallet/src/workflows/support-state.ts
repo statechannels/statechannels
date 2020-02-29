@@ -3,6 +3,7 @@ import {filter, map} from 'rxjs/operators';
 import {Store} from '../store';
 import {statesEqual, outcomesEqual, calculateChannelId} from '../store/state-utils';
 import {State} from '../store/types';
+import {lt} from '../utils/hex-number-utils';
 
 const WORKFLOW = 'support-state';
 
@@ -48,7 +49,8 @@ const sendState = (store: Store) => async ({state, channelId}: HasChannelId) => 
     statesEqual(channelConstants, latestSupportedByMe, state) ||
     // Otherwise, we only send it if we haven't signed any new states.
     (statesEqual(channelConstants, latestSupportedByMe, supported) &&
-      supported?.turnNum.lt(state.turnNum)) ||
+      supported &&
+      lt(supported.turnNum, state.turnNum)) ||
     // We always support a final state if it matches the outcome that we have signed
     (state.isFinal && outcomesEqual(state.outcome, latestSupportedByMe.outcome))
   ) {

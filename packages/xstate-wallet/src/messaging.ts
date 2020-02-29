@@ -22,6 +22,7 @@ import {ChannelStoreEntry} from './store/memory-channel-storage';
 import {Message as WireMessage} from './store/wire-protocol';
 import {createJsonRpcAllocationsFromOutcome} from './utils/json-rpc-utils';
 import {unreachable} from './utils';
+import {eq, lt} from './utils/hex-number-utils';
 
 type ChannelRequest =
   | CreateChannelRequest
@@ -145,9 +146,9 @@ export async function convertToChannelResult(
   const {participants, appDefinition} = channelEntry.channelConstants;
 
   let status: ChannelStatus = 'running';
-  if (turnNum.eq(0)) {
+  if (eq(turnNum, 0)) {
     status = 'proposed';
-  } else if (turnNum.lt(2 * participants.length - 1)) {
+  } else if (lt(turnNum, 2 * participants.length - 1)) {
     status = 'opening';
   } else if (channelEntry.supported?.isFinal) {
     status = 'closed';
@@ -161,7 +162,7 @@ export async function convertToChannelResult(
     appDefinition,
     appData,
     status,
-    turnNum: turnNum.toHexString(),
+    turnNum,
     channelId
   };
 }

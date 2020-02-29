@@ -2,6 +2,7 @@ import {ChannelConstants, StateVariables, SignedState, Participant, State} from 
 import {signState, hashState, getSignerAddress, calculateChannelId} from './state-utils';
 import _ from 'lodash';
 import {Funding} from './memory-store';
+import {gt, sub, toNumber} from '../utils/hex-number-utils';
 
 export interface ChannelStoreEntry {
   readonly channelId: string;
@@ -71,7 +72,7 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
   }
 
   private get sortedByDescendingTurnNum(): Array<StateVariables & {signatures: string[]}> {
-    return this.signedStates.sort((a, b) => b.turnNum.sub(a.turnNum).toNumber());
+    return this.signedStates.sort((a, b) => toNumber(sub(b.turnNum, a.turnNum)));
   }
 
   get supported() {
@@ -134,7 +135,7 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
       if (
         !this.supported ||
         this.inSupport(stateHash) ||
-        stateVars.turnNum.gt(this.supported.turnNum)
+        gt(stateVars.turnNum, this.supported.turnNum)
       )
         result[stateHash] = stateVars;
     });

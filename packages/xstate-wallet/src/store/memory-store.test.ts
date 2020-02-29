@@ -1,11 +1,12 @@
 import {MemoryStore} from './memory-store';
 import {Objective} from './wire-protocol';
 import {SimpleEthAllocation, State} from './types';
-import {bigNumberify, BigNumber} from 'ethers/utils';
+
 import {Wallet} from 'ethers';
 import {calculateChannelId, signState} from './state-utils';
 import {NETWORK_ID, CHALLENGE_DURATION} from '../constants';
 import {ChannelStoreEntry} from './memory-channel-storage';
+import {toHex, add} from '../utils/hex-number-utils';
 
 const {address: aAddress, privateKey: aPrivateKey} = new Wallet(
   '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318'
@@ -19,11 +20,11 @@ const [aDestination, bDestination] = [aAddress, bAddress]; // for convenience
 const outcome: SimpleEthAllocation = {
   type: 'SimpleEthAllocation',
   allocationItems: [
-    {destination: aDestination, amount: new BigNumber(5)},
-    {destination: bDestination, amount: new BigNumber(6)}
+    {destination: aDestination, amount: toHex(5)},
+    {destination: bDestination, amount: toHex(6)}
   ]
 };
-const turnNum = bigNumberify(4);
+const turnNum = toHex(4);
 const appData = '0xabc';
 const isFinal = false;
 const chainId = NETWORK_ID;
@@ -32,10 +33,10 @@ const participants = [
   {participantId: 'b', destination: bDestination, signingAddress: bAddress}
 ];
 const stateVars = {outcome, turnNum, appData, isFinal};
-const channelNonce = bigNumberify(0);
+const channelNonce = toHex(0);
 const appDefinition = '0x5409ED021D9299bf6814279A6A1411A7e866A631';
 
-const challengeDuration = bigNumberify(CHALLENGE_DURATION);
+const challengeDuration = toHex(CHALLENGE_DURATION);
 const channelConstants = {chainId, participants, channelNonce, appDefinition, challengeDuration};
 const state: State = {...stateVars, ...channelConstants};
 const channelId = calculateChannelId(channelConstants);
@@ -136,11 +137,11 @@ describe('pushMessage', () => {
     await store.createChannel(
       signedState.participants,
       signedState.challengeDuration,
-      {...signedState, turnNum: bigNumberify(0)},
+      {...signedState, turnNum: toHex(0)},
       signedState.appDefinition
     );
 
-    const nextState = {...state, turnNum: state.turnNum.add(2)};
+    const nextState = {...state, turnNum: add(state.turnNum, 2)};
     await store.pushMessage({
       signedStates: [{...nextState, signatures: [signState(nextState, bPrivateKey)]}]
     });

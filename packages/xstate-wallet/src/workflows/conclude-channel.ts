@@ -4,8 +4,8 @@ import {getDataAndInvoke, MachineFactory} from '../utils/workflow-utils';
 import {Store} from '../store';
 import {outcomesEqual} from '../store/state-utils';
 import {isIndirectFunding} from '../store/memory-store';
-import {add} from '../utils/math-utils';
 import {checkThat} from '../utils';
+import {add} from '../utils/hex-number-utils';
 const WORKFLOW = 'conclude-channel';
 
 export interface Init {
@@ -82,7 +82,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, ctx: Init) => {
       state: {
         ...channelConstants,
         ...latestSupportedByMe,
-        turnNum: latestSupportedByMe.turnNum.add(1),
+        turnNum: add(latestSupportedByMe.turnNum, 1),
         isFinal: true
       }
     };
@@ -124,7 +124,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, ctx: Init) => {
       state: {
         ...channelConstants,
         ...supported,
-        turnNum: supported.turnNum.add(1),
+        turnNum: add(supported.turnNum, 1),
         outcome: {type: 'SimpleEthAllocation', allocationItems: allocation}
       }
     };

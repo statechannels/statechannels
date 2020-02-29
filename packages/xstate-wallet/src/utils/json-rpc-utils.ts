@@ -1,7 +1,7 @@
 import {convertBytes32ToAddress, convertAddressToBytes32} from '@statechannels/nitro-protocol';
 import {UpdateChannelParams, Allocations} from '@statechannels/client-api-schema';
 import {Outcome, StateVariables, SimpleEthAllocation} from '../store/types';
-import {bigNumberify} from 'ethers/utils';
+import {toHex, add} from './hex-number-utils';
 
 export function createAllocationOutcomeFromParams(params: Allocations): SimpleEthAllocation {
   // TODO: Support all outcomes
@@ -10,7 +10,7 @@ export function createAllocationOutcomeFromParams(params: Allocations): SimpleEt
     allocationItems: params[0].allocationItems.map(a => {
       return {
         destination: convertAddressToBytes32(a.destination),
-        amount: bigNumberify(a.amount)
+        amount: toHex(a.amount)
       };
     })
   };
@@ -24,7 +24,7 @@ export function createJsonRpcAllocationsFromOutcome(outcome: Outcome): Allocatio
     {
       token: '0x0',
       allocationItems: outcome.allocationItems.map(a => ({
-        amount: a.amount.toHexString(),
+        amount: a.amount,
         destination: convertBytes32ToAddress(a.destination)
       }))
     }
@@ -44,7 +44,7 @@ export function createStateVarsFromUpdateChannelParams(
 
   return {
     ...stateVars,
-    turnNum: stateVars.turnNum.add(1),
+    turnNum: add(stateVars.turnNum, 1),
     outcome: createAllocationOutcomeFromParams(allocations),
     appData
   };

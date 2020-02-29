@@ -7,8 +7,9 @@ import {
   getStateSignerAddress as getNitroSignerAddress,
   getChannelId
 } from '@statechannels/nitro-protocol';
-import {joinSignature, splitSignature, bigNumberify} from 'ethers/utils';
+import {joinSignature, splitSignature} from 'ethers/utils';
 import _ from 'lodash';
+import {toHex, toNumber} from '../utils/hex-number-utils';
 
 export function toNitroState(state: State): NitroState {
   const {challengeDuration, appDefinition, channelNonce, participants, chainId} = state;
@@ -22,10 +23,10 @@ export function toNitroState(state: State): NitroState {
     appData: state.appData,
     isFinal: state.isFinal,
     outcome: convertToNitroOutcome(state.outcome),
-    challengeDuration: challengeDuration.toNumber(),
+    challengeDuration: toNumber(challengeDuration),
     appDefinition,
     channel,
-    turnNum: state.turnNum.toNumber()
+    turnNum: toNumber(state.turnNum)
   };
 }
 
@@ -75,7 +76,7 @@ export const firstState = (
 ): State => ({
   appData: appData || '0x',
   isFinal: false,
-  turnNum: bigNumberify(0),
+  turnNum: toHex(0),
   chainId: chainId || '0x01',
   channelNonce,
   challengeDuration,

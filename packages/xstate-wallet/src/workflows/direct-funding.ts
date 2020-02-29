@@ -1,14 +1,13 @@
 import {Machine, MachineConfig} from 'xstate';
 import _ from 'lodash';
-import {bigNumberify} from 'ethers/utils';
 import {AddressZero, HashZero} from 'ethers/constants';
-
 import * as Depositing from './depositing';
 import * as SupportState from './support-state';
 import {getDataAndInvoke, MachineFactory} from '../utils/workflow-utils';
 import {Store} from '../store';
 import {Outcome, SimpleEthAllocation} from '../store/types';
-import {add} from '../utils/math-utils';
+import {toHex, add, sub, gt} from '../utils/hex-number-utils';
+import {bigNumberify} from 'ethers/utils';
 
 const WORKFLOW = 'direct-funding';
 
@@ -107,9 +106,9 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
           .map(i => i.amount)
           .reduce(add);
 
-        const amountLeft = bigNumberify(amount).gt(currentlyAllocated)
-          ? amount.sub(currentlyAllocated)
-          : bigNumberify(0);
+        const amountLeft = gt(amount, currentlyAllocated)
+          ? sub(amount, currentlyAllocated)
+          : toHex(0);
         return {destination, amount: amountLeft};
       })
     );
@@ -139,7 +138,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
     if (entry.supported.outcome.type !== 'SimpleEthAllocation') {
       throw new Error('Unsupported outcome');
     }
-    let totalBeforeDeposit = bigNumberify(0);
+    let totalBeforeDeposit = toHex(0);
     for (let i = 0; i < minimalAllocation.allocationItems.length; i++) {
       const allocation = minimalAllocation.allocationItems[i];
       if (entry.myIndex === i) {
@@ -148,12 +147,12 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
         return {
           channelId,
           depositAt: totalBeforeDeposit,
-          totalAfterDeposit: bigNumberify(totalBeforeDeposit).add(allocation.amount),
+          totalAfterDeposit: add(totalBeforeDeposit, allocation.amount),
 
           fundedAt
         };
       } else {
-        totalBeforeDeposit = bigNumberify(allocation.amount).add(totalBeforeDeposit);
+        totalBeforeDeposit = add(allocation.amount, totalBeforeDeposit);
       }
     }
 
@@ -182,16 +181,16 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
           ...entry.latest,
           ...entry.channelConstants,
           outcome,
-          turnNum: entry.latest.turnNum.add(1)
+          turnNum: add(entry.latest.turnNum, 1)
         }
       };
     } else {
       return {
         state: {
           ...entry.channelConstants,
-          challengeDuration: bigNumberify(1),
+          challengeDuration: toHex(1),
           isFinal: false,
-          turnNum: bigNumberify(0),
+          turnNum: toHex(0),
           outcome: minimalOutcome(
             {type: 'SimpleEthAllocation', allocationItems: []},
             minimalAllocation
@@ -212,7 +211,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
       state: {
         ...supported,
         ...channelConstants,
-        turnNum: supported.turnNum.add(1),
+        turnNum: add(supported.turnNum, 1),
         outcome: mergeDestinations(supported.outcome as SimpleEthAllocation)
       }
     };

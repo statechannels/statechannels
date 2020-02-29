@@ -21,11 +21,11 @@ import * as CCC from './confirm-create-channel';
 import {Participant} from '@statechannels/client-api-schema';
 import {createMockGuard, getDataAndInvoke} from '../utils/workflow-utils';
 import {Store} from '../store/memory-store';
-import {StateVariables, SimpleEthAllocation} from '../store/types';
+import {StateVariables, SimpleEthAllocation, HexNumberString} from '../store/types';
 import {ChannelStoreEntry} from '../store/memory-channel-storage';
-import {bigNumberify, BigNumber} from 'ethers/utils';
 import * as ConcludeChannel from './conclude-channel';
 import {unreachable} from '../utils';
+import * as hexNumUtils from '../utils/hex-number-utils';
 
 export interface WorkflowContext {
   channelId?: string;
@@ -69,7 +69,7 @@ export interface CreateChannelEvent {
   outcome: SimpleEthAllocation;
   appDefinition: string;
   appData: string;
-  challengeDuration: BigNumber;
+  challengeDuration: HexNumberString;
   chainId: string;
   requestId: number;
 }
@@ -303,7 +303,7 @@ export const applicationWorkflow = (
         const existingState = await (await store.getEntry(event.channelId)).latest;
         const newState = {
           ...existingState,
-          turnNum: existingState.turnNum.add(1),
+          turnNum: hexNumUtils.add(existingState.turnNum, 1),
           appData: event.appData,
           outcome: event.outcome
         };
@@ -337,12 +337,12 @@ export const applicationWorkflow = (
       const stateVars: StateVariables = {
         outcome,
         appData,
-        turnNum: bigNumberify(0),
+        turnNum: hexNumUtils.toHex(0),
         isFinal: false
       };
       const {channelId} = await store.createChannel(
         participants,
-        bigNumberify(challengeDuration),
+        hexNumUtils.toHex(challengeDuration),
         stateVars,
         appDefinition
       );

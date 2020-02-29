@@ -12,9 +12,9 @@ import {
   MixedAllocation
 } from './types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
-import {bigNumberify} from 'ethers/utils';
 import {Allocation} from '@statechannels/client-api-schema';
 import {AddressZero} from 'ethers/constants';
+import {toHex} from '../utils/hex-number-utils';
 
 export function convertFromNitroOutcome(outcome: NitroOutcome): Outcome {
   if (outcome.length === 0) {
@@ -68,13 +68,13 @@ export function convertFromNitroOutcome(outcome: NitroOutcome): Outcome {
 
 function convertFromNitroAllocationItems(allocationItems: NitroAllocationItem[]): AllocationItem[] {
   return allocationItems.map(a => ({
-    amount: bigNumberify(a.amount),
+    amount: toHex(a.amount),
     destination: a.destination
   }));
 }
 function convertToNitroAllocationItems(allocationItems: AllocationItem[]): NitroAllocationItem[] {
   return allocationItems.map(a => ({
-    amount: a.amount.toHexString(),
+    amount: a.amount,
     destination:
       a.destination.length === 42 ? convertAddressToBytes32(a.destination) : a.destination
   }));
@@ -157,7 +157,7 @@ function convertAllocationToOutcome(
     type: allocation.token ? 'SimpleTokenAllocation' : 'SimpleEthAllocation',
     tokenAddress: allocation.token,
     allocationItems: allocation.allocationItems.map(a => ({
-      amount: bigNumberify(a.amount),
+      amount: toHex(a.amount),
       destination: a.destination
     }))
   };

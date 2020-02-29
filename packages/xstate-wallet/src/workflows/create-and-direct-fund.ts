@@ -1,13 +1,13 @@
 import {Machine, MachineConfig} from 'xstate';
 
-import {Participant, SimpleEthAllocation} from '../store/types';
+import {Participant, SimpleEthAllocation, HexNumberString} from '../store/types';
 import * as AdvanceChannel from './advance-channel';
 
 import {MachineFactory, getDataAndInvoke} from '../utils/workflow-utils';
 import {Store} from '../store';
-import {BigNumber, bigNumberify} from 'ethers/utils';
+
 import * as Depositing from './depositing';
-import {add} from '../utils/math-utils';
+import {add, toHex} from '../utils/hex-number-utils';
 const PROTOCOL = 'create-and-direct-fund';
 
 export enum Indices {
@@ -21,7 +21,7 @@ export type Init = {
   appDefinition: string;
   appData: string;
   channelId: string;
-  challengeDuration: BigNumber;
+  challengeDuration: HexNumberString;
   index: Indices;
 };
 
@@ -78,7 +78,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => 
     if (entry.supported.outcome.type !== 'SimpleEthAllocation') {
       throw new Error('Unsupported outcome');
     }
-    let totalBeforeDeposit = bigNumberify(0);
+    let totalBeforeDeposit = toHex(0);
     for (let i = 0; i < minimalAllocation.allocationItems.length; i++) {
       const allocation = minimalAllocation.allocationItems[i];
       if (entry.myIndex === i) {
@@ -87,12 +87,12 @@ export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => 
         return {
           channelId,
           depositAt: totalBeforeDeposit,
-          totalAfterDeposit: bigNumberify(totalBeforeDeposit).add(allocation.amount),
+          totalAfterDeposit: add(totalBeforeDeposit, allocation.amount),
 
           fundedAt
         };
       } else {
-        totalBeforeDeposit = bigNumberify(allocation.amount).add(totalBeforeDeposit);
+        totalBeforeDeposit = add(allocation.amount, totalBeforeDeposit);
       }
     }
 

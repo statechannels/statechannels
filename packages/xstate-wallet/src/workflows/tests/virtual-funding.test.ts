@@ -5,12 +5,12 @@ import {Init, machine, Role} from '../virtualFunding';
 
 import {MemoryStore, Store} from '../../store/memory-store';
 import {ethers} from 'ethers';
-import {bigNumberify} from 'ethers/utils';
+import {toHex, add} from '../../utils/hex-number-utils';
 import _ from 'lodash';
 import {firstState, signState, calculateChannelId} from '../../store/state-utils';
 import {ChannelConstants, Outcome, Participant, State} from '../../store/types';
 import {AddressZero} from 'ethers/constants';
-import {add} from '../../utils/math-utils';
+
 import {simpleEthAllocation} from '../../utils/outcome';
 
 const wallet1 = new ethers.Wallet(
@@ -62,11 +62,11 @@ const jointParticipants: Participant[] = [
 jest.setTimeout(20000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 const chainId = '0x01';
-const challengeDuration = bigNumberify(10);
+const challengeDuration = toHex(10);
 const appDefinition = AddressZero;
 
 const targetChannel: ChannelConstants = {
-  channelNonce: bigNumberify(0),
+  channelNonce: toHex(0),
   chainId,
   challengeDuration,
   participants: targetParticipants,
@@ -74,7 +74,7 @@ const targetChannel: ChannelConstants = {
 };
 const targetChannelId = calculateChannelId(targetChannel);
 const jointChannel: ChannelConstants = {
-  channelNonce: bigNumberify(0),
+  channelNonce: toHex(0),
   chainId,
   challengeDuration,
   participants: jointParticipants,
@@ -82,7 +82,7 @@ const jointChannel: ChannelConstants = {
 };
 const jointChannelId = calculateChannelId(jointChannel);
 
-const amounts = [bigNumberify(2), bigNumberify(3)];
+const amounts = [toHex(2), toHex(3)];
 const outcome: Outcome = {
   type: 'SimpleEthAllocation',
   allocationItems: [
@@ -196,7 +196,7 @@ test('multiple workflows', async () => {
 
     const {supported} = await aStore.getEntry(jointChannelId);
     const outcome = supported?.outcome;
-    const amount = bigNumberify(5);
+    const amount = toHex(5);
     expect(outcome).toMatchObject(
       simpleEthAllocation(
         {destination: targetChannelId, amount},

@@ -3,10 +3,9 @@ import {filter, catchError, map} from 'rxjs/operators';
 import {EventEmitter} from 'eventemitter3';
 import * as _ from 'lodash';
 
-import {BigNumber, bigNumberify} from 'ethers/utils';
 import {Wallet} from 'ethers';
 
-import {Participant, StateVariables, SignedState, State} from './types';
+import {Participant, StateVariables, SignedState, State, HexNumberString} from './types';
 import {MemoryChannelStoreEntry, ChannelStoreEntry} from './memory-channel-storage';
 import {AddressZero} from 'ethers/constants';
 import {Objective, Message} from './wire-protocol';
@@ -14,6 +13,7 @@ import {Chain, FakeChain} from '../chain';
 import {calculateChannelId, hashState} from './state-utils';
 import {NETWORK_ID} from '../constants';
 import {checkThat, exists} from '../utils';
+import * as hexNumUtils from '../utils/hex-number-utils';
 
 interface DirectFunding {
   type: 'Direct';
@@ -65,7 +65,7 @@ export interface Store {
   signAndAddState(channelId: string, stateVars: StateVariables): Promise<void>;
   createChannel(
     participants: Participant[],
-    challengeDuration: BigNumber,
+    challengeDuration: string,
     stateVars: StateVariables,
     appDefinition?: string
   ): Promise<ChannelStoreEntry>;
@@ -85,7 +85,7 @@ export class MemoryStore implements Store {
   readonly chain: Chain;
   private _channels: Record<string, MemoryChannelStoreEntry | undefined> = {};
   private _objectives: Objective[] = [];
-  private _nonces: Record<string, BigNumber | undefined> = {};
+  private _nonces: Record<string, HexNumberString | undefined> = {};
   private _eventEmitter = new EventEmitter<InternalEvents>();
   private _privateKeys: Record<string, string | undefined> = {};
 
@@ -172,7 +172,7 @@ export class MemoryStore implements Store {
 
   public async createChannel(
     participants: Participant[],
-    challengeDuration: BigNumber,
+    challengeDuration: string,
     stateVars: StateVariables,
     appDefinition = AddressZero
   ): Promise<ChannelStoreEntry> {
@@ -183,7 +183,7 @@ export class MemoryStore implements Store {
       throw new Error("Couldn't find the signing key for any participant in wallet.");
     }
 
-    const channelNonce = this.getNonce(addresses).add(1);
+    const channelNonce = hexNumUtils.add(this.getNonce(addresses), 1);
     const chainId = NETWORK_ID;
 
     const entry = await this.initializeChannel({
@@ -203,12 +203,12 @@ export class MemoryStore implements Store {
 
     return Promise.resolve(entry);
   }
-  private getNonce(addresses: string[]): BigNumber {
-    return this._nonces[this.nonceKeyFromAddresses(addresses)] || bigNumberify(-1);
+  private getNonce(addresses: string[]): HexNumberString {
+    return this._nonces[this.nonceKeyFromAddresses(addresses)] || hexNumUtils.toHex(-1);
   }
 
-  private setNonce(addresses: string[], value: BigNumber) {
-    if (value.lte(this.getNonce(addresses))) throw 'Invalid nonce';
+  private setNonce(addresses: string[], value: HexNumberString) {
+    if (hexNumUtils.lte(value, this.getNonce(addresses))) throw 'Invalid nonce';
 
     this._nonces[this.nonceKeyFromAddresses(addresses)] = value;
   }

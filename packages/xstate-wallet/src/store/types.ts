@@ -1,4 +1,5 @@
-import {BigNumber} from 'ethers/utils';
+//This is used to identify strings that are the hex values of BN
+export type HexNumberString = string;
 
 export interface Participant {
   participantId: string;
@@ -9,14 +10,14 @@ export interface Participant {
 
 export interface StateVariables {
   outcome: Outcome;
-  turnNum: BigNumber;
+  turnNum: HexNumberString;
   appData: string;
   isFinal: boolean;
 }
 
 export interface AllocationItem {
   destination: string;
-  amount: BigNumber;
+  amount: HexNumberString;
 }
 export interface SimpleEthAllocation {
   type: 'SimpleEthAllocation';
@@ -55,9 +56,9 @@ export type Outcome = SimpleOutcome | MixedAllocation;
 export interface ChannelConstants {
   chainId: string;
   participants: Participant[];
-  channelNonce: BigNumber;
+  channelNonce: HexNumberString;
   appDefinition: string;
-  challengeDuration: BigNumber;
+  challengeDuration: HexNumberString;
 }
 
 export interface State extends ChannelConstants, StateVariables {}

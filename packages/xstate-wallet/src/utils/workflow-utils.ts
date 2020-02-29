@@ -15,8 +15,8 @@ import {
   UpdateChannelRequest
 } from '@statechannels/client-api-schema';
 import {NETWORK_ID, CHALLENGE_DURATION} from '../constants';
-import {bigNumberify} from 'ethers/utils';
 import {OpenEvent, PlayerStateUpdate} from '../workflows/application';
+import {toHex} from './hex-number-utils';
 
 export function createMockGuard(guardName: string): GuardPredicate<any, any> {
   return {
@@ -90,7 +90,7 @@ export function convertToOpenEvent(request: CreateChannelRequest | JoinChannelRe
       type: 'CREATE_CHANNEL',
       ...request.params,
       outcome: createAllocationOutcomeFromParams(request.params.allocations),
-      challengeDuration: bigNumberify(CHALLENGE_DURATION),
+      challengeDuration: toHex(CHALLENGE_DURATION),
       chainId: NETWORK_ID,
       requestId: request.id
     };

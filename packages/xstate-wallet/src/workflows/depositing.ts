@@ -1,15 +1,16 @@
-import {bigNumberify, BigNumber} from 'ethers/utils';
 import {Machine, MachineConfig} from 'xstate';
 import {Store} from '../store';
 import {map} from 'rxjs/operators';
 import {MachineFactory} from '../utils/workflow-utils';
 import {Observable} from 'rxjs';
+import {HexNumberString} from '../store/types';
+import {sub, gte, gt} from '../utils/hex-number-utils';
 
 export type Init = {
   channelId: string;
-  depositAt: BigNumber;
-  totalAfterDeposit: BigNumber;
-  fundedAt: BigNumber;
+  depositAt: HexNumberString;
+  totalAfterDeposit: HexNumberString;
+  fundedAt: HexNumberString;
 };
 
 const watcher: MachineConfig<Init, any, any> = {
@@ -56,9 +57,9 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
   const subscribeDepositEvent = (ctx: Init) => {
     return store.chain.chainUpdatedFeed(ctx.channelId).pipe(
       map((chainInfo): 'FUNDED' | 'SAFE_TO_DEPOSIT' | 'NOT_SAFE_TO_DEPOSIT' => {
-        if (chainInfo.amount.gte(ctx.fundedAt)) {
+        if (gte(chainInfo.amount, ctx.fundedAt)) {
           return 'FUNDED';
-        } else if (chainInfo.amount.gte(ctx.depositAt)) {
+        } else if (gte(chainInfo.amount, ctx.depositAt)) {
           return 'SAFE_TO_DEPOSIT';
         } else {
           return 'NOT_SAFE_TO_DEPOSIT';
@@ -69,9 +70,9 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
 
   const submitDepositTransaction = async (ctx: Init) => {
     const currentHoldings = (await store.chain.getChainInfo(ctx.channelId)).amount;
-    const amount = bigNumberify(ctx.totalAfterDeposit).sub(currentHoldings);
-    if (amount.gt(0)) {
-      await store.chain.deposit(ctx.channelId, currentHoldings.toHexString(), amount.toHexString());
+    const amount = sub(ctx.totalAfterDeposit, currentHoldings);
+    if (gt(amount, 0)) {
+      await store.chain.deposit(ctx.channelId, currentHoldings, amount);
     }
   };
 

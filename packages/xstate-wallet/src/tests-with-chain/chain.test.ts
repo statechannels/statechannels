@@ -1,11 +1,13 @@
 import {ChainWatcher, ChannelChainInfo} from '../chain';
-import {bigNumberify, parseUnits, BigNumber} from 'ethers/utils';
+import {parseUnits} from 'ethers/utils';
 import {Contract, providers} from 'ethers';
 import {ContractArtifacts, randomChannelId} from '@statechannels/nitro-protocol';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
 import {Machine, interpret, Interpreter} from 'xstate';
 import {map} from 'rxjs/operators';
 import {MemoryStore} from '../store/memory-store';
+import {gte, toHex} from '../utils/hex-number-utils';
+import {HexNumberString} from '../store/types';
 
 const chain = new ChainWatcher();
 
@@ -13,14 +15,14 @@ const store = new MemoryStore(undefined, chain);
 
 const mockContext = {
   channelId: randomChannelId(),
-  fundedAt: bigNumberify('0'),
-  depositAt: bigNumberify('0')
+  fundedAt: toHex('0'),
+  depositAt: toHex('0')
 };
 type Init = {
   channelId: string;
-  depositAt: BigNumber;
-  totalAfterDeposit: BigNumber;
-  fundedAt: BigNumber;
+  depositAt: HexNumberString;
+  totalAfterDeposit: HexNumberString;
+  fundedAt: HexNumberString;
 };
 
 const provider = new providers.JsonRpcProvider(`http://localhost:${process.env.GANACHE_PORT}`);
@@ -32,9 +34,9 @@ let service: Interpreter<any, any, any, any>;
 const subscribeDepositEvent = (ctx: Init) => {
   return store.chain.chainUpdatedFeed(ctx.channelId).pipe(
     map((chainInfo: ChannelChainInfo) => {
-      if (chainInfo.amount.gte(ctx.fundedAt)) {
+      if (gte(chainInfo.amount, ctx.fundedAt)) {
         return 'FUNDED';
-      } else if (chainInfo.amount.gte(ctx.depositAt)) {
+      } else if (gte(chainInfo.amount, ctx.depositAt)) {
         return 'SAFE_TO_DEPOSIT';
       } else {
         return 'NOT_SAFE_TO_DEPOSIT';

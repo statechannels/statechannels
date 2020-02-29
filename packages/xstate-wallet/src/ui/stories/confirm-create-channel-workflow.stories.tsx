@@ -9,7 +9,7 @@ import {interpret} from 'xstate';
 import {Participant} from '@statechannels/client-api-schema';
 import {renderWalletInFrontOfApp} from './helpers';
 import {MemoryStore} from '../../store/memory-store';
-import {bigNumberify} from 'ethers/utils';
+import {toHex} from '../../utils/hex-number-utils';
 
 const store = new MemoryStore(['0xkey']);
 
@@ -31,7 +31,7 @@ const testContext: WorkflowContext = {
   appDefinition: '0x0',
   appData: '0x0',
   chainId: '0',
-  challengeDuration: bigNumberify(1)
+  challengeDuration: toHex(1)
 };
 
 if (config.states) {

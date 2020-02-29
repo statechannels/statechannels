@@ -16,7 +16,7 @@ import {SupportState} from '.';
 import {isFundGuarantor, FundGuarantor} from '../store/wire-protocol';
 import {checkThat} from '../utils';
 import {isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
-import {bigNumberify} from 'ethers/utils';
+import {toHex, eq, add} from '../utils/hex-number-utils';
 
 export const enum Role {
   A = 0,
@@ -165,7 +165,7 @@ const waitForFirstJointState = (store: Store) => ({
     .channelUpdatedFeed(jointChannelId)
     .pipe(
       flatMap(e => e.states),
-      filter(({turnNum}) => turnNum.eq(0)),
+      filter(({turnNum}) => eq(turnNum, 0)),
       tap(({outcome, participants}) => {
         const {allocationItems} = checkThat(outcome, isSimpleEthAllocation);
         const destinations = allocationItems.map(i => i.destination);
@@ -175,7 +175,7 @@ const waitForFirstJointState = (store: Store) => ({
           destinations[0] === participants[0].destination &&
           destinations[1] === participants[2].destination &&
           destinations[2] === participants[1].destination &&
-          amounts[0].add(amounts[1]).eq(amounts[2])
+          eq(add(amounts[0], amounts[1]), amounts[2])
         ) {
           return;
         } else throw 'Invalid first state';
@@ -200,7 +200,7 @@ const jointChannelUpdate = (store: Store) => ({
 }: Init): Promise<SupportState.Init> =>
   supportedStateFeed(store, jointChannelId)
     .pipe(
-      filter(({state}) => state.turnNum.eq(0)),
+      filter(({state}) => eq(state.turnNum, 0)),
       map(({state}) => {
         const oldOutcome = checkThat(state.outcome, isSimpleEthAllocation);
         const amount = oldOutcome.allocationItems[2].amount;
@@ -208,7 +208,7 @@ const jointChannelUpdate = (store: Store) => ({
           {destination: targetChannelId, amount},
           {destination: state.participants[Role.Hub].destination, amount}
         );
-        return {state: {...state, turnNum: bigNumberify(1), outcome}};
+        return {state: {...state, turnNum: toHex(1), outcome}};
       }),
       take(1)
     )
