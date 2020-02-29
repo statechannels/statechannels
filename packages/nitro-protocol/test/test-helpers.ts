@@ -236,7 +236,7 @@ export async function signStates(
 export function replaceAddressesAndBigNumberify(
   object: AssetOutcomeShortHand | OutcomeShortHand | string,
   addresses: AddressesLookup
-) {
+): AssetOutcomeShortHand | OutcomeShortHand | string {
   const newObject = {};
   Object.keys(object).forEach(key => {
     if (typeof object[key] === 'object') {

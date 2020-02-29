@@ -1,4 +1,4 @@
-import {expectRevert} from '@statechannels/devtools';
+import {expectRevert, DeployedArtifact} from '@statechannels/devtools';
 import TicTacToeArtifact from '../../build/contracts/TicTacToe.json';
 import * as ethers from 'ethers';
 import {Contract} from 'ethers';
@@ -24,14 +24,6 @@ const testProvider = new ethers.providers.JsonRpcProvider(
   `http://localhost:${process.env.GANACHE_PORT}`
 );
 
-const PositionIndex = {
-  Start: PositionType.Start,
-  XPlaying: PositionType.XPlaying,
-  OPlaying: PositionType.OPlaying,
-  Draw: PositionType.Draw,
-  Victory: PositionType.Victory
-};
-
 let TicTacToe: Contract;
 
 const numParticipants = 2;
@@ -43,8 +35,8 @@ const addresses = {
 
 export function setupContracts(
   provider: ethers.providers.JsonRpcProvider,
-  artifact,
-  address
+  artifact: DeployedArtifact,
+  address: string
 ): ethers.ethers.Contract {
   const signer = provider.getSigner(0);
 
@@ -65,8 +57,8 @@ async function sendTransaction(
 beforeAll(async () => {
   TicTacToe = await setupContracts(
     testProvider,
-    TicTacToeArtifact,
-    process.env.TTT_CONTRACT_ADDRESS
+    (TicTacToeArtifact as unknown) as DeployedArtifact,
+    process.env.TTT_CONTRACT_ADDRESS as string
   );
 });
 
@@ -121,14 +113,14 @@ const balanceBWinsToStart = [
   {A: 4, B: 6}
 ];
 
-const startToXPlaying = ['Start', 'XPlaying'];
-const xPlayingToOPlaying = ['XPlaying', 'OPlaying'];
-const oPlayingToXPlaying = ['OPlaying', 'XPlaying'];
-const xPlayingToVictory = ['XPlaying', 'Victory'];
-const oPlayingToVictory = ['OPlaying', 'Victory'];
-const oPlayingToDraw = ['OPlaying', 'Draw'];
-const drawToStart = ['Draw', 'Start'];
-const victoryToStart = ['Victory', 'Start'];
+const startToXPlaying = [PositionType.Start, PositionType.XPlaying];
+const xPlayingToOPlaying = [PositionType.XPlaying, PositionType.OPlaying];
+const oPlayingToXPlaying = [PositionType.OPlaying, PositionType.XPlaying];
+const xPlayingToVictory = [PositionType.XPlaying, PositionType.Victory];
+const oPlayingToVictory = [PositionType.OPlaying, PositionType.Victory];
+const oPlayingToDraw = [PositionType.OPlaying, PositionType.Draw];
+const drawToStart = [PositionType.Draw, PositionType.Start];
+const victoryToStart = [PositionType.Victory, PositionType.Start];
 
 async function validTransition({
   isValid,
@@ -139,14 +131,20 @@ async function validTransition({
   balances
 }: {
   isValid: boolean;
-  positionType: string[];
+  positionType: PositionType[];
   stake: number[];
   Xs: number[];
   Os: number[];
   balances: AssetOutcomeShortHand[];
 }): Promise<void> {
-  const fromBalances = replaceAddressesAndBigNumberify(balances[0], addresses);
-  const toBalances = replaceAddressesAndBigNumberify(balances[1], addresses);
+  const fromBalances: AssetOutcomeShortHand = replaceAddressesAndBigNumberify(
+    balances[0],
+    addresses
+  ) as AssetOutcomeShortHand;
+  const toBalances: AssetOutcomeShortHand = replaceAddressesAndBigNumberify(
+    balances[1],
+    addresses
+  ) as AssetOutcomeShortHand;
   const fromPositionType = positionType[0];
   const toPositionType = positionType[1];
   const fromStake = stake[0];
@@ -158,21 +156,21 @@ async function validTransition({
   const fromAllocation: Allocation = [];
   const toAllocation: Allocation = [];
   Object.keys(fromBalances).forEach(key =>
-    fromAllocation.push({destination: key, amount: fromBalances[key] as string})
+    fromAllocation.push({destination: key, amount: fromBalances[key].toString()})
   );
   Object.keys(toBalances).forEach(key =>
-    toAllocation.push({destination: key, amount: toBalances[key] as string})
+    toAllocation.push({destination: key, amount: toBalances[key].toString()})
   );
   const fromOutcome = [{assetHolderAddress: AddressZero, allocationItems: fromAllocation}];
   const toOutcome = [{assetHolderAddress: AddressZero, allocationItems: toAllocation}];
   const fromAppData: TTTData = {
-    positionType: PositionIndex[fromPositionType],
+    positionType: fromPositionType,
     stake: bigNumberify(fromStake).toString(),
     Xs: fromXs,
     Os: fromOs
   };
   const toAppData: TTTData = {
-    positionType: PositionIndex[toPositionType],
+    positionType: toPositionType,
     stake: bigNumberify(toStake).toString(),
     Xs: toXs,
     Os: toOs
@@ -250,7 +248,7 @@ describe('validTransition', () => {
       balances
     }: {
       isValid: boolean;
-      positionType: string[];
+      positionType: PositionType[];
       Xs: number[];
       Os: number[];
       balances: AssetOutcomeShortHand[];

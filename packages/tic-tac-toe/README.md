@@ -3,9 +3,11 @@ Tic Tac Toe
 </h1>
 
 <!-- TODO Update with link -->
+
 [![Netlify Status](https://api.netlify.com/api/v1/badges/3d541d58-edf8-4760-b513-4f9a11b991de/deploy-status)](https://app.netlify.com/sites/tic-tac-toe-statechannels/deploys)
 
 <!-- TODO check that ttt.statechannels.org works -->
+
 This app is an example of a game built on our [ForceMove](https://magmo.com/force-move-games.pdf) protocol. You can [play](https://ttt.statechannels.org) against a friend or against our bots on the ropsten testnet.
 
 ![splash](./screens.png 'screens')
@@ -73,23 +75,23 @@ A short introduction of this app could easily go here.
 
 You will need the following things properly installed on your computer.
 
-* [Git](https://git-scm.com/)
-* [Node.js](https://nodejs.org/)
-* [Yarn](https://yarnpkg.com/)
-* [Ember CLI](https://ember-cli.com/)
-* [Google Chrome](https://google.com/chrome/)
+- [Git](https://git-scm.com/)
+- [Node.js](https://nodejs.org/)
+- [Yarn](https://yarnpkg.com/)
+- [Ember CLI](https://ember-cli.com/)
+- [Google Chrome](https://google.com/chrome/)
 
 ## Installation
 
-* `git clone <repository-url>` this repository
-* `cd packages/tic-tac-toe`
-* `yarn install`
+- `git clone <repository-url>` this repository
+- `cd packages/tic-tac-toe`
+- `yarn install`
 
 ## Running / Development
 
-* `ember serve`
-* Visit your app at [http://localhost:4200](http://localhost:4200).
-* Visit your tests at [http://localhost:4200/tests](http://localhost:4200/tests).
+- `ember serve`
+- Visit your app at [http://localhost:4200](http://localhost:4200).
+- Visit your tests at [http://localhost:4200/tests](http://localhost:4200/tests).
 
 ### Code Generators
 
@@ -97,19 +99,19 @@ Make use of the many generators for code, try `ember help generate` for more det
 
 ### Running Tests
 
-* `ember test`
-* `ember test --server`
+- `ember test`
+- `ember test --server`
 
 ### Linting
 
-* `yarn lint:hbs`
-* `yarn lint:js`
-* `yarn lint:js --fix`
+- `yarn lint:hbs`
+- `yarn lint:js`
+- `yarn lint:js --fix`
 
 ### Building
 
-* `ember build` (development)
-* `ember build --environment production` (production)
+- `ember build` (development)
+- `ember build --environment production` (production)
 
 ### Deploying
 
@@ -117,8 +119,8 @@ Specify what it takes to deploy your app.
 
 ## Further Reading / Useful Links
 
-* [ember.js](https://emberjs.com/)
-* [ember-cli](https://ember-cli.com/)
-* Development Browser Extensions
-  * [ember inspector for chrome](https://chrome.google.com/webstore/detail/ember-inspector/bmdblncegkenkacieihfhpjfppoconhi)
-  * [ember inspector for firefox](https://addons.mozilla.org/en-US/firefox/addon/ember-inspector/)
+- [ember.js](https://emberjs.com/)
+- [ember-cli](https://ember-cli.com/)
+- Development Browser Extensions
+  - [ember inspector for chrome](https://chrome.google.com/webstore/detail/ember-inspector/bmdblncegkenkacieihfhpjfppoconhi)
+  - [ember inspector for firefox](https://addons.mozilla.org/en-US/firefox/addon/ember-inspector/)
