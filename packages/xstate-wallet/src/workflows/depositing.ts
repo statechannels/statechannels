@@ -22,6 +22,7 @@ const watcher: MachineConfig<Init, any, any> = {
 };
 
 export const config: MachineConfig<Init, any, any> = {
+  id: 'depositing',
   type: 'parallel',
   states: {
     watcher,
