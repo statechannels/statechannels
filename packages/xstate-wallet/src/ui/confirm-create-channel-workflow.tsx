@@ -28,5 +28,3 @@ export const ConfirmCreateChannel = (props: Props) => {
     return <div></div>;
   }
 };
-
-export default ConfirmCreateChannel;
