@@ -146,6 +146,7 @@ jobs:
 
   build:
     <<: *defaults
+    resource_class: large
     steps:
       - checkout
       - log_stats:
