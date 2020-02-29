@@ -348,19 +348,15 @@ export const applicationWorkflow = (
       );
       return channelId;
     },
-    invokeClosingProtocol: (context: ChannelIdExists) => {
+    invokeClosingProtocol: (context: ChannelIdExists) =>
       // TODO: Close machine needs to accept new store
-      return ConcludeChannel.machine(store, {channelId: context.channelId});
-    },
+      ConcludeChannel.machine(store, {channelId: context.channelId}),
     invokeCreateChannelAndDirectFundProtocol: (
       context,
       event: DoneInvokeEvent<CreateAndDirectFund.Init>
-    ) => {
-      return CreateAndDirectFund.machine(store, event.data);
-    },
-    invokeCreateChannelConfirmation: (context, event: DoneInvokeEvent<CCC.WorkflowContext>) => {
-      return CCC.confirmChannelCreationWorkflow(store, event.data);
-    },
+    ) => CreateAndDirectFund.machine(store, event.data),
+    invokeCreateChannelConfirmation: (context, event: DoneInvokeEvent<CCC.WorkflowContext>) =>
+      CCC.confirmChannelCreationWorkflow(store, event.data),
     getDataForCreateChannelAndDirectFund: async (
       context: WorkflowContext,
       event
