@@ -25,7 +25,7 @@ import {StateVariables, SimpleEthAllocation, HexNumberString} from '../store/typ
 import {ChannelStoreEntry} from '../store/memory-channel-storage';
 import * as ConcludeChannel from './conclude-channel';
 import {unreachable} from '../utils';
-import * as hexNumUtils from '../utils/hex-number-utils';
+import {add, toHex} from '../utils/hex-number-utils';
 
 export interface WorkflowContext {
   channelId?: string;
@@ -303,7 +303,7 @@ export const applicationWorkflow = (
         const existingState = await (await store.getEntry(event.channelId)).latest;
         const newState = {
           ...existingState,
-          turnNum: hexNumUtils.add(existingState.turnNum, 1),
+          turnNum: add(existingState.turnNum, 1),
           appData: event.appData,
           outcome: event.outcome
         };
@@ -337,12 +337,12 @@ export const applicationWorkflow = (
       const stateVars: StateVariables = {
         outcome,
         appData,
-        turnNum: hexNumUtils.toHex(0),
+        turnNum: toHex(0),
         isFinal: false
       };
       const {channelId} = await store.createChannel(
         participants,
-        hexNumUtils.toHex(challengeDuration),
+        toHex(challengeDuration),
         stateVars,
         appDefinition
       );

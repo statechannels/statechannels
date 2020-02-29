@@ -13,7 +13,7 @@ import {Chain, FakeChain} from '../chain';
 import {calculateChannelId, hashState} from './state-utils';
 import {NETWORK_ID} from '../constants';
 import {checkThat, exists} from '../utils';
-import * as hexNumUtils from '../utils/hex-number-utils';
+import {add, toHex, lte} from '../utils/hex-number-utils';
 
 interface DirectFunding {
   type: 'Direct';
@@ -183,7 +183,7 @@ export class MemoryStore implements Store {
       throw new Error("Couldn't find the signing key for any participant in wallet.");
     }
 
-    const channelNonce = hexNumUtils.add(this.getNonce(addresses), 1);
+    const channelNonce = add(this.getNonce(addresses), 1);
     const chainId = NETWORK_ID;
 
     const entry = await this.initializeChannel({
@@ -204,11 +204,11 @@ export class MemoryStore implements Store {
     return Promise.resolve(entry);
   }
   private getNonce(addresses: string[]): HexNumberString {
-    return this._nonces[this.nonceKeyFromAddresses(addresses)] || hexNumUtils.toHex(-1);
+    return this._nonces[this.nonceKeyFromAddresses(addresses)] || toHex(-1);
   }
 
   private setNonce(addresses: string[], value: HexNumberString) {
-    if (hexNumUtils.lte(value, this.getNonce(addresses))) throw 'Invalid nonce';
+    if (lte(value, this.getNonce(addresses))) throw 'Invalid nonce';
 
     this._nonces[this.nonceKeyFromAddresses(addresses)] = value;
   }
