@@ -278,7 +278,6 @@ export const applicationWorkflow = (
         event: CreateChannelEvent
       ): ChannelParamsExist & RequestIdExists => {
         return {
-          ...context,
           channelParams: event,
           requestId: event.requestId
         };
