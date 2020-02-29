@@ -1,5 +1,10 @@
 //This is used to identify strings that are the hex values of BN
-export type HexNumberString = string;
+export interface HexNumberString extends String {
+  type: 'HexNumberString';
+}
+export function isHexNumberString(t: string | HexNumberString): t is HexNumberString {
+  return t.startsWith('0x') || t.startsWith('-0x');
+}
 
 export interface Participant {
   participantId: string;

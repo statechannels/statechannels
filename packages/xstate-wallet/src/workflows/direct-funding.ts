@@ -7,7 +7,6 @@ import {getDataAndInvoke, MachineFactory} from '../utils/workflow-utils';
 import {Store} from '../store';
 import {Outcome, SimpleEthAllocation} from '../store/types';
 import {toHex, add, sub, gt} from '../utils/hex-number-utils';
-import {bigNumberify} from 'ethers/utils';
 
 const WORKFLOW = 'direct-funding';
 
@@ -87,11 +86,11 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
     const allocated = outcome.allocationItems
       .map(a => a.amount)
       .reduce((a, b) => {
-        return a.add(b);
-      }, bigNumberify(0));
+        return add(a, b);
+      }, toHex(0));
     const chainInfo = await store.chain.getChainInfo(ctx.channelId);
 
-    if (allocated.gt(chainInfo.amount))
+    if (gt(allocated, chainInfo.amount))
       throw new Error('DirectFunding: Channel outcome is already underfunded; aborting');
   }
 

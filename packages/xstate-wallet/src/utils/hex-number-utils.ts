@@ -1,24 +1,25 @@
 import {BigNumber, bigNumberify} from 'ethers/utils';
-import {HexNumberString} from '../store/types';
+import {HexNumberString, isHexNumberString} from '../store/types';
 
-type numberish = number | HexNumberString | BigNumber;
+type numberish = number | HexNumberString | BigNumber | string;
 
-export function toHex(value: number | HexNumberString | BigNumber): HexNumberString {
-  if (typeof value === 'number') {
-    return bigNumberify(value).toHexString();
-  } else if (typeof value === 'string') {
-    // TODO: Check if formatted properly?
-    return value;
+export function toString(value: numberish): string {
+  return (toHex(value) as unknown) as string;
+}
+export function toHex(value: number | HexNumberString | BigNumber | string): HexNumberString {
+  const hexValue = bigNumberify(value as string | BigNumber | number).toHexString();
+  if (isHexNumberString(hexValue)) {
+    return hexValue;
   } else {
-    return value.toHexString();
+    throw new Error(`Value ${hexValue} is not a properly formatted hex string`);
   }
 }
 
 function toBN(a: numberish): BigNumber {
-  return bigNumberify(toHex(a));
+  return bigNumberify(toHex(a) as any);
 }
 export function toNumber(a: numberish): number {
-  return bigNumberify(a).toNumber();
+  return toBN(a).toNumber();
 }
 
 export function compare(a: numberish, b: numberish): number {
@@ -43,13 +44,17 @@ export function eq(a: numberish, b: numberish): boolean {
 }
 
 export function add(a: numberish, b: numberish): HexNumberString {
-  return toBN(a)
-    .add(toBN(b))
-    .toHexString();
+  return toHex(
+    toBN(a)
+      .add(toBN(b))
+      .toHexString()
+  );
 }
 
 export function sub(a: numberish, b: numberish): HexNumberString {
-  return toBN(a)
-    .sub(toBN(b))
-    .toHexString();
+  return toHex(
+    toBN(a)
+      .sub(toBN(b))
+      .toHexString()
+  );
 }

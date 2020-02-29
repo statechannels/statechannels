@@ -14,7 +14,7 @@ import {
 import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
 import {Allocation} from '@statechannels/client-api-schema';
 import {AddressZero} from 'ethers/constants';
-import {toHex} from '../utils/hex-number-utils';
+import {toHex, toString} from '../utils/hex-number-utils';
 
 export function convertFromNitroOutcome(outcome: NitroOutcome): Outcome {
   if (outcome.length === 0) {
@@ -74,7 +74,7 @@ function convertFromNitroAllocationItems(allocationItems: NitroAllocationItem[])
 }
 function convertToNitroAllocationItems(allocationItems: AllocationItem[]): NitroAllocationItem[] {
   return allocationItems.map(a => ({
-    amount: a.amount,
+    amount: toString(a.amount),
     destination:
       a.destination.length === 42 ? convertAddressToBytes32(a.destination) : a.destination
   }));

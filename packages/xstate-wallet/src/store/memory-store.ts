@@ -65,7 +65,7 @@ export interface Store {
   signAndAddState(channelId: string, stateVars: StateVariables): Promise<void>;
   createChannel(
     participants: Participant[],
-    challengeDuration: string,
+    challengeDuration: HexNumberString,
     stateVars: StateVariables,
     appDefinition?: string
   ): Promise<ChannelStoreEntry>;
@@ -172,7 +172,7 @@ export class MemoryStore implements Store {
 
   public async createChannel(
     participants: Participant[],
-    challengeDuration: string,
+    challengeDuration: HexNumberString,
     stateVars: StateVariables,
     appDefinition = AddressZero
   ): Promise<ChannelStoreEntry> {

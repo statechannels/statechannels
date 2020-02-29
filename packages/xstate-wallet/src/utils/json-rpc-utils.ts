@@ -1,7 +1,7 @@
 import {convertBytes32ToAddress, convertAddressToBytes32} from '@statechannels/nitro-protocol';
 import {UpdateChannelParams, Allocations} from '@statechannels/client-api-schema';
 import {Outcome, StateVariables, SimpleEthAllocation} from '../store/types';
-import {toHex, add} from './hex-number-utils';
+import {toHex, add, toString} from './hex-number-utils';
 
 export function createAllocationOutcomeFromParams(params: Allocations): SimpleEthAllocation {
   // TODO: Support all outcomes
@@ -24,7 +24,7 @@ export function createJsonRpcAllocationsFromOutcome(outcome: Outcome): Allocatio
     {
       token: '0x0',
       allocationItems: outcome.allocationItems.map(a => ({
-        amount: a.amount,
+        amount: toString(a.amount),
         destination: convertBytes32ToAddress(a.destination)
       }))
     }

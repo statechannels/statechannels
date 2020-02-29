@@ -22,11 +22,11 @@ test('accepts states when running', async () => {
     allocationItems: [
       {
         destination: playerA.destination,
-        amount: '0x06f05b59d3b20000'
+        amount: toHex('0x06f05b59d3b20000')
       },
       {
         destination: playerA.destination,
-        amount: '0x06f05b59d3b20000'
+        amount: toHex('0x06f05b59d3b20000')
       }
     ],
     type: 'SimpleEthAllocation'
@@ -35,11 +35,11 @@ test('accepts states when running', async () => {
   hookUpMessaging(playerA, playerB);
   const stateVars = {
     outcome,
-    turnNum: '0x4',
+    turnNum: toHex('0x4'),
     appData: '0x0',
     isFinal: false
   };
-  playerA.store.createChannel([playerA.participant, playerB.participant], '0x4', stateVars);
+  playerA.store.createChannel([playerA.participant, playerB.participant], toHex('0x4'), stateVars);
   const channelId = '0x1823994d6d3b53b82f499c1aca2095b94108ba3ff59f55c6e765da1e24874ab2';
   playerA.startAppWorkflow('running', {channelId});
   playerB.startAppWorkflow('running', {channelId});

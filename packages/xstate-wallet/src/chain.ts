@@ -6,7 +6,7 @@ import {Observable, fromEvent, from, concat, merge} from 'rxjs';
 import {filter, map} from 'rxjs/operators';
 import {ETH_ASSET_HOLDER_ADDRESS, NITRO_ADJUDICATOR_ADDRESS} from './constants';
 import EventEmitter = require('eventemitter3');
-import {toHex, add} from './utils/hex-number-utils';
+import {toHex, add, toString} from './utils/hex-number-utils';
 import {BigNumber} from 'ethers/utils';
 
 const EthAssetHolderInterface = new ethers.utils.Interface(
@@ -28,7 +28,11 @@ export interface Chain {
   initialize(): Promise<void>;
   getChainInfo: (channelId: string) => Promise<ChannelChainInfo>;
   chainUpdatedFeed: (channelId: string) => Observable<ChannelChainInfo>;
-  deposit: (channelId: string, expectedHeld: string, amount: string) => Promise<void>;
+  deposit: (
+    channelId: string,
+    expectedHeld: HexNumberString,
+    amount: HexNumberString
+  ) => Promise<void>;
 }
 
 // TODO: This should handle amounts for each channel
@@ -38,7 +42,11 @@ export class FakeChain implements Chain {
   public async initialize() {
     /* NOOP */
   }
-  public async deposit(channelId: string, expectedHeld: string, amount: string): Promise<void> {
+  public async deposit(
+    channelId: string,
+    expectedHeld: HexNumberString,
+    amount: HexNumberString
+  ): Promise<void> {
     this.totalAmount = add(this.totalAmount, amount);
     this.depositEmitter.emit('DEPOSIT', this.totalAmount);
     return Promise.resolve();
@@ -74,13 +82,17 @@ export class ChainWatcher implements Chain {
     );
   }
 
-  public async deposit(channelId: string, expectedHeld: string, amount: string): Promise<void> {
+  public async deposit(
+    channelId: string,
+    expectedHeld: HexNumberString,
+    amount: HexNumberString
+  ): Promise<void> {
     const provider = getProvider();
     const signer = provider.getSigner();
     const transactionRequest = {
-      ...createETHDepositTransaction(channelId, expectedHeld, amount),
+      ...createETHDepositTransaction(channelId, toString(expectedHeld), toString(amount)),
       to: ETH_ASSET_HOLDER_ADDRESS,
-      value: amount
+      value: toString(amount)
     };
     const response = await signer.sendTransaction(transactionRequest);
     await response.wait();

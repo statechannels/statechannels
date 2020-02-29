@@ -22,7 +22,7 @@ import {ChannelStoreEntry} from './store/memory-channel-storage';
 import {Message as WireMessage} from './store/wire-protocol';
 import {createJsonRpcAllocationsFromOutcome} from './utils/json-rpc-utils';
 import {unreachable} from './utils';
-import {eq, lt} from './utils/hex-number-utils';
+import {eq, lt, toString} from './utils/hex-number-utils';
 
 type ChannelRequest =
   | CreateChannelRequest
@@ -162,7 +162,7 @@ export async function convertToChannelResult(
     appDefinition,
     appData,
     status,
-    turnNum,
+    turnNum: toString(turnNum),
     channelId
   };
 }
