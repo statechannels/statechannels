@@ -33,7 +33,7 @@ const HomePage: React.SFC<Props> = ({login, metamaskState}) => {
       <ConnectionBanner
         currentNetwork={currentNetwork}
         requiredNetwork={targetNetwork}
-        onWeb3Fallback={false}
+        onWeb3Fallback={true}
       />
     </div>
   );
