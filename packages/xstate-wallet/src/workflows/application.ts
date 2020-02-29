@@ -148,7 +148,7 @@ const generateConfig = (
           target: 'confirmCreateChannelWorkflow',
           actions: [actions.assignChannelParams]
         },
-        JOIN_CHANNEL: {target: 'confirmJoinChannelWorkflow', actions: [actions.assignChannelId]}
+        JOIN_CHANNEL: {target: 'confirmJoinChannelWorkflow'}
       }
     },
     confirmCreateChannelWorkflow: getDataAndInvoke(
