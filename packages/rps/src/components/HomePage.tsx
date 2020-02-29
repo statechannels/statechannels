@@ -33,7 +33,7 @@ const HomePage: React.SFC<Props> = ({login, metamaskState}) => {
       <ConnectionBanner
         currentNetwork={currentNetwork}
         requiredNetwork={targetNetwork}
-        onWeb3Fallback={true}
+        onWeb3Fallback={!('ethereum' in window)}
       />
     </div>
   );
