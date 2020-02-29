@@ -1,4 +1,4 @@
-import {messageIsValid, validateMessage} from '../validate-message';
+import {messageIsValid, validateMessage} from '../validator';
 import * as good from './good_sample_messages';
 import * as bad from './bad_sample_messages';
 

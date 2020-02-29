@@ -15,12 +15,12 @@
           },
           "type": "array"
         },
-        "token": {
+        "assetHolderAddress": {
           "$ref": "#/definitions/Address"
         }
       },
       "required": [
-        "token",
+        "assetHolderAddress",
         "allocationItems"
       ],
       "type": "object"
@@ -103,6 +103,9 @@
     "Gaurantee": {
       "additionalProperties": false,
       "properties": {
+        "assetHolderAddress": {
+          "$ref": "#/definitions/Address"
+        },
         "destinations": {
           "items": {
             "$ref": "#/definitions/Bytes32"
@@ -111,13 +114,10 @@
         },
         "targetChannelId": {
           "$ref": "#/definitions/Bytes32"
-        },
-        "token": {
-          "$ref": "#/definitions/Address"
         }
       },
       "required": [
-        "token",
+        "assetHolderAddress",
         "targetChannelId",
         "destinations"
       ],

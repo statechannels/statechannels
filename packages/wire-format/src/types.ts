@@ -34,14 +34,14 @@ export interface AllocationItem {
 }
 
 export interface Allocation {
-  token: Address; // The token's contract address.
+  assetHolderAddress: Address; // The token's contract address.
   allocationItems: AllocationItem[]; // A list of allocations (how much funds will each destination address get).
 }
 
 export type Allocations = Allocation[]; // included for backwards compatibility
 
 export interface Gaurantee {
-  token: Address;
+  assetHolderAddress: Address;
   targetChannelId: Bytes32;
   destinations: Bytes32[];
 }
@@ -49,6 +49,15 @@ export interface Gaurantee {
 export type Guarantees = Gaurantee[];
 
 export type Outcome = Guarantees | Allocations;
+
+export function isAllocations(outcome: Outcome): outcome is Allocations {
+  if (outcome.length === 0) {
+    return true;
+  } else {
+    const first = outcome[0];
+    return 'allocationItems' in first;
+  }
+}
 
 export interface SignedState {
   chainId: string;

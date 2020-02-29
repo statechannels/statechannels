@@ -3,8 +3,7 @@
   "description": "JSON-RPC Schema and TypeScript typings for the Wallet-to-Wallet Message Format",
   "version": "0.0.1",
   "author": "Tom Close",
-  "contributors": [
-  ],
+  "contributors": [],
   "dependencies": {
     "ajv": "6.11.0"
   },
