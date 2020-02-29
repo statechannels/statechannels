@@ -4,8 +4,8 @@ import {useService} from '@xstate/react';
 import './wallet.scss';
 import logo from '../images/logo.svg';
 import {Modal, Card, Flex, Image} from 'rimble-ui';
-import ApplicationWorkflow from './application-workflow';
-import ConfirmCreateChannelWorkflow from './confirm-create-channel-workflow';
+import {ApplicationWorkflow} from './application-workflow';
+import {ConfirmCreateChannel} from './confirm-create-channel-workflow';
 
 interface Props {
   workflow: Interpreter<any, any, any>;
@@ -21,11 +21,9 @@ export const Wallet = (props: Props) => {
         </Flex>
         {props.workflow.id === 'application-workflow' && <ApplicationWorkflow current={current} />}
         {props.workflow.id === 'confirm-create-channel' && (
-          <ConfirmCreateChannelWorkflow current={current} send={send} />
+          <ConfirmCreateChannel current={current} send={send} />
         )}
       </Card>
     </Modal>
   );
 };
-
-export default Wallet;
