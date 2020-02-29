@@ -4,7 +4,7 @@ import {MessagingServiceInterface} from './messaging';
 import {applicationWorkflow} from './workflows/application';
 import ReactDOM from 'react-dom';
 import React from 'react';
-import WalletUi from './ui/wallet';
+import {Wallet as WalletUi} from './ui/wallet';
 import {interpret, Interpreter, State} from 'xstate';
 import {Guid} from 'guid-typescript';
 import {convertToOpenEvent, convertToPlayerStateUpdateEvent} from './utils/workflow-utils';
