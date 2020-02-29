@@ -12,14 +12,16 @@ import {RoutePath} from './routes';
 const history = createBrowserHistory();
 class App extends React.Component {
   state = {
-    currentNetwork: parseInt(window.ethereum.chainId, 16),
+    currentNetwork:
+      'ethereum' in window && window.ethereum.chainId && parseInt(window.ethereum.chainId, 16),
     requiredNetwork: Number(process.env.REACT_APP_CHAIN_NETWORK_ID)
   };
 
   componentDidMount() {
-    window.ethereum.on('networkChanged', chainId => {
-      this.setState({...this.state, currentNetwork: parseInt(chainId, 16)});
-    });
+    'ethereum' in window &&
+      window.ethereum.on('networkChanged', chainId => {
+        this.setState({...this.state, currentNetwork: parseInt(chainId, 16)});
+      });
   }
 
   render() {

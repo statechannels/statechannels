@@ -28,7 +28,7 @@ const LayoutHeader: React.FC<RouteComponentProps & Props> = props => {
       <ConnectionBanner
         currentNetwork={props.currentNetwork}
         requiredNetwork={props.requiredNetwork}
-        onWeb3Fallback={false}
+        onWeb3Fallback={!('ethereum' in window)}
       />
     </header>
   );
