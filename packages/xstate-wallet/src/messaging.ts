@@ -22,7 +22,7 @@ import {ChannelStoreEntry} from './store/memory-channel-storage';
 import {Message as WireMessage} from './store/wire-protocol';
 import {unreachable} from './utils';
 import {isAllocation} from './store/types';
-import {serializeAllocation} from './app-messages/serialize';
+import {serializeAllocation} from './serde/app-messages/serialize';
 
 type ChannelRequest =
   | CreateChannelRequest

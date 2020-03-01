@@ -4,8 +4,8 @@ import {
   AllocationItem as AllocationItemWire,
   Allocation as AllocationWire
 } from '@statechannels/wire-format';
-import {SignedState, Outcome, AllocationItem, SimpleAllocation} from '../store/types';
-import {calculateChannelId} from '../store/state-utils';
+import {SignedState, Outcome, AllocationItem, SimpleAllocation} from '../../store/types';
+import {calculateChannelId} from '../../store/state-utils';
 
 export function serializeState(state: SignedState): SignedStateWire {
   return {
