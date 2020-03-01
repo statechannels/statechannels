@@ -17,6 +17,7 @@ import {NETWORK_ID, CHALLENGE_DURATION} from '../constants';
 import {bigNumberify} from 'ethers/utils';
 import {OpenEvent, PlayerStateUpdate} from '../workflows/application';
 import {deserializeAllocations} from '../app-messages/deserialize';
+import {isSimpleEthAllocation} from './outcome';
 
 export function createMockGuard(guardName: string): GuardPredicate<any, any> {
   return {
@@ -75,10 +76,13 @@ export function getDataAndInvoke<T>(
 }
 
 export function convertToPlayerStateUpdateEvent(request: UpdateChannelRequest): PlayerStateUpdate {
+  const outcome = deserializeAllocations(request.params.allocations);
+  if (!isSimpleEthAllocation(outcome)) {
+    throw new Error('Currently only a simple ETH allocation is supported');
+  }
   return {
     type: 'PLAYER_STATE_UPDATE',
-
-    outcome: deserializeAllocations(request.params.allocations),
+    outcome,
     channelId: request.params.channelId,
     appData: request.params.appData
   };
@@ -86,10 +90,14 @@ export function convertToPlayerStateUpdateEvent(request: UpdateChannelRequest): 
 
 export function convertToOpenEvent(request: CreateChannelRequest | JoinChannelRequest): OpenEvent {
   if (request.method === 'CreateChannel') {
+    const outcome = deserializeAllocations(request.params.allocations);
+    if (!isSimpleEthAllocation(outcome)) {
+      throw new Error('Currently only a simple ETH allocation is supported');
+    }
     return {
       type: 'CREATE_CHANNEL',
       ...request.params,
-      outcome: deserializeAllocations(request.params.allocations),
+      outcome,
       challengeDuration: bigNumberify(CHALLENGE_DURATION),
       chainId: NETWORK_ID,
       requestId: request.id

@@ -1,8 +1,8 @@
 import {FakeChain} from '../chain';
 import {Player, hookUpMessaging, generatePlayerUpdate} from './helpers';
-import {SimpleAllocation} from '../store/types';
 import {bigNumberify} from 'ethers/utils';
 import waitForExpect from 'wait-for-expect';
+import {simpleEthAllocation} from '../utils/outcome';
 
 test('accepts states when running', async () => {
   const fakeChain = new FakeChain();
@@ -17,19 +17,16 @@ test('accepts states when running', async () => {
     'PlayerB',
     fakeChain
   );
-  const outcome: SimpleAllocation = {
-    allocationItems: [
-      {
-        destination: playerA.destination,
-        amount: bigNumberify('0x06f05b59d3b20000')
-      },
-      {
-        destination: playerA.destination,
-        amount: bigNumberify('0x06f05b59d3b20000')
-      }
-    ],
-    type: 'SimpleAllocation'
-  };
+  const outcome = simpleEthAllocation([
+    {
+      destination: playerA.destination,
+      amount: bigNumberify('0x06f05b59d3b20000')
+    },
+    {
+      destination: playerA.destination,
+      amount: bigNumberify('0x06f05b59d3b20000')
+    }
+  ]);
 
   hookUpMessaging(playerA, playerB);
   const stateVars = {
