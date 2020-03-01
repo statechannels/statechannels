@@ -204,10 +204,10 @@ const jointChannelUpdate = (store: Store) => ({
       map(({state}) => {
         const oldOutcome = checkThat(state.outcome, isSimpleEthAllocation);
         const amount = oldOutcome.allocationItems[2].amount;
-        const outcome = simpleEthAllocation(
+        const outcome = simpleEthAllocation([
           {destination: targetChannelId, amount},
           {destination: state.participants[Role.Hub].destination, amount}
-        );
+        ]);
         return {state: {...state, turnNum: bigNumberify(1), outcome}};
       }),
       take(1)

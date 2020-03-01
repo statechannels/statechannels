@@ -20,8 +20,9 @@ import {fromEvent, Observable} from 'rxjs';
 import {Store} from './store';
 import {ChannelStoreEntry} from './store/memory-channel-storage';
 import {Message as WireMessage} from './store/wire-protocol';
-import {createJsonRpcAllocationsFromOutcome} from './utils/json-rpc-utils';
 import {unreachable} from './utils';
+import {isAllocation} from './store/types';
+import {serializeAllocation} from './app-messages/serialize';
 
 type ChannelRequest =
   | CreateChannelRequest
@@ -144,6 +145,12 @@ export async function convertToChannelResult(
   const {appData, turnNum} = latest;
   const {participants, appDefinition} = channelEntry.channelConstants;
 
+  const outcome = latest.outcome;
+
+  if (!isAllocation(outcome)) {
+    throw new Error('Can only send allocations to the app');
+  }
+
   let status: ChannelStatus = 'running';
   if (turnNum.eq(0)) {
     status = 'proposed';
@@ -157,7 +164,7 @@ export async function convertToChannelResult(
 
   return {
     participants,
-    allocations: createJsonRpcAllocationsFromOutcome(latest.outcome),
+    allocations: serializeAllocation(outcome),
     appDefinition,
     appData,
     status,

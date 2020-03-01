@@ -21,10 +21,11 @@ import * as CCC from './confirm-create-channel';
 import {Participant} from '@statechannels/client-api-schema';
 import {createMockGuard, getDataAndInvoke} from '../utils/workflow-utils';
 import {Store} from '../store/memory-store';
-import {StateVariables, SimpleEthAllocation} from '../store/types';
+import {StateVariables, SimpleAllocation} from '../store/types';
 import {ChannelStoreEntry} from '../store/memory-channel-storage';
 import {bigNumberify, BigNumber} from 'ethers/utils';
 import * as ConcludeChannel from './conclude-channel';
+import {isSimpleEthAllocation} from '../utils/outcome';
 import {unreachable} from '../utils';
 
 export interface WorkflowContext {
@@ -66,7 +67,7 @@ export type OpenEvent = CreateChannelEvent | JoinChannelEvent;
 export interface CreateChannelEvent {
   type: 'CREATE_CHANNEL';
   participants: Participant[];
-  outcome: SimpleEthAllocation;
+  outcome: SimpleAllocation;
   appDefinition: string;
   appData: string;
   challengeDuration: BigNumber;
@@ -82,7 +83,7 @@ export interface ChannelUpdated {
 
 export interface PlayerStateUpdate {
   type: 'PLAYER_STATE_UPDATE';
-  outcome: SimpleEthAllocation;
+  outcome: SimpleAllocation;
   channelId: string;
   appData: string;
 }
@@ -362,8 +363,8 @@ export const applicationWorkflow = (
     ): Promise<CreateAndDirectFund.Init> => {
       const entry = await store.getEntry(context.channelId);
       const {outcome} = entry.latest;
-      if (outcome.type !== 'SimpleEthAllocation') {
-        throw new Error('TODO');
+      if (!isSimpleEthAllocation(outcome)) {
+        throw new Error('Only simple eth allocation currently supported');
       }
       return {
         channelId: entry.channelId,
@@ -385,7 +386,7 @@ export const applicationWorkflow = (
           return {
             ...entry.latest,
             ...entry.channelConstants,
-            outcome: entry.latest.outcome as SimpleEthAllocation
+            outcome: entry.latest.outcome as SimpleAllocation
           };
         default:
           return unreachable(event);
