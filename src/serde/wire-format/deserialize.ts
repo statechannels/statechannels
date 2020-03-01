@@ -6,7 +6,7 @@ import {
   isAllocations
 } from '@statechannels/wire-format';
 
-import {SignedState, Outcome, AllocationItem, SimpleAllocation} from '../store/types';
+import {SignedState, Outcome, AllocationItem, SimpleAllocation} from '../../store/types';
 import {bigNumberify} from 'ethers/utils';
 
 export function deserializeState(state: SignedStateWire): SignedState {
