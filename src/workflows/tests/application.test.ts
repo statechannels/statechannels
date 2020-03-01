@@ -16,6 +16,7 @@ import {ChannelStoreEntry} from '../../store/memory-channel-storage';
 import {MessagingService, MessagingServiceInterface} from '../../messaging';
 import {bigNumberify} from 'ethers/utils';
 import {calculateChannelId} from '../../store/state-utils';
+import {simpleEthAllocation} from '../../utils/outcome';
 
 jest.setTimeout(50000);
 const createChannelEvent: CreateChannelEvent = {
@@ -24,7 +25,7 @@ const createChannelEvent: CreateChannelEvent = {
   appData: '0x0',
   appDefinition: ethers.constants.AddressZero,
   participants: [],
-  outcome: {type: 'SimpleEthAllocation', allocationItems: []},
+  outcome: simpleEthAllocation([]),
   challengeDuration: bigNumberify(500),
   requestId: 5
 };
@@ -212,7 +213,7 @@ it('starts concluding when receiving a final state', async () => {
       isFinal: true,
       appDefinition: AddressZero,
       appData: '0x0',
-      outcome: {type: 'SimpleEthAllocation', allocationItems: []},
+      outcome: simpleEthAllocation([]),
       turnNum: bigNumberify(55),
       challengeDuration: bigNumberify(500),
       chainId: '0x0',

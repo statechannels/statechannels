@@ -3,7 +3,7 @@ import {Participant} from '@statechannels/client-api-schema';
 import {sendDisplayMessage} from '../messaging';
 import {createMockGuard} from '../utils/workflow-utils';
 import {Store} from '../store/memory-store';
-import {SimpleEthAllocation} from '../store/types';
+import {SimpleAllocation} from '../store/types';
 import {BigNumber} from 'ethers/utils';
 
 interface WorkflowActions {
@@ -17,7 +17,7 @@ interface WorkflowGuards {
 // it may be used when displaying a UI
 export interface WorkflowContext {
   participants: Participant[];
-  outcome: SimpleEthAllocation;
+  outcome: SimpleAllocation;
   appDefinition: string;
   appData: string;
   chainId: string;

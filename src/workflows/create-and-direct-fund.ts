@@ -1,6 +1,6 @@
 import {Machine, MachineConfig} from 'xstate';
 
-import {Participant, SimpleEthAllocation} from '../store/types';
+import {Participant, SimpleAllocation} from '../store/types';
 import * as AdvanceChannel from './advance-channel';
 
 import {MachineFactory, getDataAndInvoke} from '../utils/workflow-utils';
@@ -8,6 +8,7 @@ import {Store} from '../store';
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import * as Depositing from './depositing';
 import {add} from '../utils/math-utils';
+import {isSimpleEthAllocation} from '../utils/outcome';
 const PROTOCOL = 'create-and-direct-fund';
 
 export enum Indices {
@@ -17,7 +18,7 @@ export enum Indices {
 
 export type Init = {
   participants: Participant[];
-  allocation: SimpleEthAllocation;
+  allocation: SimpleAllocation;
   appDefinition: string;
   appData: string;
   channelId: string;
@@ -75,7 +76,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => 
     if (!entry.supported) {
       throw new Error('Unsupported state');
     }
-    if (entry.supported.outcome.type !== 'SimpleEthAllocation') {
+    if (!isSimpleEthAllocation(entry.supported.outcome)) {
       throw new Error('Unsupported outcome');
     }
     let totalBeforeDeposit = bigNumberify(0);
