@@ -139,6 +139,7 @@ export class MessagingService implements MessagingServiceInterface {
           throw new Error(`Received message not addressed to us ${JSON.stringify(message)}`);
         }
         this.store.pushMessage(deserializeMessage(message));
+        await this.sendResponse(id, {success: true});
         break;
       case 'GetBudget':
       case 'ChallengeChannel':
