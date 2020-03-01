@@ -7,8 +7,9 @@ import * as Depositing from './depositing';
 import * as SupportState from './support-state';
 import {getDataAndInvoke, MachineFactory} from '../utils/workflow-utils';
 import {Store} from '../store';
-import {Outcome, SimpleEthAllocation} from '../store/types';
+import {Outcome, SimpleAllocation} from '../store/types';
 import {add} from '../utils/math-utils';
+import {isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
 
 const WORKFLOW = 'direct-funding';
 
@@ -37,7 +38,7 @@ WARNING: it is _not_ safe to restart this direct funding protocol. More thought 
 
 export interface Init {
   channelId: string;
-  minimalAllocation: SimpleEthAllocation;
+  minimalAllocation: SimpleAllocation;
 }
 
 const checkCurrentLevel = {
@@ -81,7 +82,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
     }
 
     const {outcome} = entry.supported;
-    if (outcome.type !== 'SimpleEthAllocation') {
+    if (!isSimpleEthAllocation(outcome)) {
       throw new Error('Only support SimpleEthAllocation');
     }
     // TODO This prevents us from funding an app channel
@@ -97,8 +98,8 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
   }
 
   function minimalOutcome(
-    currentOutcome: SimpleEthAllocation,
-    minimalEthAllocation: SimpleEthAllocation
+    currentOutcome: SimpleAllocation,
+    minimalEthAllocation: SimpleAllocation
   ): Outcome {
     const allocationItems = currentOutcome.allocationItems.concat(
       minimalEthAllocation.allocationItems.map(({destination, amount}) => {
@@ -114,11 +115,11 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
       })
     );
 
-    return {type: 'SimpleEthAllocation', allocationItems};
+    return simpleEthAllocation(allocationItems);
   }
 
-  function mergeDestinations(outcome: SimpleEthAllocation): SimpleEthAllocation {
-    const destinations = _.uniq(outcome.allocationItems.map(i => i.destination));
+  function mergeDestinations(outcome: SimpleAllocation): SimpleAllocation {
+    const destinations: string[] = _.uniq(outcome.allocationItems.map(i => i.destination));
 
     const allocationItems = destinations.map(destination => ({
       destination,
@@ -128,7 +129,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
         .reduce(add)
     }));
 
-    return {type: 'SimpleEthAllocation', allocationItems};
+    return simpleEthAllocation(allocationItems);
   }
 
   async function getDepositingInfo({minimalAllocation, channelId}: Init): Promise<Depositing.Init> {
@@ -136,14 +137,15 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
     if (!entry.supported) {
       throw new Error('Unsupported state');
     }
-    if (entry.supported.outcome.type !== 'SimpleEthAllocation') {
+    const supportedOutcome = entry.supported.outcome;
+    if (!isSimpleEthAllocation(supportedOutcome)) {
       throw new Error('Unsupported outcome');
     }
     let totalBeforeDeposit = bigNumberify(0);
     for (let i = 0; i < minimalAllocation.allocationItems.length; i++) {
       const allocation = minimalAllocation.allocationItems[i];
       if (entry.myIndex === i) {
-        const fundedAt = entry.supported.outcome.allocationItems.map(a => a.amount).reduce(add);
+        const fundedAt = supportedOutcome.allocationItems.map(a => a.amount).reduce(add);
 
         return {
           channelId,
@@ -173,10 +175,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
 
     // TODO: Safety checks?
     if (entry.supported) {
-      const outcome = minimalOutcome(
-        entry.latest.outcome as SimpleEthAllocation,
-        minimalAllocation
-      );
+      const outcome = minimalOutcome(entry.latest.outcome as SimpleAllocation, minimalAllocation);
       return {
         state: {
           ...entry.latest,
@@ -192,10 +191,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
           challengeDuration: bigNumberify(1),
           isFinal: false,
           turnNum: bigNumberify(0),
-          outcome: minimalOutcome(
-            {type: 'SimpleEthAllocation', allocationItems: []},
-            minimalAllocation
-          ),
+          outcome: minimalOutcome(simpleEthAllocation([]), minimalAllocation),
           appData: HashZero,
           appDefinition: AddressZero
         }
@@ -213,7 +209,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
         ...supported,
         ...channelConstants,
         turnNum: supported.turnNum.add(1),
-        outcome: mergeDestinations(supported.outcome as SimpleEthAllocation)
+        outcome: mergeDestinations(supported.outcome as SimpleAllocation)
       }
     };
   }

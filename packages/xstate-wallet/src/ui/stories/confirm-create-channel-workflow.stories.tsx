@@ -27,7 +27,7 @@ const bob: Participant = {
 
 const testContext: WorkflowContext = {
   participants: [alice, bob],
-  outcome: {type: 'SimpleEthAllocation', allocationItems: []},
+  outcome: {type: 'SimpleAllocation', allocationItems: []},
   appDefinition: '0x0',
   appData: '0x0',
   chainId: '0',

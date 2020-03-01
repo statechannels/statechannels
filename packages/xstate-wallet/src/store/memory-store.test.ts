@@ -1,6 +1,6 @@
 import {MemoryStore} from './memory-store';
 import {Objective} from './wire-protocol';
-import {SimpleEthAllocation, State} from './types';
+import {SimpleAllocation, State} from './types';
 import {bigNumberify, BigNumber} from 'ethers/utils';
 import {Wallet} from 'ethers';
 import {calculateChannelId, signState} from './state-utils';
@@ -16,8 +16,8 @@ const {address: bAddress, privateKey: bPrivateKey} = new Wallet(
 ); // 0x2222E21c8019b14dA16235319D34b5Dd83E644A9
 const [aDestination, bDestination] = [aAddress, bAddress]; // for convenience
 
-const outcome: SimpleEthAllocation = {
-  type: 'SimpleEthAllocation',
+const outcome: SimpleAllocation = {
+  type: 'SimpleAllocation',
   allocationItems: [
     {destination: aDestination, amount: new BigNumber(5)},
     {destination: bDestination, amount: new BigNumber(6)}
