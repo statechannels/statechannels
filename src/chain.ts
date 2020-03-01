@@ -107,11 +107,11 @@ export class ChainWatcher implements Chain {
     const first = from(this.getChainInfo(channelId));
 
     const updates = fromEvent(this._assetHolders[0], 'Deposited').pipe(
-      filter((event: {toAddress: string; amount: BigNumber}) => {
-        return event.toAddress === channelId;
+      filter((event: Array<string | BigNumber>) => {
+        return event[0] === channelId;
       }),
-      map(event => {
-        return {amount: event.amount, finalized: false};
+      map((event: Array<string | BigNumber>) => {
+        return {amount: bigNumberify(event[2]), finalized: false};
       })
     );
     return concat(first, updates);
