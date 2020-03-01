@@ -5,9 +5,11 @@ import {MemoryStore} from './store/memory-store';
 
 import {ChannelWallet} from './channel-wallet';
 import {MessagingService} from './messaging';
+import {ChainWatcher} from './chain';
 
 const {privateKey} = ethers.Wallet.createRandom();
-const store = new MemoryStore([privateKey]);
+const chain = new ChainWatcher();
+const store = new MemoryStore([privateKey], chain);
 const messagingService = new MessagingService(store);
 const channelWallet = new ChannelWallet(store, messagingService);
 
@@ -20,7 +22,6 @@ window.addEventListener('message', async event => {
   }
 });
 channelWallet.onSendMessage(m => {
-  console.log(m);
   window.parent.postMessage(m, '*');
   process.env.ADD_LOGS && console.log(`OUTGOING JSONRPC MESSAGE: ${JSON.stringify(m, null, 1)}`);
 });
