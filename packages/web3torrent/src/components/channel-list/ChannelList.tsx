@@ -19,7 +19,7 @@ const ChannelList: React.FC<ChannelListProps> = ({channels, currentUser}) => {
           {channels
             .filter(channel => channel.leecher === currentUser)
             .map(channel => (
-              <tr className={'channel'}>
+              <tr className={'channel'} key={channel.channelId}>
                 <td className="channel-address">{channel.channelId}</td>
                 <td className="channel-address">{channel.seeder}</td>
                 <td className="amount-cell">{formatUnits(channel.seederBalance, 'ether')} ETH</td>
@@ -38,7 +38,7 @@ const ChannelList: React.FC<ChannelListProps> = ({channels, currentUser}) => {
           {channels
             .filter(channel => channel.seeder === currentUser)
             .map(channel => (
-              <tr className={'channel'}>
+              <tr className={'channel'} key={channel.channelId}>
                 <td className="channel-address">{channel.channelId}</td>
                 <td className="channel-address">{channel.leecher}</td>
                 <td className="amount-cell">{formatUnits(channel.leecherBalance, 'ether')} ETH</td>
