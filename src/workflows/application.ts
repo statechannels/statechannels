@@ -148,6 +148,7 @@ const generateConfig = (
   on: {CHANNEL_UPDATED: {actions: [actions.sendChannelUpdatedNotification]}},
   states: {
     initializing: {
+      entry: actions.displayUi,
       on: {
         CREATE_CHANNEL: {
           target: 'confirmCreateChannelWorkflow',

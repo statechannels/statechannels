@@ -58,8 +58,7 @@ const generateConfig = (
         '': [
           {
             target: 'waitForUserConfirmation',
-            cond: guards.noBudget,
-            actions: [actions.displayUi]
+            cond: guards.noBudget
           },
           {
             target: 'done'
@@ -69,7 +68,7 @@ const generateConfig = (
     },
     waitForUserConfirmation: {
       on: {
-        USER_APPROVES: {target: 'done', actions: [actions.hideUi]},
+        USER_APPROVES: {target: 'done'},
         USER_REJECTS: {target: 'failure', actions: [actions.hideUi]}
       }
     },
