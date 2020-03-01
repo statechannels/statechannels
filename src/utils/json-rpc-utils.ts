@@ -16,21 +16,6 @@ export function createAllocationOutcomeFromParams(params: Allocations): SimpleEt
   };
 }
 
-export function createJsonRpcAllocationsFromOutcome(outcome: Outcome): Allocations {
-  if (outcome.type !== 'SimpleEthAllocation') {
-    throw new Error('Only SimpleEthAllocation is currently supported');
-  }
-  return [
-    {
-      token: '0x0',
-      allocationItems: outcome.allocationItems.map(a => ({
-        amount: a.amount.toHexString(),
-        destination: convertBytes32ToAddress(a.destination)
-      }))
-    }
-  ];
-}
-
 // TODO: Error handling
 export function createStateVarsFromUpdateChannelParams(
   stateVars: StateVariables,
