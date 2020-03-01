@@ -2,8 +2,7 @@ import React from 'react';
 import {RouteComponentProps} from 'react-router-dom';
 import {FormButton} from '../../components/form';
 import {ShareList} from '../../components/share-list/ShareList';
-import {ChannelList} from '../../components/channel-list/ChannelList';
-import {mockTorrents, mockChannels} from '../../constants';
+import {mockTorrents} from '../../constants';
 import {RoutePath} from '../../routes';
 import './Welcome.scss';
 
@@ -45,8 +44,6 @@ const Welcome: React.FC<RouteComponentProps & Props> = props => {
       >
         Upload
       </FormButton>
-      <h2>Current Channels</h2>
-      <ChannelList channels={mockChannels} />
     </section>
   );
 };

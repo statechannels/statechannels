@@ -89,7 +89,7 @@ yarn lint:check
 To also apply automatic fixes:
 
 ```shell
-yarn lint:fix
+yarn lint:write
 ```
 
 ### Tests

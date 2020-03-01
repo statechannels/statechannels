@@ -1,16 +1,29 @@
 @import '../../styles/variables';
 
-table.channel-list {
+.channel-list {
   width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 20px;
-
-  font-size: 18px;
-  line-height: 24px;
 }
 
-td.channel-header {
-    font-weight: bold;
+table.channel-list-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  tbody {
+    border-bottom: 1px solid $c-mediumgrey;
     text-align: center;
-    padding-bottom: 10px;
+    td {
+      min-width: 50px;
+      padding: 5px 5px;
+    }
+    td.channel-header {
+      font-weight: bold;
+    }
+    td.channel-address {
+      max-width: 100px;
+      font-style: italic;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
 }
