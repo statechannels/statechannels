@@ -8,7 +8,6 @@ import {
   StateNodeConfig
 } from 'xstate';
 import {Store} from '../store';
-import {createAllocationOutcomeFromParams} from './json-rpc-utils';
 import {
   CreateChannelRequest,
   JoinChannelRequest,
@@ -17,6 +16,7 @@ import {
 import {NETWORK_ID, CHALLENGE_DURATION} from '../constants';
 import {bigNumberify} from 'ethers/utils';
 import {OpenEvent, PlayerStateUpdate} from '../workflows/application';
+import {deserializeAllocations} from '../app-messages/deserialize';
 
 export function createMockGuard(guardName: string): GuardPredicate<any, any> {
   return {
@@ -78,7 +78,7 @@ export function convertToPlayerStateUpdateEvent(request: UpdateChannelRequest): 
   return {
     type: 'PLAYER_STATE_UPDATE',
 
-    outcome: createAllocationOutcomeFromParams(request.params.allocations),
+    outcome: deserializeAllocations(request.params.allocations),
     channelId: request.params.channelId,
     appData: request.params.appData
   };
@@ -89,7 +89,7 @@ export function convertToOpenEvent(request: CreateChannelRequest | JoinChannelRe
     return {
       type: 'CREATE_CHANNEL',
       ...request.params,
-      outcome: createAllocationOutcomeFromParams(request.params.allocations),
+      outcome: deserializeAllocations(request.params.allocations),
       challengeDuration: bigNumberify(CHALLENGE_DURATION),
       chainId: NETWORK_ID,
       requestId: request.id

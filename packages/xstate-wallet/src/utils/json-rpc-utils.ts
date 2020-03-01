@@ -1,20 +1,6 @@
-import {convertBytes32ToAddress, convertAddressToBytes32} from '@statechannels/nitro-protocol';
-import {UpdateChannelParams, Allocations} from '@statechannels/client-api-schema';
-import {Outcome, StateVariables, SimpleEthAllocation} from '../store/types';
-import {bigNumberify} from 'ethers/utils';
-
-export function createAllocationOutcomeFromParams(params: Allocations): SimpleEthAllocation {
-  // TODO: Support all outcomes
-  return {
-    type: 'SimpleEthAllocation',
-    allocationItems: params[0].allocationItems.map(a => {
-      return {
-        destination: convertAddressToBytes32(a.destination),
-        amount: bigNumberify(a.amount)
-      };
-    })
-  };
-}
+import {UpdateChannelParams} from '@statechannels/client-api-schema';
+import {StateVariables} from '../store/types';
+import {deserializeAllocations} from '../app-messages/deserialize';
 
 // TODO: Error handling
 export function createStateVarsFromUpdateChannelParams(
@@ -30,7 +16,7 @@ export function createStateVarsFromUpdateChannelParams(
   return {
     ...stateVars,
     turnNum: stateVars.turnNum.add(1),
-    outcome: createAllocationOutcomeFromParams(allocations),
+    outcome: deserializeAllocations(allocations),
     appData
   };
 }
