@@ -30,6 +30,6 @@ function serializeSimpleAllocation(allocation: SimpleAllocation): AppAllocation 
 function serializeAllocationItem(allocationItem: AllocationItem): AppAllocationItem {
   return {
     destination: allocationItem.destination,
-    amount: allocationItem.amount.toString()
+    amount: allocationItem.amount.toHexString()
   };
 }

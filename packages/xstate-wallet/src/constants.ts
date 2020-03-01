@@ -1,3 +1,5 @@
+import {bigNumberify} from 'ethers/utils';
+
 export const ETH_ASSET_HOLDER_ADDRESS =
   process.env.ETH_ASSET_HOLDER_ADDRESS || '0x0000000000000000000000000000000000000000';
 
@@ -12,7 +14,7 @@ export const NETWORK_ID = process.env.CHAIN_NETWORK_ID || '0';
 export const ETH_TOKEN = '0x0';
 
 export function assetHolderAddress(tokenAddress: string): string | undefined {
-  if (tokenAddress === ETH_TOKEN) {
+  if (bigNumberify(tokenAddress).isZero()) {
     return ETH_ASSET_HOLDER_ADDRESS;
   }
   // TODO: store mapping, implement lookup
