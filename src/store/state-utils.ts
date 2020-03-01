@@ -1,16 +1,18 @@
-import {State, ChannelConstants, Outcome, StateVariables} from './types';
-import {convertToNitroOutcome} from './outcome-utils';
+import {State, ChannelConstants, Outcome, StateVariables, AllocationItem} from './types';
 import {
   State as NitroState,
+  Outcome as NitroOutcome,
+  AllocationItem as NitroAllocationItem,
   signState as signNitroState,
   hashState as hashNitroState,
   getStateSignerAddress as getNitroSignerAddress,
-  getChannelId
+  getChannelId,
+  convertAddressToBytes32
 } from '@statechannels/nitro-protocol';
 import {joinSignature, splitSignature, bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
 
-export function toNitroState(state: State): NitroState {
+function toNitroState(state: State): NitroState {
   const {challengeDuration, appDefinition, channelNonce, participants, chainId} = state;
   const channel = {
     channelNonce: channelNonce.toString(),
@@ -83,3 +85,35 @@ export const firstState = (
   participants,
   outcome: outcome || {type: 'SimpleEthAllocation', allocationItems: []}
 });
+
+function convertToNitroAllocationItems(allocationItems: AllocationItem[]): NitroAllocationItem[] {
+  return allocationItems.map(a => ({
+    amount: a.amount.toHexString(),
+    destination:
+      a.destination.length === 42 ? convertAddressToBytes32(a.destination) : a.destination
+  }));
+}
+
+export function convertToNitroOutcome(outcome: Outcome): NitroOutcome {
+  switch (outcome.type) {
+    case 'SimpleAllocation':
+      return [
+        {
+          assetHolderAddress: outcome.assetHolderAddress,
+          allocationItems: convertToNitroAllocationItems(outcome.allocationItems)
+        }
+      ];
+    case 'SimpleGuarantee':
+      return [
+        {
+          assetHolderAddress: outcome.assetHolderAddress,
+          guarantee: {
+            targetChannelId: outcome.targetChannelId,
+            destinations: outcome.destinations.map(convertAddressToBytes32)
+          }
+        }
+      ];
+    case 'MixedAllocation':
+      return outcome.simpleAllocations.map(x => convertToNitroOutcome[0]);
+  }
+}
