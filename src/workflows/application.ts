@@ -253,7 +253,8 @@ export const applicationWorkflow = (
       await messagingService.sendResponse(context.requestId, await convertToChannelResult(entry));
     },
     sendJoinChannelResponse: async (context: RequestIdExists & ChannelIdExists) => {
-      await messagingService.sendResponse(context.requestId, context.channelId);
+      const entry = await store.getEntry(context.channelId);
+      await messagingService.sendResponse(context.requestId, await convertToChannelResult(entry));
     },
     spawnObserver: assign<ChannelIdExists>(context => ({
       ...context,
