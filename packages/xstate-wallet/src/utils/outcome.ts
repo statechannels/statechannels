@@ -1,66 +1,44 @@
-import {bigNumberify} from 'ethers/utils';
 import {
   AllocationItem,
-  SimpleEthAllocation,
+  SimpleAllocation,
+  SimpleGuarantee,
   Outcome,
-  SimpleTokenAllocation,
-  SimpleTokenGuarantee,
-  MixedAllocation,
-  SimpleEthGuarantee
+  Allocation
 } from '../store/types';
+import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
 import _ from 'lodash';
+import {bigNumberify} from 'ethers/utils';
 
-const outcomeGuard = <T extends Outcome>(type: Outcome['type']) => (o: Outcome): o is T =>
-  o.type === type;
-export const isSimpleEthAllocation = outcomeGuard<SimpleEthAllocation>('SimpleEthAllocation');
-export const isSimpleEthGuarantee = outcomeGuard<SimpleEthGuarantee>('SimpleEthGuarantee');
-export const isSimpleTokenAllocation = outcomeGuard<SimpleTokenAllocation>('SimpleTokenAllocation');
-export const isSimpleTokenGuarantee = outcomeGuard<SimpleTokenGuarantee>('SimpleTokenGuarantee');
-export const isMixedAllocation = outcomeGuard<MixedAllocation>('MixedAllocation');
+export function isSimpleEthAllocation(outcome: Outcome): outcome is SimpleAllocation {
+  return (
+    outcome.type === 'SimpleAllocation' && outcome.assetHolderAddress === ETH_ASSET_HOLDER_ADDRESS
+  );
+}
 
-export const simpleEthAllocation = (...allocationItems: AllocationItem[]): SimpleEthAllocation => ({
-  type: 'SimpleEthAllocation',
-  allocationItems: _.cloneDeep(allocationItems)
-});
-
-export const simpleTokenAllocation = (
-  tokenAddress: string,
-  ...allocationItems: AllocationItem[]
-): SimpleTokenAllocation => ({
-  type: 'SimpleTokenAllocation',
-  allocationItems: _.cloneDeep(allocationItems),
-  tokenAddress
+export const simpleEthAllocation = (allocationItems: AllocationItem[]): SimpleAllocation => ({
+  type: 'SimpleAllocation',
+  assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
+  allocationItems
 });
 
 export const simpleEthGuarantee = (
-  guarantorAddress: string,
+  targetChannelId: string,
   ...destinations: string[]
-): SimpleEthGuarantee => ({
-  type: 'SimpleEthGuarantee',
+): SimpleGuarantee => ({
+  type: 'SimpleGuarantee',
   destinations,
-  guarantorAddress
+  targetChannelId,
+  assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS
 });
 
-export const simpleTokenGuarantee = (
-  tokenAddress: string,
-  guarantorAddress: string,
-  ...destinations: string[]
-): SimpleTokenGuarantee => ({
-  type: 'SimpleTokenGuarantee',
-  destinations,
-  guarantorAddress,
-  tokenAddress
-});
-
-export function updateAllocationOutcome<O extends SimpleEthAllocation | SimpleTokenAllocation>(
-  outcome: O,
+export const simpleTokenAllocation = (
+  assetHolderAddress,
   allocationItems: AllocationItem[]
-): O {
-  return {
-    ...outcome,
-    allocationItems
-  };
-}
+): SimpleAllocation => ({
+  type: 'SimpleAllocation',
+  assetHolderAddress,
+  allocationItems
+});
 
 export enum Errors {
   DestinationMissing = 'Destination missing from ledger channel',
@@ -68,16 +46,12 @@ export enum Errors {
   InvalidOutcomeType = 'Invalid outcome type'
 }
 
-type AllocationOutcome = SimpleEthAllocation | SimpleTokenAllocation;
 export function allocateToTarget(
   currentOutcome: Outcome,
   deductions: readonly AllocationItem[],
   targetChannelId: string
-): AllocationOutcome {
-  if (
-    currentOutcome.type !== 'SimpleEthAllocation' &&
-    currentOutcome.type !== 'SimpleTokenAllocation'
-  ) {
+): Allocation {
+  if (currentOutcome.type !== 'SimpleAllocation') {
     throw new Error(Errors.InvalidOutcomeType);
   }
 

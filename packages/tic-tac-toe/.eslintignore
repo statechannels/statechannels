@@ -8,7 +8,6 @@
 /scripts/
 /config/
 /jest/
-/src/setupTests.ts
 src/contract-tests/tic-tac-toe.test.ts
 
 # unconventional js

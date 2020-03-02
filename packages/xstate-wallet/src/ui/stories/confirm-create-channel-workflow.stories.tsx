@@ -10,6 +10,7 @@ import {Participant} from '@statechannels/client-api-schema';
 import {renderWalletInFrontOfApp} from './helpers';
 import {MemoryStore} from '../../store/memory-store';
 import {bigNumberify} from 'ethers/utils';
+import {simpleEthAllocation} from '../../utils/outcome';
 
 const store = new MemoryStore(['0xkey']);
 
@@ -27,7 +28,7 @@ const bob: Participant = {
 
 const testContext: WorkflowContext = {
   participants: [alice, bob],
-  outcome: {type: 'SimpleEthAllocation', allocationItems: []},
+  outcome: simpleEthAllocation([]),
   appDefinition: '0x0',
   appData: '0x0',
   chainId: '0',

@@ -131,7 +131,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
         newOutcome,
         heldAfter,
         payouts,
-      ].map(object => replaceAddressesAndBigNumberify(object, addresses));
+      ].map(object => replaceAddressesAndBigNumberify(object, addresses) as OutcomeShortHand);
 
       // Set holdings on multiple asset holders
       resetMultipleHoldings(heldBefore, [AssetHolder1, AssetHolder2]);

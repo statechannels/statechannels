@@ -76,16 +76,12 @@ describe('allocateToTarget with valid input', () => {
     ${'four'}   | ${target4} | ${ledger4}       | ${expected4}
   `('Test $description', ({deductions, ledgerAllocation, expectedAllocation}) => {
     expect(
-      allocateToTarget(simpleEthAllocation(...ledgerAllocation), deductions, targetChannelId)
-    ).toMatchObject(simpleEthAllocation(...expectedAllocation));
+      allocateToTarget(simpleEthAllocation(ledgerAllocation), deductions, targetChannelId)
+    ).toMatchObject(simpleEthAllocation(expectedAllocation));
 
     expect(
-      allocateToTarget(
-        simpleTokenAllocation('foo', ...ledgerAllocation),
-        deductions,
-        targetChannelId
-      )
-    ).toMatchObject(simpleTokenAllocation('foo', ...expectedAllocation));
+      allocateToTarget(simpleTokenAllocation('foo', ledgerAllocation), deductions, targetChannelId)
+    ).toMatchObject(simpleTokenAllocation('foo', expectedAllocation));
   });
 });
 
@@ -116,7 +112,7 @@ describe('allocateToTarget with invalid input', () => {
     ${'two'}    | ${target2} | ${ledger2}       | ${error2}
   `('Test $description', ({deductions, ledgerAllocation, error}) => {
     expect(() =>
-      allocateToTarget(simpleEthAllocation(...ledgerAllocation), deductions, targetChannelId)
+      allocateToTarget(simpleEthAllocation(ledgerAllocation), deductions, targetChannelId)
     ).toThrow(error);
   });
 });

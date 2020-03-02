@@ -13,7 +13,7 @@ module.exports = {
   collectCoverageFrom: ['src/**/*.{js,jsx,ts,tsx}'],
   reporters: ['default'],
   setupFiles: ['<rootDir>/config/polyfills.js'],
-  setupFilesAfterEnv: ['<rootDir>/config/jest/jest.setup.js', '<rootDir>/config/setupTests.ts'],
+  setupFilesAfterEnv: ['<rootDir>/config/jest/jest.setup.js'],
   testMatch: ['<rootDir>/src/**/__tests__/?(*.)test.ts?(x)'],
   testEnvironment: 'jsdom',
   testURL: 'http://localhost',

@@ -15,6 +15,7 @@ import {isSimpleEthAllocation} from '../../utils/outcome';
 import {FakeChain, Chain} from '../../chain';
 import {wallet1, wallet2, participants} from './data';
 import {subscribeToMessages} from './message-service';
+import {ETH_ASSET_HOLDER_ADDRESS} from '../../constants';
 
 jest.setTimeout(20000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
@@ -45,7 +46,8 @@ const destinations = participants.map(p => p.destination);
 const amounts = [bigNumberify(7), bigNumberify(5)];
 const deductionAmounts = [bigNumberify(3), bigNumberify(2)];
 const outcome: Outcome = {
-  type: 'SimpleEthAllocation',
+  type: 'SimpleAllocation',
+  assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
   allocationItems: [0, 1].map(i => ({
     destination: destinations[i],
     amount: amounts[i]
