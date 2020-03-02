@@ -1,7 +1,7 @@
 import {ChannelResult, Message, ChannelClient} from '@statechannels/channel-client';
 import {bigNumberify} from 'ethers/utils';
 
-interface ChannelState {
+export interface ChannelState {
   channelId: string;
   turnNum: string;
   challengeExpirationTime;

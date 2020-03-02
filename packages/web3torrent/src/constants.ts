@@ -1,4 +1,7 @@
 import {Status, Torrent} from './types';
+import {ChannelState} from './clients/web3t-channel-client';
+
+import {bigNumberify} from 'ethers/utils';
 
 export const defaultTrackers = [
   'udp://explodie.org:6969',
@@ -58,5 +61,35 @@ export const mockTorrents: Array<Partial<Torrent>> = [
     files: [],
     magnetURI:
       'magnet:?xt=urn:btih:c9e15763f722f23e98a29decdfae341b98d53056&dn=Cosmos+Laundromat&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&ws=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2F&xs=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2Fcosmos-laundromat.torrent'
+  }
+];
+
+export const mockCurrentUser = '0x8fd00f170fdf3772c5ebdcd90bf257316c69ba45';
+const mockBalance = 200000000000000;
+export const mockLeecherA = '0x829bd824b016326a401d083b33d092293333a830';
+export const mockLeecherB = '0x3b33d092293333a830829bd824b016326a401d08';
+export const mockSeeder = '0xc631e3bf86075f4d2b45ba974cff4ef5a5f922a0';
+
+export const mockChannels: Array<Partial<ChannelState>> = [
+  {
+    channelId: '0x5a0b54d5dc17e0aadc383d2db43b0a0d3e029c4c',
+    leecher: mockLeecherA,
+    leecherBalance: bigNumberify(mockBalance / 2).toString(),
+    seeder: mockCurrentUser,
+    seederBalance: bigNumberify(mockBalance).toString()
+  },
+  {
+    channelId: '0xb43b0a0d3e029c4c5a0b54d5dc17e0aadc383d2d',
+    leecher: mockLeecherB,
+    leecherBalance: bigNumberify(mockBalance * 6).toString(),
+    seeder: mockCurrentUser,
+    seederBalance: bigNumberify(mockBalance).toString()
+  },
+  {
+    channelId: '0x7bc8f170fdf3772c5ebdcd90bf257316c69ba45',
+    leecher: mockCurrentUser,
+    leecherBalance: bigNumberify(mockBalance).toString(),
+    seeder: mockSeeder,
+    seederBalance: bigNumberify(mockBalance * 2).toString()
   }
 ];
