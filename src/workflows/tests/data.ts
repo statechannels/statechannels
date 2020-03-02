@@ -37,16 +37,10 @@ export const appState = (n: BigNumberish): State => ({
   appDefinition: '0x0000000000000000000000000000000000000000',
   isFinal: false,
   turnNum: bigNumberify(n),
-  outcome: simpleEthAllocation(
-    {
-      destination: first.destination,
-      amount: bigNumberify(1)
-    },
-    {
-      destination: second.destination,
-      amount: bigNumberify(3)
-    }
-  ),
+  outcome: simpleEthAllocation([
+    {destination: first.destination, amount: bigNumberify(1)},
+    {destination: second.destination, amount: bigNumberify(3)}
+  ]),
   participants,
   channelNonce: bigNumberify('0x01'),
   chainId: '0x01',
@@ -60,7 +54,7 @@ export const ledgerState = (
 ): State => ({
   turnNum: bigNumberify(turnNum),
   outcome: simpleEthAllocation(
-    ...amounts.map((a, i) => ({
+    amounts.map((a, i) => ({
       destination: participants[i].destination,
       amount: bigNumberify(a)
     }))

@@ -6,6 +6,7 @@ import {outcomesEqual} from '../store/state-utils';
 import {isIndirectFunding} from '../store/memory-store';
 import {add} from '../utils/math-utils';
 import {checkThat} from '../utils';
+import {isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
 const WORKFLOW = 'conclude-channel';
 
 export interface Init {
@@ -101,10 +102,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, ctx: Init) => {
     if (!supported) {
       throw new Error('No supported state for ledger channel');
     }
-    if (
-      supported.outcome.type !== 'SimpleEthAllocation' ||
-      concludedOutcome.type !== 'SimpleEthAllocation'
-    ) {
+    if (!isSimpleEthAllocation(supported.outcome) || !isSimpleEthAllocation(concludedOutcome)) {
       throw new Error('Only SimpleEthAllocations are currently supported');
     }
     const allocation = supported.outcome.allocationItems;
@@ -125,7 +123,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, ctx: Init) => {
         ...channelConstants,
         ...supported,
         turnNum: supported.turnNum.add(1),
-        outcome: {type: 'SimpleEthAllocation', allocationItems: allocation}
+        outcome: simpleEthAllocation(allocation)
       }
     };
   }

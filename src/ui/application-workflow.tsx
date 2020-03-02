@@ -45,8 +45,6 @@ export const ApplicationWorkflow = (props: Props) => {
   );
 };
 
-export default ApplicationWorkflow;
-
 const progressThroughCreateMachine = {
   initializeChannel: 0.15,
   sendOpenChannelMessage: 0.3,

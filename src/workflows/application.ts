@@ -21,10 +21,11 @@ import * as CCC from './confirm-create-channel';
 import {Participant} from '@statechannels/client-api-schema';
 import {createMockGuard, getDataAndInvoke} from '../utils/workflow-utils';
 import {Store} from '../store/memory-store';
-import {StateVariables, SimpleEthAllocation} from '../store/types';
+import {StateVariables, SimpleAllocation} from '../store/types';
 import {ChannelStoreEntry} from '../store/memory-channel-storage';
 import {bigNumberify, BigNumber} from 'ethers/utils';
 import * as ConcludeChannel from './conclude-channel';
+import {isSimpleEthAllocation} from '../utils/outcome';
 import {unreachable} from '../utils';
 
 export interface WorkflowContext {
@@ -66,7 +67,7 @@ export type OpenEvent = CreateChannelEvent | JoinChannelEvent;
 export interface CreateChannelEvent {
   type: 'CREATE_CHANNEL';
   participants: Participant[];
-  outcome: SimpleEthAllocation;
+  outcome: SimpleAllocation;
   appDefinition: string;
   appData: string;
   challengeDuration: BigNumber;
@@ -82,7 +83,7 @@ export interface ChannelUpdated {
 
 export interface PlayerStateUpdate {
   type: 'PLAYER_STATE_UPDATE';
-  outcome: SimpleEthAllocation;
+  outcome: SimpleAllocation;
   channelId: string;
   appData: string;
 }
@@ -148,7 +149,7 @@ const generateConfig = (
           target: 'confirmCreateChannelWorkflow',
           actions: [actions.assignChannelParams]
         },
-        JOIN_CHANNEL: {target: 'confirmJoinChannelWorkflow', actions: [actions.assignChannelId]}
+        JOIN_CHANNEL: {target: 'confirmJoinChannelWorkflow'}
       }
     },
     confirmCreateChannelWorkflow: getDataAndInvoke(
@@ -278,7 +279,6 @@ export const applicationWorkflow = (
         event: CreateChannelEvent
       ): ChannelParamsExist & RequestIdExists => {
         return {
-          ...context,
           channelParams: event,
           requestId: event.requestId
         };
@@ -348,28 +348,24 @@ export const applicationWorkflow = (
       );
       return channelId;
     },
-    invokeClosingProtocol: (context: ChannelIdExists) => {
+    invokeClosingProtocol: (context: ChannelIdExists) =>
       // TODO: Close machine needs to accept new store
-      return ConcludeChannel.machine(store, {channelId: context.channelId});
-    },
+      ConcludeChannel.machine(store, {channelId: context.channelId}),
     invokeCreateChannelAndDirectFundProtocol: (
       _,
       event: DoneInvokeEvent<CreateAndDirectFund.Init>
-    ) => {
-      return CreateAndDirectFund.machine(store, event.data);
-    },
-    invokeCreateChannelConfirmation: (context, event: DoneInvokeEvent<CCC.WorkflowContext>) => {
-      return CCC.confirmChannelCreationWorkflow(store, event.data);
-    },
+    ) => CreateAndDirectFund.machine(store, event.data),
+    invokeCreateChannelConfirmation: (context, event: DoneInvokeEvent<CCC.WorkflowContext>) =>
+      CCC.confirmChannelCreationWorkflow(store, event.data),
     getDataForCreateChannelAndDirectFund: async (
       context: WorkflowContext
     ): Promise<CreateAndDirectFund.Init> => {
-      const {latest, channelId} = await store.getEntry(context.channelId);
-      const {outcome} = latest;
-      if (outcome.type !== 'SimpleEthAllocation') {
-        throw new Error('TODO');
+      const entry = await store.getEntry(context.channelId);
+      const {outcome} = entry.latest;
+      if (!isSimpleEthAllocation(outcome)) {
+        throw new Error('Only simple eth allocation currently supported');
       }
-      return {channelId: channelId, allocation: outcome};
+      return {channelId: entry.channelId, allocation: outcome};
     },
     getDataForCreateChannelConfirmation: async (
       _: WorkflowContext,
@@ -383,7 +379,7 @@ export const applicationWorkflow = (
           return {
             ...entry.latest,
             ...entry.channelConstants,
-            outcome: entry.latest.outcome as SimpleEthAllocation
+            outcome: entry.latest.outcome as SimpleAllocation
           };
         default:
           return unreachable(event);

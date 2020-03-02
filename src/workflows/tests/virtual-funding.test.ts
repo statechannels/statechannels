@@ -49,15 +49,13 @@ const jointChannel: ChannelConstants = {
 };
 const jointChannelId = calculateChannelId(jointChannel);
 
-const amounts = [2, 3].map(bigNumberify);
-const outcome: Outcome = {
-  type: 'SimpleEthAllocation',
-  allocationItems: [
-    {destination: jointParticipants[0].destination, amount: amounts[0]},
-    {destination: jointParticipants[2].destination, amount: amounts[1]},
-    {destination: jointParticipants[1].destination, amount: amounts.reduce(add)}
-  ]
-};
+const amounts = [bigNumberify(2), bigNumberify(3)];
+const outcome: Outcome = simpleEthAllocation([
+  {destination: jointParticipants[0].destination, amount: amounts[0]},
+  {destination: jointParticipants[2].destination, amount: amounts[1]},
+  {destination: jointParticipants[1].destination, amount: amounts.reduce(add)}
+]);
+
 const context: Init = {targetChannelId, jointChannelId};
 
 test('virtual funding', async () => {
@@ -110,10 +108,10 @@ test('virtual funding', async () => {
     const outcome = supported?.outcome;
     const amount = bigNumberify(5);
     expect(outcome).toMatchObject(
-      simpleEthAllocation(
+      simpleEthAllocation([
         {destination: targetChannelId, amount},
         {destination: jointParticipants[1].destination, amount}
-      )
+      ])
     );
   }, EXPECT_TIMEOUT);
 });
@@ -125,7 +123,7 @@ test('invalid joint state', async () => {
   const state = firstState(outcome, jointChannel);
   const invalidState: State = {
     ...state,
-    outcome: {type: 'SimpleEthAllocation', allocationItems: []}
+    outcome: simpleEthAllocation([])
   };
 
   store.pushMessage({

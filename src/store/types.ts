@@ -18,41 +18,29 @@ export interface AllocationItem {
   destination: string;
   amount: BigNumber;
 }
-
-export type Allocation = AllocationItem[];
-export interface SimpleEthAllocation {
-  type: 'SimpleEthAllocation';
-  allocationItems: Allocation;
+export interface SimpleAllocation {
+  type: 'SimpleAllocation';
+  assetHolderAddress: string;
+  allocationItems: AllocationItem[];
 }
-export interface SimpleTokenAllocation {
-  type: 'SimpleTokenAllocation';
-  tokenAddress: string;
-  allocationItems: Allocation;
-}
-export interface SimpleEthGuarantee {
-  type: 'SimpleEthGuarantee';
-  guarantorAddress: string;
-  destinations: string[];
-}
-export interface SimpleTokenGuarantee {
-  type: 'SimpleTokenGuarantee';
-  tokenAddress: string;
-  guarantorAddress: string;
+export interface SimpleGuarantee {
+  type: 'SimpleGuarantee';
+  targetChannelId: string;
+  assetHolderAddress: string;
   destinations: string[];
 }
 export interface MixedAllocation {
   type: 'MixedAllocation';
-  ethAllocation?: SimpleEthAllocation;
-  tokenAllocations?: SimpleTokenAllocation[];
+  simpleAllocations: SimpleAllocation[];
 }
 
-// TODO: Better name?
-export type SimpleOutcome =
-  | SimpleEthAllocation
-  | SimpleTokenAllocation
-  | SimpleEthGuarantee
-  | SimpleTokenGuarantee;
-export type Outcome = SimpleOutcome | MixedAllocation;
+// Should we even have these two different types??
+export type Allocation = SimpleAllocation | MixedAllocation;
+export type Outcome = Allocation | SimpleGuarantee;
+
+export function isAllocation(outcome: Outcome): outcome is Allocation {
+  return outcome.type !== 'SimpleGuarantee';
+}
 
 export interface ChannelConstants {
   chainId: string;
