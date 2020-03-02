@@ -3,7 +3,7 @@ import {bigNumberify} from 'ethers/utils';
 import {FakeChannelProvider} from '@statechannels/channel-client';
 import {ChannelClient} from '@statechannels/channel-client';
 import React from 'react';
-
+import {mockChannels, mockCurrentUser} from '../constants';
 export interface ChannelState {
   channelId: string;
   turnNum: string;
@@ -66,11 +66,11 @@ export interface Web3TorrentChannelClientInterface {
 }
 
 export class Web3TorrentChannelClient implements Web3TorrentChannelClientInterface {
-  constructor(private readonly channelClient: ChannelClientInterface) {}
-
   mySigningAddress?: string;
   myEthereumSelectedAddress?: string; // this state can be inspected to infer whether we need to get the user to "Connect With MetaMask" or not.
-
+  public openChannels: Array<Partial<ChannelState>> = mockChannels; // TODO change to ChannelState[];
+  public myAddress: string = mockCurrentUser;
+  constructor(private readonly channelClient: ChannelClientInterface) {}
   async createChannel(
     seeder: string,
     leecher: string,
