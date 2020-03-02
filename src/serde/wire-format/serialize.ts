@@ -2,10 +2,23 @@ import {
   SignedState as SignedStateWire,
   Outcome as OutcomeWire,
   AllocationItem as AllocationItemWire,
-  Allocation as AllocationWire
+  Allocation as AllocationWire,
+  Message as WireMessage
 } from '@statechannels/wire-format';
-import {SignedState, Outcome, AllocationItem, SimpleAllocation} from '../../store/types';
+import {SignedState, Outcome, AllocationItem, SimpleAllocation, Message} from '../../store/types';
 import {calculateChannelId} from '../../store/state-utils';
+
+export function serializeMessage(message: Message, recipient: string, sender: string): WireMessage {
+  const signedStates = (message.signedStates || []).map(ss => {
+    return serializeState(ss);
+  });
+  const {objectives} = message;
+  return {
+    recipient,
+    sender,
+    data: {signedStates, objectives}
+  };
+}
 
 export function serializeState(state: SignedState): SignedStateWire {
   return {
