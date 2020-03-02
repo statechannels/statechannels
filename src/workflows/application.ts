@@ -350,7 +350,7 @@ export const applicationWorkflow = (
           appData: event.appData,
           outcome: event.outcome
         };
-        store.signAndAddState(event.channelId, newState);
+        await store.signAndAddState(event.channelId, newState);
       }
     }
   };
