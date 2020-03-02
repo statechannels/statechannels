@@ -1,6 +1,5 @@
 import {MemoryStore} from './memory-store';
-import {Objective} from './wire-protocol';
-import {State} from './types';
+import {State, Objective} from './types';
 import {bigNumberify, BigNumber} from 'ethers/utils';
 import {Wallet} from 'ethers';
 import {calculateChannelId, signState} from './state-utils';
@@ -78,7 +77,7 @@ test('newObjectiveFeed', async () => {
   const objective: Objective = {
     type: 'OpenChannel',
     participants: [],
-    targetChannelId: 'foo'
+    data: {targetChannelId: 'foo'}
   };
 
   const store = aStore();

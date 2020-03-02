@@ -11,7 +11,7 @@ import {
   Notification,
   ChannelClosingNotification,
   ChannelUpdatedNotification,
-  Message
+  Request
 } from '@statechannels/client-api-schema';
 
 import * as jrs from 'jsonrpc-lite';
@@ -19,10 +19,12 @@ import * as jrs from 'jsonrpc-lite';
 import {fromEvent, Observable} from 'rxjs';
 import {Store} from './store';
 import {ChannelStoreEntry} from './store/memory-channel-storage';
-import {Message as WireMessage} from './store/wire-protocol';
+import {Message as WireMessage} from '@statechannels/wire-format';
 import {unreachable} from './utils';
-import {isAllocation} from './store/types';
-import {serializeAllocation} from './app-messages/serialize';
+import {isAllocation, Message} from './store/types';
+import {serializeAllocation} from './serde/app-messages/serialize';
+import {deserializeMessage} from './serde/wire-format/deserialize';
+import {serializeMessage} from './serde/wire-format/serialize';
 
 type ChannelRequest =
   | CreateChannelRequest
@@ -40,13 +42,13 @@ export interface MessagingServiceInterface {
   readonly outboxFeed: Observable<Response | Notification>;
   readonly requestFeed: Observable<ChannelRequest>;
 
-  receiveMessage(jsonRpcMessage: any): Promise<void>;
+  receiveRequest(jsonRpcMessage: Request): Promise<void>;
 
   sendChannelNotification(
     method: ChannelClosingNotification['method'] | ChannelUpdatedNotification['method'],
     notificationData: ChannelResult
   );
-  sendMessageNotification(message: WireMessage): Promise<void>;
+  sendMessageNotification(message: Message): Promise<void>;
   sendResponse(id: number, result: Response['result']): Promise<void>;
 }
 
@@ -78,13 +80,37 @@ export class MessagingService implements MessagingServiceInterface {
     this.eventEmitter.emit('SendMessage', notification);
   }
 
-  public async sendMessageNotification(message) {
-    const notification = {jsonrpc: '2.0', method: 'MessageQueued', params: message} as Notification; // typescript can't handle this otherwise
-    this.eventEmitter.emit('SendMessage', notification);
+  public async sendMessageNotification(message: Message) {
+    // TODO: It is awakward to have to generate sender/recipient
+    const ourAddress = await this.store.getAddress();
+    const sender = ourAddress;
+    const objectiveRecipients =
+      message.objectives
+        ?.map(o => o.participants)
+        .reduce((a, b) => {
+          return a.concat(b);
+        }) || [];
+    const stateRecipients =
+      message.signedStates?.map(ss => ss.participants).reduce((a, b) => a.concat(b)) || [];
+
+    const filteredRecipients = [...new Set((objectiveRecipients || []).concat(stateRecipients))]
+      .filter(p => {
+        return p.signingAddress !== sender;
+      })
+      .map(p => p.participantId);
+
+    filteredRecipients.forEach(recipient => {
+      const notification = {
+        jsonrpc: '2.0',
+        method: 'MessageQueued',
+        params: serializeMessage(message, recipient, sender)
+      } as Notification; // typescript can't handle this otherwise
+      this.eventEmitter.emit('SendMessage', notification);
+    });
   }
 
-  public async receiveMessage(message) {
-    const request = parseRequest(message);
+  public async receiveRequest(jsonRpcRequest: Request) {
+    const request = parseRequest(jsonRpcRequest);
     const {id} = request;
 
     switch (request.method) {
@@ -108,11 +134,11 @@ export class MessagingService implements MessagingServiceInterface {
         break;
       case 'PushMessage':
         // todo: should verify message format here
-        const message = request.params as Message<WireMessage>;
+        const message = request.params as WireMessage;
         if (message.recipient !== this.store.getAddress()) {
           throw new Error(`Received message not addressed to us ${JSON.stringify(message)}`);
         }
-        this.store.pushMessage(message.data);
+        this.store.pushMessage(deserializeMessage(message));
         break;
       case 'GetBudget':
       case 'ChallengeChannel':

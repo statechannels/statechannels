@@ -3,8 +3,8 @@ import {
   Allocations as AppAllocations,
   AllocationItem as AppAllocationItem
 } from '@statechannels/client-api-schema';
-import {Allocation, AllocationItem, SimpleAllocation} from '../store/types';
-import {tokenAddress} from '../constants';
+import {Allocation, AllocationItem, SimpleAllocation} from '../../store/types';
+import {tokenAddress} from '../../constants';
 
 export function serializeAllocation(allocation: Allocation): AppAllocations {
   switch (allocation.type) {
