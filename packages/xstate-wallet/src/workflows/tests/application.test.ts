@@ -193,8 +193,15 @@ it('starts concluding when requested', async () => {
       })
     )
   };
+  const actions: Partial<WorkflowActions> = {
+    sendCloseChannelResponse: jest.fn().mockReturnValue(
+      new Promise(() => {
+        /* mock */
+      })
+    )
+  };
   const service = interpret<any, any, any>(
-    applicationWorkflow(store, messagingService).withConfig({services} as any)
+    applicationWorkflow(store, messagingService).withConfig({services, actions} as any)
   ); // TODO: Casting
   service.start('running');
   service.send({type: 'PLAYER_REQUEST_CONCLUDE', channelId});
