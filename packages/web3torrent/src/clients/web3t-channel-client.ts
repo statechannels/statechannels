@@ -3,7 +3,7 @@ import {bigNumberify} from 'ethers/utils';
 import {FakeChannelProvider} from '@statechannels/channel-client';
 import {ChannelClient} from '@statechannels/channel-client';
 import React from 'react';
-import {mockChannels, mockCurrentUser} from '../constants';
+
 export interface ChannelState {
   channelId: string;
   turnNum: string;
@@ -30,6 +30,10 @@ if (process.env.REACT_APP_FAKE_CHANNEL_PROVIDER === 'true') {
 // TODO: Put inside better place than here where app can handle error case
 window.channelProvider.enable(process.env.REACT_APP_WALLET_URL);
 export interface Web3TorrentChannelClientInterface {
+  mySigningAddress?: string;
+  myEthereumSelectedAddress?: string; // this state can be inspected to infer whether we need to get the user to "Connect With MetaMask" or not.
+  openChannels: Array<Partial<ChannelState>>; // TODO change to ChannelState[];
+  myAddress: string;
   createChannel(
     seeder: string,
     leecher: string,
@@ -66,10 +70,10 @@ export interface Web3TorrentChannelClientInterface {
 }
 
 export class Web3TorrentChannelClient implements Web3TorrentChannelClientInterface {
-  mySigningAddress?: string;
-  myEthereumSelectedAddress?: string; // this state can be inspected to infer whether we need to get the user to "Connect With MetaMask" or not.
-  public openChannels: Array<Partial<ChannelState>> = mockChannels; // TODO change to ChannelState[];
-  public myAddress: string = mockCurrentUser;
+  public mySigningAddress?: string;
+  public myEthereumSelectedAddress?: string; // this state can be inspected to infer whether we need to get the user to "Connect With MetaMask" or not.
+  public openChannels: ChannelState[] = [];
+  public myAddress: string;
   constructor(private readonly channelClient: ChannelClientInterface) {}
   async createChannel(
     seeder: string,
@@ -99,6 +103,7 @@ export class Web3TorrentChannelClient implements Web3TorrentChannelClientInterfa
       appDefinition,
       'appData unused'
     );
+    this.openChannels.push(convertToChannelState(channelResult));
 
     return convertToChannelState(channelResult);
   }
@@ -136,6 +141,7 @@ export class Web3TorrentChannelClient implements Web3TorrentChannelClientInterfa
 
   async joinChannel(channelId: string) {
     const channelResult = await this.channelClient.joinChannel(channelId);
+    this.openChannels.push(convertToChannelState(channelResult));
     return convertToChannelState(channelResult);
   }
 
