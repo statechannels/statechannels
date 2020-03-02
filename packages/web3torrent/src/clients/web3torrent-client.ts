@@ -5,7 +5,7 @@ import {Status, Torrent} from '../types';
 import {web3TorrentChannelClient} from './web3t-channel-client';
 
 export const web3torrent = new WebTorrentPaidStreamingClient({}, web3TorrentChannelClient);
-web3torrent.enable(); // trigger pseAccount to be set to SC signing address
+
 export const WebTorrentContext = React.createContext(web3torrent);
 
 export const getTorrentPeers = infoHash => web3torrent.allowedPeers[infoHash];
