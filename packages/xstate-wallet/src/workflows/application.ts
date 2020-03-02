@@ -205,6 +205,9 @@ const generateConfig = (
     running: {
       entry: [actions.hideUi],
       on: {
+        //TODO: spawnObservers shouldn't be here but it makes the running integration test work (since we skip right to the running state)
+        // It shouldn't cause any issues but we should probably figure a better way of handling this in the test
+        SPAWN_OBSERVERS: {actions: [actions.spawnObservers]},
         PLAYER_STATE_UPDATE: {
           target: 'running',
           actions: [actions.updateStoreWithPlayerState, actions.sendUpdateChannelResponse]
@@ -293,11 +296,17 @@ export const applicationWorkflow = (
       const entry = await store.getEntry(context.channelId);
       await messagingService.sendResponse(context.requestId, await convertToChannelResult(entry));
     },
-    spawnObservers: assign<ChannelIdExists>(context => ({
-      ...context,
-      updateObserver: spawn(notifyOnUpdate(context)),
-      requestObserver: spawn(notifyOnChannelRequest(context))
-    })),
+    spawnObservers: assign<ChannelIdExists>((context: WorkflowContext & ChannelIdExists) => {
+      if (!context.requestObserver || !context.updateObserver) {
+        return {
+          ...context,
+          updateObserver: spawn(notifyOnUpdate(context)),
+          requestObserver: spawn(notifyOnChannelRequest(context))
+        };
+      } else {
+        return context;
+      }
+    }),
 
     sendChannelUpdatedNotification: async (
       context: ChannelIdExists,
