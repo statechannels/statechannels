@@ -1,7 +1,8 @@
 import * as firebase from 'firebase';
 
-import {cHubParticipantAddress, cFirebasePrefix} from '../constants';
+import {cHubStateChannelAddress, cFirebasePrefix} from '../constants';
 import {logger} from '../logger';
+import {Message} from '@statechannels/wire-format';
 
 const log = logger();
 
@@ -30,7 +31,7 @@ function getMessagesRef() {
 
 export async function fbListen(callback) {
   log.info('firebase-relay: listen');
-  const hubRef = getMessagesRef().child(cHubParticipantAddress);
+  const hubRef = getMessagesRef().child(cHubStateChannelAddress);
 
   hubRef.on('child_added', async snapshot => {
     const key = snapshot.key;
@@ -40,10 +41,10 @@ export async function fbListen(callback) {
   });
 }
 
-export function fbSend(message: string) {
+export function fbSend(message: Message) {
   const sanitizedPayload = JSON.parse(JSON.stringify(message));
   // todo: how is the receipient pulled out?
   return getMessagesRef()
-    .child('message.recipient')
+    .child(message.recipient)
     .push(sanitizedPayload);
 }

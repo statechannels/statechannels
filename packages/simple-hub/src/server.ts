@@ -8,21 +8,19 @@ if (process.env.RUNTIME_ENV) {
 }
 import {logger} from './logger';
 import {fbListen, fbSend} from './message/firebase-relay';
+import {Message} from '@statechannels/wire-format';
+import {respondToMessage} from './wallet';
 
 const log = logger();
 
 export async function startServer(): Promise<any> {
-  const fbMessageCallback = async (message: any) => {
-    log.info({message}, 'Received message from firebase');
+  const fbMessageCallback = async (incomingMessage: Message) => {
+    log.info({incomingMessage}, 'Received message from firebase');
 
-    const outgoingMessages = ['message1'];
+    const outgoingMessage = respondToMessage(incomingMessage);
     try {
-      await Promise.all(
-        outgoingMessages.map(async outgoingMessage => {
-          // log.info({message: outgoingMessages}, 'Sending message to firebase');
-          await fbSend(outgoingMessage);
-        })
-      );
+      // log.info({message: outgoingMessages}, 'Sending message to firebase');
+      await fbSend(outgoingMessage);
     } catch (reason) {
       log.error(reason);
       throw reason;

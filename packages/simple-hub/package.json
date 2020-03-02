@@ -8,10 +8,13 @@
     "@firebase/database": "0.5.19",
     "@sentry/node": "5.11.1",
     "@statechannels/nitro-protocol": "0.0.1",
+    "@statechannels/wire-format": "0.0.1",
+    "@statechannels/xstate-wallet": "0.0.1",
     "async-lock": "1.2.2",
     "ethers": "4.0.44",
     "firebase": "7.7.0",
-    "pino": "5.16.0"
+    "pino": "5.16.0",
+    "ramda": "^0.27.0"
   },
   "devDependencies": {
     "@statechannels/client-api-schema": "0.0.1",
@@ -24,6 +27,7 @@
     "@types/nodemon": "1.19.0",
     "@types/pino": "5.20.0",
     "@types/prettier": "1.19.0",
+    "@types/ramda": "^0.26.43",
     "@typescript-eslint/eslint-plugin": "2.18.0",
     "@typescript-eslint/parser": "2.18.0",
     "eslint": "6.8.0",
