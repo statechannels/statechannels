@@ -352,30 +352,23 @@ export const applicationWorkflow = (
       // TODO: Close machine needs to accept new store
       ConcludeChannel.machine(store, {channelId: context.channelId}),
     invokeCreateChannelAndDirectFundProtocol: (
-      context,
+      _,
       event: DoneInvokeEvent<CreateAndDirectFund.Init>
     ) => CreateAndDirectFund.machine(store, event.data),
     invokeCreateChannelConfirmation: (context, event: DoneInvokeEvent<CCC.WorkflowContext>) =>
       CCC.confirmChannelCreationWorkflow(store, event.data),
     getDataForCreateChannelAndDirectFund: async (
-      context: WorkflowContext,
-      event
+      context: WorkflowContext
     ): Promise<CreateAndDirectFund.Init> => {
       const entry = await store.getEntry(context.channelId);
       const {outcome} = entry.latest;
       if (!isSimpleEthAllocation(outcome)) {
         throw new Error('Only simple eth allocation currently supported');
       }
-      return {
-        channelId: entry.channelId,
-        ...entry.channelConstants,
-        allocation: outcome,
-        index: entry.myIndex,
-        ...entry.latest
-      };
+      return {channelId: entry.channelId, allocation: outcome};
     },
     getDataForCreateChannelConfirmation: async (
-      context: WorkflowContext,
+      _: WorkflowContext,
       event: CreateChannelEvent | JoinChannelEvent
     ): Promise<CCC.WorkflowContext> => {
       switch (event.type) {
