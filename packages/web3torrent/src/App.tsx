@@ -8,6 +8,7 @@ import Welcome from './pages/welcome/Welcome';
 import File from './pages/file/File';
 import Upload from './pages/upload/Upload';
 import {RoutePath} from './routes';
+import ConnectionBanner from '@rimble/connection-banner';
 
 const history = createBrowserHistory();
 class App extends React.Component {
@@ -28,6 +29,11 @@ class App extends React.Component {
     const {currentNetwork, requiredNetwork} = this.state;
     return (
       <Router history={history}>
+        <ConnectionBanner
+          currentNetwork={currentNetwork}
+          requiredNetwork={requiredNetwork}
+          onWeb3Fallback={!('ethereum' in window)}
+        />
         <main>
           <Route
             path={RoutePath.Root}
