@@ -10,7 +10,7 @@ import {Guid} from 'guid-typescript';
 import {convertToOpenEvent, convertToPlayerStateUpdateEvent} from './utils/workflow-utils';
 import {Notification, Response} from '@statechannels/client-api-schema';
 import {filter, map} from 'rxjs/operators';
-import {OpenChannel, MessagePayload} from './store/wire-protocol';
+import {Message, OpenChannel} from './store/types';
 
 export interface Workflow {
   id: string;
@@ -28,7 +28,7 @@ export class ChannelWallet {
     this.workflows = [];
 
     // Whenever the store wants to send something call sendMessage
-    store.outboxFeed.subscribe(async (m: MessagePayload) => {
+    store.outboxFeed.subscribe(async (m: Message) => {
       this.messagingService.sendMessageNotification(m);
     });
     // Whenever an OpenChannel objective is received
