@@ -1,4 +1,3 @@
-import {FakeChannelProvider} from '@statechannels/channel-client';
 import debug from 'debug';
 import WebTorrent, {Torrent, TorrentOptions} from 'webtorrent';
 import paidStreamingExtension, {PaidStreamingExtensionOptions} from './pse-middleware';
@@ -16,8 +15,8 @@ import {
   WebTorrentSeedInput,
   WireEvents
 } from './types';
-import {Web3TorrentChannelClient} from '../clients/web3t-channel-client';
-import {ChannelClient} from '@statechannels/channel-client';
+import {FakeChannelProvider} from '@statechannels/channel-client';
+
 import {Web3TorrentChannelClientInterface} from '../clients/web3t-channel-client';
 
 const log = debug('web3torrent:library');
@@ -30,17 +29,6 @@ export * from './types';
 
 export const REQUEST_RATE = 10;
 
-if (process.env.REACT_APP_FAKE_CHANNEL_PROVIDER === 'true') {
-  window.channelProvider = new FakeChannelProvider();
-} else {
-  // TODO: Replace with injection via other means than direct app import
-  // NOTE: This adds `channelProvider` to the `Window` object
-  require('@statechannels/channel-provider');
-}
-
-// TODO: Put inside better place than here where app can handle error case
-window.channelProvider.enable(process.env.REACT_APP_WALLET_URL);
-
 export default class WebTorrentPaidStreamingClient extends WebTorrent {
   allowedPeers: PeersByTorrent;
   pseAccount: string;
@@ -48,12 +36,15 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   channelClient: Web3TorrentChannelClientInterface;
   amSeeder: boolean = false;
 
-  constructor(opts: WebTorrentPaidStreamingClientOptions = {}) {
+  constructor(
+    opts: WebTorrentPaidStreamingClientOptions = {},
+    channelClient: Web3TorrentChannelClientInterface
+  ) {
     super(opts);
-    this.channelClient = new Web3TorrentChannelClient(new ChannelClient(window.channelProvider));
     this.allowedPeers = {};
     this.pseAccount = opts.pseAccount || Math.floor(Math.random() * 99999999999999999).toString();
     log('ACCOUNT ID: ', this.pseAccount);
+    this.channelClient = channelClient;
   }
 
   async enable() {

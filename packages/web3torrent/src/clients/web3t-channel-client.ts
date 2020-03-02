@@ -1,5 +1,8 @@
 import {ChannelResult, Message, ChannelClientInterface} from '@statechannels/channel-client';
 import {bigNumberify} from 'ethers/utils';
+import {FakeChannelProvider} from '@statechannels/channel-client';
+import {ChannelClient} from '@statechannels/channel-client';
+import React from 'react';
 
 export interface ChannelState {
   channelId: string;
@@ -16,6 +19,16 @@ export interface ChannelState {
 // This class wraps the channel client converting the
 // request/response formats to those used in the app
 
+if (process.env.REACT_APP_FAKE_CHANNEL_PROVIDER === 'true') {
+  window.channelProvider = new FakeChannelProvider();
+} else {
+  // TODO: Replace with injection via other means than direct app import
+  // NOTE: This adds `channelProvider` to the `Window` object
+  require('@statechannels/channel-provider');
+}
+
+// TODO: Put inside better place than here where app can handle error case
+window.channelProvider.enable(process.env.REACT_APP_WALLET_URL);
 export interface Web3TorrentChannelClientInterface {
   createChannel(
     seeder: string,
@@ -211,6 +224,12 @@ export class Web3TorrentChannelClient implements Web3TorrentChannelClientInterfa
     );
   }
 }
+
+export const web3TorrentChannelClient = new Web3TorrentChannelClient(
+  new ChannelClient(window.channelProvider)
+);
+
+export const ChannelContext = React.createContext(web3TorrentChannelClient);
 
 const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
   const {turnNum, channelId, participants, allocations, challengeExpirationTime} = channelResult;

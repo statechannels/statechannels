@@ -1,16 +1,23 @@
 import {defaultFile, defaultLeechingOptions, defaultSeedingOptions} from '../testing/test-utils';
 import WebTorrentPaidStreamingClient, {ClientEvents} from '../web3torrent-lib';
+import {web3TorrentChannelClient} from '../../clients/web3t-channel-client';
 
 describe('Seeding and Leeching - 35sec', () => {
   let seeder: WebTorrentPaidStreamingClient;
   let leecher: WebTorrentPaidStreamingClient;
 
   beforeEach(() => {
-    seeder = new WebTorrentPaidStreamingClient({pseAccount: '3', dht: false});
+    seeder = new WebTorrentPaidStreamingClient(
+      {pseAccount: '3', dht: false},
+      web3TorrentChannelClient
+    );
     seeder.on('error', (err: any) => fail(err));
     seeder.on('warning', (err: any) => fail(err));
 
-    leecher = new WebTorrentPaidStreamingClient({pseAccount: '4', dht: false});
+    leecher = new WebTorrentPaidStreamingClient(
+      {pseAccount: '4', dht: false},
+      web3TorrentChannelClient
+    );
     leecher.on('error', (err: any) => fail(err));
     leecher.on('warning', (err: any) => fail(err));
   });
