@@ -8,6 +8,7 @@ import Welcome from './pages/welcome/Welcome';
 import File from './pages/file/File';
 import Upload from './pages/upload/Upload';
 import {RoutePath} from './routes';
+import {WebTorrentContext} from './clients/web3torrent-client';
 
 const history = createBrowserHistory();
 class App extends React.Component {
@@ -16,10 +17,13 @@ class App extends React.Component {
     requiredNetwork: Number(process.env.REACT_APP_CHAIN_NETWORK_ID)
   };
 
-  componentDidMount() {
+  static contextType = WebTorrentContext;
+
+  async componentDidMount() {
     window.ethereum.on('networkChanged', chainId => {
       this.setState({...this.state, currentNetwork: parseInt(chainId, 16)});
     });
+    await this.context.enable(); // get sc signing address and use it
   }
 
   render() {
