@@ -81,7 +81,7 @@ export class MessagingService implements MessagingServiceInterface {
   }
 
   public async sendMessageNotification(message: Message) {
-    // TODO: It is awakward to have to generate sender/recipient
+    // TODO: It is awkward to have to generate sender/recipient
     const ourAddress = await this.store.getAddress();
     const sender = ourAddress;
     const objectiveRecipients =
