@@ -17,9 +17,13 @@ import {
 import {getChannelId} from '@statechannels/nitro-protocol';
 import * as CreateAndDirectFund from './create-and-direct-fund';
 import {sendDisplayMessage, MessagingServiceInterface, convertToChannelResult} from '../messaging';
-import {filter} from 'rxjs/operators';
+import {filter, map} from 'rxjs/operators';
 import * as CCC from './confirm-create-channel';
-import {Participant} from '@statechannels/client-api-schema';
+import {
+  Participant,
+  UpdateChannelRequest,
+  CloseChannelRequest
+} from '@statechannels/client-api-schema';
 import {createMockGuard, getDataAndInvoke} from '../utils/workflow-utils';
 import {Store} from '../store/memory-store';
 import {StateVariables, SimpleAllocation} from '../store/types';
@@ -28,10 +32,12 @@ import {bigNumberify, BigNumber} from 'ethers/utils';
 import * as ConcludeChannel from './conclude-channel';
 import {isSimpleEthAllocation} from '../utils/outcome';
 import {unreachable} from '../utils';
+import {deserializeAllocations} from '../serde/app-messages/deserialize';
 
 export interface WorkflowContext {
   channelId?: string;
-  observer?: any;
+  requestObserver?: any;
+  updateObserver?: any;
   requestId?: number;
   channelParams?: Omit<CreateChannelEvent, 'type'>;
 }
@@ -53,7 +59,7 @@ export interface WorkflowActions {
   displayUi: Action<WorkflowContext, any>;
   hideUi: Action<WorkflowContext, any>;
   sendChannelUpdatedNotification: Action<WorkflowContext, any>;
-  spawnObserver: AssignAction<ChannelIdExists, any>;
+  spawnObservers: AssignAction<ChannelIdExists, any>;
   updateStoreWithPlayerState: Action<WorkflowContext, PlayerStateUpdate>;
 }
 
@@ -169,7 +175,7 @@ const generateConfig = (
         'invokeCreateChannelConfirmation',
         'openChannelAndDirectFundProtocol'
       ) as StateNodeConfig<WorkflowContext, {}, WorkflowEvent>),
-      entry: [actions.assignChannelId, actions.spawnObserver],
+      entry: [actions.assignChannelId, actions.spawnObservers],
       exit: [actions.sendJoinChannelResponse]
     },
     createChannelInStore: {
@@ -180,7 +186,7 @@ const generateConfig = (
           target: 'openChannelAndDirectFundProtocol',
           actions: [
             actions.assignChannelId,
-            actions.spawnObserver,
+            actions.spawnObservers,
             actions.sendCreateChannelResponse
           ]
         }
@@ -193,6 +199,7 @@ const generateConfig = (
       'running'
     ),
     running: {
+      entry: [actions.hideUi],
       on: {
         PLAYER_STATE_UPDATE: {
           target: 'running',
@@ -237,14 +244,31 @@ export const applicationWorkflow = (
   messagingService: MessagingServiceInterface,
   context?: WorkflowContext
 ) => {
-  const notifyOnChannelMessage = ({channelId}: ChannelIdExists) => {
+  const notifyOnChannelRequest = ({channelId}: ChannelIdExists) => {
     return messagingService.requestFeed.pipe(
       filter(
         r =>
           (r.method === 'UpdateChannel' || r.method === 'CloseChannel') &&
           r.params.channelId === channelId
-      )
+      ),
+      map((r: UpdateChannelRequest | CloseChannelRequest) => {
+        if (r.method === 'UpdateChannel') {
+          return {
+            type: 'PLAYER_STATE_UPDATE',
+            ...r.params,
+            outcome: deserializeAllocations(r.params.allocations) as SimpleAllocation // TODO: Verify this
+          };
+        } else {
+          return {type: 'PLAYER_REQUEST_CONCLUDE', channelId: r.params.channelId};
+        }
+      })
     );
+  };
+
+  const notifyOnUpdate = ({channelId}: ChannelIdExists) => {
+    return store
+      .channelUpdatedFeed(channelId)
+      .pipe(map(s => ({type: 'CHANNEL_UPDATED', storeEntry: s})));
   };
 
   const actions: WorkflowActions = {
@@ -256,10 +280,10 @@ export const applicationWorkflow = (
       const entry = await store.getEntry(context.channelId);
       await messagingService.sendResponse(context.requestId, await convertToChannelResult(entry));
     },
-    spawnObserver: assign<ChannelIdExists>(context => ({
+    spawnObservers: assign<ChannelIdExists>(context => ({
       ...context,
-      // TODO: Do protocols register themselves against the store for state updates? Or do we need to handle them
-      observer: spawn(notifyOnChannelMessage(context))
+      updateObserver: spawn(notifyOnUpdate(context)),
+      requestObserver: spawn(notifyOnChannelRequest(context))
     })),
 
     sendChannelUpdatedNotification: async (
@@ -370,8 +394,7 @@ export const applicationWorkflow = (
     invokeCreateChannelConfirmation: (context, event: DoneInvokeEvent<CCC.WorkflowContext>) =>
       CCC.confirmChannelCreationWorkflow(store, event.data),
     getDataForCreateChannelAndDirectFund: async (
-      context: WorkflowContext,
-      event
+      context: WorkflowContext
     ): Promise<CreateAndDirectFund.Init> => {
       const entry = await store.getEntry(context.channelId);
       const {outcome} = entry.latest;
@@ -445,7 +468,7 @@ const mockActions: WorkflowActions = {
   hideUi: 'hideUi',
   displayUi: 'displayUi',
   assignChannelId: 'assignChannelId',
-  spawnObserver: 'spawnObserver' as any,
+  spawnObservers: 'spawnObserver' as any,
   updateStoreWithPlayerState: 'updateStoreWithPlayerState'
 };
 const mockGuards: WorkflowGuards = {

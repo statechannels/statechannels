@@ -51,13 +51,13 @@ export function isGuarantee(funding: Funding): funding is Guaranteed {
 interface InternalEvents {
   channelUpdated: [ChannelStoreEntry];
   newObjective: [Objective];
-  addToOutbox: [MessagePayload];
+  addToOutbox: [Message];
 }
 
 export interface Store {
   newObjectiveFeed: Observable<Objective>;
-  outboxFeed: Observable<MessagePayload>;
-  pushMessage: (message: MessagePayload) => Promise<void>;
+  outboxFeed: Observable<Message>;
+  pushMessage: (message: Message) => Promise<void>;
   channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry>;
 
   getAddress(): string;
@@ -134,7 +134,7 @@ export class MemoryStore implements Store {
     return fromEvent(this._eventEmitter, 'newObjective');
   }
 
-  get outboxFeed(): Observable<MessagePayload> {
+  get outboxFeed(): Observable<Message> {
     return fromEvent(this._eventEmitter, 'addToOutbox');
   }
 
@@ -253,7 +253,7 @@ export class MemoryStore implements Store {
     return Object.keys(this._privateKeys)[0];
   }
 
-  async pushMessage(message: MessagePayload) {
+  async pushMessage(message: Message) {
     const {signedStates, objectives} = message;
 
     if (signedStates) {
