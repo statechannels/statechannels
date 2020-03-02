@@ -66,11 +66,7 @@ export class Player {
 export function hookUpMessaging(playerA: Player, playerB: Player) {
   playerA.channelWallet.onSendMessage(message => {
     if (isNotification(message) && message.method === 'MessageQueued') {
-      const pushMessageRequest = generatePushMessage(
-        message.params,
-        playerB.participantId,
-        playerA.participantId
-      );
+      const pushMessageRequest = generatePushMessage(message.params);
       if (process.env.ADD_LOGS) {
         console.log(`MESSAGE A->B: ${JSON.stringify(pushMessageRequest)}`);
       }
@@ -80,11 +76,7 @@ export function hookUpMessaging(playerA: Player, playerB: Player) {
 
   playerB.channelWallet.onSendMessage(message => {
     if (isNotification(message) && message.method === 'MessageQueued') {
-      const pushMessageRequest = generatePushMessage(
-        message.params,
-        playerA.participantId,
-        playerB.participantId
-      );
+      const pushMessageRequest = generatePushMessage(message.params);
       if (process.env.ADD_LOGS) {
         console.log(`MESSAGE B->A: ${JSON.stringify(pushMessageRequest)}`);
       }
@@ -93,12 +85,12 @@ export function hookUpMessaging(playerA: Player, playerB: Player) {
   });
 }
 
-function generatePushMessage(data: any, recipient: string, sender: string): PushMessageRequest {
+function generatePushMessage(messageParams): PushMessageRequest {
   return {
     jsonrpc: '2.0',
     id: 111111111,
     method: 'PushMessage',
-    params: {data, recipient, sender}
+    params: messageParams
   };
 }
 

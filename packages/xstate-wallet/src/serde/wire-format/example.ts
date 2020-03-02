@@ -1,4 +1,6 @@
 import {bigNumberify} from 'ethers/utils';
+import {Message} from '../../store/types';
+import {Message as WireMessage} from '@statechannels/wire-format';
 
 export const wireStateFormat = {
   participants: [
@@ -42,7 +44,7 @@ export const wireStateFormat = {
   ]
 };
 
-export const internalFormat = {
+export const internalStateFormat = {
   participants: [
     {
       destination: '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7',
@@ -81,5 +83,54 @@ export const internalFormat = {
   turnNum: bigNumberify('0x0000000000000000000000000000000000000000000000000000000000000001'),
   signatures: [
     '0x733ccfc3b0b13b446de290a9b056a5b9d7eb1538c1d48f8b863f731a0ea522c46ad30427d0859d782c98ccdc5fe10fc9c3d6480ee5080f70fd96128e4d61d50728'
+  ]
+};
+export const wireMessageFormat: WireMessage = {
+  recipient: '0xAE363d29fc0f6A9bbBbEcC87751e518Cd9CA83C0',
+  sender: '0x590A3Bd8D4A3b78411B3bDFb481E44e85C7345c0',
+  data: {
+    signedStates: [wireStateFormat],
+    objectives: [
+      {
+        type: 'OpenChannel',
+        data: {
+          targetChannelId: '0x9afc73af1808170a4ee408649219ee8322957645e40e227cb1ea29ea98034699'
+        },
+        participants: [
+          {
+            destination: '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7',
+            participantId: '0xAE363d29fc0f6A9bbBbEcC87751e518Cd9CA83C0',
+            signingAddress: '0xAE363d29fc0f6A9bbBbEcC87751e518Cd9CA83C0'
+          },
+          {
+            destination: '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7',
+            participantId: '0x590A3Bd8D4A3b78411B3bDFb481E44e85C7345c0',
+            signingAddress: '0x590A3Bd8D4A3b78411B3bDFb481E44e85C7345c0'
+          }
+        ]
+      }
+    ]
+  }
+};
+
+export const internalMessageFormat: Message = {
+  signedStates: [internalStateFormat],
+  objectives: [
+    {
+      type: 'OpenChannel',
+      data: {targetChannelId: '0x9afc73af1808170a4ee408649219ee8322957645e40e227cb1ea29ea98034699'},
+      participants: [
+        {
+          destination: '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7',
+          participantId: '0xAE363d29fc0f6A9bbBbEcC87751e518Cd9CA83C0',
+          signingAddress: '0xAE363d29fc0f6A9bbBbEcC87751e518Cd9CA83C0'
+        },
+        {
+          destination: '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7',
+          participantId: '0x590A3Bd8D4A3b78411B3bDFb481E44e85C7345c0',
+          signingAddress: '0x590A3Bd8D4A3b78411B3bDFb481E44e85C7345c0'
+        }
+      ]
+    }
   ]
 };

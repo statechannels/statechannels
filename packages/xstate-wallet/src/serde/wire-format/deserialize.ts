@@ -3,11 +3,23 @@ import {
   Outcome as OutcomeWire,
   AllocationItem as AllocationItemWire,
   Allocation as AllocationWire,
+  Message as WireMessage,
   isAllocations
 } from '@statechannels/wire-format';
 
-import {SignedState, Outcome, AllocationItem, SimpleAllocation} from '../../store/types';
+import {SignedState, Outcome, AllocationItem, SimpleAllocation, Message} from '../../store/types';
 import {bigNumberify} from 'ethers/utils';
+
+export function deserializeMessage(message: WireMessage): Message {
+  const signedStates = (message.data.signedStates || []).map(ss => {
+    return deserializeState(ss);
+  });
+  const {objectives} = message.data;
+  return {
+    signedStates,
+    objectives
+  };
+}
 
 export function deserializeState(state: SignedStateWire): SignedState {
   const stateWithoutChannelId = {...state};

@@ -13,7 +13,7 @@ import {filter, map, take, flatMap, tap} from 'rxjs/operators';
 
 import {Store, supportedStateFeed} from '../store/memory-store';
 import {SupportState} from '.';
-import {isFundGuarantor, FundGuarantor} from '../store/wire-protocol';
+import {isFundGuarantor, FundGuarantor} from '../store/types';
 import {checkThat} from '../utils';
 import {isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
 import {bigNumberify} from 'ethers/utils';
