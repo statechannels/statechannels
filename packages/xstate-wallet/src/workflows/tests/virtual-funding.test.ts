@@ -4,6 +4,7 @@ import waitForExpect from 'wait-for-expect';
 import {Init, machine, Role} from '../virtualFunding';
 
 import {MemoryStore} from '../../store/memory-store';
+import {DumbHub} from './dumb-hub';
 import {bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
 import {firstState, signState, calculateChannelId} from '../../store/state-utils';
@@ -102,6 +103,58 @@ test('virtual funding', async () => {
   await waitForExpect(async () => {
     expect(bService.state.value).toEqual('success');
     expect(hubService.state.value).toEqual('success');
+    expect(aService.state.value).toEqual('success');
+
+    const {supported} = await aStore.getEntry(jointChannelId);
+    const outcome = supported?.outcome;
+    const amount = bigNumberify(5);
+    expect(outcome).toMatchObject(
+      simpleEthAllocation([
+        {destination: targetChannelId, amount},
+        {destination: jointParticipants[1].destination, amount}
+      ])
+    );
+  }, EXPECT_TIMEOUT);
+});
+
+test('virtual funding with a dumb hub', async () => {
+  const aStore = new MemoryStore([wallet1.privateKey]);
+  const bStore = new MemoryStore([wallet2.privateKey]);
+  const hubStore = new DumbHub(wallet3.privateKey);
+
+  const aService = interpret(machine(aStore, context, Role.A));
+  const bService = interpret(machine(bStore, context, Role.B));
+  const services = [aService, bService];
+
+  [aStore, bStore].forEach((store: MemoryStore) => {
+    const state = firstState(outcome, jointChannel);
+    store.pushMessage({
+      signedStates: [{...state, signatures: [signState(state, wallet1.privateKey)]}]
+    });
+  });
+  {
+    const state = ledgerState([first, third], [1, 3]);
+    const signatures = [wallet1, wallet3].map(({privateKey}) => signState(state, privateKey));
+    aStore.pushMessage({signedStates: [{...state, signatures}]});
+    aStore.setLedger((await aStore.getEntry(calculateChannelId(state))) as MemoryChannelStoreEntry);
+  }
+  {
+    const state = ledgerState([second, third], [1, 3]);
+    const signatures = [wallet2, wallet3].map(({privateKey}) => signState(state, privateKey));
+    bStore.pushMessage({signedStates: [{...state, signatures}]});
+    bStore.setLedger((await bStore.getEntry(calculateChannelId(state))) as MemoryChannelStoreEntry);
+  }
+
+  subscribeToMessages({
+    [jointParticipants[0].participantId]: aStore,
+    [jointParticipants[2].participantId]: bStore,
+    [jointParticipants[1].participantId]: hubStore
+  });
+
+  services.forEach(service => service.start());
+
+  await waitForExpect(async () => {
+    expect(bService.state.value).toEqual('success');
     expect(aService.state.value).toEqual('success');
 
     const {supported} = await aStore.getEntry(jointChannelId);
