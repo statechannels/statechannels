@@ -6,10 +6,9 @@ import * as _ from 'lodash';
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {Wallet} from 'ethers';
 
-import {Participant, StateVariables, SignedState, State} from './types';
+import {Participant, StateVariables, SignedState, State, Objective, Message} from './types';
 import {MemoryChannelStoreEntry, ChannelStoreEntry} from './memory-channel-storage';
 import {AddressZero} from 'ethers/constants';
-import {Objective, Message} from './wire-protocol';
 import {Chain, FakeChain} from '../chain';
 import {calculateChannelId, hashState} from './state-utils';
 import {NETWORK_ID} from '../constants';

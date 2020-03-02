@@ -13,9 +13,11 @@ import {filter, map, take, flatMap, tap} from 'rxjs/operators';
 
 import {Store, supportedStateFeed} from '../store/memory-store';
 import {SupportState, LedgerFunding} from '.';
-import {isFundGuarantor, FundGuarantor} from '../store/wire-protocol';
 import {checkThat, getDataAndInvoke} from '../utils';
-import {isSimpleEthAllocation, simpleEthAllocation, simpleEthGuarantee} from '../utils/outcome';
+import {simpleEthGuarantee, isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
+
+import {isFundGuarantor, FundGuarantor} from '../store/types';
+
 import {bigNumberify} from 'ethers/utils';
 import {CHALLENGE_DURATION} from '../constants';
 import _ from 'lodash';
@@ -38,14 +40,18 @@ const getObjective = (store: Store, peer: Role.A | Role.B) => async ({
   const {participants: jointParticipants} = entry.channelConstants;
   const participants = [jointParticipants[peer], jointParticipants[Role.Hub]];
 
-  const {channelId: ledgerChannelId} = await store.getLedger(jointParticipants[peer].participantId);
+  const {channelId: ledgerId} = await store.getLedger(jointParticipants[peer].participantId);
   const {channelId: guarantorId} = await store.createChannel(participants, CHALLENGE_DURATION, {
     turnNum: bigNumberify(0),
     appData: '0x',
     isFinal: false,
     outcome: simpleEthGuarantee(jointChannelId, ...participants.map(p => p.destination))
   });
-  return {type: 'FundGuarantor', participants, jointChannelId, ledgerChannelId, guarantorId};
+  return {
+    type: 'FundGuarantor',
+    participants,
+    data: {jointChannelId, ledgerId, guarantorId}
+  };
 };
 
 type TEvent = AnyEventObject;
@@ -87,9 +93,9 @@ const fundJointChannel = (role: Role): StateNodeConfig<Init, any, TEvent> => {
           runObjective: {
             invoke: {
               src: Services.ledgerFunding,
-              data: (_, {guarantorId, ledgerChannelId}: FundGuarantor): LedgerFunding.Init => ({
-                targetChannelId: guarantorId,
-                ledgerChannelId,
+              data: (_, {data}: FundGuarantor): LedgerFunding.Init => ({
+                targetChannelId: data.guarantorId,
+                ledgerChannelId: data.ledgerId,
                 deductions: []
               }),
               onDone: 'done'
@@ -109,9 +115,9 @@ const fundJointChannel = (role: Role): StateNodeConfig<Init, any, TEvent> => {
             invoke: {
               src: Services.ledgerFunding,
               data: (_, {data}: DoneInvokeEvent<FundGuarantor>): LedgerFunding.Init => ({
-                targetChannelId: data.guarantorId,
-                ledgerChannelId: data.ledgerChannelId,
-                deductions: []
+                targetChannelId: data.data.guarantorId,
+                ledgerChannelId: data.data.ledgerId,
+                deductions: [] // TODO
               }),
               onDone: 'done'
             }
@@ -186,7 +192,7 @@ const spawnFundGuarantorObserver = (store: Store) => ({jointChannelId}: Init) =>
   spawn(
     store.newObjectiveFeed.pipe(
       filter(isFundGuarantor),
-      filter(o => o.jointChannelId === jointChannelId),
+      filter(o => o.data.jointChannelId === jointChannelId),
       take(1)
     )
   );

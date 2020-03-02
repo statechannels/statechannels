@@ -71,7 +71,7 @@ export class ChannelWallet {
 
   public async pushMessage(jsonRpcMessage) {
     // Update any workflows waiting on an observable
-    await this.messagingService.receiveMessage(jsonRpcMessage);
+    await this.messagingService.receiveRequest(jsonRpcMessage);
   }
 
   public onSendMessage(callback: (jsonRpcMessage: Notification | Response) => void) {

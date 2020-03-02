@@ -3,8 +3,8 @@ import {
   Allocations as AppAllocations,
   AllocationItem as AppAllocationItem
 } from '@statechannels/client-api-schema';
-import {Allocation, AllocationItem, SimpleAllocation} from '../store/types';
-import {assetHolderAddress} from '../constants';
+import {Allocation, AllocationItem, SimpleAllocation} from '../../store/types';
+import {assetHolderAddress} from '../../constants';
 import {bigNumberify} from 'ethers/utils';
 
 export function deserializeAllocations(allocations: AppAllocations): Allocation {

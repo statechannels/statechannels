@@ -13,6 +13,9 @@ import {useInterval} from '../../utils/useInterval';
 import './File.scss';
 import {Web3TorrentChannelClient} from '../../clients/web3t-channel-client';
 
+import {ChannelList} from '../../components/channel-list/ChannelList';
+import {mockChannels, mockCurrentUser} from '../../constants';
+
 const getTorrentAndPeersData: (
   setTorrent: React.Dispatch<React.SetStateAction<Torrent>>,
   setPeers: React.Dispatch<React.SetStateAction<TorrentPeers>>
@@ -109,6 +112,7 @@ const File: React.FC<RouteComponentProps & Props> = props => {
       ) : (
         false
       )}
+      <ChannelList channels={mockChannels} currentUser={mockCurrentUser} />
     </section>
   );
 };

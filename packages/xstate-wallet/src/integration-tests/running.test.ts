@@ -43,7 +43,7 @@ test('accepts states when running', async () => {
   const channelId = '0x1823994d6d3b53b82f499c1aca2095b94108ba3ff59f55c6e765da1e24874ab2';
   playerA.startAppWorkflow('running', {channelId});
   playerB.startAppWorkflow('running', {channelId});
-  await playerA.messagingService.receiveMessage(
+  await playerA.messagingService.receiveRequest(
     generatePlayerUpdate(channelId, playerA.participant, playerB.participant)
   );
 
@@ -56,7 +56,7 @@ test('accepts states when running', async () => {
     expect(playerBTurnNum).toBe(5);
   }, 3000);
 
-  await playerB.messagingService.receiveMessage(
+  await playerB.messagingService.receiveRequest(
     generatePlayerUpdate(channelId, playerA.participant, playerB.participant)
   );
   await waitForExpect(async () => {

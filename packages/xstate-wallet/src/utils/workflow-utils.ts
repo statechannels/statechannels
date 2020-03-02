@@ -16,7 +16,7 @@ import {
 import {NETWORK_ID, CHALLENGE_DURATION} from '../constants';
 import {bigNumberify} from 'ethers/utils';
 import {OpenEvent, PlayerStateUpdate} from '../workflows/application';
-import {deserializeAllocations} from '../app-messages/deserialize';
+import {deserializeAllocations} from '../serde/app-messages/deserialize';
 import {isSimpleEthAllocation} from './outcome';
 
 export function createMockGuard(guardName: string): GuardPredicate<any, any> {
