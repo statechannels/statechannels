@@ -1,13 +1,11 @@
 import {
   StateNodeConfig,
   MachineConfig,
-  assign,
   Machine,
   MachineOptions,
   AnyEventObject,
   DoneInvokeEvent,
-  ServiceConfig,
-  spawn
+  ServiceConfig
 } from 'xstate';
 import {filter, map, take, flatMap, tap} from 'rxjs/operators';
 
@@ -16,7 +14,7 @@ import {SupportState, LedgerFunding} from '.';
 import {checkThat, getDataAndInvoke} from '../utils';
 import {simpleEthGuarantee, isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
 
-import {isFundGuarantor, FundGuarantor} from '../store/types';
+import {FundGuarantor} from '../store/types';
 
 import {bigNumberify} from 'ethers/utils';
 import {CHALLENGE_DURATION} from '../constants';
@@ -40,7 +38,7 @@ const getObjective = (store: Store, peer: Role.A | Role.B) => async ({
   const {participants: jointParticipants} = entry.channelConstants;
   const participants = [jointParticipants[peer], jointParticipants[Role.Hub]];
 
-  const {channelId: ledgerId} = await store.getLedger(jointParticipants[peer].participantId);
+  const {channelId: ledgerId} = await store.getLedger(jointParticipants[Role.Hub].participantId);
   const {channelId: guarantorId} = await store.createChannel(participants, CHALLENGE_DURATION, {
     turnNum: bigNumberify(0),
     appData: '0x',
@@ -57,7 +55,6 @@ const getObjective = (store: Store, peer: Role.A | Role.B) => async ({
 type TEvent = AnyEventObject;
 
 const enum Actions {
-  spawnFundGuarantorObserver = 'spawnFundGuarantorObserver',
   triggerGuarantorObjective = 'triggerGuarantorObjective'
 }
 
@@ -79,58 +76,64 @@ const enum Services {
 }
 
 const fundJointChannel = (role: Role): StateNodeConfig<Init, any, TEvent> => {
+  const fundGuarantor = (objective: Services.fundGuarantorAH | Services.fundGuarantorBH) => ({
+    initial: 'getObjective',
+    states: {
+      getObjective: {invoke: {src: objective, onDone: 'runObjective'}},
+      runObjective: {
+        entry: Actions.triggerGuarantorObjective,
+        invoke: {
+          src: Services.ledgerFunding,
+          data: (_, {data}: DoneInvokeEvent<FundGuarantor>): LedgerFunding.Init => ({
+            targetChannelId: data.data.guarantorId,
+            ledgerChannelId: data.data.ledgerId,
+            deductions: [] // TODO
+          }),
+          onDone: 'done'
+        }
+      },
+      done: {type: 'final'}
+    }
+  });
+
+  const waitThenFundGuarantor = (
+    objective: Services.fundGuarantorAH | Services.fundGuarantorBH
+  ) => ({
+    initial: 'waitForObjective',
+    states: {
+      waitForObjective: {
+        // entry: Actions.spawnFundGuarantorObserver,
+        on: {FundGuarantor: 'runObjective'}
+      },
+      runObjective: {
+        invoke: {
+          src: Services.ledgerFunding,
+          data: (_, {data}: FundGuarantor): LedgerFunding.Init => ({
+            targetChannelId: data.guarantorId,
+            ledgerChannelId: data.ledgerId,
+            deductions: []
+          }),
+          onDone: 'done'
+        }
+      },
+      done: {type: 'final'}
+    }
+  });
+
   let config;
   switch (role) {
     case Role.A:
+      config = fundGuarantor(Services.fundGuarantorAH);
+      break;
     case Role.B:
-      config = {
-        initial: 'waitForObjective',
-        states: {
-          waitForObjective: {
-            entry: Actions.spawnFundGuarantorObserver,
-            on: {FundGuarantor: 'runObjective'}
-          },
-          runObjective: {
-            invoke: {
-              src: Services.ledgerFunding,
-              data: (_, {data}: FundGuarantor): LedgerFunding.Init => ({
-                targetChannelId: data.guarantorId,
-                ledgerChannelId: data.ledgerId,
-                deductions: []
-              }),
-              onDone: 'done'
-            }
-          },
-          done: {type: 'final'}
-        }
-      };
+      config = fundGuarantor(Services.fundGuarantorBH);
       break;
     case Role.Hub:
-      const fundGuarantor = (objective: Services.fundGuarantorAH | Services.fundGuarantorBH) => ({
-        initial: 'getObjective',
-        states: {
-          getObjective: {invoke: {src: objective, onDone: 'runObjective'}},
-          runObjective: {
-            entry: Actions.triggerGuarantorObjective,
-            invoke: {
-              src: Services.ledgerFunding,
-              data: (_, {data}: DoneInvokeEvent<FundGuarantor>): LedgerFunding.Init => ({
-                targetChannelId: data.data.guarantorId,
-                ledgerChannelId: data.data.ledgerId,
-                deductions: [] // TODO
-              }),
-              onDone: 'done'
-            }
-          },
-          done: {type: 'final'}
-        }
-      });
-
       config = {
         type: 'parallel',
         states: {
-          fundGuarantorAH: fundGuarantor(Services.fundGuarantorAH),
-          fundGuarantorBH: fundGuarantor(Services.fundGuarantorBH)
+          fundGuarantorAH: waitThenFundGuarantor(Services.fundGuarantorAH),
+          fundGuarantorBH: waitThenFundGuarantor(Services.fundGuarantorBH)
         }
       };
   }
@@ -188,15 +191,6 @@ const waitForFirstJointState = (store: Store) => ({
     )
     .toPromise();
 
-const spawnFundGuarantorObserver = (store: Store) => ({jointChannelId}: Init) =>
-  spawn(
-    store.newObjectiveFeed.pipe(
-      filter(isFundGuarantor),
-      filter(o => o.data.jointChannelId === jointChannelId),
-      take(1)
-    )
-  );
-
 const jointChannelUpdate = (store: Store) => ({
   jointChannelId,
   targetChannelId
@@ -219,9 +213,6 @@ const jointChannelUpdate = (store: Store) => ({
 
 export const options = (store: Store): Partial<MachineOptions<Init, TEvent>> => {
   const actions: Record<Actions, any> = {
-    [Actions.spawnFundGuarantorObserver]: assign<any>({
-      guarantorObserver: spawnFundGuarantorObserver(store)
-    }),
     [Actions.triggerGuarantorObjective]: (_, {data}: DoneInvokeEvent<FundGuarantor>) =>
       store.addObjective(data)
   };
