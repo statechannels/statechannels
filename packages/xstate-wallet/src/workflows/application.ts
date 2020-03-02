@@ -52,6 +52,8 @@ interface WorkflowGuards {
 }
 
 export interface WorkflowActions {
+  sendUpdateChannelResponse: Action<any, PlayerStateUpdate>;
+  sendCloseChannelResponse: Action<any, PlayerRequestConclude>;
   sendCreateChannelResponse: Action<RequestIdExists & ChannelIdExists, any>;
   sendJoinChannelResponse: Action<RequestIdExists & ChannelIdExists, any>;
   assignChannelId: Action<WorkflowContext, any>;
@@ -90,11 +92,13 @@ export interface ChannelUpdated {
 
 export interface PlayerStateUpdate {
   type: 'PLAYER_STATE_UPDATE';
+  requestId: number;
   outcome: SimpleAllocation;
   channelId: string;
   appData: string;
 }
 interface PlayerRequestConclude {
+  requestId: number;
   type: 'PLAYER_REQUEST_CONCLUDE';
   channelId: string;
 }
@@ -203,7 +207,7 @@ const generateConfig = (
       on: {
         PLAYER_STATE_UPDATE: {
           target: 'running',
-          actions: [actions.updateStoreWithPlayerState]
+          actions: [actions.updateStoreWithPlayerState, actions.sendUpdateChannelResponse]
         },
         CHANNEL_UPDATED: [
           {
@@ -212,7 +216,7 @@ const generateConfig = (
           }
         ],
 
-        PLAYER_REQUEST_CONCLUDE: {target: 'closing'}
+        PLAYER_REQUEST_CONCLUDE: {target: 'closing', actions: [actions.sendCloseChannelResponse]}
       }
     },
     //This could handled by another workflow instead of the application workflow
@@ -256,10 +260,11 @@ export const applicationWorkflow = (
           return {
             type: 'PLAYER_STATE_UPDATE',
             ...r.params,
+            requestId: r.id,
             outcome: deserializeAllocations(r.params.allocations) as SimpleAllocation // TODO: Verify this
           };
         } else {
-          return {type: 'PLAYER_REQUEST_CONCLUDE', channelId: r.params.channelId};
+          return {type: 'PLAYER_REQUEST_CONCLUDE', requestId: r.id, channelId: r.params.channelId};
         }
       })
     );
@@ -272,6 +277,14 @@ export const applicationWorkflow = (
   };
 
   const actions: WorkflowActions = {
+    sendUpdateChannelResponse: async (context: any, event: PlayerStateUpdate) => {
+      const entry = await store.getEntry(context.channelId);
+      messagingService.sendResponse(event.requestId, await convertToChannelResult(entry));
+    },
+    sendCloseChannelResponse: async (context: any, event: PlayerRequestConclude) => {
+      const entry = await store.getEntry(context.channelId);
+      messagingService.sendResponse(event.requestId, await convertToChannelResult(entry));
+    },
     sendCreateChannelResponse: async (context: RequestIdExists & ChannelIdExists) => {
       const entry = await store.getEntry(context.channelId);
       await messagingService.sendResponse(context.requestId, await convertToChannelResult(entry));
@@ -461,6 +474,8 @@ const mockServices: WorkflowServices = {
   }
 };
 const mockActions: WorkflowActions = {
+  sendCloseChannelResponse: 'sendCloseChannelResponse',
+  sendUpdateChannelResponse: 'sendUpdateChannelResponse',
   assignChannelParams: 'assignChannelParams',
   sendCreateChannelResponse: 'sendCreateChannelResponse',
   sendJoinChannelResponse: 'sendJoinChannelResponse',
