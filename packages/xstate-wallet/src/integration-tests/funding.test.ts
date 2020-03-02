@@ -39,7 +39,7 @@ it('allows for two wallets to fund an app', async () => {
       first()
     )
     .toPromise();
-  await playerA.messagingService.receiveMessage(createEvent);
+  await playerA.messagingService.receiveRequest(createEvent);
 
   playerA.channelWallet.workflows[0].machine.send({type: 'USER_APPROVES'});
 
@@ -56,7 +56,7 @@ it('allows for two wallets to fund an app', async () => {
       first()
     )
     .toPromise();
-  await playerB.messagingService.receiveMessage(joinEvent);
+  await playerB.messagingService.receiveRequest(joinEvent);
 
   // Wait for the create channel service to start
   await waitForExpect(async () => {
