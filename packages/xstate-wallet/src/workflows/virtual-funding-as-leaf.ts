@@ -1,12 +1,12 @@
 import {
-  StateNodeConfig,
-  MachineConfig,
   Machine,
   MachineOptions,
   AnyEventObject,
   DoneInvokeEvent,
   ServiceConfig,
-  assign
+  assign,
+  spawn,
+  StateNodeConfig
 } from 'xstate';
 import {filter, map, take, flatMap, tap} from 'rxjs/operators';
 
@@ -15,7 +15,7 @@ import {SupportState, LedgerFunding} from '.';
 import {checkThat, getDataAndInvoke} from '../utils';
 import {simpleEthGuarantee, isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
 
-import {FundGuarantor, AllocationItem} from '../store/types';
+import {FundGuarantor, AllocationItem, isFundGuarantor, Participant} from '../store/types';
 
 import {bigNumberify} from 'ethers/utils';
 import {CHALLENGE_DURATION} from '../constants';
@@ -32,14 +32,24 @@ export type Init = {
   jointChannelId: string;
 };
 
-type WithDeductions = Init & {deductions: AllocationItem[]};
+type Deductions =
+  | {
+      role: Role.A | Role.B;
+      deductions: AllocationItem[];
+    }
+  | {
+      role: Role.Hub;
+      deductions: {
+        [Role.A]: AllocationItem[];
+        [Role.B]: AllocationItem[];
+      };
+    };
+type WithDeductions = Init & Deductions;
 
-const getObjective = (store: Store, peer: Role.A | Role.B) => async ({
-  jointChannelId
-}: Init): Promise<FundGuarantor> => {
+const getObjective = (store: Store) => async ({jointChannelId}: Init): Promise<FundGuarantor> => {
   const entry = await store.getEntry(jointChannelId);
   const {participants: jointParticipants} = entry.channelConstants;
-  const participants = [jointParticipants[peer], jointParticipants[Role.Hub]];
+  const participants = [jointParticipants[entry.myIndex], jointParticipants[Role.Hub]];
 
   const {channelId: ledgerId} = await store.getLedger(jointParticipants[Role.Hub].participantId);
   const {channelId: guarantorId} = await store.createChannel(participants, CHALLENGE_DURATION, {
@@ -60,7 +70,8 @@ type TEvent = AnyEventObject;
 
 const enum Actions {
   triggerGuarantorObjective = 'triggerGuarantorObjective',
-  assignDeductions = 'assignDeductions'
+  assignDeductions = 'assignDeductions',
+  watchObjectives = 'watchObjectives'
 }
 
 const enum States {
@@ -78,77 +89,14 @@ const enum Services {
   jointChannelUpdate = 'jointChannelUpdate',
   supportState = 'supportState',
   ledgerFunding = 'ledgerFunding',
-  fundGuarantorAH = 'fundGuarantorAH',
-  fundGuarantorBH = 'fundGuarantorBH'
+  fundGuarantor = 'fundGuarantor'
+}
+const enum Events {
+  FundGuarantorWithA = 'FundGuarantorWithA',
+  FundGuarantorWithB = 'FundGuarantorWithB'
 }
 
-const fundJointChannel = (role: Role): StateNodeConfig<Init, any, TEvent> => {
-  const fundGuarantor = (objective: Services.fundGuarantorAH | Services.fundGuarantorBH) => ({
-    initial: 'getObjective',
-    states: {
-      getObjective: {invoke: {src: objective, onDone: 'runObjective'}},
-      runObjective: {
-        entry: Actions.triggerGuarantorObjective,
-        invoke: {
-          src: Services.ledgerFunding,
-          data: (
-            {deductions}: WithDeductions,
-            {data}: DoneInvokeEvent<FundGuarantor>
-          ): LedgerFunding.Init => ({
-            targetChannelId: data.data.guarantorId,
-            ledgerChannelId: data.data.ledgerId,
-            deductions
-          }),
-          onDone: 'done'
-        }
-      },
-      done: {type: 'final'}
-    }
-  });
-
-  const waitThenFundGuarantor = (
-    objective: Services.fundGuarantorAH | Services.fundGuarantorBH
-  ) => ({
-    initial: 'waitForObjective',
-    states: {
-      waitForObjective: {on: {FundGuarantor: 'runObjective'}},
-      runObjective: {
-        invoke: {
-          src: Services.ledgerFunding,
-          data: ({deductions}, {data}: FundGuarantor): LedgerFunding.Init => ({
-            targetChannelId: data.guarantorId,
-            ledgerChannelId: data.ledgerId,
-            deductions
-          }),
-          onDone: 'done'
-        }
-      },
-      done: {type: 'final'}
-    }
-  });
-
-  let config;
-  switch (role) {
-    case Role.A:
-      config = fundGuarantor(Services.fundGuarantorAH);
-      break;
-    case Role.B:
-      config = fundGuarantor(Services.fundGuarantorBH);
-      break;
-    case Role.Hub:
-      config = {
-        type: 'parallel',
-        states: {
-          fundGuarantorAH: waitThenFundGuarantor(Services.fundGuarantorAH),
-          fundGuarantorBH: waitThenFundGuarantor(Services.fundGuarantorBH)
-        }
-      };
-  }
-
-  return {...config, onDone: States.fundTargetChannel};
-};
-
-const generateConfig = (role: Role): MachineConfig<Init, any, any> => ({
+export const config: StateNodeConfig<Init, any, any> = {
   key: 'virtual-funding',
   id: 'workflow',
   initial: States.setupJointChannel,
@@ -162,7 +110,32 @@ const generateConfig = (role: Role): MachineConfig<Init, any, any> => ({
       invoke: {src: Services.getDeductions, data: ctx => ctx, onDone: States.fundJointChannel},
       exit: Actions.assignDeductions
     },
-    [States.fundJointChannel]: fundJointChannel(role),
+    [States.fundJointChannel]: {
+      initial: 'getObjective',
+      states: {
+        getObjective: {invoke: {src: Services.fundGuarantor, onDone: 'runObjective'}},
+        runObjective: {
+          entry: Actions.triggerGuarantorObjective,
+          invoke: {
+            src: Services.ledgerFunding,
+            data: (
+              ctx: WithDeductions,
+              {data}: DoneInvokeEvent<FundGuarantor>
+            ): LedgerFunding.Init => {
+              if (ctx.role === Role.Hub) throw 'Incorrect role';
+              return {
+                targetChannelId: data.data.guarantorId,
+                ledgerChannelId: data.data.ledgerId,
+                deductions: ctx.deductions
+              };
+            },
+            onDone: 'done'
+          }
+        },
+        done: {type: 'final'}
+      },
+      onDone: States.fundTargetChannel
+    },
     [States.fundTargetChannel]: getDataAndInvoke(
       {src: Services.jointChannelUpdate},
       {src: Services.supportState},
@@ -171,11 +144,9 @@ const generateConfig = (role: Role): MachineConfig<Init, any, any> => ({
     success: {type: 'final'},
     failure: {}
   }
-});
+};
 
-export const config = generateConfig(Role.Hub);
-
-const waitForFirstJointState = (store: Store) => ({
+export const waitForFirstJointState = (store: Store) => ({
   jointChannelId
 }: Init): Promise<SupportState.Init> =>
   store
@@ -202,7 +173,7 @@ const waitForFirstJointState = (store: Store) => ({
     )
     .toPromise();
 
-const jointChannelUpdate = (store: Store) => ({
+export const jointChannelUpdate = (store: Store) => ({
   jointChannelId,
   targetChannelId
 }: Init): Promise<SupportState.Init> =>
@@ -222,29 +193,79 @@ const jointChannelUpdate = (store: Store) => ({
     )
     .toPromise();
 
-const getDeductions = (store: Store) => async (ctx: Init): Promise<AllocationItem[]> => {
+const getDeductions = (store: Store) => async (ctx: Init): Promise<Deductions> => {
   const {latest, myIndex} = await store.getEntry(ctx.jointChannelId);
   const {allocationItems} = checkThat(latest.outcome, isSimpleEthAllocation);
 
-  const deductions = [
-    {
-      destination: allocationItems[1].destination,
-      amount: allocationItems[2 - myIndex].amount
-    },
-    allocationItems[myIndex]
-  ];
+  switch (myIndex) {
+    case Role.A:
+    case Role.B:
+      return {
+        role: myIndex,
+        deductions: [
+          {
+            destination: allocationItems[1].destination,
+            amount: allocationItems[2 - myIndex].amount
+          },
+          allocationItems[myIndex]
+        ]
+      };
+    case Role.Hub:
+      return {
+        role: myIndex,
+        deductions: {
+          [Role.A]: [
+            {
+              destination: allocationItems[Role.Hub].destination,
+              amount: allocationItems[Role.B].amount
+            },
+            allocationItems[Role.A]
+          ],
+          [Role.B]: [
+            {
+              destination: allocationItems[Role.Hub].destination,
+              amount: allocationItems[Role.A].amount
+            },
+            allocationItems[Role.B]
+          ]
+        }
+      };
 
-  return deductions;
+    default:
+      throw 'Incorrect index';
+  }
+};
+
+const watchObjectives = (store: Store) => (ctx: Init) => {
+  return store.newObjectiveFeed.pipe(
+    filter(isFundGuarantor),
+    filter(o => o.data.jointChannelId === ctx.jointChannelId),
+    flatMap(async o => {
+      const participant = o.participants[0].participantId;
+      const jointParticipants: Participant[] = await (await store.getEntry(ctx.jointChannelId))
+        .channelConstants.participants;
+
+      switch (participant) {
+        case jointParticipants[Role.A].participantId:
+          return {...o, type: Events.FundGuarantorWithA};
+        case jointParticipants[Role.B].participantId:
+          return {...o, type: Events.FundGuarantorWithB};
+        default:
+          throw 'Participant not found';
+      }
+    })
+  );
 };
 
 export const options = (store: Store): Partial<MachineOptions<Init, TEvent>> => {
   const actions: Record<Actions, any> = {
+    watchObjectives: assign<any>({watcher: (ctx: Init) => spawn(watchObjectives(store)(ctx))}),
     [Actions.triggerGuarantorObjective]: (_, {data}: DoneInvokeEvent<FundGuarantor>) =>
       store.addObjective(data),
     [Actions.assignDeductions]: assign(
-      (ctx: Init, {data: deductions}: DoneInvokeEvent<AllocationItem[]>): WithDeductions => ({
+      (ctx: Init, {data}: DoneInvokeEvent<Deductions>): WithDeductions => ({
         ...ctx,
-        deductions
+        ...data
       })
     )
   };
@@ -255,12 +276,11 @@ export const options = (store: Store): Partial<MachineOptions<Init, TEvent>> => 
     ledgerFunding: LedgerFunding.machine(store),
     waitForFirstJointState: waitForFirstJointState(store),
     jointChannelUpdate: jointChannelUpdate(store),
-    fundGuarantorAH: getObjective(store, Role.A),
-    fundGuarantorBH: getObjective(store, Role.B)
+    fundGuarantor: getObjective(store)
   };
 
   return {actions, services};
 };
 
-export const machine = (store: Store, context: Init, role: Role) =>
-  Machine(generateConfig(role), options(store)).withContext(context);
+export const machine = (store: Store, context: Init) =>
+  Machine(config, options(store)).withContext(context);
