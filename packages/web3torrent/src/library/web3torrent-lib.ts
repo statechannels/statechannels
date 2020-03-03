@@ -188,7 +188,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         bigNumberify(0).toString(), // seederBalance: should begin at zero
         bigNumberify(4000).toString(), // leecherBalance,
         this.channelClient.myEthereumSelectedAddress, // seederOutcomeAddress,
-        '0x0' // leecherOutcomeAddress TODO get this somehow
+        peerOutcomeAddress // leecherOutcomeAddress TODO get this somehow
       );
       log(`SEEDER > created channel with id ${channel.channelId}`);
       wire.emit(PaidStreamingExtensionEvents.REQUEST, peerAccount);
