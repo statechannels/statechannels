@@ -27,12 +27,14 @@ export function createMockTorrentPeers(): TorrentPeers {
       wire: {
         uploaded: 4225
       },
-      funds: '50'
+      funds: '50',
+      seederBalance: '50'
     },
     '5589113806923374': {
       id: '5589113806923374',
       allowed: true,
       funds: '50',
+      seederBalance: '50',
       wire: {
         uploaded: 52923
       }

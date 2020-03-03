@@ -116,15 +116,15 @@ describe('Web3TorrentClient', () => {
     const mockInfoHash = '124203';
 
     beforeEach(() => {
-      web3torrent.allowedPeers[mockInfoHash] = createMockTorrentPeers();
+      web3torrent.peersList[mockInfoHash] = createMockTorrentPeers();
     });
 
     it('should return peers for a given torrent', () => {
-      expect(getTorrentPeers(mockInfoHash)).toEqual(web3torrent.allowedPeers[mockInfoHash]);
+      expect(getTorrentPeers(mockInfoHash)).toEqual(web3torrent.peersList[mockInfoHash]);
     });
 
     afterEach(() => {
-      web3torrent.allowedPeers = {};
+      web3torrent.peersList = {};
     });
   });
 });
