@@ -16,6 +16,7 @@ export default function usePaidStreamingExtension(
     constructor(wireToUse: Wire) {
       super(wireToUse as Wireish);
       this.pseAccount = options.pseAccount;
+      this.pseAddress = options.outcomeAddress;
     }
   };
 }
@@ -23,4 +24,5 @@ export default function usePaidStreamingExtension(
 export type PaidStreamingExtensionOptions = {
   pseAccount: string;
   channelClient?: Web3TorrentChannelClientInterface;
+  outcomeAddress: string;
 };

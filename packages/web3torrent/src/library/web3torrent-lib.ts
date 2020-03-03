@@ -22,8 +22,6 @@ import {Message} from '@statechannels/channel-client';
 
 const log = debug('web3torrent:library');
 
-export type WebTorrentPaidStreamingClientOptions = WebTorrent.Options &
-  Partial<PaidStreamingExtensionOptions>;
 export type TorrentCallback = (torrent: Torrent) => any;
 
 export * from './types';
@@ -35,21 +33,24 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   pseAccount: string;
   torrents: PaidStreamingTorrent[] = [];
   channelClient: Web3TorrentChannelClientInterface;
+  outcomeAddress: string;
 
-  constructor(opts: WebTorrentPaidStreamingClientOptions = {}) {
+  constructor(opts: WebTorrent.Options & Partial<PaidStreamingExtensionOptions> = {}) {
     super(opts);
     this.peersList = {};
     this.pseAccount = opts.pseAccount;
     this.channelClient = opts.channelClient;
+    this.outcomeAddress = opts.outcomeAddress;
   }
 
   async enable() {
     this.pseAccount = await this.channelClient.getAddress();
     log('set pseAccount to sc-wallet signing address');
     await window.ethereum.enable(); // TODO move this inside fake provider
-    await this.channelClient.getEthereumSelectedAddress();
+    this.outcomeAddress = await this.channelClient.getEthereumSelectedAddress();
     log('got ethereum address');
     log('ACCOUNT ID: ', this.pseAccount);
+    log('THIS address: ', this.outcomeAddress);
   }
 
   seed(
@@ -126,7 +127,9 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   protected setupWire(torrent: Torrent, wire: PaidStreamingWire) {
     log('> Wire Setup');
 
-    wire.use(paidStreamingExtension({pseAccount: this.pseAccount}));
+    wire.use(
+      paidStreamingExtension({pseAccount: this.pseAccount, outcomeAddress: this.outcomeAddress})
+    );
     wire.setKeepAlive(true);
     wire.setTimeout(65000);
     wire.on('keep-alive', () => {
@@ -173,8 +176,11 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     });
 
     wire.paidStreamingExtension.once(PaidStreamingExtensionEvents.REQUEST, async () => {
-      const peerAccount = wire.paidStreamingExtension && wire.paidStreamingExtension.peerAccount;
-      log(`SEEDER > wire first_request of ${peerAccount}`);
+      const {peerAccount, peerOutcomeAddress} = wire.paidStreamingExtension;
+      log(
+        `SEEDER > wire first_request of ${peerAccount} with outcomeAddress ${peerOutcomeAddress}`
+      );
+
       // SEEDER is participants[0], LEECHER is participants[1]
       const channel = await this.channelClient.createChannel(
         this.pseAccount, // seeder
@@ -242,7 +248,10 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     });
 
     torrent.on(TorrentEvents.NOTICE, async (wire, {command, data}) => {
-      log(`< ${command} received from ${wire.peerExtendedHandshake.pseAccount}`, data);
+      log(
+        `< ${command} received from ${wire.peerExtendedHandshake.pseAccount} with outcomeAddress ${wire.peerExtendedHandshake.outcomeAddress}`,
+        data
+      );
       let turnNum: number;
       let channelId: string;
       switch (command) {

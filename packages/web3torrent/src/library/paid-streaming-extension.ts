@@ -14,12 +14,14 @@ export abstract class PaidStreamingExtension implements Extension {
   protected wire: PaidStreamingWire;
   protected messageBus: EventEmitter;
   protected pseId: string = '';
+  protected pseOutcomeAddress: string = '';
 
   get name(): 'paidStreamingExtension' {
     return 'paidStreamingExtension';
   }
 
   peerAccount?: string;
+  peerOutcomeAddress?: string;
 
   isForceChoking = false;
 
@@ -36,6 +38,15 @@ export abstract class PaidStreamingExtension implements Extension {
   set pseAccount(value: string) {
     this.pseId = value;
     this.wire.extendedHandshake.pseAccount = value;
+  }
+
+  get pseAddress(): string {
+    return this.pseOutcomeAddress;
+  }
+
+  set pseAddress(value: string) {
+    this.pseOutcomeAddress = value;
+    this.wire.extendedHandshake.outcomeAddress = value;
   }
 
   on(event: PaidStreamingExtensionEvents, callback: EventEmitter.ListenerFn<any[]>) {
@@ -61,8 +72,13 @@ export abstract class PaidStreamingExtension implements Extension {
       this.peerAccount = handshake.pseAccount.toString();
     }
 
+    if (handshake.outcomeAddress) {
+      this.peerOutcomeAddress = handshake.outcomeAddress.toString();
+    }
+
     this.messageBus.emit(PaidStreamingExtensionEvents.PSE_HANDSHAKE, {
-      pseAccount: this.peerAccount
+      pseAccount: this.peerAccount,
+      peerOutcomeAddress: this.peerOutcomeAddress
     });
 
     return true;

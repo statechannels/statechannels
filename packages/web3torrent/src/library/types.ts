@@ -42,6 +42,7 @@ export enum PaidStreamingExtensionNotices {
 
 export type PaidStreamingExtendedHandshake = {
   pseAccount: string;
+  outcomeAddress: string;
 };
 
 export type PaidStreamingWire = Omit<Wire, 'requests'> &
