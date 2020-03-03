@@ -52,9 +52,9 @@ const jointChannelId = calculateChannelId(jointChannel);
 
 const amounts = [bigNumberify(2), bigNumberify(3)];
 const outcome: Outcome = simpleEthAllocation([
-  {destination: jointParticipants[0].destination, amount: amounts[0]},
-  {destination: jointParticipants[2].destination, amount: amounts[1]},
-  {destination: jointParticipants[1].destination, amount: amounts.reduce(add)}
+  {destination: jointParticipants[Role.A].destination, amount: amounts[0]},
+  {destination: jointParticipants[Role.Hub].destination, amount: amounts.reduce(add)},
+  {destination: jointParticipants[Role.B].destination, amount: amounts[1]}
 ]);
 
 const context: Init = {targetChannelId, jointChannelId};
@@ -94,9 +94,9 @@ test.skip('virtual funding', async () => {
   );
 
   subscribeToMessages({
-    [jointParticipants[0].participantId]: aStore,
-    [jointParticipants[1].participantId]: hubStore,
-    [jointParticipants[2].participantId]: bStore
+    [jointParticipants[Role.A].participantId]: aStore,
+    [jointParticipants[Role.Hub].participantId]: hubStore,
+    [jointParticipants[Role.B].participantId]: bStore
   });
 
   services.forEach(service => service.start());
@@ -133,14 +133,15 @@ test('virtual funding with a dumb hub', async () => {
       signedStates: [{...state, signatures: [signState(state, wallet1.privateKey)]}]
     });
   });
+  const ledgerAmounts = [4, 4].map(bigNumberify);
   {
-    const state = ledgerState([first, third], [1, 3]);
+    const state = ledgerState([first, third], ledgerAmounts);
     const signatures = [wallet1, wallet3].map(({privateKey}) => signState(state, privateKey));
     aStore.pushMessage({signedStates: [{...state, signatures}]});
     aStore.setLedger((await aStore.getEntry(calculateChannelId(state))) as MemoryChannelStoreEntry);
   }
   {
-    const state = ledgerState([second, third], [1, 3]);
+    const state = ledgerState([second, third], ledgerAmounts);
     const signatures = [wallet2, wallet3].map(({privateKey}) => signState(state, privateKey));
     bStore.pushMessage({signedStates: [{...state, signatures}]});
     bStore.setLedger((await bStore.getEntry(calculateChannelId(state))) as MemoryChannelStoreEntry);
@@ -158,15 +159,37 @@ test('virtual funding with a dumb hub', async () => {
     expect(bService.state.value).toEqual('success');
     expect(aService.state.value).toEqual('success');
 
-    const {supported} = await aStore.getEntry(jointChannelId);
-    const outcome = supported?.outcome;
-    const amount = bigNumberify(5);
-    expect(outcome).toMatchObject(
-      simpleEthAllocation([
-        {destination: targetChannelId, amount},
-        {destination: jointParticipants[1].destination, amount}
-      ])
-    );
+    {
+      // Check a ledger channel's current outcome
+      const {supported} = await aStore.getLedger(jointParticipants[1].participantId);
+      expect(supported?.outcome).toMatchObject(
+        simpleEthAllocation([
+          {
+            destination: jointParticipants[Role.A].destination,
+            amount: ledgerAmounts[0].sub(amounts[0])
+          },
+          {
+            destination: jointParticipants[Role.Hub].destination,
+            amount: ledgerAmounts[1].sub(amounts[1])
+          },
+          // We don't know the guarantor channel id
+          {destination: expect.any(String), amount: amounts.reduce(add)}
+        ])
+      );
+    }
+
+    {
+      // Check the joint channel's current outcome
+      const {supported} = await aStore.getEntry(jointChannelId);
+      const outcome = supported?.outcome;
+      const amount = bigNumberify(5);
+      expect(outcome).toMatchObject(
+        simpleEthAllocation([
+          {destination: targetChannelId, amount},
+          {destination: jointParticipants[1].destination, amount}
+        ])
+      );
+    }
   }, EXPECT_TIMEOUT);
 });
 

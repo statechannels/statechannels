@@ -49,7 +49,7 @@ export const appState = (n: BigNumberish): State => ({
 
 export const ledgerState = (
   participants: Participant[],
-  amounts: number[],
+  amounts: BigNumberish[],
   turnNum = 0
 ): State => ({
   turnNum: bigNumberify(turnNum),
