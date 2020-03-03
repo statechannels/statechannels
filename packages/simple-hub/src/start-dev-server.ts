@@ -1,3 +1,5 @@
+import '../env'; // Note: importing this module has the side effect of modifying env vars
+
 import {setupGanache} from '@statechannels/devtools';
 import {deploy} from '../deployment/deploy';
 import {startServer} from './server';
@@ -15,6 +17,5 @@ async function start() {
 }
 
 if (require.main === module) {
-  require('../env'); // Note: importing this module has the side effect of modifying env vars
   start();
 }
