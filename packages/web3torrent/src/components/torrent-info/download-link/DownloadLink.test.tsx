@@ -5,6 +5,7 @@ import {act} from 'react-dom/test-utils';
 import {TorrentFile} from 'webtorrent';
 import {createMockTorrent} from '../../../utils/test-utils';
 import {DownloadLink} from './DownloadLink';
+import {mockMetamask} from '../../../library/testing/test-utils';
 
 Enzyme.configure({adapter: new Adapter()});
 
@@ -18,6 +19,7 @@ describe('<DownloadLink />', () => {
   let component: Enzyme.ReactWrapper;
 
   beforeAll(() => {
+    mockMetamask();
     document.execCommand = jest.fn(() => true);
     component = mount(<DownloadLink torrent={createMockTorrent()} />);
   });
