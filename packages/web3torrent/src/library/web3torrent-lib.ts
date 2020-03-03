@@ -141,6 +141,8 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
     wire.on(WireEvents.REQUEST, () => {
       const peerAccount = wire.paidStreamingExtension.peerAccount as string;
+      const channelId = wire.paidStreamingExtension.pseChannelId as string;
+
       const knownPeerAccount = this.peersList[torrent.infoHash][peerAccount];
 
       if (!knownPeerAccount) {
@@ -149,7 +151,8 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           wire,
           funds: '0',
           seederBalance: '0',
-          allowed: false
+          allowed: false,
+          channelId
         };
         this.blockPeer(torrent.infoHash, wire, peerAccount);
         this.emit(ClientEvents.PEER_STATUS_CHANGED, {
@@ -170,7 +173,8 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
             .sub(10)
             .toString(),
           seederBalance: knownPeerAccount.seederBalance,
-          allowed: true
+          allowed: true,
+          channelId
         };
       }
     });
@@ -188,10 +192,11 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         bigNumberify(0).toString(), // seederBalance: should begin at zero
         bigNumberify(4000).toString(), // leecherBalance,
         this.channelClient.myEthereumSelectedAddress, // seederOutcomeAddress,
-        peerOutcomeAddress // leecherOutcomeAddress TODO get this somehow
+        peerOutcomeAddress // leecherOutcomeAddress
       );
       log(`SEEDER > created channel with id ${channel.channelId}`);
-      wire.emit(PaidStreamingExtensionEvents.REQUEST, peerAccount);
+      wire.paidStreamingExtension.pseChannelId = channel.channelId;
+      wire.emit(PaidStreamingExtensionEvents.REQUEST);
     });
 
     wire.paidStreamingExtension.on(PaidStreamingExtensionEvents.NOTICE, notice =>
@@ -227,7 +232,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   }
 
   protected async transferFunds(wire: PaidStreamingWire) {
-    const channelId = Object.keys(this.channelClient.openChannels)[0]; // TODO use proper index to get correct channel (inspect some lookup from wire to channelId?)
+    const channelId = wire.paidStreamingExtension.peerChannelId;
 
     // (window.channelProvider as FakeChannelProvider).playerIndex = 1;
 
@@ -259,6 +264,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           wire.paidStreamingExtension.ack();
           wire.choke();
           if (!torrent.done) {
+            wire.paidStreamingExtension.peerChannelId = data as string;
             await this.transferFunds(wire);
           }
           break;

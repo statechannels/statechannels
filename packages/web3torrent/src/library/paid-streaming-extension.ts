@@ -23,6 +23,8 @@ export abstract class PaidStreamingExtension implements Extension {
   peerAccount?: string;
   peerOutcomeAddress?: string;
 
+  pseChannelId: string;
+  peerChannelId: string;
   isForceChoking = false;
 
   constructor(wireToUse: PaidStreamingWire) {
@@ -87,7 +89,7 @@ export abstract class PaidStreamingExtension implements Extension {
   stop() {
     this.isForceChoking = true;
     this.wire.choke();
-    this.executeExtensionCommand(PaidStreamingExtensionNotices.STOP);
+    this.executeExtensionCommand(PaidStreamingExtensionNotices.STOP, this.pseChannelId);
   }
 
   start() {

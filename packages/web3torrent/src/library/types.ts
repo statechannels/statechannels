@@ -123,6 +123,7 @@ export type PeerByTorrent = {
   allowed: boolean;
   funds: string;
   seederBalance: string;
+  channelId: string;
 };
 
 export type TorrentPeers = {
