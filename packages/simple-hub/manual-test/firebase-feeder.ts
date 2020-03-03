@@ -5,8 +5,6 @@ import {cFirebasePrefix} from '../src/constants';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const messages: Array<string> = require('./message-sequence.json');
 
-const cHubAddress = '0x87e0ED760fb316eeb94Bd9cF23D1d2BE87aCe3d8';
-
 configureEnvVariables(true);
 
 const config = {
