@@ -4,6 +4,7 @@ import {ChannelClientInterface, ChannelResult} from '@statechannels/channel-clie
 import {encodeAppData, ChannelState} from '../../core';
 import {bigNumberify} from 'ethers/utils';
 import {RPS_ADDRESS} from '../../constants';
+import {SiteBudget} from '@statechannels/client-api-schema';
 
 const MOCK_ADDRESS = '0xAddress';
 const MOCK_CHANNEL_ID = '0xChannelId';
@@ -91,6 +92,17 @@ class MockChannelClient implements ChannelClientInterface {
   });
   getEthereumSelectedAddress = jest.fn(async function() {
     return await MOCK_ADDRESS;
+  });
+  approveBudgetAndFund = jest.fn(async function(
+    playerAmount: string,
+    hubAmount: string,
+    playerDestinationAddress: string,
+    hubAddress: string,
+    hubDestinationAddress: string
+  ): Promise<SiteBudget> {
+    return new Promise<SiteBudget>(() => {
+      /* */
+    });
   });
 }
 
