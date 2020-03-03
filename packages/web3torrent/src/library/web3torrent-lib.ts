@@ -179,7 +179,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       const channel = await this.channelClient.createChannel(
         this.pseAccount, // seeder
         peerAccount, // leecher
-        bigNumberify(10).toString(), // seederBalance
+        bigNumberify(0).toString(), // seederBalance: should begin at zero
         bigNumberify(4000).toString(), // leecherBalance,
         this.channelClient.myEthereumSelectedAddress, // seederOutcomeAddress,
         '0x0' // leecherOutcomeAddress TODO get this somehow
