@@ -28,7 +28,8 @@ export function createMockTorrentPeers(): TorrentPeers {
         uploaded: 4225
       },
       funds: '50',
-      seederBalance: '50'
+      seederBalance: '50',
+      channelId: '0x00012319283712'
     },
     '5589113806923374': {
       id: '5589113806923374',
@@ -37,7 +38,8 @@ export function createMockTorrentPeers(): TorrentPeers {
       seederBalance: '50',
       wire: {
         uploaded: 52923
-      }
+      },
+      channelId: '0x00012319283713'
     }
   };
 }
