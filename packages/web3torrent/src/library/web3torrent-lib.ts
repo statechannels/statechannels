@@ -36,14 +36,11 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   torrents: PaidStreamingTorrent[] = [];
   channelClient: Web3TorrentChannelClientInterface;
 
-  constructor(
-    opts: WebTorrentPaidStreamingClientOptions = {},
-    channelClient: Web3TorrentChannelClientInterface
-  ) {
+  constructor(opts: WebTorrentPaidStreamingClientOptions = {}) {
     super(opts);
     this.peersList = {};
     this.pseAccount = opts.pseAccount;
-    this.channelClient = channelClient;
+    this.channelClient = opts.channelClient;
   }
 
   async enable() {

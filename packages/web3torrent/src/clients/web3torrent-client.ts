@@ -4,7 +4,9 @@ import WebTorrentPaidStreamingClient from '../library/web3torrent-lib';
 import {Status, Torrent} from '../types';
 import {web3TorrentChannelClient} from './web3t-channel-client';
 
-export const web3torrent = new WebTorrentPaidStreamingClient({}, web3TorrentChannelClient);
+export const web3torrent = new WebTorrentPaidStreamingClient({
+  channelClient: web3TorrentChannelClient
+});
 
 export const WebTorrentContext = React.createContext(web3torrent);
 
