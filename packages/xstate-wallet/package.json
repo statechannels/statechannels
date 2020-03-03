@@ -52,7 +52,6 @@
     "ts-loader": "6.2.1",
     "typescript": "3.7.5",
     "webpack": "4.41.5",
-    
     "webpack-merge": "4.2.2"
   },
   "engines": {
