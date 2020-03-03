@@ -15,9 +15,10 @@ import {
   WebTorrentSeedInput,
   WireEvents
 } from './types';
-import {FakeChannelProvider} from '@statechannels/channel-client';
+import {bigNumberify} from 'ethers/utils';
 
-import {Web3TorrentChannelClientInterface} from '../clients/web3t-channel-client';
+import {Web3TorrentChannelClientInterface, ChannelState} from '../clients/web3t-channel-client';
+import {Message} from '@statechannels/channel-client';
 
 const log = debug('web3torrent:library');
 
@@ -27,29 +28,31 @@ export type TorrentCallback = (torrent: Torrent) => any;
 
 export * from './types';
 
-export const REQUEST_RATE = 10;
+export const REQUEST_RATE = bigNumberify(10);
 
 export default class WebTorrentPaidStreamingClient extends WebTorrent {
-  allowedPeers: PeersByTorrent;
+  peersList: PeersByTorrent;
   pseAccount: string;
   torrents: PaidStreamingTorrent[] = [];
   channelClient: Web3TorrentChannelClientInterface;
-  amSeeder: boolean = false;
 
   constructor(
     opts: WebTorrentPaidStreamingClientOptions = {},
     channelClient: Web3TorrentChannelClientInterface
   ) {
     super(opts);
-    this.allowedPeers = {};
-    this.pseAccount = opts.pseAccount || Math.floor(Math.random() * 99999999999999999).toString();
-    log('ACCOUNT ID: ', this.pseAccount);
+    this.peersList = {};
+    this.pseAccount = opts.pseAccount;
     this.channelClient = channelClient;
   }
 
   async enable() {
     this.pseAccount = await this.channelClient.getAddress();
     log('set pseAccount to sc-wallet signing address');
+    await window.ethereum.enable(); // TODO move this inside fake provider
+    await this.channelClient.getEthereumSelectedAddress();
+    log('got ethereum address');
+    log('ACCOUNT ID: ', this.pseAccount);
   }
 
   seed(
@@ -68,8 +71,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     } else {
       torrent = super.seed(input, optionsOrCallback, callback) as PaidStreamingTorrent;
     }
-
-    this.amSeeder = true;
     this.setupTorrent(torrent);
     log('torrent seed created');
     return torrent;
@@ -94,29 +95,29 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   }
 
   blockPeer(torrentInfoHash: string, wire: PaidStreamingWire, peerAccount: string) {
-    this.allowedPeers[torrentInfoHash][peerAccount].allowed = false;
+    this.peersList[torrentInfoHash][peerAccount].allowed = false;
     wire.paidStreamingExtension.stop();
     this.emit(ClientEvents.PEER_STATUS_CHANGED, {
-      torrentPeers: this.allowedPeers[torrentInfoHash],
+      torrentPeers: this.peersList[torrentInfoHash],
       torrentInfoHash,
       peerAccount
     });
-    log('SEEDER: > blockedPeer', peerAccount, Object.keys(this.allowedPeers));
+    log('SEEDER: > blockedPeer', peerAccount, Object.keys(this.peersList));
   }
 
   unblockPeer(torrentInfoHash: string, wire: PaidStreamingWire, peerAccount: string) {
-    this.allowedPeers[torrentInfoHash][peerAccount].allowed = true;
+    this.peersList[torrentInfoHash][peerAccount].allowed = true;
     wire.paidStreamingExtension.start();
     this.emit(ClientEvents.PEER_STATUS_CHANGED, {
-      torrentPeers: this.allowedPeers[torrentInfoHash],
+      torrentPeers: this.peersList[torrentInfoHash],
       torrentInfoHash,
       peerAccount
     });
-    log('SEEDER: > unblockedPeer', peerAccount, 'from', Object.keys(this.allowedPeers));
+    log('SEEDER: > unblockedPeer', peerAccount, 'from', Object.keys(this.peersList));
   }
 
   togglePeer(torrentInfoHash, peerAccount: string) {
-    const {wire, allowed} = this.allowedPeers[torrentInfoHash][peerAccount];
+    const {wire, allowed} = this.peersList[torrentInfoHash][peerAccount];
     if (allowed) {
       this.blockPeer(torrentInfoHash, wire as PaidStreamingWire, peerAccount);
     } else {
@@ -140,55 +141,54 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
     wire.on(WireEvents.REQUEST, () => {
       const peerAccount = wire.paidStreamingExtension.peerAccount as string;
-      const knownPeerAccount = this.allowedPeers[torrent.infoHash][peerAccount];
+      const knownPeerAccount = this.peersList[torrent.infoHash][peerAccount];
 
       if (!knownPeerAccount) {
-        this.allowedPeers[torrent.infoHash][peerAccount] = {
+        this.peersList[torrent.infoHash][peerAccount] = {
           id: peerAccount,
           wire,
           funds: '0',
+          seederBalance: '0',
           allowed: false
         };
         this.blockPeer(torrent.infoHash, wire, peerAccount);
         this.emit(ClientEvents.PEER_STATUS_CHANGED, {
-          torrentPeers: this.allowedPeers[torrent.infoHash],
+          torrentPeers: this.peersList[torrent.infoHash],
           torrentInfoHash: torrent.infoHash,
           peerAccount
         });
-      } else if (!knownPeerAccount.allowed || Number(knownPeerAccount.funds) < REQUEST_RATE) {
+      } else if (
+        !knownPeerAccount.allowed ||
+        bigNumberify(knownPeerAccount.funds).lt(REQUEST_RATE)
+      ) {
         this.blockPeer(torrent.infoHash, wire, peerAccount);
       } else {
-        this.allowedPeers[torrent.infoHash][peerAccount] = {
+        this.peersList[torrent.infoHash][peerAccount] = {
           id: peerAccount,
           wire,
-          funds: (Number(knownPeerAccount.funds) - 10).toString(),
+          funds: bigNumberify(knownPeerAccount.funds)
+            .sub(10)
+            .toString(),
+          seederBalance: knownPeerAccount.seederBalance,
           allowed: true
         };
       }
     });
 
-    wire.paidStreamingExtension.once(PaidStreamingExtensionEvents.REQUEST, () => {
+    wire.paidStreamingExtension.once(PaidStreamingExtensionEvents.REQUEST, async () => {
       const peerAccount = wire.paidStreamingExtension && wire.paidStreamingExtension.peerAccount;
       log(`SEEDER > wire first_request of ${peerAccount}`);
-      // [ George ] Here we could call channelClient.joinChannel()
+      // SEEDER is participants[0], LEECHER is participants[1]
+      const channel = await this.channelClient.createChannel(
+        this.pseAccount, // seeder
+        peerAccount, // leecher
+        bigNumberify(10).toString(), // seederBalance
+        bigNumberify(4000).toString(), // leecherBalance,
+        this.channelClient.myEthereumSelectedAddress, // seederOutcomeAddress,
+        '0x0' // leecherOutcomeAddress TODO get this somehow
+      );
+      log(`SEEDER > created channel with id ${channel.channelId}`);
       wire.emit(PaidStreamingExtensionEvents.REQUEST, peerAccount);
-    });
-
-    wire.paidStreamingExtension.once(PaidStreamingExtensionEvents.PSE_HANDSHAKE, async () => {
-      const peerAccount = wire.paidStreamingExtension && wire.paidStreamingExtension.peerAccount;
-      const pseAccount = wire.paidStreamingExtension && wire.paidStreamingExtension.pseAccount;
-
-      if (!this.amSeeder) {
-        // leecher is participants[0], seeder is participants[1]
-        this.channelClient.createChannel(
-          peerAccount, // seeder
-          pseAccount, // leecher
-          '0', // seederBalance
-          '50', // leecherBalance,
-          await this.channelClient.getEthereumSelectedAddress(), // seederOutcomeAddress,
-          '0x0' // leecherOutcomeAddress
-        );
-      }
     });
 
     wire.paidStreamingExtension.on(PaidStreamingExtensionEvents.NOTICE, notice =>
@@ -196,45 +196,41 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     );
 
     // If the wallet queues a message, send it across the wire
-    this.channelClient.onMessageQueued(({sender, recipient, data}) => {
-      wire.paidStreamingExtension.payment(JSON.stringify(data)); // TODO don't use 'payment' since the messages are mor general than that
+    this.channelClient.onMessageQueued((message: Message) => {
+      wire.paidStreamingExtension.sendMessage(JSON.stringify(message));
+    });
+
+    // If a channel is proposed, join it
+    this.channelClient.onChannelProposed(async (channelState: ChannelState) => {
+      await this.channelClient.joinChannel(channelState.channelId);
     });
   }
 
-  protected loadFunds(infoHash: string, peerId: string, paymentHash: string) {
-    // [ George ] Here the seeder can countersign the state update by an appropriate channelClient.updateChannel(), and pull the updated state channel balance off the ChannelResult before updating this.allowedPeers[infoHash][peerId].funds accordingly.
-
+  protected async loadFunds(infoHash: string, peerId: string, channelId: string) {
     // [ George ] If web3torrent is to run the Single Asset Payments ForceMoveApp, and the payments are going to be unidirectional we could wrap the channelClient in a web3tChannelClient which offers a countersign() convenience method. This allows the seeder to immediately accept the payment and for the leecher to be ready to send another one as quickly as possible.
 
-    // [ George ] NB all channel channelClient methods are async so we would want to await them before continuing. That means a bunch of methods in this class will also need to be aysnc.
-
-    const {funds} = this.allowedPeers[infoHash][peerId];
-    this.allowedPeers[infoHash][peerId].funds = (Number(funds) + Number(paymentHash)).toString();
+    log(`querying channel client for updated funds`);
+    const newSeederBalance = bigNumberify(this.channelClient.openChannels[channelId].seederBalance);
+    const payment = newSeederBalance.sub(
+      bigNumberify(this.peersList[infoHash][peerId].seederBalance)
+    );
+    this.peersList[infoHash][peerId].funds = bigNumberify(this.peersList[infoHash][peerId].funds)
+      .add(payment)
+      .toString();
+    this.peersList[infoHash][peerId].seederBalance = newSeederBalance.toString();
+    log(
+      `newSeederBalance: ${newSeederBalance} payment: ${payment}, funds for peer: ${this.peersList[infoHash][peerId].funds}`
+    );
   }
 
   protected async transferFunds(wire: PaidStreamingWire) {
-    // [ George ] I think this is where the leecher could call channelClient.updateChannel(). A first iteration might just do this without any UI or checks.
+    const channelId = Object.keys(this.channelClient.openChannels)[0]; // TODO use proper index to get correct channel (inspect some lookup from wire to channelId?)
 
-    const channel = await this.channelClient.createChannel(
-      '0x0000000000000000000000000000000000000000',
-      '0x0000000000000000000000000000000000000000',
-      '0x00',
-      '0x00',
-      '0x0000000000000000000000000000000000000000',
-      '0x0000000000000000000000000000000000000000'
-    );
+    // (window.channelProvider as FakeChannelProvider).playerIndex = 1;
 
-    (window.channelProvider as FakeChannelProvider).playerIndex = 1;
-
-    await this.channelClient.updateChannel(
-      channel.channelId, // channelId,
-      '0x0000000000000000000000000000000000000000', // seeder,
-      '0x0000000000000000000000000000000000000000', // leecher,
-      '0x00', // seederBalance,
-      '0x00', // leecherBalance,
-      '0x0000000000000000000000000000000000000000', // seederOutcomeAddress,
-      '0x0000000000000000000000000000000000000000' // leecherOutcomeAddress
-    );
+    await this.channelClient.makePayment(channelId, bigNumberify(REQUEST_RATE.mul(10)).toString());
+    const newSeederBalance = bigNumberify(this.channelClient.openChannels[channelId].seederBalance);
+    log(`payment made for channel ${channelId}, newSeederBalance: ${newSeederBalance}`);
   }
 
   protected setupTorrent(torrent: PaidStreamingTorrent) {
@@ -242,7 +238,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       return torrent;
     }
     torrent.on('infoHash', () => {
-      this.allowedPeers = {...this.allowedPeers, [torrent.infoHash]: {}};
+      this.peersList = {...this.peersList, [torrent.infoHash]: {}};
     });
     torrent.on(TorrentEvents.WIRE, (wire: PaidStreamingWire) => {
       this.setupWire(torrent, wire);
@@ -250,24 +246,38 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
     torrent.on(TorrentEvents.NOTICE, async (wire, {command, data}) => {
       log(`< ${command} received from ${wire.peerExtendedHandshake.pseAccount}`, data);
+      let turnNum: number;
+      let channelId: string;
       switch (command) {
         case PaidStreamingExtensionNotices.STOP:
           wire.paidStreamingExtension.ack();
           wire.choke();
-          await this.transferFunds(wire);
+          if (!torrent.done) {
+            await this.transferFunds(wire);
+          }
           break;
         case PaidStreamingExtensionNotices.START:
           wire.paidStreamingExtension.ack();
           this.jumpStart(torrent, wire);
           break;
-        case PaidStreamingExtensionNotices.PAYMENT:
-          this.channelClient.pushMessage(JSON.parse(data.message));
-          this.loadFunds(
-            torrent.infoHash,
-            wire.peerExtendedHandshake.pseAccount,
-            JSON.parse(data.message)
-          );
-          this.unblockPeer(torrent.infoHash, wire, wire.peerExtendedHandshake.pseAccount);
+        case PaidStreamingExtensionNotices.MESSAGE:
+          await this.channelClient.pushMessage(JSON.parse(data.message));
+          turnNum = Number(JSON.parse(data.message).data.turnNum);
+          channelId = JSON.parse(data.message).data.channelId;
+          if (
+            JSON.parse(data.message).recipient === this.pseAccount &&
+            turnNum >= 3 &&
+            turnNum % 2 === 1
+          ) {
+            // if message sent to me (seeding), and the final PostFS or a payment
+            await this.loadFunds(
+              torrent.infoHash,
+              wire.paidStreamingExtension.peerAccount,
+              channelId
+            );
+            await this.channelClient.acceptPayment(this.channelClient.openChannels[channelId]);
+            this.unblockPeer(torrent.infoHash, wire, wire.paidStreamingExtension.peerAccount);
+          }
           break;
         default:
           break;
