@@ -6,5 +6,5 @@ import ledgerResponse from './ledger-response.json';
 
 it('Echo message with signature', () => {
   const response = respondToMessage(ledgerMessage);
-  expect(response).toMatchObject<Message>(ledgerResponse);
+  expect(response).toMatchObject<Message[]>(ledgerResponse);
 });

@@ -22,7 +22,7 @@ export async function startServer(): Promise<any> {
     const outgoingMessage = respondToMessage(incomingMessage);
     try {
       // log.info({message: outgoingMessages}, 'Sending message to firebase');
-      await fbSend(outgoingMessage);
+      await Promise.all(outgoingMessage.map(fbSend));
     } catch (reason) {
       log.error(reason);
       throw reason;

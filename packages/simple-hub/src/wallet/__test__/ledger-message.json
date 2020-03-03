@@ -1,52 +1,52 @@
 {
-   "recipient":"0x0",
-   "sender":"0x0",
-   "data":{
-      "signedStates":[
-         {
-            "outcome":[
-               {
-                  "assetHolderAddress":"0x0000000000000000000000000000000000000000",
-                  "allocationItems":[
-                     {
-                        "destination":"0x0000000000000000000000000000000000000000000000000000000000000001",
-                        "amount":"0x04"
-                     },
-                     {
-                        "destination":"0x0000000000000000000000000000000000000000000000000000000000000002",
-                        "amount":"0x03"
-                     },
-                     {
-                        "destination":"0xb998070635662eeb903c671867e9e2596cdcfff02ba5481435ca6ed16f0bc6c7",
-                        "amount":"0x05"
-                     }
-                  ]
-               }
-            ],
-            "turnNum":"0x01",
-            "appData":"0x",
-            "isFinal":false,
-            "chainId":"0x01",
-            "participants":[
-               {
-                  "signingAddress":"0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-                  "destination":"0x0000000000000000000000000000000000000000000000000000000000000001",
-                  "participantId":"playerA"
-               },
-               {
-                  "signingAddress":"0x100063c326b27f78b2cBb7cd036B8ddE4d4FCa7C",
-                  "destination":"0x0000000000000000000000000000000000000000000000000000000000000002",
-                  "participantId":"hub"
-               }
-            ],
-            "channelNonce":"0x01",
-            "appDefinition":"0x0000000000000000000000000000000000000000",
-            "challengeDuration":"0x0a",
-            "signatures":[
-               "0x3fbf71c62394d4b811b54b36fd1918bc6c9c9ea98be9385de44e85fc2e8037e12da7b10ef25f7be62da4300c249fcb1a0ecf36db1d1ab96248dcc5a9a0f33d8a1c"
-            ],
-            "channelId":"0xd90d135c1e5c57a2207784b9873f9a66b29985c39904a4934efc843b847a0fb0"
-         }
-      ]
-   }
+  "recipient": "0x100063c326b27f78b2cBb7cd036B8ddE4d4FCa7C",
+  "sender": "playerA",
+  "data": {
+    "signedStates": [
+      {
+        "outcome": [
+          {
+            "assetHolderAddress": "0x0000000000000000000000000000000000000000",
+            "allocationItems": [
+              {
+                "destination": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                "amount": "0x04"
+              },
+              {
+                "destination": "0x0000000000000000000000000000000000000000000000000000000000000002",
+                "amount": "0x03"
+              },
+              {
+                "destination": "0xb998070635662eeb903c671867e9e2596cdcfff02ba5481435ca6ed16f0bc6c7",
+                "amount": "0x05"
+              }
+            ]
+          }
+        ],
+        "turnNum": "0x01",
+        "appData": "0x",
+        "isFinal": false,
+        "chainId": "0x01",
+        "participants": [
+          {
+            "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+            "destination": "0x0000000000000000000000000000000000000000000000000000000000000001",
+            "participantId": "playerA"
+          },
+          {
+            "signingAddress": "0x100063c326b27f78b2cBb7cd036B8ddE4d4FCa7C",
+            "destination": "0x0000000000000000000000000000000000000000000000000000000000000002",
+            "participantId": "0x100063c326b27f78b2cBb7cd036B8ddE4d4FCa7C"
+          }
+        ],
+        "channelNonce": "0x01",
+        "appDefinition": "0x0000000000000000000000000000000000000000",
+        "challengeDuration": "0x0a",
+        "signatures": [
+          "0x3fbf71c62394d4b811b54b36fd1918bc6c9c9ea98be9385de44e85fc2e8037e12da7b10ef25f7be62da4300c249fcb1a0ecf36db1d1ab96248dcc5a9a0f33d8a1c"
+        ],
+        "channelId": "0xd90d135c1e5c57a2207784b9873f9a66b29985c39904a4934efc843b847a0fb0"
+      }
+    ]
+  }
 }
