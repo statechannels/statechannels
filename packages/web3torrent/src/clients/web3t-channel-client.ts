@@ -324,3 +324,82 @@ const formatAllocations = (aAddress: string, bAddress: string, aBal: string, bBa
     }
   ];
 };
+
+// Mocks
+
+export class MockWeb3TorrentChannelClient implements Web3TorrentChannelClientInterface {
+  mySigningAddress?: string;
+  myEthereumSelectedAddress?: string; // this state can be inspected to infer whether we need to get the user to "Connect With MetaMask" or not.
+  openChannels: Record<string, ChannelState> = {};
+  myAddress: string;
+  constructor(private readonly channelClient: ChannelClientInterface) {}
+
+  mockChannelState: ChannelState = {
+    channelId: '0x0',
+    turnNum: '0x0',
+    status: 'running',
+    challengeExpirationTime: '0x0',
+    seeder: '0x0',
+    leecher: '0x0',
+    seederOutcomeAddress: '0x0',
+    leecherOutcomeAddress: '0x0',
+    seederBalance: '0x0',
+    leecherBalance: '0x0'
+  };
+  async createChannel(
+    seeder: string,
+    leecher: string,
+    seederBalance: string,
+    leecherBalance: string,
+    seederOutcomeAddress: string,
+    leecherOutcomeAddress: string
+  ): Promise<ChannelState> {
+    return this.mockChannelState;
+  }
+  async getAddress() {
+    return '0x0';
+  }
+  async getEthereumSelectedAddress() {
+    return '0x0';
+  }
+  onMessageQueued(callback: (message: Message) => void) {
+    return () => {};
+  }
+  // Accepts an web3t-friendly callback, performs the necessary encoding, and subscribes to the channelClient with an appropriate, API-compliant callback
+  onChannelUpdated(web3tCallback: (channelState: ChannelState) => any) {
+    return () => {};
+  }
+  onChannelProposed(web3tCallback: (channelState: ChannelState) => any) {
+    return () => {};
+  }
+  async joinChannel(channelId: string) {
+    return {};
+  }
+  async closeChannel(channelId: string): Promise<ChannelState> {
+    return this.mockChannelState;
+  }
+  async challengeChannel(channelId: string): Promise<ChannelState> {
+    return this.mockChannelState;
+  }
+  async updateChannel(
+    channelId: string,
+    seeder: string,
+    leecher: string,
+    seederBalance: string,
+    leecherBalance: string,
+    seederOutcomeAddress: string,
+    leecherOutcomeAddress: string
+  ) {
+    return {};
+  }
+  async makePayment(channelId: string, amount: string) {}
+  async acceptPayment(channelState: ChannelState) {}
+  async pushMessage(message: Message<ChannelResult>) {}
+  async approveBudgetAndFund(
+    playerAmount: string,
+    hubAmount: string,
+    playerDestinationAddress: string,
+    hubAddress: string,
+    hubDestinationAddress: string
+  ) {}
+}

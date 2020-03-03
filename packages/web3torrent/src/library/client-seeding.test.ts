@@ -10,17 +10,41 @@ import WebTorrentPaidStreamingClient, {
   PaidStreamingExtensionNotices,
   PaidStreamingTorrent
 } from './web3torrent-lib';
+import {Web3TorrentChannelClient} from '../clients/web3t-channel-client';
+import {ChannelClient} from '@statechannels/channel-client';
+
+async function enable() {
+  return new Promise(r => r());
+}
+
+const ethereum = {
+  enable
+};
+
+// mock out window.ethereum.enable
+Object.defineProperty(window, 'ethereum', {
+  enumerable: true,
+  value: ethereum
+});
 
 describe('Seeding and Leeching', () => {
   let seeder: WebTorrentPaidStreamingClient;
   let leecher: WebTorrentPaidStreamingClient;
 
   beforeEach(() => {
-    seeder = new WebTorrentPaidStreamingClient({pseAccount: '1', dht: false});
+    seeder = new WebTorrentPaidStreamingClient({
+      pseAccount: '1',
+      dht: false,
+      channelClient: new Web3TorrentChannelClient(new ChannelClient(window.channelProvider))
+    });
     seeder.on('error', err => fail(err));
     seeder.on('warning', err => fail(err));
 
-    leecher = new WebTorrentPaidStreamingClient({pseAccount: '2', dht: false});
+    leecher = new WebTorrentPaidStreamingClient({
+      pseAccount: '2',
+      dht: false,
+      channelClient: new Web3TorrentChannelClient(new ChannelClient(window.channelProvider))
+    });
     leecher.on('error', err => fail(err));
     leecher.on('warning', err => fail(err));
   });
@@ -73,15 +97,15 @@ describe('Seeding and Leeching', () => {
           expect(torrentPeers[`${leecher.pseAccount}`].allowed).toEqual(true);
         });
 
-        seeder.once(ClientEvents.TORRENT_NOTICE, ({command}) => {
-          expect(command).toEqual(PaidStreamingExtensionNotices.ACK);
-
-          leecher.once(ClientEvents.TORRENT_DONE, ({torrent: leechedTorrent}) => {
-            expect(seededTorrent.files[0].done).toEqual(leechedTorrent.files[0].done);
-            expect(seededTorrent.files[0].length).toEqual(leechedTorrent.files[0].length);
-            expect(seededTorrent.files[0].name).toEqual(leechedTorrent.files[0].name);
-            done();
-          });
+        seeder.on(ClientEvents.TORRENT_NOTICE, ({command}) => {
+          if (command == PaidStreamingExtensionNotices.ACK) {
+            leecher.once(ClientEvents.TORRENT_DONE, ({torrent: leechedTorrent}) => {
+              expect(seededTorrent.files[0].done).toEqual(leechedTorrent.files[0].done);
+              expect(seededTorrent.files[0].length).toEqual(leechedTorrent.files[0].length);
+              expect(seededTorrent.files[0].name).toEqual(leechedTorrent.files[0].name);
+              done();
+            });
+          }
         });
       });
 
