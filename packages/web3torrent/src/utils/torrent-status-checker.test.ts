@@ -7,6 +7,9 @@ describe('Torrent Status Checker', () => {
   let torrent: Torrent;
   const mockInfoHash = '123';
 
+  beforeAll(() => {
+    web3torrent.enable(); // without this step, we do not yet have a pseAccount and tests will fail accordingly
+  });
   beforeEach(() => {
     torrent = createMockTorrent() as Torrent;
   });
