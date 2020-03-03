@@ -8,7 +8,7 @@ export const web3torrent = new WebTorrentPaidStreamingClient({}, web3TorrentChan
 
 export const WebTorrentContext = React.createContext(web3torrent);
 
-export const getTorrentPeers = infoHash => web3torrent.allowedPeers[infoHash];
+export const getTorrentPeers = infoHash => web3torrent.peersList[infoHash];
 
 export const download: (torrent: WebTorrentAddInput) => Promise<Torrent> = torrentData => {
   return new Promise(resolve =>
