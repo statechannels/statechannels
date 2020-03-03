@@ -1,17 +1,32 @@
 {
-  "extends": "../../tsconfig.json",
-  "compilerOptions": {
-    "baseUrl": ".",
-    "module": "commonjs",
-    "target": "es2017",
-    "noImplicitAny": false,
-    "rootDir": "src",
-    "outDir": "lib",
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "strict": false
-  },
-  "references": [{"path": "../devtools"}, {"path": "../nitro-protocol"}],
-  "include": ["./src"],
-  "exclude": ["**/*test_data.ts", "**/__mocks__/*"],
+   "extends":"../../tsconfig.json",
+   "compilerOptions":{
+      "baseUrl":".",
+      "module":"commonjs",
+      "target":"es2017",
+      "noImplicitAny":false,
+      "rootDir":"src",
+      "outDir":"lib",
+      "esModuleInterop":true,
+      "resolveJsonModule":true,
+      "strict":false
+   },
+   "references":[
+      {
+         "path":"../devtools"
+      },
+      {
+         "path":"../nitro-protocol"
+      },
+      {
+         "path":"../xstate-wallet"
+      }
+   ],
+   "include":[
+      "./src"
+   ],
+   "exclude":[
+      "**/*test_data.ts",
+      "**/__mocks__/*"
+   ]
 }
