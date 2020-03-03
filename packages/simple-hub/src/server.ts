@@ -10,6 +10,8 @@ import {logger} from './logger';
 import {fbListen, fbSend} from './message/firebase-relay';
 import {Message} from '@statechannels/wire-format';
 import {respondToMessage} from './wallet';
+import {assetHolderListen} from './blockchain/asset-holder-watcher';
+import {onDepositEvent} from './wallet/deposit';
 
 const log = logger();
 
@@ -28,6 +30,7 @@ export async function startServer(): Promise<any> {
   };
 
   fbListen(fbMessageCallback);
+  return assetHolderListen(onDepositEvent);
 }
 
 if (require.main === module) {

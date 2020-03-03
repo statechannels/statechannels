@@ -54,6 +54,7 @@
   "scripts": {
     "build": "tsc -b .",
     "build:typescript": "tsc -b .",
+    "chain:test": "npx jest --runInBand -c ./jest/jest.chain.config.js",
     "db:create": "createdb hub_wallet_${NODE_ENV}",
     "db:drop": "dropdb hub_wallet_${NODE_ENV}",
     "db:migrate": "npx knex migrate:latest --cwd src/db-admin",
@@ -73,6 +74,6 @@
     "prettier:check": "npx prettier --check 'src/**/*.{ts,tsx}'",
     "prettier:write": "npx prettier --write 'src/**/*.{ts,tsx}'",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
-    "test:ci": "run-s hub:test"
+    "test:ci": "run-s chain:test hub:test"
   }
 }
