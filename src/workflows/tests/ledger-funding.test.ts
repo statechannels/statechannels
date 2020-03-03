@@ -16,6 +16,7 @@ import {FakeChain, Chain} from '../../chain';
 import {wallet1, wallet2, participants} from './data';
 import {subscribeToMessages} from './message-service';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../../constants';
+import {serializeMessage} from '../../serde/wire-format/serialize';
 
 jest.setTimeout(20000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
@@ -82,6 +83,11 @@ beforeEach(() => {
 
   aStore = new MemoryStore([wallet1.privateKey], chain);
   bStore = new MemoryStore([wallet2.privateKey], chain);
+
+  aStore.outboxFeed.subscribe(messageToSend => {
+    const wireMessage = serializeMessage(messageToSend, '0x0', '0x0');
+    console.log(JSON.stringify(wireMessage, null, 2));
+  });
 
   [aStore, bStore].forEach((store: Store) => store.pushMessage(message));
   subscribeToMessages({
