@@ -14,7 +14,6 @@ export const ConfirmCreateChannel = (props: Props) => {
   const prompt = (
     <div
       style={{
-        paddingTop: '50px',
         textAlign: 'center'
       }}
     >
