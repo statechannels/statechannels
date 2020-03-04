@@ -31,10 +31,10 @@ if (process.env.REACT_APP_FAKE_CHANNEL_PROVIDER === 'true') {
 
 // TODO: Put inside better place than here where app can handle error case
 window.channelProvider.enable(process.env.REACT_APP_WALLET_URL);
-export interface Web3TorrentChannelClientInterface {
+export interface PaymentChannelClientInterface {
   mySigningAddress?: string;
   myEthereumSelectedAddress?: string; // this state can be inspected to infer whether we need to get the user to "Connect With MetaMask" or not.
-  openChannels: Record<string, ChannelState>;
+  channelCache: Record<string, ChannelState>;
   myAddress: string;
   createChannel(
     seeder: string,
@@ -63,6 +63,7 @@ export interface Web3TorrentChannelClientInterface {
   );
   makePayment(channelId: string, amount: string);
   acceptPayment(channelState: ChannelState);
+  isPaymentToMe(channelState: ChannelState): boolean;
   pushMessage(message: Message<ChannelResult>);
   approveBudgetAndFund(
     playerAmount: string,
@@ -73,10 +74,10 @@ export interface Web3TorrentChannelClientInterface {
   );
 }
 
-export class Web3TorrentChannelClient implements Web3TorrentChannelClientInterface {
+export class PaymentChannelClient implements PaymentChannelClientInterface {
   mySigningAddress?: string;
   myEthereumSelectedAddress?: string; // this state can be inspected to infer whether we need to get the user to "Connect With MetaMask" or not.
-  openChannels: Record<string, ChannelState> = {};
+  channelCache: Record<string, ChannelState> = {};
   myAddress: string;
   constructor(private readonly channelClient: ChannelClientInterface) {}
   async createChannel(
@@ -107,10 +108,7 @@ export class Web3TorrentChannelClient implements Web3TorrentChannelClientInterfa
       appDefinition,
       'appData unused'
     );
-
-    const channelId = channelResult.channelId;
-    this.openChannels = {...this.openChannels, [channelId]: convertToChannelState(channelResult)};
-
+    this.cacheChannelState(convertToChannelState(channelResult));
     return convertToChannelState(channelResult);
   }
 
@@ -127,6 +125,10 @@ export class Web3TorrentChannelClient implements Web3TorrentChannelClientInterfa
 
   onMessageQueued(callback: (message: Message) => void) {
     return this.channelClient.onMessageQueued(callback);
+  }
+
+  cacheChannelState(channelState: ChannelState) {
+    this.channelCache = {...this.channelCache, [channelState.channelId]: channelState};
   }
 
   // Accepts an web3t-friendly callback, performs the necessary encoding, and subscribes to the channelClient with an appropriate, API-compliant callback
@@ -152,18 +154,19 @@ export class Web3TorrentChannelClient implements Web3TorrentChannelClientInterfa
 
   async joinChannel(channelId: string) {
     const channelResult = await this.channelClient.joinChannel(channelId);
-    this.openChannels = {...this.openChannels, [channelId]: convertToChannelState(channelResult)};
-
+    this.cacheChannelState(convertToChannelState(channelResult));
     return convertToChannelState(channelResult);
   }
 
   async closeChannel(channelId: string): Promise<ChannelState> {
     const channelResult = await this.channelClient.closeChannel(channelId);
+    this.cacheChannelState(convertToChannelState(channelResult));
     return convertToChannelState(channelResult);
   }
 
   async challengeChannel(channelId: string): Promise<ChannelState> {
     const channelResult = await this.channelClient.challengeChannel(channelId);
+    this.cacheChannelState(convertToChannelState(channelResult));
     return convertToChannelState(channelResult);
   }
 
@@ -196,9 +199,7 @@ export class Web3TorrentChannelClient implements Web3TorrentChannelClientInterfa
       allocations,
       'appData unused'
     );
-
-    this.openChannels[channelId] = convertToChannelState(channelResult);
-
+    this.cacheChannelState(convertToChannelState(channelResult));
     return convertToChannelState(channelResult);
   }
 
@@ -211,7 +212,7 @@ export class Web3TorrentChannelClient implements Web3TorrentChannelClientInterfa
       leecherBalance,
       seederOutcomeAddress,
       leecherOutcomeAddress
-    } = this.openChannels[channelId];
+    } = this.channelCache[channelId];
     if (bigNumberify(leecherBalance).gte(amount)) {
       await this.updateChannel(
         channelId, // channelId,
@@ -250,11 +251,16 @@ export class Web3TorrentChannelClient implements Web3TorrentChannelClientInterfa
     );
   }
 
+  isPaymentToMe(channelState: ChannelState): boolean {
+    // doesn't guarantee that my balance increased
+    const myIndex = channelState.seeder ? 0 : 1;
+    return channelState.status === 'running' && Number(channelState.turnNum) % 2 === myIndex;
+  }
+
   async pushMessage(message: Message<ChannelResult>) {
     await this.channelClient.pushMessage(message);
     const channelResult: ChannelResult = message.data;
-    const channelId = channelResult.channelId;
-    this.openChannels = {...this.openChannels, [channelId]: convertToChannelState(channelResult)};
+    this.cacheChannelState(convertToChannelState(channelResult));
   }
 
   async approveBudgetAndFund(
@@ -274,11 +280,11 @@ export class Web3TorrentChannelClient implements Web3TorrentChannelClientInterfa
   }
 }
 
-export const web3TorrentChannelClient = new Web3TorrentChannelClient(
+export const paymentChannelClient = new PaymentChannelClient(
   new ChannelClient(window.channelProvider)
 );
 
-export const ChannelContext = React.createContext(web3TorrentChannelClient);
+export const ChannelContext = React.createContext(paymentChannelClient);
 
 const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
   const {
@@ -327,10 +333,10 @@ const formatAllocations = (aAddress: string, bAddress: string, aBal: string, bBa
 
 // Mocks
 
-export class MockWeb3TorrentChannelClient implements Web3TorrentChannelClientInterface {
+export class MockPaymentChannelClient implements PaymentChannelClientInterface {
   mySigningAddress?: string;
   myEthereumSelectedAddress?: string; // this state can be inspected to infer whether we need to get the user to "Connect With MetaMask" or not.
-  openChannels: Record<string, ChannelState> = {};
+  channelCache: Record<string, ChannelState> = {};
   myAddress: string;
   constructor(private readonly channelClient: ChannelClientInterface) {}
 
@@ -394,6 +400,9 @@ export class MockWeb3TorrentChannelClient implements Web3TorrentChannelClientInt
   }
   async makePayment(channelId: string, amount: string) {}
   async acceptPayment(channelState: ChannelState) {}
+  isPaymentToMe(channelState: ChannelState): boolean {
+    return false;
+  }
   async pushMessage(message: Message<ChannelResult>) {}
   async approveBudgetAndFund(
     playerAmount: string,

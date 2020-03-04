@@ -1,5 +1,5 @@
 import {Status, Torrent} from './types';
-import {ChannelState} from './clients/web3t-channel-client';
+import {ChannelState} from './clients/payment-channel-client';
 
 import {bigNumberify} from 'ethers/utils';
 

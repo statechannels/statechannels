@@ -1,5 +1,5 @@
 import React from 'react';
-import {ChannelContext, ChannelState} from '../../clients/web3t-channel-client';
+import {ChannelContext, ChannelState} from '../../clients/payment-channel-client';
 import './ChannelList.scss';
 import {formatUnits} from 'ethers/utils';
 
@@ -16,7 +16,7 @@ class ChannelList extends React.Component {
               <td className={'channel-header'}>Leecher</td>
               <td className={'channel-header'}>Earnt</td>
             </tr>
-            {Object.values(this.context.openChannels)
+            {Object.values(this.context.channelCache)
               .filter((channel: ChannelState) => channel.seeder === this.context.mySigningAddress)
               .map((channel: ChannelState) => (
                 <tr className={'channel'} key={channel.channelId}>
@@ -35,7 +35,7 @@ class ChannelList extends React.Component {
               <td className={'channel-header'}>Seeder</td>
               <td className={'channel-header'}>Left to spend</td>
             </tr>
-            {Object.values(this.context.openChannels)
+            {Object.values(this.context.channelCache)
               .filter((channel: ChannelState) => channel.leecher === this.context.mySigningAddress)
               .map((channel: ChannelState) => (
                 <tr className={'channel'} key={channel.channelId}>
