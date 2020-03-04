@@ -16,12 +16,12 @@ export const wallet3 = new ethers.Wallet(
 
 export const first: Participant = {
   signingAddress: wallet1.address,
-  destination: '0x0000000000000000000000000000000000000000000000000000000000000001',
+  destination: '0xaaaa000000000000000000000000000000000000000000000000000000000001',
   participantId: 'playerA'
 };
 export const second: Participant = {
   signingAddress: wallet2.address,
-  destination: '0x0000000000000000000000000000000000000000000000000000000000000002',
+  destination: '0xbbbb000000000000000000000000000000000000000000000000000000000002',
   participantId: 'playerB'
 };
 export const third: Participant = {
