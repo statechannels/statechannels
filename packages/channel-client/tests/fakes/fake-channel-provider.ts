@@ -8,6 +8,7 @@ import {
   CreateChannelParams,
   PushMessageResult,
   JoinChannelParams,
+  GetStateParams,
   UpdateChannelParams,
   Notification,
   CloseChannelParams
@@ -50,6 +51,9 @@ export class FakeChannelProvider implements ChannelProviderInterface {
 
       case 'JoinChannel':
         return this.joinChannel(params) as Promise<MethodType[K]>;
+
+      case 'GetState':
+        return this.getState(params) as Promise<MethodType[K]>;
 
       case 'UpdateChannel':
         return this.updateChannel(params) as Promise<MethodType[K]>;
@@ -175,6 +179,10 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     this.notifyOpponent(this.latestState, 'joinChannel');
 
     return this.latestState;
+  }
+
+  private async getState({channelId}: GetStateParams): Promise<ChannelResult> {
+    return this.findChannel(channelId);
   }
 
   private async updateChannel(params: UpdateChannelParams): Promise<ChannelResult> {
