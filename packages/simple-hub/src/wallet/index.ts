@@ -6,7 +6,7 @@ import {serializeMessage} from '@statechannels/xstate-wallet/lib/src/serde/wire-
 import {cHubStateChannelPK, cHubStateChannelAddress} from '../constants';
 import {SignedState, Message, Participant} from '@statechannels/xstate-wallet/lib/src/store/types';
 
-function broadcastRecipents(participants: Participant[]): Participant[] {
+function broadcastRecipients(participants: Participant[]): Participant[] {
   return participants.filter(p => p.participantId !== cHubStateChannelAddress);
 }
 
@@ -17,7 +17,7 @@ export function respondToMessage(wireMessage: WireMessage): WireMessage[] {
   const signatures = R.append(ourSignature, lastState.signatures);
   const ourSignedState: SignedState = {...lastState, signatures};
   const ourMessage: Message = {signedStates: [ourSignedState], objectives: message.objectives};
-  return broadcastRecipents(lastState.participants).map(participant =>
+  return broadcastRecipients(lastState.participants).map(participant =>
     serializeMessage(ourMessage, participant.participantId, wireMessage.recipient)
   );
 }
