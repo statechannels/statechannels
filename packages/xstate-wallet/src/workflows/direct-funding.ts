@@ -7,7 +7,7 @@ import * as Depositing from './depositing';
 import * as SupportState from './support-state';
 import {getDataAndInvoke, MachineFactory} from '../utils/workflow-utils';
 import {Store} from '../store';
-import {Outcome, SimpleAllocation} from '../store/types';
+import {Outcome, SimpleAllocation, AllocationItem} from '../store/types';
 import {add} from '../utils/math-utils';
 import {isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
 
@@ -38,7 +38,7 @@ WARNING: it is _not_ safe to restart this direct funding protocol. More thought 
 
 export interface Init {
   channelId: string;
-  minimalAllocation: SimpleAllocation;
+  minimalAllocation: AllocationItem[];
 }
 
 const checkCurrentLevel = {
@@ -88,9 +88,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
     // TODO This prevents us from funding an app channel
     const allocated = outcome.allocationItems
       .map(a => a.amount)
-      .reduce((a, b) => {
-        return a.add(b);
-      }, bigNumberify(0));
+      .reduce((a, b) => a.add(b), bigNumberify(0));
     const chainInfo = await store.chain.getChainInfo(ctx.channelId);
 
     if (allocated.gt(chainInfo.amount))
@@ -99,10 +97,10 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
 
   function minimalOutcome(
     currentOutcome: SimpleAllocation,
-    minimalEthAllocation: SimpleAllocation
+    minimalEthAllocation: AllocationItem[]
   ): Outcome {
     const allocationItems = currentOutcome.allocationItems.concat(
-      minimalEthAllocation.allocationItems.map(({destination, amount}) => {
+      minimalEthAllocation.map(({destination, amount}) => {
         const currentlyAllocated = currentOutcome.allocationItems
           .filter(i => i.destination === destination)
           .map(i => i.amount)
@@ -142,8 +140,8 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
       throw new Error('Unsupported outcome');
     }
     let totalBeforeDeposit = bigNumberify(0);
-    for (let i = 0; i < minimalAllocation.allocationItems.length; i++) {
-      const allocation = minimalAllocation.allocationItems[i];
+    for (let i = 0; i < minimalAllocation.length; i++) {
+      const allocation = minimalAllocation[i];
       if (entry.myIndex === i) {
         const fundedAt = supportedOutcome.allocationItems.map(a => a.amount).reduce(add);
 
@@ -169,7 +167,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
     const entry = await store.getEntry(channelId);
     const {channelConstants} = entry;
 
-    if (minimalAllocation.allocationItems.length !== channelConstants.participants.length) {
+    if (minimalAllocation.length !== channelConstants.participants.length) {
       throw new Error('Must be exactly one allocation item per participant');
     }
 
