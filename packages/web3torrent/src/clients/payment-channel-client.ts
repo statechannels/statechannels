@@ -31,54 +31,11 @@ if (process.env.REACT_APP_FAKE_CHANNEL_PROVIDER === 'true') {
 
 // TODO: Put inside better place than here where app can handle error case
 window.channelProvider.enable(process.env.REACT_APP_WALLET_URL);
-export interface PaymentChannelClientInterface {
-  mySigningAddress?: string;
-  myEthereumSelectedAddress?: string; // this state can be inspected to infer whether we need to get the user to "Connect With MetaMask" or not.
-  channelCache: Record<string, ChannelState>;
-  myAddress: string;
-  createChannel(
-    beneficiary: string,
-    payer: string,
-    beneficiaryBalance: string,
-    payerBalance: string,
-    beneficiaryOutcomeAddress: string,
-    payerOutcomeAddress: string
-  ): Promise<ChannelState>;
-  getAddress(): Promise<string>;
-  getEthereumSelectedAddress(): Promise<string>;
-  onMessageQueued(callback: (message: Message) => void);
-  onChannelUpdated(web3tCallback: (channelState: ChannelState) => any);
-  onChannelProposed(web3tCallback: (channelState: ChannelState) => any);
-  joinChannel(channelId: string);
-  closeChannel(channelId: string): Promise<ChannelState>;
-  challengeChannel(channelId: string): Promise<ChannelState>;
-  updateChannel(
-    channelId: string,
-    beneficiary: string,
-    payer: string,
-    beneficiaryBalance: string,
-    payerBalance: string,
-    beneficiaryOutcomeAddress: string,
-    payerOutcomeAddress: string
-  );
-  makePayment(channelId: string, amount: string);
-  acceptPayment(channelState: ChannelState);
-  amProposer(channelId: string): boolean;
-  isPaymentToMe(channelState: ChannelState): boolean;
-  pushMessage(message: Message<ChannelResult>);
-  approveBudgetAndFund(
-    playerAmount: string,
-    hubAmount: string,
-    playerDestinationAddress: string,
-    hubAddress: string,
-    hubDestinationAddress: string
-  );
-}
 
 // This Client targets at _unidirectional_, single asset (ETH) payment channel with 2 participants running on Nitro protocol
 // The beneficiary proposes the channel, but accepts payments
 // The payer joins the channel, and makes payments
-export class PaymentChannelClient implements PaymentChannelClientInterface {
+export class PaymentChannelClient {
   mySigningAddress?: string;
   myEthereumSelectedAddress?: string; // this state can be inspected to infer whether we need to get the user to "Connect With MetaMask" or not.
   channelCache: Record<string, ChannelState> = {};
