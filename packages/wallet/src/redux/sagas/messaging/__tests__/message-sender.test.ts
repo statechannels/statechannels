@@ -22,7 +22,8 @@ import {
   unknownChannelId,
   unknownSigningAddress,
   updateChannelResponse,
-  closeChannelResponse
+  closeChannelResponse,
+  getStateResponse
 } from "../outgoing-api-actions";
 
 describe("message sender", () => {
@@ -305,6 +306,40 @@ describe("message sender", () => {
     );
 
     const message = updateChannelResponse({
+      id: 1,
+      channelId
+    });
+
+    const {effects} = await expectSaga(messageSender, message)
+      .withState(initialState)
+      .provide([[matchers.call.fn(window.parent.postMessage), 0]])
+      .run();
+
+    expect(effects.call[0].payload.args[0]).toMatchObject({
+      jsonrpc: "2.0",
+      id: 1,
+      result: {
+        funding: [{token: "0x0", amount: "0x5"}],
+        turnNum: 1,
+        status: "running",
+        channelId
+      }
+    });
+  });
+
+  it("creates a correct response message for WALLET.GET_STATE_RESPONSE", async () => {
+    const {state, signature} = stateHelpers.appState({turnNum: 1});
+    const channelId = stateHelpers.channelId;
+    const testSharedData: SharedData = {
+      ...EMPTY_SHARED_DATA,
+      assetHoldersState: {[ETH_ASSET_HOLDER_ADDRESS]: {[channelId]: {holdings: "0x5", channelId}}}
+    };
+    const initialState = setChannel(
+      testSharedData,
+      channelFromStates([{state, signature}], stateHelpers.asAddress, stateHelpers.asPrivateKey)
+    );
+
+    const message = getStateResponse({
       id: 1,
       channelId
     });

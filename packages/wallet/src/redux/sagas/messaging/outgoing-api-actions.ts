@@ -20,6 +20,15 @@ export const createChannelResponse: ActionConstructor<CreateChannelResponse> = p
   type: "WALLET.CREATE_CHANNEL_RESPONSE"
 });
 
+export interface GetStateResponse extends ApiResponseAction {
+  type: "WALLET.GET_STATE_RESPONSE";
+  channelId: string;
+}
+export const getStateResponse: ActionConstructor<GetStateResponse> = p => ({
+  ...p,
+  type: "WALLET.GET_STATE_RESPONSE"
+});
+
 export interface UpdateChannelResponse extends ApiResponseAction {
   type: "WALLET.UPDATE_CHANNEL_RESPONSE";
   channelId: string;
@@ -198,6 +207,7 @@ export type OutgoingApiAction =
   | EthereumAddressResponse
   | CreateChannelResponse
   | UpdateChannelResponse
+  | GetStateResponse
   | ChallengeChannelResponse
   | UnknownSigningAddress
   | NoContractError

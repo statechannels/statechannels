@@ -36,6 +36,8 @@ function* createResponseMessage(action: OutgoingApiAction) {
       return jrs.success(action.id, yield getChannelInfo(action.channelId));
     case "WALLET.UPDATE_CHANNEL_RESPONSE":
       return jrs.success(action.id, yield getChannelInfo(action.channelId));
+    case "WALLET.GET_STATE_RESPONSE":
+      return jrs.success(action.id, yield getChannelInfo(action.channelId));
     case "WALLET.CHALLENGE_CHANNEL_RESPONSE":
       return jrs.success(action.id, yield getChannelInfo(action.channelId));
     case "WALLET.ADDRESS_RESPONSE":

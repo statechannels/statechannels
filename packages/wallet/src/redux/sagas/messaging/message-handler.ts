@@ -4,6 +4,7 @@ import {
   JoinChannelParams,
   PushMessageParams,
   UpdateChannelParams,
+  GetStateParams,
   CreateChannelParams,
   CloseChannelParams,
   ChallengeChannelParams
@@ -111,6 +112,9 @@ function* handleMessage(payload: RequestObject) {
       break;
     case "UpdateChannel":
       yield handleUpdateChannelMessage(payload);
+      break;
+    case "GetState":
+      yield handleGetStateMessage(payload);
       break;
     case "JoinChannel":
       yield handleJoinChannelMessage(payload);
@@ -292,6 +296,19 @@ function* handlePushMessage(payload: RequestObject) {
       default:
         console.error(`Could not handle message data with type ${message.data.type}`);
     }
+  }
+}
+
+function* handleGetStateMessage(payload: RequestObject) {
+  const {id, params} = payload;
+  const {channelId} = params as GetStateParams;
+
+  const channelExists = yield select(doesAStateExistForChannel, channelId);
+
+  if (!channelExists) {
+    yield fork(messageSender, outgoingMessageActions.unknownChannelId({id, channelId}));
+  } else {
+    yield fork(messageSender, outgoingMessageActions.getStateResponse({id, channelId}));
   }
 }
 
