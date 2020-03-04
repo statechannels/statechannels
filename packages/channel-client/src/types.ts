@@ -48,6 +48,13 @@ export interface ChannelClientInterface<Payload = object> {
   closeChannel: (channelId: string) => Promise<ChannelResult>;
   getAddress: () => Promise<string>;
   getEthereumSelectedAddress: () => Promise<string>;
+  approveBudgetAndFund(
+    playerAmount: string,
+    hubAmount: string,
+    playerDestinationAddress: string,
+    hubAddress: string,
+    hubDestinationAddress: string
+  ): Promise<SiteBudget>;
 }
 export interface EventsWithArgs {
   MessageQueued: [Message<ChannelResult>];

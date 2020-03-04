@@ -26,7 +26,8 @@ storiesOf('Web3Torrent', module)
               uploaded: number('Uploaded bytes for Peer 9720534187', 3533366, {step: 1000}, 'Peers')
             },
             funds: '50',
-            allowed: true
+            allowed: true,
+            seederBalance: '50'
           },
           '9202959009': {
             id: '9202959009',
@@ -34,7 +35,8 @@ storiesOf('Web3Torrent', module)
               uploaded: number('Uploaded bytes for Peer 9202959009', 5611625, {step: 1000}, 'Peers')
             },
             funds: '50',
-            allowed: true
+            allowed: true,
+            seederBalance: '50'
           },
           '2190352424': {
             id: '2190352424',
@@ -42,7 +44,8 @@ storiesOf('Web3Torrent', module)
               uploaded: number('Uploaded bytes for Peer 2190352424', 5051532, {step: 1000}, 'Peers')
             },
             funds: '50',
-            allowed: true
+            allowed: true,
+            seederBalance: '50'
           }
         } as TorrentPeers
       }

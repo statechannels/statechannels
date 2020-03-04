@@ -7,10 +7,9 @@ import {MemoryRouter as Router, RouteComponentProps} from 'react-router-dom';
 import {EmptyTorrent} from '../../constants';
 import {WebTorrentSeedInput} from '../../library/types';
 import {Status, Torrent} from '../../types';
-import {testSelector} from '../../utils/test-utils';
-import * as TorrentStatus from '../../utils/torrent-status-checker';
 import * as Web3TorrentClient from './../../clients/web3torrent-client';
 import Upload from './Upload';
+import {mockMetamask} from '../../library/testing/test-utils';
 
 Enzyme.configure({adapter: new Adapter()});
 
@@ -43,6 +42,10 @@ function setup() {
 describe('<Upload />', () => {
   let component: Enzyme.ReactWrapper;
   let torrentUpload: jest.SpyInstance<Promise<Torrent>, [WebTorrentSeedInput]>;
+
+  beforeAll(() => {
+    mockMetamask();
+  });
 
   beforeEach(() => {
     const mock = setup();

@@ -84,8 +84,10 @@ export abstract class PaidStreamingExtension implements Extension {
     this.executeExtensionCommand(PaidStreamingExtensionNotices.ACK);
   }
 
-  payment(hash: string) {
-    this.executeExtensionCommand(PaidStreamingExtensionNotices.PAYMENT, {hash});
+  sendMessage(message: string) {
+    this.executeExtensionCommand(PaidStreamingExtensionNotices.MESSAGE, {
+      message
+    });
   }
 
   onMessage(buffer: Buffer) {

@@ -14,6 +14,7 @@ import {
 } from '@statechannels/client-api-schema';
 import {Message} from '../../src/types';
 import {calculateChannelId} from '../../src/utils';
+import {Wallet} from 'ethers';
 
 /*
  This fake provider becomes the stateful object which handles the calls
@@ -25,7 +26,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
 
   playerIndex?: number;
   opponentIndex?: number;
-  address?: string;
+  address?: string = Wallet.createRandom().address;
   opponentAddress?: string;
   latestState?: ChannelResult;
 
@@ -40,6 +41,9 @@ export class FakeChannelProvider implements ChannelProviderInterface {
 
       case 'PushMessage':
         return this.pushMessage(params) as Promise<MethodType[K]>;
+
+      case 'GetEthereumSelectedAddress':
+        return new Promise(() => '0xEthereumSelectedAddress') as Promise<MethodType[K]>;
 
       case 'GetAddress':
         return this.getAddress() as Promise<MethodType[K]>;
