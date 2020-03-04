@@ -144,7 +144,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         this.peersList[torrent.infoHash][peerAccount] = {
           id: peerAccount,
           wire,
-          funds: '0',
+          buffer: '0',
           seederBalance: '0',
           allowed: false
         };
@@ -156,14 +156,14 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         });
       } else if (
         !knownPeerAccount.allowed ||
-        bigNumberify(knownPeerAccount.funds).lt(REQUEST_RATE)
+        bigNumberify(knownPeerAccount.buffer).lt(REQUEST_RATE)
       ) {
         this.blockPeer(torrent.infoHash, wire, peerAccount);
       } else {
         this.peersList[torrent.infoHash][peerAccount] = {
           id: peerAccount,
           wire,
-          funds: bigNumberify(knownPeerAccount.funds)
+          buffer: bigNumberify(knownPeerAccount.buffer)
             .sub(10)
             .toString(),
           seederBalance: knownPeerAccount.seederBalance,
@@ -206,19 +206,19 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   protected async loadFunds(infoHash: string, peerId: string, channelId: string) {
     // [ George ] If web3torrent is to run the Single Asset Payments ForceMoveApp, and the payments are going to be unidirectional we could wrap the paymentChannelClient in a web3tChannelClient which offers a countersign() convenience method. This allows the seeder to immediately accept the payment and for the leecher to be ready to send another one as quickly as possible.
 
-    log(`querying channel client for updated funds`);
+    log(`querying channel client for updated buffer`);
     const newSeederBalance = bigNumberify(
       this.paymentChannelClient.channelCache[channelId].proposerBalance
     );
     const payment = newSeederBalance.sub(
       bigNumberify(this.peersList[infoHash][peerId].seederBalance)
     );
-    this.peersList[infoHash][peerId].funds = bigNumberify(this.peersList[infoHash][peerId].funds)
+    this.peersList[infoHash][peerId].buffer = bigNumberify(this.peersList[infoHash][peerId].buffer)
       .add(payment)
       .toString();
     this.peersList[infoHash][peerId].seederBalance = newSeederBalance.toString();
     log(
-      `newSeederBalance: ${newSeederBalance} payment: ${payment}, funds for peer: ${this.peersList[infoHash][peerId].funds}`
+      `newSeederBalance: ${newSeederBalance} payment: ${payment}, buffer for peer: ${this.peersList[infoHash][peerId].buffer}`
     );
   }
 
