@@ -28,7 +28,7 @@ storiesOf('Web3Torrent', module)
             funds: '50',
             allowed: true,
             seederBalance: '50',
-            channelId: '0x00012319283712'
+            channelId: '0x0000000000000000000000000000001231927371'
           },
           '9202959009': {
             id: '9202959009',
@@ -38,7 +38,7 @@ storiesOf('Web3Torrent', module)
             funds: '50',
             allowed: true,
             seederBalance: '50',
-            channelId: '0x00012319283712'
+            channelId: '0x0000000000000000000000000000001231927371'
           },
           '2190352424': {
             id: '2190352424',
@@ -48,7 +48,7 @@ storiesOf('Web3Torrent', module)
             funds: '50',
             allowed: true,
             seederBalance: '50',
-            channelId: '0x00012319283712'
+            channelId: '0x0000000000000000000000000000001231927371'
           }
         } as TorrentPeers
       }
