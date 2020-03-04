@@ -1,5 +1,3 @@
-const baseConfig = require('../../.eslintrc.js');
-
 // From the tslint.json we used previously
 const leftoverTsLintRules = {
   '@typescript-eslint/no-explicit-any': 'off',
@@ -17,13 +15,13 @@ const otherViolations = {
 };
 
 module.exports = {
-  ...baseConfig,
   env: {
     node: true,
     es6: true
   },
-  plugins: [...baseConfig.plugins, 'jest'],
+  plugins: ['jest'],
   extends: [
+    '../../.eslintrc.js',
     'plugin:jest/recommended',
     'plugin:jest/style',
     'plugin:import/errors',
