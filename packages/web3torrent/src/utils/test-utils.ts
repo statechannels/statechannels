@@ -28,7 +28,7 @@ export function createMockTorrentPeers(): TorrentPeers {
         uploaded: 4225
       },
       seederBalance: '50',
-      channelId: '0x0000000000000000000000000000001231927371'
+      channelId: '0x0000000000000000000000000000001231927371',
       buffer: '50'
     },
     '5589113806923374': {
