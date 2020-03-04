@@ -144,6 +144,9 @@ export class MessagingService implements MessagingServiceInterface {
       case 'ChallengeChannel':
         // TODO: handle these requests
         break;
+      case 'GetState':
+        // TODO: handle these requests
+        break;
       default:
         unreachable(request);
     }
