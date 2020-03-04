@@ -177,12 +177,12 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       log(`SEEDER > wire first_request of ${peerAccount}`);
       // SEEDER is participants[0], LEECHER is participants[1]
       const channel = await this.paymentChannelClient.createChannel(
-        this.pseAccount, // proposer = seeder
-        peerAccount, // acceptor = leecher
-        bigNumberify(0).toString(), // proposerBalance: should begin at zero
-        bigNumberify(4000).toString(), // acceptorBalance,
-        this.paymentChannelClient.myEthereumSelectedAddress, // proposerOutcomeAddress,
-        '0x0' // acceptorOutcomeAddress TODO get this somehow
+        this.pseAccount, // beneficiary = seeder
+        peerAccount, // payer = leecher
+        bigNumberify(0).toString(), // beneficiaryBalance: should begin at zero
+        bigNumberify(4000).toString(), // payerBalance,
+        this.paymentChannelClient.myEthereumSelectedAddress, // beneficiaryOutcomeAddress,
+        '0x0' // payerOutcomeAddress TODO get this somehow
       );
       log(`SEEDER > created channel with id ${channel.channelId}`);
       wire.emit(PaidStreamingExtensionEvents.REQUEST, peerAccount);
@@ -208,7 +208,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
     log(`querying channel client for updated buffer`);
     const newSeederBalance = bigNumberify(
-      this.paymentChannelClient.channelCache[channelId].proposerBalance
+      this.paymentChannelClient.channelCache[channelId].beneficiaryBalance
     );
     const payment = newSeederBalance.sub(
       bigNumberify(this.peersList[infoHash][peerId].seederBalance)
@@ -230,7 +230,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       bigNumberify(REQUEST_RATE.mul(10)).toString()
     );
     const newSeederBalance = bigNumberify(
-      this.paymentChannelClient.channelCache[channelId].proposerBalance
+      this.paymentChannelClient.channelCache[channelId].beneficiaryBalance
     );
     log(`payment made for channel ${channelId}, newSeederBalance: ${newSeederBalance}`);
   }

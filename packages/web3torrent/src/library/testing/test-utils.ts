@@ -37,10 +37,10 @@ export const mockChannelState: ChannelState = {
   turnNum: '0x0',
   status: 'running',
   challengeExpirationTime: '0x0',
-  proposer: '0x0',
-  acceptor: '0x0',
-  proposerOutcomeAddress: '0x0',
-  acceptorOutcomeAddress: '0x0',
-  proposerBalance: '0x0',
-  acceptorBalance: '0x0'
+  beneficiary: '0x0',
+  payer: '0x0',
+  beneficiaryOutcomeAddress: '0x0',
+  payerOutcomeAddress: '0x0',
+  beneficiaryBalance: '0x0',
+  payerBalance: '0x0'
 };

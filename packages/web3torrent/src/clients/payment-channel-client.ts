@@ -10,12 +10,12 @@ export interface ChannelState {
   turnNum: string;
   status: ChannelStatus;
   challengeExpirationTime;
-  proposer: string;
-  acceptor: string;
-  proposerOutcomeAddress: string;
-  acceptorOutcomeAddress: string;
-  proposerBalance: string;
-  acceptorBalance: string;
+  beneficiary: string;
+  payer: string;
+  beneficiaryOutcomeAddress: string;
+  payerOutcomeAddress: string;
+  beneficiaryBalance: string;
+  payerBalance: string;
 }
 
 // This class wraps the channel client converting the
@@ -37,12 +37,12 @@ export interface PaymentChannelClientInterface {
   channelCache: Record<string, ChannelState>;
   myAddress: string;
   createChannel(
-    proposer: string,
-    acceptor: string,
-    proposerBalance: string,
-    acceptorBalance: string,
-    proposerOutcomeAddress: string,
-    acceptorOutcomeAddress: string
+    beneficiary: string,
+    payer: string,
+    beneficiaryBalance: string,
+    payerBalance: string,
+    beneficiaryOutcomeAddress: string,
+    payerOutcomeAddress: string
   ): Promise<ChannelState>;
   getAddress(): Promise<string>;
   getEthereumSelectedAddress(): Promise<string>;
@@ -54,12 +54,12 @@ export interface PaymentChannelClientInterface {
   challengeChannel(channelId: string): Promise<ChannelState>;
   updateChannel(
     channelId: string,
-    proposer: string,
-    acceptor: string,
-    proposerBalance: string,
-    acceptorBalance: string,
-    proposerOutcomeAddress: string,
-    acceptorOutcomeAddress: string
+    beneficiary: string,
+    payer: string,
+    beneficiaryBalance: string,
+    payerBalance: string,
+    beneficiaryOutcomeAddress: string,
+    payerOutcomeAddress: string
   );
   makePayment(channelId: string, amount: string);
   acceptPayment(channelState: ChannelState);
@@ -76,8 +76,8 @@ export interface PaymentChannelClientInterface {
 }
 
 // This Client targets at _unidirectional_, single asset (ETH) payment channel with 2 participants running on Nitro protocol
-// The proposer proposes the channel, but accepts payments
-// The acceptor joins the channel, and makes payments
+// The beneficiary proposes the channel, but accepts payments
+// The payer joins the channel, and makes payments
 export class PaymentChannelClient implements PaymentChannelClientInterface {
   mySigningAddress?: string;
   myEthereumSelectedAddress?: string; // this state can be inspected to infer whether we need to get the user to "Connect With MetaMask" or not.
@@ -85,24 +85,24 @@ export class PaymentChannelClient implements PaymentChannelClientInterface {
   myAddress: string;
   constructor(private readonly channelClient: ChannelClientInterface) {}
   async createChannel(
-    proposer: string,
-    acceptor: string,
-    proposerBalance: string,
-    acceptorBalance: string,
-    proposerOutcomeAddress: string,
-    acceptorOutcomeAddress: string
+    beneficiary: string,
+    payer: string,
+    beneficiaryBalance: string,
+    payerBalance: string,
+    beneficiaryOutcomeAddress: string,
+    payerOutcomeAddress: string
   ): Promise<ChannelState> {
     const participants = formatParticipants(
-      proposer,
-      acceptor,
-      proposerOutcomeAddress,
-      acceptorOutcomeAddress
+      beneficiary,
+      payer,
+      beneficiaryOutcomeAddress,
+      payerOutcomeAddress
     );
     const allocations = formatAllocations(
-      proposerOutcomeAddress,
-      acceptorOutcomeAddress,
-      proposerBalance,
-      acceptorBalance
+      beneficiaryOutcomeAddress,
+      payerOutcomeAddress,
+      beneficiaryBalance,
+      payerBalance
     );
     const appDefinition = '0x0'; // TODO SingleAssetPayments address
 
@@ -176,24 +176,24 @@ export class PaymentChannelClient implements PaymentChannelClientInterface {
 
   async updateChannel(
     channelId: string,
-    proposer: string,
-    acceptor: string,
-    proposerBalance: string,
-    acceptorBalance: string,
-    proposerOutcomeAddress: string,
-    acceptorOutcomeAddress: string
+    beneficiary: string,
+    payer: string,
+    beneficiaryBalance: string,
+    payerBalance: string,
+    beneficiaryOutcomeAddress: string,
+    payerOutcomeAddress: string
   ) {
     const allocations = formatAllocations(
-      proposerOutcomeAddress,
-      acceptorOutcomeAddress,
-      proposerBalance,
-      acceptorBalance
+      beneficiaryOutcomeAddress,
+      payerOutcomeAddress,
+      beneficiaryBalance,
+      payerBalance
     );
     const participants = formatParticipants(
-      proposer,
-      acceptor,
-      proposerOutcomeAddress,
-      acceptorOutcomeAddress
+      beneficiary,
+      payer,
+      beneficiaryOutcomeAddress,
+      payerOutcomeAddress
     );
 
     // ignore return val for now and stub out response
@@ -207,71 +207,66 @@ export class PaymentChannelClient implements PaymentChannelClientInterface {
     return convertToChannelState(channelResult);
   }
 
-  // acceptor may use this method to make payments (if they have sufficient funds)
+  // payer may use this method to make payments (if they have sufficient funds)
   async makePayment(channelId: string, amount: string) {
     const {
-      proposer,
-      acceptor,
-      proposerBalance,
-      acceptorBalance,
-      proposerOutcomeAddress,
-      acceptorOutcomeAddress
+      beneficiary,
+      payer,
+      beneficiaryBalance,
+      payerBalance,
+      beneficiaryOutcomeAddress,
+      payerOutcomeAddress
     } = this.channelCache[channelId];
-    if (bigNumberify(acceptorBalance).gte(amount)) {
+    if (bigNumberify(payerBalance).gte(amount)) {
       await this.updateChannel(
         channelId,
-        proposer,
-        acceptor,
-        bigNumberify(proposerBalance)
+        beneficiary,
+        payer,
+        bigNumberify(beneficiaryBalance)
           .add(amount)
           .toString(),
-        bigNumberify(acceptorBalance)
+        bigNumberify(payerBalance)
           .sub(amount)
           .toString(),
-        proposerOutcomeAddress,
-        acceptorOutcomeAddress
+        beneficiaryOutcomeAddress,
+        payerOutcomeAddress
       );
     }
   }
-  // proposer may use this method to accept payments
+  // beneficiary may use this method to accept payments
   async acceptPayment(channelState: ChannelState) {
     const {
       channelId,
-      proposer,
-      acceptor,
-      proposerBalance,
-      acceptorBalance,
-      proposerOutcomeAddress,
-      acceptorOutcomeAddress
+      beneficiary,
+      payer,
+      beneficiaryBalance,
+      payerBalance,
+      beneficiaryOutcomeAddress,
+      payerOutcomeAddress
     } = channelState;
     await this.updateChannel(
       channelId,
-      proposer,
-      acceptor,
-      proposerBalance,
-      acceptorBalance,
-      proposerOutcomeAddress,
-      acceptorOutcomeAddress
+      beneficiary,
+      payer,
+      beneficiaryBalance,
+      payerBalance,
+      beneficiaryOutcomeAddress,
+      payerOutcomeAddress
     );
   }
 
   amProposer(channelId: string): boolean {
-    return this.channelCache[channelId].proposer === this.mySigningAddress;
+    return this.channelCache[channelId].beneficiary === this.mySigningAddress;
   }
   isPaymentToMe(channelState: ChannelState): boolean {
     const turnNum = Number(channelState.turnNum);
     // doesn't guarantee that my balance increased
-    if (channelState.proposer === this.mySigningAddress) {
-      // returns true for the second postFS if I am the proposer
+    if (channelState.beneficiary === this.mySigningAddress) {
+      // returns true for the second postFS if I am the beneficiary
       // (I need to accept this 'payment' in order for another one to be sent)
       return (channelState.status === 'running' && turnNum % 2 === 1) || turnNum === 3;
     }
-    if (channelState.acceptor === this.mySigningAddress) {
-      return channelState.status === 'running' && turnNum % 2 === 0;
-    }
-    throw new Error(
-      `${this.mySigningAddress} is neither proposer ${channelState.proposer} nor acceptor ${channelState.acceptor}`
-    );
+    throw new Error(`${this.mySigningAddress} is not the beneficiary ${channelState.beneficiary}`);
   }
 
   async pushMessage(message: Message<ChannelResult>) {
@@ -317,12 +312,12 @@ const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
     turnNum: turnNum.toString(), // TODO: turnNum should be switched to a number (or be a string everywhere),
     status,
     challengeExpirationTime,
-    proposer: participants[0].participantId,
-    acceptor: participants[1].participantId,
-    proposerOutcomeAddress: participants[0].destination,
-    acceptorOutcomeAddress: participants[1].destination,
-    proposerBalance: bigNumberify(allocations[0].allocationItems[0].amount).toString(),
-    acceptorBalance: bigNumberify(allocations[0].allocationItems[1].amount).toString()
+    beneficiary: participants[0].participantId,
+    payer: participants[1].participantId,
+    beneficiaryOutcomeAddress: participants[0].destination,
+    payerOutcomeAddress: participants[1].destination,
+    beneficiaryBalance: bigNumberify(allocations[0].allocationItems[0].amount).toString(),
+    payerBalance: bigNumberify(allocations[0].allocationItems[1].amount).toString()
   };
 };
 
