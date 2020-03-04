@@ -5,7 +5,6 @@ import {
   DoneInvokeEvent,
   ServiceConfig,
   assign,
-  spawn,
   StateNodeConfig
 } from 'xstate';
 import {filter, map, take, flatMap, tap} from 'rxjs/operators';
@@ -15,7 +14,7 @@ import {SupportState, LedgerFunding} from '.';
 import {checkThat, getDataAndInvoke} from '../utils';
 import {simpleEthGuarantee, isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
 
-import {FundGuarantor, AllocationItem, isFundGuarantor, Participant} from '../store/types';
+import {FundGuarantor, AllocationItem} from '../store/types';
 
 import {bigNumberify} from 'ethers/utils';
 import {CHALLENGE_DURATION} from '../constants';
@@ -32,18 +31,7 @@ export type Init = {
   jointChannelId: string;
 };
 
-type Deductions =
-  | {
-      role: Role.A | Role.B;
-      deductions: AllocationItem[];
-    }
-  | {
-      role: Role.Hub;
-      deductions: {
-        [Role.A]: AllocationItem[];
-        [Role.B]: AllocationItem[];
-      };
-    };
+type Deductions = {deductions: AllocationItem[]};
 type WithDeductions = Init & Deductions;
 
 const getObjective = (store: Store) => async ({jointChannelId}: Init): Promise<FundGuarantor> => {
@@ -70,8 +58,7 @@ type TEvent = AnyEventObject;
 
 const enum Actions {
   triggerGuarantorObjective = 'triggerGuarantorObjective',
-  assignDeductions = 'assignDeductions',
-  watchObjectives = 'watchObjectives'
+  assignDeductions = 'assignDeductions'
 }
 
 export const enum States {
@@ -90,10 +77,6 @@ const enum Services {
   supportState = 'supportState',
   ledgerFunding = 'ledgerFunding',
   fundGuarantor = 'fundGuarantor'
-}
-const enum Events {
-  FundGuarantorWithA = 'FundGuarantorWithA',
-  FundGuarantorWithB = 'FundGuarantorWithB'
 }
 
 export const config: StateNodeConfig<Init, any, any> = {
@@ -121,14 +104,11 @@ export const config: StateNodeConfig<Init, any, any> = {
             data: (
               ctx: WithDeductions,
               {data}: DoneInvokeEvent<FundGuarantor>
-            ): LedgerFunding.Init => {
-              if (ctx.role === Role.Hub) throw 'Incorrect role';
-              return {
-                targetChannelId: data.data.guarantorId,
-                ledgerChannelId: data.data.ledgerId,
-                deductions: ctx.deductions
-              };
-            },
+            ): LedgerFunding.Init => ({
+              targetChannelId: data.data.guarantorId,
+              ledgerChannelId: data.data.ledgerId,
+              deductions: ctx.deductions
+            }),
             onDone: 'done'
           }
         },
@@ -197,71 +177,21 @@ const getDeductions = (store: Store) => async (ctx: Init): Promise<Deductions> =
   const {latest, myIndex} = await store.getEntry(ctx.jointChannelId);
   const {allocationItems} = checkThat(latest.outcome, isSimpleEthAllocation);
 
-  switch (myIndex) {
-    case Role.A:
-    case Role.B:
-      return {
-        role: myIndex,
-        deductions: [
-          {
-            destination: allocationItems[1].destination,
-            amount: allocationItems[2 - myIndex].amount
-          },
-          allocationItems[myIndex]
-        ]
-      };
-    case Role.Hub:
-      return {
-        role: myIndex,
-        deductions: {
-          [Role.A]: [
-            {
-              destination: allocationItems[Role.Hub].destination,
-              amount: allocationItems[Role.B].amount
-            },
-            allocationItems[Role.A]
-          ],
-          [Role.B]: [
-            {
-              destination: allocationItems[Role.Hub].destination,
-              amount: allocationItems[Role.A].amount
-            },
-            allocationItems[Role.B]
-          ]
-        }
-      };
-
-    default:
-      throw 'Incorrect index';
-  }
-};
-
-const watchObjectives = (store: Store) => (ctx: Init) => {
-  return store.newObjectiveFeed.pipe(
-    filter(isFundGuarantor),
-    filter(o => o.data.jointChannelId === ctx.jointChannelId),
-    flatMap(async o => {
-      const participant = o.participants[0].participantId;
-      const jointParticipants: Participant[] = await (await store.getEntry(ctx.jointChannelId))
-        .channelConstants.participants;
-
-      switch (participant) {
-        case jointParticipants[Role.A].participantId:
-          return {...o, type: Events.FundGuarantorWithA};
-        case jointParticipants[Role.B].participantId:
-          return {...o, type: Events.FundGuarantorWithB};
-        default:
-          throw 'Participant not found';
-      }
-    })
-  );
+  return {
+    deductions: [
+      {
+        destination: allocationItems[1].destination,
+        amount: allocationItems[2 - myIndex].amount
+      },
+      allocationItems[myIndex]
+    ]
+  };
 };
 
 export const options = (
   store: Store
 ): Pick<MachineOptions<Init, TEvent>, 'actions' | 'services'> => {
   const actions: Record<Actions, any> = {
-    watchObjectives: assign<any>({watcher: (ctx: Init) => spawn(watchObjectives(store)(ctx))}),
     [Actions.triggerGuarantorObjective]: (_, {data}: DoneInvokeEvent<FundGuarantor>) =>
       store.addObjective(data),
     [Actions.assignDeductions]: assign(
