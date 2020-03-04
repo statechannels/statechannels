@@ -109,7 +109,7 @@ export class ChannelClient implements ChannelClientInterface<ChannelResult> {
     return this.provider.send('GetBudget', {hubAddress});
   }
 
-  async CloseAndWithdraw(hubAddress: string): Promise<SiteBudget> {
+  async closeAndWithdraw(hubAddress: string): Promise<SiteBudget> {
     return this.provider.send('CloseAndWithdraw', {hubAddress});
   }
 }

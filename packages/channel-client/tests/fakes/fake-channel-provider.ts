@@ -59,7 +59,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
       case 'ApproveBudgetAndFund':
         return this.approveBudgetAndFund(params) as Promise<MethodType[K]>;
       case 'CloseAndWithdraw':
-        return this.CloseAndWithdraw(params) as Promise<MethodType[K]>;
+        return this.closeAndWithdraw(params) as Promise<MethodType[K]>;
       default:
         return Promise.reject(`No callback available for ${method}`);
     }
@@ -300,7 +300,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
       direct: {playerAmount: '0x0', hubAmount: '0x0'}
     };
   }
-  private async CloseAndWithdraw(params: {
+  private async closeAndWithdraw(params: {
     playerAmount: string;
     hubAmount: string;
     hubAddress: string;

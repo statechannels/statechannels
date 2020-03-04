@@ -4,6 +4,7 @@ import {FakeChannelProvider} from '@statechannels/channel-client';
 import {ChannelClient} from '@statechannels/channel-client';
 import React from 'react';
 import {ChannelStatus} from '@statechannels/client-api-schema';
+import {SiteBudget} from '@statechannels/client-api-schema';
 
 export interface ChannelState {
   channelId: string;
@@ -139,7 +140,7 @@ export class PaymentChannelClient {
     payerBalance: string,
     beneficiaryOutcomeAddress: string,
     payerOutcomeAddress: string
-  ) {
+  ): Promise<ChannelState> {
     const allocations = formatAllocations(
       beneficiaryOutcomeAddress,
       payerOutcomeAddress,
@@ -153,7 +154,6 @@ export class PaymentChannelClient {
       payerOutcomeAddress
     );
 
-    // ignore return val for now and stub out response
     const channelResult = await this.channelClient.updateChannel(
       channelId,
       participants,
@@ -246,6 +246,14 @@ export class PaymentChannelClient {
       hubAddress,
       hubDestinationAddress
     );
+  }
+
+  async getBudget(hubAddress: string): Promise<SiteBudget> {
+    return await this.channelClient.getBudget(hubAddress);
+  }
+
+  async closeAndWithdraw(hubAddress: string): Promise<SiteBudget> {
+    return await this.channelClient.closeAndWithdraw(hubAddress);
   }
 }
 
