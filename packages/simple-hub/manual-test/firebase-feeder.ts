@@ -38,7 +38,6 @@ async function sendMessage(message: Message) {
 }
 
 async function readAndFeedMessages() {
-  console.log(messages.length);
   await Promise.all(messages.map(sendMessage));
   getFirebaseApp().delete();
 }

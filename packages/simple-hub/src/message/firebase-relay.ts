@@ -35,8 +35,7 @@ export async function fbListen(callback) {
 
   hubRef.on('child_added', async snapshot => {
     const key = snapshot.key;
-    const value = snapshot.val();
-    await callback(value.data);
+    await callback(snapshot.val());
     hubRef.child(key).remove();
   });
 }
