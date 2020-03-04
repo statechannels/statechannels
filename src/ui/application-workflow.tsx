@@ -8,7 +8,8 @@ import {
   isConfirmCreateChannel,
   getConfirmCreateChannelState,
   getApplicationOpenProgress,
-  isApplicationOpening
+  isApplicationOpening,
+  getApplicationStateValue
 } from './selectors';
 import {ConfirmCreateChannel} from './confirm-create-channel-workflow';
 
@@ -36,10 +37,12 @@ export const ApplicationWorkflow = (props: Props) => {
         textAlign: 'center'
       }}
     >
-      <h1>{messages[current.value.toString()]}</h1>
-      <Flex px={3} height={3} mt={'0.8'} mx={'0.4'}>
-        <ChannelId channelId={current.context.channelId} />
-      </Flex>
+      <h1>{messages[getApplicationStateValue(current)]}</h1>
+      {!isConfirmCreateChannel(current) && (
+        <Flex px={3} height={3} mt={'0.8'} mx={'0.4'}>
+          <ChannelId channelId={current.context.channelId} />
+        </Flex>
+      )}
       {isConfirmCreateChannel(current) && (
         <ConfirmCreateChannel current={getConfirmCreateChannelState(current)} send={props.send} />
       )}

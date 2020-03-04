@@ -4,7 +4,9 @@ import {
 } from '../workflows/application';
 import {WorkflowState as CCCWorkflowState} from '../workflows/confirm-create-channel';
 
-function getApplicationStateValue(applicationWorkflowState: AppWorkflowState): AppStateValue {
+export function getApplicationStateValue(
+  applicationWorkflowState: AppWorkflowState
+): AppStateValue {
   if (typeof applicationWorkflowState.value === 'string') {
     return applicationWorkflowState.value as AppStateValue;
   } else {
