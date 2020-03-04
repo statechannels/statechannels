@@ -17,7 +17,10 @@ import {
 } from './types';
 import {bigNumberify} from 'ethers/utils';
 
-import {Web3TorrentChannelClientInterface, ChannelState} from '../clients/web3t-channel-client';
+import {
+  Web3TorrentChannelClientInterface as PaymentChannelClientInterface,
+  ChannelState
+} from '../clients/web3t-channel-client';
 import {Message} from '@statechannels/channel-client';
 
 const log = debug('web3torrent:library');
@@ -32,7 +35,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   peersList: PeersByTorrent;
   pseAccount: string;
   torrents: PaidStreamingTorrent[] = [];
-  paymentChannelClient: Web3TorrentChannelClientInterface;
+  paymentChannelClient: PaymentChannelClientInterface;
   outcomeAddress: string;
 
   constructor(opts: WebTorrent.Options & Partial<PaidStreamingExtensionOptions> = {}) {

@@ -12,7 +12,10 @@ import WebTorrentPaidStreamingClient, {
   PaidStreamingExtensionNotices,
   PaidStreamingTorrent
 } from './web3torrent-lib';
-import {Web3TorrentChannelClient, ChannelState} from '../clients/web3t-channel-client';
+import {
+  Web3TorrentChannelClient as PaymentChannelClient,
+  ChannelState
+} from '../clients/web3t-channel-client';
 import {ChannelClient, FakeChannelProvider} from '@statechannels/channel-client';
 
 describe('Seeding and Leeching', () => {
@@ -27,9 +30,7 @@ describe('Seeding and Leeching', () => {
     seeder = new WebTorrentPaidStreamingClient({
       pseAccount: '1',
       dht: false,
-      paymentChannelClient: new Web3TorrentChannelClient(
-        new ChannelClient(new FakeChannelProvider())
-      ) // use distinct provider & client
+      paymentChannelClient: new PaymentChannelClient(new ChannelClient(new FakeChannelProvider())) // use distinct provider & client
     });
     seeder.on('error', err => fail(err));
     seeder.on('warning', err => fail(err));
@@ -38,9 +39,7 @@ describe('Seeding and Leeching', () => {
     leecher = new WebTorrentPaidStreamingClient({
       pseAccount: '2',
       dht: false,
-      paymentChannelClient: new Web3TorrentChannelClient(
-        new ChannelClient(new FakeChannelProvider())
-      ) // use distinct provider & client
+      paymentChannelClient: new PaymentChannelClient(new ChannelClient(new FakeChannelProvider())) // use distinct provider & client
     });
     leecher.on('error', err => fail(err));
     leecher.on('warning', err => fail(err));

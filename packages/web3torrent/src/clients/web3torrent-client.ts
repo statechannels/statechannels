@@ -2,10 +2,10 @@ import React from 'react';
 import {WebTorrentAddInput, WebTorrentSeedInput} from '../library/types';
 import WebTorrentPaidStreamingClient from '../library/web3torrent-lib';
 import {Status, Torrent} from '../types';
-import {web3TorrentChannelClient} from './web3t-channel-client';
+import {web3TorrentChannelClient as paymentChannelClient} from './web3t-channel-client';
 
 export const web3torrent = new WebTorrentPaidStreamingClient({
-  paymentChannelClient: web3TorrentChannelClient
+  paymentChannelClient: paymentChannelClient
 });
 
 export const WebTorrentContext = React.createContext(web3torrent);
