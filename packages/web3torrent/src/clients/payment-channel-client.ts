@@ -183,7 +183,7 @@ export class PaymentChannelClient implements PaymentChannelClientInterface {
     payerBalance: string,
     beneficiaryOutcomeAddress: string,
     payerOutcomeAddress: string
-  ) {
+  ): Promise<ChannelState> {
     const allocations = formatAllocations(
       beneficiaryOutcomeAddress,
       payerOutcomeAddress,
