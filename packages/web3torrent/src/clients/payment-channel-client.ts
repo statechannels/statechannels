@@ -197,7 +197,6 @@ export class PaymentChannelClient implements PaymentChannelClientInterface {
       payerOutcomeAddress
     );
 
-    // ignore return val for now and stub out response
     const channelResult = await this.channelClient.updateChannel(
       channelId,
       participants,
