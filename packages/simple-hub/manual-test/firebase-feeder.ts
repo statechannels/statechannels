@@ -1,9 +1,10 @@
 import * as firebase from 'firebase';
 import {configureEnvVariables} from '@statechannels/devtools';
 import {cFirebasePrefix} from '../src/constants';
+import {Message} from '@statechannels/wire-format';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const messages: Array<string> = require('./message-sequence.json');
+const messages: Array<Message> = require('./message-sequence.json');
 
 configureEnvVariables(true);
 
@@ -30,15 +31,15 @@ function getMessagesRef() {
   return firebaseAppInsance.database().ref(`${cFirebasePrefix}/messages`);
 }
 
-async function sendMessage(message: string) {
-  const sanitizedPayload = JSON.parse(JSON.stringify(message));
-  await getMessagesRef()
-    .child('message.recipient')
-    .push(sanitizedPayload);
+async function sendMessage(message: Message) {
+  return getMessagesRef()
+    .child(message.recipient)
+    .push(message);
 }
 
 async function readAndFeedMessages() {
-  await Promise.all(messages.map(message => sendMessage(message)));
+  console.log(messages.length);
+  await Promise.all(messages.map(sendMessage));
   getFirebaseApp().delete();
 }
 
