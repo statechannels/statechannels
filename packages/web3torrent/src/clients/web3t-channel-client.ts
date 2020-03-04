@@ -107,10 +107,7 @@ export class Web3TorrentChannelClient implements Web3TorrentChannelClientInterfa
       appDefinition,
       'appData unused'
     );
-
-    const channelId = channelResult.channelId;
-    this.openChannels = {...this.openChannels, [channelId]: convertToChannelState(channelResult)};
-
+    this.cacheChannelState(convertToChannelState(channelResult));
     return convertToChannelState(channelResult);
   }
 
@@ -127,6 +124,10 @@ export class Web3TorrentChannelClient implements Web3TorrentChannelClientInterfa
 
   onMessageQueued(callback: (message: Message) => void) {
     return this.channelClient.onMessageQueued(callback);
+  }
+
+  cacheChannelState(channelState: ChannelState) {
+    this.openChannels = {...this.openChannels, [channelState.channelId]: channelState};
   }
 
   // Accepts an web3t-friendly callback, performs the necessary encoding, and subscribes to the channelClient with an appropriate, API-compliant callback
@@ -152,18 +153,19 @@ export class Web3TorrentChannelClient implements Web3TorrentChannelClientInterfa
 
   async joinChannel(channelId: string) {
     const channelResult = await this.channelClient.joinChannel(channelId);
-    this.openChannels = {...this.openChannels, [channelId]: convertToChannelState(channelResult)};
-
+    this.cacheChannelState(convertToChannelState(channelResult));
     return convertToChannelState(channelResult);
   }
 
   async closeChannel(channelId: string): Promise<ChannelState> {
     const channelResult = await this.channelClient.closeChannel(channelId);
+    this.cacheChannelState(convertToChannelState(channelResult));
     return convertToChannelState(channelResult);
   }
 
   async challengeChannel(channelId: string): Promise<ChannelState> {
     const channelResult = await this.channelClient.challengeChannel(channelId);
+    this.cacheChannelState(convertToChannelState(channelResult));
     return convertToChannelState(channelResult);
   }
 
@@ -196,9 +198,7 @@ export class Web3TorrentChannelClient implements Web3TorrentChannelClientInterfa
       allocations,
       'appData unused'
     );
-
-    this.openChannels[channelId] = convertToChannelState(channelResult);
-
+    this.cacheChannelState(convertToChannelState(channelResult));
     return convertToChannelState(channelResult);
   }
 
@@ -253,8 +253,7 @@ export class Web3TorrentChannelClient implements Web3TorrentChannelClientInterfa
   async pushMessage(message: Message<ChannelResult>) {
     await this.channelClient.pushMessage(message);
     const channelResult: ChannelResult = message.data;
-    const channelId = channelResult.channelId;
-    this.openChannels = {...this.openChannels, [channelId]: convertToChannelState(channelResult)};
+    this.cacheChannelState(convertToChannelState(channelResult));
   }
 
   async approveBudgetAndFund(
