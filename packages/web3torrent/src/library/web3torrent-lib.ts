@@ -250,8 +250,8 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
     torrent.on(TorrentEvents.NOTICE, async (wire, {command, data}) => {
       log(`< ${command} received from ${wire.peerExtendedHandshake.pseAccount}`, data);
-      let turnNum: number;
       let channelId: string;
+      let channelState: ChannelState;
       switch (command) {
         case PaidStreamingExtensionNotices.STOP:
           wire.paidStreamingExtension.ack();
@@ -265,15 +265,13 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           this.jumpStart(torrent, wire);
           break;
         case PaidStreamingExtensionNotices.MESSAGE:
+          channelState = JSON.parse(data.message).data;
+          channelId = channelState.channelId;
           await this.paymentChannelClient.pushMessage(JSON.parse(data.message));
-          turnNum = Number(JSON.parse(data.message).data.turnNum);
-          channelId = JSON.parse(data.message).data.channelId;
           if (
             JSON.parse(data.message).recipient === this.pseAccount &&
-            turnNum >= 3 &&
-            turnNum % 2 === 1
+            this.paymentChannelClient.isPaymentToMe(channelState)
           ) {
-            // if message sent to me (seeding), and the final PostFS or a payment
             await this.loadFunds(
               torrent.infoHash,
               wire.paidStreamingExtension.peerAccount,

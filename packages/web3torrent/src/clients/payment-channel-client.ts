@@ -63,6 +63,7 @@ export interface PaymentChannelClientInterface {
   );
   makePayment(channelId: string, amount: string);
   acceptPayment(channelState: ChannelState);
+  isPaymentToMe(channelState: ChannelState): boolean;
   pushMessage(message: Message<ChannelResult>);
   approveBudgetAndFund(
     playerAmount: string,
@@ -250,6 +251,12 @@ export class PaymentChannelClient implements PaymentChannelClientInterface {
     );
   }
 
+  isPaymentToMe(channelState: ChannelState): boolean {
+    // doesn't guarantee that my balance increased
+    const myIndex = channelState.seeder ? 0 : 1;
+    return channelState.status === 'running' && Number(channelState.turnNum) % 2 === myIndex;
+  }
+
   async pushMessage(message: Message<ChannelResult>) {
     await this.channelClient.pushMessage(message);
     const channelResult: ChannelResult = message.data;
@@ -393,6 +400,9 @@ export class MockPaymentChannelClient implements PaymentChannelClientInterface {
   }
   async makePayment(channelId: string, amount: string) {}
   async acceptPayment(channelState: ChannelState) {}
+  isPaymentToMe(channelState: ChannelState): boolean {
+    return false;
+  }
   async pushMessage(message: Message<ChannelResult>) {}
   async approveBudgetAndFund(
     playerAmount: string,
