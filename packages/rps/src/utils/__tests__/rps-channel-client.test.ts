@@ -104,6 +104,18 @@ class MockChannelClient implements ChannelClientInterface {
       /* */
     });
   });
+
+  getBudget = jest.fn(async function(hubAddress: string) {
+    return new Promise<SiteBudget>(() => {
+      /* */
+    });
+  });
+
+  closeAndWithdraw = jest.fn(async function(hubAddress: string) {
+    return new Promise<SiteBudget>(() => {
+      /* */
+    });
+  });
 }
 
 let mockChannelClient;
