@@ -18,7 +18,7 @@ import {
 import {bigNumberify} from 'ethers/utils';
 
 import {PaymentChannelClientInterface, ChannelState} from '../clients/payment-channel-client';
-import {Message} from '@statechannels/channel-client';
+import {Message, ChannelResult} from '@statechannels/channel-client';
 
 const log = debug('web3torrent:library');
 
@@ -144,7 +144,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         this.peersList[torrent.infoHash][peerAccount] = {
           id: peerAccount,
           wire,
-          funds: '0',
+          buffer: '0',
           seederBalance: '0',
           allowed: false
         };
@@ -156,14 +156,14 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         });
       } else if (
         !knownPeerAccount.allowed ||
-        bigNumberify(knownPeerAccount.funds).lt(REQUEST_RATE)
+        bigNumberify(knownPeerAccount.buffer).lt(REQUEST_RATE)
       ) {
         this.blockPeer(torrent.infoHash, wire, peerAccount);
       } else {
         this.peersList[torrent.infoHash][peerAccount] = {
           id: peerAccount,
           wire,
-          funds: bigNumberify(knownPeerAccount.funds)
+          buffer: bigNumberify(knownPeerAccount.buffer)
             .sub(10)
             .toString(),
           seederBalance: knownPeerAccount.seederBalance,
@@ -177,12 +177,12 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       log(`SEEDER > wire first_request of ${peerAccount}`);
       // SEEDER is participants[0], LEECHER is participants[1]
       const channel = await this.paymentChannelClient.createChannel(
-        this.pseAccount, // seeder
-        peerAccount, // leecher
-        bigNumberify(0).toString(), // seederBalance: should begin at zero
-        bigNumberify(4000).toString(), // leecherBalance,
-        this.paymentChannelClient.myEthereumSelectedAddress, // seederOutcomeAddress,
-        '0x0' // leecherOutcomeAddress TODO get this somehow
+        this.pseAccount, // beneficiary = seeder
+        peerAccount, // payer = leecher
+        bigNumberify(0).toString(), // beneficiaryBalance: should begin at zero
+        bigNumberify(4000).toString(), // payerBalance,
+        this.paymentChannelClient.myEthereumSelectedAddress, // beneficiaryOutcomeAddress,
+        '0x0' // payerOutcomeAddress TODO get this somehow
       );
       log(`SEEDER > created channel with id ${channel.channelId}`);
       wire.emit(PaidStreamingExtensionEvents.REQUEST, peerAccount);
@@ -206,33 +206,31 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   protected async loadFunds(infoHash: string, peerId: string, channelId: string) {
     // [ George ] If web3torrent is to run the Single Asset Payments ForceMoveApp, and the payments are going to be unidirectional we could wrap the paymentChannelClient in a web3tChannelClient which offers a countersign() convenience method. This allows the seeder to immediately accept the payment and for the leecher to be ready to send another one as quickly as possible.
 
-    log(`querying channel client for updated funds`);
+    log(`querying channel client for updated buffer`);
     const newSeederBalance = bigNumberify(
-      this.paymentChannelClient.channelCache[channelId].seederBalance
+      this.paymentChannelClient.channelCache[channelId].beneficiaryBalance
     );
     const payment = newSeederBalance.sub(
       bigNumberify(this.peersList[infoHash][peerId].seederBalance)
     );
-    this.peersList[infoHash][peerId].funds = bigNumberify(this.peersList[infoHash][peerId].funds)
+    this.peersList[infoHash][peerId].buffer = bigNumberify(this.peersList[infoHash][peerId].buffer)
       .add(payment)
       .toString();
     this.peersList[infoHash][peerId].seederBalance = newSeederBalance.toString();
     log(
-      `newSeederBalance: ${newSeederBalance} payment: ${payment}, funds for peer: ${this.peersList[infoHash][peerId].funds}`
+      `newSeederBalance: ${newSeederBalance} payment: ${payment}, buffer for peer: ${this.peersList[infoHash][peerId].buffer}`
     );
   }
 
   protected async transferFunds(wire: PaidStreamingWire) {
     const channelId = Object.keys(this.paymentChannelClient.channelCache)[0]; // TODO use proper index to get correct channel (inspect some lookup from wire to channelId?)
 
-    // (window.channelProvider as FakeChannelProvider).playerIndex = 1;
-
     await this.paymentChannelClient.makePayment(
       channelId,
       bigNumberify(REQUEST_RATE.mul(10)).toString()
     );
     const newSeederBalance = bigNumberify(
-      this.paymentChannelClient.channelCache[channelId].seederBalance
+      this.paymentChannelClient.channelCache[channelId].beneficiaryBalance
     );
     log(`payment made for channel ${channelId}, newSeederBalance: ${newSeederBalance}`);
   }
@@ -251,6 +249,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     torrent.on(TorrentEvents.NOTICE, async (wire, {command, data}) => {
       log(`< ${command} received from ${wire.peerExtendedHandshake.pseAccount}`, data);
       let channelId: string;
+      let message: Message<ChannelResult>;
       let channelState: ChannelState;
       switch (command) {
         case PaidStreamingExtensionNotices.STOP:
@@ -265,11 +264,14 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           this.jumpStart(torrent, wire);
           break;
         case PaidStreamingExtensionNotices.MESSAGE:
-          channelState = JSON.parse(data.message).data;
-          channelId = channelState.channelId;
-          await this.paymentChannelClient.pushMessage(JSON.parse(data.message));
+          message = JSON.parse(data.message);
+          await this.paymentChannelClient.pushMessage(message);
+          channelId = message.data.channelId;
+          channelState = this.paymentChannelClient.channelCache[channelId];
+          // getting this from channelCache is safer than trusting message, since the wallet has validated it
           if (
-            JSON.parse(data.message).recipient === this.pseAccount &&
+            message.recipient === this.pseAccount &&
+            this.paymentChannelClient.amProposer(channelId) &&
             this.paymentChannelClient.isPaymentToMe(channelState)
           ) {
             await this.loadFunds(

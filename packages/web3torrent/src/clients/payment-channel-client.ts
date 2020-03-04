@@ -10,12 +10,12 @@ export interface ChannelState {
   turnNum: string;
   status: ChannelStatus;
   challengeExpirationTime;
-  seeder: string;
-  leecher: string;
-  seederOutcomeAddress: string;
-  leecherOutcomeAddress: string;
-  seederBalance: string;
-  leecherBalance: string;
+  beneficiary: string;
+  payer: string;
+  beneficiaryOutcomeAddress: string;
+  payerOutcomeAddress: string;
+  beneficiaryBalance: string;
+  payerBalance: string;
 }
 
 // This class wraps the channel client converting the
@@ -37,12 +37,12 @@ export interface PaymentChannelClientInterface {
   channelCache: Record<string, ChannelState>;
   myAddress: string;
   createChannel(
-    seeder: string,
-    leecher: string,
-    seederBalance: string,
-    leecherBalance: string,
-    seederOutcomeAddress: string,
-    leecherOutcomeAddress: string
+    beneficiary: string,
+    payer: string,
+    beneficiaryBalance: string,
+    payerBalance: string,
+    beneficiaryOutcomeAddress: string,
+    payerOutcomeAddress: string
   ): Promise<ChannelState>;
   getAddress(): Promise<string>;
   getEthereumSelectedAddress(): Promise<string>;
@@ -54,15 +54,16 @@ export interface PaymentChannelClientInterface {
   challengeChannel(channelId: string): Promise<ChannelState>;
   updateChannel(
     channelId: string,
-    seeder: string,
-    leecher: string,
-    seederBalance: string,
-    leecherBalance: string,
-    seederOutcomeAddress: string,
-    leecherOutcomeAddress: string
+    beneficiary: string,
+    payer: string,
+    beneficiaryBalance: string,
+    payerBalance: string,
+    beneficiaryOutcomeAddress: string,
+    payerOutcomeAddress: string
   );
   makePayment(channelId: string, amount: string);
   acceptPayment(channelState: ChannelState);
+  amProposer(channelId: string): boolean;
   isPaymentToMe(channelState: ChannelState): boolean;
   pushMessage(message: Message<ChannelResult>);
   approveBudgetAndFund(
@@ -74,6 +75,9 @@ export interface PaymentChannelClientInterface {
   );
 }
 
+// This Client targets at _unidirectional_, single asset (ETH) payment channel with 2 participants running on Nitro protocol
+// The beneficiary proposes the channel, but accepts payments
+// The payer joins the channel, and makes payments
 export class PaymentChannelClient implements PaymentChannelClientInterface {
   mySigningAddress?: string;
   myEthereumSelectedAddress?: string; // this state can be inspected to infer whether we need to get the user to "Connect With MetaMask" or not.
@@ -81,24 +85,24 @@ export class PaymentChannelClient implements PaymentChannelClientInterface {
   myAddress: string;
   constructor(private readonly channelClient: ChannelClientInterface) {}
   async createChannel(
-    seeder: string,
-    leecher: string,
-    seederBalance: string,
-    leecherBalance: string,
-    seederOutcomeAddress: string,
-    leecherOutcomeAddress: string
+    beneficiary: string,
+    payer: string,
+    beneficiaryBalance: string,
+    payerBalance: string,
+    beneficiaryOutcomeAddress: string,
+    payerOutcomeAddress: string
   ): Promise<ChannelState> {
     const participants = formatParticipants(
-      seeder,
-      leecher,
-      seederOutcomeAddress,
-      leecherOutcomeAddress
+      beneficiary,
+      payer,
+      beneficiaryOutcomeAddress,
+      payerOutcomeAddress
     );
     const allocations = formatAllocations(
-      seederOutcomeAddress,
-      leecherOutcomeAddress,
-      seederBalance,
-      leecherBalance
+      beneficiaryOutcomeAddress,
+      payerOutcomeAddress,
+      beneficiaryBalance,
+      payerBalance
     );
     const appDefinition = '0x0'; // TODO SingleAssetPayments address
 
@@ -172,24 +176,24 @@ export class PaymentChannelClient implements PaymentChannelClientInterface {
 
   async updateChannel(
     channelId: string,
-    seeder: string,
-    leecher: string,
-    seederBalance: string,
-    leecherBalance: string,
-    seederOutcomeAddress: string,
-    leecherOutcomeAddress: string
+    beneficiary: string,
+    payer: string,
+    beneficiaryBalance: string,
+    payerBalance: string,
+    beneficiaryOutcomeAddress: string,
+    payerOutcomeAddress: string
   ) {
     const allocations = formatAllocations(
-      seederOutcomeAddress,
-      leecherOutcomeAddress,
-      seederBalance,
-      leecherBalance
+      beneficiaryOutcomeAddress,
+      payerOutcomeAddress,
+      beneficiaryBalance,
+      payerBalance
     );
     const participants = formatParticipants(
-      seeder,
-      leecher,
-      seederOutcomeAddress,
-      leecherOutcomeAddress
+      beneficiary,
+      payer,
+      beneficiaryOutcomeAddress,
+      payerOutcomeAddress
     );
 
     // ignore return val for now and stub out response
@@ -203,58 +207,66 @@ export class PaymentChannelClient implements PaymentChannelClientInterface {
     return convertToChannelState(channelResult);
   }
 
-  // leecher may use this method to make payments (if they have sufficient funds)
+  // payer may use this method to make payments (if they have sufficient funds)
   async makePayment(channelId: string, amount: string) {
     const {
-      seeder,
-      leecher,
-      seederBalance,
-      leecherBalance,
-      seederOutcomeAddress,
-      leecherOutcomeAddress
+      beneficiary,
+      payer,
+      beneficiaryBalance,
+      payerBalance,
+      beneficiaryOutcomeAddress,
+      payerOutcomeAddress
     } = this.channelCache[channelId];
-    if (bigNumberify(leecherBalance).gte(amount)) {
+    if (bigNumberify(payerBalance).gte(amount)) {
       await this.updateChannel(
-        channelId, // channelId,
-        seeder, // seeder,
-        leecher, // leecher,
-        bigNumberify(seederBalance)
+        channelId,
+        beneficiary,
+        payer,
+        bigNumberify(beneficiaryBalance)
           .add(amount)
-          .toString(), // seederBalance,
-        bigNumberify(leecherBalance)
+          .toString(),
+        bigNumberify(payerBalance)
           .sub(amount)
-          .toString(), // leecherBalance,
-        seederOutcomeAddress, // seederOutcomeAddress,
-        leecherOutcomeAddress // leecherOutcomeAddress
+          .toString(),
+        beneficiaryOutcomeAddress,
+        payerOutcomeAddress
       );
     }
   }
-  // seeder may use this method to accept payments
+  // beneficiary may use this method to accept payments
   async acceptPayment(channelState: ChannelState) {
     const {
       channelId,
-      seeder,
-      leecher,
-      seederBalance,
-      leecherBalance,
-      seederOutcomeAddress,
-      leecherOutcomeAddress
+      beneficiary,
+      payer,
+      beneficiaryBalance,
+      payerBalance,
+      beneficiaryOutcomeAddress,
+      payerOutcomeAddress
     } = channelState;
     await this.updateChannel(
       channelId,
-      seeder,
-      leecher,
-      seederBalance,
-      leecherBalance,
-      seederOutcomeAddress,
-      leecherOutcomeAddress
+      beneficiary,
+      payer,
+      beneficiaryBalance,
+      payerBalance,
+      beneficiaryOutcomeAddress,
+      payerOutcomeAddress
     );
   }
 
+  amProposer(channelId: string): boolean {
+    return this.channelCache[channelId].beneficiary === this.mySigningAddress;
+  }
   isPaymentToMe(channelState: ChannelState): boolean {
+    const turnNum = Number(channelState.turnNum);
     // doesn't guarantee that my balance increased
-    const myIndex = channelState.seeder ? 0 : 1;
-    return channelState.status === 'running' && Number(channelState.turnNum) % 2 === myIndex;
+    if (channelState.beneficiary === this.mySigningAddress) {
+      // returns true for the second postFS if I am the beneficiary
+      // (I need to accept this 'payment' in order for another one to be sent)
+      return (channelState.status === 'running' && turnNum % 2 === 1) || turnNum === 3;
+    }
+    throw new Error(`${this.mySigningAddress} is not the beneficiary ${channelState.beneficiary}`);
   }
 
   async pushMessage(message: Message<ChannelResult>) {
@@ -300,12 +312,12 @@ const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
     turnNum: turnNum.toString(), // TODO: turnNum should be switched to a number (or be a string everywhere),
     status,
     challengeExpirationTime,
-    seeder: participants[0].participantId,
-    leecher: participants[1].participantId,
-    seederOutcomeAddress: participants[0].destination,
-    leecherOutcomeAddress: participants[1].destination,
-    seederBalance: bigNumberify(allocations[0].allocationItems[0].amount).toString(),
-    leecherBalance: bigNumberify(allocations[0].allocationItems[1].amount).toString()
+    beneficiary: participants[0].participantId,
+    payer: participants[1].participantId,
+    beneficiaryOutcomeAddress: participants[0].destination,
+    payerOutcomeAddress: participants[1].destination,
+    beneficiaryBalance: bigNumberify(allocations[0].allocationItems[0].amount).toString(),
+    payerBalance: bigNumberify(allocations[0].allocationItems[1].amount).toString()
   };
 };
 
@@ -330,85 +342,3 @@ const formatAllocations = (aAddress: string, bAddress: string, aBal: string, bBa
     }
   ];
 };
-
-// Mocks
-
-export class MockPaymentChannelClient implements PaymentChannelClientInterface {
-  mySigningAddress?: string;
-  myEthereumSelectedAddress?: string; // this state can be inspected to infer whether we need to get the user to "Connect With MetaMask" or not.
-  channelCache: Record<string, ChannelState> = {};
-  myAddress: string;
-  constructor(private readonly channelClient: ChannelClientInterface) {}
-
-  mockChannelState: ChannelState = {
-    channelId: '0x0',
-    turnNum: '0x0',
-    status: 'running',
-    challengeExpirationTime: '0x0',
-    seeder: '0x0',
-    leecher: '0x0',
-    seederOutcomeAddress: '0x0',
-    leecherOutcomeAddress: '0x0',
-    seederBalance: '0x0',
-    leecherBalance: '0x0'
-  };
-  async createChannel(
-    seeder: string,
-    leecher: string,
-    seederBalance: string,
-    leecherBalance: string,
-    seederOutcomeAddress: string,
-    leecherOutcomeAddress: string
-  ): Promise<ChannelState> {
-    return this.mockChannelState;
-  }
-  async getAddress() {
-    return '0x0';
-  }
-  async getEthereumSelectedAddress() {
-    return '0x0';
-  }
-  onMessageQueued(callback: (message: Message) => void) {
-    return () => {};
-  }
-  // Accepts an web3t-friendly callback, performs the necessary encoding, and subscribes to the channelClient with an appropriate, API-compliant callback
-  onChannelUpdated(web3tCallback: (channelState: ChannelState) => any) {
-    return () => {};
-  }
-  onChannelProposed(web3tCallback: (channelState: ChannelState) => any) {
-    return () => {};
-  }
-  async joinChannel(channelId: string) {
-    return {};
-  }
-  async closeChannel(channelId: string): Promise<ChannelState> {
-    return this.mockChannelState;
-  }
-  async challengeChannel(channelId: string): Promise<ChannelState> {
-    return this.mockChannelState;
-  }
-  async updateChannel(
-    channelId: string,
-    seeder: string,
-    leecher: string,
-    seederBalance: string,
-    leecherBalance: string,
-    seederOutcomeAddress: string,
-    leecherOutcomeAddress: string
-  ) {
-    return {};
-  }
-  async makePayment(channelId: string, amount: string) {}
-  async acceptPayment(channelState: ChannelState) {}
-  isPaymentToMe(channelState: ChannelState): boolean {
-    return false;
-  }
-  async pushMessage(message: Message<ChannelResult>) {}
-  async approveBudgetAndFund(
-    playerAmount: string,
-    hubAmount: string,
-    playerDestinationAddress: string,
-    hubAddress: string,
-    hubDestinationAddress: string
-  ) {}
-}
