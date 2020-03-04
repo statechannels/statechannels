@@ -82,6 +82,7 @@ export function convertToPlayerStateUpdateEvent(request: UpdateChannelRequest): 
   }
   return {
     type: 'PLAYER_STATE_UPDATE',
+    requestId: request.id,
     outcome,
     channelId: request.params.channelId,
     appData: request.params.appData

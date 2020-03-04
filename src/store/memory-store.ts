@@ -240,7 +240,8 @@ export class MemoryStore implements Store {
     if (!channelStorage) {
       throw new Error('Channel not found');
     }
-    const myAddress = channelStorage.participants[channelStorage.myIndex].signingAddress;
+    const {participants} = channelStorage;
+    const myAddress = participants[channelStorage.myIndex].signingAddress;
     const privateKey = this._privateKeys[myAddress];
 
     if (!privateKey) {
