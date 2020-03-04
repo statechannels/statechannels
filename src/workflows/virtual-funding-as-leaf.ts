@@ -74,7 +74,7 @@ const enum Actions {
   watchObjectives = 'watchObjectives'
 }
 
-const enum States {
+export const enum States {
   determineDeductions = 'determineDeductions',
   setupJointChannel = 'setupJointChannel',
   fundJointChannel = 'fundJointChannel',
@@ -257,7 +257,9 @@ const watchObjectives = (store: Store) => (ctx: Init) => {
   );
 };
 
-export const options = (store: Store): Partial<MachineOptions<Init, TEvent>> => {
+export const options = (
+  store: Store
+): Pick<MachineOptions<Init, TEvent>, 'actions' | 'services'> => {
   const actions: Record<Actions, any> = {
     watchObjectives: assign<any>({watcher: (ctx: Init) => spawn(watchObjectives(store)(ctx))}),
     [Actions.triggerGuarantorObjective]: (_, {data}: DoneInvokeEvent<FundGuarantor>) =>
