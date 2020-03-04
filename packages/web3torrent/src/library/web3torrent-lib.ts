@@ -208,7 +208,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
     log(`querying channel client for updated funds`);
     const newSeederBalance = bigNumberify(
-      this.paymentChannelClient.channelCache[channelId].seederBalance
+      this.paymentChannelClient.channelCache[channelId].proposerBalance
     );
     const payment = newSeederBalance.sub(
       bigNumberify(this.peersList[infoHash][peerId].seederBalance)
@@ -225,14 +225,12 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   protected async transferFunds(wire: PaidStreamingWire) {
     const channelId = Object.keys(this.paymentChannelClient.channelCache)[0]; // TODO use proper index to get correct channel (inspect some lookup from wire to channelId?)
 
-    // (window.channelProvider as FakeChannelProvider).playerIndex = 1;
-
     await this.paymentChannelClient.makePayment(
       channelId,
       bigNumberify(REQUEST_RATE.mul(10)).toString()
     );
     const newSeederBalance = bigNumberify(
-      this.paymentChannelClient.channelCache[channelId].seederBalance
+      this.paymentChannelClient.channelCache[channelId].proposerBalance
     );
     log(`payment made for channel ${channelId}, newSeederBalance: ${newSeederBalance}`);
   }

@@ -73,23 +73,23 @@ export const mockSeeder = '0xc631e3bf86075f4d2b45ba974cff4ef5a5f922a0';
 export const mockChannels: Array<Partial<ChannelState>> = [
   {
     channelId: '0x5a0b54d5dc17e0aadc383d2db43b0a0d3e029c4c',
-    leecher: mockLeecherA,
-    leecherBalance: bigNumberify(mockBalance / 2).toString(),
-    seeder: mockCurrentUser,
-    seederBalance: bigNumberify(mockBalance).toString()
+    acceptor: mockLeecherA,
+    acceptorBalance: bigNumberify(mockBalance / 2).toString(),
+    proposer: mockCurrentUser,
+    proposerBalance: bigNumberify(mockBalance).toString()
   },
   {
     channelId: '0xb43b0a0d3e029c4c5a0b54d5dc17e0aadc383d2d',
-    leecher: mockLeecherB,
-    leecherBalance: bigNumberify(mockBalance * 6).toString(),
-    seeder: mockCurrentUser,
-    seederBalance: bigNumberify(mockBalance).toString()
+    acceptor: mockLeecherB,
+    acceptorBalance: bigNumberify(mockBalance * 6).toString(),
+    proposer: mockCurrentUser,
+    proposerBalance: bigNumberify(mockBalance).toString()
   },
   {
     channelId: '0x7bc8f170fdf3772c5ebdcd90bf257316c69ba45',
-    leecher: mockCurrentUser,
-    leecherBalance: bigNumberify(mockBalance).toString(),
-    seeder: mockSeeder,
-    seederBalance: bigNumberify(mockBalance * 2).toString()
+    acceptor: mockCurrentUser,
+    acceptorBalance: bigNumberify(mockBalance).toString(),
+    proposer: mockSeeder,
+    proposerBalance: bigNumberify(mockBalance * 2).toString()
   }
 ];

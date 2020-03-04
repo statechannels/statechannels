@@ -17,12 +17,12 @@ class ChannelList extends React.Component {
               <td className={'channel-header'}>Earnt</td>
             </tr>
             {Object.values(this.context.channelCache)
-              .filter((channel: ChannelState) => channel.seeder === this.context.mySigningAddress)
+              .filter((channel: ChannelState) => channel.proposer === this.context.mySigningAddress)
               .map((channel: ChannelState) => (
                 <tr className={'channel'} key={channel.channelId}>
                   <td className="channel-address">{channel.channelId}</td>
-                  <td className="channel-address">{channel.leecher}</td>
-                  <td className="amount-cell">{formatUnits(channel.seederBalance, 'wei')} wei</td>
+                  <td className="channel-address">{channel.acceptor}</td>
+                  <td className="amount-cell">{formatUnits(channel.proposerBalance, 'wei')} wei</td>
                 </tr>
               ))}
           </tbody>
@@ -36,12 +36,12 @@ class ChannelList extends React.Component {
               <td className={'channel-header'}>Left to spend</td>
             </tr>
             {Object.values(this.context.channelCache)
-              .filter((channel: ChannelState) => channel.leecher === this.context.mySigningAddress)
+              .filter((channel: ChannelState) => channel.acceptor === this.context.mySigningAddress)
               .map((channel: ChannelState) => (
                 <tr className={'channel'} key={channel.channelId}>
                   <td className="channel-address">{channel.channelId}</td>
-                  <td className="channel-address">{channel.seeder}</td>
-                  <td className="amount-cell">{formatUnits(channel.leecherBalance, 'wei')} wei</td>
+                  <td className="channel-address">{channel.proposer}</td>
+                  <td className="amount-cell">{formatUnits(channel.acceptorBalance, 'wei')} wei</td>
                 </tr>
               ))}
           </tbody>
