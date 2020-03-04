@@ -12,14 +12,14 @@ import {
 import {filter, flatMap} from 'rxjs/operators';
 
 import {Store} from '../store/memory-store';
-import {SupportState, LedgerFunding, VirtualFundingAsLeaf} from '.';
-import {checkThat, getDataAndInvoke} from '../utils';
+import {LedgerFunding, VirtualFundingAsLeaf} from '.';
+import {checkThat} from '../utils';
 import {isSimpleEthAllocation} from '../utils/outcome';
 
 import {FundGuarantor, AllocationItem, isFundGuarantor, Participant} from '../store/types';
 
 import _ from 'lodash';
-import {Role, waitForFirstJointState, jointChannelUpdate} from './virtual-funding-as-leaf';
+import {Role, States} from './virtual-funding-as-leaf';
 
 type Init = VirtualFundingAsLeaf.Init;
 
@@ -37,15 +37,6 @@ type TEvent = AnyEventObject;
 const enum Actions {
   assignDeductions = 'assignDeductions',
   watchObjectives = 'watchObjectives'
-}
-
-const enum States {
-  determineDeductions = 'determineDeductions',
-  setupJointChannel = 'setupJointChannel',
-  fundJointChannel = 'fundJointChannel',
-  fundTargetChannel = 'fundTargetChannel',
-  failure = '#workflow.failure',
-  success = 'success'
 }
 
 const enum Services {
@@ -92,15 +83,7 @@ export const config: MachineConfig<Init, any, any> = {
   id: 'workflow',
   initial: States.setupJointChannel,
   states: {
-    [States.setupJointChannel]: getDataAndInvoke<Init, Services>(
-      {src: Services.waitForFirstJointState, opts: {onError: '#workflow.failure'}},
-      {src: Services.supportState},
-      States.determineDeductions
-    ),
-    [States.determineDeductions]: {
-      invoke: {src: Services.getDeductions, data: ctx => ctx, onDone: States.fundJointChannel},
-      exit: Actions.assignDeductions
-    },
+    ...VirtualFundingAsLeaf.config.states,
     [States.fundJointChannel]: {
       type: 'parallel',
       entry: [Actions.watchObjectives, Actions.assignDeductions],
@@ -109,14 +92,7 @@ export const config: MachineConfig<Init, any, any> = {
         fundGuarantorBH: waitThenFundGuarantor(Role.B)
       },
       onDone: States.fundTargetChannel
-    },
-    [States.fundTargetChannel]: getDataAndInvoke(
-      {src: Services.jointChannelUpdate},
-      {src: Services.supportState},
-      States.success
-    ),
-    success: {type: 'final'},
-    failure: {}
+    }
   }
 };
 
@@ -176,12 +152,13 @@ export const options = (store: Store): Partial<MachineOptions<Init, TEvent>> => 
     )
   };
 
+  const leafServices = VirtualFundingAsLeaf.options(store).services;
   const services: Record<Services, ServiceConfig<Init>> = {
     getDeductions: getDeductions(store),
-    supportState: SupportState.machine(store as any),
-    ledgerFunding: LedgerFunding.machine(store),
-    waitForFirstJointState: waitForFirstJointState(store),
-    jointChannelUpdate: jointChannelUpdate(store)
+    supportState: leafServices.supportState,
+    ledgerFunding: leafServices.ledgerFunding,
+    waitForFirstJointState: leafServices.waitForFirstJointState,
+    jointChannelUpdate: leafServices.jointChannelUpdate
   };
 
   return {actions, services};
