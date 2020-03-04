@@ -88,6 +88,7 @@ describe('when opponent joins your game', () => {
         .dispatch(channelUpdate)
         .dispatch(appNotification)
         .provide([callJoinChannel(channelStates.preFund1)])
+        .dispatch(updateChannelState(channelStates.preFund1))
         .run({silenceTimeout: true});
 
       expect(storeState).toEqual(gameState(localStatesB.opponentJoined, channelStates.preFund1));
@@ -104,6 +105,7 @@ describe('when opponent joins your game', () => {
         .dispatch(appNotification)
         .dispatch(channelUpdate)
         .provide([callJoinChannel(channelStates.preFund1)])
+        .dispatch(updateChannelState(channelStates.preFund1))
         .run({silenceTimeout: true});
 
       expect(storeState).toEqual(gameState(localStatesB.opponentJoined, channelStates.preFund1));
@@ -135,6 +137,7 @@ describe('when choosing a weapon as player B', () => {
         .withReducer(reducer, initialState)
         .dispatch(action)
         .provide([callUpdateChannel(channelStates.roundAccepted)])
+        .dispatch(updateChannelState(channelStates.roundAccepted))
         .run({silenceTimeout: true});
 
       expect(storeState).toEqual(gameState(localStatesB.weaponChosen, channelStates.roundAccepted));
@@ -161,6 +164,7 @@ describe('when choosing a weapon as player B', () => {
         .withReducer(reducer, initialState)
         .dispatch(action)
         .provide([callUpdateChannel(channelStates.roundAccepted)])
+        .dispatch(updateChannelState(channelStates.roundAccepted))
         .run({silenceTimeout: true});
 
       expect(storeState).toEqual(gameState(localStatesB.weaponChosen, channelStates.roundAccepted));
@@ -194,6 +198,7 @@ describe('when player B receives the reveal', () => {
         .withReducer(reducer, initialState)
         .dispatch(action)
         .provide([callCloseChannel(channelStates.concludeInsufficientFundsB)])
+        .dispatch(updateChannelState(channelStates.concludeInsufficientFundsB))
         .run({silenceTimeout: true});
 
       expect(storeState).toEqual(
@@ -212,6 +217,7 @@ describe('when player B decides to play again', () => {
       .withReducer(reducer, initialState)
       .dispatch(action)
       .provide([callUpdateChannel(channelStates.start2)])
+      .dispatch(updateChannelState(channelStates.start2))
       .run({silenceTimeout: true});
 
     expect(storeState).toEqual(gameState(localStatesB.chooseWeapon2, channelStates.start2));
@@ -229,6 +235,7 @@ describe('when the player resigns (which includes deciding not to play again)', 
         .withReducer(reducer, initialState)
         .dispatch(action)
         .provide([callCloseChannel(channelStates.concludeFromProposed)])
+        .dispatch(updateChannelState(channelStates.concludeFromProposed))
         .run({silenceTimeout: true});
 
       expect(storeState).toEqual(
@@ -261,6 +268,7 @@ describe('when the player resigns (which includes deciding not to play again)', 
         .withReducer(reducer, initialState)
         .dispatch(action)
         .provide([callCloseChannel(channelStates.concludeFromProposed)])
+        .dispatch(updateChannelState(channelStates.concludeFromProposed))
         .run({silenceTimeout: true});
 
       expect(storeState).toEqual(

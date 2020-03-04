@@ -3,7 +3,7 @@ import {getProvider} from './utils/contract-utils';
 import {ethers} from 'ethers';
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {State} from './store/types';
-import {Observable, fromEvent, from, concat, merge} from 'rxjs';
+import {Observable, fromEvent, from, concat} from 'rxjs';
 import {filter, map} from 'rxjs/operators';
 import {ETH_ASSET_HOLDER_ADDRESS, NITRO_ADJUDICATOR_ADDRESS} from './constants';
 import EventEmitter = require('eventemitter3');
@@ -30,32 +30,51 @@ export interface Chain {
   deposit: (channelId: string, expectedHeld: string, amount: string) => Promise<void>;
 }
 
-// TODO: This should handle amounts for each channel
+// TODO: This chain should be fleshed out enough so it mimics basic chain behavior
+const DEPOSITED = 'deposited';
+type Deposited = ChannelChainInfo & {channelId: string};
 export class FakeChain implements Chain {
-  private totalAmount = bigNumberify(0);
-  public depositEmitter = new EventEmitter();
+  private holdings: Record<string, BigNumber> = {};
+  private eventEmitter: EventEmitter<{
+    deposited: [Deposited];
+  }> = new EventEmitter();
   public async initialize() {
     /* NOOP */
   }
+
   public async deposit(channelId: string, expectedHeld: string, amount: string): Promise<void> {
-    this.totalAmount = this.totalAmount.add(amount);
-    this.depositEmitter.emit('DEPOSIT', this.totalAmount);
-    return Promise.resolve();
+    this.depositSync(channelId, expectedHeld, amount);
   }
+
+  public depositSync(channelId: string, expectedHeld: string, amount: string) {
+    const current = this.holdings[channelId] || bigNumberify(0);
+
+    if (current.gte(expectedHeld)) {
+      this.holdings[channelId] = current.add(amount);
+      this.eventEmitter.emit(DEPOSITED, {
+        amount: this.holdings[channelId],
+        finalized: false,
+        channelId
+      });
+    }
+  }
+
   public async getChainInfo(channelId: string): Promise<ChannelChainInfo> {
-    return {amount: bigNumberify(this.totalAmount), finalized: false};
+    return {amount: this.holdings[channelId] || bigNumberify(0), finalized: false};
   }
+
   public chainUpdatedFeed(channelId: string): Observable<ChannelChainInfo> {
-    const updated = fromEvent<BigNumber>(this.depositEmitter, 'DEPOSIT').pipe(
-      map(a => ({
-        amount: a,
-        finalized: false
-      }))
+    const first = from(this.getChainInfo(channelId));
+
+    const updates = fromEvent(this.eventEmitter, DEPOSITED).pipe(
+      filter((event: Deposited) => event.channelId === channelId),
+      map(({amount, finalized}) => ({amount, finalized}))
     );
-    const first = from(Promise.resolve({amount: bigNumberify(this.totalAmount), finalized: false}));
-    return merge(first, updated);
+
+    return concat(first, updates);
   }
 }
+
 export class ChainWatcher implements Chain {
   private _adjudicator?: ethers.Contract;
   private _assetHolders: ethers.Contract[];
@@ -99,6 +118,7 @@ export class ChainWatcher implements Chain {
       finalized: false
     };
   }
+
   public chainUpdatedFeed(channelId: string): Observable<ChannelChainInfo> {
     if (!this._assetHolders[0] && !this._adjudicator) {
       throw new Error('Not connected to contracts');
@@ -107,11 +127,11 @@ export class ChainWatcher implements Chain {
     const first = from(this.getChainInfo(channelId));
 
     const updates = fromEvent(this._assetHolders[0], 'Deposited').pipe(
-      filter((event: {toAddress: string; amount: BigNumber}) => {
-        return event.toAddress === channelId;
+      filter((event: Array<string | BigNumber>) => {
+        return event[0] === channelId;
       }),
-      map(event => {
-        return {amount: event.amount, finalized: false};
+      map((event: Array<string | BigNumber>) => {
+        return {amount: bigNumberify(event[2]), finalized: false};
       })
     );
     return concat(first, updates);

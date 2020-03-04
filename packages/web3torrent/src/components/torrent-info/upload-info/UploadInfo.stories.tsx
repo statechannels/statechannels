@@ -25,7 +25,7 @@ storiesOf('Web3Torrent', module)
             wire: {
               uploaded: number('Uploaded bytes for Peer 9720534187', 3533366, {step: 1000}, 'Peers')
             },
-            funds: '50',
+            buffer: '50',
             allowed: true,
             seederBalance: '50',
             channelId: '0x0000000000000000000000000000001231927371'
@@ -35,7 +35,7 @@ storiesOf('Web3Torrent', module)
             wire: {
               uploaded: number('Uploaded bytes for Peer 9202959009', 5611625, {step: 1000}, 'Peers')
             },
-            funds: '50',
+            buffer: '50',
             allowed: true,
             seederBalance: '50',
             channelId: '0x0000000000000000000000000000001231927371'
@@ -45,7 +45,7 @@ storiesOf('Web3Torrent', module)
             wire: {
               uploaded: number('Uploaded bytes for Peer 2190352424', 5051532, {step: 1000}, 'Peers')
             },
-            funds: '50',
+            buffer: '50',
             allowed: true,
             seederBalance: '50',
             channelId: '0x0000000000000000000000000000001231927371'

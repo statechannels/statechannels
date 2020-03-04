@@ -12,10 +12,7 @@ import WebTorrentPaidStreamingClient, {
   PaidStreamingExtensionNotices,
   PaidStreamingTorrent
 } from './web3torrent-lib';
-import {
-  Web3TorrentChannelClient as PaymentChannelClient,
-  ChannelState
-} from '../clients/web3t-channel-client';
+import {PaymentChannelClient, ChannelState} from '../clients/payment-channel-client';
 import {ChannelClient, FakeChannelProvider} from '@statechannels/channel-client';
 
 describe('Seeding and Leeching', () => {
@@ -34,7 +31,7 @@ describe('Seeding and Leeching', () => {
     });
     seeder.on('error', err => fail(err));
     seeder.on('warning', err => fail(err));
-    seeder.paymentChannelClient.openChannels = {0x0: mockChannelState};
+    seeder.paymentChannelClient.channelCache = {0x0: mockChannelState};
 
     leecher = new WebTorrentPaidStreamingClient({
       pseAccount: '2',
@@ -43,7 +40,7 @@ describe('Seeding and Leeching', () => {
     });
     leecher.on('error', err => fail(err));
     leecher.on('warning', err => fail(err));
-    leecher.paymentChannelClient.openChannels = {0x0: mockChannelState};
+    leecher.paymentChannelClient.channelCache = {0x0: mockChannelState};
   });
 
   it('should seed and remove a Torrent', done => {

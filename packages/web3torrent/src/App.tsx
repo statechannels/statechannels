@@ -1,3 +1,4 @@
+import ConnectionBanner from '@rimble/connection-banner';
 import {createBrowserHistory} from 'history';
 import React from 'react';
 import {Route, Router, Switch} from 'react-router-dom';
@@ -13,16 +14,18 @@ import {WebTorrentContext} from './clients/web3torrent-client';
 const history = createBrowserHistory();
 class App extends React.Component {
   state = {
-    currentNetwork: parseInt(window.ethereum.chainId, 16),
+    currentNetwork:
+      'ethereum' in window && window.ethereum.chainId && parseInt(window.ethereum.chainId, 16),
     requiredNetwork: Number(process.env.REACT_APP_CHAIN_NETWORK_ID)
   };
 
   static contextType = WebTorrentContext;
 
   async componentDidMount() {
-    window.ethereum.on('networkChanged', chainId => {
-      this.setState({...this.state, currentNetwork: parseInt(chainId, 16)});
-    });
+    'ethereum' in window &&
+      window.ethereum.on('networkChanged', chainId => {
+        this.setState({...this.state, currentNetwork: parseInt(chainId, 16)});
+      });
     await this.context.enable(); // get sc signing address and use it
   }
 
@@ -30,6 +33,11 @@ class App extends React.Component {
     const {currentNetwork, requiredNetwork} = this.state;
     return (
       <Router history={history}>
+        <ConnectionBanner
+          currentNetwork={currentNetwork}
+          requiredNetwork={requiredNetwork}
+          onWeb3Fallback={!('ethereum' in window)}
+        />
         <main>
           <Route
             path={RoutePath.Root}

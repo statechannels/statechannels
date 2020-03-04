@@ -16,11 +16,9 @@ export class MessagingService {
   protected readonly timeoutMs: number;
   protected readonly maxRetries: number;
 
-  // TODO: We need to think about timeouts and how we handle them
-  // If the timeout is too short then we can end up generating duplicate messages to the wallet.
-  constructor({timeoutMs = 1000, maxRetries = 5}: MessagingServiceOptions = {}) {
-    this.timeoutMs = timeoutMs;
-    this.maxRetries = maxRetries;
+  constructor({timeoutMs, maxRetries}: MessagingServiceOptions = {}) {
+    this.timeoutMs = timeoutMs || -1;
+    this.maxRetries = maxRetries || 0;
   }
 
   setUrl(url: string) {
@@ -34,19 +32,21 @@ export class MessagingService {
     target.postMessage(message, corsUrl);
     log('Sent message: %o', message);
 
-    this.timeoutListener = setTimeout(() => {
-      if (this.attempts < this.maxRetries) {
-        log('Request %o timed out after %o ms, retrying', message, this.timeoutMs);
-        this.send(target, message, corsUrl);
-      } else {
-        log(
-          'Request %o timed out after %o attempts; is the wallet unreachable?',
-          message,
-          this.attempts
-        );
-        console.warn(`Request timed out after ${this.attempts} attempts`, message);
-      }
-    }, this.timeoutMs);
+    if (this.timeoutMs >= 0) {
+      this.timeoutListener = setTimeout(() => {
+        if (this.attempts < this.maxRetries) {
+          log('Request %o timed out after %o ms, retrying', message, this.timeoutMs);
+          this.send(target, message, corsUrl);
+        } else {
+          log(
+            'Request %o timed out after %o attempts; is the wallet unreachable?',
+            message,
+            this.attempts
+          );
+          console.warn(`Request timed out after ${this.attempts} attempts`, message);
+        }
+      }, this.timeoutMs);
+    }
   }
 
   async request<ResultType = any>(

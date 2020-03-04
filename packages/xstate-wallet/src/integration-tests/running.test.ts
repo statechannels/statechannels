@@ -3,7 +3,7 @@ import {Player, hookUpMessaging, generatePlayerUpdate} from './helpers';
 import {bigNumberify} from 'ethers/utils';
 import waitForExpect from 'wait-for-expect';
 import {simpleEthAllocation} from '../utils/outcome';
-
+jest.setTimeout(30000);
 test('accepts states when running', async () => {
   const fakeChain = new FakeChain();
 
@@ -41,8 +41,11 @@ test('accepts states when running', async () => {
     stateVars
   );
   const channelId = '0x1823994d6d3b53b82f499c1aca2095b94108ba3ff59f55c6e765da1e24874ab2';
+
   playerA.startAppWorkflow('running', {channelId});
   playerB.startAppWorkflow('running', {channelId});
+  playerA.workflowMachine?.send('SPAWN_OBSERVERS');
+  playerB.workflowMachine?.send('SPAWN_OBSERVERS');
   await playerA.messagingService.receiveRequest(
     generatePlayerUpdate(channelId, playerA.participant, playerB.participant)
   );

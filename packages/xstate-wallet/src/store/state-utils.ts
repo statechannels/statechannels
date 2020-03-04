@@ -109,7 +109,7 @@ export function convertToNitroOutcome(outcome: Outcome): NitroOutcome {
           assetHolderAddress: outcome.assetHolderAddress,
           guarantee: {
             targetChannelId: outcome.targetChannelId,
-            destinations: outcome.destinations.map(convertAddressToBytes32)
+            destinations: outcome.destinations
           }
         }
       ];

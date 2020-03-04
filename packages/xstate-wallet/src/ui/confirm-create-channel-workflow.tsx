@@ -1,11 +1,12 @@
 import React from 'react';
-import {State, EventData} from 'xstate';
+import {EventData} from 'xstate';
 import './wallet.scss';
 import {Button} from 'rimble-ui';
+import {WorkflowState} from '../workflows/confirm-create-channel';
 
 interface Props {
-  current: State<any, any, any, any>;
-  send: (event: any, payload?: EventData | undefined) => State<any, any, any, any>;
+  current: WorkflowState;
+  send: (event: any, payload?: EventData | undefined) => WorkflowState;
 }
 
 export const ConfirmCreateChannel = (props: Props) => {
@@ -13,12 +14,11 @@ export const ConfirmCreateChannel = (props: Props) => {
   const prompt = (
     <div
       style={{
-        paddingTop: '50px',
         textAlign: 'center'
       }}
     >
       <h1>Do you wish to create a channel?</h1>
-      <Button onClick={() => props.send('USER_APPROVED')}>Yes</Button>
+      <Button onClick={() => props.send('USER_APPROVES')}>Yes</Button>
       <Button.Text onClick={() => props.send('USER_REJECTS')}>No</Button.Text>
     </div>
   );

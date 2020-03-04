@@ -1,5 +1,5 @@
 import {Store} from './store/memory-store';
-import {MessagingServiceInterface} from './messaging';
+import {MessagingServiceInterface, convertToChannelResult} from './messaging';
 
 import {applicationWorkflow} from './workflows/application';
 import ReactDOM from 'react-dom';
@@ -7,8 +7,10 @@ import React from 'react';
 import {Wallet as WalletUi} from './ui/wallet';
 import {interpret, Interpreter, State} from 'xstate';
 import {Guid} from 'guid-typescript';
-import {convertToOpenEvent, convertToPlayerStateUpdateEvent} from './utils/workflow-utils';
+import {convertToOpenEvent} from './utils/workflow-utils';
 import {Notification, Response} from '@statechannels/client-api-schema';
+import {filter, map} from 'rxjs/operators';
+import {Message, OpenChannel} from './store/types';
 
 export interface Workflow {
   id: string;
@@ -24,8 +26,27 @@ export class ChannelWallet {
     public id?: string
   ) {
     this.workflows = [];
+
     // Whenever the store wants to send something call sendMessage
-    store.outboxFeed.subscribe(m => this.messagingService.sendMessageNotification(m));
+    store.outboxFeed.subscribe(async (m: Message) => {
+      this.messagingService.sendMessageNotification(m);
+    });
+    // Whenever an OpenChannel objective is received
+    // we alert the user that there is a new channel
+    // It is up to the app to call JoinChannel
+    this.store.newObjectiveFeed
+      .pipe(
+        // TODO: type guard
+        filter(o => o.type === 'OpenChannel'),
+        map(o => o as OpenChannel)
+      )
+      .subscribe(async o => {
+        const channelEntry = await this.store.getEntry(o.data.targetChannelId);
+        this.messagingService.sendChannelNotification(
+          'ChannelUpdated',
+          await convertToChannelResult(channelEntry)
+        );
+      });
 
     this.messagingService.requestFeed.subscribe(r => {
       if (r.method === 'CreateChannel' || r.method === 'JoinChannel') {
@@ -33,11 +54,6 @@ export class ChannelWallet {
         this.workflows.push(workflow);
 
         workflow.machine.send(convertToOpenEvent(r));
-      } else if (r.method === 'UpdateChannel') {
-        const update = convertToPlayerStateUpdateEvent(r);
-        this.workflows.forEach(w => {
-          w.machine.send(update);
-        });
       }
     });
   }

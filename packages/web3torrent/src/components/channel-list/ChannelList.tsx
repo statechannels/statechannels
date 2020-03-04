@@ -1,5 +1,5 @@
 import React from 'react';
-import {ChannelContext, ChannelState} from '../../clients/web3t-channel-client';
+import {ChannelContext, ChannelState} from '../../clients/payment-channel-client';
 import './ChannelList.scss';
 import {formatUnits} from 'ethers/utils';
 
@@ -16,13 +16,17 @@ class ChannelList extends React.Component {
               <td className={'channel-header'}>Leecher</td>
               <td className={'channel-header'}>Earnt</td>
             </tr>
-            {Object.values(this.context.openChannels)
-              .filter((channel: ChannelState) => channel.seeder === this.context.mySigningAddress)
+            {Object.values(this.context.channelCache)
+              .filter(
+                (channel: ChannelState) => channel.beneficiary === this.context.mySigningAddress
+              )
               .map((channel: ChannelState) => (
                 <tr className={'channel'} key={channel.channelId}>
                   <td className="channel-address">{channel.channelId}</td>
-                  <td className="channel-address">{channel.leecher}</td>
-                  <td className="amount-cell">{formatUnits(channel.seederBalance, 'wei')} wei</td>
+                  <td className="channel-address">{channel.payer}</td>
+                  <td className="amount-cell">
+                    {formatUnits(channel.beneficiaryBalance, 'wei')} wei
+                  </td>
                 </tr>
               ))}
           </tbody>
@@ -35,13 +39,13 @@ class ChannelList extends React.Component {
               <td className={'channel-header'}>Seeder</td>
               <td className={'channel-header'}>Left to spend</td>
             </tr>
-            {Object.values(this.context.openChannels)
-              .filter((channel: ChannelState) => channel.leecher === this.context.mySigningAddress)
+            {Object.values(this.context.channelCache)
+              .filter((channel: ChannelState) => channel.payer === this.context.mySigningAddress)
               .map((channel: ChannelState) => (
                 <tr className={'channel'} key={channel.channelId}>
                   <td className="channel-address">{channel.channelId}</td>
-                  <td className="channel-address">{channel.seeder}</td>
-                  <td className="amount-cell">{formatUnits(channel.leecherBalance, 'wei')} wei</td>
+                  <td className="channel-address">{channel.beneficiary}</td>
+                  <td className="amount-cell">{formatUnits(channel.payerBalance, 'wei')} wei</td>
                 </tr>
               ))}
           </tbody>

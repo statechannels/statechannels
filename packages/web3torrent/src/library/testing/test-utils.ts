@@ -1,6 +1,6 @@
 import MemoryChunkStore from 'memory-chunk-store';
 import fixtures from 'webtorrent-fixtures';
-import {ChannelState} from '../../clients/web3t-channel-client';
+import {ChannelState} from '../../clients/payment-channel-client';
 
 export const defaultFile = new Blob([fixtures.leaves.content]);
 export const defaultTorrentHash = fixtures.leaves.parsedTorrent.infoHash;
@@ -37,10 +37,10 @@ export const mockChannelState: ChannelState = {
   turnNum: '0x0',
   status: 'running',
   challengeExpirationTime: '0x0',
-  seeder: '0x0',
-  leecher: '0x0',
-  seederOutcomeAddress: '0x0',
-  leecherOutcomeAddress: '0x0',
-  seederBalance: '0x0',
-  leecherBalance: '0x0'
+  beneficiary: '0x0',
+  payer: '0x0',
+  beneficiaryOutcomeAddress: '0x0',
+  payerOutcomeAddress: '0x0',
+  beneficiaryBalance: '0x0',
+  payerBalance: '0x0'
 };
