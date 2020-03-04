@@ -10,12 +10,12 @@ export interface ChannelState {
   turnNum: string;
   status: ChannelStatus;
   challengeExpirationTime;
-  seeder: string;
-  leecher: string;
-  seederOutcomeAddress: string;
-  leecherOutcomeAddress: string;
-  seederBalance: string;
-  leecherBalance: string;
+  proposer: string;
+  acceptor: string;
+  proposerOutcomeAddress: string;
+  acceptorOutcomeAddress: string;
+  proposerBalance: string;
+  acceptorBalance: string;
 }
 
 // This class wraps the channel client converting the
@@ -37,12 +37,12 @@ export interface PaymentChannelClientInterface {
   channelCache: Record<string, ChannelState>;
   myAddress: string;
   createChannel(
-    seeder: string,
-    leecher: string,
-    seederBalance: string,
-    leecherBalance: string,
-    seederOutcomeAddress: string,
-    leecherOutcomeAddress: string
+    proposer: string,
+    acceptor: string,
+    proposerBalance: string,
+    acceptorBalance: string,
+    proposerOutcomeAddress: string,
+    acceptorOutcomeAddress: string
   ): Promise<ChannelState>;
   getAddress(): Promise<string>;
   getEthereumSelectedAddress(): Promise<string>;
@@ -54,12 +54,12 @@ export interface PaymentChannelClientInterface {
   challengeChannel(channelId: string): Promise<ChannelState>;
   updateChannel(
     channelId: string,
-    seeder: string,
-    leecher: string,
-    seederBalance: string,
-    leecherBalance: string,
-    seederOutcomeAddress: string,
-    leecherOutcomeAddress: string
+    proposer: string,
+    acceptor: string,
+    proposerBalance: string,
+    acceptorBalance: string,
+    proposerOutcomeAddress: string,
+    acceptorOutcomeAddress: string
   );
   makePayment(channelId: string, amount: string);
   acceptPayment(channelState: ChannelState);
@@ -74,6 +74,7 @@ export interface PaymentChannelClientInterface {
   );
 }
 
+// This Client targets at _unidirectional_, single asset (ETH) payment channel running on Nitro protocol
 export class PaymentChannelClient implements PaymentChannelClientInterface {
   mySigningAddress?: string;
   myEthereumSelectedAddress?: string; // this state can be inspected to infer whether we need to get the user to "Connect With MetaMask" or not.
@@ -81,24 +82,24 @@ export class PaymentChannelClient implements PaymentChannelClientInterface {
   myAddress: string;
   constructor(private readonly channelClient: ChannelClientInterface) {}
   async createChannel(
-    seeder: string,
-    leecher: string,
-    seederBalance: string,
-    leecherBalance: string,
-    seederOutcomeAddress: string,
-    leecherOutcomeAddress: string
+    proposer: string,
+    acceptor: string,
+    proposerBalance: string,
+    acceptorBalance: string,
+    proposerOutcomeAddress: string,
+    acceptorOutcomeAddress: string
   ): Promise<ChannelState> {
     const participants = formatParticipants(
-      seeder,
-      leecher,
-      seederOutcomeAddress,
-      leecherOutcomeAddress
+      proposer,
+      acceptor,
+      proposerOutcomeAddress,
+      acceptorOutcomeAddress
     );
     const allocations = formatAllocations(
-      seederOutcomeAddress,
-      leecherOutcomeAddress,
-      seederBalance,
-      leecherBalance
+      proposerOutcomeAddress,
+      acceptorOutcomeAddress,
+      proposerBalance,
+      acceptorBalance
     );
     const appDefinition = '0x0'; // TODO SingleAssetPayments address
 
@@ -172,24 +173,24 @@ export class PaymentChannelClient implements PaymentChannelClientInterface {
 
   async updateChannel(
     channelId: string,
-    seeder: string,
-    leecher: string,
-    seederBalance: string,
-    leecherBalance: string,
-    seederOutcomeAddress: string,
-    leecherOutcomeAddress: string
+    proposer: string,
+    acceptor: string,
+    proposerBalance: string,
+    acceptorBalance: string,
+    proposerOutcomeAddress: string,
+    acceptorOutcomeAddress: string
   ) {
     const allocations = formatAllocations(
-      seederOutcomeAddress,
-      leecherOutcomeAddress,
-      seederBalance,
-      leecherBalance
+      proposerOutcomeAddress,
+      acceptorOutcomeAddress,
+      proposerBalance,
+      acceptorBalance
     );
     const participants = formatParticipants(
-      seeder,
-      leecher,
-      seederOutcomeAddress,
-      leecherOutcomeAddress
+      proposer,
+      acceptor,
+      proposerOutcomeAddress,
+      acceptorOutcomeAddress
     );
 
     // ignore return val for now and stub out response
@@ -203,57 +204,57 @@ export class PaymentChannelClient implements PaymentChannelClientInterface {
     return convertToChannelState(channelResult);
   }
 
-  // leecher may use this method to make payments (if they have sufficient funds)
+  // acceptor may use this method to make payments (if they have sufficient funds)
   async makePayment(channelId: string, amount: string) {
     const {
-      seeder,
-      leecher,
-      seederBalance,
-      leecherBalance,
-      seederOutcomeAddress,
-      leecherOutcomeAddress
+      proposer,
+      acceptor,
+      proposerBalance,
+      acceptorBalance,
+      proposerOutcomeAddress,
+      acceptorOutcomeAddress
     } = this.channelCache[channelId];
-    if (bigNumberify(leecherBalance).gte(amount)) {
+    if (bigNumberify(acceptorBalance).gte(amount)) {
       await this.updateChannel(
-        channelId, // channelId,
-        seeder, // seeder,
-        leecher, // leecher,
-        bigNumberify(seederBalance)
+        channelId,
+        proposer,
+        acceptor,
+        bigNumberify(proposerBalance)
           .add(amount)
-          .toString(), // seederBalance,
-        bigNumberify(leecherBalance)
+          .toString(),
+        bigNumberify(acceptorBalance)
           .sub(amount)
-          .toString(), // leecherBalance,
-        seederOutcomeAddress, // seederOutcomeAddress,
-        leecherOutcomeAddress // leecherOutcomeAddress
+          .toString(),
+        proposerOutcomeAddress,
+        acceptorOutcomeAddress
       );
     }
   }
-  // seeder may use this method to accept payments
+  // proposer may use this method to accept payments
   async acceptPayment(channelState: ChannelState) {
     const {
       channelId,
-      seeder,
-      leecher,
-      seederBalance,
-      leecherBalance,
-      seederOutcomeAddress,
-      leecherOutcomeAddress
+      proposer,
+      acceptor,
+      proposerBalance,
+      acceptorBalance,
+      proposerOutcomeAddress,
+      acceptorOutcomeAddress
     } = channelState;
     await this.updateChannel(
       channelId,
-      seeder,
-      leecher,
-      seederBalance,
-      leecherBalance,
-      seederOutcomeAddress,
-      leecherOutcomeAddress
+      proposer,
+      acceptor,
+      proposerBalance,
+      acceptorBalance,
+      proposerOutcomeAddress,
+      acceptorOutcomeAddress
     );
   }
 
   isPaymentToMe(channelState: ChannelState): boolean {
     // doesn't guarantee that my balance increased
-    const myIndex = channelState.seeder ? 0 : 1;
+    const myIndex = channelState.proposer ? 0 : 1;
     return channelState.status === 'running' && Number(channelState.turnNum) % 2 === myIndex;
   }
 
@@ -300,12 +301,12 @@ const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
     turnNum: turnNum.toString(), // TODO: turnNum should be switched to a number (or be a string everywhere),
     status,
     challengeExpirationTime,
-    seeder: participants[0].participantId,
-    leecher: participants[1].participantId,
-    seederOutcomeAddress: participants[0].destination,
-    leecherOutcomeAddress: participants[1].destination,
-    seederBalance: bigNumberify(allocations[0].allocationItems[0].amount).toString(),
-    leecherBalance: bigNumberify(allocations[0].allocationItems[1].amount).toString()
+    proposer: participants[0].participantId,
+    acceptor: participants[1].participantId,
+    proposerOutcomeAddress: participants[0].destination,
+    acceptorOutcomeAddress: participants[1].destination,
+    proposerBalance: bigNumberify(allocations[0].allocationItems[0].amount).toString(),
+    acceptorBalance: bigNumberify(allocations[0].allocationItems[1].amount).toString()
   };
 };
 
@@ -335,7 +336,7 @@ const formatAllocations = (aAddress: string, bAddress: string, aBal: string, bBa
 
 export class MockPaymentChannelClient implements PaymentChannelClientInterface {
   mySigningAddress?: string;
-  myEthereumSelectedAddress?: string; // this state can be inspected to infer whether we need to get the user to "Connect With MetaMask" or not.
+  myEthereumSelectedAddress?: string;
   channelCache: Record<string, ChannelState> = {};
   myAddress: string;
   constructor(private readonly channelClient: ChannelClientInterface) {}
@@ -345,20 +346,20 @@ export class MockPaymentChannelClient implements PaymentChannelClientInterface {
     turnNum: '0x0',
     status: 'running',
     challengeExpirationTime: '0x0',
-    seeder: '0x0',
-    leecher: '0x0',
-    seederOutcomeAddress: '0x0',
-    leecherOutcomeAddress: '0x0',
-    seederBalance: '0x0',
-    leecherBalance: '0x0'
+    proposer: '0x0',
+    acceptor: '0x0',
+    proposerOutcomeAddress: '0x0',
+    acceptorOutcomeAddress: '0x0',
+    proposerBalance: '0x0',
+    acceptorBalance: '0x0'
   };
   async createChannel(
-    seeder: string,
-    leecher: string,
-    seederBalance: string,
-    leecherBalance: string,
-    seederOutcomeAddress: string,
-    leecherOutcomeAddress: string
+    proposer: string,
+    acceptor: string,
+    proposerBalance: string,
+    acceptorBalance: string,
+    proposerOutcomeAddress: string,
+    acceptorOutcomeAddress: string
   ): Promise<ChannelState> {
     return this.mockChannelState;
   }
@@ -389,12 +390,12 @@ export class MockPaymentChannelClient implements PaymentChannelClientInterface {
   }
   async updateChannel(
     channelId: string,
-    seeder: string,
-    leecher: string,
-    seederBalance: string,
-    leecherBalance: string,
-    seederOutcomeAddress: string,
-    leecherOutcomeAddress: string
+    proposer: string,
+    acceptor: string,
+    proposerBalance: string,
+    acceptorBalance: string,
+    proposerOutcomeAddress: string,
+    acceptorOutcomeAddress: string
   ) {
     return {};
   }
