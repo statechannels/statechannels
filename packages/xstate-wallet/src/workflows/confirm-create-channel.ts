@@ -1,4 +1,4 @@
-import {MachineConfig, Action, StateSchema, Machine, Condition, StateMachine} from 'xstate';
+import {MachineConfig, Action, StateSchema, Machine, Condition, StateMachine, State} from 'xstate';
 import {Participant} from '@statechannels/client-api-schema';
 import {sendDisplayMessage} from '../messaging';
 import {createMockGuard} from '../utils/workflow-utils';
@@ -34,6 +34,10 @@ interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
   };
 }
 
+export type StateValue = keyof WorkflowStateSchema['states'];
+
+export type WorkflowState = State<WorkflowContext, WorkflowEvent, WorkflowStateSchema, any>;
+
 interface UserApproves {
   type: 'USER_APPROVES';
 }
@@ -54,8 +58,7 @@ const generateConfig = (
         '': [
           {
             target: 'waitForUserConfirmation',
-            cond: guards.noBudget,
-            actions: [actions.displayUi]
+            cond: guards.noBudget
           },
           {
             target: 'done'
@@ -65,7 +68,7 @@ const generateConfig = (
     },
     waitForUserConfirmation: {
       on: {
-        USER_APPROVES: {target: 'done', actions: [actions.hideUi]},
+        USER_APPROVES: {target: 'done'},
         USER_REJECTS: {target: 'failure', actions: [actions.hideUi]}
       }
     },

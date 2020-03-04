@@ -23,7 +23,7 @@ describe('MessagingService', () => {
   } as JsonRpcResponse;
 
   beforeEach(async () => {
-    messagingService = new MessagingService();
+    messagingService = new MessagingService({timeoutMs: 1000, maxRetries: 5});
     messagingService.setUrl('*');
 
     uiService = new UIService();

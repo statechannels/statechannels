@@ -11,7 +11,7 @@ import {
   CreateChannelRequest,
   UpdateChannelRequest
 } from '@statechannels/client-api-schema';
-import {interpret} from 'xstate';
+import {interpret, Interpreter} from 'xstate';
 import {applicationWorkflow, WorkflowContext} from '../workflows/application';
 import {Guid} from 'guid-typescript';
 
@@ -38,7 +38,9 @@ export class Player {
 
     this.channelWallet.workflows.push({id: workflowId, machine, domain: 'TODO'});
   }
-
+  get workflowMachine(): Interpreter<any, any, any, any> | undefined {
+    return this.channelWallet.workflows[0]?.machine;
+  }
   get workflowState(): string | object | undefined {
     return this.channelWallet.workflows[0]?.machine.state.value;
   }
