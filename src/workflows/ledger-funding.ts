@@ -1,11 +1,12 @@
-import {Machine, MachineConfig, ServiceConfig} from 'xstate';
+import {Machine, MachineConfig, ServiceConfig, assign, DoneInvokeEvent} from 'xstate';
 
 import {SupportState} from '.';
 import {Store} from '../store';
-import {allocateToTarget} from '../utils/outcome';
+import {allocateToTarget, isSimpleEthAllocation} from '../utils/outcome';
 import {AllocationItem} from '../store/types';
-import {getDataAndInvoke} from '../utils';
+import {getDataAndInvoke, checkThat} from '../utils';
 import {Funding} from '../store/memory-store';
+import {add} from '../utils/math-utils';
 
 const WORKFLOW = 'ledger-funding';
 
@@ -15,35 +16,42 @@ export interface Init {
   deductions: AllocationItem[];
 }
 
-const checkLedger = {
-  invoke: {src: 'checkLedger', onDone: 'fundTarget'}
-};
+const enum Services {
+  getTargetOutcome = 'getTargetOutcome',
+  updateFunding = 'updateFunding',
+  supportState = 'supportState'
+}
+
+export const enum Errors {
+  underfunded = 'Ledger channel is underfunded',
+  underallocated = 'Ledger channel is underallocated',
+  finalized = 'Ledger channel is finalized'
+}
+
 const FAILURE = `#${WORKFLOW}.failure`;
+const onError = {
+  target: FAILURE,
+  actions: assign({
+    error: (_, event: DoneInvokeEvent<Error>) => event.data.message
+  })
+};
 const fundTarget = getDataAndInvoke(
-  {src: 'getTargetOutcome'},
-  {src: 'supportState', opts: {onError: FAILURE}},
+  {src: 'getTargetOutcome', opts: {onError}},
+  {src: 'supportState', opts: {onError}},
   'updateFunding'
 );
 const updateFunding = {invoke: {src: 'updateFunding', onDone: 'success'}};
 
 export const config: MachineConfig<any, any, any> = {
   key: WORKFLOW,
-  initial: 'checkLedger',
+  initial: 'fundTarget',
   states: {
-    checkLedger,
     fundTarget,
     updateFunding,
     success: {type: 'final'},
     failure: {}
   }
 };
-
-const enum Services {
-  checkLedger = 'checkLedger',
-  getTargetOutcome = 'getTargetOutcome',
-  updateFunding = 'updateFunding',
-  supportState = 'supportState'
-}
 
 export const machine = (store: Store) => {
   async function getTargetOutcome(ctx: Init): Promise<SupportState.Init> {
@@ -52,6 +60,18 @@ export const machine = (store: Store) => {
     const {supported: ledgerState, channelConstants} = await store.getEntry(ledgerChannelId);
 
     if (!ledgerState) throw 'No supported state found';
+
+    const {amount, finalized} = await store.chain.getChainInfo(ledgerChannelId);
+
+    const currentlyAllocated = checkThat(ledgerState.outcome, isSimpleEthAllocation)
+      .allocationItems.map(i => i.amount)
+      .reduce(add);
+    const toDeduct = deductions.map(i => i.amount).reduce(add);
+
+    if (amount.lt(currentlyAllocated)) throw new Error(Errors.underfunded);
+    if (finalized) throw new Error(Errors.finalized);
+    if (currentlyAllocated.lt(toDeduct)) throw new Error(Errors.underallocated);
+
     return {
       state: {
         ...channelConstants,
@@ -68,7 +88,6 @@ export const machine = (store: Store) => {
   }
 
   const services: Record<Services, ServiceConfig<Init>> = {
-    checkLedger: () => Promise.resolve(), // TODO
     getTargetOutcome,
     updateFunding,
     supportState: SupportState.machine(store)
