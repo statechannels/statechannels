@@ -4,6 +4,7 @@ import {FakeChannelProvider} from '@statechannels/channel-client';
 import {ChannelClient} from '@statechannels/channel-client';
 import React from 'react';
 import {ChannelStatus} from '@statechannels/client-api-schema';
+import {SiteBudget} from '@statechannels/client-api-schema';
 
 export interface ChannelState {
   channelId: string;
@@ -289,6 +290,14 @@ export class PaymentChannelClient implements PaymentChannelClientInterface {
       hubAddress,
       hubDestinationAddress
     );
+  }
+
+  async getBudget(hubAddress: string): Promise<SiteBudget> {
+    return await this.channelClient.getBudget(hubAddress);
+  }
+
+  async closeAndWithdraw(hubAddress: string): Promise<SiteBudget> {
+    return await this.channelClient.closeAndWithdraw(hubAddress);
   }
 }
 
