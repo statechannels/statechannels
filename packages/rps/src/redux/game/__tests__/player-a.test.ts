@@ -42,6 +42,7 @@ describe('when joining an open game', () => {
       .withReducer(reducer, initialState)
       .dispatch(action)
       .provide([callCreateChannel(channelStates.preFund0)])
+      .dispatch(updateChannelState(channelStates.preFund0))
       .run({silenceTimeout: true});
 
     expect(storeState).toEqual(gameState(localStatesA.gameChosen, channelStates.preFund0));
@@ -71,6 +72,7 @@ describe('when chosing a weapon as player A', () => {
       .withReducer(reducer, initialState)
       .dispatch(action)
       .provide([[match.call.fn(randomHex), salt], callUpdateChannel(channelStates.roundProposed)])
+      .dispatch(updateChannelState(channelStates.roundProposed))
       .run({silenceTimeout: true});
 
     expect(storeState).toEqual(
@@ -89,6 +91,7 @@ describe("when player A receives player B's move", () => {
         .withReducer(reducer, initialState)
         .dispatch(action)
         .provide([callUpdateChannel(channelStates.reveal)])
+        .dispatch(updateChannelState(channelStates.reveal))
         .run({silenceTimeout: true});
 
       expect(storeState).toEqual(gameState(localStatesA.resultPlayAgain, channelStates.reveal));
@@ -104,6 +107,7 @@ describe("when player A receives player B's move", () => {
         .withReducer(reducer, initialState)
         .dispatch(action)
         .provide([callUpdateChannel(channelStates.revealInsufficientFundsB)])
+        .dispatch(updateChannelState(channelStates.revealInsufficientFundsB))
         .run({silenceTimeout: true});
 
       expect(storeState).toEqual(
@@ -166,6 +170,7 @@ describe('when the player resigns (which includes deciding not to play again)', 
         .withReducer(reducer, initialState)
         .dispatch(action)
         .provide([callCloseChannel(channelStates.concludeFromStart)])
+        .dispatch(updateChannelState(channelStates.concludeFromStart))
         .run({silenceTimeout: true});
 
       expect(storeState).toEqual(
@@ -197,6 +202,7 @@ describe('when the player resigns (which includes deciding not to play again)', 
         .withReducer(reducer, initialState)
         .dispatch(action)
         .provide([callCloseChannel(channelStates.concludeFromAccepted)])
+        .dispatch(updateChannelState(channelStates.concludeFromAccepted))
         .run({silenceTimeout: true});
 
       expect(storeState).toEqual(
