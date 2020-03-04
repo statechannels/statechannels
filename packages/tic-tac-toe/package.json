@@ -17,6 +17,7 @@
     "babel-preset-react-app": "9.1.0",
     "babel-runtime": "6.23.0",
     "bn.js": "5.1.1",
+    "broccoli": "3.3.3",
     "case-sensitive-paths-webpack-plugin": "2.3.0",
     "chalk": "3.0.0",
     "css-loader": "3.4.2",
@@ -146,6 +147,9 @@
     "**/*.{json,scss}": "prettier --ignore-path '.gitignore'"
   },
   "private": true,
+  "resolutions": {
+    "broccoli": "3.3.3"
+  },
   "scripts": {
     "build:ci": "run-s clearContracts contracts:compile build:ember:ci",
     "build:ember": "ember build",

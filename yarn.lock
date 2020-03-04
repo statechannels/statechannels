@@ -10074,10 +10074,10 @@ broccoli-uglify-sourcemap@^3.1.0:
     walk-sync "^1.1.3"
     workerpool "^5.0.1"
 
-broccoli@^3.2.0:
-  version "3.2.2"
-  resolved "https://registry.npmjs.org/broccoli/-/broccoli-3.2.2.tgz#00def531a9f745a6de5f1e5af1e823a54cb9f09f"
-  integrity sha512-eT8v8TeZzR3TzPzNhzM5BpvpG2nwtWBjEFmYVMbsvsJjO2STDqnTbYlDpTI7tzU0aqokmLxgYSBITxHWHNiD3A==
+broccoli@3.3.3, broccoli@^3.2.0:
+  version "3.3.3"
+  resolved "https://registry.npmjs.org/broccoli/-/broccoli-3.3.3.tgz#f4034b2495b709e99dd7e7d8834bf4a01bb4d0d7"
+  integrity sha512-MFyAk94I8XcSmfDZ0DtXlkgDvWL/U2lGbFpWiU1OPBGyUNC5WgWElC2U18SEFuDc0GncZfUaIxN+QAALrs4fAQ==
   dependencies:
     "@types/chai" "^4.2.9"
     "@types/chai-as-promised" "^7.1.2"
