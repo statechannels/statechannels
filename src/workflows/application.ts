@@ -19,7 +19,6 @@ import * as CreateAndDirectFund from './create-and-direct-fund';
 import {sendDisplayMessage, MessagingServiceInterface, convertToChannelResult} from '../messaging';
 import {filter, map} from 'rxjs/operators';
 import * as CCC from './confirm-create-channel';
-import {UpdateChannelRequest, CloseChannelRequest} from '@statechannels/client-api-schema';
 import {createMockGuard, getDataAndInvoke} from '../utils/workflow-utils';
 import {Store} from '../store/memory-store';
 import {StateVariables, SimpleAllocation} from '../store/types';
@@ -28,7 +27,6 @@ import {bigNumberify} from 'ethers/utils';
 import * as ConcludeChannel from './conclude-channel';
 import {isSimpleEthAllocation} from '../utils/outcome';
 import {unreachable} from '../utils';
-import {deserializeAllocations} from '../serde/app-messages/deserialize';
 import {
   PlayerRequestConclude,
   PlayerStateUpdate,
@@ -218,21 +216,9 @@ export const applicationWorkflow = (
     return messagingService.requestFeed.pipe(
       filter(
         r =>
-          (r.method === 'UpdateChannel' || r.method === 'CloseChannel') &&
-          r.params.channelId === channelId
-      ),
-      map((r: UpdateChannelRequest | CloseChannelRequest) => {
-        if (r.method === 'UpdateChannel') {
-          return {
-            type: 'PLAYER_STATE_UPDATE',
-            ...r.params,
-            requestId: r.id,
-            outcome: deserializeAllocations(r.params.allocations) as SimpleAllocation // TODO: Verify this
-          };
-        } else {
-          return {type: 'PLAYER_REQUEST_CONCLUDE', requestId: r.id, channelId: r.params.channelId};
-        }
-      })
+          (r.type === 'PLAYER_STATE_UPDATE' || r.type === 'PLAYER_REQUEST_CONCLUDE') &&
+          r.channelId === channelId
+      )
     );
   };
 

@@ -25,6 +25,11 @@ import {isAllocation, Message} from './store/types';
 import {serializeAllocation} from './serde/app-messages/serialize';
 import {deserializeMessage} from './serde/wire-format/deserialize';
 import {serializeMessage} from './serde/wire-format/serialize';
+import {AppRequestEvent} from './event-types';
+import {deserializeAllocations} from './serde/app-messages/deserialize';
+import {isSimpleEthAllocation} from './utils/outcome';
+import {bigNumberify} from 'ethers/utils';
+import {CHALLENGE_DURATION, NETWORK_ID} from './constants';
 
 type ChannelRequest =
   | CreateChannelRequest
@@ -33,14 +38,14 @@ type ChannelRequest =
   | CloseChannelRequest;
 
 interface InternalEvents {
-  ChannelRequest: [ChannelRequest];
+  AppRequest: [AppRequestEvent];
   CreateChannelRequest: [CreateChannelRequest];
   SendMessage: [Response | Notification];
 }
 
 export interface MessagingServiceInterface {
   readonly outboxFeed: Observable<Response | Notification>;
-  readonly requestFeed: Observable<ChannelRequest>;
+  readonly requestFeed: Observable<AppRequestEvent>;
 
   receiveRequest(jsonRpcMessage: Request): Promise<void>;
 
@@ -63,8 +68,8 @@ export class MessagingService implements MessagingServiceInterface {
     return fromEvent(this.eventEmitter, 'SendMessage');
   }
 
-  get requestFeed(): Observable<ChannelRequest> {
-    return fromEvent<ChannelRequest>(this.eventEmitter, 'ChannelRequest');
+  get requestFeed(): Observable<AppRequestEvent> {
+    return fromEvent(this.eventEmitter, 'AppRequest');
   }
 
   public async sendResponse(id: number, result: Response['result']) {
@@ -130,7 +135,8 @@ export class MessagingService implements MessagingServiceInterface {
       case 'UpdateChannel':
       case 'CloseChannel':
       case 'JoinChannel':
-        this.eventEmitter.emit('ChannelRequest', request);
+        const appRequest = convertToInternalEvent(request);
+        this.eventEmitter.emit('AppRequest', appRequest);
         break;
       case 'PushMessage':
         // todo: should verify message format here
@@ -205,4 +211,45 @@ export function sendDisplayMessage(displayMessage: 'Show' | 'Hide') {
   const showWallet = displayMessage === 'Show';
   const message = jrs.notification('UIUpdate', {showWallet});
   window.parent.postMessage(message, '*');
+}
+
+function convertToInternalEvent(request: ChannelRequest): AppRequestEvent {
+  switch (request.method) {
+    case 'CloseChannel':
+      return {
+        type: 'PLAYER_REQUEST_CONCLUDE',
+        requestId: request.id,
+        channelId: request.params.channelId
+      };
+    case 'CreateChannel': {
+      const outcome = deserializeAllocations(request.params.allocations);
+      if (!isSimpleEthAllocation(outcome)) {
+        throw new Error('Currently only a simple ETH allocation is supported');
+      }
+      return {
+        type: 'CREATE_CHANNEL',
+        ...request.params,
+        outcome,
+        challengeDuration: bigNumberify(CHALLENGE_DURATION),
+        chainId: NETWORK_ID,
+        requestId: request.id
+      };
+    }
+    case 'JoinChannel':
+      return {type: 'JOIN_CHANNEL', ...request.params, requestId: request.id};
+    case 'UpdateChannel':
+      const outcome = deserializeAllocations(request.params.allocations);
+
+      if (!isSimpleEthAllocation(outcome)) {
+        throw new Error('Currently only a simple ETH allocation is supported');
+      }
+
+      return {
+        type: 'PLAYER_STATE_UPDATE',
+        requestId: request.id,
+        outcome,
+        channelId: request.params.channelId,
+        appData: request.params.appData
+      };
+  }
 }
