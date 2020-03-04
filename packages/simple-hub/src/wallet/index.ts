@@ -6,18 +6,31 @@ import {serializeMessage} from '@statechannels/xstate-wallet/lib/src/serde/wire-
 import {cHubStateChannelPK, cHubStateChannelAddress} from '../constants';
 import {SignedState, Message, Participant} from '@statechannels/xstate-wallet/lib/src/store/types';
 
-function broadcastRecipients(participants: Participant[]): Participant[] {
-  return participants.filter(p => p.participantId !== cHubStateChannelAddress);
+function containsHub(participant: Participant): boolean {
+  return participant.participantId === cHubStateChannelAddress;
+}
+const notContainsHub = R.compose(R.not, containsHub);
+
+function broadcastRecipients(states: SignedState[]): Participant[] {
+  const allParticipantsWithDups = states
+    .map(state => state.participants)
+    .reduce((participantsSoFar, participants) => participantsSoFar.concat(participants), []);
+  return R.intersection(allParticipantsWithDups, allParticipantsWithDups).filter(notContainsHub);
 }
 
 export function respondToMessage(wireMessage: WireMessage): WireMessage[] {
   const message = deserializeMessage(wireMessage);
-  const lastState = R.last(message.signedStates);
-  const ourSignature = signState(lastState, cHubStateChannelPK);
-  const signatures = R.append(ourSignature, lastState.signatures);
-  const ourSignedState: SignedState = {...lastState, signatures};
-  const ourMessage: Message = {signedStates: [ourSignedState], objectives: message.objectives};
-  return broadcastRecipients(lastState.participants).map(participant =>
+  const statesWithHub = message.signedStates.filter(
+    state => state.participants.filter(containsHub).length
+  );
+  const signedStates = statesWithHub.map(state => {
+    const ourSignature = signState(state, cHubStateChannelPK);
+    const signatures = R.append(ourSignature, state.signatures);
+    return {...state, signatures};
+  });
+  const ourMessage: Message = {signedStates, objectives: message.objectives};
+
+  return broadcastRecipients(signedStates).map(participant =>
     serializeMessage(ourMessage, participant.participantId, wireMessage.recipient)
   );
 }
