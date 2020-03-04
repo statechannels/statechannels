@@ -32,22 +32,22 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   peersList: PeersByTorrent;
   pseAccount: string;
   torrents: PaidStreamingTorrent[] = [];
-  channelClient: Web3TorrentChannelClientInterface;
+  paymentChannelClient: Web3TorrentChannelClientInterface;
   outcomeAddress: string;
 
   constructor(opts: WebTorrent.Options & Partial<PaidStreamingExtensionOptions> = {}) {
     super(opts);
     this.peersList = {};
     this.pseAccount = opts.pseAccount;
-    this.channelClient = opts.channelClient;
+    this.paymentChannelClient = opts.paymentChannelClient;
     this.outcomeAddress = opts.outcomeAddress;
   }
 
   async enable() {
-    this.pseAccount = await this.channelClient.getAddress();
+    this.pseAccount = await this.paymentChannelClient.getAddress();
     log('set pseAccount to sc-wallet signing address');
     await window.ethereum.enable(); // TODO move this inside fake provider
-    this.outcomeAddress = await this.channelClient.getEthereumSelectedAddress();
+    this.outcomeAddress = await this.paymentChannelClient.getEthereumSelectedAddress();
     log('got ethereum address');
     log('ACCOUNT ID: ', this.pseAccount);
     log('THIS address: ', this.outcomeAddress);
@@ -186,12 +186,12 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       );
 
       // SEEDER is participants[0], LEECHER is participants[1]
-      const channel = await this.channelClient.createChannel(
+      const channel = await this.paymentChannelClient.createChannel(
         this.pseAccount, // seeder
         peerAccount, // leecher
         bigNumberify(0).toString(), // seederBalance: should begin at zero
         bigNumberify(4000).toString(), // leecherBalance,
-        this.channelClient.myEthereumSelectedAddress, // seederOutcomeAddress,
+        this.paymentChannelClient.myEthereumSelectedAddress, // seederOutcomeAddress,
         peerOutcomeAddress // leecherOutcomeAddress
       );
       log(`SEEDER > created channel with id ${channel.channelId}`);
@@ -204,13 +204,13 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     );
 
     // If the wallet queues a message, send it across the wire
-    this.channelClient.onMessageQueued((message: Message) => {
+    this.paymentChannelClient.onMessageQueued((message: Message) => {
       wire.paidStreamingExtension.sendMessage(JSON.stringify(message));
     });
 
     // If a channel is proposed, join it
-    this.channelClient.onChannelProposed(async (channelState: ChannelState) => {
-      await this.channelClient.joinChannel(channelState.channelId);
+    this.paymentChannelClient.onChannelProposed(async (channelState: ChannelState) => {
+      await this.paymentChannelClient.joinChannel(channelState.channelId);
     });
   }
 
@@ -218,7 +218,9 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     // [ George ] If web3torrent is to run the Single Asset Payments ForceMoveApp, and the payments are going to be unidirectional we could wrap the channelClient in a web3tChannelClient which offers a countersign() convenience method. This allows the seeder to immediately accept the payment and for the leecher to be ready to send another one as quickly as possible.
 
     log(`querying channel client for updated funds`);
-    const newSeederBalance = bigNumberify(this.channelClient.openChannels[channelId].seederBalance);
+    const newSeederBalance = bigNumberify(
+      this.paymentChannelClient.openChannels[channelId].seederBalance
+    );
     const payment = newSeederBalance.sub(
       bigNumberify(this.peersList[infoHash][peerId].seederBalance)
     );
@@ -236,8 +238,13 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
     // (window.channelProvider as FakeChannelProvider).playerIndex = 1;
 
-    await this.channelClient.makePayment(channelId, bigNumberify(REQUEST_RATE.mul(10)).toString());
-    const newSeederBalance = bigNumberify(this.channelClient.openChannels[channelId].seederBalance);
+    await this.paymentChannelClient.makePayment(
+      channelId,
+      bigNumberify(REQUEST_RATE.mul(10)).toString()
+    );
+    const newSeederBalance = bigNumberify(
+      this.paymentChannelClient.openChannels[channelId].seederBalance
+    );
     log(`payment made for channel ${channelId}, newSeederBalance: ${newSeederBalance}`);
   }
 
@@ -273,7 +280,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           this.jumpStart(torrent, wire);
           break;
         case PaidStreamingExtensionNotices.MESSAGE:
-          await this.channelClient.pushMessage(JSON.parse(data.message));
+          await this.paymentChannelClient.pushMessage(JSON.parse(data.message));
           turnNum = Number(JSON.parse(data.message).data.turnNum);
           channelId = JSON.parse(data.message).data.channelId;
           if (
@@ -287,7 +294,9 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
               wire.paidStreamingExtension.peerAccount,
               channelId
             );
-            await this.channelClient.acceptPayment(this.channelClient.openChannels[channelId]);
+            await this.paymentChannelClient.acceptPayment(
+              this.paymentChannelClient.openChannels[channelId]
+            );
             this.unblockPeer(torrent.infoHash, wire, wire.paidStreamingExtension.peerAccount);
           }
           break;

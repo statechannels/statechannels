@@ -23,6 +23,6 @@ export default function usePaidStreamingExtension(
 
 export type PaidStreamingExtensionOptions = {
   pseAccount: string;
-  channelClient?: Web3TorrentChannelClientInterface;
+  paymentChannelClient?: Web3TorrentChannelClientInterface;
   outcomeAddress: string;
 };

@@ -27,20 +27,24 @@ describe('Seeding and Leeching', () => {
     seeder = new WebTorrentPaidStreamingClient({
       pseAccount: '1',
       dht: false,
-      channelClient: new Web3TorrentChannelClient(new ChannelClient(new FakeChannelProvider())) // use distinct provider & client
+      paymentChannelClient: new Web3TorrentChannelClient(
+        new ChannelClient(new FakeChannelProvider())
+      ) // use distinct provider & client
     });
     seeder.on('error', err => fail(err));
     seeder.on('warning', err => fail(err));
-    seeder.channelClient.openChannels = {0x0: mockChannelState};
+    seeder.paymentChannelClient.openChannels = {0x0: mockChannelState};
 
     leecher = new WebTorrentPaidStreamingClient({
       pseAccount: '2',
       dht: false,
-      channelClient: new Web3TorrentChannelClient(new ChannelClient(new FakeChannelProvider())) // use distinct provider & client
+      paymentChannelClient: new Web3TorrentChannelClient(
+        new ChannelClient(new FakeChannelProvider())
+      ) // use distinct provider & client
     });
     leecher.on('error', err => fail(err));
     leecher.on('warning', err => fail(err));
-    leecher.channelClient.openChannels = {0x0: mockChannelState};
+    leecher.paymentChannelClient.openChannels = {0x0: mockChannelState};
   });
 
   it('should seed and remove a Torrent', done => {
