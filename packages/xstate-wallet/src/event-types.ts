@@ -40,9 +40,11 @@ export interface PlayerRequestConclude {
   channelId: string;
 }
 
-export type WorkflowEvent =
+export type AppRequestEvent =
   | PlayerRequestConclude
   | PlayerStateUpdate
   | OpenEvent
   | ChannelUpdated
   | JoinChannelEvent;
+
+export type WorkflowEvent = AppRequestEvent;
