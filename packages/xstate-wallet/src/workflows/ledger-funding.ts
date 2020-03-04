@@ -46,14 +46,12 @@ const enum Services {
 }
 
 export const machine = (store: Store) => {
-  async function getTargetOutcome({
-    targetChannelId,
-    ledgerChannelId,
-    deductions
-  }: Init): Promise<SupportState.Init> {
+  async function getTargetOutcome(ctx: Init): Promise<SupportState.Init> {
     // TODO: Switch to feed
-    const {latest: ledgerState, channelConstants} = await store.getEntry(ledgerChannelId);
+    const {targetChannelId, ledgerChannelId, deductions} = ctx;
+    const {supported: ledgerState, channelConstants} = await store.getEntry(ledgerChannelId);
 
+    if (!ledgerState) throw 'No supported state found';
     return {
       state: {
         ...channelConstants,
