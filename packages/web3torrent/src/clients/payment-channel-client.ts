@@ -63,6 +63,7 @@ export interface PaymentChannelClientInterface {
   );
   makePayment(channelId: string, amount: string);
   acceptPayment(channelState: ChannelState);
+  amProposer(channelId: string): boolean;
   isPaymentToMe(channelState: ChannelState): boolean;
   pushMessage(message: Message<ChannelResult>);
   approveBudgetAndFund(
@@ -74,7 +75,9 @@ export interface PaymentChannelClientInterface {
   );
 }
 
-// This Client targets at _unidirectional_, single asset (ETH) payment channel running on Nitro protocol
+// This Client targets at _unidirectional_, single asset (ETH) payment channel with 2 participants running on Nitro protocol
+// The proposer proposes the channel, but accepts payments
+// The acceptor joins the channel, and makes payments
 export class PaymentChannelClient implements PaymentChannelClientInterface {
   mySigningAddress?: string;
   myEthereumSelectedAddress?: string; // this state can be inspected to infer whether we need to get the user to "Connect With MetaMask" or not.
@@ -252,10 +255,23 @@ export class PaymentChannelClient implements PaymentChannelClientInterface {
     );
   }
 
+  amProposer(channelId: string): boolean {
+    return this.channelCache[channelId].proposer === this.mySigningAddress;
+  }
   isPaymentToMe(channelState: ChannelState): boolean {
+    const turnNum = Number(channelState.turnNum);
     // doesn't guarantee that my balance increased
-    const myIndex = channelState.proposer ? 0 : 1;
-    return channelState.status === 'running' && Number(channelState.turnNum) % 2 === myIndex;
+    if (channelState.proposer === this.mySigningAddress) {
+      // returns true for the second postFS if I am the proposer
+      // (I need to accept this 'payment' in order for another one to be sent)
+      return (channelState.status === 'running' && turnNum % 2 === 1) || turnNum === 3;
+    }
+    if (channelState.acceptor === this.mySigningAddress) {
+      return channelState.status === 'running' && turnNum % 2 === 0;
+    }
+    throw new Error(
+      `${this.mySigningAddress} is neither proposer ${channelState.proposer} nor acceptor ${channelState.acceptor}`
+    );
   }
 
   async pushMessage(message: Message<ChannelResult>) {

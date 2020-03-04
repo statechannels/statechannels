@@ -18,7 +18,7 @@ import {
 import {bigNumberify} from 'ethers/utils';
 
 import {PaymentChannelClientInterface, ChannelState} from '../clients/payment-channel-client';
-import {Message} from '@statechannels/channel-client';
+import {Message, ChannelResult} from '@statechannels/channel-client';
 
 const log = debug('web3torrent:library');
 
@@ -177,12 +177,12 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       log(`SEEDER > wire first_request of ${peerAccount}`);
       // SEEDER is participants[0], LEECHER is participants[1]
       const channel = await this.paymentChannelClient.createChannel(
-        this.pseAccount, // seeder
-        peerAccount, // leecher
-        bigNumberify(0).toString(), // seederBalance: should begin at zero
-        bigNumberify(4000).toString(), // leecherBalance,
-        this.paymentChannelClient.myEthereumSelectedAddress, // seederOutcomeAddress,
-        '0x0' // leecherOutcomeAddress TODO get this somehow
+        this.pseAccount, // proposer = seeder
+        peerAccount, // acceptor = leecher
+        bigNumberify(0).toString(), // proposerBalance: should begin at zero
+        bigNumberify(4000).toString(), // acceptorBalance,
+        this.paymentChannelClient.myEthereumSelectedAddress, // proposerOutcomeAddress,
+        '0x0' // acceptorOutcomeAddress TODO get this somehow
       );
       log(`SEEDER > created channel with id ${channel.channelId}`);
       wire.emit(PaidStreamingExtensionEvents.REQUEST, peerAccount);
@@ -249,6 +249,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     torrent.on(TorrentEvents.NOTICE, async (wire, {command, data}) => {
       log(`< ${command} received from ${wire.peerExtendedHandshake.pseAccount}`, data);
       let channelId: string;
+      let message: Message<ChannelResult>;
       let channelState: ChannelState;
       switch (command) {
         case PaidStreamingExtensionNotices.STOP:
@@ -263,11 +264,14 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           this.jumpStart(torrent, wire);
           break;
         case PaidStreamingExtensionNotices.MESSAGE:
-          channelState = JSON.parse(data.message).data;
-          channelId = channelState.channelId;
-          await this.paymentChannelClient.pushMessage(JSON.parse(data.message));
+          message = JSON.parse(data.message);
+          await this.paymentChannelClient.pushMessage(message);
+          channelId = message.data.channelId;
+          channelState = this.paymentChannelClient.channelCache[channelId];
+          // getting this from channelCache is safer than trusting message, since the wallet has validated it
           if (
-            JSON.parse(data.message).recipient === this.pseAccount &&
+            message.recipient === this.pseAccount &&
+            this.paymentChannelClient.amProposer(channelId) &&
             this.paymentChannelClient.isPaymentToMe(channelState)
           ) {
             await this.loadFunds(
