@@ -64,7 +64,7 @@ const File: React.FC<RouteComponentProps & Props> = props => {
               setButtonLabel('Preparing Download...');
               try {
                 // TODO: Put real values here
-                await web3torrent.channelClient.approveBudgetAndFund('', '', '', '', '');
+                await web3torrent.paymentChannelClient.approveBudgetAndFund('', '', '', '', '');
                 setTorrent({...torrent, ...(await download(torrent.magnetURI))});
               } catch (error) {
                 setErrorLabel(

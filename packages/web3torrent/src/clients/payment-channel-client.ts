@@ -31,10 +31,10 @@ if (process.env.REACT_APP_FAKE_CHANNEL_PROVIDER === 'true') {
 
 // TODO: Put inside better place than here where app can handle error case
 window.channelProvider.enable(process.env.REACT_APP_WALLET_URL);
-export interface Web3TorrentChannelClientInterface {
+export interface PaymentChannelClientInterface {
   mySigningAddress?: string;
   myEthereumSelectedAddress?: string; // this state can be inspected to infer whether we need to get the user to "Connect With MetaMask" or not.
-  openChannels: Record<string, ChannelState>;
+  channelCache: Record<string, ChannelState>;
   myAddress: string;
   createChannel(
     seeder: string,
@@ -73,10 +73,10 @@ export interface Web3TorrentChannelClientInterface {
   );
 }
 
-export class Web3TorrentChannelClient implements Web3TorrentChannelClientInterface {
+export class PaymentChannelClient implements PaymentChannelClientInterface {
   mySigningAddress?: string;
   myEthereumSelectedAddress?: string; // this state can be inspected to infer whether we need to get the user to "Connect With MetaMask" or not.
-  openChannels: Record<string, ChannelState> = {};
+  channelCache: Record<string, ChannelState> = {};
   myAddress: string;
   constructor(private readonly channelClient: ChannelClientInterface) {}
   async createChannel(
@@ -127,7 +127,7 @@ export class Web3TorrentChannelClient implements Web3TorrentChannelClientInterfa
   }
 
   cacheChannelState(channelState: ChannelState) {
-    this.openChannels = {...this.openChannels, [channelState.channelId]: channelState};
+    this.channelCache = {...this.channelCache, [channelState.channelId]: channelState};
   }
 
   // Accepts an web3t-friendly callback, performs the necessary encoding, and subscribes to the channelClient with an appropriate, API-compliant callback
@@ -211,7 +211,7 @@ export class Web3TorrentChannelClient implements Web3TorrentChannelClientInterfa
       leecherBalance,
       seederOutcomeAddress,
       leecherOutcomeAddress
-    } = this.openChannels[channelId];
+    } = this.channelCache[channelId];
     if (bigNumberify(leecherBalance).gte(amount)) {
       await this.updateChannel(
         channelId, // channelId,
@@ -273,11 +273,11 @@ export class Web3TorrentChannelClient implements Web3TorrentChannelClientInterfa
   }
 }
 
-export const web3TorrentChannelClient = new Web3TorrentChannelClient(
+export const paymentChannelClient = new PaymentChannelClient(
   new ChannelClient(window.channelProvider)
 );
 
-export const ChannelContext = React.createContext(web3TorrentChannelClient);
+export const ChannelContext = React.createContext(paymentChannelClient);
 
 const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
   const {
@@ -326,10 +326,10 @@ const formatAllocations = (aAddress: string, bAddress: string, aBal: string, bBa
 
 // Mocks
 
-export class MockWeb3TorrentChannelClient implements Web3TorrentChannelClientInterface {
+export class MockPaymentChannelClient implements PaymentChannelClientInterface {
   mySigningAddress?: string;
   myEthereumSelectedAddress?: string; // this state can be inspected to infer whether we need to get the user to "Connect With MetaMask" or not.
-  openChannels: Record<string, ChannelState> = {};
+  channelCache: Record<string, ChannelState> = {};
   myAddress: string;
   constructor(private readonly channelClient: ChannelClientInterface) {}
 

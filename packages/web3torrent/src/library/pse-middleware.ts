@@ -1,7 +1,7 @@
 import {ExtensionConstructor, Wire} from 'bittorrent-protocol';
 import {PaidStreamingExtension} from './paid-streaming-extension';
 import {Wireish} from './types';
-import {Web3TorrentChannelClientInterface} from '../clients/web3t-channel-client';
+import {PaymentChannelClientInterface} from '../clients/payment-channel-client';
 
 /**
  * Returns a bittorrent extension
@@ -22,5 +22,5 @@ export default function usePaidStreamingExtension(
 
 export type PaidStreamingExtensionOptions = {
   pseAccount: string;
-  channelClient?: Web3TorrentChannelClientInterface;
+  paymentChannelClient?: PaymentChannelClientInterface;
 };

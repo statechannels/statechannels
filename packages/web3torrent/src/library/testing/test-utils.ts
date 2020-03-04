@@ -1,6 +1,6 @@
 import MemoryChunkStore from 'memory-chunk-store';
 import fixtures from 'webtorrent-fixtures';
-import {ChannelState} from '../../clients/web3t-channel-client';
+import {ChannelState} from '../../clients/payment-channel-client';
 
 export const defaultFile = new Blob([fixtures.leaves.content]);
 export const defaultTorrentHash = fixtures.leaves.parsedTorrent.infoHash;
