@@ -7,7 +7,7 @@ import {cHubStateChannelPK, cHubStateChannelAddress} from '../constants';
 import {SignedState, Message, Participant} from '@statechannels/xstate-wallet/lib/src/store/types';
 
 function containsHub(participant: Participant): boolean {
-  return participant.participantId === cHubStateChannelAddress;
+  return participant.signingAddress === cHubStateChannelAddress;
 }
 const notContainsHub = R.compose(R.not, containsHub);
 

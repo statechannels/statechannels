@@ -23,9 +23,5 @@
     }
   ],
   "include": ["./src"],
-  "exclude": ["**/*test_data.ts", "**/__mocks__/*"],
-  "files": [
-    "./src/wallet/__test__/ledger-message.json",
-    "./src/wallet/__test__/ledger-response.json"
-  ]
+  "exclude": ["**/*test_data.ts", "**/__mocks__/*"]
 }

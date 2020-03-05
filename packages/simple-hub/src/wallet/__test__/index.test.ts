@@ -1,10 +1,20 @@
 import {respondToMessage} from '../';
 import {Message} from '@statechannels/wire-format';
-
-import ledgerMessage from './ledger-message.json';
-import ledgerResponse from './ledger-response.json';
+import {serializeMessage} from '@statechannels/xstate-wallet/lib/src/serde/wire-format/serialize';
+import {ledgerState1, participants, ledgerState2} from '../test-helpers';
 
 it('Echo message with signature', () => {
+  const ledgerMessage = serializeMessage(
+    {signedStates: [ledgerState1]},
+    participants[1].participantId,
+    participants[0].participantId
+  );
+  // expect(ledgerMessage).toMatchObject(ledgerMessageStatic);
   const response = respondToMessage(ledgerMessage);
-  expect(response).toMatchObject<Message[]>(ledgerResponse);
+  const expectedResponse = serializeMessage(
+    {signedStates: [ledgerState2]},
+    participants[0].participantId,
+    participants[1].participantId
+  );
+  expect(response).toMatchObject<Message[]>([expectedResponse]);
 });
