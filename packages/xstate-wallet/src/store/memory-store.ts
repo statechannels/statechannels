@@ -14,6 +14,10 @@ import {calculateChannelId, hashState} from './state-utils';
 import {NETWORK_ID} from '../constants';
 import {checkThat, exists} from '../utils';
 
+// To add virtual-funding to create-and-fund, I need a budget concept on the store.
+// Since I don't know what this will look like, I will simply make it a boolean -- it's
+// there or it isn't.
+type Budget = boolean & {_isBudget: void};
 interface DirectFunding {
   type: 'Direct';
 }
@@ -69,7 +73,8 @@ export interface Store {
   ): Promise<ChannelStoreEntry>;
   getEntry(channelId): Promise<ChannelStoreEntry>;
   getLedger(peerId: string): Promise<ChannelStoreEntry>;
-  // TODO: This is awkward. Might be better to set the funding on create/initialize channel?
+  getBudget(appDefinition: string): Promise<Budget>;
+
   setFunding(channelId: string, funding: Funding): Promise<void>;
 
   // TODO: I don't know how the store is mean to send outgoing messages.
@@ -170,12 +175,21 @@ export class MemoryStore implements Store {
     channelEntry.setFunding(funding);
   }
 
+  private budgets: Record<string, Budget> = {};
+  public async getBudget(appDefinition: string) {
+    return this.budgets[appDefinition] || (false as Budget);
+  }
+
   public async getLedger(peerId: string) {
     const ledgerId = this._ledgers[peerId];
 
     if (!ledgerId) throw new Error(`No ledger exists with peer ${peerId}`);
 
     return await this.getEntry(ledgerId);
+  }
+
+  public setBudget(appDefinition: string, budget: Budget) {
+    this.budgets[appDefinition] = budget;
   }
 
   public setLedger(entry: MemoryChannelStoreEntry) {
