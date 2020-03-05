@@ -9,7 +9,6 @@ it('Echo message with signature', () => {
     participants[1].participantId,
     participants[0].participantId
   );
-  // expect(ledgerMessage).toMatchObject(ledgerMessageStatic);
   const response = respondToMessage(ledgerMessage);
   const expectedResponse = serializeMessage(
     {signedStates: [ledgerState2]},
