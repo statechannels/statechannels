@@ -13,6 +13,7 @@
     "@statechannels/channel-client": "0.0.1",
     "bencode": "2.0.1",
     "debug": "4.1.1",
+    "ethers": "^4.0.45",
     "eventemitter3": "4.0.0",
     "jszip": "3.2.2",
     "node-sass": "4.13.1",
