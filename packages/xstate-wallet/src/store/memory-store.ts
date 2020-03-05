@@ -6,13 +6,22 @@ import * as _ from 'lodash';
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {Wallet} from 'ethers';
 
-import {Participant, StateVariables, SignedState, State, Objective, Message} from './types';
+import {
+  Participant,
+  StateVariables,
+  SignedState,
+  State,
+  Objective,
+  Message,
+  DBBackend
+} from './types';
 import {MemoryChannelStoreEntry, ChannelStoreEntry} from './memory-channel-storage';
 import {AddressZero} from 'ethers/constants';
 import {Chain, FakeChain} from '../chain';
 import {calculateChannelId, hashState} from './state-utils';
 import {NETWORK_ID} from '../constants';
 import {checkThat, exists} from '../utils';
+import {MemoryBackend} from './store-memory-backend';
 
 interface DirectFunding {
   type: 'Direct';
@@ -60,7 +69,7 @@ export interface Store {
   pushMessage: (message: Message) => Promise<void>;
   channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry>;
 
-  getAddress(): string;
+  getAddress(): Promise<string>;
   signAndAddState(channelId: string, stateVars: StateVariables): Promise<void>;
   createChannel(
     participants: Participant[],
@@ -82,30 +91,32 @@ export interface Store {
 }
 
 export class MemoryStore implements Store {
+  private backend: DBBackend = new MemoryBackend();
   readonly chain: Chain;
-  private _channels: Record<string, MemoryChannelStoreEntry | undefined> = {};
-  private _objectives: Objective[] = [];
-  private _nonces: Record<string, BigNumber | undefined> = {};
   private _eventEmitter = new EventEmitter<InternalEvents>();
-  private _privateKeys: Record<string, string | undefined> = {};
-  private _ledgers: Record<string, string | undefined> = {};
 
-  constructor(privateKeys?: string[], chain?: Chain) {
+  constructor(privateKeys?: string[], chain?: Chain, backend?: DBBackend) {
     // TODO: We shouldn't default to a fake chain
     // but I didn't feel like updating all the constructor calls
     this.chain = chain || new FakeChain();
     this.chain.initialize();
 
+    if (backend) {
+      this.backend = backend;
+    } else {
+      this.backend = new MemoryBackend();
+    }
+
     if (privateKeys && privateKeys.length > 0) {
       // load existing keys
       privateKeys.forEach(key => {
         const wallet = new Wallet(key);
-        this._privateKeys[wallet.address] = wallet.privateKey;
+        this.backend.setPrivateKey(wallet.address, wallet.privateKey);
       });
     } else {
       // generate a new key
       const wallet = Wallet.createRandom();
-      this._privateKeys[wallet.address] = wallet.privateKey;
+      this.backend.setPrivateKey(wallet.address, wallet.privateKey);
     }
   }
 
@@ -142,8 +153,8 @@ export class MemoryStore implements Store {
 
   private async initializeChannel(state: State): Promise<MemoryChannelStoreEntry> {
     const addresses = state.participants.map(x => x.signingAddress);
-
-    const myIndex = addresses.findIndex(address => !!this._privateKeys[address]);
+    const privateKeys = await this.backend.privateKeys();
+    const myIndex = addresses.findIndex(async address => !!privateKeys[address]);
     if (myIndex === -1) {
       throw new Error("Couldn't find the signing key for any participant in wallet.");
     }
@@ -153,15 +164,15 @@ export class MemoryStore implements Store {
     // TODO: There could be concurrency problems which lead to entries potentially being overwritten.
     this.setNonce(addresses, state.channelNonce);
     const key = hashState(state);
-    const entry =
-      this._channels[channelId] || new MemoryChannelStoreEntry(state, myIndex, {[key]: state});
 
-    this._channels[channelId] = entry;
-    return Promise.resolve(entry);
+    const channel = await this.backend.getChannel(channelId);
+    const entry = channel || new MemoryChannelStoreEntry(state, myIndex, {[key]: state});
+
+    return this.backend.setChannel(channelId, entry);
   }
 
   public async setFunding(channelId: string, funding: Funding): Promise<void> {
-    const channelEntry = this._channels[channelId];
+    const channelEntry = await this.backend.getChannel(channelId);
     if (!channelEntry) {
       throw new Error(`No channel for ${channelId}`);
     }
@@ -172,7 +183,7 @@ export class MemoryStore implements Store {
   }
 
   public async getLedger(peerId: string) {
-    const ledgerId = this._ledgers[peerId];
+    const ledgerId = await this.backend.getLedger(peerId);
 
     if (!ledgerId) throw new Error(`No ledger exists with peer ${peerId}`);
 
@@ -180,13 +191,16 @@ export class MemoryStore implements Store {
   }
 
   public setLedger(entry: MemoryChannelStoreEntry) {
+    // !! SP: this function is not async!.... so that saved me!
     // This is not on the Store interface itself -- it is useful to set up a test store
     const {channelId} = entry;
-    this._channels[channelId] = entry;
-
-    const peerId = entry.participants.find(p => p.signingAddress !== this.getAddress());
-    if (peerId) this._ledgers[peerId.participantId] = channelId;
-    else throw 'No peer';
+    this.backend.setChannel(channelId, entry).then(_ => {
+      this.getAddress().then(address => {
+        const peerId = entry.participants.find(p => p.signingAddress !== address);
+        if (peerId) this.backend.setLedger(peerId.participantId, channelId);
+        else throw 'No peer';
+      });
+    });
   }
 
   public async createChannel(
@@ -196,13 +210,13 @@ export class MemoryStore implements Store {
     appDefinition = AddressZero
   ): Promise<ChannelStoreEntry> {
     const addresses = participants.map(x => x.signingAddress);
-
-    const myIndex = addresses.findIndex(address => !!this._privateKeys[address]);
+    const privateKeys = await this.backend.privateKeys();
+    const myIndex = addresses.findIndex(address => !!privateKeys[address]);
     if (myIndex === -1) {
       throw new Error("Couldn't find the signing key for any participant in wallet.");
     }
 
-    const channelNonce = this.getNonce(addresses).add(1);
+    const channelNonce = (await this.getNonce(addresses)).add(1);
     const chainId = NETWORK_ID;
 
     const entry = await this.initializeChannel({
@@ -220,29 +234,30 @@ export class MemoryStore implements Store {
       _.pick(stateVars, 'outcome', 'turnNum', 'appData', 'isFinal')
     );
 
-    return Promise.resolve(entry);
+    return entry;
   }
-  private getNonce(addresses: string[]): BigNumber {
-    return this._nonces[this.nonceKeyFromAddresses(addresses)] || bigNumberify(-1);
+  private async getNonce(addresses: string[]): Promise<BigNumber> {
+    const nonce = await this.backend.getNonce(this.nonceKeyFromAddresses(addresses));
+    return nonce || bigNumberify(-1);
   }
 
-  private setNonce(addresses: string[], value: BigNumber) {
-    if (value.lte(this.getNonce(addresses))) throw 'Invalid nonce';
-
-    this._nonces[this.nonceKeyFromAddresses(addresses)] = value;
+  private async setNonce(addresses: string[], value: BigNumber) {
+    const nonce = await this.getNonce(addresses);
+    if (value.lte(nonce)) throw 'Invalid nonce';
+    await this.backend.setNonce(this.nonceKeyFromAddresses(addresses), value);
   }
 
   private nonceKeyFromAddresses = (addresses: string[]): string => addresses.join('::');
 
   async signAndAddState(channelId: string, stateVars: StateVariables) {
-    const channelStorage = this._channels[channelId];
+    const channelStorage = await this.backend.getChannel(channelId);
 
     if (!channelStorage) {
       throw new Error('Channel not found');
     }
     const {participants} = channelStorage;
     const myAddress = participants[channelStorage.myIndex].signingAddress;
-    const privateKey = this._privateKeys[myAddress];
+    const privateKey = await this.backend.getPrivateKey(myAddress);
 
     if (!privateKey) {
       throw new Error('No longer have private key');
@@ -262,15 +277,17 @@ export class MemoryStore implements Store {
 
   async addState(state: SignedState): Promise<ChannelStoreEntry> {
     const channelId = calculateChannelId(state);
-    const channelStorage = this._channels[channelId] || (await this.initializeChannel(state));
+    const channelStorage =
+      (await this.backend.getChannel(channelId)) || (await this.initializeChannel(state));
     // TODO: This is kind of awkward
     state.signatures.forEach(sig => channelStorage.addState(state, sig));
     this._eventEmitter.emit('channelUpdated', await this.getEntry(channelId));
     return this.getEntry(channelId);
   }
 
-  public getAddress(): string {
-    return Object.keys(this._privateKeys)[0];
+  public async getAddress(): Promise<string> {
+    const privateKeys = await this.backend.privateKeys();
+    return Object.keys(privateKeys)[0];
   }
 
   async pushMessage(message: Message) {
@@ -285,17 +302,18 @@ export class MemoryStore implements Store {
         })
       );
     }
-
+    const dbObjectives = await this.backend.objectives();
     objectives?.forEach(objective => {
-      if (!_.includes(this._objectives, objective)) {
-        this._objectives.push(objective);
+      if (!_.includes(objectives, objective)) {
+        objectives.push(objective);
         this._eventEmitter.emit('newObjective', objective);
       }
     });
+    this.backend.setObjectives(dbObjectives);
   }
 
   public async getEntry(channelId: string): Promise<ChannelStoreEntry> {
-    const entry = this._channels[channelId];
+    const entry = await this.backend.getChannel(channelId);
     if (!entry) {
       throw 'Channel id not found';
     }
