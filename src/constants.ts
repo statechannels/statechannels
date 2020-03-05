@@ -12,7 +12,7 @@ export const NITRO_ADJUDICATOR_ADDRESS =
 export const HUB_ADDRESS = process.env.HUB_ADDRESS || '0xaaaa84838319627Fa056fC3FC29ab94d479B8502';
 export const HUB_DESTINATION = HUB_ADDRESS;
 export const HUB: Participant = {
-  destination: hexZeroPad(HUB_DESTINATION.toLowerCase(), 32 - 20),
+  destination: hexZeroPad(HUB_DESTINATION.toLowerCase(), 32),
   signingAddress: HUB_ADDRESS,
   participantId: 'hub'
 };
