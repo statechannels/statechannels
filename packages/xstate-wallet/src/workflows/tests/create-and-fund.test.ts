@@ -1,6 +1,5 @@
 import {interpret} from 'xstate';
 import waitForExpect from 'wait-for-expect';
-import {add} from '../../utils/math-utils';
 
 import {Init, machine} from '../create-and-fund';
 
@@ -12,10 +11,10 @@ import {ChannelConstants, Outcome, State} from '../../store/types';
 import {AddressZero} from 'ethers/constants';
 import {checkThat} from '../../utils';
 import {isSimpleEthAllocation} from '../../utils/outcome';
-import {FakeChain, Chain} from '../../chain';
 import {wallet1, wallet2, participants} from './data';
 import {subscribeToMessages} from './message-service';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../../constants';
+import {FakeChain, Chain} from '../../chain';
 
 jest.setTimeout(20000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
@@ -40,10 +39,10 @@ const ledgerChannel: ChannelConstants = {
   participants,
   appDefinition
 };
-const ledgerChannelId = calculateChannelId(ledgerChannel);
 
 const destinations = participants.map(p => p.destination);
 const amounts = [bigNumberify(7), bigNumberify(5)];
+const totalAmount = amounts.reduce((a, b) => a.add(b));
 const allocation: Outcome = {
   type: 'SimpleAllocation',
   assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
@@ -60,7 +59,6 @@ const context: Init = {
   appData: '0x'
 };
 
-let chain: Chain;
 let aStore: Store;
 let bStore: Store;
 
@@ -70,6 +68,7 @@ const allSignState = (state: State) => ({
 });
 
 beforeEach(() => {
+  const chain: Chain = new FakeChain();
   aStore = new MemoryStore([wallet1.privateKey], chain);
   bStore = new MemoryStore([wallet2.privateKey], chain);
 
@@ -87,11 +86,7 @@ beforeEach(() => {
   });
 });
 
-test('direct funding', async () => {
-  const _chain = new FakeChain();
-  _chain.depositSync(ledgerChannelId, '0', amounts.reduce(add).toHexString());
-  [aStore, bStore].forEach((store: Store) => (store.chain = _chain));
-
+test('it uses direct funding when there is no budget', async () => {
   const aService = interpret(machine(aStore).withContext(context));
 
   const bService = interpret(machine(bStore).withContext(context));
@@ -106,6 +101,8 @@ test('direct funding', async () => {
 
     expect(outcome).toMatchObject(allocation);
     expect((await aStore.getEntry(targetChannelId)).funding).toMatchObject({type: 'Direct'});
-    expect(await (await chain.getChainInfo(targetChannelId)).amount).toEqual('2');
+    expect(await (await aStore.chain.getChainInfo(targetChannelId)).amount).toMatchObject(
+      totalAmount
+    );
   }, EXPECT_TIMEOUT);
 });

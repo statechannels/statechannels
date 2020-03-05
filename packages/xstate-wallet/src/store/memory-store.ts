@@ -16,7 +16,6 @@ import {checkThat, exists} from '../utils';
 
 interface DirectFunding {
   type: 'Direct';
-  amount: BigNumber;
 }
 
 interface IndirectFunding {

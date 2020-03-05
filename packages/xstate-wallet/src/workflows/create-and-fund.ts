@@ -1,5 +1,7 @@
-import {Machine, MachineConfig} from 'xstate';
+import {Machine, MachineConfig, StateNodeConfig} from 'xstate';
 
+import {filter, map, take, tap} from 'rxjs/operators';
+import _ from 'lodash';
 import {SimpleAllocation} from '../store/types';
 
 import {MachineFactory} from '../utils/workflow-utils';
@@ -27,14 +29,22 @@ export type Init = {
 const preFundSetup = getDataAndInvoke<Init, Service>(
   {src: 'getPreFundSetup'},
   {src: 'supportState'},
-  'depositing'
+  'directFunding'
 );
 
-const depositing = getDataAndInvoke<Context, Service>(
-  {src: 'getDepositingInfo'},
-  {src: 'depositing'},
-  'postFundSetup'
-);
+const directFunding: StateNodeConfig<any, any, any> = {
+  initial: 'depositing',
+  states: {
+    depositing: getDataAndInvoke<Context, Service>(
+      {src: 'getDepositingInfo'},
+      {src: 'depositing'},
+      'updateFunding'
+    ),
+    updateFunding: {invoke: {src: 'updateFunding', onDone: 'done'}},
+    done: {type: 'final'}
+  },
+  onDone: 'postFundSetup'
+};
 
 const postFundSetup = getDataAndInvoke<Init, Service>(
   {src: 'getPostFundSetup'},
@@ -48,7 +58,7 @@ export const config: MachineConfig<Context, any, any> = {
   initial: 'preFundSetup',
   states: {
     preFundSetup,
-    depositing,
+    directFunding,
     postFundSetup,
     success: {type: 'final'}
   }
@@ -59,7 +69,8 @@ const services = (store: Store) => ({
   supportState: SupportState.machine(store),
   getDepositingInfo: getDepositingInfo(store),
   getPreFundSetup: getPreFundSetup(store),
-  getPostFundSetup: getPostFundSetup(store)
+  getPostFundSetup: getPostFundSetup(store),
+  updateFunding: updateFunding(store)
 });
 type Service = keyof ReturnType<typeof services>;
 
@@ -68,9 +79,6 @@ const options = (store: Store) => ({services: services(store)});
 export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => {
   return Machine(config).withConfig(options(store), init);
 };
-
-import {filter, map, take, tap} from 'rxjs/operators';
-import _ from 'lodash';
 
 /*
 It's safe to use support state instead of advance-channel:
@@ -132,3 +140,6 @@ const getDepositingInfo = (store: Store) => async ({channelId}: Init): Promise<D
 
   throw Error(`Could not find an allocation for participant id ${myIndex}`);
 };
+
+const updateFunding = (store: Store) => (ctx: Init) =>
+  store.setFunding(ctx.channelId, {type: 'Direct'});
