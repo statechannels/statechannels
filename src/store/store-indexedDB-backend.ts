@@ -3,7 +3,7 @@ import {MemoryChannelStoreEntry} from './memory-channel-storage';
 import {Objective, DBBackend} from './types';
 import 'fake-indexeddb/auto';
 
-export class MemoryBackend implements DBBackend {
+export class IndexedDBBackend implements DBBackend {
   // I leave this for reference of types
   // private _channels: Record<string, MemoryChannelStoreEntry | undefined> = {};
   // private _objectives: Objective[] = [];
@@ -13,7 +13,7 @@ export class MemoryBackend implements DBBackend {
 
   private _db;
 
-  constructor(params) {
+  constructor(_) {
     if (!indexedDB) {
       console.error("Your browser doesn't support a stable version of IndexedDB.");
     }
