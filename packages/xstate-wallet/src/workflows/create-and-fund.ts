@@ -1,14 +1,8 @@
-import {Machine, MachineConfig, StateNodeConfig} from 'xstate';
+import {Machine, MachineConfig, StateNodeConfig, ActionTypes} from 'xstate';
 
 import {filter, map, take, tap} from 'rxjs/operators';
 import _ from 'lodash';
-import {
-  SimpleAllocation,
-  isVirtuallyFund,
-  StateVariables,
-  Participant,
-  Outcome
-} from '../store/types';
+import {SimpleAllocation, isVirtuallyFund, StateVariables, Outcome} from '../store/types';
 
 import {MachineFactory} from '../utils/workflow-utils';
 import {Store} from '../store';
@@ -18,7 +12,7 @@ import {isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
 import {checkThat, getDataAndInvoke} from '../utils';
 import {SupportState, VirtualFundingAsLeaf} from '.';
 import {from, Observable} from 'rxjs';
-import {CHALLENGE_DURATION, HUB_ADDRESS, HUB_DESTINATION} from '../constants';
+import {CHALLENGE_DURATION, HUB} from '../constants';
 import {bigNumberify} from 'ethers/utils';
 const PROTOCOL = 'create-and-fund';
 
@@ -62,20 +56,15 @@ const triggerObjective = (store: Store) => async (ctx: Init): Promise<void> => {
   const {channelConstants, supported, myIndex} = await store.getEntry(ctx.channelId);
   if (myIndex !== 0) return;
 
-  const hub: Participant = {
-    destination: HUB_DESTINATION,
-    participantId: 'hub',
-    signingAddress: HUB_ADDRESS
-  };
   const {participants: targetParticipants} = channelConstants;
-  const participants = [targetParticipants[0], hub, targetParticipants[1]];
+  const participants = [targetParticipants[0], HUB, targetParticipants[1]];
 
   const {allocationItems} = checkThat(supported?.outcome, isSimpleEthAllocation);
 
   const outcome: Outcome = simpleEthAllocation([
     allocationItems[0],
     allocationItems[1],
-    {destination: hub.destination, amount: allocationItems.map(i => i.amount).reduce(add)}
+    {destination: HUB.destination, amount: allocationItems.map(i => i.amount).reduce(add)}
   ]);
 
   const stateVars: StateVariables = {
@@ -125,7 +114,7 @@ const postFundSetup = getDataAndInvoke<Init, Service>(
 export const config: MachineConfig<Init, any, any> = {
   key: PROTOCOL,
   initial: 'preFundSetup',
-  on: {FAILURE: {target: 'failure'}},
+  on: {[ActionTypes.ErrorCustom]: {target: 'failure'}},
   states: {
     preFundSetup,
     funding: {
