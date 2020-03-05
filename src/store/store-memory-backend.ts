@@ -12,19 +12,19 @@ export class MemoryBackend implements DBBackend {
   // Generic Getters
 
   public async privateKeys() {
-    return Promise.resolve(this._privateKeys);
+    return this._privateKeys;
   }
   public async ledgers() {
-    return Promise.resolve(this._ledgers);
+    return this._ledgers;
   }
   public async nonces() {
-    return Promise.resolve(this._nonces);
+    return this._nonces;
   }
   public async objectives() {
-    return Promise.resolve(this._objectives);
+    return this._objectives;
   }
   public async channels() {
-    return Promise.resolve(this._channels);
+    return this._channels;
   }
 
   // Individual Getters/seters
