@@ -385,7 +385,7 @@ export const applicationWorkflow = (
     invokeCreateChannelConfirmation: (context, event: DoneInvokeEvent<CCC.WorkflowContext>) =>
       CCC.confirmChannelCreationWorkflow(store, event.data),
     getDataForCreateChannelAndFund: async (
-      context: WorkflowContext
+      context: ChannelParamsExist
     ): Promise<CreateAndFund.Init> => {
       const {latestSupportedByMe, channelId} = await store.getEntry(context.channelId);
       const allocation = checkThat(latestSupportedByMe?.outcome, isSimpleEthAllocation);
