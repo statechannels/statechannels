@@ -28,7 +28,7 @@ export const second: Participant = {
 };
 export const third: Participant = HUB;
 export const participants: [Participant, Participant] = [first, second];
-export const threeParticipants: [Participant, Participant, Participant] = [first, third, second];
+export const threeParticipants: [Participant, Participant, Participant] = [first, second, third];
 
 export const appState = (n: BigNumberish): State => ({
   appData: '0x0000000000000000000000000000000000000000000000000000000000000000',
