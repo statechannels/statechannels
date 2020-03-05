@@ -11,11 +11,12 @@ export function subscribeToMessages(stores: Record<string, Store>) {
           message.objectives?.map(m => m.participants)
         )
       );
-
-      participants
-        .filter(exists)
-        .filter(p => p.signingAddress !== store.getAddress())
-        .map(p => stores[p.participantId].pushMessage(message));
+      store.getAddress().then(address => {
+        participants
+          .filter(exists)
+          .filter(p => p.signingAddress !== address)
+          .map(p => stores[p.participantId].pushMessage(message));
+      });
     })
   );
 }

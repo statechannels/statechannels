@@ -41,9 +41,9 @@ const signedState = {...state, signatures: [signature]};
 const signedStates = [signedState];
 
 describe('getAddress', () => {
-  it('returns an address', () => {
+  it('returns an address', async () => {
     const store = new MemoryStore([aPrivateKey]);
-    const address = store.getAddress();
+    const address = await store.getAddress();
 
     expect(address).toEqual(aAddress);
   });
