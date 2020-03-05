@@ -12,6 +12,7 @@ import {add} from '../utils/math-utils';
 import {isSimpleEthAllocation} from '../utils/outcome';
 import {checkThat, getDataAndInvoke} from '../utils';
 import {SupportState} from '.';
+import {from} from 'rxjs';
 const PROTOCOL = 'create-and-fund';
 
 export enum Indices {
@@ -29,13 +30,22 @@ export type Init = {
 const preFundSetup = getDataAndInvoke<Init, Service>(
   {src: 'getPreFundSetup'},
   {src: 'supportState'},
-  'directFunding'
+  'chooseFundingStrategy'
 );
+
+type TEvent = {type: 'BudgetExists' | 'NoBudget'};
+const chooseFundingStrategy: StateNodeConfig<any, any, TEvent> = {
+  invoke: {src: 'determineFunding'},
+  on: {
+    BudgetExists: 'virtualFunding',
+    NoBudget: 'directFunding'
+  }
+};
 
 const directFunding: StateNodeConfig<any, any, any> = {
   initial: 'depositing',
   states: {
-    depositing: getDataAndInvoke<Context, Service>(
+    depositing: getDataAndInvoke<Init, Service>(
       {src: 'getDepositingInfo'},
       {src: 'depositing'},
       'updateFunding'
@@ -46,19 +56,22 @@ const directFunding: StateNodeConfig<any, any, any> = {
   onDone: 'postFundSetup'
 };
 
+const virtualFunding: StateNodeConfig<Init, any, any> = {};
+
 const postFundSetup = getDataAndInvoke<Init, Service>(
   {src: 'getPostFundSetup'},
   {src: 'supportState'},
   'success'
 );
 
-type Context = Init;
-export const config: MachineConfig<Context, any, any> = {
+export const config: MachineConfig<Init, any, any> = {
   key: PROTOCOL,
   initial: 'preFundSetup',
   states: {
     preFundSetup,
+    chooseFundingStrategy,
     directFunding,
+    virtualFunding,
     postFundSetup,
     success: {type: 'final'}
   }
@@ -70,6 +83,7 @@ const services = (store: Store) => ({
   getDepositingInfo: getDepositingInfo(store),
   getPreFundSetup: getPreFundSetup(store),
   getPostFundSetup: getPostFundSetup(store),
+  determineFunding: determineFunding(store),
   updateFunding: updateFunding(store)
 });
 type Service = keyof ReturnType<typeof services>;
@@ -79,6 +93,11 @@ const options = (store: Store) => ({services: services(store)});
 export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => {
   return Machine(config).withConfig(options(store), init);
 };
+
+const determineFunding = (store: Store) => (ctx: Init) =>
+  from(store.getBudget(ctx.appDefinition)).pipe(
+    map(budget => (budget ? 'BudgetExists' : 'NoBudget'))
+  );
 
 /*
 It's safe to use support state instead of advance-channel:

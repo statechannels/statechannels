@@ -188,8 +188,8 @@ export class MemoryStore implements Store {
     return await this.getEntry(ledgerId);
   }
 
-  public setBudget(appDefinition: string, budget: Budget) {
-    this.budgets[appDefinition] = budget;
+  public setBudget(appDefinition: string, budget: boolean) {
+    this.budgets[appDefinition] = budget as Budget;
   }
 
   public setLedger(entry: MemoryChannelStoreEntry) {

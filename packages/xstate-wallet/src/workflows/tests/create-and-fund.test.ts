@@ -59,8 +59,8 @@ const context: Init = {
   appData: '0x'
 };
 
-let aStore: Store;
-let bStore: Store;
+let aStore: MemoryStore;
+let bStore: MemoryStore;
 
 const allSignState = (state: State) => ({
   ...state,
@@ -86,11 +86,9 @@ beforeEach(() => {
   });
 });
 
+const connectToStore = (store: Store) => interpret(machine(store).withContext(context)).start();
 test('it uses direct funding when there is no budget', async () => {
-  const aService = interpret(machine(aStore).withContext(context));
-
-  const bService = interpret(machine(bStore).withContext(context));
-  [aService, bService].map(s => s.start());
+  const [aService, bService] = [aStore, bStore].map(connectToStore);
 
   await waitForExpect(async () => {
     expect(bService.state.value).toEqual('success');
@@ -104,5 +102,21 @@ test('it uses direct funding when there is no budget', async () => {
     expect(await (await aStore.chain.getChainInfo(targetChannelId)).amount).toMatchObject(
       totalAmount
     );
+  }, EXPECT_TIMEOUT);
+});
+
+test('it uses virtual funding when there is a budget', async () => {
+  [aStore, bStore].map(store => store.setBudget(appDefinition, true));
+  const [aService, bService] = [aStore, bStore].map(connectToStore);
+
+  await waitForExpect(async () => {
+    expect(aService.state.value).toEqual('virtualFunding');
+    expect(bService.state.value).toEqual('virtualFunding');
+
+    const {supported} = await aStore.getEntry(targetChannelId);
+    const outcome = checkThat(supported?.outcome, isSimpleEthAllocation);
+
+    expect(outcome).toMatchObject(allocation);
+    // expect((await aStore.getEntry(targetChannelId)).funding).toMatchObject({type: 'Virtual'});
   }, EXPECT_TIMEOUT);
 });
