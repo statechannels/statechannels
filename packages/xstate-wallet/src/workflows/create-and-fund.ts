@@ -2,7 +2,7 @@ import {Machine, MachineConfig, StateNodeConfig} from 'xstate';
 
 import {filter, map, take, tap} from 'rxjs/operators';
 import _ from 'lodash';
-import {SimpleAllocation} from '../store/types';
+import {SimpleAllocation, isVirtuallyFund, StateVariables, Participant} from '../store/types';
 
 import {MachineFactory} from '../utils/workflow-utils';
 import {Store} from '../store';
@@ -11,14 +11,10 @@ import * as Depositing from './depositing';
 import {add} from '../utils/math-utils';
 import {isSimpleEthAllocation} from '../utils/outcome';
 import {checkThat, getDataAndInvoke} from '../utils';
-import {SupportState} from '.';
+import {SupportState, VirtualFundingAsLeaf} from '.';
 import {from, Observable} from 'rxjs';
+import {CHALLENGE_DURATION, HUB_ADDRESS} from '../constants';
 const PROTOCOL = 'create-and-fund';
-
-export enum Indices {
-  Left = 0,
-  Right = 0
-}
 
 export type Init = {
   allocation: SimpleAllocation;
@@ -30,19 +26,19 @@ export type Init = {
 const preFundSetup = getDataAndInvoke<Init, Service>(
   {src: 'getPreFundSetup'},
   {src: 'supportState'},
-  'chooseFundingStrategy'
+  'funding'
 );
 
 type TEvent = {type: 'UseVirtualFunding' | 'UseDirectFunding'};
 const chooseFundingStrategy: StateNodeConfig<any, any, TEvent> = {
   invoke: {src: 'determineFunding'},
   on: {
-    UseVirtualFunding: 'virtualFunding',
-    UseDirectFunding: 'directFunding'
+    UseVirtualFunding: 'virtual',
+    UseDirectFunding: 'direct'
   }
 };
 
-const directFunding: StateNodeConfig<any, any, any> = {
+const direct: StateNodeConfig<any, any, any> = {
   initial: 'depositing',
   states: {
     depositing: getDataAndInvoke<Init, Service>(
@@ -53,10 +49,62 @@ const directFunding: StateNodeConfig<any, any, any> = {
     updateFunding: {invoke: {src: 'updateFunding', onDone: 'done'}},
     done: {type: 'final'}
   },
-  onDone: 'postFundSetup'
+  onDone: 'done'
 };
 
-const virtualFunding: StateNodeConfig<Init, any, any> = {};
+const triggerObjective = (store: Store) => async (ctx: Init): Promise<void> => {
+  const {channelConstants, supported, myIndex} = await store.getEntry(ctx.channelId);
+  if (myIndex !== 0) return;
+
+  const hub: Participant = {
+    destination: HUB_ADDRESS,
+    participantId: 'hub',
+    signingAddress: HUB_ADDRESS
+  };
+  const {participants: targetParticipants} = channelConstants;
+  const participants = [targetParticipants[0], hub, targetParticipants[1]];
+
+  const targetOutcome = checkThat(supported?.outcome, isSimpleEthAllocation);
+
+  const outcome = targetOutcome; // TODO
+
+  const stateVars: StateVariables = {
+    turnNum: bigNumberify(0),
+    outcome,
+    appData: '0x',
+    isFinal: false
+  };
+
+  const {channelId: jointChannelId} = await store.createChannel(
+    participants,
+    CHALLENGE_DURATION,
+    stateVars
+  );
+
+  store.addObjective({
+    type: 'VirtuallyFund',
+    participants,
+    data: {
+      jointChannelId,
+      targetChannelId: ctx.channelId
+    }
+  });
+};
+
+const virtual: StateNodeConfig<Init, any, any> = {
+  initial: 'running',
+  entry: triggerObjective.name,
+  states: {
+    running: getDataAndInvoke<Init, Service>(
+      {src: 'getObjective'},
+      {src: 'virtualFunding'},
+      'updateFunding'
+    ),
+    updateFunding: {},
+    done: {type: 'final'}
+  },
+  onDone: 'done'
+};
 
 const postFundSetup = getDataAndInvoke<Init, Service>(
   {src: 'getPostFundSetup'},
@@ -67,32 +115,61 @@ const postFundSetup = getDataAndInvoke<Init, Service>(
 export const config: MachineConfig<Init, any, any> = {
   key: PROTOCOL,
   initial: 'preFundSetup',
+  on: {FAILURE: {target: 'failure'}},
   states: {
     preFundSetup,
-    chooseFundingStrategy,
-    directFunding,
-    virtualFunding,
+    funding: {
+      initial: 'chooseFundingStrategy',
+      states: {
+        chooseFundingStrategy,
+        direct,
+        virtual,
+        done: {type: 'final'}
+      },
+      onDone: 'postFundSetup'
+    },
     postFundSetup,
-    success: {type: 'final'}
+    success: {type: 'final'},
+    failure: {}
   }
 };
 
 const services = (store: Store) => ({
   depositing: Depositing.machine(store),
   supportState: SupportState.machine(store),
+  virtualFunding: VirtualFundingAsLeaf.machine(store),
   getDepositingInfo: getDepositingInfo(store),
   getPreFundSetup: getPreFundSetup(store),
   getPostFundSetup: getPostFundSetup(store),
   determineFunding: determineFunding(store),
-  updateFunding: updateFunding(store)
+  updateFunding: updateFunding(store),
+  getObjective: getObjective(store)
 });
 type Service = keyof ReturnType<typeof services>;
 
-const options = (store: Store) => ({services: services(store)});
+const options = (store: Store) => ({
+  services: services(store),
+  actions: {triggerObjective: triggerObjective(store)}
+});
 
 export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => {
   return Machine(config).withConfig(options(store), init);
 };
+
+const getObjective = (store: Store) => (ctx: Init): Promise<VirtualFundingAsLeaf.Init> =>
+  store.newObjectiveFeed
+    .pipe(
+      filter(isVirtuallyFund),
+      map(
+        ({data}): VirtualFundingAsLeaf.Init => ({
+          targetChannelId: data.targetChannelId,
+          jointChannelId: data.jointChannelId
+        })
+      ),
+      filter(({targetChannelId}) => targetChannelId === ctx.channelId),
+      take(1)
+    )
+    .toPromise();
 
 const determineFunding = (_: Store) => (_: Init): Observable<TEvent> =>
   // This should use the store and the context to make a choice, but we have not
