@@ -164,5 +164,4 @@ export const options = (store: Store): Partial<MachineOptions<Init, TEvent>> => 
   return {actions, services};
 };
 
-export const machine = (store: Store, context: Init, role: Role) =>
-  Machine(config, options(store)).withContext(context);
+export const machine = (store: Store) => Machine(config, options(store));

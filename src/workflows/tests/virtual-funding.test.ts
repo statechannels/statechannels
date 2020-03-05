@@ -75,9 +75,9 @@ beforeEach(() => {
 });
 
 test('virtual funding with smart hub', async () => {
-  const hubService = interpret(VirtualFundingAsHub.machine(hubStore, context, Role.Hub));
-  const aService = interpret(VirtualFundingAsLeaf.machine(aStore, context));
-  const bService = interpret(VirtualFundingAsLeaf.machine(bStore, context));
+  const hubService = interpret(VirtualFundingAsHub.machine(hubStore).withContext(context));
+  const aService = interpret(VirtualFundingAsLeaf.machine(aStore).withContext(context));
+  const bService = interpret(VirtualFundingAsLeaf.machine(bStore).withContext(context));
   const services = [aService, hubService, bService];
 
   [aStore, hubStore, bStore].forEach((store: MemoryStore) => {
@@ -137,8 +137,8 @@ test('virtual funding with smart hub', async () => {
 test('virtual funding with a simple hub', async () => {
   const hubStore = new SimpleHub(wallet3.privateKey);
 
-  const aService = interpret(VirtualFundingAsLeaf.machine(aStore, context));
-  const bService = interpret(VirtualFundingAsLeaf.machine(bStore, context));
+  const aService = interpret(VirtualFundingAsLeaf.machine(aStore).withContext(context));
+  const bService = interpret(VirtualFundingAsLeaf.machine(bStore).withContext(context));
   const services = [aService, bService];
 
   [aStore, bStore].forEach((store: MemoryStore) => {
@@ -211,7 +211,7 @@ test('virtual funding with a simple hub', async () => {
 
 test('invalid joint state', async () => {
   const store = new MemoryStore([wallet1.privateKey]);
-  const service = interpret(VirtualFundingAsLeaf.machine(store, context)).start();
+  const service = interpret(VirtualFundingAsLeaf.machine(store).withContext(context)).start();
 
   const state = firstState(outcome, jointChannel);
   const invalidState: State = {
