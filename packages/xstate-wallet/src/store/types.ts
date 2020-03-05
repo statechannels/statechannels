@@ -52,9 +52,12 @@ export interface ChannelConstants {
 
 export interface State extends ChannelConstants, StateVariables {}
 
-export interface SignedState extends State {
+interface Signed {
   signatures: string[];
 }
+
+export interface SignedState extends State, Signed {}
+export interface SignedStateVariables extends StateVariables, Signed {}
 
 type _Objective<Name, Data> = {
   participants: Participant[];

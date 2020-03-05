@@ -9,7 +9,8 @@ import {
   PushMessageRequest,
   JoinChannelRequest,
   CreateChannelRequest,
-  UpdateChannelRequest
+  UpdateChannelRequest,
+  CloseChannelRequest
 } from '@statechannels/client-api-schema';
 import {interpret, Interpreter} from 'xstate';
 import {applicationWorkflow, WorkflowContext} from '../workflows/application';
@@ -93,6 +94,17 @@ function generatePushMessage(messageParams): PushMessageRequest {
     id: 111111111,
     method: 'PushMessage',
     params: messageParams
+  };
+}
+
+export function generateCloseRequest(channelId: string): CloseChannelRequest {
+  return {
+    jsonrpc: '2.0',
+    method: 'CloseChannel',
+    id: 777777777,
+    params: {
+      channelId
+    }
   };
 }
 
