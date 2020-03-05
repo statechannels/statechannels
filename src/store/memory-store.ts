@@ -10,7 +10,7 @@ import {Participant, StateVariables, SignedState, State, Objective, Message} fro
 import {MemoryChannelStoreEntry, ChannelStoreEntry} from './memory-channel-storage';
 import {AddressZero} from 'ethers/constants';
 import {Chain, FakeChain} from '../chain';
-import {calculateChannelId, hashState, statesEqual} from './state-utils';
+import {calculateChannelId, hashState} from './state-utils';
 import {NETWORK_ID} from '../constants';
 import {checkThat, exists} from '../utils';
 
@@ -227,17 +227,13 @@ export class MemoryStore implements Store {
     if (!privateKey) {
       throw new Error('No longer have private key');
     }
-    // Only send updates if we're actually adding a new signature
-    if (
-      !statesEqual(channelStorage.channelConstants, stateVars, channelStorage.latestSupportedByMe)
-    ) {
-      const signedState = channelStorage.signAndAdd(
-        _.pick(stateVars, 'outcome', 'turnNum', 'appData', 'isFinal'),
-        privateKey
-      );
-      this._eventEmitter.emit('channelUpdated', await this.getEntry(channelId));
-      this._eventEmitter.emit('addToOutbox', {signedStates: [signedState]});
-    }
+
+    const signedState = channelStorage.signAndAdd(
+      _.pick(stateVars, 'outcome', 'turnNum', 'appData', 'isFinal'),
+      privateKey
+    );
+    this._eventEmitter.emit('channelUpdated', await this.getEntry(channelId));
+    this._eventEmitter.emit('addToOutbox', {signedStates: [signedState]});
   }
 
   addObjective(objective: Objective) {
