@@ -26,6 +26,7 @@ import {subscribeToMessages} from './message-service';
 import {MemoryChannelStoreEntry} from '../../store/memory-channel-storage';
 import {Role} from '../virtual-funding-as-leaf';
 import {VirtualFundingAsLeaf, VirtualFundingAsHub} from '..';
+import {FakeChain} from '../../chain';
 
 jest.setTimeout(20000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
@@ -60,12 +61,20 @@ const outcome: Outcome = simpleEthAllocation([
 const context: VirtualFundingAsLeaf.Init = {targetChannelId, jointChannelId};
 
 const ledgerAmounts = [4, 4].map(bigNumberify);
+const depositAmount = ledgerAmounts.reduce(add).toHexString();
+let hubStore: MemoryStore;
+let aStore: MemoryStore;
+let bStore: MemoryStore;
+let chain: FakeChain;
+
+beforeEach(() => {
+  chain = new FakeChain();
+  hubStore = new MemoryStore([wallet3.privateKey], chain);
+  aStore = new MemoryStore([wallet1.privateKey], chain);
+  bStore = new MemoryStore([wallet2.privateKey], chain);
+});
 
 test('virtual funding with smart hub', async () => {
-  const hubStore = new MemoryStore([wallet3.privateKey]);
-  const aStore = new MemoryStore([wallet1.privateKey]);
-  const bStore = new MemoryStore([wallet2.privateKey]);
-
   const hubService = interpret(VirtualFundingAsHub.machine(hubStore, context, Role.Hub));
   const aService = interpret(VirtualFundingAsLeaf.machine(aStore, context));
   const bService = interpret(VirtualFundingAsLeaf.machine(bStore, context));
@@ -77,20 +86,26 @@ test('virtual funding with smart hub', async () => {
       signedStates: [{...state, signatures: [signState(state, wallet1.privateKey)]}]
     });
   });
+
+  let state = ledgerState([first, third], ledgerAmounts);
+  let ledgerId = calculateChannelId(state);
+  chain.depositSync(ledgerId, '0', depositAmount);
   await Promise.all(
     [aStore, hubStore].map(async (store: MemoryStore) => {
-      const state = ledgerState([first, third], ledgerAmounts);
       const signatures = [wallet1, wallet3].map(({privateKey}) => signState(state, privateKey));
       store.pushMessage({signedStates: [{...state, signatures}]});
-      store.setLedger((await store.getEntry(calculateChannelId(state))) as MemoryChannelStoreEntry);
+      store.setLedger((await store.getEntry(ledgerId)) as MemoryChannelStoreEntry);
     })
   );
+
+  state = ledgerState([second, third], ledgerAmounts);
+  ledgerId = calculateChannelId(state);
+  chain.depositSync(ledgerId, '0', depositAmount);
   await Promise.all(
     [bStore, hubStore].map(async (store: MemoryStore) => {
-      const state = ledgerState([second, third], ledgerAmounts);
       const signatures = [wallet2, wallet3].map(({privateKey}) => signState(state, privateKey));
       store.pushMessage({signedStates: [{...state, signatures}]});
-      store.setLedger((await store.getEntry(calculateChannelId(state))) as MemoryChannelStoreEntry);
+      store.setLedger((await store.getEntry(ledgerId)) as MemoryChannelStoreEntry);
     })
   );
 
@@ -120,8 +135,6 @@ test('virtual funding with smart hub', async () => {
 });
 
 test('virtual funding with a dumb hub', async () => {
-  const aStore = new MemoryStore([wallet1.privateKey]);
-  const bStore = new MemoryStore([wallet2.privateKey]);
   const hubStore = new DumbHub(wallet3.privateKey);
 
   const aService = interpret(VirtualFundingAsLeaf.machine(aStore, context));
@@ -134,18 +147,22 @@ test('virtual funding with a dumb hub', async () => {
       signedStates: [{...state, signatures: [signState(state, wallet1.privateKey)]}]
     });
   });
-  {
-    const state = ledgerState([first, third], ledgerAmounts);
-    const signatures = [wallet1, wallet3].map(({privateKey}) => signState(state, privateKey));
-    aStore.pushMessage({signedStates: [{...state, signatures}]});
-    aStore.setLedger((await aStore.getEntry(calculateChannelId(state))) as MemoryChannelStoreEntry);
-  }
-  {
-    const state = ledgerState([second, third], ledgerAmounts);
-    const signatures = [wallet2, wallet3].map(({privateKey}) => signState(state, privateKey));
-    bStore.pushMessage({signedStates: [{...state, signatures}]});
-    bStore.setLedger((await bStore.getEntry(calculateChannelId(state))) as MemoryChannelStoreEntry);
-  }
+
+  let state = ledgerState([first, third], ledgerAmounts);
+  let ledgerId = calculateChannelId(state);
+  let signatures = [wallet1, wallet3].map(({privateKey}) => signState(state, privateKey));
+
+  chain.depositSync(ledgerId, '0', depositAmount);
+  aStore.pushMessage({signedStates: [{...state, signatures}]});
+  aStore.setLedger((await aStore.getEntry(calculateChannelId(state))) as MemoryChannelStoreEntry);
+
+  state = ledgerState([second, third], ledgerAmounts);
+  ledgerId = calculateChannelId(state);
+  signatures = [wallet2, wallet3].map(({privateKey}) => signState(state, privateKey));
+
+  chain.depositSync(ledgerId, '0', depositAmount);
+  bStore.pushMessage({signedStates: [{...state, signatures}]});
+  bStore.setLedger((await bStore.getEntry(calculateChannelId(state))) as MemoryChannelStoreEntry);
 
   subscribeToMessages({
     [jointParticipants[0].participantId]: aStore,
@@ -180,8 +197,7 @@ test('virtual funding with a dumb hub', async () => {
 
     {
       // Check the joint channel's current outcome
-      const {supported} = await aStore.getEntry(jointChannelId);
-      const outcome = supported?.outcome;
+      const outcome = await (await aStore.getEntry(jointChannelId)).supported?.outcome;
       const amount = bigNumberify(5);
       expect(outcome).toMatchObject(
         simpleEthAllocation([
