@@ -144,13 +144,16 @@ export const waitForFirstJointState = (store: Store) => ({
         const amounts = allocationItems.map(i => i.amount);
 
         if (
-          destinations[Role.A] === participants[Role.A].destination &&
-          destinations[Role.Hub] === participants[Role.Hub].destination &&
-          destinations[Role.B] === participants[Role.B].destination &&
-          amounts[Role.A].add(amounts[Role.B]).eq(amounts[Role.Hub])
+          !(
+            destinations[0] === participants[Role.A].destination &&
+            destinations[1] === participants[Role.B].destination &&
+            destinations[2] === participants[Role.Hub].destination
+          )
         ) {
-          return;
-        } else throw new Error('Invalid first state');
+          throw new Error('Incorrect participants');
+        } else if (!amounts[0].add(amounts[1]).eq(amounts[2])) {
+          throw new Error('Incorrect allocation');
+        } else return;
       }),
       map(s => ({state: s})),
       take(1)
