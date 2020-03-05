@@ -7,7 +7,6 @@ import React from 'react';
 import {Wallet as WalletUi} from './ui/wallet';
 import {interpret, Interpreter, State} from 'xstate';
 import {Guid} from 'guid-typescript';
-import {convertToOpenEvent} from './utils/workflow-utils';
 import {Notification, Response} from '@statechannels/client-api-schema';
 import {filter, map} from 'rxjs/operators';
 import {Message, OpenChannel} from './store/types';
@@ -49,11 +48,11 @@ export class ChannelWallet {
       });
 
     this.messagingService.requestFeed.subscribe(r => {
-      if (r.method === 'CreateChannel' || r.method === 'JoinChannel') {
+      if (r.type === 'CREATE_CHANNEL' || r.type === 'JOIN_CHANNEL') {
         const workflow = this.startApplicationWorkflow();
         this.workflows.push(workflow);
 
-        workflow.machine.send(convertToOpenEvent(r));
+        workflow.machine.send(r);
       }
     });
   }

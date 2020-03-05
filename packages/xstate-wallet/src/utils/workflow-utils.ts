@@ -8,16 +8,6 @@ import {
   StateNodeConfig
 } from 'xstate';
 import {Store} from '../store';
-import {
-  CreateChannelRequest,
-  JoinChannelRequest,
-  UpdateChannelRequest
-} from '@statechannels/client-api-schema';
-import {NETWORK_ID, CHALLENGE_DURATION} from '../constants';
-import {bigNumberify} from 'ethers/utils';
-import {OpenEvent, PlayerStateUpdate} from '../workflows/application';
-import {deserializeAllocations} from '../serde/app-messages/deserialize';
-import {isSimpleEthAllocation} from './outcome';
 
 export function createMockGuard(guardName: string): GuardPredicate<any, any> {
   return {
@@ -73,37 +63,4 @@ export function getDataAndInvoke<T>(
     },
     onDone
   };
-}
-
-export function convertToPlayerStateUpdateEvent(request: UpdateChannelRequest): PlayerStateUpdate {
-  const outcome = deserializeAllocations(request.params.allocations);
-  if (!isSimpleEthAllocation(outcome)) {
-    throw new Error('Currently only a simple ETH allocation is supported');
-  }
-  return {
-    type: 'PLAYER_STATE_UPDATE',
-    requestId: request.id,
-    outcome,
-    channelId: request.params.channelId,
-    appData: request.params.appData
-  };
-}
-
-export function convertToOpenEvent(request: CreateChannelRequest | JoinChannelRequest): OpenEvent {
-  if (request.method === 'CreateChannel') {
-    const outcome = deserializeAllocations(request.params.allocations);
-    if (!isSimpleEthAllocation(outcome)) {
-      throw new Error('Currently only a simple ETH allocation is supported');
-    }
-    return {
-      type: 'CREATE_CHANNEL',
-      ...request.params,
-      outcome,
-      challengeDuration: bigNumberify(CHALLENGE_DURATION),
-      chainId: NETWORK_ID,
-      requestId: request.id
-    };
-  } else {
-    return {type: 'JOIN_CHANNEL', ...request.params, requestId: request.id};
-  }
 }
