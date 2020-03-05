@@ -7,14 +7,15 @@ import {MemoryStore, Store} from '../../store/memory-store';
 import {bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
 import {firstState, signState, calculateChannelId} from '../../store/state-utils';
-import {ChannelConstants, Outcome, State} from '../../store/types';
+import {ChannelConstants, Outcome, State, Participant} from '../../store/types';
 import {AddressZero} from 'ethers/constants';
 import {checkThat} from '../../utils';
 import {isSimpleEthAllocation} from '../../utils/outcome';
-import {wallet1, wallet2, participants} from './data';
+import {wallet1, wallet2, participants, wallet3} from './data';
 import {subscribeToMessages} from './message-service';
-import {ETH_ASSET_HOLDER_ADDRESS} from '../../constants';
+import {ETH_ASSET_HOLDER_ADDRESS, HUB_ADDRESS} from '../../constants';
 import {FakeChain, Chain} from '../../chain';
+import {DumbHub} from './dumb-hub';
 
 jest.setTimeout(20000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
@@ -71,6 +72,7 @@ beforeEach(() => {
   const chain: Chain = new FakeChain();
   aStore = new MemoryStore([wallet1.privateKey], chain);
   bStore = new MemoryStore([wallet2.privateKey], chain);
+  const hubStore = new DumbHub(wallet3.privateKey);
 
   const message = {
     signedStates: [
@@ -80,9 +82,16 @@ beforeEach(() => {
   };
   [aStore, bStore].forEach((store: Store) => store.pushMessage(message));
 
+  const hub: Participant = {
+    participantId: 'hub',
+    destination: HUB_ADDRESS,
+    signingAddress: wallet3.address
+  };
+
   subscribeToMessages({
     [participants[0].participantId]: aStore,
-    [participants[1].participantId]: bStore
+    [participants[1].participantId]: bStore,
+    [hub.participantId]: hubStore
   });
 });
 
@@ -110,14 +119,14 @@ test('it uses virtual funding when there is a budget', async () => {
   const [aService, bService] = [aStore, bStore].map(connectToStore);
 
   await waitForExpect(async () => {
-    expect(aService.state.value).toEqual('virtualFunding');
-    expect(bService.state.value).toEqual('virtualFunding');
+    expect(bService.state.value).toEqual('success');
+    expect(aService.state.value).toEqual('success');
 
     const {supported} = await aStore.getEntry(targetChannelId);
     const outcome = checkThat(supported?.outcome, isSimpleEthAllocation);
 
     expect(outcome).toMatchObject(allocation);
-    // expect((await aStore.getEntry(targetChannelId)).funding).toMatchObject({type: 'Virtual'});
+    expect((await aStore.getEntry(targetChannelId)).funding).toMatchObject({type: 'Virtual'});
   }, EXPECT_TIMEOUT);
 
   delete process.env.USE_VIRTUAL_FUNDING;
