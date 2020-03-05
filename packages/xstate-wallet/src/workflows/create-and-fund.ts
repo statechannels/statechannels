@@ -12,7 +12,7 @@ import {add} from '../utils/math-utils';
 import {isSimpleEthAllocation} from '../utils/outcome';
 import {checkThat, getDataAndInvoke} from '../utils';
 import {SupportState} from '.';
-import {from} from 'rxjs';
+import {from, Observable} from 'rxjs';
 const PROTOCOL = 'create-and-fund';
 
 export enum Indices {
@@ -33,12 +33,12 @@ const preFundSetup = getDataAndInvoke<Init, Service>(
   'chooseFundingStrategy'
 );
 
-type TEvent = {type: 'BudgetExists' | 'NoBudget'};
+type TEvent = {type: 'UseVirtualFunding' | 'UseDirectFunding'};
 const chooseFundingStrategy: StateNodeConfig<any, any, TEvent> = {
   invoke: {src: 'determineFunding'},
   on: {
-    BudgetExists: 'virtualFunding',
-    NoBudget: 'directFunding'
+    UseVirtualFunding: 'virtualFunding',
+    UseDirectFunding: 'directFunding'
   }
 };
 
@@ -94,11 +94,16 @@ export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => 
   return Machine(config).withConfig(options(store), init);
 };
 
-const determineFunding = (store: Store) => (ctx: Init) =>
-  from(store.getBudget(ctx.appDefinition)).pipe(
-    map(budget => (budget ? 'BudgetExists' : 'NoBudget'))
+const determineFunding = (_: Store) => (_: Init): Observable<TEvent> =>
+  // This should use the store and the context to make a choice, but we have not
+  // moved anywhere towards making that choice
+  // So, the choice is a hard-coded environment variable
+  from(Promise.resolve(process.env.USE_VIRTUAL_FUNDING)).pipe(
+    map(
+      (useVirtualFunding): TEvent =>
+        useVirtualFunding ? {type: 'UseVirtualFunding'} : {type: 'UseDirectFunding'}
+    )
   );
-
 /*
 It's safe to use support state instead of advance-channel:
 - If the latest state that I support has turn `n`, then other participants can support a state

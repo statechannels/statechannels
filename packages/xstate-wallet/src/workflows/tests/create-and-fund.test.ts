@@ -106,7 +106,7 @@ test('it uses direct funding when there is no budget', async () => {
 });
 
 test('it uses virtual funding when there is a budget', async () => {
-  [aStore, bStore].map(store => store.setBudget(appDefinition, true));
+  process.env.USE_VIRTUAL_FUNDING = 'true';
   const [aService, bService] = [aStore, bStore].map(connectToStore);
 
   await waitForExpect(async () => {
@@ -119,4 +119,6 @@ test('it uses virtual funding when there is a budget', async () => {
     expect(outcome).toMatchObject(allocation);
     // expect((await aStore.getEntry(targetChannelId)).funding).toMatchObject({type: 'Virtual'});
   }, EXPECT_TIMEOUT);
+
+  delete process.env.USE_VIRTUAL_FUNDING;
 });
