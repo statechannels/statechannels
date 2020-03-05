@@ -28,7 +28,6 @@ import * as ConcludeChannel from './conclude-channel';
 import {isSimpleEthAllocation} from '../utils/outcome';
 import {unreachable} from '../utils';
 import {
-  PlayerRequestConclude,
   PlayerStateUpdate,
   ChannelUpdated,
   JoinChannelEvent,
