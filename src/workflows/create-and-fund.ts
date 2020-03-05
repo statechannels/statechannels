@@ -2,18 +2,24 @@ import {Machine, MachineConfig, StateNodeConfig} from 'xstate';
 
 import {filter, map, take, tap} from 'rxjs/operators';
 import _ from 'lodash';
-import {SimpleAllocation, isVirtuallyFund, StateVariables, Participant} from '../store/types';
+import {
+  SimpleAllocation,
+  isVirtuallyFund,
+  StateVariables,
+  Participant,
+  Outcome
+} from '../store/types';
 
 import {MachineFactory} from '../utils/workflow-utils';
 import {Store} from '../store';
-import {bigNumberify} from 'ethers/utils';
 import * as Depositing from './depositing';
 import {add} from '../utils/math-utils';
-import {isSimpleEthAllocation} from '../utils/outcome';
+import {isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
 import {checkThat, getDataAndInvoke} from '../utils';
 import {SupportState, VirtualFundingAsLeaf} from '.';
 import {from, Observable} from 'rxjs';
-import {CHALLENGE_DURATION, HUB_ADDRESS} from '../constants';
+import {CHALLENGE_DURATION, HUB_ADDRESS, HUB_DESTINATION} from '../constants';
+import {bigNumberify} from 'ethers/utils';
 const PROTOCOL = 'create-and-fund';
 
 export type Init = {
@@ -57,16 +63,20 @@ const triggerObjective = (store: Store) => async (ctx: Init): Promise<void> => {
   if (myIndex !== 0) return;
 
   const hub: Participant = {
-    destination: HUB_ADDRESS,
+    destination: HUB_DESTINATION,
     participantId: 'hub',
     signingAddress: HUB_ADDRESS
   };
   const {participants: targetParticipants} = channelConstants;
   const participants = [targetParticipants[0], hub, targetParticipants[1]];
 
-  const targetOutcome = checkThat(supported?.outcome, isSimpleEthAllocation);
+  const {allocationItems} = checkThat(supported?.outcome, isSimpleEthAllocation);
 
-  const outcome = targetOutcome; // TODO
+  const outcome: Outcome = simpleEthAllocation([
+    allocationItems[0],
+    allocationItems[1],
+    {destination: hub.destination, amount: allocationItems.map(i => i.amount).reduce(add)}
+  ]);
 
   const stateVars: StateVariables = {
     turnNum: bigNumberify(0),
