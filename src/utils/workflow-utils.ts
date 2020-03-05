@@ -69,3 +69,8 @@ export function getDataAndInvoke<T>(
 export const assignError = assign({
   error: (_, event: DoneInvokeEvent<Error>) => event.data.message
 });
+
+export const debugAction = (c, e, {state}) => {
+  // eslint-disable-next-line no-debugger
+  debugger;
+};
