@@ -57,14 +57,14 @@ const triggerObjective = (store: Store) => async (ctx: Init): Promise<void> => {
   if (myIndex !== 0) return;
 
   const {participants: targetParticipants} = channelConstants;
-  const participants = [targetParticipants[0], HUB, targetParticipants[1]];
+  const participants = [...targetParticipants, HUB];
 
   const {allocationItems} = checkThat(supported?.outcome, isSimpleEthAllocation);
 
   const outcome: Outcome = simpleEthAllocation([
     allocationItems[0],
-    allocationItems[1],
-    {destination: HUB.destination, amount: allocationItems.map(i => i.amount).reduce(add)}
+    {destination: HUB.destination, amount: allocationItems.map(i => i.amount).reduce(add)},
+    allocationItems[1]
   ]);
 
   const stateVars: StateVariables = {

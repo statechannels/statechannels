@@ -23,10 +23,15 @@ import _ from 'lodash';
 import {assignError} from '../utils/workflow-utils';
 import {escalate} from 'xstate/lib/actions';
 
-export const enum Role {
+export const enum OutcomeIdx {
   A = 0,
   Hub = 1,
   B = 2
+}
+export const enum ParticipantIdx {
+  A = 0,
+  B = 1,
+  Hub = 2
 }
 
 export type Init = {
@@ -40,9 +45,11 @@ type WithDeductions = Init & Deductions;
 const getObjective = (store: Store) => async ({jointChannelId}: Init): Promise<FundGuarantor> => {
   const entry = await store.getEntry(jointChannelId);
   const {participants: jointParticipants} = entry.channelConstants;
-  const participants = [jointParticipants[entry.myIndex], jointParticipants[Role.Hub]];
+  const participants = [jointParticipants[entry.myIndex], jointParticipants[ParticipantIdx.Hub]];
 
-  const {channelId: ledgerId} = await store.getLedger(jointParticipants[Role.Hub].participantId);
+  const {channelId: ledgerId} = await store.getLedger(
+    jointParticipants[ParticipantIdx.Hub].participantId
+  );
   const {channelId: guarantorId} = await store.createChannel(participants, CHALLENGE_DURATION, {
     turnNum: bigNumberify(0),
     appData: '0x',
@@ -155,13 +162,13 @@ export const waitForFirstJointState = (store: Store) => ({
 
         if (
           !(
-            destinations[0] === participants[Role.A].destination &&
-            destinations[1] === participants[Role.B].destination &&
-            destinations[2] === participants[Role.Hub].destination
+            destinations[OutcomeIdx.A] === participants[ParticipantIdx.A].destination &&
+            destinations[OutcomeIdx.B] === participants[ParticipantIdx.B].destination &&
+            destinations[OutcomeIdx.Hub] === participants[ParticipantIdx.Hub].destination
           )
         ) {
           throw new Error('Incorrect participants');
-        } else if (!amounts[0].add(amounts[1]).eq(amounts[2])) {
+        } else if (!amounts[OutcomeIdx.A].add(amounts[OutcomeIdx.B]).eq(amounts[OutcomeIdx.Hub])) {
           throw new Error('Incorrect allocation');
         } else return;
       }),
@@ -179,10 +186,10 @@ export const jointChannelUpdate = (store: Store) => ({
       filter(({state}) => state.turnNum.eq(0)),
       map(({state}) => {
         const oldOutcome = checkThat(state.outcome, isSimpleEthAllocation);
-        const amount = oldOutcome.allocationItems[Role.Hub].amount;
+        const amount = oldOutcome.allocationItems[OutcomeIdx.Hub].amount;
         const outcome = simpleEthAllocation([
           {destination: targetChannelId, amount},
-          {destination: state.participants[Role.Hub].destination, amount}
+          {destination: state.participants[ParticipantIdx.Hub].destination, amount}
         ]);
         return {state: {...state, turnNum: bigNumberify(1), outcome}};
       }),
@@ -194,13 +201,15 @@ const getDeductions = (store: Store) => async (ctx: Init): Promise<Deductions> =
   const {latest, myIndex} = await store.getEntry(ctx.jointChannelId);
   const {allocationItems} = checkThat(latest.outcome, isSimpleEthAllocation);
 
+  const outcomeIdx = myIndex === ParticipantIdx.A ? OutcomeIdx.A : OutcomeIdx.B;
+
   return {
     deductions: [
       {
-        destination: allocationItems[2].destination,
-        amount: allocationItems[(2 - myIndex) / 2].amount
+        destination: allocationItems[OutcomeIdx.Hub].destination,
+        amount: allocationItems[2 - outcomeIdx].amount
       },
-      allocationItems[myIndex]
+      allocationItems[outcomeIdx]
     ]
   };
 };
