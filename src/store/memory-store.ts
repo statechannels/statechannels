@@ -6,7 +6,15 @@ import * as _ from 'lodash';
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {Wallet} from 'ethers';
 
-import {Participant, StateVariables, SignedState, State, Objective, Message} from './types';
+import {
+  Participant,
+  StateVariables,
+  SignedState,
+  State,
+  Objective,
+  Message,
+  SiteBudget
+} from './types';
 import {MemoryChannelStoreEntry, ChannelStoreEntry} from './memory-channel-storage';
 import {AddressZero} from 'ethers/constants';
 import {Chain, FakeChain} from '../chain';
@@ -16,7 +24,6 @@ import {checkThat, exists} from '../utils';
 
 interface DirectFunding {
   type: 'Direct';
-  amount: BigNumber;
 }
 
 interface IndirectFunding {
@@ -27,6 +34,7 @@ interface IndirectFunding {
 interface VirtualFunding {
   type: 'Virtual';
   jointChannelId: string;
+  guarantorChannelId: string;
 }
 
 interface Guaranteed {
@@ -69,7 +77,6 @@ export interface Store {
     appDefinition?: string
   ): Promise<ChannelStoreEntry>;
   getEntry(channelId): Promise<ChannelStoreEntry>;
-  getLedger(peerId: string): Promise<ChannelStoreEntry>;
   // TODO: This is awkward. Might be better to set the funding on create/initialize channel?
   setFunding(channelId: string, funding: Funding): Promise<void>;
 
@@ -79,6 +86,9 @@ export interface Store {
 
   // TODO: should this be exposed via the Store?
   chain: Chain;
+
+  getBudget: (site: string) => Promise<SiteBudget | undefined>;
+  updateOrCreateBudget: (budget: SiteBudget) => Promise<void>;
 }
 
 export class MemoryStore implements Store {
@@ -88,7 +98,7 @@ export class MemoryStore implements Store {
   private _nonces: Record<string, BigNumber | undefined> = {};
   private _eventEmitter = new EventEmitter<InternalEvents>();
   private _privateKeys: Record<string, string | undefined> = {};
-  private _ledgers: Record<string, string | undefined> = {};
+  private _budgets: Record<string, SiteBudget> = {};
 
   constructor(privateKeys?: string[], chain?: Chain) {
     // TODO: We shouldn't default to a fake chain
@@ -107,6 +117,14 @@ export class MemoryStore implements Store {
       const wallet = Wallet.createRandom();
       this._privateKeys[wallet.address] = wallet.privateKey;
     }
+  }
+
+  public getBudget(site: string): Promise<SiteBudget | undefined> {
+    return Promise.resolve(this._budgets[site]);
+  }
+  public updateOrCreateBudget(budget: SiteBudget): Promise<void> {
+    this._budgets[budget.site] = budget;
+    return Promise.resolve();
   }
 
   // for short-term backwards compatibility
@@ -169,24 +187,6 @@ export class MemoryStore implements Store {
       throw `Channel ${channelId} already funded`;
     }
     channelEntry.setFunding(funding);
-  }
-
-  public async getLedger(peerId: string) {
-    const ledgerId = this._ledgers[peerId];
-
-    if (!ledgerId) throw new Error(`No ledger exists with peer ${peerId}`);
-
-    return await this.getEntry(ledgerId);
-  }
-
-  public setLedger(entry: MemoryChannelStoreEntry) {
-    // This is not on the Store interface itself -- it is useful to set up a test store
-    const {channelId} = entry;
-    this._channels[channelId] = entry;
-
-    const peerId = entry.participants.find(p => p.signingAddress !== this.getAddress());
-    if (peerId) this._ledgers[peerId.participantId] = channelId;
-    else throw 'No peer';
   }
 
   public async createChannel(
