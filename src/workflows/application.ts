@@ -19,20 +19,22 @@ import * as CreateAndDirectFund from './create-and-direct-fund';
 import {sendDisplayMessage, MessagingServiceInterface, convertToChannelResult} from '../messaging';
 import {filter, map} from 'rxjs/operators';
 import * as CCC from './confirm-create-channel';
-import {
-  Participant,
-  UpdateChannelRequest,
-  CloseChannelRequest
-} from '@statechannels/client-api-schema';
 import {createMockGuard, getDataAndInvoke} from '../utils/workflow-utils';
 import {Store} from '../store/memory-store';
 import {StateVariables, SimpleAllocation} from '../store/types';
 import {ChannelStoreEntry} from '../store/memory-channel-storage';
-import {bigNumberify, BigNumber} from 'ethers/utils';
+import {bigNumberify} from 'ethers/utils';
 import * as ConcludeChannel from './conclude-channel';
 import {isSimpleEthAllocation} from '../utils/outcome';
 import {unreachable} from '../utils';
-import {deserializeAllocations} from '../serde/app-messages/deserialize';
+import {
+  PlayerRequestConclude,
+  PlayerStateUpdate,
+  ChannelUpdated,
+  JoinChannelEvent,
+  CreateChannelEvent,
+  WorkflowEvent
+} from '../event-types';
 
 export interface WorkflowContext {
   channelId?: string;
@@ -65,53 +67,7 @@ export interface WorkflowActions {
   updateStoreWithPlayerState: Action<WorkflowContext, PlayerStateUpdate>;
 }
 
-export interface JoinChannelEvent {
-  type: 'JOIN_CHANNEL';
-  channelId: string;
-  requestId: number;
-}
-// Events
-export type OpenEvent = CreateChannelEvent | JoinChannelEvent;
-
-export interface CreateChannelEvent {
-  type: 'CREATE_CHANNEL';
-  participants: Participant[];
-  outcome: SimpleAllocation;
-  appDefinition: string;
-  appData: string;
-  challengeDuration: BigNumber;
-  chainId: string;
-  requestId: number;
-}
-
-export interface ChannelUpdated {
-  type: 'CHANNEL_UPDATED';
-  storeEntry: ChannelStoreEntry;
-  requestId: number;
-}
-
-export interface PlayerStateUpdate {
-  type: 'PLAYER_STATE_UPDATE';
-  requestId: number;
-  outcome: SimpleAllocation;
-  channelId: string;
-  appData: string;
-}
-interface PlayerRequestConclude {
-  requestId: number;
-  type: 'PLAYER_REQUEST_CONCLUDE';
-  channelId: string;
-}
-type WorkflowEvent =
-  | PlayerRequestConclude
-  | PlayerStateUpdate
-  | OpenEvent
-  | ChannelUpdated
-  | JoinChannelEvent
-  | DoneInvokeEvent<string>;
-
-export type ApplicationWorkflowEvent = WorkflowEvent;
-
+export type ApplicationWorkflowEvent = WorkflowEvent | DoneInvokeEvent<string>;
 // TODO: Is this all that useful?
 export interface WorkflowServices extends Record<string, ServiceConfig<WorkflowContext>> {
   createChannel: (context: WorkflowContext, event: WorkflowEvent) => Promise<string>;
@@ -149,12 +105,17 @@ interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
 }
 export type StateValue = keyof WorkflowStateSchema['states'];
 
-export type WorkflowState = State<WorkflowContext, WorkflowEvent, WorkflowStateSchema, any>;
+export type WorkflowState = State<
+  WorkflowContext,
+  ApplicationWorkflowEvent,
+  WorkflowStateSchema,
+  any
+>;
 
 const generateConfig = (
   actions: WorkflowActions,
   guards: WorkflowGuards
-): MachineConfig<WorkflowContext, WorkflowStateSchema, WorkflowEvent> => ({
+): MachineConfig<WorkflowContext, WorkflowStateSchema, ApplicationWorkflowEvent> => ({
   id: 'application-workflow',
   initial: 'initializing',
   on: {CHANNEL_UPDATED: {actions: [actions.sendChannelUpdatedNotification]}},
@@ -181,7 +142,7 @@ const generateConfig = (
         'getDataForCreateChannelConfirmation',
         'invokeCreateChannelConfirmation',
         'openChannelAndDirectFundProtocol'
-      ) as StateNodeConfig<WorkflowContext, {}, WorkflowEvent>),
+      ) as StateNodeConfig<WorkflowContext, {}, ApplicationWorkflowEvent>),
       entry: [actions.assignChannelId, actions.spawnObservers],
       exit: [actions.sendJoinChannelResponse]
     },
@@ -255,21 +216,9 @@ export const applicationWorkflow = (
     return messagingService.requestFeed.pipe(
       filter(
         r =>
-          (r.method === 'UpdateChannel' || r.method === 'CloseChannel') &&
-          r.params.channelId === channelId
-      ),
-      map((r: UpdateChannelRequest | CloseChannelRequest) => {
-        if (r.method === 'UpdateChannel') {
-          return {
-            type: 'PLAYER_STATE_UPDATE',
-            ...r.params,
-            requestId: r.id,
-            outcome: deserializeAllocations(r.params.allocations) as SimpleAllocation // TODO: Verify this
-          };
-        } else {
-          return {type: 'PLAYER_REQUEST_CONCLUDE', requestId: r.id, channelId: r.params.channelId};
-        }
-      })
+          (r.type === 'PLAYER_STATE_UPDATE' || r.type === 'PLAYER_REQUEST_CONCLUDE') &&
+          r.channelId === channelId
+      )
     );
   };
 
@@ -412,7 +361,7 @@ export const applicationWorkflow = (
       // TODO: Close machine needs to accept new store
       ConcludeChannel.machine(store, {channelId: context.channelId}),
     invokeCreateChannelAndDirectFundProtocol: (
-      context,
+      _,
       event: DoneInvokeEvent<CreateAndDirectFund.Init>
     ) => CreateAndDirectFund.machine(store, event.data),
     invokeCreateChannelConfirmation: (context, event: DoneInvokeEvent<CCC.WorkflowContext>) =>
@@ -425,16 +374,10 @@ export const applicationWorkflow = (
       if (!isSimpleEthAllocation(outcome)) {
         throw new Error('Only simple eth allocation currently supported');
       }
-      return {
-        channelId: entry.channelId,
-        ...entry.channelConstants,
-        allocation: outcome,
-        index: entry.myIndex,
-        ...entry.latest
-      };
+      return {channelId: entry.channelId, allocation: outcome};
     },
     getDataForCreateChannelConfirmation: async (
-      context: WorkflowContext,
+      _: WorkflowContext,
       event: CreateChannelEvent | JoinChannelEvent
     ): Promise<CCC.WorkflowContext> => {
       switch (event.type) {

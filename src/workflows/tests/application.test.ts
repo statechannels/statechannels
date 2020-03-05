@@ -1,14 +1,7 @@
 import {interpret} from 'xstate';
 import {ethers} from 'ethers';
 import waitForExpect from 'wait-for-expect';
-import {
-  applicationWorkflow,
-  JoinChannelEvent,
-  WorkflowServices,
-  ChannelUpdated,
-  CreateChannelEvent,
-  WorkflowActions
-} from '../application';
+import {applicationWorkflow, WorkflowServices, WorkflowActions} from '../application';
 import {AddressZero} from 'ethers/constants';
 import {MemoryStore, Store} from '../../store/memory-store';
 import {StateVariables, SignedState} from '../../store/types';
@@ -17,6 +10,7 @@ import {MessagingService, MessagingServiceInterface} from '../../messaging';
 import {bigNumberify} from 'ethers/utils';
 import {calculateChannelId} from '../../store/state-utils';
 import {simpleEthAllocation} from '../../utils/outcome';
+import {CreateChannelEvent, ChannelUpdated, JoinChannelEvent} from '../../event-types';
 
 jest.setTimeout(50000);
 const createChannelEvent: CreateChannelEvent = {
