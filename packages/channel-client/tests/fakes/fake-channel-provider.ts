@@ -253,19 +253,19 @@ export class FakeChannelProvider implements ChannelProviderInterface {
   private async pushMessage(params: Message<ChannelResult>): Promise<PushMessageResult> {
     this.setState(params.data);
     this.notifyAppChannelUpdated(this.latestState[params.data.channelId]);
-    const turnNum = bigNumberify(params.data.turnNum)
+    const channel: ChannelResult = params.data;
+    const turnNum = bigNumberify(channel.turnNum)
       .add(1)
       .toString();
-
     switch (params.data.status) {
       case 'proposed':
-        this.events.emit('ChannelProposed', {params: params.data});
+        this.events.emit('ChannelProposed', {params: channel});
         break;
       // auto-close, if we received a close
       case 'closing':
-        this.setState({...this.latestState[params.data.channelId], turnNum, status: 'closed'});
-        this.notifyOpponent(this.latestState[params.data.channelId], 'ChannelUpdate');
-        this.notifyAppChannelUpdated(this.latestState[params.data.channelId]);
+        this.setState({...this.latestState[channel.channelId], turnNum, status: 'closed'});
+        this.notifyOpponent(this.latestState[channel.channelId], 'ChannelUpdate');
+        this.notifyAppChannelUpdated(this.latestState[channel.channelId]);
         break;
       default:
         break;
