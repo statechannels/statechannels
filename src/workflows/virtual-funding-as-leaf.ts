@@ -6,7 +6,7 @@ import {
   ServiceConfig,
   assign,
   StateNodeConfig,
-  sendParent
+  ActionTypes
 } from 'xstate';
 import {filter, map, take, flatMap, tap} from 'rxjs/operators';
 
@@ -21,6 +21,7 @@ import {bigNumberify} from 'ethers/utils';
 import {CHALLENGE_DURATION} from '../constants';
 import _ from 'lodash';
 import {assignError} from '../utils/workflow-utils';
+import {escalate} from 'xstate/lib/actions';
 
 export const enum Role {
   A = 0,
@@ -85,6 +86,9 @@ export const config: StateNodeConfig<Init, any, any> = {
   key: 'virtual-funding-as-leaf',
   id: 'workflow',
   initial: States.setupJointChannel,
+  on: {
+    [ActionTypes.ErrorCustom]: '#workflow.failure'
+  },
   states: {
     [States.setupJointChannel]: getDataAndInvoke<Init, Services>(
       {src: Services.waitForFirstJointState, opts: {onError: '#workflow.failure'}},
@@ -98,7 +102,13 @@ export const config: StateNodeConfig<Init, any, any> = {
     [States.fundJointChannel]: {
       initial: 'getObjective',
       states: {
-        getObjective: {invoke: {src: Services.fundGuarantor, onDone: 'runObjective'}},
+        getObjective: {
+          invoke: {
+            src: Services.fundGuarantor,
+            onDone: 'runObjective',
+            onError: '#workflow.failure'
+          }
+        },
         runObjective: {
           entry: Actions.triggerGuarantorObjective,
           invoke: {
@@ -125,7 +135,7 @@ export const config: StateNodeConfig<Init, any, any> = {
     ),
     success: {type: 'final'},
     failure: {
-      entry: [assignError, sendParent(({error}) => ({type: 'FAILURE', error}))]
+      entry: [assignError, escalate(({error}: any) => ({type: 'FAILURE', error}))]
     }
   }
 };
