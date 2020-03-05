@@ -1,4 +1,5 @@
 import {BigNumber} from 'ethers/utils';
+import {MemoryChannelStoreEntry} from './memory-channel-storage';
 
 export interface Participant {
   participantId: string;
@@ -94,4 +95,24 @@ export const isFundGuarantor = guard<FundGuarantor>('FundGuarantor');
 export interface Message {
   signedStates?: SignedState[];
   objectives?: Objective[];
+}
+
+export interface DBBackend {
+  privateKeys(): Promise<Record<string, string | undefined>>;
+  ledgers(): Promise<Record<string, string | undefined>>;
+  nonces(): Promise<Record<string, BigNumber | undefined>>;
+  objectives(): Promise<Objective[]>;
+  channels(): Promise<Record<string, MemoryChannelStoreEntry | undefined>>;
+
+  setPrivateKey(key: string, value: string): Promise<string>;
+  getPrivateKey(key: string): Promise<string | undefined>;
+  setChannel(key: string, value: MemoryChannelStoreEntry): Promise<MemoryChannelStoreEntry>;
+  getChannel(key: string): Promise<MemoryChannelStoreEntry | undefined>;
+  setLedger(key: string, value: string): Promise<string>;
+  getLedger(key: string): Promise<string | undefined>;
+  setNonce(key: string, value: BigNumber): Promise<BigNumber>;
+  getNonce(key: string): Promise<BigNumber | undefined>;
+  setObjective(key: string, value: string): Promise<string>;
+  getObjective(key: string): Promise<string | undefined>;
+  setObjectives(values: Objective[]): Promise<Objective[]>;
 }
