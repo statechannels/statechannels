@@ -2,7 +2,8 @@ import {
   ChannelConstants,
   Participant,
   Outcome,
-  SignedState
+  SignedState,
+  State
 } from '@statechannels/xstate-wallet/lib/src/store/types';
 import {bigNumberify} from 'ethers/utils';
 import {ethers} from 'ethers';
@@ -80,7 +81,7 @@ const outcome3: Outcome = {
 };
 
 const ledgerState = firstState(outcome, channel);
-export const ledgerStateMessage: SignedState = {
+export const ledgerStateIncoming: SignedState = {
   ...ledgerState,
   signatures: [signState(ledgerState, wallet1.privateKey)]
 };
@@ -94,7 +95,7 @@ export const ledgerStateResponse: SignedState = {
 };
 
 const ledgerState3 = firstState(outcome3, channel3);
-export const ledgerStateMessage3: SignedState = {
+export const ledgerStateIncoming3: SignedState = {
   ...ledgerState3,
   signatures: [signState(ledgerState3, wallet1.privateKey)]
 };
@@ -104,5 +105,19 @@ export const ledgerStateResponse3: SignedState = {
   signatures: [
     signState(ledgerState3, wallet1.privateKey),
     signState(ledgerState3, cHubStateChannelPK)
+  ]
+};
+
+const ledgerState3_2: State = {...ledgerState3, turnNum: bigNumberify(1)};
+export const ledgerStateIncoming3_2: SignedState = {
+  ...ledgerState3_2,
+  signatures: [signState(ledgerState3_2, wallet1.privateKey)]
+};
+
+export const ledgerStateResponse3_2: SignedState = {
+  ...ledgerState3_2,
+  signatures: [
+    signState(ledgerState3_2, wallet1.privateKey),
+    signState(ledgerState3_2, cHubStateChannelPK)
   ]
 };
