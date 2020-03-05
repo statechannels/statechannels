@@ -9,7 +9,7 @@ import {bigNumberify} from 'ethers/utils';
 import * as Depositing from './depositing';
 import {add} from '../utils/math-utils';
 import {isSimpleEthAllocation} from '../utils/outcome';
-const PROTOCOL = 'create-and-direct-fund';
+const PROTOCOL = 'create-and-fund';
 
 export enum Indices {
   Left = 0,
