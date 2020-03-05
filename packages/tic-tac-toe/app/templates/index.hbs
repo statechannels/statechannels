@@ -13,7 +13,7 @@
     <span class="text-gray-700">
       Name
     </span>
-    <input class="bg-white border border-gray-300 rounded py-1 px-2 mt-1 block w-full" placeholder="Jane Doe" />
+    <Input class="bg-white border border-gray-300 rounded py-1 px-2 mt-1 block w-full" placeholder="Jane Doe" @value={{this.username}} />
     <small>
       This will be displayed to other players.
     </small>
@@ -22,7 +22,7 @@
     <button
       type="button"
       class="flex items-center px-4 bg-indigo-500 p-3 rounded-lg text-white hover:bg-indigo-400"
-      {{on "click" this.connectWithMetaMask}}
+      {{on "click" (perform this.connectWithMetaMask this.username)}}
     >
       {{svg-jar "metamask-icon" class="mr-4 h-6 w-6"}}
       Connect With MetaMask
