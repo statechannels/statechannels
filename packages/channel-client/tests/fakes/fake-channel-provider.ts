@@ -28,7 +28,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
   opponentIndex?: number;
   address?: string = Wallet.createRandom().address;
   opponentAddress?: string;
-  latestState?: ChannelResult;
+  latestState: Record<string, ChannelResult> = {};
 
   async enable(url?: string): Promise<void> {
     this.url = url || '';
@@ -81,7 +81,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
   }
 
   setState(state: ChannelResult): void {
-    this.latestState = state;
+    this.latestState = {...this.latestState, [state.channelId]: state};
   }
 
   setAddress(address: string): void {
@@ -127,10 +127,10 @@ export class FakeChannelProvider implements ChannelProviderInterface {
   }
 
   public findChannel(channelId: string): ChannelResult {
-    if (!(this.latestState && this.latestState.channelId === channelId)) {
+    if (!Object.keys(this.latestState).includes(channelId)) {
       throw Error(`Channel does't exist with channelId '${JSON.stringify(channelId, null, 4)}'`);
     }
-    return this.latestState;
+    return this.latestState[channelId];
   }
 
   private async createChannel(params: CreateChannelParams): Promise<ChannelResult> {
@@ -149,7 +149,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
       status: 'proposed'
     };
     this.updatePlayerIndex(0);
-    this.latestState = channel;
+    this.setState(channel);
     this.address = channel.participants[0].participantId;
     this.opponentAddress = channel.participants[1].participantId;
     this.notifyOpponent(channel, 'CreateChannel');
@@ -166,15 +166,15 @@ export class FakeChannelProvider implements ChannelProviderInterface {
 
     // skip funding by setting the channel to 'running' the moment it is joined
     // [assuming we're working with 2-participant channels for the time being]
-    this.latestState = {
+    this.setState({
       ...latestState,
       turnNum: bigNumberify(3).toString(),
       status: 'running'
-    };
+    });
     this.opponentAddress = latestState.participants[0].participantId;
-    this.notifyOpponent(this.latestState, 'joinChannel');
+    this.notifyOpponent(this.latestState[channelId], 'joinChannel');
 
-    return this.latestState;
+    return this.latestState[channelId];
   }
 
   private async updateChannel(params: UpdateChannelParams): Promise<ChannelResult> {
@@ -195,10 +195,10 @@ export class FakeChannelProvider implements ChannelProviderInterface {
       log.debug(`Player ${this.getPlayerIndex()} updated channel to turnNum ${nextState.turnNum}`);
     }
 
-    this.latestState = nextState;
+    this.setState(nextState);
 
-    this.notifyOpponent(this.latestState, 'ChannelUpdate');
-    return this.latestState;
+    this.notifyOpponent(this.latestState[channelId], 'ChannelUpdate');
+    return this.latestState[channelId];
   }
 
   private async closeChannel(params: CloseChannelParams): Promise<ChannelResult> {
@@ -209,13 +209,13 @@ export class FakeChannelProvider implements ChannelProviderInterface {
       .toString();
     const status = 'closing';
 
-    this.latestState = {...latestState, turnNum, status};
+    this.setState({...latestState, turnNum, status});
     log.debug(
       `Player ${this.getPlayerIndex()} updated channel to status ${status} on turnNum ${turnNum}`
     );
-    this.notifyOpponent(this.latestState, 'ChannelUpdate');
+    this.notifyOpponent(this.latestState[params.channelId], 'ChannelUpdate');
 
-    return this.latestState;
+    return this.latestState[params.channelId];
   }
 
   // TODO: Craft a full message
@@ -251,21 +251,21 @@ export class FakeChannelProvider implements ChannelProviderInterface {
   }
 
   private async pushMessage(params: Message<ChannelResult>): Promise<PushMessageResult> {
-    this.latestState = params.data;
-    this.notifyAppChannelUpdated(this.latestState);
-    const turnNum = bigNumberify(this.latestState.turnNum)
+    this.setState(params.data);
+    this.notifyAppChannelUpdated(this.latestState[params.data.channelId]);
+    const channel: ChannelResult = params.data;
+    const turnNum = bigNumberify(channel.turnNum)
       .add(1)
       .toString();
-
     switch (params.data.status) {
       case 'proposed':
-        this.events.emit('ChannelProposed', {params: params.data});
+        this.events.emit('ChannelProposed', {params: channel});
         break;
       // auto-close, if we received a close
       case 'closing':
-        this.latestState = {...this.latestState, turnNum, status: 'closed'};
-        this.notifyOpponent(this.latestState, 'ChannelUpdate');
-        this.notifyAppChannelUpdated(this.latestState);
+        this.setState({...this.latestState[channel.channelId], turnNum, status: 'closed'});
+        this.notifyOpponent(this.latestState[channel.channelId], 'ChannelUpdate');
+        this.notifyAppChannelUpdated(this.latestState[channel.channelId]);
         break;
       default:
         break;
