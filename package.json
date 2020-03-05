@@ -1,5 +1,5 @@
 {
-  "name": "xstate-wallet",
+  "name": "@statechannels/xstate-wallet",
   "description": "State channel wallet using xstate.",
   "version": "0.0.1",
   "author": "Alex Gap",
