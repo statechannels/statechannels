@@ -1,5 +1,19 @@
 import {BigNumber} from 'ethers/utils';
-
+export interface SiteBudget {
+  site: string;
+  budgets: Record<string, AssetBudget>;
+}
+interface Budget {
+  send: BigNumber;
+  receive: BigNumber;
+}
+export interface AssetBudget {
+  assetHolderAddress: string;
+  pending: Budget;
+  free: Budget;
+  inUse: Budget;
+  direct: Budget;
+}
 export interface Participant {
   participantId: string;
   signingAddress: string;
