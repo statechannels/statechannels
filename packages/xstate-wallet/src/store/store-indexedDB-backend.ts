@@ -40,22 +40,36 @@ export class MemoryBackend implements DBBackend {
       const request = this._db
         .transaction([collection], 'readonly')
         .objectStore(collection)
-        .openCursor();
-      let result = {};
+        .getAll(); // TODO: fix: not returning with keys
       request.onerror = err => reject(err);
-      request.onsuccess = event => {
-        const cursor = (event.target as any).result;
-        if (cursor) {
-          result = {...result, [cursor.key]: cursor.value};
-          cursor.continue();
-        } else {
-          resolve(result);
-        }
-      };
+      request.onsuccess = event => resolve(event.target.result);
+    });
+  }
+
+  private async get(collection: string, key: string) {
+    return new Promise<any>((resolve, reject) => {
+      const request = this._db
+        .transaction([collection], 'readonly')
+        .objectStore(collection)
+        .get(key);
+      request.onerror = err => reject(err);
+      request.onsuccess = _ => resolve(request.result);
+    });
+  }
+
+  private async add(collection, key, value) {
+    return new Promise<any>((resolve, reject) => {
+      const request = this._db
+        .transaction([collection], 'readwrite')
+        .objectStore(collection)
+        .add(value, key);
+      request.onerror = err => reject(err);
+      request.onsuccess = _ => resolve(value);
     });
   }
 
   // Generic Getters
+
   public async channels() {
     return this.getAll('channels');
   }
@@ -72,49 +86,43 @@ export class MemoryBackend implements DBBackend {
     return this.getAll('ledgers');
   }
 
-  // Individual Getters/seters
-
-  public async setPrivateKey(key: string, value: string) {
-    return value;
-  }
-
-  public async getPrivateKey(key: string) {
-    return undefined;
-  }
-
-  public async setChannel(key: string, value: MemoryChannelStoreEntry) {
-    return value;
-  }
+  // Individual Getters
 
   public async getChannel(key: string) {
-    return undefined;
+    return this.get('channels', key);
   }
-
-  public async setLedger(key: string, value: string) {
-    return value;
-  }
-
-  public async getLedger(key: string) {
-    return undefined;
-  }
-
-  public async setNonce(key: string, value: BigNumber) {
-    return value;
-  }
-
-  public async getNonce(key: string) {
-    return undefined;
-  }
-
-  public async setObjective(key: string, value: string) {
-    return value;
-  }
-
-  public async setObjectives(values: Objective[]) {
-    return values;
-  }
-
   public async getObjective(key: string) {
-    return undefined;
+    return this.get('objectives', key);
+  }
+  public async getNonce(key: string) {
+    return this.get('nonces', key);
+  }
+  public async getPrivateKey(key: string) {
+    return this.get('privateKeys', key);
+  }
+  public async getLedger(key: string) {
+    return this.get('ledgers', key);
+  }
+
+  // Individual Getters
+
+  public async setPrivateKey(key: string, value: string) {
+    return this.add('privateKeys', key, value);
+  }
+  public async setChannel(key: string, value: MemoryChannelStoreEntry) {
+    return this.add('channels', key, value);
+  }
+  public async setLedger(key: string, value: string) {
+    return this.add('ledgers', key, value);
+  }
+  public async setNonce(key: string, value: BigNumber) {
+    return this.add('nonces', key, value);
+  }
+  public async setObjective(key: string, value: string) {
+    return this.add('objectives', key, value);
+  }
+  public async setObjectives(values: Objective[]) {
+    // TODO: make a indexedDB objectCollection full replacer.
+    return values;
   }
 }
