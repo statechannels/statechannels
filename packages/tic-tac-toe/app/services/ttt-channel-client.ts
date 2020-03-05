@@ -67,7 +67,7 @@ const formatAllocations = (
   ];
 };
 
-export default class TttChannelProvider extends Service {
+export default class TttChannelClientService extends Service {
   private channelClient!: ChannelClientInterface;
 
   enable(channelClient: ChannelClientInterface): void {
@@ -176,6 +176,6 @@ export default class TttChannelProvider extends Service {
 // DO NOT DELETE: this is how TypeScript knows how to look up your services.
 declare module '@ember/service' {
   interface Registry {
-    'ttt-channel-provider': TttChannelProvider;
+    'ttt-channel-client': TttChannelClientService;
   }
 }
