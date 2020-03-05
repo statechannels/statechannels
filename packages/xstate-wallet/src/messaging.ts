@@ -115,8 +115,7 @@ export class MessagingService implements MessagingServiceInterface {
 
     switch (request.method) {
       case 'GetAddress':
-        const address = this.store.getAddress();
-        this.sendResponse(id, address);
+        this.sendResponse(id, await this.store.getAddress());
         break;
       case 'GetEthereumSelectedAddress':
         //  ask metamask permission to access accounts
@@ -135,7 +134,7 @@ export class MessagingService implements MessagingServiceInterface {
       case 'PushMessage':
         // todo: should verify message format here
         const message = request.params as WireMessage;
-        if (message.recipient !== this.store.getAddress()) {
+        if (message.recipient !== (await this.store.getAddress())) {
           throw new Error(`Received message not addressed to us ${JSON.stringify(message)}`);
         }
         this.store.pushMessage(deserializeMessage(message));
