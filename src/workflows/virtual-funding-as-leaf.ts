@@ -5,7 +5,8 @@ import {
   DoneInvokeEvent,
   ServiceConfig,
   assign,
-  StateNodeConfig
+  StateNodeConfig,
+  sendParent
 } from 'xstate';
 import {filter, map, take, flatMap, tap} from 'rxjs/operators';
 
@@ -19,6 +20,7 @@ import {FundGuarantor, AllocationItem} from '../store/types';
 import {bigNumberify} from 'ethers/utils';
 import {CHALLENGE_DURATION} from '../constants';
 import _ from 'lodash';
+import {assignError} from '../utils/workflow-utils';
 
 export const enum Role {
   A = 0,
@@ -122,7 +124,9 @@ export const config: StateNodeConfig<Init, any, any> = {
       States.success
     ),
     success: {type: 'final'},
-    failure: {}
+    failure: {
+      entry: [assignError, sendParent(({error}) => ({type: 'FAILURE', error}))]
+    }
   }
 };
 
@@ -146,7 +150,7 @@ export const waitForFirstJointState = (store: Store) => ({
           amounts[Role.A].add(amounts[Role.B]).eq(amounts[Role.Hub])
         ) {
           return;
-        } else throw 'Invalid first state';
+        } else throw new Error('Invalid first state');
       }),
       map(s => ({state: s})),
       take(1)
