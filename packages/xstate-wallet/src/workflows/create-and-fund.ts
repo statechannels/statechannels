@@ -9,6 +9,7 @@ import {bigNumberify} from 'ethers/utils';
 import * as Depositing from './depositing';
 import {add} from '../utils/math-utils';
 import {isSimpleEthAllocation} from '../utils/outcome';
+import {checkThat} from '../utils';
 const PROTOCOL = 'create-and-fund';
 
 export enum Indices {
@@ -35,8 +36,6 @@ const preFundSetup = {
   }
 };
 
-// FIXME: Abort should not be success
-
 const depositing = getDataAndInvoke('getDepositingInfo', 'invokeDepositing', 'postFundSetup');
 
 const postFundSetup = {
@@ -56,44 +55,29 @@ export const config: MachineConfig<Context, any, any> = {
     preFundSetup,
     depositing,
     postFundSetup,
-    success: {
-      type: 'final' as 'final'
-    }
+    success: {type: 'final'}
   }
 };
 
 export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => {
-  async function getDepositingInfo({
-    allocation: minimalAllocation,
-    channelId
-  }: Init): Promise<Depositing.Init> {
-    const entry = await store.getEntry(channelId);
-    if (!entry.supported) {
-      throw new Error('Unsupported state');
-    }
-    if (!isSimpleEthAllocation(entry.supported.outcome)) {
-      throw new Error('Unsupported outcome');
-    }
-    let totalBeforeDeposit = bigNumberify(0);
-    for (let i = 0; i < minimalAllocation.allocationItems.length; i++) {
-      const allocation = minimalAllocation.allocationItems[i];
-      if (entry.myIndex === i) {
-        const fundedAt = entry.supported.outcome.allocationItems.map(a => a.amount).reduce(add);
+  async function getDepositingInfo({allocation, channelId}: Init): Promise<Depositing.Init> {
+    const {supported, myIndex} = await store.getEntry(channelId);
+    const outcome = checkThat(supported?.outcome, isSimpleEthAllocation);
 
-        return {
-          channelId,
-          depositAt: totalBeforeDeposit,
-          totalAfterDeposit: bigNumberify(totalBeforeDeposit).add(allocation.amount),
-
-          fundedAt
-        };
-      } else {
-        totalBeforeDeposit = bigNumberify(allocation.amount).add(totalBeforeDeposit);
+    const fundedAt = outcome.allocationItems.map(a => a.amount).reduce(add);
+    let depositAt = bigNumberify(0);
+    for (let i = 0; i < allocation.allocationItems.length; i++) {
+      const {amount} = allocation.allocationItems[i];
+      if (i !== myIndex) depositAt = depositAt.add(amount);
+      else {
+        const totalAfterDeposit = depositAt.add(amount);
+        return {channelId, depositAt, totalAfterDeposit, fundedAt};
       }
     }
 
-    throw Error(`Could not find an allocation for participant id ${entry.myIndex}`);
+    throw Error(`Could not find an allocation for participant id ${myIndex}`);
   }
+
   const services = {
     invokeDepositing: Depositing.machine(store),
     advanceChannel: AdvanceChannel.machine(store),
