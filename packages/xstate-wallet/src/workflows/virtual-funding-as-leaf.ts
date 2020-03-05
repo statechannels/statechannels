@@ -197,8 +197,8 @@ const getDeductions = (store: Store) => async (ctx: Init): Promise<Deductions> =
   return {
     deductions: [
       {
-        destination: allocationItems[1].destination,
-        amount: allocationItems[2 - myIndex].amount
+        destination: allocationItems[2].destination,
+        amount: allocationItems[(2 - myIndex) / 2].amount
       },
       allocationItems[myIndex]
     ]
