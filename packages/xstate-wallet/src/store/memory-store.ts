@@ -210,8 +210,9 @@ export class MemoryStore implements Store {
     appDefinition = AddressZero
   ): Promise<ChannelStoreEntry> {
     const addresses = participants.map(x => x.signingAddress);
-    const privateKeys = await this.backend.privateKeys();
-    const myIndex = addresses.findIndex(address => !!privateKeys[address]);
+    const myIndex = await addresses.findIndex(
+      async address => !!(await this.backend.getPrivateKey(address))
+    );
     if (myIndex === -1) {
       throw new Error("Couldn't find the signing key for any participant in wallet.");
     }
