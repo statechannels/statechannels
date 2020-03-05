@@ -1,4 +1,4 @@
-import {AnyEventObject, AssignAction, MachineConfig, assign, spawn, Machine} from 'xstate';
+import {AnyEventObject, AssignAction, MachineConfig, assign, spawn, Machine, Actor} from 'xstate';
 import {filter, map} from 'rxjs/operators';
 import {Store} from '../store';
 import {statesEqual, outcomesEqual, calculateChannelId} from '../store/state-utils';
@@ -6,7 +6,7 @@ import {State} from '../store/types';
 
 const WORKFLOW = 'support-state';
 
-export type Init = {state: State};
+export type Init = {state: State; observer?: Actor<any, any>};
 type HasChannelId = Init & {channelId: string};
 
 /*
@@ -44,8 +44,6 @@ const sendState = (store: Store) => async ({state, channelId}: HasChannelId) => 
   if (
     // If we've haven't already signed a state, there's no harm in supporting one.
     !latestSupportedByMe ||
-    // If we've already supported this state, we might as well re-send it.
-    statesEqual(channelConstants, latestSupportedByMe, state) ||
     // Otherwise, we only send it if we haven't signed any new states.
     (statesEqual(channelConstants, latestSupportedByMe, supported) &&
       supported?.turnNum.lt(state.turnNum)) ||
@@ -72,7 +70,7 @@ const options = (store: Store): Options => ({
   actions: {
     spawnObserver: assign<HasChannelId>((ctx: HasChannelId) => ({
       ...ctx,
-      observer: spawn(notifyWhenSupported(store, ctx))
+      observer: !ctx.observer ? spawn(notifyWhenSupported(store, ctx)) : ctx.observer
     }))
   }
 });
