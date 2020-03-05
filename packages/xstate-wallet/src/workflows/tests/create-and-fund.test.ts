@@ -7,15 +7,17 @@ import {MemoryStore, Store} from '../../store/memory-store';
 import {bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
 import {firstState, signState, calculateChannelId} from '../../store/state-utils';
-import {ChannelConstants, Outcome, State, Participant} from '../../store/types';
+import {ChannelConstants, Outcome, State} from '../../store/types';
 import {AddressZero} from 'ethers/constants';
 import {checkThat} from '../../utils';
 import {isSimpleEthAllocation} from '../../utils/outcome';
-import {wallet1, wallet2, participants, wallet3} from './data';
+import {wallet1, wallet2, participants, wallet3, ledgerState, first, third, second} from './data';
 import {subscribeToMessages} from './message-service';
-import {ETH_ASSET_HOLDER_ADDRESS, HUB_ADDRESS} from '../../constants';
-import {FakeChain, Chain} from '../../chain';
+import {ETH_ASSET_HOLDER_ADDRESS, HUB} from '../../constants';
+import {FakeChain} from '../../chain';
 import {DumbHub} from './dumb-hub';
+import {MemoryChannelStoreEntry} from '../../store/memory-channel-storage';
+import {add} from '../../utils/math-utils';
 
 jest.setTimeout(20000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
@@ -44,6 +46,7 @@ const ledgerChannel: ChannelConstants = {
 const destinations = participants.map(p => p.destination);
 const amounts = [bigNumberify(7), bigNumberify(5)];
 const totalAmount = amounts.reduce((a, b) => a.add(b));
+
 const allocation: Outcome = {
   type: 'SimpleAllocation',
   assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
@@ -52,6 +55,9 @@ const allocation: Outcome = {
     amount: amounts[i]
   }))
 };
+
+const ledgerAmounts = amounts.map(a => a.add(2));
+const depositAmount = ledgerAmounts.reduce(add).toHexString();
 
 const context: Init = {
   channelId: targetChannelId,
@@ -68,8 +74,9 @@ const allSignState = (state: State) => ({
   signatures: [wallet1, wallet2].map(({privateKey}) => signState(state, privateKey))
 });
 
+let chain: FakeChain;
 beforeEach(() => {
-  const chain: Chain = new FakeChain();
+  chain = new FakeChain();
   aStore = new MemoryStore([wallet1.privateKey], chain);
   bStore = new MemoryStore([wallet2.privateKey], chain);
   const hubStore = new DumbHub(wallet3.privateKey);
@@ -82,16 +89,10 @@ beforeEach(() => {
   };
   [aStore, bStore].forEach((store: Store) => store.pushMessage(message));
 
-  const hub: Participant = {
-    participantId: 'hub',
-    destination: HUB_ADDRESS,
-    signingAddress: wallet3.address
-  };
-
   subscribeToMessages({
     [participants[0].participantId]: aStore,
     [participants[1].participantId]: bStore,
-    [hub.participantId]: hubStore
+    [HUB.participantId]: hubStore
   });
 });
 
@@ -114,13 +115,30 @@ test('it uses direct funding when there is no budget', async () => {
   }, EXPECT_TIMEOUT);
 });
 
-test('it uses virtual funding when there is a budget', async () => {
+test('it uses virtual funding when enabled', async () => {
   process.env.USE_VIRTUAL_FUNDING = 'true';
+
+  let state = ledgerState([first, third], ledgerAmounts);
+  let ledgerId = calculateChannelId(state);
+  let signatures = [wallet1, wallet3].map(({privateKey}) => signState(state, privateKey));
+
+  chain.depositSync(ledgerId, '0', depositAmount);
+  aStore.pushMessage({signedStates: [{...state, signatures}]});
+  aStore.setLedger((await aStore.getEntry(calculateChannelId(state))) as MemoryChannelStoreEntry);
+
+  state = ledgerState([second, third], ledgerAmounts);
+  ledgerId = calculateChannelId(state);
+  signatures = [wallet2, wallet3].map(({privateKey}) => signState(state, privateKey));
+
+  chain.depositSync(ledgerId, '0', depositAmount);
+  bStore.pushMessage({signedStates: [{...state, signatures}]});
+  bStore.setLedger((await bStore.getEntry(calculateChannelId(state))) as MemoryChannelStoreEntry);
+
   const [aService, bService] = [aStore, bStore].map(connectToStore);
 
   await waitForExpect(async () => {
-    expect(bService.state.value).toEqual('success');
     expect(aService.state.value).toEqual('success');
+    expect(bService.state.value).toEqual('success');
 
     const {supported} = await aStore.getEntry(targetChannelId);
     const outcome = checkThat(supported?.outcome, isSimpleEthAllocation);
