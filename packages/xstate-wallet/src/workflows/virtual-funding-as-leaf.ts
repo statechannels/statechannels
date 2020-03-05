@@ -214,5 +214,4 @@ export const options = (
   return {actions, services};
 };
 
-export const machine = (store: Store, context: Init) =>
-  Machine(config, options(store)).withContext(context);
+export const machine = (store: Store) => Machine(config, options(store));
