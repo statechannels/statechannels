@@ -26,7 +26,14 @@ export type TorrentCallback = (torrent: Torrent) => any;
 
 export * from './types';
 
-export const REQUEST_RATE = bigNumberify(10);
+export const WEI_PER_PIECE = bigNumberify(1); // cost per credit / piece
+export const BUFFER_REFILL_RATE = bigNumberify(100); // number of credits / pieces the leecher wishes to increase the buffer by
+// These variables control the amount of (micro)trust the leecher must invest in the seeder
+// As well as the overall performance hit of integrating payments into webtorrent.
+// A high BUFFER_REFILL_RATE increases the need for trust, but decreases the number of additional messages and therefore latency
+// It can also cause a payment to go above the leecher's balance / capabilities
+export const INITIAL_SEEDER_BALANCE = bigNumberify(0); // needs to be zero so that depositing works correctly (unidirectional payment channel)
+export const INITIAL_LEECHER_BALANCE = bigNumberify(1e9); // e.g. gwei = 1e9 = nano-ETH
 
 export default class WebTorrentPaidStreamingClient extends WebTorrent {
   peersList: PeersByTorrent;
@@ -149,8 +156,8 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         this.peersList[torrent.infoHash][peerAccount] = {
           id: peerAccount,
           wire,
-          buffer: '0',
-          seederBalance: '0',
+          buffer: '0', // (pieces) a value x > 0 would allow a leecher to download x pieces for free
+          seederBalance: '0', // (wei) must begin at zero so that depositing works
           allowed: false,
           channelId
         };
@@ -160,17 +167,15 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           torrentInfoHash: torrent.infoHash,
           peerAccount
         });
-      } else if (
-        !knownPeerAccount.allowed ||
-        bigNumberify(knownPeerAccount.buffer).lt(REQUEST_RATE)
-      ) {
+      } else if (!knownPeerAccount.allowed || bigNumberify(knownPeerAccount.buffer).isZero()) {
+        // As soon as buffer is empty, block
         this.blockPeer(torrent.infoHash, wire, peerAccount);
       } else {
         this.peersList[torrent.infoHash][peerAccount] = {
           id: peerAccount,
           wire,
           buffer: bigNumberify(knownPeerAccount.buffer)
-            .sub(10)
+            .sub(1) // decrease buffer by one unit (one piece)
             .toString(),
           seederBalance: knownPeerAccount.seederBalance,
           allowed: true,
@@ -189,8 +194,8 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       const channel = await this.paymentChannelClient.createChannel(
         this.pseAccount, // seeder
         peerAccount, // leecher
-        bigNumberify(0).toString(), // seederBalance: should begin at zero
-        bigNumberify(4000).toString(), // leecherBalance,
+        INITIAL_SEEDER_BALANCE.toString(), // seederBalance,
+        INITIAL_LEECHER_BALANCE.toString(), // leecherBalance,
         this.paymentChannelClient.myEthereumSelectedAddress, // seederOutcomeAddress,
         peerOutcomeAddress // leecherOutcomeAddress
       );
@@ -214,22 +219,24 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     });
   }
 
-  protected async loadFunds(infoHash: string, peerId: string, channelId: string) {
-    // [ George ] If web3torrent is to run the Single Asset Payments ForceMoveApp, and the payments are going to be unidirectional we could wrap the paymentChannelClient in a web3tChannelClient which offers a countersign() convenience method. This allows the seeder to immediately accept the payment and for the leecher to be ready to send another one as quickly as possible.
-
-    log(`querying channel client for updated buffer`);
+  protected async refillBuffer(infoHash: string, peerId: string, channelId: string) {
+    log(`querying channel client for updated balance`);
     const newSeederBalance = bigNumberify(
       this.paymentChannelClient.channelCache[channelId].beneficiaryBalance
     );
+    // infer payment using update balance and previously stored balance
     const payment = newSeederBalance.sub(
       bigNumberify(this.peersList[infoHash][peerId].seederBalance)
     );
-    this.peersList[infoHash][peerId].buffer = bigNumberify(this.peersList[infoHash][peerId].buffer)
-      .add(payment)
-      .toString();
+    // store new balance
     this.peersList[infoHash][peerId].seederBalance = newSeederBalance.toString();
+    // convert payment into number of pieces
+    this.peersList[infoHash][peerId].buffer = bigNumberify(this.peersList[infoHash][peerId].buffer)
+      .add(payment.div(WEI_PER_PIECE)) // TODO allow this to vary by piece size
+      .toString();
+
     log(
-      `newSeederBalance: ${newSeederBalance} payment: ${payment}, buffer for peer: ${this.peersList[infoHash][peerId].buffer}`
+      `newSeederBalance: ${newSeederBalance} wei; payment: ${payment} wei;, buffer for peer: ${this.peersList[infoHash][peerId].buffer} pieces`
     );
   }
 
@@ -238,7 +245,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
     await this.paymentChannelClient.makePayment(
       channelId,
-      bigNumberify(REQUEST_RATE.mul(10)).toString()
+      WEI_PER_PIECE.mul(BUFFER_REFILL_RATE).toString()
     );
     const newSeederBalance = bigNumberify(
       this.paymentChannelClient.channelCache[channelId].beneficiaryBalance
@@ -289,7 +296,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
             this.paymentChannelClient.amProposer(channelId) &&
             this.paymentChannelClient.isPaymentToMe(channelState)
           ) {
-            await this.loadFunds(
+            await this.refillBuffer(
               torrent.infoHash,
               wire.paidStreamingExtension.peerAccount,
               channelId
