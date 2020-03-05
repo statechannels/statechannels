@@ -44,6 +44,8 @@ const sendState = (store: Store) => async ({state, channelId}: HasChannelId) => 
   if (
     // If we've haven't already signed a state, there's no harm in supporting one.
     !latestSupportedByMe ||
+    // If we've already supported this state, we might as well re-send it.
+    statesEqual(channelConstants, latestSupportedByMe, state) ||
     // Otherwise, we only send it if we haven't signed any new states.
     (statesEqual(channelConstants, latestSupportedByMe, supported) &&
       supported?.turnNum.lt(state.turnNum)) ||
