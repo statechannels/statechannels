@@ -9,6 +9,7 @@ import {DownloadInfo, DownloadInfoProps} from './download-info/DownloadInfo';
 import {MagnetLinkButton} from './magnet-link-button/MagnetLinkButton';
 import {TorrentInfo, TorrentInfoProps} from './TorrentInfo';
 import {UploadInfo, UploadInfoProps} from './upload-info/UploadInfo';
+import {mockMetamask} from '../../library/testing/test-utils';
 
 Enzyme.configure({adapter: new Adapter()});
 
@@ -48,6 +49,10 @@ const mockTorrentInfo = (torrentProps?: Partial<Torrent>): MockTorrentInfo => {
 
 describe('<TorrentInfo />', () => {
   let torrentInfo: MockTorrentInfo;
+
+  beforeAll(() => {
+    mockMetamask();
+  });
 
   beforeEach(() => {
     torrentInfo = mockTorrentInfo();

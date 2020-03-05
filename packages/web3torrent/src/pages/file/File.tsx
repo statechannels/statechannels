@@ -1,8 +1,7 @@
-import {ChannelClient} from '@statechannels/channel-client';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useContext} from 'react';
 import {RouteComponentProps, useLocation} from 'react-router-dom';
 
-import {download, getTorrentPeers} from '../../clients/web3torrent-client';
+import {download, getTorrentPeers, WebTorrentContext} from '../../clients/web3torrent-client';
 import {FormButton} from '../../components/form';
 import {TorrentInfo} from '../../components/torrent-info/TorrentInfo';
 import {TorrentPeers} from '../../library/types';
@@ -11,7 +10,7 @@ import {parseMagnetURL} from '../../utils/magnet';
 import torrentStatusChecker from '../../utils/torrent-status-checker';
 import {useInterval} from '../../utils/useInterval';
 import './File.scss';
-import {Web3TorrentChannelClient} from '../../clients/web3t-channel-client';
+import {ChannelList} from '../../components/channel-list/ChannelList';
 
 const getTorrentAndPeersData: (
   setTorrent: React.Dispatch<React.SetStateAction<Torrent>>,
@@ -34,10 +33,9 @@ const File: React.FC<RouteComponentProps & Props> = props => {
   const [loading, setLoading] = useState(false);
   const [buttonLabel, setButtonLabel] = useState('Start Download');
   const [errorLabel, setErrorLabel] = useState('');
-  const getLiveData = getTorrentAndPeersData(setTorrent, setPeers);
+  const web3torrent = useContext(WebTorrentContext);
 
-  // TODO move this to a more abvious place (we may need it in other components)
-  const channelClient = new Web3TorrentChannelClient(new ChannelClient(window.channelProvider));
+  const getLiveData = getTorrentAndPeersData(setTorrent, setPeers);
 
   useEffect(() => {
     if (torrent.infoHash) {
@@ -66,7 +64,7 @@ const File: React.FC<RouteComponentProps & Props> = props => {
               setButtonLabel('Preparing Download...');
               try {
                 // TODO: Put real values here
-                await channelClient.approveBudgetAndFund('', '', '', '', '');
+                await web3torrent.paymentChannelClient.approveBudgetAndFund('', '', '', '', '');
                 setTorrent({...torrent, ...(await download(torrent.magnetURI))});
               } catch (error) {
                 setErrorLabel(
@@ -109,6 +107,7 @@ const File: React.FC<RouteComponentProps & Props> = props => {
       ) : (
         false
       )}
+      <ChannelList />
     </section>
   );
 };

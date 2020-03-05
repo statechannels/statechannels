@@ -122,7 +122,7 @@ describe('FakeChannelClient', () => {
 
       return new Promise(resolve => {
         clientBEventEmitter.once('ChannelProposed', () => {
-          expect(providerB.latestState).toEqual(states['proposed']);
+          expect(providerB.latestState[channelId]).toEqual(states['proposed']);
           resolve();
         });
 
@@ -137,7 +137,7 @@ describe('FakeChannelClient', () => {
       setProviderStates([providerB], states['proposed']);
       const channelResult = await clientB.joinChannel(channelId);
       expect(channelResult).toEqual(states['running']);
-      expect(providerA.latestState).toEqual(states['running']);
+      expect(providerA.latestState[channelId]).toEqual(states['running']);
     });
 
     it('the player whose turn it is not cannot accept a join proposal they sent', async () => {
@@ -156,7 +156,7 @@ describe('FakeChannelClient', () => {
         UPDATED_APP_DATA
       );
       expect(channelResult).toEqual(states['updated_app_data']);
-      expect(providerB.latestState).toEqual(states['updated_app_data']);
+      expect(providerB.latestState[channelId]).toEqual(states['updated_app_data']);
     });
 
     it('the player whose turn it is not cannot update the channel', async () => {
@@ -174,7 +174,7 @@ describe('FakeChannelClient', () => {
       // phase and the clients directly go to the channel 'closed' state
       const channelResult = await clientA.closeChannel(channelId);
       expect(channelResult).toEqual(states['closed']);
-      expect(providerB.latestState).toEqual(states['closed']);
+      expect(providerB.latestState[channelId]).toEqual(states['closed']);
     });
 
     it('player with invalid turn cannot make a valid close channel call', async () => {

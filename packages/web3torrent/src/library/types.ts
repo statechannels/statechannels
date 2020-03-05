@@ -34,7 +34,7 @@ export enum PaidStreamingExtensionEvents {
 }
 
 export enum PaidStreamingExtensionNotices {
-  PAYMENT = 'payment',
+  MESSAGE = 'message',
   START = 'start',
   STOP = 'stop',
   ACK = 'ack'
@@ -42,6 +42,7 @@ export enum PaidStreamingExtensionNotices {
 
 export type PaidStreamingExtendedHandshake = {
   pseAccount: string;
+  outcomeAddress: string;
 };
 
 export type PaidStreamingWire = Omit<Wire, 'requests'> &
@@ -120,7 +121,9 @@ export type PeerByTorrent = {
   id: string;
   wire: PaidStreamingWire | PeerWire;
   allowed: boolean;
-  funds: string;
+  buffer: string;
+  seederBalance: string;
+  channelId: string;
 };
 
 export type TorrentPeers = {

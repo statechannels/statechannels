@@ -1,0 +1,29 @@
+@import '../../styles/variables';
+
+.channel-list {
+  width: 100%;
+}
+
+table.channel-list-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  tbody {
+    border-bottom: 1px solid $c-mediumgrey;
+    text-align: center;
+    td {
+      min-width: 50px;
+      padding: 5px 5px;
+    }
+    td.channel-header {
+      font-weight: bold;
+    }
+    td.channel-address {
+      max-width: 100px;
+      font-style: italic;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+}
