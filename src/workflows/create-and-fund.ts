@@ -46,7 +46,7 @@ const direct: StateNodeConfig<any, any, any> = {
       {src: 'depositing'},
       'updateFunding'
     ),
-    updateFunding: {invoke: {src: 'updateFunding', onDone: 'done'}},
+    updateFunding: {invoke: {src: 'setFundingToDirect', onDone: 'done'}},
     done: {type: 'final'}
   },
   onDone: 'done'
@@ -99,7 +99,7 @@ const virtual: StateNodeConfig<Init, any, any> = {
       {src: 'virtualFunding'},
       'updateFunding'
     ),
-    updateFunding: {},
+    updateFunding: {invoke: {src: 'setFundingToVirtual', onDone: 'done'}},
     done: {type: 'final'}
   },
   onDone: 'done'
@@ -141,7 +141,8 @@ const services = (store: Store) => ({
   getPreFundSetup: getPreFundSetup(store),
   getPostFundSetup: getPostFundSetup(store),
   determineFunding: determineFunding(store),
-  updateFunding: updateFunding(store),
+  setFundingToDirect: setFundingToDirect(store),
+  setFundingToVirtual: setFundingToVirtual(store),
   getObjective: getObjective(store)
 });
 type Service = keyof ReturnType<typeof services>;
@@ -241,5 +242,8 @@ const getDepositingInfo = (store: Store) => async ({channelId}: Init): Promise<D
   throw Error(`Could not find an allocation for participant id ${myIndex}`);
 };
 
-const updateFunding = (store: Store) => (ctx: Init) =>
-  store.setFunding(ctx.channelId, {type: 'Direct'});
+const setFundingToDirect = (store: Store) => async (ctx: Init) =>
+  await store.setFunding(ctx.channelId, {type: 'Direct'});
+
+const setFundingToVirtual = (store: Store) => async (ctx: Init) =>
+  await store.setFunding(ctx.channelId, {type: 'Virtual', jointChannelId: 'TODO'});
