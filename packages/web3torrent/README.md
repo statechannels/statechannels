@@ -8,6 +8,8 @@ Web3Torrent is a streaming torrent implementation, based of [Webtorrent](https:/
 
 The Extension establishes a basic way to send/recieve messages between peers, and it allows the seeder to easily control what to do when request for torrent pieces are receieved.
 
+A Whimsical Diagram was made to explain how Web3Torrent, you can see it [here](https://whimsical.com/Sq6whAwa8aTjbwMRJc7vPU).
+
 ### The client
 
 As the client is a custom, extended version of [Webtorrent](https://github.com/webtorrent/webtorrent), most of the docs from [their docs page](https://webtorrent.io/docs) are applicable on this project.
