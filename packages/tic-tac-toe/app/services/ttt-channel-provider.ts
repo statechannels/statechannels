@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Service from '@ember/service';
-// import {
-//   ChannelResult,
-//   Message,
-//   ChannelClientInterface,
-//   UnsubscribeFunction
-// } from '@statechannels/channel-client';
+import {
+  ChannelResult,
+  Message,
+  ChannelClientInterface,
+  UnsubscribeFunction
+} from '@statechannels/channel-client';
 import {AppData, encodeAppData, decodeAppData} from '../core/app-data';
 import {ChannelState} from '../core/channel-state';
 
@@ -13,7 +13,7 @@ const {bigNumberify} = ethers.utils;
 
 const TTT_ADDRESS = '0x000'; // Need to pass in the actual address at build time
 
-const convertToChannelState = (channelResult: any): ChannelState => {
+const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
   const {
     turnNum,
     channelId,
@@ -68,9 +68,9 @@ const formatAllocations = (
 };
 
 export default class TttChannelProvider extends Service {
-  private channelClient!: any;
+  private channelClient!: ChannelClientInterface;
 
-  enable(channelClient: any): void {
+  enable(channelClient: ChannelClientInterface): void {
     this.channelClient = channelClient;
   }
 
@@ -106,12 +106,12 @@ export default class TttChannelProvider extends Service {
     return this.channelClient.getEthereumSelectedAddress();
   }
 
-  onMessageQueued(callback: (message: any) => void): any {
+  onMessageQueued(callback: (message: Message) => void): any {
     return this.channelClient.onMessageQueued(callback);
   }
 
   // Accepts a ttt-friendly callback, performs the necessary encoding, and subscribes to the channelClient with an appropriate, API-compliant callback
-  onChannelUpdated(tttCallback: (channelState: ChannelState) => any): () => {} {
+  onChannelUpdated(tttCallback: (channelState: ChannelState) => UnsubscribeFunction): () => {} {
     function callback(channelResult: any): any {
       tttCallback(convertToChannelState(channelResult));
     }
@@ -168,7 +168,7 @@ export default class TttChannelProvider extends Service {
     return convertToChannelState(channelResult);
   }
 
-  async pushMessage(message: any): Promise<void> {
+  async pushMessage(message: Message): Promise<void> {
     await this.channelClient.pushMessage(message);
   }
 }

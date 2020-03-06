@@ -1,4 +1,4 @@
-import EventEmitter = require('eventemitter3');
+import EventEmitter from 'eventemitter3';
 import {Guid} from 'guid-typescript';
 import {MessagingService} from './messaging-service';
 import {ChannelProviderInterface, isJsonRpcNotification} from './types';
