@@ -3,6 +3,10 @@ import * as firebase from 'firebase';
 import {cHubStateChannelAddress, cFirebasePrefix} from '../constants';
 import {logger} from '../logger';
 import {Message} from '@statechannels/wire-format';
+import {fromEvent, Observable} from 'rxjs';
+import {flatMap} from 'rxjs/operators';
+
+export type Snapshot = firebase.database.DataSnapshot;
 
 const log = logger();
 
@@ -29,15 +33,15 @@ function getMessagesRef() {
   return firebaseAppInsance.database().ref(`${cFirebasePrefix}/messages`);
 }
 
-export async function fbListen(callback) {
+export async function fbListen(onChildAdded) {
   log.info('firebase-relay: listen');
   const hubRef = getMessagesRef().child(cHubStateChannelAddress);
 
-  hubRef.on('child_added', async snapshot => {
-    const key = snapshot.key;
-    await callback(snapshot.val());
-    hubRef.child(key).remove();
-  });
+  const childAddedObservable: Observable<Snapshot> = fromEvent(hubRef, 'child_added');
+  childAddedObservable.pipe(
+    flatMap(onChildAdded),
+    flatMap(async (snapshot: Snapshot) => await hubRef.child(snapshot.key).remove())
+  );
 }
 
 export function fbSend(message: Message) {
