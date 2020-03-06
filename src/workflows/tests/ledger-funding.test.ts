@@ -148,7 +148,9 @@ test.each`
   });
   aStore.chain.initialize();
 
-  const aService = interpret(machine(aStore).withContext(context)).start();
+  const aService = interpret(machine(aStore).withContext(context), {
+    parent: {send: () => undefined} as any // Consumes uncaught errors
+  }).start();
 
   await waitForExpect(async () => {
     expect(aService.state.value).toEqual('failure');

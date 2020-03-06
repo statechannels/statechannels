@@ -213,7 +213,9 @@ test('virtual funding with a simple hub', async () => {
 
 test('invalid joint state', async () => {
   const store = new MemoryStore([wallet1.privateKey]);
-  const service = interpret(VirtualFundingAsLeaf.machine(store).withContext(context)).start();
+  const service = interpret(VirtualFundingAsLeaf.machine(store).withContext(context), {
+    parent: {send: () => undefined} as any // Limits console noise
+  }).start();
 
   const state = firstState(outcome, jointChannel);
   const invalidState: State = {
