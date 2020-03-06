@@ -63,7 +63,7 @@ const DownloadInfo: React.FC<DownloadInfoProps> = ({
                 myLeechingChannelIds.includes(channelId) && (
                   <tr className="seederInfo" key={seeder}>
                     <td>
-                      <a>Close</a>
+                      <button>Close</button>
                     </td>
                     <td className="channel-id">{channelId}</td>
                     <td className="seeder-id">{seeder}</td>

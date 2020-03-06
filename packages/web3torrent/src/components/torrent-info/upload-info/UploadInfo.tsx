@@ -44,7 +44,7 @@ const UploadInfo: React.FC<UploadInfoProps> = ({
                 mySeedingChannelIds.includes(channelId) && (
                   <tr className="leecherInfo" key={leecher}>
                     <td>
-                      <a>Close</a>
+                      <button>Close</button>
                     </td>
                     <td className="channel-id">{channelId}</td>
                     <td className="leecher-id">{leecher}</td>
