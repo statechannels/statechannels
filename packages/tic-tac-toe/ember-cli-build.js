@@ -30,6 +30,18 @@ module.exports = function(defaults) {
           }
         ]
       }
+    },
+    autoImport: {
+      webpack: {
+        node: {
+          https: true,
+          http: true,
+          fs: 'empty',
+          crypto: true,
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          child_process: 'empty'
+        }
+      }
     }
   });
 
