@@ -34,7 +34,6 @@ interface IndirectFunding {
 interface VirtualFunding {
   type: 'Virtual';
   jointChannelId: string;
-  guarantorChannelId: string;
 }
 
 interface Guaranteed {
@@ -77,6 +76,7 @@ export interface Store {
     appDefinition?: string
   ): Promise<ChannelStoreEntry>;
   getEntry(channelId): Promise<ChannelStoreEntry>;
+  getLedger(peerId: string): Promise<ChannelStoreEntry>;
   // TODO: This is awkward. Might be better to set the funding on create/initialize channel?
   setFunding(channelId: string, funding: Funding): Promise<void>;
 
@@ -98,6 +98,7 @@ export class MemoryStore implements Store {
   private _nonces: Record<string, BigNumber | undefined> = {};
   private _eventEmitter = new EventEmitter<InternalEvents>();
   private _privateKeys: Record<string, string | undefined> = {};
+  private _ledgers: Record<string, string | undefined> = {};
   private _budgets: Record<string, SiteBudget> = {};
 
   constructor(privateKeys?: string[], chain?: Chain) {
@@ -187,6 +188,23 @@ export class MemoryStore implements Store {
       throw `Channel ${channelId} already funded`;
     }
     channelEntry.setFunding(funding);
+  }
+  public async getLedger(peerId: string) {
+    const ledgerId = this._ledgers[peerId];
+
+    if (!ledgerId) throw new Error(`No ledger exists with peer ${peerId}`);
+
+    return await this.getEntry(ledgerId);
+  }
+
+  public setLedger(entry: MemoryChannelStoreEntry) {
+    // This is not on the Store interface itself -- it is useful to set up a test store
+    const {channelId} = entry;
+    this._channels[channelId] = entry;
+
+    const peerId = entry.participants.find(p => p.signingAddress !== this.getAddress());
+    if (peerId) this._ledgers[peerId.participantId] = channelId;
+    else throw 'No peer';
   }
 
   public async createChannel(
