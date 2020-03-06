@@ -41,7 +41,7 @@
     "clean:dry": "git clean -Xdn --exclude=\"!.env.*\"",
     "lint:check": "lerna run lint:check --no-sort --no-bail -- --max-warnings=0",
     "lint:write": "lerna run lint:write --no-sort --no-bail",
-    "postinstall": "patch-package --exclude '.*ember.*'",
+    "postinstall": "patch-package",
     "preinstall": "npx typesync",
     "prepare": "lerna run --concurrency 8 --stream prepare",
     "publish": "lerna publish --yes from-package patch",
