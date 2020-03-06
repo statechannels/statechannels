@@ -41,7 +41,6 @@ export class PaymentChannelClient {
   mySigningAddress?: string;
   myEthereumSelectedAddress?: string; // this state can be inspected to infer whether we need to get the user to "Connect With MetaMask" or not.
   channelCache: Record<string, ChannelState> = {};
-  myAddress: string;
   constructor(private readonly channelClient: ChannelClientInterface) {}
   async createChannel(
     beneficiary: string,
