@@ -45,7 +45,7 @@ describe('<ShareList />', () => {
     expect(firstFileData.childAt(1).text()).toBe(props.torrents[0].length + 'Mb');
     expect(firstFileData.childAt(2).text()).toBe(props.torrents[0].numPeers + 'S');
     expect(firstFileData.childAt(3).text()).toBe(props.torrents[0].numPeers + 'P');
-    expect(firstFileData.childAt(4).text()).toBe('$' + props.torrents[0].cost);
+    // expect(firstFileData.childAt(4).text()).toBe('$' + props.torrents[0].cost);
     expect(firstFileData.childAt(5).find('button')).not.toBeNull();
   });
 
