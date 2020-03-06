@@ -35,6 +35,7 @@ export const BUFFER_REFILL_RATE = bigNumberify(100); // number of credits / piec
 export const INITIAL_SEEDER_BALANCE = bigNumberify(0); // needs to be zero so that depositing works correctly (unidirectional payment channel)
 export const INITIAL_LEECHER_BALANCE = bigNumberify(1e9); // e.g. gwei = 1e9 = nano-ETH
 
+// A Whimsical diagram explaining the functionality of Web3Torrent: https://whimsical.com/Sq6whAwa8aTjbwMRJc7vPU
 export default class WebTorrentPaidStreamingClient extends WebTorrent {
   peersList: PeersByTorrent;
   pseAccount: string;
