@@ -232,7 +232,8 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     this.peersList[infoHash][peerId].seederBalance = newSeederBalance.toString();
     // convert payment into number of pieces
     this.peersList[infoHash][peerId].buffer = bigNumberify(this.peersList[infoHash][peerId].buffer)
-      .add(payment.div(WEI_PER_PIECE)) // TODO allow this to vary by piece size
+      .add(payment.div(WEI_PER_PIECE)) // This must remain an integer as long as our check above uses .isZero()
+      // ethers BigNumbers are always integers
       .toString();
 
     log(
