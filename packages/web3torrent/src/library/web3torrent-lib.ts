@@ -15,11 +15,11 @@ import {
   WebTorrentSeedInput,
   WireEvents
 } from './types';
-import {bigNumberify} from 'ethers/utils';
-
+import {utils} from 'ethers';
 import {ChannelState, PaymentChannelClient} from '../clients/payment-channel-client';
 import {Message, ChannelResult} from '@statechannels/channel-client';
 
+const bigNumberify = utils.bigNumberify;
 const log = debug('web3torrent:library');
 
 export type TorrentCallback = (torrent: Torrent) => any;

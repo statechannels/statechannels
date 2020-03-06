@@ -1,11 +1,12 @@
 import {ChannelResult, Message, ChannelClientInterface} from '@statechannels/channel-client';
-import {bigNumberify} from 'ethers/utils';
+import {utils} from 'ethers';
 import {FakeChannelProvider} from '@statechannels/channel-client';
 import {ChannelClient} from '@statechannels/channel-client';
 import React from 'react';
 import {ChannelStatus} from '@statechannels/client-api-schema';
 import {SiteBudget} from '@statechannels/client-api-schema';
 
+const bigNumberify = utils.bigNumberify;
 export interface ChannelState {
   channelId: string;
   turnNum: string;

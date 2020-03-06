@@ -1,6 +1,6 @@
 import {ChannelProviderInterface, MethodType} from '@statechannels/channel-provider/src';
 import log = require('loglevel');
-import {bigNumberify} from 'ethers/utils';
+
 import {EventEmitter, ListenerFn} from 'eventemitter3';
 import {
   ChannelResult,
@@ -14,7 +14,9 @@ import {
 } from '@statechannels/client-api-schema';
 import {Message} from '../../src/types';
 import {calculateChannelId} from '../../src/utils';
-import {Wallet} from 'ethers';
+import {Wallet, utils} from 'ethers';
+
+const bigNumberify = utils.bigNumberify;
 
 /*
  This fake provider becomes the stateful object which handles the calls
