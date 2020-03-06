@@ -58,7 +58,7 @@ const generateConfig = (
     },
     updateBudgetInStore: {invoke: {src: 'updateBudget', onDone: 'fundLedger'}},
     fundLedger: {invoke: {src: 'createAndFundLedger', onDone: 'done'}},
-    done: {type: 'final'},
+    done: {type: 'final', entry: [actions.hideUi]},
     failure: {type: 'final'}
   }
 });
