@@ -1,4 +1,12 @@
-import {StateSchema, State, Action, MachineConfig, Machine, StateMachine} from 'xstate';
+import {
+  StateSchema,
+  State,
+  Action,
+  MachineConfig,
+  Machine,
+  StateMachine,
+  ServiceConfig
+} from 'xstate';
 import {SiteBudget} from '../store/types';
 import {sendDisplayMessage} from '../messaging';
 import {Store} from '../store/memory-store';
@@ -11,12 +19,16 @@ interface UserRejects {
 export type WorkflowEvent = UserApproves | UserRejects;
 
 export interface WorkflowContext {
-  budget?: SiteBudget;
+  budget: SiteBudget;
 }
 
+export interface WorkflowServices extends Record<string, ServiceConfig<WorkflowContext>> {
+  updateBudget: (context: WorkflowContext, event: any) => Promise<void>;
+}
 export interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
   states: {
     waitForUserApproval: {};
+    updateBudgetInStore: {};
     done: {};
     failure: {};
   };
@@ -38,11 +50,12 @@ const generateConfig = (
     waitForUserApproval: {
       entry: [actions.displayUi],
       on: {
-        USER_APPROVES_BUDGET: {target: 'done'},
+        USER_APPROVES_BUDGET: {target: 'updateBudgetInStore'},
         USER_REJECTS_BUDGET: {target: 'failure'}
       }
     },
-    done: {type: 'final', data: context => context},
+    updateBudgetInStore: {invoke: {src: 'updateBudget', onDone: 'done'}},
+    done: {type: 'final'},
     failure: {type: 'final'}
   }
 });
@@ -51,7 +64,6 @@ const mockActions: WorkflowActions = {
   hideUi: 'hideUi',
   displayUi: 'displayUi'
 };
-export const mockOptions = {actions: mockActions};
 
 const actions = {
   // TODO: We should probably set up some standard actions for all workflows
@@ -62,14 +74,27 @@ const actions = {
     sendDisplayMessage('Hide');
   }
 };
+export const mockServices: WorkflowServices = {
+  updateBudget: () => {
+    return new Promise(() => {
+      /* Mock call */
+    }) as any;
+  }
+};
 
 export const config = generateConfig(actions);
 
 export const approveBudgetAndFundWorkflow = (
-  _store: Store,
+  store: Store,
   context: WorkflowContext
 ): WorkflowMachine => {
-  return Machine(config).withConfig({}, context) as WorkflowMachine;
+  const services: WorkflowServices = {
+    updateBudget: (context: WorkflowContext, event) => {
+      return store.updateOrCreateBudget(context.budget);
+    }
+  };
+  return Machine(config).withConfig({services}, context) as WorkflowMachine;
 };
 
 export type WorkflowMachine = StateMachine<WorkflowContext, StateSchema, WorkflowEvent, any>;
+export const mockOptions = {services: mockServices, actions: mockActions};
