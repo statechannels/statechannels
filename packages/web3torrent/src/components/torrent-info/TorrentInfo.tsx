@@ -7,6 +7,7 @@ import {DownloadLink} from './download-link/DownloadLink';
 import {MagnetLinkButton} from './magnet-link-button/MagnetLinkButton';
 import './TorrentInfo.scss';
 import {UploadInfo} from './upload-info/UploadInfo';
+import {WEI_PER_PIECE} from '../../library/web3torrent-lib';
 
 export type TorrentInfoProps = {torrent: Torrent; peers?: TorrentPeers};
 
@@ -23,7 +24,8 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({torrent, peers}) => {
           </span>
           {torrent.status && <span className="fileStatus">{torrent.status}</span>}
           <span className="fileCost">
-            Cost {!torrent.cost ? 'Unknown' : `$${Number(torrent.cost).toFixed(2)}`}
+            Cost {torrent.pieces ? WEI_PER_PIECE.mul(torrent.pieces.length).toNumber() : 'unkown'}{' '}
+            wei
           </span>
           {torrent.magnetURI && <MagnetLinkButton />}
         </div>
