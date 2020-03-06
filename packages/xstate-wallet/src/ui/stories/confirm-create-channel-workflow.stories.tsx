@@ -12,7 +12,9 @@ import {MemoryStore} from '../../store/memory-store';
 import {bigNumberify} from 'ethers/utils';
 import {simpleEthAllocation} from '../../utils/outcome';
 
-const store = new MemoryStore(['0xkey']);
+const store = new MemoryStore([
+  '0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29'
+]);
 
 const alice: Participant = {
   participantId: 'a',
