@@ -6,6 +6,7 @@ import './DownloadInfo.scss';
 import {ProgressBar} from './progress-bar/ProgressBar';
 import {ChannelState} from '../../../clients/payment-channel-client';
 import {utils} from 'ethers';
+import {WiresList} from '../wires-list/WiresList';
 
 const bigNumberify = utils.bigNumberify;
 
@@ -53,31 +54,12 @@ const DownloadInfo: React.FC<DownloadInfoProps> = ({
           Connected to <strong>{torrent.numPeers}</strong> peers.
         </p>
       </section>
-      <section className="wires-list">
-        <table className="wires-list-table">
-          <tbody>
-            {Object.values(torrent.wires).map(wire => {
-              const seeder = wire.paidStreamingExtension.peerAccount;
-              const channelId = wire.paidStreamingExtension.peerChannelId;
-              return (
-                myLeechingChannelIds.includes(channelId) && (
-                  <tr className="seederInfo" key={seeder}>
-                    <td>
-                      <button>Close</button>
-                    </td>
-                    <td className="channel-id">{channelId}</td>
-                    <td className="seeder-id">{seeder}</td>
-                    <td className="leecher-downloaded">{prettier(wire.uploaded)}&nbsp;down</td>
-                    <td className="seeder-received">
-                      - {Number(channelCache[channelId].beneficiaryBalance)} wei
-                    </td>
-                  </tr>
-                )
-              );
-            })}
-          </tbody>
-        </table>
-      </section>
+      <WiresList
+        torrent={torrent}
+        channelCache={channelCache}
+        channelIds={myLeechingChannelIds}
+        peerType={'leecher'}
+      />
     </>
   );
 };

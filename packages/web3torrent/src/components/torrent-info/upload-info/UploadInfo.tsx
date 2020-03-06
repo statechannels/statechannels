@@ -1,9 +1,9 @@
-import prettier from 'prettier-bytes';
 import React from 'react';
 import {Torrent} from '../../../types';
 import './UploadInfo.scss';
 import {ChannelState} from '../../../clients/payment-channel-client';
 import {utils} from 'ethers';
+import {WiresList} from '../wires-list/WiresList';
 
 const bigNumberify = utils.bigNumberify;
 
@@ -34,31 +34,12 @@ const UploadInfo: React.FC<UploadInfoProps> = ({
           <strong data-test-selector="numPeers">{torrent.numPeers}</strong> Peers connected
         </p>
       </section>
-      <section className="wires-list">
-        <table className="wires-list-table">
-          <tbody>
-            {Object.values(torrent.wires).map(wire => {
-              const leecher = wire.paidStreamingExtension.peerAccount;
-              const channelId = wire.paidStreamingExtension.pseChannelId;
-              return (
-                mySeedingChannelIds.includes(channelId) && (
-                  <tr className="leecherInfo" key={leecher}>
-                    <td>
-                      <button>Close</button>
-                    </td>
-                    <td className="channel-id">{channelId}</td>
-                    <td className="leecher-id">{leecher}</td>
-                    <td className="leecher-downloaded">{prettier(wire.uploaded)}&nbsp;up</td>
-                    <td className="leecher-paid">
-                      {Number(channelCache[channelId].beneficiaryBalance)} wei
-                    </td>
-                  </tr>
-                )
-              );
-            })}
-          </tbody>
-        </table>
-      </section>
+      <WiresList
+        torrent={torrent}
+        channelCache={channelCache}
+        channelIds={mySeedingChannelIds}
+        peerType={'seeder'}
+      />
     </>
   );
 };
