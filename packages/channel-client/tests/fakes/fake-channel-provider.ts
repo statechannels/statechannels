@@ -128,7 +128,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
 
   public findChannel(channelId: string): ChannelResult {
     if (!Object.keys(this.latestState).includes(channelId)) {
-      throw Error(`Channel does't exist with channelId '${JSON.stringify(channelId, null, 4)}'`);
+      throw Error(`Channel doesn't exist with channelId '${JSON.stringify(channelId, null, 4)}'`);
     }
     return this.latestState[channelId];
   }
