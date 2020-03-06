@@ -32,9 +32,9 @@ const WiresList: React.FC<UploadInfoProps> = ({torrent, channelCache, channelIds
           <td className="downloaded">
             {prettier(wire.uploaded)}
             &nbsp;
-            {peerType == 'seeder' ? `up` : `down`}
+            {peerType === 'seeder' ? `up` : `down`}
           </td>
-          {peerType == 'seeder' ? (
+          {peerType === 'seeder' ? (
             <td className="earned">{Number(channelCache[channelId].beneficiaryBalance)} wei</td>
           ) : (
             <td className="paid">-{Number(channelCache[channelId].beneficiaryBalance)} wei</td>
