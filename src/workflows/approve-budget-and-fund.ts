@@ -24,11 +24,13 @@ export interface WorkflowContext {
 
 export interface WorkflowServices extends Record<string, ServiceConfig<WorkflowContext>> {
   updateBudget: (context: WorkflowContext, event: any) => Promise<void>;
+  createAndFundLedger: (context: WorkflowContext, event: any) => Promise<void>;
 }
 export interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
   states: {
     waitForUserApproval: {};
     updateBudgetInStore: {};
+    fundLedger: {};
     done: {};
     failure: {};
   };
@@ -54,7 +56,8 @@ const generateConfig = (
         USER_REJECTS_BUDGET: {target: 'failure'}
       }
     },
-    updateBudgetInStore: {invoke: {src: 'updateBudget', onDone: 'done'}},
+    updateBudgetInStore: {invoke: {src: 'updateBudget', onDone: 'fundLedger'}},
+    fundLedger: {invoke: {src: 'createAndFundLedger', onDone: 'done'}},
     done: {type: 'final'},
     failure: {type: 'final'}
   }
@@ -79,6 +82,11 @@ export const mockServices: WorkflowServices = {
     return new Promise(() => {
       /* Mock call */
     }) as any;
+  },
+  createAndFundLedger: () => {
+    return new Promise(() => {
+      /* Mock call */
+    }) as any;
   }
 };
 
@@ -91,6 +99,10 @@ export const approveBudgetAndFundWorkflow = (
   const services: WorkflowServices = {
     updateBudget: (context: WorkflowContext, event) => {
       return store.updateOrCreateBudget(context.budget);
+    },
+    createAndFundLedger: (context: WorkflowContext, event) => {
+      // TODO: Hook up to workflow when it exists
+      return Promise.resolve();
     }
   };
   return Machine(config).withConfig({services}, context) as WorkflowMachine;
