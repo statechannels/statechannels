@@ -4,7 +4,7 @@ import {cHubStateChannelAddress, cFirebasePrefix} from '../constants';
 import {logger} from '../logger';
 import {Message} from '@statechannels/wire-format';
 import {fromEvent, Observable} from 'rxjs';
-import {flatMap} from 'rxjs/operators';
+import {flatMap, map, withLatestFrom} from 'rxjs/operators';
 
 export type Snapshot = firebase.database.DataSnapshot;
 
@@ -33,21 +33,33 @@ function getMessagesRef() {
   return firebaseAppInsance.database().ref(`${cFirebasePrefix}/messages`);
 }
 
-export async function fbListen(onChildAdded) {
+export function fbListen(responseForMessage: (message: Message) => Message[]) {
   log.info('firebase-relay: listen');
   const hubRef = getMessagesRef().child(cHubStateChannelAddress);
 
   const childAddedObservable: Observable<Snapshot> = fromEvent(hubRef, 'child_added');
-  childAddedObservable.pipe(
-    flatMap(onChildAdded),
-    flatMap(async (snapshot: Snapshot) => await hubRef.child(snapshot.key).remove())
-  );
+  childAddedObservable
+    .pipe(
+      map(snapshot => snapshot[0].val()),
+      map(responseForMessage),
+      flatMap(fbSend),
+      withLatestFrom(childAddedObservable)
+    )
+    .subscribe(
+      output => {
+        hubRef.child(output[1][0].key).remove();
+      },
+      error => log.error(error),
+      () => {
+        log.info('Completed listening to Firebase');
+      }
+    );
 }
 
-export function fbSend(message: Message) {
-  const sanitizedPayload = JSON.parse(JSON.stringify(message));
-  // todo: how is the receipient pulled out?
-  return getMessagesRef()
-    .child(message.recipient)
-    .push(sanitizedPayload);
+function fbSend(messages: Message[]) {
+  return messages.map(message =>
+    getMessagesRef()
+      .child(message.recipient)
+      .push(JSON.parse(JSON.stringify(message)))
+  );
 }
