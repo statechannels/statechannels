@@ -3,16 +3,16 @@ export interface SiteBudget {
   site: string;
   budgets: Record<string, AssetBudget>;
 }
-interface Budget {
-  send: BigNumber;
-  receive: BigNumber;
+export interface BudgetItem {
+  playerAmount: BigNumber;
+  hubAmount: BigNumber;
 }
 export interface AssetBudget {
   assetHolderAddress: string;
-  pending: Budget;
-  free: Budget;
-  inUse: Budget;
-  direct: Budget;
+  pending: BudgetItem;
+  free: BudgetItem;
+  inUse: BudgetItem;
+  direct: BudgetItem;
 }
 export interface Participant {
   participantId: string;
