@@ -8,7 +8,7 @@ import {
   ServiceConfig
 } from 'xstate';
 import {SiteBudget} from '../store/types';
-import {sendDisplayMessage} from '../messaging';
+import {sendDisplayMessage, MessagingServiceInterface} from '../messaging';
 import {Store} from '../store/memory-store';
 interface UserApproves {
   type: 'USER_APPROVES_BUDGET';
@@ -20,6 +20,7 @@ export type WorkflowEvent = UserApproves | UserRejects;
 
 export interface WorkflowContext {
   budget: SiteBudget;
+  requestId: number;
 }
 
 export interface WorkflowServices extends Record<string, ServiceConfig<WorkflowContext>> {
@@ -40,6 +41,7 @@ export type WorkflowState = State<WorkflowContext, WorkflowEvent, WorkflowStateS
 export interface WorkflowActions {
   hideUi: Action<WorkflowContext, any>;
   displayUi: Action<WorkflowContext, any>;
+  sendResponse: Action<WorkflowContext, any>;
 }
 export type StateValue = keyof WorkflowStateSchema['states'];
 
@@ -52,7 +54,7 @@ const generateConfig = (
     waitForUserApproval: {
       entry: [actions.displayUi],
       on: {
-        USER_APPROVES_BUDGET: {target: 'updateBudgetInStore'},
+        USER_APPROVES_BUDGET: {target: 'updateBudgetInStore', actions: []},
         USER_REJECTS_BUDGET: {target: 'failure'}
       }
     },
@@ -65,18 +67,10 @@ const generateConfig = (
 
 const mockActions: WorkflowActions = {
   hideUi: 'hideUi',
-  displayUi: 'displayUi'
+  displayUi: 'displayUi',
+  sendResponse: 'sendResponse'
 };
 
-const actions = {
-  // TODO: We should probably set up some standard actions for all workflows
-  displayUi: () => {
-    sendDisplayMessage('Show');
-  },
-  hideUi: () => {
-    sendDisplayMessage('Hide');
-  }
-};
 export const mockServices: WorkflowServices = {
   updateBudget: () => {
     return new Promise(() => {
@@ -90,10 +84,9 @@ export const mockServices: WorkflowServices = {
   }
 };
 
-export const config = generateConfig(actions);
-
 export const createBudgetAndFundWorkflow = (
   store: Store,
+  messagingService: MessagingServiceInterface,
   context: WorkflowContext
 ): WorkflowMachine => {
   const services: WorkflowServices = {
@@ -105,8 +98,22 @@ export const createBudgetAndFundWorkflow = (
       return Promise.resolve();
     }
   };
+  const actions = {
+    // TODO: We should probably set up some standard actions for all workflows
+    displayUi: () => {
+      sendDisplayMessage('Show');
+    },
+    hideUi: () => {
+      sendDisplayMessage('Hide');
+    },
+    sendResponse: (context: WorkflowContext, event) => {
+      messagingService.sendResponse(context.requestId, context.budget);
+    }
+  };
+  const config = generateConfig(actions);
   return Machine(config).withConfig({services}, context) as WorkflowMachine;
 };
 
 export type WorkflowMachine = StateMachine<WorkflowContext, StateSchema, WorkflowEvent, any>;
 export const mockOptions = {services: mockServices, actions: mockActions};
+export const config = generateConfig(mockActions);
