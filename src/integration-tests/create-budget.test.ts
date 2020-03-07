@@ -1,7 +1,7 @@
-import {CreateBudgetAndFundResponse} from '@statechannels/client-api-schema';
+import {ApproveBudgetAndFundResponse} from '@statechannels/client-api-schema';
 import {filter, map, first} from 'rxjs/operators';
 import {FakeChain} from '../chain';
-import {Player, generateCreateBudgetAndFundRequest} from './helpers';
+import {Player, generateApproveBudgetAndFundRequest} from './helpers';
 import waitForExpect from 'wait-for-expect';
 
 jest.setTimeout(30000);
@@ -15,11 +15,11 @@ it('allows for a wallet to approve a budget and fund with the hub', async () => 
     fakeChain
   );
 
-  const createBudgetEvent = generateCreateBudgetAndFundRequest();
+  const createBudgetEvent = generateApproveBudgetAndFundRequest(playerA.participant);
   const createBudgetPromise = playerA.messagingService.outboxFeed
     .pipe(
       filter(m => 'id' in m && m.id === createBudgetEvent.id),
-      map(m => m as CreateBudgetAndFundResponse),
+      map(m => m as ApproveBudgetAndFundResponse),
       first()
     )
     .toPromise();
