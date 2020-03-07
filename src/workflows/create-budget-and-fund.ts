@@ -10,6 +10,7 @@ import {
 import {SiteBudget} from '../store/types';
 import {sendDisplayMessage, MessagingServiceInterface} from '../messaging';
 import {Store} from '../store/memory-store';
+
 interface UserApproves {
   type: 'USER_APPROVES_BUDGET';
 }
@@ -60,7 +61,7 @@ const generateConfig = (
     },
     updateBudgetInStore: {invoke: {src: 'updateBudget', onDone: 'fundLedger'}},
     fundLedger: {invoke: {src: 'createAndFundLedger', onDone: 'done'}},
-    done: {type: 'final', entry: [actions.hideUi]},
+    done: {type: 'final', entry: [actions.hideUi, actions.sendResponse]},
     failure: {type: 'final'}
   }
 });

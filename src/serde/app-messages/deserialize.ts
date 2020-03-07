@@ -2,7 +2,8 @@ import {
   Allocation as AppAllocation,
   Allocations as AppAllocations,
   AllocationItem as AppAllocationItem,
-  SiteBudget as AppSiteBudget
+  SiteBudget as AppSiteBudget,
+  BudgetRequest as AppBudgetRequest
 } from '@statechannels/client-api-schema';
 import {
   Allocation,
@@ -14,6 +15,20 @@ import {
 } from '../../store/types';
 import {assetHolderAddress, ETH_ASSET_HOLDER_ADDRESS} from '../../constants';
 import {bigNumberify} from 'ethers/utils';
+
+export function deserializeBudgetRequest(budgetRequest: AppBudgetRequest): SiteBudget {
+  const assetBudget: AssetBudget = {
+    assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
+    inUse: {playerAmount: bigNumberify(0), hubAmount: bigNumberify(0)},
+    free: {playerAmount: bigNumberify(0), hubAmount: bigNumberify(0)},
+    pending: deserializeBudgetItem(budgetRequest),
+    direct: {playerAmount: bigNumberify(0), hubAmount: bigNumberify(0)}
+  };
+  return {
+    site: budgetRequest.site,
+    budgets: {[ETH_ASSET_HOLDER_ADDRESS]: assetBudget}
+  };
+}
 
 export function deserializeSiteBudget(siteBudget: AppSiteBudget): SiteBudget {
   const assetBudget: AssetBudget = {

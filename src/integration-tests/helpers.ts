@@ -10,7 +10,8 @@ import {
   JoinChannelRequest,
   CreateChannelRequest,
   UpdateChannelRequest,
-  CloseChannelRequest
+  CloseChannelRequest,
+  CreateBudgetAndFundRequest
 } from '@statechannels/client-api-schema';
 import {interpret, Interpreter} from 'xstate';
 import {applicationWorkflow, WorkflowContext} from '../workflows/application';
@@ -171,6 +172,20 @@ export function generateCreateChannelRequest(
       ],
       appDefinition: '0x430869383d611bBB1ce7Ca207024E7901bC26b40',
       appData: '0x0' // TODO: This works for now but will break when we start validating
+    }
+  };
+}
+
+export function generateCreateBudgetAndFundRequest(): CreateBudgetAndFundRequest {
+  return {
+    jsonrpc: '2.0',
+    id: 88888888,
+    method: 'CreateBudgetAndFund',
+    params: {
+      site: 'rps.statechannels.org',
+      hub: 'rps.statechannels.org',
+      playerAmount: '0x5',
+      hubAmount: '0x5'
     }
   };
 }

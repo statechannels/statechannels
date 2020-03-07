@@ -39,9 +39,9 @@ export interface PlayerRequestConclude {
   type: 'PLAYER_REQUEST_CONCLUDE';
   channelId: string;
 }
-export interface ApproveBudgetAndFund {
+export interface CreateBudgetAndFund {
   requestId: number;
-  type: 'APPROVE_BUDGET_AND_FUND';
+  type: 'CREATE_BUDGET_AND_FUND';
   budget: SiteBudget;
 }
 
@@ -51,6 +51,6 @@ export type AppRequestEvent =
   | OpenEvent
   | ChannelUpdated
   | JoinChannelEvent
-  | ApproveBudgetAndFund;
+  | CreateBudgetAndFund;
 
 export type WorkflowEvent = AppRequestEvent;
