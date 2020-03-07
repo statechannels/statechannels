@@ -161,7 +161,9 @@ export interface SiteBudget {
   direct: Balance;
 }
 export type GetBudgetRequest = JsonRpcRequest<'GetBudget', {hubAddress: Address}>;
-export type GetBudgetResponse = JsonRpcResponse<SiteBudget>;
+export type GetBudgetResponse = JsonRpcResponse<SiteBudget | {}>;
+
+export type CreateBudgetAndFundRequest = JsonRpcRequest<'CreateBudgetAndFund', SiteBudget>;
 
 // Notifications
 export type ChannelProposedNotification = JsonRpcNotification<'ChannelProposed', ChannelResult>;
@@ -187,6 +189,7 @@ export type Request =
   | PushMessageRequest
   | ChallengeChannelRequest
   | GetBudgetRequest
+  | CreateBudgetAndFundRequest
   | CloseChannelRequest;
 
 export type Response =

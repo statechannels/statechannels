@@ -353,6 +353,36 @@
       ],
       "type": "object"
     },
+    "CreateBudgetAndFundRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "CreateBudgetAndFund"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/SiteBudget"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
     "CreateChannelParams": {
       "additionalProperties": false,
       "properties": {
@@ -563,7 +593,15 @@
           "type": "string"
         },
         "result": {
-          "$ref": "#/definitions/SiteBudget"
+          "anyOf": [
+            {
+              "$ref": "#/definitions/SiteBudget"
+            },
+            {
+              "additionalProperties": false,
+              "type": "object"
+            }
+          ]
         }
       },
       "required": [
@@ -937,6 +975,9 @@
         },
         {
           "$ref": "#/definitions/GetBudgetRequest"
+        },
+        {
+          "$ref": "#/definitions/CreateBudgetAndFundRequest"
         },
         {
           "$ref": "#/definitions/CloseChannelRequest"

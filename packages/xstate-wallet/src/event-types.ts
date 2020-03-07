@@ -1,4 +1,4 @@
-import {SimpleAllocation, Participant} from './store/types';
+import {SimpleAllocation, Participant, SiteBudget} from './store/types';
 import {BigNumber} from 'ethers/utils';
 import {ChannelStoreEntry} from './store/memory-channel-storage';
 
@@ -39,12 +39,18 @@ export interface PlayerRequestConclude {
   type: 'PLAYER_REQUEST_CONCLUDE';
   channelId: string;
 }
+export interface ApproveBudgetAndFund {
+  requestId: number;
+  type: 'APPROVE_BUDGET_AND_FUND';
+  budget: SiteBudget;
+}
 
 export type AppRequestEvent =
   | PlayerRequestConclude
   | PlayerStateUpdate
   | OpenEvent
   | ChannelUpdated
-  | JoinChannelEvent;
+  | JoinChannelEvent
+  | ApproveBudgetAndFund;
 
 export type WorkflowEvent = AppRequestEvent;
