@@ -10,7 +10,7 @@ import {Guid} from 'guid-typescript';
 import {Notification, Response} from '@statechannels/client-api-schema';
 import {filter, map, tap} from 'rxjs/operators';
 import {Message, OpenChannel} from './store/types';
-import {approveBudgetAndFundWorkflow} from './workflows/approve-budget-and-fund';
+import {createBudgetAndFundWorkflow} from './workflows/create-budget-and-fund';
 import {ApproveBudgetAndFund} from './event-types';
 
 export interface Workflow {
@@ -63,7 +63,7 @@ export class ChannelWallet {
       filter((r): r is ApproveBudgetAndFund => r.type === 'APPROVE_BUDGET_AND_FUND'),
       tap(r => {
         const workflow = this.startWorkflow(
-          approveBudgetAndFundWorkflow(this.store, {budget: r.budget})
+          createBudgetAndFundWorkflow(this.store, {budget: r.budget})
         );
         this.workflows.push(workflow);
 
