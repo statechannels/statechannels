@@ -7,10 +7,10 @@ import {
 } from '@statechannels/channel-client';
 import {AppData, encodeAppData, decodeAppData} from '../core/app-data';
 import {ChannelState} from '../core/channel-state';
+import ENV from '@statechannels/tic-tac-toe/config/environment';
 
 const {bigNumberify} = ethers.utils;
-
-const TTT_ADDRESS = '0x000'; // Need to pass in the actual address at build time
+const {TTT_CONTRACT_ADDRESS} = ENV;
 
 const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
   const {
@@ -84,7 +84,7 @@ export default class TttChannelClientService extends Service {
   ): Promise<ChannelState> {
     const participants = formatParticipants(aAddress, bAddress, aOutcomeAddress, bOutcomeAddress);
     const allocations = formatAllocations(aOutcomeAddress, bOutcomeAddress, aBal, bBal);
-    const appDefinition = TTT_ADDRESS;
+    const appDefinition = TTT_CONTRACT_ADDRESS;
     const appData = encodeAppData(appAttrs);
 
     const channelResult = await this.channelClient.createChannel(
