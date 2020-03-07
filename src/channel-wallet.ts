@@ -5,11 +5,13 @@ import {applicationWorkflow} from './workflows/application';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import {Wallet as WalletUi} from './ui/wallet';
-import {interpret, Interpreter, State} from 'xstate';
+import {interpret, Interpreter, State, StateNode} from 'xstate';
 import {Guid} from 'guid-typescript';
 import {Notification, Response} from '@statechannels/client-api-schema';
 import {filter, map, tap} from 'rxjs/operators';
 import {Message, OpenChannel} from './store/types';
+import {approveBudgetAndFundWorkflow} from './workflows/approve-budget-and-fund';
+import {ApproveBudgetAndFund} from './event-types';
 
 export interface Workflow {
   id: string;
@@ -47,26 +49,34 @@ export class ChannelWallet {
         );
       });
 
-    this.messagingService.requestFeed
-      .pipe(
-        filter(r => r.type === 'CREATE_CHANNEL' || r.type === 'JOIN_CHANNEL'),
-        tap(r => {
-          const workflow = this.startApplicationWorkflow();
-          this.workflows.push(workflow);
-          workflow.machine.send(r);
-        })
-      )
-      .subscribe(undefined, console.error);
+    this.messagingService.requestFeed.pipe(
+      filter(r => r.type === 'CREATE_CHANNEL' || r.type === 'JOIN_CHANNEL'),
+      tap(r => {
+        const workflow = this.startWorkflow(applicationWorkflow(this.store, this.messagingService));
+        this.workflows.push(workflow);
+
+        workflow.machine.send(r);
+      })
+    );
+
+    this.messagingService.requestFeed.pipe(
+      filter((r): r is ApproveBudgetAndFund => r.type === 'APPROVE_BUDGET_AND_FUND'),
+      tap(r => {
+        const workflow = this.startWorkflow(
+          approveBudgetAndFundWorkflow(this.store, {budget: r.budget})
+        );
+        this.workflows.push(workflow);
+
+        workflow.machine.send(r);
+      })
+    );
   }
 
-  private startApplicationWorkflow(): Workflow {
+  private startWorkflow(machineConfig: StateNode<any, any, any, any>): Workflow {
     const workflowId = Guid.create().toString();
-    const machine = interpret<any, any, any>(
-      applicationWorkflow(this.store, this.messagingService),
-      {
-        devTools: true
-      }
-    )
+    const machine = interpret<any, any, any>(machineConfig, {
+      devTools: true
+    })
       .onTransition((state, event) => process.env.ADD_LOGS && logTransition(state, event, this.id))
 
       .onDone(() => (this.workflows = this.workflows.filter(w => w.id !== workflowId)))
