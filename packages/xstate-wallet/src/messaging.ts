@@ -27,7 +27,7 @@ import {serializeAllocation, serializeSiteBudget} from './serde/app-messages/ser
 import {deserializeMessage} from './serde/wire-format/deserialize';
 import {serializeMessage} from './serde/wire-format/serialize';
 import {AppRequestEvent} from './event-types';
-import {deserializeAllocations, deserializeSiteBudget} from './serde/app-messages/deserialize';
+import {deserializeAllocations, deserializeBudgetRequest} from './serde/app-messages/deserialize';
 import {isSimpleEthAllocation} from './utils/outcome';
 import {bigNumberify} from 'ethers/utils';
 import {CHALLENGE_DURATION, NETWORK_ID} from './constants';
@@ -228,9 +228,9 @@ function convertToInternalEvent(request: ChannelRequest): AppRequestEvent {
   switch (request.method) {
     case 'CreateBudgetAndFund':
       return {
-        type: 'APPROVE_BUDGET_AND_FUND',
+        type: 'CREATE_BUDGET_AND_FUND',
         requestId: request.id,
-        budget: deserializeSiteBudget(request.params)
+        budget: deserializeBudgetRequest(request.params)
       };
     case 'CloseChannel':
       return {

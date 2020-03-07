@@ -47,6 +47,30 @@
       },
       "type": "array"
     },
+    "BudgetRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "hub": {
+          "type": "string"
+        },
+        "hubAmount": {
+          "type": "string"
+        },
+        "playerAmount": {
+          "type": "string"
+        },
+        "site": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "hub",
+        "hubAmount",
+        "playerAmount",
+        "site"
+      ],
+      "type": "object"
+    },
     "BudgetUpdatedNotification": {
       "additionalProperties": false,
       "properties": {
@@ -372,7 +396,7 @@
           "type": "string"
         },
         "params": {
-          "$ref": "#/definitions/SiteBudget"
+          "$ref": "#/definitions/BudgetRequest"
         }
       },
       "required": [
@@ -380,6 +404,29 @@
         "jsonrpc",
         "method",
         "params"
+      ],
+      "type": "object"
+    },
+    "CreateBudgetAndFundResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "result": {
+          "$ref": "#/definitions/SiteBudget"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
       ],
       "type": "object"
     },
@@ -1015,6 +1062,9 @@
         },
         {
           "$ref": "#/definitions/CloseChannelResponse"
+        },
+        {
+          "$ref": "#/definitions/CreateBudgetAndFundResponse"
         }
       ]
     },

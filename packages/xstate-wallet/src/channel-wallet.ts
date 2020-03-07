@@ -11,7 +11,7 @@ import {Notification, Response} from '@statechannels/client-api-schema';
 import {filter, map, tap} from 'rxjs/operators';
 import {Message, OpenChannel} from './store/types';
 import {createBudgetAndFundWorkflow} from './workflows/create-budget-and-fund';
-import {ApproveBudgetAndFund} from './event-types';
+import {CreateBudgetAndFund} from './event-types';
 
 export interface Workflow {
   id: string;
@@ -59,9 +59,9 @@ export class ChannelWallet {
       })
     );
 
-    this.messagingService.requestFeed.pipe(
-      filter((r): r is ApproveBudgetAndFund => r.type === 'APPROVE_BUDGET_AND_FUND'),
-      tap(r => {
+    this.messagingService.requestFeed
+      .pipe(filter((r): r is  ApproveBudgetAndFund => r.type === 'APPROVE_BUDGET_AND_FUND'))
+      .subscribe(r => {
         const workflow = this.startWorkflow(
           createBudgetAndFundWorkflow(this.store, this.messagingService, {
             budget: r.budget,

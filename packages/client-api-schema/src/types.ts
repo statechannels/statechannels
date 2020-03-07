@@ -160,10 +160,15 @@ export interface SiteBudget {
   inUse: Balance;
   direct: Balance;
 }
+
+export interface BudgetRequest extends Balance {
+  site: string;
+  hub: string;
+}
 export type GetBudgetRequest = JsonRpcRequest<'GetBudget', {hubAddress: Address}>;
 export type GetBudgetResponse = JsonRpcResponse<SiteBudget | {}>;
 
-export type CreateBudgetAndFundRequest = JsonRpcRequest<'CreateBudgetAndFund', SiteBudget>;
+export type CreateBudgetAndFundRequest = JsonRpcRequest<'CreateBudgetAndFund', BudgetRequest>;
 export type CreateBudgetAndFundResponse = JsonRpcResponse<SiteBudget>;
 // Notifications
 export type ChannelProposedNotification = JsonRpcNotification<'ChannelProposed', ChannelResult>;
