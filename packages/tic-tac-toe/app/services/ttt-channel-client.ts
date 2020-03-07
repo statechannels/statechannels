@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import Service from '@ember/service';
 import {
   ChannelResult,
@@ -106,13 +105,13 @@ export default class TttChannelClientService extends Service {
     return this.channelClient.getEthereumSelectedAddress();
   }
 
-  onMessageQueued(callback: (message: Message) => void): any {
+  onMessageQueued(callback: (message: Message) => void): UnsubscribeFunction {
     return this.channelClient.onMessageQueued(callback);
   }
 
   // Accepts a ttt-friendly callback, performs the necessary encoding, and subscribes to the channelClient with an appropriate, API-compliant callback
-  onChannelUpdated(tttCallback: (channelState: ChannelState) => UnsubscribeFunction): () => {} {
-    function callback(channelResult: any): any {
+  onChannelUpdated(tttCallback: (channelState: ChannelState) => UnsubscribeFunction): () => void {
+    function callback(channelResult: ChannelResult): void {
       tttCallback(convertToChannelState(channelResult));
     }
     // These are two distinct events from the channel client
@@ -121,7 +120,7 @@ export default class TttChannelClientService extends Service {
     const unsubChannelUpdated = this.channelClient.onChannelUpdated(callback);
     const unsubChannelProposed = this.channelClient.onChannelProposed(callback);
 
-    return (): any => {
+    return (): void => {
       unsubChannelUpdated();
       unsubChannelProposed();
     };
