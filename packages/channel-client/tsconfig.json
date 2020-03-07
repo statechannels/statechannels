@@ -5,6 +5,7 @@
     "module": "commonjs",
     "outDir": "lib",
     "target": "es2015",
+    "esModuleInterop":true,
     "types": ["react", "jest", "node"]
   },
   "references": [{"path": "../channel-provider"}]

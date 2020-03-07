@@ -1,6 +1,6 @@
-// import {Weapon} from './weapons';
-import {defaultAbiCoder, bigNumberify} from 'ethers/utils';
 import {unreachable} from '../utils/unreachable';
+
+const {defaultAbiCoder, bigNumberify} = ethers.utils;
 
 export enum PositionType {
   Start, // 0

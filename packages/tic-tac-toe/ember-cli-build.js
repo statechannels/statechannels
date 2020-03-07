@@ -30,6 +30,18 @@ module.exports = function(defaults) {
           }
         ]
       }
+    },
+    autoImport: {
+      webpack: {
+        node: {
+          https: true,
+          http: true,
+          fs: 'empty',
+          crypto: true,
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          child_process: 'empty'
+        }
+      }
     }
   });
 
@@ -45,6 +57,12 @@ module.exports = function(defaults) {
   // modules that you would like to import into your application
   // please specify an object with the list of modules as keys
   // along with the exports of each module as its value.
+
+  app.import('node_modules/@statechannels/channel-provider/dist/channel-provider.js');
+  app.import({
+    development: 'node_modules/ethers/dist/ethers.js',
+    production: 'node_modules/ethers/dist/ethers.min.js'
+  });
 
   return app.toTree();
 };
