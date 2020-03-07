@@ -3,8 +3,8 @@ import * as firebase from 'firebase';
 import {cHubStateChannelAddress, cFirebasePrefix} from '../constants';
 import {logger} from '../logger';
 import {Message} from '@statechannels/wire-format';
-import {fromEvent, Observable} from 'rxjs';
-import {flatMap, map, withLatestFrom} from 'rxjs/operators';
+import {fromEvent, Observable, combineLatest, of, forkJoin} from 'rxjs';
+import {flatMap, map} from 'rxjs/operators';
 
 export type Snapshot = firebase.database.DataSnapshot;
 
@@ -38,16 +38,18 @@ export function fbListen(responseForMessage: (message: Message) => Message[]) {
   const hubRef = getMessagesRef().child(cHubStateChannelAddress);
 
   const childAddedObservable: Observable<Snapshot> = fromEvent(hubRef, 'child_added');
+
+  // Figure out why we need to reference index 0
   childAddedObservable
     .pipe(
-      map(snapshot => snapshot[0].val()),
-      map(responseForMessage),
-      flatMap(fbSend),
-      withLatestFrom(childAddedObservable)
+      map(childAdded => childAdded[0]),
+      flatMap(snapshot =>
+        combineLatest(of(snapshot), forkJoin(fbSend(responseForMessage(snapshot.val()))))
+      )
     )
     .subscribe(
-      output => {
-        hubRef.child(output[1][0].key).remove();
+      ([snapshot]) => {
+        hubRef.child(snapshot.key).remove();
       },
       error => log.error(error),
       () => {
