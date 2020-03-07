@@ -63,7 +63,10 @@ export class ChannelWallet {
       filter((r): r is ApproveBudgetAndFund => r.type === 'APPROVE_BUDGET_AND_FUND'),
       tap(r => {
         const workflow = this.startWorkflow(
-          createBudgetAndFundWorkflow(this.store, {budget: r.budget})
+          createBudgetAndFundWorkflow(this.store, this.messagingService, {
+            budget: r.budget,
+            requestId: r.requestId
+          })
         );
         this.workflows.push(workflow);
 
