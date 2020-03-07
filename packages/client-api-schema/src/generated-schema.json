@@ -47,16 +47,75 @@
       },
       "type": "array"
     },
+    "ApproveBudgetAndFundRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "ApproveBudgetAndFund"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/BudgetRequest"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "ApproveBudgetAndFundResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "result": {
+          "$ref": "#/definitions/SiteBudget"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
+      "type": "object"
+    },
     "BudgetRequest": {
       "additionalProperties": false,
       "properties": {
-        "hub": {
+        "hubAddress": {
           "type": "string"
         },
         "hubAmount": {
           "type": "string"
         },
+        "hubDestinationAddress": {
+          "type": "string"
+        },
         "playerAmount": {
+          "type": "string"
+        },
+        "playerDestinationAddress": {
           "type": "string"
         },
         "site": {
@@ -64,9 +123,11 @@
         }
       },
       "required": [
-        "hub",
+        "hubAddress",
         "hubAmount",
+        "hubDestinationAddress",
         "playerAmount",
+        "playerDestinationAddress",
         "site"
       ],
       "type": "object"
@@ -368,59 +429,6 @@
         },
         "result": {
           "$ref": "#/definitions/ChannelResult"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "result"
-      ],
-      "type": "object"
-    },
-    "CreateBudgetAndFundRequest": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "method": {
-          "enum": [
-            "CreateBudgetAndFund"
-          ],
-          "type": "string"
-        },
-        "params": {
-          "$ref": "#/definitions/BudgetRequest"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "method",
-        "params"
-      ],
-      "type": "object"
-    },
-    "CreateBudgetAndFundResponse": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "result": {
-          "$ref": "#/definitions/SiteBudget"
         }
       },
       "required": [
@@ -1024,7 +1032,7 @@
           "$ref": "#/definitions/GetBudgetRequest"
         },
         {
-          "$ref": "#/definitions/CreateBudgetAndFundRequest"
+          "$ref": "#/definitions/ApproveBudgetAndFundRequest"
         },
         {
           "$ref": "#/definitions/CloseChannelRequest"
@@ -1064,7 +1072,7 @@
           "$ref": "#/definitions/CloseChannelResponse"
         },
         {
-          "$ref": "#/definitions/CreateBudgetAndFundResponse"
+          "$ref": "#/definitions/ApproveBudgetAndFundResponse"
         }
       ]
     },

@@ -9,7 +9,8 @@ import {
   GetStateResponse,
   GetEthereumSelectedAddressResponse,
   ChallengeChannelResponse,
-  GetBudgetResponse
+  GetBudgetResponse,
+  ApproveBudgetAndFundResponse
 } from '@statechannels/client-api-schema';
 
 export interface JsonRpcRequest<MethodName = string, RequestParams = any> {
@@ -67,7 +68,7 @@ export type MethodType = {
   GetAddress: GetAddressResponse['result'];
   GetEthereumSelectedAddress: GetEthereumSelectedAddressResponse['result'];
   ChallengeChannel: ChallengeChannelResponse['result'];
-  ApproveBudgetAndFund: GetBudgetResponse['result'];
+  ApproveBudgetAndFund: ApproveBudgetAndFundResponse['result'];
   GetBudget: GetBudgetResponse['result'];
   CloseAndWithdraw: GetBudgetResponse['result'];
 };

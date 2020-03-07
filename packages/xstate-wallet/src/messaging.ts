@@ -12,7 +12,7 @@ import {
   ChannelClosingNotification,
   ChannelUpdatedNotification,
   Request,
-  CreateBudgetAndFundRequest
+  ApproveBudgetAndFundRequest
 } from '@statechannels/client-api-schema';
 
 import * as jrs from 'jsonrpc-lite';
@@ -37,7 +37,7 @@ type ChannelRequest =
   | JoinChannelRequest
   | UpdateChannelRequest
   | CloseChannelRequest
-  | CreateBudgetAndFundRequest;
+  | ApproveBudgetAndFundRequest;
 
 interface InternalEvents {
   AppRequest: [AppRequestEvent];
@@ -137,7 +137,7 @@ export class MessagingService implements MessagingServiceInterface {
       case 'UpdateChannel':
       case 'CloseChannel':
       case 'JoinChannel':
-      case 'CreateBudgetAndFund':
+      case 'ApproveBudgetAndFund':
         const appRequest = convertToInternalEvent(request);
         this.eventEmitter.emit('AppRequest', appRequest);
         break;
@@ -226,7 +226,7 @@ export function sendDisplayMessage(displayMessage: 'Show' | 'Hide') {
 
 function convertToInternalEvent(request: ChannelRequest): AppRequestEvent {
   switch (request.method) {
-    case 'CreateBudgetAndFund':
+    case 'ApproveBudgetAndFund':
       return {
         type: 'CREATE_BUDGET_AND_FUND',
         requestId: request.id,
