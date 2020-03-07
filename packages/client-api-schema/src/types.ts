@@ -164,7 +164,7 @@ export type GetBudgetRequest = JsonRpcRequest<'GetBudget', {hubAddress: Address}
 export type GetBudgetResponse = JsonRpcResponse<SiteBudget | {}>;
 
 export type CreateBudgetAndFundRequest = JsonRpcRequest<'CreateBudgetAndFund', SiteBudget>;
-
+export type CreateBudgetAndFundResponse = JsonRpcResponse<SiteBudget>;
 // Notifications
 export type ChannelProposedNotification = JsonRpcNotification<'ChannelProposed', ChannelResult>;
 export type ChannelUpdatedNotification = JsonRpcNotification<'ChannelUpdated', ChannelResult>;
@@ -202,7 +202,8 @@ export type Response =
   | PushMessageResponse
   | ChallengeChannelResponse
   | GetBudgetResponse
-  | CloseChannelResponse;
+  | CloseChannelResponse
+  | CreateBudgetAndFundResponse;
 
 export function isResponse(message: Response | Request | Notification): message is Response {
   return 'id' in message && 'result' in message;

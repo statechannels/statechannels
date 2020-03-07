@@ -46,7 +46,7 @@ export type StateValue = keyof WorkflowStateSchema['states'];
 const generateConfig = (
   actions: WorkflowActions
 ): MachineConfig<WorkflowContext, WorkflowStateSchema, WorkflowEvent> => ({
-  id: 'approve-budget-and-fund',
+  id: 'create-budget-and-fund',
   initial: 'waitForUserApproval',
   states: {
     waitForUserApproval: {
@@ -92,7 +92,7 @@ export const mockServices: WorkflowServices = {
 
 export const config = generateConfig(actions);
 
-export const approveBudgetAndFundWorkflow = (
+export const createBudgetAndFundWorkflow = (
   store: Store,
   context: WorkflowContext
 ): WorkflowMachine => {
