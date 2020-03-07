@@ -1,11 +1,35 @@
 import {
   Allocation as AppAllocation,
   Allocations as AppAllocations,
-  AllocationItem as AppAllocationItem
+  AllocationItem as AppAllocationItem,
+  SiteBudget as AppSiteBudget
 } from '@statechannels/client-api-schema';
-import {Allocation, AllocationItem, SimpleAllocation} from '../../store/types';
-import {tokenAddress} from '../../constants';
+import {
+  Allocation,
+  AllocationItem,
+  SimpleAllocation,
+  SiteBudget,
+  BudgetItem
+} from '../../store/types';
+import {tokenAddress, ETH_ASSET_HOLDER_ADDRESS} from '../../constants';
 
+export function serializeSiteBudget(budget: SiteBudget): AppSiteBudget {
+  const assetBudget = budget.budgets[ETH_ASSET_HOLDER_ADDRESS];
+  return {
+    site: budget.site,
+    hub: budget.site,
+    pending: serializeBudgetItem(assetBudget.pending),
+    free: serializeBudgetItem(assetBudget.free),
+    inUse: serializeBudgetItem(assetBudget.inUse),
+    direct: serializeBudgetItem(assetBudget.direct)
+  };
+}
+function serializeBudgetItem(budgetItem: BudgetItem): {playerAmount: string; hubAmount: string} {
+  return {
+    playerAmount: budgetItem.playerAmount.toHexString(),
+    hubAmount: budgetItem.hubAmount.toHexString()
+  };
+}
 export function serializeAllocation(allocation: Allocation): AppAllocations {
   switch (allocation.type) {
     case 'SimpleAllocation':
