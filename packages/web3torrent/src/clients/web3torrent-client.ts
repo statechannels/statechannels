@@ -24,7 +24,6 @@ export const upload: (files: WebTorrentSeedInput) => Promise<Torrent> = files =>
       resolve({
         ...torrent,
         status: Status.Seeding,
-        cost: String(torrent.length * 0.000005),
         originalSeed: true
       });
     })

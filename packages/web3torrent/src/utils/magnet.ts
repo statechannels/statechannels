@@ -33,9 +33,6 @@ export const generateMagnetURL = (torrent: Torrent) => {
   const magnetParams = new URLSearchParams(torrent.magnetURI.replace(/magnet:/g, ''));
   magnetParams.delete('tr');
   magnetParams.append('xl', String(torrent.length));
-  if (torrent.cost) {
-    magnetParams[!magnetParams.has('cost') ? 'append' : 'set']('cost', torrent.cost);
-  }
   magnetParams[!magnetParams.has('xl') ? 'append' : 'set']('xl', String(torrent.length));
 
   return `${RoutePath.File}#magnet:?${magnetParams.toString()}`;

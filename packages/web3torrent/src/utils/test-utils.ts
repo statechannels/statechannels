@@ -13,7 +13,6 @@ export function createMockTorrent(props?: Partial<Torrent>): Torrent {
     name: 'on-the-shortness-of-life-1.jpg',
     downloaded: 0,
     length: 128913,
-    cost: '1.34',
     ready: true,
     ...props
   };

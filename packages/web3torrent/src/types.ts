@@ -14,7 +14,6 @@ export const IdleStatuses = [Status.Idle, Status.Completed];
 
 export type Torrent = ExtendedTorrent & {
   parsedTimeRemaining?: string;
-  cost?: string;
   numSeeds?: number;
   status: Status;
   originalSeed?: boolean;

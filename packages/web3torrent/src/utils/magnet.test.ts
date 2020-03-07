@@ -11,19 +11,16 @@ const instantIOMagnet =
 const mockMagnetGenerator: ({
   name,
   xl,
-  cost,
   withTrackers
 }: {
   name?: string;
   xl: number;
-  cost?: string;
   withTrackers?: boolean;
-}) => string = ({name, xl, cost, withTrackers}) =>
+}) => string = ({name, xl, withTrackers}) =>
   `#magnet:?` +
   `xt=urn%3Abtih%3A148c62a7f7845c91e7d16ca9be85de6fbaed3a1f` +
   `${name !== undefined ? '&dn=' + name : ''}` +
   `${xl !== undefined ? '&xl=' + xl : ''}` +
-  `${cost !== undefined ? '&cost=' + cost : ''}` +
   `${withTrackers ? defaultTrackers.map(tr => '&tr=' + tr).join('') : ''}`;
 
 describe('Magnet Parsing', () => {
@@ -32,7 +29,6 @@ describe('Magnet Parsing', () => {
 
     expect(result.name).toBe(magnetConstants.name);
     expect(result.length).toBe(magnetConstants.xl);
-    expect(result.cost).toBe(magnetConstants.cost);
   });
 
   it('can parse an Instant.io Magnet', () => {
@@ -40,7 +36,6 @@ describe('Magnet Parsing', () => {
 
     expect(result.name).toBe(magnetConstants.name);
     expect(result.length).toBe(0);
-    expect(result.cost).toBe('0');
   });
 
   it('can parse an Instant.io Magnet', () => {
@@ -77,8 +72,6 @@ describe('Magnet Generation', () => {
   it('does not break when the magnet is not a Web3Torrent Magnet', () => {
     const parsedTorrent = parseMagnetURL(instantIOMagnet);
     const result = generateMagnetURL(parsedTorrent);
-    expect(result).toBe(
-      RoutePath.File + mockMagnetGenerator({name: magnetConstants.name, xl: 0, cost: '0'})
-    );
+    expect(result).toBe(RoutePath.File + mockMagnetGenerator({name: magnetConstants.name, xl: 0}));
   });
 });

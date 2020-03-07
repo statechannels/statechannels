@@ -82,7 +82,6 @@ describe('<TorrentInfo />', () => {
 
     expect(fileNameElement.text()).toEqual(torrent.name);
     expect(fileSizeElement.text()).toEqual(prettier(torrent.length));
-    expect(fileCostElement.text()).toEqual(`Cost $1.34`);
   });
 
   it('can show the `? Mb` label when the torrent size is unknown', () => {
@@ -96,8 +95,8 @@ describe('<TorrentInfo />', () => {
   });
 
   it('can show `Unknown` when the torrent cost is not available', () => {
-    const {fileCostElement} = mockTorrentInfo({cost: undefined});
-    expect(fileCostElement.text()).toEqual('Cost Unknown');
+    const {fileCostElement} = mockTorrentInfo();
+    expect(fileCostElement.text()).toEqual('Cost unknown');
   });
 
   it('can show the DownloadInfo component when the status allows it', () => {
