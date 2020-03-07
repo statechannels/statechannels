@@ -26,7 +26,9 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({torrent, peers}) => {
           <span className="fileCost">
             Cost{' '}
             {torrent.pieces
-              ? 'WEI_PER_PIECE.mul(torrent.pieces.length).toNumber()' + ' wei'
+              ? WEI_PER_PIECE.mul(torrent.pieces.length)
+                  .toNumber()
+                  .toString() + ' wei'
               : 'unknown'}
           </span>
           {torrent.magnetURI && <MagnetLinkButton />}
