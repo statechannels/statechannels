@@ -1,9 +1,11 @@
 import _, {Dictionary} from 'lodash';
 import prettier from 'prettier-bytes';
 import React from 'react';
-import './WiresList.scss';
+
 import {ChannelState} from '../../../clients/payment-channel-client';
 import {PaidStreamingWire} from '../../../library/types';
+
+import './WiresList.scss';
 
 export type UploadInfoProps = {
   wires: PaidStreamingWire[];
@@ -12,24 +14,22 @@ export type UploadInfoProps = {
 };
 
 const WiresList: React.FC<UploadInfoProps> = ({wires, channels, peerType}) => {
-  function wireToTableRow(wire: PaidStreamingWire) {
-    const peer = wire.paidStreamingExtension.peerAccount;
-    let channelId: string;
-    if (peerType === 'seeder') {
-      channelId = wire.paidStreamingExtension.pseChannelId;
-    } else {
-      channelId = wire.paidStreamingExtension.peerChannelId;
-    }
+  function wireToTableRow({
+    uploaded,
+    paidStreamingExtension: {peerAccount, peerChannelId, pseChannelId}
+  }: PaidStreamingWire) {
+    const channelId = peerType === 'seeder' ? pseChannelId : peerChannelId;
+
     return (
       _.keys(channels).includes(channelId) && (
-        <tr className="peerInfo" key={peer}>
+        <tr className="peerInfo" key={peerAccount}>
           <td>
             <button>Close</button>
           </td>
           <td className="channel-id">{channelId}</td>
-          <td className="peer-id">{peer}</td>
+          <td className="peer-id">{peerAccount}</td>
           <td className="downloaded">
-            {prettier(wire.uploaded)}
+            {prettier(uploaded)}
             &nbsp;
             {peerType === 'seeder' ? `up` : `down`}
           </td>
@@ -46,7 +46,7 @@ const WiresList: React.FC<UploadInfoProps> = ({wires, channels, peerType}) => {
   return (
     <section className="wires-list">
       <table className="wires-list-table">
-        <tbody>{Object.values(wires).map(wireToTableRow)}</tbody>
+        <tbody>{wires.map(wireToTableRow)}</tbody>
       </table>
     </section>
   );
