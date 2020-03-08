@@ -62,7 +62,7 @@ export class PaymentChannelClient {
       beneficiaryBalance,
       payerBalance
     );
-    const appDefinition = '0x0'; // TODO SingleAssetPayments address
+    const appDefinition = process.env.REACT_APP_SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS;
 
     const channelResult = await this.channelClient.createChannel(
       participants,

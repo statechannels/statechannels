@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 // TODO connect to *existing* ganache. Here we start a new instance to aid development.
 
 // Do this as the first thing so that any code reading it knows the right env.
@@ -31,11 +33,17 @@ void (async () => {
   const {deployer} = await setupGanache();
   const deployedArtifacts = await deploy(deployer);
 
-  process.env = {...process.env, ...deployedArtifacts};
+  // We must edit .env.local since there is no easy programmatic way to inject
+  // environment variables into the react-scripts start command.
 
-  process.env.TARGET_NETWORK = getNetworkName(process.env.CHAIN_NETWORK_ID);
-
-  process.env.NODE_ENV = process.env.NODE_ENV || 'test';
+  let data = '# NOTE: This file is auto-generated. Use .env.development.local for custom values\n';
+  for (const artifactName in deployedArtifacts) {
+    data += `REACT_APP_${artifactName} = ${deployedArtifacts[artifactName]}\n`;
+  }
+  data += `REACT_APP_TARGET_NETWORK = ${getNetworkName(process.env.CHAIN_NETWORK_ID)}\n`;
+  fs.writeFile('.env.local', data, err => {
+    if (err) throw err;
+  });
 
   const cmd = 'yarn';
   const args = ['run', 'react-scripts', 'start'];
