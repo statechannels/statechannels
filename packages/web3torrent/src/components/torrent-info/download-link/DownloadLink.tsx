@@ -2,6 +2,8 @@ import React, {useEffect, useState} from 'react';
 import {Torrent} from '../../../types';
 import {getFileSavingData, SavingData} from '../../../utils/file-saver';
 
+import './DownloadLink.scss';
+
 export type DownloadLinkProps = {torrent: Torrent};
 
 export const DownloadLink: React.FC<DownloadLinkProps> = ({torrent}) => {
@@ -15,7 +17,7 @@ export const DownloadLink: React.FC<DownloadLinkProps> = ({torrent}) => {
   return (
     <>
       {torrent.done && (
-        <a href={file.content} className="button" download={file.name || torrent.name}>
+        <a href={file.content} className="DownloadLink button" download={file.name || torrent.name}>
           Save Download
         </a>
       )}
