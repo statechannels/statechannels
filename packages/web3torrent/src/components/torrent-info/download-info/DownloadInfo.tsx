@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import prettier from 'prettier-bytes';
 import React from 'react';
 import {remove} from '../../../clients/web3torrent-client';
@@ -55,9 +56,8 @@ const DownloadInfo: React.FC<DownloadInfoProps> = ({
         </p>
       </section>
       <WiresList
-        torrent={torrent}
-        channelCache={channelCache}
-        channelIds={myLeechingChannelIds}
+        wires={torrent.wires}
+        channels={_.pickBy(channelCache, ({channelId}) => myLeechingChannelIds.includes(channelId))}
         peerType={'leecher'}
       />
     </>

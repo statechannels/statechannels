@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import React from 'react';
 import {Torrent} from '../../../types';
 import './UploadInfo.scss';
@@ -35,9 +36,8 @@ const UploadInfo: React.FC<UploadInfoProps> = ({
         </p>
       </section>
       <WiresList
-        torrent={torrent}
-        channelCache={channelCache}
-        channelIds={mySeedingChannelIds}
+        wires={torrent.wires}
+        channels={_.pickBy(channelCache, ({channelId}) => mySeedingChannelIds.includes(channelId))}
         peerType={'seeder'}
       />
     </>
