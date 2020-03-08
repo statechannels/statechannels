@@ -10,6 +10,8 @@ const setupDeployEnv = async () => {
 
   process.env = {...process.env, ...deployedArtifacts};
 
+  console.log(`TTT Address ember-cli-build.js: ${process.env.TTT_CONTRACT_ADDRESS}`);
+
   process.env.TARGET_NETWORK = getNetworkName(process.env.CHAIN_NETWORK_ID);
 };
 
