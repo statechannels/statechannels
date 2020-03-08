@@ -205,10 +205,12 @@ export class FakeChannelProvider implements ChannelProviderInterface {
 
   private async closeChannel(params: CloseChannelParams): Promise<ChannelResult> {
     const latestState = this.findChannel(params.channelId);
+
     await this.verifyTurnNum(latestState.turnNum);
     const turnNum = bigNumberify(latestState.turnNum)
       .add(1)
       .toString();
+
     const status = 'closing';
 
     this.setState({...latestState, turnNum, status});

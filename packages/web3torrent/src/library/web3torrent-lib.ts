@@ -200,7 +200,9 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         this.paymentChannelClient.myEthereumSelectedAddress, // seederOutcomeAddress,
         peerOutcomeAddress // leecherOutcomeAddress
       );
+
       log(`SEEDER > created channel with id ${channel.channelId}`);
+
       wire.paidStreamingExtension.pseChannelId = channel.channelId;
       wire.emit(PaidStreamingExtensionEvents.REQUEST);
     });

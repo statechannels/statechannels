@@ -41,7 +41,13 @@ export class PaymentChannelClient {
   mySigningAddress?: string;
   myEthereumSelectedAddress?: string; // this state can be inspected to infer whether we need to get the user to "Connect With MetaMask" or not.
   channelCache: Record<string, ChannelState> = {};
-  constructor(private readonly channelClient: ChannelClientInterface) {}
+
+  constructor(private readonly channelClient: ChannelClientInterface) {
+    this.channelClient.onChannelUpdated(channelResult => {
+      this.cacheChannelState(convertToChannelState(channelResult));
+    });
+  }
+
   async createChannel(
     beneficiary: string,
     payer: string,
@@ -70,7 +76,9 @@ export class PaymentChannelClient {
       appDefinition,
       'appData unused'
     );
+
     this.cacheChannelState(convertToChannelState(channelResult));
+
     return convertToChannelState(channelResult);
   }
 
@@ -228,8 +236,6 @@ export class PaymentChannelClient {
 
   async pushMessage(message: Message<ChannelResult>) {
     await this.channelClient.pushMessage(message);
-    const channelResult: ChannelResult = message.data;
-    this.cacheChannelState(convertToChannelState(channelResult));
   }
 
   async approveBudgetAndFund(
