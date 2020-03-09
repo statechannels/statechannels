@@ -3,8 +3,8 @@ import * as firebase from 'firebase';
 import {cHubStateChannelAddress, cFirebasePrefix} from '../constants';
 import {logger} from '../logger';
 import {Message} from '@statechannels/wire-format';
-import {fromEvent, Observable, combineLatest, of, forkJoin} from 'rxjs';
-import {flatMap, map, tap} from 'rxjs/operators';
+import {fromEvent, Observable, combineLatest, of} from 'rxjs';
+import {flatMap, map} from 'rxjs/operators';
 
 export type Snapshot = firebase.database.DataSnapshot;
 
@@ -43,13 +43,13 @@ export function fbListen(responseForMessage: (message: Message) => Message[]) {
     .pipe(
       map(childAdded => childAdded[0]),
       flatMap((snapshot: Snapshot) =>
-        combineLatest(of(snapshot), forkJoin(fbSend(responseForMessage(snapshot.val()))))
-      ),
-      tap(([snapshot]) => hubRef.child(snapshot.key).remove())
+        combineLatest(of(snapshot), of(responseForMessage(snapshot.val())))
+      )
     )
     .subscribe(
-      () => {
-        // On event
+      async ([snapshot, messagesToSend]) => {
+        await Promise.all(messagesToSend.map(fbSend));
+        hubRef.child(snapshot.key).remove();
       },
       error => log.error(error),
       () => {
@@ -58,10 +58,8 @@ export function fbListen(responseForMessage: (message: Message) => Message[]) {
     );
 }
 
-function fbSend(messages: Message[]) {
-  return messages.map(message =>
-    getMessagesRef()
-      .child(message.recipient)
-      .push(JSON.parse(JSON.stringify(message)))
-  );
+function fbSend(message: Message) {
+  return getMessagesRef()
+    .child(message.recipient)
+    .push(JSON.parse(JSON.stringify(message)));
 }
