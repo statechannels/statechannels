@@ -228,7 +228,7 @@ function convertToInternalEvent(request: ChannelRequest): AppRequestEvent {
   switch (request.method) {
     case 'ApproveBudgetAndFund':
       return {
-        type: 'CREATE_BUDGET_AND_FUND',
+        type: 'APPROVE_BUDGET_AND_FUND',
         requestId: request.id,
         budget: deserializeBudgetRequest(request.params)
       };
