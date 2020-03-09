@@ -317,8 +317,15 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       this.emit(ClientEvents.TORRENT_NOTICE, {torrent, wire, command, data});
     });
 
-    torrent.on(TorrentEvents.DONE, () => this.emit(ClientEvents.TORRENT_DONE, {torrent}));
-    // [ George ] Here we can call paymentChannelClient.closeChannel()
+    torrent.on(TorrentEvents.DONE, async () => {
+      log('Torrent DONE!');
+      this.emit(ClientEvents.TORRENT_DONE, {torrent});
+      torrent.wires.forEach(
+        async wire =>
+          wire.paidStreamingExtension.peerChannelId &&
+          (await this.paymentChannelClient.closeChannel(wire.paidStreamingExtension.peerChannelId))
+      ); // close any channels that I am the leecher in (that my peer opened)
+    });
 
     torrent.on(TorrentEvents.ERROR, err => {
       log('ERROR: > ', err);
