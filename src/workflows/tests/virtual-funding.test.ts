@@ -2,7 +2,7 @@ import {interpret} from 'xstate';
 import waitForExpect from 'wait-for-expect';
 
 import {MemoryStore} from '../../store/memory-store';
-import {DumbHub} from './dumb-hub';
+import {SimpleHub} from './simple-hub';
 import {bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
 import {firstState, signState, calculateChannelId} from '../../store/state-utils';
@@ -134,8 +134,8 @@ test('virtual funding with smart hub', async () => {
   }, EXPECT_TIMEOUT);
 });
 
-test('virtual funding with a dumb hub', async () => {
-  const hubStore = new DumbHub(wallet3.privateKey);
+test('virtual funding with a simple hub', async () => {
+  const hubStore = new SimpleHub(wallet3.privateKey);
 
   const aService = interpret(VirtualFundingAsLeaf.machine(aStore, context));
   const bService = interpret(VirtualFundingAsLeaf.machine(bStore, context));

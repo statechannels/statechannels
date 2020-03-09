@@ -4,7 +4,7 @@ import {EventEmitter} from 'eventemitter3';
 import {signState} from '../../store/state-utils';
 import {ethers} from 'ethers';
 
-export class DumbHub {
+export class SimpleHub {
   constructor(
     private readonly privateKey: string,
     private readonly _eventEmitter = new EventEmitter()
