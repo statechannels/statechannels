@@ -12,12 +12,14 @@ export type UploadInfoProps = {
   torrent: Torrent;
   channelCache: Record<string, ChannelState>;
   mySigningAddress: string;
+  closeChannel: (channelId: string) => Promise<ChannelState>;
 };
 
 const UploadInfo: React.FC<UploadInfoProps> = ({
   torrent,
   channelCache = {},
-  mySigningAddress
+  mySigningAddress,
+  closeChannel
 }: UploadInfoProps) => {
   const mySeedingChannelIds: string[] = Object.keys(channelCache).filter(
     key => channelCache[key].beneficiary === mySigningAddress
@@ -39,6 +41,7 @@ const UploadInfo: React.FC<UploadInfoProps> = ({
         wires={torrent.wires}
         channels={_.pickBy(channelCache, ({channelId}) => mySeedingChannelIds.includes(channelId))}
         peerType={'seeder'}
+        closeChannel={closeChannel}
       />
     </>
   );
