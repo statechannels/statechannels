@@ -4,8 +4,7 @@ import {
   defaultFileMagnetURI,
   defaultSeedingOptions,
   defaultTorrentHash,
-  mockMetamask,
-  mockChannelState
+  mockMetamask
 } from './testing/test-utils';
 import WebTorrentPaidStreamingClient, {
   ClientEvents,
@@ -31,7 +30,7 @@ describe('Seeding and Leeching', () => {
     });
     seeder.on('error', err => fail(err));
     seeder.on('warning', err => fail(err));
-    seeder.paymentChannelClient.channelCache = {0x0: mockChannelState};
+    seeder.paymentChannelClient.channelCache = {};
 
     leecher = new WebTorrentPaidStreamingClient({
       pseAccount: '2',
@@ -40,7 +39,7 @@ describe('Seeding and Leeching', () => {
     });
     leecher.on('error', err => fail(err));
     leecher.on('warning', err => fail(err));
-    leecher.paymentChannelClient.channelCache = {0x0: mockChannelState};
+    leecher.paymentChannelClient.channelCache = {};
   });
 
   it('should seed and remove a Torrent', done => {
@@ -82,25 +81,14 @@ describe('Seeding and Leeching', () => {
     });
   }, 10000);
 
-  it.skip('should be able to unchoke and finish a download', done => {
+  it('should unchoke when seeder unblocks leecher', done => {
     seeder.seed(defaultFile as File, defaultSeedingOptions(), seededTorrent => {
       seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({peerAccount}) => {
-        seeder.togglePeer(seededTorrent.infoHash, peerAccount);
-
         seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({torrentPeers}) => {
           expect(torrentPeers[`${leecher.pseAccount}`].allowed).toEqual(true);
+          done();
         });
-
-        seeder.on(ClientEvents.TORRENT_NOTICE, ({command}) => {
-          if (command == PaidStreamingExtensionNotices.ACK) {
-            leecher.once(ClientEvents.TORRENT_DONE, ({torrent: leechedTorrent}) => {
-              expect(seededTorrent.files[0].done).toEqual(leechedTorrent.files[0].done);
-              expect(seededTorrent.files[0].length).toEqual(leechedTorrent.files[0].length);
-              expect(seededTorrent.files[0].name).toEqual(leechedTorrent.files[0].name);
-              done();
-            });
-          }
-        });
+        seeder.togglePeer(seededTorrent.infoHash, peerAccount);
       });
 
       leecher.add(seededTorrent.magnetURI, {store: MemoryChunkStore});
