@@ -1,6 +1,7 @@
 import {BigNumber} from 'ethers/utils';
 export interface SiteBudget {
   site: string;
+  hubAddress: string;
   budgets: Record<string, AssetBudget>;
 }
 export interface BudgetItem {

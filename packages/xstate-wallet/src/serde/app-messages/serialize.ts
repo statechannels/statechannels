@@ -17,7 +17,7 @@ export function serializeSiteBudget(budget: SiteBudget): AppSiteBudget {
   const assetBudget = budget.budgets[ETH_ASSET_HOLDER_ADDRESS];
   return {
     site: budget.site,
-    hub: budget.site,
+    hub: budget.hubAddress,
     pending: serializeBudgetItem(assetBudget.pending),
     free: serializeBudgetItem(assetBudget.free),
     inUse: serializeBudgetItem(assetBudget.inUse),
