@@ -39,7 +39,6 @@ export function fbListen(responseForMessage: (message: Message) => Message[]) {
 
   const childAddedObservable: Observable<Snapshot> = fromEvent(hubRef, 'child_added');
 
-  // Figure out why we need to reference index 0
   childAddedObservable
     .pipe(
       map(childAdded => childAdded[0]),
