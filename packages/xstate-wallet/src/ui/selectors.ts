@@ -3,6 +3,9 @@ import {
   StateValue as AppStateValue
 } from '../workflows/application';
 import {WorkflowState as CCCWorkflowState} from '../workflows/confirm-create-channel';
+import {SiteBudget} from '../store/types';
+import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
+import {BigNumber} from 'ethers/utils';
 
 export function getApplicationStateValue(
   applicationWorkflowState: AppWorkflowState
@@ -52,4 +55,12 @@ export function getApplicationOpenProgress(applicationWorkflowState: AppWorkflow
     default:
       return 1;
   }
+}
+
+export function getAmountsFromPendingBudget(
+  budget: SiteBudget
+): {playerAmount: BigNumber; hubAmount: BigNumber} {
+  const {pending} = budget.budgets[ETH_ASSET_HOLDER_ADDRESS];
+  const {playerAmount, hubAmount} = pending;
+  return {playerAmount, hubAmount};
 }
