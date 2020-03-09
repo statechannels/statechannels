@@ -190,7 +190,7 @@ describe('ChannelClient with FakeChannelProvider', () => {
       setProviderStates([providerA, providerB], states['running']);
       const channelResult = await clientA.getState(channelId);
       expect(channelResult).toEqual(states['running']);
-      expect(providerB.latestState).toEqual(states['running']);
+      expect(providerB.latestState[channelId]).toEqual(states['running']);
     });
   });
 
