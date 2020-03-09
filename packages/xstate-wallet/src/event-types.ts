@@ -41,7 +41,7 @@ export interface PlayerRequestConclude {
 }
 export interface ApproveBudgetAndFund {
   requestId: number;
-  type: 'CREATE_BUDGET_AND_FUND';
+  type: 'APPROVE_BUDGET_AND_FUND';
   budget: SiteBudget;
 }
 

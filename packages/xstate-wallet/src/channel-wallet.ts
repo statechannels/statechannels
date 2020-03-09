@@ -59,9 +59,9 @@ export class ChannelWallet {
       })
     );
 
-    this.messagingService.requestFeed
-      .pipe(filter((r): r is ApproveBudgetAndFund => r.type === 'CREATE_BUDGET_AND_FUND'))
-      .subscribe(r => {
+    this.messagingService.requestFeed.pipe(
+      filter((r): r is ApproveBudgetAndFund => r.type === 'APPROVE_BUDGET_AND_FUND'),
+      tap(r => {
         const workflow = this.startWorkflow(
           approveBudgetAndFundWorkflow(this.store, this.messagingService, {
             budget: r.budget,
