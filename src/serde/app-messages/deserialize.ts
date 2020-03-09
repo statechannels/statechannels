@@ -15,6 +15,7 @@ import {
 } from '../../store/types';
 import {assetHolderAddress, ETH_ASSET_HOLDER_ADDRESS} from '../../constants';
 import {bigNumberify} from 'ethers/utils';
+import {AddressZero} from 'ethers/constants';
 
 export function deserializeBudgetRequest(budgetRequest: AppBudgetRequest): SiteBudget {
   const assetBudget: AssetBudget = {
@@ -32,17 +33,22 @@ export function deserializeBudgetRequest(budgetRequest: AppBudgetRequest): SiteB
 }
 
 export function deserializeSiteBudget(siteBudget: AppSiteBudget): SiteBudget {
-  const assetBudget: AssetBudget = {
-    assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
-    inUse: deserializeBudgetItem(siteBudget.inUse),
-    free: deserializeBudgetItem(siteBudget.free),
-    pending: deserializeBudgetItem(siteBudget.pending),
-    direct: deserializeBudgetItem(siteBudget.direct)
-  };
+  const assetBudgets = siteBudget.budgets.map(b => ({
+    assetHolderAddress: assetHolderAddress(b.token) || AddressZero,
+    inUse: deserializeBudgetItem(b.inUse),
+    free: deserializeBudgetItem(b.free),
+    pending: deserializeBudgetItem(b.pending),
+    direct: deserializeBudgetItem(b.direct)
+  }));
+  const budgets = {};
+  assetBudgets.forEach(a => {
+    budgets[a.assetHolderAddress] = a;
+  });
+
   return {
     site: siteBudget.site,
     hubAddress: siteBudget.hub,
-    budgets: {[ETH_ASSET_HOLDER_ADDRESS]: assetBudget}
+    budgets
   };
 }
 export function deserializeBudgetItem(budgetItem: {
