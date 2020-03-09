@@ -26,8 +26,8 @@ export type TorrentCallback = (torrent: Torrent) => any;
 
 export * from './types';
 
-export const WEI_PER_PIECE = bigNumberify(1); // cost per credit / piece
-export const BUFFER_REFILL_RATE = bigNumberify(100); // number of credits / pieces the leecher wishes to increase the buffer by
+export const WEI_PER_BYTE = bigNumberify(1); // cost per credit / piece
+export const BUFFER_REFILL_RATE = bigNumberify(100000); // number of credits / pieces the leecher wishes to increase the buffer by
 // These variables control the amount of (micro)trust the leecher must invest in the seeder
 // As well as the overall performance hit of integrating payments into webtorrent.
 // A high BUFFER_REFILL_RATE increases the need for trust, but decreases the number of additional messages and therefore latency
@@ -141,13 +141,15 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     wire.setKeepAlive(true);
     wire.setTimeout(65000);
     wire.on('keep-alive', () => {
-      log('> wire keep-alive :', !torrent.done && wire.amChoking ? 'Clearing Timeout' : '');
+      log('> wire keep-alive :', !torrent.done && wire.amChoking, torrent, wire);
       if (!torrent.done && wire.amChoking) {
         wire._clearTimeout();
       }
     });
 
-    wire.on(WireEvents.REQUEST, () => {
+    wire.on(WireEvents.REQUEST, (index: number, _: number, size: number) => {
+      const reqPrice = bigNumberify(size).mul(WEI_PER_BYTE); // in buffer units
+      // log('> REQ: ' + index, ' cost ' + reqPrice.toNumber());
       const peerAccount = wire.paidStreamingExtension.peerAccount as string;
       const channelId = wire.paidStreamingExtension.pseChannelId as string;
 
@@ -157,7 +159,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         this.peersList[torrent.infoHash][peerAccount] = {
           id: peerAccount,
           wire,
-          buffer: '0', // (pieces) a value x > 0 would allow a leecher to download x pieces for free
+          buffer: '0', // (pieces) a value x > 0 would allow a leecher to download x bytes
           seederBalance: '0', // (wei) must begin at zero so that depositing works
           allowed: false,
           channelId
@@ -168,7 +170,8 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           torrentInfoHash: torrent.infoHash,
           peerAccount
         });
-      } else if (!knownPeerAccount.allowed || bigNumberify(knownPeerAccount.buffer).isZero()) {
+      } else if (!knownPeerAccount.allowed || bigNumberify(knownPeerAccount.buffer).lt(reqPrice)) {
+        // log('BLOCKED: ' + index, 'buffer: ' + bigNumberify(knownPeerAccount.buffer).toString());
         // As soon as buffer is empty, block
         this.blockPeer(torrent.infoHash, wire, peerAccount);
       } else {
@@ -176,36 +179,40 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           id: peerAccount,
           wire,
           buffer: bigNumberify(knownPeerAccount.buffer)
-            .sub(1) // decrease buffer by one unit (one piece)
+            .sub(reqPrice) // decrease buffer by the price of this request
             .toString(),
           seederBalance: knownPeerAccount.seederBalance,
           allowed: true,
           channelId
         };
+        // log(
+        //   'PASSED: ' + index,
+        //   'Buffer Updated: ' + this.peersList[torrent.infoHash][peerAccount].buffer,
+        //   'Seeder Balance: ' + knownPeerAccount.seederBalance
+        // );
       }
     });
 
-    wire.paidStreamingExtension.once(PaidStreamingExtensionEvents.REQUEST, async () => {
-      const {peerAccount, peerOutcomeAddress} = wire.paidStreamingExtension;
-      log(
-        `SEEDER > wire first_request of ${peerAccount} with outcomeAddress ${peerOutcomeAddress}`
-      );
+    wire.paidStreamingExtension.once(
+      PaidStreamingExtensionEvents.REQUEST,
+      async (index: number, offset: number, size: number) => {
+        const {peerAccount, peerOutcomeAddress} = wire.paidStreamingExtension;
+        log(`> wire first_request of ${peerAccount} with outcomeAddress ${peerOutcomeAddress}`);
 
-      // SEEDER is participants[0], LEECHER is participants[1]
-      const channel = await this.paymentChannelClient.createChannel(
-        this.pseAccount, // seeder
-        peerAccount, // leecher
-        INITIAL_SEEDER_BALANCE.toString(), // seederBalance,
-        INITIAL_LEECHER_BALANCE.toString(), // leecherBalance,
-        this.paymentChannelClient.myEthereumSelectedAddress, // seederOutcomeAddress,
-        peerOutcomeAddress // leecherOutcomeAddress
-      );
-
-      log(`SEEDER > created channel with id ${channel.channelId}`);
-
-      wire.paidStreamingExtension.pseChannelId = channel.channelId;
-      wire.emit(PaidStreamingExtensionEvents.REQUEST);
-    });
+        // SEEDER is participants[0], LEECHER is participants[1]
+        const channel = await this.paymentChannelClient.createChannel(
+          this.pseAccount, // seeder
+          peerAccount, // leecher
+          INITIAL_SEEDER_BALANCE.toString(), // seederBalance,
+          INITIAL_LEECHER_BALANCE.toString(), // leecherBalance,
+          this.paymentChannelClient.myEthereumSelectedAddress, // seederOutcomeAddress,
+          peerOutcomeAddress // leecherOutcomeAddress
+        );
+        log(`> created channel with id ${channel.channelId}`);
+        wire.paidStreamingExtension.pseChannelId = channel.channelId;
+        wire.emit(PaidStreamingExtensionEvents.REQUEST, index, offset, size);
+      }
+    );
 
     wire.paidStreamingExtension.on(PaidStreamingExtensionEvents.NOTICE, notice =>
       torrent.emit(PaidStreamingExtensionEvents.NOTICE, wire, notice)
@@ -237,7 +244,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     this.peersList[infoHash][peerId].seederBalance = newSeederBalance.toString();
     // convert payment into number of pieces
     this.peersList[infoHash][peerId].buffer = bigNumberify(this.peersList[infoHash][peerId].buffer)
-      .add(payment.div(WEI_PER_PIECE)) // This must remain an integer as long as our check above uses .isZero()
+      .add(payment.div(WEI_PER_BYTE)) // This must remain an integer as long as our check above uses .isZero()
       // ethers BigNumbers are always integers
       .toString();
 
@@ -251,7 +258,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
     await this.paymentChannelClient.makePayment(
       channelId,
-      WEI_PER_PIECE.mul(BUFFER_REFILL_RATE).toString()
+      WEI_PER_BYTE.mul(BUFFER_REFILL_RATE).toString()
     );
     const newSeederBalance = bigNumberify(
       this.paymentChannelClient.channelCache[channelId].beneficiaryBalance
@@ -271,10 +278,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     });
 
     torrent.on(TorrentEvents.NOTICE, async (wire, {command, data}) => {
-      log(
-        `< ${command} received from ${wire.peerExtendedHandshake.pseAccount} with outcomeAddress ${wire.peerExtendedHandshake.outcomeAddress}`,
-        data
-      );
+      log(`< ${command} received from ${wire.peerExtendedHandshake.pseAccount}`, data);
       let channelId: string;
       let message: Message<ChannelResult>;
       let channelState: ChannelState;
@@ -339,7 +343,10 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   }
 
   protected jumpStart(torrent: ExtendedTorrent, wire: PaidStreamingWire) {
-    log(`LEECHER: > JumpStarting! - With ${wire.requests.length} pending wire requests`);
+    log(
+      `LEECHER: > JumpStarting! - With ${wire.requests.length} pending wire requests. Current Torrent Pieces: `,
+      torrent.pieces
+    );
     wire.unchoke();
     torrent._startDiscovery();
     torrent.resume();
@@ -353,7 +360,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         }
         return piece;
       });
-      log('LEECHER: > Requests cleared!');
+      log('LEECHER: > Requests cleared!', canceledReservations);
       torrent._updateWire(wire);
     } else {
       log('LEECHER: > Torrent its working fine or it finished', torrent, wire);
