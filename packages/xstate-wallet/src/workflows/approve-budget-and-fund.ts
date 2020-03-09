@@ -10,6 +10,7 @@ import {
 import {SiteBudget} from '../store/types';
 import {sendDisplayMessage, MessagingServiceInterface} from '../messaging';
 import {Store} from '../store/memory-store';
+import {serializeSiteBudget} from '../serde/app-messages/serialize';
 
 interface UserApproves {
   type: 'USER_APPROVES_BUDGET';
@@ -108,7 +109,7 @@ export const approveBudgetAndFundWorkflow = (
       sendDisplayMessage('Hide');
     },
     sendResponse: (context: WorkflowContext, event) => {
-      messagingService.sendResponse(context.requestId, context.budget);
+      messagingService.sendResponse(context.requestId, serializeSiteBudget(context.budget));
     }
   };
   const config = generateConfig(actions);

@@ -11,17 +11,22 @@ import {
   SiteBudget,
   BudgetItem
 } from '../../store/types';
-import {tokenAddress, ETH_ASSET_HOLDER_ADDRESS} from '../../constants';
+import {tokenAddress} from '../../constants';
+import {AddressZero} from 'ethers/constants';
 
 export function serializeSiteBudget(budget: SiteBudget): AppSiteBudget {
-  const assetBudget = budget.budgets[ETH_ASSET_HOLDER_ADDRESS];
+  const budgets = Object.keys(budget.budgets).map(assetHolderAddress => ({
+    token: tokenAddress(assetHolderAddress) || AddressZero,
+    pending: serializeBudgetItem(budget.budgets[assetHolderAddress].pending),
+    free: serializeBudgetItem(budget.budgets[assetHolderAddress].free),
+    inUse: serializeBudgetItem(budget.budgets[assetHolderAddress].inUse),
+    direct: serializeBudgetItem(budget.budgets[assetHolderAddress].direct)
+  }));
+
   return {
     site: budget.site,
     hub: budget.hubAddress,
-    pending: serializeBudgetItem(assetBudget.pending),
-    free: serializeBudgetItem(assetBudget.free),
-    inUse: serializeBudgetItem(assetBudget.inUse),
-    direct: serializeBudgetItem(assetBudget.direct)
+    budgets
   };
 }
 function serializeBudgetItem(budgetItem: BudgetItem): {playerAmount: string; hubAmount: string} {

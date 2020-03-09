@@ -152,13 +152,17 @@ export type ChallengeChannelRequest = JsonRpcRequest<'ChallengeChannel', {channe
 export type ChallengeChannelResponse = JsonRpcResponse<ChannelResult>;
 
 // Budget
-export interface SiteBudget {
-  site: string;
-  hub: string;
+export interface TokenBudget {
+  token: string;
   pending: Balance;
   free: Balance;
   inUse: Balance;
   direct: Balance;
+}
+export interface SiteBudget {
+  site: string;
+  hub: string;
+  budgets: TokenBudget[];
 }
 
 export interface BudgetRequest extends Balance {

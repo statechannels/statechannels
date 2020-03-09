@@ -1079,6 +1079,29 @@
     "SiteBudget": {
       "additionalProperties": false,
       "properties": {
+        "budgets": {
+          "items": {
+            "$ref": "#/definitions/TokenBudget"
+          },
+          "type": "array"
+        },
+        "hub": {
+          "type": "string"
+        },
+        "site": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "site",
+        "hub",
+        "budgets"
+      ],
+      "type": "object"
+    },
+    "TokenBudget": {
+      "additionalProperties": false,
+      "properties": {
         "direct": {
           "additionalProperties": false,
           "properties": {
@@ -1110,9 +1133,6 @@
             "hubAmount"
           ],
           "type": "object"
-        },
-        "hub": {
-          "type": "string"
         },
         "inUse": {
           "additionalProperties": false,
@@ -1146,13 +1166,12 @@
           ],
           "type": "object"
         },
-        "site": {
+        "token": {
           "type": "string"
         }
       },
       "required": [
-        "site",
-        "hub",
+        "token",
         "pending",
         "free",
         "inUse",
