@@ -19,7 +19,7 @@ import {filter, map, tap, flatMap, first} from 'rxjs/operators';
 import * as CCC from './confirm-create-channel';
 import {createMockGuard, getDataAndInvoke} from '../utils/workflow-utils';
 import {Store} from '../store/memory-store';
-import {StateVariables, SimpleAllocation} from '../store/types';
+import {StateVariables} from '../store/types';
 import {ChannelStoreEntry} from '../store/memory-channel-storage';
 import {bigNumberify} from 'ethers/utils';
 import * as ConcludeChannel from './conclude-channel';
@@ -403,7 +403,7 @@ export const applicationWorkflow = (
           return {
             ...entry.latest,
             ...entry.channelConstants,
-            outcome: entry.latest.outcome as SimpleAllocation
+            outcome: checkThat(entry.latest.outcome, isSimpleEthAllocation)
           };
         default:
           return unreachable(event);
