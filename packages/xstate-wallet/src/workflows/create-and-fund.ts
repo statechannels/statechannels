@@ -1,6 +1,6 @@
 import {Machine, MachineConfig, StateNodeConfig, ActionTypes} from 'xstate';
 
-import {filter, map, take, tap} from 'rxjs/operators';
+import {filter, map, first} from 'rxjs/operators';
 import _ from 'lodash';
 import {SimpleAllocation, isVirtuallyFund, StateVariables, Outcome} from '../store/types';
 
@@ -19,8 +19,6 @@ const PROTOCOL = 'create-and-fund';
 export type Init = {
   allocation: SimpleAllocation;
   channelId: string;
-  appData: string;
-  appDefinition: string;
 };
 
 const preFundSetup = getDataAndInvoke<Init, Service>(
@@ -167,7 +165,7 @@ const getObjective = (store: Store) => (ctx: Init): Promise<VirtualFundingAsLeaf
         })
       ),
       filter(({targetChannelId}) => targetChannelId === ctx.channelId),
-      take(1)
+      first()
     )
     .toPromise();
 
@@ -197,14 +195,9 @@ const getPreFundSetup = (store: Store) => (ctx: Init): Promise<SupportState.Init
     .channelUpdatedFeed(ctx.channelId)
     .pipe(
       map(e => _.sortBy(e.states, s => s.turnNum)[0]),
-      filter(s => s.turnNum.lte(1)),
-      tap(s => {
-        if (!_.isEqual(s.outcome, ctx.allocation)) throw 'Unexpected outcome';
-        if (!_.isEqual(s.appData, ctx.appData)) throw 'Unexpected appData';
-        if (!_.isEqual(s.appDefinition, ctx.appDefinition)) throw 'Unexpected appDefinition';
-      }),
-      map(s => ({state: {...s, turnNum: bigNumberify(1)}})),
-      take(1)
+      filter(s => s.turnNum.eq(0)),
+      map(state => ({state: {...state, turnNum: bigNumberify(1)}})),
+      first()
     )
     .toPromise();
 
@@ -214,13 +207,8 @@ const getPostFundSetup = (store: Store) => (ctx: Init): Promise<SupportState.Ini
     .pipe(
       map(e => _.sortBy(e.states, s => s.turnNum)[0]),
       filter(s => s.turnNum.eq(1)),
-      tap(s => {
-        if (!_.isEqual(s.outcome, ctx.allocation)) throw 'Unexpected outcome';
-        if (!_.isEqual(s.appData, ctx.appData)) throw 'Unexpected appData';
-        if (!_.isEqual(s.appDefinition, ctx.appDefinition)) throw 'Unexpected appDefinition';
-      }),
       map(s => ({state: {...s, turnNum: bigNumberify(3)}})),
-      take(1)
+      first()
     )
     .toPromise();
 

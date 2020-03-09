@@ -59,12 +59,7 @@ const allocation: Outcome = {
 const ledgerAmounts = amounts.map(a => a.add(2));
 const depositAmount = ledgerAmounts.reduce(add).toHexString();
 
-const context: Init = {
-  channelId: targetChannelId,
-  allocation,
-  appDefinition: AddressZero,
-  appData: '0x'
-};
+const context: Init = {channelId: targetChannelId, allocation};
 
 let aStore: MemoryStore;
 let bStore: MemoryStore;
