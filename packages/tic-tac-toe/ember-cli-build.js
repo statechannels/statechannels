@@ -1,8 +1,22 @@
 'use strict';
 
 const EmberApp = require('ember-cli/lib/broccoli/ember-app');
+const {getNetworkName, setupGanache} = require('@statechannels/devtools');
+const {deploy} = require('./deployment/deploy');
+
+const setupDeployEnv = async () => {
+  const {deployer} = await setupGanache();
+  const deployedArtifacts = await deploy(deployer);
+
+  process.env = {...process.env, ...deployedArtifacts};
+
+  console.log(`TTT Address ember-cli-build.js: ${process.env.TTT_CONTRACT_ADDRESS}`);
+
+  process.env.TARGET_NETWORK = getNetworkName(process.env.CHAIN_NETWORK_ID);
+};
 
 module.exports = function(defaults) {
+  setupDeployEnv();
   const app = new EmberApp(defaults, {
     postcssOptions: {
       compile: {

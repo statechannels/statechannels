@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import Service from '@ember/service';
 import {
   ChannelResult,
@@ -8,10 +7,10 @@ import {
 } from '@statechannels/channel-client';
 import {AppData, encodeAppData, decodeAppData} from '../core/app-data';
 import {ChannelState} from '../core/channel-state';
+import ENV from '@statechannels/tic-tac-toe/config/environment';
 
 const {bigNumberify} = ethers.utils;
-
-const TTT_ADDRESS = '0x000'; // Need to pass in the actual address at build time
+const {TTT_CONTRACT_ADDRESS} = ENV;
 
 const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
   const {
@@ -85,7 +84,7 @@ export default class TttChannelClientService extends Service {
   ): Promise<ChannelState> {
     const participants = formatParticipants(aAddress, bAddress, aOutcomeAddress, bOutcomeAddress);
     const allocations = formatAllocations(aOutcomeAddress, bOutcomeAddress, aBal, bBal);
-    const appDefinition = TTT_ADDRESS;
+    const appDefinition = TTT_CONTRACT_ADDRESS;
     const appData = encodeAppData(appAttrs);
 
     const channelResult = await this.channelClient.createChannel(
@@ -106,13 +105,13 @@ export default class TttChannelClientService extends Service {
     return this.channelClient.getEthereumSelectedAddress();
   }
 
-  onMessageQueued(callback: (message: Message) => void): any {
+  onMessageQueued(callback: (message: Message) => void): UnsubscribeFunction {
     return this.channelClient.onMessageQueued(callback);
   }
 
   // Accepts a ttt-friendly callback, performs the necessary encoding, and subscribes to the channelClient with an appropriate, API-compliant callback
-  onChannelUpdated(tttCallback: (channelState: ChannelState) => UnsubscribeFunction): () => {} {
-    function callback(channelResult: any): any {
+  onChannelUpdated(tttCallback: (channelState: ChannelState) => UnsubscribeFunction): () => void {
+    function callback(channelResult: ChannelResult): void {
       tttCallback(convertToChannelState(channelResult));
     }
     // These are two distinct events from the channel client
@@ -121,7 +120,7 @@ export default class TttChannelClientService extends Service {
     const unsubChannelUpdated = this.channelClient.onChannelUpdated(callback);
     const unsubChannelProposed = this.channelClient.onChannelProposed(callback);
 
-    return (): any => {
+    return (): void => {
       unsubChannelUpdated();
       unsubChannelProposed();
     };
