@@ -28,6 +28,7 @@ export const ApplicationWorkflow = (props: Props) => {
     openChannelAndDirectFundProtocol: 'Opening channel...',
     running: 'Running channel...',
     closing: 'Closing channel...',
+    concludeState: 'Closing channel...',
     done: 'Channel closed'
   };
   return (
