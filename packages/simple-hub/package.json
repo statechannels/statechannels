@@ -53,7 +53,6 @@
   "private": true,
   "scripts": {
     "build": "tsc -b .",
-    "build:ci": "build",
     "build:typescript": "tsc -b .",
     "chain:test": "npx jest --runInBand -c ./jest/jest.chain.config.js",
     "db:create": "createdb hub_wallet_${NODE_ENV}",
@@ -70,6 +69,7 @@
     "lint:check": "eslint \"*/**/*.{js,ts,tsx}\" --cache",
     "lint:write": "eslint \"*/**/*.{js,ts,tsx}\" --fix",
     "precommit": "lint-staged --quiet",
+    "prepare": "yarn build",
     "prestart": "yarn build && npm run db:rollback && npm run db:migrate && npm run db:seed",
     "prettier:check": "npx prettier --check 'src/**/*.{ts,tsx}'",
     "prettier:write": "npx prettier --write 'src/**/*.{ts,tsx}'",
