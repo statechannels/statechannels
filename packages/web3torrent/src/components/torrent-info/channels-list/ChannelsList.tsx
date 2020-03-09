@@ -25,14 +25,13 @@ const ChannelsList: React.FC<UploadInfoProps> = ({wires, channels, peerType, clo
       channelButton = <button onClick={() => closeChannel(channelId)}>Close Channel</button>;
     }
 
-    let uploaded;
-    let peerAccount;
-    wires.forEach(wire => {
-      if (peerType === 'leecher' && wire.paidStreamingExtension.peerChannelId === channelId) {
-        uploaded = wire.uploaded;
-        peerAccount = wire.paidStreamingExtension.peerAccount;
-      }
-    });
+    const wire = wires.find(
+      wire =>
+        wire.paidStreamingExtension.peerChannelId === channelId ||
+        wire.paidStreamingExtension.pseChannelId === channelId
+    );
+    const {uploaded} = wire;
+    const {peerAccount} = wire.paidStreamingExtension;
 
     return (
       <tr className="peerInfo" key={peerAccount}>
