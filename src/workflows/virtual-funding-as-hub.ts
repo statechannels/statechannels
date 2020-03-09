@@ -79,7 +79,7 @@ const waitThenFundGuarantor = (
 };
 
 export const config: MachineConfig<Init, any, any> = {
-  key: 'virtual-funding',
+  key: 'virtual-funding-as-hub',
   id: 'workflow',
   initial: States.setupJointChannel,
   states: {

@@ -80,7 +80,7 @@ const enum Services {
 }
 
 export const config: StateNodeConfig<Init, any, any> = {
-  key: 'virtual-funding',
+  key: 'virtual-funding-as-leaf',
   id: 'workflow',
   initial: States.setupJointChannel,
   states: {
