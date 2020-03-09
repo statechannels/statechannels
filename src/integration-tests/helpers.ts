@@ -188,8 +188,8 @@ export function generateApproveBudgetAndFundRequest(
       hubAddress: 'rps.statechannels.org',
       playerAmount: '0x5',
       hubAmount: '0x5',
-      hubDestinationAddress: '0x0',
-      playerDestinationAddress: player.destination
+      hubOutcomeAddress: '0x0',
+      playerOutcomeAddress: player.destination
     }
   };
 }
