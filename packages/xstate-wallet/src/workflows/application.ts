@@ -10,14 +10,13 @@ import {
   StateSchema,
   ServiceConfig,
   StateMachine,
-  StateNodeConfig,
   State
 } from 'xstate';
 
 import {getChannelId} from '@statechannels/nitro-protocol';
 import * as CreateAndDirectFund from './create-and-direct-fund';
 import {sendDisplayMessage, MessagingServiceInterface, convertToChannelResult} from '../messaging';
-import {filter, map} from 'rxjs/operators';
+import {filter, map, tap, flatMap, first} from 'rxjs/operators';
 import * as CCC from './confirm-create-channel';
 import {createMockGuard, getDataAndInvoke} from '../utils/workflow-utils';
 import {Store} from '../store/memory-store';
@@ -26,7 +25,7 @@ import {ChannelStoreEntry} from '../store/memory-channel-storage';
 import {bigNumberify} from 'ethers/utils';
 import * as ConcludeChannel from './conclude-channel';
 import {isSimpleEthAllocation} from '../utils/outcome';
-import {unreachable} from '../utils';
+import {unreachable, checkThat} from '../utils';
 import {
   PlayerRequestConclude,
   PlayerStateUpdate,
@@ -92,7 +91,14 @@ interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
   states: {
     initializing: {};
     confirmCreateChannelWorkflow: {};
-    confirmJoinChannelWorkflow: {};
+    confirmJoinChannelWorkflow: {
+      initial: 'signFirstState';
+      states: {
+        signFirstState: {};
+        confirmChannelCreation: {};
+        done: {};
+      };
+    };
     openChannelAndDirectFundProtocol: {};
     createChannelInStore: {};
     running: {};
@@ -133,15 +139,20 @@ const generateConfig = (
       'invokeCreateChannelConfirmation',
       'createChannelInStore'
     ),
-
     confirmJoinChannelWorkflow: {
-      ...(getDataAndInvoke(
-        'getDataForCreateChannelConfirmation',
-        'invokeCreateChannelConfirmation',
-        'openChannelAndDirectFundProtocol'
-      ) as StateNodeConfig<WorkflowContext, {}, ApplicationWorkflowEvent>),
+      initial: 'signFirstState',
+      states: {
+        signFirstState: {invoke: {src: 'signFirstState', onDone: 'confirmChannelCreation'}},
+        confirmChannelCreation: getDataAndInvoke(
+          'getDataForCreateChannelConfirmation',
+          'invokeCreateChannelConfirmation',
+          'done'
+        ),
+        done: {type: 'final'}
+      },
       entry: [actions.assignChannelId, actions.spawnObservers],
-      exit: [actions.sendJoinChannelResponse]
+      exit: [actions.sendJoinChannelResponse],
+      onDone: 'openChannelAndDirectFundProtocol'
     },
     createChannelInStore: {
       invoke: {
@@ -327,6 +338,16 @@ export const applicationWorkflow = (
   };
 
   const services: WorkflowServices = {
+    signFirstState: async ({channelId}: ChannelIdExists) =>
+      store
+        .channelUpdatedFeed(channelId)
+        .pipe(
+          flatMap(({states}) => states),
+          filter(s => s.turnNum.eq(0)),
+          tap(async s => await store.signAndAddState(channelId, s)),
+          first()
+        )
+        .toPromise(),
     createChannel: async (context: ChannelParamsExist) => {
       const {
         participants,
@@ -367,12 +388,9 @@ export const applicationWorkflow = (
     getDataForCreateChannelAndDirectFund: async (
       context: WorkflowContext
     ): Promise<CreateAndDirectFund.Init> => {
-      const entry = await store.getEntry(context.channelId);
-      const {outcome} = entry.latest;
-      if (!isSimpleEthAllocation(outcome)) {
-        throw new Error('Only simple eth allocation currently supported');
-      }
-      return {channelId: entry.channelId, allocation: outcome};
+      const {latestSupportedByMe, channelId} = await store.getEntry(context.channelId);
+      const allocation = checkThat(latestSupportedByMe?.outcome, isSimpleEthAllocation);
+      return {channelId, allocation};
     },
     getDataForCreateChannelConfirmation: async (
       _: WorkflowContext,
