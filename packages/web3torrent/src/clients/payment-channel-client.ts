@@ -1,11 +1,12 @@
 import {ChannelResult, Message, ChannelClientInterface} from '@statechannels/channel-client';
-import {bigNumberify} from 'ethers/utils';
+import {utils} from 'ethers';
 import {FakeChannelProvider} from '@statechannels/channel-client';
 import {ChannelClient} from '@statechannels/channel-client';
 import React from 'react';
 import {ChannelStatus} from '@statechannels/client-api-schema';
 import {SiteBudget} from '@statechannels/client-api-schema';
 
+const bigNumberify = utils.bigNumberify;
 export interface ChannelState {
   channelId: string;
   turnNum: string;
@@ -40,8 +41,13 @@ export class PaymentChannelClient {
   mySigningAddress?: string;
   myEthereumSelectedAddress?: string; // this state can be inspected to infer whether we need to get the user to "Connect With MetaMask" or not.
   channelCache: Record<string, ChannelState> = {};
-  myAddress: string;
-  constructor(private readonly channelClient: ChannelClientInterface) {}
+
+  constructor(private readonly channelClient: ChannelClientInterface) {
+    this.channelClient.onChannelUpdated(channelResult => {
+      this.cacheChannelState(convertToChannelState(channelResult));
+    });
+  }
+
   async createChannel(
     beneficiary: string,
     payer: string,
@@ -70,7 +76,9 @@ export class PaymentChannelClient {
       appDefinition,
       'appData unused'
     );
+
     this.cacheChannelState(convertToChannelState(channelResult));
+
     return convertToChannelState(channelResult);
   }
 
@@ -228,8 +236,6 @@ export class PaymentChannelClient {
 
   async pushMessage(message: Message<ChannelResult>) {
     await this.channelClient.pushMessage(message);
-    const channelResult: ChannelResult = message.data;
-    this.cacheChannelState(convertToChannelState(channelResult));
   }
 
   async approveBudgetAndFund(

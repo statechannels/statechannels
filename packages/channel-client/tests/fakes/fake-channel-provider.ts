@@ -1,6 +1,6 @@
 import {ChannelProviderInterface, MethodType} from '@statechannels/channel-provider/src';
 import log = require('loglevel');
-import {bigNumberify} from 'ethers/utils';
+
 import {EventEmitter, ListenerFn} from 'eventemitter3';
 import {
   ChannelResult,
@@ -15,7 +15,9 @@ import {
 } from '@statechannels/client-api-schema';
 import {Message} from '../../src/types';
 import {calculateChannelId} from '../../src/utils';
-import {Wallet} from 'ethers';
+import {Wallet, utils} from 'ethers';
+
+const bigNumberify = utils.bigNumberify;
 
 /*
  This fake provider becomes the stateful object which handles the calls
@@ -211,10 +213,12 @@ export class FakeChannelProvider implements ChannelProviderInterface {
 
   private async closeChannel(params: CloseChannelParams): Promise<ChannelResult> {
     const latestState = this.findChannel(params.channelId);
+
     await this.verifyTurnNum(latestState.turnNum);
     const turnNum = bigNumberify(latestState.turnNum)
       .add(1)
       .toString();
+
     const status = 'closing';
 
     this.setState({...latestState, turnNum, status});

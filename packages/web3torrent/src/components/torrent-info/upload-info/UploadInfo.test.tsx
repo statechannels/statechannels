@@ -57,7 +57,7 @@ const mockUploadInfo = (noPeers = false): MockUploadInfo => {
   };
 };
 
-describe('<UploadInfo />', () => {
+describe.skip('<UploadInfo />', () => {
   let uploadInfo: MockUploadInfo;
 
   beforeEach(() => {

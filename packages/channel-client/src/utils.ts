@@ -1,4 +1,4 @@
-import {hashMessage} from 'ethers/utils';
+import {utils} from 'ethers';
 
 import {Participant} from '@statechannels/client-api-schema';
 
@@ -11,5 +11,5 @@ export function calculateChannelId(participants: Participant[], appDefinition: s
   let message = '';
   participants.forEach(p => (message += p.participantId));
   message += appDefinition;
-  return hashMessage(message);
+  return utils.hashMessage(message);
 }

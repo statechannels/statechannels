@@ -10,7 +10,6 @@ import {parseMagnetURL} from '../../utils/magnet';
 import torrentStatusChecker from '../../utils/torrent-status-checker';
 import {useInterval} from '../../utils/useInterval';
 import './File.scss';
-import {ChannelList} from '../../components/channel-list/ChannelList';
 
 const getTorrentAndPeersData: (
   setTorrent: React.Dispatch<React.SetStateAction<Torrent>>,
@@ -29,7 +28,7 @@ interface Props {
 
 const File: React.FC<RouteComponentProps & Props> = props => {
   const [torrent, setTorrent] = useState(parseMagnetURL(useLocation().hash));
-  const [peers, setPeers] = useState({});
+  const [, setPeers] = useState({});
   const [loading, setLoading] = useState(false);
   const [buttonLabel, setButtonLabel] = useState('Start Download');
   const [errorLabel, setErrorLabel] = useState('');
@@ -51,7 +50,15 @@ const File: React.FC<RouteComponentProps & Props> = props => {
 
   return (
     <section className="section fill download">
-      <TorrentInfo torrent={torrent} peers={peers} />
+      <WebTorrentContext.Consumer>
+        {web3Torrent => {
+          const me = web3Torrent.paymentChannelClient.mySigningAddress;
+          const channelCache = web3Torrent.paymentChannelClient.channelCache;
+          return (
+            <TorrentInfo torrent={torrent} channelCache={channelCache} mySigningAddress={me} />
+          );
+        }}
+      </WebTorrentContext.Consumer>
       {torrent.status === Status.Idle ? (
         <>
           <FormButton
@@ -107,7 +114,6 @@ const File: React.FC<RouteComponentProps & Props> = props => {
       ) : (
         false
       )}
-      <ChannelList />
     </section>
   );
 };

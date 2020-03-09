@@ -1,6 +1,5 @@
 import prettier from 'prettier-bytes';
 import React from 'react';
-import {TorrentPeers} from '../../library/types';
 import {DownloadingStatuses, Torrent, UploadingStatuses} from '../../types';
 import {DownloadInfo} from './download-info/DownloadInfo';
 import {DownloadLink} from './download-link/DownloadLink';
@@ -8,10 +7,19 @@ import {MagnetLinkButton} from './magnet-link-button/MagnetLinkButton';
 import './TorrentInfo.scss';
 import {UploadInfo} from './upload-info/UploadInfo';
 import {WEI_PER_PIECE} from '../../library/web3torrent-lib';
+import {ChannelState} from '../../clients/payment-channel-client';
 
-export type TorrentInfoProps = {torrent: Torrent; peers?: TorrentPeers};
+export type TorrentInfoProps = {
+  torrent: Torrent;
+  channelCache: Record<string, ChannelState>;
+  mySigningAddress: string;
+};
 
-const TorrentInfo: React.FC<TorrentInfoProps> = ({torrent, peers}) => {
+const TorrentInfo: React.FC<TorrentInfoProps> = ({
+  torrent,
+  channelCache = {},
+  mySigningAddress
+}) => {
   return (
     <>
       <section className="torrentInfo">
@@ -35,9 +43,19 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({torrent, peers}) => {
         </div>
       </section>
       {DownloadingStatuses.includes(torrent.status) ? (
-        <DownloadInfo torrent={torrent} />
+        <DownloadInfo
+          torrent={torrent}
+          channelCache={channelCache}
+          mySigningAddress={mySigningAddress}
+        />
       ) : (
-        UploadingStatuses.includes(torrent.status) && <UploadInfo torrent={torrent} peers={peers} />
+        UploadingStatuses.includes(torrent.status) && (
+          <UploadInfo
+            torrent={torrent}
+            channelCache={channelCache}
+            mySigningAddress={mySigningAddress}
+          />
+        )
       )}
       {!torrent.originalSeed && <DownloadLink torrent={torrent} />}
     </>
