@@ -3,10 +3,11 @@ import * as firebase from 'firebase';
 import {cHubStateChannelAddress, cFirebasePrefix} from '../constants';
 import {logger} from '../logger';
 import {Message} from '@statechannels/wire-format';
-import {fromEvent, Observable, combineLatest, of} from 'rxjs';
-import {flatMap, map} from 'rxjs/operators';
+import {fromEvent, Observable} from 'rxjs';
+import {map} from 'rxjs/operators';
 
-export type Snapshot = firebase.database.DataSnapshot;
+type Snapshot = firebase.database.DataSnapshot;
+type FirebaseEvent = [Snapshot, string | null];
 
 const log = logger();
 
@@ -37,19 +38,17 @@ export function fbListen(responseForMessage: (message: Message) => Message[]) {
   log.info('firebase-relay: listen');
   const hubRef = getMessagesRef().child(cHubStateChannelAddress);
 
-  const childAddedObservable: Observable<Snapshot> = fromEvent(hubRef, 'child_added');
+  const childAddedObservable: Observable<FirebaseEvent> = fromEvent(hubRef, 'child_added');
 
   childAddedObservable
     .pipe(
       map(childAdded => childAdded[0]),
-      flatMap((snapshot: Snapshot) =>
-        combineLatest(of(snapshot), of(responseForMessage(snapshot.val())))
-      )
+      map(snapshot => ({snapshot, messagesToSend: responseForMessage(snapshot.val())}))
     )
     .subscribe(
-      async ([snapshot, messagesToSend]) => {
+      async ({snapshot, messagesToSend}) => {
         await Promise.all(messagesToSend.map(fbSend));
-        hubRef.child(snapshot.key).remove();
+        await hubRef.child(snapshot.key).remove();
       },
       error => log.error(error),
       () => {
