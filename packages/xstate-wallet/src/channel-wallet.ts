@@ -8,7 +8,7 @@ import {Wallet as WalletUi} from './ui/wallet';
 import {interpret, Interpreter, State, StateNode} from 'xstate';
 import {Guid} from 'guid-typescript';
 import {Notification, Response} from '@statechannels/client-api-schema';
-import {filter, map, tap} from 'rxjs/operators';
+import {filter, map} from 'rxjs/operators';
 import {Message, OpenChannel} from './store/types';
 import {approveBudgetAndFundWorkflow} from './workflows/approve-budget-and-fund';
 import {ApproveBudgetAndFund} from './event-types';
@@ -49,19 +49,18 @@ export class ChannelWallet {
         );
       });
 
-    this.messagingService.requestFeed.pipe(
-      filter(r => r.type === 'CREATE_CHANNEL' || r.type === 'JOIN_CHANNEL'),
-      tap(r => {
+    this.messagingService.requestFeed
+      .pipe(filter(r => r.type === 'CREATE_CHANNEL' || r.type === 'JOIN_CHANNEL'))
+      .subscribe(r => {
         const workflow = this.startWorkflow(applicationWorkflow(this.store, this.messagingService));
         this.workflows.push(workflow);
 
         workflow.machine.send(r);
-      })
-    );
+      });
 
-    this.messagingService.requestFeed.pipe(
-      filter((r): r is ApproveBudgetAndFund => r.type === 'APPROVE_BUDGET_AND_FUND'),
-      tap(r => {
+    this.messagingService.requestFeed
+      .pipe(filter((r): r is ApproveBudgetAndFund => r.type === 'APPROVE_BUDGET_AND_FUND'))
+      .subscribe(r => {
         const workflow = this.startWorkflow(
           approveBudgetAndFundWorkflow(this.store, this.messagingService, {
             budget: r.budget,
@@ -71,8 +70,7 @@ export class ChannelWallet {
         this.workflows.push(workflow);
 
         workflow.machine.send(r);
-      })
-    );
+      });
   }
 
   private startWorkflow(machineConfig: StateNode<any, any, any, any>): Workflow {
