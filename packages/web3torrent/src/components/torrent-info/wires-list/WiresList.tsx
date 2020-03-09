@@ -63,7 +63,15 @@ const WiresList: React.FC<UploadInfoProps> = ({wires, channels, peerType}) => {
   return (
     <section className="wires-list">
       <table className="wires-list-table">
-        <tbody>{wires.map(wireToTableRow)}</tbody>
+        <tbody>
+          {wires
+            .sort(
+              (wire1, wire2) =>
+                Number(wire1.paidStreamingExtension.peerAccount) -
+                Number(wire2.paidStreamingExtension.peerAccount)
+            )
+            .map(wireToTableRow)}
+        </tbody>
       </table>
     </section>
   );
