@@ -267,8 +267,6 @@ export const paymentChannelClient = new PaymentChannelClient(
   new ChannelClient(window.channelProvider)
 );
 
-export const ChannelContext = React.createContext(paymentChannelClient);
-
 const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
   const {
     turnNum,

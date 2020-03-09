@@ -1,8 +1,6 @@
 import _, {Dictionary} from 'lodash';
 import prettier from 'prettier-bytes';
-import React, {useContext} from 'react';
-
-import {WebTorrentContext} from '../../../clients/web3torrent-client';
+import React from 'react';
 import {ChannelState} from '../../../clients/payment-channel-client';
 import {PaidStreamingWire} from '../../../library/types';
 
