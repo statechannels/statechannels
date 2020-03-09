@@ -173,7 +173,6 @@
     "test": "run-s test:contracts test:ember",
     "test:ci": "yarn test:ci:contracts",
     "test:ci:contracts": "yarn test:contracts --all --ci --runInBand --bail",
-    "prepare": "yarn build:ci",
     "precommit": "lint-staged --quiet"
   }
 }
