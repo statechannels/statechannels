@@ -149,8 +149,6 @@ export class MessagingService implements MessagingServiceInterface {
         break;
       case 'GetBudget':
       case 'ChallengeChannel':
-        // TODO: handle these requests
-        break;
       case 'GetState':
         // TODO: handle these requests
         break;
