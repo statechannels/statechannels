@@ -40,8 +40,9 @@ class ChannelsList extends React.Component<UploadInfoProps> {
         wire.paidStreamingExtension.peerChannelId === channelId ||
         wire.paidStreamingExtension.pseChannelId === channelId
     );
-    const {uploaded} = wire;
-    const {peerAccount} = wire.paidStreamingExtension;
+
+    const uploaded = wire ? wire.uploaded : 0;
+    const peerAccount = wire ? wire.paidStreamingExtension.peerAccount : 'unknown';
 
     return (
       <tr className="peerInfo" key={peerAccount}>
