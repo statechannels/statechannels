@@ -2,7 +2,6 @@ import {ChannelResult, Message, ChannelClientInterface} from '@statechannels/cha
 import {utils} from 'ethers';
 import {FakeChannelProvider} from '@statechannels/channel-client';
 import {ChannelClient} from '@statechannels/channel-client';
-import React from 'react';
 import {ChannelStatus} from '@statechannels/client-api-schema';
 import {SiteBudget} from '@statechannels/client-api-schema';
 
@@ -266,8 +265,6 @@ export class PaymentChannelClient {
 export const paymentChannelClient = new PaymentChannelClient(
   new ChannelClient(window.channelProvider)
 );
-
-export const ChannelContext = React.createContext(paymentChannelClient);
 
 const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
   const {

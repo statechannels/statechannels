@@ -228,8 +228,10 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       this.paymentChannelClient.channelCache[channelId].beneficiaryBalance
     );
     // infer payment using update balance and previously stored balance
-    const payment = newSeederBalance.sub(
-      bigNumberify(this.peersList[infoHash][peerId].seederBalance)
+    const payment = bigNumberify(
+      this.peersList[infoHash][peerId]
+        ? newSeederBalance.sub(bigNumberify(this.peersList[infoHash][peerId].seederBalance))
+        : 0
     );
     // store new balance
     this.peersList[infoHash][peerId].seederBalance = newSeederBalance.toString();
