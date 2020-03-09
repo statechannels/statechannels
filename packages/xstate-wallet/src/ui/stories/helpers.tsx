@@ -2,6 +2,7 @@ import React from 'react';
 
 import fakeApp from '../../images/fake-app.png';
 import {Modal, Card, Flex, Image} from 'rimble-ui';
+import logo from '../../images/logo.svg';
 
 export function renderComponentInFrontOfApp(component) {
   function renderFunction() {
