@@ -8,7 +8,7 @@ import {Wallet as WalletUi} from './ui/wallet';
 import {interpret, Interpreter, State} from 'xstate';
 import {Guid} from 'guid-typescript';
 import {Notification, Response} from '@statechannels/client-api-schema';
-import {filter, map} from 'rxjs/operators';
+import {filter, map, tap} from 'rxjs/operators';
 import {Message, OpenChannel} from './store/types';
 
 export interface Workflow {
@@ -47,14 +47,16 @@ export class ChannelWallet {
         );
       });
 
-    this.messagingService.requestFeed.subscribe(r => {
-      if (r.type === 'CREATE_CHANNEL' || r.type === 'JOIN_CHANNEL') {
-        const workflow = this.startApplicationWorkflow();
-        this.workflows.push(workflow);
-
-        workflow.machine.send(r);
-      }
-    });
+    this.messagingService.requestFeed
+      .pipe(
+        filter(r => r.type === 'CREATE_CHANNEL' || r.type === 'JOIN_CHANNEL'),
+        tap(r => {
+          const workflow = this.startApplicationWorkflow();
+          this.workflows.push(workflow);
+          workflow.machine.send(r);
+        })
+      )
+      .subscribe(undefined, console.error);
   }
 
   private startApplicationWorkflow(): Workflow {

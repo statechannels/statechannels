@@ -126,6 +126,13 @@ export interface UpdateChannelParams {
 export type UpdateChannelRequest = JsonRpcRequest<'UpdateChannel', UpdateChannelParams>;
 export type UpdateChannelResponse = JsonRpcResponse<ChannelResult>;
 
+// GetState
+export interface GetStateParams {
+  channelId: ChannelId;
+}
+export type GetStateRequest = JsonRpcRequest<'GetState', GetStateParams>;
+export type GetStateResponse = JsonRpcResponse<ChannelResult>;
+
 // PushMessage
 export type PushMessageParams = PushMessageRequest['params']; // included for backwards compatibility
 export type PushMessageResult = {success: boolean};
@@ -176,6 +183,7 @@ export type Request =
   | CreateChannelRequest
   | JoinChannelRequest
   | UpdateChannelRequest
+  | GetStateRequest
   | PushMessageRequest
   | ChallengeChannelRequest
   | GetBudgetRequest
@@ -187,6 +195,7 @@ export type Response =
   | CreateChannelResponse
   | JoinChannelResponse
   | UpdateChannelResponse
+  | GetStateResponse
   | PushMessageResponse
   | ChallengeChannelResponse
   | GetBudgetResponse

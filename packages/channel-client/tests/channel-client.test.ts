@@ -185,6 +185,15 @@ describe('ChannelClient with FakeChannelProvider', () => {
     });
   });
 
+  describe('gets state from a channel', () => {
+    it('anyone can get state', async () => {
+      setProviderStates([providerA, providerB], states['running']);
+      const channelResult = await clientA.getState(channelId);
+      expect(channelResult).toEqual(states['running']);
+      expect(providerB.latestState[channelId]).toEqual(states['running']);
+    });
+  });
+
   describe('closes a channel', () => {
     it('player with valid turn can make a valid close channel call', async () => {
       setProviderStates([providerA, providerB], states['running']);

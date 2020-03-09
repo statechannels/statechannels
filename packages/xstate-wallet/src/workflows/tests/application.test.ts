@@ -168,11 +168,8 @@ it('initializes and starts the join channel machine', async () => {
   service.send(event);
 
   await waitForExpect(async () => {
-    expect(service.state.value).toEqual({
-      confirmJoinChannelWorkflow: 'getDataForCreateChannelConfirmation'
-    });
-    expect(service.state.context).toBeDefined();
-    expect(service.state.context.channelId).toEqual('0xabc');
+    expect(service.state.value).toEqual({confirmJoinChannelWorkflow: 'signFirstState'});
+    expect(service.state.context).toMatchObject({channelId: '0xabc'});
   }, 2000);
 });
 
@@ -181,6 +178,7 @@ it('starts concluding when requested', async () => {
   const messagingService: MessagingServiceInterface = new MessagingService(store);
   const channelId = ethers.utils.id('channel');
   const services: Partial<WorkflowServices> = {
+    signConcludeState: jest.fn().mockReturnValue(Promise.resolve()),
     invokeClosingProtocol: jest.fn().mockReturnValue(
       new Promise(() => {
         /* mock */
@@ -228,14 +226,15 @@ it('starts concluding when receiving a final state', async () => {
       new Promise(() => {
         /* mock */
       })
-    )
+    ),
+    signConcludeState: jest.fn().mockReturnValue(Promise.resolve())
   };
   const channelId = calculateChannelId(states[0]);
   const channelUpdate: ChannelUpdated = {
     type: 'CHANNEL_UPDATED',
     requestId: 5,
     storeEntry: {
-      latestSupportedByMe: {isFinal: true} as StateVariables
+      latest: {isFinal: true} as StateVariables
     } as ChannelStoreEntry
   };
 

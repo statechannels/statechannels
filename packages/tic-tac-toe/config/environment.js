@@ -1,6 +1,7 @@
 'use strict';
 
 module.exports = function(environment) {
+  console.log(`TTT Address environment.js: ${process.env.TTT_CONTRACT_ADDRESS}`);
   let ENV = {
     modulePrefix: '@statechannels/tic-tac-toe',
     environment,
@@ -16,7 +17,12 @@ module.exports = function(environment) {
         Date: false
       }
     },
-
+    TARGET_NETWORK: process.env.TARGET_NETWORK,
+    FIREBASE_PROJECT: process.env.FIREBASE_PROJECT,
+    FIREBASE_API_KEY: process.env.FIREBASE_API_KEY,
+    FIREBASE_PREFIX: process.env.FIREBASE_PREFIX,
+    WALLET_URL: process.env.WALLET_URL,
+    TTT_CONTRACT_ADDRESS: process.env.TTT_CONTRACT_ADDRESS, // Need to inject this similar to start.js
     APP: {
       // Here you can pass flags/options to your application instance
       // when it is created
