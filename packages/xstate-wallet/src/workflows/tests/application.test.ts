@@ -168,11 +168,8 @@ it('initializes and starts the join channel machine', async () => {
   service.send(event);
 
   await waitForExpect(async () => {
-    expect(service.state.value).toEqual({
-      confirmJoinChannelWorkflow: 'getDataForCreateChannelConfirmation'
-    });
-    expect(service.state.context).toBeDefined();
-    expect(service.state.context.channelId).toEqual('0xabc');
+    expect(service.state.value).toEqual({confirmJoinChannelWorkflow: 'signFirstState'});
+    expect(service.state.context).toMatchObject({channelId: '0xabc'});
   }, 2000);
 });
 
