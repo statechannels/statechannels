@@ -35,6 +35,7 @@ const DEPOSITED = 'deposited';
 type Deposited = ChannelChainInfo & {channelId: string};
 export class FakeChain implements Chain {
   private holdings: Record<string, BigNumber> = {};
+  private finalized: Record<string, boolean | undefined> = {};
   private eventEmitter: EventEmitter<{
     deposited: [Deposited];
   }> = new EventEmitter();
@@ -44,6 +45,10 @@ export class FakeChain implements Chain {
 
   public async deposit(channelId: string, expectedHeld: string, amount: string): Promise<void> {
     this.depositSync(channelId, expectedHeld, amount);
+  }
+
+  public finalizeSync(channelId: string) {
+    this.finalized[channelId] = true;
   }
 
   public depositSync(channelId: string, expectedHeld: string, amount: string) {
@@ -60,7 +65,10 @@ export class FakeChain implements Chain {
   }
 
   public async getChainInfo(channelId: string): Promise<ChannelChainInfo> {
-    return {amount: this.holdings[channelId] || bigNumberify(0), finalized: false};
+    return {
+      amount: this.holdings[channelId] || bigNumberify(0),
+      finalized: this.finalized[channelId] || false
+    };
   }
 
   public chainUpdatedFeed(channelId: string): Observable<ChannelChainInfo> {
