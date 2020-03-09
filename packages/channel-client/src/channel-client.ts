@@ -96,16 +96,16 @@ export class ChannelClient implements ChannelClientInterface<ChannelResult> {
   async approveBudgetAndFund(
     playerAmount: string,
     hubAmount: string,
-    playerDestinationAddress: string,
+    playerOutcomeAddress: string,
     hubAddress: string,
-    hubDestinationAddress: string
+    hubOutcomeAddress: string
   ): Promise<SiteBudget> {
     return this.provider.send('ApproveBudgetAndFund', {
       playerAmount,
       hubAmount,
-      playerDestinationAddress,
+      playerOutcomeAddress,
       hubAddress,
-      hubDestinationAddress
+      hubOutcomeAddress
     });
   }
 

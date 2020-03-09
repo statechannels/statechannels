@@ -289,9 +289,9 @@ export class FakeChannelProvider implements ChannelProviderInterface {
   private async approveBudgetAndFund(params: {
     playerAmount: string;
     hubAmount: string;
-    playerDestinationAddress: string;
+    playerOutcomeAddress: string;
     hubAddress: string;
-    hubDestinationAddress: string;
+    hubOutcomeAddress: string;
   }): Promise<SiteBudget> {
     const {hubAddress, playerAmount, hubAmount} = params;
     // TODO: Does this need to be delayed?

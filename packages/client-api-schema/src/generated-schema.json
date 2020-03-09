@@ -109,13 +109,13 @@
         "hubAmount": {
           "type": "string"
         },
-        "hubDestinationAddress": {
+        "hubOutcomeAddress": {
           "type": "string"
         },
         "playerAmount": {
           "type": "string"
         },
-        "playerDestinationAddress": {
+        "playerOutcomeAddress": {
           "type": "string"
         },
         "site": {
@@ -125,9 +125,9 @@
       "required": [
         "hubAddress",
         "hubAmount",
-        "hubDestinationAddress",
+        "hubOutcomeAddress",
         "playerAmount",
-        "playerDestinationAddress",
+        "playerOutcomeAddress",
         "site"
       ],
       "type": "object"

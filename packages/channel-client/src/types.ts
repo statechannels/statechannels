@@ -52,9 +52,9 @@ export interface ChannelClientInterface<Payload = object> {
   approveBudgetAndFund(
     playerAmount: string,
     hubAmount: string,
-    playerDestinationAddress: string,
+    playerOutcomeAddress: string,
     hubAddress: string,
-    hubDestinationAddress: string
+    hubOutcomeAddress: string
   ): Promise<SiteBudget>;
   getBudget(hubAddress: string): Promise<SiteBudget | {}>;
   closeAndWithdraw(hubAddress: string): Promise<SiteBudget | {}>;
