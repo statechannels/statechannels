@@ -15,7 +15,7 @@ import {wallet1, wallet2, participants, wallet3, ledgerState, first, third, seco
 import {subscribeToMessages} from './message-service';
 import {ETH_ASSET_HOLDER_ADDRESS, HUB} from '../../constants';
 import {FakeChain} from '../../chain';
-import {DumbHub} from './dumb-hub';
+import {SimpleHub} from './simple-hub';
 import {MemoryChannelStoreEntry} from '../../store/memory-channel-storage';
 import {add} from '../../utils/math-utils';
 
@@ -74,7 +74,7 @@ beforeEach(() => {
   chain = new FakeChain();
   aStore = new MemoryStore([wallet1.privateKey], chain);
   bStore = new MemoryStore([wallet2.privateKey], chain);
-  const hubStore = new DumbHub(wallet3.privateKey);
+  const hubStore = new SimpleHub(wallet3.privateKey);
 
   const message = {
     signedStates: [
