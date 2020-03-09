@@ -74,6 +74,5 @@ storiesOf('Web3Torrent', module)
         } as ChannelState
       }}
       mySigningAddress={b}
-      closeChannel={async () => ({} as ChannelState)}
     ></DownloadInfo>
   ));

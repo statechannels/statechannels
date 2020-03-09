@@ -1,5 +1,5 @@
 import prettier from 'prettier-bytes';
-import React, {useContext} from 'react';
+import React from 'react';
 import {DownloadingStatuses, Torrent, UploadingStatuses} from '../../types';
 import {DownloadInfo} from './download-info/DownloadInfo';
 import {DownloadLink} from './download-link/DownloadLink';
@@ -8,7 +8,6 @@ import './TorrentInfo.scss';
 import {UploadInfo} from './upload-info/UploadInfo';
 import {WEI_PER_PIECE} from '../../library/web3torrent-lib';
 import {ChannelState} from '../../clients/payment-channel-client';
-import {WebTorrentContext} from '../../clients/web3torrent-client';
 
 export type TorrentInfoProps = {
   torrent: Torrent;
@@ -21,8 +20,6 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({
   channelCache = {},
   mySigningAddress
 }) => {
-  const closeChannel = useContext(WebTorrentContext).paymentChannelClient.closeChannel;
-
   return (
     <>
       <section className="torrentInfo">
@@ -50,7 +47,6 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({
           torrent={torrent}
           channelCache={channelCache}
           mySigningAddress={mySigningAddress}
-          closeChannel={closeChannel}
         />
       ) : (
         UploadingStatuses.includes(torrent.status) && (
@@ -58,7 +54,6 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({
             torrent={torrent}
             channelCache={channelCache}
             mySigningAddress={mySigningAddress}
-            closeChannel={closeChannel}
           />
         )
       )}

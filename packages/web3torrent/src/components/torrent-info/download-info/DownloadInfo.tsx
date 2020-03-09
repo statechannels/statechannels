@@ -15,14 +15,12 @@ export type DownloadInfoProps = {
   torrent: Torrent;
   channelCache: Record<string, ChannelState>;
   mySigningAddress: string;
-  closeChannel: (channelId: string) => Promise<ChannelState>;
 };
 
 const DownloadInfo: React.FC<DownloadInfoProps> = ({
   torrent,
   channelCache = {},
-  mySigningAddress,
-  closeChannel
+  mySigningAddress
 }: DownloadInfoProps) => {
   const myLeechingChannelIds: string[] = Object.keys(channelCache).filter(
     key => channelCache[key].payer === mySigningAddress
@@ -61,7 +59,6 @@ const DownloadInfo: React.FC<DownloadInfoProps> = ({
         wires={torrent.wires}
         channels={_.pickBy(channelCache, ({channelId}) => myLeechingChannelIds.includes(channelId))}
         peerType={'leecher'}
-        closeChannel={closeChannel}
       />
     </>
   );
