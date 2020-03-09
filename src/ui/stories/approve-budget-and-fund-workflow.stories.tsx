@@ -21,7 +21,8 @@ const store = new MemoryStore([
 const messagingService: MessagingServiceInterface = new MessagingService(store);
 
 const budget: SiteBudget = {
-  site: 'hub.com',
+  site: 'rps.org',
+  hubAddress: 'hub.com',
   budgets: {
     [ETH_ASSET_HOLDER_ADDRESS]: {
       assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,

@@ -26,6 +26,7 @@ export function deserializeBudgetRequest(budgetRequest: AppBudgetRequest): SiteB
   };
   return {
     site: budgetRequest.site,
+    hubAddress: budgetRequest.hubAddress,
     budgets: {[ETH_ASSET_HOLDER_ADDRESS]: assetBudget}
   };
 }
@@ -40,6 +41,7 @@ export function deserializeSiteBudget(siteBudget: AppSiteBudget): SiteBudget {
   };
   return {
     site: siteBudget.site,
+    hubAddress: siteBudget.hub,
     budgets: {[ETH_ASSET_HOLDER_ADDRESS]: assetBudget}
   };
 }
