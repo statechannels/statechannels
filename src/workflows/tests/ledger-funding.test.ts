@@ -2,7 +2,7 @@ import {interpret} from 'xstate';
 import waitForExpect from 'wait-for-expect';
 import {add} from '../../utils/math-utils';
 
-import {Init, machine} from '../ledger-funding';
+import {Init, machine, Errors} from '../ledger-funding';
 
 import {MemoryStore, Store} from '../../store/memory-store';
 import {bigNumberify} from 'ethers/utils';
@@ -70,20 +70,17 @@ const allSignState = (state: State) => ({
 });
 
 beforeEach(() => {
+  aStore = new MemoryStore([wallet1.privateKey], chain);
+  bStore = new MemoryStore([wallet2.privateKey], chain);
+
   const message = {
     signedStates: [
       allSignState(firstState(outcome, targetChannel)),
       allSignState(firstState(outcome, ledgerChannel))
     ]
   };
-  const _chain = new FakeChain();
-  _chain.depositSync(ledgerChannelId, '0', '12');
-  chain = _chain;
-
-  aStore = new MemoryStore([wallet1.privateKey], chain);
-  bStore = new MemoryStore([wallet2.privateKey], chain);
-
   [aStore, bStore].forEach((store: Store) => store.pushMessage(message));
+
   subscribeToMessages({
     [participants[0].participantId]: aStore,
     [participants[1].participantId]: bStore
@@ -91,7 +88,12 @@ beforeEach(() => {
 });
 
 test('multiple workflows', async () => {
+  const _chain = new FakeChain();
+  _chain.depositSync(ledgerChannelId, '0', amounts.reduce(add).toHexString());
+  [aStore, bStore].forEach((store: Store) => (store.chain = _chain));
+
   const aService = interpret(machine(aStore).withContext(context));
+
   const bService = interpret(machine(bStore).withContext(context));
   [aService, bService].map(s => s.start());
 
@@ -115,5 +117,41 @@ test('multiple workflows', async () => {
       type: 'Indirect',
       ledgerId: ledgerChannelId
     });
+  }, EXPECT_TIMEOUT);
+});
+
+const twelveTotalAllocated = outcome;
+const fiveTotalAllocated: Outcome = {
+  type: 'SimpleAllocation',
+  assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
+  allocationItems: [0, 1].map(i => ({
+    destination: destinations[i],
+    amount: deductionAmounts[i].sub(1)
+  }))
+};
+
+test.each`
+  description         | ledgerOutcome           | chainInfo            | error
+  ${'underfunded'}    | ${twelveTotalAllocated} | ${{amount: '1'}}     | ${Errors.underfunded}
+  ${'underallocated'} | ${fiveTotalAllocated}   | ${undefined}         | ${Errors.underallocated}
+  ${'finalized'}      | ${twelveTotalAllocated} | ${{finalized: true}} | ${Errors.finalized}
+`('failure mode: $description', async ({ledgerOutcome, error, chainInfo}) => {
+  const _chain = new FakeChain();
+  _chain.depositSync(ledgerChannelId, '0', chainInfo?.amount || '12');
+  chainInfo?.finalized && _chain.finalizeSync(ledgerChannelId);
+  aStore.chain = _chain;
+
+  aStore.pushMessage({
+    signedStates: [
+      allSignState({...firstState(ledgerOutcome, ledgerChannel), turnNum: bigNumberify(1)})
+    ]
+  });
+  aStore.chain.initialize();
+
+  const aService = interpret(machine(aStore).withContext(context)).start();
+
+  await waitForExpect(async () => {
+    expect(aService.state.value).toEqual('failure');
+    expect(aService.state.context).toMatchObject({error});
   }, EXPECT_TIMEOUT);
 });

@@ -2,7 +2,9 @@ import {Store} from '../../store';
 import _ from 'lodash';
 import {exists} from '../../utils';
 
-export function subscribeToMessages(stores: Record<string, Store>) {
+export function subscribeToMessages(
+  stores: Record<string, Pick<Store, 'pushMessage' | 'outboxFeed' | 'getAddress'>>
+) {
   Object.values(stores).map(store =>
     store.outboxFeed.subscribe(message => {
       const participants = _.flatten(
