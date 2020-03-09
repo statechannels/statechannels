@@ -95,7 +95,7 @@ describe('<TorrentInfo />', () => {
   });
 
   it('can show `Unknown` when the torrent cost is not available', () => {
-    const {fileCostElement} = mockTorrentInfo();
+    const {fileCostElement} = mockTorrentInfo({length: 0});
     expect(fileCostElement.text()).toEqual('Cost unknown');
   });
 

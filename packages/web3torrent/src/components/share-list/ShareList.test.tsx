@@ -6,6 +6,8 @@ import {MemoryRouter as Router} from 'react-router-dom';
 import {mockTorrents} from '../../constants';
 import {RoutePath} from '../../routes';
 import {ShareList, ShareListProps} from './ShareList';
+import {calculateWei} from '../../utils/calculateWei';
+import prettier from 'prettier-bytes';
 
 function setup(withNoTorrents = false) {
   Enzyme.configure({adapter: new Adapter()});
@@ -42,10 +44,10 @@ describe('<ShareList />', () => {
     expect(filesData.length).toBe(props.torrents.length);
     const firstFileData = filesData.at(0);
     expect(firstFileData.childAt(0).text()).toBe(props.torrents[0].name);
-    expect(firstFileData.childAt(1).text()).toBe(props.torrents[0].length + 'Mb');
+    expect(firstFileData.childAt(1).text()).toBe(prettier(props.torrents[0].length));
     expect(firstFileData.childAt(2).text()).toBe(props.torrents[0].numPeers + 'S');
     expect(firstFileData.childAt(3).text()).toBe(props.torrents[0].numPeers + 'P');
-    // expect(firstFileData.childAt(4).text()).toBe('$' + props.torrents[0].cost);
+    expect(firstFileData.childAt(4).text()).toBe(calculateWei(props.torrents[0].length));
     expect(firstFileData.childAt(5).find('button')).not.toBeNull();
   });
 

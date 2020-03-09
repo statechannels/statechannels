@@ -6,6 +6,7 @@ import {TorrentPeers} from '../../../library/types';
 import {Torrent} from '../../../types';
 import {createMockTorrent, createMockTorrentPeers, testSelector} from '../../../utils/test-utils';
 import {UploadInfo, UploadInfoProps} from './UploadInfo';
+import {calculateWei} from '../../../utils/calculateWei';
 
 Enzyme.configure({adapter: new Adapter()});
 
@@ -99,9 +100,9 @@ describe('<UploadInfo />', () => {
       expect(leecherDownloadedElement.exists()).toEqual(true);
       expect(leecherPaid.exists()).toEqual(true);
 
-      expect(leecherIdElement.text()).toEqual(`#${peerId}`);
+      expect(leecherIdElement.text()).toEqual(`#${peerId}...`);
       expect(leecherDownloadedElement.text()).toEqual(prettier(uploaded));
-      expect(leecherPaid.text()).toEqual(`$${(uploaded * 0.000005).toFixed(2)}`);
+      expect(leecherPaid.text()).toEqual(`$${calculateWei(uploaded)}`);
     }
   );
 });

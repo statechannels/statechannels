@@ -33,7 +33,7 @@ export const EmptyTorrent = ({
 export const mockTorrents: Array<Partial<Torrent>> = [
   {
     name: 'Sintel',
-    length: 123.3,
+    length: 129302391,
     numSeeds: 47,
     numPeers: 12,
     files: [],
@@ -42,7 +42,7 @@ export const mockTorrents: Array<Partial<Torrent>> = [
   },
   {
     name: 'Big Buck Bunny',
-    length: 263.6,
+    length: 276445467,
     numSeeds: 8,
     numPeers: 6,
     files: [],
@@ -51,7 +51,7 @@ export const mockTorrents: Array<Partial<Torrent>> = [
   },
   {
     name: 'Cosmos Laundromat',
-    length: 210.6,
+    length: 220864086,
     numSeeds: 10,
     numPeers: 6,
     files: [],
