@@ -6,7 +6,7 @@ import {WebTorrentContext} from '../../../clients/web3torrent-client';
 import {ChannelState} from '../../../clients/payment-channel-client';
 import {PaidStreamingWire} from '../../../library/types';
 
-import './WiresList.scss';
+import './ChannelsList.scss';
 
 export type UploadInfoProps = {
   wires: PaidStreamingWire[];
@@ -15,7 +15,7 @@ export type UploadInfoProps = {
   closeChannel: (channelId: string) => Promise<ChannelState>;
 };
 
-const WiresList: React.FC<UploadInfoProps> = ({wires, channels, peerType, closeChannel}) => {
+const ChannelsList: React.FC<UploadInfoProps> = ({wires, channels, peerType, closeChannel}) => {
   function channelIdToTableRow(channelId: string) {
     let channelButton;
 
@@ -68,4 +68,4 @@ const WiresList: React.FC<UploadInfoProps> = ({wires, channels, peerType, closeC
   );
 };
 
-export {WiresList};
+export {ChannelsList};

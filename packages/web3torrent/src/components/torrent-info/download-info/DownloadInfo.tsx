@@ -7,7 +7,7 @@ import './DownloadInfo.scss';
 import {ProgressBar} from './progress-bar/ProgressBar';
 import {ChannelState} from '../../../clients/payment-channel-client';
 import {utils} from 'ethers';
-import {WiresList} from '../wires-list/WiresList';
+import {ChannelsList} from '../channels-list/ChannelsList';
 
 const bigNumberify = utils.bigNumberify;
 
@@ -57,10 +57,11 @@ const DownloadInfo: React.FC<DownloadInfoProps> = ({
           Connected to <strong>{torrent.numPeers}</strong> peers.
         </p>
       </section>
-      <WiresList
+      <ChannelsList
         wires={torrent.wires}
         channels={_.pickBy(channelCache, ({channelId}) => myLeechingChannelIds.includes(channelId))}
         peerType={'leecher'}
+        closeChannel={closeChannel}
       />
     </>
   );

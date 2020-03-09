@@ -4,7 +4,7 @@ import {Torrent} from '../../../types';
 import './UploadInfo.scss';
 import {ChannelState} from '../../../clients/payment-channel-client';
 import {utils} from 'ethers';
-import {WiresList} from '../wires-list/WiresList';
+import {ChannelsList} from '../channels-list/ChannelsList';
 
 const bigNumberify = utils.bigNumberify;
 
@@ -37,7 +37,7 @@ const UploadInfo: React.FC<UploadInfoProps> = ({
           <strong data-test-selector="numPeers">{torrent.numPeers}</strong> Peers connected
         </p>
       </section>
-      <WiresList
+      <ChannelsList
         wires={torrent.wires}
         channels={_.pickBy(channelCache, ({channelId}) => mySeedingChannelIds.includes(channelId))}
         peerType={'seeder'}
