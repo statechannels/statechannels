@@ -4,7 +4,7 @@ import {cHubStateChannelAddress, cFirebasePrefix} from '../constants';
 import {logger} from '../logger';
 import {Message} from '@statechannels/wire-format';
 import {fromEvent, Observable, combineLatest, of, forkJoin} from 'rxjs';
-import {flatMap, map} from 'rxjs/operators';
+import {flatMap, map, tap} from 'rxjs/operators';
 
 export type Snapshot = firebase.database.DataSnapshot;
 
@@ -42,13 +42,14 @@ export function fbListen(responseForMessage: (message: Message) => Message[]) {
   childAddedObservable
     .pipe(
       map(childAdded => childAdded[0]),
-      flatMap(snapshot =>
+      flatMap((snapshot: Snapshot) =>
         combineLatest(of(snapshot), forkJoin(fbSend(responseForMessage(snapshot.val()))))
-      )
+      ),
+      tap(([snapshot]) => hubRef.child(snapshot.key).remove())
     )
     .subscribe(
-      ([snapshot]) => {
-        hubRef.child(snapshot.key).remove();
+      () => {
+        // On event
       },
       error => log.error(error),
       () => {
