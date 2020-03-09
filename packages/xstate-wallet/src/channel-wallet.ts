@@ -8,8 +8,9 @@ import {Wallet as WalletUi} from './ui/wallet';
 import {interpret, Interpreter, State} from 'xstate';
 import {Guid} from 'guid-typescript';
 import {Notification, Response} from '@statechannels/client-api-schema';
-import {filter, map, tap} from 'rxjs/operators';
+import {filter, map} from 'rxjs/operators';
 import {Message, OpenChannel} from './store/types';
+import {AppRequestEvent} from './event-types';
 
 export interface Workflow {
   id: string;
@@ -50,31 +51,19 @@ export class ChannelWallet {
     this.messagingService.requestFeed
       .pipe(
         filter(r => r.type === 'CREATE_CHANNEL' || r.type === 'JOIN_CHANNEL'),
-        tap(r => {
-          const workflow = this.startApplicationWorkflow();
-          this.workflows.push(workflow);
-          workflow.machine.send(r);
-        })
+        map(r => createApplicationWorkflow(r, this.store, this.messagingService, this.id))
       )
-      .subscribe(undefined, console.error);
-  }
+      .subscribe(workflow => {
+        workflow.machine.start();
+        workflow.machine.onDone(
+          () => (this.workflows = this.workflows.filter(w => w.id !== workflow.id))
+        );
 
-  private startApplicationWorkflow(): Workflow {
-    const workflowId = Guid.create().toString();
-    const machine = interpret<any, any, any>(
-      applicationWorkflow(this.store, this.messagingService),
-      {
-        devTools: true
-      }
-    )
-      .onTransition((state, event) => process.env.ADD_LOGS && logTransition(state, event, this.id))
+        this.workflows.push(workflow);
 
-      .onDone(() => (this.workflows = this.workflows.filter(w => w.id !== workflowId)))
-      .start();
-    // TODO: Figure out how to resolve rendering priorities
-    this.renderUI(machine);
-
-    return {id: workflowId, machine, domain: 'TODO'};
+        // TODO: Figure out how to resolve rendering priorities
+        this.renderUI(workflow.machine);
+      }, console.error);
   }
 
   private renderUI(machine) {
@@ -122,3 +111,19 @@ export function logTransition(
     }
   });
 }
+
+const createApplicationWorkflow = (
+  r: AppRequestEvent,
+  store: Store,
+  messagingService: MessagingServiceInterface,
+  id?: string
+): Workflow => {
+  const workflowId = Guid.create().toString();
+  const machine = interpret(applicationWorkflow(store, messagingService), {
+    devTools: true
+  }).onTransition((state, event) => process.env.ADD_LOGS && logTransition(state, event, id));
+
+  machine.send(r);
+
+  return {id: workflowId, machine, domain: 'TODO'};
+};
