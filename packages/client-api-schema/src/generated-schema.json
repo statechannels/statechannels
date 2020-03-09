@@ -627,6 +627,71 @@
       ],
       "type": "object"
     },
+    "GetStateParams": {
+      "additionalProperties": false,
+      "properties": {
+        "channelId": {
+          "$ref": "#/definitions/ChannelId"
+        }
+      },
+      "required": [
+        "channelId"
+      ],
+      "type": "object"
+    },
+    "GetStateRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "GetState"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "$ref": "#/definitions/GetStateParams"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "GetStateResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "result": {
+          "$ref": "#/definitions/ChannelResult"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
+      "type": "object"
+    },
     "JoinChannelParams": {
       "additionalProperties": false,
       "properties": {
@@ -862,6 +927,9 @@
           "$ref": "#/definitions/UpdateChannelRequest"
         },
         {
+          "$ref": "#/definitions/GetStateRequest"
+        },
+        {
           "$ref": "#/definitions/PushMessageRequest"
         },
         {
@@ -891,6 +959,9 @@
         },
         {
           "$ref": "#/definitions/UpdateChannelResponse"
+        },
+        {
+          "$ref": "#/definitions/GetStateResponse"
         },
         {
           "$ref": "#/definitions/PushMessageResponse"

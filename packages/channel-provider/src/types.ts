@@ -6,6 +6,7 @@ import {
   PushMessageResponse,
   JoinChannelResponse,
   GetAddressResponse,
+  GetStateResponse,
   GetEthereumSelectedAddressResponse,
   ChallengeChannelResponse,
   GetBudgetResponse
@@ -62,6 +63,7 @@ export type MethodType = {
   PushMessage: PushMessageResponse['result'];
   CloseChannel: CloseChannelResponse['result'];
   JoinChannel: JoinChannelResponse['result'];
+  GetState: GetStateResponse['result'];
   GetAddress: GetAddressResponse['result'];
   GetEthereumSelectedAddress: GetEthereumSelectedAddressResponse['result'];
   ChallengeChannel: ChallengeChannelResponse['result'];

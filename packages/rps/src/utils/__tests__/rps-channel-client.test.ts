@@ -73,6 +73,9 @@ class MockChannelClient implements ChannelClientInterface {
   joinChannel = jest.fn(async function(channelId: string) {
     return await mockChannelResult;
   });
+  getState = jest.fn(async function(channelId: string) {
+    return await mockChannelResult;
+  });
   updateChannel = jest.fn(async function(channelId, participants, allocations, appData) {
     return await mockChannelResult;
   });

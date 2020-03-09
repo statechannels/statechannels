@@ -44,6 +44,7 @@ export interface ChannelClientInterface<Payload = object> {
     allocations: Allocation[],
     appData: string
   ) => Promise<ChannelResult>;
+  getState: (channelId: string) => Promise<ChannelResult>;
   challengeChannel: (channelId: string) => Promise<ChannelResult>;
   closeChannel: (channelId: string) => Promise<ChannelResult>;
   getAddress: () => Promise<string>;
