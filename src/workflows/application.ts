@@ -28,7 +28,6 @@ import * as ConcludeChannel from './conclude-channel';
 import {isSimpleEthAllocation} from '../utils/outcome';
 import {unreachable} from '../utils';
 import {
-  PlayerRequestConclude,
   PlayerStateUpdate,
   ChannelUpdated,
   JoinChannelEvent,
@@ -55,7 +54,7 @@ interface WorkflowGuards {
 
 export interface WorkflowActions {
   sendUpdateChannelResponse: Action<any, PlayerStateUpdate>;
-  sendCloseChannelResponse: Action<any, PlayerRequestConclude>;
+  sendCloseChannelResponse: Action<ChannelIdExists, any>;
   sendCreateChannelResponse: Action<RequestIdExists & ChannelIdExists, any>;
   sendJoinChannelResponse: Action<RequestIdExists & ChannelIdExists, any>;
   assignChannelId: Action<WorkflowContext, any>;
@@ -87,6 +86,7 @@ export interface WorkflowServices extends Record<string, ServiceConfig<WorkflowC
     context: WorkflowContext,
     event: CreateChannelEvent | JoinChannelEvent
   ) => Promise<CCC.WorkflowContext>;
+  signConcludeState: (context: WorkflowContext, event: any) => Promise<void>;
 }
 interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
   states: {
@@ -95,6 +95,7 @@ interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
     confirmJoinChannelWorkflow: {};
     openChannelAndDirectFundProtocol: {};
     createChannelInStore: {};
+    concludeState: {};
     running: {};
     closing: {};
     // TODO: Is it possible to type these as type:'final' ?
@@ -128,6 +129,7 @@ const generateConfig = (
         JOIN_CHANNEL: {target: 'confirmJoinChannelWorkflow'}
       }
     },
+    concludeState: {invoke: {src: 'signConcludeState', onDone: {target: 'closing'}}},
     confirmCreateChannelWorkflow: getDataAndInvoke(
       'getDataForCreateChannelConfirmation',
       'invokeCreateChannelConfirmation',
@@ -176,11 +178,13 @@ const generateConfig = (
         CHANNEL_UPDATED: [
           {
             cond: guards.channelClosing,
-            target: 'closing'
+            target: 'concludeState'
           }
         ],
 
-        PLAYER_REQUEST_CONCLUDE: {target: 'closing', actions: [actions.sendCloseChannelResponse]}
+        PLAYER_REQUEST_CONCLUDE: {
+          target: 'concludeState'
+        }
       }
     },
     //This could handled by another workflow instead of the application workflow
@@ -191,16 +195,11 @@ const generateConfig = (
         id: 'closing-protocol',
         src: 'invokeClosingProtocol',
         data: context => context,
-        autoForward: true
-      },
-      on: {
-        CHANNEL_UPDATED: [
-          {
-            cond: guards.channelClosed,
-            target: 'done'
-          },
-          'closing'
-        ]
+        autoForward: true,
+        onDone: {
+          target: 'done',
+          actions: [actions.sendCloseChannelResponse]
+        }
       }
     },
     done: {type: 'final'}
@@ -233,9 +232,11 @@ export const applicationWorkflow = (
       const entry = await store.getEntry(context.channelId);
       messagingService.sendResponse(event.requestId, await convertToChannelResult(entry));
     },
-    sendCloseChannelResponse: async (context: any, event: PlayerRequestConclude) => {
+    sendCloseChannelResponse: async (context: ChannelIdExists, event: any) => {
       const entry = await store.getEntry(context.channelId);
-      messagingService.sendResponse(event.requestId, await convertToChannelResult(entry));
+      if (context.requestId) {
+        messagingService.sendResponse(event.requestId, await convertToChannelResult(entry));
+      }
     },
     sendCreateChannelResponse: async (context: RequestIdExists & ChannelIdExists) => {
       const entry = await store.getEntry(context.channelId);
@@ -318,10 +319,10 @@ export const applicationWorkflow = (
       return !event.storeEntry.latestSupportedByMe?.isFinal;
     },
     channelClosing: (context: ChannelIdExists, event: ChannelUpdated): boolean => {
-      return event.storeEntry.latestSupportedByMe?.isFinal || false;
+      return event.storeEntry.latest?.isFinal || false;
     },
 
-    channelClosed: (context: ChannelIdExists, event: ChannelUpdated): boolean => {
+    channelClosed: (context: ChannelIdExists, event: any): boolean => {
       return event.storeEntry.supported?.isFinal || false;
     }
   };
@@ -391,6 +392,17 @@ export const applicationWorkflow = (
         default:
           return unreachable(event);
       }
+    },
+    signConcludeState: async (context: ChannelIdExists) => {
+      if (context.channelId === context.channelId) {
+        const existingState = await (await store.getEntry(context.channelId)).latest;
+        const newState = {
+          ...existingState,
+          turnNum: existingState.isFinal ? existingState.turnNum : existingState.turnNum.add(1),
+          isFinal: true
+        };
+        await store.signAndAddState(context.channelId, newState);
+      }
     }
   };
 
@@ -420,6 +432,11 @@ const mockServices: WorkflowServices = {
     }) as any;
   },
   getDataForCreateChannelConfirmation: () => {
+    return new Promise(() => {
+      /* Mock call */
+    }) as any;
+  },
+  signConcludeState: () => {
     return new Promise(() => {
       /* Mock call */
     }) as any;

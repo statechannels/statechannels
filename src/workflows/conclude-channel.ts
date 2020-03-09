@@ -12,8 +12,13 @@ const WORKFLOW = 'conclude-channel';
 export interface Init {
   channelId: string;
 }
+// TODO:Currently this is hard coded to go to done after the state is concluded
+// We need to support various funding type options here
+const determineFundingType = {on: {'': 'success'}};
 
-const concludeTarget = getDataAndInvoke('getFinalState', 'supportState', 'ledgerDefunding');
+const concludeTarget = {
+  ...getDataAndInvoke('getFinalState', 'supportState', 'determineFundingType')
+};
 const ledgerDefunding = getDataAndInvoke('getDefundedLedgerState', 'supportState', 'success');
 
 const virtualDefunding = {
@@ -51,6 +56,7 @@ export const config = {
     concludeTarget,
     virtualDefunding,
     ledgerDefunding,
+    determineFundingType,
     success: {type: 'final' as 'final'}
   }
 };
