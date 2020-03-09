@@ -298,18 +298,28 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     this.notifyAppBudgetUpdated({
       hub: hubAddress,
       site: 'fakehub.com',
-      inUse: {playerAmount: '0x0', hubAmount: '0x0'},
-      free: {playerAmount, hubAmount},
-      pending: {playerAmount: '0x0', hubAmount: '0x0'},
-      direct: {playerAmount: '0x0', hubAmount: '0x0'}
+      budgets: [
+        {
+          token: '0x0',
+          inUse: {playerAmount: '0x0', hubAmount: '0x0'},
+          free: {playerAmount, hubAmount},
+          pending: {playerAmount: '0x0', hubAmount: '0x0'},
+          direct: {playerAmount: '0x0', hubAmount: '0x0'}
+        }
+      ]
     });
     return {
       hub: hubAddress,
       site: 'fakehub.com',
-      pending: {playerAmount, hubAmount},
-      free: {playerAmount: '0x0', hubAmount: '0x0'},
-      inUse: {playerAmount: '0x0', hubAmount: '0x0'},
-      direct: {playerAmount: '0x0', hubAmount: '0x0'}
+      budgets: [
+        {
+          token: '0x0',
+          pending: {playerAmount, hubAmount},
+          free: {playerAmount: '0x0', hubAmount: '0x0'},
+          inUse: {playerAmount: '0x0', hubAmount: '0x0'},
+          direct: {playerAmount: '0x0', hubAmount: '0x0'}
+        }
+      ]
     };
   }
   private async closeAndWithdraw(params: {
@@ -321,10 +331,15 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     const budget = {
       hub: hubAddress,
       site: 'fakehub.com',
-      pending: {playerAmount, hubAmount},
-      free: {playerAmount: '0x0', hubAmount: '0x0'},
-      inUse: {playerAmount: '0x0', hubAmount: '0x0'},
-      direct: {playerAmount: '0x0', hubAmount: '0x0'}
+      budgets: [
+        {
+          token: '0x0',
+          pending: {playerAmount, hubAmount},
+          free: {playerAmount: '0x0', hubAmount: '0x0'},
+          inUse: {playerAmount: '0x0', hubAmount: '0x0'},
+          direct: {playerAmount: '0x0', hubAmount: '0x0'}
+        }
+      ]
     };
 
     // TODO: Does this need to be delayed?
@@ -332,10 +347,15 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     this.notifyAppBudgetUpdated({
       hub: hubAddress,
       site: 'fakehub.com',
-      inUse: {playerAmount: '0x0', hubAmount: '0x0'},
-      free: {playerAmount: '0x0', hubAmount: '0x0'},
-      pending: {playerAmount: '0x0', hubAmount: '0x0'},
-      direct: {playerAmount: '0x0', hubAmount: '0x0'}
+      budgets: [
+        {
+          token: '0x0',
+          inUse: {playerAmount: '0x0', hubAmount: '0x0'},
+          free: {playerAmount: '0x0', hubAmount: '0x0'},
+          pending: {playerAmount: '0x0', hubAmount: '0x0'},
+          direct: {playerAmount: '0x0', hubAmount: '0x0'}
+        }
+      ]
     });
 
     return budget;
