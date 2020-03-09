@@ -9,7 +9,7 @@ import {renderComponentInFrontOfApp} from './helpers';
 import {MemoryStore} from '../../store/memory-store';
 import {MessagingServiceInterface, MessagingService} from '../../messaging';
 import React from 'react';
-import ApplicationWorkflow from '../application-workflow';
+import {ApplicationWorkflow} from '../application-workflow';
 
 const store = new MemoryStore([
   '0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29'
@@ -21,7 +21,8 @@ const testContext = {
 
 if (applicationWorkflowConfig.states) {
   Object.keys(applicationWorkflowConfig.states).forEach(state => {
-    if (typeof state === 'string') {
+    // TODO: We should figure out a nice way of dealing with nested workflows
+    if (state !== 'confirmJoinChannelWorkflow' && state !== 'confirmCreateChannelWorkflow') {
       const machine = interpret<any, any, any>(
         applicationWorkflow(store, messagingService).withContext(testContext),
         {
