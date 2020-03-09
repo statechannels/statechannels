@@ -141,10 +141,7 @@ export abstract class PaidStreamingExtension implements Extension {
     this.wire._onRequest = function(index: number, offset: number, length: number) {
       log(`!> Incoming request for piece - index ${arguments[0]}`);
 
-      messageBus.emit(
-        PaidStreamingExtensionEvents.REQUEST,
-        wire.paidStreamingExtension && wire.paidStreamingExtension.peerAccount
-      );
+      messageBus.emit(PaidStreamingExtensionEvents.REQUEST, index, offset, length);
 
       // Call onRequest after the handlers triggered by this event have been called
 
