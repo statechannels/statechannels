@@ -5,9 +5,11 @@ import {
 export default {title: 'X-state wallet'};
 import {storiesOf} from '@storybook/react';
 import {interpret} from 'xstate';
-import {renderWalletInFrontOfApp} from './helpers';
+import {renderComponentInFrontOfApp} from './helpers';
 import {MemoryStore} from '../../store/memory-store';
 import {MessagingServiceInterface, MessagingService} from '../../messaging';
+import React from 'react';
+import ApplicationWorkflow from '../application-workflow';
 
 const store = new MemoryStore([
   '0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29'
@@ -19,31 +21,21 @@ const testContext = {
 
 if (applicationWorkflowConfig.states) {
   Object.keys(applicationWorkflowConfig.states).forEach(state => {
-    const machine = interpret<any, any, any>(
-      applicationWorkflow(store, messagingService).withContext(testContext),
-      {
-        devTools: true
-      }
-    ); // start a new interpreted machine for each story
-    machine.start(state);
-    storiesOf('Workflows / Application', module).add(
-      state.toString(),
-      renderWalletInFrontOfApp(machine)
-    );
-    machine.stop();
-  });
-}
-
-if (applicationWorkflowConfig.states) {
-  ['CREATE_CHANNEL', 'OPEN_CHANNEL'].forEach(event => {
-    const machineWithChildren = interpret<any, any, any>(
-      applicationWorkflow(store, messagingService).withContext(testContext)
-    ).start(); // start a new interpreted machine for each story
-    machineWithChildren.send(event);
-    storiesOf('Workflows / Application', module).add(
-      'Initialising + ' + event,
-      renderWalletInFrontOfApp(machineWithChildren)
-    );
-    machineWithChildren.stop();
+    if (typeof state === 'string') {
+      const machine = interpret<any, any, any>(
+        applicationWorkflow(store, messagingService).withContext(testContext),
+        {
+          devTools: true
+        }
+      ); // start a new interpreted machine for each story
+      machine.start(state);
+      storiesOf('Workflows / Application', module).add(
+        state.toString(),
+        renderComponentInFrontOfApp(
+          <ApplicationWorkflow current={machine.state} send={machine.send} />
+        )
+      );
+      machine.stop();
+    }
   });
 }
