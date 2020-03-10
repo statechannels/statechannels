@@ -128,7 +128,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     const currentTurnNum = bigNumberify(turnNum);
     if (currentTurnNum.mod(2).eq(this.getPlayerIndex(channelId))) {
       return Promise.reject(
-        `Not your turn: currentTurnNum = ${currentTurnNum}, index = ${this.playerIndex}`
+        `Not your turn: currentTurnNum = ${currentTurnNum}, index = ${this.playerIndex[channelId]}`
       );
     }
     return Promise.resolve();
@@ -199,15 +199,13 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     const latestState = this.findChannel(channelId);
 
     const nextState = {...latestState, participants, allocations, appData};
-    if (nextState !== latestState) {
-      await this.verifyTurnNum(channelId, nextState.turnNum);
-      nextState.turnNum = bigNumberify(latestState.turnNum)
-        .add(1)
-        .toString();
-      log.debug(
-        `Player ${this.getPlayerIndex(channelId)} updated channel to turnNum ${nextState.turnNum}`
-      );
-    }
+    await this.verifyTurnNum(channelId, nextState.turnNum);
+    nextState.turnNum = bigNumberify(latestState.turnNum)
+      .add(1)
+      .toString();
+    log.debug(
+      `Player ${this.getPlayerIndex(channelId)} updated channel to turnNum ${nextState.turnNum}`
+    );
 
     this.setState(nextState);
 

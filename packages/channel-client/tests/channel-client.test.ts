@@ -71,12 +71,12 @@ describe('ChannelClient with FakeChannelProvider', () => {
 
   function setupProvider(
     provider: FakeChannelProvider,
-    playerIndex: number,
+    playerIndex: 0 | 1,
     addresses: Addresses
   ): void {
     provider.setAddress(addresses.self);
-    provider.updatePlayerIndex(playerIndex);
-    provider.opponentAddress = addresses.opponent;
+    provider.updatePlayerIndex(channelId, playerIndex);
+    provider.opponentAddress[channelId] = addresses.opponent;
   }
 
   beforeEach(() => {
