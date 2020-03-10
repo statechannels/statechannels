@@ -97,25 +97,19 @@ export const machine: MachineFactory<Init, any> = (store: Store, ctx: Init) => {
 
   async function getDefundedLedgerState({channelId}: Init): Promise<SupportState.Init> {
     const funding = checkThat((await store.getEntry(channelId)).funding, isIndirectFunding);
-    const {supported: targetChannelSupported} = await store.getEntry(channelId);
-    if (!targetChannelSupported) {
-      throw new Error('No supported state for target channel');
-    }
-    const {outcome: concludedOutcome, isFinal} = targetChannelSupported;
-    if (!isFinal) throw 'Target channel not finalized';
+    const {supportedState: targetChannelState} = await store.getEntry(channelId);
+    const {outcome: concludedOutcome} = targetChannelState;
+    if (!targetChannelState.isFinal) throw 'Target channel not finalized';
 
-    const {supported, channelConstants} = await store.getEntry(funding.ledgerId);
-    if (!supported) {
-      throw new Error('No supported state for ledger channel');
-    }
-    if (!isSimpleEthAllocation(supported.outcome) || !isSimpleEthAllocation(concludedOutcome)) {
+    const {supportedState: ledgerState, channelConstants} = await store.getEntry(funding.ledgerId);
+    if (!isSimpleEthAllocation(ledgerState.outcome) || !isSimpleEthAllocation(concludedOutcome)) {
       throw new Error('Only SimpleEthAllocations are currently supported');
     }
-    const allocation = supported.outcome.allocationItems;
+    const allocation = ledgerState.outcome.allocationItems;
     const idx = allocation.findIndex(({destination}) => destination === channelId);
 
     if (
-      supported.outcome.allocationItems[idx]?.amount !==
+      ledgerState.outcome.allocationItems[idx]?.amount !==
       concludedOutcome.allocationItems.map(a => a.amount).reduce(add)
     ) {
       // TODO: What should we do here?
@@ -127,8 +121,8 @@ export const machine: MachineFactory<Init, any> = (store: Store, ctx: Init) => {
     return {
       state: {
         ...channelConstants,
-        ...supported,
-        turnNum: supported.turnNum.add(1),
+        ...ledgerState,
+        turnNum: ledgerState.turnNum.add(1),
         outcome: simpleEthAllocation(allocation)
       }
     };
