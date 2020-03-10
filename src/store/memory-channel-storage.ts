@@ -81,7 +81,11 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     return {...this.channelConstants, ...vars};
   }
 
-  get latestSupportedByMe() {
+  get isSupportedByMe() {
+    return !!this.latestSupportedByMe;
+  }
+
+  private get latestSupportedByMe() {
     return this.sortedByDescendingTurnNum.find(s => this.mySignature(s, s.signatures));
   }
 

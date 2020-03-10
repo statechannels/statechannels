@@ -39,11 +39,17 @@ type Options = {
 
 const sendState = (store: Store) => async ({state, channelId}: HasChannelId) => {
   const entry = await store.getEntry(channelId);
-  const {latestSupportedByMe, isSupported, supportedState: supported, channelConstants} = entry;
+  const {
+    isSupportedByMe,
+    latestStateSupportedByMe: latestSupportedByMe,
+    isSupported,
+    supportedState: supported,
+    channelConstants
+  } = entry;
   // TODO: Should these safety checks be performed in the store?
   if (
     // If we've haven't already signed a state, there's no harm in supporting one.
-    !latestSupportedByMe ||
+    !isSupportedByMe ||
     // If we've already supported this state, we might as well re-send it.
     statesEqual(channelConstants, latestSupportedByMe, state) ||
     // Otherwise, we only send it if we haven't signed any new states.
