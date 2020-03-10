@@ -21,7 +21,6 @@ import {AddressZero} from 'ethers/constants';
 import {Chain, FakeChain} from '../chain';
 import {calculateChannelId, hashState} from './state-utils';
 import {NETWORK_ID} from '../constants';
-import {checkThat, exists} from '../utils';
 import {Store} from './store';
 
 interface DirectFunding {
@@ -296,9 +295,7 @@ export class MemoryStore implements Store {
 }
 
 export function supportedStateFeed(store: Store, channelId: string) {
-  return store.channelUpdatedFeed(channelId).pipe(
-    map(e => ({
-      state: {...checkThat<StateVariables>(e.supported, exists), ...e.channelConstants}
-    }))
-  );
+  return store
+    .channelUpdatedFeed(channelId)
+    .pipe(map(({supportedState}) => ({state: supportedState})));
 }

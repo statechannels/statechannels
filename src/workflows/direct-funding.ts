@@ -10,6 +10,7 @@ import {Store} from '../store';
 import {Outcome, SimpleAllocation, AllocationItem} from '../store/types';
 import {add} from '../utils/math-utils';
 import {isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
+import {checkThat} from '../utils';
 
 const WORKFLOW = 'direct-funding';
 
@@ -74,17 +75,9 @@ type Options = {services: Services};
 
 export const machine: MachineFactory<Init, any> = (store: Store, context: Init) => {
   async function checkCurrentLevel(ctx: Init) {
-    const entry = await store.getEntry(ctx.channelId);
+    const {supportedState} = await store.getEntry(ctx.channelId);
 
-    if (!entry.supported) {
-      // TODO figure out what to do here.
-      throw new Error('Unsafe channel state');
-    }
-
-    const {outcome} = entry.supported;
-    if (!isSimpleEthAllocation(outcome)) {
-      throw new Error('Only support SimpleEthAllocation');
-    }
+    const outcome = checkThat(supportedState.outcome, isSimpleEthAllocation);
     // TODO This prevents us from funding an app channel
     const allocated = outcome.allocationItems
       .map(a => a.amount)
@@ -131,18 +124,15 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
   }
 
   async function getDepositingInfo({minimalAllocation, channelId}: Init): Promise<Depositing.Init> {
-    const entry = await store.getEntry(channelId);
-    if (!entry.supported) {
-      throw new Error('Unsupported state');
-    }
-    const supportedOutcome = entry.supported.outcome;
+    const {supportedState, myIndex} = await store.getEntry(channelId);
+    const supportedOutcome = supportedState.outcome;
     if (!isSimpleEthAllocation(supportedOutcome)) {
       throw new Error('Unsupported outcome');
     }
     let totalBeforeDeposit = bigNumberify(0);
     for (let i = 0; i < minimalAllocation.length; i++) {
       const allocation = minimalAllocation[i];
-      if (entry.myIndex === i) {
+      if (myIndex === i) {
         const fundedAt = supportedOutcome.allocationItems.map(a => a.amount).reduce(add);
 
         return {
@@ -157,7 +147,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
       }
     }
 
-    throw Error(`Could not find an allocation for participant id ${entry.myIndex}`);
+    throw Error(`Could not find an allocation for participant id ${myIndex}`);
   }
 
   async function getPrefundOutcome({
@@ -198,16 +188,13 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
   }
 
   async function getPostfundOutcome({channelId}: Init): Promise<SupportState.Init> {
-    const {supported, channelConstants} = await store.getEntry(channelId);
-    if (!supported) {
-      throw new Error('State not supported');
-    }
+    const {supportedState, channelConstants} = await store.getEntry(channelId);
     return {
       state: {
-        ...supported,
+        ...supportedState,
         ...channelConstants,
-        turnNum: supported.turnNum.add(1),
-        outcome: mergeDestinations(supported.outcome as SimpleAllocation)
+        turnNum: supportedState.turnNum.add(1),
+        outcome: mergeDestinations(supportedState.outcome as SimpleAllocation)
       }
     };
   }
