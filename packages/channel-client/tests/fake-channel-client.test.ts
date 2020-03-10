@@ -72,11 +72,11 @@ describe('FakeChannelClient', () => {
     clientA = new ChannelClient(providerA);
     clientB = new ChannelClient(providerB);
 
-    providerA.updatePlayerIndex(0);
-    providerA.opponentAddress = participantB.participantId;
+    providerA.updatePlayerIndex(channelId, 0);
+    providerA.opponentAddress[channelId] = participantB.participantId;
 
-    providerB.updatePlayerIndex(1);
-    providerB.opponentAddress = participantA.participantId;
+    providerB.updatePlayerIndex(channelId, 1);
+    providerB.opponentAddress[channelId] = participantA.participantId;
 
     // This setup simulates the message being received from A's wallet
     // and "queued" by A's app to be sent to the opponent (handled by
