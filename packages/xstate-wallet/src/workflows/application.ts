@@ -320,7 +320,7 @@ export const applicationWorkflow = (
 
   const guards: WorkflowGuards = {
     channelOpen: (context: ChannelIdExists, event: ChannelUpdated): boolean => {
-      return !event.storeEntry.latestSupportedByMe?.isFinal;
+      return !event.storeEntry.latestStateSupportedByMe.isFinal;
     },
     channelClosing: (context: ChannelIdExists, event: ChannelUpdated): boolean => {
       return event.storeEntry.latest?.isFinal || false;
@@ -380,8 +380,8 @@ export const applicationWorkflow = (
     getDataForCreateChannelAndFund: async (
       context: ChannelParamsExist
     ): Promise<CreateAndFund.Init> => {
-      const {latestSupportedByMe, channelId} = await store.getEntry(context.channelId);
-      const allocation = checkThat(latestSupportedByMe?.outcome, isSimpleEthAllocation);
+      const {latestStateSupportedByMe, channelId} = await store.getEntry(context.channelId);
+      const allocation = checkThat(latestStateSupportedByMe.outcome, isSimpleEthAllocation);
       return {channelId, allocation};
     },
     getDataForCreateChannelConfirmation: async (
