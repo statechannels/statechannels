@@ -18,8 +18,7 @@ import {
 import * as jrs from 'jsonrpc-lite';
 
 import {fromEvent, Observable} from 'rxjs';
-import {Store} from './store';
-import {ChannelStoreEntry} from './store/memory-channel-storage';
+import {ChannelStoreEntry} from './store/channel-store-entry';
 import {Message as WireMessage} from '@statechannels/wire-format';
 import {unreachable} from './utils';
 import {isAllocation, Message} from './store/types';
@@ -31,6 +30,7 @@ import {deserializeAllocations, deserializeBudgetRequest} from './serde/app-mess
 import {isSimpleEthAllocation} from './utils/outcome';
 import {bigNumberify} from 'ethers/utils';
 import {CHALLENGE_DURATION, NETWORK_ID} from './constants';
+import {Store} from './store';
 
 type ChannelRequest =
   | CreateChannelRequest
@@ -198,7 +198,7 @@ export async function convertToChannelResult(
     status = 'proposed';
   } else if (turnNum.lt(2 * participants.length - 1)) {
     status = 'opening';
-  } else if (channelEntry.supported?.isFinal) {
+  } else if (channelEntry.isSupported && channelEntry.supported.isFinal) {
     status = 'closed';
   } else if (latest?.isFinal) {
     status = 'closing';

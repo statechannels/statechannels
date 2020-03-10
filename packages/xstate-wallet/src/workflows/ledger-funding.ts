@@ -58,8 +58,6 @@ export const machine = (store: Store) => {
     const {targetChannelId, ledgerChannelId, deductions} = ctx;
     const {supported: ledgerState, channelConstants} = await store.getEntry(ledgerChannelId);
 
-    if (!ledgerState) throw 'No supported state found';
-
     const {amount, finalized} = await store.chain.getChainInfo(ledgerChannelId);
 
     const currentlyAllocated = checkThat(ledgerState.outcome, isSimpleEthAllocation)

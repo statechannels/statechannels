@@ -1,6 +1,7 @@
 import {MessagingServiceInterface, MessagingService} from '../messaging';
 import {Wallet} from 'ethers/wallet';
-import {Store, MemoryStore} from '../store/memory-store';
+import {MemoryStore} from '../store/memory-store';
+import {Store} from '../store';
 import {ChannelWallet, logTransition} from '../channel-wallet';
 import {Participant} from '../store/types';
 import {Chain} from '../chain';

@@ -17,9 +17,9 @@ import {sendDisplayMessage, MessagingServiceInterface, convertToChannelResult} f
 import {filter, map, tap, flatMap, first} from 'rxjs/operators';
 import * as CCC from './confirm-create-channel';
 import {createMockGuard, getDataAndInvoke} from '../utils/workflow-utils';
-import {Store} from '../store/memory-store';
+import {Store} from '../store';
 import {StateVariables} from '../store/types';
-import {ChannelStoreEntry} from '../store/memory-channel-storage';
+import {ChannelStoreEntry} from '../store/channel-store-entry';
 import {bigNumberify} from 'ethers/utils';
 import * as ConcludeChannel from './conclude-channel';
 import {isSimpleEthAllocation} from '../utils/outcome';
@@ -320,7 +320,7 @@ export const applicationWorkflow = (
 
   const guards: WorkflowGuards = {
     channelOpen: (context: ChannelIdExists, event: ChannelUpdated): boolean => {
-      return !event.storeEntry.latestSupportedByMe?.isFinal;
+      return !event.storeEntry.latestSupportedByMe.isFinal;
     },
     channelClosing: (context: ChannelIdExists, event: ChannelUpdated): boolean => {
       return event.storeEntry.latest?.isFinal || false;
@@ -380,8 +380,10 @@ export const applicationWorkflow = (
     getDataForCreateChannelAndFund: async (
       context: ChannelParamsExist
     ): Promise<CreateAndFund.Init> => {
-      const {latestSupportedByMe, channelId} = await store.getEntry(context.channelId);
-      const allocation = checkThat(latestSupportedByMe?.outcome, isSimpleEthAllocation);
+      const {latestSupportedByMe: latestStateSupportedByMe, channelId} = await store.getEntry(
+        context.channelId
+      );
+      const allocation = checkThat(latestStateSupportedByMe.outcome, isSimpleEthAllocation);
       return {channelId, allocation};
     },
     getDataForCreateChannelConfirmation: async (

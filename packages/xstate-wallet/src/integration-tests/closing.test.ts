@@ -51,7 +51,7 @@ test('concludes on their turn', async () => {
   await waitForExpect(async () => {
     expect(playerA.workflowState).toEqual('done');
     expect(playerB.workflowState).toEqual('done');
-    expect((await playerA.store.getEntry(channelId)).supported?.isFinal).toBe(true);
-    expect((await playerB.store.getEntry(channelId)).supported?.isFinal).toBe(true);
+    expect((await playerA.store.getEntry(channelId)).supported.isFinal).toBe(true);
+    expect((await playerB.store.getEntry(channelId)).supported.isFinal).toBe(true);
   }, 3000);
 });

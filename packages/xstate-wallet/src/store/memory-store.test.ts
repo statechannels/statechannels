@@ -4,7 +4,7 @@ import {bigNumberify, BigNumber} from 'ethers/utils';
 import {Wallet} from 'ethers';
 import {calculateChannelId, signState} from './state-utils';
 import {NETWORK_ID, CHALLENGE_DURATION} from '../constants';
-import {ChannelStoreEntry} from './memory-channel-storage';
+import {ChannelStoreEntry} from './channel-store-entry';
 import {simpleEthAllocation} from '../utils/outcome';
 
 const {address: aAddress, privateKey: aPrivateKey} = new Wallet(
@@ -94,7 +94,7 @@ test('newObjectiveFeed', async () => {
 });
 
 describe('createChannel', () => {
-  it('returns a ChannelStoreEntry', async () => {
+  it('returns a channel-store-entry', async () => {
     const store = aStore();
 
     const firstEntry = await store.createChannel(

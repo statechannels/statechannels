@@ -1,18 +1,8 @@
-import {ChannelConstants, StateVariables, SignedState, Participant, State} from './types';
+import {ChannelConstants, StateVariables, SignedState, Participant} from './types';
 import {signState, hashState, getSignerAddress, calculateChannelId} from './state-utils';
 import _ from 'lodash';
 import {Funding} from './memory-store';
-
-export interface ChannelStoreEntry {
-  readonly channelId: string;
-  readonly myIndex: number;
-  readonly latest: StateVariables;
-  readonly supported: StateVariables | undefined;
-  readonly latestSupportedByMe: StateVariables | undefined;
-  readonly channelConstants: ChannelConstants;
-  readonly funding?: Funding;
-  readonly states: State[];
-}
+import {ChannelStoreEntry} from './channel-store-entry';
 
 export class MemoryChannelStoreEntry implements ChannelStoreEntry {
   public readonly channelConstants: ChannelConstants;
@@ -74,18 +64,43 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     return this.signedStates.sort((a, b) => b.turnNum.sub(a.turnNum).toNumber());
   }
 
-  get supported() {
+  get isSupported() {
+    return !!this._supported;
+  }
+
+  private get _supported() {
     // TODO: proper check
     return this.sortedByDescendingTurnNum.find(
       s => s.signatures.filter(sig => !!sig).length === this.participants.length
     );
   }
 
-  get latestSupportedByMe() {
+  get supported() {
+    const vars = this._supported;
+    if (!vars) throw new Error('No supported state found');
+    return {...this.channelConstants, ...vars};
+  }
+
+  get isSupportedByMe() {
+    return !!this._latestSupportedByMe;
+  }
+
+  private get _latestSupportedByMe() {
     return this.sortedByDescendingTurnNum.find(s => this.mySignature(s, s.signatures));
   }
-  get latest(): StateVariables {
-    return this.sortedByDescendingTurnNum[0];
+
+  get latestSupportedByMe() {
+    const vars = this._latestSupportedByMe;
+    if (!vars) throw new Error('No state supported by me');
+    return {...this.channelConstants, ...vars};
+  }
+
+  get latest() {
+    return {...this.channelConstants, ...this.sortedByDescendingTurnNum[0]};
+  }
+
+  get latestState() {
+    return {...this.channelConstants, ...this.latest};
   }
 
   get channelId(): string {
@@ -132,7 +147,7 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     // TODO: Examine the safety here
     this.stateVariables = _.transform(this.stateVariables, (result, stateVars, stateHash) => {
       if (
-        !this.supported ||
+        !this.isSupported ||
         this.inSupport(stateHash) ||
         stateVars.turnNum.gt(this.supported.turnNum)
       )
@@ -141,7 +156,7 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
   }
 
   private inSupport(key): boolean {
-    const supportKeys = this.supported
+    const supportKeys = this.isSupported
       ? // TODO get the proper keys
         [hashState({...this.supported, ...this.channelConstants})]
       : [];

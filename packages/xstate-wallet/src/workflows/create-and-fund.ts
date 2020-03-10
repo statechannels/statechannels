@@ -51,13 +51,15 @@ const direct: StateNodeConfig<any, any, any> = {
 };
 
 const triggerObjective = (store: Store) => async (ctx: Init): Promise<void> => {
-  const {channelConstants, supported, myIndex} = await store.getEntry(ctx.channelId);
+  const {channelConstants, supported: supportedState, myIndex} = await store.getEntry(
+    ctx.channelId
+  );
   if (myIndex !== 0) return;
 
   const {participants: targetParticipants} = channelConstants;
   const participants = [...targetParticipants, HUB];
 
-  const {allocationItems} = checkThat(supported?.outcome, isSimpleEthAllocation);
+  const {allocationItems} = checkThat(supportedState.outcome, isSimpleEthAllocation);
 
   const outcome: Outcome = simpleEthAllocation([
     allocationItems[0],
@@ -213,8 +215,8 @@ const getPostFundSetup = (store: Store) => (ctx: Init): Promise<SupportState.Ini
     .toPromise();
 
 const getDepositingInfo = (store: Store) => async ({channelId}: Init): Promise<Depositing.Init> => {
-  const {supported, myIndex} = await store.getEntry(channelId);
-  const {allocationItems} = checkThat(supported?.outcome, isSimpleEthAllocation);
+  const {supported: supportedState, myIndex} = await store.getEntry(channelId);
+  const {allocationItems} = checkThat(supportedState.outcome, isSimpleEthAllocation);
 
   const fundedAt = allocationItems.map(a => a.amount).reduce(add);
   let depositAt = bigNumberify(0);

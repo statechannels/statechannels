@@ -15,12 +15,13 @@ import {
   Message,
   SiteBudget
 } from './types';
-import {MemoryChannelStoreEntry, ChannelStoreEntry} from './memory-channel-storage';
+import {MemoryChannelStoreEntry} from './memory-channel-storage';
+import {ChannelStoreEntry} from './channel-store-entry';
 import {AddressZero} from 'ethers/constants';
 import {Chain, FakeChain} from '../chain';
 import {calculateChannelId, hashState} from './state-utils';
 import {NETWORK_ID} from '../constants';
-import {checkThat, exists} from '../utils';
+import {Store} from './store';
 
 interface DirectFunding {
   type: 'Direct';
@@ -59,36 +60,6 @@ interface InternalEvents {
   channelUpdated: [ChannelStoreEntry];
   newObjective: [Objective];
   addToOutbox: [Message];
-}
-
-export interface Store {
-  newObjectiveFeed: Observable<Objective>;
-  outboxFeed: Observable<Message>;
-  pushMessage: (message: Message) => Promise<void>;
-  channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry>;
-
-  getAddress(): string;
-  signAndAddState(channelId: string, stateVars: StateVariables): Promise<void>;
-  createChannel(
-    participants: Participant[],
-    challengeDuration: BigNumber,
-    stateVars: StateVariables,
-    appDefinition?: string
-  ): Promise<ChannelStoreEntry>;
-  getEntry(channelId): Promise<ChannelStoreEntry>;
-  getLedger(peerId: string): Promise<ChannelStoreEntry>;
-  // TODO: This is awkward. Might be better to set the funding on create/initialize channel?
-  setFunding(channelId: string, funding: Funding): Promise<void>;
-
-  // TODO: I don't know how the store is mean to send outgoing messages.
-  // But I need one, in order to implement virtual funding.
-  addObjective(objective: Objective): void;
-
-  // TODO: should this be exposed via the Store?
-  chain: Chain;
-
-  getBudget: (site: string) => Promise<SiteBudget | undefined>;
-  updateOrCreateBudget: (budget: SiteBudget) => Promise<void>;
 }
 
 export class MemoryStore implements Store {
@@ -325,8 +296,7 @@ export class MemoryStore implements Store {
 
 export function supportedStateFeed(store: Store, channelId: string) {
   return store.channelUpdatedFeed(channelId).pipe(
-    map(e => ({
-      state: {...checkThat<StateVariables>(e.supported, exists), ...e.channelConstants}
-    }))
+    filter(e => e.isSupported),
+    map(({supported}) => ({state: supported}))
   );
 }

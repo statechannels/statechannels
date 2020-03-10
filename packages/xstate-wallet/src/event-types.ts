@@ -1,6 +1,6 @@
 import {SimpleAllocation, Participant, SiteBudget} from './store/types';
 import {BigNumber} from 'ethers/utils';
-import {ChannelStoreEntry} from './store/memory-channel-storage';
+import {ChannelStoreEntry} from './store/channel-store-entry';
 
 export interface JoinChannelEvent {
   type: 'JOIN_CHANNEL';
