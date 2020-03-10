@@ -162,7 +162,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
     }
 
     // TODO: Safety checks?
-    if (entry.supported) {
+    if (entry.isSupported) {
       const outcome = minimalOutcome(entry.latest.outcome as SimpleAllocation, minimalAllocation);
       return {
         state: {
