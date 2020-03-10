@@ -151,7 +151,8 @@
     "broccoli": "3.3.3"
   },
   "scripts": {
-    "build:ci": "run-s clearContracts contracts:compile build:ember:ci",
+    "prepare": "run-s clearContracts contracts:compile",
+    "build:ci": "run-s prepare build:ember:ci",
     "build:ember": "ember build",
     "build:ember:ci": "ember build -prod",
     "build": "ember build --environment=production",
@@ -173,7 +174,6 @@
     "test": "run-s test:contracts test:ember",
     "test:ci": "yarn test:ci:contracts",
     "test:ci:contracts": "yarn test:contracts --all --ci --runInBand --bail",
-    "prepare": "yarn build:ci",
     "precommit": "lint-staged --quiet"
   }
 }
