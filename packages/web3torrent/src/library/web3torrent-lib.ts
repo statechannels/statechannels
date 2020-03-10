@@ -305,7 +305,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           if (message.recipient === this.pseAccount) {
             channelId = message.data.channelId;
             channelState = await this.paymentChannelClient.pushMessage(message);
-            log(`State receivced with turnNum ${channelState.turnNum}`);
+            log(`State received with turnNum ${channelState.turnNum}`);
             // channelState = this.paymentChannelClient.channelCache[channelId];
             // getting this from channelCache would be safer than trusting the return value of pushMessage
             // since the wallet has validated the former but not the latter
@@ -328,7 +328,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
                 channelId
               );
               this.unblockPeer(torrent.infoHash, wire, wire.paidStreamingExtension.peerAccount);
-              // TODO only unblock if the buffer is large enough
+              // TODO: only unblock if the buffer is large enough
             }
           }
           break;

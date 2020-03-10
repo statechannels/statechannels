@@ -228,7 +228,6 @@ export class PaymentChannelClient {
     if (channelState.beneficiary === this.mySigningAddress) {
       return channelState.status === 'running' && turnNum % 2 === 1;
     }
-    // throw new Error(`${this.mySigningAddress} is not the beneficiary ${channelState.beneficiary}`);
     return false; // only beneficiary may receive payments
   }
 
