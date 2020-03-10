@@ -47,12 +47,18 @@ export interface ApproveBudgetAndFund {
   hub: Participant;
 }
 
+export interface EnableEthereum {
+  requestId: number;
+  type: 'ENABLE_ETHEREUM';
+}
+
 export type AppRequestEvent =
   | PlayerRequestConclude
   | PlayerStateUpdate
   | OpenEvent
   | ChannelUpdated
-  | JoinChannelEvent
-  | ApproveBudgetAndFund;
+  | ApproveBudgetAndFund
+  | EnableEthereum
+  | JoinChannelEvent;
 
 export type WorkflowEvent = AppRequestEvent;
