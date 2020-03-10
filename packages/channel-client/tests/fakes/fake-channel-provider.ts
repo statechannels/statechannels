@@ -260,7 +260,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
       )} about ${notificationType}`
     );
     const sender = this.address;
-    const recipient = this.opponentAddress;
+    const recipient: string = this.opponentAddress[data.channelId];
 
     if (!recipient) {
       throw Error(`Cannot notify opponent - opponent address not set`);
