@@ -5,7 +5,8 @@ import {
   MachineConfig,
   Machine,
   DoneInvokeEvent,
-  StateNodeConfig
+  StateNodeConfig,
+  assign
 } from 'xstate';
 import {Store} from '../store';
 
@@ -64,3 +65,12 @@ export function getDataAndInvoke<T>(
     onDone
   };
 }
+
+export const assignError = assign({
+  error: (_, event: DoneInvokeEvent<Error>) => event.data.message
+});
+
+export const debugAction = (c, e, {state}) => {
+  // eslint-disable-next-line no-debugger
+  debugger;
+};

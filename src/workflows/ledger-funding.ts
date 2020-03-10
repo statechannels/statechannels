@@ -1,4 +1,4 @@
-import {Machine, MachineConfig, ServiceConfig, assign, DoneInvokeEvent} from 'xstate';
+import {Machine, MachineConfig, ServiceConfig} from 'xstate';
 
 import {SupportState} from '.';
 import {Store} from '../store';
@@ -7,6 +7,8 @@ import {AllocationItem} from '../store/types';
 import {getDataAndInvoke, checkThat} from '../utils';
 import {Funding} from '../store/memory-store';
 import {add} from '../utils/math-utils';
+import {assignError} from '../utils/workflow-utils';
+import {escalate} from '../actions';
 
 const WORKFLOW = 'ledger-funding';
 
@@ -29,12 +31,7 @@ export const enum Errors {
 }
 
 const FAILURE = `#${WORKFLOW}.failure`;
-const onError = {
-  target: FAILURE,
-  actions: assign({
-    error: (_, event: DoneInvokeEvent<Error>) => event.data.message
-  })
-};
+const onError = {target: FAILURE};
 const fundTarget = getDataAndInvoke(
   {src: 'getTargetOutcome', opts: {onError}},
   {src: 'supportState', opts: {onError}},
@@ -49,7 +46,9 @@ export const config: MachineConfig<any, any, any> = {
     fundTarget,
     updateFunding,
     success: {type: 'final'},
-    failure: {}
+    failure: {
+      entry: [assignError, escalate(({error}) => ({type: 'FAILURE', error}))]
+    }
   }
 };
 

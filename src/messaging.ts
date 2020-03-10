@@ -156,8 +156,6 @@ export class MessagingService implements MessagingServiceInterface {
         await this.sendResponse(id, siteBudget ? serializeSiteBudget(siteBudget) : {});
         break;
       case 'ChallengeChannel':
-        // TODO: handle these requests
-        break;
       case 'GetState':
         // TODO: handle these requests
         break;

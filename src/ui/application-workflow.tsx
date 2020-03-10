@@ -25,7 +25,7 @@ export const ApplicationWorkflow = (props: Props) => {
     confirmCreateChannelWorkflow: 'Creating channel...',
     createChannelInStore: 'Creating channel...',
     confirmJoinChannelWorkflow: 'Joining channel ... ',
-    openChannelAndDirectFundProtocol: 'Opening channel...',
+    openChannelAndFundProtocol: 'Opening channel...',
     running: 'Running channel...',
     closing: 'Closing channel...',
     concludeState: 'Closing channel...',

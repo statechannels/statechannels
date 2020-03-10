@@ -3,7 +3,7 @@ import {
   JoinChannelRequest,
   JoinChannelResponse
 } from '@statechannels/client-api-schema';
-import {filter, map, first} from 'rxjs/operators';
+import {filter, first} from 'rxjs/operators';
 import waitForExpect from 'wait-for-expect';
 import {FakeChain} from '../chain';
 import {
@@ -34,8 +34,7 @@ it('allows for two wallets to fund an app', async () => {
   const createEvent = generateCreateChannelRequest(playerA.participant, playerB.participant);
   const createPromise = playerA.messagingService.outboxFeed
     .pipe(
-      filter(m => 'id' in m && m.id === createEvent.id),
-      map(m => m as CreateChannelResponse),
+      filter((m): m is CreateChannelResponse => 'id' in m && m.id === createEvent.id),
       first()
     )
     .toPromise();

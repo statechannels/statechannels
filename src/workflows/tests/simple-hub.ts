@@ -16,15 +16,17 @@ export class SimpleHub {
 
   public async pushMessage({signedStates}: Message) {
     signedStates?.map(signedState => {
-      const signature = signState(signedState, this.privateKey);
       const {signatures, participants} = signedState;
       const hubIdx = participants.findIndex(p => p.signingAddress === this.getAddress());
-      signatures[hubIdx] = signature;
+      if (hubIdx > -1) {
+        const signature = signState(signedState, this.privateKey);
+        signatures[hubIdx] = signature;
 
-      this._eventEmitter.emit('addToOutbox', {
-        signedStates: [{...signedState, signatures}],
-        from: 'hub'
-      });
+        this._eventEmitter.emit('addToOutbox', {
+          signedStates: [{...signedState, signatures}],
+          from: 'hub'
+        });
+      }
     });
   }
 

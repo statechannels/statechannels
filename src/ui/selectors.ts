@@ -38,7 +38,7 @@ export function isApplicationOpening(applicationWorkflowState: AppWorkflowState)
     stateValue === 'confirmJoinChannelWorkflow' ||
     stateValue === 'confirmCreateChannelWorkflow' ||
     stateValue === 'createChannelInStore' ||
-    stateValue === 'openChannelAndDirectFundProtocol'
+    stateValue === 'openChannelAndFundProtocol'
   );
 }
 
@@ -50,7 +50,7 @@ export function getApplicationOpenProgress(applicationWorkflowState: AppWorkflow
     case 'createChannelInStore':
       return 0.3;
     // TODO: We should create a selector that gets a state value or progress value for this
-    case 'openChannelAndDirectFundProtocol':
+    case 'openChannelAndFundProtocol':
       return 0.65;
     default:
       return 1;

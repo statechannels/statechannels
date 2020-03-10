@@ -1,4 +1,5 @@
-import {bigNumberify} from 'ethers/utils';
+import {bigNumberify, hexZeroPad} from 'ethers/utils';
+import {Participant} from './store/types';
 
 export const ETH_ASSET_HOLDER_ADDRESS =
   process.env.ETH_ASSET_HOLDER_ADDRESS || '0x0000000000000000000000000000000000000000';
@@ -7,7 +8,14 @@ export const NITRO_ADJUDICATOR_ADDRESS =
   process.env.NITRO_ADJUDICATOR_ADDRESS || '0x0000000000000000000000000000000000000000';
 
 // TODO: Move top ENV variable
-export const HUB_ADDRESS = process.env.HUB_ADDRESS || '0x100063c326b27f78b2cBb7cd036B8ddE4d4FCa7C';
+// Corresponds to '0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29' from test data
+export const HUB_ADDRESS = process.env.HUB_ADDRESS || '0xaaaa84838319627Fa056fC3FC29ab94d479B8502';
+export const HUB_DESTINATION = HUB_ADDRESS;
+export const HUB: Participant = {
+  destination: hexZeroPad(HUB_DESTINATION.toLowerCase(), 32),
+  signingAddress: HUB_ADDRESS,
+  participantId: 'hub'
+};
 export const CHALLENGE_DURATION = bigNumberify(0x12c); // 5 minutes
 export const NETWORK_ID = process.env.CHAIN_NETWORK_ID || '0';
 
