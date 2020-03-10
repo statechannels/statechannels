@@ -227,6 +227,30 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     this.paymentChannelClient.onChannelProposed(async (channelState: ChannelState) => {
       await this.paymentChannelClient.joinChannel(channelState.channelId);
     });
+
+    this.paymentChannelClient.onChannelUpdated(async (channelState: ChannelState) => {
+      log(`State received with turnNum ${channelState.turnNum}`);
+      if (
+        this.paymentChannelClient.isPaymentToMe(channelState) ||
+        Number(channelState.turnNum) === 3
+        // returns true for the second postFS if I am the beneficiary
+        // (I need to countersign this state in order for the first payment to be sent)
+      ) {
+        log(
+          `Accepting payment, refilling buffer and unblocking ${wire.paidStreamingExtension.peerAccount}`
+        );
+        await this.paymentChannelClient.acceptPayment(
+          this.paymentChannelClient.channelCache[channelState.channelId]
+        );
+        await this.refillBuffer(
+          torrent.infoHash,
+          wire.paidStreamingExtension.peerAccount,
+          channelState.channelId
+        );
+        this.unblockPeer(torrent.infoHash, wire, wire.paidStreamingExtension.peerAccount);
+        // TODO: only unblock if the buffer is large enough
+      }
+    });
   }
 
   protected async refillBuffer(infoHash: string, peerId: string, channelId: string) {
@@ -258,7 +282,8 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
     if (
       this.paymentChannelClient.channelCache[channelId] &&
-      this.paymentChannelClient.channelCache[channelId].status === 'running'
+      this.paymentChannelClient.channelCache[channelId].status === 'running' &&
+      bigNumberify(this.paymentChannelClient.channelCache[channelId].turnNum).gt(3)
     ) {
       await this.paymentChannelClient.makePayment(
         channelId,
@@ -304,32 +329,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           message = JSON.parse(data.message);
           if (message.recipient === this.pseAccount) {
             channelId = message.data.channelId;
-            channelState = await this.paymentChannelClient.pushMessage(message);
-            log(`State received with turnNum ${channelState.turnNum}`);
-            // channelState = this.paymentChannelClient.channelCache[channelId];
-            // getting this from channelCache would be safer than trusting the return value of pushMessage
-            // since the wallet has validated the former but not the latter
-            // however, that cache is only updated asynchronously
-            if (
-              this.paymentChannelClient.isPaymentToMe(channelState) ||
-              Number(channelState.turnNum) === 3
-              // returns true for the second postFS if I am the beneficiary
-              // (I need to countersign this state in order for the first payment to be sent)
-            ) {
-              log(
-                `Accepting payment, refilling buffer and unblocking ${wire.paidStreamingExtension.peerAccount}`
-              );
-              await this.paymentChannelClient.acceptPayment(
-                this.paymentChannelClient.channelCache[channelId]
-              );
-              await this.refillBuffer(
-                torrent.infoHash,
-                wire.paidStreamingExtension.peerAccount,
-                channelId
-              );
-              this.unblockPeer(torrent.infoHash, wire, wire.paidStreamingExtension.peerAccount);
-              // TODO: only unblock if the buffer is large enough
-            }
+            await this.paymentChannelClient.pushMessage(message);
           }
           break;
         default:
