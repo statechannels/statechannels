@@ -18,8 +18,7 @@ import {
 import * as jrs from 'jsonrpc-lite';
 
 import {fromEvent, Observable} from 'rxjs';
-import {Store} from './store';
-import {ChannelStoreEntry} from './store/memory-channel-storage';
+import {ChannelStoreEntry} from './store/channel-store-entry';
 import {Message as WireMessage} from '@statechannels/wire-format';
 import {unreachable} from './utils';
 import {isAllocation, Message} from './store/types';

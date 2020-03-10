@@ -1,18 +1,8 @@
-import {ChannelConstants, StateVariables, SignedState, Participant, State} from './types';
+import {ChannelConstants, StateVariables, SignedState, Participant} from './types';
 import {signState, hashState, getSignerAddress, calculateChannelId} from './state-utils';
 import _ from 'lodash';
 import {Funding} from './memory-store';
-
-export interface ChannelStoreEntry {
-  readonly channelId: string;
-  readonly myIndex: number;
-  readonly latest: StateVariables;
-  readonly supported: StateVariables | undefined;
-  readonly latestSupportedByMe: StateVariables | undefined;
-  readonly channelConstants: ChannelConstants;
-  readonly funding?: Funding;
-  readonly states: State[];
-}
+import {ChannelStoreEntry} from './channel-store-entry';
 
 export class MemoryChannelStoreEntry implements ChannelStoreEntry {
   public readonly channelConstants: ChannelConstants;

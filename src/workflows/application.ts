@@ -19,7 +19,7 @@ import * as CCC from './confirm-create-channel';
 import {createMockGuard, getDataAndInvoke} from '../utils/workflow-utils';
 import {Store} from '../store/memory-store';
 import {StateVariables} from '../store/types';
-import {ChannelStoreEntry} from '../store/memory-channel-storage';
+import {ChannelStoreEntry} from '../store/channel-store-entry';
 import {bigNumberify} from 'ethers/utils';
 import * as ConcludeChannel from './conclude-channel';
 import {isSimpleEthAllocation} from '../utils/outcome';
