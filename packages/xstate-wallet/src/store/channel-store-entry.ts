@@ -8,7 +8,7 @@ export interface ChannelStoreEntry {
   readonly isSupportedByMe: boolean;
   readonly latestState: State;
   readonly supported: State;
-  readonly latestStateSupportedByMe: State;
+  readonly latestSupportedByMe: State;
   readonly channelConstants: ChannelConstants;
   readonly funding?: Funding;
   readonly states: State[];
