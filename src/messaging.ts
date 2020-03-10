@@ -183,9 +183,11 @@ async function metamaskUnlocked(): Promise<string> {
 export async function convertToChannelResult(
   channelEntry: ChannelStoreEntry
 ): Promise<ChannelResult> {
-  const {latestState, channelId} = channelEntry;
-  const {appData, turnNum, outcome} = latestState;
+  const {latest, channelId} = channelEntry;
+  const {appData, turnNum} = latest;
   const {participants, appDefinition} = channelEntry.channelConstants;
+
+  const outcome = latest.outcome;
 
   if (!isAllocation(outcome)) {
     throw new Error('Can only send allocations to the app');
@@ -196,9 +198,9 @@ export async function convertToChannelResult(
     status = 'proposed';
   } else if (turnNum.lt(2 * participants.length - 1)) {
     status = 'opening';
-  } else if (channelEntry.supportedState.isFinal) {
+  } else if (channelEntry.supported?.isFinal) {
     status = 'closed';
-  } else if (latestState.isFinal) {
+  } else if (latest?.isFinal) {
     status = 'closing';
   }
 
