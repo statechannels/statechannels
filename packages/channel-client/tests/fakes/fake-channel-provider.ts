@@ -199,7 +199,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     const latestState = this.findChannel(channelId);
 
     const nextState = {...latestState, participants, allocations, appData};
-    await this.verifyTurnNum(channelId, nextState.turnNum);
+    await this.verifyTurnNum(channelId, latestState.turnNum);
     nextState.turnNum = bigNumberify(latestState.turnNum)
       .add(1)
       .toString();
