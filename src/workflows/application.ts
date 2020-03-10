@@ -13,7 +13,6 @@ import {
   State
 } from 'xstate';
 
-import {getChannelId} from '@statechannels/nitro-protocol';
 import {sendDisplayMessage, MessagingServiceInterface, convertToChannelResult} from '../messaging';
 import {filter, map, tap, flatMap, first} from 'rxjs/operators';
 import * as CCC from './confirm-create-channel';
@@ -291,19 +290,19 @@ export const applicationWorkflow = (
         };
       }
     ),
-    assignChannelId: assign((context, event) => {
-      if (!context.channelId) {
-        if (event.type === 'PLAYER_STATE_UPDATE') {
-          return {channelId: getChannelId(event.state.channel)};
-        } else if (event.type === 'JOIN_CHANNEL') {
+    assignChannelId: assign((context, event: AssignChannelEvent) => {
+      if (context.channelId) return context;
+      switch (event.type) {
+        case 'PLAYER_STATE_UPDATE':
+          return {channelId: event.channelId};
+        case 'JOIN_CHANNEL':
           // TODO: Might be better to split set request Id in it's own action
           return {channelId: event.channelId, requestId: event.requestId};
-        } else if (event.type === 'done.invoke.createChannel') {
+        case 'done.invoke.createChannel':
           return {channelId: event.data};
-        }
-        return {};
+        default:
+          return unreachable(event);
       }
-      return {};
     }),
     updateStoreWithPlayerState: async (context: ChannelIdExists, event: PlayerStateUpdate) => {
       if (context.channelId === event.channelId) {
@@ -472,3 +471,8 @@ const mockGuards: WorkflowGuards = {
 };
 export const config = generateConfig(mockActions, mockGuards);
 export const mockOptions = {services: mockServices, actions: mockActions, guards: mockGuards};
+
+type AssignChannelEvent =
+  | PlayerStateUpdate
+  | JoinChannelEvent
+  | (DoneInvokeEvent<string> & {type: 'done.invoke.createChannel'});
