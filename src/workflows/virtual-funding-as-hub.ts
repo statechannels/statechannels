@@ -11,7 +11,7 @@ import {
 } from 'xstate';
 import {filter, flatMap} from 'rxjs/operators';
 
-import {Store} from '../store/memory-store';
+import {Store} from '../store';
 import {LedgerFunding, VirtualFundingAsLeaf} from '.';
 import {checkThat} from '../utils';
 import {isSimpleEthAllocation} from '../utils/outcome';

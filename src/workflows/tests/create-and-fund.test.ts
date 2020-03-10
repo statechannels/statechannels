@@ -3,7 +3,8 @@ import waitForExpect from 'wait-for-expect';
 
 import {Init, machine} from '../create-and-fund';
 
-import {MemoryStore, Store} from '../../store/memory-store';
+import {MemoryStore} from '../../store/memory-store';
+import {Store} from '../../store';
 import {bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
 import {firstState, signState, calculateChannelId} from '../../store/state-utils';

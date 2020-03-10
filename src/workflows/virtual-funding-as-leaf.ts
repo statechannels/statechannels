@@ -10,7 +10,8 @@ import {
 } from 'xstate';
 import {filter, map, take, flatMap, tap} from 'rxjs/operators';
 
-import {Store, supportedStateFeed} from '../store/memory-store';
+import {supportedStateFeed} from '../store/memory-store';
+import {Store} from '../store';
 import {SupportState, LedgerFunding} from '.';
 import {checkThat, getDataAndInvoke} from '../utils';
 import {simpleEthGuarantee, isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
