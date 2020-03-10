@@ -1,4 +1,4 @@
-import {State, ChannelConstants, Outcome, StateVariables, AllocationItem} from './types';
+import {State, ChannelConstants, Outcome, AllocationItem} from './types';
 import {
   State as NitroState,
   Outcome as NitroOutcome,
@@ -57,12 +57,8 @@ export function getSignerAddress(state: State, signature: string): string {
   return getNitroSignerAddress({state: nitroState, signature: splitSignature(signature)});
 }
 
-export function statesEqual(
-  constants: ChannelConstants,
-  left: StateVariables,
-  right?: StateVariables
-): boolean {
-  return right ? hashState({...constants, ...left}) === hashState({...constants, ...right}) : false;
+export function statesEqual(left: State, right: State) {
+  return hashState(left) === hashState(right);
 }
 
 export function outcomesEqual(left: Outcome, right?: Outcome) {
