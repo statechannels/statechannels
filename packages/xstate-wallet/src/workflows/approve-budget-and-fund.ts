@@ -9,7 +9,7 @@ import {
 } from 'xstate';
 import {SiteBudget} from '../store/types';
 import {sendDisplayMessage, MessagingServiceInterface} from '../messaging';
-import {Store} from '../store/memory-store';
+import {Store} from '../store';
 import {serializeSiteBudget} from '../serde/app-messages/serialize';
 
 interface UserApproves {

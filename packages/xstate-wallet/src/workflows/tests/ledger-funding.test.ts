@@ -4,7 +4,8 @@ import {add} from '../../utils/math-utils';
 
 import {Init, machine, Errors} from '../ledger-funding';
 
-import {MemoryStore, Store} from '../../store/memory-store';
+import {MemoryStore} from '../../store/memory-store';
+import {Store} from '../../store';
 import {bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
 import {firstState, signState, calculateChannelId} from '../../store/state-utils';

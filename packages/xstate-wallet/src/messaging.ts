@@ -30,6 +30,7 @@ import {deserializeAllocations, deserializeBudgetRequest} from './serde/app-mess
 import {isSimpleEthAllocation} from './utils/outcome';
 import {bigNumberify} from 'ethers/utils';
 import {CHALLENGE_DURATION, NETWORK_ID} from './constants';
+import {Store} from './store';
 
 type ChannelRequest =
   | CreateChannelRequest
