@@ -146,7 +146,7 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     // TODO: Examine the safety here
     this.stateVariables = _.transform(this.stateVariables, (result, stateVars, stateHash) => {
       if (
-        !this.supported ||
+        !this.isSupported ||
         this.inSupport(stateHash) ||
         stateVars.turnNum.gt(this.supported.turnNum)
       )
@@ -155,7 +155,7 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
   }
 
   private inSupport(key): boolean {
-    const supportKeys = this.supported
+    const supportKeys = this.isSupported
       ? // TODO get the proper keys
         [hashState({...this.supported, ...this.channelConstants})]
       : [];

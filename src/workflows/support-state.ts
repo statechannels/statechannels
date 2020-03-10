@@ -39,25 +39,19 @@ type Options = {
 
 const sendState = (store: Store) => async ({state, channelId}: HasChannelId) => {
   const entry = await store.getEntry(channelId);
-  const {
-    isSupportedByMe,
-    latestStateSupportedByMe: latestSupportedByMe,
-    isSupported,
-    supported: supported,
-    channelConstants
-  } = entry;
+  const {isSupportedByMe, isSupported, channelConstants} = entry;
   // TODO: Should these safety checks be performed in the store?
   if (
     // If we've haven't already signed a state, there's no harm in supporting one.
     !isSupportedByMe ||
     // If we've already supported this state, we might as well re-send it.
-    statesEqual(channelConstants, latestSupportedByMe, state) ||
+    (isSupportedByMe && statesEqual(channelConstants, entry.latestStateSupportedByMe, state)) ||
     // Otherwise, we only send it if we haven't signed any new states.
     (isSupported &&
-      statesEqual(channelConstants, latestSupportedByMe, supported) &&
-      supported?.turnNum.lt(state.turnNum)) ||
+      statesEqual(channelConstants, entry.latestStateSupportedByMe, entry.supported) &&
+      entry.supported.turnNum.lt(state.turnNum)) ||
     // We always support a final state if it matches the outcome that we have signed
-    (state.isFinal && outcomesEqual(state.outcome, latestSupportedByMe.outcome))
+    (state.isFinal && outcomesEqual(state.outcome, entry.latestStateSupportedByMe.outcome))
   ) {
     await store.signAndAddState(channelId, state);
   } else {
@@ -67,10 +61,8 @@ const sendState = (store: Store) => async ({state, channelId}: HasChannelId) => 
 
 const notifyWhenSupported = (store: Store, {state, channelId}: HasChannelId) => {
   return store.channelUpdatedFeed(channelId).pipe(
-    filter(
-      ({isSupported, supported: supported, channelConstants}) =>
-        isSupported && statesEqual(channelConstants, state, supported)
-    ),
+    filter(({isSupported}) => isSupported),
+    filter(({channelConstants, supported}) => statesEqual(channelConstants, state, supported)),
     map(() => 'SUPPORTED')
   );
 };
