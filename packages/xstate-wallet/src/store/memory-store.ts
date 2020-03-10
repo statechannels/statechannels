@@ -276,6 +276,7 @@ export class MemoryStore implements Store {
 
   addObjective(objective: Objective) {
     this._eventEmitter.emit('addToOutbox', {objectives: [objective]});
+    this._eventEmitter.emit('newObjective', objective);
   }
 
   async addState(state: SignedState): Promise<ChannelStoreEntry> {

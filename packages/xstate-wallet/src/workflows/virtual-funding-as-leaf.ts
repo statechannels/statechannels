@@ -5,7 +5,8 @@ import {
   DoneInvokeEvent,
   ServiceConfig,
   assign,
-  StateNodeConfig
+  StateNodeConfig,
+  ActionTypes
 } from 'xstate';
 import {filter, map, take, flatMap, tap} from 'rxjs/operators';
 
@@ -19,11 +20,18 @@ import {FundGuarantor, AllocationItem} from '../store/types';
 import {bigNumberify} from 'ethers/utils';
 import {CHALLENGE_DURATION} from '../constants';
 import _ from 'lodash';
+import {assignError} from '../utils/workflow-utils';
+import {escalate} from '../actions';
 
-export const enum Role {
+export const enum OutcomeIdx {
   A = 0,
   Hub = 1,
   B = 2
+}
+export const enum ParticipantIdx {
+  A = 0,
+  B = 1,
+  Hub = 2
 }
 
 export type Init = {
@@ -37,9 +45,11 @@ type WithDeductions = Init & Deductions;
 const getObjective = (store: Store) => async ({jointChannelId}: Init): Promise<FundGuarantor> => {
   const entry = await store.getEntry(jointChannelId);
   const {participants: jointParticipants} = entry.channelConstants;
-  const participants = [jointParticipants[entry.myIndex], jointParticipants[Role.Hub]];
+  const participants = [jointParticipants[entry.myIndex], jointParticipants[ParticipantIdx.Hub]];
 
-  const {channelId: ledgerId} = await store.getLedger(jointParticipants[Role.Hub].participantId);
+  const {channelId: ledgerId} = await store.getLedger(
+    jointParticipants[ParticipantIdx.Hub].participantId
+  );
   const {channelId: guarantorId} = await store.createChannel(participants, CHALLENGE_DURATION, {
     turnNum: bigNumberify(0),
     appData: '0x',
@@ -83,6 +93,9 @@ export const config: StateNodeConfig<Init, any, any> = {
   key: 'virtual-funding-as-leaf',
   id: 'workflow',
   initial: States.setupJointChannel,
+  on: {
+    [ActionTypes.ErrorCustom]: '#workflow.failure'
+  },
   states: {
     [States.setupJointChannel]: getDataAndInvoke<Init, Services>(
       {src: Services.waitForFirstJointState, opts: {onError: '#workflow.failure'}},
@@ -96,7 +109,13 @@ export const config: StateNodeConfig<Init, any, any> = {
     [States.fundJointChannel]: {
       initial: 'getObjective',
       states: {
-        getObjective: {invoke: {src: Services.fundGuarantor, onDone: 'runObjective'}},
+        getObjective: {
+          invoke: {
+            src: Services.fundGuarantor,
+            onDone: 'runObjective',
+            onError: '#workflow.failure'
+          }
+        },
         runObjective: {
           entry: Actions.triggerGuarantorObjective,
           invoke: {
@@ -122,7 +141,9 @@ export const config: StateNodeConfig<Init, any, any> = {
       States.success
     ),
     success: {type: 'final'},
-    failure: {}
+    failure: {
+      entry: [assignError, escalate(({error}: any) => ({type: 'FAILURE', error}))]
+    }
   }
 };
 
@@ -140,13 +161,16 @@ export const waitForFirstJointState = (store: Store) => ({
         const amounts = allocationItems.map(i => i.amount);
 
         if (
-          destinations[Role.A] === participants[Role.A].destination &&
-          destinations[Role.Hub] === participants[Role.Hub].destination &&
-          destinations[Role.B] === participants[Role.B].destination &&
-          amounts[Role.A].add(amounts[Role.B]).eq(amounts[Role.Hub])
+          !(
+            destinations[OutcomeIdx.A] === participants[ParticipantIdx.A].destination &&
+            destinations[OutcomeIdx.B] === participants[ParticipantIdx.B].destination &&
+            destinations[OutcomeIdx.Hub] === participants[ParticipantIdx.Hub].destination
+          )
         ) {
-          return;
-        } else throw 'Invalid first state';
+          throw new Error('Incorrect participants');
+        } else if (!amounts[OutcomeIdx.A].add(amounts[OutcomeIdx.B]).eq(amounts[OutcomeIdx.Hub])) {
+          throw new Error('Incorrect allocation');
+        } else return;
       }),
       map(s => ({state: s})),
       take(1)
@@ -162,10 +186,10 @@ export const jointChannelUpdate = (store: Store) => ({
       filter(({state}) => state.turnNum.eq(0)),
       map(({state}) => {
         const oldOutcome = checkThat(state.outcome, isSimpleEthAllocation);
-        const amount = oldOutcome.allocationItems[Role.Hub].amount;
+        const amount = oldOutcome.allocationItems[OutcomeIdx.Hub].amount;
         const outcome = simpleEthAllocation([
           {destination: targetChannelId, amount},
-          {destination: state.participants[Role.Hub].destination, amount}
+          {destination: state.participants[ParticipantIdx.Hub].destination, amount}
         ]);
         return {state: {...state, turnNum: bigNumberify(1), outcome}};
       }),
@@ -177,13 +201,15 @@ const getDeductions = (store: Store) => async (ctx: Init): Promise<Deductions> =
   const {latest, myIndex} = await store.getEntry(ctx.jointChannelId);
   const {allocationItems} = checkThat(latest.outcome, isSimpleEthAllocation);
 
+  const outcomeIdx = myIndex === ParticipantIdx.A ? OutcomeIdx.A : OutcomeIdx.B;
+
   return {
     deductions: [
       {
-        destination: allocationItems[1].destination,
-        amount: allocationItems[2 - myIndex].amount
+        destination: allocationItems[OutcomeIdx.Hub].destination,
+        amount: allocationItems[2 - outcomeIdx].amount
       },
-      allocationItems[myIndex]
+      allocationItems[outcomeIdx]
     ]
   };
 };
@@ -214,5 +240,4 @@ export const options = (
   return {actions, services};
 };
 
-export const machine = (store: Store, context: Init) =>
-  Machine(config, options(store)).withContext(context);
+export const machine = (store: Store) => Machine(config, options(store));

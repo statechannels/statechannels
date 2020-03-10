@@ -24,7 +24,7 @@ import {
 } from './data';
 import {subscribeToMessages} from './message-service';
 import {MemoryChannelStoreEntry} from '../../store/memory-channel-storage';
-import {Role} from '../virtual-funding-as-leaf';
+import {ParticipantIdx} from '../virtual-funding-as-leaf';
 import {VirtualFundingAsLeaf, VirtualFundingAsHub} from '..';
 import {FakeChain} from '../../chain';
 
@@ -53,9 +53,9 @@ const jointChannelId = calculateChannelId(jointChannel);
 
 const amounts = [bigNumberify(2), bigNumberify(3)];
 const outcome: Outcome = simpleEthAllocation([
-  {destination: jointParticipants[Role.A].destination, amount: amounts[0]},
-  {destination: jointParticipants[Role.Hub].destination, amount: amounts.reduce(add)},
-  {destination: jointParticipants[Role.B].destination, amount: amounts[1]}
+  {destination: jointParticipants[ParticipantIdx.A].destination, amount: amounts[0]},
+  {destination: jointParticipants[ParticipantIdx.Hub].destination, amount: amounts.reduce(add)},
+  {destination: jointParticipants[ParticipantIdx.B].destination, amount: amounts[1]}
 ]);
 
 const context: VirtualFundingAsLeaf.Init = {targetChannelId, jointChannelId};
@@ -75,9 +75,9 @@ beforeEach(() => {
 });
 
 test('virtual funding with smart hub', async () => {
-  const hubService = interpret(VirtualFundingAsHub.machine(hubStore, context, Role.Hub));
-  const aService = interpret(VirtualFundingAsLeaf.machine(aStore, context));
-  const bService = interpret(VirtualFundingAsLeaf.machine(bStore, context));
+  const hubService = interpret(VirtualFundingAsHub.machine(hubStore).withContext(context));
+  const aService = interpret(VirtualFundingAsLeaf.machine(aStore).withContext(context));
+  const bService = interpret(VirtualFundingAsLeaf.machine(bStore).withContext(context));
   const services = [aService, hubService, bService];
 
   [aStore, hubStore, bStore].forEach((store: MemoryStore) => {
@@ -110,9 +110,9 @@ test('virtual funding with smart hub', async () => {
   );
 
   subscribeToMessages({
-    [jointParticipants[Role.A].participantId]: aStore,
-    [jointParticipants[Role.Hub].participantId]: hubStore,
-    [jointParticipants[Role.B].participantId]: bStore
+    [jointParticipants[ParticipantIdx.A].participantId]: aStore,
+    [jointParticipants[ParticipantIdx.Hub].participantId]: hubStore,
+    [jointParticipants[ParticipantIdx.B].participantId]: bStore
   });
 
   services.forEach(service => service.start());
@@ -128,7 +128,7 @@ test('virtual funding with smart hub', async () => {
     expect(outcome).toMatchObject(
       simpleEthAllocation([
         {destination: targetChannelId, amount},
-        {destination: jointParticipants[1].destination, amount}
+        {destination: jointParticipants[ParticipantIdx.Hub].destination, amount}
       ])
     );
   }, EXPECT_TIMEOUT);
@@ -137,8 +137,8 @@ test('virtual funding with smart hub', async () => {
 test('virtual funding with a simple hub', async () => {
   const hubStore = new SimpleHub(wallet3.privateKey);
 
-  const aService = interpret(VirtualFundingAsLeaf.machine(aStore, context));
-  const bService = interpret(VirtualFundingAsLeaf.machine(bStore, context));
+  const aService = interpret(VirtualFundingAsLeaf.machine(aStore).withContext(context));
+  const bService = interpret(VirtualFundingAsLeaf.machine(bStore).withContext(context));
   const services = [aService, bService];
 
   [aStore, bStore].forEach((store: MemoryStore) => {
@@ -165,9 +165,9 @@ test('virtual funding with a simple hub', async () => {
   bStore.setLedger((await bStore.getEntry(calculateChannelId(state))) as MemoryChannelStoreEntry);
 
   subscribeToMessages({
-    [jointParticipants[0].participantId]: aStore,
-    [jointParticipants[2].participantId]: bStore,
-    [jointParticipants[1].participantId]: hubStore
+    [jointParticipants[ParticipantIdx.A].participantId]: aStore,
+    [jointParticipants[ParticipantIdx.B].participantId]: bStore,
+    [jointParticipants[ParticipantIdx.Hub].participantId]: hubStore
   });
 
   services.forEach(service => service.start());
@@ -178,15 +178,17 @@ test('virtual funding with a simple hub', async () => {
 
     {
       // Check a ledger channel's current outcome
-      const {supported} = await aStore.getLedger(jointParticipants[1].participantId);
+      const {supported} = await aStore.getLedger(
+        jointParticipants[ParticipantIdx.Hub].participantId
+      );
       expect(supported?.outcome).toMatchObject(
         simpleEthAllocation([
           {
-            destination: jointParticipants[Role.A].destination,
+            destination: jointParticipants[ParticipantIdx.A].destination,
             amount: ledgerAmounts[0].sub(amounts[0])
           },
           {
-            destination: jointParticipants[Role.Hub].destination,
+            destination: jointParticipants[ParticipantIdx.Hub].destination,
             amount: ledgerAmounts[1].sub(amounts[1])
           },
           // We don't know the guarantor channel id
@@ -202,7 +204,7 @@ test('virtual funding with a simple hub', async () => {
       expect(outcome).toMatchObject(
         simpleEthAllocation([
           {destination: targetChannelId, amount},
-          {destination: jointParticipants[1].destination, amount}
+          {destination: jointParticipants[ParticipantIdx.Hub].destination, amount}
         ])
       );
     }
@@ -211,7 +213,9 @@ test('virtual funding with a simple hub', async () => {
 
 test('invalid joint state', async () => {
   const store = new MemoryStore([wallet1.privateKey]);
-  const service = interpret(VirtualFundingAsLeaf.machine(store, context)).start();
+  const service = interpret(VirtualFundingAsLeaf.machine(store).withContext(context), {
+    parent: {send: () => undefined} as any // Limits console noise
+  }).start();
 
   const state = firstState(outcome, jointChannel);
   const invalidState: State = {

@@ -52,8 +52,8 @@ it('invokes the createChannelAndFund protocol', async () => {
   const store = new MemoryStore();
   const messagingService: MessagingServiceInterface = new MessagingService(store);
   const services: Partial<WorkflowServices> = {
-    getDataForCreateChannelAndDirectFund: jest.fn().mockReturnValue(Promise.resolve('foo')),
-    invokeCreateChannelAndDirectFundProtocol: jest.fn().mockReturnValue(
+    getDataForCreateChannelAndFund: jest.fn().mockReturnValue(Promise.resolve('foo')),
+    invokeCreateChannelAndFundProtocol: jest.fn().mockReturnValue(
       new Promise(() => {
         /* mock */
       })
@@ -77,9 +77,9 @@ it('invokes the createChannelAndFund protocol', async () => {
   service.send({type: 'done.invoke.createChannel', data: channelId});
   await waitForExpect(async () => {
     expect(service.state.value).toEqual({
-      openChannelAndDirectFundProtocol: 'invokeCreateChannelAndDirectFundProtocol'
+      openChannelAndFundProtocol: 'invokeCreateChannelAndFundProtocol'
     });
-    expect(services.invokeCreateChannelAndDirectFundProtocol).toHaveBeenCalledWith(
+    expect(services.invokeCreateChannelAndFundProtocol).toHaveBeenCalledWith(
       expect.objectContaining({channelId}),
       expect.any(Object)
     );
@@ -115,7 +115,7 @@ it.skip('handles confirmCreateChannel workflow finishing', async () => {
   const messagingService: MessagingServiceInterface = new MessagingService(store);
   const services: Partial<WorkflowServices> = {
     createChannel: jest.fn().mockReturnValue(Promise.resolve('0xb1ab1a')),
-    invokeCreateChannelAndDirectFundProtocol: jest.fn().mockReturnValue(
+    invokeCreateChannelAndFundProtocol: jest.fn().mockReturnValue(
       new Promise(() => {
         /*mock*/
       })
@@ -133,7 +133,7 @@ it.skip('handles confirmCreateChannel workflow finishing', async () => {
   });
 
   await waitForExpect(async () => {
-    expect(service.state.value).toEqual('openChannelAndDirectFundProtocol');
+    expect(service.state.value).toEqual('openChannelAndFundProtocol');
     expect(service.state.context).toMatchObject({channelId: '0xb1ab1a'});
   }, 2000);
 });

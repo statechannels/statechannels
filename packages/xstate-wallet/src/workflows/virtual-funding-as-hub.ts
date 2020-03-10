@@ -19,14 +19,14 @@ import {isSimpleEthAllocation} from '../utils/outcome';
 import {FundGuarantor, AllocationItem, isFundGuarantor, Participant} from '../store/types';
 
 import _ from 'lodash';
-import {Role, States} from './virtual-funding-as-leaf';
+import {ParticipantIdx, States, OutcomeIdx} from './virtual-funding-as-leaf';
 
 type Init = VirtualFundingAsLeaf.Init;
 
 type Deductions = {
   deductions: {
-    [Role.A]: AllocationItem[];
-    [Role.B]: AllocationItem[];
+    [ParticipantIdx.A]: AllocationItem[];
+    [ParticipantIdx.B]: AllocationItem[];
   };
 };
 
@@ -53,9 +53,9 @@ const enum Events {
 }
 
 const waitThenFundGuarantor = (
-  role: Role.A | Role.B
+  role: ParticipantIdx.A | ParticipantIdx.B
 ): StateNodeConfig<WithDeductions, any, any> => {
-  const event = role === Role.A ? Events.FundGuarantorWithA : Events.FundGuarantorWithB;
+  const event = role === ParticipantIdx.A ? Events.FundGuarantorWithA : Events.FundGuarantorWithB;
   return {
     initial: 'waitForObjective',
     states: {
@@ -88,8 +88,8 @@ export const config: MachineConfig<Init, any, any> = {
       type: 'parallel',
       entry: [Actions.watchObjectives, Actions.assignDeductions],
       states: {
-        fundGuarantorAH: waitThenFundGuarantor(Role.A),
-        fundGuarantorBH: waitThenFundGuarantor(Role.B)
+        fundGuarantorAH: waitThenFundGuarantor(ParticipantIdx.A),
+        fundGuarantorBH: waitThenFundGuarantor(ParticipantIdx.B)
       },
       onDone: States.fundTargetChannel
     }
@@ -102,19 +102,19 @@ const getDeductions = (store: Store) => async (ctx: Init): Promise<Deductions> =
 
   return {
     deductions: {
-      [Role.A]: [
+      [ParticipantIdx.A]: [
         {
-          destination: allocationItems[Role.Hub].destination,
-          amount: allocationItems[Role.B].amount
+          destination: allocationItems[OutcomeIdx.Hub].destination,
+          amount: allocationItems[OutcomeIdx.B].amount
         },
-        allocationItems[Role.A]
+        allocationItems[OutcomeIdx.A]
       ],
-      [Role.B]: [
+      [ParticipantIdx.B]: [
         {
-          destination: allocationItems[Role.Hub].destination,
-          amount: allocationItems[Role.A].amount
+          destination: allocationItems[OutcomeIdx.Hub].destination,
+          amount: allocationItems[OutcomeIdx.A].amount
         },
-        allocationItems[Role.B]
+        allocationItems[OutcomeIdx.B]
       ]
     }
   };
@@ -130,9 +130,9 @@ const watchObjectives = (store: Store) => (ctx: Init) => {
         .channelConstants.participants;
 
       switch (participant) {
-        case jointParticipants[Role.A].participantId:
+        case jointParticipants[ParticipantIdx.A].participantId:
           return {...o, type: Events.FundGuarantorWithA};
-        case jointParticipants[Role.B].participantId:
+        case jointParticipants[ParticipantIdx.B].participantId:
           return {...o, type: Events.FundGuarantorWithB};
         default:
           throw 'Participant not found';
@@ -164,5 +164,4 @@ export const options = (store: Store): Partial<MachineOptions<Init, TEvent>> => 
   return {actions, services};
 };
 
-export const machine = (store: Store, context: Init, role: Role) =>
-  Machine(config, options(store)).withContext(context);
+export const machine = (store: Store) => Machine(config, options(store));
