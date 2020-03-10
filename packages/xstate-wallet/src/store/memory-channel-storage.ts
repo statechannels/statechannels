@@ -64,7 +64,11 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     return this.signedStates.sort((a, b) => b.turnNum.sub(a.turnNum).toNumber());
   }
 
-  get supported() {
+  get isSupported() {
+    return !!this.supported;
+  }
+
+  private get supported() {
     // TODO: proper check
     return this.sortedByDescendingTurnNum.find(
       s => s.signatures.filter(sig => !!sig).length === this.participants.length

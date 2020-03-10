@@ -39,7 +39,7 @@ type Options = {
 
 const sendState = (store: Store) => async ({state, channelId}: HasChannelId) => {
   const entry = await store.getEntry(channelId);
-  const {latestSupportedByMe, supported, channelConstants} = entry;
+  const {latestSupportedByMe, isSupported, supportedState: supported, channelConstants} = entry;
   // TODO: Should these safety checks be performed in the store?
   if (
     // If we've haven't already signed a state, there's no harm in supporting one.
@@ -47,7 +47,8 @@ const sendState = (store: Store) => async ({state, channelId}: HasChannelId) => 
     // If we've already supported this state, we might as well re-send it.
     statesEqual(channelConstants, latestSupportedByMe, state) ||
     // Otherwise, we only send it if we haven't signed any new states.
-    (statesEqual(channelConstants, latestSupportedByMe, supported) &&
+    (isSupported &&
+      statesEqual(channelConstants, latestSupportedByMe, supported) &&
       supported?.turnNum.lt(state.turnNum)) ||
     // We always support a final state if it matches the outcome that we have signed
     (state.isFinal && outcomesEqual(state.outcome, latestSupportedByMe.outcome))
@@ -60,7 +61,10 @@ const sendState = (store: Store) => async ({state, channelId}: HasChannelId) => 
 
 const notifyWhenSupported = (store: Store, {state, channelId}: HasChannelId) => {
   return store.channelUpdatedFeed(channelId).pipe(
-    filter(({supported, channelConstants}) => statesEqual(channelConstants, state, supported)),
+    filter(
+      ({isSupported, supportedState: supported, channelConstants}) =>
+        isSupported && statesEqual(channelConstants, state, supported)
+    ),
     map(() => 'SUPPORTED')
   );
 };
