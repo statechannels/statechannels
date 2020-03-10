@@ -152,17 +152,30 @@ export type ChallengeChannelRequest = JsonRpcRequest<'ChallengeChannel', {channe
 export type ChallengeChannelResponse = JsonRpcResponse<ChannelResult>;
 
 // Budget
-export interface SiteBudget {
-  site: string;
-  hub: string;
+export interface TokenBudget {
+  token: string;
   pending: Balance;
   free: Balance;
   inUse: Balance;
   direct: Balance;
 }
-export type GetBudgetRequest = JsonRpcRequest<'GetBudget', {hubAddress: Address}>;
-export type GetBudgetResponse = JsonRpcResponse<SiteBudget>;
+export interface SiteBudget {
+  site: string;
+  hub: string;
+  budgets: TokenBudget[];
+}
 
+export interface BudgetRequest extends Balance {
+  site: string;
+  playerOutcomeAddress: string;
+  hubAddress: string;
+  hubOutcomeAddress: string;
+}
+export type GetBudgetRequest = JsonRpcRequest<'GetBudget', {hubAddress: Address}>;
+export type GetBudgetResponse = JsonRpcResponse<SiteBudget | {}>;
+
+export type ApproveBudgetAndFundRequest = JsonRpcRequest<'ApproveBudgetAndFund', BudgetRequest>;
+export type ApproveBudgetAndFundResponse = JsonRpcResponse<SiteBudget>;
 // Notifications
 export type ChannelProposedNotification = JsonRpcNotification<'ChannelProposed', ChannelResult>;
 export type ChannelUpdatedNotification = JsonRpcNotification<'ChannelUpdated', ChannelResult>;
@@ -187,6 +200,7 @@ export type Request =
   | PushMessageRequest
   | ChallengeChannelRequest
   | GetBudgetRequest
+  | ApproveBudgetAndFundRequest
   | CloseChannelRequest;
 
 export type Response =
@@ -199,7 +213,8 @@ export type Response =
   | PushMessageResponse
   | ChallengeChannelResponse
   | GetBudgetResponse
-  | CloseChannelResponse;
+  | CloseChannelResponse
+  | ApproveBudgetAndFundResponse;
 
 export function isResponse(message: Response | Request | Notification): message is Response {
   return 'id' in message && 'result' in message;

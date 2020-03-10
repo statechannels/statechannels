@@ -1,11 +1,65 @@
 import {
   Allocation as AppAllocation,
   Allocations as AppAllocations,
-  AllocationItem as AppAllocationItem
+  AllocationItem as AppAllocationItem,
+  SiteBudget as AppSiteBudget,
+  BudgetRequest as AppBudgetRequest
 } from '@statechannels/client-api-schema';
-import {Allocation, AllocationItem, SimpleAllocation} from '../../store/types';
-import {assetHolderAddress} from '../../constants';
+import {
+  Allocation,
+  AllocationItem,
+  SimpleAllocation,
+  SiteBudget,
+  BudgetItem,
+  AssetBudget
+} from '../../store/types';
+import {assetHolderAddress, ETH_ASSET_HOLDER_ADDRESS} from '../../constants';
 import {bigNumberify} from 'ethers/utils';
+import {AddressZero} from 'ethers/constants';
+
+export function deserializeBudgetRequest(budgetRequest: AppBudgetRequest): SiteBudget {
+  const assetBudget: AssetBudget = {
+    assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
+    inUse: {playerAmount: bigNumberify(0), hubAmount: bigNumberify(0)},
+    free: {playerAmount: bigNumberify(0), hubAmount: bigNumberify(0)},
+    pending: deserializeBudgetItem(budgetRequest),
+    direct: {playerAmount: bigNumberify(0), hubAmount: bigNumberify(0)}
+  };
+  return {
+    site: budgetRequest.site,
+    hubAddress: budgetRequest.hubAddress,
+    budgets: {[ETH_ASSET_HOLDER_ADDRESS]: assetBudget}
+  };
+}
+
+export function deserializeSiteBudget(siteBudget: AppSiteBudget): SiteBudget {
+  const assetBudgets = siteBudget.budgets.map(b => ({
+    assetHolderAddress: assetHolderAddress(b.token) || AddressZero,
+    inUse: deserializeBudgetItem(b.inUse),
+    free: deserializeBudgetItem(b.free),
+    pending: deserializeBudgetItem(b.pending),
+    direct: deserializeBudgetItem(b.direct)
+  }));
+  const budgets = {};
+  assetBudgets.forEach(a => {
+    budgets[a.assetHolderAddress] = a;
+  });
+
+  return {
+    site: siteBudget.site,
+    hubAddress: siteBudget.hub,
+    budgets
+  };
+}
+export function deserializeBudgetItem(budgetItem: {
+  playerAmount: string;
+  hubAmount: string;
+}): BudgetItem {
+  return {
+    playerAmount: bigNumberify(budgetItem.playerAmount),
+    hubAmount: bigNumberify(budgetItem.hubAmount)
+  };
+}
 
 export function deserializeAllocations(allocations: AppAllocations): Allocation {
   switch (allocations.length) {

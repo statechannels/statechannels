@@ -253,11 +253,11 @@ export class PaymentChannelClient {
     );
   }
 
-  async getBudget(hubAddress: string): Promise<SiteBudget> {
+  async getBudget(hubAddress: string): Promise<SiteBudget | {}> {
     return await this.channelClient.getBudget(hubAddress);
   }
 
-  async closeAndWithdraw(hubAddress: string): Promise<SiteBudget> {
+  async closeAndWithdraw(hubAddress: string): Promise<SiteBudget | {}> {
     return await this.channelClient.closeAndWithdraw(hubAddress);
   }
 }

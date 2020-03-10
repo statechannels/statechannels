@@ -106,5 +106,4 @@ export const confirmChannelCreationWorkflow = (
   return Machine(config).withConfig({}, context) as WorkflowMachine;
 };
 
-// TODO: We should be
 export type WorkflowMachine = StateMachine<WorkflowContext, StateSchema, WorkflowEvent, any>;

@@ -11,7 +11,8 @@ import {
   Notification,
   ChannelClosingNotification,
   ChannelUpdatedNotification,
-  Request
+  Request,
+  ApproveBudgetAndFundRequest
 } from '@statechannels/client-api-schema';
 
 import * as jrs from 'jsonrpc-lite';
@@ -22,11 +23,11 @@ import {ChannelStoreEntry} from './store/memory-channel-storage';
 import {Message as WireMessage} from '@statechannels/wire-format';
 import {unreachable} from './utils';
 import {isAllocation, Message} from './store/types';
-import {serializeAllocation} from './serde/app-messages/serialize';
+import {serializeAllocation, serializeSiteBudget} from './serde/app-messages/serialize';
 import {deserializeMessage} from './serde/wire-format/deserialize';
 import {serializeMessage} from './serde/wire-format/serialize';
 import {AppRequestEvent} from './event-types';
-import {deserializeAllocations} from './serde/app-messages/deserialize';
+import {deserializeAllocations, deserializeBudgetRequest} from './serde/app-messages/deserialize';
 import {isSimpleEthAllocation} from './utils/outcome';
 import {bigNumberify} from 'ethers/utils';
 import {CHALLENGE_DURATION, NETWORK_ID} from './constants';
@@ -35,7 +36,8 @@ type ChannelRequest =
   | CreateChannelRequest
   | JoinChannelRequest
   | UpdateChannelRequest
-  | CloseChannelRequest;
+  | CloseChannelRequest
+  | ApproveBudgetAndFundRequest;
 
 interface InternalEvents {
   AppRequest: [AppRequestEvent];
@@ -135,6 +137,7 @@ export class MessagingService implements MessagingServiceInterface {
       case 'UpdateChannel':
       case 'CloseChannel':
       case 'JoinChannel':
+      case 'ApproveBudgetAndFund':
         const appRequest = convertToInternalEvent(request);
         this.eventEmitter.emit('AppRequest', appRequest);
         break;
@@ -148,12 +151,17 @@ export class MessagingService implements MessagingServiceInterface {
         await this.sendResponse(id, {success: true});
         break;
       case 'GetBudget':
+        const site = request.params.hubAddress;
+        const siteBudget = await this.store.getBudget(site);
+        await this.sendResponse(id, siteBudget ? serializeSiteBudget(siteBudget) : {});
+        break;
       case 'ChallengeChannel':
         // TODO: handle these requests
         break;
       case 'GetState':
         // TODO: handle these requests
         break;
+
       default:
         unreachable(request);
     }
@@ -218,6 +226,12 @@ export function sendDisplayMessage(displayMessage: 'Show' | 'Hide') {
 
 function convertToInternalEvent(request: ChannelRequest): AppRequestEvent {
   switch (request.method) {
+    case 'ApproveBudgetAndFund':
+      return {
+        type: 'APPROVE_BUDGET_AND_FUND',
+        requestId: request.id,
+        budget: deserializeBudgetRequest(request.params)
+      };
     case 'CloseChannel':
       return {
         type: 'PLAYER_REQUEST_CONCLUDE',

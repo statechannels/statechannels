@@ -6,7 +6,15 @@ import * as _ from 'lodash';
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {Wallet} from 'ethers';
 
-import {Participant, StateVariables, SignedState, State, Objective, Message} from './types';
+import {
+  Participant,
+  StateVariables,
+  SignedState,
+  State,
+  Objective,
+  Message,
+  SiteBudget
+} from './types';
 import {MemoryChannelStoreEntry, ChannelStoreEntry} from './memory-channel-storage';
 import {AddressZero} from 'ethers/constants';
 import {Chain, FakeChain} from '../chain';
@@ -16,7 +24,6 @@ import {checkThat, exists} from '../utils';
 
 interface DirectFunding {
   type: 'Direct';
-  amount: BigNumber;
 }
 
 interface IndirectFunding {
@@ -79,6 +86,9 @@ export interface Store {
 
   // TODO: should this be exposed via the Store?
   chain: Chain;
+
+  getBudget: (site: string) => Promise<SiteBudget | undefined>;
+  updateOrCreateBudget: (budget: SiteBudget) => Promise<void>;
 }
 
 export class MemoryStore implements Store {
@@ -89,6 +99,7 @@ export class MemoryStore implements Store {
   private _eventEmitter = new EventEmitter<InternalEvents>();
   private _privateKeys: Record<string, string | undefined> = {};
   private _ledgers: Record<string, string | undefined> = {};
+  private _budgets: Record<string, SiteBudget> = {};
 
   constructor(privateKeys?: string[], chain?: Chain) {
     // TODO: We shouldn't default to a fake chain
@@ -107,6 +118,14 @@ export class MemoryStore implements Store {
       const wallet = Wallet.createRandom();
       this._privateKeys[wallet.address] = wallet.privateKey;
     }
+  }
+
+  public getBudget(site: string): Promise<SiteBudget | undefined> {
+    return Promise.resolve(this._budgets[site]);
+  }
+  public updateOrCreateBudget(budget: SiteBudget): Promise<void> {
+    this._budgets[budget.site] = budget;
+    return Promise.resolve();
   }
 
   // for short-term backwards compatibility
@@ -170,7 +189,6 @@ export class MemoryStore implements Store {
     }
     channelEntry.setFunding(funding);
   }
-
   public async getLedger(peerId: string) {
     const ledgerId = this._ledgers[peerId];
 

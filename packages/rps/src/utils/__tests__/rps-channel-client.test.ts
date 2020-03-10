@@ -99,9 +99,9 @@ class MockChannelClient implements ChannelClientInterface {
   approveBudgetAndFund = jest.fn(async function(
     playerAmount: string,
     hubAmount: string,
-    playerDestinationAddress: string,
+    playerOutcomeAddress: string,
     hubAddress: string,
-    hubDestinationAddress: string
+    hubOutcomeAddress: string
   ): Promise<SiteBudget> {
     return new Promise<SiteBudget>(() => {
       /* */
