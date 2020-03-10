@@ -21,7 +21,7 @@ import {bigNumberify} from 'ethers/utils';
 import {CHALLENGE_DURATION} from '../constants';
 import _ from 'lodash';
 import {assignError} from '../utils/workflow-utils';
-import {escalate} from 'xstate/lib/actions';
+import {escalate} from '../actions';
 
 export const enum OutcomeIdx {
   A = 0,
