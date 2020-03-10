@@ -100,7 +100,7 @@ test('it uses direct funding when there is no budget', async () => {
     expect(bService.state.value).toEqual('success');
     expect(aService.state.value).toEqual('success');
 
-    const {supportedState} = await aStore.getEntry(targetChannelId);
+    const {supported: supportedState} = await aStore.getEntry(targetChannelId);
     const outcome = checkThat(supportedState.outcome, isSimpleEthAllocation);
 
     expect(outcome).toMatchObject(allocation);
@@ -136,7 +136,7 @@ test('it uses virtual funding when enabled', async () => {
     expect(aService.state.value).toEqual('success');
     expect(bService.state.value).toEqual('success');
 
-    const {supportedState} = await aStore.getEntry(targetChannelId);
+    const {supported: supportedState} = await aStore.getEntry(targetChannelId);
     const outcome = checkThat(supportedState.outcome, isSimpleEthAllocation);
 
     expect(outcome).toMatchObject(allocation);

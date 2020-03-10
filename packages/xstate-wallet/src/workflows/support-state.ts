@@ -43,7 +43,7 @@ const sendState = (store: Store) => async ({state, channelId}: HasChannelId) => 
     isSupportedByMe,
     latestStateSupportedByMe: latestSupportedByMe,
     isSupported,
-    supportedState: supported,
+    supported: supported,
     channelConstants
   } = entry;
   // TODO: Should these safety checks be performed in the store?
@@ -68,7 +68,7 @@ const sendState = (store: Store) => async ({state, channelId}: HasChannelId) => 
 const notifyWhenSupported = (store: Store, {state, channelId}: HasChannelId) => {
   return store.channelUpdatedFeed(channelId).pipe(
     filter(
-      ({isSupported, supportedState: supported, channelConstants}) =>
+      ({isSupported, supported: supported, channelConstants}) =>
         isSupported && statesEqual(channelConstants, state, supported)
     ),
     map(() => 'SUPPORTED')

@@ -75,7 +75,7 @@ type Options = {services: Services};
 
 export const machine: MachineFactory<Init, any> = (store: Store, context: Init) => {
   async function checkCurrentLevel(ctx: Init) {
-    const {supportedState} = await store.getEntry(ctx.channelId);
+    const {supported: supportedState} = await store.getEntry(ctx.channelId);
 
     const outcome = checkThat(supportedState.outcome, isSimpleEthAllocation);
     // TODO This prevents us from funding an app channel
@@ -124,7 +124,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
   }
 
   async function getDepositingInfo({minimalAllocation, channelId}: Init): Promise<Depositing.Init> {
-    const {supportedState, myIndex} = await store.getEntry(channelId);
+    const {supported: supportedState, myIndex} = await store.getEntry(channelId);
     const supportedOutcome = supportedState.outcome;
     if (!isSimpleEthAllocation(supportedOutcome)) {
       throw new Error('Unsupported outcome');
@@ -188,7 +188,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
   }
 
   async function getPostfundOutcome({channelId}: Init): Promise<SupportState.Init> {
-    const {supportedState, channelConstants} = await store.getEntry(channelId);
+    const {supported: supportedState, channelConstants} = await store.getEntry(channelId);
     return {
       state: {
         ...supportedState,

@@ -56,7 +56,7 @@ export const machine = (store: Store) => {
   async function getTargetOutcome(ctx: Init): Promise<SupportState.Init> {
     // TODO: Switch to feed
     const {targetChannelId, ledgerChannelId, deductions} = ctx;
-    const {supportedState: ledgerState, channelConstants} = await store.getEntry(ledgerChannelId);
+    const {supported: ledgerState, channelConstants} = await store.getEntry(ledgerChannelId);
 
     const {amount, finalized} = await store.chain.getChainInfo(ledgerChannelId);
 
