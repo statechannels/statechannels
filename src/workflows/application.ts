@@ -235,7 +235,7 @@ export const applicationWorkflow = (
   const notifyOnUpdate = ({channelId}: ChannelIdExists) => {
     return store
       .channelUpdatedFeed(channelId)
-      .pipe(map(s => ({type: 'CHANNEL_UPDATED', storeEntry: s})));
+      .pipe(map(storeEntry => ({type: 'CHANNEL_UPDATED', storeEntry})));
   };
 
   const actions: WorkflowActions = {
@@ -257,17 +257,11 @@ export const applicationWorkflow = (
       const entry = await store.getEntry(context.channelId);
       await messagingService.sendResponse(context.requestId, await convertToChannelResult(entry));
     },
-    spawnObservers: assign<ChannelIdExists>((context: WorkflowContext & ChannelIdExists) => {
-      if (!context.requestObserver || !context.updateObserver) {
-        return {
-          ...context,
-          updateObserver: spawn(notifyOnUpdate(context)),
-          requestObserver: spawn(notifyOnChannelRequest(context))
-        };
-      } else {
-        return context;
-      }
-    }),
+    spawnObservers: assign<ChannelIdExists>((context: ChannelIdExists) => ({
+      ...context,
+      updateObserver: context.updateObserver ?? spawn(notifyOnUpdate(context)),
+      requestObserver: context.requestObserver ?? spawn(notifyOnChannelRequest(context))
+    })),
 
     sendChannelUpdatedNotification: async (
       context: ChannelIdExists,
