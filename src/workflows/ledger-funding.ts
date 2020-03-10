@@ -8,7 +8,7 @@ import {getDataAndInvoke, checkThat} from '../utils';
 import {Funding} from '../store/memory-store';
 import {add} from '../utils/math-utils';
 import {assignError} from '../utils/workflow-utils';
-import {escalate} from 'xstate/lib/actions';
+import {escalate} from '../actions';
 
 const WORKFLOW = 'ledger-funding';
 
