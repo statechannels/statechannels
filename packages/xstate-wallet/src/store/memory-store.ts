@@ -15,7 +15,8 @@ import {
   Message,
   SiteBudget
 } from './types';
-import {MemoryChannelStoreEntry, ChannelStoreEntry} from './memory-channel-storage';
+import {MemoryChannelStoreEntry} from './memory-channel-storage';
+import {ChannelStoreEntry} from './channel-store-entry';
 import {AddressZero} from 'ethers/constants';
 import {Chain, FakeChain} from '../chain';
 import {calculateChannelId, hashState} from './state-utils';

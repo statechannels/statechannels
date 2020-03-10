@@ -5,7 +5,7 @@ import {applicationWorkflow, WorkflowServices, WorkflowActions} from '../applica
 import {AddressZero} from 'ethers/constants';
 import {MemoryStore, Store} from '../../store/memory-store';
 import {StateVariables, SignedState} from '../../store/types';
-import {ChannelStoreEntry} from '../../store/memory-channel-storage';
+import {ChannelStoreEntry} from '../../store/channel-store-entry';
 import {MessagingService, MessagingServiceInterface} from '../../messaging';
 import {bigNumberify} from 'ethers/utils';
 import {calculateChannelId} from '../../store/state-utils';
