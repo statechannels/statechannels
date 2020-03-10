@@ -295,5 +295,8 @@ export class MemoryStore implements Store {
 }
 
 export function supportedStateFeed(store: Store, channelId: string) {
-  return store.channelUpdatedFeed(channelId).pipe(map(({supported}) => ({state: supported})));
+  return store.channelUpdatedFeed(channelId).pipe(
+    filter(e => e.isSupported),
+    map(({supported}) => ({state: supported}))
+  );
 }
