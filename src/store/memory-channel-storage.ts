@@ -71,11 +71,27 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     );
   }
 
+  get supportedState() {
+    const vars = this.supported;
+    if (!vars) throw new Error('No supported state found');
+    return {...this.channelConstants, ...vars};
+  }
+
   get latestSupportedByMe() {
     return this.sortedByDescendingTurnNum.find(s => this.mySignature(s, s.signatures));
   }
+
+  get latestStateSupportedByMe() {
+    const vars = this.latestSupportedByMe;
+    if (!vars) throw new Error('No state supported by me');
+    return {...this.channelConstants, ...vars};
+  }
+
   get latest(): StateVariables {
     return this.sortedByDescendingTurnNum[0];
+  }
+  get latestState() {
+    return {...this.channelConstants, ...this.latest};
   }
 
   get channelId(): string {

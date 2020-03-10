@@ -6,6 +6,9 @@ export interface ChannelStoreEntry {
   readonly latest: StateVariables;
   readonly supported: StateVariables | undefined;
   readonly latestSupportedByMe: StateVariables | undefined;
+  readonly latestState: State;
+  readonly supportedState: State;
+  readonly latestStateSupportedByMe: State;
   readonly channelConstants: ChannelConstants;
   readonly funding?: Funding;
   readonly states: State[];
