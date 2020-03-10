@@ -1,9 +1,9 @@
-import {ChannelConstants, StateVariables, State} from './types';
+import {ChannelConstants, State} from './types';
 import {Funding} from './memory-store';
 export interface ChannelStoreEntry {
   readonly channelId: string;
   readonly myIndex: number;
-  readonly latest: StateVariables;
+  readonly latest: State;
   readonly isSupported: boolean;
   readonly isSupportedByMe: boolean;
   readonly latestState: State;
