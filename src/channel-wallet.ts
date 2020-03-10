@@ -11,6 +11,7 @@ import {Notification, Response} from '@statechannels/client-api-schema';
 import {filter, map} from 'rxjs/operators';
 import {Message, OpenChannel} from './store/types';
 import {approveBudgetAndFundWorkflow} from './workflows/approve-budget-and-fund';
+import {ethereumEnableWorkflow} from './workflows/ethereum-enable';
 import {AppRequestEvent} from './event-types';
 
 export interface Workflow {
@@ -58,6 +59,7 @@ export class ChannelWallet {
       case 'JOIN_CHANNEL': {
         const workflow = this.startWorkflow(applicationWorkflow(this.store, this.messagingService));
         this.workflows.push(workflow);
+        // throw new Error('oops');
 
         workflow.machine.send(request);
         break;
@@ -74,10 +76,17 @@ export class ChannelWallet {
         this.workflows.push(workflow);
 
         workflow.machine.send(request);
+        break;
+      }
+      case 'ENABLE_ETHEREUM': {
+        const workflow = this.startWorkflow(
+          ethereumEnableWorkflow(this.store, this.messagingService, {requestId: request.requestId})
+        );
+        this.workflows.push(workflow);
+        break;
       }
     }
   }
-
   private startWorkflow(machineConfig: StateNode<any, any, any, any>): Workflow {
     const workflowId = Guid.create().toString();
     const machine = interpret<any, any, any>(machineConfig, {
