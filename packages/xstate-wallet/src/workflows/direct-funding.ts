@@ -188,13 +188,12 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
   }
 
   async function getPostfundOutcome({channelId}: Init): Promise<SupportState.Init> {
-    const {supported: supportedState, channelConstants} = await store.getEntry(channelId);
+    const {supported} = await store.getEntry(channelId);
     return {
       state: {
-        ...supportedState,
-        ...channelConstants,
-        turnNum: supportedState.turnNum.add(1),
-        outcome: mergeDestinations(supportedState.outcome as SimpleAllocation)
+        ...supported,
+        turnNum: supported.turnNum.add(1),
+        outcome: mergeDestinations(supported.outcome as SimpleAllocation)
       }
     };
   }

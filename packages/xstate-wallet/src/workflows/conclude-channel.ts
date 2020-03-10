@@ -71,20 +71,19 @@ export const mockOptions = {
 
 export const machine: MachineFactory<Init, any> = (store: Store, ctx: Init) => {
   async function getFinalState({channelId}: Init): Promise<SupportState.Init> {
-    const {latestSupportedByMe, latest, channelConstants} = await store.getEntry(channelId);
+    const {latestSupportedByMe, latest} = await store.getEntry(channelId);
 
     // If we've received a new final state that matches our outcome we support that
     if (latest.isFinal && outcomesEqual(latestSupportedByMe.outcome, latest.outcome)) {
-      return {state: {...latest, ...channelConstants}};
+      return {state: latest};
     }
     // Otherwise send out our final state that we support
     if (latestSupportedByMe.isFinal) {
-      return {state: {...latestSupportedByMe, ...channelConstants}};
+      return {state: latestSupportedByMe};
     }
     // Otherwise create a new final state
     return {
       state: {
-        ...channelConstants,
         ...latestSupportedByMe,
         turnNum: latestSupportedByMe.turnNum.add(1),
         isFinal: true
