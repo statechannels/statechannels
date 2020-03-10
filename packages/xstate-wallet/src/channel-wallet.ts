@@ -11,7 +11,7 @@ import {Notification, Response} from '@statechannels/client-api-schema';
 import {filter, map} from 'rxjs/operators';
 import {Message, OpenChannel} from './store/types';
 import {approveBudgetAndFundWorkflow} from './workflows/approve-budget-and-fund';
-import {ApproveBudgetAndFund} from './event-types';
+import {AppRequestEvent} from './event-types';
 
 export interface Workflow {
   id: string;
@@ -49,30 +49,33 @@ export class ChannelWallet {
         );
       });
 
-    this.messagingService.requestFeed
-      .pipe(filter(r => r.type === 'CREATE_CHANNEL' || r.type === 'JOIN_CHANNEL'))
-      .subscribe(r => {
+    this.messagingService.requestFeed.subscribe(this.handleRequest);
+  }
+
+  private handleRequest(request: AppRequestEvent) {
+    switch (request.type) {
+      case 'CREATE_CHANNEL':
+      case 'JOIN_CHANNEL': {
         const workflow = this.startWorkflow(applicationWorkflow(this.store, this.messagingService));
         this.workflows.push(workflow);
 
-        workflow.machine.send(r);
-      });
-
-    this.messagingService.requestFeed
-      .pipe(filter((r): r is ApproveBudgetAndFund => r.type === 'APPROVE_BUDGET_AND_FUND'))
-      .subscribe(r => {
+        workflow.machine.send(request);
+        break;
+      }
+      case 'APPROVE_BUDGET_AND_FUND': {
         const workflow = this.startWorkflow(
           approveBudgetAndFundWorkflow(this.store, this.messagingService, {
-            budget: r.budget,
-            requestId: r.requestId,
-            player: r.player,
-            hub: r.hub
+            player: request.player,
+            hub: request.hub,
+            budget: request.budget,
+            requestId: request.requestId
           })
         );
         this.workflows.push(workflow);
 
-        workflow.machine.send(r);
-      });
+        workflow.machine.send(request);
+      }
+    }
   }
 
   private startWorkflow(machineConfig: StateNode<any, any, any, any>): Workflow {
