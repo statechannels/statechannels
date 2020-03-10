@@ -5,7 +5,7 @@ export interface ChannelStoreEntry {
   readonly myIndex: number;
   readonly latest: StateVariables;
   readonly isSupported: boolean;
-  readonly latestSupportedByMe: StateVariables | undefined;
+  readonly isSupportedByMe: boolean;
   readonly latestState: State;
   readonly supportedState: State;
   readonly latestStateSupportedByMe: State;
