@@ -95,9 +95,10 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     return {...this.channelConstants, ...vars};
   }
 
-  get latest(): StateVariables {
-    return this.sortedByDescendingTurnNum[0];
+  get latest() {
+    return {...this.channelConstants, ...this.sortedByDescendingTurnNum[0]};
   }
+
   get latestState() {
     return {...this.channelConstants, ...this.latest};
   }
