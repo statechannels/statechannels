@@ -82,15 +82,15 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
   }
 
   get isSupportedByMe() {
-    return !!this.latestSupportedByMe;
+    return !!this._latestSupportedByMe;
   }
 
-  private get latestSupportedByMe() {
+  private get _latestSupportedByMe() {
     return this.sortedByDescendingTurnNum.find(s => this.mySignature(s, s.signatures));
   }
 
-  get latestStateSupportedByMe() {
-    const vars = this.latestSupportedByMe;
+  get latestSupportedByMe() {
+    const vars = this._latestSupportedByMe;
     if (!vars) throw new Error('No state supported by me');
     return {...this.channelConstants, ...vars};
   }
