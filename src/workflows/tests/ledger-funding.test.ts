@@ -102,7 +102,7 @@ test('multiple workflows', async () => {
     expect(bService.state.value).toEqual('success');
     expect(aService.state.value).toEqual('success');
 
-    const {supportedState} = await aStore.getEntry(ledgerChannelId);
+    const {supported: supportedState} = await aStore.getEntry(ledgerChannelId);
     const outcome = checkThat(supportedState.outcome, isSimpleEthAllocation);
 
     expect(outcome.allocationItems).toMatchObject(

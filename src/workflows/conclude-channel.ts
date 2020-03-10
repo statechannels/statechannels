@@ -94,11 +94,11 @@ export const machine: MachineFactory<Init, any> = (store: Store, ctx: Init) => {
 
   async function getDefundedLedgerState({channelId}: Init): Promise<SupportState.Init> {
     const funding = checkThat((await store.getEntry(channelId)).funding, isIndirectFunding);
-    const {supportedState: targetChannelState} = await store.getEntry(channelId);
+    const {supported: targetChannelState} = await store.getEntry(channelId);
     const {outcome: concludedOutcome} = targetChannelState;
     if (!targetChannelState.isFinal) throw 'Target channel not finalized';
 
-    const {supportedState: ledgerState, channelConstants} = await store.getEntry(funding.ledgerId);
+    const {supported: ledgerState, channelConstants} = await store.getEntry(funding.ledgerId);
     if (!isSimpleEthAllocation(ledgerState.outcome) || !isSimpleEthAllocation(concludedOutcome)) {
       throw new Error('Only SimpleEthAllocations are currently supported');
     }

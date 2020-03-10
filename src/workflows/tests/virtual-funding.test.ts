@@ -122,7 +122,7 @@ test('virtual funding with smart hub', async () => {
     expect(bService.state.value).toEqual('success');
     expect(aService.state.value).toEqual('success');
 
-    const {supportedState} = await aStore.getEntry(jointChannelId);
+    const {supported: supportedState} = await aStore.getEntry(jointChannelId);
     const outcome = supportedState.outcome;
     const amount = bigNumberify(5);
     expect(outcome).toMatchObject(
@@ -178,7 +178,7 @@ test('virtual funding with a simple hub', async () => {
 
     {
       // Check a ledger channel's current outcome
-      const {supportedState} = await aStore.getLedger(
+      const {supported: supportedState} = await aStore.getLedger(
         jointParticipants[ParticipantIdx.Hub].participantId
       );
       expect(supportedState.outcome).toMatchObject(
@@ -199,7 +199,7 @@ test('virtual funding with a simple hub', async () => {
 
     {
       // Check the joint channel's current outcome
-      const {outcome} = (await aStore.getEntry(jointChannelId)).supportedState;
+      const {outcome} = (await aStore.getEntry(jointChannelId)).supported;
       const amount = bigNumberify(5);
       expect(outcome).toMatchObject(
         simpleEthAllocation([
