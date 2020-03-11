@@ -19,6 +19,8 @@ import {Wallet, utils} from 'ethers';
 
 const bigNumberify = utils.bigNumberify;
 
+type ChannelId = string;
+
 /*
  This fake provider becomes the stateful object which handles the calls
  coming from a non-fake `ChannelClient`.
@@ -27,11 +29,11 @@ export class FakeChannelProvider implements ChannelProviderInterface {
   private events = new EventEmitter();
   protected url = '';
 
-  playerIndex?: number;
-  opponentIndex?: number;
+  playerIndex: Record<ChannelId, 0 | 1> = {};
+  opponentIndex: Record<ChannelId, 0 | 1> = {};
   address?: string = Wallet.createRandom().address;
-  opponentAddress?: string;
-  latestState: Record<string, ChannelResult> = {};
+  opponentAddress: Record<ChannelId, string> = {};
+  latestState: Record<ChannelId, ChannelResult> = {};
 
   async enable(url?: string): Promise<void> {
     this.url = url || '';
@@ -94,10 +96,10 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     this.address = address;
   }
 
-  updatePlayerIndex(playerIndex: number): void {
-    if (this.playerIndex === undefined) {
-      this.playerIndex = playerIndex;
-      this.opponentIndex = playerIndex == 1 ? 0 : 1;
+  updatePlayerIndex(channelId: ChannelId, playerIndex: 0 | 1): void {
+    if (this.playerIndex[channelId] === undefined) {
+      this.playerIndex[channelId] = playerIndex;
+      this.opponentIndex[channelId] = playerIndex == 1 ? 0 : 1;
     }
   }
 
@@ -108,25 +110,25 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     return this.address;
   }
 
-  private getPlayerIndex(): number {
+  private getPlayerIndex(channelId: ChannelId): number {
     if (this.playerIndex === undefined) {
       throw Error(`This client does not have its player index set yet`);
     }
-    return this.playerIndex;
+    return this.playerIndex[channelId];
   }
 
-  public getOpponentIndex(): number {
-    if (this.opponentIndex === undefined) {
+  public getOpponentIndex(channelId: ChannelId): number {
+    if (this.opponentIndex[channelId] === undefined) {
       throw Error(`This client does not have its opponent player index set yet`);
     }
-    return this.opponentIndex;
+    return this.opponentIndex[channelId];
   }
 
-  public verifyTurnNum(turnNum: string): Promise<void> {
+  public verifyTurnNum(channelId: ChannelId, turnNum: string): Promise<void> {
     const currentTurnNum = bigNumberify(turnNum);
-    if (currentTurnNum.mod(2).eq(this.getPlayerIndex())) {
+    if (currentTurnNum.mod(2).eq(this.getPlayerIndex(channelId))) {
       return Promise.reject(
-        `Not your turn: currentTurnNum = ${currentTurnNum}, index = ${this.playerIndex}`
+        `Not your turn: currentTurnNum = ${currentTurnNum}, index = ${this.playerIndex[channelId]}`
       );
     }
     return Promise.resolve();
@@ -154,10 +156,10 @@ export class FakeChannelProvider implements ChannelProviderInterface {
       turnNum: bigNumberify(0).toString(),
       status: 'proposed'
     };
-    this.updatePlayerIndex(0);
+    this.updatePlayerIndex(channel.channelId, 0);
     this.setState(channel);
     this.address = channel.participants[0].participantId;
-    this.opponentAddress = channel.participants[1].participantId;
+    this.opponentAddress[channel.channelId] = channel.participants[1].participantId;
     this.notifyOpponent(channel, 'CreateChannel');
 
     return channel;
@@ -166,9 +168,9 @@ export class FakeChannelProvider implements ChannelProviderInterface {
   private async joinChannel(params: JoinChannelParams): Promise<ChannelResult> {
     const {channelId} = params;
     const latestState = this.findChannel(channelId);
-    this.updatePlayerIndex(1);
-    log.debug(`Player ${this.getPlayerIndex()} joining channel ${channelId}`);
-    await this.verifyTurnNum(latestState.turnNum);
+    this.updatePlayerIndex(channelId, 1);
+    log.debug(`Player ${this.getPlayerIndex(channelId)} joining channel ${channelId}`);
+    await this.verifyTurnNum(channelId, latestState.turnNum);
 
     // skip funding by setting the channel to 'running' the moment it is joined
     // [assuming we're working with 2-participant channels for the time being]
@@ -177,7 +179,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
       turnNum: bigNumberify(3).toString(),
       status: 'running'
     });
-    this.opponentAddress = latestState.participants[0].participantId;
+    this.opponentAddress[channelId] = latestState.participants[0].participantId;
     this.notifyOpponent(this.latestState[channelId], 'joinChannel');
 
     return this.latestState[channelId];
@@ -193,17 +195,17 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     const allocations = params.allocations;
     const appData = params.appData;
 
-    log.debug(`Player ${this.getPlayerIndex()} updating channel ${channelId}`);
+    log.debug(`Player ${this.getPlayerIndex(channelId)} updating channel ${channelId}`);
     const latestState = this.findChannel(channelId);
 
     const nextState = {...latestState, participants, allocations, appData};
-    if (nextState !== latestState) {
-      await this.verifyTurnNum(nextState.turnNum);
-      nextState.turnNum = bigNumberify(latestState.turnNum)
-        .add(1)
-        .toString();
-      log.debug(`Player ${this.getPlayerIndex()} updated channel to turnNum ${nextState.turnNum}`);
-    }
+    await this.verifyTurnNum(channelId, latestState.turnNum);
+    nextState.turnNum = bigNumberify(latestState.turnNum)
+      .add(1)
+      .toString();
+    log.debug(
+      `Player ${this.getPlayerIndex(channelId)} updated channel to turnNum ${nextState.turnNum}`
+    );
 
     this.setState(nextState);
 
@@ -214,7 +216,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
   private async closeChannel(params: CloseChannelParams): Promise<ChannelResult> {
     const latestState = this.findChannel(params.channelId);
 
-    await this.verifyTurnNum(latestState.turnNum);
+    await this.verifyTurnNum(params.channelId, latestState.turnNum);
     const turnNum = bigNumberify(latestState.turnNum)
       .add(1)
       .toString();
@@ -223,7 +225,9 @@ export class FakeChannelProvider implements ChannelProviderInterface {
 
     this.setState({...latestState, turnNum, status});
     log.debug(
-      `Player ${this.getPlayerIndex()} updated channel to status ${status} on turnNum ${turnNum}`
+      `Player ${this.getPlayerIndex(
+        params.channelId
+      )} updated channel to status ${status} on turnNum ${turnNum}`
     );
     this.notifyOpponent(this.latestState[params.channelId], 'ChannelUpdate');
 
@@ -251,10 +255,12 @@ export class FakeChannelProvider implements ChannelProviderInterface {
 
   protected notifyOpponent(data: ChannelResult, notificationType: string): void {
     log.debug(
-      `${this.getPlayerIndex()} notifying opponent ${this.getOpponentIndex()} about ${notificationType}`
+      `${this.getPlayerIndex(data.channelId)} notifying opponent ${this.getOpponentIndex(
+        data.channelId
+      )} about ${notificationType}`
     );
     const sender = this.address;
-    const recipient = this.opponentAddress;
+    const recipient: string = this.opponentAddress[data.channelId];
 
     if (!recipient) {
       throw Error(`Cannot notify opponent - opponent address not set`);

@@ -226,15 +226,14 @@ export class PaymentChannelClient {
     const turnNum = Number(channelState.turnNum);
     // doesn't guarantee that my balance increased
     if (channelState.beneficiary === this.mySigningAddress) {
-      // returns true for the second postFS if I am the beneficiary
-      // (I need to accept this 'payment' in order for another one to be sent)
-      return (channelState.status === 'running' && turnNum % 2 === 1) || turnNum === 3;
+      return channelState.status === 'running' && turnNum % 2 === 1;
     }
-    throw new Error(`${this.mySigningAddress} is not the beneficiary ${channelState.beneficiary}`);
+    return false; // only beneficiary may receive payments
   }
 
   async pushMessage(message: Message<ChannelResult>) {
     await this.channelClient.pushMessage(message);
+    return convertToChannelState(message.data);
   }
 
   async approveBudgetAndFund(
