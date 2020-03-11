@@ -78,7 +78,7 @@ const defundTarget: StateNodeConfig<any, any, any> = _.merge(
   {exit: ['deleteTargetChannel']}
 );
 
-const defundGuarantorInLedger = (store: Store) => async ({
+export const defundGuarantorInLedger = (store: Store) => async ({
   jointChannelId,
   ledgerId,
   guarantorChannelId,
