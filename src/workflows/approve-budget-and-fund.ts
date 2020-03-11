@@ -7,12 +7,14 @@ import {
   StateMachine,
   ServiceConfig
 } from 'xstate';
-import {SiteBudget} from '../store/types';
+import {SiteBudget, AllocationItem, Participant} from '../store/types';
 import {sendDisplayMessage, MessagingServiceInterface} from '../messaging';
 import {Store} from '../store';
 import {serializeSiteBudget} from '../serde/app-messages/serialize';
 
-import * as LedgerFunding from '../workflows/ledger-funding';
+import * as CreateAndFundLedger from '../workflows/create-and-fund-ledger';
+import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
+import {simpleEthAllocation} from '../utils/outcome';
 interface UserApproves {
   type: 'USER_APPROVES_BUDGET';
 }
@@ -23,6 +25,8 @@ export type WorkflowEvent = UserApproves | UserRejects;
 
 export interface WorkflowContext {
   budget: SiteBudget;
+  player: Participant;
+  hub: Participant;
   requestId: number;
 }
 
@@ -74,19 +78,6 @@ const mockActions: WorkflowActions = {
   sendResponse: 'sendResponse'
 };
 
-export const mockServices: WorkflowServices = {
-  updateBudget: () => {
-    return new Promise(() => {
-      /* Mock call */
-    }) as any;
-  },
-  createAndFundLedger: () => {
-    return new Promise(() => {
-      /* Mock call */
-    }) as any;
-  }
-};
-
 export const approveBudgetAndFundWorkflow = (
   store: Store,
   messagingService: MessagingServiceInterface,
@@ -96,7 +87,23 @@ export const approveBudgetAndFundWorkflow = (
     updateBudget: (context: WorkflowContext, event) => {
       return store.updateOrCreateBudget(context.budget);
     },
-    createAndFundLedger: (context: WorkflowContext) => LedgerFunding.machine(store)
+    createAndFundLedger: ({player, hub, budget}: WorkflowContext) => {
+      // TODO: Abstract into function that takes a budget and returns a outcome
+      const ethBudget = budget.budgets[ETH_ASSET_HOLDER_ADDRESS];
+      const playerItem: AllocationItem = {
+        destination: player.destination,
+        amount: ethBudget.free.playerAmount
+      };
+      const hubItem: AllocationItem = {
+        destination: player.destination,
+        amount: ethBudget.free.playerAmount
+      };
+
+      return CreateAndFundLedger.createAndFundLedgerWorkflow(store, {
+        initialOutcome: simpleEthAllocation([playerItem, hubItem]),
+        participants: [player, hub]
+      });
+    }
   };
   const actions = {
     // TODO: We should probably set up some standard actions for all workflows
@@ -115,5 +122,5 @@ export const approveBudgetAndFundWorkflow = (
 };
 
 export type WorkflowMachine = StateMachine<WorkflowContext, StateSchema, WorkflowEvent, any>;
-export const mockOptions = {services: mockServices, actions: mockActions};
+
 export const config = generateConfig(mockActions);
