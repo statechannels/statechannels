@@ -56,7 +56,6 @@ const state = (
     outcome
   };
 
-  // TODO: Hard-code these signatures
   return {
     ...state,
     signatures: constants.participants.map(p => signState(state, privateKeys[p.participantId]))
