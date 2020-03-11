@@ -117,8 +117,8 @@ export class ChainWatcher implements Chain {
 
   public async ethereumEnable(): Promise<string> {
     if (window.ethereum) {
-      await window.ethereum.enable();
-      return this.selectedDestination;
+      const [selectedAddress] = await window.ethereum.enable();
+      return selectedAddress;
     } else {
       return Promise.reject('window.ethereum not found');
     }
