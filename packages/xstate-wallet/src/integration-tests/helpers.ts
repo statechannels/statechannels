@@ -17,6 +17,7 @@ import {
 import {interpret, Interpreter} from 'xstate';
 import {applicationWorkflow, WorkflowContext} from '../workflows/application';
 import {Guid} from 'guid-typescript';
+import {HUB_ADDRESS, HUB_DESTINATION} from '../constants';
 
 export class Player {
   privateKey: string;
@@ -188,8 +189,8 @@ export function generateApproveBudgetAndFundRequest(
       site: 'rps.statechannels.org',
       hub: {
         participantId: 'hub',
-        signingAddress: '0x0',
-        destination: '0x0'
+        signingAddress: HUB_ADDRESS,
+        destination: HUB_DESTINATION
       },
       player,
       playerAmount: '0x5',
