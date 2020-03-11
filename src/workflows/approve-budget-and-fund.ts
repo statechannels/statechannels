@@ -9,7 +9,13 @@ import {
   assign,
   AssignAction
 } from 'xstate';
-import {SiteBudget, AllocationItem, Participant, AssetBudget} from '../store/types';
+import {
+  SiteBudget,
+  AllocationItem,
+  Participant,
+  AssetBudget,
+  SimpleAllocation
+} from '../store/types';
 import {sendDisplayMessage, MessagingServiceInterface} from '../messaging';
 import {Store} from '../store';
 import {serializeSiteBudget} from '../serde/app-messages/serialize';
@@ -113,21 +119,10 @@ export const approveBudgetAndFundWorkflow = (
     updateBudget: (context: WorkflowContext, event) => {
       return store.updateOrCreateBudget(context.budget);
     },
-    createAndFundLedger: ({player, hub, budget}: WorkflowContext) => {
-      // TODO: Abstract into function that takes a budget and returns a outcome
-      const ethBudget = budget.budgets[ETH_ASSET_HOLDER_ADDRESS];
-      const playerItem: AllocationItem = {
-        destination: player.destination,
-        amount: ethBudget.pending.playerAmount
-      };
-      const hubItem: AllocationItem = {
-        destination: player.destination,
-        amount: ethBudget.pending.playerAmount
-      };
-
+    createAndFundLedger: (context: WorkflowContext) => {
       return CreateAndFundLedger.createAndFundLedgerWorkflow(store, {
-        initialOutcome: simpleEthAllocation([playerItem, hubItem]),
-        participants: [player, hub]
+        initialOutcome: convertPendingBudgetToAllocation(context),
+        participants: [context.player, context.hub]
       });
     }
   };
@@ -174,4 +169,25 @@ function freeAssetBudget(assetBudget: AssetBudget): AssetBudget {
     free: pending,
     pending: {playerAmount: bigNumberify(0), hubAmount: bigNumberify(0)}
   };
+}
+
+function convertPendingBudgetToAllocation({
+  hub,
+  player,
+  budget
+}: WorkflowContext): SimpleAllocation {
+  // TODO: Eventually we will need to support more complex budgets
+  if (Object.keys(budget.budgets).length !== 1) {
+    throw new Error('Cannot handle mixed budget');
+  }
+  const ethBudget = budget.budgets[ETH_ASSET_HOLDER_ADDRESS];
+  const playerItem: AllocationItem = {
+    destination: player.destination,
+    amount: ethBudget.pending.playerAmount
+  };
+  const hubItem: AllocationItem = {
+    destination: hub.destination,
+    amount: ethBudget.pending.hubAmount
+  };
+  return simpleEthAllocation([playerItem, hubItem]);
 }
