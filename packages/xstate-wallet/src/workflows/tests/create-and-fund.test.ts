@@ -120,7 +120,9 @@ test('it uses virtual funding when enabled', async () => {
 
   chain.depositSync(ledgerId, '0', depositAmount);
   aStore.pushMessage({signedStates: [{...state, signatures}]});
-  aStore.setLedger((await aStore.getEntry(calculateChannelId(state))) as MemoryChannelStoreEntry);
+  aStore.setLedgerByEntry(
+    (await aStore.getEntry(calculateChannelId(state))) as MemoryChannelStoreEntry
+  );
 
   state = ledgerState([second, third], ledgerAmounts);
   ledgerId = calculateChannelId(state);
@@ -128,7 +130,9 @@ test('it uses virtual funding when enabled', async () => {
 
   chain.depositSync(ledgerId, '0', depositAmount);
   bStore.pushMessage({signedStates: [{...state, signatures}]});
-  bStore.setLedger((await bStore.getEntry(calculateChannelId(state))) as MemoryChannelStoreEntry);
+  bStore.setLedgerByEntry(
+    (await bStore.getEntry(calculateChannelId(state))) as MemoryChannelStoreEntry
+  );
 
   const [aService, bService] = [aStore, bStore].map(connectToStore);
 

@@ -5,9 +5,11 @@ import {
   MachineConfig,
   Machine,
   StateMachine,
-  ServiceConfig
+  ServiceConfig,
+  assign,
+  AssignAction
 } from 'xstate';
-import {SiteBudget, AllocationItem, Participant} from '../store/types';
+import {SiteBudget, AllocationItem, Participant, AssetBudget} from '../store/types';
 import {sendDisplayMessage, MessagingServiceInterface} from '../messaging';
 import {Store} from '../store';
 import {serializeSiteBudget} from '../serde/app-messages/serialize';
@@ -15,6 +17,8 @@ import {serializeSiteBudget} from '../serde/app-messages/serialize';
 import * as CreateAndFundLedger from '../workflows/create-and-fund-ledger';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
 import {simpleEthAllocation} from '../utils/outcome';
+import {bigNumberify} from 'ethers/utils';
+import _ from 'lodash';
 interface UserApproves {
   type: 'USER_APPROVES_BUDGET';
 }
@@ -38,6 +42,7 @@ export interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
   states: {
     waitForUserApproval: {};
     updateBudgetInStore: {};
+    freeBudgetInStore: {};
     fundLedger: {};
     done: {};
     failure: {};
@@ -49,6 +54,8 @@ export interface WorkflowActions {
   hideUi: Action<WorkflowContext, any>;
   displayUi: Action<WorkflowContext, any>;
   sendResponse: Action<WorkflowContext, any>;
+  sendBudgetUpdated: Action<WorkflowContext, any>;
+  updateBudgetToFree: AssignAction<WorkflowContext, any>;
 }
 export type StateValue = keyof WorkflowStateSchema['states'];
 
@@ -65,9 +72,26 @@ const generateConfig = (
         USER_REJECTS_BUDGET: {target: 'failure'}
       }
     },
-    updateBudgetInStore: {invoke: {src: 'updateBudget', onDone: 'fundLedger'}},
-    fundLedger: {invoke: {src: 'createAndFundLedger', onDone: 'done'}},
-    done: {type: 'final', entry: [actions.hideUi, actions.sendResponse]},
+    updateBudgetInStore: {
+      invoke: {
+        src: 'updateBudget',
+        onDone: 'fundLedger'
+      },
+      exit: actions.sendBudgetUpdated
+    },
+    freeBudgetInStore: {
+      entry: actions.updateBudgetToFree,
+      invoke: {src: 'updateBudget', onDone: 'done'}
+    },
+    fundLedger: {invoke: {src: 'createAndFundLedger', onDone: 'freeBudgetInStore'}},
+    done: {
+      type: 'final',
+      entry: [
+        actions.hideUi,
+        actions.sendResponse,
+        /* This might be overkill */ actions.sendBudgetUpdated
+      ]
+    },
     failure: {type: 'final'}
   }
 });
@@ -75,7 +99,9 @@ const generateConfig = (
 const mockActions: WorkflowActions = {
   hideUi: 'hideUi',
   displayUi: 'displayUi',
-  sendResponse: 'sendResponse'
+  sendResponse: 'sendResponse',
+  sendBudgetUpdated: 'sendBudgetUpdated',
+  updateBudgetToFree: 'updateBudgetToFree' as any
 };
 
 export const approveBudgetAndFundWorkflow = (
@@ -92,11 +118,11 @@ export const approveBudgetAndFundWorkflow = (
       const ethBudget = budget.budgets[ETH_ASSET_HOLDER_ADDRESS];
       const playerItem: AllocationItem = {
         destination: player.destination,
-        amount: ethBudget.free.playerAmount
+        amount: ethBudget.pending.playerAmount
       };
       const hubItem: AllocationItem = {
         destination: player.destination,
-        amount: ethBudget.free.playerAmount
+        amount: ethBudget.pending.playerAmount
       };
 
       return CreateAndFundLedger.createAndFundLedgerWorkflow(store, {
@@ -115,7 +141,20 @@ export const approveBudgetAndFundWorkflow = (
     },
     sendResponse: (context: WorkflowContext, event) => {
       messagingService.sendResponse(context.requestId, serializeSiteBudget(context.budget));
-    }
+    },
+    sendBudgetUpdated: async (context: WorkflowContext, event) => {
+      await messagingService.sendBudgetNotification(context.budget);
+    },
+    updateBudgetToFree: assign(
+      (context: WorkflowContext): WorkflowContext => {
+        const clonedBudget = _.cloneDeep(context.budget);
+        // TODO: There must be a nicer way of mapping from one record to a new one
+        Object.keys(clonedBudget.budgets).forEach(k => {
+          clonedBudget.budgets[k] = freeAssetBudget(clonedBudget.budgets[k]);
+        });
+        return {...context, budget: clonedBudget};
+      }
+    )
   };
   const config = generateConfig(actions);
   return Machine(config).withConfig({services}, context) as WorkflowMachine;
@@ -124,3 +163,15 @@ export const approveBudgetAndFundWorkflow = (
 export type WorkflowMachine = StateMachine<WorkflowContext, StateSchema, WorkflowEvent, any>;
 
 export const config = generateConfig(mockActions);
+
+// TODO: Should there be a Site Budget class that handles this?
+function freeAssetBudget(assetBudget: AssetBudget): AssetBudget {
+  const {pending, inUse, direct, assetHolderAddress} = assetBudget;
+  return {
+    assetHolderAddress,
+    inUse,
+    direct,
+    free: pending,
+    pending: {playerAmount: bigNumberify(0), hubAmount: bigNumberify(0)}
+  };
+}

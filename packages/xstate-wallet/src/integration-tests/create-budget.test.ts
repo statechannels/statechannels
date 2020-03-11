@@ -7,6 +7,8 @@ import {FundLedger} from '../store/types';
 import {checkThat} from '../utils';
 import {isSimpleEthAllocation} from '../utils/outcome';
 
+import {bigNumberify} from 'ethers/utils';
+
 jest.setTimeout(30000);
 
 it('allows for a wallet to approve a budget and fund with the hub', async () => {
@@ -56,7 +58,25 @@ it('allows for a wallet to approve a budget and fund with the hub', async () => 
   }, 3000);
   playerA.channelWallet.workflows[0].machine.send({type: 'USER_APPROVES_BUDGET'});
 
-  const createResponse = await createBudgetPromise;
+  const createResponse: ApproveBudgetAndFundResponse = await createBudgetPromise;
+  const ethBudget = createResponse.result.budgets[0];
 
-  expect(createResponse.result).toBeDefined();
+  // Check that the budget shows the funds are free
+  expect(ethBudget.free.hubAmount).toEqual('0x5');
+  expect(ethBudget.free.playerAmount).toEqual('0x5');
+  // Check that the ledger channel is set up correct
+  const ledgerEntry = await playerA.store.getLedger(hub.signingAddress);
+  expect(ledgerEntry.isSupported).toBe(true);
+  const allocation = checkThat(ledgerEntry.supported.outcome, isSimpleEthAllocation);
+  expect(allocation.allocationItems).toContainEqual({
+    destination: hub.destination,
+    amount: bigNumberify('0x5')
+  });
+  expect(allocation.allocationItems).toContainEqual({
+    destination: playerA.destination,
+    amount: bigNumberify('0x5')
+  });
+  // Check that the funds are reflected on chain
+  const chainInfo = await playerA.store.chain.getChainInfo(ledgerEntry.channelId);
+  expect(chainInfo.amount.eq(10)).toBe(true);
 });
