@@ -62,7 +62,7 @@ const sendState = (store: Store) => async ({state, channelId}: HasChannelId) => 
 const notifyWhenSupported = (store: Store, {state, channelId}: HasChannelId) => {
   return store.channelUpdatedFeed(channelId).pipe(
     filter(({isSupported}) => isSupported),
-    filter(({channelConstants, supported}) => statesEqual(state, supported)),
+    filter(({supported}) => statesEqual(state, supported)),
     map(() => 'SUPPORTED')
   );
 };
