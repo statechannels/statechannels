@@ -75,16 +75,21 @@ const defundGuarantorInLedger = (store: Store) => async ({
 }: ChannelsSet): Promise<SupportState.Init> => {
   const {supported: jointState} = await store.getEntry(jointChannelId);
   const jAlloc = checkThat(jointState.outcome, isSimpleEthAllocation).allocationItems;
-  const refundsFromTargetChannel = [
-    {destination: jAlloc[role].destination, amount: jAlloc[role].amount},
-    {destination: jAlloc[OutcomeIdx.Hub].destination, amount: jAlloc[2 - role].amount}
-  ];
 
   const {supported: ledgerState} = await store.getEntry(ledgerId);
   const {allocationItems: lAlloc} = checkThat(ledgerState.outcome, isSimpleEthAllocation);
   const ledgerWithoutGuarantor = _.filter(lAlloc, a => a.destination !== guarantorChannelId);
 
-  const outcome = simpleEthAllocation([...ledgerWithoutGuarantor, ...refundsFromTargetChannel]);
+  const [hub, leaf] = ledgerWithoutGuarantor.slice(0, 2);
+  const BadOutcome = new Error('Bad outcomes');
+  if (hub.destination !== jAlloc[OutcomeIdx.Hub].destination) throw BadOutcome;
+  if (leaf.destination !== jAlloc[role].destination) throw BadOutcome;
+
+  const outcome = simpleEthAllocation([
+    {destination: hub.destination, amount: hub.amount.add(jAlloc[2 - role].amount)},
+    {destination: leaf.destination, amount: leaf.amount.add(jAlloc[role].amount)},
+    ...ledgerWithoutGuarantor.slice(2)
+  ]);
   return {state: nextState(ledgerState, outcome)};
 };
 
