@@ -231,7 +231,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     this.paymentChannelClient.onChannelUpdated(async (channelState: ChannelState) => {
       log(`State received with turnNum ${channelState.turnNum}`);
       if (
-        (wire.paidStreamingExtension.pseAccount === channelState.beneficiary && // must narrow to *this* wire
+        (channelState.channelId === wire.paidStreamingExtension.pseChannelId && // must narrow to *this* wire
           this.paymentChannelClient.isPaymentToMe(channelState)) ||
         Number(channelState.turnNum) === 3
         // returns true for the second postFS if I am the beneficiary
