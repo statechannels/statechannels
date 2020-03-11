@@ -5,6 +5,7 @@ import './wallet.scss';
 import logo from '../images/logo.svg';
 import {Modal, Card, Flex, Image} from 'rimble-ui';
 import {ApplicationWorkflow} from './application-workflow';
+import {EnableEthereum} from './enable-ethereum-workflow';
 
 interface Props {
   workflow: Interpreter<any, any, any>;
@@ -20,6 +21,9 @@ export const Wallet = (props: Props) => {
         </Flex>
         {props.workflow.id === 'application-workflow' && (
           <ApplicationWorkflow current={current} send={send} />
+        )}
+        {props.workflow.id === 'enable-ethereum' && (
+          <EnableEthereum current={current} send={send} />
         )}
       </Card>
     </Modal>
