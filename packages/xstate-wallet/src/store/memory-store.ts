@@ -71,12 +71,12 @@ interface InternalEvents {
 
 export class MemoryStore implements Store {
   readonly chain: Chain;
-  private _channels: Record<string, MemoryChannelStoreEntry | undefined> = {};
+  protected _channels: Record<string, MemoryChannelStoreEntry | undefined> = {};
   private _objectives: Objective[] = [];
   private _nonces: Record<string, BigNumber | undefined> = {};
   private _eventEmitter = new EventEmitter<InternalEvents>();
   private _privateKeys: Record<string, string | undefined> = {};
-  private _ledgers: Record<string, string | undefined> = {};
+  protected _ledgers: Record<string, string | undefined> = {};
   private _budgets: Record<string, SiteBudget> = {};
 
   constructor(privateKeys?: string[], chain?: Chain) {
@@ -173,16 +173,6 @@ export class MemoryStore implements Store {
     if (!ledgerId) throw new Error(`No ledger exists with peer ${peerId}`);
 
     return await this.getEntry(ledgerId);
-  }
-
-  public setLedger(entry: MemoryChannelStoreEntry) {
-    // This is not on the Store interface itself -- it is useful to set up a test store
-    const {channelId} = entry;
-    this._channels[channelId] = entry;
-
-    const peerId = entry.participants.find(p => p.signingAddress !== this.getAddress());
-    if (peerId) this._ledgers[peerId.participantId] = channelId;
-    else throw 'No peer';
   }
 
   public async createChannel(
