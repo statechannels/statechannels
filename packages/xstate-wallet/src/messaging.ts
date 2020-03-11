@@ -138,7 +138,7 @@ export class MessagingService implements MessagingServiceInterface {
       case 'CloseChannel':
       case 'JoinChannel':
       case 'ApproveBudgetAndFund':
-        const appRequest = convertToInternalEvent(request);
+        const appRequest = await convertToInternalEvent(request);
         this.eventEmitter.emit('AppRequest', appRequest);
         break;
       case 'PushMessage':
@@ -225,10 +225,13 @@ export function sendDisplayMessage(displayMessage: 'Show' | 'Hide') {
 function convertToInternalEvent(request: ChannelRequest): AppRequestEvent {
   switch (request.method) {
     case 'ApproveBudgetAndFund':
+      const {player, hub} = request.params;
       return {
         type: 'APPROVE_BUDGET_AND_FUND',
         requestId: request.id,
-        budget: deserializeBudgetRequest(request.params)
+        budget: deserializeBudgetRequest(request.params),
+        player,
+        hub
       };
     case 'CloseChannel':
       return {

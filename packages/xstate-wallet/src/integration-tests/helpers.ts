@@ -186,11 +186,14 @@ export function generateApproveBudgetAndFundRequest(
     method: 'ApproveBudgetAndFund',
     params: {
       site: 'rps.statechannels.org',
-      hubAddress: 'rps.statechannels.org',
+      hub: {
+        participantId: 'hub',
+        signingAddress: '0x0',
+        destination: '0x0'
+      },
+      player,
       playerAmount: '0x5',
-      hubAmount: '0x5',
-      hubOutcomeAddress: '0x0',
-      playerOutcomeAddress: player.destination
+      hubAmount: '0x5'
     }
   };
 }

@@ -30,7 +30,6 @@ export type WorkflowEvent = AnyEventObject;
 export type WorkflowContext = {
   initialOutcome: SimpleAllocation;
   participants: Participant[];
-  ourIndex: number;
   ledgerId?: string;
 };
 export type LedgerIdExists = WorkflowContext & {ledgerId: string};
