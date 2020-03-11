@@ -5,6 +5,7 @@ import * as VirtualFundingAsLeaf from './virtual-funding-as-leaf';
 import * as VirtualFundingAsHub from './virtual-funding-as-hub';
 import * as CreateAndFund from './create-and-fund';
 import * as VirtualDefundingAsLeaf from './virtual-defunding-as-leaf';
+import * as VirtualDefundingAsHub from './virtual-defunding-as-hub';
 
 export {
   SupportState,
@@ -13,5 +14,6 @@ export {
   CreateAndFund,
   VirtualFundingAsLeaf,
   VirtualFundingAsHub,
-  VirtualDefundingAsLeaf
+  VirtualDefundingAsLeaf,
+  VirtualDefundingAsHub
 };
