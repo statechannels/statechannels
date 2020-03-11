@@ -28,6 +28,12 @@ case $TARGET_PACKAGE in
         status=$?
         ;;
 
+    xstate-wallet)
+        echo "Checking for changes across xstate-wallet package..."
+        git diff --quiet origin/master HEAD -- ./packages/xstate-wallet
+        status=$?
+        ;;
+
     nitro-protocol)
         echo "Checking for changes in nitro-protocol package..."
         git diff --quiet origin/master HEAD -- ./packages/nitro-protocol
