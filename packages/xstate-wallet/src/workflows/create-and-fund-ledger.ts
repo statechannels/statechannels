@@ -144,9 +144,7 @@ export const options = (
       assignChannelId: assign(channelId: (_, {data}: DoneInvokeEvent<string>) => data)
     },
     guards: {
-      doesChannelIdExist: (context: WorkflowContext) => {
-        return !!context.ledgerId;
-      }
+      doesChannelIdExist: (context: WorkflowContext) => !!context.ledgerId
     },
     services: {
       initializeChannel: initializeChannel(store),
