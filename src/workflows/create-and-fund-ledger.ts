@@ -161,7 +161,7 @@ export const mockGuards: WorkflowGuards = {
   doesChannelIdExist: () => true
 };
 
-export const mockOptions = {services: mockServices, actions: mockActions, guards: mockGuards};
+export const mockOptions = {guards: mockGuards};
 
 export const createAndFundLedgerWorkflow = (store: Store, context: WorkflowContext) =>
   Machine(config)
