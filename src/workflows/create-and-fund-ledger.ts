@@ -48,7 +48,7 @@ export const config: StateNodeConfig<WorkflowContext, any, any> = {
   states: {
     isChannelIdDefined: {
       on: {
-        '': [{cond: 'doesChannelIdExist', target: 'waitForObjective'}, {target: 'initialize'}]
+        '': [{cond: 'doesChannelIdExist', target: 'supportPreFundState'}, {target: 'initialize'}]
       }
     },
     initialize: {
