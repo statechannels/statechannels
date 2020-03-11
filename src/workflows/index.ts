@@ -4,6 +4,7 @@ import * as LedgerFunding from './ledger-funding';
 import * as VirtualFundingAsLeaf from './virtual-funding-as-leaf';
 import * as VirtualFundingAsHub from './virtual-funding-as-hub';
 import * as CreateAndFund from './create-and-fund';
+import * as VirtualDefundingAsLeaf from './virtual-defunding-as-leaf';
 
 export {
   SupportState,
@@ -11,5 +12,6 @@ export {
   LedgerFunding,
   CreateAndFund,
   VirtualFundingAsLeaf,
-  VirtualFundingAsHub
+  VirtualFundingAsHub,
+  VirtualDefundingAsLeaf
 };
