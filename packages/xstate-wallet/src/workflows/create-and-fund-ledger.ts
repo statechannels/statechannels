@@ -58,7 +58,7 @@ export const config: StateNodeConfig<WorkflowContext, any, any> = {
         initializeChannel: {
           invoke: {
             src: 'initializeChannel',
-            onDone: {target: 'createObjective', actions: []}
+            onDone: 'createObjective'
           }
         },
         createObjective: {
