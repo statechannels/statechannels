@@ -1,6 +1,6 @@
 import {Message as WireMessage} from '@statechannels/wire-format';
 import * as R from 'ramda';
-import {cHubStateChannelPK, cHubStateChannelAddress} from '../constants';
+import {cHubParticipantPK, cHubParticipantAddress} from '../constants';
 import {
   deserializeMessage,
   serializeMessage,
@@ -11,7 +11,7 @@ import {
 } from './xstate-wallet-internals';
 
 function containsHub(participant: Participant): boolean {
-  return participant.signingAddress === cHubStateChannelAddress;
+  return participant.signingAddress === cHubParticipantAddress;
 }
 const notContainsHub = R.compose(R.not, containsHub);
 
@@ -28,7 +28,7 @@ export function respondToMessage(wireMessage: WireMessage): WireMessage[] {
     state => state.participants.filter(containsHub).length
   );
   const signedStates = statesWithHub.map(state => {
-    const ourSignature = signState(state, cHubStateChannelPK);
+    const ourSignature = signState(state, cHubParticipantPK);
     const signatures = R.append(ourSignature, state.signatures);
     return {...state, signatures};
   });

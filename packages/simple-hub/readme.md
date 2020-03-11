@@ -20,16 +20,16 @@ $ yarn hub:watch (will rebuild app on file change)
 
 ### Establishing a virtual channel between clients through the hub
 
-**NOTE**: Running this package makes a connection to a shared external Firebase database. So, to avoid colliding with other developers also running this package, set the environment variable `HUB_ADDRESS` to one that is likely not being used by any other developer for local development purposes.
+**NOTE**: Running this package makes a connection to a shared external Firebase database. So, to avoid colliding with other developers also running this package, set the environment variable `HUB_PARTICIPANT_PK` to one that is likely not being used by any other developer for local development purposes.
 
 To connect to the `hub` from the browser `wallet`, the `hub` and the browser `wallet` need to:
 
-- Share the state-channel address of the hub. A good way to do so is to create a `.env.development.local` in the monorepo root with `HUB_ADDRESS` and `HUB_PRIVATE_KEY` defined.
+- Share the state-channel address of the hub. A good way to do so is to create a `.env.development.local` in the monorepo root with `HUB_PARTICIPANT_ADDRESS` and `HUB_PARTICIPANT_PK` defined.
 - Point to the same local Ganache server. Configure your `.env` files accordingly. This should work without any modifications.
 - Point to the same shared local Ganache server. This should work without any modifications. To see which ports are being used by the `hub` and `wallet`, and to verify they are the same, you can reference the `GANACHE_PORT` environment variable which by default is set in `.env` of each package.
 - Point to the same contract addresses on Ganache. This will be the case if the hub and the client wallet point to the same Ganache server.
 
-You will also need to make sure that the hub's blockchain address has funds. The default hub blockchain address `HUB_SIGNER_ADDRESS` is in [constants.ts](https://github.com/statechannels/monorepo/blob/master/packages/hub/src/constants.ts). This address will have funds by default. Ganache is started with [these funded private keys](https://github.com/statechannels/monorepo/blob/hub-address/packages/devtools/src/constants.ts). Consequently, feel free to substitute any of these address/private key pairs for `HUB_SIGNER_ADDRESS` and `HUB_SIGNER_PRIVATE_KEY`.
+You will also need to make sure that the hub's blockchain address has funds. The default hub blockchain address is calculated from the HUB_CHAIN_PK in [constants.ts](https://github.com/statechannels/monorepo/blob/master/packages/simple-hub/src/constants.ts#L13). This address will have funds by default. Ganache is started with [these funded private keys](https://github.com/statechannels/monorepo/blob/hub-address/packages/devtools/src/constants.ts). Consequently, feel free to substitute any of these private keys for `HUB_CHAIN_PK`.
 
 ## Testing
 
@@ -47,7 +47,7 @@ Heroku runs a production version of the build `Dockerfile.hub.staging` in the ro
 **Build the Dockerfile locally, by running**
 
 ```bash
-docker build -t registry.heroku.com/simple-hub-staging/simple-hub -f Dockerfile.hub.staging .
+docker build -t registry.heroku.com/simple-hub-staging/simple-hub -f Dockerfile.simple-hub.staging .
 ```
 
 **Push the container to the Heroku Container Registry**
