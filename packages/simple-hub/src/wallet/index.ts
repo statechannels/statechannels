@@ -1,10 +1,14 @@
 import {Message as WireMessage} from '@statechannels/wire-format';
 import * as R from 'ramda';
-import {signState} from '@statechannels/xstate-wallet/lib/src/store/state-utils';
-import {deserializeMessage} from '@statechannels/xstate-wallet/lib/src/serde/wire-format/deserialize';
-import {serializeMessage} from '@statechannels/xstate-wallet/lib/src/serde/wire-format/serialize';
 import {cHubStateChannelPK, cHubStateChannelAddress} from '../constants';
-import {SignedState, Message, Participant} from '@statechannels/xstate-wallet/lib/src/store/types';
+import {
+  deserializeMessage,
+  serializeMessage,
+  SignedState,
+  Message,
+  Participant,
+  signState
+} from './xstate-wallet-internals';
 
 function containsHub(participant: Participant): boolean {
   return participant.signingAddress === cHubStateChannelAddress;
