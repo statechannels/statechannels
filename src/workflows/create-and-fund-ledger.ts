@@ -117,7 +117,7 @@ const getPreFundState = (store: Store): WorkflowServices['getPreFundState'] => a
   const {latestState} = await store.getEntry(context.ledgerId);
   return {state: latestState};
 };
-// TODO: Can this be shared with create-and-fund?
+
 const getDepositingInfo = (
   store: Store
 ): WorkflowServices['getDepositingInfo'] => async context => {
