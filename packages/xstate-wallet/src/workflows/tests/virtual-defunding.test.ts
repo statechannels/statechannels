@@ -13,7 +13,7 @@ import {simpleEthAllocation, simpleEthGuarantee} from '../../utils/outcome';
 import {wallet1, wallet2, wallet3, threeParticipants as participants} from './data';
 import {subscribeToMessages} from './message-service';
 import {ParticipantIdx} from '../virtual-funding-as-leaf';
-import {VirtualDefundingAsLeaf} from '..';
+import {VirtualDefundingAsLeaf, VirtualDefundingAsHub} from '..';
 import {TestStore} from './store';
 
 jest.setTimeout(20000);
@@ -181,6 +181,45 @@ test('virtual defunding with a simple hub', async () => {
     expect(aService.state.value).toEqual('success');
 
     const {supported} = await aStore.getEntry(ledger1Id);
+    expect((supported.outcome as any).allocationItems).toEqual([
+      {destination: hub.destination, amount: targetAmounts[1].add(ledger1Amounts[0])},
+      {destination: alice.destination, amount: targetAmounts[0].add(ledger1Amounts[1])}
+    ]);
+  }, EXPECT_TIMEOUT);
+});
+
+test('virtual defunding with a proper hub', async () => {
+  const hubStore = new TestStore([wallet3.privateKey]);
+
+  hubStore.createEntry(ledger1State, {type: 'Direct'});
+  hubStore.createEntry(jointState, {
+    type: 'Guarantees',
+    guarantorChannelIds: [guarantor1Id, guarantor2Id]
+  });
+  hubStore.createEntry(guarantor1State, {type: 'Indirect', ledgerId: ledger1Id});
+  hubStore.createEntry(ledger2State, {type: 'Direct'});
+  hubStore.createEntry(guarantor2State, {type: 'Indirect', ledgerId: ledger2Id});
+
+  const aService = interpret(VirtualDefundingAsLeaf.machine(aStore).withContext(context));
+  const bService = interpret(VirtualDefundingAsLeaf.machine(bStore).withContext(context));
+  const hubService = interpret(
+    VirtualDefundingAsHub.machine(hubStore).withContext({jointChannelId})
+  );
+  const services = [aService, bService, hubService];
+
+  subscribeToMessages({
+    [alice.participantId]: aStore,
+    [bob.participantId]: bStore,
+    [hub.participantId]: hubStore
+  });
+
+  services.forEach(service => service.start());
+
+  await waitForExpect(async () => {
+    expect(hubService.state.value).toEqual('success');
+    expect(aService.state.value).toEqual('success');
+
+    const {supported} = await hubStore.getEntry(ledger1Id);
     expect((supported.outcome as any).allocationItems).toEqual([
       {destination: hub.destination, amount: targetAmounts[1].add(ledger1Amounts[0])},
       {destination: alice.destination, amount: targetAmounts[0].add(ledger1Amounts[1])}
