@@ -50,7 +50,7 @@ export class ChannelWallet {
         );
       });
 
-    this.messagingService.requestFeed.subscribe(this.handleRequest);
+    this.messagingService.requestFeed.subscribe(x => this.handleRequest(x));
   }
 
   private handleRequest(request: AppRequestEvent) {

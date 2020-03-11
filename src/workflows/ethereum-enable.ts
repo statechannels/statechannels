@@ -63,7 +63,7 @@ const generateConfig = (
       invoke: {
         src: 'enableEthereum',
         onDone: {target: 'done', actions: assign({enabledAddress: (context, event) => event.data})},
-        onError: 'retry'
+        onError: 'failure'
       }
     }, // invoke ethereum enable
     done: {type: 'final', entry: [actions.hideUi, actions.sendResponse]},
@@ -91,7 +91,7 @@ export const ethereumEnableWorkflow = (
   context: WorkflowContext
 ): WorkflowMachine => {
   const services: WorkflowServices = {
-    enableEthereum: store.chain.ethereumEnable
+    enableEthereum: () => store.chain.ethereumEnable()
   };
   const actions = {
     displayUi: () => {
