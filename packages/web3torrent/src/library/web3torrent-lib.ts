@@ -26,14 +26,14 @@ export type TorrentCallback = (torrent: Torrent) => any;
 
 export * from './types';
 
-export const WEI_PER_BYTE = bigNumberify(1); // cost per credit / piece
-export const BUFFER_REFILL_RATE = bigNumberify(100000); // number of credits / pieces the leecher wishes to increase the buffer by
+export const WEI_PER_BYTE = bigNumberify(1); // cost per byte
+export const BUFFER_REFILL_RATE = bigNumberify(1e5); // number of bytes the leecher wishes to increase the buffer by
 // These variables control the amount of (micro)trust the leecher must invest in the seeder
 // As well as the overall performance hit of integrating payments into webtorrent.
 // A high BUFFER_REFILL_RATE increases the need for trust, but decreases the number of additional messages and therefore latency
 // It can also cause a payment to go above the leecher's balance / capabilities
 export const INITIAL_SEEDER_BALANCE = bigNumberify(0); // needs to be zero so that depositing works correctly (unidirectional payment channel)
-export const INITIAL_LEECHER_BALANCE = bigNumberify(1e9); // e.g. gwei = 1e9 = nano-ETH
+export const INITIAL_LEECHER_BALANCE = bigNumberify(2e9); // e.g. gwei = 1e9 = nano-ETH
 
 // A Whimsical diagram explaining the functionality of Web3Torrent: https://whimsical.com/Sq6whAwa8aTjbwMRJc7vPU
 export default class WebTorrentPaidStreamingClient extends WebTorrent {
@@ -231,7 +231,8 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     this.paymentChannelClient.onChannelUpdated(async (channelState: ChannelState) => {
       log(`State received with turnNum ${channelState.turnNum}`);
       if (
-        this.paymentChannelClient.isPaymentToMe(channelState) ||
+        (wire.paidStreamingExtension.pseAccount === channelState.beneficiary && // must narrow to *this* wire
+          this.paymentChannelClient.isPaymentToMe(channelState)) ||
         Number(channelState.turnNum) === 3
         // returns true for the second postFS if I am the beneficiary
         // (I need to countersign this state in order for the first payment to be sent)
@@ -273,7 +274,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       .toString();
 
     log(
-      `newSeederBalance: ${newSeederBalance} wei; payment: ${payment} wei;, buffer for peer: ${this.peersList[infoHash][peerId].buffer} pieces`
+      `newSeederBalance: ${newSeederBalance} wei; payment: ${payment} wei;, buffer for peer: ${this.peersList[infoHash][peerId].buffer} bytes`
     );
   }
 
