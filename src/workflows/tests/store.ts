@@ -9,7 +9,7 @@ export class TestStore extends MemoryStore {
     this._channels[channelId] = entry;
 
     const peerId = entry.participants.find(p => p.signingAddress !== this.getAddress());
-    if (peerId) this._ledgers[peerId.participantId] = channelId;
+    if (peerId) this._ledgers[peerId.participantId] = {ledgerId: channelId};
     else throw 'No peer';
   }
 

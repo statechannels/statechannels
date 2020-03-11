@@ -69,6 +69,11 @@ interface InternalEvents {
   addToOutbox: [Message];
 }
 
+type LedgerStatus = {
+  ledgerId: string;
+  lockId?: string;
+};
+
 export class MemoryStore implements Store {
   readonly chain: Chain;
   protected _channels: Record<string, MemoryChannelStoreEntry | undefined> = {};
@@ -76,7 +81,7 @@ export class MemoryStore implements Store {
   private _nonces: Record<string, BigNumber | undefined> = {};
   private _eventEmitter = new EventEmitter<InternalEvents>();
   private _privateKeys: Record<string, string | undefined> = {};
-  protected _ledgers: Record<string, string | undefined> = {};
+  protected _ledgers: Record<string, LedgerStatus | undefined> = {};
   private _budgets: Record<string, SiteBudget> = {};
 
   constructor(privateKeys?: string[], chain?: Chain) {
@@ -168,11 +173,10 @@ export class MemoryStore implements Store {
     channelEntry.setFunding(funding);
   }
   public async getLedger(peerId: string) {
-    const ledgerId = this._ledgers[peerId];
+    const status = this._ledgers[peerId];
+    if (!status) throw new Error(`No ledger exists with peer ${peerId}`);
 
-    if (!ledgerId) throw new Error(`No ledger exists with peer ${peerId}`);
-
-    return await this.getEntry(ledgerId);
+    return await this.getEntry(status.ledgerId);
   }
 
   public async createChannel(
