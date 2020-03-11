@@ -46,12 +46,11 @@ const privateKeys: Record<string, string> = {
 const state = (
   constants: ChannelConstants,
   outcome: Outcome,
-  turnNum: BigNumberish = 0,
-  isFinal = false
+  turnNum: BigNumberish = 0
 ): SignedState => {
   const state = {
     ...constants,
-    isFinal,
+    isFinal: false,
     turnNum: bigNumberify(turnNum),
     appData: HashZero,
     outcome
@@ -90,7 +89,7 @@ const targetOutcome = simpleEthAllocation([
   {destination: bob.destination, amount: targetAmounts[1]}
 ]);
 const targetTurnNum = 5;
-const targetState = state(targetChannel, targetOutcome, targetTurnNum, true);
+const targetState = state(targetChannel, targetOutcome, targetTurnNum);
 
 const jointChannel = channelConstants(participants);
 const jointOutcome = simpleEthAllocation([
