@@ -100,8 +100,13 @@ export type FundGuarantor = _Objective<
     guarantorId: string;
   }
 >;
-
-export type Objective = OpenChannel | VirtuallyFund | FundGuarantor;
+export type FundLedger = _Objective<
+  'FundLedger',
+  {
+    ledgerId: string;
+  }
+>;
+export type Objective = OpenChannel | VirtuallyFund | FundGuarantor | FundLedger;
 
 const guard = <T extends Objective>(name: Objective['type']) => (o: Objective): o is T =>
   o.type === name;

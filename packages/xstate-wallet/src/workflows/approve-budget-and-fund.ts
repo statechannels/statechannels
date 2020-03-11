@@ -12,6 +12,7 @@ import {sendDisplayMessage, MessagingServiceInterface} from '../messaging';
 import {Store} from '../store';
 import {serializeSiteBudget} from '../serde/app-messages/serialize';
 
+import * as LedgerFunding from '../workflows/ledger-funding';
 interface UserApproves {
   type: 'USER_APPROVES_BUDGET';
 }
@@ -27,7 +28,7 @@ export interface WorkflowContext {
 
 export interface WorkflowServices extends Record<string, ServiceConfig<WorkflowContext>> {
   updateBudget: (context: WorkflowContext, event: any) => Promise<void>;
-  createAndFundLedger: (context: WorkflowContext, event: any) => Promise<void>;
+  createAndFundLedger: (context: WorkflowContext, event: any) => StateMachine<any, any, any, any>;
 }
 export interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
   states: {
@@ -95,10 +96,7 @@ export const approveBudgetAndFundWorkflow = (
     updateBudget: (context: WorkflowContext, event) => {
       return store.updateOrCreateBudget(context.budget);
     },
-    createAndFundLedger: (context: WorkflowContext, event) => {
-      // TODO: Hook up to workflow when it exists
-      return Promise.resolve();
-    }
+    createAndFundLedger: (context: WorkflowContext) => LedgerFunding.machine(store)
   };
   const actions = {
     // TODO: We should probably set up some standard actions for all workflows
