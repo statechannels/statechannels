@@ -35,9 +35,20 @@ type ChannelIds = {
 type ChannelsSet = Init & ChannelIds;
 
 const checkChannels: StateNodeConfig<ChannelsSet, any, any> = {
-  invoke: {src: checkChannelsService.name, onDone: 'defundTarget'},
+  invoke: {src: checkChannelsService.name, onDone: 'closeTarget'},
   exit: assign<ChannelsSet>((_: Init, {data}: DoneInvokeEvent<ChannelIds>) => data)
 };
+
+const finalTargetState = (store: Store) => async (ctx: Init): Promise<SupportState.Init> => {
+  const {supported} = await store.getEntry(ctx.targetChannelId);
+  return {state: {...supported, turnNum: supported.turnNum.add(1), isFinal: true}};
+};
+
+const closeTarget: StateNodeConfig<any, any, any> = getDataAndInvoke(
+  {src: finalTargetState.name},
+  {src: 'supportState'},
+  'defundTarget'
+);
 
 const finalJointChannelUpdate = (store: Store) => async (
   ctx: ChannelsSet
@@ -81,7 +92,7 @@ const defundGuarantorInLedger = (store: Store) => async ({
   const ledgerWithoutGuarantor = _.filter(lAlloc, a => a.destination !== guarantorChannelId);
 
   const [hub, leaf] = ledgerWithoutGuarantor.slice(0, 2);
-  const BadOutcome = new Error('Bad outcomes');
+  const BadOutcome = new Error('Invalid ledger channel outcome');
   if (hub.destination !== jAlloc[OutcomeIdx.Hub].destination) throw BadOutcome;
   if (leaf.destination !== jAlloc[role].destination) throw BadOutcome;
 
@@ -101,16 +112,22 @@ const defundGuarantor: StateNodeConfig<any, any, any> = _.merge(
 export const config: StateNodeConfig<any, any, any> = {
   key: PROTOCOL,
   initial: 'checkChannels',
-  states: {checkChannels, defundTarget, defundGuarantor, success: {type: 'final'}}
+  states: {
+    checkChannels,
+    closeTarget,
+    defundTarget,
+    defundGuarantor,
+    success: {type: 'final'}
+  }
 };
 
 const services = (store: Store) => ({
   checkChannelsService: checkChannelsService(store),
   defundGuarantorInLedger: defundGuarantorInLedger(store),
   finalJointChannelUpdate: finalJointChannelUpdate(store),
+  finalTargetState: finalTargetState(store),
   supportState: SupportState.machine(store)
 });
-const actions = (_: Store) => ({});
-const options = (store: Store) => ({services: services(store), actions: actions(store)});
+const options = (store: Store) => ({services: services(store)});
 
 export const machine = (store: Store) => Machine(config).withConfig(options(store));
