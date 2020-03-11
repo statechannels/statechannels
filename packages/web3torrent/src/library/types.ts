@@ -22,14 +22,14 @@ export enum TorrentEvents {
 export enum WireEvents {
   DOWNLOAD = 'download',
   FIRST_REQUEST = 'first_request',
-  REQUEST = 'request'
+  REQUEST = 'request',
+  KEEP_ALIVE = 'keep-alive'
 }
 
 export enum PaidStreamingExtensionEvents {
   WARNING = 'warning',
   PSE_HANDSHAKE = 'pse_handshake',
   NOTICE = 'notice',
-  FIRST_REQUEST = 'first_request',
   REQUEST = 'request'
 }
 
@@ -61,6 +61,8 @@ export type PaidStreamingWire = Omit<Wire, 'requests'> &
 
     _clearTimeout(): void;
     _onRequest(index: number, offset: number, length: number): void;
+    _onCancel(index: number, offset: number, length: number): void;
+    _onPiece(index: number, offset: number, buffer: Buffer): void;
   };
 
 export type ExtendedHandshake = PaidStreamingExtendedHandshake & {
@@ -97,7 +99,9 @@ export type ExtendedTorrent = Omit<WebTorrent.Torrent, OverridenTorrentPropertie
 
   _startDiscovery(): void;
   _selections: unknown;
+  _update(): void;
   _updateWire(wire: PaidStreamingWire): void;
+  _reservations: unknown;
 };
 
 export type ArgumentTypes<F extends Function> = F extends (...args: infer A) => any ? A : never;
