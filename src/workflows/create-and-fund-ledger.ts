@@ -141,9 +141,7 @@ export const options = (
 ): {actions: WorkflowActions; services: WorkflowServices; guards: WorkflowGuards} => {
   return {
     actions: {
-      assignChannelId: assign((context: WorkflowContext, event: DoneInvokeEvent<string>) => {
-        return {...context, channelId: event.data};
-      })
+      assignChannelId: assign(channelId: (_, {data}: DoneInvokeEvent<string>) => data)
     },
     guards: {
       doesChannelIdExist: (context: WorkflowContext) => {
