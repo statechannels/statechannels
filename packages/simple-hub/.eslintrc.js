@@ -1,19 +1,4 @@
 // From the tslint.json we used previously
-const leftoverTsLintRules = {
-  '@typescript-eslint/no-explicit-any': 'off',
-  '@typescript-eslint/explicit-function-return-type': 'off',
-  '@typescript-eslint/no-use-before-define': 'off'
-};
-
-const jestViolations = {
-  'jest/no-disabled-tests': 'off',
-  'jest/expect-expect': 'off'
-};
-
-const otherViolations = {
-  '@typescript-eslint/camelcase': 'off'
-};
-
 module.exports = {
   env: {
     node: true,
@@ -29,8 +14,6 @@ module.exports = {
     'plugin:import/typescript'
   ],
   rules: {
-    ...leftoverTsLintRules,
-    ...jestViolations,
-    ...otherViolations
+    '@typescript-eslint/explicit-function-return-type': 'off'
   }
 };

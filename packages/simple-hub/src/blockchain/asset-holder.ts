@@ -8,7 +8,7 @@ const provider = new providers.JsonRpcProvider(rpcEndpoint);
 const walletWithProvider = new ethers.Wallet(cHubChainPK, provider);
 
 export async function ethAssetHolder() {
-  let ethAssetHolderFactory;
+  let ethAssetHolderFactory: ContractFactory;
   try {
     ethAssetHolderFactory = await ContractFactory.fromSolidity(
       ContractArtifacts.EthAssetHolderArtifact,
