@@ -168,7 +168,13 @@ export class MemoryStore implements Store {
     return await this.getEntry(ledgerId);
   }
 
-  public setLedger(entry: MemoryChannelStoreEntry) {
+  public async setLedger(channelId: string): Promise<void> {
+    const entry = this._channels[channelId];
+    if (!entry) throw 'No entry for channelId';
+    this.setLedgerByEntry(entry);
+  }
+
+  public setLedgerByEntry(entry: MemoryChannelStoreEntry) {
     // This is not on the Store interface itself -- it is useful to set up a test store
     const {channelId} = entry;
     this._channels[channelId] = entry;

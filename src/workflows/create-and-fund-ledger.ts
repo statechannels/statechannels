@@ -100,6 +100,8 @@ const initializeChannel = (
     appData: '0x0'
   };
   const entry = await store.createChannel(context.participants, CHALLENGE_DURATION, stateVars);
+  await store.setFunding(entry.channelId, {type: 'Direct'});
+  await store.setLedger(entry.channelId);
   return entry.channelId;
 };
 

@@ -94,7 +94,7 @@ test('virtual funding with smart hub', async () => {
     [aStore, hubStore].map(async (store: MemoryStore) => {
       const signatures = [wallet1, wallet3].map(({privateKey}) => signState(state, privateKey));
       store.pushMessage({signedStates: [{...state, signatures}]});
-      store.setLedger((await store.getEntry(ledgerId)) as MemoryChannelStoreEntry);
+      store.setLedgerByEntry((await store.getEntry(ledgerId)) as MemoryChannelStoreEntry);
     })
   );
 
@@ -105,7 +105,7 @@ test('virtual funding with smart hub', async () => {
     [bStore, hubStore].map(async (store: MemoryStore) => {
       const signatures = [wallet2, wallet3].map(({privateKey}) => signState(state, privateKey));
       store.pushMessage({signedStates: [{...state, signatures}]});
-      store.setLedger((await store.getEntry(ledgerId)) as MemoryChannelStoreEntry);
+      store.setLedgerByEntry((await store.getEntry(ledgerId)) as MemoryChannelStoreEntry);
     })
   );
 
@@ -154,7 +154,9 @@ test('virtual funding with a simple hub', async () => {
 
   chain.depositSync(ledgerId, '0', depositAmount);
   aStore.pushMessage({signedStates: [{...state, signatures}]});
-  aStore.setLedger((await aStore.getEntry(calculateChannelId(state))) as MemoryChannelStoreEntry);
+  aStore.setLedgerByEntry(
+    (await aStore.getEntry(calculateChannelId(state))) as MemoryChannelStoreEntry
+  );
 
   state = ledgerState([second, third], ledgerAmounts);
   ledgerId = calculateChannelId(state);
@@ -162,7 +164,9 @@ test('virtual funding with a simple hub', async () => {
 
   chain.depositSync(ledgerId, '0', depositAmount);
   bStore.pushMessage({signedStates: [{...state, signatures}]});
-  bStore.setLedger((await bStore.getEntry(calculateChannelId(state))) as MemoryChannelStoreEntry);
+  bStore.setLedgerByEntry(
+    (await bStore.getEntry(calculateChannelId(state))) as MemoryChannelStoreEntry
+  );
 
   subscribeToMessages({
     [jointParticipants[ParticipantIdx.A].participantId]: aStore,
