@@ -302,8 +302,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
     torrent.on(TorrentEvents.NOTICE, async (wire, {command, data}) => {
       log(`< ${command} received from ${wire.peerExtendedHandshake.pseAccount}`, data);
-      const peerAccount = wire.paidStreamingExtension.peerAccount;
-      let channelId: string;
       let message: Message<ChannelResult>;
       switch (command) {
         case PaidStreamingExtensionNotices.STOP:
