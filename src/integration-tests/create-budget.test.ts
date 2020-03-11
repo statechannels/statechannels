@@ -1,8 +1,11 @@
 import {ApproveBudgetAndFundResponse} from '@statechannels/client-api-schema';
 import {filter, map, first} from 'rxjs/operators';
 import {FakeChain} from '../chain';
-import {Player, generateApproveBudgetAndFundRequest} from './helpers';
+import {Player, generateApproveBudgetAndFundRequest, hookUpMessaging} from './helpers';
 import waitForExpect from 'wait-for-expect';
+import {FundLedger} from '../store/types';
+import {checkThat} from '../utils';
+import {isSimpleEthAllocation} from '../utils/outcome';
 
 jest.setTimeout(30000);
 
@@ -14,6 +17,30 @@ it('allows for a wallet to approve a budget and fund with the hub', async () => 
     'PlayerA',
     fakeChain
   );
+
+  const hub = new Player(
+    '0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29',
+    'Hub',
+    fakeChain
+  );
+
+  hookUpMessaging(playerA, hub);
+  // We need to spawn a create and fund ledger when receiving the objective
+  // This should be similar to how the actual hub handles this
+  hub.store.newObjectiveFeed
+    .pipe(
+      filter((o): o is FundLedger => {
+        return o.type === 'FundLedger';
+      })
+    )
+    .subscribe(async o => {
+      const entry = await hub.store.getEntry(o.data.ledgerId);
+      hub.startCreateAndFundLedger({
+        ledgerId: o.data.ledgerId,
+        participants: o.participants,
+        initialOutcome: checkThat(entry.latest.outcome, isSimpleEthAllocation)
+      });
+    });
 
   const createBudgetEvent = generateApproveBudgetAndFundRequest(playerA.participant);
   const createBudgetPromise = playerA.messagingService.outboxFeed

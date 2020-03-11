@@ -53,11 +53,12 @@ export const config: StateNodeConfig<WorkflowContext, any, any> = {
     },
     initialize: {
       initial: 'initializeChannel',
+
       states: {
         initializeChannel: {
           invoke: {
             src: 'initializeChannel',
-            onDone: 'createObjective'
+            onDone: {target: 'createObjective', actions: ['assignChannelId']}
           }
         },
         createObjective: {

@@ -15,7 +15,8 @@ import {
   ApproveBudgetAndFundRequest
 } from '@statechannels/client-api-schema';
 import {interpret, Interpreter} from 'xstate';
-import {applicationWorkflow, WorkflowContext} from '../workflows/application';
+import * as App from '../workflows/application';
+import * as CreateAndFundLedger from '../workflows/create-and-fund-ledger';
 import {Guid} from 'guid-typescript';
 import {HUB_ADDRESS, HUB_DESTINATION} from '../constants';
 
@@ -28,10 +29,24 @@ export class Player {
   messagingService: MessagingServiceInterface;
   channelWallet: ChannelWallet;
 
-  startAppWorkflow(startingState: string, context?: WorkflowContext) {
+  startCreateAndFundLedger(context: CreateAndFundLedger.WorkflowContext) {
     const workflowId = Guid.create().toString();
     const machine = interpret<any, any, any>(
-      applicationWorkflow(this.store, this.messagingService, context),
+      CreateAndFundLedger.createAndFundLedgerWorkflow(this.store, context),
+      {
+        devTools: true
+      }
+    )
+      .onTransition((state, event) => process.env.ADD_LOGS && logTransition(state, event, this.id))
+
+      .start();
+
+    this.channelWallet.workflows.push({id: workflowId, machine, domain: 'TODO'});
+  }
+  startAppWorkflow(startingState: string, context?: App.WorkflowContext) {
+    const workflowId = Guid.create().toString();
+    const machine = interpret<any, any, any>(
+      App.applicationWorkflow(this.store, this.messagingService, context),
       {
         devTools: true
       }
@@ -188,7 +203,7 @@ export function generateApproveBudgetAndFundRequest(
     params: {
       site: 'rps.statechannels.org',
       hub: {
-        participantId: 'hub',
+        participantId: HUB_ADDRESS,
         signingAddress: HUB_ADDRESS,
         destination: HUB_DESTINATION
       },
