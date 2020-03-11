@@ -160,17 +160,6 @@ export const options = (
 export const mockGuards: WorkflowGuards = {
   doesChannelIdExist: () => true
 };
-export const mockActions: WorkflowActions = {
-  assignChannelId: 'assignChannelId' as any
-};
-export const mockServices: WorkflowServices = {
-  initializeChannel: 'initializeChannel' as any,
-  supportState: 'supportState' as any,
-  createObjective: 'createObjective' as any,
-  depositing: 'depositing' as any,
-  getDepositingInfo: 'getDepositingInfo' as any,
-  getPreFundState: 'getPreFundState' as any
-};
 
 export const mockOptions = {services: mockServices, actions: mockActions, guards: mockGuards};
 
