@@ -176,11 +176,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           response(false);
 
           this.blockPeer(torrent.infoHash, wire, peerAccount);
-          this.emit(ClientEvents.PEER_STATUS_CHANGED, {
-            torrentPeers: this.peersList[torrent.infoHash],
-            torrentInfoHash: torrent.infoHash,
-            peerAccount
-          });
         } else if (!knownPeerAccount.allowed || reqPrice.gt(knownPeerAccount.buffer)) {
           response(false);
           log('> BLOCKED: ' + index, 'BUFFER: ' + knownPeerAccount.buffer);
