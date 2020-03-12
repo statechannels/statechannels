@@ -19,13 +19,11 @@ export interface Store {
   ): Promise<ChannelStoreEntry>;
   getEntry(channelId): Promise<ChannelStoreEntry>;
   getLedger(peerId: string): Promise<ChannelStoreEntry>;
-  // TODO: This is awkward. Might be better to set the funding on create/initialize channel?
+
   setFunding(channelId: string, funding: Funding): Promise<void>;
-  // TODO: I don't know how the store is mean to send outgoing messages.
-  // But I need one, in order to implement virtual funding.
   addObjective(objective: Objective): void;
-  // TODO: should this be exposed via the Store?
-  chain: Chain;
   getBudget: (site: string) => Promise<SiteBudget | undefined>;
   updateOrCreateBudget: (budget: SiteBudget) => Promise<void>;
+
+  chain: Chain;
 }
