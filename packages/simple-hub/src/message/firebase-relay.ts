@@ -1,6 +1,6 @@
 import * as firebase from 'firebase';
 
-import {cHubParticipantAddress, cFirebasePrefix} from '../constants';
+import {cFirebasePrefix, cHubParticipantId} from '../constants';
 import {logger} from '../logger';
 import {Message} from '@statechannels/wire-format';
 import {fromEvent, Observable} from 'rxjs';
@@ -30,7 +30,7 @@ function getMessagesRef() {
 
 export function fbListen(responseForMessage: (message: Message) => Message[]) {
   log.info('firebase-relay: listen');
-  const hubRef = getMessagesRef().child(cHubParticipantAddress);
+  const hubRef = getMessagesRef().child(cHubParticipantId);
 
   const childAddedObservable: Observable<FirebaseEvent> = fromEvent(hubRef, 'child_added');
 
