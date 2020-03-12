@@ -175,6 +175,22 @@ export class MemoryStore implements Store {
     return await this.getEntry(ledgerId);
   }
 
+  public async setLedger(channelId: string): Promise<void> {
+    const entry = this._channels[channelId];
+    if (!entry) throw 'No entry for channelId';
+    this.setLedgerByEntry(entry);
+  }
+
+  public setLedgerByEntry(entry: MemoryChannelStoreEntry) {
+    // This is not on the Store interface itself -- it is useful to set up a test store
+    const {channelId} = entry;
+    this._channels[channelId] = entry;
+
+    const peerId = entry.participants.find(p => p.signingAddress !== this.getAddress());
+    if (peerId) this._ledgers[peerId.participantId] = channelId;
+    else throw 'No peer';
+  }
+
   public async createChannel(
     participants: Participant[],
     challengeDuration: BigNumber,

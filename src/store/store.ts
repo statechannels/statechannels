@@ -4,6 +4,7 @@ import {Participant, StateVariables, Objective, Message, SiteBudget} from './typ
 import {ChannelStoreEntry} from './channel-store-entry';
 import {Chain} from '../chain';
 import {Funding} from './memory-store';
+
 export interface Store {
   newObjectiveFeed: Observable<Objective>;
   outboxFeed: Observable<Message>;
@@ -19,6 +20,8 @@ export interface Store {
   ): Promise<ChannelStoreEntry>;
   getEntry(channelId): Promise<ChannelStoreEntry>;
   getLedger(peerId: string): Promise<ChannelStoreEntry>;
+
+  setLedger(channelId: string): Promise<void>;
   // TODO: This is awkward. Might be better to set the funding on create/initialize channel?
   setFunding(channelId: string, funding: Funding): Promise<void>;
   // TODO: I don't know how the store is mean to send outgoing messages.
