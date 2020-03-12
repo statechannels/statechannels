@@ -30,7 +30,7 @@ export interface Chain {
   deposit: (channelId: string, expectedHeld: string, amount: string) => Promise<void>;
   ethereumEnable: () => Promise<string>;
   ethereumIsEnabled: boolean;
-  selectedDestination: string;
+  selectedAddress: string;
 }
 
 // TODO: This chain should be fleshed out enough so it mimics basic chain behavior
@@ -86,14 +86,14 @@ export class FakeChain implements Chain {
   }
 
   public ethereumEnable() {
-    return Promise.resolve(this.selectedDestination);
+    return Promise.resolve(this.selectedAddress);
   }
 
   public get ethereumIsEnabled() {
     return true;
   }
 
-  public get selectedDestination() {
+  public get selectedAddress() {
     return '0x123';
   }
 }
@@ -132,7 +132,7 @@ export class ChainWatcher implements Chain {
     }
   }
 
-  public get selectedDestination(): string {
+  public get selectedAddress(): string {
     if (window.ethereum) {
       const destination = window.ethereum.selectedAddress;
       if (destination) {
