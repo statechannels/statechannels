@@ -3,7 +3,6 @@ import waitForExpect from 'wait-for-expect';
 
 import {Init, machine} from '../create-and-fund';
 
-import {MemoryStore} from '../../store/memory-store';
 import {Store} from '../../store';
 import {bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
@@ -17,8 +16,8 @@ import {subscribeToMessages} from './message-service';
 import {ETH_ASSET_HOLDER_ADDRESS, HUB} from '../../constants';
 import {FakeChain} from '../../chain';
 import {SimpleHub} from './simple-hub';
-import {MemoryChannelStoreEntry} from '../../store/memory-channel-storage';
 import {add} from '../../utils/math-utils';
+import {TestStore} from './store';
 
 jest.setTimeout(20000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
@@ -62,8 +61,8 @@ const depositAmount = ledgerAmounts.reduce(add).toHexString();
 
 const context: Init = {channelId: targetChannelId, allocation};
 
-let aStore: MemoryStore;
-let bStore: MemoryStore;
+let aStore: TestStore;
+let bStore: TestStore;
 
 const allSignState = (state: State) => ({
   ...state,
@@ -73,17 +72,14 @@ const allSignState = (state: State) => ({
 let chain: FakeChain;
 beforeEach(() => {
   chain = new FakeChain();
-  aStore = new MemoryStore([wallet1.privateKey], chain);
-  bStore = new MemoryStore([wallet2.privateKey], chain);
+  aStore = new TestStore([wallet1.privateKey], chain);
+  bStore = new TestStore([wallet2.privateKey], chain);
   const hubStore = new SimpleHub(wallet3.privateKey);
 
-  const message = {
-    signedStates: [
-      allSignState(firstState(allocation, targetChannel)),
-      allSignState(firstState(allocation, ledgerChannel))
-    ]
-  };
-  [aStore, bStore].forEach((store: Store) => store.pushMessage(message));
+  [aStore, bStore].forEach((store: TestStore) => {
+    store.createEntry(allSignState(firstState(allocation, targetChannel)));
+    store.createEntry(allSignState(firstState(allocation, ledgerChannel)));
+  });
 
   subscribeToMessages({
     [participants[0].participantId]: aStore,
@@ -119,20 +115,14 @@ test('it uses virtual funding when enabled', async () => {
   let signatures = [wallet1, wallet3].map(({privateKey}) => signState(state, privateKey));
 
   chain.depositSync(ledgerId, '0', depositAmount);
-  aStore.pushMessage({signedStates: [{...state, signatures}]});
-  aStore.setLedgerByEntry(
-    (await aStore.getEntry(calculateChannelId(state))) as MemoryChannelStoreEntry
-  );
+  aStore.setLedgerByEntry(aStore.createEntry({...state, signatures}));
 
   state = ledgerState([second, third], ledgerAmounts);
   ledgerId = calculateChannelId(state);
   signatures = [wallet2, wallet3].map(({privateKey}) => signState(state, privateKey));
 
   chain.depositSync(ledgerId, '0', depositAmount);
-  bStore.pushMessage({signedStates: [{...state, signatures}]});
-  bStore.setLedgerByEntry(
-    (await bStore.getEntry(calculateChannelId(state))) as MemoryChannelStoreEntry
-  );
+  bStore.setLedgerByEntry(bStore.createEntry({...state, signatures}));
 
   const [aService, bService] = [aStore, bStore].map(connectToStore);
 

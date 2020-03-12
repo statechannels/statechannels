@@ -32,17 +32,22 @@ interface IndirectFunding {
   ledgerId: string;
 }
 
-interface VirtualFunding {
+export interface VirtualFunding {
   type: 'Virtual';
   jointChannelId: string;
 }
 
-interface Guaranteed {
+interface Guarantee {
   type: 'Guarantee';
+  guarantorChannelId: string;
+}
+
+interface Guarantees {
+  type: 'Guarantees';
   guarantorChannelIds: [string, string];
 }
 
-export type Funding = DirectFunding | IndirectFunding | VirtualFunding | Guaranteed;
+export type Funding = DirectFunding | IndirectFunding | VirtualFunding | Guarantees | Guarantee;
 export function isIndirectFunding(funding: Funding): funding is IndirectFunding {
   return funding.type === 'Indirect';
 }
@@ -51,10 +56,12 @@ export function isVirtualFunding(funding: Funding): funding is VirtualFunding {
   return funding.type === 'Virtual';
 }
 
-export function isGuarantee(funding: Funding): funding is Guaranteed {
+export function isGuarantee(funding: Funding): funding is Guarantee {
   return funding.type === 'Guarantee';
 }
-// get it so that when you add a state to a channel, it sends that state to all participant
+export function isGuarantees(funding: Funding): funding is Guarantees {
+  return funding.type === 'Guarantees';
+}
 
 interface InternalEvents {
   channelUpdated: [ChannelStoreEntry];
@@ -64,12 +71,12 @@ interface InternalEvents {
 
 export class MemoryStore implements Store {
   readonly chain: Chain;
-  private _channels: Record<string, MemoryChannelStoreEntry | undefined> = {};
+  protected _channels: Record<string, MemoryChannelStoreEntry | undefined> = {};
   private _objectives: Objective[] = [];
   private _nonces: Record<string, BigNumber | undefined> = {};
   private _eventEmitter = new EventEmitter<InternalEvents>();
   private _privateKeys: Record<string, string | undefined> = {};
-  private _ledgers: Record<string, string | undefined> = {};
+  protected _ledgers: Record<string, string | undefined> = {};
   private _budgets: Record<string, SiteBudget> = {};
 
   constructor(privateKeys?: string[], chain?: Chain) {

@@ -113,3 +113,11 @@ export function convertToNitroOutcome(outcome: Outcome): NitroOutcome {
       return outcome.simpleAllocations.map(x => convertToNitroOutcome[0]);
   }
 }
+
+export function nextState(state: State, outcome: Outcome) {
+  if (state.outcome.type !== outcome.type) {
+    throw new Error('Attempting to change outcome type');
+  }
+
+  return {...state, turnNum: state.turnNum.add(1), outcome};
+}
