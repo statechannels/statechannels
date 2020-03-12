@@ -9,7 +9,7 @@ import {WebTorrentContext} from '../../../clients/web3torrent-client';
 export type UploadInfoProps = {
   wires: PaidStreamingWire[];
   channels: Dictionary<ChannelState>;
-  peerType: 'seeder' | 'leecher';
+  pseType: 'seeder' | 'leecher';
 };
 
 class ChannelsList extends React.Component<UploadInfoProps> {
@@ -19,7 +19,7 @@ class ChannelsList extends React.Component<UploadInfoProps> {
     channelId: string,
     channels: Dictionary<ChannelState>,
     wires: PaidStreamingWire[],
-    peerType: 'seeder' | 'leecher'
+    pseType: 'seeder' | 'leecher'
   ) {
     let channelButton;
 
@@ -42,7 +42,8 @@ class ChannelsList extends React.Component<UploadInfoProps> {
     );
 
     const uploaded = wire ? wire.uploaded : 0;
-    const peerAccount = wire ? wire.paidStreamingExtension.peerAccount : 'unknown';
+    const peerAccount =
+      pseType === 'leecher' ? channels[channelId].beneficiary : channels[channelId].payer;
 
     return (
       <tr className="peerInfo" key={channelId}>
@@ -51,10 +52,9 @@ class ChannelsList extends React.Component<UploadInfoProps> {
         <td className="peer-id">{peerAccount}</td>
         <td className="uploaded">
           {uploaded && prettier(uploaded)}
-          &nbsp;
-          {peerType === 'seeder' ? `up` : `down`}
+          {pseType === 'seeder' ? ` up` : ` down`}
         </td>
-        {peerType === 'seeder' ? (
+        {pseType === 'seeder' ? (
           <td className="earned">{Number(channels[channelId].beneficiaryBalance)} wei</td>
         ) : (
           <td className="paid">-{Number(channels[channelId].beneficiaryBalance)} wei</td>
@@ -75,7 +75,7 @@ class ChannelsList extends React.Component<UploadInfoProps> {
                   id,
                   this.props.channels,
                   this.props.wires,
-                  this.props.peerType
+                  this.props.pseType
                 )
               )}
           </tbody>
