@@ -35,7 +35,7 @@ export class ChannelWallet {
     // Whenever an OpenChannel objective is received
     // we alert the user that there is a new channel
     // It is up to the app to call JoinChannel
-    this.store.newObjectiveFeed
+    this.store.objectiveFeed
       .pipe(
         // TODO: type guard
         filter(o => o.type === 'OpenChannel'),

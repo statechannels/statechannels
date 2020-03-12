@@ -170,7 +170,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => 
 };
 
 const getObjective = (store: Store) => (ctx: Init): Promise<VirtualFundingAsLeaf.Init> =>
-  store.newObjectiveFeed
+  store.objectiveFeed
     .pipe(
       filter(isVirtuallyFund),
       map(
