@@ -56,7 +56,7 @@ export const config: MachineConfig<any, any, any> = {
     updatingFunding: {invoke: {src: Services.updateFunding, onDone: 'success'}},
     success: {type: 'final'},
     failure: {
-      entry: [assignError, escalate(({error}) => ({type: 'FAILURE', error}))],
+      entry: [assignError, 'escalateError'],
       invoke: {src: Services.releaseLock}
     }
   }
@@ -123,6 +123,10 @@ const services = (store: Store): Record<Services, ServiceConfig<Init>> => ({
   releaseLock: releaseLock(store)
 });
 
-const options = (store: Store) => ({services: services(store)});
+const actions = {
+  escalateError: escalate(({error}) => ({type: 'FAILURE', error}))
+};
+
+const options = (store: Store) => ({services: services(store), actions});
 
 export const machine = (store: Store) => Machine(config, options(store));
