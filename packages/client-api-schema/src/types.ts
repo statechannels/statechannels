@@ -167,9 +167,8 @@ export interface SiteBudget {
 
 export interface BudgetRequest extends Balance {
   site: string;
-  playerOutcomeAddress: string;
-  hubAddress: string;
-  hubOutcomeAddress: string;
+  player: Participant;
+  hub: Participant;
 }
 export type GetBudgetRequest = JsonRpcRequest<'GetBudget', {hubAddress: Address}>;
 export type GetBudgetResponse = JsonRpcResponse<SiteBudget | {}>;

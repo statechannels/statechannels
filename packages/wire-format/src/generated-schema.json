@@ -100,6 +100,41 @@
       ],
       "type": "object"
     },
+    "FundLedger": {
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+          "additionalProperties": false,
+          "properties": {
+            "ledgerId": {
+              "$ref": "#/definitions/Bytes32"
+            }
+          },
+          "required": [
+            "ledgerId"
+          ],
+          "type": "object"
+        },
+        "participants": {
+          "items": {
+            "$ref": "#/definitions/Participant"
+          },
+          "type": "array"
+        },
+        "type": {
+          "enum": [
+            "FundLedger"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "participants",
+        "type",
+        "data"
+      ],
+      "type": "object"
+    },
     "Gaurantee": {
       "additionalProperties": false,
       "properties": {
@@ -174,6 +209,9 @@
         },
         {
           "$ref": "#/definitions/FundGuarantor"
+        },
+        {
+          "$ref": "#/definitions/FundLedger"
         }
       ]
     },
