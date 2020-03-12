@@ -87,20 +87,22 @@ test('virtual funding with smart hub', async () => {
   let state = ledgerState([first, third], ledgerAmounts);
   let ledgerId = calculateChannelId(state);
   chain.depositSync(ledgerId, '0', depositAmount);
-
-  [aStore, hubStore].map(async (store: TestStore) => {
-    const signatures = [wallet1, wallet3].map(({privateKey}) => signState(state, privateKey));
-    store.setLedger(store.createEntry({...state, signatures}));
-  });
+  await Promise.all(
+    [aStore, hubStore].map(async (store: TestStore) => {
+      const signatures = [wallet1, wallet3].map(({privateKey}) => signState(state, privateKey));
+      store.setLedgerByEntry(store.createEntry({...state, signatures}));
+    })
+  );
 
   state = ledgerState([second, third], ledgerAmounts);
   ledgerId = calculateChannelId(state);
   chain.depositSync(ledgerId, '0', depositAmount);
-
-  [bStore, hubStore].map(async (store: TestStore) => {
-    const signatures = [wallet2, wallet3].map(({privateKey}) => signState(state, privateKey));
-    store.setLedger(store.createEntry({...state, signatures}));
-  });
+  await Promise.all(
+    [bStore, hubStore].map(async (store: TestStore) => {
+      const signatures = [wallet2, wallet3].map(({privateKey}) => signState(state, privateKey));
+      store.setLedgerByEntry(store.createEntry({...state, signatures}));
+    })
+  );
 
   subscribeToMessages({
     [jointParticipants[ParticipantIdx.A].participantId]: aStore,
@@ -144,14 +146,14 @@ test('virtual funding with a simple hub', async () => {
   let signatures = [wallet1, wallet3].map(({privateKey}) => signState(state, privateKey));
 
   chain.depositSync(ledgerId, '0', depositAmount);
-  aStore.setLedger(aStore.createEntry({...state, signatures}));
+  aStore.setLedgerByEntry(aStore.createEntry({...state, signatures}));
 
   state = ledgerState([second, third], ledgerAmounts);
   ledgerId = calculateChannelId(state);
   signatures = [wallet2, wallet3].map(({privateKey}) => signState(state, privateKey));
 
   chain.depositSync(ledgerId, '0', depositAmount);
-  bStore.setLedger(bStore.createEntry({...state, signatures}));
+  bStore.setLedgerByEntry(bStore.createEntry({...state, signatures}));
 
   subscribeToMessages({
     [jointParticipants[ParticipantIdx.A].participantId]: aStore,

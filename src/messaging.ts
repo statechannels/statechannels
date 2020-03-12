@@ -21,7 +21,7 @@ import {fromEvent, Observable} from 'rxjs';
 import {ChannelStoreEntry} from './store/channel-store-entry';
 import {Message as WireMessage} from '@statechannels/wire-format';
 import {unreachable} from './utils';
-import {isAllocation, Message} from './store/types';
+import {isAllocation, Message, SiteBudget} from './store/types';
 import {serializeAllocation, serializeSiteBudget} from './serde/app-messages/serialize';
 import {deserializeMessage} from './serde/wire-format/deserialize';
 import {serializeMessage} from './serde/wire-format/serialize';
@@ -50,7 +50,7 @@ export interface MessagingServiceInterface {
   readonly requestFeed: Observable<AppRequestEvent>;
 
   receiveRequest(jsonRpcMessage: Request): Promise<void>;
-
+  sendBudgetNotification(notificationData: SiteBudget): Promise<void>;
   sendChannelNotification(
     method: ChannelClosingNotification['method'] | ChannelUpdatedNotification['method'],
     notificationData: ChannelResult
@@ -77,6 +77,15 @@ export class MessagingService implements MessagingServiceInterface {
   public async sendResponse(id: number, result: Response['result']) {
     const response = {id, jsonrpc: '2.0', result} as Response; // typescript can't handle this otherwise
     this.eventEmitter.emit('SendMessage', response);
+  }
+
+  public async sendBudgetNotification(notificationData: SiteBudget) {
+    const notification = {
+      jsonrpc: '2.0',
+      method: 'BudgetUpdated',
+      params: serializeSiteBudget(notificationData)
+    } as Notification; // typescript can't handle this otherwise
+    this.eventEmitter.emit('SendMessage', notification);
   }
 
   public async sendChannelNotification(
@@ -138,7 +147,7 @@ export class MessagingService implements MessagingServiceInterface {
       case 'CloseChannel':
       case 'JoinChannel':
       case 'ApproveBudgetAndFund':
-        const appRequest = convertToInternalEvent(request);
+        const appRequest = await convertToInternalEvent(request);
         this.eventEmitter.emit('AppRequest', appRequest);
         break;
       case 'PushMessage':
@@ -225,10 +234,13 @@ export function sendDisplayMessage(displayMessage: 'Show' | 'Hide') {
 function convertToInternalEvent(request: ChannelRequest): AppRequestEvent {
   switch (request.method) {
     case 'ApproveBudgetAndFund':
+      const {player, hub} = request.params;
       return {
         type: 'APPROVE_BUDGET_AND_FUND',
         requestId: request.id,
-        budget: deserializeBudgetRequest(request.params)
+        budget: deserializeBudgetRequest(request.params),
+        player,
+        hub
       };
     case 'CloseChannel':
       return {

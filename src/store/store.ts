@@ -4,6 +4,7 @@ import {Participant, StateVariables, Objective, Message, SiteBudget} from './typ
 import {ChannelStoreEntry} from './channel-store-entry';
 import {Chain} from '../chain';
 import {Funding, ChannelLock} from './memory-store';
+
 export interface Store {
   objectiveFeed: Observable<Objective>;
   outboxFeed: Observable<Message>;

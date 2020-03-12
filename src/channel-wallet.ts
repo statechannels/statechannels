@@ -64,7 +64,9 @@ export class ChannelWallet {
         const workflow = this.startWorkflow(
           approveBudgetAndFundWorkflow(this.store, this.messagingService, {
             budget: r.budget,
-            requestId: r.requestId
+            requestId: r.requestId,
+            player: r.player,
+            hub: r.hub
           })
         );
         this.workflows.push(workflow);
