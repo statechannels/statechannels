@@ -6,6 +6,8 @@ import {ChannelStatus} from '@statechannels/client-api-schema';
 import {SiteBudget} from '@statechannels/client-api-schema';
 
 const bigNumberify = utils.bigNumberify;
+const FINAL_SETUP_STATE = 3; // for a 2 party ForceMove channel
+
 export interface ChannelState {
   channelId: string;
   turnNum: string;
@@ -233,7 +235,7 @@ export class PaymentChannelClient {
 
   shouldSendSpacerState(channelState: ChannelState): boolean {
     const turnNum = Number(channelState.turnNum);
-    return turnNum === 3 ? true : false;
+    return turnNum === FINAL_SETUP_STATE ? true : false;
   }
 
   async pushMessage(message: Message<ChannelResult>) {
