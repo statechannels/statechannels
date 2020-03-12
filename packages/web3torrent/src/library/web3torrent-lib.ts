@@ -348,6 +348,5 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       }
     });
     torrent._update();
-    // torrent._startDiscovery(); // useful for long blocked torrents, forces the client to re-start searching for peers
   }
 }
