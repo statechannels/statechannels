@@ -1,5 +1,6 @@
 import '../env'; // Note: importing this module has the side effect of modifying env vars
 
+import FirebaseServer from 'firebase-server';
 import {setupGanache} from '@statechannels/devtools';
 import {deploy} from '../deployment/deploy';
 import {startServer} from './server';
@@ -11,8 +12,26 @@ async function setupGanacheAndContracts() {
   process.env = {...process.env, ...deployedArtifacts};
 }
 
+async function startLocalFirebaseServer() {
+  const server = new FirebaseServer(5555, 'localhost');
+
+  const closeServer = () => server.close;
+
+  process.env = {...process.env, FIREBASE_URL: 'ws://localhost:5555'};
+
+  process.on('SIGINT', closeServer);
+  process.on('SIGTERM', closeServer);
+  process.on('uncaughtException', e => {
+    closeServer();
+    throw e;
+  });
+  process.on('exit', closeServer);
+  process.on('unhandledRejection', closeServer);
+}
+
 async function start() {
   await setupGanacheAndContracts();
+  await startLocalFirebaseServer();
   await startServer();
 }
 
