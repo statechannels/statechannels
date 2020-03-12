@@ -198,7 +198,7 @@ export class PaymentChannelClient {
     }
   }
   // beneficiary may use this method to accept payments
-  async acceptPayment(channelState: ChannelState) {
+  async acceptChannelUpdate(channelState: ChannelState) {
     const {
       channelId,
       beneficiary,
