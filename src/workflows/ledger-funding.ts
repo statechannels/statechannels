@@ -32,19 +32,19 @@ export const enum Errors {
 
 const FAILURE = `#${WORKFLOW}.failure`;
 const onError = {target: FAILURE};
-const fundTarget = getDataAndInvoke(
+const fundingTarget = getDataAndInvoke(
   {src: 'getTargetOutcome', opts: {onError}},
   {src: 'supportState', opts: {onError}},
-  'updateFunding'
+  'updatingFunding'
 );
-const updateFunding = {invoke: {src: 'updateFunding', onDone: 'success'}};
+const updatingFunding = {invoke: {src: 'updateFunding', onDone: 'success'}};
 
 export const config: MachineConfig<any, any, any> = {
   key: WORKFLOW,
-  initial: 'fundTarget',
+  initial: 'fundingTarget',
   states: {
-    fundTarget,
-    updateFunding,
+    fundingTarget,
+    updatingFunding,
     success: {type: 'final'},
     failure: {
       entry: [assignError, escalate(({error}) => ({type: 'FAILURE', error}))]
@@ -52,43 +52,43 @@ export const config: MachineConfig<any, any, any> = {
   }
 };
 
-export const machine = (store: Store) => {
-  async function getTargetOutcome(ctx: Init): Promise<SupportState.Init> {
-    // TODO: Switch to feed
-    const {targetChannelId, ledgerChannelId, deductions} = ctx;
-    const {supported: ledgerState, channelConstants} = await store.getEntry(ledgerChannelId);
+const getTargetOutcome = (store: Store) => async (ctx: Init): Promise<SupportState.Init> => {
+  // TODO: Switch to feed
+  const {targetChannelId, ledgerChannelId, deductions} = ctx;
+  const {supported: ledgerState, channelConstants} = await store.getEntry(ledgerChannelId);
 
-    const {amount, finalized} = await store.chain.getChainInfo(ledgerChannelId);
+  const {amount, finalized} = await store.chain.getChainInfo(ledgerChannelId);
 
-    const currentlyAllocated = checkThat(ledgerState.outcome, isSimpleEthAllocation)
-      .allocationItems.map(i => i.amount)
-      .reduce(add);
-    const toDeduct = deductions.map(i => i.amount).reduce(add);
+  const currentlyAllocated = checkThat(ledgerState.outcome, isSimpleEthAllocation)
+    .allocationItems.map(i => i.amount)
+    .reduce(add);
+  const toDeduct = deductions.map(i => i.amount).reduce(add);
 
-    if (amount.lt(currentlyAllocated)) throw new Error(Errors.underfunded);
-    if (finalized) throw new Error(Errors.finalized);
-    if (currentlyAllocated.lt(toDeduct)) throw new Error(Errors.underallocated);
+  if (amount.lt(currentlyAllocated)) throw new Error(Errors.underfunded);
+  if (finalized) throw new Error(Errors.finalized);
+  if (currentlyAllocated.lt(toDeduct)) throw new Error(Errors.underallocated);
 
-    return {
-      state: {
-        ...channelConstants,
-        ...ledgerState,
-        turnNum: ledgerState.turnNum.add(1),
-        outcome: allocateToTarget(ledgerState.outcome, deductions, targetChannelId)
-      }
-    };
-  }
-
-  async function updateFunding({targetChannelId, ledgerChannelId}: Init) {
-    const funding: Funding = {type: 'Indirect', ledgerId: ledgerChannelId};
-    await store.setFunding(targetChannelId, funding);
-  }
-
-  const services: Record<Services, ServiceConfig<Init>> = {
-    getTargetOutcome,
-    updateFunding,
-    supportState: SupportState.machine(store)
+  return {
+    state: {
+      ...channelConstants,
+      ...ledgerState,
+      turnNum: ledgerState.turnNum.add(1),
+      outcome: allocateToTarget(ledgerState.outcome, deductions, targetChannelId)
+    }
   };
-
-  return Machine(config, {services});
 };
+
+const updateFunding = (store: Store) => async ({targetChannelId, ledgerChannelId}: Init) => {
+  const funding: Funding = {type: 'Indirect', ledgerId: ledgerChannelId};
+  await store.setFunding(targetChannelId, funding);
+};
+
+const services = (store: Store): Record<Services, ServiceConfig<Init>> => ({
+  getTargetOutcome: getTargetOutcome(store),
+  updateFunding: updateFunding(store),
+  supportState: SupportState.machine(store)
+});
+
+const options = (store: Store) => ({services: services(store)});
+
+export const machine = (store: Store) => Machine(config, options(store));
