@@ -21,7 +21,9 @@ export interface Init {
 const enum Services {
   getTargetOutcome = 'getTargetOutcome',
   updateFunding = 'updateFunding',
-  supportState = 'supportState'
+  supportState = 'supportState',
+  acquireLock = 'acquireLock',
+  releaseLock = 'releaseLock'
 }
 
 export const enum Errors {
@@ -32,23 +34,26 @@ export const enum Errors {
 
 const FAILURE = `#${WORKFLOW}.failure`;
 const onError = {target: FAILURE};
+
 const fundingTarget = getDataAndInvoke(
   {src: 'getTargetOutcome', opts: {onError}},
   {src: 'supportState', opts: {onError}},
-  'updatingFunding'
+  'releasingLock'
 );
-const updatingFunding = {invoke: {src: 'updateFunding', onDone: 'success'}};
 
 export const config: MachineConfig<any, any, any> = {
   key: WORKFLOW,
-  initial: 'fundingTarget',
+  initial: 'acquiringLock',
   states: {
+    acquiringLock: {
+      invoke: {src: Services.acquireLock, onDone: 'fundingTarget'},
+      exit: 'assignLock'
+    },
     fundingTarget,
-    updatingFunding,
+    releasingLock: {invoke: {src: Services.releaseLock, onDone: 'updatingFunding'}},
+    updatingFunding: {invoke: {src: Services.updateFunding, onDone: 'success'}},
     success: {type: 'final'},
-    failure: {
-      entry: [assignError, escalate(({error}) => ({type: 'FAILURE', error}))]
-    }
+    failure: {entry: [assignError, escalate(({error}) => ({type: 'FAILURE', error}))]}
   }
 };
 
@@ -86,7 +91,9 @@ const updateFunding = (store: Store) => async ({targetChannelId, ledgerChannelId
 const services = (store: Store): Record<Services, ServiceConfig<Init>> => ({
   getTargetOutcome: getTargetOutcome(store),
   updateFunding: updateFunding(store),
-  supportState: SupportState.machine(store)
+  supportState: SupportState.machine(store),
+  acquireLock: () => Promise.resolve(),
+  releaseLock: () => Promise.resolve()
 });
 
 const options = (store: Store) => ({services: services(store)});
