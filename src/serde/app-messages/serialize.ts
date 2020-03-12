@@ -15,12 +15,12 @@ import {tokenAddress} from '../../constants';
 import {AddressZero} from 'ethers/constants';
 
 export function serializeSiteBudget(budget: SiteBudget): AppSiteBudget {
-  const budgets = Object.keys(budget.budgets).map(assetHolderAddress => ({
+  const budgets = Object.keys(budget.forAsset).map(assetHolderAddress => ({
     token: tokenAddress(assetHolderAddress) || AddressZero,
-    pending: serializeBudgetItem(budget.budgets[assetHolderAddress].pending),
-    free: serializeBudgetItem(budget.budgets[assetHolderAddress].free),
-    inUse: serializeBudgetItem(budget.budgets[assetHolderAddress].inUse),
-    direct: serializeBudgetItem(budget.budgets[assetHolderAddress].direct)
+    pending: serializeBudgetItem(budget.forAsset[assetHolderAddress].pending),
+    free: serializeBudgetItem(budget.forAsset[assetHolderAddress].free),
+    inUse: serializeBudgetItem(budget.forAsset[assetHolderAddress].inUse),
+    direct: serializeBudgetItem(budget.forAsset[assetHolderAddress].direct)
   }));
 
   return {

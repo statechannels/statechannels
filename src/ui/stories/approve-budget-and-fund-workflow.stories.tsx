@@ -23,7 +23,7 @@ const messagingService: MessagingServiceInterface = new MessagingService(store);
 const budget: SiteBudget = {
   site: 'rps.org',
   hubAddress: 'hub.com',
-  budgets: {
+  forAsset: {
     [ETH_ASSET_HOLDER_ADDRESS]: {
       assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
       pending: {playerAmount: parseEther('5'), hubAmount: parseEther('5')},
