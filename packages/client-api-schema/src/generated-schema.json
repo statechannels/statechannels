@@ -369,18 +369,6 @@
       ],
       "type": "object"
     },
-    "CloseAndWithdrawParams": {
-      "additionalProperties": false,
-      "properties": {
-        "channelId": {
-          "$ref": "#/definitions/ChannelId"
-        }
-      },
-      "required": [
-        "channelId"
-      ],
-      "type": "object"
-    },
     "CloseAndWithdrawRequest": {
       "additionalProperties": false,
       "properties": {
@@ -402,12 +390,20 @@
         "params": {
           "additionalProperties": false,
           "properties": {
-            "channelId": {
-              "$ref": "#/definitions/ChannelId"
+            "hub": {
+              "$ref": "#/definitions/Participant"
+            },
+            "player": {
+              "$ref": "#/definitions/Participant"
+            },
+            "site": {
+              "type": "string"
             }
           },
           "required": [
-            "channelId"
+            "site",
+            "player",
+            "hub"
           ],
           "type": "object"
         }
@@ -433,7 +429,8 @@
           "type": "string"
         },
         "result": {
-          "$ref": "#/definitions/ChannelResult"
+          "additionalProperties": false,
+          "type": "object"
         }
       },
       "required": [
