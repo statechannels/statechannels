@@ -1,5 +1,7 @@
 ## Web3Torrent
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/440f8079-95c2-4ffa-8a80-d9afc1e52616/deploy-status)](https://app.netlify.com/sites/sc-web3torrent/deploys)
+
 ![Web3Torrent App Screenshot](https://user-images.githubusercontent.com/118913/68315088-05c34880-0096-11ea-94ab-bc86337f15d2.png)
 
 Web3Torrent is a streaming torrent implementation, based of [Webtorrent](https://github.com/webtorrent/webtorrent) and including a custom BitTorrent protocol extension, that allows seeders to block/choke and unblock other peers by user request.
