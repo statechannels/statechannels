@@ -1,4 +1,11 @@
-import {Machine, MachineConfig, StateNodeConfig, ActionTypes} from 'xstate';
+import {
+  Machine,
+  MachineConfig,
+  StateNodeConfig,
+  ActionTypes,
+  DoneInvokeEvent,
+  assign
+} from 'xstate';
 
 import {filter, map, first} from 'rxjs/operators';
 import _ from 'lodash';
@@ -14,6 +21,7 @@ import {SupportState, VirtualFundingAsLeaf} from '.';
 import {from, Observable} from 'rxjs';
 import {CHALLENGE_DURATION, HUB} from '../constants';
 import {bigNumberify} from 'ethers/utils';
+import {LedgerUpdated, LedgerStatus} from '../store/memory-store';
 const PROTOCOL = 'create-and-fund';
 
 export type Init = {
@@ -90,15 +98,19 @@ const triggerObjective = (store: Store) => async (ctx: Init): Promise<void> => {
   });
 };
 
+type WithLock = Init & {ledgerStatus: LedgerStatus};
 const virtual: StateNodeConfig<Init, any, any> = {
   initial: 'lockLedger',
   entry: triggerObjective.name,
   states: {
-    lockLedger: {invoke: {src: 'acquireLock', onDone: 'running'}},
+    lockLedger: {
+      invoke: {src: 'acquireLock', onDone: 'running'},
+      exit: assign<WithLock>({ledgerStatus: (_, event: DoneInvokeEvent<any>) => event.data})
+    },
     running: getDataAndInvoke<Init, Service>(
       {src: 'getObjective'},
       {src: 'virtualFunding'},
-      'updateFunding'
+      'releaseLedger'
     ),
     releaseLedger: {invoke: {src: 'releaseLock', onDone: 'updateFunding'}},
     updateFunding: {invoke: {src: 'setFundingToVirtual', onDone: 'done'}},
@@ -135,14 +147,18 @@ export const config: MachineConfig<Init, any, any> = {
   }
 };
 
-const acquireLock = (store: Store) => (): Promise<any> =>
-  store.ledgerFeed
+const acquireLock = (store: Store) => async (): Promise<LedgerUpdated> =>
+  await store.ledgerFeed
     .pipe(
       filter(s => s.participantId === HUB.participantId),
       first(s => !s.lock),
       map(async s => await store.lockLedger(s.participantId))
     )
     .toPromise();
+
+const releaseLock = (store: Store) => async (ctx: WithLock): Promise<void> => {
+  await store.releaseLedger(ctx.ledgerStatus);
+};
 
 const services = (store: Store) => ({
   depositing: Depositing.machine(store),
@@ -155,7 +171,8 @@ const services = (store: Store) => ({
   setFundingToDirect: setFundingToDirect(store),
   setFundingToVirtual: setFundingToVirtual(store),
   getObjective: getObjective(store),
-  acquireLock: acquireLock(store)
+  acquireLock: acquireLock(store),
+  releaseLock: releaseLock(store)
 });
 
 type Service = keyof ReturnType<typeof services>;

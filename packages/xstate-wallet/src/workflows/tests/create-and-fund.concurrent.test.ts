@@ -120,5 +120,9 @@ test('it must acquire a lock on the ledger channel', async () => {
     expect(aService.state.value).toEqual('success');
   }, EXPECT_TIMEOUT);
 
+  const currentStatus = aStore._ledgers[HUB.participantId];
+  expect(currentStatus).toBeDefined();
+  expect(currentStatus?.lock).toBeUndefined();
+
   delete process.env.USE_VIRTUAL_FUNDING;
 });
