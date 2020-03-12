@@ -91,14 +91,16 @@ const triggerObjective = (store: Store) => async (ctx: Init): Promise<void> => {
 };
 
 const virtual: StateNodeConfig<Init, any, any> = {
-  initial: 'running',
+  initial: 'lockLedger',
   entry: triggerObjective.name,
   states: {
+    lockLedger: {invoke: {src: 'acquireLock', onDone: 'running'}},
     running: getDataAndInvoke<Init, Service>(
       {src: 'getObjective'},
       {src: 'virtualFunding'},
       'updateFunding'
     ),
+    releaseLedger: {invoke: {src: 'releaseLock', onDone: 'updateFunding'}},
     updateFunding: {invoke: {src: 'setFundingToVirtual', onDone: 'done'}},
     done: {type: 'final'}
   },
@@ -143,8 +145,13 @@ const services = (store: Store) => ({
   determineFunding: determineFunding(store),
   setFundingToDirect: setFundingToDirect(store),
   setFundingToVirtual: setFundingToVirtual(store),
-  getObjective: getObjective(store)
+  getObjective: getObjective(store),
+  acquireLock: () =>
+    new Promise(() => {
+      // NOOP
+    })
 });
+
 type Service = keyof ReturnType<typeof services>;
 
 const options = (store: Store) => ({

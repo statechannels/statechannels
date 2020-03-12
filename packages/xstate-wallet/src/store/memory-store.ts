@@ -69,7 +69,7 @@ interface InternalEvents {
   addToOutbox: [Message];
 }
 
-type LedgerStatus = {
+export type LedgerStatus = {
   ledgerId: string;
   lockId?: string;
 };
