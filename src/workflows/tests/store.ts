@@ -1,8 +1,7 @@
-import {MemoryStore, Funding, LedgerStatus} from '../../store/memory-store';
+import {MemoryStore, Funding} from '../../store/memory-store';
 import {MemoryChannelStoreEntry} from '../../store/memory-channel-storage';
 import {SignedState} from '../../store/types';
 import {hashState} from '../../store/state-utils';
-import {Guid} from 'guid-typescript';
 
 export class TestStore extends MemoryStore {
   public setLedger(entry: MemoryChannelStoreEntry) {
@@ -28,13 +27,5 @@ export class TestStore extends MemoryStore {
     this._channels[entry.channelId] = entry;
 
     return entry;
-  }
-
-  public lockLedger(participantId: string): LedgerStatus {
-    const status = this._ledgers[participantId];
-    if (!status) throw 'No ledger found';
-    if (status.lockId) throw 'Ledger already locked';
-
-    return {ledgerId: status.ledgerId, lockId: Guid.create().toString()};
   }
 }

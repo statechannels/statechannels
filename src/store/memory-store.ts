@@ -22,6 +22,7 @@ import {Chain, FakeChain} from '../chain';
 import {calculateChannelId, hashState} from './state-utils';
 import {NETWORK_ID} from '../constants';
 import {Store} from './store';
+import {Guid} from 'guid-typescript';
 
 interface DirectFunding {
   type: 'Direct';
@@ -67,12 +68,15 @@ interface InternalEvents {
   channelUpdated: [ChannelStoreEntry];
   newObjective: [Objective];
   addToOutbox: [Message];
+  ledgerUpdated: [LedgerUpdated];
 }
 
 export type LedgerStatus = {
   ledgerId: string;
-  lockId?: string;
+  lock?: Guid;
 };
+export type LedgerUpdated = LedgerStatus & {participantId: string};
+type LedgerLocked = LedgerUpdated & {lock: Guid};
 
 export class MemoryStore implements Store {
   readonly chain: Chain;
@@ -172,6 +176,30 @@ export class MemoryStore implements Store {
     }
     channelEntry.setFunding(funding);
   }
+
+  public async lockLedger(participantId: string): Promise<LedgerLocked> {
+    const status = this._ledgers[participantId];
+    if (!status) throw new Error('Ledger not found');
+    if (status.lock) throw new Error('Ledger channel locked');
+
+    const newStatus = {...status, lock: Guid.create()};
+    this._ledgers[participantId] = newStatus;
+    this._eventEmitter.emit('ledgerUpdated', {...newStatus, participantId});
+
+    return {...newStatus, participantId};
+  }
+
+  public async releaseLedger(status: LedgerLocked): Promise<void> {
+    const {ledgerId, lock, participantId} = status;
+    const currentStatus = this._ledgers[participantId];
+    if (!currentStatus) throw new Error('Attempting to unlock a free channel');
+    if (!currentStatus.lock?.equals(lock)) throw new Error('Invalid lock');
+
+    const newStatus = {ledgerId, lock: undefined};
+    this._ledgers[participantId] = newStatus;
+    this._eventEmitter.emit('ledgerUpdated', {...newStatus, participantId});
+  }
+
   public async getLedger(peerId: string) {
     const status = this._ledgers[peerId];
     if (!status) throw new Error(`No ledger exists with peer ${peerId}`);
