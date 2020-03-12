@@ -35,7 +35,8 @@ export function getDataAndInvoke<T, Services extends string = string>(
           id: service?.opts?.id,
           src: service.src,
           data: (_, {data}: DoneInvokeEvent<T>) => data,
-          onDone: 'done'
+          onDone: 'done',
+          onError: service.opts?.onError
         }
       },
       done: {type: 'final'}
