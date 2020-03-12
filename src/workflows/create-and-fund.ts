@@ -160,7 +160,7 @@ const releaseLock = (store: Store) => async (ctx: WithLock): Promise<void> => {
   await store.releaseLedger(ctx.ledgerStatus);
 };
 
-const services = (store: Store) => ({
+export const services = (store: Store) => ({
   depositing: Depositing.machine(store),
   supportState: SupportState.machine(store),
   virtualFunding: VirtualFundingAsLeaf.machine(store),

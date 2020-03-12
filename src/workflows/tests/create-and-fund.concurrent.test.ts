@@ -1,7 +1,7 @@
 import {interpret} from 'xstate';
 import waitForExpect from 'wait-for-expect';
 
-import {Init, machine} from '../create-and-fund';
+import {Init, machine, services} from '../create-and-fund';
 
 import {Store} from '../../store';
 import {bigNumberify} from 'ethers/utils';
@@ -17,7 +17,7 @@ import {SimpleHub} from './simple-hub';
 import {TestStore} from './store';
 import {add} from '../../utils/math-utils';
 
-jest.setTimeout(20000);
+jest.setTimeout(30000);
 const EXPECT_TIMEOUT = 1000;
 
 const chainId = '0x01';
@@ -85,7 +85,13 @@ beforeEach(() => {
   });
 });
 
-const connectToStore = (store: Store) => interpret(machine(store).withContext(context)).start();
+const connectToStore = (store: Store) =>
+  interpret(
+    machine(store).withConfig(
+      {services: {...services(store), virtualFunding: () => Promise.resolve()}},
+      context
+    )
+  ).start();
 
 test('it must acquire a lock on the ledger channel', async () => {
   process.env.USE_VIRTUAL_FUNDING = 'true';
@@ -107,7 +113,7 @@ test('it must acquire a lock on the ledger channel', async () => {
   }
 
   const status = await aStore.lockLedger(HUB.participantId);
-  const [aService, bService] = [aStore, bStore].map(connectToStore);
+  const [aService] = [aStore, bStore].map(connectToStore);
 
   aService.onTransition(s => {
     if (_.isEqual(s.value, {funding: {virtual: {running: 'virtualFunding '}}})) {
@@ -118,7 +124,6 @@ test('it must acquire a lock on the ledger channel', async () => {
 
   await waitForExpect(async () => {
     expect(aService.state.value).toEqual({funding: {virtual: 'lockLedger'}});
-    expect(bService.state.value).toEqual({funding: {virtual: {running: 'virtualFunding'}}});
   }, EXPECT_TIMEOUT);
 
   await aStore.releaseLedger(status);
