@@ -109,6 +109,13 @@ test('it must acquire a lock on the ledger channel', async () => {
   const status = await aStore.lockLedger(HUB.participantId);
   const [aService, bService] = [aStore, bStore].map(connectToStore);
 
+  aService.onTransition(s => {
+    if (_.isEqual(s.value, {funding: {virtual: {running: 'virtualFunding '}}})) {
+      expect((s.context as any).ledgerStatus).toBeDefined();
+      expect((s.context as any).ledgerStatus.lock).not.toEqual(status.lock);
+    }
+  });
+
   await waitForExpect(async () => {
     expect(aService.state.value).toEqual({funding: {virtual: 'lockLedger'}});
     expect(bService.state.value).toEqual({funding: {virtual: {running: 'virtualFunding'}}});
