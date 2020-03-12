@@ -17,6 +17,7 @@ import {wallet1, wallet2, participants} from './data';
 import {subscribeToMessages} from './message-service';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../../constants';
 import {TestStore} from './store';
+import {Guid} from 'guid-typescript';
 
 jest.setTimeout(20000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
@@ -121,12 +122,16 @@ test('happy path', async () => {
 test('locks', async () => {
   const _chain = new FakeChain();
   _chain.depositSync(ledgerChannelId, '0', amounts.reduce(add).toHexString());
-  [aStore, bStore].forEach((store: Store) => (store.chain = _chain));
+  [aStore, bStore].forEach((store: TestStore) => ((store as any).chain = _chain));
 
   const aService = interpret(machine(aStore).withContext(context));
   const bService = interpret(machine(bStore).withContext(context));
 
   const status = await aStore.acquireChannelLock(context.ledgerChannelId);
+  expect(status).toEqual({
+    channelId: context.ledgerChannelId,
+    lock: expect.any(Guid)
+  });
 
   [aService, bService].map(s => s.start());
 
@@ -142,14 +147,12 @@ test('locks', async () => {
     }
   });
 
-  await aStore.releaseLedger(status);
+  await aStore.releaseChannelLock(status);
   await waitForExpect(async () => {
     expect(aService.state.value).toEqual('success');
   }, EXPECT_TIMEOUT);
 
-  const currentStatus = aStore._ledgers[participants[1].participantId];
-  expect(currentStatus).toBeDefined();
-  expect(currentStatus?.lock).toBeUndefined();
+  expect(aStore._channelLocks[context.ledgerChannelId]).toBeUndefined();
 });
 
 const twelveTotalAllocated = outcome;

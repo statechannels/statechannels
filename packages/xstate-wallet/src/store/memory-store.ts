@@ -23,6 +23,7 @@ import {calculateChannelId, hashState} from './state-utils';
 import {NETWORK_ID} from '../constants';
 import {Store} from './store';
 import {Guid} from 'guid-typescript';
+import {Errors} from '.';
 
 interface DirectFunding {
   type: 'Direct';
@@ -68,15 +69,13 @@ interface InternalEvents {
   channelUpdated: [ChannelStoreEntry];
   newObjective: [Objective];
   addToOutbox: [Message];
-  ledgerUpdated: [LedgerUpdated];
+  lockUpdated: [ChannelLock];
 }
 
-export type LedgerStatus = {
-  ledgerId: string;
+export type ChannelLock = {
+  channelId: string;
   lock?: Guid;
 };
-export type LedgerUpdated = LedgerStatus & {participantId: string};
-type LedgerLocked = LedgerUpdated & {lock: Guid};
 
 export class MemoryStore implements Store {
   readonly chain: Chain;
@@ -85,7 +84,8 @@ export class MemoryStore implements Store {
   private _nonces: Record<string, BigNumber | undefined> = {};
   private _eventEmitter = new EventEmitter<InternalEvents>();
   private _privateKeys: Record<string, string | undefined> = {};
-  protected _ledgers: Record<string, LedgerStatus | undefined> = {};
+  protected _ledgers: Record<string, string> = {};
+  protected _channelLocks: Record<string, Guid | undefined> = {};
   private _budgets: Record<string, SiteBudget> = {};
 
   constructor(privateKeys?: string[], chain?: Chain) {
@@ -170,41 +170,43 @@ export class MemoryStore implements Store {
     channelEntry.setFunding(funding);
   }
 
-  public async lockLedger(participantId: string): Promise<LedgerLocked> {
-    const status = this._ledgers[participantId];
-    if (!status) throw new Error('Ledger not found');
-    if (status.lock) throw new Error('Ledger channel locked');
+  public async acquireChannelLock(channelId: string): Promise<ChannelLock> {
+    const lock = this._channelLocks[channelId];
+    if (lock) throw new Error(Errors.channelLocked);
 
-    const newStatus = {...status, lock: Guid.create()};
-    this._ledgers[participantId] = newStatus;
-    this._eventEmitter.emit('ledgerUpdated', {...newStatus, participantId});
+    const newStatus = {channelId, lock: Guid.create()};
+    this._channelLocks[channelId] = newStatus.lock;
 
-    return {...newStatus, participantId};
+    this._eventEmitter.emit('lockUpdated', newStatus);
+
+    return newStatus;
   }
 
-  public async releaseLedger(status: LedgerLocked): Promise<void> {
-    const {ledgerId, lock, participantId} = status;
-    const currentStatus = this._ledgers[participantId];
+  public async releaseChannelLock(status: ChannelLock): Promise<void> {
+    if (!status.lock) throw new Error('Invalid lock');
+
+    const {channelId, lock} = status;
+    const currentStatus = this._channelLocks[channelId];
     if (!currentStatus) throw new Error('Attempting to unlock a free channel');
-    if (!currentStatus.lock?.equals(lock)) throw new Error('Invalid lock');
+    if (!currentStatus.equals(lock)) throw new Error('Invalid lock');
 
-    const newStatus = {ledgerId, lock: undefined};
-    this._ledgers[participantId] = newStatus;
-    this._eventEmitter.emit('ledgerUpdated', {...newStatus, participantId});
+    const newStatus = {channelId, lock: undefined};
+    this._channelLocks[channelId] = undefined;
+    this._eventEmitter.emit('lockUpdated', newStatus);
   }
 
-  public get ledgerFeed(): Observable<LedgerUpdated> {
+  public get lockFeed(): Observable<ChannelLock> {
     return merge(
-      from(_.map(this._ledgers, (s: LedgerStatus, participantId) => ({...s, participantId}))),
-      fromEvent<LedgerUpdated>(this._eventEmitter, 'ledgerUpdated')
+      from(_.map(this._channelLocks, (lock: Guid, channelId) => ({lock, channelId}))),
+      fromEvent<ChannelLock>(this._eventEmitter, 'lockUpdated')
     );
   }
 
   public async getLedger(peerId: string) {
-    const status = this._ledgers[peerId];
-    if (!status) throw new Error(`No ledger exists with peer ${peerId}`);
+    const ledgerId = this._ledgers[peerId];
+    if (!ledgerId) throw new Error(`No ledger exists with peer ${peerId}`);
 
-    return await this.getEntry(status.ledgerId);
+    return await this.getEntry(ledgerId);
   }
 
   public async createChannel(
