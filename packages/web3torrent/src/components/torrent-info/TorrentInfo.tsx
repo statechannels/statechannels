@@ -1,6 +1,6 @@
 import prettier from 'prettier-bytes';
 import React from 'react';
-import {DownloadingStatuses, Torrent, UploadingStatuses} from '../../types';
+import {DownloadingStatuses, Torrent} from '../../types';
 import {DownloadInfo} from './download-info/DownloadInfo';
 import {DownloadLink} from './download-link/DownloadLink';
 import {MagnetLinkButton} from './magnet-link-button/MagnetLinkButton';
@@ -37,21 +37,18 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({
           {torrent.magnetURI && <MagnetLinkButton />}
         </div>
       </section>
-      {DownloadingStatuses.includes(torrent.status) ? (
+      {DownloadingStatuses.includes(torrent.status) && !torrent.originalSeed && (
         <DownloadInfo
           torrent={torrent}
           channelCache={channelCache}
           mySigningAddress={mySigningAddress}
         />
-      ) : (
-        UploadingStatuses.includes(torrent.status) && (
-          <UploadInfo
-            torrent={torrent}
-            channelCache={channelCache}
-            mySigningAddress={mySigningAddress}
-          />
-        )
       )}
+      <UploadInfo
+        torrent={torrent}
+        channelCache={channelCache}
+        mySigningAddress={mySigningAddress}
+      />
       {!torrent.originalSeed && <DownloadLink torrent={torrent} />}
     </>
   );
