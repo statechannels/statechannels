@@ -190,6 +190,13 @@ export class MemoryStore implements Store {
     this._eventEmitter.emit('ledgerUpdated', {...newStatus, participantId});
   }
 
+  public get ledgerFeed(): Observable<LedgerUpdated> {
+    return merge(
+      from(_.map(this._ledgers, (s: LedgerStatus, participantId) => ({...s, participantId}))),
+      fromEvent<LedgerUpdated>(this._eventEmitter, 'ledgerUpdated')
+    );
+  }
+
   public async getLedger(peerId: string) {
     const status = this._ledgers[peerId];
     if (!status) throw new Error(`No ledger exists with peer ${peerId}`);

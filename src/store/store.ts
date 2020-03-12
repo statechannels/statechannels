@@ -19,6 +19,7 @@ export interface Store {
   ): Promise<ChannelStoreEntry>;
   getEntry(channelId): Promise<ChannelStoreEntry>;
 
+  ledgerFeed: Observable<LedgerUpdated>;
   lockLedger(participantId: string): Promise<LedgerUpdated>;
   releaseLedger(status: LedgerStatus): Promise<void>;
   getLedger(peerId: string): Promise<ChannelStoreEntry>;

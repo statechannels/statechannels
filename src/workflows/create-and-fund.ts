@@ -135,6 +135,15 @@ export const config: MachineConfig<Init, any, any> = {
   }
 };
 
+const acquireLock = (store: Store) => (): Promise<any> =>
+  store.ledgerFeed
+    .pipe(
+      filter(s => s.participantId === HUB.participantId),
+      first(s => !s.lock),
+      map(async s => await store.lockLedger(s.participantId))
+    )
+    .toPromise();
+
 const services = (store: Store) => ({
   depositing: Depositing.machine(store),
   supportState: SupportState.machine(store),
@@ -146,10 +155,7 @@ const services = (store: Store) => ({
   setFundingToDirect: setFundingToDirect(store),
   setFundingToVirtual: setFundingToVirtual(store),
   getObjective: getObjective(store),
-  acquireLock: () =>
-    new Promise(() => {
-      // NOOP
-    })
+  acquireLock: acquireLock(store)
 });
 
 type Service = keyof ReturnType<typeof services>;
