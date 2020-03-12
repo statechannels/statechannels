@@ -11,17 +11,15 @@ type FirebaseEvent = [Snapshot, string | null];
 
 const log = logger();
 
-const config = {
-  apiKey: process.env.FIREBASE_API_KEY,
-  databaseURL: process.env.FIREBASE_URL
-};
-
 let firebaseApp: firebase.app.App;
 function getFirebaseApp() {
   if (firebaseApp) {
     return firebaseApp;
   }
-  firebaseApp = firebase.initializeApp(config);
+  firebaseApp = firebase.initializeApp({
+    apiKey: process.env.FIREBASE_API_KEY,
+    databaseURL: process.env.FIREBASE_URL
+  });
   return firebaseApp;
 }
 
