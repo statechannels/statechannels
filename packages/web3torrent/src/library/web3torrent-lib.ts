@@ -17,6 +17,7 @@ import {
 import {utils} from 'ethers';
 import {ChannelState, PaymentChannelClient} from '../clients/payment-channel-client';
 import {Message, ChannelResult} from '@statechannels/channel-client';
+import {mockTorrents} from '../constants';
 
 const bigNumberify = utils.bigNumberify;
 const log = debug('web3torrent:library');
@@ -58,6 +59,23 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     log('got ethereum address');
     log('ACCOUNT ID: ', this.pseAccount);
     log('THIS address: ', this.outcomeAddress);
+    const canTorrent = await this.testTorrentingCapability(3000);
+    console.log(canTorrent ? 'Can Torrent!' : 'Cannot torrent');
+  }
+
+  async testTorrentingCapability(timeOut: number) {
+    const gotAWire = new Promise(resolve => {
+      super.add(mockTorrents[0].magnetURI, (torrent: Torrent) => {
+        torrent.once('wire', wire => {
+          this.remove(torrent.infoHash);
+          resolve(true);
+        });
+      });
+    });
+    const timer = new Promise(function(resolve, reject) {
+      setTimeout(resolve, timeOut);
+    });
+    return Promise.race([gotAWire, timer]);
   }
 
   seed(
