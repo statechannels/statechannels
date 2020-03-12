@@ -1,9 +1,11 @@
-import {MemoryStore, Funding} from '../../store/memory-store';
+import {MemoryStore, Funding, LedgerStatus} from '../../store/memory-store';
 import {MemoryChannelStoreEntry} from '../../store/memory-channel-storage';
 import {SignedState} from '../../store/types';
 import {hashState} from '../../store/state-utils';
 
 export class TestStore extends MemoryStore {
+  public _ledgers: Record<string, LedgerStatus | undefined> = {};
+
   public setLedger(entry: MemoryChannelStoreEntry) {
     const {channelId} = entry;
     this._channels[channelId] = entry;
