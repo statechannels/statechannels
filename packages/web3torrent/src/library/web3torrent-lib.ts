@@ -147,7 +147,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
     wire.paidStreamingExtension.on(
       PaidStreamingExtensionEvents.REQUEST,
-      async (index: number, _: number, size: number, response: (allow: boolean) => void) => {
+      async (index: number, size: number, response: (allow: boolean) => void) => {
         const reqPrice = bigNumberify(size).mul(WEI_PER_BYTE);
         const {peerAccount, peerOutcomeAddress} = wire.paidStreamingExtension;
         const knownPeerAccount = this.peersList[torrent.infoHash][peerAccount];
