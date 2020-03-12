@@ -196,7 +196,7 @@ export class MemoryStore implements Store {
 
     const {channelId, lock} = status;
     const currentStatus = this._channelLocks[channelId];
-    if (!currentStatus) throw new Error('Attempting to unlock a free channel');
+    if (!currentStatus) return;
     if (!currentStatus.equals(lock)) throw new Error('Invalid lock');
 
     const newStatus = {channelId, lock: undefined};
