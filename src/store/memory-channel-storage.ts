@@ -68,6 +68,18 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     return !!this._supported;
   }
 
+  get isFinalized() {
+    return this.isSupported && this.supported.isFinal;
+  }
+
+  get finalizationProof(): SignedState[] {
+    if (!this.isFinalized) {
+      throw new Error('Channel is not finalized');
+    }
+    return this.sortedByDescendingTurnNum
+      .filter(s => s.isFinal)
+      .map(s => ({...this.channelConstants, ...s}));
+  }
   private get _supported() {
     // TODO: proper check
     return this.sortedByDescendingTurnNum.find(
