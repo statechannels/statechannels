@@ -79,7 +79,7 @@ export const firstState = (
   challengeDuration,
   appDefinition,
   participants,
-  outcome: outcome || {type: 'SimpleAllocation', allocationItems: []}
+  outcome
 });
 
 function convertToNitroAllocationItems(allocationItems: AllocationItem[]): NitroAllocationItem[] {

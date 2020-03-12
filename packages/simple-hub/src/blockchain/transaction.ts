@@ -1,9 +1,10 @@
 import AsyncLock from 'async-lock';
 import {ethAssetHolder} from './asset-holder';
+import {Contract} from 'ethers';
 
 const lock = new AsyncLock();
 export class Blockchain {
-  static ethAssetHolder: any;
+  static ethAssetHolder: Contract;
   static async fund(channelID: string, expectedHeld: string, value: string): Promise<string> {
     // We lock to avoid this issue: https://github.com/ethers-io/ethers.js/issues/363
     // When ethers.js attempts to run multiple transactions around the same time it results in an error
@@ -26,7 +27,6 @@ export class Blockchain {
       return;
     }
     const newAssetHolder = await ethAssetHolder();
-    // eslint-disable-next-line require-atomic-updates
     Blockchain.ethAssetHolder = Blockchain.ethAssetHolder || newAssetHolder;
   }
 }

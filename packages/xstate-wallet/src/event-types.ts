@@ -43,6 +43,8 @@ export interface ApproveBudgetAndFund {
   requestId: number;
   type: 'APPROVE_BUDGET_AND_FUND';
   budget: SiteBudget;
+  player: Participant;
+  hub: Participant;
 }
 
 export type AppRequestEvent =
