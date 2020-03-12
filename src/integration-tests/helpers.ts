@@ -12,13 +12,13 @@ import {
   CreateChannelRequest,
   UpdateChannelRequest,
   CloseChannelRequest,
-  ApproveBudgetAndFundRequest
+  ApproveBudgetAndFundRequest,
+  CloseAndWithdrawRequest
 } from '@statechannels/client-api-schema';
 import {interpret, Interpreter} from 'xstate';
 import * as App from '../workflows/application';
 import * as CreateAndFundLedger from '../workflows/create-and-fund-ledger';
 import {Guid} from 'guid-typescript';
-import {HUB_ADDRESS, HUB_DESTINATION} from '../constants';
 
 export class Player {
   privateKey: string;
@@ -194,7 +194,8 @@ export function generateCreateChannelRequest(
 }
 
 export function generateApproveBudgetAndFundRequest(
-  player: Participant
+  player: Participant,
+  hub: Participant
 ): ApproveBudgetAndFundRequest {
   return {
     jsonrpc: '2.0',
@@ -202,14 +203,26 @@ export function generateApproveBudgetAndFundRequest(
     method: 'ApproveBudgetAndFund',
     params: {
       site: 'rps.statechannels.org',
-      hub: {
-        participantId: HUB_ADDRESS,
-        signingAddress: HUB_ADDRESS,
-        destination: HUB_DESTINATION
-      },
+      hub,
       player,
       playerAmount: '0x5',
       hubAmount: '0x5'
+    }
+  };
+}
+
+export function generateCloseAndWithdraw(
+  player: Participant,
+  hub: Participant
+): CloseAndWithdrawRequest {
+  return {
+    jsonrpc: '2.0',
+    id: 88888888,
+    method: 'CloseAndWithdraw',
+    params: {
+      site: 'rps.statechannels.org',
+      hub,
+      player
     }
   };
 }

@@ -44,7 +44,10 @@ it('allows for a wallet to approve a budget and fund with the hub', async () => 
       });
     });
 
-  const createBudgetEvent = generateApproveBudgetAndFundRequest(playerA.participant);
+  const createBudgetEvent = generateApproveBudgetAndFundRequest(
+    playerA.participant,
+    hub.participant
+  );
   const createBudgetPromise = playerA.messagingService.outboxFeed
     .pipe(
       filter(m => 'id' in m && m.id === createBudgetEvent.id),
