@@ -5,6 +5,7 @@ import {hashState} from '../../store/state-utils';
 import {Guid} from 'guid-typescript';
 
 export class TestStore extends MemoryStore {
+  public _channelLocks: Record<string, Guid>;
   public createEntry(signedState: SignedState, funding?: Funding): MemoryChannelStoreEntry {
     const myIndex = signedState.participants
       .map(p => p.signingAddress)

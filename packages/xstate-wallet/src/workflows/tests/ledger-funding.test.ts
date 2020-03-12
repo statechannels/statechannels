@@ -77,7 +77,7 @@ beforeEach(() => {
 
   [aStore, bStore].forEach((store: TestStore) => {
     store.createEntry(allSignState(firstState(outcome, targetChannel)));
-    store.setLedger(store.createEntry(allSignState(firstState(outcome, ledgerChannel))));
+    store.setLedgerByEntry(store.createEntry(allSignState(firstState(outcome, ledgerChannel))));
   });
 
   subscribeToMessages({

@@ -23,6 +23,8 @@ export interface Store {
   lockFeed: Observable<ChannelLock>;
   acquireChannelLock(channelId: string): Promise<ChannelLock>;
   releaseChannelLock(lock: ChannelLock): Promise<void>;
+
+  setLedger(ledgerId: string): Promise<void>;
   getLedger(peerId: string): Promise<ChannelStoreEntry>;
 
   setFunding(channelId: string, funding: Funding): Promise<void>;
