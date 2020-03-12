@@ -41,7 +41,7 @@ class ChannelsList extends React.Component<UploadInfoProps> {
         wire.paidStreamingExtension.pseChannelId === channelId
     );
 
-    const uploaded = wire ? wire.uploaded : 0;
+    const transferred = pseType === 'seeder' ? wire.uploaded : wire.downloaded;
     const peerAccount =
       pseType === 'leecher' ? channels[channelId].beneficiary : channels[channelId].payer;
 
@@ -51,7 +51,7 @@ class ChannelsList extends React.Component<UploadInfoProps> {
         <td className="channel-id">{channelId}</td>
         <td className="peer-id">{peerAccount}</td>
         <td className="uploaded">
-          {uploaded && prettier(uploaded)}
+          {prettier(transferred)}
           {pseType === 'seeder' ? ` up` : ` down`}
         </td>
         {pseType === 'seeder' ? (
