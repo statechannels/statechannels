@@ -25,6 +25,8 @@ import {Store} from './store';
 import {Guid} from 'guid-typescript';
 import {Errors} from '.';
 
+const LOCK_TIMEOUT = 30000;
+
 interface DirectFunding {
   type: 'Direct';
 }
@@ -177,6 +179,13 @@ export class MemoryStore implements Store {
     const newStatus = {channelId, lock: Guid.create()};
     this._channelLocks[channelId] = newStatus.lock;
 
+    setTimeout(async () => {
+      try {
+        await this.releaseChannelLock(newStatus);
+      } finally {
+        // NO OP
+      }
+    }, LOCK_TIMEOUT);
     this._eventEmitter.emit('lockUpdated', newStatus);
 
     return newStatus;
