@@ -83,7 +83,7 @@ test('newObjectiveFeed', async () => {
   const store = aStore();
 
   const outputs: Objective[] = [];
-  store.newObjectiveFeed.subscribe(x => outputs.push(x));
+  store.objectiveFeed.subscribe(x => outputs.push(x));
 
   await store.pushMessage({objectives: [objective]});
   expect(outputs).toEqual([objective]);

@@ -5,7 +5,7 @@ import {ChannelStoreEntry} from './channel-store-entry';
 import {Chain} from '../chain';
 import {Funding, LedgerStatus, LedgerUpdated} from './memory-store';
 export interface Store {
-  newObjectiveFeed: Observable<Objective>;
+  objectiveFeed: Observable<Objective>;
   outboxFeed: Observable<Message>;
   pushMessage: (message: Message) => Promise<void>;
   channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry>;

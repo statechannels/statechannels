@@ -121,7 +121,7 @@ const getDeductions = (store: Store) => async (ctx: Init): Promise<Deductions> =
 };
 
 const watchObjectives = (store: Store) => (ctx: Init) => {
-  return store.newObjectiveFeed.pipe(
+  return store.objectiveFeed.pipe(
     filter(isFundGuarantor),
     filter(o => o.data.jointChannelId === ctx.jointChannelId),
     flatMap(async o => {
