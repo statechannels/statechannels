@@ -141,13 +141,10 @@ export const approveBudgetAndFundWorkflow = (
       await messagingService.sendBudgetNotification(context.budget);
     },
     updateBudgetToFree: assign(
-      (context: WorkflowContext): WorkflowContext => {
-        const clonedBudget = _.cloneDeep(context.budget);
-        // TODO: There must be a nicer way of mapping from one record to a new one
-        Object.keys(clonedBudget.budgets).forEach(k => {
-          clonedBudget.budgets[k] = freeAssetBudget(clonedBudget.budgets[k]);
-        });
-        return {...context, budget: clonedBudget};
+      ({budget}: WorkflowContext): WorkflowContext => {
+        const {site, hubAddress} = budget;
+        const clonedAssetBudgets = _.mapValues(context.budget.forAsset, freeAssetBudget);
+        return {...context, budget: {site, hubAddress, forAsset: clonedAssetBudgets}};
       }
     )
   };
@@ -177,10 +174,10 @@ function convertPendingBudgetToAllocation({
   budget
 }: WorkflowContext): SimpleAllocation {
   // TODO: Eventually we will need to support more complex budgets
-  if (Object.keys(budget.budgets).length !== 1) {
+  if (Object.keys(budget.forAsset).length !== 1) {
     throw new Error('Cannot handle mixed budget');
   }
-  const ethBudget = budget.budgets[ETH_ASSET_HOLDER_ADDRESS];
+  const ethBudget = budget.forAsset[ETH_ASSET_HOLDER_ADDRESS];
   const playerItem: AllocationItem = {
     destination: player.destination,
     amount: ethBudget.pending.playerAmount
