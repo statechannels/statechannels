@@ -12,7 +12,8 @@ import {
   ChannelClosingNotification,
   ChannelUpdatedNotification,
   Request,
-  ApproveBudgetAndFundRequest
+  ApproveBudgetAndFundRequest,
+  CloseAndWithdrawRequest
 } from '@statechannels/client-api-schema';
 
 import * as jrs from 'jsonrpc-lite';
@@ -37,7 +38,8 @@ type ChannelRequest =
   | JoinChannelRequest
   | UpdateChannelRequest
   | CloseChannelRequest
-  | ApproveBudgetAndFundRequest;
+  | ApproveBudgetAndFundRequest
+  | CloseAndWithdrawRequest;
 
 interface InternalEvents {
   AppRequest: [AppRequestEvent];
@@ -147,6 +149,7 @@ export class MessagingService implements MessagingServiceInterface {
       case 'CloseChannel':
       case 'JoinChannel':
       case 'ApproveBudgetAndFund':
+      case 'CloseAndWithdraw':
         const appRequest = await convertToInternalEvent(request);
         this.eventEmitter.emit('AppRequest', appRequest);
         break;
@@ -219,6 +222,8 @@ export function sendDisplayMessage(displayMessage: 'Show' | 'Hide') {
 
 function convertToInternalEvent(request: ChannelRequest): AppRequestEvent {
   switch (request.method) {
+    case 'CloseAndWithdraw':
+      return {...request.params, requestId: request.id, type: 'CLOSE_AND_WITHDRAW'};
     case 'ApproveBudgetAndFund':
       const {player, hub} = request.params;
       return {

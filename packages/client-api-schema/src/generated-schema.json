@@ -369,6 +369,77 @@
       ],
       "type": "object"
     },
+    "CloseAndWithdrawRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "CloseAndWithdraw"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": false,
+          "properties": {
+            "hub": {
+              "$ref": "#/definitions/Participant"
+            },
+            "player": {
+              "$ref": "#/definitions/Participant"
+            },
+            "site": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "site",
+            "player",
+            "hub"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "CloseAndWithdrawResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "result": {
+          "additionalProperties": false,
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
+      "type": "object"
+    },
     "CloseChannelParams": {
       "additionalProperties": false,
       "properties": {
@@ -1032,6 +1103,9 @@
         },
         {
           "$ref": "#/definitions/CloseChannelRequest"
+        },
+        {
+          "$ref": "#/definitions/CloseAndWithdrawRequest"
         }
       ]
     },
@@ -1069,6 +1143,9 @@
         },
         {
           "$ref": "#/definitions/ApproveBudgetAndFundResponse"
+        },
+        {
+          "$ref": "#/definitions/CloseAndWithdrawResponse"
         }
       ]
     },
