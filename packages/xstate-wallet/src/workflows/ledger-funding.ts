@@ -50,15 +50,15 @@ export const config: MachineConfig<any, any, any> = {
       exit: assign<WithLock>({lock: (_, event: DoneInvokeEvent<ChannelLock>) => event.data})
     },
     fundingTarget,
+    failure: {
+      entry: [assignError, 'escalateError'],
+      invoke: {src: Services.releaseLock}
+    },
     releasingLock: {
       invoke: {src: Services.releaseLock, onDone: 'updatingFunding', onError: 'updatingFunding'}
     },
     updatingFunding: {invoke: {src: Services.updateFunding, onDone: 'success'}},
-    success: {type: 'final'},
-    failure: {
-      entry: [assignError, 'escalateError'],
-      invoke: {src: Services.releaseLock}
-    }
+    success: {type: 'final'}
   }
 };
 
