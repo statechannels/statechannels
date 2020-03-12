@@ -19,7 +19,7 @@ import {ETH_ASSET_HOLDER_ADDRESS} from '../../constants';
 import {TestStore} from './store';
 import {Guid} from 'guid-typescript';
 
-jest.setTimeout(20000);
+jest.setTimeout(10000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 
 const chainId = '0x01';
@@ -137,7 +137,7 @@ test('locks', async () => {
 
   await waitForExpect(async () => {
     expect(aService.state.value).toEqual('acquiringLock');
-    expect(aService.state.value).toEqual('fundTarget');
+    expect(bService.state.value).toEqual({fundingTarget: 'supportState'});
   }, EXPECT_TIMEOUT);
 
   aService.onTransition(s => {
@@ -146,8 +146,8 @@ test('locks', async () => {
       expect((s.context as any).lock).not.toEqual(status.lock);
     }
   });
-
   await aStore.releaseChannelLock(status);
+
   await waitForExpect(async () => {
     expect(aService.state.value).toEqual('success');
   }, EXPECT_TIMEOUT);
