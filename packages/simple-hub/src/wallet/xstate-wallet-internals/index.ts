@@ -40,7 +40,7 @@ interface MixedAllocation {
 }
 
 type Allocation = SimpleAllocation | MixedAllocation;
-type Outcome = Allocation | SimpleGuarantee;
+export type Outcome = Allocation | SimpleGuarantee;
 
 interface StateVariables {
   outcome: Outcome;
@@ -49,7 +49,7 @@ interface StateVariables {
   isFinal: boolean;
 }
 
-interface ChannelConstants {
+export interface ChannelConstants {
   chainId: string;
   participants: Participant[];
   channelNonce: BigNumber;
@@ -57,7 +57,7 @@ interface ChannelConstants {
   challengeDuration: BigNumber;
 }
 
-interface State extends ChannelConstants, StateVariables {}
+export interface State extends ChannelConstants, StateVariables {}
 
 interface Signed {
   signatures: string[];
@@ -90,8 +90,13 @@ type FundGuarantor = _Objective<
     guarantorId: string;
   }
 >;
-
-type Objective = OpenChannel | VirtuallyFund | FundGuarantor;
+type FundLedger = _Objective<
+  'FundLedger',
+  {
+    ledgerId: string;
+  }
+>;
+export type Objective = OpenChannel | VirtuallyFund | FundGuarantor | FundLedger;
 
 export interface Participant {
   participantId: string;
@@ -285,3 +290,19 @@ export function signState(state: State, privateKey: string): string {
   const {signature} = signNitroState(nitroState, privateKey);
   return joinSignature(signature);
 }
+
+export const firstState = (
+  outcome: Outcome,
+  {channelNonce, chainId, challengeDuration, appDefinition, participants}: ChannelConstants,
+  appData?: string
+): State => ({
+  appData: appData || '0x',
+  isFinal: false,
+  turnNum: bigNumberify(0),
+  chainId: chainId || '0x01',
+  channelNonce,
+  challengeDuration,
+  appDefinition,
+  participants,
+  outcome
+});
