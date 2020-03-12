@@ -136,7 +136,7 @@ export class MessagingService implements MessagingServiceInterface {
         break;
       case 'GetEthereumSelectedAddress':
         if (this.store.chain.ethereumIsEnabled) {
-          const ethereumSelectedAddress = this.store.chain.selectedDestination;
+          const ethereumSelectedAddress = this.store.chain.selectedAddress;
           window.parent.postMessage(jrs.success(requestId, ethereumSelectedAddress), '*');
         } else {
           this.eventEmitter.emit('AppRequest', {type: 'ENABLE_ETHEREUM', requestId});
