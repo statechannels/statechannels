@@ -76,7 +76,7 @@ beforeEach(() => {
 
   [aStore, bStore].forEach((store: TestStore) => {
     store.createEntry(allSignState(firstState(outcome, targetChannel)));
-    store.createEntry(allSignState(firstState(outcome, ledgerChannel)));
+    store.setLedger(store.createEntry(allSignState(firstState(outcome, ledgerChannel))));
   });
 
   subscribeToMessages({
@@ -85,7 +85,7 @@ beforeEach(() => {
   });
 });
 
-test('multiple workflows', async () => {
+test('happy path', async () => {
   const _chain = new FakeChain();
   _chain.depositSync(ledgerChannelId, '0', amounts.reduce(add).toHexString());
   [aStore, bStore].forEach((store: Store) => (store.chain = _chain));
@@ -116,6 +116,40 @@ test('multiple workflows', async () => {
       ledgerId: ledgerChannelId
     });
   }, EXPECT_TIMEOUT);
+});
+
+test('locks', async () => {
+  const _chain = new FakeChain();
+  _chain.depositSync(ledgerChannelId, '0', amounts.reduce(add).toHexString());
+  [aStore, bStore].forEach((store: Store) => (store.chain = _chain));
+
+  const aService = interpret(machine(aStore).withContext(context));
+  const bService = interpret(machine(bStore).withContext(context));
+
+  const status = await aStore.acquireChannelLock(context.ledgerChannelId);
+
+  [aService, bService].map(s => s.start());
+
+  await waitForExpect(async () => {
+    expect(aService.state.value).toEqual('acquiringLock');
+    expect(aService.state.value).toEqual('fundTarget');
+  }, EXPECT_TIMEOUT);
+
+  aService.onTransition(s => {
+    if (_.isEqual(s.value, {fundTarget: 'getTargetOutcome'})) {
+      expect((s.context as any).lock).toBeDefined();
+      expect((s.context as any).lock).not.toEqual(status.lock);
+    }
+  });
+
+  await aStore.releaseLedger(status);
+  await waitForExpect(async () => {
+    expect(aService.state.value).toEqual('success');
+  }, EXPECT_TIMEOUT);
+
+  const currentStatus = aStore._ledgers[participants[1].participantId];
+  expect(currentStatus).toBeDefined();
+  expect(currentStatus?.lock).toBeUndefined();
 });
 
 const twelveTotalAllocated = outcome;
