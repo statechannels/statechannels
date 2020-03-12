@@ -217,34 +217,30 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     });
 
     this.paymentChannelClient.onChannelUpdated(async (channelState: ChannelState) => {
-      if (channelState.channelId !== wire.paidStreamingExtension.pseChannelId) {
+      if (channelState.channelId === wire.paidStreamingExtension.pseChannelId) {
         // filter to updates for the channel on this wire
-        return;
-      }
-      log(`State received with turnNum ${channelState.turnNum}`);
-      if (this.paymentChannelClient.shouldSendSpacerState(channelState)) {
-        // send "spacer" state
-        await this.paymentChannelClient.acceptChannelUpdate(
-          this.paymentChannelClient.channelCache[channelState.channelId]
-        );
-        wire.paidStreamingExtension.stop(); // prompt peer for a payment
-        return;
-      }
-      if (this.paymentChannelClient.isPaymentToMe(channelState)) {
-        log(
-          `Accepting payment, refilling buffer and unblocking ${wire.paidStreamingExtension.peerAccount}`
-        );
-        await this.paymentChannelClient.acceptChannelUpdate(
-          this.paymentChannelClient.channelCache[channelState.channelId]
-        );
-        await this.refillBuffer(
-          torrent.infoHash,
-          wire.paidStreamingExtension.peerAccount,
-          channelState.channelId
-        );
-        this.unblockPeer(torrent.infoHash, wire, wire.paidStreamingExtension.peerAccount);
-        // TODO: only unblock if the buffer is large enough
-        return;
+        log(`State received with turnNum ${channelState.turnNum}`);
+        if (this.paymentChannelClient.shouldSendSpacerState(channelState)) {
+          // send "spacer" state
+          await this.paymentChannelClient.acceptChannelUpdate(
+            this.paymentChannelClient.channelCache[channelState.channelId]
+          );
+          wire.paidStreamingExtension.stop(); // prompt peer for a payment
+        } else if (this.paymentChannelClient.isPaymentToMe(channelState)) {
+          log(
+            `Accepting payment, refilling buffer and unblocking ${wire.paidStreamingExtension.peerAccount}`
+          );
+          await this.paymentChannelClient.acceptChannelUpdate(
+            this.paymentChannelClient.channelCache[channelState.channelId]
+          );
+          await this.refillBuffer(
+            torrent.infoHash,
+            wire.paidStreamingExtension.peerAccount,
+            channelState.channelId
+          );
+          this.unblockPeer(torrent.infoHash, wire, wire.paidStreamingExtension.peerAccount);
+          // TODO: only unblock if the buffer is large enough
+        }
       }
     });
   }
