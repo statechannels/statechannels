@@ -11,7 +11,7 @@ import {
   assign
 } from 'xstate';
 import {sendDisplayMessage, MessagingServiceInterface} from '../messaging';
-import {Store} from '../store/memory-store';
+import {Store} from '../store';
 
 interface UserApproves {
   type: 'USER_APPROVES_ENABLE';
