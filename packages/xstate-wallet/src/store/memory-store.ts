@@ -129,7 +129,10 @@ export class MemoryStore implements Store {
   }
 
   get newObjectiveFeed(): Observable<Objective> {
-    return fromEvent(this._eventEmitter, 'newObjective');
+    const newObjectives = fromEvent<Objective>(this._eventEmitter, 'newObjective');
+    const currentObjectives = from(this._objectives);
+
+    return merge(newObjectives, currentObjectives);
   }
 
   get outboxFeed(): Observable<Message> {
