@@ -16,7 +16,6 @@ import {subscribeToMessages} from './message-service';
 import {ETH_ASSET_HOLDER_ADDRESS, HUB} from '../../constants';
 import {FakeChain} from '../../chain';
 import {SimpleHub} from './simple-hub';
-import {MemoryChannelStoreEntry} from '../../store/memory-channel-storage';
 import {add} from '../../utils/math-utils';
 import {TestStore} from './store';
 
@@ -77,13 +76,10 @@ beforeEach(() => {
   bStore = new TestStore([wallet2.privateKey], chain);
   const hubStore = new SimpleHub(wallet3.privateKey);
 
-  const message = {
-    signedStates: [
-      allSignState(firstState(allocation, targetChannel)),
-      allSignState(firstState(allocation, ledgerChannel))
-    ]
-  };
-  [aStore, bStore].forEach((store: Store) => store.pushMessage(message));
+  [aStore, bStore].forEach((store: TestStore) => {
+    store.createEntry(allSignState(firstState(allocation, targetChannel)));
+    store.createEntry(allSignState(firstState(allocation, ledgerChannel)));
+  });
 
   subscribeToMessages({
     [participants[0].participantId]: aStore,
@@ -119,16 +115,14 @@ test('it uses virtual funding when enabled', async () => {
   let signatures = [wallet1, wallet3].map(({privateKey}) => signState(state, privateKey));
 
   chain.depositSync(ledgerId, '0', depositAmount);
-  aStore.pushMessage({signedStates: [{...state, signatures}]});
-  aStore.setLedger((await aStore.getEntry(calculateChannelId(state))) as MemoryChannelStoreEntry);
+  aStore.setLedger(aStore.createEntry({...state, signatures}));
 
   state = ledgerState([second, third], ledgerAmounts);
   ledgerId = calculateChannelId(state);
   signatures = [wallet2, wallet3].map(({privateKey}) => signState(state, privateKey));
 
   chain.depositSync(ledgerId, '0', depositAmount);
-  bStore.pushMessage({signedStates: [{...state, signatures}]});
-  bStore.setLedger((await bStore.getEntry(calculateChannelId(state))) as MemoryChannelStoreEntry);
+  bStore.setLedger(bStore.createEntry({...state, signatures}));
 
   const [aService, bService] = [aStore, bStore].map(connectToStore);
 

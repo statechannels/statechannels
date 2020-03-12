@@ -4,7 +4,6 @@ import {add} from '../../utils/math-utils';
 
 import {Init, machine, Errors} from '../ledger-funding';
 
-import {MemoryStore} from '../../store/memory-store';
 import {Store} from '../../store';
 import {bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
@@ -17,6 +16,7 @@ import {FakeChain, Chain} from '../../chain';
 import {wallet1, wallet2, participants} from './data';
 import {subscribeToMessages} from './message-service';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../../constants';
+import {TestStore} from './store';
 
 jest.setTimeout(20000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
@@ -62,8 +62,8 @@ const deductions = [0, 1].map(i => ({
 const context: Init = {targetChannelId, ledgerChannelId, deductions};
 
 let chain: Chain;
-let aStore: Store;
-let bStore: Store;
+let aStore: TestStore;
+let bStore: TestStore;
 
 const allSignState = (state: State) => ({
   ...state,
@@ -71,16 +71,13 @@ const allSignState = (state: State) => ({
 });
 
 beforeEach(() => {
-  aStore = new MemoryStore([wallet1.privateKey], chain);
-  bStore = new MemoryStore([wallet2.privateKey], chain);
+  aStore = new TestStore([wallet1.privateKey], chain);
+  bStore = new TestStore([wallet2.privateKey], chain);
 
-  const message = {
-    signedStates: [
-      allSignState(firstState(outcome, targetChannel)),
-      allSignState(firstState(outcome, ledgerChannel))
-    ]
-  };
-  [aStore, bStore].forEach((store: Store) => store.pushMessage(message));
+  [aStore, bStore].forEach((store: TestStore) => {
+    store.createEntry(allSignState(firstState(outcome, targetChannel)));
+    store.createEntry(allSignState(firstState(outcome, ledgerChannel)));
+  });
 
   subscribeToMessages({
     [participants[0].participantId]: aStore,
@@ -140,13 +137,11 @@ test.each`
   const _chain = new FakeChain();
   _chain.depositSync(ledgerChannelId, '0', chainInfo?.amount || '12');
   chainInfo?.finalized && _chain.finalizeSync(ledgerChannelId);
-  aStore.chain = _chain;
+  (aStore as any).chain = _chain;
 
-  aStore.pushMessage({
-    signedStates: [
-      allSignState({...firstState(ledgerOutcome, ledgerChannel), turnNum: bigNumberify(1)})
-    ]
-  });
+  aStore.createEntry(
+    allSignState({...firstState(ledgerOutcome, ledgerChannel), turnNum: bigNumberify(1)})
+  );
   aStore.chain.initialize();
 
   const aService = interpret(machine(aStore).withContext(context), {
