@@ -81,14 +81,23 @@ describe('Seeding and Leeching', () => {
     });
   }, 10000);
 
-  it('should unchoke when seeder unblocks leecher', done => {
+  it('should unchoke when seeder unblocks leecher', async done => {
+    await seeder.enable();
+    await leecher.enable();
+
     seeder.seed(defaultFile as File, defaultSeedingOptions(), seededTorrent => {
       seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({peerAccount}) => {
         seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({torrentPeers}) => {
           expect(torrentPeers[`${leecher.pseAccount}`].allowed).toEqual(true);
-          done();
         });
         seeder.togglePeer(seededTorrent.infoHash, peerAccount);
+
+        leecher.once(ClientEvents.TORRENT_DONE, ({torrent: leechedTorrent}) => {
+          expect(seededTorrent.files[0].done).toEqual(leechedTorrent.files[0].done);
+          expect(seededTorrent.files[0].length).toEqual(leechedTorrent.files[0].length);
+          expect(seededTorrent.files[0].name).toEqual(leechedTorrent.files[0].name);
+          done();
+        });
       });
 
       leecher.add(seededTorrent.magnetURI, {store: MemoryChunkStore});
