@@ -59,7 +59,6 @@ export class ChannelWallet {
       case 'JOIN_CHANNEL': {
         const workflow = this.startWorkflow(applicationWorkflow(this.store, this.messagingService));
         this.workflows.push(workflow);
-        // throw new Error('oops');
 
         workflow.machine.send(request);
         break;
