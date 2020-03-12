@@ -230,11 +230,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         wire.paidStreamingExtension.stop(); // prompt peer for a payment
         return;
       }
-      if (
-        this.paymentChannelClient.isPaymentToMe(channelState)
-        // returns true for the second postFS if I am the beneficiary
-        // (I need to countersign this state in order for the first payment to be sent)
-      ) {
+      if (this.paymentChannelClient.isPaymentToMe(channelState)) {
         log(
           `Accepting payment, refilling buffer and unblocking ${wire.paidStreamingExtension.peerAccount}`
         );
@@ -255,7 +251,9 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
   protected refillBuffer(infoHash: string, peerId: string, channelId: string) {
     if (!this.peersList[infoHash][peerId]) {
-      log(`Received payment from ${peerId} in channel ${channelId} but peer not known!`);
+      throw new Error(
+        `Received payment from ${peerId} in channel ${channelId} but peer not known!`
+      );
     }
     log(`querying channel client for updated balance`);
     const newSeederBalance = bigNumberify(
