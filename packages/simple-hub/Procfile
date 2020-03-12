@@ -1,1 +1,1 @@
-hub: node ./lib/hub/server.js
+simple-hub: node ./lib/simple-hub/server.js

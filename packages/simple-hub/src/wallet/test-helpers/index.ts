@@ -7,7 +7,7 @@ import {
 } from '@statechannels/xstate-wallet/lib/src/store/types';
 import {bigNumberify} from 'ethers/utils';
 import {ethers} from 'ethers';
-import {cHubStateChannelPK, cHubStateChannelAddress} from '../../constants';
+import {cHubParticipantPK, cHubParticipantAddress} from '../../constants';
 import {AddressZero} from 'ethers/constants';
 import {firstState, signState} from '@statechannels/xstate-wallet/lib/src/store/state-utils';
 import * as R from 'ramda';
@@ -27,7 +27,7 @@ const first: Participant = {
 };
 
 const hub: Participant = {
-  signingAddress: cHubStateChannelAddress,
+  signingAddress: cHubParticipantAddress,
   destination: '0x0000000000000000000000000000000000000000000000000000000000000002',
   participantId: 'hub'
 };
@@ -90,7 +90,7 @@ export const ledgerStateResponse: SignedState = {
   ...ledgerState,
   signatures: [
     signState(ledgerState, wallet1.privateKey),
-    signState(ledgerState, cHubStateChannelPK)
+    signState(ledgerState, cHubParticipantPK)
   ]
 };
 
@@ -104,7 +104,7 @@ export const ledgerStateResponse3: SignedState = {
   ...ledgerState3,
   signatures: [
     signState(ledgerState3, wallet1.privateKey),
-    signState(ledgerState3, cHubStateChannelPK)
+    signState(ledgerState3, cHubParticipantPK)
   ]
 };
 
@@ -118,6 +118,6 @@ export const ledgerStateResponse3_2: SignedState = {
   ...ledgerState3_2,
   signatures: [
     signState(ledgerState3_2, wallet1.privateKey),
-    signState(ledgerState3_2, cHubStateChannelPK)
+    signState(ledgerState3_2, cHubParticipantPK)
   ]
 };
