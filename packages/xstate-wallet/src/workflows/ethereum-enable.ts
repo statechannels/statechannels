@@ -71,18 +71,6 @@ const generateConfig = (
   }
 });
 
-// This is all a bit horrible because we want to make it possible to both generate a nice
-// picture and also generate code.
-
-// And then there are services and actions and events and states
-
-// protocol interface:
-//   - methods you can call on the store / messaging service
-//   - actions
-//
-
-// but if you want to build something complex out of these, you still need to give it a display name
-// and then you need to mock these
 export type WorkflowMachine = StateMachine<WorkflowContext, StateSchema, WorkflowEvent, any>;
 
 export const ethereumEnableWorkflow = (
@@ -101,7 +89,7 @@ export const ethereumEnableWorkflow = (
       sendDisplayMessage('Hide');
     },
     sendResponse: (context: WorkflowContext, event) => {
-      messagingService.sendResponse(context.requestId, context.enabledAddress as string); // todo: typing
+      messagingService.sendResponse(context.requestId, context.enabledAddress as string); // TODO: typing
     }
   };
   const config = generateConfig(actions);
