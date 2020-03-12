@@ -3,7 +3,7 @@ import {BigNumber} from 'ethers/utils';
 import {Participant, StateVariables, Objective, Message, SiteBudget} from './types';
 import {ChannelStoreEntry} from './channel-store-entry';
 import {Chain} from '../chain';
-import {Funding} from './memory-store';
+import {Funding, LedgerStatus, LedgerUpdated} from './memory-store';
 export interface Store {
   newObjectiveFeed: Observable<Objective>;
   outboxFeed: Observable<Message>;
@@ -18,6 +18,9 @@ export interface Store {
     appDefinition?: string
   ): Promise<ChannelStoreEntry>;
   getEntry(channelId): Promise<ChannelStoreEntry>;
+
+  lockLedger(participantId: string): Promise<LedgerUpdated>;
+  releaseLedger(status: LedgerStatus): Promise<void>;
   getLedger(peerId: string): Promise<ChannelStoreEntry>;
 
   setFunding(channelId: string, funding: Funding): Promise<void>;
