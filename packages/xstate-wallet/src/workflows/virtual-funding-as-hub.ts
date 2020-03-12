@@ -97,8 +97,8 @@ export const config: MachineConfig<Init, any, any> = {
 };
 
 const getDeductions = (store: Store) => async (ctx: Init): Promise<Deductions> => {
-  const {latest} = await store.getEntry(ctx.jointChannelId);
-  const {allocationItems} = checkThat(latest.outcome, isSimpleEthAllocation);
+  const {latestSupportedByMe} = await store.getEntry(ctx.jointChannelId);
+  const {allocationItems} = checkThat(latestSupportedByMe.outcome, isSimpleEthAllocation);
 
   return {
     deductions: {
