@@ -1,5 +1,5 @@
 import {Observable, fromEvent, merge, from} from 'rxjs';
-import {filter, catchError, map} from 'rxjs/operators';
+import {filter, map} from 'rxjs/operators';
 import {EventEmitter} from 'eventemitter3';
 import * as _ from 'lodash';
 
@@ -115,7 +115,6 @@ export class MemoryStore implements Store {
     return Promise.resolve();
   }
 
-  // for short-term backwards compatibility
   public channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry> {
     // TODO: The following line is not actually type safe.
     // fromEvent<'foo'>(this._eventEmitter, 'channelUpdated') would happily return
@@ -124,18 +123,9 @@ export class MemoryStore implements Store {
       filter(cs => cs.channelId === channelId)
     );
 
-    const currentEntry = from(this.getEntry(channelId));
+    const currentEntry = this._channels[channelId] ? from(this.getEntry(channelId)) : from([]);
 
-    return merge(currentEntry, newEntries).pipe(
-      catchError(e => {
-        // TODO: This seems fragile
-        if (e === 'Channel id not found') {
-          return newEntries;
-        } else {
-          throw e;
-        }
-      })
-    );
+    return merge(currentEntry, newEntries);
   }
 
   get newObjectiveFeed(): Observable<Objective> {
