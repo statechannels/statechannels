@@ -53,7 +53,10 @@ export const config: MachineConfig<any, any, any> = {
     releasingLock: {invoke: {src: Services.releaseLock, onDone: 'updatingFunding'}},
     updatingFunding: {invoke: {src: Services.updateFunding, onDone: 'success'}},
     success: {type: 'final'},
-    failure: {entry: [assignError, escalate(({error}) => ({type: 'FAILURE', error}))]}
+    failure: {
+      entry: [assignError, escalate(({error}) => ({type: 'FAILURE', error}))],
+      invoke: {src: Services.releaseLock}
+    }
   }
 };
 
