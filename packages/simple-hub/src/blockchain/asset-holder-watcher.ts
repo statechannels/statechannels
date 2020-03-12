@@ -15,10 +15,10 @@ export interface AssetHolderWatcherEvent {
   event: ethers.Event;
 }
 
-export type AssetHolderEventHandler = (assetHolderEvent: AssetHolderWatcherEvent) => any;
+export type AssetHolderEventHandler = (assetHolderEvent: AssetHolderWatcherEvent) => void;
 export type RemoveListeners = () => void;
 
-export async function assetHolderListen(eventHandler: AssetHolderEventHandler) {
+export async function assetHolderListen(eventHandler: AssetHolderEventHandler): Promise<void> {
   log.info('asset-holder-watcher: listen');
   const ethAssetHolder: ethers.Contract = await attachEthAssetHolder();
   const depositedFilter = ethAssetHolder.filters.Deposited();

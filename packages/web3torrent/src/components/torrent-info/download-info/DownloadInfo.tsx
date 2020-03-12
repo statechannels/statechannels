@@ -58,7 +58,7 @@ const DownloadInfo: React.FC<DownloadInfoProps> = ({
       <ChannelsList
         wires={torrent.wires}
         channels={_.pickBy(channelCache, ({channelId}) => myLeechingChannelIds.includes(channelId))}
-        peerType={'leecher'}
+        pseType={'leecher'}
       />
     </>
   );

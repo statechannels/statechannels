@@ -6,6 +6,8 @@ import {ChannelStatus} from '@statechannels/client-api-schema';
 import {SiteBudget} from '@statechannels/client-api-schema';
 
 const bigNumberify = utils.bigNumberify;
+const FINAL_SETUP_STATE = 3; // for a 2 party ForceMove channel
+
 export interface ChannelState {
   channelId: string;
   turnNum: string;
@@ -198,7 +200,7 @@ export class PaymentChannelClient {
     }
   }
   // beneficiary may use this method to accept payments
-  async acceptPayment(channelState: ChannelState) {
+  async acceptChannelUpdate(channelState: ChannelState) {
     const {
       channelId,
       beneficiary,
@@ -229,6 +231,11 @@ export class PaymentChannelClient {
       return channelState.status === 'running' && turnNum % 2 === 1;
     }
     return false; // only beneficiary may receive payments
+  }
+
+  shouldSendSpacerState(channelState: ChannelState): boolean {
+    const turnNum = Number(channelState.turnNum);
+    return turnNum === FINAL_SETUP_STATE ? true : false;
   }
 
   async pushMessage(message: Message<ChannelResult>) {

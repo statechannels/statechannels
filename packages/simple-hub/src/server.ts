@@ -1,8 +1,10 @@
+import '../env'; // Note: importing this module has the side effect of modifying env vars
+
 import * as Sentry from '@sentry/node';
 
 if (process.env.RUNTIME_ENV) {
   Sentry.init({
-    dsn: 'https://5b818f025d1a4259a8cf086377b67025@sentry.io/2047255',
+    dsn: 'https://18f53d1daf144411b98547e2ac93a914@sentry.io/4410960',
     environment: process.env.RUNTIME_ENV
   });
 }

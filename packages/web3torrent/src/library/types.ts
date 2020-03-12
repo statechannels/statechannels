@@ -55,6 +55,7 @@ export type PaidStreamingWire = Omit<Wire, 'requests'> &
     extended: (name: 'paidStreamingExtension', data: Buffer) => void;
 
     uploaded: number;
+    downloaded: number;
 
     // TODO: Remove after merging https://github.com/DefinitelyTyped/DefinitelyTyped/pull/38469.
     setTimeout(ms: number, unref?: boolean): void;

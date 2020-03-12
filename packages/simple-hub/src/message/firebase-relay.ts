@@ -1,6 +1,6 @@
 import * as firebase from 'firebase';
 
-import {cHubStateChannelAddress, cFirebasePrefix} from '../constants';
+import {cHubParticipantAddress, cFirebasePrefix} from '../constants';
 import {logger} from '../logger';
 import {Message} from '@statechannels/wire-format';
 import {fromEvent, Observable} from 'rxjs';
@@ -11,21 +11,15 @@ type FirebaseEvent = [Snapshot, string | null];
 
 const log = logger();
 
-const config = {
-  apiKey: process.env.FIREBASE_API_KEY,
-  authDomain: `${process.env.FIREBASE_PROJECT}.firebaseapp.com`,
-  databaseURL: `https://${process.env.FIREBASE_PROJECT}.firebaseio.com`,
-  projectId: process.env.FIREBASE_PROJECT,
-  storageBucket: '',
-  messagingSenderId: '913007764573'
-};
-
 let firebaseApp: firebase.app.App;
 function getFirebaseApp() {
   if (firebaseApp) {
     return firebaseApp;
   }
-  firebaseApp = firebase.initializeApp(config);
+  firebaseApp = firebase.initializeApp({
+    apiKey: process.env.FIREBASE_API_KEY,
+    databaseURL: process.env.FIREBASE_URL
+  });
   return firebaseApp;
 }
 
@@ -36,7 +30,7 @@ function getMessagesRef() {
 
 export function fbListen(responseForMessage: (message: Message) => Message[]) {
   log.info('firebase-relay: listen');
-  const hubRef = getMessagesRef().child(cHubStateChannelAddress);
+  const hubRef = getMessagesRef().child(cHubParticipantAddress);
 
   const childAddedObservable: Observable<FirebaseEvent> = fromEvent(hubRef, 'child_added');
 

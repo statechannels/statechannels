@@ -2,10 +2,10 @@ import {ethers} from 'ethers';
 
 export const cFirebasePrefix = process.env.FIREBASE_PREFIX || 'default-prefix';
 
-export const cHubStateChannelPK =
-  process.env.HUB_STATE_CHANNEL_PK ||
+export const cHubParticipantPK =
+  process.env.HUB_PARTICIPANT_PK ||
   '0x1b427b7ab88e2e10674b5aa92bb63c0ca26aa0b5a858e1d17295db6ad91c049b';
-export const cHubStateChannelAddress = new ethers.Wallet(cHubStateChannelPK).address;
+export const cHubParticipantAddress = new ethers.Wallet(cHubParticipantPK).address;
 
 // This account is provided eth in @statechannels/devtools/utils/startGanache.js
 export const cHubChainPK =

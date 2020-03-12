@@ -175,9 +175,7 @@ export abstract class PaidStreamingExtension implements Extension {
     wire._onRequest = function(index, offset, length) {
       log(`_onRequest: ${index}`);
 
-      messageBus.emit(PaidStreamingExtensionEvents.REQUEST, index, offset, length, function(
-        allow = false
-      ) {
+      messageBus.emit(PaidStreamingExtensionEvents.REQUEST, index, length, function(allow = false) {
         if (allow) {
           _onRequest.apply(wire, [index, offset, length]);
           log(`_onRequest PASS - ${index}`);

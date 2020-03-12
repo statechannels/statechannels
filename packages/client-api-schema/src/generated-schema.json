@@ -103,19 +103,16 @@
     "BudgetRequest": {
       "additionalProperties": false,
       "properties": {
-        "hubAddress": {
-          "type": "string"
+        "hub": {
+          "$ref": "#/definitions/Participant"
         },
         "hubAmount": {
           "type": "string"
         },
-        "hubOutcomeAddress": {
-          "type": "string"
+        "player": {
+          "$ref": "#/definitions/Participant"
         },
         "playerAmount": {
-          "type": "string"
-        },
-        "playerOutcomeAddress": {
           "type": "string"
         },
         "site": {
@@ -123,11 +120,10 @@
         }
       },
       "required": [
-        "hubAddress",
+        "hub",
         "hubAmount",
-        "hubOutcomeAddress",
+        "player",
         "playerAmount",
-        "playerOutcomeAddress",
         "site"
       ],
       "type": "object"

@@ -38,7 +38,7 @@ const UploadInfo: React.FC<UploadInfoProps> = ({
       <ChannelsList
         wires={torrent.wires}
         channels={_.pickBy(channelCache, ({channelId}) => mySeedingChannelIds.includes(channelId))}
-        peerType={'seeder'}
+        pseType={'seeder'}
       />
     </>
   );

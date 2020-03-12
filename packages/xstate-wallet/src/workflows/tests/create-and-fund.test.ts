@@ -115,14 +115,14 @@ test('it uses virtual funding when enabled', async () => {
   let signatures = [wallet1, wallet3].map(({privateKey}) => signState(state, privateKey));
 
   chain.depositSync(ledgerId, '0', depositAmount);
-  aStore.setLedger(aStore.createEntry({...state, signatures}));
+  aStore.setLedgerByEntry(aStore.createEntry({...state, signatures}));
 
   state = ledgerState([second, third], ledgerAmounts);
   ledgerId = calculateChannelId(state);
   signatures = [wallet2, wallet3].map(({privateKey}) => signState(state, privateKey));
 
   chain.depositSync(ledgerId, '0', depositAmount);
-  bStore.setLedger(bStore.createEntry({...state, signatures}));
+  bStore.setLedgerByEntry(bStore.createEntry({...state, signatures}));
 
   const [aService, bService] = [aStore, bStore].map(connectToStore);
 
