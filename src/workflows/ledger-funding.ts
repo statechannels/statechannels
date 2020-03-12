@@ -1,11 +1,11 @@
-import {Machine, MachineConfig, ServiceConfig} from 'xstate';
+import {Machine, MachineConfig, ServiceConfig, assign, DoneInvokeEvent} from 'xstate';
 
 import {SupportState} from '.';
-import {Store} from '../store';
+import {Store, Errors as StoreErrors} from '../store';
 import {allocateToTarget, isSimpleEthAllocation} from '../utils/outcome';
 import {AllocationItem} from '../store/types';
 import {getDataAndInvoke, checkThat} from '../utils';
-import {Funding} from '../store/memory-store';
+import {Funding, ChannelLock} from '../store/memory-store';
 import {add} from '../utils/math-utils';
 import {assignError} from '../utils/workflow-utils';
 import {escalate} from '../actions';
@@ -47,7 +47,7 @@ export const config: MachineConfig<any, any, any> = {
   states: {
     acquiringLock: {
       invoke: {src: Services.acquireLock, onDone: 'fundingTarget'},
-      exit: 'assignLock'
+      exit: assign<WithLock>({lock: (_, event: DoneInvokeEvent<ChannelLock>) => event.data})
     },
     fundingTarget,
     releasingLock: {invoke: {src: Services.releaseLock, onDone: 'updatingFunding'}},
@@ -55,6 +55,28 @@ export const config: MachineConfig<any, any, any> = {
     success: {type: 'final'},
     failure: {entry: [assignError, escalate(({error}) => ({type: 'FAILURE', error}))]}
   }
+};
+
+import {filter, first, map} from 'rxjs/operators';
+const acquireLock = (store: Store) => async (ctx: Init): Promise<ChannelLock> => {
+  try {
+    return await store.acquireChannelLock(ctx.ledgerChannelId);
+  } catch (e) {
+    if (e.message === StoreErrors.channelLocked) {
+      return await store.lockFeed
+        .pipe(
+          filter(s => s.channelId === ctx.ledgerChannelId),
+          first(s => !s.lock),
+          map(async s => await store.acquireChannelLock(ctx.ledgerChannelId))
+        )
+        .toPromise();
+    } else throw e;
+  }
+};
+
+type WithLock = Init & {lock: ChannelLock};
+const releaseLock = (store: Store) => async (ctx: WithLock): Promise<void> => {
+  await store.releaseChannelLock(ctx.lock);
 };
 
 const getTargetOutcome = (store: Store) => async (ctx: Init): Promise<SupportState.Init> => {
@@ -92,8 +114,8 @@ const services = (store: Store): Record<Services, ServiceConfig<Init>> => ({
   getTargetOutcome: getTargetOutcome(store),
   updateFunding: updateFunding(store),
   supportState: SupportState.machine(store),
-  acquireLock: () => Promise.resolve(),
-  releaseLock: () => Promise.resolve()
+  acquireLock: acquireLock(store),
+  releaseLock: releaseLock(store)
 });
 
 const options = (store: Store) => ({services: services(store)});
