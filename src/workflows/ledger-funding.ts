@@ -36,8 +36,8 @@ const FAILURE = `#${WORKFLOW}.failure`;
 const onError = {target: FAILURE};
 
 const fundingTarget = getDataAndInvoke(
-  {src: 'getTargetOutcome', opts: {onError}},
-  {src: 'supportState', opts: {onError}},
+  {src: Services.getTargetOutcome, opts: {onError}},
+  {src: Services.supportState, opts: {onError}},
   'releasingLock'
 );
 
