@@ -3,13 +3,15 @@ import {
   Participant,
   Outcome,
   SignedState,
-  State
-} from '@statechannels/xstate-wallet/lib/src/store/types';
+  State,
+  firstState,
+  signState
+} from '../xstate-wallet-internals';
 import {bigNumberify} from 'ethers/utils';
 import {ethers} from 'ethers';
 import {cHubParticipantPK, cHubParticipantAddress} from '../../constants';
 import {AddressZero} from 'ethers/constants';
-import {firstState, signState} from '@statechannels/xstate-wallet/lib/src/store/state-utils';
+
 import * as R from 'ramda';
 
 const wallet1 = new ethers.Wallet(
