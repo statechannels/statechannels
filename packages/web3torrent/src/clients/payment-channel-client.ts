@@ -231,6 +231,11 @@ export class PaymentChannelClient {
     return false; // only beneficiary may receive payments
   }
 
+  shouldSendSpacerState(channelState: ChannelState): boolean {
+    const turnNum = Number(channelState.turnNum);
+    return turnNum === 3 ? true : false;
+  }
+
   async pushMessage(message: Message<ChannelResult>) {
     await this.channelClient.pushMessage(message);
     return convertToChannelState(message.data);

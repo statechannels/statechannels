@@ -222,7 +222,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         return;
       }
       log(`State received with turnNum ${channelState.turnNum}`);
-      if (Number(channelState.turnNum) === 3) {
+      if (this.paymentChannelClient.shouldSendSpacerState(channelState)) {
         // send "spacer" state
         await this.paymentChannelClient.acceptChannelUpdate(
           this.paymentChannelClient.channelCache[channelState.channelId]
