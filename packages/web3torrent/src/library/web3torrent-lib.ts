@@ -62,6 +62,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   }
 
   async testTorrentingCapability(timeOut: number) {
+    log('Testing torrenting capability...');
     const gotAWire = new Promise(resolve => {
       super.add(mockTorrents[0].magnetURI, (torrent: Torrent) => {
         torrent.once('wire', wire => {
