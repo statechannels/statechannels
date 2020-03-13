@@ -11,13 +11,14 @@ import {getDataAndInvoke} from '../utils';
 import {SupportState} from '.';
 import {Store} from '../store';
 import {outcomesEqual} from '../store/state-utils';
-import {Participant} from '../store/types';
+import {Participant, Objective} from '../store/types';
 import {MessagingServiceInterface} from '../messaging';
 
 type WorkflowEvent = AnyEventObject;
 export type WorkflowContext = {
   requestId: number;
   hub: Participant;
+  player: Participant;
 };
 interface WorkflowActions extends ActionFunctionMap<WorkflowContext, WorkflowEvent> {
   sendResponse: ActionFunction<WorkflowContext, WorkflowEvent>;
@@ -26,11 +27,13 @@ interface WorkflowServices extends Record<string, ServiceConfig<WorkflowContext>
   getFinalState: (context: WorkflowContext, event: WorkflowEvent) => Promise<SupportState.Init>;
   supportState: StateMachine<any, any, any>;
   submitWithdrawTransaction: (context: WorkflowContext, event: WorkflowEvent) => Promise<void>;
+  createObjective: (context: WorkflowContext, event: any) => Promise<void>;
 }
 
 export const config: StateNodeConfig<WorkflowContext, any, any> = {
-  initial: 'closeLedger',
+  initial: 'createObjective',
   states: {
+    createObjective: {invoke: {src: 'createObjective', onDone: 'closeLedger'}},
     closeLedger: getDataAndInvoke({src: 'getFinalState'}, {src: 'supportState'}, 'withdraw'),
     withdraw: {
       invoke: {src: 'submitWithdrawTransaction', onDone: 'done', onError: 'failure'}
@@ -71,6 +74,20 @@ const submitWithdrawTransaction = (
   }
   await store.chain.finalizeAndWithdraw(ledgerEntry.finalizationProof);
 };
+
+const createObjective = (store: Store): WorkflowServices['createObjective'] => async context => {
+  const ledgerEntry = await store.getLedger(context.hub.participantId);
+  if (!ledgerEntry.isFinalized) {
+    throw new Error(`Channel ${ledgerEntry.channelId} is not finalized`);
+  }
+  const objective: Objective = {
+    type: 'CloseLedger',
+    participants: [context.player, context.hub],
+    data: {ledgerId: ledgerEntry.channelId}
+  };
+  return store.addObjective(objective);
+};
+
 const options = (
   store: Store,
   messagingService: MessagingServiceInterface
@@ -79,7 +96,8 @@ const options = (
     services: {
       getFinalState: getFinalState(store),
       supportState: SupportState.machine(store),
-      submitWithdrawTransaction: submitWithdrawTransaction(store)
+      submitWithdrawTransaction: submitWithdrawTransaction(store),
+      createObjective: createObjective(store)
     },
     actions: {
       sendResponse: async context => await messagingService.sendResponse(context.requestId, {})

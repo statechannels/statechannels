@@ -3,6 +3,10 @@ import {Player, hookUpMessaging, generateCloseAndWithdrawRequest} from './helper
 import {CloseAndWithdrawResponse} from '@statechannels/client-api-schema';
 import {filter, map, first} from 'rxjs/operators';
 import waitForExpect from 'wait-for-expect';
+import {CHALLENGE_DURATION} from '../constants';
+import {simpleEthAllocation} from '../utils/outcome';
+import {bigNumberify} from 'ethers/utils';
+import {isCloseLedger} from '../store/types';
 
 jest.setTimeout(30000);
 
@@ -20,11 +24,30 @@ it('allows for a wallet to close the ledger channel with the hub and withdraw', 
     'Hub',
     fakeChain
   );
-
+  const outcome = simpleEthAllocation([
+    {amount: bigNumberify(6), destination: playerA.destination},
+    {amount: bigNumberify(4), destination: hub.destination}
+  ]);
   hookUpMessaging(playerA, hub);
 
-  // TODO: Implement this for conclude objective
-  // hub.store.newObjectiveFeed
+  const ledgerChannel = await playerA.store.createChannel([playerA, hub], CHALLENGE_DURATION, {
+    outcome,
+    turnNum: bigNumberify(20),
+    isFinal: false,
+    appData: '0x0'
+  });
+  playerA.store.setLedger(ledgerChannel.channelId);
+  hub.store.setLedger(ledgerChannel.channelId);
+
+  playerA.store.chain.deposit(ledgerChannel.channelId, '0x0', '0x10');
+
+  hub.store.objectiveFeed.pipe(filter(o => isCloseLedger(o))).subscribe(async o => {
+    hub.startCloseLedgerAndWithdraw({
+      hub: hub.participant,
+      player: playerA.participant,
+      requestId: 134556607
+    });
+  });
 
   const closeAndWithdrawMessage = generateCloseAndWithdrawRequest(
     playerA.participant,
