@@ -8,7 +8,7 @@ import {simpleEthAllocation} from '../utils/outcome';
 import {bigNumberify} from 'ethers/utils';
 import {isCloseLedger} from '../store/types';
 
-jest.setTimeout(30000);
+jest.setTimeout(20000);
 
 it('allows for a wallet to close the ledger channel with the hub and withdraw', async () => {
   const fakeChain = new FakeChain();
@@ -38,7 +38,7 @@ it('allows for a wallet to close the ledger channel with the hub and withdraw', 
   });
   playerA.store.setLedger(ledgerChannel.channelId);
   hub.store.setLedger(ledgerChannel.channelId);
-
+  hub.store.signAndAddState(ledgerChannel.channelId, ledgerChannel.latest);
   playerA.store.chain.deposit(ledgerChannel.channelId, '0x0', '0x10');
 
   hub.store.objectiveFeed.pipe(filter(o => isCloseLedger(o))).subscribe(async o => {
@@ -62,10 +62,8 @@ it('allows for a wallet to close the ledger channel with the hub and withdraw', 
     .toPromise();
   await playerA.messagingService.receiveRequest(closeAndWithdrawMessage);
   await waitForExpect(async () => {
-    expect(playerA.workflowState).toEqual('waitForUserApproval');
+    expect(playerA.workflowState).toEqual('done');
   }, 3000);
-
-  playerA.channelWallet.workflows[0].machine.send({type: 'USER_APPROVES_CLOSE'});
 
   const closeAndWithdrawResponse: CloseAndWithdrawResponse = await closeAndWithdrawPromise;
 
