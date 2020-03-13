@@ -19,6 +19,7 @@ import {interpret, Interpreter} from 'xstate';
 import * as App from '../workflows/application';
 import * as CreateAndFundLedger from '../workflows/create-and-fund-ledger';
 import {Guid} from 'guid-typescript';
+import * as CloseLedgerAndWithdraw from '../workflows/close-ledger-and-withdraw';
 
 export class Player {
   privateKey: string;
@@ -29,6 +30,20 @@ export class Player {
   messagingService: MessagingServiceInterface;
   channelWallet: ChannelWallet;
 
+  startCloseLedgerAndWithdraw(context: CloseLedgerAndWithdraw.WorkflowContext) {
+    const workflowId = Guid.create().toString();
+    const machine = interpret<any, any, any>(
+      CloseLedgerAndWithdraw.workflow(this.store, this.messagingService, context),
+      {
+        devTools: true
+      }
+    )
+      .onTransition((state, event) => process.env.ADD_LOGS && logTransition(state, event, this.id))
+
+      .start();
+
+    this.channelWallet.workflows.push({id: workflowId, machine, domain: 'TODO'});
+  }
   startCreateAndFundLedger(context: CreateAndFundLedger.WorkflowContext) {
     const workflowId = Guid.create().toString();
     const machine = interpret<any, any, any>(

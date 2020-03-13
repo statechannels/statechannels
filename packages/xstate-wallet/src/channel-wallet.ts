@@ -82,7 +82,7 @@ export class ChannelWallet {
         const workflow = this.startWorkflow(
           CloseLedgerAndWithdraw.workflow(this.store, this.messagingService, {
             hub: request.hub,
-
+            player: request.player,
             requestId: request.requestId
           })
         );
