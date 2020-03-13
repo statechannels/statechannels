@@ -35,6 +35,8 @@ export const BUFFER_REFILL_RATE = bigNumberify(2e4); // number of credits / piec
 export const INITIAL_SEEDER_BALANCE = bigNumberify(0); // needs to be zero so that depositing works correctly (unidirectional payment channel)
 export const INITIAL_LEECHER_BALANCE = bigNumberify(BUFFER_REFILL_RATE.mul(100)); // e.g. gwei = 1e9 = nano-ETH
 
+const HUB_ADDRESS = 'TODO';
+
 // A Whimsical diagram explaining the functionality of Web3Torrent: https://whimsical.com/Sq6whAwa8aTjbwMRJc7vPU
 export default class WebTorrentPaidStreamingClient extends WebTorrent {
   peersList: PeersByTorrent;
@@ -59,6 +61,17 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     log('got ethereum address');
     log('ACCOUNT ID: ', this.pseAccount);
     log('THIS address: ', this.outcomeAddress);
+
+    // Hub messaging
+    this.paymentChannelClient.onMessageQueued((message: Message) => {
+      if (message.recipient === HUB_ADDRESS) {
+        // pipe to firebase.
+      }
+    });
+    // TODO
+    // onFirebaseMessageReceived(message:Message) => {
+    //   await this.paymentChannelClient.pushMessage(message);
+    // }
   }
 
   async testTorrentingCapability(timeOut: number) {
@@ -224,7 +237,9 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
     // If the wallet queues a message, send it across the wire
     this.paymentChannelClient.onMessageQueued((message: Message) => {
-      wire.paidStreamingExtension.sendMessage(JSON.stringify(message));
+      if (message.recipient === wire.paidStreamingExtension.peerAccount) {
+        wire.paidStreamingExtension.sendMessage(JSON.stringify(message));
+      }
     });
 
     // If a channel is proposed, join it
