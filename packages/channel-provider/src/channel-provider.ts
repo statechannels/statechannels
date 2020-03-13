@@ -1,7 +1,12 @@
 import EventEmitter from 'eventemitter3';
 import {Guid} from 'guid-typescript';
 import {MessagingService} from './messaging-service';
-import {ChannelProviderInterface, isJsonRpcNotification} from './types';
+import {
+  ChannelProviderInterface,
+  isJsonRpcNotification,
+  MethodRequestType,
+  MethodResponseType
+} from './types';
 import {UIService} from './ui-service';
 
 class ChannelProvider implements ChannelProviderInterface {
@@ -33,7 +38,10 @@ class ChannelProvider implements ChannelProviderInterface {
     this.events.emit('Connect');
   }
 
-  async send(method: string, params: any): Promise<any> {
+  async send<K extends keyof MethodRequestType>(
+    method: K,
+    params: MethodRequestType[K]
+  ): Promise<MethodResponseType[K]> {
     const target = await this.ui.getTarget();
     const response = await this.messaging.request(target, {
       jsonrpc: '2.0',

@@ -1,16 +1,27 @@
 import {ListenerFn} from 'eventemitter3';
 import {
   CreateChannelResponse,
+  CreateChannelRequest,
   CloseChannelResponse,
+  CloseChannelRequest,
   UpdateChannelResponse,
+  UpdateChannelRequest,
   PushMessageResponse,
+  PushMessageRequest,
   JoinChannelResponse,
+  JoinChannelRequest,
   GetAddressResponse,
+  GetAddressRequest,
   GetStateResponse,
+  GetStateRequest,
   GetEthereumSelectedAddressResponse,
+  GetEthereumSelectedAddressRequest,
   ChallengeChannelResponse,
+  ChallengeChannelRequest,
   GetBudgetResponse,
-  ApproveBudgetAndFundResponse
+  GetBudgetRequest,
+  ApproveBudgetAndFundResponse,
+  ApproveBudgetAndFundRequest
 } from '@statechannels/client-api-schema';
 
 export interface JsonRpcRequest<MethodName = string, RequestParams = any> {
@@ -57,8 +68,9 @@ export interface JsonRpcErrorResponse {
 export function isJsonRpcErrorResponse(message: any): message is JsonRpcErrorResponse {
   return 'error' in message;
 }
+
 // TODO: This probably should live in client-api-schema?
-export type MethodType = {
+export type MethodResponseType = {
   CreateChannel: CreateChannelResponse['result'];
   UpdateChannel: UpdateChannelResponse['result'];
   PushMessage: PushMessageResponse['result'];
@@ -73,9 +85,28 @@ export type MethodType = {
   CloseAndWithdraw: GetBudgetResponse['result'];
 };
 
+// TODO: This probably should live in client-api-schema?
+export type MethodRequestType = {
+  CreateChannel: CreateChannelRequest['params'];
+  UpdateChannel: UpdateChannelRequest['params'];
+  PushMessage: PushMessageRequest['params'];
+  CloseChannel: CloseChannelRequest['params'];
+  JoinChannel: JoinChannelRequest['params'];
+  GetState: GetStateRequest['params'];
+  GetAddress: GetAddressRequest['params'];
+  GetEthereumSelectedAddress: GetEthereumSelectedAddressRequest['params'];
+  ChallengeChannel: ChallengeChannelRequest['params'];
+  ApproveBudgetAndFund: ApproveBudgetAndFundRequest['params'];
+  GetBudget: GetBudgetRequest['params'];
+  CloseAndWithdraw: GetBudgetRequest['params'];
+};
+
 export interface ChannelProviderInterface {
   enable(url?: string): Promise<void>;
-  send<K extends keyof MethodType>(method: K, params?: any): Promise<MethodType[K]>;
+  send<K extends keyof MethodRequestType>(
+    method: K,
+    params?: MethodRequestType[K]
+  ): Promise<MethodResponseType[K]>;
   on(event: string, callback: ListenerFn): void;
   off(event: string, callback?: ListenerFn): void;
   subscribe(subscriptionType: string, params?: any): Promise<string>;

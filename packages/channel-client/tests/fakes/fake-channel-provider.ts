@@ -1,4 +1,8 @@
-import {ChannelProviderInterface, MethodType} from '@statechannels/channel-provider/src';
+import {
+  ChannelProviderInterface,
+  MethodResponseType,
+  MethodRequestType
+} from '@statechannels/channel-provider/src';
 import log = require('loglevel');
 
 import {EventEmitter, ListenerFn} from 'eventemitter3';
@@ -39,35 +43,41 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     this.url = url || '';
   }
 
-  async send<K extends keyof MethodType>(method: K, params?: any): Promise<MethodType[K]> {
+  async send<K extends keyof MethodRequestType>(
+    method: K,
+    params: MethodRequestType[K]
+  ): Promise<MethodResponseType[K]> {
     switch (method) {
       case 'CreateChannel':
-        return this.createChannel(params) as Promise<MethodType[K]>;
+        return this.createChannel(params);
 
       case 'PushMessage':
-        return this.pushMessage(params) as Promise<MethodType[K]>;
+        return this.pushMessage(params);
 
       case 'GetEthereumSelectedAddress':
-        return '0xEthereumSelectedAddress' as MethodType[K];
+        return '0xEthereumSelectedAddress';
 
       case 'GetAddress':
-        return this.getAddress() as Promise<MethodType[K]>;
+        return this.getAddress();
 
       case 'JoinChannel':
-        return this.joinChannel(params) as Promise<MethodType[K]>;
+        return this.joinChannel(params);
 
       case 'GetState':
-        return this.getState(params) as Promise<MethodType[K]>;
+        return this.getState(params);
 
       case 'UpdateChannel':
-        return this.updateChannel(params) as Promise<MethodType[K]>;
+        return this.updateChannel(params);
 
       case 'CloseChannel':
-        return this.closeChannel(params) as Promise<MethodType[K]>;
+        return this.closeChannel(params);
+
       case 'ApproveBudgetAndFund':
-        return this.approveBudgetAndFund(params) as Promise<MethodType[K]>;
+        return this.approveBudgetAndFund(params);
+
       case 'CloseAndWithdraw':
-        return this.closeAndWithdraw(params) as Promise<MethodType[K]>;
+        return this.closeAndWithdraw(params);
+
       default:
         return Promise.reject(`No callback available for ${method}`);
     }

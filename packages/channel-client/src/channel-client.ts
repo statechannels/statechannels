@@ -102,9 +102,17 @@ export class ChannelClient implements ChannelClientInterface<ChannelResult> {
     return this.provider.send('ApproveBudgetAndFund', {
       playerAmount,
       hubAmount,
-      playerOutcomeAddress,
-      hubAddress,
-      hubOutcomeAddress
+      site: 'abc.com', // TODO: use real value
+      player: {
+        participantId: await this.getAddress(),
+        signingAddress: await this.getAddress(),
+        destination: playerOutcomeAddress
+      },
+      hub: {
+        participantId: hubAddress,
+        signingAddress: hubAddress,
+        destination: hubOutcomeAddress
+      }
     });
   }
 
