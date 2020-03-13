@@ -98,6 +98,7 @@ export interface Message {
 }
 
 export interface DBBackend {
+  initialize(): Promise<any>;
   privateKeys(): Promise<Record<string, string | undefined>>;
   ledgers(): Promise<Record<string, string | undefined>>;
   nonces(): Promise<Record<string, BigNumber | undefined>>;
@@ -112,7 +113,7 @@ export interface DBBackend {
   getLedger(key: string): Promise<string | undefined>;
   setNonce(key: string, value: BigNumber): Promise<BigNumber>;
   getNonce(key: string): Promise<BigNumber | undefined>;
-  setObjective(key: string, value: string): Promise<string>;
-  getObjective(key: string): Promise<string | undefined>;
-  setObjectives(values: Objective[]): Promise<Objective[]>;
+  setObjective(key: number, value: Objective): Promise<Objective>;
+  getObjective(key: number): Promise<Objective | undefined>;
+  setReplaceObjectives(values: Objective[]): Promise<Objective[]>;
 }

@@ -9,6 +9,9 @@ export class MemoryBackend implements DBBackend {
   private _privateKeys: Record<string, string | undefined> = {};
   private _ledgers: Record<string, string | undefined> = {};
 
+  public async initialize() {
+    // NOOP
+  }
   // Generic Getters
 
   public async privateKeys() {
@@ -65,17 +68,23 @@ export class MemoryBackend implements DBBackend {
     return this._nonces[key];
   }
 
-  public async setObjective(key: string, value: string) {
+  public async setObjective(key: number, value: Objective) {
     this._objectives[key] = value;
     return value;
   }
 
-  public async setObjectives(values: Objective[]) {
-    this._objectives = values;
-    return values;
+  public async setReplaceObjectives(values: Objective[]) {
+    const newObjectives: Objective[] = [];
+    values.forEach(objective => {
+      if (!this._objectives.includes(objective)) {
+        this._objectives.push(objective);
+        newObjectives.push(objective);
+      }
+    });
+    return newObjectives;
   }
 
-  public async getObjective(key: string) {
+  public async getObjective(key: number) {
     return this._objectives[key];
   }
 }
