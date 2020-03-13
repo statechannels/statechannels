@@ -18,7 +18,7 @@ export interface AssetHolderEvent {
   event: ethers.Event;
 }
 
-export async function assetHolderObservable(): Promise<Observable<AssetHolderEvent>> {
+export async function ethAssetHolderObservable(): Promise<Observable<AssetHolderEvent>> {
   const ethAssetHolder: ethers.Contract = await createEthAssetHolder();
   return fromEvent(ethAssetHolder, 'Deposited').pipe(
     map(

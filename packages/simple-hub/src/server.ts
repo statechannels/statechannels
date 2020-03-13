@@ -12,8 +12,8 @@ import {logger} from './logger';
 import {fbListen} from './message/firebase-relay';
 import {Message} from '@statechannels/wire-format';
 import {respondToMessage} from './wallet/respond-to-message';
-import {assetHolderObservable} from './blockchain/asset-holder-watcher';
-import {attachToChainObservable} from './wallet/chain-event';
+import {ethAssetHolderObservable} from './blockchain/eth-asset-holder-watcher';
+import {subscribeToEthAssetHolder} from './wallet/chain-event';
 
 const log = logger();
 
@@ -23,7 +23,7 @@ function responseForMessage(incomingMessage: Message): Message[] {
 }
 
 export async function startServer() {
-  attachToChainObservable(await assetHolderObservable());
+  subscribeToEthAssetHolder(await ethAssetHolderObservable());
   fbListen(responseForMessage);
 }
 

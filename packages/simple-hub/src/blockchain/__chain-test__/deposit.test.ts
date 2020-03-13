@@ -1,8 +1,8 @@
 import {bigNumberify} from 'ethers/utils';
-import {assetHolderObservable} from '../asset-holder-watcher';
+import {ethAssetHolderObservable} from '../eth-asset-holder-watcher';
 import {Blockchain} from '../eth-asset-holder';
 import {first, pairwise} from 'rxjs/operators';
-import {attachToChainObservable} from '../../wallet/chain-event';
+import {subscribeToEthAssetHolder} from '../../wallet/chain-event';
 import {ethers} from 'ethers';
 
 jest.setTimeout(20000);
@@ -14,7 +14,7 @@ const channelId1 = '0x1823994d6d3b53b82f499c1aca2095b94108ba3ff59f55c6e765da1e24
 const channelId2 = '0x1823994d6d3b53b82f499c1aca2095b94108ba3ff59f55c6e765da1e24874ab3';
 
 test('chain observable: detect deposit events', async () => {
-  const messagePromise = (await assetHolderObservable()).pipe(first()).toPromise();
+  const messagePromise = (await ethAssetHolderObservable()).pipe(first()).toPromise();
   await Blockchain.fund(channelId1, zero, five);
   const message = await messagePromise;
   expect(message.channelId).toEqual(channelId1);
@@ -24,8 +24,8 @@ test('chain observable: detect deposit events', async () => {
 });
 
 test('chain observable: matches deposit events', async () => {
-  const subscription = attachToChainObservable(await assetHolderObservable());
-  const messagePromise = (await assetHolderObservable()).pipe(pairwise(), first()).toPromise();
+  const subscription = subscribeToEthAssetHolder(await ethAssetHolderObservable());
+  const messagePromise = (await ethAssetHolderObservable()).pipe(pairwise(), first()).toPromise();
 
   await Blockchain.fund(channelId2, zero, five);
 
