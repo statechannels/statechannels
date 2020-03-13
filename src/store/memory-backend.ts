@@ -34,7 +34,11 @@ export class MemoryBackend implements DBBackend {
   public async nonces() {
     const nonces: Record<string, BigNumber | string | undefined> = this._nonces;
     for (const key in nonces) {
-      nonces[key] = new BigNumber(nonces[key] as string);
+      if (!this._nonces[key]) {
+        nonces[key] = new BigNumber(-1);
+      } else {
+        nonces[key] = new BigNumber(nonces[key] as string);
+      }
     }
     return nonces as Record<string, BigNumber | undefined>;
   }
@@ -80,6 +84,9 @@ export class MemoryBackend implements DBBackend {
   }
 
   public async getNonce(key: string) {
+    if (!this._nonces[key]) {
+      return new BigNumber(-1);
+    }
     return new BigNumber(this._nonces[key] as string);
   }
 

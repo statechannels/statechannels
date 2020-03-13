@@ -172,6 +172,10 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
   }
 
   static fromJson(data) {
+    if (!data) {
+      console.error("Data is undefined or null, Memory Channel Store Entry can't be created.");
+      return data;
+    }
     const {stateVariables, channelConstants, signatures, funding, myIndex} = data;
     return new MemoryChannelStoreEntry(
       channelConstants,
