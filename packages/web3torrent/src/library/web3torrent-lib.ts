@@ -59,8 +59,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     log('got ethereum address');
     log('ACCOUNT ID: ', this.pseAccount);
     log('THIS address: ', this.outcomeAddress);
-    const canTorrent = await this.testTorrentingCapability(3000);
-    console.log(canTorrent ? 'Can Torrent!' : 'Cannot torrent');
   }
 
   async testTorrentingCapability(timeOut: number) {
