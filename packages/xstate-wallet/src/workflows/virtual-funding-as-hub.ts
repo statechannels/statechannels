@@ -97,8 +97,8 @@ export const config: MachineConfig<Init, any, any> = {
 };
 
 const getDeductions = (store: Store) => async (ctx: Init): Promise<Deductions> => {
-  const {latest} = await store.getEntry(ctx.jointChannelId);
-  const {allocationItems} = checkThat(latest.outcome, isSimpleEthAllocation);
+  const {latestSupportedByMe} = await store.getEntry(ctx.jointChannelId);
+  const {allocationItems} = checkThat(latestSupportedByMe.outcome, isSimpleEthAllocation);
 
   return {
     deductions: {
@@ -121,7 +121,7 @@ const getDeductions = (store: Store) => async (ctx: Init): Promise<Deductions> =
 };
 
 const watchObjectives = (store: Store) => (ctx: Init) => {
-  return store.newObjectiveFeed.pipe(
+  return store.objectiveFeed.pipe(
     filter(isFundGuarantor),
     filter(o => o.data.jointChannelId === ctx.jointChannelId),
     flatMap(async o => {

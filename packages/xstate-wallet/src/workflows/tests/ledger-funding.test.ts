@@ -17,8 +17,9 @@ import {wallet1, wallet2, participants} from './data';
 import {subscribeToMessages} from './message-service';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../../constants';
 import {TestStore} from './store';
+import {Guid} from 'guid-typescript';
 
-jest.setTimeout(20000);
+jest.setTimeout(10000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 
 const chainId = '0x01';
@@ -76,7 +77,7 @@ beforeEach(() => {
 
   [aStore, bStore].forEach((store: TestStore) => {
     store.createEntry(allSignState(firstState(outcome, targetChannel)));
-    store.createEntry(allSignState(firstState(outcome, ledgerChannel)));
+    store.setLedgerByEntry(store.createEntry(allSignState(firstState(outcome, ledgerChannel))));
   });
 
   subscribeToMessages({
@@ -85,7 +86,7 @@ beforeEach(() => {
   });
 });
 
-test('multiple workflows', async () => {
+test('happy path', async () => {
   const _chain = new FakeChain();
   _chain.depositSync(ledgerChannelId, '0', amounts.reduce(add).toHexString());
   [aStore, bStore].forEach((store: Store) => (store.chain = _chain));
@@ -116,6 +117,42 @@ test('multiple workflows', async () => {
       ledgerId: ledgerChannelId
     });
   }, EXPECT_TIMEOUT);
+});
+
+test('locks', async () => {
+  const _chain = new FakeChain();
+  _chain.depositSync(ledgerChannelId, '0', amounts.reduce(add).toHexString());
+  [aStore, bStore].forEach((store: TestStore) => ((store as any).chain = _chain));
+
+  const aService = interpret(machine(aStore).withContext(context));
+  const bService = interpret(machine(bStore).withContext(context));
+
+  const status = await aStore.acquireChannelLock(context.ledgerChannelId);
+  expect(status).toEqual({
+    channelId: context.ledgerChannelId,
+    lock: expect.any(Guid)
+  });
+
+  [aService, bService].map(s => s.start());
+
+  await waitForExpect(async () => {
+    expect(aService.state.value).toEqual('acquiringLock');
+    expect(bService.state.value).toEqual({fundingTarget: 'supportState'});
+  }, EXPECT_TIMEOUT);
+
+  aService.onTransition(s => {
+    if (_.isEqual(s.value, {fundTarget: 'getTargetOutcome'})) {
+      expect((s.context as any).lock).toBeDefined();
+      expect((s.context as any).lock).not.toEqual(status.lock);
+    }
+  });
+  await aStore.releaseChannelLock(status);
+
+  await waitForExpect(async () => {
+    expect(aService.state.value).toEqual('success');
+  }, EXPECT_TIMEOUT);
+
+  expect(aStore._channelLocks[context.ledgerChannelId]).toBeUndefined();
 });
 
 const twelveTotalAllocated = outcome;
