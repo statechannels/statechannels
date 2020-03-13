@@ -369,6 +369,80 @@
       ],
       "type": "object"
     },
+    "CloseAndWithdrawParams": {
+      "additionalProperties": false,
+      "properties": {
+        "channelId": {
+          "$ref": "#/definitions/ChannelId"
+        }
+      },
+      "required": [
+        "channelId"
+      ],
+      "type": "object"
+    },
+    "CloseAndWithdrawRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "CloseAndWithdraw"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": false,
+          "properties": {
+            "channelId": {
+              "$ref": "#/definitions/ChannelId"
+            }
+          },
+          "required": [
+            "channelId"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "CloseAndWithdrawResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "result": {
+          "$ref": "#/definitions/ChannelResult"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
+      "type": "object"
+    },
     "CloseChannelParams": {
       "additionalProperties": false,
       "properties": {
@@ -1032,6 +1106,9 @@
         },
         {
           "$ref": "#/definitions/CloseChannelRequest"
+        },
+        {
+          "$ref": "#/definitions/CloseAndWithdrawRequest"
         }
       ]
     },
@@ -1069,6 +1146,9 @@
         },
         {
           "$ref": "#/definitions/ApproveBudgetAndFundResponse"
+        },
+        {
+          "$ref": "#/definitions/CloseAndWithdrawResponse"
         }
       ]
     },
