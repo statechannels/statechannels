@@ -45,7 +45,7 @@ export class PaymentChannelClient {
 
   constructor(private readonly channelClient: ChannelClientInterface) {
     this.channelClient.onChannelUpdated(channelResult => {
-      this.cacheChannelState(convertToChannelState(channelResult));
+      this.updateChannelCache(convertToChannelState(channelResult));
     });
   }
 
@@ -78,7 +78,7 @@ export class PaymentChannelClient {
       'appData unused'
     );
 
-    this.cacheChannelState(convertToChannelState(channelResult));
+    this.insertIntoChannelCache(convertToChannelState(channelResult));
 
     return convertToChannelState(channelResult);
   }
@@ -98,8 +98,13 @@ export class PaymentChannelClient {
     return this.channelClient.onMessageQueued(callback);
   }
 
-  cacheChannelState(channelState: ChannelState) {
+  insertIntoChannelCache(channelState: ChannelState) {
     this.channelCache = {...this.channelCache, [channelState.channelId]: channelState};
+  }
+
+  updateChannelCache(channelState: ChannelState) {
+    this.channelCache[channelState.channelId] && // only update an existing key
+      (this.channelCache[channelState.channelId] = channelState);
   }
 
   // Accepts an web3t-friendly callback, performs the necessary encoding, and subscribes to the channelClient with an appropriate, API-compliant callback
@@ -125,19 +130,18 @@ export class PaymentChannelClient {
 
   async joinChannel(channelId: string) {
     const channelResult = await this.channelClient.joinChannel(channelId);
-    this.cacheChannelState(convertToChannelState(channelResult));
-    return convertToChannelState(channelResult);
+    this.insertIntoChannelCache(convertToChannelState(channelResult));
   }
 
   async closeChannel(channelId: string): Promise<ChannelState> {
     const channelResult = await this.channelClient.closeChannel(channelId);
-    this.cacheChannelState(convertToChannelState(channelResult));
+    this.updateChannelCache(convertToChannelState(channelResult));
     return convertToChannelState(channelResult);
   }
 
   async challengeChannel(channelId: string): Promise<ChannelState> {
     const channelResult = await this.channelClient.challengeChannel(channelId);
-    this.cacheChannelState(convertToChannelState(channelResult));
+    this.updateChannelCache(convertToChannelState(channelResult));
     return convertToChannelState(channelResult);
   }
 
@@ -169,7 +173,7 @@ export class PaymentChannelClient {
       allocations,
       'appData unused'
     );
-    this.cacheChannelState(convertToChannelState(channelResult));
+    this.updateChannelCache(convertToChannelState(channelResult));
     return convertToChannelState(channelResult);
   }
 
