@@ -17,7 +17,7 @@ import {MessagingServiceInterface} from '../messaging';
 type WorkflowEvent = AnyEventObject;
 export type WorkflowContext = {
   requestId: number;
-  hub: Participant;
+  opponent: Participant;
   player: Participant;
 };
 interface WorkflowActions extends ActionFunctionMap<WorkflowContext, WorkflowEvent> {
@@ -43,7 +43,9 @@ export const config: StateNodeConfig<WorkflowContext, any, any> = {
   }
 };
 
-const getFinalState = (store: Store): WorkflowServices['getFinalState'] => async ({hub}) => {
+const getFinalState = (store: Store): WorkflowServices['getFinalState'] => async ({
+  opponent: hub
+}) => {
   const {latestSupportedByMe, latest} = await store.getLedger(hub.participantId);
 
   // If we've received a new final state that matches our outcome we support that
@@ -68,21 +70,19 @@ const submitWithdrawTransaction = (
   store: Store
 ): WorkflowServices['submitWithdrawTransaction'] => async context => {
   // TODO: Should we just fetch this once and store on the context
-  const ledgerEntry = await store.getLedger(context.hub.participantId);
+  const ledgerEntry = await store.getLedger(context.opponent.participantId);
   if (!ledgerEntry.isFinalized) {
     throw new Error(`Channel ${ledgerEntry.channelId} is not finalized`);
   }
-  await store.chain.finalizeAndWithdraw(ledgerEntry.finalizationProof);
+  await store.chain.finalizeAndWithdraw(ledgerEntry.support);
 };
 
 const createObjective = (store: Store): WorkflowServices['createObjective'] => async context => {
-  const ledgerEntry = await store.getLedger(context.hub.participantId);
-  if (!ledgerEntry.isFinalized) {
-    throw new Error(`Channel ${ledgerEntry.channelId} is not finalized`);
-  }
+  const ledgerEntry = await store.getLedger(context.opponent.participantId);
+
   const objective: Objective = {
     type: 'CloseLedger',
-    participants: [context.player, context.hub],
+    participants: [context.player, context.opponent],
     data: {ledgerId: ledgerEntry.channelId}
   };
   return store.addObjective(objective);

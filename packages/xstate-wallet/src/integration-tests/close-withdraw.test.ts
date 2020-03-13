@@ -43,8 +43,8 @@ it('allows for a wallet to close the ledger channel with the hub and withdraw', 
 
   hub.store.objectiveFeed.pipe(filter(o => isCloseLedger(o))).subscribe(async o => {
     hub.startCloseLedgerAndWithdraw({
-      hub: hub.participant,
-      player: playerA.participant,
+      player: hub.participant,
+      opponent: playerA.participant,
       requestId: 134556607
     });
   });
