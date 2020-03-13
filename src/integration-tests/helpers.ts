@@ -211,7 +211,7 @@ export function generateApproveBudgetAndFundRequest(
   };
 }
 
-export function generateCloseAndWithdraw(
+export function generateCloseAndWithdrawRequest(
   player: Participant,
   hub: Participant
 ): CloseAndWithdrawRequest {
