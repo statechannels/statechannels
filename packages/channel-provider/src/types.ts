@@ -1,5 +1,6 @@
 import {ListenerFn} from 'eventemitter3';
 import {
+  Request as RequestParams,
   CreateChannelResponse,
   CreateChannelRequest,
   CloseChannelResponse,
@@ -85,28 +86,43 @@ export type MethodResponseType = {
   CloseAndWithdraw: any; // TODO: Add types
 };
 
-// TODO: This probably should live in client-api-schema?
-export type MethodRequestType = {
-  CreateChannel: CreateChannelRequest['params'];
-  UpdateChannel: UpdateChannelRequest['params'];
-  PushMessage: PushMessageRequest['params'];
-  CloseChannel: CloseChannelRequest['params'];
-  JoinChannel: JoinChannelRequest['params'];
-  GetState: GetStateRequest['params'];
-  GetAddress: GetAddressRequest['params'];
-  GetEthereumSelectedAddress: GetEthereumSelectedAddressRequest['params'];
-  ChallengeChannel: ChallengeChannelRequest['params'];
-  ApproveBudgetAndFund: ApproveBudgetAndFundRequest['params'];
-  GetBudget: GetBudgetRequest['params'];
-  CloseAndWithdraw: any; // TODO: Add types
+type Method =
+  | 'CreateChannel'
+  | 'UpdateChannel'
+  | 'PushMessage'
+  | 'CloseChannel'
+  | 'JoinChannel'
+  | 'GetState'
+  | 'GetAddress'
+  | 'GetEthereumSelectedAddress'
+  | 'ChallengeChannel'
+  | 'ApproveBudgetAndFund'
+  | 'GetBudget'
+  | 'CloseAndWithdraw';
+
+type Request = {params: RequestParams['params']}; // Replace with union type
+type Call<K extends Method, T extends Request> = {
+  method: K;
+  params: T['params'];
 };
+
+export type MethodRequestType =
+  | Call<'CreateChannel', CreateChannelRequest>
+  | Call<'UpdateChannel', UpdateChannelRequest>
+  | Call<'PushMessage', PushMessageRequest>
+  | Call<'CloseChannel', CloseChannelRequest>
+  | Call<'JoinChannel', JoinChannelRequest>
+  | Call<'GetState', GetStateRequest>
+  | Call<'GetAddress', GetAddressRequest>
+  | Call<'GetEthereumSelectedAddress', GetEthereumSelectedAddressRequest>
+  | Call<'ChallengeChannel', ChallengeChannelRequest>
+  | Call<'ApproveBudgetAndFund', ApproveBudgetAndFundRequest>
+  | Call<'GetBudget', GetBudgetRequest>
+  | Call<'CloseAndWithdraw', any>;
 
 export interface ChannelProviderInterface {
   enable(url?: string): Promise<void>;
-  send<K extends keyof MethodRequestType>(
-    method: K,
-    params?: MethodRequestType[K]
-  ): Promise<MethodResponseType[K]>;
+  send(request: MethodRequestType): Promise<MethodResponseType[MethodRequestType['method']]>;
   on(event: string, callback: ListenerFn): void;
   off(event: string, callback?: ListenerFn): void;
   subscribe(subscriptionType: string, params?: any): Promise<string>;

@@ -46,43 +46,40 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     this.url = url || '';
   }
 
-  async send<K extends keyof MethodRequestType>(
-    method: K,
-    params: MethodRequestType[K]
-  ): Promise<MethodResponseType[K]> {
-    switch (method) {
+  async send(request: MethodRequestType): Promise<MethodResponseType[MethodRequestType['method']]> {
+    switch (request.method) {
       case 'CreateChannel':
-        return this.createChannel(params as CreateChannelParams) as Promise<MethodResponseType[K]>;
+        return this.createChannel(request.params);
 
       case 'PushMessage':
-        return this.pushMessage(params as PushMessageParams) as Promise<MethodResponseType[K]>;
+        return this.pushMessage(request.params);
 
       case 'GetEthereumSelectedAddress':
-        return '0xEthereumSelectedAddress' as MethodResponseType[K];
+        return '0xEthereumSelectedAddress';
 
       case 'GetAddress':
-        return this.getAddress() as Promise<MethodResponseType[K]>;
+        return this.getAddress();
 
       case 'JoinChannel':
-        return this.joinChannel(params as JoinChannelParams) as Promise<MethodResponseType[K]>;
+        return this.joinChannel(request.params);
 
       case 'GetState':
-        return this.getState(params as GetStateParams) as Promise<MethodResponseType[K]>;
+        return this.getState(request.params);
 
       case 'UpdateChannel':
-        return this.updateChannel(params as UpdateChannelParams) as Promise<MethodResponseType[K]>;
+        return this.updateChannel(request.params);
 
       case 'CloseChannel':
-        return this.closeChannel(params as CloseChannelParams) as Promise<MethodResponseType[K]>;
+        return this.closeChannel(request.params);
 
       case 'ApproveBudgetAndFund':
-        return this.approveBudgetAndFund(params as BudgetRequest) as Promise<MethodResponseType[K]>;
+        return this.approveBudgetAndFund(request.params);
 
       case 'CloseAndWithdraw':
-        return this.closeAndWithdraw(params) as Promise<MethodResponseType[K]>;
+        return this.closeAndWithdraw(request.params);
 
       default:
-        return Promise.reject(`No callback available for ${method}`);
+        return Promise.reject(`No callback available for ${request.method}`);
     }
   }
 

@@ -38,15 +38,12 @@ class ChannelProvider implements ChannelProviderInterface {
     this.events.emit('Connect');
   }
 
-  async send<K extends keyof MethodRequestType>(
-    method: K,
-    params: MethodRequestType[K]
-  ): Promise<MethodResponseType[K]> {
+  async send(request: MethodRequestType): Promise<MethodResponseType[MethodRequestType['method']]> {
     const target = await this.ui.getTarget();
     const response = await this.messaging.request(target, {
       jsonrpc: '2.0',
-      method,
-      params
+      method: request.method,
+      params: request.params
     });
 
     return response;
