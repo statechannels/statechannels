@@ -26,8 +26,8 @@ export type TorrentCallback = (torrent: Torrent) => any;
 
 export * from './types';
 
-export const WEI_PER_BYTE = bigNumberify(1); // cost per credit / piece
-export const BUFFER_REFILL_RATE = bigNumberify(2e4); // number of credits / pieces the leecher wishes to increase the buffer by
+export const WEI_PER_BYTE = bigNumberify(1); // cost per byte
+export const BUFFER_REFILL_RATE = bigNumberify(2e4); // number of bytes the leecher wishes to increase the buffer by
 // These variables control the amount of (micro)trust the leecher must invest in the seeder
 // As well as the overall performance hit of integrating payments into webtorrent.
 // A high BUFFER_REFILL_RATE increases the need for trust, but decreases the number of additional messages and therefore latency
@@ -198,7 +198,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
             id: peerAccount,
             wire,
             buffer: '0', // (bytes) a value x > 0 would allow a leecher to download x bytes
-            credit: '0', // (wei)
+            beneficiaryBalance: '0', // (wei)
             allowed: false,
             channelId: channel.channelId
           };
@@ -217,7 +217,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
             buffer: bigNumberify(knownPeerAccount.buffer)
               .sub(reqPrice) // decrease buffer by the price of this request
               .toString(),
-            credit: knownPeerAccount.credit,
+            beneficiaryBalance: knownPeerAccount.beneficiaryBalance,
             allowed: true,
             channelId: knownPeerAccount.channelId
           };
@@ -225,7 +225,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           log(
             '> ALLOWED: ' + index,
             'BUFFER: ' + this.peersList[torrent.infoHash][peerAccount].buffer,
-            'BALANCE: ' + this.peersList[torrent.infoHash][peerAccount].credit
+            'BALANCE: ' + this.peersList[torrent.infoHash][peerAccount].beneficiaryBalance
           );
         }
       }
@@ -284,16 +284,16 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       );
     }
     log(`querying channel client for updated balance`);
-    const newCredit = bigNumberify(
+    const newBeneficiaryBalance = bigNumberify(
       this.paymentChannelClient.channelCache[channelId].beneficiaryBalance
     );
     // infer payment using update balance and previously stored balance
     const payment = bigNumberify(
-      newCredit.sub(bigNumberify(this.peersList[infoHash][peerId].credit))
+      newBeneficiaryBalance.sub(bigNumberify(this.peersList[infoHash][peerId].beneficiaryBalance))
     );
     // store new balance
 
-    this.peersList[infoHash][peerId].credit = newCredit.toString();
+    this.peersList[infoHash][peerId].beneficiaryBalance = newBeneficiaryBalance.toString();
     // convert payment into buffer units (bytes)
     this.peersList[infoHash][peerId].buffer = bigNumberify(this.peersList[infoHash][peerId].buffer)
       .add(payment.div(WEI_PER_BYTE)) // This must remain an integer as long as our check above uses .isZero()
@@ -301,7 +301,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       .toString();
 
     log(
-      `newSeederBalance: ${newCredit} wei; payment: ${payment} wei;, buffer for peer: ${this.peersList[infoHash][peerId].buffer} bytes`
+      `beneficiaryBalance: ${newBeneficiaryBalance} wei; payment: ${payment} wei;, buffer for peer: ${this.peersList[infoHash][peerId].buffer} bytes`
     );
   }
 
