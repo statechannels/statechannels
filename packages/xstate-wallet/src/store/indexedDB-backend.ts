@@ -208,32 +208,32 @@ export class IndexedDBBackend implements DBBackend {
    * @param key
    * @returns true on success, false on fail.
    */
-  private async delete(storeName: ObjectStores, key: string | number): Promise<any> {
-    return new Promise((resolve, reject) => {
-      const store = this._db.transaction([storeName], 'readwrite').objectStore(storeName);
-      const request = store.openCursor(key);
-      request.onerror = err => {
-        this.logError(err, 'delete (not found)' + storeName);
-        reject(err);
-      };
-      request.onsuccess = event => {
-        const cursor = event.target && (event.target as any).result;
-        const record = cursor && cursor.value;
-        console.log(typeof record, typeof cursor);
-        if (!cursor) {
-          console.error(`Record of ${storeName} with key: ${key} not found`);
-          resolve(false);
-        } else {
-          const reqDelete = store.delete(key);
-          reqDelete.onsuccess = _ => resolve(true);
-          reqDelete.onerror = err => {
-            this.logError(err, 'delete ' + storeName);
-            reject(err);
-          };
-        }
-      };
-    });
-  }
+  // private async delete(storeName: ObjectStores, key: string | number): Promise<any> {
+  //   return new Promise((resolve, reject) => {
+  //     const store = this._db.transaction([storeName], 'readwrite').objectStore(storeName);
+  //     const request = store.openCursor(key);
+  //     request.onerror = err => {
+  //       this.logError(err, 'delete (not found)' + storeName);
+  //       reject(err);
+  //     };
+  //     request.onsuccess = event => {
+  //       const cursor = event.target && (event.target as any).result;
+  //       const record = cursor && cursor.value;
+  //       console.log(typeof record, typeof cursor);
+  //       if (!cursor) {
+  //         console.error(`Record of ${storeName} with key: ${key} not found`);
+  //         resolve(false);
+  //       } else {
+  //         const reqDelete = store.delete(key);
+  //         reqDelete.onsuccess = _ => resolve(true);
+  //         reqDelete.onerror = err => {
+  //           this.logError(err, 'delete ' + storeName);
+  //           reject(err);
+  //         };
+  //       }
+  //     };
+  //   });
+  // }
 
   /**
    * Formats and parses errors thrown
