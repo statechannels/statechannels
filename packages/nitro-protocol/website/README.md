@@ -1,3 +1,5 @@
+[![Netlify Status](https://api.netlify.com/api/v1/badges/8472e36f-72ee-4b18-8d1a-c2dfbc27667b/deploy-status)](https://app.netlify.com/sites/nitro-protocol/deploys)
+
 This website was created with [Docusaurus](https://docusaurus.io/).
 
 # What's In This Document
