@@ -6,11 +6,7 @@ import {
   defaultTorrentHash,
   mockMetamask
 } from './testing/test-utils';
-import WebTorrentPaidStreamingClient, {
-  ClientEvents,
-  PaidStreamingExtensionNotices,
-  PaidStreamingTorrent
-} from './web3torrent-lib';
+import WebTorrentPaidStreamingClient, {ClientEvents, PaidStreamingTorrent} from './web3torrent-lib';
 import {PaymentChannelClient, ChannelState} from '../clients/payment-channel-client';
 import {ChannelClient, FakeChannelProvider} from '@statechannels/channel-client';
 
@@ -22,7 +18,7 @@ describe('Seeding and Leeching', () => {
     mockMetamask();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     seeder = new WebTorrentPaidStreamingClient({
       pseAccount: '1',
       dht: false,
@@ -40,10 +36,21 @@ describe('Seeding and Leeching', () => {
     leecher.on('error', err => fail(err));
     leecher.on('warning', err => fail(err));
     leecher.paymentChannelClient.channelCache = {};
+
+    await seeder.enable();
+    await leecher.enable();
+  });
+
+  it('should throw when the client is not enabled', async done => {
+    await seeder.disable();
+    expect(() => {
+      seeder.seed(defaultFile as File, defaultSeedingOptions(false));
+    }).toThrow();
+    done();
   });
 
   it('should seed and remove a Torrent', done => {
-    expect(seeder.pseAccount).toBe('1');
+    // expect(seeder.pseAccount).toBe('1');
     seeder.seed(defaultFile as File, defaultSeedingOptions(false), seededTorrent => {
       expect(seeder.torrents.length).toEqual(1);
       expect(seededTorrent.infoHash).toEqual(defaultTorrentHash);
@@ -81,10 +88,7 @@ describe('Seeding and Leeching', () => {
     });
   }, 10000);
 
-  it('should unchoke when seeder unblocks leecher', async done => {
-    await seeder.enable();
-    await leecher.enable();
-
+  it('should be able to unchoke and finish a download', async done => {
     seeder.seed(defaultFile as File, defaultSeedingOptions(), seededTorrent => {
       seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({peerAccount}) => {
         seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({torrentPeers}) => {

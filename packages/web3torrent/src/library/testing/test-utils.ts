@@ -22,8 +22,14 @@ export function mockMetamask() {
   async function enable() {
     return new Promise(r => r());
   }
+  async function disable() {
+    return new Promise(r => r());
+  }
+
   const ethereum = {
-    enable
+    enable,
+    disable,
+    selectedAddress: '0x0'
   };
   // mock out window.ethereum.enable
   Object.defineProperty(window, 'ethereum', {
