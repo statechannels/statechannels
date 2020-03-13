@@ -3,7 +3,7 @@ import {MemoryChannelStoreEntry} from './memory-channel-storage';
 import {Objective, DBBackend} from './types';
 import 'fake-indexeddb/auto';
 
-export enum ObjectStores {
+enum ObjectStores {
   channels = 'channels',
   objectives = 'objectives',
   nonces = 'nonces',
@@ -13,7 +13,7 @@ export enum ObjectStores {
 
 // A running, functioning example can be seen and played with here: https://codesandbox.io/s/elastic-kare-m1jp8
 export class IndexedDBBackend implements DBBackend {
-  private _db: IDBDatabase;
+  private _db: any;
 
   constructor() {
     if (!indexedDB) {
