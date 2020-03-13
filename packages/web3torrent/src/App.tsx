@@ -38,7 +38,7 @@ class App extends React.Component {
       <Router history={history}>
         <main>
           {!canTorrent && (
-            <Flash my={3} variant="warning">
+            <Flash variant="danger">
               Looks like you do not have an internet connection or are behind a firewall.
               Web3Torrent may not work on some public wifi networks.
             </Flash>
