@@ -28,6 +28,9 @@ export interface Chain {
   getChainInfo: (channelId: string) => Promise<ChannelChainInfo>;
   chainUpdatedFeed: (channelId: string) => Observable<ChannelChainInfo>;
   deposit: (channelId: string, expectedHeld: string, amount: string) => Promise<void>;
+  ethereumEnable: () => Promise<string>;
+  ethereumIsEnabled: boolean;
+  selectedAddress: string;
 }
 
 // TODO: This chain should be fleshed out enough so it mimics basic chain behavior
@@ -81,6 +84,18 @@ export class FakeChain implements Chain {
 
     return concat(first, updates);
   }
+
+  public ethereumEnable() {
+    return Promise.resolve(this.selectedAddress);
+  }
+
+  public get ethereumIsEnabled() {
+    return true;
+  }
+
+  public get selectedAddress() {
+    return '0x123';
+  }
 }
 
 export class ChainWatcher implements Chain {
@@ -98,6 +113,36 @@ export class ChainWatcher implements Chain {
       NitroAdjudicatorInterface,
       signer
     );
+  }
+
+  public async ethereumEnable(): Promise<string> {
+    if (window.ethereum) {
+      const [selectedAddress] = await window.ethereum.enable();
+      return selectedAddress;
+    } else {
+      return Promise.reject('window.ethereum not found');
+    }
+  }
+
+  public get ethereumIsEnabled(): boolean {
+    if (window.ethereum) {
+      return !!window.ethereum.selectedAddress;
+    } else {
+      return false;
+    }
+  }
+
+  public get selectedAddress(): string {
+    if (window.ethereum) {
+      const destination = window.ethereum.selectedAddress;
+      if (destination) {
+        return destination;
+      } else {
+        throw new Error('window.ethereum is not enabled');
+      }
+    } else {
+      throw new Error('window.ethereum not found');
+    }
   }
 
   public async deposit(channelId: string, expectedHeld: string, amount: string): Promise<void> {

@@ -127,20 +127,20 @@ export class MessagingService implements MessagingServiceInterface {
 
   public async receiveRequest(jsonRpcRequest: Request) {
     const request = parseRequest(jsonRpcRequest);
-    const {id} = request;
+    const {id: requestId} = request;
 
     switch (request.method) {
       case 'GetAddress':
         const address = this.store.getAddress();
-        this.sendResponse(id, address);
+        this.sendResponse(requestId, address);
         break;
       case 'GetEthereumSelectedAddress':
-        //  ask metamask permission to access accounts
-        await window.ethereum.enable();
-        //  block until accounts changed
-        //  (indicating user acceptance)
-        const ethereumSelectedAddress: string = await metamaskUnlocked();
-        window.parent.postMessage(jrs.success(id, ethereumSelectedAddress), '*');
+        if (this.store.chain.ethereumIsEnabled) {
+          const ethereumSelectedAddress = this.store.chain.selectedAddress;
+          window.parent.postMessage(jrs.success(requestId, ethereumSelectedAddress), '*');
+        } else {
+          this.eventEmitter.emit('AppRequest', {type: 'ENABLE_ETHEREUM', requestId});
+        }
         break;
       case 'CreateChannel':
       case 'UpdateChannel':
@@ -157,12 +157,12 @@ export class MessagingService implements MessagingServiceInterface {
           throw new Error(`Received message not addressed to us ${JSON.stringify(message)}`);
         }
         this.store.pushMessage(deserializeMessage(message));
-        await this.sendResponse(id, {success: true});
+        await this.sendResponse(requestId, {success: true});
         break;
       case 'GetBudget':
         const site = request.params.hubAddress;
         const siteBudget = await this.store.getBudget(site);
-        await this.sendResponse(id, siteBudget ? serializeSiteBudget(siteBudget) : {});
+        await this.sendResponse(requestId, siteBudget ? serializeSiteBudget(siteBudget) : {});
         break;
       case 'ChallengeChannel':
       case 'GetState':
@@ -173,20 +173,6 @@ export class MessagingService implements MessagingServiceInterface {
         unreachable(request);
     }
   }
-}
-
-async function metamaskUnlocked(): Promise<string> {
-  return new Promise(function(resolve) {
-    function ifSelectedAddressThenResolve() {
-      if (typeof window.ethereum.selectedAddress === 'string') {
-        resolve(window.ethereum.selectedAddress);
-      }
-    }
-    ifSelectedAddressThenResolve();
-    window.ethereum.on('accountsChanged', function() {
-      ifSelectedAddressThenResolve();
-    });
-  });
 }
 
 export async function convertToChannelResult(
