@@ -7,18 +7,17 @@ import log = require('loglevel');
 
 import {EventEmitter, ListenerFn} from 'eventemitter3';
 import {
+  BudgetRequest,
+  CloseAndWithdrawParams,
   ChannelResult,
-  SiteBudget,
-  CreateChannelParams,
-  PushMessageResult,
-  JoinChannelParams,
-  GetStateParams,
-  UpdateChannelParams,
-  Notification,
   CloseChannelParams,
-  PushMessageParams,
-  Participant,
-  BudgetRequest
+  CreateChannelParams,
+  GetStateParams,
+  JoinChannelParams,
+  Notification,
+  PushMessageResult,
+  SiteBudget,
+  UpdateChannelParams
 } from '@statechannels/client-api-schema';
 import {Message} from '../../src/types';
 import {calculateChannelId} from '../../src/utils';
@@ -302,13 +301,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     return {success: true};
   }
 
-  private async approveBudgetAndFund(params: {
-    playerAmount: string;
-    hubAmount: string;
-    site: string;
-    player: Participant;
-    hub: Participant;
-  }): Promise<SiteBudget> {
+  private async approveBudgetAndFund(params: BudgetRequest): Promise<SiteBudget> {
     const {hub, site, playerAmount, hubAmount} = params;
 
     // TODO: Does this need to be delayed?
@@ -331,42 +324,24 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     return result;
   }
 
-  private async closeAndWithdraw(params: {
-    playerAmount: string;
-    hubAmount: string;
-    hubAddress: string;
-  }): Promise<SiteBudget> {
-    const {hubAddress, playerAmount, hubAmount} = params;
-    const budget = {
-      hub: hubAddress,
-      site: 'fakehub.com',
-      budgets: [
-        {
-          token: '0x0',
-          pending: {playerAmount, hubAmount},
-          free: {playerAmount: '0x0', hubAmount},
-          inUse: {playerAmount: '0x0', hubAmount: '0x0'},
-          direct: {playerAmount: '0x0', hubAmount: '0x0'}
-        }
-      ]
-    };
+  private async closeAndWithdraw(params: CloseAndWithdrawParams): Promise<ChannelResult> {
+    const latestState = this.findChannel(params.channelId);
 
-    // TODO: Does this need to be delayed?
+    await this.verifyTurnNum(params.channelId, latestState.turnNum);
+    const turnNum = bigNumberify(latestState.turnNum)
+      .add(1)
+      .toString();
 
-    this.notifyAppBudgetUpdated({
-      hub: hubAddress,
-      site: 'fakehub.com',
-      budgets: [
-        {
-          token: '0x0',
-          inUse: {playerAmount: '0x0', hubAmount: '0x0'},
-          free: {playerAmount: '0x0', hubAmount: '0x0'},
-          pending: {playerAmount: '0x0', hubAmount: '0x0'},
-          direct: {playerAmount: '0x0', hubAmount: '0x0'}
-        }
-      ]
-    });
+    const status = 'closing';
 
-    return budget;
+    this.setState({...latestState, turnNum, status});
+    log.debug(
+      `Player ${this.getPlayerIndex(
+        params.channelId
+      )} updated channel to status ${status} on turnNum ${turnNum}`
+    );
+    this.notifyOpponent(this.latestState[params.channelId], 'ChannelUpdate');
+
+    return this.latestState[params.channelId];
   }
 }
