@@ -3,6 +3,14 @@ import {signState, hashState, getSignerAddress, calculateChannelId} from './stat
 import _ from 'lodash';
 import {Funding} from './memory-store';
 
+export type ChannelStoredData = {
+  stateVariables: Record<string, StateVariables>;
+  channelConstants: ChannelConstants;
+  signatures: Record<string, string[] | undefined>;
+  funding: Funding | undefined;
+  myIndex: number;
+};
+
 export interface ChannelStoreEntry {
   readonly channelId: string;
   readonly myIndex: number;
@@ -12,6 +20,7 @@ export interface ChannelStoreEntry {
   readonly channelConstants: ChannelConstants;
   readonly funding?: Funding;
   readonly states: State[];
+  data(): ChannelStoredData;
 }
 
 export class MemoryChannelStoreEntry implements ChannelStoreEntry {
@@ -150,5 +159,26 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
 
   private nParticipants(): number {
     return this.channelConstants.participants.length;
+  }
+
+  public data(): ChannelStoredData {
+    return {
+      stateVariables: this.stateVariables,
+      channelConstants: this.channelConstants,
+      signatures: this.signatures,
+      funding: this.funding,
+      myIndex: this.myIndex
+    };
+  }
+
+  static fromJson(data) {
+    const {stateVariables, channelConstants, signatures, funding, myIndex} = data;
+    return new MemoryChannelStoreEntry(
+      channelConstants,
+      myIndex,
+      stateVariables,
+      signatures,
+      funding
+    );
   }
 }

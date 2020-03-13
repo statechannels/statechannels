@@ -178,10 +178,10 @@ export class MemoryStore implements Store {
     this.setNonce(addresses, state.channelNonce);
     const key = hashState(state);
 
-    const channel = await this.backend.getChannel(channelId);
-    const entry = channel || new MemoryChannelStoreEntry(state, myIndex, {[key]: state});
-
-    return this.backend.setChannel(channelId, entry);
+    return this.backend.setChannel(
+      channelId,
+      new MemoryChannelStoreEntry(state, myIndex, {[key]: state})
+    );
   }
 
   public async setFunding(channelId: string, funding: Funding): Promise<void> {
@@ -203,17 +203,13 @@ export class MemoryStore implements Store {
     return await this.getEntry(ledgerId);
   }
 
-  public setLedger(entry: MemoryChannelStoreEntry) {
-    // !! SP: this function is not async!.... so that saved me!
+  public async setLedger(entry: MemoryChannelStoreEntry) {
     // This is not on the Store interface itself -- it is useful to set up a test store
-    const {channelId} = entry;
-    this.backend.setChannel(channelId, entry).then(_ => {
-      this.getAddress().then(address => {
-        const peerId = entry.participants.find(p => p.signingAddress !== address);
-        if (peerId) this.backend.setLedger(peerId.participantId, channelId);
-        else throw 'No peer';
-      });
-    });
+    await this.backend.setChannel(entry.channelId, entry);
+    const address = await this.getAddress();
+    const peerId = entry.participants.find(p => p.signingAddress !== address);
+    if (peerId) await this.backend.setLedger(peerId.participantId, entry.channelId);
+    else throw 'No peer';
   }
 
   public async createChannel(
