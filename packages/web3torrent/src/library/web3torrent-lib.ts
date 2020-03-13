@@ -326,11 +326,10 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
             await this.paymentChannelClient.makePayment(
               channelId,
               WEI_PER_BYTE.mul(BUFFER_REFILL_RATE).toString()
+            ); // if I have run out of money,
+            log(
+              `attempted to make payment for channel ${channelId}, beneficiaryBalance: ${this.paymentChannelClient.channelCache[channelId].beneficiaryBalance}`
             );
-            const newSeederBalance = bigNumberify(
-              this.paymentChannelClient.channelCache[channelId].beneficiaryBalance
-            );
-            log(`payment made for channel ${channelId}, newSeederBalance: ${newSeederBalance}`);
           }
           break;
         case PaidStreamingExtensionNotices.START:

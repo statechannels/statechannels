@@ -179,28 +179,35 @@ export class PaymentChannelClient {
 
   // payer may use this method to make payments (if they have sufficient funds)
   async makePayment(channelId: string, amount: string) {
-    const {
-      beneficiary,
-      payer,
-      beneficiaryBalance,
-      payerBalance,
-      beneficiaryOutcomeAddress,
-      payerOutcomeAddress
-    } = this.channelCache[channelId];
-    if (bigNumberify(payerBalance).gte(amount)) {
-      await this.updateChannel(
-        channelId,
+    if (
+      this.channelCache[channelId] &&
+      this.channelCache[channelId].payer === this.mySigningAddress
+    ) {
+      const {
         beneficiary,
         payer,
-        bigNumberify(beneficiaryBalance)
-          .add(amount)
-          .toString(),
-        bigNumberify(payerBalance)
-          .sub(amount)
-          .toString(),
+        beneficiaryBalance,
+        payerBalance,
         beneficiaryOutcomeAddress,
         payerOutcomeAddress
-      );
+      } = this.channelCache[channelId];
+      if (bigNumberify(payerBalance).gte(amount)) {
+        await this.updateChannel(
+          channelId,
+          beneficiary,
+          payer,
+          bigNumberify(beneficiaryBalance)
+            .add(amount)
+            .toString(),
+          bigNumberify(payerBalance)
+            .sub(amount)
+            .toString(),
+          beneficiaryOutcomeAddress,
+          payerOutcomeAddress
+        );
+      }
+    } else {
+      console.error('Cannot make a payment in a channel that you did not join');
     }
   }
   // beneficiary may use this method to accept payments
