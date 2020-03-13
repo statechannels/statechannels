@@ -1,4 +1,5 @@
 import ConnectionBanner from '@rimble/connection-banner';
+import {Flash} from 'rimble-ui';
 import {createBrowserHistory} from 'history';
 import React from 'react';
 import {Route, Router, Switch} from 'react-router-dom';
@@ -16,7 +17,8 @@ class App extends React.Component {
   state = {
     currentNetwork:
       'ethereum' in window && window.ethereum.chainId && parseInt(window.ethereum.chainId, 16),
-    requiredNetwork: Number(process.env.REACT_APP_CHAIN_NETWORK_ID)
+    requiredNetwork: Number(process.env.REACT_APP_CHAIN_NETWORK_ID),
+    canTorrent: true
   };
 
   static contextType = WebTorrentContext;
@@ -26,14 +28,21 @@ class App extends React.Component {
       window.ethereum.on('networkChanged', chainId => {
         this.setState({...this.state, currentNetwork: parseInt(chainId, 16)});
       });
-    await this.context.enable(); // get sc signing address and use it
+    await this.context.enable();
+    this.setState({...this.state, canTorrent: await this.context.testTorrentingCapability(3000)});
   }
 
   render() {
-    const {currentNetwork, requiredNetwork} = this.state;
+    const {currentNetwork, requiredNetwork, canTorrent} = this.state;
     return (
       <Router history={history}>
         <main>
+          {!canTorrent && (
+            <Flash variant="danger">
+              Looks like you do not have an internet connection or are behind a firewall.
+              Web3Torrent may not work on some public wifi networks.
+            </Flash>
+          )}
           <ConnectionBanner
             currentNetwork={currentNetwork}
             requiredNetwork={requiredNetwork}
