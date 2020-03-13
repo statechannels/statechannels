@@ -8,20 +8,21 @@ export const calculateWei = (fileSize: number | string) => {
 };
 
 export const prettyPrintWei = (wei: utils.BigNumber): string => {
-  const names = ['kwei', 'Mwei', 'Gwei', 'szabo', 'finney', 'ether'];
-  const decimals = [3, 6, 9, 12, 15, 18];
+  const names = ['wei', 'kwei', 'Mwei', 'Gwei', 'szabo', 'finney', 'ether'];
+  const decimals = [0, 3, 6, 9, 12, 15, 18];
   if (!wei) {
     return 'unknown';
   } else {
-    let formattedString = utils.formatUnits(wei, 'wei') + ' ' + 'wei';
+    let formattedString;
     decimals.forEach((decimal, index, array) => {
       if (wei.gte(utils.bigNumberify(10).pow(decimal))) {
         formattedString =
+          wei.div(utils.bigNumberify(10).pow(decimal)).toNumber() +
+          '.' +
           wei
-            .div(utils.bigNumberify(10).pow(decimal))
-            .toNumber()
-            .toFixed(1)
-            .toString() +
+            .mod(utils.bigNumberify(10).pow(decimal))
+            .div(utils.bigNumberify(10).pow(decimal - 1)) // TODO: this doesn't do rounding properly
+            .toNumber() +
           ' ' +
           names[index];
       }
