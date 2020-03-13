@@ -1,5 +1,5 @@
 import {AssetHolderEvent} from '../blockchain/asset-holder-watcher';
-import {Blockchain} from '../blockchain/transaction';
+import {Blockchain} from '../blockchain/eth-asset-holder';
 import {Observable} from 'rxjs';
 import {logger} from '../logger';
 import {filter} from 'rxjs/operators';

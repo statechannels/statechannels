@@ -1,6 +1,6 @@
 import {bigNumberify} from 'ethers/utils';
 import {assetHolderObservable} from '../asset-holder-watcher';
-import {Blockchain} from '../transaction';
+import {Blockchain} from '../eth-asset-holder';
 import {first, pairwise} from 'rxjs/operators';
 import {attachToChainObservable} from '../../wallet/chain-event';
 
@@ -19,6 +19,7 @@ test('chain observable: detect deposit events', async () => {
   expect(message.channelId).toEqual(channelId1);
   expect(message.amountDeposited).toEqual(five);
   expect(message.destinationHoldings).toEqual(five);
+  Blockchain.ethAssetHolder = null;
 });
 
 test('chain observable: matches deposit events', async () => {
@@ -32,4 +33,5 @@ test('chain observable: matches deposit events', async () => {
   expect(message.amountDeposited).toEqual(five);
   expect(message.destinationHoldings).toEqual(ten);
   subscription.unsubscribe();
+  Blockchain.ethAssetHolder = null;
 });
