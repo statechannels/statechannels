@@ -22,6 +22,7 @@ import {calculateChannelId, hashState} from './state-utils';
 import {NETWORK_ID} from '../constants';
 import {checkThat, exists} from '../utils';
 import {MemoryBackend} from './memory-backend';
+import {IndexedDBBackend} from './indexedDB-backend';
 
 interface DirectFunding {
   type: 'Direct';
@@ -100,12 +101,7 @@ export class MemoryStore implements Store {
     // but I didn't feel like updating all the constructor calls
     this.chain = chain || new FakeChain();
     this.chain.initialize();
-
-    if (backend) {
-      this.backend = backend;
-    } else {
-      this.backend = new MemoryBackend();
-    }
+    this.backend = new MemoryBackend();
 
     if (privateKeys && privateKeys.length > 0) {
       // load existing keys
@@ -117,6 +113,23 @@ export class MemoryStore implements Store {
       // generate a new key
       const wallet = Wallet.createRandom();
       this.backend.setPrivateKey(wallet.address, wallet.privateKey);
+    }
+  }
+
+  public async initialize(privateKeys?: string[]) {
+    this.backend = new IndexedDBBackend();
+    await this.backend.initialize();
+
+    if (privateKeys && privateKeys.length > 0) {
+      // load existing keys
+      privateKeys.forEach(async key => {
+        const wallet = new Wallet(key);
+        await this.backend.setPrivateKey(wallet.address, wallet.privateKey);
+      });
+    } else {
+      // generate a new key
+      const wallet = Wallet.createRandom();
+      await this.backend.setPrivateKey(wallet.address, wallet.privateKey);
     }
   }
 

@@ -1,4 +1,4 @@
-import {IndexedStore as Store} from './indexedDB-store';
+import {MemoryStore as Store} from './memory-store';
 import {State, Objective} from './types';
 import {bigNumberify, BigNumber} from 'ethers/utils';
 import {Wallet} from 'ethers';
@@ -40,21 +40,21 @@ const signature = signState(state, aPrivateKey);
 const signedState = {...state, signatures: [signature]};
 const signedStates = [signedState];
 
+const aStore = async () => {
+  const store = new Store();
+  await store.initialize([aPrivateKey]);
+  return store;
+};
+
 describe('getAddress', () => {
   it('returns an address', async () => {
-    const store = new Store();
-    await store.initialize([aPrivateKey]);
+    const store = await aStore();
 
     const address = await store.getAddress();
 
     expect(address).toEqual(aAddress);
   });
 });
-const aStore = async () => {
-  const store = new Store();
-  await store.initialize([aPrivateKey]);
-  return store;
-};
 
 describe('channelUpdatedFeed', () => {
   test('it fires when a state with the correct channel id is received', async () => {
