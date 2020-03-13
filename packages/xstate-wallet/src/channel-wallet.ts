@@ -81,7 +81,7 @@ export class ChannelWallet {
       case 'CLOSE_AND_WITHDRAW': {
         const workflow = this.startWorkflow(
           CloseLedgerAndWithdraw.workflow(this.store, this.messagingService, {
-            hub: request.hub,
+            opponent: request.hub,
             player: request.player,
             requestId: request.requestId
           })

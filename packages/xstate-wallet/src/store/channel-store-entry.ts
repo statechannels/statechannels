@@ -9,7 +9,7 @@ export interface ChannelStoreEntry {
   readonly isFinalized: boolean;
   readonly latestState: State;
   readonly supported: State;
-  readonly finalizationProof: SignedState[];
+  readonly support: SignedState[];
   readonly latestSupportedByMe: State;
   readonly channelConstants: ChannelConstants;
   readonly funding?: Funding;
