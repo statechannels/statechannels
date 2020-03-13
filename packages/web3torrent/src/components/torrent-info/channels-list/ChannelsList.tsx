@@ -9,7 +9,7 @@ import {WebTorrentContext} from '../../../clients/web3torrent-client';
 export type UploadInfoProps = {
   wires: PaidStreamingWire[];
   channels: Dictionary<ChannelState>;
-  pseType: 'seeder' | 'leecher';
+  participantType: 'payer' | 'beneficiary';
 };
 
 class ChannelsList extends React.Component<UploadInfoProps> {
@@ -19,7 +19,7 @@ class ChannelsList extends React.Component<UploadInfoProps> {
     channelId: string,
     channels: Dictionary<ChannelState>,
     wires: PaidStreamingWire[],
-    pseType: 'seeder' | 'leecher'
+    participantType: 'payer' | 'beneficiary'
   ) {
     let channelButton;
 
@@ -44,9 +44,9 @@ class ChannelsList extends React.Component<UploadInfoProps> {
     let transferred: string;
     let peerAccount: string;
     if (wire) {
-      transferred = pseType === 'seeder' ? prettier(wire.uploaded) : prettier(wire.downloaded);
-      peerAccount =
-        pseType === 'leecher' ? channels[channelId].beneficiary : channels[channelId].payer;
+      transferred =
+        participantType === 'beneficiary' ? prettier(wire.uploaded) : prettier(wire.downloaded);
+      peerAccount = channels[channelId][participantType];
     } else {
       transferred = 'NOWIRE';
       peerAccount = 'NOWIRE';
@@ -59,9 +59,9 @@ class ChannelsList extends React.Component<UploadInfoProps> {
         <td className="peer-id">{peerAccount}</td>
         <td className="uploaded">
           {transferred}
-          {pseType === 'seeder' ? ` up` : ` down`}
+          {participantType === 'beneficiary' ? ` up` : ` down`}
         </td>
-        {pseType === 'seeder' ? (
+        {participantType === 'beneficiary' ? (
           <td className="earned">{Number(channels[channelId].beneficiaryBalance)} wei</td>
         ) : (
           <td className="paid">-{Number(channels[channelId].beneficiaryBalance)} wei</td>
@@ -82,7 +82,7 @@ class ChannelsList extends React.Component<UploadInfoProps> {
                   id,
                   this.props.channels,
                   this.props.wires,
-                  this.props.pseType
+                  this.props.participantType
                 )
               )}
           </tbody>

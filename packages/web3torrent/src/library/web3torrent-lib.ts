@@ -167,8 +167,8 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           this.peersList[torrent.infoHash][peerAccount] = {
             id: peerAccount,
             wire,
-            buffer: '0', // (pieces) a value x > 0 would allow a leecher to download x bytes
-            seederBalance: '0', // (wei) must begin at zero so that depositing works
+            buffer: '0', // (bytes) a value x > 0 would allow a leecher to download x bytes
+            credit: '0', // (wei)
             allowed: false,
             channelId: channel.channelId
           };
@@ -187,7 +187,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
             buffer: bigNumberify(knownPeerAccount.buffer)
               .sub(reqPrice) // decrease buffer by the price of this request
               .toString(),
-            seederBalance: knownPeerAccount.seederBalance,
+            credit: knownPeerAccount.credit,
             allowed: true,
             channelId: knownPeerAccount.channelId
           };
@@ -195,7 +195,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           log(
             '> ALLOWED: ' + index,
             'BUFFER: ' + this.peersList[torrent.infoHash][peerAccount].buffer,
-            'BALANCE: ' + this.peersList[torrent.infoHash][peerAccount].seederBalance
+            'BALANCE: ' + this.peersList[torrent.infoHash][peerAccount].credit
           );
         }
       }
@@ -252,16 +252,16 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       );
     }
     log(`querying channel client for updated balance`);
-    const newSeederBalance = bigNumberify(
+    const newCredit = bigNumberify(
       this.paymentChannelClient.channelCache[channelId].beneficiaryBalance
     );
     // infer payment using update balance and previously stored balance
     const payment = bigNumberify(
-      newSeederBalance.sub(bigNumberify(this.peersList[infoHash][peerId].seederBalance))
+      newCredit.sub(bigNumberify(this.peersList[infoHash][peerId].credit))
     );
     // store new balance
 
-    this.peersList[infoHash][peerId].seederBalance = newSeederBalance.toString();
+    this.peersList[infoHash][peerId].credit = newCredit.toString();
     // convert payment into buffer units (bytes)
     this.peersList[infoHash][peerId].buffer = bigNumberify(this.peersList[infoHash][peerId].buffer)
       .add(payment.div(WEI_PER_BYTE)) // This must remain an integer as long as our check above uses .isZero()
@@ -269,7 +269,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       .toString();
 
     log(
-      `newSeederBalance: ${newSeederBalance} wei; payment: ${payment} wei;, buffer for peer: ${this.peersList[infoHash][peerId].buffer} bytes`
+      `newSeederBalance: ${newCredit} wei; payment: ${payment} wei;, buffer for peer: ${this.peersList[infoHash][peerId].buffer} bytes`
     );
   }
 

@@ -92,9 +92,9 @@ const File: React.FC<RouteComponentProps & Props> = props => {
               <strong>How do I pay for the download?</strong>
               <br />
               When you click "Start Download", you'll be asked to allocate an amount of ETH so
-              Web3Torrent can collect payments on your behalf and transfer those funds to the
-              seeder. Unlike other systems, the payment is not upfront; instead, you pay as you
-              download.
+              Web3Torrent can collect payments on your behalf and transfer those funds to peers who
+              have pieces of the file . Unlike other systems, the payment is not upfront; instead,
+              you pay as you download.
             </p>
             <p>
               <strong>Is it safe?</strong>

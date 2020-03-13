@@ -2,11 +2,11 @@
 
 ![Web3Torrent App Screenshot](https://user-images.githubusercontent.com/118913/68315088-05c34880-0096-11ea-94ab-bc86337f15d2.png)
 
-Web3Torrent is a streaming torrent implementation, based of [Webtorrent](https://github.com/webtorrent/webtorrent) and including a custom BitTorrent protocol extension, that allows seeders to block/choke and unblock other peers by user request.
+Web3Torrent is a streaming torrent implementation, based of [Webtorrent](https://github.com/webtorrent/webtorrent) and including a custom BitTorrent protocol extension that allows peers to block/choke and unblock other peers, conditional on (for example) the receipt of a payment.
 
 ### The BitTorrent Wire extension
 
-The Extension establishes a basic way to send/recieve messages between peers, and it allows the seeder to easily control what to do when request for torrent pieces are receieved.
+The Extension establishes a basic way to send/recieve messages between peers, and it allows a peer to easily control what to do when requests for torrent pieces are receieved.
 
 A Whimsical Diagram was made to explain how Web3Torrent, you can see it [here](https://whimsical.com/Sq6whAwa8aTjbwMRJc7vPU).
 

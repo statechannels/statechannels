@@ -22,10 +22,10 @@ const DownloadInfo: React.FC<DownloadInfoProps> = ({
   channelCache = {},
   mySigningAddress
 }: DownloadInfoProps) => {
-  const myLeechingChannelIds: string[] = Object.keys(channelCache).filter(
+  const myPayingChannelIds: string[] = Object.keys(channelCache).filter(
     key => channelCache[key].payer === mySigningAddress
   );
-  const totalSpent = myLeechingChannelIds
+  const totalSpent = myPayingChannelIds
     .map(id => channelCache[id].beneficiaryBalance)
     .reduce((a, b) => bigNumberify(a).add(bigNumberify(b)), bigNumberify(0))
     .toNumber();
@@ -57,8 +57,8 @@ const DownloadInfo: React.FC<DownloadInfoProps> = ({
       </section>
       <ChannelsList
         wires={torrent.wires}
-        channels={_.pickBy(channelCache, ({channelId}) => myLeechingChannelIds.includes(channelId))}
-        pseType={'leecher'}
+        channels={_.pickBy(channelCache, ({channelId}) => myPayingChannelIds.includes(channelId))}
+        participantType={'payer'}
       />
     </>
   );

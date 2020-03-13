@@ -19,10 +19,10 @@ const UploadInfo: React.FC<UploadInfoProps> = ({
   channelCache = {},
   mySigningAddress
 }: UploadInfoProps) => {
-  const mySeedingChannelIds: string[] = Object.keys(channelCache).filter(
+  const myReceivingChannelIds: string[] = Object.keys(channelCache).filter(
     key => channelCache[key].beneficiary === mySigningAddress
   );
-  const totalReceived = mySeedingChannelIds
+  const totalReceived = myReceivingChannelIds
     .map(id => channelCache[id].beneficiaryBalance)
     .reduce((a, b) => bigNumberify(a).add(bigNumberify(b)), bigNumberify(0))
     .toNumber();
@@ -37,8 +37,10 @@ const UploadInfo: React.FC<UploadInfoProps> = ({
       </section>
       <ChannelsList
         wires={torrent.wires}
-        channels={_.pickBy(channelCache, ({channelId}) => mySeedingChannelIds.includes(channelId))}
-        pseType={'seeder'}
+        channels={_.pickBy(channelCache, ({channelId}) =>
+          myReceivingChannelIds.includes(channelId)
+        )}
+        participantType={'beneficiary'}
       />
     </>
   );

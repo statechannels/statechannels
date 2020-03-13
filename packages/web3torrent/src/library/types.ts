@@ -127,7 +127,7 @@ export type PeerByTorrent = {
   wire: PaidStreamingWire | PeerWire;
   allowed: boolean;
   buffer: string;
-  seederBalance: string;
+  credit: string;
   channelId: string;
 };
 
