@@ -46,12 +46,21 @@ describe('Seeding and Leeching', () => {
     done();
   });
 
-  it('should seed and remove a Torrent', done => {
-    seeder.seed(defaultFile as File, defaultSeedingOptions(false), seededTorrent => {
-      expect(seeder.torrents.length).toEqual(1);
-      expect(seededTorrent.infoHash).toEqual(defaultTorrentHash);
-      expect(seededTorrent.magnetURI).toEqual(defaultFileMagnetURI);
-      expect((seededTorrent as PaidStreamingTorrent).usingPaidStreaming).toBe(true);
+  it('should seed and remove a Torrent', async done => {
+    const torrent = seeder.seed(
+      defaultFile as File,
+      defaultSeedingOptions(false),
+      seededTorrent => {
+        expect(seeder.torrents.length).toEqual(1);
+        expect(seededTorrent.infoHash).toEqual(defaultTorrentHash);
+        expect(seededTorrent.magnetURI).toEqual(defaultFileMagnetURI);
+        expect((seededTorrent as PaidStreamingTorrent).usingPaidStreaming).toBe(true);
+      }
+    );
+
+    seeder.remove(torrent, err => {
+      expect(err).toBeFalsy();
+      expect(seeder.torrents.length).toEqual(0);
       done();
     });
   });
