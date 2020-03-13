@@ -5,6 +5,8 @@ import {ChannelState} from '../../../clients/payment-channel-client';
 import {PaidStreamingWire} from '../../../library/types';
 import './ChannelsList.scss';
 import {WebTorrentContext} from '../../../clients/web3torrent-client';
+import {prettyPrintWei} from '../../../utils/calculateWei';
+import {utils} from 'ethers';
 
 export type UploadInfoProps = {
   wires: PaidStreamingWire[];
@@ -62,9 +64,13 @@ class ChannelsList extends React.Component<UploadInfoProps> {
           {participantType === 'beneficiary' ? ` up` : ` down`}
         </td>
         {participantType === 'beneficiary' ? (
-          <td className="earned">{Number(channels[channelId].beneficiaryBalance)} wei</td>
+          <td className="earned">
+            {prettyPrintWei(utils.bigNumberify(channels[channelId].beneficiaryBalance))}
+          </td>
         ) : (
-          <td className="paid">-{Number(channels[channelId].beneficiaryBalance)} wei</td>
+          <td className="paid">
+            -{prettyPrintWei(utils.bigNumberify(channels[channelId].beneficiaryBalance))}
+          </td>
         )}
       </tr>
     );
