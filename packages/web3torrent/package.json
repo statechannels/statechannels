@@ -116,8 +116,9 @@
   },
   "scripts": {
     "build": "react-scripts build",
-    "build:ci": "run-s contracts:compile build",
+    "build:ci": "run-s contracts:compile build build:storybook",
     "build:typescript": "tsc -b .",
+    "build:storybook": "build-storybook -c .storybook -s ./public -o storybook",
     "contracts:compile": "node ./bin/compile.js",
     "eject": "react-scripts eject",
     "eslint:check": "eslint \"**/*.{js,ts,tsx}\" --cache --max-warnings=0",

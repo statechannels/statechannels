@@ -52,6 +52,7 @@ junit.xml
 **/gas.json
 **/gas.md
 **/*.gas.md
+**/storybook
 
 
 ganache-deployments.json

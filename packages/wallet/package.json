@@ -168,8 +168,9 @@
   },
   "scripts": {
     "build": "run-s build:typescript build:webpack",
-    "build:ci": "yarn build:typescript",
+    "build:ci": "yarn build:typescript build:storybook",
     "build:netlify": "NODE_ENV=production yarn build:webpack",
+    "build:storybook": "build-storybook -c .storybook -o storybook",
     "build:typescript": "npx tsc -b",
     "build:webpack": "CI=false node scripts/build.js",
     "lint:check": "eslint \"src/**/*.{js,ts,tsx}\" --cache",

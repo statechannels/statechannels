@@ -184,8 +184,9 @@
   },
   "scripts": {
     "build": "run-s build:typescript build:webpack",
-    "build:ci": "run-s build:typescript contracts:compile",
+    "build:ci": "run-s build:typescript contracts:compile build:storybook",
     "build:netlify": "NODE_ENV=production yarn build:webpack",
+    "build:storybook": "build-storybook -c .storybook -o storybook",
     "build:typescript": "npx tsc -b",
     "build:webpack": "CI=false node scripts/build.js",
     "contracts:compile": "node ./bin/compile.js",
