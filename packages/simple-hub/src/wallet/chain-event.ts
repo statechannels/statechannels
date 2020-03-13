@@ -8,7 +8,7 @@ const log = logger();
 
 export function attachToChainObservable(observable: Observable<AssetHolderEvent>) {
   log.info('attachToChainObservable: subscribe');
-  observable
+  return observable
     .pipe(
       filter(assetHolderEvent =>
         assetHolderEvent.amountDeposited.eq(assetHolderEvent.destinationHoldings)

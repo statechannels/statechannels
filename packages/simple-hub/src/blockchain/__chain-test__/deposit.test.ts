@@ -22,7 +22,7 @@ test('chain observable: detect deposit events', async () => {
 });
 
 test('chain observable: matches deposit events', async () => {
-  attachToChainObservable(await assetHolderObservable());
+  const subscription = attachToChainObservable(await assetHolderObservable());
   const messagePromise = (await assetHolderObservable()).pipe(pairwise(), first()).toPromise();
 
   await Blockchain.fund(channelId2, zero, five);
@@ -31,4 +31,5 @@ test('chain observable: matches deposit events', async () => {
   expect(message.channelId).toEqual(channelId2);
   expect(message.amountDeposited).toEqual(five);
   expect(message.destinationHoldings).toEqual(ten);
+  subscription.unsubscribe();
 });
