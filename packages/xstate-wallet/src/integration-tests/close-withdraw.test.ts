@@ -1,9 +1,5 @@
 import {FakeChain} from '../chain';
-import {
-  Player,
-  hookUpMessaging,
-  generateCloseAndWithdraw as generateCloseAndWithdrawRequest
-} from './helpers';
+import {Player, hookUpMessaging, generateCloseAndWithdrawRequest} from './helpers';
 import {CloseAndWithdrawResponse} from '@statechannels/client-api-schema';
 import {filter, map, first} from 'rxjs/operators';
 import waitForExpect from 'wait-for-expect';
