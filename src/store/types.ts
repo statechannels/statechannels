@@ -108,6 +108,7 @@ export interface DBBackend {
   setPrivateKey(key: string, value: string): Promise<string>;
   getPrivateKey(key: string): Promise<string | undefined>;
   setChannel(key: string, value: MemoryChannelStoreEntry): Promise<MemoryChannelStoreEntry>;
+  addChannel(key: string, value: MemoryChannelStoreEntry): Promise<MemoryChannelStoreEntry>;
   getChannel(key: string): Promise<MemoryChannelStoreEntry | undefined>;
   setLedger(key: string, value: string): Promise<string>;
   getLedger(key: string): Promise<string | undefined>;
