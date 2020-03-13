@@ -3,9 +3,10 @@ import {assetHolderObservable} from '../asset-holder-watcher';
 import {Blockchain} from '../eth-asset-holder';
 import {first, pairwise} from 'rxjs/operators';
 import {attachToChainObservable} from '../../wallet/chain-event';
+import {ethers} from 'ethers';
 
 jest.setTimeout(20000);
-const zero = bigNumberify(0);
+const zero = ethers.constants.Zero;
 const five = bigNumberify(5);
 const ten = bigNumberify(10);
 
