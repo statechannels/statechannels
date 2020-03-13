@@ -116,9 +116,9 @@ export class MemoryStore implements Store {
     }
   }
 
-  public async initialize(privateKeys?: string[]) {
+  public async initialize(privateKeys?: string[], cleanSlate = false) {
     this.backend = new IndexedDBBackend();
-    await this.backend.initialize();
+    await this.backend.initialize(cleanSlate);
 
     if (privateKeys && privateKeys.length > 0) {
       // load existing keys
