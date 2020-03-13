@@ -1,33 +1,37 @@
 import {ethers} from 'ethers';
 import {logger} from '../logger';
 import {ethAssetHolder as attachEthAssetHolder} from './asset-holder';
+import {fromEvent, Observable} from 'rxjs';
+import {map} from 'rxjs/operators';
+import {bigNumberify, BigNumber} from 'ethers/utils';
 
 const log = logger();
 
-export enum AssetHolderWatcherEventType {
-  Deposited
-}
+type RawAssetHolderEvent = [
+  string, //channelId
+  string, //amountDeposited
+  string, //destinationHoldings
+  ethers.Event //event
+];
 
-export interface AssetHolderWatcherEvent {
+export interface AssetHolderEvent {
   channelId: string;
-  amountDeposited: string;
-  destinationHoldings: string;
+  amountDeposited: BigNumber;
+  destinationHoldings: BigNumber;
   event: ethers.Event;
 }
 
-export type AssetHolderEventHandler = (assetHolderEvent: AssetHolderWatcherEvent) => void;
-export type RemoveListeners = () => void;
-
-export async function assetHolderListen(eventHandler: AssetHolderEventHandler): Promise<void> {
+export async function assetHolderObservable(): Promise<Observable<AssetHolderEvent>> {
   log.info('asset-holder-watcher: listen');
   const ethAssetHolder: ethers.Contract = await attachEthAssetHolder();
-  const depositedFilter = ethAssetHolder.filters.Deposited();
-  ethAssetHolder.on(depositedFilter, (channelId, amountDeposited, destinationHoldings, event) => {
-    eventHandler({
-      channelId,
-      amountDeposited: amountDeposited.toHexString(),
-      destinationHoldings: destinationHoldings.toHexString(),
-      event
-    });
-  });
+  return fromEvent(ethAssetHolder, 'Deposited').pipe(
+    map(
+      (event: RawAssetHolderEvent): AssetHolderEvent => ({
+        channelId: event[0],
+        amountDeposited: bigNumberify(event[1]),
+        destinationHoldings: bigNumberify(event[2]),
+        event: event[3]
+      })
+    )
+  );
 }

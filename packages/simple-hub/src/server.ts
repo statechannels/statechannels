@@ -11,9 +11,9 @@ if (process.env.RUNTIME_ENV) {
 import {logger} from './logger';
 import {fbListen} from './message/firebase-relay';
 import {Message} from '@statechannels/wire-format';
-import {respondToMessage} from './wallet';
-import {assetHolderListen} from './blockchain/asset-holder-watcher';
-import {onDepositEvent} from './wallet/deposit';
+import {respondToMessage} from './wallet/respond-to-message';
+import {assetHolderObservable} from './blockchain/asset-holder-watcher';
+import {attachToChainObservable} from './wallet/chain-event';
 
 const log = logger();
 
@@ -23,7 +23,7 @@ function responseForMessage(incomingMessage: Message): Message[] {
 }
 
 export async function startServer() {
-  await assetHolderListen(onDepositEvent);
+  attachToChainObservable(await assetHolderObservable());
   fbListen(responseForMessage);
 }
 
