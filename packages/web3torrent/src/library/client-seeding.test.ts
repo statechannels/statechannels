@@ -7,8 +7,21 @@ import {
   mockMetamask
 } from './testing/test-utils';
 import WebTorrentPaidStreamingClient, {ClientEvents, PaidStreamingTorrent} from './web3torrent-lib';
-import {PaymentChannelClient, ChannelState} from '../clients/payment-channel-client';
+import {PaymentChannelClient} from '../clients/payment-channel-client';
 import {ChannelClient, FakeChannelProvider} from '@statechannels/channel-client';
+
+async function defaultClient(): Promise<WebTorrentPaidStreamingClient> {
+  const client = new WebTorrentPaidStreamingClient({
+    dht: false,
+    paymentChannelClient: new PaymentChannelClient(new ChannelClient(new FakeChannelProvider()))
+  });
+  client.on('error', err => fail(err));
+  client.on('warning', err => fail(err));
+  client.paymentChannelClient.channelCache = {};
+  await client.enable();
+
+  return client;
+}
 
 describe('Seeding and Leeching', () => {
   let seeder: WebTorrentPaidStreamingClient;
@@ -19,26 +32,8 @@ describe('Seeding and Leeching', () => {
   });
 
   beforeEach(async () => {
-    seeder = new WebTorrentPaidStreamingClient({
-      pseAccount: '1',
-      dht: false,
-      paymentChannelClient: new PaymentChannelClient(new ChannelClient(new FakeChannelProvider())) // use distinct provider & client
-    });
-    seeder.on('error', err => fail(err));
-    seeder.on('warning', err => fail(err));
-    seeder.paymentChannelClient.channelCache = {};
-
-    leecher = new WebTorrentPaidStreamingClient({
-      pseAccount: '2',
-      dht: false,
-      paymentChannelClient: new PaymentChannelClient(new ChannelClient(new FakeChannelProvider())) // use distinct provider & client
-    });
-    leecher.on('error', err => fail(err));
-    leecher.on('warning', err => fail(err));
-    leecher.paymentChannelClient.channelCache = {};
-
-    await seeder.enable();
-    await leecher.enable();
+    seeder = await defaultClient();
+    leecher = await defaultClient();
   });
 
   it('should throw when the client is not enabled', async done => {
@@ -50,7 +45,6 @@ describe('Seeding and Leeching', () => {
   });
 
   it('should seed and remove a Torrent', done => {
-    // expect(seeder.pseAccount).toBe('1');
     seeder.seed(defaultFile as File, defaultSeedingOptions(false), seededTorrent => {
       expect(seeder.torrents.length).toEqual(1);
       expect(seededTorrent.infoHash).toEqual(defaultTorrentHash);
@@ -106,6 +100,30 @@ describe('Seeding and Leeching', () => {
 
       leecher.add(seededTorrent.magnetURI, {store: MemoryChunkStore});
     });
+  }, 10000);
+
+  it('should support multiple leechers finishing their downloads', async done => {
+    const leecherA = await defaultClient();
+    const leecherB = await defaultClient();
+    let finishCount = 0;
+
+    seeder.seed(defaultFile as File, defaultSeedingOptions(), seededTorrent => {
+      seeder.once(ClientEvents.PEER_STATUS_CHANGED, ({peerAccount}) => {
+        seeder.togglePeer(seededTorrent.infoHash, peerAccount);
+      });
+      leecherA.add(seededTorrent.magnetURI, {store: MemoryChunkStore});
+      leecherB.add(seededTorrent.magnetURI, {store: MemoryChunkStore});
+    });
+
+    async function downloadFinished() {
+      finishCount += 1;
+      if (finishCount == 2) {
+        done();
+      }
+    }
+
+    leecherA.once(ClientEvents.TORRENT_DONE, downloadFinished);
+    leecherB.once(ClientEvents.TORRENT_DONE, downloadFinished);
   }, 10000);
 
   afterEach(() => {
