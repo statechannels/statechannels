@@ -7,11 +7,11 @@ import {filter} from 'rxjs/operators';
 const log = logger();
 
 export function attachToChainObservable(observable: Observable<AssetHolderEvent>) {
+  log.info('attachToChainObservable: subscribe');
   observable
     .pipe(
-      filter(
-        assetHolderEvent =>
-          assetHolderEvent.amountDeposited === assetHolderEvent.destinationHoldings
+      filter(assetHolderEvent =>
+        assetHolderEvent.amountDeposited.eq(assetHolderEvent.destinationHoldings)
       )
     )
     .subscribe(

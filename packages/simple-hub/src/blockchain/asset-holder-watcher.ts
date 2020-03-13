@@ -1,11 +1,8 @@
 import {ethers} from 'ethers';
-import {logger} from '../logger';
 import {ethAssetHolder as attachEthAssetHolder} from './asset-holder';
 import {fromEvent, Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {bigNumberify, BigNumber} from 'ethers/utils';
-
-const log = logger();
 
 type RawAssetHolderEvent = [
   string, //channelId
@@ -22,7 +19,6 @@ export interface AssetHolderEvent {
 }
 
 export async function assetHolderObservable(): Promise<Observable<AssetHolderEvent>> {
-  log.info('asset-holder-watcher: listen');
   const ethAssetHolder: ethers.Contract = await attachEthAssetHolder();
   return fromEvent(ethAssetHolder, 'Deposited').pipe(
     map(
