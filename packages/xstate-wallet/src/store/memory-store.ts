@@ -21,7 +21,7 @@ import {Chain, FakeChain} from '../chain';
 import {calculateChannelId, hashState} from './state-utils';
 import {NETWORK_ID} from '../constants';
 import {checkThat, exists} from '../utils';
-import {MemoryBackend} from './store-memory-backend';
+import {MemoryBackend} from './memory-backend';
 
 interface DirectFunding {
   type: 'Direct';
@@ -303,14 +303,11 @@ export class MemoryStore implements Store {
         })
       );
     }
-    const dbObjectives = await this.backend.objectives();
-    objectives?.forEach(objective => {
-      if (!_.includes(objectives, objective)) {
-        objectives.push(objective);
-        this._eventEmitter.emit('newObjective', objective);
-      }
-    });
-    this.backend.setObjectives(dbObjectives);
+    if (objectives && objectives.length) {
+      (await this.backend.setReplaceObjectives(objectives)).forEach(objective =>
+        this._eventEmitter.emit('newObjective', objective)
+      );
+    }
   }
 
   public async getEntry(channelId: string): Promise<ChannelStoreEntry> {
