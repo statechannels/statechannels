@@ -82,7 +82,7 @@ export type MethodResponseType = {
   ChallengeChannel: ChallengeChannelResponse['result'];
   ApproveBudgetAndFund: ApproveBudgetAndFundResponse['result'];
   GetBudget: GetBudgetResponse['result'];
-  CloseAndWithdraw: GetBudgetResponse['result'];
+  CloseAndWithdraw: any; // TODO: Add types
 };
 
 // TODO: This probably should live in client-api-schema?
@@ -98,7 +98,7 @@ export type MethodRequestType = {
   ChallengeChannel: ChallengeChannelRequest['params'];
   ApproveBudgetAndFund: ApproveBudgetAndFundRequest['params'];
   GetBudget: GetBudgetRequest['params'];
-  CloseAndWithdraw: GetBudgetRequest['params'];
+  CloseAndWithdraw: any; // TODO: Add types
 };
 
 export interface ChannelProviderInterface {

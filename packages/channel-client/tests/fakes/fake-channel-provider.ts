@@ -15,7 +15,10 @@ import {
   GetStateParams,
   UpdateChannelParams,
   Notification,
-  CloseChannelParams
+  CloseChannelParams,
+  PushMessageParams,
+  Participant,
+  BudgetRequest
 } from '@statechannels/client-api-schema';
 import {Message} from '../../src/types';
 import {calculateChannelId} from '../../src/utils';
@@ -49,34 +52,34 @@ export class FakeChannelProvider implements ChannelProviderInterface {
   ): Promise<MethodResponseType[K]> {
     switch (method) {
       case 'CreateChannel':
-        return this.createChannel(params);
+        return this.createChannel(params as CreateChannelParams) as Promise<MethodResponseType[K]>;
 
       case 'PushMessage':
-        return this.pushMessage(params);
+        return this.pushMessage(params as PushMessageParams) as Promise<MethodResponseType[K]>;
 
       case 'GetEthereumSelectedAddress':
-        return '0xEthereumSelectedAddress';
+        return '0xEthereumSelectedAddress' as MethodResponseType[K];
 
       case 'GetAddress':
-        return this.getAddress();
+        return this.getAddress() as Promise<MethodResponseType[K]>;
 
       case 'JoinChannel':
-        return this.joinChannel(params);
+        return this.joinChannel(params as JoinChannelParams) as Promise<MethodResponseType[K]>;
 
       case 'GetState':
-        return this.getState(params);
+        return this.getState(params as GetStateParams) as Promise<MethodResponseType[K]>;
 
       case 'UpdateChannel':
-        return this.updateChannel(params);
+        return this.updateChannel(params as UpdateChannelParams) as Promise<MethodResponseType[K]>;
 
       case 'CloseChannel':
-        return this.closeChannel(params);
+        return this.closeChannel(params as CloseChannelParams) as Promise<MethodResponseType[K]>;
 
       case 'ApproveBudgetAndFund':
-        return this.approveBudgetAndFund(params);
+        return this.approveBudgetAndFund(params as BudgetRequest) as Promise<MethodResponseType[K]>;
 
       case 'CloseAndWithdraw':
-        return this.closeAndWithdraw(params);
+        return this.closeAndWithdraw(params) as Promise<MethodResponseType[K]>;
 
       default:
         return Promise.reject(`No callback available for ${method}`);
@@ -305,39 +308,32 @@ export class FakeChannelProvider implements ChannelProviderInterface {
   private async approveBudgetAndFund(params: {
     playerAmount: string;
     hubAmount: string;
-    playerOutcomeAddress: string;
-    hubAddress: string;
-    hubOutcomeAddress: string;
+    site: string;
+    player: Participant;
+    hub: Participant;
   }): Promise<SiteBudget> {
-    const {hubAddress, playerAmount, hubAmount} = params;
+    const {hub, site, playerAmount, hubAmount} = params;
+
     // TODO: Does this need to be delayed?
-    this.notifyAppBudgetUpdated({
-      hub: hubAddress,
-      site: 'fakehub.com',
+    const result = {
+      hub: hub.signingAddress,
+      site,
       budgets: [
         {
           token: '0x0',
-          inUse: {playerAmount: '0x0', hubAmount: '0x0'},
+          inUse: {playerAmount, hubAmount},
           free: {playerAmount, hubAmount},
-          pending: {playerAmount: '0x0', hubAmount: '0x0'},
-          direct: {playerAmount: '0x0', hubAmount: '0x0'}
-        }
-      ]
-    });
-    return {
-      hub: hubAddress,
-      site: 'fakehub.com',
-      budgets: [
-        {
-          token: '0x0',
           pending: {playerAmount, hubAmount},
-          free: {playerAmount: '0x0', hubAmount: '0x0'},
-          inUse: {playerAmount: '0x0', hubAmount: '0x0'},
-          direct: {playerAmount: '0x0', hubAmount: '0x0'}
+          direct: {playerAmount, hubAmount}
         }
       ]
     };
+
+    this.notifyAppBudgetUpdated(result);
+
+    return result;
   }
+
   private async closeAndWithdraw(params: {
     playerAmount: string;
     hubAmount: string;
@@ -351,7 +347,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
         {
           token: '0x0',
           pending: {playerAmount, hubAmount},
-          free: {playerAmount: '0x0', hubAmount: '0x0'},
+          free: {playerAmount: '0x0', hubAmount},
           inUse: {playerAmount: '0x0', hubAmount: '0x0'},
           direct: {playerAmount: '0x0', hubAmount: '0x0'}
         }
