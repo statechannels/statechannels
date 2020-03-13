@@ -18,7 +18,6 @@ type WorkflowEvent = AnyEventObject;
 export type WorkflowContext = {
   requestId: number;
   hub: Participant;
-  site: string;
 };
 interface WorkflowActions extends ActionFunctionMap<WorkflowContext, WorkflowEvent> {
   sendResponse: ActionFunction<WorkflowContext, WorkflowEvent>;
@@ -30,12 +29,14 @@ interface WorkflowServices extends Record<string, ServiceConfig<WorkflowContext>
 }
 
 export const config: StateNodeConfig<WorkflowContext, any, any> = {
+  initial: 'closeLedger',
   states: {
     closeLedger: getDataAndInvoke({src: 'getFinalState'}, {src: 'supportState'}, 'withdraw'),
     withdraw: {
       invoke: {src: 'submitWithdrawTransaction', onDone: 'done', onError: 'failure'}
     },
-    done: {type: 'final', entry: ['sendResponse']}
+    done: {type: 'final', entry: ['sendResponse']},
+    failure: {type: 'final'}
   }
 };
 
@@ -85,5 +86,11 @@ const options = (
     }
   };
 };
-export const workflow = (store: Store, messagingService: MessagingServiceInterface) =>
-  Machine(config).withConfig(options(store, messagingService));
+export const workflow = (
+  store: Store,
+  messagingService: MessagingServiceInterface,
+  context: WorkflowContext
+) =>
+  Machine(config)
+    .withConfig(options(store, messagingService))
+    .withContext(context);
