@@ -653,6 +653,9 @@
       ],
       "type": "object"
     },
+    "ErrorResponse": {
+      "$ref": "#/definitions/GetAddressError"
+    },
     "ExternalDestination": {
       "description": "Nitro ChannelId",
       "pattern": "^0x(0{24})([a-fA-F0-9]{40})$",
@@ -671,6 +674,48 @@
       "required": [
         "token",
         "amount"
+      ],
+      "type": "object"
+    },
+    "GetAddressError": {
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "enum": [
+                100
+              ],
+              "type": "number"
+            },
+            "message": {
+              "enum": [
+                "Ethereum Not Enabled"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "type": "object"
+        },
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "error"
       ],
       "type": "object"
     },
@@ -981,6 +1026,22 @@
         "result"
       ],
       "type": "object"
+    },
+    "JsonRpcMessage": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/Request"
+        },
+        {
+          "$ref": "#/definitions/Response"
+        },
+        {
+          "$ref": "#/definitions/Notification"
+        },
+        {
+          "$ref": "#/definitions/ErrorResponse"
+        }
+      ]
     },
     "Message": {
       "additionalProperties": false,

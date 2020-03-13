@@ -35,6 +35,7 @@ export interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
     enabling: {};
     done: {};
     failure: {};
+    retry: {};
   };
 }
 export type WorkflowState = State<WorkflowContext, WorkflowEvent, WorkflowStateSchema, any>;
@@ -66,8 +67,14 @@ const generateConfig = (
         onError: 'failure'
       }
     }, // invoke ethereum enable
+    retry: {
+      on: {
+        USER_APPROVES_ENABLE: {target: 'enabling'},
+        USER_REJECTS_ENABLE: {target: 'failure'}
+      }
+    },
     done: {type: 'final', entry: [actions.hideUi, actions.sendResponse]},
-    failure: {type: 'final'}
+    failure: {type: 'final', entry: [actions.hideUi]}
   }
 });
 
