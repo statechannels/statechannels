@@ -9,8 +9,14 @@ export class MemoryBackend implements DBBackend {
   private _privateKeys: Record<string, string | undefined> = {};
   private _ledgers: Record<string, string | undefined> = {};
 
-  public async initialize() {
-    // NOOP
+  public async initialize(cleanSlate = false) {
+    if (cleanSlate) {
+      this._channels = {};
+      this._objectives = [];
+      this._nonces = {};
+      this._privateKeys = {};
+      this._ledgers = {};
+    }
   }
   // Generic Getters
 

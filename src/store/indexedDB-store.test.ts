@@ -42,7 +42,7 @@ const signedStates = [signedState];
 
 const aStore = async () => {
   const store = new Store();
-  await store.initialize([aPrivateKey]);
+  await store.initialize([aPrivateKey], true);
   return store;
 };
 

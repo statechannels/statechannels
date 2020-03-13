@@ -98,7 +98,7 @@ export interface Message {
 }
 
 export interface DBBackend {
-  initialize(): Promise<any>;
+  initialize(cleanSlate?: boolean): Promise<any>;
   privateKeys(): Promise<Record<string, string | undefined>>;
   ledgers(): Promise<Record<string, string | undefined>>;
   nonces(): Promise<Record<string, BigNumber | undefined>>;

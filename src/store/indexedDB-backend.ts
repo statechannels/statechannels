@@ -20,7 +20,14 @@ export class IndexedDBBackend implements DBBackend {
       console.error("Your browser doesn't support a stable version of IndexedDB.");
     }
   }
-  public async initialize() {
+  public async initialize(cleanSlate = false) {
+    if (cleanSlate) {
+      await this.reset();
+    }
+    return this.create();
+  }
+
+  private async create() {
     return new Promise<IDBDatabase>((resolve, reject) => {
       const request = indexedDB.open('xstateWallet', 1);
 
@@ -37,6 +44,17 @@ export class IndexedDBBackend implements DBBackend {
       request.onsuccess = () => {
         this._db = request.result;
         resolve(request.result);
+      };
+    });
+  }
+
+  private async reset() {
+    return new Promise((resolve, reject) => {
+      const reqDeletion = indexedDB.deleteDatabase('xstateWallet');
+      reqDeletion.onerror = err => reject(err);
+      reqDeletion.onsuccess = () => {
+        console.log('DB reseted');
+        resolve();
       };
     });
   }
