@@ -4,6 +4,9 @@ const EmberApp = require('ember-cli/lib/broccoli/ember-app');
 const {getNetworkName, setupGanache} = require('@statechannels/devtools');
 const {deploy} = require('./deployment/deploy');
 
+const environment = EmberApp.env();
+const IS_DEV = environment === 'development';
+
 const setupDeployEnv = async () => {
   const {deployer} = await setupGanache();
   const deployedArtifacts = await deploy(deployer);
@@ -16,7 +19,9 @@ const setupDeployEnv = async () => {
 };
 
 module.exports = function(defaults) {
-  setupDeployEnv();
+  if (IS_DEV) {
+    setupDeployEnv();
+  }
   const app = new EmberApp(defaults, {
     postcssOptions: {
       compile: {
