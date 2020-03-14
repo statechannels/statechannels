@@ -18,6 +18,8 @@ import {utils} from 'ethers';
 import {ChannelState, PaymentChannelClient} from '../clients/payment-channel-client';
 import {Message, ChannelResult} from '@statechannels/channel-client';
 import {mockTorrents} from '../constants';
+import * as firebase from 'firebase/app';
+import 'firebase/database';
 
 const bigNumberify = utils.bigNumberify;
 const log = debug('web3torrent:library');
@@ -35,7 +37,21 @@ export const BUFFER_REFILL_RATE = bigNumberify(2e4); // number of bytes the leec
 export const INITIAL_SEEDER_BALANCE = bigNumberify(0); // needs to be zero so that depositing works correctly (unidirectional payment channel)
 export const INITIAL_LEECHER_BALANCE = bigNumberify(BUFFER_REFILL_RATE.mul(100)); // e.g. gwei = 1e9 = nano-ETH
 
+// firebase setup
+const FIREBASE_PREFIX = 'web3t';
+const config = {
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: `${process.env.REACT_APP_FIREBASE_PROJECT}.firebaseapp.com`,
+  databaseURL: `https://${process.env.REACT_APP_FIREBASE_PROJECT}.firebaseio.com`,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT,
+  storageBucket: '',
+  messagingSenderId: '913007764573'
+};
 const HUB_ADDRESS = 'TODO';
+firebase.initializeApp(config);
+function sanitizeMessageForFirebase(message) {
+  return JSON.parse(JSON.stringify(message));
+}
 
 // A Whimsical diagram explaining the functionality of Web3Torrent: https://whimsical.com/Sq6whAwa8aTjbwMRJc7vPU
 export default class WebTorrentPaidStreamingClient extends WebTorrent {
@@ -63,15 +79,26 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     log('THIS address: ', this.outcomeAddress);
 
     // Hub messaging
+
+    const myFirebaseRef = firebase
+      .database()
+      .ref(`/${FIREBASE_PREFIX}/messages/${this.pseAccount}`);
+    const hubFirebaseRef = firebase.database().ref(`/${FIREBASE_PREFIX}/messages/${HUB_ADDRESS}`);
+    // firebase setup
+    myFirebaseRef.onDisconnect().remove();
+
     this.paymentChannelClient.onMessageQueued((message: Message) => {
       if (message.recipient === HUB_ADDRESS) {
-        // pipe to firebase.
+        hubFirebaseRef.push(sanitizeMessageForFirebase(message));
       }
     });
-    // TODO
-    // onFirebaseMessageReceived(message:Message) => {
-    //   await this.paymentChannelClient.pushMessage(message);
-    // }
+    myFirebaseRef.on('child_added', snapshot => {
+      const key = snapshot.key;
+      const message = snapshot.val();
+      myFirebaseRef.child(key).remove();
+      console.log('GOT FROM FIREBASE: ' + message);
+      this.paymentChannelClient.pushMessage(message);
+    });
   }
 
   async testTorrentingCapability(timeOut: number) {
