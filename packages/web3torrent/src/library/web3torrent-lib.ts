@@ -322,7 +322,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       switch (command) {
         case PaidStreamingExtensionNotices.STOP: // synonymous with a prompt for a payment
           if (!torrent.done) {
-            const channelId = wire.paidStreamingExtension.peerChannelId;
+            const channelId = data;
             await this.paymentChannelClient.makePayment(
               channelId,
               WEI_PER_BYTE.mul(BUFFER_REFILL_RATE).toString()
