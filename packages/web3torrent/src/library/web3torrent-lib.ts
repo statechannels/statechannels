@@ -126,7 +126,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   }
 
   blockPeer(torrentInfoHash: string, wire: PaidStreamingWire, peerAccount: string) {
-    this.ensureEnabled();
     this.peersList[torrentInfoHash][peerAccount].allowed = false;
     this.emit(ClientEvents.PEER_STATUS_CHANGED, {
       torrentPeers: this.peersList[torrentInfoHash],
@@ -137,7 +136,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   }
 
   unblockPeer(torrentInfoHash: string, wire: PaidStreamingWire, peerAccount: string) {
-    this.ensureEnabled();
     this.peersList[torrentInfoHash][peerAccount].allowed = true;
     wire.paidStreamingExtension.start();
     this.emit(ClientEvents.PEER_STATUS_CHANGED, {
