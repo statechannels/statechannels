@@ -52,6 +52,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   }
 
   async enable() {
+    log('Enabling WebTorrentPaidStreamingClient');
     this.pseAccount = await this.paymentChannelClient.getAddress();
     log('set pseAccount to sc-wallet signing address');
     await window.ethereum.enable(); // TODO move this inside fake provider
@@ -59,6 +60,13 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     log('got ethereum address');
     log('ACCOUNT ID: ', this.pseAccount);
     log('THIS address: ', this.outcomeAddress);
+  }
+
+  async disable() {
+    log('Disabling WebTorrentPaidStreamingClient');
+    this.pseAccount = null;
+    this.outcomeAddress = null;
+    await window.ethereum.disable();
   }
 
   async testTorrentingCapability(timeOut: number) {
@@ -82,6 +90,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     optionsOrCallback?: TorrentOptions | TorrentCallback,
     callback?: TorrentCallback
   ): PaidStreamingTorrent {
+    this.ensureEnabled();
     let torrent: PaidStreamingTorrent;
 
     if (typeof optionsOrCallback === 'function') {
@@ -103,6 +112,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     optionsOrCallback?: TorrentOptions | TorrentCallback,
     callback?: TorrentCallback
   ): PaidStreamingTorrent {
+    this.ensureEnabled();
     let torrent: PaidStreamingTorrent;
 
     if (typeof optionsOrCallback === 'function') {
@@ -136,7 +146,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     log('SEEDER: > unblockedPeer', peerAccount, 'from', Object.keys(this.peersList));
   }
 
-  togglePeer(torrentInfoHash, peerAccount: string) {
+  togglePeer(torrentInfoHash: string, peerAccount: string) {
     const {wire, allowed} = this.peersList[torrentInfoHash][peerAccount];
     if (allowed) {
       this.blockPeer(torrentInfoHash, wire as PaidStreamingWire, peerAccount);
@@ -144,6 +154,12 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       this.unblockPeer(torrentInfoHash, wire as PaidStreamingWire, peerAccount);
     }
     log('SEEDER: > togglePeer', peerAccount);
+  }
+
+  protected ensureEnabled() {
+    if (!(this.pseAccount && this.outcomeAddress)) {
+      throw new Error('WebTorrentPaidStreamingClient is not enabled');
+    }
   }
 
   protected setupWire(torrent: Torrent, wire: PaidStreamingWire) {
