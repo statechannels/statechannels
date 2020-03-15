@@ -8,6 +8,7 @@ import {ProgressBar} from './progress-bar/ProgressBar';
 import {ChannelState} from '../../../clients/payment-channel-client';
 import {utils} from 'ethers';
 import {ChannelsList} from '../channels-list/ChannelsList';
+import {prettyPrintWei} from '../../../utils/calculateWei';
 
 const bigNumberify = utils.bigNumberify;
 
@@ -27,8 +28,7 @@ const DownloadInfo: React.FC<DownloadInfoProps> = ({
   );
   const totalSpent = myPayingChannelIds
     .map(id => channelCache[id].beneficiaryBalance)
-    .reduce((a, b) => bigNumberify(a).add(bigNumberify(b)), bigNumberify(0))
-    .toNumber();
+    .reduce((a, b) => bigNumberify(a).add(bigNumberify(b)), bigNumberify(0));
   return (
     <>
       <section className="downloadingInfo">
@@ -45,7 +45,7 @@ const DownloadInfo: React.FC<DownloadInfoProps> = ({
           false
         )}
         <p>
-          Total Spent: <span className="total-spent">{totalSpent} wei</span>
+          Total Spent: <span className="total-spent">{prettyPrintWei(totalSpent)}</span>
         </p>
         <p>
           {torrent.parsedTimeRemaining}.{' '}

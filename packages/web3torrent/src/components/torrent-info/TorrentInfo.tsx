@@ -6,7 +6,7 @@ import {DownloadLink} from './download-link/DownloadLink';
 import {MagnetLinkButton} from './magnet-link-button/MagnetLinkButton';
 import './TorrentInfo.scss';
 import {UploadInfo} from './upload-info/UploadInfo';
-import {calculateWei} from '../../utils/calculateWei';
+import {calculateWei, prettyPrintWei} from '../../utils/calculateWei';
 import {ChannelState} from '../../clients/payment-channel-client';
 
 export type TorrentInfoProps = {
@@ -32,7 +32,7 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({
           </span>
           {torrent.status && <span className="fileStatus">{torrent.status}</span>}
           <span className="fileCost">
-            Cost {torrent.length ? calculateWei(torrent.length) : 'unknown'}
+            Cost {torrent.length ? prettyPrintWei(calculateWei(torrent.length)) : 'unknown'}
           </span>
           {torrent.magnetURI && <MagnetLinkButton />}
         </div>

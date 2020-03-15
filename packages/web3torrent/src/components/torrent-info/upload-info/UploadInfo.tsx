@@ -5,6 +5,7 @@ import './UploadInfo.scss';
 import {ChannelState} from '../../../clients/payment-channel-client';
 import {utils} from 'ethers';
 import {ChannelsList} from '../channels-list/ChannelsList';
+import {prettyPrintWei} from '../../../utils/calculateWei';
 
 const bigNumberify = utils.bigNumberify;
 
@@ -24,13 +25,12 @@ const UploadInfo: React.FC<UploadInfoProps> = ({
   );
   const totalReceived = myReceivingChannelIds
     .map(id => channelCache[id].beneficiaryBalance)
-    .reduce((a, b) => bigNumberify(a).add(bigNumberify(b)), bigNumberify(0))
-    .toNumber();
+    .reduce((a, b) => bigNumberify(a).add(bigNumberify(b)), bigNumberify(0));
   return (
     <>
       <section className="uploadingInfo">
         <p>
-          Total Received: <strong>{totalReceived}</strong> wei
+          Total Received: <strong>{prettyPrintWei(totalReceived)}</strong>
           <br />
           <strong data-test-selector="numPeers">{torrent.numPeers}</strong> Peers connected
         </p>
