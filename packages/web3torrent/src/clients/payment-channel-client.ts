@@ -120,9 +120,11 @@ export class PaymentChannelClient {
 
   onChannelProposed(web3tCallback: (channelState: ChannelState) => any) {
     function callback(channelResult: ChannelResult): any {
-      web3tCallback(convertToChannelState(channelResult));
+      if (bigNumberify(channelResult.turnNum).isZero()) {
+        web3tCallback(convertToChannelState(channelResult));
+      }
     }
-    const unsubChannelProposed = this.channelClient.onChannelProposed(callback);
+    const unsubChannelProposed = this.channelClient.onChannelUpdated(callback);
     return () => {
       unsubChannelProposed();
     };
