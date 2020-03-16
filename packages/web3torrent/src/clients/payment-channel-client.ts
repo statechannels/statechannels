@@ -1,5 +1,5 @@
 import {ChannelResult, Message, ChannelClientInterface} from '@statechannels/channel-client';
-import {utils} from 'ethers';
+import {utils, constants} from 'ethers';
 import {FakeChannelProvider} from '@statechannels/channel-client';
 import {ChannelClient} from '@statechannels/channel-client';
 import {ChannelStatus} from '@statechannels/client-api-schema';
@@ -7,7 +7,7 @@ import {SiteBudget} from '@statechannels/client-api-schema';
 
 const bigNumberify = utils.bigNumberify;
 const FINAL_SETUP_STATE = 3; // for a 2 party ForceMove channel
-
+const APP_DATA = constants.HashZero; // unused in the SingleAssetPaymentApp
 export interface ChannelState {
   channelId: string;
   turnNum: string;
@@ -75,7 +75,7 @@ export class PaymentChannelClient {
       participants,
       allocations,
       appDefinition,
-      'appData unused'
+      APP_DATA
     );
 
     this.insertIntoChannelCache(convertToChannelState(channelResult));
@@ -107,7 +107,7 @@ export class PaymentChannelClient {
       (this.channelCache[channelState.channelId] = channelState);
   }
 
-  // Accepts an web3t-friendly callback, performs the necessary encoding, and subscribes to the channelClient with an appropriate, API-compliant callback
+  // Accepts an payment-channel-friendly callback, performs the necessary encoding, and subscribes to the channelClient with an appropriate, API-compliant callback
   onChannelUpdated(web3tCallback: (channelState: ChannelState) => any) {
     function callback(channelResult: ChannelResult): any {
       web3tCallback(convertToChannelState(channelResult));
@@ -171,7 +171,7 @@ export class PaymentChannelClient {
       channelId,
       participants,
       allocations,
-      'appData unused'
+      APP_DATA
     );
     this.updateChannelCache(convertToChannelState(channelResult));
     return convertToChannelState(channelResult);
