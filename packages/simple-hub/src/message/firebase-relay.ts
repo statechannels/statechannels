@@ -2,9 +2,12 @@ import * as firebase from 'firebase';
 
 import {cFirebasePrefix, cHubParticipantId} from '../constants';
 import {logger} from '../logger';
-import {Message} from '@statechannels/wire-format';
+import {Message as WireMessage} from '@statechannels/wire-format';
 import {fromEvent, Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
+import {deserializeMessage, Message, serializeMessage} from '../wallet/xstate-wallet-internals';
+import * as R from 'ramda';
+import {notContainsHub} from '../utils';
 
 type Snapshot = firebase.database.DataSnapshot;
 type FirebaseEvent = [Snapshot, string | null];
@@ -28,31 +31,36 @@ function getMessagesRef() {
   return firebaseAppInsance.database().ref(`${cFirebasePrefix}/messages`);
 }
 
-export function fbListen(responseForMessage: (message: Message) => Message[]) {
-  log.info('firebase-relay: listen');
-  const hubRef = getMessagesRef().child(cHubParticipantId);
-
-  const childAddedObservable: Observable<FirebaseEvent> = fromEvent(hubRef, 'child_added');
-
-  childAddedObservable
-    .pipe(
-      map(childAdded => childAdded[0]),
-      map(snapshot => ({snapshot, messagesToSend: responseForMessage(snapshot.val())}))
-    )
-    .subscribe(
-      async ({snapshot, messagesToSend}) => {
-        await Promise.all(messagesToSend.map(fbSend));
-        await hubRef.child(snapshot.key).remove();
-      },
-      error => log.error(error),
-      () => {
-        log.info('Completed listening to Firebase');
-      }
-    );
-}
-
-function fbSend(message: Message) {
+function fbSend(message: WireMessage) {
   return getMessagesRef()
     .child(message.recipient)
     .push(JSON.parse(JSON.stringify(message)));
+}
+
+export function fbObservable() {
+  log.info('firebase-relay: listen');
+  const hubRef = getMessagesRef().child(cHubParticipantId);
+  const childAddedObservable: Observable<FirebaseEvent> = fromEvent(hubRef, 'child_added');
+  return childAddedObservable.pipe(
+    map(childAdded => childAdded[0]),
+    map(snapshot => ({snapshotKey: snapshot.key, message: deserializeMessage(snapshot.val())}))
+  );
+}
+
+// exported just for unit testing
+export function messagesToSend(messageToSend: Message): WireMessage[] {
+  const allParticipantsWithDups = messageToSend.signedStates
+    .map(state => state.participants)
+    .reduce((participantsSoFar, participants) => participantsSoFar.concat(participants), []);
+  return R.intersection(allParticipantsWithDups, allParticipantsWithDups)
+    .filter(notContainsHub)
+    .map(participant =>
+      serializeMessage(messageToSend, participant.participantId, cHubParticipantId)
+    );
+}
+
+export async function sendMessagesAndCleanup(snapshotKey: string, messageToSend: Message) {
+  const hubRef = getMessagesRef().child(cHubParticipantId);
+  await Promise.all(messagesToSend(messageToSend).map(fbSend));
+  await hubRef.child(snapshotKey).remove();
 }

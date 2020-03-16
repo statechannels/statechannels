@@ -8,23 +8,35 @@ if (process.env.RUNTIME_ENV) {
     environment: process.env.RUNTIME_ENV
   });
 }
-import {logger} from './logger';
-import {fbListen} from './message/firebase-relay';
-import {Message} from '@statechannels/wire-format';
+import {fbObservable, sendMessagesAndCleanup} from './message/firebase-relay';
 import {respondToMessage} from './wallet/respond-to-message';
 import {ethAssetHolderObservable} from './blockchain/eth-asset-holder-watcher';
 import {subscribeToEthAssetHolder} from './wallet/chain-event';
+import {map} from 'rxjs/operators';
+import {logger} from './logger';
 
 const log = logger();
 
-function responseForMessage(incomingMessage: Message): Message[] {
-  log.info({incomingMessage}, 'Received message from firebase');
-  return respondToMessage(incomingMessage);
-}
-
 export async function startServer() {
   subscribeToEthAssetHolder(await ethAssetHolderObservable());
-  fbListen(responseForMessage);
+
+  fbObservable()
+    .pipe(
+      map(({snapshotKey, message}) => ({
+        snapshotKey,
+        messageToSend: respondToMessage(message)
+      }))
+    )
+    .subscribe(
+      async ({snapshotKey, messageToSend}) => {
+        log.info({messageToSend}, 'Responding with message');
+        await sendMessagesAndCleanup(snapshotKey, messageToSend);
+      },
+      error => log.error(error),
+      () => {
+        log.info('Completed listening to Firebase');
+      }
+    );
 }
 
 if (require.main === module) {
