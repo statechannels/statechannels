@@ -36,8 +36,6 @@ export class Blockchain {
     Blockchain.ethAssetHolder = Blockchain.ethAssetHolder || newAssetHolder;
     return Blockchain.ethAssetHolder;
   }
-
-  private;
 }
 
 export async function createEthAssetHolder() {
