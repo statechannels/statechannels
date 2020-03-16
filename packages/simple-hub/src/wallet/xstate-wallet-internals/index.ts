@@ -42,6 +42,10 @@ interface MixedAllocation {
 type Allocation = SimpleAllocation | MixedAllocation;
 export type Outcome = Allocation | SimpleGuarantee;
 
+export function isSimpleAllocation(outcome: Outcome): outcome is SimpleAllocation {
+  return outcome.type === 'SimpleAllocation';
+}
+
 interface StateVariables {
   outcome: Outcome;
   turnNum: BigNumber;
@@ -199,7 +203,7 @@ function serializeState(state: SignedState): SignedStateWire {
   };
 }
 
-function calculateChannelId(channelConstants: ChannelConstants): string {
+export function calculateChannelId(channelConstants: ChannelConstants): string {
   const {chainId, channelNonce, participants} = channelConstants;
   const addresses = participants.map(p => p.signingAddress);
   return getChannelId({
