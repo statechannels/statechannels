@@ -2,7 +2,7 @@ import {BigNumber} from 'ethers/utils';
 export interface SiteBudget {
   site: string;
   hubAddress: string;
-  forAsset: Record<string, AssetBudget>;
+  forAsset: Record<string, AssetBudget | undefined>;
 }
 export interface BudgetItem {
   playerAmount: BigNumber;
@@ -10,9 +10,9 @@ export interface BudgetItem {
 }
 export interface AssetBudget {
   assetHolderAddress: string;
-  pending: BudgetItem;
-  free: BudgetItem;
-  inUse: BudgetItem;
+  pending: BudgetItem; // Approved by user, but not yet funded
+  free: BudgetItem; // Funded, and ready to be allocated
+  inUse: BudgetItem; // Funded, but currently allocated
   direct: BudgetItem;
 }
 export interface Participant {
@@ -20,7 +20,6 @@ export interface Participant {
   signingAddress: string;
   destination: string;
 }
-// signers
 
 export interface StateVariables {
   outcome: Outcome;
