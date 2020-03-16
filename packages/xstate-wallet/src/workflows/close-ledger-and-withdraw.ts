@@ -5,13 +5,16 @@ import {
   Machine,
   AnyEventObject,
   ActionFunction,
-  ActionFunctionMap
+  ActionFunctionMap,
+  DoneInvokeEvent,
+  assign,
+  ConditionPredicate
 } from 'xstate';
 import {getDataAndInvoke} from '../utils';
 import {SupportState} from '.';
 import {Store} from '../store';
 import {outcomesEqual} from '../store/state-utils';
-import {Participant, Objective} from '../store/types';
+import {Participant, Objective, CloseLedger} from '../store/types';
 import {MessagingServiceInterface} from '../messaging';
 
 type WorkflowEvent = AnyEventObject;
@@ -19,21 +22,34 @@ export type WorkflowContext = {
   requestId: number;
   opponent: Participant;
   player: Participant;
+  ledgerId?: string;
+};
+type WorkflowGuards = {
+  doesChannelIdExist: ConditionPredicate<WorkflowContext, WorkflowEvent>;
 };
 interface WorkflowActions extends ActionFunctionMap<WorkflowContext, WorkflowEvent> {
   sendResponse: ActionFunction<WorkflowContext, WorkflowEvent>;
+  assignLedgerId: ActionFunction<WorkflowContext, DoneInvokeEvent<CloseLedger>>;
 }
 interface WorkflowServices extends Record<string, ServiceConfig<WorkflowContext>> {
   getFinalState: (context: WorkflowContext, event: WorkflowEvent) => Promise<SupportState.Init>;
   supportState: StateMachine<any, any, any>;
   submitWithdrawTransaction: (context: WorkflowContext, event: WorkflowEvent) => Promise<void>;
-  createObjective: (context: WorkflowContext, event: any) => Promise<void>;
+  createObjective: (context: WorkflowContext, event: any) => Promise<Objective>;
 }
 
 export const config: StateNodeConfig<WorkflowContext, any, any> = {
-  initial: 'createObjective',
+  initial: 'doesLedgerIdExist',
   states: {
-    createObjective: {invoke: {src: 'createObjective', onDone: 'closeLedger'}},
+    doesLedgerIdExist: {
+      on: {'': [{cond: 'doesChannelIdExist', target: 'closeLedger'}, 'createObjective']}
+    },
+    createObjective: {
+      invoke: {
+        src: 'createObjective',
+        onDone: {target: 'closeLedger', actions: ['assignLedgerId']}
+      }
+    },
     closeLedger: getDataAndInvoke({src: 'getFinalState'}, {src: 'supportState'}, 'withdraw'),
     withdraw: {
       invoke: {src: 'submitWithdrawTransaction', onDone: 'done', onError: 'failure'}
@@ -85,13 +101,14 @@ const createObjective = (store: Store): WorkflowServices['createObjective'] => a
     participants: [context.player, context.opponent],
     data: {ledgerId: ledgerEntry.channelId}
   };
-  return store.addObjective(objective);
+  await store.addObjective(objective);
+  return objective;
 };
 
 const options = (
   store: Store,
   messagingService: MessagingServiceInterface
-): {services: WorkflowServices; actions: WorkflowActions} => {
+): {services: WorkflowServices; actions: WorkflowActions; guards: WorkflowGuards} => {
   return {
     services: {
       getFinalState: getFinalState(store),
@@ -100,7 +117,12 @@ const options = (
       createObjective: createObjective(store)
     },
     actions: {
-      sendResponse: async context => await messagingService.sendResponse(context.requestId, {})
+      sendResponse: async context =>
+        await messagingService.sendResponse(context.requestId, {success: true}),
+      assignLedgerId: async (_, event) => assign({ledgerId: event.data.data.ledgerId})
+    },
+    guards: {
+      doesChannelIdExist: context => !!context.ledgerId
     }
   };
 };

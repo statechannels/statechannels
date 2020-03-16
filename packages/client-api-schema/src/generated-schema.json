@@ -430,6 +430,14 @@
         },
         "result": {
           "additionalProperties": false,
+          "properties": {
+            "success": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "success"
+          ],
           "type": "object"
         }
       },
