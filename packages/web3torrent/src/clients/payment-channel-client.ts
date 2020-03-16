@@ -119,8 +119,12 @@ export class PaymentChannelClient {
   }
 
   onChannelProposed(web3tCallback: (channelState: ChannelState) => any) {
+    const mySigningAddress = this.mySigningAddress;
     function callback(channelResult: ChannelResult): any {
-      if (bigNumberify(channelResult.turnNum).isZero()) {
+      if (
+        bigNumberify(channelResult.turnNum).isZero() &&
+        channelResult.participants[1].signingAddress === mySigningAddress
+      ) {
         web3tCallback(convertToChannelState(channelResult));
       }
     }
