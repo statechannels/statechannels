@@ -103,7 +103,9 @@ export function hookUpMessaging(playerA: Player, playerB: Player) {
   playerA.channelWallet.onSendMessage(message => {
     if (isNotification(message) && message.method === 'MessageQueued') {
       const pushMessageRequest = generatePushMessage(message.params);
-      if (process.env.ADD_LOGS) {
+      // TODO: This is failing with TypeError: Converting circular structure to JSON
+      // eslint-disable-next-line no-constant-condition
+      if (process.env.ADD_LOGS && false) {
         console.log(`MESSAGE A->B: ${JSON.stringify(pushMessageRequest)}`);
       }
       playerB.channelWallet.pushMessage(pushMessageRequest);
@@ -113,7 +115,9 @@ export function hookUpMessaging(playerA: Player, playerB: Player) {
   playerB.channelWallet.onSendMessage(message => {
     if (isNotification(message) && message.method === 'MessageQueued') {
       const pushMessageRequest = generatePushMessage(message.params);
-      if (process.env.ADD_LOGS) {
+      // TODO: This is failing with TypeError: Converting circular structure to JSON
+      // eslint-disable-next-line no-constant-condition
+      if (process.env.ADD_LOGS && false) {
         console.log(`MESSAGE B->A: ${JSON.stringify(pushMessageRequest)}`);
       }
       playerA.channelWallet.pushMessage(pushMessageRequest);

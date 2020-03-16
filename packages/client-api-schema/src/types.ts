@@ -180,7 +180,7 @@ export type CloseAndWithdrawRequest = JsonRpcRequest<
   'CloseAndWithdraw',
   {site: string; player: Participant; hub: Participant}
 >;
-export type CloseAndWithdrawResponse = JsonRpcResponse<{}>;
+export type CloseAndWithdrawResponse = JsonRpcResponse<{success: boolean}>;
 // Notifications
 export type ChannelProposedNotification = JsonRpcNotification<'ChannelProposed', ChannelResult>;
 export type ChannelUpdatedNotification = JsonRpcNotification<'ChannelUpdated', ChannelResult>;
