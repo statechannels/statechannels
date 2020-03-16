@@ -17,6 +17,9 @@ export type UploadInfoProps = {
 class ChannelsList extends React.Component<UploadInfoProps> {
   static contextType = WebTorrentContext;
 
+  // Adds typing information to this.context
+  context!: React.ContextType<typeof WebTorrentContext>;
+
   channelIdToTableRow(
     channelId: string,
     channels: Dictionary<ChannelState>,
