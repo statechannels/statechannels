@@ -2,13 +2,13 @@ import {FakeChain} from '../chain';
 import {Player, hookUpMessaging, generateCloseAndWithdrawRequest} from './helpers';
 import {CloseAndWithdrawResponse} from '@statechannels/client-api-schema';
 import {filter, map, first} from 'rxjs/operators';
-import waitForExpect from 'wait-for-expect';
+
 import {CHALLENGE_DURATION} from '../constants';
 import {simpleEthAllocation} from '../utils/outcome';
 import {bigNumberify} from 'ethers/utils';
-import {isCloseLedger} from '../store/types';
+import {isCloseLedger, CloseLedger} from '../store/types';
 
-jest.setTimeout(20000);
+jest.setTimeout(30000);
 
 it('allows for a wallet to close the ledger channel with the hub and withdraw', async () => {
   const fakeChain = new FakeChain();
@@ -36,16 +36,22 @@ it('allows for a wallet to close the ledger channel with the hub and withdraw', 
     isFinal: false,
     appData: '0x0'
   });
-  playerA.store.setLedger(ledgerChannel.channelId);
-  hub.store.setLedger(ledgerChannel.channelId);
-  hub.store.signAndAddState(ledgerChannel.channelId, ledgerChannel.latest);
-  playerA.store.chain.deposit(ledgerChannel.channelId, '0x0', '0x10');
+  // TODO: We need to wait until the hub has received the channel message from player A's store
+  // This should only be an issue in this test and is in actual use both the hub and the player
+  // should have the channel in their store from previous workflows
+  await new Promise(resolve => setTimeout(() => resolve(), 500));
+  await playerA.store.setLedger(ledgerChannel.channelId);
+
+  await hub.store.setLedger(ledgerChannel.channelId);
+  await hub.store.signAndAddState(ledgerChannel.channelId, ledgerChannel.latest);
+  await playerA.store.chain.deposit(ledgerChannel.channelId, '0x0', '0x10');
 
   hub.store.objectiveFeed.pipe(filter(o => isCloseLedger(o))).subscribe(async o => {
     hub.startCloseLedgerAndWithdraw({
       player: hub.participant,
       opponent: playerA.participant,
-      requestId: 134556607
+      requestId: 134556607,
+      ledgerId: (o as CloseLedger).data.ledgerId
     });
   });
 
@@ -61,11 +67,8 @@ it('allows for a wallet to close the ledger channel with the hub and withdraw', 
     )
     .toPromise();
   await playerA.messagingService.receiveRequest(closeAndWithdrawMessage);
-  await waitForExpect(async () => {
-    expect(playerA.workflowState).toEqual('done');
-  }, 3000);
 
   const closeAndWithdrawResponse: CloseAndWithdrawResponse = await closeAndWithdrawPromise;
 
-  expect(closeAndWithdrawResponse).toBeDefined();
+  expect(closeAndWithdrawResponse.result.success).toBe(true);
 });
