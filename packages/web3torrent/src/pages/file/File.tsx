@@ -64,14 +64,17 @@ const File: React.FC<RouteComponentProps & Props> = props => {
           <FormButton
             name="download"
             spinner={loading}
-            disabled={props.currentNetwork !== props.requiredNetwork}
+            disabled={
+              props.currentNetwork !== props.requiredNetwork ||
+              buttonLabel === 'Preparing Download...'
+            }
             onClick={async () => {
               setLoading(true);
               setErrorLabel('');
               setButtonLabel('Preparing Download...');
               try {
                 // TODO: Put real values here
-                await web3torrent.paymentChannelClient.approveBudgetAndFund('', '', '', '', '');
+                // await web3torrent.paymentChannelClient.approveBudgetAndFund('', '', '', '', '');
                 setTorrent({...torrent, ...(await download(torrent.magnetURI))});
               } catch (error) {
                 setErrorLabel(
