@@ -7,7 +7,7 @@ import {CHALLENGE_DURATION} from '../constants';
 import {simpleEthAllocation} from '../utils/outcome';
 import {bigNumberify} from 'ethers/utils';
 import {isCloseLedger, CloseLedger} from '../store/types';
-
+import waitForExpect from 'wait-for-expect';
 jest.setTimeout(30000);
 
 it('allows for a wallet to close the ledger channel with the hub and withdraw', async () => {
@@ -36,10 +36,7 @@ it('allows for a wallet to close the ledger channel with the hub and withdraw', 
     isFinal: false,
     appData: '0x0'
   });
-  // TODO: We need to wait until the hub has received the channel message from player A's store
-  // This should only be an issue in this test and is in actual use both the hub and the player
-  // should have the channel in their store from previous workflows
-  await new Promise(resolve => setTimeout(() => resolve(), 500));
+
   await playerA.store.setLedger(ledgerChannel.channelId);
 
   await hub.store.setLedger(ledgerChannel.channelId);
@@ -67,6 +64,15 @@ it('allows for a wallet to close the ledger channel with the hub and withdraw', 
     )
     .toPromise();
   await playerA.messagingService.receiveRequest(closeAndWithdrawMessage);
+
+  await waitForExpect(async () => {
+    expect(playerA.workflowState).toEqual('waitForUserApproval');
+  }, 3000);
+  playerA.channelWallet.workflows[0].machine.send({type: 'USER_APPROVES_CLOSE'});
+  await waitForExpect(async () => {
+    expect(hub.workflowState).toEqual('waitForUserApproval');
+  }, 3000);
+  hub.channelWallet.workflows[0].machine.send({type: 'USER_APPROVES_CLOSE'});
 
   const closeAndWithdrawResponse: CloseAndWithdrawResponse = await closeAndWithdrawPromise;
 

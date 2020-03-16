@@ -3,7 +3,6 @@ import {
   ServiceConfig,
   StateMachine,
   Machine,
-  AnyEventObject,
   ActionFunction,
   ActionFunctionMap,
   DoneInvokeEvent,
@@ -15,9 +14,15 @@ import {SupportState} from '.';
 import {Store} from '../store';
 import {outcomesEqual} from '../store/state-utils';
 import {Participant, Objective, CloseLedger} from '../store/types';
-import {MessagingServiceInterface} from '../messaging';
+import {MessagingServiceInterface, sendDisplayMessage} from '../messaging';
 
-type WorkflowEvent = AnyEventObject;
+type WorkflowEvent = UserApproves | UserRejects | DoneInvokeEvent<CloseLedger>;
+interface UserApproves {
+  type: 'USER_APPROVES_CLOSE';
+}
+interface UserRejects {
+  type: 'USER_REJECTS_CLOSE';
+}
 export type WorkflowContext = {
   requestId: number;
   opponent: Participant;
@@ -30,6 +35,8 @@ type WorkflowGuards = {
 interface WorkflowActions extends ActionFunctionMap<WorkflowContext, WorkflowEvent> {
   sendResponse: ActionFunction<WorkflowContext, WorkflowEvent>;
   assignLedgerId: ActionFunction<WorkflowContext, DoneInvokeEvent<CloseLedger>>;
+  hideUi: ActionFunction<WorkflowContext, any>;
+  displayUi: ActionFunction<WorkflowContext, any>;
 }
 interface WorkflowServices extends Record<string, ServiceConfig<WorkflowContext>> {
   getFinalState: (context: WorkflowContext, event: WorkflowEvent) => Promise<SupportState.Init>;
@@ -39,11 +46,19 @@ interface WorkflowServices extends Record<string, ServiceConfig<WorkflowContext>
 }
 
 export const config: StateNodeConfig<WorkflowContext, any, any> = {
-  initial: 'doesLedgerIdExist',
+  initial: 'waitForUserApproval',
   states: {
-    doesLedgerIdExist: {
-      on: {'': [{cond: 'doesChannelIdExist', target: 'closeLedger'}, 'createObjective']}
+    waitForUserApproval: {
+      entry: ['displayUi'],
+      on: {
+        USER_APPROVES_CLOSE: [
+          {cond: 'doesChannelIdExist', target: 'closeLedger'},
+          'createObjective'
+        ],
+        USER_REJECTS_CLOSE: {target: 'failure'}
+      }
     },
+
     createObjective: {
       invoke: {
         src: 'createObjective',
@@ -117,6 +132,12 @@ const options = (
       createObjective: createObjective(store)
     },
     actions: {
+      displayUi: () => {
+        sendDisplayMessage('Show');
+      },
+      hideUi: () => {
+        sendDisplayMessage('Hide');
+      },
       sendResponse: async context =>
         await messagingService.sendResponse(context.requestId, {success: true}),
       assignLedgerId: async (_, event) => assign({ledgerId: event.data.data.ledgerId})
