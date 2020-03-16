@@ -1,4 +1,4 @@
-import {respondToMessage} from '../';
+import {respondToMessage} from '../respond-to-message';
 import {Message} from '@statechannels/wire-format';
 import {serializeMessage} from '@statechannels/xstate-wallet/lib/src/serde/wire-format/serialize';
 import {
