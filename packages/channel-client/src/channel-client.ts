@@ -113,7 +113,7 @@ export class ChannelClient implements ChannelClientInterface<ChannelResult> {
       params: {
         playerAmount,
         hubAmount,
-        site: 'abc.com', // TODO: use real value
+        site: window.location.hostname,
         player: {
           participantId: await this.getAddress(),
           signingAddress: await this.getAddress(),
