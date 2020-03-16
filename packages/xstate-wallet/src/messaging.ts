@@ -12,7 +12,8 @@ import {
   ChannelClosingNotification,
   ChannelUpdatedNotification,
   Request,
-  ApproveBudgetAndFundRequest
+  ApproveBudgetAndFundRequest,
+  ChannelProposedNotification
 } from '@statechannels/client-api-schema';
 
 import * as jrs from 'jsonrpc-lite';
@@ -52,7 +53,10 @@ export interface MessagingServiceInterface {
   receiveRequest(jsonRpcMessage: Request): Promise<void>;
   sendBudgetNotification(notificationData: SiteBudget): Promise<void>;
   sendChannelNotification(
-    method: ChannelClosingNotification['method'] | ChannelUpdatedNotification['method'],
+    method:
+      | ChannelClosingNotification['method']
+      | ChannelUpdatedNotification['method']
+      | ChannelProposedNotification['method'],
     notificationData: ChannelResult
   );
   sendMessageNotification(message: Message): Promise<void>;
