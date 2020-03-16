@@ -24,7 +24,7 @@ export class ChannelClient implements ChannelClientInterface<ChannelResult> {
     return this.provider.off.bind(this, 'ChannelUpdated', callback);
   }
 
-  // TODO: Currently not in use in the xstate wallet
+  // TODO: Currently not in use in the xstate wallet!
   onChannelProposed(callback: (result: ChannelResult) => void): UnsubscribeFunction {
     this.provider.on('ChannelProposed', result => callback(result.params));
     return this.provider.off.bind(this, 'ChannelProposed', callback);

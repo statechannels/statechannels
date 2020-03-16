@@ -48,6 +48,10 @@ export class ChannelWallet {
           'ChannelUpdated',
           await convertToChannelResult(channelEntry)
         );
+        this.messagingService.sendChannelNotification(
+          'ChannelProposed',
+          await convertToChannelResult(channelEntry)
+        );
       });
 
     this.messagingService.requestFeed.subscribe(x => this.handleRequest(x));

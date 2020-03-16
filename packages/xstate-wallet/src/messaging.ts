@@ -9,6 +9,7 @@ import {
   ChannelResult,
   ChannelStatus,
   Notification,
+  ChannelProposedNotification,
   ChannelClosingNotification,
   ChannelUpdatedNotification,
   Request,
@@ -52,7 +53,10 @@ export interface MessagingServiceInterface {
   receiveRequest(jsonRpcMessage: Request): Promise<void>;
   sendBudgetNotification(notificationData: SiteBudget): Promise<void>;
   sendChannelNotification(
-    method: ChannelClosingNotification['method'] | ChannelUpdatedNotification['method'],
+    method:
+      | ChannelProposedNotification['method']
+      | ChannelClosingNotification['method']
+      | ChannelUpdatedNotification['method'],
     notificationData: ChannelResult
   );
   sendMessageNotification(message: Message): Promise<void>;
