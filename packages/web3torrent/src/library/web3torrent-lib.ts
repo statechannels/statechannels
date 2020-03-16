@@ -26,14 +26,16 @@ export type TorrentCallback = (torrent: Torrent) => any;
 
 export * from './types';
 
-export const WEI_PER_BYTE = bigNumberify(1); // cost per credit / piece
-export const BUFFER_REFILL_RATE = bigNumberify(2e4); // number of credits / pieces the leecher wishes to increase the buffer by
+export const WEI_PER_BYTE = bigNumberify(1); // cost per byte
+export const BUFFER_REFILL_RATE = bigNumberify(2e4); // number of bytes the leecher wishes to increase the buffer by
 // These variables control the amount of (micro)trust the leecher must invest in the seeder
 // As well as the overall performance hit of integrating payments into webtorrent.
 // A high BUFFER_REFILL_RATE increases the need for trust, but decreases the number of additional messages and therefore latency
 // It can also cause a payment to go above the leecher's balance / capabilities
 export const INITIAL_SEEDER_BALANCE = bigNumberify(0); // needs to be zero so that depositing works correctly (unidirectional payment channel)
 export const INITIAL_LEECHER_BALANCE = bigNumberify(BUFFER_REFILL_RATE.mul(100)); // e.g. gwei = 1e9 = nano-ETH
+
+const HUB_ADDRESS = 'TODO';
 
 // A Whimsical diagram explaining the functionality of Web3Torrent: https://whimsical.com/Sq6whAwa8aTjbwMRJc7vPU
 export default class WebTorrentPaidStreamingClient extends WebTorrent {
@@ -60,6 +62,17 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     log('got ethereum address');
     log('ACCOUNT ID: ', this.pseAccount);
     log('THIS address: ', this.outcomeAddress);
+
+    // Hub messaging
+    this.paymentChannelClient.onMessageQueued((message: Message) => {
+      if (message.recipient === HUB_ADDRESS) {
+        // pipe to firebase.
+      }
+    });
+    // TODO
+    // onFirebaseMessageReceived(message:Message) => {
+    //   await this.paymentChannelClient.pushMessage(message);
+    // }
   }
 
   async disable() {
@@ -201,7 +214,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
             id: peerAccount,
             wire,
             buffer: '0', // (bytes) a value x > 0 would allow a leecher to download x bytes
-            credit: '0', // (wei)
+            beneficiaryBalance: '0', // (wei)
             allowed: false,
             channelId: channel.channelId
           };
@@ -220,7 +233,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
             buffer: bigNumberify(knownPeerAccount.buffer)
               .sub(reqPrice) // decrease buffer by the price of this request
               .toString(),
-            credit: knownPeerAccount.credit,
+            beneficiaryBalance: knownPeerAccount.beneficiaryBalance,
             allowed: true,
             channelId: knownPeerAccount.channelId
           };
@@ -228,7 +241,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           log(
             '> ALLOWED: ' + index,
             'BUFFER: ' + this.peersList[torrent.infoHash][peerAccount].buffer,
-            'BALANCE: ' + this.peersList[torrent.infoHash][peerAccount].credit
+            'BALANCE: ' + this.peersList[torrent.infoHash][peerAccount].beneficiaryBalance
           );
         }
       }
@@ -240,7 +253,9 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
     // If the wallet queues a message, send it across the wire
     this.paymentChannelClient.onMessageQueued((message: Message) => {
-      wire.paidStreamingExtension.sendMessage(JSON.stringify(message));
+      if (message.recipient === wire.paidStreamingExtension.peerAccount) {
+        wire.paidStreamingExtension.sendMessage(JSON.stringify(message));
+      }
     });
 
     // If a channel is proposed, join it
@@ -285,16 +300,16 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       );
     }
     log(`querying channel client for updated balance`);
-    const newCredit = bigNumberify(
+    const newBeneficiaryBalance = bigNumberify(
       this.paymentChannelClient.channelCache[channelId].beneficiaryBalance
     );
     // infer payment using update balance and previously stored balance
     const payment = bigNumberify(
-      newCredit.sub(bigNumberify(this.peersList[infoHash][peerId].credit))
+      newBeneficiaryBalance.sub(bigNumberify(this.peersList[infoHash][peerId].beneficiaryBalance))
     );
     // store new balance
 
-    this.peersList[infoHash][peerId].credit = newCredit.toString();
+    this.peersList[infoHash][peerId].beneficiaryBalance = newBeneficiaryBalance.toString();
     // convert payment into buffer units (bytes)
     this.peersList[infoHash][peerId].buffer = bigNumberify(this.peersList[infoHash][peerId].buffer)
       .add(payment.div(WEI_PER_BYTE)) // This must remain an integer as long as our check above uses .isZero()
@@ -302,7 +317,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       .toString();
 
     log(
-      `newSeederBalance: ${newCredit} wei; payment: ${payment} wei;, buffer for peer: ${this.peersList[infoHash][peerId].buffer} bytes`
+      `beneficiaryBalance: ${newBeneficiaryBalance} wei; payment: ${payment} wei;, buffer for peer: ${this.peersList[infoHash][peerId].buffer} bytes`
     );
   }
 
@@ -323,15 +338,14 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       switch (command) {
         case PaidStreamingExtensionNotices.STOP: // synonymous with a prompt for a payment
           if (!torrent.done) {
-            const channelId = wire.paidStreamingExtension.peerChannelId;
+            const channelId = data;
             await this.paymentChannelClient.makePayment(
               channelId,
               WEI_PER_BYTE.mul(BUFFER_REFILL_RATE).toString()
+            ); // if I have run out of money,
+            log(
+              `attempted to make payment for channel ${channelId}, beneficiaryBalance: ${this.paymentChannelClient.channelCache[channelId].beneficiaryBalance}`
             );
-            const newSeederBalance = bigNumberify(
-              this.paymentChannelClient.channelCache[channelId].beneficiaryBalance
-            );
-            log(`payment made for channel ${channelId}, newSeederBalance: ${newSeederBalance}`);
           }
           break;
         case PaidStreamingExtensionNotices.START:
