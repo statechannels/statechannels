@@ -10,27 +10,40 @@ if (process.env.RUNTIME_ENV) {
 }
 import {fbObservable, sendMessagesAndCleanup} from './message/firebase-relay';
 import {respondToMessage} from './wallet/respond-to-message';
-import {ethAssetHolderObservable} from './blockchain/eth-asset-holder-watcher';
-import {subscribeToEthAssetHolder} from './wallet/chain-event';
 import {map} from 'rxjs/operators';
 import {logger} from './logger';
+import {depositsToMake} from './wallet/deposit';
+import {Blockchain} from './blockchain/eth-asset-holder';
+import {ethers} from 'ethers';
 
 const log = logger();
 
 export async function startServer() {
-  subscribeToEthAssetHolder(await ethAssetHolderObservable());
-
   fbObservable()
     .pipe(
       map(({snapshotKey, message}) => ({
         snapshotKey,
         messageToSend: respondToMessage(message)
+      })),
+      map(({snapshotKey, messageToSend}) => ({
+        snapshotKey,
+        messageToSend,
+        depositsToMake: depositsToMake(messageToSend)
       }))
     )
     .subscribe(
-      async ({snapshotKey, messageToSend}) => {
+      async ({snapshotKey, messageToSend, depositsToMake}) => {
         log.info({messageToSend}, 'Responding with message');
         await sendMessagesAndCleanup(snapshotKey, messageToSend);
+        await Promise.all(
+          depositsToMake.map(depositToMake =>
+            Blockchain.fund(
+              depositToMake.channelId,
+              ethers.constants.Zero,
+              depositToMake.amountToDeposit
+            )
+          )
+        );
       },
       error => log.error(error),
       () => {

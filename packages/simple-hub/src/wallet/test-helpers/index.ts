@@ -93,6 +93,12 @@ export const ledgerStateResponse: SignedState = {
   signatures: [signState(ledgerState, wallet1.privateKey), signState(ledgerState, cHubChannelPK)]
 };
 
+export const ledgerStateResponse2: SignedState = {
+  ...ledgerState,
+  turnNum: ethers.constants.One,
+  signatures: [signState(ledgerState, wallet1.privateKey), signState(ledgerState, cHubChannelPK)]
+};
+
 const ledgerState3 = firstState(outcome3, channel3);
 export const ledgerStateIncoming3: SignedState = {
   ...ledgerState3,
@@ -104,7 +110,7 @@ export const ledgerStateResponse3: SignedState = {
   signatures: [signState(ledgerState3, wallet1.privateKey), signState(ledgerState3, cHubChannelPK)]
 };
 
-const ledgerState3_2: State = {...ledgerState3, turnNum: bigNumberify(1)};
+const ledgerState3_2: State = {...ledgerState3, turnNum: ethers.constants.One};
 export const ledgerStateIncoming3_2: SignedState = {
   ...ledgerState3_2,
   signatures: [signState(ledgerState3_2, wallet1.privateKey)]
