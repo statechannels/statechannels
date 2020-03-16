@@ -70,5 +70,15 @@ it('allows for a wallet to close the ledger channel with the hub and withdraw', 
 
   const closeAndWithdrawResponse: CloseAndWithdrawResponse = await closeAndWithdrawPromise;
 
+  // Verify the response is correct
   expect(closeAndWithdrawResponse.result.success).toBe(true);
+
+  // Verify that the blockchain is correct
+  const chainView = await playerA.store.chain.getChainInfo(ledgerChannel.channelId);
+  expect(chainView.finalized).toBe(true);
+  expect(chainView.amount.eq(0)).toBe(true);
+
+  // Check the channel is finalized
+  const latestEntry = playerA.store.getEntry(ledgerChannel.channelId);
+  expect((await latestEntry).isFinalized).toBe(true);
 });
