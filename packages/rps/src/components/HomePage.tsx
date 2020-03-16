@@ -10,7 +10,7 @@ interface Props {
 
 const HomePage: React.SFC<Props> = ({login, metamaskState}) => {
   const currentNetwork = Number(metamaskState.network);
-  const targetNetwork = Number(process.env.CHAIN_NETWORK_ID);
+  const targetNetwork = Number(process.env.REACT_APP_CHAIN_NETWORK_ID);
   return (
     <div>
       <div className="homePage">
