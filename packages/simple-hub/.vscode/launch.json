@@ -45,7 +45,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Launch Server",
+      "name": "Launch Dev Server",
       "cwd": "${workspaceRoot}",
       "protocol": "inspector",
       "internalConsoleOptions": "neverOpen",
@@ -53,6 +53,20 @@
       "args": ["${workspaceFolder}/src/start-dev-server.ts"],
       "env": {
         "NODE_ENV": "development"
+      },
+      "skipFiles": ["<node_internals>/**/*.js"]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch Prod Server",
+      "cwd": "${workspaceRoot}",
+      "protocol": "inspector",
+      "internalConsoleOptions": "neverOpen",
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "args": ["${workspaceFolder}/src/server.ts"],
+      "env": {
+        "NODE_ENV": "production"
       },
       "skipFiles": ["<node_internals>/**/*.js"]
     }
