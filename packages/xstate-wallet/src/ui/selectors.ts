@@ -60,7 +60,8 @@ export function getApplicationOpenProgress(applicationWorkflowState: AppWorkflow
 export function getAmountsFromPendingBudget(
   budget: SiteBudget
 ): {playerAmount: BigNumber; hubAmount: BigNumber} {
-  const {pending} = budget.forAsset[ETH_ASSET_HOLDER_ADDRESS];
+  const pending = budget.forAsset[ETH_ASSET_HOLDER_ADDRESS]?.pending;
+  if (!pending) throw new Error('No eth budget found');
   const {playerAmount, hubAmount} = pending;
   return {playerAmount, hubAmount};
 }
