@@ -291,11 +291,6 @@ const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
     status
   } = channelResult;
 
-  try {
-    utils.bigNumberify(turnNum);
-  } catch {
-    console.error('got' + turnNum);
-  }
   return {
     channelId,
     turnNum: utils.bigNumberify(turnNum),
