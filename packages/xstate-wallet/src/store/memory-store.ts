@@ -91,7 +91,7 @@ export class MemoryStore implements Store {
   private _privateKeys: Record<string, string | undefined> = {};
   protected _ledgers: Record<string, string> = {};
   protected _channelLocks: Record<string, Guid | undefined> = {};
-  private _budgets: Record<string, SiteBudget> = {};
+  private _budgets: Record<string, SiteBudget | undefined> = {};
 
   constructor(privateKeys?: string[], chain?: Chain) {
     // TODO: We shouldn't default to a fake chain
@@ -113,7 +113,9 @@ export class MemoryStore implements Store {
   }
 
   public getBudget(site: string): Promise<SiteBudget> {
-    return Promise.resolve(this._budgets[site]);
+    const currentBudget = this._budgets[site];
+    if (!currentBudget) throw new Error(Errors.noBudget);
+    return Promise.resolve(currentBudget);
   }
 
   public updateOrCreateBudget(budget: SiteBudget): Promise<void> {
