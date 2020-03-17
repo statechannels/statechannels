@@ -2,7 +2,7 @@ import {
   ChannelProviderInterface,
   MethodResponseType,
   MethodRequestType
-} from '@statechannels/channel-provider/src';
+} from '@statechannels/channel-provider';
 import log = require('loglevel');
 
 import {EventEmitter, ListenerFn} from 'eventemitter3';
