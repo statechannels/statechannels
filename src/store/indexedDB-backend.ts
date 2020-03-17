@@ -1,6 +1,7 @@
 import {BigNumber} from 'ethers/utils';
 import {MemoryChannelStoreEntry} from './memory-channel-storage';
 import {Objective, DBBackend} from './types';
+import * as _ from 'lodash';
 
 enum ObjectStores {
   channels = 'channels',
@@ -111,7 +112,10 @@ export class IndexedDBBackend implements DBBackend {
   }
   public async getNonce(key: string) {
     const nonce = await this.get(ObjectStores.nonces, key);
-    return nonce && new BigNumber(nonce);
+    if (!nonce) {
+      return new BigNumber(-1);
+    }
+    return new BigNumber(nonce);
   }
   public async getPrivateKey(key: string) {
     return this.get(ObjectStores.privateKeys, key);
@@ -154,7 +158,7 @@ export class IndexedDBBackend implements DBBackend {
     const _objectives: Objective[] = await this.getAll(ObjectStores.objectives, true);
     const newObjectives: Objective[] = [];
     values.forEach(objective => {
-      if (!_objectives.includes(objective)) {
+      if (!_objectives.some(saved => _.isEqual(objective, saved))) {
         _objectives.push(objective);
         newObjectives.push(objective);
       }
