@@ -8,7 +8,7 @@ const NODE_ENV = process.env.NODE_ENV;
 if (!NODE_ENV) {
   throw new Error('The NODE_ENV environment variable is required but was not specified.');
 }
-configureEnvVariables();
+configureEnvVariables(true);
 
 // We support resolving modules according to `NODE_PATH`.
 // This lets you use absolute paths in imports inside large monorepos:
@@ -38,6 +38,7 @@ const MAGMO_VALUES = [
   'BOT_URL',
   'AUTO_PLAYER',
   'AUTO_OPPONENT',
+  'GANACHE_PORT'
 ];
 
 const CONTRACT_ADDRESSES = /_ADDRESS$/i;
@@ -62,7 +63,7 @@ function getClientEnvironment(publicUrl) {
         // images into the `src` and `import` them in code to get their paths.
         PUBLIC_URL: publicUrl,
 
-        BUILD_VERSION: new Date(Date.now()).toISOString(),
+        BUILD_VERSION: new Date(Date.now()).toISOString()
       }
     );
   // Stringify all values so we can feed into Webpack DefinePlugin
@@ -70,11 +71,11 @@ function getClientEnvironment(publicUrl) {
     'process.env': Object.keys(raw).reduce((env, key) => {
       env[key] = JSON.stringify(raw[key]);
       return env;
-    }, {}),
+    }, {})
   };
   return {
     raw,
-    stringified,
+    stringified
   };
 }
 
