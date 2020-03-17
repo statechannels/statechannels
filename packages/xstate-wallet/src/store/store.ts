@@ -90,7 +90,7 @@ export interface Store {
   chain: Chain;
 }
 
-export class MemoryStore implements Store {
+export class XstateStore implements Store {
   private backend: DBBackend = new MemoryBackend();
   readonly chain: Chain;
   private _eventEmitter = new EventEmitter<InternalEvents>();
@@ -165,7 +165,7 @@ export class MemoryStore implements Store {
     // TODO: There could be concurrency problems which lead to entries potentially being overwritten.
     await this.setNonce(addresses, state.channelNonce);
     const key = hashState(state);
-    
+
     return this.backend.setChannel(
       channelId,
       new MemoryChannelStoreEntry(state, myIndex, {[key]: state})
@@ -224,9 +224,9 @@ export class MemoryStore implements Store {
       appDefinition,
       ...stateVars
     });
-
+    // console.log('createChannel stateVars', stateVars)
     // sign the state, store the channel
-    this.signAndAddState(
+    await this.signAndAddState(
       entry.channelId,
       _.pick(stateVars, 'outcome', 'turnNum', 'appData', 'isFinal')
     );
@@ -259,11 +259,12 @@ export class MemoryStore implements Store {
     if (!privateKey) {
       throw new Error('No longer have private key');
     }
-
+    // console.log('signAndAddState', channelStorage)
     const signedState = channelStorage.signAndAdd(
       _.pick(stateVars, 'outcome', 'turnNum', 'appData', 'isFinal'),
       privateKey
     );
+    await this.backend.setChannel(channelId, channelStorage);
     this._eventEmitter.emit('channelUpdated', await this.getEntry(channelId));
     this._eventEmitter.emit('addToOutbox', {signedStates: [signedState]});
   }
