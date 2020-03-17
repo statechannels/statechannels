@@ -26,8 +26,20 @@ export function getConfirmCreateChannelState(
 
 // TODO:Ideally this should be a type guard
 export function isConfirmCreateChannel(applicationWorkflowState: AppWorkflowState): boolean {
+  // TODO: This is fragile and should be revisited at some point
+  const joinInConfirmCreateChannel =
+    getApplicationStateValue(applicationWorkflowState) === 'confirmJoinChannelWorkflow' &&
+    applicationWorkflowState.value['confirmJoinChannelWorkflow'] &&
+    applicationWorkflowState.value['confirmJoinChannelWorkflow']['confirmChannelCreation'] ===
+      'invokeCreateChannelConfirmation';
+  console.log(JSON.stringify(applicationWorkflowState.value));
+  console.log('joinInConfirmCreateChannel ', joinInConfirmCreateChannel);
+  if (joinInConfirmCreateChannel) {
+    console.log(getConfirmCreateChannelState(applicationWorkflowState));
+  }
+
   return (
-    getApplicationStateValue(applicationWorkflowState) === 'confirmJoinChannelWorkflow' ||
+    joinInConfirmCreateChannel ||
     getApplicationStateValue(applicationWorkflowState) === 'confirmCreateChannelWorkflow'
   );
 }
