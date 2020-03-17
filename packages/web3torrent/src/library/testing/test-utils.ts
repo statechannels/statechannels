@@ -1,6 +1,7 @@
 import MemoryChunkStore from 'memory-chunk-store';
 import fixtures from 'webtorrent-fixtures';
 import {ChannelState} from '../../clients/payment-channel-client';
+import {utils} from 'ethers';
 
 export const defaultFile = new Blob([fixtures.leaves.content]);
 export const defaultTorrentHash = fixtures.leaves.parsedTorrent.infoHash;
@@ -40,7 +41,7 @@ export function mockMetamask() {
 
 export const mockChannelState: ChannelState = {
   channelId: '0x0',
-  turnNum: '0x0',
+  turnNum: utils.bigNumberify(0),
   status: 'running',
   challengeExpirationTime: '0x0',
   beneficiary: '0x0',
