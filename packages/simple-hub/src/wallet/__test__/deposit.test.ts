@@ -3,10 +3,13 @@ import {
   ledgerStateResponse,
   ledgerStateResponse3_2,
   ledgerStateResponse3,
-  ledgerStateResponse2
+  ledgerStateResponse2,
+  participants
 } from '../test-helpers';
-import {calculateChannelId} from '../xstate-wallet-internals';
+import {calculateChannelId, Outcome} from '../xstate-wallet-internals';
 import {SimpleAllocation} from '@statechannels/xstate-wallet/src/store/types';
+import {AddressZero} from 'ethers/constants';
+import {ethers} from 'ethers';
 
 describe('deposit on prefund state', () => {
   it('one prefund state', () => {
@@ -17,7 +20,7 @@ describe('deposit on prefund state', () => {
     const deposit = deposits[0];
     expect(deposit.channelId).toEqual(calculateChannelId(ledgerStateResponse));
     expect(deposit.amountToDeposit).toEqual(
-      (ledgerStateResponse.outcome as SimpleAllocation).allocationItems[1].amount
+      (ledgerStateResponse.outcome as SimpleAllocation).allocationItems[0].amount
     );
   });
 
@@ -35,6 +38,23 @@ describe('deposit on prefund state', () => {
     expect(deposits).toHaveLength(0);
   });
 
+  it('hub is not the first in allocations', () => {
+    const outcome: Outcome = {
+      type: 'SimpleAllocation',
+      assetHolderAddress: AddressZero,
+      allocationItems: [0, 1].map(i => ({
+        destination: participants[i].destination,
+        amount: ethers.constants.One
+      }))
+    };
+
+    const ledgerResponse = {...ledgerStateResponse, outcome};
+    const deposits = depositsToMake({
+      signedStates: [ledgerResponse]
+    });
+    expect(deposits).toHaveLength(0);
+  });
+
   it('multiple states, one prefund state', () => {
     const deposits = depositsToMake({
       signedStates: [ledgerStateResponse, ledgerStateResponse2]
@@ -43,7 +63,7 @@ describe('deposit on prefund state', () => {
     const deposit = deposits[0];
     expect(deposit.channelId).toEqual(calculateChannelId(ledgerStateResponse));
     expect(deposit.amountToDeposit).toEqual(
-      (ledgerStateResponse.outcome as SimpleAllocation).allocationItems[1].amount
+      (ledgerStateResponse.outcome as SimpleAllocation).allocationItems[0].amount
     );
   });
 });

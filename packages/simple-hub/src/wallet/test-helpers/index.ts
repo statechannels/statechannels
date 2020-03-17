@@ -9,7 +9,12 @@ import {
 } from '../xstate-wallet-internals';
 import {bigNumberify} from 'ethers/utils';
 import {ethers} from 'ethers';
-import {cHubChannelPK, cHubChannelSigningAddress, cHubParticipantId} from '../../constants';
+import {
+  cHubChannelPK,
+  cHubChannelSigningAddress,
+  cHubParticipantId,
+  cHubChainAddress
+} from '../../constants';
 import {AddressZero} from 'ethers/constants';
 
 import * as R from 'ramda';
@@ -30,7 +35,7 @@ const first: Participant = {
 
 const hub: Participant = {
   signingAddress: cHubChannelSigningAddress,
-  destination: '0x0000000000000000000000000000000000000000000000000000000000000002',
+  destination: cHubChainAddress,
   participantId: cHubParticipantId
 };
 
@@ -62,7 +67,11 @@ const channel3: ChannelConstants = {
   appDefinition
 };
 
-const destinations = participants.map(p => p.destination);
+const destinations = [
+  participants[1].destination,
+  participants[0].destination,
+  participants[2].destination
+];
 const amounts = [bigNumberify(7), bigNumberify(5), bigNumberify(3)];
 const outcome: Outcome = {
   type: 'SimpleAllocation',
