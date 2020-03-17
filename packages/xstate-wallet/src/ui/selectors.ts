@@ -32,11 +32,6 @@ export function isConfirmCreateChannel(applicationWorkflowState: AppWorkflowStat
     applicationWorkflowState.value['confirmJoinChannelWorkflow'] &&
     applicationWorkflowState.value['confirmJoinChannelWorkflow']['confirmChannelCreation'] ===
       'invokeCreateChannelConfirmation';
-  console.log(JSON.stringify(applicationWorkflowState.value));
-  console.log('joinInConfirmCreateChannel ', joinInConfirmCreateChannel);
-  if (joinInConfirmCreateChannel) {
-    console.log(getConfirmCreateChannelState(applicationWorkflowState));
-  }
 
   return (
     joinInConfirmCreateChannel ||
