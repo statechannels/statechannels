@@ -1,16 +1,9 @@
-import {
-  Message,
-  State,
-  Participant,
-  calculateChannelId,
-  ChannelConstants
-} from './xstate-wallet-internals';
+import {Message, State, calculateChannelId, ChannelConstants} from './xstate-wallet-internals';
 import {ethers} from 'ethers';
 import {BigNumber} from 'ethers/utils';
-import * as R from 'ramda';
-import {cHubParticipantId} from '../constants';
+import {cHubChainAddress} from '../constants';
 import {SimpleAllocation} from '@statechannels/xstate-wallet/src/store/types';
-import _ from 'lodash';
+import _ from 'lodash/fp';
 
 interface SimpleAllocationStateVariables {
   outcome: SimpleAllocation;
@@ -27,19 +20,19 @@ export function isSimpleAllocationState(state: State): state is SimpleAllocation
 export function depositsToMake(
   message: Message
 ): {channelId: string; amountToDeposit: BigNumber}[] {
-  const simpleAllocationStates = _.filter(message.signedStates, isSimpleAllocationState);
+  const simpleAllocationStates = _.filter(isSimpleAllocationState, message.signedStates);
   return simpleAllocationStates
     .filter(state => state.participants.length === 2)
+    .filter(
+      state =>
+        _.findIndex(
+          allocationItem => allocationItem.destination === cHubChainAddress,
+          state.outcome.allocationItems
+        ) === 0
+    )
     .filter(state => state.turnNum.eq(ethers.constants.Zero))
     .map(state => ({
       channelId: calculateChannelId(state),
-      amountToDeposit: amountToDeposit(state)
+      amountToDeposit: state.outcome.allocationItems[0].amount
     }));
-}
-
-function amountToDeposit(state: SimpleAllocationState): BigNumber {
-  const hubIndex = R.findIndex<Participant>(R.propEq('participantId', cHubParticipantId))(
-    state.participants
-  );
-  return R.nth(hubIndex, state.outcome.allocationItems).amount;
 }
