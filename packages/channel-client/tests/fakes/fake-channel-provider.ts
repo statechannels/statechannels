@@ -324,24 +324,9 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     return result;
   }
 
-  private async closeAndWithdraw(params: CloseAndWithdrawParams): Promise<ChannelResult> {
-    const latestState = this.findChannel(params.channelId);
-
-    await this.verifyTurnNum(params.channelId, latestState.turnNum);
-    const turnNum = bigNumberify(latestState.turnNum)
-      .add(1)
-      .toString();
-
-    const status = 'closing';
-
-    this.setState({...latestState, turnNum, status});
-    log.debug(
-      `Player ${this.getPlayerIndex(
-        params.channelId
-      )} updated channel to status ${status} on turnNum ${turnNum}`
-    );
-    this.notifyOpponent(this.latestState[params.channelId], 'ChannelUpdate');
-
-    return this.latestState[params.channelId];
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private async closeAndWithdraw(_params: CloseAndWithdrawParams): Promise<{success: boolean}> {
+    // TODO: Implement a fake implementation
+    return {success: true};
   }
 }

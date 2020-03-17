@@ -176,10 +176,8 @@ export type GetBudgetResponse = JsonRpcResponse<SiteBudget | {}>;
 export type ApproveBudgetAndFundRequest = JsonRpcRequest<'ApproveBudgetAndFund', BudgetRequest>;
 export type ApproveBudgetAndFundResponse = JsonRpcResponse<SiteBudget>;
 
-export type CloseAndWithdrawRequest = JsonRpcRequest<
-  'CloseAndWithdraw',
-  {site: string; player: Participant; hub: Participant}
->;
+export type CloseAndWithdrawParams = {site: string; player: Participant; hub: Participant};
+export type CloseAndWithdrawRequest = JsonRpcRequest<'CloseAndWithdraw', CloseAndWithdrawParams>;
 export type CloseAndWithdrawResponse = JsonRpcResponse<{success: boolean}>;
 // Notifications
 export type ChannelProposedNotification = JsonRpcNotification<'ChannelProposed', ChannelResult>;

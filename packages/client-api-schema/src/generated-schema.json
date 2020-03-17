@@ -369,6 +369,26 @@
       ],
       "type": "object"
     },
+    "CloseAndWithdrawParams": {
+      "additionalProperties": false,
+      "properties": {
+        "hub": {
+          "$ref": "#/definitions/Participant"
+        },
+        "player": {
+          "$ref": "#/definitions/Participant"
+        },
+        "site": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "site",
+        "player",
+        "hub"
+      ],
+      "type": "object"
+    },
     "CloseAndWithdrawRequest": {
       "additionalProperties": false,
       "properties": {
@@ -388,24 +408,7 @@
           "type": "string"
         },
         "params": {
-          "additionalProperties": false,
-          "properties": {
-            "hub": {
-              "$ref": "#/definitions/Participant"
-            },
-            "player": {
-              "$ref": "#/definitions/Participant"
-            },
-            "site": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "site",
-            "player",
-            "hub"
-          ],
-          "type": "object"
+          "$ref": "#/definitions/CloseAndWithdrawParams"
         }
       },
       "required": [
