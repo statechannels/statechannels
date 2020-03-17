@@ -62,13 +62,13 @@ export class MemoryBackend implements DBBackend {
 
   public async setChannel(key: string, value: MemoryChannelStoreEntry) {
     this._channels[key] = value.data();
-    return value;
+    return MemoryChannelStoreEntry.fromJson(this._channels[key]);
   }
   public async addChannel(key: string, value: MemoryChannelStoreEntry) {
     if (!this._channels[key]) {
       this._channels[key] = value.data();
     }
-    return value;
+    return MemoryChannelStoreEntry.fromJson(this._channels[key]);
   }
 
   public async getChannel(key: string) {
@@ -86,7 +86,7 @@ export class MemoryBackend implements DBBackend {
 
   public async setNonce(key: string, value: BigNumber) {
     this._nonces[key] = value.toString();
-    return value;
+    return new BigNumber(this._nonces[key] as string);
   }
 
   public async getNonce(key: string) {

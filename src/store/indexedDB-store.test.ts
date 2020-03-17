@@ -1,4 +1,4 @@
-import {MemoryStore as Store} from './memory-store';
+import {MemoryStore} from './memory-store';
 import {State, Objective} from './types';
 import {bigNumberify, BigNumber} from 'ethers/utils';
 import {Wallet} from 'ethers';
@@ -6,6 +6,8 @@ import {calculateChannelId, signState} from './state-utils';
 import {NETWORK_ID, CHALLENGE_DURATION} from '../constants';
 import {ChannelStoreEntry} from './memory-channel-storage';
 import {simpleEthAllocation} from '../utils/outcome';
+import {IndexedDBBackend as Backend} from './indexedDB-backend';
+require('fake-indexeddb/auto');
 
 const {address: aAddress, privateKey: aPrivateKey} = new Wallet(
   '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318'
@@ -40,16 +42,16 @@ const signature = signState(state, aPrivateKey);
 const signedState = {...state, signatures: [signature]};
 const signedStates = [signedState];
 
-const aStore = async () => {
-  const store = new Store();
-  await store.initialize([aPrivateKey], true);
+const aStore = async (noPrivateKeys = false) => {
+  const store = new MemoryStore(undefined, new Backend());
+  const privateKeys = noPrivateKeys ? undefined : [aPrivateKey];
+  await store.initialize(privateKeys, true);
   return store;
 };
 
 describe('getAddress', () => {
   it('returns an address', async () => {
     const store = await aStore();
-
     const address = await store.getAddress();
 
     expect(address).toEqual(aAddress);
@@ -59,7 +61,6 @@ describe('getAddress', () => {
 describe('channelUpdatedFeed', () => {
   test('it fires when a state with the correct channel id is received', async () => {
     const store = await aStore();
-
     const outputs: ChannelStoreEntry[] = [];
     store.channelUpdatedFeed(channelId).subscribe(x => {
       outputs.push(x);
@@ -124,7 +125,7 @@ describe('createChannel', () => {
   });
 
   it("fails if the wallet doesn't hold the private key for any participant", async () => {
-    const store = await aStore();
+    const store = await aStore(true);
 
     await expect(
       store.createChannel(participants, challengeDuration, stateVars, appDefinition)
@@ -136,8 +137,8 @@ describe('createChannel', () => {
 
 describe('pushMessage', () => {
   it('stores states', async () => {
+    // TODO: This fails currently. Fix
     const store = await aStore();
-
     await store.createChannel(
       signedState.participants,
       signedState.challengeDuration,
@@ -154,7 +155,6 @@ describe('pushMessage', () => {
 
   it('creates a channel if it receives states for a new channel', async () => {
     const store = await aStore();
-
     await store.pushMessage({signedStates});
     expect(await store.getEntry(channelId)).not.toBeUndefined();
   });
