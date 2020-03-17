@@ -1,16 +1,28 @@
 import {ListenerFn} from 'eventemitter3';
 import {
+  Request as RequestParams,
   CreateChannelResponse,
+  CreateChannelRequest,
   CloseChannelResponse,
+  CloseChannelRequest,
   UpdateChannelResponse,
+  UpdateChannelRequest,
   PushMessageResponse,
+  PushMessageRequest,
   JoinChannelResponse,
+  JoinChannelRequest,
   GetAddressResponse,
+  GetAddressRequest,
   GetStateResponse,
+  GetStateRequest,
   GetEthereumSelectedAddressResponse,
+  GetEthereumSelectedAddressRequest,
   ChallengeChannelResponse,
+  ChallengeChannelRequest,
   GetBudgetResponse,
-  ApproveBudgetAndFundResponse
+  GetBudgetRequest,
+  ApproveBudgetAndFundResponse,
+  ApproveBudgetAndFundRequest
 } from '@statechannels/client-api-schema';
 
 export interface JsonRpcRequest<MethodName = string, RequestParams = any> {
@@ -57,8 +69,9 @@ export interface JsonRpcErrorResponse {
 export function isJsonRpcErrorResponse(message: any): message is JsonRpcErrorResponse {
   return 'error' in message;
 }
+
 // TODO: This probably should live in client-api-schema?
-export type MethodType = {
+export type MethodResponseType = {
   CreateChannel: CreateChannelResponse['result'];
   UpdateChannel: UpdateChannelResponse['result'];
   PushMessage: PushMessageResponse['result'];
@@ -70,12 +83,46 @@ export type MethodType = {
   ChallengeChannel: ChallengeChannelResponse['result'];
   ApproveBudgetAndFund: ApproveBudgetAndFundResponse['result'];
   GetBudget: GetBudgetResponse['result'];
-  CloseAndWithdraw: GetBudgetResponse['result'];
+  CloseAndWithdraw: any; // TODO: Add types
 };
+
+type Method =
+  | 'CreateChannel'
+  | 'UpdateChannel'
+  | 'PushMessage'
+  | 'CloseChannel'
+  | 'JoinChannel'
+  | 'GetState'
+  | 'GetAddress'
+  | 'GetEthereumSelectedAddress'
+  | 'ChallengeChannel'
+  | 'ApproveBudgetAndFund'
+  | 'GetBudget'
+  | 'CloseAndWithdraw';
+
+type Request = {params: RequestParams['params']}; // Replace with union type
+type Call<K extends Method, T extends Request> = {
+  method: K;
+  params: T['params'];
+};
+
+export type MethodRequestType =
+  | Call<'CreateChannel', CreateChannelRequest>
+  | Call<'UpdateChannel', UpdateChannelRequest>
+  | Call<'PushMessage', PushMessageRequest>
+  | Call<'CloseChannel', CloseChannelRequest>
+  | Call<'JoinChannel', JoinChannelRequest>
+  | Call<'GetState', GetStateRequest>
+  | Call<'GetAddress', GetAddressRequest>
+  | Call<'GetEthereumSelectedAddress', GetEthereumSelectedAddressRequest>
+  | Call<'ChallengeChannel', ChallengeChannelRequest>
+  | Call<'ApproveBudgetAndFund', ApproveBudgetAndFundRequest>
+  | Call<'GetBudget', GetBudgetRequest>
+  | Call<'CloseAndWithdraw', any>;
 
 export interface ChannelProviderInterface {
   enable(url?: string): Promise<void>;
-  send<K extends keyof MethodType>(method: K, params?: any): Promise<MethodType[K]>;
+  send(request: MethodRequestType): Promise<MethodResponseType[MethodRequestType['method']]>;
   on(event: string, callback: ListenerFn): void;
   off(event: string, callback?: ListenerFn): void;
   subscribe(subscriptionType: string, params?: any): Promise<string>;

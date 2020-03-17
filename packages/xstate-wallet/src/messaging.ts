@@ -170,6 +170,7 @@ export class MessagingService implements MessagingServiceInterface {
         break;
       case 'ChallengeChannel':
       case 'GetState':
+      case 'CloseAndWithdraw':
         // TODO: handle these requests
         break;
 

@@ -1,17 +1,23 @@
-import {ChannelProviderInterface, MethodType} from '@statechannels/channel-provider/src';
+import {
+  ChannelProviderInterface,
+  MethodResponseType,
+  MethodRequestType
+} from '@statechannels/channel-provider';
 import log = require('loglevel');
 
 import {EventEmitter, ListenerFn} from 'eventemitter3';
 import {
+  BudgetRequest,
+  CloseAndWithdrawParams,
   ChannelResult,
-  SiteBudget,
+  CloseChannelParams,
   CreateChannelParams,
-  PushMessageResult,
-  JoinChannelParams,
   GetStateParams,
-  UpdateChannelParams,
+  JoinChannelParams,
   Notification,
-  CloseChannelParams
+  PushMessageResult,
+  SiteBudget,
+  UpdateChannelParams
 } from '@statechannels/client-api-schema';
 import {Message} from '../../src/types';
 import {calculateChannelId} from '../../src/utils';
@@ -39,37 +45,40 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     this.url = url || '';
   }
 
-  async send<K extends keyof MethodType>(method: K, params?: any): Promise<MethodType[K]> {
-    switch (method) {
+  async send(request: MethodRequestType): Promise<MethodResponseType[MethodRequestType['method']]> {
+    switch (request.method) {
       case 'CreateChannel':
-        return this.createChannel(params) as Promise<MethodType[K]>;
+        return this.createChannel(request.params);
 
       case 'PushMessage':
-        return this.pushMessage(params) as Promise<MethodType[K]>;
+        return this.pushMessage(request.params);
 
       case 'GetEthereumSelectedAddress':
-        return '0xEthereumSelectedAddress' as MethodType[K];
+        return '0xEthereumSelectedAddress';
 
       case 'GetAddress':
-        return this.getAddress() as Promise<MethodType[K]>;
+        return this.getAddress();
 
       case 'JoinChannel':
-        return this.joinChannel(params) as Promise<MethodType[K]>;
+        return this.joinChannel(request.params);
 
       case 'GetState':
-        return this.getState(params) as Promise<MethodType[K]>;
+        return this.getState(request.params);
 
       case 'UpdateChannel':
-        return this.updateChannel(params) as Promise<MethodType[K]>;
+        return this.updateChannel(request.params);
 
       case 'CloseChannel':
-        return this.closeChannel(params) as Promise<MethodType[K]>;
+        return this.closeChannel(request.params);
+
       case 'ApproveBudgetAndFund':
-        return this.approveBudgetAndFund(params) as Promise<MethodType[K]>;
+        return this.approveBudgetAndFund(request.params);
+
       case 'CloseAndWithdraw':
-        return this.closeAndWithdraw(params) as Promise<MethodType[K]>;
+        return this.closeAndWithdraw(request.params);
+
       default:
-        return Promise.reject(`No callback available for ${method}`);
+        return Promise.reject(`No callback available for ${request.method}`);
     }
   }
 
@@ -292,78 +301,47 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     return {success: true};
   }
 
-  private async approveBudgetAndFund(params: {
-    playerAmount: string;
-    hubAmount: string;
-    playerOutcomeAddress: string;
-    hubAddress: string;
-    hubOutcomeAddress: string;
-  }): Promise<SiteBudget> {
-    const {hubAddress, playerAmount, hubAmount} = params;
+  private async approveBudgetAndFund(params: BudgetRequest): Promise<SiteBudget> {
+    const {hub, site, playerAmount, hubAmount} = params;
+
     // TODO: Does this need to be delayed?
-    this.notifyAppBudgetUpdated({
-      hub: hubAddress,
-      site: 'fakehub.com',
+    const result = {
+      hub: hub.signingAddress,
+      site,
       budgets: [
         {
           token: '0x0',
-          inUse: {playerAmount: '0x0', hubAmount: '0x0'},
+          inUse: {playerAmount, hubAmount},
           free: {playerAmount, hubAmount},
-          pending: {playerAmount: '0x0', hubAmount: '0x0'},
-          direct: {playerAmount: '0x0', hubAmount: '0x0'}
-        }
-      ]
-    });
-    return {
-      hub: hubAddress,
-      site: 'fakehub.com',
-      budgets: [
-        {
-          token: '0x0',
           pending: {playerAmount, hubAmount},
-          free: {playerAmount: '0x0', hubAmount: '0x0'},
-          inUse: {playerAmount: '0x0', hubAmount: '0x0'},
-          direct: {playerAmount: '0x0', hubAmount: '0x0'}
+          direct: {playerAmount, hubAmount}
         }
       ]
     };
+
+    this.notifyAppBudgetUpdated(result);
+
+    return result;
   }
-  private async closeAndWithdraw(params: {
-    playerAmount: string;
-    hubAmount: string;
-    hubAddress: string;
-  }): Promise<SiteBudget> {
-    const {hubAddress, playerAmount, hubAmount} = params;
-    const budget = {
-      hub: hubAddress,
-      site: 'fakehub.com',
-      budgets: [
-        {
-          token: '0x0',
-          pending: {playerAmount, hubAmount},
-          free: {playerAmount: '0x0', hubAmount: '0x0'},
-          inUse: {playerAmount: '0x0', hubAmount: '0x0'},
-          direct: {playerAmount: '0x0', hubAmount: '0x0'}
-        }
-      ]
-    };
 
-    // TODO: Does this need to be delayed?
+  private async closeAndWithdraw(params: CloseAndWithdrawParams): Promise<ChannelResult> {
+    const latestState = this.findChannel(params.channelId);
 
-    this.notifyAppBudgetUpdated({
-      hub: hubAddress,
-      site: 'fakehub.com',
-      budgets: [
-        {
-          token: '0x0',
-          inUse: {playerAmount: '0x0', hubAmount: '0x0'},
-          free: {playerAmount: '0x0', hubAmount: '0x0'},
-          pending: {playerAmount: '0x0', hubAmount: '0x0'},
-          direct: {playerAmount: '0x0', hubAmount: '0x0'}
-        }
-      ]
-    });
+    await this.verifyTurnNum(params.channelId, latestState.turnNum);
+    const turnNum = bigNumberify(latestState.turnNum)
+      .add(1)
+      .toString();
 
-    return budget;
+    const status = 'closing';
+
+    this.setState({...latestState, turnNum, status});
+    log.debug(
+      `Player ${this.getPlayerIndex(
+        params.channelId
+      )} updated channel to status ${status} on turnNum ${turnNum}`
+    );
+    this.notifyOpponent(this.latestState[params.channelId], 'ChannelUpdate');
+
+    return this.latestState[params.channelId];
   }
 }
