@@ -1,6 +1,6 @@
 import prettier from 'prettier-bytes';
 import React from 'react';
-import {DownloadingStatuses, Torrent, Status} from '../../types';
+import {DownloadingStatuses, Torrent} from '../../types';
 import {DownloadInfo} from './download-info/DownloadInfo';
 import {DownloadLink} from './download-link/DownloadLink';
 import {MagnetLinkButton} from './magnet-link-button/MagnetLinkButton';
