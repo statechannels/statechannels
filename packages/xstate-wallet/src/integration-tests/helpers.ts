@@ -1,6 +1,6 @@
 import {MessagingServiceInterface, MessagingService} from '../messaging';
 import {Wallet} from 'ethers/wallet';
-import {Store, MemoryStore} from '../store/memory-store';
+import {Store, XstateStore} from '../store';
 import {ChannelWallet, logTransition} from '../channel-wallet';
 import {Participant} from '../store/types';
 import {Chain} from '../chain';
@@ -59,9 +59,14 @@ export class Player {
   }
   constructor(privateKey: string, private id: string, chain: Chain) {
     this.privateKey = privateKey;
-    this.store = new MemoryStore([this.privateKey], chain);
+    this.store = new XstateStore(chain);
     this.messagingService = new MessagingService(this.store);
     this.channelWallet = new ChannelWallet(this.store, this.messagingService, id);
+    // TODO: It's possible this could lead to the player being used before the store is ready
+    // but since its only a test helper we're probably ok
+  }
+  async initialize() {
+    return this.store.initialize([this.privateKey]);
   }
 }
 

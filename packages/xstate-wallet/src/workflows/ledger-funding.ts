@@ -5,7 +5,7 @@ import {Store} from '../store';
 import {allocateToTarget} from '../utils/outcome';
 import {AllocationItem} from '../store/types';
 import {getDataAndInvoke} from '../utils';
-import {Funding} from '../store/memory-store';
+import {Funding} from '../store';
 
 const WORKFLOW = 'ledger-funding';
 

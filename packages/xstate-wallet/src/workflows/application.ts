@@ -25,7 +25,7 @@ import {
   CloseChannelRequest
 } from '@statechannels/client-api-schema';
 import {createMockGuard, getDataAndInvoke} from '../utils/workflow-utils';
-import {Store} from '../store/memory-store';
+import {Store} from '../store';
 import {StateVariables, SimpleAllocation} from '../store/types';
 import {ChannelStoreEntry} from '../store/memory-channel-storage';
 import {bigNumberify, BigNumber} from 'ethers/utils';

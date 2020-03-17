@@ -88,6 +88,8 @@ export interface Store {
 
   // TODO: should this be exposed via the Store?
   chain: Chain;
+
+  initialize(privateKeys?: string[], cleanSlate?: boolean): Promise<void>;
 }
 
 export class XstateStore implements Store {
