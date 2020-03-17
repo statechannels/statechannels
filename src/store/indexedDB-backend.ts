@@ -20,8 +20,13 @@ export class IndexedDBBackend implements DBBackend {
       console.error("Your browser doesn't support a stable version of IndexedDB.");
     }
   }
-  public async initialize(cleanSlate = false) {
-    const createdDB = await this.create();
+  /**
+   * Initializes the Database and it's structure.
+   * @param cleanSlate if true, it clears all the object stores of data
+   * @param databaseName (optional) useful maybe for multiple tenants in the same page?
+   */
+  public async initialize(cleanSlate = false, databaseName = 'xstateWallet') {
+    const createdDB = await this.create(databaseName);
     if (cleanSlate) {
       await Promise.all([
         this.clear(ObjectStores.channels),
@@ -29,22 +34,22 @@ export class IndexedDBBackend implements DBBackend {
         this.clear(ObjectStores.nonces),
         this.clear(ObjectStores.privateKeys),
         this.clear(ObjectStores.ledgers)
-      ]).then(cleared => console.log('Cleared', cleared));
+      ]);
     }
     return createdDB;
   }
 
-  private async create() {
+  private async create(databaseName: string) {
     return new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open('xstateWallet', 1);
+      const request = indexedDB.open(databaseName, 1);
 
       request.onupgradeneeded = event => {
         const db = (event.target as any).result;
-        db.createObjectStore('channels', {unique: true});
-        db.createObjectStore('objectives', {unique: true});
-        db.createObjectStore('nonces', {unique: true});
-        db.createObjectStore('privateKeys', {unique: true});
-        db.createObjectStore('ledgers', {unique: true});
+        db.createObjectStore(ObjectStores.channels, {unique: true});
+        db.createObjectStore(ObjectStores.objectives, {unique: true});
+        db.createObjectStore(ObjectStores.nonces, {unique: true});
+        db.createObjectStore(ObjectStores.privateKeys, {unique: true});
+        db.createObjectStore(ObjectStores.ledgers, {unique: true});
       };
 
       request.onerror = err => reject(err);
@@ -55,7 +60,7 @@ export class IndexedDBBackend implements DBBackend {
     });
   }
 
-  private async clear(storeName: ObjectStores): Promise<string> {
+  public async clear(storeName: ObjectStores): Promise<string> {
     return new Promise((resolve, reject) => {
       const request = this._db
         .transaction([storeName], 'readwrite')
@@ -175,7 +180,6 @@ export class IndexedDBBackend implements DBBackend {
    * @param asArray if true, the result object, is transformed to an array
    */
   private async getAll(storeName: ObjectStores, asArray?: boolean): Promise<any> {
-    // console.log('getAll', storeName);
     return new Promise((resolve, reject) => {
       const request = this._db
         .transaction([storeName], 'readwrite')
@@ -204,7 +208,6 @@ export class IndexedDBBackend implements DBBackend {
    * @param key required
    */
   private async get(storeName: ObjectStores, key: string | number): Promise<any> {
-    // console.log('get', storeName, key);
     return new Promise((resolve, reject) => {
       const request = this._db
         .transaction([storeName], 'readonly')
@@ -231,7 +234,6 @@ export class IndexedDBBackend implements DBBackend {
     key: string | number,
     silentOverwriteError: boolean
   ): Promise<any> {
-    // console.log('add', storeName, key);
     return new Promise((resolve, reject) => {
       const transaction = this._db.transaction([storeName], 'readwrite');
       const request = transaction.objectStore(storeName).add(value, key);
@@ -256,7 +258,6 @@ export class IndexedDBBackend implements DBBackend {
    * @param key
    */
   private async put(storeName: ObjectStores, value: any, key: string | number): Promise<any> {
-    // console.log('put', storeName, key);
     return new Promise((resolve, reject) => {
       const transaction = this._db.transaction([storeName], 'readwrite');
       const request = transaction.objectStore(storeName).put(value, key);
@@ -276,7 +277,6 @@ export class IndexedDBBackend implements DBBackend {
    * @param values
    */
   private async setArray(storeName: ObjectStores, values: any[]): Promise<any[]> {
-    // console.log('setArrays', storeName);
     return new Promise((resolve, reject) => {
       const transaction = this._db.transaction([storeName], 'readwrite');
       const store = transaction.objectStore(storeName);

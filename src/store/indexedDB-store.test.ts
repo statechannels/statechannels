@@ -93,7 +93,7 @@ test('newObjectiveFeed', async () => {
 
   const outputs: Objective[] = [];
   store.newObjectiveFeed.subscribe(x => outputs.push(x));
-  
+
   await store.pushMessage({objectives: [objective]});
   expect(outputs).toEqual([objective]);
 
@@ -137,8 +137,7 @@ describe('createChannel', () => {
 });
 
 describe('pushMessage', () => {
-  it.skip('stores states', async () => {
-    // TODO: This fails currently. Fix
+  it('stores states', async () => {
     const store = await aStore();
     await store.createChannel(
       signedState.participants,

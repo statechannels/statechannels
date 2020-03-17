@@ -154,7 +154,6 @@ export class XstateStore implements Store {
   private async initializeChannel(state: State): Promise<MemoryChannelStoreEntry> {
     const addresses = state.participants.map(x => x.signingAddress);
     const privateKeys = await this.backend.privateKeys();
-    console.log('initializeChannel', 'pk', privateKeys);
     const myIndex = addresses.findIndex(async address => !!privateKeys[address]);
     if (myIndex === -1) {
       throw new Error("Couldn't find the signing key for any participant in wallet.");
@@ -224,7 +223,6 @@ export class XstateStore implements Store {
       appDefinition,
       ...stateVars
     });
-    // console.log('createChannel stateVars', stateVars)
     // sign the state, store the channel
     await this.signAndAddState(
       entry.channelId,
@@ -259,7 +257,6 @@ export class XstateStore implements Store {
     if (!privateKey) {
       throw new Error('No longer have private key');
     }
-    // console.log('signAndAddState', channelStorage)
     const signedState = channelStorage.signAndAdd(
       _.pick(stateVars, 'outcome', 'turnNum', 'appData', 'isFinal'),
       privateKey
@@ -277,27 +274,16 @@ export class XstateStore implements Store {
     const channelId = calculateChannelId(state);
     const channelStorage =
       (await this.backend.getChannel(channelId)) || (await this.initializeChannel(state));
-    console.log('channelStorage', channelStorage);
     // TODO: This is kind of awkward
     state.signatures.forEach(sig => channelStorage.addState(state, sig));
 
-    // TODO: the test will pass, but this DOES NOT work okay: It produces different results!!!
-    // console.log(
-    //   'LATEST',
-    //   channelStorage.latest,
-    //   'LATEST CONVERTED',
-    //   MemoryChannelStoreEntry.fromJson(channelStorage.data()).latest
-    // );
-    // Conversion from ChannelStoredData to ChannelStoreEntry it's not working properly.
-
     const entry = await this.backend.setChannel(channelId, channelStorage);
-    this._eventEmitter.emit('channelUpdated', channelStorage);
+    this._eventEmitter.emit('channelUpdated', entry);
     return entry;
   }
 
   public async getAddress(): Promise<string> {
     const privateKeys = await this.backend.privateKeys();
-    console.log('getAddress', privateKeys, Object.keys(privateKeys)[0]);
     return Object.keys(privateKeys)[0];
   }
 
