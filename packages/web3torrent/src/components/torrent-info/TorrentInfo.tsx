@@ -1,6 +1,6 @@
 import prettier from 'prettier-bytes';
 import React from 'react';
-import {DownloadingStatuses, Torrent} from '../../types';
+import {DownloadingStatuses, Torrent, Status} from '../../types';
 import {DownloadInfo} from './download-info/DownloadInfo';
 import {DownloadLink} from './download-link/DownloadLink';
 import {MagnetLinkButton} from './magnet-link-button/MagnetLinkButton';
@@ -8,6 +8,7 @@ import './TorrentInfo.scss';
 import {UploadInfo} from './upload-info/UploadInfo';
 import {calculateWei, prettyPrintWei} from '../../utils/calculateWei';
 import {ChannelState} from '../../clients/payment-channel-client';
+import {FaFileDownload, FaFileUpload} from 'react-icons/fa';
 
 export type TorrentInfoProps = {
   torrent: Torrent;
@@ -24,16 +25,23 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({
     <>
       <section className="torrentInfo">
         <div className="row">
-          <span className="fileName">{torrent.name}</span>
+          <span className="fileName">
+            {torrent.originalSeed ? (
+              <FaFileUpload className="fileIcon" />
+            ) : (
+              <FaFileDownload className="fileIcon" />
+            )}
+            {torrent.name}
+          </span>
         </div>
         <div className="row">
           <span className="fileSize">
-            {torrent.length === 0 ? '? Mb' : prettier(torrent.length)}
+            Size: {torrent.length === 0 ? '? Mb' : prettier(torrent.length)}
           </span>
-          {torrent.status && <span className="fileStatus">{torrent.status}</span>}
           <span className="fileCost">
-            Cost {torrent.length ? prettyPrintWei(calculateWei(torrent.length)) : 'unknown'}
+            Cost: {torrent.length ? prettyPrintWei(calculateWei(torrent.length)) : 'unknown'}
           </span>
+          {torrent.status && <span className="fileStatus">Status: {torrent.status}</span>}
           {torrent.magnetURI && <MagnetLinkButton />}
         </div>
       </section>

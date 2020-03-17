@@ -16,14 +16,23 @@ section {
     line-height: 24px;
 
     .fileName {
-      text-align: left;
+      font-size: 30px;
+      font-weight: bold;
+      text-align: center;
       min-width: 250px;
       width: 100%;
+      padding: 10px 0;
+    }
+
+    .fileIcon {
+      font-weight: bold;
+      font-size: 25px;
+      margin-right: 10px;
     }
 
     .fileSize {
       text-align: left;
-      min-width: 50px;
+      min-width: 120px;
       width: 15%;
     }
 
@@ -34,9 +43,9 @@ section {
     }
 
     .fileCost {
-      min-width: 70px;
+      min-width: 120px;
       width: 35%;
-      text-align: right;
+      text-align: center;
     }
 
     .fileLink {
