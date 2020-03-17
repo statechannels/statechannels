@@ -12,4 +12,5 @@ export interface ChannelStoreEntry {
   readonly channelConstants: ChannelConstants;
   readonly funding?: Funding;
   readonly states: State[];
+  readonly applicationSite?: string;
 }
