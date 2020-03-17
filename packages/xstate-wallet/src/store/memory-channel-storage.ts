@@ -32,7 +32,7 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
   constructor(
     constants: ChannelConstants,
     public readonly myIndex: number,
-    private stateVariables: Record<string, StateVariables> = {},
+    private stateVariables: Record<string, StateVariables & Partial<ChannelConstants>> = {},
     private signatures: Record<string, string[] | undefined> = {},
     public funding: Funding | undefined = undefined
   ) {
@@ -46,7 +46,18 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     );
 
     this.stateVariables = _.transform(this.stateVariables, (result, stateVariables, stateHash) => {
-      result[stateHash] = _.pick(stateVariables, 'turnNum', 'outcome', 'appData', 'isFinal');
+      result[stateHash] = _.pick(
+        stateVariables,
+        'turnNum',
+        'outcome',
+        'appData',
+        'isFinal',
+        'participants',
+        'channelNonce',
+        'appDefinition',
+        'challengeDuration',
+        'chainId'
+      );
     });
   }
 
@@ -172,21 +183,25 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
       channelNonce: this.channelConstants.channelNonce.toString()
     };
 
+    const stateVariables: Record<string, any> = MemoryChannelStoreEntry.prepareStateVariables(
+      _.cloneDeep(this.stateVariables)
+    );
+
     return {
-      stateVariables: this.stateVariables,
+      stateVariables,
       channelConstants,
       signatures: this.signatures,
       funding: this.funding,
       myIndex: this.myIndex
     };
   }
-
   static fromJson(data) {
     if (!data) {
       console.error("Data is undefined or null, Memory Channel Store Entry can't be created.");
       return data;
     }
-    const {stateVariables, channelConstants, signatures, funding, myIndex} = data;
+    const {channelConstants, signatures, funding, myIndex} = data;
+    const stateVariables = MemoryChannelStoreEntry.prepareStateVariables(data.stateVariables);
     channelConstants.challengeDuration = new BigNumber(channelConstants.challengeDuration);
     channelConstants.channelNonce = new BigNumber(channelConstants.channelNonce);
     return new MemoryChannelStoreEntry(
@@ -196,5 +211,49 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
       signatures,
       funding
     );
+  }
+
+  private static prepareStateVariables(
+    stateVariables,
+    parserFunction: (data: string | BigNumber) => BigNumber | string = v => new BigNumber(v)
+  ) {
+    for (const stateHash in stateVariables) {
+      const state = stateVariables[stateHash];
+      if (state.turnNum) {
+        state.turnNum = parserFunction(state.turnNum);
+      }
+      if (state.channelNonce) {
+        state.channelNonce = parserFunction(state.channelNonce);
+      }
+      if (state.challengeDuration) {
+        state.challengeDuration = parserFunction(state.challengeDuration);
+      }
+      state.outcome = MemoryChannelStoreEntry.toogleBigNumberOutcome(state.outcome, parserFunction);
+    }
+    return stateVariables;
+  }
+
+  private static toogleBigNumberOutcome(
+    outcome,
+    parserFunction: (data: string | BigNumber) => BigNumber | string
+  ) {
+    if (outcome.allocationItems) {
+      return {
+        ...outcome,
+        allocationItems: outcome.allocationItems.map(item => ({
+          ...item,
+          amount: parserFunction(item.amount)
+        }))
+      };
+    } else if (outcome.simpleAllocations) {
+      return {
+        ...outcome,
+        simpleAllocations: outcome.simpleAllocations.map(sA =>
+          MemoryChannelStoreEntry.toogleBigNumberOutcome(sA, parserFunction)
+        )
+      };
+    } else {
+      return outcome;
+    }
   }
 }
