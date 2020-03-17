@@ -53,6 +53,10 @@ export class FakeChannelProvider implements ChannelProviderInterface {
       case 'PushMessage':
         return this.pushMessage(request.params);
 
+      case 'EnableEthereum':
+        await window.ethereum.enable();
+        return window.ethereum.selectedAddress;
+
       case 'GetEthereumSelectedAddress':
         return '0xEthereumSelectedAddress';
 

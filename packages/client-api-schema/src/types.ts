@@ -91,6 +91,10 @@ interface Balance {
   hubAmount: string;
 }
 
+// EnableEthereum
+export type EnableEthereumRequest = JsonRpcRequest<'EnableEthereum', {}>;
+export type EnableEthereumResponse = JsonRpcResponse<Address>;
+
 // GetAddress
 export type GetAddressRequest = JsonRpcRequest<'GetAddress', {}>; // todo: what are params
 export type GetAddressResponse = JsonRpcResponse<Address>;
@@ -201,6 +205,7 @@ export type Request =
   | CreateChannelRequest
   | JoinChannelRequest
   | UpdateChannelRequest
+  | EnableEthereumRequest
   | GetStateRequest
   | PushMessageRequest
   | ChallengeChannelRequest
@@ -215,6 +220,7 @@ export type Response =
   | CreateChannelResponse
   | JoinChannelResponse
   | UpdateChannelResponse
+  | EnableEthereumResponse
   | GetStateResponse
   | PushMessageResponse
   | ChallengeChannelResponse

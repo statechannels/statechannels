@@ -80,14 +80,17 @@ export class PaymentChannelClient {
     return convertToChannelState(channelResult);
   }
 
+  async enableEthereum() {
+    await this.channelClient.enableEthereum();
+  }
+
   async getAddress() {
     this.mySigningAddress = await this.channelClient.getAddress();
     return this.mySigningAddress;
   }
 
   async getEthereumSelectedAddress() {
-    this.myEthereumSelectedAddress = window.ethereum.selectedAddress;
-    // this.myEthereumSelectedAddress = await this.channelClient.getEthereumSelectedAddress();
+    this.myEthereumSelectedAddress = await this.channelClient.getEthereumSelectedAddress();
     return this.myEthereumSelectedAddress;
   }
 

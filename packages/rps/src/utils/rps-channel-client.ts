@@ -36,6 +36,10 @@ export class RPSChannelClient {
     return convertToChannelState(channelResult);
   }
 
+  async enableEthereum() {
+    return this.channelClient.enableEthereum();
+  }
+
   async getAddress() {
     return this.channelClient.getAddress();
   }
