@@ -2,32 +2,44 @@ import {
   Message,
   State,
   Participant,
-  isSimpleAllocation,
-  calculateChannelId
+  calculateChannelId,
+  ChannelConstants
 } from './xstate-wallet-internals';
 import {ethers} from 'ethers';
 import {BigNumber} from 'ethers/utils';
 import * as R from 'ramda';
 import {cHubParticipantId} from '../constants';
 import {SimpleAllocation} from '@statechannels/xstate-wallet/src/store/types';
+import _ from 'lodash';
+
+interface SimpleAllocationStateVariables {
+  outcome: SimpleAllocation;
+  turnNum: BigNumber;
+  appData: string;
+  isFinal: boolean;
+}
+export interface SimpleAllocationState extends ChannelConstants, SimpleAllocationStateVariables {}
+
+export function isSimpleAllocationState(state: State): state is SimpleAllocationState {
+  return state.outcome.type === 'SimpleAllocation';
+}
 
 export function depositsToMake(
   message: Message
 ): {channelId: string; amountToDeposit: BigNumber}[] {
-  return message.signedStates
-    .filter(state => state.turnNum.eq(ethers.constants.Zero))
+  const simpleAllocationStates = _.filter(message.signedStates, isSimpleAllocationState);
+  return simpleAllocationStates
     .filter(state => state.participants.length === 2)
-    .filter(state => isSimpleAllocation(state.outcome))
+    .filter(state => state.turnNum.eq(ethers.constants.Zero))
     .map(state => ({
       channelId: calculateChannelId(state),
       amountToDeposit: amountToDeposit(state)
     }));
 }
 
-function amountToDeposit(state: State): BigNumber {
+function amountToDeposit(state: SimpleAllocationState): BigNumber {
   const hubIndex = R.findIndex<Participant>(R.propEq('participantId', cHubParticipantId))(
     state.participants
   );
-  // Is there a way to narrow the type in the filtering stage above?
-  return R.nth(hubIndex, (state.outcome as SimpleAllocation).allocationItems).amount;
+  return R.nth(hubIndex, state.outcome.allocationItems).amount;
 }
