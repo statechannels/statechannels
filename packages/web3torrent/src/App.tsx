@@ -23,6 +23,9 @@ class App extends React.Component {
 
   static contextType = WebTorrentContext;
 
+  // Adds typing information to this.context
+  context!: React.ContextType<typeof WebTorrentContext>;
+
   async componentDidMount() {
     'ethereum' in window &&
       window.ethereum.on('networkChanged', chainId => {
