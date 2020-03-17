@@ -1,3 +1,5 @@
+process.env.REACT_APP_FAKE_CHANNEL_PROVIDER = 'true';
+
 module.exports = () => {
   const {Server} = require('bittorrent-tracker');
 

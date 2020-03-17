@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useContext} from 'react';
+import React, {useEffect, useState} from 'react';
 import {RouteComponentProps, useLocation} from 'react-router-dom';
 
 import {download, getTorrentPeers, WebTorrentContext} from '../../clients/web3torrent-client';
@@ -32,7 +32,6 @@ const File: React.FC<RouteComponentProps & Props> = props => {
   const [loading, setLoading] = useState(false);
   const [buttonLabel, setButtonLabel] = useState('Start Download');
   const [errorLabel, setErrorLabel] = useState('');
-  const web3torrent = useContext(WebTorrentContext);
 
   const getLiveData = getTorrentAndPeersData(setTorrent, setPeers);
 
@@ -64,14 +63,17 @@ const File: React.FC<RouteComponentProps & Props> = props => {
           <FormButton
             name="download"
             spinner={loading}
-            disabled={props.currentNetwork !== props.requiredNetwork}
+            disabled={
+              props.currentNetwork !== props.requiredNetwork ||
+              buttonLabel === 'Preparing Download...'
+            }
             onClick={async () => {
               setLoading(true);
               setErrorLabel('');
               setButtonLabel('Preparing Download...');
               try {
                 // TODO: Put real values here
-                await web3torrent.paymentChannelClient.approveBudgetAndFund('', '', '', '', '');
+                // await web3torrent.paymentChannelClient.approveBudgetAndFund('', '', '', '', '');
                 setTorrent({...torrent, ...(await download(torrent.magnetURI))});
               } catch (error) {
                 setErrorLabel(

@@ -27,10 +27,12 @@ class App extends React.Component {
   context!: React.ContextType<typeof WebTorrentContext>;
 
   async componentDidMount() {
-    'ethereum' in window &&
+    if ('ethereum' in window) {
+      this.setState({...this.state, currentNetwork: parseInt(window.ethereum.networkVersion, 10)});
       window.ethereum.on('networkChanged', chainId => {
-        this.setState({...this.state, currentNetwork: parseInt(chainId, 16)});
+        this.setState({...this.state, currentNetwork: parseInt(chainId, 10)});
       });
+    }
     await this.context.enable();
     this.setState({...this.state, canTorrent: await this.context.testTorrentingCapability(3000)});
   }
