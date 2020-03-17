@@ -1,6 +1,7 @@
 import {BigNumber} from 'ethers/utils';
 import {ChannelStoredData, MemoryChannelStoreEntry} from './memory-channel-storage';
 import {Objective, DBBackend} from './types';
+import * as _ from 'lodash';
 
 export class MemoryBackend implements DBBackend {
   private _channels: Record<string, ChannelStoredData | undefined> = {};
@@ -104,7 +105,7 @@ export class MemoryBackend implements DBBackend {
   public async setReplaceObjectives(values: Objective[]) {
     const newObjectives: Objective[] = [];
     values.forEach(objective => {
-      if (!this._objectives.includes(objective)) {
+      if (!this._objectives.some(saved => _.isEqual(objective, saved))) {
         this._objectives.push(objective);
         newObjectives.push(objective);
       }
