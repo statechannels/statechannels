@@ -1,11 +1,15 @@
 import {ChannelConstants, StateVariables, SignedState, Participant, State} from './types';
 import {signState, hashState, getSignerAddress, calculateChannelId} from './state-utils';
 import _ from 'lodash';
-import {Funding} from './memory-store';
+import {Funding} from './store';
+import {BigNumber} from 'ethers/utils';
 
 export type ChannelStoredData = {
   stateVariables: Record<string, StateVariables>;
-  channelConstants: ChannelConstants;
+  channelConstants: Omit<ChannelConstants, 'challengeDuration' | 'channelNonce'> & {
+    challengeDuration: BigNumber | string;
+    channelNonce: BigNumber | string;
+  };
   signatures: Record<string, string[] | undefined>;
   funding: Funding | undefined;
   myIndex: number;
@@ -162,9 +166,15 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
   }
 
   public data(): ChannelStoredData {
+    const channelConstants = {
+      ...this.channelConstants,
+      challengeDuration: this.channelConstants.challengeDuration.toString(),
+      channelNonce: this.channelConstants.channelNonce.toString()
+    };
+
     return {
       stateVariables: this.stateVariables,
-      channelConstants: this.channelConstants,
+      channelConstants,
       signatures: this.signatures,
       funding: this.funding,
       myIndex: this.myIndex
@@ -177,6 +187,8 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
       return data;
     }
     const {stateVariables, channelConstants, signatures, funding, myIndex} = data;
+    channelConstants.challengeDuration = new BigNumber(channelConstants.challengeDuration);
+    channelConstants.channelNonce = new BigNumber(channelConstants.channelNonce);
     return new MemoryChannelStoreEntry(
       channelConstants,
       myIndex,
