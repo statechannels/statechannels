@@ -6,7 +6,7 @@
   "dependencies": {
     "@statechannels/devtools": "0.1.21",
     "easy-table": "1.1.1",
-    "ethers": "4.0.44",
+    "ethers": "4.0.45",
     "path": "0.12.7",
     "solc": "0.6.0",
     "typescript": "3.7.5"

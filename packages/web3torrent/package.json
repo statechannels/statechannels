@@ -9,13 +9,13 @@
     "not op_mini all"
   ],
   "dependencies": {
-    "@rimble/connection-banner": "^1.2.3",
+    "@rimble/connection-banner": "1.2.3",
     "@statechannels/channel-client": "0.0.1",
     "bencode": "2.0.1",
     "debug": "4.1.1",
-    "ethers": "^4.0.45",
+    "ethers": "4.0.45",
     "eventemitter3": "4.0.0",
-    "firebase": "^7.11.0",
+    "firebase": "7.11.0",
     "jszip": "3.2.2",
     "lodash": "4.17.15",
     "node-sass": "4.13.1",
@@ -27,7 +27,7 @@
     "webtorrent": "0.107.16"
   },
   "devDependencies": {
-    "@statechannels/channel-provider": "0.0.3",
+    "@statechannels/channel-provider": "*",
     "@storybook/addon-actions": "5.3.9",
     "@storybook/addon-knobs": "5.2.5",
     "@storybook/addon-notes": "5.2.5",
@@ -125,8 +125,8 @@
     "eslint:write": "eslint \"**/*.{js,ts,tsx}\" --fix --max-warnings=0",
     "lint:check": "run-s eslint:check prettier:check",
     "lint:write": "run-s eslint:write prettier:write",
-    "prepare": "yarn contracts:compile",
     "precommit": "lint-staged --quiet",
+    "prepare": "yarn contracts:compile",
     "prettier:check": "prettier --check '**/*.{scss,json}' --ignore-path '.eslintignore'",
     "prettier:write": "prettier --write '**/*.{scss,json}' --ignore-path '.eslintignore'",
     "start": "node scripts/start.js",
