@@ -1,7 +1,6 @@
 import {BigNumber} from 'ethers/utils';
 import {MemoryChannelStoreEntry} from './memory-channel-storage';
 import {Objective, DBBackend} from './types';
-import 'fake-indexeddb/auto';
 
 enum ObjectStores {
   channels = 'channels',
@@ -21,10 +20,17 @@ export class IndexedDBBackend implements DBBackend {
     }
   }
   public async initialize(cleanSlate = false) {
+    const createdDB = await this.create();
     if (cleanSlate) {
-      await this.reset();
+      await Promise.all([
+        this.clear(ObjectStores.channels),
+        this.clear(ObjectStores.objectives),
+        this.clear(ObjectStores.nonces),
+        this.clear(ObjectStores.privateKeys),
+        this.clear(ObjectStores.ledgers)
+      ]).then(cleared => console.log('Cleared', cleared));
     }
-    return this.create();
+    return createdDB;
   }
 
   private async create() {
@@ -48,14 +54,17 @@ export class IndexedDBBackend implements DBBackend {
     });
   }
 
-  private async reset() {
+  private async clear(storeName: ObjectStores): Promise<string> {
     return new Promise((resolve, reject) => {
-      const reqDeletion = indexedDB.deleteDatabase('xstateWallet');
-      reqDeletion.onerror = err => reject(err);
-      reqDeletion.onsuccess = () => {
-        console.log('DB reseted');
-        resolve();
+      const request = this._db
+        .transaction([storeName], 'readwrite')
+        .objectStore(storeName)
+        .clear();
+      request.onerror = _ => {
+        this.logError(request.error, 'get ' + storeName);
+        reject(request.error);
       };
+      request.onsuccess = _ => resolve(storeName);
     });
   }
 
@@ -64,7 +73,9 @@ export class IndexedDBBackend implements DBBackend {
   public async channels() {
     const channels = await this.getAll(ObjectStores.channels);
     for (const key in channels) {
-      channels[key] = MemoryChannelStoreEntry.fromJson(channels[key]);
+      if (channels[key]) {
+        channels[key] = MemoryChannelStoreEntry.fromJson(channels[key]);
+      }
     }
     return channels;
   }
@@ -74,12 +85,16 @@ export class IndexedDBBackend implements DBBackend {
   public async nonces() {
     const nonces = await this.getAll(ObjectStores.nonces);
     for (const key in nonces) {
-      nonces[key] = new BigNumber(nonces[key]);
+      if (nonces[key]) {
+        nonces[key] = new BigNumber(-1);
+      } else {
+        nonces[key] = new BigNumber(nonces[key]);
+      }
     }
     return nonces;
   }
   public async privateKeys() {
-    return this.getAll(ObjectStores.nonces);
+    return this.getAll(ObjectStores.privateKeys);
   }
   public async ledgers() {
     return this.getAll(ObjectStores.ledgers);
@@ -88,14 +103,15 @@ export class IndexedDBBackend implements DBBackend {
   // Individual Getters
 
   public async getChannel(key: string) {
-    return MemoryChannelStoreEntry.fromJson(await this.get(ObjectStores.channels, key));
+    const channel = await this.get(ObjectStores.channels, key);
+    return channel && MemoryChannelStoreEntry.fromJson(channel);
   }
   public async getObjective(key: number) {
     return this.get(ObjectStores.objectives, key);
   }
   public async getNonce(key: string) {
     const nonce = await this.get(ObjectStores.nonces, key);
-    return new BigNumber(nonce);
+    return nonce && new BigNumber(nonce);
   }
   public async getPrivateKey(key: string) {
     return this.get(ObjectStores.privateKeys, key);
@@ -107,19 +123,23 @@ export class IndexedDBBackend implements DBBackend {
   // Individual Setters
 
   public async setPrivateKey(key: string, value: string) {
-    return this.put(ObjectStores.privateKeys, value, key);
+    const pksPutted = await this.put(ObjectStores.privateKeys, value, key);
+    return pksPutted;
   }
   public async setChannel(key: string, value: MemoryChannelStoreEntry) {
-    return this.put(ObjectStores.channels, value.data(), key);
+    const savedChannel = await this.put(ObjectStores.channels, value.data(), key);
+    return MemoryChannelStoreEntry.fromJson(savedChannel);
   }
   public async addChannel(key: string, value: MemoryChannelStoreEntry) {
-    return this.add(ObjectStores.channels, value.data(), key, true);
+    const savedChannel = await this.add(ObjectStores.channels, value.data(), key, true);
+    return MemoryChannelStoreEntry.fromJson(savedChannel);
   }
   public async setLedger(key: string, value: string) {
     return this.put(ObjectStores.ledgers, value, key);
   }
   public async setNonce(key: string, value: BigNumber) {
-    return this.put(ObjectStores.nonces, value.toString(), key);
+    const savedNonce = await this.put(ObjectStores.nonces, value.toString(), key);
+    return new BigNumber(savedNonce);
   }
   public async setObjective(key: number, value: Objective) {
     return this.put(ObjectStores.objectives, value, Number(key)) as Promise<Objective>;
@@ -151,6 +171,7 @@ export class IndexedDBBackend implements DBBackend {
    * @param asArray if true, the result object, is transformed to an array
    */
   private async getAll(storeName: ObjectStores, asArray?: boolean): Promise<any> {
+    // console.log('getAll', storeName);
     return new Promise((resolve, reject) => {
       const request = this._db
         .transaction([storeName], 'readwrite')
@@ -179,6 +200,7 @@ export class IndexedDBBackend implements DBBackend {
    * @param key required
    */
   private async get(storeName: ObjectStores, key: string | number): Promise<any> {
+    // console.log('get', storeName, key);
     return new Promise((resolve, reject) => {
       const request = this._db
         .transaction([storeName], 'readonly')
@@ -205,6 +227,7 @@ export class IndexedDBBackend implements DBBackend {
     key: string | number,
     silentOverwriteError: boolean
   ): Promise<any> {
+    // console.log('add', storeName, key);
     return new Promise((resolve, reject) => {
       const transaction = this._db.transaction([storeName], 'readwrite');
       const request = transaction.objectStore(storeName).add(value, key);
@@ -229,6 +252,7 @@ export class IndexedDBBackend implements DBBackend {
    * @param key
    */
   private async put(storeName: ObjectStores, value: any, key: string | number): Promise<any> {
+    // console.log('put', storeName, key);
     return new Promise((resolve, reject) => {
       const transaction = this._db.transaction([storeName], 'readwrite');
       const request = transaction.objectStore(storeName).put(value, key);
@@ -248,6 +272,7 @@ export class IndexedDBBackend implements DBBackend {
    * @param values
    */
   private async setArray(storeName: ObjectStores, values: any[]): Promise<any[]> {
+    // console.log('setArrays', storeName);
     return new Promise((resolve, reject) => {
       const transaction = this._db.transaction([storeName], 'readwrite');
       const store = transaction.objectStore(storeName);
