@@ -32,7 +32,6 @@ const File: React.FC<RouteComponentProps & Props> = props => {
   const [loading, setLoading] = useState(false);
   const [buttonLabel, setButtonLabel] = useState('Start Download');
   const [errorLabel, setErrorLabel] = useState('');
-  const web3torrent = useContext(WebTorrentContext);
 
   const getLiveData = getTorrentAndPeersData(setTorrent, setPeers);
 
