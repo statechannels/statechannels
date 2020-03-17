@@ -135,8 +135,7 @@ describe('createChannel', () => {
 });
 
 describe('pushMessage', () => {
-  it.skip('stores states', async () => {
-    // TODO: This fails currently. Fix
+  it('stores states', async () => {
     const store = await aStore();
     await store.createChannel(
       signedState.participants,

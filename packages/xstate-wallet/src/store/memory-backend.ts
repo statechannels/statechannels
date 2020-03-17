@@ -73,6 +73,9 @@ export class MemoryBackend implements DBBackend {
   }
 
   public async getChannel(key: string) {
+    if (!this._channels[key]) {
+      return;
+    }
     return MemoryChannelStoreEntry.fromJson(this._channels[key]);
   }
 
