@@ -45,7 +45,7 @@ export class ChannelWallet {
       .subscribe(async o => {
         const channelEntry = await this.store.getEntry(o.data.targetChannelId);
         this.messagingService.sendChannelNotification(
-          'ChannelUpdated',
+          'ChannelProposed',
           await convertToChannelResult(channelEntry)
         );
       });
