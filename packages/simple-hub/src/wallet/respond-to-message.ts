@@ -5,7 +5,7 @@ import {containsHub} from '../utils';
 
 export function respondToMessage(message: Message): Message {
   const statesWithHub = message.signedStates.filter(
-    state => state.participants.filter(containsHub).length
+    state => state.participants.some(containsHub)
   );
   const signedStates = statesWithHub.map(state => {
     const ourSignature = signState(state, cHubChannelPK);
