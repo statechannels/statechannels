@@ -6,10 +6,11 @@ export default {title: 'X-state wallet'};
 import {storiesOf} from '@storybook/react';
 import {interpret} from 'xstate';
 import {renderWalletInFrontOfApp} from './helpers';
-import {MemoryStore} from '../../store/memory-store';
+import {XstateStore} from '../../store';
 import {MessagingServiceInterface, MessagingService} from '../../messaging';
 
-const store = new MemoryStore(['0xkey']);
+const store = new XstateStore();
+store.initialize(['0xkey']);
 const messagingService: MessagingServiceInterface = new MessagingService(store);
 const testContext = {
   channelId: '0x697ecf681033a2514ed19c90299a67ae8677f3c78b5877fe4550c4f0960e87b7'

@@ -28,6 +28,8 @@ it('allows for two wallets to fund an app', async () => {
     'PlayerB',
     fakeChain
   );
+  await playerA.initialize();
+  await playerB.initialize();
 
   hookUpMessaging(playerA, playerB);
 

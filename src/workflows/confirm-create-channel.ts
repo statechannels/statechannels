@@ -2,7 +2,7 @@ import {MachineConfig, Action, StateSchema, Machine, Condition, StateMachine, St
 import {Participant} from '@statechannels/client-api-schema';
 import {sendDisplayMessage} from '../messaging';
 import {createMockGuard} from '../utils/workflow-utils';
-import {Store} from '../store/memory-store';
+import {Store} from '../store';
 import {SimpleAllocation} from '../store/types';
 import {BigNumber} from 'ethers/utils';
 

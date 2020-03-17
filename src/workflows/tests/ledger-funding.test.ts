@@ -4,7 +4,7 @@ import {add} from '../../utils/math-utils';
 
 import {Init, machine} from '../ledger-funding';
 
-import {MemoryStore, Store} from '../../store/memory-store';
+import {XstateStore, Store} from '../../store';
 import {bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
 import {firstState, signState, calculateChannelId} from '../../store/state-utils';
@@ -69,7 +69,7 @@ const allSignState = (state: State) => ({
   signatures: [wallet1, wallet2].map(({privateKey}) => signState(state, privateKey))
 });
 
-beforeEach(() => {
+beforeEach(async () => {
   const message = {
     signedStates: [
       allSignState(firstState(outcome, targetChannel)),
@@ -80,8 +80,10 @@ beforeEach(() => {
   _chain.depositSync(ledgerChannelId, '0', '12');
   chain = _chain;
 
-  aStore = new MemoryStore([wallet1.privateKey], chain);
-  bStore = new MemoryStore([wallet2.privateKey], chain);
+  aStore = new XstateStore(chain);
+  await aStore.initialize([wallet1.privateKey]);
+  bStore = new XstateStore(chain);
+  await bStore.initialize([wallet2.privateKey]);
 
   [aStore, bStore].forEach((store: Store) => store.pushMessage(message));
   subscribeToMessages({

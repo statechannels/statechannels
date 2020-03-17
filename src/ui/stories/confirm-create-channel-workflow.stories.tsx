@@ -8,11 +8,12 @@ import {storiesOf} from '@storybook/react';
 import {interpret} from 'xstate';
 import {Participant} from '@statechannels/client-api-schema';
 import {renderWalletInFrontOfApp} from './helpers';
-import {MemoryStore} from '../../store/memory-store';
+import {XstateStore} from '../../store';
 import {bigNumberify} from 'ethers/utils';
 import {simpleEthAllocation} from '../../utils/outcome';
 
-const store = new MemoryStore(['0xkey']);
+const store = new XstateStore();
+store.initialize(['0xkey']);
 
 const alice: Participant = {
   participantId: 'a',

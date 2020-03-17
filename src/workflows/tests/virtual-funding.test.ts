@@ -3,7 +3,7 @@ import waitForExpect from 'wait-for-expect';
 
 import {Init, machine, Role} from '../virtualFunding';
 
-import {MemoryStore} from '../../store/memory-store';
+import {XstateStore} from '../../store';
 import {bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
 import {firstState, signState, calculateChannelId} from '../../store/state-utils';
@@ -59,23 +59,27 @@ const outcome: Outcome = simpleEthAllocation([
 const context: Init = {targetChannelId, jointChannelId};
 
 test('virtual funding', async () => {
-  const hubStore = new MemoryStore([wallet3.privateKey]);
-  const aStore = new MemoryStore([wallet1.privateKey]);
-  const bStore = new MemoryStore([wallet2.privateKey]);
+  const hubStore = new XstateStore();
+  await hubStore.initialize([wallet3.privateKey]);
+
+  const aStore = new XstateStore();
+  await aStore.initialize([wallet1.privateKey]);
+  const bStore = new XstateStore();
+  await bStore.initialize([wallet2.privateKey]);
 
   const hubService = interpret(machine(hubStore, context, Role.Hub));
   const aService = interpret(machine(aStore, context, Role.A));
   const bService = interpret(machine(bStore, context, Role.B));
   const services = [aService, hubService, bService];
 
-  [aStore, hubStore, bStore].forEach((store: MemoryStore) => {
+  [aStore, hubStore, bStore].forEach((store: XstateStore) => {
     const state = firstState(outcome, jointChannel);
     store.pushMessage({
       signedStates: [{...state, signatures: [signState(state, wallet1.privateKey)]}]
     });
   });
   await Promise.all(
-    [aStore, hubStore].map(async (store: MemoryStore) => {
+    [aStore, hubStore].map(async (store: XstateStore) => {
       const state = ledgerState([first, third], [1, 3]);
       const signatures = [wallet1, wallet3].map(({privateKey}) => signState(state, privateKey));
       store.pushMessage({signedStates: [{...state, signatures}]});
@@ -83,7 +87,7 @@ test('virtual funding', async () => {
     })
   );
   await Promise.all(
-    [bStore, hubStore].map(async (store: MemoryStore) => {
+    [bStore, hubStore].map(async (store: XstateStore) => {
       const state = ledgerState([second, third], [1, 3]);
       const signatures = [wallet2, wallet3].map(({privateKey}) => signState(state, privateKey));
       store.pushMessage({signedStates: [{...state, signatures}]});
@@ -117,7 +121,8 @@ test('virtual funding', async () => {
 });
 
 test('invalid joint state', async () => {
-  const store = new MemoryStore([wallet1.privateKey]);
+  const store = new XstateStore();
+  await store.initialize([wallet1.privateKey]);
   const service = interpret(machine(store, context, Role.A)).start();
 
   const state = firstState(outcome, jointChannel);

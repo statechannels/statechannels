@@ -1,4 +1,4 @@
-import {Store} from './store/memory-store';
+import {Store} from './store';
 import {MessagingServiceInterface, convertToChannelResult} from './messaging';
 
 import {applicationWorkflow} from './workflows/application';
