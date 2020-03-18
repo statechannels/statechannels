@@ -1,5 +1,5 @@
 import {Observable, fromEvent, merge, from} from 'rxjs';
-import {filter, catchError, map} from 'rxjs/operators';
+import {filter, map} from 'rxjs/operators';
 import {EventEmitter} from 'eventemitter3';
 import * as _ from 'lodash';
 
@@ -22,6 +22,10 @@ import {Chain, FakeChain} from '../chain';
 import {calculateChannelId, hashState} from './state-utils';
 import {NETWORK_ID} from '../constants';
 import {Store} from './store';
+import {Guid} from 'guid-typescript';
+import {Errors} from '.';
+
+const LOCK_TIMEOUT = 30000;
 
 interface DirectFunding {
   type: 'Direct';
@@ -32,17 +36,22 @@ interface IndirectFunding {
   ledgerId: string;
 }
 
-interface VirtualFunding {
+export interface VirtualFunding {
   type: 'Virtual';
   jointChannelId: string;
 }
 
-interface Guaranteed {
+interface Guarantee {
   type: 'Guarantee';
+  guarantorChannelId: string;
+}
+
+interface Guarantees {
+  type: 'Guarantees';
   guarantorChannelIds: [string, string];
 }
 
-export type Funding = DirectFunding | IndirectFunding | VirtualFunding | Guaranteed;
+export type Funding = DirectFunding | IndirectFunding | VirtualFunding | Guarantees | Guarantee;
 export function isIndirectFunding(funding: Funding): funding is IndirectFunding {
   return funding.type === 'Indirect';
 }
@@ -51,25 +60,34 @@ export function isVirtualFunding(funding: Funding): funding is VirtualFunding {
   return funding.type === 'Virtual';
 }
 
-export function isGuarantee(funding: Funding): funding is Guaranteed {
+export function isGuarantee(funding: Funding): funding is Guarantee {
   return funding.type === 'Guarantee';
 }
-// get it so that when you add a state to a channel, it sends that state to all participant
+export function isGuarantees(funding: Funding): funding is Guarantees {
+  return funding.type === 'Guarantees';
+}
 
 interface InternalEvents {
   channelUpdated: [ChannelStoreEntry];
   newObjective: [Objective];
   addToOutbox: [Message];
+  lockUpdated: [ChannelLock];
 }
+
+export type ChannelLock = {
+  channelId: string;
+  lock?: Guid;
+};
 
 export class MemoryStore implements Store {
   readonly chain: Chain;
-  private _channels: Record<string, MemoryChannelStoreEntry | undefined> = {};
+  protected _channels: Record<string, MemoryChannelStoreEntry | undefined> = {};
   private _objectives: Objective[] = [];
   private _nonces: Record<string, BigNumber | undefined> = {};
   private _eventEmitter = new EventEmitter<InternalEvents>();
   private _privateKeys: Record<string, string | undefined> = {};
-  private _ledgers: Record<string, string | undefined> = {};
+  protected _ledgers: Record<string, string> = {};
+  protected _channelLocks: Record<string, Guid | undefined> = {};
   private _budgets: Record<string, SiteBudget> = {};
 
   constructor(privateKeys?: string[], chain?: Chain) {
@@ -99,7 +117,6 @@ export class MemoryStore implements Store {
     return Promise.resolve();
   }
 
-  // for short-term backwards compatibility
   public channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry> {
     // TODO: The following line is not actually type safe.
     // fromEvent<'foo'>(this._eventEmitter, 'channelUpdated') would happily return
@@ -108,22 +125,16 @@ export class MemoryStore implements Store {
       filter(cs => cs.channelId === channelId)
     );
 
-    const currentEntry = from(this.getEntry(channelId));
+    const currentEntry = this._channels[channelId] ? from(this.getEntry(channelId)) : from([]);
 
-    return merge(currentEntry, newEntries).pipe(
-      catchError(e => {
-        // TODO: This seems fragile
-        if (e === 'Channel id not found') {
-          return newEntries;
-        } else {
-          throw e;
-        }
-      })
-    );
+    return merge(currentEntry, newEntries);
   }
 
-  get newObjectiveFeed(): Observable<Objective> {
-    return fromEvent(this._eventEmitter, 'newObjective');
+  get objectiveFeed(): Observable<Objective> {
+    const newObjectives = fromEvent<Objective>(this._eventEmitter, 'newObjective');
+    const currentObjectives = from(this._objectives);
+
+    return merge(newObjectives, currentObjectives);
   }
 
   get outboxFeed(): Observable<Message> {
@@ -160,15 +171,60 @@ export class MemoryStore implements Store {
     }
     channelEntry.setFunding(funding);
   }
+
+  public async acquireChannelLock(channelId: string): Promise<ChannelLock> {
+    const lock = this._channelLocks[channelId];
+    if (lock) throw new Error(Errors.channelLocked);
+
+    const newStatus = {channelId, lock: Guid.create()};
+    this._channelLocks[channelId] = newStatus.lock;
+
+    setTimeout(async () => {
+      try {
+        await this.releaseChannelLock(newStatus);
+      } finally {
+        // NO OP
+      }
+    }, LOCK_TIMEOUT);
+    this._eventEmitter.emit('lockUpdated', newStatus);
+
+    return newStatus;
+  }
+
+  public async releaseChannelLock(status: ChannelLock): Promise<void> {
+    if (!status.lock) throw new Error('Invalid lock');
+
+    const {channelId, lock} = status;
+    const currentStatus = this._channelLocks[channelId];
+    if (!currentStatus) return;
+    if (!currentStatus.equals(lock)) throw new Error('Invalid lock');
+
+    const newStatus = {channelId, lock: undefined};
+    this._channelLocks[channelId] = undefined;
+    this._eventEmitter.emit('lockUpdated', newStatus);
+  }
+
+  public get lockFeed(): Observable<ChannelLock> {
+    return merge(
+      from(_.map(this._channelLocks, (lock: Guid, channelId) => ({lock, channelId}))),
+      fromEvent<ChannelLock>(this._eventEmitter, 'lockUpdated')
+    );
+  }
+
   public async getLedger(peerId: string) {
     const ledgerId = this._ledgers[peerId];
-
     if (!ledgerId) throw new Error(`No ledger exists with peer ${peerId}`);
 
     return await this.getEntry(ledgerId);
   }
 
-  public setLedger(entry: MemoryChannelStoreEntry) {
+  public async setLedger(channelId: string): Promise<void> {
+    const entry = this._channels[channelId];
+    if (!entry) throw 'No entry for channelId';
+    this.setLedgerByEntry(entry);
+  }
+
+  public setLedgerByEntry(entry: MemoryChannelStoreEntry) {
     // This is not on the Store interface itself -- it is useful to set up a test store
     const {channelId} = entry;
     this._channels[channelId] = entry;
@@ -246,8 +302,11 @@ export class MemoryStore implements Store {
   }
 
   addObjective(objective: Objective) {
-    this._eventEmitter.emit('addToOutbox', {objectives: [objective]});
-    this._eventEmitter.emit('newObjective', objective);
+    if (!_.includes(this._objectives, objective)) {
+      this._objectives.push(objective);
+      this._eventEmitter.emit('addToOutbox', {objectives: [objective]});
+      this._eventEmitter.emit('newObjective', objective);
+    }
   }
 
   async addState(state: SignedState): Promise<ChannelStoreEntry> {

@@ -79,7 +79,7 @@ export const firstState = (
   challengeDuration,
   appDefinition,
   participants,
-  outcome: outcome || {type: 'SimpleAllocation', allocationItems: []}
+  outcome
 });
 
 function convertToNitroAllocationItems(allocationItems: AllocationItem[]): NitroAllocationItem[] {
@@ -112,4 +112,12 @@ export function convertToNitroOutcome(outcome: Outcome): NitroOutcome {
     case 'MixedAllocation':
       return outcome.simpleAllocations.map(x => convertToNitroOutcome[0]);
   }
+}
+
+export function nextState(state: State, outcome: Outcome) {
+  if (state.outcome.type !== outcome.type) {
+    throw new Error('Attempting to change outcome type');
+  }
+
+  return {...state, turnNum: state.turnNum.add(1), outcome};
 }

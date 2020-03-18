@@ -11,7 +11,7 @@ import {MemoryStore} from '../../store/memory-store';
 import {bigNumberify, parseEther} from 'ethers/utils';
 import React from 'react';
 import {ApproveBudgetAndFund} from '../approve-budget-and-fund-workflow';
-import {SiteBudget} from '../../store/types';
+import {SiteBudget, Participant} from '../../store/types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../../constants';
 import {MessagingServiceInterface, MessagingService} from '../../messaging';
 
@@ -23,7 +23,7 @@ const messagingService: MessagingServiceInterface = new MessagingService(store);
 const budget: SiteBudget = {
   site: 'rps.org',
   hubAddress: 'hub.com',
-  budgets: {
+  forAsset: {
     [ETH_ASSET_HOLDER_ADDRESS]: {
       assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
       pending: {playerAmount: parseEther('5'), hubAmount: parseEther('5')},
@@ -33,9 +33,23 @@ const budget: SiteBudget = {
     }
   }
 };
+
+const alice: Participant = {
+  participantId: 'a',
+  signingAddress: '0xa',
+  destination: '0xad'
+};
+
+const hub: Participant = {
+  participantId: 'b',
+  signingAddress: '0xb',
+  destination: '0xbd'
+};
 const testContext: WorkflowContext = {
   budget,
-  requestId: 55
+  requestId: 55,
+  player: alice,
+  hub
 };
 
 if (config.states) {

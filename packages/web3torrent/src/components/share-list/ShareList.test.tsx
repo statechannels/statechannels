@@ -6,7 +6,7 @@ import {MemoryRouter as Router} from 'react-router-dom';
 import {mockTorrents} from '../../constants';
 import {RoutePath} from '../../routes';
 import {ShareList, ShareListProps} from './ShareList';
-import {calculateWei} from '../../utils/calculateWei';
+import {calculateWei, prettyPrintWei} from '../../utils/calculateWei';
 import prettier from 'prettier-bytes';
 
 function setup(withNoTorrents = false) {
@@ -47,7 +47,9 @@ describe('<ShareList />', () => {
     expect(firstFileData.childAt(1).text()).toBe(prettier(props.torrents[0].length));
     expect(firstFileData.childAt(2).text()).toBe(props.torrents[0].numPeers + 'S');
     expect(firstFileData.childAt(3).text()).toBe(props.torrents[0].numPeers + 'P');
-    expect(firstFileData.childAt(4).text()).toBe(calculateWei(props.torrents[0].length));
+    expect(firstFileData.childAt(4).text()).toBe(
+      prettyPrintWei(calculateWei(props.torrents[0].length))
+    );
     expect(firstFileData.childAt(5).find('button')).not.toBeNull();
   });
 

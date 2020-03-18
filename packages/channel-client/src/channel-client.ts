@@ -24,7 +24,6 @@ export class ChannelClient implements ChannelClientInterface<ChannelResult> {
     return this.provider.off.bind(this, 'ChannelUpdated', callback);
   }
 
-  // TODO: Currently not in use in the xstate wallet
   onChannelProposed(callback: (result: ChannelResult) => void): UnsubscribeFunction {
     this.provider.on('ChannelProposed', result => callback(result.params));
     return this.provider.off.bind(this, 'ChannelProposed', callback);
@@ -41,16 +40,19 @@ export class ChannelClient implements ChannelClientInterface<ChannelResult> {
     appDefinition: string,
     appData: string
   ): Promise<ChannelResult> {
-    return this.provider.send('CreateChannel', {
-      participants,
-      allocations,
-      appDefinition,
-      appData
+    return this.provider.send({
+      method: 'CreateChannel',
+      params: {
+        participants,
+        allocations,
+        appDefinition,
+        appData
+      }
     });
   }
 
   async joinChannel(channelId: string): Promise<ChannelResult> {
-    return this.provider.send('JoinChannel', {channelId});
+    return this.provider.send({method: 'JoinChannel', params: {channelId}});
   }
 
   async updateChannel(
@@ -59,38 +61,44 @@ export class ChannelClient implements ChannelClientInterface<ChannelResult> {
     allocations: TokenAllocations,
     appData: string
   ): Promise<ChannelResult> {
-    return this.provider.send('UpdateChannel', {
-      channelId,
-      participants,
-      allocations,
-      appData
+    return this.provider.send({
+      method: 'UpdateChannel',
+      params: {
+        channelId,
+        participants,
+        allocations,
+        appData
+      }
     });
   }
 
   async getState(channelId: string): Promise<ChannelResult> {
-    return this.provider.send('GetState', {channelId});
+    return this.provider.send({method: 'GetState', params: {channelId}});
   }
 
   async challengeChannel(channelId: string): Promise<ChannelResult> {
-    return this.provider.send('ChallengeChannel', {
-      channelId
+    return this.provider.send({
+      method: 'ChallengeChannel',
+      params: {
+        channelId
+      }
     });
   }
 
   async closeChannel(channelId: string): Promise<ChannelResult> {
-    return this.provider.send('CloseChannel', {channelId});
+    return this.provider.send({method: 'CloseChannel', params: {channelId}});
   }
 
   async pushMessage(message: Message<ChannelResult>): Promise<PushMessageResult> {
-    return this.provider.send('PushMessage', message);
+    return this.provider.send({method: 'PushMessage', params: message});
   }
 
   async getAddress(): Promise<string> {
-    return this.provider.send('GetAddress', {});
+    return this.provider.send({method: 'GetAddress', params: {}});
   }
 
   async getEthereumSelectedAddress(): Promise<string> {
-    return this.provider.send('GetEthereumSelectedAddress', {});
+    return this.provider.send({method: 'GetEthereumSelectedAddress', params: {}});
   }
 
   async approveBudgetAndFund(
@@ -100,20 +108,31 @@ export class ChannelClient implements ChannelClientInterface<ChannelResult> {
     hubAddress: string,
     hubOutcomeAddress: string
   ): Promise<SiteBudget> {
-    return this.provider.send('ApproveBudgetAndFund', {
-      playerAmount,
-      hubAmount,
-      playerOutcomeAddress,
-      hubAddress,
-      hubOutcomeAddress
+    return this.provider.send({
+      method: 'ApproveBudgetAndFund',
+      params: {
+        playerAmount,
+        hubAmount,
+        site: window.location.hostname,
+        player: {
+          participantId: await this.getAddress(),
+          signingAddress: await this.getAddress(),
+          destination: playerOutcomeAddress
+        },
+        hub: {
+          participantId: hubAddress,
+          signingAddress: hubAddress,
+          destination: hubOutcomeAddress
+        }
+      }
     });
   }
 
   async getBudget(hubAddress: string): Promise<SiteBudget | {}> {
-    return this.provider.send('GetBudget', {hubAddress});
+    return this.provider.send({method: 'GetBudget', params: {hubAddress}});
   }
 
   async closeAndWithdraw(hubAddress: string): Promise<SiteBudget | {}> {
-    return this.provider.send('CloseAndWithdraw', {hubAddress});
+    return this.provider.send({method: 'CloseAndWithdraw', params: {hubAddress}});
   }
 }

@@ -1,12 +1,12 @@
 import prettier from 'prettier-bytes';
 import React from 'react';
-import {DownloadingStatuses, Torrent, UploadingStatuses} from '../../types';
+import {DownloadingStatuses, Torrent} from '../../types';
 import {DownloadInfo} from './download-info/DownloadInfo';
 import {DownloadLink} from './download-link/DownloadLink';
 import {MagnetLinkButton} from './magnet-link-button/MagnetLinkButton';
 import './TorrentInfo.scss';
 import {UploadInfo} from './upload-info/UploadInfo';
-import {calculateWei} from '../../utils/calculateWei';
+import {calculateWei, prettyPrintWei} from '../../utils/calculateWei';
 import {ChannelState} from '../../clients/payment-channel-client';
 
 export type TorrentInfoProps = {
@@ -32,26 +32,23 @@ const TorrentInfo: React.FC<TorrentInfoProps> = ({
           </span>
           {torrent.status && <span className="fileStatus">{torrent.status}</span>}
           <span className="fileCost">
-            Cost {torrent.length ? calculateWei(torrent.length) : 'unknown'}
+            Cost {torrent.length ? prettyPrintWei(calculateWei(torrent.length)) : 'unknown'}
           </span>
           {torrent.magnetURI && <MagnetLinkButton />}
         </div>
       </section>
-      {DownloadingStatuses.includes(torrent.status) ? (
+      {DownloadingStatuses.includes(torrent.status) && !torrent.originalSeed && (
         <DownloadInfo
           torrent={torrent}
           channelCache={channelCache}
           mySigningAddress={mySigningAddress}
         />
-      ) : (
-        UploadingStatuses.includes(torrent.status) && (
-          <UploadInfo
-            torrent={torrent}
-            channelCache={channelCache}
-            mySigningAddress={mySigningAddress}
-          />
-        )
       )}
+      <UploadInfo
+        torrent={torrent}
+        channelCache={channelCache}
+        mySigningAddress={mySigningAddress}
+      />
       {!torrent.originalSeed && <DownloadLink torrent={torrent} />}
     </>
   );

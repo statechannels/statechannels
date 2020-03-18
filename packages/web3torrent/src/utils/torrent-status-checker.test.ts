@@ -25,7 +25,7 @@ describe('Torrent Status Checker', () => {
     });
 
     it('should return a torrent with a status of Idle when the torrent is no longer live', () => {
-      const getSpy = jest.spyOn(web3torrent, 'get').mockImplementation(_ => undefined);
+      const getSpy = jest.spyOn(web3torrent, 'get').mockImplementation(() => undefined);
 
       const result = checkTorrentStatus(torrent, mockInfoHash);
 
@@ -39,6 +39,7 @@ describe('Torrent Status Checker', () => {
     });
 
     it("should return a torrent with a valid status if it's a live torrent", () => {
+      expect(process.env.REACT_APP_FAKE_CHANNEL_PROVIDER).toBe('true');
       const inProgressTorrent: Partial<Torrent> = {
         downloaded: 12891.3,
         uploadSpeed: 3000,
@@ -49,7 +50,7 @@ describe('Torrent Status Checker', () => {
         originalSeed: false
       };
 
-      const getSpy = jest.spyOn(web3torrent, 'get').mockImplementation(_ => ({
+      const getSpy = jest.spyOn(web3torrent, 'get').mockImplementation(() => ({
         ...torrent,
         ...inProgressTorrent
       }));

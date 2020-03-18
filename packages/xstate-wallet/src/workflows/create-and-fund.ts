@@ -133,7 +133,7 @@ export const config: MachineConfig<Init, any, any> = {
   }
 };
 
-const services = (store: Store) => ({
+export const services = (store: Store) => ({
   depositing: Depositing.machine(store),
   supportState: SupportState.machine(store),
   virtualFunding: VirtualFundingAsLeaf.machine(store),
@@ -145,6 +145,7 @@ const services = (store: Store) => ({
   setFundingToVirtual: setFundingToVirtual(store),
   getObjective: getObjective(store)
 });
+
 type Service = keyof ReturnType<typeof services>;
 
 const options = (store: Store) => ({
@@ -157,7 +158,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => 
 };
 
 const getObjective = (store: Store) => (ctx: Init): Promise<VirtualFundingAsLeaf.Init> =>
-  store.newObjectiveFeed
+  store.objectiveFeed
     .pipe(
       filter(isVirtuallyFund),
       map(

@@ -3,14 +3,20 @@ import {
   Participant,
   Outcome,
   SignedState,
-  State
-} from '@statechannels/xstate-wallet/lib/src/store/types';
+  State,
+  firstState,
+  signState
+} from '../xstate-wallet-internals';
 import {bigNumberify} from 'ethers/utils';
 import {ethers} from 'ethers';
-import {cHubStateChannelPK, cHubStateChannelAddress} from '../../constants';
+import {
+  cHubChannelPK,
+  cHubChannelSigningAddress,
+  cHubParticipantId,
+  cHubChainAddress
+} from '../../constants';
 import {AddressZero} from 'ethers/constants';
-import {firstState, signState} from '@statechannels/xstate-wallet/lib/src/store/state-utils';
-import * as R from 'ramda';
+import * as _ from 'lodash/fp';
 
 const wallet1 = new ethers.Wallet(
   '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318'
@@ -27,15 +33,15 @@ const first: Participant = {
 };
 
 const hub: Participant = {
-  signingAddress: cHubStateChannelAddress,
-  destination: '0x0000000000000000000000000000000000000000000000000000000000000002',
-  participantId: 'hub'
+  signingAddress: cHubChannelSigningAddress,
+  destination: cHubChainAddress,
+  participantId: cHubParticipantId
 };
 
 const second: Participant = {
   signingAddress: wallet2.address,
   destination: '0x0000000000000000000000000000000000000000000000000000000000000003',
-  participantId: 'a'
+  participantId: 'b'
 };
 
 export const participants: [Participant, Participant, Participant] = [first, hub, second];
@@ -48,7 +54,7 @@ const channel: ChannelConstants = {
   channelNonce: bigNumberify(0),
   chainId,
   challengeDuration,
-  participants: R.slice(0, 2, participants),
+  participants: _.slice(0, 2, participants),
   appDefinition
 };
 
@@ -60,7 +66,11 @@ const channel3: ChannelConstants = {
   appDefinition
 };
 
-const destinations = participants.map(p => p.destination);
+const destinations = [
+  participants[1].destination,
+  participants[0].destination,
+  participants[2].destination
+];
 const amounts = [bigNumberify(7), bigNumberify(5), bigNumberify(3)];
 const outcome: Outcome = {
   type: 'SimpleAllocation',
@@ -88,10 +98,13 @@ export const ledgerStateIncoming: SignedState = {
 
 export const ledgerStateResponse: SignedState = {
   ...ledgerState,
-  signatures: [
-    signState(ledgerState, wallet1.privateKey),
-    signState(ledgerState, cHubStateChannelPK)
-  ]
+  signatures: [signState(ledgerState, wallet1.privateKey), signState(ledgerState, cHubChannelPK)]
+};
+
+export const ledgerStateResponse2: SignedState = {
+  ...ledgerState,
+  turnNum: ethers.constants.One,
+  signatures: [signState(ledgerState, wallet1.privateKey), signState(ledgerState, cHubChannelPK)]
 };
 
 const ledgerState3 = firstState(outcome3, channel3);
@@ -102,13 +115,10 @@ export const ledgerStateIncoming3: SignedState = {
 
 export const ledgerStateResponse3: SignedState = {
   ...ledgerState3,
-  signatures: [
-    signState(ledgerState3, wallet1.privateKey),
-    signState(ledgerState3, cHubStateChannelPK)
-  ]
+  signatures: [signState(ledgerState3, wallet1.privateKey), signState(ledgerState3, cHubChannelPK)]
 };
 
-const ledgerState3_2: State = {...ledgerState3, turnNum: bigNumberify(1)};
+const ledgerState3_2: State = {...ledgerState3, turnNum: ethers.constants.One};
 export const ledgerStateIncoming3_2: SignedState = {
   ...ledgerState3_2,
   signatures: [signState(ledgerState3_2, wallet1.privateKey)]
@@ -118,6 +128,6 @@ export const ledgerStateResponse3_2: SignedState = {
   ...ledgerState3_2,
   signatures: [
     signState(ledgerState3_2, wallet1.privateKey),
-    signState(ledgerState3_2, cHubStateChannelPK)
+    signState(ledgerState3_2, cHubChannelPK)
   ]
 };

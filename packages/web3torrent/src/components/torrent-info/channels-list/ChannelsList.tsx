@@ -5,21 +5,26 @@ import {ChannelState} from '../../../clients/payment-channel-client';
 import {PaidStreamingWire} from '../../../library/types';
 import './ChannelsList.scss';
 import {WebTorrentContext} from '../../../clients/web3torrent-client';
+import {prettyPrintWei} from '../../../utils/calculateWei';
+import {utils} from 'ethers';
 
 export type UploadInfoProps = {
   wires: PaidStreamingWire[];
   channels: Dictionary<ChannelState>;
-  peerType: 'seeder' | 'leecher';
+  participantType: 'payer' | 'beneficiary';
 };
 
 class ChannelsList extends React.Component<UploadInfoProps> {
   static contextType = WebTorrentContext;
 
+  // Adds typing information to this.context
+  context!: React.ContextType<typeof WebTorrentContext>;
+
   channelIdToTableRow(
     channelId: string,
     channels: Dictionary<ChannelState>,
     wires: PaidStreamingWire[],
-    peerType: 'seeder' | 'leecher'
+    participantType: 'payer' | 'beneficiary'
   ) {
     let channelButton;
 
@@ -28,11 +33,7 @@ class ChannelsList extends React.Component<UploadInfoProps> {
     } else if (channels[channelId].status === 'closed') {
       channelButton = <button disabled>Closed</button>;
     } else {
-      channelButton = (
-        <button onClick={() => this.context.paymentChannelClient.closeChannel(channelId)}>
-          Close Channel
-        </button>
-      );
+      channelButton = <button disabled>Running</button>;
     }
 
     const wire = wires.find(
@@ -41,23 +42,34 @@ class ChannelsList extends React.Component<UploadInfoProps> {
         wire.paidStreamingExtension.pseChannelId === channelId
     );
 
-    const uploaded = wire ? wire.uploaded : 0;
-    const peerAccount = wire ? wire.paidStreamingExtension.peerAccount : 'unknown';
+    let transferred: string;
+    let peerAccount: string;
+    if (wire) {
+      transferred =
+        participantType === 'beneficiary' ? prettier(wire.uploaded) : prettier(wire.downloaded);
+      peerAccount = channels[channelId][participantType];
+    } else {
+      transferred = 'NOWIRE';
+      peerAccount = 'NOWIRE';
+    }
 
     return (
-      <tr className="peerInfo" key={peerAccount}>
+      <tr className="peerInfo" key={channelId}>
         <td>{channelButton}</td>
         <td className="channel-id">{channelId}</td>
         <td className="peer-id">{peerAccount}</td>
         <td className="uploaded">
-          {uploaded && prettier(uploaded)}
-          &nbsp;
-          {peerType === 'seeder' ? `up` : `down`}
+          {transferred}
+          {participantType === 'beneficiary' ? ` up` : ` down`}
         </td>
-        {peerType === 'seeder' ? (
-          <td className="earned">{Number(channels[channelId].beneficiaryBalance)} wei</td>
+        {participantType === 'beneficiary' ? (
+          <td className="earned">
+            {prettyPrintWei(utils.bigNumberify(channels[channelId].beneficiaryBalance))}
+          </td>
         ) : (
-          <td className="paid">-{Number(channels[channelId].beneficiaryBalance)} wei</td>
+          <td className="paid">
+            -{prettyPrintWei(utils.bigNumberify(channels[channelId].beneficiaryBalance))}
+          </td>
         )}
       </tr>
     );
@@ -75,7 +87,7 @@ class ChannelsList extends React.Component<UploadInfoProps> {
                   id,
                   this.props.channels,
                   this.props.wires,
-                  this.props.peerType
+                  this.props.participantType
                 )
               )}
           </tbody>

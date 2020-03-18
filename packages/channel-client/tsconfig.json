@@ -9,6 +9,5 @@
     "types": ["react", "jest", "node"],
     "skipLibCheck": true
   },
-  "references": [{"path": "../channel-provider"}],
-  "include": ["./src"]
+  "references": [{"path": "../channel-provider"}, {"path": "../client-api-schema"}]
 }

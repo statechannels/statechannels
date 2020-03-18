@@ -12,7 +12,8 @@ import {
   ChannelClosingNotification,
   ChannelUpdatedNotification,
   Request,
-  ApproveBudgetAndFundRequest
+  ApproveBudgetAndFundRequest,
+  ChannelProposedNotification
 } from '@statechannels/client-api-schema';
 
 import * as jrs from 'jsonrpc-lite';
@@ -21,7 +22,7 @@ import {fromEvent, Observable} from 'rxjs';
 import {ChannelStoreEntry} from './store/channel-store-entry';
 import {Message as WireMessage} from '@statechannels/wire-format';
 import {unreachable} from './utils';
-import {isAllocation, Message} from './store/types';
+import {isAllocation, Message, SiteBudget} from './store/types';
 import {serializeAllocation, serializeSiteBudget} from './serde/app-messages/serialize';
 import {deserializeMessage} from './serde/wire-format/deserialize';
 import {serializeMessage} from './serde/wire-format/serialize';
@@ -50,9 +51,12 @@ export interface MessagingServiceInterface {
   readonly requestFeed: Observable<AppRequestEvent>;
 
   receiveRequest(jsonRpcMessage: Request): Promise<void>;
-
+  sendBudgetNotification(notificationData: SiteBudget): Promise<void>;
   sendChannelNotification(
-    method: ChannelClosingNotification['method'] | ChannelUpdatedNotification['method'],
+    method:
+      | ChannelClosingNotification['method']
+      | ChannelUpdatedNotification['method']
+      | ChannelProposedNotification['method'],
     notificationData: ChannelResult
   );
   sendMessageNotification(message: Message): Promise<void>;
@@ -77,6 +81,15 @@ export class MessagingService implements MessagingServiceInterface {
   public async sendResponse(id: number, result: Response['result']) {
     const response = {id, jsonrpc: '2.0', result} as Response; // typescript can't handle this otherwise
     this.eventEmitter.emit('SendMessage', response);
+  }
+
+  public async sendBudgetNotification(notificationData: SiteBudget) {
+    const notification = {
+      jsonrpc: '2.0',
+      method: 'BudgetUpdated',
+      params: serializeSiteBudget(notificationData)
+    } as Notification; // typescript can't handle this otherwise
+    this.eventEmitter.emit('SendMessage', notification);
   }
 
   public async sendChannelNotification(
@@ -118,27 +131,27 @@ export class MessagingService implements MessagingServiceInterface {
 
   public async receiveRequest(jsonRpcRequest: Request) {
     const request = parseRequest(jsonRpcRequest);
-    const {id} = request;
+    const {id: requestId} = request;
 
     switch (request.method) {
       case 'GetAddress':
         const address = this.store.getAddress();
-        this.sendResponse(id, address);
+        this.sendResponse(requestId, address);
         break;
       case 'GetEthereumSelectedAddress':
-        //  ask metamask permission to access accounts
-        await window.ethereum.enable();
-        //  block until accounts changed
-        //  (indicating user acceptance)
-        const ethereumSelectedAddress: string = await metamaskUnlocked();
-        window.parent.postMessage(jrs.success(id, ethereumSelectedAddress), '*');
+        if (this.store.chain.ethereumIsEnabled) {
+          const ethereumSelectedAddress = this.store.chain.selectedAddress;
+          window.parent.postMessage(jrs.success(requestId, ethereumSelectedAddress), '*');
+        } else {
+          this.eventEmitter.emit('AppRequest', {type: 'ENABLE_ETHEREUM', requestId});
+        }
         break;
       case 'CreateChannel':
       case 'UpdateChannel':
       case 'CloseChannel':
       case 'JoinChannel':
       case 'ApproveBudgetAndFund':
-        const appRequest = convertToInternalEvent(request);
+        const appRequest = await convertToInternalEvent(request);
         this.eventEmitter.emit('AppRequest', appRequest);
         break;
       case 'PushMessage':
@@ -148,15 +161,16 @@ export class MessagingService implements MessagingServiceInterface {
           throw new Error(`Received message not addressed to us ${JSON.stringify(message)}`);
         }
         this.store.pushMessage(deserializeMessage(message));
-        await this.sendResponse(id, {success: true});
+        await this.sendResponse(requestId, {success: true});
         break;
       case 'GetBudget':
         const site = request.params.hubAddress;
         const siteBudget = await this.store.getBudget(site);
-        await this.sendResponse(id, siteBudget ? serializeSiteBudget(siteBudget) : {});
+        await this.sendResponse(requestId, siteBudget ? serializeSiteBudget(siteBudget) : {});
         break;
       case 'ChallengeChannel':
       case 'GetState':
+      case 'CloseAndWithdraw':
         // TODO: handle these requests
         break;
 
@@ -164,20 +178,6 @@ export class MessagingService implements MessagingServiceInterface {
         unreachable(request);
     }
   }
-}
-
-async function metamaskUnlocked(): Promise<string> {
-  return new Promise(function(resolve) {
-    function ifSelectedAddressThenResolve() {
-      if (typeof window.ethereum.selectedAddress === 'string') {
-        resolve(window.ethereum.selectedAddress);
-      }
-    }
-    ifSelectedAddressThenResolve();
-    window.ethereum.on('accountsChanged', function() {
-      ifSelectedAddressThenResolve();
-    });
-  });
 }
 
 export async function convertToChannelResult(
@@ -225,10 +225,13 @@ export function sendDisplayMessage(displayMessage: 'Show' | 'Hide') {
 function convertToInternalEvent(request: ChannelRequest): AppRequestEvent {
   switch (request.method) {
     case 'ApproveBudgetAndFund':
+      const {player, hub} = request.params;
       return {
         type: 'APPROVE_BUDGET_AND_FUND',
         requestId: request.id,
-        budget: deserializeBudgetRequest(request.params)
+        budget: deserializeBudgetRequest(request.params),
+        player,
+        hub
       };
     case 'CloseChannel':
       return {

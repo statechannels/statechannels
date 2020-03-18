@@ -1,40 +1,29 @@
-import {respondToMessage} from '../';
 import {Message} from '@statechannels/wire-format';
 import {serializeMessage} from '@statechannels/xstate-wallet/lib/src/serde/wire-format/serialize';
 import {
-  ledgerStateIncoming,
   participants,
   ledgerStateResponse,
-  ledgerStateIncoming3,
   ledgerStateResponse3,
-  ledgerStateIncoming3_2,
   ledgerStateResponse3_2
-} from '../test-helpers';
+} from '../../wallet/test-helpers';
+import {messagesToSend} from '../firebase-relay';
 
-describe('ledger state', () => {
+describe('broadcast to 1 participant', () => {
   it('Echo message with signature', () => {
-    const ledgerMessage = serializeMessage(
-      {signedStates: [ledgerStateIncoming]},
-      participants[1].participantId,
-      participants[0].participantId
-    );
-    const response = respondToMessage(ledgerMessage);
-    const expectedResponse = serializeMessage(
+    const messageToSend = {signedStates: [ledgerStateResponse]};
+    const wireMessageToSend = messagesToSend(messageToSend);
+    const expectedWireMessageToSend = serializeMessage(
       {signedStates: [ledgerStateResponse]},
       participants[0].participantId,
       participants[1].participantId
     );
-    expect(response).toMatchObject<Message[]>([expectedResponse]);
+    expect(wireMessageToSend).toMatchObject<Message[]>([expectedWireMessageToSend]);
   });
 
   it('Echo message with signature with 3 participants', () => {
-    const ledgerMessage = serializeMessage(
-      {signedStates: [ledgerStateIncoming3]},
-      participants[1].participantId,
-      participants[0].participantId
-    );
-    const response = respondToMessage(ledgerMessage);
-    const expectedResponses = [
+    const messageToSend = {signedStates: [ledgerStateResponse3]};
+    const response = messagesToSend(messageToSend);
+    const expectedWireMessageToSend = [
       serializeMessage(
         {signedStates: [ledgerStateResponse3]},
         participants[0].participantId,
@@ -46,17 +35,14 @@ describe('ledger state', () => {
         participants[1].participantId
       )
     ];
-    expect(response).toMatchObject<Message[]>(expectedResponses);
+    expect(response).toMatchObject<Message[]>(expectedWireMessageToSend);
   });
 
   it('Echo message with signature with 3 participants, 2 states', () => {
-    const ledgerMessage = serializeMessage(
-      {signedStates: [ledgerStateIncoming3, ledgerStateIncoming3_2]},
-      participants[1].participantId,
-      participants[0].participantId
-    );
-    const response = respondToMessage(ledgerMessage);
-    const expectedResponses = [
+    const message = {signedStates: [ledgerStateResponse3, ledgerStateResponse3_2]};
+    const wireMessagesToSend = messagesToSend(message);
+
+    const expectedWireMessageToSend = [
       serializeMessage(
         {signedStates: [ledgerStateResponse3, ledgerStateResponse3_2]},
         participants[0].participantId,
@@ -68,6 +54,6 @@ describe('ledger state', () => {
         participants[1].participantId
       )
     ];
-    expect(response).toMatchObject<Message[]>(expectedResponses);
+    expect(wireMessagesToSend).toMatchObject<Message[]>(expectedWireMessageToSend);
   });
 });

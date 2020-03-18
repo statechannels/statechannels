@@ -1,4 +1,4 @@
-import {select, call, put, putResolve, take, actionChannel} from 'redux-saga/effects';
+import {select, call, put, putResolve, take, actionChannel, fork} from 'redux-saga/effects';
 import {RPSChannelClient} from '../../utils/rps-channel-client';
 import {
   AppData,
@@ -84,7 +84,7 @@ function* gameSagaRun(client: RPSChannelClient) {
       break;
     case 'B.OpponentJoined':
       if (cs.inChannelProposed(channelState)) {
-        yield* joinChannel(channelState, client);
+        yield fork(joinChannel, channelState, client);
       } else if (cs.isRunning(channelState)) {
         yield* startRound();
       }

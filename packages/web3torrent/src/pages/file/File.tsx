@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useContext} from 'react';
+import React, {useEffect, useState} from 'react';
 import {RouteComponentProps, useLocation} from 'react-router-dom';
 
 import {download, getTorrentPeers, WebTorrentContext} from '../../clients/web3torrent-client';
@@ -22,8 +22,7 @@ const getTorrentAndPeersData: (
 };
 
 interface Props {
-  currentNetwork: number;
-  requiredNetwork: number;
+  ready: boolean;
 }
 
 const File: React.FC<RouteComponentProps & Props> = props => {
@@ -32,7 +31,6 @@ const File: React.FC<RouteComponentProps & Props> = props => {
   const [loading, setLoading] = useState(false);
   const [buttonLabel, setButtonLabel] = useState('Start Download');
   const [errorLabel, setErrorLabel] = useState('');
-  const web3torrent = useContext(WebTorrentContext);
 
   const getLiveData = getTorrentAndPeersData(setTorrent, setPeers);
 
@@ -64,14 +62,14 @@ const File: React.FC<RouteComponentProps & Props> = props => {
           <FormButton
             name="download"
             spinner={loading}
-            disabled={props.currentNetwork !== props.requiredNetwork}
+            disabled={!props.ready || buttonLabel === 'Preparing Download...'}
             onClick={async () => {
               setLoading(true);
               setErrorLabel('');
               setButtonLabel('Preparing Download...');
               try {
                 // TODO: Put real values here
-                await web3torrent.paymentChannelClient.approveBudgetAndFund('', '', '', '', '');
+                // await web3torrent.paymentChannelClient.approveBudgetAndFund('', '', '', '', '');
                 setTorrent({...torrent, ...(await download(torrent.magnetURI))});
               } catch (error) {
                 setErrorLabel(
@@ -92,9 +90,9 @@ const File: React.FC<RouteComponentProps & Props> = props => {
               <strong>How do I pay for the download?</strong>
               <br />
               When you click "Start Download", you'll be asked to allocate an amount of ETH so
-              Web3Torrent can collect payments on your behalf and transfer those funds to the
-              seeder. Unlike other systems, the payment is not upfront; instead, you pay as you
-              download.
+              Web3Torrent can collect payments on your behalf and transfer those funds to peers who
+              have pieces of the file . Unlike other systems, the payment is not upfront; instead,
+              you pay as you download.
             </p>
             <p>
               <strong>Is it safe?</strong>

@@ -8,6 +8,7 @@ import {ProgressBar} from './progress-bar/ProgressBar';
 import {ChannelState} from '../../../clients/payment-channel-client';
 import {utils} from 'ethers';
 import {ChannelsList} from '../channels-list/ChannelsList';
+import {prettyPrintWei} from '../../../utils/calculateWei';
 
 const bigNumberify = utils.bigNumberify;
 
@@ -22,13 +23,12 @@ const DownloadInfo: React.FC<DownloadInfoProps> = ({
   channelCache = {},
   mySigningAddress
 }: DownloadInfoProps) => {
-  const myLeechingChannelIds: string[] = Object.keys(channelCache).filter(
+  const myPayingChannelIds: string[] = Object.keys(channelCache).filter(
     key => channelCache[key].payer === mySigningAddress
   );
-  const totalSpent = myLeechingChannelIds
+  const totalSpent = myPayingChannelIds
     .map(id => channelCache[id].beneficiaryBalance)
-    .reduce((a, b) => bigNumberify(a).add(bigNumberify(b)), bigNumberify(0))
-    .toNumber();
+    .reduce((a, b) => bigNumberify(a).add(bigNumberify(b)), bigNumberify(0));
   return (
     <>
       <section className="downloadingInfo">
@@ -45,7 +45,7 @@ const DownloadInfo: React.FC<DownloadInfoProps> = ({
           false
         )}
         <p>
-          Total Spent: <span className="total-spent">{totalSpent} wei</span>
+          Total Spent: <span className="total-spent">{prettyPrintWei(totalSpent)}</span>
         </p>
         <p>
           {torrent.parsedTimeRemaining}.{' '}
@@ -57,8 +57,8 @@ const DownloadInfo: React.FC<DownloadInfoProps> = ({
       </section>
       <ChannelsList
         wires={torrent.wires}
-        channels={_.pickBy(channelCache, ({channelId}) => myLeechingChannelIds.includes(channelId))}
-        peerType={'leecher'}
+        channels={_.pickBy(channelCache, ({channelId}) => myPayingChannelIds.includes(channelId))}
+        participantType={'payer'}
       />
     </>
   );

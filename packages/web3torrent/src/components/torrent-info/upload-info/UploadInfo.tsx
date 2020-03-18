@@ -5,6 +5,7 @@ import './UploadInfo.scss';
 import {ChannelState} from '../../../clients/payment-channel-client';
 import {utils} from 'ethers';
 import {ChannelsList} from '../channels-list/ChannelsList';
+import {prettyPrintWei} from '../../../utils/calculateWei';
 
 const bigNumberify = utils.bigNumberify;
 
@@ -19,26 +20,27 @@ const UploadInfo: React.FC<UploadInfoProps> = ({
   channelCache = {},
   mySigningAddress
 }: UploadInfoProps) => {
-  const mySeedingChannelIds: string[] = Object.keys(channelCache).filter(
+  const myReceivingChannelIds: string[] = Object.keys(channelCache).filter(
     key => channelCache[key].beneficiary === mySigningAddress
   );
-  const totalReceived = mySeedingChannelIds
+  const totalReceived = myReceivingChannelIds
     .map(id => channelCache[id].beneficiaryBalance)
-    .reduce((a, b) => bigNumberify(a).add(bigNumberify(b)), bigNumberify(0))
-    .toNumber();
+    .reduce((a, b) => bigNumberify(a).add(bigNumberify(b)), bigNumberify(0));
   return (
     <>
       <section className="uploadingInfo">
         <p>
-          Total Received: <strong>{totalReceived}</strong> wei
+          Total Received: <strong>{prettyPrintWei(totalReceived)}</strong>
           <br />
           <strong data-test-selector="numPeers">{torrent.numPeers}</strong> Peers connected
         </p>
       </section>
       <ChannelsList
         wires={torrent.wires}
-        channels={_.pickBy(channelCache, ({channelId}) => mySeedingChannelIds.includes(channelId))}
-        peerType={'seeder'}
+        channels={_.pickBy(channelCache, ({channelId}) =>
+          myReceivingChannelIds.includes(channelId)
+        )}
+        participantType={'beneficiary'}
       />
     </>
   );

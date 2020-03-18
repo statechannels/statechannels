@@ -26,8 +26,15 @@ export function getConfirmCreateChannelState(
 
 // TODO:Ideally this should be a type guard
 export function isConfirmCreateChannel(applicationWorkflowState: AppWorkflowState): boolean {
+  // TODO: This is fragile and should be revisited at some point
+  const joinInConfirmCreateChannel =
+    getApplicationStateValue(applicationWorkflowState) === 'confirmJoinChannelWorkflow' &&
+    applicationWorkflowState.value['confirmJoinChannelWorkflow'] &&
+    applicationWorkflowState.value['confirmJoinChannelWorkflow']['confirmChannelCreation'] ===
+      'invokeCreateChannelConfirmation';
+
   return (
-    getApplicationStateValue(applicationWorkflowState) === 'confirmJoinChannelWorkflow' ||
+    joinInConfirmCreateChannel ||
     getApplicationStateValue(applicationWorkflowState) === 'confirmCreateChannelWorkflow'
   );
 }
@@ -60,7 +67,7 @@ export function getApplicationOpenProgress(applicationWorkflowState: AppWorkflow
 export function getAmountsFromPendingBudget(
   budget: SiteBudget
 ): {playerAmount: BigNumber; hubAmount: BigNumber} {
-  const {pending} = budget.budgets[ETH_ASSET_HOLDER_ADDRESS];
+  const {pending} = budget.forAsset[ETH_ASSET_HOLDER_ADDRESS];
   const {playerAmount, hubAmount} = pending;
   return {playerAmount, hubAmount};
 }

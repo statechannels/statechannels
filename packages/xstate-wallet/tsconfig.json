@@ -28,6 +28,9 @@
     },
     {
       "path": "../devtools"
+    },
+    {
+      "path": "../client-api-schema"
     }
   ]
 }

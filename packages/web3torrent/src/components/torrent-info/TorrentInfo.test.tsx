@@ -78,7 +78,6 @@ describe('<TorrentInfo />', () => {
     expect(fileCostElement.exists()).toEqual(true);
     expect(magnetLinkButtonElement.exists()).toEqual(true);
     expect(downloadInfoElement.exists()).toEqual(false);
-    expect(uploadInfoElement.exists()).toEqual(false);
 
     expect(fileNameElement.text()).toEqual(torrent.name);
     expect(fileSizeElement.text()).toEqual(prettier(torrent.length));
@@ -102,7 +101,6 @@ describe('<TorrentInfo />', () => {
   it('can show the DownloadInfo component when the status allows it', () => {
     const {downloadInfoElement, uploadInfoElement} = mockTorrentInfo({status: Status.Downloading});
     expect(downloadInfoElement.exists()).toEqual(true);
-    expect(uploadInfoElement.exists()).toEqual(false);
   });
 
   it("can show the UploadInfo component when the client is the torrent's author", () => {
