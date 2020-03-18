@@ -1,11 +1,10 @@
 import {Machine, MachineConfig, ServiceConfig} from 'xstate';
 
 import {SupportState} from '.';
-import {Store} from '../store';
+import {Store, Funding} from '../store';
 import {allocateToTarget} from '../utils/outcome';
 import {AllocationItem} from '../store/types';
 import {getDataAndInvoke} from '../utils';
-import {Funding} from '../store';
 
 const WORKFLOW = 'ledger-funding';
 
