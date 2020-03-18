@@ -6,8 +6,8 @@ import {Message as WireMessage} from '@statechannels/wire-format';
 import {fromEvent, Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {deserializeMessage, Message, serializeMessage} from '../wallet/xstate-wallet-internals';
-import * as R from 'ramda';
-import {notContainsHub} from '../utils';
+import * as _ from 'lodash/fp';
+import {notContainsHubParticipantId} from '../utils';
 
 type Snapshot = firebase.database.DataSnapshot;
 type FirebaseEvent = [Snapshot, string | null];
@@ -52,8 +52,9 @@ export function messagesToSend(messageToSend: Message): WireMessage[] {
   const allParticipantsWithDups = messageToSend.signedStates
     .map(state => state.participants)
     .reduce((participantsSoFar, participants) => participantsSoFar.concat(participants), []);
-  return R.intersection(allParticipantsWithDups, allParticipantsWithDups)
-    .filter(notContainsHub)
+
+  return _.uniqBy(p => p.participantId, allParticipantsWithDups)
+    .filter(notContainsHubParticipantId)
     .map(participant =>
       serializeMessage(messageToSend, participant.participantId, cHubParticipantId)
     );

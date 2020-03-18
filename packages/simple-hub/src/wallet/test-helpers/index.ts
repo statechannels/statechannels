@@ -16,8 +16,7 @@ import {
   cHubChainAddress
 } from '../../constants';
 import {AddressZero} from 'ethers/constants';
-
-import * as R from 'ramda';
+import * as _ from 'lodash/fp';
 
 const wallet1 = new ethers.Wallet(
   '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318'
@@ -42,7 +41,7 @@ const hub: Participant = {
 const second: Participant = {
   signingAddress: wallet2.address,
   destination: '0x0000000000000000000000000000000000000000000000000000000000000003',
-  participantId: 'a'
+  participantId: 'b'
 };
 
 export const participants: [Participant, Participant, Participant] = [first, hub, second];
@@ -55,7 +54,7 @@ const channel: ChannelConstants = {
   channelNonce: bigNumberify(0),
   chainId,
   challengeDuration,
-  participants: R.slice(0, 2, participants),
+  participants: _.slice(0, 2, participants),
   appDefinition
 };
 
