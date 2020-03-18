@@ -82,16 +82,20 @@ test('virtual funding', async () => {
     [aStore, hubStore].map(async (store: XstateStore) => {
       const state = ledgerState([first, third], [1, 3]);
       const signatures = [wallet1, wallet3].map(({privateKey}) => signState(state, privateKey));
-      store.pushMessage({signedStates: [{...state, signatures}]});
-      store.setLedger((await store.getEntry(calculateChannelId(state))) as MemoryChannelStoreEntry);
+      await store.pushMessage({signedStates: [{...state, signatures}]});
+      await store.setLedger(
+        (await store.getEntry(calculateChannelId(state))) as MemoryChannelStoreEntry
+      );
     })
   );
   await Promise.all(
     [bStore, hubStore].map(async (store: XstateStore) => {
       const state = ledgerState([second, third], [1, 3]);
       const signatures = [wallet2, wallet3].map(({privateKey}) => signState(state, privateKey));
-      store.pushMessage({signedStates: [{...state, signatures}]});
-      store.setLedger((await store.getEntry(calculateChannelId(state))) as MemoryChannelStoreEntry);
+      await store.pushMessage({signedStates: [{...state, signatures}]});
+      await store.setLedger(
+        (await store.getEntry(calculateChannelId(state))) as MemoryChannelStoreEntry
+      );
     })
   );
 
@@ -131,7 +135,7 @@ test('invalid joint state', async () => {
     outcome: simpleEthAllocation([])
   };
 
-  store.pushMessage({
+  await store.pushMessage({
     signedStates: [{...invalidState, signatures: [signState(invalidState, wallet1.privateKey)]}]
   });
 
