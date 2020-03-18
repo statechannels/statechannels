@@ -53,14 +53,41 @@ export class ChannelWallet {
     this.messagingService.requestFeed.subscribe(x => this.handleRequest(x));
   }
 
+  private isWorkflowIdInUse(workflowId: string): boolean {
+    return this.workflows.map(w => w.id).indexOf(workflowId) > -1;
+  }
+
+  // Deterministic workflow ids for certain workflows allows us to avoid spawning a duplicate workflow if the app sends duplicate requests
+  private calculateWorkflowId(request: AppRequestEvent): string {
+    switch (request.type) {
+      case 'JOIN_CHANNEL':
+        return `${request.type}-${request.channelId}`;
+      case 'APPROVE_BUDGET_AND_FUND':
+        return `${request.type}-${request.player.participantId}-${request.hub.participantId}`;
+      default:
+        return `${request.type}-${Guid.create().toString()}`;
+    }
+  }
   private handleRequest(request: AppRequestEvent) {
+    const workflowId = this.calculateWorkflowId(request);
     switch (request.type) {
       case 'CREATE_CHANNEL':
       case 'JOIN_CHANNEL': {
-        const workflow = this.startWorkflow(applicationWorkflow(this.store, this.messagingService));
-        this.workflows.push(workflow);
+        if (!this.isWorkflowIdInUse(workflowId)) {
+          const workflow = this.startWorkflow(
+            applicationWorkflow(this.store, this.messagingService),
+            workflowId
+          );
+          this.workflows.push(workflow);
 
-        workflow.machine.send(request);
+          workflow.machine.send(request);
+        } else {
+          // TODO: To allow RPS to keep working we just warn about duplicate events
+          // Eventually this could probably be an error
+          console.warn(
+            `There is already a workflow running with id ${workflowId}, no new workflow will be spawned`
+          );
+        }
         break;
       }
       case 'APPROVE_BUDGET_AND_FUND': {
@@ -70,7 +97,8 @@ export class ChannelWallet {
             hub: request.hub,
             budget: request.budget,
             requestId: request.requestId
-          })
+          }),
+          workflowId
         );
         this.workflows.push(workflow);
 
@@ -79,15 +107,21 @@ export class ChannelWallet {
       }
       case 'ENABLE_ETHEREUM': {
         const workflow = this.startWorkflow(
-          ethereumEnableWorkflow(this.store, this.messagingService, {requestId: request.requestId})
+          ethereumEnableWorkflow(this.store, this.messagingService, {requestId: request.requestId}),
+          workflowId
         );
         this.workflows.push(workflow);
         break;
       }
     }
   }
-  private startWorkflow(machineConfig: StateNode<any, any, any, any>): Workflow {
-    const workflowId = Guid.create().toString();
+  private startWorkflow(
+    machineConfig: StateNode<any, any, any, any>,
+    workflowId: string
+  ): Workflow {
+    if (this.isWorkflowIdInUse(workflowId)) {
+      throw new Error(`There is already a workflow running with id ${workflowId}`);
+    }
     const machine = interpret<any, any, any>(machineConfig, {
       devTools: true
     })
