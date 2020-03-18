@@ -70,7 +70,9 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   }
 
   async enable() {
-    log('Enabling WebTorrentPaidStreamingClient');
+    log('Enabling Channel Provider...');
+    await window.channelProvider.enable(process.env.REACT_APP_WALLET_URL);
+    log('Enabling WebTorrentPaidStreamingClient...');
     this.pseAccount = await this.paymentChannelClient.getAddress();
     log('set pseAccount to sc-wallet signing address');
     await window.ethereum.enable(); // TODO move this inside fake provider
