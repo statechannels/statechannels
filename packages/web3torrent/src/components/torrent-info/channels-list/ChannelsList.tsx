@@ -33,11 +33,7 @@ class ChannelsList extends React.Component<UploadInfoProps> {
     } else if (channels[channelId].status === 'closed') {
       channelButton = <button disabled>Closed</button>;
     } else {
-      channelButton = (
-        <button onClick={() => this.context.paymentChannelClient.closeChannel(channelId)}>
-          Close Channel
-        </button>
-      );
+      channelButton = <button disabled>Running</button>;
     }
 
     const wire = wires.find(
