@@ -24,7 +24,7 @@ function setup() {
 
   const component = mount(
     <Router initialEntries={['/']}>
-      <Welcome {...props} />
+      <Welcome {...props} ready={true} />
     </Router>
   );
 

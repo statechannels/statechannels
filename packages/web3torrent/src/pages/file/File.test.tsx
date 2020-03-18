@@ -43,7 +43,7 @@ function setup() {
 
   const component = mount(
     <Router>
-      <File {...props} />
+      <File {...props} ready={true} />
     </Router>
   );
 
