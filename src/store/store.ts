@@ -184,6 +184,7 @@ export class XstateStore implements Store {
       throw `Channel ${channelId} already funded`;
     }
     channelEntry.setFunding(funding);
+    await this.backend.setChannel(channelEntry.channelId, channelEntry);
   }
 
   public async getLedger(peerId: string) {
