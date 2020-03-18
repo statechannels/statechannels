@@ -235,9 +235,14 @@ export class PaymentChannelClient {
     );
   }
 
-  amProposer(channelId: string): boolean {
-    return this.channelCache[channelId].beneficiary === this.mySigningAddress;
+  amProposer(channelIdOrChannelState: string | ChannelState): boolean {
+    if (typeof channelIdOrChannelState === 'string') {
+      return this.channelCache[channelIdOrChannelState].beneficiary === this.mySigningAddress;
+    } else {
+      return channelIdOrChannelState.beneficiary === this.mySigningAddress;
+    }
   }
+
   isPaymentToMe(channelState: ChannelState): boolean {
     // doesn't guarantee that my balance increased
     if (channelState.beneficiary === this.mySigningAddress) {

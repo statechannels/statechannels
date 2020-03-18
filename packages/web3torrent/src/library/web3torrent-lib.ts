@@ -294,7 +294,8 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     // If a channel is proposed, join it
     this.paymentChannelClient.onChannelProposed(async (channelState: ChannelState) => {
       log(channelState);
-      if (!this.paymentChannelClient.amProposer(channelState.channelId)) {
+      if (!this.paymentChannelClient.amProposer(channelState)) {
+        // do not pass a channelId, since this is the first we heard about this channel and it won't be cached
         // only join if counterparty proposed
         await this.paymentChannelClient.joinChannel(channelState.channelId);
         log(`Joined channel ${channelState.channelId}`);
