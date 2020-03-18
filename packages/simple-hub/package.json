@@ -13,7 +13,6 @@
     "ethers": "4.0.45",
     "firebase": "7.11.0",
     "pino": "5.16.0",
-    "ramda": "0.27.0",
     "rxjs": "6.5.4"
   },
   "devDependencies": {
@@ -26,7 +25,6 @@
     "@types/nodemon": "1.19.0",
     "@types/pino": "5.20.0",
     "@types/prettier": "1.19.0",
-    "@types/ramda": "0.26.43",
     "@typescript-eslint/eslint-plugin": "2.18.0",
     "@typescript-eslint/parser": "2.18.0",
     "eslint": "6.8.0",
