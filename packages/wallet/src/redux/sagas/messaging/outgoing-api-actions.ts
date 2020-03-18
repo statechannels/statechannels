@@ -56,6 +56,15 @@ export const addressResponse: ActionConstructor<AddressResponse> = p => ({
   type: "WALLET.ADDRESS_RESPONSE"
 });
 
+export interface EthereumAddressError extends ApiResponseAction {
+  type: "WALLET.ETHEREUM_ADDRESS_ERROR";
+}
+
+export const ethereumAddressError: ActionConstructor<EthereumAddressError> = p => ({
+  ...p,
+  type: "WALLET.ETHEREUM_ADDRESS_ERROR"
+});
+
 export interface EthereumAddressResponse extends ApiResponseAction {
   type: "WALLET.ETHEREUM_ADDRESS_RESPONSE";
   ethereumSelectedAddress: string;
@@ -216,6 +225,7 @@ export type OutgoingApiAction =
   | ChannelProposedEvent
   | PushMessageResponse
   | UnknownChannelId
+  | EthereumAddressError
   | NoContractError
   | JoinChannelResponse
   | ValidationError

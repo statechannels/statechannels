@@ -91,7 +91,15 @@ function* handleMessage(payload: RequestObject) {
   switch (payload.method) {
     case "EnableEthereum":
       //  ask metamask permission to access accounts
-      yield call([window.ethereum, "enable"]);
+      try {
+        yield call([window.ethereum, "enable"]);
+        yield fork(
+          messageSender,
+          outgoingMessageActions.addressResponse({id, address: yield accountsChangedSaga()})
+        );
+      } catch {
+        yield fork(messageSender, outgoingMessageActions.ethereumAddressError({id}));
+      }
       break;
     case "GetAddress":
       const address = yield select(getAddress);
