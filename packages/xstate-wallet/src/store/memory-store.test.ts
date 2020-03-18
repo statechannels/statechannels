@@ -5,7 +5,7 @@ import {Wallet} from 'ethers';
 import {calculateChannelId, signState} from './state-utils';
 import {NETWORK_ID, CHALLENGE_DURATION} from '../constants';
 import {ChannelStoreEntry} from './channel-store-entry';
-import {simpleEthAllocation} from '../utils/outcome';
+import {simpleEthAllocation, makeDestination} from '../utils/outcome';
 
 const {address: aAddress, privateKey: aPrivateKey} = new Wallet(
   '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318'
@@ -14,7 +14,7 @@ const {address: aAddress, privateKey: aPrivateKey} = new Wallet(
 const {address: bAddress, privateKey: bPrivateKey} = new Wallet(
   '0xb3ab7b031311fe1764b657a6ae7133f19bac97acd1d7edca9409daa35892e727'
 ); // 0x2222E21c8019b14dA16235319D34b5Dd83E644A9
-const [aDestination, bDestination] = [aAddress, bAddress]; // for convenience
+const [aDestination, bDestination] = [aAddress, bAddress].map(makeDestination); // for convenience
 
 const outcome = simpleEthAllocation([
   {destination: aDestination, amount: new BigNumber(5)},

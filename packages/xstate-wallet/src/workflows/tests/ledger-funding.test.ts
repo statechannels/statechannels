@@ -109,7 +109,7 @@ test('happy path', async () => {
           destination: destinations[i],
           amount: amounts[i].sub(deductionAmounts[i])
         }))
-        .concat([{destination: targetChannelId, amount: deductionAmounts.reduce(add)}])
+        .concat([{destination: targetChannelId as any, amount: deductionAmounts.reduce(add)}])
     );
 
     expect((await aStore.getEntry(targetChannelId)).funding).toMatchObject({

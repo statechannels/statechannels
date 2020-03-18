@@ -8,7 +8,7 @@ import {signState, calculateChannelId} from '../../store/state-utils';
 import {Participant, Outcome, SignedState, ChannelConstants} from '../../store/types';
 import {AddressZero, HashZero} from 'ethers/constants';
 import {add} from '../../utils/math-utils';
-import {simpleEthAllocation, simpleEthGuarantee} from '../../utils/outcome';
+import {simpleEthAllocation, simpleEthGuarantee, makeDestination} from '../../utils/outcome';
 
 import {wallet1, wallet2, wallet3, threeParticipants as participants} from './data';
 import {subscribeToMessages} from './message-service';
@@ -92,7 +92,7 @@ const targetState = state(targetChannel, targetOutcome, targetTurnNum);
 
 const jointChannel = channelConstants(participants);
 const jointOutcome = simpleEthAllocation([
-  {destination: targetChannelId, amount: totalTargetAmount},
+  {destination: makeDestination(targetChannelId), amount: totalTargetAmount},
   {destination: hub.destination, amount: totalTargetAmount}
 ]);
 const jointState = state(jointChannel, jointOutcome, 1);
@@ -113,7 +113,7 @@ const ledger1 = channelConstants(aliceAndHub);
 const ledger1Outcome = simpleEthAllocation([
   {destination: hub.destination, amount: ledger1Amounts[0]},
   {destination: alice.destination, amount: ledger1Amounts[1]},
-  {destination: guarantor1Id, amount: totalTargetAmount}
+  {destination: makeDestination(guarantor1Id), amount: totalTargetAmount}
 ]);
 const ledger1TurnNum = 8;
 const ledger1State = state(ledger1, ledger1Outcome, ledger1TurnNum);
@@ -132,9 +132,9 @@ const guarantor2Id = calculateChannelId(guarantor2State);
 const ledger2Amounts = [5, 7].map(bigNumberify);
 const ledger2 = channelConstants(bobAndHub);
 const ledger2Outcome = simpleEthAllocation([
-  {destination: hub.destination, amount: ledger2Amounts[0]},
-  {destination: bob.destination, amount: ledger2Amounts[1]},
-  {destination: guarantor2Id, amount: totalTargetAmount}
+  {destination: makeDestination(hub.destination), amount: ledger2Amounts[0]},
+  {destination: makeDestination(bob.destination), amount: ledger2Amounts[1]},
+  {destination: makeDestination(targetChannelId), amount: totalTargetAmount}
 ]);
 const ledger2TurnNum = 6;
 const ledger2State = state(ledger2, ledger2Outcome, ledger2TurnNum);

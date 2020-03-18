@@ -20,6 +20,7 @@ import * as App from '../workflows/application';
 import * as CreateAndFundLedger from '../workflows/create-and-fund-ledger';
 import {Guid} from 'guid-typescript';
 import * as CloseLedgerAndWithdraw from '../workflows/close-ledger-and-withdraw';
+import {makeDestination} from '../utils/outcome';
 
 export class Player {
   privateKey: string;
@@ -79,7 +80,7 @@ export class Player {
     return this.channelWallet.workflows[0]?.machine.state.value;
   }
   get destination() {
-    return '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7';
+    return makeDestination('0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7');
   }
   get participant(): Participant {
     return {

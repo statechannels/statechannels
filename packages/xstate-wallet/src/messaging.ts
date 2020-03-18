@@ -24,13 +24,13 @@ import {fromEvent, Observable} from 'rxjs';
 import {ChannelStoreEntry} from './store/channel-store-entry';
 import {Message as WireMessage} from '@statechannels/wire-format';
 import {unreachable} from './utils';
-import {isAllocation, Message, SiteBudget} from './store/types';
+import {isAllocation, Message, SiteBudget, Participant} from './store/types';
 import {serializeAllocation, serializeSiteBudget} from './serde/app-messages/serialize';
 import {deserializeMessage} from './serde/wire-format/deserialize';
 import {serializeMessage} from './serde/wire-format/serialize';
 import {AppRequestEvent} from './event-types';
 import {deserializeAllocations, deserializeBudgetRequest} from './serde/app-messages/deserialize';
-import {isSimpleEthAllocation} from './utils/outcome';
+import {isSimpleEthAllocation, makeDestination} from './utils/outcome';
 import {bigNumberify} from 'ethers/utils';
 import {CHALLENGE_DURATION, NETWORK_ID} from './constants';
 import {Store} from './store';
@@ -241,6 +241,16 @@ export function sendDisplayMessage(displayMessage: 'Show' | 'Hide') {
   window.parent.postMessage(message, '*');
 }
 
+export function convertToInternalParticipant(participant: {
+  destination: string;
+  signingAddress: string;
+  participantId: string;
+}): Participant {
+  return {
+    ...participant,
+    destination: makeDestination(participant.destination)
+  };
+}
 function convertToInternalEvent(request: ChannelRequest): AppRequestEvent {
   switch (request.method) {
     case 'CloseAndWithdraw':
@@ -251,8 +261,8 @@ function convertToInternalEvent(request: ChannelRequest): AppRequestEvent {
         type: 'APPROVE_BUDGET_AND_FUND',
         requestId: request.id,
         budget: deserializeBudgetRequest(request.params),
-        player,
-        hub
+        player: convertToInternalParticipant(player),
+        hub: convertToInternalParticipant(hub)
       };
     case 'CloseChannel':
       return {
@@ -268,6 +278,7 @@ function convertToInternalEvent(request: ChannelRequest): AppRequestEvent {
       return {
         type: 'CREATE_CHANNEL',
         ...request.params,
+        participants: request.params.participants.map(convertToInternalParticipant),
         outcome,
         challengeDuration: bigNumberify(CHALLENGE_DURATION),
         chainId: NETWORK_ID,

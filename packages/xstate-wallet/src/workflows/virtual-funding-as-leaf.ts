@@ -14,7 +14,12 @@ import {supportedStateFeed} from '../store/memory-store';
 import {Store} from '../store';
 import {SupportState, LedgerFunding} from '.';
 import {checkThat, getDataAndInvoke} from '../utils';
-import {simpleEthGuarantee, isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
+import {
+  simpleEthGuarantee,
+  isSimpleEthAllocation,
+  simpleEthAllocation,
+  makeDestination
+} from '../utils/outcome';
 
 import {FundGuarantor, AllocationItem} from '../store/types';
 
@@ -189,7 +194,7 @@ export const jointChannelUpdate = (store: Store) => ({
         const oldOutcome = checkThat(state.outcome, isSimpleEthAllocation);
         const amount = oldOutcome.allocationItems[OutcomeIdx.Hub].amount;
         const outcome = simpleEthAllocation([
-          {destination: targetChannelId, amount},
+          {destination: makeDestination(targetChannelId), amount},
           {destination: state.participants[ParticipantIdx.Hub].destination, amount}
         ]);
         return {state: {...state, turnNum: bigNumberify(1), outcome}};
