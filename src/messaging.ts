@@ -14,7 +14,7 @@ import {
   Request,
   ApproveBudgetAndFundRequest,
   ChannelProposedNotification,
-  CloseAndWithdrawRequest
+  CloseAndWithdrawRequest,
   ErrorResponse
 } from '@statechannels/client-api-schema';
 
