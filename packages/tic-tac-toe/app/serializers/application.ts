@@ -6,7 +6,7 @@ export default class ApplicationSerializer extends FirestoreSerializer {
   normalizeCreateRecordResponse(
     _store: DS.Store,
     _primaryModelClass: DS.Model,
-    payload: any,
+    payload: {doc: {id: string; parent: {id: string}}; data: object},
     id: string
   ): {data: {id: string; attributes: object; type: string}} {
     return {
