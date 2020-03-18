@@ -6,8 +6,7 @@ import {
   ledgerStateResponse2,
   participants
 } from '../test-helpers';
-import {calculateChannelId, Outcome} from '../xstate-wallet-internals';
-import {SimpleAllocation} from '@statechannels/xstate-wallet/src/store/types';
+import {calculateChannelId, Outcome, SimpleAllocation} from '../xstate-wallet-internals';
 import {AddressZero} from 'ethers/constants';
 import {ethers} from 'ethers';
 

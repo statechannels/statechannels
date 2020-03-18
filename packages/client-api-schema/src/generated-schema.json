@@ -372,12 +372,20 @@
     "CloseAndWithdrawParams": {
       "additionalProperties": false,
       "properties": {
-        "channelId": {
-          "$ref": "#/definitions/ChannelId"
+        "hub": {
+          "$ref": "#/definitions/Participant"
+        },
+        "player": {
+          "$ref": "#/definitions/Participant"
+        },
+        "site": {
+          "type": "string"
         }
       },
       "required": [
-        "channelId"
+        "site",
+        "player",
+        "hub"
       ],
       "type": "object"
     },
@@ -400,16 +408,7 @@
           "type": "string"
         },
         "params": {
-          "additionalProperties": false,
-          "properties": {
-            "channelId": {
-              "$ref": "#/definitions/ChannelId"
-            }
-          },
-          "required": [
-            "channelId"
-          ],
-          "type": "object"
+          "$ref": "#/definitions/CloseAndWithdrawParams"
         }
       },
       "required": [
@@ -433,7 +432,16 @@
           "type": "string"
         },
         "result": {
-          "$ref": "#/definitions/ChannelResult"
+          "additionalProperties": false,
+          "properties": {
+            "success": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "success"
+          ],
+          "type": "object"
         }
       },
       "required": [
@@ -582,6 +590,60 @@
         },
         "result": {
           "$ref": "#/definitions/ChannelResult"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
+      "type": "object"
+    },
+    "EnableEthereumRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "EnableEthereum"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": false,
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "EnableEthereumResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "result": {
+          "$ref": "#/definitions/Address"
         }
       },
       "required": [
@@ -1090,6 +1152,9 @@
           "$ref": "#/definitions/UpdateChannelRequest"
         },
         {
+          "$ref": "#/definitions/EnableEthereumRequest"
+        },
+        {
           "$ref": "#/definitions/GetStateRequest"
         },
         {
@@ -1128,6 +1193,9 @@
         },
         {
           "$ref": "#/definitions/UpdateChannelResponse"
+        },
+        {
+          "$ref": "#/definitions/EnableEthereumResponse"
         },
         {
           "$ref": "#/definitions/GetStateResponse"

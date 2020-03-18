@@ -75,7 +75,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     log('Enabling WebTorrentPaidStreamingClient...');
     this.pseAccount = await this.paymentChannelClient.getAddress();
     log('set pseAccount to sc-wallet signing address');
-    await window.ethereum.enable(); // TODO move this inside fake provider
     this.outcomeAddress = await this.paymentChannelClient.getEthereumSelectedAddress();
     log('got ethereum address');
     log('ACCOUNT ID: ', this.pseAccount);

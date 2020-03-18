@@ -91,6 +91,10 @@ interface Balance {
   hubAmount: string;
 }
 
+// EnableEthereum
+export type EnableEthereumRequest = JsonRpcRequest<'EnableEthereum', {}>;
+export type EnableEthereumResponse = JsonRpcResponse<Address>;
+
 // GetAddress
 export type GetAddressRequest = JsonRpcRequest<'GetAddress', {}>; // todo: what are params
 export type GetAddressResponse = JsonRpcResponse<Address>;
@@ -151,12 +155,6 @@ export type ChallengeChannelParams = ChallengeChannelRequest['params']; // for b
 export type ChallengeChannelRequest = JsonRpcRequest<'ChallengeChannel', {channelId: ChannelId}>;
 export type ChallengeChannelResponse = JsonRpcResponse<ChannelResult>;
 
-export interface CloseAndWithdrawParams {
-  channelId: ChannelId;
-}
-export type CloseAndWithdrawRequest = JsonRpcRequest<'CloseAndWithdraw', {channelId: ChannelId}>;
-export type CloseAndWithdrawResponse = JsonRpcResponse<ChannelResult>;
-
 // Budget
 export interface TokenBudget {
   token: string;
@@ -181,6 +179,10 @@ export type GetBudgetResponse = JsonRpcResponse<SiteBudget | {}>;
 
 export type ApproveBudgetAndFundRequest = JsonRpcRequest<'ApproveBudgetAndFund', BudgetRequest>;
 export type ApproveBudgetAndFundResponse = JsonRpcResponse<SiteBudget>;
+
+export type CloseAndWithdrawParams = {site: string; player: Participant; hub: Participant};
+export type CloseAndWithdrawRequest = JsonRpcRequest<'CloseAndWithdraw', CloseAndWithdrawParams>;
+export type CloseAndWithdrawResponse = JsonRpcResponse<{success: boolean}>;
 // Notifications
 export type ChannelProposedNotification = JsonRpcNotification<'ChannelProposed', ChannelResult>;
 export type ChannelUpdatedNotification = JsonRpcNotification<'ChannelUpdated', ChannelResult>;
@@ -201,6 +203,7 @@ export type Request =
   | CreateChannelRequest
   | JoinChannelRequest
   | UpdateChannelRequest
+  | EnableEthereumRequest
   | GetStateRequest
   | PushMessageRequest
   | ChallengeChannelRequest
@@ -215,6 +218,7 @@ export type Response =
   | CreateChannelResponse
   | JoinChannelResponse
   | UpdateChannelResponse
+  | EnableEthereumResponse
   | GetStateResponse
   | PushMessageResponse
   | ChallengeChannelResponse
