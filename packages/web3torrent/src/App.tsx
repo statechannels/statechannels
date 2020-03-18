@@ -39,6 +39,10 @@ class App extends React.Component {
 
   render() {
     const {currentNetwork, requiredNetwork, canTorrent} = this.state;
+    const ready =
+      currentNetwork === requiredNetwork &&
+      !!this.context.pseAccount &&
+      !!this.context.outcomeAddress;
     return (
       <Router history={history}>
         <main>
@@ -53,49 +57,22 @@ class App extends React.Component {
             requiredNetwork={requiredNetwork}
             onWeb3Fallback={!('ethereum' in window)}
           />
-          <Route
-            path={RoutePath.Root}
-            render={props => (
-              <LayoutHeader
-                {...props}
-                currentNetwork={currentNetwork}
-                requiredNetwork={requiredNetwork}
-              />
-            )}
-          />
+          <Route path={RoutePath.Root} render={props => <LayoutHeader {...props} />} />
           <Switch>
             <Route
               exact
               path={RoutePath.Root}
-              render={props => (
-                <Welcome
-                  {...props}
-                  currentNetwork={currentNetwork}
-                  requiredNetwork={requiredNetwork}
-                />
-              )}
+              render={props => <Welcome {...props} ready={ready} />}
             />
             <Route
               exact
               path={RoutePath.File}
-              render={props => (
-                <File
-                  {...props}
-                  currentNetwork={currentNetwork}
-                  requiredNetwork={requiredNetwork}
-                />
-              )}
+              render={props => <File {...props} ready={ready} />}
             />
             <Route
               exact
               path={RoutePath.Upload}
-              render={props => (
-                <Upload
-                  {...props}
-                  currentNetwork={currentNetwork}
-                  requiredNetwork={requiredNetwork}
-                />
-              )}
+              render={props => <Upload {...props} ready={ready} />}
             />
           </Switch>
         </main>

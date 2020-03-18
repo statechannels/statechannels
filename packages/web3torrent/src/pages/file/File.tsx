@@ -22,8 +22,7 @@ const getTorrentAndPeersData: (
 };
 
 interface Props {
-  currentNetwork: number;
-  requiredNetwork: number;
+  ready: boolean;
 }
 
 const File: React.FC<RouteComponentProps & Props> = props => {
@@ -63,10 +62,7 @@ const File: React.FC<RouteComponentProps & Props> = props => {
           <FormButton
             name="download"
             spinner={loading}
-            disabled={
-              props.currentNetwork !== props.requiredNetwork ||
-              buttonLabel === 'Preparing Download...'
-            }
+            disabled={!props.ready || buttonLabel === 'Preparing Download...'}
             onClick={async () => {
               setLoading(true);
               setErrorLabel('');

@@ -5,8 +5,7 @@ import {generateMagnetURL} from '../../utils/magnet';
 import './Upload.scss';
 
 interface Props {
-  currentNetwork: number;
-  requiredNetwork: number;
+  ready: boolean;
 }
 
 const Upload: React.FC<RouteComponentProps & Props> = props => {
@@ -23,7 +22,7 @@ const Upload: React.FC<RouteComponentProps & Props> = props => {
           name="file"
           id="file"
           multiple={true}
-          disabled={props.currentNetwork !== props.requiredNetwork}
+          disabled={!props.ready}
           className="inputfile"
           onChange={async event => {
             if (event.target.files && event.target.files[0]) {

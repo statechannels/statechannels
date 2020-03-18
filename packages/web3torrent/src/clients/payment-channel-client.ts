@@ -32,9 +32,6 @@ if (process.env.REACT_APP_FAKE_CHANNEL_PROVIDER === 'true') {
   require('@statechannels/channel-provider');
 }
 
-// TODO: Put inside better place than here where app can handle error case
-window.channelProvider.enable(process.env.REACT_APP_WALLET_URL);
-
 // This Client targets at _unidirectional_, single asset (ETH) payment channel with 2 participants running on Nitro protocol
 // The beneficiary proposes the channel, but accepts payments
 // The payer joins the channel, and makes payments
