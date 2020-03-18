@@ -9,7 +9,7 @@ import {interpret, Interpreter, State} from 'xstate';
 import {Guid} from 'guid-typescript';
 import {convertToOpenEvent} from './utils/workflow-utils';
 import {Notification, Response} from '@statechannels/client-api-schema';
-import {filter, map} from 'rxjs/operators';
+import {filter, map, take} from 'rxjs/operators';
 import {Message, OpenChannel} from './store/types';
 
 export interface Workflow {
@@ -41,7 +41,11 @@ export class ChannelWallet {
         map(o => o as OpenChannel)
       )
       .subscribe(async o => {
-        const channelEntry = await this.store.getEntry(o.data.targetChannelId);
+        const channelEntry = await this.store
+          .channelUpdatedFeed(o.data.targetChannelId)
+          .pipe(take(1))
+          .toPromise();
+
         this.messagingService.sendChannelNotification(
           'ChannelUpdated',
           await convertToChannelResult(channelEntry)
