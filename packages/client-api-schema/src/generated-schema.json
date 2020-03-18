@@ -635,19 +635,7 @@
           "type": "string"
         },
         "result": {
-          "additionalProperties": false,
-          "properties": {
-            "success": {
-              "enum": [
-                true
-              ],
-              "type": "boolean"
-            }
-          },
-          "required": [
-            "success"
-          ],
-          "type": "object"
+          "$ref": "#/definitions/Address"
         }
       },
       "required": [
