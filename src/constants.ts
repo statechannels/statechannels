@@ -16,7 +16,7 @@ export const HUB_DESTINATION = HUB_ADDRESS;
 export const HUB: Participant = {
   destination: hexZeroPad(HUB_DESTINATION.toLowerCase(), 32),
   signingAddress: HUB_ADDRESS,
-  participantId: 'hub'
+  participantId: 'firebase:simple-hub'
 };
 export const CHALLENGE_DURATION = bigNumberify(0x12c); // 5 minutes
 export const NETWORK_ID = process.env.CHAIN_NETWORK_ID || '0';
