@@ -3,7 +3,7 @@ import {
   JoinChannelRequest,
   JoinChannelResponse
 } from '@statechannels/client-api-schema';
-import {filter, map, first} from 'rxjs/operators';
+import {filter, map, first, take} from 'rxjs/operators';
 import waitForExpect from 'wait-for-expect';
 import {FakeChain} from '../chain';
 import {
@@ -28,8 +28,6 @@ it('allows for two wallets to fund an app', async () => {
     'PlayerB',
     fakeChain
   );
-  await playerA.initialize();
-  await playerB.initialize();
 
   hookUpMessaging(playerA, playerB);
 
@@ -41,6 +39,13 @@ it('allows for two wallets to fund an app', async () => {
       first()
     )
     .toPromise();
+
+  const playerBChannelUpdatedPromise = playerB.messagingService.outboxFeed
+    .pipe(
+      filter(o => 'method' in o && o.method === 'ChannelUpdated'),
+      take(1)
+    )
+    .toPromise();
   await playerA.messagingService.receiveRequest(createEvent);
 
   playerA.channelWallet.workflows[0].machine.send({type: 'USER_APPROVES'});
@@ -48,7 +53,6 @@ it('allows for two wallets to fund an app', async () => {
   const createResponse = await createPromise;
 
   expect(createResponse.result).toBeDefined();
-
   const {channelId} = createResponse.result;
   const joinEvent: JoinChannelRequest = generateJoinChannelRequest(channelId);
   const joinPromise = playerB.messagingService.outboxFeed
@@ -58,6 +62,9 @@ it('allows for two wallets to fund an app', async () => {
       first()
     )
     .toPromise();
+
+  await playerBChannelUpdatedPromise;
+
   await playerB.messagingService.receiveRequest(joinEvent);
 
   // Wait for the create channel service to start
