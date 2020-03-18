@@ -6,12 +6,7 @@ import {RoutePath} from '../../../routes';
 
 import './LayoutHeader.scss';
 
-interface Props {
-  currentNetwork: number;
-  requiredNetwork: number;
-}
-
-class LayoutHeader extends React.Component<RouteComponentProps & Props> {
+class LayoutHeader extends React.Component<RouteComponentProps> {
   render() {
     return (
       <header className="header">
