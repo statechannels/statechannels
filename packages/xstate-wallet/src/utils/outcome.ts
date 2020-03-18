@@ -3,11 +3,13 @@ import {
   SimpleAllocation,
   SimpleGuarantee,
   Outcome,
-  Allocation
+  Allocation,
+  Destination
 } from '../store/types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
 import _ from 'lodash';
 import {bigNumberify} from 'ethers/utils';
+import {ethers} from 'ethers';
 
 export function isSimpleEthAllocation(outcome: Outcome): outcome is SimpleAllocation {
   return (
@@ -70,9 +72,19 @@ export function allocateToTarget(
     if (ledgerItem.amount.lt(0)) throw new Error(Errors.InsufficientFunds);
   });
 
-  currentItems.push({destination: targetChannelId, amount: total});
+  currentItems.push({destination: makeDestination(targetChannelId), amount: total});
   currentItems = currentItems.filter(i => i.amount.gt(0));
 
   currentOutcome.allocationItems = currentItems;
   return currentOutcome;
+}
+
+export function makeDestination(addressOrDestination: string): Destination {
+  if (addressOrDestination.length === 42) {
+    return ethers.utils.hexZeroPad(addressOrDestination, 32) as Destination;
+  } else if (addressOrDestination.length === 66) {
+    return addressOrDestination as Destination;
+  } else {
+    throw new Error('Invalid input');
+  }
 }

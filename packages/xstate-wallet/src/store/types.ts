@@ -20,7 +20,7 @@ export interface AssetBudget {
 export interface Participant {
   participantId: string;
   signingAddress: string;
-  destination: string;
+  destination: Destination;
 }
 // signers
 
@@ -31,8 +31,9 @@ export interface StateVariables {
   isFinal: boolean;
 }
 
+export type Destination = string & {_isDestination: void};
 export interface AllocationItem {
-  destination: string;
+  destination: Destination;
   amount: BigNumber;
 }
 export interface SimpleAllocation {
