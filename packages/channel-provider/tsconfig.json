@@ -9,8 +9,7 @@
     "outDir": "dist",
     "jsx": "preserve",
     "target": "es5",
-    "sourceMap": true,
-    "skipLibCheck": true
+    "sourceMap": true
   },
   "include": ["src", "tests"]
 }

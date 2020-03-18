@@ -8,8 +8,7 @@
     "rootDir": "src",
     "outDir": "lib",
     "esModuleInterop": true,
-    "strict": false,
-    "skipLibCheck": true
+    "strict": false
   },
   "references": [{"path": "../devtools"}, {"path": "../nitro-protocol"}],
   "include": ["src/**/*"],
