@@ -80,6 +80,10 @@ export class PaymentChannelClient {
     return convertToChannelState(channelResult);
   }
 
+  async walletVersion() {
+    await this.channelClient.walletVersion();
+  }
+
   async enableEthereum() {
     await this.channelClient.enableEthereum();
   }

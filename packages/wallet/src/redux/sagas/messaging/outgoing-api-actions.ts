@@ -20,6 +20,14 @@ export const createChannelResponse: ActionConstructor<CreateChannelResponse> = p
   type: "WALLET.CREATE_CHANNEL_RESPONSE"
 });
 
+export interface WalletVersionResponse extends ApiResponseAction {
+  type: "WALLET.WALLET_VERSION_RESPONSE";
+}
+export const walletVersionResponse: ActionConstructor<WalletVersionResponse> = p => ({
+  ...p,
+  type: "WALLET.WALLET_VERSION_RESPONSE"
+});
+
 export interface GetStateResponse extends ApiResponseAction {
   type: "WALLET.GET_STATE_RESPONSE";
   channelId: string;
@@ -213,6 +221,7 @@ export const closeChannelResponse: ActionConstructor<CloseChannelResponse> = p =
 
 export type OutgoingApiAction =
   | AddressResponse
+  | WalletVersionResponse
   | EthereumAddressResponse
   | CreateChannelResponse
   | UpdateChannelResponse

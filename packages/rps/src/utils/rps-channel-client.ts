@@ -36,6 +36,10 @@ export class RPSChannelClient {
     return convertToChannelState(channelResult);
   }
 
+  async walletVersion() {
+    return this.channelClient.walletVersion();
+  }
+
   async enableEthereum() {
     return this.channelClient.enableEthereum();
   }

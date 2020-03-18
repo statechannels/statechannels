@@ -143,6 +143,9 @@ export class MessagingService implements MessagingServiceInterface {
     const {id: requestId} = request;
 
     switch (request.method) {
+      case 'WalletVersion':
+        window.parent.postMessage(jrs.success(requestId, 'xstate-wallet@VersionTBD'), '*'); // TODO: inject git or build info
+        break;
       case 'EnableEthereum':
         if (this.store.chain.ethereumIsEnabled) {
           window.parent.postMessage(

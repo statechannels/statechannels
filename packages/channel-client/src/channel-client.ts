@@ -93,6 +93,10 @@ export class ChannelClient implements ChannelClientInterface<ChannelResult> {
     return this.provider.send({method: 'PushMessage', params: message});
   }
 
+  async walletVersion(): Promise<string> {
+    return this.provider.send({method: 'WalletVersion', params: {}});
+  }
+
   async enableEthereum(): Promise<string> {
     return this.provider.send({method: 'EnableEthereum', params: {}});
   }
