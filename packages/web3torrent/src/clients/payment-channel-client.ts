@@ -205,6 +205,9 @@ export class PaymentChannelClient {
           beneficiaryOutcomeAddress,
           payerOutcomeAddress
         );
+      } else {
+        console.error('Insufficient fund to make a payment. Closing channel.');
+        await this.closeChannel(channelId);
       }
     } else {
       console.error('Cannot make a payment in a channel that you did not join');
