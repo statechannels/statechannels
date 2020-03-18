@@ -2,7 +2,7 @@ import {ethers} from 'ethers';
 import {Participant, State} from '../../store/types';
 import {BigNumberish, bigNumberify} from 'ethers/utils';
 import {CHALLENGE_DURATION, HUB} from '../../constants';
-import {simpleEthAllocation} from '../../utils/outcome';
+import {simpleEthAllocation, makeDestination} from '../../utils/outcome';
 
 export const wallet1 = new ethers.Wallet(
   '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318'
@@ -18,12 +18,16 @@ export const wallet3 = new ethers.Wallet(
 
 export const first: Participant = {
   signingAddress: wallet1.address,
-  destination: '0xaaaa000000000000000000000000000000000000000000000000000000000001',
+  destination: makeDestination(
+    '0xaaaa000000000000000000000000000000000000000000000000000000000001'
+  ),
   participantId: 'playerA'
 };
 export const second: Participant = {
   signingAddress: wallet2.address,
-  destination: '0xbbbb000000000000000000000000000000000000000000000000000000000002',
+  destination: makeDestination(
+    '0xbbbb000000000000000000000000000000000000000000000000000000000002'
+  ),
   participantId: 'playerB'
 };
 export const third: Participant = HUB;

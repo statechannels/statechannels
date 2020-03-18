@@ -1,5 +1,6 @@
-import {bigNumberify, hexZeroPad} from 'ethers/utils';
+import {bigNumberify} from 'ethers/utils';
 import {Participant} from './store/types';
+import {makeDestination} from './utils/outcome';
 
 export const WALLET_VERSION = 'xstate-wallet@VersionTBD';
 
@@ -14,7 +15,7 @@ export const NITRO_ADJUDICATOR_ADDRESS =
 export const HUB_ADDRESS = process.env.HUB_ADDRESS || '0xaaaa84838319627Fa056fC3FC29ab94d479B8502';
 export const HUB_DESTINATION = HUB_ADDRESS;
 export const HUB: Participant = {
-  destination: hexZeroPad(HUB_DESTINATION.toLowerCase(), 32),
+  destination: makeDestination(HUB_DESTINATION.toLowerCase()),
   signingAddress: HUB_ADDRESS,
   participantId: 'firebase:simple-hub'
 };

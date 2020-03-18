@@ -11,9 +11,9 @@ const one = bigNumberify(1);
 const two = bigNumberify(2);
 const three = bigNumberify(3);
 
-const left = 'left';
-const right = 'right';
-const middle = 'middle';
+const left = 'left' as any;
+const right = 'right' as any;
+const middle = 'middle' as any;
 const targetChannelId = 'target';
 
 type Allocation = AllocationItem[];

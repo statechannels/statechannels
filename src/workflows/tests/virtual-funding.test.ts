@@ -8,7 +8,7 @@ import {firstState, signState, calculateChannelId} from '../../store/state-utils
 import {ChannelConstants, Outcome, State} from '../../store/types';
 import {AddressZero} from 'ethers/constants';
 import {add} from '../../utils/math-utils';
-import {simpleEthAllocation} from '../../utils/outcome';
+import {simpleEthAllocation, makeDestination} from '../../utils/outcome';
 
 import {
   wallet1,
@@ -125,7 +125,7 @@ test('virtual funding with smart hub', async () => {
     const amount = bigNumberify(5);
     expect(outcome).toMatchObject(
       simpleEthAllocation([
-        {destination: targetChannelId, amount},
+        {destination: makeDestination(targetChannelId), amount},
         {destination: jointParticipants[ParticipantIdx.Hub].destination, amount}
       ])
     );
@@ -197,7 +197,7 @@ test('virtual funding with a simple hub', async () => {
       const amount = bigNumberify(5);
       expect(outcome).toMatchObject(
         simpleEthAllocation([
-          {destination: targetChannelId, amount},
+          {destination: makeDestination(targetChannelId), amount},
           {destination: jointParticipants[ParticipantIdx.Hub].destination, amount}
         ])
       );

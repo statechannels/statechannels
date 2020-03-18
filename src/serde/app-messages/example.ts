@@ -2,6 +2,7 @@ import {Allocations} from '@statechannels/client-api-schema';
 import {SimpleAllocation, MixedAllocation} from '../../store/types';
 import {bigNumberify} from 'ethers/utils';
 import {ETH_ASSET_HOLDER_ADDRESS, ETH_TOKEN} from '../../constants';
+import {makeDestination} from '../../utils/outcome';
 
 export const externalEthAllocation: Allocations = [
   {
@@ -16,8 +17,14 @@ export const externalEthAllocation: Allocations = [
 export const internalEthAllocation: SimpleAllocation = {
   assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
   allocationItems: [
-    {amount: bigNumberify('0x5'), destination: '0xa5c9D076b3FC5910d67B073cbF75c4E13a5AC6e5'},
-    {amount: bigNumberify('0x5'), destination: '0xbaF5D86514365d487ea69B7d7C85913e5Df51648'}
+    {
+      amount: bigNumberify('0x5'),
+      destination: makeDestination('0xa5c9D076b3FC5910d67B073cbF75c4E13a5AC6e5')
+    },
+    {
+      amount: bigNumberify('0x5'),
+      destination: makeDestination('0xbaF5D86514365d487ea69B7d7C85913e5Df51648')
+    }
   ],
   type: 'SimpleAllocation'
 };
@@ -43,11 +50,11 @@ export const internalMixedAllocation: MixedAllocation = {
       allocationItems: [
         {
           amount: bigNumberify('0x1'),
-          destination: '0xa5c9D076b3FC5910d67B073cbF75c4E13a5AC6e5'
+          destination: makeDestination('0xa5c9D076b3FC5910d67B073cbF75c4E13a5AC6e5')
         },
         {
           amount: bigNumberify('0x1'),
-          destination: '0xbaF5D86514365d487ea69B7d7C85913e5Df51648'
+          destination: makeDestination('0xbaF5D86514365d487ea69B7d7C85913e5Df51648')
         }
       ]
     }

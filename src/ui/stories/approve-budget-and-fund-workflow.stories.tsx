@@ -38,13 +38,13 @@ const budget: SiteBudget = {
 const alice: Participant = {
   participantId: 'a',
   signingAddress: '0xa',
-  destination: '0xad'
+  destination: '0xad' as any
 };
 
 const hub: Participant = {
   participantId: 'b',
   signingAddress: '0xb',
-  destination: '0xbd'
+  destination: '0xbd' as any
 };
 const testContext: WorkflowContext = {
   budget,
