@@ -56,7 +56,8 @@ module.exports = {
       'HUB_ADDRESS',
       'CHAIN_NETWORK_ID',
       'ADD_LOGS',
-      'USE_INDEXED_DB'
+      'USE_INDEXED_DB',
+      'USE_VIRTUAL_FUNDING'
     ]),
     new HtmlWebpackPlugin({template: './index-template.html'})
   ],
