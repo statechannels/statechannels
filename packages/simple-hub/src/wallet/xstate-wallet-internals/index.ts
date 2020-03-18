@@ -21,7 +21,7 @@ interface AllocationItem {
   amount: BigNumber;
 }
 
-interface SimpleAllocation {
+export interface SimpleAllocation {
   type: 'SimpleAllocation';
   assetHolderAddress: string;
   allocationItems: AllocationItem[];
