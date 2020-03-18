@@ -112,7 +112,8 @@ export class ChannelWallet {
             opponent: request.hub,
             player: request.player,
             requestId: request.requestId
-          })
+          }),
+          workflowId
         );
         this.workflows.push(workflow);
         break;
