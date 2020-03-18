@@ -62,22 +62,21 @@ export class Player {
     this.store = new XstateStore(chain);
     this.messagingService = new MessagingService(this.store);
     this.channelWallet = new ChannelWallet(this.store, this.messagingService, id);
+
     // TODO: It's possible this could lead to the player being used before the store is ready
     // but since its only a test helper we're probably ok
-  }
-  async initialize() {
-    return this.store.initialize([this.privateKey]);
+    this.store.initialize([this.privateKey]);
   }
 }
 
 export function hookUpMessaging(playerA: Player, playerB: Player) {
-  playerA.channelWallet.onSendMessage(message => {
+  playerA.channelWallet.onSendMessage(async message => {
     if (isNotification(message) && message.method === 'MessageQueued') {
       const pushMessageRequest = generatePushMessage(message.params);
       if (process.env.ADD_LOGS) {
         console.log(`MESSAGE A->B: ${JSON.stringify(pushMessageRequest)}`);
       }
-      playerB.channelWallet.pushMessage(pushMessageRequest);
+      await playerB.channelWallet.pushMessage(pushMessageRequest);
     }
   });
 
