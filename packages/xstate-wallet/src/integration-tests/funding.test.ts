@@ -3,7 +3,7 @@ import {
   JoinChannelRequest,
   JoinChannelResponse
 } from '@statechannels/client-api-schema';
-import {filter, map, first, take} from 'rxjs/operators';
+import {filter, map, first} from 'rxjs/operators';
 import waitForExpect from 'wait-for-expect';
 import {FakeChain} from '../chain';
 import {
@@ -43,7 +43,7 @@ it('allows for two wallets to fund an app', async () => {
   const playerBChannelUpdatedPromise = playerB.messagingService.outboxFeed
     .pipe(
       filter(o => 'method' in o && o.method === 'ChannelUpdated'),
-      take(1)
+      first()
     )
     .toPromise();
   await playerA.messagingService.receiveRequest(createEvent);
