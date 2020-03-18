@@ -96,7 +96,13 @@ type FundLedger = _Objective<
     ledgerId: string;
   }
 >;
-export type Objective = OpenChannel | VirtuallyFund | FundGuarantor | FundLedger;
+type CloseLedger = _Objective<
+  'CloseLedger',
+  {
+    ledgerId: string;
+  }
+>;
+export type Objective = OpenChannel | VirtuallyFund | FundGuarantor | FundLedger | CloseLedger;
 
 export interface Participant {
   participantId: string;

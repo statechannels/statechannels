@@ -106,13 +106,21 @@ export type FundLedger = _Objective<
     ledgerId: string;
   }
 >;
-export type Objective = OpenChannel | VirtuallyFund | FundGuarantor | FundLedger;
+export type CloseLedger = _Objective<
+  'CloseLedger',
+  {
+    ledgerId: string;
+  }
+>;
+export type Objective = OpenChannel | VirtuallyFund | FundGuarantor | FundLedger | CloseLedger;
 
 const guard = <T extends Objective>(name: Objective['type']) => (o: Objective): o is T =>
   o.type === name;
 export const isOpenChannel = guard<OpenChannel>('OpenChannel');
 export const isVirtuallyFund = guard<VirtuallyFund>('VirtuallyFund');
 export const isFundGuarantor = guard<FundGuarantor>('FundGuarantor');
+export const isFundLedger = guard<FundLedger>('FundLedger');
+export const isCloseLedger = guard<CloseLedger>('CloseLedger');
 
 export interface Message {
   signedStates?: SignedState[];

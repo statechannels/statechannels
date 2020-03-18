@@ -52,6 +52,13 @@ export interface EnableEthereum {
   type: 'ENABLE_ETHEREUM';
 }
 
+export interface CloseAndWithdrawRequest {
+  requestId: number;
+  type: 'CLOSE_AND_WITHDRAW';
+  player: Participant;
+  hub: Participant;
+}
+
 export type AppRequestEvent =
   | PlayerRequestConclude
   | PlayerStateUpdate
@@ -59,6 +66,7 @@ export type AppRequestEvent =
   | ChannelUpdated
   | ApproveBudgetAndFund
   | EnableEthereum
-  | JoinChannelEvent;
+  | JoinChannelEvent
+  | CloseAndWithdrawRequest;
 
 export type WorkflowEvent = AppRequestEvent;
