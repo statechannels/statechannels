@@ -12,13 +12,14 @@ import {
   CreateChannelRequest,
   UpdateChannelRequest,
   CloseChannelRequest,
-  ApproveBudgetAndFundRequest
+  ApproveBudgetAndFundRequest,
+  CloseAndWithdrawRequest
 } from '@statechannels/client-api-schema';
 import {interpret, Interpreter} from 'xstate';
 import * as App from '../workflows/application';
 import * as CreateAndFundLedger from '../workflows/create-and-fund-ledger';
 import {Guid} from 'guid-typescript';
-import {HUB_ADDRESS, HUB_DESTINATION} from '../constants';
+import * as CloseLedgerAndWithdraw from '../workflows/close-ledger-and-withdraw';
 
 export class Player {
   privateKey: string;
@@ -29,6 +30,20 @@ export class Player {
   messagingService: MessagingServiceInterface;
   channelWallet: ChannelWallet;
 
+  startCloseLedgerAndWithdraw(context: CloseLedgerAndWithdraw.WorkflowContext) {
+    const workflowId = Guid.create().toString();
+    const machine = interpret<any, any, any>(
+      CloseLedgerAndWithdraw.workflow(this.store, this.messagingService, context),
+      {
+        devTools: true
+      }
+    )
+      .onTransition((state, event) => process.env.ADD_LOGS && logTransition(state, event, this.id))
+
+      .start();
+
+    this.channelWallet.workflows.push({id: workflowId, machine, domain: 'TODO'});
+  }
   startCreateAndFundLedger(context: CreateAndFundLedger.WorkflowContext) {
     const workflowId = Guid.create().toString();
     const machine = interpret<any, any, any>(
@@ -88,7 +103,9 @@ export function hookUpMessaging(playerA: Player, playerB: Player) {
   playerA.channelWallet.onSendMessage(message => {
     if (isNotification(message) && message.method === 'MessageQueued') {
       const pushMessageRequest = generatePushMessage(message.params);
-      if (process.env.ADD_LOGS) {
+      // TODO: This is failing with TypeError: Converting circular structure to JSON
+      // eslint-disable-next-line no-constant-condition
+      if (process.env.ADD_LOGS && false) {
         console.log(`MESSAGE A->B: ${JSON.stringify(pushMessageRequest)}`);
       }
       playerB.channelWallet.pushMessage(pushMessageRequest);
@@ -98,7 +115,9 @@ export function hookUpMessaging(playerA: Player, playerB: Player) {
   playerB.channelWallet.onSendMessage(message => {
     if (isNotification(message) && message.method === 'MessageQueued') {
       const pushMessageRequest = generatePushMessage(message.params);
-      if (process.env.ADD_LOGS) {
+      // TODO: This is failing with TypeError: Converting circular structure to JSON
+      // eslint-disable-next-line no-constant-condition
+      if (process.env.ADD_LOGS && false) {
         console.log(`MESSAGE B->A: ${JSON.stringify(pushMessageRequest)}`);
       }
       playerA.channelWallet.pushMessage(pushMessageRequest);
@@ -194,7 +213,8 @@ export function generateCreateChannelRequest(
 }
 
 export function generateApproveBudgetAndFundRequest(
-  player: Participant
+  player: Participant,
+  hub: Participant
 ): ApproveBudgetAndFundRequest {
   return {
     jsonrpc: '2.0',
@@ -202,14 +222,26 @@ export function generateApproveBudgetAndFundRequest(
     method: 'ApproveBudgetAndFund',
     params: {
       site: 'rps.statechannels.org',
-      hub: {
-        participantId: HUB_ADDRESS,
-        signingAddress: HUB_ADDRESS,
-        destination: HUB_DESTINATION
-      },
+      hub,
       player,
       playerAmount: '0x5',
       hubAmount: '0x5'
+    }
+  };
+}
+
+export function generateCloseAndWithdrawRequest(
+  player: Participant,
+  hub: Participant
+): CloseAndWithdrawRequest {
+  return {
+    jsonrpc: '2.0',
+    id: 88888888,
+    method: 'CloseAndWithdraw',
+    params: {
+      site: 'rps.statechannels.org',
+      hub,
+      player
     }
   };
 }
