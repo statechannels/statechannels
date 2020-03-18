@@ -9,7 +9,8 @@
     "outDir": "lib",
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "strict": false
+    "strict": false,
+    "skipLibCheck": true
   },
   "references": [
     {
