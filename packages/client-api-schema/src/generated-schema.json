@@ -591,6 +591,60 @@
       ],
       "type": "object"
     },
+    "EnableEthereumRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "EnableEthereum"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": false,
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "EnableEthereumResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "result": {
+          "$ref": "#/definitions/Address"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
+      "type": "object"
+    },
     "ExternalDestination": {
       "description": "Nitro ChannelId",
       "pattern": "^0x(0{24})([a-fA-F0-9]{40})$",
@@ -1090,6 +1144,9 @@
           "$ref": "#/definitions/UpdateChannelRequest"
         },
         {
+          "$ref": "#/definitions/EnableEthereumRequest"
+        },
+        {
           "$ref": "#/definitions/GetStateRequest"
         },
         {
@@ -1128,6 +1185,9 @@
         },
         {
           "$ref": "#/definitions/UpdateChannelResponse"
+        },
+        {
+          "$ref": "#/definitions/EnableEthereumResponse"
         },
         {
           "$ref": "#/definitions/GetStateResponse"

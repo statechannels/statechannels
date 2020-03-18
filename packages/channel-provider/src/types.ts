@@ -15,6 +15,8 @@ import {
   GetAddressRequest,
   GetStateResponse,
   GetStateRequest,
+  EnableEthereumRequest,
+  EnableEthereumResponse,
   GetEthereumSelectedAddressResponse,
   GetEthereumSelectedAddressRequest,
   ChallengeChannelResponse,
@@ -78,6 +80,7 @@ export type MethodResponseType = {
   CloseChannel: CloseChannelResponse['result'];
   JoinChannel: JoinChannelResponse['result'];
   GetState: GetStateResponse['result'];
+  EnableEthereum: EnableEthereumResponse['result'];
   GetAddress: GetAddressResponse['result'];
   GetEthereumSelectedAddress: GetEthereumSelectedAddressResponse['result'];
   ChallengeChannel: ChallengeChannelResponse['result'];
@@ -93,6 +96,7 @@ type Method =
   | 'CloseChannel'
   | 'JoinChannel'
   | 'GetState'
+  | 'EnableEthereum'
   | 'GetAddress'
   | 'GetEthereumSelectedAddress'
   | 'ChallengeChannel'
@@ -112,6 +116,7 @@ export type MethodRequestType =
   | Call<'PushMessage', PushMessageRequest>
   | Call<'CloseChannel', CloseChannelRequest>
   | Call<'JoinChannel', JoinChannelRequest>
+  | Call<'EnableEthereum', EnableEthereumRequest>
   | Call<'GetState', GetStateRequest>
   | Call<'GetAddress', GetAddressRequest>
   | Call<'GetEthereumSelectedAddress', GetEthereumSelectedAddressRequest>

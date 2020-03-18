@@ -109,6 +109,29 @@ Note: we don't return the state of the channel, as messages are not necessarily 
 | ---- | ----------------- | -------------------------------------------- |
 | 900  | Wrong Participant | The message is not addressed to this wallet. |
 
+## EnableEthereum
+
+Enables the wallet domain against an ethereum provider (e.g., MetaMask). This triggers the connected State Channels wallet to call `window.ethereum.enable()` in the background from the wallet's domain (e.g., `wallet.statechannels.org`). This must be done _prior_ to calling `GetEthereumSelectedAddress` as otherwise that value will be `undefined`, since the wallet won't have access to that value.
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "EnableEthereum",
+  "id": 1,
+  "params": {}
+}
+```
+
+> Example response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": "0xabc..."
+}
+```
+
 ## GetAddress
 
 Returns the signing address for the current domain.
@@ -151,7 +174,7 @@ Returns the ethereum address selected in metamask. Typically used as the `destin
 {
   "jsonrpc": "2.0",
   "id": 1,
-  "result": ["0xabc..."]
+  "result": "0xabc..."
 }
 ```
 

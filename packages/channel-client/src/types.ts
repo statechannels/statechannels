@@ -47,6 +47,7 @@ export interface ChannelClientInterface<Payload = object> {
   getState: (channelId: string) => Promise<ChannelResult>;
   challengeChannel: (channelId: string) => Promise<ChannelResult>;
   closeChannel: (channelId: string) => Promise<ChannelResult>;
+  enableEthereum: () => Promise<string>;
   getAddress: () => Promise<string>;
   getEthereumSelectedAddress: () => Promise<string>;
   approveBudgetAndFund(
