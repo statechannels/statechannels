@@ -155,12 +155,6 @@ export type ChallengeChannelParams = ChallengeChannelRequest['params']; // for b
 export type ChallengeChannelRequest = JsonRpcRequest<'ChallengeChannel', {channelId: ChannelId}>;
 export type ChallengeChannelResponse = JsonRpcResponse<ChannelResult>;
 
-export interface CloseAndWithdrawParams {
-  channelId: ChannelId;
-}
-export type CloseAndWithdrawRequest = JsonRpcRequest<'CloseAndWithdraw', {channelId: ChannelId}>;
-export type CloseAndWithdrawResponse = JsonRpcResponse<ChannelResult>;
-
 // Budget
 export interface TokenBudget {
   token: string;
@@ -185,6 +179,10 @@ export type GetBudgetResponse = JsonRpcResponse<SiteBudget | {}>;
 
 export type ApproveBudgetAndFundRequest = JsonRpcRequest<'ApproveBudgetAndFund', BudgetRequest>;
 export type ApproveBudgetAndFundResponse = JsonRpcResponse<SiteBudget>;
+
+export type CloseAndWithdrawParams = {site: string; player: Participant; hub: Participant};
+export type CloseAndWithdrawRequest = JsonRpcRequest<'CloseAndWithdraw', CloseAndWithdrawParams>;
+export type CloseAndWithdrawResponse = JsonRpcResponse<{success: boolean}>;
 // Notifications
 export type ChannelProposedNotification = JsonRpcNotification<'ChannelProposed', ChannelResult>;
 export type ChannelUpdatedNotification = JsonRpcNotification<'ChannelUpdated', ChannelResult>;

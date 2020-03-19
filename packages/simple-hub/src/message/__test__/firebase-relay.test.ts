@@ -1,5 +1,4 @@
 import {Message} from '@statechannels/wire-format';
-import {serializeMessage} from '@statechannels/xstate-wallet/lib/src/serde/wire-format/serialize';
 import {
   participants,
   ledgerStateResponse,
@@ -7,6 +6,7 @@ import {
   ledgerStateResponse3_2
 } from '../../wallet/test-helpers';
 import {messagesToSend} from '../firebase-relay';
+import {serializeMessage} from '../../wallet/xstate-wallet-internals';
 
 describe('broadcast to 1 participant', () => {
   it('Echo message with signature', () => {

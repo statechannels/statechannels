@@ -17,9 +17,6 @@
     },
     {
       "path": "../nitro-protocol"
-    },
-    {
-      "path": "../xstate-wallet"
     }
   ],
   "include": ["./src"],

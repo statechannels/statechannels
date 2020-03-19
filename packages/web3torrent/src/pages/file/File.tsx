@@ -48,6 +48,9 @@ const File: React.FC<RouteComponentProps & Props> = props => {
 
   return (
     <section className="section fill download">
+      <div className="jumbotron-upload">
+        <h1>{torrent.originalSeed ? 'Upload a File' : 'Download a File'}</h1>
+      </div>
       <WebTorrentContext.Consumer>
         {web3Torrent => {
           const me = web3Torrent.paymentChannelClient.mySigningAddress;

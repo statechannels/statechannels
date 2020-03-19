@@ -1,8 +1,13 @@
-import {Message, State, calculateChannelId, ChannelConstants} from './xstate-wallet-internals';
+import {
+  Message,
+  State,
+  calculateChannelId,
+  ChannelConstants,
+  SimpleAllocation
+} from './xstate-wallet-internals';
 import {ethers} from 'ethers';
 import {BigNumber} from 'ethers/utils';
 import {cHubChainAddress} from '../constants';
-import {SimpleAllocation} from '@statechannels/xstate-wallet/src/store/types';
 import _ from 'lodash/fp';
 
 interface SimpleAllocationStateVariables {

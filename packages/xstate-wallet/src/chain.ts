@@ -1,12 +1,18 @@
-import {ContractArtifacts, createETHDepositTransaction} from '@statechannels/nitro-protocol';
+import {
+  ContractArtifacts,
+  createETHDepositTransaction,
+  Transactions
+} from '@statechannels/nitro-protocol';
 import {getProvider} from './utils/contract-utils';
 import {ethers} from 'ethers';
 import {BigNumber, bigNumberify} from 'ethers/utils';
-import {State} from './store/types';
+import {State, SignedState} from './store/types';
 import {Observable, fromEvent, from, concat} from 'rxjs';
 import {filter, map} from 'rxjs/operators';
 import {ETH_ASSET_HOLDER_ADDRESS, NITRO_ADJUDICATOR_ADDRESS} from './constants';
 import EventEmitter = require('eventemitter3');
+
+import {toNitroSignedState, calculateChannelId} from './store/state-utils';
 
 const EthAssetHolderInterface = new ethers.utils.Interface(
   // https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
@@ -30,24 +36,39 @@ export interface Chain {
   deposit: (channelId: string, expectedHeld: string, amount: string) => Promise<void>;
   ethereumEnable: () => Promise<string>;
   ethereumIsEnabled: boolean;
-  selectedAddress: string;
+  finalizeAndWithdraw: (finalizationProof: SignedState[]) => Promise<void>;
+  selectedAddress?: string;
 }
 
 // TODO: This chain should be fleshed out enough so it mimics basic chain behavior
-const DEPOSITED = 'deposited';
-type Deposited = ChannelChainInfo & {channelId: string};
+const UPDATED = 'updated';
+type Updated = ChannelChainInfo & {channelId: string};
 export class FakeChain implements Chain {
   private holdings: Record<string, BigNumber> = {};
   private finalized: Record<string, boolean | undefined> = {};
   private eventEmitter: EventEmitter<{
-    deposited: [Deposited];
+    updated: [Updated];
   }> = new EventEmitter();
+
+  private fakeSelectedAddress: string;
+
   public async initialize() {
     /* NOOP */
   }
 
   public async deposit(channelId: string, expectedHeld: string, amount: string): Promise<void> {
     this.depositSync(channelId, expectedHeld, amount);
+  }
+  public async finalizeAndWithdraw(finalizationProof: SignedState[]): Promise<void> {
+    const channelId = calculateChannelId(finalizationProof[0]);
+    this.finalizeSync(channelId);
+
+    this.holdings[channelId] = bigNumberify('0x0');
+    this.eventEmitter.emit(UPDATED, {
+      amount: this.holdings[channelId],
+      finalized: true,
+      channelId
+    });
   }
 
   public finalizeSync(channelId: string) {
@@ -59,7 +80,7 @@ export class FakeChain implements Chain {
 
     if (current.gte(expectedHeld)) {
       this.holdings[channelId] = current.add(amount);
-      this.eventEmitter.emit(DEPOSITED, {
+      this.eventEmitter.emit(UPDATED, {
         amount: this.holdings[channelId],
         finalized: false,
         channelId
@@ -77,8 +98,8 @@ export class FakeChain implements Chain {
   public chainUpdatedFeed(channelId: string): Observable<ChannelChainInfo> {
     const first = from(this.getChainInfo(channelId));
 
-    const updates = fromEvent(this.eventEmitter, DEPOSITED).pipe(
-      filter((event: Deposited) => event.channelId === channelId),
+    const updates = fromEvent(this.eventEmitter, UPDATED).pipe(
+      filter((event: Updated) => event.channelId === channelId),
       map(({amount, finalized}) => ({amount, finalized}))
     );
 
@@ -86,6 +107,7 @@ export class FakeChain implements Chain {
   }
 
   public ethereumEnable() {
+    this.fakeSelectedAddress = '0x123';
     return Promise.resolve(this.selectedAddress);
   }
 
@@ -94,7 +116,7 @@ export class FakeChain implements Chain {
   }
 
   public get selectedAddress() {
-    return '0x123';
+    return this.fakeSelectedAddress;
   }
 }
 
@@ -145,6 +167,18 @@ export class ChainWatcher implements Chain {
     }
   }
 
+  public async finalizeAndWithdraw(finalizationProof: SignedState[]): Promise<void> {
+    const provider = getProvider();
+    const signer = provider.getSigner();
+    const transactionRequest = {
+      ...Transactions.createConcludePushOutcomeAndTransferAllTransaction(
+        finalizationProof.flatMap(toNitroSignedState)
+      ),
+      to: NITRO_ADJUDICATOR_ADDRESS
+    };
+    const response = await signer.sendTransaction(transactionRequest);
+    await response.wait();
+  }
   public async deposit(channelId: string, expectedHeld: string, amount: string): Promise<void> {
     const provider = getProvider();
     const signer = provider.getSigner();

@@ -12,6 +12,7 @@ import {filter, map} from 'rxjs/operators';
 import {Message, OpenChannel} from './store/types';
 import {approveBudgetAndFundWorkflow} from './workflows/approve-budget-and-fund';
 import {ethereumEnableWorkflow} from './workflows/ethereum-enable';
+import * as CloseLedgerAndWithdraw from './workflows/close-ledger-and-withdraw';
 import {AppRequestEvent} from './event-types';
 
 export interface Workflow {
@@ -103,6 +104,18 @@ export class ChannelWallet {
         this.workflows.push(workflow);
 
         workflow.machine.send(request);
+        break;
+      }
+      case 'CLOSE_AND_WITHDRAW': {
+        const workflow = this.startWorkflow(
+          CloseLedgerAndWithdraw.workflow(this.store, this.messagingService, {
+            opponent: request.hub,
+            player: request.player,
+            requestId: request.requestId
+          }),
+          workflowId
+        );
+        this.workflows.push(workflow);
         break;
       }
       case 'ENABLE_ETHEREUM': {

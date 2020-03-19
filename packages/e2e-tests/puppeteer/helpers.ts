@@ -9,22 +9,27 @@ export async function loadRPSApp(page: Page, ganacheAccountIndex: number): Promi
   // and then assign it on the window
   const web3JsFile = fs.readFileSync(path.resolve(__dirname, 'web3/web3.min.js'), 'utf8');
   await page.evaluateOnNewDocument(web3JsFile);
-  await page.evaluateOnNewDocument(`window.web3 = new Web3("http://localhost:8547")`);
-  await page.evaluateOnNewDocument(`window.ethereum = window.web3.currentProvider`);
-  // MetaMask has an .enable() API to unlock it / access it from the app
-  await page.evaluateOnNewDocument(`window.ethereum.enable = () => new Promise(r => r())`);
-  await page.evaluateOnNewDocument(
-    `web3.eth.getAccounts().then(lst => {
+  await page.evaluateOnNewDocument(`
+    window.web3 = new Web3("http://localhost:8547");
+    window.ethereum = window.web3.currentProvider;
+    window.ethereum.enable = () => new Promise(r => {
+      console.log("[puppeteer] window.ethereum.enable() was called");
+      return r();
+    });
+    web3.eth.getAccounts().then(lst => {
       web3.eth.defaultAccount = lst[${ganacheAccountIndex}];
       window.ethereum.selectedAddress = web3.eth.defaultAccount;
-    });`
-  );
-  await page.evaluateOnNewDocument(`window.ethereum.networkVersion = 9001`);
-  await page.evaluateOnNewDocument(`window.ethereum.on = () => {}`);
+    });
+    window.ethereum.networkVersion = 9001;
+    window.ethereum.on = () => {};
+  `);
+
   await page.goto('http://localhost:3000/', {waitUntil: 'load'});
+
   page.on('pageerror', error => {
     throw error;
   });
+
   page.on('console', msg => {
     if (msg.type() === 'error') {
       throw new Error(`Error was logged into the console ${msg.text()}`);
@@ -77,6 +82,11 @@ export async function setUpBrowser(headless: boolean, slowMo?: number): Promise<
       '--disable-background-timer-throttling',
       '--disable-backgrounding-occluded-windows',
       '--disable-renderer-backgrounding'
+    ],
+    args: [
+      // Needed to inject web3.js code into wallet iframe
+      // https://github.com/puppeteer/puppeteer/issues/2548#issuecomment-390077713
+      '--disable-features=site-per-process'
     ]
   });
 

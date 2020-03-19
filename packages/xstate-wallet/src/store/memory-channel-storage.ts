@@ -11,7 +11,8 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     public readonly myIndex: number,
     private stateVariables: Record<string, StateVariables> = {},
     private signatures: Record<string, string[] | undefined> = {},
-    public funding: Funding | undefined = undefined
+    public funding: Funding | undefined = undefined,
+    public readonly applicationSite?: string
   ) {
     this.channelConstants = _.pick(
       constants,
@@ -68,6 +69,10 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     return !!this._supported;
   }
 
+  get isFinalized() {
+    return this.isSupported && this.supported.isFinal;
+  }
+
   private get _supported() {
     // TODO: proper check
     return this.sortedByDescendingTurnNum.find(
@@ -80,7 +85,11 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     if (!vars) throw new Error('No supported state found');
     return {...this.channelConstants, ...vars};
   }
-
+  get support() {
+    // TODO: This should return the whole support
+    // aka the whole chain of signed states that support the latest state
+    return [{...this.channelConstants, ...this.supported}];
+  }
   get isSupportedByMe() {
     return !!this._latestSupportedByMe;
   }

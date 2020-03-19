@@ -13,7 +13,8 @@ import {
   ChannelUpdatedNotification,
   Request,
   ApproveBudgetAndFundRequest,
-  ChannelProposedNotification
+  ChannelProposedNotification,
+  CloseAndWithdrawRequest
 } from '@statechannels/client-api-schema';
 
 import * as jrs from 'jsonrpc-lite';
@@ -38,7 +39,8 @@ type ChannelRequest =
   | JoinChannelRequest
   | UpdateChannelRequest
   | CloseChannelRequest
-  | ApproveBudgetAndFundRequest;
+  | ApproveBudgetAndFundRequest
+  | CloseAndWithdrawRequest;
 
 interface InternalEvents {
   AppRequest: [AppRequestEvent];
@@ -136,7 +138,10 @@ export class MessagingService implements MessagingServiceInterface {
     switch (request.method) {
       case 'EnableEthereum':
         if (this.store.chain.ethereumIsEnabled) {
-          window.parent.postMessage(jrs.success(requestId, this.store.chain.selectedAddress), '*');
+          window.parent.postMessage(
+            jrs.success(requestId, this.store.chain.selectedAddress || null),
+            '*'
+          );
         } else {
           this.eventEmitter.emit('AppRequest', {type: 'ENABLE_ETHEREUM', requestId});
         }
@@ -148,13 +153,14 @@ export class MessagingService implements MessagingServiceInterface {
       case 'GetEthereumSelectedAddress':
         // Possibly undefined, App should call EnableEthereum if so
         const ethereumSelectedAddress = this.store.chain.selectedAddress;
-        window.parent.postMessage(jrs.success(requestId, ethereumSelectedAddress), '*');
+        window.parent.postMessage(jrs.success(requestId, ethereumSelectedAddress || null), '*');
         break;
       case 'CreateChannel':
       case 'UpdateChannel':
       case 'CloseChannel':
       case 'JoinChannel':
       case 'ApproveBudgetAndFund':
+      case 'CloseAndWithdraw':
         const appRequest = await convertToInternalEvent(request);
         this.eventEmitter.emit('AppRequest', appRequest);
         break;
@@ -174,7 +180,6 @@ export class MessagingService implements MessagingServiceInterface {
         break;
       case 'ChallengeChannel':
       case 'GetState':
-      case 'CloseAndWithdraw':
         // TODO: handle these requests
         break;
 
@@ -228,6 +233,8 @@ export function sendDisplayMessage(displayMessage: 'Show' | 'Hide') {
 
 function convertToInternalEvent(request: ChannelRequest): AppRequestEvent {
   switch (request.method) {
+    case 'CloseAndWithdraw':
+      return {...request.params, requestId: request.id, type: 'CLOSE_AND_WITHDRAW'};
     case 'ApproveBudgetAndFund':
       const {player, hub} = request.params;
       return {
