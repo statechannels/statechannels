@@ -15,9 +15,11 @@ export class SimpleHub {
   }
 
   public async pushMessage({signedStates}: Message) {
+    const address = await this.getAddress();
     signedStates?.map(signedState => {
       const {signatures, participants} = signedState;
-      const hubIdx = participants.findIndex(p => p.signingAddress === this.getAddress());
+
+      const hubIdx = participants.findIndex(p => p.signingAddress === address);
       if (hubIdx > -1) {
         const signature = signState(signedState, this.privateKey);
         signatures[hubIdx] = signature;
@@ -30,7 +32,7 @@ export class SimpleHub {
     });
   }
 
-  public getAddress() {
+  public async getAddress() {
     return new ethers.Wallet(this.privateKey).address;
   }
 }

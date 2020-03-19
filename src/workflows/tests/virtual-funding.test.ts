@@ -59,8 +59,11 @@ const outcome: Outcome = simpleEthAllocation([
 
 const context: VirtualFundingAsLeaf.Init = {targetChannelId, jointChannelId};
 
-const ledgerAmounts = [4, 4].map(bigNumberify);
-const depositAmount = ledgerAmounts.reduce(add).toHexString();
+const ledgerAmounts = [4, 4];
+const depositAmount = ledgerAmounts
+  .map(bigNumberify)
+  .reduce(add)
+  .toHexString();
 let hubStore: TestStore;
 let aStore: TestStore;
 let bStore: TestStore;
@@ -179,11 +182,11 @@ test('virtual funding with a simple hub', async () => {
         simpleEthAllocation([
           {
             destination: jointParticipants[ParticipantIdx.A].destination,
-            amount: ledgerAmounts[0].sub(amounts[0])
+            amount: bigNumberify(ledgerAmounts[0]).sub(amounts[0])
           },
           {
             destination: jointParticipants[ParticipantIdx.Hub].destination,
-            amount: ledgerAmounts[1].sub(amounts[1])
+            amount: bigNumberify(ledgerAmounts[1]).sub(amounts[1])
           },
           // We don't know the guarantor channel id
           {destination: expect.any(String), amount: amounts.reduce(add)}

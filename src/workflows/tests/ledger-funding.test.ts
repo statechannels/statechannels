@@ -77,7 +77,7 @@ beforeEach(() => {
   bStore = new TestStore(chain);
   bStore.initialize([wallet2.privateKey]);
 
-  [(aStore, bStore)].forEach((store: TestStore) => {
+  [aStore, bStore].forEach((store: TestStore) => {
     store.createEntry(allSignState(firstState(outcome, targetChannel)));
     store.setLedgerByEntry(store.createEntry(allSignState(firstState(outcome, ledgerChannel))));
   });

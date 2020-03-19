@@ -146,14 +146,16 @@ let aStore: TestStore;
 let bStore: TestStore;
 
 beforeEach(() => {
-  aStore = new TestStore([wallet1.privateKey]);
+  aStore = new TestStore();
+  aStore.initialize([wallet1.privateKey]);
 
   aStore.createEntry(ledger1State, {type: 'Direct'});
   aStore.createEntry(guarantor1State, {type: 'Indirect', ledgerId: ledger1Id});
   aStore.createEntry(jointState, {type: 'Guarantee', guarantorChannelId: guarantor1Id});
   aStore.createEntry(targetState, {type: 'Virtual', jointChannelId});
 
-  bStore = new TestStore([wallet2.privateKey]);
+  bStore = new TestStore();
+  bStore.initialize([wallet2.privateKey]);
   bStore.createEntry(ledger2State, {type: 'Direct'});
   bStore.createEntry(guarantor2State, {type: 'Indirect', ledgerId: ledger2Id});
   bStore.createEntry(jointState, {type: 'Guarantee', guarantorChannelId: guarantor2Id});
@@ -188,7 +190,8 @@ test('virtual defunding with a simple hub', async () => {
 });
 
 test('virtual defunding with a proper hub', async () => {
-  const hubStore = new TestStore([wallet3.privateKey]);
+  const hubStore = new TestStore();
+  await hubStore.initialize([wallet3.privateKey]);
 
   hubStore.createEntry(ledger1State, {type: 'Direct'});
   hubStore.createEntry(jointState, {

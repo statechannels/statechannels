@@ -2,9 +2,9 @@ import {MemoryChannelStoreEntry} from '../../store/memory-channel-storage';
 import {SignedState} from '../../store/types';
 import {hashState} from '../../store/state-utils';
 import {Guid} from 'guid-typescript';
-import {XstateStore, Funding} from '../../store';
+import {XstateStore, Funding, Store} from '../../store';
 
-export class TestStore extends XstateStore {
+export class TestStore extends XstateStore implements Store {
   public _channelLocks: Record<string, Guid>;
   public async createEntry(
     signedState: SignedState,

@@ -70,10 +70,12 @@ const allSignState = (state: State) => ({
 });
 
 let chain: FakeChain;
-beforeEach(() => {
+beforeEach(async () => {
   chain = new FakeChain();
-  aStore = new TestStore([wallet1.privateKey], chain);
-  bStore = new TestStore([wallet2.privateKey], chain);
+  aStore = new TestStore(chain);
+  await aStore.initialize([wallet1.privateKey]);
+  bStore = new TestStore(chain);
+  await bStore.initialize([wallet2.privateKey]);
   const hubStore = new SimpleHub(wallet3.privateKey);
 
   [aStore, bStore].forEach((store: TestStore) => {
