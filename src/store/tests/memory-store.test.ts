@@ -1,12 +1,12 @@
-import {XstateStore} from './store';
-import {State, Objective} from './types';
+import {XstateStore} from './../store';
+import {State, Objective} from './../types';
 import {bigNumberify, BigNumber} from 'ethers/utils';
 import {Wallet} from 'ethers';
-import {calculateChannelId, signState} from './state-utils';
-import {NETWORK_ID, CHALLENGE_DURATION} from '../constants';
-import {ChannelStoreEntry} from './channel-store-entry';
-import {simpleEthAllocation} from '../utils/outcome';
-import {MemoryBackend as Backend} from './memory-backend';
+import {calculateChannelId, signState} from './../state-utils';
+import {NETWORK_ID, CHALLENGE_DURATION} from '../../constants';
+import {ChannelStoreEntry} from '../channel-store-entry';
+import {simpleEthAllocation} from '../../utils/outcome';
+import {MemoryBackend as Backend} from '../memory-backend';
 
 const {address: aAddress, privateKey: aPrivateKey} = new Wallet(
   '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318'

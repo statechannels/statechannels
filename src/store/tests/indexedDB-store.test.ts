@@ -1,13 +1,13 @@
 /* eslint-disable jest/no-disabled-tests */
-import {XstateStore} from './store';
-import {State, Objective} from './types';
+import {XstateStore} from '../store';
+import {State, Objective} from '../types';
 import {bigNumberify, BigNumber} from 'ethers/utils';
 import {Wallet} from 'ethers';
-import {calculateChannelId, signState} from './state-utils';
-import {NETWORK_ID, CHALLENGE_DURATION} from '../constants';
-import {simpleEthAllocation} from '../utils/outcome';
-import {IndexedDBBackend as Backend} from './indexedDB-backend';
-import {ChannelStoreEntry} from './channel-store-entry';
+import {calculateChannelId, signState} from '../state-utils';
+import {NETWORK_ID, CHALLENGE_DURATION} from '../../constants';
+import {simpleEthAllocation} from '../../utils/outcome';
+import {IndexedDBBackend as Backend} from '../indexedDB-backend';
+import {ChannelStoreEntry} from '../channel-store-entry';
 require('fake-indexeddb/auto');
 
 const {address: aAddress, privateKey: aPrivateKey} = new Wallet(
