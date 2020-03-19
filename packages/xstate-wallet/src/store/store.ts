@@ -26,8 +26,6 @@ import {Guid} from 'guid-typescript';
 import {MemoryBackend} from './memory-backend';
 import {ChannelStoreEntry} from './channel-store-entry';
 
-const LOCK_TIMEOUT = 30000;
-
 interface DirectFunding {
   type: 'Direct';
 }

@@ -1,4 +1,4 @@
-import {ChannelConstants, StateVariables, SignedState, Participant, State} from './types';
+import {ChannelConstants, StateVariables, SignedState, Participant} from './types';
 import {signState, hashState, getSignerAddress, calculateChannelId} from './state-utils';
 import _ from 'lodash';
 import {Funding} from './store';

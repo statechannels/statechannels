@@ -5,9 +5,9 @@ import {bigNumberify, BigNumber} from 'ethers/utils';
 import {Wallet} from 'ethers';
 import {calculateChannelId, signState} from './state-utils';
 import {NETWORK_ID, CHALLENGE_DURATION} from '../constants';
-import {ChannelStoreEntry} from './memory-channel-storage';
 import {simpleEthAllocation} from '../utils/outcome';
 import {IndexedDBBackend as Backend} from './indexedDB-backend';
+import {ChannelStoreEntry} from './channel-store-entry';
 require('fake-indexeddb/auto');
 
 const {address: aAddress, privateKey: aPrivateKey} = new Wallet(
@@ -92,7 +92,7 @@ test('newObjectiveFeed', async () => {
   const store = await aStore();
 
   const outputs: Objective[] = [];
-  store.newObjectiveFeed.subscribe(x => outputs.push(x));
+  store.objectiveFeed.subscribe(x => outputs.push(x));
 
   await store.pushMessage({objectives: [objective]});
   expect(outputs).toEqual([objective]);

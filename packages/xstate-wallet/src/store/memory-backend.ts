@@ -1,7 +1,8 @@
 import {BigNumber} from 'ethers/utils';
-import {ChannelStoredData, MemoryChannelStoreEntry} from './memory-channel-storage';
+import {MemoryChannelStoreEntry} from './memory-channel-storage';
 import {Objective, DBBackend} from './types';
 import * as _ from 'lodash';
+import {ChannelStoredData} from './channel-store-entry';
 
 export class MemoryBackend implements DBBackend {
   private _channels: Record<string, ChannelStoredData | undefined> = {};
