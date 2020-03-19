@@ -82,8 +82,8 @@ class ChannelProvider implements ChannelProviderInterface {
       return;
     }
 
-    if (isJsonRpcNotification<keyof NotificationType>(message)) {
-      // this line asserts the type. Not currently safe
+    if (isJsonRpcNotification<keyof NotificationType, any>(message)) {
+      // TODO: use schema validations as better type guards
       const notificationMethod = message.method;
       const notificationParams = message.params;
       this.events.emit(notificationMethod, notificationParams);
