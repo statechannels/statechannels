@@ -4,7 +4,9 @@ import {
   ChannelProviderInterface,
   isJsonRpcNotification,
   MethodRequestType,
-  MethodResponseType
+  MethodResponseType,
+  OnType,
+  OffType
 } from './types';
 import {UIService} from './ui-service';
 import {NotificationType} from '@statechannels/client-api-schema';
@@ -31,17 +33,12 @@ class ChannelProvider implements ChannelProviderInterface {
 
   async enable(url?: string) {
     window.addEventListener('message', this.onMessage.bind(this));
-
     if (url) {
       this.url = url;
     }
-
     this.ui.setUrl(this.url);
     this.messaging.setUrl(this.url);
-
     await this.ui.mount();
-
-    // this.events.emit('Connect');
   }
 
   async send(request: MethodRequestType): Promise<MethodResponseType[MethodRequestType['method']]> {
@@ -73,9 +70,9 @@ class ChannelProvider implements ChannelProviderInterface {
   //   return true;
   // }
 
-  on = this.events.on;
+  on: OnType = (method, params) => this.events.on(method, params);
 
-  off = this.events.off;
+  off: OffType = (method, params) => this.events.off(method, params);
 
   protected async onMessage(event: MessageEvent) {
     const message = event.data;
