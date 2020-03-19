@@ -5,7 +5,7 @@ import {
 } from '@statechannels/channel-provider';
 import log = require('loglevel');
 
-import {EventEmitter, ListenerFn} from 'eventemitter3';
+import {EventEmitter} from 'eventemitter3';
 import {
   BudgetRequest,
   CloseAndWithdrawParams,
@@ -14,12 +14,12 @@ import {
   CreateChannelParams,
   GetStateParams,
   JoinChannelParams,
-  Notification,
   PushMessageResult,
   SiteBudget,
-  UpdateChannelParams
+  UpdateChannelParams,
+  NotificationType,
+  Message
 } from '@statechannels/client-api-schema';
-import {Message} from '../../src/types';
 import {calculateChannelId} from '../../src/utils';
 import {Wallet, utils} from 'ethers';
 
@@ -32,12 +32,12 @@ type ChannelId = string;
  coming from a non-fake `ChannelClient`.
  */
 export class FakeChannelProvider implements ChannelProviderInterface {
-  private events = new EventEmitter();
+  private events = new EventEmitter<NotificationType>();
   protected url = '';
 
   playerIndex: Record<ChannelId, 0 | 1> = {};
   opponentIndex: Record<ChannelId, 0 | 1> = {};
-  address?: string = Wallet.createRandom().address;
+  address: string = Wallet.createRandom().address;
   opponentAddress: Record<ChannelId, string> = {};
   latestState: Record<ChannelId, ChannelResult> = {};
 
@@ -86,20 +86,16 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     }
   }
 
-  on(event: string, callback: ListenerFn): void {
-    this.events.on(event, callback);
-  }
+  on = this.events.on;
 
-  off(event: string): void {
-    this.events.off(event);
-  }
+  off = this.events.off;
 
-  subscribe(): Promise<string> {
-    return Promise.resolve('success');
-  }
-  unsubscribe(): Promise<boolean> {
-    return Promise.resolve(true);
-  }
+  // subscribe(): Promise<string> {
+  //   return Promise.resolve('success');
+  // }
+  // unsubscribe(): Promise<boolean> {
+  //   return Promise.resolve(true);
+  // }
 
   setState(state: ChannelResult): void {
     this.latestState = {...this.latestState, [state.channelId]: state};
@@ -249,21 +245,10 @@ export class FakeChannelProvider implements ChannelProviderInterface {
 
   // TODO: Craft a full message
   protected notifyAppChannelUpdated(data: ChannelResult): void {
-    const message: Notification = {
-      jsonrpc: '2.0',
-      method: 'ChannelUpdated',
-      params: data
-    };
-    this.events.emit('ChannelUpdated', message);
+    this.events.emit('ChannelUpdated', data);
   }
   protected notifyAppBudgetUpdated(data: SiteBudget): void {
-    // TODO: Define budget type in the json-rpc types
-    const message: Notification = {
-      jsonrpc: '2.0',
-      method: 'BudgetUpdated',
-      params: data
-    };
-    this.events.emit('BudgetUpdated', message);
+    this.events.emit('BudgetUpdated', data);
   }
 
   protected notifyOpponent(data: ChannelResult, notificationType: string): void {
@@ -281,7 +266,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     this.events.emit('MessageQueued', {sender, recipient, data});
   }
 
-  private async pushMessage(params: Message<ChannelResult>): Promise<PushMessageResult> {
+  private async pushMessage(params: Message): Promise<PushMessageResult> {
     this.setState(params.data);
     this.notifyAppChannelUpdated(this.latestState[params.data.channelId]);
     const channel: ChannelResult = params.data;
@@ -290,7 +275,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
       .toString();
     switch (params.data.status) {
       case 'proposed':
-        this.events.emit('ChannelProposed', {params: channel});
+        this.events.emit('ChannelProposed', channel);
         break;
       // auto-close, if we received a close
       case 'closing':

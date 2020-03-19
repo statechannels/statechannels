@@ -281,11 +281,11 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
     // If the wallet queues a message, send it across the wire
     this.paymentChannelClient.onMessageQueued((message: Message | any) => {
+      log('message queued event' + JSON.stringify(message));
       // TODO remove any
       if ('params' in message) {
         message = message.params; // peel off jsonrpc headers
       } // else there are no headers with the fake provider
-      log('message queued event' + JSON.stringify(message));
       if (message.recipient === wire.paidStreamingExtension.peerAccount) {
         wire.paidStreamingExtension.sendMessage(JSON.stringify(message));
       }
@@ -293,7 +293,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
     // If a channel is proposed, join it
     this.paymentChannelClient.onChannelProposed(async (channelState: ChannelState) => {
-      log(channelState);
       if (!this.paymentChannelClient.amProposer(channelState)) {
         // do not pass a channelId, since this is the first we heard about this channel and it won't be cached
         // only join if counterparty proposed
