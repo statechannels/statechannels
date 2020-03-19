@@ -17,8 +17,6 @@ async function startLocalFirebaseServer() {
 
   const closeServer = () => server.close;
 
-  process.env = {...process.env, FIREBASE_URL: 'ws://localhost:5555'};
-
   process.on('SIGINT', closeServer);
   process.on('SIGTERM', closeServer);
   process.on('uncaughtException', e => {
