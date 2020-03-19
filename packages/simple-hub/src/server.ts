@@ -34,17 +34,21 @@ export async function startServer() {
     )
     .subscribe(
       async ({snapshotKey, messageToSend, depositsToMake}) => {
-        log.info({messageToSend}, 'Responding with message');
-        await sendMessagesAndCleanup(snapshotKey, messageToSend);
-        await Promise.all(
-          depositsToMake.map(depositToMake =>
-            Blockchain.fund(
-              depositToMake.channelId,
-              ethers.constants.Zero,
-              depositToMake.amountToDeposit
+        try {
+          log.info({messageToSend}, 'Responding with message');
+          await sendMessagesAndCleanup(snapshotKey, messageToSend);
+          await Promise.all(
+            depositsToMake.map(depositToMake =>
+              Blockchain.fund(
+                depositToMake.channelId,
+                ethers.constants.Zero,
+                depositToMake.amountToDeposit
+              )
             )
-          )
-        );
+          );
+        } catch (e) {
+          log.error(e);
+        }
       },
       error => log.error(error),
       () => {
