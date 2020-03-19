@@ -1,6 +1,5 @@
 import {ethers} from 'ethers';
 
-// TODO import {ChainWatcher} from './chain';
 import {XstateStore} from './store';
 
 import {ChannelWallet} from './channel-wallet';
