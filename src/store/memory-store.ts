@@ -3,6 +3,8 @@ import {filter, map} from 'rxjs/operators';
 import {EventEmitter} from 'eventemitter3';
 import * as _ from 'lodash';
 
+import AsyncLock from 'async-lock';
+
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {Wallet} from 'ethers';
 
@@ -13,7 +15,8 @@ import {
   State,
   Objective,
   Message,
-  SiteBudget
+  SiteBudget,
+  BudgetItem
 } from './types';
 import {MemoryChannelStoreEntry} from './memory-channel-storage';
 import {ChannelStoreEntry} from './channel-store-entry';
@@ -88,7 +91,7 @@ export class MemoryStore implements Store {
   private _privateKeys: Record<string, string | undefined> = {};
   protected _ledgers: Record<string, string> = {};
   protected _channelLocks: Record<string, Guid | undefined> = {};
-  private _budgets: Record<string, SiteBudget> = {};
+  private _budgets: Record<string, SiteBudget | undefined> = {};
 
   constructor(privateKeys?: string[], chain?: Chain) {
     // TODO: We shouldn't default to a fake chain
@@ -109,12 +112,58 @@ export class MemoryStore implements Store {
     }
   }
 
-  public getBudget(site: string): Promise<SiteBudget | undefined> {
-    return Promise.resolve(this._budgets[site]);
+  public getBudget(site: string): Promise<SiteBudget> {
+    const currentBudget = this._budgets[site];
+    if (!currentBudget) throw new Error(Errors.noBudget);
+    return Promise.resolve(currentBudget);
   }
+
   public updateOrCreateBudget(budget: SiteBudget): Promise<void> {
     this._budgets[budget.site] = budget;
     return Promise.resolve();
+  }
+
+  private budgetLock = new AsyncLock();
+  public async reserveFunds(
+    site: string,
+    assetHolderAddress: string,
+    amount: BudgetItem
+  ): Promise<SiteBudget> {
+    return await this.budgetLock
+      .acquire<SiteBudget>(site, async release => {
+        const currentBudget = await this.getBudget(site);
+
+        const ethBudget = currentBudget?.forAsset[assetHolderAddress];
+        if (!ethBudget) {
+          throw new Error(Errors.noBudget);
+        }
+
+        const {free, inUse} = ethBudget;
+
+        if (free.hubAmount.lt(amount.hubAmount) || free.playerAmount.lt(amount.playerAmount)) {
+          throw new Error(Errors.budgetInsufficient);
+        }
+
+        currentBudget.forAsset[assetHolderAddress] = {
+          ...ethBudget,
+          free: {
+            hubAmount: free.hubAmount.sub(amount.hubAmount),
+            playerAmount: free.playerAmount.sub(amount.playerAmount)
+          },
+          inUse: {
+            hubAmount: inUse.hubAmount.add(amount.hubAmount),
+            playerAmount: inUse.playerAmount.add(amount.playerAmount)
+          }
+        };
+
+        release();
+
+        return currentBudget;
+      })
+      .catch(e => {
+        console.error(e);
+        throw e;
+      });
   }
 
   public channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry> {
