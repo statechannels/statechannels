@@ -83,7 +83,7 @@ export class MessagingService implements MessagingServiceInterface {
   }
 
   public async sendResponse(id: number, result: Response['result']) {
-    const response = {id, jsonrpc: '2.0', result} as Response; // typescript can't handle this otherwise
+    const response: Response = {id, jsonrpc: '2.0', result};
     this.eventEmitter.emit('SendMessage', response);
   }
 
@@ -129,11 +129,11 @@ export class MessagingService implements MessagingServiceInterface {
       .map(p => p.participantId);
 
     filteredRecipients.forEach(recipient => {
-      const notification = {
+      const notification: Notification = {
         jsonrpc: '2.0',
         method: 'MessageQueued',
         params: serializeMessage(message, recipient, sender)
-      } as Notification; // typescript can't handle this otherwise
+      };
       this.eventEmitter.emit('SendMessage', notification);
     });
   }
