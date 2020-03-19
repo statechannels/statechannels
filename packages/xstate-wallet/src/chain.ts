@@ -158,7 +158,7 @@ export class ChainWatcher implements Chain {
     if (window.ethereum) {
       const destination = window.ethereum.selectedAddress;
       if (destination) {
-        return destination;
+        return ethers.utils.getAddress(destination);
       } else {
         throw new Error('window.ethereum is not enabled');
       }
