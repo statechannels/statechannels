@@ -33,9 +33,7 @@ export function depositsToMake(
     .filter(state => {
       return (
         _.findIndex(
-          allocationItem =>
-            allocationItem.destination === makeDestination(cHubChainAddress).toLowerCase(),
-
+          allocationItem => allocationItem.destination === makeDestination(cHubChainAddress),
           state.outcome.allocationItems
         ) === 0
       );
