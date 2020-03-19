@@ -92,12 +92,12 @@ export class FakeChannelProvider implements ChannelProviderInterface {
 
   off: OffType = (method, params) => this.events.off(method, params);
 
-  // subscribe(): Promise<string> {
-  //   return Promise.resolve('success');
-  // }
-  // unsubscribe(): Promise<boolean> {
-  //   return Promise.resolve(true);
-  // }
+  subscribe(): Promise<string> {
+    return Promise.resolve('success');
+  }
+  unsubscribe(): Promise<boolean> {
+    return Promise.resolve(true);
+  }
 
   setState(state: ChannelResult): void {
     this.latestState = {...this.latestState, [state.channelId]: state};
