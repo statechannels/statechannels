@@ -9,22 +9,19 @@ import {
 
 export type UnsubscribeFunction = () => void;
 
-// The message Payload is designed to be opaque to the app. However, it's useful
-// to be able to specify the Payload type for the FakeChannelClient, as we'll be
-// manipulating it within the client.
-export interface ChannelClientInterface<Payload = object> {
+export interface ChannelClientInterface {
   /*
     Queuing a message is meant for when the app receives messages from
     the wallet meant for the opponent's app (and hence the opponent's wallet).
   */
-  onMessageQueued: (callback: (message: Message<Payload>) => void) => UnsubscribeFunction;
+  onMessageQueued: (callback: (message: Message<object>) => void) => UnsubscribeFunction;
   onChannelUpdated: (callback: (result: ChannelResult) => void) => UnsubscribeFunction;
   onChannelProposed: (callback: (result: ChannelResult) => void) => UnsubscribeFunction;
   /*
     Pushing a message is meant for when the app receives a message from
     the opponent's app meant for the wallet.
   */
-  pushMessage: (message: Message<Payload>) => Promise<PushMessageResult>;
+  pushMessage: (message: Message<object>) => Promise<PushMessageResult>;
   createChannel: (
     participants: Participant[],
     allocations: Allocation[],
