@@ -158,9 +158,9 @@ export class XstateStore implements Store {
       filter(cs => cs.channelId === channelId)
     );
 
-    const currentEntry = this.backend.channels[channelId]
-      ? from(this.getEntry(channelId))
-      : from([]);
+    const currentEntry = from(this.backend.getChannel(channelId)).pipe(
+      filter<MemoryChannelStoreEntry>(c => !!c)
+    );
 
     return merge(currentEntry, newEntries);
   }
