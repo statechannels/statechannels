@@ -1,0 +1,1 @@
+[![Netlify Status](https://api.netlify.com/api/v1/badges/fe975674-cea9-44ed-b9f4-685c03d9f17c/deploy-status)](https://app.netlify.com/sites/xstate-wallet/deploys)

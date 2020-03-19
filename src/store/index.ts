@@ -50,3 +50,6 @@ export function isGuarantee(funding): funding is Guarantee {
 export function isGuarantees(funding): funding is Guarantees {
   return funding.type === 'Guarantees';
 }
+export enum Errors {
+  channelLocked = 'Channel is locked'
+}

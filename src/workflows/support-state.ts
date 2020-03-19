@@ -1,4 +1,4 @@
-import {AnyEventObject, AssignAction, MachineConfig, assign, spawn, Machine} from 'xstate';
+import {AnyEventObject, AssignAction, MachineConfig, assign, spawn, Machine, Actor} from 'xstate';
 import {filter, map} from 'rxjs/operators';
 import {Store} from '../store';
 import {statesEqual, outcomesEqual, calculateChannelId} from '../store/state-utils';
@@ -6,7 +6,7 @@ import {State} from '../store/types';
 
 const WORKFLOW = 'support-state';
 
-export type Init = {state: State};
+export type Init = {state: State; observer?: Actor<any, any>};
 type HasChannelId = Init & {channelId: string};
 
 /*
@@ -39,18 +39,19 @@ type Options = {
 
 const sendState = (store: Store) => async ({state, channelId}: HasChannelId) => {
   const entry = await store.getEntry(channelId);
-  const {latestSupportedByMe, supported, channelConstants} = entry;
+  const {isSupportedByMe, isSupported} = entry;
   // TODO: Should these safety checks be performed in the store?
   if (
     // If we've haven't already signed a state, there's no harm in supporting one.
-    !latestSupportedByMe ||
+    !isSupportedByMe ||
     // If we've already supported this state, we might as well re-send it.
-    statesEqual(channelConstants, latestSupportedByMe, state) ||
+    (isSupportedByMe && statesEqual(entry.latestSupportedByMe, state)) ||
     // Otherwise, we only send it if we haven't signed any new states.
-    (statesEqual(channelConstants, latestSupportedByMe, supported) &&
-      supported?.turnNum.lt(state.turnNum)) ||
+    (isSupported &&
+      statesEqual(entry.latestSupportedByMe, entry.supported) &&
+      entry.supported.turnNum.lt(state.turnNum)) ||
     // We always support a final state if it matches the outcome that we have signed
-    (state.isFinal && outcomesEqual(state.outcome, latestSupportedByMe.outcome))
+    (state.isFinal && outcomesEqual(state.outcome, entry.latestSupportedByMe.outcome))
   ) {
     await store.signAndAddState(channelId, state);
   } else {
@@ -60,7 +61,8 @@ const sendState = (store: Store) => async ({state, channelId}: HasChannelId) => 
 
 const notifyWhenSupported = (store: Store, {state, channelId}: HasChannelId) => {
   return store.channelUpdatedFeed(channelId).pipe(
-    filter(({supported, channelConstants}) => statesEqual(channelConstants, state, supported)),
+    filter(({isSupported}) => isSupported),
+    filter(({supported}) => statesEqual(state, supported)),
     map(() => 'SUPPORTED')
   );
 };
@@ -72,7 +74,7 @@ const options = (store: Store): Options => ({
   actions: {
     spawnObserver: assign<HasChannelId>((ctx: HasChannelId) => ({
       ...ctx,
-      observer: spawn(notifyWhenSupported(store, ctx))
+      observer: !ctx.observer ? spawn(notifyWhenSupported(store, ctx)) : ctx.observer
     }))
   }
 });

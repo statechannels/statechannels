@@ -3,6 +3,9 @@ import {
   StateValue as AppStateValue
 } from '../workflows/application';
 import {WorkflowState as CCCWorkflowState} from '../workflows/confirm-create-channel';
+import {SiteBudget} from '../store/types';
+import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
+import {BigNumber} from 'ethers/utils';
 
 export function getApplicationStateValue(
   applicationWorkflowState: AppWorkflowState
@@ -23,8 +26,15 @@ export function getConfirmCreateChannelState(
 
 // TODO:Ideally this should be a type guard
 export function isConfirmCreateChannel(applicationWorkflowState: AppWorkflowState): boolean {
+  // TODO: This is fragile and should be revisited at some point
+  const joinInConfirmCreateChannel =
+    getApplicationStateValue(applicationWorkflowState) === 'confirmJoinChannelWorkflow' &&
+    applicationWorkflowState.value['confirmJoinChannelWorkflow'] &&
+    applicationWorkflowState.value['confirmJoinChannelWorkflow']['confirmChannelCreation'] ===
+      'invokeCreateChannelConfirmation';
+
   return (
-    getApplicationStateValue(applicationWorkflowState) === 'confirmJoinChannelWorkflow' ||
+    joinInConfirmCreateChannel ||
     getApplicationStateValue(applicationWorkflowState) === 'confirmCreateChannelWorkflow'
   );
 }
@@ -35,7 +45,7 @@ export function isApplicationOpening(applicationWorkflowState: AppWorkflowState)
     stateValue === 'confirmJoinChannelWorkflow' ||
     stateValue === 'confirmCreateChannelWorkflow' ||
     stateValue === 'createChannelInStore' ||
-    stateValue === 'openChannelAndDirectFundProtocol'
+    stateValue === 'openChannelAndFundProtocol'
   );
 }
 
@@ -47,9 +57,17 @@ export function getApplicationOpenProgress(applicationWorkflowState: AppWorkflow
     case 'createChannelInStore':
       return 0.3;
     // TODO: We should create a selector that gets a state value or progress value for this
-    case 'openChannelAndDirectFundProtocol':
+    case 'openChannelAndFundProtocol':
       return 0.65;
     default:
       return 1;
   }
+}
+
+export function getAmountsFromPendingBudget(
+  budget: SiteBudget
+): {playerAmount: BigNumber; hubAmount: BigNumber} {
+  const {pending} = budget.forAsset[ETH_ASSET_HOLDER_ADDRESS];
+  const {playerAmount, hubAmount} = pending;
+  return {playerAmount, hubAmount};
 }

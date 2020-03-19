@@ -1,9 +1,7 @@
 import {interpret} from 'xstate';
 import waitForExpect from 'wait-for-expect';
 
-import {Init, machine, Role} from '../virtualFunding';
-
-import {XstateStore} from '../../store';
+import {SimpleHub} from './simple-hub';
 import {bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
 import {firstState, signState, calculateChannelId} from '../../store/state-utils';
@@ -24,7 +22,10 @@ import {
   third
 } from './data';
 import {subscribeToMessages} from './message-service';
-import {MemoryChannelStoreEntry} from '../../store/memory-channel-storage';
+import {ParticipantIdx} from '../virtual-funding-as-leaf';
+import {VirtualFundingAsLeaf, VirtualFundingAsHub} from '..';
+import {FakeChain} from '../../chain';
+import {TestStore} from './store';
 
 jest.setTimeout(20000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
@@ -51,83 +52,165 @@ const jointChannelId = calculateChannelId(jointChannel);
 
 const amounts = [bigNumberify(2), bigNumberify(3)];
 const outcome: Outcome = simpleEthAllocation([
-  {destination: jointParticipants[0].destination, amount: amounts[0]},
-  {destination: jointParticipants[2].destination, amount: amounts[1]},
-  {destination: jointParticipants[1].destination, amount: amounts.reduce(add)}
+  {destination: jointParticipants[ParticipantIdx.A].destination, amount: amounts[0]},
+  {destination: jointParticipants[ParticipantIdx.Hub].destination, amount: amounts.reduce(add)},
+  {destination: jointParticipants[ParticipantIdx.B].destination, amount: amounts[1]}
 ]);
 
-const context: Init = {targetChannelId, jointChannelId};
+const context: VirtualFundingAsLeaf.Init = {targetChannelId, jointChannelId};
 
-test('virtual funding', async () => {
-  const hubStore = new XstateStore();
-  await hubStore.initialize([wallet3.privateKey]);
+const ledgerAmounts = [4, 4].map(bigNumberify);
+const depositAmount = ledgerAmounts.reduce(add).toHexString();
+let hubStore: TestStore;
+let aStore: TestStore;
+let bStore: TestStore;
+let chain: FakeChain;
 
-  const aStore = new XstateStore();
-  await aStore.initialize([wallet1.privateKey]);
-  const bStore = new XstateStore();
-  await bStore.initialize([wallet2.privateKey]);
+beforeEach(() => {
+  chain = new FakeChain();
+  hubStore = new TestStore(chain);
+  hubStore.initialize([wallet3.privateKey]);
+  aStore = new TestStore(chain);
+  aStore.initialize([wallet1.privateKey]);
+  bStore = new TestStore(chain);
+  bStore.initialize([wallet2.privateKey]);
+});
 
-  const hubService = interpret(machine(hubStore, context, Role.Hub));
-  const aService = interpret(machine(aStore, context, Role.A));
-  const bService = interpret(machine(bStore, context, Role.B));
+test('virtual funding with smart hub', async () => {
+  const hubService = interpret(VirtualFundingAsHub.machine(hubStore).withContext(context));
+  const aService = interpret(VirtualFundingAsLeaf.machine(aStore).withContext(context));
+  const bService = interpret(VirtualFundingAsLeaf.machine(bStore).withContext(context));
   const services = [aService, hubService, bService];
 
-  [aStore, hubStore, bStore].forEach((store: XstateStore) => {
+  [aStore, hubStore, bStore].forEach((store: TestStore) => {
     const state = firstState(outcome, jointChannel);
-    store.pushMessage({
-      signedStates: [{...state, signatures: [signState(state, wallet1.privateKey)]}]
-    });
+    store.createEntry({...state, signatures: [signState(state, wallet1.privateKey)]});
   });
+
+  let state = ledgerState([first, third], ledgerAmounts);
+  let ledgerId = calculateChannelId(state);
+  chain.depositSync(ledgerId, '0', depositAmount);
   await Promise.all(
-    [aStore, hubStore].map(async (store: XstateStore) => {
-      const state = ledgerState([first, third], [1, 3]);
+    [aStore, hubStore].map(async (store: TestStore) => {
       const signatures = [wallet1, wallet3].map(({privateKey}) => signState(state, privateKey));
-      await store.pushMessage({signedStates: [{...state, signatures}]});
-      await store.setLedger(
-        (await store.getEntry(calculateChannelId(state))) as MemoryChannelStoreEntry
-      );
+      store.setLedgerByEntry(store.createEntry({...state, signatures}));
     })
   );
+
+  state = ledgerState([second, third], ledgerAmounts);
+  ledgerId = calculateChannelId(state);
+  chain.depositSync(ledgerId, '0', depositAmount);
   await Promise.all(
-    [bStore, hubStore].map(async (store: XstateStore) => {
-      const state = ledgerState([second, third], [1, 3]);
+    [bStore, hubStore].map(async (store: TestStore) => {
       const signatures = [wallet2, wallet3].map(({privateKey}) => signState(state, privateKey));
-      await store.pushMessage({signedStates: [{...state, signatures}]});
-      await store.setLedger(
-        (await store.getEntry(calculateChannelId(state))) as MemoryChannelStoreEntry
-      );
+      store.setLedgerByEntry(store.createEntry({...state, signatures}));
     })
   );
 
   subscribeToMessages({
-    [jointParticipants[0].participantId]: aStore,
-    [jointParticipants[1].participantId]: hubStore,
-    [jointParticipants[2].participantId]: bStore
+    [jointParticipants[ParticipantIdx.A].participantId]: aStore,
+    [jointParticipants[ParticipantIdx.Hub].participantId]: hubStore,
+    [jointParticipants[ParticipantIdx.B].participantId]: bStore
+  });
+
+  services.forEach(service => service.start());
+
+  await waitForExpect(async () => {
+    expect(hubService.state.value).toEqual('success');
+    expect(bService.state.value).toEqual('success');
+    expect(aService.state.value).toEqual('success');
+
+    const {supported: supportedState} = await aStore.getEntry(jointChannelId);
+    const outcome = supportedState.outcome;
+    const amount = bigNumberify(5);
+    expect(outcome).toMatchObject(
+      simpleEthAllocation([
+        {destination: targetChannelId, amount},
+        {destination: jointParticipants[ParticipantIdx.Hub].destination, amount}
+      ])
+    );
+  }, EXPECT_TIMEOUT);
+});
+
+test('virtual funding with a simple hub', async () => {
+  const hubStore = new SimpleHub(wallet3.privateKey);
+
+  const aService = interpret(VirtualFundingAsLeaf.machine(aStore).withContext(context));
+  const bService = interpret(VirtualFundingAsLeaf.machine(bStore).withContext(context));
+  const services = [aService, bService];
+
+  [aStore, bStore].forEach((store: TestStore) => {
+    const state = firstState(outcome, jointChannel);
+    store.createEntry({...state, signatures: [signState(state, wallet1.privateKey)]});
+  });
+
+  let state = ledgerState([first, third], ledgerAmounts);
+  let ledgerId = calculateChannelId(state);
+  let signatures = [wallet1, wallet3].map(({privateKey}) => signState(state, privateKey));
+
+  chain.depositSync(ledgerId, '0', depositAmount);
+  aStore.setLedgerByEntry(aStore.createEntry({...state, signatures}));
+
+  state = ledgerState([second, third], ledgerAmounts);
+  ledgerId = calculateChannelId(state);
+  signatures = [wallet2, wallet3].map(({privateKey}) => signState(state, privateKey));
+
+  chain.depositSync(ledgerId, '0', depositAmount);
+  bStore.setLedgerByEntry(bStore.createEntry({...state, signatures}));
+
+  subscribeToMessages({
+    [jointParticipants[ParticipantIdx.A].participantId]: aStore,
+    [jointParticipants[ParticipantIdx.B].participantId]: bStore,
+    [jointParticipants[ParticipantIdx.Hub].participantId]: hubStore
   });
 
   services.forEach(service => service.start());
 
   await waitForExpect(async () => {
     expect(bService.state.value).toEqual('success');
-    expect(hubService.state.value).toEqual('success');
     expect(aService.state.value).toEqual('success');
 
-    const {supported} = await aStore.getEntry(jointChannelId);
-    const outcome = supported?.outcome;
-    const amount = bigNumberify(5);
-    expect(outcome).toMatchObject(
-      simpleEthAllocation([
-        {destination: targetChannelId, amount},
-        {destination: jointParticipants[1].destination, amount}
-      ])
-    );
+    {
+      // Check a ledger channel's current outcome
+      const {supported: supportedState} = await aStore.getLedger(
+        jointParticipants[ParticipantIdx.Hub].participantId
+      );
+      expect(supportedState.outcome).toMatchObject(
+        simpleEthAllocation([
+          {
+            destination: jointParticipants[ParticipantIdx.A].destination,
+            amount: ledgerAmounts[0].sub(amounts[0])
+          },
+          {
+            destination: jointParticipants[ParticipantIdx.Hub].destination,
+            amount: ledgerAmounts[1].sub(amounts[1])
+          },
+          // We don't know the guarantor channel id
+          {destination: expect.any(String), amount: amounts.reduce(add)}
+        ])
+      );
+    }
+
+    {
+      // Check the joint channel's current outcome
+      const {outcome} = (await aStore.getEntry(jointChannelId)).supported;
+      const amount = bigNumberify(5);
+      expect(outcome).toMatchObject(
+        simpleEthAllocation([
+          {destination: targetChannelId, amount},
+          {destination: jointParticipants[ParticipantIdx.Hub].destination, amount}
+        ])
+      );
+    }
   }, EXPECT_TIMEOUT);
 });
 
 test('invalid joint state', async () => {
-  const store = new XstateStore();
+  const store = new TestStore();
   await store.initialize([wallet1.privateKey]);
-  const service = interpret(machine(store, context, Role.A)).start();
+  const service = interpret(VirtualFundingAsLeaf.machine(store).withContext(context), {
+    parent: {send: () => undefined} as any // Limits console noise
+  }).start();
 
   const state = firstState(outcome, jointChannel);
   const invalidState: State = {

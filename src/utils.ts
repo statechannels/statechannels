@@ -1,4 +1,4 @@
-import {StateNodeConfig, DoneInvokeEvent} from 'xstate';
+import {StateNodeConfig, DoneInvokeEvent, TransitionConfig} from 'xstate';
 import {hexZeroPad} from 'ethers/utils';
 
 export function unreachable(x: never) {
@@ -20,10 +20,10 @@ export function checkThat<T, S = undefined>(t: T | S, isTypeT: TypeGuard<T, S>):
   return t;
 }
 
-type Opts = {onDone?: string; id?: string; onError?: string};
+type Opts<T> = {onDone?: string; id?: string; onError?: string | TransitionConfig<T, any>};
 export function getDataAndInvoke<T, Services extends string = string>(
-  data: {src: Services; opts?: Opts},
-  service: {src: Services; opts?: Opts},
+  data: {src: Services; opts?: Opts<T>},
+  service: {src: Services; opts?: Opts<T>},
   onDone?: string
 ): StateNodeConfig<T, any, DoneInvokeEvent<T>> {
   return {
@@ -35,7 +35,8 @@ export function getDataAndInvoke<T, Services extends string = string>(
           id: service?.opts?.id,
           src: service.src,
           data: (_, {data}: DoneInvokeEvent<T>) => data,
-          onDone: 'done'
+          onDone: 'done',
+          onError: service.opts?.onError
         }
       },
       done: {type: 'final'}
