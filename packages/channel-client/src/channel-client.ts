@@ -49,7 +49,7 @@ export class ChannelClient implements ChannelClientInterface {
     };
   }
 
-  onBudgetpdated(
+  onBudgetUpdated(
     callback: (result: BudgetUpdatedNotification['params']) => void
   ): UnsubscribeFunction {
     const listenerFn = (result: BudgetUpdatedNotification['params']): void => callback(result);
