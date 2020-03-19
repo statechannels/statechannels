@@ -7,47 +7,66 @@ import {MessagingService} from './messaging';
 import {ChainWatcher} from './chain';
 import {TestStore} from './workflows/tests/store';
 import {bigNumberify} from 'ethers/utils';
-import {ETH_ASSET_HOLDER_ADDRESS, CHALLENGE_DURATION} from './constants';
-import {State} from './store/types';
-import {calculateChannelId} from './store/state-utils';
+import {ETH_ASSET_HOLDER_ADDRESS, CHALLENGE_DURATION, HUB} from './constants';
+import {State, Participant} from './store/types';
+import {calculateChannelId, signState} from './store/state-utils';
+import {makeDestination} from './utils/outcome';
+import {getProvider} from './utils/contract-utils';
 
 const {privateKey, address} = ethers.Wallet.createRandom();
 const chain = new ChainWatcher();
 const store = new TestStore([privateKey], chain);
 
-const state: State = {
-  outcome: {
-    type: 'SimpleAllocation',
-    assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
-    allocationItems: [
-      {
-        destination: '0x000000000000000000000000aaaa84838319627fa056fc3fc29ab94d479b8502',
-        amount: bigNumberify('0x3b9aca00')
+setTimeout(
+  async () => {
+    const me: Participant = {
+      destination: makeDestination(
+        await getProvider()
+          .getSigner()
+          .getAddress()
+      ),
+      participantId: address,
+      signingAddress: address
+    };
+    const state: State = {
+      outcome: {
+        type: 'SimpleAllocation',
+        assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
+        allocationItems: [
+          {destination: HUB.destination, amount: ethers.utils.parseEther('1')},
+          {destination: me.destination, amount: ethers.utils.parseEther('1')}
+        ]
       },
-      {
-        destination: '0x06C61e614f291840Da440BbDD8175dF4Ad5728b7',
-        amount: bigNumberify('0x3b9aca00')
-      }
-    ]
+      turnNum: bigNumberify('0x00'),
+      appData: '0x0',
+      isFinal: false,
+      chainId: '9001',
+      participants: [me, HUB],
+      channelNonce: bigNumberify('0x00'),
+      appDefinition: '0x0000000000000000000000000000000000000000',
+      challengeDuration: CHALLENGE_DURATION
+    };
+    store.createEntry({
+      ...state,
+      signatures: [
+        signState(state, '0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29'),
+        signState(state, privateKey)
+      ]
+    });
+    (store as any).setNonce(
+      state.participants.map(p => p.signingAddress),
+      bigNumberify(1)
+    );
+    const ledgerChannelId = calculateChannelId(state);
+    store.setLedger(ledgerChannelId);
+    await store.chain.deposit(ledgerChannelId, '0', ethers.utils.parseEther('2').toHexString());
   },
-  turnNum: bigNumberify('0x00'),
-  appData: '0x0',
-  isFinal: false,
-  chainId: '9001',
-  participants: [
-    {destination: address, participantId: address, signingAddress: address},
-    {
-      destination: '0x000000000000000000000000aaaa84838319627fa056fc3fc29ab94d479b8502',
-      signingAddress: '0xaaaa84838319627Fa056fC3FC29ab94d479B8502',
-      participantId: 'firebase:simple-hub'
-    }
-  ],
-  channelNonce: bigNumberify('0x00'),
-  appDefinition: '0x0000000000000000000000000000000000000000',
-  challengeDuration: CHALLENGE_DURATION
-};
-store.createEntry({...state, signatures: ['mySig', 'hubSig']});
-store.setLedger(calculateChannelId(state));
+  // On save, if I have two tabs open, they both reload and trigger deposits at the same time.
+  // This seems to cause a nonce issue, though it's pretty difficult to see the actual error message
+  // in metamask, and the ganache server is not logging errors.
+  // Adding a random delay seems to deal with this
+  Math.random() * 2000
+);
 
 const messagingService = new MessagingService(store);
 const channelWallet = new ChannelWallet(store, messagingService);
