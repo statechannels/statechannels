@@ -64,7 +64,9 @@ export function allocateToTarget(
 
   deductions.forEach(targetItem => {
     const ledgerItem = currentItems.find(i => i.destination === targetItem.destination);
-    if (!ledgerItem) throw new Error(Errors.DestinationMissing);
+    if (!ledgerItem) {
+      throw new Error(Errors.DestinationMissing);
+    }
 
     total = total.add(targetItem.amount);
     ledgerItem.amount = ledgerItem.amount.sub(targetItem.amount);
@@ -81,6 +83,9 @@ export function allocateToTarget(
 
 export function makeDestination(addressOrDestination: string): Destination {
   if (addressOrDestination.length === 42) {
+    if (addressOrDestination === addressOrDestination.toLowerCase()) {
+      throw new Error('Lowercase address detected');
+    }
     return ethers.utils.hexZeroPad(addressOrDestination, 32) as Destination;
   } else if (addressOrDestination.length === 66) {
     return addressOrDestination as Destination;
