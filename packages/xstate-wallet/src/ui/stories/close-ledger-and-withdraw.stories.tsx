@@ -6,12 +6,12 @@ import {
 export default {title: 'X-state wallet'};
 import {storiesOf} from '@storybook/react';
 import {interpret} from 'xstate';
-import {Participant} from '@statechannels/client-api-schema';
 import {renderComponentInFrontOfApp} from './helpers';
 import {XstateStore} from '../../store';
 import React from 'react';
 import {CloseLegerWithdraw} from '../close-ledger-and-withdraw';
 import {MessagingService, MessagingServiceInterface} from '../../messaging';
+import {Participant} from '../../store/types';
 
 const store = new XstateStore();
 store.initialize(['0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29']);
@@ -20,13 +20,13 @@ const messagingService: MessagingServiceInterface = new MessagingService(store);
 const alice: Participant = {
   participantId: 'a',
   signingAddress: '0xa',
-  destination: '0xad'
+  destination: '0xad' as any
 };
 
 const bob: Participant = {
   participantId: 'b',
   signingAddress: '0xb',
-  destination: '0xbd'
+  destination: '0xbd' as any
 };
 
 const testContext: WorkflowContext = {
