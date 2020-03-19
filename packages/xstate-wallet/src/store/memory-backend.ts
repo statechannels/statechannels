@@ -23,17 +23,19 @@ export class MemoryBackend implements DBBackend {
   // Generic Getters
 
   public async privateKeys() {
-    return this._privateKeys;
+    return _.cloneDeep(this._privateKeys);
   }
   public async ledgers() {
-    return this._ledgers;
+    return _.cloneDeep(this._ledgers);
   }
   public async objectives() {
-    return this._objectives;
+    return _.cloneDeep(this._objectives);
   }
   public async channels() {
-    const channels: Record<string, ChannelStoredData | MemoryChannelStoreEntry | undefined> = this
-      ._channels;
+    const channels: Record<
+      string,
+      ChannelStoredData | MemoryChannelStoreEntry | undefined
+    > = _.cloneDeep(this._channels);
     for (const key in channels) {
       channels[key] = MemoryChannelStoreEntry.fromJson(channels[key]);
     }
