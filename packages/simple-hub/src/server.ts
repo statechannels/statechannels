@@ -10,7 +10,7 @@ if (process.env.RUNTIME_ENV) {
 }
 import {fbObservable, sendMessagesAndCleanup} from './message/firebase-relay';
 import {respondToMessage} from './wallet/respond-to-message';
-import {map} from 'rxjs/operators';
+import {map, retry} from 'rxjs/operators';
 import {logger} from './logger';
 import {depositsToMake} from './wallet/deposit';
 import {Blockchain} from './blockchain/eth-asset-holder';
@@ -29,7 +29,8 @@ export async function startServer() {
         snapshotKey,
         messageToSend,
         depositsToMake: depositsToMake(messageToSend)
-      }))
+      })),
+      retry()
     )
     .subscribe(
       async ({snapshotKey, messageToSend, depositsToMake}) => {
