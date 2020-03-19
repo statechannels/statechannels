@@ -16,10 +16,11 @@ import {
 } from './types';
 import {utils} from 'ethers';
 import {ChannelState, PaymentChannelClient} from '../clients/payment-channel-client';
-import {Message, ChannelResult} from '@statechannels/channel-client';
+import {ChannelResult} from '@statechannels/channel-client';
 import {mockTorrents} from '../constants';
 import * as firebase from 'firebase/app';
 import 'firebase/database';
+import {Message} from '@statechannels/client-api-schema';
 
 const bigNumberify = utils.bigNumberify;
 const log = debug('web3torrent:library');

@@ -1,8 +1,8 @@
-import {ChannelResult, Message, ChannelClientInterface} from '@statechannels/channel-client';
+import {ChannelResult, ChannelClientInterface} from '@statechannels/channel-client';
 import {utils, constants} from 'ethers';
 import {FakeChannelProvider} from '@statechannels/channel-client';
 import {ChannelClient} from '@statechannels/channel-client';
-import {ChannelStatus} from '@statechannels/client-api-schema';
+import {ChannelStatus, Message} from '@statechannels/client-api-schema';
 import {SiteBudget} from '@statechannels/client-api-schema';
 
 const bigNumberify = utils.bigNumberify;
