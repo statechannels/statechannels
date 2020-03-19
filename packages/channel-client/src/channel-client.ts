@@ -16,7 +16,7 @@ import {
 
 type TokenAllocations = Allocation[];
 
-export class ChannelClient implements ChannelClientInterface<ChannelResult> {
+export class ChannelClient implements ChannelClientInterface {
   constructor(private readonly provider: ChannelProviderInterface) {}
 
   onMessageQueued(
