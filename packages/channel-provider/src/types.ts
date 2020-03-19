@@ -1,4 +1,4 @@
-import {ListenerFn, EventEmitter} from 'eventemitter3';
+import {EventEmitter} from 'eventemitter3';
 import {
   Request as RequestParams,
   CreateChannelResponse,
@@ -25,8 +25,7 @@ import {
   GetBudgetRequest,
   ApproveBudgetAndFundResponse,
   ApproveBudgetAndFundRequest,
-  NotificationType,
-  ChannelProposedNotification
+  NotificationType
 } from '@statechannels/client-api-schema';
 
 export interface JsonRpcRequest<MethodName = string, RequestParams = any> {
@@ -60,7 +59,7 @@ export interface JsonRpcNotification<NotificationName = string, NotificationPara
   params: NotificationParams;
 }
 
-export function isJsonRpcNotification(message: any): message is JsonRpcNotification {
+export function isJsonRpcNotification<T>(message: any): message is JsonRpcNotification<T, any> {
   return 'method' in message && !('id' in message);
 }
 
@@ -133,6 +132,6 @@ export interface ChannelProviderInterface {
   send(request: MethodRequestType): Promise<MethodResponseType[MethodRequestType['method']]>;
   on: typeof eventEmitter.on;
   off: typeof eventEmitter.off;
-  subscribe(subscriptionType: string, params?: any): Promise<string>;
-  unsubscribe(subscriptionId: string): Promise<boolean>;
+  // subscribe(subscriptionType: string, params?: any): Promise<string>;
+  // unsubscribe(subscriptionId: string): Promise<boolean>;
 }

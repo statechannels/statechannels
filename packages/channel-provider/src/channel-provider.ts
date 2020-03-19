@@ -1,5 +1,4 @@
 import EventEmitter from 'eventemitter3';
-import {Guid} from 'guid-typescript';
 import {MessagingService} from './messaging-service';
 import {
   ChannelProviderInterface,
@@ -8,19 +7,26 @@ import {
   MethodResponseType
 } from './types';
 import {UIService} from './ui-service';
+import {NotificationType} from '@statechannels/client-api-schema';
 
 class ChannelProvider implements ChannelProviderInterface {
-  protected readonly events: EventEmitter;
+  protected readonly events: EventEmitter<NotificationType>;
   protected readonly ui: UIService;
   protected readonly messaging: MessagingService;
-  protected readonly subscriptions: {[eventName: string]: string[]};
+  // protected readonly subscriptions: {[T in keyof NotificationType]: string[]};
   protected url = '';
 
   constructor() {
-    this.events = new EventEmitter();
+    this.events = new EventEmitter<NotificationType>();
     this.ui = new UIService();
     this.messaging = new MessagingService();
-    this.subscriptions = {};
+    // this.subscriptions = {
+    //   ChannelProposed: [],
+    //   ChannelUpdated: [],
+    //   ChannelClosed: [],
+    //   BudgetUpdated: [],
+    //   MessageQueued: []
+    // };
   }
 
   async enable(url?: string) {
@@ -35,7 +41,7 @@ class ChannelProvider implements ChannelProviderInterface {
 
     await this.ui.mount();
 
-    this.events.emit('Connect');
+    // this.events.emit('Connect');
   }
 
   async send(request: MethodRequestType): Promise<MethodResponseType[MethodRequestType['method']]> {
@@ -49,31 +55,27 @@ class ChannelProvider implements ChannelProviderInterface {
     return response;
   }
 
-  async subscribe(subscriptionType: string): Promise<string> {
-    const subscriptionId = Guid.create().toString();
-    if (!this.subscriptions[subscriptionType]) {
-      this.subscriptions[subscriptionType] = [];
-    }
-    this.subscriptions[subscriptionType].push(subscriptionId);
-    return subscriptionId;
-  }
+  // async subscribe(subscriptionType: string): Promise<string> {
+  //   const subscriptionId = Guid.create().toString();
+  //   if (!this.subscriptions[subscriptionType]) {
+  //     this.subscriptions[subscriptionType] = [];
+  //   }
+  //   this.subscriptions[subscriptionType].push(subscriptionId);
+  //   return subscriptionId;
+  // }
 
-  async unsubscribe(subscriptionId: string): Promise<boolean> {
-    Object.keys(this.subscriptions).map(e => {
-      this.subscriptions[e] = this.subscriptions[e]
-        ? this.subscriptions[e].filter(s => s !== subscriptionId)
-        : [];
-    });
-    return true;
-  }
+  // async unsubscribe(subscriptionId: string): Promise<boolean> {
+  //   Object.keys(this.subscriptions).map(e => {
+  //     this.subscriptions[e] = this.subscriptions[e]
+  //       ? this.subscriptions[e].filter(s => s !== subscriptionId)
+  //       : [];
+  //   });
+  //   return true;
+  // }
 
-  on(event: string, callback: EventEmitter.ListenerFn<any>): void {
-    this.events.on(event, callback);
-  }
+  on = this.events.on;
 
-  off(event: string, callback?: EventEmitter.ListenerFn<any> | undefined): void {
-    this.events.off(event, callback);
-  }
+  off = this.events.off;
 
   protected async onMessage(event: MessageEvent) {
     const message = event.data;
@@ -81,18 +83,19 @@ class ChannelProvider implements ChannelProviderInterface {
       return;
     }
 
-    if (isJsonRpcNotification(message)) {
-      const eventName = message.method;
-      if (eventName === 'UIUpdate') {
-        this.ui.setVisibility(message.params.showWallet);
-      }
-      this.events.emit(eventName, message);
-
-      if (this.subscriptions[eventName]) {
-        this.subscriptions[eventName].forEach(s => {
-          this.events.emit(s, message);
-        });
-      }
+    if (isJsonRpcNotification<keyof NotificationType>(message)) {
+      // this line asserts the type. Not currently safe
+      const notificationMethod = message.method;
+      const notificationParams = message.params;
+      // if (eventName === 'UIUpdate') {
+      //   this.ui.setVisibility(message.params.showWallet);
+      // }
+      this.events.emit(notificationMethod, notificationParams);
+      // if (this.subscriptions[notificationMethod]) {
+      //   this.subscriptions[notificationMethod].forEach(s => {
+      //     this.events.emit(s, notificationParams);
+      //   });
+      // }
     }
   }
 }

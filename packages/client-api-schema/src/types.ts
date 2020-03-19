@@ -190,12 +190,28 @@ export type ChannelClosingNotification = JsonRpcNotification<'ChannelClosed', Ch
 export type MessageQueuedNotification = JsonRpcNotification<'MessageQueued', Message>;
 export type BudgetUpdatedNotification = JsonRpcNotification<'BudgetUpdated', SiteBudget>;
 
+// these notifications come *from* the wallet, which is not how JSON-RPC works
 export type Notification =
   | ChannelProposedNotification
   | ChannelUpdatedNotification
   | ChannelClosingNotification
   | BudgetUpdatedNotification
   | MessageQueuedNotification;
+
+type FilterByMethod<T, Method> = T extends {method: Method} ? T : never;
+
+export type NotificationType = {
+  [T in Notification['method']]: [FilterByMethod<Notification, T>['params']];
+};
+
+// export interface NotificationType {
+//   // TODO this more safely
+//   ChannelProposed: [ChannelProposedNotification['params']];
+//   ChannelUpdated: [ChannelUpdatedNotification['params']];
+//   ChannelClosed: [ChannelClosingNotification['params']];
+//   BudgetUpdated: [BudgetUpdatedNotification['params']];
+//   MessageQueued: [MessageQueuedNotification['params']];
+// }
 
 export type Request =
   | GetAddressRequest

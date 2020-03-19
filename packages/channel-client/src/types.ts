@@ -3,15 +3,9 @@ import {
   ChannelResult,
   Participant,
   Allocation,
-  SiteBudget
+  SiteBudget,
+  Message
 } from '@statechannels/client-api-schema';
-
-export interface Message<T = object> {
-  recipient: string; // Identifier of user that the message should be relayed to
-  sender: string; // Identifier of user that the message is from
-  data: T; // Message payload. Format defined by wallet and opaque to app.
-  // But useful to be able to specify, for the purposes of the fake-client
-}
 
 export type UnsubscribeFunction = () => void;
 

@@ -1046,6 +1046,25 @@
         }
       ]
     },
+    "NotificationType": {
+      "additionalProperties": false,
+      "properties": {
+        "ChannelProposed": {
+          "items": [
+            {
+              "$ref": "#/definitions/ChannelResult"
+            }
+          ],
+          "maxItems": 1,
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "ChannelProposed"
+      ],
+      "type": "object"
+    },
     "Participant": {
       "additionalProperties": false,
       "properties": {
