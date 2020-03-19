@@ -149,7 +149,9 @@ export const config: StateNodeConfig<Init, any, any> = {
     failure: {
       entry: [assignError, escalate(({error}: any) => ({type: 'FAILURE', error}))]
     }
-  }
+  } as any // TODO: This is to deal with some flickering compilation issues.
+  // It is hard to debug, since once the compile error goes away, it does not come back
+  // until a seemingly random number of project changes
 };
 
 export const waitForFirstJointState = (store: Store) => ({
