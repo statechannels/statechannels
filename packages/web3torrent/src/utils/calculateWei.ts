@@ -1,10 +1,16 @@
 import {WEI_PER_BYTE} from '../library/web3torrent-lib';
 import {utils} from 'ethers';
+import prettier from 'prettier-bytes';
 
 export const calculateWei = (fileSize: number | string) => {
   if (!isNaN(Number(fileSize))) {
     return WEI_PER_BYTE.mul(fileSize);
   } else return utils.bigNumberify(NaN);
+};
+
+export const prettyPrintBytes = (wei: utils.BigNumber): string => {
+  const bytes = wei.div(WEI_PER_BYTE);
+  return prettier(bytes.toNumber());
 };
 
 export const prettyPrintWei = (wei: utils.BigNumber): string => {
