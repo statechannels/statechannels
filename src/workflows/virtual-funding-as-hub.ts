@@ -93,7 +93,7 @@ export const config: MachineConfig<Init, any, any> = {
       },
       onDone: States.fundTargetChannel
     }
-  }
+  } as any
 };
 
 const getDeductions = (store: Store) => async (ctx: Init): Promise<Deductions> => {
