@@ -1,7 +1,9 @@
 import {
   ChannelProviderInterface,
   MethodResponseType,
-  MethodRequestType
+  MethodRequestType,
+  OnType,
+  OffType
 } from '@statechannels/channel-provider';
 import log = require('loglevel');
 
@@ -86,9 +88,9 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     }
   }
 
-  on = this.events.on;
+  on: OnType = (method, params) => this.events.on(method, params);
 
-  off = this.events.off;
+  off: OffType = (method, params) => this.events.off(method, params);
 
   // subscribe(): Promise<string> {
   //   return Promise.resolve('success');
