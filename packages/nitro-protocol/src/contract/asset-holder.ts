@@ -1,6 +1,7 @@
 import {utils} from 'ethers';
 
 import {parseEventResult} from '../ethers-utils';
+import {hexZeroPad} from 'ethers/utils';
 
 export interface DepositedEvent {
   destination: string;
@@ -47,9 +48,7 @@ export function convertAddressToBytes32(address: string): string {
       `Address value is not right length. Expected length of 42 received length ${normalizedAddress.length} instead.`
     );
   }
+
   // We pad to 66 = (32*2) + 2('0x')
-  return `0x${normalizedAddress
-    .toLowerCase()
-    .substr(2)
-    .padStart(64, '0')}`;
+  return hexZeroPad(normalizedAddress, 32);
 }
