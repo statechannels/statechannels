@@ -254,7 +254,12 @@ export function convertToInternalParticipant(participant: {
 function convertToInternalEvent(request: ChannelRequest): AppRequestEvent {
   switch (request.method) {
     case 'CloseAndWithdraw':
-      return {...request.params, requestId: request.id, type: 'CLOSE_AND_WITHDRAW'};
+      return {
+        requestId: request.id,
+        type: 'CLOSE_AND_WITHDRAW',
+        player: convertToInternalParticipant(request.params.player),
+        hub: convertToInternalParticipant(request.params.hub)
+      };
     case 'ApproveBudgetAndFund':
       const {player, hub} = request.params;
       return {
