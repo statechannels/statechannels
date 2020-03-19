@@ -32,7 +32,7 @@ export class OpenGameEntry extends React.PureComponent<Props> {
         </div>
         <Blockie
           opts={{
-            seed: openGame.outcomeAddress.toLowerCase(),
+            seed: openGame.outcomeAddress,
           }}
         />
         <div className="ogc-stakes">
