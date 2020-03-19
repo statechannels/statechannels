@@ -73,7 +73,6 @@
     "prestart": "yarn build && npm run db:rollback && npm run db:migrate && npm run db:seed",
     "prettier:check": "npx prettier --check 'src/**/*.{ts,tsx}'",
     "prettier:write": "npx prettier --write 'src/**/*.{ts,tsx}'",
-    "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
-    "test:ci": "run-s chain:test hub:test"
+    "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache"
   }
 }
