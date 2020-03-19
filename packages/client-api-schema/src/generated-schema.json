@@ -1043,6 +1043,9 @@
         },
         {
           "$ref": "#/definitions/MessageQueuedNotification"
+        },
+        {
+          "$ref": "#/definitions/UiNotification"
         }
       ]
     },
@@ -1339,6 +1342,41 @@
         "free",
         "inUse",
         "direct"
+      ],
+      "type": "object"
+    },
+    "UiNotification": {
+      "additionalProperties": false,
+      "properties": {
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "UIUpdate"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": false,
+          "properties": {
+            "showWallet": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "showWallet"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "method",
+        "params"
       ],
       "type": "object"
     },

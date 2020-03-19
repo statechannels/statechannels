@@ -127,7 +127,7 @@ export type MethodRequestType =
   | Call<'CloseAndWithdraw', any>;
 
 export interface EventType extends NotificationType {
-  UIUpdate: [];
+  [id: string]: [unknown]; // guid
 }
 const eventEmitter = new EventEmitter<EventType>();
 export type OnType = typeof eventEmitter.on;
@@ -138,6 +138,6 @@ export interface ChannelProviderInterface {
   send(request: MethodRequestType): Promise<MethodResponseType[MethodRequestType['method']]>;
   on: OnType;
   off: OffType;
-  // subscribe(subscriptionType: string, params?: any): Promise<string>;
-  // unsubscribe(subscriptionId: string): Promise<boolean>;
+  subscribe(subscriptionType: string, params?: any): Promise<string>;
+  unsubscribe(subscriptionId: string): Promise<boolean>;
 }
