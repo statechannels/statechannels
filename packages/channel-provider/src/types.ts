@@ -127,11 +127,14 @@ export type MethodRequestType =
   | Call<'CloseAndWithdraw', any>;
 
 const eventEmitter = new EventEmitter<NotificationType>();
+export type OnType = typeof eventEmitter.on;
+export type OffType = typeof eventEmitter.off;
+
 export interface ChannelProviderInterface {
   enable(url?: string): Promise<void>;
   send(request: MethodRequestType): Promise<MethodResponseType[MethodRequestType['method']]>;
-  on: typeof eventEmitter.on;
-  off: typeof eventEmitter.off;
+  on: OnType;
+  off: OffType;
   // subscribe(subscriptionType: string, params?: any): Promise<string>;
   // unsubscribe(subscriptionId: string): Promise<boolean>;
 }

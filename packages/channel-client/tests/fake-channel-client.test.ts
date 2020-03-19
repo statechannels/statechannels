@@ -10,8 +10,8 @@ import {
   UPDATED_APP_DATA
 } from './constants';
 import {ChannelResultBuilder, buildParticipant, buildAllocation, setProviderStates} from './utils';
-import {Message, ChannelClient} from '../src';
-import {ChannelResult} from '@statechannels/client-api-schema';
+import {ChannelClient} from '../src';
+import {Message, ChannelResult} from '@statechannels/client-api-schema';
 import {EventsWithArgs} from '../src/types';
 import {calculateChannelId} from '../src/utils';
 import {FakeChannelProvider} from './fakes/fake-channel-provider';
