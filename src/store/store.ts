@@ -1,5 +1,5 @@
-import {Observable, fromEvent, merge, from, of} from 'rxjs';
-import {filter, map, mergeAll, flatMap} from 'rxjs/operators';
+import {Observable, fromEvent, merge, from} from 'rxjs';
+import {filter, map, concatAll} from 'rxjs/operators';
 import {EventEmitter} from 'eventemitter3';
 import * as _ from 'lodash';
 
@@ -167,10 +167,7 @@ export class XstateStore implements Store {
 
   get objectiveFeed(): Observable<Objective> {
     const newObjectives = fromEvent<Objective>(this._eventEmitter, 'newObjective');
-    const currentObjectives = from(this.backend.objectives()).pipe(
-      flatMap(o => of(o)),
-      mergeAll()
-    );
+    const currentObjectives = from(this.backend.objectives()).pipe(concatAll());
 
     return merge(newObjectives, currentObjectives);
   }

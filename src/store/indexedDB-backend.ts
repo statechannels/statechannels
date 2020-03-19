@@ -86,7 +86,7 @@ export class IndexedDBBackend implements DBBackend {
     return channels;
   }
   public async objectives() {
-    return this.getAll(ObjectStores.objectives);
+    return this.getAll(ObjectStores.objectives, true);
   }
   public async nonces() {
     const nonces = await this.getAll(ObjectStores.nonces);
