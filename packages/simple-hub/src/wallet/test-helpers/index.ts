@@ -7,7 +7,7 @@ import {
   firstState,
   signState
 } from '../xstate-wallet-internals';
-import {bigNumberify} from 'ethers/utils';
+import {bigNumberify, hexZeroPad} from 'ethers/utils';
 import {ethers} from 'ethers';
 import {
   cHubChannelPK,
@@ -34,7 +34,7 @@ const first: Participant = {
 
 const hub: Participant = {
   signingAddress: cHubChannelSigningAddress,
-  destination: cHubChainAddress,
+  destination: hexZeroPad(cHubChainAddress, 32),
   participantId: cHubParticipantId
 };
 
