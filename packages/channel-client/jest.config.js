@@ -4,5 +4,6 @@ module.exports = {
       tsConfig: './tsconfig.json'
     }
   },
-  preset: 'ts-jest'
+  preset: 'ts-jest',
+  testMatch: ['**/__tests__/**/*.ts?(x)', '**/?(*.)+(spec|test).ts?(x)']
 };
