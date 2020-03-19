@@ -126,7 +126,10 @@ export type MethodRequestType =
   | Call<'GetBudget', GetBudgetRequest>
   | Call<'CloseAndWithdraw', any>;
 
-const eventEmitter = new EventEmitter<NotificationType>();
+export interface EventType extends NotificationType {
+  UIUpdate: [];
+}
+const eventEmitter = new EventEmitter<EventType>();
 export type OnType = typeof eventEmitter.on;
 export type OffType = typeof eventEmitter.off;
 

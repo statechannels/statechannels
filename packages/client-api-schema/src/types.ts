@@ -204,15 +204,6 @@ export type NotificationType = {
   [T in Notification['method']]: [FilterByMethod<Notification, T>['params']];
 };
 
-// export interface NotificationType {
-//   // TODO this more safely
-//   ChannelProposed: [ChannelProposedNotification['params']];
-//   ChannelUpdated: [ChannelUpdatedNotification['params']];
-//   ChannelClosed: [ChannelClosingNotification['params']];
-//   BudgetUpdated: [BudgetUpdatedNotification['params']];
-//   MessageQueued: [MessageQueuedNotification['params']];
-// }
-
 export type Request =
   | GetAddressRequest
   | GetEthereumSelectedAddressRequest

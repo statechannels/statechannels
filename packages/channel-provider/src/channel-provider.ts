@@ -6,20 +6,20 @@ import {
   MethodRequestType,
   MethodResponseType,
   OnType,
-  OffType
+  OffType,
+  EventType
 } from './types';
 import {UIService} from './ui-service';
-import {NotificationType} from '@statechannels/client-api-schema';
 
 class ChannelProvider implements ChannelProviderInterface {
-  protected readonly events: EventEmitter<NotificationType>;
+  protected readonly events: EventEmitter<EventType>;
   protected readonly ui: UIService;
   protected readonly messaging: MessagingService;
   // protected readonly subscriptions: {[T in keyof NotificationType]: string[]};
   protected url = '';
 
   constructor() {
-    this.events = new EventEmitter<NotificationType>();
+    this.events = new EventEmitter<EventType>();
     this.ui = new UIService();
     this.messaging = new MessagingService();
     // this.subscriptions = {
@@ -80,11 +80,11 @@ class ChannelProvider implements ChannelProviderInterface {
       return;
     }
 
-    if (isJsonRpcNotification<keyof NotificationType>(message)) {
+    if (isJsonRpcNotification<keyof EventType>(message)) {
       // this line asserts the type. Not currently safe
       const notificationMethod = message.method;
       const notificationParams = message.params;
-      if (message.method === ('UIUpdate' as keyof NotificationType)) {
+      if (message.method === 'UIUpdate') {
         // TODO expand event emitter type to included this, as well as the subscription id stuff
         this.ui.setVisibility(message.params.showWallet);
       }

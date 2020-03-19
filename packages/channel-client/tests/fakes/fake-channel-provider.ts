@@ -3,7 +3,8 @@ import {
   MethodResponseType,
   MethodRequestType,
   OnType,
-  OffType
+  OffType,
+  EventType
 } from '@statechannels/channel-provider';
 import log = require('loglevel');
 
@@ -19,7 +20,6 @@ import {
   PushMessageResult,
   SiteBudget,
   UpdateChannelParams,
-  NotificationType,
   Message
 } from '@statechannels/client-api-schema';
 import {calculateChannelId} from '../../src/utils';
@@ -34,7 +34,7 @@ type ChannelId = string;
  coming from a non-fake `ChannelClient`.
  */
 export class FakeChannelProvider implements ChannelProviderInterface {
-  private events = new EventEmitter<NotificationType>();
+  private events = new EventEmitter<EventType>();
   protected url = '';
 
   playerIndex: Record<ChannelId, 0 | 1> = {};
