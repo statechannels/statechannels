@@ -6,7 +6,10 @@ import {
   ChannelResult,
   Allocation,
   Participant,
-  SiteBudget
+  SiteBudget,
+  ChannelUpdatedNotification,
+  ChannelProposedNotification,
+  BudgetUpdatedNotification
 } from '@statechannels/client-api-schema';
 
 type TokenAllocations = Allocation[];
@@ -20,17 +23,23 @@ export class ChannelClient implements ChannelClientInterface {
   }
 
   onChannelUpdated(callback: (result: ChannelResult) => void): UnsubscribeFunction {
-    this.provider.on('ChannelUpdated', result => callback(result.params));
+    this.provider.on('ChannelUpdated', (result: ChannelUpdatedNotification) =>
+      callback(result.params)
+    );
     return this.provider.off.bind(this, 'ChannelUpdated', callback);
   }
 
   onChannelProposed(callback: (result: ChannelResult) => void): UnsubscribeFunction {
-    this.provider.on('ChannelProposed', result => callback(result.params));
+    this.provider.on('ChannelProposed', (result: ChannelProposedNotification) =>
+      callback(result.params)
+    );
     return this.provider.off.bind(this, 'ChannelProposed', callback);
   }
 
   onBudgetUpdated(callback: (result: SiteBudget) => void): UnsubscribeFunction {
-    this.provider.on('BudgetUpdated', result => callback(result.params));
+    this.provider.on('BudgetUpdated', (result: BudgetUpdatedNotification) =>
+      callback(result.params)
+    );
     return this.provider.off.bind(this, 'BudgetUpdated', callback);
   }
 
