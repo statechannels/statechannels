@@ -110,7 +110,6 @@ export class PaymentChannelClient {
   // Accepts an payment-channel-friendly callback, performs the necessary encoding, and subscribes to the channelClient with an appropriate, API-compliant callback
   onChannelUpdated(web3tCallback: (channelState: ChannelState) => any) {
     function callback(channelResult: ChannelResult): any {
-      console.log('on channel updated' + JSON.stringify(channelResult));
       web3tCallback(convertToChannelState(channelResult));
     }
     const unsubChannelUpdated = this.channelClient.onChannelUpdated(callback);
@@ -291,7 +290,6 @@ export const paymentChannelClient = new PaymentChannelClient(
 );
 
 const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
-  console.log('trying to convert' + JSON.stringify(channelResult) + 'to a channel state');
   const {
     turnNum,
     channelId,
