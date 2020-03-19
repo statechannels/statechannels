@@ -36,8 +36,8 @@ export interface Chain {
   deposit: (channelId: string, expectedHeld: string, amount: string) => Promise<void>;
   ethereumEnable: () => Promise<string>;
   ethereumIsEnabled: boolean;
-  selectedAddress: string;
   finalizeAndWithdraw: (finalizationProof: SignedState[]) => Promise<void>;
+  selectedAddress?: string;
 }
 
 // TODO: This chain should be fleshed out enough so it mimics basic chain behavior
@@ -49,6 +49,9 @@ export class FakeChain implements Chain {
   private eventEmitter: EventEmitter<{
     updated: [Updated];
   }> = new EventEmitter();
+
+  private fakeSelectedAddress: string;
+
   public async initialize() {
     /* NOOP */
   }
@@ -104,6 +107,7 @@ export class FakeChain implements Chain {
   }
 
   public ethereumEnable() {
+    this.fakeSelectedAddress = '0x123';
     return Promise.resolve(this.selectedAddress);
   }
 
@@ -112,7 +116,7 @@ export class FakeChain implements Chain {
   }
 
   public get selectedAddress() {
-    return '0x123';
+    return this.fakeSelectedAddress;
   }
 }
 
