@@ -1,4 +1,4 @@
-import {ListenerFn} from 'eventemitter3';
+import {ListenerFn, EventEmitter} from 'eventemitter3';
 import {
   Request as RequestParams,
   CreateChannelResponse,
@@ -24,7 +24,9 @@ import {
   GetBudgetResponse,
   GetBudgetRequest,
   ApproveBudgetAndFundResponse,
-  ApproveBudgetAndFundRequest
+  ApproveBudgetAndFundRequest,
+  NotificationType,
+  ChannelProposedNotification
 } from '@statechannels/client-api-schema';
 
 export interface JsonRpcRequest<MethodName = string, RequestParams = any> {
@@ -125,11 +127,12 @@ export type MethodRequestType =
   | Call<'GetBudget', GetBudgetRequest>
   | Call<'CloseAndWithdraw', any>;
 
+const eventEmitter = new EventEmitter<NotificationType>();
 export interface ChannelProviderInterface {
   enable(url?: string): Promise<void>;
   send(request: MethodRequestType): Promise<MethodResponseType[MethodRequestType['method']]>;
-  on(event: string, callback: ListenerFn): void;
-  off(event: string, callback?: ListenerFn): void;
+  on: typeof eventEmitter.on;
+  off: typeof eventEmitter.off;
   subscribe(subscriptionType: string, params?: any): Promise<string>;
   unsubscribe(subscriptionId: string): Promise<boolean>;
 }
