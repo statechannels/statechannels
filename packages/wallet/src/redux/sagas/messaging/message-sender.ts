@@ -36,12 +36,19 @@ function* createResponseMessage(action: OutgoingApiAction) {
       return jrs.success(action.id, yield getChannelInfo(action.channelId));
     case "WALLET.UPDATE_CHANNEL_RESPONSE":
       return jrs.success(action.id, yield getChannelInfo(action.channelId));
+    case "WALLET.GET_STATE_RESPONSE":
+      return jrs.success(action.id, yield getChannelInfo(action.channelId));
     case "WALLET.CHALLENGE_CHANNEL_RESPONSE":
       return jrs.success(action.id, yield getChannelInfo(action.channelId));
     case "WALLET.ADDRESS_RESPONSE":
       return jrs.success(action.id, action.address);
     case "WALLET.ETHEREUM_ADDRESS_RESPONSE":
       return jrs.success(action.id, action.ethereumSelectedAddress);
+    case "WALLET.ETHEREUM_ADDRESS_ERROR":
+      return jrs.error(
+        action.id,
+        new jrs.JsonRpcError("Wallet hit an error connecting to window.ethereum", 1001)
+      );
     case "WALLET.NO_CONTRACT_ERROR":
       return jrs.error(action.id, new jrs.JsonRpcError("Invalid app definition", 1001));
     case "WALLET.VALIDATION_ERROR":

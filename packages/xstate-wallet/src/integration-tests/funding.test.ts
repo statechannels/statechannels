@@ -3,7 +3,7 @@ import {
   JoinChannelRequest,
   JoinChannelResponse
 } from '@statechannels/client-api-schema';
-import {filter, map, first} from 'rxjs/operators';
+import {filter, first} from 'rxjs/operators';
 import waitForExpect from 'wait-for-expect';
 import {FakeChain} from '../chain';
 import {
@@ -34,8 +34,7 @@ it('allows for two wallets to fund an app', async () => {
   const createEvent = generateCreateChannelRequest(playerA.participant, playerB.participant);
   const createPromise = playerA.messagingService.outboxFeed
     .pipe(
-      filter(m => 'id' in m && m.id === createEvent.id),
-      map(m => m as CreateChannelResponse),
+      filter((m): m is CreateChannelResponse => 'id' in m && m.id === createEvent.id),
       first()
     )
     .toPromise();
@@ -51,14 +50,12 @@ it('allows for two wallets to fund an app', async () => {
   playerA.channelWallet.workflows[0].machine.send({type: 'USER_APPROVES'});
 
   const createResponse = await createPromise;
-
   expect(createResponse.result).toBeDefined();
   const {channelId} = createResponse.result;
   const joinEvent: JoinChannelRequest = generateJoinChannelRequest(channelId);
   const joinPromise = playerB.messagingService.outboxFeed
     .pipe(
-      filter(r => 'id' in r && r.id === joinEvent.id),
-      map(r => r as JoinChannelResponse),
+      filter((r): r is JoinChannelResponse => 'id' in r && r.id === joinEvent.id),
       first()
     )
     .toPromise();
@@ -70,7 +67,7 @@ it('allows for two wallets to fund an app', async () => {
   // Wait for the create channel service to start
   await waitForExpect(async () => {
     expect(playerB.workflowState).toMatchObject({
-      confirmJoinChannelWorkflow: 'invokeCreateChannelConfirmation'
+      confirmJoinChannelWorkflow: {confirmChannelCreation: 'invokeCreateChannelConfirmation'}
     });
   }, 3000);
 

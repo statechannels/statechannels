@@ -13,7 +13,6 @@ export function createMockTorrent(props?: Partial<Torrent>): Torrent {
     name: 'on-the-shortness-of-life-1.jpg',
     downloaded: 0,
     length: 128913,
-    cost: '1.34',
     ready: true,
     ...props
   };
@@ -27,7 +26,7 @@ export function createMockTorrentPeers(): TorrentPeers {
       wire: {
         uploaded: 4225
       },
-      seederBalance: '50',
+      beneficiaryBalance: '50',
       channelId: '0x0000000000000000000000000000001231927371',
       buffer: '50'
     },
@@ -35,7 +34,7 @@ export function createMockTorrentPeers(): TorrentPeers {
       id: '5589113806923374',
       allowed: true,
       buffer: '50',
-      seederBalance: '50',
+      beneficiaryBalance: '50',
       wire: {
         uploaded: 52923
       },

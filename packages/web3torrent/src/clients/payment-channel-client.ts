@@ -1,14 +1,16 @@
 import {ChannelResult, Message, ChannelClientInterface} from '@statechannels/channel-client';
-import {bigNumberify} from 'ethers/utils';
+import {utils, constants} from 'ethers';
 import {FakeChannelProvider} from '@statechannels/channel-client';
 import {ChannelClient} from '@statechannels/channel-client';
-import React from 'react';
 import {ChannelStatus} from '@statechannels/client-api-schema';
 import {SiteBudget} from '@statechannels/client-api-schema';
 
+const bigNumberify = utils.bigNumberify;
+const FINAL_SETUP_STATE = utils.bigNumberify(3); // for a 2 party ForceMove channel
+const APP_DATA = constants.HashZero; // unused in the SingleAssetPaymentApp
 export interface ChannelState {
   channelId: string;
-  turnNum: string;
+  turnNum: utils.BigNumber;
   status: ChannelStatus;
   challengeExpirationTime;
   beneficiary: string;
@@ -30,9 +32,6 @@ if (process.env.REACT_APP_FAKE_CHANNEL_PROVIDER === 'true') {
   require('@statechannels/channel-provider');
 }
 
-// TODO: Put inside better place than here where app can handle error case
-window.channelProvider.enable(process.env.REACT_APP_WALLET_URL);
-
 // This Client targets at _unidirectional_, single asset (ETH) payment channel with 2 participants running on Nitro protocol
 // The beneficiary proposes the channel, but accepts payments
 // The payer joins the channel, and makes payments
@@ -40,8 +39,13 @@ export class PaymentChannelClient {
   mySigningAddress?: string;
   myEthereumSelectedAddress?: string; // this state can be inspected to infer whether we need to get the user to "Connect With MetaMask" or not.
   channelCache: Record<string, ChannelState> = {};
-  myAddress: string;
-  constructor(private readonly channelClient: ChannelClientInterface) {}
+
+  constructor(private readonly channelClient: ChannelClientInterface) {
+    this.channelClient.onChannelUpdated(channelResult => {
+      this.updateChannelCache(convertToChannelState(channelResult));
+    });
+  }
+
   async createChannel(
     beneficiary: string,
     payer: string,
@@ -62,16 +66,22 @@ export class PaymentChannelClient {
       beneficiaryBalance,
       payerBalance
     );
-    const appDefinition = '0x0'; // TODO SingleAssetPayments address
+    const appDefinition = process.env.REACT_APP_SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS;
 
     const channelResult = await this.channelClient.createChannel(
       participants,
       allocations,
       appDefinition,
-      'appData unused'
+      APP_DATA
     );
-    this.cacheChannelState(convertToChannelState(channelResult));
+
+    this.insertIntoChannelCache(convertToChannelState(channelResult));
+
     return convertToChannelState(channelResult);
+  }
+
+  async enableEthereum() {
+    await this.channelClient.enableEthereum();
   }
 
   async getAddress() {
@@ -80,8 +90,7 @@ export class PaymentChannelClient {
   }
 
   async getEthereumSelectedAddress() {
-    this.myEthereumSelectedAddress = window.ethereum.selectedAddress;
-    // this.myEthereumSelectedAddress = await this.channelClient.getEthereumSelectedAddress();
+    this.myEthereumSelectedAddress = await this.channelClient.getEthereumSelectedAddress();
     return this.myEthereumSelectedAddress;
   }
 
@@ -89,11 +98,16 @@ export class PaymentChannelClient {
     return this.channelClient.onMessageQueued(callback);
   }
 
-  cacheChannelState(channelState: ChannelState) {
+  insertIntoChannelCache(channelState: ChannelState) {
     this.channelCache = {...this.channelCache, [channelState.channelId]: channelState};
   }
 
-  // Accepts an web3t-friendly callback, performs the necessary encoding, and subscribes to the channelClient with an appropriate, API-compliant callback
+  updateChannelCache(channelState: ChannelState) {
+    this.channelCache[channelState.channelId] && // only update an existing key
+      (this.channelCache[channelState.channelId] = channelState);
+  }
+
+  // Accepts an payment-channel-friendly callback, performs the necessary encoding, and subscribes to the channelClient with an appropriate, API-compliant callback
   onChannelUpdated(web3tCallback: (channelState: ChannelState) => any) {
     function callback(channelResult: ChannelResult): any {
       web3tCallback(convertToChannelState(channelResult));
@@ -116,19 +130,18 @@ export class PaymentChannelClient {
 
   async joinChannel(channelId: string) {
     const channelResult = await this.channelClient.joinChannel(channelId);
-    this.cacheChannelState(convertToChannelState(channelResult));
-    return convertToChannelState(channelResult);
+    this.insertIntoChannelCache(convertToChannelState(channelResult));
   }
 
   async closeChannel(channelId: string): Promise<ChannelState> {
     const channelResult = await this.channelClient.closeChannel(channelId);
-    this.cacheChannelState(convertToChannelState(channelResult));
+    this.updateChannelCache(convertToChannelState(channelResult));
     return convertToChannelState(channelResult);
   }
 
   async challengeChannel(channelId: string): Promise<ChannelState> {
     const channelResult = await this.channelClient.challengeChannel(channelId);
-    this.cacheChannelState(convertToChannelState(channelResult));
+    this.updateChannelCache(convertToChannelState(channelResult));
     return convertToChannelState(channelResult);
   }
 
@@ -158,40 +171,50 @@ export class PaymentChannelClient {
       channelId,
       participants,
       allocations,
-      'appData unused'
+      APP_DATA
     );
-    this.cacheChannelState(convertToChannelState(channelResult));
+    this.updateChannelCache(convertToChannelState(channelResult));
     return convertToChannelState(channelResult);
   }
 
   // payer may use this method to make payments (if they have sufficient funds)
   async makePayment(channelId: string, amount: string) {
-    const {
-      beneficiary,
-      payer,
-      beneficiaryBalance,
-      payerBalance,
-      beneficiaryOutcomeAddress,
-      payerOutcomeAddress
-    } = this.channelCache[channelId];
-    if (bigNumberify(payerBalance).gte(amount)) {
-      await this.updateChannel(
-        channelId,
+    if (
+      this.channelCache[channelId] &&
+      this.channelCache[channelId].payer === this.mySigningAddress
+    ) {
+      const {
         beneficiary,
         payer,
-        bigNumberify(beneficiaryBalance)
-          .add(amount)
-          .toString(),
-        bigNumberify(payerBalance)
-          .sub(amount)
-          .toString(),
+        beneficiaryBalance,
+        payerBalance,
         beneficiaryOutcomeAddress,
         payerOutcomeAddress
-      );
+      } = this.channelCache[channelId];
+      if (bigNumberify(payerBalance).gte(amount)) {
+        await this.updateChannel(
+          channelId,
+          beneficiary,
+          payer,
+          bigNumberify(beneficiaryBalance)
+            .add(amount)
+            .toString(),
+          bigNumberify(payerBalance)
+            .sub(amount)
+            .toString(),
+          beneficiaryOutcomeAddress,
+          payerOutcomeAddress
+        );
+      } else {
+        console.error('Insufficient fund to make a payment. Closing channel.');
+        await this.closeChannel(channelId);
+      }
+    } else {
+      console.error('Cannot make a payment in a channel that you did not join');
     }
   }
   // beneficiary may use this method to accept payments
-  async acceptPayment(channelState: ChannelState) {
+  async acceptChannelUpdate(channelState: ChannelState) {
     const {
       channelId,
       beneficiary,
@@ -216,20 +239,20 @@ export class PaymentChannelClient {
     return this.channelCache[channelId].beneficiary === this.mySigningAddress;
   }
   isPaymentToMe(channelState: ChannelState): boolean {
-    const turnNum = Number(channelState.turnNum);
     // doesn't guarantee that my balance increased
     if (channelState.beneficiary === this.mySigningAddress) {
-      // returns true for the second postFS if I am the beneficiary
-      // (I need to accept this 'payment' in order for another one to be sent)
-      return (channelState.status === 'running' && turnNum % 2 === 1) || turnNum === 3;
+      return channelState.status === 'running' && channelState.turnNum.mod(2).eq(1);
     }
-    throw new Error(`${this.mySigningAddress} is not the beneficiary ${channelState.beneficiary}`);
+    return false; // only beneficiary may receive payments
+  }
+
+  shouldSendSpacerState(channelState: ChannelState): boolean {
+    return channelState.turnNum.eq(FINAL_SETUP_STATE) ? true : false;
   }
 
   async pushMessage(message: Message<ChannelResult>) {
     await this.channelClient.pushMessage(message);
-    const channelResult: ChannelResult = message.data;
-    this.cacheChannelState(convertToChannelState(channelResult));
+    return convertToChannelState(message.data);
   }
 
   async approveBudgetAndFund(
@@ -248,11 +271,11 @@ export class PaymentChannelClient {
     );
   }
 
-  async getBudget(hubAddress: string): Promise<SiteBudget> {
+  async getBudget(hubAddress: string): Promise<SiteBudget | {}> {
     return await this.channelClient.getBudget(hubAddress);
   }
 
-  async closeAndWithdraw(hubAddress: string): Promise<SiteBudget> {
+  async closeAndWithdraw(hubAddress: string): Promise<SiteBudget | {}> {
     return await this.channelClient.closeAndWithdraw(hubAddress);
   }
 }
@@ -260,8 +283,6 @@ export class PaymentChannelClient {
 export const paymentChannelClient = new PaymentChannelClient(
   new ChannelClient(window.channelProvider)
 );
-
-export const ChannelContext = React.createContext(paymentChannelClient);
 
 const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
   const {
@@ -272,9 +293,10 @@ const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
     challengeExpirationTime,
     status
   } = channelResult;
+
   return {
     channelId,
-    turnNum: turnNum.toString(), // TODO: turnNum should be switched to a number (or be a string everywhere),
+    turnNum: utils.bigNumberify(turnNum),
     status,
     challengeExpirationTime,
     beneficiary: participants[0].participantId,

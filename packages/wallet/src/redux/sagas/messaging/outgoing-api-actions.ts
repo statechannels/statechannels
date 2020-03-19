@@ -20,6 +20,15 @@ export const createChannelResponse: ActionConstructor<CreateChannelResponse> = p
   type: "WALLET.CREATE_CHANNEL_RESPONSE"
 });
 
+export interface GetStateResponse extends ApiResponseAction {
+  type: "WALLET.GET_STATE_RESPONSE";
+  channelId: string;
+}
+export const getStateResponse: ActionConstructor<GetStateResponse> = p => ({
+  ...p,
+  type: "WALLET.GET_STATE_RESPONSE"
+});
+
 export interface UpdateChannelResponse extends ApiResponseAction {
   type: "WALLET.UPDATE_CHANNEL_RESPONSE";
   channelId: string;
@@ -45,6 +54,15 @@ export interface AddressResponse extends ApiResponseAction {
 export const addressResponse: ActionConstructor<AddressResponse> = p => ({
   ...p,
   type: "WALLET.ADDRESS_RESPONSE"
+});
+
+export interface EthereumAddressError extends ApiResponseAction {
+  type: "WALLET.ETHEREUM_ADDRESS_ERROR";
+}
+
+export const ethereumAddressError: ActionConstructor<EthereumAddressError> = p => ({
+  ...p,
+  type: "WALLET.ETHEREUM_ADDRESS_ERROR"
 });
 
 export interface EthereumAddressResponse extends ApiResponseAction {
@@ -198,6 +216,7 @@ export type OutgoingApiAction =
   | EthereumAddressResponse
   | CreateChannelResponse
   | UpdateChannelResponse
+  | GetStateResponse
   | ChallengeChannelResponse
   | UnknownSigningAddress
   | NoContractError
@@ -206,6 +225,7 @@ export type OutgoingApiAction =
   | ChannelProposedEvent
   | PushMessageResponse
   | UnknownChannelId
+  | EthereumAddressError
   | NoContractError
   | JoinChannelResponse
   | ValidationError

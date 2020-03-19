@@ -2,9 +2,9 @@ import {interpret} from 'xstate';
 import waitForExpect from 'wait-for-expect';
 import {add} from '../../utils/math-utils';
 
-import {Init, machine} from '../ledger-funding';
+import {Init, machine, Errors} from '../ledger-funding';
 
-import {XstateStore, Store} from '../../store';
+import {Store} from '../../store';
 import {bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
 import {firstState, signState, calculateChannelId} from '../../store/state-utils';
@@ -16,8 +16,10 @@ import {FakeChain, Chain} from '../../chain';
 import {wallet1, wallet2, participants} from './data';
 import {subscribeToMessages} from './message-service';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../../constants';
+import {TestStore} from './store';
+import {Guid} from 'guid-typescript';
 
-jest.setTimeout(20000);
+jest.setTimeout(10000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 
 const chainId = '0x01';
@@ -61,39 +63,38 @@ const deductions = [0, 1].map(i => ({
 const context: Init = {targetChannelId, ledgerChannelId, deductions};
 
 let chain: Chain;
-let aStore: Store;
-let bStore: Store;
+let aStore: TestStore;
+let bStore: TestStore;
 
 const allSignState = (state: State) => ({
   ...state,
   signatures: [wallet1, wallet2].map(({privateKey}) => signState(state, privateKey))
 });
 
-beforeEach(async () => {
-  const message = {
-    signedStates: [
-      allSignState(firstState(outcome, targetChannel)),
-      allSignState(firstState(outcome, ledgerChannel))
-    ]
-  };
-  const _chain = new FakeChain();
-  _chain.depositSync(ledgerChannelId, '0', '12');
-  chain = _chain;
+beforeEach(() => {
+  aStore = new TestStore(chain);
+  aStore.initialize([wallet1.privateKey]);
+  bStore = new TestStore(chain);
+  bStore.initialize([wallet2.privateKey]);
 
-  aStore = new XstateStore(chain);
-  await aStore.initialize([wallet1.privateKey]);
-  bStore = new XstateStore(chain);
-  await bStore.initialize([wallet2.privateKey]);
+  [(aStore, bStore)].forEach((store: TestStore) => {
+    store.createEntry(allSignState(firstState(outcome, targetChannel)));
+    store.setLedgerByEntry(store.createEntry(allSignState(firstState(outcome, ledgerChannel))));
+  });
 
-  [aStore, bStore].forEach((store: Store) => store.pushMessage(message));
   subscribeToMessages({
     [participants[0].participantId]: aStore,
     [participants[1].participantId]: bStore
   });
 });
 
-test('multiple workflows', async () => {
+test('happy path', async () => {
+  const _chain = new FakeChain();
+  _chain.depositSync(ledgerChannelId, '0', amounts.reduce(add).toHexString());
+  [aStore, bStore].forEach((store: Store) => (store.chain = _chain));
+
   const aService = interpret(machine(aStore).withContext(context));
+
   const bService = interpret(machine(bStore).withContext(context));
   [aService, bService].map(s => s.start());
 
@@ -101,8 +102,8 @@ test('multiple workflows', async () => {
     expect(bService.state.value).toEqual('success');
     expect(aService.state.value).toEqual('success');
 
-    const {supported} = await aStore.getEntry(ledgerChannelId);
-    const outcome = checkThat(supported?.outcome, isSimpleEthAllocation);
+    const {supported: supportedState} = await aStore.getEntry(ledgerChannelId);
+    const outcome = checkThat(supportedState.outcome, isSimpleEthAllocation);
 
     expect(outcome.allocationItems).toMatchObject(
       [0, 1]
@@ -117,5 +118,77 @@ test('multiple workflows', async () => {
       type: 'Indirect',
       ledgerId: ledgerChannelId
     });
+  }, EXPECT_TIMEOUT);
+});
+
+test('locks', async () => {
+  const _chain = new FakeChain();
+  _chain.depositSync(ledgerChannelId, '0', amounts.reduce(add).toHexString());
+  [aStore, bStore].forEach((store: TestStore) => ((store as any).chain = _chain));
+
+  const aService = interpret(machine(aStore).withContext(context));
+  const bService = interpret(machine(bStore).withContext(context));
+
+  const status = await aStore.acquireChannelLock(context.ledgerChannelId);
+  expect(status).toEqual({
+    channelId: context.ledgerChannelId,
+    lock: expect.any(Guid)
+  });
+
+  [aService, bService].map(s => s.start());
+
+  await waitForExpect(async () => {
+    expect(aService.state.value).toEqual('acquiringLock');
+    expect(bService.state.value).toEqual({fundingTarget: 'supportState'});
+  }, EXPECT_TIMEOUT);
+
+  aService.onTransition(s => {
+    if (_.isEqual(s.value, {fundTarget: 'getTargetOutcome'})) {
+      expect((s.context as any).lock).toBeDefined();
+      expect((s.context as any).lock).not.toEqual(status.lock);
+    }
+  });
+  await aStore.releaseChannelLock(status);
+
+  await waitForExpect(async () => {
+    expect(aService.state.value).toEqual('success');
+  }, EXPECT_TIMEOUT);
+
+  expect(aStore._channelLocks[context.ledgerChannelId]).toBeUndefined();
+});
+
+const twelveTotalAllocated = outcome;
+const fiveTotalAllocated: Outcome = {
+  type: 'SimpleAllocation',
+  assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
+  allocationItems: [0, 1].map(i => ({
+    destination: destinations[i],
+    amount: deductionAmounts[i].sub(1)
+  }))
+};
+
+test.each`
+  description         | ledgerOutcome           | chainInfo            | error
+  ${'underfunded'}    | ${twelveTotalAllocated} | ${{amount: '1'}}     | ${Errors.underfunded}
+  ${'underallocated'} | ${fiveTotalAllocated}   | ${undefined}         | ${Errors.underallocated}
+  ${'finalized'}      | ${twelveTotalAllocated} | ${{finalized: true}} | ${Errors.finalized}
+`('failure mode: $description', async ({ledgerOutcome, error, chainInfo}) => {
+  const _chain = new FakeChain();
+  _chain.depositSync(ledgerChannelId, '0', chainInfo?.amount || '12');
+  chainInfo?.finalized && _chain.finalizeSync(ledgerChannelId);
+  (aStore as any).chain = _chain;
+
+  aStore.createEntry(
+    allSignState({...firstState(ledgerOutcome, ledgerChannel), turnNum: bigNumberify(1)})
+  );
+  aStore.chain.initialize();
+
+  const aService = interpret(machine(aStore).withContext(context), {
+    parent: {send: () => undefined} as any // Consumes uncaught errors
+  }).start();
+
+  await waitForExpect(async () => {
+    expect(aService.state.value).toEqual('failure');
+    expect(aService.state.context).toMatchObject({error});
   }, EXPECT_TIMEOUT);
 });

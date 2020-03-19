@@ -44,19 +44,21 @@ export interface ChannelClientInterface<Payload = object> {
     allocations: Allocation[],
     appData: string
   ) => Promise<ChannelResult>;
+  getState: (channelId: string) => Promise<ChannelResult>;
   challengeChannel: (channelId: string) => Promise<ChannelResult>;
   closeChannel: (channelId: string) => Promise<ChannelResult>;
+  enableEthereum: () => Promise<string>;
   getAddress: () => Promise<string>;
   getEthereumSelectedAddress: () => Promise<string>;
   approveBudgetAndFund(
     playerAmount: string,
     hubAmount: string,
-    playerDestinationAddress: string,
+    playerOutcomeAddress: string,
     hubAddress: string,
-    hubDestinationAddress: string
+    hubOutcomeAddress: string
   ): Promise<SiteBudget>;
-  getBudget(hubAddress: string): Promise<SiteBudget>;
-  closeAndWithdraw(hubAddress: string): Promise<SiteBudget>;
+  getBudget(hubAddress: string): Promise<SiteBudget | {}>;
+  closeAndWithdraw(hubAddress: string): Promise<SiteBudget | {}>;
 }
 export interface EventsWithArgs {
   MessageQueued: [Message<ChannelResult>];

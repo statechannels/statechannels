@@ -1,4 +1,4 @@
-import {select, call, put, putResolve, take, actionChannel} from 'redux-saga/effects';
+import {select, call, put, putResolve, take, actionChannel, fork} from 'redux-saga/effects';
 import {RPSChannelClient} from '../../utils/rps-channel-client';
 import {
   AppData,
@@ -70,6 +70,7 @@ function* gameSagaRun(client: RPSChannelClient) {
 
   switch (localState.type) {
     case 'Setup.NeedAddress':
+      yield call([client, 'enableEthereum']);
       const address: string = yield call([client, 'getAddress']);
       // this delegates window.ethereum.enable() to the wallet
       const outcomeAddress: string = yield call([client, 'getEthereumSelectedAddress']);
@@ -84,7 +85,7 @@ function* gameSagaRun(client: RPSChannelClient) {
       break;
     case 'B.OpponentJoined':
       if (cs.inChannelProposed(channelState)) {
-        yield* joinChannel(channelState, client);
+        yield fork(joinChannel, channelState, client);
       } else if (cs.isRunning(channelState)) {
         yield* startRound();
       }

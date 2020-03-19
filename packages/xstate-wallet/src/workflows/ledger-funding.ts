@@ -1,10 +1,14 @@
-import {Machine, MachineConfig, ServiceConfig} from 'xstate';
+import {Machine, MachineConfig, ServiceConfig, assign, DoneInvokeEvent} from 'xstate';
 
 import {SupportState} from '.';
-import {Store, Funding} from '../store';
-import {allocateToTarget} from '../utils/outcome';
+import {Store, Errors as StoreErrors, Funding} from '../store';
+import {allocateToTarget, isSimpleEthAllocation} from '../utils/outcome';
 import {AllocationItem} from '../store/types';
-import {getDataAndInvoke} from '../utils';
+import {getDataAndInvoke, checkThat} from '../utils';
+
+import {add} from '../utils/math-utils';
+import {assignError} from '../utils/workflow-utils';
+import {escalate} from '../actions';
 
 const WORKFLOW = 'ledger-funding';
 
@@ -14,66 +18,116 @@ export interface Init {
   deductions: AllocationItem[];
 }
 
-const checkLedger = {
-  invoke: {src: 'checkLedger', onDone: 'fundTarget'}
-};
+const enum Services {
+  getTargetOutcome = 'getTargetOutcome',
+  updateFunding = 'updateFunding',
+  supportState = 'supportState',
+  acquireLock = 'acquireLock',
+  releaseLock = 'releaseLock'
+}
+
+export const enum Errors {
+  underfunded = 'Ledger channel is underfunded',
+  underallocated = 'Ledger channel is underallocated',
+  finalized = 'Ledger channel is finalized'
+}
+
 const FAILURE = `#${WORKFLOW}.failure`;
-const fundTarget = getDataAndInvoke(
-  {src: 'getTargetOutcome'},
-  {src: 'supportState', opts: {onError: FAILURE}},
-  'updateFunding'
+const onError = {target: FAILURE};
+
+const fundingTarget = getDataAndInvoke(
+  {src: Services.getTargetOutcome, opts: {onError}},
+  {src: Services.supportState, opts: {onError}},
+  'releasingLock'
 );
-const updateFunding = {invoke: {src: 'updateFunding', onDone: 'success'}};
 
 export const config: MachineConfig<any, any, any> = {
   key: WORKFLOW,
-  initial: 'checkLedger',
+  initial: 'acquiringLock',
   states: {
-    checkLedger,
-    fundTarget,
-    updateFunding,
-    success: {type: 'final'},
-    failure: {}
+    acquiringLock: {
+      invoke: {src: Services.acquireLock, onDone: 'fundingTarget'},
+      exit: assign<WithLock>({lock: (_, event: DoneInvokeEvent<ChannelLock>) => event.data})
+    },
+    fundingTarget,
+    failure: {
+      entry: [assignError, 'escalateError'],
+      invoke: {src: Services.releaseLock}
+    },
+    releasingLock: {
+      invoke: {src: Services.releaseLock, onDone: 'updatingFunding', onError: 'updatingFunding'}
+    },
+    updatingFunding: {invoke: {src: Services.updateFunding, onDone: 'success'}},
+    success: {type: 'final'}
   }
 };
 
-const enum Services {
-  checkLedger = 'checkLedger',
-  getTargetOutcome = 'getTargetOutcome',
-  updateFunding = 'updateFunding',
-  supportState = 'supportState'
-}
-
-export const machine = (store: Store) => {
-  async function getTargetOutcome({
-    targetChannelId,
-    ledgerChannelId,
-    deductions
-  }: Init): Promise<SupportState.Init> {
-    // TODO: Switch to feed
-    const {latest: ledgerState, channelConstants} = await store.getEntry(ledgerChannelId);
-
-    return {
-      state: {
-        ...channelConstants,
-        ...ledgerState,
-        turnNum: ledgerState.turnNum.add(1),
-        outcome: allocateToTarget(ledgerState.outcome, deductions, targetChannelId)
-      }
-    };
+import {filter, first, map} from 'rxjs/operators';
+import {ChannelLock} from '../store/store';
+const acquireLock = (store: Store) => async (ctx: Init): Promise<ChannelLock> => {
+  try {
+    return await store.acquireChannelLock(ctx.ledgerChannelId);
+  } catch (e) {
+    if (e.message === StoreErrors.channelLocked) {
+      return await store.lockFeed
+        .pipe(
+          filter(s => s.channelId === ctx.ledgerChannelId),
+          first(s => !s.lock),
+          map(async s => await store.acquireChannelLock(ctx.ledgerChannelId))
+        )
+        .toPromise();
+    } else throw e;
   }
+};
 
-  async function updateFunding({targetChannelId, ledgerChannelId}: Init) {
-    const funding: Funding = {type: 'Indirect', ledgerId: ledgerChannelId};
-    await store.setFunding(targetChannelId, funding);
-  }
+type WithLock = Init & {lock: ChannelLock};
+const releaseLock = (store: Store) => async (ctx: WithLock): Promise<void> => {
+  await store.releaseChannelLock(ctx.lock);
+};
 
-  const services: Record<Services, ServiceConfig<Init>> = {
-    checkLedger: () => Promise.resolve(), // TODO
-    getTargetOutcome,
-    updateFunding,
-    supportState: SupportState.machine(store)
+const getTargetOutcome = (store: Store) => async (ctx: Init): Promise<SupportState.Init> => {
+  // TODO: Switch to feed
+  const {targetChannelId, ledgerChannelId, deductions} = ctx;
+  const {supported: ledgerState, channelConstants} = await store.getEntry(ledgerChannelId);
+
+  const {amount, finalized} = await store.chain.getChainInfo(ledgerChannelId);
+
+  const currentlyAllocated = checkThat(ledgerState.outcome, isSimpleEthAllocation)
+    .allocationItems.map(i => i.amount)
+    .reduce(add);
+  const toDeduct = deductions.map(i => i.amount).reduce(add);
+
+  if (amount.lt(currentlyAllocated)) throw new Error(Errors.underfunded);
+  if (finalized) throw new Error(Errors.finalized);
+  if (currentlyAllocated.lt(toDeduct)) throw new Error(Errors.underallocated);
+
+  return {
+    state: {
+      ...channelConstants,
+      ...ledgerState,
+      turnNum: ledgerState.turnNum.add(1),
+      outcome: allocateToTarget(ledgerState.outcome, deductions, targetChannelId)
+    }
   };
-
-  return Machine(config, {services});
 };
+
+const updateFunding = (store: Store) => async ({targetChannelId, ledgerChannelId}: Init) => {
+  const funding: Funding = {type: 'Indirect', ledgerId: ledgerChannelId};
+  await store.setFunding(targetChannelId, funding);
+};
+
+const services = (store: Store): Record<Services, ServiceConfig<Init>> => ({
+  getTargetOutcome: getTargetOutcome(store),
+  updateFunding: updateFunding(store),
+  supportState: SupportState.machine(store),
+  acquireLock: acquireLock(store),
+  releaseLock: releaseLock(store)
+});
+
+const actions = {
+  escalateError: escalate(({error}) => ({type: 'FAILURE', error}))
+};
+
+const options = (store: Store) => ({services: services(store), actions});
+
+export const machine = (store: Store) => Machine(config, options(store));

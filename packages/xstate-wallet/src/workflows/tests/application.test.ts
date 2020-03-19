@@ -1,22 +1,16 @@
 import {interpret} from 'xstate';
 import {ethers} from 'ethers';
 import waitForExpect from 'wait-for-expect';
-import {
-  applicationWorkflow,
-  JoinChannelEvent,
-  WorkflowServices,
-  ChannelUpdated,
-  CreateChannelEvent,
-  WorkflowActions
-} from '../application';
+import {applicationWorkflow, WorkflowServices, WorkflowActions} from '../application';
 import {AddressZero} from 'ethers/constants';
 import {XstateStore} from '../../store';
 import {StateVariables, SignedState} from '../../store/types';
-import {ChannelStoreEntry} from '../../store/memory-channel-storage';
+import {ChannelStoreEntry} from '../../store/channel-store-entry';
 import {MessagingService, MessagingServiceInterface} from '../../messaging';
 import {bigNumberify} from 'ethers/utils';
 import {calculateChannelId} from '../../store/state-utils';
 import {simpleEthAllocation} from '../../utils/outcome';
+import {CreateChannelEvent, ChannelUpdated, JoinChannelEvent} from '../../event-types';
 
 jest.setTimeout(50000);
 const createChannelEvent: CreateChannelEvent = {
@@ -60,8 +54,8 @@ it('invokes the createChannelAndFund protocol', async () => {
   await store.initialize();
   const messagingService: MessagingServiceInterface = new MessagingService(store);
   const services: Partial<WorkflowServices> = {
-    getDataForCreateChannelAndDirectFund: jest.fn().mockReturnValue(Promise.resolve('foo')),
-    invokeCreateChannelAndDirectFundProtocol: jest.fn().mockReturnValue(
+    getDataForCreateChannelAndFund: jest.fn().mockReturnValue(Promise.resolve('foo')),
+    invokeCreateChannelAndFundProtocol: jest.fn().mockReturnValue(
       new Promise(() => {
         /* mock */
       })
@@ -85,9 +79,9 @@ it('invokes the createChannelAndFund protocol', async () => {
   service.send({type: 'done.invoke.createChannel', data: channelId});
   await waitForExpect(async () => {
     expect(service.state.value).toEqual({
-      openChannelAndDirectFundProtocol: 'invokeCreateChannelAndDirectFundProtocol'
+      openChannelAndFundProtocol: 'invokeCreateChannelAndFundProtocol'
     });
-    expect(services.invokeCreateChannelAndDirectFundProtocol).toHaveBeenCalledWith(
+    expect(services.invokeCreateChannelAndFundProtocol).toHaveBeenCalledWith(
       expect.objectContaining({channelId}),
       expect.any(Object)
     );
@@ -125,7 +119,7 @@ it.skip('handles confirmCreateChannel workflow finishing', async () => {
   const messagingService: MessagingServiceInterface = new MessagingService(store);
   const services: Partial<WorkflowServices> = {
     createChannel: jest.fn().mockReturnValue(Promise.resolve('0xb1ab1a')),
-    invokeCreateChannelAndDirectFundProtocol: jest.fn().mockReturnValue(
+    invokeCreateChannelAndFundProtocol: jest.fn().mockReturnValue(
       new Promise(() => {
         /*mock*/
       })
@@ -143,7 +137,7 @@ it.skip('handles confirmCreateChannel workflow finishing', async () => {
   });
 
   await waitForExpect(async () => {
-    expect(service.state.value).toEqual('openChannelAndDirectFundProtocol');
+    expect(service.state.value).toEqual('openChannelAndFundProtocol');
     expect(service.state.context).toMatchObject({channelId: '0xb1ab1a'});
   }, 2000);
 });
@@ -179,11 +173,8 @@ it('initializes and starts the join channel machine', async () => {
   service.send(event);
 
   await waitForExpect(async () => {
-    expect(service.state.value).toEqual({
-      confirmJoinChannelWorkflow: 'getDataForCreateChannelConfirmation'
-    });
-    expect(service.state.context).toBeDefined();
-    expect(service.state.context.channelId).toEqual('0xabc');
+    expect(service.state.value).toEqual({confirmJoinChannelWorkflow: 'signFirstState'});
+    expect(service.state.context).toMatchObject({channelId: '0xabc'});
   }, 2000);
 });
 
@@ -193,6 +184,7 @@ it('starts concluding when requested', async () => {
   const messagingService: MessagingServiceInterface = new MessagingService(store);
   const channelId = ethers.utils.id('channel');
   const services: Partial<WorkflowServices> = {
+    signConcludeState: jest.fn().mockReturnValue(Promise.resolve()),
     invokeClosingProtocol: jest.fn().mockReturnValue(
       new Promise(() => {
         /* mock */
@@ -241,14 +233,15 @@ it('starts concluding when receiving a final state', async () => {
       new Promise(() => {
         /* mock */
       })
-    )
+    ),
+    signConcludeState: jest.fn().mockReturnValue(Promise.resolve())
   };
   const channelId = calculateChannelId(states[0]);
   const channelUpdate: ChannelUpdated = {
     type: 'CHANNEL_UPDATED',
     requestId: 5,
     storeEntry: {
-      latestSupportedByMe: {isFinal: true} as StateVariables
+      latest: {isFinal: true} as StateVariables
     } as ChannelStoreEntry
   };
 

@@ -109,6 +109,29 @@ Note: we don't return the state of the channel, as messages are not necessarily 
 | ---- | ----------------- | -------------------------------------------- |
 | 900  | Wrong Participant | The message is not addressed to this wallet. |
 
+## EnableEthereum
+
+Enables the wallet domain against an ethereum provider (e.g., MetaMask). This triggers the connected State Channels wallet to call `window.ethereum.enable()` in the background from the wallet's domain (e.g., `wallet.statechannels.org`). This must be done _prior_ to calling `GetEthereumSelectedAddress` as otherwise that value will be `undefined`, since the wallet won't have access to that value.
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "EnableEthereum",
+  "id": 1,
+  "params": {}
+}
+```
+
+> Example response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": "0xabc..."
+}
+```
+
 ## GetAddress
 
 Returns the signing address for the current domain.
@@ -151,7 +174,7 @@ Returns the ethereum address selected in metamask. Typically used as the `destin
 {
   "jsonrpc": "2.0",
   "id": 1,
-  "result": ["0xabc..."]
+  "result": "0xabc..."
 }
 ```
 
@@ -375,6 +398,63 @@ Possible response to a `Channel Proposed` event.
 |      | Channel not found  | The wallet can't find the channel corresponding to the channelId                      |
 |      | Invalid app data   | The app data isn't a valid state for the force-move app defined by the app definition |
 |      | Invalid transition | The state transition implied by this state is invalid                                 |
+
+## Get State
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "GetState",
+  "id": 0,
+  "params": {
+    "channelId": "0xabc123"
+  }
+}
+```
+
+> Example response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "channelId": "0xabc123...",
+    "status": "running",
+    "funding": [{"token": "0x0", "amount": "24"}],
+    "participants": [
+      {
+        "participantId": "user123",
+        "signingAddress": "0x...",
+        "destination": "0xa..."
+      },
+      {
+        "participantId": "user456",
+        "signingAddress": "0x...",
+        "destination": "0xb..."
+      }
+    ],
+    "turnNum": 7,
+    "allocations": [
+      {
+        "token": "0x...", // 0x0 for ETH
+        "allocationItems": [
+          {"destination": "0xa...", "amount": "18"},
+          {"destination": "0xb...", "amount": "6"}
+        ]
+      }
+    ],
+    "appData": "0x...."
+  }
+}
+```
+
+### Errors
+
+| Code | Message            | Meaning                                                                               |
+| ---- | ------------------ | ------------------------------------------------------------------------------------- |
+|      | Channel not found  | The wallet can't find the channel corresponding to the channelId                      |                            |
+
 
 ## Close Channel
 

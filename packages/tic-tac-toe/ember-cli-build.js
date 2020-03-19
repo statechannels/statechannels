@@ -1,8 +1,27 @@
 'use strict';
 
 const EmberApp = require('ember-cli/lib/broccoli/ember-app');
+const {getNetworkName, setupGanache} = require('@statechannels/devtools');
+const {deploy} = require('./deployment/deploy');
+
+const environment = EmberApp.env();
+const IS_DEV = environment === 'development';
+
+const setupDeployEnv = async () => {
+  const {deployer} = await setupGanache();
+  const deployedArtifacts = await deploy(deployer);
+
+  process.env = {...process.env, ...deployedArtifacts};
+
+  console.log(`TTT Address ember-cli-build.js: ${process.env.TTT_CONTRACT_ADDRESS}`);
+
+  process.env.TARGET_NETWORK = getNetworkName(process.env.CHAIN_NETWORK_ID);
+};
 
 module.exports = function(defaults) {
+  if (IS_DEV) {
+    setupDeployEnv();
+  }
   const app = new EmberApp(defaults, {
     postcssOptions: {
       compile: {
@@ -30,6 +49,18 @@ module.exports = function(defaults) {
           }
         ]
       }
+    },
+    autoImport: {
+      webpack: {
+        node: {
+          https: true,
+          http: true,
+          fs: 'empty',
+          crypto: true,
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          child_process: 'empty'
+        }
+      }
     }
   });
 
@@ -45,6 +76,12 @@ module.exports = function(defaults) {
   // modules that you would like to import into your application
   // please specify an object with the list of modules as keys
   // along with the exports of each module as its value.
+
+  app.import('node_modules/@statechannels/channel-provider/dist/channel-provider.js');
+  app.import({
+    development: 'node_modules/ethers/dist/ethers.js',
+    production: 'node_modules/ethers/dist/ethers.min.js'
+  });
 
   return app.toTree();
 };

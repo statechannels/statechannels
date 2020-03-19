@@ -1,6 +1,7 @@
-import {State, ChannelConstants, Outcome, StateVariables, AllocationItem} from './types';
+import {State, ChannelConstants, Outcome, AllocationItem, SignedState} from './types';
 import {
   State as NitroState,
+  SignedState as NitroSignedState,
   Outcome as NitroOutcome,
   AllocationItem as NitroAllocationItem,
   signState as signNitroState,
@@ -31,6 +32,14 @@ function toNitroState(state: State): NitroState {
   };
 }
 
+// Since the nitro signed state only contains one signature we may get multiple
+// NitroSignedStates for a signed state with multiple signatures
+export function toNitroSignedState(signedState: SignedState): NitroSignedState[] {
+  const state = toNitroState(signedState);
+  const {signatures} = signedState;
+  return signatures.map(sig => ({state, signature: splitSignature(sig)}));
+}
+
 export function calculateChannelId(channelConstants: ChannelConstants): string {
   const {chainId, channelNonce, participants} = channelConstants;
   const addresses = participants.map(p => p.signingAddress);
@@ -57,12 +66,8 @@ export function getSignerAddress(state: State, signature: string): string {
   return getNitroSignerAddress({state: nitroState, signature: splitSignature(signature)});
 }
 
-export function statesEqual(
-  constants: ChannelConstants,
-  left: StateVariables,
-  right?: StateVariables
-): boolean {
-  return right ? hashState({...constants, ...left}) === hashState({...constants, ...right}) : false;
+export function statesEqual(left: State, right: State) {
+  return hashState(left) === hashState(right);
 }
 
 export function outcomesEqual(left: Outcome, right?: Outcome) {
@@ -83,7 +88,7 @@ export const firstState = (
   challengeDuration,
   appDefinition,
   participants,
-  outcome: outcome || {type: 'SimpleAllocation', allocationItems: []}
+  outcome
 });
 
 function convertToNitroAllocationItems(allocationItems: AllocationItem[]): NitroAllocationItem[] {
@@ -116,4 +121,12 @@ export function convertToNitroOutcome(outcome: Outcome): NitroOutcome {
     case 'MixedAllocation':
       return outcome.simpleAllocations.map(x => convertToNitroOutcome[0]);
   }
+}
+
+export function nextState(state: State, outcome: Outcome) {
+  if (state.outcome.type !== outcome.type) {
+    throw new Error('Attempting to change outcome type');
+  }
+
+  return {...state, turnNum: state.turnNum.add(1), outcome};
 }

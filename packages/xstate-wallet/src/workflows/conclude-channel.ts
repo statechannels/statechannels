@@ -11,8 +11,13 @@ const WORKFLOW = 'conclude-channel';
 export interface Init {
   channelId: string;
 }
+// TODO:Currently this is hard coded to go to done after the state is concluded
+// We need to support various funding type options here
+const determineFundingType = {on: {'': 'success'}};
 
-const concludeTarget = getDataAndInvoke('getFinalState', 'supportState', 'ledgerDefunding');
+const concludeTarget = {
+  ...getDataAndInvoke('getFinalState', 'supportState', 'determineFundingType')
+};
 const ledgerDefunding = getDataAndInvoke('getDefundedLedgerState', 'supportState', 'success');
 
 const virtualDefunding = {
@@ -50,6 +55,7 @@ export const config = {
     concludeTarget,
     virtualDefunding,
     ledgerDefunding,
+    determineFundingType,
     success: {type: 'final' as 'final'}
   }
 };
@@ -64,23 +70,19 @@ export const mockOptions = {
 
 export const machine: MachineFactory<Init, any> = (store: Store, ctx: Init) => {
   async function getFinalState({channelId}: Init): Promise<SupportState.Init> {
-    const {latestSupportedByMe, latest, channelConstants} = await store.getEntry(channelId);
+    const {latestSupportedByMe, latest} = await store.getEntry(channelId);
 
-    if (!latestSupportedByMe) {
-      throw new Error('No state');
-    }
     // If we've received a new final state that matches our outcome we support that
     if (latest.isFinal && outcomesEqual(latestSupportedByMe.outcome, latest.outcome)) {
-      return {state: {...latest, ...channelConstants}};
+      return {state: latest};
     }
     // Otherwise send out our final state that we support
     if (latestSupportedByMe.isFinal) {
-      return {state: {...latestSupportedByMe, ...channelConstants}};
+      return {state: latestSupportedByMe};
     }
     // Otherwise create a new final state
     return {
       state: {
-        ...channelConstants,
         ...latestSupportedByMe,
         turnNum: latestSupportedByMe.turnNum.add(1),
         isFinal: true
@@ -90,25 +92,19 @@ export const machine: MachineFactory<Init, any> = (store: Store, ctx: Init) => {
 
   async function getDefundedLedgerState({channelId}: Init): Promise<SupportState.Init> {
     const funding = checkThat((await store.getEntry(channelId)).funding, isIndirectFunding);
-    const {supported: targetChannelSupported} = await store.getEntry(channelId);
-    if (!targetChannelSupported) {
-      throw new Error('No supported state for target channel');
-    }
-    const {outcome: concludedOutcome, isFinal} = targetChannelSupported;
-    if (!isFinal) throw 'Target channel not finalized';
+    const {supported: targetChannelState} = await store.getEntry(channelId);
+    const {outcome: concludedOutcome} = targetChannelState;
+    if (!targetChannelState.isFinal) throw 'Target channel not finalized';
 
-    const {supported, channelConstants} = await store.getEntry(funding.ledgerId);
-    if (!supported) {
-      throw new Error('No supported state for ledger channel');
-    }
-    if (!isSimpleEthAllocation(supported.outcome) || !isSimpleEthAllocation(concludedOutcome)) {
+    const {supported: ledgerState, channelConstants} = await store.getEntry(funding.ledgerId);
+    if (!isSimpleEthAllocation(ledgerState.outcome) || !isSimpleEthAllocation(concludedOutcome)) {
       throw new Error('Only SimpleEthAllocations are currently supported');
     }
-    const allocation = supported.outcome.allocationItems;
+    const allocation = ledgerState.outcome.allocationItems;
     const idx = allocation.findIndex(({destination}) => destination === channelId);
 
     if (
-      supported.outcome.allocationItems[idx]?.amount !==
+      ledgerState.outcome.allocationItems[idx]?.amount !==
       concludedOutcome.allocationItems.map(a => a.amount).reduce(add)
     ) {
       // TODO: What should we do here?
@@ -120,8 +116,8 @@ export const machine: MachineFactory<Init, any> = (store: Store, ctx: Init) => {
     return {
       state: {
         ...channelConstants,
-        ...supported,
-        turnNum: supported.turnNum.add(1),
+        ...ledgerState,
+        turnNum: ledgerState.turnNum.add(1),
         outcome: simpleEthAllocation(allocation)
       }
     };

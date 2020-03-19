@@ -7,12 +7,11 @@ import {RoutePath} from '../../routes';
 import './Welcome.scss';
 
 interface Props {
-  currentNetwork: number;
-  requiredNetwork: number;
+  ready: boolean;
 }
 
 const Welcome: React.FC<RouteComponentProps & Props> = props => {
-  const {history} = props;
+  const {history, ready} = props;
   return (
     <section className="section fill">
       <div className="jumbotron">
@@ -39,7 +38,7 @@ const Welcome: React.FC<RouteComponentProps & Props> = props => {
       <FormButton
         name="upload"
         block={true}
-        disabled={props.currentNetwork !== props.requiredNetwork}
+        disabled={!ready}
         onClick={() => history.push(RoutePath.Upload)}
       >
         Upload

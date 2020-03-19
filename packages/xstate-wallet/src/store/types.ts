@@ -1,6 +1,22 @@
 import {BigNumber} from 'ethers/utils';
 import {MemoryChannelStoreEntry} from './memory-channel-storage';
 
+export interface SiteBudget {
+  site: string;
+  hubAddress: string;
+  forAsset: Record<string, AssetBudget>;
+}
+export interface BudgetItem {
+  playerAmount: BigNumber;
+  hubAmount: BigNumber;
+}
+export interface AssetBudget {
+  assetHolderAddress: string;
+  pending: BudgetItem;
+  free: BudgetItem;
+  inUse: BudgetItem;
+  direct: BudgetItem;
+}
 export interface Participant {
   participantId: string;
   signingAddress: string;
@@ -53,9 +69,12 @@ export interface ChannelConstants {
 
 export interface State extends ChannelConstants, StateVariables {}
 
-export interface SignedState extends State {
+interface Signed {
   signatures: string[];
 }
+
+export interface SignedState extends State, Signed {}
+export interface SignedStateVariables extends StateVariables, Signed {}
 
 type _Objective<Name, Data> = {
   participants: Participant[];
@@ -83,14 +102,27 @@ export type FundGuarantor = _Objective<
     guarantorId: string;
   }
 >;
-
-export type Objective = OpenChannel | VirtuallyFund | FundGuarantor;
+export type FundLedger = _Objective<
+  'FundLedger',
+  {
+    ledgerId: string;
+  }
+>;
+export type CloseLedger = _Objective<
+  'CloseLedger',
+  {
+    ledgerId: string;
+  }
+>;
+export type Objective = OpenChannel | VirtuallyFund | FundGuarantor | FundLedger | CloseLedger;
 
 const guard = <T extends Objective>(name: Objective['type']) => (o: Objective): o is T =>
   o.type === name;
 export const isOpenChannel = guard<OpenChannel>('OpenChannel');
 export const isVirtuallyFund = guard<VirtuallyFund>('VirtuallyFund');
 export const isFundGuarantor = guard<FundGuarantor>('FundGuarantor');
+export const isFundLedger = guard<FundLedger>('FundLedger');
+export const isCloseLedger = guard<CloseLedger>('CloseLedger');
 
 export interface Message {
   signedStates?: SignedState[];

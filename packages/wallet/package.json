@@ -19,7 +19,7 @@
     "chalk": "3.0.0",
     "css-loader": "3.4.2",
     "emittery": "0.5.1",
-    "ethers": "4.0.44",
+    "ethers": "4.0.45",
     "eventemitter2": "6.0.0",
     "fs-extra": "8.1.0",
     "jsonrpc-lite": "2.1.0",

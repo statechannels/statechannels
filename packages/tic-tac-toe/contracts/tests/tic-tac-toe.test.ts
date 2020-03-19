@@ -1,3 +1,10 @@
+declare global {
+  interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ethers: any;
+  }
+}
+
 import {expectRevert, DeployedArtifact} from '@statechannels/devtools';
 import TicTacToeArtifact from '../../build/contracts/TicTacToe.json';
 import * as ethers from 'ethers';
@@ -14,7 +21,9 @@ import {
   randomExternalDestination
 } from '@statechannels/nitro-protocol';
 import {VariablePart} from '@statechannels/nitro-protocol';
-import {TTTData, PositionType, encodeTTTData} from './types/app-data';
+
+window.ethers = ethers; // Needed because core/app-data uses global ethers
+import {TTTData, PositionType, encodeTTTData} from '../../app/core/app-data';
 
 dotEnvExtended.load();
 

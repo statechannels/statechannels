@@ -4,6 +4,7 @@ import {
   JoinChannelParams,
   PushMessageParams,
   UpdateChannelParams,
+  GetStateParams,
   CreateChannelParams,
   CloseChannelParams,
   ChallengeChannelParams
@@ -88,13 +89,23 @@ function* accountsChangedSaga() {
 function* handleMessage(payload: RequestObject) {
   const {id} = payload;
   switch (payload.method) {
+    case "EnableEthereum":
+      //  ask metamask permission to access accounts
+      try {
+        yield call([window.ethereum, "enable"]);
+        yield fork(
+          messageSender,
+          outgoingMessageActions.addressResponse({id, address: yield accountsChangedSaga()})
+        );
+      } catch {
+        yield fork(messageSender, outgoingMessageActions.ethereumAddressError({id}));
+      }
+      break;
     case "GetAddress":
       const address = yield select(getAddress);
       yield fork(messageSender, outgoingMessageActions.addressResponse({id, address}));
       break;
     case "GetEthereumSelectedAddress":
-      //  ask metamask permission to access accounts
-      yield call([window.ethereum, "enable"]);
       //  block until accounts changed
       //  (indicating user acceptance)
       const ethereumSelectedAddress = yield accountsChangedSaga();
@@ -111,6 +122,9 @@ function* handleMessage(payload: RequestObject) {
       break;
     case "UpdateChannel":
       yield handleUpdateChannelMessage(payload);
+      break;
+    case "GetState":
+      yield handleGetStateMessage(payload);
       break;
     case "JoinChannel":
       yield handleJoinChannelMessage(payload);
@@ -292,6 +306,19 @@ function* handlePushMessage(payload: RequestObject) {
       default:
         console.error(`Could not handle message data with type ${message.data.type}`);
     }
+  }
+}
+
+function* handleGetStateMessage(payload: RequestObject) {
+  const {id, params} = payload;
+  const {channelId} = params as GetStateParams;
+
+  const channelExists = yield select(doesAStateExistForChannel, channelId);
+
+  if (!channelExists) {
+    yield fork(messageSender, outgoingMessageActions.unknownChannelId({id, channelId}));
+  } else {
+    yield fork(messageSender, outgoingMessageActions.getStateResponse({id, channelId}));
   }
 }
 

@@ -19,7 +19,6 @@ storiesOf('Web3Torrent', module)
             name: text('File name', 'Once-Upon-A-Time.zip', 'File data'),
             length: number('File size (in Mb)', 172, {step: 0.01}, 'File data'),
             numPeers: number('Number of peers', 17, {step: 1}, 'File data'),
-            cost: text('Cost', '0.01', 'File data'),
             magnetURI: text('Magnet link', '', 'File data')
           }}
           goTo={action('button-clicked')}

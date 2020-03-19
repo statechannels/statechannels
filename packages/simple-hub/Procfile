@@ -1,0 +1,1 @@
+simple-hub: node ./lib/simple-hub/server.js

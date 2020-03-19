@@ -91,6 +91,10 @@ interface Balance {
   hubAmount: string;
 }
 
+// EnableEthereum
+export type EnableEthereumRequest = JsonRpcRequest<'EnableEthereum', {}>;
+export type EnableEthereumResponse = JsonRpcResponse<Address>;
+
 // GetAddress
 export type GetAddressRequest = JsonRpcRequest<'GetAddress', {}>; // todo: what are params
 export type GetAddressResponse = JsonRpcResponse<Address>;
@@ -126,6 +130,13 @@ export interface UpdateChannelParams {
 export type UpdateChannelRequest = JsonRpcRequest<'UpdateChannel', UpdateChannelParams>;
 export type UpdateChannelResponse = JsonRpcResponse<ChannelResult>;
 
+// GetState
+export interface GetStateParams {
+  channelId: ChannelId;
+}
+export type GetStateRequest = JsonRpcRequest<'GetState', GetStateParams>;
+export type GetStateResponse = JsonRpcResponse<ChannelResult>;
+
 // PushMessage
 export type PushMessageParams = PushMessageRequest['params']; // included for backwards compatibility
 export type PushMessageResult = {success: boolean};
@@ -145,17 +156,33 @@ export type ChallengeChannelRequest = JsonRpcRequest<'ChallengeChannel', {channe
 export type ChallengeChannelResponse = JsonRpcResponse<ChannelResult>;
 
 // Budget
-export interface SiteBudget {
-  site: string;
-  hub: string;
+export interface TokenBudget {
+  token: string;
   pending: Balance;
   free: Balance;
   inUse: Balance;
   direct: Balance;
 }
-export type GetBudgetRequest = JsonRpcRequest<'GetBudget', {hubAddress: Address}>;
-export type GetBudgetResponse = JsonRpcResponse<SiteBudget>;
+export interface SiteBudget {
+  site: string;
+  hub: string;
+  budgets: TokenBudget[];
+}
 
+export interface BudgetRequest extends Balance {
+  site: string;
+  player: Participant;
+  hub: Participant;
+}
+export type GetBudgetRequest = JsonRpcRequest<'GetBudget', {hubAddress: Address}>;
+export type GetBudgetResponse = JsonRpcResponse<SiteBudget | {}>;
+
+export type ApproveBudgetAndFundRequest = JsonRpcRequest<'ApproveBudgetAndFund', BudgetRequest>;
+export type ApproveBudgetAndFundResponse = JsonRpcResponse<SiteBudget>;
+
+export type CloseAndWithdrawParams = {site: string; player: Participant; hub: Participant};
+export type CloseAndWithdrawRequest = JsonRpcRequest<'CloseAndWithdraw', CloseAndWithdrawParams>;
+export type CloseAndWithdrawResponse = JsonRpcResponse<{success: boolean}>;
 // Notifications
 export type ChannelProposedNotification = JsonRpcNotification<'ChannelProposed', ChannelResult>;
 export type ChannelUpdatedNotification = JsonRpcNotification<'ChannelUpdated', ChannelResult>;
@@ -176,10 +203,14 @@ export type Request =
   | CreateChannelRequest
   | JoinChannelRequest
   | UpdateChannelRequest
+  | EnableEthereumRequest
+  | GetStateRequest
   | PushMessageRequest
   | ChallengeChannelRequest
   | GetBudgetRequest
-  | CloseChannelRequest;
+  | ApproveBudgetAndFundRequest
+  | CloseChannelRequest
+  | CloseAndWithdrawRequest;
 
 export type Response =
   | GetAddressResponse
@@ -187,10 +218,14 @@ export type Response =
   | CreateChannelResponse
   | JoinChannelResponse
   | UpdateChannelResponse
+  | EnableEthereumResponse
+  | GetStateResponse
   | PushMessageResponse
   | ChallengeChannelResponse
   | GetBudgetResponse
-  | CloseChannelResponse;
+  | CloseChannelResponse
+  | ApproveBudgetAndFundResponse
+  | CloseAndWithdrawResponse;
 
 export function isResponse(message: Response | Request | Notification): message is Response {
   return 'id' in message && 'result' in message;

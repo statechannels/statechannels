@@ -12,36 +12,6 @@
   }
 }
 
-.leecherInfo {
-  padding-top: 10px;
-  padding-bottom: 10px;
-  margin-bottom: 10px;
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  border-bottom: 1px solid $c-mediumgrey;
-
-  &:last-child {
-    border-bottom: 0px solid transparent;
-  }
-  .leecher-id {
-    text-align: left;
-
-    min-width: 250px;
-    width: 50%;
-  }
-  .leecher-downloaded {
-    min-width: 50px;
-    width: 15%;
-    text-align: left;
-  }
-  .leecher-paid {
-    min-width: 70px;
-    width: 35%;
-    text-align: right;
-  }
-}
-
 @media only screen and (max-width: 370px) {
   .leecherInfo {
     flex-direction: column;

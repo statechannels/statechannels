@@ -71,12 +71,12 @@ describe('ChannelClient with FakeChannelProvider', () => {
 
   function setupProvider(
     provider: FakeChannelProvider,
-    playerIndex: number,
+    playerIndex: 0 | 1,
     addresses: Addresses
   ): void {
     provider.setAddress(addresses.self);
-    provider.updatePlayerIndex(playerIndex);
-    provider.opponentAddress = addresses.opponent;
+    provider.updatePlayerIndex(channelId, playerIndex);
+    provider.opponentAddress[channelId] = addresses.opponent;
   }
 
   beforeEach(() => {
@@ -140,7 +140,7 @@ describe('ChannelClient with FakeChannelProvider', () => {
 
       return new Promise(resolve => {
         clientBEventEmitter.once('ChannelProposed', () => {
-          expect(providerB.latestState).toEqual(states['proposed']);
+          expect(providerB.latestState[channelId]).toEqual(states['proposed']);
           resolve();
         });
 
@@ -155,7 +155,7 @@ describe('ChannelClient with FakeChannelProvider', () => {
       setProviderStates([providerB], states['proposed']);
       const channelResult = await clientB.joinChannel(channelId);
       expect(channelResult).toEqual(states['running']);
-      expect(providerA.latestState).toEqual(states['running']);
+      expect(providerA.latestState[channelId]).toEqual(states['running']);
     });
 
     it('the player whose turn it is not cannot accept a join proposal they sent', async () => {
@@ -174,7 +174,7 @@ describe('ChannelClient with FakeChannelProvider', () => {
         UPDATED_APP_DATA
       );
       expect(channelResult).toEqual(states['updated_app_data']);
-      expect(providerB.latestState).toEqual(states['updated_app_data']);
+      expect(providerB.latestState[channelId]).toEqual(states['updated_app_data']);
     });
 
     it('the player whose turn it is not cannot update the channel', async () => {
@@ -185,6 +185,15 @@ describe('ChannelClient with FakeChannelProvider', () => {
     });
   });
 
+  describe('gets state from a channel', () => {
+    it('anyone can get state', async () => {
+      setProviderStates([providerA, providerB], states['running']);
+      const channelResult = await clientA.getState(channelId);
+      expect(channelResult).toEqual(states['running']);
+      expect(providerB.latestState[channelId]).toEqual(states['running']);
+    });
+  });
+
   describe('closes a channel', () => {
     it('player with valid turn can make a valid close channel call', async () => {
       setProviderStates([providerA, providerB], states['running']);
@@ -192,7 +201,7 @@ describe('ChannelClient with FakeChannelProvider', () => {
       // phase and the clients directly go to the channel 'closed' state
       const channelResult = await clientA.closeChannel(channelId);
       expect(channelResult).toEqual(states['closed']);
-      expect(providerB.latestState).toEqual(states['closed']);
+      expect(providerB.latestState[channelId]).toEqual(states['closed']);
     });
 
     it('player with invalid turn cannot make a valid close channel call', async () => {

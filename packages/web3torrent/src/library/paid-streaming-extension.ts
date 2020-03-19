@@ -25,7 +25,9 @@ export abstract class PaidStreamingExtension implements Extension {
 
   pseChannelId: string;
   peerChannelId: string;
+
   isForceChoking = false;
+  isBeingChoked = false;
 
   constructor(wireToUse: PaidStreamingWire) {
     this.wire = wireToUse;
@@ -87,15 +89,19 @@ export abstract class PaidStreamingExtension implements Extension {
   }
 
   stop() {
-    this.isForceChoking = true;
-    this.wire.choke();
-    this.executeExtensionCommand(PaidStreamingExtensionNotices.STOP, this.pseChannelId);
+    if (!this.isForceChoking) {
+      this.isForceChoking = true;
+      this.executeExtensionCommand(PaidStreamingExtensionNotices.STOP, this.pseChannelId);
+    }
   }
 
   start() {
-    this.isForceChoking = false;
-    this.wire.unchoke();
-    this.executeExtensionCommand(PaidStreamingExtensionNotices.START);
+    if (this.isForceChoking) {
+      setTimeout(() => {
+        this.isForceChoking = false;
+        this.executeExtensionCommand(PaidStreamingExtensionNotices.START);
+      }, 0);
+    }
   }
 
   ack() {
@@ -111,11 +117,34 @@ export abstract class PaidStreamingExtension implements Extension {
   onMessage(buffer: Buffer) {
     try {
       const jsonData = bencode.decode(buffer, undefined, undefined, 'utf8');
-      this.messageBus.emit(PaidStreamingExtensionEvents.NOTICE, jsonData);
+      this.messageHandler(jsonData);
     } catch (err) {
-      log('ERROR: decoding', err);
+      log('ERROR: onMessage decoding', err);
       return;
     }
+  }
+
+  protected messageHandler({command, data}) {
+    switch (command) {
+      case PaidStreamingExtensionNotices.ACK:
+        return;
+      case PaidStreamingExtensionNotices.START:
+        log(`START received from ${this.peerAccount}`);
+        this.isBeingChoked = false;
+        this.wire.requests = [];
+        this.wire.unchoke();
+        break;
+      case PaidStreamingExtensionNotices.STOP:
+        log(`STOP received from ${this.peerAccount}`);
+        this.peerChannelId = data;
+        if (this.isBeingChoked) return;
+        this.isBeingChoked = true;
+        break;
+      default:
+        log(`MESSAGE received from ${this.peerAccount}`, data);
+    }
+    this.ack();
+    this.messageBus.emit(PaidStreamingExtensionEvents.NOTICE, {command, data});
   }
 
   protected executeExtensionCommand(command: PaidStreamingExtensionNotices, data = {}) {
@@ -133,28 +162,28 @@ export abstract class PaidStreamingExtension implements Extension {
   }
 
   protected interceptRequests() {
-    const undecoratedOnRequestFunction = this.wire._onRequest;
-    const extension = this;
-    const {messageBus} = extension;
-    const wire = this.wire as PaidStreamingWire;
+    const {messageBus, wire} = this;
 
-    this.wire._onRequest = function(index: number, offset: number, length: number) {
-      log(`!> Incoming request for piece - index ${arguments[0]}`);
+    // for debugging purposes. It logs when a piece is received
+    const _onPiece = wire._onPiece;
+    wire._onPiece = function(index, offset, buffer) {
+      log(`_onPiece PIECE: ${index}`, arguments);
+      _onPiece.apply(wire, [index, offset, buffer]);
+    };
 
-      messageBus.emit(
-        PaidStreamingExtensionEvents.REQUEST,
-        wire.paidStreamingExtension && wire.paidStreamingExtension.peerAccount
-      );
+    const _onRequest = wire._onRequest;
+    wire._onRequest = function(index, offset, length) {
+      log(`_onRequest: ${index}`);
 
-      // Call onRequest after the handlers triggered by this event have been called
-
-      setTimeout(() => {
-        if (!extension.isForceChoking) {
-          undecoratedOnRequestFunction.apply(wire, [index, offset, length]);
+      messageBus.emit(PaidStreamingExtensionEvents.REQUEST, index, length, function(allow = false) {
+        if (allow) {
+          _onRequest.apply(wire, [index, offset, length]);
+          log(`_onRequest PASS - ${index}`);
         } else {
-          log('!> dropped request - index: ' + index);
+          wire._onCancel(index, offset, length);
+          log(`_onRequest CHOKED - ${index}`);
         }
-      }, 0);
+      });
     };
   }
 }

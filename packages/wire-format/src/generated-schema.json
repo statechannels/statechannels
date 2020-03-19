@@ -57,6 +57,41 @@
       "pattern": "^0x([a-fA-F0-9]{64})$",
       "type": "string"
     },
+    "CloseLedger": {
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+          "additionalProperties": false,
+          "properties": {
+            "ledgerId": {
+              "$ref": "#/definitions/Bytes32"
+            }
+          },
+          "required": [
+            "ledgerId"
+          ],
+          "type": "object"
+        },
+        "participants": {
+          "items": {
+            "$ref": "#/definitions/Participant"
+          },
+          "type": "array"
+        },
+        "type": {
+          "enum": [
+            "CloseLedger"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "participants",
+        "type",
+        "data"
+      ],
+      "type": "object"
+    },
     "FundGuarantor": {
       "additionalProperties": false,
       "properties": {
@@ -89,6 +124,41 @@
         "type": {
           "enum": [
             "FundGuarantor"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "participants",
+        "type",
+        "data"
+      ],
+      "type": "object"
+    },
+    "FundLedger": {
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+          "additionalProperties": false,
+          "properties": {
+            "ledgerId": {
+              "$ref": "#/definitions/Bytes32"
+            }
+          },
+          "required": [
+            "ledgerId"
+          ],
+          "type": "object"
+        },
+        "participants": {
+          "items": {
+            "$ref": "#/definitions/Participant"
+          },
+          "type": "array"
+        },
+        "type": {
+          "enum": [
+            "FundLedger"
           ],
           "type": "string"
         }
@@ -174,6 +244,12 @@
         },
         {
           "$ref": "#/definitions/FundGuarantor"
+        },
+        {
+          "$ref": "#/definitions/FundLedger"
+        },
+        {
+          "$ref": "#/definitions/CloseLedger"
         }
       ]
     },

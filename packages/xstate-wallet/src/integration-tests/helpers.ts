@@ -9,11 +9,16 @@ import {
   PushMessageRequest,
   JoinChannelRequest,
   CreateChannelRequest,
-  UpdateChannelRequest
+  UpdateChannelRequest,
+  CloseChannelRequest,
+  ApproveBudgetAndFundRequest,
+  CloseAndWithdrawRequest
 } from '@statechannels/client-api-schema';
 import {interpret, Interpreter} from 'xstate';
-import {applicationWorkflow, WorkflowContext} from '../workflows/application';
+import * as App from '../workflows/application';
+import * as CreateAndFundLedger from '../workflows/create-and-fund-ledger';
 import {Guid} from 'guid-typescript';
+import * as CloseLedgerAndWithdraw from '../workflows/close-ledger-and-withdraw';
 
 export class Player {
   privateKey: string;
@@ -24,10 +29,38 @@ export class Player {
   messagingService: MessagingServiceInterface;
   channelWallet: ChannelWallet;
 
-  startAppWorkflow(startingState: string, context?: WorkflowContext) {
+  startCloseLedgerAndWithdraw(context: CloseLedgerAndWithdraw.WorkflowContext) {
     const workflowId = Guid.create().toString();
     const machine = interpret<any, any, any>(
-      applicationWorkflow(this.store, this.messagingService, context),
+      CloseLedgerAndWithdraw.workflow(this.store, this.messagingService, context),
+      {
+        devTools: true
+      }
+    )
+      .onTransition((state, event) => process.env.ADD_LOGS && logTransition(state, event, this.id))
+
+      .start();
+
+    this.channelWallet.workflows.push({id: workflowId, machine, domain: 'TODO'});
+  }
+  startCreateAndFundLedger(context: CreateAndFundLedger.WorkflowContext) {
+    const workflowId = Guid.create().toString();
+    const machine = interpret<any, any, any>(
+      CreateAndFundLedger.createAndFundLedgerWorkflow(this.store, context),
+      {
+        devTools: true
+      }
+    )
+      .onTransition((state, event) => process.env.ADD_LOGS && logTransition(state, event, this.id))
+
+      .start();
+
+    this.channelWallet.workflows.push({id: workflowId, machine, domain: 'TODO'});
+  }
+  startAppWorkflow(startingState: string, context?: App.WorkflowContext) {
+    const workflowId = Guid.create().toString();
+    const machine = interpret<any, any, any>(
+      App.applicationWorkflow(this.store, this.messagingService, context),
       {
         devTools: true
       }
@@ -73,7 +106,9 @@ export function hookUpMessaging(playerA: Player, playerB: Player) {
   playerA.channelWallet.onSendMessage(async message => {
     if (isNotification(message) && message.method === 'MessageQueued') {
       const pushMessageRequest = generatePushMessage(message.params);
-      if (process.env.ADD_LOGS) {
+      // TODO: This is failing with TypeError: Converting circular structure to JSON
+      // eslint-disable-next-line no-constant-condition
+      if (process.env.ADD_LOGS && false) {
         console.log(`MESSAGE A->B: ${JSON.stringify(pushMessageRequest)}`);
       }
       await playerB.channelWallet.pushMessage(pushMessageRequest);
@@ -83,7 +118,9 @@ export function hookUpMessaging(playerA: Player, playerB: Player) {
   playerB.channelWallet.onSendMessage(message => {
     if (isNotification(message) && message.method === 'MessageQueued') {
       const pushMessageRequest = generatePushMessage(message.params);
-      if (process.env.ADD_LOGS) {
+      // TODO: This is failing with TypeError: Converting circular structure to JSON
+      // eslint-disable-next-line no-constant-condition
+      if (process.env.ADD_LOGS && false) {
         console.log(`MESSAGE B->A: ${JSON.stringify(pushMessageRequest)}`);
       }
       playerA.channelWallet.pushMessage(pushMessageRequest);
@@ -97,6 +134,17 @@ function generatePushMessage(messageParams): PushMessageRequest {
     id: 111111111,
     method: 'PushMessage',
     params: messageParams
+  };
+}
+
+export function generateCloseRequest(channelId: string): CloseChannelRequest {
+  return {
+    jsonrpc: '2.0',
+    method: 'CloseChannel',
+    id: 777777777,
+    params: {
+      channelId
+    }
   };
 }
 
@@ -163,6 +211,40 @@ export function generateCreateChannelRequest(
       ],
       appDefinition: '0x430869383d611bBB1ce7Ca207024E7901bC26b40',
       appData: '0x0' // TODO: This works for now but will break when we start validating
+    }
+  };
+}
+
+export function generateApproveBudgetAndFundRequest(
+  player: Participant,
+  hub: Participant
+): ApproveBudgetAndFundRequest {
+  return {
+    jsonrpc: '2.0',
+    id: 88888888,
+    method: 'ApproveBudgetAndFund',
+    params: {
+      site: 'rps.statechannels.org',
+      hub,
+      player,
+      playerAmount: '0x5',
+      hubAmount: '0x5'
+    }
+  };
+}
+
+export function generateCloseAndWithdrawRequest(
+  player: Participant,
+  hub: Participant
+): CloseAndWithdrawRequest {
+  return {
+    jsonrpc: '2.0',
+    id: 88888888,
+    method: 'CloseAndWithdraw',
+    params: {
+      site: 'rps.statechannels.org',
+      hub,
+      player
     }
   };
 }

@@ -565,6 +565,61 @@ describe("message listener", () => {
     });
   });
 
+  describe("GetState", () => {
+    it("handles an get state request", async () => {
+      // Existing data in the store
+      const testChannel = channelFromStates([appState({turnNum: 0})], asAddress, asPrivateKey);
+
+      const requestMessage = {
+        jsonrpc: "2.0",
+        method: "GetState",
+        id: 1,
+        params: {
+          channelId: testChannel.channelId
+        }
+      };
+
+      const {effects} = await expectSaga(messageHandler, requestMessage, "localhost")
+        .withState({...initialState, channelStore: setChannel({}, testChannel)})
+        // Mock out the fork call so we don't actually try to post the message
+        .provide([[matchers.fork.fn(messageSender), 0]])
+        .run();
+
+      expect(effects.fork[0].payload.args[0]).toMatchObject({
+        type: "WALLET.GET_STATE_RESPONSE",
+        id: 1,
+        channelId: stateHelpers.channelId
+      });
+    });
+
+    it("returns an error when the channelId is not known", async () => {
+      const unknownChannelId = "0x" + "a".repeat(64);
+
+      const requestMessage = {
+        jsonrpc: "2.0",
+        method: "GetState",
+        id: 1,
+        params: {
+          channelId: unknownChannelId, // <----- important part of the test
+          allocations: [],
+          appData: "0x"
+        }
+      };
+
+      const {effects} = await expectSaga(messageHandler, requestMessage, "localhost")
+        .withState(initialState)
+        // Mock out the fork call so we don't actually try to post the message
+        .provide([[matchers.fork.fn(messageSender), 0]])
+        .run();
+
+      expect(effects.fork[0].payload.args[0]).toMatchObject({
+        type: "WALLET.UNKNOWN_CHANNEL_ID_ERROR",
+        id: 1,
+        channelId: unknownChannelId
+      });
+    });
+  });
+
   describe("CloseChannel", () => {
     it("handles an close channel request", async () => {
       const previousGameState = appState({turnNum: 20});

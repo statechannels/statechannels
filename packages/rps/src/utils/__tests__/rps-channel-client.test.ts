@@ -73,6 +73,9 @@ class MockChannelClient implements ChannelClientInterface {
   joinChannel = jest.fn(async function(channelId: string) {
     return await mockChannelResult;
   });
+  getState = jest.fn(async function(channelId: string) {
+    return await mockChannelResult;
+  });
   updateChannel = jest.fn(async function(channelId, participants, allocations, appData) {
     return await mockChannelResult;
   });
@@ -87,6 +90,9 @@ class MockChannelClient implements ChannelClientInterface {
       /* */
     });
   }
+  enableEthereum = jest.fn(async function() {
+    return await MOCK_ADDRESS;
+  });
   getAddress = jest.fn(async function() {
     return await MOCK_ADDRESS;
   });
@@ -96,9 +102,9 @@ class MockChannelClient implements ChannelClientInterface {
   approveBudgetAndFund = jest.fn(async function(
     playerAmount: string,
     hubAmount: string,
-    playerDestinationAddress: string,
+    playerOutcomeAddress: string,
     hubAddress: string,
-    hubDestinationAddress: string
+    hubOutcomeAddress: string
   ): Promise<SiteBudget> {
     return new Promise<SiteBudget>(() => {
       /* */

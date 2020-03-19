@@ -5,12 +5,15 @@ import {applicationWorkflow} from './workflows/application';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import {Wallet as WalletUi} from './ui/wallet';
-import {interpret, Interpreter, State} from 'xstate';
+import {interpret, Interpreter, State, StateNode} from 'xstate';
 import {Guid} from 'guid-typescript';
-import {convertToOpenEvent} from './utils/workflow-utils';
 import {Notification, Response} from '@statechannels/client-api-schema';
 import {filter, map, take} from 'rxjs/operators';
 import {Message, OpenChannel} from './store/types';
+import {approveBudgetAndFundWorkflow} from './workflows/approve-budget-and-fund';
+import {ethereumEnableWorkflow} from './workflows/ethereum-enable';
+import * as CloseLedgerAndWithdraw from './workflows/close-ledger-and-withdraw';
+import {AppRequestEvent} from './event-types';
 
 export interface Workflow {
   id: string;
@@ -34,7 +37,7 @@ export class ChannelWallet {
     // Whenever an OpenChannel objective is received
     // we alert the user that there is a new channel
     // It is up to the app to call JoinChannel
-    this.store.newObjectiveFeed
+    this.store.objectiveFeed
       .pipe(
         // TODO: type guard
         filter(o => o.type === 'OpenChannel'),
@@ -47,29 +50,98 @@ export class ChannelWallet {
           .toPromise();
 
         this.messagingService.sendChannelNotification(
-          'ChannelUpdated',
+          'ChannelProposed',
           await convertToChannelResult(channelEntry)
         );
       });
 
-    this.messagingService.requestFeed.subscribe(r => {
-      if (r.method === 'CreateChannel' || r.method === 'JoinChannel') {
-        const workflow = this.startApplicationWorkflow();
-        this.workflows.push(workflow);
-
-        workflow.machine.send(convertToOpenEvent(r));
-      }
-    });
+    this.messagingService.requestFeed.subscribe(x => this.handleRequest(x));
   }
 
-  private startApplicationWorkflow(): Workflow {
-    const workflowId = Guid.create().toString();
-    const machine = interpret<any, any, any>(
-      applicationWorkflow(this.store, this.messagingService),
-      {
-        devTools: true
+  private isWorkflowIdInUse(workflowId: string): boolean {
+    return this.workflows.map(w => w.id).indexOf(workflowId) > -1;
+  }
+
+  // Deterministic workflow ids for certain workflows allows us to avoid spawning a duplicate workflow if the app sends duplicate requests
+  private calculateWorkflowId(request: AppRequestEvent): string {
+    switch (request.type) {
+      case 'JOIN_CHANNEL':
+        return `${request.type}-${request.channelId}`;
+      case 'APPROVE_BUDGET_AND_FUND':
+        return `${request.type}-${request.player.participantId}-${request.hub.participantId}`;
+      default:
+        return `${request.type}-${Guid.create().toString()}`;
+    }
+  }
+  private handleRequest(request: AppRequestEvent) {
+    const workflowId = this.calculateWorkflowId(request);
+    switch (request.type) {
+      case 'CREATE_CHANNEL':
+      case 'JOIN_CHANNEL': {
+        if (!this.isWorkflowIdInUse(workflowId)) {
+          const workflow = this.startWorkflow(
+            applicationWorkflow(this.store, this.messagingService),
+            workflowId
+          );
+          this.workflows.push(workflow);
+
+          workflow.machine.send(request);
+        } else {
+          // TODO: To allow RPS to keep working we just warn about duplicate events
+          // Eventually this could probably be an error
+          console.warn(
+            `There is already a workflow running with id ${workflowId}, no new workflow will be spawned`
+          );
+        }
+        break;
       }
-    )
+      case 'APPROVE_BUDGET_AND_FUND': {
+        const workflow = this.startWorkflow(
+          approveBudgetAndFundWorkflow(this.store, this.messagingService, {
+            player: request.player,
+            hub: request.hub,
+            budget: request.budget,
+            requestId: request.requestId
+          }),
+          workflowId
+        );
+        this.workflows.push(workflow);
+
+        workflow.machine.send(request);
+        break;
+      }
+      case 'CLOSE_AND_WITHDRAW': {
+        const workflow = this.startWorkflow(
+          CloseLedgerAndWithdraw.workflow(this.store, this.messagingService, {
+            opponent: request.hub,
+            player: request.player,
+            requestId: request.requestId
+          }),
+          workflowId
+        );
+        this.workflows.push(workflow);
+        break;
+      }
+      case 'ENABLE_ETHEREUM': {
+        const workflow = this.startWorkflow(
+          ethereumEnableWorkflow(this.store, this.messagingService, {requestId: request.requestId}),
+          workflowId
+        );
+        this.workflows.push(workflow);
+        break;
+      }
+    }
+  }
+  private startWorkflow(
+    machineConfig: StateNode<any, any, any, any>,
+    workflowId: string
+  ): Workflow {
+    if (this.isWorkflowIdInUse(workflowId)) {
+      throw new Error(`There is already a workflow running with id ${workflowId}`);
+    }
+    const machine = interpret<any, any, any>(machineConfig, {
+      devTools: true
+    })
       .onTransition((state, event) => process.env.ADD_LOGS && logTransition(state, event, this.id))
 
       .onDone(() => (this.workflows = this.workflows.filter(w => w.id !== workflowId)))
