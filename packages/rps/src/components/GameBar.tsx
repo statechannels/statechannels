@@ -68,7 +68,7 @@ export default class GameBar extends React.PureComponent<Props> {
         <div className="container">
           <Blockie
             opts={{
-              seed: outcomeAddress.toLowerCase(),
+              seed: outcomeAddress,
             }}
           />
           <div className="col-2 my-name text-right">{myName}</div>
@@ -89,7 +89,7 @@ export default class GameBar extends React.PureComponent<Props> {
           <div className="col-2 opponent-name">{opponentName}</div>
           <Blockie
             opts={{
-              seed: opponentOutcomeAddress.toLowerCase(),
+              seed: opponentOutcomeAddress,
             }}
           />
         </div>
