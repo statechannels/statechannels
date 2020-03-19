@@ -11,10 +11,10 @@ import {
 
 type TokenAllocations = Allocation[];
 
-export class ChannelClient implements ChannelClientInterface<ChannelResult> {
+export class ChannelClient implements ChannelClientInterface {
   constructor(private readonly provider: ChannelProviderInterface) {}
 
-  onMessageQueued(callback: (message: Message<ChannelResult>) => void): UnsubscribeFunction {
+  onMessageQueued(callback: (message: Message) => void): UnsubscribeFunction {
     this.provider.on('MessageQueued', callback);
     return this.provider.off.bind(this, 'MessageQueued', callback);
   }
@@ -89,7 +89,7 @@ export class ChannelClient implements ChannelClientInterface<ChannelResult> {
     return this.provider.send({method: 'CloseChannel', params: {channelId}});
   }
 
-  async pushMessage(message: Message<ChannelResult>): Promise<PushMessageResult> {
+  async pushMessage(message: Message): Promise<PushMessageResult> {
     return this.provider.send({method: 'PushMessage', params: message});
   }
 

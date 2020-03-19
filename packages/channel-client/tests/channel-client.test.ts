@@ -103,11 +103,11 @@ describe('ChannelClient with FakeChannelProvider', () => {
     // pushed from B's app to B's wallet.
     // The de/queuing described above is effectively faked by explicitly passing
     // the messages between the clients.
-    clientA.onMessageQueued(async (message: Message<ChannelResult>) => {
+    clientA.onMessageQueued(async (message: Message) => {
       await clientB.pushMessage(message);
     });
 
-    clientB.onMessageQueued(async (message: Message<ChannelResult>) => {
+    clientB.onMessageQueued(async (message: Message) => {
       await clientA.pushMessage(message);
     });
 
@@ -117,7 +117,7 @@ describe('ChannelClient with FakeChannelProvider', () => {
   });
 
   describe('creates a channel', () => {
-    let proposalMessage: Message<ChannelResult>;
+    let proposalMessage: Message;
 
     it('client A produces the right channel result', async () => {
       const clientAChannelState = await clientA.createChannel(

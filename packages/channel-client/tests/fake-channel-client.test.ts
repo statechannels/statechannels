@@ -126,11 +126,11 @@ describe('FakeChannelClient', () => {
     // pushed from B's app to B's wallet.
     // The de/queuing described above is effectively faked by explicitly passing
     // the messages between the clients.
-    clientA.onMessageQueued(async (message: Message<ChannelResult>) => {
+    clientA.onMessageQueued(async (message: Message) => {
       await clientB.pushMessage(message);
     });
 
-    clientB.onMessageQueued(async (message: Message<ChannelResult>) => {
+    clientB.onMessageQueued(async (message: Message) => {
       await clientA.pushMessage(message);
     });
 
@@ -138,7 +138,7 @@ describe('FakeChannelClient', () => {
       clientBEventEmitter.emit('ChannelProposed', result);
     });
 
-    clientC.onMessageQueued(async (message: Message<ChannelResult>) => {
+    clientC.onMessageQueued(async (message: Message) => {
       await clientA.pushMessage(message);
     });
 
