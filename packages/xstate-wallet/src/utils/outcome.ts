@@ -83,8 +83,8 @@ export function allocateToTarget(
 
 export function makeDestination(addressOrDestination: string): Destination {
   if (addressOrDestination.length === 42) {
-    if (addressOrDestination === addressOrDestination.toLowerCase()) {
-      throw new Error('Lowercase address detected');
+    if (addressOrDestination !== ethers.utils.getAddress(addressOrDestination)) {
+      throw new Error('Incorrect checksum detected');
     }
     return ethers.utils.hexZeroPad(addressOrDestination, 32) as Destination;
   } else if (addressOrDestination.length === 66) {

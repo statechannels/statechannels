@@ -2,7 +2,8 @@ import {
   Errors,
   allocateToTarget,
   simpleEthAllocation,
-  simpleTokenAllocation
+  simpleTokenAllocation,
+  makeDestination
 } from './utils/outcome';
 import {AllocationItem} from './store/types';
 import {bigNumberify} from 'ethers/utils';
@@ -11,10 +12,12 @@ const one = bigNumberify(1);
 const two = bigNumberify(2);
 const three = bigNumberify(3);
 
-const left = 'left' as any;
-const right = 'right' as any;
-const middle = 'middle' as any;
-const targetChannelId = 'target';
+const left = makeDestination('0x0000000000000000000000000000000000000001');
+const right = makeDestination('0x0000000000000000000000000000000000000002');
+const middle = makeDestination('0x0000000000000000000000000000000000000003');
+const targetChannelId = makeDestination(
+  '0x1234123412341234123412341234123412341234123412341234123412341234'
+);
 
 type Allocation = AllocationItem[];
 describe('allocateToTarget with valid input', () => {
