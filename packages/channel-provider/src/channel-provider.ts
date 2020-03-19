@@ -84,9 +84,10 @@ class ChannelProvider implements ChannelProviderInterface {
       // this line asserts the type. Not currently safe
       const notificationMethod = message.method;
       const notificationParams = message.params;
-      // if (eventName === 'UIUpdate') {
-      //   this.ui.setVisibility(message.params.showWallet);
-      // }
+      if (message.method === ('UIUpdate' as keyof NotificationType)) {
+        // TODO expand event emitter type to included this, as well as the subscription id stuff
+        this.ui.setVisibility(message.params.showWallet);
+      }
       this.events.emit(notificationMethod, notificationParams);
       // if (this.subscriptions[notificationMethod]) {
       //   this.subscriptions[notificationMethod].forEach(s => {
