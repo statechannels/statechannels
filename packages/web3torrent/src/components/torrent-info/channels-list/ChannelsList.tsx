@@ -5,7 +5,7 @@ import {ChannelState} from '../../../clients/payment-channel-client';
 import {PaidStreamingWire} from '../../../library/types';
 import './ChannelsList.scss';
 import {WebTorrentContext} from '../../../clients/web3torrent-client';
-import {prettyPrintWei} from '../../../utils/calculateWei';
+import {prettyPrintWei, prettyPrintBytes} from '../../../utils/calculateWei';
 import {utils} from 'ethers';
 
 export type UploadInfoProps = {
@@ -27,10 +27,11 @@ class ChannelsList extends React.Component<UploadInfoProps> {
     participantType: 'payer' | 'beneficiary'
   ) {
     let channelButton;
+    const channel = channels[channelId];
 
-    if (channels[channelId].status === 'closing') {
+    if (channel.status === 'closing') {
       channelButton = <button disabled>Closing ...</button>;
-    } else if (channels[channelId].status === 'closed') {
+    } else if (channel.status === 'closed') {
       channelButton = <button disabled>Closed</button>;
     } else {
       channelButton = <button disabled>Running</button>;
@@ -43,14 +44,13 @@ class ChannelsList extends React.Component<UploadInfoProps> {
     );
 
     let transferred: string;
-    let peerAccount: string;
+    const peerAccount = channel[participantType];
     if (wire) {
       transferred =
         participantType === 'beneficiary' ? prettier(wire.uploaded) : prettier(wire.downloaded);
-      peerAccount = channels[channelId][participantType];
     } else {
-      transferred = 'NOWIRE';
-      peerAccount = 'NOWIRE';
+      // Use the beneficiery balance as an approximate of the file size, when wire is dropped.
+      transferred = prettyPrintBytes(utils.bigNumberify(channel.beneficiaryBalance));
     }
 
     return (
@@ -64,11 +64,11 @@ class ChannelsList extends React.Component<UploadInfoProps> {
         </td>
         {participantType === 'beneficiary' ? (
           <td className="earned">
-            {prettyPrintWei(utils.bigNumberify(channels[channelId].beneficiaryBalance))}
+            {prettyPrintWei(utils.bigNumberify(channel.beneficiaryBalance))}
           </td>
         ) : (
           <td className="paid">
-            -{prettyPrintWei(utils.bigNumberify(channels[channelId].beneficiaryBalance))}
+            -{prettyPrintWei(utils.bigNumberify(channel.beneficiaryBalance))}
           </td>
         )}
       </tr>
