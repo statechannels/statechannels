@@ -8,7 +8,7 @@ import {Wallet as WalletUi} from './ui/wallet';
 import {interpret, Interpreter, State, StateNode} from 'xstate';
 import {Guid} from 'guid-typescript';
 import {Notification, Response} from '@statechannels/client-api-schema';
-import {filter, map} from 'rxjs/operators';
+import {filter} from 'rxjs/operators';
 import {Message, OpenChannel} from './store/types';
 import {approveBudgetAndFundWorkflow} from './workflows/approve-budget-and-fund';
 import {ethereumEnableWorkflow} from './workflows/ethereum-enable';
@@ -38,11 +38,7 @@ export class ChannelWallet {
     // we alert the user that there is a new channel
     // It is up to the app to call JoinChannel
     this.store.objectiveFeed
-      .pipe(
-        // TODO: type guard
-        filter(o => o.type === 'OpenChannel'),
-        map(o => o as OpenChannel)
-      )
+      .pipe(filter((o): o is OpenChannel => o.type === 'OpenChannel'))
       .subscribe(async o => {
         const channelEntry = await this.store.getEntry(o.data.targetChannelId);
         this.messagingService.sendChannelNotification(
