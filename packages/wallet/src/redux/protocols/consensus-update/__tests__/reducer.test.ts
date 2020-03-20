@@ -9,7 +9,7 @@ import {
 
 import * as scenarios from "./scenarios";
 
-describe("Two Players", () => {
+describe.skip("Two Players", () => {
   describe("Player A Happy Path", () => {
     const scenario = scenarios.twoPlayerAHappyPath;
     describe("when initializing", () => {
@@ -101,7 +101,7 @@ describe("Two Players", () => {
   });
 });
 
-describe("Three Players", () => {
+describe.skip("Three Players", () => {
   describe("Player A Happy Path", () => {
     const scenario = scenarios.threePlayerAHappyPath;
     describe("when initializing", () => {

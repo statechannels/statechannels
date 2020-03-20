@@ -30,13 +30,13 @@ describe("player B happy path", () => {
     itTransitionsTo(result, "ExistingLedgerFunding.WaitForLedgerUpdate");
   });
 
-  describeScenarioStep(scenario.waitForLedgerUpdate, () => {
-    const {state, action, sharedData, reply} = scenario.waitForLedgerUpdate;
-    const updatedState = existingLedgerFundingReducer(state, sharedData, action);
+  // describeScenarioStep(scenario.waitForLedgerUpdate, () => {
+  //   const {state, action, sharedData, reply} = scenario.waitForLedgerUpdate;
+  //   const updatedState = existingLedgerFundingReducer(state, sharedData, action);
 
-    itSendsTheseStates(updatedState, reply);
-    itTransitionsTo(updatedState, "ExistingLedgerFunding.Success");
-  });
+  //   itSendsTheseStates(updatedState, reply);
+  //   itTransitionsTo(updatedState, "ExistingLedgerFunding.Success");
+  // });
 });
 
 describe("player A invalid ledger state", () => {
