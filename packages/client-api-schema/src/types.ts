@@ -34,6 +34,14 @@ interface JsonRpcNotification<NotificationName, NotificationParams> {
   params: NotificationParams;
 }
 
+interface JsonRpcError<Code, Message, Data = undefined> {
+  id: number;
+  jsonrpc: '2.0';
+  error: Data extends undefined
+    ? {code: Code; message: Message}
+    : {code: Code; message: Message; data: Data};
+}
+
 export type ChannelStatus =
   | 'proposed'
   | 'opening'
@@ -98,6 +106,7 @@ export type EnableEthereumResponse = JsonRpcResponse<Address>;
 // GetAddress
 export type GetAddressRequest = JsonRpcRequest<'GetAddress', {}>; // todo: what are params
 export type GetAddressResponse = JsonRpcResponse<Address>;
+export type GetAddressError = JsonRpcError<100, 'Ethereum Not Enabled'>; // TODO: how should we choose error codes
 
 // GetEthereumSelectedAddress
 export type GetEthereumSelectedAddressRequest = JsonRpcRequest<'GetEthereumSelectedAddress', {}>; // todo: what are params
@@ -227,15 +236,21 @@ export type Response =
   | ApproveBudgetAndFundResponse
   | CloseAndWithdrawResponse;
 
-export function isResponse(message: Response | Request | Notification): message is Response {
+export type ErrorResponse = GetAddressError;
+
+export type JsonRpcMessage = Request | Response | Notification | ErrorResponse;
+
+export function isResponse(message: JsonRpcMessage): message is Response {
   return 'id' in message && 'result' in message;
 }
 
-export function isNotification(
-  message: Response | Request | Notification
-): message is Notification {
+export function isNotification(message: JsonRpcMessage): message is Notification {
   return !('id' in message);
 }
-export function isRequest(message: Response | Request | Notification): message is Request {
+export function isRequest(message: JsonRpcMessage): message is Request {
   return 'id' in message && 'params' in message;
+}
+
+export function isError(message: JsonRpcMessage): message is ErrorResponse {
+  return 'id' in message && 'error' in message;
 }

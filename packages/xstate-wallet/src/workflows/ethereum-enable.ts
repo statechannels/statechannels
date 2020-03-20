@@ -35,14 +35,16 @@ export interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
     enabling: {};
     done: {};
     failure: {};
+    retry: {};
   };
 }
 export type WorkflowState = State<WorkflowContext, WorkflowEvent, WorkflowStateSchema, any>;
 
 export interface WorkflowActions {
   hideUi: Action<WorkflowContext, any>;
-  displayUi: Action<WorkflowContext, any>; // calls directly to messaging service
-  sendResponse: Action<WorkflowContext, any>; // calls directly to messaging service
+  displayUi: Action<WorkflowContext, any>;
+  sendResponse: Action<WorkflowContext, any>;
+  sendErrorResponse: Action<WorkflowContext, any>;
 }
 export type StateValue = keyof WorkflowStateSchema['states'];
 
@@ -66,8 +68,14 @@ const generateConfig = (
         onError: 'failure'
       }
     }, // invoke ethereum enable
+    retry: {
+      on: {
+        USER_APPROVES_ENABLE: {target: 'enabling'},
+        USER_REJECTS_ENABLE: {target: 'failure'}
+      }
+    },
     done: {type: 'final', entry: [actions.hideUi, actions.sendResponse]},
-    failure: {type: 'final'}
+    failure: {type: 'final', entry: [actions.hideUi, actions.sendErrorResponse]}
   }
 });
 
@@ -90,6 +98,9 @@ export const ethereumEnableWorkflow = (
     },
     sendResponse: (context: WorkflowContext, event) => {
       messagingService.sendResponse(context.requestId, context.enabledAddress as string); // TODO: typing
+    },
+    sendErrorResponse: (context: WorkflowContext, event) => {
+      messagingService.sendError(context.requestId, {code: 100, message: 'Ethereum Not Enabled'}); // TODO: typing
     }
   };
   const config = generateConfig(actions);
@@ -102,7 +113,8 @@ export const ethereumEnableWorkflow = (
 const mockActions: WorkflowActions = {
   hideUi: 'hideUi',
   displayUi: 'displayUi',
-  sendResponse: 'sendResponse'
+  sendResponse: 'sendResponse',
+  sendErrorResponse: 'sendErrorResponse'
 };
 
 export const mockServices: WorkflowServices = {
