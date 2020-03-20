@@ -12,6 +12,7 @@ import {makeDestination} from './utils/outcome';
 import {bigNumberify} from 'ethers/utils';
 import {calculateChannelId, signState} from './store/state-utils';
 import {getProvider} from './utils/contract-utils';
+import {ethBudget} from './utils/budget-utils';
 
 (async function() {
   const {privateKey, address} = ethers.Wallet.createRandom();
@@ -72,6 +73,10 @@ import {getProvider} from './utils/contract-utils';
   (store as any).setNonce(
     state.participants.map(p => p.signingAddress),
     bigNumberify(1)
+  );
+  const oneEther = ethers.utils.parseEther('1');
+  store.updateOrCreateBudget(
+    ethBudget('application', {free: {hubAmount: oneEther, playerAmount: oneEther}})
   );
   const ledgerChannelId = calculateChannelId(state);
   store.setLedger(ledgerChannelId);
