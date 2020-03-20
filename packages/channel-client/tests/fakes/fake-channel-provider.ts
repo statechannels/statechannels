@@ -268,27 +268,32 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     this.events.emit('MessageQueued', {sender, recipient, data});
   }
 
-  private async pushMessage(params: Message): Promise<PushMessageResult> {
-    this.setState(params.data);
-    this.notifyAppChannelUpdated(this.latestState[params.data.channelId]);
-    const channel: ChannelResult = params.data;
-    const turnNum = bigNumberify(channel.turnNum)
-      .add(1)
-      .toString();
-    switch (params.data.status) {
-      case 'proposed':
-        this.events.emit('ChannelProposed', channel);
-        break;
-      // auto-close, if we received a close
-      case 'closing':
-        this.setState({...this.latestState[channel.channelId], turnNum, status: 'closed'});
-        this.notifyOpponent(this.latestState[channel.channelId], 'ChannelUpdate');
-        this.notifyAppChannelUpdated(this.latestState[channel.channelId]);
-        break;
-      default:
-        break;
-    }
+  private isChannelResult(data: unknown): data is ChannelResult {
+    return typeof data === 'object' && data != null && 'turnNum' in data;
+  }
 
+  private async pushMessage(params: Message): Promise<PushMessageResult> {
+    if (this.isChannelResult(params.data)) {
+      this.setState(params.data);
+      this.notifyAppChannelUpdated(this.latestState[params.data.channelId]);
+      const channel: ChannelResult = params.data;
+      const turnNum = bigNumberify(channel.turnNum)
+        .add(1)
+        .toString();
+      switch (params.data.status) {
+        case 'proposed':
+          this.events.emit('ChannelProposed', channel);
+          break;
+        // auto-close, if we received a close
+        case 'closing':
+          this.setState({...this.latestState[channel.channelId], turnNum, status: 'closed'});
+          this.notifyOpponent(this.latestState[channel.channelId], 'ChannelUpdate');
+          this.notifyAppChannelUpdated(this.latestState[channel.channelId]);
+          break;
+        default:
+          break;
+      }
+    }
     return {success: true};
   }
 
