@@ -1,6 +1,6 @@
 import {BigNumber} from 'ethers/utils';
 import {MemoryChannelStoreEntry} from './memory-channel-storage';
-import {Objective, DBBackend} from './types';
+import {Objective, DBBackend, SiteBudget} from './types';
 import * as _ from 'lodash';
 
 enum ObjectStores {
@@ -8,7 +8,8 @@ enum ObjectStores {
   objectives = 'objectives',
   nonces = 'nonces',
   privateKeys = 'privateKeys',
-  ledgers = 'ledgers'
+  ledgers = 'ledgers',
+  budgets = 'budgets'
 }
 
 // A running, functioning example can be seen and played with here: https://codesandbox.io/s/elastic-kare-m1jp8
@@ -33,7 +34,8 @@ export class IndexedDBBackend implements DBBackend {
         this.clear(ObjectStores.objectives),
         this.clear(ObjectStores.nonces),
         this.clear(ObjectStores.privateKeys),
-        this.clear(ObjectStores.ledgers)
+        this.clear(ObjectStores.ledgers),
+        this.clear(ObjectStores.budgets)
       ]);
     }
     return createdDB;
@@ -50,6 +52,7 @@ export class IndexedDBBackend implements DBBackend {
         db.createObjectStore(ObjectStores.nonces, {unique: true});
         db.createObjectStore(ObjectStores.privateKeys, {unique: true});
         db.createObjectStore(ObjectStores.ledgers, {unique: true});
+        db.createObjectStore(ObjectStores.budgets, {unique: true});
       };
 
       request.onerror = err => reject(err);
@@ -107,7 +110,12 @@ export class IndexedDBBackend implements DBBackend {
   }
 
   // Individual Getters
-
+  public async getBudget(key: string) {
+    return this.get(ObjectStores.budgets, key);
+  }
+  public async setBudget(key: string, value: SiteBudget) {
+    return this.put(ObjectStores.budgets, value, key);
+  }
   public async getChannel(key: string) {
     const channel = await this.get(ObjectStores.channels, key);
     return channel && MemoryChannelStoreEntry.fromJson(channel);

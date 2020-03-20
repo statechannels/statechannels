@@ -141,13 +141,11 @@ export class XstateStore implements Store {
     }
   }
 
-  public getBudget(site: string): Promise<SiteBudget | undefined> {
-    // TODO: get budget from backend
-    return Promise.resolve(undefined);
+  public async getBudget(site: string): Promise<SiteBudget | undefined> {
+    return this.backend.getBudget(site);
   }
-  public updateOrCreateBudget(budget: SiteBudget): Promise<void> {
-    // TODO: Set budget in backend
-    return Promise.resolve();
+  public async updateOrCreateBudget(budget: SiteBudget): Promise<void> {
+    await this.backend.setBudget(budget.site, budget);
   }
 
   public channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry> {
@@ -307,7 +305,9 @@ export class XstateStore implements Store {
 
   private async setNonce(addresses: string[], value: BigNumber) {
     const nonce = await this.getNonce(addresses);
-    if (value.lte(nonce)) throw 'Invalid nonce';
+    if (value.lte(nonce)) {
+      throw 'Invalid nonce';
+    }
     await this.backend.setNonce(this.nonceKeyFromAddresses(addresses), value);
   }
 
