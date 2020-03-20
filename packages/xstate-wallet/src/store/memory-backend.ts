@@ -1,6 +1,6 @@
 import {BigNumber} from 'ethers/utils';
 import {MemoryChannelStoreEntry} from './memory-channel-storage';
-import {Objective, DBBackend} from './types';
+import {Objective, DBBackend, SiteBudget} from './types';
 import * as _ from 'lodash';
 import {ChannelStoredData} from './channel-store-entry';
 
@@ -10,6 +10,7 @@ export class MemoryBackend implements DBBackend {
   private _nonces: Record<string, string | undefined> = {};
   private _privateKeys: Record<string, string | undefined> = {};
   private _ledgers: Record<string, string | undefined> = {};
+  private _budgets: Record<string, SiteBudget | undefined> = {};
 
   public async initialize(cleanSlate = false) {
     if (cleanSlate) {
@@ -18,6 +19,7 @@ export class MemoryBackend implements DBBackend {
       this._nonces = {};
       this._privateKeys = {};
       this._ledgers = {};
+      this._budgets = {};
     }
   }
   // Generic Getters
@@ -54,7 +56,14 @@ export class MemoryBackend implements DBBackend {
   }
 
   // Individual Getters/seters
+  public async getBudget(key: string) {
+    return this._budgets[key];
+  }
 
+  public async setBudget(key: string, value: SiteBudget) {
+    this._budgets[key] = value;
+    return value;
+  }
   public async setPrivateKey(key: string, value: string) {
     this._privateKeys[key] = value;
     return value;
