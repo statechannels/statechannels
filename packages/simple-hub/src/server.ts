@@ -14,7 +14,6 @@ import {map, retry} from 'rxjs/operators';
 import {logger} from './logger';
 import {depositsToMake} from './wallet/deposit';
 import {Blockchain} from './blockchain/eth-asset-holder';
-import {ethers} from 'ethers';
 
 const log = logger();
 
@@ -36,16 +35,12 @@ export async function startServer() {
       async ({snapshotKey, messageToSend, depositsToMake}) => {
         try {
           log.info({messageToSend}, 'Responding with message');
-          await sendMessagesAndCleanup(snapshotKey, messageToSend);
           await Promise.all(
-            depositsToMake.map(depositToMake =>
-              Blockchain.fund(
-                depositToMake.channelId,
-                ethers.constants.Zero,
-                depositToMake.amountToDeposit
-              )
-            )
+            depositsToMake.map(depositToMake => {
+              return Blockchain.fund(depositToMake.channelId, depositToMake.amountToDeposit);
+            })
           );
+          await sendMessagesAndCleanup(snapshotKey, messageToSend);
         } catch (e) {
           log.error(e);
         }
