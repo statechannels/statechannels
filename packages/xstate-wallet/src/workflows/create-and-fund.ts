@@ -249,9 +249,18 @@ const reserveFunds = (store: Store) => async (ctx: Init): Promise<SiteBudget> =>
     playerAmount: items[0].amount
   };
 
-  const {applicationSite} = await store.getEntry(ctx.channelId);
+  let {applicationSite} = await store.getEntry(ctx.channelId);
 
-  if (!applicationSite) throw new Error('Channel entry does not have a site');
+  if (!applicationSite) {
+    const error = new Error('Channel entry does not have a site');
+    if (process.env.NODE_ENV === 'production') {
+      throw error;
+    } else {
+      // TODO: The applicationSite should be set by the application workflow.
+      console.error(error);
+      applicationSite = 'application';
+    }
+  }
   return await store.reserveFunds(applicationSite, ETH_ASSET_HOLDER_ADDRESS, budgetItem);
 };
 
