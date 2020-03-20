@@ -90,15 +90,21 @@ export class Player {
   get participantId(): string {
     return this.signingAddress;
   }
-  constructor(privateKey: string, private id: string, chain: Chain) {
+  private constructor(privateKey: string, private id: string, chain: Chain) {
     this.privateKey = privateKey;
     this.store = new XstateStore(chain);
-    this.messagingService = new MessagingService(this.store);
-    this.channelWallet = new ChannelWallet(this.store, this.messagingService, id);
 
     // TODO: It's possible this could lead to the player being used before the store is ready
     // but since its only a test helper we're probably ok
     this.store.initialize([this.privateKey]);
+    this.messagingService = new MessagingService(this.store);
+    this.channelWallet = new ChannelWallet(this.store, this.messagingService, id);
+  }
+
+  static async createPlayer(privateKey: string, id: string, chain: Chain): Promise<Player> {
+    const player = new Player(privateKey, id, chain);
+    await player.store.initialize([privateKey]);
+    return player;
   }
 }
 
