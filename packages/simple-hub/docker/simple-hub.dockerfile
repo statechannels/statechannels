@@ -33,5 +33,12 @@ COPY ./packages/wire-format/ packages/wire-format/
 COPY ./packages/simple-hub/ packages/simple-hub/
 
 WORKDIR /statechannels/monorepo/packages/simple-hub
-ENTRYPOINT ["/bin/sh", "-c"]
+
+# docker-entrypoint.sh starts a shell that execs the list of arguments in CMD
+# This works around the following heroku constraint:
+# https://devcenter.heroku.com/articles/container-registry-and-runtime#dockerfile-commands-and-runtime
+#   CMD will always be executed by a shell ... to execute single binaries or use images without a shell please use ENTRYPOINT
+# To interactively debug the container:
+# docker run -it registry.heroku.com/simple-hub-staging/simple-hub:latest bash
+ENTRYPOINT ["docker/docker-entrypoint.sh"]
 CMD ["node", "./lib/server.js"]
