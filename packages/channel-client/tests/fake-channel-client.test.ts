@@ -10,8 +10,8 @@ import {
   UPDATED_APP_DATA
 } from './constants';
 import {ChannelResultBuilder, buildParticipant, buildAllocation, setProviderStates} from './utils';
-import {Message, ChannelClient} from '../src';
-import {ChannelResult} from '@statechannels/client-api-schema';
+import {ChannelClient} from '../src';
+import {Message, ChannelResult} from '@statechannels/client-api-schema';
 import {EventsWithArgs} from '../src/types';
 import {calculateChannelId} from '../src/utils';
 import {FakeChannelProvider} from './fakes/fake-channel-provider';
@@ -126,11 +126,11 @@ describe('FakeChannelClient', () => {
     // pushed from B's app to B's wallet.
     // The de/queuing described above is effectively faked by explicitly passing
     // the messages between the clients.
-    clientA.onMessageQueued(async (message: Message<ChannelResult>) => {
+    clientA.onMessageQueued(async (message: Message) => {
       await clientB.pushMessage(message);
     });
 
-    clientB.onMessageQueued(async (message: Message<ChannelResult>) => {
+    clientB.onMessageQueued(async (message: Message) => {
       await clientA.pushMessage(message);
     });
 
@@ -138,7 +138,7 @@ describe('FakeChannelClient', () => {
       clientBEventEmitter.emit('ChannelProposed', result);
     });
 
-    clientC.onMessageQueued(async (message: Message<ChannelResult>) => {
+    clientC.onMessageQueued(async (message: Message) => {
       await clientA.pushMessage(message);
     });
 
@@ -148,7 +148,7 @@ describe('FakeChannelClient', () => {
   });
 
   describe('client A creates channels', () => {
-    let proposalMessageB: Message<ChannelResult>, proposalMessageC: Message<ChannelResult>;
+    let proposalMessageB: Message, proposalMessageC: Message;
 
     it('client A produces the right channel result', async () => {
       const clientChannelStateAB = await clientA.createChannel(

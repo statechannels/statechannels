@@ -16,10 +16,10 @@ import {
 } from './types';
 import {utils} from 'ethers';
 import {ChannelState, PaymentChannelClient} from '../clients/payment-channel-client';
-import {Message, ChannelResult} from '@statechannels/channel-client';
 import {mockTorrents} from '../constants';
 import * as firebase from 'firebase/app';
 import 'firebase/database';
+import {Message} from '@statechannels/client-api-schema';
 
 const bigNumberify = utils.bigNumberify;
 const log = debug('web3torrent:library');
@@ -288,8 +288,12 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
     // If a channel is proposed, join it
     this.paymentChannelClient.onChannelProposed(async (channelState: ChannelState) => {
-      await this.paymentChannelClient.joinChannel(channelState.channelId);
-      log(`Joined channel ${channelState.channelId}`);
+      if (!this.paymentChannelClient.amProposer(channelState)) {
+        // do not pass a channelId, since this is the first we heard about this channel and it won't be cached
+        // only join if counterparty proposed
+        await this.paymentChannelClient.joinChannel(channelState.channelId);
+        log(`Joined channel ${channelState.channelId}`);
+      }
     });
 
     this.paymentChannelClient.onChannelUpdated(async (channelState: ChannelState) => {
@@ -362,7 +366,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
     torrent.on(TorrentEvents.NOTICE, async (wire, {command, data}) => {
       log(`< ${command} received from ${wire.peerExtendedHandshake.pseAccount}`, data);
-      let message: Message<ChannelResult>;
+      let message: Message;
       switch (command) {
         case PaidStreamingExtensionNotices.STOP: // synonymous with a prompt for a payment
           if (!torrent.done) {

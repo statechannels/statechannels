@@ -4,13 +4,8 @@ describe('ChannelProvider', () => {
   it('can be enabled', () => {
     const onMessageSpy = jest.spyOn(window, 'addEventListener');
 
-    return new Promise(done => {
-      channelProvider.on('Connect', () => {
-        expect(onMessageSpy).toHaveBeenCalled();
-        done();
-      });
+    channelProvider.enable('www.test.com');
 
-      channelProvider.enable();
-    });
+    expect(onMessageSpy).toHaveBeenCalled();
   });
 });

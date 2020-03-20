@@ -1,39 +1,59 @@
 import {ChannelProviderInterface} from '@statechannels/channel-provider';
 
-import {ChannelClientInterface, UnsubscribeFunction, Message} from './types';
+import {ChannelClientInterface, UnsubscribeFunction} from './types';
 import {
   PushMessageResult,
   ChannelResult,
   Allocation,
   Participant,
-  SiteBudget
+  SiteBudget,
+  ChannelUpdatedNotification,
+  ChannelProposedNotification,
+  BudgetUpdatedNotification,
+  Message,
+  MessageQueuedNotification
 } from '@statechannels/client-api-schema';
 
 type TokenAllocations = Allocation[];
 
-export class ChannelClient implements ChannelClientInterface<ChannelResult> {
+export class ChannelClient implements ChannelClientInterface {
   constructor(private readonly provider: ChannelProviderInterface) {}
 
-  onMessageQueued(callback: (message: Message<ChannelResult>) => void): UnsubscribeFunction {
+  onMessageQueued(
+    callback: (result: MessageQueuedNotification['params']) => void
+  ): UnsubscribeFunction {
     this.provider.on('MessageQueued', callback);
-    return this.provider.off.bind(this, 'MessageQueued', callback);
+    return (): void => {
+      this.provider.off('MessageQueued', callback);
+    };
   }
 
-  onChannelUpdated(callback: (result: ChannelResult) => void): UnsubscribeFunction {
-    this.provider.on('ChannelUpdated', result => callback(result.params));
-    return this.provider.off.bind(this, 'ChannelUpdated', callback);
+  onChannelUpdated(
+    callback: (result: ChannelUpdatedNotification['params']) => void
+  ): UnsubscribeFunction {
+    this.provider.on('ChannelUpdated', callback);
+    return (): void => {
+      this.provider.off('ChannelUpdated', callback);
+    };
   }
 
-  onChannelProposed(callback: (result: ChannelResult) => void): UnsubscribeFunction {
-    this.provider.on('ChannelProposed', result => callback(result.params));
-    return this.provider.off.bind(this, 'ChannelProposed', callback);
+  onChannelProposed(
+    callback: (result: ChannelProposedNotification['params']) => void
+  ): UnsubscribeFunction {
+    this.provider.on('ChannelProposed', callback);
+    return (): void => {
+      this.provider.off('ChannelProposed', callback);
+    };
   }
 
-  onBudgetUpdated(callback: (result: SiteBudget) => void): UnsubscribeFunction {
-    this.provider.on('BudgetUpdated', result => callback(result.params));
-    return this.provider.off.bind(this, 'BudgetUpdated', callback);
+  onBudgetUpdated(
+    callback: (result: BudgetUpdatedNotification['params']) => void
+  ): UnsubscribeFunction {
+    this.provider.on('BudgetUpdated', callback);
+    return (): void => {
+      this.provider.off('BudgetUpdated', callback);
+    };
   }
-
   async createChannel(
     participants: Participant[],
     allocations: TokenAllocations,
@@ -89,7 +109,7 @@ export class ChannelClient implements ChannelClientInterface<ChannelResult> {
     return this.provider.send({method: 'CloseChannel', params: {channelId}});
   }
 
-  async pushMessage(message: Message<ChannelResult>): Promise<PushMessageResult> {
+  async pushMessage(message: Message): Promise<PushMessageResult> {
     return this.provider.send({method: 'PushMessage', params: message});
   }
 

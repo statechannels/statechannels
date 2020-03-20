@@ -1104,8 +1104,30 @@
         },
         {
           "$ref": "#/definitions/MessageQueuedNotification"
+        },
+        {
+          "$ref": "#/definitions/UiNotification"
         }
       ]
+    },
+    "NotificationType": {
+      "additionalProperties": false,
+      "properties": {
+        "ChannelProposed": {
+          "items": [
+            {
+              "$ref": "#/definitions/ChannelResult"
+            }
+          ],
+          "maxItems": 1,
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "ChannelProposed"
+      ],
+      "type": "object"
     },
     "Participant": {
       "additionalProperties": false,
@@ -1381,6 +1403,41 @@
         "free",
         "inUse",
         "direct"
+      ],
+      "type": "object"
+    },
+    "UiNotification": {
+      "additionalProperties": false,
+      "properties": {
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "UIUpdate"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": false,
+          "properties": {
+            "showWallet": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "showWallet"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "method",
+        "params"
       ],
       "type": "object"
     },
