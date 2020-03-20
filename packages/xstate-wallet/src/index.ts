@@ -12,6 +12,7 @@ import {State, Participant} from './store/types';
 import {calculateChannelId, signState} from './store/state-utils';
 import {makeDestination} from './utils/outcome';
 import {getProvider} from './utils/contract-utils';
+import {ethBudget} from './utils/budget-utils';
 
 const {privateKey, address} = ethers.Wallet.createRandom();
 const chain = new ChainWatcher();
@@ -28,13 +29,14 @@ setTimeout(
       participantId: address,
       signingAddress: address
     };
+    const oneEther = ethers.utils.parseEther('1');
     const state: State = {
       outcome: {
         type: 'SimpleAllocation',
         assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
         allocationItems: [
-          {destination: HUB.destination, amount: ethers.utils.parseEther('1')},
-          {destination: me.destination, amount: ethers.utils.parseEther('1')}
+          {destination: HUB.destination, amount: oneEther},
+          {destination: me.destination, amount: oneEther}
         ]
       },
       turnNum: bigNumberify('0x00'),
@@ -56,6 +58,9 @@ setTimeout(
     (store as any).setNonce(
       state.participants.map(p => p.signingAddress),
       bigNumberify(1)
+    );
+    store.updateOrCreateBudget(
+      ethBudget('application', {free: {hubAmount: oneEther, playerAmount: oneEther}})
     );
     const ledgerChannelId = calculateChannelId(state);
     store.setLedger(ledgerChannelId);
