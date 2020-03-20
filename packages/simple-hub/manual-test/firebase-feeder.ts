@@ -4,7 +4,7 @@ import {cFirebasePrefix} from '../src/constants';
 import {Message} from '@statechannels/wire-format';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const messages: Array<Message> = require('./message-sequence.json');
+const messages: Array<Message> = require('./message-sequence2.json');
 
 configureEnvVariables(true);
 
