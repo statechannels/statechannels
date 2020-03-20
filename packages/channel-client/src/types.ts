@@ -14,14 +14,14 @@ export interface ChannelClientInterface {
     Queuing a message is meant for when the app receives messages from
     the wallet meant for the opponent's app (and hence the opponent's wallet).
   */
-  onMessageQueued: (callback: (message: Message<object>) => void) => UnsubscribeFunction;
+  onMessageQueued: (callback: (message: Message) => void) => UnsubscribeFunction;
   onChannelUpdated: (callback: (result: ChannelResult) => void) => UnsubscribeFunction;
   onChannelProposed: (callback: (result: ChannelResult) => void) => UnsubscribeFunction;
   /*
     Pushing a message is meant for when the app receives a message from
     the opponent's app meant for the wallet.
   */
-  pushMessage: (message: Message<object>) => Promise<PushMessageResult>;
+  pushMessage: (message: Message) => Promise<PushMessageResult>;
   createChannel: (
     participants: Participant[],
     allocations: Allocation[],
@@ -52,7 +52,7 @@ export interface ChannelClientInterface {
   closeAndWithdraw(hubAddress: string): Promise<SiteBudget | {}>;
 }
 export interface EventsWithArgs {
-  MessageQueued: [Message<ChannelResult>];
+  MessageQueued: [Message];
   ChannelUpdated: [ChannelResult];
   BudgetUpdated: [SiteBudget];
   // TODO: Is `ChannelResult` the right type to use here?

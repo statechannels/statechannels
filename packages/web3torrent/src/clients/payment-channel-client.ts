@@ -255,7 +255,7 @@ export class PaymentChannelClient {
     return channelState.turnNum.eq(FINAL_SETUP_STATE) ? true : false;
   }
 
-  async pushMessage(message: Message<ChannelResult>) {
+  async pushMessage(message: Message) {
     await this.channelClient.pushMessage(message);
     return convertToChannelState(message.data);
   }

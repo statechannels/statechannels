@@ -62,12 +62,10 @@ export interface Allocation {
 
 export type Allocations = Allocation[]; // included for backwards compatibility
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface Message<T = any> {
+export interface Message {
   recipient: string; // Identifier of user that the message should be relayed to
   sender: string; // Identifier of user that the message is from
-  data: T; // Message payload. Format defined by wallet and opaque to app.
-  // But useful to be able to specify, for the purposes of the fake-client
+  data: unknown; // Message payload. Format defined by wallet and opaque to app.
 }
 
 export interface Funds {

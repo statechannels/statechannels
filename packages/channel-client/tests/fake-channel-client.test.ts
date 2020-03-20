@@ -148,7 +148,7 @@ describe('FakeChannelClient', () => {
   });
 
   describe('client A creates channels', () => {
-    let proposalMessageB: Message<ChannelResult>, proposalMessageC: Message<ChannelResult>;
+    let proposalMessageB: Message, proposalMessageC: Message;
 
     it('client A produces the right channel result', async () => {
       const clientChannelStateAB = await clientA.createChannel(
