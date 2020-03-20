@@ -35,7 +35,7 @@ test('concludes on their turn', async () => {
     appData: '0x0',
     isFinal: false
   };
-  playerA.store.createChannel(
+  await playerA.store.createChannel(
     [playerA.participant, playerB.participant],
     bigNumberify(4),
     stateVars
