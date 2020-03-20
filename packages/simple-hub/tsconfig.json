@@ -17,6 +17,9 @@
     },
     {
       "path": "../nitro-protocol"
+    },
+    {
+      "path": "../wire-format"
     }
   ],
   "include": ["./src"],
