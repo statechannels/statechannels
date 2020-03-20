@@ -1,7 +1,8 @@
 import {AppData, ChannelState, encodeAppData, decodeAppData} from '../core';
-import {ChannelResult, Message, ChannelClientInterface} from '@statechannels/channel-client';
+import {ChannelResult, ChannelClientInterface} from '@statechannels/channel-client';
 import {RPS_ADDRESS} from '../constants';
 import {bigNumberify} from 'ethers/utils';
+import {Message} from '@statechannels/client-api-schema';
 
 // This class wraps the channel client converting the request/response formats to those used in the app
 

@@ -2,9 +2,9 @@ import {take, call, apply} from 'redux-saga/effects';
 
 import {default as firebase, reduxSagaFirebase} from '../../gateways/firebase';
 import {RPSChannelClient} from '../../utils/rps-channel-client';
-import {Message} from '@statechannels/channel-client';
 import {buffers} from 'redux-saga';
 import {FIREBASE_PREFIX} from '../../constants';
+import {Message} from '@statechannels/client-api-schema';
 
 export function* firebaseInboxListener(client: RPSChannelClient, address: string) {
   const channel = yield call(
