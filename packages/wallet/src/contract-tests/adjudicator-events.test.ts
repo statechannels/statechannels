@@ -41,7 +41,7 @@ describe("adjudicator listener", () => {
     await depositIntoETHAssetHolder(signer, channelId);
   });
 
-  it("should not handle an event when no process has registered", async () => {
+  it.skip("should not handle an event when no process has registered", async () => {
     const channelId = await getChannelId(getNextNonce(), participantA, participantB);
     const initialState = walletStates.initialized({
       ...walletStates.EMPTY_SHARED_DATA,
@@ -59,7 +59,7 @@ describe("adjudicator listener", () => {
     expect(sagaTester.numCalled("WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT")).toEqual(0);
   });
 
-  it("should ignore events for other channels", async () => {
+  it.skip("should ignore events for other channels", async () => {
     const channelId = await getChannelId(getNextNonce(), participantA, participantB);
     const channelIdToIgnore = await getChannelId(getNextNonce(), participantA, participantB);
     const processId = Wallet.createRandom().address;
@@ -71,7 +71,7 @@ describe("adjudicator listener", () => {
     expect(sagaTester.numCalled("WALLET.ADJUDICATOR.CHALLENGE_CREATED_EVENT")).toEqual(0);
   });
 
-  it("should handle a challengeCreated event", async () => {
+  it.skip("should handle a challengeCreated event", async () => {
     const startTimestamp = Date.now();
     const channelNonce = getNextNonce();
 
@@ -91,7 +91,7 @@ describe("adjudicator listener", () => {
     expect(action.challengeStates[1].state).toMatchObject(challengeState);
   });
 
-  it("should handle a ChallengeCleared event when registered for that channel", async () => {
+  it.skip("should handle a ChallengeCleared event when registered for that channel", async () => {
     const channelNonce = getNextNonce();
     const channelId = nitroGetChannelId({
       chainId: (await provider.getNetwork()).chainId.toString(),
@@ -129,7 +129,7 @@ describe("adjudicator listener", () => {
     expect(action.newTurnNumRecord).toEqual(response.state.turnNum);
   });
 
-  it("should handle a concluded event when registered for that channel", async () => {
+  it.skip("should handle a concluded event when registered for that channel", async () => {
     const channelNonce = getNextNonce();
     const channelId = nitroGetChannelId({
       chainId: (await provider.getNetwork()).chainId.toString(),
