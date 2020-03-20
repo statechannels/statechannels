@@ -38,7 +38,10 @@ it('allows for a wallet to close the ledger channel with the hub and withdraw', 
   });
 
   await playerA.store.setLedger(ledgerChannel.channelId);
-
+  await hub.store
+    .channelUpdatedFeed(ledgerChannel.channelId)
+    .pipe(first())
+    .toPromise();
   await hub.store.setLedger(ledgerChannel.channelId);
   await hub.store.signAndAddState(ledgerChannel.channelId, ledgerChannel.latest);
   await playerA.store.chain.deposit(ledgerChannel.channelId, '0x0', '0x10');
@@ -85,6 +88,6 @@ it('allows for a wallet to close the ledger channel with the hub and withdraw', 
   expect(chainView.amount.eq(0)).toBe(true);
 
   // Check the channel is finalized
-  const latestEntry = playerA.store.getEntry(ledgerChannel.channelId);
-  expect((await latestEntry).isFinalized).toBe(true);
+  const latestEntry = await playerA.store.getEntry(ledgerChannel.channelId);
+  expect(latestEntry.isFinalized).toBe(true);
 });
