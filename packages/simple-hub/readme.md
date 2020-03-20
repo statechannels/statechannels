@@ -46,8 +46,10 @@ Heroku runs a production version of the build `Dockerfile.hub.staging` in the ro
 
 **Build the Dockerfile locally, by running**
 
+In monorepo root:
+
 ```bash
-docker build -t registry.heroku.com/simple-hub-staging/simple-hub -f Dockerfile.simple-hub.staging .
+docker build -t registry.heroku.com/simple-hub-staging/simple-hub -f simple-hub.dockerfile .
 ```
 
 **Push the container to the Heroku Container Registry**
