@@ -155,6 +155,10 @@ export const approveBudgetAndFundWorkflow = (
 
 export type WorkflowMachine = StateMachine<WorkflowContext, StateSchema, WorkflowEvent, any>;
 
+// To keep consistent with the majority of other workflows
+export type Init = WorkflowContext;
+export const machine = approveBudgetAndFundWorkflow;
+
 export const config = generateConfig(mockActions);
 
 // TODO: Should there be a Site Budget class that handles this?
