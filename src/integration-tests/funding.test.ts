@@ -30,6 +30,7 @@ it('allows for two wallets to fund an app', async () => {
   );
 
   hookUpMessaging(playerA, playerB);
+  const channelId = '0x1823994d6d3b53b82f499c1aca2095b94108ba3ff59f55c6e765da1e24874ab2';
 
   const createEvent = generateCreateChannelRequest(playerA.participant, playerB.participant);
   const createPromise = playerA.messagingService.outboxFeed
@@ -39,19 +40,17 @@ it('allows for two wallets to fund an app', async () => {
     )
     .toPromise();
 
-  const playerBChannelUpdatedPromise = playerB.messagingService.outboxFeed
-    .pipe(
-      filter(o => 'method' in o && o.method === 'ChannelUpdated'),
-      first()
-    )
+  const playerBChannelUpdatedPromise = playerB.store
+    .channelUpdatedFeed(channelId)
+    .pipe(first())
     .toPromise();
   await playerA.messagingService.receiveRequest(createEvent);
 
   playerA.channelWallet.workflows[0].machine.send({type: 'USER_APPROVES'});
 
   const createResponse = await createPromise;
-  expect(createResponse.result).toBeDefined();
-  const {channelId} = createResponse.result;
+  expect(createResponse.result.channelId).toEqual(channelId);
+
   const joinEvent: JoinChannelRequest = generateJoinChannelRequest(channelId);
   const joinPromise = playerB.messagingService.outboxFeed
     .pipe(
