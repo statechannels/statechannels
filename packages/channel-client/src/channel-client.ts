@@ -22,40 +22,36 @@ export class ChannelClient implements ChannelClientInterface {
   onMessageQueued(
     callback: (result: MessageQueuedNotification['params']) => void
   ): UnsubscribeFunction {
-    const listenerFn = (result: MessageQueuedNotification['params']): void => callback(result);
-    this.provider.on('MessageQueued', listenerFn);
+    this.provider.on('MessageQueued', callback);
     return (): void => {
-      this.provider.off('MessageQueued', listenerFn);
+      this.provider.off('MessageQueued', callback);
     };
   }
 
   onChannelUpdated(
     callback: (result: ChannelUpdatedNotification['params']) => void
   ): UnsubscribeFunction {
-    const listenerFn = (result: ChannelUpdatedNotification['params']): void => callback(result);
-    this.provider.on('ChannelUpdated', listenerFn);
+    this.provider.on('ChannelUpdated', callback);
     return (): void => {
-      this.provider.off('ChannelUpdated', listenerFn);
+      this.provider.off('ChannelUpdated', callback);
     };
   }
 
   onChannelProposed(
     callback: (result: ChannelProposedNotification['params']) => void
   ): UnsubscribeFunction {
-    const listenerFn = (result: ChannelProposedNotification['params']): void => callback(result);
-    this.provider.on('ChannelProposed', listenerFn);
+    this.provider.on('ChannelProposed', callback);
     return (): void => {
-      this.provider.off('ChannelProposed', listenerFn);
+      this.provider.off('ChannelProposed', callback);
     };
   }
 
   onBudgetUpdated(
     callback: (result: BudgetUpdatedNotification['params']) => void
   ): UnsubscribeFunction {
-    const listenerFn = (result: BudgetUpdatedNotification['params']): void => callback(result);
-    this.provider.on('BudgetUpdated', listenerFn);
+    this.provider.on('BudgetUpdated', callback);
     return (): void => {
-      this.provider.off('BudgetUpdated', listenerFn);
+      this.provider.off('BudgetUpdated', callback);
     };
   }
   async createChannel(
