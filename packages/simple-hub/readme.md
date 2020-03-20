@@ -43,3 +43,17 @@ yarn test:ci
 ## Deploying
 
 Heroku runs a production version of the build `docker/simple-hub.dockerfile`. To create a deployment run `docker/build-push-release.sh`
+
+## Running locally
+
+To start a hub in a docker container locally with development environment variables:
+
+```
+docker run -it --env-file .env.development registry.heroku.com/simple-hub-staging/simple-hub:latest
+```
+
+To start a docker container locally without starting the hub, append `bash` to the command above. This is handy when you would like to poke around the container or try running commands in the container:
+
+```
+docker run -it --env-file .env.development registry.heroku.com/simple-hub-staging/simple-hub:latest bash
+```
