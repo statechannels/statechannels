@@ -25,7 +25,13 @@ export class TestStore extends XstateStore implements Store {
 
     return entry;
   }
-  setLedgerByEntry(entry) {
-    /* TODO: Implement this */
+  async setLedgerByEntry(entry: MemoryChannelStoreEntry) {
+    // This is not on the Store interface itself -- it is useful to set up a test store
+    const {channelId} = entry;
+    this.backend.setChannel(channelId, entry);
+    const address = await this.getAddress();
+    const peerId = entry.participants.find(p => p.signingAddress !== address);
+    if (!peerId) throw 'No peer';
+    this.backend.setLedger(peerId?.participantId, channelId);
   }
 }

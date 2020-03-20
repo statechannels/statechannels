@@ -96,7 +96,7 @@ test('virtual funding with smart hub', async () => {
   await Promise.all(
     [aStore, hubStore].map(async (store: TestStore) => {
       const signatures = [wallet1, wallet3].map(({privateKey}) => signState(state, privateKey));
-      await store.setLedgerByEntry(store.createEntry({...state, signatures}));
+      await store.setLedgerByEntry(await store.createEntry({...state, signatures}));
     })
   );
 
@@ -106,7 +106,7 @@ test('virtual funding with smart hub', async () => {
   await Promise.all(
     [bStore, hubStore].map(async (store: TestStore) => {
       const signatures = [wallet2, wallet3].map(({privateKey}) => signState(state, privateKey));
-      await store.setLedgerByEntry(store.createEntry({...state, signatures}));
+      await store.setLedgerByEntry(await store.createEntry({...state, signatures}));
     })
   );
 
@@ -152,14 +152,14 @@ test('virtual funding with a simple hub', async () => {
   let signatures = [wallet1, wallet3].map(({privateKey}) => signState(state, privateKey));
 
   chain.depositSync(ledgerId, '0', depositAmount);
-  await aStore.setLedgerByEntry(aStore.createEntry({...state, signatures}));
+  await aStore.setLedgerByEntry(await aStore.createEntry({...state, signatures}));
 
   state = ledgerState([second, third], ledgerAmounts);
   ledgerId = calculateChannelId(state);
   signatures = [wallet2, wallet3].map(({privateKey}) => signState(state, privateKey));
 
   await chain.depositSync(ledgerId, '0', depositAmount);
-  await bStore.setLedgerByEntry(bStore.createEntry({...state, signatures}));
+  await bStore.setLedgerByEntry(await bStore.createEntry({...state, signatures}));
 
   subscribeToMessages({
     [jointParticipants[ParticipantIdx.A].participantId]: aStore,
