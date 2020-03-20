@@ -42,31 +42,4 @@ yarn test:ci
 
 ## Deploying
 
-Heroku runs a production version of the build `Dockerfile.hub.staging` in the root of the repo. To create a deployment you must:
-
-**Build the Dockerfile locally, by running**
-
-In monorepo root:
-
-```bash
-docker build -t registry.heroku.com/simple-hub-staging/simple-hub -f simple-hub.dockerfile .
-```
-
-**Push the container to the Heroku Container Registry**
-
-```bash
-docker push registry.heroku.com/simple-hub-staging/simple-hub
-```
-
-**Release the container on Heroku (a.k.a., trigger the dyno to update)**
-
-```bash
-heroku container:release -a simple-hub-staging simple-hub
-```
-
-To run a test deploy, run
-
-```
-// Starts a local server serving the app
-$ NODE_ENV=production heroku local
-```
+Heroku runs a production version of the build `docker/simple-hub.dockerfile`. To create a deployment run `docker/build-push-release.sh`
