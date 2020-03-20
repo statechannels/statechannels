@@ -16,7 +16,6 @@ import {
 } from './types';
 import {utils} from 'ethers';
 import {ChannelState, PaymentChannelClient} from '../clients/payment-channel-client';
-import {ChannelResult} from '@statechannels/channel-client';
 import {mockTorrents} from '../constants';
 import * as firebase from 'firebase/app';
 import 'firebase/database';
