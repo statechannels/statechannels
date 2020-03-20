@@ -78,9 +78,9 @@ beforeEach(async () => {
   await bStore.initialize([wallet2.privateKey]);
   const hubStore = new SimpleHub(wallet3.privateKey);
 
-  [aStore, bStore].forEach((store: TestStore) => {
-    store.createEntry(allSignState(firstState(allocation, targetChannel)));
-    store.createEntry(allSignState(firstState(allocation, ledgerChannel)));
+  [aStore, bStore].forEach(async (store: TestStore) => {
+    await store.createEntry(allSignState(firstState(allocation, targetChannel)));
+    await store.createEntry(allSignState(firstState(allocation, ledgerChannel)));
   });
 
   subscribeToMessages({
@@ -117,14 +117,14 @@ test('it uses virtual funding when enabled', async () => {
   let signatures = [wallet1, wallet3].map(({privateKey}) => signState(state, privateKey));
 
   chain.depositSync(ledgerId, '0', depositAmount);
-  aStore.setLedgerByEntry(aStore.createEntry({...state, signatures}));
+  await aStore.setLedgerByEntry(await aStore.createEntry({...state, signatures}));
 
   state = ledgerState([second, third], ledgerAmounts);
   ledgerId = calculateChannelId(state);
   signatures = [wallet2, wallet3].map(({privateKey}) => signState(state, privateKey));
 
   chain.depositSync(ledgerId, '0', depositAmount);
-  bStore.setLedgerByEntry(bStore.createEntry({...state, signatures}));
+  await bStore.setLedgerByEntry(await bStore.createEntry({...state, signatures}));
 
   const [aService, bService] = [aStore, bStore].map(connectToStore);
 
