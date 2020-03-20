@@ -9,11 +9,16 @@ import {interpret, Interpreter, State, StateNode} from 'xstate';
 import {Guid} from 'guid-typescript';
 import {Notification, Response} from '@statechannels/client-api-schema';
 import {filter, take} from 'rxjs/operators';
-import {Message, OpenChannel} from './store/types';
-import {approveBudgetAndFundWorkflow} from './workflows/approve-budget-and-fund';
+import {Message, OpenChannel, Participant} from './store/types';
+
+import {ApproveBudgetAndFund, CloseLedgerAndWithdraw} from './workflows';
 import {ethereumEnableWorkflow} from './workflows/ethereum-enable';
-import * as CloseLedgerAndWithdraw from './workflows/close-ledger-and-withdraw';
 import {AppRequestEvent} from './event-types';
+import {ethBudget} from './utils/budget-utils';
+import {HUB} from './constants';
+import {makeDestination} from './utils/outcome';
+import {getProvider} from './utils/contract-utils';
+import {ethers} from 'ethers';
 
 export interface Workflow {
   id: string;
@@ -29,6 +34,31 @@ export class ChannelWallet {
     public id?: string
   ) {
     this.workflows = [];
+
+    setTimeout(async () => {
+      const oneEther = ethers.utils.parseEther('1');
+      const workflowId = 'automatically-create-ledger';
+      const budget = ethBudget('application', {
+        pending: {hubAmount: oneEther, playerAmount: oneEther}
+      });
+      const player: Participant = {
+        destination: makeDestination(
+          await getProvider()
+            .getSigner()
+            .getAddress()
+        ),
+        participantId: await this.store.getAddress(),
+        signingAddress: await this.store.getAddress()
+      };
+      const context: ApproveBudgetAndFund.Init = {budget, player, hub: HUB, requestId: 0};
+      const workflow = this.startWorkflow(
+        ApproveBudgetAndFund.machine(this.store, this.messagingService, context),
+        workflowId
+      );
+
+      workflow.machine.send('USER_APPROVES_BUDGET');
+      this.workflows.push(workflow);
+    });
 
     // Whenever the store wants to send something call sendMessage
     store.outboxFeed.subscribe(async (m: Message) => {
@@ -93,7 +123,7 @@ export class ChannelWallet {
       }
       case 'APPROVE_BUDGET_AND_FUND': {
         const workflow = this.startWorkflow(
-          approveBudgetAndFundWorkflow(this.store, this.messagingService, {
+          ApproveBudgetAndFund.machine(this.store, this.messagingService, {
             player: request.player,
             hub: request.hub,
             budget: request.budget,
