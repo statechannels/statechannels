@@ -69,14 +69,14 @@ let aStore: TestStore;
 let bStore: TestStore;
 let chain: FakeChain;
 
-beforeEach(() => {
+beforeEach(async () => {
   chain = new FakeChain();
   hubStore = new TestStore(chain);
-  hubStore.initialize([wallet3.privateKey]);
+  await hubStore.initialize([wallet3.privateKey]);
   aStore = new TestStore(chain);
-  aStore.initialize([wallet1.privateKey]);
+  await aStore.initialize([wallet1.privateKey]);
   bStore = new TestStore(chain);
-  bStore.initialize([wallet2.privateKey]);
+  await bStore.initialize([wallet2.privateKey]);
 });
 
 test('virtual funding with smart hub', async () => {
@@ -85,9 +85,9 @@ test('virtual funding with smart hub', async () => {
   const bService = interpret(VirtualFundingAsLeaf.machine(bStore).withContext(context));
   const services = [aService, hubService, bService];
 
-  [aStore, hubStore, bStore].forEach((store: TestStore) => {
+  [aStore, hubStore, bStore].forEach(async (store: TestStore) => {
     const state = firstState(outcome, jointChannel);
-    store.createEntry({...state, signatures: [signState(state, wallet1.privateKey)]});
+    await store.createEntry({...state, signatures: [signState(state, wallet1.privateKey)]});
   });
 
   let state = ledgerState([first, third], ledgerAmounts);
@@ -96,7 +96,7 @@ test('virtual funding with smart hub', async () => {
   await Promise.all(
     [aStore, hubStore].map(async (store: TestStore) => {
       const signatures = [wallet1, wallet3].map(({privateKey}) => signState(state, privateKey));
-      store.setLedgerByEntry(store.createEntry({...state, signatures}));
+      await store.setLedgerByEntry(store.createEntry({...state, signatures}));
     })
   );
 
@@ -106,7 +106,7 @@ test('virtual funding with smart hub', async () => {
   await Promise.all(
     [bStore, hubStore].map(async (store: TestStore) => {
       const signatures = [wallet2, wallet3].map(({privateKey}) => signState(state, privateKey));
-      store.setLedgerByEntry(store.createEntry({...state, signatures}));
+      await store.setLedgerByEntry(store.createEntry({...state, signatures}));
     })
   );
 
@@ -142,9 +142,9 @@ test('virtual funding with a simple hub', async () => {
   const bService = interpret(VirtualFundingAsLeaf.machine(bStore).withContext(context));
   const services = [aService, bService];
 
-  [aStore, bStore].forEach((store: TestStore) => {
+  [aStore, bStore].forEach(async (store: TestStore) => {
     const state = firstState(outcome, jointChannel);
-    store.createEntry({...state, signatures: [signState(state, wallet1.privateKey)]});
+    await store.createEntry({...state, signatures: [signState(state, wallet1.privateKey)]});
   });
 
   let state = ledgerState([first, third], ledgerAmounts);
@@ -152,14 +152,14 @@ test('virtual funding with a simple hub', async () => {
   let signatures = [wallet1, wallet3].map(({privateKey}) => signState(state, privateKey));
 
   chain.depositSync(ledgerId, '0', depositAmount);
-  aStore.setLedgerByEntry(aStore.createEntry({...state, signatures}));
+  await aStore.setLedgerByEntry(aStore.createEntry({...state, signatures}));
 
   state = ledgerState([second, third], ledgerAmounts);
   ledgerId = calculateChannelId(state);
   signatures = [wallet2, wallet3].map(({privateKey}) => signState(state, privateKey));
 
-  chain.depositSync(ledgerId, '0', depositAmount);
-  bStore.setLedgerByEntry(bStore.createEntry({...state, signatures}));
+  await chain.depositSync(ledgerId, '0', depositAmount);
+  await bStore.setLedgerByEntry(bStore.createEntry({...state, signatures}));
 
   subscribeToMessages({
     [jointParticipants[ParticipantIdx.A].participantId]: aStore,
