@@ -257,7 +257,6 @@ export class PaymentChannelClient {
 
   async pushMessage(message: Message) {
     await this.channelClient.pushMessage(message);
-    return convertToChannelState(message.data);
   }
 
   async approveBudgetAndFund(
