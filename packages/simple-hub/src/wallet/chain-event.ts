@@ -16,11 +16,7 @@ export function subscribeToEthAssetHolder(observable: Observable<AssetHolderEven
     )
     .subscribe(
       async assetHolderEvent => {
-        await Blockchain.fund(
-          assetHolderEvent.channelId,
-          assetHolderEvent.destinationHoldings,
-          assetHolderEvent.amountDeposited
-        );
+        await Blockchain.fund(assetHolderEvent.channelId, assetHolderEvent.amountDeposited);
       },
       e => log.error(e),
       () => log.info('assetHolderObservable completed')
