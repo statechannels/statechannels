@@ -7,12 +7,12 @@ jest.setTimeout(30000);
 test('concludes on their turn', async () => {
   const fakeChain = new FakeChain();
 
-  const playerA = new Player(
+  const playerA = await Player.createPlayer(
     '0x275a2e2cd9314f53b42246694034a80119963097e3adf495fbf6d821dc8b6c8e',
     'PlayerA',
     fakeChain
   );
-  const playerB = new Player(
+  const playerB = await Player.createPlayer(
     '0x3341c348ea8ade1ba7c3b6f071bfe9635c544b7fb5501797eaa2f673169a7d0d',
     'PlayerB',
     fakeChain
