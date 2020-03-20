@@ -305,7 +305,8 @@ export class XstateStore implements Store {
 
   private async setNonce(addresses: string[], value: BigNumber) {
     const nonce = await this.getNonce(addresses);
-    if (value.lte(nonce)) {
+    // TODO: Figure out why the lte check is failing
+    if (value.lt(nonce)) {
       throw 'Invalid nonce';
     }
     await this.backend.setNonce(this.nonceKeyFromAddresses(addresses), value);
