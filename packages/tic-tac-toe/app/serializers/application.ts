@@ -3,6 +3,8 @@ import FirestoreSerializer from 'emberfire/serializers/firestore';
 import {singularize} from 'ember-inflector';
 
 export default class ApplicationSerializer extends FirestoreSerializer {
+  // This is needed because of a bug in EmberFire v3.0.0-rc.6
+  // Tracking PR: https://github.com/firebase/emberfire/pull/600
   normalizeCreateRecordResponse(
     _store: DS.Store,
     _primaryModelClass: DS.Model,
