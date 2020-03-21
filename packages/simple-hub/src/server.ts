@@ -37,6 +37,7 @@ export async function startServer() {
           log.info({messageToSend}, 'Responding with message');
           await Promise.all(
             depositsToMake.map(depositToMake => {
+              log.info(`depositing ${depositToMake.amountToDeposit} to ${depositToMake.channelId}`);
               return Blockchain.fund(depositToMake.channelId, depositToMake.amountToDeposit);
             })
           );
