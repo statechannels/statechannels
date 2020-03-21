@@ -1,0 +1,17 @@
+diff --git a/node_modules/emberfire/services/firebase-app.d.ts b/node_modules/emberfire/services/firebase-app.d.ts
+index ad1eed7..ddf1906 100644
+--- a/node_modules/emberfire/services/firebase-app.d.ts
++++ b/node_modules/emberfire/services/firebase-app.d.ts
+@@ -3,10 +3,10 @@ import Service from '@ember/service';
+ import Ember from 'ember';
+ import FirebaseService from './firebase';
+ declare const FirebaseAppService_base: Readonly<typeof Service> & (new (properties?: object | undefined) => {
+-    name: undefined;
++    name?: string;
+     firebase: import("@ember/object/computed").default<FirebaseService, FirebaseService>;
+ } & Service) & (new (...args: any[]) => {
+-    name: undefined;
++    name?: string;
+     firebase: import("@ember/object/computed").default<FirebaseService, FirebaseService>;
+ } & Service);
+ export default class FirebaseAppService extends FirebaseAppService_base {
