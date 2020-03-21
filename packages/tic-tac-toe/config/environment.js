@@ -18,7 +18,6 @@ module.exports = function(environment) {
       }
     },
     TARGET_NETWORK: process.env.TARGET_NETWORK,
-    FIREBASE_PREFIX: process.env.FIREBASE_PREFIX,
     WALLET_URL: process.env.WALLET_URL,
     TTT_CONTRACT_ADDRESS: process.env.TTT_CONTRACT_ADDRESS, // Need to inject this similar to start.js
     APP: {
@@ -26,12 +25,8 @@ module.exports = function(environment) {
       // when it is created
     },
     firebase: {
-      apiKey: process.env.FIREBASE_API_KEY,
-      authDomain: `${process.env.FIREBASE_PROJECT}.firebaseapp.com`,
       databaseURL: `https://${process.env.FIREBASE_PROJECT}.firebaseio.com`,
-      projectId: process.env.FIREBASE_PROJECT,
-      storageBucket: `https://${process.env.FIREBASE_PROJECT}.appspot.com`,
-      messagingSenderId: process.env.FIREBASE_MESSAGE_SENDER_ID
+      projectId: process.env.FIREBASE_PROJECT
     }
   };
 

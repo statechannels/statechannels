@@ -13,11 +13,6 @@ module.exports = function(env) {
     clientAllowedKeys: [
       'TARGET_NETWORK',
       'FIREBASE_PROJECT',
-      'FIREBASE_API_KEY',
-      'FIREBASE_MESSAGE_SENDER_ID',
-      'FIREBASE_APP_ID',
-      'FIREBASE_MEASUREMENT_ID',
-      'FIREBASE_PREFIX',
       'WALLET_URL',
       'TTT_CONTRACT_ADDRESS',
       'CHAIN_NETWORK_ID',
