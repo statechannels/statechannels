@@ -57,7 +57,7 @@
     "@types/case-sensitive-paths-webpack-plugin": "2.1.4",
     "@types/copyfiles": "2.1.1",
     "@types/detect-port": "1.1.0",
-    "@types/ember-data": "^3.1.9",
+    "@types/ember-data": "3.1.10",
     "@types/ember-qunit": "3.4.7",
     "@types/ember-resolver": "5.0.7",
     "@types/enzyme": "3.10.4",
