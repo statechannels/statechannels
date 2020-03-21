@@ -14,11 +14,11 @@ import {Message, OpenChannel, Participant} from './store/types';
 import {ApproveBudgetAndFund, CloseLedgerAndWithdraw} from './workflows';
 import {ethereumEnableWorkflow} from './workflows/ethereum-enable';
 import {AppRequestEvent} from './event-types';
-import {ethBudget} from './utils/budget-utils';
-import {HUB} from './constants';
-import {makeDestination} from './utils/outcome';
-import {getProvider} from './utils/contract-utils';
 import {ethers} from 'ethers';
+import {makeDestination} from './utils/outcome';
+import {ethBudget} from './utils/budget-utils';
+import {getProvider} from './utils/contract-utils';
+import {HUB} from './constants';
 
 export interface Workflow {
   id: string;
