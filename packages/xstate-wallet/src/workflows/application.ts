@@ -184,16 +184,8 @@ const generateConfig = (
           target: 'running',
           actions: [actions.updateStoreWithPlayerState, actions.sendUpdateChannelResponse]
         },
-        CHANNEL_UPDATED: [
-          {
-            cond: guards.channelClosing,
-            target: 'concludeState'
-          }
-        ],
-
-        PLAYER_REQUEST_CONCLUDE: {
-          target: 'concludeState'
-        }
+        CHANNEL_UPDATED: [{target: 'concludeState', cond: guards.channelClosing}],
+        PLAYER_REQUEST_CONCLUDE: {target: 'concludeState'}
       }
     },
     //This could handled by another workflow instead of the application workflow
@@ -205,10 +197,7 @@ const generateConfig = (
         src: 'invokeClosingProtocol',
         data: context => context,
         autoForward: true,
-        onDone: {
-          target: 'done',
-          actions: [actions.sendCloseChannelResponse]
-        }
+        onDone: {target: 'done', actions: [actions.sendCloseChannelResponse]}
       }
     },
     done: {type: 'final'}
