@@ -308,11 +308,11 @@ export const applicationWorkflow = (
       return !event.storeEntry.latestSupportedByMe.isFinal;
     },
     channelClosing: (context: ChannelIdExists, event: ChannelUpdated): boolean => {
-      return event.storeEntry.latest?.isFinal || false;
+      return !!event.storeEntry.latest?.isFinal;
     },
 
     channelClosed: (context: ChannelIdExists, event: any): boolean => {
-      return event.storeEntry.supported?.isFinal || false;
+      return !!event.storeEntry.supported?.isFinal;
     }
   };
 
@@ -395,58 +395,14 @@ export const applicationWorkflow = (
   return Machine(config).withConfig({services}, context || {});
 };
 
-const mockServices: WorkflowServices = {
-  createChannel: () => {
-    return new Promise(() => {
-      /* Mock call */
-    }) as any;
-  },
-  invokeClosingProtocol: () => {
-    return new Promise(() => {
-      /* Mock call */
-    }) as any;
-  },
-  invokeCreateChannelAndFundProtocol: () => {
-    return new Promise(() => {
-      /* mock*/
-    }) as any;
-  },
-  invokeCreateChannelConfirmation: () => {
-    return new Promise(() => {
-      /* Mock call */
-    }) as any;
-  },
-  getDataForCreateChannelConfirmation: () => {
-    return new Promise(() => {
-      /* Mock call */
-    }) as any;
-  },
-  signConcludeState: () => {
-    return new Promise(() => {
-      /* Mock call */
-    }) as any;
-  }
-};
-const mockActions: WorkflowActions = {
-  sendCloseChannelResponse: 'sendCloseChannelResponse',
-  sendUpdateChannelResponse: 'sendUpdateChannelResponse',
-  assignChannelParams: 'assignChannelParams',
-  sendCreateChannelResponse: 'sendCreateChannelResponse',
-  sendJoinChannelResponse: 'sendJoinChannelResponse',
-  sendChannelUpdatedNotification: 'sendChannelUpdatedNotification',
-  hideUi: 'hideUi',
-  displayUi: 'displayUi',
-  assignChannelId: 'assignChannelId',
-  spawnObservers: 'spawnObserver' as any,
-  updateStoreWithPlayerState: 'updateStoreWithPlayerState'
-};
 const mockGuards: WorkflowGuards = {
   channelOpen: createMockGuard('channelOpen'),
   channelClosing: createMockGuard('channelClosing'),
   channelClosed: createMockGuard('channelClosed')
 };
-export const config = generateConfig(mockActions, mockGuards);
-export const mockOptions = {services: mockServices, actions: mockActions, guards: mockGuards};
+
+export const config = generateConfig({} as any, mockGuards);
+export const mockOptions = {guards: mockGuards};
 
 type AssignChannelEvent =
   | PlayerStateUpdate
