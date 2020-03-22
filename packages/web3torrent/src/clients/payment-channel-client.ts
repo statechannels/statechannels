@@ -1,8 +1,8 @@
-import {ChannelResult, Message, ChannelClientInterface} from '@statechannels/channel-client';
+import {ChannelResult, ChannelClientInterface} from '@statechannels/channel-client';
 import {utils, constants} from 'ethers';
 import {FakeChannelProvider} from '@statechannels/channel-client';
 import {ChannelClient} from '@statechannels/channel-client';
-import {ChannelStatus} from '@statechannels/client-api-schema';
+import {ChannelStatus, Message} from '@statechannels/client-api-schema';
 import {SiteBudget} from '@statechannels/client-api-schema';
 
 const bigNumberify = utils.bigNumberify;
@@ -78,6 +78,10 @@ export class PaymentChannelClient {
     this.insertIntoChannelCache(convertToChannelState(channelResult));
 
     return convertToChannelState(channelResult);
+  }
+
+  async walletVersion() {
+    await this.channelClient.walletVersion();
   }
 
   async enableEthereum() {
@@ -235,9 +239,14 @@ export class PaymentChannelClient {
     );
   }
 
-  amProposer(channelId: string): boolean {
-    return this.channelCache[channelId].beneficiary === this.mySigningAddress;
+  amProposer(channelIdOrChannelState: string | ChannelState): boolean {
+    if (typeof channelIdOrChannelState === 'string') {
+      return this.channelCache[channelIdOrChannelState].beneficiary === this.mySigningAddress;
+    } else {
+      return channelIdOrChannelState.beneficiary === this.mySigningAddress;
+    }
   }
+
   isPaymentToMe(channelState: ChannelState): boolean {
     // doesn't guarantee that my balance increased
     if (channelState.beneficiary === this.mySigningAddress) {
@@ -250,9 +259,8 @@ export class PaymentChannelClient {
     return channelState.turnNum.eq(FINAL_SETUP_STATE) ? true : false;
   }
 
-  async pushMessage(message: Message<ChannelResult>) {
+  async pushMessage(message: Message) {
     await this.channelClient.pushMessage(message);
-    return convertToChannelState(message.data);
   }
 
   async approveBudgetAndFund(

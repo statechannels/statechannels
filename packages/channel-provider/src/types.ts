@@ -1,4 +1,4 @@
-import {ListenerFn} from 'eventemitter3';
+import {EventEmitter} from 'eventemitter3';
 import {
   Request as RequestParams,
   CreateChannelResponse,
@@ -15,6 +15,8 @@ import {
   GetAddressRequest,
   GetStateResponse,
   GetStateRequest,
+  WalletVersionRequest,
+  WalletVersionResponse,
   EnableEthereumRequest,
   EnableEthereumResponse,
   GetEthereumSelectedAddressResponse,
@@ -24,7 +26,8 @@ import {
   GetBudgetResponse,
   GetBudgetRequest,
   ApproveBudgetAndFundResponse,
-  ApproveBudgetAndFundRequest
+  ApproveBudgetAndFundRequest,
+  NotificationType
 } from '@statechannels/client-api-schema';
 
 export interface JsonRpcRequest<MethodName = string, RequestParams = any> {
@@ -58,7 +61,7 @@ export interface JsonRpcNotification<NotificationName = string, NotificationPara
   params: NotificationParams;
 }
 
-export function isJsonRpcNotification(message: any): message is JsonRpcNotification {
+export function isJsonRpcNotification<T>(message: any): message is JsonRpcNotification<T, any> {
   return 'method' in message && !('id' in message);
 }
 
@@ -80,6 +83,7 @@ export type MethodResponseType = {
   CloseChannel: CloseChannelResponse['result'];
   JoinChannel: JoinChannelResponse['result'];
   GetState: GetStateResponse['result'];
+  WalletVersion: WalletVersionResponse['result'];
   EnableEthereum: EnableEthereumResponse['result'];
   GetAddress: GetAddressResponse['result'];
   GetEthereumSelectedAddress: GetEthereumSelectedAddressResponse['result'];
@@ -96,6 +100,7 @@ type Method =
   | 'CloseChannel'
   | 'JoinChannel'
   | 'GetState'
+  | 'WalletVersion'
   | 'EnableEthereum'
   | 'GetAddress'
   | 'GetEthereumSelectedAddress'
@@ -116,6 +121,7 @@ export type MethodRequestType =
   | Call<'PushMessage', PushMessageRequest>
   | Call<'CloseChannel', CloseChannelRequest>
   | Call<'JoinChannel', JoinChannelRequest>
+  | Call<'WalletVersion', WalletVersionRequest>
   | Call<'EnableEthereum', EnableEthereumRequest>
   | Call<'GetState', GetStateRequest>
   | Call<'GetAddress', GetAddressRequest>
@@ -125,11 +131,18 @@ export type MethodRequestType =
   | Call<'GetBudget', GetBudgetRequest>
   | Call<'CloseAndWithdraw', any>;
 
+export interface EventType extends NotificationType {
+  [id: string]: [unknown]; // guid
+}
+const eventEmitter = new EventEmitter<EventType>();
+export type OnType = typeof eventEmitter.on;
+export type OffType = typeof eventEmitter.off;
+
 export interface ChannelProviderInterface {
   enable(url?: string): Promise<void>;
   send(request: MethodRequestType): Promise<MethodResponseType[MethodRequestType['method']]>;
-  on(event: string, callback: ListenerFn): void;
-  off(event: string, callback?: ListenerFn): void;
+  on: OnType;
+  off: OffType;
   subscribe(subscriptionType: string, params?: any): Promise<string>;
   unsubscribe(subscriptionId: string): Promise<boolean>;
 }

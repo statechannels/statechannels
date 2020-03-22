@@ -34,6 +34,14 @@ interface JsonRpcNotification<NotificationName, NotificationParams> {
   params: NotificationParams;
 }
 
+interface JsonRpcError<Code, Message, Data = undefined> {
+  id: number;
+  jsonrpc: '2.0';
+  error: Data extends undefined
+    ? {code: Code; message: Message}
+    : {code: Code; message: Message; data: Data};
+}
+
 export type ChannelStatus =
   | 'proposed'
   | 'opening'
@@ -62,12 +70,10 @@ export interface Allocation {
 
 export type Allocations = Allocation[]; // included for backwards compatibility
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface Message<T = any> {
+export interface Message {
   recipient: string; // Identifier of user that the message should be relayed to
   sender: string; // Identifier of user that the message is from
-  data: T; // Message payload. Format defined by wallet and opaque to app.
-  // But useful to be able to specify, for the purposes of the fake-client
+  data: unknown; // Message payload. Format defined by wallet and opaque to app.
 }
 
 export interface Funds {
@@ -91,6 +97,10 @@ interface Balance {
   hubAmount: string;
 }
 
+// WalletVersion
+export type WalletVersionRequest = JsonRpcRequest<'WalletVersion', {}>;
+export type WalletVersionResponse = JsonRpcResponse<string>;
+
 // EnableEthereum
 export type EnableEthereumRequest = JsonRpcRequest<'EnableEthereum', {}>;
 export type EnableEthereumResponse = JsonRpcResponse<Address>;
@@ -98,6 +108,7 @@ export type EnableEthereumResponse = JsonRpcResponse<Address>;
 // GetAddress
 export type GetAddressRequest = JsonRpcRequest<'GetAddress', {}>; // todo: what are params
 export type GetAddressResponse = JsonRpcResponse<Address>;
+export type GetAddressError = JsonRpcError<100, 'Ethereum Not Enabled'>; // TODO: how should we choose error codes
 
 // GetEthereumSelectedAddress
 export type GetEthereumSelectedAddressRequest = JsonRpcRequest<'GetEthereumSelectedAddress', {}>; // todo: what are params
@@ -184,18 +195,28 @@ export type CloseAndWithdrawParams = {site: string; player: Participant; hub: Pa
 export type CloseAndWithdrawRequest = JsonRpcRequest<'CloseAndWithdraw', CloseAndWithdrawParams>;
 export type CloseAndWithdrawResponse = JsonRpcResponse<{success: boolean}>;
 // Notifications
+// these notifications come *from* the wallet, which is not strictly how JSON-RPC should work
+// (since we treat the wallet as the 'server')
 export type ChannelProposedNotification = JsonRpcNotification<'ChannelProposed', ChannelResult>;
 export type ChannelUpdatedNotification = JsonRpcNotification<'ChannelUpdated', ChannelResult>;
 export type ChannelClosingNotification = JsonRpcNotification<'ChannelClosed', ChannelResult>;
 export type MessageQueuedNotification = JsonRpcNotification<'MessageQueued', Message>;
 export type BudgetUpdatedNotification = JsonRpcNotification<'BudgetUpdated', SiteBudget>;
+export type UiNotification = JsonRpcNotification<'UIUpdate', {showWallet: boolean}>;
 
 export type Notification =
   | ChannelProposedNotification
   | ChannelUpdatedNotification
   | ChannelClosingNotification
   | BudgetUpdatedNotification
-  | MessageQueuedNotification;
+  | MessageQueuedNotification
+  | UiNotification;
+
+type FilterByMethod<T, Method> = T extends {method: Method} ? T : never;
+
+export type NotificationType = {
+  [T in Notification['method']]: [FilterByMethod<Notification, T>['params']];
+};
 
 export type Request =
   | GetAddressRequest
@@ -203,6 +224,7 @@ export type Request =
   | CreateChannelRequest
   | JoinChannelRequest
   | UpdateChannelRequest
+  | WalletVersionRequest
   | EnableEthereumRequest
   | GetStateRequest
   | PushMessageRequest
@@ -218,6 +240,7 @@ export type Response =
   | CreateChannelResponse
   | JoinChannelResponse
   | UpdateChannelResponse
+  | WalletVersionResponse
   | EnableEthereumResponse
   | GetStateResponse
   | PushMessageResponse
@@ -227,15 +250,21 @@ export type Response =
   | ApproveBudgetAndFundResponse
   | CloseAndWithdrawResponse;
 
-export function isResponse(message: Response | Request | Notification): message is Response {
+export type ErrorResponse = GetAddressError;
+
+export type JsonRpcMessage = Request | Response | Notification | ErrorResponse;
+
+export function isResponse(message: JsonRpcMessage): message is Response {
   return 'id' in message && 'result' in message;
 }
 
-export function isNotification(
-  message: Response | Request | Notification
-): message is Notification {
+export function isNotification(message: JsonRpcMessage): message is Notification {
   return !('id' in message);
 }
-export function isRequest(message: Response | Request | Notification): message is Request {
+export function isRequest(message: JsonRpcMessage): message is Request {
   return 'id' in message && 'params' in message;
+}
+
+export function isError(message: JsonRpcMessage): message is ErrorResponse {
+  return 'id' in message && 'error' in message;
 }

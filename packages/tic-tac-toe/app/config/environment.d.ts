@@ -14,8 +14,6 @@ declare const config: {
   rootURL: string;
   TARGET_NETWORK: string;
   FIREBASE_PROJECT: string;
-  FIREBASE_API_KEY: string;
-  FIREBASE_PREFIX: string;
   WALLET_URL: string;
   TTT_CONTRACT_ADDRESS: string;
 };

@@ -1,11 +1,14 @@
 import {
   ChannelProviderInterface,
   MethodResponseType,
-  MethodRequestType
+  MethodRequestType,
+  OnType,
+  OffType,
+  EventType
 } from '@statechannels/channel-provider';
 import log = require('loglevel');
 
-import {EventEmitter, ListenerFn} from 'eventemitter3';
+import {EventEmitter} from 'eventemitter3';
 import {
   BudgetRequest,
   CloseAndWithdrawParams,
@@ -14,12 +17,11 @@ import {
   CreateChannelParams,
   GetStateParams,
   JoinChannelParams,
-  Notification,
   PushMessageResult,
   SiteBudget,
-  UpdateChannelParams
+  UpdateChannelParams,
+  Message
 } from '@statechannels/client-api-schema';
-import {Message} from '../../src/types';
 import {calculateChannelId} from '../../src/utils';
 import {Wallet, utils} from 'ethers';
 
@@ -32,12 +34,12 @@ type ChannelId = string;
  coming from a non-fake `ChannelClient`.
  */
 export class FakeChannelProvider implements ChannelProviderInterface {
-  private events = new EventEmitter();
+  private events = new EventEmitter<EventType>();
   protected url = '';
 
   playerIndex: Record<ChannelId, 0 | 1> = {};
   opponentIndex: Record<ChannelId, 0 | 1> = {};
-  address?: string = Wallet.createRandom().address;
+  address: string = Wallet.createRandom().address;
   opponentAddress: Record<ChannelId, string> = {};
   latestState: Record<ChannelId, ChannelResult> = {};
 
@@ -52,6 +54,9 @@ export class FakeChannelProvider implements ChannelProviderInterface {
 
       case 'PushMessage':
         return this.pushMessage(request.params);
+
+      case 'WalletVersion':
+        return `FakeChannelProvider@VersionTBD`; // TODO: Inject git / build information for version
 
       case 'EnableEthereum':
         await window.ethereum.enable();
@@ -86,13 +91,9 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     }
   }
 
-  on(event: string, callback: ListenerFn): void {
-    this.events.on(event, callback);
-  }
+  on: OnType = (method, params) => this.events.on(method, params);
 
-  off(event: string): void {
-    this.events.off(event);
-  }
+  off: OffType = (method, params) => this.events.off(method, params);
 
   subscribe(): Promise<string> {
     return Promise.resolve('success');
@@ -249,21 +250,10 @@ export class FakeChannelProvider implements ChannelProviderInterface {
 
   // TODO: Craft a full message
   protected notifyAppChannelUpdated(data: ChannelResult): void {
-    const message: Notification = {
-      jsonrpc: '2.0',
-      method: 'ChannelUpdated',
-      params: data
-    };
-    this.events.emit('ChannelUpdated', message);
+    this.events.emit('ChannelUpdated', data);
   }
   protected notifyAppBudgetUpdated(data: SiteBudget): void {
-    // TODO: Define budget type in the json-rpc types
-    const message: Notification = {
-      jsonrpc: '2.0',
-      method: 'BudgetUpdated',
-      params: data
-    };
-    this.events.emit('BudgetUpdated', message);
+    this.events.emit('BudgetUpdated', data);
   }
 
   protected notifyOpponent(data: ChannelResult, notificationType: string): void {
@@ -281,27 +271,32 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     this.events.emit('MessageQueued', {sender, recipient, data});
   }
 
-  private async pushMessage(params: Message<ChannelResult>): Promise<PushMessageResult> {
-    this.setState(params.data);
-    this.notifyAppChannelUpdated(this.latestState[params.data.channelId]);
-    const channel: ChannelResult = params.data;
-    const turnNum = bigNumberify(channel.turnNum)
-      .add(1)
-      .toString();
-    switch (params.data.status) {
-      case 'proposed':
-        this.events.emit('ChannelProposed', {params: channel});
-        break;
-      // auto-close, if we received a close
-      case 'closing':
-        this.setState({...this.latestState[channel.channelId], turnNum, status: 'closed'});
-        this.notifyOpponent(this.latestState[channel.channelId], 'ChannelUpdate');
-        this.notifyAppChannelUpdated(this.latestState[channel.channelId]);
-        break;
-      default:
-        break;
-    }
+  private isChannelResult(data: unknown): data is ChannelResult {
+    return typeof data === 'object' && data != null && 'turnNum' in data;
+  }
 
+  private async pushMessage(params: Message): Promise<PushMessageResult> {
+    if (this.isChannelResult(params.data)) {
+      this.setState(params.data);
+      this.notifyAppChannelUpdated(this.latestState[params.data.channelId]);
+      const channel: ChannelResult = params.data;
+      const turnNum = bigNumberify(channel.turnNum)
+        .add(1)
+        .toString();
+      switch (params.data.status) {
+        case 'proposed':
+          this.events.emit('ChannelProposed', channel);
+          break;
+        // auto-close, if we received a close
+        case 'closing':
+          this.setState({...this.latestState[channel.channelId], turnNum, status: 'closed'});
+          this.notifyOpponent(this.latestState[channel.channelId], 'ChannelUpdate');
+          this.notifyAppChannelUpdated(this.latestState[channel.channelId]);
+          break;
+        default:
+          break;
+      }
+    }
     return {success: true};
   }
 

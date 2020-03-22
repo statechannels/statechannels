@@ -149,17 +149,21 @@ beforeEach(async () => {
   aStore = new TestStore();
   await aStore.initialize([wallet1.privateKey]);
 
-  await aStore.createEntry(ledger1State, {type: 'Direct'});
-  await aStore.createEntry(guarantor1State, {type: 'Indirect', ledgerId: ledger1Id});
-  await aStore.createEntry(jointState, {type: 'Guarantee', guarantorChannelId: guarantor1Id});
-  await aStore.createEntry(targetState, {type: 'Virtual', jointChannelId});
+  await aStore.createEntry(ledger1State, {funding: {type: 'Direct'}});
+  await aStore.createEntry(guarantor1State, {funding: {type: 'Indirect', ledgerId: ledger1Id}});
+  await aStore.createEntry(jointState, {
+    funding: {type: 'Guarantee', guarantorChannelId: guarantor1Id}
+  });
+  await aStore.createEntry(targetState, {funding: {type: 'Virtual', jointChannelId}});
 
   bStore = new TestStore();
   await bStore.initialize([wallet2.privateKey]);
-  await bStore.createEntry(ledger2State, {type: 'Direct'});
-  await bStore.createEntry(guarantor2State, {type: 'Indirect', ledgerId: ledger2Id});
-  await bStore.createEntry(jointState, {type: 'Guarantee', guarantorChannelId: guarantor2Id});
-  await bStore.createEntry(targetState, {type: 'Virtual', jointChannelId});
+  await bStore.createEntry(ledger2State, {funding: {type: 'Direct'}});
+  await bStore.createEntry(guarantor2State, {funding: {type: 'Indirect', ledgerId: ledger2Id}});
+  await bStore.createEntry(jointState, {
+    funding: {type: 'Guarantee', guarantorChannelId: guarantor2Id}
+  });
+  await bStore.createEntry(targetState, {funding: {type: 'Virtual', jointChannelId}});
 });
 
 test('virtual defunding with a simple hub', async () => {
@@ -193,14 +197,13 @@ test('virtual defunding with a proper hub', async () => {
   const hubStore = new TestStore();
   await hubStore.initialize([wallet3.privateKey]);
 
-  await hubStore.createEntry(ledger1State, {type: 'Direct'});
+  await hubStore.createEntry(ledger1State, {funding: {type: 'Direct'}});
   hubStore.createEntry(jointState, {
-    type: 'Guarantees',
-    guarantorChannelIds: [guarantor1Id, guarantor2Id]
+    funding: {type: 'Guarantees', guarantorChannelIds: [guarantor1Id, guarantor2Id]}
   });
-  await hubStore.createEntry(guarantor1State, {type: 'Indirect', ledgerId: ledger1Id});
-  await hubStore.createEntry(ledger2State, {type: 'Direct'});
-  await hubStore.createEntry(guarantor2State, {type: 'Indirect', ledgerId: ledger2Id});
+  await hubStore.createEntry(guarantor1State, {funding: {type: 'Indirect', ledgerId: ledger1Id}});
+  await hubStore.createEntry(ledger2State, {funding: {type: 'Direct'}});
+  await hubStore.createEntry(guarantor2State, {funding: {type: 'Indirect', ledgerId: ledger2Id}});
 
   const aService = interpret(VirtualDefundingAsLeaf.machine(aStore).withContext(context));
   const bService = interpret(VirtualDefundingAsLeaf.machine(bStore).withContext(context));

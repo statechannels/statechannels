@@ -1,41 +1,48 @@
 import EventEmitter from 'eventemitter3';
-import {Guid} from 'guid-typescript';
 import {MessagingService} from './messaging-service';
+import {Guid} from 'guid-typescript';
 import {
   ChannelProviderInterface,
   isJsonRpcNotification,
   MethodRequestType,
-  MethodResponseType
+  MethodResponseType,
+  OnType,
+  OffType,
+  EventType
 } from './types';
 import {UIService} from './ui-service';
+import {NotificationType, Notification} from '@statechannels/client-api-schema';
 
 class ChannelProvider implements ChannelProviderInterface {
-  protected readonly events: EventEmitter;
+  protected readonly events: EventEmitter<EventType>;
   protected readonly ui: UIService;
   protected readonly messaging: MessagingService;
-  protected readonly subscriptions: {[eventName: string]: string[]};
+  protected readonly subscriptions: {
+    [T in keyof NotificationType]: string[];
+  } = {
+    ChannelProposed: [],
+    ChannelUpdated: [],
+    ChannelClosed: [],
+    BudgetUpdated: [],
+    MessageQueued: [],
+    UIUpdate: []
+  };
   protected url = '';
 
   constructor() {
-    this.events = new EventEmitter();
+    this.events = new EventEmitter<EventType>();
     this.ui = new UIService();
     this.messaging = new MessagingService();
-    this.subscriptions = {};
   }
 
   async enable(url?: string) {
     window.addEventListener('message', this.onMessage.bind(this));
-
     if (url) {
       this.url = url;
     }
-
     this.ui.setUrl(this.url);
     this.messaging.setUrl(this.url);
-
     await this.ui.mount();
-
-    this.events.emit('Connect');
   }
 
   async send(request: MethodRequestType): Promise<MethodResponseType[MethodRequestType['method']]> {
@@ -49,31 +56,25 @@ class ChannelProvider implements ChannelProviderInterface {
     return response;
   }
 
-  async subscribe(subscriptionType: string): Promise<string> {
+  async subscribe(subscriptionType: Notification['method']): Promise<string> {
     const subscriptionId = Guid.create().toString();
-    if (!this.subscriptions[subscriptionType]) {
-      this.subscriptions[subscriptionType] = [];
-    }
     this.subscriptions[subscriptionType].push(subscriptionId);
     return subscriptionId;
   }
 
   async unsubscribe(subscriptionId: string): Promise<boolean> {
-    Object.keys(this.subscriptions).map(e => {
-      this.subscriptions[e] = this.subscriptions[e]
-        ? this.subscriptions[e].filter(s => s !== subscriptionId)
-        : [];
+    Object.keys(this.subscriptions).forEach(method => {
+      this.subscriptions[method as Notification['method']] = this.subscriptions[
+        method as Notification['method']
+      ].filter((id: string) => id != subscriptionId);
     });
+
     return true;
   }
 
-  on(event: string, callback: EventEmitter.ListenerFn<any>): void {
-    this.events.on(event, callback);
-  }
+  on: OnType = (method, params) => this.events.on(method, params);
 
-  off(event: string, callback?: EventEmitter.ListenerFn<any> | undefined): void {
-    this.events.off(event, callback);
-  }
+  off: OffType = (method, params) => this.events.off(method, params);
 
   protected async onMessage(event: MessageEvent) {
     const message = event.data;
@@ -81,16 +82,16 @@ class ChannelProvider implements ChannelProviderInterface {
       return;
     }
 
-    if (isJsonRpcNotification(message)) {
-      const eventName = message.method;
-      if (eventName === 'UIUpdate') {
+    if (isJsonRpcNotification<keyof NotificationType>(message)) {
+      // TODO: use schema validations as better type guards
+      const notificationMethod = message.method;
+      const notificationParams = message.params;
+      this.events.emit(notificationMethod, notificationParams);
+      if (notificationMethod === 'UIUpdate') {
         this.ui.setVisibility(message.params.showWallet);
-      }
-      this.events.emit(eventName, message);
-
-      if (this.subscriptions[eventName]) {
-        this.subscriptions[eventName].forEach(s => {
-          this.events.emit(s, message);
+      } else {
+        this.subscriptions[notificationMethod].forEach(id => {
+          this.events.emit(id, notificationParams);
         });
       }
     }

@@ -1,4 +1,5 @@
 import {checkThat, getDataAndInvoke} from '../utils';
+
 import {SupportState} from '.';
 import {isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
 import {OutcomeIdx, ParticipantIdx} from './virtual-funding-as-leaf';

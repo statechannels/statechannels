@@ -25,6 +25,7 @@ import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
 import {simpleEthAllocation} from '../utils/outcome';
 import {bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
+import {checkThat, exists} from '../utils';
 interface UserApproves {
   type: 'USER_APPROVES_BUDGET';
 }
@@ -177,7 +178,7 @@ function convertPendingBudgetToAllocation({
   if (Object.keys(budget.forAsset).length !== 1) {
     throw new Error('Cannot handle mixed budget');
   }
-  const ethBudget = budget.forAsset[ETH_ASSET_HOLDER_ADDRESS];
+  const ethBudget = checkThat<AssetBudget>(budget.forAsset[ETH_ASSET_HOLDER_ADDRESS], exists);
   const playerItem: AllocationItem = {
     destination: player.destination,
     amount: ethBudget.pending.playerAmount

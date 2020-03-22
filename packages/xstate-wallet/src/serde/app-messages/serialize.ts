@@ -9,19 +9,25 @@ import {
   AllocationItem,
   SimpleAllocation,
   SiteBudget,
-  BudgetItem
+  BudgetItem,
+  AssetBudget
 } from '../../store/types';
 import {tokenAddress} from '../../constants';
 import {AddressZero} from 'ethers/constants';
+import {checkThat, exists} from '../../utils';
 
 export function serializeSiteBudget(budget: SiteBudget): AppSiteBudget {
-  const budgets = Object.keys(budget.forAsset).map(assetHolderAddress => ({
-    token: tokenAddress(assetHolderAddress) || AddressZero,
-    pending: serializeBudgetItem(budget.forAsset[assetHolderAddress].pending),
-    free: serializeBudgetItem(budget.forAsset[assetHolderAddress].free),
-    inUse: serializeBudgetItem(budget.forAsset[assetHolderAddress].inUse),
-    direct: serializeBudgetItem(budget.forAsset[assetHolderAddress].direct)
-  }));
+  const budgets = Object.keys(budget.forAsset).map(assetHolderAddress => {
+    const assetBudget = checkThat<AssetBudget>(budget.forAsset[assetHolderAddress], exists);
+
+    return {
+      token: tokenAddress(assetHolderAddress) || AddressZero,
+      pending: serializeBudgetItem(assetBudget.pending),
+      free: serializeBudgetItem(assetBudget.free),
+      inUse: serializeBudgetItem(assetBudget.inUse),
+      direct: serializeBudgetItem(assetBudget.direct)
+    };
+  });
 
   return {
     site: budget.site,

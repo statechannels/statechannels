@@ -18,14 +18,15 @@ module.exports = function(environment) {
       }
     },
     TARGET_NETWORK: process.env.TARGET_NETWORK,
-    FIREBASE_PROJECT: process.env.FIREBASE_PROJECT,
-    FIREBASE_API_KEY: process.env.FIREBASE_API_KEY,
-    FIREBASE_PREFIX: process.env.FIREBASE_PREFIX,
     WALLET_URL: process.env.WALLET_URL,
     TTT_CONTRACT_ADDRESS: process.env.TTT_CONTRACT_ADDRESS, // Need to inject this similar to start.js
     APP: {
       // Here you can pass flags/options to your application instance
       // when it is created
+    },
+    firebase: {
+      databaseURL: `https://${process.env.FIREBASE_PROJECT}.firebaseio.com`,
+      projectId: process.env.FIREBASE_PROJECT
     }
   };
 

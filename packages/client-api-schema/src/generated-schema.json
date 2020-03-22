@@ -653,6 +653,9 @@
       ],
       "type": "object"
     },
+    "ErrorResponse": {
+      "$ref": "#/definitions/GetAddressError"
+    },
     "ExternalDestination": {
       "description": "Nitro ChannelId",
       "pattern": "^0x(0{24})([a-fA-F0-9]{40})$",
@@ -671,6 +674,48 @@
       "required": [
         "token",
         "amount"
+      ],
+      "type": "object"
+    },
+    "GetAddressError": {
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "enum": [
+                100
+              ],
+              "type": "number"
+            },
+            "message": {
+              "enum": [
+                "Ethereum Not Enabled"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "type": "object"
+        },
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "error"
       ],
       "type": "object"
     },
@@ -982,6 +1027,22 @@
       ],
       "type": "object"
     },
+    "JsonRpcMessage": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/Request"
+        },
+        {
+          "$ref": "#/definitions/Response"
+        },
+        {
+          "$ref": "#/definitions/Notification"
+        },
+        {
+          "$ref": "#/definitions/ErrorResponse"
+        }
+      ]
+    },
     "Message": {
       "additionalProperties": false,
       "properties": {
@@ -1043,8 +1104,30 @@
         },
         {
           "$ref": "#/definitions/MessageQueuedNotification"
+        },
+        {
+          "$ref": "#/definitions/UiNotification"
         }
       ]
+    },
+    "NotificationType": {
+      "additionalProperties": false,
+      "properties": {
+        "ChannelProposed": {
+          "items": [
+            {
+              "$ref": "#/definitions/ChannelResult"
+            }
+          ],
+          "maxItems": 1,
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "ChannelProposed"
+      ],
+      "type": "object"
     },
     "Participant": {
       "additionalProperties": false,
@@ -1152,6 +1235,9 @@
           "$ref": "#/definitions/UpdateChannelRequest"
         },
         {
+          "$ref": "#/definitions/WalletVersionRequest"
+        },
+        {
           "$ref": "#/definitions/EnableEthereumRequest"
         },
         {
@@ -1193,6 +1279,9 @@
         },
         {
           "$ref": "#/definitions/UpdateChannelResponse"
+        },
+        {
+          "$ref": "#/definitions/WalletVersionResponse"
         },
         {
           "$ref": "#/definitions/EnableEthereumResponse"
@@ -1323,6 +1412,41 @@
       ],
       "type": "object"
     },
+    "UiNotification": {
+      "additionalProperties": false,
+      "properties": {
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "UIUpdate"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": false,
+          "properties": {
+            "showWallet": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "showWallet"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
     "UpdateChannelParams": {
       "additionalProperties": false,
       "properties": {
@@ -1397,6 +1521,60 @@
         },
         "result": {
           "$ref": "#/definitions/ChannelResult"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
+      "type": "object"
+    },
+    "WalletVersionRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "WalletVersion"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": false,
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "WalletVersionResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "result": {
+          "type": "string"
         }
       },
       "required": [

@@ -89,6 +89,9 @@ function* accountsChangedSaga() {
 function* handleMessage(payload: RequestObject) {
   const {id} = payload;
   switch (payload.method) {
+    case "WalletVersion":
+      yield fork(messageSender, outgoingMessageActions.walletVersionResponse({id}));
+      break;
     case "EnableEthereum":
       //  ask metamask permission to access accounts
       try {
@@ -211,16 +214,17 @@ function* handlePushMessage(payload: RequestObject) {
   // TODO: We need to handle the case where we receive an invalid wallet message
   const {id} = payload;
   const message = payload.params as PushMessageParams;
+  const messageData = message.data as any;
   if (isRelayableAction(message.data)) {
     yield put(message.data);
     yield fork(messageSender, outgoingMessageActions.pushMessageResponse({id}));
   } else {
-    switch (message.data.type) {
+    switch (messageData.type) {
       case "Channel.Updated":
         yield put(
           actions.application.opponentStateReceived({
             processId: APPLICATION_PROCESS_ID,
-            signedState: message.data.signedState
+            signedState: messageData.signedState
           })
         );
         yield fork(messageSender, outgoingMessageActions.pushMessageResponse({id}));
@@ -228,7 +232,7 @@ function* handlePushMessage(payload: RequestObject) {
         yield fork(
           messageSender,
           outgoingMessageActions.channelUpdatedEvent({
-            channelId: getChannelId(message.data.signedState.state.channel)
+            channelId: getChannelId(messageData.signedState.state.channel)
           })
         );
 
@@ -237,26 +241,26 @@ function* handlePushMessage(payload: RequestObject) {
         yield put(
           actions.application.opponentStateReceived({
             processId: APPLICATION_PROCESS_ID,
-            signedState: message.data.signedState
+            signedState: messageData.signedState
           })
         );
 
         yield put(
           fundingRequested({
-            channelId: getChannelId(message.data.signedState.state.channel),
+            channelId: getChannelId(messageData.signedState.state.channel),
             playerIndex: TwoPartyPlayerIndex.A
           })
         );
         yield fork(
           messageSender,
           outgoingMessageActions.channelUpdatedEvent({
-            channelId: getChannelId(message.data.signedState.state.channel)
+            channelId: getChannelId(messageData.signedState.state.channel)
           })
         );
         yield fork(messageSender, outgoingMessageActions.pushMessageResponse({id}));
         break;
       case "Channel.Open":
-        const {signedState, participants} = message.data;
+        const {signedState, participants} = messageData;
         // The channel gets initialized and the state will be pushed into the app protocol
         // If the client doesn't want to join the channel then we dispose of these on that API call
         // Since only our wallet can progress the app protocol from this point by signing the next state
@@ -304,7 +308,7 @@ function* handlePushMessage(payload: RequestObject) {
         );
         break;
       default:
-        console.error(`Could not handle message data with type ${message.data.type}`);
+        console.error(`Could not handle message data with type ${messageData.type}`);
     }
   }
 }
