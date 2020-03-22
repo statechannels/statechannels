@@ -39,7 +39,7 @@ const concludeChannel = getDataAndInvoke<Init>(
 const determineFundingType = {
   invoke: {src: 'getFunding'},
   on: {
-    VIRTUAL: 'virtualDefunding',
+    VIRTUAL: 'virtual',
     DIRECT: 'withdraw'
   }
 };
@@ -55,14 +55,18 @@ const virtualDefunding = {
         ]
       }
     },
-    asLeaf: {
-      invoke: {src: 'virtualDefundingAsLeaf', onDone: 'success'}
-    },
-    asHub: {
-      invoke: {src: 'virtualDefundingAsHub', onDone: 'success'}
-    },
+    asLeaf: {invoke: {src: 'virtualDefundingAsLeaf', onDone: 'success'}},
+    asHub: {invoke: {src: 'virtualDefundingAsHub', onDone: 'success'}},
     success: {type: 'final' as 'final'}
   },
+  onDone: 'freeingBudget'
+};
+
+const freeingBudget = {onDone: 'done'};
+
+const virtual: StateNodeConfig<Init, any, any> = {
+  initial: 'virtualDefunding',
+  states: {virtualDefunding, freeingBudget, done: {type: 'final'}},
   onDone: 'success'
 };
 
@@ -74,7 +78,7 @@ export const config: StateNodeConfig<Init, any, any> = {
   states: {
     concludeChannel,
     determineFundingType,
-    virtualDefunding,
+    virtual,
     withdraw,
     success: {type: 'final' as 'final'}
   }
