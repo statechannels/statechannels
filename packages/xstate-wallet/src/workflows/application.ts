@@ -83,7 +83,6 @@ export interface WorkflowServices extends Record<string, ServiceConfig<WorkflowC
     context: WorkflowContext,
     event: CreateChannelEvent | JoinChannelEvent
   ) => Promise<CCC.WorkflowContext>;
-  signConcludeState: (context: WorkflowContext, event: any) => Promise<void>;
 }
 interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
   states: {
@@ -99,7 +98,6 @@ interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
     };
     openChannelAndFundProtocol: {};
     createChannelInStore: {};
-    concludeState: {};
     running: {};
     closing: {};
     // TODO: Is it possible to type these as type:'final' ?
@@ -133,7 +131,6 @@ const generateConfig = (
         JOIN_CHANNEL: {target: 'confirmJoinChannelWorkflow'}
       }
     },
-    concludeState: {invoke: {src: 'signConcludeState', onDone: {target: 'closing'}}},
     confirmCreateChannelWorkflow: getDataAndInvoke(
       'getDataForCreateChannelConfirmation',
       'invokeCreateChannelConfirmation',
@@ -184,8 +181,8 @@ const generateConfig = (
           target: 'running',
           actions: [actions.updateStoreWithPlayerState, actions.sendUpdateChannelResponse]
         },
-        CHANNEL_UPDATED: [{target: 'concludeState', cond: guards.channelClosing}],
-        PLAYER_REQUEST_CONCLUDE: {target: 'concludeState'}
+        CHANNEL_UPDATED: [{target: 'closing', cond: guards.channelClosing}],
+        PLAYER_REQUEST_CONCLUDE: {target: 'closing'}
       }
     },
     //This could handled by another workflow instead of the application workflow
@@ -360,7 +357,7 @@ export const applicationWorkflow = (
     },
     invokeClosingProtocol: (context: ChannelIdExists) =>
       // TODO: Close machine needs to accept new store
-      ConcludeChannel.machine(store, {channelId: context.channelId}),
+      ConcludeChannel.machine(store).withContext({channelId: context.channelId}),
     invokeCreateChannelAndFundProtocol: (_, event: DoneInvokeEvent<CreateAndFund.Init>) =>
       CreateAndFund.machine(store, event.data),
     invokeCreateChannelConfirmation: (context, event: DoneInvokeEvent<CCC.WorkflowContext>) =>
@@ -390,17 +387,6 @@ export const applicationWorkflow = (
           };
         default:
           return unreachable(event);
-      }
-    },
-    signConcludeState: async (context: ChannelIdExists) => {
-      if (context.channelId === context.channelId) {
-        const existingState = await (await store.getEntry(context.channelId)).latest;
-        const newState = {
-          ...existingState,
-          turnNum: existingState.isFinal ? existingState.turnNum : existingState.turnNum.add(1),
-          isFinal: true
-        };
-        await store.signAndAddState(context.channelId, newState);
       }
     }
   };
