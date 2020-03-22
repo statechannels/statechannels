@@ -118,7 +118,7 @@ export class MemoryStore implements Store {
     return Promise.resolve(currentBudget);
   }
 
-  public updateOrCreateBudget(budget: SiteBudget): Promise<void> {
+  public createBudget(budget: SiteBudget): Promise<void> {
     this._budgets[budget.site] = budget;
     return Promise.resolve();
   }

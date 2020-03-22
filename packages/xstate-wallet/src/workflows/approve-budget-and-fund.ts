@@ -118,7 +118,7 @@ export const approveBudgetAndFundWorkflow = (
 ): WorkflowMachine => {
   const services: WorkflowServices = {
     updateBudget: (context: WorkflowContext, event) => {
-      return store.updateOrCreateBudget(context.budget);
+      return store.createBudget(context.budget);
     },
     createAndFundLedger: (context: WorkflowContext) => {
       return CreateAndFundLedger.createAndFundLedgerWorkflow(store, {
