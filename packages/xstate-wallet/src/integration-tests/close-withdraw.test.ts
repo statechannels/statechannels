@@ -30,12 +30,16 @@ it('allows for a wallet to close the ledger channel with the hub and withdraw', 
   ]);
   hookUpMessaging(playerA, hub);
 
-  const ledgerChannel = await playerA.store.createChannel([playerA, hub], CHALLENGE_DURATION, {
-    outcome,
-    turnNum: bigNumberify(20),
-    isFinal: false,
-    appData: '0x0'
-  });
+  const ledgerChannel = await playerA.store.createChannel(
+    [playerA, hub].map(p => p.participant),
+    CHALLENGE_DURATION,
+    {
+      outcome,
+      turnNum: bigNumberify(20),
+      isFinal: false,
+      appData: '0x0'
+    }
+  );
 
   await playerA.store.setLedger(ledgerChannel.channelId);
   await hub.store
