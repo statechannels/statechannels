@@ -16,7 +16,9 @@ import {
   Objective,
   Message,
   SiteBudget,
-  BudgetItem
+  BudgetItem,
+  ToRelease,
+  AssetBudget
 } from './types';
 import {MemoryChannelStoreEntry} from './memory-channel-storage';
 import {ChannelStoreEntry} from './channel-store-entry';
@@ -118,12 +120,48 @@ export class MemoryStore implements Store {
     return Promise.resolve(currentBudget);
   }
 
-  public createBudget(budget: SiteBudget): Promise<void> {
+  public async createBudget(budget: SiteBudget): Promise<void> {
     this._budgets[budget.site] = budget;
-    return Promise.resolve();
   }
 
   private budgetLock = new AsyncLock();
+
+  public async releaseFunds(site: string, toRelease: ToRelease[]): Promise<SiteBudget> {
+    return await this.budgetLock.acquire<SiteBudget>(site, async release => {
+      const budget = await this.getBudget(site);
+
+      toRelease.forEach(({assetHolderAddress, inUse}) => {
+        const forAsset = budget.forAsset[assetHolderAddress];
+        if (!forAsset) {
+          throw new Error('Asset not budgeted');
+        }
+
+        const hubAmount = forAsset.inUse.hubAmount.sub(inUse.hubAmount);
+        const playerAmount = forAsset.inUse.playerAmount.sub(inUse.playerAmount);
+
+        if (hubAmount.lt(0) || playerAmount.lt(0)) {
+          throw new Error('Trying to release too much funds');
+        }
+
+        const newBudget: AssetBudget = {
+          ...forAsset,
+          free: {
+            hubAmount: forAsset.free.hubAmount.add(hubAmount),
+            playerAmount: forAsset.free.playerAmount.add(playerAmount)
+          },
+          inUse: {hubAmount, playerAmount}
+        };
+
+        budget[assetHolderAddress] = newBudget;
+      });
+
+      this._budgets[site] = budget;
+
+      release();
+      return budget;
+    });
+  }
+
   public async reserveFunds(
     site: string,
     assetHolderAddress: string,

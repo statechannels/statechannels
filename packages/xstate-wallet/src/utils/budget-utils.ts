@@ -1,17 +1,9 @@
-import {BudgetItem, SiteBudget} from '../store/types';
+import {SiteBudget, AssetBudget} from '../store/types';
 import {HUB_ADDRESS, ETH_ASSET_HOLDER_ADDRESS} from '../constants';
 import {bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
 
-export function ethBudget(
-  site: string,
-  opts: {
-    free?: BudgetItem;
-    inUse?: BudgetItem;
-    pending?: BudgetItem;
-    direct?: BudgetItem;
-  }
-): SiteBudget {
+export function ethBudget(site: string, opts: Partial<AssetBudget>): SiteBudget {
   return {
     site,
     hubAddress: HUB_ADDRESS,
@@ -28,4 +20,10 @@ export function ethBudget(
       )
     }
   };
+}
+
+export function forEthAsset(budget: SiteBudget): AssetBudget {
+  const ethPart = budget.forAsset[ETH_ASSET_HOLDER_ADDRESS];
+  if (!ethPart) throw 'No eth part!';
+  return ethPart;
 }
