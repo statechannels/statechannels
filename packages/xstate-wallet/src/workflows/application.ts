@@ -21,7 +21,7 @@ import {Store} from '../store';
 import {StateVariables} from '../store/types';
 import {ChannelStoreEntry} from '../store/channel-store-entry';
 import {bigNumberify} from 'ethers/utils';
-import * as ConcludeChannel from './conclude-channel';
+import {ConcludeChannel, CreateAndFund} from './';
 import {isSimpleEthAllocation} from '../utils/outcome';
 import {unreachable, checkThat} from '../utils';
 import {
@@ -31,7 +31,6 @@ import {
   CreateChannelEvent,
   WorkflowEvent
 } from '../event-types';
-import {CreateAndFund} from '.';
 
 export interface WorkflowContext {
   channelId?: string;
