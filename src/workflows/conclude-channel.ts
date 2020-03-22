@@ -84,12 +84,7 @@ export const config: StateNodeConfig<Init, any, any> = {
   }
 };
 
-export const mockOptions = {
-  guards: {
-    virtuallyFunded: _ => true,
-    directlyFunded: _ => true
-  }
-};
+export const mockOptions = {guards: {virtuallyFunded: _ => true, directlyFunded: _ => true}};
 
 const services = (store: Store) => ({
   finalState: finalState(store),
