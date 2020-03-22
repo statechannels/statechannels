@@ -51,6 +51,8 @@ export async function startServer() {
         log.info('Completed listening to Firebase');
       }
     );
+
+  log.info(`Listening on database ${process.env.FIREBASE_URL}`);
 }
 
 if (require.main === module) {
