@@ -125,3 +125,5 @@ export interface Message {
   signedStates?: SignedState[];
   objectives?: Objective[];
 }
+
+export type ToRelease = {inUse: BudgetItem; assetHolderAddress: string};

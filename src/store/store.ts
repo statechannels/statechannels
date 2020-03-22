@@ -1,6 +1,14 @@
 import {Observable} from 'rxjs';
 import {BigNumber} from 'ethers/utils';
-import {Participant, StateVariables, Objective, Message, SiteBudget, BudgetItem} from './types';
+import {
+  Participant,
+  StateVariables,
+  Objective,
+  Message,
+  SiteBudget,
+  BudgetItem,
+  ToRelease
+} from './types';
 import {ChannelStoreEntry} from './channel-store-entry';
 import {Chain} from '../chain';
 import {Funding, ChannelLock} from './memory-store';
@@ -32,6 +40,7 @@ export interface Store {
   getBudget: (site: string) => Promise<SiteBudget>;
   createBudget: (budget: SiteBudget) => Promise<void>;
   reserveFunds(site: string, assetHolderAddress: string, amount: BudgetItem): Promise<SiteBudget>;
+  releaseFunds(site: string, toRelease: ToRelease[]): Promise<SiteBudget>;
 
   chain: Chain;
 }
