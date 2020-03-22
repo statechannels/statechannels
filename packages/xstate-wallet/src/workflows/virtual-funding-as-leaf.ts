@@ -154,7 +154,7 @@ export const waitForFirstJointState = (store: Store) => ({
   store
     .channelUpdatedFeed(jointChannelId)
     .pipe(
-      flatMap(e => e.states),
+      flatMap(e => e.sortedStates),
       filter(({turnNum}) => turnNum.eq(0)),
       tap(({outcome, participants}) => {
         const {allocationItems} = checkThat(outcome, isSimpleEthAllocation);

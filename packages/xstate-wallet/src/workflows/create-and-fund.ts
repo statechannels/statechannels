@@ -206,7 +206,7 @@ const getPreFundSetup = (store: Store) => (ctx: Init): Promise<SupportState.Init
   store
     .channelUpdatedFeed(ctx.channelId)
     .pipe(
-      map(e => _.sortBy(e.states, s => s.turnNum)[0]),
+      map(e => _.sortBy(e.sortedStates, s => s.turnNum)[0]),
       filter(s => s.turnNum.eq(0)),
       map(state => ({state})),
       first()
@@ -217,7 +217,7 @@ const getPostFundSetup = (store: Store) => (ctx: Init): Promise<SupportState.Ini
   store
     .channelUpdatedFeed(ctx.channelId)
     .pipe(
-      map(e => _.sortBy(e.states, s => s.turnNum)[0]),
+      map(e => _.sortBy(e.sortedStates, s => s.turnNum)[0]),
       filter(s => s.turnNum.eq(0)),
       map(s => ({state: {...s, turnNum: bigNumberify(3)}})),
       first()

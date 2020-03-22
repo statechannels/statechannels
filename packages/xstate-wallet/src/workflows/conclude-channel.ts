@@ -3,34 +3,33 @@ import {Store} from '../store';
 import {SupportState} from '.';
 import {getDataAndInvoke} from '../utils';
 import {outcomesEqual} from '../store/state-utils';
+import {State} from '../store/types';
 
 const WORKFLOW = 'conclude-channel';
 
 export type Init = {channelId: string};
 
 const finalState = (store: Store) => async (context: Init): Promise<SupportState.Init> => {
-  const {states, latestSupportedByMe, latest} = await store.getEntry(context.channelId);
+  const {sortedStates, latestSupportedByMe, latest} = await store.getEntry(context.channelId);
 
-  states.filter(s => s.isFinal);
+  const latestFinalState: State | undefined = sortedStates.filter(s => s.isFinal)[0];
 
   // If we've received a new final state that matches our outcome we support that
-  if (latest.isFinal && outcomesEqual(latestSupportedByMe.outcome, latest.outcome)) {
-    return {state: latest};
+  if (outcomesEqual(latestSupportedByMe.outcome, latestFinalState?.outcome)) {
+    return {state: latestFinalState};
   }
-  // Otherwise send out our final state that we support
+
+  // If we've supported a final state, send it
   if (latestSupportedByMe.isFinal) {
     return {state: latestSupportedByMe};
   }
+
   // Otherwise create a new final state
-  return {
-    state: {
-      ...latestSupportedByMe,
-      turnNum: latestSupportedByMe.turnNum.add(1),
-      isFinal: true
-    }
-  };
+  return {state: {...latestSupportedByMe, turnNum: latest.turnNum.add(1), isFinal: true}};
 };
+
 const supportState = (store: Store) => SupportState.machine(store);
+
 const concludeChannel = getDataAndInvoke<Init>(
   {src: finalState.name},
   {src: supportState.name},

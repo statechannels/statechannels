@@ -314,7 +314,7 @@ export const applicationWorkflow = (
       store
         .channelUpdatedFeed(channelId)
         .pipe(
-          flatMap(({states}) => states),
+          flatMap(({sortedStates: states}) => states),
           filter(s => s.turnNum.eq(0)),
           tap(async s => await store.signAndAddState(channelId, s)),
           first()

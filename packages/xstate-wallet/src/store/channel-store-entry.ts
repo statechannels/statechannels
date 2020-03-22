@@ -13,6 +13,6 @@ export interface ChannelStoreEntry {
   readonly latestSupportedByMe: State;
   readonly channelConstants: ChannelConstants;
   readonly funding?: Funding;
-  readonly states: State[];
+  readonly sortedStates: State[];
   readonly applicationSite?: string;
 }
