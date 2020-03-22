@@ -1,11 +1,9 @@
 import {Machine, StateNodeConfig} from 'xstate';
 import {Store} from '../store';
 import {SupportState} from '.';
-import {getDataAndInvoke, checkThat} from '../utils';
+import {getDataAndInvoke} from '../utils';
 import {outcomesEqual} from '../store/state-utils';
-import {State, BudgetItem} from '../store/types';
-import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
-import {isSimpleEthAllocation} from '../utils/outcome';
+import {State} from '../store/types';
 
 const WORKFLOW = 'conclude-channel';
 
@@ -41,7 +39,7 @@ const concludeChannel = getDataAndInvoke<Init>(
 const determineFundingType = {
   invoke: {src: 'getFunding'},
   on: {
-    VIRTUAL: 'virtual',
+    VIRTUAL: 'virtualDefunding',
     DIRECT: 'withdraw'
   }
 };
@@ -61,38 +59,6 @@ const virtualDefunding = {
     asHub: {invoke: {src: 'virtualDefundingAsHub', onDone: 'success'}},
     success: {type: 'final' as 'final'}
   },
-  onDone: 'freeingBudget'
-};
-
-const freeBudget = (store: Store) => async (ctx: Init) => {
-  const {applicationSite, supported, myIndex} = await store.getEntry(ctx.channelId);
-  if (!applicationSite) throw 'No site found';
-
-  const items = checkThat(supported.outcome, isSimpleEthAllocation).allocationItems;
-  if (items.length !== 2) {
-    throw new Error('Unexpected number of allocation items');
-  }
-
-  const {participants} = supported;
-  const outcomeIdx = items.findIndex(
-    item => item.destination === participants[myIndex].destination
-  );
-
-  const inUse: BudgetItem = {
-    playerAmount: items[outcomeIdx].amount,
-    hubAmount: items[1 - outcomeIdx].amount
-  };
-
-  await store.releaseFunds(applicationSite, [
-    {assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS, inUse}
-  ]);
-};
-
-const freeingBudget = {invoke: {src: freeBudget.name, onDone: 'done'}};
-
-const virtual: StateNodeConfig<Init, any, any> = {
-  initial: 'virtualDefunding',
-  states: {virtualDefunding, freeingBudget, done: {type: 'final'}},
   onDone: 'success'
 };
 
@@ -104,9 +70,9 @@ export const config: StateNodeConfig<Init, any, any> = {
   states: {
     concludeChannel,
     determineFundingType,
-    virtual,
+    virtualDefunding,
     withdraw,
-    success: {type: 'final' as 'final'}
+    success: {type: 'final'}
   }
 };
 

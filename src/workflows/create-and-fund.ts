@@ -2,14 +2,7 @@ import {Machine, MachineConfig, StateNodeConfig, ActionTypes} from 'xstate';
 
 import {filter, map, first} from 'rxjs/operators';
 import _ from 'lodash';
-import {
-  SimpleAllocation,
-  isVirtuallyFund,
-  StateVariables,
-  Outcome,
-  BudgetItem,
-  SiteBudget
-} from '../store/types';
+import {SimpleAllocation, isVirtuallyFund, StateVariables, Outcome} from '../store/types';
 
 import {MachineFactory} from '../utils/workflow-utils';
 import {Store} from '../store';
@@ -19,7 +12,7 @@ import {isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
 import {checkThat, getDataAndInvoke} from '../utils';
 import {SupportState, VirtualFundingAsLeaf} from '.';
 import {from, Observable} from 'rxjs';
-import {CHALLENGE_DURATION, HUB, ETH_ASSET_HOLDER_ADDRESS} from '../constants';
+import {CHALLENGE_DURATION, HUB} from '../constants';
 import {bigNumberify} from 'ethers/utils';
 const PROTOCOL = 'create-and-fund';
 
@@ -98,10 +91,9 @@ const triggerObjective = (store: Store) => async (ctx: Init): Promise<void> => {
 };
 
 const virtual: StateNodeConfig<Init, any, any> = {
-  initial: 'reservingFunds',
+  initial: 'virtualFunding',
   entry: triggerObjective.name,
   states: {
-    reservingFunds: {invoke: {src: 'reserveFunds', onDone: 'virtualFunding'}},
     virtualFunding: getDataAndInvoke<Init, Service>(
       {src: 'getObjective'},
       {src: 'virtualFunding'},
@@ -151,8 +143,7 @@ export const services = (store: Store) => ({
   determineFunding: determineFunding(store),
   setFundingToDirect: setFundingToDirect(store),
   setFundingToVirtual: setFundingToVirtual(store),
-  getObjective: getObjective(store),
-  reserveFunds: reserveFunds(store)
+  getObjective: getObjective(store)
 });
 
 type Service = keyof ReturnType<typeof services>;
@@ -240,19 +231,6 @@ const getDepositingInfo = (store: Store) => async ({channelId}: Init): Promise<D
   }
 
   throw Error(`Could not find an allocation for participant id ${myIndex}`);
-};
-
-const reserveFunds = (store: Store) => async (ctx: Init): Promise<SiteBudget> => {
-  const items = checkThat(ctx.allocation, isSimpleEthAllocation).allocationItems;
-  const budgetItem: BudgetItem = {
-    hubAmount: items[1].amount,
-    playerAmount: items[0].amount
-  };
-
-  const {applicationSite} = await store.getEntry(ctx.channelId);
-
-  if (!applicationSite) throw new Error('Channel entry does not have a site');
-  return await store.reserveFunds(applicationSite, ETH_ASSET_HOLDER_ADDRESS, budgetItem);
 };
 
 const setFundingToDirect = (store: Store) => async (ctx: Init) =>

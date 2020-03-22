@@ -6,8 +6,7 @@ import {
   Machine,
   StateMachine,
   ServiceConfig,
-  assign,
-  AssignAction
+  assign
 } from 'xstate';
 import {
   SiteBudget,
@@ -42,14 +41,11 @@ export interface WorkflowContext {
 }
 
 export interface WorkflowServices extends Record<string, ServiceConfig<WorkflowContext>> {
-  updateBudget: (context: WorkflowContext, event: any) => Promise<void>;
   createAndFundLedger: (context: WorkflowContext, event: any) => StateMachine<any, any, any, any>;
 }
 export interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
   states: {
     waitForUserApproval: {};
-    updateBudgetInStore: {};
-    freeBudgetInStore: {};
     fundLedger: {};
     done: {};
     failure: {};
@@ -62,7 +58,6 @@ export interface WorkflowActions {
   displayUi: Action<WorkflowContext, any>;
   sendResponse: Action<WorkflowContext, any>;
   sendBudgetUpdated: Action<WorkflowContext, any>;
-  updateBudgetToFree: AssignAction<WorkflowContext, any>;
 }
 export type StateValue = keyof WorkflowStateSchema['states'];
 
@@ -75,22 +70,11 @@ const generateConfig = (
     waitForUserApproval: {
       entry: [actions.displayUi],
       on: {
-        USER_APPROVES_BUDGET: {target: 'updateBudgetInStore', actions: []},
+        USER_APPROVES_BUDGET: {target: 'fundLedger', actions: []},
         USER_REJECTS_BUDGET: {target: 'failure'}
       }
     },
-    updateBudgetInStore: {
-      invoke: {
-        src: 'updateBudget',
-        onDone: 'fundLedger'
-      },
-      exit: actions.sendBudgetUpdated
-    },
-    freeBudgetInStore: {
-      entry: actions.updateBudgetToFree,
-      invoke: {src: 'updateBudget', onDone: 'done'}
-    },
-    fundLedger: {invoke: {src: 'createAndFundLedger', onDone: 'freeBudgetInStore'}},
+    fundLedger: {invoke: {src: 'createAndFundLedger', onDone: 'done'}},
     done: {
       type: 'final',
       entry: [
@@ -107,8 +91,7 @@ const mockActions: WorkflowActions = {
   hideUi: 'hideUi',
   displayUi: 'displayUi',
   sendResponse: 'sendResponse',
-  sendBudgetUpdated: 'sendBudgetUpdated',
-  updateBudgetToFree: 'updateBudgetToFree' as any
+  sendBudgetUpdated: 'sendBudgetUpdated'
 };
 
 export const approveBudgetAndFundWorkflow = (
