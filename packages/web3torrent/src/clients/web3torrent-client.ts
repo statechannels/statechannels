@@ -30,9 +30,9 @@ export const upload: (files: WebTorrentSeedInput) => Promise<Torrent> = files =>
   );
 };
 
-export const remove = (id: string = '') => {
+export const cancel = (id: string = '') => {
   return new Promise((resolve, reject) =>
-    web3torrent.remove(id, err => {
+    web3torrent.cancel(id, err => {
       if (err) {
         reject(err);
       } else {

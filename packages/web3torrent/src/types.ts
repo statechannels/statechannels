@@ -4,6 +4,7 @@ export enum Status {
   Downloading = 'Downloading',
   Seeding = 'Seeding',
   Completed = 'Completed',
+  Paused = 'Paused',
   Idle = 'Idle',
   Connecting = 'Connecting'
 }
