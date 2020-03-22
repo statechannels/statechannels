@@ -55,6 +55,9 @@ export class FakeChannelProvider implements ChannelProviderInterface {
       case 'PushMessage':
         return this.pushMessage(request.params);
 
+      case 'WalletVersion':
+        return `FakeChannelProvider@VersionTBD`; // TODO: Inject git / build information for version
+
       case 'EnableEthereum':
         await window.ethereum.enable();
         return window.ethereum.selectedAddress;

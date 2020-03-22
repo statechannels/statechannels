@@ -89,6 +89,9 @@ function* accountsChangedSaga() {
 function* handleMessage(payload: RequestObject) {
   const {id} = payload;
   switch (payload.method) {
+    case "WalletVersion":
+      yield fork(messageSender, outgoingMessageActions.walletVersionResponse({id}));
+      break;
     case "EnableEthereum":
       //  ask metamask permission to access accounts
       try {
