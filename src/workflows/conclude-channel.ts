@@ -1,9 +1,11 @@
 import {Machine, StateNodeConfig} from 'xstate';
 import {Store} from '../store';
 import {SupportState} from '.';
-import {getDataAndInvoke} from '../utils';
+import {getDataAndInvoke, checkThat} from '../utils';
 import {outcomesEqual} from '../store/state-utils';
-import {State} from '../store/types';
+import {State, BudgetItem} from '../store/types';
+import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
+import {isSimpleEthAllocation} from '../utils/outcome';
 
 const WORKFLOW = 'conclude-channel';
 
@@ -62,7 +64,31 @@ const virtualDefunding = {
   onDone: 'freeingBudget'
 };
 
-const freeingBudget = {onDone: 'done'};
+const freeBudget = (store: Store) => async (ctx: Init) => {
+  const {applicationSite, supported, myIndex} = await store.getEntry(ctx.channelId);
+  if (!applicationSite) throw 'No site found';
+
+  const items = checkThat(supported.outcome, isSimpleEthAllocation).allocationItems;
+  if (items.length !== 2) {
+    throw new Error('Unexpected number of allocation items');
+  }
+
+  const {participants} = supported;
+  const outcomeIdx = items.findIndex(
+    item => item.destination === participants[myIndex].destination
+  );
+
+  const inUse: BudgetItem = {
+    playerAmount: items[outcomeIdx].amount,
+    hubAmount: items[1 - outcomeIdx].amount
+  };
+
+  await store.releaseFunds(applicationSite, [
+    {assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS, inUse}
+  ]);
+};
+
+const freeingBudget = {invoke: {src: freeBudget.name, onDone: 'done'}};
 
 const virtual: StateNodeConfig<Init, any, any> = {
   initial: 'virtualDefunding',
