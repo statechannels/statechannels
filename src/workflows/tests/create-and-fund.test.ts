@@ -85,7 +85,7 @@ beforeEach(() => {
 
   [aStore, bStore].forEach(async (store: TestStore) => {
     const budget = ethBudget(applicationSite, {free});
-    await store.updateOrCreateBudget(budget);
+    await store.createBudget(budget);
     store.createEntry(allSignState(firstState(allocation, targetChannel)), {
       applicationSite
     });

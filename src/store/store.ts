@@ -30,7 +30,7 @@ export interface Store {
   setFunding(channelId: string, funding: Funding): Promise<void>;
   addObjective(objective: Objective): void;
   getBudget: (site: string) => Promise<SiteBudget>;
-  updateOrCreateBudget: (budget: SiteBudget) => Promise<void>;
+  createBudget: (budget: SiteBudget) => Promise<void>;
   reserveFunds(site: string, assetHolderAddress: string, amount: BudgetItem): Promise<SiteBudget>;
 
   chain: Chain;
