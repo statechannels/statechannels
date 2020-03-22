@@ -14,7 +14,8 @@ import {
   Request,
   ApproveBudgetAndFundRequest,
   ChannelProposedNotification,
-  CloseAndWithdrawRequest
+  CloseAndWithdrawRequest,
+  ErrorResponse
 } from '@statechannels/client-api-schema';
 
 import * as jrs from 'jsonrpc-lite';
@@ -45,7 +46,7 @@ type ChannelRequest =
 interface InternalEvents {
   AppRequest: [AppRequestEvent];
   CreateChannelRequest: [CreateChannelRequest];
-  SendMessage: [Response | Notification];
+  SendMessage: [Response | Notification | ErrorResponse];
 }
 
 export interface MessagingServiceInterface {
@@ -63,6 +64,7 @@ export interface MessagingServiceInterface {
   );
   sendMessageNotification(message: Message): Promise<void>;
   sendResponse(id: number, result: Response['result']): Promise<void>;
+  sendError(id: number, error: ErrorResponse['error']): Promise<void>;
 }
 
 export class MessagingService implements MessagingServiceInterface {
@@ -82,6 +84,11 @@ export class MessagingService implements MessagingServiceInterface {
 
   public async sendResponse(id: number, result: Response['result']) {
     const response = {id, jsonrpc: '2.0', result} as Response; // typescript can't handle this otherwise
+    this.eventEmitter.emit('SendMessage', response);
+  }
+
+  public async sendError(id: number, error: ErrorResponse['error']) {
+    const response = {id, jsonrpc: '2.0', error} as ErrorResponse; // typescript can't handle this otherwise
     this.eventEmitter.emit('SendMessage', response);
   }
 
@@ -136,9 +143,15 @@ export class MessagingService implements MessagingServiceInterface {
     const {id: requestId} = request;
 
     switch (request.method) {
+      case 'WalletVersion':
+        window.parent.postMessage(jrs.success(requestId, 'xstate-wallet@VersionTBD'), '*'); // TODO: inject git or build info
+        break;
       case 'EnableEthereum':
         if (this.store.chain.ethereumIsEnabled) {
-          window.parent.postMessage(jrs.success(requestId, this.store.chain.selectedAddress), '*');
+          window.parent.postMessage(
+            jrs.success(requestId, this.store.chain.selectedAddress || null),
+            '*'
+          );
         } else {
           this.eventEmitter.emit('AppRequest', {type: 'ENABLE_ETHEREUM', requestId});
         }
@@ -150,7 +163,7 @@ export class MessagingService implements MessagingServiceInterface {
       case 'GetEthereumSelectedAddress':
         // Possibly undefined, App should call EnableEthereum if so
         const ethereumSelectedAddress = this.store.chain.selectedAddress;
-        window.parent.postMessage(jrs.success(requestId, ethereumSelectedAddress), '*');
+        window.parent.postMessage(jrs.success(requestId, ethereumSelectedAddress || null), '*');
         break;
       case 'CreateChannel':
       case 'UpdateChannel':

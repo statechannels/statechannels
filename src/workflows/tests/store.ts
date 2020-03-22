@@ -8,18 +8,23 @@ export class TestStore extends XstateStore implements Store {
   public _channelLocks: Record<string, Guid>;
   public async createEntry(
     signedState: SignedState,
-    funding?: Funding
+    opts?: {
+      funding?: Funding;
+      applicationSite?: string;
+    }
   ): Promise<MemoryChannelStoreEntry> {
     const address = await this.getAddress();
     const myIndex = signedState.participants
       .map(p => p.signingAddress)
       .findIndex(a => a === address);
+    const {funding, applicationSite} = opts || {};
     const entry = new MemoryChannelStoreEntry(
       signedState,
       myIndex,
       {[hashState(signedState)]: signedState},
       {[hashState(signedState)]: signedState.signatures},
-      funding
+      funding,
+      applicationSite
     );
     await this.backend.setChannel(entry.channelId, entry);
 

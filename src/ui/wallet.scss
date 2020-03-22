@@ -33,3 +33,7 @@ h1 {
 
 // Bootstrap overrides
 $font-family-base: WoodfordBourne;
+
+body {
+  font-family: "WoodfordBourne", Fallback, sans-serif;
+}

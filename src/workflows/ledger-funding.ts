@@ -5,7 +5,6 @@ import {Store, Errors as StoreErrors, Funding} from '../store';
 import {allocateToTarget, isSimpleEthAllocation} from '../utils/outcome';
 import {AllocationItem} from '../store/types';
 import {getDataAndInvoke, checkThat} from '../utils';
-
 import {add} from '../utils/math-utils';
 import {assignError} from '../utils/workflow-utils';
 import {escalate} from '../actions';

@@ -59,11 +59,8 @@ const outcome: Outcome = simpleEthAllocation([
 
 const context: VirtualFundingAsLeaf.Init = {targetChannelId, jointChannelId};
 
-const ledgerAmounts = [4, 4];
-const depositAmount = ledgerAmounts
-  .map(bigNumberify)
-  .reduce(add)
-  .toHexString();
+const ledgerAmounts = [4, 4].map(bigNumberify);
+const depositAmount = ledgerAmounts.reduce(add).toHexString();
 let hubStore: TestStore;
 let aStore: TestStore;
 let bStore: TestStore;
@@ -158,7 +155,7 @@ test('virtual funding with a simple hub', async () => {
   ledgerId = calculateChannelId(state);
   signatures = [wallet2, wallet3].map(({privateKey}) => signState(state, privateKey));
 
-  await chain.depositSync(ledgerId, '0', depositAmount);
+  chain.depositSync(ledgerId, '0', depositAmount);
   await bStore.setLedgerByEntry(await bStore.createEntry({...state, signatures}));
 
   subscribeToMessages({
@@ -182,11 +179,11 @@ test('virtual funding with a simple hub', async () => {
         simpleEthAllocation([
           {
             destination: jointParticipants[ParticipantIdx.A].destination,
-            amount: bigNumberify(ledgerAmounts[0]).sub(amounts[0])
+            amount: ledgerAmounts[0].sub(amounts[0])
           },
           {
             destination: jointParticipants[ParticipantIdx.Hub].destination,
-            amount: bigNumberify(ledgerAmounts[1]).sub(amounts[1])
+            amount: ledgerAmounts[1].sub(amounts[1])
           },
           // We don't know the guarantor channel id
           {destination: expect.any(String), amount: amounts.reduce(add)}

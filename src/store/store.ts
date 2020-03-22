@@ -5,7 +5,6 @@ import * as _ from 'lodash';
 
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {Wallet} from 'ethers';
-
 import {
   Participant,
   StateVariables,
@@ -14,7 +13,8 @@ import {
   Objective,
   Message,
   DBBackend,
-  SiteBudget
+  SiteBudget,
+  BudgetItem
 } from './types';
 import {MemoryChannelStoreEntry} from './memory-channel-storage';
 import {AddressZero} from 'ethers/constants';
@@ -26,6 +26,7 @@ import {Guid} from 'guid-typescript';
 import {MemoryBackend} from './memory-backend';
 import {ChannelStoreEntry} from './channel-store-entry';
 import {Errors} from '.';
+import AsyncLock from 'async-lock';
 
 interface DirectFunding {
   type: 'Direct';
@@ -98,8 +99,9 @@ export interface Store {
 
   setFunding(channelId: string, funding: Funding): Promise<void>;
   addObjective(objective: Objective): void;
-  getBudget: (site: string) => Promise<SiteBudget | undefined>;
+  getBudget: (site: string) => Promise<SiteBudget>;
   updateOrCreateBudget: (budget: SiteBudget) => Promise<void>;
+  reserveFunds(site: string, assetHolderAddress: string, amount: BudgetItem): Promise<SiteBudget>;
 
   chain: Chain;
   initialize(privateKeys?: string[], cleanSlate?: boolean): Promise<void>;
@@ -141,8 +143,10 @@ export class XstateStore implements Store {
     }
   }
 
-  public async getBudget(site: string): Promise<SiteBudget | undefined> {
-    return this.backend.getBudget(site);
+  public async getBudget(site: string): Promise<SiteBudget> {
+    const budget = await this.backend.getBudget(site);
+    if (!budget) throw new Error(`No budget for ${site}`);
+    return budget;
   }
   public async updateOrCreateBudget(budget: SiteBudget): Promise<void> {
     await this.backend.setBudget(budget.site, budget);
@@ -384,6 +388,48 @@ export class XstateStore implements Store {
     }
 
     return entry;
+  }
+  private budgetLock = new AsyncLock();
+  public async reserveFunds(
+    site: string,
+    assetHolderAddress: string,
+    amount: BudgetItem
+  ): Promise<SiteBudget> {
+    return await this.budgetLock
+      .acquire<SiteBudget>(site, async release => {
+        const currentBudget = await this.getBudget(site);
+
+        const ethBudget = currentBudget?.forAsset[assetHolderAddress];
+        if (!ethBudget) {
+          throw new Error(Errors.noBudget);
+        }
+
+        const {free, inUse} = ethBudget;
+
+        if (free.hubAmount.lt(amount.hubAmount) || free.playerAmount.lt(amount.playerAmount)) {
+          throw new Error(Errors.budgetInsufficient);
+        }
+
+        currentBudget.forAsset[assetHolderAddress] = {
+          ...ethBudget,
+          free: {
+            hubAmount: free.hubAmount.sub(amount.hubAmount),
+            playerAmount: free.playerAmount.sub(amount.playerAmount)
+          },
+          inUse: {
+            hubAmount: inUse.hubAmount.add(amount.hubAmount),
+            playerAmount: inUse.playerAmount.add(amount.playerAmount)
+          }
+        };
+
+        release();
+
+        return currentBudget;
+      })
+      .catch(e => {
+        console.error(e);
+        throw e;
+      });
   }
 }
 
