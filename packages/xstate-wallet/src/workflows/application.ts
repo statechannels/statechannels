@@ -264,17 +264,10 @@ export const applicationWorkflow = (
     hideUi: () => {
       sendDisplayMessage('Hide');
     },
-    assignChannelParams: assign(
-      (
-        context: WorkflowContext,
-        event: CreateChannelEvent
-      ): ChannelParamsExist & RequestIdExists => {
-        return {
-          channelParams: event,
-          requestId: event.requestId
-        };
-      }
-    ),
+    assignChannelParams: assign((_, event: CreateChannelEvent): ChannelParamsExist &
+      RequestIdExists => {
+      return {channelParams: event, requestId: event.requestId};
+    }),
     assignChannelId: assign((context, event: AssignChannelEvent) => {
       if (context.channelId) return context;
       switch (event.type) {
@@ -365,10 +358,8 @@ export const applicationWorkflow = (
     getDataForCreateChannelAndFund: async (
       context: ChannelParamsExist
     ): Promise<CreateAndFund.Init> => {
-      const {latestSupportedByMe: latestStateSupportedByMe, channelId} = await store.getEntry(
-        context.channelId
-      );
-      const allocation = checkThat(latestStateSupportedByMe.outcome, isSimpleEthAllocation);
+      const {latestSupportedByMe, channelId} = await store.getEntry(context.channelId);
+      const allocation = checkThat(latestSupportedByMe.outcome, isSimpleEthAllocation);
       return {channelId, allocation};
     },
     getDataForCreateChannelConfirmation: async (
@@ -379,12 +370,8 @@ export const applicationWorkflow = (
         case 'CREATE_CHANNEL':
           return event;
         case 'JOIN_CHANNEL':
-          const entry = await store.getEntry(event.channelId);
-          return {
-            ...entry.latest,
-            ...entry.channelConstants,
-            outcome: checkThat(entry.latest.outcome, isSimpleEthAllocation)
-          };
+          const {latest} = await store.getEntry(event.channelId);
+          return {...latest, outcome: checkThat(latest.outcome, isSimpleEthAllocation)};
         default:
           return unreachable(event);
       }
