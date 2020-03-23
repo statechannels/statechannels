@@ -56,10 +56,11 @@ function sanitizeMessageForFirebase(message) {
 // A Whimsical diagram explaining the functionality of Web3Torrent: https://whimsical.com/Sq6whAwa8aTjbwMRJc7vPU
 export default class WebTorrentPaidStreamingClient extends WebTorrent {
   peersList: PeersByTorrent;
-  pseAccount: string;
   torrents: PaidStreamingTorrent[] = [];
-  outcomeAddress: string;
   paymentChannelClient: PaymentChannelClient;
+
+  pseAccount: string;
+  outcomeAddress: string;
 
   constructor(opts: WebTorrent.Options & Partial<PaidStreamingExtensionOptions> = {}) {
     super(opts);
@@ -70,8 +71,10 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   }
 
   async enable() {
-    log('Enabling Channel Provider...');
+    log('Mounting Wallet to App...');
     await window.channelProvider.mountWalletComponent(process.env.REACT_APP_WALLET_URL);
+    log('Enabling Channel Provider...');
+    await window.channelProvider.enable();
     log('Enabling WebTorrentPaidStreamingClient...');
     this.pseAccount = this.paymentChannelClient.mySigningAddress;
     log('set pseAccount to sc-wallet signing address');
