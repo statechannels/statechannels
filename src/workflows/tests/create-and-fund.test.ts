@@ -36,6 +36,14 @@ const targetChannel: ChannelConstants = {
 };
 const targetChannelId = calculateChannelId(targetChannel);
 
+const ledgerChannel: ChannelConstants = {
+  channelNonce: bigNumberify(1),
+  chainId,
+  challengeDuration,
+  participants,
+  appDefinition
+};
+
 const destinations = participants.map(p => p.destination);
 const amounts = [bigNumberify(7), bigNumberify(5)];
 const totalAmount = amounts.reduce((a, b) => a.add(b));
@@ -80,8 +88,10 @@ beforeEach(async () => {
   [aStore, bStore].forEach(async (store: TestStore) => {
     const budget = ethBudget(applicationSite, {free});
     await store.updateOrCreateBudget(budget);
-    await store.createEntry(allSignState(firstState(allocation, targetChannel)));
-    applicationSite;
+    store.createEntry(allSignState(firstState(allocation, targetChannel)), {
+      applicationSite
+    });
+    store.createEntry(allSignState(firstState(allocation, ledgerChannel)));
   });
 
   subscribeToMessages({
