@@ -97,10 +97,6 @@ export default class TttChannelClientService extends Service {
     return convertToChannelState(channelResult);
   }
 
-  async enableEthereum(): Promise<string> {
-    return this.channelClient.enableEthereum();
-  }
-
   async getAddress(): Promise<string> {
     return this.channelClient.getAddress();
   }

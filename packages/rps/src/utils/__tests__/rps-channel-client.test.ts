@@ -93,9 +93,6 @@ class MockChannelClient implements ChannelClientInterface {
   walletVersion = jest.fn(async function() {
     return await 'JestMockVersion';
   });
-  enableEthereum = jest.fn(async function() {
-    return await MOCK_ADDRESS;
-  });
   getAddress = jest.fn(async function() {
     return await MOCK_ADDRESS;
   });

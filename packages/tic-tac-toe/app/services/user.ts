@@ -15,7 +15,7 @@ export default class UserService extends Service {
   }
 
   private async requestAddresses(): Promise<void> {
-    await this.tttChannelClient.enableEthereum();
+    await window.channelProvider.enable();
     this.walletAddress = await this.tttChannelClient.getAddress();
     this.userAddress = await this.tttChannelClient.getEthereumSelectedAddress();
   }

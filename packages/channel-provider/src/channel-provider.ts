@@ -29,13 +29,17 @@ class ChannelProvider implements ChannelProviderInterface {
   };
   protected url = '';
 
+  public internalAddress?: string;
+  public selectedAddress?: string;
+  public walletVersion?: string;
+
   constructor() {
     this.events = new EventEmitter<EventType>();
     this.ui = new UIService();
     this.messaging = new MessagingService();
   }
 
-  async enable(url?: string) {
+  async mountWalletComponent(url?: string) {
     window.addEventListener('message', this.onMessage.bind(this));
     if (url) {
       this.url = url;
@@ -43,6 +47,14 @@ class ChannelProvider implements ChannelProviderInterface {
     this.ui.setUrl(this.url);
     this.messaging.setUrl(this.url);
     await this.ui.mount();
+    console.info('Application successfully mounted Wallet iFrame inside DOM.');
+  }
+
+  async enable() {
+    await this.send({method: 'EnableEthereum', params: {}});
+    this.internalAddress = await this.send({method: 'GetAddress', params: {}});
+    this.selectedAddress = await this.send({method: 'GetEthereumSelectedAddress', params: {}});
+    this.walletVersion = await this.send({method: 'WalletVersion', params: {}});
   }
 
   async send(request: MethodRequestType): Promise<MethodResponseType[MethodRequestType['method']]> {

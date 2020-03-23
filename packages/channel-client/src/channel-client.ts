@@ -17,6 +17,18 @@ import {
 type TokenAllocations = Allocation[];
 
 export class ChannelClient implements ChannelClientInterface {
+  get address(): string | undefined {
+    return this.provider.address;
+  }
+
+  get selectedAddress(): string | undefined {
+    return this.provider.selectedAddress;
+  }
+
+  get walletVersion(): string | undefined {
+    return this.provider.selectedAddress;
+  }
+
   constructor(private readonly provider: ChannelProviderInterface) {}
 
   onMessageQueued(
@@ -113,22 +125,6 @@ export class ChannelClient implements ChannelClientInterface {
     return this.provider.send({method: 'PushMessage', params: message});
   }
 
-  async walletVersion(): Promise<string> {
-    return this.provider.send({method: 'WalletVersion', params: {}});
-  }
-
-  async enableEthereum(): Promise<string> {
-    return this.provider.send({method: 'EnableEthereum', params: {}});
-  }
-
-  async getAddress(): Promise<string> {
-    return this.provider.send({method: 'GetAddress', params: {}});
-  }
-
-  async getEthereumSelectedAddress(): Promise<string> {
-    return this.provider.send({method: 'GetEthereumSelectedAddress', params: {}});
-  }
-
   async approveBudgetAndFund(
     playerAmount: string,
     hubAmount: string,
@@ -143,8 +139,8 @@ export class ChannelClient implements ChannelClientInterface {
         hubAmount,
         site: window.location.hostname,
         player: {
-          participantId: await this.getAddress(),
-          signingAddress: await this.getAddress(),
+          participantId: this.address as string,
+          signingAddress: this.address as string, // TODO: methods like this ought not be callable if undefined
           destination: playerOutcomeAddress
         },
         hub: {

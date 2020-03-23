@@ -17,6 +17,11 @@ export interface ChannelClientInterface {
   onMessageQueued: (callback: (message: Message) => void) => UnsubscribeFunction;
   onChannelUpdated: (callback: (result: ChannelResult) => void) => UnsubscribeFunction;
   onChannelProposed: (callback: (result: ChannelResult) => void) => UnsubscribeFunction;
+
+  walletVersion?: string;
+  address?: string;
+  selectedAddress?: string;
+
   /*
     Pushing a message is meant for when the app receives a message from
     the opponent's app meant for the wallet.
@@ -38,10 +43,6 @@ export interface ChannelClientInterface {
   getState: (channelId: string) => Promise<ChannelResult>;
   challengeChannel: (channelId: string) => Promise<ChannelResult>;
   closeChannel: (channelId: string) => Promise<ChannelResult>;
-  walletVersion: () => Promise<string>;
-  enableEthereum: () => Promise<string>;
-  getAddress: () => Promise<string>;
-  getEthereumSelectedAddress: () => Promise<string>;
   approveBudgetAndFund(
     playerAmount: string,
     hubAmount: string,
