@@ -4,13 +4,19 @@ Web3Torrent uses state channels tech to stream money between webTorrent peers, s
 
 These tradeoffs are set in [`constants.ts`](https://github.com/statechannels/monorepo/blob/master/packages/web3torrent/src/constants.ts).
 
+## Paid streaming extension
+
+We wrote a small extension to the BiTorrent protocol that allows for extra information to exchanged between torrenting peers: sufficient for them to run a state channel.
+
 ## Payment channel client
 
 Web3Torrent includes a general purpose, 2-party unidirectional payment channel client that wraps the state channels wallet provider and provides convenient methods such as `sendPayment`. This client takes care of all downstream encoding to interface with the state channels stack.
 
-## Paid streaming extension
+## Web3Torrent client
 
-Web3Torrent consists of a paid streaming extension to the webTorrent protocol. The purpose of the extension is
+Web3Torrent in based on WebTorrent, and coordinates the torrenting and payment channels.
+
+The client's responsibilities are
 
 - to keep track of peers that have requested data from me, and to maintain a buffer representing the number of bytes I am willing to upload to them
 - to interface with the state channels wallet in order to setup and teardown payment channels with my peers
