@@ -16,7 +16,7 @@ import {
 } from './types';
 import {utils} from 'ethers';
 import {ChannelState, PaymentChannelClient} from '../clients/payment-channel-client';
-import {mockTorrents} from '../constants';
+import {mockTorrents, defaultTrackers} from '../constants';
 import * as firebase from 'firebase/app';
 import 'firebase/database';
 import {Message} from '@statechannels/client-api-schema';
@@ -112,18 +112,19 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
   async testTorrentingCapability(timeOut: number) {
     log('Testing torrenting capability...');
+    let torrentId;
     const gotAWire = new Promise(resolve => {
       super.add(mockTorrents[0].magnetURI, (torrent: Torrent) => {
-        torrent.once('wire', wire => {
-          this.remove(torrent.infoHash);
-          resolve(true);
-        });
+        torrentId = torrent.infoHash;
+        torrent.once('wire', wire => resolve(true));
       });
     });
     const timer = new Promise(function(resolve, reject) {
       setTimeout(resolve, timeOut);
     });
-    return Promise.race([gotAWire, timer]);
+    const raceResult = await Promise.race([gotAWire, timer]);
+    this.remove(torrentId);
+    return raceResult;
   }
 
   seed(
@@ -137,7 +138,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     if (typeof optionsOrCallback === 'function') {
       torrent = super.seed(
         input,
-        {createdBy: this.pseAccount} as TorrentOptions,
+        {createdBy: this.pseAccount, announce: defaultTrackers} as TorrentOptions,
         optionsOrCallback
       ) as PaidStreamingTorrent;
     } else {

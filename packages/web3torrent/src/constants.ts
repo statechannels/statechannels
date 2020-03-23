@@ -4,13 +4,17 @@ import {ChannelState} from './clients/payment-channel-client';
 import {bigNumberify} from 'ethers/utils';
 
 export const defaultTrackers = [
-  'udp://explodie.org:6969',
-  'udp://tracker.coppersurfer.tk:6969',
-  'udp://tracker.empire-js.us:1337',
-  'udp://tracker.leechers-paradise.org:6969',
-  'udp://tracker.opentrackr.org:1337',
-  'wss://tracker.btorrent.xyz',
-  'wss://tracker.openwebtorrent.com'
+  // 'udp://explodie.org:6969',
+  // 'udp://tracker.coppersurfer.tk:6969',
+  // 'udp://tracker.empire-js.us:1337',
+  // 'udp://tracker.leechers-paradise.org:6969',
+  // 'udp://tracker.opentrackr.org:1337',
+  // 'wss://tracker.btorrent.xyz',
+  // 'wss://tracker.openwebtorrent.com'
+  'http://localhost:8000/announce',
+  'udp://0.0.0.0:8000',
+  'udp://localhost:8000',
+  'ws://localhost:8000'
 ];
 
 export const EmptyTorrent = ({

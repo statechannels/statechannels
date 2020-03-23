@@ -131,6 +131,7 @@
     "prettier:check": "prettier --check '**/*.{scss,json}' --ignore-path '.eslintignore'",
     "prettier:write": "prettier --write '**/*.{scss,json}' --ignore-path '.eslintignore'",
     "start": "node scripts/start.js",
+    "start:tracker": "node tracker/index.js",
     "start:alt": "PORT=3333 node scripts/start.js",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
     "storybook": "start-storybook -s ./public -p 4568",
