@@ -13,6 +13,7 @@ import {
   Message,
   MessageQueuedNotification
 } from '@statechannels/client-api-schema';
+import {HUB} from './constants';
 
 type TokenAllocations = Allocation[];
 
@@ -144,7 +145,7 @@ export class ChannelClient implements ChannelClientInterface {
           destination: playerOutcomeAddress
         },
         hub: {
-          participantId: hubAddress,
+          participantId: HUB.participantId,
           signingAddress: hubAddress,
           destination: hubOutcomeAddress
         }
