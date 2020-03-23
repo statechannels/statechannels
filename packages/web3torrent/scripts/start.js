@@ -69,7 +69,8 @@ void (async () => {
   });
 
   trackerServer.stderr.on('data', data => {
-    throw data.toString();
+    if (process.env.DEBUG !== 'web3torrent:tracker') throw data.toString();
+    console.log(data.toString());
   });
 
   trackerServer.on('close', code => {
