@@ -1,1 +1,1 @@
-web3torrent-tracker: node ./tracker/index.js
+web3torrent-tracker-staging: node packages/web3torrent/tracker/heroku builds -a.js
