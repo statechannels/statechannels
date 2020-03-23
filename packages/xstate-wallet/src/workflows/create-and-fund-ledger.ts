@@ -121,21 +121,12 @@ const getPreFundState = (store: Store): WorkflowServices['getPreFundState'] => a
 const getDepositingInfo = (
   store: Store
 ): WorkflowServices['getDepositingInfo'] => async context => {
-  const {supported, myIndex} = await store.getEntry(context.ledgerId);
+  const {supported} = await store.getEntry(context.ledgerId);
   const {allocationItems} = checkThat(supported?.outcome, isSimpleEthAllocation);
 
   const fundedAt = allocationItems.map(a => a.amount).reduce(add);
-  let depositAt = bigNumberify(0);
-  for (let i = 0; i < allocationItems.length; i++) {
-    const {amount} = allocationItems[i];
-    if (i !== myIndex) depositAt = depositAt.add(amount);
-    else {
-      const totalAfterDeposit = depositAt.add(amount);
-      return {channelId: context.ledgerId, depositAt, totalAfterDeposit, fundedAt};
-    }
-  }
-
-  throw Error(`Could not find an allocation for participant id ${myIndex}`);
+  const depositAt = allocationItems[0].amount;
+  return {channelId: context.ledgerId, depositAt, totalAfterDeposit: fundedAt, fundedAt};
 };
 
 export const options = (
