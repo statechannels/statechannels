@@ -170,6 +170,14 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     return torrent;
   }
 
+  async cancel(torrentInfoHash: string, callback?: (err: Error | string) => void) {
+    log('> Peer cancels download. Pausing torrents');
+    const torrent = this.torrents.find(t => t.infoHash === torrentInfoHash);
+    if (torrent) {
+      torrent.pause();
+    }
+  }
+
   blockPeer(torrentInfoHash: string, wire: PaidStreamingWire, peerAccount: string) {
     this.peersList[torrentInfoHash][peerAccount].allowed = false;
     this.emit(ClientEvents.PEER_STATUS_CHANGED, {
@@ -373,7 +381,10 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       let message: Message;
       switch (command) {
         case PaidStreamingExtensionNotices.STOP: // synonymous with a prompt for a payment
-          if (!torrent.done) {
+          if (torrent.paused) {
+            // We currently treat pausing torrent as canceling downloads
+            await this.closeDownloadingChannels(torrent);
+          } else if (!torrent.done) {
             const channelId = data;
             await this.paymentChannelClient.makePayment(
               channelId,
@@ -412,11 +423,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     torrent.on(TorrentEvents.DONE, async () => {
       log('Torrent DONE!');
       this.emit(ClientEvents.TORRENT_DONE, {torrent});
-      torrent.wires.forEach(
-        async wire =>
-          wire.paidStreamingExtension.peerChannelId &&
-          (await this.paymentChannelClient.closeChannel(wire.paidStreamingExtension.peerChannelId))
-      ); // close any channels that I am the leecher in (that my peer opened)
+      await this.closeDownloadingChannels(torrent);
     });
 
     torrent.on(TorrentEvents.ERROR, err => {
@@ -426,6 +433,15 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     torrent.usingPaidStreaming = true;
 
     return torrent;
+  }
+
+  protected async closeDownloadingChannels(torrent: PaidStreamingTorrent) {
+    // Close any channels that I am downloading from (that my peer opened)
+    torrent.wires.forEach(async wire => {
+      if (wire.paidStreamingExtension && wire.paidStreamingExtension.peerChannelId) {
+        await this.paymentChannelClient.closeChannel(wire.paidStreamingExtension.peerChannelId);
+      }
+    });
   }
 
   protected jumpStart(torrent: ExtendedTorrent, wire: PaidStreamingWire) {
