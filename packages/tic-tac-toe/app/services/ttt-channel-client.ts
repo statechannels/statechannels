@@ -97,14 +97,6 @@ export default class TttChannelClientService extends Service {
     return convertToChannelState(channelResult);
   }
 
-  async getAddress(): Promise<string> {
-    return this.channelClient.getAddress();
-  }
-
-  async getEthereumSelectedAddress(): Promise<string> {
-    return this.channelClient.getEthereumSelectedAddress();
-  }
-
   onMessageQueued(callback: (message: Message) => void): UnsubscribeFunction {
     return this.channelClient.onMessageQueued(callback);
   }
