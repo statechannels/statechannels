@@ -61,4 +61,18 @@ void (async () => {
   devServer.on('close', code => {
     process.exit(code);
   });
+
+  const trackerServer = spawn(cmd, ['run', 'start:tracker']);
+
+  trackerServer.stdout.on('data', data => {
+    console.log(data.toString());
+  });
+
+  trackerServer.stderr.on('data', data => {
+    throw data.toString();
+  });
+
+  trackerServer.on('close', code => {
+    process.exit(code);
+  });
 })();
