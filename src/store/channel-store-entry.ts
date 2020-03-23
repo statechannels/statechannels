@@ -10,6 +10,7 @@ export type ChannelStoredData = {
   };
   signatures: Record<string, string[] | undefined>;
   funding: Funding | undefined;
+  applicationSite: string | undefined;
   myIndex: number;
 };
 export interface ChannelStoreEntry {
