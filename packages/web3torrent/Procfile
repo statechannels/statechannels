@@ -1,1 +1,1 @@
-tracker: node ./tracker/index.js
+web3torrent-tracker: node ./tracker/index.js
