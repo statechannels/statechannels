@@ -4,6 +4,7 @@ import {SupportState} from '.';
 import {getDataAndInvoke} from '../utils';
 import {outcomesEqual} from '../store/state-utils';
 import {State} from '../store/types';
+import {map} from 'rxjs/operators';
 
 const WORKFLOW = 'conclude-channel';
 
@@ -36,11 +37,24 @@ const concludeChannel = getDataAndInvoke<Init>(
   'determineFundingType'
 );
 
+const getFunding = (store: Store) => (ctx: Init) =>
+  store.channelUpdatedFeed(ctx.channelId).pipe(
+    map(({funding}) => {
+      switch (funding?.type) {
+        case 'Direct':
+        case 'Virtual':
+          return funding.type;
+        default:
+          throw new Error(`Unexpected funding type ${funding?.type}`);
+      }
+    })
+  );
+
 const determineFundingType = {
-  invoke: {src: 'getFunding'},
+  invoke: {src: getFunding.name},
   on: {
-    VIRTUAL: 'virtualDefunding',
-    DIRECT: 'withdraw'
+    Virtual: 'virtualDefunding',
+    Direct: 'withdrawing'
   }
 };
 
@@ -80,7 +94,8 @@ export const mockOptions = {guards: {virtuallyFunded: _ => true, directlyFunded:
 
 const services = (store: Store) => ({
   finalState: finalState(store),
-  supportState: supportState(store)
+  getFunding: getFunding(store),
+  supportState: supportState(store),
 });
 const options = (store: Store) => ({services: services(store)});
 export const machine = (store: Store) => Machine(config).withConfig(options(store));
