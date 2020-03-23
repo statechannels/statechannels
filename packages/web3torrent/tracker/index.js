@@ -1,6 +1,6 @@
 const Server = require('bittorrent-tracker').Server;
 const log = require('debug')('web3torrent:tracker');
-const port = process.env.TRACKER_PORT || 8000;
+const port = process.env.PORT || 8000;
 
 const server = new Server({
   udp: true,
