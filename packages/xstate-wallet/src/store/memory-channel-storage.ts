@@ -204,7 +204,8 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
       channelConstants,
       signatures: this.signatures,
       funding: this.funding,
-      myIndex: this.myIndex
+      myIndex: this.myIndex,
+      applicationSite: this.applicationSite
     };
   }
   static fromJson(data) {
@@ -212,7 +213,7 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
       console.error("Data is undefined or null, Memory Channel Store Entry can't be created.");
       return data;
     }
-    const {channelConstants, signatures, funding, myIndex} = data;
+    const {channelConstants, signatures, funding, myIndex, applicationSite} = data;
     const stateVariables = MemoryChannelStoreEntry.prepareStateVariables(data.stateVariables);
     channelConstants.challengeDuration = new BigNumber(channelConstants.challengeDuration);
     channelConstants.channelNonce = new BigNumber(channelConstants.channelNonce);
@@ -221,7 +222,8 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
       myIndex,
       stateVariables,
       signatures,
-      funding
+      funding,
+      applicationSite
     );
   }
 
