@@ -4347,7 +4347,7 @@
     "@rimble/utils" "^1.2.3"
     rimble-ui "^0.9.1"
 
-"@rimble/utils@^1.2.3":
+"@rimble/utils@1.2.3", "@rimble/utils@^1.2.3":
   version "1.2.3"
   resolved "https://registry.npmjs.org/@rimble/utils/-/utils-1.2.3.tgz#df4b24a7841264d40de984edbac0391d16e192ad"
   integrity sha512-2KEN5+t9P8LsFijslluz1axoYoJQGMAlVdaW7WFFplvArCzjvTIoAeCdtNoZt8JyJi7ccxbzamavY5vP8rQQDw==
