@@ -4,6 +4,7 @@ import {
   ChannelClientInterface,
   UnsubscribeFunction
 } from '@statechannels/channel-client';
+import {Message} from '@statechannels/client-api-schema';
 import {AppData, encodeAppData, decodeAppData} from '../core/app-data';
 import {ChannelState} from '../core/channel-state';
 import ENV from '@statechannels/tic-tac-toe/config/environment';
