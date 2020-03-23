@@ -16,7 +16,17 @@ import {
 } from './types';
 import {utils} from 'ethers';
 import {ChannelState, PaymentChannelClient} from '../clients/payment-channel-client';
-import {mockTorrents, defaultTrackers} from '../constants';
+import {
+  mockTorrents,
+  defaultTrackers,
+  fireBaseConfig,
+  HUB_ADDRESS,
+  FIREBASE_PREFIX,
+  WEI_PER_BYTE,
+  BUFFER_REFILL_RATE,
+  INITIAL_LEECHER_BALANCE,
+  INITIAL_SEEDER_BALANCE
+} from '../constants';
 import * as firebase from 'firebase/app';
 import 'firebase/database';
 import {Message} from '@statechannels/client-api-schema';
@@ -28,27 +38,7 @@ export type TorrentCallback = (torrent: Torrent) => any;
 
 export * from './types';
 
-export const WEI_PER_BYTE = bigNumberify(1); // cost per byte
-export const BUFFER_REFILL_RATE = bigNumberify(2e4); // number of bytes the leecher wishes to increase the buffer by
-// These variables control the amount of (micro)trust the leecher must invest in the seeder
-// As well as the overall performance hit of integrating payments into webtorrent.
-// A high BUFFER_REFILL_RATE increases the need for trust, but decreases the number of additional messages and therefore latency
-// It can also cause a payment to go above the leecher's balance / capabilities
-export const INITIAL_SEEDER_BALANCE = bigNumberify(0); // needs to be zero so that depositing works correctly (unidirectional payment channel)
-export const INITIAL_LEECHER_BALANCE = bigNumberify(BUFFER_REFILL_RATE.mul(100)); // e.g. gwei = 1e9 = nano-ETH
-
-// firebase setup
-const FIREBASE_PREFIX = 'web3t';
-const config = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-  authDomain: `${process.env.REACT_APP_FIREBASE_PROJECT}.firebaseapp.com`,
-  databaseURL: `https://${process.env.REACT_APP_FIREBASE_PROJECT}.firebaseio.com`,
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT,
-  storageBucket: '',
-  messagingSenderId: '913007764573'
-};
-const HUB_ADDRESS = 'TODO';
-firebase.initializeApp(config);
+firebase.initializeApp(fireBaseConfig);
 function sanitizeMessageForFirebase(message) {
   return JSON.parse(JSON.stringify(message));
 }
