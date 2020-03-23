@@ -13,6 +13,22 @@ export class RPSChannelClient {
     /* empty */
   }
 
+  async approveBudgetAndFund(
+    playerAmount: string,
+    hubAmount: string,
+    playerOutcomeAddress: string,
+    hubAddress: string,
+    hubOutcomeAddress: string
+  ) {
+    await this.channelClient.approveBudgetAndFund(
+      playerAmount,
+      hubAmount,
+      playerOutcomeAddress,
+      hubAddress,
+      hubOutcomeAddress
+    );
+  }
+
   async createChannel(
     aAddress: string,
     bAddress: string,

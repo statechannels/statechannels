@@ -17,6 +17,7 @@ import * as ls from './state';
 import {randomHex} from '../../utils/randomHex';
 import {bigNumberify} from 'ethers/utils';
 import {buffers} from 'redux-saga';
+import {HUB} from '../../constants';
 
 let opponentResigned;
 opponentResigned = false;
@@ -158,6 +159,15 @@ function* createChannel(localState: ls.A.GameChosen, client: RPSChannelClient) {
     .mul(5)
     .toString();
   const startState: AppData = {type: 'start', stake: localState.roundBuyIn};
+  yield call(
+    [client, 'approveBudgetAndFund'],
+    openingBalance.toString(),
+    openingBalance.toString(),
+    localState.address,
+    HUB.signingAddress,
+    HUB.outcomeAddress
+  );
+
   yield call(
     [client, 'createChannel'],
     localState.address,
