@@ -20,7 +20,10 @@ export class Blockchain {
 
     return lock.acquire('depositing', async release => {
       const expectedHeld: BigNumber = await Blockchain.ethAssetHolder.holdings(channelID);
-      if (expectedHeld.gte(value)) return;
+      if (expectedHeld.gte(value)) {
+        release();
+        return;
+      }
 
       const tx = await Blockchain.ethAssetHolder.deposit(
         channelID,
@@ -30,7 +33,7 @@ export class Blockchain {
       );
       await tx.wait();
 
-      const holdings = await Blockchain.ethAssetHolder.holdings(channelID).toString();
+      const holdings = (await Blockchain.ethAssetHolder.holdings(channelID)).toHexString();
       release();
       return holdings;
     });
