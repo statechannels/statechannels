@@ -42,6 +42,8 @@ function* createResponseMessage(action: OutgoingApiAction) {
       return jrs.success(action.id, yield getChannelInfo(action.channelId));
     case "WALLET.ADDRESS_RESPONSE":
       return jrs.success(action.id, action.address);
+    case "WALLET.WALLET_VERSION_RESPONSE":
+      return jrs.success(action.id, "wallet@VersionTBD"); // TODO: Inject git or build information
     case "WALLET.ETHEREUM_ADDRESS_RESPONSE":
       return jrs.success(action.id, action.ethereumSelectedAddress);
     case "WALLET.ETHEREUM_ADDRESS_ERROR":

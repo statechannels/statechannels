@@ -97,6 +97,10 @@ interface Balance {
   hubAmount: string;
 }
 
+// WalletVersion
+export type WalletVersionRequest = JsonRpcRequest<'WalletVersion', {}>;
+export type WalletVersionResponse = JsonRpcResponse<string>;
+
 // EnableEthereum
 export type EnableEthereumRequest = JsonRpcRequest<'EnableEthereum', {}>;
 export type EnableEthereumResponse = JsonRpcResponse<Address>;
@@ -220,6 +224,7 @@ export type Request =
   | CreateChannelRequest
   | JoinChannelRequest
   | UpdateChannelRequest
+  | WalletVersionRequest
   | EnableEthereumRequest
   | GetStateRequest
   | PushMessageRequest
@@ -235,6 +240,7 @@ export type Response =
   | CreateChannelResponse
   | JoinChannelResponse
   | UpdateChannelResponse
+  | WalletVersionResponse
   | EnableEthereumResponse
   | GetStateResponse
   | PushMessageResponse

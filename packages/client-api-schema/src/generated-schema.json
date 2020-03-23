@@ -369,6 +369,60 @@
       ],
       "type": "object"
     },
+    "WalletVersionRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "WalletVersion"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": false,
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "WalletVersionResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "result": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
+      "type": "object"
+    },
     "CloseAndWithdrawParams": {
       "additionalProperties": false,
       "properties": {
@@ -1235,6 +1289,9 @@
           "$ref": "#/definitions/UpdateChannelRequest"
         },
         {
+          "$ref": "#/definitions/WalletVersionRequest"
+        },
+        {
           "$ref": "#/definitions/EnableEthereumRequest"
         },
         {
@@ -1276,6 +1333,9 @@
         },
         {
           "$ref": "#/definitions/UpdateChannelResponse"
+        },
+        {
+          "$ref": "#/definitions/WalletVersionResponse"
         },
         {
           "$ref": "#/definitions/EnableEthereumResponse"

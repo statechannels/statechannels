@@ -38,6 +38,7 @@ export interface ChannelClientInterface {
   getState: (channelId: string) => Promise<ChannelResult>;
   challengeChannel: (channelId: string) => Promise<ChannelResult>;
   closeChannel: (channelId: string) => Promise<ChannelResult>;
+  walletVersion: () => Promise<string>;
   enableEthereum: () => Promise<string>;
   getAddress: () => Promise<string>;
   getEthereumSelectedAddress: () => Promise<string>;

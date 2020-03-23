@@ -109,6 +109,29 @@ Note: we don't return the state of the channel, as messages are not necessarily 
 | ---- | ----------------- | -------------------------------------------- |
 | 900  | Wrong Participant | The message is not addressed to this wallet. |
 
+## WalletVersion
+
+Retrieves the current version of the state channels wallet the client is connected to.
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "WalletVersion",
+  "id": 1,
+  "params": {}
+}
+```
+
+> Example response
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": "xstate-wallet@e5fba554d"
+}
+```
+
 ## EnableEthereum
 
 Enables the wallet domain against an ethereum provider (e.g., MetaMask). This triggers the connected State Channels wallet to call `window.ethereum.enable()` in the background from the wallet's domain (e.g., `wallet.statechannels.org`). This must be done _prior_ to calling `GetEthereumSelectedAddress` as otherwise that value will be `undefined`, since the wallet won't have access to that value.
