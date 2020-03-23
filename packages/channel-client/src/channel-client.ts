@@ -17,8 +17,8 @@ import {
 type TokenAllocations = Allocation[];
 
 export class ChannelClient implements ChannelClientInterface {
-  get address(): string | undefined {
-    return this.provider.address;
+  get signingAddress(): string | undefined {
+    return this.provider.signingAddress;
   }
 
   get selectedAddress(): string | undefined {
@@ -139,8 +139,8 @@ export class ChannelClient implements ChannelClientInterface {
         hubAmount,
         site: window.location.hostname,
         player: {
-          participantId: this.address as string,
-          signingAddress: this.address as string, // TODO: methods like this ought not be callable if undefined
+          participantId: this.signingAddress as string,
+          signingAddress: this.signingAddress as string, // TODO: methods like this ought not be callable if undefined
           destination: playerOutcomeAddress
         },
         hub: {

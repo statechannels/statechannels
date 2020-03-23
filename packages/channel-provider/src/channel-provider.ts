@@ -29,7 +29,7 @@ class ChannelProvider implements ChannelProviderInterface {
   };
   protected url = '';
 
-  public internalAddress?: string;
+  public signingAddress?: string;
   public selectedAddress?: string;
   public walletVersion?: string;
 
@@ -88,7 +88,7 @@ class ChannelProvider implements ChannelProviderInterface {
   off: OffType = (method, params) => this.events.off(method, params);
 
   private async populateProviderProperties() {
-    this.internalAddress = await this.send({method: 'GetAddress', params: {}});
+    this.signingAddress = await this.send({method: 'GetAddress', params: {}});
     this.selectedAddress = await this.send({method: 'GetEthereumSelectedAddress', params: {}});
     this.walletVersion = await this.send({method: 'WalletVersion', params: {}});
   }

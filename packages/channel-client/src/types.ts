@@ -19,7 +19,7 @@ export interface ChannelClientInterface {
   onChannelProposed: (callback: (result: ChannelResult) => void) => UnsubscribeFunction;
 
   walletVersion?: string;
-  address?: string;
+  signingAddress?: string;
   selectedAddress?: string;
 
   /*

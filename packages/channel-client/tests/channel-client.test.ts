@@ -132,8 +132,8 @@ describe('ChannelClient with FakeChannelProvider', () => {
       expect(clientAChannelState).toEqual(states['proposed']);
 
       proposalMessage = {
-        sender: clientA.address as string,
-        recipient: clientB.address as string,
+        sender: clientA.signingAddress as string,
+        recipient: clientB.signingAddress as string,
         data: clientAChannelState
       };
     });

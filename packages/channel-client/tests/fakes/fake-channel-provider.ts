@@ -34,7 +34,7 @@ type ChannelId = string;
  coming from a non-fake `ChannelClient`.
  */
 export class FakeChannelProvider implements ChannelProviderInterface {
-  public address?: string;
+  public signingAddress?: string;
   public selectedAddress?: string;
   public walletVersion?: string;
 
@@ -53,7 +53,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
 
   async enable(): Promise<void> {
     await this.send({method: 'EnableEthereum', params: {}});
-    this.address = await this.send({method: 'GetAddress', params: {}});
+    this.signingAddress = await this.send({method: 'GetAddress', params: {}});
     this.selectedAddress = await this.send({method: 'GetEthereumSelectedAddress', params: {}});
     this.walletVersion = await this.send({method: 'WalletVersion', params: {}});
   }
