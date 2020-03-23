@@ -3,24 +3,19 @@ const log = require('debug')('web3torrent:tracker');
 const port = process.env.TRACKER_PORT || 8000;
 
 const server = new Server({
-  udp: true, // enable udp server? [default=true]
-  http: true, // enable http server? [default=true]
-  ws: true, // enable websocket server? [default=true]
-  stats: true // enable web-based statistics? [default=true]
+  udp: true,
+  http: true,
+  ws: true,
+  stats: true
 });
 
-server.on('error', function(err) {
-  // fatal server error!
-  console.error(err.message);
-});
+server.on('error', err => console.error(err.message));
 
-server.on('warning', function(err) {
-  // client sent bad data. probably not a problem, just a buggy client.
-  console.warn(err.message);
-});
+server.on('warning', err => console.warn(err.message));
 
-server.on('listening', function() {
+server.on('listening', () => {
   console.log('Tracker listening on port ' + port);
+
   if (server.http) {
     const httpAddr = server.http.address();
     const httpHost = httpAddr.address !== '::' ? httpAddr.address : 'localhost';
@@ -65,15 +60,15 @@ server.on('start', (peerId, {info_hash, downloaded}) => {
   );
 });
 
-server.on('complete', (peerId, {info_hash}) => {
-  log('COMPLETE - PeerId: ' + peerId + ' - infoHash: ' + info_hash);
-});
-server.on('update', (peerId, {info_hash}) => {
-  log('UPDATE - PeerId: ' + peerId + ' - infoHash: ' + info_hash);
-});
-server.on('stop', (peerId, {info_hash}) => {
-  log('STOP - PeerId: ' + peerId + ' - infoHash: ' + info_hash);
-});
+server.on('complete', (peerId, {info_hash}) =>
+  log('COMPLETE - PeerId: ' + peerId + ' - infoHash: ' + info_hash)
+);
+server.on('update', (peerId, {info_hash}) =>
+  log('UPDATE - PeerId: ' + peerId + ' - infoHash: ' + info_hash)
+);
+server.on('stop', (peerId, {info_hash}) =>
+  log('STOP - PeerId: ' + peerId + ' - infoHash: ' + info_hash)
+);
 
 server.listen(port);
 
