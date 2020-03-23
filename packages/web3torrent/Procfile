@@ -1,1 +1,1 @@
-web3torrent-tracker-staging: node packages/web3torrent/tracker/index.js
+web: node packages/web3torrent/tracker/index.js
