@@ -8,7 +8,8 @@ section.wires-list {
     border-collapse: collapse;
     text-align: left;
 
-    tbody {
+    tbody,
+    thead {
       border-bottom: 1px solid $c-mediumgrey;
       text-align: center;
 
@@ -48,6 +49,10 @@ section.wires-list {
           vertical-align: middle;
           width: 25%;
           min-width: 100px;
+          text-align: left;
+        }
+
+        .channel {
         }
 
         .peer-id,
@@ -63,9 +68,9 @@ section.wires-list {
           font-weight: bold;
         }
 
-        .uploaded {
+        .transferred {
           min-width: 50px;
-          text-align: left;
+          text-align: center;
           white-space: nowrap;
         }
         .paid {
@@ -78,8 +83,37 @@ section.wires-list {
           min-width: 70px;
           text-align: right;
           width: 20%;
+          i {
+            transform: rotate(-135deg);
+            -webkit-transform: rotate(-135deg);
+            margin-bottom: 5px;
+          }
         }
       }
+    }
+    thead {
+      text-align: center;
+      color: #ea692b;
+      border-bottom: 1px solid #ea692b;
+      line-height: 0.3;
+    }
+  }
+  i {
+    border: solid $c-orange;
+    border-width: 0 3px 3px 0;
+    display: inline-block;
+    padding: 3px;
+    margin-left: 3px;
+    margin-bottom: 3px;
+
+    &.up {
+      transform: rotate(-135deg);
+      -webkit-transform: rotate(-135deg);
+    }
+
+    &.down {
+      transform: rotate(45deg);
+      -webkit-transform: rotate(45deg);
     }
   }
 }

@@ -29,7 +29,7 @@ class ChannelsList extends React.Component<UploadInfoProps> {
   ) {
     let channelButton;
     const channel = channels[channelId];
-
+    const isBeneficiary = participantType === 'beneficiary';
     const wire = torrent.wires.find(
       wire =>
         wire.paidStreamingExtension.peerChannelId === channelId ||
@@ -57,26 +57,24 @@ class ChannelsList extends React.Component<UploadInfoProps> {
     let dataTransferred: string;
     const peerAccount = channel[participantType];
     if (wire) {
-      dataTransferred =
-        participantType === 'beneficiary'
-          ? prettier(wire.uploaded) + ` up`
-          : prettier(wire.downloaded) + ` down`;
+      dataTransferred = isBeneficiary ? prettier(wire.uploaded) : prettier(wire.downloaded);
     } else {
       // Use the beneficiery balance as an approximate of the file size, when wire is dropped.
-      dataTransferred =
-        prettyPrintBytes(utils.bigNumberify(channel.beneficiaryBalance)) +
-        (participantType === 'beneficiary' ? ` up` : ` down`);
+      dataTransferred = prettyPrintBytes(utils.bigNumberify(channel.beneficiaryBalance));
     }
 
     const weiTransferred = prettyPrintWei(utils.bigNumberify(channel.beneficiaryBalance));
 
     return (
       <tr className="peerInfo" key={channelId}>
-        <td>{channelButton}</td>
+        <td className="channel">{channelButton}</td>
         <td className="channel-id">{channelId}</td>
         <td className="peer-id">{peerAccount}</td>
-        <td className="uploaded">{dataTransferred}</td>
-        {participantType === 'beneficiary' ? (
+        <td className="transferred">
+          {dataTransferred}
+          <i className={isBeneficiary ? 'up' : 'down'}></i>
+        </td>
+        {isBeneficiary ? (
           <td className="earned">{weiTransferred}</td>
         ) : (
           <td className="paid">-{weiTransferred}</td>
@@ -86,20 +84,33 @@ class ChannelsList extends React.Component<UploadInfoProps> {
   }
 
   render() {
+    const channelsInfo = _.keys(this.props.channels).sort(
+      (channelId1, channelId2) => Number(channelId1) - Number(channelId2)
+    );
+    console.log(channelsInfo);
     return (
       <section className="wires-list">
         <table className="wires-list-table">
+          {channelsInfo.length > 0 && (
+            <thead>
+              <tr className="peerInfo">
+                <td className="channel">Status</td>
+                <td className="channel-id">Channel</td>
+                <td className="peer-id">Peer</td>
+                <td className="transferred">Data</td>
+                <td className="earned">Funds</td>
+              </tr>
+            </thead>
+          )}
           <tbody>
-            {_.keys(this.props.channels)
-              .sort((channelId1, channelId2) => Number(channelId1) - Number(channelId2))
-              .map(id =>
-                this.channelIdToTableRow(
-                  id,
-                  this.props.channels,
-                  this.props.torrent,
-                  this.props.participantType
-                )
-              )}
+            {channelsInfo.map(id =>
+              this.channelIdToTableRow(
+                id,
+                this.props.channels,
+                this.props.torrent,
+                this.props.participantType
+              )
+            )}
           </tbody>
         </table>
       </section>
