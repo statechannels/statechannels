@@ -65,10 +65,10 @@ const generateConfig = (
   actions: WorkflowActions
 ): MachineConfig<WorkflowContext, WorkflowStateSchema, WorkflowEvent> => ({
   id: 'approve-budget-and-fund',
-  initial: 'waitForUserApproval',
+  initial: 'updateBudgetInStore',
+  entry: [actions.displayUi],
   states: {
     waitForUserApproval: {
-      entry: [actions.displayUi],
       on: {
         USER_APPROVES_BUDGET: {target: 'fundLedger', actions: []},
         USER_REJECTS_BUDGET: {target: 'failure'}
