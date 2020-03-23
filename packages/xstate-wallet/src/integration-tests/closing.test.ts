@@ -42,10 +42,11 @@ test('concludes on their turn', async () => {
   );
   playerB.store.signAndAddState(channelId, latest);
 
-  playerA.startAppWorkflow('running', {channelId});
-  playerB.startAppWorkflow('running', {channelId});
-  playerA.workflowMachine?.send('SPAWN_OBSERVERS');
-  playerB.workflowMachine?.send('SPAWN_OBSERVERS');
+  [playerA, playerB].forEach(async player => {
+    player.startAppWorkflow('running', {channelId});
+    player.workflowMachine?.send('SPAWN_OBSERVERS');
+    await player.store.setFunding(channelId, {type: 'Direct'});
+  });
 
   await playerA.messagingService.receiveRequest(generateCloseRequest(channelId));
 
