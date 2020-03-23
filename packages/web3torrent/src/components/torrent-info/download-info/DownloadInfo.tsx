@@ -56,7 +56,7 @@ const DownloadInfo: React.FC<DownloadInfoProps> = ({
         </p>
       </section>
       <ChannelsList
-        wires={torrent.wires}
+        torrent={torrent}
         channels={_.pickBy(channelCache, ({channelId}) => myPayingChannelIds.includes(channelId))}
         participantType={'payer'}
       />

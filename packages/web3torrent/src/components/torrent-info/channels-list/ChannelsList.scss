@@ -16,10 +16,19 @@ section.wires-list {
         vertical-align: middle;
         color: $c-orange;
         border: 1px solid $c-orange;
-        margin-top: 0;
-        margin-bottom: 0;
+        margin-top: -3px;
+        margin-bottom: 0px;
+        padding: 3px 6px;
+        &.button-alt {
+          color: $c-white;
+          background-color: $c-orange;
+      
+          &:hover {
+            border: 1px solid $c-darkred;
+          }
+        }
       }
-
+      
       tr.peerInfo {
         padding-top: 10px;
         padding-bottom: 10px;
@@ -37,8 +46,8 @@ section.wires-list {
           min-width: 50px;
           padding: 5px 5px;
           vertical-align: middle;
-          width: 20%;
-          min-width: 50px;
+          width: 25%;
+          min-width: 100px;
         }
 
         .peer-id,
@@ -63,10 +72,12 @@ section.wires-list {
           min-width: 70px;
           text-align: right;
           color: red;
+          width: 20%;
         }
         .earned {
           min-width: 70px;
           text-align: right;
+          width: 20%;
         }
       }
     }

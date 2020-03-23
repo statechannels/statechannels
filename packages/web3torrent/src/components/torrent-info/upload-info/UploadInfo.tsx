@@ -36,7 +36,7 @@ const UploadInfo: React.FC<UploadInfoProps> = ({
         </p>
       </section>
       <ChannelsList
-        wires={torrent.wires}
+        torrent={torrent}
         channels={_.pickBy(channelCache, ({channelId}) =>
           myReceivingChannelIds.includes(channelId)
         )}
