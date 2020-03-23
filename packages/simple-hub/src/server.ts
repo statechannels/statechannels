@@ -41,7 +41,9 @@ export async function startServer() {
               return Blockchain.fund(depositToMake.channelId, depositToMake.amountToDeposit);
             })
           );
+          log.info('Deposited');
           await sendMessagesAndCleanup(snapshotKey, messageToSend);
+          log.info('Messages sent');
         } catch (e) {
           log.error(e);
         }
