@@ -55,7 +55,8 @@ module.exports = {
       'ETH_ASSET_HOLDER_ADDRESS',
       'HUB_ADDRESS',
       'CHAIN_NETWORK_ID',
-      'ADD_LOGS'
+      'ADD_LOGS',
+      'USE_INDEXED_DB'
     ]),
     new HtmlWebpackPlugin({template: './index-template.html'})
   ],
