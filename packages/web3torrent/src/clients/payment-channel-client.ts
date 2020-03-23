@@ -39,7 +39,7 @@ export class PaymentChannelClient {
   channelCache: Record<string, ChannelState> = {};
 
   get mySigningAddress(): string | undefined {
-    return this.channelClient.address;
+    return this.channelClient.signingAddress;
   }
 
   get myEthereumSelectedAddress(): string | undefined {
