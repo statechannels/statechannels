@@ -1,5 +1,5 @@
 import {applyMiddleware, compose, createStore} from 'redux';
-import {fork, take} from 'redux-saga/effects';
+import {fork, take, call} from 'redux-saga/effects';
 import createSagaMiddleware from 'redux-saga';
 
 import reducer from './reducer';
@@ -17,6 +17,7 @@ import {gameSaga} from './game/saga';
 import {autoPlayer, autoOpponent} from './auto-opponent';
 import {ChannelClient, FakeChannelProvider} from '@statechannels/channel-client';
 import {GotAddressFromWallet} from './game/actions';
+import {HUB} from '../constants';
 
 const composeEnhancers = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const enhancers = composeEnhancers(applyMiddleware(sagaMiddleware));
@@ -38,6 +39,7 @@ function* rootSaga() {
   }
 
   yield fork(channelUpdatedListener, client);
+
   yield fork(gameSaga, client);
 
   if (process.env.AUTO_PLAYER === 'A') {
@@ -52,8 +54,21 @@ function* rootSaga() {
     yield fork(autoOpponent, 'B', client);
   } else {
     // wait for the address from wallet before starting firebase sagas
+    yield call([client, 'enableEthereum']);
+    const address: string = yield call([client, 'getAddress']);
+    yield fork(firebaseInboxListener, client, address);
+
+    const outcomeAddress: string = yield call([client, 'getEthereumSelectedAddress']);
+    yield call(
+      [client, 'approveBudgetAndFund'],
+      '0x8ac7230489e80000', // 10 eth
+      '0x8ac7230489e80000',
+      outcomeAddress,
+      HUB.signingAddress,
+      HUB.outcomeAddress
+    );
+
     const action: GotAddressFromWallet = yield take('GotAddressFromWallet');
-    yield fork(firebaseInboxListener, client, action.address);
     yield fork(openGameSaga, action.address);
   }
 }
