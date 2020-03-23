@@ -7,7 +7,7 @@ import {Store} from '../../store';
 import {bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
 import {firstState, signState, calculateChannelId} from '../../store/state-utils';
-import {ChannelConstants, Outcome, State, BudgetItem} from '../../store/types';
+import {ChannelConstants, Outcome, State} from '../../store/types';
 import {AddressZero} from 'ethers/constants';
 import {checkThat} from '../../utils';
 import {isSimpleEthAllocation} from '../../utils/outcome';
@@ -18,7 +18,6 @@ import {FakeChain} from '../../chain';
 import {SimpleHub} from './simple-hub';
 import {add} from '../../utils/math-utils';
 import {TestStore} from './store';
-import {ethBudget} from '../../utils/budget-utils';
 
 jest.setTimeout(20000);
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
@@ -73,10 +72,6 @@ const allSignState = (state: State) => ({
 const applicationSite = 'application';
 let chain: FakeChain;
 
-const free: BudgetItem = {
-  hubAmount: ledgerAmounts[1],
-  playerAmount: ledgerAmounts[0]
-};
 beforeEach(() => {
   chain = new FakeChain();
   aStore = new TestStore([wallet1.privateKey], chain);
@@ -84,8 +79,6 @@ beforeEach(() => {
   const hubStore = new SimpleHub(wallet3.privateKey);
 
   [aStore, bStore].forEach(async (store: TestStore) => {
-    const budget = ethBudget(applicationSite, {free});
-    await store.createBudget(budget);
     store.createEntry(allSignState(firstState(allocation, targetChannel)), {
       applicationSite
     });
@@ -100,7 +93,8 @@ beforeEach(() => {
 });
 
 const connectToStore = (store: Store) => interpret(machine(store).withContext(context)).start();
-test('it uses direct funding when there is no budget', async () => {
+test('it uses direct funding when process.env.USE_VIRTUAL_FUNDING is undefined', async () => {
+  process.env.USE_VIRTUAL_FUNDING = undefined;
   const [aService, bService] = [aStore, bStore].map(connectToStore);
 
   await waitForExpect(async () => {
@@ -145,19 +139,6 @@ test('it uses virtual funding when enabled', async () => {
 
   expect(outcome).toMatchObject(allocation);
   expect((await aStore.getEntry(targetChannelId)).funding).toMatchObject({type: 'Virtual'});
-
-  const budget = await aStore.getBudget(applicationSite);
-
-  expect(budget.forAsset[ETH_ASSET_HOLDER_ADDRESS]).toMatchObject({
-    inUse: {
-      hubAmount: amounts[1],
-      playerAmount: amounts[0]
-    },
-    free: {
-      hubAmount: bigNumberify(2),
-      playerAmount: bigNumberify(2)
-    }
-  });
 
   delete process.env.USE_VIRTUAL_FUNDING;
 });

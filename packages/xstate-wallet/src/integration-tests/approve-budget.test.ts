@@ -1,5 +1,4 @@
-import {ApproveBudgetAndFundResponse} from '@statechannels/client-api-schema';
-import {filter, map, first} from 'rxjs/operators';
+import {filter} from 'rxjs/operators';
 import {FakeChain} from '../chain';
 import {Player, generateApproveBudgetAndFundRequest, hookUpMessaging} from './helpers';
 import waitForExpect from 'wait-for-expect';
@@ -48,25 +47,12 @@ it('allows for a wallet to approve a budget and fund with the hub', async () => 
     playerA.participant,
     hub.participant
   );
-  const createBudgetPromise = playerA.messagingService.outboxFeed
-    .pipe(
-      filter(m => 'id' in m && m.id === createBudgetEvent.id),
-      map(m => m as ApproveBudgetAndFundResponse),
-      first()
-    )
-    .toPromise();
   await playerA.messagingService.receiveRequest(createBudgetEvent);
   await waitForExpect(async () => {
     expect(playerA.workflowState).toEqual('waitForUserApproval');
   }, 3000);
   playerA.channelWallet.workflows[0].machine.send({type: 'USER_APPROVES_BUDGET'});
 
-  const createResponse: ApproveBudgetAndFundResponse = await createBudgetPromise;
-  const ethBudget = createResponse.result.budgets[0];
-
-  // Check that the budget shows the funds are free
-  expect(ethBudget.free.hubAmount).toEqual('0x5');
-  expect(ethBudget.free.playerAmount).toEqual('0x5');
   // Check that the ledger channel is set up correct
   const ledgerEntry = await playerA.store.getLedger(hub.signingAddress);
   expect(ledgerEntry.isSupported).toBe(true);
