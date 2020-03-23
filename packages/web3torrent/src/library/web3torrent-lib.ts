@@ -56,10 +56,11 @@ function sanitizeMessageForFirebase(message) {
 // A Whimsical diagram explaining the functionality of Web3Torrent: https://whimsical.com/Sq6whAwa8aTjbwMRJc7vPU
 export default class WebTorrentPaidStreamingClient extends WebTorrent {
   peersList: PeersByTorrent;
-  pseAccount: string;
   torrents: PaidStreamingTorrent[] = [];
-  outcomeAddress: string;
   paymentChannelClient: PaymentChannelClient;
+
+  pseAccount: string;
+  outcomeAddress: string;
 
   constructor(opts: WebTorrent.Options & Partial<PaidStreamingExtensionOptions> = {}) {
     super(opts);

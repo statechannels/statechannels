@@ -47,6 +47,14 @@ export class FakeChannelProvider implements ChannelProviderInterface {
   opponentAddress: Record<ChannelId, string> = {};
   latestState: Record<ChannelId, ChannelResult> = {};
 
+  constructor(alreadyEnabled = true) {
+    if (alreadyEnabled) {
+      this.signingAddress = this.getAddress();
+      this.selectedAddress = '0xEthereumSelectedAddress';
+      this.walletVersion = 'FakeChannelProvider@VersionTBD';
+    }
+  }
+
   async mountWalletComponent(url?: string): Promise<void> {
     this.url = url || '';
   }
@@ -128,7 +136,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     }
   }
 
-  private async getAddress(): Promise<string> {
+  private getAddress(): string {
     if (this.internalAddress === undefined) {
       throw Error('No address has been set yet');
     }
