@@ -35,17 +35,18 @@ test('concludes on their turn', async () => {
     appData: '0x0',
     isFinal: false
   };
-  playerA.store.createChannel(
+  const {channelId, latest} = await playerA.store.createChannel(
     [playerA.participant, playerB.participant],
     bigNumberify(4),
     stateVars
   );
-  const channelId = '0x1823994d6d3b53b82f499c1aca2095b94108ba3ff59f55c6e765da1e24874ab2';
+  playerB.store.signAndAddState(channelId, latest);
 
   playerA.startAppWorkflow('running', {channelId});
   playerB.startAppWorkflow('running', {channelId});
   playerA.workflowMachine?.send('SPAWN_OBSERVERS');
   playerB.workflowMachine?.send('SPAWN_OBSERVERS');
+
   await playerA.messagingService.receiveRequest(generateCloseRequest(channelId));
 
   await waitForExpect(async () => {

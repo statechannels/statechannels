@@ -1,7 +1,5 @@
 import {MessagingServiceInterface, MessagingService} from '../messaging';
 import {Wallet} from 'ethers/wallet';
-import {MemoryStore} from '../store/memory-store';
-import {Store} from '../store';
 import {ChannelWallet, logTransition} from '../channel-wallet';
 import {Participant} from '../store/types';
 import {Chain} from '../chain';
@@ -20,13 +18,14 @@ import * as App from '../workflows/application';
 import * as CreateAndFundLedger from '../workflows/create-and-fund-ledger';
 import {Guid} from 'guid-typescript';
 import * as CloseLedgerAndWithdraw from '../workflows/close-ledger-and-withdraw';
+import {TestStore} from '../workflows/tests/store';
 
 export class Player {
   privateKey: string;
   get signingAddress() {
     return new Wallet(this.privateKey).address;
   }
-  store: Store;
+  store: TestStore;
   messagingService: MessagingServiceInterface;
   channelWallet: ChannelWallet;
 
@@ -93,7 +92,7 @@ export class Player {
   }
   constructor(privateKey: string, private id: string, chain: Chain) {
     this.privateKey = privateKey;
-    this.store = new MemoryStore([this.privateKey], chain);
+    this.store = new TestStore([this.privateKey], chain);
     this.messagingService = new MessagingService(this.store);
     this.channelWallet = new ChannelWallet(this.store, this.messagingService, id);
   }
@@ -103,9 +102,7 @@ export function hookUpMessaging(playerA: Player, playerB: Player) {
   playerA.channelWallet.onSendMessage(message => {
     if (isNotification(message) && message.method === 'MessageQueued') {
       const pushMessageRequest = generatePushMessage(message.params);
-      // TODO: This is failing with TypeError: Converting circular structure to JSON
-      // eslint-disable-next-line no-constant-condition
-      if (process.env.ADD_LOGS && false) {
+      if (process.env.ADD_LOGS) {
         console.log(`MESSAGE A->B: ${JSON.stringify(pushMessageRequest)}`);
       }
       playerB.channelWallet.pushMessage(pushMessageRequest);
@@ -115,9 +112,7 @@ export function hookUpMessaging(playerA: Player, playerB: Player) {
   playerB.channelWallet.onSendMessage(message => {
     if (isNotification(message) && message.method === 'MessageQueued') {
       const pushMessageRequest = generatePushMessage(message.params);
-      // TODO: This is failing with TypeError: Converting circular structure to JSON
-      // eslint-disable-next-line no-constant-condition
-      if (process.env.ADD_LOGS && false) {
+      if (process.env.ADD_LOGS) {
         console.log(`MESSAGE B->A: ${JSON.stringify(pushMessageRequest)}`);
       }
       playerA.channelWallet.pushMessage(pushMessageRequest);
