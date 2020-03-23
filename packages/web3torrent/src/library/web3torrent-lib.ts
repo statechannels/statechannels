@@ -375,7 +375,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         case PaidStreamingExtensionNotices.STOP: // synonymous with a prompt for a payment
           if (torrent.paused) {
             // We currently treat pausing torrent as canceling downloads
-            await this.closeChannels(torrent);
+            await this.closeDownloadingChannels(torrent);
           } else if (!torrent.done) {
             const channelId = data;
             await this.paymentChannelClient.makePayment(
@@ -415,7 +415,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     torrent.on(TorrentEvents.DONE, async () => {
       log('Torrent DONE!');
       this.emit(ClientEvents.TORRENT_DONE, {torrent});
-      await this.closeChannels(torrent);
+      await this.closeDownloadingChannels(torrent);
     });
 
     torrent.on(TorrentEvents.ERROR, err => {
@@ -427,7 +427,8 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     return torrent;
   }
 
-  protected async closeChannels(torrent: PaidStreamingTorrent) {
+  protected async closeDownloadingChannels(torrent: PaidStreamingTorrent) {
+    // Close any channels that I am downloading from (that my peer opened)
     torrent.wires.forEach(async wire => {
       if (wire.paidStreamingExtension && wire.paidStreamingExtension.peerChannelId) {
         await this.paymentChannelClient.closeChannel(wire.paidStreamingExtension.peerChannelId);

@@ -100,7 +100,7 @@ describe('Web3TorrentClient', () => {
         );
     });
 
-    it('should return the ID of the removed client', async () => {
+    it('should return the infohash of the paused client', async () => {
       const mockInfoHash = '124203';
       const result = await cancel(mockInfoHash);
 
