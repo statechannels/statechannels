@@ -76,7 +76,11 @@ const virtualDefunding = {
   onDone: 'success'
 };
 
-const withdraw = {};
+const withdraw = (store: Store) => async (ctx: Init) => {
+  // NOOP
+};
+
+const withdrawing = {invoke: {src: withdraw.name, onDone: 'success'}};
 
 export const config: StateNodeConfig<Init, any, any> = {
   key: WORKFLOW,
@@ -85,7 +89,7 @@ export const config: StateNodeConfig<Init, any, any> = {
     concludeChannel,
     determineFundingType,
     virtualDefunding,
-    withdraw,
+    withdrawing,
     success: {type: 'final'}
   }
 };
@@ -96,6 +100,7 @@ const services = (store: Store) => ({
   finalState: finalState(store),
   getFunding: getFunding(store),
   supportState: supportState(store),
+  withdraw: withdraw(store)
 });
 const options = (store: Store) => ({services: services(store)});
 export const machine = (store: Store) => Machine(config).withConfig(options(store));
