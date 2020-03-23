@@ -48,13 +48,12 @@ class ChannelProvider implements ChannelProviderInterface {
     this.messaging.setUrl(this.url);
     await this.ui.mount();
     console.info('Application successfully mounted Wallet iFrame inside DOM.');
+    await this.populateProviderProperties();
   }
 
   async enable() {
     await this.send({method: 'EnableEthereum', params: {}});
-    this.internalAddress = await this.send({method: 'GetAddress', params: {}});
-    this.selectedAddress = await this.send({method: 'GetEthereumSelectedAddress', params: {}});
-    this.walletVersion = await this.send({method: 'WalletVersion', params: {}});
+    await this.populateProviderProperties();
   }
 
   async send(request: MethodRequestType): Promise<MethodResponseType[MethodRequestType['method']]> {
@@ -88,6 +87,12 @@ class ChannelProvider implements ChannelProviderInterface {
 
   off: OffType = (method, params) => this.events.off(method, params);
 
+  private async populateProviderProperties() {
+    this.internalAddress = await this.send({method: 'GetAddress', params: {}});
+    this.selectedAddress = await this.send({method: 'GetEthereumSelectedAddress', params: {}});
+    this.walletVersion = await this.send({method: 'WalletVersion', params: {}});
+  }
+
   protected async onMessage(event: MessageEvent) {
     const message = event.data;
     if (!message.jsonrpc) {
@@ -109,6 +114,7 @@ class ChannelProvider implements ChannelProviderInterface {
     }
   }
 }
+
 const channelProvider = new ChannelProvider();
 
 export {channelProvider};
