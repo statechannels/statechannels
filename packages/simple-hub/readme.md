@@ -29,7 +29,7 @@ To connect to the `hub` from the browser `wallet`, the `hub` and the browser `wa
 - Point to the same shared local Ganache server. This should work without any modifications. To see which ports are being used by the `hub` and `wallet`, and to verify they are the same, you can reference the `GANACHE_PORT` environment variable which by default is set in `.env` of each package.
 - Point to the same contract addresses on Ganache. This will be the case if the hub and the client wallet point to the same Ganache server.
 
-You will also need to make sure that the hub's blockchain address has funds. The default hub blockchain address is calculated from the HUB_CHAIN_PK in [constants.ts](https://github.com/statechannels/monorepo/blob/master/packages/simple-hub/src/constants.ts#L13). This address will have funds by default. Ganache is started with [these funded private keys](https://github.com/statechannels/monorepo/blob/hub-address/packages/devtools/src/constants.ts). Consequently, feel free to substitute any of these private keys for `HUB_CHAIN_PK`.
+You will also need to make sure that the hub's blockchain address has funds. The default hub blockchain address is calculated from the HUB_CHAIN_PK in [constants.ts](https://github.com/statechannels/monorepo/blob/master/packages/simple-hub/src/constants.ts#L13). This address will have funds by default. Ganache is started with [these funded private keys](https://github.com/statechannels/monorepo/blob/master/packages/devtools/src/constants.ts). Consequently, feel free to substitute any of these private keys for `HUB_CHAIN_PK`.
 
 ## Testing
 
