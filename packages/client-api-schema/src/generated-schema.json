@@ -369,60 +369,6 @@
       ],
       "type": "object"
     },
-    "WalletVersionRequest": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "method": {
-          "enum": [
-            "WalletVersion"
-          ],
-          "type": "string"
-        },
-        "params": {
-          "additionalProperties": false,
-          "type": "object"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "method",
-        "params"
-      ],
-      "type": "object"
-    },
-    "WalletVersionResponse": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "result": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "result"
-      ],
-      "type": "object"
-    },
     "CloseAndWithdrawParams": {
       "additionalProperties": false,
       "properties": {
@@ -653,6 +599,48 @@
       ],
       "type": "object"
     },
+    "EnableEthereumError": {
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "enum": [
+                100
+              ],
+              "type": "number"
+            },
+            "message": {
+              "enum": [
+                "Ethereum Not Enabled"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "type": "object"
+        },
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "error"
+      ],
+      "type": "object"
+    },
     "EnableEthereumRequest": {
       "additionalProperties": false,
       "properties": {
@@ -708,7 +696,7 @@
       "type": "object"
     },
     "ErrorResponse": {
-      "$ref": "#/definitions/GetAddressError"
+      "$ref": "#/definitions/EnableEthereumError"
     },
     "ExternalDestination": {
       "description": "Nitro ChannelId",
@@ -728,48 +716,6 @@
       "required": [
         "token",
         "amount"
-      ],
-      "type": "object"
-    },
-    "GetAddressError": {
-      "additionalProperties": false,
-      "properties": {
-        "error": {
-          "additionalProperties": false,
-          "properties": {
-            "code": {
-              "enum": [
-                100
-              ],
-              "type": "number"
-            },
-            "message": {
-              "enum": [
-                "Ethereum Not Enabled"
-              ],
-              "type": "string"
-            }
-          },
-          "required": [
-            "code",
-            "message"
-          ],
-          "type": "object"
-        },
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "error"
       ],
       "type": "object"
     },
@@ -1575,6 +1521,60 @@
         },
         "result": {
           "$ref": "#/definitions/ChannelResult"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
+      "type": "object"
+    },
+    "WalletVersionRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "WalletVersion"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": false,
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "WalletVersionResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "result": {
+          "type": "string"
         }
       },
       "required": [

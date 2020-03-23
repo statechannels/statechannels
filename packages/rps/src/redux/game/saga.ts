@@ -70,11 +70,13 @@ function* gameSagaRun(client: RPSChannelClient) {
 
   switch (localState.type) {
     case 'Setup.NeedAddress':
-      yield call([client, 'enableEthereum']);
-      const address: string = yield call([client, 'getAddress']);
-      // this delegates window.ethereum.enable() to the wallet
-      const outcomeAddress: string = yield call([client, 'getEthereumSelectedAddress']);
-      yield put(a.gotAddressFromWallet(address, outcomeAddress));
+      yield call([window.channelProvider, 'enable']);
+      yield put(
+        a.gotAddressFromWallet(
+          window.channelProvider.signingAddress,
+          window.channelProvider.selectedAddress
+        )
+      );
       break;
     case 'A.GameChosen':
       if (cs.isEmpty(channelState)) {

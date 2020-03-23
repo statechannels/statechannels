@@ -71,11 +71,11 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
   async enable() {
     log('Enabling Channel Provider...');
-    await window.channelProvider.enable(process.env.REACT_APP_WALLET_URL);
+    await window.channelProvider.mountWalletComponent(process.env.REACT_APP_WALLET_URL);
     log('Enabling WebTorrentPaidStreamingClient...');
-    this.pseAccount = await this.paymentChannelClient.getAddress();
+    this.pseAccount = this.paymentChannelClient.mySigningAddress;
     log('set pseAccount to sc-wallet signing address');
-    this.outcomeAddress = await this.paymentChannelClient.getEthereumSelectedAddress();
+    this.outcomeAddress = this.paymentChannelClient.myEthereumSelectedAddress;
     log('got ethereum address');
     log('ACCOUNT ID: ', this.pseAccount);
     log('THIS address: ', this.outcomeAddress);

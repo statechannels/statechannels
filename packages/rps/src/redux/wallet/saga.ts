@@ -15,7 +15,7 @@ export default function* checkWallet() {
   try {
     if (window.channelProvider) {
       try {
-        yield call([window.channelProvider, 'enable'], process.env.WALLET_URL);
+        yield call([window.channelProvider, 'mountWalletComponent'], process.env.WALLET_URL);
         yield put(walletActions.walletSuccess());
         return true;
       } catch (e) {

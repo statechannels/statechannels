@@ -34,17 +34,28 @@ type ChannelId = string;
  coming from a non-fake `ChannelClient`.
  */
 export class FakeChannelProvider implements ChannelProviderInterface {
+  public signingAddress?: string;
+  public selectedAddress?: string;
+  public walletVersion?: string;
+
   private events = new EventEmitter<EventType>();
   protected url = '';
 
   playerIndex: Record<ChannelId, 0 | 1> = {};
   opponentIndex: Record<ChannelId, 0 | 1> = {};
-  address: string = Wallet.createRandom().address;
+  internalAddress: string = Wallet.createRandom().address;
   opponentAddress: Record<ChannelId, string> = {};
   latestState: Record<ChannelId, ChannelResult> = {};
 
-  async enable(url?: string): Promise<void> {
+  async mountWalletComponent(url?: string): Promise<void> {
     this.url = url || '';
+  }
+
+  async enable(): Promise<void> {
+    await this.send({method: 'EnableEthereum', params: {}});
+    this.signingAddress = await this.send({method: 'GetAddress', params: {}});
+    this.selectedAddress = await this.send({method: 'GetEthereumSelectedAddress', params: {}});
+    this.walletVersion = await this.send({method: 'WalletVersion', params: {}});
   }
 
   async send(request: MethodRequestType): Promise<MethodResponseType[MethodRequestType['method']]> {
@@ -107,7 +118,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
   }
 
   setAddress(address: string): void {
-    this.address = address;
+    this.internalAddress = address;
   }
 
   updatePlayerIndex(channelId: ChannelId, playerIndex: 0 | 1): void {
@@ -118,10 +129,10 @@ export class FakeChannelProvider implements ChannelProviderInterface {
   }
 
   private async getAddress(): Promise<string> {
-    if (this.address === undefined) {
+    if (this.internalAddress === undefined) {
       throw Error('No address has been set yet');
     }
-    return this.address;
+    return this.internalAddress;
   }
 
   private getPlayerIndex(channelId: ChannelId): number {
@@ -172,7 +183,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     };
     this.updatePlayerIndex(channel.channelId, 0);
     this.setState(channel);
-    this.address = channel.participants[0].participantId;
+    this.internalAddress = channel.participants[0].participantId;
     this.opponentAddress[channel.channelId] = channel.participants[1].participantId;
     this.notifyOpponent(channel, 'CreateChannel');
 
@@ -262,7 +273,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
         data.channelId
       )} about ${notificationType}`
     );
-    const sender = this.address;
+    const sender = this.internalAddress;
     const recipient: string = this.opponentAddress[data.channelId];
 
     if (!recipient) {
