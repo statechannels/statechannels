@@ -47,7 +47,7 @@ class ChannelsList extends React.Component<UploadInfoProps> {
       ) : (
         <button
           className="button-alt"
-          onClick={_ => this.context.paymentChannelClient.challengeChannel(channelId)}
+          onClick={() => this.context.paymentChannelClient.challengeChannel(channelId)}
         >
           Challenge Channel
         </button>
