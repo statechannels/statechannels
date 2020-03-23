@@ -22,13 +22,13 @@ section.wires-list {
         &.button-alt {
           color: $c-white;
           background-color: $c-orange;
-      
+
           &:hover {
             border: 1px solid $c-darkred;
           }
         }
       }
-      
+
       tr.peerInfo {
         padding-top: 10px;
         padding-bottom: 10px;
