@@ -1,9 +1,10 @@
 import {bigNumberify, BigNumber} from 'ethers/utils';
 import {Machine, MachineConfig} from 'xstate';
 import {Store} from '../store';
-import {map} from 'rxjs/operators';
+import {map, filter} from 'rxjs/operators';
 import {MachineFactory} from '../utils/workflow-utils';
 import {Observable} from 'rxjs';
+import {exists} from '../utils';
 
 export type Init = {
   channelId: string;
@@ -56,11 +57,12 @@ type Options = {services: Services};
 export const machine: MachineFactory<Init, any> = (store: Store, context: Init) => {
   const subscribeDepositEvent = (ctx: Init) => {
     return store.chain.chainUpdatedFeed(ctx.channelId).pipe(
-      map((chainInfo): 'FUNDED' | 'SAFE_TO_DEPOSIT' | 'NOT_SAFE_TO_DEPOSIT' => {
+      map((chainInfo): 'FUNDED' | 'SAFE_TO_DEPOSIT' | undefined => {
         if (chainInfo.amount.gte(ctx.fundedAt)) return 'FUNDED';
         else if (chainInfo.amount.gte(ctx.depositAt)) return 'SAFE_TO_DEPOSIT';
-        else return 'NOT_SAFE_TO_DEPOSIT';
-      })
+        else return;
+      }),
+      filter(exists)
     );
   };
 
