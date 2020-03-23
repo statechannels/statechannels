@@ -26,7 +26,7 @@ export class ChannelClient implements ChannelClientInterface {
   }
 
   get walletVersion(): string | undefined {
-    return this.provider.selectedAddress;
+    return this.provider.walletVersion;
   }
 
   constructor(private readonly provider: ChannelProviderInterface) {}
