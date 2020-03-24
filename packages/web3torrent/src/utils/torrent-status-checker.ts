@@ -2,7 +2,7 @@ import {web3torrent} from '../clients/web3torrent-client';
 import {Status, Torrent} from '../types';
 
 export const getStatus = (torrent: Torrent): Status => {
-  const {uploadSpeed, downloadSpeed, progress, uploaded, done, createdBy} = torrent;
+  const {uploadSpeed, downloadSpeed, progress, uploaded, paused, done, createdBy} = torrent;
   if (createdBy && createdBy === web3torrent.pseAccount) {
     return Status.Seeding;
   }
@@ -11,6 +11,9 @@ export const getStatus = (torrent: Torrent): Status => {
       return Status.Seeding;
     }
     return Status.Completed;
+  }
+  if (paused) {
+    return Status.Paused;
   }
   if (uploadSpeed - downloadSpeed === 0) {
     return Status.Connecting;
@@ -40,6 +43,12 @@ export const getFormattedETA = (torrent: Torrent) => {
     (minutes && ' ' + minutes + 'm') || '',
     !days && !hours ? ' ' + seconds + 's' : ''
   ].join('');
+};
+
+export const getPeerStatus = (torrent, wire) => {
+  if (!wire) return false;
+  const peerId = wire.peerId;
+  return Object.keys(torrent._peers).includes(peerId);
 };
 
 export default (previousData: Torrent, infoHash): Torrent => {

@@ -14,6 +14,7 @@ import {SupportState, VirtualFundingAsLeaf} from '.';
 import {from, Observable} from 'rxjs';
 import {CHALLENGE_DURATION, HUB} from '../constants';
 import {bigNumberify} from 'ethers/utils';
+
 const PROTOCOL = 'create-and-fund';
 
 export type Init = {

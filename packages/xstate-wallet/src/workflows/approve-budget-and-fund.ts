@@ -19,7 +19,7 @@ import {sendDisplayMessage, MessagingServiceInterface} from '../messaging';
 import {Store} from '../store';
 import {serializeSiteBudget} from '../serde/app-messages/serialize';
 
-import * as CreateAndFundLedger from '../workflows/create-and-fund-ledger';
+import {CreateAndFundLedger} from '../workflows';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
 import {simpleEthAllocation} from '../utils/outcome';
 import {bigNumberify} from 'ethers/utils';
@@ -170,5 +170,5 @@ function convertPendingBudgetToAllocation({
     destination: hub.destination,
     amount: ethBudget.pending.hubAmount
   };
-  return simpleEthAllocation([playerItem, hubItem]);
+  return simpleEthAllocation([hubItem, playerItem]);
 }

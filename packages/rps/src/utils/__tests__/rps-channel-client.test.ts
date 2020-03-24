@@ -90,18 +90,11 @@ class MockChannelClient implements ChannelClientInterface {
       /* */
     });
   }
-  walletVersion = jest.fn(async function() {
-    return await 'JestMockVersion';
-  });
-  enableEthereum = jest.fn(async function() {
-    return await MOCK_ADDRESS;
-  });
-  getAddress = jest.fn(async function() {
-    return await MOCK_ADDRESS;
-  });
-  getEthereumSelectedAddress = jest.fn(async function() {
-    return await MOCK_ADDRESS;
-  });
+
+  walletVersion = 'JestMockVersion';
+  signingAddress = MOCK_ADDRESS;
+  selectedAddress = MOCK_ADDRESS;
+
   approveBudgetAndFund = jest.fn(async function(
     playerAmount: string,
     hubAmount: string,
@@ -133,19 +126,6 @@ let client;
 beforeAll(() => {
   mockChannelClient = new MockChannelClient();
   client = new RPSChannelClient(mockChannelClient);
-});
-
-describe('when getAddress() is called', () => {
-  let result;
-  beforeAll(async () => {
-    result = await client.getAddress();
-  });
-  it('calls channelClient.getAddress()', async () => {
-    expect(mockChannelClient.getAddress).toHaveBeenCalled();
-  });
-  it('and returns the result', async () => {
-    expect(result).toEqual(MOCK_ADDRESS);
-  });
 });
 
 describe('when createChannel() is called', () => {

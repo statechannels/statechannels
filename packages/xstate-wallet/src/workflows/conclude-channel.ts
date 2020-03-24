@@ -2,6 +2,7 @@ import {Machine, StateNodeConfig} from 'xstate';
 import {Store} from '../store';
 import {SupportState} from '.';
 import {getDataAndInvoke} from '../utils';
+
 import {outcomesEqual} from '../store/state-utils';
 import {State} from '../store/types';
 import {map} from 'rxjs/operators';

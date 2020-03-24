@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import prettier from 'prettier-bytes';
 import React from 'react';
-import {remove} from '../../../clients/web3torrent-client';
+import {cancel} from '../../../clients/web3torrent-client';
 import {Torrent} from '../../../types';
 import './DownloadInfo.scss';
 import {ProgressBar} from './progress-bar/ProgressBar';
@@ -29,24 +29,29 @@ const DownloadInfo: React.FC<DownloadInfoProps> = ({
   const totalSpent = myPayingChannelIds
     .map(id => channelCache[id].beneficiaryBalance)
     .reduce((a, b) => bigNumberify(a).add(bigNumberify(b)), bigNumberify(0));
+
+  const displayProgress = !(torrent.done || torrent.paused);
   return (
     <>
       <section className="downloadingInfo">
-        <ProgressBar
-          downloaded={torrent.downloaded}
-          length={torrent.length}
-          status={torrent.status}
-        />
-        {!torrent.done ? (
-          <button type="button" className="button cancel" onClick={() => remove(torrent.infoHash)}>
-            Cancel Download
-          </button>
+        {displayProgress ? (
+          <>
+            <ProgressBar
+              downloaded={torrent.downloaded}
+              length={torrent.length}
+              status={torrent.status}
+            />
+            <button
+              type="button"
+              className="button cancel"
+              onClick={() => cancel(torrent.infoHash)}
+            >
+              Cancel Download
+            </button>
+          </>
         ) : (
           false
         )}
-        <p>
-          Total Spent: <span className="total-spent">{prettyPrintWei(totalSpent)}</span>
-        </p>
         <p>
           {torrent.parsedTimeRemaining}.{' '}
           {prettier(torrent.done || !torrent.downloadSpeed ? 0 : torrent.downloadSpeed)}
@@ -56,10 +61,17 @@ const DownloadInfo: React.FC<DownloadInfoProps> = ({
         </p>
       </section>
       <ChannelsList
-        wires={torrent.wires}
+        torrent={torrent}
         channels={_.pickBy(channelCache, ({channelId}) => myPayingChannelIds.includes(channelId))}
         participantType={'payer'}
       />
+      {!totalSpent.isZero() && (
+        <section className="totalPayed">
+          <p>
+            Total Spent: <strong className="total-spent">{prettyPrintWei(totalSpent)}</strong>
+          </p>
+        </section>
+      )}
     </>
   );
 };
