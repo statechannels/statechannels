@@ -6,7 +6,7 @@ These tradeoffs are set in [`constants.ts`](https://github.com/statechannels/mon
 
 ## Paid streaming extension
 
-We wrote a small extension to the BiTorrent protocol that allows for extra information to exchanged between torrenting peers: sufficient for them to run a state channel.
+We wrote a small extension to the BiTorrent protocol that allows for extra information to exchanged between torrenting peers: sufficient for them to run a state channel. The extension also allows requests to be intercepted, and the flow of data between peers to be controlled.
 
 ## Payment channel client
 
@@ -30,13 +30,13 @@ When the `MessageQueued` event fires, send the associated data down the `wire`. 
 
 ### Channel setup
 
-Uploader: Upon the first request for data of an unkown peer, choke them and send them a `STOP` notification (which is a prompt for a payment). Also create a new, unidirectional payment channel with me (the uploader) as the "beneficiary", and the peer (the downloader) as the "payer". This action is associated with the `paymentChannelClient.createChannel()` API call.
+Uploader: Upon the first request for data of an unkown peer; create a new, unidirectional payment channel with me (the uploader) as the "beneficiary", and the peer (the downloader) as the "payer". This action is associated with the `paymentChannelClient.createChannel()` API call. Then choke the downloader and send them a `STOP` notification (which is a prompt for a payment).
 
 Downloader: When the "ChannelProposed" event fires, automatically join that channel.
 
 ### Payments
 
-Uploader: if a payment is received, "accept" it.
+Uploader: if a payment is received, "accept" it. Then unchoke the downloader and send a START notification.
 
 Downloader: if a STOP is received, make a payment corresponding to some fixed number of bytes.
 
