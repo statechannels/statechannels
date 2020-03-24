@@ -3,7 +3,12 @@ import {Player, hookUpMessaging, generateCloseRequest} from './helpers';
 import {bigNumberify} from 'ethers/utils';
 import waitForExpect from 'wait-for-expect';
 import {simpleEthAllocation} from '../utils/outcome';
+import {State, SignedState} from '../store/types';
+import {signState} from '../store/state-utils';
+import {CHALLENGE_DURATION, NETWORK_ID} from '../constants';
+import {AddressZero} from 'ethers/constants';
 jest.setTimeout(30000);
+
 test('concludes on their turn', async () => {
   const fakeChain = new FakeChain();
 
@@ -29,18 +34,25 @@ test('concludes on their turn', async () => {
   ]);
 
   hookUpMessaging(playerA, playerB);
-  const stateVars = {
+  const state: State = {
     outcome,
     turnNum: bigNumberify(5),
     appData: '0x0',
-    isFinal: false
+    isFinal: false,
+    challengeDuration: CHALLENGE_DURATION,
+    chainId: NETWORK_ID,
+    channelNonce: bigNumberify(0),
+    appDefinition: AddressZero,
+    participants: [playerA.participant, playerB.participant]
   };
-  const {channelId, latest} = await playerA.store.createChannel(
-    [playerA.participant, playerB.participant],
-    bigNumberify(4),
-    stateVars
-  );
-  playerB.store.signAndAddState(channelId, latest);
+
+  const allSignState: SignedState = {
+    ...state,
+    signatures: [playerA, playerB].map(({privateKey}) => signState(state, privateKey))
+  };
+
+  const {channelId} = await playerB.store.createEntry(allSignState);
+  await playerA.store.createEntry(allSignState);
 
   [playerA, playerB].forEach(async player => {
     player.startAppWorkflow('running', {channelId});
@@ -53,7 +65,7 @@ test('concludes on their turn', async () => {
   await waitForExpect(async () => {
     expect(playerA.workflowState).toEqual('done');
     expect(playerB.workflowState).toEqual('done');
-    expect((await playerA.store.getEntry(channelId)).supported.isFinal).toBe(true);
-    expect((await playerB.store.getEntry(channelId)).supported.isFinal).toBe(true);
   }, 3000);
+  expect((await playerA.store.getEntry(channelId)).supported.isFinal).toBe(true);
+  expect((await playerB.store.getEntry(channelId)).supported.isFinal).toBe(true);
 });

@@ -6,6 +6,7 @@ import {XstateStore, Funding, Store} from '../../store';
 
 export class TestStore extends XstateStore implements Store {
   public _channelLocks: Record<string, Guid>;
+
   public async createEntry(
     signedState: SignedState,
     opts?: {
