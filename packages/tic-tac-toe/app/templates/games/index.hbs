@@ -9,33 +9,88 @@
         <button
           type="button"
           class="self-center w-48 h-10 text-xl font-bold rounded-full bg-secondary text-primary"
-          {{on "click" (set this.showCreateGameModal true)}}
+          {{on 'click' (set this.showCreateGameModal true)}}
         >
           Create a game
         </button>
       </div>
     </div>
     <div class="mt-5">
-      <div class="flex">
-        <div class="card card-body bg-white flex flex-col p-4 border border-gray-400 rounded-sm">
-          <h3 class="text-2xl font-medium mb-2">
-            ℹ️ Try playing against yourself!
-          </h3>
-          <p>
-            If you open a new window or tab, you can simulate two users playing this game against each other. By
-            clicking
-            <b>
-              Create a game
-            </b>
-            above, you can start a game that your second browser window or tab can then join.
-          </p>
+      {{#if true}}
+        <div class="flex flex-wrap justify-between">
+          <div
+            class="flex flex-col justify-evenly items-center bg-white w-56 h-64 border border-sm rounded-lg border-gray-100"
+          >
+            <div class="flex justify-center">
+              <div class="ogc-vs text-red-500 mr-2 text-2xl font-bold">
+                vs
+              </div>
+              <div class="text-2xl font-bold">
+                Burrito
+              </div>
+            </div>
+            <img class="w-12 h-12" src={{this.blockieSrc}} alt="address blockie" />
+            <div class="flex justify-evenly items-center">
+              <div class="pr-4 flex flex-col items-center">
+                <div class="text-xs text-gray-700">
+                  Game Buy In:
+                </div>
+                <div class="text-lg">
+                  0.005
+                </div>
+                <div class="text-2xs">
+                  ETH
+                </div>
+              </div>
+              <svg class="pr-4 w-1 h-3 text-gray-200 stroke-current">
+                <line x1="0" y1="0" x2="0" y2="14"></line>
+              </svg>
+              <div class="flex flex-col items-center">
+                <div class="text-xs text-gray-700">
+                  Round Buy In:
+                </div>
+                <div class="text-lg">
+                  0.005
+                </div>
+                <div class="text-2xs">
+                  ETH
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              class="w-40 h-10 rounded-full bg-red-600 text-lg font-bold text-white"
+            >
+              Join
+            </button>
+          </div>
         </div>
-      </div>
+      {{else}}
+        <div class="flex">
+          <div class="card card-body bg-white flex flex-col p-4 border border-gray-400 rounded-sm">
+            <h3 class="text-2xl font-medium mb-2">
+              ℹ️ Try playing against yourself!
+            </h3>
+            <p>
+              If you open a new window or tab, you can simulate two users playing this game against each other. By
+            clicking
+              <b>
+                Create a game
+              </b>
+              above, you can start a game that your second browser window or tab can then join.
+            </p>
+          </div>
+        </div>
+      {{/if}}
     </div>
   </div>
 </div>
-<Modal @isShowing={{this.showCreateGameModal}} @title="Create A Game" @onClose={{set this.showCreateGameModal false}}>
-  <form {{on "submit" this.createNewGame}}>
+<Modal
+  @isShowing={{this.showCreateGameModal}}
+  @title="Create A Game"
+  @onClose={{set this.showCreateGameModal false}}
+>
+  <form {{on 'submit' this.createNewGame}}>
     <label class="block mb-4">
       <span class="text-gray-700">
         Enter Round Buy In Amount
@@ -70,7 +125,10 @@
       amount.
     </small>
     <div class="flex justify-center pt-2">
-      <button type="submit" class="flex items-center px-4 bg-indigo-500 p-3 rounded-lg text-white hover:bg-indigo-400">
+      <button
+        type="submit"
+        class="flex items-center px-4 bg-indigo-500 p-3 rounded-lg text-white hover:bg-indigo-400"
+      >
         Create Game
       </button>
     </div>
