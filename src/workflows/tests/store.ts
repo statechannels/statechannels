@@ -1,21 +1,22 @@
-import {MemoryStore, Funding} from '../../store/memory-store';
 import {MemoryChannelStoreEntry} from '../../store/memory-channel-storage';
 import {SignedState} from '../../store/types';
 import {hashState} from '../../store/state-utils';
 import {Guid} from 'guid-typescript';
+import {XstateStore, Funding, Store} from '../../store';
 
-export class TestStore extends MemoryStore {
+export class TestStore extends XstateStore implements Store {
   public _channelLocks: Record<string, Guid>;
-  public createEntry(
+  public async createEntry(
     signedState: SignedState,
     opts?: {
       funding?: Funding;
       applicationSite?: string;
     }
-  ): MemoryChannelStoreEntry {
+  ): Promise<MemoryChannelStoreEntry> {
+    const address = await this.getAddress();
     const myIndex = signedState.participants
       .map(p => p.signingAddress)
-      .findIndex(a => a === this.getAddress());
+      .findIndex(a => a === address);
     const {funding, applicationSite} = opts || {};
     const entry = new MemoryChannelStoreEntry(
       signedState,
@@ -25,8 +26,17 @@ export class TestStore extends MemoryStore {
       funding,
       applicationSite
     );
-    this._channels[entry.channelId] = entry;
+    await this.backend.setChannel(entry.channelId, entry);
 
     return entry;
+  }
+  async setLedgerByEntry(entry: MemoryChannelStoreEntry) {
+    // This is not on the Store interface itself -- it is useful to set up a test store
+    const {channelId} = entry;
+    this.backend.setChannel(channelId, entry);
+    const address = await this.getAddress();
+    const peerId = entry.participants.find(p => p.signingAddress !== address);
+    if (!peerId) throw 'No peer';
+    this.backend.setLedger(peerId?.participantId, channelId);
   }
 }

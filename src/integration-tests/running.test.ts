@@ -3,16 +3,17 @@ import {Player, hookUpMessaging, generatePlayerUpdate} from './helpers';
 import {bigNumberify} from 'ethers/utils';
 import waitForExpect from 'wait-for-expect';
 import {simpleEthAllocation} from '../utils/outcome';
+import {first} from 'rxjs/operators';
 jest.setTimeout(30000);
 test('accepts states when running', async () => {
   const fakeChain = new FakeChain();
 
-  const playerA = new Player(
+  const playerA = await Player.createPlayer(
     '0x275a2e2cd9314f53b42246694034a80119963097e3adf495fbf6d821dc8b6c8e',
     'PlayerA',
     fakeChain
   );
-  const playerB = new Player(
+  const playerB = await Player.createPlayer(
     '0x3341c348ea8ade1ba7c3b6f071bfe9635c544b7fb5501797eaa2f673169a7d0d',
     'PlayerB',
     fakeChain
@@ -29,6 +30,13 @@ test('accepts states when running', async () => {
   ]);
 
   hookUpMessaging(playerA, playerB);
+  const channelId = '0x1823994d6d3b53b82f499c1aca2095b94108ba3ff59f55c6e765da1e24874ab2';
+
+  const playerBChannelUpdatedPromise = playerB.store
+    .channelUpdatedFeed(channelId)
+    .pipe(first())
+    .toPromise();
+
   const stateVars = {
     outcome,
     turnNum: bigNumberify(4),
@@ -40,7 +48,7 @@ test('accepts states when running', async () => {
     bigNumberify(4),
     stateVars
   );
-  const channelId = '0x1823994d6d3b53b82f499c1aca2095b94108ba3ff59f55c6e765da1e24874ab2';
+  await playerBChannelUpdatedPromise;
 
   playerA.startAppWorkflow('running', {channelId});
   playerB.startAppWorkflow('running', {channelId});

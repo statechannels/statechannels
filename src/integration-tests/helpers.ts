@@ -90,22 +90,28 @@ export class Player {
   get participantId(): string {
     return this.signingAddress;
   }
-  constructor(privateKey: string, private id: string, chain: Chain) {
+  private constructor(privateKey: string, private id: string, chain: Chain) {
     this.privateKey = privateKey;
-    this.store = new TestStore([this.privateKey], chain);
+    this.store = new TestStore(chain);
     this.messagingService = new MessagingService(this.store);
     this.channelWallet = new ChannelWallet(this.store, this.messagingService, id);
+  }
+
+  static async createPlayer(privateKey: string, id: string, chain: Chain): Promise<Player> {
+    const player = new Player(privateKey, id, chain);
+    await player.store.initialize([privateKey]);
+    return player;
   }
 }
 
 export function hookUpMessaging(playerA: Player, playerB: Player) {
-  playerA.channelWallet.onSendMessage(message => {
+  playerA.channelWallet.onSendMessage(async message => {
     if (isNotification(message) && message.method === 'MessageQueued') {
       const pushMessageRequest = generatePushMessage(message.params);
       if (process.env.ADD_LOGS) {
         console.log(`MESSAGE A->B: ${JSON.stringify(pushMessageRequest)}`);
       }
-      playerB.channelWallet.pushMessage(pushMessageRequest);
+      await playerB.channelWallet.pushMessage(pushMessageRequest);
     }
   });
 

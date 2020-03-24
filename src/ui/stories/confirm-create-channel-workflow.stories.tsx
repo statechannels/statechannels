@@ -8,15 +8,15 @@ import {storiesOf} from '@storybook/react';
 import {interpret} from 'xstate';
 import {Participant} from '@statechannels/client-api-schema';
 import {renderComponentInFrontOfApp} from './helpers';
-import {MemoryStore} from '../../store/memory-store';
+
 import {bigNumberify} from 'ethers/utils';
 import {simpleEthAllocation} from '../../utils/outcome';
 import React from 'react';
 import {ConfirmCreateChannel} from '../confirm-create-channel-workflow';
+import {XstateStore} from '../../store';
 
-const store = new MemoryStore([
-  '0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29'
-]);
+const store = new XstateStore();
+store.initialize(['0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29']);
 
 const alice: Participant = {
   participantId: 'a',
