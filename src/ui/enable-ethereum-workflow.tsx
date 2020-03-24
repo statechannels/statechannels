@@ -1,7 +1,7 @@
 import React, {useContext} from 'react';
 import {EventData} from 'xstate';
 import './wallet.scss';
-import {Button, Box, Flex, Icon, Text, MetaMaskButton, Flash} from 'rimble-ui';
+import {Button, Box, Flex, Icon, Text, MetaMaskButton, Flash, Heading} from 'rimble-ui';
 
 import ConnectionBanner from '@rimble/connection-banner';
 import RimbleUtils from '@rimble/utils';
@@ -132,18 +132,18 @@ export const EnableEthereum = (props: Props) => {
   );
 
   const prompt = (
-    <div style={{textAlign: 'center'}}>
-      <h1>Connect to Blockchain</h1>
+    <Flex flexDirection="column" alignItems="center">
+      <Heading>Connect to Blockchain</Heading>
 
-      <p>
+      <Text pb={3}>
         This app uses state channels. It order to continue you need to connect to the blockchain.
-      </p>
+      </Text>
 
       <div>{button()}</div>
       <div>
         <Button.Text onClick={() => props.send('USER_REJECTS_ENABLE')}>Cancel</Button.Text>
       </div>
-    </div>
+    </Flex>
   );
 
   // need currentNetwork to be defined, and equal to the targetNetwork
