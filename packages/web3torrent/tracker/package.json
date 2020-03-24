@@ -1,0 +1,8 @@
+{
+  "name": "@statechannels/tracker",
+  "version": "0.0.0",
+  "dependencies": {
+    "bittorrent-tracker": "9.14.4",
+    "debug": "4.1.1"
+  }
+}
