@@ -599,6 +599,48 @@
       ],
       "type": "object"
     },
+    "EnableEthereumError": {
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "enum": [
+                100
+              ],
+              "type": "number"
+            },
+            "message": {
+              "enum": [
+                "Ethereum Not Enabled"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "type": "object"
+        },
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "error"
+      ],
+      "type": "object"
+    },
     "EnableEthereumRequest": {
       "additionalProperties": false,
       "properties": {
@@ -654,7 +696,7 @@
       "type": "object"
     },
     "ErrorResponse": {
-      "$ref": "#/definitions/GetAddressError"
+      "$ref": "#/definitions/EnableEthereumError"
     },
     "ExternalDestination": {
       "description": "Nitro ChannelId",
@@ -674,48 +716,6 @@
       "required": [
         "token",
         "amount"
-      ],
-      "type": "object"
-    },
-    "GetAddressError": {
-      "additionalProperties": false,
-      "properties": {
-        "error": {
-          "additionalProperties": false,
-          "properties": {
-            "code": {
-              "enum": [
-                100
-              ],
-              "type": "number"
-            },
-            "message": {
-              "enum": [
-                "Ethereum Not Enabled"
-              ],
-              "type": "string"
-            }
-          },
-          "required": [
-            "code",
-            "message"
-          ],
-          "type": "object"
-        },
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "error"
       ],
       "type": "object"
     },

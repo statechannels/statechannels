@@ -19,7 +19,7 @@ export default class ApplicationRoute extends Route {
 
   async beforeModel(transition: Transition): Promise<void> {
     super.beforeModel(transition);
-    window.channelProvider.enable(WALLET_URL);
+    window.channelProvider.mountWalletComponent(WALLET_URL);
     this.tttChannelClient.enable(new ChannelClient(window.channelProvider));
   }
 }

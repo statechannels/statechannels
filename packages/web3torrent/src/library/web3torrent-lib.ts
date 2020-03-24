@@ -16,7 +16,17 @@ import {
 } from './types';
 import {utils} from 'ethers';
 import {ChannelState, PaymentChannelClient} from '../clients/payment-channel-client';
-import {mockTorrents} from '../constants';
+import {
+  mockTorrents,
+  defaultTrackers,
+  fireBaseConfig,
+  HUB_ADDRESS,
+  FIREBASE_PREFIX,
+  WEI_PER_BYTE,
+  BUFFER_REFILL_RATE,
+  INITIAL_LEECHER_BALANCE,
+  INITIAL_SEEDER_BALANCE
+} from '../constants';
 import * as firebase from 'firebase/app';
 import 'firebase/database';
 import {Message} from '@statechannels/client-api-schema';
@@ -28,27 +38,7 @@ export type TorrentCallback = (torrent: Torrent) => any;
 
 export * from './types';
 
-export const WEI_PER_BYTE = bigNumberify(1); // cost per byte
-export const BUFFER_REFILL_RATE = bigNumberify(2e4); // number of bytes the leecher wishes to increase the buffer by
-// These variables control the amount of (micro)trust the leecher must invest in the seeder
-// As well as the overall performance hit of integrating payments into webtorrent.
-// A high BUFFER_REFILL_RATE increases the need for trust, but decreases the number of additional messages and therefore latency
-// It can also cause a payment to go above the leecher's balance / capabilities
-export const INITIAL_SEEDER_BALANCE = bigNumberify(0); // needs to be zero so that depositing works correctly (unidirectional payment channel)
-export const INITIAL_LEECHER_BALANCE = bigNumberify(BUFFER_REFILL_RATE.mul(100)); // e.g. gwei = 1e9 = nano-ETH
-
-// firebase setup
-const FIREBASE_PREFIX = 'web3t';
-const config = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-  authDomain: `${process.env.REACT_APP_FIREBASE_PROJECT}.firebaseapp.com`,
-  databaseURL: `https://${process.env.REACT_APP_FIREBASE_PROJECT}.firebaseio.com`,
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT,
-  storageBucket: '',
-  messagingSenderId: '913007764573'
-};
-const HUB_ADDRESS = 'TODO';
-firebase.initializeApp(config);
+firebase.initializeApp(fireBaseConfig);
 function sanitizeMessageForFirebase(message) {
   return JSON.parse(JSON.stringify(message));
 }
@@ -56,10 +46,11 @@ function sanitizeMessageForFirebase(message) {
 // A Whimsical diagram explaining the functionality of Web3Torrent: https://whimsical.com/Sq6whAwa8aTjbwMRJc7vPU
 export default class WebTorrentPaidStreamingClient extends WebTorrent {
   peersList: PeersByTorrent;
-  pseAccount: string;
   torrents: PaidStreamingTorrent[] = [];
-  outcomeAddress: string;
   paymentChannelClient: PaymentChannelClient;
+
+  pseAccount: string;
+  outcomeAddress: string;
 
   constructor(opts: WebTorrent.Options & Partial<PaidStreamingExtensionOptions> = {}) {
     super(opts);
@@ -70,12 +61,14 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   }
 
   async enable() {
+    log('Mounting Wallet to App...');
+    await window.channelProvider.mountWalletComponent(process.env.REACT_APP_WALLET_URL);
     log('Enabling Channel Provider...');
-    await window.channelProvider.enable(process.env.REACT_APP_WALLET_URL);
+    await window.channelProvider.enable();
     log('Enabling WebTorrentPaidStreamingClient...');
-    this.pseAccount = await this.paymentChannelClient.getAddress();
+    this.pseAccount = this.paymentChannelClient.mySigningAddress;
     log('set pseAccount to sc-wallet signing address');
-    this.outcomeAddress = await this.paymentChannelClient.getEthereumSelectedAddress();
+    this.outcomeAddress = this.paymentChannelClient.myEthereumSelectedAddress;
     log('got ethereum address');
     log('ACCOUNT ID: ', this.pseAccount);
     log('THIS address: ', this.outcomeAddress);
@@ -112,18 +105,19 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
   async testTorrentingCapability(timeOut: number) {
     log('Testing torrenting capability...');
+    let torrentId;
     const gotAWire = new Promise(resolve => {
       super.add(mockTorrents[0].magnetURI, (torrent: Torrent) => {
-        torrent.once('wire', wire => {
-          this.remove(torrent.infoHash);
-          resolve(true);
-        });
+        torrentId = torrent.infoHash;
+        torrent.once('wire', wire => resolve(true));
       });
     });
     const timer = new Promise(function(resolve, reject) {
       setTimeout(resolve, timeOut);
     });
-    return Promise.race([gotAWire, timer]);
+    const raceResult = await Promise.race([gotAWire, timer]);
+    this.remove(torrentId);
+    return raceResult;
   }
 
   seed(
@@ -137,7 +131,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     if (typeof optionsOrCallback === 'function') {
       torrent = super.seed(
         input,
-        {createdBy: this.pseAccount} as TorrentOptions,
+        {createdBy: this.pseAccount, announce: defaultTrackers} as TorrentOptions,
         optionsOrCallback
       ) as PaidStreamingTorrent;
     } else {
@@ -164,6 +158,14 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     this.setupTorrent(torrent);
 
     return torrent;
+  }
+
+  async cancel(torrentInfoHash: string, callback?: (err: Error | string) => void) {
+    log('> Peer cancels download. Pausing torrents');
+    const torrent = this.torrents.find(t => t.infoHash === torrentInfoHash);
+    if (torrent) {
+      torrent.pause();
+    }
   }
 
   blockPeer(torrentInfoHash: string, wire: PaidStreamingWire, peerAccount: string) {
@@ -369,7 +371,10 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       let message: Message;
       switch (command) {
         case PaidStreamingExtensionNotices.STOP: // synonymous with a prompt for a payment
-          if (!torrent.done) {
+          if (torrent.paused) {
+            // We currently treat pausing torrent as canceling downloads
+            await this.closeDownloadingChannels(torrent);
+          } else if (!torrent.done) {
             const channelId = data;
             await this.paymentChannelClient.makePayment(
               channelId,
@@ -408,11 +413,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     torrent.on(TorrentEvents.DONE, async () => {
       log('Torrent DONE!');
       this.emit(ClientEvents.TORRENT_DONE, {torrent});
-      torrent.wires.forEach(
-        async wire =>
-          wire.paidStreamingExtension.peerChannelId &&
-          (await this.paymentChannelClient.closeChannel(wire.paidStreamingExtension.peerChannelId))
-      ); // close any channels that I am the leecher in (that my peer opened)
+      await this.closeDownloadingChannels(torrent);
     });
 
     torrent.on(TorrentEvents.ERROR, err => {
@@ -422,6 +423,15 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     torrent.usingPaidStreaming = true;
 
     return torrent;
+  }
+
+  protected async closeDownloadingChannels(torrent: PaidStreamingTorrent) {
+    // Close any channels that I am downloading from (that my peer opened)
+    torrent.wires.forEach(async wire => {
+      if (wire.paidStreamingExtension && wire.paidStreamingExtension.peerChannelId) {
+        await this.paymentChannelClient.closeChannel(wire.paidStreamingExtension.peerChannelId);
+      }
+    });
   }
 
   protected jumpStart(torrent: ExtendedTorrent, wire: PaidStreamingWire) {

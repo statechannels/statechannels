@@ -139,10 +139,14 @@ export type OnType = typeof eventEmitter.on;
 export type OffType = typeof eventEmitter.off;
 
 export interface ChannelProviderInterface {
-  enable(url?: string): Promise<void>;
-  send(request: MethodRequestType): Promise<MethodResponseType[MethodRequestType['method']]>;
+  signingAddress?: string;
+  selectedAddress?: string;
+  walletVersion?: string;
   on: OnType;
   off: OffType;
+  mountWalletComponent(url?: string): Promise<void>;
+  enable(): Promise<void>;
+  send(request: MethodRequestType): Promise<MethodResponseType[MethodRequestType['method']]>;
   subscribe(subscriptionType: string, params?: any): Promise<string>;
   unsubscribe(subscriptionId: string): Promise<boolean>;
 }

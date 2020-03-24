@@ -61,4 +61,19 @@ void (async () => {
   devServer.on('close', code => {
     process.exit(code);
   });
+
+  const trackerServer = spawn(cmd, ['run', 'start:tracker']);
+
+  trackerServer.stdout.on('data', data => {
+    console.log(data.toString());
+  });
+
+  trackerServer.stderr.on('data', data => {
+    if (process.env.DEBUG !== 'web3torrent:tracker') throw data.toString();
+    console.log(data.toString());
+  });
+
+  trackerServer.on('close', code => {
+    process.exit(code);
+  });
 })();
