@@ -4,12 +4,16 @@ import {RouteComponentProps, useLocation} from 'react-router-dom';
 import {download, getTorrentPeers, WebTorrentContext} from '../../clients/web3torrent-client';
 import {FormButton} from '../../components/form';
 import {TorrentInfo} from '../../components/torrent-info/TorrentInfo';
+import {SiteBudgetTable} from '../../components/site-budget-table/SiteBudgetTable';
+import {createMockBudget} from '../../utils/test-utils';
 import {TorrentPeers} from '../../library/types';
 import {Status, Torrent} from '../../types';
 import {parseMagnetURL} from '../../utils/magnet';
 import torrentStatusChecker from '../../utils/torrent-status-checker';
 import {useInterval} from '../../utils/useInterval';
 import './File.scss';
+
+const mockBudget = createMockBudget();
 
 const getTorrentAndPeersData: (
   setTorrent: React.Dispatch<React.SetStateAction<Torrent>>,
@@ -55,8 +59,16 @@ const File: React.FC<RouteComponentProps & Props> = props => {
         {web3Torrent => {
           const me = web3Torrent.paymentChannelClient.mySigningAddress;
           const channelCache = web3Torrent.paymentChannelClient.channelCache;
+
+          // Only show budget when any channel exists.
+          const showBudget = Object.keys(channelCache).length > 0;
+
           return (
-            <TorrentInfo torrent={torrent} channelCache={channelCache} mySigningAddress={me} />
+            <>
+              <TorrentInfo torrent={torrent} channelCache={channelCache} mySigningAddress={me} />
+              <br />
+              {showBudget ? <SiteBudgetTable budget={mockBudget} /> : false}
+            </>
           );
         }}
       </WebTorrentContext.Consumer>
