@@ -1,6 +1,6 @@
 # How are channels integrated into web3Torrent?
 
-Web3Torrent uses state channels tech to stream money between webTorrent peers, so that downloaders may pay uploaders for data. The granularity of the payments can be tuned, which alters the trust-performance tradeoff. For example, peers can pay per byte (low trust, high overhead for processing payments resulting in low data transfer speeds) or per Megabyte (higher trust, lower overhead and greater transfer speed).
+Web3Torrent uses state channels tech to stream money between webTorrent peers, so that downloaders may pay **Uploader**s for data. The granularity of the payments can be tuned, which alters the trust-performance tradeoff. For example, peers can pay per byte (low trust, high overhead for processing payments resulting in low data transfer speeds) or per Megabyte (higher trust, lower overhead and greater transfer speed).
 
 These tradeoffs are set in [`constants.ts`](https://github.com/statechannels/monorepo/blob/master/packages/web3torrent/src/constants.ts).
 
@@ -30,22 +30,22 @@ When the `MessageQueued` event fires, send the associated data down the `wire`. 
 
 ### Channel setup
 
-Uploader: Upon the first request for data of an unkown peer; create a new, unidirectional payment channel with me (the uploader) as the "beneficiary", and the peer (the downloader) as the "payer". This action is associated with the `paymentChannelClient.createChannel()` API call. Then choke the downloader and send them a `STOP` notification (which is a prompt for a payment).
+**Uploader:**: Upon the first request for data of an unkown peer; create a new, unidirectional payment channel with me (the uploader) as the "beneficiary", and the peer (the downloader) as the "payer". This action is associated with the `paymentChannelClient.createChannel()` API call. Then choke the downloader and send them a `STOP` notification (which is a prompt for a payment).
 
-Downloader: When the "ChannelProposed" event fires, automatically join that channel.
+**Downloader:** When the "ChannelProposed" event fires, automatically join that channel.
 
 ### Payments
 
-Uploader: if a payment is received, "accept" it. Then unchoke the downloader and send a START notification.
+**Uploader**: if a payment is received, "accept" it. Then unchoke the downloader and send a START notification.
 
-Downloader: if a STOP is received, make a payment corresponding to some fixed number of bytes.
+**Downloader:** if a STOP is received, make a payment corresponding to some fixed number of bytes.
 
 ### Channel teardown
 
-Downloader: close the channel if I run out of funds or if if the download finishes.
+**Downloader:** close the channel if I run out of funds or if if the download finishes.
 
-Uploader: the wallet will automatically respond and collaboratively close the channel.
+**Uploader**: the wallet will automatically respond and collaboratively close the channel.
 
 ### Channel Disconnects
 
-Uploader / Downloader: Can click "Challenge" to launch a blockchain challenge against an unresponsive peer. This will close the channel without the need for collaboration with the counterparty.
+**Uploader** / **Downloader:** Can click "Challenge" to launch a blockchain challenge against an unresponsive peer. This will close the channel without the need for collaboration with the counterparty.
