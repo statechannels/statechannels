@@ -22,6 +22,7 @@ export function serializeMessage(message: Message, recipient: string, sender: st
 }
 
 function bigNumberToUint256(bigNumber: BigNumber): string {
+  // our wire protocol calls for hex strings of this exact format
   return (
     '0x' +
     bigNumber
