@@ -10,7 +10,7 @@ export default class UserService extends Service {
   @tracked username!: string;
 
   public get isInitialized(): boolean {
-    return !!this.username;
+    return !!this.username || window.localStorage.getItem('dev') === 'true';
   }
 
   public async initialize(username: string): Promise<void> {
