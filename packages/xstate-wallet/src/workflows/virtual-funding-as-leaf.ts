@@ -73,7 +73,8 @@ type TEvent = AnyEventObject;
 
 const enum Actions {
   triggerGuarantorObjective = 'triggerGuarantorObjective',
-  assignDeductions = 'assignDeductions'
+  assignDeductions = 'assignDeductions',
+  assignGuarantorId = 'assignGuarantorId'
 }
 
 export const enum States {
@@ -91,7 +92,8 @@ const enum Services {
   jointChannelUpdate = 'jointChannelUpdate',
   supportState = 'supportState',
   ledgerFunding = 'ledgerFunding',
-  fundGuarantor = 'fundGuarantor'
+  fundGuarantor = 'fundGuarantor',
+  updateJointChannelFunding = 'updateJointChannelFunding'
 }
 
 export const config: StateNodeConfig<Init, any, any> = {
@@ -122,7 +124,7 @@ export const config: StateNodeConfig<Init, any, any> = {
           }
         },
         runObjective: {
-          entry: Actions.triggerGuarantorObjective,
+          entry: [Actions.triggerGuarantorObjective, Actions.assignGuarantorId],
           invoke: {
             src: Services.ledgerFunding,
             data: (
@@ -133,9 +135,10 @@ export const config: StateNodeConfig<Init, any, any> = {
               ledgerChannelId: data.data.ledgerId,
               deductions: ctx.deductions
             }),
-            onDone: 'done'
+            onDone: 'updateFunding'
           }
         },
+        updateFunding: {invoke: {src: Services.updateJointChannelFunding, onDone: 'done'}},
         done: {type: 'final'}
       },
       onDone: States.fundTargetChannel
@@ -221,6 +224,13 @@ const getDeductions = (store: Store) => async (ctx: Init): Promise<Deductions> =
   };
 };
 
+type GuarantorKnown = Init & {guarantorChannelId: string};
+
+const updateJointChannelFunding = (store: Store) => async (ctx: GuarantorKnown) => {
+  const {jointChannelId, guarantorChannelId} = ctx;
+  await store.setFunding(jointChannelId, {type: 'Guarantee', guarantorChannelId});
+};
+
 export const options = (
   store: Store
 ): Pick<MachineOptions<Init, TEvent>, 'actions' | 'services'> => {
@@ -228,11 +238,11 @@ export const options = (
     [Actions.triggerGuarantorObjective]: (_, {data}: DoneInvokeEvent<FundGuarantor>) =>
       store.addObjective(data),
     [Actions.assignDeductions]: assign(
-      (ctx: Init, {data}: DoneInvokeEvent<Deductions>): WithDeductions => ({
-        ...ctx,
-        ...data
-      })
-    )
+      (ctx: Init, {data}: DoneInvokeEvent<Deductions>): WithDeductions => ({...ctx, ...data})
+    ),
+    [Actions.assignGuarantorId]: assign({
+      guarantorChannelId: (_, {data}: DoneInvokeEvent<FundGuarantor>) => data.data.guarantorId
+    })
   };
 
   const services: Record<Services, ServiceConfig<Init>> = {
@@ -241,7 +251,8 @@ export const options = (
     ledgerFunding: LedgerFunding.machine(store),
     waitForFirstJointState: waitForFirstJointState(store),
     jointChannelUpdate: jointChannelUpdate(store),
-    fundGuarantor: getObjective(store)
+    fundGuarantor: getObjective(store),
+    updateJointChannelFunding: updateJointChannelFunding(store)
   };
 
   return {actions, services};
