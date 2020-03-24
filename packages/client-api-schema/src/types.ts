@@ -104,11 +104,11 @@ export type WalletVersionResponse = JsonRpcResponse<string>;
 // EnableEthereum
 export type EnableEthereumRequest = JsonRpcRequest<'EnableEthereum', {}>;
 export type EnableEthereumResponse = JsonRpcResponse<Address>;
+export type EnableEthereumError = JsonRpcError<100, 'Ethereum Not Enabled'>;
 
 // GetAddress
 export type GetAddressRequest = JsonRpcRequest<'GetAddress', {}>; // todo: what are params
 export type GetAddressResponse = JsonRpcResponse<Address>;
-export type GetAddressError = JsonRpcError<100, 'Ethereum Not Enabled'>; // TODO: how should we choose error codes
 
 // GetEthereumSelectedAddress
 export type GetEthereumSelectedAddressRequest = JsonRpcRequest<'GetEthereumSelectedAddress', {}>; // todo: what are params
@@ -250,7 +250,7 @@ export type Response =
   | ApproveBudgetAndFundResponse
   | CloseAndWithdrawResponse;
 
-export type ErrorResponse = GetAddressError;
+export type ErrorResponse = EnableEthereumError;
 
 export type JsonRpcMessage = Request | Response | Notification | ErrorResponse;
 

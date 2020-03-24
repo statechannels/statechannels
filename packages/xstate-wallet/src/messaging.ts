@@ -157,7 +157,7 @@ export class MessagingService implements MessagingServiceInterface {
         }
         break;
       case 'GetAddress':
-        const address = this.store.getAddress();
+        const address = await this.store.getAddress();
         this.sendResponse(requestId, address);
         break;
       case 'GetEthereumSelectedAddress':
@@ -177,7 +177,7 @@ export class MessagingService implements MessagingServiceInterface {
       case 'PushMessage':
         // todo: should verify message format here
         const message = request.params as WireMessage;
-        if (message.recipient !== this.store.getAddress()) {
+        if (message.recipient !== (await this.store.getAddress())) {
           throw new Error(`Received message not addressed to us ${JSON.stringify(message)}`);
         }
         this.store.pushMessage(deserializeMessage(message));

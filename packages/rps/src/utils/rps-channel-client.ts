@@ -37,22 +37,6 @@ export class RPSChannelClient {
     return convertToChannelState(channelResult);
   }
 
-  async walletVersion() {
-    return this.channelClient.walletVersion();
-  }
-
-  async enableEthereum() {
-    return this.channelClient.enableEthereum();
-  }
-
-  async getAddress() {
-    return this.channelClient.getAddress();
-  }
-
-  async getEthereumSelectedAddress() {
-    return this.channelClient.getEthereumSelectedAddress();
-  }
-
   onMessageQueued(callback: (message: Message) => void) {
     return this.channelClient.onMessageQueued(callback);
   }

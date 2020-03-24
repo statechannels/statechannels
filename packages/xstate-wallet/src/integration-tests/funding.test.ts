@@ -18,18 +18,19 @@ jest.setTimeout(30000);
 it('allows for two wallets to fund an app', async () => {
   const fakeChain = new FakeChain();
 
-  const playerA = new Player(
+  const playerA = await Player.createPlayer(
     '0x275a2e2cd9314f53b42246694034a80119963097e3adf495fbf6d821dc8b6c8e',
     'PlayerA',
     fakeChain
   );
-  const playerB = new Player(
+  const playerB = await Player.createPlayer(
     '0x3341c348ea8ade1ba7c3b6f071bfe9635c544b7fb5501797eaa2f673169a7d0d',
     'PlayerB',
     fakeChain
   );
 
   hookUpMessaging(playerA, playerB);
+  const channelId = '0x1823994d6d3b53b82f499c1aca2095b94108ba3ff59f55c6e765da1e24874ab2';
 
   const createEvent = generateCreateChannelRequest(playerA.participant, playerB.participant);
   const createPromise = playerA.messagingService.outboxFeed
@@ -38,14 +39,18 @@ it('allows for two wallets to fund an app', async () => {
       first()
     )
     .toPromise();
+
+  const playerBChannelUpdatedPromise = playerB.store
+    .channelUpdatedFeed(channelId)
+    .pipe(first())
+    .toPromise();
   await playerA.messagingService.receiveRequest(createEvent);
 
   playerA.channelWallet.workflows[0].machine.send({type: 'USER_APPROVES'});
 
   const createResponse = await createPromise;
-  expect(createResponse.result).toBeDefined();
+  expect(createResponse.result.channelId).toEqual(channelId);
 
-  const {channelId} = createResponse.result;
   const joinEvent: JoinChannelRequest = generateJoinChannelRequest(channelId);
   const joinPromise = playerB.messagingService.outboxFeed
     .pipe(
@@ -53,6 +58,9 @@ it('allows for two wallets to fund an app', async () => {
       first()
     )
     .toPromise();
+
+  await playerBChannelUpdatedPromise;
+
   await playerB.messagingService.receiveRequest(joinEvent);
 
   // Wait for the create channel service to start

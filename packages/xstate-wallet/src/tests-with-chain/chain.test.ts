@@ -5,11 +5,11 @@ import {ContractArtifacts, randomChannelId} from '@statechannels/nitro-protocol'
 import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
 import {Machine, interpret, Interpreter} from 'xstate';
 import {map} from 'rxjs/operators';
-import {MemoryStore} from '../store/memory-store';
+import {XstateStore} from '../store';
 
 const chain = new ChainWatcher();
 
-const store = new MemoryStore(undefined, chain);
+const store = new XstateStore(chain);
 
 const mockContext = {
   channelId: randomChannelId(),

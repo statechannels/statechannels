@@ -4,11 +4,17 @@ export enum Status {
   Downloading = 'Downloading',
   Seeding = 'Seeding',
   Completed = 'Completed',
+  Paused = 'Cancelled',
   Idle = 'Idle',
   Connecting = 'Connecting'
 }
 
-export const DownloadingStatuses = [Status.Connecting, Status.Downloading, Status.Completed];
+export const DownloadingStatuses = [
+  Status.Connecting,
+  Status.Downloading,
+  Status.Completed,
+  Status.Paused
+];
 export const UploadingStatuses = [Status.Seeding];
 export const IdleStatuses = [Status.Idle, Status.Completed];
 

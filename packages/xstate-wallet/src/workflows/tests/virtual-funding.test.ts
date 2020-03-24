@@ -66,11 +66,14 @@ let aStore: TestStore;
 let bStore: TestStore;
 let chain: FakeChain;
 
-beforeEach(() => {
+beforeEach(async () => {
   chain = new FakeChain();
-  hubStore = new TestStore([wallet3.privateKey], chain);
-  aStore = new TestStore([wallet1.privateKey], chain);
-  bStore = new TestStore([wallet2.privateKey], chain);
+  hubStore = new TestStore(chain);
+  await hubStore.initialize([wallet3.privateKey]);
+  aStore = new TestStore(chain);
+  await aStore.initialize([wallet1.privateKey]);
+  bStore = new TestStore(chain);
+  await bStore.initialize([wallet2.privateKey]);
 });
 
 test('virtual funding with smart hub', async () => {
@@ -79,9 +82,9 @@ test('virtual funding with smart hub', async () => {
   const bService = interpret(VirtualFundingAsLeaf.machine(bStore).withContext(context));
   const services = [aService, hubService, bService];
 
-  [aStore, hubStore, bStore].forEach((store: TestStore) => {
+  [aStore, hubStore, bStore].forEach(async (store: TestStore) => {
     const state = firstState(outcome, jointChannel);
-    store.createEntry({...state, signatures: [signState(state, wallet1.privateKey)]});
+    await store.createEntry({...state, signatures: [signState(state, wallet1.privateKey)]});
   });
 
   let state = ledgerState([first, third], ledgerAmounts);
@@ -90,7 +93,7 @@ test('virtual funding with smart hub', async () => {
   await Promise.all(
     [aStore, hubStore].map(async (store: TestStore) => {
       const signatures = [wallet1, wallet3].map(({privateKey}) => signState(state, privateKey));
-      store.setLedgerByEntry(store.createEntry({...state, signatures}));
+      await store.setLedgerByEntry(await store.createEntry({...state, signatures}));
     })
   );
 
@@ -100,7 +103,7 @@ test('virtual funding with smart hub', async () => {
   await Promise.all(
     [bStore, hubStore].map(async (store: TestStore) => {
       const signatures = [wallet2, wallet3].map(({privateKey}) => signState(state, privateKey));
-      store.setLedgerByEntry(store.createEntry({...state, signatures}));
+      await store.setLedgerByEntry(await store.createEntry({...state, signatures}));
     })
   );
 
@@ -136,9 +139,9 @@ test('virtual funding with a simple hub', async () => {
   const bService = interpret(VirtualFundingAsLeaf.machine(bStore).withContext(context));
   const services = [aService, bService];
 
-  [aStore, bStore].forEach((store: TestStore) => {
+  [aStore, bStore].forEach(async (store: TestStore) => {
     const state = firstState(outcome, jointChannel);
-    store.createEntry({...state, signatures: [signState(state, wallet1.privateKey)]});
+    await store.createEntry({...state, signatures: [signState(state, wallet1.privateKey)]});
   });
 
   let state = ledgerState([first, third], ledgerAmounts);
@@ -146,14 +149,14 @@ test('virtual funding with a simple hub', async () => {
   let signatures = [wallet1, wallet3].map(({privateKey}) => signState(state, privateKey));
 
   chain.depositSync(ledgerId, '0', depositAmount);
-  aStore.setLedgerByEntry(aStore.createEntry({...state, signatures}));
+  await aStore.setLedgerByEntry(await aStore.createEntry({...state, signatures}));
 
   state = ledgerState([second, third], ledgerAmounts);
   ledgerId = calculateChannelId(state);
   signatures = [wallet2, wallet3].map(({privateKey}) => signState(state, privateKey));
 
   chain.depositSync(ledgerId, '0', depositAmount);
-  bStore.setLedgerByEntry(bStore.createEntry({...state, signatures}));
+  await bStore.setLedgerByEntry(await bStore.createEntry({...state, signatures}));
 
   subscribeToMessages({
     [jointParticipants[ParticipantIdx.A].participantId]: aStore,
@@ -203,7 +206,8 @@ test('virtual funding with a simple hub', async () => {
 });
 
 test('invalid joint state', async () => {
-  const store = new TestStore([wallet1.privateKey]);
+  const store = new TestStore();
+  await store.initialize([wallet1.privateKey]);
   const service = interpret(VirtualFundingAsLeaf.machine(store).withContext(context), {
     parent: {send: () => undefined} as any // Limits console noise
   }).start();
@@ -214,7 +218,7 @@ test('invalid joint state', async () => {
     outcome: simpleEthAllocation([])
   };
 
-  store.pushMessage({
+  await store.pushMessage({
     signedStates: [{...invalidState, signatures: [signState(invalidState, wallet1.privateKey)]}]
   });
 
