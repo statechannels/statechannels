@@ -9,6 +9,8 @@ import {ChannelState} from '../../../clients/payment-channel-client';
 import {utils} from 'ethers';
 import {ChannelsList} from '../channels-list/ChannelsList';
 import {prettyPrintWei} from '../../../utils/calculateWei';
+import {ChannelBudget} from '../channel-budget/ChannelBudget';
+import {createMockBudget} from '../../../utils/test-utils';
 
 const bigNumberify = utils.bigNumberify;
 
@@ -66,11 +68,14 @@ const DownloadInfo: React.FC<DownloadInfoProps> = ({
         participantType={'payer'}
       />
       {!totalSpent.isZero() && (
-        <section className="totalPayed">
-          <p>
-            Total Spent: <strong className="total-spent">{prettyPrintWei(totalSpent)}</strong>
-          </p>
-        </section>
+        <>
+          <section className="totalPayed">
+            <p>
+              Total Spent: <strong className="total-spent">{prettyPrintWei(totalSpent)}</strong>
+            </p>
+          </section>
+          <ChannelBudget budget={createMockBudget()} />
+        </>
       )}
     </>
   );

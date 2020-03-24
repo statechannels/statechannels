@@ -7,6 +7,8 @@ import {ChannelState} from '../../../clients/payment-channel-client';
 import {utils} from 'ethers';
 import {ChannelsList} from '../channels-list/ChannelsList';
 import {prettyPrintWei} from '../../../utils/calculateWei';
+import {ChannelBudget} from '../channel-budget/ChannelBudget';
+import {createMockBudget} from '../../../utils/test-utils';
 
 const bigNumberify = utils.bigNumberify;
 
@@ -47,11 +49,14 @@ const UploadInfo: React.FC<UploadInfoProps> = ({
         participantType={'beneficiary'}
       />
       {!totalReceived.isZero() && (
-        <section className="totalReceived">
-          <p>
-            Total Received: <strong>{prettyPrintWei(totalReceived)}</strong>
-          </p>
-        </section>
+        <>
+          <section className="totalReceived">
+            <p>
+              Total Received: <strong>{prettyPrintWei(totalReceived)}</strong>
+            </p>
+          </section>
+          <ChannelBudget budget={createMockBudget()} />
+        </>
       )}
     </>
   );
