@@ -87,7 +87,6 @@ class ChannelsList extends React.Component<UploadInfoProps> {
     const channelsInfo = _.keys(this.props.channels).sort(
       (channelId1, channelId2) => Number(channelId1) - Number(channelId2)
     );
-    console.log(channelsInfo);
     return (
       <section className="wires-list">
         <table className="wires-list-table">
