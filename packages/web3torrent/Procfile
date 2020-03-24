@@ -1,1 +1,0 @@
-web: node packages/web3torrent/tracker/index.js
