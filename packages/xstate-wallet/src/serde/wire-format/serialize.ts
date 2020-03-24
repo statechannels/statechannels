@@ -31,7 +31,7 @@ function bigNumberToUint256(bigNumber: BigNumber): string {
   );
 }
 export function serializeState(state: SignedState): SignedStateWire {
-  const sswire = {
+  return {
     ...state,
     challengeDuration: bigNumberToUint256(state.challengeDuration),
     channelNonce: bigNumberToUint256(state.channelNonce),
@@ -39,8 +39,6 @@ export function serializeState(state: SignedState): SignedStateWire {
     outcome: serializeOutcome(state.outcome),
     channelId: calculateChannelId(state)
   };
-  console.log('serializing' + JSON.stringify(state) + ' to ' + JSON.stringify(sswire));
-  return sswire;
 }
 
 function serializeOutcome(outcome: Outcome): OutcomeWire {
