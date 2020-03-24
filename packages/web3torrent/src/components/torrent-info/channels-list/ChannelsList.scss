@@ -8,7 +8,8 @@ section.wires-list {
     border-collapse: collapse;
     text-align: left;
 
-    tbody {
+    tbody,
+    thead {
       border-bottom: 1px solid $c-mediumgrey;
       text-align: center;
 
@@ -16,8 +17,17 @@ section.wires-list {
         vertical-align: middle;
         color: $c-orange;
         border: 1px solid $c-orange;
-        margin-top: 0;
-        margin-bottom: 0;
+        margin-top: -3px;
+        margin-bottom: 0px;
+        padding: 3px 6px;
+        &.button-alt {
+          color: $c-white;
+          background-color: $c-orange;
+
+          &:hover {
+            border: 1px solid $c-darkred;
+          }
+        }
       }
 
       tr.peerInfo {
@@ -37,8 +47,12 @@ section.wires-list {
           min-width: 50px;
           padding: 5px 5px;
           vertical-align: middle;
-          width: 20%;
-          min-width: 50px;
+          width: 25%;
+          min-width: 100px;
+          text-align: left;
+        }
+
+        .channel {
         }
 
         .peer-id,
@@ -54,21 +68,52 @@ section.wires-list {
           font-weight: bold;
         }
 
-        .uploaded {
+        .transferred {
           min-width: 50px;
-          text-align: left;
+          text-align: center;
           white-space: nowrap;
         }
         .paid {
           min-width: 70px;
           text-align: right;
           color: red;
+          width: 20%;
         }
         .earned {
           min-width: 70px;
           text-align: right;
+          width: 20%;
+          i {
+            transform: rotate(-135deg);
+            -webkit-transform: rotate(-135deg);
+            margin-bottom: 5px;
+          }
         }
       }
+    }
+    thead {
+      text-align: center;
+      color: #ea692b;
+      border-bottom: 1px solid #ea692b;
+      line-height: 0.3;
+    }
+  }
+  i {
+    border: solid $c-orange;
+    border-width: 0 3px 3px 0;
+    display: inline-block;
+    padding: 3px;
+    margin-left: 3px;
+    margin-bottom: 3px;
+
+    &.up {
+      transform: rotate(-135deg);
+      -webkit-transform: rotate(-135deg);
+    }
+
+    &.down {
+      transform: rotate(45deg);
+      -webkit-transform: rotate(45deg);
     }
   }
 }

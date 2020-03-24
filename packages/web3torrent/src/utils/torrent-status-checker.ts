@@ -45,6 +45,12 @@ export const getFormattedETA = (torrent: Torrent) => {
   ].join('');
 };
 
+export const getPeerStatus = (torrent, wire) => {
+  if (!wire) return false;
+  const peerId = wire.peerId;
+  return Object.keys(torrent._peers).includes(peerId);
+};
+
 export default (previousData: Torrent, infoHash): Torrent => {
   if (!infoHash) {
     // torrent in magnet form

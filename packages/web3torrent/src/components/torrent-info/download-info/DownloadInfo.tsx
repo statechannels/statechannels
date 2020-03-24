@@ -53,9 +53,6 @@ const DownloadInfo: React.FC<DownloadInfoProps> = ({
           false
         )}
         <p>
-          Total Spent: <span className="total-spent">{prettyPrintWei(totalSpent)}</span>
-        </p>
-        <p>
           {torrent.parsedTimeRemaining}.{' '}
           {prettier(torrent.done || !torrent.downloadSpeed ? 0 : torrent.downloadSpeed)}
           /s down, {prettier(!torrent.uploadSpeed ? 0 : torrent.uploadSpeed)}/s up
@@ -64,10 +61,17 @@ const DownloadInfo: React.FC<DownloadInfoProps> = ({
         </p>
       </section>
       <ChannelsList
-        wires={torrent.wires}
+        torrent={torrent}
         channels={_.pickBy(channelCache, ({channelId}) => myPayingChannelIds.includes(channelId))}
         participantType={'payer'}
       />
+      {!totalSpent.isZero() && (
+        <section className="totalPayed">
+          <p>
+            Total Spent: <strong className="total-spent">{prettyPrintWei(totalSpent)}</strong>
+          </p>
+        </section>
+      )}
     </>
   );
 };
