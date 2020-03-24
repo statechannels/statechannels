@@ -77,19 +77,21 @@ const free: BudgetItem = {
   hubAmount: ledgerAmounts[1],
   playerAmount: ledgerAmounts[0]
 };
-beforeEach(() => {
+beforeEach(async () => {
   chain = new FakeChain();
-  aStore = new TestStore([wallet1.privateKey], chain);
-  bStore = new TestStore([wallet2.privateKey], chain);
+  aStore = new TestStore(chain);
+  await aStore.initialize([wallet1.privateKey]);
+  bStore = new TestStore(chain);
+  bStore.initialize([wallet2.privateKey]);
   const hubStore = new SimpleHub(wallet3.privateKey);
 
   [aStore, bStore].forEach(async (store: TestStore) => {
     const budget = ethBudget(applicationSite, {free});
     await store.updateOrCreateBudget(budget);
-    store.createEntry(allSignState(firstState(allocation, targetChannel)), {
+    await store.createEntry(allSignState(firstState(allocation, targetChannel)), {
       applicationSite
     });
-    store.createEntry(allSignState(firstState(allocation, ledgerChannel)));
+    await store.createEntry(allSignState(firstState(allocation, ledgerChannel)));
   });
 
   subscribeToMessages({
@@ -124,14 +126,14 @@ test('it uses virtual funding when enabled', async () => {
   let signatures = [wallet1, wallet3].map(({privateKey}) => signState(state, privateKey));
 
   chain.depositSync(ledgerId, '0', depositAmount);
-  aStore.setLedgerByEntry(aStore.createEntry({...state, signatures}));
+  await aStore.setLedgerByEntry(await aStore.createEntry({...state, signatures}));
 
   state = ledgerState([second, third], ledgerAmounts);
   ledgerId = calculateChannelId(state);
   signatures = [wallet2, wallet3].map(({privateKey}) => signState(state, privateKey));
 
   chain.depositSync(ledgerId, '0', depositAmount);
-  bStore.setLedgerByEntry(bStore.createEntry({...state, signatures}));
+  await bStore.setLedgerByEntry(await bStore.createEntry({...state, signatures}));
 
   const [aService, bService] = [aStore, bStore].map(connectToStore);
 

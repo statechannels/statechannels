@@ -7,17 +7,18 @@ export default {title: 'X-state wallet'};
 import {storiesOf} from '@storybook/react';
 import {interpret} from 'xstate';
 import {renderComponentInFrontOfApp} from './helpers';
-import {MemoryStore} from '../../store/memory-store';
+
 import {bigNumberify, parseEther} from 'ethers/utils';
 import React from 'react';
 import {ApproveBudgetAndFund} from '../approve-budget-and-fund-workflow';
 import {SiteBudget, Participant} from '../../store/types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../../constants';
 import {MessagingServiceInterface, MessagingService} from '../../messaging';
+import {XstateStore} from '../../store';
 
-const store = new MemoryStore([
-  '0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29'
-]);
+const store = new XstateStore();
+
+store.initialize(['0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29']);
 const messagingService: MessagingServiceInterface = new MessagingService(store);
 
 const budget: SiteBudget = {

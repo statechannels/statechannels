@@ -71,13 +71,17 @@ const allSignState = (state: State) => ({
   signatures: [wallet1, wallet2].map(({privateKey}) => signState(state, privateKey))
 });
 
-beforeEach(() => {
-  aStore = new TestStore([wallet1.privateKey], chain);
-  bStore = new TestStore([wallet2.privateKey], chain);
+beforeEach(async () => {
+  aStore = new TestStore(chain);
+  await aStore.initialize([wallet1.privateKey]);
+  bStore = new TestStore(chain);
+  await bStore.initialize([wallet2.privateKey]);
 
-  [aStore, bStore].forEach((store: TestStore) => {
-    store.createEntry(allSignState(firstState(outcome, targetChannel)));
-    store.setLedgerByEntry(store.createEntry(allSignState(firstState(outcome, ledgerChannel))));
+  [aStore, bStore].forEach(async (store: TestStore) => {
+    await store.createEntry(allSignState(firstState(outcome, targetChannel)));
+    await store.setLedgerByEntry(
+      await store.createEntry(allSignState(firstState(outcome, ledgerChannel)))
+    );
   });
 
   subscribeToMessages({

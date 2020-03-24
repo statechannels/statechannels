@@ -1,4 +1,6 @@
 import {BigNumber} from 'ethers/utils';
+import {MemoryChannelStoreEntry} from './memory-channel-storage';
+
 export interface SiteBudget {
   site: string;
   hubAddress: string;
@@ -20,6 +22,7 @@ export interface Participant {
   signingAddress: string;
   destination: string;
 }
+// signers
 
 export interface StateVariables {
   outcome: Outcome;
@@ -124,4 +127,28 @@ export const isCloseLedger = guard<CloseLedger>('CloseLedger');
 export interface Message {
   signedStates?: SignedState[];
   objectives?: Objective[];
+}
+
+export interface DBBackend {
+  initialize(cleanSlate?: boolean): Promise<any>;
+  privateKeys(): Promise<Record<string, string | undefined>>;
+  ledgers(): Promise<Record<string, string | undefined>>;
+  nonces(): Promise<Record<string, BigNumber | undefined>>;
+  objectives(): Promise<Objective[]>;
+  channels(): Promise<Record<string, MemoryChannelStoreEntry | undefined>>;
+
+  setPrivateKey(key: string, value: string): Promise<string>;
+  getPrivateKey(key: string): Promise<string | undefined>;
+  setChannel(key: string, value: MemoryChannelStoreEntry): Promise<MemoryChannelStoreEntry>;
+  addChannel(key: string, value: MemoryChannelStoreEntry): Promise<MemoryChannelStoreEntry>;
+  getChannel(key: string): Promise<MemoryChannelStoreEntry | undefined>;
+  getBudget(key: string): Promise<SiteBudget | undefined>;
+  setBudget(key: string, budget: SiteBudget): Promise<SiteBudget>;
+  setLedger(key: string, value: string): Promise<string>;
+  getLedger(key: string): Promise<string | undefined>;
+  setNonce(key: string, value: BigNumber): Promise<BigNumber>;
+  getNonce(key: string): Promise<BigNumber | undefined>;
+  setObjective(key: number, value: Objective): Promise<Objective>;
+  getObjective(key: number): Promise<Objective | undefined>;
+  setReplaceObjectives(values: Objective[]): Promise<Objective[]>;
 }
