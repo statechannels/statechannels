@@ -14,10 +14,8 @@ const server = new Server({
   filter: function(_, params, cb) {
     if (params && params.action === ACTIONS.ANNOUNCE && params.event === EVENTS.START) {
       if (!params.pseAccount || !isAddress(params.pseAccount)) {
-        console.log('NOT Valid!', params.pseAccount);
         cb(new Error('401 - Unauthorized client - This tracker is for Web3Torrents only'));
       } else {
-        console.log('Valid!', params.pseAccount);
         cb(null);
       }
     } else {
