@@ -175,12 +175,12 @@ export class MessagingService implements MessagingServiceInterface {
         this.eventEmitter.emit('AppRequest', appRequest);
         break;
       case 'PushMessage':
-        // todo: should verify message format here
+        // TODO: should verify message format here
         const message = request.params as WireMessage;
         if (message.recipient !== (await this.store.getAddress())) {
           throw new Error(`Received message not addressed to us ${JSON.stringify(message)}`);
         }
-        this.store.pushMessage(deserializeMessage(message));
+        await this.store.pushMessage(deserializeMessage(message));
         await this.sendResponse(requestId, {success: true});
         break;
       case 'GetBudget':

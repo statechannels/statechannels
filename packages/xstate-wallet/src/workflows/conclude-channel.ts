@@ -1,24 +1,63 @@
-import {Machine} from 'xstate';
-import * as SupportState from './support-state';
-import {getDataAndInvoke, MachineFactory} from '../utils/workflow-utils';
+import {Machine, StateNodeConfig} from 'xstate';
+import {Store} from '../store';
+import {SupportState} from '.';
+import {getDataAndInvoke} from '../utils';
+
 import {outcomesEqual} from '../store/state-utils';
-import {Store, isIndirectFunding} from '../store';
-import {add} from '../utils/math-utils';
-import {checkThat} from '../utils';
-import {isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
+import {State} from '../store/types';
+import {map} from 'rxjs/operators';
+
 const WORKFLOW = 'conclude-channel';
 
-export interface Init {
-  channelId: string;
-}
-// TODO:Currently this is hard coded to go to done after the state is concluded
-// We need to support various funding type options here
-const determineFundingType = {on: {'': 'success'}};
+export type Init = {channelId: string};
 
-const concludeTarget = {
-  ...getDataAndInvoke('getFinalState', 'supportState', 'determineFundingType')
+const finalState = (store: Store) => async (context: Init): Promise<SupportState.Init> => {
+  const {sortedStates, latestSupportedByMe, latest} = await store.getEntry(context.channelId);
+
+  const latestFinalState: State | undefined = sortedStates.filter(s => s.isFinal)[0];
+
+  // If we've received a new final state that matches our outcome we support that
+  if (outcomesEqual(latestSupportedByMe.outcome, latestFinalState?.outcome)) {
+    return {state: latestFinalState};
+  }
+
+  // If we've supported a final state, send it
+  if (latestSupportedByMe.isFinal) {
+    return {state: latestSupportedByMe};
+  }
+
+  // Otherwise create a new final state
+  return {state: {...latestSupportedByMe, turnNum: latest.turnNum.add(1), isFinal: true}};
 };
-const ledgerDefunding = getDataAndInvoke('getDefundedLedgerState', 'supportState', 'success');
+
+const supportState = (store: Store) => SupportState.machine(store);
+
+const concludeChannel = getDataAndInvoke<Init>(
+  {src: finalState.name},
+  {src: supportState.name},
+  'determineFundingType'
+);
+
+const getFunding = (store: Store) => (ctx: Init) =>
+  store.channelUpdatedFeed(ctx.channelId).pipe(
+    map(({funding}) => {
+      switch (funding?.type) {
+        case 'Direct':
+        case 'Virtual':
+          return funding.type;
+        default:
+          throw new Error(`Unexpected funding type ${funding?.type}`);
+      }
+    })
+  );
+
+const determineFundingType = {
+  invoke: {src: getFunding.name},
+  on: {
+    Virtual: 'virtualDefunding',
+    Direct: 'withdrawing'
+  }
+};
 
 const virtualDefunding = {
   initial: 'start',
@@ -31,104 +70,38 @@ const virtualDefunding = {
         ]
       }
     },
-    asLeaf: {
-      invoke: {
-        src: 'virtualDefundingAsLeaf',
-        onDone: 'success'
-      }
-    },
-    asHub: {
-      invoke: {
-        src: 'virtualDefundingAsHub',
-        onDone: 'success'
-      }
-    },
+    asLeaf: {invoke: {src: 'virtualDefundingAsLeaf', onDone: 'success'}},
+    asHub: {invoke: {src: 'virtualDefundingAsHub', onDone: 'success'}},
     success: {type: 'final' as 'final'}
   },
   onDone: 'success'
 };
 
-export const config = {
+const withdraw = (store: Store) => async (ctx: Init) => {
+  // NOOP
+};
+
+const withdrawing = {invoke: {src: withdraw.name, onDone: 'success'}};
+
+export const config: StateNodeConfig<Init, any, any> = {
   key: WORKFLOW,
-  initial: 'concludeTarget',
+  initial: 'concludeChannel',
   states: {
-    concludeTarget,
-    virtualDefunding,
-    ledgerDefunding,
+    concludeChannel,
     determineFundingType,
-    success: {type: 'final' as 'final'}
+    virtualDefunding,
+    withdrawing,
+    success: {type: 'final'}
   }
 };
 
-export const mockOptions = {
-  guards: {
-    virtuallyFunded: _ => true,
-    indirectlyFunded: _ => true,
-    directlyFunded: _ => true
-  }
-};
+export const mockOptions = {guards: {virtuallyFunded: _ => true, directlyFunded: _ => true}};
 
-export const machine: MachineFactory<Init, any> = (store: Store, ctx: Init) => {
-  async function getFinalState({channelId}: Init): Promise<SupportState.Init> {
-    const {latestSupportedByMe, latest} = await store.getEntry(channelId);
-
-    // If we've received a new final state that matches our outcome we support that
-    if (latest.isFinal && outcomesEqual(latestSupportedByMe.outcome, latest.outcome)) {
-      return {state: latest};
-    }
-    // Otherwise send out our final state that we support
-    if (latestSupportedByMe.isFinal) {
-      return {state: latestSupportedByMe};
-    }
-    // Otherwise create a new final state
-    return {
-      state: {
-        ...latestSupportedByMe,
-        turnNum: latestSupportedByMe.turnNum.add(1),
-        isFinal: true
-      }
-    };
-  }
-
-  async function getDefundedLedgerState({channelId}: Init): Promise<SupportState.Init> {
-    const funding = checkThat((await store.getEntry(channelId)).funding, isIndirectFunding);
-    const {supported: targetChannelState} = await store.getEntry(channelId);
-    const {outcome: concludedOutcome} = targetChannelState;
-    if (!targetChannelState.isFinal) throw 'Target channel not finalized';
-
-    const {supported: ledgerState, channelConstants} = await store.getEntry(funding.ledgerId);
-    if (!isSimpleEthAllocation(ledgerState.outcome) || !isSimpleEthAllocation(concludedOutcome)) {
-      throw new Error('Only SimpleEthAllocations are currently supported');
-    }
-    const allocation = ledgerState.outcome.allocationItems;
-    const idx = allocation.findIndex(({destination}) => destination === channelId);
-
-    if (
-      ledgerState.outcome.allocationItems[idx]?.amount !==
-      concludedOutcome.allocationItems.map(a => a.amount).reduce(add)
-    ) {
-      // TODO: What should we do here?
-      throw 'Target channel underfunded';
-    }
-
-    allocation.splice(idx, 1).push(...concludedOutcome.allocationItems);
-
-    return {
-      state: {
-        ...channelConstants,
-        ...ledgerState,
-        turnNum: ledgerState.turnNum.add(1),
-        outcome: simpleEthAllocation(allocation)
-      }
-    };
-  }
-
-  const services = {
-    getFinalState,
-    getDefundedLedgerState,
-    supportState: SupportState.machine(store)
-  };
-
-  const options = {services};
-  return Machine(config).withConfig(options, ctx);
-};
+const services = (store: Store) => ({
+  finalState: finalState(store),
+  getFunding: getFunding(store),
+  supportState: supportState(store),
+  withdraw: withdraw(store)
+});
+const options = (store: Store) => ({services: services(store)});
+export const machine = (store: Store) => Machine(config).withConfig(options(store));

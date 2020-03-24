@@ -44,7 +44,7 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     this.funding = funding;
   }
 
-  public get states() {
+  public get sortedStates() {
     return this.sortedByDescendingTurnNum.map(s => ({...this.channelConstants, ...s}));
   }
 
