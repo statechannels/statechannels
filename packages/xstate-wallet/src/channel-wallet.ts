@@ -8,7 +8,7 @@ import {Wallet as WalletUi} from './ui/wallet';
 import {interpret, Interpreter, State, StateNode} from 'xstate';
 import {Guid} from 'guid-typescript';
 import {Notification, Response} from '@statechannels/client-api-schema';
-import {filter, map} from 'rxjs/operators';
+import {filter, map, take} from 'rxjs/operators';
 import {Message, OpenChannel} from './store/types';
 import {approveBudgetAndFundWorkflow} from './workflows/approve-budget-and-fund';
 import {ethereumEnableWorkflow} from './workflows/ethereum-enable';
@@ -44,7 +44,11 @@ export class ChannelWallet {
         map(o => o as OpenChannel)
       )
       .subscribe(async o => {
-        const channelEntry = await this.store.getEntry(o.data.targetChannelId);
+        const channelEntry = await this.store
+          .channelUpdatedFeed(o.data.targetChannelId)
+          .pipe(take(1))
+          .toPromise();
+
         this.messagingService.sendChannelNotification(
           'ChannelProposed',
           await convertToChannelResult(channelEntry)

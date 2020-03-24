@@ -3,8 +3,7 @@ import {ethers} from 'ethers';
 import waitForExpect from 'wait-for-expect';
 import {applicationWorkflow, WorkflowServices, WorkflowActions} from '../application';
 import {AddressZero} from 'ethers/constants';
-import {MemoryStore} from '../../store/memory-store';
-import {Store} from '../../store';
+import {XstateStore} from '../../store';
 import {StateVariables, SignedState} from '../../store/types';
 import {ChannelStoreEntry} from '../../store/channel-store-entry';
 import {MessagingService, MessagingServiceInterface} from '../../messaging';
@@ -26,7 +25,8 @@ const createChannelEvent: CreateChannelEvent = {
 };
 
 it('initializes and starts confirmCreateChannelWorkflow', async () => {
-  const store = new MemoryStore();
+  const store = new XstateStore();
+  await store.initialize();
   const messagingService: MessagingServiceInterface = new MessagingService(store);
   const services: Partial<WorkflowServices> = {
     getDataForCreateChannelConfirmation: jest.fn().mockReturnValue(
@@ -50,7 +50,8 @@ it('initializes and starts confirmCreateChannelWorkflow', async () => {
 });
 
 it('invokes the createChannelAndFund protocol', async () => {
-  const store = new MemoryStore();
+  const store = new XstateStore();
+  await store.initialize();
   const messagingService: MessagingServiceInterface = new MessagingService(store);
   const services: Partial<WorkflowServices> = {
     getDataForCreateChannelAndFund: jest.fn().mockReturnValue(Promise.resolve('foo')),
@@ -88,7 +89,8 @@ it('invokes the createChannelAndFund protocol', async () => {
 });
 
 it('raises an channel updated action when the channel is updated', async () => {
-  const store = new MemoryStore();
+  const store = new XstateStore();
+  await store.initialize();
   const messagingService: MessagingServiceInterface = new MessagingService(store);
   const mockOptions = {
     actions: {
@@ -112,7 +114,8 @@ it('raises an channel updated action when the channel is updated', async () => {
 // TODO: Fix this
 // eslint-disable-next-line jest/no-disabled-tests
 it.skip('handles confirmCreateChannel workflow finishing', async () => {
-  const store = new MemoryStore();
+  const store = new XstateStore();
+  await store.initialize();
   const messagingService: MessagingServiceInterface = new MessagingService(store);
   const services: Partial<WorkflowServices> = {
     createChannel: jest.fn().mockReturnValue(Promise.resolve('0xb1ab1a')),
@@ -140,7 +143,8 @@ it.skip('handles confirmCreateChannel workflow finishing', async () => {
 });
 
 it('initializes and starts the join channel machine', async () => {
-  const store = new MemoryStore();
+  const store = new XstateStore();
+  await store.initialize();
   const messagingService: MessagingServiceInterface = new MessagingService(store);
   const event: JoinChannelEvent = {
     type: 'JOIN_CHANNEL',
@@ -175,7 +179,8 @@ it('initializes and starts the join channel machine', async () => {
 });
 
 it('starts concluding when requested', async () => {
-  const store: Store = new MemoryStore();
+  const store = new XstateStore();
+  await store.initialize();
   const messagingService: MessagingServiceInterface = new MessagingService(store);
   const channelId = ethers.utils.id('channel');
   const services: Partial<WorkflowServices> = {
@@ -206,7 +211,8 @@ it('starts concluding when requested', async () => {
 });
 
 it('starts concluding when receiving a final state', async () => {
-  const store = new MemoryStore();
+  const store = new XstateStore();
+  await store.initialize();
   const messagingService: MessagingServiceInterface = new MessagingService(store);
   const states: SignedState[] = [
     {

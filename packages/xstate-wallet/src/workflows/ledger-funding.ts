@@ -1,11 +1,10 @@
 import {Machine, MachineConfig, ServiceConfig, assign, DoneInvokeEvent} from 'xstate';
 
 import {SupportState} from '.';
-import {Store, Errors as StoreErrors} from '../store';
+import {Store, Errors as StoreErrors, Funding} from '../store';
 import {allocateToTarget, isSimpleEthAllocation} from '../utils/outcome';
 import {AllocationItem} from '../store/types';
 import {getDataAndInvoke, checkThat} from '../utils';
-import {Funding, ChannelLock} from '../store/memory-store';
 import {add} from '../utils/math-utils';
 import {assignError} from '../utils/workflow-utils';
 import {escalate} from '../actions';
@@ -63,6 +62,7 @@ export const config: MachineConfig<any, any, any> = {
 };
 
 import {filter, first, map} from 'rxjs/operators';
+import {ChannelLock} from '../store/store';
 const acquireLock = (store: Store) => async (ctx: Init): Promise<ChannelLock> => {
   try {
     return await store.acquireChannelLock(ctx.ledgerChannelId);

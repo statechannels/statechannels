@@ -19,8 +19,8 @@ import {isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
 import {checkThat, getDataAndInvoke} from '../utils';
 import {SupportState, VirtualFundingAsLeaf} from '.';
 import {from, Observable} from 'rxjs';
-import {CHALLENGE_DURATION, HUB, ETH_ASSET_HOLDER_ADDRESS} from '../constants';
 import {bigNumberify} from 'ethers/utils';
+import {CHALLENGE_DURATION, HUB, ETH_ASSET_HOLDER_ADDRESS} from '../constants';
 const PROTOCOL = 'create-and-fund';
 
 export type Init = {
