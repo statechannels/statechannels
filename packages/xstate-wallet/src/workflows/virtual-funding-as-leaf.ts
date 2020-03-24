@@ -47,7 +47,8 @@ export type Init = {
 type Deductions = {deductions: AllocationItem[]};
 type WithDeductions = Init & Deductions;
 
-const getObjective = (store: Store) => async ({jointChannelId}: Init): Promise<FundGuarantor> => {
+const getObjective = (store: Store) => async (ctx: Init): Promise<FundGuarantor> => {
+  const {jointChannelId, targetChannelId} = ctx;
   const entry = await store.getEntry(jointChannelId);
   const {participants: jointParticipants} = entry.channelConstants;
   const participants = [jointParticipants[entry.myIndex], jointParticipants[ParticipantIdx.Hub]];
@@ -59,7 +60,11 @@ const getObjective = (store: Store) => async ({jointChannelId}: Init): Promise<F
     turnNum: bigNumberify(0),
     appData: '0x',
     isFinal: false,
-    outcome: simpleEthGuarantee(jointChannelId, ...participants.map(p => p.destination))
+    outcome: simpleEthGuarantee(
+      jointChannelId,
+      targetChannelId,
+      ...participants.map(p => p.destination)
+    )
   });
 
   return {
