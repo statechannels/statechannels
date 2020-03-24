@@ -164,7 +164,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       torrent = super.add(input, optionsOrCallback, callback) as PaidStreamingTorrent;
     }
     this.setupTorrent(torrent);
-    
+
     return torrent;
   }
 
