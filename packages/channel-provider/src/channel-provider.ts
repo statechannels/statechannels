@@ -48,7 +48,6 @@ class ChannelProvider implements ChannelProviderInterface {
     this.messaging.setUrl(this.url);
     await this.ui.mount();
     console.info('Application successfully mounted Wallet iFrame inside DOM.');
-    await this.populateProviderProperties();
   }
 
   async enable() {
