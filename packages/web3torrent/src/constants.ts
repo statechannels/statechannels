@@ -3,6 +3,8 @@ import {ChannelState} from './clients/payment-channel-client';
 
 import {bigNumberify} from 'ethers/utils';
 
+const httpProtocol = process.env.REACT_APP_TRACKER_URL_HTTP_PROTOCOL;
+const url = process.env.REACT_APP_TRACKER_URL;
 export const defaultTrackers = [
   // 'udp://explodie.org:6969',
   // 'udp://tracker.coppersurfer.tk:6969',
@@ -11,10 +13,9 @@ export const defaultTrackers = [
   // 'udp://tracker.opentrackr.org:1337',
   // 'wss://tracker.btorrent.xyz',
   // 'wss://tracker.openwebtorrent.com'
-  'http://localhost:8000/announce',
-  'udp://0.0.0.0:8000',
-  'udp://localhost:8000',
-  'ws://localhost:8000'
+  `${httpProtocol}://${url}/announce`,
+  `udp://${url}`,
+  `ws://${url}`
 ];
 
 export const EmptyTorrent = ({
