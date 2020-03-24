@@ -82,7 +82,8 @@ beforeEach(() => {
     store.createEntry(allSignState(firstState(allocation, targetChannel)), {
       applicationSite
     });
-    store.createEntry(allSignState(firstState(allocation, ledgerChannel)));
+    const ledgerEntry = store.createEntry(allSignState(firstState(allocation, ledgerChannel)));
+    store.setLedgerByEntry(ledgerEntry);
   });
 
   subscribeToMessages({
@@ -94,7 +95,7 @@ beforeEach(() => {
 
 const connectToStore = (store: Store) => interpret(machine(store).withContext(context)).start();
 test('it uses direct funding when process.env.USE_VIRTUAL_FUNDING is undefined', async () => {
-  process.env.USE_VIRTUAL_FUNDING = undefined;
+  delete process.env.USE_VIRTUAL_FUNDING;
   const [aService, bService] = [aStore, bStore].map(connectToStore);
 
   await waitForExpect(async () => {
