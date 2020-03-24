@@ -132,7 +132,7 @@ export class MessagingService implements MessagingServiceInterface {
       const notification = {
         jsonrpc: '2.0',
         method: 'MessageQueued',
-        params: serializeMessage(message, recipient, sender)
+        params: validateMessage(serializeMessage(message, recipient, sender))
       } as Notification; // typescript can't handle this otherwise
       this.eventEmitter.emit('SendMessage', notification);
     });
