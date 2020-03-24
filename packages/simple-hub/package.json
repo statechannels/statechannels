@@ -65,6 +65,6 @@
     "prettier:check": "npx prettier --check 'src/**/*.{ts,tsx}'",
     "prettier:write": "npx prettier --write 'src/**/*.{ts,tsx}'",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
-    "test:ci": "run-s chain:test hub:test"
+    "test:ci": "yarn hub:test"
   }
 }
