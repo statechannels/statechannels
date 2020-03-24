@@ -1,5 +1,5 @@
 {
-  "name": "@statechannels/tracker",
+  "name": "@statechannels/web3torrent-tracker",
   "version": "0.0.0",
   "dependencies": {
     "bittorrent-tracker": "9.14.4",
