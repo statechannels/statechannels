@@ -77,7 +77,7 @@ beforeEach(async () => {
   aStore = new TestStore(chain);
   await aStore.initialize([wallet1.privateKey]);
   bStore = new TestStore(chain);
-  bStore.initialize([wallet2.privateKey]);
+  await bStore.initialize([wallet2.privateKey]);
   const hubStore = new SimpleHub(wallet3.privateKey);
 
   [aStore, bStore].forEach(async (store: TestStore) => {
@@ -87,7 +87,7 @@ beforeEach(async () => {
     const ledgerEntry = await store.createEntry(
       allSignState(firstState(allocation, ledgerChannel))
     );
-    store.setLedgerByEntry(ledgerEntry);
+    await store.setLedgerByEntry(ledgerEntry);
   });
 
   subscribeToMessages({
