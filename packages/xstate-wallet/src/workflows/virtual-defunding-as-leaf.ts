@@ -1,11 +1,11 @@
 import {checkThat, getDataAndInvoke} from '../utils';
-import {isVirtualFunding, isIndirectFunding, isGuarantee} from '../store/memory-store';
+
 import {SupportState} from '.';
 import {isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
 import {OutcomeIdx, ParticipantIdx} from './virtual-funding-as-leaf';
 import {StateNodeConfig, assign, DoneInvokeEvent, Machine} from 'xstate';
 
-import {Store} from '../store';
+import {Store, isVirtualFunding, isIndirectFunding, isGuarantee} from '../store';
 import {nextState} from '../store/state-utils';
 import _ from 'lodash';
 

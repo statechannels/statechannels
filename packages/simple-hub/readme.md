@@ -29,7 +29,7 @@ To connect to the `hub` from the browser `wallet`, the `hub` and the browser `wa
 - Point to the same shared local Ganache server. This should work without any modifications. To see which ports are being used by the `hub` and `wallet`, and to verify they are the same, you can reference the `GANACHE_PORT` environment variable which by default is set in `.env` of each package.
 - Point to the same contract addresses on Ganache. This will be the case if the hub and the client wallet point to the same Ganache server.
 
-You will also need to make sure that the hub's blockchain address has funds. The default hub blockchain address is calculated from the HUB_CHAIN_PK in [constants.ts](https://github.com/statechannels/monorepo/blob/master/packages/simple-hub/src/constants.ts#L13). This address will have funds by default. Ganache is started with [these funded private keys](https://github.com/statechannels/monorepo/blob/hub-address/packages/devtools/src/constants.ts). Consequently, feel free to substitute any of these private keys for `HUB_CHAIN_PK`.
+You will also need to make sure that the hub's blockchain address has funds. The default hub blockchain address is calculated from the HUB_CHAIN_PK in [constants.ts](https://github.com/statechannels/monorepo/blob/master/packages/simple-hub/src/constants.ts#L13). This address will have funds by default. Ganache is started with [these funded private keys](https://github.com/statechannels/monorepo/blob/master/packages/devtools/src/constants.ts). Consequently, feel free to substitute any of these private keys for `HUB_CHAIN_PK`.
 
 ## Testing
 
@@ -42,29 +42,18 @@ yarn test:ci
 
 ## Deploying
 
-Heroku runs a production version of the build `Dockerfile.hub.staging` in the root of the repo. To create a deployment you must:
+Heroku runs a production version of the build `docker/simple-hub.dockerfile`. To create a deployment run `docker/build-push-release.sh`
 
-**Build the Dockerfile locally, by running**
+## Running locally
 
-```bash
-docker build -t registry.heroku.com/simple-hub-staging/simple-hub -f Dockerfile.simple-hub.staging .
-```
-
-**Push the container to the Heroku Container Registry**
-
-```bash
-docker push registry.heroku.com/simple-hub-staging/simple-hub
-```
-
-**Release the container on Heroku (a.k.a., trigger the dyno to update)**
-
-```bash
-heroku container:release -a simple-hub-staging simple-hub
-```
-
-To run a test deploy, run
+To start a hub in a docker container locally with development environment variables:
 
 ```
-// Starts a local server serving the app
-$ NODE_ENV=production heroku local
+docker run -it --env-file .env.development registry.heroku.com/simple-hub-staging/simple-hub:latest
+```
+
+To start a docker container locally without starting the hub, append `bash` to the command above. This is handy when you would like to poke around the container or try running commands in the container:
+
+```
+docker run -it --env-file .env.development registry.heroku.com/simple-hub-staging/simple-hub:latest bash
 ```

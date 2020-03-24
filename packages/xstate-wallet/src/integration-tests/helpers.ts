@@ -1,7 +1,6 @@
 import {MessagingServiceInterface, MessagingService} from '../messaging';
 import {Wallet} from 'ethers/wallet';
-import {MemoryStore} from '../store/memory-store';
-import {Store} from '../store';
+import {Store, XstateStore} from '../store';
 import {ChannelWallet, logTransition} from '../channel-wallet';
 import {Participant} from '../store/types';
 import {Chain} from '../chain';
@@ -91,16 +90,26 @@ export class Player {
   get participantId(): string {
     return this.signingAddress;
   }
-  constructor(privateKey: string, private id: string, chain: Chain) {
+  private constructor(privateKey: string, private id: string, chain: Chain) {
     this.privateKey = privateKey;
-    this.store = new MemoryStore([this.privateKey], chain);
+    this.store = new XstateStore(chain);
+
+    // TODO: It's possible this could lead to the player being used before the store is ready
+    // but since its only a test helper we're probably ok
+    this.store.initialize([this.privateKey]);
     this.messagingService = new MessagingService(this.store);
     this.channelWallet = new ChannelWallet(this.store, this.messagingService, id);
+  }
+
+  static async createPlayer(privateKey: string, id: string, chain: Chain): Promise<Player> {
+    const player = new Player(privateKey, id, chain);
+    await player.store.initialize([privateKey]);
+    return player;
   }
 }
 
 export function hookUpMessaging(playerA: Player, playerB: Player) {
-  playerA.channelWallet.onSendMessage(message => {
+  playerA.channelWallet.onSendMessage(async message => {
     if (isNotification(message) && message.method === 'MessageQueued') {
       const pushMessageRequest = generatePushMessage(message.params);
       // TODO: This is failing with TypeError: Converting circular structure to JSON
@@ -108,7 +117,7 @@ export function hookUpMessaging(playerA: Player, playerB: Player) {
       if (process.env.ADD_LOGS && false) {
         console.log(`MESSAGE A->B: ${JSON.stringify(pushMessageRequest)}`);
       }
-      playerB.channelWallet.pushMessage(pushMessageRequest);
+      await playerB.channelWallet.pushMessage(pushMessageRequest);
     }
   });
 

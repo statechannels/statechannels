@@ -29,13 +29,17 @@ class ChannelProvider implements ChannelProviderInterface {
   };
   protected url = '';
 
+  public signingAddress?: string;
+  public selectedAddress?: string;
+  public walletVersion?: string;
+
   constructor() {
     this.events = new EventEmitter<EventType>();
     this.ui = new UIService();
     this.messaging = new MessagingService();
   }
 
-  async enable(url?: string) {
+  async mountWalletComponent(url?: string) {
     window.addEventListener('message', this.onMessage.bind(this));
     if (url) {
       this.url = url;
@@ -43,6 +47,13 @@ class ChannelProvider implements ChannelProviderInterface {
     this.ui.setUrl(this.url);
     this.messaging.setUrl(this.url);
     await this.ui.mount();
+    console.info('Application successfully mounted Wallet iFrame inside DOM.');
+    await this.populateProviderProperties();
+  }
+
+  async enable() {
+    await this.send({method: 'EnableEthereum', params: {}});
+    await this.populateProviderProperties();
   }
 
   async send(request: MethodRequestType): Promise<MethodResponseType[MethodRequestType['method']]> {
@@ -76,6 +87,12 @@ class ChannelProvider implements ChannelProviderInterface {
 
   off: OffType = (method, params) => this.events.off(method, params);
 
+  private async populateProviderProperties() {
+    this.signingAddress = await this.send({method: 'GetAddress', params: {}});
+    this.selectedAddress = await this.send({method: 'GetEthereumSelectedAddress', params: {}});
+    this.walletVersion = await this.send({method: 'WalletVersion', params: {}});
+  }
+
   protected async onMessage(event: MessageEvent) {
     const message = event.data;
     if (!message.jsonrpc) {
@@ -97,6 +114,7 @@ class ChannelProvider implements ChannelProviderInterface {
     }
   }
 }
+
 const channelProvider = new ChannelProvider();
 
 export {channelProvider};

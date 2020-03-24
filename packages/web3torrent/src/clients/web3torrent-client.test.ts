@@ -3,7 +3,7 @@ import {PaidStreamingTorrent, WebTorrentAddInput, WebTorrentSeedInput} from '../
 import {TorrentCallback} from '../library/web3torrent-lib';
 import {Status} from '../types';
 import {createMockTorrent, createMockTorrentPeers} from '../utils/test-utils';
-import {download, getTorrentPeers, remove, upload, web3torrent} from './web3torrent-client';
+import {download, getTorrentPeers, cancel, upload, web3torrent} from './web3torrent-client';
 
 describe('Web3TorrentClient', () => {
   describe('download()', () => {
@@ -90,7 +90,7 @@ describe('Web3TorrentClient', () => {
 
     beforeEach(() => {
       removeSpy = jest
-        .spyOn(web3torrent, 'remove')
+        .spyOn(web3torrent, 'cancel')
         .mockImplementation(
           (_: string | WebTorrent.Torrent | Buffer, callback?: (err: string) => void) => {
             if (callback) {
@@ -100,9 +100,9 @@ describe('Web3TorrentClient', () => {
         );
     });
 
-    it('should return the ID of the removed client', async () => {
+    it('should return the infohash of the paused client', async () => {
       const mockInfoHash = '124203';
-      const result = await remove(mockInfoHash);
+      const result = await cancel(mockInfoHash);
 
       expect(result).toEqual(mockInfoHash);
     });

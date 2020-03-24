@@ -100,11 +100,11 @@ describe('FakeChannelClient', () => {
 
   beforeEach(() => {
     providerA = new FakeChannelProvider();
-    providerA.address = participantA.signingAddress;
+    providerA.internalAddress = participantA.signingAddress;
     providerB = new FakeChannelProvider();
-    providerB.address = participantB.signingAddress;
+    providerB.internalAddress = participantB.signingAddress;
     providerC = new FakeChannelProvider();
-    providerC.address = participantC.signingAddress;
+    providerC.internalAddress = participantC.signingAddress;
 
     clientA = new ChannelClient(providerA);
     clientB = new ChannelClient(providerB);

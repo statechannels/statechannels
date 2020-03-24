@@ -36,9 +36,15 @@ if (process.env.REACT_APP_FAKE_CHANNEL_PROVIDER === 'true') {
 // The beneficiary proposes the channel, but accepts payments
 // The payer joins the channel, and makes payments
 export class PaymentChannelClient {
-  mySigningAddress?: string;
-  myEthereumSelectedAddress?: string; // this state can be inspected to infer whether we need to get the user to "Connect With MetaMask" or not.
   channelCache: Record<string, ChannelState> = {};
+
+  get mySigningAddress(): string | undefined {
+    return this.channelClient.signingAddress;
+  }
+
+  get myEthereumSelectedAddress(): string | undefined {
+    return this.channelClient.selectedAddress;
+  }
 
   constructor(private readonly channelClient: ChannelClientInterface) {
     this.channelClient.onChannelUpdated(channelResult => {
@@ -78,24 +84,6 @@ export class PaymentChannelClient {
     this.insertIntoChannelCache(convertToChannelState(channelResult));
 
     return convertToChannelState(channelResult);
-  }
-
-  async walletVersion() {
-    await this.channelClient.walletVersion();
-  }
-
-  async enableEthereum() {
-    await this.channelClient.enableEthereum();
-  }
-
-  async getAddress() {
-    this.mySigningAddress = await this.channelClient.getAddress();
-    return this.mySigningAddress;
-  }
-
-  async getEthereumSelectedAddress() {
-    this.myEthereumSelectedAddress = await this.channelClient.getEthereumSelectedAddress();
-    return this.myEthereumSelectedAddress;
   }
 
   onMessageQueued(callback: (message: Message) => void) {

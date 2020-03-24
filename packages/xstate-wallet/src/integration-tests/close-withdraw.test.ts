@@ -13,13 +13,13 @@ jest.setTimeout(30000);
 it('allows for a wallet to close the ledger channel with the hub and withdraw', async () => {
   const fakeChain = new FakeChain();
 
-  const playerA = new Player(
+  const playerA = await Player.createPlayer(
     '0x275a2e2cd9314f53b42246694034a80119963097e3adf495fbf6d821dc8b6c8e',
     'PlayerA',
     fakeChain
   );
 
-  const hub = new Player(
+  const hub = await Player.createPlayer(
     '0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29',
     'Hub',
     fakeChain
@@ -38,7 +38,10 @@ it('allows for a wallet to close the ledger channel with the hub and withdraw', 
   });
 
   await playerA.store.setLedger(ledgerChannel.channelId);
-
+  await hub.store
+    .channelUpdatedFeed(ledgerChannel.channelId)
+    .pipe(first())
+    .toPromise();
   await hub.store.setLedger(ledgerChannel.channelId);
   await hub.store.signAndAddState(ledgerChannel.channelId, ledgerChannel.latest);
   await playerA.store.chain.deposit(ledgerChannel.channelId, '0x0', '0x10');
@@ -85,6 +88,6 @@ it('allows for a wallet to close the ledger channel with the hub and withdraw', 
   expect(chainView.amount.eq(0)).toBe(true);
 
   // Check the channel is finalized
-  const latestEntry = playerA.store.getEntry(ledgerChannel.channelId);
-  expect((await latestEntry).isFinalized).toBe(true);
+  const latestEntry = await playerA.store.getEntry(ledgerChannel.channelId);
+  expect(latestEntry.isFinalized).toBe(true);
 });

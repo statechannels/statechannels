@@ -83,6 +83,9 @@ describe('ChannelClient with FakeChannelProvider', () => {
     providerA = new FakeChannelProvider();
     providerB = new FakeChannelProvider();
 
+    providerA.enable();
+    providerB.enable();
+
     clientA = new ChannelClient(providerA);
     clientB = new ChannelClient(providerB);
 
@@ -129,8 +132,8 @@ describe('ChannelClient with FakeChannelProvider', () => {
       expect(clientAChannelState).toEqual(states['proposed']);
 
       proposalMessage = {
-        sender: await clientA.getAddress(),
-        recipient: await clientB.getAddress(),
+        sender: clientA.signingAddress as string,
+        recipient: clientB.signingAddress as string,
         data: clientAChannelState
       };
     });
