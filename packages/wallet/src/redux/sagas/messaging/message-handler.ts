@@ -89,8 +89,13 @@ function* accountsChangedSaga() {
 function* handleMessage(payload: RequestObject) {
   const {id} = payload;
   switch (payload.method) {
-    case "WalletVersion":
-      yield fork(messageSender, outgoingMessageActions.walletVersionResponse({id}));
+    case "GetWalletInformation":
+      const address = yield select(getAddress);
+      const ethereumSelectedAddress = yield accountsChangedSaga();
+      yield fork(
+        messageSender,
+        outgoingMessageActions.getWalletInformationResponse({id, address, ethereumSelectedAddress})
+      );
       break;
     case "EnableEthereum":
       //  ask metamask permission to access accounts
@@ -98,24 +103,15 @@ function* handleMessage(payload: RequestObject) {
         yield call([window.ethereum, "enable"]);
         yield fork(
           messageSender,
-          outgoingMessageActions.addressResponse({id, address: yield accountsChangedSaga()})
+          outgoingMessageActions.getWalletInformationResponse({
+            id,
+            address: yield select(getAddress),
+            ethereumSelectedAddress: yield accountsChangedSaga()
+          })
         );
       } catch {
         yield fork(messageSender, outgoingMessageActions.ethereumAddressError({id}));
       }
-      break;
-    case "GetAddress":
-      const address = yield select(getAddress);
-      yield fork(messageSender, outgoingMessageActions.addressResponse({id, address}));
-      break;
-    case "GetEthereumSelectedAddress":
-      //  block until accounts changed
-      //  (indicating user acceptance)
-      const ethereumSelectedAddress = yield accountsChangedSaga();
-      yield fork(
-        messageSender,
-        outgoingMessageActions.ethereumAddressResponse({id, ethereumSelectedAddress})
-      );
       break;
     case "CreateChannel":
       yield handleCreateChannelMessage(payload);

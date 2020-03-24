@@ -10,7 +10,7 @@ import {AddressZero} from "ethers/constants";
 
 import {messageHandler} from "../message-handler";
 import * as walletStates from "../../../state";
-import {addressResponse} from "../outgoing-api-actions";
+import {getWalletInformationResponse} from "../outgoing-api-actions";
 
 import {messageSender} from "../message-sender";
 
@@ -34,10 +34,10 @@ describe("message listener", () => {
     address: wallet.address
   });
 
-  it("handles an address request", () => {
+  it("handles an information request", () => {
     const requestMessage = {
       jsonrpc: "2.0",
-      method: "GetAddress",
+      method: "GetWalletInformation",
       id: 1,
       params: {}
     };
@@ -47,7 +47,8 @@ describe("message listener", () => {
     }
 
     const ethereum = {
-      enable
+      enable,
+      selectedAddress: "abc123"
     };
 
     // mock out window.ethereum.enable
@@ -61,7 +62,14 @@ describe("message listener", () => {
         .withState(initialState)
         // Mock out the fork call so we don't actually try to post the message
         .provide([[matchers.fork.fn(messageSender), 0]])
-        .fork(messageSender, addressResponse({id: 1, address: wallet.address}))
+        .fork(
+          messageSender,
+          getWalletInformationResponse({
+            id: 1,
+            address: wallet.address,
+            ethereumSelectedAddress: "abc123"
+          })
+        )
         .run()
     );
   });

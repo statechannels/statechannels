@@ -9,7 +9,6 @@ import {channelFromStates} from "../../../channel-store/channel-state/__tests__"
 import {EMPTY_SHARED_DATA, setChannel, SharedData} from "../../../state";
 import {messageSender} from "../message-sender";
 import {
-  addressResponse,
   channelProposedEvent,
   channelUpdatedEvent,
   createChannelResponse,
@@ -23,7 +22,8 @@ import {
   unknownSigningAddress,
   updateChannelResponse,
   closeChannelResponse,
-  getStateResponse
+  getStateResponse,
+  getWalletInformationResponse
 } from "../outgoing-api-actions";
 
 describe("message sender", () => {
@@ -220,17 +220,25 @@ describe("message sender", () => {
     });
   });
 
-  it("sends a correct response message for WALLET.ADDRESS_RESPONSE", async () => {
+  it("sends a correct response message for WALLET.GET_WALLET_INFORMATION_RESPONSE", async () => {
     const address = Wallet.createRandom().address;
-    const message = addressResponse({id: 5, address});
+    const message = getWalletInformationResponse({
+      id: 5,
+      address,
+      ethereumSelectedAddress: address
+    });
     const {effects} = await expectSaga(messageSender, message)
       .provide([[matchers.call.fn(window.parent.postMessage), 0]])
-
       .run();
+
     expect(effects.call[0].payload.args[0]).toMatchObject({
       jsonrpc: "2.0",
       id: 5,
-      result: address
+      result: {
+        signingAddress: address,
+        ethereumSelectedAddress: address,
+        walletVersion: "wallet@VersionTBD"
+      }
     });
   });
 

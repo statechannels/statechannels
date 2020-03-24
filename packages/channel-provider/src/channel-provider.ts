@@ -48,12 +48,23 @@ class ChannelProvider implements ChannelProviderInterface {
     this.messaging.setUrl(this.url);
     await this.ui.mount();
     console.info('Application successfully mounted Wallet iFrame inside DOM.');
-    await this.populateProviderProperties();
+    const {signingAddress, selectedAddress, walletVersion} = await this.send({
+      method: 'GetWalletInformation',
+      params: {}
+    });
+    this.signingAddress = signingAddress;
+    this.selectedAddress = selectedAddress;
+    this.walletVersion = walletVersion;
   }
 
   async enable() {
-    await this.send({method: 'EnableEthereum', params: {}});
-    await this.populateProviderProperties();
+    const {signingAddress, selectedAddress, walletVersion} = await this.send({
+      method: 'EnableEthereum',
+      params: {}
+    });
+    this.signingAddress = signingAddress;
+    this.selectedAddress = selectedAddress;
+    this.walletVersion = walletVersion;
   }
 
   async send(request: MethodRequestType): Promise<MethodResponseType[MethodRequestType['method']]> {
@@ -86,12 +97,6 @@ class ChannelProvider implements ChannelProviderInterface {
   on: OnType = (method, params) => this.events.on(method, params);
 
   off: OffType = (method, params) => this.events.off(method, params);
-
-  private async populateProviderProperties() {
-    this.signingAddress = await this.send({method: 'GetAddress', params: {}});
-    this.selectedAddress = await this.send({method: 'GetEthereumSelectedAddress', params: {}});
-    this.walletVersion = await this.send({method: 'WalletVersion', params: {}});
-  }
 
   protected async onMessage(event: MessageEvent) {
     const message = event.data;

@@ -97,22 +97,22 @@ interface Balance {
   hubAmount: string;
 }
 
-// WalletVersion
-export type WalletVersionRequest = JsonRpcRequest<'WalletVersion', {}>;
-export type WalletVersionResponse = JsonRpcResponse<string>;
+// GetWalletInformation
+export type GetWalletInformationRequest = JsonRpcRequest<'GetWalletInformation', {}>;
+export type GetWalletInformationResponse = JsonRpcResponse<{
+  signingAddress: Address;
+  selectedAddress?: Address;
+  walletVersion: string;
+}>;
 
 // EnableEthereum
 export type EnableEthereumRequest = JsonRpcRequest<'EnableEthereum', {}>;
-export type EnableEthereumResponse = JsonRpcResponse<Address>;
+export type EnableEthereumResponse = JsonRpcResponse<{
+  signingAddress: Address;
+  selectedAddress: Address;
+  walletVersion: string;
+}>;
 export type EnableEthereumError = JsonRpcError<100, 'Ethereum Not Enabled'>;
-
-// GetAddress
-export type GetAddressRequest = JsonRpcRequest<'GetAddress', {}>; // todo: what are params
-export type GetAddressResponse = JsonRpcResponse<Address>;
-
-// GetEthereumSelectedAddress
-export type GetEthereumSelectedAddressRequest = JsonRpcRequest<'GetEthereumSelectedAddress', {}>; // todo: what are params
-export type GetEthereumSelectedAddressResponse = JsonRpcResponse<Address>;
 
 // CreateChannel
 export interface CreateChannelParams {
@@ -219,12 +219,10 @@ export type NotificationType = {
 };
 
 export type Request =
-  | GetAddressRequest
-  | GetEthereumSelectedAddressRequest
   | CreateChannelRequest
   | JoinChannelRequest
   | UpdateChannelRequest
-  | WalletVersionRequest
+  | GetWalletInformationRequest
   | EnableEthereumRequest
   | GetStateRequest
   | PushMessageRequest
@@ -235,12 +233,10 @@ export type Request =
   | CloseAndWithdrawRequest;
 
 export type Response =
-  | GetAddressResponse
-  | GetEthereumSelectedAddressResponse
   | CreateChannelResponse
   | JoinChannelResponse
   | UpdateChannelResponse
-  | WalletVersionResponse
+  | GetWalletInformationResponse
   | EnableEthereumResponse
   | GetStateResponse
   | PushMessageResponse

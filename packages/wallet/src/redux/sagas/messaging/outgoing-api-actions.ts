@@ -20,12 +20,14 @@ export const createChannelResponse: ActionConstructor<CreateChannelResponse> = p
   type: "WALLET.CREATE_CHANNEL_RESPONSE"
 });
 
-export interface WalletVersionResponse extends ApiResponseAction {
-  type: "WALLET.WALLET_VERSION_RESPONSE";
+export interface GetWalletInformationResponse extends ApiResponseAction {
+  type: "WALLET.GET_WALLET_INFORMATION_RESPONSE";
+  address: string;
+  ethereumSelectedAddress: string;
 }
-export const walletVersionResponse: ActionConstructor<WalletVersionResponse> = p => ({
+export const getWalletInformationResponse: ActionConstructor<GetWalletInformationResponse> = p => ({
   ...p,
-  type: "WALLET.WALLET_VERSION_RESPONSE"
+  type: "WALLET.GET_WALLET_INFORMATION_RESPONSE"
 });
 
 export interface GetStateResponse extends ApiResponseAction {
@@ -54,16 +56,6 @@ export const challengeChannelResponse: ActionConstructor<ChallengeChannelRespons
   type: "WALLET.CHALLENGE_CHANNEL_RESPONSE"
 });
 
-export interface AddressResponse extends ApiResponseAction {
-  type: "WALLET.ADDRESS_RESPONSE";
-  address: string;
-}
-
-export const addressResponse: ActionConstructor<AddressResponse> = p => ({
-  ...p,
-  type: "WALLET.ADDRESS_RESPONSE"
-});
-
 export interface EthereumAddressError extends ApiResponseAction {
   type: "WALLET.ETHEREUM_ADDRESS_ERROR";
 }
@@ -71,16 +63,6 @@ export interface EthereumAddressError extends ApiResponseAction {
 export const ethereumAddressError: ActionConstructor<EthereumAddressError> = p => ({
   ...p,
   type: "WALLET.ETHEREUM_ADDRESS_ERROR"
-});
-
-export interface EthereumAddressResponse extends ApiResponseAction {
-  type: "WALLET.ETHEREUM_ADDRESS_RESPONSE";
-  ethereumSelectedAddress: string;
-}
-
-export const ethereumAddressResponse: ActionConstructor<EthereumAddressResponse> = p => ({
-  ...p,
-  type: "WALLET.ETHEREUM_ADDRESS_RESPONSE"
 });
 
 export interface UnknownSigningAddress extends ApiResponseAction {
@@ -220,9 +202,7 @@ export const closeChannelResponse: ActionConstructor<CloseChannelResponse> = p =
 });
 
 export type OutgoingApiAction =
-  | AddressResponse
-  | WalletVersionResponse
-  | EthereumAddressResponse
+  | GetWalletInformationResponse
   | CreateChannelResponse
   | UpdateChannelResponse
   | GetStateResponse

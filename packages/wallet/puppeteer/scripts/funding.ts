@@ -3,7 +3,7 @@ import {
   setUpBrowser,
   loadWallet,
   pushMessage,
-  sendGetAddress,
+  sendGetWalletInformation,
   sendCreateChannel,
   sendJoinChannel,
   createMessageHandler,
@@ -41,8 +41,8 @@ require("../../config/env");
 
   const playerAAddressPromise: Promise<any> = walletMessages.once(MessageType.PlayerAResult);
   const playerBAddressPromise: Promise<any> = walletMessages.once(MessageType.PlayerBResult);
-  await sendGetAddress(walletA);
-  await sendGetAddress(walletB);
+  await sendGetWalletInformation(walletA);
+  await sendGetWalletInformation(walletB);
   const playerAAddress = (await playerAAddressPromise).result;
   const playerBAddress = (await playerBAddressPromise).result;
   console.log("Player A address is ", playerAAddress);

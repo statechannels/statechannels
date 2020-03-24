@@ -1,15 +1,16 @@
+import Emittery from "emittery";
+
 import {
   loadWallet,
   setUpBrowser,
   pushMessage,
-  sendGetAddress,
+  sendGetWalletInformation,
   sendCreateChannel,
   sendJoinChannel,
   MessageEventTypes,
   createMessageHandler,
   MessageType
 } from "../helpers";
-import Emittery from "emittery";
 
 jest.setTimeout(60000);
 
@@ -56,7 +57,7 @@ describe("Funding", () => {
   let playerAAddress;
   it("gets As address", async () => {
     const getAddressPromise: Promise<any> = walletMessages.once(MessageType.PlayerAResult);
-    await sendGetAddress(walletA);
+    await sendGetWalletInformation(walletA);
     playerAAddress = (await getAddressPromise).result;
     expect(playerAAddress).toMatch(/^0x[a-fA-F0-9]{40}$/);
   });
@@ -64,7 +65,7 @@ describe("Funding", () => {
   let playerBAddress;
   it("gets Bs address", async () => {
     const getAddressPromise: Promise<any> = walletMessages.once(MessageType.PlayerBResult);
-    await sendGetAddress(walletB);
+    await sendGetWalletInformation(walletB);
     playerBAddress = (await getAddressPromise).result;
     expect(playerBAddress).toMatch(/^0x[a-fA-F0-9]{40}$/);
   });

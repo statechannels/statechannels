@@ -29,28 +29,26 @@ export function* messageSender(action: OutgoingApiAction) {
 function* createResponseMessage(action: OutgoingApiAction) {
   switch (action.type) {
     case "WALLET.JOIN_CHANNEL_RESPONSE":
-      return jrs.success(action.id, yield getChannelInfo(action.channelId));
     case "WALLET.CREATE_CHANNEL_RESPONSE":
-      return jrs.success(action.id, yield getChannelInfo(action.channelId));
     case "WALLET.CLOSE_CHANNEL_RESPONSE":
-      return jrs.success(action.id, yield getChannelInfo(action.channelId));
     case "WALLET.UPDATE_CHANNEL_RESPONSE":
-      return jrs.success(action.id, yield getChannelInfo(action.channelId));
     case "WALLET.GET_STATE_RESPONSE":
-      return jrs.success(action.id, yield getChannelInfo(action.channelId));
     case "WALLET.CHALLENGE_CHANNEL_RESPONSE":
       return jrs.success(action.id, yield getChannelInfo(action.channelId));
-    case "WALLET.ADDRESS_RESPONSE":
-      return jrs.success(action.id, action.address);
-    case "WALLET.WALLET_VERSION_RESPONSE":
-      return jrs.success(action.id, "wallet@VersionTBD"); // TODO: Inject git or build information
-    case "WALLET.ETHEREUM_ADDRESS_RESPONSE":
-      return jrs.success(action.id, action.ethereumSelectedAddress);
+
+    case "WALLET.GET_WALLET_INFORMATION_RESPONSE":
+      return jrs.success(action.id, {
+        signingAddress: action.address,
+        selectedAddress: action.ethereumSelectedAddress,
+        walletVersion: "wallet@VersionTBD" // TODO: Inject git or build information
+      });
+
     case "WALLET.ETHEREUM_ADDRESS_ERROR":
       return jrs.error(
         action.id,
         new jrs.JsonRpcError("Wallet hit an error connecting to window.ethereum", 1001)
       );
+
     case "WALLET.NO_CONTRACT_ERROR":
       return jrs.error(action.id, new jrs.JsonRpcError("Invalid app definition", 1001));
     case "WALLET.VALIDATION_ERROR":

@@ -174,12 +174,12 @@ export async function sendCreateChannel(page: puppeteer.Page, playerAAddress, pl
   );
 }
 
-export async function sendGetAddress(page: puppeteer.Page) {
+export async function sendGetWalletInformation(page: puppeteer.Page) {
   await page.evaluate(() => {
     window.postMessage(
       {
         jsonrpc: "2.0",
-        method: "GetAddress",
+        method: "GetWalletInformation",
         id: 1,
         params: {}
       },
@@ -257,8 +257,8 @@ export async function completeFunding(
   const playerAAddressPromise: Promise<any> = walletMessages.once(MessageType.PlayerAResult);
   const playerBAddressPromise: Promise<any> = walletMessages.once(MessageType.PlayerBResult);
 
-  await sendGetAddress(walletA);
-  await sendGetAddress(walletB);
+  await sendGetWalletInformation(walletA);
+  await sendGetWalletInformation(walletB);
 
   const playerAAddress = (await playerAAddressPromise).result;
   const playerBAddress = (await playerBAddressPromise).result;
