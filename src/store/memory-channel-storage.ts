@@ -242,12 +242,12 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
       if (state.challengeDuration) {
         state.challengeDuration = parserFunction(state.challengeDuration);
       }
-      state.outcome = MemoryChannelStoreEntry.toogleBigNumberOutcome(state.outcome, parserFunction);
+      state.outcome = MemoryChannelStoreEntry.toggleBigNumberOutcome(state.outcome, parserFunction);
     }
     return stateVariables;
   }
 
-  private static toogleBigNumberOutcome(
+  private static toggleBigNumberOutcome(
     outcome,
     parserFunction: (data: string | BigNumber) => BigNumber | string
   ) {
@@ -263,7 +263,7 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
       return {
         ...outcome,
         simpleAllocations: outcome.simpleAllocations.map(sA =>
-          MemoryChannelStoreEntry.toogleBigNumberOutcome(sA, parserFunction)
+          MemoryChannelStoreEntry.toggleBigNumberOutcome(sA, parserFunction)
         )
       };
     } else {
