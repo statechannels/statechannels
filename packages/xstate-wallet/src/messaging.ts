@@ -114,18 +114,12 @@ export class MessagingService implements MessagingServiceInterface {
     const ourAddress = await this.store.getAddress();
     const sender = ourAddress;
     const objectiveRecipients =
-      message.objectives
-        ?.map(o => o.participants)
-        .reduce((a, b) => {
-          return a.concat(b);
-        }) || [];
+      message.objectives?.map(o => o.participants).reduce((a, b) => a.concat(b)) || [];
     const stateRecipients =
       message.signedStates?.map(ss => ss.participants).reduce((a, b) => a.concat(b)) || [];
 
     const filteredRecipients = [...new Set((objectiveRecipients || []).concat(stateRecipients))]
-      .filter(p => {
-        return p.signingAddress !== sender;
-      })
+      .filter(p => p.signingAddress !== sender)
       .map(p => p.participantId);
 
     filteredRecipients.forEach(recipient => {

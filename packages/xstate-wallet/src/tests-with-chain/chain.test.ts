@@ -29,8 +29,8 @@ let ETHAssetHolder: Contract;
 let service: Interpreter<any, any, any, any>;
 
 // this service to be invoked by a protocol xstate machine
-const subscribeDepositEvent = (ctx: Init) => {
-  return store.chain.chainUpdatedFeed(ctx.channelId).pipe(
+const subscribeDepositEvent = (ctx: Init) =>
+  store.chain.chainUpdatedFeed(ctx.channelId).pipe(
     map((chainInfo: ChannelChainInfo) => {
       if (chainInfo.amount.gte(ctx.fundedAt)) {
         return 'FUNDED';
@@ -41,7 +41,6 @@ const subscribeDepositEvent = (ctx: Init) => {
       }
     })
   );
-};
 
 const fundedEventSent = jest.fn();
 const safeToDepositEventSent = jest.fn();

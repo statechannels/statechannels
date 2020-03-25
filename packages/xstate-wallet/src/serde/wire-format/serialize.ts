@@ -10,9 +10,7 @@ import {calculateChannelId} from '../../store/state-utils';
 import {BigNumber, hexZeroPad, hexlify} from 'ethers/utils';
 
 export function serializeMessage(message: Message, recipient: string, sender: string): WireMessage {
-  const signedStates = (message.signedStates || []).map(ss => {
-    return serializeState(ss);
-  });
+  const signedStates = (message.signedStates || []).map(ss => serializeState(ss));
   const {objectives} = message;
   return {
     recipient,

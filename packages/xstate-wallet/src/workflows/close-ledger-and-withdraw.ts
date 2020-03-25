@@ -123,30 +123,28 @@ const createObjective = (store: Store): WorkflowServices['createObjective'] => a
 const options = (
   store: Store,
   messagingService: MessagingServiceInterface
-): {services: WorkflowServices; actions: WorkflowActions; guards: WorkflowGuards} => {
-  return {
-    services: {
-      getFinalState: getFinalState(store),
-      supportState: SupportState.machine(store),
-      submitWithdrawTransaction: submitWithdrawTransaction(store),
-      createObjective: createObjective(store)
+): {services: WorkflowServices; actions: WorkflowActions; guards: WorkflowGuards} => ({
+  services: {
+    getFinalState: getFinalState(store),
+    supportState: SupportState.machine(store),
+    submitWithdrawTransaction: submitWithdrawTransaction(store),
+    createObjective: createObjective(store)
+  },
+  actions: {
+    displayUi: () => {
+      sendDisplayMessage('Show');
     },
-    actions: {
-      displayUi: () => {
-        sendDisplayMessage('Show');
-      },
-      hideUi: () => {
-        sendDisplayMessage('Hide');
-      },
-      sendResponse: async context =>
-        await messagingService.sendResponse(context.requestId, {success: true}),
-      assignLedgerId: async (_, event) => assign({ledgerId: event.data.data.ledgerId})
+    hideUi: () => {
+      sendDisplayMessage('Hide');
     },
-    guards: {
-      doesChannelIdExist: context => !!context.ledgerId
-    }
-  };
-};
+    sendResponse: async context =>
+      await messagingService.sendResponse(context.requestId, {success: true}),
+    assignLedgerId: async (_, event) => assign({ledgerId: event.data.data.ledgerId})
+  },
+  guards: {
+    doesChannelIdExist: context => !!context.ledgerId
+  }
+});
 export const workflow = (
   store: Store,
   messagingService: MessagingServiceInterface,

@@ -21,12 +21,8 @@ import {makeDestination} from '../../utils/outcome';
 import {convertToInternalParticipant} from '../../messaging';
 
 export function deserializeMessage(message: WireMessage): Message {
-  const signedStates = message?.data?.signedStates?.map(ss => {
-    return deserializeState(ss);
-  });
-  const objectives = message?.data?.objectives?.map(objective => {
-    return deserializeObjective(objective);
-  });
+  const signedStates = message?.data?.signedStates?.map(ss => deserializeState(ss));
+  const objectives = message?.data?.objectives?.map(objective => deserializeObjective(objective));
 
   return {
     signedStates,
