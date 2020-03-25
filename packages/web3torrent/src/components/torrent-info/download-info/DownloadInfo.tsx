@@ -6,13 +6,7 @@ import {Torrent} from '../../../types';
 import './DownloadInfo.scss';
 import {ProgressBar} from './progress-bar/ProgressBar';
 import {ChannelState} from '../../../clients/payment-channel-client';
-import {utils} from 'ethers';
 import {ChannelsList} from '../channels-list/ChannelsList';
-import {prettyPrintWei} from '../../../utils/calculateWei';
-import {ChannelBudget} from '../channel-budget/ChannelBudget';
-import {createMockBudget} from '../../../utils/test-utils';
-
-const bigNumberify = utils.bigNumberify;
 
 export type DownloadInfoProps = {
   torrent: Torrent;
@@ -28,9 +22,6 @@ const DownloadInfo: React.FC<DownloadInfoProps> = ({
   const myPayingChannelIds: string[] = Object.keys(channelCache).filter(
     key => channelCache[key].payer === mySigningAddress
   );
-  const totalSpent = myPayingChannelIds
-    .map(id => channelCache[id].beneficiaryBalance)
-    .reduce((a, b) => bigNumberify(a).add(bigNumberify(b)), bigNumberify(0));
 
   const displayProgress = !(torrent.done || torrent.paused);
   return (
@@ -67,16 +58,6 @@ const DownloadInfo: React.FC<DownloadInfoProps> = ({
         channels={_.pickBy(channelCache, ({channelId}) => myPayingChannelIds.includes(channelId))}
         participantType={'payer'}
       />
-      {!totalSpent.isZero() && (
-        <>
-          <section className="totalPayed">
-            <p>
-              Total Spent: <strong className="total-spent">{prettyPrintWei(totalSpent)}</strong>
-            </p>
-          </section>
-          <ChannelBudget budget={createMockBudget()} />
-        </>
-      )}
     </>
   );
 };

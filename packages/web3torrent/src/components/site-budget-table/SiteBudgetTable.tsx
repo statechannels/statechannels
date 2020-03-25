@@ -1,14 +1,14 @@
 import React from 'react';
 import {SiteBudget} from '@statechannels/client-api-schema';
-import {prettyPrintWei} from '../../../utils/calculateWei';
+import {prettyPrintWei} from '../../utils/calculateWei';
 import {utils} from 'ethers';
-import './ChannelBudget.scss';
+import './SiteBudgetTable.scss';
 
-export type ChannelBudgetProps = {
+export type SiteBudgetTableProps = {
   budget: SiteBudget;
 };
 
-class ChannelBudget extends React.Component<ChannelBudgetProps> {
+class SiteBudgetTable extends React.Component<SiteBudgetTableProps> {
   render() {
     const budget = this.props.budget;
     const spent = prettyPrintWei(utils.bigNumberify(budget.budgets[0].inUse.playerAmount));
@@ -25,7 +25,7 @@ class ChannelBudget extends React.Component<ChannelBudgetProps> {
         .add(utils.bigNumberify(budget.budgets[0].free.hubAmount))
     );
     return (
-      <table className="channel-budget-table">
+      <table className="site-budget-table">
         <thead>
           <tr className="budget-info">
             <td className="budget-button">Wallet Action</td>
@@ -47,4 +47,4 @@ class ChannelBudget extends React.Component<ChannelBudgetProps> {
   }
 }
 
-export {ChannelBudget};
+export {SiteBudgetTable};
