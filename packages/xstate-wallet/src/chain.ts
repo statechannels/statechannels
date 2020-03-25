@@ -154,17 +154,8 @@ export class ChainWatcher implements Chain {
     }
   }
 
-  public get selectedAddress(): string {
-    if (window.ethereum) {
-      const destination = window.ethereum.selectedAddress;
-      if (destination) {
-        return destination;
-      } else {
-        throw new Error('window.ethereum is not enabled');
-      }
-    } else {
-      throw new Error('window.ethereum not found');
-    }
+  public get selectedAddress(): string | null {
+    return (window.ethereum && window.ethereum.selectedAddress) || null;
   }
 
   public async finalizeAndWithdraw(finalizationProof: SignedState[]): Promise<void> {
