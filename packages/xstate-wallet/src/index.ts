@@ -28,4 +28,4 @@ import {TestStore} from './workflows/tests/store';
     window.parent.postMessage(m, '*');
     process.env.ADD_LOGS && console.log(`OUTGOING JSONRPC MESSAGE: ${JSON.stringify(m, null, 1)}`);
   });
-});
+})();
