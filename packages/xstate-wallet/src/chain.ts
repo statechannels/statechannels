@@ -37,7 +37,7 @@ export interface Chain {
   ethereumEnable: () => Promise<string>;
   ethereumIsEnabled: boolean;
   finalizeAndWithdraw: (finalizationProof: SignedState[]) => Promise<void>;
-  selectedAddress?: string;
+  selectedAddress: string | null;
 }
 
 // TODO: This chain should be fleshed out enough so it mimics basic chain behavior
