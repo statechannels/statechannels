@@ -66,7 +66,7 @@
           "type": "string"
         },
         "params": {
-          "$ref": "#/definitions/BudgetRequest"
+          "$ref": "#/definitions/TokenBudgetRequest"
         }
       },
       "required": [
@@ -97,34 +97,6 @@
         "id",
         "jsonrpc",
         "result"
-      ],
-      "type": "object"
-    },
-    "BudgetRequest": {
-      "additionalProperties": false,
-      "properties": {
-        "hub": {
-          "$ref": "#/definitions/Participant"
-        },
-        "hubAmount": {
-          "type": "string"
-        },
-        "player": {
-          "$ref": "#/definitions/Participant"
-        },
-        "playerAmount": {
-          "type": "string"
-        },
-        "site": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "hub",
-        "hubAmount",
-        "player",
-        "playerAmount",
-        "site"
       ],
       "type": "object"
     },
@@ -1293,16 +1265,16 @@
           },
           "type": "array"
         },
-        "hub": {
+        "domain": {
           "type": "string"
         },
-        "site": {
+        "hubAddress": {
           "type": "string"
         }
       },
       "required": [
-        "site",
-        "hub",
+        "domain",
+        "hubAddress",
         "budgets"
       ],
       "type": "object"
@@ -1310,68 +1282,33 @@
     "TokenBudget": {
       "additionalProperties": false,
       "properties": {
-        "direct": {
-          "additionalProperties": false,
-          "properties": {
-            "hubAmount": {
-              "type": "string"
-            },
-            "playerAmount": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "playerAmount",
-            "hubAmount"
-          ],
-          "type": "object"
+        "availableReceiveCapacity": {
+          "type": "string"
         },
-        "free": {
-          "additionalProperties": false,
-          "properties": {
-            "hubAmount": {
-              "type": "string"
-            },
-            "playerAmount": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "playerAmount",
-            "hubAmount"
-          ],
-          "type": "object"
+        "availableSendCapacity": {
+          "type": "string"
         },
-        "inUse": {
-          "additionalProperties": false,
-          "properties": {
-            "hubAmount": {
-              "type": "string"
+        "channels": {
+          "additionalProperties": {
+            "additionalProperties": false,
+            "properties": {
+              "amount": {
+                "type": "string"
+              },
+              "status": {
+                "enum": [
+                  "pending",
+                  "free"
+                ],
+                "type": "string"
+              }
             },
-            "playerAmount": {
-              "type": "string"
-            }
+            "required": [
+              "status",
+              "amount"
+            ],
+            "type": "object"
           },
-          "required": [
-            "playerAmount",
-            "hubAmount"
-          ],
-          "type": "object"
-        },
-        "pending": {
-          "additionalProperties": false,
-          "properties": {
-            "hubAmount": {
-              "type": "string"
-            },
-            "playerAmount": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "playerAmount",
-            "hubAmount"
-          ],
           "type": "object"
         },
         "token": {
@@ -1380,10 +1317,33 @@
       },
       "required": [
         "token",
-        "pending",
-        "free",
-        "inUse",
-        "direct"
+        "availableReceiveCapacity",
+        "availableSendCapacity",
+        "channels"
+      ],
+      "type": "object"
+    },
+    "TokenBudgetRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "hub": {
+          "$ref": "#/definitions/Participant"
+        },
+        "requestedReceiveCapacity": {
+          "type": "string"
+        },
+        "requestedSendCapacity": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "hub",
+        "token",
+        "requestedSendCapacity",
+        "requestedReceiveCapacity"
       ],
       "type": "object"
     },

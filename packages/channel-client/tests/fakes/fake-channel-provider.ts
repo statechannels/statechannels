@@ -10,7 +10,7 @@ import log = require('loglevel');
 
 import {EventEmitter} from 'eventemitter3';
 import {
-  BudgetRequest,
+  TokenBudgetRequest,
   CloseAndWithdrawParams,
   ChannelResult,
   CloseChannelParams,
@@ -312,20 +312,18 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     return {success: true};
   }
 
-  private async approveBudgetAndFund(params: BudgetRequest): Promise<SiteBudget> {
-    const {hub, site, playerAmount, hubAmount} = params;
-
+  private async approveBudgetAndFund(params: TokenBudgetRequest): Promise<SiteBudget> {
     // TODO: Does this need to be delayed?
-    const result = {
-      hub: hub.signingAddress,
-      site,
+    const result: SiteBudget = {
+      hubAddress: params.hub.signingAddress,
+      domain: 'web3torrent.statechannels.org',
+
       budgets: [
         {
           token: '0x0',
-          inUse: {playerAmount, hubAmount},
-          free: {playerAmount, hubAmount},
-          pending: {playerAmount, hubAmount},
-          direct: {playerAmount, hubAmount}
+          availableReceiveCapacity: params.requestedReceiveCapacity,
+          availableSendCapacity: params.requestedSendCapacity,
+          channels: {}
         }
       ]
     };

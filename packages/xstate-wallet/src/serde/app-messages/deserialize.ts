@@ -47,8 +47,8 @@ export function deserializeSiteBudget(siteBudget: AppSiteBudget): SiteBudget {
   });
 
   return {
-    site: siteBudget.site,
-    hubAddress: siteBudget.hub,
+    site: siteBudget.domain,
+    hubAddress: siteBudget.hubAddress,
     forAsset: budgets
   };
 }
