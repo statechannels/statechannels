@@ -6,7 +6,7 @@ import {FundLedger} from '../store/types';
 import {checkThat} from '../utils';
 import {isSimpleEthAllocation} from '../utils/outcome';
 
-import {bigNumberify} from 'ethers/utils';
+import {bigNumberify, hexZeroPad} from 'ethers/utils';
 import {ApproveBudgetAndFundResponse} from '@statechannels/client-api-schema/src';
 
 jest.setTimeout(30000);
@@ -69,11 +69,11 @@ it('allows for a wallet to approve a budget and fund with the hub', async () => 
   const allocation = checkThat(ledgerEntry.supported.outcome, isSimpleEthAllocation);
   expect(allocation.allocationItems).toContainEqual({
     destination: hub.destination,
-    amount: bigNumberify('0x5')
+    amount: bigNumberify(hexZeroPad('0x5', 32))
   });
   expect(allocation.allocationItems).toContainEqual({
     destination: playerA.destination,
-    amount: bigNumberify('0x5')
+    amount: bigNumberify(hexZeroPad('0x5', 32))
   });
   // Check that the funds are reflected on chain
   const chainInfo = await playerA.store.chain.getChainInfo(ledgerEntry.channelId);

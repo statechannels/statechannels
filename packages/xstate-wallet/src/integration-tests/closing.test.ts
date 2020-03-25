@@ -1,6 +1,6 @@
 import {FakeChain} from '../chain';
 import {Player, hookUpMessaging, generateCloseRequest} from './helpers';
-import {bigNumberify} from 'ethers/utils';
+import {bigNumberify, hexZeroPad} from 'ethers/utils';
 import waitForExpect from 'wait-for-expect';
 import {simpleEthAllocation} from '../utils/outcome';
 import {State, SignedState} from '../store/types';
@@ -25,11 +25,11 @@ test('concludes on their turn', async () => {
   const outcome = simpleEthAllocation([
     {
       destination: playerA.destination,
-      amount: bigNumberify('0x06f05b59d3b20000')
+      amount: bigNumberify(hexZeroPad('0x06f05b59d3b20000', 32))
     },
     {
       destination: playerA.destination,
-      amount: bigNumberify('0x06f05b59d3b20000')
+      amount: bigNumberify(hexZeroPad('0x06f05b59d3b20000', 32))
     }
   ]);
 
