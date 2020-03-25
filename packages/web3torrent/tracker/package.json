@@ -1,0 +1,12 @@
+{
+  "name": "@statechannels/web3torrent-tracker",
+  "version": "0.0.0",
+  "scripts": {
+    "build-and-release": "./build-push-release.sh"
+  },
+  "dependencies": {
+    "bittorrent-tracker": "9.14.4",
+    "web3":"1.2.6",
+    "debug": "4.1.1"
+  }
+}

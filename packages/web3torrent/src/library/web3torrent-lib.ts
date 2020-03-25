@@ -72,6 +72,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     log('got ethereum address');
     log('ACCOUNT ID: ', this.pseAccount);
     log('THIS address: ', this.outcomeAddress);
+    this.tracker.getAnnounceOpts = () => ({pseAccount: this.pseAccount});
 
     // Hub messaging
     const myFirebaseRef = firebase

@@ -120,6 +120,7 @@
     "build": "react-scripts build",
     "build:ci": "run-s contracts:compile build",
     "build:typescript": "tsc -b .",
+    "build-and-release:tracker": "./tracker/build-push-release.sh",
     "contracts:compile": "node ./bin/compile.js",
     "eject": "react-scripts eject",
     "eslint:check": "eslint \"**/*.{js,ts,tsx}\" --cache --max-warnings=0",
