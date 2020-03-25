@@ -8,7 +8,7 @@ import {firstState, signState, calculateChannelId} from '../../store/state-utils
 import {ChannelConstants, Outcome, State} from '../../store/types';
 import {AddressZero} from 'ethers/constants';
 import {add} from '../../utils/math-utils';
-import {simpleEthAllocation} from '../../utils/outcome';
+import {simpleEthAllocation, makeDestination, simpleEthGuarantee} from '../../utils/outcome';
 
 import {
   wallet1,
@@ -125,7 +125,7 @@ test('virtual funding with smart hub', async () => {
     const amount = bigNumberify(5);
     expect(outcome).toMatchObject(
       simpleEthAllocation([
-        {destination: targetChannelId, amount},
+        {destination: makeDestination(targetChannelId), amount},
         {destination: jointParticipants[ParticipantIdx.Hub].destination, amount}
       ])
     );
@@ -169,40 +169,59 @@ test('virtual funding with a simple hub', async () => {
   await waitForExpect(async () => {
     expect(bService.state.value).toEqual('success');
     expect(aService.state.value).toEqual('success');
-
-    {
-      // Check a ledger channel's current outcome
-      const {supported: supportedState} = await aStore.getLedger(
-        jointParticipants[ParticipantIdx.Hub].participantId
-      );
-      expect(supportedState.outcome).toMatchObject(
-        simpleEthAllocation([
-          {
-            destination: jointParticipants[ParticipantIdx.A].destination,
-            amount: ledgerAmounts[0].sub(amounts[0])
-          },
-          {
-            destination: jointParticipants[ParticipantIdx.Hub].destination,
-            amount: ledgerAmounts[1].sub(amounts[1])
-          },
-          // We don't know the guarantor channel id
-          {destination: expect.any(String), amount: amounts.reduce(add)}
-        ])
-      );
-    }
-
-    {
-      // Check the joint channel's current outcome
-      const {outcome} = (await aStore.getEntry(jointChannelId)).supported;
-      const amount = bigNumberify(5);
-      expect(outcome).toMatchObject(
-        simpleEthAllocation([
-          {destination: targetChannelId, amount},
-          {destination: jointParticipants[ParticipantIdx.Hub].destination, amount}
-        ])
-      );
-    }
   }, EXPECT_TIMEOUT);
+  let guarantorChannelId;
+  {
+    // Inspect the ledger entry
+    const {supported: supportedState} = await aStore.getLedger(
+      jointParticipants[ParticipantIdx.Hub].participantId
+    );
+    // The virtual-funding workflow does not touch the ledger channel's funding status
+    expect(supportedState.outcome).toMatchObject(
+      simpleEthAllocation([
+        {
+          destination: jointParticipants[ParticipantIdx.A].destination,
+          amount: ledgerAmounts[0].sub(amounts[0])
+        },
+        {
+          destination: jointParticipants[ParticipantIdx.Hub].destination,
+          amount: ledgerAmounts[1].sub(amounts[1])
+        },
+        // We don't know the guarantor channel id
+        {destination: expect.any(String), amount: amounts.reduce(add)}
+      ])
+    );
+    guarantorChannelId = (supportedState.outcome as any).allocationItems[2].destination;
+  }
+
+  {
+    // Inspect the joint entry
+    const {supported, funding} = await aStore.getEntry(jointChannelId);
+    expect(funding).toEqual({type: 'Guarantee', guarantorChannelId: expect.any(String)});
+    guarantorChannelId = (funding as any).guarantorChannelId;
+
+    const amount = bigNumberify(5);
+    expect(supported.outcome).toMatchObject(
+      simpleEthAllocation([
+        {destination: makeDestination(targetChannelId), amount},
+        {destination: jointParticipants[ParticipantIdx.Hub].destination, amount}
+      ])
+    );
+  }
+
+  {
+    // Inspect the guarantor entry
+    const {supported, funding} = await aStore.getEntry(guarantorChannelId);
+    expect(funding).toEqual({type: 'Indirect', ledgerId: expect.any(String)});
+    expect(supported.outcome).toMatchObject(
+      simpleEthGuarantee(
+        jointChannelId,
+        targetChannelId,
+        jointParticipants[ParticipantIdx.A].destination,
+        jointParticipants[ParticipantIdx.Hub].destination
+      )
+    );
+  }
 });
 
 test('invalid joint state', async () => {

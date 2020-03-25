@@ -1,16 +1,17 @@
 import {bigNumberify} from 'ethers/utils';
 import {Message} from '../../store/types';
 import {Message as WireMessage} from '@statechannels/wire-format';
+import {makeDestination} from '../../utils/outcome';
 
 export const wireStateFormat = {
   participants: [
     {
-      destination: '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7',
+      destination: '0x00000000000000000000000063E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7',
       participantId: '0xAE363d29fc0f6A9bbBbEcC87751e518Cd9CA83C0',
       signingAddress: '0xAE363d29fc0f6A9bbBbEcC87751e518Cd9CA83C0'
     },
     {
-      destination: '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7',
+      destination: '0x00000000000000000000000063E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7',
       participantId: '0x590A3Bd8D4A3b78411B3bDFb481E44e85C7345c0',
       signingAddress: '0x590A3Bd8D4A3b78411B3bDFb481E44e85C7345c0'
     }
@@ -47,12 +48,12 @@ export const wireStateFormat = {
 export const internalStateFormat = {
   participants: [
     {
-      destination: '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7',
+      destination: makeDestination('0x63E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7'),
       participantId: '0xAE363d29fc0f6A9bbBbEcC87751e518Cd9CA83C0',
       signingAddress: '0xAE363d29fc0f6A9bbBbEcC87751e518Cd9CA83C0'
     },
     {
-      destination: '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7',
+      destination: makeDestination('0x63E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7'),
       participantId: '0x590A3Bd8D4A3b78411B3bDFb481E44e85C7345c0',
       signingAddress: '0x590A3Bd8D4A3b78411B3bDFb481E44e85C7345c0'
     }
@@ -72,11 +73,15 @@ export const internalStateFormat = {
     allocationItems: [
       {
         amount: bigNumberify('0x00000000000000000000000000000000000000000000000006f05b59d3b20000'),
-        destination: '0x00000000000000000000000063e3fb11830c01ac7c9c64091c14bb6cbaac9ac7'
+        destination: makeDestination(
+          '0x00000000000000000000000063e3fb11830c01ac7c9c64091c14bb6cbaac9ac7'
+        )
       },
       {
         amount: bigNumberify('0x00000000000000000000000000000000000000000000000006f05b59d3b20000'),
-        destination: '0x00000000000000000000000063e3fb11830c01ac7c9c64091c14bb6cbaac9ac7'
+        destination: makeDestination(
+          '0x00000000000000000000000063e3fb11830c01ac7c9c64091c14bb6cbaac9ac7'
+        )
       }
     ]
   },
@@ -98,12 +103,12 @@ export const wireMessageFormat: WireMessage = {
         },
         participants: [
           {
-            destination: '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7',
+            destination: '0x00000000000000000000000063E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7',
             participantId: '0xAE363d29fc0f6A9bbBbEcC87751e518Cd9CA83C0',
             signingAddress: '0xAE363d29fc0f6A9bbBbEcC87751e518Cd9CA83C0'
           },
           {
-            destination: '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7',
+            destination: '0x00000000000000000000000063E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7',
             participantId: '0x590A3Bd8D4A3b78411B3bDFb481E44e85C7345c0',
             signingAddress: '0x590A3Bd8D4A3b78411B3bDFb481E44e85C7345c0'
           }
@@ -121,12 +126,12 @@ export const internalMessageFormat: Message = {
       data: {targetChannelId: '0x9afc73af1808170a4ee408649219ee8322957645e40e227cb1ea29ea98034699'},
       participants: [
         {
-          destination: '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7',
+          destination: makeDestination('0x63E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7'),
           participantId: '0xAE363d29fc0f6A9bbBbEcC87751e518Cd9CA83C0',
           signingAddress: '0xAE363d29fc0f6A9bbBbEcC87751e518Cd9CA83C0'
         },
         {
-          destination: '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7',
+          destination: makeDestination('0x63E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7'),
           participantId: '0x590A3Bd8D4A3b78411B3bDFb481E44e85C7345c0',
           signingAddress: '0x590A3Bd8D4A3b78411B3bDFb481E44e85C7345c0'
         }

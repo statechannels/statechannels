@@ -16,6 +16,7 @@ import {
 import {assetHolderAddress, ETH_ASSET_HOLDER_ADDRESS} from '../../constants';
 import {bigNumberify} from 'ethers/utils';
 import {AddressZero} from 'ethers/constants';
+import {makeDestination} from '../../utils/outcome';
 
 export function deserializeBudgetRequest(budgetRequest: AppBudgetRequest): SiteBudget {
   const assetBudget: AssetBudget = {
@@ -90,7 +91,7 @@ function deserializeAllocation(allocation: AppAllocation): SimpleAllocation {
 
 function deserializeAllocationItem(allocationItem: AppAllocationItem): AllocationItem {
   return {
-    destination: allocationItem.destination,
+    destination: makeDestination(allocationItem.destination),
     amount: bigNumberify(allocationItem.amount)
   };
 }

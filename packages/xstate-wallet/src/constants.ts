@@ -1,5 +1,4 @@
 import {bigNumberify, hexZeroPad} from 'ethers/utils';
-import {Participant} from './store/types';
 
 export const WALLET_VERSION = 'xstate-wallet@VersionTBD';
 
@@ -12,11 +11,11 @@ export const NITRO_ADJUDICATOR_ADDRESS =
 // TODO: Move top ENV variable
 // Corresponds to '0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29' from test data
 export const HUB_ADDRESS = process.env.HUB_ADDRESS || '0xaaaa84838319627Fa056fC3FC29ab94d479B8502';
-export const HUB_DESTINATION = HUB_ADDRESS;
-export const HUB: Participant = {
-  destination: hexZeroPad(HUB_DESTINATION.toLowerCase(), 32),
+export const HUB_DESTINATION = hexZeroPad(HUB_ADDRESS, 32) as any;
+export const HUB = {
+  destination: HUB_DESTINATION,
   signingAddress: HUB_ADDRESS,
-  participantId: 'hub'
+  participantId: 'firebase:simple-hub'
 };
 export const CHALLENGE_DURATION = bigNumberify(0x12c); // 5 minutes
 export const NETWORK_ID = process.env.CHAIN_NETWORK_ID || '0';

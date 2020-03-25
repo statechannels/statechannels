@@ -198,7 +198,7 @@ const generateConfig = (
       }
     },
     done: {type: 'final'}
-  }
+  } as any // TODO: This is to deal with some flickering compilation issues.
 });
 
 export const applicationWorkflow = (

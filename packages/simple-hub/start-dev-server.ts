@@ -28,8 +28,8 @@ async function startLocalFirebaseServer() {
 }
 
 async function start() {
+  if (process.env.CI) await startLocalFirebaseServer();
   await setupGanacheAndContracts();
-  await startLocalFirebaseServer();
   await startServer();
 }
 

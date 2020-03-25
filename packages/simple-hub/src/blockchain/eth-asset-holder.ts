@@ -11,20 +11,31 @@ const walletWithProvider = new ethers.Wallet(cHubChainPK, provider);
 const lock = new AsyncLock();
 export class Blockchain {
   static ethAssetHolder: Contract;
-  static async fund(channelID: string, expectedHeld: BigNumber, value: BigNumber): Promise<string> {
+  static async fund(channelID: string, value: BigNumber): Promise<string> {
     // We lock to avoid this issue: https://github.com/ethers-io/ethers.js/issues/363
     // When ethers.js attempts to run multiple transactions around the same time it results in an error
     // due to the nonce getting out of sync.
     // To avoid this we only allow deposit transactions to happen serially.
     await Blockchain.attachEthAssetHolder();
 
-    return lock.acquire('depositing', async () => {
-      const tx = await Blockchain.ethAssetHolder.deposit(channelID, expectedHeld, value, {
-        value
-      });
+    return lock.acquire('depositing', async release => {
+      const expectedHeld: BigNumber = await Blockchain.ethAssetHolder.holdings(channelID);
+      if (expectedHeld.gte(value)) {
+        release();
+        return;
+      }
+
+      const tx = await Blockchain.ethAssetHolder.deposit(
+        channelID,
+        expectedHeld.toHexString(),
+        value,
+        {value: value.sub(expectedHeld)}
+      );
       await tx.wait();
 
-      return (await Blockchain.ethAssetHolder.holdings(channelID)).toString();
+      const holdings = (await Blockchain.ethAssetHolder.holdings(channelID)).toHexString();
+      release();
+      return holdings;
     });
   }
 

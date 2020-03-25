@@ -65,10 +65,10 @@ const generateConfig = (
   actions: WorkflowActions
 ): MachineConfig<WorkflowContext, WorkflowStateSchema, WorkflowEvent> => ({
   id: 'approve-budget-and-fund',
-  initial: 'waitForUserApproval',
+  initial: 'fundLedger',
+  entry: [actions.displayUi],
   states: {
     waitForUserApproval: {
-      entry: [actions.displayUi],
       on: {
         USER_APPROVES_BUDGET: {target: 'fundLedger', actions: []},
         USER_REJECTS_BUDGET: {target: 'failure'}
@@ -137,6 +137,10 @@ export const approveBudgetAndFundWorkflow = (
 };
 
 export type WorkflowMachine = StateMachine<WorkflowContext, StateSchema, WorkflowEvent, any>;
+
+// To keep consistent with the majority of other workflows
+export type Init = WorkflowContext;
+export const machine = approveBudgetAndFundWorkflow;
 
 export const config = generateConfig(mockActions);
 

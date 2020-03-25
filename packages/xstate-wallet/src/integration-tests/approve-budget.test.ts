@@ -1,7 +1,6 @@
 import {filter, map, first} from 'rxjs/operators';
 import {FakeChain} from '../chain';
 import {Player, generateApproveBudgetAndFundRequest, hookUpMessaging} from './helpers';
-import waitForExpect from 'wait-for-expect';
 import {FundLedger} from '../store/types';
 import {checkThat} from '../utils';
 import {isSimpleEthAllocation} from '../utils/outcome';
@@ -56,9 +55,12 @@ it('allows for a wallet to approve a budget and fund with the hub', async () => 
     )
     .toPromise();
   await playerA.messagingService.receiveRequest(createBudgetEvent);
-  await waitForExpect(async () => {
-    expect(playerA.workflowState).toEqual('waitForUserApproval');
-  }, 3000);
+  // The approveBudgetAndFund workflow has to skip the approval state
+  // owing to the lack of a UI
+  // await waitForExpect(async () => {
+  //   fakeChain;
+  //   expect(playerA.workflowState).toEqual('waitForUserApproval');
+  // }, 3000);
   playerA.channelWallet.workflows[0].machine.send({type: 'USER_APPROVES_BUDGET'});
 
   await createBudgetPromise;

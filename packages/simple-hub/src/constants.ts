@@ -4,7 +4,8 @@ export const cFirebasePrefix = process.env.FIREBASE_PREFIX || 'default-prefix';
 
 export const cHubChannelPK =
   process.env.HUB_CHANNEL_PK ||
-  '0x1b427b7ab88e2e10674b5aa92bb63c0ca26aa0b5a858e1d17295db6ad91c049b';
+  '0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29';
+// '0xaaaa84838319627Fa056fC3FC29ab94d479B8502'
 export const cHubChannelSigningAddress = new ethers.Wallet(cHubChannelPK).address;
 
 // This account is provided eth in @statechannels/devtools/utils/startGanache.js
