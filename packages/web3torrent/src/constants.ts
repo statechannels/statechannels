@@ -1,9 +1,9 @@
 import {Status, Torrent} from './types';
 import {ChannelState} from './clients/payment-channel-client';
 import {bigNumberify} from 'ethers/utils';
-
+export const BLOCK_LENGTH = 1 << 14; // Standard request length. Setting less than this doesn't make sense.
 export const WEI_PER_BYTE = bigNumberify(1); // cost per byte
-export const BUFFER_REFILL_RATE = bigNumberify(2e4); // number of bytes the leecher wishes to increase the buffer by
+export const BUFFER_REFILL_RATE = bigNumberify(WEI_PER_BYTE.mul(BLOCK_LENGTH)); // number of requests the leecher wishes to increase the buffer by
 // These variables control the amount of (micro)trust the leecher must invest in the seeder
 // As well as the overall performance hit of integrating payments into webtorrent.
 // A high BUFFER_REFILL_RATE increases the need for trust, but decreases the number of additional messages and therefore latency

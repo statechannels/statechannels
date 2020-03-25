@@ -131,8 +131,6 @@ export abstract class PaidStreamingExtension implements Extension {
       case PaidStreamingExtensionNotices.START:
         log(`START received from ${this.peerAccount}`);
         this.isBeingChoked = false;
-        this.wire.requests = [];
-        this.wire.unchoke();
         break;
       case PaidStreamingExtensionNotices.STOP:
         log(`STOP received from ${this.peerAccount}`);
@@ -140,8 +138,13 @@ export abstract class PaidStreamingExtension implements Extension {
         if (this.isBeingChoked) return;
         this.isBeingChoked = true;
         break;
-      default:
+      case PaidStreamingExtensionNotices.MESSAGE:
+        data = JSON.parse(data.message);
+        if (data.recipient !== this.pseAccount) {
+          return;
+        }
         log(`MESSAGE received from ${this.peerAccount}`, data);
+        break;
     }
     this.ack();
     this.messageBus.emit(PaidStreamingExtensionEvents.NOTICE, {command, data});
@@ -175,15 +178,20 @@ export abstract class PaidStreamingExtension implements Extension {
     wire._onRequest = function(index, offset, length) {
       log(`_onRequest: ${index}`);
 
-      messageBus.emit(PaidStreamingExtensionEvents.REQUEST, index, length, function(allow = false) {
-        if (allow) {
-          _onRequest.apply(wire, [index, offset, length]);
-          log(`_onRequest PASS - ${index}`);
-        } else {
-          wire._onCancel(index, offset, length);
-          log(`_onRequest CHOKED - ${index}`);
-        }
-      });
+      if (this.paidStreamingExtension.isForceChoking) {
+        wire._onCancel(index, offset, length);
+        log(`_onRequest AUTO CHOKE - ${index}, ${offset}, ${length}`);
+      } else {
+        messageBus.emit(PaidStreamingExtensionEvents.REQUEST, index, length, function(allow) {
+          if (allow) {
+            _onRequest.apply(wire, [index, offset, length]);
+            log(`_onRequest PASS - ${index}, ${offset}, ${length}`);
+          } else {
+            wire._onCancel(index, offset, length);
+            log(`_onRequest CHOKED - ${index}, ${offset}, ${length}`);
+          }
+        });
+      }
     };
   }
 }
