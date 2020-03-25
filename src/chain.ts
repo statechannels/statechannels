@@ -7,7 +7,7 @@ import {getProvider} from './utils/contract-utils';
 import {ethers} from 'ethers';
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {State, SignedState} from './store/types';
-import {Observable, fromEvent, from, concat} from 'rxjs';
+import {Observable, fromEvent, from, merge} from 'rxjs';
 import {filter, map} from 'rxjs/operators';
 import {ETH_ASSET_HOLDER_ADDRESS, NITRO_ADJUDICATOR_ADDRESS} from './constants';
 import EventEmitter = require('eventemitter3');
@@ -59,6 +59,7 @@ export class FakeChain implements Chain {
   public async deposit(channelId: string, expectedHeld: string, amount: string): Promise<void> {
     this.depositSync(channelId, expectedHeld, amount);
   }
+
   public async finalizeAndWithdraw(finalizationProof: SignedState[]): Promise<void> {
     const channelId = calculateChannelId(finalizationProof[0]);
     this.finalizeSync(channelId);
@@ -99,11 +100,15 @@ export class FakeChain implements Chain {
     const first = from(this.getChainInfo(channelId));
 
     const updates = fromEvent(this.eventEmitter, UPDATED).pipe(
-      filter((event: Updated) => event.channelId === channelId),
-      map(({amount, finalized}) => ({amount, finalized}))
+      filter((event: Updated) => {
+        return event.channelId === channelId;
+      }),
+      map(({amount, finalized}) => {
+        return {amount, finalized};
+      })
     );
 
-    return concat(first, updates);
+    return merge(first, updates);
   }
 
   public ethereumEnable() {
@@ -212,6 +217,6 @@ export class ChainWatcher implements Chain {
         return {amount: bigNumberify(event[2]), finalized: false};
       })
     );
-    return concat(first, updates);
+    return merge(first, updates);
   }
 }
