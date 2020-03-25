@@ -121,11 +121,11 @@ const getPreFundState = (store: Store): WorkflowServices['getPreFundState'] => a
 const getDepositingInfo = (
   store: Store
 ): WorkflowServices['getDepositingInfo'] => async context => {
-  const {supported} = await store.getEntry(context.ledgerId);
+  const {supported, myIndex} = await store.getEntry(context.ledgerId);
   const {allocationItems} = checkThat(supported?.outcome, isSimpleEthAllocation);
 
   const fundedAt = allocationItems.map(a => a.amount).reduce(add);
-  const depositAt = allocationItems[0].amount;
+  const depositAt = myIndex === 0 ? allocationItems[0].amount : bigNumberify(0);
   return {channelId: context.ledgerId, depositAt, totalAfterDeposit: fundedAt, fundedAt};
 };
 
