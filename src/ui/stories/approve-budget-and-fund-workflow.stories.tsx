@@ -8,32 +8,19 @@ import {storiesOf} from '@storybook/react';
 import {interpret} from 'xstate';
 import {renderComponentInFrontOfApp} from './helpers';
 
-import {bigNumberify, parseEther} from 'ethers/utils';
 import React from 'react';
 import {ApproveBudgetAndFund} from '../approve-budget-and-fund-workflow';
 import {SiteBudget, Participant} from '../../store/types';
-import {ETH_ASSET_HOLDER_ADDRESS} from '../../constants';
 import {MessagingServiceInterface, MessagingService} from '../../messaging';
 import {XstateStore} from '../../store';
+import {ethBudget} from '../../utils/budget-utils';
 
 const store = new XstateStore();
 
 store.initialize(['0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29']);
 const messagingService: MessagingServiceInterface = new MessagingService(store);
 
-const budget: SiteBudget = {
-  site: 'rps.org',
-  hubAddress: 'hub.com',
-  forAsset: {
-    [ETH_ASSET_HOLDER_ADDRESS]: {
-      assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
-      pending: {playerAmount: parseEther('5'), hubAmount: parseEther('5')},
-      free: {playerAmount: bigNumberify(0), hubAmount: bigNumberify(0)},
-      inUse: {playerAmount: bigNumberify(0), hubAmount: bigNumberify(0)},
-      direct: {playerAmount: bigNumberify(0), hubAmount: bigNumberify(0)}
-    }
-  }
-};
+const budget: SiteBudget = ethBudget('rps.statechannels.org', {});
 
 const alice: Participant = {
   participantId: 'a',
