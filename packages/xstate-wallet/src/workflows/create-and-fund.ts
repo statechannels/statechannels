@@ -13,11 +13,10 @@ import {SimpleAllocation, isVirtuallyFund, StateVariables, Outcome} from '../sto
 
 import {MachineFactory} from '../utils/workflow-utils';
 import {Store} from '../store';
-import * as Depositing from './depositing';
 import {add} from '../utils/math-utils';
 import {isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
 import {checkThat, getDataAndInvoke} from '../utils';
-import {SupportState, VirtualFundingAsLeaf} from '.';
+import {SupportState, VirtualFundingAsLeaf, Depositing} from '.';
 import {from, Observable} from 'rxjs';
 import {CHALLENGE_DURATION, HUB} from '../constants';
 import {bigNumberify} from 'ethers/utils';
