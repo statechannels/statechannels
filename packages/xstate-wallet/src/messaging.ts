@@ -22,7 +22,7 @@ import * as jrs from 'jsonrpc-lite';
 
 import {fromEvent, Observable} from 'rxjs';
 import {ChannelStoreEntry} from './store/channel-store-entry';
-import {Message as WireMessage} from '@statechannels/wire-format';
+import {validateMessage} from '@statechannels/wire-format';
 import {unreachable} from './utils';
 import {isAllocation, Message, SiteBudget, Participant} from './store/types';
 import {serializeAllocation, serializeSiteBudget} from './serde/app-messages/serialize';
@@ -132,7 +132,7 @@ export class MessagingService implements MessagingServiceInterface {
       const notification: Notification = {
         jsonrpc: '2.0',
         method: 'MessageQueued',
-        params: serializeMessage(message, recipient, sender)
+        params: validateMessage(serializeMessage(message, recipient, sender))
       };
       this.eventEmitter.emit('SendMessage', notification);
     });
@@ -173,8 +173,7 @@ export class MessagingService implements MessagingServiceInterface {
         this.eventEmitter.emit('AppRequest', appRequest);
         break;
       case 'PushMessage':
-        // TODO: should verify message format here
-        const message = request.params as WireMessage;
+        const message = validateMessage(request.params);
         if (message.recipient !== (await this.store.getAddress())) {
           throw new Error(`Received message not addressed to us ${JSON.stringify(message)}`);
         }
