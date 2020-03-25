@@ -7,6 +7,7 @@ import {
 } from '@statechannels/wire-format';
 import {SignedState, Outcome, AllocationItem, SimpleAllocation, Message} from '../../store/types';
 import {calculateChannelId} from '../../store/state-utils';
+import {BigNumber, hexZeroPad, hexlify} from 'ethers/utils';
 
 export function serializeMessage(message: Message, recipient: string, sender: string): WireMessage {
   const signedStates = (message.signedStates || []).map(ss => {
@@ -20,12 +21,16 @@ export function serializeMessage(message: Message, recipient: string, sender: st
   };
 }
 
+function bigNumberToUint256(bigNumber: BigNumber): string {
+  return hexZeroPad(hexlify(bigNumber), 32);
+}
+
 export function serializeState(state: SignedState): SignedStateWire {
   return {
     ...state,
-    challengeDuration: state.challengeDuration.toHexString(),
-    channelNonce: state.channelNonce.toHexString(),
-    turnNum: state.turnNum.toHexString(),
+    challengeDuration: bigNumberToUint256(state.challengeDuration),
+    channelNonce: bigNumberToUint256(state.channelNonce),
+    turnNum: bigNumberToUint256(state.turnNum),
     outcome: serializeOutcome(state.outcome),
     channelId: calculateChannelId(state)
   };
@@ -52,5 +57,5 @@ function serializeSimpleAllocation(allocation: SimpleAllocation): AllocationWire
 
 function serializeAllocationItem(allocationItem: AllocationItem): AllocationItemWire {
   const {destination, amount} = allocationItem;
-  return {destination, amount: amount.toHexString()};
+  return {destination, amount: bigNumberToUint256(amount)};
 }
