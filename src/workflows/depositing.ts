@@ -27,8 +27,8 @@ export const config: MachineConfig<Init, any, any> = {
 type SafeToDeposit = {type: 'SAFE_TO_DEPOSIT'; currentHoldings: BigNumber};
 
 export const machine: MachineFactory<Init, any> = (store: Store) => {
-  const subscribeDepositEvent = (ctx: Init) => {
-    return store.chain.chainUpdatedFeed(ctx.channelId).pipe(
+  const subscribeDepositEvent = (ctx: Init) =>
+    store.chain.chainUpdatedFeed(ctx.channelId).pipe(
       map((chainInfo): 'FUNDED' | SafeToDeposit | undefined => {
         if (chainInfo.amount.gte(ctx.fundedAt)) return 'FUNDED';
         else if (chainInfo.amount.gte(ctx.depositAt))
@@ -37,7 +37,6 @@ export const machine: MachineFactory<Init, any> = (store: Store) => {
       }),
       filter(exists)
     );
-  };
 
   const submitDepositTransaction = async (ctx: Init, {currentHoldings}: SafeToDeposit) => {
     const amount = bigNumberify(ctx.totalAfterDeposit).sub(currentHoldings);

@@ -71,9 +71,10 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
   }
 
   private get signedStates(): Array<StateVariables & {signatures: string[]}> {
-    return Object.keys(this.stateVariables).map(k => {
-      return {...this.getStateVariables(k), signatures: this.getFilteredSignatures(k)};
-    });
+    return Object.keys(this.stateVariables).map(k => ({
+      ...this.getStateVariables(k),
+      signatures: this.getFilteredSignatures(k)
+    }));
   }
 
   private get sortedByDescendingTurnNum(): Array<StateVariables & {signatures: string[]}> {

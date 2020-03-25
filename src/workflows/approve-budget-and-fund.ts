@@ -100,15 +100,12 @@ export const approveBudgetAndFundWorkflow = (
   context: WorkflowContext
 ): WorkflowMachine => {
   const services: WorkflowServices = {
-    updateBudget: (context: WorkflowContext, event) => {
-      return store.createBudget(context.budget);
-    },
-    createAndFundLedger: (context: WorkflowContext) => {
-      return CreateAndFundLedger.createAndFundLedgerWorkflow(store, {
+    updateBudget: (context: WorkflowContext, event) => store.createBudget(context.budget),
+    createAndFundLedger: (context: WorkflowContext) =>
+      CreateAndFundLedger.createAndFundLedgerWorkflow(store, {
         initialOutcome: convertPendingBudgetToAllocation(context),
         participants: [context.player, context.hub]
-      });
-    }
+      })
   };
   const actions = {
     // TODO: We should probably set up some standard actions for all workflows

@@ -185,9 +185,7 @@ export class XstateStore implements Store {
   private async initializeChannel(state: State): Promise<MemoryChannelStoreEntry> {
     const addresses = state.participants.map(x => x.signingAddress);
     const privateKeys = await this.backend.privateKeys();
-    const myIndex = addresses.findIndex(address => {
-      return !!privateKeys[address];
-    });
+    const myIndex = addresses.findIndex(address => !!privateKeys[address]);
     if (myIndex === -1) {
       throw new Error("Couldn't find the signing key for any participant in wallet.");
     }

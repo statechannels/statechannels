@@ -206,21 +206,19 @@ export const applicationWorkflow = (
   messagingService: MessagingServiceInterface,
   context?: WorkflowContext
 ) => {
-  const notifyOnChannelRequest = ({channelId}: ChannelIdExists) => {
-    return messagingService.requestFeed.pipe(
+  const notifyOnChannelRequest = ({channelId}: ChannelIdExists) =>
+    messagingService.requestFeed.pipe(
       filter(
         r =>
           (r.type === 'PLAYER_STATE_UPDATE' || r.type === 'PLAYER_REQUEST_CONCLUDE') &&
           r.channelId === channelId
       )
     );
-  };
 
-  const notifyOnUpdate = ({channelId}: ChannelIdExists) => {
-    return store
+  const notifyOnUpdate = ({channelId}: ChannelIdExists) =>
+    store
       .channelUpdatedFeed(channelId)
       .pipe(map(storeEntry => ({type: 'CHANNEL_UPDATED', storeEntry})));
-  };
 
   const actions: WorkflowActions = {
     sendUpdateChannelResponse: async (context: any, event: PlayerStateUpdate) => {
@@ -265,9 +263,7 @@ export const applicationWorkflow = (
       sendDisplayMessage('Hide');
     },
     assignChannelParams: assign((_, event: CreateChannelEvent): ChannelParamsExist &
-      RequestIdExists => {
-      return {channelParams: event, requestId: event.requestId};
-    }),
+      RequestIdExists => ({channelParams: event, requestId: event.requestId})),
     assignChannelId: assign((context, event: AssignChannelEvent) => {
       if (context.channelId) return context;
       switch (event.type) {
@@ -297,16 +293,13 @@ export const applicationWorkflow = (
   };
 
   const guards: WorkflowGuards = {
-    channelOpen: (context: ChannelIdExists, event: ChannelUpdated): boolean => {
-      return !event.storeEntry.latestSupportedByMe.isFinal;
-    },
-    channelClosing: (context: ChannelIdExists, event: ChannelUpdated): boolean => {
-      return !!event.storeEntry.latest?.isFinal;
-    },
+    channelOpen: (context: ChannelIdExists, event: ChannelUpdated): boolean =>
+      !event.storeEntry.latestSupportedByMe.isFinal,
+    channelClosing: (context: ChannelIdExists, event: ChannelUpdated): boolean =>
+      !!event.storeEntry.latest?.isFinal,
 
-    channelClosed: (context: ChannelIdExists, event: any): boolean => {
-      return !!event.storeEntry.supported?.isFinal;
-    }
+    channelClosed: (context: ChannelIdExists, event: any): boolean =>
+      !!event.storeEntry.supported?.isFinal
   };
 
   const services: WorkflowServices = {

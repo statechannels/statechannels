@@ -100,12 +100,8 @@ export class FakeChain implements Chain {
     const first = from(this.getChainInfo(channelId));
 
     const updates = fromEvent(this.eventEmitter, UPDATED).pipe(
-      filter((event: Updated) => {
-        return event.channelId === channelId;
-      }),
-      map(({amount, finalized}) => {
-        return {amount, finalized};
-      })
+      filter((event: Updated) => event.channelId === channelId),
+      map(({amount, finalized}) => ({amount, finalized}))
     );
 
     return merge(first, updates);
@@ -210,12 +206,11 @@ export class ChainWatcher implements Chain {
     const first = from(this.getChainInfo(channelId));
 
     const updates = fromEvent(this._assetHolders[0], 'Deposited').pipe(
-      filter((event: Array<string | BigNumber>) => {
-        return event[0] === channelId;
-      }),
-      map((event: Array<string | BigNumber>) => {
-        return {amount: bigNumberify(event[2]), finalized: false};
-      })
+      filter((event: Array<string | BigNumber>) => event[0] === channelId),
+      map((event: Array<string | BigNumber>) => ({
+        amount: bigNumberify(event[2]),
+        finalized: false
+      }))
     );
     return merge(first, updates);
   }
