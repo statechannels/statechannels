@@ -8,14 +8,13 @@ import {storiesOf} from '@storybook/react';
 import {interpret} from 'xstate';
 import {Participant} from '@statechannels/client-api-schema';
 import {renderComponentInFrontOfApp} from './helpers';
-import {MemoryStore} from '../../store/memory-store';
+import {XstateStore} from '../../store';
 import React from 'react';
 import {CloseLegerWithdraw} from '../close-ledger-and-withdraw';
 import {MessagingService, MessagingServiceInterface} from '../../messaging';
 
-const store = new MemoryStore([
-  '0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29'
-]);
+const store = new XstateStore();
+store.initialize(['0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29']);
 const messagingService: MessagingServiceInterface = new MessagingService(store);
 
 const alice: Participant = {
