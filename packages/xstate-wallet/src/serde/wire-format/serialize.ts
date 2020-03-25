@@ -7,7 +7,7 @@ import {
 } from '@statechannels/wire-format';
 import {SignedState, Outcome, AllocationItem, SimpleAllocation, Message} from '../../store/types';
 import {calculateChannelId} from '../../store/state-utils';
-import {BigNumber} from 'ethers/utils';
+import {BigNumber, hexZeroPad, hexlify} from 'ethers/utils';
 
 export function serializeMessage(message: Message, recipient: string, sender: string): WireMessage {
   const signedStates = (message.signedStates || []).map(ss => {
@@ -22,15 +22,9 @@ export function serializeMessage(message: Message, recipient: string, sender: st
 }
 
 function bigNumberToUint256(bigNumber: BigNumber): string {
-  // our wire protocol calls for hex strings of this exact format
-  return (
-    '0x' +
-    bigNumber
-      .toHexString()
-      .slice(2)
-      .padStart(64, '0')
-  );
+  return hexZeroPad(hexlify(bigNumber), 32);
 }
+
 export function serializeState(state: SignedState): SignedStateWire {
   return {
     ...state,

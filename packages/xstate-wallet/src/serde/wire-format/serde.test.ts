@@ -20,5 +20,6 @@ it('works for a message', () => {
 });
 
 it('creates valid wire format', () => {
-  expect(() => validateState(serializeState(internalStateFormat))).not.toThrow();
+  const serializedState = serializeState(internalStateFormat);
+  expect(() => validateState(serializedState)).not.toThrow();
 });
