@@ -99,7 +99,7 @@ export const ethereumEnableWorkflow = (
     },
     sendResponse: async (context: WorkflowContext, event) => {
       messagingService.sendResponse(context.requestId, {
-        address: await store.getAddress(),
+        signingAddress: await store.getAddress(),
         walletVersion: WALLET_VERSION,
         selectedAddress: context.enabledAddress as string
       }); // TODO: typing
