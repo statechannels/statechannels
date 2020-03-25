@@ -1,6 +1,10 @@
 import {RPSChannelClient} from '../rps-channel-client';
 import {aAddress, bAddress, aBal, bBal, appData} from '../../redux/game/__tests__/scenarios';
-import {ChannelClientInterface, ChannelResult} from '@statechannels/channel-client';
+import {
+  ChannelClientInterface,
+  ChannelResult,
+  FakeChannelProvider,
+} from '@statechannels/channel-client';
 import {encodeAppData, ChannelState} from '../../core';
 import {bigNumberify} from 'ethers/utils';
 import {RPS_ADDRESS} from '../../constants';
@@ -91,6 +95,7 @@ class MockChannelClient implements ChannelClientInterface {
     });
   }
 
+  provider = new FakeChannelProvider();
   walletVersion = 'JestMockVersion';
   signingAddress = MOCK_ADDRESS;
   selectedAddress = MOCK_ADDRESS;

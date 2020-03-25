@@ -6,6 +6,7 @@ import {
   SiteBudget,
   Message
 } from '@statechannels/client-api-schema';
+import {ChannelProviderInterface} from '@statechannels/channel-provider/src';
 
 export type UnsubscribeFunction = () => void;
 
@@ -17,6 +18,8 @@ export interface ChannelClientInterface {
   onMessageQueued: (callback: (message: Message) => void) => UnsubscribeFunction;
   onChannelUpdated: (callback: (result: ChannelResult) => void) => UnsubscribeFunction;
   onChannelProposed: (callback: (result: ChannelResult) => void) => UnsubscribeFunction;
+
+  provider: ChannelProviderInterface;
 
   walletVersion?: string;
   signingAddress?: string;
