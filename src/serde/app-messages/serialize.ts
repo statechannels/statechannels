@@ -30,8 +30,8 @@ export function serializeSiteBudget(budget: SiteBudget): AppSiteBudget {
   });
 
   return {
-    site: budget.site,
-    hub: budget.hubAddress,
+    domain: budget.site,
+    hubAddress: budget.hubAddress,
     budgets
   };
 }

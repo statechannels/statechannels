@@ -11,7 +11,7 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     constants: ChannelConstants,
     public readonly myIndex: number,
     private stateVariables: Record<string, StateVariables & Partial<ChannelConstants>> = {},
-    private signatures: Record<string, (string | undefined)[]> = {},
+    private signatures: Record<string, string[] | undefined> = {},
     public funding: Funding | undefined = undefined,
     public readonly applicationSite?: string
   ) {
