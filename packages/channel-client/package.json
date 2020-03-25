@@ -36,7 +36,7 @@
     "build:typescript": "tsc -b .",
     "lint:check": "eslint \"{src,tests}/**/*.ts\"",
     "lint:write": "yarn lint:check --fix",
-    "prepare": "yarn build",
+    "prepare": "rm -rf lib && yarn build",
     "test": "jest",
     "test:ci": "jest"
   }

@@ -1,21 +1,24 @@
 import {Observable, fromEvent, merge, from} from 'rxjs';
+import {BigNumber, bigNumberify} from 'ethers/utils';
+import {
+  BudgetItem,
+  DBBackend,
+  Message,
+  Objective,
+  Participant,
+  SignedState,
+  SiteBudget,
+  State,
+  StateVariables,
+  ToRelease
+} from './types';
+
 import {filter, map, concatAll} from 'rxjs/operators';
 import {EventEmitter} from 'eventemitter3';
 import * as _ from 'lodash';
 
-import {BigNumber, bigNumberify} from 'ethers/utils';
 import {Wallet} from 'ethers';
-import {
-  Participant,
-  StateVariables,
-  SignedState,
-  State,
-  Objective,
-  Message,
-  DBBackend,
-  SiteBudget,
-  BudgetItem
-} from './types';
+
 import {MemoryChannelStoreEntry} from './memory-channel-storage';
 import {AddressZero} from 'ethers/constants';
 import {Chain, FakeChain} from '../chain';
@@ -100,8 +103,9 @@ export interface Store {
   setFunding(channelId: string, funding: Funding): Promise<void>;
   addObjective(objective: Objective): void;
   getBudget: (site: string) => Promise<SiteBudget>;
-  updateOrCreateBudget: (budget: SiteBudget) => Promise<void>;
+  createBudget: (budget: SiteBudget) => Promise<void>;
   reserveFunds(site: string, assetHolderAddress: string, amount: BudgetItem): Promise<SiteBudget>;
+  releaseFunds(site: string, toRelease: ToRelease[]): Promise<SiteBudget>;
 
   chain: Chain;
   initialize(privateKeys?: string[], cleanSlate?: boolean): Promise<void>;
@@ -389,7 +393,14 @@ export class XstateStore implements Store {
 
     return entry;
   }
+
   private budgetLock = new AsyncLock();
+  public async createBudget() {
+    // NOOP
+  }
+  public async releaseFunds(site, budget) {
+    return budget;
+  }
   public async reserveFunds(
     site: string,
     assetHolderAddress: string,

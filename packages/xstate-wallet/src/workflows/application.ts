@@ -21,7 +21,7 @@ import {Store} from '../store';
 import {StateVariables} from '../store/types';
 import {ChannelStoreEntry} from '../store/channel-store-entry';
 import {bigNumberify} from 'ethers/utils';
-import * as ConcludeChannel from './conclude-channel';
+import {ConcludeChannel, CreateAndFund} from './';
 import {isSimpleEthAllocation} from '../utils/outcome';
 import {unreachable, checkThat} from '../utils';
 import {
@@ -31,7 +31,6 @@ import {
   CreateChannelEvent,
   WorkflowEvent
 } from '../event-types';
-import {CreateAndFund} from '.';
 
 export interface WorkflowContext {
   channelId?: string;
@@ -84,7 +83,6 @@ export interface WorkflowServices extends Record<string, ServiceConfig<WorkflowC
     context: WorkflowContext,
     event: CreateChannelEvent | JoinChannelEvent
   ) => Promise<CCC.WorkflowContext>;
-  signConcludeState: (context: WorkflowContext, event: any) => Promise<void>;
 }
 interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
   states: {
@@ -100,7 +98,6 @@ interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
     };
     openChannelAndFundProtocol: {};
     createChannelInStore: {};
-    concludeState: {};
     running: {};
     closing: {};
     // TODO: Is it possible to type these as type:'final' ?
@@ -134,7 +131,6 @@ const generateConfig = (
         JOIN_CHANNEL: {target: 'confirmJoinChannelWorkflow'}
       }
     },
-    concludeState: {invoke: {src: 'signConcludeState', onDone: {target: 'closing'}}},
     confirmCreateChannelWorkflow: getDataAndInvoke(
       'getDataForCreateChannelConfirmation',
       'invokeCreateChannelConfirmation',
@@ -185,16 +181,8 @@ const generateConfig = (
           target: 'running',
           actions: [actions.updateStoreWithPlayerState, actions.sendUpdateChannelResponse]
         },
-        CHANNEL_UPDATED: [
-          {
-            cond: guards.channelClosing,
-            target: 'concludeState'
-          }
-        ],
-
-        PLAYER_REQUEST_CONCLUDE: {
-          target: 'concludeState'
-        }
+        CHANNEL_UPDATED: [{target: 'closing', cond: guards.channelClosing}],
+        PLAYER_REQUEST_CONCLUDE: {target: 'closing'}
       }
     },
     //This could handled by another workflow instead of the application workflow
@@ -206,10 +194,7 @@ const generateConfig = (
         src: 'invokeClosingProtocol',
         data: context => context,
         autoForward: true,
-        onDone: {
-          target: 'done',
-          actions: [actions.sendCloseChannelResponse]
-        }
+        onDone: {target: 'done', actions: [actions.sendCloseChannelResponse]}
       }
     },
     done: {type: 'final'}
@@ -279,17 +264,10 @@ export const applicationWorkflow = (
     hideUi: () => {
       sendDisplayMessage('Hide');
     },
-    assignChannelParams: assign(
-      (
-        context: WorkflowContext,
-        event: CreateChannelEvent
-      ): ChannelParamsExist & RequestIdExists => {
-        return {
-          channelParams: event,
-          requestId: event.requestId
-        };
-      }
-    ),
+    assignChannelParams: assign((_, event: CreateChannelEvent): ChannelParamsExist &
+      RequestIdExists => {
+      return {channelParams: event, requestId: event.requestId};
+    }),
     assignChannelId: assign((context, event: AssignChannelEvent) => {
       if (context.channelId) return context;
       switch (event.type) {
@@ -323,11 +301,11 @@ export const applicationWorkflow = (
       return !event.storeEntry.latestSupportedByMe.isFinal;
     },
     channelClosing: (context: ChannelIdExists, event: ChannelUpdated): boolean => {
-      return event.storeEntry.latest?.isFinal || false;
+      return !!event.storeEntry.latest?.isFinal;
     },
 
     channelClosed: (context: ChannelIdExists, event: any): boolean => {
-      return event.storeEntry.supported?.isFinal || false;
+      return !!event.storeEntry.supported?.isFinal;
     }
   };
 
@@ -336,7 +314,7 @@ export const applicationWorkflow = (
       store
         .channelUpdatedFeed(channelId)
         .pipe(
-          flatMap(({states}) => states),
+          flatMap(({sortedStates: states}) => states),
           filter(s => s.turnNum.eq(0)),
           tap(async s => await store.signAndAddState(channelId, s)),
           first()
@@ -372,7 +350,7 @@ export const applicationWorkflow = (
     },
     invokeClosingProtocol: (context: ChannelIdExists) =>
       // TODO: Close machine needs to accept new store
-      ConcludeChannel.machine(store, {channelId: context.channelId}),
+      ConcludeChannel.machine(store).withContext({channelId: context.channelId}),
     invokeCreateChannelAndFundProtocol: (_, event: DoneInvokeEvent<CreateAndFund.Init>) =>
       CreateAndFund.machine(store, event.data),
     invokeCreateChannelConfirmation: (context, event: DoneInvokeEvent<CCC.WorkflowContext>) =>
@@ -380,10 +358,8 @@ export const applicationWorkflow = (
     getDataForCreateChannelAndFund: async (
       context: ChannelParamsExist
     ): Promise<CreateAndFund.Init> => {
-      const {latestSupportedByMe: latestStateSupportedByMe, channelId} = await store.getEntry(
-        context.channelId
-      );
-      const allocation = checkThat(latestStateSupportedByMe.outcome, isSimpleEthAllocation);
+      const {latestSupportedByMe, channelId} = await store.getEntry(context.channelId);
+      const allocation = checkThat(latestSupportedByMe.outcome, isSimpleEthAllocation);
       return {channelId, allocation};
     },
     getDataForCreateChannelConfirmation: async (
@@ -394,25 +370,10 @@ export const applicationWorkflow = (
         case 'CREATE_CHANNEL':
           return event;
         case 'JOIN_CHANNEL':
-          const entry = await store.getEntry(event.channelId);
-          return {
-            ...entry.latest,
-            ...entry.channelConstants,
-            outcome: checkThat(entry.latest.outcome, isSimpleEthAllocation)
-          };
+          const {latest} = await store.getEntry(event.channelId);
+          return {...latest, outcome: checkThat(latest.outcome, isSimpleEthAllocation)};
         default:
           return unreachable(event);
-      }
-    },
-    signConcludeState: async (context: ChannelIdExists) => {
-      if (context.channelId === context.channelId) {
-        const existingState = await (await store.getEntry(context.channelId)).latest;
-        const newState = {
-          ...existingState,
-          turnNum: existingState.isFinal ? existingState.turnNum : existingState.turnNum.add(1),
-          isFinal: true
-        };
-        await store.signAndAddState(context.channelId, newState);
       }
     }
   };
@@ -421,58 +382,14 @@ export const applicationWorkflow = (
   return Machine(config).withConfig({services}, context || {});
 };
 
-const mockServices: WorkflowServices = {
-  createChannel: () => {
-    return new Promise(() => {
-      /* Mock call */
-    }) as any;
-  },
-  invokeClosingProtocol: () => {
-    return new Promise(() => {
-      /* Mock call */
-    }) as any;
-  },
-  invokeCreateChannelAndFundProtocol: () => {
-    return new Promise(() => {
-      /* mock*/
-    }) as any;
-  },
-  invokeCreateChannelConfirmation: () => {
-    return new Promise(() => {
-      /* Mock call */
-    }) as any;
-  },
-  getDataForCreateChannelConfirmation: () => {
-    return new Promise(() => {
-      /* Mock call */
-    }) as any;
-  },
-  signConcludeState: () => {
-    return new Promise(() => {
-      /* Mock call */
-    }) as any;
-  }
-};
-const mockActions: WorkflowActions = {
-  sendCloseChannelResponse: 'sendCloseChannelResponse',
-  sendUpdateChannelResponse: 'sendUpdateChannelResponse',
-  assignChannelParams: 'assignChannelParams',
-  sendCreateChannelResponse: 'sendCreateChannelResponse',
-  sendJoinChannelResponse: 'sendJoinChannelResponse',
-  sendChannelUpdatedNotification: 'sendChannelUpdatedNotification',
-  hideUi: 'hideUi',
-  displayUi: 'displayUi',
-  assignChannelId: 'assignChannelId',
-  spawnObservers: 'spawnObserver' as any,
-  updateStoreWithPlayerState: 'updateStoreWithPlayerState'
-};
 const mockGuards: WorkflowGuards = {
   channelOpen: createMockGuard('channelOpen'),
   channelClosing: createMockGuard('channelClosing'),
   channelClosed: createMockGuard('channelClosed')
 };
-export const config = generateConfig(mockActions, mockGuards);
-export const mockOptions = {services: mockServices, actions: mockActions, guards: mockGuards};
+
+export const config = generateConfig({} as any, mockGuards);
+export const mockOptions = {guards: mockGuards};
 
 type AssignChannelEvent =
   | PlayerStateUpdate

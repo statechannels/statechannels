@@ -129,6 +129,8 @@ export interface Message {
   objectives?: Objective[];
 }
 
+export type ToRelease = {inUse: BudgetItem; assetHolderAddress: string};
+
 export interface DBBackend {
   initialize(cleanSlate?: boolean): Promise<any>;
   privateKeys(): Promise<Record<string, string | undefined>>;

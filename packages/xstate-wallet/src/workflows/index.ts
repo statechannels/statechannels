@@ -7,6 +7,7 @@ import * as CreateAndFund from './create-and-fund';
 import * as CreateAndFundLedger from './create-and-fund-ledger';
 import * as VirtualDefundingAsLeaf from './virtual-defunding-as-leaf';
 import * as VirtualDefundingAsHub from './virtual-defunding-as-hub';
+import * as ConcludeChannel from './conclude-channel';
 
 export {
   SupportState,
@@ -16,6 +17,7 @@ export {
   VirtualFundingAsLeaf,
   VirtualFundingAsHub,
   VirtualDefundingAsLeaf,
+  ConcludeChannel,
   VirtualDefundingAsHub,
   CreateAndFundLedger
 };

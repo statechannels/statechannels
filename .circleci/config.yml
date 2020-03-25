@@ -48,12 +48,9 @@ save_lib: &save_lib
       - packages/web3torrent/lib
       - packages/embedded-wallet/lib
       - packages/devtools/lib
-      - packages/wallet/lib
       - packages/jest-gas-reporter/lib
       - packages/channel-provider/lib
       - packages/channel-client/lib
-      - packages/hub/lib
-      - packages/wallet-specs/lib
 restore_lib: &restore_lib
   restore_cache:
     # Restore from the most recently cached version of lib, using a partial key match
@@ -315,10 +312,10 @@ workflows:
       - test:
           requires:
             - prepare
-
-      - integration-test:
-          requires:
-            - prepare
+      # TODO: Enable once working with xstate wallet
+      #  - integration-test:
+      #      requires:
+      #        - prepare
       # TODO: Enable once the test runs reliably
       # - integration-test-with-hub:
       #    requires:
