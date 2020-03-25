@@ -147,7 +147,9 @@ export class MessagingService implements MessagingServiceInterface {
         window.parent.postMessage(
           jrs.success(requestId, {
             address: await this.store.getAddress(),
-            selectedAddress: this.store.chain.selectedAddress,
+            selectedAddress: this.store.chain.ethereumIsEnabled
+              ? this.store.chain.selectedAddress
+              : null,
             walletVersion: WALLET_VERSION
           }),
           '*'
