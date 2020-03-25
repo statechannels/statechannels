@@ -16,72 +16,13 @@
       </div>
     </div>
     <div class="mt-5">
-      {{#if true}}
-        <div class="flex flex-wrap justify-between">
-          <div
-            class="flex flex-col justify-evenly items-center bg-white w-56 h-64 border border-sm rounded-lg border-gray-100"
-          >
-            <div class="flex justify-center">
-              <div class="ogc-vs text-red-500 mr-2 text-2xl font-bold">
-                vs
-              </div>
-              <div class="text-2xl font-bold">
-                Burrito
-              </div>
-            </div>
-            <img class="w-12 h-12" src={{this.blockieSrc}} alt="address blockie" />
-            <div class="flex justify-evenly items-center">
-              <div class="pr-4 flex flex-col items-center">
-                <div class="text-xs text-gray-700">
-                  Game Buy In:
-                </div>
-                <div class="text-lg">
-                  0.005
-                </div>
-                <div class="text-2xs">
-                  ETH
-                </div>
-              </div>
-              <svg class="pr-4 w-1 h-3 text-gray-200 stroke-current">
-                <line x1="0" y1="0" x2="0" y2="14"></line>
-              </svg>
-              <div class="flex flex-col items-center">
-                <div class="text-xs text-gray-700">
-                  Round Buy In:
-                </div>
-                <div class="text-lg">
-                  0.005
-                </div>
-                <div class="text-2xs">
-                  ETH
-                </div>
-              </div>
-            </div>
-            <button
-              type="button"
-              class="w-40 h-10 rounded-full bg-red-600 text-lg font-bold text-white"
-            >
-              Join
-            </button>
-          </div>
-        </div>
-      {{else}}
-        <div class="flex">
-          <div class="card card-body bg-white flex flex-col p-4 border border-gray-400 rounded-sm">
-            <h3 class="text-2xl font-medium mb-2">
-              ℹ️ Try playing against yourself!
-            </h3>
-            <p>
-              If you open a new window or tab, you can simulate two users playing this game against each other. By
-            clicking
-              <b>
-                Create a game
-              </b>
-              above, you can start a game that your second browser window or tab can then join.
-            </p>
-          </div>
-        </div>
-      {{/if}}
+      <div class="flex flex-wrap justify-between">
+        {{#each this.model as |game|}}
+          <GameCard @game={{game}} />
+        {{else}}
+          <GamesEmpty />
+        {{/each}}
+      </div>
     </div>
   </div>
 </div>
@@ -90,47 +31,9 @@
   @title="Create A Game"
   @onClose={{set this.showCreateGameModal false}}
 >
-  <form {{on 'submit' this.createNewGame}}>
-    <label class="block mb-4">
-      <span class="text-gray-700">
-        Enter Round Buy In Amount
-      </span>
-      <div class="flex items-center">
-        <Input
-          class="bg-white border border-gray-300 rounded py-1 px-2 mt-1 mr-2"
-          @value={{this.buyInAmount}}
-          type="number"
-          min="0.001"
-          max="1"
-          step="0.001"
-        />
-        <div>
-          ETH
-        </div>
-      </div>
-      <small>
-        Please enter an amount between 0.001 and 1
-      </small>
-    </label>
-    <small class="form-text text-danger cog-error-message">
-      {{this.createGameError}}
-    </small>
-    <div class="mt-2">
-      Game Buy In:
-      {{mult this.buyInAmount 5}}
-      ETH
-    </div>
-    <small class="form-text text-muted">
-      This is 5 times the round buy in
-      amount.
-    </small>
-    <div class="flex justify-center pt-2">
-      <button
-        type="submit"
-        class="flex items-center px-4 bg-indigo-500 p-3 rounded-lg text-white hover:bg-indigo-400"
-      >
-        Create Game
-      </button>
-    </div>
-  </form>
+  <GameForm
+    @createNewGame={{this.createNewGame}}
+    @buyInAmount={{this.buyInAmount}}
+    @createGameError={{this.createGameError}}
+  />
 </Modal>
