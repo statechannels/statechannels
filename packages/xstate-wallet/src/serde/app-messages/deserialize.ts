@@ -3,7 +3,8 @@ import {
   Allocations as AppAllocations,
   AllocationItem as AppAllocationItem,
   SiteBudget as AppSiteBudget,
-  TokenBudgetRequest as AppBudgetRequest} from '@statechannels/client-api-schema';
+  TokenBudgetRequest as AppBudgetRequest
+} from '@statechannels/client-api-schema';
 import {
   Allocation,
   AllocationItem,
@@ -16,10 +17,7 @@ import {bigNumberify} from 'ethers/utils';
 import {AddressZero} from 'ethers/constants';
 import {makeDestination} from '../../utils/outcome';
 
-export function deserializeBudgetRequest(
-  budgetRequest: AppBudgetRequest,
-  domain: string
-): SiteBudget {
+export function deserializeBudgetRequest(budgetRequest: AppBudgetRequest): SiteBudget {
   const assetBudget: AssetBudget = {
     assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
     availableSendCapacity: bigNumberify(budgetRequest.requestedSendCapacity),
@@ -27,7 +25,7 @@ export function deserializeBudgetRequest(
     channels: {}
   };
   return {
-    domain,
+    domain: budgetRequest.domain,
     hubAddress: budgetRequest.hub.signingAddress,
     forAsset: {[ETH_ASSET_HOLDER_ADDRESS]: assetBudget}
   };

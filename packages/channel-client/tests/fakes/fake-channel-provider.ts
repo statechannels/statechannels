@@ -323,7 +323,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
           token: '0x0',
           availableReceiveCapacity: params.requestedReceiveCapacity,
           availableSendCapacity: params.requestedSendCapacity,
-          channels: {}
+          channels: []
         }
       ]
     };

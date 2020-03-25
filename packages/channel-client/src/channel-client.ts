@@ -130,7 +130,7 @@ export class ChannelClient implements ChannelClientInterface {
   async approveBudgetAndFund(
     receiveCapacity: string,
     sendCapacity: string,
-    playerOutcomeAddress: string,
+    _playerOutcomeAddress: string, // TODO: This is done by the wallet and not needed
     hubAddress: string,
     hubOutcomeAddress: string
   ): Promise<SiteBudget> {
@@ -140,7 +140,8 @@ export class ChannelClient implements ChannelClientInterface {
         requestedReceiveCapacity: receiveCapacity,
         requestedSendCapacity: sendCapacity,
         token: ETH_TOKEN_ADDRESS,
-
+        playerParticipantId: this.signingAddress as string,
+        domain: window.location.hostname,
         hub: {
           participantId: HUB.participantId,
           signingAddress: hubAddress,
