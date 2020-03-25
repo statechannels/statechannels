@@ -27,21 +27,16 @@ export function depositsToMake(
 ): {channelId: string; amountToDeposit: BigNumber}[] {
   const simpleAllocationStates = _.filter(isSimpleAllocationState, message.signedStates);
   return simpleAllocationStates
-    .filter(state => {
-      return state.participants.length === 2;
-    })
-    .filter(state => {
-      return (
+    .filter(state => state.participants.length === 2)
+    .filter(
+      state =>
         _.findIndex(
           allocationItem =>
             allocationItem.destination === makeDestination(cHubChannelSigningAddress),
           state.outcome.allocationItems
         ) === 0
-      );
-    })
-    .filter(state => {
-      return state.turnNum.eq(ethers.constants.Zero);
-    })
+    )
+    .filter(state => state.turnNum.eq(ethers.constants.Zero))
     .map(state => ({
       channelId: calculateChannelId(state),
       amountToDeposit: state.outcome.allocationItems[0].amount
