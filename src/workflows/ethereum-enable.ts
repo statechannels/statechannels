@@ -12,6 +12,7 @@ import {
 } from 'xstate';
 import {sendDisplayMessage, MessagingServiceInterface} from '../messaging';
 import {Store} from '../store';
+import {WALLET_VERSION} from '../constants';
 
 interface UserApproves {
   type: 'USER_APPROVES_ENABLE';
@@ -96,8 +97,12 @@ export const ethereumEnableWorkflow = (
     hideUi: () => {
       sendDisplayMessage('Hide');
     },
-    sendResponse: (context: WorkflowContext, event) => {
-      messagingService.sendResponse(context.requestId, context.enabledAddress as string); // TODO: typing
+    sendResponse: async (context: WorkflowContext, event) => {
+      messagingService.sendResponse(context.requestId, {
+        signingAddress: await store.getAddress(),
+        walletVersion: WALLET_VERSION,
+        selectedAddress: context.enabledAddress as string
+      }); // TODO: typing
     },
     sendErrorResponse: (context: WorkflowContext, event) => {
       messagingService.sendError(context.requestId, {code: 100, message: 'Ethereum Not Enabled'}); // TODO: typing

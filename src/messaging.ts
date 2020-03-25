@@ -32,7 +32,7 @@ import {AppRequestEvent} from './event-types';
 import {deserializeAllocations, deserializeBudgetRequest} from './serde/app-messages/deserialize';
 import {isSimpleEthAllocation} from './utils/outcome';
 import {bigNumberify} from 'ethers/utils';
-import {CHALLENGE_DURATION, NETWORK_ID} from './constants';
+import {CHALLENGE_DURATION, NETWORK_ID, WALLET_VERSION} from './constants';
 import {Store} from './store';
 
 type ChannelRequest =
@@ -143,27 +143,25 @@ export class MessagingService implements MessagingServiceInterface {
     const {id: requestId} = request;
 
     switch (request.method) {
-      case 'WalletVersion':
-        window.parent.postMessage(jrs.success(requestId, 'xstate-wallet@VersionTBD'), '*'); // TODO: inject git or build info
+      case 'GetWalletInformation':
+        await this.sendResponse(requestId, {
+          signingAddress: await this.store.getAddress(),
+          selectedAddress: this.store.chain.ethereumIsEnabled
+            ? this.store.chain.selectedAddress
+            : null,
+          walletVersion: WALLET_VERSION
+        });
         break;
       case 'EnableEthereum':
         if (this.store.chain.ethereumIsEnabled) {
-          window.parent.postMessage(
-            jrs.success(requestId, this.store.chain.selectedAddress || null),
-            '*'
-          );
+          await this.sendResponse(requestId, {
+            signingAddress: await this.store.getAddress(),
+            selectedAddress: this.store.chain.selectedAddress,
+            walletVersion: WALLET_VERSION
+          });
         } else {
           this.eventEmitter.emit('AppRequest', {type: 'ENABLE_ETHEREUM', requestId});
         }
-        break;
-      case 'GetAddress':
-        const address = await this.store.getAddress();
-        this.sendResponse(requestId, address);
-        break;
-      case 'GetEthereumSelectedAddress':
-        // Possibly undefined, App should call EnableEthereum if so
-        const ethereumSelectedAddress = this.store.chain.selectedAddress;
-        window.parent.postMessage(jrs.success(requestId, ethereumSelectedAddress || null), '*');
         break;
       case 'CreateChannel':
       case 'UpdateChannel':
