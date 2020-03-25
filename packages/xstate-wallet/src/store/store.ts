@@ -127,7 +127,7 @@ export class XstateStore implements Store {
     this.chain = chain || new FakeChain();
     this.chain.initialize();
     if (backend) {
-      this.backend = backend as DBBackend;
+      this.backend = backend;
     }
   }
 
