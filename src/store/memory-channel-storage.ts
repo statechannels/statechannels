@@ -11,7 +11,7 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     constants: ChannelConstants,
     public readonly myIndex: number,
     private stateVariables: Record<string, StateVariables & Partial<ChannelConstants>> = {},
-    private signatures: Record<string, string[] | undefined> = {},
+    private signatures: Record<string, (string | undefined)[]> = {},
     public funding: Funding | undefined = undefined,
     public readonly applicationSite?: string
   ) {
@@ -63,13 +63,16 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     return vars;
   }
 
-  private getSignatures(k): string[] {
-    return this.signatures[k] || [];
+  private getFilteredSignatures(k): string[] {
+    function isString(x: string | undefined): x is string {
+      return x !== undefined;
+    }
+    return (this.signatures[k] || []).filter(isString);
   }
 
   private get signedStates(): Array<StateVariables & {signatures: string[]}> {
     return Object.keys(this.stateVariables).map(k => {
-      return {...this.getStateVariables(k), signatures: this.getSignatures(k)};
+      return {...this.getStateVariables(k), signatures: this.getFilteredSignatures(k)};
     });
   }
 
@@ -142,7 +145,7 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     return {
       ...stateVars,
       ...this.channelConstants,
-      signatures: this.signatures[hashState(state)] || []
+      signatures: this.getFilteredSignatures(hashState(state))
     };
   }
 
@@ -160,7 +163,8 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
       throw new Error('State not signed by a participant of this channel');
     }
 
-    const signatures = this.signatures[stateHash] ?? new Array(this.nParticipants());
+    const signatures =
+      this.signatures[stateHash] ?? new Array<string | undefined>(this.nParticipants());
     signatures[signerIndex] = signature;
     this.signatures[stateHash] = signatures;
 
