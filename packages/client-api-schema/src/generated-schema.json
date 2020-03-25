@@ -200,6 +200,30 @@
       ],
       "type": "object"
     },
+    "ChannelBudget": {
+      "additionalProperties": false,
+      "properties": {
+        "amount": {
+          "type": "string"
+        },
+        "channelId": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "pending",
+            "available"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "channelId",
+        "status",
+        "amount"
+      ],
+      "type": "object"
+    },
     "ChannelClosingNotification": {
       "additionalProperties": false,
       "properties": {
@@ -1289,27 +1313,10 @@
           "type": "string"
         },
         "channels": {
-          "additionalProperties": {
-            "additionalProperties": false,
-            "properties": {
-              "amount": {
-                "type": "string"
-              },
-              "status": {
-                "enum": [
-                  "pending",
-                  "free"
-                ],
-                "type": "string"
-              }
-            },
-            "required": [
-              "status",
-              "amount"
-            ],
-            "type": "object"
+          "items": {
+            "$ref": "#/definitions/ChannelBudget"
           },
-          "type": "object"
+          "type": "array"
         },
         "token": {
           "type": "string"
@@ -1326,8 +1333,14 @@
     "TokenBudgetRequest": {
       "additionalProperties": false,
       "properties": {
+        "domain": {
+          "type": "string"
+        },
         "hub": {
           "$ref": "#/definitions/Participant"
+        },
+        "playerParticipantId": {
+          "type": "string"
         },
         "requestedReceiveCapacity": {
           "type": "string"
@@ -1341,6 +1354,8 @@
       },
       "required": [
         "hub",
+        "playerParticipantId",
+        "domain",
         "token",
         "requestedSendCapacity",
         "requestedReceiveCapacity"

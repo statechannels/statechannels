@@ -163,8 +163,9 @@ export type ChallengeChannelResponse = JsonRpcResponse<ChannelResult>;
 
 // Budget
 
-interface ChannelBudget {
-  status: 'pending' | 'free';
+export interface ChannelBudget {
+  channelId: string;
+  status: 'pending' | 'available';
   amount: string;
 }
 
@@ -172,7 +173,7 @@ export interface TokenBudget {
   token: string;
   availableReceiveCapacity: string;
   availableSendCapacity: string;
-  channels: Record<ChannelId, ChannelBudget>;
+  channels: ChannelBudget[];
 }
 export interface SiteBudget {
   domain: string;
@@ -182,6 +183,11 @@ export interface SiteBudget {
 
 export interface TokenBudgetRequest {
   hub: Participant;
+  playerParticipantId: string;
+  // TODO: The domain could be taken from incoming message instead
+  // leaving here for now as it's simpler then changing the wallet
+  // and the channel client already handles this
+  domain: string;
   token: string;
   requestedSendCapacity: string;
   requestedReceiveCapacity: string;
