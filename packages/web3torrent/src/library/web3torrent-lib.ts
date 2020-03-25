@@ -61,24 +61,24 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   }
 
   async enable() {
-    log('Mounting Wallet to App...');
-    await window.channelProvider.mountWalletComponent(process.env.REACT_APP_WALLET_URL);
-    log('Enabling Channel Provider...');
-    await window.channelProvider.enable();
-    log('Enabling WebTorrentPaidStreamingClient...');
-    this.pseAccount = this.paymentChannelClient.mySigningAddress;
+    await this.paymentChannelClient.enable();
+
     log('set pseAccount to sc-wallet signing address');
+    this.pseAccount = this.paymentChannelClient.mySigningAddress;
+
+    log('set outcomeAddress to sc-wallet web3 wallet address');
     this.outcomeAddress = this.paymentChannelClient.myEthereumSelectedAddress;
+
     log('got ethereum address');
     log('ACCOUNT ID: ', this.pseAccount);
     log('THIS address: ', this.outcomeAddress);
 
     // Hub messaging
-
     const myFirebaseRef = firebase
       .database()
       .ref(`/${FIREBASE_PREFIX}/messages/${this.pseAccount}`);
     const hubFirebaseRef = firebase.database().ref(`/${FIREBASE_PREFIX}/messages/${HUB_ADDRESS}`);
+
     // firebase setup
     myFirebaseRef.onDisconnect().remove();
 
@@ -87,6 +87,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
         hubFirebaseRef.push(sanitizeMessageForFirebase(message));
       }
     });
+
     myFirebaseRef.on('child_added', snapshot => {
       const key = snapshot.key;
       const message = snapshot.val();
@@ -100,7 +101,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     log('Disabling WebTorrentPaidStreamingClient');
     this.pseAccount = null;
     this.outcomeAddress = null;
-    await window.ethereum.disable();
   }
 
   async testTorrentingCapability(timeOut: number) {

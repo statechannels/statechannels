@@ -52,6 +52,11 @@ export class PaymentChannelClient {
     });
   }
 
+  async enable() {
+    await this.channelClient.provider.mountWalletComponent(process.env.REACT_APP_WALLET_URL);
+    await this.channelClient.provider.enable();
+  }
+
   async createChannel(
     beneficiary: string,
     payer: string,

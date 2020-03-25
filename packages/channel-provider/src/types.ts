@@ -11,16 +11,12 @@ import {
   PushMessageRequest,
   JoinChannelResponse,
   JoinChannelRequest,
-  GetAddressResponse,
-  GetAddressRequest,
   GetStateResponse,
   GetStateRequest,
-  WalletVersionRequest,
-  WalletVersionResponse,
+  GetWalletInformationRequest,
+  GetWalletInformationResponse,
   EnableEthereumRequest,
   EnableEthereumResponse,
-  GetEthereumSelectedAddressResponse,
-  GetEthereumSelectedAddressRequest,
   ChallengeChannelResponse,
   ChallengeChannelRequest,
   GetBudgetResponse,
@@ -83,10 +79,8 @@ export type MethodResponseType = {
   CloseChannel: CloseChannelResponse['result'];
   JoinChannel: JoinChannelResponse['result'];
   GetState: GetStateResponse['result'];
-  WalletVersion: WalletVersionResponse['result'];
+  GetWalletInformation: GetWalletInformationResponse['result'];
   EnableEthereum: EnableEthereumResponse['result'];
-  GetAddress: GetAddressResponse['result'];
-  GetEthereumSelectedAddress: GetEthereumSelectedAddressResponse['result'];
   ChallengeChannel: ChallengeChannelResponse['result'];
   ApproveBudgetAndFund: ApproveBudgetAndFundResponse['result'];
   GetBudget: GetBudgetResponse['result'];
@@ -100,10 +94,8 @@ type Method =
   | 'CloseChannel'
   | 'JoinChannel'
   | 'GetState'
-  | 'WalletVersion'
+  | 'GetWalletInformation'
   | 'EnableEthereum'
-  | 'GetAddress'
-  | 'GetEthereumSelectedAddress'
   | 'ChallengeChannel'
   | 'ApproveBudgetAndFund'
   | 'GetBudget'
@@ -121,11 +113,9 @@ export type MethodRequestType =
   | Call<'PushMessage', PushMessageRequest>
   | Call<'CloseChannel', CloseChannelRequest>
   | Call<'JoinChannel', JoinChannelRequest>
-  | Call<'WalletVersion', WalletVersionRequest>
+  | Call<'GetWalletInformation', GetWalletInformationRequest>
   | Call<'EnableEthereum', EnableEthereumRequest>
   | Call<'GetState', GetStateRequest>
-  | Call<'GetAddress', GetAddressRequest>
-  | Call<'GetEthereumSelectedAddress', GetEthereumSelectedAddressRequest>
   | Call<'ChallengeChannel', ChallengeChannelRequest>
   | Call<'ApproveBudgetAndFund', ApproveBudgetAndFundRequest>
   | Call<'GetBudget', GetBudgetRequest>

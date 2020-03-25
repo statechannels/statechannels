@@ -685,7 +685,24 @@
           "type": "string"
         },
         "result": {
-          "$ref": "#/definitions/Address"
+          "additionalProperties": false,
+          "properties": {
+            "selectedAddress": {
+              "$ref": "#/definitions/Address"
+            },
+            "signingAddress": {
+              "$ref": "#/definitions/Address"
+            },
+            "walletVersion": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "signingAddress",
+            "selectedAddress",
+            "walletVersion"
+          ],
+          "type": "object"
         }
       },
       "required": [
@@ -716,60 +733,6 @@
       "required": [
         "token",
         "amount"
-      ],
-      "type": "object"
-    },
-    "GetAddressRequest": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "method": {
-          "enum": [
-            "GetAddress"
-          ],
-          "type": "string"
-        },
-        "params": {
-          "additionalProperties": false,
-          "type": "object"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "method",
-        "params"
-      ],
-      "type": "object"
-    },
-    "GetAddressResponse": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "result": {
-          "$ref": "#/definitions/Address"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "result"
       ],
       "type": "object"
     },
@@ -843,60 +806,6 @@
       ],
       "type": "object"
     },
-    "GetEthereumSelectedAddressRequest": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "method": {
-          "enum": [
-            "GetEthereumSelectedAddress"
-          ],
-          "type": "string"
-        },
-        "params": {
-          "additionalProperties": false,
-          "type": "object"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "method",
-        "params"
-      ],
-      "type": "object"
-    },
-    "GetEthereumSelectedAddressResponse": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "result": {
-          "$ref": "#/definitions/Address"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "result"
-      ],
-      "type": "object"
-    },
     "GetStateParams": {
       "additionalProperties": false,
       "properties": {
@@ -953,6 +862,84 @@
         },
         "result": {
           "$ref": "#/definitions/ChannelResult"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
+      "type": "object"
+    },
+    "GetWalletInformationRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "GetWalletInformation"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": false,
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "GetWalletInformationResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "result": {
+          "additionalProperties": false,
+          "properties": {
+            "selectedAddress": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/Address"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "signingAddress": {
+              "$ref": "#/definitions/Address"
+            },
+            "walletVersion": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "signingAddress",
+            "selectedAddress",
+            "walletVersion"
+          ],
+          "type": "object"
         }
       },
       "required": [
@@ -1220,12 +1207,6 @@
     "Request": {
       "anyOf": [
         {
-          "$ref": "#/definitions/GetAddressRequest"
-        },
-        {
-          "$ref": "#/definitions/GetEthereumSelectedAddressRequest"
-        },
-        {
           "$ref": "#/definitions/CreateChannelRequest"
         },
         {
@@ -1235,7 +1216,7 @@
           "$ref": "#/definitions/UpdateChannelRequest"
         },
         {
-          "$ref": "#/definitions/WalletVersionRequest"
+          "$ref": "#/definitions/GetWalletInformationRequest"
         },
         {
           "$ref": "#/definitions/EnableEthereumRequest"
@@ -1266,12 +1247,6 @@
     "Response": {
       "anyOf": [
         {
-          "$ref": "#/definitions/GetAddressResponse"
-        },
-        {
-          "$ref": "#/definitions/GetEthereumSelectedAddressResponse"
-        },
-        {
           "$ref": "#/definitions/CreateChannelResponse"
         },
         {
@@ -1281,7 +1256,7 @@
           "$ref": "#/definitions/UpdateChannelResponse"
         },
         {
-          "$ref": "#/definitions/WalletVersionResponse"
+          "$ref": "#/definitions/GetWalletInformationResponse"
         },
         {
           "$ref": "#/definitions/EnableEthereumResponse"
@@ -1521,60 +1496,6 @@
         },
         "result": {
           "$ref": "#/definitions/ChannelResult"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "result"
-      ],
-      "type": "object"
-    },
-    "WalletVersionRequest": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "method": {
-          "enum": [
-            "WalletVersion"
-          ],
-          "type": "string"
-        },
-        "params": {
-          "additionalProperties": false,
-          "type": "object"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "method",
-        "params"
-      ],
-      "type": "object"
-    },
-    "WalletVersionResponse": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "result": {
-          "type": "string"
         }
       },
       "required": [

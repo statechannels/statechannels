@@ -47,23 +47,21 @@ export class FakeChannelProvider implements ChannelProviderInterface {
   opponentAddress: Record<ChannelId, string> = {};
   latestState: Record<ChannelId, ChannelResult> = {};
 
-  constructor(alreadyEnabled = true) {
-    if (alreadyEnabled) {
-      this.signingAddress = this.getAddress();
-      this.selectedAddress = '0xEthereumSelectedAddress';
-      this.walletVersion = 'FakeChannelProvider@VersionTBD';
-    }
-  }
-
   async mountWalletComponent(url?: string): Promise<void> {
     this.url = url || '';
+    this.signingAddress = this.getAddress();
+    this.walletVersion = 'FakeChannelProvider@VersionTBD';
+    this.selectedAddress = '0xEthereumSelectedAddress';
   }
 
   async enable(): Promise<void> {
-    await this.send({method: 'EnableEthereum', params: {}});
-    this.signingAddress = await this.send({method: 'GetAddress', params: {}});
-    this.selectedAddress = await this.send({method: 'GetEthereumSelectedAddress', params: {}});
-    this.walletVersion = await this.send({method: 'WalletVersion', params: {}});
+    const {signingAddress, selectedAddress, walletVersion} = await this.send({
+      method: 'EnableEthereum',
+      params: {}
+    });
+    this.signingAddress = signingAddress;
+    this.selectedAddress = selectedAddress;
+    this.walletVersion = walletVersion;
   }
 
   async send(request: MethodRequestType): Promise<MethodResponseType[MethodRequestType['method']]> {
@@ -74,18 +72,13 @@ export class FakeChannelProvider implements ChannelProviderInterface {
       case 'PushMessage':
         return this.pushMessage(request.params);
 
-      case 'WalletVersion':
-        return `FakeChannelProvider@VersionTBD`; // TODO: Inject git / build information for version
-
+      case 'GetWalletInformation':
       case 'EnableEthereum':
-        await window.ethereum.enable();
-        return window.ethereum.selectedAddress;
-
-      case 'GetEthereumSelectedAddress':
-        return '0xEthereumSelectedAddress';
-
-      case 'GetAddress':
-        return this.getAddress();
+        return {
+          signingAddress: this.getAddress(),
+          selectedAddress: '0xEthereumSelectedAddress',
+          walletVersion: 'FakeChannelProvider@VersionTBD'
+        };
 
       case 'JoinChannel':
         return this.joinChannel(request.params);

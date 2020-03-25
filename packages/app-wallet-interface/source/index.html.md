@@ -109,32 +109,9 @@ Note: we don't return the state of the channel, as messages are not necessarily 
 | ---- | ----------------- | -------------------------------------------- |
 | 900  | Wrong Participant | The message is not addressed to this wallet. |
 
-## WalletVersion
-
-Retrieves the current version of the state channels wallet the client is connected to.
-
-```json
-{
-  "jsonrpc": "2.0",
-  "method": "WalletVersion",
-  "id": 1,
-  "params": {}
-}
-```
-
-> Example response
-
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "result": "xstate-wallet@e5fba554d"
-}
-```
-
 ## EnableEthereum
 
-Enables the wallet domain against an ethereum provider (e.g., MetaMask). This triggers the connected State Channels wallet to call `window.ethereum.enable()` in the background from the wallet's domain (e.g., `wallet.statechannels.org`). This must be done _prior_ to calling `GetEthereumSelectedAddress` as otherwise that value will be `undefined`, since the wallet won't have access to that value.
+Enables the wallet domain against an ethereum provider (e.g., MetaMask). This triggers the connected State Channels wallet to initiate its "Enable Workflow" which will result in a call to `window.ethereum.enable()` in the background from the wallet's domain (e.g., `wallet.statechannels.org`).
 
 ```json
 {
@@ -151,18 +128,28 @@ Enables the wallet domain against an ethereum provider (e.g., MetaMask). This tr
 {
   "jsonrpc": "2.0",
   "id": 1,
-  "result": "0xabc..."
+  "result": {
+    "signingAddress": "0xabc...",
+    "selectedAddress": "0xabc...",
+    "walletVersion": "wallet@0.0.1"
+  }
 }
 ```
 
-## GetAddress
+### Errors
 
-Returns the signing address for the current domain.
+| Code | Message              | Meaning                                                |
+| ---- | -------------------- | ------------------------------------------------------ |
+| 100  | Ethereum Not Enabled | The wallet approval was rejected by the Web3 provider. |
+
+## GetWalletInformation
+
+Gets the current data from the wallet on its `signingAddress`, `selectedAddress`, and `walletVersion`. If the wallet has not been enabled relative to a Web3 Provider, `selectedAddress` will be `undefined`.
 
 ```json
 {
   "jsonrpc": "2.0",
-  "method": "GetAddress",
+  "method": "GetWalletInformation",
   "id": 1,
   "params": {}
 }
@@ -174,30 +161,11 @@ Returns the signing address for the current domain.
 {
   "jsonrpc": "2.0",
   "id": 1,
-  "result": ["0x123..."]
-}
-```
-
-## GetEthereumSelectedAddress
-
-Returns the ethereum address selected in metamask. Typically used as the `destination`.
-
-```json
-{
-  "jsonrpc": "2.0",
-  "method": "GetEthereumSelectedAddress",
-  "id": 1,
-  "params": {}
-}
-```
-
-> Example response
-
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "result": "0xabc..."
+  "result": {
+    "signingAddress": "0xabc...",
+    "selectedAddress": "0xabc...",
+    "walletVersion": "wallet@0.0.1"
+  }
 }
 ```
 

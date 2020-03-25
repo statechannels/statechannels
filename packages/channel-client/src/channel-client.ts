@@ -29,7 +29,7 @@ export class ChannelClient implements ChannelClientInterface {
     return this.provider.walletVersion;
   }
 
-  constructor(private readonly provider: ChannelProviderInterface) {}
+  constructor(readonly provider: ChannelProviderInterface) {}
 
   onMessageQueued(
     callback: (result: MessageQueuedNotification['params']) => void

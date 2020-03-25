@@ -1,6 +1,8 @@
 import {bigNumberify, hexZeroPad} from 'ethers/utils';
 import {Participant} from './store/types';
 
+export const WALLET_VERSION = 'xstate-wallet@VersionTBD';
+
 export const ETH_ASSET_HOLDER_ADDRESS =
   process.env.ETH_ASSET_HOLDER_ADDRESS || '0x0000000000000000000000000000000000000000';
 
