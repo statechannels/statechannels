@@ -4,6 +4,8 @@ import {prettyPrintWei} from '../../utils/calculateWei';
 import {utils} from 'ethers';
 import './SiteBudgetTable.scss';
 
+const bigNumberify = utils.bigNumberify;
+
 export type SiteBudgetTableProps = {
   budget: SiteBudget;
 };
@@ -11,18 +13,18 @@ export type SiteBudgetTableProps = {
 class SiteBudgetTable extends React.Component<SiteBudgetTableProps> {
   render() {
     const budget = this.props.budget;
-    const spent = prettyPrintWei(utils.bigNumberify(budget.budgets[0].inUse.playerAmount));
+    const spent = prettyPrintWei(bigNumberify(budget.budgets[0].inUse.playerAmount));
     const spendBudget = prettyPrintWei(
-      utils
-        .bigNumberify(budget.budgets[0].inUse.playerAmount)
-        .add(utils.bigNumberify(budget.budgets[0].free.playerAmount))
+      bigNumberify(budget.budgets[0].inUse.playerAmount).add(
+        bigNumberify(budget.budgets[0].free.playerAmount)
+      )
     );
 
-    const received = prettyPrintWei(utils.bigNumberify(budget.budgets[0].inUse.hubAmount));
+    const received = prettyPrintWei(bigNumberify(budget.budgets[0].inUse.hubAmount));
     const receiveBudget = prettyPrintWei(
-      utils
-        .bigNumberify(budget.budgets[0].inUse.hubAmount)
-        .add(utils.bigNumberify(budget.budgets[0].free.hubAmount))
+      bigNumberify(budget.budgets[0].inUse.hubAmount).add(
+        bigNumberify(budget.budgets[0].free.hubAmount)
+      )
     );
     return (
       <table className="site-budget-table">
