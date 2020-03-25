@@ -1,10 +1,14 @@
 import DS from 'ember-data';
-import RealtimeDatabaseSerializer from 'emberfire/serializers/realtime-database';
+import _RealtimeDatabaseSerializer from 'emberfire/serializers/realtime-database';
 import {singularize} from 'ember-inflector';
 import {inject as service} from '@ember/service';
 import FirebaseAppService from 'emberfire/services/firebase-app';
 
-export default class ApplicationSerializer extends RealtimeDatabaseSerializer {
+// Had to rename the class name
+// EmberFire has a conditional which checks constructor.name
+// This has to be RealtimeDatabaseSerializer or realtime data doesn't work
+// File: https://github.com/firebase/emberfire/blob/master/addon/services/realtime-listener.ts#L177
+export default class RealtimeDatabaseSerializer extends _RealtimeDatabaseSerializer {
   @service firebaseApp!: FirebaseAppService;
 
   // This is needed because of a bug in EmberFire v3.0.0-rc.6
@@ -33,6 +37,6 @@ export default class ApplicationSerializer extends RealtimeDatabaseSerializer {
 // DO NOT DELETE: this is how TypeScript knows how to look up your serializers.
 declare module 'ember-data/types/registries/serializer' {
   export default interface SerializerRegistry {
-    application: ApplicationSerializer;
+    application: RealtimeDatabaseSerializer;
   }
 }
