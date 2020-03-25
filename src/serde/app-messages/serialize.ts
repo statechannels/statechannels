@@ -2,14 +2,14 @@ import {
   Allocation as AppAllocation,
   Allocations as AppAllocations,
   AllocationItem as AppAllocationItem,
-  SiteBudget as AppSiteBudget
+  SiteBudget as AppSiteBudget,
+  TokenBudget
 } from '@statechannels/client-api-schema';
 import {
   Allocation,
   AllocationItem,
   SimpleAllocation,
   SiteBudget,
-  BudgetItem,
   AssetBudget
 } from '../../store/types';
 import {tokenAddress} from '../../constants';
@@ -17,30 +17,28 @@ import {AddressZero} from 'ethers/constants';
 import {checkThat, exists} from '../../utils';
 
 export function serializeSiteBudget(budget: SiteBudget): AppSiteBudget {
-  const budgets = Object.keys(budget.forAsset).map(assetHolderAddress => {
+  const budgets: TokenBudget[] = Object.keys(budget.forAsset).map(assetHolderAddress => {
     const assetBudget = checkThat<AssetBudget>(budget.forAsset[assetHolderAddress], exists);
-
+    const channels = Object.keys(assetBudget.channels).map(channelId => ({
+      channelId,
+      amount: assetBudget.channels[channelId].amount.toHexString(),
+      status: assetBudget.channels[channelId].status
+    }));
     return {
       token: tokenAddress(assetHolderAddress) || AddressZero,
-      pending: serializeBudgetItem(assetBudget.pending),
-      free: serializeBudgetItem(assetBudget.free),
-      inUse: serializeBudgetItem(assetBudget.inUse),
-      direct: serializeBudgetItem(assetBudget.direct)
+      availableReceiveCapacity: assetBudget.availableReceiveCapacity.toHexString(),
+      availableSendCapacity: assetBudget.availableSendCapacity.toHexString(),
+      channels
     };
   });
 
   return {
-    domain: budget.site,
+    domain: budget.domain,
     hubAddress: budget.hubAddress,
     budgets
   };
 }
-function serializeBudgetItem(budgetItem: BudgetItem): {playerAmount: string; hubAmount: string} {
-  return {
-    playerAmount: budgetItem.playerAmount.toHexString(),
-    hubAmount: budgetItem.hubAmount.toHexString()
-  };
-}
+
 export function serializeAllocation(allocation: Allocation): AppAllocations {
   switch (allocation.type) {
     case 'SimpleAllocation':

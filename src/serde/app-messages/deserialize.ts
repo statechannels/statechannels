@@ -3,14 +3,12 @@ import {
   Allocations as AppAllocations,
   AllocationItem as AppAllocationItem,
   SiteBudget as AppSiteBudget,
-  BudgetRequest as AppBudgetRequest
-} from '@statechannels/client-api-schema';
+  TokenBudgetRequest as AppBudgetRequest} from '@statechannels/client-api-schema';
 import {
   Allocation,
   AllocationItem,
   SimpleAllocation,
   SiteBudget,
-  BudgetItem,
   AssetBudget
 } from '../../store/types';
 import {assetHolderAddress, ETH_ASSET_HOLDER_ADDRESS} from '../../constants';
@@ -18,47 +16,42 @@ import {bigNumberify} from 'ethers/utils';
 import {AddressZero} from 'ethers/constants';
 import {makeDestination} from '../../utils/outcome';
 
-export function deserializeBudgetRequest(budgetRequest: AppBudgetRequest): SiteBudget {
+export function deserializeBudgetRequest(
+  budgetRequest: AppBudgetRequest,
+  domain: string
+): SiteBudget {
   const assetBudget: AssetBudget = {
     assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
-    inUse: {playerAmount: bigNumberify(0), hubAmount: bigNumberify(0)},
-    free: {playerAmount: bigNumberify(0), hubAmount: bigNumberify(0)},
-    pending: deserializeBudgetItem(budgetRequest),
-    direct: {playerAmount: bigNumberify(0), hubAmount: bigNumberify(0)}
+    availableSendCapacity: bigNumberify(budgetRequest.requestedSendCapacity),
+    availableReceiveCapacity: bigNumberify(budgetRequest.requestedReceiveCapacity),
+    channels: {}
   };
   return {
-    site: budgetRequest.site,
+    domain,
     hubAddress: budgetRequest.hub.signingAddress,
     forAsset: {[ETH_ASSET_HOLDER_ADDRESS]: assetBudget}
   };
 }
 
 export function deserializeSiteBudget(siteBudget: AppSiteBudget): SiteBudget {
-  const assetBudgets = siteBudget.budgets.map(b => ({
+  const assetBudgets: AssetBudget[] = siteBudget.budgets.map(b => ({
     assetHolderAddress: assetHolderAddress(b.token) || AddressZero,
-    inUse: deserializeBudgetItem(b.inUse),
-    free: deserializeBudgetItem(b.free),
-    pending: deserializeBudgetItem(b.pending),
-    direct: deserializeBudgetItem(b.direct)
+    availableReceiveCapacity: bigNumberify(b.availableReceiveCapacity),
+    availableSendCapacity: bigNumberify(b.availableSendCapacity),
+    channels: b.channels.reduce((record, item) => {
+      record[item.channelId] = {amount: bigNumberify(item.amount), status: item.status};
+      return record;
+    }, {})
   }));
-  const budgets = {};
-  assetBudgets.forEach(a => {
-    budgets[a.assetHolderAddress] = a;
-  });
+  const budgets = assetBudgets.reduce((record, a) => {
+    record[a.assetHolderAddress] = a;
+    return record;
+  }, {});
 
   return {
-    site: siteBudget.domain,
+    domain: siteBudget.domain,
     hubAddress: siteBudget.hubAddress,
     forAsset: budgets
-  };
-}
-export function deserializeBudgetItem(budgetItem: {
-  playerAmount: string;
-  hubAmount: string;
-}): BudgetItem {
-  return {
-    playerAmount: bigNumberify(budgetItem.playerAmount),
-    hubAmount: bigNumberify(budgetItem.hubAmount)
   };
 }
 
