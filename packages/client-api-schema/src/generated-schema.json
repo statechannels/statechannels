@@ -918,7 +918,14 @@
           "additionalProperties": false,
           "properties": {
             "selectedAddress": {
-              "$ref": "#/definitions/Address"
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/Address"
+                },
+                {
+                  "type": "null"
+                }
+              ]
             },
             "signingAddress": {
               "$ref": "#/definitions/Address"
@@ -929,6 +936,7 @@
           },
           "required": [
             "signingAddress",
+            "selectedAddress",
             "walletVersion"
           ],
           "type": "object"

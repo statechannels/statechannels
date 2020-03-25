@@ -101,7 +101,7 @@ interface Balance {
 export type GetWalletInformationRequest = JsonRpcRequest<'GetWalletInformation', {}>;
 export type GetWalletInformationResponse = JsonRpcResponse<{
   signingAddress: Address;
-  selectedAddress?: Address;
+  selectedAddress: Address | null;
   walletVersion: string;
 }>;
 
