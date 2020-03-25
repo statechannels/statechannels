@@ -144,27 +144,21 @@ export class MessagingService implements MessagingServiceInterface {
 
     switch (request.method) {
       case 'GetWalletInformation':
-        window.parent.postMessage(
-          jrs.success(requestId, {
-            signingAddress: await this.store.getAddress(),
-            selectedAddress: this.store.chain.ethereumIsEnabled
-              ? this.store.chain.selectedAddress
-              : null,
-            walletVersion: WALLET_VERSION
-          }),
-          '*'
-        );
+        await this.sendResponse(requestId, {
+          signingAddress: await this.store.getAddress(),
+          selectedAddress: this.store.chain.ethereumIsEnabled
+            ? this.store.chain.selectedAddress
+            : null,
+          walletVersion: WALLET_VERSION
+        });
         break;
       case 'EnableEthereum':
         if (this.store.chain.ethereumIsEnabled) {
-          window.parent.postMessage(
-            jrs.success(requestId, {
-              signingAddress: await this.store.getAddress(),
-              selectedAddress: this.store.chain.selectedAddress,
-              walletVersion: WALLET_VERSION
-            }),
-            '*'
-          );
+          await this.sendResponse(requestId, {
+            signingAddress: await this.store.getAddress(),
+            selectedAddress: this.store.chain.selectedAddress,
+            walletVersion: WALLET_VERSION
+          });
         } else {
           this.eventEmitter.emit('AppRequest', {type: 'ENABLE_ETHEREUM', requestId});
         }
