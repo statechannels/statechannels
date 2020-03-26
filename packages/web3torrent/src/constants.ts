@@ -26,6 +26,7 @@ export const fireBaseConfig = {
   storageBucket: '',
   messagingSenderId: '913007764573'
 };
+export const AUTO_FUND_LEDGER = process.env.REACT_APP_AUTO_FUND_LEDGER;
 
 const httpProtocol = process.env.REACT_APP_TRACKER_URL_HTTP_PROTOCOL;
 const url = process.env.REACT_APP_TRACKER_URL;
