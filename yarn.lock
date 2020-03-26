@@ -14975,7 +14975,7 @@ ember-truth-helpers@2.1.0:
   dependencies:
     ember-cli-babel "^6.6.0"
 
-emberfire@^3.0.0-rc.6:
+emberfire@3.0.0-rc.6:
   version "3.0.0-rc.6"
   resolved "https://registry.npmjs.org/emberfire/-/emberfire-3.0.0-rc.6.tgz#c8677fdb3407a9109dc99cef3e0d635b8f05d449"
   integrity sha512-DBaffIId95yBTWfz6zea7hr1tmTl4NGpovM2zLcP82TwimFBL+9XQB4m0zuGiL8hq1k2Wq7xY9JTfP5BzzjhRA==
@@ -16812,7 +16812,7 @@ extsprintf@^1.2.0:
   resolved "https://registry.npmjs.org/extsprintf/-/extsprintf-1.4.0.tgz#e2689f8f356fad62cca65a3a91c5df5f9551692f"
   integrity sha1-4mifjzVvrWLMplo6kcXfX5VRaS8=
 
-fake-indexeddb@^3.0.0:
+fake-indexeddb@3.0.0:
   version "3.0.0"
   resolved "https://registry.npmjs.org/fake-indexeddb/-/fake-indexeddb-3.0.0.tgz#1bd0ffce41b0f433409df301d334d8fd7d77da27"
   integrity sha512-VrnV9dJWlVWvd8hp9MMR+JS4RLC4ZmToSkuCg91ZwpYE5mSODb3n5VEaV62Hf3AusnbrPfwQhukU+rGZm5W8PQ==
@@ -27948,7 +27948,7 @@ react-hotkeys@2.0.0:
   dependencies:
     prop-types "^15.6.1"
 
-react-icons@^3.9.0:
+react-icons@3.9.0:
   version "3.9.0"
   resolved "https://registry.npmjs.org/react-icons/-/react-icons-3.9.0.tgz#89a00f20a0e02e6bfd899977eaf46eb4624239d5"
   integrity sha512-gKbYKR+4QsD3PmIHLAM9TDDpnaTsr3XZeK1NTAb6WQQ+gxEdJ0xuCgLq0pxXdS7Utg2AIpcVhM1ut/jlDhcyNg==
@@ -29248,22 +29248,6 @@ rgba-regex@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npmjs.org/rgba-regex/-/rgba-regex-1.0.0.tgz#43374e2e2ca0968b0ef1523460b7d730ff22eeb3"
   integrity sha1-QzdOLiyglosO8VI0YLfXMP8i7rM=
-
-rimble-ui@0.11.1:
-  version "0.11.1"
-  resolved "https://registry.npmjs.org/rimble-ui/-/rimble-ui-0.11.1.tgz#ad695cf5c2363e0d28ffe8f34f0490fd305cd28a"
-  integrity sha512-iG/t0KKGI7gknJOSQ/T+g5PxsctCCw2kf2jB+9wrAuQhshMgfXT7hQnTMTLuYDp62hnMHpDn3In6/qsFFzlPHg==
-  dependencies:
-    "@d8660091/react-popper" "^1.0.4"
-    "@svgr/rollup" "^4.2.0"
-    clipboard "^2.0.4"
-    ethereum-blockies "^0.1.1"
-    mixin-deep "^2.0.1"
-    polished "^3.2.0"
-    qrcode.react "^0.9.3"
-    rmdi "^1.0.1"
-    set-value "^3.0.1"
-    styled-system "^4.1.0"
 
 rimble-ui@0.13.1:
   version "0.13.1"
