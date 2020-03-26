@@ -14,7 +14,7 @@ import {
   WebTorrentSeedInput,
   WireEvents
 } from './types';
-import {utils, ethers} from 'ethers';
+import {utils} from 'ethers';
 import {ChannelState, PaymentChannelClient} from '../clients/payment-channel-client';
 import {
   mockTorrents,
@@ -101,7 +101,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
 
     // TODO: This is a temporary measure while we don't have any budgeting built out.
     // We automatically call approveBudgetAndFund.
-    const ten = ethers.utils.parseEther('10').toHexString();
+    const ten = utils.parseEther('10').toHexString();
     const success = await this.paymentChannelClient.approveBudgetAndFund(
       ten,
       ten,
