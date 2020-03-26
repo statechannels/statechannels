@@ -9,7 +9,6 @@ export interface SiteBudget {
 
 interface ChannelBudgetEntry {
   amount: BigNumber;
-  status: 'pending' | 'available';
 }
 export interface AssetBudget {
   assetHolderAddress: string;

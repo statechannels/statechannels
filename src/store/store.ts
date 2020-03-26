@@ -432,7 +432,7 @@ export class XstateStore implements Store {
           ...ethBudget,
           channels: {
             ...ethBudget.channels,
-            channelId: {amount: amount.receive.add(amount.send), status: 'pending'}
+            channelId: {amount: amount.receive.add(amount.send)}
           }
         };
 
