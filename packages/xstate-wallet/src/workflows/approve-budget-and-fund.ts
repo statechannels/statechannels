@@ -22,7 +22,7 @@ import {serializeSiteBudget} from '../serde/app-messages/serialize';
 import {CreateAndFundLedger} from '../workflows';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
 import {simpleEthAllocation} from '../utils/outcome';
-import {bigNumberify} from 'ethers/utils';
+
 import _ from 'lodash';
 import {checkThat, exists} from '../utils';
 interface UserApproves {
@@ -126,9 +126,9 @@ export const approveBudgetAndFundWorkflow = (
     },
     updateBudgetToFree: assign(
       ({budget}: WorkflowContext): WorkflowContext => {
-        const {site, hubAddress} = budget;
+        const {domain: site, hubAddress} = budget;
         const clonedAssetBudgets = _.mapValues(context.budget.forAsset, freeAssetBudget);
-        return {...context, budget: {site, hubAddress, forAsset: clonedAssetBudgets}};
+        return {...context, budget: {domain: site, hubAddress, forAsset: clonedAssetBudgets}};
       }
     )
   };
@@ -145,15 +145,10 @@ export const machine = approveBudgetAndFundWorkflow;
 export const config = generateConfig(mockActions);
 
 // TODO: Should there be a Site Budget class that handles this?
-function freeAssetBudget(assetBudget: AssetBudget): AssetBudget {
-  const {pending, inUse, direct, assetHolderAddress} = assetBudget;
-  return {
-    assetHolderAddress,
-    inUse,
-    direct,
-    free: pending,
-    pending: {playerAmount: bigNumberify(0), hubAmount: bigNumberify(0)}
-  };
+function freeAssetBudget(assetBudget: AssetBudget, channelId: string): AssetBudget {
+  const clonedBudget = _.cloneDeep(assetBudget);
+
+  return clonedBudget;
 }
 
 function convertPendingBudgetToAllocation({
@@ -168,11 +163,11 @@ function convertPendingBudgetToAllocation({
   const ethBudget = checkThat<AssetBudget>(budget.forAsset[ETH_ASSET_HOLDER_ADDRESS], exists);
   const playerItem: AllocationItem = {
     destination: player.destination,
-    amount: ethBudget.pending.playerAmount
+    amount: ethBudget.availableSendCapacity
   };
   const hubItem: AllocationItem = {
     destination: hub.destination,
-    amount: ethBudget.pending.hubAmount
+    amount: ethBudget.availableReceiveCapacity
   };
   return simpleEthAllocation([hubItem, playerItem]);
 }

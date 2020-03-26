@@ -92,11 +92,6 @@ export interface ChannelResult {
   challengeExpirationTime?: number;
 }
 
-interface Balance {
-  playerAmount: string;
-  hubAmount: string;
-}
-
 // GetWalletInformation
 export type GetWalletInformationRequest = JsonRpcRequest<'GetWalletInformation', {}>;
 export type GetWalletInformationResponse = JsonRpcResponse<{
@@ -167,28 +162,42 @@ export type ChallengeChannelRequest = JsonRpcRequest<'ChallengeChannel', {channe
 export type ChallengeChannelResponse = JsonRpcResponse<ChannelResult>;
 
 // Budget
+
+export interface ChannelBudget {
+  channelId: string;
+  amount: string;
+}
+
 export interface TokenBudget {
   token: string;
-  pending: Balance;
-  free: Balance;
-  inUse: Balance;
-  direct: Balance;
+  availableReceiveCapacity: string;
+  availableSendCapacity: string;
+  channels: ChannelBudget[];
 }
 export interface SiteBudget {
-  site: string;
-  hub: string;
+  domain: string;
+  hubAddress: string;
   budgets: TokenBudget[];
 }
 
-export interface BudgetRequest extends Balance {
-  site: string;
-  player: Participant;
+export interface TokenBudgetRequest {
   hub: Participant;
+  playerParticipantId: string;
+  // TODO: The domain could be taken from incoming message instead
+  // leaving here for now as it's simpler then changing the wallet
+  // and the channel client already handles this
+  domain: string;
+  token: string;
+  requestedSendCapacity: string;
+  requestedReceiveCapacity: string;
 }
 export type GetBudgetRequest = JsonRpcRequest<'GetBudget', {hubAddress: Address}>;
 export type GetBudgetResponse = JsonRpcResponse<SiteBudget | {}>;
 
-export type ApproveBudgetAndFundRequest = JsonRpcRequest<'ApproveBudgetAndFund', BudgetRequest>;
+export type ApproveBudgetAndFundRequest = JsonRpcRequest<
+  'ApproveBudgetAndFund',
+  TokenBudgetRequest
+>;
 export type ApproveBudgetAndFundResponse = JsonRpcResponse<SiteBudget>;
 
 export type CloseAndWithdrawParams = {site: string; player: Participant; hub: Participant};

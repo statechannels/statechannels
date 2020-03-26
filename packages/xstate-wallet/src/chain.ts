@@ -5,7 +5,7 @@ import {
 } from '@statechannels/nitro-protocol';
 import {getProvider} from './utils/contract-utils';
 import {ethers} from 'ethers';
-import {BigNumber, bigNumberify} from 'ethers/utils';
+import {BigNumber, bigNumberify, hexZeroPad} from 'ethers/utils';
 import {State, SignedState} from './store/types';
 import {Observable, fromEvent, from, merge} from 'rxjs';
 import {filter, map} from 'rxjs/operators';
@@ -112,7 +112,7 @@ export class FakeChain implements Chain {
   }
 
   public ethereumEnable() {
-    this.fakeSelectedAddress = '0x123';
+    this.fakeSelectedAddress = hexZeroPad('0x123', 32);
     return Promise.resolve(this.selectedAddress);
   }
 

@@ -2,20 +2,19 @@ import {BigNumber} from 'ethers/utils';
 import {MemoryChannelStoreEntry} from './memory-channel-storage';
 
 export interface SiteBudget {
-  site: string;
+  domain: string;
   hubAddress: string;
   forAsset: Record<string, AssetBudget | undefined>;
 }
-export interface BudgetItem {
-  playerAmount: BigNumber;
-  hubAmount: BigNumber;
+
+interface ChannelBudgetEntry {
+  amount: BigNumber;
 }
 export interface AssetBudget {
   assetHolderAddress: string;
-  pending: BudgetItem; // Approved by user, but not yet funded
-  free: BudgetItem; // Funded, and ready to be allocated
-  inUse: BudgetItem; // Funded, but currently allocated
-  direct: BudgetItem;
+  availableReceiveCapacity: BigNumber;
+  availableSendCapacity: BigNumber;
+  channels: Record<string, ChannelBudgetEntry>;
 }
 export interface Participant {
   participantId: string;
@@ -130,7 +129,7 @@ export interface Message {
   objectives?: Objective[];
 }
 
-export type ToRelease = {inUse: BudgetItem; assetHolderAddress: string};
+export type ToRelease = {assetHolderAddress: string; channelId: string};
 
 export interface DBBackend {
   initialize(cleanSlate?: boolean): Promise<any>;

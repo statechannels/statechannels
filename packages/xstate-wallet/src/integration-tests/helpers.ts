@@ -19,6 +19,7 @@ import * as CreateAndFundLedger from '../workflows/create-and-fund-ledger';
 import {Guid} from 'guid-typescript';
 import * as CloseLedgerAndWithdraw from '../workflows/close-ledger-and-withdraw';
 import {TestStore} from '../workflows/tests/store';
+import {ETH_TOKEN} from '../constants';
 import {makeDestination} from '../utils/outcome';
 
 export class Player {
@@ -223,11 +224,12 @@ export function generateApproveBudgetAndFundRequest(
     id: 88888888,
     method: 'ApproveBudgetAndFund',
     params: {
-      site: 'rps.statechannels.org',
+      token: ETH_TOKEN,
+      domain: 'rps.statechannels.org',
       hub,
-      player,
-      playerAmount: '0x5',
-      hubAmount: '0x5'
+      playerParticipantId: player.participantId,
+      requestedSendCapacity: '0x5',
+      requestedReceiveCapacity: '0x5'
     }
   };
 }

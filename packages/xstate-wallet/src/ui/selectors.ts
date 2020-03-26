@@ -64,11 +64,11 @@ export function getApplicationOpenProgress(applicationWorkflowState: AppWorkflow
   }
 }
 
-export function getAmountsFromPendingBudget(
+export function getAmountsFromBudget(
   budget: SiteBudget
 ): {playerAmount: BigNumber; hubAmount: BigNumber} {
-  const pending = budget.forAsset[ETH_ASSET_HOLDER_ADDRESS]?.pending;
+  const pending = budget.forAsset[ETH_ASSET_HOLDER_ADDRESS];
   if (!pending) throw new Error('No eth budget found');
-  const {playerAmount, hubAmount} = pending;
-  return {playerAmount, hubAmount};
+  const {availableReceiveCapacity, availableSendCapacity} = pending;
+  return {playerAmount: availableSendCapacity, hubAmount: availableReceiveCapacity};
 }

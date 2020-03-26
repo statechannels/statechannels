@@ -1,7 +1,6 @@
 import {Observable, fromEvent, merge, from} from 'rxjs';
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {
-  BudgetItem,
   DBBackend,
   Message,
   Objective,
@@ -104,7 +103,12 @@ export interface Store {
   addObjective(objective: Objective): void;
   getBudget: (site: string) => Promise<SiteBudget>;
   createBudget: (budget: SiteBudget) => Promise<void>;
-  reserveFunds(site: string, assetHolderAddress: string, amount: BudgetItem): Promise<SiteBudget>;
+  reserveFunds(
+    site: string,
+    assetHolderAddress: string,
+    channelId: string,
+    amount: {send: BigNumber; receive: BigNumber}
+  ): Promise<SiteBudget>;
   releaseFunds(site: string, toRelease: ToRelease[]): Promise<SiteBudget>;
 
   chain: Chain;
@@ -153,7 +157,7 @@ export class XstateStore implements Store {
     return budget;
   }
   public async updateOrCreateBudget(budget: SiteBudget): Promise<void> {
-    await this.backend.setBudget(budget.site, budget);
+    await this.backend.setBudget(budget.domain, budget);
   }
 
   public channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry> {
@@ -401,10 +405,12 @@ export class XstateStore implements Store {
   public async releaseFunds(site, budget) {
     return budget;
   }
+
   public async reserveFunds(
     site: string,
     assetHolderAddress: string,
-    amount: BudgetItem
+    channelId: string,
+    amount: {send: BigNumber; receive: BigNumber}
   ): Promise<SiteBudget> {
     return await this.budgetLock
       .acquire<SiteBudget>(site, async release => {
@@ -415,21 +421,18 @@ export class XstateStore implements Store {
           throw new Error(Errors.noBudget);
         }
 
-        const {free, inUse} = ethBudget;
-
-        if (free.hubAmount.lt(amount.hubAmount) || free.playerAmount.lt(amount.playerAmount)) {
+        if (
+          ethBudget.availableSendCapacity.lt(amount.send) ||
+          ethBudget.availableReceiveCapacity.lt(amount.receive)
+        ) {
           throw new Error(Errors.budgetInsufficient);
         }
 
         currentBudget.forAsset[assetHolderAddress] = {
           ...ethBudget,
-          free: {
-            hubAmount: free.hubAmount.sub(amount.hubAmount),
-            playerAmount: free.playerAmount.sub(amount.playerAmount)
-          },
-          inUse: {
-            hubAmount: inUse.hubAmount.add(amount.hubAmount),
-            playerAmount: inUse.playerAmount.add(amount.playerAmount)
+          channels: {
+            ...ethBudget.channels,
+            channelId: {amount: amount.receive.add(amount.send)}
           }
         };
 

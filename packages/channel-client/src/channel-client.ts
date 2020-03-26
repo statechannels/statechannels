@@ -14,6 +14,7 @@ import {
   MessageQueuedNotification
 } from '@statechannels/client-api-schema';
 import {HUB} from './constants';
+import {ETH_TOKEN_ADDRESS} from '../tests/constants';
 
 type TokenAllocations = Allocation[];
 
@@ -127,23 +128,20 @@ export class ChannelClient implements ChannelClientInterface {
   }
 
   async approveBudgetAndFund(
-    playerAmount: string,
-    hubAmount: string,
-    playerOutcomeAddress: string,
+    receiveCapacity: string,
+    sendCapacity: string,
+    _playerOutcomeAddress: string, // TODO: This is done by the wallet and not needed
     hubAddress: string,
     hubOutcomeAddress: string
   ): Promise<SiteBudget> {
     return this.provider.send({
       method: 'ApproveBudgetAndFund',
       params: {
-        playerAmount,
-        hubAmount,
-        site: window.location.hostname,
-        player: {
-          participantId: this.signingAddress as string,
-          signingAddress: this.signingAddress as string, // TODO: methods like this ought not be callable if undefined
-          destination: playerOutcomeAddress
-        },
+        requestedReceiveCapacity: receiveCapacity,
+        requestedSendCapacity: sendCapacity,
+        token: ETH_TOKEN_ADDRESS,
+        playerParticipantId: this.signingAddress as string,
+        domain: window.location.hostname,
         hub: {
           participantId: HUB.participantId,
           signingAddress: hubAddress,

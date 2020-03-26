@@ -169,7 +169,7 @@ export class MessagingService implements MessagingServiceInterface {
       case 'JoinChannel':
       case 'ApproveBudgetAndFund':
       case 'CloseAndWithdraw':
-        const appRequest = await convertToInternalEvent(request);
+        const appRequest = await convertToInternalEvent(request, this.store);
         this.eventEmitter.emit('AppRequest', appRequest);
         break;
       case 'PushMessage':
@@ -248,7 +248,10 @@ export function convertToInternalParticipant(participant: {
     destination: makeDestination(participant.destination)
   };
 }
-function convertToInternalEvent(request: ChannelRequest): AppRequestEvent {
+async function convertToInternalEvent(
+  request: ChannelRequest,
+  store: Store
+): Promise<AppRequestEvent> {
   switch (request.method) {
     case 'CloseAndWithdraw':
       return {
@@ -258,12 +261,21 @@ function convertToInternalEvent(request: ChannelRequest): AppRequestEvent {
         hub: convertToInternalParticipant(request.params.hub)
       };
     case 'ApproveBudgetAndFund':
-      const {player, hub} = request.params;
+      const {hub, playerParticipantId} = request.params;
+      const signingAddress = await store.getAddress();
+      const destination = store.chain.selectedAddress;
+      if (!destination) {
+        throw new Error('No selected destination');
+      }
       return {
         type: 'APPROVE_BUDGET_AND_FUND',
         requestId: request.id,
         budget: deserializeBudgetRequest(request.params),
-        player: convertToInternalParticipant(player),
+        player: convertToInternalParticipant({
+          participantId: playerParticipantId,
+          signingAddress,
+          destination
+        }),
         hub: convertToInternalParticipant(hub)
       };
     case 'CloseChannel':

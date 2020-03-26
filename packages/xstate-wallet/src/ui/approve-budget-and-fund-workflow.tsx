@@ -4,7 +4,7 @@ import './wallet.scss';
 import {WorkflowState} from '../workflows/approve-budget-and-fund';
 import {formatEther} from 'ethers/utils';
 import {Button, Heading, Flex, Text, Table} from 'rimble-ui';
-import {getAmountsFromPendingBudget} from './selectors';
+import {getAmountsFromBudget} from './selectors';
 
 interface Props {
   current: WorkflowState;
@@ -14,14 +14,14 @@ interface Props {
 export const ApproveBudgetAndFund = (props: Props) => {
   const current = props.current;
   const {budget} = current.context;
-  const {playerAmount, hubAmount} = getAmountsFromPendingBudget(budget);
+  const {playerAmount, hubAmount} = getAmountsFromBudget(budget);
 
   const prompt = (
     <Flex alignItems="center" flexDirection="column">
       <Heading>App Budget</Heading>
 
       <Text textAlign="center">
-        The app <strong>{budget.site}</strong> wants to manage some of your funds in a state
+        The app <strong>{budget.domain}</strong> wants to manage some of your funds in a state
         channel. It wants to be able to:
       </Text>
 

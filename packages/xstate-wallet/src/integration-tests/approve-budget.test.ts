@@ -26,6 +26,7 @@ it('allows for a wallet to approve a budget and fund with the hub', async () => 
   );
 
   hookUpMessaging(playerA, hub);
+  await playerA.store.chain.ethereumEnable();
   // We need to spawn a create and fund ledger when receiving the objective
   // This should be similar to how the actual hub handles this
   hub.store.objectiveFeed
