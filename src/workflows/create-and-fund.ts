@@ -161,9 +161,8 @@ const options = (store: Store) => ({
   actions: {triggerObjective: triggerObjective(store), assignJointChannelId}
 });
 
-export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => {
-  return Machine(config).withConfig(options(store), init);
-};
+export const machine: MachineFactory<Init, any> = (store: Store, init: Init) =>
+  Machine(config).withConfig(options(store), init);
 
 const getObjective = (store: Store) => (ctx: Init): Promise<VirtualFundingAsLeaf.Init> =>
   store.objectiveFeed

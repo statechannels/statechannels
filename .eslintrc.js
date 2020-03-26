@@ -13,7 +13,6 @@ const leftoverTsLintRules = {
   '@typescript-eslint/ban-ts-ignore': 'off'
 };
 
-
 module.exports = {
   env: {
     browser: true,
@@ -46,6 +45,7 @@ module.exports = {
       {
         patterns: ['**/lib/**', '**/src/**']
       }
-    ]
+    ],
+    'arrow-body-style': 'error'
   }
 };
