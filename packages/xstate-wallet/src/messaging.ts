@@ -15,7 +15,8 @@ import {
   ApproveBudgetAndFundRequest,
   ChannelProposedNotification,
   CloseAndWithdrawRequest,
-  ErrorResponse
+  ErrorResponse,
+  ChallengeChannelRequest
 } from '@statechannels/client-api-schema';
 
 import * as jrs from 'jsonrpc-lite';
@@ -36,6 +37,7 @@ import {CHALLENGE_DURATION, NETWORK_ID, WALLET_VERSION} from './constants';
 import {Store} from './store';
 
 type ChannelRequest =
+  | ChallengeChannelRequest
   | CreateChannelRequest
   | JoinChannelRequest
   | UpdateChannelRequest
@@ -157,6 +159,7 @@ export class MessagingService implements MessagingServiceInterface {
           this.eventEmitter.emit('AppRequest', {type: 'ENABLE_ETHEREUM', requestId});
         }
         break;
+      case 'ChallengeChannel':
       case 'CreateChannel':
       case 'UpdateChannel':
       case 'CloseChannel':
@@ -179,7 +182,6 @@ export class MessagingService implements MessagingServiceInterface {
         const siteBudget = await this.store.getBudget(site);
         await this.sendResponse(requestId, siteBudget ? serializeSiteBudget(siteBudget) : {});
         break;
-      case 'ChallengeChannel':
       case 'GetState':
         // TODO: handle these requests
         break;
@@ -248,6 +250,12 @@ async function convertToInternalEvent(
   domain: string
 ): Promise<AppRequestEvent> {
   switch (request.method) {
+    case 'ChallengeChannel':
+      return {
+        type: 'PLAYER_REQUEST_CHALLENGE',
+        requestId: request.id,
+        channelId: request.params.channelId
+      };
     case 'CloseAndWithdraw':
       return {
         type: 'CLOSE_AND_WITHDRAW',

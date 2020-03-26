@@ -36,6 +36,13 @@ export interface PlayerStateUpdate {
   channelId: string;
   appData: string;
 }
+
+export interface PlayerRequestChallenge {
+  type: 'PLAYER_REQUEST_CHALLENGE';
+  requestId: number;
+  channelId: string;
+}
+
 export interface PlayerRequestConclude {
   requestId: number;
   type: 'PLAYER_REQUEST_CONCLUDE';
@@ -63,6 +70,7 @@ export interface CloseAndWithdrawRequest {
 }
 
 export type AppRequestEvent =
+  | PlayerRequestChallenge
   | PlayerRequestConclude
   | PlayerStateUpdate
   | OpenEvent
