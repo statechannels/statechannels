@@ -37,7 +37,7 @@ export function deserializeSiteBudget(siteBudget: AppSiteBudget): SiteBudget {
     availableReceiveCapacity: bigNumberify(b.availableReceiveCapacity),
     availableSendCapacity: bigNumberify(b.availableSendCapacity),
     channels: b.channels.reduce((record, item) => {
-      record[item.channelId] = {amount: bigNumberify(item.amount), status: item.status};
+      record[item.channelId] = {amount: bigNumberify(item.amount)};
       return record;
     }, {})
   }));

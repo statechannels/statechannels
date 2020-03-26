@@ -148,7 +148,6 @@ export const config = generateConfig(mockActions);
 function freeAssetBudget(assetBudget: AssetBudget, channelId: string): AssetBudget {
   const clonedBudget = _.cloneDeep(assetBudget);
 
-  clonedBudget.channels[channelId].status = 'available';
   return clonedBudget;
 }
 
