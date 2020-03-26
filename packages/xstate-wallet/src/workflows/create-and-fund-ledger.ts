@@ -131,26 +131,24 @@ const getDepositingInfo = (
 
 export const options = (
   store: Store
-): {actions: WorkflowActions; services: WorkflowServices; guards: WorkflowGuards} => {
-  return {
-    actions: {
-      assignChannelId: assign({
-        ledgerId: (_, event: DoneInvokeEvent<string>) => event.data
-      })
-    },
-    guards: {
-      doesChannelIdExist: (context: WorkflowContext) => !!context.ledgerId
-    },
-    services: {
-      initializeChannel: initializeChannel(store),
-      supportState: SupportState.machine(store),
-      createObjective: createObjective(store),
-      depositing: Depositing.machine(store),
-      getDepositingInfo: getDepositingInfo(store),
-      getPreFundState: getPreFundState(store)
-    }
-  };
-};
+): {actions: WorkflowActions; services: WorkflowServices; guards: WorkflowGuards} => ({
+  actions: {
+    assignChannelId: assign({
+      ledgerId: (_, event: DoneInvokeEvent<string>) => event.data
+    })
+  },
+  guards: {
+    doesChannelIdExist: (context: WorkflowContext) => !!context.ledgerId
+  },
+  services: {
+    initializeChannel: initializeChannel(store),
+    supportState: SupportState.machine(store),
+    createObjective: createObjective(store),
+    depositing: Depositing.machine(store),
+    getDepositingInfo: getDepositingInfo(store),
+    getPreFundState: getPreFundState(store)
+  }
+});
 
 export const mockGuards: WorkflowGuards = {
   doesChannelIdExist: () => true

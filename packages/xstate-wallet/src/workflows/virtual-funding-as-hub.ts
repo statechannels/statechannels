@@ -63,13 +63,11 @@ const waitThenFundGuarantor = (
       runObjective: {
         invoke: {
           src: Services.ledgerFunding,
-          data: (ctx: WithDeductions, {data}: FundGuarantor): LedgerFunding.Init => {
-            return {
-              targetChannelId: data.guarantorId,
-              ledgerChannelId: data.ledgerId,
-              deductions: ctx.deductions[role]
-            };
-          },
+          data: (ctx: WithDeductions, {data}: FundGuarantor): LedgerFunding.Init => ({
+            targetChannelId: data.guarantorId,
+            ledgerChannelId: data.ledgerId,
+            deductions: ctx.deductions[role]
+          }),
           onDone: 'done'
         }
       },
@@ -120,8 +118,8 @@ const getDeductions = (store: Store) => async (ctx: Init): Promise<Deductions> =
   };
 };
 
-const watchObjectives = (store: Store) => (ctx: Init) => {
-  return store.objectiveFeed.pipe(
+const watchObjectives = (store: Store) => (ctx: Init) =>
+  store.objectiveFeed.pipe(
     filter(isFundGuarantor),
     filter(o => o.data.jointChannelId === ctx.jointChannelId),
     flatMap(async o => {
@@ -139,7 +137,6 @@ const watchObjectives = (store: Store) => (ctx: Init) => {
       }
     })
   );
-};
 
 export const options = (store: Store): Partial<MachineOptions<Init, TEvent>> => {
   const actions: Record<Actions, any> = {

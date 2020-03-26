@@ -30,11 +30,7 @@ it('allows for a wallet to approve a budget and fund with the hub', async () => 
   // We need to spawn a create and fund ledger when receiving the objective
   // This should be similar to how the actual hub handles this
   hub.store.objectiveFeed
-    .pipe(
-      filter((o): o is FundLedger => {
-        return o.type === 'FundLedger';
-      })
-    )
+    .pipe(filter((o): o is FundLedger => o.type === 'FundLedger'))
     .subscribe(async o => {
       const entry = await hub.store.getEntry(o.data.ledgerId);
       hub.startCreateAndFundLedger({

@@ -100,10 +100,9 @@ export const config = generateConfig(actions, guards);
 export const confirmChannelCreationWorkflow = (
   _store: Store,
   context: WorkflowContext
-): WorkflowMachine => {
+): WorkflowMachine =>
   // TODO: Once budgets are a thing this should check for a budget
   // TODO: We shouldn't need to cast this but some xstate typing is not lining up around stateSchema
-  return Machine(config).withConfig({}, context) as WorkflowMachine;
-};
+  Machine(config).withConfig({}, context) as WorkflowMachine;
 
 export type WorkflowMachine = StateMachine<WorkflowContext, StateSchema, WorkflowEvent, any>;

@@ -123,11 +123,10 @@ const mockActions: WorkflowActions = {
 };
 
 export const mockServices: WorkflowServices = {
-  enableEthereum: () => {
-    return new Promise(() => {
+  enableEthereum: () =>
+    new Promise(() => {
       /* Mock call */
-    }) as any;
-  }
+    }) as any
 };
 export const mockOptions = {services: mockServices, actions: mockActions};
 export const config = generateConfig(mockActions);
