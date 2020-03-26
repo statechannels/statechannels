@@ -192,7 +192,7 @@ export interface TokenBudgetRequest {
   requestedReceiveCapacity: string;
 }
 export type GetBudgetRequest = JsonRpcRequest<'GetBudget', {hubAddress: Address}>;
-export type GetBudgetResponse = JsonRpcResponse<SiteBudget | {}>;
+export type GetBudgetResponse = JsonRpcResponse<SiteBudget>;
 
 export type ApproveBudgetAndFundRequest = JsonRpcRequest<
   'ApproveBudgetAndFund',
@@ -203,6 +203,8 @@ export type ApproveBudgetAndFundResponse = JsonRpcResponse<SiteBudget>;
 export type CloseAndWithdrawParams = {site: string; player: Participant; hub: Participant};
 export type CloseAndWithdrawRequest = JsonRpcRequest<'CloseAndWithdraw', CloseAndWithdrawParams>;
 export type CloseAndWithdrawResponse = JsonRpcResponse<{success: boolean}>;
+
+export type GetBudgetParams = {hubAddress: string};
 // Notifications
 // these notifications come *from* the wallet, which is not strictly how JSON-RPC should work
 // (since we treat the wallet as the 'server')

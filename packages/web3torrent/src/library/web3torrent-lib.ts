@@ -115,6 +115,10 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       );
       console.log(`Budget approved: ${JSON.stringify(success)}`);
     }
+
+    // Cache the site budget for the first time.
+    // We don't need to do this if we implement approve budget call.
+    await this.paymentChannelClient.getBudget(HUB_ADDRESS);
   }
 
   async disable() {

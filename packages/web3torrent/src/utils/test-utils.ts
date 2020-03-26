@@ -43,19 +43,3 @@ export function createMockTorrentPeers(): TorrentPeers {
     }
   };
 }
-
-export function createMockBudget(): SiteBudget {
-  return {
-    hub: 'mock.hub.com',
-    site: 'mock.web3torrent.com',
-    budgets: [
-      {
-        token: '0x0',
-        inUse: {playerAmount: '0x5', hubAmount: '0x10'},
-        free: {playerAmount: '0x10', hubAmount: '0x30'},
-        pending: {playerAmount: '0x0', hubAmount: '0x0'},
-        direct: {playerAmount: '0x0', hubAmount: '0x0'}
-      }
-    ]
-  };
-}

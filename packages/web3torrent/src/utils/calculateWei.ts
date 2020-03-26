@@ -1,6 +1,7 @@
 import {utils} from 'ethers';
 import prettier from 'prettier-bytes';
 import {WEI_PER_BYTE} from '../constants';
+import {bigNumberify} from 'ethers/utils';
 
 export const calculateWei = (fileSize: number | string) => {
   if (!isNaN(Number(fileSize))) {
@@ -18,6 +19,8 @@ export const prettyPrintWei = (wei: utils.BigNumber): string => {
   const decimals = [0, 3, 6, 9, 12, 15, 18];
   if (!wei) {
     return 'unknown';
+  } else if (wei.eq(bigNumberify(0))) {
+    return '0 wei';
   } else {
     let formattedString;
     decimals.forEach((decimal, index, array) => {

@@ -724,6 +724,18 @@
       ],
       "type": "object"
     },
+    "GetBudgetParams": {
+      "additionalProperties": false,
+      "properties": {
+        "hubAddress": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "hubAddress"
+      ],
+      "type": "object"
+    },
     "GetBudgetRequest": {
       "additionalProperties": false,
       "properties": {
@@ -776,15 +788,7 @@
           "type": "string"
         },
         "result": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/SiteBudget"
-            },
-            {
-              "additionalProperties": false,
-              "type": "object"
-            }
-          ]
+          "$ref": "#/definitions/SiteBudget"
         }
       },
       "required": [

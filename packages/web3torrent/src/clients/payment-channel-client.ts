@@ -37,6 +37,7 @@ if (process.env.REACT_APP_FAKE_CHANNEL_PROVIDER === 'true') {
 // The payer joins the channel, and makes payments
 export class PaymentChannelClient {
   channelCache: Record<string, ChannelState> = {};
+  budgetCache: SiteBudget = null;
 
   get mySigningAddress(): string | undefined {
     return this.channelClient.signingAddress;
@@ -263,7 +264,7 @@ export class PaymentChannelClient {
     hubAddress: string,
     hubDestinationAddress: string
   ) {
-    await this.channelClient.approveBudgetAndFund(
+    this.budgetCache = await this.channelClient.approveBudgetAndFund(
       playerAmount,
       hubAmount,
       playerDestinationAddress,
@@ -272,12 +273,14 @@ export class PaymentChannelClient {
     );
   }
 
-  async getBudget(hubAddress: string): Promise<SiteBudget | {}> {
-    return await this.channelClient.getBudget(hubAddress);
+  async getBudget(hubAddress: string): Promise<SiteBudget> {
+    this.budgetCache = await this.channelClient.getBudget(hubAddress);
+    return this.budgetCache;
   }
 
-  async closeAndWithdraw(hubAddress: string): Promise<SiteBudget | {}> {
-    return await this.channelClient.closeAndWithdraw(hubAddress);
+  async closeAndWithdraw(hubAddress: string): Promise<SiteBudget> {
+    this.budgetCache = await this.channelClient.closeAndWithdraw(hubAddress);
+    return this.budgetCache;
   }
 }
 
