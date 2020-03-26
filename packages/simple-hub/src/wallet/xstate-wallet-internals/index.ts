@@ -216,9 +216,7 @@ export function calculateChannelId(channelConstants: ChannelConstants): string {
 }
 
 export function deserializeMessage(message: WireMessage): Message {
-  const signedStates = (message.data.signedStates || []).map(ss => {
-    return deserializeState(ss);
-  });
+  const signedStates = (message.data.signedStates || []).map(ss => deserializeState(ss));
   const {objectives} = message.data;
   return {
     signedStates,
@@ -227,9 +225,7 @@ export function deserializeMessage(message: WireMessage): Message {
 }
 
 export function serializeMessage(message: Message, recipient: string, sender: string): WireMessage {
-  const signedStates = (message.signedStates || []).map(ss => {
-    return serializeState(ss);
-  });
+  const signedStates = (message.signedStates || []).map(ss => serializeState(ss));
   const {objectives} = message;
   return {
     recipient,
