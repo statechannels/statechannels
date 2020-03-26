@@ -30,14 +30,19 @@ export interface ChannelChainInfo {
 }
 
 export interface Chain {
-  initialize(): Promise<void>;
-  getChainInfo: (channelId: string) => Promise<ChannelChainInfo>;
+  // Properties
+  ethereumIsEnabled: boolean;
+  selectedAddress: string | null;
+
+  // Feeds
   chainUpdatedFeed: (channelId: string) => Observable<ChannelChainInfo>;
+
+  // Methods
   deposit: (channelId: string, expectedHeld: string, amount: string) => Promise<void>;
   ethereumEnable: () => Promise<string>;
-  ethereumIsEnabled: boolean;
   finalizeAndWithdraw: (finalizationProof: SignedState[]) => Promise<void>;
-  selectedAddress: string | null;
+  getChainInfo: (channelId: string) => Promise<ChannelChainInfo>;
+  initialize(): Promise<void>;
 }
 
 // TODO: This chain should be fleshed out enough so it mimics basic chain behavior
