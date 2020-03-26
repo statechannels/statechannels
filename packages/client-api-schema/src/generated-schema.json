@@ -208,18 +208,10 @@
         },
         "channelId": {
           "type": "string"
-        },
-        "status": {
-          "enum": [
-            "pending",
-            "available"
-          ],
-          "type": "string"
         }
       },
       "required": [
         "channelId",
-        "status",
         "amount"
       ],
       "type": "object"

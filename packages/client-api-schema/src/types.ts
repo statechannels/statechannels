@@ -165,7 +165,6 @@ export type ChallengeChannelResponse = JsonRpcResponse<ChannelResult>;
 
 export interface ChannelBudget {
   channelId: string;
-  status: 'pending' | 'available';
   amount: string;
 }
 
