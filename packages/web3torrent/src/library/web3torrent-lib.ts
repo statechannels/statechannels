@@ -98,6 +98,18 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       console.log('GOT FROM FIREBASE: ' + message);
       this.paymentChannelClient.pushMessage(message);
     });
+
+    // TODO: This is a temporary measure while we don't have any budgeting built out.
+    // We automatically call approveBudgetAndFund.
+    const ten = ethers.utils.parseEther('10').toHexString();
+    const success = await this.paymentChannelClient.approveBudgetAndFund(
+      ten,
+      ten,
+      window.channelProvider.selectedAddress,
+      HUB.signingAddress,
+      HUB.outcomeAddress
+    );
+    console.log(`Budget approved: ${JSON.stringify(success)}`);
   }
 
   async disable() {
