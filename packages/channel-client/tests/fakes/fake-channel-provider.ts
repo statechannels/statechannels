@@ -316,7 +316,7 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     // TODO: Does this need to be delayed?
     const result: SiteBudget = {
       hubAddress: params.hub.signingAddress,
-      domain: 'web3torrent.statechannels.org',
+      domain: 'localhost',
 
       budgets: [
         {
