@@ -14,13 +14,13 @@ import {
   WebTorrentSeedInput,
   WireEvents
 } from './types';
-import {utils} from 'ethers';
+import {utils, ethers} from 'ethers';
 import {ChannelState, PaymentChannelClient} from '../clients/payment-channel-client';
 import {
   mockTorrents,
   defaultTrackers,
   fireBaseConfig,
-  HUB_ADDRESS,
+  HUB,
   FIREBASE_PREFIX,
   WEI_PER_BYTE,
   BUFFER_REFILL_RATE,
@@ -78,13 +78,15 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     const myFirebaseRef = firebase
       .database()
       .ref(`/${FIREBASE_PREFIX}/messages/${this.pseAccount}`);
-    const hubFirebaseRef = firebase.database().ref(`/${FIREBASE_PREFIX}/messages/${HUB_ADDRESS}`);
+    const hubFirebaseRef = firebase
+      .database()
+      .ref(`/${FIREBASE_PREFIX}/messages/${HUB.participantId}`);
 
     // firebase setup
     myFirebaseRef.onDisconnect().remove();
 
     this.paymentChannelClient.onMessageQueued((message: Message) => {
-      if (message.recipient === HUB_ADDRESS) {
+      if (message.recipient === HUB.participantId) {
         hubFirebaseRef.push(sanitizeMessageForFirebase(message));
       }
     });
