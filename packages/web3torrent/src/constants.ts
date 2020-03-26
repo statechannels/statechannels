@@ -1,15 +1,21 @@
 import {Status, Torrent} from './types';
 import {ChannelState} from './clients/payment-channel-client';
 import {bigNumberify} from 'ethers/utils';
-export const BLOCK_LENGTH = 1 << 14; // Standard request length. Setting less than this doesn't make sense.
+
 export const WEI_PER_BYTE = bigNumberify(1); // cost per byte
-export const BUFFER_REFILL_RATE = bigNumberify(WEI_PER_BYTE.mul(BLOCK_LENGTH)); // number of requests the leecher wishes to increase the buffer by
+export const BLOCK_LENGTH = 1 << 14; // Standard request length.
+export const PEER_TRUST = 1; //amount of trust between peers. It's equivalent to the amount of request to pre-pay.
+// The recomended value is 5 ( the size of the queue of requests made by the leecher to the seeder)
+
+export const BUFFER_REFILL_RATE = bigNumberify(WEI_PER_BYTE.mul(BLOCK_LENGTH * PEER_TRUST));
+// number of requests the leecher wishes to increase the buffer by
 // These variables control the amount of (micro)trust the leecher must invest in the seeder
 // As well as the overall performance hit of integrating payments into webtorrent.
 // A high BUFFER_REFILL_RATE increases the need for trust, but decreases the number of additional messages and therefore latency
 // It can also cause a payment to go above the leecher's balance / capabilities
+
 export const INITIAL_SEEDER_BALANCE = bigNumberify(0); // needs to be zero so that depositing works correctly (unidirectional payment channel)
-export const INITIAL_LEECHER_BALANCE = bigNumberify(BUFFER_REFILL_RATE.mul(100)); // e.g. gwei = 1e9 = nano-ETH
+export const INITIAL_LEECHER_BALANCE = bigNumberify(BUFFER_REFILL_RATE.mul(10000)); // e.g. gwei = 1e9 = nano-ETH
 
 // firebase setup
 export const HUB_ADDRESS = 'TODO';
