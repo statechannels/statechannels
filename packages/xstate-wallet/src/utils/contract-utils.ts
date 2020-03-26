@@ -11,8 +11,8 @@ export function getProvider(): Web3Provider | JsonRpcProvider {
   }
 }
 
-export async function getEthAssetHolderContract() {
-  const provider = await getProvider();
+export function getEthAssetHolderContract() {
+  const provider = getProvider();
   return new Contract(
     process.env.ETH_ASSET_HOLDER_ADDRESS || '0x0',
     getETHAssetHolderInterface(),
