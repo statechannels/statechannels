@@ -83,10 +83,10 @@ export function allocateToTarget(
 
 export function makeDestination(addressOrDestination: string): Destination {
   if (addressOrDestination.length === 42) {
-    if (addressOrDestination !== ethers.utils.getAddress(addressOrDestination)) {
-      throw new Error('Incorrect checksum detected');
-    }
-    return ethers.utils.hexZeroPad(addressOrDestination, 32) as Destination;
+    return ethers.utils.hexZeroPad(
+      ethers.utils.getAddress(addressOrDestination),
+      32
+    ) as Destination;
   } else if (addressOrDestination.length === 66) {
     return addressOrDestination as Destination;
   } else {
