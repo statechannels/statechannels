@@ -12,7 +12,11 @@ export const INITIAL_SEEDER_BALANCE = bigNumberify(0); // needs to be zero so th
 export const INITIAL_LEECHER_BALANCE = bigNumberify(BUFFER_REFILL_RATE.mul(100)); // e.g. gwei = 1e9 = nano-ETH
 
 // firebase setup
-export const HUB_ADDRESS = 'TODO';
+export const HUB = {
+  signingAddress: '0xaaaa84838319627Fa056fC3FC29ab94d479B8502',
+  outcomeAddress: '0xaaaa84838319627Fa056fC3FC29ab94d479B8502',
+  participantId: 'firebase:simple-hub'
+};
 export const FIREBASE_PREFIX = 'web3t';
 export const fireBaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
