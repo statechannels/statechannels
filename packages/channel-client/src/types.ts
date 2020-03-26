@@ -53,8 +53,8 @@ export interface ChannelClientInterface {
     hubAddress: string,
     hubOutcomeAddress: string
   ): Promise<SiteBudget>;
-  getBudget(hubAddress: string): Promise<SiteBudget>;
-  closeAndWithdraw(hubAddress: string): Promise<SiteBudget>;
+  getBudget(hubAddress: string): Promise<SiteBudget | {}>;
+  closeAndWithdraw(hubAddress: string): Promise<SiteBudget | {}>;
 }
 export interface EventsWithArgs {
   MessageQueued: [Message];

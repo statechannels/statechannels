@@ -788,7 +788,15 @@
           "type": "string"
         },
         "result": {
-          "$ref": "#/definitions/SiteBudget"
+          "anyOf": [
+            {
+              "$ref": "#/definitions/SiteBudget"
+            },
+            {
+              "additionalProperties": false,
+              "type": "object"
+            }
+          ]
         }
       },
       "required": [

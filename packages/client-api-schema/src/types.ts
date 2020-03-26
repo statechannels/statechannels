@@ -192,7 +192,7 @@ export interface TokenBudgetRequest {
   requestedReceiveCapacity: string;
 }
 export type GetBudgetRequest = JsonRpcRequest<'GetBudget', {hubAddress: Address}>;
-export type GetBudgetResponse = JsonRpcResponse<SiteBudget>;
+export type GetBudgetResponse = JsonRpcResponse<SiteBudget | {}>;
 
 export type ApproveBudgetAndFundRequest = JsonRpcRequest<
   'ApproveBudgetAndFund',
