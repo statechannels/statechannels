@@ -39,6 +39,15 @@ class ChannelProvider implements ChannelProviderInterface {
     this.messaging = new MessagingService();
   }
 
+  walletReady = new Promise(resolve => {
+    window.addEventListener('message', event => {
+      if (event.data === 'WalletReady') {
+        console.log(event);
+        resolve();
+      }
+    });
+  });
+
   async mountWalletComponent(url?: string) {
     window.addEventListener('message', this.onMessage.bind(this));
     if (url) {
@@ -48,6 +57,8 @@ class ChannelProvider implements ChannelProviderInterface {
     this.messaging.setUrl(this.url);
     await this.ui.mount();
     console.info('Application successfully mounted Wallet iFrame inside DOM.');
+    await this.walletReady;
+    console.info('Wallet ready to receive requests');
     const {signingAddress, selectedAddress, walletVersion} = await this.send({
       method: 'GetWalletInformation',
       params: {}
@@ -68,12 +79,16 @@ class ChannelProvider implements ChannelProviderInterface {
   }
 
   async send(request: MethodRequestType): Promise<MethodResponseType[MethodRequestType['method']]> {
+    console.log('getting target');
     const target = await this.ui.getTarget();
+    console.log('got target');
+    console.log('sending request');
     const response = await this.messaging.request(target, {
       jsonrpc: '2.0',
       method: request.method,
       params: request.params
     });
+    console.log('got response');
 
     return response;
   }
