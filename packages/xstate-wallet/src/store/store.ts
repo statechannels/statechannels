@@ -8,8 +8,7 @@ import {
   SignedState,
   SiteBudget,
   State,
-  StateVariables,
-  ToRelease
+  StateVariables
 } from './types';
 
 import {filter, map, concatAll} from 'rxjs/operators';
@@ -109,7 +108,7 @@ export interface Store {
     channelId: string,
     amount: {send: BigNumber; receive: BigNumber}
   ): Promise<SiteBudget>;
-  releaseFunds(site: string, toRelease: ToRelease[]): Promise<SiteBudget>;
+  releaseFunds(site: string, assetHolderAddress: string, channelId: string): Promise<SiteBudget>;
 
   chain: Chain;
   initialize(privateKeys?: string[], cleanSlate?: boolean): Promise<void>;
@@ -157,7 +156,10 @@ export class XstateStore implements Store {
     return budget;
   }
   public async updateOrCreateBudget(budget: SiteBudget): Promise<void> {
-    await this.backend.setBudget(budget.domain, budget);
+    await this.budgetLock.acquire(budget.domain, async release => {
+      await this.backend.setBudget(budget.domain, budget);
+      release();
+    });
   }
 
   public channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry> {
@@ -397,11 +399,30 @@ export class XstateStore implements Store {
   }
 
   private budgetLock = new AsyncLock();
-  public async createBudget() {
-    // NOOP
+
+  public async createBudget(budget: SiteBudget): Promise<void> {
+    const existingBudget = this.backend.getBudget(budget.domain);
+    if (existingBudget) {
+      throw new Error(Errors.budgetAlreadyExists);
+    }
+    await this.updateOrCreateBudget(budget);
   }
-  public async releaseFunds(site, budget) {
-    return budget;
+  public async releaseFunds(site: string, assetHolderAddress: string, channelId: string) {
+    return await this.budgetLock.acquire<SiteBudget>(site, async release => {
+      const currentBudget = await this.getBudget(site);
+      const assetBudget = currentBudget?.forAsset[assetHolderAddress];
+      if (!assetBudget) {
+        throw new Error(Errors.noBudget);
+      }
+      const channelBudget = assetBudget.channels[channelId];
+      if (!channelBudget) throw new Error(Errors.noBudget);
+      assetBudget.availableReceiveCapacity = channelBudget.amount.div(2);
+      assetBudget.availableSendCapacity = channelBudget.amount.div(2);
+      delete assetBudget.channels[channelId];
+
+      await this.backend.setBudget(site, currentBudget);
+      release();
+    });
   }
 
   public async reserveFunds(
@@ -414,26 +435,26 @@ export class XstateStore implements Store {
       .acquire<SiteBudget>(site, async release => {
         const currentBudget = await this.getBudget(site);
 
-        const ethBudget = currentBudget?.forAsset[assetHolderAddress];
-        if (!ethBudget) {
+        const assetBudget = currentBudget?.forAsset[assetHolderAddress];
+        if (!assetBudget) {
           throw new Error(Errors.noBudget);
         }
 
         if (
-          ethBudget.availableSendCapacity.lt(amount.send) ||
-          ethBudget.availableReceiveCapacity.lt(amount.receive)
+          assetBudget.availableSendCapacity.lt(amount.send) ||
+          assetBudget.availableReceiveCapacity.lt(amount.receive)
         ) {
           throw new Error(Errors.budgetInsufficient);
         }
 
         currentBudget.forAsset[assetHolderAddress] = {
-          ...ethBudget,
+          ...assetBudget,
           channels: {
-            ...ethBudget.channels,
-            channelId: {amount: amount.receive.add(amount.send)}
+            ...assetBudget.channels,
+            [channelId]: {amount: amount.receive.add(amount.send)}
           }
         };
-
+        this.backend.setBudget(currentBudget.domain, currentBudget);
         release();
 
         return currentBudget;
