@@ -40,11 +40,7 @@ class ChannelProvider implements ChannelProviderInterface {
   }
 
   walletReady = new Promise(resolve => {
-    window.addEventListener('message', event => {
-      if (event.data === 'WalletReady') {
-        resolve();
-      }
-    });
+    window.addEventListener('message', event => event.data === 'WalletReady' && resolve());
   });
 
   async mountWalletComponent(url?: string) {
