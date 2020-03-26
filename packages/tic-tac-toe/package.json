@@ -24,6 +24,7 @@
     "dotenv-extended": "2.7.1",
     "ember-auto-import": "1.5.3",
     "enum": "2.5.0",
+    "ethereum-blockies-base64": "^1.0.2",
     "ethers": "4.0.45",
     "fs-extra": "8.1.0",
     "key-mirror": "1.0.1",
