@@ -129,8 +129,6 @@ export interface Message {
   objectives?: Objective[];
 }
 
-export type ToRelease = {assetHolderAddress: string; channelId: string};
-
 export interface DBBackend {
   initialize(cleanSlate?: boolean): Promise<any>;
   privateKeys(): Promise<Record<string, string | undefined>>;
