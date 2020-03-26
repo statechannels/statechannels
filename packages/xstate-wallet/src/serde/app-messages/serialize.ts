@@ -21,8 +21,7 @@ export function serializeSiteBudget(budget: SiteBudget): AppSiteBudget {
     const assetBudget = checkThat<AssetBudget>(budget.forAsset[assetHolderAddress], exists);
     const channels = Object.keys(assetBudget.channels).map(channelId => ({
       channelId,
-      amount: assetBudget.channels[channelId].amount.toHexString(),
-      status: assetBudget.channels[channelId].status
+      amount: assetBudget.channels[channelId].amount.toHexString()
     }));
     return {
       token: tokenAddress(assetHolderAddress) || AddressZero,
