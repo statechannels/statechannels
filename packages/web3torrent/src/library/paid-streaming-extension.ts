@@ -170,7 +170,7 @@ export abstract class PaidStreamingExtension implements Extension {
     // for debugging purposes. It logs when a piece is received
     const _onPiece = wire._onPiece;
     wire._onPiece = function(index, offset, buffer) {
-      log(`_onPiece PIECE: ${index}`, arguments);
+      log(`<< _onPiece PIECE: ${index} - offset ${offset}`);
       _onPiece.apply(wire, [index, offset, buffer]);
     };
 
@@ -185,7 +185,7 @@ export abstract class PaidStreamingExtension implements Extension {
         messageBus.emit(PaidStreamingExtensionEvents.REQUEST, index, length, function(allow) {
           if (allow) {
             _onRequest.apply(wire, [index, offset, length]);
-            log(`_onRequest PASS - ${index}, ${offset}, ${length}`);
+            log(`>> _onRequest PASS - ${index}, ${offset}, ${length}`);
           } else {
             wire._onCancel(index, offset, length);
             log(`_onRequest CHOKED - ${index}, ${offset}, ${length}`);

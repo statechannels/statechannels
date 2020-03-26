@@ -28,7 +28,8 @@ export function createMockTorrentPeers(): TorrentPeers {
       },
       beneficiaryBalance: '50',
       channelId: '0x0000000000000000000000000000001231927371',
-      buffer: '50'
+      buffer: '50',
+      uploaded: 4225
     },
     '5589113806923374': {
       id: '5589113806923374',
@@ -38,7 +39,8 @@ export function createMockTorrentPeers(): TorrentPeers {
       wire: {
         uploaded: 52923
       },
-      channelId: '0x0000000000000000000000000000001231927371'
+      channelId: '0x0000000000000000000000000000001231927371',
+      uploaded: 52923
     }
   };
 }

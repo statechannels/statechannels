@@ -134,6 +134,7 @@ export type PeerByTorrent = {
   buffer: string;
   beneficiaryBalance: string;
   channelId: string;
+  uploaded: number;
 };
 
 export type TorrentPeers = {
