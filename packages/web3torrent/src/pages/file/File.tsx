@@ -55,11 +55,11 @@ const File: React.FC<RouteComponentProps & Props> = props => {
       </div>
       <WebTorrentContext.Consumer>
         {web3Torrent => {
-          const paymentChannelClient = web3Torrent.paymentChannelClient;
-          const me = paymentChannelClient.mySigningAddress;
-          const channelCache = paymentChannelClient.channelCache;
-          const budgetCache = paymentChannelClient.budgetCache;
-
+          const {
+            channelCache,
+            budgetCache,
+            mySigningAddress: me
+          } = web3Torrent.paymentChannelClient;
           // Only show budget when any channel exists.
           const showBudget =
             Object.keys(budgetCache).length > 0 && Object.keys(channelCache).length > 0;

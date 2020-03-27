@@ -51,6 +51,10 @@ export class PaymentChannelClient {
     this.channelClient.onChannelUpdated(channelResult => {
       this.updateChannelCache(convertToChannelState(channelResult));
     });
+
+    this.channelClient.onBudgetUpdated(budgetResult => {
+      this.budgetCache = budgetResult;
+    });
   }
 
   async enable() {
@@ -264,7 +268,7 @@ export class PaymentChannelClient {
     hubAddress: string,
     hubDestinationAddress: string
   ) {
-    this.budgetCache = await this.channelClient.approveBudgetAndFund(
+    await this.channelClient.approveBudgetAndFund(
       playerAmount,
       hubAmount,
       playerDestinationAddress,
@@ -279,8 +283,7 @@ export class PaymentChannelClient {
   }
 
   async closeAndWithdraw(hubAddress: string): Promise<SiteBudget | {}> {
-    this.budgetCache = await this.channelClient.closeAndWithdraw(hubAddress);
-    return this.budgetCache;
+    return await this.channelClient.closeAndWithdraw(hubAddress);
   }
 }
 
