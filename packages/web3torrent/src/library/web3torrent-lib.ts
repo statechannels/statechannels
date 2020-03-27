@@ -20,12 +20,13 @@ import {
   mockTorrents,
   defaultTrackers,
   fireBaseConfig,
-  HUB_ADDRESS,
+  HUB,
   FIREBASE_PREFIX,
   WEI_PER_BYTE,
   BUFFER_REFILL_RATE,
   INITIAL_LEECHER_BALANCE,
-  INITIAL_SEEDER_BALANCE
+  INITIAL_SEEDER_BALANCE,
+  AUTO_FUND_LEDGER
 } from '../constants';
 import * as firebase from 'firebase/app';
 import 'firebase/database';
@@ -78,13 +79,15 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     const myFirebaseRef = firebase
       .database()
       .ref(`/${FIREBASE_PREFIX}/messages/${this.pseAccount}`);
-    const hubFirebaseRef = firebase.database().ref(`/${FIREBASE_PREFIX}/messages/${HUB_ADDRESS}`);
+    const hubFirebaseRef = firebase
+      .database()
+      .ref(`/${FIREBASE_PREFIX}/messages/${HUB.participantId}`);
 
     // firebase setup
     myFirebaseRef.onDisconnect().remove();
 
     this.paymentChannelClient.onMessageQueued((message: Message) => {
-      if (message.recipient === HUB_ADDRESS) {
+      if (message.recipient === HUB.participantId) {
         hubFirebaseRef.push(sanitizeMessageForFirebase(message));
       }
     });
@@ -96,6 +99,22 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       console.log('GOT FROM FIREBASE: ' + message);
       this.paymentChannelClient.pushMessage(message);
     });
+
+    console.log(process.env);
+
+    if (AUTO_FUND_LEDGER) {
+      // TODO: This is a temporary measure while we don't have any budgeting built out.
+      // We automatically call approveBudgetAndFund.
+      const ten = utils.parseEther('10').toHexString();
+      const success = await this.paymentChannelClient.approveBudgetAndFund(
+        ten,
+        ten,
+        window.channelProvider.selectedAddress,
+        HUB.signingAddress,
+        HUB.outcomeAddress
+      );
+      console.log(`Budget approved: ${JSON.stringify(success)}`);
+    }
   }
 
   async disable() {
