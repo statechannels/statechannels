@@ -177,12 +177,16 @@ export class PaymentChannelClient {
   // payer may use this method to make payments (if they have sufficient funds)
   async makePayment(channelId: string, amount: string) {
     const channelReady = new Promise(resolve => {
-      this.channelClient.onChannelProposed(channelResult => {
-        const channelState = convertToChannelState(channelResult);
-        channelState.channelId === channelId &&
-          this.isAcceptanceOfMyPayment(channelState) &&
-          resolve();
-      });
+      if (this.isAcceptanceOfMyPayment(this.channelCache[channelId])) {
+        resolve();
+      } else {
+        this.channelClient.onChannelProposed(channelResult => {
+          const channelState = convertToChannelState(channelResult);
+          channelState.channelId === channelId &&
+            this.isAcceptanceOfMyPayment(channelState) &&
+            resolve();
+        });
+      }
     });
 
     await channelReady; // deals with race conditions where I am prompted to pay but did not receive previous acceptance yet
