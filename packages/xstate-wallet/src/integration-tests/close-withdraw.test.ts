@@ -55,7 +55,8 @@ it('allows for a wallet to close the ledger channel with the hub and withdraw', 
       player: hub.participant,
       opponent: playerA.participant,
       requestId: 134556607,
-      ledgerId: (o as CloseLedger).data.ledgerId
+      ledgerId: (o as CloseLedger).data.ledgerId,
+      site: 'abc.com' // TODO: Set a proper budget before this is run
     });
   });
 

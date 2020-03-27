@@ -144,6 +144,7 @@ export interface DBBackend {
   getChannel(key: string): Promise<MemoryChannelStoreEntry | undefined>;
   getBudget(key: string): Promise<SiteBudget | undefined>;
   setBudget(key: string, budget: SiteBudget): Promise<SiteBudget>;
+  deleteBudget(key: string): Promise<void>;
   setLedger(key: string, value: string): Promise<string>;
   getLedger(key: string): Promise<string | undefined>;
   setNonce(key: string, value: BigNumber): Promise<BigNumber>;

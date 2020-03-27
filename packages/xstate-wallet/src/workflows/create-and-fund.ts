@@ -4,7 +4,8 @@ import {
   StateNodeConfig,
   ActionTypes,
   DoneInvokeEvent,
-  assign
+  assign,
+  ActionFunction
 } from 'xstate';
 
 import {filter, map, first} from 'rxjs/operators';
@@ -18,7 +19,7 @@ import {isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
 import {checkThat, getDataAndInvoke} from '../utils';
 import {SupportState, VirtualFundingAsLeaf, Depositing} from '.';
 import {from, Observable} from 'rxjs';
-import {CHALLENGE_DURATION, HUB} from '../constants';
+import {CHALLENGE_DURATION, HUB, ETH_ASSET_HOLDER_ADDRESS, HUB_DESTINATION} from '../constants';
 import {bigNumberify} from 'ethers/utils';
 
 const PROTOCOL = 'create-and-fund';
@@ -97,10 +98,27 @@ const triggerObjective = (store: Store) => async (ctx: Init): Promise<void> => {
 const assignJointChannelId = assign<VirtualFundingComplete>({
   jointChannelId: (_, event: DoneInvokeEvent<{jointChannelId: string}>) => event.data.jointChannelId
 });
+
+const reserveFunds = (store: Store): ActionFunction<Init, any> => async (context, event) => {
+  const channelEntry = await store.getEntry(context.channelId);
+  const {allocationItems} = checkThat(channelEntry.supported.outcome, isSimpleEthAllocation);
+  const playerDestination = channelEntry.supported.participants.find(
+    async p => p.signingAddress === (await store.getAddress())
+  )?.destination;
+  if (!playerDestination) throw new Error('No destination found for player');
+
+  const receive =
+    allocationItems.find(a => a.destination === HUB_DESTINATION)?.amount || bigNumberify(0);
+  const send =
+    allocationItems.find(a => a.destination === playerDestination)?.amount || bigNumberify(0);
+
+  await store.reserveFunds(ETH_ASSET_HOLDER_ADDRESS, context.channelId, {send, receive});
+};
+
 type VirtualFundingComplete = Init & {jointChannelId: string};
 const virtual: StateNodeConfig<Init, any, any> = {
   initial: 'virtualFunding',
-  entry: triggerObjective.name,
+  entry: [triggerObjective.name, 'reserveFunds'],
   states: {
     virtualFunding: getDataAndInvoke<Init, Service>(
       {src: 'getObjective'},
@@ -122,6 +140,7 @@ const postFundSetup = getDataAndInvoke<Init, Service>(
 export const config: MachineConfig<Init, any, any> = {
   key: PROTOCOL,
   initial: 'preFundSetup',
+
   on: {[ActionTypes.ErrorCustom]: {target: 'failure'}},
   states: {
     preFundSetup,
@@ -158,7 +177,11 @@ type Service = keyof ReturnType<typeof services>;
 
 const options = (store: Store) => ({
   services: services(store),
-  actions: {triggerObjective: triggerObjective(store), assignJointChannelId}
+  actions: {
+    triggerObjective: triggerObjective(store),
+    assignJointChannelId,
+    reserveFunds: reserveFunds(store)
+  }
 });
 
 export const machine: MachineFactory<Init, any> = (store: Store, init: Init) =>
