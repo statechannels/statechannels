@@ -183,7 +183,7 @@ export class PaymentChannelClient {
       ) {
         resolve();
       } else {
-        this.channelClient.onChannelProposed(channelResult => {
+        this.channelClient.onChannelUpdated(channelResult => {
           const channelState = convertToChannelState(channelResult);
           channelState.channelId === channelId &&
             this.isAcceptanceOfMyPayment(channelState) &&
