@@ -155,12 +155,6 @@ export class XstateStore implements Store {
     if (!budget) throw Error(`No budget for ${site}`);
     return budget;
   }
-  public async updateOrCreateBudget(budget: SiteBudget): Promise<void> {
-    await this.budgetLock.acquire(budget.domain, async release => {
-      await this.backend.setBudget(budget.domain, budget);
-      release();
-    });
-  }
 
   public channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry> {
     // TODO: The following line is not actually type safe.
@@ -405,7 +399,10 @@ export class XstateStore implements Store {
     if (existingBudget) {
       throw new Error(Errors.budgetAlreadyExists);
     }
-    await this.updateOrCreateBudget(budget);
+    await this.budgetLock.acquire(budget.domain, async release => {
+      await this.backend.setBudget(budget.domain, budget);
+      release();
+    });
   }
 
   public async clearBudget(site): Promise<void> {
