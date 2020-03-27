@@ -15,6 +15,7 @@ import {
   ChannelResult,
   CloseChannelParams,
   CreateChannelParams,
+  GetBudgetParams,
   GetStateParams,
   JoinChannelParams,
   PushMessageResult,
@@ -28,6 +29,19 @@ import {Wallet, utils} from 'ethers';
 const bigNumberify = utils.bigNumberify;
 
 type ChannelId = string;
+
+const mockSiteBudget = {
+  hubAddress: 'mock.hub.com',
+  domain: 'mock.web3torrent.com',
+  budgets: [
+    {
+      token: '0x0',
+      availableReceiveCapacity: '0x5000000',
+      availableSendCapacity: '0x3000000',
+      channels: []
+    }
+  ]
+};
 
 /*
  This fake provider becomes the stateful object which handles the calls
@@ -46,6 +60,9 @@ export class FakeChannelProvider implements ChannelProviderInterface {
   internalAddress: string = Wallet.createRandom().address;
   opponentAddress: Record<ChannelId, string> = {};
   latestState: Record<ChannelId, ChannelResult> = {};
+
+  // Replace mock with real initial budget
+  budget: SiteBudget = mockSiteBudget;
 
   async mountWalletComponent(url?: string): Promise<void> {
     this.url = url || '';
@@ -97,6 +114,9 @@ export class FakeChannelProvider implements ChannelProviderInterface {
 
       case 'CloseAndWithdraw':
         return this.closeAndWithdraw(request.params);
+
+      case 'GetBudget':
+        return this.getBudget(request.params);
 
       default:
         return Promise.reject(`No callback available for ${request.method}`);
@@ -314,10 +334,9 @@ export class FakeChannelProvider implements ChannelProviderInterface {
 
   private async approveBudgetAndFund(params: TokenBudgetRequest): Promise<SiteBudget> {
     // TODO: Does this need to be delayed?
-    const result: SiteBudget = {
+    this.budget = {
       hubAddress: params.hub.signingAddress,
       domain: 'localhost',
-
       budgets: [
         {
           token: '0x0',
@@ -328,14 +347,19 @@ export class FakeChannelProvider implements ChannelProviderInterface {
       ]
     };
 
-    this.notifyAppBudgetUpdated(result);
+    this.notifyAppBudgetUpdated(this.budget);
 
-    return result;
+    return this.budget;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private async closeAndWithdraw(_params: CloseAndWithdrawParams): Promise<{success: boolean}> {
     // TODO: Implement a fake implementation
     return {success: true};
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private async getBudget(_params: GetBudgetParams): Promise<SiteBudget> {
+    return this.budget;
   }
 }

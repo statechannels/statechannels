@@ -4,12 +4,14 @@ import {RouteComponentProps, useLocation} from 'react-router-dom';
 import {download, getTorrentPeers, WebTorrentContext} from '../../clients/web3torrent-client';
 import {FormButton} from '../../components/form';
 import {TorrentInfo} from '../../components/torrent-info/TorrentInfo';
+import {SiteBudgetTable} from '../../components/site-budget-table/SiteBudgetTable';
 import {TorrentPeers} from '../../library/types';
 import {Status, Torrent} from '../../types';
 import {parseMagnetURL} from '../../utils/magnet';
 import torrentStatusChecker from '../../utils/torrent-status-checker';
 import {useInterval} from '../../utils/useInterval';
 import './File.scss';
+import {SiteBudget} from '@statechannels/client-api-schema';
 
 const getTorrentAndPeersData: (
   setTorrent: React.Dispatch<React.SetStateAction<Torrent>>,
@@ -53,10 +55,28 @@ const File: React.FC<RouteComponentProps & Props> = props => {
       </div>
       <WebTorrentContext.Consumer>
         {web3Torrent => {
-          const me = web3Torrent.paymentChannelClient.mySigningAddress;
-          const channelCache = web3Torrent.paymentChannelClient.channelCache;
+          const {
+            channelCache,
+            budgetCache,
+            mySigningAddress: me
+          } = web3Torrent.paymentChannelClient;
+          // Only show budget when any channel exists.
+          const showBudget =
+            Object.keys(budgetCache).length > 0 && Object.keys(channelCache).length > 0;
           return (
-            <TorrentInfo torrent={torrent} channelCache={channelCache} mySigningAddress={me} />
+            <>
+              <TorrentInfo torrent={torrent} channelCache={channelCache} mySigningAddress={me} />
+              <br />
+              {showBudget ? (
+                <SiteBudgetTable
+                  budgetCache={budgetCache as SiteBudget}
+                  channelCache={channelCache}
+                  mySigningAddress={me}
+                />
+              ) : (
+                false
+              )}
+            </>
           );
         }}
       </WebTorrentContext.Consumer>
