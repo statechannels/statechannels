@@ -8,6 +8,7 @@ import {simpleEthAllocation} from '../utils/outcome';
 import {bigNumberify} from 'ethers/utils';
 import {isCloseLedger, CloseLedger} from '../store/types';
 import waitForExpect from 'wait-for-expect';
+import {TEST_SITE, budget} from '../workflows/tests/data';
 jest.setTimeout(30000);
 
 it('allows for a wallet to close the ledger channel with the hub and withdraw', async () => {
@@ -41,6 +42,9 @@ it('allows for a wallet to close the ledger channel with the hub and withdraw', 
     }
   );
 
+  await playerA.store.createBudget(budget(bigNumberify(6), bigNumberify(4)));
+  await hub.store.createBudget(budget(bigNumberify(6), bigNumberify(4)));
+
   await playerA.store.setLedger(ledgerChannel.channelId);
   await hub.store
     .channelUpdatedFeed(ledgerChannel.channelId)
@@ -56,7 +60,7 @@ it('allows for a wallet to close the ledger channel with the hub and withdraw', 
       opponent: playerA.participant,
       requestId: 134556607,
       ledgerId: (o as CloseLedger).data.ledgerId,
-      site: 'abc.com' // TODO: Set a proper budget before this is run
+      site: TEST_SITE
     });
   });
 
@@ -95,4 +99,10 @@ it('allows for a wallet to close the ledger channel with the hub and withdraw', 
   // Check the channel is finalized
   const latestEntry = await playerA.store.getEntry(ledgerChannel.channelId);
   expect(latestEntry.isFinalized).toBe(true);
+
+  waitForExpect(async () => {
+    expect(playerA.workflowState).toEqual('success');
+  }, 3000);
+  // Check the budget has been removed
+  expect(await playerA.store.dbBackend.getBudget(TEST_SITE)).not.toBeDefined();
 });
