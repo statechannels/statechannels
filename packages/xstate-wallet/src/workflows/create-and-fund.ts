@@ -19,7 +19,7 @@ import {isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
 import {checkThat, getDataAndInvoke} from '../utils';
 import {SupportState, VirtualFundingAsLeaf, Depositing} from '.';
 import {from, Observable} from 'rxjs';
-import {CHALLENGE_DURATION, HUB, ETH_ASSET_HOLDER_ADDRESS, HUB_DESTINATION} from '../constants';
+import {CHALLENGE_DURATION, HUB, ETH_ASSET_HOLDER_ADDRESS} from '../constants';
 import {bigNumberify} from 'ethers/utils';
 
 const PROTOCOL = 'create-and-fund';
@@ -102,17 +102,9 @@ const assignJointChannelId = assign<VirtualFundingComplete>({
 const reserveFunds = (store: Store): ActionFunction<Init, any> => async (context, event) => {
   const channelEntry = await store.getEntry(context.channelId);
   const {allocationItems} = checkThat(channelEntry.supported.outcome, isSimpleEthAllocation);
-  const playerDestination = channelEntry.supported.participants.find(
-    async p => p.signingAddress === (await store.getAddress())
-  )?.destination;
-  if (!playerDestination) throw new Error('No destination found for player');
+  const total = allocationItems.map(a => a.amount).reduce(add);
 
-  const receive =
-    allocationItems.find(a => a.destination === HUB_DESTINATION)?.amount || bigNumberify(0);
-  const send =
-    allocationItems.find(a => a.destination === playerDestination)?.amount || bigNumberify(0);
-
-  await store.reserveFunds(ETH_ASSET_HOLDER_ADDRESS, context.channelId, {send, receive});
+  await store.reserveFunds(ETH_ASSET_HOLDER_ADDRESS, context.channelId, total);
 };
 
 type VirtualFundingComplete = Init & {jointChannelId: string};

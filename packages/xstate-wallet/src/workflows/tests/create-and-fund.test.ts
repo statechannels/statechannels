@@ -20,7 +20,8 @@ import {
   first,
   third,
   second,
-  TEST_SITE
+  TEST_SITE,
+  budget
 } from './data';
 import {subscribeToMessages} from './message-service';
 import {ETH_ASSET_HOLDER_ADDRESS, HUB} from '../../constants';
@@ -130,8 +131,8 @@ test('it uses virtual funding when enabled', async () => {
   let state = ledgerState([first, third], ledgerAmounts);
   let ledgerId = calculateChannelId(state);
   let signatures = [wallet1, wallet3].map(({privateKey}) => signState(state, privateKey));
-  // await aStore.createBudget(budget(bigNumberify(7), bigNumberify(3)));
-  // await bStore.createBudget(budget(bigNumberify(7), bigNumberify(3)));
+  await aStore.createBudget(budget(bigNumberify(7), bigNumberify(7)));
+  await bStore.createBudget(budget(bigNumberify(7), bigNumberify(7)));
   chain.depositSync(ledgerId, '0', depositAmount);
   await aStore.setLedgerByEntry(await aStore.createEntry({...state, signatures}));
 
@@ -154,6 +155,17 @@ test('it uses virtual funding when enabled', async () => {
 
   expect(outcome).toMatchObject(allocation);
   expect((await aStore.getEntry(targetChannelId)).funding).toMatchObject({type: 'Virtual'});
+
+  // Verify the budgets are allocated to the channel
+  const aBudget = await aStore.getBudget(TEST_SITE);
+  const aChannelAmount =
+    aBudget.forAsset[ETH_ASSET_HOLDER_ADDRESS]?.channels[targetChannelId].amount;
+  expect(aChannelAmount?.toHexString()).toEqual(totalAmount.toHexString());
+
+  const bBudget = await bStore.getBudget(TEST_SITE);
+  const bChannelAmount =
+    bBudget.forAsset[ETH_ASSET_HOLDER_ADDRESS]?.channels[targetChannelId].amount;
+  expect(bChannelAmount?.toHexString()).toEqual(totalAmount.toHexString());
 
   delete process.env.USE_VIRTUAL_FUNDING;
 });
