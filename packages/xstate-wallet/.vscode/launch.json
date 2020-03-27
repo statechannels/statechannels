@@ -18,7 +18,6 @@
         "webpack:///./~/*": "${webRoot}/node_modules/*"
       }
     },
-
     {
       "name": "Jest Current",
       "type": "node",
@@ -44,6 +43,14 @@
       "processId": "${command:PickProcess}",
       "skipFiles": ["<node_internals>/**"],
       "sourceMaps": true
+    },
+    {
+      "name": "Attach to running wallet",
+      "type": "chrome",
+      "request": "attach",
+      "port": 9222,
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}"
     }
   ]
 }
