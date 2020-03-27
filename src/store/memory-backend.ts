@@ -55,7 +55,7 @@ export class MemoryBackend implements DBBackend {
     return nonces as Record<string, BigNumber | undefined>;
   }
 
-  // Individual Getters/seters
+  // Individual Getters/setters
   public async getBudget(key: string) {
     return this._budgets[key];
   }
@@ -63,6 +63,9 @@ export class MemoryBackend implements DBBackend {
   public async setBudget(key: string, value: SiteBudget) {
     this._budgets[key] = value;
     return value;
+  }
+  public async deleteBudget(key: string) {
+    delete this._budgets[key];
   }
   public async setPrivateKey(key: string, value: string) {
     this._privateKeys[key] = value;

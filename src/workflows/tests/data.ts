@@ -1,7 +1,7 @@
 import {ethers} from 'ethers';
-import {Participant, State} from '../../store/types';
-import {BigNumberish, bigNumberify} from 'ethers/utils';
-import {CHALLENGE_DURATION, HUB} from '../../constants';
+import {Participant, State, SiteBudget} from '../../store/types';
+import {BigNumberish, bigNumberify, BigNumber} from 'ethers/utils';
+import {CHALLENGE_DURATION, HUB, HUB_ADDRESS, ETH_ASSET_HOLDER_ADDRESS} from '../../constants';
 import {simpleEthAllocation, makeDestination} from '../../utils/outcome';
 
 export const wallet1 = new ethers.Wallet(
@@ -68,4 +68,18 @@ export const ledgerState = (
   challengeDuration: CHALLENGE_DURATION,
   appData: '0x0000000000000000000000000000000000000000000000000000000000000000',
   appDefinition: '0x0000000000000000000000000000000000000000'
+});
+
+export const TEST_SITE = 'test.com';
+export const budget = (send: BigNumber, receive: BigNumber): SiteBudget => ({
+  hubAddress: HUB_ADDRESS,
+  domain: TEST_SITE,
+  forAsset: {
+    [ETH_ASSET_HOLDER_ADDRESS]: {
+      assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
+      availableReceiveCapacity: receive,
+      availableSendCapacity: send,
+      channels: {}
+    }
+  }
 });

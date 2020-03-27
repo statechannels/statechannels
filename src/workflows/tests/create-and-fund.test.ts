@@ -11,7 +11,17 @@ import {ChannelConstants, Outcome, State} from '../../store/types';
 import {AddressZero} from 'ethers/constants';
 import {checkThat} from '../../utils';
 import {isSimpleEthAllocation} from '../../utils/outcome';
-import {wallet1, wallet2, participants, wallet3, ledgerState, first, third, second} from './data';
+import {
+  wallet1,
+  wallet2,
+  participants,
+  wallet3,
+  ledgerState,
+  first,
+  third,
+  second,
+  TEST_SITE
+} from './data';
 import {subscribeToMessages} from './message-service';
 import {ETH_ASSET_HOLDER_ADDRESS, HUB} from '../../constants';
 import {FakeChain} from '../../chain';
@@ -69,7 +79,6 @@ const allSignState = (state: State) => ({
   signatures: [wallet1, wallet2].map(({privateKey}) => signState(state, privateKey))
 });
 
-const applicationSite = 'application';
 let chain: FakeChain;
 
 beforeEach(async () => {
@@ -82,7 +91,7 @@ beforeEach(async () => {
 
   [aStore, bStore].forEach(async (store: TestStore) => {
     await store.createEntry(allSignState(firstState(allocation, targetChannel)), {
-      applicationSite
+      applicationSite: TEST_SITE
     });
     const ledgerEntry = await store.createEntry(
       allSignState(firstState(allocation, ledgerChannel))
@@ -121,7 +130,8 @@ test('it uses virtual funding when enabled', async () => {
   let state = ledgerState([first, third], ledgerAmounts);
   let ledgerId = calculateChannelId(state);
   let signatures = [wallet1, wallet3].map(({privateKey}) => signState(state, privateKey));
-
+  // await aStore.createBudget(budget(bigNumberify(7), bigNumberify(3)));
+  // await bStore.createBudget(budget(bigNumberify(7), bigNumberify(3)));
   chain.depositSync(ledgerId, '0', depositAmount);
   await aStore.setLedgerByEntry(await aStore.createEntry({...state, signatures}));
 

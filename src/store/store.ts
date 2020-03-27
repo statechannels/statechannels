@@ -21,7 +21,7 @@ import {MemoryChannelStoreEntry} from './memory-channel-storage';
 import {AddressZero} from 'ethers/constants';
 import {Chain, FakeChain} from '../chain';
 import {calculateChannelId, hashState} from './state-utils';
-import {NETWORK_ID} from '../constants';
+import {NETWORK_ID, HUB_ADDRESS} from '../constants';
 
 import {Guid} from 'guid-typescript';
 import {MemoryBackend} from './memory-backend';
@@ -102,13 +102,13 @@ export interface Store {
   addObjective(objective: Objective): void;
   getBudget: (site: string) => Promise<SiteBudget>;
   createBudget: (budget: SiteBudget) => Promise<void>;
+  clearBudget: (site: string) => Promise<void>;
   reserveFunds(
-    site: string,
     assetHolderAddress: string,
     channelId: string,
     amount: {send: BigNumber; receive: BigNumber}
   ): Promise<SiteBudget>;
-  releaseFunds(site: string, assetHolderAddress: string, channelId: string): Promise<SiteBudget>;
+  releaseFunds(assetHolderAddress: string, channelId: string): Promise<SiteBudget>;
 
   chain: Chain;
   initialize(privateKeys?: string[], cleanSlate?: boolean): Promise<void>;
@@ -152,7 +152,7 @@ export class XstateStore implements Store {
 
   public async getBudget(site: string): Promise<SiteBudget> {
     const budget = await this.backend.getBudget(site);
-    if (!budget) throw new Error(`No budget for ${site}`);
+    if (!budget) throw Error(`No budget for ${site}`);
     return budget;
   }
   public async updateOrCreateBudget(budget: SiteBudget): Promise<void> {
@@ -392,7 +392,7 @@ export class XstateStore implements Store {
   public async getEntry(channelId: string): Promise<ChannelStoreEntry> {
     const entry = await this.backend.getChannel(channelId);
     if (!entry) {
-      throw 'Channel id not found';
+      throw Error('Channel id not found');
     }
 
     return entry;
@@ -407,9 +407,18 @@ export class XstateStore implements Store {
     }
     await this.updateOrCreateBudget(budget);
   }
-  public async releaseFunds(site: string, assetHolderAddress: string, channelId: string) {
-    return await this.budgetLock.acquire<SiteBudget>(site, async release => {
-      const currentBudget = await this.getBudget(site);
+
+  public async clearBudget(site): Promise<void> {
+    this.backend.deleteBudget(site);
+  }
+
+  public async releaseFunds(assetHolderAddress: string, channelId: string) {
+    const {applicationSite} = await this.getEntry(channelId);
+    if (!applicationSite) {
+      throw new Error(Errors.noBudget);
+    }
+    return await this.budgetLock.acquire<SiteBudget>(applicationSite, async release => {
+      const currentBudget = await this.getBudget(applicationSite);
       const assetBudget = currentBudget?.forAsset[assetHolderAddress];
       if (!assetBudget) {
         throw new Error(Errors.noBudget);
@@ -420,20 +429,39 @@ export class XstateStore implements Store {
       assetBudget.availableSendCapacity = channelBudget.amount.div(2);
       delete assetBudget.channels[channelId];
 
-      await this.backend.setBudget(site, currentBudget);
+      await this.backend.setBudget(applicationSite, currentBudget);
       release();
     });
   }
 
   public async reserveFunds(
-    site: string,
     assetHolderAddress: string,
     channelId: string,
     amount: {send: BigNumber; receive: BigNumber}
   ): Promise<SiteBudget> {
+    const entry = await this.getEntry(channelId);
+    const site = entry.applicationSite;
+    if (!site) throw new Error(Errors.noBudget);
+
     return await this.budgetLock
       .acquire<SiteBudget>(site, async release => {
-        const currentBudget = await this.getBudget(site);
+        let currentBudget = await this.backend.getBudget(site);
+
+        // Create a new budget if one doesn't exist
+        if (!currentBudget) {
+          currentBudget = {
+            hubAddress: HUB_ADDRESS,
+            domain: site,
+            forAsset: {
+              [assetHolderAddress]: {
+                assetHolderAddress,
+                availableReceiveCapacity: amount.receive,
+                availableSendCapacity: amount.send,
+                channels: {}
+              }
+            }
+          };
+        }
 
         const assetBudget = currentBudget?.forAsset[assetHolderAddress];
         if (!assetBudget) {

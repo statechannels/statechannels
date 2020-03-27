@@ -28,6 +28,7 @@ export type WorkflowContext = {
   opponent: Participant;
   player: Participant;
   ledgerId?: string;
+  site: string;
 };
 type WorkflowGuards = {
   doesChannelIdExist: ConditionPredicate<WorkflowContext, WorkflowEvent>;
@@ -37,6 +38,7 @@ interface WorkflowActions extends ActionFunctionMap<WorkflowContext, WorkflowEve
   assignLedgerId: ActionFunction<WorkflowContext, DoneInvokeEvent<CloseLedger>>;
   hideUi: ActionFunction<WorkflowContext, any>;
   displayUi: ActionFunction<WorkflowContext, any>;
+  clearBudget: ActionFunction<WorkflowContext, any>;
 }
 interface WorkflowServices extends Record<string, ServiceConfig<WorkflowContext>> {
   getFinalState: (context: WorkflowContext, event: WorkflowEvent) => Promise<SupportState.Init>;
@@ -67,6 +69,7 @@ export const config: StateNodeConfig<WorkflowContext, any, any> = {
     },
     closeLedger: getDataAndInvoke({src: 'getFinalState'}, {src: 'supportState'}, 'withdraw'),
     withdraw: {
+      entry: ['clearBudget'],
       invoke: {src: 'submitWithdrawTransaction', onDone: 'done', onError: 'failure'}
     },
     done: {type: 'final', entry: ['sendResponse']},
@@ -120,6 +123,12 @@ const createObjective = (store: Store): WorkflowServices['createObjective'] => a
   return objective;
 };
 
+const clearBudget = (store: Store): ActionFunction<WorkflowContext, any> => async (
+  context,
+  event
+) => {
+  await store.clearBudget(context.site);
+};
 const options = (
   store: Store,
   messagingService: MessagingServiceInterface
@@ -131,6 +140,7 @@ const options = (
     createObjective: createObjective(store)
   },
   actions: {
+    clearBudget: clearBudget(store),
     displayUi: () => {
       sendDisplayMessage('Show');
     },
