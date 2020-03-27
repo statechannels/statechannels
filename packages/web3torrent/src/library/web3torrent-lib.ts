@@ -330,7 +330,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           await this.paymentChannelClient.acceptChannelUpdate(
             this.paymentChannelClient.channelCache[channelState.channelId]
           );
-          log('sent space state, now sending STOP');
+          log('sent spacer state, now sending STOP');
           wire.paidStreamingExtension.stop(); // prompt peer for a payment
         } else if (this.paymentChannelClient.isPaymentToMe(channelState)) {
           log(

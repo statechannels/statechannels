@@ -177,7 +177,10 @@ export class PaymentChannelClient {
   // payer may use this method to make payments (if they have sufficient funds)
   async makePayment(channelId: string, amount: string) {
     const channelReady = new Promise(resolve => {
-      if (this.isAcceptanceOfMyPayment(this.channelCache[channelId])) {
+      if (
+        this.channelCache[channelId] &&
+        this.isAcceptanceOfMyPayment(this.channelCache[channelId])
+      ) {
         resolve();
       } else {
         this.channelClient.onChannelProposed(channelResult => {
