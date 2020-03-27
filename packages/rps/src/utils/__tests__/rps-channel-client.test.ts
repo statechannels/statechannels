@@ -29,6 +29,7 @@ const appDefinition = RPS_ADDRESS;
 const onMessageQueuedMockReturn = () => '0xOMQReturn';
 const onChannelUpdatedMockReturn = jest.fn(() => '0xOCUReturn');
 const onChannelProposedmMockReturn = jest.fn(() => '0xOCPReturn');
+const onBudgetUpdatedMockReturn = jest.fn(() => '0xOCRReturn');
 const mockChannelState: ChannelState = {
   channelId: MOCK_CHANNEL_ID,
   turnNum: '0',
@@ -63,6 +64,9 @@ class MockChannelClient implements ChannelClientInterface {
   });
   onChannelProposed = jest.fn(function(callback) {
     return onChannelProposedmMockReturn;
+  });
+  onBudgetUpdated = jest.fn(function(callback) {
+    return onBudgetUpdatedMockReturn;
   });
   createChannel = jest.fn(async function(participants, allocations, appDefinition, appData) {
     const channelResult: ChannelResult = {
