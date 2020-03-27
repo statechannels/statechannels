@@ -268,7 +268,6 @@ export class PaymentChannelClient {
   }
 
   isAcceptanceOfMyPayment(channelState: ChannelState): boolean {
-    // doesn't guarantee that my balance increased
     if (channelState.payer === this.mySigningAddress) {
       return channelState.status === 'running' && channelState.turnNum.mod(2).eq(0);
     }
