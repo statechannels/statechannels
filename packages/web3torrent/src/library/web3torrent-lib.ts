@@ -64,15 +64,11 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   async enable() {
     await this.paymentChannelClient.enable();
 
-    log('set pseAccount to sc-wallet signing address');
     this.pseAccount = this.paymentChannelClient.mySigningAddress;
-
-    log('set outcomeAddress to sc-wallet web3 wallet address');
+    log('set pseAccount to sc-wallet signing address: ' + this.pseAccount);
     this.outcomeAddress = this.paymentChannelClient.myEthereumSelectedAddress;
+    log('set outcomeAddress to sc-wallet web3 wallet address: ' + this.outcomeAddress);
 
-    log('got ethereum address');
-    log('ACCOUNT ID: ', this.pseAccount);
-    log('THIS address: ', this.outcomeAddress);
     this.tracker.getAnnounceOpts = () => ({pseAccount: this.pseAccount});
 
     // Hub messaging
