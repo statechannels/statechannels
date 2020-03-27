@@ -4,8 +4,7 @@ import {
   StateNodeConfig,
   ActionTypes,
   DoneInvokeEvent,
-  assign,
-  ActionFunction
+  assign
 } from 'xstate';
 
 import {filter, map, first} from 'rxjs/operators';
@@ -99,7 +98,7 @@ const assignJointChannelId = assign<VirtualFundingComplete>({
   jointChannelId: (_, event: DoneInvokeEvent<{jointChannelId: string}>) => event.data.jointChannelId
 });
 
-const reserveFunds = (store: Store): ActionFunction<Init, any> => async (context, event) => {
+const reserveFunds = (store: Store) => async (context, event) => {
   const channelEntry = await store.getEntry(context.channelId);
   const {allocationItems} = checkThat(channelEntry.supported.outcome, isSimpleEthAllocation);
   const total = allocationItems.map(a => a.amount).reduce(add);
@@ -109,9 +108,10 @@ const reserveFunds = (store: Store): ActionFunction<Init, any> => async (context
 
 type VirtualFundingComplete = Init & {jointChannelId: string};
 const virtual: StateNodeConfig<Init, any, any> = {
-  initial: 'virtualFunding',
-  entry: [triggerObjective.name, 'reserveFunds'],
+  initial: 'reserveFunds',
+  entry: [triggerObjective.name],
   states: {
+    reserveFunds: {invoke: {src: 'reserveFunds', onDone: 'virtualFunding'}},
     virtualFunding: getDataAndInvoke<Init, Service>(
       {src: 'getObjective'},
       {src: 'virtualFunding', opts: {entry: 'assignJointChannelId'}},
@@ -162,7 +162,8 @@ export const services = (store: Store) => ({
   determineFunding: determineFunding(store),
   setFundingToDirect: setFundingToDirect(store),
   setFundingToVirtual: setFundingToVirtual(store),
-  getObjective: getObjective(store)
+  getObjective: getObjective(store),
+  reserveFunds: reserveFunds(store)
 });
 
 type Service = keyof ReturnType<typeof services>;
@@ -171,8 +172,7 @@ const options = (store: Store) => ({
   services: services(store),
   actions: {
     triggerObjective: triggerObjective(store),
-    assignJointChannelId,
-    reserveFunds: reserveFunds(store)
+    assignJointChannelId
   }
 });
 
