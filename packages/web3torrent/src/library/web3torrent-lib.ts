@@ -319,14 +319,18 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     });
 
     this.paymentChannelClient.onChannelUpdated(async (channelState: ChannelState) => {
-      if (channelState.channelId === wire.paidStreamingExtension.pseChannelId) {
+      if (
+        channelState.channelId === wire.paidStreamingExtension.pseChannelId ||
+        channelState.channelId === wire.paidStreamingExtension.peerChannelId
+      ) {
         // filter to updates for the channel on this wire
-        log(`State received with turnNum ${channelState.turnNum}`);
+        log(`Channel updated to turnNum ${channelState.turnNum}`);
         if (this.paymentChannelClient.shouldSendSpacerState(channelState)) {
           // send "spacer" state
           await this.paymentChannelClient.acceptChannelUpdate(
             this.paymentChannelClient.channelCache[channelState.channelId]
           );
+          log('sent space state, now sending STOP');
           wire.paidStreamingExtension.stop(); // prompt peer for a payment
         } else if (this.paymentChannelClient.isPaymentToMe(channelState)) {
           log(
