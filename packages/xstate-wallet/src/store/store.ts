@@ -1,3 +1,4 @@
+import {Transactions} from '@statechannels/nitro-protocol';
 import {Observable, fromEvent, merge, from} from 'rxjs';
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {
@@ -21,8 +22,8 @@ import {Wallet} from 'ethers';
 import {ChannelStoreEntry} from './channel-store-entry';
 import {AddressZero} from 'ethers/constants';
 import {Chain, FakeChain} from '../chain';
-import {calculateChannelId, hashState} from './state-utils';
 import {NETWORK_ID, HUB} from '../constants';
+import {calculateChannelId, hashState, toNitroSignedState} from './state-utils';
 
 import {Guid} from 'guid-typescript';
 import {MemoryBackend} from './memory-backend';
@@ -30,6 +31,7 @@ import {Errors} from '.';
 import AsyncLock from 'async-lock';
 import {checkThat} from '../utils';
 import {isSimpleEthAllocation} from '../utils/outcome';
+import {TransactionRequest} from 'ethers/providers';
 
 interface DirectFunding {
   type: 'Direct';
@@ -84,6 +86,7 @@ export interface Store {
   pushMessage: (message: Message) => Promise<void>;
   channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry>;
   getAddress(): Promise<string>;
+  getForceMoveTransactionData(channelId: string): Promise<TransactionRequest>;
   signAndAddState(channelId: string, stateVars: StateVariables): Promise<void>;
   createChannel(
     participants: Participant[],
@@ -337,6 +340,27 @@ export class XstateStore implements Store {
   }
 
   private nonceKeyFromAddresses = (addresses: string[]): string => addresses.join('::');
+
+  async getForceMoveTransactionData(channelId: string): Promise<TransactionRequest> {
+    const channelStorage = await this.backend.getChannel(channelId);
+
+    if (!channelStorage) {
+      throw new Error('Channel not found');
+    }
+
+    const {participants} = channelStorage;
+    const myAddress = participants[channelStorage.myIndex].signingAddress;
+    const privateKey = await this.backend.getPrivateKey(myAddress);
+
+    if (!privateKey) {
+      throw new Error('No longer have private key');
+    }
+
+    return Transactions.createForceMoveTransaction(
+      toNitroSignedState(channelStorage.support[0]),
+      privateKey
+    );
+  }
 
   async signAndAddState(channelId: string, stateVars: StateVariables) {
     const channelData = await this.backend.getChannel(channelId);

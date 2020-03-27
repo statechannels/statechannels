@@ -33,6 +33,7 @@ export class TestStore extends XstateStore implements Store {
 
     return entry;
   }
+
   async setLedgerByEntry(entry: ChannelStoreEntry) {
     // This is not on the Store interface itself -- it is useful to set up a test store
     const {channelId} = entry;
@@ -41,5 +42,9 @@ export class TestStore extends XstateStore implements Store {
     const peerId = entry.participants.find(p => p.signingAddress !== address);
     if (!peerId) throw 'No peer';
     this.backend.setLedger(peerId?.participantId, channelId);
+  }
+
+  async setPrivateKey(address: string, pk: string) {
+    await this.backend.setPrivateKey(address, pk);
   }
 }

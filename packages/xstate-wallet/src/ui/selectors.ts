@@ -39,6 +39,11 @@ export function isConfirmCreateChannel(applicationWorkflowState: AppWorkflowStat
   );
 }
 
+export function isApplicationChallenging(applicationWorkflowState: AppWorkflowState): boolean {
+  const stateValue = getApplicationStateValue(applicationWorkflowState);
+  return stateValue === 'sendChallenge';
+}
+
 export function isApplicationOpening(applicationWorkflowState: AppWorkflowState): boolean {
   const stateValue = getApplicationStateValue(applicationWorkflowState);
   return (

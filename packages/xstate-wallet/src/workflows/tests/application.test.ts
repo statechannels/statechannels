@@ -226,6 +226,38 @@ it('starts concluding when requested', async () => {
   }, 2000);
 });
 
+it('starts challenging when requested', async () => {
+  const store = new XstateStore();
+  await store.initialize();
+  const messagingService: MessagingServiceInterface = new MessagingService(store);
+  const channelId = ethers.utils.id('channel');
+  const services: Partial<WorkflowServices> = {
+    invokeChallengingProtocol: jest.fn().mockReturnValue(
+      new Promise(() => {
+        /* mock */
+      })
+    )
+  };
+  const actions: Partial<WorkflowActions> = {
+    sendChallengeChannelResponse: jest.fn().mockReturnValue(
+      new Promise(() => {
+        /* mock */
+      })
+    )
+  };
+  const service = interpret<any, any, any>(
+    applicationWorkflow(store, messagingService).withConfig({services, actions} as any)
+  ); // TODO: Casting
+  service.start('running');
+  service.send({type: 'PLAYER_REQUEST_CHALLENGE', channelId});
+  await waitForExpect(async () => {
+    expect(service.state.value).toEqual('sendChallenge');
+    expect(services.invokeChallengingProtocol).toHaveBeenCalled();
+    expect(service.state.actions.map(a => a.type)).toContain('displayUi');
+  }, 2000);
+});
+
+// TODO: (liam) I don't think `states` matters in this test, channelid could be any string
 it('starts concluding when receiving a final state', async () => {
   const store = new XstateStore();
   await store.initialize();

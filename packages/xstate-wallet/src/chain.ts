@@ -13,6 +13,7 @@ import {ETH_ASSET_HOLDER_ADDRESS, NITRO_ADJUDICATOR_ADDRESS} from './constants';
 import EventEmitter = require('eventemitter3');
 
 import {toNitroSignedState, calculateChannelId} from './store/state-utils';
+import {TransactionRequest} from 'ethers/providers';
 
 const EthAssetHolderInterface = new ethers.utils.Interface(
   // https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
@@ -37,12 +38,15 @@ export interface Chain {
   // Feeds
   chainUpdatedFeed: (channelId: string) => Observable<ChannelChainInfo>;
 
-  // Methods
-  deposit: (channelId: string, expectedHeld: string, amount: string) => Promise<void>;
+  // Setup / Web3 Specific
   ethereumEnable: () => Promise<string>;
+  initialize(): Promise<void>;
+
+  // Chain Methods
+  deposit: (channelId: string, expectedHeld: string, amount: string) => Promise<void>;
+  challenge: (channelId: string, forceMoveTransactionData: TransactionRequest) => Promise<void>;
   finalizeAndWithdraw: (finalizationProof: SignedState[]) => Promise<void>;
   getChainInfo: (channelId: string) => Promise<ChannelChainInfo>;
-  initialize(): Promise<void>;
 }
 
 // TODO: This chain should be fleshed out enough so it mimics basic chain behavior
@@ -63,6 +67,15 @@ export class FakeChain implements Chain {
 
   public async deposit(channelId: string, expectedHeld: string, amount: string): Promise<void> {
     this.depositSync(channelId, expectedHeld, amount);
+  }
+
+  public async challenge(channelId: string): Promise<void> {
+    this.finalizeSync(channelId); // TODO: Implement some challenge system
+    this.eventEmitter.emit(UPDATED, {
+      amount: this.holdings[channelId],
+      finalized: true,
+      channelId
+    });
   }
 
   public async finalizeAndWithdraw(finalizationProof: SignedState[]): Promise<void> {
@@ -176,6 +189,21 @@ export class ChainWatcher implements Chain {
     const response = await signer.sendTransaction(transactionRequest);
     await response.wait();
   }
+
+  public async challenge(
+    channelId: string,
+    forceMoveTransactionData: TransactionRequest
+  ): Promise<void> {
+    const provider = getProvider();
+    const signer = provider.getSigner();
+    const response = await signer.sendTransaction({
+      ...forceMoveTransactionData,
+      to: NITRO_ADJUDICATOR_ADDRESS,
+      value: 0
+    });
+    await response.wait();
+  }
+
   public async deposit(channelId: string, expectedHeld: string, amount: string): Promise<void> {
     const provider = getProvider();
     const signer = provider.getSigner();

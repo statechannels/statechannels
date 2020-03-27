@@ -21,7 +21,7 @@ import {Store} from '../store';
 import {StateVariables} from '../store/types';
 import {ChannelStoreEntry} from '../store/channel-store-entry';
 import {bigNumberify} from 'ethers/utils';
-import {ConcludeChannel, CreateAndFund} from './';
+import {ConcludeChannel, ChallengeChannel, CreateAndFund} from './';
 import {isSimpleEthAllocation} from '../utils/outcome';
 import {unreachable, checkThat} from '../utils';
 import {
@@ -52,6 +52,7 @@ interface WorkflowGuards {
 
 export interface WorkflowActions {
   sendUpdateChannelResponse: Action<any, PlayerStateUpdate>;
+  sendChallengeChannelResponse: Action<RequestIdExists & ChannelIdExists, any>;
   sendCloseChannelResponse: Action<ChannelIdExists, any>;
   sendCreateChannelResponse: Action<RequestIdExists & ChannelIdExists, any>;
   sendJoinChannelResponse: Action<RequestIdExists & ChannelIdExists, any>;
@@ -72,14 +73,20 @@ export interface WorkflowServices extends Record<string, ServiceConfig<WorkflowC
     context: ChannelIdExists
   ) => StateMachine<ConcludeChannel.Init, any, any, any>;
 
+  invokeChallengingProtocol: (
+    context: ChannelIdExists
+  ) => StateMachine<ChallengeChannel.Init, any, any, any>; // FIXME: add type
+
   invokeCreateChannelAndFundProtocol: (
     context,
     event: DoneInvokeEvent<CreateAndFund.Init>
   ) => StateMachine<any, any, any, any>;
+
   invokeCreateChannelConfirmation: (
     context: ChannelParamsExist,
     event: DoneInvokeEvent<CCC.WorkflowContext>
   ) => CCC.WorkflowMachine;
+
   getDataForCreateChannelConfirmation: (
     context: WorkflowContext,
     event: CreateChannelEvent | JoinChannelEvent
@@ -100,11 +107,13 @@ interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
     openChannelAndFundProtocol: {};
     createChannelInStore: {};
     running: {};
+    sendChallenge: {};
     closing: {};
     // TODO: Is it possible to type these as type:'final' ?
     done: {};
   };
 }
+
 export type StateValue = keyof WorkflowStateSchema['states'];
 
 export type WorkflowState = State<
@@ -132,11 +141,13 @@ const generateConfig = (
         JOIN_CHANNEL: {target: 'confirmJoinChannelWorkflow'}
       }
     },
+
     confirmCreateChannelWorkflow: getDataAndInvoke(
       'getDataForCreateChannelConfirmation',
       'invokeCreateChannelConfirmation',
       'createChannelInStore'
     ),
+
     confirmJoinChannelWorkflow: {
       initial: 'signFirstState',
       states: {
@@ -152,6 +163,7 @@ const generateConfig = (
       exit: [actions.sendJoinChannelResponse],
       onDone: 'openChannelAndFundProtocol'
     },
+
     createChannelInStore: {
       invoke: {
         data: (context, event) => event.data,
@@ -172,6 +184,7 @@ const generateConfig = (
       'invokeCreateChannelAndFundProtocol',
       'running'
     ),
+
     running: {
       entry: [actions.hideUi],
       on: {
@@ -183,9 +196,11 @@ const generateConfig = (
           actions: [actions.updateStoreWithPlayerState, actions.sendUpdateChannelResponse]
         },
         CHANNEL_UPDATED: [{target: 'closing', cond: guards.channelClosing}],
-        PLAYER_REQUEST_CONCLUDE: {target: 'closing'}
+        PLAYER_REQUEST_CONCLUDE: {target: 'closing'},
+        PLAYER_REQUEST_CHALLENGE: {target: 'sendChallenge'}
       }
     },
+
     //This could handled by another workflow instead of the application workflow
     closing: {
       entry: actions.displayUi,
@@ -198,6 +213,24 @@ const generateConfig = (
         onDone: {target: 'done', actions: [actions.sendCloseChannelResponse]}
       }
     },
+
+    //This could handled by another workflow instead of the application workflow
+    sendChallenge: {
+      entry: actions.displayUi,
+      exit: actions.hideUi,
+      invoke: {
+        id: 'challenge-protocol',
+        src: 'invokeChallengingProtocol',
+        data: context => context,
+        autoForward: true,
+        onDone: {target: 'inChallenge', actions: [actions.sendChallengeChannelResponse]}
+      }
+    },
+
+    inChallenge: {
+      type: 'inChallenge'
+    },
+
     done: {type: 'final'}
   } as any // TODO: This is to deal with some flickering compilation issues.
 });
@@ -211,7 +244,9 @@ export const applicationWorkflow = (
     messagingService.requestFeed.pipe(
       filter(
         r =>
-          (r.type === 'PLAYER_STATE_UPDATE' || r.type === 'PLAYER_REQUEST_CONCLUDE') &&
+          (r.type === 'PLAYER_STATE_UPDATE' ||
+            r.type === 'PLAYER_REQUEST_CONCLUDE' ||
+            r.type === 'PLAYER_REQUEST_CHALLENGE') &&
           r.channelId === channelId
       )
     );
@@ -226,20 +261,29 @@ export const applicationWorkflow = (
       const entry = await store.getEntry(context.channelId);
       messagingService.sendResponse(event.requestId, await convertToChannelResult(entry));
     },
+
     sendCloseChannelResponse: async (context: ChannelIdExists, event: any) => {
       const entry = await store.getEntry(context.channelId);
       if (context.requestId) {
         messagingService.sendResponse(event.requestId, await convertToChannelResult(entry));
       }
     },
+
     sendCreateChannelResponse: async (context: RequestIdExists & ChannelIdExists) => {
       const entry = await store.getEntry(context.channelId);
       await messagingService.sendResponse(context.requestId, await convertToChannelResult(entry));
     },
+
     sendJoinChannelResponse: async (context: RequestIdExists & ChannelIdExists) => {
       const entry = await store.getEntry(context.channelId);
       await messagingService.sendResponse(context.requestId, await convertToChannelResult(entry));
     },
+
+    sendChallengeChannelResponse: async (context: RequestIdExists & ChannelIdExists) => {
+      const entry = await store.getEntry(context.channelId);
+      await messagingService.sendResponse(context.requestId, await convertToChannelResult(entry));
+    },
+
     spawnObservers: assign<ChannelIdExists>((context: ChannelIdExists) => ({
       ...context,
       updateObserver: context.updateObserver ?? spawn(notifyOnUpdate(context)),
@@ -347,13 +391,20 @@ export const applicationWorkflow = (
       });
       return channelId;
     },
+
     invokeClosingProtocol: (context: ChannelIdExists) =>
       // TODO: Close machine needs to accept new store
       ConcludeChannel.machine(store).withContext({channelId: context.channelId}),
+
+    invokeChallengingProtocol: ({channelId}: ChannelIdExists) =>
+      ChallengeChannel.machine(store).withContext({channelId}),
+
     invokeCreateChannelAndFundProtocol: (_, event: DoneInvokeEvent<CreateAndFund.Init>) =>
       CreateAndFund.machine(store, event.data),
+
     invokeCreateChannelConfirmation: (context, event: DoneInvokeEvent<CCC.WorkflowContext>) =>
       CCC.confirmChannelCreationWorkflow(store, event.data),
+
     getDataForCreateChannelAndFund: async (
       context: ChannelParamsExist
     ): Promise<CreateAndFund.Init> => {
@@ -361,6 +412,7 @@ export const applicationWorkflow = (
       const allocation = checkThat(latestSupportedByMe.outcome, isSimpleEthAllocation);
       return {channelId, allocation};
     },
+
     getDataForCreateChannelConfirmation: async (
       _: WorkflowContext,
       event: CreateChannelEvent | JoinChannelEvent
