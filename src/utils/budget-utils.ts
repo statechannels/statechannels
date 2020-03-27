@@ -2,8 +2,6 @@ import {SiteBudget, AssetBudget} from '../store/types';
 import {HUB_ADDRESS, ETH_ASSET_HOLDER_ADDRESS} from '../constants';
 import {bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
-// import {checkThat} from '../utils';
-// import {Workflow} from '../channel-wallet';
 
 export function ethBudget(site: string, opts: Partial<AssetBudget>): SiteBudget {
   return {

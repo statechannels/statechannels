@@ -21,7 +21,7 @@ import {MemoryChannelStoreEntry} from './memory-channel-storage';
 import {AddressZero} from 'ethers/constants';
 import {Chain, FakeChain} from '../chain';
 import {calculateChannelId, hashState} from './state-utils';
-import {NETWORK_ID, HUB_ADDRESS} from '../constants';
+import {NETWORK_ID} from '../constants';
 
 import {Guid} from 'guid-typescript';
 import {MemoryBackend} from './memory-backend';
@@ -106,7 +106,7 @@ export interface Store {
   reserveFunds(
     assetHolderAddress: string,
     channelId: string,
-    amount: {send: BigNumber; receive: BigNumber}
+    amount: BigNumber
   ): Promise<SiteBudget>;
   releaseFunds(assetHolderAddress: string, channelId: string): Promise<SiteBudget>;
 
@@ -401,7 +401,7 @@ export class XstateStore implements Store {
   private budgetLock = new AsyncLock();
 
   public async createBudget(budget: SiteBudget): Promise<void> {
-    const existingBudget = this.backend.getBudget(budget.domain);
+    const existingBudget = await this.backend.getBudget(budget.domain);
     if (existingBudget) {
       throw new Error(Errors.budgetAlreadyExists);
     }
@@ -437,7 +437,7 @@ export class XstateStore implements Store {
   public async reserveFunds(
     assetHolderAddress: string,
     channelId: string,
-    amount: {send: BigNumber; receive: BigNumber}
+    amount: BigNumber
   ): Promise<SiteBudget> {
     const entry = await this.getEntry(channelId);
     const site = entry.applicationSite;
@@ -445,22 +445,11 @@ export class XstateStore implements Store {
 
     return await this.budgetLock
       .acquire<SiteBudget>(site, async release => {
-        let currentBudget = await this.backend.getBudget(site);
+        const currentBudget = await this.backend.getBudget(site);
 
         // Create a new budget if one doesn't exist
         if (!currentBudget) {
-          currentBudget = {
-            hubAddress: HUB_ADDRESS,
-            domain: site,
-            forAsset: {
-              [assetHolderAddress]: {
-                assetHolderAddress,
-                availableReceiveCapacity: amount.receive,
-                availableSendCapacity: amount.send,
-                channels: {}
-              }
-            }
-          };
+          throw new Error(Errors.noBudget);
         }
 
         const assetBudget = currentBudget?.forAsset[assetHolderAddress];
@@ -469,8 +458,8 @@ export class XstateStore implements Store {
         }
 
         if (
-          assetBudget.availableSendCapacity.lt(amount.send) ||
-          assetBudget.availableReceiveCapacity.lt(amount.receive)
+          assetBudget.availableSendCapacity.lt(amount.div(2)) ||
+          assetBudget.availableReceiveCapacity.lt(amount.div(2))
         ) {
           throw new Error(Errors.budgetInsufficient);
         }
@@ -479,7 +468,7 @@ export class XstateStore implements Store {
           ...assetBudget,
           channels: {
             ...assetBudget.channels,
-            [channelId]: {amount: amount.receive.add(amount.send)}
+            [channelId]: {amount}
           }
         };
         this.backend.setBudget(currentBudget.domain, currentBudget);
