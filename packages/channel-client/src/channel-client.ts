@@ -151,11 +151,11 @@ export class ChannelClient implements ChannelClientInterface {
     });
   }
 
-  async getBudget(hubAddress: string): Promise<SiteBudget | {}> {
+  async getBudget(hubAddress: string): Promise<SiteBudget> {
     return this.provider.send({method: 'GetBudget', params: {hubAddress}});
   }
 
-  async closeAndWithdraw(hubAddress: string): Promise<SiteBudget | {}> {
+  async closeAndWithdraw(hubAddress: string): Promise<SiteBudget> {
     return this.provider.send({method: 'CloseAndWithdraw', params: {hubAddress}});
   }
 }
