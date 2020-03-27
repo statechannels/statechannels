@@ -5,8 +5,7 @@ import {
   MachineConfig,
   Machine,
   StateMachine,
-  ServiceConfig,
-  assign
+  ServiceConfig
 } from 'xstate';
 import {
   SiteBudget,
@@ -58,6 +57,7 @@ export interface WorkflowActions {
   displayUi: Action<WorkflowContext, any>;
   sendResponse: Action<WorkflowContext, any>;
   sendBudgetUpdated: Action<WorkflowContext, any>;
+  updateBudget: Action<WorkflowContext, any>;
 }
 export type StateValue = keyof WorkflowStateSchema['states'];
 
@@ -66,7 +66,7 @@ const generateConfig = (
 ): MachineConfig<WorkflowContext, WorkflowStateSchema, WorkflowEvent> => ({
   id: 'approve-budget-and-fund',
   initial: 'fundLedger',
-  entry: [actions.displayUi],
+  entry: [actions.displayUi, actions.updateBudget],
   states: {
     waitForUserApproval: {
       on: {
@@ -91,7 +91,8 @@ const mockActions: WorkflowActions = {
   hideUi: 'hideUi',
   displayUi: 'displayUi',
   sendResponse: 'sendResponse',
-  sendBudgetUpdated: 'sendBudgetUpdated'
+  sendBudgetUpdated: 'sendBudgetUpdated',
+  updateBudget: 'updateBudget'
 };
 
 export const approveBudgetAndFundWorkflow = (
@@ -100,10 +101,9 @@ export const approveBudgetAndFundWorkflow = (
   context: WorkflowContext
 ): WorkflowMachine => {
   const services: WorkflowServices = {
-    updateBudget: (context: WorkflowContext, event) => store.createBudget(context.budget),
     createAndFundLedger: (context: WorkflowContext) =>
       CreateAndFundLedger.createAndFundLedgerWorkflow(store, {
-        initialOutcome: convertPendingBudgetToAllocation(context),
+        initialOutcome: convertBudgetToAllocation(context),
         participants: [context.player, context.hub]
       })
   };
@@ -121,13 +121,7 @@ export const approveBudgetAndFundWorkflow = (
     sendBudgetUpdated: async (context: WorkflowContext, event) => {
       await messagingService.sendBudgetNotification(context.budget);
     },
-    updateBudgetToFree: assign(
-      ({budget}: WorkflowContext): WorkflowContext => {
-        const {domain: site, hubAddress} = budget;
-        const clonedAssetBudgets = _.mapValues(context.budget.forAsset, freeAssetBudget);
-        return {...context, budget: {domain: site, hubAddress, forAsset: clonedAssetBudgets}};
-      }
-    )
+    updateBudget: (context: WorkflowContext, event) => store.createBudget(context.budget)
   };
   const config = generateConfig(actions);
   return Machine(config).withConfig({services}, context) as WorkflowMachine;
@@ -141,18 +135,7 @@ export const machine = approveBudgetAndFundWorkflow;
 
 export const config = generateConfig(mockActions);
 
-// TODO: Should there be a Site Budget class that handles this?
-function freeAssetBudget(assetBudget: AssetBudget, channelId: string): AssetBudget {
-  const clonedBudget = _.cloneDeep(assetBudget);
-
-  return clonedBudget;
-}
-
-function convertPendingBudgetToAllocation({
-  hub,
-  player,
-  budget
-}: WorkflowContext): SimpleAllocation {
+function convertBudgetToAllocation({hub, player, budget}: WorkflowContext): SimpleAllocation {
   // TODO: Eventually we will need to support more complex budgets
   if (Object.keys(budget.forAsset).length !== 1) {
     throw new Error('Cannot handle mixed budget');
