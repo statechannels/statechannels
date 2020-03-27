@@ -21,6 +21,11 @@ export interface ChannelState {
   payerBalance: string;
 }
 
+const enum Index {
+  Leecher = 0,
+  Seeder = 1
+}
+
 // This class wraps the channel client converting the
 // request/response formats to those used in the app
 
@@ -176,57 +181,37 @@ export class PaymentChannelClient {
 
   // payer may use this method to make payments (if they have sufficient funds)
   async makePayment(channelId: string, amount: string) {
-    const channelReady = new Promise(resolve => {
-      if (
-        this.channelCache[channelId] &&
-        this.isAcceptanceOfMyPayment(this.channelCache[channelId])
-      ) {
-        resolve();
-      } else {
-        this.channelClient.onChannelUpdated(channelResult => {
-          const channelState = convertToChannelState(channelResult);
-          channelState.channelId === channelId &&
-            this.isAcceptanceOfMyPayment(channelState) &&
-            resolve();
-        });
-      }
+    const channelState: ChannelState = await new Promise(resolve => {
+      const readyToPay = (state: ChannelState | undefined) =>
+        state &&
+        state.status === 'running' &&
+        state.payer === this.mySigningAddress &&
+        state.turnNum.mod(2).eq(Index.Leecher);
+
+      const currentState = this.channelCache[channelId];
+      if (readyToPay(currentState)) resolve(currentState);
+
+      this.channelClient.onChannelUpdated(
+        cu => readyToPay(convertToChannelState(cu)) && resolve(convertToChannelState(cu))
+      );
     });
 
-    await channelReady; // deals with race conditions where I am prompted to pay but did not receive previous acceptance yet
-
-    if (
-      this.channelCache[channelId] &&
-      this.channelCache[channelId].payer === this.mySigningAddress
-    ) {
-      const {
-        beneficiary,
-        payer,
-        beneficiaryBalance,
-        payerBalance,
-        beneficiaryOutcomeAddress,
-        payerOutcomeAddress
-      } = this.channelCache[channelId];
-      if (bigNumberify(payerBalance).gte(amount)) {
-        await this.updateChannel(
-          channelId,
-          beneficiary,
-          payer,
-          bigNumberify(beneficiaryBalance)
-            .add(amount)
-            .toString(),
-          bigNumberify(payerBalance)
-            .sub(amount)
-            .toString(),
-          beneficiaryOutcomeAddress,
-          payerOutcomeAddress
-        );
-      } else {
-        console.error('Insufficient fund to make a payment. Closing channel.');
-        await this.closeChannel(channelId);
-      }
-    } else {
-      console.error('Cannot make a payment in a channel that you did not join');
+    const {payerBalance} = channelState;
+    if (bigNumberify(payerBalance).lt(amount)) {
+      console.error('Insufficient fund to make a payment. Closing channel.');
+      await this.closeChannel(channelId);
+      return;
     }
+
+    await this.updateChannel(
+      channelId,
+      channelState.beneficiary,
+      channelState.payer,
+      subract(channelState.beneficiaryBalance, amount),
+      subract(payerBalance, amount),
+      channelState.beneficiaryOutcomeAddress,
+      channelState.payerOutcomeAddress
+    );
   }
 
   // beneficiary may use this method to accept payments
@@ -265,13 +250,6 @@ export class PaymentChannelClient {
       return channelState.status === 'running' && channelState.turnNum.mod(2).eq(1);
     }
     return false; // only beneficiary may receive payments
-  }
-
-  isAcceptanceOfMyPayment(channelState: ChannelState): boolean {
-    if (channelState.payer === this.mySigningAddress) {
-      return channelState.status === 'running' && channelState.turnNum.mod(2).eq(0);
-    }
-    return false; // only payer may have their payments accepted
   }
 
   shouldSendSpacerState(channelState: ChannelState): boolean {
@@ -356,3 +334,8 @@ const formatAllocations = (aAddress: string, bAddress: string, aBal: string, bBa
     }
   ];
 };
+
+const subract = (a: string, b: string) =>
+  bigNumberify(a)
+    .sub(b)
+    .toString();
