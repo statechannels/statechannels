@@ -1,6 +1,7 @@
 import {Status, Torrent} from './types';
 import {ChannelState} from './clients/payment-channel-client';
 import {bigNumberify} from 'ethers/utils';
+import {AddressZero} from 'ethers/constants';
 
 export const WEI_PER_BYTE = bigNumberify(1); // cost per byte
 export const BUFFER_REFILL_RATE = bigNumberify(2e4); // number of bytes the leecher wishes to increase the buffer by
@@ -119,3 +120,12 @@ export const mockChannels: Array<Partial<ChannelState>> = [
     beneficiaryBalance: bigNumberify(mockBalance * 2).toString()
   }
 ];
+
+let SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS: string;
+if (process.env.REACT_APP_SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS) {
+  SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS =
+    process.env.REACT_APP_SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS;
+} else {
+  throw new Error('Contract address not defined');
+}
+export {SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS};

@@ -4,6 +4,7 @@ import {FakeChannelProvider} from '@statechannels/channel-client';
 import {ChannelClient} from '@statechannels/channel-client';
 import {ChannelStatus, Message} from '@statechannels/client-api-schema';
 import {SiteBudget} from '@statechannels/client-api-schema';
+import {SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS} from '../constants';
 
 const bigNumberify = utils.bigNumberify;
 const FINAL_SETUP_STATE = utils.bigNumberify(3); // for a 2 party ForceMove channel
@@ -41,7 +42,7 @@ if (process.env.REACT_APP_FAKE_CHANNEL_PROVIDER === 'true') {
 // The beneficiary proposes the channel, but accepts payments
 // The payer joins the channel, and makes payments
 export class PaymentChannelClient {
-  channelCache: Record<string, ChannelState> = {};
+  channelCache: Record<string, ChannelState | undefined> = {};
 
   get mySigningAddress(): string | undefined {
     return this.channelClient.signingAddress;
@@ -82,8 +83,8 @@ export class PaymentChannelClient {
       beneficiaryBalance,
       payerBalance
     );
-    const appDefinition = process.env.REACT_APP_SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS;
 
+    const appDefinition = SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS;
     const channelResult = await this.channelClient.createChannel(
       participants,
       allocations,
@@ -238,7 +239,7 @@ export class PaymentChannelClient {
 
   amProposer(channelIdOrChannelState: string | ChannelState): boolean {
     if (typeof channelIdOrChannelState === 'string') {
-      return this.channelCache[channelIdOrChannelState].beneficiary === this.mySigningAddress;
+      return this.channelCache[channelIdOrChannelState]?.beneficiary === this.mySigningAddress;
     } else {
       return channelIdOrChannelState.beneficiary === this.mySigningAddress;
     }
