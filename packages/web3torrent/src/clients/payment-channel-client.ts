@@ -176,6 +176,17 @@ export class PaymentChannelClient {
 
   // payer may use this method to make payments (if they have sufficient funds)
   async makePayment(channelId: string, amount: string) {
+    const channelReady = new Promise(resolve => {
+      this.channelClient.onChannelProposed(channelResult => {
+        const channelState = convertToChannelState(channelResult);
+        channelState.channelId === channelId &&
+          this.isAcceptanceOfMyPayment(channelState) &&
+          resolve();
+      });
+    });
+
+    await channelReady; // deals with race conditions where I am prompted to pay but did not receive previous acceptance yet
+
     if (
       this.channelCache[channelId] &&
       this.channelCache[channelId].payer === this.mySigningAddress
@@ -210,6 +221,7 @@ export class PaymentChannelClient {
       console.error('Cannot make a payment in a channel that you did not join');
     }
   }
+
   // beneficiary may use this method to accept payments
   async acceptChannelUpdate(channelState: ChannelState) {
     const {
@@ -246,6 +258,14 @@ export class PaymentChannelClient {
       return channelState.status === 'running' && channelState.turnNum.mod(2).eq(1);
     }
     return false; // only beneficiary may receive payments
+  }
+
+  isAcceptanceOfMyPayment(channelState: ChannelState): boolean {
+    // doesn't guarantee that my balance increased
+    if (channelState.payer === this.mySigningAddress) {
+      return channelState.status === 'running' && channelState.turnNum.mod(2).eq(0);
+    }
+    return false; // only payer may have their payments accepted
   }
 
   shouldSendSpacerState(channelState: ChannelState): boolean {
