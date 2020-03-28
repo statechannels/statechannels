@@ -18,6 +18,7 @@ export interface ChannelClientInterface {
   onMessageQueued: (callback: (message: Message) => void) => UnsubscribeFunction;
   onChannelUpdated: (callback: (result: ChannelResult) => void) => UnsubscribeFunction;
   onChannelProposed: (callback: (result: ChannelResult) => void) => UnsubscribeFunction;
+  onBudgetUpdated: (callback: (result: SiteBudget) => void) => UnsubscribeFunction;
 
   provider: ChannelProviderInterface;
 
@@ -53,8 +54,8 @@ export interface ChannelClientInterface {
     hubAddress: string,
     hubOutcomeAddress: string
   ): Promise<SiteBudget>;
-  getBudget(hubAddress: string): Promise<SiteBudget | {}>;
-  closeAndWithdraw(hubAddress: string): Promise<SiteBudget | {}>;
+  getBudget(hubAddress: string): Promise<SiteBudget>;
+  closeAndWithdraw(hubAddress: string): Promise<SiteBudget>;
 }
 export interface EventsWithArgs {
   MessageQueued: [Message];
