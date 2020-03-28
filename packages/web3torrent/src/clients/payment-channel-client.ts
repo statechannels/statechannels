@@ -23,8 +23,8 @@ export interface ChannelState {
 }
 
 enum Index {
-  Leecher = 0,
-  Seeder = 1
+  Payer = 0,
+  Beneficiary = 1
 }
 
 // This class wraps the channel client converting the
@@ -187,7 +187,7 @@ export class PaymentChannelClient {
         state &&
         state.status === 'running' &&
         state.payer === this.mySigningAddress &&
-        state.turnNum.mod(2).eq(Index.Leecher);
+        state.turnNum.mod(2).eq(Index.Payer);
 
       const currentState = this.channelCache[channelId];
       if (readyToPay(currentState)) resolve(currentState);
