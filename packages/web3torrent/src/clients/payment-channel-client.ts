@@ -4,6 +4,7 @@ import {FakeChannelProvider} from '@statechannels/channel-client';
 import {ChannelClient} from '@statechannels/channel-client';
 import {ChannelStatus, Message} from '@statechannels/client-api-schema';
 import {SiteBudget} from '@statechannels/client-api-schema';
+import {SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS} from '../constants';
 
 const bigNumberify = utils.bigNumberify;
 const FINAL_SETUP_STATE = utils.bigNumberify(3); // for a 2 party ForceMove channel
@@ -21,6 +22,11 @@ export interface ChannelState {
   payerBalance: string;
 }
 
+enum Index {
+  Payer = 0,
+  Beneficiary = 1
+}
+
 // This class wraps the channel client converting the
 // request/response formats to those used in the app
 
@@ -36,7 +42,7 @@ if (process.env.REACT_APP_FAKE_CHANNEL_PROVIDER === 'true') {
 // The beneficiary proposes the channel, but accepts payments
 // The payer joins the channel, and makes payments
 export class PaymentChannelClient {
-  channelCache: Record<string, ChannelState> = {};
+  channelCache: Record<string, ChannelState | undefined> = {};
   budgetCache?: SiteBudget;
 
   get mySigningAddress(): string | undefined {
@@ -82,8 +88,8 @@ export class PaymentChannelClient {
       beneficiaryBalance,
       payerBalance
     );
-    const appDefinition = process.env.REACT_APP_SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS;
 
+    const appDefinition = SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS;
     const channelResult = await this.channelClient.createChannel(
       participants,
       allocations,
@@ -181,40 +187,42 @@ export class PaymentChannelClient {
 
   // payer may use this method to make payments (if they have sufficient funds)
   async makePayment(channelId: string, amount: string) {
-    if (
-      this.channelCache[channelId] &&
-      this.channelCache[channelId].payer === this.mySigningAddress
-    ) {
-      const {
-        beneficiary,
-        payer,
-        beneficiaryBalance,
-        payerBalance,
-        beneficiaryOutcomeAddress,
-        payerOutcomeAddress
-      } = this.channelCache[channelId];
-      if (bigNumberify(payerBalance).gte(amount)) {
-        await this.updateChannel(
-          channelId,
-          beneficiary,
-          payer,
-          bigNumberify(beneficiaryBalance)
-            .add(amount)
-            .toString(),
-          bigNumberify(payerBalance)
-            .sub(amount)
-            .toString(),
-          beneficiaryOutcomeAddress,
-          payerOutcomeAddress
-        );
-      } else {
-        console.error('Insufficient fund to make a payment. Closing channel.');
-        await this.closeChannel(channelId);
-      }
-    } else {
-      console.error('Cannot make a payment in a channel that you did not join');
+    const channelState: ChannelState = await new Promise(resolve => {
+      const readyToPay = (state: ChannelState | undefined) =>
+        state &&
+        state.status === 'running' &&
+        state.payer === this.mySigningAddress &&
+        state.turnNum.mod(2).eq(Index.Payer);
+
+      const currentState = this.channelCache[channelId];
+      if (readyToPay(currentState)) resolve(currentState);
+
+      const unsubscribeListener = this.channelClient.onChannelUpdated(cu => {
+        if (readyToPay(convertToChannelState(cu))) {
+          unsubscribeListener();
+          resolve(convertToChannelState(cu));
+        }
+      });
+    });
+
+    const {payerBalance} = channelState;
+    if (bigNumberify(payerBalance).lt(amount)) {
+      console.error('Insufficient fund to make a payment. Closing channel.');
+      await this.closeChannel(channelId);
+      return;
     }
+
+    await this.updateChannel(
+      channelId,
+      channelState.beneficiary,
+      channelState.payer,
+      add(channelState.beneficiaryBalance, amount),
+      subract(payerBalance, amount),
+      channelState.beneficiaryOutcomeAddress,
+      channelState.payerOutcomeAddress
+    );
   }
+
   // beneficiary may use this method to accept payments
   async acceptChannelUpdate(channelState: ChannelState) {
     const {
@@ -239,7 +247,7 @@ export class PaymentChannelClient {
 
   amProposer(channelIdOrChannelState: string | ChannelState): boolean {
     if (typeof channelIdOrChannelState === 'string') {
-      return this.channelCache[channelIdOrChannelState].beneficiary === this.mySigningAddress;
+      return this.channelCache[channelIdOrChannelState]?.beneficiary === this.mySigningAddress;
     } else {
       return channelIdOrChannelState.beneficiary === this.mySigningAddress;
     }
@@ -336,3 +344,13 @@ const formatAllocations = (aAddress: string, bAddress: string, aBal: string, bBa
     }
   ];
 };
+
+const subract = (a: string, b: string) =>
+  bigNumberify(a)
+    .sub(bigNumberify(b))
+    .toString();
+
+const add = (a: string, b: string) =>
+  bigNumberify(a)
+    .add(bigNumberify(b))
+    .toString();

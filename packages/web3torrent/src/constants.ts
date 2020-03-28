@@ -119,3 +119,12 @@ export const mockChannels: Array<Partial<ChannelState>> = [
     beneficiaryBalance: bigNumberify(mockBalance * 2).toString()
   }
 ];
+
+let SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS: string;
+if (process.env.REACT_APP_SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS) {
+  SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS =
+    process.env.REACT_APP_SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS;
+} else {
+  throw new Error('Contract address not defined');
+}
+export {SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS};

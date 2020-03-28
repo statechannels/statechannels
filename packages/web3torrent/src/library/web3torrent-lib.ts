@@ -64,15 +64,11 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   async enable() {
     await this.paymentChannelClient.enable();
 
-    log('set pseAccount to sc-wallet signing address');
     this.pseAccount = this.paymentChannelClient.mySigningAddress;
-
-    log('set outcomeAddress to sc-wallet web3 wallet address');
+    log('set pseAccount to sc-wallet signing address: ' + this.pseAccount);
     this.outcomeAddress = this.paymentChannelClient.myEthereumSelectedAddress;
+    log('set outcomeAddress to sc-wallet web3 wallet address: ' + this.outcomeAddress);
 
-    log('got ethereum address');
-    log('ACCOUNT ID: ', this.pseAccount);
-    log('THIS address: ', this.outcomeAddress);
     this.tracker.getAnnounceOpts = () => ({pseAccount: this.pseAccount});
 
     // Hub messaging
@@ -100,8 +96,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       this.paymentChannelClient.pushMessage(message);
     });
 
-    console.log(process.env);
-
     if (AUTO_FUND_LEDGER) {
       // TODO: This is a temporary measure while we don't have any budgeting built out.
       // We automatically call approveBudgetAndFund.
@@ -115,10 +109,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       );
       console.log(`Budget approved: ${JSON.stringify(success)}`);
     }
-
-    // Cache the site budget so we have data to render in the budget UI.
-    // We don't need to do this when we wire up xstate-wallet and the approveBudgetAndFund function.
-    await this.paymentChannelClient.getBudget(window.location.hostname);
   }
 
   async disable() {
@@ -323,14 +313,18 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     });
 
     this.paymentChannelClient.onChannelUpdated(async (channelState: ChannelState) => {
-      if (channelState.channelId === wire.paidStreamingExtension.pseChannelId) {
+      if (
+        channelState.channelId === wire.paidStreamingExtension.pseChannelId ||
+        channelState.channelId === wire.paidStreamingExtension.peerChannelId
+      ) {
         // filter to updates for the channel on this wire
-        log(`State received with turnNum ${channelState.turnNum}`);
+        log(`Channel updated to turnNum ${channelState.turnNum}`);
         if (this.paymentChannelClient.shouldSendSpacerState(channelState)) {
           // send "spacer" state
           await this.paymentChannelClient.acceptChannelUpdate(
             this.paymentChannelClient.channelCache[channelState.channelId]
           );
+          log('sent spacer state, now sending STOP');
           wire.paidStreamingExtension.stop(); // prompt peer for a payment
         } else if (this.paymentChannelClient.isPaymentToMe(channelState)) {
           log(
