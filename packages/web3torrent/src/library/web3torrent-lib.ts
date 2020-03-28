@@ -111,10 +111,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       );
       console.log(`Budget approved: ${JSON.stringify(success)}`);
     }
-
-    // Cache the site budget so we have data to render in the budget UI.
-    // We don't need to do this when we wire up xstate-wallet and the approveBudgetAndFund function.
-    await this.paymentChannelClient.getBudget(window.location.hostname);
   }
 
   async disable() {
