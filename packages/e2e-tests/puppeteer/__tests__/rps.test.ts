@@ -2,7 +2,7 @@
 import {Page, Browser} from 'puppeteer';
 import {configureEnvVariables, getEnvBool} from '@statechannels/devtools';
 
-import {setUpBrowser, loadRPSApp} from '../helpers';
+import {setUpBrowser, loadWeb3App} from '../helpers';
 import {
   login,
   aChallenges,
@@ -29,8 +29,8 @@ describe('completes game 1 (challenge by A, challenge by B, resign by B) and beg
     rpsTabA = (await browserA.pages())[0];
     rpsTabB = (await browserB.pages())[0];
 
-    await loadRPSApp(rpsTabA, 0);
-    await loadRPSApp(rpsTabB, 1);
+    await loadWeb3App(rpsTabA, 0);
+    await loadWeb3App(rpsTabB, 1);
 
     await login(rpsTabA, rpsTabB);
   });
