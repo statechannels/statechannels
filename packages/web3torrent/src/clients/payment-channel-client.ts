@@ -22,7 +22,7 @@ export interface ChannelState {
   payerBalance: string;
 }
 
-const enum Index {
+enum Index {
   Leecher = 0,
   Seeder = 1
 }
@@ -192,9 +192,12 @@ export class PaymentChannelClient {
       const currentState = this.channelCache[channelId];
       if (readyToPay(currentState)) resolve(currentState);
 
-      this.channelClient.onChannelUpdated(
-        cu => readyToPay(convertToChannelState(cu)) && resolve(convertToChannelState(cu))
-      );
+      const unsubscribeListener = this.channelClient.onChannelUpdated(cu => {
+        if (readyToPay(convertToChannelState(cu))) {
+          unsubscribeListener();
+          resolve(convertToChannelState(cu));
+        }
+      });
     });
 
     const {payerBalance} = channelState;
@@ -208,7 +211,7 @@ export class PaymentChannelClient {
       channelId,
       channelState.beneficiary,
       channelState.payer,
-      subract(channelState.beneficiaryBalance, amount),
+      add(channelState.beneficiaryBalance, amount),
       subract(payerBalance, amount),
       channelState.beneficiaryOutcomeAddress,
       channelState.payerOutcomeAddress
@@ -338,5 +341,10 @@ const formatAllocations = (aAddress: string, bAddress: string, aBal: string, bBa
 
 const subract = (a: string, b: string) =>
   bigNumberify(a)
-    .sub(b)
+    .sub(bigNumberify(b))
+    .toString();
+
+const add = (a: string, b: string) =>
+  bigNumberify(a)
+    .add(bigNumberify(b))
     .toString();
