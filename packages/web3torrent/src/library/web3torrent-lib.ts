@@ -96,8 +96,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       this.paymentChannelClient.pushMessage(message);
     });
 
-    console.log(process.env);
-
     if (AUTO_FUND_LEDGER) {
       // TODO: This is a temporary measure while we don't have any budgeting built out.
       // We automatically call approveBudgetAndFund.
