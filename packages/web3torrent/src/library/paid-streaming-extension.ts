@@ -8,6 +8,7 @@ import {
   PaidStreamingExtensionNotices,
   PaidStreamingWire
 } from './types';
+import {PEER_TRUST} from '../constants';
 const log = debug('web3torrent:extension');
 
 export abstract class PaidStreamingExtension implements Extension {
@@ -28,6 +29,8 @@ export abstract class PaidStreamingExtension implements Extension {
 
   isForceChoking = false;
   isBeingChoked = false;
+
+  blockedRequests: number[][] = [];
 
   constructor(wireToUse: PaidStreamingWire) {
     this.wire = wireToUse;
@@ -91,16 +94,28 @@ export abstract class PaidStreamingExtension implements Extension {
   stop() {
     if (!this.isForceChoking) {
       this.isForceChoking = true;
-      this.executeExtensionCommand(PaidStreamingExtensionNotices.STOP, this.pseChannelId);
+      setTimeout(() => {
+        this.executeExtensionCommand(PaidStreamingExtensionNotices.STOP, this.pseChannelId);
+      }, 0);
     }
   }
 
   start() {
     if (this.isForceChoking) {
+      this.isForceChoking = false;
+
       setTimeout(() => {
-        this.isForceChoking = false;
+        this.respond();
         this.executeExtensionCommand(PaidStreamingExtensionNotices.START);
       }, 0);
+    }
+  }
+
+  respond() {
+    const _onRequest = this.wire._onRequest;
+    this.blockedRequests.splice(0, PEER_TRUST).map(request => _onRequest.apply(this.wire, request));
+    if (this.blockedRequests.length) {
+      this.stop();
     }
   }
 
@@ -170,25 +185,23 @@ export abstract class PaidStreamingExtension implements Extension {
     // for debugging purposes. It logs when a piece is received
     const _onPiece = wire._onPiece;
     wire._onPiece = function(index, offset, buffer) {
-      log(`<< _onPiece PIECE: ${index} - offset ${offset}`);
       _onPiece.apply(wire, [index, offset, buffer]);
+      log(`<< _onPiece PIECE: ${index} OFFSET: ${offset} DOWNLOADED: ${wire.downloaded}`);
     };
-
+    const blockedRequests = this.blockedRequests;
     const _onRequest = wire._onRequest;
     wire._onRequest = function(index, offset, length) {
       log(`_onRequest: ${index}`);
 
       if (this.paidStreamingExtension.isForceChoking) {
-        wire._onCancel(index, offset, length);
-        log(`_onRequest AUTO CHOKE - ${index}, ${offset}, ${length}`);
+        blockedRequests.push([index, offset, length]);
+        log(`_onRequest AUTO IGNORE - ${index}, ${offset}, ${length}`);
       } else {
         messageBus.emit(PaidStreamingExtensionEvents.REQUEST, index, length, function(allow) {
           if (allow) {
             _onRequest.apply(wire, [index, offset, length]);
-            log(`>> _onRequest PASS - ${index}, ${offset}, ${length}`);
           } else {
-            wire._onCancel(index, offset, length);
-            log(`_onRequest CHOKED - ${index}, ${offset}, ${length}`);
+            blockedRequests.push([index, offset, length]);
           }
         });
       }

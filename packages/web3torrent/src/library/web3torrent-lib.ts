@@ -248,16 +248,12 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
             channelId,
             uploaded: 0
           };
-          log(`${peerAccount} >> REQUEST BLOCKED (NEW PEER): ${index} - Channel id: ${channelId}`);
+          log(`${peerAccount} >> REQUEST BLOCKED (NEW PEER): ${index} ChannelID: ${channelId}`);
           response(false);
           this.blockPeer(torrent.infoHash, wire, peerAccount);
         } else if (!knownPeerAccount.allowed || reqPrice.gt(knownPeerAccount.buffer)) {
-          const {buffer, beneficiaryBalance, uploaded} = this.peersList[torrent.infoHash][
-            peerAccount
-          ];
-          log(
-            `${peerAccount} >> REQUEST BLOCKED: ${index} BUFFER: ${buffer} BALANCE: ${beneficiaryBalance} UPLOADED: ${uploaded}`
-          );
+          const {uploaded} = this.peersList[torrent.infoHash][peerAccount];
+          log(`${peerAccount} >> REQUEST BLOCKED: ${index} UPLOADED: ${uploaded}`);
           response(false);
           this.blockPeer(torrent.infoHash, wire, peerAccount); // As soon as buffer is empty, block
           wire.paidStreamingExtension.stop(); // prompt peer for a payment
@@ -271,12 +267,9 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
             uploaded: knownPeerAccount.uploaded + size
           };
 
-          const {buffer, beneficiaryBalance, uploaded} = this.peersList[torrent.infoHash][
-            peerAccount
-          ];
-          log(
-            `${peerAccount} >> REQUEST ALLOWED: ${index} BUFFER: ${buffer} BALANCE: ${beneficiaryBalance} UPLOADED: ${uploaded}`
-          );
+          const {buffer, uploaded} = this.peersList[torrent.infoHash][peerAccount];
+          log(`${peerAccount} >> REQUEST ALLOWED: ${index} BUFFER: ${buffer} UPLOAD: ${uploaded}`);
+
           response(true);
         }
       }
@@ -340,25 +333,24 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       );
     }
     // querying channel client for updated balance
-    const newBeneficiaryBalance = bigNumberify(
+    const newBalance = bigNumberify(
       this.paymentChannelClient.channelCache[channelId].beneficiaryBalance
     );
     // infer payment using update balance and previously stored balance
     const payment = bigNumberify(
-      newBeneficiaryBalance.sub(bigNumberify(this.peersList[infoHash][peerId].beneficiaryBalance))
+      newBalance.sub(bigNumberify(this.peersList[infoHash][peerId].beneficiaryBalance))
     );
     // store new balance
 
-    this.peersList[infoHash][peerId].beneficiaryBalance = newBeneficiaryBalance.toString();
+    this.peersList[infoHash][peerId].beneficiaryBalance = newBalance.toString();
     // convert payment into buffer units (bytes)
     this.peersList[infoHash][peerId].buffer = bigNumberify(this.peersList[infoHash][peerId].buffer)
       .add(payment.div(WEI_PER_BYTE)) // This must remain an integer as long as our check above uses .isZero()
       // ethers BigNumbers are always integers
       .toString();
 
-    log(
-      `${peerId} >> Buffer refilled: Balance ${newBeneficiaryBalance} - payment: ${payment} - buffer: ${this.peersList[infoHash][peerId].buffer}`
-    );
+    const logBuffer = this.peersList[infoHash][peerId].buffer;
+    log(`${peerId} >> Refill: Balance ${newBalance} payment: ${payment} buffer: ${logBuffer}`);
   }
 
   protected setupTorrent(torrent: PaidStreamingTorrent) {
@@ -411,16 +403,27 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
    */
   protected async makePayment(torrent: PaidStreamingTorrent, wire: PaidStreamingWire) {
     const {peerChannelId, peerAccount} = wire.paidStreamingExtension;
-    log(`<< STOP ${peerAccount} - About to pay`);
+    log(`<< STOP ${peerAccount} - About to pay`, torrent);
     let amountToPay = WEI_PER_BYTE.mul(BUFFER_REFILL_RATE).toString();
     // On each wire, the algorithm tries to download the uneven piece (which is always the last piece)
-    if (torrent.downloaded === 0 && torrent.pieces[torrent.pieces.length - 1]) {
+
+    const lastPieceReservations: PaidStreamingWire[] =
+      torrent._reservations[torrent.pieces.length - 1];
+    const lastPieceReservationsIncludesThisWire =
+      lastPieceReservations &&
+      lastPieceReservations.find(
+        wire => wire && wire.paidStreamingExtension.peerAccount === peerAccount
+      );
+    if (torrent.downloaded === 0 && lastPieceReservationsIncludesThisWire) {
+      log(`<< STOP ${peerAccount} - LAST PIECE`);
       amountToPay = WEI_PER_BYTE.mul(torrent.store.store.lastChunkLength).toString();
     }
 
     await this.paymentChannelClient.makePayment(peerChannelId, amountToPay);
 
-    const balance = this.paymentChannelClient.channelCache[peerChannelId].beneficiaryBalance;
+    const balance =
+      this.paymentChannelClient.channelCache[peerChannelId] &&
+      this.paymentChannelClient.channelCache[peerChannelId].beneficiaryBalance;
     log(`<< Payment - Peer ${peerAccount} Balance: ${balance} Downloaded ${wire.downloaded}`);
   }
 
@@ -437,28 +440,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   }
 
   /**
-   * TODO: FIGURE OUT IF THIS IS GOING TO BE NECESSARY!
-   * Cleans up the pending
-   */
-  protected cleanUp(torrent: ExtendedTorrent, wire: PaidStreamingWire) {
-    // log(
-    //   `< CLEANUP - Peer ${wire.paidStreamingExtension.peerAccount.slice(0, 10)}:`,
-    //   JSON.stringify(
-    //     wire.requests.map(({piece}) => ({
-    //       [piece]: JSON.stringify(torrent.pieces[piece], [
-    //         '_reservations',
-    //         '_buffered',
-    //         '_chunks',
-    //         '_cancellations'
-    //       ])
-    //     })),
-    //     null,
-    //     1
-    //   )
-    // );
-  }
-
-  /**
    * Jumpstart a torrent wire download, after being stopped by a peer.
    */
   protected jumpStart(torrent: ExtendedTorrent, wire: PaidStreamingWire) {
@@ -467,16 +448,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       return;
     }
     log(`<< START ${wire.paidStreamingExtension.peerAccount}`, torrent.pieces, wire.requests);
-    wire.requests.forEach(({piece}) => {
-      const torrentPiece = torrent.pieces[piece];
-      if (torrentPiece && !!torrentPiece._reservations) {
-        torrent.pieces[piece]._reservations = torrent.pieces[piece]._reservations - 1;
-        torrent._reservations[piece] = [
-          ...new Set(torrent._reservations[piece].filter(w => wire.peerId !== w.peerId))
-        ];
-      }
-    });
-    wire.requests = [];
     wire.unchoke();
     (torrent as any)._updateWireWrapper(wire); // TODO: fix this type, if its the solution
   }
