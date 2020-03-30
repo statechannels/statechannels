@@ -21,6 +21,7 @@ import * as CloseLedgerAndWithdraw from '../workflows/close-ledger-and-withdraw'
 import {TestStore} from '../workflows/tests/store';
 import {ETH_TOKEN} from '../constants';
 import {makeDestination} from '../utils/outcome';
+import {hexZeroPad} from 'ethers/utils';
 
 export class Player {
   privateKey: string;
@@ -160,18 +161,18 @@ export function generatePlayerUpdate(
     params: {
       channelId,
       participants: [playerA, playerB],
-      appData: '0x0',
+      appData: hexZeroPad('0x0', 32),
       allocations: [
         {
           token: '0x0',
           allocationItems: [
             {
               destination: playerA.destination,
-              amount: '0x06f05b59d3b20000'
+              amount: hexZeroPad('0x06f05b59d3b20000', 32)
             },
             {
               destination: playerB.destination,
-              amount: '0x06f05b59d3b20000'
+              amount: hexZeroPad('0x06f05b59d3b20000', 32)
             }
           ]
         }
@@ -196,15 +197,15 @@ export function generateCreateChannelRequest(
       participants: [playerA, playerB],
       allocations: [
         {
-          token: '0x0',
+          token: hexZeroPad('0x0', 32),
           allocationItems: [
             {
               destination: playerA.destination,
-              amount: '0x06f05b59d3b20000'
+              amount: hexZeroPad('0x06f05b59d3b20000', 32)
             },
             {
               destination: playerB.destination,
-              amount: '0x06f05b59d3b20000'
+              amount: hexZeroPad('0x06f05b59d3b20000', 32)
             }
           ]
         }
@@ -228,8 +229,8 @@ export function generateApproveBudgetAndFundRequest(
       domain: 'rps.statechannels.org',
       hub,
       playerParticipantId: player.participantId,
-      requestedSendCapacity: '0x5',
-      requestedReceiveCapacity: '0x5'
+      requestedSendCapacity: hexZeroPad('0x5', 32),
+      requestedReceiveCapacity: hexZeroPad('0x5', 32)
     }
   };
 }
