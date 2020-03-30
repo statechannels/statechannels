@@ -1,9 +1,8 @@
 import {Machine, StateNodeConfig, spawn, assign} from 'xstate';
-import {map, filter} from 'rxjs/operators';
+import {map} from 'rxjs/operators';
 
 import {Store} from '../store';
 import {ChannelChainInfo} from '../chain';
-import {exists} from '../utils';
 
 const WORKFLOW = 'challenge-channel';
 
@@ -25,8 +24,8 @@ export const config: StateNodeConfig<Init, any, any> = {
 type SafeToChallenge = {type: 'SAFE_TO_CHALLENGE'};
 
 export const machine = (store: Store) => {
-  const subscribeChallengeRegisteredEvent = (ctx: Init) => {
-    return store.chain.chainUpdatedFeed(ctx.channelId).pipe(
+  const subscribeChallengeRegisteredEvent = (ctx: Init) =>
+    store.chain.chainUpdatedFeed(ctx.channelId).pipe(
       map((chainInfo: ChannelChainInfo):
         | 'CHALLENGE_ONCHAIN_SUCCESSFULLY'
         | 'UNEXPECTED_CHALLENGE_ALREADY_EXISTS'
@@ -43,7 +42,6 @@ export const machine = (store: Store) => {
         else return {type: 'SAFE_TO_CHALLENGE'};
       })
     );
-  };
 
   const submitChallengeTransaction = async (ctx: Init) => {
     const txRequest = await store.getForceMoveTransactionData(ctx.channelId);
