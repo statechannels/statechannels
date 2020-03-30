@@ -22,7 +22,8 @@ const createChannelEvent: CreateChannelEvent = {
   outcome: simpleEthAllocation([]),
   challengeDuration: bigNumberify(500),
   requestId: 5,
-  applicationSite: 'localhost'
+  applicationSite: 'localhost',
+  fundingStrategy: 'Direct'
 };
 
 it('initializes and starts confirmCreateChannelWorkflow', async () => {

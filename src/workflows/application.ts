@@ -341,13 +341,12 @@ export const applicationWorkflow = (
         participants,
         bigNumberify(challengeDuration),
         stateVars,
-        appDefinition,
-        context.applicationSite
+        appDefinition
       );
       // Create a open channel objective so we can coordinate with all participants
       await store.addObjective({
         type: 'OpenChannel',
-        data: {targetChannelId: channelId},
+        data: {targetChannelId: channelId, fundingStrategy: 'Direct'},
         participants
       });
       return channelId;

@@ -21,6 +21,7 @@ export interface CreateChannelEvent {
   chainId: string;
   requestId: number;
   applicationSite: string;
+  fundingStrategy: 'Direct' | 'Ledger' | 'Virtual';
 }
 
 export interface ChannelUpdated {
