@@ -1,4 +1,5 @@
 import {bigNumberify, hexZeroPad} from 'ethers/utils';
+import {getEnvBool} from '@statechannels/devtools';
 
 export const WALLET_VERSION = 'xstate-wallet@VersionTBD';
 
@@ -37,3 +38,5 @@ export function tokenAddress(assetHolderAddress: string): string | undefined {
   // TODO: store mapping, implement lookup
   return assetHolderAddress;
 }
+
+export const useVirtualFunding: boolean = getEnvBool('USE_VIRTUAL_FUNDING');

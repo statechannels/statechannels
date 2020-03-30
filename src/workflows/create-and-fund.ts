@@ -18,7 +18,7 @@ import {isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
 import {checkThat, getDataAndInvoke} from '../utils';
 import {SupportState, VirtualFundingAsLeaf, Depositing} from '.';
 import {from, Observable} from 'rxjs';
-import {CHALLENGE_DURATION, HUB, ETH_ASSET_HOLDER_ADDRESS} from '../constants';
+import {CHALLENGE_DURATION, HUB, ETH_ASSET_HOLDER_ADDRESS, useVirtualFunding} from '../constants';
 import {bigNumberify} from 'ethers/utils';
 
 const PROTOCOL = 'create-and-fund';
@@ -205,7 +205,7 @@ const determineFunding = (_: Store) => (_: Init): Observable<TEvent> =>
   // This should use the store and the context to make a choice, but we have not
   // moved anywhere towards making that choice
   // So, the choice is a hard-coded environment variable
-  from(Promise.resolve(process.env.USE_VIRTUAL_FUNDING)).pipe(
+  from(Promise.resolve(useVirtualFunding)).pipe(
     map(
       (useVirtualFunding): TEvent =>
         useVirtualFunding ? {type: 'UseVirtualFunding'} : {type: 'UseDirectFunding'}
