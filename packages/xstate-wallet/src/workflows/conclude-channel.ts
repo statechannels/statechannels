@@ -19,6 +19,7 @@ const finalState = (store: Store) => async (context: Init): Promise<SupportState
 
   // If we've received a new final state that matches our outcome we support that
   if (outcomesEqual(latestSupportedByMe.outcome, latestFinalState?.outcome)) {
+    // outcomesEqual function will return false if there is inconsistent padding of hex strings
     return {state: latestFinalState};
   }
 

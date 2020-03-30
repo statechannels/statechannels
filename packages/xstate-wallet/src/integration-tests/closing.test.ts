@@ -51,6 +51,7 @@ test('concludes on their turn', async () => {
     signatures: [playerA, playerB].map(({privateKey}) => signState(state, privateKey))
   };
 
+  // ^ this choice only tests one path through the conclude-channel workflow
   const {channelId} = await playerB.store.createEntry(allSignState);
   await playerA.store.createEntry(allSignState);
 
@@ -63,7 +64,7 @@ test('concludes on their turn', async () => {
   await playerA.messagingService.receiveRequest(generateCloseRequest(channelId));
 
   await waitForExpect(async () => {
-    expect(playerA.workflowState).toEqual('done');
+    expect(playerA.workflowState).toEqual('done'); // is this enough of an assertion?
     expect(playerB.workflowState).toEqual('done');
   }, 3000);
   expect((await playerA.store.getEntry(channelId)).supported.isFinal).toBe(true);
