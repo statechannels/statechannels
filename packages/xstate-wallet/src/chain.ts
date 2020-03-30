@@ -54,7 +54,14 @@ const UPDATED = 'updated';
 type Updated = ChannelChainInfo & {channelId: string};
 export class FakeChain implements Chain {
   private holdings: Record<string, BigNumber> = {};
-  private finalized: Record<string, boolean | undefined> = {};
+  private channelStatus: Record<
+    string,
+    {
+      state: State;
+      challengeExpiry: BigNumber;
+      finalized: boolean;
+    }
+  > = {};
   private eventEmitter: EventEmitter<{
     updated: [Updated];
   }> = new EventEmitter();
@@ -91,7 +98,10 @@ export class FakeChain implements Chain {
   }
 
   public finalizeSync(channelId: string) {
-    this.finalized[channelId] = true;
+    this.channelStatus[channelId] = {
+      ...(this.channelStatus[channelId] || {}),
+      finalized: true
+    };
   }
 
   public depositSync(channelId: string, expectedHeld: string, amount: string) {
@@ -110,7 +120,7 @@ export class FakeChain implements Chain {
   public async getChainInfo(channelId: string): Promise<ChannelChainInfo> {
     return {
       amount: this.holdings[channelId] || bigNumberify(0),
-      finalized: this.finalized[channelId] || false
+      finalized: (this.channelStatus[channelId] || {}).finalized || false
     };
   }
 
