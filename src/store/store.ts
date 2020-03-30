@@ -423,8 +423,7 @@ export class XstateStore implements Store {
         throw new Error(Errors.noBudget);
       }
 
-      const entry = await (await this.getEntry(channelId)).supported;
-      const {outcome} = entry;
+      const {outcome, participants} = (await this.getEntry(channelId)).supported;
       const playerAddress = await this.getAddress();
       const currentAllocation = checkThat(outcome, isSimpleEthAllocation);
       const playerDestination =
