@@ -44,6 +44,7 @@
       "skipFiles": ["<node_internals>/**"],
       "sourceMaps": true
     },
+    // Install Debugger for Chrome extension
     {
       "name": "Attach to running wallet",
       "type": "chrome",
