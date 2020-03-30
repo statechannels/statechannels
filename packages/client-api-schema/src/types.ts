@@ -16,6 +16,18 @@ export type ChannelId = string;
  */
 export type ExternalDestination = string; // currently unused in this schema
 
+/**
+ * Bytes32
+ * @pattern  ^0x([a-fA-F0-9]{64})$
+ */
+export type Bytes32 = string;
+
+/**
+ * Uint256
+ * @pattern  ^0x([a-fA-F0-9]{64})$
+ */
+export type Uint256 = string;
+
 interface JsonRpcRequest<MethodName, RequestParams> {
   id: number; // in the json-rpc spec this is optional, but we require it for all our requests
   jsonrpc: '2.0';
@@ -60,7 +72,7 @@ export interface Participant {
 
 export interface AllocationItem {
   destination: Address; // Address of EOA to receive channel proceeds.
-  amount: string; // How much funds will be transferred to the destination address.
+  amount: Uint256; // How much funds will be transferred to the destination address.
 }
 
 export interface Allocation {
@@ -78,7 +90,7 @@ export interface Message {
 
 export interface Funds {
   token: Address;
-  amount: string;
+  amount: Uint256;
 }
 
 export interface ChannelResult {
@@ -88,7 +100,7 @@ export interface ChannelResult {
   appDefinition: Address;
   channelId: ChannelId;
   status: ChannelStatus;
-  turnNum: string;
+  turnNum: Uint256;
   challengeExpirationTime?: number;
 }
 
@@ -114,7 +126,7 @@ export interface CreateChannelParams {
   participants: Participant[];
   allocations: Allocation[];
   appDefinition: Address;
-  appData: string;
+  appData: Bytes32;
 }
 export type CreateChannelRequest = JsonRpcRequest<'CreateChannel', CreateChannelParams>;
 export type CreateChannelResponse = JsonRpcResponse<ChannelResult>;
@@ -131,7 +143,7 @@ export interface UpdateChannelParams {
   channelId: ChannelId;
   participants: Participant[];
   allocations: Allocation[];
-  appData: string;
+  appData: Bytes32;
 }
 export type UpdateChannelRequest = JsonRpcRequest<'UpdateChannel', UpdateChannelParams>;
 export type UpdateChannelResponse = JsonRpcResponse<ChannelResult>;
@@ -164,14 +176,14 @@ export type ChallengeChannelResponse = JsonRpcResponse<ChannelResult>;
 // Budget
 
 export interface ChannelBudget {
-  channelId: string;
-  amount: string;
+  channelId: Bytes32;
+  amount: Uint256;
 }
 
 export interface TokenBudget {
-  token: string;
-  availableReceiveCapacity: string;
-  availableSendCapacity: string;
+  token: Bytes32;
+  availableReceiveCapacity: Uint256;
+  availableSendCapacity: Uint256;
   channels: ChannelBudget[];
 }
 export interface SiteBudget {
@@ -187,9 +199,9 @@ export interface TokenBudgetRequest {
   // leaving here for now as it's simpler then changing the wallet
   // and the channel client already handles this
   domain: string;
-  token: string;
-  requestedSendCapacity: string;
-  requestedReceiveCapacity: string;
+  token: Bytes32;
+  requestedSendCapacity: Uint256;
+  requestedReceiveCapacity: Uint256;
 }
 export type GetBudgetRequest = JsonRpcRequest<'GetBudget', {hubAddress: Address}>;
 export type GetBudgetResponse = JsonRpcResponse<SiteBudget | {}>;
