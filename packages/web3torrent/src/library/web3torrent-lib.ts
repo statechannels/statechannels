@@ -26,7 +26,9 @@ import {
   BUFFER_REFILL_RATE,
   INITIAL_LEECHER_BALANCE,
   INITIAL_SEEDER_BALANCE,
-  AUTO_FUND_LEDGER
+  AUTO_FUND_LEDGER,
+  BLOCK_LENGTH,
+  PEER_TRUST
 } from '../constants';
 import * as firebase from 'firebase/app';
 import 'firebase/database';
@@ -422,12 +424,17 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
    */
   protected async makePayment(torrent: PaidStreamingTorrent, wire: PaidStreamingWire) {
     const {peerChannelId, peerAccount} = wire.paidStreamingExtension;
-    log(`<< STOP ${peerAccount} - About to pay`, torrent);
-    let amountToPay = WEI_PER_BYTE.mul(BUFFER_REFILL_RATE).toString();
+    let amountToPay = BUFFER_REFILL_RATE.sub(
+      WEI_PER_BYTE.mul(BLOCK_LENGTH).mul(PEER_TRUST - wire.requests.length)
+    ).toString();
+    log(`<< STOP ${peerAccount} - About to pay`, torrent, amountToPay);
+
     // On each wire, the algorithm tries to download the uneven piece (which is always the last piece)
     if (torrent.downloaded === 0 && this.isLastPieceIsReservedToWire(torrent, peerAccount)) {
-      log(`<< STOP ${peerAccount} - LAST PIECE`);
-      amountToPay = WEI_PER_BYTE.mul(torrent.store.store.lastChunkLength).toString();
+      amountToPay = BUFFER_REFILL_RATE.sub(
+        WEI_PER_BYTE.mul(BLOCK_LENGTH - torrent.store.store.lastChunkLength)
+      ).toString();
+      log(`<< STOP ${peerAccount} - LAST PIECE`, amountToPay);
     }
 
     await this.paymentChannelClient.makePayment(peerChannelId, amountToPay);
@@ -438,7 +445,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     log(`<< Payment - Peer ${peerAccount} Balance: ${balance} Downloaded ${wire.downloaded}`);
   }
 
-  protected isLastPieceIsReservedToWire(torrent: PaidStreamingTorrent, peerAccount: string) {
+  private isLastPieceIsReservedToWire(torrent: PaidStreamingTorrent, peerAccount: string) {
     const lastPieceReservations: PaidStreamingWire[] =
       torrent._reservations[torrent.pieces.length - 1];
     if (!lastPieceReservations || !lastPieceReservations.length) return false;
