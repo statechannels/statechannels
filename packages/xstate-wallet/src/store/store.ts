@@ -342,24 +342,22 @@ export class XstateStore implements Store {
   private nonceKeyFromAddresses = (addresses: string[]): string => addresses.join('::');
 
   async getForceMoveTransactionData(channelId: string): Promise<TransactionRequest> {
-    const channelStorage = await this.backend.getChannel(channelId);
+    const {
+      myIndex,
+      support,
+      channelConstants: {participants}
+    } = await this.getEntry(channelId);
 
-    if (!channelStorage) {
-      throw new Error('Channel not found');
-    }
+    // createForceMoveTransaction requires this to sign a "challenge message"
+    const privateKey = await this.getPrivateKey(participants[myIndex].signingAddress);
 
-    const {participants} = channelStorage;
-    const myAddress = participants[channelStorage.myIndex].signingAddress;
-    const privateKey = await this.backend.getPrivateKey(myAddress);
+    return Transactions.createForceMoveTransaction(toNitroSignedState(support[0]), privateKey);
+  }
 
-    if (!privateKey) {
-      throw new Error('No longer have private key');
-    }
-
-    return Transactions.createForceMoveTransaction(
-      toNitroSignedState(channelStorage.support[0]),
-      privateKey
-    );
+  private async getPrivateKey(signingAddress: string): Promise<string> {
+    const ret = await this.backend.getPrivateKey(signingAddress);
+    if (!ret) throw new Error('No longer have private key');
+    return ret;
   }
 
   async signAndAddState(channelId: string, stateVars: StateVariables) {
