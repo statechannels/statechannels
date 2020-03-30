@@ -1,6 +1,7 @@
 import {AddressZero} from 'ethers/constants';
 import {interpret} from 'xstate';
 import {bigNumberify, hexZeroPad} from 'ethers/utils';
+import waitForExpect from 'wait-for-expect';
 
 import {CHALLENGE_DURATION, NETWORK_ID} from '../../constants';
 import {FakeChain} from '../../chain';
@@ -11,7 +12,6 @@ import {simpleEthAllocation} from '../../utils/outcome';
 import {State, SignedState} from '../../store/types';
 
 import {TestStore} from './store';
-import waitForExpect from 'wait-for-expect';
 
 jest.setTimeout(50000);
 
