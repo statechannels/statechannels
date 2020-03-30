@@ -68,7 +68,7 @@
     "@sentry/browser": "5.12.1",
     "@statechannels/channel-provider": "*",
     "@statechannels/client-api-schema": "0.0.1",
-    "@statechannels/devtools": "0.1.21",
+    "@statechannels/devtools": "0.1.22",
     "@statechannels/jest-gas-reporter": "0.0.2",
     "@storybook/react": "5.3.9",
     "@types/autoprefixer": "9.6.1",

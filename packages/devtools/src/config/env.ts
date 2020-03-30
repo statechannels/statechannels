@@ -13,6 +13,7 @@ export function getEnvBool(name: string, throwIfMissing = true): boolean {
     case null:
     case 'null':
     case 'false':
+    case 'FALSE':
     case '0':
       return false;
     default:
