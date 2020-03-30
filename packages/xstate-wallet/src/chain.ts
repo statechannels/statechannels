@@ -76,11 +76,20 @@ export class FakeChain implements Chain {
     this.depositSync(channelId, expectedHeld, amount);
   }
 
-  public async challenge(channelId: string): Promise<void> {
-    this.finalizeSync(channelId); // TODO: Implement some challenge system
+  public async challenge(
+    channelId: string,
+    forceMoveTransactionData: TransactionRequest
+  ): Promise<void> {
+    this.channelStatus[channelId] = {
+      ...(this.channelStatus[channelId] || {}),
+      challengeExpiry: bigNumberify(100),
+      state: {} as State, // TODO: Decode? :S
+      finalized: false
+    };
     this.eventEmitter.emit(UPDATED, {
       amount: this.holdings[channelId],
       finalized: true,
+      challenge: this.channelStatus[channelId],
       channelId
     });
   }
@@ -120,7 +129,8 @@ export class FakeChain implements Chain {
   public async getChainInfo(channelId: string): Promise<ChannelChainInfo> {
     return {
       amount: this.holdings[channelId] || bigNumberify(0),
-      finalized: (this.channelStatus[channelId] || {}).finalized || false
+      finalized: (this.channelStatus[channelId] || {}).finalized || false,
+      challenge: this.channelStatus[channelId]
     };
   }
 
@@ -129,7 +139,7 @@ export class FakeChain implements Chain {
 
     const updates = fromEvent(this.eventEmitter, UPDATED).pipe(
       filter((event: Updated) => event.channelId === channelId),
-      map(({amount, finalized}) => ({amount, finalized}))
+      map(({amount, finalized, challenge}) => ({amount, finalized, challenge}))
     );
 
     return merge(first, updates);

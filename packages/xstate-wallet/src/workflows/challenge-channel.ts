@@ -12,7 +12,7 @@ export const config: StateNodeConfig<Init, any, any> = {
   key: WORKFLOW,
   initial: 'idle',
   entry: 'assignChainWatcher',
-  on: {CHALLENGE_ONCHAIN_SUCCESSFULLY: 'done'},
+  on: {CHALLENGE_PLACED_ONCHAIN_AS_EXPECTED: 'done'},
   states: {
     idle: {on: {SAFE_TO_CHALLENGE: 'submit'}},
     submit: {invoke: {src: 'submitChallengeTransaction', onDone: 'idle', onError: 'failure'}},
@@ -20,8 +20,6 @@ export const config: StateNodeConfig<Init, any, any> = {
     failure: {entry: assign<any>({error: () => 'Challenge failed'})}
   }
 };
-
-type SafeToChallenge = {type: 'SAFE_TO_CHALLENGE'};
 
 /**
  * Helper method for determining what the chain's latest state represents with
@@ -33,31 +31,29 @@ async function determineChallengeStatus(
   channelId: string,
   chainInfo: ChannelChainInfo
 ): Promise<
-  'CHALLENGE_ONCHAIN_SUCCESSFULLY' | 'UNEXPECTED_CHALLENGE_ALREADY_EXISTS' | SafeToChallenge
+  | 'CHALLENGE_PLACED_ONCHAIN_AS_EXPECTED'
+  | 'SOME_OTHER_CHALLENGE_ALREADY_EXISTS'
+  | 'SAFE_TO_CHALLENGE'
 > {
-  const {finalized, challenge} = chainInfo;
-
-  if (finalized) {
-    return 'CHALLENGE_ONCHAIN_SUCCESSFULLY';
-  }
+  const {challenge} = chainInfo;
 
   if (typeof challenge !== 'undefined') {
-    const {
-      state: {turnNum: challengeTurnNum}
-    } = challenge;
+    // const {
+    //   state: {turnNum: challengeTurnNum}
+    // } = challenge;
 
-    const {
-      latestState: {turnNum}
-    } = await store.getEntry(channelId);
+    // const {
+    //   latestState: {turnNum}
+    // } = await store.getEntry(channelId);
 
-    if (challengeTurnNum !== turnNum) {
-      return 'UNEXPECTED_CHALLENGE_ALREADY_EXISTS';
-    }
+    // if (challengeTurnNum !== turnNum) {
+    //   return 'SOME_OTHER_CHALLENGE_ALREADY_EXISTS';
+    // }
 
-    return 'CHALLENGE_ONCHAIN_SUCCESSFULLY';
+    return 'CHALLENGE_PLACED_ONCHAIN_AS_EXPECTED';
   }
 
-  return {type: 'SAFE_TO_CHALLENGE'};
+  return 'SAFE_TO_CHALLENGE';
 }
 
 export const machine = (store: Store) => {

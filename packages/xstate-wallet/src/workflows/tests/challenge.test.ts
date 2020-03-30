@@ -67,6 +67,13 @@ it('initializes and starts challenge thing', async () => {
 
   await waitForExpect(async () => {
     expect(service.state.value).toEqual('done');
-    expect(await fakeChain.getChainInfo(channelId)).toMatchObject({finalized: true});
+    expect(await fakeChain.getChainInfo(channelId)).toMatchObject({
+      // Copied from FakeChain.challenge hard-coded values
+      finalized: false,
+      challenge: {
+        challengeExpiry: bigNumberify(100),
+        state: {}
+      }
+    });
   }, 10000);
 });
