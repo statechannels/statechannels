@@ -61,16 +61,10 @@ it('initializes and starts challenge thing', async () => {
 
   const {channelId} = await store.createEntry(allSignState);
 
-  // Mock out the Chain?
-
-  // Start the machine
   const service = interpret<any, any, any>(
     challengeMachine(store).withContext({channelId})
   ).start();
 
-  // Expect a well-formatted transaction to be submitted to the chain
-
-  // Wait so I can debug right now
   await waitForExpect(async () => {
     expect(service.state.value).toEqual('done');
     expect(await fakeChain.getChainInfo(channelId)).toMatchObject({finalized: true});
