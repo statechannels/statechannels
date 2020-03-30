@@ -123,9 +123,7 @@ const createObjective = (store: Store): WorkflowServices['createObjective'] => a
   return objective;
 };
 
-const clearBudget = (store: Store): ActionFunction<WorkflowContext, any> => async (
-  context
-) => {
+const clearBudget = (store: Store): ActionFunction<WorkflowContext, any> => async context => {
   await store.clearBudget(context.site);
 };
 const options = (
