@@ -7,7 +7,7 @@ import {
 } from './xstate-wallet-internals';
 import {ethers} from 'ethers';
 import {BigNumber} from 'ethers/utils';
-import {cHubChainAddress} from '../constants';
+import {cHubChannelSigningAddress} from '../constants';
 import _ from 'lodash/fp';
 
 interface SimpleAllocationStateVariables {
@@ -31,7 +31,8 @@ export function depositsToMake(
     .filter(
       state =>
         _.findIndex(
-          allocationItem => allocationItem.destination === cHubChainAddress,
+          allocationItem =>
+            allocationItem.destination === makeDestination(cHubChannelSigningAddress),
           state.outcome.allocationItems
         ) === 0
     )
@@ -41,3 +42,5 @@ export function depositsToMake(
       amountToDeposit: state.outcome.allocationItems[0].amount
     }));
 }
+
+const makeDestination = (address: string): string => ethers.utils.hexZeroPad(address, 32);

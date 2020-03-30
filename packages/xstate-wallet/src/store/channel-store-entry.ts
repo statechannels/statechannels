@@ -8,7 +8,7 @@ export type ChannelStoredData = {
     challengeDuration: BigNumber | string;
     channelNonce: BigNumber | string;
   };
-  signatures: Record<string, string[] | undefined>;
+  signatures: Record<string, Array<string | undefined>>;
   funding: Funding | undefined;
   applicationSite: string | undefined;
   myIndex: number;

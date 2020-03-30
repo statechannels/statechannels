@@ -9,6 +9,10 @@ export default class UserService extends Service {
   @tracked userAddress!: string;
   @tracked username!: string;
 
+  public get isInitialized(): boolean {
+    return !!this.username || window.localStorage.getItem('dev') === 'true';
+  }
+
   public async initialize(username: string): Promise<void> {
     this.username = username;
     await this.requestAddresses();

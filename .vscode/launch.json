@@ -5,6 +5,20 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "type": "chrome",
+      "request": "launch",
+      "name": "[xstate-wallet] Storybook Debug",
+      "url": "http://localhost:6006",
+      "sourceMaps": true,
+      "webRoot": "${workspaceFolder}/packages/xstate-wallet",
+      "sourceMapPathOverrides": {
+        "webpack:///*": "${webRoot}/*",
+        "webpack:///./*": "${webRoot}/*",
+        "webpack:///src/*": "${webRoot}/*",
+        "webpack:///./~/*": "${webRoot}/node_modules/*"
+      }
+    },
+    {
       "type": "node",
       "request": "launch",
       // this is the best way I can find to work with a monorepo in vscode ...

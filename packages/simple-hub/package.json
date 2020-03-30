@@ -52,7 +52,6 @@
   "scripts": {
     "build": "tsc -b .",
     "build:typescript": "tsc -b .",
-    "chain:test": "npx jest --runInBand -c ./jest/jest.chain.config.js",
     "firebase-relay:start:sdev": "nodemon --watch 'src/**/*' -e ts,tsx --exec ts-node src/message/firebase-relay",
     "hub:start:dev": "ts-node ./start-dev-server.ts",
     "hub:start:prod": "NODE_ENV=production ts-node ./src/server.ts",
@@ -66,6 +65,6 @@
     "prettier:check": "npx prettier --check 'src/**/*.{ts,tsx}'",
     "prettier:write": "npx prettier --write 'src/**/*.{ts,tsx}'",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
-    "test:ci": "run-s chain:test hub:test"
+    "test:ci": "yarn hub:test"
   }
 }

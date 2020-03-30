@@ -1,4 +1,11 @@
-import {Machine, MachineConfig, StateNodeConfig, ActionTypes} from 'xstate';
+import {
+  Machine,
+  MachineConfig,
+  StateNodeConfig,
+  ActionTypes,
+  DoneInvokeEvent,
+  assign
+} from 'xstate';
 
 import {filter, map, first} from 'rxjs/operators';
 import _ from 'lodash';
@@ -6,11 +13,10 @@ import {SimpleAllocation, isVirtuallyFund, StateVariables, Outcome} from '../sto
 
 import {MachineFactory} from '../utils/workflow-utils';
 import {Store} from '../store';
-import * as Depositing from './depositing';
 import {add} from '../utils/math-utils';
 import {isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
 import {checkThat, getDataAndInvoke} from '../utils';
-import {SupportState, VirtualFundingAsLeaf} from '.';
+import {SupportState, VirtualFundingAsLeaf, Depositing} from '.';
 import {from, Observable} from 'rxjs';
 import {CHALLENGE_DURATION, HUB} from '../constants';
 import {bigNumberify} from 'ethers/utils';
@@ -84,20 +90,21 @@ const triggerObjective = (store: Store) => async (ctx: Init): Promise<void> => {
   store.addObjective({
     type: 'VirtuallyFund',
     participants,
-    data: {
-      jointChannelId,
-      targetChannelId: ctx.channelId
-    }
+    data: {jointChannelId, targetChannelId: ctx.channelId}
   });
 };
 
+const assignJointChannelId = assign<VirtualFundingComplete>({
+  jointChannelId: (_, event: DoneInvokeEvent<{jointChannelId: string}>) => event.data.jointChannelId
+});
+type VirtualFundingComplete = Init & {jointChannelId: string};
 const virtual: StateNodeConfig<Init, any, any> = {
   initial: 'virtualFunding',
   entry: triggerObjective.name,
   states: {
     virtualFunding: getDataAndInvoke<Init, Service>(
       {src: 'getObjective'},
-      {src: 'virtualFunding'},
+      {src: 'virtualFunding', opts: {entry: 'assignJointChannelId'}},
       'updateFunding'
     ),
     updateFunding: {invoke: {src: 'setFundingToVirtual', onDone: 'done'}},
@@ -151,12 +158,11 @@ type Service = keyof ReturnType<typeof services>;
 
 const options = (store: Store) => ({
   services: services(store),
-  actions: {triggerObjective: triggerObjective(store)}
+  actions: {triggerObjective: triggerObjective(store), assignJointChannelId}
 });
 
-export const machine: MachineFactory<Init, any> = (store: Store, init: Init) => {
-  return Machine(config).withConfig(options(store), init);
-};
+export const machine: MachineFactory<Init, any> = (store: Store, init: Init) =>
+  Machine(config).withConfig(options(store), init);
 
 const getObjective = (store: Store) => (ctx: Init): Promise<VirtualFundingAsLeaf.Init> =>
   store.objectiveFeed
@@ -237,5 +243,6 @@ const getDepositingInfo = (store: Store) => async ({channelId}: Init): Promise<D
 const setFundingToDirect = (store: Store) => async (ctx: Init) =>
   await store.setFunding(ctx.channelId, {type: 'Direct'});
 
-const setFundingToVirtual = (store: Store) => async (ctx: Init) =>
-  await store.setFunding(ctx.channelId, {type: 'Virtual', jointChannelId: 'TODO'});
+const setFundingToVirtual = (store: Store) => async (ctx: VirtualFundingComplete) => {
+  await store.setFunding(ctx.channelId, {type: 'Virtual', jointChannelId: ctx.jointChannelId});
+};

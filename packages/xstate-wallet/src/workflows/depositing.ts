@@ -1,9 +1,9 @@
 import {bigNumberify, BigNumber} from 'ethers/utils';
-import {Machine, MachineConfig} from 'xstate';
+import {Machine, MachineConfig, assign, spawn} from 'xstate';
 import {Store} from '../store';
-import {map} from 'rxjs/operators';
+import {map, filter} from 'rxjs/operators';
 import {MachineFactory} from '../utils/workflow-utils';
-import {Observable} from 'rxjs';
+import {exists} from '../utils';
 
 export type Init = {
   channelId: string;
@@ -12,70 +12,45 @@ export type Init = {
   fundedAt: BigNumber;
 };
 
-const watcher: MachineConfig<Init, any, any> = {
-  initial: 'watching',
-  states: {
-    watching: {invoke: {src: 'subscribeDepositEvent'}},
-    done: {type: 'final'}
-  },
-  on: {FUNDED: '.done'}
-};
-
 export const config: MachineConfig<Init, any, any> = {
   id: 'depositing',
-  type: 'parallel',
+  initial: 'idle',
+  entry: 'assignChainWatcher',
+  on: {FUNDED: 'done'},
   states: {
-    watcher,
-    depositor: {
-      initial: 'idle',
-      on: {FUNDED: '.done'},
-      states: {
-        idle: {on: {SAFE_TO_DEPOSIT: 'submit'}},
-        submit: {
-          invoke: {src: 'submitDepositTransaction', onDone: 'done', onError: 'failure'}
-        },
-        done: {type: 'final'},
-        failure: {
-          entry: () => {
-            throw `Deposit failed`;
-          }
-        }
-      }
-    }
+    idle: {on: {SAFE_TO_DEPOSIT: 'submit'}},
+    submit: {invoke: {src: 'submitDepositTransaction', onDone: 'idle', onError: 'failure'}},
+    done: {type: 'final'},
+    failure: {entry: assign<any>({error: () => 'Deposit failed'})}
   }
 };
+type SafeToDeposit = {type: 'SAFE_TO_DEPOSIT'; currentHoldings: BigNumber};
 
-type Services = {
-  submitDepositTransaction: (context: Init) => Promise<void>;
-  subscribeDepositEvent: (
-    context: Init
-  ) => Observable<'FUNDED' | 'SAFE_TO_DEPOSIT' | 'NOT_SAFE_TO_DEPOSIT'>;
-};
-
-type Options = {services: Services};
-export const machine: MachineFactory<Init, any> = (store: Store, context: Init) => {
-  const subscribeDepositEvent = (ctx: Init) => {
-    return store.chain.chainUpdatedFeed(ctx.channelId).pipe(
-      map((chainInfo): 'FUNDED' | 'SAFE_TO_DEPOSIT' | 'NOT_SAFE_TO_DEPOSIT' => {
+export const machine: MachineFactory<Init, any> = (store: Store) => {
+  const subscribeDepositEvent = (ctx: Init) =>
+    store.chain.chainUpdatedFeed(ctx.channelId).pipe(
+      map((chainInfo): 'FUNDED' | SafeToDeposit | undefined => {
         if (chainInfo.amount.gte(ctx.fundedAt)) return 'FUNDED';
-        else if (chainInfo.amount.gte(ctx.depositAt)) return 'SAFE_TO_DEPOSIT';
-        else return 'NOT_SAFE_TO_DEPOSIT';
-      })
+        else if (chainInfo.amount.gte(ctx.depositAt))
+          return {type: 'SAFE_TO_DEPOSIT', currentHoldings: chainInfo.amount};
+        else return;
+      }),
+      filter(exists)
     );
-  };
 
-  const submitDepositTransaction = async (ctx: Init) => {
-    const currentHoldings = (await store.chain.getChainInfo(ctx.channelId)).amount;
+  const submitDepositTransaction = async (ctx: Init, {currentHoldings}: SafeToDeposit) => {
     const amount = bigNumberify(ctx.totalAfterDeposit).sub(currentHoldings);
-    if (amount.gt(0)) {
-      await store.chain.deposit(ctx.channelId, currentHoldings.toHexString(), amount.toHexString());
-    }
+    if (amount.lte(0)) return;
+
+    await store.chain.deposit(ctx.channelId, currentHoldings.toHexString(), amount.toHexString());
   };
 
-  const services: Services = {
-    submitDepositTransaction,
-    subscribeDepositEvent
-  };
-  const options: Options = {services};
-  return Machine(config).withConfig(options, context);
+  const services = {submitDepositTransaction};
+  const actions = {
+    assignChainWatcher: assign<Init & {chainWatcher: any}>({
+      chainWatcher: (ctx: Init) => spawn(subscribeDepositEvent(ctx))
+    })
+  } as any;
+  const options = {services, actions};
+  return Machine(config).withConfig(options);
 };

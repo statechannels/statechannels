@@ -20,12 +20,13 @@ import {
   mockTorrents,
   defaultTrackers,
   fireBaseConfig,
-  HUB_ADDRESS,
+  HUB,
   FIREBASE_PREFIX,
   WEI_PER_BYTE,
   BUFFER_REFILL_RATE,
   INITIAL_LEECHER_BALANCE,
-  INITIAL_SEEDER_BALANCE
+  INITIAL_SEEDER_BALANCE,
+  AUTO_FUND_LEDGER
 } from '../constants';
 import * as firebase from 'firebase/app';
 import 'firebase/database';
@@ -61,32 +62,32 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   }
 
   async enable() {
-    log('Mounting Wallet to App...');
-    await window.channelProvider.mountWalletComponent(process.env.REACT_APP_WALLET_URL);
-    log('Enabling Channel Provider...');
-    await window.channelProvider.enable();
-    log('Enabling WebTorrentPaidStreamingClient...');
+    await this.paymentChannelClient.enable();
+
     this.pseAccount = this.paymentChannelClient.mySigningAddress;
-    log('set pseAccount to sc-wallet signing address');
+    log('set pseAccount to sc-wallet signing address: ' + this.pseAccount);
     this.outcomeAddress = this.paymentChannelClient.myEthereumSelectedAddress;
-    log('got ethereum address');
-    log('ACCOUNT ID: ', this.pseAccount);
-    log('THIS address: ', this.outcomeAddress);
+    log('set outcomeAddress to sc-wallet web3 wallet address: ' + this.outcomeAddress);
+
+    this.tracker.getAnnounceOpts = () => ({pseAccount: this.pseAccount});
 
     // Hub messaging
-
     const myFirebaseRef = firebase
       .database()
       .ref(`/${FIREBASE_PREFIX}/messages/${this.pseAccount}`);
-    const hubFirebaseRef = firebase.database().ref(`/${FIREBASE_PREFIX}/messages/${HUB_ADDRESS}`);
+    const hubFirebaseRef = firebase
+      .database()
+      .ref(`/${FIREBASE_PREFIX}/messages/${HUB.participantId}`);
+
     // firebase setup
     myFirebaseRef.onDisconnect().remove();
 
     this.paymentChannelClient.onMessageQueued((message: Message) => {
-      if (message.recipient === HUB_ADDRESS) {
+      if (message.recipient === HUB.participantId) {
         hubFirebaseRef.push(sanitizeMessageForFirebase(message));
       }
     });
+
     myFirebaseRef.on('child_added', snapshot => {
       const key = snapshot.key;
       const message = snapshot.val();
@@ -94,13 +95,26 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       console.log('GOT FROM FIREBASE: ' + message);
       this.paymentChannelClient.pushMessage(message);
     });
+
+    if (AUTO_FUND_LEDGER) {
+      // TODO: This is a temporary measure while we don't have any budgeting built out.
+      // We automatically call approveBudgetAndFund.
+      const ten = utils.parseEther('10').toHexString();
+      const success = await this.paymentChannelClient.approveBudgetAndFund(
+        ten,
+        ten,
+        window.channelProvider.selectedAddress,
+        HUB.signingAddress,
+        HUB.outcomeAddress
+      );
+      console.log(`Budget approved: ${JSON.stringify(success)}`);
+    }
   }
 
   async disable() {
     log('Disabling WebTorrentPaidStreamingClient');
     this.pseAccount = null;
     this.outcomeAddress = null;
-    await window.ethereum.disable();
   }
 
   async testTorrentingCapability(timeOut: number) {
@@ -297,14 +311,18 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     });
 
     this.paymentChannelClient.onChannelUpdated(async (channelState: ChannelState) => {
-      if (channelState.channelId === wire.paidStreamingExtension.pseChannelId) {
+      if (
+        channelState.channelId === wire.paidStreamingExtension.pseChannelId ||
+        channelState.channelId === wire.paidStreamingExtension.peerChannelId
+      ) {
         // filter to updates for the channel on this wire
-        log(`State received with turnNum ${channelState.turnNum}`);
+        log(`Channel updated to turnNum ${channelState.turnNum}`);
         if (this.paymentChannelClient.shouldSendSpacerState(channelState)) {
           // send "spacer" state
           await this.paymentChannelClient.acceptChannelUpdate(
             this.paymentChannelClient.channelCache[channelState.channelId]
           );
+          log('sent spacer state, now sending STOP');
           wire.paidStreamingExtension.stop(); // prompt peer for a payment
         } else if (this.paymentChannelClient.isPaymentToMe(channelState)) {
           // Accepting payment, refilling buffer and unblocking

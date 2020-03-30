@@ -158,6 +158,7 @@ function* createChannel(localState: ls.A.GameChosen, client: RPSChannelClient) {
     .mul(5)
     .toString();
   const startState: AppData = {type: 'start', stake: localState.roundBuyIn};
+
   yield call(
     [client, 'createChannel'],
     localState.address,

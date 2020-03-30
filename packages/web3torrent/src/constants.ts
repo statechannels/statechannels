@@ -18,7 +18,11 @@ export const INITIAL_SEEDER_BALANCE = bigNumberify(0); // needs to be zero so th
 export const INITIAL_LEECHER_BALANCE = bigNumberify(BUFFER_REFILL_RATE.mul(10000)); // e.g. gwei = 1e9 = nano-ETH
 
 // firebase setup
-export const HUB_ADDRESS = 'TODO';
+export const HUB = {
+  signingAddress: '0xaaaa84838319627Fa056fC3FC29ab94d479B8502',
+  outcomeAddress: '0xaaaa84838319627Fa056fC3FC29ab94d479B8502',
+  participantId: 'firebase:simple-hub'
+};
 export const FIREBASE_PREFIX = 'web3t';
 export const fireBaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -28,7 +32,10 @@ export const fireBaseConfig = {
   storageBucket: '',
   messagingSenderId: '913007764573'
 };
+export const AUTO_FUND_LEDGER = process.env.REACT_APP_AUTO_FUND_LEDGER;
 
+const httpProtocol = process.env.REACT_APP_TRACKER_URL_HTTP_PROTOCOL;
+const url = process.env.REACT_APP_TRACKER_URL;
 export const defaultTrackers = [
   // 'udp://explodie.org:6969',
   // 'udp://tracker.coppersurfer.tk:6969',
@@ -37,10 +44,9 @@ export const defaultTrackers = [
   // 'udp://tracker.opentrackr.org:1337',
   // 'wss://tracker.btorrent.xyz',
   // 'wss://tracker.openwebtorrent.com'
-  'http://localhost:8000/announce',
-  'udp://0.0.0.0:8000',
-  'udp://localhost:8000',
-  'ws://localhost:8000'
+  `${httpProtocol}://${url}/announce`,
+  `udp://${url}`,
+  `ws://${url}`
 ];
 
 export const EmptyTorrent = ({
@@ -119,3 +125,12 @@ export const mockChannels: Array<Partial<ChannelState>> = [
     beneficiaryBalance: bigNumberify(mockBalance * 2).toString()
   }
 ];
+
+let SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS: string;
+if (process.env.REACT_APP_SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS) {
+  SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS =
+    process.env.REACT_APP_SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS;
+} else {
+  throw new Error('Contract address not defined');
+}
+export {SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS};

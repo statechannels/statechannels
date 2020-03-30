@@ -7,14 +7,9 @@ import {
   firstState,
   signState
 } from '../xstate-wallet-internals';
-import {bigNumberify} from 'ethers/utils';
+import {bigNumberify, hexZeroPad} from 'ethers/utils';
 import {ethers} from 'ethers';
-import {
-  cHubChannelPK,
-  cHubChannelSigningAddress,
-  cHubParticipantId,
-  cHubChainAddress
-} from '../../constants';
+import {cHubChannelPK, cHubChannelSigningAddress, cHubParticipantId} from '../../constants';
 import {AddressZero} from 'ethers/constants';
 import * as _ from 'lodash/fp';
 
@@ -34,7 +29,7 @@ const first: Participant = {
 
 const hub: Participant = {
   signingAddress: cHubChannelSigningAddress,
-  destination: cHubChainAddress,
+  destination: hexZeroPad(cHubChannelSigningAddress, 32),
   participantId: cHubParticipantId
 };
 

@@ -4,6 +4,7 @@ import {action} from '@ember/object';
 import {inject as service} from '@ember/service';
 import DS from 'ember-data';
 import UserService from '@statechannels/tic-tac-toe/services/user';
+import makeBlockie from 'ethereum-blockies-base64';
 
 export default class GamesIndexController extends Controller {
   @service store!: DS.Store;
@@ -11,6 +12,10 @@ export default class GamesIndexController extends Controller {
 
   @tracked buyInAmount = 0.001;
   @tracked showCreateGameModal = false;
+
+  get blockieSrc(): string {
+    return makeBlockie(this.user.userAddress ?? '0');
+  }
 
   @action
   protected async createNewGame(event: Event): Promise<void> {

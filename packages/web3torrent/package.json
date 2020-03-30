@@ -22,7 +22,7 @@
     "prettier-bytes": "1.0.4",
     "react": "16.12.0",
     "react-dom": "16.12.0",
-    "react-icons": "^3.9.0",
+    "react-icons": "3.9.0",
     "react-router-dom": "5.1.0",
     "react-scripts": "3.1.2",
     "webtorrent": "0.107.16"
@@ -118,6 +118,7 @@
   },
   "scripts": {
     "build": "react-scripts build",
+    "build-and-release:tracker": "./tracker/build-push-release.sh",
     "build:ci": "run-s contracts:compile build",
     "build:typescript": "tsc -b .",
     "contracts:compile": "node ./bin/compile.js",
@@ -131,9 +132,9 @@
     "prettier:check": "prettier --check '**/*.{scss,json}' --ignore-path '.eslintignore'",
     "prettier:write": "prettier --write '**/*.{scss,json}' --ignore-path '.eslintignore'",
     "start": "node scripts/start.js",
-    "start:tracker": "node tracker/index.js",
     "start:alt": "PORT=3333 node scripts/start.js",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
+    "start:tracker": "node tracker/index.js",
     "storybook": "start-storybook -s ./public -p 4568",
     "test": "TRACKER_URL=http://localhost:4242/announce react-scripts test",
     "test:ci": "CI=true yarn test --runInBand --ci --all --forceExit",

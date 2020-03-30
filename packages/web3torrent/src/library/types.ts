@@ -147,6 +147,11 @@ export type PeersByTorrent = {
 
 declare module 'webtorrent' {
   export interface Instance {
+    tracker: {
+      announce: string[];
+      getAnnounceOpts: () => {[key: string]: string | number};
+      [key: string]: any;
+    };
     on(event: 'warning', callback: (err: Error | string) => void): this;
     on(
       event: ClientEvents.PEER_STATUS_CHANGED,

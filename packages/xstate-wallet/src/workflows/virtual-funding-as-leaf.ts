@@ -13,7 +13,12 @@ import {filter, map, take, flatMap, tap} from 'rxjs/operators';
 import {Store, supportedStateFeed} from '../store';
 import {SupportState, LedgerFunding} from '.';
 import {checkThat, getDataAndInvoke} from '../utils';
-import {simpleEthGuarantee, isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
+import {
+  simpleEthGuarantee,
+  isSimpleEthAllocation,
+  simpleEthAllocation,
+  makeDestination
+} from '../utils/outcome';
 
 import {FundGuarantor, AllocationItem} from '../store/types';
 
@@ -42,7 +47,8 @@ export type Init = {
 type Deductions = {deductions: AllocationItem[]};
 type WithDeductions = Init & Deductions;
 
-const getObjective = (store: Store) => async ({jointChannelId}: Init): Promise<FundGuarantor> => {
+const getObjective = (store: Store) => async (ctx: Init): Promise<FundGuarantor> => {
+  const {jointChannelId, targetChannelId} = ctx;
   const entry = await store.getEntry(jointChannelId);
   const {participants: jointParticipants} = entry.channelConstants;
   const participants = [jointParticipants[entry.myIndex], jointParticipants[ParticipantIdx.Hub]];
@@ -54,7 +60,11 @@ const getObjective = (store: Store) => async ({jointChannelId}: Init): Promise<F
     turnNum: bigNumberify(0),
     appData: '0x',
     isFinal: false,
-    outcome: simpleEthGuarantee(jointChannelId, ...participants.map(p => p.destination))
+    outcome: simpleEthGuarantee(
+      jointChannelId,
+      targetChannelId,
+      ...participants.map(p => p.destination)
+    )
   });
 
   return {
@@ -68,7 +78,8 @@ type TEvent = AnyEventObject;
 
 const enum Actions {
   triggerGuarantorObjective = 'triggerGuarantorObjective',
-  assignDeductions = 'assignDeductions'
+  assignDeductions = 'assignDeductions',
+  assignGuarantorId = 'assignGuarantorId'
 }
 
 export const enum States {
@@ -86,7 +97,8 @@ const enum Services {
   jointChannelUpdate = 'jointChannelUpdate',
   supportState = 'supportState',
   ledgerFunding = 'ledgerFunding',
-  fundGuarantor = 'fundGuarantor'
+  fundGuarantor = 'fundGuarantor',
+  updateJointChannelFunding = 'updateJointChannelFunding'
 }
 
 export const config: StateNodeConfig<Init, any, any> = {
@@ -117,7 +129,7 @@ export const config: StateNodeConfig<Init, any, any> = {
           }
         },
         runObjective: {
-          entry: Actions.triggerGuarantorObjective,
+          entry: [Actions.triggerGuarantorObjective, Actions.assignGuarantorId],
           invoke: {
             src: Services.ledgerFunding,
             data: (
@@ -128,9 +140,10 @@ export const config: StateNodeConfig<Init, any, any> = {
               ledgerChannelId: data.data.ledgerId,
               deductions: ctx.deductions
             }),
-            onDone: 'done'
+            onDone: 'updateFunding'
           }
         },
+        updateFunding: {invoke: {src: Services.updateJointChannelFunding, onDone: 'done'}},
         done: {type: 'final'}
       },
       onDone: States.fundTargetChannel
@@ -144,7 +157,9 @@ export const config: StateNodeConfig<Init, any, any> = {
     failure: {
       entry: [assignError, escalate(({error}: any) => ({type: 'FAILURE', error}))]
     }
-  }
+  } as any // TODO: This is to deal with some flickering compilation issues.
+  // It is hard to debug, since once the compile error goes away, it does not come back
+  // until a seemingly random number of project changes
 };
 
 export const waitForFirstJointState = (store: Store) => ({
@@ -188,7 +203,7 @@ export const jointChannelUpdate = (store: Store) => ({
         const oldOutcome = checkThat(state.outcome, isSimpleEthAllocation);
         const amount = oldOutcome.allocationItems[OutcomeIdx.Hub].amount;
         const outcome = simpleEthAllocation([
-          {destination: targetChannelId, amount},
+          {destination: makeDestination(targetChannelId), amount},
           {destination: state.participants[ParticipantIdx.Hub].destination, amount}
         ]);
         return {state: {...state, turnNum: bigNumberify(1), outcome}};
@@ -214,6 +229,13 @@ const getDeductions = (store: Store) => async (ctx: Init): Promise<Deductions> =
   };
 };
 
+type GuarantorKnown = Init & {guarantorChannelId: string};
+
+const updateJointChannelFunding = (store: Store) => async (ctx: GuarantorKnown) => {
+  const {jointChannelId, guarantorChannelId} = ctx;
+  await store.setFunding(jointChannelId, {type: 'Guarantee', guarantorChannelId});
+};
+
 export const options = (
   store: Store
 ): Pick<MachineOptions<Init, TEvent>, 'actions' | 'services'> => {
@@ -221,11 +243,11 @@ export const options = (
     [Actions.triggerGuarantorObjective]: (_, {data}: DoneInvokeEvent<FundGuarantor>) =>
       store.addObjective(data),
     [Actions.assignDeductions]: assign(
-      (ctx: Init, {data}: DoneInvokeEvent<Deductions>): WithDeductions => ({
-        ...ctx,
-        ...data
-      })
-    )
+      (ctx: Init, {data}: DoneInvokeEvent<Deductions>): WithDeductions => ({...ctx, ...data})
+    ),
+    [Actions.assignGuarantorId]: assign({
+      guarantorChannelId: (_, {data}: DoneInvokeEvent<FundGuarantor>) => data.data.guarantorId
+    })
   };
 
   const services: Record<Services, ServiceConfig<Init>> = {
@@ -234,7 +256,8 @@ export const options = (
     ledgerFunding: LedgerFunding.machine(store),
     waitForFirstJointState: waitForFirstJointState(store),
     jointChannelUpdate: jointChannelUpdate(store),
-    fundGuarantor: getObjective(store)
+    fundGuarantor: getObjective(store),
+    updateJointChannelFunding: updateJointChannelFunding(store)
   };
 
   return {actions, services};

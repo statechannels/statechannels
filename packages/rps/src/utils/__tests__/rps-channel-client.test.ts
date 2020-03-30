@@ -1,6 +1,10 @@
 import {RPSChannelClient} from '../rps-channel-client';
 import {aAddress, bAddress, aBal, bBal, appData} from '../../redux/game/__tests__/scenarios';
-import {ChannelClientInterface, ChannelResult} from '@statechannels/channel-client';
+import {
+  ChannelClientInterface,
+  ChannelResult,
+  FakeChannelProvider,
+} from '@statechannels/channel-client';
 import {encodeAppData, ChannelState} from '../../core';
 import {bigNumberify} from 'ethers/utils';
 import {RPS_ADDRESS} from '../../constants';
@@ -25,6 +29,7 @@ const appDefinition = RPS_ADDRESS;
 const onMessageQueuedMockReturn = () => '0xOMQReturn';
 const onChannelUpdatedMockReturn = jest.fn(() => '0xOCUReturn');
 const onChannelProposedmMockReturn = jest.fn(() => '0xOCPReturn');
+const onBudgetUpdatedMockReturn = jest.fn(() => '0xOCRReturn');
 const mockChannelState: ChannelState = {
   channelId: MOCK_CHANNEL_ID,
   turnNum: '0',
@@ -60,6 +65,9 @@ class MockChannelClient implements ChannelClientInterface {
   onChannelProposed = jest.fn(function(callback) {
     return onChannelProposedmMockReturn;
   });
+  onBudgetUpdated = jest.fn(function(callback) {
+    return onBudgetUpdatedMockReturn;
+  });
   createChannel = jest.fn(async function(participants, allocations, appDefinition, appData) {
     const channelResult: ChannelResult = {
       ...mockChannelResult,
@@ -91,6 +99,7 @@ class MockChannelClient implements ChannelClientInterface {
     });
   }
 
+  provider = new FakeChannelProvider();
   walletVersion = 'JestMockVersion';
   signingAddress = MOCK_ADDRESS;
   selectedAddress = MOCK_ADDRESS;

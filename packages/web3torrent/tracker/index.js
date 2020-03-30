@@ -1,12 +1,27 @@
 const Server = require('bittorrent-tracker').Server;
 const log = require('debug')('web3torrent:tracker');
-const port = process.env.TRACKER_PORT || 8000;
+const isAddress = require('web3').utils.isAddress;
+const port = process.env.PORT || 8000;
+
+const ACTIONS = {CONNECT: 0, ANNOUNCE: 1, SCRAPE: 2, ERROR: 3};
+const EVENTS = {START: 'started', COMPLETE: 'completed', UPDATE: undefined, STOP: undefined};
 
 const server = new Server({
   udp: true,
   http: true,
   ws: true,
-  stats: true
+  stats: true,
+  filter: function(_, params, cb) {
+    if (params && params.action === ACTIONS.ANNOUNCE && params.event === EVENTS.START) {
+      if (!params.pseAccount || !isAddress(params.pseAccount)) {
+        cb(new Error('401 - Unauthorized client - This tracker is for Web3Torrents only'));
+      } else {
+        cb(null);
+      }
+    } else {
+      cb(null);
+    }
+  }
 });
 
 server.on('error', err => console.error(err.message));

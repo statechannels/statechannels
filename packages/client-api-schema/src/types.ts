@@ -92,27 +92,22 @@ export interface ChannelResult {
   challengeExpirationTime?: number;
 }
 
-interface Balance {
-  playerAmount: string;
-  hubAmount: string;
-}
-
-// WalletVersion
-export type WalletVersionRequest = JsonRpcRequest<'WalletVersion', {}>;
-export type WalletVersionResponse = JsonRpcResponse<string>;
+// GetWalletInformation
+export type GetWalletInformationRequest = JsonRpcRequest<'GetWalletInformation', {}>;
+export type GetWalletInformationResponse = JsonRpcResponse<{
+  signingAddress: Address;
+  selectedAddress: Address | null;
+  walletVersion: string;
+}>;
 
 // EnableEthereum
 export type EnableEthereumRequest = JsonRpcRequest<'EnableEthereum', {}>;
-export type EnableEthereumResponse = JsonRpcResponse<Address>;
+export type EnableEthereumResponse = JsonRpcResponse<{
+  signingAddress: Address;
+  selectedAddress: Address;
+  walletVersion: string;
+}>;
 export type EnableEthereumError = JsonRpcError<100, 'Ethereum Not Enabled'>;
-
-// GetAddress
-export type GetAddressRequest = JsonRpcRequest<'GetAddress', {}>; // todo: what are params
-export type GetAddressResponse = JsonRpcResponse<Address>;
-
-// GetEthereumSelectedAddress
-export type GetEthereumSelectedAddressRequest = JsonRpcRequest<'GetEthereumSelectedAddress', {}>; // todo: what are params
-export type GetEthereumSelectedAddressResponse = JsonRpcResponse<Address>;
 
 // CreateChannel
 export interface CreateChannelParams {
@@ -167,33 +162,49 @@ export type ChallengeChannelRequest = JsonRpcRequest<'ChallengeChannel', {channe
 export type ChallengeChannelResponse = JsonRpcResponse<ChannelResult>;
 
 // Budget
+
+export interface ChannelBudget {
+  channelId: string;
+  amount: string;
+}
+
 export interface TokenBudget {
   token: string;
-  pending: Balance;
-  free: Balance;
-  inUse: Balance;
-  direct: Balance;
+  availableReceiveCapacity: string;
+  availableSendCapacity: string;
+  channels: ChannelBudget[];
 }
 export interface SiteBudget {
-  site: string;
-  hub: string;
+  domain: string;
+  hubAddress: string;
   budgets: TokenBudget[];
 }
 
-export interface BudgetRequest extends Balance {
-  site: string;
-  player: Participant;
+export interface TokenBudgetRequest {
   hub: Participant;
+  playerParticipantId: string;
+  // TODO: The domain could be taken from incoming message instead
+  // leaving here for now as it's simpler then changing the wallet
+  // and the channel client already handles this
+  domain: string;
+  token: string;
+  requestedSendCapacity: string;
+  requestedReceiveCapacity: string;
 }
 export type GetBudgetRequest = JsonRpcRequest<'GetBudget', {hubAddress: Address}>;
 export type GetBudgetResponse = JsonRpcResponse<SiteBudget | {}>;
 
-export type ApproveBudgetAndFundRequest = JsonRpcRequest<'ApproveBudgetAndFund', BudgetRequest>;
+export type ApproveBudgetAndFundRequest = JsonRpcRequest<
+  'ApproveBudgetAndFund',
+  TokenBudgetRequest
+>;
 export type ApproveBudgetAndFundResponse = JsonRpcResponse<SiteBudget>;
 
 export type CloseAndWithdrawParams = {site: string; player: Participant; hub: Participant};
 export type CloseAndWithdrawRequest = JsonRpcRequest<'CloseAndWithdraw', CloseAndWithdrawParams>;
 export type CloseAndWithdrawResponse = JsonRpcResponse<{success: boolean}>;
+
+export type GetBudgetParams = {hubAddress: string};
 // Notifications
 // these notifications come *from* the wallet, which is not strictly how JSON-RPC should work
 // (since we treat the wallet as the 'server')
@@ -219,12 +230,10 @@ export type NotificationType = {
 };
 
 export type Request =
-  | GetAddressRequest
-  | GetEthereumSelectedAddressRequest
   | CreateChannelRequest
   | JoinChannelRequest
   | UpdateChannelRequest
-  | WalletVersionRequest
+  | GetWalletInformationRequest
   | EnableEthereumRequest
   | GetStateRequest
   | PushMessageRequest
@@ -235,12 +244,10 @@ export type Request =
   | CloseAndWithdrawRequest;
 
 export type Response =
-  | GetAddressResponse
-  | GetEthereumSelectedAddressResponse
   | CreateChannelResponse
   | JoinChannelResponse
   | UpdateChannelResponse
-  | WalletVersionResponse
+  | GetWalletInformationResponse
   | EnableEthereumResponse
   | GetStateResponse
   | PushMessageResponse

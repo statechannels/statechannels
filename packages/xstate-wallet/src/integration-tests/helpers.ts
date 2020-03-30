@@ -19,6 +19,8 @@ import * as CreateAndFundLedger from '../workflows/create-and-fund-ledger';
 import {Guid} from 'guid-typescript';
 import * as CloseLedgerAndWithdraw from '../workflows/close-ledger-and-withdraw';
 import {TestStore} from '../workflows/tests/store';
+import {ETH_TOKEN} from '../constants';
+import {makeDestination} from '../utils/outcome';
 
 export class Player {
   privateKey: string;
@@ -78,7 +80,7 @@ export class Player {
     return this.channelWallet.workflows[0]?.machine.state.value;
   }
   get destination() {
-    return '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7';
+    return makeDestination('0x63E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7');
   }
   get participant(): Participant {
     return {
@@ -222,11 +224,12 @@ export function generateApproveBudgetAndFundRequest(
     id: 88888888,
     method: 'ApproveBudgetAndFund',
     params: {
-      site: 'rps.statechannels.org',
+      token: ETH_TOKEN,
+      domain: 'rps.statechannels.org',
       hub,
-      player,
-      playerAmount: '0x5',
-      hubAmount: '0x5'
+      playerParticipantId: player.participantId,
+      requestedSendCapacity: '0x5',
+      requestedReceiveCapacity: '0x5'
     }
   };
 }

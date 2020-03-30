@@ -10,11 +10,12 @@ import log = require('loglevel');
 
 import {EventEmitter} from 'eventemitter3';
 import {
-  BudgetRequest,
+  TokenBudgetRequest,
   CloseAndWithdrawParams,
   ChannelResult,
   CloseChannelParams,
   CreateChannelParams,
+  GetBudgetParams,
   GetStateParams,
   JoinChannelParams,
   PushMessageResult,
@@ -28,6 +29,19 @@ import {Wallet, utils} from 'ethers';
 const bigNumberify = utils.bigNumberify;
 
 type ChannelId = string;
+
+const mockSiteBudget = {
+  hubAddress: 'mock.hub.com',
+  domain: 'mock.web3torrent.com',
+  budgets: [
+    {
+      token: '0x0',
+      availableReceiveCapacity: '0x5000000',
+      availableSendCapacity: '0x3000000',
+      channels: []
+    }
+  ]
+};
 
 /*
  This fake provider becomes the stateful object which handles the calls
@@ -47,23 +61,24 @@ export class FakeChannelProvider implements ChannelProviderInterface {
   opponentAddress: Record<ChannelId, string> = {};
   latestState: Record<ChannelId, ChannelResult> = {};
 
-  constructor(alreadyEnabled = true) {
-    if (alreadyEnabled) {
-      this.signingAddress = this.getAddress();
-      this.selectedAddress = '0xEthereumSelectedAddress';
-      this.walletVersion = 'FakeChannelProvider@VersionTBD';
-    }
-  }
+  // Replace mock with real initial budget
+  budget: SiteBudget = mockSiteBudget;
 
   async mountWalletComponent(url?: string): Promise<void> {
     this.url = url || '';
+    this.signingAddress = this.getAddress();
+    this.walletVersion = 'FakeChannelProvider@VersionTBD';
+    this.selectedAddress = '0xEthereumSelectedAddress';
   }
 
   async enable(): Promise<void> {
-    await this.send({method: 'EnableEthereum', params: {}});
-    this.signingAddress = await this.send({method: 'GetAddress', params: {}});
-    this.selectedAddress = await this.send({method: 'GetEthereumSelectedAddress', params: {}});
-    this.walletVersion = await this.send({method: 'WalletVersion', params: {}});
+    const {signingAddress, selectedAddress, walletVersion} = await this.send({
+      method: 'EnableEthereum',
+      params: {}
+    });
+    this.signingAddress = signingAddress;
+    this.selectedAddress = selectedAddress;
+    this.walletVersion = walletVersion;
   }
 
   async send(request: MethodRequestType): Promise<MethodResponseType[MethodRequestType['method']]> {
@@ -74,18 +89,13 @@ export class FakeChannelProvider implements ChannelProviderInterface {
       case 'PushMessage':
         return this.pushMessage(request.params);
 
-      case 'WalletVersion':
-        return `FakeChannelProvider@VersionTBD`; // TODO: Inject git / build information for version
-
+      case 'GetWalletInformation':
       case 'EnableEthereum':
-        await window.ethereum.enable();
-        return window.ethereum.selectedAddress;
-
-      case 'GetEthereumSelectedAddress':
-        return '0xEthereumSelectedAddress';
-
-      case 'GetAddress':
-        return this.getAddress();
+        return {
+          signingAddress: this.getAddress(),
+          selectedAddress: '0xEthereumSelectedAddress',
+          walletVersion: 'FakeChannelProvider@VersionTBD'
+        };
 
       case 'JoinChannel':
         return this.joinChannel(request.params);
@@ -104,6 +114,9 @@ export class FakeChannelProvider implements ChannelProviderInterface {
 
       case 'CloseAndWithdraw':
         return this.closeAndWithdraw(request.params);
+
+      case 'GetBudget':
+        return this.getBudget(request.params);
 
       default:
         return Promise.reject(`No callback available for ${request.method}`);
@@ -319,32 +332,34 @@ export class FakeChannelProvider implements ChannelProviderInterface {
     return {success: true};
   }
 
-  private async approveBudgetAndFund(params: BudgetRequest): Promise<SiteBudget> {
-    const {hub, site, playerAmount, hubAmount} = params;
-
+  private async approveBudgetAndFund(params: TokenBudgetRequest): Promise<SiteBudget> {
     // TODO: Does this need to be delayed?
-    const result = {
-      hub: hub.signingAddress,
-      site,
+    this.budget = {
+      hubAddress: params.hub.signingAddress,
+      domain: 'localhost',
       budgets: [
         {
           token: '0x0',
-          inUse: {playerAmount, hubAmount},
-          free: {playerAmount, hubAmount},
-          pending: {playerAmount, hubAmount},
-          direct: {playerAmount, hubAmount}
+          availableReceiveCapacity: params.requestedReceiveCapacity,
+          availableSendCapacity: params.requestedSendCapacity,
+          channels: []
         }
       ]
     };
 
-    this.notifyAppBudgetUpdated(result);
+    this.notifyAppBudgetUpdated(this.budget);
 
-    return result;
+    return this.budget;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private async closeAndWithdraw(_params: CloseAndWithdrawParams): Promise<{success: boolean}> {
     // TODO: Implement a fake implementation
     return {success: true};
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private async getBudget(_params: GetBudgetParams): Promise<SiteBudget> {
+    return this.budget;
   }
 }

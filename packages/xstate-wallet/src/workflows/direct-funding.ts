@@ -7,7 +7,7 @@ import * as Depositing from './depositing';
 import * as SupportState from './support-state';
 import {getDataAndInvoke, MachineFactory} from '../utils/workflow-utils';
 import {Store} from '../store';
-import {Outcome, SimpleAllocation, AllocationItem} from '../store/types';
+import {Outcome, SimpleAllocation, AllocationItem, Destination} from '../store/types';
 import {add} from '../utils/math-utils';
 import {isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
 import {checkThat} from '../utils';
@@ -110,7 +110,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
   }
 
   function mergeDestinations(outcome: SimpleAllocation): SimpleAllocation {
-    const destinations: string[] = _.uniq(outcome.allocationItems.map(i => i.destination));
+    const destinations: Destination[] = _.uniq(outcome.allocationItems.map(i => i.destination));
 
     const allocationItems = destinations.map(destination => ({
       destination,

@@ -8,11 +8,11 @@ import {Wallet as WalletUi} from './ui/wallet';
 import {interpret, Interpreter, State, StateNode} from 'xstate';
 import {Guid} from 'guid-typescript';
 import {Notification, Response} from '@statechannels/client-api-schema';
-import {filter, map, take} from 'rxjs/operators';
+import {filter, take} from 'rxjs/operators';
 import {Message, OpenChannel} from './store/types';
-import {approveBudgetAndFundWorkflow} from './workflows/approve-budget-and-fund';
+
+import {ApproveBudgetAndFund, CloseLedgerAndWithdraw} from './workflows';
 import {ethereumEnableWorkflow} from './workflows/ethereum-enable';
-import * as CloseLedgerAndWithdraw from './workflows/close-ledger-and-withdraw';
 import {AppRequestEvent} from './event-types';
 
 export interface Workflow {
@@ -38,11 +38,7 @@ export class ChannelWallet {
     // we alert the user that there is a new channel
     // It is up to the app to call JoinChannel
     this.store.objectiveFeed
-      .pipe(
-        // TODO: type guard
-        filter(o => o.type === 'OpenChannel'),
-        map(o => o as OpenChannel)
-      )
+      .pipe(filter((o): o is OpenChannel => o.type === 'OpenChannel'))
       .subscribe(async o => {
         const channelEntry = await this.store
           .channelUpdatedFeed(o.data.targetChannelId)
@@ -97,7 +93,7 @@ export class ChannelWallet {
       }
       case 'APPROVE_BUDGET_AND_FUND': {
         const workflow = this.startWorkflow(
-          approveBudgetAndFundWorkflow(this.store, this.messagingService, {
+          ApproveBudgetAndFund.machine(this.store, this.messagingService, {
             player: request.player,
             hub: request.hub,
             budget: request.budget,

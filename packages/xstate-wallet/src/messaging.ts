@@ -22,17 +22,17 @@ import * as jrs from 'jsonrpc-lite';
 
 import {fromEvent, Observable} from 'rxjs';
 import {ChannelStoreEntry} from './store/channel-store-entry';
-import {Message as WireMessage} from '@statechannels/wire-format';
+import {validateMessage} from '@statechannels/wire-format';
 import {unreachable} from './utils';
-import {isAllocation, Message, SiteBudget} from './store/types';
+import {isAllocation, Message, SiteBudget, Participant} from './store/types';
 import {serializeAllocation, serializeSiteBudget} from './serde/app-messages/serialize';
 import {deserializeMessage} from './serde/wire-format/deserialize';
 import {serializeMessage} from './serde/wire-format/serialize';
 import {AppRequestEvent} from './event-types';
 import {deserializeAllocations, deserializeBudgetRequest} from './serde/app-messages/deserialize';
-import {isSimpleEthAllocation} from './utils/outcome';
+import {isSimpleEthAllocation, makeDestination} from './utils/outcome';
 import {bigNumberify} from 'ethers/utils';
-import {CHALLENGE_DURATION, NETWORK_ID} from './constants';
+import {CHALLENGE_DURATION, NETWORK_ID, WALLET_VERSION} from './constants';
 import {Store} from './store';
 
 type ChannelRequest =
@@ -83,7 +83,7 @@ export class MessagingService implements MessagingServiceInterface {
   }
 
   public async sendResponse(id: number, result: Response['result']) {
-    const response = {id, jsonrpc: '2.0', result} as Response; // typescript can't handle this otherwise
+    const response: Response = {id, jsonrpc: '2.0', result};
     this.eventEmitter.emit('SendMessage', response);
   }
 
@@ -114,26 +114,20 @@ export class MessagingService implements MessagingServiceInterface {
     const ourAddress = await this.store.getAddress();
     const sender = ourAddress;
     const objectiveRecipients =
-      message.objectives
-        ?.map(o => o.participants)
-        .reduce((a, b) => {
-          return a.concat(b);
-        }) || [];
+      message.objectives?.map(o => o.participants).reduce((a, b) => a.concat(b)) || [];
     const stateRecipients =
       message.signedStates?.map(ss => ss.participants).reduce((a, b) => a.concat(b)) || [];
 
     const filteredRecipients = [...new Set((objectiveRecipients || []).concat(stateRecipients))]
-      .filter(p => {
-        return p.signingAddress !== sender;
-      })
+      .filter(p => p.signingAddress !== sender)
       .map(p => p.participantId);
 
     filteredRecipients.forEach(recipient => {
-      const notification = {
+      const notification: Notification = {
         jsonrpc: '2.0',
         method: 'MessageQueued',
-        params: serializeMessage(message, recipient, sender)
-      } as Notification; // typescript can't handle this otherwise
+        params: validateMessage(serializeMessage(message, recipient, sender))
+      };
       this.eventEmitter.emit('SendMessage', notification);
     });
   }
@@ -143,27 +137,25 @@ export class MessagingService implements MessagingServiceInterface {
     const {id: requestId} = request;
 
     switch (request.method) {
-      case 'WalletVersion':
-        window.parent.postMessage(jrs.success(requestId, 'xstate-wallet@VersionTBD'), '*'); // TODO: inject git or build info
+      case 'GetWalletInformation':
+        await this.sendResponse(requestId, {
+          signingAddress: await this.store.getAddress(),
+          selectedAddress: this.store.chain.ethereumIsEnabled
+            ? this.store.chain.selectedAddress
+            : null,
+          walletVersion: WALLET_VERSION
+        });
         break;
       case 'EnableEthereum':
         if (this.store.chain.ethereumIsEnabled) {
-          window.parent.postMessage(
-            jrs.success(requestId, this.store.chain.selectedAddress || null),
-            '*'
-          );
+          await this.sendResponse(requestId, {
+            signingAddress: await this.store.getAddress(),
+            selectedAddress: this.store.chain.selectedAddress,
+            walletVersion: WALLET_VERSION
+          });
         } else {
           this.eventEmitter.emit('AppRequest', {type: 'ENABLE_ETHEREUM', requestId});
         }
-        break;
-      case 'GetAddress':
-        const address = await this.store.getAddress();
-        this.sendResponse(requestId, address);
-        break;
-      case 'GetEthereumSelectedAddress':
-        // Possibly undefined, App should call EnableEthereum if so
-        const ethereumSelectedAddress = this.store.chain.selectedAddress;
-        window.parent.postMessage(jrs.success(requestId, ethereumSelectedAddress || null), '*');
         break;
       case 'CreateChannel':
       case 'UpdateChannel':
@@ -171,12 +163,11 @@ export class MessagingService implements MessagingServiceInterface {
       case 'JoinChannel':
       case 'ApproveBudgetAndFund':
       case 'CloseAndWithdraw':
-        const appRequest = await convertToInternalEvent(request);
+        const appRequest = await convertToInternalEvent(request, this.store);
         this.eventEmitter.emit('AppRequest', appRequest);
         break;
       case 'PushMessage':
-        // TODO: should verify message format here
-        const message = request.params as WireMessage;
+        const message = validateMessage(request.params);
         if (message.recipient !== (await this.store.getAddress())) {
           throw new Error(`Received message not addressed to us ${JSON.stringify(message)}`);
         }
@@ -241,18 +232,45 @@ export function sendDisplayMessage(displayMessage: 'Show' | 'Hide') {
   window.parent.postMessage(message, '*');
 }
 
-function convertToInternalEvent(request: ChannelRequest): AppRequestEvent {
+export function convertToInternalParticipant(participant: {
+  destination: string;
+  signingAddress: string;
+  participantId: string;
+}): Participant {
+  return {
+    ...participant,
+    destination: makeDestination(participant.destination)
+  };
+}
+async function convertToInternalEvent(
+  request: ChannelRequest,
+  store: Store
+): Promise<AppRequestEvent> {
   switch (request.method) {
     case 'CloseAndWithdraw':
-      return {...request.params, requestId: request.id, type: 'CLOSE_AND_WITHDRAW'};
+      return {
+        type: 'CLOSE_AND_WITHDRAW',
+        requestId: request.id,
+        player: convertToInternalParticipant(request.params.player),
+        hub: convertToInternalParticipant(request.params.hub)
+      };
     case 'ApproveBudgetAndFund':
-      const {player, hub} = request.params;
+      const {hub, playerParticipantId} = request.params;
+      const signingAddress = await store.getAddress();
+      const destination = store.chain.selectedAddress;
+      if (!destination) {
+        throw new Error('No selected destination');
+      }
       return {
         type: 'APPROVE_BUDGET_AND_FUND',
         requestId: request.id,
         budget: deserializeBudgetRequest(request.params),
-        player,
-        hub
+        player: convertToInternalParticipant({
+          participantId: playerParticipantId,
+          signingAddress,
+          destination
+        }),
+        hub: convertToInternalParticipant(hub)
       };
     case 'CloseChannel':
       return {
@@ -268,6 +286,7 @@ function convertToInternalEvent(request: ChannelRequest): AppRequestEvent {
       return {
         type: 'CREATE_CHANNEL',
         ...request.params,
+        participants: request.params.participants.map(convertToInternalParticipant),
         outcome,
         challengeDuration: bigNumberify(CHALLENGE_DURATION),
         chainId: NETWORK_ID,

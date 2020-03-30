@@ -1,11 +1,12 @@
 import {Machine, StateNodeConfig} from 'xstate';
 import {Store} from '../store';
-import {SupportState} from '.';
+import {SupportState, VirtualDefundingAsLeaf} from '.';
 import {getDataAndInvoke} from '../utils';
 
 import {outcomesEqual} from '../store/state-utils';
 import {State} from '../store/types';
 import {map} from 'rxjs/operators';
+import {ParticipantIdx} from './virtual-funding-as-leaf';
 
 const WORKFLOW = 'conclude-channel';
 
@@ -59,18 +60,23 @@ const determineFundingType = {
   }
 };
 
+const getRole = (store: Store) => (ctx: Init) => async cb => {
+  const {myIndex} = await store.getEntry(ctx.channelId);
+  if (myIndex === ParticipantIdx.Hub) cb('AmHub');
+  else cb('AmLeaf');
+};
+
 const virtualDefunding = {
-  initial: 'start',
+  initial: 'gettingRole',
   states: {
-    start: {
-      on: {
-        '': [
-          {target: 'asLeaf', cond: 'amLeaf'},
-          {target: 'asHub', cond: 'amHub'}
-        ]
+    gettingRole: {invoke: {src: getRole.name}, on: {AmHub: 'asHub', AmLeaf: 'asLeaf'}},
+    asLeaf: {
+      invoke: {
+        src: 'virtualDefundingAsLeaf',
+        data: (ctx: Init): VirtualDefundingAsLeaf.Init => ({targetChannelId: ctx.channelId}),
+        onDone: 'success'
       }
     },
-    asLeaf: {invoke: {src: 'virtualDefundingAsLeaf', onDone: 'success'}},
     asHub: {invoke: {src: 'virtualDefundingAsHub', onDone: 'success'}},
     success: {type: 'final' as 'final'}
   },
@@ -95,13 +101,14 @@ export const config: StateNodeConfig<Init, any, any> = {
   }
 };
 
-export const mockOptions = {guards: {virtuallyFunded: _ => true, directlyFunded: _ => true}};
-
 const services = (store: Store) => ({
   finalState: finalState(store),
   getFunding: getFunding(store),
   supportState: supportState(store),
-  withdraw: withdraw(store)
+  withdraw: withdraw(store),
+  getRole: getRole(store),
+  virtualDefundingAsLeaf: VirtualDefundingAsLeaf.machine(store)
 });
+
 const options = (store: Store) => ({services: services(store)});
 export const machine = (store: Store) => Machine(config).withConfig(options(store));

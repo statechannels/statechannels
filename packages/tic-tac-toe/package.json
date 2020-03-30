@@ -24,6 +24,7 @@
     "dotenv-extended": "2.7.1",
     "ember-auto-import": "1.5.3",
     "enum": "2.5.0",
+    "ethereum-blockies-base64": "^1.0.2",
     "ethers": "4.0.45",
     "fs-extra": "8.1.0",
     "key-mirror": "1.0.1",
@@ -69,6 +70,7 @@
     "@types/fs-extra": "8.0.1",
     "@types/jest": "25.1.0",
     "@types/lodash": "4.14.149",
+    "@types/mini-css-extract-plugin": "0.9.0",
     "@types/nanoid": "2.1.0",
     "@types/node": "13.5.1",
     "@types/object-assign": "4.0.30",
@@ -117,7 +119,7 @@
     "ember-svg-jar": "2.2.3",
     "ember-template-lint": "1.13.2",
     "ember-truth-helpers": "2.1.0",
-    "emberfire": "^3.0.0-rc.6",
+    "emberfire": "3.0.0-rc.6",
     "enzyme": "3.11.0",
     "enzyme-adapter-react-16": "1.15.2",
     "eslint": "6.8.0",
@@ -130,6 +132,7 @@
     "jest": "25.1.0",
     "lint-staged": "10.0.4",
     "loader.js": "4.7.0",
+    "mini-css-extract-plugin": "0.9.0",
     "postcss-import": "12.0.1",
     "prettier": "1.19.1",
     "qunit-dom": "1.0.0",
@@ -168,7 +171,6 @@
     "lint:check": "run-s type:check eslint:check prettier:check lint:hbs",
     "lint:hbs": "ember-template-lint .",
     "lint:write": "run-s eslint:write prettier:write",
-    "type:check": "tsc --noEmit",
     "precommit": "lint-staged --quiet",
     "prepare": "run-s clearContracts contracts:compile",
     "prettier:check": "prettier --check '**/*.{scss,json}' --ignore-path '.gitignore'",
@@ -181,6 +183,7 @@
     "test:ci:contracts": "yarn test:contracts --all --ci --runInBand --bail",
     "test:contracts": "npx jest -c ./config/jest/jest.contracts.config.js",
     "test:ember": "ember test",
-    "test:prepare": "yarn clearContracts && yarn contracts:compile"
+    "test:prepare": "yarn clearContracts && yarn contracts:compile",
+    "type:check": "tsc --noEmit"
   }
 }

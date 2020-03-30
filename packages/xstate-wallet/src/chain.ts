@@ -5,9 +5,9 @@ import {
 } from '@statechannels/nitro-protocol';
 import {getProvider} from './utils/contract-utils';
 import {ethers} from 'ethers';
-import {BigNumber, bigNumberify} from 'ethers/utils';
+import {BigNumber, bigNumberify, hexZeroPad} from 'ethers/utils';
 import {State, SignedState} from './store/types';
-import {Observable, fromEvent, from, concat} from 'rxjs';
+import {Observable, fromEvent, from, merge} from 'rxjs';
 import {filter, map} from 'rxjs/operators';
 import {ETH_ASSET_HOLDER_ADDRESS, NITRO_ADJUDICATOR_ADDRESS} from './constants';
 import EventEmitter = require('eventemitter3');
@@ -37,7 +37,7 @@ export interface Chain {
   ethereumEnable: () => Promise<string>;
   ethereumIsEnabled: boolean;
   finalizeAndWithdraw: (finalizationProof: SignedState[]) => Promise<void>;
-  selectedAddress?: string;
+  selectedAddress: string | null;
 }
 
 // TODO: This chain should be fleshed out enough so it mimics basic chain behavior
@@ -59,6 +59,7 @@ export class FakeChain implements Chain {
   public async deposit(channelId: string, expectedHeld: string, amount: string): Promise<void> {
     this.depositSync(channelId, expectedHeld, amount);
   }
+
   public async finalizeAndWithdraw(finalizationProof: SignedState[]): Promise<void> {
     const channelId = calculateChannelId(finalizationProof[0]);
     this.finalizeSync(channelId);
@@ -103,11 +104,11 @@ export class FakeChain implements Chain {
       map(({amount, finalized}) => ({amount, finalized}))
     );
 
-    return concat(first, updates);
+    return merge(first, updates);
   }
 
   public ethereumEnable() {
-    this.fakeSelectedAddress = '0x123';
+    this.fakeSelectedAddress = hexZeroPad('0x123', 32);
     return Promise.resolve(this.selectedAddress);
   }
 
@@ -154,17 +155,8 @@ export class ChainWatcher implements Chain {
     }
   }
 
-  public get selectedAddress(): string {
-    if (window.ethereum) {
-      const destination = window.ethereum.selectedAddress;
-      if (destination) {
-        return destination;
-      } else {
-        throw new Error('window.ethereum is not enabled');
-      }
-    } else {
-      throw new Error('window.ethereum not found');
-    }
+  public get selectedAddress(): string | null {
+    return (window.ethereum && window.ethereum.selectedAddress) || null;
   }
 
   public async finalizeAndWithdraw(finalizationProof: SignedState[]): Promise<void> {
@@ -214,13 +206,12 @@ export class ChainWatcher implements Chain {
     const first = from(this.getChainInfo(channelId));
 
     const updates = fromEvent(this._assetHolders[0], 'Deposited').pipe(
-      filter((event: Array<string | BigNumber>) => {
-        return event[0] === channelId;
-      }),
-      map((event: Array<string | BigNumber>) => {
-        return {amount: bigNumberify(event[2]), finalized: false};
-      })
+      filter((event: Array<string | BigNumber>) => event[0] === channelId),
+      map((event: Array<string | BigNumber>) => ({
+        amount: bigNumberify(event[2]),
+        finalized: false
+      }))
     );
-    return concat(first, updates);
+    return merge(first, updates);
   }
 }

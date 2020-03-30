@@ -66,7 +66,7 @@
           "type": "string"
         },
         "params": {
-          "$ref": "#/definitions/BudgetRequest"
+          "$ref": "#/definitions/TokenBudgetRequest"
         }
       },
       "required": [
@@ -97,34 +97,6 @@
         "id",
         "jsonrpc",
         "result"
-      ],
-      "type": "object"
-    },
-    "BudgetRequest": {
-      "additionalProperties": false,
-      "properties": {
-        "hub": {
-          "$ref": "#/definitions/Participant"
-        },
-        "hubAmount": {
-          "type": "string"
-        },
-        "player": {
-          "$ref": "#/definitions/Participant"
-        },
-        "playerAmount": {
-          "type": "string"
-        },
-        "site": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "hub",
-        "hubAmount",
-        "player",
-        "playerAmount",
-        "site"
       ],
       "type": "object"
     },
@@ -225,6 +197,22 @@
         "id",
         "jsonrpc",
         "result"
+      ],
+      "type": "object"
+    },
+    "ChannelBudget": {
+      "additionalProperties": false,
+      "properties": {
+        "amount": {
+          "type": "string"
+        },
+        "channelId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "channelId",
+        "amount"
       ],
       "type": "object"
     },
@@ -685,7 +673,24 @@
           "type": "string"
         },
         "result": {
-          "$ref": "#/definitions/Address"
+          "additionalProperties": false,
+          "properties": {
+            "selectedAddress": {
+              "$ref": "#/definitions/Address"
+            },
+            "signingAddress": {
+              "$ref": "#/definitions/Address"
+            },
+            "walletVersion": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "signingAddress",
+            "selectedAddress",
+            "walletVersion"
+          ],
+          "type": "object"
         }
       },
       "required": [
@@ -719,57 +724,15 @@
       ],
       "type": "object"
     },
-    "GetAddressRequest": {
+    "GetBudgetParams": {
       "additionalProperties": false,
       "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
+        "hubAddress": {
           "type": "string"
-        },
-        "method": {
-          "enum": [
-            "GetAddress"
-          ],
-          "type": "string"
-        },
-        "params": {
-          "additionalProperties": false,
-          "type": "object"
         }
       },
       "required": [
-        "id",
-        "jsonrpc",
-        "method",
-        "params"
-      ],
-      "type": "object"
-    },
-    "GetAddressResponse": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "result": {
-          "$ref": "#/definitions/Address"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "result"
+        "hubAddress"
       ],
       "type": "object"
     },
@@ -843,60 +806,6 @@
       ],
       "type": "object"
     },
-    "GetEthereumSelectedAddressRequest": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "method": {
-          "enum": [
-            "GetEthereumSelectedAddress"
-          ],
-          "type": "string"
-        },
-        "params": {
-          "additionalProperties": false,
-          "type": "object"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "method",
-        "params"
-      ],
-      "type": "object"
-    },
-    "GetEthereumSelectedAddressResponse": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "result": {
-          "$ref": "#/definitions/Address"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "result"
-      ],
-      "type": "object"
-    },
     "GetStateParams": {
       "additionalProperties": false,
       "properties": {
@@ -953,6 +862,84 @@
         },
         "result": {
           "$ref": "#/definitions/ChannelResult"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "result"
+      ],
+      "type": "object"
+    },
+    "GetWalletInformationRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "GetWalletInformation"
+          ],
+          "type": "string"
+        },
+        "params": {
+          "additionalProperties": false,
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "jsonrpc",
+        "method",
+        "params"
+      ],
+      "type": "object"
+    },
+    "GetWalletInformationResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "jsonrpc": {
+          "enum": [
+            "2.0"
+          ],
+          "type": "string"
+        },
+        "result": {
+          "additionalProperties": false,
+          "properties": {
+            "selectedAddress": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/Address"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "signingAddress": {
+              "$ref": "#/definitions/Address"
+            },
+            "walletVersion": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "signingAddress",
+            "selectedAddress",
+            "walletVersion"
+          ],
+          "type": "object"
         }
       },
       "required": [
@@ -1220,12 +1207,6 @@
     "Request": {
       "anyOf": [
         {
-          "$ref": "#/definitions/GetAddressRequest"
-        },
-        {
-          "$ref": "#/definitions/GetEthereumSelectedAddressRequest"
-        },
-        {
           "$ref": "#/definitions/CreateChannelRequest"
         },
         {
@@ -1235,7 +1216,7 @@
           "$ref": "#/definitions/UpdateChannelRequest"
         },
         {
-          "$ref": "#/definitions/WalletVersionRequest"
+          "$ref": "#/definitions/GetWalletInformationRequest"
         },
         {
           "$ref": "#/definitions/EnableEthereumRequest"
@@ -1266,12 +1247,6 @@
     "Response": {
       "anyOf": [
         {
-          "$ref": "#/definitions/GetAddressResponse"
-        },
-        {
-          "$ref": "#/definitions/GetEthereumSelectedAddressResponse"
-        },
-        {
           "$ref": "#/definitions/CreateChannelResponse"
         },
         {
@@ -1281,7 +1256,7 @@
           "$ref": "#/definitions/UpdateChannelResponse"
         },
         {
-          "$ref": "#/definitions/WalletVersionResponse"
+          "$ref": "#/definitions/GetWalletInformationResponse"
         },
         {
           "$ref": "#/definitions/EnableEthereumResponse"
@@ -1318,16 +1293,16 @@
           },
           "type": "array"
         },
-        "hub": {
+        "domain": {
           "type": "string"
         },
-        "site": {
+        "hubAddress": {
           "type": "string"
         }
       },
       "required": [
-        "site",
-        "hub",
+        "domain",
+        "hubAddress",
         "budgets"
       ],
       "type": "object"
@@ -1335,69 +1310,17 @@
     "TokenBudget": {
       "additionalProperties": false,
       "properties": {
-        "direct": {
-          "additionalProperties": false,
-          "properties": {
-            "hubAmount": {
-              "type": "string"
-            },
-            "playerAmount": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "playerAmount",
-            "hubAmount"
-          ],
-          "type": "object"
+        "availableReceiveCapacity": {
+          "type": "string"
         },
-        "free": {
-          "additionalProperties": false,
-          "properties": {
-            "hubAmount": {
-              "type": "string"
-            },
-            "playerAmount": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "playerAmount",
-            "hubAmount"
-          ],
-          "type": "object"
+        "availableSendCapacity": {
+          "type": "string"
         },
-        "inUse": {
-          "additionalProperties": false,
-          "properties": {
-            "hubAmount": {
-              "type": "string"
-            },
-            "playerAmount": {
-              "type": "string"
-            }
+        "channels": {
+          "items": {
+            "$ref": "#/definitions/ChannelBudget"
           },
-          "required": [
-            "playerAmount",
-            "hubAmount"
-          ],
-          "type": "object"
-        },
-        "pending": {
-          "additionalProperties": false,
-          "properties": {
-            "hubAmount": {
-              "type": "string"
-            },
-            "playerAmount": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "playerAmount",
-            "hubAmount"
-          ],
-          "type": "object"
+          "type": "array"
         },
         "token": {
           "type": "string"
@@ -1405,10 +1328,41 @@
       },
       "required": [
         "token",
-        "pending",
-        "free",
-        "inUse",
-        "direct"
+        "availableReceiveCapacity",
+        "availableSendCapacity",
+        "channels"
+      ],
+      "type": "object"
+    },
+    "TokenBudgetRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "domain": {
+          "type": "string"
+        },
+        "hub": {
+          "$ref": "#/definitions/Participant"
+        },
+        "playerParticipantId": {
+          "type": "string"
+        },
+        "requestedReceiveCapacity": {
+          "type": "string"
+        },
+        "requestedSendCapacity": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "hub",
+        "playerParticipantId",
+        "domain",
+        "token",
+        "requestedSendCapacity",
+        "requestedReceiveCapacity"
       ],
       "type": "object"
     },
@@ -1521,60 +1475,6 @@
         },
         "result": {
           "$ref": "#/definitions/ChannelResult"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "result"
-      ],
-      "type": "object"
-    },
-    "WalletVersionRequest": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "method": {
-          "enum": [
-            "WalletVersion"
-          ],
-          "type": "string"
-        },
-        "params": {
-          "additionalProperties": false,
-          "type": "object"
-        }
-      },
-      "required": [
-        "id",
-        "jsonrpc",
-        "method",
-        "params"
-      ],
-      "type": "object"
-    },
-    "WalletVersionResponse": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "number"
-        },
-        "jsonrpc": {
-          "enum": [
-            "2.0"
-          ],
-          "type": "string"
-        },
-        "result": {
-          "type": "string"
         }
       },
       "required": [
