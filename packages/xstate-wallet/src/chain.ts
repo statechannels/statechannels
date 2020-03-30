@@ -13,7 +13,6 @@ import {ETH_ASSET_HOLDER_ADDRESS, NITRO_ADJUDICATOR_ADDRESS} from './constants';
 import EventEmitter = require('eventemitter3');
 
 import {toNitroSignedState, calculateChannelId} from './store/state-utils';
-import {TransactionRequest} from 'ethers/providers';
 
 const EthAssetHolderInterface = new ethers.utils.Interface(
   // https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
@@ -44,7 +43,7 @@ export interface Chain {
 
   // Chain Methods
   deposit: (channelId: string, expectedHeld: string, amount: string) => Promise<void>;
-  challenge: (channelId: string, forceMoveTransactionData: TransactionRequest) => Promise<void>;
+  challenge: (support: SignedState[], privateKey: string) => Promise<void>;
   finalizeAndWithdraw: (finalizationProof: SignedState[]) => Promise<void>;
   getChainInfo: (channelId: string) => Promise<ChannelChainInfo>;
 }
@@ -76,14 +75,12 @@ export class FakeChain implements Chain {
     this.depositSync(channelId, expectedHeld, amount);
   }
 
-  public async challenge(
-    channelId: string,
-    forceMoveTransactionData: TransactionRequest
-  ): Promise<void> {
+  public async challenge(support: SignedState[], privateKey: string): Promise<void> {
+    const channelId = calculateChannelId(support[0]);
     this.channelStatus[channelId] = {
       ...(this.channelStatus[channelId] || {}),
       challengeExpiry: bigNumberify(100),
-      state: {} as State, // TODO: Decode? :S
+      state: support[support.length - 1],
       finalized: false
     };
     this.eventEmitter.emit(UPDATED, {
@@ -210,16 +207,17 @@ export class ChainWatcher implements Chain {
     await response.wait();
   }
 
-  public async challenge(
-    channelId: string,
-    forceMoveTransactionData: TransactionRequest
-  ): Promise<void> {
+  public async challenge(support: SignedState[], privateKey: string): Promise<void> {
     const provider = getProvider();
     const signer = provider.getSigner();
     const response = await signer.sendTransaction({
-      ...forceMoveTransactionData,
-      to: NITRO_ADJUDICATOR_ADDRESS,
-      value: 0
+      ...Transactions.createForceMoveTransaction(
+        // TODO: Code is assuming a doubly-signed state at the moment.
+        toNitroSignedState(support[0]),
+        // createForceMoveTransaction requires this to sign a "challenge message"
+        privateKey
+      ),
+      to: NITRO_ADJUDICATOR_ADDRESS
     });
     await response.wait();
   }

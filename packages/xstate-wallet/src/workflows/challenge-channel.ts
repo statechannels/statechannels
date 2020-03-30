@@ -62,9 +62,14 @@ export const machine = (store: Store) => {
       .chainUpdatedFeed(channelId)
       .pipe(flatMap(determineChallengeStatus.bind(null, store, channelId)));
 
-  const submitChallengeTransaction = async (ctx: Init) => {
-    const txRequest = await store.getForceMoveTransactionData(ctx.channelId);
-    await store.chain.challenge(ctx.channelId, txRequest);
+  const submitChallengeTransaction = async ({channelId}: Init) => {
+    const {
+      support,
+      myIndex,
+      channelConstants: {participants}
+    } = await store.getEntry(channelId);
+    const privateKey = await store.getPrivateKey(participants[myIndex].signingAddress);
+    await store.chain.challenge(support, privateKey);
   };
 
   return Machine(config).withConfig({

@@ -1,4 +1,3 @@
-import {Transactions} from '@statechannels/nitro-protocol';
 import {Observable, fromEvent, merge, from} from 'rxjs';
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {
@@ -16,14 +15,13 @@ import {
 import {filter, map, concatAll} from 'rxjs/operators';
 import {EventEmitter} from 'eventemitter3';
 import * as _ from 'lodash';
-
 import {Wallet} from 'ethers';
 
 import {ChannelStoreEntry} from './channel-store-entry';
 import {AddressZero} from 'ethers/constants';
 import {Chain, FakeChain} from '../chain';
 import {NETWORK_ID, HUB} from '../constants';
-import {calculateChannelId, hashState, toNitroSignedState} from './state-utils';
+import {calculateChannelId, hashState} from './state-utils';
 
 import {Guid} from 'guid-typescript';
 import {MemoryBackend} from './memory-backend';
@@ -31,7 +29,6 @@ import {Errors} from '.';
 import AsyncLock from 'async-lock';
 import {checkThat} from '../utils';
 import {isSimpleEthAllocation} from '../utils/outcome';
-import {TransactionRequest} from 'ethers/providers';
 
 interface DirectFunding {
   type: 'Direct';
@@ -86,7 +83,6 @@ export interface Store {
   pushMessage: (message: Message) => Promise<void>;
   channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry>;
   getAddress(): Promise<string>;
-  getForceMoveTransactionData(channelId: string): Promise<TransactionRequest>;
   signAndAddState(channelId: string, stateVars: StateVariables): Promise<void>;
   createChannel(
     participants: Participant[],
@@ -96,6 +92,7 @@ export interface Store {
     applicationSite?: string
   ): Promise<ChannelStoreEntry>;
   getEntry(channelId): Promise<ChannelStoreEntry>;
+  getPrivateKey(signingAddress: string): Promise<string>;
 
   lockFeed: Observable<ChannelLock>;
   acquireChannelLock(channelId: string): Promise<ChannelLock>;
@@ -341,22 +338,7 @@ export class XstateStore implements Store {
 
   private nonceKeyFromAddresses = (addresses: string[]): string => addresses.join('::');
 
-  async getForceMoveTransactionData(channelId: string): Promise<TransactionRequest> {
-    const {
-      myIndex,
-      support,
-      channelConstants: {participants}
-    } = await this.getEntry(channelId);
-
-    return Transactions.createForceMoveTransaction(
-      // TODO: Code is assuming a doubly-signed state at the moment.
-      toNitroSignedState(support[0]),
-      // createForceMoveTransaction requires this to sign a "challenge message"
-      await this.getPrivateKey(participants[myIndex].signingAddress)
-    );
-  }
-
-  private async getPrivateKey(signingAddress: string): Promise<string> {
+  public async getPrivateKey(signingAddress: string): Promise<string> {
     const ret = await this.backend.getPrivateKey(signingAddress);
     if (!ret) throw new Error('No longer have private key');
     return ret;
