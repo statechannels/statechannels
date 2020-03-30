@@ -31,10 +31,7 @@ it('initializes and starts challenge thing', async () => {
     fakeChain
   );
 
-  await store.setPrivateKey(
-    playerA.signingAddress,
-    '0x275a2e2cd9314f53b42246694034a80119963097e3adf495fbf6d821dc8b6c8e'
-  );
+  await store.setPrivateKey('0x275a2e2cd9314f53b42246694034a80119963097e3adf495fbf6d821dc8b6c8e');
 
   const state: State = {
     outcome: simpleEthAllocation([

@@ -3,6 +3,7 @@ import {SignedState} from '../../store/types';
 import {hashState} from '../../store/state-utils';
 import {Guid} from 'guid-typescript';
 import {XstateStore, Funding, Store} from '../../store';
+import {SigningKey} from 'ethers/utils';
 
 export class TestStore extends XstateStore implements Store {
   public _channelLocks: Record<string, Guid>;
@@ -44,7 +45,8 @@ export class TestStore extends XstateStore implements Store {
     this.backend.setLedger(peerId?.participantId, channelId);
   }
 
-  async setPrivateKey(address: string, pk: string) {
+  async setPrivateKey(pk: string) {
+    const {address} = new SigningKey(pk);
     await this.backend.setPrivateKey(address, pk);
   }
 }
