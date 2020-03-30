@@ -4,7 +4,7 @@ import {bigNumberify} from 'ethers/utils';
 
 export const WEI_PER_BYTE = bigNumberify(1); // cost per byte
 export const BLOCK_LENGTH = 1 << 14; // Standard request length.
-export const PEER_TRUST = 1; //amount of trust between peers. It's equivalent to the amount of request to pre-pay.
+export const PEER_TRUST = 4; //amount of trust between peers. It's equivalent to the amount of request to pre-pay.
 // The recomended value is 5 ( the size of the queue of requests made by the leecher to the seeder)
 
 export const BUFFER_REFILL_RATE = bigNumberify(WEI_PER_BYTE.mul(BLOCK_LENGTH * PEER_TRUST));
