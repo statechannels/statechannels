@@ -38,17 +38,17 @@ async function determineChallengeStatus(
   const {challenge} = chainInfo;
 
   if (typeof challenge !== 'undefined') {
-    // const {
-    //   state: {turnNum: challengeTurnNum}
-    // } = challenge;
+    const {
+      state: {turnNum: challengeTurnNum}
+    } = challenge;
 
-    // const {
-    //   latestState: {turnNum}
-    // } = await store.getEntry(channelId);
+    const {
+      latestState: {turnNum}
+    } = await store.getEntry(channelId);
 
-    // if (challengeTurnNum !== turnNum) {
-    //   return 'SOME_OTHER_CHALLENGE_ALREADY_EXISTS';
-    // }
+    if (!challengeTurnNum.eq(turnNum)) {
+      return 'SOME_OTHER_CHALLENGE_ALREADY_EXISTS';
+    }
 
     return 'CHALLENGE_PLACED_ONCHAIN_AS_EXPECTED';
   }
