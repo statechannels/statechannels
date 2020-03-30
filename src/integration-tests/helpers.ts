@@ -230,7 +230,6 @@ export function generateApproveBudgetAndFundRequest(
     id: 88888888,
     method: 'ApproveBudgetAndFund',
     params: {
-      domain: 'example.com',
       token: ETH_TOKEN,
       hub,
       playerParticipantId: player.participantId,
@@ -249,7 +248,6 @@ export function generateCloseAndWithdrawRequest(
     id: 88888888,
     method: 'CloseAndWithdraw',
     params: {
-      site: 'foo.com',
       hub,
       player
     }

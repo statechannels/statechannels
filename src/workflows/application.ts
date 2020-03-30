@@ -363,7 +363,7 @@ export const applicationWorkflow = (
     ): Promise<CreateAndFund.Init> => {
       const {latestSupportedByMe, channelId} = await store.getEntry(context.channelId);
       const allocation = checkThat(latestSupportedByMe.outcome, isSimpleEthAllocation);
-      return {channelId, allocation};
+      return {channelId, allocation, funding: 'Direct'}; // FIXME
     },
     getDataForCreateChannelConfirmation: async (
       _: WorkflowContext,

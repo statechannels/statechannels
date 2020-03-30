@@ -70,7 +70,7 @@ const allocation: Outcome = {
 const ledgerAmounts = amounts.map(a => a.add(2));
 const depositAmount = ledgerAmounts.reduce(add).toHexString();
 
-const context: Init = {channelId: targetChannelId, allocation};
+const context: Init = {channelId: targetChannelId, allocation, funding: 'Direct'};
 
 let aStore: TestStore;
 let bStore: TestStore;
@@ -107,8 +107,8 @@ beforeEach(async () => {
   });
 });
 
-const connectToStore = (store: Store) => interpret(machine(store).withContext(context)).start();
-test('it uses direct funding when process.env.USE_VIRTUAL_FUNDING is undefined', async () => {
+test('it uses direct funding when told', async () => {
+  const connectToStore = (store: Store) => interpret(machine(store).withContext(context)).start();
   const [aService, bService] = [aStore, bStore].map(connectToStore);
 
   await waitForExpect(async () => {
@@ -145,7 +145,9 @@ test('it uses virtual funding when enabled', async () => {
   chain.depositSync(ledgerId, '0', depositAmount);
   await bStore.setLedgerByEntry(await bStore.createEntry({...state, signatures}));
 
-  const [aService, bService] = [aStore, bStore].map(connectToStore);
+  const [aService, bService] = [aStore, bStore].map((store: Store) =>
+    interpret(machine(store).withContext({...context, funding: 'Virtual'})).start()
+  );
 
   await waitForExpect(async () => {
     expect(aService.state.value).toEqual('success');
