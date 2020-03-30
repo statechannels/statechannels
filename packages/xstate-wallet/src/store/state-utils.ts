@@ -72,7 +72,16 @@ export function statesEqual(left: State, right: State) {
 
 export function outcomesEqual(left: Outcome, right?: Outcome) {
   // TODO: do we need a more detailed check?
-  return _.isEqual(left, right);
+  console.log(
+    'checking for equality betwen ' +
+      JSON.stringify(left) +
+      'and' +
+      JSON.stringify(right) +
+      ' // conclusion ' +
+      _.isEqual(left, right)
+  );
+  return !!right;
+  // return _.isEqual(left, right);
 }
 
 export const firstState = (
