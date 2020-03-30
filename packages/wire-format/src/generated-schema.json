@@ -170,7 +170,7 @@
       ],
       "type": "object"
     },
-    "Gaurantee": {
+    "Guarantee": {
       "additionalProperties": false,
       "properties": {
         "assetHolderAddress": {
@@ -195,7 +195,7 @@
     },
     "Guarantees": {
       "items": {
-        "$ref": "#/definitions/Gaurantee"
+        "$ref": "#/definitions/Guarantee"
       },
       "type": "array"
     },
