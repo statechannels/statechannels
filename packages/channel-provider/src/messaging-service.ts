@@ -1,5 +1,6 @@
 import debug from 'debug';
 import {JsonRpcRequest} from './types';
+import {Guid} from 'guid-typescript';
 
 const log = debug('channel-provider:messaging');
 
@@ -86,12 +87,15 @@ export class MessagingService {
     reject: (reason?: any) => void,
     callback?: (result: ResultType) => void
   ) {
+    const guid = Guid.create().toString();
+    console.log(`${guid} - CREATE`);
     const listener = (event: MessageEvent) => {
       if (event.data && event.data.jsonrpc && event.data.result && event.data.id === message.id) {
         if (callback) {
           callback(event.data.result);
         }
         this.acknowledge();
+        console.log(`${guid} - REMOVE`);
         window.removeEventListener('message', listener);
         log('Received response: %o', event.data);
         resolve(event.data.result);
