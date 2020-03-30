@@ -181,21 +181,22 @@ export abstract class PaidStreamingExtension implements Extension {
 
   protected interceptRequests() {
     const {messageBus, wire} = this;
+    const peer = wire.paidStreamingExtension.peerAccount;
 
     // for debugging purposes. It logs when a piece is received
     const _onPiece = wire._onPiece;
     wire._onPiece = function(index, offset, buffer) {
       _onPiece.apply(wire, [index, offset, buffer]);
-      log(`<< _onPiece PIECE: ${index} OFFSET: ${offset} DOWNLOADED: ${wire.downloaded}`);
+      log(`<< _onPiece ${peer}: ${index} OFFSET: ${offset} DOWNLOADED: ${wire.downloaded}`);
     };
     const blockedRequests = this.blockedRequests;
     const _onRequest = wire._onRequest;
     wire._onRequest = function(index, offset, length) {
-      log(`_onRequest: ${index}`);
+      log(`_onRequest ${peer}: ${index}`);
 
       if (this.paidStreamingExtension.isForceChoking) {
         blockedRequests.push([index, offset, length]);
-        log(`_onRequest AUTO IGNORE - ${index}, ${offset}, ${length}`);
+        log(`_onRequest ${peer}: ${index}, ${offset}, ${length} - IGNORED`);
       } else {
         messageBus.emit(PaidStreamingExtensionEvents.REQUEST, index, length, function(allow) {
           if (allow) {
