@@ -426,9 +426,8 @@ export class XstateStore implements Store {
       const {outcome, participants} = (await this.getEntry(channelId)).supported;
       const playerAddress = await this.getAddress();
       const currentAllocation = checkThat(outcome, isSimpleEthAllocation);
-      const playerDestination =
-        entry.participants.find(p => p.signingAddress === playerAddress) || '0x0;';
-      const hubDestination = entry.participants.find(p => p === HUB_DESTINATION) || '0x0';
+      const playerDestination = participants.find(p => p.signingAddress === playerAddress) || '0x0';
+      const hubDestination = participants.find(p => p === HUB_DESTINATION) || '0x0';
 
       const channelBudget = assetBudget.channels[channelId];
       if (!channelBudget) throw new Error(Errors.noBudget);
