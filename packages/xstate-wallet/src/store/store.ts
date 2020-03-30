@@ -348,10 +348,12 @@ export class XstateStore implements Store {
       channelConstants: {participants}
     } = await this.getEntry(channelId);
 
-    // createForceMoveTransaction requires this to sign a "challenge message"
-    const privateKey = await this.getPrivateKey(participants[myIndex].signingAddress);
-
-    return Transactions.createForceMoveTransaction(toNitroSignedState(support[0]), privateKey);
+    return Transactions.createForceMoveTransaction(
+      // TODO: Code is assuming a doubly-signed state at the moment.
+      toNitroSignedState(support[0]),
+      // createForceMoveTransaction requires this to sign a "challenge message"
+      await this.getPrivateKey(participants[myIndex].signingAddress)
+    );
   }
 
   private async getPrivateKey(signingAddress: string): Promise<string> {
