@@ -21,13 +21,15 @@ import {MemoryChannelStoreEntry} from './memory-channel-storage';
 import {AddressZero} from 'ethers/constants';
 import {Chain, FakeChain} from '../chain';
 import {calculateChannelId, hashState} from './state-utils';
-import {NETWORK_ID} from '../constants';
+import {NETWORK_ID, HUB_DESTINATION} from '../constants';
 
 import {Guid} from 'guid-typescript';
 import {MemoryBackend} from './memory-backend';
 import {ChannelStoreEntry} from './channel-store-entry';
 import {Errors} from '.';
 import AsyncLock from 'async-lock';
+import {checkThat} from '../utils';
+import {isSimpleEthAllocation} from '../utils/outcome';
 
 interface DirectFunding {
   type: 'Direct';
@@ -106,7 +108,7 @@ export interface Store {
   reserveFunds(
     assetHolderAddress: string,
     channelId: string,
-    amount: BigNumber
+    amount: {send: BigNumber; receive: BigNumber}
   ): Promise<SiteBudget>;
   releaseFunds(assetHolderAddress: string, channelId: string): Promise<SiteBudget>;
 
@@ -420,10 +422,26 @@ export class XstateStore implements Store {
       if (!assetBudget) {
         throw new Error(Errors.noBudget);
       }
+
+      const entry = await (await this.getEntry(channelId)).supported;
+      const {outcome} = entry;
+      const playerAddress = await this.getAddress();
+      const currentAllocation = checkThat(outcome, isSimpleEthAllocation);
+      const playerDestination =
+        entry.participants.find(p => p.signingAddress === playerAddress) || '0x0;';
+      const hubDestination = entry.participants.find(p => p === HUB_DESTINATION) || '0x0';
+
       const channelBudget = assetBudget.channels[channelId];
       if (!channelBudget) throw new Error(Errors.noBudget);
-      assetBudget.availableReceiveCapacity = channelBudget.amount.div(2);
-      assetBudget.availableSendCapacity = channelBudget.amount.div(2);
+      const sendAmount =
+        currentAllocation.allocationItems.find(a => a.destination === playerDestination)?.amount ||
+        0;
+      const receiveAmount =
+        currentAllocation.allocationItems.find(a => a.destination === hubDestination)?.amount || 0;
+      assetBudget.availableReceiveCapacity = assetBudget.availableReceiveCapacity.add(
+        receiveAmount
+      );
+      assetBudget.availableSendCapacity = assetBudget.availableSendCapacity.add(sendAmount);
       delete assetBudget.channels[channelId];
 
       await this.backend.setBudget(applicationSite, currentBudget);
@@ -434,7 +452,7 @@ export class XstateStore implements Store {
   public async reserveFunds(
     assetHolderAddress: string,
     channelId: string,
-    amount: BigNumber
+    amount: {send: BigNumber; receive: BigNumber}
   ): Promise<SiteBudget> {
     const entry = await this.getEntry(channelId);
     const site = entry.applicationSite;
@@ -455,8 +473,8 @@ export class XstateStore implements Store {
         }
 
         if (
-          assetBudget.availableSendCapacity.lt(amount.div(2)) ||
-          assetBudget.availableReceiveCapacity.lt(amount.div(2))
+          assetBudget.availableSendCapacity.lt(amount.send) ||
+          assetBudget.availableReceiveCapacity.lt(amount.receive)
         ) {
           throw new Error(Errors.budgetInsufficient);
         }
@@ -465,7 +483,7 @@ export class XstateStore implements Store {
           ...assetBudget,
           channels: {
             ...assetBudget.channels,
-            [channelId]: {amount}
+            [channelId]: {amount: amount.send.add(amount.receive)}
           }
         };
         this.backend.setBudget(currentBudget.domain, currentBudget);

@@ -101,9 +101,16 @@ const assignJointChannelId = assign<VirtualFundingComplete>({
 const reserveFunds = (store: Store) => async (context, event) => {
   const channelEntry = await store.getEntry(context.channelId);
   const {allocationItems} = checkThat(channelEntry.supported.outcome, isSimpleEthAllocation);
-  const total = allocationItems.map(a => a.amount).reduce(add);
+  const playerAddress = await store.getAddress();
+  const playerDestination =
+    channelEntry.supported.participants.find(p => p.signingAddress === playerAddress)
+      ?.destination || '0x0';
+  const receive =
+    allocationItems.find(a => a.destination !== playerDestination)?.amount || bigNumberify(0);
+  const send =
+    allocationItems.find(a => a.destination === playerDestination)?.amount || bigNumberify(0);
 
-  await store.reserveFunds(ETH_ASSET_HOLDER_ADDRESS, context.channelId, total);
+  await store.reserveFunds(ETH_ASSET_HOLDER_ADDRESS, context.channelId, {receive, send});
 };
 
 type VirtualFundingComplete = Init & {jointChannelId: string};
