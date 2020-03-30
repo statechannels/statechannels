@@ -215,7 +215,8 @@ export function generateCreateChannelRequest(
         }
       ],
       appDefinition: '0x430869383d611bBB1ce7Ca207024E7901bC26b40',
-      appData: '0x0'
+      appData: '0x0',
+      fundingStrategy: 'Direct'
     }
   };
 }
@@ -229,6 +230,7 @@ export function generateApproveBudgetAndFundRequest(
     id: 88888888,
     method: 'ApproveBudgetAndFund',
     params: {
+      domain: 'example.com',
       token: ETH_TOKEN,
       hub,
       playerParticipantId: player.participantId,
@@ -247,6 +249,7 @@ export function generateCloseAndWithdrawRequest(
     id: 88888888,
     method: 'CloseAndWithdraw',
     params: {
+      site: 'foo.com',
       hub,
       player
     }

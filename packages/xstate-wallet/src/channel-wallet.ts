@@ -9,7 +9,7 @@ import {interpret, Interpreter, State, StateNode} from 'xstate';
 import {Guid} from 'guid-typescript';
 import {Notification, Response} from '@statechannels/client-api-schema';
 import {filter, take} from 'rxjs/operators';
-import {Message, OpenChannel} from './store/types';
+import {Message, isOpenChannel} from './store/types';
 
 import {ApproveBudgetAndFund, CloseLedgerAndWithdraw} from './workflows';
 import {ethereumEnableWorkflow} from './workflows/ethereum-enable';
@@ -37,19 +37,17 @@ export class ChannelWallet {
     // Whenever an OpenChannel objective is received
     // we alert the user that there is a new channel
     // It is up to the app to call JoinChannel
-    this.store.objectiveFeed
-      .pipe(filter((o): o is OpenChannel => o.type === 'OpenChannel'))
-      .subscribe(async o => {
-        const channelEntry = await this.store
-          .channelUpdatedFeed(o.data.targetChannelId)
-          .pipe(take(1))
-          .toPromise();
+    this.store.objectiveFeed.pipe(filter(isOpenChannel)).subscribe(async o => {
+      const channelEntry = await this.store
+        .channelUpdatedFeed(o.data.targetChannelId)
+        .pipe(take(1))
+        .toPromise();
 
-        this.messagingService.sendChannelNotification(
-          'ChannelProposed',
-          await convertToChannelResult(channelEntry)
-        );
+      this.messagingService.sendChannelNotification('ChannelProposed', {
+        ...(await convertToChannelResult(channelEntry)),
+        fundingStrategy: o.data.fundingStrategy
       });
+    });
 
     this.messagingService.requestFeed.subscribe(x => this.handleRequest(x));
   }

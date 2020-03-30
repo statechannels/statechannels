@@ -15,7 +15,8 @@ import {
   ApproveBudgetAndFundRequest,
   ChannelProposedNotification,
   CloseAndWithdrawRequest,
-  ErrorResponse
+  ErrorResponse,
+  FundingStrategy
 } from '@statechannels/client-api-schema';
 
 import {fromEvent, Observable} from 'rxjs';
@@ -54,11 +55,12 @@ export interface MessagingServiceInterface {
   receiveRequest(jsonRpcMessage: Request, fromDomain: string): Promise<void>;
   sendBudgetNotification(notificationData: SiteBudget): Promise<void>;
   sendChannelNotification(
-    method:
-      | ChannelClosingNotification['method']
-      | ChannelUpdatedNotification['method']
-      | ChannelProposedNotification['method'],
+    method: (ChannelClosingNotification | ChannelUpdatedNotification)['method'],
     notificationData: ChannelResult
+  );
+  sendChannelNotification(
+    method: ChannelProposedNotification['method'],
+    notificationData: ChannelResult & {fundingStrategy: FundingStrategy}
   );
   sendMessageNotification(message: Message): Promise<void>;
   sendDisplayMessage(displayMessage: 'Show' | 'Hide');
@@ -103,7 +105,14 @@ export class MessagingService implements MessagingServiceInterface {
   public async sendChannelNotification(
     method: ChannelClosingNotification['method'] | ChannelUpdatedNotification['method'],
     notificationData: ChannelResult
-  ) {
+  );
+  // eslint-disable-next-line no-dupe-class-members
+  public async sendChannelNotification(
+    method: ChannelProposedNotification['method'],
+    notificationData: ChannelResult & {fundingStrategy: FundingStrategy}
+  );
+  // eslint-disable-next-line no-dupe-class-members
+  public async sendChannelNotification(method, notificationData) {
     const notification = {jsonrpc: '2.0', method, params: notificationData} as Notification; // typescript can't handle this otherwise
     this.eventEmitter.emit('SendMessage', notification);
   }
