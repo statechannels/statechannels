@@ -124,8 +124,7 @@ const createObjective = (store: Store): WorkflowServices['createObjective'] => a
 };
 
 const clearBudget = (store: Store): ActionFunction<WorkflowContext, any> => async (
-  context,
-  event
+  context
 ) => {
   await store.clearBudget(context.site);
 };
