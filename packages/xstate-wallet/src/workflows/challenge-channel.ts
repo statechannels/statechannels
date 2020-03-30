@@ -41,8 +41,7 @@ export const machine = (store: Store) => {
         //   }
         // }
         else return {type: 'SAFE_TO_CHALLENGE'};
-      }),
-      filter(exists)
+      })
     );
   };
 
