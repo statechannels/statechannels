@@ -209,7 +209,7 @@ const generateConfig = (
   } as any // TODO: This is to deal with some flickering compilation issues.
 });
 
-export const applicationWorkflow = (
+export const workflow = (
   store: Store,
   messagingService: MessagingServiceInterface,
   context: WorkflowContext

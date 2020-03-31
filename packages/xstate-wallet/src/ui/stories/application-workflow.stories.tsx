@@ -23,7 +23,7 @@ if (Application.config.states) {
     // TODO: We should figure out a nice way of dealing with nested workflows
     if (state !== 'confirmJoinChannelWorkflow' && state !== 'confirmCreateChannelWorkflow') {
       const machine = interpret<any, any, any>(
-        Application.applicationWorkflow(store, messagingService, testContext),
+        Application.workflow(store, messagingService, testContext),
         {devTools: true}
       ); // start a new interpreted machine for each story
       machine.start(state);

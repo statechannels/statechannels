@@ -73,7 +73,7 @@ export class ChannelWallet {
       case 'JOIN_CHANNEL': {
         if (!this.isWorkflowIdInUse(workflowId)) {
           const workflow = this.startWorkflow(
-            Application.applicationWorkflow(this.store, this.messagingService, {
+            Application.workflow(this.store, this.messagingService, {
               fundingStrategy: 'Direct',
               applicationSite: request.applicationSite
             }), // FIXME
