@@ -21,7 +21,7 @@ import {MemoryChannelStoreEntry} from './memory-channel-storage';
 import {AddressZero} from 'ethers/constants';
 import {Chain, FakeChain} from '../chain';
 import {calculateChannelId, hashState} from './state-utils';
-import {NETWORK_ID, HUB_DESTINATION} from '../constants';
+import {NETWORK_ID, HUB} from '../constants';
 
 import {Guid} from 'guid-typescript';
 import {MemoryBackend} from './memory-backend';
@@ -427,9 +427,12 @@ export class XstateStore implements Store {
       const {outcome, participants} = (await this.getEntry(channelId)).supported;
       const playerAddress = await this.getAddress();
       const currentAllocation = checkThat(outcome, isSimpleEthAllocation);
-      const playerDestination = participants.find(p => p.signingAddress === playerAddress) || '0x0';
-      const hubDestination = participants.find(p => p === HUB_DESTINATION) || '0x0';
-
+      const playerDestination = participants.find(p => p.signingAddress === playerAddress)
+        ?.destination;
+      const hubDestination = participants.find(p => p === HUB.destination)?.destination;
+      if (!playerDestination || !hubDestination) {
+        throw new Error(Errors.cannotFindDestination);
+      }
       const channelBudget = assetBudget.channels[channelId];
       if (!channelBudget) throw new Error(Errors.noBudget);
       const sendAmount =
