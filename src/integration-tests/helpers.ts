@@ -35,9 +35,7 @@ export class Player {
     const workflowId = Guid.create().toString();
     const machine = interpret<any, any, any>(
       CloseLedgerAndWithdraw.workflow(this.store, this.messagingService, context),
-      {
-        devTools: true
-      }
+      {devTools: true}
     )
       .onTransition((state, event) => process.env.ADD_LOGS && logTransition(state, event, this.id))
 
@@ -67,9 +65,7 @@ export class Player {
         this.messagingService,
         context ? context : {applicationSite: 'localhost', fundingStrategy: 'Direct'}
       ),
-      {
-        devTools: true
-      }
+      {devTools: true}
     )
       .onTransition((state, event) => process.env.ADD_LOGS && logTransition(state, event, this.id))
 
