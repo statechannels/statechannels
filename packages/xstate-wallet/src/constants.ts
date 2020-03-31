@@ -20,7 +20,7 @@ export const HUB = {
 export const CHALLENGE_DURATION = bigNumberify(0x12c); // 5 minutes
 export const NETWORK_ID = process.env.CHAIN_NETWORK_ID || '0';
 
-export const ETH_TOKEN = '0000000000000000000000000000000000000000000000000000000000000000';
+export const ETH_TOKEN = '0x0000000000000000000000000000000000000000000000000000000000000000';
 
 export function assetHolderAddress(tokenAddress: string): string | undefined {
   if (bigNumberify(tokenAddress).isZero()) {

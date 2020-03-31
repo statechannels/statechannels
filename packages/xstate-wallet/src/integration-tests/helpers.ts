@@ -234,6 +234,7 @@ export function generateApproveBudgetAndFundRequest(
     }
   };
 }
+0x0000000000000000000000000000000000000000000000000000000000000005;
 
 export function generateCloseAndWithdrawRequest(
   player: Participant,
