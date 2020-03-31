@@ -95,8 +95,14 @@ export const createChannel = {
       {
         token: '0x0',
         allocationItems: [
-          {destination: '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7', amount: '0x06f05b59d3b20000'},
-          {destination: '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7', amount: '0x06f05b59d3b20000'}
+          {
+            destination: '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7',
+            amount: '0x00000000000000000000000000000000000000000000000006f05b59d3b20000'
+          },
+          {
+            destination: '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7',
+            amount: '0x00000000000000000000000000000000000000000000000006f05b59d3b20000'
+          }
         ]
       }
     ],
@@ -148,11 +154,11 @@ export const pushMessage2 = {
             {
               allocationItems: [
                 {
-                  amount: '0x06f05b59d3b20000',
+                  amount: '0x00000000000000000000000000000000000000000000000006f05b59d3b20000',
                   destination: '0x00000000000000000000000063e3fb11830c01ac7c9c64091c14bb6cbaac9ac7'
                 },
                 {
-                  amount: '0x06f05b59d3b20000',
+                  amount: '0x00000000000000000000000000000000000000000000000006f05b59d3b20000',
                   destination: '0x00000000000000000000000063e3fb11830c01ac7c9c64091c14bb6cbaac9ac7'
                 }
               ],
