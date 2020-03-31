@@ -3,7 +3,6 @@ import {State, EventData} from 'xstate';
 import './wallet.scss';
 import {Flex, Progress} from 'rimble-ui';
 import {ChannelId} from './channel-id';
-import {StateValue, WorkflowState} from '../workflows/application';
 import {
   isConfirmCreateChannel,
   getConfirmCreateChannelState,
@@ -12,15 +11,16 @@ import {
   getApplicationStateValue
 } from './selectors';
 import {ConfirmCreateChannel} from './confirm-create-channel-workflow';
+import {Application} from '../workflows';
 
 interface Props {
-  current: WorkflowState;
+  current: Application.WorkflowState;
   send: (event: any, payload?: EventData | undefined) => State<any, any, any, any>;
 }
 
 export const ApplicationWorkflow = (props: Props) => {
   const current = props.current;
-  const messages: Record<StateValue, string> = {
+  const messages: Record<Application.StateValue, string> = {
     initializing: 'Initializing...',
     confirmCreateChannelWorkflow: 'Creating channel...',
     createChannelInStore: 'Creating channel...',

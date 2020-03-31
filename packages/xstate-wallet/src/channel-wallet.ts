@@ -1,7 +1,6 @@
 import {Store} from './store';
 import {MessagingServiceInterface, convertToChannelResult} from './messaging';
 
-import {applicationWorkflow} from './workflows/application';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import {Wallet as WalletUi} from './ui/wallet';
@@ -11,7 +10,7 @@ import {Notification, Response} from '@statechannels/client-api-schema';
 import {filter, take} from 'rxjs/operators';
 import {Message, isOpenChannel} from './store/types';
 
-import {ApproveBudgetAndFund, CloseLedgerAndWithdraw} from './workflows';
+import {ApproveBudgetAndFund, CloseLedgerAndWithdraw, Application} from './workflows';
 import {ethereumEnableWorkflow} from './workflows/ethereum-enable';
 import {AppRequestEvent} from './event-types';
 
@@ -74,7 +73,7 @@ export class ChannelWallet {
       case 'JOIN_CHANNEL': {
         if (!this.isWorkflowIdInUse(workflowId)) {
           const workflow = this.startWorkflow(
-            applicationWorkflow(this.store, this.messagingService, {
+            Application.applicationWorkflow(this.store, this.messagingService, {
               fundingStrategy: 'Direct',
               applicationSite: request.applicationSite
             }), // FIXME

@@ -1,7 +1,6 @@
 import {interpret} from 'xstate';
 import {ethers} from 'ethers';
 import waitForExpect from 'wait-for-expect';
-import {applicationWorkflow, WorkflowServices, WorkflowActions} from '../application';
 import {AddressZero} from 'ethers/constants';
 import {XstateStore} from '../../store';
 import {StateVariables, SignedState} from '../../store/types';
@@ -11,6 +10,7 @@ import {bigNumberify} from 'ethers/utils';
 import {calculateChannelId} from '../../store/state-utils';
 import {simpleEthAllocation} from '../../utils';
 import {CreateChannelEvent, ChannelUpdated, JoinChannelEvent} from '../../event-types';
+import {Application} from '..';
 
 jest.setTimeout(50000);
 const createChannelEvent: CreateChannelEvent = {
@@ -30,7 +30,7 @@ it('initializes and starts confirmCreateChannelWorkflow', async () => {
   const store = new XstateStore();
   await store.initialize();
   const messagingService: MessagingServiceInterface = new MessagingService(store);
-  const services: Partial<WorkflowServices> = {
+  const services: Partial<Application.WorkflowServices> = {
     getDataForCreateChannelConfirmation: jest.fn().mockReturnValue(
       new Promise(() => {
         /*mock*/
@@ -39,7 +39,7 @@ it('initializes and starts confirmCreateChannelWorkflow', async () => {
   };
 
   const service = interpret<any, any, any>(
-    applicationWorkflow(store, messagingService, {
+    Application.applicationWorkflow(store, messagingService, {
       fundingStrategy: 'Direct',
       applicationSite: 'localhost'
     }).withConfig({
@@ -60,7 +60,7 @@ it('invokes the createChannelAndFund protocol', async () => {
   const store = new XstateStore();
   await store.initialize();
   const messagingService: MessagingServiceInterface = new MessagingService(store);
-  const services: Partial<WorkflowServices> = {
+  const services: Partial<Application.WorkflowServices> = {
     getDataForCreateChannelAndFund: jest.fn().mockReturnValue(Promise.resolve('foo')),
     invokeCreateChannelAndFundProtocol: jest.fn().mockReturnValue(
       new Promise(() => {
@@ -68,7 +68,7 @@ it('invokes the createChannelAndFund protocol', async () => {
       })
     )
   };
-  const actions: Partial<WorkflowActions> = {
+  const actions: Partial<Application.WorkflowActions> = {
     sendCreateChannelResponse: jest.fn().mockReturnValue(
       new Promise(() => {
         /* mock */
@@ -77,7 +77,7 @@ it('invokes the createChannelAndFund protocol', async () => {
   };
 
   const service = interpret<any, any, any>(
-    applicationWorkflow(store, messagingService, {
+    Application.applicationWorkflow(store, messagingService, {
       fundingStrategy: 'Direct',
       applicationSite: 'localhost'
     }).withConfig({
@@ -111,7 +111,7 @@ it('raises an channel updated action when the channel is updated', async () => {
     }
   };
   const service = interpret<any, any, any>(
-    applicationWorkflow(store, messagingService, {
+    Application.applicationWorkflow(store, messagingService, {
       fundingStrategy: 'Direct',
       applicationSite: 'localhost'
     }).withConfig(mockOptions)
@@ -133,7 +133,7 @@ it.skip('handles confirmCreateChannel workflow finishing', async () => {
   const store = new XstateStore();
   await store.initialize();
   const messagingService: MessagingServiceInterface = new MessagingService(store);
-  const services: Partial<WorkflowServices> = {
+  const services: Partial<Application.WorkflowServices> = {
     createChannel: jest.fn().mockReturnValue(Promise.resolve('0xb1ab1a')),
     invokeCreateChannelAndFundProtocol: jest.fn().mockReturnValue(
       new Promise(() => {
@@ -143,7 +143,7 @@ it.skip('handles confirmCreateChannel workflow finishing', async () => {
   };
 
   const service = interpret<any, any, any>(
-    applicationWorkflow(store, messagingService, {
+    Application.applicationWorkflow(store, messagingService, {
       fundingStrategy: 'Direct',
       applicationSite: 'localhost'
     }).withConfig({
@@ -174,7 +174,7 @@ it('initializes and starts the join channel machine', async () => {
     applicationSite: 'localhost'
   };
 
-  const services: Partial<WorkflowServices> = {
+  const services: Partial<Application.WorkflowServices> = {
     getDataForCreateChannelConfirmation: jest.fn().mockReturnValue(
       new Promise(() => {
         /*mock*/
@@ -183,7 +183,7 @@ it('initializes and starts the join channel machine', async () => {
   };
 
   const service = interpret<any, any, any>(
-    applicationWorkflow(store, messagingService, {
+    Application.applicationWorkflow(store, messagingService, {
       fundingStrategy: 'Direct',
       applicationSite: 'localhost'
     }).withConfig({
@@ -210,7 +210,7 @@ it('starts concluding when requested', async () => {
   await store.initialize();
   const messagingService: MessagingServiceInterface = new MessagingService(store);
   const channelId = ethers.utils.id('channel');
-  const services: Partial<WorkflowServices> = {
+  const services: Partial<Application.WorkflowServices> = {
     signConcludeState: jest.fn().mockReturnValue(Promise.resolve()),
     invokeClosingProtocol: jest.fn().mockReturnValue(
       new Promise(() => {
@@ -218,7 +218,7 @@ it('starts concluding when requested', async () => {
       })
     )
   };
-  const actions: Partial<WorkflowActions> = {
+  const actions: Partial<Application.WorkflowActions> = {
     sendCloseChannelResponse: jest.fn().mockReturnValue(
       new Promise(() => {
         /* mock */
@@ -226,7 +226,7 @@ it('starts concluding when requested', async () => {
     )
   };
   const service = interpret<any, any, any>(
-    applicationWorkflow(store, messagingService, {
+    Application.applicationWorkflow(store, messagingService, {
       fundingStrategy: 'Direct',
       applicationSite: 'localhost'
     }).withConfig({
@@ -261,7 +261,7 @@ it('starts concluding when receiving a final state', async () => {
       signatures: ['0x0']
     }
   ];
-  const services: Partial<WorkflowServices> = {
+  const services: Partial<Application.WorkflowServices> = {
     invokeClosingProtocol: jest.fn().mockReturnValue(
       new Promise(() => {
         /* mock */
@@ -279,7 +279,7 @@ it('starts concluding when receiving a final state', async () => {
   };
 
   const service = interpret<any, any, any>(
-    applicationWorkflow(store, messagingService, {
+    Application.applicationWorkflow(store, messagingService, {
       channelId,
       fundingStrategy: 'Direct',
       applicationSite: 'localhost'
