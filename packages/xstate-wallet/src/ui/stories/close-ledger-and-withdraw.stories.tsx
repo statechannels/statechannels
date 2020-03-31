@@ -33,7 +33,8 @@ const testContext: WorkflowContext = {
   player: alice,
   opponent: bob,
   requestId: 123,
-  ledgerId: 'ledger-id-123'
+  ledgerId: 'ledger-id-123',
+  site: 'abc.com'
 };
 
 if (config.states) {

@@ -18,7 +18,7 @@ import {isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
 import {checkThat, getDataAndInvoke} from '../utils';
 import {SupportState, VirtualFundingAsLeaf, Depositing} from '.';
 import {from, Observable} from 'rxjs';
-import {CHALLENGE_DURATION, HUB} from '../constants';
+import {CHALLENGE_DURATION, HUB, ETH_ASSET_HOLDER_ADDRESS} from '../constants';
 import {bigNumberify} from 'ethers/utils';
 
 const PROTOCOL = 'create-and-fund';
@@ -97,11 +97,28 @@ const triggerObjective = (store: Store) => async (ctx: Init): Promise<void> => {
 const assignJointChannelId = assign<VirtualFundingComplete>({
   jointChannelId: (_, event: DoneInvokeEvent<{jointChannelId: string}>) => event.data.jointChannelId
 });
+
+const reserveFunds = (store: Store) => async (context, event) => {
+  const channelEntry = await store.getEntry(context.channelId);
+  const {allocationItems} = checkThat(channelEntry.supported.outcome, isSimpleEthAllocation);
+  const playerAddress = await store.getAddress();
+  const playerDestination =
+    channelEntry.supported.participants.find(p => p.signingAddress === playerAddress)
+      ?.destination || '0x0';
+  const receive =
+    allocationItems.find(a => a.destination !== playerDestination)?.amount || bigNumberify(0);
+  const send =
+    allocationItems.find(a => a.destination === playerDestination)?.amount || bigNumberify(0);
+
+  await store.reserveFunds(ETH_ASSET_HOLDER_ADDRESS, context.channelId, {receive, send});
+};
+
 type VirtualFundingComplete = Init & {jointChannelId: string};
 const virtual: StateNodeConfig<Init, any, any> = {
-  initial: 'virtualFunding',
-  entry: triggerObjective.name,
+  initial: 'reserveFunds',
+  entry: [triggerObjective.name],
   states: {
+    reserveFunds: {invoke: {src: 'reserveFunds', onDone: 'virtualFunding'}},
     virtualFunding: getDataAndInvoke<Init, Service>(
       {src: 'getObjective'},
       {src: 'virtualFunding', opts: {entry: 'assignJointChannelId'}},
@@ -122,6 +139,7 @@ const postFundSetup = getDataAndInvoke<Init, Service>(
 export const config: MachineConfig<Init, any, any> = {
   key: PROTOCOL,
   initial: 'preFundSetup',
+
   on: {[ActionTypes.ErrorCustom]: {target: 'failure'}},
   states: {
     preFundSetup,
@@ -151,14 +169,18 @@ export const services = (store: Store) => ({
   determineFunding: determineFunding(store),
   setFundingToDirect: setFundingToDirect(store),
   setFundingToVirtual: setFundingToVirtual(store),
-  getObjective: getObjective(store)
+  getObjective: getObjective(store),
+  reserveFunds: reserveFunds(store)
 });
 
 type Service = keyof ReturnType<typeof services>;
 
 const options = (store: Store) => ({
   services: services(store),
-  actions: {triggerObjective: triggerObjective(store), assignJointChannelId}
+  actions: {
+    triggerObjective: triggerObjective(store),
+    assignJointChannelId
+  }
 });
 
 export const machine: MachineFactory<Init, any> = (store: Store, init: Init) =>

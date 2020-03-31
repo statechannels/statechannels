@@ -57,6 +57,7 @@ export interface CloseAndWithdrawRequest {
   type: 'CLOSE_AND_WITHDRAW';
   player: Participant;
   hub: Participant;
+  site: string;
 }
 
 export type AppRequestEvent =
