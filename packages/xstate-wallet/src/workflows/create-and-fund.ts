@@ -205,7 +205,7 @@ const determineFunding = (_: Store) => (_: Init): Observable<TEvent> =>
   // This should use the store and the context to make a choice, but we have not
   // moved anywhere towards making that choice
   // So, the choice is a hard-coded environment variable
-  from(Promise.resolve(useVirtualFunding)).pipe(
+  from(Promise.resolve(useVirtualFunding())).pipe(
     map(
       (useVirtualFunding): TEvent =>
         useVirtualFunding ? {type: 'UseVirtualFunding'} : {type: 'UseDirectFunding'}

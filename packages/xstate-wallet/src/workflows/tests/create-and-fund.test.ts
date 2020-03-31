@@ -24,7 +24,7 @@ import {
   budget
 } from './data';
 import {subscribeToMessages} from './message-service';
-import {ETH_ASSET_HOLDER_ADDRESS, HUB} from '../../constants';
+import * as constants from '../../constants';
 import {FakeChain} from '../../chain';
 import {SimpleHub} from './simple-hub';
 import {add} from '../../utils/math-utils';
@@ -60,7 +60,7 @@ const totalAmount = amounts.reduce((a, b) => a.add(b));
 
 const allocation: Outcome = {
   type: 'SimpleAllocation',
-  assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
+  assetHolderAddress: constants.ETH_ASSET_HOLDER_ADDRESS,
   allocationItems: [0, 1].map(i => ({
     destination: destinations[i],
     amount: amounts[i]
@@ -103,13 +103,12 @@ beforeEach(async () => {
   subscribeToMessages({
     [participants[0].participantId]: aStore,
     [participants[1].participantId]: bStore,
-    [HUB.participantId]: hubStore
+    [constants.HUB.participantId]: hubStore
   });
 });
 
 const connectToStore = (store: Store) => interpret(machine(store).withContext(context)).start();
 test('it uses direct funding when process.env.USE_VIRTUAL_FUNDING is undefined', async () => {
-  delete process.env.USE_VIRTUAL_FUNDING;
   const [aService, bService] = [aStore, bStore].map(connectToStore);
 
   await waitForExpect(async () => {
@@ -126,6 +125,9 @@ test('it uses direct funding when process.env.USE_VIRTUAL_FUNDING is undefined',
 });
 
 test('it uses virtual funding when enabled', async () => {
+  const mockVirtualFunding = jest.spyOn(constants, 'useVirtualFunding');
+  mockVirtualFunding.mockImplementation(() => true);
+
   process.env.USE_VIRTUAL_FUNDING = 'true';
 
   let state = ledgerState([first, third], ledgerAmounts);
@@ -167,5 +169,5 @@ test('it uses virtual funding when enabled', async () => {
     bBudget.forAsset[ETH_ASSET_HOLDER_ADDRESS]?.channels[targetChannelId].amount;
   expect(bChannelAmount?.toHexString()).toEqual(totalAmount.toHexString());
 
-  delete process.env.USE_VIRTUAL_FUNDING;
+  mockVirtualFunding.mockRestore();
 });
