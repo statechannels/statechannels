@@ -9,12 +9,32 @@ import {Request} from './types.js';
 const ajv = new Ajv();
 ajv.addSchema(apiSchema, 'api.json');
 
+function prettyPrintError(e: Ajv.ErrorObject): string {
+  switch (e.keyword) {
+    case 'additionalProperties': {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const unexpected = (e.params as any).additionalProperty;
+      return `Unexpected property '${unexpected}' found at root${e.dataPath} `;
+    }
+    case 'required': {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const missing = (e.params as any).missingProperty;
+      return `Missing required property '${missing}' at root${e.dataPath}`;
+    }
+    case 'type':
+    case 'pattern': {
+      return `Property at root${e.dataPath} ${e.message}`;
+    }
+  }
+  return JSON.stringify(e);
+}
+
 export const validateRequest = ajv.compile({$ref: 'api.json#/definitions/Request'});
 
 export function parseRequest(jsonBlob: object): Request {
   const valid = validateRequest(jsonBlob);
   if (!valid) {
-    const errorMessages = validateRequest.errors?.map(e => e.message);
+    const errorMessages = validateRequest.errors?.map(e => prettyPrintError(e)).join(`;\n`);
     throw new Error(`Validation Error: ${errorMessages}`);
   }
   return jsonBlob as Request;
