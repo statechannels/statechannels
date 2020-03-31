@@ -39,12 +39,10 @@ it('initializes and starts confirmCreateChannelWorkflow', async () => {
   };
 
   const service = interpret<any, any, any>(
-    Application.workflow(store, messagingService, {
-      fundingStrategy: 'Direct',
-      applicationSite: 'localhost'
-    }).withConfig({
-      services
-    } as any) // TODO: We shouldn't need to cast
+    Application.workflow(store, messagingService).withConfig(
+      {services} as any, // TODO: We shouldn't need to cast
+      {fundingStrategy: 'Direct', applicationSite: 'localhost'}
+    )
   );
   service.start();
   service.send(createChannelEvent);
@@ -77,13 +75,10 @@ it('invokes the createChannelAndFund protocol', async () => {
   };
 
   const service = interpret<any, any, any>(
-    Application.workflow(store, messagingService, {
-      fundingStrategy: 'Direct',
-      applicationSite: 'localhost'
-    }).withConfig({
-      services,
-      actions
-    } as any) // TODO: We shouldn't need to cast
+    Application.workflow(store, messagingService).withConfig(
+      {services, actions} as any, // TODO: We shouldn't need to cast
+      {fundingStrategy: 'Direct', applicationSite: 'localhost'}
+    )
   );
 
   const channelId = '0xabc';
@@ -111,10 +106,10 @@ it('raises an channel updated action when the channel is updated', async () => {
     }
   };
   const service = interpret<any, any, any>(
-    Application.workflow(store, messagingService, {
+    Application.workflow(store, messagingService).withConfig(mockOptions, {
       fundingStrategy: 'Direct',
       applicationSite: 'localhost'
-    }).withConfig(mockOptions)
+    })
   );
   service.start();
 
@@ -143,13 +138,11 @@ it.skip('handles confirmCreateChannel workflow finishing', async () => {
   };
 
   const service = interpret<any, any, any>(
-    Application.workflow(store, messagingService, {
-      fundingStrategy: 'Direct',
-      applicationSite: 'localhost'
-    }).withConfig({
-      services
-    } as any)
-  ); //TODO: Casting
+    Application.workflow(store, messagingService).withConfig(
+      {services} as any, //TODO: Casting
+      {fundingStrategy: 'Direct', applicationSite: 'localhost'}
+    )
+  );
   service.start('confirmCreateChannelWorkflow');
 
   service.send({
@@ -183,12 +176,10 @@ it('initializes and starts the join channel machine', async () => {
   };
 
   const service = interpret<any, any, any>(
-    Application.workflow(store, messagingService, {
-      fundingStrategy: 'Direct',
-      applicationSite: 'localhost'
-    }).withConfig({
-      services
-    } as any)
+    Application.workflow(store, messagingService).withConfig(
+      {services} as any, // TODO: casting
+      {fundingStrategy: 'Direct', applicationSite: 'localhost'}
+    )
   );
 
   service.start();
@@ -226,14 +217,11 @@ it('starts concluding when requested', async () => {
     )
   };
   const service = interpret<any, any, any>(
-    Application.workflow(store, messagingService, {
-      fundingStrategy: 'Direct',
-      applicationSite: 'localhost'
-    }).withConfig({
-      services,
-      actions
-    } as any)
-  ); // TODO: Casting
+    Application.workflow(store, messagingService).withConfig(
+      {services, actions} as any, // TODO: Casting
+      {fundingStrategy: 'Direct', applicationSite: 'localhost'}
+    )
+  );
   service.start('running');
   service.send({type: 'PLAYER_REQUEST_CONCLUDE', channelId});
   await waitForExpect(async () => {
@@ -279,12 +267,11 @@ it('starts concluding when receiving a final state', async () => {
   };
 
   const service = interpret<any, any, any>(
-    Application.workflow(store, messagingService, {
-      channelId,
-      fundingStrategy: 'Direct',
-      applicationSite: 'localhost'
-    }).withConfig({services} as any)
-  ); //TODO: Casting
+    Application.workflow(store, messagingService).withConfig(
+      {services} as any, //TODO: Casting
+      {channelId, fundingStrategy: 'Direct', applicationSite: 'localhost'}
+    )
+  );
   service.start('running');
 
   service.send(channelUpdate);

@@ -46,6 +46,9 @@ export interface WorkflowContext {
   requestId?: number;
   channelParams?: Omit<CreateChannelEvent, 'type'>;
 }
+
+export type Init = WorkflowContext &
+  (CreateChannelEvent | {channelId: string; type: 'JOIN_CHANNEL'});
 type ChannelParamsExist = WorkflowContext & {channelParams: CCC.WorkflowContext};
 type ChannelIdExists = WorkflowContext & {channelId: string};
 type RequestIdExists = WorkflowContext & {requestId: number};
@@ -211,7 +214,7 @@ const generateConfig = (
 export const workflow = (
   store: Store,
   messagingService: MessagingServiceInterface,
-  context: WorkflowContext
+  context?: Init
 ) => {
   const notifyOnChannelRequest = ({channelId}: ChannelIdExists) =>
     messagingService.requestFeed.pipe(
@@ -272,7 +275,7 @@ export const workflow = (
     assignChannelParams: assign<WorkflowContext>({
       channelParams: (_, event: CreateChannelEvent) => event,
       requestId: (_, {requestId}: CreateChannelEvent) => requestId,
-      applicationSite: context.applicationSite
+      applicationSite: (context: WorkflowContext) => context.applicationSite
     }),
     assignChannelId: assign((context, event: AssignChannelEvent) => {
       if (context.channelId) return context;
