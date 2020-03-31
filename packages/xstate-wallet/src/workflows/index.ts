@@ -12,6 +12,7 @@ import * as ConcludeChannel from './conclude-channel';
 import * as ApproveBudgetAndFund from './approve-budget-and-fund';
 import * as CloseLedgerAndWithdraw from './close-ledger-and-withdraw';
 import * as Application from './application';
+import * as Confirm from './confirm';
 
 export {
   Application,
@@ -27,5 +28,6 @@ export {
   CreateAndFundLedger,
   ConcludeChannel,
   ApproveBudgetAndFund,
-  CloseLedgerAndWithdraw
+  CloseLedgerAndWithdraw,
+  Confirm
 };
