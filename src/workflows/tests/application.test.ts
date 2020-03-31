@@ -39,7 +39,7 @@ it('initializes and starts confirmCreateChannelWorkflow', async () => {
   };
 
   const service = interpret<any, any, any>(
-    Application.applicationWorkflow(store, messagingService, {
+    Application.workflow(store, messagingService, {
       fundingStrategy: 'Direct',
       applicationSite: 'localhost'
     }).withConfig({
@@ -77,7 +77,7 @@ it('invokes the createChannelAndFund protocol', async () => {
   };
 
   const service = interpret<any, any, any>(
-    Application.applicationWorkflow(store, messagingService, {
+    Application.workflow(store, messagingService, {
       fundingStrategy: 'Direct',
       applicationSite: 'localhost'
     }).withConfig({
@@ -111,7 +111,7 @@ it('raises an channel updated action when the channel is updated', async () => {
     }
   };
   const service = interpret<any, any, any>(
-    Application.applicationWorkflow(store, messagingService, {
+    Application.workflow(store, messagingService, {
       fundingStrategy: 'Direct',
       applicationSite: 'localhost'
     }).withConfig(mockOptions)
@@ -143,7 +143,7 @@ it.skip('handles confirmCreateChannel workflow finishing', async () => {
   };
 
   const service = interpret<any, any, any>(
-    Application.applicationWorkflow(store, messagingService, {
+    Application.workflow(store, messagingService, {
       fundingStrategy: 'Direct',
       applicationSite: 'localhost'
     }).withConfig({
@@ -183,7 +183,7 @@ it('initializes and starts the join channel machine', async () => {
   };
 
   const service = interpret<any, any, any>(
-    Application.applicationWorkflow(store, messagingService, {
+    Application.workflow(store, messagingService, {
       fundingStrategy: 'Direct',
       applicationSite: 'localhost'
     }).withConfig({
@@ -226,7 +226,7 @@ it('starts concluding when requested', async () => {
     )
   };
   const service = interpret<any, any, any>(
-    Application.applicationWorkflow(store, messagingService, {
+    Application.workflow(store, messagingService, {
       fundingStrategy: 'Direct',
       applicationSite: 'localhost'
     }).withConfig({
@@ -279,7 +279,7 @@ it('starts concluding when receiving a final state', async () => {
   };
 
   const service = interpret<any, any, any>(
-    Application.applicationWorkflow(store, messagingService, {
+    Application.workflow(store, messagingService, {
       channelId,
       fundingStrategy: 'Direct',
       applicationSite: 'localhost'

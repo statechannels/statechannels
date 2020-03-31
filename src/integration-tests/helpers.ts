@@ -62,7 +62,7 @@ export class Player {
   startAppWorkflow(startingState: string, context: App.WorkflowContext) {
     const workflowId = Guid.create().toString();
     const machine = interpret<any, any, any>(
-      App.applicationWorkflow(
+      App.workflow(
         this.store,
         this.messagingService,
         context ? context : {applicationSite: 'localhost', fundingStrategy: 'Direct'}
