@@ -56,5 +56,6 @@ export enum Errors {
   noSiteForChannel = 'No site defined for channel',
   budgetAlreadyExists = 'There already exists a budget for this site',
   budgetInsufficient = 'Budget insufficient to reserve funds',
-  amountUnauthorized = 'Amount unauthorized in current budget'
+  amountUnauthorized = 'Amount unauthorized in current budget',
+  cannotFindDestination = 'Cannot find destination for participant'
 }
