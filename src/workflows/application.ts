@@ -161,7 +161,7 @@ const generateConfig = (
     },
     createChannelInStore: {
       invoke: {
-        data: (context, event) => event.data,
+        data: (_, event) => event.data,
         src: 'createChannel',
         onDone: {
           target: 'openChannelAndFundProtocol',
@@ -304,13 +304,11 @@ export const workflow = (
   };
 
   const guards: WorkflowGuards = {
-    channelOpen: (context: ChannelIdExists, event: ChannelUpdated): boolean =>
+    channelOpen: (_, event: ChannelUpdated): boolean =>
       !event.storeEntry.latestSupportedByMe.isFinal,
-    channelClosing: (context: ChannelIdExists, event: ChannelUpdated): boolean =>
-      !!event.storeEntry.latest?.isFinal,
+    channelClosing: (_, event: ChannelUpdated): boolean => !!event.storeEntry.latest?.isFinal,
 
-    channelClosed: (context: ChannelIdExists, event: any): boolean =>
-      !!event.storeEntry.supported?.isFinal
+    channelClosed: (_, event: any): boolean => !!event.storeEntry.supported?.isFinal
   };
 
   const services: WorkflowServices = {
