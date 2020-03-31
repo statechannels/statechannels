@@ -1,5 +1,5 @@
 import {BigNumber} from 'ethers/utils';
-import {MemoryChannelStoreEntry} from './memory-channel-storage';
+import {ChannelStoredData} from './channel-store-entry';
 
 export interface SiteBudget {
   domain: string;
@@ -135,13 +135,13 @@ export interface DBBackend {
   ledgers(): Promise<Record<string, string | undefined>>;
   nonces(): Promise<Record<string, BigNumber | undefined>>;
   objectives(): Promise<Objective[]>;
-  channels(): Promise<Record<string, MemoryChannelStoreEntry | undefined>>;
+  channels(): Promise<Record<string, ChannelStoredData | undefined>>;
 
   setPrivateKey(key: string, value: string): Promise<string>;
   getPrivateKey(key: string): Promise<string | undefined>;
-  setChannel(key: string, value: MemoryChannelStoreEntry): Promise<MemoryChannelStoreEntry>;
-  addChannel(key: string, value: MemoryChannelStoreEntry): Promise<MemoryChannelStoreEntry>;
-  getChannel(key: string): Promise<MemoryChannelStoreEntry | undefined>;
+  setChannel(key: string, value: ChannelStoredData): Promise<ChannelStoredData>;
+  addChannel(key: string, value: ChannelStoredData): Promise<ChannelStoredData>;
+  getChannel(key: string): Promise<ChannelStoredData | undefined>;
   getBudget(key: string): Promise<SiteBudget | undefined>;
   setBudget(key: string, budget: SiteBudget): Promise<SiteBudget>;
   deleteBudget(key: string): Promise<void>;

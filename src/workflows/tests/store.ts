@@ -21,22 +21,22 @@ export class TestStore extends XstateStore implements Store {
       .map(p => p.signingAddress)
       .findIndex(a => a === address);
     const {funding, applicationSite} = opts || {};
-    const entry = new MemoryChannelStoreEntry(
-      signedState,
+    const entry = new MemoryChannelStoreEntry({
+      channelConstants: signedState,
       myIndex,
-      {[hashState(signedState)]: signedState},
-      {[hashState(signedState)]: signedState.signatures},
+      stateVariables: {[hashState(signedState)]: signedState},
+      signatures: {[hashState(signedState)]: signedState.signatures},
       funding,
       applicationSite
-    );
-    await this.backend.setChannel(entry.channelId, entry);
+    });
+    await this.backend.setChannel(entry.channelId, entry.data());
 
     return entry;
   }
   async setLedgerByEntry(entry: MemoryChannelStoreEntry) {
     // This is not on the Store interface itself -- it is useful to set up a test store
     const {channelId} = entry;
-    this.backend.setChannel(channelId, entry);
+    this.backend.setChannel(channelId, entry.data());
     const address = await this.getAddress();
     const peerId = entry.participants.find(p => p.signingAddress !== address);
     if (!peerId) throw 'No peer';

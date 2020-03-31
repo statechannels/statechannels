@@ -1,4 +1,4 @@
-import {ChannelConstants, State, SignedState, StateVariables} from './types';
+import {ChannelConstants, State, SignedState, StateVariables, Participant} from './types';
 import {Funding} from '.';
 import {BigNumber} from 'ethers/utils';
 
@@ -28,5 +28,6 @@ export interface ChannelStoreEntry {
   readonly funding?: Funding;
   readonly sortedStates: State[];
   readonly applicationSite?: string;
+  readonly participants: Participant[];
   data(): ChannelStoredData;
 }
