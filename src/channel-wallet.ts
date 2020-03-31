@@ -79,7 +79,6 @@ export class ChannelWallet {
             }), // FIXME
             workflowId
           );
-          this.workflows.push(workflow);
 
           workflow.machine.send(request);
         } else {
@@ -102,13 +101,12 @@ export class ChannelWallet {
           workflowId,
           true // devtools
         );
-        this.workflows.push(workflow);
 
         workflow.machine.send(request);
         break;
       }
       case 'CLOSE_AND_WITHDRAW': {
-        const workflow = this.startWorkflow(
+        this.startWorkflow(
           CloseLedgerAndWithdraw.workflow(this.store, this.messagingService, {
             opponent: request.hub,
             player: request.player,
@@ -117,15 +115,13 @@ export class ChannelWallet {
           }),
           workflowId
         );
-        this.workflows.push(workflow);
         break;
       }
       case 'ENABLE_ETHEREUM': {
-        const workflow = this.startWorkflow(
+        this.startWorkflow(
           ethereumEnableWorkflow(this.store, this.messagingService, {requestId: request.requestId}),
           workflowId
         );
-        this.workflows.push(workflow);
         break;
       }
     }
@@ -147,7 +143,9 @@ export class ChannelWallet {
     // TODO: Figure out how to resolve rendering priorities
     this.renderUI(machine);
 
-    return {id: workflowId, machine, domain: 'TODO'};
+    const workflow = {id: workflowId, machine, domain: 'TODO'};
+    this.workflows.push(workflow);
+    return workflow;
   }
 
   private renderUI(machine) {
