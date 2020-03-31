@@ -36,20 +36,25 @@ export class ChannelWallet {
     // Whenever an OpenChannel objective is received
     // we alert the user that there is a new channel
     // It is up to the app to call JoinChannel
-    this.store.objectiveFeed.pipe(filter(isOpenChannel)).subscribe(async o => {
+    this.store.objectiveFeed.pipe(filter(isOpenChannel)).subscribe(async objective => {
       const channelEntry = await this.store
-        .channelUpdatedFeed(o.data.targetChannelId)
+        .channelUpdatedFeed(objective.data.targetChannelId)
         .pipe(take(1))
         .toPromise();
 
       this.startWorkflow(
-        Application.workflow(this.store, this.messagingService, {} as any),
-        this.calculateWorkflowId(o)
-      ); // FIXME: add proper context
+        Application.workflow(this.store, this.messagingService, {
+          type: 'JOIN_CHANNEL',
+          fundingStrategy: objective.data.fundingStrategy,
+          channelId: objective.data.targetChannelId,
+          applicationSite: 'TODO' // FIXME
+        }),
+        this.calculateWorkflowId(objective)
+      );
 
       this.messagingService.sendChannelNotification('ChannelProposed', {
         ...(await convertToChannelResult(channelEntry)),
-        fundingStrategy: o.data.fundingStrategy
+        fundingStrategy: objective.data.fundingStrategy
       });
     });
 
@@ -84,15 +89,10 @@ export class ChannelWallet {
     switch (request.type) {
       case 'CREATE_CHANNEL': {
         if (!this.isWorkflowIdInUse(workflowId)) {
-          const workflow = this.startWorkflow(
-            Application.workflow(this.store, this.messagingService, {
-              fundingStrategy: 'Direct',
-              applicationSite: request.applicationSite
-            }), // FIXME
+          this.startWorkflow(
+            Application.workflow(this.store, this.messagingService, request),
             workflowId
           );
-
-          workflow.machine.send(request);
         } else {
           // TODO: To allow RPS to keep working we just warn about duplicate events
           // Eventually this could probably be an error

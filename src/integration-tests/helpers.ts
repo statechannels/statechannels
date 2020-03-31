@@ -60,11 +60,7 @@ export class Player {
   startAppWorkflow(startingState: string, context: App.WorkflowContext) {
     const workflowId = Guid.create().toString();
     const machine = interpret<any, any, any>(
-      App.workflow(
-        this.store,
-        this.messagingService,
-        context ? context : {applicationSite: 'localhost', fundingStrategy: 'Direct'}
-      ),
+      App.workflow(this.store, this.messagingService).withContext(context),
       {devTools: true}
     )
       .onTransition((state, event) => process.env.ADD_LOGS && logTransition(state, event, this.id))
