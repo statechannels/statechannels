@@ -28,7 +28,7 @@ function* rootSaga() {
   yield fork(metamaskSaga);
   yield fork(loginSaga);
 
-  let client;
+  let client: RPSChannelClient;
   if (process.env.AUTO_OPPONENT === 'A' || process.env.AUTO_OPPONENT === 'B') {
     console.info('Bypassing state channel wallet');
     client = new RPSChannelClient(new ChannelClient(new FakeChannelProvider()));
@@ -53,17 +53,14 @@ function* rootSaga() {
   } else if (process.env.AUTO_OPPONENT === 'B') {
     yield fork(autoOpponent, 'B', client);
   } else {
-    // wait for the address from wallet before starting firebase sagas
-    yield call([client, 'enableEthereum']);
-    const address: string = yield call([client, 'getAddress']);
-    yield fork(firebaseInboxListener, client, address);
+    yield call([window.channelProvider, 'enable']);
+    yield fork(firebaseInboxListener, client, window.channelProvider.signingAddress);
 
-    const outcomeAddress: string = yield call([client, 'getEthereumSelectedAddress']);
     yield call(
       [client, 'approveBudgetAndFund'],
       '0x8ac7230489e80000', // 10 eth
       '0x8ac7230489e80000',
-      outcomeAddress,
+      window.channelProvider.selectedAddress,
       HUB.signingAddress,
       HUB.outcomeAddress
     );
