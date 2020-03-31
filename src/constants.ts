@@ -42,3 +42,6 @@ export function tokenAddress(assetHolderAddress: string): string | undefined {
 export function useVirtualFunding(): boolean {
   return getEnvBool('USE_VIRTUAL_FUNDING', false);
 }
+
+export const CLEAR_STORAGE_ON_START = getEnvBool('CLEAR_STORAGE_ON_START', false);
+export const USE_INDEXED_DB = getEnvBool('USE_INDEXED_DB', false);
