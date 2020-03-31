@@ -15,6 +15,7 @@ export class TestStore extends XstateStore implements Store {
     opts?: {
       funding?: Funding;
       applicationSite?: string;
+      hasChallenge?: boolean;
     }
   ): Promise<ChannelStoreEntry> {
     const address = await this.getAddress();

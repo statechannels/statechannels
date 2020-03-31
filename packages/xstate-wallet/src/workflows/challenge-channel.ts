@@ -12,10 +12,27 @@ export const config: StateNodeConfig<Init, any, any> = {
   key: WORKFLOW,
   initial: 'idle',
   entry: 'assignChainWatcher',
-  on: {CHALLENGE_PLACED_ONCHAIN_AS_EXPECTED: 'done'},
+  on: {CHALLENGE_DEALT_WITH: 'done'},
   states: {
-    idle: {on: {SAFE_TO_CHALLENGE: 'submit'}},
-    submit: {invoke: {src: 'submitChallengeTransaction', onDone: 'idle', onError: 'failure'}},
+    idle: {
+      on: {
+        SAFE_TO_CHALLENGE: 'submit',
+        CHALLENGE_PLACED_ONCHAIN_AS_EXPECTED: 'waitForResponseOrTimeout'
+      }
+    },
+    waitForResponseOrTimeout: {
+      on: {
+        TIMEOUT_PASSED: 'idle',
+        RESPONSE_OBSERVED: 'idle'
+      }
+    },
+    submit: {
+      invoke: {
+        src: 'submitChallengeTransaction',
+        onDone: {target: 'idle'},
+        onError: 'failure'
+      }
+    },
     done: {type: 'final'},
     failure: {entry: assign<any>({error: () => 'Challenge failed'})}
   }

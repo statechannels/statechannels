@@ -66,7 +66,7 @@ it('initializes and starts challenge thing', async () => {
   ).start();
 
   await waitForExpect(async () => {
-    expect(service.state.value).toEqual('done');
+    expect(service.state.value).toEqual('waitForResponseOrTimeout');
     const {finalized, challenge} = await fakeChain.getChainInfo(channelId);
     expect(finalized).toBe(false);
     expect(challenge).toMatchObject({

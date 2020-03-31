@@ -108,6 +108,7 @@ interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
     createChannelInStore: {};
     running: {};
     sendChallenge: {};
+    waitingForResponse: {};
     closing: {};
     // TODO: Is it possible to type these as type:'final' ?
     done: {};
@@ -223,12 +224,8 @@ const generateConfig = (
         src: 'invokeChallengingProtocol',
         data: context => context,
         autoForward: true,
-        onDone: {target: 'inChallenge', actions: [actions.sendChallengeChannelResponse]}
+        onDone: {target: 'running', actions: [actions.sendChallengeChannelResponse]}
       }
-    },
-
-    inChallenge: {
-      type: 'inChallenge'
     },
 
     done: {type: 'final'}
