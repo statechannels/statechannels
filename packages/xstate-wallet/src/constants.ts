@@ -39,4 +39,6 @@ export function tokenAddress(assetHolderAddress: string): string | undefined {
   return assetHolderAddress;
 }
 
-export const useVirtualFunding: boolean = getEnvBool('USE_VIRTUAL_FUNDING');
+export function useVirtualFunding(): boolean {
+  return getEnvBool('USE_VIRTUAL_FUNDING', false);
+}
