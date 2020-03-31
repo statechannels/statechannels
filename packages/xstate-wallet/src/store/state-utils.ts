@@ -80,8 +80,7 @@ export function outcomesEqual(left: Outcome, right?: Outcome) {
       ' // conclusion ' +
       _.isEqual(left, right)
   );
-  return !!right;
-  // return _.isEqual(left, right);
+  return _.isEqual(left, right);
 }
 
 export const firstState = (

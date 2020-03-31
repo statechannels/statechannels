@@ -64,7 +64,7 @@ test('concludes on their turn', async () => {
   await playerA.messagingService.receiveRequest(generateCloseRequest(channelId));
 
   await waitForExpect(async () => {
-    expect(playerA.workflowState).toEqual('done'); // is this enough of an assertion?
+    expect(playerA.workflowState).toEqual('done');
     expect(playerB.workflowState).toEqual('done');
   }, 3000);
   expect((await playerA.store.getEntry(channelId)).supported.isFinal).toBe(true);
