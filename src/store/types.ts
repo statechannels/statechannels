@@ -1,5 +1,5 @@
 import {BigNumber} from 'ethers/utils';
-import {ChannelStoredData} from './channel-store-entry';
+import {Funding} from './store';
 
 export interface SiteBudget {
   domain: string;
@@ -129,6 +129,17 @@ export interface Message {
   objectives?: Objective[];
 }
 
+export type ChannelStoredData = {
+  stateVariables: Record<string, StateVariables>;
+  channelConstants: Omit<ChannelConstants, 'challengeDuration' | 'channelNonce'> & {
+    challengeDuration: BigNumber | string;
+    channelNonce: BigNumber | string;
+  };
+  signatures: Record<string, Array<string | undefined>>;
+  funding: Funding | undefined;
+  applicationSite: string | undefined;
+  myIndex: number;
+};
 export interface DBBackend {
   initialize(cleanSlate?: boolean): Promise<any>;
   privateKeys(): Promise<Record<string, string | undefined>>;

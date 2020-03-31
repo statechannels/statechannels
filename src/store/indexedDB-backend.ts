@@ -1,8 +1,7 @@
 import {BigNumber} from 'ethers/utils';
-import {MemoryChannelStoreEntry} from './memory-channel-storage';
-import {Objective, DBBackend, SiteBudget} from './types';
+import {ChannelStoreEntry} from './channel-store-entry';
+import {Objective, DBBackend, SiteBudget, ChannelStoredData} from './types';
 import * as _ from 'lodash';
-import {ChannelStoredData} from './channel-store-entry';
 
 enum ObjectStores {
   channels = 'channels',
@@ -81,14 +80,9 @@ export class IndexedDBBackend implements DBBackend {
   // Generic Getters
 
   public async channels() {
-    const channels = await this.getAll(ObjectStores.channels);
-    for (const key in channels) {
-      if (channels[key]) {
-        channels[key] = MemoryChannelStoreEntry.fromJson(channels[key]);
-      }
-    }
-    return channels;
+    return this.getAll(ObjectStores.channels);
   }
+
   public async objectives() {
     return this.getAll(ObjectStores.objectives, true);
   }
@@ -123,7 +117,7 @@ export class IndexedDBBackend implements DBBackend {
   }
   public async getChannel(key: string) {
     const channel = await this.get(ObjectStores.channels, key);
-    return channel && MemoryChannelStoreEntry.fromJson(channel);
+    return channel && ChannelStoreEntry.fromJson(channel);
   }
   public async getObjective(key: number) {
     return this.get(ObjectStores.objectives, key);
