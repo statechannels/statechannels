@@ -8,7 +8,7 @@ import {interpret, Interpreter, State, StateNode} from 'xstate';
 import {Guid} from 'guid-typescript';
 import {Notification, Response} from '@statechannels/client-api-schema';
 import {filter, take} from 'rxjs/operators';
-import {Message, isOpenChannel} from './store/types';
+import {Message, isOpenChannel, OpenChannel} from './store/types';
 
 import {ApproveBudgetAndFund, CloseLedgerAndWithdraw, Application} from './workflows';
 import {ethereumEnableWorkflow} from './workflows/ethereum-enable';
@@ -42,6 +42,11 @@ export class ChannelWallet {
         .pipe(take(1))
         .toPromise();
 
+      this.startWorkflow(
+        Application.workflow(this.store, this.messagingService, {} as any),
+        this.calculateWorkflowId(o)
+      ); // FIXME: add proper context
+
       this.messagingService.sendChannelNotification('ChannelProposed', {
         ...(await convertToChannelResult(channelEntry)),
         fundingStrategy: o.data.fundingStrategy
@@ -55,11 +60,19 @@ export class ChannelWallet {
     return this.workflows.map(w => w.id).indexOf(workflowId) > -1;
   }
 
+  public getWorkflow(workflowId: string): Workflow {
+    const workflow = this.workflows.find(w => w.id === workflowId);
+    if (!workflow) throw Error('Workflow not found');
+    return workflow;
+  }
+
   // Deterministic workflow ids for certain workflows allows us to avoid spawning a duplicate workflow if the app sends duplicate requests
-  private calculateWorkflowId(request: AppRequestEvent): string {
+  private calculateWorkflowId(request: AppRequestEvent | OpenChannel): string {
     switch (request.type) {
       case 'JOIN_CHANNEL':
         return `${request.type}-${request.channelId}`;
+      case 'OpenChannel':
+        return `JOIN_CHANNEL-${request.data.targetChannelId}`;
       case 'APPROVE_BUDGET_AND_FUND':
         return `${request.type}-${request.player.participantId}-${request.hub.participantId}`;
       default:
@@ -69,8 +82,7 @@ export class ChannelWallet {
   private handleRequest(request: AppRequestEvent) {
     const workflowId = this.calculateWorkflowId(request);
     switch (request.type) {
-      case 'CREATE_CHANNEL':
-      case 'JOIN_CHANNEL': {
+      case 'CREATE_CHANNEL': {
         if (!this.isWorkflowIdInUse(workflowId)) {
           const workflow = this.startWorkflow(
             Application.workflow(this.store, this.messagingService, {
@@ -90,6 +102,9 @@ export class ChannelWallet {
         }
         break;
       }
+      case 'JOIN_CHANNEL':
+        this.getWorkflow(this.calculateWorkflowId(request)).machine.send(request);
+        break;
       case 'APPROVE_BUDGET_AND_FUND': {
         const workflow = this.startWorkflow(
           ApproveBudgetAndFund.machine(this.store, this.messagingService, {
@@ -134,10 +149,10 @@ export class ChannelWallet {
     if (this.isWorkflowIdInUse(workflowId)) {
       throw new Error(`There is already a workflow running with id ${workflowId}`);
     }
-
-    const machine = interpret<any, any, any>(machineConfig, {devTools})
-      .onTransition((state, event) => process.env.ADD_LOGS && logTransition(state, event, this.id))
-
+    const machine = interpret<any, any, any>(machineConfig, {devTools: true})
+      .onTransition(
+        (state, event) => process.env.ADD_LOGS && logTransition(state, event, workflowId)
+      )
       .onDone(() => (this.workflows = this.workflows.filter(w => w.id !== workflowId)))
       .start();
     // TODO: Figure out how to resolve rendering priorities
