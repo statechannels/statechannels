@@ -5,14 +5,17 @@ import {MessagingService} from './messaging';
 import {ChainWatcher} from './chain';
 import {IndexedDBBackend} from './store/indexedDB-backend';
 import {MemoryBackend} from './store/memory-backend';
-import {TestStore} from './workflows/tests/store';
+import {XstateStore} from './store';
+import * as constants from './constants';
 
 (async function() {
   const {privateKey} = ethers.Wallet.createRandom();
   const chain = new ChainWatcher();
-  const backend = process.env.USE_INDEXED_DB ? new IndexedDBBackend() : new MemoryBackend();
-  const store = new TestStore(chain, backend);
-  await store.initialize([privateKey]);
+
+  const backend = constants.USE_INDEXED_DB ? new IndexedDBBackend() : new MemoryBackend();
+  const store = new XstateStore(chain, backend);
+
+  await store.initialize([privateKey], constants.CLEAR_STORAGE_ON_START);
   const messagingService = new MessagingService(store);
   const channelWallet = new ChannelWallet(store, messagingService);
 
