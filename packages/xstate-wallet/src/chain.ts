@@ -1,18 +1,23 @@
 import {
   ContractArtifacts,
   createETHDepositTransaction,
-  Transactions
+  Transactions,
+  getChallengeRegisteredEvent,
+  ChallengeRegisteredEvent
 } from '@statechannels/nitro-protocol';
-import {getProvider} from './utils/contract-utils';
-import {ethers} from 'ethers';
 import {BigNumber, bigNumberify, hexZeroPad} from 'ethers/utils';
-import {State, SignedState} from './store/types';
+import {ethers} from 'ethers';
 import {Observable, fromEvent, from, merge} from 'rxjs';
 import {filter, map} from 'rxjs/operators';
-import {ETH_ASSET_HOLDER_ADDRESS, NITRO_ADJUDICATOR_ADDRESS} from './constants';
+
 import EventEmitter = require('eventemitter3');
 
-import {toNitroSignedState, calculateChannelId} from './store/state-utils';
+import {fromNitroState, toNitroSignedState, calculateChannelId} from './store/state-utils';
+import {getProvider} from './utils/contract-utils';
+import {State, SignedState} from './store/types';
+import {ETH_ASSET_HOLDER_ADDRESS, NITRO_ADJUDICATOR_ADDRESS} from './constants';
+import {exists} from './utils';
+import {Zero} from 'ethers/constants';
 
 const EthAssetHolderInterface = new ethers.utils.Interface(
   // https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
@@ -36,6 +41,7 @@ export interface Chain {
 
   // Feeds
   chainUpdatedFeed: (channelId: string) => Observable<ChannelChainInfo>;
+  challengeRegisteredFeed: (channelId: string) => Observable<ChallengeRegistered>;
 
   // Setup / Web3 Specific
   ethereumEnable: () => Promise<string>;
@@ -48,21 +54,28 @@ export interface Chain {
   getChainInfo: (channelId: string) => Promise<ChannelChainInfo>;
 }
 
-// TODO: This chain should be fleshed out enough so it mimics basic chain behavior
 const UPDATED = 'updated';
+
+const CHALLENGE_REGISTERED = 'challengeRegistered';
+const CHALLENGE_CLEARED = 'challengeCleared';
+const CONCLUDED = 'concluded';
+
 type Updated = ChannelChainInfo & {channelId: string};
+
+type ChallengeRegistered = {channelId: string; challengeState: State; challengeExpiry: BigNumber};
+type ChallengeCleared = {channelId: string};
+type Concluded = {channelId: string};
+
 export class FakeChain implements Chain {
   private holdings: Record<string, BigNumber> = {};
-  private channelStatus: Record<
-    string,
-    {
-      state: State;
-      challengeExpiry: BigNumber;
-      finalized: boolean;
-    }
-  > = {};
+  private channelStatus: Record<string, ChannelChainInfo> = {};
   private eventEmitter: EventEmitter<{
-    updated: [Updated];
+    // TODO: Remove?
+    [UPDATED]: [Updated];
+    // TODO: Add AssetHolder events
+    [CHALLENGE_REGISTERED]: [ChallengeRegistered];
+    [CHALLENGE_CLEARED]: [ChallengeCleared];
+    [CONCLUDED]: [Concluded];
   }> = new EventEmitter();
 
   private fakeSelectedAddress: string;
@@ -77,17 +90,24 @@ export class FakeChain implements Chain {
 
   public async challenge(support: SignedState[], privateKey: string): Promise<void> {
     const channelId = calculateChannelId(support[0]);
+
     this.channelStatus[channelId] = {
       ...(this.channelStatus[channelId] || {}),
-      challengeExpiry: bigNumberify(100),
-      state: support[support.length - 1],
+      challenge: {
+        challengeExpiry: bigNumberify(100),
+        state: support[support.length - 1]
+      },
       finalized: false
     };
+
     this.eventEmitter.emit(UPDATED, {
+      channelId,
       amount: this.holdings[channelId],
-      finalized: true,
-      challenge: this.channelStatus[channelId],
-      channelId
+      finalized: false,
+      challenge: {
+        state: support[support.length - 1],
+        challengeExpiry: bigNumberify(100)
+      }
     });
   }
 
@@ -97,8 +117,7 @@ export class FakeChain implements Chain {
 
     this.holdings[channelId] = bigNumberify('0x0');
     this.eventEmitter.emit(UPDATED, {
-      amount: this.holdings[channelId],
-      finalized: true,
+      ...this.channelStatus[channelId],
       channelId
     });
   }
@@ -116,19 +135,19 @@ export class FakeChain implements Chain {
     if (current.gte(expectedHeld)) {
       this.holdings[channelId] = current.add(amount);
       this.eventEmitter.emit(UPDATED, {
-        amount: this.holdings[channelId],
-        finalized: false,
+        ...this.channelStatus[channelId],
         channelId
       });
     }
   }
 
   public async getChainInfo(channelId: string): Promise<ChannelChainInfo> {
-    return {
-      amount: this.holdings[channelId] || bigNumberify(0),
-      finalized: (this.channelStatus[channelId] || {}).finalized || false,
-      challenge: this.channelStatus[channelId]
-    };
+    return (
+      this.channelStatus[channelId] || {
+        finalized: false,
+        amount: Zero
+      }
+    );
   }
 
   public chainUpdatedFeed(channelId: string): Observable<ChannelChainInfo> {
@@ -137,6 +156,27 @@ export class FakeChain implements Chain {
     const updates = fromEvent(this.eventEmitter, UPDATED).pipe(
       filter((event: Updated) => event.channelId === channelId),
       map(({amount, finalized, challenge}) => ({amount, finalized, challenge}))
+    );
+
+    return merge(first, updates);
+  }
+
+  public challengeRegisteredFeed(channelId: string): Observable<ChallengeRegistered> {
+    const first = from(this.getChainInfo(channelId)).pipe(
+      filter(exists),
+      filter(({challenge}: ChannelChainInfo) => typeof challenge !== 'undefined'),
+      map(({challenge}: ChannelChainInfo) => ({
+        channelId,
+        // eslint-disable-next-line
+        challengeState: challenge!.state,
+        // eslint-disable-next-line
+        challengeExpiry: challenge!.challengeExpiry
+      }))
+    );
+
+    const updates = fromEvent(this.eventEmitter, CHALLENGE_REGISTERED).pipe(
+      filter((event: ChallengeRegistered) => event.channelId === channelId),
+      map(({challengeState, challengeExpiry}) => ({channelId, challengeState, challengeExpiry}))
     );
 
     return merge(first, updates);
@@ -257,12 +297,44 @@ export class ChainWatcher implements Chain {
     const first = from(this.getChainInfo(channelId));
 
     const updates = fromEvent(this._assetHolders[0], 'Deposited').pipe(
+      // TODO: Type event correctly, use ethers-utils.js
       filter((event: Array<string | BigNumber>) => event[0] === channelId),
       map((event: Array<string | BigNumber>) => ({
         amount: bigNumberify(event[2]),
         finalized: false
       }))
     );
+    return merge(first, updates);
+  }
+
+  public challengeRegisteredFeed(channelId: string): Observable<ChallengeRegistered> {
+    if (!this._adjudicator) {
+      throw new Error('Not connected to contracts');
+    }
+
+    const first = from(this.getChainInfo(channelId)).pipe(
+      filter(({challenge}: ChannelChainInfo) => typeof challenge !== 'undefined'),
+      map(({challenge}: ChannelChainInfo) => ({
+        channelId,
+        // eslint-disable-next-line
+        challengeState: challenge!.state,
+        // eslint-disable-next-line
+        challengeExpiry: challenge!.challengeExpiry
+      }))
+    );
+
+    const updates = fromEvent(this._adjudicator, 'ChallengeRegistered').pipe(
+      filter((event: any) => event[0] === channelId), // index 0 of ChallengeRegistered event is channelId
+      map(getChallengeRegisteredEvent),
+      map((event: ChallengeRegisteredEvent) => ({
+        channelId,
+        challengeState: fromNitroState(
+          event.challengeStates[event.challengeStates.length - 1].state
+        ),
+        challengeExpiry: bigNumberify(event.finalizesAt)
+      }))
+    );
+
     return merge(first, updates);
   }
 }

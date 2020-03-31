@@ -30,7 +30,11 @@ export {
   convertBytes32ToAddress,
   convertAddressToBytes32,
 } from './contract/asset-holder';
-export {getChallengeRegisteredEvent, getChallengeClearedEvent} from './contract/challenge';
+export {
+  getChallengeRegisteredEvent,
+  getChallengeClearedEvent,
+  ChallengeRegisteredEvent,
+} from './contract/challenge';
 export {Channel, getChannelId} from './contract/channel';
 export {encodeConsensusData, decodeConsensusData, ConsensusData} from './contract/consensus-data';
 export {validTransition, ForceMoveAppContractInterface} from './contract/force-move-app';

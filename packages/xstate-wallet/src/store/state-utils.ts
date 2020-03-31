@@ -1,4 +1,4 @@
-import {State, ChannelConstants, Outcome, AllocationItem, SignedState} from './types';
+import {State, ChannelConstants, Outcome, AllocationItem, SignedState, Destination} from './types';
 import {
   State as NitroState,
   SignedState as NitroSignedState,
@@ -8,7 +8,8 @@ import {
   hashState as hashNitroState,
   getStateSignerAddress as getNitroSignerAddress,
   getChannelId,
-  convertAddressToBytes32
+  convertAddressToBytes32,
+  convertBytes32ToAddress
 } from '@statechannels/nitro-protocol';
 import {joinSignature, splitSignature, bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
@@ -29,6 +30,27 @@ function toNitroState(state: State): NitroState {
     appDefinition,
     channel,
     turnNum: state.turnNum.toNumber()
+  };
+}
+
+export function fromNitroState(state: NitroState): State {
+  const {appData, isFinal, outcome, challengeDuration, appDefinition, channel, turnNum} = state;
+
+  return {
+    appDefinition,
+    isFinal,
+    appData,
+    outcome: fromNitroOutcome(outcome),
+    turnNum: bigNumberify(turnNum),
+    challengeDuration: bigNumberify(challengeDuration),
+    channelNonce: bigNumberify(channel.channelNonce),
+    chainId: channel.chainId,
+    participants: channel.participants.map(x => ({
+      signingAddress: x,
+      // FIXME: Get real values
+      participantId: x,
+      destination: x as Destination
+    }))
   };
 }
 
@@ -99,6 +121,16 @@ function convertToNitroAllocationItems(allocationItems: AllocationItem[]): Nitro
   }));
 }
 
+function convertFromNitroAllocationItems(allocationItems: NitroAllocationItem[]): AllocationItem[] {
+  return allocationItems.map(a => ({
+    amount: bigNumberify(a.amount),
+    destination:
+      a.destination.substr(2, 22) === '00000000000000000000'
+        ? (convertBytes32ToAddress(a.destination) as Destination)
+        : (a.destination as Destination)
+  }));
+}
+
 export function convertToNitroOutcome(outcome: Outcome): NitroOutcome {
   switch (outcome.type) {
     case 'SimpleAllocation':
@@ -119,8 +151,37 @@ export function convertToNitroOutcome(outcome: Outcome): NitroOutcome {
         }
       ];
     case 'MixedAllocation':
+      // FIXME: is this a typo?
       return outcome.simpleAllocations.map(x => convertToNitroOutcome[0]);
   }
+}
+
+export function fromNitroOutcome(outcome: NitroOutcome): Outcome {
+  const [singleOutcomeItem] = outcome;
+
+  if (typeof singleOutcomeItem['allocationItems'] !== 'undefined') {
+    return {
+      type: 'SimpleAllocation',
+      assetHolderAddress: singleOutcomeItem.assetHolderAddress,
+      allocationItems: convertFromNitroAllocationItems(singleOutcomeItem['allocationItems'])
+    };
+  }
+
+  if (typeof singleOutcomeItem['guarantee'] !== 'undefined') {
+    return {
+      type: 'SimpleGuarantee',
+      assetHolderAddress: singleOutcomeItem.assetHolderAddress,
+      targetChannelId: singleOutcomeItem['guarantee'].targetChannelId,
+      destinations: singleOutcomeItem['guarantee'].destinations
+    };
+  }
+
+  return {
+    type: 'MixedAllocation',
+    // FIXME: Figure out what needs to be here
+    simpleAllocations: []
+    // simpleAllocations: outcome.map(fromNitroOutcome)
+  };
 }
 
 export function nextState(state: State, outcome: Outcome) {
