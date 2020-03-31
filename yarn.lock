@@ -9744,6 +9744,19 @@ bencode@2.0.1, bencode@^2.0.0:
   dependencies:
     safe-buffer "^5.1.1"
 
+better-ajv-errors@^0.6.7:
+  version "0.6.7"
+  resolved "https://registry.npmjs.org/better-ajv-errors/-/better-ajv-errors-0.6.7.tgz#b5344af1ce10f434fe02fc4390a5a9c811e470d1"
+  integrity sha512-PYgt/sCzR4aGpyNy5+ViSQ77ognMnWq7745zM+/flYO4/Yisdtp9wDQW2IKCyVYPUxQt3E/b5GBSwfhd1LPdlg==
+  dependencies:
+    "@babel/code-frame" "^7.0.0"
+    "@babel/runtime" "^7.0.0"
+    chalk "^2.4.1"
+    core-js "^3.2.1"
+    json-to-ast "^2.0.3"
+    jsonpointer "^4.0.1"
+    leven "^3.1.0"
+
 better-assert@~1.0.0:
   version "1.0.2"
   resolved "https://registry.npmjs.org/better-assert/-/better-assert-1.0.2.tgz#40866b9e1b9e0b55b481894311e68faffaebc522"
@@ -11999,6 +12012,11 @@ coa@^2.0.2:
     chalk "^2.4.1"
     q "^1.1.2"
 
+code-error-fragment@0.0.230:
+  version "0.0.230"
+  resolved "https://registry.npmjs.org/code-error-fragment/-/code-error-fragment-0.0.230.tgz#d736d75c832445342eca1d1fedbf17d9618b14d7"
+  integrity sha512-cadkfKp6932H8UkhzE/gcUqhRMNf8jHzkAN7+5Myabswaghu4xABTgPHDCjW+dBAJxj/SpkTYokpzDqY4pCzQw==
+
 code-point-at@^1.0.0:
   version "1.1.0"
   resolved "https://registry.npmjs.org/code-point-at/-/code-point-at-1.1.0.tgz#0d070b4d043a5bea33a2f1a40e2edb3d9a4ccf77"
@@ -12661,7 +12679,7 @@ core-js@3.6.2:
   resolved "https://registry.npmjs.org/core-js/-/core-js-3.6.2.tgz#2799ea1a59050f0acf50dfe89b916d6503b16caa"
   integrity sha512-hIE5dXkRzRvnZ5vhkRfQxUvDxQZmD9oueA08jDYRBKJHx+VIl/Pne/e0A4x9LObEEthC/TqiZybUoNM4tRgnKg==
 
-core-js@3.6.4, core-js@^3.0.1, core-js@^3.0.4, core-js@^3.3.6, core-js@^3.5.0:
+core-js@3.6.4, core-js@^3.0.1, core-js@^3.0.4, core-js@^3.2.1, core-js@^3.3.6, core-js@^3.5.0:
   version "3.6.4"
   resolved "https://registry.npmjs.org/core-js/-/core-js-3.6.4.tgz#440a83536b458114b9cb2ac1580ba377dc470647"
   integrity sha512-4paDGScNgZP2IXXilaffL9X7968RuvwlkK3xWtZRVqgd8SYNiVKRJvkFd1aqqEuPfN7E68ZHEp9hDj6lHj4Hyw==
@@ -18628,6 +18646,11 @@ graceful-fs@^4.0.0, graceful-fs@^4.1.10, graceful-fs@^4.1.11, graceful-fs@^4.1.1
   resolved "https://registry.npmjs.org/graceful-readlink/-/graceful-readlink-1.0.1.tgz#4cafad76bc62f02fa039b2f94e9a3dd3a391a725"
   integrity sha1-TK+tdrxi8C+gObL5Tpo906ORpyU=
 
+grapheme-splitter@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.npmjs.org/grapheme-splitter/-/grapheme-splitter-1.0.4.tgz#9cf3a665c6247479896834af35cf1dbb4400767e"
+  integrity sha512-bzh50DW9kTPM00T8y4o8vQg89Di9oLJVLW/KaOGIXJWP/iqCN6WKYkbNOF04vFLJhwcpYUh9ydh/+5vpOqV4YQ==
+
 group-by@^0.0.1:
   version "0.0.1"
   resolved "https://registry.npmjs.org/group-by/-/group-by-0.0.1.tgz#857620575f6714786f8d86bb19fd13e188dd68a4"
@@ -21699,6 +21722,14 @@ json-stringify-safe@5.0.x, json-stringify-safe@^5.0.1, json-stringify-safe@~5.0.
   resolved "https://registry.npmjs.org/json-stringify-safe/-/json-stringify-safe-5.0.1.tgz#1296a2d58fd45f19a0f6ce01d65701e2c735b6eb"
   integrity sha1-Epai1Y/UXxmg9s4B1lcB4sc1tus=
 
+json-to-ast@^2.0.3:
+  version "2.1.0"
+  resolved "https://registry.npmjs.org/json-to-ast/-/json-to-ast-2.1.0.tgz#041a9fcd03c0845036acb670d29f425cea4faaf9"
+  integrity sha512-W9Lq347r8tA1DfMvAGn9QNcgYm4Wm7Yc+k8e6vezpMnRT+NHbtlxgNBXRVjXe9YM6eTn6+p/MKOlV/aABJcSnQ==
+  dependencies:
+    code-error-fragment "0.0.230"
+    grapheme-splitter "^1.0.4"
+
 json3@3.3.0:
   version "3.3.0"
   resolved "https://registry.npmjs.org/json3/-/json3-3.3.0.tgz#0e9e7f6c5d270b758929af4d6fefdc84bd66e259"
@@ -21751,6 +21782,11 @@ jsonparse@^1.2.0:
   version "1.3.1"
   resolved "https://registry.npmjs.org/jsonparse/-/jsonparse-1.3.1.tgz#3f4dae4a91fac315f71062f8521cc239f1366280"
   integrity sha1-P02uSpH6wxX3EGL4UhzCOfE2YoA=
+
+jsonpointer@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.npmjs.org/jsonpointer/-/jsonpointer-4.0.1.tgz#4fd92cb34e0e9db3c89c8622ecf51f9b978c6cb9"
+  integrity sha1-T9kss04OnbPInIYi7PUfm5eMbLk=
 
 jsonrpc-lite@2.1.0:
   version "2.1.0"

@@ -8,7 +8,8 @@
     "Liam Horne <liam@l4v.io>"
   ],
   "dependencies": {
-    "ajv": "6.11.0"
+    "ajv": "6.11.0",
+    "better-ajv-errors": "^0.6.7"
   },
   "devDependencies": {
     "@types/eslint": "6.1.7",
