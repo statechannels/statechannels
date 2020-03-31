@@ -55,7 +55,11 @@ test('concludes on their turn', async () => {
   await playerA.store.createEntry(allSignState);
 
   [playerA, playerB].forEach(async player => {
-    player.startAppWorkflow('running', {channelId, applicationSite: 'localhost'});
+    player.startAppWorkflow('running', {
+      channelId,
+      applicationSite: 'localhost',
+      fundingStrategy: 'Direct'
+    });
     player.workflowMachine?.send('SPAWN_OBSERVERS');
     await player.store.setFunding(channelId, {type: 'Direct'});
   });

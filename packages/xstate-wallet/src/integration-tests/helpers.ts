@@ -60,13 +60,13 @@ export class Player {
 
     this.channelWallet.workflows.push({id: workflowId, machine, domain: 'TODO'});
   }
-  startAppWorkflow(startingState: string, context?: App.WorkflowContext) {
+  startAppWorkflow(startingState: string, context: App.WorkflowContext) {
     const workflowId = Guid.create().toString();
     const machine = interpret<any, any, any>(
       App.applicationWorkflow(
         this.store,
         this.messagingService,
-        context ? context : {applicationSite: 'localhost'}
+        context ? context : {applicationSite: 'localhost', fundingStrategy: 'Direct'}
       ),
       {
         devTools: true

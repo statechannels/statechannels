@@ -36,9 +36,11 @@ import {
   CreateChannelEvent,
   WorkflowEvent
 } from '../event-types';
+import {FundingStrategy} from '@statechannels/client-api-schema';
 
 export interface WorkflowContext {
   applicationSite: string;
+  fundingStrategy: FundingStrategy;
   channelId?: string;
   requestObserver?: any;
   updateObserver?: any;
@@ -268,12 +270,11 @@ export const applicationWorkflow = (
     hideUi: () => {
       messagingService.sendDisplayMessage('Hide');
     },
-    assignChannelParams: assign((context, event: CreateChannelEvent): ChannelParamsExist &
-      RequestIdExists => ({
-      channelParams: event,
-      requestId: event.requestId,
+    assignChannelParams: assign<WorkflowContext>({
+      channelParams: (_, event: CreateChannelEvent) => event,
+      requestId: (_, {requestId}: CreateChannelEvent) => requestId,
       applicationSite: context.applicationSite
-    })),
+    }),
     assignChannelId: assign((context, event: AssignChannelEvent) => {
       if (context.channelId) return context;
       switch (event.type) {
@@ -346,7 +347,7 @@ export const applicationWorkflow = (
       // Create a open channel objective so we can coordinate with all participants
       await store.addObjective({
         type: 'OpenChannel',
-        data: {targetChannelId: channelId, fundingStrategy: 'Direct'},
+        data: {targetChannelId: channelId, fundingStrategy: 'Direct'}, // FIXME
         participants
       });
       return channelId;
