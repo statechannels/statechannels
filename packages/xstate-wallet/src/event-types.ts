@@ -6,6 +6,7 @@ export interface JoinChannelEvent {
   type: 'JOIN_CHANNEL';
   channelId: string;
   requestId: number;
+  applicationSite: string;
 }
 // Events
 export type OpenEvent = CreateChannelEvent | JoinChannelEvent;
@@ -19,6 +20,7 @@ export interface CreateChannelEvent {
   challengeDuration: BigNumber;
   chainId: string;
   requestId: number;
+  applicationSite: string;
 }
 
 export interface ChannelUpdated {

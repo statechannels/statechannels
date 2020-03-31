@@ -63,7 +63,11 @@ export class Player {
   startAppWorkflow(startingState: string, context?: App.WorkflowContext) {
     const workflowId = Guid.create().toString();
     const machine = interpret<any, any, any>(
-      App.applicationWorkflow(this.store, this.messagingService, context),
+      App.applicationWorkflow(
+        this.store,
+        this.messagingService,
+        context ? context : {applicationSite: 'localhost'}
+      ),
       {
         devTools: true
       }
@@ -114,7 +118,7 @@ export function hookUpMessaging(playerA: Player, playerB: Player) {
       if (process.env.ADD_LOGS) {
         console.log(`MESSAGE A->B: ${JSON.stringify(pushMessageRequest)}`);
       }
-      await playerB.channelWallet.pushMessage(pushMessageRequest);
+      await playerB.channelWallet.pushMessage(pushMessageRequest, 'localhost');
     }
   });
 
@@ -124,7 +128,7 @@ export function hookUpMessaging(playerA: Player, playerB: Player) {
       if (process.env.ADD_LOGS) {
         console.log(`MESSAGE B->A: ${JSON.stringify(pushMessageRequest)}`);
       }
-      playerA.channelWallet.pushMessage(pushMessageRequest);
+      playerA.channelWallet.pushMessage(pushMessageRequest, 'localhost');
     }
   });
 }

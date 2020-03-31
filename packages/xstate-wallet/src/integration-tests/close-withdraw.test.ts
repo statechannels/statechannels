@@ -75,7 +75,7 @@ it('allows for a wallet to close the ledger channel with the hub and withdraw', 
       first()
     )
     .toPromise();
-  await playerA.messagingService.receiveRequest(closeAndWithdrawMessage);
+  await playerA.messagingService.receiveRequest(closeAndWithdrawMessage, 'localhost');
 
   await waitForExpect(async () => {
     expect(playerA.workflowState).toEqual('waitForUserApproval');

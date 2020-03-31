@@ -16,7 +16,8 @@ const store = new XstateStore();
 store.initialize(['0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29']);
 const messagingService: MessagingServiceInterface = new MessagingService(store);
 const testContext = {
-  channelId: '0x697ecf681033a2514ed19c90299a67ae8677f3c78b5877fe4550c4f0960e87b7'
+  channelId: '0x697ecf681033a2514ed19c90299a67ae8677f3c78b5877fe4550c4f0960e87b7',
+  applicationSite: 'localhost'
 };
 
 if (applicationWorkflowConfig.states) {
@@ -24,7 +25,7 @@ if (applicationWorkflowConfig.states) {
     // TODO: We should figure out a nice way of dealing with nested workflows
     if (state !== 'confirmJoinChannelWorkflow' && state !== 'confirmCreateChannelWorkflow') {
       const machine = interpret<any, any, any>(
-        applicationWorkflow(store, messagingService).withContext(testContext),
+        applicationWorkflow(store, messagingService, testContext),
         {
           devTools: true
         }

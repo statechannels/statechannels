@@ -76,7 +76,9 @@ export class ChannelWallet {
       case 'JOIN_CHANNEL': {
         if (!this.isWorkflowIdInUse(workflowId)) {
           const workflow = this.startWorkflow(
-            applicationWorkflow(this.store, this.messagingService),
+            applicationWorkflow(this.store, this.messagingService, {
+              applicationSite: request.applicationSite
+            }),
             workflowId
           );
           this.workflows.push(workflow);
@@ -158,9 +160,9 @@ export class ChannelWallet {
     }
   }
 
-  public async pushMessage(jsonRpcMessage) {
+  public async pushMessage(jsonRpcMessage, fromDomain) {
     // Update any workflows waiting on an observable
-    await this.messagingService.receiveRequest(jsonRpcMessage);
+    await this.messagingService.receiveRequest(jsonRpcMessage, fromDomain);
   }
 
   public onSendMessage(callback: (jsonRpcMessage: Notification | Response) => void) {
