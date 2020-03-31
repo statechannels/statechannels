@@ -397,11 +397,12 @@ export class XstateStore implements Store {
   private budgetLock = new AsyncLock();
 
   public async createBudget(budget: SiteBudget): Promise<void> {
-    const existingBudget = await this.backend.getBudget(budget.domain);
-    if (existingBudget) {
-      throw new Error(Errors.budgetAlreadyExists);
-    }
     await this.budgetLock.acquire(budget.domain, async release => {
+      const existingBudget = await this.backend.getBudget(budget.domain);
+      if (existingBudget) {
+        release();
+        throw new Error(Errors.budgetAlreadyExists);
+      }
       await this.backend.setBudget(budget.domain, budget);
       release();
     });
