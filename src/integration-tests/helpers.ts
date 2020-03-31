@@ -14,8 +14,7 @@ import {
   CloseAndWithdrawRequest
 } from '@statechannels/client-api-schema';
 import {interpret, Interpreter} from 'xstate';
-import * as App from '../workflows/application';
-import * as CreateAndFundLedger from '../workflows/create-and-fund-ledger';
+import {CreateAndFundLedger, Application as App} from '../workflows';
 import {Guid} from 'guid-typescript';
 import * as CloseLedgerAndWithdraw from '../workflows/close-ledger-and-withdraw';
 import {TestStore} from '../workflows/tests/store';
