@@ -33,6 +33,7 @@ import {
 } from '../event-types';
 
 export interface WorkflowContext {
+  applicationSite: string;
   channelId?: string;
   requestObserver?: any;
   updateObserver?: any;
@@ -204,7 +205,7 @@ const generateConfig = (
 export const applicationWorkflow = (
   store: Store,
   messagingService: MessagingServiceInterface,
-  context?: WorkflowContext
+  context: WorkflowContext
 ) => {
   const notifyOnChannelRequest = ({channelId}: ChannelIdExists) =>
     messagingService.requestFeed.pipe(
@@ -262,8 +263,12 @@ export const applicationWorkflow = (
     hideUi: () => {
       sendDisplayMessage('Hide');
     },
-    assignChannelParams: assign((_, event: CreateChannelEvent): ChannelParamsExist &
-      RequestIdExists => ({channelParams: event, requestId: event.requestId})),
+    assignChannelParams: assign((context, event: CreateChannelEvent): ChannelParamsExist &
+      RequestIdExists => ({
+      channelParams: event,
+      requestId: event.requestId,
+      applicationSite: context.applicationSite
+    })),
     assignChannelId: assign((context, event: AssignChannelEvent) => {
       if (context.channelId) return context;
       switch (event.type) {
@@ -331,7 +336,8 @@ export const applicationWorkflow = (
         participants,
         bigNumberify(challengeDuration),
         stateVars,
-        appDefinition
+        appDefinition,
+        context.applicationSite
       );
       // Create a open channel objective so we can coordinate with all participants
       await store.addObjective({
@@ -372,7 +378,7 @@ export const applicationWorkflow = (
   };
 
   const config = generateConfig(actions, guards);
-  return Machine(config).withConfig({services}, context || {});
+  return Machine(config).withConfig({services}, context);
 };
 
 const mockGuards: WorkflowGuards = {

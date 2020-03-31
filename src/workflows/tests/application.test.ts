@@ -21,7 +21,8 @@ const createChannelEvent: CreateChannelEvent = {
   participants: [],
   outcome: simpleEthAllocation([]),
   challengeDuration: bigNumberify(500),
-  requestId: 5
+  requestId: 5,
+  applicationSite: 'localhost'
 };
 
 it('initializes and starts confirmCreateChannelWorkflow', async () => {
@@ -37,7 +38,9 @@ it('initializes and starts confirmCreateChannelWorkflow', async () => {
   };
 
   const service = interpret<any, any, any>(
-    applicationWorkflow(store, messagingService).withConfig({services} as any) // TODO: We shouldn't need to cast
+    applicationWorkflow(store, messagingService, {applicationSite: 'localhost'}).withConfig({
+      services
+    } as any) // TODO: We shouldn't need to cast
   );
   service.start();
   service.send(createChannelEvent);
@@ -70,7 +73,10 @@ it('invokes the createChannelAndFund protocol', async () => {
   };
 
   const service = interpret<any, any, any>(
-    applicationWorkflow(store, messagingService).withConfig({services, actions} as any) // TODO: We shouldn't need to cast
+    applicationWorkflow(store, messagingService, {applicationSite: 'localhost'}).withConfig({
+      services,
+      actions
+    } as any) // TODO: We shouldn't need to cast
   );
 
   const channelId = '0xabc';
@@ -98,7 +104,9 @@ it('raises an channel updated action when the channel is updated', async () => {
     }
   };
   const service = interpret<any, any, any>(
-    applicationWorkflow(store, messagingService).withConfig(mockOptions)
+    applicationWorkflow(store, messagingService, {applicationSite: 'localhost'}).withConfig(
+      mockOptions
+    )
   );
   service.start();
 
@@ -127,7 +135,9 @@ it.skip('handles confirmCreateChannel workflow finishing', async () => {
   };
 
   const service = interpret<any, any, any>(
-    applicationWorkflow(store, messagingService).withConfig({services} as any)
+    applicationWorkflow(store, messagingService, {applicationSite: 'localhost'}).withConfig({
+      services
+    } as any)
   ); //TODO: Casting
   service.start('confirmCreateChannelWorkflow');
 
@@ -149,7 +159,8 @@ it('initializes and starts the join channel machine', async () => {
   const event: JoinChannelEvent = {
     type: 'JOIN_CHANNEL',
     channelId: '0xabc',
-    requestId: 5
+    requestId: 5,
+    applicationSite: 'localhost'
   };
 
   const services: Partial<WorkflowServices> = {
@@ -161,7 +172,9 @@ it('initializes and starts the join channel machine', async () => {
   };
 
   const service = interpret<any, any, any>(
-    applicationWorkflow(store, messagingService).withConfig({services} as any)
+    applicationWorkflow(store, messagingService, {applicationSite: 'localhost'}).withConfig({
+      services
+    } as any)
   );
 
   service.start();
@@ -199,7 +212,10 @@ it('starts concluding when requested', async () => {
     )
   };
   const service = interpret<any, any, any>(
-    applicationWorkflow(store, messagingService).withConfig({services, actions} as any)
+    applicationWorkflow(store, messagingService, {applicationSite: 'localhost'}).withConfig({
+      services,
+      actions
+    } as any)
   ); // TODO: Casting
   service.start('running');
   service.send({type: 'PLAYER_REQUEST_CONCLUDE', channelId});
@@ -246,7 +262,10 @@ it('starts concluding when receiving a final state', async () => {
   };
 
   const service = interpret<any, any, any>(
-    applicationWorkflow(store, messagingService, {channelId}).withConfig({services} as any)
+    applicationWorkflow(store, messagingService, {
+      channelId,
+      applicationSite: 'localhost'
+    }).withConfig({services} as any)
   ); //TODO: Casting
   service.start('running');
 

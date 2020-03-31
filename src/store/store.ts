@@ -89,7 +89,8 @@ export interface Store {
     participants: Participant[],
     challengeDuration: BigNumber,
     stateVars: StateVariables,
-    appDefinition?: string
+    appDefinition?: string,
+    applicationSite?: string
   ): Promise<ChannelStoreEntry>;
   getEntry(channelId): Promise<ChannelStoreEntry>;
 
@@ -185,7 +186,10 @@ export class XstateStore implements Store {
     return fromEvent(this._eventEmitter, 'addToOutbox');
   }
 
-  private async initializeChannel(state: State): Promise<ChannelStoreEntry> {
+  private async initializeChannel(
+    state: State,
+    applicationSite?: string
+  ): Promise<ChannelStoreEntry> {
     const addresses = state.participants.map(x => x.signingAddress);
     const privateKeys = await this.backend.privateKeys();
     const myIndex = addresses.findIndex(address => !!privateKeys[address]);
@@ -204,7 +208,7 @@ export class XstateStore implements Store {
       signatures: {},
       myIndex,
       funding: undefined,
-      applicationSite: undefined
+      applicationSite
     };
     await this.backend.setChannel(channelId, data);
     return new ChannelStoreEntry(data);
@@ -286,7 +290,8 @@ export class XstateStore implements Store {
     participants: Participant[],
     challengeDuration: BigNumber,
     stateVars: StateVariables,
-    appDefinition = AddressZero
+    appDefinition = AddressZero,
+    applicationSite?: string
   ): Promise<ChannelStoreEntry> {
     const addresses = participants.map(x => x.signingAddress);
     const privateKeys = await this.backend.privateKeys();
@@ -298,14 +303,17 @@ export class XstateStore implements Store {
     const channelNonce = (await this.getNonce(addresses)).add(1);
     const chainId = NETWORK_ID;
 
-    const entry = await this.initializeChannel({
-      chainId,
-      challengeDuration,
-      channelNonce,
-      participants,
-      appDefinition,
-      ...stateVars
-    });
+    const entry = await this.initializeChannel(
+      {
+        chainId,
+        challengeDuration,
+        channelNonce,
+        participants,
+        appDefinition,
+        ...stateVars
+      },
+      applicationSite
+    );
     // sign the state, store the channel
     await this.signAndAddState(
       entry.channelId,

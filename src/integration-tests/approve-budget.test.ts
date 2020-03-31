@@ -52,7 +52,7 @@ it('allows for a wallet to approve a budget and fund with the hub', async () => 
       first()
     )
     .toPromise();
-  await playerA.messagingService.receiveRequest(createBudgetEvent);
+  await playerA.messagingService.receiveRequest(createBudgetEvent, 'localhost');
   // The approveBudgetAndFund workflow has to skip the approval state
   // owing to the lack of a UI
   // await waitForExpect(async () => {

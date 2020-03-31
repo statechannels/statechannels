@@ -55,12 +55,12 @@ test('concludes on their turn', async () => {
   await playerA.store.createEntry(allSignState);
 
   [playerA, playerB].forEach(async player => {
-    player.startAppWorkflow('running', {channelId});
+    player.startAppWorkflow('running', {channelId, applicationSite: 'localhost'});
     player.workflowMachine?.send('SPAWN_OBSERVERS');
     await player.store.setFunding(channelId, {type: 'Direct'});
   });
 
-  await playerA.messagingService.receiveRequest(generateCloseRequest(channelId));
+  await playerA.messagingService.receiveRequest(generateCloseRequest(channelId), 'localhost');
 
   await waitForExpect(async () => {
     expect(playerA.workflowState).toEqual('done');

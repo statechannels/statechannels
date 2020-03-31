@@ -50,12 +50,13 @@ test('accepts states when running', async () => {
   );
   await playerBChannelUpdatedPromise;
 
-  playerA.startAppWorkflow('running', {channelId});
-  playerB.startAppWorkflow('running', {channelId});
+  playerA.startAppWorkflow('running', {channelId, applicationSite: 'localhost'});
+  playerB.startAppWorkflow('running', {channelId, applicationSite: 'localhost'});
   playerA.workflowMachine?.send('SPAWN_OBSERVERS');
   playerB.workflowMachine?.send('SPAWN_OBSERVERS');
   await playerA.messagingService.receiveRequest(
-    generatePlayerUpdate(channelId, playerA.participant, playerB.participant)
+    generatePlayerUpdate(channelId, playerA.participant, playerB.participant),
+    'localhost'
   );
 
   await waitForExpect(async () => {
@@ -68,7 +69,8 @@ test('accepts states when running', async () => {
   }, 3000);
 
   await playerB.messagingService.receiveRequest(
-    generatePlayerUpdate(channelId, playerA.participant, playerB.participant)
+    generatePlayerUpdate(channelId, playerA.participant, playerB.participant),
+    'localhost'
   );
   await waitForExpect(async () => {
     expect(playerA.workflowState).toEqual('running');

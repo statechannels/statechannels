@@ -7,6 +7,7 @@ import {IndexedDBBackend} from './store/indexedDB-backend';
 import {MemoryBackend} from './store/memory-backend';
 import {XstateStore} from './store';
 import * as constants from './constants';
+import extractDomain from 'extract-domain';
 
 (async function() {
   const {privateKey} = ethers.Wallet.createRandom();
@@ -24,7 +25,7 @@ import * as constants from './constants';
     if (event.data && event.data.jsonrpc && event.data.jsonrpc === '2.0') {
       process.env.ADD_LOGS &&
         console.log(`INCOMING JSONRPC REQUEST: ${JSON.stringify(event.data, null, 1)}`);
-      channelWallet.pushMessage(event.data);
+      channelWallet.pushMessage(event.data, extractDomain(event.origin));
     }
   });
   channelWallet.onSendMessage(m => {
