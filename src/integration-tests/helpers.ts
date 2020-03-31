@@ -21,6 +21,7 @@ import * as CloseLedgerAndWithdraw from '../workflows/close-ledger-and-withdraw'
 import {TestStore} from '../workflows/tests/store';
 import {ETH_TOKEN} from '../constants';
 import {makeDestination} from '../utils/outcome';
+import {hexZeroPad} from 'ethers/utils';
 
 export class Player {
   privateKey: string;
@@ -167,15 +168,15 @@ export function generatePlayerUpdate(
       appData: '0x0',
       allocations: [
         {
-          token: '0x0',
+          token: hexZeroPad('0x0', 32),
           allocationItems: [
             {
               destination: playerA.destination,
-              amount: '0x06f05b59d3b20000'
+              amount: hexZeroPad('0x06f05b59d3b20000', 32)
             },
             {
               destination: playerB.destination,
-              amount: '0x06f05b59d3b20000'
+              amount: hexZeroPad('0x06f05b59d3b20000', 32)
             }
           ]
         }
@@ -200,21 +201,21 @@ export function generateCreateChannelRequest(
       participants: [playerA, playerB],
       allocations: [
         {
-          token: '0x0',
+          token: hexZeroPad('0x0', 32),
           allocationItems: [
             {
               destination: playerA.destination,
-              amount: '0x06f05b59d3b20000'
+              amount: hexZeroPad('0x06f05b59d3b20000', 32)
             },
             {
               destination: playerB.destination,
-              amount: '0x06f05b59d3b20000'
+              amount: hexZeroPad('0x06f05b59d3b20000', 32)
             }
           ]
         }
       ],
       appDefinition: '0x430869383d611bBB1ce7Ca207024E7901bC26b40',
-      appData: '0x0' // TODO: This works for now but will break when we start validating
+      appData: '0x0'
     }
   };
 }
@@ -231,8 +232,8 @@ export function generateApproveBudgetAndFundRequest(
       token: ETH_TOKEN,
       hub,
       playerParticipantId: player.participantId,
-      requestedSendCapacity: '0x5',
-      requestedReceiveCapacity: '0x5'
+      requestedSendCapacity: hexZeroPad('0x5', 32),
+      requestedReceiveCapacity: hexZeroPad('0x5', 32)
     }
   };
 }
