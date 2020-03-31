@@ -2,7 +2,7 @@ import {
   WorkflowState as AppWorkflowState,
   StateValue as AppStateValue
 } from '../workflows/application';
-import {WorkflowState as CCCWorkflowState} from '../workflows/confirm-create-channel';
+import {WorkflowState as CCCWorkflowState} from '../workflows/confirm';
 import {SiteBudget} from '../store/types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
 import {BigNumber} from 'ethers/utils';

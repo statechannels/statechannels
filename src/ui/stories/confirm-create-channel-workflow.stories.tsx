@@ -1,4 +1,4 @@
-import {workflow, config, WorkflowContext} from '../../workflows/confirm-create-channel';
+import {workflow, config, WorkflowContext} from '../../workflows/confirm';
 export default {title: 'X-state wallet'};
 import {storiesOf} from '@storybook/react';
 import {interpret} from 'xstate';
