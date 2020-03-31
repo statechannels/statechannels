@@ -356,7 +356,7 @@ export const workflow = (
     invokeCreateChannelAndFundProtocol: (_, event: DoneInvokeEvent<CreateAndFund.Init>) =>
       CreateAndFund.machine(store, event.data),
     invokeCreateChannelConfirmation: (context, event: DoneInvokeEvent<CCC.WorkflowContext>) =>
-      CCC.confirmChannelCreationWorkflow(store, messagingService, event.data),
+      CCC.workflow(event.data),
     getDataForCreateChannelAndFund: async (
       context: ChannelParamsExist
     ): Promise<CreateAndFund.Init> => {
