@@ -29,7 +29,7 @@
       "additionalProperties": false,
       "properties": {
         "amount": {
-          "type": "string"
+          "$ref": "#/definitions/Uint256"
         },
         "destination": {
           "$ref": "#/definitions/Address"
@@ -126,6 +126,11 @@
       ],
       "type": "object"
     },
+    "Bytes32": {
+      "description": "Bytes32",
+      "pattern": "^0x([a-fA-F0-9]{64})$",
+      "type": "string"
+    },
     "ChallengeChannelParams": {
       "additionalProperties": false,
       "properties": {
@@ -204,10 +209,10 @@
       "additionalProperties": false,
       "properties": {
         "amount": {
-          "type": "string"
+          "$ref": "#/definitions/Uint256"
         },
         "channelId": {
-          "type": "string"
+          "$ref": "#/definitions/Bytes32"
         }
       },
       "required": [
@@ -304,7 +309,7 @@
           "$ref": "#/definitions/ChannelStatus"
         },
         "turnNum": {
-          "type": "string"
+          "$ref": "#/definitions/Uint256"
         }
       },
       "required": [
@@ -708,7 +713,7 @@
       "additionalProperties": false,
       "properties": {
         "amount": {
-          "type": "string"
+          "$ref": "#/definitions/Uint256"
         },
         "token": {
           "$ref": "#/definitions/Address"
@@ -1307,10 +1312,10 @@
       "additionalProperties": false,
       "properties": {
         "availableReceiveCapacity": {
-          "type": "string"
+          "$ref": "#/definitions/Uint256"
         },
         "availableSendCapacity": {
-          "type": "string"
+          "$ref": "#/definitions/Uint256"
         },
         "channels": {
           "items": {
@@ -1319,7 +1324,7 @@
           "type": "array"
         },
         "token": {
-          "type": "string"
+          "$ref": "#/definitions/Address"
         }
       },
       "required": [
@@ -1340,13 +1345,13 @@
           "type": "string"
         },
         "requestedReceiveCapacity": {
-          "type": "string"
+          "$ref": "#/definitions/Uint256"
         },
         "requestedSendCapacity": {
-          "type": "string"
+          "$ref": "#/definitions/Uint256"
         },
         "token": {
-          "type": "string"
+          "$ref": "#/definitions/Address"
         }
       },
       "required": [
@@ -1392,6 +1397,11 @@
         "params"
       ],
       "type": "object"
+    },
+    "Uint256": {
+      "description": "Uint256",
+      "pattern": "^0x([a-fA-F0-9]{64})$",
+      "type": "string"
     },
     "UpdateChannelParams": {
       "additionalProperties": false,
