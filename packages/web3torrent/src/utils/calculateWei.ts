@@ -25,12 +25,12 @@ export const prettyPrintWei = (wei: utils.BigNumber): string => {
     decimals.forEach((decimal, index, array) => {
       if (wei.gte(utils.bigNumberify(10).pow(decimal))) {
         formattedString =
-          wei.div(utils.bigNumberify(10).pow(decimal)).toNumber() +
+          wei.div(utils.bigNumberify(10).pow(decimal)).toString() +
           '.' +
           wei
             .mod(utils.bigNumberify(10).pow(decimal))
             .div(utils.bigNumberify(10).pow(decimal - 1)) // TODO: this doesn't do rounding properly
-            .toNumber() +
+            .toString() +
           ' ' +
           names[index];
       }
