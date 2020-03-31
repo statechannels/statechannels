@@ -75,8 +75,9 @@ export class ChannelWallet {
         if (!this.isWorkflowIdInUse(workflowId)) {
           const workflow = this.startWorkflow(
             applicationWorkflow(this.store, this.messagingService, {
+              fundingStrategy: 'Direct',
               applicationSite: request.applicationSite
-            }),
+            }), // FIXME
             workflowId
           );
           this.workflows.push(workflow);

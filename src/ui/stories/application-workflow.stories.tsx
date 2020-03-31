@@ -15,8 +15,9 @@ import {XstateStore} from '../../store';
 const store = new XstateStore();
 store.initialize(['0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29']);
 const messagingService: MessagingServiceInterface = new MessagingService(store);
-const testContext = {
+const testContext: any = {
   channelId: '0x697ecf681033a2514ed19c90299a67ae8677f3c78b5877fe4550c4f0960e87b7',
+  fundingStrategy: 'Direct',
   applicationSite: 'localhost'
 };
 
