@@ -1,28 +1,30 @@
 import {ChannelConstants, StateVariables, SignedState, Participant} from './types';
 import {signState, hashState, getSignerAddress, calculateChannelId} from './state-utils';
 import _ from 'lodash';
-import {Funding} from './store';
-import {BigNumber} from 'ethers/utils';
+import {BigNumber, bigNumberify} from 'ethers/utils';
 import {ChannelStoreEntry, ChannelStoredData} from './channel-store-entry';
+import {Funding} from './store';
 
 export class MemoryChannelStoreEntry implements ChannelStoreEntry {
   public readonly channelConstants: ChannelConstants;
-  constructor(
-    constants: ChannelConstants,
-    public readonly myIndex: number,
-    private stateVariables: Record<string, StateVariables & Partial<ChannelConstants>> = {},
-    private signatures: Record<string, Array<string | undefined>> = {},
-    public funding: Funding | undefined = undefined,
-    public readonly applicationSite?: string
-  ) {
-    this.channelConstants = _.pick(
-      constants,
-      'chainId',
-      'participants',
-      'channelNonce',
-      'appDefinition',
-      'challengeDuration'
-    );
+  public readonly myIndex: number;
+  private stateVariables: Record<string, StateVariables & Partial<ChannelConstants>> = {};
+  private signatures: Record<string, Array<string | undefined>> = {};
+  public funding: Funding | undefined = undefined;
+  public readonly applicationSite?: string;
+  constructor(channelData: ChannelStoredData) {
+    this.myIndex = channelData.myIndex;
+    this.stateVariables = channelData.stateVariables;
+    this.signatures = channelData.signatures;
+    this.funding = channelData.funding;
+    this.applicationSite = channelData.applicationSite;
+    this.channelConstants = {
+      chainId: channelData.channelConstants.chainId,
+      participants: channelData.channelConstants.participants,
+      appDefinition: channelData.channelConstants.appDefinition,
+      challengeDuration: bigNumberify(channelData.channelConstants.challengeDuration),
+      channelNonce: bigNumberify(channelData.channelConstants.channelNonce)
+    };
 
     this.stateVariables = _.transform(this.stateVariables, (result, stateVariables, stateHash) => {
       result[stateHash] = _.pick(
@@ -222,14 +224,14 @@ export class MemoryChannelStoreEntry implements ChannelStoreEntry {
     const stateVariables = MemoryChannelStoreEntry.prepareStateVariables(data.stateVariables);
     channelConstants.challengeDuration = new BigNumber(channelConstants.challengeDuration);
     channelConstants.channelNonce = new BigNumber(channelConstants.channelNonce);
-    return new MemoryChannelStoreEntry(
+    return new MemoryChannelStoreEntry({
       channelConstants,
       myIndex,
       stateVariables,
       signatures,
       funding,
       applicationSite
-    );
+    });
   }
 
   private static prepareStateVariables(
