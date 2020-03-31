@@ -252,7 +252,8 @@ async function convertToInternalEvent(
         type: 'CLOSE_AND_WITHDRAW',
         requestId: request.id,
         player: convertToInternalParticipant(request.params.player),
-        hub: convertToInternalParticipant(request.params.hub)
+        hub: convertToInternalParticipant(request.params.hub),
+        site: request.params.site
       };
     case 'ApproveBudgetAndFund':
       const {hub, playerParticipantId} = request.params;

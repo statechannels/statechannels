@@ -111,7 +111,8 @@ export class ChannelWallet {
           CloseLedgerAndWithdraw.workflow(this.store, this.messagingService, {
             opponent: request.hub,
             player: request.player,
-            requestId: request.requestId
+            requestId: request.requestId,
+            site: request.site
           }),
           workflowId
         );
