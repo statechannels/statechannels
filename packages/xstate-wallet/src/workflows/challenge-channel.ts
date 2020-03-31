@@ -37,6 +37,12 @@ async function determineChallengeStatus(
 > {
   const {challenge} = chainInfo;
 
+  // TODO: I think it is possible that the chain is UPDATED
+  // _after_ challenge tx is sent to network but before the
+  // ChallengeRegistered event is observed, which would cause
+  // this machine to send tx twice. If e.g., a new deposit
+  // occured for some reason.
+
   if (typeof challenge !== 'undefined') {
     const {
       state: {turnNum: challengeTurnNum}
