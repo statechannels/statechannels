@@ -1,5 +1,5 @@
 import {BigNumber} from 'ethers/utils';
-import {MemoryChannelStoreEntry} from './memory-channel-storage';
+import {Funding} from './store';
 
 export interface SiteBudget {
   domain: string;
@@ -129,19 +129,30 @@ export interface Message {
   objectives?: Objective[];
 }
 
+export type ChannelStoredData = {
+  stateVariables: Record<string, StateVariables>;
+  channelConstants: Omit<ChannelConstants, 'challengeDuration' | 'channelNonce'> & {
+    challengeDuration: BigNumber | string;
+    channelNonce: BigNumber | string;
+  };
+  signatures: Record<string, Array<string | undefined>>;
+  funding: Funding | undefined;
+  applicationSite: string | undefined;
+  myIndex: number;
+};
 export interface DBBackend {
   initialize(cleanSlate?: boolean): Promise<any>;
   privateKeys(): Promise<Record<string, string | undefined>>;
   ledgers(): Promise<Record<string, string | undefined>>;
   nonces(): Promise<Record<string, BigNumber | undefined>>;
   objectives(): Promise<Objective[]>;
-  channels(): Promise<Record<string, MemoryChannelStoreEntry | undefined>>;
+  channels(): Promise<Record<string, ChannelStoredData | undefined>>;
 
   setPrivateKey(key: string, value: string): Promise<string>;
   getPrivateKey(key: string): Promise<string | undefined>;
-  setChannel(key: string, value: MemoryChannelStoreEntry): Promise<MemoryChannelStoreEntry>;
-  addChannel(key: string, value: MemoryChannelStoreEntry): Promise<MemoryChannelStoreEntry>;
-  getChannel(key: string): Promise<MemoryChannelStoreEntry | undefined>;
+  setChannel(key: string, value: ChannelStoredData): Promise<ChannelStoredData>;
+  addChannel(key: string, value: ChannelStoredData): Promise<ChannelStoredData>;
+  getChannel(key: string): Promise<ChannelStoredData | undefined>;
   getBudget(key: string): Promise<SiteBudget | undefined>;
   setBudget(key: string, budget: SiteBudget): Promise<SiteBudget>;
   deleteBudget(key: string): Promise<void>;

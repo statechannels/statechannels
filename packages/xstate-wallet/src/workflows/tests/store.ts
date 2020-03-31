@@ -1,4 +1,4 @@
-import {MemoryChannelStoreEntry} from '../../store/memory-channel-storage';
+import {ChannelStoreEntry} from '../../store/channel-store-entry';
 import {SignedState} from '../../store/types';
 import {hashState} from '../../store/state-utils';
 import {Guid} from 'guid-typescript';
@@ -15,28 +15,28 @@ export class TestStore extends XstateStore implements Store {
       funding?: Funding;
       applicationSite?: string;
     }
-  ): Promise<MemoryChannelStoreEntry> {
+  ): Promise<ChannelStoreEntry> {
     const address = await this.getAddress();
     const myIndex = signedState.participants
       .map(p => p.signingAddress)
       .findIndex(a => a === address);
     const {funding, applicationSite} = opts || {};
-    const entry = new MemoryChannelStoreEntry(
-      signedState,
+    const entry = new ChannelStoreEntry({
+      channelConstants: signedState,
       myIndex,
-      {[hashState(signedState)]: signedState},
-      {[hashState(signedState)]: signedState.signatures},
+      stateVariables: {[hashState(signedState)]: signedState},
+      signatures: {[hashState(signedState)]: signedState.signatures},
       funding,
       applicationSite
-    );
-    await this.backend.setChannel(entry.channelId, entry);
+    });
+    await this.backend.setChannel(entry.channelId, entry.data());
 
     return entry;
   }
-  async setLedgerByEntry(entry: MemoryChannelStoreEntry) {
+  async setLedgerByEntry(entry: ChannelStoreEntry) {
     // This is not on the Store interface itself -- it is useful to set up a test store
     const {channelId} = entry;
-    this.backend.setChannel(channelId, entry);
+    this.backend.setChannel(channelId, entry.data());
     const address = await this.getAddress();
     const peerId = entry.participants.find(p => p.signingAddress !== address);
     if (!peerId) throw 'No peer';

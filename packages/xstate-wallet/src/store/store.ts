@@ -8,7 +8,8 @@ import {
   SignedState,
   SiteBudget,
   State,
-  StateVariables
+  StateVariables,
+  ChannelStoredData
 } from './types';
 
 import {filter, map, concatAll} from 'rxjs/operators';
@@ -17,7 +18,7 @@ import * as _ from 'lodash';
 
 import {Wallet} from 'ethers';
 
-import {MemoryChannelStoreEntry} from './memory-channel-storage';
+import {ChannelStoreEntry} from './channel-store-entry';
 import {AddressZero} from 'ethers/constants';
 import {Chain, FakeChain} from '../chain';
 import {calculateChannelId, hashState} from './state-utils';
@@ -25,7 +26,6 @@ import {NETWORK_ID, HUB} from '../constants';
 
 import {Guid} from 'guid-typescript';
 import {MemoryBackend} from './memory-backend';
-import {ChannelStoreEntry} from './channel-store-entry';
 import {Errors} from '.';
 import AsyncLock from 'async-lock';
 import {checkThat} from '../utils';
@@ -167,7 +167,8 @@ export class XstateStore implements Store {
     );
 
     const currentEntry = from(this.backend.getChannel(channelId)).pipe(
-      filter<MemoryChannelStoreEntry>(c => !!c)
+      filter<ChannelStoredData>(c => !!c),
+      map(c => new ChannelStoreEntry(c))
     );
 
     return merge(currentEntry, newEntries);
@@ -184,7 +185,7 @@ export class XstateStore implements Store {
     return fromEvent(this._eventEmitter, 'addToOutbox');
   }
 
-  private async initializeChannel(state: State): Promise<MemoryChannelStoreEntry> {
+  private async initializeChannel(state: State): Promise<ChannelStoreEntry> {
     const addresses = state.participants.map(x => x.signingAddress);
     const privateKeys = await this.backend.privateKeys();
     const myIndex = addresses.findIndex(address => !!privateKeys[address]);
@@ -197,23 +198,29 @@ export class XstateStore implements Store {
     // TODO: There could be concurrency problems which lead to entries potentially being overwritten.
     await this.setNonce(addresses, state.channelNonce);
     const key = hashState(state);
-
-    return this.backend.setChannel(
-      channelId,
-      new MemoryChannelStoreEntry(state, myIndex, {[key]: state})
-    );
+    const data: ChannelStoredData = {
+      channelConstants: state,
+      stateVariables: {[key]: state},
+      signatures: {},
+      myIndex,
+      funding: undefined,
+      applicationSite: undefined
+    };
+    await this.backend.setChannel(channelId, data);
+    return new ChannelStoreEntry(data);
   }
 
   public async setFunding(channelId: string, funding: Funding): Promise<void> {
-    const channelEntry = await this.backend.getChannel(channelId);
-    if (!channelEntry) {
+    const channelData = await this.backend.getChannel(channelId);
+    if (!channelData) {
       throw new Error(`No channel for ${channelId}`);
     }
+    const channelEntry = new ChannelStoreEntry(channelData);
     if (channelEntry.funding) {
       throw `Channel ${channelId} already funded`;
     }
     channelEntry.setFunding(funding);
-    await this.backend.setChannel(channelEntry.channelId, channelEntry);
+    await this.backend.setChannel(channelEntry.channelId, channelEntry.data());
   }
 
   public async acquireChannelLock(channelId: string): Promise<ChannelLock> {
@@ -262,12 +269,13 @@ export class XstateStore implements Store {
   }
 
   public async setLedger(ledgerId: string) {
-    const entry = await this.backend.getChannel(ledgerId);
-    if (!entry) {
+    const data = await this.backend.getChannel(ledgerId);
+    if (!data) {
       throw new Error(`No channel found with channel id ${ledgerId}`);
     }
+    const entry = new ChannelStoreEntry(data);
     // This is not on the Store interface itself -- it is useful to set up a test store
-    await this.backend.setChannel(entry.channelId, entry);
+    await this.backend.setChannel(entry.channelId, entry.data());
     const address = await this.getAddress();
     const peerId = entry.participants.find(p => p.signingAddress !== address);
     if (peerId) await this.backend.setLedger(peerId.participantId, entry.channelId);
@@ -323,11 +331,12 @@ export class XstateStore implements Store {
   private nonceKeyFromAddresses = (addresses: string[]): string => addresses.join('::');
 
   async signAndAddState(channelId: string, stateVars: StateVariables) {
-    const channelStorage = await this.backend.getChannel(channelId);
-
-    if (!channelStorage) {
+    const channelData = await this.backend.getChannel(channelId);
+    if (!channelData) {
       throw new Error('Channel not found');
     }
+    const channelStorage = new ChannelStoreEntry(channelData);
+
     const {participants} = channelStorage;
     const myAddress = participants[channelStorage.myIndex].signingAddress;
     const privateKey = await this.backend.getPrivateKey(myAddress);
@@ -339,7 +348,7 @@ export class XstateStore implements Store {
       _.pick(stateVars, 'outcome', 'turnNum', 'appData', 'isFinal'),
       privateKey
     );
-    await this.backend.setChannel(channelId, channelStorage);
+    await this.backend.setChannel(channelId, channelStorage.data());
     this._eventEmitter.emit('channelUpdated', await this.getEntry(channelId));
     this._eventEmitter.emit('addToOutbox', {signedStates: [signedState]});
   }
@@ -356,14 +365,15 @@ export class XstateStore implements Store {
 
   async addState(state: SignedState): Promise<ChannelStoreEntry> {
     const channelId = calculateChannelId(state);
-    const channelStorage =
-      (await this.backend.getChannel(channelId)) || (await this.initializeChannel(state));
+    const channelData =
+      (await this.backend.getChannel(channelId)) || (await this.initializeChannel(state)).data();
+    const memoryChannelStorage = new ChannelStoreEntry(channelData);
     // TODO: This is kind of awkward
-    state.signatures.forEach(sig => channelStorage.addState(state, sig));
+    state.signatures.forEach(sig => memoryChannelStorage.addState(state, sig));
 
-    const entry = await this.backend.setChannel(channelId, channelStorage);
-    this._eventEmitter.emit('channelUpdated', entry);
-    return entry;
+    await this.backend.setChannel(channelId, memoryChannelStorage.data());
+    this._eventEmitter.emit('channelUpdated', memoryChannelStorage);
+    return memoryChannelStorage;
   }
 
   public async getAddress(): Promise<string> {
@@ -386,12 +396,12 @@ export class XstateStore implements Store {
   }
 
   public async getEntry(channelId: string): Promise<ChannelStoreEntry> {
-    const entry = await this.backend.getChannel(channelId);
-    if (!entry) {
+    const data = await this.backend.getChannel(channelId);
+    if (!data) {
       throw Error('Channel id not found');
     }
 
-    return entry;
+    return new ChannelStoreEntry(data);
   }
 
   private budgetLock = new AsyncLock();

@@ -1,6 +1,6 @@
 import {BigNumber} from 'ethers/utils';
-import {MemoryChannelStoreEntry} from './memory-channel-storage';
-import {Objective, DBBackend, SiteBudget} from './types';
+import {ChannelStoreEntry} from './channel-store-entry';
+import {Objective, DBBackend, SiteBudget, ChannelStoredData} from './types';
 import * as _ from 'lodash';
 
 enum ObjectStores {
@@ -80,14 +80,9 @@ export class IndexedDBBackend implements DBBackend {
   // Generic Getters
 
   public async channels() {
-    const channels = await this.getAll(ObjectStores.channels);
-    for (const key in channels) {
-      if (channels[key]) {
-        channels[key] = MemoryChannelStoreEntry.fromJson(channels[key]);
-      }
-    }
-    return channels;
+    return this.getAll(ObjectStores.channels);
   }
+
   public async objectives() {
     return this.getAll(ObjectStores.objectives, true);
   }
@@ -122,7 +117,7 @@ export class IndexedDBBackend implements DBBackend {
   }
   public async getChannel(key: string) {
     const channel = await this.get(ObjectStores.channels, key);
-    return channel && MemoryChannelStoreEntry.fromJson(channel);
+    return channel && ChannelStoreEntry.fromJson(channel);
   }
   public async getObjective(key: number) {
     return this.get(ObjectStores.objectives, key);
@@ -147,13 +142,11 @@ export class IndexedDBBackend implements DBBackend {
     const pksPutted = await this.put(ObjectStores.privateKeys, value, key);
     return pksPutted;
   }
-  public async setChannel(key: string, value: MemoryChannelStoreEntry) {
-    const savedChannel = await this.put(ObjectStores.channels, value.data(), key);
-    return MemoryChannelStoreEntry.fromJson(savedChannel);
+  public async setChannel(key: string, value: ChannelStoredData) {
+    return this.put(ObjectStores.channels, value, key);
   }
-  public async addChannel(key: string, value: MemoryChannelStoreEntry) {
-    const savedChannel = await this.add(ObjectStores.channels, value.data(), key, true);
-    return MemoryChannelStoreEntry.fromJson(savedChannel);
+  public async addChannel(key: string, value: ChannelStoredData) {
+    return this.add(ObjectStores.channels, value, key, true);
   }
   public async setLedger(key: string, value: string) {
     return this.put(ObjectStores.ledgers, value, key);

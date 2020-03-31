@@ -1,8 +1,7 @@
 import {BigNumber} from 'ethers/utils';
-import {MemoryChannelStoreEntry} from './memory-channel-storage';
-import {Objective, DBBackend, SiteBudget} from './types';
+
+import {Objective, DBBackend, SiteBudget, ChannelStoredData} from './types';
 import * as _ from 'lodash';
-import {ChannelStoredData} from './channel-store-entry';
 
 export class MemoryBackend implements DBBackend {
   private _channels: Record<string, ChannelStoredData | undefined> = {};
@@ -34,14 +33,9 @@ export class MemoryBackend implements DBBackend {
     return _.cloneDeep(this._objectives);
   }
   public async channels() {
-    const channels: Record<
-      string,
-      ChannelStoredData | MemoryChannelStoreEntry | undefined
-    > = _.cloneDeep(this._channels);
-    for (const key in channels) {
-      channels[key] = MemoryChannelStoreEntry.fromJson(channels[key]);
-    }
-    return channels as Record<string, MemoryChannelStoreEntry | undefined>;
+    const channels: Record<string, ChannelStoredData | undefined> = _.cloneDeep(this._channels);
+
+    return channels as Record<string, ChannelStoredData | undefined>;
   }
   public async nonces() {
     const nonces: Record<string, BigNumber | string | undefined> = this._nonces;
@@ -76,22 +70,22 @@ export class MemoryBackend implements DBBackend {
     return this._privateKeys[key];
   }
 
-  public async setChannel(key: string, value: MemoryChannelStoreEntry) {
-    this._channels[key] = value.data();
-    return MemoryChannelStoreEntry.fromJson(this._channels[key]);
+  public async setChannel(key: string, value: ChannelStoredData) {
+    this._channels[key] = value;
+    return value;
   }
-  public async addChannel(key: string, value: MemoryChannelStoreEntry) {
+  public async addChannel(key: string, value: ChannelStoredData) {
     if (!this._channels[key]) {
-      this._channels[key] = value.data();
+      this._channels[key] = value;
     }
-    return MemoryChannelStoreEntry.fromJson(this._channels[key]);
+    return value;
   }
 
   public async getChannel(key: string) {
     if (!this._channels[key]) {
       return;
     }
-    return MemoryChannelStoreEntry.fromJson(this._channels[key]);
+    return this._channels[key];
   }
 
   public async setLedger(key: string, value: string) {
