@@ -3,7 +3,7 @@
 import Ajv = require('ajv');
 
 // You need to pass `jsonPointers: true`
-const ajv = new Ajv({jsonPointers: true});
+const ajv = new Ajv({jsonPointers: true, verbose: true});
 import betterAjvErrors from 'better-ajv-errors';
 
 // eslint-disable-next-line

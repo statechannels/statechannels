@@ -164,7 +164,7 @@ export function generatePlayerUpdate(
       appData: hexZeroPad('0x0', 32),
       allocations: [
         {
-          token: '0x0',
+          token: hexZeroPad('0x0', 32),
           allocationItems: [
             {
               destination: playerA.destination,
@@ -211,7 +211,7 @@ export function generateCreateChannelRequest(
         }
       ],
       appDefinition: '0x430869383d611bBB1ce7Ca207024E7901bC26b40',
-      appData: '0x0' // TODO: This works for now but will break when we start validating
+      appData: hexZeroPad('0x0', 32)
     }
   };
 }
