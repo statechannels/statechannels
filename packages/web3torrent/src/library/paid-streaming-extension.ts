@@ -113,10 +113,9 @@ export abstract class PaidStreamingExtension implements Extension {
 
   respond() {
     const _onRequest = this.wire._onRequest;
-    this.blockedRequests.splice(0, PEER_TRUST).map(request => _onRequest.apply(this.wire, request));
-    if (this.blockedRequests.length) {
-      this.stop();
-    }
+    this.blockedRequests
+      .splice(0, this.blockedRequests.length)
+      .map(req => _onRequest.apply(this.wire, req));
   }
 
   ack() {
