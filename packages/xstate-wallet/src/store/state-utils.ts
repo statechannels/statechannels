@@ -1,4 +1,12 @@
-import {State, ChannelConstants, Outcome, AllocationItem, SignedState} from './types';
+import {
+  State,
+  ChannelConstants,
+  Outcome,
+  AllocationItem,
+  SignedState,
+  SimpleAllocation,
+  SimpleGuarantee
+} from './types';
 import {
   State as NitroState,
   SignedState as NitroSignedState,
@@ -70,9 +78,46 @@ export function statesEqual(left: State, right: State) {
   return hashState(left) === hashState(right);
 }
 
+function simpleAllocationsEqual(left: SimpleAllocation, right: SimpleAllocation) {
+  if (left.assetHolderAddress === right.assetHolderAddress) {
+    if ((left.allocationItems.length = right.allocationItems.length)) {
+      return left.allocationItems
+        .map(
+          (value, index, array) =>
+            value.destination === right.allocationItems[index].destination &&
+            value.amount.eq(right.allocationItems[index].amount)
+        )
+        .reduce((a, b) => a && b);
+    }
+  }
+  return false;
+}
+
+function simpleGuaranteesEqual(left: SimpleGuarantee, right: SimpleGuarantee) {
+  return (
+    left.assetHolderAddress === right.assetHolderAddress &&
+    left.targetChannelId == right.targetChannelId &&
+    left.destinations === right.destinations
+  );
+}
+
 export function outcomesEqual(left: Outcome, right?: Outcome) {
-  // TODO: do we need a more detailed check?
-  return _.isEqual(left, right);
+  if (left.type === 'SimpleAllocation' && right?.type === 'SimpleAllocation') {
+    return simpleAllocationsEqual(left, right);
+  }
+  if (left.type === 'SimpleGuarantee' && right?.type === 'SimpleGuarantee') {
+    return simpleGuaranteesEqual(left, right);
+  }
+  if (left.type === 'MixedAllocation' && right?.type === 'MixedAllocation') {
+    if (left.simpleAllocations.length === right.simpleAllocations.length) {
+      return left.simpleAllocations
+        .map((value, index, array) =>
+          simpleAllocationsEqual(left.simpleAllocations[index], right.simpleAllocations[index])
+        )
+        .reduce((a, b) => a && b);
+    }
+  }
+  return false;
 }
 
 export const firstState = (
