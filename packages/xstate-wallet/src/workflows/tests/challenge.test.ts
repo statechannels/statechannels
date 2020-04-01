@@ -62,7 +62,7 @@ it('initializes and starts challenge thing', async () => {
   const {channelId} = await store.createEntry(allSignState);
 
   const service = interpret<any, any, any>(
-    challengeMachine(store).withContext({channelId, challengeSubmitted: false})
+    challengeMachine(store, {channelId, challengeSubmitted: false})
   ).start();
 
   await waitForExpect(async () => {

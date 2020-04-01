@@ -75,7 +75,7 @@ export interface WorkflowServices extends Record<string, ServiceConfig<WorkflowC
 
   invokeChallengingProtocol: (
     context: ChannelIdExists
-  ) => StateMachine<ChallengeChannel.Init, any, any, any>; // FIXME: add type
+  ) => StateMachine<ChallengeChannel.Initial, any, any, any>; // FIXME: add type
 
   invokeCreateChannelAndFundProtocol: (
     context,
@@ -393,7 +393,7 @@ export const applicationWorkflow = (
       ConcludeChannel.machine(store).withContext({channelId: context.channelId}),
 
     invokeChallengingProtocol: ({channelId}: ChannelIdExists) =>
-      ChallengeChannel.machine(store).withContext({channelId, challengeSubmitted: false}),
+      ChallengeChannel.machine(store, {channelId}),
 
     invokeCreateChannelAndFundProtocol: (_, event: DoneInvokeEvent<CreateAndFund.Init>) =>
       CreateAndFund.machine(store, event.data),
