@@ -5,7 +5,7 @@ import {Button, Box, Flex, Icon, Text, MetaMaskButton, Flash, Heading} from 'rim
 
 import ConnectionBanner from '@rimble/connection-banner';
 import RimbleUtils from '@rimble/utils';
-import {WorkflowState} from '../workflows/approve-budget-and-fund';
+import {WorkflowState} from '../workflows/ethereum-enable';
 import {WindowContext} from './window-context';
 
 interface Props {
@@ -27,83 +27,77 @@ export const EnableEthereum = (props: Props) => {
     </MetaMaskButton.Outline>
   );
 
-  const NoNetwork = () => {
-    return (
-      <div>
-        <Flash variant={'danger'}>
-          <Flex alignItems="center" justifyContent="space-between" flexDirection="column">
-            <Flex alignItems="center" pb={3} flexDirection="column">
-              <Box>
-                <Icon name="Warning" size="44" />
-              </Box>
-              <Flex flexDirection="column">
-                <Text fontWeight="bold" color={'inherit'} textAlign="center">
-                  Install the MetaMask browser extension to use our blockchain features in your
-                  current browser
-                </Text>
-              </Flex>
-            </Flex>
-
-            <MetaMaskButton as="a" href="https://metamask.io/" target="_blank" color={'white'}>
-              Install MetaMask
-            </MetaMaskButton>
-          </Flex>
-        </Flash>
-      </div>
-    );
-  };
-
-  const WrongNetwork = () => {
-    return (
-      <div>
-        <Flash variant={'danger'}>
-          <Flex alignItems="center" flexDirection="column">
+  const NoNetwork = () => (
+    <div>
+      <Flash variant={'danger'}>
+        <Flex alignItems="center" justifyContent="space-between" flexDirection="column">
+          <Flex alignItems="center" pb={3} flexDirection="column">
             <Box>
               <Icon name="Warning" size="44" />
             </Box>
             <Flex flexDirection="column">
-              <Text fontWeight="bold" color={'inherit'} textAlign="center" pb={3}>
-                Switch to the {RimbleUtils.getEthNetworkNameById(targetNetwork)} network in MetaMask
-              </Text>
-              <Text color={'inherit'} textAlign="center">
-                To use our blockchain features, you need to be on the{' '}
-                {RimbleUtils.getEthNetworkNameById(targetNetwork)} network. You're currently on{' '}
-                {RimbleUtils.getEthNetworkNameById(currentNetwork)}.
+              <Text fontWeight="bold" color={'inherit'} textAlign="center">
+                Install the MetaMask browser extension to use our blockchain features in your
+                current browser
               </Text>
             </Flex>
           </Flex>
-        </Flash>
-      </div>
-    );
-  };
 
-  const NotWeb3Browser = () => {
-    return (
-      <div>
-        <Flash variant={'danger'}>
-          <Flex alignItems="center" flexDirection="column">
-            <Box>
-              <Icon name="Warning" size="44" />
-            </Box>
-            <Flex flexDirection="column">
-              <Text fontWeight="bold" color={'inherit'}>
-                Your browser doesn't support our blockchain features
-              </Text>
-              {RimbleUtils.isMobileDevice() ? (
-                <Text color={'inherit'}>
-                  Try a mobile wallet browser like Status, Coinbase wallet or Cipher
-                </Text>
-              ) : (
-                <Text color={'inherit'}>
-                  Switch to either Brave, FireFox, Opera, or Chrome to continue
-                </Text>
-              )}
-            </Flex>
+          <MetaMaskButton as="a" href="https://metamask.io/" target="_blank" color={'white'}>
+            Install MetaMask
+          </MetaMaskButton>
+        </Flex>
+      </Flash>
+    </div>
+  );
+
+  const WrongNetwork = () => (
+    <div>
+      <Flash variant={'danger'}>
+        <Flex alignItems="center" flexDirection="column">
+          <Box>
+            <Icon name="Warning" size="44" />
+          </Box>
+          <Flex flexDirection="column">
+            <Text fontWeight="bold" color={'inherit'} textAlign="center" pb={3}>
+              Switch to the {RimbleUtils.getEthNetworkNameById(targetNetwork)} network in MetaMask
+            </Text>
+            <Text color={'inherit'} textAlign="center">
+              To use our blockchain features, you need to be on the{' '}
+              {RimbleUtils.getEthNetworkNameById(targetNetwork)} network. You are currently on{' '}
+              {RimbleUtils.getEthNetworkNameById(currentNetwork)}.
+            </Text>
           </Flex>
-        </Flash>
-      </div>
-    );
-  };
+        </Flex>
+      </Flash>
+    </div>
+  );
+
+  const NotWeb3Browser = () => (
+    <div>
+      <Flash variant={'danger'}>
+        <Flex alignItems="center" flexDirection="column">
+          <Box>
+            <Icon name="Warning" size="44" />
+          </Box>
+          <Flex flexDirection="column">
+            <Text fontWeight="bold" color={'inherit'}>
+              Your browser does not support our blockchain features
+            </Text>
+            {RimbleUtils.isMobileDevice() ? (
+              <Text color={'inherit'}>
+                Try a mobile wallet browser like Status, Coinbase wallet or Cipher
+              </Text>
+            ) : (
+              <Text color={'inherit'}>
+                Switch to either Brave, FireFox, Opera, or Chrome to continue
+              </Text>
+            )}
+          </Flex>
+        </Flex>
+      </Flash>
+    </div>
+  );
 
   const button = () => {
     switch (currentState.value.toString()) {

@@ -16,7 +16,7 @@ export const ApproveBudgetAndFund = (props: Props) => {
   const {budget} = current.context;
   const {playerAmount, hubAmount} = getAmountsFromBudget(budget);
 
-  const prompt = (
+  const waitForUserApproval = ({waiting}: {waiting: boolean} = {waiting: false}) => (
     <Flex alignItems="center" flexDirection="column">
       <Heading>App Budget</Heading>
 
@@ -27,12 +27,16 @@ export const ApproveBudgetAndFund = (props: Props) => {
 
       <Table>
         <thead>
-          <th>Send</th>
-          <th>Receive</th>
+          <tr>
+            <th>Send</th>
+            <th>Receive</th>
+          </tr>
         </thead>
         <tbody>
-          <td>{formatEther(playerAmount)} ETH</td>
-          <td>{formatEther(hubAmount)} ETH</td>
+          <tr>
+            <td>{formatEther(playerAmount)} ETH</td>
+            <td>{formatEther(hubAmount)} ETH</td>
+          </tr>
         </tbody>
       </Table>
 
@@ -41,13 +45,29 @@ export const ApproveBudgetAndFund = (props: Props) => {
       <Text textAlign="center" pb={3}>
         To enable this, you will need to make a deposit of {formatEther(playerAmount)} ETH.
       </Text>
-      <Button onClick={() => props.send('USER_APPROVES_BUDGET')}>Approve budget</Button>
+      <Button disabled={waiting} onClick={() => props.send('USER_APPROVES_BUDGET')}>
+        Approve budget
+      </Button>
       <Button.Text onClick={() => props.send('USER_REJECTS_BUDGET')}>Cancel</Button.Text>
     </Flex>
   );
-  if (current.value.toString() === 'waitForUserApproval') {
-    return prompt;
-  } else {
-    return <div></div>;
+
+  const waitForPreFS = (
+    <Flex alignItems="center" flexDirection="column">
+      <Heading>App Budget</Heading>
+
+      <Text textAlign="center">Waiting for the hub to respond.</Text>
+    </Flex>
+  );
+
+  switch (current.value.toString()) {
+    case 'waitForUserApproval':
+      return waitForUserApproval();
+    case 'createLedgerStartState':
+      return waitForUserApproval({waiting: true});
+    case 'waitForPreFS':
+      return waitForPreFS;
+    default:
+      return <div>todo</div>;
   }
 };
