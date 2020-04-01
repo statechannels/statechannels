@@ -134,14 +134,8 @@ const generateConfig = (
     branchingOnRole: {
       on: {
         '': [
-          {
-            target: 'creatingChannel',
-            cond: guards.amCreator
-          },
-          {
-            target: 'joiningChannel',
-            cond: guards.amJoiner
-          }
+          {target: 'creatingChannel', cond: guards.amCreator},
+          {target: 'joiningChannel', cond: guards.amJoiner}
         ]
       }
     },
@@ -151,16 +145,11 @@ const generateConfig = (
         src: 'createChannel',
         onDone: {
           target: 'openChannelAndFundProtocol',
-          actions: [
-            actions.assignChannelId,
-            actions.spawnObservers,
-            actions.sendCreateChannelResponse
-          ]
+          actions: [actions.assignChannelId, actions.sendCreateChannelResponse]
         }
       }
     },
     joiningChannel: {
-      entry: [actions.spawnObservers],
       invoke: {src: 'signFirstState', onDone: 'openChannelAndFundProtocol'},
       exit: [actions.sendJoinChannelResponse]
     },
@@ -170,11 +159,8 @@ const generateConfig = (
       'running'
     ),
     running: {
-      entry: [actions.hideUi],
+      entry: [actions.hideUi, actions.spawnObservers],
       on: {
-        //TODO: spawnObservers shouldn't be here but it makes the running integration test work (since we skip right to the running state)
-        // It shouldn't cause any issues but we should probably figure a better way of handling this in the test
-        SPAWN_OBSERVERS: {actions: [actions.spawnObservers]},
         PLAYER_STATE_UPDATE: {
           target: 'running',
           actions: [actions.updateStoreWithPlayerState, actions.sendUpdateChannelResponse]
