@@ -13,6 +13,7 @@
     "async-lock": "1.2.2",
     "ethers": "4.0.45",
     "eventemitter3": "4.0.0",
+    "extract-domain": "2.2.1",
     "filter-async-rxjs-pipe": "0.1.5",
     "guid-typescript": "1.0.9",
     "jest": "25.1.0",

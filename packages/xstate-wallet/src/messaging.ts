@@ -53,7 +53,7 @@ export interface MessagingServiceInterface {
   readonly outboxFeed: Observable<Response | Notification>;
   readonly requestFeed: Observable<AppRequestEvent>;
 
-  receiveRequest(jsonRpcMessage: Request): Promise<void>;
+  receiveRequest(jsonRpcMessage: Request, fromDomain: string): Promise<void>;
   sendBudgetNotification(notificationData: SiteBudget): Promise<void>;
   sendChannelNotification(
     method:
@@ -132,7 +132,7 @@ export class MessagingService implements MessagingServiceInterface {
     });
   }
 
-  public async receiveRequest(jsonRpcRequest: Request) {
+  public async receiveRequest(jsonRpcRequest: Request, fromDomain: string) {
     const request = parseRequest(jsonRpcRequest);
     const {id: requestId} = request;
 
@@ -163,7 +163,7 @@ export class MessagingService implements MessagingServiceInterface {
       case 'JoinChannel':
       case 'ApproveBudgetAndFund':
       case 'CloseAndWithdraw':
-        const appRequest = await convertToInternalEvent(request, this.store);
+        const appRequest = await convertToInternalEvent(request, this.store, fromDomain);
         this.eventEmitter.emit('AppRequest', appRequest);
         break;
       case 'PushMessage':
@@ -244,7 +244,8 @@ export function convertToInternalParticipant(participant: {
 }
 async function convertToInternalEvent(
   request: ChannelRequest,
-  store: Store
+  store: Store,
+  domain: string
 ): Promise<AppRequestEvent> {
   switch (request.method) {
     case 'CloseAndWithdraw':
@@ -253,7 +254,7 @@ async function convertToInternalEvent(
         requestId: request.id,
         player: convertToInternalParticipant(request.params.player),
         hub: convertToInternalParticipant(request.params.hub),
-        site: request.params.site
+        site: domain
       };
     case 'ApproveBudgetAndFund':
       const {hub, playerParticipantId} = request.params;
@@ -265,7 +266,7 @@ async function convertToInternalEvent(
       return {
         type: 'APPROVE_BUDGET_AND_FUND',
         requestId: request.id,
-        budget: deserializeBudgetRequest(request.params),
+        budget: deserializeBudgetRequest(request.params, domain),
         player: convertToInternalParticipant({
           participantId: playerParticipantId,
           signingAddress,
@@ -291,11 +292,17 @@ async function convertToInternalEvent(
         outcome,
         challengeDuration: bigNumberify(CHALLENGE_DURATION),
         chainId: NETWORK_ID,
-        requestId: request.id
+        requestId: request.id,
+        applicationSite: domain
       };
     }
     case 'JoinChannel':
-      return {type: 'JOIN_CHANNEL', ...request.params, requestId: request.id};
+      return {
+        type: 'JOIN_CHANNEL',
+        ...request.params,
+        requestId: request.id,
+        applicationSite: domain
+      };
     case 'UpdateChannel':
       const outcome = deserializeAllocations(request.params.allocations);
 

@@ -21,7 +21,6 @@ import * as CloseLedgerAndWithdraw from '../workflows/close-ledger-and-withdraw'
 import {TestStore} from '../workflows/tests/store';
 import {ETH_TOKEN} from '../constants';
 import {makeDestination} from '../utils/outcome';
-import {TEST_SITE} from '../workflows/tests/data';
 
 export class Player {
   privateKey: string;
@@ -63,7 +62,11 @@ export class Player {
   startAppWorkflow(startingState: string, context?: App.WorkflowContext) {
     const workflowId = Guid.create().toString();
     const machine = interpret<any, any, any>(
-      App.applicationWorkflow(this.store, this.messagingService, context),
+      App.applicationWorkflow(
+        this.store,
+        this.messagingService,
+        context ? context : {applicationSite: 'localhost'}
+      ),
       {
         devTools: true
       }
@@ -114,7 +117,7 @@ export function hookUpMessaging(playerA: Player, playerB: Player) {
       if (process.env.ADD_LOGS) {
         console.log(`MESSAGE A->B: ${JSON.stringify(pushMessageRequest)}`);
       }
-      await playerB.channelWallet.pushMessage(pushMessageRequest);
+      await playerB.channelWallet.pushMessage(pushMessageRequest, 'localhost');
     }
   });
 
@@ -124,7 +127,7 @@ export function hookUpMessaging(playerA: Player, playerB: Player) {
       if (process.env.ADD_LOGS) {
         console.log(`MESSAGE B->A: ${JSON.stringify(pushMessageRequest)}`);
       }
-      playerA.channelWallet.pushMessage(pushMessageRequest);
+      playerA.channelWallet.pushMessage(pushMessageRequest, 'localhost');
     }
   });
 }
@@ -226,7 +229,6 @@ export function generateApproveBudgetAndFundRequest(
     method: 'ApproveBudgetAndFund',
     params: {
       token: ETH_TOKEN,
-      domain: TEST_SITE,
       hub,
       playerParticipantId: player.participantId,
       requestedSendCapacity: '0x5',
@@ -244,7 +246,6 @@ export function generateCloseAndWithdrawRequest(
     id: 88888888,
     method: 'CloseAndWithdraw',
     params: {
-      site: TEST_SITE,
       hub,
       player
     }

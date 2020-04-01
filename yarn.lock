@@ -6550,6 +6550,13 @@
     "@types/events" "*"
     "@types/node" "*"
 
+"@types/postcss-import@12.0.0":
+  version "12.0.0"
+  resolved "https://registry.npmjs.org/@types/postcss-import/-/postcss-import-12.0.0.tgz#d7c584b2651258ed5b3657d25467df1c4aec33e1"
+  integrity sha512-AFgOR4zOOp/izuY7n5aEr/0SJ5e8fNYVxMkx49IA3Jf/Bs6Hhd6staMoSkdiTr9fi0z3Q1Ts5SqpFI5vv4k7BQ==
+  dependencies:
+    postcss "^7.0.27"
+
 "@types/prettier@1.19.0":
   version "1.19.0"
   resolved "https://registry.npmjs.org/@types/prettier/-/prettier-1.19.0.tgz#a2502fb7ce9b6626fdbfc2e2a496f472de1bdd05"
@@ -16783,6 +16790,11 @@ extract-comments@^1.1.0:
   dependencies:
     esprima-extract-comments "^1.1.0"
     parse-code-context "^1.0.0"
+
+extract-domain@2.2.1:
+  version "2.2.1"
+  resolved "https://registry.npmjs.org/extract-domain/-/extract-domain-2.2.1.tgz#1deeae633a5cbf05ae2fd7b3ff87cb98cbc4cb5b"
+  integrity sha512-lOq1adCJha0tFFBci4quxC4XLa6+Rs2WgAwTo9qbO9OsElvJmGgCvOzmHo/yg5CiqeP4+sHjkXYGkrCcIEprMg==
 
 extract-stack@^1.0.0:
   version "1.0.0"

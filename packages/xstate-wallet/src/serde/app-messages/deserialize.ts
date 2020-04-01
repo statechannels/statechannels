@@ -17,7 +17,10 @@ import {bigNumberify} from 'ethers/utils';
 import {AddressZero} from 'ethers/constants';
 import {makeDestination} from '../../utils/outcome';
 
-export function deserializeBudgetRequest(budgetRequest: AppBudgetRequest): SiteBudget {
+export function deserializeBudgetRequest(
+  budgetRequest: AppBudgetRequest,
+  domain: string
+): SiteBudget {
   const assetBudget: AssetBudget = {
     assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
     availableSendCapacity: bigNumberify(budgetRequest.requestedSendCapacity),
@@ -25,7 +28,7 @@ export function deserializeBudgetRequest(budgetRequest: AppBudgetRequest): SiteB
     channels: {}
   };
   return {
-    domain: budgetRequest.domain,
+    domain,
     hubAddress: budgetRequest.hub.signingAddress,
     forAsset: {[ETH_ASSET_HOLDER_ADDRESS]: assetBudget}
   };
