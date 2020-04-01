@@ -79,18 +79,16 @@ export function statesEqual(left: State, right: State) {
 }
 
 function simpleAllocationsEqual(left: SimpleAllocation, right: SimpleAllocation) {
-  if (left.assetHolderAddress === right.assetHolderAddress) {
-    if ((left.allocationItems.length = right.allocationItems.length)) {
-      return left.allocationItems
-        .map(
-          (value, index, array) =>
-            value.destination === right.allocationItems[index].destination &&
-            value.amount.eq(right.allocationItems[index].amount)
-        )
-        .reduce((a, b) => a && b);
-    }
-  }
-  return false;
+  return (
+    left.assetHolderAddress === right.assetHolderAddress &&
+    left.allocationItems.length === right.allocationItems.length &&
+    _.every(
+      left.allocationItems,
+      (value, index) =>
+        value.destination === right.allocationItems[index].destination &&
+        value.amount.eq(right.allocationItems[index].amount)
+    )
+  );
 }
 
 function simpleGuaranteesEqual(left: SimpleGuarantee, right: SimpleGuarantee) {
