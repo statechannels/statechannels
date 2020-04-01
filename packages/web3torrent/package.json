@@ -11,6 +11,7 @@
   "dependencies": {
     "@rimble/connection-banner": "1.2.3",
     "@statechannels/channel-client": "0.0.1",
+    "@statechannels/devtools": "0.1.22",
     "bencode": "2.0.1",
     "debug": "4.1.1",
     "ethers": "4.0.45",
@@ -77,31 +78,6 @@
   "eslintConfig": {
     "extends": "react-app"
   },
-  "jest": {
-    "collectCoverageFrom": [
-      "./src/**/*.ts*",
-      "!./src/**/index.ts*",
-      "!./src/routes.ts*",
-      "!./src/library/testing/*.ts*",
-      "!./src/library/time-based-leeching/*.ts*",
-      "!./src/utils/copy-to-clipboard.ts",
-      "!./src/utils/test-utils.ts",
-      "!./src/components/form/form-input/**",
-      "!./src/utils/useInterval.ts",
-      "!./src/**/react-app-env.d.ts",
-      "!./src/**/types.ts",
-      "!./src/**/constants.ts",
-      "!./test/utils.ts"
-    ],
-    "globalSetup": "./src/library/testing/setup.js",
-    "globalTeardown": "./src/library/testing/teardown.js",
-    "transform": {
-      "^.+\\.tsx?$": "ts-jest"
-    },
-    "moduleNameMapper": {
-      "\\.(css|less|scss|sass)$": "identity-obj-proxy"
-    }
-  },
   "keywords": [
     "state-channels",
     "webtorrent",
@@ -136,7 +112,7 @@
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
     "start:tracker": "node tracker/index.js",
     "storybook": "start-storybook -s ./public -p 4568",
-    "test": "TRACKER_URL=http://localhost:4242/announce react-scripts test",
+    "test": "npx jest -c ./config/jest/jest.config.js",
     "test:ci": "CI=true yarn test --runInBand --ci --all --forceExit",
     "test:coverage": "yarn test --coverage"
   }
