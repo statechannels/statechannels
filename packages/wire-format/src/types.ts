@@ -40,13 +40,13 @@ export interface Allocation {
 
 export type Allocations = Allocation[]; // included for backwards compatibility
 
-export interface Gaurantee {
+export interface Guarantee {
   assetHolderAddress: Address;
   targetChannelId: Bytes32;
   destinations: Bytes32[];
 }
 
-export type Guarantees = Gaurantee[];
+export type Guarantees = Guarantee[];
 
 export type Outcome = Guarantees | Allocations;
 

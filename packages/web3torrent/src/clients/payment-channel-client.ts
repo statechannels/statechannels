@@ -5,6 +5,8 @@ import {ChannelClient} from '@statechannels/channel-client';
 import {ChannelStatus, Message} from '@statechannels/client-api-schema';
 import {SiteBudget} from '@statechannels/client-api-schema';
 import {SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS} from '../constants';
+import {hexZeroPad} from 'ethers/utils';
+import {AddressZero} from 'ethers/constants';
 
 const bigNumberify = utils.bigNumberify;
 const FINAL_SETUP_STATE = utils.bigNumberify(3); // for a 2 party ForceMove channel
@@ -318,8 +320,14 @@ const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
     payer: participants[1].participantId,
     beneficiaryOutcomeAddress: participants[0].destination,
     payerOutcomeAddress: participants[1].destination,
-    beneficiaryBalance: bigNumberify(allocations[0].allocationItems[0].amount).toString(),
-    payerBalance: bigNumberify(allocations[0].allocationItems[1].amount).toString()
+    beneficiaryBalance: hexZeroPad(
+      bigNumberify(allocations[0].allocationItems[0].amount).toHexString(),
+      32
+    ),
+    payerBalance: hexZeroPad(
+      bigNumberify(allocations[0].allocationItems[1].amount).toHexString(),
+      32
+    )
   };
 };
 
@@ -336,21 +344,27 @@ const formatParticipants = (
 const formatAllocations = (aAddress: string, bAddress: string, aBal: string, bBal: string) => {
   return [
     {
-      token: '0x0',
+      token: AddressZero,
       allocationItems: [
-        {destination: aAddress, amount: bigNumberify(aBal).toHexString()},
-        {destination: bAddress, amount: bigNumberify(bBal).toHexString()}
+        {destination: aAddress, amount: hexZeroPad(bigNumberify(aBal).toHexString(), 32)},
+        {destination: bAddress, amount: hexZeroPad(bigNumberify(bBal).toHexString(), 32)}
       ]
     }
   ];
 };
 
 const subract = (a: string, b: string) =>
-  bigNumberify(a)
-    .sub(bigNumberify(b))
-    .toString();
+  hexZeroPad(
+    bigNumberify(a)
+      .sub(bigNumberify(b))
+      .toHexString(),
+    32
+  );
 
 const add = (a: string, b: string) =>
-  bigNumberify(a)
-    .add(bigNumberify(b))
-    .toString();
+  hexZeroPad(
+    bigNumberify(a)
+      .add(bigNumberify(b))
+      .toHexString(),
+    32
+  );

@@ -31,6 +31,7 @@ import {
 import * as firebase from 'firebase/app';
 import 'firebase/database';
 import {Message} from '@statechannels/client-api-schema';
+import {hexZeroPad} from 'ethers/utils';
 
 const bigNumberify = utils.bigNumberify;
 const log = debug('web3torrent:library');
@@ -99,7 +100,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     if (AUTO_FUND_LEDGER) {
       // TODO: This is a temporary measure while we don't have any budgeting built out.
       // We automatically call approveBudgetAndFund.
-      const ten = utils.parseEther('10').toHexString();
+      const ten = hexZeroPad(utils.parseEther('10').toHexString(), 32);
       const success = await this.paymentChannelClient.approveBudgetAndFund(
         ten,
         ten,
@@ -246,8 +247,8 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
           const channel = await this.paymentChannelClient.createChannel(
             this.pseAccount, // seeder
             peerAccount, // leecher
-            INITIAL_SEEDER_BALANCE.toString(), // seederBalance,
-            INITIAL_LEECHER_BALANCE.toString(), // leecherBalance,
+            hexZeroPad(INITIAL_SEEDER_BALANCE.toHexString(), 32), // seederBalance,
+            hexZeroPad(INITIAL_LEECHER_BALANCE.toHexString(), 32), // leecherBalance,
             this.paymentChannelClient.myEthereumSelectedAddress, // seederOutcomeAddress,
             peerOutcomeAddress // leecherOutcomeAddress
           );
