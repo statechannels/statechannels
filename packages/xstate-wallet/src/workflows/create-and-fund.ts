@@ -9,7 +9,7 @@ import {
 
 import {filter, map, first} from 'rxjs/operators';
 import _ from 'lodash';
-import {SimpleAllocation, isVirtuallyFund, StateVariables, Outcome} from '../store/types';
+import {isVirtuallyFund, StateVariables, Outcome} from '../store/types';
 
 import {
   MachineFactory,
@@ -28,7 +28,6 @@ import {bigNumberify} from 'ethers/utils';
 const PROTOCOL = 'create-and-fund';
 
 export type Init = {
-  allocation: SimpleAllocation;
   channelId: string;
   funding: 'Direct' | 'Virtual' | 'Ledger';
 };

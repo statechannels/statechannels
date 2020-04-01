@@ -70,7 +70,7 @@ const allocation: Outcome = {
 const ledgerAmounts = amounts.map(a => a.add(2));
 const depositAmount = ledgerAmounts.reduce(add).toHexString();
 
-const context: Init = {channelId: targetChannelId, allocation, funding: 'Direct'};
+const context: Init = {channelId: targetChannelId, funding: 'Direct'};
 
 let aStore: TestStore;
 let bStore: TestStore;
