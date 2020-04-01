@@ -3,7 +3,7 @@ import {Page} from 'puppeteer';
 
 export async function uploadFile(page: Page): Promise<string> {
   await page.waitForSelector('input[type=file]');
-  const fileToUpload = 'file.pdf';
+  const fileToUpload = 'sample.txt';
 
   // https://pub.dev/documentation/puppeteer/latest/puppeteer/FileChooser-class.html
   // Not clear why puppeteer FileChooser won't work out of box. We are doing it manually for now.

@@ -214,13 +214,12 @@ jobs:
           command: (cd packages/devtools && yarn run start:shared-ganache)
           background: true
       - run:
-          command: (cd packages/wallet && yarn run wait-on ../../.ganache-deployments && yarn run start:integration)
+          command: (cd packages/xstate-wallet && yarn run wait-on ../../.ganache-deployments && yarn start)
           background: true
       - run:
-          command: (cd packages/rps && yarn run wait-on ../../.ganache-deployments && yarn run start)
+          command: (cd packages/web3torrent && yarn run wait-on ../../.ganache-deployments && yarn start)
           background: true
-      - run: (cd packages/wallet && yarn run test:ci:integration)
-      - run: (cd packages/e2e-tests && USE_VIRTUAL_FUNDING=false yarn test)
+      - run: (cd packages/e2e-tests && openssl rand -out sample.txt -base64 $(( 2**20 * 3/4 * 4 )) && yarn test puppeteer/__tests__/web3torrent.test.ts)
       - upload_logs:
           file: integration-test-stats
       - upload_e2e_screenshots:
@@ -313,9 +312,9 @@ workflows:
           requires:
             - prepare
       # TODO: Enable once working with xstate wallet
-      #  - integration-test:
-      #      requires:
-      #        - prepare
+      - integration-test:
+          requires:
+            - prepare
       # TODO: Enable once the test runs reliably
       # - integration-test-with-hub:
       #    requires:
