@@ -101,7 +101,8 @@ export class ChannelWallet {
             budget: request.budget,
             requestId: request.requestId
           }),
-          workflowId
+          workflowId,
+          true // devtools
         );
         this.workflows.push(workflow);
 
@@ -133,14 +134,14 @@ export class ChannelWallet {
   }
   private startWorkflow(
     machineConfig: StateNode<any, any, any, any>,
-    workflowId: string
+    workflowId: string,
+    devTools = false
   ): Workflow {
     if (this.isWorkflowIdInUse(workflowId)) {
       throw new Error(`There is already a workflow running with id ${workflowId}`);
     }
-    const machine = interpret<any, any, any>(machineConfig, {
-      devTools: true
-    })
+
+    const machine = interpret<any, any, any>(machineConfig, {devTools})
       .onTransition((state, event) => process.env.ADD_LOGS && logTransition(state, event, this.id))
 
       .onDone(() => (this.workflows = this.workflows.filter(w => w.id !== workflowId)))
