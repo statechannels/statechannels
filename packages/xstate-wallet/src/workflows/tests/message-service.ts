@@ -3,9 +3,11 @@ import _ from 'lodash';
 import {exists} from '../../utils';
 
 export function subscribeToMessages(
-  stores: Record<string, Pick<Store, 'pushMessage' | 'outboxFeed' | 'getAddress'>>
+  stores: Record<string, Pick<Store, 'pushMessage' | 'outboxFeed' | 'getAddress'>>,
+  log = false
 ) {
-  Object.values(stores).map(store =>
+  Object.keys(stores).map(participantId => {
+    const store = stores[participantId];
     store.outboxFeed.subscribe(message => {
       const participants = _.flatten(
         _.concat(
@@ -17,8 +19,12 @@ export function subscribeToMessages(
         participants
           .filter(exists)
           .filter(p => p.signingAddress !== address)
-          .map(p => stores[p.participantId].pushMessage(message));
+          .map(p => {
+            log &&
+              console.log(`${participantId} to ${p.participantId}: ${JSON.stringify(message)}`);
+            return stores[p.participantId].pushMessage(message);
+          });
       });
-    })
-  );
+    });
+  });
 }
