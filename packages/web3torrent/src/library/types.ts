@@ -91,11 +91,7 @@ export type OverridenTorrentProperties = 'pieces';
 
 export type ExtendedTorrentPiece = WebTorrent.TorrentPiece & {
   _reservations: number;
-  _chunks: number;
   length: number;
-  _buffered: number;
-  _buffer: any[];
-  _cancellations: any[];
 };
 
 export type ExtendedTorrent = Omit<WebTorrent.Torrent, OverridenTorrentProperties> & {
