@@ -30,7 +30,7 @@ const PROTOCOL = 'create-and-fund';
 export type Init = {
   allocation: SimpleAllocation;
   channelId: string;
-  funding: 'Direct' | 'Virtual';
+  funding: 'Direct' | 'Virtual' | 'Ledger';
 };
 
 const isDirect = (ctx: Init) => ctx.funding === 'Direct';

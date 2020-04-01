@@ -47,9 +47,9 @@ export interface WorkflowContext {
   channelParams?: Omit<CreateChannelEvent, 'type'>;
 }
 
-export type Init = WorkflowContext &
-  (CreateChannelEvent | {channelId: string; type: 'JOIN_CHANNEL'});
-type ChannelParamsExist = WorkflowContext & {channelParams: CCC.WorkflowContext};
+type CreateInit = WorkflowContext & CreateChannelEvent;
+type JoinInit = WorkflowContext & {channelId: string; type: 'JOIN_CHANNEL'};
+export type Init = CreateInit | JoinInit;
 type ChannelIdExists = WorkflowContext & {channelId: string};
 type RequestIdExists = WorkflowContext & {requestId: number};
 
@@ -65,7 +65,6 @@ export interface WorkflowActions {
   sendCreateChannelResponse: Action<RequestIdExists & ChannelIdExists, any>;
   sendJoinChannelResponse: Action<RequestIdExists & ChannelIdExists, any>;
   assignChannelId: Action<WorkflowContext, any>;
-  assignChannelParams: Action<WorkflowContext, CreateChannelEvent>;
   displayUi: Action<WorkflowContext, any>;
   hideUi: Action<WorkflowContext, any>;
   sendChannelUpdatedNotification: Action<WorkflowContext, any>;
@@ -86,7 +85,7 @@ export interface WorkflowServices extends Record<string, ServiceConfig<WorkflowC
     event: DoneInvokeEvent<CreateAndFund.Init>
   ) => StateMachine<any, any, any, any>;
   invokeCreateChannelConfirmation: (
-    context: ChannelParamsExist,
+    context: Init,
     event: DoneInvokeEvent<CCC.WorkflowContext>
   ) => CCC.WorkflowMachine;
   getDataForCreateChannelConfirmation: (
@@ -97,17 +96,19 @@ export interface WorkflowServices extends Record<string, ServiceConfig<WorkflowC
 interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
   states: {
     initializing: {};
-    confirmCreateChannelWorkflow: {};
-    confirmJoinChannelWorkflow: {
-      initial: 'signFirstState';
+    creatingChannel: {
+      initial: 'confirmChannelCreation';
+      states: {confirmChannelCreation: {}; creatingChannelInStore: {}; done: {}};
+    };
+    joiningChannel: {
+      initial: 'joiningChannel';
       states: {
-        signFirstState: {};
         confirmChannelCreation: {};
+        signFirstState: {};
         done: {};
       };
     };
     openChannelAndFundProtocol: {};
-    createChannelInStore: {};
     running: {};
     closing: {};
     // TODO: Is it possible to type these as type:'final' ?
@@ -134,46 +135,63 @@ const generateConfig = (
     initializing: {
       entry: actions.displayUi,
       on: {
-        CREATE_CHANNEL: {
-          target: 'confirmCreateChannelWorkflow',
-          actions: [actions.assignChannelParams]
-        },
-        JOIN_CHANNEL: {target: 'confirmJoinChannelWorkflow'}
+        '': [
+          {
+            target: 'creatingChannel',
+            cond: (ctx: Init) => ctx.type === 'CREATE_CHANNEL'
+          },
+          {
+            target: 'joiningChannel',
+            cond: (ctx: Init) => ctx.type === 'JOIN_CHANNEL'
+          },
+          {
+            actions: () => {
+              throw new Error('Unsupported funding type');
+            }
+          }
+        ]
       }
     },
-    confirmCreateChannelWorkflow: getDataAndInvoke2(
-      'getDataForCreateChannelConfirmation',
-      'invokeCreateChannelConfirmation',
-      'createChannelInStore'
-    ),
-    confirmJoinChannelWorkflow: {
+    creatingChannel: {
+      initial: 'confirmingChannel',
+      states: {
+        confirmingChannel: getDataAndInvoke2(
+          'getDataForCreateChannelConfirmation',
+          'invokeCreateChannelConfirmation',
+          'creatingChannelInStore'
+        ),
+        creatingChannelInStore: {
+          invoke: {
+            data: (_, event) => event.data,
+            src: 'createChannel',
+            onDone: {
+              target: 'done',
+              actions: [
+                actions.assignChannelId,
+                actions.spawnObservers,
+                actions.sendCreateChannelResponse
+              ]
+            }
+          }
+        },
+        done: {type: 'final'}
+      },
+      onDone: 'openChannelAndFundProtocol'
+    },
+    joiningChannel: {
       initial: 'signFirstState',
       states: {
-        signFirstState: {invoke: {src: 'signFirstState', onDone: 'confirmChannelCreation'}},
         confirmChannelCreation: getDataAndInvoke2(
           'getDataForCreateChannelConfirmation',
           'invokeCreateChannelConfirmation',
-          'done'
+          'signFirstState'
         ),
+        signFirstState: {invoke: {src: 'signFirstState', onDone: 'confirmChannelCreation'}},
         done: {type: 'final'}
       },
       entry: [actions.assignChannelId, actions.spawnObservers],
       exit: [actions.sendJoinChannelResponse],
       onDone: 'openChannelAndFundProtocol'
-    },
-    createChannelInStore: {
-      invoke: {
-        data: (_, event) => event.data,
-        src: 'createChannel',
-        onDone: {
-          target: 'openChannelAndFundProtocol',
-          actions: [
-            actions.assignChannelId,
-            actions.spawnObservers,
-            actions.sendCreateChannelResponse
-          ]
-        }
-      }
     },
 
     openChannelAndFundProtocol: getDataAndInvoke2(
@@ -272,11 +290,6 @@ export const workflow = (
     hideUi: () => {
       messagingService.sendDisplayMessage('Hide');
     },
-    assignChannelParams: assign<WorkflowContext>({
-      channelParams: (_, event: CreateChannelEvent) => event,
-      requestId: (_, {requestId}: CreateChannelEvent) => requestId,
-      applicationSite: (context: WorkflowContext) => context.applicationSite
-    }),
     assignChannelId: assign((context, event: AssignChannelEvent) => {
       if (context.channelId) return context;
       switch (event.type) {
@@ -324,14 +337,15 @@ export const workflow = (
           first()
         )
         .toPromise(),
-    createChannel: async (context: ChannelParamsExist) => {
+    createChannel: async (context: CreateInit) => {
       const {
         participants,
         challengeDuration,
         outcome,
         appData,
-        appDefinition
-      } = context.channelParams;
+        appDefinition,
+        fundingStrategy
+      } = context;
       const stateVars: StateVariables = {
         outcome,
         appData,
@@ -347,7 +361,7 @@ export const workflow = (
       // Create a open channel objective so we can coordinate with all participants
       await store.addObjective({
         type: 'OpenChannel',
-        data: {targetChannelId: channelId, fundingStrategy: 'Direct'}, // FIXME
+        data: {targetChannelId: channelId, fundingStrategy},
         participants
       });
       return channelId;
@@ -359,12 +373,13 @@ export const workflow = (
       CreateAndFund.machine(store, event.data),
     invokeCreateChannelConfirmation: (context, event: DoneInvokeEvent<CCC.WorkflowContext>) =>
       CCC.workflow(event.data),
-    getDataForCreateChannelAndFund: async (
-      context: ChannelParamsExist
-    ): Promise<CreateAndFund.Init> => {
-      const {latestSupportedByMe, channelId} = await store.getEntry(context.channelId);
+    getDataForCreateChannelAndFund: async ({
+      channelId,
+      fundingStrategy
+    }: ChannelIdExists): Promise<CreateAndFund.Init> => {
+      const {latestSupportedByMe} = await store.getEntry(channelId);
       const allocation = checkThat(latestSupportedByMe.outcome, isSimpleEthAllocation);
-      return {channelId, allocation, funding: 'Direct'}; // FIXME
+      return {channelId, allocation, funding: fundingStrategy};
     },
     getDataForCreateChannelConfirmation: async (
       _: WorkflowContext,
