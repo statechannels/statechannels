@@ -132,7 +132,9 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       setTimeout(resolve, timeOut);
     });
     const raceResult = await Promise.race([gotAWire, timer]);
-    this.remove(torrentId);
+    if (torrentId) {
+      this.remove(torrentId);
+    }
     return raceResult;
   }
 
