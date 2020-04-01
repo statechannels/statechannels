@@ -23,7 +23,9 @@ type MockDownloadInfo = {
 const mockDownloadInfo = (torrentProps?: Partial<Torrent>): MockDownloadInfo => {
   const torrent = createMockTorrent(torrentProps);
   torrent.parsedTimeRemaining = getFormattedETA(torrent as Torrent);
-  const downloadInfoWrapper = mount(<DownloadInfo torrent={torrent as Torrent} />);
+  const downloadInfoWrapper = mount(
+    <DownloadInfo torrent={torrent as Torrent} channelCache={{}} mySigningAddress="0x0" />
+  );
 
   return {
     downloadInfoWrapper,
@@ -73,7 +75,7 @@ describe.skip('<DownloadInfo />', () => {
 
   it('can call Web3TorrentClient.remove() when clicking the Cancel button', () => {
     const removeSpy = jest
-      .spyOn(Web3TorrentClient, 'remove')
+      .spyOn(Web3TorrentClient, 'cancel')
       .mockImplementation(async (_?: string) => {
         /* nothing to see here */
       });

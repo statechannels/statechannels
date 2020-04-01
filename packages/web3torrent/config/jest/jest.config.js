@@ -6,7 +6,7 @@ const {resolve} = require('path');
 const root = resolve(__dirname, '../../');
 module.exports = {
   rootDir: root,
-  testMatch: ['<rootDir>/src/**/*.test.ts'],
+  testMatch: ['<rootDir>/src/**/*.test.ts*'],
   testEnvironment: 'jsdom',
   preset: 'ts-jest',
   transform: {

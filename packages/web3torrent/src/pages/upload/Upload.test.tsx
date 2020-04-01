@@ -32,7 +32,7 @@ function setup() {
 
   const component = mount(
     <Router>
-      <Upload {...props} />
+      <Upload {...props} ready={true} />
     </Router>
   );
 
