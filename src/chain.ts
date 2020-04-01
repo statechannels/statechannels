@@ -27,13 +27,14 @@ export interface ChannelChainInfo {
   readonly amount: BigNumber;
   // TODO: This is the same as challengeExpiry < now
   readonly finalized: boolean;
+  readonly blockNum: number; // blockNum that the information is from
 }
 
 export interface Chain {
   initialize(): Promise<void>;
   getChainInfo: (channelId: string) => Promise<ChannelChainInfo>;
   chainUpdatedFeed: (channelId: string) => Observable<ChannelChainInfo>;
-  deposit: (channelId: string, expectedHeld: string, amount: string) => Promise<void>;
+  deposit: (channelId: string, expectedHeld: string, amount: string) => Promise<string | undefined>;
   ethereumEnable: () => Promise<string>;
   ethereumIsEnabled: boolean;
   finalizeAndWithdraw: (finalizationProof: SignedState[]) => Promise<void>;
@@ -56,19 +57,22 @@ export class FakeChain implements Chain {
     /* NOOP */
   }
 
-  public async deposit(channelId: string, expectedHeld: string, amount: string): Promise<void> {
+  public async deposit(channelId: string, expectedHeld: string, amount: string) {
     this.depositSync(channelId, expectedHeld, amount);
+    return 'fake-transaction-id';
   }
 
   public async finalizeAndWithdraw(finalizationProof: SignedState[]): Promise<void> {
     const channelId = calculateChannelId(finalizationProof[0]);
     this.finalizeSync(channelId);
 
+    const blockNum = 4;
     this.holdings[channelId] = bigNumberify('0x0');
     this.eventEmitter.emit(UPDATED, {
       amount: this.holdings[channelId],
       finalized: true,
-      channelId
+      channelId,
+      blockNum
     });
   }
 
@@ -79,29 +83,34 @@ export class FakeChain implements Chain {
   public depositSync(channelId: string, expectedHeld: string, amount: string) {
     const current = this.holdings[channelId] || bigNumberify(0);
 
+    const blockNum = 4;
     if (current.gte(expectedHeld)) {
       this.holdings[channelId] = current.add(amount);
       this.eventEmitter.emit(UPDATED, {
         amount: this.holdings[channelId],
         finalized: false,
-        channelId
+        channelId,
+        blockNum
       });
     }
   }
 
   public async getChainInfo(channelId: string): Promise<ChannelChainInfo> {
+    const blockNum = 4;
     return {
       amount: this.holdings[channelId] || bigNumberify(0),
-      finalized: this.finalized[channelId] || false
+      finalized: this.finalized[channelId] || false,
+      blockNum
     };
   }
 
   public chainUpdatedFeed(channelId: string): Observable<ChannelChainInfo> {
     const first = from(this.getChainInfo(channelId));
 
+    const blockNum = 4;
     const updates = fromEvent(this.eventEmitter, UPDATED).pipe(
       filter((event: Updated) => event.channelId === channelId),
-      map(({amount, finalized}) => ({amount, finalized}))
+      map(({amount, finalized}) => ({amount, finalized, blockNum}))
     );
 
     return merge(first, updates);
@@ -171,7 +180,11 @@ export class ChainWatcher implements Chain {
     const response = await signer.sendTransaction(transactionRequest);
     await response.wait();
   }
-  public async deposit(channelId: string, expectedHeld: string, amount: string): Promise<void> {
+  public async deposit(
+    channelId: string,
+    expectedHeld: string,
+    amount: string
+  ): Promise<string | undefined> {
     const provider = getProvider();
     const signer = provider.getSigner();
     const transactionRequest = {
@@ -180,7 +193,8 @@ export class ChainWatcher implements Chain {
       value: amount
     };
     const response = await signer.sendTransaction(transactionRequest);
-    await response.wait();
+    const transaction = await response.wait();
+    return transaction.transactionHash;
   }
 
   public async getChainInfo(channelId: string): Promise<ChannelChainInfo> {
@@ -191,10 +205,12 @@ export class ChainWatcher implements Chain {
       provider
     );
     const amount: ethers.utils.BigNumber = await contract.holdings(channelId);
+    const blockNum = await provider.getBlockNumber();
     // TODO: Fetch other info
     return {
       amount,
-      finalized: false
+      finalized: false,
+      blockNum
     };
   }
 
@@ -207,10 +223,10 @@ export class ChainWatcher implements Chain {
 
     const updates = fromEvent(this._assetHolders[0], 'Deposited').pipe(
       filter((event: Array<string | BigNumber>) => event[0] === channelId),
-      map((event: Array<string | BigNumber>) => ({
-        amount: bigNumberify(event[2]),
-        finalized: false
-      }))
+      map((event: Array<string | BigNumber>) =>
+        //TODO: get blockNum to work
+        ({amount: bigNumberify(event[2]), finalized: false, blockNum: 4})
+      )
     );
     return merge(first, updates);
   }
