@@ -6,6 +6,7 @@ import './wallet.scss';
 import {ApplicationWorkflow} from './application-workflow';
 import {EnableEthereum} from './enable-ethereum-workflow';
 import {Layout} from './layout';
+import {ApproveBudgetAndFund} from './approve-budget-and-fund-workflow';
 
 interface Props {
   workflow: Interpreter<any, any, any>;
@@ -21,6 +22,9 @@ export const Wallet = (props: Props) => {
         )}
         {props.workflow.id === 'enable-ethereum' && (
           <EnableEthereum current={current} send={send} />
+        )}
+        {props.workflow.id === 'approve-budget-and-fund' && (
+          <ApproveBudgetAndFund current={current} send={send} />
         )}
       </Layout>
     </WindowContext.Provider>
