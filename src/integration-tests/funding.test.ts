@@ -1,10 +1,11 @@
 import {
   CreateChannelResponse,
-  JoinChannelRequest,
-  JoinChannelResponse
+  ChannelProposedNotification,
+  Response,
+  Notification,
+  ChannelUpdatedNotification
 } from '@statechannels/client-api-schema';
 import {filter, first} from 'rxjs/operators';
-import waitForExpect from 'wait-for-expect';
 import {FakeChain} from '../chain';
 import {
   Player,
@@ -13,9 +14,11 @@ import {
   generateJoinChannelRequest
 } from './helpers';
 
-jest.setTimeout(30000);
+jest.setTimeout(20000);
 
 it('allows for two wallets to fund an app', async () => {
+  /*
+   */
   const fakeChain = new FakeChain();
 
   const playerA = await Player.createPlayer(
@@ -33,53 +36,41 @@ it('allows for two wallets to fund an app', async () => {
   const channelId = '0x1823994d6d3b53b82f499c1aca2095b94108ba3ff59f55c6e765da1e24874ab2';
 
   const createEvent = generateCreateChannelRequest(playerA.participant, playerB.participant);
+  const isCreateChannelResponse = (m): m is CreateChannelResponse =>
+    'id' in m && m.id === createEvent.id;
   const createPromise = playerA.messagingService.outboxFeed
-    .pipe(
-      filter((m): m is CreateChannelResponse => 'id' in m && m.id === createEvent.id),
-      first()
-    )
+    .pipe(filter(isCreateChannelResponse), first())
     .toPromise();
 
-  const playerBChannelUpdatedPromise = playerB.store
-    .channelUpdatedFeed(channelId)
-    .pipe(first())
-    .toPromise();
   await playerA.messagingService.receiveRequest(createEvent, 'localhost');
 
-  await waitForExpect(() => expect(playerA.channelWallet.workflows[0]).toBeDefined());
-
-  playerA.channelWallet.workflows[0].machine.send({type: 'USER_APPROVES'});
-
+  setTimeout(() => playerA.channelWallet.workflows[0].machine.send({type: 'USER_APPROVES'}), 50);
   const createResponse = await createPromise;
   expect(createResponse.result.channelId).toEqual(channelId);
 
-  const joinEvent: JoinChannelRequest = generateJoinChannelRequest(channelId);
-  const joinPromise = playerB.messagingService.outboxFeed
-    .pipe(
-      filter((r): r is JoinChannelResponse => 'id' in r && r.id === joinEvent.id),
-      first()
-    )
+  const isChannelProposed = (m: Response | Notification): m is ChannelProposedNotification =>
+    'method' in m && m.method === 'ChannelProposed';
+  const channelProposedNotification = await playerB.messagingService.outboxFeed
+    .pipe(filter(isChannelProposed), first())
     .toPromise();
+  expect(channelProposedNotification.params.channelId).toEqual(channelId);
 
-  await playerBChannelUpdatedPromise;
+  const expectedId = `JOIN_CHANNEL-${channelId}`;
+  expect(playerB.channelWallet.getWorkflow(expectedId).id).toEqual(expectedId);
 
-  await playerB.messagingService.receiveRequest(joinEvent, 'localhost');
-
-  // Wait for the create channel service to start
-  await waitForExpect(async () => {
-    expect(playerB.workflowState).toMatchObject({
-      confirmJoinChannelWorkflow: {confirmChannelCreation: 'invokeCreateChannelConfirmation'}
-    });
-  }, 3000);
-
+  playerB.channelWallet.pushMessage(generateJoinChannelRequest(channelId), 'localhost');
   playerB.channelWallet.workflows[0].machine.send({type: 'USER_APPROVES'});
 
-  const playerBResponse: JoinChannelResponse = await joinPromise;
+  const isChannelUpdated = (m: Response | Notification): m is ChannelUpdatedNotification =>
+    'method' in m && m.method === 'ChannelProposed';
 
-  expect(playerBResponse.result).toBeDefined();
-
-  await waitForExpect(async () => {
-    expect(playerA.workflowState).toEqual('running');
-    expect(playerB.workflowState).toEqual('running');
-  }, 3000);
+  return Promise.all(
+    [playerA, playerB].map(player =>
+      player.messagingService.outboxFeed.pipe(
+        filter(isChannelUpdated),
+        filter(notification => notification.params.status === 'running'),
+        first()
+      )
+    )
+  );
 });
