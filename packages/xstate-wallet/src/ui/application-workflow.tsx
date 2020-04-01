@@ -21,13 +21,15 @@ interface Props {
 export const ApplicationWorkflow = (props: Props) => {
   const current = props.current;
   const messages: Record<Application.StateValue, string> = {
+    branchingOnFundingStrategy: '', // UI never sees this state
     confirmingWithUser: 'Confirming with user...',
     creatingChannel: 'Creating channel...',
     joiningChannel: 'Joining channel ... ',
     openChannelAndFundProtocol: 'Opening channel...',
     running: 'Running channel...',
     closing: 'Closing channel...',
-    done: 'Channel closed'
+    done: 'Channel closed',
+    failure: 'Something went wrong ...'
   };
   return (
     <div
