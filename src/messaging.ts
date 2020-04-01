@@ -48,6 +48,9 @@ interface InternalEvents {
   SendMessage: [Response | Notification | ErrorResponse];
 }
 
+export const isChannelUpdated = (m: Response | Notification): m is ChannelUpdatedNotification =>
+  'method' in m && m.method === 'ChannelProposed';
+
 export interface MessagingServiceInterface {
   readonly outboxFeed: Observable<Response | Notification>;
   readonly requestFeed: Observable<AppRequestEvent>;
