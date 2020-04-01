@@ -394,7 +394,7 @@ export const applicationWorkflow = (
       ConcludeChannel.machine(store).withContext({channelId: context.channelId}),
 
     invokeChallengingProtocol: ({channelId}: ChannelIdExists) =>
-      ChallengeChannel.machine(store).withContext({channelId}),
+      ChallengeChannel.machine(store).withContext({channelId, challengeSubmitted: false}),
 
     invokeCreateChannelAndFundProtocol: (_, event: DoneInvokeEvent<CreateAndFund.Init>) =>
       CreateAndFund.machine(store, event.data),
