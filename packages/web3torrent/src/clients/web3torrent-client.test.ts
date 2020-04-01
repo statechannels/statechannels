@@ -28,6 +28,10 @@ describe('Web3TorrentClient', () => {
         );
     });
 
+    afterAll(() => {
+      web3torrent.destroy();
+    });
+
     it('should return a torrent with a status of Connecting', async () => {
       const {magnetURI} = torrent;
 

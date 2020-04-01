@@ -54,6 +54,10 @@ describe('<Upload />', () => {
     jest.useFakeTimers();
   });
 
+  afterAll(() => {
+    Web3TorrentClient.web3torrent.destroy();
+  });
+
   it('should render an Upload button', () => {
     expect(component.find('input.inputfile').exists()).toBe(true);
   });

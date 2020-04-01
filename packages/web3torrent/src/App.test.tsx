@@ -21,6 +21,10 @@ import {web3torrent, WebTorrentContext} from './clients/web3torrent-client';
 // Currently the App.tsx component is arguably responsible for too much: e.g. enabling the web3torrent client and state channel provider. We should figure out a way to test the rendering of App.tsx in isolation from that; possibly by moving the WebTorrentPaidStreamingClient.enable() call elsewhere.
 // https://github.com/statechannels/monorepo/issues/1291
 
+afterAll(() => {
+  web3torrent.destroy();
+});
+
 it.skip('renders app without crashing', () => {
   const div = document.createElement('div');
 
