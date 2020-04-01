@@ -4,8 +4,7 @@ import {
   Outcome,
   AllocationItem,
   SignedState,
-  SimpleAllocation,
-  SimpleGuarantee
+  SimpleAllocation
 } from './types';
 import {
   State as NitroState,
@@ -91,20 +90,12 @@ function simpleAllocationsEqual(left: SimpleAllocation, right: SimpleAllocation)
   );
 }
 
-function simpleGuaranteesEqual(left: SimpleGuarantee, right: SimpleGuarantee) {
-  return (
-    left.assetHolderAddress === right.assetHolderAddress &&
-    left.targetChannelId == right.targetChannelId &&
-    left.destinations === right.destinations
-  );
-}
-
 export function outcomesEqual(left: Outcome, right?: Outcome) {
   if (left.type === 'SimpleAllocation' && right?.type === 'SimpleAllocation') {
     return simpleAllocationsEqual(left, right);
   }
   if (left.type === 'SimpleGuarantee' && right?.type === 'SimpleGuarantee') {
-    return simpleGuaranteesEqual(left, right);
+    return _.isEqual(left, right);
   }
   if (left.type === 'MixedAllocation' && right?.type === 'MixedAllocation') {
     return (
@@ -113,7 +104,6 @@ export function outcomesEqual(left: Outcome, right?: Outcome) {
         simpleAllocationsEqual(left.simpleAllocations[index], right.simpleAllocations[index])
       )
     );
-    }
   }
   return false;
 }
