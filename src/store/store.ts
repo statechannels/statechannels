@@ -107,7 +107,6 @@ export interface Store {
   clearBudget: (site: string) => Promise<void>;
   reserveFunds(
     assetHolderAddress: string,
-    channelId: string,
     amount: {send: BigNumber; receive: BigNumber}
   ): Promise<SiteBudget>;
   releaseFunds(assetHolderAddress: string, channelId: string): Promise<SiteBudget>;
@@ -470,7 +469,6 @@ export class XstateStore implements Store {
 
   public async reserveFunds(
     assetHolderAddress: string,
-    channelId: string,
     amount: {send: BigNumber; receive: BigNumber}
   ): Promise<SiteBudget> {
     const entry = await this.getEntry(channelId);
