@@ -6,6 +6,7 @@ import {WorkflowState as CCCWorkflowState} from '../workflows/confirm';
 import {SiteBudget} from '../store/types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
 import {BigNumber} from 'ethers/utils';
+import {unreachable} from '../utils';
 
 export function getApplicationStateValue(
   applicationWorkflowState: AppWorkflowState
@@ -49,14 +50,22 @@ export function isApplicationOpening(applicationWorkflowState: AppWorkflowState)
 }
 
 export function getApplicationOpenProgress(applicationWorkflowState: AppWorkflowState): number {
-  switch (getApplicationStateValue(applicationWorkflowState)) {
+  const stateValue = getApplicationStateValue(applicationWorkflowState);
+  switch (stateValue) {
+    case 'confirmingWithUser':
+      return 0.25;
     case 'joiningChannel':
     case 'creatingChannel':
-      return 0.33;
+      return 0.5;
     case 'openChannelAndFundProtocol':
-      return 0.66;
-    default:
+      return 0.75;
+    case 'running':
       return 1;
+    case 'closing':
+    case 'done':
+      throw Error('Should not be in this state');
+    default:
+      return unreachable(stateValue);
   }
 }
 
