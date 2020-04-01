@@ -6550,6 +6550,13 @@
     "@types/events" "*"
     "@types/node" "*"
 
+"@types/postcss-import@12.0.0":
+  version "12.0.0"
+  resolved "https://registry.npmjs.org/@types/postcss-import/-/postcss-import-12.0.0.tgz#d7c584b2651258ed5b3657d25467df1c4aec33e1"
+  integrity sha512-AFgOR4zOOp/izuY7n5aEr/0SJ5e8fNYVxMkx49IA3Jf/Bs6Hhd6staMoSkdiTr9fi0z3Q1Ts5SqpFI5vv4k7BQ==
+  dependencies:
+    postcss "^7.0.27"
+
 "@types/prettier@1.19.0":
   version "1.19.0"
   resolved "https://registry.npmjs.org/@types/prettier/-/prettier-1.19.0.tgz#a2502fb7ce9b6626fdbfc2e2a496f472de1bdd05"
@@ -18600,7 +18607,7 @@ got@^6.7.1:
     unzip-response "^2.0.1"
     url-parse-lax "^1.0.0"
 
-got@^8.0.1, got@^8.3.1, got@^8.3.2:
+got@^8.0.1, got@^8.3.1:
   version "8.3.2"
   resolved "https://registry.npmjs.org/got/-/got-8.3.2.tgz#1d23f64390e97f776cac52e5b936e5f514d2e937"
   integrity sha512-qjUJ5U/hawxosMryILofZCkm3C84PLJS/0grRIpjAwu+Lkxxj5cxeCU25BG0/3mDSpXKTyZr8oh8wIgLaH0QCw==
@@ -21368,7 +21375,7 @@ jest-worker@^25.1.0:
     merge-stream "^2.0.0"
     supports-color "^7.0.0"
 
-jest@24.9.0, jest@^24.9.0:
+jest@24.9.0:
   version "24.9.0"
   resolved "https://registry.npmjs.org/jest/-/jest-24.9.0.tgz#987d290c05a08b52c56188c1002e368edb007171"
   integrity sha512-YvkBL1Zm7d2B1+h5fHEOdyjCG+sGMz4f8D86/0HiqJ6MB4MnDc8FgP5vdWsGnemOQro7lnYo8UakZ3+5A0jxGw==
@@ -24790,7 +24797,7 @@ npm-pick-manifest@^3.0.0:
     npm-package-arg "^6.0.0"
     semver "^5.4.1"
 
-npm-run-all@4.1.5, npm-run-all@^4.1.5:
+npm-run-all@4.1.5:
   version "4.1.5"
   resolved "https://registry.npmjs.org/npm-run-all/-/npm-run-all-4.1.5.tgz#04476202a15ee0e2e214080861bff12a51d98fba"
   integrity sha512-Oo82gJDAVcaMdi3nuoKFavkIHBRVqQ1qvMb+9LHk/cF4P6B2m8aP04hGf7oL6wZ9BuGwX1onlLhpuoofSyoQDQ==
@@ -25539,16 +25546,6 @@ parse-code-context@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npmjs.org/parse-code-context/-/parse-code-context-1.0.0.tgz#718c295c593d0d19a37f898473268cc75e98de1e"
   integrity sha512-OZQaqKaQnR21iqhlnPfVisFjBWjhnMl5J9MgbP8xC+EwoVqbXrq78lp+9Zb3ahmLzrIX5Us/qbvBnaS3hkH6OA==
-
-parse-domain@2.3.4:
-  version "2.3.4"
-  resolved "https://registry.npmjs.org/parse-domain/-/parse-domain-2.3.4.tgz#acf46caab0f1b5412b95cdc01a74ba793db15a0d"
-  integrity sha512-LlFJJVTry4DD3Xa76CsVNP6MIu3JZ8GXd5HEEp38KSDGBCVsnccagAJ5YLy7uEEabvwtauQEQPcvXWgUGkJbMA==
-  dependencies:
-    got "^8.3.2"
-    jest "^24.9.0"
-    mkdirp "^0.5.1"
-    npm-run-all "^4.1.5"
 
 parse-entities@^1.1.2:
   version "1.2.2"
