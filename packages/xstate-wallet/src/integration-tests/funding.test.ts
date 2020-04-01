@@ -2,8 +2,7 @@ import {
   CreateChannelResponse,
   ChannelProposedNotification,
   Response,
-  Notification,
-  ChannelUpdatedNotification
+  Notification
 } from '@statechannels/client-api-schema';
 import {filter, first} from 'rxjs/operators';
 import {FakeChain} from '../chain';
@@ -13,6 +12,7 @@ import {
   hookUpMessaging,
   generateJoinChannelRequest
 } from './helpers';
+import {isChannelUpdated} from '../messaging';
 
 jest.setTimeout(20000);
 
@@ -60,9 +60,6 @@ it('allows for two wallets to fund an app', async () => {
 
   playerB.channelWallet.pushMessage(generateJoinChannelRequest(channelId), 'localhost');
   playerB.channelWallet.workflows[0].machine.send({type: 'USER_APPROVES'});
-
-  const isChannelUpdated = (m: Response | Notification): m is ChannelUpdatedNotification =>
-    'method' in m && m.method === 'ChannelProposed';
 
   return Promise.all(
     [playerA, playerB].map(player =>
