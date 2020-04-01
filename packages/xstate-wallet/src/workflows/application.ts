@@ -108,7 +108,6 @@ interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
     createChannelInStore: {};
     running: {};
     sendChallenge: {};
-    waitingForResponse: {};
     closing: {};
     // TODO: Is it possible to type these as type:'final' ?
     done: {};

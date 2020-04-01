@@ -197,7 +197,6 @@ it('starts concluding when requested', async () => {
   const messagingService: MessagingServiceInterface = new MessagingService(store);
   const channelId = ethers.utils.id('channel');
   const services: Partial<WorkflowServices> = {
-    signConcludeState: jest.fn().mockReturnValue(Promise.resolve()),
     invokeClosingProtocol: jest.fn().mockReturnValue(
       new Promise(() => {
         /* mock */
@@ -246,7 +245,10 @@ it('starts challenging when requested', async () => {
     )
   };
   const service = interpret<any, any, any>(
-    applicationWorkflow(store, messagingService).withConfig({services, actions} as any)
+    applicationWorkflow(store, messagingService, {
+      channelId,
+      applicationSite: 'localhost'
+    }).withConfig({services, actions} as any)
   ); // TODO: Casting
   service.start('running');
   service.send({type: 'PLAYER_REQUEST_CHALLENGE', channelId});
@@ -281,8 +283,7 @@ it('starts concluding when receiving a final state', async () => {
       new Promise(() => {
         /* mock */
       })
-    ),
-    signConcludeState: jest.fn().mockReturnValue(Promise.resolve())
+    )
   };
   const channelId = calculateChannelId(states[0]);
   const channelUpdate: ChannelUpdated = {
