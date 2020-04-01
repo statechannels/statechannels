@@ -63,6 +63,8 @@ export function getApplicationOpenProgress(applicationWorkflowState: AppWorkflow
       return 1;
     case 'closing':
     case 'done':
+    case 'failure':
+    case 'branchingOnFundingStrategy':
       throw Error('Should not be in this state');
     default:
       return unreachable(stateValue);
