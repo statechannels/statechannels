@@ -8,7 +8,6 @@ import {
   PaidStreamingExtensionNotices,
   PaidStreamingWire
 } from './types';
-import {PEER_TRUST} from '../constants';
 const log = debug('web3torrent:extension');
 
 export abstract class PaidStreamingExtension implements Extension {
