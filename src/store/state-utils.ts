@@ -107,12 +107,12 @@ export function outcomesEqual(left: Outcome, right?: Outcome) {
     return simpleGuaranteesEqual(left, right);
   }
   if (left.type === 'MixedAllocation' && right?.type === 'MixedAllocation') {
-    if (left.simpleAllocations.length === right.simpleAllocations.length) {
-      return left.simpleAllocations
-        .map((value, index, array) =>
-          simpleAllocationsEqual(left.simpleAllocations[index], right.simpleAllocations[index])
-        )
-        .reduce((a, b) => a && b);
+    return (
+      left.simpleAllocations.length === right.simpleAllocations.length &&
+      _.every(left.simpleAllocations, (_, index) =>
+        simpleAllocationsEqual(left.simpleAllocations[index], right.simpleAllocations[index])
+      )
+    );
     }
   }
   return false;
