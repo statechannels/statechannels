@@ -254,7 +254,7 @@ async function convertToInternalEvent(
         requestId: request.id,
         player: convertToInternalParticipant(request.params.player),
         hub: convertToInternalParticipant(request.params.hub),
-        site: request.params.site
+        site: domain
       };
     case 'ApproveBudgetAndFund':
       const {hub, playerParticipantId} = request.params;
@@ -266,7 +266,7 @@ async function convertToInternalEvent(
       return {
         type: 'APPROVE_BUDGET_AND_FUND',
         requestId: request.id,
-        budget: deserializeBudgetRequest(request.params),
+        budget: deserializeBudgetRequest(request.params, domain),
         player: convertToInternalParticipant({
           participantId: playerParticipantId,
           signingAddress,

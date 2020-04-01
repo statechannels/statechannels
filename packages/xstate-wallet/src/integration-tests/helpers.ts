@@ -21,7 +21,6 @@ import * as CloseLedgerAndWithdraw from '../workflows/close-ledger-and-withdraw'
 import {TestStore} from '../workflows/tests/store';
 import {ETH_TOKEN} from '../constants';
 import {makeDestination} from '../utils/outcome';
-import {TEST_SITE} from '../workflows/tests/data';
 
 export class Player {
   privateKey: string;
@@ -230,7 +229,6 @@ export function generateApproveBudgetAndFundRequest(
     method: 'ApproveBudgetAndFund',
     params: {
       token: ETH_TOKEN,
-      domain: TEST_SITE,
       hub,
       playerParticipantId: player.participantId,
       requestedSendCapacity: '0x5',
@@ -248,7 +246,6 @@ export function generateCloseAndWithdrawRequest(
     id: 88888888,
     method: 'CloseAndWithdraw',
     params: {
-      site: TEST_SITE,
       hub,
       player
     }

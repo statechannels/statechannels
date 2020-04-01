@@ -141,7 +141,7 @@ export class ChannelClient implements ChannelClientInterface {
         requestedSendCapacity: sendCapacity,
         token: ETH_TOKEN_ADDRESS,
         playerParticipantId: this.signingAddress as string,
-        domain: window.location.hostname,
+
         hub: {
           participantId: HUB.participantId,
           signingAddress: hubAddress,

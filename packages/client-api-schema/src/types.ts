@@ -183,10 +183,6 @@ export interface SiteBudget {
 export interface TokenBudgetRequest {
   hub: Participant;
   playerParticipantId: string;
-  // TODO: The domain could be taken from incoming message instead
-  // leaving here for now as it's simpler then changing the wallet
-  // and the channel client already handles this
-  domain: string;
   token: string;
   requestedSendCapacity: string;
   requestedReceiveCapacity: string;
@@ -200,7 +196,7 @@ export type ApproveBudgetAndFundRequest = JsonRpcRequest<
 >;
 export type ApproveBudgetAndFundResponse = JsonRpcResponse<SiteBudget>;
 
-export type CloseAndWithdrawParams = {site: string; player: Participant; hub: Participant};
+export type CloseAndWithdrawParams = {player: Participant; hub: Participant};
 export type CloseAndWithdrawRequest = JsonRpcRequest<'CloseAndWithdraw', CloseAndWithdrawParams>;
 export type CloseAndWithdrawResponse = JsonRpcResponse<{success: boolean}>;
 

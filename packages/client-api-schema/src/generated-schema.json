@@ -365,13 +365,9 @@
         },
         "player": {
           "$ref": "#/definitions/Participant"
-        },
-        "site": {
-          "type": "string"
         }
       },
       "required": [
-        "site",
         "player",
         "hub"
       ],
@@ -1337,9 +1333,6 @@
     "TokenBudgetRequest": {
       "additionalProperties": false,
       "properties": {
-        "domain": {
-          "type": "string"
-        },
         "hub": {
           "$ref": "#/definitions/Participant"
         },
@@ -1359,7 +1352,6 @@
       "required": [
         "hub",
         "playerParticipantId",
-        "domain",
         "token",
         "requestedSendCapacity",
         "requestedReceiveCapacity"
