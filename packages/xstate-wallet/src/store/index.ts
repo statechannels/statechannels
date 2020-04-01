@@ -3,6 +3,7 @@ import {filter, map} from 'rxjs/operators';
 import {StateVariables} from './types';
 
 export {Store, XstateStore} from './store';
+export * from './types';
 
 // TODO: Move to somewhere better?
 export function supportedStateFeed(store: Store, channelId: string) {
