@@ -22,9 +22,8 @@ export const ApplicationWorkflow = (props: Props) => {
   const current = props.current;
   const messages: Record<Application.StateValue, string> = {
     initializing: 'Initializing...',
-    confirmCreateChannelWorkflow: 'Creating channel...',
-    createChannelInStore: 'Creating channel...',
-    confirmJoinChannelWorkflow: 'Joining channel ... ',
+    creatingChannel: 'Creating channel...',
+    joiningChannel: 'Joining channel ... ',
     openChannelAndFundProtocol: 'Opening channel...',
     running: 'Running channel...',
     closing: 'Closing channel...',

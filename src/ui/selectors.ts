@@ -28,37 +28,33 @@ export function getConfirmCreateChannelState(
 export function isConfirmCreateChannel(applicationWorkflowState: AppWorkflowState): boolean {
   // TODO: This is fragile and should be revisited at some point
   const joinInConfirmCreateChannel =
-    getApplicationStateValue(applicationWorkflowState) === 'confirmJoinChannelWorkflow' &&
-    applicationWorkflowState.value['confirmJoinChannelWorkflow'] &&
-    applicationWorkflowState.value['confirmJoinChannelWorkflow']['confirmChannelCreation'] ===
+    getApplicationStateValue(applicationWorkflowState) === 'joiningChannel' &&
+    applicationWorkflowState.value['joiningChannel'] &&
+    applicationWorkflowState.value['joiningChannel']['confirmChannelCreation'] ===
       'invokeCreateChannelConfirmation';
 
   return (
     joinInConfirmCreateChannel ||
-    getApplicationStateValue(applicationWorkflowState) === 'confirmCreateChannelWorkflow'
+    getApplicationStateValue(applicationWorkflowState) === 'creatingChannel'
   );
 }
 
 export function isApplicationOpening(applicationWorkflowState: AppWorkflowState): boolean {
   const stateValue = getApplicationStateValue(applicationWorkflowState);
   return (
-    stateValue === 'confirmJoinChannelWorkflow' ||
-    stateValue === 'confirmCreateChannelWorkflow' ||
-    stateValue === 'createChannelInStore' ||
+    stateValue === 'joiningChannel' ||
+    stateValue === 'creatingChannel' ||
     stateValue === 'openChannelAndFundProtocol'
   );
 }
 
 export function getApplicationOpenProgress(applicationWorkflowState: AppWorkflowState): number {
   switch (getApplicationStateValue(applicationWorkflowState)) {
-    case 'confirmJoinChannelWorkflow':
-    case 'confirmCreateChannelWorkflow':
-      return 0.25;
-    case 'createChannelInStore':
-      return 0.3;
-    // TODO: We should create a selector that gets a state value or progress value for this
+    case 'joiningChannel':
+    case 'creatingChannel':
+      return 0.33;
     case 'openChannelAndFundProtocol':
-      return 0.65;
+      return 0.66;
     default:
       return 1;
   }
