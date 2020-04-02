@@ -15,7 +15,7 @@ import {BigNumber, bigNumberify} from 'ethers/utils';
 import {Store, State as ChannelState} from '../store';
 import {CHALLENGE_DURATION, ETH_ASSET_HOLDER_ADDRESS} from '../constants';
 import {checkThat, exists, simpleEthAllocation} from '../utils';
-import {sendDisplayMessage, MessagingServiceInterface} from '../messaging';
+import {MessagingServiceInterface} from '../messaging';
 import {serializeSiteBudget} from '../serde/app-messages/serialize';
 import {filter, map, first} from 'rxjs/operators';
 import {statesEqual} from '../store/state-utils';
@@ -251,11 +251,11 @@ function convertPendingBudgetToAllocation({hub, player, budget}: Context): Simpl
 
 const displayUI = (messagingService: MessagingServiceInterface): ActionObject<Context, Event> => ({
   type: 'displayUI',
-  exec: () => sendDisplayMessage('Show')
+  exec: () => messagingService.sendDisplayMessage('Show')
 });
 const hideUI = (messagingService: MessagingServiceInterface): ActionObject<Context, Event> => ({
   type: 'hideUI',
-  exec: () => sendDisplayMessage('Hide')
+  exec: () => messagingService.sendDisplayMessage('Hide')
 });
 
 const sendResponse = (

@@ -18,8 +18,6 @@ import {
   ErrorResponse
 } from '@statechannels/client-api-schema';
 
-import * as jrs from 'jsonrpc-lite';
-
 import {fromEvent, Observable} from 'rxjs';
 import {ChannelStoreEntry} from './store/channel-store-entry';
 import {validateMessage} from '@statechannels/wire-format';
@@ -63,6 +61,7 @@ export interface MessagingServiceInterface {
     notificationData: ChannelResult
   );
   sendMessageNotification(message: Message): Promise<void>;
+  sendDisplayMessage(displayMessage: 'Show' | 'Hide');
   sendResponse(id: number, result: Response['result']): Promise<void>;
   sendError(id: number, error: ErrorResponse['error']): Promise<void>;
 }
@@ -93,11 +92,11 @@ export class MessagingService implements MessagingServiceInterface {
   }
 
   public async sendBudgetNotification(notificationData: SiteBudget) {
-    const notification = {
+    const notification: Notification = {
       jsonrpc: '2.0',
       method: 'BudgetUpdated',
       params: serializeSiteBudget(notificationData)
-    } as Notification; // typescript can't handle this otherwise
+    };
     this.eventEmitter.emit('SendMessage', notification);
   }
 
@@ -130,6 +129,16 @@ export class MessagingService implements MessagingServiceInterface {
       };
       this.eventEmitter.emit('SendMessage', notification);
     });
+  }
+
+  public sendDisplayMessage(displayMessage: 'Show' | 'Hide') {
+    const showWallet = displayMessage === 'Show';
+    const notification: Notification = {
+      jsonrpc: '2.0',
+      method: 'UIUpdate',
+      params: {showWallet}
+    };
+    this.eventEmitter.emit('SendMessage', notification);
   }
 
   public async receiveRequest(jsonRpcRequest: Request, fromDomain: string) {
@@ -223,13 +232,6 @@ export async function convertToChannelResult(
     turnNum: turnNum.toHexString(),
     channelId
   };
-}
-
-// TODO: Should be handled by messaging service?
-export function sendDisplayMessage(displayMessage: 'Show' | 'Hide') {
-  const showWallet = displayMessage === 'Show';
-  const message = jrs.notification('UIUpdate', {showWallet});
-  window.parent.postMessage(message, '*');
 }
 
 export function convertToInternalParticipant(participant: {
