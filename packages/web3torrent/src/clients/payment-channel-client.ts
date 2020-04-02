@@ -96,7 +96,8 @@ export class PaymentChannelClient {
       participants,
       allocations,
       appDefinition,
-      APP_DATA
+      APP_DATA,
+      'Virtual'
     );
 
     this.insertIntoChannelCache(convertToChannelState(channelResult));
