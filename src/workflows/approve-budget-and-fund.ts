@@ -61,7 +61,7 @@ interface Transaction {
 
 type Typestate =
   | {value: 'waitForApproval'; context: Initial}
-  | {value: 'createLedger'; context: Initial}
+  | {value: 'createBudgetAndLedger'; context: Initial}
   | {value: 'waitForPreFS'; context: LedgerExists}
   | {value: {deposit: 'init'}; context: LedgerExists & Deposit}
   | {value: {deposit: 'waitTurn'}; context: LedgerExists & Deposit & Chain}
@@ -77,7 +77,7 @@ type Context = Typestate['context'];
 export interface Schema extends StateSchema<Context> {
   states: {
     waitForUserApproval: {};
-    createLedger: {};
+    createBudgetAndLedger: {};
     waitForPreFS: {};
     deposit: {
       states: {
@@ -111,14 +111,14 @@ export const machine = (
     states: {
       waitForUserApproval: {
         on: {
-          USER_APPROVES_BUDGET: {target: 'createLedger'},
+          USER_APPROVES_BUDGET: {target: 'createBudgetAndLedger'},
           USER_REJECTS_BUDGET: {target: 'failure'}
         }
       },
-      createLedger: {
+      createBudgetAndLedger: {
         invoke: {
-          id: 'createLedgerStartState',
-          src: initializeLedger(store),
+          id: 'createBudgetAndLedger',
+          src: createBudgetAndLedger(store),
           onDone: {target: 'waitForPreFS', actions: setLedgerInfo}
         }
       },
@@ -193,7 +193,13 @@ interface LedgerInitRetVal {
   ledgerState: ChannelState;
 }
 
-const initializeLedger = (store: Store) => async (context: Initial): Promise<LedgerInitRetVal> => {
+const createBudgetAndLedger = (store: Store) => async (
+  context: Initial
+): Promise<LedgerInitRetVal> => {
+  // create budget
+  store.createBudget(context.budget);
+
+  // create ledger
   const initialOutcome = convertPendingBudgetToAllocation(context);
   const participants = [context.player, context.hub];
 
