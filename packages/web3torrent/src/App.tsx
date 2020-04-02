@@ -15,8 +15,7 @@ import {WebTorrentContext} from './clients/web3torrent-client';
 const history = createBrowserHistory();
 class App extends React.Component {
   state = {
-    currentNetwork:
-      'ethereum' in window && window.ethereum.chainId && parseInt(window.ethereum.chainId, 16),
+    currentNetwork: 'ethereum' in window && Number(window.ethereum.networkVersion),
     requiredNetwork: Number(process.env.REACT_APP_CHAIN_NETWORK_ID),
     canTorrent: true
   };
@@ -28,21 +27,17 @@ class App extends React.Component {
 
   async componentDidMount() {
     if ('ethereum' in window) {
-      this.setState({...this.state, currentNetwork: parseInt(window.ethereum.networkVersion, 10)});
+      this.setState({...this.state, currentNetwork: Number(window.ethereum.networkVersion)});
       window.ethereum.on('networkChanged', chainId => {
-        this.setState({...this.state, currentNetwork: parseInt(chainId, 10)});
+        this.setState({...this.state, currentNetwork: Number(chainId)});
       });
     }
-    await this.context.enable();
     this.setState({...this.state, canTorrent: await this.context.testTorrentingCapability(3000)});
   }
 
   render() {
     const {currentNetwork, requiredNetwork, canTorrent} = this.state;
-    const ready =
-      currentNetwork === requiredNetwork &&
-      !!this.context.pseAccount &&
-      !!this.context.outcomeAddress;
+    const ready = currentNetwork === requiredNetwork;
     return (
       <Router history={history}>
         <main>
@@ -53,8 +48,8 @@ class App extends React.Component {
             </Flash>
           )}
           <ConnectionBanner
-            currentNetwork={currentNetwork}
-            requiredNetwork={requiredNetwork}
+            currentNetwork={Number(currentNetwork)}
+            requiredNetwork={Number(requiredNetwork)}
             onWeb3Fallback={!('ethereum' in window)}
           />
           <Route path={RoutePath.Root} render={props => <LayoutHeader {...props} />} />
