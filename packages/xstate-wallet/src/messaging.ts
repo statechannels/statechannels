@@ -49,6 +49,8 @@ interface InternalEvents {
 }
 
 export const isChannelUpdated = (m: Response | Notification): m is ChannelUpdatedNotification =>
+  'method' in m && m.method === 'ChannelUpdated';
+export const isChannelProposed = (m: Response | Notification): m is ChannelProposedNotification =>
   'method' in m && m.method === 'ChannelProposed';
 
 export interface MessagingServiceInterface {
