@@ -7,20 +7,20 @@ export const wireStateFormat = {
   participants: [
     {
       destination: '0x00000000000000000000000063E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7',
-      participantId: '0xAE363d29fc0f6A9bbBbEcC87751e518Cd9CA83C0',
-      signingAddress: '0xAE363d29fc0f6A9bbBbEcC87751e518Cd9CA83C0'
+      participantId: '0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf',
+      signingAddress: '0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf' // key: 0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318
     },
     {
       destination: '0x00000000000000000000000063E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7',
-      participantId: '0x590A3Bd8D4A3b78411B3bDFb481E44e85C7345c0',
-      signingAddress: '0x590A3Bd8D4A3b78411B3bDFb481E44e85C7345c0'
+      participantId: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9',
+      signingAddress: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9' // key: 0xb3ab7b031311fe1764b657a6ae7133f19bac97acd1d7edca9409daa35892e727
     }
   ],
   appData:
     '0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000016345785d8a00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004444444444444444444444444444444444444444444444444444444444444444',
   appDefinition: '0x430869383d611bBB1ce7Ca207024E7901bC26b40',
   challengeDuration: '0x00000000000000000000000000000000000000000000000000000000000004a0',
-  channelId: '0x9afc73af1808170a4ee408649219ee8322957645e40e227cb1ea29ea98034699',
+  channelId: '0x59fb8a0bff0f4553b0169d4b6cad93f3baa9edd94bd28c954ae0ad1622252967',
   chainId: '0x2329',
   channelNonce: '0x11b1a311d845ca99f8e3c9a5f828f574b1afe2c3a0eb8cd51115dff18f0f34a0',
   isFinal: false,
@@ -41,7 +41,7 @@ export const wireStateFormat = {
   ],
   turnNum: '0x0000000000000000000000000000000000000000000000000000000000000001',
   signatures: [
-    '0x733ccfc3b0b13b446de290a9b056a5b9d7eb1538c1d48f8b863f731a0ea522c46ad30427d0859d782c98ccdc5fe10fc9c3d6480ee5080f70fd96128e4d61d50728'
+    '0x13151e7faaa5524a223869ba2fbb20419031049defc685dda8e7b35bcfc797c56c7ac82ff32fb02ce618c73efb8a233479ad2bbc25b9c1d67ded33517d4d5ff51c'
   ]
 };
 
@@ -49,13 +49,13 @@ export const internalStateFormat = {
   participants: [
     {
       destination: makeDestination('0x63E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7'),
-      participantId: '0xAE363d29fc0f6A9bbBbEcC87751e518Cd9CA83C0',
-      signingAddress: '0xAE363d29fc0f6A9bbBbEcC87751e518Cd9CA83C0'
+      participantId: '0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf',
+      signingAddress: '0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf'
     },
     {
       destination: makeDestination('0x63E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7'),
-      participantId: '0x590A3Bd8D4A3b78411B3bDFb481E44e85C7345c0',
-      signingAddress: '0x590A3Bd8D4A3b78411B3bDFb481E44e85C7345c0'
+      participantId: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9',
+      signingAddress: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9'
     }
   ],
   appData:
@@ -89,32 +89,32 @@ export const internalStateFormat = {
   signatures: [
     {
       signature:
-        '0x733ccfc3b0b13b446de290a9b056a5b9d7eb1538c1d48f8b863f731a0ea522c46ad30427d0859d782c98ccdc5fe10fc9c3d6480ee5080f70fd96128e4d61d50728',
-      signer: '0xAE363d29fc0f6A9bbBbEcC87751e518Cd9CA83C0'
+        '0x13151e7faaa5524a223869ba2fbb20419031049defc685dda8e7b35bcfc797c56c7ac82ff32fb02ce618c73efb8a233479ad2bbc25b9c1d67ded33517d4d5ff51c',
+      signer: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9'
     }
   ]
 };
 export const wireMessageFormat: WireMessage = {
-  recipient: '0xAE363d29fc0f6A9bbBbEcC87751e518Cd9CA83C0',
-  sender: '0x590A3Bd8D4A3b78411B3bDFb481E44e85C7345c0',
+  recipient: '0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf',
+  sender: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9',
   data: {
     signedStates: [wireStateFormat],
     objectives: [
       {
         type: 'OpenChannel',
         data: {
-          targetChannelId: '0x9afc73af1808170a4ee408649219ee8322957645e40e227cb1ea29ea98034699'
+          targetChannelId: '0x59fb8a0bff0f4553b0169d4b6cad93f3baa9edd94bd28c954ae0ad1622252967'
         },
         participants: [
           {
             destination: '0x00000000000000000000000063E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7',
-            participantId: '0xAE363d29fc0f6A9bbBbEcC87751e518Cd9CA83C0',
-            signingAddress: '0xAE363d29fc0f6A9bbBbEcC87751e518Cd9CA83C0'
+            participantId: '0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf',
+            signingAddress: '0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf'
           },
           {
             destination: '0x00000000000000000000000063E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7',
-            participantId: '0x590A3Bd8D4A3b78411B3bDFb481E44e85C7345c0',
-            signingAddress: '0x590A3Bd8D4A3b78411B3bDFb481E44e85C7345c0'
+            participantId: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9',
+            signingAddress: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9'
           }
         ]
       }
@@ -127,17 +127,17 @@ export const internalMessageFormat: Message = {
   objectives: [
     {
       type: 'OpenChannel',
-      data: {targetChannelId: '0x9afc73af1808170a4ee408649219ee8322957645e40e227cb1ea29ea98034699'},
+      data: {targetChannelId: '0x59fb8a0bff0f4553b0169d4b6cad93f3baa9edd94bd28c954ae0ad1622252967'},
       participants: [
         {
           destination: makeDestination('0x63E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7'),
-          participantId: '0xAE363d29fc0f6A9bbBbEcC87751e518Cd9CA83C0',
-          signingAddress: '0xAE363d29fc0f6A9bbBbEcC87751e518Cd9CA83C0'
+          participantId: '0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf',
+          signingAddress: '0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf'
         },
         {
           destination: makeDestination('0x63E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7'),
-          participantId: '0x590A3Bd8D4A3b78411B3bDFb481E44e85C7345c0',
-          signingAddress: '0x590A3Bd8D4A3b78411B3bDFb481E44e85C7345c0'
+          participantId: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9',
+          signingAddress: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9'
         }
       ]
     }
