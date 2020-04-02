@@ -9,8 +9,8 @@ import _ from 'lodash';
 import {firstState, signState, calculateChannelId} from '../../store/state-utils';
 import {ChannelConstants, Outcome, State} from '../../store/types';
 import {AddressZero} from 'ethers/constants';
-import {checkThat} from '../../utils';
-import {isSimpleEthAllocation} from '../../utils/outcome';
+import {checkThat, isSimpleEthAllocation, add} from '../../utils';
+
 import {
   wallet1,
   wallet2,
@@ -27,7 +27,7 @@ import {subscribeToMessages} from './message-service';
 import * as constants from '../../constants';
 import {FakeChain} from '../../chain';
 import {SimpleHub} from './simple-hub';
-import {add} from '../../utils/math-utils';
+
 import {TestStore} from './store';
 
 jest.setTimeout(20000);

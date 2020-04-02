@@ -3,7 +3,7 @@ import {
   createETHDepositTransaction,
   Transactions
 } from '@statechannels/nitro-protocol';
-import {getProvider} from './utils/contract-utils';
+import {getProvider} from './utils';
 import {ethers} from 'ethers';
 import {BigNumber, bigNumberify, hexZeroPad} from 'ethers/utils';
 import {State, SignedState} from './store/types';

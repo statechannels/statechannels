@@ -3,7 +3,7 @@ import {calculateChannelId, signState} from './../state-utils';
 import {ChannelStoreEntry} from '../channel-store-entry';
 import {MemoryBackend as Backend} from '../memory-backend';
 import {NETWORK_ID, CHALLENGE_DURATION} from '../../constants';
-import {simpleEthAllocation, makeDestination} from '../../utils/outcome';
+import {simpleEthAllocation, makeDestination} from '../../utils';
 import {State, Objective} from './../types';
 import {Wallet} from 'ethers';
 import {XstateStore} from './../store';

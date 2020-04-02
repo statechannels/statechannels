@@ -4,7 +4,7 @@ import {
   simpleEthAllocation,
   simpleTokenAllocation,
   makeDestination
-} from './utils/outcome';
+} from './utils';
 import {AllocationItem} from './store/types';
 import {bigNumberify} from 'ethers/utils';
 

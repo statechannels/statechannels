@@ -2,7 +2,7 @@ import {FakeChain} from '../chain';
 import {Player, hookUpMessaging, generatePlayerUpdate} from './helpers';
 import {bigNumberify} from 'ethers/utils';
 import waitForExpect from 'wait-for-expect';
-import {simpleEthAllocation} from '../utils/outcome';
+import {simpleEthAllocation} from '../utils';
 import {first} from 'rxjs/operators';
 jest.setTimeout(30000);
 test('accepts states when running', async () => {

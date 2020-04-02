@@ -5,12 +5,16 @@ import {AddressZero, HashZero} from 'ethers/constants';
 
 import * as Depositing from './depositing';
 import * as SupportState from './support-state';
-import {getDataAndInvoke2, MachineFactory} from '../utils/workflow-utils';
+import {
+  getDataAndInvoke2,
+  MachineFactory,
+  add,
+  isSimpleEthAllocation,
+  simpleEthAllocation,
+  checkThat
+} from '../utils';
 import {Store} from '../store';
 import {Outcome, SimpleAllocation, AllocationItem, Destination} from '../store/types';
-import {add} from '../utils/math-utils';
-import {isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
-import {checkThat} from '../utils';
 
 const WORKFLOW = 'direct-funding';
 

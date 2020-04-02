@@ -13,7 +13,7 @@ import {ApproveBudgetAndFund} from '../approve-budget-and-fund-workflow';
 import {SiteBudget, Participant} from '../../store/types';
 import {MessagingServiceInterface, MessagingService} from '../../messaging';
 import {XstateStore} from '../../store';
-import {ethBudget} from '../../utils/budget-utils';
+import {ethBudget} from '../../utils';
 
 const store = new XstateStore();
 

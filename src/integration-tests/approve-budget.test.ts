@@ -3,7 +3,7 @@ import {FakeChain} from '../chain';
 import {Player, generateApproveBudgetAndFundRequest, hookUpMessaging} from './helpers';
 import {FundLedger} from '../store/types';
 import {checkThat} from '../utils';
-import {isSimpleEthAllocation} from '../utils/outcome';
+import {isSimpleEthAllocation} from '../utils';
 
 import {bigNumberify, hexZeroPad} from 'ethers/utils';
 import {ApproveBudgetAndFundResponse} from '@statechannels/client-api-schema/src';

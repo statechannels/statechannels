@@ -15,7 +15,7 @@ import {
 import {assetHolderAddress, ETH_ASSET_HOLDER_ADDRESS} from '../../constants';
 import {bigNumberify} from 'ethers/utils';
 import {AddressZero} from 'ethers/constants';
-import {makeDestination} from '../../utils/outcome';
+import {makeDestination} from '../../utils';
 
 export function deserializeBudgetRequest(
   budgetRequest: AppBudgetRequest,
