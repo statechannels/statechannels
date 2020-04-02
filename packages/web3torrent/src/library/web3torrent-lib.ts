@@ -124,7 +124,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     log('Testing torrenting capability...');
     let torrentId;
     const gotAWire = new Promise(resolve => {
-      super.add(mockTorrents[0].magnetURI, (torrent: Torrent) => {
+      super.add(mockTorrents[1].magnetURI, (torrent: Torrent) => {
         torrentId = torrent.infoHash;
         torrent.once('wire', wire => resolve(true));
       });
