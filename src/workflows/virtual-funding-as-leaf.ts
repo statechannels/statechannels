@@ -215,7 +215,7 @@ export const jointChannelUpdate = (store: Store) => ({
     .toPromise();
 
 const getDeductions = (store: Store) => async (ctx: Init): Promise<Deductions> => {
-  const {latestSupportedByMe, myIndex} = await store.getEntry(ctx.jointChannelId);
+  const {latestSignedByMe: latestSupportedByMe, myIndex} = await store.getEntry(ctx.jointChannelId);
   const {allocationItems} = checkThat(latestSupportedByMe.outcome, isSimpleEthAllocation);
 
   const outcomeIdx = myIndex === ParticipantIdx.A ? OutcomeIdx.A : OutcomeIdx.B;
