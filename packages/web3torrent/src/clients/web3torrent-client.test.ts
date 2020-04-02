@@ -28,6 +28,10 @@ describe('Web3TorrentClient', () => {
         );
     });
 
+    afterAll(() => {
+      web3torrent.destroy();
+    });
+
     it('should return a torrent with a status of Connecting', async () => {
       const {magnetURI} = torrent;
 
@@ -84,20 +88,19 @@ describe('Web3TorrentClient', () => {
 
   describe('remove()', () => {
     let removeSpy: jest.SpyInstance<
-      void,
+      Promise<void>,
       [string | WebTorrent.Torrent | Buffer, (((err: string | Error) => void) | undefined)?]
     >;
 
     beforeEach(() => {
-      removeSpy = jest
-        .spyOn(web3torrent, 'cancel')
-        .mockImplementation(
-          (_: string | WebTorrent.Torrent | Buffer, callback?: (err: string) => void) => {
-            if (callback) {
-              callback('');
-            }
+      removeSpy = jest.spyOn(web3torrent, 'cancel').mockImplementation(
+        (torrentInfoHash: string, callback?: (err: string | Error) => void): Promise<void> => {
+          if (callback) {
+            return new Promise(() => callback(''));
           }
-        );
+          return new Promise(() => ({}));
+        }
+      );
     });
 
     it('should return the infohash of the paused client', async () => {

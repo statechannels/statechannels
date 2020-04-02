@@ -33,7 +33,9 @@ const mockUploadInfo = (noPeers = false): MockUploadInfo => {
   const peers = noPeers ? {} : createMockTorrentPeers();
   const torrent = createMockTorrent({numPeers: Object.keys(peers).length}) as Torrent;
 
-  const uploadInfoWrapper = mount(<UploadInfo torrent={torrent} peers={peers} />);
+  const uploadInfoWrapper = mount(
+    <UploadInfo torrent={torrent} channelCache={{}} mySigningAddress="0x0" />
+  );
 
   return {
     uploadInfoWrapper,
