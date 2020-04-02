@@ -2,7 +2,7 @@
 import {Page, Browser} from 'puppeteer';
 import {configureEnvVariables, getEnvBool} from '@statechannels/devtools';
 
-import {setUpBrowser, loadWeb3App, waitAndOpenChannel, waitForClosingChannel} from '../helpers';
+import {setUpBrowser, loadDapp, waitAndOpenChannel, waitForClosingChannel} from '../helpers';
 
 import {uploadFile, startDownload, cancelDownload} from '../scripts/web3torrent';
 
@@ -25,8 +25,10 @@ describe('Supports torrenting among peers with channels', () => {
     web3tTabA = (await browserA.pages())[0];
     web3tTabB = (await browserB.pages())[0];
 
-    await loadWeb3App(web3tTabA, 0, 'file/new', true);
-    await loadWeb3App(web3tTabB, 0, '', true);
+    await loadDapp(web3tTabA, 0, true);
+    await loadDapp(web3tTabB, 0, true);
+
+    await web3tTabA.goto('http://localhost:3000/file/new', {waitUntil: 'load'});
   });
 
   afterAll(async () => {
@@ -55,7 +57,7 @@ describe('Supports torrenting among peers with channels', () => {
     await waitForClosingChannel(web3tTabB);
     await waitForClosingChannel(web3tTabA);
 
-    console.log('Checking exchanged amount from downloader and uploader...');
+    console.log('Checking exchanged amount between downloader and uploader...');
     const earnedColumn = await web3tTabA.$('td.earned');
     const earned = await web3tTabA.evaluate(e => e.textContent, earnedColumn);
     const paidColumn = await web3tTabB.$('td.paid');

@@ -1,6 +1,6 @@
 import {Page} from 'puppeteer';
 
-import {waitForAndClickButton, setUpBrowser, loadWeb3App} from '../helpers';
+import {waitForAndClickButton, setUpBrowser, loadDapp} from '../helpers';
 import {getEnvBool} from '@statechannels/devtools';
 
 export async function login(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
@@ -149,8 +149,8 @@ export async function bResigns(rpsTabA: Page, rpsTabB: Page): Promise<boolean> {
     const rpsTabA = (await browserA.pages())[0];
     const rpsTabB = (await browserB.pages())[0];
 
-    await loadWeb3App(rpsTabA, 0);
-    await loadWeb3App(rpsTabB, 1);
+    await loadDapp(rpsTabA, 0);
+    await loadDapp(rpsTabB, 1);
 
     await login(rpsTabA, rpsTabB);
   }

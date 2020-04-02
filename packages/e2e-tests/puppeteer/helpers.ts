@@ -3,10 +3,9 @@ import {Browser, Page, Frame, launch} from 'puppeteer';
 import * as fs from 'fs';
 import * as path from 'path';
 
-export async function loadWeb3App(
+export async function loadDapp(
   page: Page,
   ganacheAccountIndex: number,
-  urlPath?: string,
   ignoreConsoleError?: boolean
 ): Promise<void> {
   // TODO: This is kinda ugly but it works
@@ -28,16 +27,6 @@ export async function loadWeb3App(
     window.ethereum.networkVersion = 9001;
     window.ethereum.on = () => {};
   `);
-
-  const base = 'http://localhost:3000/';
-
-  let url = base;
-
-  if (urlPath) {
-    url = `${base}${urlPath}`;
-  }
-
-  await page.goto(url, {waitUntil: 'load'});
 
   page.on('pageerror', error => {
     throw error;
