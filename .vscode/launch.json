@@ -28,7 +28,7 @@
         "${relativeFile}",
         "--config",
         // ... because we need some way of locating this jest config
-        "${workspaceFolder}/packages/xstate-wallet/jest.config.js"
+        "${workspaceFolder}/packages/xstate-wallet/config/jest/jest.config.js"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",

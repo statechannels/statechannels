@@ -12,5 +12,6 @@
     {"directory": "packages/tic-tac-toe", "changeProcessCWD": true},
     {"directory": "packages/wallet", "changeProcessCWD": true},
     {"directory": "packages/wallet-specs", "changeProcessCWD": true}
-  ]
+  ],
+  "typescript.tsdk": "node_modules/typescript/lib"
 }

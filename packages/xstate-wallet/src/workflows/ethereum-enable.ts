@@ -10,7 +10,7 @@ import {
   ServiceConfig,
   assign
 } from 'xstate';
-import {sendDisplayMessage, MessagingServiceInterface} from '../messaging';
+import {MessagingServiceInterface} from '../messaging';
 import {Store} from '../store';
 import {WALLET_VERSION} from '../constants';
 
@@ -92,10 +92,10 @@ export const ethereumEnableWorkflow = (
   };
   const actions = {
     displayUi: () => {
-      sendDisplayMessage('Show');
+      messagingService.sendDisplayMessage('Show');
     },
     hideUi: () => {
-      sendDisplayMessage('Hide');
+      messagingService.sendDisplayMessage('Hide');
     },
     sendResponse: async (context: WorkflowContext, event) => {
       messagingService.sendResponse(context.requestId, {

@@ -13,7 +13,7 @@ import {
   State
 } from 'xstate';
 
-import {sendDisplayMessage, MessagingServiceInterface, convertToChannelResult} from '../messaging';
+import {MessagingServiceInterface, convertToChannelResult} from '../messaging';
 import {filter, map, tap, flatMap, first} from 'rxjs/operators';
 import * as CCC from './confirm-create-channel';
 import {
@@ -263,10 +263,10 @@ export const applicationWorkflow = (
       }
     },
     displayUi: () => {
-      sendDisplayMessage('Show');
+      messagingService.sendDisplayMessage('Show');
     },
     hideUi: () => {
-      sendDisplayMessage('Hide');
+      messagingService.sendDisplayMessage('Hide');
     },
     assignChannelParams: assign((context, event: CreateChannelEvent): ChannelParamsExist &
       RequestIdExists => ({
@@ -358,7 +358,7 @@ export const applicationWorkflow = (
     invokeCreateChannelAndFundProtocol: (_, event: DoneInvokeEvent<CreateAndFund.Init>) =>
       CreateAndFund.machine(store, event.data),
     invokeCreateChannelConfirmation: (context, event: DoneInvokeEvent<CCC.WorkflowContext>) =>
-      CCC.confirmChannelCreationWorkflow(store, event.data),
+      CCC.confirmChannelCreationWorkflow(store, messagingService, event.data),
     getDataForCreateChannelAndFund: async (
       context: ChannelParamsExist
     ): Promise<CreateAndFund.Init> => {
