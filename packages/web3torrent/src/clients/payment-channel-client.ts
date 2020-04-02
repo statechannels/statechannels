@@ -4,9 +4,24 @@ import {FakeChannelProvider} from '@statechannels/channel-client';
 import {ChannelClient} from '@statechannels/channel-client';
 import {ChannelStatus, Message} from '@statechannels/client-api-schema';
 import {SiteBudget} from '@statechannels/client-api-schema';
-import {SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS} from '../constants';
+import {
+  SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS,
+  AUTO_FUND_LEDGER,
+  HUB,
+  FIREBASE_PREFIX,
+  fireBaseConfig
+} from '../constants';
 import {hexZeroPad} from 'ethers/utils';
 import {AddressZero} from 'ethers/constants';
+import * as firebase from 'firebase/app';
+import 'firebase/database';
+import debug from 'debug';
+const log = debug('web3torrent:payment-channel');
+
+firebase.initializeApp(fireBaseConfig);
+function sanitizeMessageForFirebase(message) {
+  return JSON.parse(JSON.stringify(message));
+}
 
 const bigNumberify = utils.bigNumberify;
 const FINAL_SETUP_STATE = utils.bigNumberify(3); // for a 2 party ForceMove channel
@@ -66,8 +81,49 @@ export class PaymentChannelClient {
   }
 
   async enable() {
+    log('enabling payment channel client');
     await this.channelClient.provider.mountWalletComponent(process.env.REACT_APP_WALLET_URL);
     await this.channelClient.provider.enable();
+
+    // Hub messaging
+    const myFirebaseRef = firebase
+      .database()
+      .ref(`/${FIREBASE_PREFIX}/messages/${this.mySigningAddress}`);
+    const hubFirebaseRef = firebase
+      .database()
+      .ref(`/${FIREBASE_PREFIX}/messages/${HUB.participantId}`);
+
+    // firebase setup
+    myFirebaseRef.onDisconnect().remove();
+
+    this.onMessageQueued((message: Message) => {
+      if (message.recipient === HUB.participantId) {
+        hubFirebaseRef.push(sanitizeMessageForFirebase(message));
+      }
+    });
+
+    myFirebaseRef.on('child_added', snapshot => {
+      const key = snapshot.key;
+      const message = snapshot.val();
+      myFirebaseRef.child(key).remove();
+      log('GOT FROM FIREBASE: ' + message);
+      this.pushMessage(message);
+    });
+
+    if (AUTO_FUND_LEDGER) {
+      // TODO: This is a temporary measure while we don't have any budgeting built out.
+      // We automatically call approveBudgetAndFund.
+      const ten = hexZeroPad(utils.parseEther('10').toHexString(), 32);
+      const success = await this.approveBudgetAndFund(
+        ten,
+        ten,
+        window.channelProvider.selectedAddress,
+        HUB.signingAddress,
+        HUB.outcomeAddress
+      );
+      log(`Budget approved: ${JSON.stringify(success)}`);
+    }
+    log('payment channel client enabled');
   }
 
   async createChannel(
