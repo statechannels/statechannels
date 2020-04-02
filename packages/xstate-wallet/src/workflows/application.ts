@@ -16,7 +16,7 @@ import {
 import {sendDisplayMessage, MessagingServiceInterface, convertToChannelResult} from '../messaging';
 import {filter, map, tap, flatMap, first} from 'rxjs/operators';
 import * as CCC from './confirm-create-channel';
-import {createMockGuard, getDataAndInvoke} from '../utils/workflow-utils';
+import {createMockGuard, getDataAndInvoke2} from '../utils/workflow-utils';
 import {Store} from '../store';
 import {StateVariables} from '../store/types';
 import {ChannelStoreEntry} from '../store/channel-store-entry';
@@ -132,7 +132,7 @@ const generateConfig = (
         JOIN_CHANNEL: {target: 'confirmJoinChannelWorkflow'}
       }
     },
-    confirmCreateChannelWorkflow: getDataAndInvoke(
+    confirmCreateChannelWorkflow: getDataAndInvoke2(
       'getDataForCreateChannelConfirmation',
       'invokeCreateChannelConfirmation',
       'createChannelInStore'
@@ -141,7 +141,7 @@ const generateConfig = (
       initial: 'signFirstState',
       states: {
         signFirstState: {invoke: {src: 'signFirstState', onDone: 'confirmChannelCreation'}},
-        confirmChannelCreation: getDataAndInvoke(
+        confirmChannelCreation: getDataAndInvoke2(
           'getDataForCreateChannelConfirmation',
           'invokeCreateChannelConfirmation',
           'done'
@@ -167,7 +167,7 @@ const generateConfig = (
       }
     },
 
-    openChannelAndFundProtocol: getDataAndInvoke(
+    openChannelAndFundProtocol: getDataAndInvoke2(
       'getDataForCreateChannelAndFund',
       'invokeCreateChannelAndFundProtocol',
       'running'
