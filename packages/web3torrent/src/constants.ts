@@ -24,14 +24,17 @@ export const HUB = {
   participantId: 'firebase:simple-hub'
 };
 export const FIREBASE_PREFIX = process.env.FIREBASE_PREFIX;
-export const fireBaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-  authDomain: `${process.env.REACT_APP_FIREBASE_PROJECT}.firebaseapp.com`,
-  databaseURL: `https://${process.env.REACT_APP_FIREBASE_PROJECT}.firebaseio.com`,
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT,
-  storageBucket: '',
-  messagingSenderId: '913007764573'
-};
+export const fireBaseConfig =
+  process.env.NODE_ENV === 'test'
+    ? undefined
+    : {
+        apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+        authDomain: `${process.env.REACT_APP_FIREBASE_PROJECT}.firebaseapp.com`,
+        databaseURL: `https://${process.env.REACT_APP_FIREBASE_PROJECT}.firebaseio.com`,
+        projectId: process.env.REACT_APP_FIREBASE_PROJECT,
+        storageBucket: '',
+        messagingSenderId: '913007764573'
+      };
 export const AUTO_FUND_LEDGER = process.env.REACT_APP_AUTO_FUND_LEDGER;
 
 const httpProtocol = process.env.REACT_APP_TRACKER_URL_HTTP_PROTOCOL;
