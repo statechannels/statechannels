@@ -15,7 +15,6 @@ export const BUFFER_REFILL_RATE = bigNumberify(WEI_PER_BYTE.mul(BLOCK_LENGTH * P
 // It can also cause a payment to go above the leecher's balance / capabilities
 
 export const INITIAL_SEEDER_BALANCE = bigNumberify(0); // needs to be zero so that depositing works correctly (unidirectional payment channel)
-export const INITIAL_LEECHER_BALANCE = bigNumberify(BUFFER_REFILL_RATE.mul(10000)); // e.g. gwei = 1e9 = nano-ETH
 
 // firebase setup
 export const HUB = {

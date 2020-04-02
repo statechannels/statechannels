@@ -23,7 +23,6 @@ import {
   FIREBASE_PREFIX,
   WEI_PER_BYTE,
   BUFFER_REFILL_RATE,
-  INITIAL_LEECHER_BALANCE,
   INITIAL_SEEDER_BALANCE,
   AUTO_FUND_LEDGER,
   BLOCK_LENGTH,
@@ -251,7 +250,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
             this.pseAccount, // seeder
             peerAccount, // leecher
             hexZeroPad(INITIAL_SEEDER_BALANCE.toHexString(), 32), // seederBalance,
-            hexZeroPad(INITIAL_LEECHER_BALANCE.toHexString(), 32), // leecherBalance,
+            hexZeroPad(WEI_PER_BYTE.mul(torrent.length).toHexString(), 32), // leecherBalance,
             this.paymentChannelClient.myEthereumSelectedAddress, // seederOutcomeAddress,
             peerOutcomeAddress // leecherOutcomeAddress
           );
