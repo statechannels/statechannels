@@ -161,7 +161,10 @@ export class ChannelStoreEntry {
   addState(stateVars: StateVariables, signatureEntry: SignatureEntry) {
     const state = {...stateVars, ...this.channelConstants};
     const stateHash = hashState(state);
-    this.stateVariables.push({...stateVars, stateHash});
+    // TODO: This check could be more efficient
+    if (!this.stateVariables.some(s => s.stateHash === stateHash)) {
+      this.stateVariables.push({...stateVars, stateHash});
+    }
     const {participants} = this.channelConstants;
 
     // check the signature
@@ -176,25 +179,23 @@ export class ChannelStoreEntry {
     signatures.push(signatureEntry);
     this.signatures[stateHash] = signatures;
 
-    //this.clearOldStates();
+    this.clearOldStates();
   }
 
-  // private clearOldStates() {
-  //   // If we don't have a supported state we don't clean anything out
-  //   if (this.isSupported) {
-  //     const supportedIndex = this.stateVariables.findIndex(
-  //       sv => sv.stateHash === this._supported?.stateHash
-  //     );
-  //     if (supportedIndex > this.stateVariables.length - 1) {
-  //       // TODO: Need to sanitize out the signatures
-  //       this.stateVariables = (this._support as Array<StateVariablesWithHash>).concat(
-  //         this.stateVariables.slice(supportedIndex + 1)
-  //       );
-  //     } else {
-  //       this.stateVariables = this._support;
-  //     }
-  //   }
-  // }
+  private clearOldStates() {
+    // If we don't have a supported state we don't clean anything out
+    if (this.isSupported) {
+      // The support is returned in descending turn number so we need to grab the last element to find the earliest state
+      const {stateHash: firstSupportStateHash} = this._support[this._support.length - 1];
+
+      // Find where the first support state is in our current state array
+      const supportIndex = this.stateVariables.findIndex(
+        sv => sv.stateHash === firstSupportStateHash
+      );
+      // Take everything after that
+      this.stateVariables = this.stateVariables.slice(supportIndex);
+    }
+  }
 
   private nParticipants(): number {
     return this.channelConstants.participants.length;
