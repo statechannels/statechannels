@@ -27,7 +27,7 @@
         "--config=${workspaceRoot}/config/jest/jest.config.js",
         "--runInBand",
         "--env=jsdom",
-
+        "--watch",
         "${relativeFile}"
       ],
       "skipFiles": ["<node_internals>/**/*.js", "node_modules"],
