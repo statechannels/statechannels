@@ -1,5 +1,4 @@
 import {bigNumberify, hexZeroPad} from 'ethers/utils';
-import {getEnvBool} from '@statechannels/devtools';
 
 export const WALLET_VERSION = 'xstate-wallet@VersionTBD';
 
@@ -39,6 +38,22 @@ export function tokenAddress(assetHolderAddress: string): string | undefined {
   return assetHolderAddress;
 }
 
+export function getBool(val: string | undefined, throwIfMissing = true): boolean {
+  if (throwIfMissing && val === undefined) {
+    throw Error(`Environment variable ${name} is not set.`);
+  }
 
-export const CLEAR_STORAGE_ON_START = getEnvBool('CLEAR_STORAGE_ON_START', false);
-export const USE_INDEXED_DB = getEnvBool('USE_INDEXED_DB', false);
+  switch (val) {
+    case undefined:
+    case null:
+    case 'null':
+    case 'false':
+    case 'FALSE':
+    case '0':
+      return false;
+    default:
+      return true;
+  }
+}
+export const CLEAR_STORAGE_ON_START = getBool(process.env.CLEAR_STORAGE_ON_START, false);
+export const USE_INDEXED_DB = getBool(process.env.USE_INDEXED_DB, false);
