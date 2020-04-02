@@ -54,5 +54,12 @@ describe('Supports torrenting among peers with channels', () => {
 
     await waitForClosingChannel(web3tTabB);
     await waitForClosingChannel(web3tTabA);
+
+    // Assert exchanged amount are the same on both sides
+    const earnedColumn = await web3tTabA.$('td.earned');
+    const earned = await web3tTabA.evaluate(e => e.textContent, earnedColumn);
+    const paidColumn = await web3tTabB.$('td.paid');
+    const paid = await web3tTabB.evaluate(e => e.textContent, paidColumn);
+    expect(paid).toEqual(`-${earned}`);
   });
 });
