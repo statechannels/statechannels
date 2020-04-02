@@ -69,9 +69,10 @@ export const EmptyTorrent = ({
 export const mockTorrents: Array<Partial<Torrent>> = [
   {
     name: 'Sintel',
-    length: 129302391,
+    length: 129241752,
     infoHash: 'c53da4fa28aa2edc1faa91861cce38527414d874',
-    magnetURI: 'magnet:?xt=urn:btih:08ada5a7a6183aae1e09d831df6748d566095a10&dn=Sintel&xl=129302391'
+    magnetURI:
+      'magnet:?xt=urn%3Abtih%3Ac53da4fa28aa2edc1faa91861cce38527414d874&dn=Sintel.mp4&xl=129241752'
   },
   {
     name: 'Big Buck Bunny',
