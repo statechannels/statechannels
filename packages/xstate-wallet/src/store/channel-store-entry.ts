@@ -122,7 +122,7 @@ export class ChannelStoreEntry {
     return this.signedStates.find(s => this.mySignature(s, s.signatures));
   }
 
-  get latestSupportedByMe() {
+  get latestSignedByMe() {
     const vars = this._latestSupportedByMe;
     if (!vars) throw new Error('No state supported by me');
     return {...this.channelConstants, ...vars};
