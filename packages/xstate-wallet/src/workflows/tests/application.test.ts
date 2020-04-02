@@ -2,61 +2,110 @@ import {interpret} from 'xstate';
 import {ethers} from 'ethers';
 import waitForExpect from 'wait-for-expect';
 import {AddressZero} from 'ethers/constants';
-import {XstateStore, Store} from '../../store';
-import {StateVariables, SignedState} from '../../store/types';
+import {XstateStore} from '../../store';
+import {StateVariables, SignedState, isOpenChannel} from '../../store/types';
 import {ChannelStoreEntry} from '../../store/channel-store-entry';
-import {MessagingService, MessagingServiceInterface, isChannelUpdated} from '../../messaging';
+import {MessagingService, MessagingServiceInterface} from '../../messaging';
 import {bigNumberify} from 'ethers/utils';
 import {calculateChannelId} from '../../store/state-utils';
-import {simpleEthAllocation} from '../../utils';
+import {simpleEthAllocation, exists} from '../../utils';
 import {ChannelUpdated, JoinChannelEvent} from '../../event-types';
 import {Application} from '..';
-import {filter, first} from 'rxjs/operators';
+import {participants, wallet1} from './data';
+import {filter, first, map} from 'rxjs/operators';
 
 jest.setTimeout(10000);
-// const createChannelEvent: CreateChannelEvent = {
-//   type: 'CREATE_CHANNEL',
-//   chainId: '0x0',
-//   appData: '0x0',
-//   appDefinition: ethers.constants.AddressZero,
-//   participants: [],
-//   outcome: simpleEthAllocation([]),
-//   challengeDuration: bigNumberify(500),
-//   requestId: 5,
-//   fundingStrategy: 'Direct'
-// };
 
-describe('Channel setup, JOIN_CHANNEL role', () => {
-  let service: ReturnType<typeof interpret>;
-  const channelId = '0xabc';
-  const context: Application.Init = {
-    fundingStrategy: 'Direct',
-    channelId,
-    type: 'JOIN_CHANNEL',
-    applicationSite: 'localhost'
-  };
-  let store: Store;
-  let messagingService: MessagingServiceInterface;
-
-  beforeEach(async () => {
-    store = new XstateStore();
-    await store.initialize();
-    messagingService = new MessagingService(store);
-
-    service = interpret<any, any, any>(Application.workflow(store, messagingService, context));
-  });
-
+describe('Channel setup, CREATE_CHANNEL role', () => {
   test('with direct funding strategy', async () => {
+    const context: Application.Init = {
+      type: 'CREATE_CHANNEL',
+      chainId: '0x0',
+      appData: '0x0',
+      appDefinition: ethers.constants.AddressZero,
+      participants,
+      outcome: simpleEthAllocation([]),
+      challengeDuration: bigNumberify(500),
+      requestId: 5,
+      fundingStrategy: 'Direct',
+      applicationSite: 'localhost'
+    };
+
+    const store = new XstateStore();
+    await store.initialize([wallet1.privateKey]);
+    const messagingService = new MessagingService(store);
+
+    const spy = jest.fn(x => x);
+    const service = interpret<any, any, any>(
+      Application.workflow(store, messagingService, context).withConfig({
+        services: {
+          invokeCreateChannelAndFundProtocol: () =>
+            new Promise(r => spy('Channel was funded') && r())
+        }
+      })
+    );
+
     service.start();
 
     // It invokes confirmingWithUser
-    await waitForExpect(async () => {
-      expect(service.state.value).toEqual('confirmingWithUser');
-    }, 2000);
+    await waitForExpect(
+      async () => expect(service.state.value).toEqual('confirmingWithUser'),
+      2000
+    );
+
+    const objective = store.outboxFeed
+      .pipe(
+        map(m => m.objectives),
+        filter(exists),
+        map(objectives => objectives[0]),
+        filter(isOpenChannel),
+        first()
+      )
+      .toPromise();
 
     service.state.children.invokeCreateChannelConfirmation.send({type: 'USER_APPROVES'});
 
-    await waitForExpect(async () => expect(service.state.value).toEqual('joiningChannel'), 2000);
+    const result = await objective;
+    expect(result).toMatchObject({type: 'OpenChannel'});
+
+    await waitForExpect(() => expect(service.state.value).toEqual('running'));
+
+    expect(spy).toHaveBeenLastCalledWith('Channel was funded');
+  });
+});
+
+describe('Channel setup, JOIN_CHANNEL role', () => {
+  test('with direct funding strategy', async () => {
+    const channelId = '0xabc';
+    const context: Application.Init = {
+      fundingStrategy: 'Direct',
+      channelId,
+      type: 'JOIN_CHANNEL',
+      applicationSite: 'localhost'
+    };
+
+    const store = new XstateStore();
+    await store.initialize();
+    const messagingService = new MessagingService(store);
+
+    const spy = jest.fn(x => x);
+
+    const service = interpret<any, any, any>(
+      Application.workflow(store, messagingService, context).withConfig({
+        actions: {sendJoinChannelResponse: spy, sendUpdateChannelResponse: spy},
+        services: {
+          invokeCreateChannelAndFundProtocol: () =>
+            new Promise(resolve => spy('Channel was funded') && resolve())
+        }
+      })
+    );
+
+    service.start();
+
+    await waitForExpect(
+      async () => expect(service.state.value).toEqual({joiningChannel: 'joining'}),
+      2000
+    );
 
     const joinEvent: JoinChannelEvent = {
       type: 'JOIN_CHANNEL',
@@ -66,14 +115,19 @@ describe('Channel setup, JOIN_CHANNEL role', () => {
     };
 
     service.send(joinEvent);
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy).toHaveBeenLastCalledWith(context, joinEvent, expect.any(Object));
 
-    return messagingService.outboxFeed
-      .pipe(
-        filter(isChannelUpdated),
-        filter(m => m.params.status === 'running'),
-        first()
-      )
-      .toPromise();
+    // It invokes confirmingWithUser
+    await waitForExpect(async () => {
+      expect(service.state.value).toEqual('confirmingWithUser');
+    }, 2000);
+
+    service.state.children.invokeCreateChannelConfirmation.send({type: 'USER_APPROVES'});
+
+    expect(spy).toHaveBeenCalledTimes(2);
+    expect(spy).toHaveBeenLastCalledWith('Channel was funded');
+    await waitForExpect(() => expect(service.state.value).toEqual('running'));
   });
 });
 

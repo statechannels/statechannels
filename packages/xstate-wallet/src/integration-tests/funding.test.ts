@@ -1,9 +1,4 @@
-import {
-  CreateChannelResponse,
-  ChannelProposedNotification,
-  Response,
-  Notification
-} from '@statechannels/client-api-schema';
+import {CreateChannelResponse} from '@statechannels/client-api-schema';
 import {filter, first} from 'rxjs/operators';
 import {FakeChain} from '../chain';
 import {
@@ -12,7 +7,7 @@ import {
   hookUpMessaging,
   generateJoinChannelRequest
 } from './helpers';
-import {isChannelUpdated} from '../messaging';
+import {isChannelUpdated, isChannelProposed} from '../messaging';
 
 jest.setTimeout(20000);
 
@@ -43,13 +38,15 @@ it('allows for two wallets to fund an app', async () => {
     .toPromise();
 
   await playerA.messagingService.receiveRequest(createEvent, 'localhost');
+  playerA.channelWallet.workflows[0].machine.onTransition(state => {
+    if (state.value === 'confirmingWithUser') {
+      state.children.invokeCreateChannelConfirmation.send({type: 'USER_APPROVES'});
+    }
+  });
 
-  setTimeout(() => playerA.channelWallet.workflows[0].machine.send({type: 'USER_APPROVES'}), 50);
   const createResponse = await createPromise;
   expect(createResponse.result.channelId).toEqual(channelId);
 
-  const isChannelProposed = (m: Response | Notification): m is ChannelProposedNotification =>
-    'method' in m && m.method === 'ChannelProposed';
   const channelProposedNotification = await playerB.messagingService.outboxFeed
     .pipe(filter(isChannelProposed), first())
     .toPromise();
