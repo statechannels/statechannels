@@ -45,9 +45,7 @@ describe('<ShareList />', () => {
     const firstFileData = filesData.at(0);
     expect(firstFileData.childAt(0).text()).toBe(props.torrents[0].name);
     expect(firstFileData.childAt(1).text()).toBe(prettier(props.torrents[0].length));
-    expect(firstFileData.childAt(2).text()).toBe(props.torrents[0].numPeers + 'S');
-    expect(firstFileData.childAt(3).text()).toBe(props.torrents[0].numPeers + 'P');
-    expect(firstFileData.childAt(4).text()).toBe(
+    expect(firstFileData.childAt(2).text()).toBe(
       prettyPrintWei(calculateWei(props.torrents[0].length))
     );
     expect(firstFileData.childAt(5).find('button')).not.toBeNull();
