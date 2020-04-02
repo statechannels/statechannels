@@ -98,10 +98,89 @@ export class ChannelStoreEntry {
   }
 
   private get _supported() {
-    // TODO: proper check
-    return this.sortedByDescendingTurnNum.find(
-      s => s.signatures.filter(sig => !!sig).length === this.participants.length
+    return this.sortedByDescendingTurnNum.find(s => this.stateIsSupported(s));
+  }
+  private stateSupport(
+    state: StateVariables & {
+      signatures: string[];
+    }
+  ): Array<
+    StateVariables & {
+      signatures: string[];
+    }
+  > {
+    const support = [state];
+
+    const signers = new Set<string>();
+    // Check if everyone is signed the current state
+    for (const a of state.signatures.map(sig =>
+      getSignerAddress({...this.channelConstants, ...state}, sig)
+    )) {
+      signers.add(a);
+      if (signers.size === this.nParticipants()) {
+        return support;
+      }
+    }
+    // Find remaining states with a lower turn number
+    const remainingStatesToCheck = this.sortedByDescendingTurnNum.filter(s =>
+      s.turnNum.lt(state.turnNum)
     );
+
+    for (const s of remainingStatesToCheck) {
+      support.push(s);
+
+      for (const a of s.signatures.map(sig =>
+        getSignerAddress({...this.channelConstants, ...s}, sig)
+      )) {
+        // TODO: Explain b b a a
+        if (signers.has(a)) {
+          throw new Error('State is not supported');
+        }
+
+        signers.add(a);
+        if (signers.size === this.nParticipants()) {
+          return support;
+        }
+      }
+    }
+    return support;
+  }
+  private stateIsSupported(
+    state: StateVariables & {
+      signatures: string[];
+    }
+  ): boolean {
+    const signers = new Set<string>();
+    // Check if everyone is signed the current state
+    for (const a of state.signatures.map(sig =>
+      getSignerAddress({...this.channelConstants, ...state}, sig)
+    )) {
+      signers.add(a);
+      if (signers.size === this.nParticipants()) {
+        return true;
+      }
+    }
+    // Find remaining states with a lower turn number
+    const remainingStatesToCheck = this.sortedByDescendingTurnNum.filter(s =>
+      s.turnNum.lt(state.turnNum)
+    );
+
+    for (const s of remainingStatesToCheck)
+      for (const a of s.signatures.map(sig =>
+        getSignerAddress({...this.channelConstants, ...s}, sig)
+      )) {
+        // TODO: Explain b b a a
+        if (signers.has(a)) {
+          return false;
+        }
+
+        signers.add(a);
+        if (signers.size === this.nParticipants()) {
+          return true;
+        }
+      }
+
+    return false;
   }
 
   get supported() {
@@ -110,9 +189,10 @@ export class ChannelStoreEntry {
     return {...this.channelConstants, ...vars};
   }
   get support() {
-    // TODO: This should return the whole support
-    // aka the whole chain of signed states that support the latest state
-    return [{...this.channelConstants, ...this.supported}];
+    if (!this.isSupported) {
+      return []; // TODO: throw error?
+    }
+    return this.stateSupport(this.supported).map(s => ({...s, ...this.channelConstants}));
   }
   get isSupportedByMe() {
     return !!this._latestSupportedByMe;
@@ -180,29 +260,41 @@ export class ChannelStoreEntry {
     signatures[signerIndex] = signature;
     this.signatures[stateHash] = signatures;
 
-    // TODO: Since the supported state check doesn't work correctly this GC doesn't work
-    // and eats up a lot of CPU. Temporarily disabling
-    // See https://github.com/statechannels/monorepo/issues/1344
-
-    // // Garbage collect stale states
-    // // TODO: Examine the safety here
-    // this.stateVariables = _.transform(this.stateVariables, (result, stateVars, stateHash) => {
-    //   if (
-    //     !this.isSupported ||
-    //     this.inSupport(stateHash) ||
-    //     stateVars.turnNum.gt(this.supported.turnNum)
-    //   )
-    //     result[stateHash] = stateVars;
-    // });
+    // TODO: Supported checks are not very efficient so we don't want to GC to aggresively
+    if (stateVars.turnNum.mod(100).eq(0)) {
+      this.clearOldStates();
+    }
+    console.log('AFTER GC');
+    console.log(Object.keys(this.stateVariables));
   }
 
-  // private inSupport(key): boolean {
-  //   const supportKeys = this.isSupported
-  //     ? // TODO get the proper keys
-  //       [hashState({...this.supported, ...this.channelConstants})]
-  //     : [];
-  //   return supportKeys.indexOf(key) !== -1;
-  // }
+  private clearOldStates() {
+    this.stateVariables = _.transform(this.stateVariables, (result, stateVars, stateHash) => {
+      console.log(stateHash);
+      console.log(`SUPPORTED ${this.isSupported}`);
+      if (this.isSupported) console.log(`INSUPPORT ${this.inSupport(stateHash)} `);
+      if (this.isSupported) {
+        console.log(`BIGGER_TURNUM ${stateVars.turnNum.gt(this.supported.turnNum)}`);
+        console.log(
+          `TURNNUMS STATEVAR ${stateVars.turnNum.toNumber()} SUPPORTED ${this.supported.turnNum.toNumber()}`
+        );
+      }
+      if (
+        !this.isSupported ||
+        this.inSupport(stateHash) ||
+        stateVars.turnNum.gte(this.supported.turnNum)
+      )
+        result[stateHash] = stateVars;
+    });
+  }
+
+  private inSupport(key): boolean {
+    const supportKeys = this.isSupported
+      ? // TODO get the proper keys
+        this.support.map(state => hashState(state))
+      : [];
+    return supportKeys.indexOf(key) !== -1;
+  }
 
   private nParticipants(): number {
     return this.channelConstants.participants.length;
