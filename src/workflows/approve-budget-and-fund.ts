@@ -1,6 +1,5 @@
 import {
   StateSchema,
-  Action,
   StateMachine,
   ActionObject,
   createMachine,
@@ -97,12 +96,6 @@ export interface Schema extends StateSchema<Context> {
 
 export type WorkflowState = XStateState<Context, Event, Schema, Typestate>;
 
-export interface WorkflowActions {
-  hideUi: Action<Context, any>;
-  displayUi: Action<Context, any>;
-  sendResponse: Action<Context, any>;
-  sendBudgetUpdated: Action<Context, any>;
-}
 export type StateValue = keyof Schema['states'];
 
 export const machine = (
@@ -152,15 +145,15 @@ export const machine = (
           init: {
             on: {
               CHAIN_EVENT: [
-                {target: 'submitTransaction', actions: assignChainData, cond: priorAmountConfirmed},
-                {target: 'waitTurn', actions: assignChainData}
+                {target: 'submitTransaction', actions: assignChainData, cond: myTurnNow},
+                {target: 'waitTurn', actions: assignChainData, cond: notMyTurnYet}
               ]
             }
           },
           waitTurn: {
             on: {
               CHAIN_EVENT: [
-                {target: 'submitTransaction', actions: assignChainData, cond: priorAmountConfirmed}
+                {target: 'submitTransaction', actions: assignChainData, cond: myTurnNow}
               ]
             }
           },
@@ -211,11 +204,17 @@ const initializeLedger = (store: Store) => async (context: Initial): Promise<Led
     appData: '0x0'
   };
   const entry = await store.createChannel(participants, CHALLENGE_DURATION, stateVars);
+  const ledgerId = entry.channelId;
   await store.setFunding(entry.channelId, {type: 'Direct'});
   await store.setLedger(entry.channelId);
+  await store.addObjective({
+    type: 'FundLedger',
+    participants: participants,
+    data: {ledgerId}
+  });
 
   return {
-    ledgerId: entry.channelId,
+    ledgerId,
     ledgerState: entry.latestState
   };
 };
@@ -309,15 +308,22 @@ const fullAmountConfirmed: Guard<Deposit, ChainEvent> = {
   name: 'fullAmountConfirmed',
   predicate: (context, event) => event.balance.gte(context.fundedAt)
 };
-const priorAmountConfirmed: Guard<Deposit, ChainEvent> = {
+const myTurnNow: Guard<Deposit, ChainEvent> = {
   type: 'xstate.guard',
-  name: 'priorAmountConfirmed',
-  predicate: (context, event) => event.balance.gte(context.depositAt)
+  name: 'myTurnNow',
+  predicate: (context, event) =>
+    event.balance.gte(context.depositAt) && event.balance.lt(context.totalAfterDeposit)
+};
+const notMyTurnYet: Guard<Deposit, ChainEvent> = {
+  type: 'xstate.guard',
+  name: 'notMyTurnYet',
+  predicate: (context, event) => event.balance.lt(context.depositAt)
 };
 const myAmountConfirmed: Guard<Deposit, ChainEvent> = {
   type: 'xstate.guard',
   name: 'myAmountConfirmed',
-  predicate: (context, event) => event.balance.gte(context.totalAfterDeposit)
+  predicate: (context, event) =>
+    event.balance.gte(context.totalAfterDeposit) && event.balance.lt(context.fundedAt)
 };
 
 const assignChainData = assign<Context, ChainEvent>({
@@ -337,7 +343,12 @@ const submitDepositTransaction = (store: Store) => async (
   ctx: LedgerExists & Deposit & Chain
 ): Promise<string | undefined> => {
   const amount = ctx.totalAfterDeposit.sub(ctx.ledgerTotal);
-  if (amount.lte(0)) return undefined; // sanity check: we shouldn't be in this state, if this is the case
+  if (amount.lte(0)) {
+    // sanity check: we shouldn't be in this state, if this is the case
+    throw new Error(
+      `Something is wrong! Shouldn't be trying to deposit when the remaining amount is ${amount.toString()}.`
+    );
+  }
 
   return store.chain.deposit(ctx.ledgerId, ctx.ledgerTotal.toHexString(), amount.toHexString());
 };
