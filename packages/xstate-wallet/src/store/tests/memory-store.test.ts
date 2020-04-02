@@ -135,7 +135,7 @@ describe('createChannel', () => {
 });
 
 describe('pushMessage', () => {
-  it.only('stores states', async () => {
+  it('stores states', async () => {
     const store = await aStore();
     await store.createChannel(
       signedState.participants,
