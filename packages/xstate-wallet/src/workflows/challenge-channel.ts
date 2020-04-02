@@ -94,12 +94,8 @@ const subscribeChainUpdatedFeed = (store: Store) => (ctx: Initial | Initial) =>
     .pipe(flatMap(determineChallengeStatus.bind(null, ctx, store)));
 
 const submitChallengeTransaction = (store: Store) => async ({channelId}: Initial) => {
-  const {
-    support,
-    myIndex,
-    channelConstants: {participants}
-  } = await store.getEntry(channelId);
-  const privateKey = await store.getPrivateKey(participants[myIndex].signingAddress);
+  const {support, myAddress} = await store.getEntry(channelId);
+  const privateKey = await store.getPrivateKey(myAddress);
   await store.chain.challenge(support, privateKey);
 };
 

@@ -61,7 +61,7 @@ export class ChannelStoreEntry {
     return signatures.some(sig => getSignerAddress(state, sig) === this.myAddress);
   }
 
-  private get myAddress(): string {
+  public get myAddress(): string {
     return this.participants[this.myIndex].signingAddress;
   }
 
