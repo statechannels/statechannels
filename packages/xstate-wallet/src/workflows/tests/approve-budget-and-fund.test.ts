@@ -86,3 +86,38 @@ it('works end to end', async () => {
 
   expect(true).toBe(true);
 });
+
+it('works when someone else deposits the full amount', async () => {
+  const runningWorkflow = interpret(
+    approveBudgetAndFund(playerStore, messagingService, initialContext)
+  ).start();
+
+  await waitForExpect(async () => {
+    expect(runningWorkflow.state.value).toEqual('waitForUserApproval');
+  }, EXPECT_TIMEOUT);
+
+  await runningWorkflow.send({type: 'USER_APPROVES_BUDGET'});
+  // creates preFS
+  // sends preFS to hub
+  // hub replies with signed preFS
+  // workflow subscribes to chain
+  // chain responds with initial state
+  // it's the hub turn first
+
+  await waitForExpect(async () => {
+    expect(runningWorkflow.state.value).toEqual({deposit: 'waitTurn'});
+  }, EXPECT_TIMEOUT);
+
+  const ledgerId = (runningWorkflow.state.context as any).ledgerId;
+
+  chain.depositSync(ledgerId, 0, 10);
+
+  // skip submitTransaction
+  // skip waitMining
+  // skip waitFullyFunded
+  // end in done
+
+  await waitForExpect(async () => {
+    expect(runningWorkflow.state.value).toEqual('done');
+  }, EXPECT_TIMEOUT);
+});
