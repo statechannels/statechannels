@@ -3,7 +3,7 @@ import Adapter from 'enzyme-adapter-react-16';
 import {createMemoryHistory} from 'history';
 import React from 'react';
 import {MemoryRouter as Router} from 'react-router-dom';
-import {mockTorrents} from '../../constants';
+import {preSeededTorrents} from '../../constants';
 import {RoutePath} from '../../routes';
 import {ShareList, ShareListProps} from './ShareList';
 import {calculateWei, prettyPrintWei} from '../../utils/calculateWei';
@@ -14,7 +14,7 @@ function setup(withNoTorrents = false) {
   const history = createMemoryHistory();
   const props: ShareListProps = {
     history,
-    torrents: withNoTorrents ? [] : mockTorrents
+    torrents: withNoTorrents ? [] : preSeededTorrents
   };
   const component = mount(
     <Router>

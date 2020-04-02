@@ -17,7 +17,6 @@ import {
 import {utils} from 'ethers';
 import {ChannelState, PaymentChannelClient} from '../clients/payment-channel-client';
 import {
-  mockTorrents,
   defaultTrackers,
   fireBaseConfig,
   HUB,
@@ -28,7 +27,8 @@ import {
   INITIAL_SEEDER_BALANCE,
   AUTO_FUND_LEDGER,
   BLOCK_LENGTH,
-  PEER_TRUST
+  PEER_TRUST,
+  testTorrent
 } from '../constants';
 import * as firebase from 'firebase/app';
 import 'firebase/database';
@@ -124,7 +124,7 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     log('Testing torrenting capability...');
     let torrentId;
     const gotAWire = new Promise(resolve => {
-      super.add(mockTorrents[1].magnetURI, (torrent: Torrent) => {
+      super.add(testTorrent.magnetURI, (torrent: Torrent) => {
         torrentId = torrent.infoHash;
         torrent.once('wire', wire => resolve(true));
       });

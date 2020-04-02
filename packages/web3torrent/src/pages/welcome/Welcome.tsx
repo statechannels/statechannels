@@ -3,7 +3,7 @@ import React from 'react';
 import {RouteComponentProps} from 'react-router-dom';
 import {FormButton} from '../../components/form';
 import {ShareList} from '../../components/share-list/ShareList';
-import {mockTorrents, defaultTrackers} from '../../constants';
+import {preSeededTorrents, defaultTrackers} from '../../constants';
 import {RoutePath} from '../../routes';
 import './Welcome.scss';
 import {Client} from 'bittorrent-tracker';
@@ -74,7 +74,7 @@ class Welcome extends React.Component<RouteComponentProps & Props, {[infoHash: s
         </div>
         <h2>Download a sample file</h2>
         <ShareList
-          torrents={mockTorrents.filter(torrent => this.state[torrent.infoHash])}
+          torrents={preSeededTorrents.filter(torrent => this.state[torrent.infoHash])}
           history={history}
         />
         <h2>Or share a file</h2>

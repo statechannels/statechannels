@@ -65,34 +65,23 @@ export const EmptyTorrent = ({
   wires: []
 } as unknown) as Torrent;
 
-// Mocked Constants
-export const mockTorrents: Array<Partial<Torrent>> = [
+// Pre Seeded Constants (by StateChannels team)
+export const preSeededTorrents: Array<Partial<Torrent>> = [
   {
     name: 'Sintel',
     length: 129241752,
     infoHash: 'c53da4fa28aa2edc1faa91861cce38527414d874',
     magnetURI:
       'magnet:?xt=urn%3Abtih%3Ac53da4fa28aa2edc1faa91861cce38527414d874&dn=Sintel.mp4&xl=129241752'
-  },
-  {
-    name: 'Big Buck Bunny',
-    length: 276445467,
-    numSeeds: 8,
-    numPeers: 6,
-    files: [],
-    magnetURI:
-      'magnet:?xt=urn:btih:dd8255ecdc7ca55fb0bbf81323d87062db1f6d1c&dn=Big+Buck+Bunny&xl=276445467'
-  },
-  {
-    name: 'Cosmos Laundromat',
-    length: 220864086,
-    numSeeds: 10,
-    numPeers: 6,
-    files: [],
-    magnetURI:
-      'magnet:?xt=urn:btih:c9e15763f722f23e98a29decdfae341b98d53056&dn=Cosmos+Laundromat&xl=220864086'
   }
 ];
+
+export const testTorrent = {
+  name: 'Big Buck Bunny',
+  length: 276445467,
+  magnetURI:
+    'magnet:?xt=urn:btih:dd8255ecdc7ca55fb0bbf81323d87062db1f6d1c&dn=Big+Buck+Bunny&xl=276445467'
+};
 
 export const mockCurrentUser = '0x8fd00f170fdf3772c5ebdcd90bf257316c69ba45';
 const mockBalance = 200000000000000;
