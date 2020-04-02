@@ -42,6 +42,8 @@ export class ChannelWallet {
         .pipe(take(1))
         .toPromise();
 
+      // Note that it's important to start the workflow first, before sending ChannelProposed.
+      // This way, the workflow is listening to JOIN_CHANNEL right from the get go.
       this.startWorkflow(
         Application.workflow(this.store, this.messagingService, {
           type: 'JOIN_CHANNEL',
