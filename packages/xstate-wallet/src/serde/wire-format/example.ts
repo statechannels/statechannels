@@ -1,7 +1,7 @@
 import {bigNumberify} from 'ethers/utils';
 import {Message} from '../../store/types';
 import {Message as WireMessage} from '@statechannels/wire-format';
-import {makeDestination} from '../../utils/outcome';
+import {makeDestination} from '../../utils';
 
 export const wireStateFormat = {
   participants: [

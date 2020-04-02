@@ -20,7 +20,7 @@ import {Guid} from 'guid-typescript';
 import * as CloseLedgerAndWithdraw from '../workflows/close-ledger-and-withdraw';
 import {TestStore} from '../workflows/tests/store';
 import {ETH_TOKEN} from '../constants';
-import {makeDestination} from '../utils/outcome';
+import {makeDestination} from '../utils';
 import {hexZeroPad} from 'ethers/utils';
 
 export class Player {

@@ -17,7 +17,7 @@ import {
   Objective
 } from '../../store/types';
 import {bigNumberify} from 'ethers/utils';
-import {makeDestination} from '../../utils/outcome';
+import {makeDestination} from '../../utils';
 import {convertToInternalParticipant} from '../../messaging';
 
 export function deserializeMessage(message: WireMessage): Message {

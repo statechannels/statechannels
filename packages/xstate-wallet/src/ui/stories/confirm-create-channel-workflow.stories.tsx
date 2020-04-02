@@ -10,7 +10,7 @@ import {Participant} from '@statechannels/client-api-schema';
 import {renderComponentInFrontOfApp} from './helpers';
 
 import {bigNumberify} from 'ethers/utils';
-import {simpleEthAllocation} from '../../utils/outcome';
+import {simpleEthAllocation} from '../../utils';
 import React from 'react';
 import {ConfirmCreateChannel} from '../confirm-create-channel-workflow';
 import {XstateStore} from '../../store';

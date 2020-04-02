@@ -4,7 +4,7 @@ import {CloseAndWithdrawResponse} from '@statechannels/client-api-schema';
 import {filter, map, first} from 'rxjs/operators';
 
 import {CHALLENGE_DURATION} from '../constants';
-import {simpleEthAllocation} from '../utils/outcome';
+import {simpleEthAllocation} from '../utils';
 import {bigNumberify} from 'ethers/utils';
 import {isCloseLedger, CloseLedger} from '../store/types';
 import waitForExpect from 'wait-for-expect';

@@ -16,14 +16,19 @@ import {
 import {sendDisplayMessage, MessagingServiceInterface, convertToChannelResult} from '../messaging';
 import {filter, map, tap, flatMap, first} from 'rxjs/operators';
 import * as CCC from './confirm-create-channel';
-import {createMockGuard, getDataAndInvoke2} from '../utils/workflow-utils';
+import {
+  createMockGuard,
+  getDataAndInvoke2,
+  isSimpleEthAllocation,
+  unreachable,
+  checkThat
+} from '../utils';
 import {Store} from '../store';
 import {StateVariables} from '../store/types';
 import {ChannelStoreEntry} from '../store/channel-store-entry';
 import {bigNumberify} from 'ethers/utils';
 import {ConcludeChannel, CreateAndFund} from './';
-import {isSimpleEthAllocation} from '../utils/outcome';
-import {unreachable, checkThat} from '../utils';
+
 import {
   PlayerStateUpdate,
   ChannelUpdated,

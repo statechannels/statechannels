@@ -1,6 +1,6 @@
 import {interpret} from 'xstate';
 import waitForExpect from 'wait-for-expect';
-import {add} from '../../utils/math-utils';
+import {add, checkThat, isSimpleEthAllocation} from '../../utils';
 
 import {Init, machine, Errors} from '../ledger-funding';
 
@@ -10,8 +10,7 @@ import _ from 'lodash';
 import {firstState, signState, calculateChannelId} from '../../store/state-utils';
 import {ChannelConstants, Outcome, State} from '../../store/types';
 import {AddressZero} from 'ethers/constants';
-import {checkThat} from '../../utils';
-import {isSimpleEthAllocation} from '../../utils/outcome';
+
 import {FakeChain, Chain} from '../../chain';
 import {wallet1, wallet2, participants} from './data';
 import {subscribeToMessages} from './message-service';

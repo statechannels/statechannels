@@ -23,14 +23,14 @@ import * as jrs from 'jsonrpc-lite';
 import {fromEvent, Observable} from 'rxjs';
 import {ChannelStoreEntry} from './store/channel-store-entry';
 import {validateMessage} from '@statechannels/wire-format';
-import {unreachable} from './utils';
+import {unreachable, isSimpleEthAllocation, makeDestination} from './utils';
 import {isAllocation, Message, SiteBudget, Participant} from './store/types';
 import {serializeAllocation, serializeSiteBudget} from './serde/app-messages/serialize';
 import {deserializeMessage} from './serde/wire-format/deserialize';
 import {serializeMessage} from './serde/wire-format/serialize';
 import {AppRequestEvent} from './event-types';
 import {deserializeAllocations, deserializeBudgetRequest} from './serde/app-messages/deserialize';
-import {isSimpleEthAllocation, makeDestination} from './utils/outcome';
+
 import {bigNumberify} from 'ethers/utils';
 import {CHALLENGE_DURATION, NETWORK_ID, WALLET_VERSION} from './constants';
 import {Store} from './store';
