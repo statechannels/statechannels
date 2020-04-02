@@ -3,24 +3,32 @@ import {
   StateVariables,
   SignedState,
   Participant,
-  ChannelStoredData
+  ChannelStoredData,
+  StateVariablesWithHash,
+  SignedStateWithHash
 } from './types';
-import {signState, hashState, getSignerAddress, calculateChannelId} from './state-utils';
+import {hashState, calculateChannelId, createSignatureEntry} from './state-utils';
 import _ from 'lodash';
 import {BigNumber, bigNumberify} from 'ethers/utils';
 
 import {Funding} from './store';
+export interface SignatureEntry {
+  signature: string;
+  signer: string;
+}
+
+export type SignedStateVariables = StateVariables & {signatures: SignatureEntry[]};
 
 export class ChannelStoreEntry {
   public readonly channelConstants: ChannelConstants;
   public readonly myIndex: number;
-  private stateVariables: Record<string, StateVariables & Partial<ChannelConstants>> = {};
-  private signatures: Record<string, Array<string | undefined>> = {};
+  private stateVariables: Array<StateVariablesWithHash> = [];
+  private signatures: Record<string, Array<SignatureEntry>> = {};
   public funding: Funding | undefined = undefined;
   public readonly applicationSite?: string;
   constructor(channelData: ChannelStoredData) {
     this.myIndex = channelData.myIndex;
-    this.stateVariables = channelData.stateVariables;
+
     this.signatures = channelData.signatures;
     this.funding = channelData.funding;
     this.applicationSite = channelData.applicationSite;
@@ -32,20 +40,7 @@ export class ChannelStoreEntry {
       channelNonce: bigNumberify(channelData.channelConstants.channelNonce)
     };
 
-    this.stateVariables = _.transform(this.stateVariables, (result, stateVariables, stateHash) => {
-      result[stateHash] = _.pick(
-        stateVariables,
-        'turnNum',
-        'outcome',
-        'appData',
-        'isFinal',
-        'participants',
-        'channelNonce',
-        'appDefinition',
-        'challengeDuration',
-        'chainId'
-      );
-    });
+    this.stateVariables = channelData.stateVariables;
   }
 
   public setFunding(funding: Funding) {
@@ -53,40 +48,23 @@ export class ChannelStoreEntry {
   }
 
   public get sortedStates() {
-    return this.sortedByDescendingTurnNum.map(s => ({...this.channelConstants, ...s}));
+    return this.signedStates.map(s => ({...this.channelConstants, ...s}));
   }
 
-  private mySignature(stateVars: StateVariables, signatures: string[]): boolean {
-    const state = {...stateVars, ...this.channelConstants};
-    return signatures.some(sig => getSignerAddress(state, sig) === this.myAddress);
+  private mySignature(stateVars: StateVariables, signatures: SignatureEntry[]): boolean {
+    return signatures.some(sig => sig.signer === this.myAddress);
   }
 
   private get myAddress(): string {
     return this.participants[this.myIndex].signingAddress;
   }
 
-  private getStateVariables(k): StateVariables {
-    const vars = this.stateVariables[k];
-    if (!vars) throw 'No variable found';
-    return vars;
-  }
-
-  private getFilteredSignatures(k): string[] {
-    function isString(x: string | undefined): x is string {
-      return x !== undefined;
-    }
-    return (this.signatures[k] || []).filter(isString);
-  }
-
-  private get signedStates(): Array<StateVariables & {signatures: string[]}> {
-    return Object.keys(this.stateVariables).map(k => ({
-      ...this.getStateVariables(k),
-      signatures: this.getFilteredSignatures(k)
+  private get signedStates(): Array<SignedStateWithHash> {
+    return this.stateVariables.map(s => ({
+      ...this.channelConstants,
+      ...s,
+      signatures: this.signatures[s.stateHash]
     }));
-  }
-
-  private get sortedByDescendingTurnNum(): Array<StateVariables & {signatures: string[]}> {
-    return this.signedStates.sort((a, b) => b.turnNum.sub(a.turnNum).toNumber());
   }
 
   get isSupported() {
@@ -98,89 +76,36 @@ export class ChannelStoreEntry {
   }
 
   private get _supported() {
-    return this.sortedByDescendingTurnNum.find(s => this.stateIsSupported(s));
+    const latestSupport = this._support;
+    return latestSupport.length === 0 ? undefined : latestSupport[0];
   }
-  private stateSupport(
-    state: StateVariables & {
-      signatures: string[];
-    }
-  ): Array<
-    StateVariables & {
-      signatures: string[];
-    }
-  > {
-    const support = [state];
 
-    const signers = new Set<string>();
-    // Check if everyone is signed the current state
-    for (const a of state.signatures.map(sig =>
-      getSignerAddress({...this.channelConstants, ...state}, sig)
-    )) {
-      signers.add(a);
-      if (signers.size === this.nParticipants()) {
-        return support;
-      }
-    }
-    // Find remaining states with a lower turn number
-    const remainingStatesToCheck = this.sortedByDescendingTurnNum.filter(s =>
-      s.turnNum.lt(state.turnNum)
-    );
-
-    for (const s of remainingStatesToCheck) {
-      support.push(s);
-
-      for (const a of s.signatures.map(sig =>
-        getSignerAddress({...this.channelConstants, ...s}, sig)
-      )) {
-        // TODO: Explain b b a a
-        if (signers.has(a)) {
-          throw new Error('State is not supported');
-        }
-
-        signers.add(a);
-        if (signers.size === this.nParticipants()) {
-          return support;
-        }
-      }
-    }
-    return support;
+  public get support(): Array<SignedState> {
+    return this._support.map(s => ({...s, ...this.channelConstants}));
   }
-  private stateIsSupported(
-    state: StateVariables & {
-      signatures: string[];
-    }
-  ): boolean {
-    const signers = new Set<string>();
-    // Check if everyone is signed the current state
-    for (const a of state.signatures.map(sig =>
-      getSignerAddress({...this.channelConstants, ...state}, sig)
-    )) {
-      signers.add(a);
-      if (signers.size === this.nParticipants()) {
-        return true;
-      }
-    }
-    // Find remaining states with a lower turn number
-    const remainingStatesToCheck = this.sortedByDescendingTurnNum.filter(s =>
-      s.turnNum.lt(state.turnNum)
-    );
 
-    for (const s of remainingStatesToCheck)
-      for (const a of s.signatures.map(sig =>
-        getSignerAddress({...this.channelConstants, ...s}, sig)
-      )) {
-        // TODO: Explain b b a a
-        if (signers.has(a)) {
-          return false;
-        }
+  private get _support(): Array<SignedStateWithHash> {
+    const support: Array<SignedStateWithHash> = [];
 
-        signers.add(a);
-        if (signers.size === this.nParticipants()) {
-          return true;
+    const participantsWhoHaveNotSigned = new Set(this.participants.map(p => p.signingAddress));
+
+    for (const signedState of this.signedStates.reverse()) {
+      const moverIndex = signedState.turnNum.mod(this.nParticipants()).toNumber();
+      const moverForThisTurn = this.participants[moverIndex].signingAddress;
+
+      // If the mover hasn't signed the state then we know it cannot be part of the support
+      if (signedState.signatures.some(s => s.signer === moverForThisTurn)) {
+        support.push(signedState);
+
+        for (const signature of signedState.signatures) {
+          participantsWhoHaveNotSigned.delete(signature.signer);
+          if (participantsWhoHaveNotSigned.size === 0) {
+            return support;
+          }
         }
       }
-
-    return false;
+    }
+    return [];
   }
 
   get supported() {
@@ -188,18 +113,13 @@ export class ChannelStoreEntry {
     if (!vars) throw new Error('No supported state found');
     return {...this.channelConstants, ...vars};
   }
-  get support() {
-    if (!this.isSupported) {
-      return []; // TODO: throw error?
-    }
-    return this.stateSupport(this.supported).map(s => ({...s, ...this.channelConstants}));
-  }
+
   get isSupportedByMe() {
     return !!this._latestSupportedByMe;
   }
 
   private get _latestSupportedByMe() {
-    return this.sortedByDescendingTurnNum.find(s => this.mySignature(s, s.signatures));
+    return this.signedStates.find(s => this.mySignature(s, s.signatures));
   }
 
   get latestSupportedByMe() {
@@ -209,7 +129,7 @@ export class ChannelStoreEntry {
   }
 
   get latest() {
-    return {...this.channelConstants, ...this.sortedByDescendingTurnNum[0]};
+    return {...this.channelConstants, ...this.signedStates[this.signedStates.length - 1]};
   }
 
   get latestState() {
@@ -227,74 +147,54 @@ export class ChannelStoreEntry {
   signAndAdd(stateVars: StateVariables, privateKey: string): SignedState {
     const state = {...stateVars, ...this.channelConstants};
 
-    const signatureString = signState(state, privateKey);
+    const signatureEntry = createSignatureEntry(state, privateKey);
 
-    this.addState(stateVars, signatureString);
-
+    this.addState(stateVars, signatureEntry);
+    const stateHash = hashState(state);
     return {
       ...stateVars,
       ...this.channelConstants,
-      signatures: this.getFilteredSignatures(hashState(state))
+      signatures: this.signatures[stateHash]
     };
   }
 
-  addState(stateVars: StateVariables, signature: string) {
-    const state = {
-      ...stateVars,
-      ...this.channelConstants
-    };
+  addState(stateVars: StateVariables, signatureEntry: SignatureEntry) {
+    const state = {...stateVars, ...this.channelConstants};
     const stateHash = hashState(state);
-    this.stateVariables[stateHash] = stateVars;
+    this.stateVariables.push({...stateVars, stateHash});
     const {participants} = this.channelConstants;
 
     // check the signature
-    const signer = getSignerAddress(state, signature);
-    const signerIndex = participants.findIndex(p => p.signingAddress === signer);
+
+    const signerIndex = participants.findIndex(p => p.signingAddress === signatureEntry.signer);
 
     if (signerIndex === -1) {
       throw new Error('State not signed by a participant of this channel');
     }
 
-    const signatures =
-      this.signatures[stateHash] ?? new Array<string | undefined>(this.nParticipants());
-    signatures[signerIndex] = signature;
+    const signatures = this.signatures[stateHash] ?? new Array<SignatureEntry>();
+    signatures.push(signatureEntry);
     this.signatures[stateHash] = signatures;
 
-    // TODO: Supported checks are not very efficient so we don't want to GC to aggresively
-    if (stateVars.turnNum.mod(100).eq(0)) {
-      this.clearOldStates();
-    }
-    console.log('AFTER GC');
-    console.log(Object.keys(this.stateVariables));
+    //this.clearOldStates();
   }
 
-  private clearOldStates() {
-    this.stateVariables = _.transform(this.stateVariables, (result, stateVars, stateHash) => {
-      console.log(stateHash);
-      console.log(`SUPPORTED ${this.isSupported}`);
-      if (this.isSupported) console.log(`INSUPPORT ${this.inSupport(stateHash)} `);
-      if (this.isSupported) {
-        console.log(`BIGGER_TURNUM ${stateVars.turnNum.gt(this.supported.turnNum)}`);
-        console.log(
-          `TURNNUMS STATEVAR ${stateVars.turnNum.toNumber()} SUPPORTED ${this.supported.turnNum.toNumber()}`
-        );
-      }
-      if (
-        !this.isSupported ||
-        this.inSupport(stateHash) ||
-        stateVars.turnNum.gte(this.supported.turnNum)
-      )
-        result[stateHash] = stateVars;
-    });
-  }
-
-  private inSupport(key): boolean {
-    const supportKeys = this.isSupported
-      ? // TODO get the proper keys
-        this.support.map(state => hashState(state))
-      : [];
-    return supportKeys.indexOf(key) !== -1;
-  }
+  // private clearOldStates() {
+  //   // If we don't have a supported state we don't clean anything out
+  //   if (this.isSupported) {
+  //     const supportedIndex = this.stateVariables.findIndex(
+  //       sv => sv.stateHash === this._supported?.stateHash
+  //     );
+  //     if (supportedIndex > this.stateVariables.length - 1) {
+  //       // TODO: Need to sanitize out the signatures
+  //       this.stateVariables = (this._support as Array<StateVariablesWithHash>).concat(
+  //         this.stateVariables.slice(supportedIndex + 1)
+  //       );
+  //     } else {
+  //       this.stateVariables = this._support;
+  //     }
+  //   }
+  // }
 
   private nParticipants(): number {
     return this.channelConstants.participants.length;
@@ -307,7 +207,7 @@ export class ChannelStoreEntry {
       channelNonce: this.channelConstants.channelNonce.toString()
     };
 
-    const stateVariables: Record<string, any> = ChannelStoreEntry.prepareStateVariables(
+    const stateVariables = ChannelStoreEntry.prepareStateVariables(
       _.cloneDeep(this.stateVariables)
     );
 
@@ -340,11 +240,10 @@ export class ChannelStoreEntry {
   }
 
   private static prepareStateVariables(
-    stateVariables,
+    stateVariables, // TODO: Make this typesafe!
     parserFunction: (data: string | BigNumber) => BigNumber | string = v => new BigNumber(v)
   ) {
-    for (const stateHash in stateVariables) {
-      const state = stateVariables[stateHash];
+    for (const state of stateVariables) {
       if (state.turnNum) {
         state.turnNum = parserFunction(state.turnNum);
       }

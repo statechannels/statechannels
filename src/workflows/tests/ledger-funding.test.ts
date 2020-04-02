@@ -7,7 +7,7 @@ import {Init, machine, Errors} from '../ledger-funding';
 import {Store} from '../../store';
 import {bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
-import {firstState, signState, calculateChannelId} from '../../store/state-utils';
+import {firstState, calculateChannelId, createSignatureEntry} from '../../store/state-utils';
 import {ChannelConstants, Outcome, State} from '../../store/types';
 import {AddressZero} from 'ethers/constants';
 
@@ -67,7 +67,7 @@ let bStore: TestStore;
 
 const allSignState = (state: State) => ({
   ...state,
-  signatures: [wallet1, wallet2].map(({privateKey}) => signState(state, privateKey))
+  signatures: [wallet1, wallet2].map(({privateKey}) => createSignatureEntry(state, privateKey))
 });
 
 beforeEach(async () => {

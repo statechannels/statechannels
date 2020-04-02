@@ -87,7 +87,11 @@ export const internalStateFormat = {
   },
   turnNum: bigNumberify('0x0000000000000000000000000000000000000000000000000000000000000001'),
   signatures: [
-    '0x733ccfc3b0b13b446de290a9b056a5b9d7eb1538c1d48f8b863f731a0ea522c46ad30427d0859d782c98ccdc5fe10fc9c3d6480ee5080f70fd96128e4d61d50728'
+    {
+      signature:
+        '0x733ccfc3b0b13b446de290a9b056a5b9d7eb1538c1d48f8b863f731a0ea522c46ad30427d0859d782c98ccdc5fe10fc9c3d6480ee5080f70fd96128e4d61d50728',
+      signer: '0xAE363d29fc0f6A9bbBbEcC87751e518Cd9CA83C0'
+    }
   ]
 };
 export const wireMessageFormat: WireMessage = {

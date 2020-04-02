@@ -30,7 +30,8 @@ export function serializeState(state: SignedState): SignedStateWire {
     channelNonce: bigNumberToUint256(state.channelNonce),
     turnNum: bigNumberToUint256(state.turnNum),
     outcome: serializeOutcome(state.outcome),
-    channelId: calculateChannelId(state)
+    channelId: calculateChannelId(state),
+    signatures: state.signatures.map(s => s.signature)
   };
 }
 
