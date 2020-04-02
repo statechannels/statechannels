@@ -20,7 +20,7 @@ type Typestate =
 
 type Context = Typestate['context'];
 
-type ChallengeObservation =
+type ChainObservation =
   | 'CHALLENGE_PLACED_ONCHAIN_AS_EXPECTED'
   | 'SOME_OTHER_CHALLENGE_ALREADY_EXISTS'
   | 'SAFE_TO_CHALLENGE'
@@ -50,7 +50,7 @@ async function determineChallengeStatus(
   {channelId, challengeSubmitted}: Initial | Initial,
   store: Store,
   chainInfo: ChannelChainInfo
-): Promise<ChallengeObservation> {
+): Promise<ChainObservation> {
   // TODO: This function is starting to look ugly. Split it up?
   const {challenge} = chainInfo;
   if (!challengeSubmitted) {
