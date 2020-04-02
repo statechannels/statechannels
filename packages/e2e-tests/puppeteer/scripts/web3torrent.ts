@@ -1,9 +1,25 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {Page} from 'puppeteer';
+import * as fs from 'fs';
+
+function prepareUploadFile(path: string): void {
+  // Write deterministic content to the test file.
+  const content = 'web3torrent\n'.repeat(100000);
+  const buf = Buffer.from(content);
+  fs.writeFile(path, buf, err => {
+    if (err) {
+      console.log(err);
+      throw new Error('Failed to prepare the upload file');
+    }
+  });
+}
 
 export async function uploadFile(page: Page): Promise<string> {
   await page.waitForSelector('input[type=file]');
-  const fileToUpload = 'sample.txt';
+  // Generated from command: openssl rand -out random.txt -base64 $(( 2**20 * 3/4 * 4 ))
+  const fileToUpload = '/tmp/web3torrent-tests-stub';
+
+  prepareUploadFile(fileToUpload);
 
   // https://pub.dev/documentation/puppeteer/latest/puppeteer/FileChooser-class.html
   // Not clear why puppeteer FileChooser won't work out of box. We are doing it manually for now.

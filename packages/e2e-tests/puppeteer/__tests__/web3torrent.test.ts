@@ -39,7 +39,7 @@ describe('Supports torrenting among peers with channels', () => {
   });
 
   it('allows peers to start torrenting', async () => {
-    console.log('A uploads a file...');
+    console.log('A uploads a file');
     const url = await uploadFile(web3tTabA);
 
     console.log('B starts downloading...');
@@ -49,13 +49,13 @@ describe('Supports torrenting among peers with channels', () => {
     await waitAndOpenChannel(web3tTabB);
 
     await web3tTabB.waitFor(3000);
-    console.log('B cancels download...');
+    console.log('B cancels download');
     await cancelDownload(web3tTabB);
 
     await waitForClosingChannel(web3tTabB);
     await waitForClosingChannel(web3tTabA);
 
-    // Assert exchanged amount are the same on both sides
+    console.log('Checking exchanged amount from downloader and uploader...');
     const earnedColumn = await web3tTabA.$('td.earned');
     const earned = await web3tTabA.evaluate(e => e.textContent, earnedColumn);
     const paidColumn = await web3tTabB.$('td.paid');
