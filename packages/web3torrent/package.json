@@ -109,6 +109,7 @@
     "prettier:check": "prettier --check '**/*.{scss,json}' --ignore-path '.eslintignore'",
     "prettier:write": "prettier --write '**/*.{scss,json}' --ignore-path '.eslintignore'",
     "start": "node scripts/start.js",
+    "start:tracker-logs-on": "DEBUG='web3torrent:tracker' yarn start",
     "start:alt": "PORT=3333 node scripts/start.js",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
     "start:tracker": "node tracker/index.js",
