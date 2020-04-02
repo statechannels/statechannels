@@ -9,7 +9,7 @@ import {ethers} from 'ethers';
 import {Zero, One} from 'ethers/constants';
 import {Interface, BigNumber, bigNumberify, hexZeroPad, BigNumberish} from 'ethers/utils';
 import {Observable, fromEvent, from, merge} from 'rxjs';
-import {filter, map} from 'rxjs/operators';
+import {filter, map, flatMap} from 'rxjs/operators';
 
 import EventEmitter = require('eventemitter3');
 
@@ -93,8 +93,10 @@ export class FakeChain implements Chain {
     this.blockNumber = bigNumberify(blockNumber);
 
     for (const channelId in this.channelStatus) {
-      const {channelStorage} = this.channelStatus[channelId];
-      if (channelStorage && channelStorage.finalizesAt.lte(blockNumber)) {
+      const {
+        channelStorage: {finalizesAt}
+      } = this.channelStatus[channelId];
+      if (finalizesAt.gt(0) && finalizesAt.lte(blockNumber)) {
         this.eventEmitter.emit(UPDATED, {channelId, ...this.channelStatus[channelId]});
       }
     }
@@ -347,11 +349,22 @@ export class ChainWatcher implements Chain {
       }))
     );
 
-    // const provider = this._assetHolders[0].provider;
-
-    // const expiredChallenges = fromEvent(provider, 'block').pipe(filter(async blockNumber => {
-    //   if
-    // }));
+    // @ts-ignore -- FIXME: ethers events do not have .off for some reason
+    const timeoutEvents = fromEvent(this._adjudicator?.provider, 'block').pipe(
+      flatMap(async (blockNumber: number) => {
+        const chainInfo = await this.getChainInfo(channelId);
+        return {blockNumber, chainInfo};
+      }),
+      filter(
+        ({
+          blockNumber,
+          chainInfo: {
+            channelStorage: {finalizesAt}
+          }
+        }) => finalizesAt.gt(0) && finalizesAt.lte(blockNumber)
+      ),
+      map(({chainInfo}) => ({channelId, ...chainInfo}))
+    );
 
     return merge(first, depositEvents);
   }
@@ -364,12 +377,10 @@ export class ChainWatcher implements Chain {
     const updates = fromEvent(this._adjudicator, 'ChallengeRegistered').pipe(
       filter((event: any) => event[0] === channelId), // index 0 of ChallengeRegistered event is channelId
       map(getChallengeRegisteredEvent),
-      map((event: ChallengeRegisteredEvent) => ({
+      map(({challengeStates, finalizesAt}: ChallengeRegisteredEvent) => ({
         channelId,
-        challengeState: fromNitroState(
-          event.challengeStates[event.challengeStates.length - 1].state
-        ),
-        challengeExpiry: bigNumberify(event.finalizesAt)
+        challengeState: fromNitroState(challengeStates[challengeStates.length - 1].state),
+        challengeExpiry: bigNumberify(finalizesAt)
       }))
     );
 

@@ -1,32 +1,33 @@
-import {spawn, assign, StateSchema, State, createMachine, StateMachine} from 'xstate';
+import {spawn, assign, StateSchema, State, createMachine, StateMachine, Actor} from 'xstate';
 import {flatMap} from 'rxjs/operators';
 
 import {Store} from '../store';
 import {ChannelChainInfo} from '../chain';
-import {getProvider} from '../utils/contract-utils';
 import {Zero} from 'ethers/constants';
 
 export interface Initial {
   channelId: string;
-  challengeSubmitted?: boolean;
-  chainWatcher?: any;
   error?: any;
 }
 
+interface ChannelStorageWatcherEnabled extends Initial {
+  channelStorageWatcher: Actor;
+}
+
 type Typestate =
-  | {value: 'idle'; context: Initial}
-  | {value: 'waitForResponseOrTimeout'; context: Initial}
-  | {value: 'submit'; context: Initial}
-  | {value: 'done'; context: Initial}
-  | {value: 'failure'; context: Initial};
+  | {value: 'idle'; context: Initial | ChannelStorageWatcherEnabled}
+  | {value: 'waitForResponseOrTimeout'; context: ChannelStorageWatcherEnabled}
+  | {value: 'submit'; context: ChannelStorageWatcherEnabled}
+  | {value: 'done'; context: ChannelStorageWatcherEnabled}
+  | {value: 'failure'; context: ChannelStorageWatcherEnabled};
 
 type Context = Typestate['context'];
 
 type ChainObservation =
-  | 'CHALLENGE_PLACED_ONCHAIN_AS_EXPECTED'
+  | 'CHALLENGE_IS_ONCHAIN_WITH_CORRECT_TURN_NUM_RECORD'
   | 'SOME_OTHER_CHALLENGE_ALREADY_EXISTS'
-  | 'SAFE_TO_CHALLENGE'
-  | 'TIMEOUT_PASSED'
+  | 'NO_CHALLENGE_EXISTS_ONCHAIN'
+  | 'TIMEOUT_PASSED_FOR_ONCHAIN_CHALLENGE'
   | 'RESPONSE_OBSERVED';
 
 interface Schema extends StateSchema<Context> {
@@ -49,43 +50,34 @@ export type StateValue = keyof Schema['states'];
  * in our store.
  */
 async function determineChallengeStatus(
-  {channelId, challengeSubmitted}: Initial,
+  {channelId}: Initial,
   store: Store,
   chainInfo: ChannelChainInfo
 ): Promise<ChainObservation> {
-  // TODO: This function is starting to look ugly. Split it up?
   const {
     channelStorage: {turnNumRecord, finalizesAt}
   } = chainInfo;
-  if (!challengeSubmitted) {
-    // TODO: I think it is possible that the chain is UPDATED
-    // _after_ challenge tx is sent to network but before the
-    // Initial event is observed, which would cause
-    // this machine to send tx twice. If e.g., a new deposit
-    // occured for some reason.
-    if (finalizesAt.gt(Zero)) {
-      const {
-        latestState: {turnNum}
-      } = await store.getEntry(channelId);
-      if (!turnNumRecord.eq(turnNum)) {
-        return 'SOME_OTHER_CHALLENGE_ALREADY_EXISTS';
-      }
-      return 'CHALLENGE_PLACED_ONCHAIN_AS_EXPECTED';
-    }
-    return 'SAFE_TO_CHALLENGE';
-  } else {
-    if (finalizesAt.gt(Zero)) {
-      const currentBlock = await (await getProvider()).getBlockNumber();
-      if (finalizesAt.lte(currentBlock)) {
-        return 'TIMEOUT_PASSED';
-      } else {
-        // TODO: Why would UPDATED get triggered if this was the case? Is it possible?
-        // A deposit mid-challenge?
-        return 'CHALLENGE_PLACED_ONCHAIN_AS_EXPECTED';
-      }
+  const currentBlock = await store.chain.getBlockNumber();
+  const {
+    latestState: {turnNum}
+  } = await store.getEntry(channelId);
+
+  // TODO: I think it is possible that the chain is UPDATED
+  // _after_ challenge tx is sent to network but before the
+  // Initial event is observed, which would cause
+  // this machine to send tx twice. If e.g., a new deposit
+  // occured for some reason.
+  if (finalizesAt.lte(Zero)) {
+    return 'NO_CHALLENGE_EXISTS_ONCHAIN';
+  } else if (finalizesAt.gt(currentBlock)) {
+    if (!turnNumRecord.eq(turnNum)) {
+      return 'SOME_OTHER_CHALLENGE_ALREADY_EXISTS';
     } else {
-      return 'RESPONSE_OBSERVED';
+      // NOTE: For extra safety we could check the fingerprint
+      return 'CHALLENGE_IS_ONCHAIN_WITH_CORRECT_TURN_NUM_RECORD';
     }
+  } else {
+    return 'TIMEOUT_PASSED_FOR_ONCHAIN_CHALLENGE';
   }
 }
 
@@ -100,10 +92,13 @@ const submitChallengeTransaction = (store: Store) => async ({channelId}: Initial
   await store.chain.challenge(support, privateKey);
 };
 
-const assignChainWatcher = (store: Store) =>
-  assign<Initial>({
-    chainWatcher: (ctx: Initial) => spawn(subscribeChainUpdatedFeed(store)(ctx))
-  });
+const assignChannelStorageWatcher = (store: Store) =>
+  assign(
+    (context: Initial): ChannelStorageWatcherEnabled => ({
+      ...context,
+      channelStorageWatcher: spawn(subscribeChainUpdatedFeed(store)(context))
+    })
+  );
 
 export const machine = (
   store: Store,
@@ -113,7 +108,7 @@ export const machine = (
     context,
     id: 'challenge-channel',
     initial: 'idle',
-    entry: assignChainWatcher(store),
+    entry: assignChannelStorageWatcher(store),
 
     on: {
       CHALLENGE_DEALT_WITH: {
@@ -124,10 +119,10 @@ export const machine = (
     states: {
       idle: {
         on: {
-          SAFE_TO_CHALLENGE: {
+          NO_CHALLENGE_EXISTS_ONCHAIN: {
             target: 'submit'
           },
-          CHALLENGE_PLACED_ONCHAIN_AS_EXPECTED: {
+          CHALLENGE_IS_ONCHAIN_WITH_CORRECT_TURN_NUM_RECORD: {
             target: 'waitForResponseOrTimeout'
           }
         }
@@ -135,7 +130,7 @@ export const machine = (
 
       waitForResponseOrTimeout: {
         on: {
-          TIMEOUT_PASSED: {
+          TIMEOUT_PASSED_FOR_ONCHAIN_CHALLENGE: {
             target: 'done'
           },
           RESPONSE_OBSERVED: {
@@ -148,8 +143,7 @@ export const machine = (
         invoke: {
           src: submitChallengeTransaction(store),
           onDone: {
-            target: 'idle',
-            actions: assign<Context>({challengeSubmitted: true})
+            target: 'idle'
           },
           onError: {
             target: 'failure'

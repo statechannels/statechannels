@@ -78,11 +78,14 @@ interface InternalEvents {
   lockUpdated: [ChannelLock];
 }
 export interface Store {
+  // Feeds
   objectiveFeed: Observable<Objective>;
   outboxFeed: Observable<Message>;
-  pushMessage: (message: Message) => Promise<void>;
   channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry>;
-  getAddress(): Promise<string>;
+
+  /* Core Channels API */
+  // Write
+  pushMessage: (message: Message) => Promise<void>;
   signAndAddState(channelId: string, stateVars: StateVariables): Promise<void>;
   createChannel(
     participants: Participant[],
@@ -91,18 +94,23 @@ export interface Store {
     appDefinition?: string,
     applicationSite?: string
   ): Promise<ChannelStoreEntry>;
+  // Read
+  getAddress(): Promise<string>;
   getEntry(channelId): Promise<ChannelStoreEntry>;
   getPrivateKey(signingAddress: string): Promise<string>;
 
+  /* Locking API */
   lockFeed: Observable<ChannelLock>;
   acquireChannelLock(channelId: string): Promise<ChannelLock>;
   releaseChannelLock(lock: ChannelLock): Promise<void>;
 
-  setLedger(ledgerId: string): Promise<void>;
   getLedger(peerId: string): Promise<ChannelStoreEntry>;
+  setLedger(ledgerId: string): Promise<void>;
 
-  setFunding(channelId: string, funding: Funding): Promise<void>;
   addObjective(objective: Objective): void;
+
+  /* Environmental API (browser-specific) */
+  setFunding(channelId: string, funding: Funding): Promise<void>;
   getBudget: (site: string) => Promise<SiteBudget>;
   createBudget: (budget: SiteBudget) => Promise<void>;
   clearBudget: (site: string) => Promise<void>;
@@ -114,6 +122,7 @@ export interface Store {
   releaseFunds(assetHolderAddress: string, channelId: string): Promise<SiteBudget>;
 
   chain: Chain;
+
   initialize(privateKeys?: string[], cleanSlate?: boolean): Promise<void>;
 }
 

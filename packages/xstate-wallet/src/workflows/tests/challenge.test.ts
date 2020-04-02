@@ -70,7 +70,7 @@ beforeEach(async () => {
   channelId = (await store.createEntry(allSignState)).channelId;
 });
 
-it.only('initializes and starts challenge thing', async () => {
+it('initializes and starts challenge thing', async () => {
   const service = interpret(challengeMachine(store, {channelId})).start();
 
   await waitForExpect(async () => {
@@ -91,11 +91,11 @@ it('finalized when timeout ends', async () => {
     const {
       channelStorage: {finalizesAt, turnNumRecord}
     } = await fakeChain.getChainInfo(channelId);
-    expect(finalizesAt).toBe(state.challengeDuration);
-    expect(turnNumRecord).toBe(state.turnNum);
+    expect(finalizesAt).toStrictEqual(state.challengeDuration.add(1));
+    expect(turnNumRecord).toStrictEqual(state.turnNum);
   }, 10000);
 
-  fakeChain.setBlockNumber(101); // NOTE: FakeChain hard codes challengeExpiry to 100
+  fakeChain.setBlockNumber(301); // NOTE: CHALLENGE_DURATION is 300
 
   await waitForExpect(async () => {
     expect(service.state.value).toEqual('done');
