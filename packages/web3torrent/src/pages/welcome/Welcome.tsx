@@ -45,6 +45,11 @@ class Welcome extends React.Component<RouteComponentProps & Props, {[infoHash: s
     this.trackerClient.on('update', this.updateIfSeederFound);
     this.trackerClient.start();
   }
+
+  componentWillUnmount() {
+    this.trackerClient.off('update', this.updateIfSeederFound);
+  }
+
   render() {
     const {history, ready} = this.props;
     return (
