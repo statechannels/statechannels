@@ -35,6 +35,7 @@ const DownloadInfo: React.FC<DownloadInfoProps> = ({
               status={torrent.status}
             />
             <button
+              id="cancel-download-button"
               type="button"
               className="button cancel"
               onClick={() => cancel(torrent.infoHash)}

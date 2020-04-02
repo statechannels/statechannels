@@ -6,6 +6,7 @@ export const MagnetLinkButton: React.FC<{}> = () => {
 
   return (
     <a
+      id="download-link"
       href={window.location.href}
       className="fileLink"
       type="button"
