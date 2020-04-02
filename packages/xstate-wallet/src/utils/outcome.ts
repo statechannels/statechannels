@@ -10,11 +10,16 @@ import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
 import _ from 'lodash';
 import {bigNumberify} from 'ethers/utils';
 import {ethers} from 'ethers';
+import {checkThat} from './helpers';
 
 export function isSimpleEthAllocation(outcome: Outcome): outcome is SimpleAllocation {
   return (
     outcome.type === 'SimpleAllocation' && outcome.assetHolderAddress === ETH_ASSET_HOLDER_ADDRESS
   );
+}
+
+export function assertSimpleEthAllocation(outcome: Outcome): SimpleAllocation {
+  return checkThat(outcome, isSimpleEthAllocation);
 }
 
 export const simpleEthAllocation = (allocationItems: AllocationItem[]): SimpleAllocation => ({
