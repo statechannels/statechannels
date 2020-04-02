@@ -6,7 +6,7 @@ import {Init, machine} from '../create-and-fund';
 import {Store} from '../../store';
 import {bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
-import {firstState, signState, calculateChannelId} from '../../store/state-utils';
+import {firstState, calculateChannelId, createSignatureEntry} from '../../store/state-utils';
 import {ChannelConstants, Outcome, State} from '../../store/types';
 import {AddressZero} from 'ethers/constants';
 import {checkThat, isSimpleEthAllocation, add} from '../../utils';
@@ -77,7 +77,7 @@ let bStore: TestStore;
 
 const allSignState = (state: State) => ({
   ...state,
-  signatures: [wallet1, wallet2].map(({privateKey}) => signState(state, privateKey))
+  signatures: [wallet1, wallet2].map(({privateKey}) => createSignatureEntry(state, privateKey))
 });
 
 let chain: FakeChain;
@@ -132,7 +132,9 @@ test('it uses virtual funding when enabled', async () => {
 
   let state = ledgerState([first, third], ledgerAmounts);
   let ledgerId = calculateChannelId(state);
-  let signatures = [wallet1, wallet3].map(({privateKey}) => signState(state, privateKey));
+  let signatures = [wallet1, wallet3].map(({privateKey}) =>
+    createSignatureEntry(state, privateKey)
+  );
   await aStore.createBudget(budget(bigNumberify(7), bigNumberify(7)));
   await bStore.createBudget(budget(bigNumberify(7), bigNumberify(7)));
   chain.depositSync(ledgerId, '0', depositAmount);
@@ -140,7 +142,7 @@ test('it uses virtual funding when enabled', async () => {
 
   state = ledgerState([second, third], ledgerAmounts);
   ledgerId = calculateChannelId(state);
-  signatures = [wallet2, wallet3].map(({privateKey}) => signState(state, privateKey));
+  signatures = [wallet2, wallet3].map(({privateKey}) => createSignatureEntry(state, privateKey));
 
   chain.depositSync(ledgerId, '0', depositAmount);
   await bStore.setLedgerByEntry(await bStore.createEntry({...state, signatures}));
