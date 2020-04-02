@@ -168,6 +168,9 @@ const generateConfig = (
     running: {
       entry: [actions.hideUi, actions.spawnObservers],
       on: {
+        // TODO: It would be nice to get rid of this event, which is used
+        // in testing when starting the workflow in the 'running' state.
+        SPAWN_OBSERVERS: {actions: actions.spawnObservers},
         PLAYER_STATE_UPDATE: {
           target: 'running',
           actions: [actions.updateStoreWithPlayerState, actions.sendUpdateChannelResponse]
