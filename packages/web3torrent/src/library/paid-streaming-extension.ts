@@ -29,6 +29,8 @@ export abstract class PaidStreamingExtension implements Extension {
   isForceChoking = false;
   isBeingChoked = false;
 
+  blockedRequests: number[][] = [];
+
   constructor(wireToUse: PaidStreamingWire) {
     this.wire = wireToUse;
     this.messageBus = new EventEmitter();
@@ -91,17 +93,28 @@ export abstract class PaidStreamingExtension implements Extension {
   stop() {
     if (!this.isForceChoking) {
       this.isForceChoking = true;
-      this.executeExtensionCommand(PaidStreamingExtensionNotices.STOP, this.pseChannelId);
+      setTimeout(() => {
+        this.executeExtensionCommand(PaidStreamingExtensionNotices.STOP, this.pseChannelId);
+      }, 0);
     }
   }
 
   start() {
     if (this.isForceChoking) {
+      this.isForceChoking = false;
+
       setTimeout(() => {
-        this.isForceChoking = false;
+        this.respond();
         this.executeExtensionCommand(PaidStreamingExtensionNotices.START);
       }, 0);
     }
+  }
+
+  respond() {
+    const _onRequest = this.wire._onRequest;
+    this.blockedRequests
+      .splice(0, this.blockedRequests.length)
+      .map(req => _onRequest.apply(this.wire, req));
   }
 
   ack() {
@@ -131,8 +144,6 @@ export abstract class PaidStreamingExtension implements Extension {
       case PaidStreamingExtensionNotices.START:
         log(`START received from ${this.peerAccount}`);
         this.isBeingChoked = false;
-        this.wire.requests = [];
-        this.wire.unchoke();
         break;
       case PaidStreamingExtensionNotices.STOP:
         log(`STOP received from ${this.peerAccount}`);
@@ -140,8 +151,13 @@ export abstract class PaidStreamingExtension implements Extension {
         if (this.isBeingChoked) return;
         this.isBeingChoked = true;
         break;
-      default:
+      case PaidStreamingExtensionNotices.MESSAGE:
+        data = JSON.parse(data.message);
+        if (data.recipient !== this.pseAccount) {
+          return;
+        }
         log(`MESSAGE received from ${this.peerAccount}`, data);
+        break;
     }
     this.ack();
     this.messageBus.emit(PaidStreamingExtensionEvents.NOTICE, {command, data});
@@ -167,23 +183,26 @@ export abstract class PaidStreamingExtension implements Extension {
     // for debugging purposes. It logs when a piece is received
     const _onPiece = wire._onPiece;
     wire._onPiece = function(index, offset, buffer) {
-      log(`_onPiece PIECE: ${index}`, arguments);
       _onPiece.apply(wire, [index, offset, buffer]);
+      log(`<< _onPiece: ${index} OFFSET: ${offset} DOWNLOADED: ${wire.downloaded}`);
     };
-
+    const blockedRequests = this.blockedRequests;
     const _onRequest = wire._onRequest;
     wire._onRequest = function(index, offset, length) {
       log(`_onRequest: ${index}`);
 
-      messageBus.emit(PaidStreamingExtensionEvents.REQUEST, index, length, function(allow = false) {
-        if (allow) {
-          _onRequest.apply(wire, [index, offset, length]);
-          log(`_onRequest PASS - ${index}`);
-        } else {
-          wire._onCancel(index, offset, length);
-          log(`_onRequest CHOKED - ${index}`);
-        }
-      });
+      if (this.paidStreamingExtension.isForceChoking) {
+        blockedRequests.push([index, offset, length]);
+        log(`_onRequest: ${index}, ${offset}, ${length} - IGNORED`);
+      } else {
+        messageBus.emit(PaidStreamingExtensionEvents.REQUEST, index, length, function(allow) {
+          if (allow) {
+            _onRequest.apply(wire, [index, offset, length]);
+          } else {
+            blockedRequests.push([index, offset, length]);
+          }
+        });
+      }
     };
   }
 }
