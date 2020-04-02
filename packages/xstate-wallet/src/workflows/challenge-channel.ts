@@ -88,7 +88,7 @@ async function determineChallengeStatus(
   }
 }
 
-const subscribeChainUpdatedFeed = (store: Store) => (ctx: Initial | Initial) =>
+const subscribeChainUpdatedFeed = (store: Store) => (ctx: Initial) =>
   store.chain
     .chainUpdatedFeed(ctx.channelId)
     .pipe(flatMap(determineChallengeStatus.bind(null, ctx, store)));
