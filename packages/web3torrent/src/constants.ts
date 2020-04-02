@@ -68,7 +68,7 @@ export const EmptyTorrent = ({
 // Pre Seeded Constants (by StateChannels team)
 export const preSeededTorrents: Array<Partial<Torrent>> = [
   {
-    name: 'Sintel',
+    name: 'Sintel.mp4',
     length: 129241752,
     infoHash: 'c53da4fa28aa2edc1faa91861cce38527414d874',
     magnetURI:
