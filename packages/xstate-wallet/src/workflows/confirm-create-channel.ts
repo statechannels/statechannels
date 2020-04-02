@@ -1,7 +1,7 @@
 import {MachineConfig, Action, StateSchema, Machine, Condition, StateMachine, State} from 'xstate';
 import {Participant} from '@statechannels/client-api-schema';
 import {sendDisplayMessage} from '../messaging';
-import {createMockGuard} from '../utils/workflow-utils';
+import {createMockGuard} from '../utils';
 import {Store} from '../store';
 import {SimpleAllocation} from '../store/types';
 import {BigNumber} from 'ethers/utils';

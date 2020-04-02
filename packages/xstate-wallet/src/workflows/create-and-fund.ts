@@ -11,11 +11,16 @@ import {filter, map, first} from 'rxjs/operators';
 import _ from 'lodash';
 import {SimpleAllocation, isVirtuallyFund, StateVariables, Outcome} from '../store/types';
 
-import {MachineFactory} from '../utils/workflow-utils';
+import {
+  MachineFactory,
+  add,
+  isSimpleEthAllocation,
+  simpleEthAllocation,
+  checkThat,
+  getDataAndInvoke
+} from '../utils';
 import {Store} from '../store';
-import {add} from '../utils/math-utils';
-import {isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
-import {checkThat, getDataAndInvoke} from '../utils';
+
 import {SupportState, VirtualFundingAsLeaf, Depositing} from '.';
 import {from, Observable} from 'rxjs';
 import {CHALLENGE_DURATION, HUB, ETH_ASSET_HOLDER_ADDRESS, useVirtualFunding} from '../constants';

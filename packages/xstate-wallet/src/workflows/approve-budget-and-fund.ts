@@ -20,10 +20,10 @@ import {serializeSiteBudget} from '../serde/app-messages/serialize';
 
 import {CreateAndFundLedger} from '../workflows';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
-import {simpleEthAllocation} from '../utils/outcome';
+import {simpleEthAllocation, checkThat, exists} from '../utils';
 
 import _ from 'lodash';
-import {checkThat, exists} from '../utils';
+
 interface UserApproves {
   type: 'USER_APPROVES_BUDGET';
 }

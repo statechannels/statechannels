@@ -12,20 +12,22 @@ import {filter, map, take, flatMap, tap} from 'rxjs/operators';
 
 import {Store, supportedStateFeed} from '../store';
 import {SupportState, LedgerFunding} from '.';
-import {checkThat, getDataAndInvoke} from '../utils';
 import {
+  checkThat,
+  getDataAndInvoke,
   simpleEthGuarantee,
   isSimpleEthAllocation,
   simpleEthAllocation,
-  makeDestination
-} from '../utils/outcome';
+  makeDestination,
+  assignError
+} from '../utils';
 
 import {FundGuarantor, AllocationItem} from '../store/types';
 
 import {bigNumberify} from 'ethers/utils';
 import {CHALLENGE_DURATION} from '../constants';
 import _ from 'lodash';
-import {assignError} from '../utils/workflow-utils';
+
 import {escalate} from '../actions';
 
 export const enum OutcomeIdx {

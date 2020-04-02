@@ -16,9 +16,7 @@ import {SupportState} from '.';
 import {CHALLENGE_DURATION} from '../constants';
 import {bigNumberify} from 'ethers/utils';
 import * as Depositing from './depositing';
-import {getDataAndInvoke, checkThat} from '../utils';
-import {isSimpleEthAllocation} from '../utils/outcome';
-import {add} from '../utils/math-utils';
+import {getDataAndInvoke, checkThat, isSimpleEthAllocation, add} from '../utils';
 
 type WorkflowActions = {
   assignChannelId: AssignAction<WorkflowContext, DoneInvokeEvent<string>>;

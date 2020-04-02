@@ -1,6 +1,5 @@
 import {StateNodeConfig, DoneInvokeEvent, TransitionConfig} from 'xstate';
 import {hexZeroPad} from 'ethers/utils';
-
 export function unreachable(x: never) {
   return x;
 }

@@ -2,7 +2,7 @@ import {FakeChain} from '../chain';
 import {Player, hookUpMessaging, generateCloseRequest} from './helpers';
 import {bigNumberify, hexZeroPad} from 'ethers/utils';
 import waitForExpect from 'wait-for-expect';
-import {simpleEthAllocation} from '../utils/outcome';
+import {simpleEthAllocation} from '../utils';
 import {State, SignedState} from '../store/types';
 import {signState} from '../store/state-utils';
 import {CHALLENGE_DURATION, NETWORK_ID} from '../constants';

@@ -2,11 +2,16 @@ import {Machine, MachineConfig, ServiceConfig, assign, DoneInvokeEvent} from 'xs
 
 import {SupportState} from '.';
 import {Store, Errors as StoreErrors, Funding} from '../store';
-import {allocateToTarget, isSimpleEthAllocation} from '../utils/outcome';
+import {
+  allocateToTarget,
+  isSimpleEthAllocation,
+  getDataAndInvoke,
+  checkThat,
+  add,
+  assignError
+} from '../utils';
 import {AllocationItem} from '../store/types';
-import {getDataAndInvoke, checkThat} from '../utils';
-import {add} from '../utils/math-utils';
-import {assignError} from '../utils/workflow-utils';
+
 import {escalate} from '../actions';
 
 const WORKFLOW = 'ledger-funding';

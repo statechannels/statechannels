@@ -13,8 +13,7 @@ import {filter, flatMap} from 'rxjs/operators';
 
 import {Store} from '../store';
 import {LedgerFunding, VirtualFundingAsLeaf} from '.';
-import {checkThat} from '../utils';
-import {isSimpleEthAllocation} from '../utils/outcome';
+import {checkThat, isSimpleEthAllocation} from '../utils';
 
 import {FundGuarantor, AllocationItem, isFundGuarantor, Participant} from '../store/types';
 
