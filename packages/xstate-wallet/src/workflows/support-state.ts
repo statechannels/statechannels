@@ -47,9 +47,7 @@ const sendState = (store: Store) => async ({state, channelId}: HasChannelId) => 
     // If we've already supported this state, we might as well re-send it.
     (isSupportedByMe && statesEqual(entry.latestSignedByMe, state)) ||
     // Otherwise, we only send it if we haven't signed any new states.
-    (isSupported &&
-      statesEqual(entry.latestSignedByMe, entry.supported) &&
-      entry.supported.turnNum.lt(state.turnNum)) ||
+    (isSupported && entry.supported.turnNum.lt(state.turnNum)) ||
     // We always support a final state if it matches the outcome that we have signed
     (state.isFinal && outcomesEqual(state.outcome, entry.latestSignedByMe.outcome))
   ) {
