@@ -57,7 +57,6 @@ module.exports = {
       'CHAIN_NETWORK_ID',
       'ADD_LOGS',
       'USE_INDEXED_DB',
-      'USE_VIRTUAL_FUNDING',
       'CLEAR_STORAGE_ON_START'
     ]),
     new HtmlWebpackPlugin({template: './index-template.html'})

@@ -125,11 +125,6 @@ test('it uses direct funding when told', async () => {
 });
 
 test('it uses virtual funding when enabled', async () => {
-  const mockVirtualFunding = jest.spyOn(constants, 'useVirtualFunding');
-  mockVirtualFunding.mockImplementation(() => true);
-
-  process.env.USE_VIRTUAL_FUNDING = 'true';
-
   let state = ledgerState([first, third], ledgerAmounts);
   let ledgerId = calculateChannelId(state);
   let signatures = [wallet1, wallet3].map(({privateKey}) => signState(state, privateKey));
@@ -170,6 +165,4 @@ test('it uses virtual funding when enabled', async () => {
   const bChannelAmount =
     bBudget.forAsset[constants.ETH_ASSET_HOLDER_ADDRESS]?.channels[targetChannelId].amount;
   expect(bChannelAmount?.toHexString()).toEqual(totalAmount.toHexString());
-
-  mockVirtualFunding.mockRestore();
 });
