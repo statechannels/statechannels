@@ -8,20 +8,14 @@ import {
   Condition,
   DoneInvokeEvent,
   StateSchema,
-  ServiceConfig,
   StateMachine,
   State
 } from 'xstate';
 
 import {MessagingServiceInterface, convertToChannelResult} from '../messaging';
-import {filter, map, tap, flatMap, first} from 'rxjs/operators';
-import {
-  createMockGuard,
-  getDataAndInvoke2,
-  isSimpleEthAllocation,
-  unreachable,
-  checkThat
-} from '../utils';
+import {filter, map} from 'rxjs/operators';
+import {createMockGuard, unreachable} from '../utils';
+
 import {Store} from '../store';
 import {StateVariables} from '../store/types';
 import {ChannelStoreEntry} from '../store/channel-store-entry';
@@ -37,6 +31,7 @@ import {
   OpenEvent
 } from '../event-types';
 import {FundingStrategy} from '@statechannels/client-api-schema';
+import _ from 'lodash';
 
 export interface WorkflowContext {
   applicationSite: string;
@@ -56,7 +51,14 @@ type RequestIdExists = WorkflowContext & {requestId: number};
 
 type Guards<Keys extends string> = Record<Keys, Condition<WorkflowContext, WorkflowEvent>>;
 type WorkflowGuards = Guards<
-  'channelOpen' | 'channelClosing' | 'channelClosed' | 'isDirectFunding' | 'amCreator' | 'amJoiner'
+  | 'channelOpen'
+  | 'channelClosing'
+  | 'channelClosed'
+  | 'isDirectFunding'
+  | 'isLedgerFunding'
+  | 'isVirtualFunding'
+  | 'amCreator'
+  | 'amJoiner'
 >;
 
 export interface WorkflowActions {
@@ -80,7 +82,7 @@ export type WorkflowEvent =
   | JoinChannelEvent
   | DoneInvokeEvent<keyof WorkflowServices>;
 
-export interface WorkflowServices extends Record<string, ServiceConfig<WorkflowContext>> {
+export type WorkflowServices = {
   createChannel: (context: WorkflowContext, event: WorkflowEvent) => Promise<string>;
   invokeClosingProtocol: (
     context: ChannelIdExists
@@ -90,7 +92,7 @@ export interface WorkflowServices extends Record<string, ServiceConfig<WorkflowC
     event: DoneInvokeEvent<CreateAndFund.Init>
   ) => StateMachine<any, any, any, any>;
   invokeCreateChannelConfirmation: CCC.WorkflowMachine;
-}
+};
 interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
   states: {
     branchingOnFundingStrategy: {};
@@ -113,51 +115,56 @@ const generateConfig = (
   guards: WorkflowGuards
 ): MachineConfig<WorkflowContext, WorkflowStateSchema, WorkflowEvent> => ({
   id: 'application-workflow',
-  initial: 'branchingOnFundingStrategy',
+  initial: 'joiningChannel',
   on: {CHANNEL_UPDATED: {actions: [actions.sendChannelUpdatedNotification]}},
   states: {
-    branchingOnFundingStrategy: {
-      on: {
-        '': [
-          {target: 'confirmingWithUser', cond: guards.isDirectFunding},
-          {target: 'checkingBudget'}
-        ]
-      }
+    joiningChannel: {
+      initial: 'joining',
+      states: {
+        failure: {},
+        joining: {
+          on: {
+            '': [
+              {target: 'failure', cond: guards.isLedgerFunding}, // TODO: Should we even support ledger funding?
+              {target: 'done', cond: guards.amCreator}
+            ],
+            JOIN_CHANNEL: {target: 'done', actions: actions.sendJoinChannelResponse}
+          }
+        },
+        done: {type: 'final'}
+      },
+      onDone: [
+        {target: 'confirmingWithUser', cond: guards.isDirectFunding},
+        {target: 'creatingChannel', cond: guards.isVirtualFunding}
+      ]
     },
     confirmingWithUser: {
-      entry: actions.displayUi,
-      invoke: {src: 'invokeCreateChannelConfirmation', onDone: 'branchingOnRole'}
-    },
-    checkingBudget: {
-      invoke: {src: 'checkBudget', onDone: 'branchingOnRole', onError: 'failure'}
-    },
-    branchingOnRole: {
-      on: {
-        '': [
-          {target: 'creatingChannel', cond: guards.amCreator},
-          {target: 'joiningChannel', cond: guards.amJoiner}
-        ]
-      }
+      // FIXME We should keep track of whether the UI was turned on in the context.
+      // That way, at the end, we know whether we have to send hideUI
+      entry: [actions.displayUi, 'assignUIState'],
+      invoke: {src: 'invokeCreateChannelConfirmation', onDone: 'creatingChannel'}
     },
     creatingChannel: {
+      on: {'': {target: 'fundingChannel', cond: guards.amJoiner}},
       invoke: {
         data: (_, event) => event.data,
         src: 'createChannel',
         onDone: {
-          target: 'openChannelAndFundProtocol',
+          target: 'fundingChannel',
           actions: [actions.assignChannelId, actions.sendCreateChannelResponse]
         }
       }
     },
-    joiningChannel: {
-      invoke: {src: 'signFirstState', onDone: 'openChannelAndFundProtocol'},
-      exit: [actions.sendJoinChannelResponse]
+    fundingChannel: {
+      invoke: {
+        src: 'invokeCreateChannelAndFundProtocol',
+        data: (ctx: ChannelIdExists): CreateAndFund.Init => ({
+          channelId: ctx.channelId,
+          funding: ctx.fundingStrategy
+        }),
+        onDone: 'running'
+      }
     },
-    openChannelAndFundProtocol: getDataAndInvoke2(
-      'getDataForCreateChannelAndFund',
-      'invokeCreateChannelAndFundProtocol',
-      'running'
-    ),
     running: {
       entry: [actions.hideUi, actions.spawnObservers],
       on: {
@@ -181,8 +188,7 @@ const generateConfig = (
         onDone: {target: 'done', actions: [actions.sendCloseChannelResponse]}
       }
     },
-    done: {type: 'final'},
-    failure: {}
+    done: {type: 'final'}
   } as any // TODO: This is to deal with some flickering compilation issues.
 });
 
@@ -282,41 +288,13 @@ export const workflow = (
 
     channelClosed: (_, event: any): boolean => !!event.storeEntry.supported?.isFinal,
     isDirectFunding: (ctx: Init) => ctx.fundingStrategy === 'Direct',
+    isLedgerFunding: (ctx: Init) => ctx.fundingStrategy === 'Ledger',
+    isVirtualFunding: (ctx: Init) => ctx.fundingStrategy === 'Virtual',
     amCreator: (ctx: Init) => ctx.type === 'CREATE_CHANNEL',
     amJoiner: (ctx: Init) => ctx.type === 'JOIN_CHANNEL'
   };
 
   const services: WorkflowServices = {
-    checkBudget: async (_: Init) =>
-      // TODO
-      // let outcome: Outcome;
-      // switch (ctx.type) {
-      //   case 'CREATE_CHANNEL':
-      //     outcome = checkThat(ctx.outcome, isSimpleEthAllocation);
-      //     break;
-
-      //   case 'JOIN_CHANNEL':
-      //     outcome = checkThat(
-      //       (await store.getEntry(ctx.channelId)).latest.outcome,
-      //       isSimpleEthAllocation
-      //     );
-      //     break;
-      // }
-
-      // // FIXME
-      // await store.reserveFunds('TODO', ETH_ASSET_HOLDER_ADDRESS, );
-      // forEthAsset(budget).availableReceiveCapacity;
-      'NOOP',
-    signFirstState: async ({channelId}: ChannelIdExists) =>
-      store
-        .channelUpdatedFeed(channelId)
-        .pipe(
-          flatMap(({sortedStates: states}) => states),
-          filter(s => s.turnNum.eq(0)),
-          tap(async s => await store.signAndAddState(channelId, s)),
-          first()
-        )
-        .toPromise(),
     createChannel: async (context: CreateInit) => {
       const {
         participants,
@@ -338,6 +316,7 @@ export const workflow = (
         stateVars,
         appDefinition
       );
+
       // Create a open channel objective so we can coordinate with all participants
       await store.addObjective({
         type: 'OpenChannel',
@@ -351,15 +330,7 @@ export const workflow = (
       ConcludeChannel.machine(store).withContext({channelId: context.channelId}),
     invokeCreateChannelAndFundProtocol: (_, event: DoneInvokeEvent<CreateAndFund.Init>) =>
       CreateAndFund.machine(store, event.data),
-    invokeCreateChannelConfirmation: CCC.workflow({}),
-    getDataForCreateChannelAndFund: async ({
-      channelId,
-      fundingStrategy
-    }: ChannelIdExists): Promise<CreateAndFund.Init> => {
-      const {latestSupportedByMe} = await store.getEntry(channelId);
-      const allocation = checkThat(latestSupportedByMe.outcome, isSimpleEthAllocation);
-      return {channelId, allocation, funding: fundingStrategy};
-    }
+    invokeCreateChannelConfirmation: CCC.workflow({})
   };
 
   const config = generateConfig(actions, guards);
@@ -371,6 +342,8 @@ const mockGuards: WorkflowGuards = {
   channelClosing: createMockGuard('channelClosing'),
   channelClosed: createMockGuard('channelClosed'),
   isDirectFunding: createMockGuard('isDirectFunding'),
+  isLedgerFunding: createMockGuard('isLedgerFunding'),
+  isVirtualFunding: createMockGuard('isVirtualFunding'),
   amCreator: createMockGuard('amCreator'),
   amJoiner: createMockGuard('amJoiner')
 };

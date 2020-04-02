@@ -110,7 +110,6 @@ it('starts concluding when requested', async () => {
   const messagingService: MessagingServiceInterface = new MessagingService(store);
   const channelId = ethers.utils.id('channel');
   const services: Partial<Application.WorkflowServices> = {
-    signConcludeState: jest.fn().mockReturnValue(Promise.resolve()),
     invokeClosingProtocol: jest.fn().mockReturnValue(
       new Promise(() => {
         /* mock */
@@ -162,8 +161,7 @@ it('starts concluding when receiving a final state', async () => {
       new Promise(() => {
         /* mock */
       })
-    ),
-    signConcludeState: jest.fn().mockReturnValue(Promise.resolve())
+    )
   };
   const channelId = calculateChannelId(states[0]);
   const channelUpdate: ChannelUpdated = {
