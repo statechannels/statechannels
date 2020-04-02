@@ -9,23 +9,31 @@ import {machine as challengeMachine} from '../challenge-channel';
 import {Player} from '../../integration-tests/helpers';
 import {signState} from '../../store/state-utils';
 import {simpleEthAllocation} from '../../utils/outcome';
-import {State, SignedState} from '../../store/types';
+import {State} from '../../store/types';
 
 import {TestStore} from './store';
 
 jest.setTimeout(50000);
 
-it('initializes and starts challenge thing', async () => {
-  const fakeChain = new FakeChain();
-  const store = new TestStore(fakeChain);
+// Test suite variables
+let fakeChain: FakeChain;
+let store: TestStore;
+let playerA: Player;
+let playerB: Player;
+let state: State;
+let channelId: string;
 
-  const playerA = await Player.createPlayer(
+beforeEach(async () => {
+  fakeChain = new FakeChain();
+  store = new TestStore(fakeChain);
+
+  playerA = await Player.createPlayer(
     '0x275a2e2cd9314f53b42246694034a80119963097e3adf495fbf6d821dc8b6c8e',
     'PlayerA',
     fakeChain
   );
 
-  const playerB = await Player.createPlayer(
+  playerB = await Player.createPlayer(
     '0x3341c348ea8ade1ba7c3b6f071bfe9635c544b7fb5501797eaa2f673169a7d0d',
     'PlayerB',
     fakeChain
@@ -33,7 +41,7 @@ it('initializes and starts challenge thing', async () => {
 
   await store.setPrivateKey('0x275a2e2cd9314f53b42246694034a80119963097e3adf495fbf6d821dc8b6c8e');
 
-  const state: State = {
+  state = {
     outcome: simpleEthAllocation([
       {
         destination: playerA.destination,
@@ -54,24 +62,42 @@ it('initializes and starts challenge thing', async () => {
     participants: [playerA.participant, playerB.participant]
   };
 
-  const allSignState: SignedState = {
+  const allSignState = {
     ...state,
     signatures: [playerA, playerB].map(({privateKey}) => signState(state, privateKey))
   };
 
-  const {channelId} = await store.createEntry(allSignState);
+  channelId = (await store.createEntry(allSignState)).channelId;
+});
 
-  const service = interpret<any, any, any>(
-    challengeMachine(store, {channelId, challengeSubmitted: false})
-  ).start();
+it.only('initializes and starts challenge thing', async () => {
+  const service = interpret(challengeMachine(store, {channelId})).start();
 
   await waitForExpect(async () => {
     expect(service.state.value).toEqual('waitForResponseOrTimeout');
-    const {finalized, challenge} = await fakeChain.getChainInfo(channelId);
-    expect(finalized).toBe(false);
-    expect(challenge).toMatchObject({
-      state,
-      challengeExpiry: bigNumberify(100)
-    });
+    const {
+      channelStorage: {finalizesAt, turnNumRecord}
+    } = await fakeChain.getChainInfo(channelId);
+    expect(finalizesAt).toStrictEqual(state.challengeDuration.add(1));
+    expect(turnNumRecord).toStrictEqual(state.turnNum);
+  }, 10000);
+});
+
+it('finalized when timeout ends', async () => {
+  const service = interpret(challengeMachine(store, {channelId})).start();
+
+  await waitForExpect(async () => {
+    expect(service.state.value).toEqual('waitForResponseOrTimeout');
+    const {
+      channelStorage: {finalizesAt, turnNumRecord}
+    } = await fakeChain.getChainInfo(channelId);
+    expect(finalizesAt).toBe(state.challengeDuration);
+    expect(turnNumRecord).toBe(state.turnNum);
+  }, 10000);
+
+  fakeChain.setBlockNumber(101); // NOTE: FakeChain hard codes challengeExpiry to 100
+
+  await waitForExpect(async () => {
+    expect(service.state.value).toEqual('done');
   }, 10000);
 });

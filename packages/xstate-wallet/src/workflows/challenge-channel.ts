@@ -3,6 +3,8 @@ import {flatMap} from 'rxjs/operators';
 
 import {Store} from '../store';
 import {ChannelChainInfo} from '../chain';
+import {getProvider} from '../utils/contract-utils';
+import {Zero} from 'ethers/constants';
 
 export interface Initial {
   channelId: string;
@@ -47,35 +49,34 @@ export type StateValue = keyof Schema['states'];
  * in our store.
  */
 async function determineChallengeStatus(
-  {channelId, challengeSubmitted}: Initial | Initial,
+  {channelId, challengeSubmitted}: Initial,
   store: Store,
   chainInfo: ChannelChainInfo
 ): Promise<ChainObservation> {
   // TODO: This function is starting to look ugly. Split it up?
-  const {challenge} = chainInfo;
+  const {
+    channelStorage: {turnNumRecord, finalizesAt}
+  } = chainInfo;
   if (!challengeSubmitted) {
     // TODO: I think it is possible that the chain is UPDATED
     // _after_ challenge tx is sent to network but before the
     // Initial event is observed, which would cause
     // this machine to send tx twice. If e.g., a new deposit
     // occured for some reason.
-    if (typeof challenge !== 'undefined') {
-      const {
-        state: {turnNum: challengeTurnNum}
-      } = challenge;
+    if (finalizesAt.gt(Zero)) {
       const {
         latestState: {turnNum}
       } = await store.getEntry(channelId);
-      if (!challengeTurnNum.eq(turnNum)) {
+      if (!turnNumRecord.eq(turnNum)) {
         return 'SOME_OTHER_CHALLENGE_ALREADY_EXISTS';
       }
       return 'CHALLENGE_PLACED_ONCHAIN_AS_EXPECTED';
     }
     return 'SAFE_TO_CHALLENGE';
   } else {
-    if (typeof challenge !== 'undefined') {
-      const {challengeExpiry} = challenge;
-      if (challengeExpiry.gt(1337)) {
+    if (finalizesAt.gt(Zero)) {
+      const currentBlock = await (await getProvider()).getBlockNumber();
+      if (finalizesAt.lte(currentBlock)) {
         return 'TIMEOUT_PASSED';
       } else {
         // TODO: Why would UPDATED get triggered if this was the case? Is it possible?

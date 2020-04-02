@@ -93,7 +93,7 @@ it('allows for a wallet to close the ledger channel with the hub and withdraw', 
 
   // Verify that the blockchain is correct
   const chainView = await playerA.store.chain.getChainInfo(ledgerChannel.channelId);
-  expect(chainView.finalized).toBe(true);
+  expect(chainView.channelStorage.finalizesAt.gt(0)).toBe(true);
   expect(chainView.amount.eq(0)).toBe(true);
 
   // Check the channel is finalized
