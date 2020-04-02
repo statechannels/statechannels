@@ -27,8 +27,7 @@ type ChainObservation =
   | 'CHALLENGE_IS_ONCHAIN_WITH_CORRECT_TURN_NUM_RECORD'
   | 'SOME_OTHER_CHALLENGE_ALREADY_EXISTS'
   | 'NO_CHALLENGE_EXISTS_ONCHAIN'
-  | 'TIMEOUT_PASSED_FOR_ONCHAIN_CHALLENGE'
-  | 'RESPONSE_OBSERVED';
+  | 'TIMEOUT_PASSED_FOR_ONCHAIN_CHALLENGE';
 
 interface Schema extends StateSchema<Context> {
   states: {
@@ -93,12 +92,9 @@ const submitChallengeTransaction = (store: Store) => async ({channelId}: Initial
 };
 
 const assignChannelStorageWatcher = (store: Store) =>
-  assign(
-    (context: Initial): ChannelStorageWatcherEnabled => ({
-      ...context,
-      channelStorageWatcher: spawn(subscribeChainUpdatedFeed(store)(context))
-    })
-  );
+  assign<Context>({
+    channelStorageWatcher: ctx => spawn(subscribeChainUpdatedFeed(store)(ctx))
+  });
 
 export const machine = (
   store: Store,
@@ -132,10 +128,11 @@ export const machine = (
         on: {
           TIMEOUT_PASSED_FOR_ONCHAIN_CHALLENGE: {
             target: 'done'
-          },
-          RESPONSE_OBSERVED: {
-            target: 'done'
           }
+          // TODO: Handle responses...
+          // RESPONSE_OBSERVED: {
+          //   target: 'done'
+          // }
         }
       },
 
