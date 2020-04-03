@@ -78,7 +78,7 @@ const challengeOnchainAsExpected: Guard<Initial, ChainEvent> = {
 const challengeFinalized: Guard<Initial, ChainEvent> = {
   type: 'xstate.guard',
   name: 'challengeFinalized',
-  predicate: (context, {finalized}) => finalized === true
+  predicate: (context, {finalized}) => finalized
 };
 
 const submitChallengeTransaction = (store: Store) => async ({channelId}: Initial) => {
