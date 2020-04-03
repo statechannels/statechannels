@@ -7,8 +7,7 @@ import _ from 'lodash';
 import {signState, calculateChannelId} from '../../store/state-utils';
 import {Participant, Outcome, SignedState, ChannelConstants} from '../../store/types';
 import {AddressZero, HashZero} from 'ethers/constants';
-import {add} from '../../utils/math-utils';
-import {simpleEthAllocation, simpleEthGuarantee, makeDestination} from '../../utils/outcome';
+import {add, simpleEthAllocation, simpleEthGuarantee, makeDestination} from '../../utils';
 
 import {wallet1, wallet2, wallet3, threeParticipants as participants} from './data';
 import {subscribeToMessages} from './message-service';

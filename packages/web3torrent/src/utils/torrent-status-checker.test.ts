@@ -15,6 +15,9 @@ describe('Torrent Status Checker', () => {
   beforeEach(() => {
     torrent = createMockTorrent() as Torrent;
   });
+  afterAll(() => {
+    web3torrent.destroy();
+  });
 
   describe('Main function', () => {
     it('should return a torrent with a status of Idle when no info hash exists', () => {

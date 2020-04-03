@@ -35,3 +35,5 @@ import extractDomain from 'extract-domain';
 
   window.parent.postMessage('WalletReady', '*');
 })();
+
+import './render';

@@ -1,10 +1,10 @@
 import {MachineConfig, Action, StateSchema, Machine, Condition, StateMachine, State} from 'xstate';
 import {Participant} from '@statechannels/client-api-schema';
-import {sendDisplayMessage} from '../messaging';
-import {createMockGuard} from '../utils/workflow-utils';
+import {createMockGuard} from '../utils';
 import {Store} from '../store';
 import {SimpleAllocation} from '../store/types';
 import {BigNumber} from 'ethers/utils';
+import {MessagingServiceInterface} from '../messaging';
 
 interface WorkflowActions {
   hideUi: Action<WorkflowContext, any>;
@@ -87,22 +87,25 @@ const mockGuards = {
 export const mockOptions = {actions: mockActions, guards: mockGuards};
 export const mockConfig = generateConfig(mockActions, mockGuards);
 const guards = {noBudget: () => true};
-const actions = {
-  // TODO: We should probably set up some standard actions for all workflows
-  displayUi: () => {
-    sendDisplayMessage('Show');
-  },
-  hideUi: () => {
-    sendDisplayMessage('Hide');
-  }
-};
-export const config = generateConfig(actions, guards);
+export const config = generateConfig(mockActions, guards);
+
 export const confirmChannelCreationWorkflow = (
   _store: Store,
+  messagingService: MessagingServiceInterface,
   context: WorkflowContext
-): WorkflowMachine =>
-  // TODO: Once budgets are a thing this should check for a budget
-  // TODO: We shouldn't need to cast this but some xstate typing is not lining up around stateSchema
-  Machine(config).withConfig({}, context) as WorkflowMachine;
+): WorkflowMachine => {
+  const actions = {
+    // TODO: We should probably set up some standard actions for all workflows
+    displayUi: () => {
+      messagingService.sendDisplayMessage('Show');
+    },
+    hideUi: () => {
+      messagingService.sendDisplayMessage('Hide');
+    }
+  };
+  return Machine(config).withConfig({actions}, context) as WorkflowMachine;
+};
+// TODO: Once budgets are a thing this should check for a budget
+// TODO: We shouldn't need to cast this but some xstate typing is not lining up around stateSchema
 
 export type WorkflowMachine = StateMachine<WorkflowContext, StateSchema, WorkflowEvent, any>;

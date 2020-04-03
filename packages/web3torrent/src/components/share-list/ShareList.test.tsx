@@ -3,7 +3,7 @@ import Adapter from 'enzyme-adapter-react-16';
 import {createMemoryHistory} from 'history';
 import React from 'react';
 import {MemoryRouter as Router} from 'react-router-dom';
-import {mockTorrents} from '../../constants';
+import {preSeededTorrents} from '../../constants';
 import {RoutePath} from '../../routes';
 import {ShareList, ShareListProps} from './ShareList';
 import {calculateWei, prettyPrintWei} from '../../utils/calculateWei';
@@ -14,7 +14,7 @@ function setup(withNoTorrents = false) {
   const history = createMemoryHistory();
   const props: ShareListProps = {
     history,
-    torrents: withNoTorrents ? [] : mockTorrents
+    torrents: withNoTorrents ? [] : preSeededTorrents
   };
   const component = mount(
     <Router>
@@ -45,9 +45,7 @@ describe('<ShareList />', () => {
     const firstFileData = filesData.at(0);
     expect(firstFileData.childAt(0).text()).toBe(props.torrents[0].name);
     expect(firstFileData.childAt(1).text()).toBe(prettier(props.torrents[0].length));
-    expect(firstFileData.childAt(2).text()).toBe(props.torrents[0].numPeers + 'S');
-    expect(firstFileData.childAt(3).text()).toBe(props.torrents[0].numPeers + 'P');
-    expect(firstFileData.childAt(4).text()).toBe(
+    expect(firstFileData.childAt(2).text()).toBe(
       prettyPrintWei(calculateWei(props.torrents[0].length))
     );
     expect(firstFileData.childAt(5).find('button')).not.toBeNull();

@@ -61,6 +61,10 @@ describe('<File />', () => {
     jest.useFakeTimers();
   });
 
+  afterAll(() => {
+    Web3TorrentClient.web3torrent.destroy();
+  });
+
   it('should render an download button', () => {
     expect(component.find(testSelector('download-button')).text()).toBe('Start Download');
   });

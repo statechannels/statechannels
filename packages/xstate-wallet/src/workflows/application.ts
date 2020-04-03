@@ -13,17 +13,22 @@ import {
   State
 } from 'xstate';
 
-import {sendDisplayMessage, MessagingServiceInterface, convertToChannelResult} from '../messaging';
+import {MessagingServiceInterface, convertToChannelResult} from '../messaging';
 import {filter, map, tap, flatMap, first} from 'rxjs/operators';
 import * as CCC from './confirm-create-channel';
-import {createMockGuard, getDataAndInvoke} from '../utils/workflow-utils';
+import {
+  createMockGuard,
+  getDataAndInvoke2,
+  isSimpleEthAllocation,
+  unreachable,
+  checkThat
+} from '../utils';
 import {Store} from '../store';
 import {StateVariables} from '../store/types';
 import {ChannelStoreEntry} from '../store/channel-store-entry';
 import {bigNumberify} from 'ethers/utils';
 import {ConcludeChannel, ChallengeChannel, CreateAndFund} from './';
-import {isSimpleEthAllocation} from '../utils/outcome';
-import {unreachable, checkThat} from '../utils';
+
 import {
   PlayerStateUpdate,
   ChannelUpdated,
@@ -142,7 +147,7 @@ const generateConfig = (
       }
     },
 
-    confirmCreateChannelWorkflow: getDataAndInvoke(
+    confirmCreateChannelWorkflow: getDataAndInvoke2(
       'getDataForCreateChannelConfirmation',
       'invokeCreateChannelConfirmation',
       'createChannelInStore'
@@ -152,7 +157,7 @@ const generateConfig = (
       initial: 'signFirstState',
       states: {
         signFirstState: {invoke: {src: 'signFirstState', onDone: 'confirmChannelCreation'}},
-        confirmChannelCreation: getDataAndInvoke(
+        confirmChannelCreation: getDataAndInvoke2(
           'getDataForCreateChannelConfirmation',
           'invokeCreateChannelConfirmation',
           'done'
@@ -179,7 +184,7 @@ const generateConfig = (
       }
     },
 
-    openChannelAndFundProtocol: getDataAndInvoke(
+    openChannelAndFundProtocol: getDataAndInvoke2(
       'getDataForCreateChannelAndFund',
       'invokeCreateChannelAndFundProtocol',
       'running'
@@ -298,10 +303,10 @@ export const applicationWorkflow = (
       }
     },
     displayUi: () => {
-      sendDisplayMessage('Show');
+      messagingService.sendDisplayMessage('Show');
     },
     hideUi: () => {
-      sendDisplayMessage('Hide');
+      messagingService.sendDisplayMessage('Hide');
     },
     assignChannelParams: assign((context, event: CreateChannelEvent): ChannelParamsExist &
       RequestIdExists => ({
@@ -399,7 +404,7 @@ export const applicationWorkflow = (
       CreateAndFund.machine(store, event.data),
 
     invokeCreateChannelConfirmation: (context, event: DoneInvokeEvent<CCC.WorkflowContext>) =>
-      CCC.confirmChannelCreationWorkflow(store, event.data),
+      CCC.confirmChannelCreationWorkflow(store, messagingService, event.data),
 
     getDataForCreateChannelAndFund: async (
       context: ChannelParamsExist

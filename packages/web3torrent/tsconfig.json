@@ -12,7 +12,8 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "target": "es2015"
   },
   "include": ["**/*.ts", "**/*.tsx"]
 }

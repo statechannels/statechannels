@@ -10,13 +10,15 @@ import {Participant} from '@statechannels/client-api-schema';
 import {renderComponentInFrontOfApp} from './helpers';
 
 import {bigNumberify} from 'ethers/utils';
-import {simpleEthAllocation} from '../../utils/outcome';
+import {simpleEthAllocation} from '../../utils';
 import React from 'react';
 import {ConfirmCreateChannel} from '../confirm-create-channel-workflow';
 import {XstateStore} from '../../store';
+import {MessagingService} from '../../messaging';
 
 const store = new XstateStore();
 store.initialize(['0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29']);
+const messagingService = new MessagingService(store);
 
 const alice: Participant = {
   participantId: 'a',
@@ -42,7 +44,7 @@ const testContext: WorkflowContext = {
 if (config.states) {
   Object.keys(config.states).forEach(state => {
     const machine = interpret<any, any, any>(
-      confirmChannelCreationWorkflow(store, testContext).withContext(testContext),
+      confirmChannelCreationWorkflow(store, messagingService, testContext).withContext(testContext),
       {
         devTools: true
       }

@@ -9,7 +9,7 @@ import {ChannelStoreEntry} from '../../store/channel-store-entry';
 import {MessagingService, MessagingServiceInterface} from '../../messaging';
 import {bigNumberify} from 'ethers/utils';
 import {calculateChannelId} from '../../store/state-utils';
-import {simpleEthAllocation} from '../../utils/outcome';
+import {simpleEthAllocation} from '../../utils';
 import {CreateChannelEvent, ChannelUpdated, JoinChannelEvent} from '../../event-types';
 
 jest.setTimeout(50000);

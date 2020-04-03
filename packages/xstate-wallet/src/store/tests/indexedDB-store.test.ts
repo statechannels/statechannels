@@ -5,7 +5,7 @@ import {bigNumberify, BigNumber} from 'ethers/utils';
 import {Wallet} from 'ethers';
 import {calculateChannelId, signState} from '../state-utils';
 import {NETWORK_ID, CHALLENGE_DURATION} from '../../constants';
-import {simpleEthAllocation, makeDestination} from '../../utils/outcome';
+import {simpleEthAllocation, makeDestination} from '../../utils';
 import {IndexedDBBackend as Backend} from '../indexedDB-backend';
 import {ChannelStoreEntry} from '../channel-store-entry';
 require('fake-indexeddb/auto');

@@ -2,8 +2,7 @@ import {filter, map, first} from 'rxjs/operators';
 import {FakeChain} from '../chain';
 import {Player, generateApproveBudgetAndFundRequest, hookUpMessaging} from './helpers';
 import {FundLedger} from '../store/types';
-import {checkThat} from '../utils';
-import {isSimpleEthAllocation} from '../utils/outcome';
+import {assertSimpleEthAllocation} from '../utils';
 
 import {bigNumberify, hexZeroPad} from 'ethers/utils';
 import {ApproveBudgetAndFundResponse} from '@statechannels/client-api-schema/src';
@@ -37,7 +36,7 @@ it('allows for a wallet to approve a budget and fund with the hub', async () => 
       hub.startCreateAndFundLedger({
         ledgerId: o.data.ledgerId,
         participants: o.participants,
-        initialOutcome: checkThat(entry.latest.outcome, isSimpleEthAllocation)
+        initialOutcome: assertSimpleEthAllocation(entry.latest.outcome)
       });
     });
 
@@ -66,7 +65,7 @@ it('allows for a wallet to approve a budget and fund with the hub', async () => 
   // Check that the ledger channel is set up correct
   const ledgerEntry = await playerA.store.getLedger(hub.signingAddress);
   expect(ledgerEntry.isSupported).toBe(true);
-  const allocation = checkThat(ledgerEntry.supported.outcome, isSimpleEthAllocation);
+  const allocation = assertSimpleEthAllocation(ledgerEntry.supported.outcome);
   expect(allocation.allocationItems).toContainEqual({
     destination: hub.destination,
     amount: bigNumberify(hexZeroPad('0x5', 32))

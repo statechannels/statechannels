@@ -32,7 +32,7 @@ function setup() {
 
   const component = mount(
     <Router>
-      <Upload {...props} />
+      <Upload {...props} ready={true} />
     </Router>
   );
 
@@ -52,6 +52,10 @@ describe('<Upload />', () => {
     component = mock.component;
     torrentUpload = mock.torrentUpload;
     jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    Web3TorrentClient.web3torrent.destroy();
   });
 
   it('should render an Upload button', () => {

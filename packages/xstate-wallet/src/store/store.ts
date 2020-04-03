@@ -27,8 +27,7 @@ import {Guid} from 'guid-typescript';
 import {MemoryBackend} from './memory-backend';
 import {Errors} from '.';
 import AsyncLock from 'async-lock';
-import {checkThat} from '../utils';
-import {isSimpleEthAllocation} from '../utils/outcome';
+import {checkThat, isSimpleEthAllocation} from '../utils';
 
 interface DirectFunding {
   type: 'Direct';

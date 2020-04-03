@@ -5,7 +5,7 @@ import {
   getChallengeRegisteredEvent,
   ChallengeRegisteredEvent
 } from '@statechannels/nitro-protocol';
-import {ethers} from 'ethers';
+import {Contract} from 'ethers';
 import {Zero, One} from 'ethers/constants';
 import {Interface, BigNumber, bigNumberify, hexZeroPad, BigNumberish} from 'ethers/utils';
 import {Observable, fromEvent, from, merge} from 'rxjs';
@@ -32,6 +32,7 @@ export interface ChannelChainInfo {
     finalizesAt: BigNumber;
     /* fingerprint: string */
   };
+  readonly blockNum: number; // blockNum that the information is from
 }
 
 export interface Chain {
@@ -49,7 +50,7 @@ export interface Chain {
 
   // Chain Methods
   getBlockNumber: () => Promise<BigNumber>;
-  deposit: (channelId: string, expectedHeld: string, amount: string) => Promise<void>;
+  deposit: (channelId: string, expectedHeld: string, amount: string) => Promise<string | undefined>;
   challenge: (support: SignedState[], privateKey: string) => Promise<void>;
   finalizeAndWithdraw: (finalizationProof: SignedState[]) => Promise<void>;
   getChainInfo: (channelId: string) => Promise<ChannelChainInfo>;
@@ -102,8 +103,9 @@ export class FakeChain implements Chain {
     }
   }
 
-  public async deposit(channelId: string, expectedHeld: string, amount: string): Promise<void> {
+  public async deposit(channelId: string, expectedHeld: string, amount: string) {
     this.depositSync(channelId, expectedHeld, amount);
+    return 'fake-transaction-id';
   }
 
   public async challenge(support: SignedState[], privateKey: string): Promise<void> {
@@ -134,12 +136,16 @@ export class FakeChain implements Chain {
 
     this.channelStatus[channelId] = {
       ...this.channelStatus[channelId],
-      amount: Zero
+      amount: Zero,
+      blockNum: 4
     };
+
+    const blockNum = 4;
 
     this.eventEmitter.emit(UPDATED, {
       ...this.channelStatus[channelId],
-      channelId
+      channelId,
+      blockNum
     });
   }
 
@@ -156,35 +162,41 @@ export class FakeChain implements Chain {
   public depositSync(channelId: string, expectedHeld: string, amount: string) {
     const current = (this.channelStatus[channelId] || {}).amount || bigNumberify(0);
 
+    const blockNum = 4;
     if (current.gte(expectedHeld)) {
       this.channelStatus[channelId] = {
         ...this.channelStatus[channelId],
-        amount: current.add(amount)
+        amount: current.add(amount),
+        blockNum
       };
       this.eventEmitter.emit(UPDATED, {
         ...this.channelStatus[channelId],
-        channelId
+        channelId,
+        blockNum
       });
     }
   }
 
   public async getChainInfo(channelId: string): Promise<ChannelChainInfo> {
     const {amount, channelStorage} = this.channelStatus[channelId] || {};
+    const blockNum = 4;
     return {
       channelStorage: channelStorage || {
         turnNumRecord: Zero,
         finalizesAt: Zero
       },
-      amount: amount || Zero
+      amount: amount || Zero,
+      blockNum
     };
   }
 
   public chainUpdatedFeed(channelId: string): Observable<ChannelChainInfo> {
     const first = from(this.getChainInfo(channelId));
 
+    const blockNum = 4;
     const updates = fromEvent(this.eventEmitter, UPDATED).pipe(
       filter((event: Updated) => event.channelId === channelId),
-      map(({amount, channelStorage}) => ({amount, channelStorage}))
+      map(({amount, channelStorage}) => ({amount, channelStorage, blockNum}))
     );
 
     return merge(first, updates);
@@ -217,22 +229,16 @@ export class FakeChain implements Chain {
 }
 
 export class ChainWatcher implements Chain {
-  private _adjudicator?: ethers.Contract;
-  private _assetHolders: ethers.Contract[];
+  private _adjudicator?: Contract;
+  private _assetHolders: Contract[];
 
   public async initialize() {
     const provider = getProvider();
     const signer = provider.getSigner();
 
-    this._assetHolders = [
-      new ethers.Contract(ETH_ASSET_HOLDER_ADDRESS, EthAssetHolderInterface, signer)
-    ]; // TODO allow for other asset holders, for now we use slot 0 only
+    this._assetHolders = [new Contract(ETH_ASSET_HOLDER_ADDRESS, EthAssetHolderInterface, signer)]; // TODO allow for other asset holders, for now we use slot 0 only
 
-    this._adjudicator = new ethers.Contract(
-      NITRO_ADJUDICATOR_ADDRESS,
-      NitroAdjudicatorInterface,
-      signer
-    );
+    this._adjudicator = new Contract(NITRO_ADJUDICATOR_ADDRESS, NitroAdjudicatorInterface, signer);
   }
 
   public async getBlockNumber() {
@@ -288,7 +294,11 @@ export class ChainWatcher implements Chain {
     await response.wait();
   }
 
-  public async deposit(channelId: string, expectedHeld: string, amount: string): Promise<void> {
+  public async deposit(
+    channelId: string,
+    expectedHeld: string,
+    amount: string
+  ): Promise<string | undefined> {
     const provider = getProvider();
     const signer = provider.getSigner();
     const transactionRequest = {
@@ -297,33 +307,38 @@ export class ChainWatcher implements Chain {
       value: amount
     };
     const response = await signer.sendTransaction(transactionRequest);
-    await response.wait();
+    const transaction = await response.wait();
+    return transaction.transactionHash;
   }
 
   public async getChainInfo(channelId: string): Promise<ChannelChainInfo> {
     const provider = getProvider();
-    const ethAssetHolder = new ethers.Contract(
+    const ethAssetHolder = new Contract(
       ETH_ASSET_HOLDER_ADDRESS,
       EthAssetHolderInterface,
       provider
     );
 
-    const nitroAdjudicator = new ethers.Contract(
+    const nitroAdjudicator = new Contract(
       NITRO_ADJUDICATOR_ADDRESS,
       NitroAdjudicatorInterface,
       provider
     );
 
-    const amount: ethers.utils.BigNumber = await ethAssetHolder.holdings(channelId);
+    const amount: BigNumber = await ethAssetHolder.holdings(channelId);
 
     const [turnNumRecord, finalizesAt] = await nitroAdjudicator.getData(channelId);
 
+    const blockNum = await provider.getBlockNumber();
+
+    // TODO: Fetch other info
     return {
       amount,
       channelStorage: {
         turnNumRecord,
         finalizesAt
-      }
+      },
+      blockNum
     };
   }
 
@@ -345,7 +360,8 @@ export class ChainWatcher implements Chain {
         channelStorage: {
           turnNumRecord: Zero,
           finalizesAt: Zero
-        }
+        },
+        blockNum: 4
       }))
     );
 

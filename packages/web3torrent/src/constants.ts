@@ -3,13 +3,18 @@ import {ChannelState} from './clients/payment-channel-client';
 import {bigNumberify} from 'ethers/utils';
 
 export const WEI_PER_BYTE = bigNumberify(1); // cost per byte
-export const BUFFER_REFILL_RATE = bigNumberify(2e4); // number of bytes the leecher wishes to increase the buffer by
+export const BLOCK_LENGTH = 1 << 14; // Standard request length.
+export const PEER_TRUST = 4; //amount of trust between peers. It's equivalent to the amount of request to pre-pay.
+// The recomended value is 5 ( the size of the queue of requests made by the leecher to the seeder)
+
+export const BUFFER_REFILL_RATE = bigNumberify(WEI_PER_BYTE.mul(BLOCK_LENGTH * PEER_TRUST));
+// number of requests the leecher wishes to increase the buffer by
 // These variables control the amount of (micro)trust the leecher must invest in the seeder
 // As well as the overall performance hit of integrating payments into webtorrent.
 // A high BUFFER_REFILL_RATE increases the need for trust, but decreases the number of additional messages and therefore latency
 // It can also cause a payment to go above the leecher's balance / capabilities
+
 export const INITIAL_SEEDER_BALANCE = bigNumberify(0); // needs to be zero so that depositing works correctly (unidirectional payment channel)
-export const INITIAL_LEECHER_BALANCE = bigNumberify(BUFFER_REFILL_RATE.mul(100)); // e.g. gwei = 1e9 = nano-ETH
 
 // firebase setup
 export const HUB = {
@@ -17,7 +22,7 @@ export const HUB = {
   outcomeAddress: '0xaaaa84838319627Fa056fC3FC29ab94d479B8502',
   participantId: 'firebase:simple-hub'
 };
-export const FIREBASE_PREFIX = 'web3t';
+export const FIREBASE_PREFIX = process.env.FIREBASE_PREFIX;
 export const fireBaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
   authDomain: `${process.env.REACT_APP_FIREBASE_PROJECT}.firebaseapp.com`,
@@ -59,36 +64,23 @@ export const EmptyTorrent = ({
   wires: []
 } as unknown) as Torrent;
 
-// Mocked Constants
-export const mockTorrents: Array<Partial<Torrent>> = [
+// Pre Seeded Constants (by StateChannels team)
+export const preSeededTorrents: Array<Partial<Torrent>> = [
   {
-    name: 'Sintel',
-    length: 129302391,
-    numSeeds: 47,
-    numPeers: 12,
-    files: [],
+    name: 'Sintel.mp4',
+    length: 129241752,
+    infoHash: 'c53da4fa28aa2edc1faa91861cce38527414d874',
     magnetURI:
-      'magnet:?xt=urn:btih:08ada5a7a6183aae1e09d831df6748d566095a10&dn=Sintel&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&ws=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2F&xs=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2Fsintel.torrent'
-  },
-  {
-    name: 'Big Buck Bunny',
-    length: 276445467,
-    numSeeds: 8,
-    numPeers: 6,
-    files: [],
-    magnetURI:
-      'magnet:?xt=urn:btih:dd8255ecdc7ca55fb0bbf81323d87062db1f6d1c&dn=Big+Buck+Bunny&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&ws=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2F&xs=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2Fbig-buck-bunny.torrent'
-  },
-  {
-    name: 'Cosmos Laundromat',
-    length: 220864086,
-    numSeeds: 10,
-    numPeers: 6,
-    files: [],
-    magnetURI:
-      'magnet:?xt=urn:btih:c9e15763f722f23e98a29decdfae341b98d53056&dn=Cosmos+Laundromat&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&ws=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2F&xs=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2Fcosmos-laundromat.torrent'
+      'magnet:?xt=urn%3Abtih%3Ac53da4fa28aa2edc1faa91861cce38527414d874&dn=Sintel.mp4&xl=129241752'
   }
 ];
+
+export const testTorrent = {
+  name: 'Big Buck Bunny',
+  length: 276445467,
+  magnetURI:
+    'magnet:?xt=urn:btih:dd8255ecdc7ca55fb0bbf81323d87062db1f6d1c&dn=Big+Buck+Bunny&xl=276445467'
+};
 
 export const mockCurrentUser = '0x8fd00f170fdf3772c5ebdcd90bf257316c69ba45';
 const mockBalance = 200000000000000;

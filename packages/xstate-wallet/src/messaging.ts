@@ -19,19 +19,17 @@ import {
   ChallengeChannelRequest
 } from '@statechannels/client-api-schema';
 
-import * as jrs from 'jsonrpc-lite';
-
 import {fromEvent, Observable} from 'rxjs';
 import {ChannelStoreEntry} from './store/channel-store-entry';
 import {validateMessage} from '@statechannels/wire-format';
-import {unreachable} from './utils';
+import {unreachable, isSimpleEthAllocation, makeDestination} from './utils';
 import {isAllocation, Message, SiteBudget, Participant} from './store/types';
 import {serializeAllocation, serializeSiteBudget} from './serde/app-messages/serialize';
 import {deserializeMessage} from './serde/wire-format/deserialize';
 import {serializeMessage} from './serde/wire-format/serialize';
 import {AppRequestEvent} from './event-types';
 import {deserializeAllocations, deserializeBudgetRequest} from './serde/app-messages/deserialize';
-import {isSimpleEthAllocation, makeDestination} from './utils/outcome';
+
 import {bigNumberify} from 'ethers/utils';
 import {CHALLENGE_DURATION, NETWORK_ID, WALLET_VERSION} from './constants';
 import {Store} from './store';
@@ -65,6 +63,7 @@ export interface MessagingServiceInterface {
     notificationData: ChannelResult
   );
   sendMessageNotification(message: Message): Promise<void>;
+  sendDisplayMessage(displayMessage: 'Show' | 'Hide');
   sendResponse(id: number, result: Response['result']): Promise<void>;
   sendError(id: number, error: ErrorResponse['error']): Promise<void>;
 }
@@ -95,11 +94,11 @@ export class MessagingService implements MessagingServiceInterface {
   }
 
   public async sendBudgetNotification(notificationData: SiteBudget) {
-    const notification = {
+    const notification: Notification = {
       jsonrpc: '2.0',
       method: 'BudgetUpdated',
       params: serializeSiteBudget(notificationData)
-    } as Notification; // typescript can't handle this otherwise
+    };
     this.eventEmitter.emit('SendMessage', notification);
   }
 
@@ -132,6 +131,16 @@ export class MessagingService implements MessagingServiceInterface {
       };
       this.eventEmitter.emit('SendMessage', notification);
     });
+  }
+
+  public sendDisplayMessage(displayMessage: 'Show' | 'Hide') {
+    const showWallet = displayMessage === 'Show';
+    const notification: Notification = {
+      jsonrpc: '2.0',
+      method: 'UIUpdate',
+      params: {showWallet}
+    };
+    this.eventEmitter.emit('SendMessage', notification);
   }
 
   public async receiveRequest(jsonRpcRequest: Request, fromDomain: string) {
@@ -225,13 +234,6 @@ export async function convertToChannelResult(
     turnNum: turnNum.toHexString(),
     channelId
   };
-}
-
-// TODO: Should be handled by messaging service?
-export function sendDisplayMessage(displayMessage: 'Show' | 'Hide') {
-  const showWallet = displayMessage === 'Show';
-  const message = jrs.notification('UIUpdate', {showWallet});
-  window.parent.postMessage(message, '*');
 }
 
 export function convertToInternalParticipant(participant: {

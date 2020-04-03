@@ -39,7 +39,7 @@ export const connectToStore: <T>(config: Config<T>, options: Options) => Machine
 Since machines typically  don't have sync access to a store, we invoke a promise to get the
 desired outcome; that outcome can then be forwarded to the invoked service.
 */
-export function getDataAndInvoke<T>(
+export function getDataAndInvoke2<T>(
   data: string,
   src: string,
   onDone?: string,

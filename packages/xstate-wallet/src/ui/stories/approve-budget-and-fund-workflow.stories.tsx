@@ -1,8 +1,4 @@
-import {
-  approveBudgetAndFundWorkflow,
-  config,
-  WorkflowContext
-} from '../../workflows/approve-budget-and-fund';
+import {machine as approveBudgetAndFundWorkflow} from '../../workflows/approve-budget-and-fund';
 export default {title: 'X-state wallet'};
 import {storiesOf} from '@storybook/react';
 import {interpret} from 'xstate';
@@ -13,7 +9,7 @@ import {ApproveBudgetAndFund} from '../approve-budget-and-fund-workflow';
 import {SiteBudget, Participant} from '../../store/types';
 import {MessagingServiceInterface, MessagingService} from '../../messaging';
 import {XstateStore} from '../../store';
-import {ethBudget} from '../../utils/budget-utils';
+import {ethBudget} from '../../utils';
 
 const store = new XstateStore();
 
@@ -33,21 +29,17 @@ const hub: Participant = {
   signingAddress: '0xb',
   destination: '0xbd' as any
 };
-const testContext: WorkflowContext = {
+const testContext = {
   budget,
   requestId: 55,
   player: alice,
   hub
 };
+const workflow = approveBudgetAndFundWorkflow(store, messagingService, testContext);
 
-if (config.states) {
-  Object.keys(config.states).forEach(state => {
-    const machine = interpret<any, any, any>(
-      approveBudgetAndFundWorkflow(store, messagingService, testContext).withContext(testContext),
-      {
-        devTools: true
-      }
-    ); // start a new interpreted machine for each story
+if (workflow.states) {
+  Object.keys(workflow.states).forEach(state => {
+    const machine = interpret(workflow, {devTools: true}); // start a new interpreted machine for each story
     machine.onEvent(event => console.log(event.type)).start(state);
     storiesOf('Workflows / Approve Budget And Fund', module).add(
       state.toString(),

@@ -30,7 +30,9 @@ type MockTorrentInfo = {
 const mockTorrentInfo = (torrentProps?: Partial<Torrent>): MockTorrentInfo => {
   const torrent = createMockTorrent(torrentProps);
   const peers = createMockTorrentPeers();
-  const torrentInfoWrapper = mount(<TorrentInfo torrent={torrent as Torrent} peers={peers} />);
+  const torrentInfoWrapper = mount(
+    <TorrentInfo torrent={torrent as Torrent} channelCache={{}} mySigningAddress="0x0" />
+  );
 
   return {
     torrentInfoWrapper,

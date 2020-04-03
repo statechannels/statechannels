@@ -14,7 +14,7 @@ import {SupportState} from '.';
 import {Store} from '../store';
 import {outcomesEqual} from '../store/state-utils';
 import {Participant, Objective, CloseLedger} from '../store/types';
-import {MessagingServiceInterface, sendDisplayMessage} from '../messaging';
+import {MessagingServiceInterface} from '../messaging';
 
 type WorkflowEvent = UserApproves | UserRejects | DoneInvokeEvent<CloseLedger>;
 interface UserApproves {
@@ -139,10 +139,10 @@ const options = (
   actions: {
     clearBudget: clearBudget(store),
     displayUi: () => {
-      sendDisplayMessage('Show');
+      messagingService.sendDisplayMessage('Show');
     },
     hideUi: () => {
-      sendDisplayMessage('Hide');
+      messagingService.sendDisplayMessage('Hide');
     },
     sendResponse: async context =>
       await messagingService.sendResponse(context.requestId, {success: true}),

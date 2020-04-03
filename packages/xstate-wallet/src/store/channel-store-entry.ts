@@ -159,7 +159,10 @@ export class ChannelStoreEntry {
   }
 
   addState(stateVars: StateVariables, signature: string) {
-    const state = {...stateVars, ...this.channelConstants};
+    const state = {
+      ...stateVars,
+      ...this.channelConstants
+    };
     const stateHash = hashState(state);
     this.stateVariables[stateHash] = stateVars;
     const {participants} = this.channelConstants;
@@ -177,25 +180,29 @@ export class ChannelStoreEntry {
     signatures[signerIndex] = signature;
     this.signatures[stateHash] = signatures;
 
-    // Garbage collect stale states
-    // TODO: Examine the safety here
-    this.stateVariables = _.transform(this.stateVariables, (result, stateVars, stateHash) => {
-      if (
-        !this.isSupported ||
-        this.inSupport(stateHash) ||
-        stateVars.turnNum.gt(this.supported.turnNum)
-      )
-        result[stateHash] = stateVars;
-    });
+    // TODO: Since the supported state check doesn't work correctly this GC doesn't work
+    // and eats up a lot of CPU. Temporarily disabling
+    // See https://github.com/statechannels/monorepo/issues/1344
+
+    // // Garbage collect stale states
+    // // TODO: Examine the safety here
+    // this.stateVariables = _.transform(this.stateVariables, (result, stateVars, stateHash) => {
+    //   if (
+    //     !this.isSupported ||
+    //     this.inSupport(stateHash) ||
+    //     stateVars.turnNum.gt(this.supported.turnNum)
+    //   )
+    //     result[stateHash] = stateVars;
+    // });
   }
 
-  private inSupport(key): boolean {
-    const supportKeys = this.isSupported
-      ? // TODO get the proper keys
-        [hashState({...this.supported, ...this.channelConstants})]
-      : [];
-    return supportKeys.indexOf(key) !== -1;
-  }
+  // private inSupport(key): boolean {
+  //   const supportKeys = this.isSupported
+  //     ? // TODO get the proper keys
+  //       [hashState({...this.supported, ...this.channelConstants})]
+  //     : [];
+  //   return supportKeys.indexOf(key) !== -1;
+  // }
 
   private nParticipants(): number {
     return this.channelConstants.participants.length;

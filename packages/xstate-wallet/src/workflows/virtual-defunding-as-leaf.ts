@@ -1,7 +1,7 @@
-import {checkThat, getDataAndInvoke} from '../utils';
+import {checkThat, getDataAndInvoke, isSimpleEthAllocation, simpleEthAllocation} from '../utils';
 
 import {SupportState} from '.';
-import {isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
+
 import {OutcomeIdx, ParticipantIdx} from './virtual-funding-as-leaf';
 import {StateNodeConfig, assign, DoneInvokeEvent, Machine} from 'xstate';
 

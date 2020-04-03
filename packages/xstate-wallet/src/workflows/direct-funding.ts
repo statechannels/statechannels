@@ -5,12 +5,16 @@ import {AddressZero, HashZero} from 'ethers/constants';
 
 import * as Depositing from './depositing';
 import * as SupportState from './support-state';
-import {getDataAndInvoke, MachineFactory} from '../utils/workflow-utils';
+import {
+  getDataAndInvoke2,
+  MachineFactory,
+  add,
+  isSimpleEthAllocation,
+  simpleEthAllocation,
+  checkThat
+} from '../utils';
 import {Store} from '../store';
 import {Outcome, SimpleAllocation, AllocationItem, Destination} from '../store/types';
-import {add} from '../utils/math-utils';
-import {isSimpleEthAllocation, simpleEthAllocation} from '../utils/outcome';
-import {checkThat} from '../utils';
 
 const WORKFLOW = 'direct-funding';
 
@@ -54,9 +58,9 @@ export const config: MachineConfig<any, any, any> = {
   initial: 'checkCurrentLevel',
   states: {
     checkCurrentLevel,
-    updatePrefundOutcome: getDataAndInvoke('getPrefundOutcome', 'supportState', 'funding'),
-    funding: getDataAndInvoke('getDepositingInfo', 'fundingService', 'updatePostfundOutcome'),
-    updatePostfundOutcome: getDataAndInvoke('getPostfundOutcome', 'supportState', 'success'),
+    updatePrefundOutcome: getDataAndInvoke2('getPrefundOutcome', 'supportState', 'funding'),
+    funding: getDataAndInvoke2('getDepositingInfo', 'fundingService', 'updatePostfundOutcome'),
+    updatePostfundOutcome: getDataAndInvoke2('getPostfundOutcome', 'supportState', 'success'),
     success: {type: 'final'},
     failure: {type: 'final'}
   }
