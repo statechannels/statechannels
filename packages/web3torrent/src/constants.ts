@@ -22,7 +22,7 @@ export const HUB = {
   outcomeAddress: '0xaaaa84838319627Fa056fC3FC29ab94d479B8502',
   participantId: 'firebase:simple-hub'
 };
-export const FIREBASE_PREFIX = process.env.FIREBASE_PREFIX;
+export const FIREBASE_PREFIX = process.env.REACT_APP_FIREBASE_PREFIX;
 export const fireBaseConfig =
   process.env.NODE_ENV === 'test'
     ? undefined
