@@ -1,54 +1,43 @@
 import React from 'react';
-import {EventData} from 'xstate';
 import './wallet.scss';
-import {WorkflowState} from '../workflows/approve-budget-and-fund';
+import {ApproveBudgetAndFundService} from '../workflows/approve-budget-and-fund';
+import {useService} from '@xstate/react';
+
 import {formatEther} from 'ethers/utils';
-import {Button, Heading, Flex, Text, Table} from 'rimble-ui';
+import {Button, Heading, Flex, Text, Box} from 'rimble-ui';
 import {getAmountsFromBudget} from './selectors';
 
 interface Props {
-  current: WorkflowState;
-  send: (event: any, payload?: EventData | undefined) => WorkflowState;
+  service: ApproveBudgetAndFundService;
 }
 
 export const ApproveBudgetAndFund = (props: Props) => {
-  const current = props.current;
+  const [current, send] = useService(props.service);
   const {budget} = current.context;
   const {playerAmount, hubAmount} = getAmountsFromBudget(budget);
 
   const waitForUserApproval = ({waiting}: {waiting: boolean} = {waiting: false}) => (
-    <Flex alignItems="center" flexDirection="column">
-      <Heading>App Budget</Heading>
-
-      <Text textAlign="center">
+    <Flex alignItems="left" flexDirection="column">
+      <Heading textAlign="center">App Budget</Heading>
+      <Text>
         The app <strong>{budget.domain}</strong> wants to manage some of your funds in a state
         channel. It wants to be able to:
       </Text>
 
-      <Table>
-        <thead>
-          <tr>
-            <th>Send</th>
-            <th>Receive</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>{formatEther(playerAmount)} ETH</td>
-            <td>{formatEther(hubAmount)} ETH</td>
-          </tr>
-        </tbody>
-      </Table>
-
+      <Flex justifyContent="center">
+        <Box>
+          <Text>Send: {formatEther(playerAmount)} ETH</Text>
+          <Text>Receive: {formatEther(hubAmount)} ETH</Text>
+        </Box>
+      </Flex>
       <Text>on your behalf.</Text>
-
-      <Text textAlign="center" pb={3}>
+      <Text pb={3}>
         To enable this, you will need to make a deposit of {formatEther(playerAmount)} ETH.
       </Text>
-      <Button disabled={waiting} onClick={() => props.send('USER_APPROVES_BUDGET')}>
+      <Button disabled={waiting} onClick={() => send('USER_APPROVES_BUDGET')}>
         Approve budget
       </Button>
-      <Button.Text onClick={() => props.send('USER_REJECTS_BUDGET')}>Cancel</Button.Text>
+      <Button.Text onClick={() => send('USER_REJECTS_BUDGET')}>Cancel</Button.Text>
     </Flex>
   );
 
@@ -60,14 +49,23 @@ export const ApproveBudgetAndFund = (props: Props) => {
     </Flex>
   );
 
-  switch (current.value.toString()) {
-    case 'waitForUserApproval':
-      return waitForUserApproval();
-    case 'createLedgerStartState':
-      return waitForUserApproval({waiting: true});
-    case 'waitForPreFS':
-      return waitForPreFS;
-    default:
-      return <div>todo</div>;
+  if (current.matches('waitForUserApproval')) {
+    return waitForUserApproval();
+  } else if (current.matches('createBudgetAndLedger')) {
+    return waitForUserApproval({waiting: true});
+  } else if (current.matches('waitForPreFS')) {
+    return waitForPreFS;
+  } else if (current.matches({deposit: 'init'})) {
+    return <div>{current.context.depositAt.toString()}</div>;
+  } else if (current.matches({deposit: 'submitTransaction'})) {
+    return <div>{current.context.depositAt.toString()}</div>;
+  } else if (current.matches({deposit: 'waitMining'})) {
+    return <div>{current.context.depositAt.toString()}</div>;
+  } else if (current.matches({deposit: 'retry'})) {
+    return <div>{current.context.depositAt.toString()}</div>;
+  } else if (current.matches({deposit: 'waitFullyFunded'})) {
+    return <div>{current.context.depositAt.toString()}</div>;
+  } else {
+    return <div>Todo</div>;
   }
 };
