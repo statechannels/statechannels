@@ -4,7 +4,7 @@ import {bigNumberify, hexZeroPad} from 'ethers/utils';
 import waitForExpect from 'wait-for-expect';
 import {simpleEthAllocation} from '../utils';
 import {State, SignedState} from '../store/types';
-import {signState} from '../store/state-utils';
+import {createSignatureEntry} from '../store/state-utils';
 import {CHALLENGE_DURATION, NETWORK_ID} from '../constants';
 import {AddressZero} from 'ethers/constants';
 jest.setTimeout(30000);
@@ -48,7 +48,7 @@ test('concludes on their turn', async () => {
 
   const allSignState: SignedState = {
     ...state,
-    signatures: [playerA, playerB].map(({privateKey}) => signState(state, privateKey))
+    signatures: [playerA, playerB].map(({privateKey}) => createSignatureEntry(state, privateKey))
   };
 
   const {channelId} = await playerB.store.createEntry(allSignState);
