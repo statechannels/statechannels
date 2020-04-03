@@ -1,6 +1,6 @@
-import {BigNumber} from 'ethers/utils';
+import {BigNumber, bigNumberify} from 'ethers/utils';
 import {ChannelStoreEntry} from './channel-store-entry';
-import {Objective, DBBackend, SiteBudget, ChannelStoredData} from './types';
+import {Objective, DBBackend, SiteBudget, ChannelStoredData, AssetBudget} from './types';
 import * as _ from 'lodash';
 
 enum ObjectStores {
@@ -105,9 +105,21 @@ export class IndexedDBBackend implements DBBackend {
   }
 
   // Individual Getters
-  public async getBudget(key: string) {
-    return this.get(ObjectStores.budgets, key);
+  public async getBudget(key: string): Promise<SiteBudget> {
+    const budget: SiteBudget = await this.get(ObjectStores.budgets, key);
+    if (!budget) throw Error('Budget not persisted');
+
+    return {
+      ...budget,
+      forAsset: _.mapValues(budget.forAsset, (assetBudget: AssetBudget) => ({
+        assetHolderAddress: assetBudget.assetHolderAddress,
+        availableReceiveCapacity: bigNumberify(assetBudget.availableReceiveCapacity),
+        availableSendCapacity: bigNumberify(assetBudget.availableSendCapacity),
+        channels: assetBudget.channels
+      }))
+    };
   }
+
   public async setBudget(key: string, value: SiteBudget) {
     return this.put(ObjectStores.budgets, value, key);
   }
