@@ -49,7 +49,7 @@ export type StateValue = keyof Schema['states'];
  * in our store.
  */
 async function determineChallengeStatus(
-  {channelId}: Initial,
+  channelId: string,
   store: Store,
   chainInfo: ChannelChainInfo
 ): Promise<ChainObservation> {
@@ -80,10 +80,10 @@ async function determineChallengeStatus(
   }
 }
 
-const subscribeChainUpdatedFeed = (store: Store) => (ctx: Initial) =>
+const subscribeChainUpdatedFeed = (store: Store, channelId: string) =>
   store.chain
-    .chainUpdatedFeed(ctx.channelId)
-    .pipe(flatMap(determineChallengeStatus.bind(null, ctx, store)));
+    .chainUpdatedFeed(channelId)
+    .pipe(flatMap(determineChallengeStatus.bind(null, channelId, store)));
 
 const submitChallengeTransaction = (store: Store) => async ({channelId}: Initial) => {
   const {support, myAddress} = await store.getEntry(channelId);
@@ -93,7 +93,7 @@ const submitChallengeTransaction = (store: Store) => async ({channelId}: Initial
 
 const assignChannelStorageWatcher = (store: Store) =>
   assign<Context>({
-    channelStorageWatcher: ctx => spawn(subscribeChainUpdatedFeed(store)(ctx))
+    channelStorageWatcher: ({channelId}) => spawn(subscribeChainUpdatedFeed(store, channelId))
   });
 
 export const machine = (
