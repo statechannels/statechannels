@@ -86,18 +86,9 @@ it('initializes and starts challenge thing', async () => {
 it('finalized when timeout ends', async () => {
   const service = interpret(challengeMachine(store, {channelId})).start();
 
-  await waitForExpect(async () => {
-    expect(service.state.value).toEqual('waitForResponseOrTimeout');
-    const {
-      channelStorage: {finalizesAt, turnNumRecord}
-    } = await fakeChain.getChainInfo(channelId);
-    expect(finalizesAt).toStrictEqual(state.challengeDuration.add(1));
-    expect(turnNumRecord).toStrictEqual(state.turnNum);
-  }, 10000);
-
   fakeChain.setBlockNumber(301); // NOTE: CHALLENGE_DURATION is 300
 
   await waitForExpect(async () => {
     expect(service.state.value).toEqual('done');
-  }, 10000);
+  }, 15_000);
 });

@@ -1,40 +1,46 @@
-import {spawn, assign, StateSchema, State, createMachine, StateMachine, Actor} from 'xstate';
-import {flatMap} from 'rxjs/operators';
+import {
+  assign,
+  createMachine,
+  DoneInvokeEvent,
+  State,
+  StateMachine,
+  StateSchema,
+  Guard,
+  spawn
+} from 'xstate';
+import {map} from 'rxjs/operators';
+import {Zero} from 'ethers/constants';
+import {BigNumber} from 'ethers/utils';
 
 import {Store} from '../store';
-import {ChannelChainInfo} from '../chain';
-import {Zero} from 'ethers/constants';
 
 export interface Initial {
   channelId: string;
-  error?: any;
 }
 
-interface ChannelStorageWatcherEnabled extends Initial {
-  channelStorageWatcher: Actor;
+interface Transaction {
+  transactionId: string;
 }
 
 type Typestate =
-  | {value: 'idle'; context: Initial | ChannelStorageWatcherEnabled}
-  | {value: 'waitForResponseOrTimeout'; context: ChannelStorageWatcherEnabled}
-  | {value: 'submit'; context: ChannelStorageWatcherEnabled}
-  | {value: 'done'; context: ChannelStorageWatcherEnabled}
-  | {value: 'failure'; context: ChannelStorageWatcherEnabled};
+  | {value: 'init'; context: Initial}
+  | {value: 'waitForResponseOrTimeout'; context: Initial & Transaction}
+  | {value: 'submitTransaction'; context: Initial}
+  | {value: 'retry'; context: Initial & Transaction}
+  | {value: 'waitMining'; context: Initial & Transaction}
+  | {value: 'done'; context: Initial}
+  | {value: 'failure'; context: Initial};
 
 type Context = Typestate['context'];
 
-type ChainObservation =
-  | 'CHALLENGE_IS_ONCHAIN_WITH_CORRECT_TURN_NUM_RECORD'
-  | 'SOME_OTHER_CHALLENGE_ALREADY_EXISTS'
-  | 'NO_CHALLENGE_EXISTS_ONCHAIN'
-  | 'TIMEOUT_PASSED_FOR_ONCHAIN_CHALLENGE';
-
 interface Schema extends StateSchema<Context> {
   states: {
-    idle: {};
+    init: {};
     waitForResponseOrTimeout: {};
-    submit: {};
+    submitTransaction: {};
+    retry: {};
     done: {};
+    waitMining: {};
     failure: {};
   };
 }
@@ -43,58 +49,57 @@ export type WorkflowState = State<Context, Event, Schema, Typestate>;
 
 export type StateValue = keyof Schema['states'];
 
-/**
- * Helper method for determining what the chain's latest state represents with
- * regards to a particular channelId and our local representation of that channel
- * in our store.
- */
-async function determineChallengeStatus(
-  channelId: string,
-  store: Store,
-  chainInfo: ChannelChainInfo
-): Promise<ChainObservation> {
-  const {
-    channelStorage: {turnNumRecord, finalizesAt}
-  } = chainInfo;
-  const currentBlock = await store.chain.getBlockNumber();
-  const {
-    latestState: {turnNum}
-  } = await store.getEntry(channelId);
-
-  // TODO: I think it is possible that the chain is UPDATED
-  // _after_ challenge tx is sent to network but before the
-  // Initial event is observed, which would cause
-  // this machine to send tx twice. If e.g., a new deposit
-  // occured for some reason.
-  if (finalizesAt.lte(Zero)) {
-    return 'NO_CHALLENGE_EXISTS_ONCHAIN';
-  } else if (finalizesAt.gt(currentBlock)) {
-    if (!turnNumRecord.eq(turnNum)) {
-      return 'SOME_OTHER_CHALLENGE_ALREADY_EXISTS';
-    } else {
-      // NOTE: For extra safety we could check the fingerprint
-      return 'CHALLENGE_IS_ONCHAIN_WITH_CORRECT_TURN_NUM_RECORD';
-    }
-  } else {
-    return 'TIMEOUT_PASSED_FOR_ONCHAIN_CHALLENGE';
-  }
+interface ChainEvent {
+  type: 'CHAIN_EVENT';
+  turnNumRecord: BigNumber;
+  finalizesAt: BigNumber;
+  finalized: boolean;
 }
 
-const subscribeChainUpdatedFeed = (store: Store, channelId: string) =>
-  store.chain
-    .chainUpdatedFeed(channelId)
-    .pipe(flatMap(determineChallengeStatus.bind(null, channelId, store)));
+const noChallengeOnchain: Guard<Initial, ChainEvent> = {
+  type: 'xstate.guard',
+  name: 'noChallengeOnchain',
+  predicate: (context, {finalizesAt}) => finalizesAt.lte(Zero)
+};
+
+// const someOtherChallengeOnchain: Guard<Initial, ChainEvent> = {
+//   type: 'xstate.guard',
+//   name: 'myTurnNow',
+//   predicate: (context, event) => false // TODO: Add challenge state to context
+// };
+
+const challengeOnchainAsExpected: Guard<Initial, ChainEvent> = {
+  type: 'xstate.guard',
+  name: 'challengeOnchainAsExpected',
+  predicate: (context, {finalizesAt, finalized}) => finalizesAt.gt(0) && !finalized
+};
+
+const channelFinalized: Guard<Initial, ChainEvent> = {
+  type: 'xstate.guard',
+  name: 'channelFinalized',
+  predicate: (context, {finalized}) => finalized === true
+};
 
 const submitChallengeTransaction = (store: Store) => async ({channelId}: Initial) => {
   const {support, myAddress} = await store.getEntry(channelId);
   const privateKey = await store.getPrivateKey(myAddress);
-  await store.chain.challenge(support, privateKey);
+  return await store.chain.challenge(support, privateKey);
 };
 
-const assignChannelStorageWatcher = (store: Store) =>
-  assign<Context>({
-    channelStorageWatcher: ({channelId}) => spawn(subscribeChainUpdatedFeed(store, channelId))
-  });
+const observeOnChainChannelStorage = (store: Store, channelId: string) =>
+  store.chain.chainUpdatedFeed(channelId).pipe(
+    map(
+      (chainInfo): ChainEvent => ({
+        type: 'CHAIN_EVENT',
+        finalized: chainInfo.finalized,
+        ...chainInfo.channelStorage
+      })
+    )
+  );
+
+const setTransactionId = assign<Context, DoneInvokeEvent<string>>({
+  transactionId: (context, event) => event.data
+});
 
 export const machine = (
   store: Store,
@@ -102,49 +107,64 @@ export const machine = (
 ): StateMachine<Context, Schema, Event, Typestate> =>
   createMachine<Context, Event, Typestate>({
     context,
+
+    strict: true,
     id: 'challenge-channel',
-    initial: 'idle',
-    entry: assignChannelStorageWatcher(store),
+    initial: 'init',
 
     on: {
-      CHALLENGE_DEALT_WITH: {
-        target: 'done'
-      }
+      CHAIN_EVENT: [
+        {
+          target: 'waitForResponseOrTimeout',
+          cond: challengeOnchainAsExpected
+        },
+        {
+          target: 'done',
+          cond: channelFinalized
+        }
+      ]
+      // TODO: Handle responses...
+      // RESPONSE_OBSERVED: {
+      //   target: 'done'
+      // }
     },
 
     states: {
-      idle: {
+      init: {
+        // TODO: Figure out how to make invoke work at root-level here. Seems to cause
+        // an infinite loop if entry is on the root-level of the machine.
+        entry: assign<any>({
+          chainWatcher: ({channelId}) => spawn(observeOnChainChannelStorage(store, channelId))
+        }),
+
         on: {
-          NO_CHALLENGE_EXISTS_ONCHAIN: {
-            target: 'submit'
-          },
-          CHALLENGE_IS_ONCHAIN_WITH_CORRECT_TURN_NUM_RECORD: {
-            target: 'waitForResponseOrTimeout'
+          CHAIN_EVENT: {
+            target: 'submitTransaction',
+            cond: noChallengeOnchain
           }
         }
       },
 
-      waitForResponseOrTimeout: {
-        on: {
-          TIMEOUT_PASSED_FOR_ONCHAIN_CHALLENGE: {
-            target: 'done'
-          }
-          // TODO: Handle responses...
-          // RESPONSE_OBSERVED: {
-          //   target: 'done'
-          // }
-        }
-      },
+      waitForResponseOrTimeout: {},
 
-      submit: {
+      submitTransaction: {
         invoke: {
+          id: 'submitTransaction',
           src: submitChallengeTransaction(store),
           onDone: {
-            target: 'idle'
-          },
-          onError: {
-            target: 'failure'
+            target: 'waitMining',
+            actions: setTransactionId
           }
+          // onError: {target: 'retry'}
+        }
+      },
+
+      waitMining: {},
+
+      retry: {
+        on: {
+          USER_APPROVES_RETRY: {target: 'submitTransaction'},
+          USER_REJECTS_RETRY: {target: 'failure'}
         }
       },
 
@@ -155,8 +175,7 @@ export const machine = (
 
       failure: {
         id: 'failure',
-        type: 'final',
-        entry: assign<Context>({error: 'Challenge failed'})
+        type: 'final'
       }
     }
   });

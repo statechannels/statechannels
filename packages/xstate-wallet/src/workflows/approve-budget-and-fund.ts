@@ -22,7 +22,7 @@ import {statesEqual} from '../store/state-utils';
 
 interface ChainEvent {
   type: 'CHAIN_EVENT';
-  blockNum: number;
+  blockNum: BigNumber;
   balance: BigNumber;
 }
 
@@ -51,8 +51,8 @@ interface Deposit {
 
 interface Chain {
   ledgerTotal: BigNumber;
-  lastChangeBlockNum: number;
-  currentBlockNum: number;
+  lastChangeBlockNum: BigNumber;
+  currentBlockNum: BigNumber;
 }
 
 interface Transaction {
@@ -301,11 +301,13 @@ const notifyWhenPreFSSupported = (store: Store) => ({ledgerState, ledgerId}: Led
 
 const observeLedgerOnChainBalance = (store: Store) => ({ledgerId}: LedgerExists) =>
   store.chain.chainUpdatedFeed(ledgerId).pipe(
-    map(chainInfo => ({
-      type: 'CHAIN_EVENT',
-      balance: chainInfo.amount,
-      blockNum: chainInfo.blockNum
-    }))
+    map(
+      (chainInfo): ChainEvent => ({
+        type: 'CHAIN_EVENT',
+        balance: chainInfo.amount,
+        blockNum: chainInfo.blockNum
+      })
+    )
   );
 
 // // for now don't wait for any number of blocks (until the chain is reporting blockNum)

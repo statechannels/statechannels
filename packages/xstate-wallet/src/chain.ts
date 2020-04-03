@@ -32,7 +32,8 @@ export interface ChannelChainInfo {
     finalizesAt: BigNumber;
     /* fingerprint: string */
   };
-  readonly blockNum: number; // blockNum that the information is from
+  readonly finalized: boolean; // this is a check on 0 < finalizesAt <= now
+  readonly blockNum: BigNumber; // blockNum that the information is from
 }
 
 export interface Chain {
@@ -51,7 +52,7 @@ export interface Chain {
   // Chain Methods
   getBlockNumber: () => Promise<BigNumber>;
   deposit: (channelId: string, expectedHeld: string, amount: string) => Promise<string | undefined>;
-  challenge: (support: SignedState[], privateKey: string) => Promise<void>;
+  challenge: (support: SignedState[], privateKey: string) => Promise<string | undefined>;
   finalizeAndWithdraw: (finalizationProof: SignedState[]) => Promise<void>;
   getChainInfo: (channelId: string) => Promise<ChannelChainInfo>;
 }
@@ -98,6 +99,7 @@ export class FakeChain implements Chain {
         channelStorage: {finalizesAt}
       } = this.channelStatus[channelId];
       if (finalizesAt.gt(0) && finalizesAt.lte(blockNumber)) {
+        this.channelStatus[channelId] = {...this.channelStatus[channelId], finalized: true};
         this.eventEmitter.emit(UPDATED, {channelId, ...this.channelStatus[channelId]});
       }
     }
@@ -108,7 +110,7 @@ export class FakeChain implements Chain {
     return 'fake-transaction-id';
   }
 
-  public async challenge(support: SignedState[], privateKey: string): Promise<void> {
+  public async challenge(support: SignedState[], privateKey: string): Promise<string> {
     const channelId = calculateChannelId(support[0]);
 
     const {turnNum, challengeDuration} = support[support.length - 1];
@@ -118,7 +120,8 @@ export class FakeChain implements Chain {
       channelStorage: {
         turnNumRecord: turnNum,
         finalizesAt: this.blockNumber.add(challengeDuration)
-      }
+      },
+      finalized: challengeDuration.eq(0)
     };
 
     this.eventEmitter.emit(UPDATED, {channelId, ...this.channelStatus[channelId]});
@@ -128,6 +131,8 @@ export class FakeChain implements Chain {
       challengeState: support[support.length - 1],
       challengeExpiry: this.blockNumber.add(challengeDuration)
     });
+
+    return 'fake-transaction-id';
   }
 
   public async finalizeAndWithdraw(finalizationProof: SignedState[]): Promise<void> {
@@ -137,15 +142,13 @@ export class FakeChain implements Chain {
     this.channelStatus[channelId] = {
       ...this.channelStatus[channelId],
       amount: Zero,
-      blockNum: 4
+      blockNum: this.blockNumber
     };
-
-    const blockNum = 4;
 
     this.eventEmitter.emit(UPDATED, {
       ...this.channelStatus[channelId],
       channelId,
-      blockNum
+      blockNum: this.blockNumber
     });
   }
 
@@ -162,41 +165,45 @@ export class FakeChain implements Chain {
   public depositSync(channelId: string, expectedHeld: string, amount: string) {
     const current = (this.channelStatus[channelId] || {}).amount || bigNumberify(0);
 
-    const blockNum = 4;
     if (current.gte(expectedHeld)) {
       this.channelStatus[channelId] = {
         ...this.channelStatus[channelId],
-        amount: current.add(amount),
-        blockNum
+        amount: current.add(amount)
       };
       this.eventEmitter.emit(UPDATED, {
         ...this.channelStatus[channelId],
-        channelId,
-        blockNum
+        channelId
       });
     }
   }
 
   public async getChainInfo(channelId: string): Promise<ChannelChainInfo> {
     const {amount, channelStorage} = this.channelStatus[channelId] || {};
-    const blockNum = 4;
     return {
       channelStorage: channelStorage || {
         turnNumRecord: Zero,
         finalizesAt: Zero
       },
-      amount: amount || Zero,
-      blockNum
+      finalized:
+        channelStorage &&
+        channelStorage.finalizesAt.gt(0) &&
+        channelStorage.finalizesAt.lte(this.blockNumber),
+      blockNum: this.blockNumber,
+      amount: amount || Zero
     };
   }
 
   public chainUpdatedFeed(channelId: string): Observable<ChannelChainInfo> {
     const first = from(this.getChainInfo(channelId));
 
-    const blockNum = 4;
     const updates = fromEvent(this.eventEmitter, UPDATED).pipe(
       filter((event: Updated) => event.channelId === channelId),
-      map(({amount, channelStorage}) => ({amount, channelStorage, blockNum}))
+      map(({amount, channelStorage, finalized, blockNum}) => ({
+        amount,
+        channelStorage,
+        finalized,
+        blockNum
+      }))
     );
 
     return merge(first, updates);
@@ -279,7 +286,7 @@ export class ChainWatcher implements Chain {
     await response.wait();
   }
 
-  public async challenge(support: SignedState[], privateKey: string): Promise<void> {
+  public async challenge(support: SignedState[], privateKey: string): Promise<string | undefined> {
     const provider = getProvider();
     const signer = provider.getSigner();
     const response = await signer.sendTransaction({
@@ -291,7 +298,8 @@ export class ChainWatcher implements Chain {
       ),
       to: NITRO_ADJUDICATOR_ADDRESS
     });
-    await response.wait();
+    const tx = await response.wait();
+    return tx.transactionHash;
   }
 
   public async deposit(
@@ -329,7 +337,7 @@ export class ChainWatcher implements Chain {
 
     const [turnNumRecord, finalizesAt] = await nitroAdjudicator.getData(channelId);
 
-    const blockNum = await provider.getBlockNumber();
+    const blockNum = bigNumberify(await provider.getBlockNumber());
 
     // TODO: Fetch other info
     return {
@@ -338,6 +346,7 @@ export class ChainWatcher implements Chain {
         turnNumRecord,
         finalizesAt
       },
+      finalized: finalizesAt.gt(0) && finalizesAt.lte(blockNum),
       blockNum
     };
   }
@@ -352,17 +361,8 @@ export class ChainWatcher implements Chain {
     const depositEvents = fromEvent(this._assetHolders[0], 'Deposited').pipe(
       // TODO: Type event correctly, use ethers-utils.js
       filter((event: Array<string | BigNumber>) => event[0] === channelId),
-      map((event: Array<string | BigNumber>) => ({
-        amount: bigNumberify(event[2]),
-        // FIXME: These values could be wrong, but it is unlikely since why would a Deposit
-        // get made during a challenge? In any case, if we read the chain here then
-        // we wouldn't even need to bother using the `event` data, so.. to decide
-        channelStorage: {
-          turnNumRecord: Zero,
-          finalizesAt: Zero
-        },
-        blockNum: 4
-      }))
+      // Actually ignores the event data and just polls the chain
+      flatMap(async () => this.getChainInfo.bind(channelId))
     );
 
     // @ts-ignore -- FIXME: ethers events do not have .off for some reason
