@@ -10,7 +10,7 @@ export const web3torrent = new WebTorrentPaidStreamingClient({
   tracker: {announce: defaultTrackers}
 });
 
-export const WebTorrentContext = React.createContext(web3torrent);
+export const Web3TorrentContext = React.createContext(web3torrent);
 
 export const getTorrentPeers = infoHash => web3torrent.peersList[infoHash];
 

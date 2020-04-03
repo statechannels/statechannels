@@ -10,7 +10,7 @@ import Welcome from './pages/welcome/Welcome';
 import File from './pages/file/File';
 import Upload from './pages/upload/Upload';
 import {RoutePath} from './routes';
-import {WebTorrentContext} from './clients/web3torrent-client';
+import {Web3TorrentContext} from './clients/web3torrent-client';
 
 const history = createBrowserHistory();
 class App extends React.Component {
@@ -20,10 +20,10 @@ class App extends React.Component {
     canTorrent: true
   };
 
-  static contextType = WebTorrentContext;
+  static contextType = Web3TorrentContext;
 
   // Adds typing information to this.context
-  context!: React.ContextType<typeof WebTorrentContext>;
+  context!: React.ContextType<typeof Web3TorrentContext>;
 
   async componentDidMount() {
     if ('ethereum' in window) {

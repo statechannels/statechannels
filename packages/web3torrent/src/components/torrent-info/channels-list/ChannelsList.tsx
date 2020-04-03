@@ -3,7 +3,7 @@ import prettier from 'prettier-bytes';
 import React from 'react';
 import {ChannelState} from '../../../clients/payment-channel-client';
 import './ChannelsList.scss';
-import {WebTorrentContext} from '../../../clients/web3torrent-client';
+import {Web3TorrentContext} from '../../../clients/web3torrent-client';
 import {prettyPrintWei, prettyPrintBytes} from '../../../utils/calculateWei';
 import {utils} from 'ethers';
 import {Torrent} from '../../../types';
@@ -16,10 +16,10 @@ export type UploadInfoProps = {
 };
 
 class ChannelsList extends React.Component<UploadInfoProps> {
-  static contextType = WebTorrentContext;
+  static contextType = Web3TorrentContext;
 
   // Adds typing information to this.context
-  context!: React.ContextType<typeof WebTorrentContext>;
+  context!: React.ContextType<typeof Web3TorrentContext>;
 
   channelIdToTableRow(
     channelId: string,

@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {RouteComponentProps, useLocation} from 'react-router-dom';
 
-import {download, getTorrentPeers, WebTorrentContext} from '../../clients/web3torrent-client';
+import {download, getTorrentPeers, Web3TorrentContext} from '../../clients/web3torrent-client';
 import {FormButton} from '../../components/form';
 import {TorrentInfo} from '../../components/torrent-info/TorrentInfo';
 import {SiteBudgetTable} from '../../components/site-budget-table/SiteBudgetTable';
@@ -52,7 +52,7 @@ const File: React.FC<RouteComponentProps & Props> = props => {
       <div className="jumbotron-upload">
         <h1>{torrent.originalSeed ? 'Upload a File' : 'Download a File'}</h1>
       </div>
-      <WebTorrentContext.Consumer>
+      <Web3TorrentContext.Consumer>
         {web3Torrent => {
           const {
             channelCache,
@@ -77,7 +77,7 @@ const File: React.FC<RouteComponentProps & Props> = props => {
             </>
           );
         }}
-      </WebTorrentContext.Consumer>
+      </Web3TorrentContext.Consumer>
       {torrent.status === Status.Idle ? (
         <>
           <FormButton
