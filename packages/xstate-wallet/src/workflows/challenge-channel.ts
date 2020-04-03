@@ -13,7 +13,7 @@ import {Zero} from 'ethers/constants';
 import {BigNumber} from 'ethers/utils';
 
 import {Store} from '../store';
-import {ChannelChainInfo} from 'src/chain';
+import {ChannelChainInfo} from '../chain';
 
 export interface Initial {
   channelId: string;
