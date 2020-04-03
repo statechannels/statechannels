@@ -37,9 +37,13 @@ export const fireBaseConfig =
 export const AUTO_FUND_LEDGER = process.env.REACT_APP_AUTO_FUND_LEDGER;
 
 // Tracker URLs
-const protocol = process.env.REACT_APP_TRACKER_URL_HTTP_PROTOCOL;
+const suffix = process.env.REACT_APP_TRACKER_URL_HTTP_PROTOCOL === 'https' ? 's' : '';
 const url = process.env.REACT_APP_TRACKER_URL;
-export const defaultTrackers = [`${protocol}://${url}/announce`, `udp://${url}`, `ws://${url}`];
+export const defaultTrackers = [
+  `http${suffix}://${url}/announce`,
+  `udp://${url}`,
+  `ws${suffix}://${url}`
+];
 
 // Default Torrent Data
 export const EmptyTorrent = ({
