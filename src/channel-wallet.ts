@@ -5,7 +5,7 @@ import {applicationWorkflow} from './workflows/application';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import {Wallet as WalletUi} from './ui/wallet';
-import {interpret, Interpreter, State, StateNode} from 'xstate';
+import {interpret, Interpreter, State} from 'xstate';
 import {Guid} from 'guid-typescript';
 import {Notification, Response} from '@statechannels/client-api-schema';
 import {filter, take} from 'rxjs/operators';
