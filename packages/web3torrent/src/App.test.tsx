@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
-import {web3torrent, WebTorrentContext} from './clients/web3torrent-client';
+import {web3torrent, Web3TorrentContext} from './clients/web3torrent-client';
 
 // This tests fails with the following error message
 // /Users/georgeknee/statechannels/monorepo/node_modules/webtorrent/lib/torrent.js:232
@@ -29,9 +29,9 @@ it.skip('renders app without crashing', () => {
   const div = document.createElement('div');
 
   ReactDOM.render(
-    <WebTorrentContext.Provider value={web3torrent}>
+    <Web3TorrentContext.Provider value={web3torrent}>
       <App />
-    </WebTorrentContext.Provider>,
+    </Web3TorrentContext.Provider>,
     div
   );
 

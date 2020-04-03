@@ -29,6 +29,23 @@ section.fill {
     color: $c-lessdarkgrey;
   }
 }
+.loading-torrent {
+  padding-top: 30px;
+  padding-bottom: 10px;
+  font-size: 18px;
+  font-weight: 700;
+  color: $c-darkergrey;
+  .spinner {
+    margin-left: 20px;
+  }
+}
+
+.hide {
+  display: none;
+}
+.show {
+  display: flex;
+}
 
 button,
 .subtitle {
