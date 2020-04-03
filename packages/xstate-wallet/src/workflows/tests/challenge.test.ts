@@ -90,5 +90,5 @@ it('finalized when timeout ends', async () => {
 
   await waitForExpect(async () => {
     expect(service.state.value).toEqual('done');
-  }, 15_000);
+  }, 20_000);
 });
