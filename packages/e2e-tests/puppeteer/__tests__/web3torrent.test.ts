@@ -50,6 +50,7 @@ describe('Supports torrenting among peers with channels', () => {
     await waitAndOpenChannel(web3tTabA);
     await waitAndOpenChannel(web3tTabB);
 
+    // Let the download cointinue for some time
     await web3tTabB.waitFor(3000);
     console.log('B cancels download');
     await cancelDownload(web3tTabB);
@@ -57,8 +58,10 @@ describe('Supports torrenting among peers with channels', () => {
     await waitForClosingChannel(web3tTabB);
     await waitForClosingChannel(web3tTabA);
 
+    // Inject some delays. Otherwise puppeteer may read the stale amounts and fails.
     await web3tTabA.waitFor(1500);
     await web3tTabB.waitFor(1500);
+
     console.log('Checking exchanged amount between downloader and uploader...');
     const earnedColumn = await web3tTabA.$('td.earned');
     const earned = await web3tTabA.evaluate(e => e.textContent, earnedColumn);

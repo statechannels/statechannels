@@ -3,7 +3,6 @@ import {Page} from 'puppeteer';
 import * as fs from 'fs';
 
 function prepareUploadFile(path: string): void {
-  // Write deterministic content to the test file.
   const content = 'web3torrent\n'.repeat(100000);
   const buf = Buffer.from(content);
   fs.writeFile(path, buf, err => {
@@ -16,9 +15,9 @@ function prepareUploadFile(path: string): void {
 
 export async function uploadFile(page: Page): Promise<string> {
   await page.waitForSelector('input[type=file]');
-  // Generated from command: openssl rand -out random.txt -base64 $(( 2**20 * 3/4 * 4 ))
-  const fileToUpload = '/tmp/web3torrent-tests-stub';
 
+  // Generate a /tmp file with deterministic data for upload testing
+  const fileToUpload = '/tmp/web3torrent-tests-stub';
   prepareUploadFile(fileToUpload);
 
   // https://pub.dev/documentation/puppeteer/latest/puppeteer/FileChooser-class.html
@@ -30,18 +29,17 @@ export async function uploadFile(page: Page): Promise<string> {
     upload.dispatchEvent(new Event('change', {bubbles: true}));
   });
 
-  await page.waitFor(3000);
-
-  const downloadLink = await page.$eval('#download-link', a => a.getAttribute('href'));
+  const downloadLinkSelector = '#download-link';
+  await page.waitForSelector(downloadLinkSelector);
+  const downloadLink = await page.$eval(downloadLinkSelector, a => a.getAttribute('href'));
 
   return downloadLink ? downloadLink : '';
 }
 
 export async function startDownload(page: Page, url: string): Promise<void> {
   await page.goto(url);
-  const downloadButton = '#download-button';
+  const downloadButton = '#download-button:not([disabled])';
   await page.waitForSelector(downloadButton);
-  await page.waitFor(2000);
   await page.click(downloadButton);
 }
 
