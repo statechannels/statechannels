@@ -122,10 +122,6 @@ export const machine = (
           cond: challengeFinalized
         }
       ]
-      // TODO: Handle responses...
-      // RESPONSE_OBSERVED: {
-      //   target: 'done'
-      // }
     },
 
     states: {
