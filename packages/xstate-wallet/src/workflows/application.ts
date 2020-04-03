@@ -52,6 +52,7 @@ type RequestIdExists = WorkflowContext & {requestId: number};
 interface WorkflowGuards {
   channelOpen: Condition<WorkflowContext, WorkflowEvent>;
   channelClosing: Condition<WorkflowContext, WorkflowEvent>;
+  channelChallenging: Condition<WorkflowContext, WorkflowEvent>;
   channelClosed: Condition<WorkflowContext, WorkflowEvent>;
 }
 
@@ -200,7 +201,10 @@ const generateConfig = (
           target: 'running',
           actions: [actions.updateStoreWithPlayerState, actions.sendUpdateChannelResponse]
         },
-        CHANNEL_UPDATED: [{target: 'closing', cond: guards.channelClosing}],
+        CHANNEL_UPDATED: [
+          {target: 'closing', cond: guards.channelClosing},
+          {target: 'sendChallenge', cond: guards.channelChallenging}
+        ],
         PLAYER_REQUEST_CONCLUDE: {target: 'closing'},
         PLAYER_REQUEST_CHALLENGE: {target: 'sendChallenge'}
       }
@@ -345,8 +349,12 @@ export const applicationWorkflow = (
   const guards: WorkflowGuards = {
     channelOpen: (context: ChannelIdExists, event: ChannelUpdated): boolean =>
       !event.storeEntry.latestSupportedByMe.isFinal,
+
     channelClosing: (context: ChannelIdExists, event: ChannelUpdated): boolean =>
       !!event.storeEntry.latest?.isFinal,
+
+    channelChallenging: (context: ChannelIdExists, event: ChannelUpdated): boolean =>
+      !!event.storeEntry.isChallenging,
 
     channelClosed: (context: ChannelIdExists, event: any): boolean =>
       !!event.storeEntry.supported?.isFinal
@@ -437,6 +445,7 @@ export const applicationWorkflow = (
 const mockGuards: WorkflowGuards = {
   channelOpen: createMockGuard('channelOpen'),
   channelClosing: createMockGuard('channelClosing'),
+  channelChallenging: createMockGuard('channelChallenging'),
   channelClosed: createMockGuard('channelClosed')
 };
 

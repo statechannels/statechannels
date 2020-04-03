@@ -12,24 +12,37 @@ import {BigNumber, bigNumberify} from 'ethers/utils';
 import {Funding} from './store';
 
 export class ChannelStoreEntry {
+  private signatures: Record<string, Array<string | undefined>> = {};
+  private stateVariables: Record<string, StateVariables & Partial<ChannelConstants>> = {};
+
+  public funding: Funding | undefined = undefined;
+
+  public readonly applicationSite?: string;
   public readonly channelConstants: ChannelConstants;
   public readonly myIndex: number;
-  private stateVariables: Record<string, StateVariables & Partial<ChannelConstants>> = {};
-  private signatures: Record<string, Array<string | undefined>> = {};
-  public funding: Funding | undefined = undefined;
-  public readonly applicationSite?: string;
+
   constructor(channelData: ChannelStoredData) {
-    this.myIndex = channelData.myIndex;
-    this.stateVariables = channelData.stateVariables;
-    this.signatures = channelData.signatures;
-    this.funding = channelData.funding;
-    this.applicationSite = channelData.applicationSite;
+    const {
+      myIndex,
+      stateVariables,
+      signatures,
+      funding,
+      applicationSite,
+      channelConstants: {chainId, participants, appDefinition, challengeDuration, channelNonce}
+    } = channelData;
+
+    this.myIndex = myIndex;
+    this.stateVariables = stateVariables;
+    this.signatures = signatures;
+    this.funding = funding;
+    this.applicationSite = applicationSite;
+
     this.channelConstants = {
-      chainId: channelData.channelConstants.chainId,
-      participants: channelData.channelConstants.participants,
-      appDefinition: channelData.channelConstants.appDefinition,
-      challengeDuration: bigNumberify(channelData.channelConstants.challengeDuration),
-      channelNonce: bigNumberify(channelData.channelConstants.channelNonce)
+      chainId,
+      participants,
+      appDefinition,
+      challengeDuration: bigNumberify(challengeDuration),
+      channelNonce: bigNumberify(channelNonce)
     };
 
     this.stateVariables = _.transform(this.stateVariables, (result, stateVariables, stateHash) => {
@@ -95,6 +108,11 @@ export class ChannelStoreEntry {
 
   get isFinalized() {
     return this.isSupported && this.supported.isFinal;
+  }
+
+  get isChallenging() {
+    // TODO: Check chain
+    return false;
   }
 
   private get _supported() {
@@ -228,6 +246,7 @@ export class ChannelStoreEntry {
       applicationSite: this.applicationSite
     };
   }
+
   static fromJson(data) {
     if (!data) {
       console.error("Data is undefined or null, Memory Channel Store Entry can't be created.");
