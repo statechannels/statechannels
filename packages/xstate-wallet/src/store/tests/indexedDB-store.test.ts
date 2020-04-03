@@ -1,6 +1,6 @@
 /* eslint-disable jest/no-disabled-tests */
 import {XstateStore} from '../store';
-import {State, Objective} from '../types';
+import {State, Objective, SiteBudget, AssetBudget} from '../types';
 import {bigNumberify, BigNumber} from 'ethers/utils';
 import {Wallet} from 'ethers';
 import {calculateChannelId, signState} from '../state-utils';
@@ -157,5 +157,30 @@ describe('pushMessage', () => {
     const store = await aStore();
     await store.pushMessage({signedStates});
     expect(await store.getEntry(channelId)).not.toBeUndefined();
+  });
+});
+
+describe('getBudget', () => {
+  it('returns an address', async () => {
+    const store = await aStore();
+    const budget: SiteBudget = {
+      domain: 'localhost',
+      hubAddress: 'foo',
+      forAsset: {
+        ETH: {
+          assetHolderAddress: 'home',
+          availableSendCapacity: bigNumberify(10),
+          availableReceiveCapacity: bigNumberify(5),
+          channels: {}
+        }
+      }
+    };
+    await store.createBudget(budget);
+
+    const storedBudget = await store.getBudget(budget.domain);
+
+    const {availableReceiveCapacity, availableSendCapacity} = storedBudget.forAsset
+      .ETH as AssetBudget;
+    expect(availableReceiveCapacity.add(availableSendCapacity).eq(15)).toBeTruthy();
   });
 });
