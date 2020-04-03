@@ -36,15 +36,13 @@ const hub: Participant = {
 
 const addStory = (name, value, context) => {
   const workflow = approveBudgetAndFundWorkflow(store, messagingService, context);
-  const machine = interpret(workflow, {devTools: true}); // start a new interpreted machine for each story
-  machine.onEvent(event => console.log(event.type)).start(value);
+  const service = interpret(workflow, {devTools: true}); // start a new interpreted machine for each story
+  service.onEvent(event => console.log(event.type)).start(value);
   storiesOf('Workflows / Approve Budget And Fund', module).add(
     name,
-    renderComponentInFrontOfApp(
-      <ApproveBudgetAndFund current={machine.state} send={machine.send} />
-    )
+    renderComponentInFrontOfApp(<ApproveBudgetAndFund service={service} />)
   );
-  machine.stop(); // the machine will be stopped before it can be transitioned. This means the console.log on L49 throws a warning that we sent an event to a stopped machine.
+  service.stop(); // the machine will be stopped before it can be transitioned. This means the console.log on L49 throws a warning that we sent an event to a stopped machine.
 };
 
 const testContext = {
