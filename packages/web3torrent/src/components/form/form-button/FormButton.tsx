@@ -15,6 +15,7 @@ const FormButton: React.FC<FormButtonProps> = ({
 }: FormButtonProps) => {
   return (
     <button
+      id={`${name || className}-button`}
       data-test-selector={`${name || className}-button`}
       disabled={disabled}
       onClick={onClick}
