@@ -93,5 +93,7 @@ it('finalized when timeout ends', async () => {
 
   await waitForExpect(async () => {
     expect(service.state.value).toEqual('done');
+    const {finalized} = await fakeChain.getChainInfo(channelId);
+    expect(finalized).toBe(true);
   }, 10_000);
 });
