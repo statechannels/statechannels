@@ -74,9 +74,9 @@ const challengeOnchainAsExpected: Guard<Initial, ChainEvent> = {
   predicate: (context, {finalizesAt, finalized}) => finalizesAt.gt(0) && !finalized
 };
 
-const channelFinalized: Guard<Initial, ChainEvent> = {
+const challengeFinalized: Guard<Initial, ChainEvent> = {
   type: 'xstate.guard',
-  name: 'channelFinalized',
+  name: 'challengeFinalized',
   predicate: (context, {finalized}) => finalized === true
 };
 
@@ -120,7 +120,7 @@ export const machine = (
         },
         {
           target: 'done',
-          cond: channelFinalized
+          cond: challengeFinalized
         }
       ]
       // TODO: Handle responses...

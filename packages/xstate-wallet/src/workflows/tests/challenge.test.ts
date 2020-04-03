@@ -86,9 +86,12 @@ it('initializes and starts challenge thing', async () => {
 it('finalized when timeout ends', async () => {
   const service = interpret(challengeMachine(store, {channelId})).start();
 
-  fakeChain.setBlockNumber(301); // NOTE: CHALLENGE_DURATION is 300
+  // Wait until the challenge is on-chain, then fast-forward the blocks.
+  service.onTransition(
+    ({value}) => value === 'waitForResponseOrTimeout' && fakeChain.setBlockNumber(301) // NOTE: CHALLENGE_DURATION is 300)
+  );
 
   await waitForExpect(async () => {
     expect(service.state.value).toEqual('done');
-  }, 20_000);
+  }, 10_000);
 });
