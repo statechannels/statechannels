@@ -19,6 +19,7 @@ import {MessagingServiceInterface} from '../messaging';
 import {serializeSiteBudget} from '../serde/app-messages/serialize';
 import {filter, map, first} from 'rxjs/operators';
 import {statesEqual} from '../store/state-utils';
+import {ChannelChainInfo} from 'src/chain';
 
 interface ChainEvent {
   type: 'CHAIN_EVENT';
@@ -301,13 +302,11 @@ const notifyWhenPreFSSupported = (store: Store) => ({ledgerState, ledgerId}: Led
 
 const observeLedgerOnChainBalance = (store: Store) => ({ledgerId}: LedgerExists) =>
   store.chain.chainUpdatedFeed(ledgerId).pipe(
-    map(
-      (chainInfo): ChainEvent => ({
-        type: 'CHAIN_EVENT',
-        balance: chainInfo.amount,
-        blockNum: chainInfo.blockNum
-      })
-    )
+    map<ChannelChainInfo, ChainEvent>(({amount: balance, blockNum}) => ({
+      type: 'CHAIN_EVENT',
+      balance,
+      blockNum
+    }))
   );
 
 // // for now don't wait for any number of blocks (until the chain is reporting blockNum)
