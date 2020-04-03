@@ -5,12 +5,7 @@ import {generateMagnetURL} from '../../utils/magnet';
 import './Upload.scss';
 import {Spinner} from '../../components/form/spinner/Spinner';
 
-interface Props {
-  ready: boolean;
-}
-
-const Upload: React.FC<RouteComponentProps & Props> = props => {
-  const {history} = props;
+const Upload: React.FC<RouteComponentProps & {ready: boolean}> = ({history, ready}) => {
   const [showSpinner, setSpinner] = useState<boolean>(false);
 
   return (
@@ -25,7 +20,7 @@ const Upload: React.FC<RouteComponentProps & Props> = props => {
           name="file"
           id="file"
           multiple={true}
-          disabled={!props.ready}
+          disabled={!ready}
           className="inputfile"
           onChange={async event => {
             if (event.target.files && event.target.files[0]) {
