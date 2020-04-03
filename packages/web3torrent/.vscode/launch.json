@@ -12,8 +12,22 @@
         "node_modules/.bin/jest",
         "--config=${workspaceRoot}/config/jest/jest.config.js",
         "--runInBand",
-        "--env=jsdom",
         "${relativeFile}"
+      ],
+      "skipFiles": ["<node_internals>/**/*.js", "node_modules"],
+      "cwd": "${workspaceRoot}",
+      "protocol": "inspector",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "Jest All",
+      "type": "node",
+      "request": "launch",
+      "args": [
+        "node_modules/.bin/jest",
+        "--config=${workspaceRoot}/config/jest/jest.config.js",
+        "--runInBand"
       ],
       "skipFiles": ["<node_internals>/**/*.js", "node_modules"],
       "cwd": "${workspaceRoot}",

@@ -1,11 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
-import {web3torrent, WebTorrentContext} from './clients/web3torrent-client';
+import {web3torrent, Web3TorrentContext} from './clients/web3torrent-client';
 
 ReactDOM.render(
-  <WebTorrentContext.Provider value={web3torrent}>
+  <Web3TorrentContext.Provider value={web3torrent}>
     <App />
-  </WebTorrentContext.Provider>,
+  </Web3TorrentContext.Provider>,
   document.getElementById('root')
 );

@@ -1,8 +1,9 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {RouteComponentProps} from 'react-router-dom';
 import {upload} from '../../clients/web3torrent-client';
 import {generateMagnetURL} from '../../utils/magnet';
 import './Upload.scss';
+import {Spinner} from '../../components/form/spinner/Spinner';
 
 interface Props {
   ready: boolean;
@@ -10,12 +11,14 @@ interface Props {
 
 const Upload: React.FC<RouteComponentProps & Props> = props => {
   const {history} = props;
+  const [showSpinner, setSpinner] = useState<boolean>(false);
+
   return (
     <section className="section fill">
       <div className="jumbotron-upload">
         <h1>Upload a File</h1>
       </div>
-      <div className="upload-action-bar">
+      <div className={`upload-action-bar ${showSpinner ? 'hide' : 'show'}`}>
         <label htmlFor="file">Select file to upload</label>
         <input
           type="file"
@@ -26,10 +29,15 @@ const Upload: React.FC<RouteComponentProps & Props> = props => {
           className="inputfile"
           onChange={async event => {
             if (event.target.files && event.target.files[0]) {
+              setSpinner(true);
               history.push(generateMagnetURL(await upload(event.target.files)));
             }
           }}
         ></input>
+      </div>
+      <div className={`loading-torrent ${showSpinner ? 'show' : 'hide'}`}>
+        Setting up your Torrent
+        <Spinner visible color="orange" content="Setting up your torrent!"></Spinner>
       </div>
       <div className="subtitle">
         <p>
