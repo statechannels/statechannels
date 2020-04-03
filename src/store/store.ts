@@ -470,7 +470,9 @@ export class XstateStore implements Store {
     channelId: string,
     amount: {send: BigNumber; receive: BigNumber}
   ): Promise<SiteBudget> {
-    const site = ''; // TODO: The ApproveBudgetAndFund workflow seems to set this as the applicationSite
+    const entry = await this.getEntry(channelId);
+    const site = entry.applicationSite;
+    if (!site) throw new Error(Errors.noBudget);
 
     return await this.budgetLock
       .acquire<SiteBudget>(site, async release => {
