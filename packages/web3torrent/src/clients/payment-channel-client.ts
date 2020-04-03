@@ -11,12 +11,12 @@ import {
   FIREBASE_PREFIX,
   fireBaseConfig
 } from '../constants';
-import {hexZeroPad} from 'ethers/utils';
 import {AddressZero} from 'ethers/constants';
 import * as firebase from 'firebase/app';
 import 'firebase/database';
 import debug from 'debug';
 const log = debug('web3torrent:payment-channel');
+const hexZeroPad = utils.hexZeroPad;
 
 function sanitizeMessageForFirebase(message) {
   return JSON.parse(JSON.stringify(message));

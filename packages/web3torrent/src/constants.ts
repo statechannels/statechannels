@@ -1,6 +1,7 @@
 import {Status, Torrent} from './types';
 import {ChannelState} from './clients/payment-channel-client';
-import {bigNumberify} from 'ethers/utils';
+import {utils} from 'ethers';
+const bigNumberify = utils.bigNumberify;
 
 export const WEI_PER_BYTE = bigNumberify(1); // cost per byte
 export const BLOCK_LENGTH = 1 << 14; // Standard request length.
