@@ -433,9 +433,7 @@ export class XstateStore implements Store {
     return await this.budgetLock.acquire<SiteBudget>(applicationSite, async release => {
       const currentBudget = await this.getBudget(applicationSite);
       const assetBudget = currentBudget?.forAsset[assetHolderAddress];
-      if (!assetBudget) {
-        throw new Error(Errors.noBudget);
-      }
+      if (!assetBudget) throw new Error(Errors.noAssetBudget);
 
       const {outcome, participants} = (await this.getEntry(channelId)).supported;
       const playerAddress = await this.getAddress();
@@ -447,7 +445,7 @@ export class XstateStore implements Store {
         throw new Error(Errors.cannotFindDestination);
       }
       const channelBudget = assetBudget.channels[channelId];
-      if (!channelBudget) throw new Error(Errors.noBudget);
+      if (!channelBudget) throw new Error(Errors.channelNotInBudget);
       const sendAmount =
         currentAllocation.allocationItems.find(a => a.destination === playerDestination)?.amount ||
         0;
@@ -471,21 +469,17 @@ export class XstateStore implements Store {
   ): Promise<SiteBudget> {
     const entry = await this.getEntry(channelId);
     const site = entry.applicationSite;
-    if (!site) throw new Error(Errors.noBudget);
+    if (!site) throw new Error(Errors.noSiteForChannel);
 
     return await this.budgetLock
       .acquire<SiteBudget>(site, async release => {
         const currentBudget = await this.backend.getBudget(site);
 
-        // Create a new budget if one doesn't exist
-        if (!currentBudget) {
-          throw new Error(Errors.noBudget);
-        }
+        // TODO?: Create a new budget if one doesn't exist
+        if (!currentBudget) throw new Error(Errors.noBudget + site);
 
         const assetBudget = currentBudget?.forAsset[assetHolderAddress];
-        if (!assetBudget) {
-          throw new Error(Errors.noBudget);
-        }
+        if (!assetBudget) throw new Error(Errors.noAssetBudget);
 
         if (
           assetBudget.availableSendCapacity.lt(amount.send) ||
