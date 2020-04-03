@@ -105,9 +105,9 @@ export class IndexedDBBackend implements DBBackend {
   }
 
   // Individual Getters
-  public async getBudget(key: string): Promise<SiteBudget> {
-    const budget: SiteBudget = await this.get(ObjectStores.budgets, key);
-    if (!budget) throw Error('Budget not persisted');
+  public async getBudget(key: string): Promise<SiteBudget | undefined> {
+    const budget: SiteBudget | undefined = await this.get(ObjectStores.budgets, key);
+    if (!budget) return budget;
 
     return {
       ...budget,
