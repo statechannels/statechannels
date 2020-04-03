@@ -13,6 +13,7 @@ import {Zero} from 'ethers/constants';
 import {BigNumber} from 'ethers/utils';
 
 import {Store} from '../store';
+import {ChannelChainInfo} from 'src/chain';
 
 export interface Initial {
   channelId: string;
@@ -88,17 +89,15 @@ const submitChallengeTransaction = (store: Store) => async ({channelId}: Initial
 
 const observeOnChainChannelStorage = (store: Store, channelId: string) =>
   store.chain.chainUpdatedFeed(channelId).pipe(
-    map(
-      (chainInfo): ChainEvent => ({
-        type: 'CHAIN_EVENT',
-        finalized: chainInfo.finalized,
-        ...chainInfo.channelStorage
-      })
-    )
+    map<ChannelChainInfo, ChainEvent>(({finalized, channelStorage}) => ({
+      type: 'CHAIN_EVENT',
+      finalized,
+      ...channelStorage
+    }))
   );
 
 const setTransactionId = assign<Context, DoneInvokeEvent<string>>({
-  transactionId: (context, event) => event.data
+  transactionId: (context, {data}) => data
 });
 
 export const machine = (
