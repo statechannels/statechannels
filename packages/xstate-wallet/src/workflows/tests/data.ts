@@ -70,7 +70,7 @@ export const ledgerState = (
   appDefinition: '0x0000000000000000000000000000000000000000'
 });
 
-export const TEST_SITE = ''; // TODO
+export const TEST_SITE = 'localhost';
 export const budget = (send: BigNumber, receive: BigNumber): SiteBudget => ({
   hubAddress: HUB_ADDRESS,
   domain: TEST_SITE,
