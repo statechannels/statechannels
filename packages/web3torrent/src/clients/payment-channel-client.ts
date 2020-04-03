@@ -18,7 +18,6 @@ import 'firebase/database';
 import debug from 'debug';
 const log = debug('web3torrent:payment-channel');
 
-firebase.initializeApp(fireBaseConfig);
 function sanitizeMessageForFirebase(message) {
   return JSON.parse(JSON.stringify(message));
 }
@@ -84,8 +83,31 @@ export class PaymentChannelClient {
     log('enabling payment channel client');
     await this.channelClient.provider.mountWalletComponent(process.env.REACT_APP_WALLET_URL);
     await this.channelClient.provider.enable();
+    this.initializeHubComms();
+    log('payment channel client enabled');
+    if (AUTO_FUND_LEDGER) {
+      // TODO: This is a temporary measure while we don't have any budgeting built out.
+      // We automatically call approveBudgetAndFund.
+      const ten = hexZeroPad(utils.parseEther('10').toHexString(), 32);
+      const success = await this.approveBudgetAndFund(
+        ten,
+        ten,
+        window.channelProvider.selectedAddress,
+        HUB.signingAddress,
+        HUB.outcomeAddress
+      );
+      console.log(`Budget approved: ${JSON.stringify(success)}`);
+    }
+  }
+
+  private initializeHubComms() {
+    if (!fireBaseConfig) {
+      log('Abandoning firebase setup, configuration is undefined');
+      return;
+    }
 
     // Hub messaging
+    firebase.initializeApp(fireBaseConfig);
     const myFirebaseRef = firebase
       .database()
       .ref(`/${FIREBASE_PREFIX}/messages/${this.mySigningAddress}`);
@@ -109,21 +131,6 @@ export class PaymentChannelClient {
       log('GOT FROM FIREBASE: ' + message);
       this.pushMessage(message);
     });
-
-    if (AUTO_FUND_LEDGER) {
-      // TODO: This is a temporary measure while we don't have any budgeting built out.
-      // We automatically call approveBudgetAndFund.
-      const ten = hexZeroPad(utils.parseEther('10').toHexString(), 32);
-      const success = await this.approveBudgetAndFund(
-        ten,
-        ten,
-        window.channelProvider.selectedAddress,
-        HUB.signingAddress,
-        HUB.outcomeAddress
-      );
-      log(`Budget approved: ${JSON.stringify(success)}`);
-    }
-    log('payment channel client enabled');
   }
 
   async createChannel(
