@@ -3,22 +3,12 @@ import React from 'react';
 import {RouteComponentProps} from 'react-router-dom';
 import {FormButton} from '../../components/form';
 import {ShareList} from '../../components/share-list/ShareList';
-import {preSeededTorrents, defaultTrackers} from '../../constants';
+import {preSeededTorrents, welcomePageTrackerOpts} from '../../constants';
 import {RoutePath} from '../../routes';
 import './Welcome.scss';
 import {Client} from 'bittorrent-tracker';
 
 const log = debug('web3torrent:welcome-page-tracker-client');
-
-const requiredOpts = {
-  infoHash: ['c53da4fa28aa2edc1faa91861cce38527414d874'], // Sintel.mp4 concentrate on this torrent for now
-  peerId: '2d5757303030372d37454e613073307937495630', // hex string or Buffer
-  announce: defaultTrackers, // list of tracker server urls,
-  port: 6881 // torrent client port, (in browser, optional)
-};
-const optionalOpts = {
-  getAnnounceOpts: () => ({pseAccount: '0x7F0126D6c4270498b6514Cb934a3274898f68777'}) // dummy pseAccount, but it works
-};
 
 interface Props {
   ready: boolean;
@@ -26,21 +16,21 @@ interface Props {
 
 class Welcome extends React.Component<RouteComponentProps & Props, {[infoHash: string]: boolean}> {
   trackerClient: Client; // bittorrent tracker client
-  state = {c53da4fa28aa2edc1faa91861cce38527414d874: false}; // do not display by default
+  state = {[preSeededTorrents[0].infoHash]: false}; // do not display by default
 
   updateIfSeederFound(data: any) {
-    log('got an announce response from tracker: ' + data.announce);
+    log('got an announce response from tracker: ', data);
     if (data.complete > 0) {
       // there are some seeders for this torrent
-      this.setState({[requiredOpts.infoHash[0]]: true});
+      this.setState({[preSeededTorrents[0].infoHash]: true});
       // this torrent should be displayed
-      log(`Seeder found for ${requiredOpts.infoHash[0]}`);
+      log(`Seeder found for ${preSeededTorrents[0].infoHash}`);
     }
   }
 
   constructor(props) {
     super(props);
-    this.trackerClient = new Client({...requiredOpts, ...optionalOpts});
+    this.trackerClient = new Client(welcomePageTrackerOpts);
     this.updateIfSeederFound = this.updateIfSeederFound.bind(this);
     this.trackerClient.on('update', this.updateIfSeederFound);
     this.trackerClient.start();
