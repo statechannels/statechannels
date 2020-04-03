@@ -41,7 +41,6 @@ export type TorrentCallback = (torrent: Torrent) => any;
 
 export * from './types';
 
-firebase.initializeApp(fireBaseConfig);
 function sanitizeMessageForFirebase(message) {
   return JSON.parse(JSON.stringify(message));
 }
@@ -72,8 +71,31 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     log('set outcomeAddress to sc-wallet web3 wallet address: ' + this.outcomeAddress);
 
     this.tracker.getAnnounceOpts = () => ({pseAccount: this.pseAccount});
+    this.initializeHubComms();
+
+    if (AUTO_FUND_LEDGER) {
+      // TODO: This is a temporary measure while we don't have any budgeting built out.
+      // We automatically call approveBudgetAndFund.
+      const ten = hexZeroPad(utils.parseEther('10').toHexString(), 32);
+      const success = await this.paymentChannelClient.approveBudgetAndFund(
+        ten,
+        ten,
+        window.channelProvider.selectedAddress,
+        HUB.signingAddress,
+        HUB.outcomeAddress
+      );
+      console.log(`Budget approved: ${JSON.stringify(success)}`);
+    }
+  }
+
+  private initializeHubComms() {
+    if (!fireBaseConfig) {
+      log('Abandoning firebase setup, configuration is undefined');
+      return;
+    }
 
     // Hub messaging
+    firebase.initializeApp(fireBaseConfig);
     const myFirebaseRef = firebase
       .database()
       .ref(`/${FIREBASE_PREFIX}/messages/${this.pseAccount}`);
@@ -97,20 +119,6 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
       console.log('GOT FROM FIREBASE: ' + message);
       this.paymentChannelClient.pushMessage(message);
     });
-
-    if (AUTO_FUND_LEDGER) {
-      // TODO: This is a temporary measure while we don't have any budgeting built out.
-      // We automatically call approveBudgetAndFund.
-      const ten = hexZeroPad(utils.parseEther('10').toHexString(), 32);
-      const success = await this.paymentChannelClient.approveBudgetAndFund(
-        ten,
-        ten,
-        window.channelProvider.selectedAddress,
-        HUB.signingAddress,
-        HUB.outcomeAddress
-      );
-      console.log(`Budget approved: ${JSON.stringify(success)}`);
-    }
   }
 
   async disable() {
