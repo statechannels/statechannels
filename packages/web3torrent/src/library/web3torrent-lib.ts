@@ -18,19 +18,13 @@ import {utils} from 'ethers';
 import {ChannelState, PaymentChannelClient} from '../clients/payment-channel-client';
 import {
   defaultTrackers,
-  fireBaseConfig,
-  HUB,
-  FIREBASE_PREFIX,
   WEI_PER_BYTE,
   BUFFER_REFILL_RATE,
   INITIAL_SEEDER_BALANCE,
-  AUTO_FUND_LEDGER,
   BLOCK_LENGTH,
   PEER_TRUST,
   testTorrent
 } from '../constants';
-import * as firebase from 'firebase/app';
-import 'firebase/database';
 import {Message} from '@statechannels/client-api-schema';
 import {hexZeroPad} from 'ethers/utils';
 
@@ -40,11 +34,6 @@ const log = debug('web3torrent:library');
 export type TorrentCallback = (torrent: Torrent) => any;
 
 export * from './types';
-
-firebase.initializeApp(fireBaseConfig);
-function sanitizeMessageForFirebase(message) {
-  return JSON.parse(JSON.stringify(message));
-}
 
 // A Whimsical diagram explaining the functionality of Web3Torrent: https://whimsical.com/Sq6whAwa8aTjbwMRJc7vPU
 export default class WebTorrentPaidStreamingClient extends WebTorrent {
@@ -64,52 +53,13 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
   }
 
   async enable() {
-    await this.paymentChannelClient.enable();
-
-    this.pseAccount = this.paymentChannelClient.mySigningAddress;
-    log('set pseAccount to sc-wallet signing address: ' + this.pseAccount);
-    this.outcomeAddress = this.paymentChannelClient.myEthereumSelectedAddress;
-    log('set outcomeAddress to sc-wallet web3 wallet address: ' + this.outcomeAddress);
-
-    this.tracker.getAnnounceOpts = () => ({pseAccount: this.pseAccount});
-
-    // Hub messaging
-    const myFirebaseRef = firebase
-      .database()
-      .ref(`/${FIREBASE_PREFIX}/messages/${this.pseAccount}`);
-    const hubFirebaseRef = firebase
-      .database()
-      .ref(`/${FIREBASE_PREFIX}/messages/${HUB.participantId}`);
-
-    // firebase setup
-    myFirebaseRef.onDisconnect().remove();
-
-    this.paymentChannelClient.onMessageQueued((message: Message) => {
-      if (message.recipient === HUB.participantId) {
-        hubFirebaseRef.push(sanitizeMessageForFirebase(message));
-      }
-    });
-
-    myFirebaseRef.on('child_added', snapshot => {
-      const key = snapshot.key;
-      const message = snapshot.val();
-      myFirebaseRef.child(key).remove();
-      console.log('GOT FROM FIREBASE: ' + message);
-      this.paymentChannelClient.pushMessage(message);
-    });
-
-    if (AUTO_FUND_LEDGER) {
-      // TODO: This is a temporary measure while we don't have any budgeting built out.
-      // We automatically call approveBudgetAndFund.
-      const ten = hexZeroPad(utils.parseEther('10').toHexString(), 32);
-      const success = await this.paymentChannelClient.approveBudgetAndFund(
-        ten,
-        ten,
-        window.channelProvider.selectedAddress,
-        HUB.signingAddress,
-        HUB.outcomeAddress
-      );
-      console.log(`Budget approved: ${JSON.stringify(success)}`);
+    if (!this.pseAccount || !this.outcomeAddress) {
+      await this.paymentChannelClient.enable();
+      this.pseAccount = this.paymentChannelClient.mySigningAddress;
+      log('set pseAccount to sc-wallet signing address: ' + this.pseAccount);
+      this.outcomeAddress = this.paymentChannelClient.myEthereumSelectedAddress;
+      log('set outcomeAddress to sc-wallet web3 wallet address: ' + this.outcomeAddress);
+      this.tracker.getAnnounceOpts = () => ({pseAccount: this.pseAccount});
     }
   }
 
@@ -125,10 +75,10 @@ export default class WebTorrentPaidStreamingClient extends WebTorrent {
     const gotAWire = new Promise(resolve => {
       super.add(testTorrent.magnetURI, (torrent: Torrent) => {
         torrentId = torrent.infoHash;
-        torrent.once('wire', wire => resolve(true));
+        torrent.once('wire', () => resolve(true));
       });
     });
-    const timer = new Promise(function(resolve, reject) {
+    const timer = new Promise(function(resolve, _) {
       setTimeout(resolve, timeOut);
     });
     const raceResult = await Promise.race([gotAWire, timer]);

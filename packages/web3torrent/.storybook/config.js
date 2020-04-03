@@ -1,10 +1,10 @@
 import {configure} from '@storybook/react';
-import {WebTorrentContext, web3torrent} from '../../../clients/web3torrent-client';
+import {Web3TorrentContext, web3torrent} from '../../../clients/web3torrent-client';
 
 configure(require.context('../src', true, /\.stories\.tsx$/), module);
 
 const contextWrapper = storyFn => (
-  <WebTorrentContext.Provider value={web3torrent}>{storyFn()}</WebTorrentContext.Provider>
+  <Web3TorrentContext.Provider value={web3torrent}>{storyFn()}</Web3TorrentContext.Provider>
 );
 
 addDecorator(contextWrapper);
