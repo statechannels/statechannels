@@ -335,7 +335,9 @@ export class ChainWatcher implements Chain {
 
     const amount: BigNumber = await ethAssetHolder.holdings(channelId);
 
-    const [turnNumRecord, finalizesAt] = await nitroAdjudicator.getData(channelId);
+    const result = await nitroAdjudicator.getData(channelId);
+
+    const [turnNumRecord, finalizesAt] = result.map(bigNumberify);
 
     const blockNum = bigNumberify(await provider.getBlockNumber());
 
