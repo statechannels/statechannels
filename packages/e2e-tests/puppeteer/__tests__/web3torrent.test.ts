@@ -57,6 +57,8 @@ describe('Supports torrenting among peers with channels', () => {
     await waitForClosingChannel(web3tTabB);
     await waitForClosingChannel(web3tTabA);
 
+    await web3tTabA.waitFor(1500);
+    await web3tTabB.waitFor(1500);
     console.log('Checking exchanged amount between downloader and uploader...');
     const earnedColumn = await web3tTabA.$('td.earned');
     const earned = await web3tTabA.evaluate(e => e.textContent, earnedColumn);
