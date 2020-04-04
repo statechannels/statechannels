@@ -320,7 +320,7 @@ export const workflow = (
         turnNum: bigNumberify(0),
         isFinal: false
       };
-      const {channelId} = await store.createChannel(
+      const {channelId: targetChannelId} = await store.createChannel(
         participants,
         bigNumberify(challengeDuration),
         stateVars,
@@ -331,10 +331,10 @@ export const workflow = (
       // Create a open channel objective so we can coordinate with all participants
       await store.addObjective({
         type: 'OpenChannel',
-        data: {targetChannelId: channelId, fundingStrategy},
-        participants
+        data: {targetChannelId, fundingStrategy},
+        participants: [participants[1]]
       });
-      return channelId;
+      return targetChannelId;
     },
     invokeClosingProtocol: (context: ChannelIdExists) =>
       ConcludeChannel.machine(store).withContext({channelId: context.channelId}),
