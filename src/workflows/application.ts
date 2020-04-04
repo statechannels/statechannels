@@ -62,6 +62,7 @@ type WorkflowGuards = Guards<
 >;
 
 export interface WorkflowActions {
+  setApplicationSite: Action<ChannelIdExists, JoinChannelEvent>;
   sendUpdateChannelResponse: Action<any, PlayerStateUpdate>;
   sendCloseChannelResponse: Action<ChannelIdExists, any>;
   sendCreateChannelResponse: Action<RequestIdExists & ChannelIdExists, any>;
@@ -128,7 +129,10 @@ const generateConfig = (
               {target: 'failure', cond: guards.isLedgerFunding}, // TODO: Should we even support ledger funding?
               {target: 'done', cond: guards.amCreator}
             ],
-            JOIN_CHANNEL: {target: 'done', actions: actions.sendJoinChannelResponse}
+            JOIN_CHANNEL: {
+              target: 'done',
+              actions: [actions.sendJoinChannelResponse, actions.setApplicationSite]
+            }
           }
         },
         done: {type: 'final'}
@@ -215,6 +219,8 @@ export const workflow = (
       .pipe(map(storeEntry => ({type: 'CHANNEL_UPDATED', storeEntry})));
 
   const actions: WorkflowActions = {
+    setApplicationSite: async (ctx: ChannelIdExists, event: JoinChannelEvent) =>
+      await store.setApplicationSite(ctx.channelId, event.applicationSite),
     sendUpdateChannelResponse: async (context: any, event: PlayerStateUpdate) => {
       const entry = await store.getEntry(context.channelId);
       messagingService.sendResponse(event.requestId, await convertToChannelResult(entry));
@@ -305,7 +311,8 @@ export const workflow = (
         outcome,
         appData,
         appDefinition,
-        fundingStrategy
+        fundingStrategy,
+        applicationSite
       } = context;
       const stateVars: StateVariables = {
         outcome,
@@ -317,7 +324,8 @@ export const workflow = (
         participants,
         bigNumberify(challengeDuration),
         stateVars,
-        appDefinition
+        appDefinition,
+        applicationSite
       );
 
       // Create a open channel objective so we can coordinate with all participants
@@ -351,6 +359,7 @@ const mockGuards: WorkflowGuards = {
 };
 
 const mockActions: Record<keyof WorkflowActions, string> = {
+  setApplicationSite: 'setApplicationSite',
   assignChannelId: 'assignChannelId',
   sendChannelUpdatedNotification: 'sendChannelUpdatedNotification',
   sendCloseChannelResponse: 'sendCloseChannelResponse',

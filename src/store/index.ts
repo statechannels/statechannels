@@ -57,6 +57,7 @@ export enum Errors {
   noAssetBudget = "This site's budget does contain this asset",
   channelNotInBudget = "This site's budget does not reference this channel",
   noSiteForChannel = 'No site defined for channel',
+  siteExistsOnChannel = 'Channel already has a site.',
   budgetAlreadyExists = 'There already exists a budget for this site',
   budgetInsufficient = 'Budget insufficient to reserve funds',
   amountUnauthorized = 'Amount unauthorized in current budget',
