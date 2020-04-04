@@ -14,22 +14,22 @@ const WORKFLOW = 'conclude-channel';
 export type Init = {channelId: string};
 
 const finalState = (store: Store) => async (context: Init): Promise<SupportState.Init> => {
-  const {sortedStates, latestSupportedByMe, latest} = await store.getEntry(context.channelId);
+  const {sortedStates, latestSignedByMe, latest} = await store.getEntry(context.channelId);
 
   const latestFinalState: State | undefined = sortedStates.filter(s => s.isFinal)[0];
 
   // If we've received a new final state that matches our outcome we support that
-  if (outcomesEqual(latestSupportedByMe.outcome, latestFinalState?.outcome)) {
+  if (outcomesEqual(latestSignedByMe.outcome, latestFinalState?.outcome)) {
     return {state: latestFinalState};
   }
 
   // If we've supported a final state, send it
-  if (latestSupportedByMe.isFinal) {
-    return {state: latestSupportedByMe};
+  if (latestSignedByMe.isFinal) {
+    return {state: latestSignedByMe};
   }
 
   // Otherwise create a new final state
-  return {state: {...latestSupportedByMe, turnNum: latest.turnNum.add(1), isFinal: true}};
+  return {state: {...latestSignedByMe, turnNum: latest.turnNum.add(1), isFinal: true}};
 };
 
 const supportState = (store: Store) => SupportState.machine(store);

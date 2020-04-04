@@ -7,7 +7,7 @@ import {Init, machine, Errors} from '../ledger-funding';
 import {Store} from '../../store';
 import {bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
-import {firstState, signState, calculateChannelId} from '../../store/state-utils';
+import {firstState, calculateChannelId, createSignatureEntry} from '../../store/state-utils';
 import {ChannelConstants, Outcome, State} from '../../store/types';
 import {AddressZero} from 'ethers/constants';
 
@@ -67,7 +67,7 @@ let bStore: TestStore;
 
 const allSignState = (state: State) => ({
   ...state,
-  signatures: [wallet1, wallet2].map(({privateKey}) => signState(state, privateKey))
+  signatures: [wallet1, wallet2].map(({privateKey}) => createSignatureEntry(state, privateKey))
 });
 
 beforeEach(async () => {
@@ -129,8 +129,10 @@ test('locks', async () => {
 
   const aService = interpret(machine(aStore).withContext(context));
   const bService = interpret(machine(bStore).withContext(context));
-
-  const status = await aStore.acquireChannelLock(context.ledgerChannelId);
+  // Note: We need player B to block on the lock since technically
+  // if player B signs state 1 then state 1 is supported and it won't block
+  // waiting for player A
+  const status = await bStore.acquireChannelLock(context.ledgerChannelId);
   expect(status).toEqual({
     channelId: context.ledgerChannelId,
     lock: expect.any(Guid)
@@ -139,8 +141,8 @@ test('locks', async () => {
   [aService, bService].map(s => s.start());
 
   await waitForExpect(async () => {
-    expect(aService.state.value).toEqual('acquiringLock');
-    expect(bService.state.value).toEqual({fundingTarget: 'supportState'});
+    expect(bService.state.value).toEqual('acquiringLock');
+    expect(aService.state.value).toEqual({fundingTarget: 'supportState'});
   }, EXPECT_TIMEOUT);
 
   aService.onTransition(s => {
@@ -149,13 +151,13 @@ test('locks', async () => {
       expect((s.context as any).lock).not.toEqual(status.lock);
     }
   });
-  await aStore.releaseChannelLock(status);
+  await bStore.releaseChannelLock(status);
 
   await waitForExpect(async () => {
     expect(aService.state.value).toEqual('success');
   }, EXPECT_TIMEOUT);
 
-  expect(aStore._channelLocks[context.ledgerChannelId]).toBeUndefined();
+  expect(bStore._channelLocks[context.ledgerChannelId]).toBeUndefined();
 });
 
 const twelveTotalAllocated = outcome;

@@ -201,10 +201,10 @@ export class XstateStore implements Store {
 
     // TODO: There could be concurrency problems which lead to entries potentially being overwritten.
     await this.setNonce(addresses, state.channelNonce);
-    const key = hashState(state);
+
     const data: ChannelStoredData = {
       channelConstants: state,
-      stateVariables: {[key]: state},
+      stateVariables: [{...state, stateHash: hashState(state)}],
       signatures: {},
       myIndex,
       funding: undefined,

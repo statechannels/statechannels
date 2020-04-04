@@ -1,6 +1,7 @@
 import {BigNumber} from 'ethers/utils';
 import {Funding} from './store';
 import {FundingStrategy} from '@statechannels/client-api-schema/src';
+import {SignatureEntry} from './channel-store-entry';
 
 export interface SiteBudget {
   domain: string;
@@ -30,7 +31,7 @@ export interface StateVariables {
   appData: string;
   isFinal: boolean;
 }
-
+export type StateVariablesWithHash = StateVariables & Hashed;
 export type Destination = string & {_isDestination: void};
 export interface AllocationItem {
   destination: Destination;
@@ -71,10 +72,13 @@ export interface ChannelConstants {
 export interface State extends ChannelConstants, StateVariables {}
 
 interface Signed {
-  signatures: string[];
+  signatures: SignatureEntry[];
 }
-
+interface Hashed {
+  stateHash: string;
+}
 export interface SignedState extends State, Signed {}
+export type SignedStateWithHash = SignedState & Hashed;
 export interface SignedStateVariables extends StateVariables, Signed {}
 
 type _Objective<Name, Data> = {
@@ -132,12 +136,12 @@ export interface Message {
 }
 
 export type ChannelStoredData = {
-  stateVariables: Record<string, StateVariables>;
+  stateVariables: Array<StateVariablesWithHash>;
   channelConstants: Omit<ChannelConstants, 'challengeDuration' | 'channelNonce'> & {
     challengeDuration: BigNumber | string;
     channelNonce: BigNumber | string;
   };
-  signatures: Record<string, Array<string | undefined>>;
+  signatures: Record<string, Array<SignatureEntry>>;
   funding: Funding | undefined;
   applicationSite: string | undefined;
   myIndex: number;
