@@ -17,7 +17,7 @@ export const ConfirmCreateChannel = (props: Props) => {
       <Button.Text onClick={() => send('USER_REJECTS')}>No</Button.Text>
     </div>
   );
-  if (current.value.toString() === 'waitForUserConfirmation') {
+  if (current?.value.toString() === 'waitForUserConfirmation') {
     return prompt;
   } else {
     return <div></div>;
