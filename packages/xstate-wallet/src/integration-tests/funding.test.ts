@@ -36,11 +36,13 @@ it('allows for two wallets to fund an app', async () => {
     .toPromise();
 
   await playerA.messagingService.receiveRequest(createEvent, 'localhost');
-  playerA.channelWallet.workflows[0].service.onTransition(state => {
+
+  const confirm = state => {
     if (state.value === 'confirmingWithUser') {
       state.children.invokeCreateChannelConfirmation.send({type: 'USER_APPROVES'});
     }
-  });
+  };
+  playerA.channelWallet.workflows[0].service.onTransition(confirm);
 
   const createResponse = await createPromise;
   expect(createResponse.result.channelId).toEqual(channelId);
@@ -50,19 +52,22 @@ it('allows for two wallets to fund an app', async () => {
     .toPromise();
   expect(channelProposedNotification.params.channelId).toEqual(channelId);
 
+  playerB.channelWallet.workflows[0].service.onTransition(confirm);
   const expectedId = `JOIN_CHANNEL-${channelId}`;
   expect(playerB.channelWallet.getWorkflow(expectedId).id).toEqual(expectedId);
 
   playerB.channelWallet.pushMessage(generateJoinChannelRequest(channelId), 'localhost');
   playerB.channelWallet.workflows[0].service.send({type: 'USER_APPROVES'});
 
-  return Promise.all(
+  await Promise.all(
     [playerA, playerB].map(player =>
-      player.messagingService.outboxFeed.pipe(
-        filter(isChannelUpdated),
-        filter(notification => notification.params.status === 'running'),
-        first()
-      )
+      player.messagingService.outboxFeed
+        .pipe(
+          filter(isChannelUpdated),
+          filter(notification => notification.params.status === 'running'),
+          first()
+        )
+        .toPromise()
     )
   );
 });
