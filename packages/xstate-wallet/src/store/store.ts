@@ -275,7 +275,7 @@ export class XstateStore implements Store {
   public async setApplicationSite(channelId: string, applicationSite: string) {
     const entry = await this.getEntry(channelId);
 
-    if (entry.applicationSite) throw new Error(Errors.noSiteForChannel);
+    if (entry.applicationSite) throw new Error(Errors.siteExistsOnChannel);
 
     await this.backend.setChannel(channelId, {...entry.data(), applicationSite});
   }
