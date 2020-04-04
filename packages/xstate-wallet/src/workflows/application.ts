@@ -285,10 +285,10 @@ export const workflow = (
   };
 
   const guards: WorkflowGuards = {
-    channelOpen: (_, event: ChannelUpdated): boolean =>
-      !event.storeEntry.latestSupportedByMe.isFinal,
-    channelClosing: (_, event: ChannelUpdated): boolean => !!event.storeEntry.latest?.isFinal,
-
+    channelOpen: (context: ChannelIdExists, event: ChannelUpdated): boolean =>
+      !event.storeEntry.latestSignedByMe.isFinal,
+    channelClosing: (context: ChannelIdExists, event: ChannelUpdated): boolean =>
+      !!event.storeEntry.latest?.isFinal,
     channelClosed: (_, event: any): boolean => !!event.storeEntry.supported?.isFinal,
     isDirectFunding: (ctx: Init) => ctx.fundingStrategy === 'Direct',
     isLedgerFunding: (ctx: Init) => ctx.fundingStrategy === 'Ledger',

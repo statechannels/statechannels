@@ -1,7 +1,7 @@
 import {Message} from '../../store/types';
 import {Observable, fromEvent} from 'rxjs';
 import {EventEmitter} from 'eventemitter3';
-import {signState} from '../../store/state-utils';
+import {createSignatureEntry} from '../../store/state-utils';
 import {ethers} from 'ethers';
 
 export class SimpleHub {
@@ -21,8 +21,7 @@ export class SimpleHub {
 
       const hubIdx = participants.findIndex(p => p.signingAddress === address);
       if (hubIdx > -1) {
-        const signature = signState(signedState, this.privateKey);
-        signatures[hubIdx] = signature;
+        signatures.push(createSignatureEntry(signedState, this.privateKey));
 
         this._eventEmitter.emit('addToOutbox', {
           signedStates: [{...signedState, signatures}],

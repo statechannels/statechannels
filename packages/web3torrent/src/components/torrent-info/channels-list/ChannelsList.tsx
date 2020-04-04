@@ -93,11 +93,11 @@ class ChannelsList extends React.Component<UploadInfoProps> {
           {channelsInfo.length > 0 && (
             <thead>
               <tr className="peerInfo">
-                <td className="channel">Status</td>
-                <td className="channel-id">Channel</td>
-                <td className="peer-id">Peer</td>
-                <td className="transferred">Data</td>
-                <td className="earned">Funds</td>
+                <td>Status</td>
+                <td>Channel</td>
+                <td>Peer</td>
+                <td>Data</td>
+                <td>Funds</td>
               </tr>
             </thead>
           )}

@@ -80,7 +80,7 @@ export const config: StateNodeConfig<WorkflowContext, any, any> = {
 const getFinalState = (store: Store): WorkflowServices['getFinalState'] => async ({
   opponent: hub
 }) => {
-  const {latestSupportedByMe, latest} = await store.getLedger(hub.participantId);
+  const {latestSignedByMe: latestSupportedByMe, latest} = await store.getLedger(hub.participantId);
 
   // If we've received a new final state that matches our outcome we support that
   if (latest.isFinal && outcomesEqual(latestSupportedByMe.outcome, latest.outcome)) {
