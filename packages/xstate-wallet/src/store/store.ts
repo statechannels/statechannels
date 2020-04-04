@@ -101,6 +101,7 @@ export interface Store {
   getLedger(peerId: string): Promise<ChannelStoreEntry>;
 
   setFunding(channelId: string, funding: Funding): Promise<void>;
+  setApplicationSite(channelId: string, applicationSite: string): Promise<void>;
   addObjective(objective: Objective): void;
   getBudget: (site: string) => Promise<SiteBudget>;
   createBudget: (budget: SiteBudget) => Promise<void>;
@@ -269,6 +270,14 @@ export class XstateStore implements Store {
     if (!ledgerId) throw new Error(`No ledger exists with peer ${peerId}`);
 
     return await this.getEntry(ledgerId);
+  }
+
+  public async setApplicationSite(channelId: string, applicationSite: string) {
+    const entry = await this.getEntry(channelId);
+
+    if (entry.applicationSite) throw new Error(Errors.noSiteForChannel);
+
+    await this.backend.setChannel(channelId, {...entry.data(), applicationSite});
   }
 
   public async setLedger(ledgerId: string) {
