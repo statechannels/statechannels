@@ -17,7 +17,7 @@
     </div>
     <div class="mt-5">
       <div class="flex flex-wrap justify-between">
-        {{#each this.model as |game|}}
+        {{#each this.publicGames as |game|}}
           <GameCard @game={{game}} />
         {{else}}
           <GamesEmpty />

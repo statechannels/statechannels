@@ -5,6 +5,7 @@ import {inject as service} from '@ember/service';
 import DS from 'ember-data';
 import UserService from '@statechannels/tic-tac-toe/services/user';
 import CurrentGameService from '@statechannels/tic-tac-toe/services/current-game';
+import ChallengeModel from '@statechannels/tic-tac-toe/models/challenge';
 import makeBlockie from 'ethereum-blockies-base64';
 
 export default class GamesIndexController extends Controller {
@@ -17,6 +18,10 @@ export default class GamesIndexController extends Controller {
 
   get blockieSrc(): string {
     return makeBlockie(this.user.userAddress ?? '0');
+  }
+
+  get publicGames(): ChallengeModel[] {
+    return this.model.filterBy('isPublic', true);
   }
 
   @action
