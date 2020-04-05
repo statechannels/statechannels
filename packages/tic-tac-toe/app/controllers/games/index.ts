@@ -4,11 +4,13 @@ import {action} from '@ember/object';
 import {inject as service} from '@ember/service';
 import DS from 'ember-data';
 import UserService from '@statechannels/tic-tac-toe/services/user';
+import CurrentGameService from '@statechannels/tic-tac-toe/services/current-game';
 import makeBlockie from 'ethereum-blockies-base64';
 
 export default class GamesIndexController extends Controller {
   @service store!: DS.Store;
   @service user!: UserService;
+  @service currentGame!: CurrentGameService;
 
   @tracked buyInAmount = 0.001;
   @tracked showCreateGameModal = false;
@@ -34,6 +36,7 @@ export default class GamesIndexController extends Controller {
     };
     const newGame = this.store.createRecord('challenge', myPublicOpenGame);
     await newGame.save();
+    this.currentGame.setGame(newGame);
     this.transitionToRoute('games.waiting');
   }
 }
