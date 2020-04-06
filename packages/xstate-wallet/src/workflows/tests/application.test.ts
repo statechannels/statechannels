@@ -122,6 +122,7 @@ describe('Channel setup, JOIN_CHANNEL role', () => {
     service.send(joinEvent);
     expect(spy).toHaveBeenCalledTimes(2);
     expect(spy).toHaveBeenCalledWith(context, joinEvent, expect.any(Object));
+    expect(spy).toHaveBeenCalledWith(expectations.siteSet);
 
     // It invokes confirmingWithUser
     await waitForExpect(async () => {
@@ -131,8 +132,7 @@ describe('Channel setup, JOIN_CHANNEL role', () => {
     service.state.children.invokeCreateChannelConfirmation.send({type: 'USER_APPROVES'});
 
     expect(spy).toHaveBeenCalledTimes(3);
-    expect(spy).toHaveBeenLastCalledWith(expectations.channelFunded);
-    expect(spy).toHaveBeenLastCalledWith(expectations.siteSet);
+    expect(spy).toHaveBeenCalledWith(expectations.channelFunded);
     await waitForExpect(() => expect(service.state.value).toEqual('running'));
   });
 });
