@@ -90,12 +90,17 @@ describe('Channel setup, JOIN_CHANNEL role', () => {
 
     const spy = jest.fn(x => x);
 
+    const enum expectations {
+      channelFunded = 'Channel was funded',
+      siteSet = 'applicationSite was set'
+    }
     const service = interpret<any, any, any>(
       Application.workflow(store, messagingService, context).withConfig({
         actions: {sendJoinChannelResponse: spy, sendUpdateChannelResponse: spy},
         services: {
           invokeCreateChannelAndFundProtocol: () =>
-            new Promise(resolve => spy('Channel was funded') && resolve())
+            new Promise(resolve => spy(expectations.channelFunded) && resolve()),
+          setApplicationSite: () => new Promise(resolve => spy(expectations.siteSet) && resolve())
         }
       })
     );
@@ -115,8 +120,8 @@ describe('Channel setup, JOIN_CHANNEL role', () => {
     };
 
     service.send(joinEvent);
-    expect(spy).toHaveBeenCalledTimes(1);
-    expect(spy).toHaveBeenLastCalledWith(context, joinEvent, expect.any(Object));
+    expect(spy).toHaveBeenCalledTimes(2);
+    expect(spy).toHaveBeenCalledWith(context, joinEvent, expect.any(Object));
 
     // It invokes confirmingWithUser
     await waitForExpect(async () => {
@@ -125,8 +130,9 @@ describe('Channel setup, JOIN_CHANNEL role', () => {
 
     service.state.children.invokeCreateChannelConfirmation.send({type: 'USER_APPROVES'});
 
-    expect(spy).toHaveBeenCalledTimes(2);
-    expect(spy).toHaveBeenLastCalledWith('Channel was funded');
+    expect(spy).toHaveBeenCalledTimes(3);
+    expect(spy).toHaveBeenLastCalledWith(expectations.channelFunded);
+    expect(spy).toHaveBeenLastCalledWith(expectations.siteSet);
     await waitForExpect(() => expect(service.state.value).toEqual('running'));
   });
 });
