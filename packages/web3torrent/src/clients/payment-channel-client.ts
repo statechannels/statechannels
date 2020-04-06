@@ -6,11 +6,11 @@ import {ChannelStatus, Message} from '@statechannels/client-api-schema';
 import {SiteBudget} from '@statechannels/client-api-schema';
 import {
   SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS,
-  AUTO_FUND_LEDGER,
   HUB,
   FIREBASE_PREFIX,
   fireBaseConfig,
-  FUNDING_STRATEGY
+  FUNDING_STRATEGY,
+  INITIAL_BUDGET_AMOUNT
 } from '../constants';
 import {hexZeroPad} from 'ethers/utils';
 import {AddressZero} from 'ethers/constants';
@@ -86,18 +86,9 @@ export class PaymentChannelClient {
     await this.channelClient.provider.enable();
     this.initializeHubComms();
     log('payment channel client enabled');
-    if (AUTO_FUND_LEDGER) {
-      // TODO: This is a temporary measure while we don't have any budgeting built out.
-      // We automatically call approveBudgetAndFund.
-      const ten = hexZeroPad(utils.parseEther('10').toHexString(), 32);
-      const success = await this.approveBudgetAndFund(
-        ten,
-        ten,
-        window.channelProvider.selectedAddress,
-        HUB.signingAddress,
-        HUB.outcomeAddress
-      );
-      console.log(`Budget approved: ${JSON.stringify(success)}`);
+    // TODO: This should probably not be long term behaviour
+    if (!(await this.getBudget())) {
+      this.createBudget(INITIAL_BUDGET_AMOUNT);
     }
   }
 
@@ -336,24 +327,19 @@ export class PaymentChannelClient {
     await this.channelClient.pushMessage(message);
   }
 
-  async approveBudgetAndFund(
-    playerAmount: string,
-    hubAmount: string,
-    playerDestinationAddress: string,
-    hubAddress: string,
-    hubDestinationAddress: string
-  ) {
+  async createBudget(amount: string) {
+    const playerDestinationAddress = this.channelClient.selectedAddress;
     await this.channelClient.approveBudgetAndFund(
-      playerAmount,
-      hubAmount,
+      amount,
+      amount,
       playerDestinationAddress,
-      hubAddress,
-      hubDestinationAddress
+      HUB.signingAddress,
+      HUB.outcomeAddress
     );
   }
 
-  async getBudget(hubAddress: string): Promise<SiteBudget> {
-    this.budgetCache = await this.channelClient.getBudget(hubAddress);
+  async getBudget(): Promise<SiteBudget> {
+    this.budgetCache = await this.channelClient.getBudget(HUB.signingAddress);
     return this.budgetCache;
   }
 
