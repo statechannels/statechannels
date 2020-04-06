@@ -160,11 +160,11 @@ test('it uses virtual funding when enabled', async () => {
   // Verify the budgets are allocated to the channel
   const aBudget = await aStore.getBudget(TEST_SITE);
   const aChannelAmount =
-    aBudget.forAsset[constants.ETH_ASSET_HOLDER_ADDRESS]?.channels[targetChannelId].amount;
+    aBudget?.forAsset[constants.ETH_ASSET_HOLDER_ADDRESS]?.channels[targetChannelId].amount;
   expect(aChannelAmount?.toHexString()).toEqual(totalAmount.toHexString());
 
   const bBudget = await bStore.getBudget(TEST_SITE);
   const bChannelAmount =
-    bBudget.forAsset[constants.ETH_ASSET_HOLDER_ADDRESS]?.channels[targetChannelId].amount;
+    bBudget?.forAsset[constants.ETH_ASSET_HOLDER_ADDRESS]?.channels[targetChannelId].amount;
   expect(bChannelAmount?.toHexString()).toEqual(totalAmount.toHexString());
 });

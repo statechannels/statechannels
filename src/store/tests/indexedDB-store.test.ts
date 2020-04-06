@@ -179,7 +179,7 @@ describe('getBudget', () => {
 
     const storedBudget = await store.getBudget(budget.domain);
 
-    const {availableReceiveCapacity, availableSendCapacity} = storedBudget.forAsset
+    const {availableReceiveCapacity, availableSendCapacity} = storedBudget?.forAsset
       .ETH as AssetBudget;
     expect(availableReceiveCapacity.add(availableSendCapacity).eq(15)).toBeTruthy();
   });
