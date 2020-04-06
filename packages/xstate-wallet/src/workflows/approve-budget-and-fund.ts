@@ -4,9 +4,9 @@ import {
   ActionObject,
   createMachine,
   Guard,
-  State as XStateState,
   assign,
-  DoneInvokeEvent
+  DoneInvokeEvent,
+  Interpreter
 } from 'xstate';
 import {SiteBudget, Participant, SimpleAllocation, AssetBudget} from '../store/types';
 
@@ -61,7 +61,7 @@ interface Transaction {
 }
 
 type Typestate =
-  | {value: 'waitForApproval'; context: Initial}
+  | {value: 'waitForUserApproval'; context: Initial}
   | {value: 'createBudgetAndLedger'; context: Initial}
   | {value: 'waitForPreFS'; context: LedgerExists}
   | {value: {deposit: 'init'}; context: LedgerExists & Deposit}
@@ -94,10 +94,6 @@ export interface Schema extends StateSchema<Context> {
     failure: {};
   };
 }
-
-export type WorkflowState = XStateState<Context, Event, Schema, Typestate>;
-
-export type StateValue = keyof Schema['states'];
 
 export const machine = (
   store: Store,
@@ -359,3 +355,5 @@ const submitDepositTransaction = (store: Store) => async (
 
   return store.chain.deposit(ctx.ledgerId, ctx.ledgerTotal.toHexString(), amount.toHexString());
 };
+
+export type ApproveBudgetAndFundService = Interpreter<Context, any, Event, Typestate>;

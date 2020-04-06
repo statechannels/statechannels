@@ -5,7 +5,7 @@ import {applicationWorkflow} from './workflows/application';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import {Wallet as WalletUi} from './ui/wallet';
-import {interpret, Interpreter, State, StateNode} from 'xstate';
+import {interpret, Interpreter, State} from 'xstate';
 import {Guid} from 'guid-typescript';
 import {Notification, Response} from '@statechannels/client-api-schema';
 import {filter, take} from 'rxjs/operators';
@@ -17,7 +17,7 @@ import {AppRequestEvent} from './event-types';
 
 export interface Workflow {
   id: string;
-  machine: Interpreter<any, any, any>;
+  service: Interpreter<any, any, any>;
   domain: string; // TODO: Is this useful?
 }
 export class ChannelWallet {
@@ -83,7 +83,7 @@ export class ChannelWallet {
           );
           this.workflows.push(workflow);
 
-          workflow.machine.send(request);
+          workflow.service.send(request);
         } else {
           // TODO: To allow RPS to keep working we just warn about duplicate events
           // Eventually this could probably be an error
@@ -106,7 +106,7 @@ export class ChannelWallet {
         );
         this.workflows.push(workflow);
 
-        workflow.machine.send(request);
+        workflow.service.send(request);
         break;
       }
       case 'CLOSE_AND_WITHDRAW': {
@@ -132,24 +132,19 @@ export class ChannelWallet {
       }
     }
   }
-  private startWorkflow(
-    machineConfig: StateNode<any, any, any, any>,
-    workflowId: string,
-    devTools = false
-  ): Workflow {
+  private startWorkflow(machineConfig: any, workflowId: string, devTools = false): Workflow {
     if (this.isWorkflowIdInUse(workflowId)) {
       throw new Error(`There is already a workflow running with id ${workflowId}`);
     }
 
-    const machine = interpret<any, any, any>(machineConfig, {devTools})
+    const service = interpret(machineConfig, {devTools})
       .onTransition((state, event) => process.env.ADD_LOGS && logTransition(state, event, this.id))
-
       .onDone(() => (this.workflows = this.workflows.filter(w => w.id !== workflowId)))
       .start();
     // TODO: Figure out how to resolve rendering priorities
-    this.renderUI(machine);
+    this.renderUI(service);
 
-    return {id: workflowId, machine, domain: 'TODO'};
+    return {id: workflowId, service, domain: 'TODO'};
   }
 
   private renderUI(machine) {

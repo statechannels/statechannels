@@ -4,7 +4,7 @@ import waitForExpect from 'wait-for-expect';
 import {SimpleHub} from './simple-hub';
 import {bigNumberify, BigNumberish} from 'ethers/utils';
 import _ from 'lodash';
-import {signState, calculateChannelId} from '../../store/state-utils';
+import {calculateChannelId, createSignatureEntry} from '../../store/state-utils';
 import {Participant, Outcome, SignedState, ChannelConstants} from '../../store/types';
 import {AddressZero, HashZero} from 'ethers/constants';
 import {add, simpleEthAllocation, simpleEthGuarantee, makeDestination} from '../../utils';
@@ -57,7 +57,9 @@ const state = (
 
   return {
     ...state,
-    signatures: constants.participants.map(p => signState(state, privateKeys[p.participantId]))
+    signatures: constants.participants.map(p =>
+      createSignatureEntry(state, privateKeys[p.participantId])
+    )
   };
 };
 

@@ -21,6 +21,8 @@ import {
 } from '@statechannels/nitro-protocol';
 import {joinSignature, splitSignature, bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
+import {Wallet} from 'ethers';
+import {SignatureEntry} from './channel-store-entry';
 
 function toNitroState(state: State): NitroState {
   const {challengeDuration, appDefinition, channelNonce, participants, chainId} = state;
@@ -67,7 +69,7 @@ export function fromNitroState(state: NitroState): State {
 export function toNitroSignedState(signedState: SignedState): NitroSignedState[] {
   const state = toNitroState(signedState);
   const {signatures} = signedState;
-  return signatures.map(sig => ({state, signature: splitSignature(sig)}));
+  return signatures.map(sig => ({state, signature: splitSignature(sig.signature)}));
 }
 
 export function calculateChannelId(channelConstants: ChannelConstants): string {
@@ -80,6 +82,12 @@ export function calculateChannelId(channelConstants: ChannelConstants): string {
   });
 }
 
+export function createSignatureEntry(state: State, privateKey: string): SignatureEntry {
+  const {address} = new Wallet(privateKey);
+  const nitroState = toNitroState(state);
+  const {signature} = signNitroState(nitroState, privateKey);
+  return {signature: joinSignature(signature), signer: address};
+}
 export function signState(state: State, privateKey: string): string {
   const nitroState = toNitroState(state);
   const {signature} = signNitroState(nitroState, privateKey);

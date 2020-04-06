@@ -19,6 +19,7 @@ import {
 import {bigNumberify} from 'ethers/utils';
 import {makeDestination} from '../../utils';
 import {convertToInternalParticipant} from '../../messaging';
+import {getSignerAddress} from '../../store/state-utils';
 
 export function deserializeMessage(message: WireMessage): Message {
   const signedStates = message?.data?.signedStates?.map(ss => deserializeState(ss));
@@ -33,14 +34,21 @@ export function deserializeMessage(message: WireMessage): Message {
 export function deserializeState(state: SignedStateWire): SignedState {
   const stateWithoutChannelId = {...state};
   delete stateWithoutChannelId.channelId;
-
-  return {
+  const deserializedState = {
     ...stateWithoutChannelId,
     challengeDuration: bigNumberify(state.challengeDuration),
     channelNonce: bigNumberify(state.channelNonce),
     turnNum: bigNumberify(state.turnNum),
     outcome: deserializeOutcome(state.outcome),
     participants: stateWithoutChannelId.participants.map(convertToInternalParticipant)
+  };
+
+  return {
+    ...deserializedState,
+    signatures: state.signatures.map(sig => ({
+      signature: sig,
+      signer: getSignerAddress(deserializedState, sig)
+    }))
   };
 }
 

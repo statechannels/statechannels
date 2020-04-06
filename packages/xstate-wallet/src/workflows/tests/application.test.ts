@@ -275,7 +275,7 @@ it('starts concluding when receiving a final state', async () => {
       chainId: '0x0',
       channelNonce: bigNumberify('0x0'),
       participants: [],
-      signatures: ['0x0']
+      signatures: [{signature: '0x0', signer: '0x0'}]
     }
   ];
   const services: Partial<WorkflowServices> = {

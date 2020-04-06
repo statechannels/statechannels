@@ -4,7 +4,7 @@ import waitForExpect from 'wait-for-expect';
 import {SimpleHub} from './simple-hub';
 import {bigNumberify} from 'ethers/utils';
 import _ from 'lodash';
-import {firstState, signState, calculateChannelId} from '../../store/state-utils';
+import {firstState, createSignatureEntry, calculateChannelId} from '../../store/state-utils';
 import {ChannelConstants, Outcome, State} from '../../store/types';
 import {AddressZero} from 'ethers/constants';
 import {add, simpleEthAllocation, makeDestination, simpleEthGuarantee} from '../../utils';
@@ -83,7 +83,10 @@ test('virtual funding with smart hub', async () => {
 
   [aStore, hubStore, bStore].forEach(async (store: TestStore) => {
     const state = firstState(outcome, jointChannel);
-    await store.createEntry({...state, signatures: [signState(state, wallet1.privateKey)]});
+    await store.createEntry({
+      ...state,
+      signatures: [createSignatureEntry(state, wallet1.privateKey)]
+    });
   });
 
   let state = ledgerState([first, third], ledgerAmounts);
@@ -91,7 +94,9 @@ test('virtual funding with smart hub', async () => {
   chain.depositSync(ledgerId, '0', depositAmount);
   await Promise.all(
     [aStore, hubStore].map(async (store: TestStore) => {
-      const signatures = [wallet1, wallet3].map(({privateKey}) => signState(state, privateKey));
+      const signatures = [wallet1, wallet3].map(({privateKey}) =>
+        createSignatureEntry(state, privateKey)
+      );
       await store.setLedgerByEntry(await store.createEntry({...state, signatures}));
     })
   );
@@ -101,7 +106,9 @@ test('virtual funding with smart hub', async () => {
   chain.depositSync(ledgerId, '0', depositAmount);
   await Promise.all(
     [bStore, hubStore].map(async (store: TestStore) => {
-      const signatures = [wallet2, wallet3].map(({privateKey}) => signState(state, privateKey));
+      const signatures = [wallet2, wallet3].map(({privateKey}) =>
+        createSignatureEntry(state, privateKey)
+      );
       await store.setLedgerByEntry(await store.createEntry({...state, signatures}));
     })
   );
@@ -140,19 +147,24 @@ test('virtual funding with a simple hub', async () => {
 
   [aStore, bStore].forEach(async (store: TestStore) => {
     const state = firstState(outcome, jointChannel);
-    await store.createEntry({...state, signatures: [signState(state, wallet1.privateKey)]});
+    await store.createEntry({
+      ...state,
+      signatures: [createSignatureEntry(state, wallet1.privateKey)]
+    });
   });
 
   let state = ledgerState([first, third], ledgerAmounts);
   let ledgerId = calculateChannelId(state);
-  let signatures = [wallet1, wallet3].map(({privateKey}) => signState(state, privateKey));
+  let signatures = [wallet1, wallet3].map(({privateKey}) =>
+    createSignatureEntry(state, privateKey)
+  );
 
   chain.depositSync(ledgerId, '0', depositAmount);
   await aStore.setLedgerByEntry(await aStore.createEntry({...state, signatures}));
 
   state = ledgerState([second, third], ledgerAmounts);
   ledgerId = calculateChannelId(state);
-  signatures = [wallet2, wallet3].map(({privateKey}) => signState(state, privateKey));
+  signatures = [wallet2, wallet3].map(({privateKey}) => createSignatureEntry(state, privateKey));
 
   chain.depositSync(ledgerId, '0', depositAmount);
   await bStore.setLedgerByEntry(await bStore.createEntry({...state, signatures}));
@@ -237,7 +249,13 @@ test('invalid joint state', async () => {
   };
 
   await store.pushMessage({
-    signedStates: [{...invalidState, signatures: [signState(invalidState, wallet1.privateKey)]}]
+    signedStates: [
+      {
+        ...invalidState,
+
+        signatures: [createSignatureEntry(invalidState, wallet1.privateKey)]
+      }
+    ]
   });
 
   await waitForExpect(() => expect(service.state.value).toEqual('failure'), EXPECT_TIMEOUT);

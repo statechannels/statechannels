@@ -23,11 +23,12 @@ export class TestStore extends XstateStore implements Store {
       .map(p => p.signingAddress)
       .findIndex(a => a === address);
     const {funding, applicationSite} = opts || {};
+    const stateHash = hashState(signedState);
     const entry = new ChannelStoreEntry({
       channelConstants: signedState,
       myIndex,
-      stateVariables: {[hashState(signedState)]: signedState},
-      signatures: {[hashState(signedState)]: signedState.signatures},
+      stateVariables: [{...signedState, stateHash}],
+      signatures: {[stateHash]: signedState.signatures},
       funding,
       applicationSite
     });
