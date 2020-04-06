@@ -103,7 +103,7 @@ export interface Store {
   setFunding(channelId: string, funding: Funding): Promise<void>;
   setApplicationSite(channelId: string, applicationSite: string): Promise<void>;
   addObjective(objective: Objective): void;
-  getBudget: (site: string) => Promise<SiteBudget>;
+  getBudget: (site: string) => Promise<SiteBudget | undefined>;
   createBudget: (budget: SiteBudget) => Promise<void>;
   clearBudget: (site: string) => Promise<void>;
   reserveFunds(
@@ -154,10 +154,8 @@ export class XstateStore implements Store {
     }
   }
 
-  public async getBudget(site: string): Promise<SiteBudget> {
-    const budget = await this.backend.getBudget(site);
-    if (!budget) throw Error(`No budget for ${site}`);
-    return budget;
+  public async getBudget(site: string): Promise<SiteBudget | undefined> {
+    return this.backend.getBudget(site);
   }
 
   public channelUpdatedFeed(channelId: string): Observable<ChannelStoreEntry> {
@@ -440,8 +438,10 @@ export class XstateStore implements Store {
 
     return await this.budgetLock.acquire<SiteBudget>(applicationSite, async release => {
       const currentBudget = await this.getBudget(applicationSite);
+
       const assetBudget = currentBudget?.forAsset[assetHolderAddress];
-      if (!assetBudget) throw new Error(Errors.noAssetBudget);
+
+      if (!currentBudget || !assetBudget) throw new Error(Errors.noBudget);
 
       const {outcome, participants} = (await this.getEntry(channelId)).supported;
       const playerAddress = await this.getAddress();
