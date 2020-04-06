@@ -477,7 +477,7 @@ export class XstateStore implements Store {
   ): Promise<SiteBudget> {
     const entry = await this.getEntry(channelId);
     const site = entry.applicationSite;
-    if (typeof site !== 'string') throw new Error(Errors.noSiteForChannel);
+    if (typeof site !== 'string') throw new Error(Errors.noSiteForChannel + ' ' + channelId);
 
     return await this.budgetLock
       .acquire<SiteBudget>(site, async release => {
