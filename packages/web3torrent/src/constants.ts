@@ -73,7 +73,7 @@ export const preSeededTorrents: Array<Partial<Torrent>> = [
   }
 ];
 
-// Welcoe Page Tracker creation options
+// Welcome Page Tracker creation options
 export const welcomePageTrackerOpts = {
   infoHash: [preSeededTorrents[0].infoHash],
   announce: defaultTrackers,
