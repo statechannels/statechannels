@@ -186,7 +186,7 @@ export function logTransition(
   id?: string,
   logger = console
 ): void {
-  const to = JSON.stringify(state.value);
+  const to = JSON.stringify(state.value, null, 2);
   if (!state.history) {
     logger.log(`${id || ''} - STARTED ${state.configuration[0].id} TRANSITIONED TO ${to}`);
   } else {
