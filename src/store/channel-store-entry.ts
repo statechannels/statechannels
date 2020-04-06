@@ -177,7 +177,7 @@ export class ChannelStoreEntry {
       throw new Error('State not signed by a participant of this channel');
     }
 
-    entry.signatures.push(signatureEntry);
+    entry.signatures = _.uniq(_.concat(entry.signatures, signatureEntry));
 
     this.clearOldStates();
 
