@@ -329,7 +329,6 @@ export const workflow = (
       return channelId;
     },
     invokeClosingProtocol: (context: ChannelIdExists) =>
-      // TODO: Close machine needs to accept new store
       ConcludeChannel.machine(store).withContext({channelId: context.channelId}),
     invokeCreateChannelAndFundProtocol: (_, event: DoneInvokeEvent<CreateAndFund.Init>) =>
       CreateAndFund.machine(store, event.data),

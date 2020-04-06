@@ -136,12 +136,12 @@ export interface Message {
 }
 
 export type ChannelStoredData = {
-  stateVariables: Array<StateVariablesWithHash>;
+  stateVariables: Array<SignedStateWithHash>;
   channelConstants: Omit<ChannelConstants, 'challengeDuration' | 'channelNonce'> & {
     challengeDuration: BigNumber | string;
     channelNonce: BigNumber | string;
   };
-  signatures: Record<string, Array<SignatureEntry>>;
+  signatures: Record<string, any>; // FIXME
   funding: Funding | undefined;
   applicationSite: string | undefined;
   myIndex: number;
