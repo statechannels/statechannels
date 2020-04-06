@@ -77,9 +77,11 @@ interface Signed {
 interface Hashed {
   stateHash: string;
 }
-export interface SignedState extends State, Signed {}
+export type SignedState = State & Signed;
 export type SignedStateWithHash = SignedState & Hashed;
-export interface SignedStateVariables extends StateVariables, Signed {}
+
+export type SignedStateVariables = StateVariables & Signed;
+export type SignedStateVarsWithHash = SignedStateVariables & Hashed;
 
 type _Objective<Name, Data> = {
   participants: Participant[];
@@ -136,12 +138,11 @@ export interface Message {
 }
 
 export type ChannelStoredData = {
-  stateVariables: Array<StateVariablesWithHash>;
+  stateVariables: Array<SignedStateWithHash>;
   channelConstants: Omit<ChannelConstants, 'challengeDuration' | 'channelNonce'> & {
-    challengeDuration: BigNumber | string;
+    challengeDuration: BigNumber | string; // TODO: This probably shouldn't be a BigNumber
     channelNonce: BigNumber | string;
   };
-  signatures: Record<string, Array<SignatureEntry>>;
   funding: Funding | undefined;
   applicationSite: string | undefined;
   myIndex: number;

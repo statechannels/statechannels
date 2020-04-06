@@ -204,8 +204,7 @@ export class XstateStore implements Store {
 
     const data: ChannelStoredData = {
       channelConstants: state,
-      stateVariables: [{...state, stateHash: hashState(state)}],
-      signatures: {},
+      stateVariables: [{...state, stateHash: hashState(state), signatures: []}],
       myIndex,
       funding: undefined,
       applicationSite
