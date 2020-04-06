@@ -43,9 +43,7 @@ if (config.states) {
     machine.onEvent(event => console.log(event.type)).start(state);
     storiesOf('Workflows / Confirm Create Channel', module).add(
       state.toString(),
-      renderComponentInFrontOfApp(
-        <ConfirmCreateChannel current={machine.state} send={machine.send} />
-      )
+      renderComponentInFrontOfApp(<ConfirmCreateChannel service={machine} />)
     );
     machine.stop(); // the machine will be stopped before it can be transitioned. This means the console.log on L49 throws a warning that we sent an event to a stopped machine.
   });
