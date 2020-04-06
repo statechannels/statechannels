@@ -520,6 +520,9 @@
         "appDefinition": {
           "$ref": "#/definitions/Address"
         },
+        "fundingStrategy": {
+          "$ref": "#/definitions/FundingStrategy"
+        },
         "participants": {
           "items": {
             "$ref": "#/definitions/Participant"
@@ -531,7 +534,8 @@
         "participants",
         "allocations",
         "appDefinition",
-        "appData"
+        "appData",
+        "fundingStrategy"
       ],
       "type": "object"
     },
@@ -707,6 +711,14 @@
     "ExternalDestination": {
       "description": "Nitro ChannelId",
       "pattern": "^0x(0{24})([a-fA-F0-9]{40})$",
+      "type": "string"
+    },
+    "FundingStrategy": {
+      "enum": [
+        "Direct",
+        "Ledger",
+        "Virtual"
+      ],
       "type": "string"
     },
     "Funds": {

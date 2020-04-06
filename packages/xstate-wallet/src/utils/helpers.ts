@@ -20,7 +20,7 @@ export function checkThat<T, S = undefined>(t: T | S, isTypeT: TypeGuard<T, S>):
 }
 
 type Opts<T> = {
-  onDone?: string;
+  onDone?: string | TransitionConfig<T, any>;
   id?: string;
   onError?: string | TransitionConfig<T, any>;
   entry?: string;
@@ -29,7 +29,7 @@ type Opts<T> = {
 export function getDataAndInvoke<T, Services extends string = string>(
   data: {src: Services; opts?: Opts<T>},
   service: {src: Services; opts?: Opts<T>},
-  onDone?: string
+  onDone?: string | TransitionConfig<T, any> | TransitionConfig<T, any>[]
 ): StateNodeConfig<T, any, DoneInvokeEvent<T>> {
   return {
     initial: data.src,

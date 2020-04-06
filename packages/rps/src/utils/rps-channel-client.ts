@@ -47,7 +47,8 @@ export class RPSChannelClient {
       participants,
       allocations,
       appDefinition,
-      appData
+      appData,
+      'Direct'
     );
 
     return convertToChannelState(channelResult);

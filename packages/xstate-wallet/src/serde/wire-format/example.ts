@@ -103,7 +103,8 @@ export const wireMessageFormat: WireMessage = {
       {
         type: 'OpenChannel',
         data: {
-          targetChannelId: '0x59fb8a0bff0f4553b0169d4b6cad93f3baa9edd94bd28c954ae0ad1622252967'
+          targetChannelId: '0x59fb8a0bff0f4553b0169d4b6cad93f3baa9edd94bd28c954ae0ad1622252967',
+          fundingStrategy: 'Direct'
         },
         participants: [
           {
@@ -127,7 +128,10 @@ export const internalMessageFormat: Message = {
   objectives: [
     {
       type: 'OpenChannel',
-      data: {targetChannelId: '0x59fb8a0bff0f4553b0169d4b6cad93f3baa9edd94bd28c954ae0ad1622252967'},
+      data: {
+        targetChannelId: '0x59fb8a0bff0f4553b0169d4b6cad93f3baa9edd94bd28c954ae0ad1622252967',
+        fundingStrategy: 'Direct'
+      },
       participants: [
         {
           destination: makeDestination('0x63E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7'),

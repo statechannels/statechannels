@@ -91,7 +91,8 @@ export default class TttChannelClientService extends Service {
       participants,
       allocations,
       appDefinition,
-      appData
+      appData,
+      'Direct'
     );
 
     return convertToChannelState(channelResult);

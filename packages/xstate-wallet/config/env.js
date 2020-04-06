@@ -31,23 +31,15 @@ process.env.NODE_PATH = (process.env.NODE_PATH || '')
 // injected into the application via DefinePlugin in Webpack configuration.
 const REACT_APP = /^REACT_APP_/i;
 // These are wallet configuration values that should be injected into the application
-const WALLET_CONFIGS = [
-  'TARGET_NETWORK',
-  'CHAIN_NETWORK_ID',
-  'GANACHE_PORT',
-  'USE_STORAGE',
-  'USE_VIRTUAL_FUNDING'
-];
+const WALLET_CONFIGS = ['TARGET_NETWORK', 'CHAIN_NETWORK_ID', 'GANACHE_PORT', 'USE_STORAGE'];
 
 const CONTRACT_ADDRESSES = /_ADDRESS$/i;
 
 function getClientEnvironment(publicUrl) {
   const raw = Object.keys(process.env)
-    .filter(key => {
-      return (
-        REACT_APP.test(key) || CONTRACT_ADDRESSES.test(key) || WALLET_CONFIGS.indexOf(key) > -1
-      );
-    })
+    .filter(
+      key => REACT_APP.test(key) || CONTRACT_ADDRESSES.test(key) || WALLET_CONFIGS.indexOf(key) > -1
+    )
     .reduce(
       (env, key) => {
         env[key] = process.env[key];

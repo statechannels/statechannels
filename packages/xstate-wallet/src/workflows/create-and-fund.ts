@@ -9,7 +9,7 @@ import {
 
 import {filter, map, first} from 'rxjs/operators';
 import _ from 'lodash';
-import {SimpleAllocation, isVirtuallyFund, StateVariables, Outcome} from '../store/types';
+import {isVirtuallyFund, StateVariables, Outcome} from '../store/types';
 
 import {
   MachineFactory,
@@ -22,31 +22,26 @@ import {
 import {Store} from '../store';
 
 import {SupportState, VirtualFundingAsLeaf, Depositing} from '.';
-import {from, Observable} from 'rxjs';
-import {CHALLENGE_DURATION, HUB, ETH_ASSET_HOLDER_ADDRESS, useVirtualFunding} from '../constants';
+import {CHALLENGE_DURATION, HUB, ETH_ASSET_HOLDER_ADDRESS} from '../constants';
 import {bigNumberify} from 'ethers/utils';
 
 const PROTOCOL = 'create-and-fund';
 
 export type Init = {
-  allocation: SimpleAllocation;
   channelId: string;
+  funding: 'Direct' | 'Virtual' | 'Ledger';
 };
 
+const isDirect = (ctx: Init) => ctx.funding === 'Direct';
+const isVirtual = (ctx: Init) => ctx.funding === 'Virtual';
 const preFundSetup = getDataAndInvoke<Init, Service>(
   {src: 'getPreFundSetup'},
   {src: 'supportState'},
-  'funding'
+  [
+    {target: 'direct', cond: isDirect},
+    {target: 'virtual', cond: isVirtual}
+  ]
 );
-
-type TEvent = {type: 'UseVirtualFunding' | 'UseDirectFunding'};
-const chooseFundingStrategy: StateNodeConfig<any, any, TEvent> = {
-  invoke: {src: 'determineFunding'},
-  on: {
-    UseVirtualFunding: 'virtual',
-    UseDirectFunding: 'direct'
-  }
-};
 
 const direct: StateNodeConfig<any, any, any> = {
   initial: 'depositing',
@@ -59,7 +54,7 @@ const direct: StateNodeConfig<any, any, any> = {
     updateFunding: {invoke: {src: 'setFundingToDirect', onDone: 'done'}},
     done: {type: 'final'}
   },
-  onDone: 'done'
+  onDone: 'postFundSetup'
 };
 
 const triggerObjective = (store: Store) => async (ctx: Init): Promise<void> => {
@@ -132,7 +127,7 @@ const virtual: StateNodeConfig<Init, any, any> = {
     updateFunding: {invoke: {src: 'setFundingToVirtual', onDone: 'done'}},
     done: {type: 'final'}
   },
-  onDone: 'done'
+  onDone: 'postFundSetup'
 };
 
 const postFundSetup = getDataAndInvoke<Init, Service>(
@@ -148,16 +143,8 @@ export const config: MachineConfig<Init, any, any> = {
   on: {[ActionTypes.ErrorCustom]: {target: 'failure'}},
   states: {
     preFundSetup,
-    funding: {
-      initial: 'chooseFundingStrategy',
-      states: {
-        chooseFundingStrategy,
-        direct,
-        virtual,
-        done: {type: 'final'}
-      },
-      onDone: 'postFundSetup'
-    },
+    direct,
+    virtual,
     postFundSetup,
     success: {type: 'final'},
     failure: {}
@@ -171,7 +158,6 @@ export const services = (store: Store) => ({
   getDepositingInfo: getDepositingInfo(store),
   getPreFundSetup: getPreFundSetup(store),
   getPostFundSetup: getPostFundSetup(store),
-  determineFunding: determineFunding(store),
   setFundingToDirect: setFundingToDirect(store),
   setFundingToVirtual: setFundingToVirtual(store),
   getObjective: getObjective(store),
@@ -206,16 +192,6 @@ const getObjective = (store: Store) => (ctx: Init): Promise<VirtualFundingAsLeaf
     )
     .toPromise();
 
-const determineFunding = (_: Store) => (_: Init): Observable<TEvent> =>
-  // This should use the store and the context to make a choice, but we have not
-  // moved anywhere towards making that choice
-  // So, the choice is a hard-coded environment variable
-  from(Promise.resolve(useVirtualFunding())).pipe(
-    map(
-      (useVirtualFunding): TEvent =>
-        useVirtualFunding ? {type: 'UseVirtualFunding'} : {type: 'UseDirectFunding'}
-    )
-  );
 /*
 It's safe to use support state instead of advance-channel:
 - If the latest state that I support has turn `n`, then other participants can support a state

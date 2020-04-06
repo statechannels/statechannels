@@ -1,4 +1,4 @@
-import {Observable, fromEvent, merge, from} from 'rxjs';
+import {Observable, fromEvent, merge, from, of} from 'rxjs';
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {
   DBBackend,
@@ -125,6 +125,7 @@ export class XstateStore implements Store {
   readonly chain: Chain;
   private _eventEmitter = new EventEmitter<InternalEvents>();
   protected _channelLocks: Record<string, Guid | undefined> = {};
+  private objectives: Objective[] = [];
 
   constructor(chain?: Chain, backend?: DBBackend) {
     // TODO: We shouldn't default to a fake chain
@@ -176,7 +177,7 @@ export class XstateStore implements Store {
 
   get objectiveFeed(): Observable<Objective> {
     const newObjectives = fromEvent<Objective>(this._eventEmitter, 'newObjective');
-    const currentObjectives = from(this.backend.objectives()).pipe(concatAll());
+    const currentObjectives = of(this.objectives).pipe(concatAll());
 
     return merge(newObjectives, currentObjectives);
   }
@@ -360,12 +361,12 @@ export class XstateStore implements Store {
     this._eventEmitter.emit('addToOutbox', {signedStates: [signedState]});
   }
 
-  async addObjective(objective: Objective) {
-    const objectives = await this.backend.objectives();
+  async addObjective(objective: Objective, addToOutbox = true) {
+    const objectives = this.objectives;
     if (!_.includes(objectives, objective)) {
       // TODO: Should setObjective take a key??
-      this.backend.setObjective(objectives.length, objective);
-      this._eventEmitter.emit('addToOutbox', {objectives: [objective]});
+      this.objectives.push(objective);
+      addToOutbox && this._eventEmitter.emit('addToOutbox', {objectives: [objective]});
       this._eventEmitter.emit('newObjective', objective);
     }
   }
@@ -395,11 +396,7 @@ export class XstateStore implements Store {
       // todo: check the channel involves me
       await Promise.all(signedStates.map(signedState => this.addState(signedState)));
     }
-    if (objectives && objectives.length) {
-      (await this.backend.setReplaceObjectives(objectives)).forEach(objective =>
-        this._eventEmitter.emit('newObjective', objective)
-      );
-    }
+    objectives?.map(o => this.addObjective(o, false));
   }
 
   public async getEntry(channelId: string): Promise<ChannelStoreEntry> {

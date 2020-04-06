@@ -73,6 +73,7 @@ type OpenChannel = _Objective<
   'OpenChannel',
   {
     targetChannelId: string;
+    fundingStrategy: 'Direct' | 'Virtual' | 'Ledger';
   }
 >;
 type VirtuallyFund = _Objective<

@@ -1,5 +1,6 @@
 import {BigNumber} from 'ethers/utils';
 import {Funding} from './store';
+import {FundingStrategy} from '@statechannels/client-api-schema/src';
 import {SignatureEntry} from './channel-store-entry';
 
 export interface SiteBudget {
@@ -89,6 +90,7 @@ export type OpenChannel = _Objective<
   'OpenChannel',
   {
     targetChannelId: string;
+    fundingStrategy: FundingStrategy;
   }
 >;
 export type VirtuallyFund = _Objective<
