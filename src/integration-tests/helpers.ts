@@ -33,7 +33,7 @@ export class Player {
 
   startCloseLedgerAndWithdraw(context: CloseLedgerAndWithdraw.WorkflowContext) {
     const workflowId = Guid.create().toString();
-    const machine = interpret<any, any, any>(
+    const service = interpret<any, any, any>(
       CloseLedgerAndWithdraw.workflow(this.store, this.messagingService, context),
       {devTools: true}
     )
@@ -41,11 +41,11 @@ export class Player {
 
       .start();
 
-    this.channelWallet.workflows.push({id: workflowId, machine, domain: 'TODO'});
+    this.channelWallet.workflows.push({id: workflowId, service, domain: 'TODO'});
   }
   startCreateAndFundLedger(context: CreateAndFundLedger.WorkflowContext) {
     const workflowId = Guid.create().toString();
-    const machine = interpret<any, any, any>(
+    const service = interpret<any, any, any>(
       CreateAndFundLedger.createAndFundLedgerWorkflow(this.store, context),
       {
         devTools: true
@@ -55,25 +55,24 @@ export class Player {
 
       .start();
 
-    this.channelWallet.workflows.push({id: workflowId, machine, domain: 'TODO'});
+    this.channelWallet.workflows.push({id: workflowId, service, domain: 'TODO'});
   }
   startAppWorkflow(startingState: string, context: App.WorkflowContext) {
     const workflowId = Guid.create().toString();
-    const machine = interpret<any, any, any>(
+    const service = interpret<any, any, any>(
       App.workflow(this.store, this.messagingService).withContext(context),
       {devTools: true}
     )
       .onTransition((state, event) => process.env.ADD_LOGS && logTransition(state, event, this.id))
-
       .start(startingState);
 
-    this.channelWallet.workflows.push({id: workflowId, machine, domain: 'TODO'});
+    this.channelWallet.workflows.push({id: workflowId, service, domain: 'TODO'});
   }
   get workflowMachine(): Interpreter<any, any, any, any> | undefined {
-    return this.channelWallet.workflows[0]?.machine;
+    return this.channelWallet.workflows[0]?.service;
   }
   get workflowState(): string | object | undefined {
-    return this.channelWallet.workflows[0]?.machine.state.value;
+    return this.channelWallet.workflows[0]?.service.state.value;
   }
   get destination() {
     return makeDestination('0x63E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7');
