@@ -80,11 +80,11 @@ it('allows for a wallet to close the ledger channel with the hub and withdraw', 
   await waitForExpect(async () => {
     expect(playerA.workflowState).toEqual('waitForUserApproval');
   }, 3000);
-  playerA.channelWallet.workflows[0].machine.send({type: 'USER_APPROVES_CLOSE'});
+  playerA.channelWallet.workflows[0].service.send({type: 'USER_APPROVES_CLOSE'});
   await waitForExpect(async () => {
     expect(hub.workflowState).toEqual('waitForUserApproval');
   }, 3000);
-  hub.channelWallet.workflows[0].machine.send({type: 'USER_APPROVES_CLOSE'});
+  hub.channelWallet.workflows[0].service.send({type: 'USER_APPROVES_CLOSE'});
 
   const closeAndWithdrawResponse: CloseAndWithdrawResponse = await closeAndWithdrawPromise;
 
