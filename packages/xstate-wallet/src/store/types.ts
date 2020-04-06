@@ -138,7 +138,7 @@ export interface Message {
 export type ChannelStoredData = {
   stateVariables: Array<SignedStateWithHash>;
   channelConstants: Omit<ChannelConstants, 'challengeDuration' | 'channelNonce'> & {
-    challengeDuration: BigNumber | string;
+    challengeDuration: BigNumber | string; // TODO: This probably shouldn't be a BigNumber
     channelNonce: BigNumber | string;
   };
   signatures: Record<string, any>; // FIXME
