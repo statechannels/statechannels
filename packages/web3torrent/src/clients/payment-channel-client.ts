@@ -17,6 +17,7 @@ import {AddressZero} from 'ethers/constants';
 import * as firebase from 'firebase/app';
 import 'firebase/database';
 import debug from 'debug';
+import _ from 'lodash';
 const log = debug('web3torrent:payment-channel');
 
 function sanitizeMessageForFirebase(message) {
@@ -86,9 +87,10 @@ export class PaymentChannelClient {
     await this.channelClient.provider.enable();
     this.initializeHubComms();
     log('payment channel client enabled');
-    // TODO: This should probably not be long term behaviour
-    if (!(await this.getBudget())) {
-      this.createBudget(INITIAL_BUDGET_AMOUNT);
+    // TODO: This should probably not be long term behavior
+    const existingBudget = await this.getBudget();
+    if (_.isEmpty(existingBudget)) {
+      await this.createBudget(INITIAL_BUDGET_AMOUNT);
     }
   }
 
