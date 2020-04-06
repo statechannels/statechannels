@@ -12,7 +12,6 @@ import _ from 'lodash';
 import {isVirtuallyFund, StateVariables, Outcome} from '../store/types';
 
 import {
-  MachineFactory,
   add,
   isSimpleEthAllocation,
   simpleEthAllocation,
@@ -174,8 +173,7 @@ const options = (store: Store) => ({
   }
 });
 
-export const machine: MachineFactory<Init, any> = (store: Store, init: Init) =>
-  Machine(config).withConfig(options(store), init);
+export const machine = (store: Store) => Machine(config).withConfig(options(store));
 
 const getObjective = (store: Store) => (ctx: Init): Promise<VirtualFundingAsLeaf.Init> =>
   store.objectiveFeed
