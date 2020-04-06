@@ -3,6 +3,7 @@ import {Status, Torrent} from './types';
 import {ChannelState} from './clients/payment-channel-client';
 import {bigNumberify} from 'ethers/utils';
 import {ethers} from 'ethers';
+import {parseEther, hexZeroPad} from 'ethers/utils';
 
 export const WEI_PER_BYTE = bigNumberify(1); // cost per byte
 export const BLOCK_LENGTH = 1 << 14; // Standard request length.
@@ -128,4 +129,4 @@ export {SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS};
 export const FUNDING_STRATEGY =
   process.env.REACT_APP_FUNDING_STRATEGY === 'Direct' ? 'Direct' : 'Virtual';
 
-export const INITIAL_BUDGET_AMOUNT = ethers.utils.parseEther('10').toHexString();
+export const INITIAL_BUDGET_AMOUNT = hexZeroPad(parseEther('10').toHexString(), 32);
