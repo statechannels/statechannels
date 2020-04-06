@@ -26,7 +26,6 @@ export class TestStore extends XstateStore implements Store {
       channelConstants: signedState,
       myIndex,
       stateVariables: [{...signedState, stateHash}],
-      signatures: {[stateHash]: signedState.signatures},
       funding,
       applicationSite
     });

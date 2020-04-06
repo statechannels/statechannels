@@ -4,8 +4,9 @@ import {
   SignedState,
   Participant,
   ChannelStoredData,
-  StateVariablesWithHash,
-  SignedStateWithHash
+  SignedStateWithHash,
+  SignedStateVarsWithHash,
+  StateVariablesWithHash
 } from './types';
 import {hashState, calculateChannelId, createSignatureEntry} from './state-utils';
 import _ from 'lodash';
@@ -22,14 +23,12 @@ export type SignedStateVariables = StateVariables & {signatures: SignatureEntry[
 export class ChannelStoreEntry {
   public readonly channelConstants: ChannelConstants;
   public readonly myIndex: number;
-  private stateVariables: Array<StateVariablesWithHash> = [];
-  private signatures: Record<string, Array<SignatureEntry>> = {};
+  private stateVariables: Array<SignedStateVarsWithHash> = [];
   public funding: Funding | undefined = undefined;
   public readonly applicationSite?: string;
   constructor(channelData: ChannelStoredData) {
     this.myIndex = channelData.myIndex;
 
-    this.signatures = channelData.signatures;
     this.funding = channelData.funding;
     this.applicationSite = channelData.applicationSite;
     this.channelConstants = {
@@ -62,8 +61,7 @@ export class ChannelStoreEntry {
   private get signedStates(): Array<SignedStateWithHash> {
     return this.stateVariables.map(s => ({
       ...this.channelConstants,
-      ...s,
-      signatures: this.signatures[s.stateHash]
+      ...s
     }));
   }
 
@@ -149,39 +147,41 @@ export class ChannelStoreEntry {
 
     const signatureEntry = createSignatureEntry(state, privateKey);
 
-    this.addState(stateVars, signatureEntry);
-    const stateHash = hashState(state);
-    return {
-      ...stateVars,
-      ...this.channelConstants,
-      signatures: this.signatures[stateHash]
-    };
+    return this.addState(stateVars, signatureEntry);
   }
 
   addState(stateVars: StateVariables, signatureEntry: SignatureEntry): SignedState {
-    const state = {...stateVars, ...this.channelConstants};
-    const stateHash = hashState(state);
+    const signedStateVars: SignedStateVariables = {
+      ...stateVars,
+      signatures: [signatureEntry]
+    };
+    const withHash: StateVariablesWithHash = {
+      ...stateVars,
+      stateHash: hashState(this.state(signedStateVars))
+    };
+
     // TODO: This check could be more efficient
-    if (!this.stateVariables.some(s => s.stateHash === stateHash)) {
-      this.stateVariables.push({...stateVars, stateHash});
-    }
     const {participants} = this.channelConstants;
 
     // check the signature
 
     const signerIndex = participants.findIndex(p => p.signingAddress === signatureEntry.signer);
+    let entry = this.stateVariables.find(s => s.stateHash === withHash.stateHash);
+
+    if (!entry) {
+      entry = {...withHash, signatures: []};
+      this.stateVariables.push(entry);
+    }
 
     if (signerIndex === -1) {
       throw new Error('State not signed by a participant of this channel');
     }
 
-    const signatures = this.signatures[stateHash] ?? new Array<SignatureEntry>();
-    signatures.push(signatureEntry);
-    this.signatures[stateHash] = signatures;
+    entry.signatures.push(signatureEntry);
 
     this.clearOldStates();
 
-    return this.state({...stateVars, signatures});
+    return this.state(entry);
   }
 
   private state(stateVars: SignedStateVariables): SignedState {
@@ -221,7 +221,6 @@ export class ChannelStoreEntry {
     return {
       stateVariables,
       channelConstants,
-      signatures: this.signatures,
       funding: this.funding,
       myIndex: this.myIndex,
       applicationSite: this.applicationSite
@@ -232,15 +231,15 @@ export class ChannelStoreEntry {
       console.error("Data is undefined or null, Memory Channel Store Entry can't be created.");
       return data;
     }
-    const {channelConstants, signatures, funding, myIndex, applicationSite} = data;
+    const {channelConstants, funding, myIndex, applicationSite} = data;
     const stateVariables = ChannelStoreEntry.prepareStateVariables(data.stateVariables);
     channelConstants.challengeDuration = new BigNumber(channelConstants.challengeDuration);
     channelConstants.channelNonce = new BigNumber(channelConstants.channelNonce);
+
     return new ChannelStoreEntry({
       channelConstants,
       myIndex,
       stateVariables,
-      signatures,
       funding,
       applicationSite
     });
