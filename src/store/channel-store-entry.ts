@@ -8,7 +8,7 @@ import {
   SignedStateVarsWithHash,
   StateVariablesWithHash
 } from './types';
-import {hashState, calculateChannelId, createSignatureEntry} from './state-utils';
+import {hashState, calculateChannelId, createSignatureEntry, outcomesEqual} from './state-utils';
 import _ from 'lodash';
 import {BigNumber, bigNumberify} from 'ethers/utils';
 
@@ -82,12 +82,38 @@ export class ChannelStoreEntry {
     return this._support.map(s => ({...s, ...this.channelConstants}));
   }
 
-  private get _support(): Array<SignedStateWithHash> {
-    const support: Array<SignedStateWithHash> = [];
+  // This is a simple check based on _requireValidTransition from NitroProtocol
+  // We will eventually want to perform a proper validTransition check
+  // but we will have to be careful where we do that to prevent eating up a ton of cpu
+  private validChain(firstState: SignedState, secondState: SignedState): boolean {
+    if (!firstState.turnNum.add(1).eq(secondState.turnNum)) {
+      return false;
+    }
+    if (secondState.isFinal) {
+      return outcomesEqual(firstState.outcome, secondState.outcome);
+    }
+    if (secondState.turnNum.lt(2 * this.nParticipants())) {
+      return (
+        outcomesEqual(firstState.outcome, secondState.outcome) &&
+        firstState.appData === secondState.appData
+      );
+    }
+    return true;
+  }
 
-    const participantsWhoHaveNotSigned = new Set(this.participants.map(p => p.signingAddress));
+  private get _support(): Array<SignedStateWithHash> {
+    let support: Array<SignedStateWithHash> = [];
+
+    let participantsWhoHaveNotSigned = new Set(this.participants.map(p => p.signingAddress));
+    let previousState;
 
     for (const signedState of this.signedStates.reverse()) {
+      // If there is not a valid transition we know there cannot be a valid support
+      // so we clear out what we have and start at the current signed state
+      if (previousState && !this.validChain(signedState, previousState)) {
+        support = [];
+        participantsWhoHaveNotSigned = new Set(this.participants.map(p => p.signingAddress));
+      }
       const moverIndex = signedState.turnNum.mod(this.nParticipants()).toNumber();
       const moverForThisTurn = this.participants[moverIndex].signingAddress;
 
@@ -102,6 +128,7 @@ export class ChannelStoreEntry {
           }
         }
       }
+      previousState = signedState;
     }
     return [];
   }
