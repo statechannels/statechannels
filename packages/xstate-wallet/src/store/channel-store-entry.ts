@@ -7,7 +7,7 @@ import {
   StateVariablesWithHash,
   SignedStateWithHash
 } from './types';
-import {hashState, calculateChannelId, createSignatureEntry} from './state-utils';
+import {hashState, calculateChannelId, createSignatureEntry, outcomesEqual} from './state-utils';
 import _ from 'lodash';
 import {BigNumber, bigNumberify} from 'ethers/utils';
 
@@ -84,12 +84,23 @@ export class ChannelStoreEntry {
     return this._support.map(s => ({...s, ...this.channelConstants}));
   }
 
-  // This is a simple check
+  // This is a simple check based on _requireValidTransition from NitroProtocol
+  // We will eventually want to perform a proper validTransition check
+  // but we will have to be careful where we do that to prevent eating up a ton of cpu
   private validChain(firstState: SignedState, secondState: SignedState): boolean {
-    return (
-      firstState.turnNum.add(1).eq(secondState.turnNum) &&
-      (firstState.isFinal === secondState.isFinal || secondState.isFinal)
-    );
+    if (!firstState.turnNum.add(1).eq(secondState.turnNum)) {
+      return false;
+    }
+    if (secondState.isFinal) {
+      return outcomesEqual(firstState.outcome, secondState.outcome);
+    }
+    if (secondState.turnNum.lt(2 * this.nParticipants())) {
+      return (
+        outcomesEqual(firstState.outcome, secondState.outcome) &&
+        firstState.appData === secondState.appData
+      );
+    }
+    return true;
   }
 
   private get _support(): Array<SignedStateWithHash> {
