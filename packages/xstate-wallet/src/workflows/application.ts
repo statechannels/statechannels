@@ -88,10 +88,7 @@ export type WorkflowServices = {
   invokeClosingProtocol: (
     context: ChannelIdExists
   ) => StateMachine<ConcludeChannel.Init, any, any, any>;
-  invokeCreateChannelAndFundProtocol: (
-    context,
-    event: DoneInvokeEvent<CreateAndFund.Init>
-  ) => StateMachine<any, any, any, any>;
+  invokeCreateChannelAndFundProtocol: StateMachine<any, any, any, any>;
   invokeCreateChannelConfirmation: CCC.WorkflowMachine;
 };
 interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
