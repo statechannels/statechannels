@@ -5,7 +5,7 @@ import {Flex, Progress} from 'rimble-ui';
 import {ChannelId} from './channel-id';
 import {
   isConfirmCreateChannel,
-  getConfirmCreateChannelState,
+  getConfirmCreateChannelService,
   getApplicationOpenProgress,
   isApplicationOpening,
   getApplicationStateValue
@@ -45,7 +45,7 @@ export const ApplicationWorkflow = (props: Props) => {
         </Flex>
       )}
       {isConfirmCreateChannel(current) && (
-        <ConfirmCreateChannel current={getConfirmCreateChannelState(current)} send={props.send} />
+        <ConfirmCreateChannel service={getConfirmCreateChannelService(current)} />
       )}
       {!isConfirmCreateChannel(current) && isApplicationOpening(current) && (
         <Progress value={getApplicationOpenProgress(current)} />

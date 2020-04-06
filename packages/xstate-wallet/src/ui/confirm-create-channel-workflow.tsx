@@ -1,25 +1,20 @@
 import React from 'react';
-import {EventData} from 'xstate';
 import './wallet.scss';
 import {Button} from 'rimble-ui';
-import {WorkflowState} from '../workflows/confirm';
+import {useService} from '@xstate/react';
+import {Interpreter} from 'xstate';
 
 interface Props {
-  current: WorkflowState;
-  send: (event: any, payload?: EventData | undefined) => WorkflowState;
+  service: Interpreter<any>;
 }
 
 export const ConfirmCreateChannel = (props: Props) => {
-  const current = props.current;
+  const [current, send] = useService(props.service);
   const prompt = (
-    <div
-      style={{
-        textAlign: 'center'
-      }}
-    >
+    <div style={{textAlign: 'center'}}>
       <h1>Do you wish to create a channel?</h1>
-      <Button onClick={() => props.send('USER_APPROVES')}>Yes</Button>
-      <Button.Text onClick={() => props.send('USER_REJECTS')}>No</Button.Text>
+      <Button onClick={() => send('USER_APPROVES')}>Yes</Button>
+      <Button.Text onClick={() => send('USER_REJECTS')}>No</Button.Text>
     </div>
   );
   if (current.value.toString() === 'waitForUserConfirmation') {

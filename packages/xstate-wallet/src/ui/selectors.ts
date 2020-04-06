@@ -7,6 +7,7 @@ import {SiteBudget} from '../store/types';
 import {ETH_ASSET_HOLDER_ADDRESS} from '../constants';
 import {BigNumber} from 'ethers/utils';
 import {unreachable} from '../utils';
+import {Interpreter} from 'xstate';
 
 export function getApplicationStateValue(
   applicationWorkflowState: AppWorkflowState
@@ -24,20 +25,15 @@ export function getConfirmCreateChannelState(
   return applicationWorkflowState.children[Object.keys(applicationWorkflowState.children)[0]]
     .state as CCCWorkflowState;
 }
+export function getConfirmCreateChannelService(
+  applicationWorkflowState: AppWorkflowState
+): Interpreter<any> {
+  return applicationWorkflowState.children.invokeCreateChannelConfirmation as any;
+}
 
 // TODO:Ideally this should be a type guard
 export function isConfirmCreateChannel(applicationWorkflowState: AppWorkflowState): boolean {
-  // TODO: This is fragile and should be revisited at some point
-  const joinInConfirmCreateChannel =
-    getApplicationStateValue(applicationWorkflowState) === 'joiningChannel' &&
-    applicationWorkflowState.value['joiningChannel'] &&
-    applicationWorkflowState.value['joiningChannel']['confirmChannelCreation'] ===
-      'invokeCreateChannelConfirmation';
-
-  return (
-    joinInConfirmCreateChannel ||
-    getApplicationStateValue(applicationWorkflowState) === 'creatingChannel'
-  );
+  return applicationWorkflowState.value === 'confirmingWithUser';
 }
 
 export function isApplicationOpening(applicationWorkflowState: AppWorkflowState): boolean {
