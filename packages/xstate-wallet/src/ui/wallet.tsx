@@ -24,7 +24,7 @@ export const Wallet = (props: Props) => {
           <EnableEthereum current={current} send={send} />
         )}
         {props.workflow.id === 'approve-budget-and-fund' && (
-          <ApproveBudgetAndFund current={current} send={send} />
+          <ApproveBudgetAndFund service={props.workflow} />
         )}
       </Layout>
     </WindowContext.Provider>

@@ -46,7 +46,7 @@ it('allows for two wallets to fund an app', async () => {
     .toPromise();
   await playerA.messagingService.receiveRequest(createEvent, 'localhost');
 
-  playerA.channelWallet.workflows[0].machine.send({type: 'USER_APPROVES'});
+  playerA.channelWallet.workflows[0].service.send({type: 'USER_APPROVES'});
 
   const createResponse = await createPromise;
   expect(createResponse.result.channelId).toEqual(channelId);
@@ -70,7 +70,7 @@ it('allows for two wallets to fund an app', async () => {
     });
   }, 3000);
 
-  playerB.channelWallet.workflows[0].machine.send({type: 'USER_APPROVES'});
+  playerB.channelWallet.workflows[0].service.send({type: 'USER_APPROVES'});
 
   const playerBResponse: JoinChannelResponse = await joinPromise;
 
