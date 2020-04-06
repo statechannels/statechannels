@@ -37,7 +37,7 @@ export function tokenAddress(assetHolderAddress: string): string | undefined {
   // TODO: store mapping, implement lookup
   return assetHolderAddress;
 }
-
+// TODO: Use getEnvBool from devtools once working
 export function getBool(val: string | undefined, throwIfMissing = true): boolean {
   if (throwIfMissing && val === undefined) {
     throw Error(`Environment variable ${name} is not set.`);
