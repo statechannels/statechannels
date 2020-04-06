@@ -62,7 +62,6 @@ type WorkflowGuards = Guards<
 >;
 
 export interface WorkflowActions {
-  setApplicationSite: Action<ChannelIdExists, JoinChannelEvent>;
   sendUpdateChannelResponse: Action<any, PlayerStateUpdate>;
   sendCloseChannelResponse: Action<ChannelIdExists, any>;
   sendCreateChannelResponse: Action<RequestIdExists & ChannelIdExists, any>;
@@ -84,6 +83,7 @@ export type WorkflowEvent =
   | DoneInvokeEvent<keyof WorkflowServices>;
 
 export type WorkflowServices = {
+  setApplicationSite(ctx: ChannelIdExists, e: JoinChannelEvent): Promise<void>;
   createChannel: (context: WorkflowContext, event: WorkflowEvent) => Promise<string>;
   invokeClosingProtocol: (
     context: ChannelIdExists
@@ -130,11 +130,12 @@ const generateConfig = (
               {target: 'done', cond: guards.amCreator}
             ],
             JOIN_CHANNEL: {
-              target: 'done',
-              actions: [actions.sendJoinChannelResponse, actions.setApplicationSite]
+              target: 'settingSite',
+              actions: [actions.sendJoinChannelResponse]
             }
           }
         },
+        settingSite: {invoke: {src: 'setApplicationSite', onDone: 'done'}},
         done: {type: 'final'}
       },
       onDone: [
@@ -219,8 +220,6 @@ export const workflow = (
       .pipe(map(storeEntry => ({type: 'CHANNEL_UPDATED', storeEntry})));
 
   const actions: WorkflowActions = {
-    setApplicationSite: async (ctx: ChannelIdExists, event: JoinChannelEvent) =>
-      await store.setApplicationSite(ctx.channelId, event.applicationSite),
     sendUpdateChannelResponse: async (context: any, event: PlayerStateUpdate) => {
       const entry = await store.getEntry(context.channelId);
       messagingService.sendResponse(event.requestId, await convertToChannelResult(entry));
@@ -304,6 +303,8 @@ export const workflow = (
   };
 
   const services: WorkflowServices = {
+    setApplicationSite: async (ctx: ChannelIdExists, event: JoinChannelEvent) =>
+      await store.setApplicationSite(ctx.channelId, event.applicationSite),
     createChannel: async (context: CreateInit) => {
       const {
         participants,
@@ -359,7 +360,6 @@ const mockGuards: WorkflowGuards = {
 };
 
 const mockActions: Record<keyof WorkflowActions, string> = {
-  setApplicationSite: 'setApplicationSite',
   assignChannelId: 'assignChannelId',
   sendChannelUpdatedNotification: 'sendChannelUpdatedNotification',
   sendCloseChannelResponse: 'sendCloseChannelResponse',
