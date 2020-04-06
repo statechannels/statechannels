@@ -339,8 +339,7 @@ export const workflow = (
     },
     invokeClosingProtocol: (context: ChannelIdExists) =>
       ConcludeChannel.machine(store).withContext({channelId: context.channelId}),
-    invokeCreateChannelAndFundProtocol: (_, event: DoneInvokeEvent<CreateAndFund.Init>) =>
-      CreateAndFund.machine(store, event.data),
+    invokeCreateChannelAndFundProtocol: CreateAndFund.machine(store),
     invokeCreateChannelConfirmation: CCC.workflow({})
   };
 
