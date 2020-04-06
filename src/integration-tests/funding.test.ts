@@ -12,7 +12,6 @@ import {isChannelUpdated, isChannelProposed} from '../messaging';
 jest.setTimeout(20000);
 
 it('allows for two wallets to fund an app', async () => {
-  /*
   const fakeChain = new FakeChain();
 
   const playerA = await Player.createPlayer(
