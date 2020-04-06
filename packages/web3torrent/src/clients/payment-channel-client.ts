@@ -9,7 +9,8 @@ import {
   AUTO_FUND_LEDGER,
   HUB,
   FIREBASE_PREFIX,
-  fireBaseConfig
+  fireBaseConfig,
+  FUNDING_STRATEGY
 } from '../constants';
 import {hexZeroPad} from 'ethers/utils';
 import {AddressZero} from 'ethers/constants';
@@ -160,7 +161,7 @@ export class PaymentChannelClient {
       allocations,
       appDefinition,
       APP_DATA,
-      'Virtual'
+      FUNDING_STRATEGY
     );
 
     this.insertIntoChannelCache(convertToChannelState(channelResult));

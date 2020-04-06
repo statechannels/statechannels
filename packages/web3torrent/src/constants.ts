@@ -124,3 +124,6 @@ if (process.env.REACT_APP_SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS) {
   throw new Error('Contract address not defined');
 }
 export {SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS};
+
+export const FUNDING_STRATEGY =
+  process.env.REACT_APP_FUNDING_STRATEGY === 'Direct' ? 'Direct' : 'Virtual';
