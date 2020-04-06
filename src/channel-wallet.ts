@@ -105,7 +105,7 @@ export class ChannelWallet {
         break;
       }
       case 'JOIN_CHANNEL':
-        this.getWorkflow(this.calculateWorkflowId(request)).machine.send(request);
+        this.getWorkflow(this.calculateWorkflowId(request)).service.send(request);
         break;
       case 'APPROVE_BUDGET_AND_FUND': {
         const workflow = this.startWorkflow(
@@ -148,7 +148,9 @@ export class ChannelWallet {
       throw new Error(`There is already a workflow running with id ${workflowId}`);
     }
     const service = interpret(machineConfig, {devTools})
-      .onTransition((state, event) => process.env.ADD_LOGS && logTransition(state, event, workflowId))
+      .onTransition(
+        (state, event) => process.env.ADD_LOGS && logTransition(state, event, workflowId)
+      )
       .onDone(() => (this.workflows = this.workflows.filter(w => w.id !== workflowId)))
       .start();
     // TODO: Figure out how to resolve rendering priorities
