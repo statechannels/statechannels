@@ -3,20 +3,24 @@ import {ChannelStoredData} from '../types';
 import {appState, wallet1, wallet2} from '../../workflows/tests/data';
 import {hashState, createSignatureEntry} from '../state-utils';
 
+const signState = (state, privateKeys: string[]) => ({
+  ...state,
+  signatures: privateKeys.map(k => createSignatureEntry(state, k))
+});
+
 describe('isSupported', () => {
   it('returns false when there is an invalid transition due to turnnum', () => {
     const firstSupportState = {...appState(0), stateHash: hashState(appState(0))};
     const secondSupportState = {...appState(3), stateHash: hashState(appState(3))};
-    const signatures = {
-      [firstSupportState.stateHash]: [createSignatureEntry(firstSupportState, wallet1.privateKey)],
-      [secondSupportState.stateHash]: [createSignatureEntry(firstSupportState, wallet2.privateKey)]
-    };
+    const stateVariables = [
+      signState(firstSupportState, [wallet1.privateKey]),
+      signState(secondSupportState, [wallet2.privateKey])
+    ];
     const channelStoreData: ChannelStoredData = {
-      stateVariables: [firstSupportState, secondSupportState],
+      stateVariables,
       channelConstants: firstSupportState,
       myIndex: 0,
       funding: undefined,
-      signatures,
       applicationSite: 'localhost'
     };
     const entry = new ChannelStoreEntry(channelStoreData);
@@ -26,16 +30,14 @@ describe('isSupported', () => {
   it('returns true when there a valid chain of signed states', () => {
     const firstSupportState = {...appState(0), stateHash: hashState(appState(0))};
     const secondSupportState = {...appState(1), stateHash: hashState(appState(1))};
-    const signatures = {
-      [firstSupportState.stateHash]: [createSignatureEntry(firstSupportState, wallet1.privateKey)],
-      [secondSupportState.stateHash]: [createSignatureEntry(secondSupportState, wallet2.privateKey)]
-    };
     const channelStoreData: ChannelStoredData = {
-      stateVariables: [firstSupportState, secondSupportState],
+      stateVariables: [
+        signState(firstSupportState, [wallet1.privateKey]),
+        signState(secondSupportState, [wallet2.privateKey])
+      ],
       channelConstants: firstSupportState,
       myIndex: 0,
       funding: undefined,
-      signatures,
       applicationSite: 'localhost'
     };
     const entry = new ChannelStoreEntry(channelStoreData);
@@ -45,18 +47,12 @@ describe('isSupported', () => {
   it('returns true when there a state signed by everyone', () => {
     const supportState = {...appState(0), stateHash: hashState(appState(0))};
 
-    const signatures = {
-      [supportState.stateHash]: [
-        createSignatureEntry(supportState, wallet1.privateKey),
-        createSignatureEntry(supportState, wallet2.privateKey)
-      ]
-    };
+    const signed = signState(supportState, [wallet1.privateKey, wallet2.privateKey]);
     const channelStoreData: ChannelStoredData = {
-      stateVariables: [supportState],
+      stateVariables: [signed],
       channelConstants: supportState,
       myIndex: 0,
       funding: undefined,
-      signatures,
       applicationSite: 'localhost'
     };
     const entry = new ChannelStoreEntry(channelStoreData);
@@ -67,21 +63,17 @@ describe('isSupported', () => {
     const firstSupportState = {...appState(0), stateHash: hashState(appState(0))};
     const secondSupportState = {...appState(1), stateHash: hashState(appState(1))};
     const thirdUnsupportedState = {...appState(3), stateHash: hashState(appState(3))};
-    const signatures = {
-      [firstSupportState.stateHash]: [createSignatureEntry(firstSupportState, wallet1.privateKey)],
-      [secondSupportState.stateHash]: [
-        createSignatureEntry(secondSupportState, wallet2.privateKey)
-      ],
-      [thirdUnsupportedState.stateHash]: [
-        createSignatureEntry(thirdUnsupportedState, wallet1.privateKey)
-      ]
-    };
+    const stateVariables = [
+      signState(firstSupportState, [wallet1.privateKey]),
+      signState(secondSupportState, [wallet2.privateKey]),
+      signState(thirdUnsupportedState, [wallet1.privateKey])
+    ];
+
     const channelStoreData: ChannelStoredData = {
-      stateVariables: [firstSupportState, secondSupportState, thirdUnsupportedState],
+      stateVariables,
       channelConstants: firstSupportState,
       myIndex: 0,
       funding: undefined,
-      signatures,
       applicationSite: 'localhost'
     };
     const entry = new ChannelStoreEntry(channelStoreData);
