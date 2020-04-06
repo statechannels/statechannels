@@ -158,7 +158,7 @@ export class ChannelStoreEntry {
     };
   }
 
-  addState(stateVars: StateVariables, signatureEntry: SignatureEntry) {
+  addState(stateVars: StateVariables, signatureEntry: SignatureEntry): SignedState {
     const state = {...stateVars, ...this.channelConstants};
     const stateHash = hashState(state);
     // TODO: This check could be more efficient
@@ -180,6 +180,12 @@ export class ChannelStoreEntry {
     this.signatures[stateHash] = signatures;
 
     this.clearOldStates();
+
+    return this.state({...stateVars, signatures});
+  }
+
+  private state(stateVars: SignedStateVariables): SignedState {
+    return {...this.channelConstants, ...stateVars};
   }
 
   private clearOldStates() {
