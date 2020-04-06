@@ -24,14 +24,19 @@ function bigNumberToUint256(bigNumber: BigNumber): string {
 }
 
 export function serializeState(state: SignedState): SignedStateWire {
+  const {appData, appDefinition, isFinal, chainId, participants} = state;
   return {
-    ...state,
     challengeDuration: bigNumberToUint256(state.challengeDuration),
     channelNonce: bigNumberToUint256(state.channelNonce),
     turnNum: bigNumberToUint256(state.turnNum),
     outcome: serializeOutcome(state.outcome),
     channelId: calculateChannelId(state),
-    signatures: state.signatures.map(s => s.signature)
+    signatures: state.signatures.map(s => s.signature),
+    appData,
+    appDefinition,
+    isFinal,
+    chainId,
+    participants
   };
 }
 
