@@ -84,12 +84,27 @@ export class ChannelStoreEntry {
     return this._support.map(s => ({...s, ...this.channelConstants}));
   }
 
-  private get _support(): Array<SignedStateWithHash> {
-    const support: Array<SignedStateWithHash> = [];
+  // This is a simple check
+  private validChain(firstState: SignedState, secondState: SignedState): boolean {
+    return (
+      firstState.turnNum.add(1).eq(secondState.turnNum) &&
+      (firstState.isFinal === secondState.isFinal || secondState.isFinal)
+    );
+  }
 
-    const participantsWhoHaveNotSigned = new Set(this.participants.map(p => p.signingAddress));
+  private get _support(): Array<SignedStateWithHash> {
+    let support: Array<SignedStateWithHash> = [];
+
+    let participantsWhoHaveNotSigned = new Set(this.participants.map(p => p.signingAddress));
+    let previousState;
 
     for (const signedState of this.signedStates.reverse()) {
+      // If there is not a valid transition we know there cannot be a valid support
+      // so we clear out what we have and start at the current signed state
+      if (previousState && !this.validChain(signedState, previousState)) {
+        support = [];
+        participantsWhoHaveNotSigned = new Set(this.participants.map(p => p.signingAddress));
+      }
       const moverIndex = signedState.turnNum.mod(this.nParticipants()).toNumber();
       const moverForThisTurn = this.participants[moverIndex].signingAddress;
 
@@ -104,6 +119,7 @@ export class ChannelStoreEntry {
           }
         }
       }
+      previousState = signedState;
     }
     return [];
   }
