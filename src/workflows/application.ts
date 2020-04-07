@@ -83,14 +83,12 @@ export type WorkflowEvent =
   | DoneInvokeEvent<keyof WorkflowServices>;
 
 export type WorkflowServices = {
+  setApplicationSite(ctx: ChannelIdExists, e: JoinChannelEvent): Promise<void>;
   createChannel: (context: WorkflowContext, event: WorkflowEvent) => Promise<string>;
   invokeClosingProtocol: (
     context: ChannelIdExists
   ) => StateMachine<ConcludeChannel.Init, any, any, any>;
-  invokeCreateChannelAndFundProtocol: (
-    context,
-    event: DoneInvokeEvent<CreateAndFund.Init>
-  ) => StateMachine<any, any, any, any>;
+  invokeCreateChannelAndFundProtocol: StateMachine<any, any, any, any>;
   invokeCreateChannelConfirmation: CCC.WorkflowMachine;
 };
 interface WorkflowStateSchema extends StateSchema<WorkflowContext> {
@@ -128,9 +126,13 @@ const generateConfig = (
               {target: 'failure', cond: guards.isLedgerFunding}, // TODO: Should we even support ledger funding?
               {target: 'done', cond: guards.amCreator}
             ],
-            JOIN_CHANNEL: {target: 'done', actions: actions.sendJoinChannelResponse}
+            JOIN_CHANNEL: {
+              target: 'settingSite',
+              actions: [actions.sendJoinChannelResponse]
+            }
           }
         },
+        settingSite: {invoke: {src: 'setApplicationSite', onDone: 'done'}},
         done: {type: 'final'}
       },
       onDone: [
@@ -298,6 +300,8 @@ export const workflow = (
   };
 
   const services: WorkflowServices = {
+    setApplicationSite: async (ctx: ChannelIdExists, event: JoinChannelEvent) =>
+      await store.setApplicationSite(ctx.channelId, event.applicationSite),
     createChannel: async (context: CreateInit) => {
       const {
         participants,
@@ -305,7 +309,8 @@ export const workflow = (
         outcome,
         appData,
         appDefinition,
-        fundingStrategy
+        fundingStrategy,
+        applicationSite
       } = context;
       const stateVars: StateVariables = {
         outcome,
@@ -313,25 +318,25 @@ export const workflow = (
         turnNum: bigNumberify(0),
         isFinal: false
       };
-      const {channelId} = await store.createChannel(
+      const {channelId: targetChannelId} = await store.createChannel(
         participants,
         bigNumberify(challengeDuration),
         stateVars,
-        appDefinition
+        appDefinition,
+        applicationSite
       );
 
       // Create a open channel objective so we can coordinate with all participants
       await store.addObjective({
         type: 'OpenChannel',
-        data: {targetChannelId: channelId, fundingStrategy},
-        participants
+        data: {targetChannelId, fundingStrategy},
+        participants: [participants[1]]
       });
-      return channelId;
+      return targetChannelId;
     },
     invokeClosingProtocol: (context: ChannelIdExists) =>
       ConcludeChannel.machine(store).withContext({channelId: context.channelId}),
-    invokeCreateChannelAndFundProtocol: (_, event: DoneInvokeEvent<CreateAndFund.Init>) =>
-      CreateAndFund.machine(store, event.data),
+    invokeCreateChannelAndFundProtocol: CreateAndFund.machine(store),
     invokeCreateChannelConfirmation: CCC.workflow({})
   };
 

@@ -101,6 +101,7 @@ export interface Store {
   getLedger(peerId: string): Promise<ChannelStoreEntry>;
 
   setFunding(channelId: string, funding: Funding): Promise<void>;
+  setApplicationSite(channelId: string, applicationSite: string): Promise<void>;
   addObjective(objective: Objective): void;
   getBudget: (site: string) => Promise<SiteBudget>;
   createBudget: (budget: SiteBudget) => Promise<void>;
@@ -271,6 +272,14 @@ export class XstateStore implements Store {
     return await this.getEntry(ledgerId);
   }
 
+  public async setApplicationSite(channelId: string, applicationSite: string) {
+    const entry = await this.getEntry(channelId);
+
+    if (typeof entry.applicationSite === 'string') throw new Error(Errors.siteExistsOnChannel);
+
+    await this.backend.setChannel(channelId, {...entry.data(), applicationSite});
+  }
+
   public async setLedger(ledgerId: string) {
     const data = await this.backend.getChannel(ledgerId);
     if (!data) {
@@ -427,15 +436,12 @@ export class XstateStore implements Store {
 
   public async releaseFunds(assetHolderAddress: string, channelId: string) {
     const {applicationSite} = await this.getEntry(channelId);
-    if (!applicationSite) {
-      throw new Error(Errors.noSiteForChannel);
-    }
+    if (typeof applicationSite !== 'string') throw new Error(Errors.noSiteForChannel);
+
     return await this.budgetLock.acquire<SiteBudget>(applicationSite, async release => {
       const currentBudget = await this.getBudget(applicationSite);
       const assetBudget = currentBudget?.forAsset[assetHolderAddress];
-      if (!assetBudget) {
-        throw new Error(Errors.noBudget);
-      }
+      if (!assetBudget) throw new Error(Errors.noAssetBudget);
 
       const {outcome, participants} = (await this.getEntry(channelId)).supported;
       const playerAddress = await this.getAddress();
@@ -447,7 +453,7 @@ export class XstateStore implements Store {
         throw new Error(Errors.cannotFindDestination);
       }
       const channelBudget = assetBudget.channels[channelId];
-      if (!channelBudget) throw new Error(Errors.noBudget);
+      if (!channelBudget) throw new Error(Errors.channelNotInBudget);
       const sendAmount =
         currentAllocation.allocationItems.find(a => a.destination === playerDestination)?.amount ||
         0;
@@ -471,21 +477,17 @@ export class XstateStore implements Store {
   ): Promise<SiteBudget> {
     const entry = await this.getEntry(channelId);
     const site = entry.applicationSite;
-    if (!site) throw new Error(Errors.noBudget);
+    if (typeof site !== 'string') throw new Error(Errors.noSiteForChannel + ' ' + channelId);
 
     return await this.budgetLock
       .acquire<SiteBudget>(site, async release => {
         const currentBudget = await this.backend.getBudget(site);
 
-        // Create a new budget if one doesn't exist
-        if (!currentBudget) {
-          throw new Error(Errors.noBudget);
-        }
+        // TODO?: Create a new budget if one doesn't exist
+        if (!currentBudget) throw new Error(Errors.noBudget + site);
 
         const assetBudget = currentBudget?.forAsset[assetHolderAddress];
-        if (!assetBudget) {
-          throw new Error(Errors.noBudget);
-        }
+        if (!assetBudget) throw new Error(Errors.noAssetBudget);
 
         if (
           assetBudget.availableSendCapacity.lt(amount.send) ||
