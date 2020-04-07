@@ -29,7 +29,7 @@ export async function startServer() {
         messageToSend,
         depositsToMake: depositsToMake(messageToSend)
       })),
-      retry()
+      retry(3)
     )
     .subscribe(
       async ({snapshotKey, messageToSend, depositsToMake}) => {
