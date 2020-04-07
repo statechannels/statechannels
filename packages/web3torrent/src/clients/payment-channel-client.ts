@@ -89,7 +89,7 @@ export class PaymentChannelClient {
     log('payment channel client enabled');
     // TODO: This should probably not be long term behavior
     const existingBudget = await this.getBudget();
-    if (_.isEmpty(existingBudget)) {
+    if (_.isEmpty(existingBudget) && FUNDING_STRATEGY !== 'Direct') {
       await this.createBudget(INITIAL_BUDGET_AMOUNT);
     }
   }
