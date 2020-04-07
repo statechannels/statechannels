@@ -37,6 +37,7 @@ export const ApplicationWorkflow = (props: Props) => {
         paddingTop: '50px',
         textAlign: 'center'
       }}
+      className="application-workflow-prompt"
     >
       <h1>{messages[getApplicationStateValue(current)]}</h1>
       {!isConfirmCreateChannel(current) && (

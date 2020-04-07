@@ -96,15 +96,14 @@ export async function setUpBrowser(headless: boolean, slowMo?: number): Promise<
 }
 
 export async function waitAndOpenChannel(page: Page): Promise<void> {
-  const createChannelButton =
-    'body > div:nth-child(3) > div > div > div:nth-child(2) > div > button';
+  const createChannelButton = 'div.application-workflow-prompt > div > button';
 
   const walletIFrame = page.frames()[1];
   await waitForAndClickButton(page, walletIFrame, createChannelButton);
 }
 
 export async function waitForClosingChannel(page: Page): Promise<void> {
-  const closingText = 'body > div:nth-child(3) > div > div > div:nth-child(2) > h1';
+  const closingText = 'div.application-workflow-prompt > h1';
   const closingIframeB = page.frames()[1];
   await closingIframeB.waitForSelector(closingText);
 }
