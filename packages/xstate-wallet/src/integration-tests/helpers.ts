@@ -14,8 +14,7 @@ import {
   CloseAndWithdrawRequest
 } from '@statechannels/client-api-schema';
 import {interpret, Interpreter} from 'xstate';
-import * as App from '../workflows/application';
-import * as CreateAndFundLedger from '../workflows/create-and-fund-ledger';
+import {CreateAndFundLedger, Application as App} from '../workflows';
 import {Guid} from 'guid-typescript';
 import * as CloseLedgerAndWithdraw from '../workflows/close-ledger-and-withdraw';
 import {TestStore} from '../workflows/tests/store';
@@ -36,9 +35,7 @@ export class Player {
     const workflowId = Guid.create().toString();
     const service = interpret<any, any, any>(
       CloseLedgerAndWithdraw.workflow(this.store, this.messagingService, context),
-      {
-        devTools: true
-      }
+      {devTools: true}
     )
       .onTransition((state, event) => process.env.ADD_LOGS && logTransition(state, event, this.id))
 
@@ -60,20 +57,13 @@ export class Player {
 
     this.channelWallet.workflows.push({id: workflowId, service, domain: 'TODO'});
   }
-  startAppWorkflow(startingState: string, context?: App.WorkflowContext) {
+  startAppWorkflow(startingState: string, context: App.WorkflowContext) {
     const workflowId = Guid.create().toString();
     const service = interpret<any, any, any>(
-      App.applicationWorkflow(
-        this.store,
-        this.messagingService,
-        context ? context : {applicationSite: 'localhost'}
-      ),
-      {
-        devTools: true
-      }
+      App.workflow(this.store, this.messagingService).withContext(context),
+      {devTools: true}
     )
       .onTransition((state, event) => process.env.ADD_LOGS && logTransition(state, event, this.id))
-
       .start(startingState);
 
     this.channelWallet.workflows.push({id: workflowId, service, domain: 'TODO'});
@@ -215,7 +205,8 @@ export function generateCreateChannelRequest(
         }
       ],
       appDefinition: '0x430869383d611bBB1ce7Ca207024E7901bC26b40',
-      appData: '0x0'
+      appData: '0x0',
+      fundingStrategy: 'Direct'
     }
   };
 }

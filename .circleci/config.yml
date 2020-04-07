@@ -233,7 +233,7 @@ jobs:
       - image: circleci/node:10.16.3
     environment:
       FIREBASE_PREFIX: << pipeline.git.branch >>-1
-      USE_VIRTUAL_FUNDING: 'FALSE'
+      REACT_APP_FUNDING_STRATEGY: Direct
       USE_GANACHE_DEPLOYMENT_CACHE: true
       GANACHE_CACHE_FOLDER: ../../.ganache-deployments
       GANACHE_PORT: 8547

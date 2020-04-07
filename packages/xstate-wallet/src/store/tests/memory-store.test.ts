@@ -84,7 +84,7 @@ test('newObjectiveFeed', async () => {
   const objective: Objective = {
     type: 'OpenChannel',
     participants: [],
-    data: {targetChannelId: 'foo'}
+    data: {targetChannelId: 'foo', fundingStrategy: 'Direct'}
   };
 
   const store = await aStore();

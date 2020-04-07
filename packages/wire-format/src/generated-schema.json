@@ -259,12 +259,21 @@
         "data": {
           "additionalProperties": false,
           "properties": {
+            "fundingStrategy": {
+              "enum": [
+                "Direct",
+                "Ledger",
+                "Virtual"
+              ],
+              "type": "string"
+            },
             "targetChannelId": {
               "$ref": "#/definitions/Bytes32"
             }
           },
           "required": [
-            "targetChannelId"
+            "targetChannelId",
+            "fundingStrategy"
           ],
           "type": "object"
         },

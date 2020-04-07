@@ -12,8 +12,11 @@ import * as ConcludeChannel from './conclude-channel';
 import * as ChallengeChannel from './challenge-channel';
 import * as ApproveBudgetAndFund from './approve-budget-and-fund';
 import * as CloseLedgerAndWithdraw from './close-ledger-and-withdraw';
+import * as Application from './application';
+import * as Confirm from './confirm';
 
 export {
+  Application,
   SupportState,
   DirectFunding,
   Depositing,
@@ -27,5 +30,6 @@ export {
   ChallengeChannel,
   ConcludeChannel,
   ApproveBudgetAndFund,
-  CloseLedgerAndWithdraw
+  CloseLedgerAndWithdraw,
+  Confirm
 };

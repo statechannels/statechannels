@@ -1,8 +1,4 @@
-import {
-  confirmChannelCreationWorkflow,
-  config,
-  WorkflowContext
-} from '../../workflows/confirm-create-channel';
+import {workflow, config, WorkflowContext} from '../../workflows/confirm';
 export default {title: 'X-state wallet'};
 import {storiesOf} from '@storybook/react';
 import {interpret} from 'xstate';
@@ -14,11 +10,9 @@ import {simpleEthAllocation} from '../../utils';
 import React from 'react';
 import {ConfirmCreateChannel} from '../confirm-create-channel-workflow';
 import {XstateStore} from '../../store';
-import {MessagingService} from '../../messaging';
 
 const store = new XstateStore();
 store.initialize(['0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29']);
-const messagingService = new MessagingService(store);
 
 const alice: Participant = {
   participantId: 'a',
@@ -43,18 +37,13 @@ const testContext: WorkflowContext = {
 
 if (config.states) {
   Object.keys(config.states).forEach(state => {
-    const machine = interpret<any, any, any>(
-      confirmChannelCreationWorkflow(store, messagingService, testContext).withContext(testContext),
-      {
-        devTools: true
-      }
-    ); // start a new interpreted machine for each story
+    const machine = interpret<any, any, any>(workflow(testContext).withContext(testContext), {
+      devTools: true
+    }); // start a new interpreted machine for each story
     machine.onEvent(event => console.log(event.type)).start(state);
     storiesOf('Workflows / Confirm Create Channel', module).add(
       state.toString(),
-      renderComponentInFrontOfApp(
-        <ConfirmCreateChannel current={machine.state} send={machine.send} />
-      )
+      renderComponentInFrontOfApp(<ConfirmCreateChannel service={machine} />)
     );
     machine.stop(); // the machine will be stopped before it can be transitioned. This means the console.log on L49 throws a warning that we sent an event to a stopped machine.
   });

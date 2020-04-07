@@ -64,7 +64,10 @@ beforeEach(async () => {
 
   const allSignState = {
     ...state,
-    signatures: [playerA, playerB].map(({privateKey}) => signState(state, privateKey))
+    signatures: [playerA, playerB].map(({privateKey, signingAddress}) => ({
+      signature: signState(state, privateKey),
+      signer: signingAddress
+    }))
   };
 
   channelId = (await store.createEntry(allSignState)).channelId;

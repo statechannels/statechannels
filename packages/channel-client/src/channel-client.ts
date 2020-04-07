@@ -11,7 +11,8 @@ import {
   ChannelProposedNotification,
   BudgetUpdatedNotification,
   Message,
-  MessageQueuedNotification
+  MessageQueuedNotification,
+  FundingStrategy
 } from '@statechannels/client-api-schema';
 import {HUB} from './constants';
 import {ETH_TOKEN_ADDRESS} from '../tests/constants';
@@ -72,7 +73,8 @@ export class ChannelClient implements ChannelClientInterface {
     participants: Participant[],
     allocations: TokenAllocations,
     appDefinition: string,
-    appData: string
+    appData: string,
+    fundingStrategy: FundingStrategy
   ): Promise<ChannelResult> {
     return this.provider.send({
       method: 'CreateChannel',
@@ -80,7 +82,8 @@ export class ChannelClient implements ChannelClientInterface {
         participants,
         allocations,
         appDefinition,
-        appData
+        appData,
+        fundingStrategy
       }
     });
   }

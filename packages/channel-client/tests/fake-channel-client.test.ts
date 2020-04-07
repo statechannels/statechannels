@@ -155,7 +155,8 @@ describe('FakeChannelClient', () => {
         participantsAB,
         allocationsAB,
         APP_DEFINITION,
-        APP_DATA
+        APP_DATA,
+        'Direct'
       );
       expect(clientChannelStateAB).toEqual(statesAB['proposed']);
 
@@ -169,7 +170,8 @@ describe('FakeChannelClient', () => {
         participantsAC,
         allocationsAC,
         APP_DEFINITION,
-        APP_DATA
+        APP_DATA,
+        'Direct'
       );
       expect(clientChannelStateAC).toEqual(statesAC['proposed']);
 

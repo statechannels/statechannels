@@ -1,4 +1,4 @@
-import {Observable, fromEvent, merge, from} from 'rxjs';
+import {Observable, fromEvent, merge, from, of} from 'rxjs';
 import {BigNumber, bigNumberify} from 'ethers/utils';
 import {
   DBBackend,
@@ -106,6 +106,7 @@ export interface Store {
   getLedger(peerId: string): Promise<ChannelStoreEntry>;
   setLedger(ledgerId: string): Promise<void>;
 
+  setApplicationSite(channelId: string, applicationSite: string): Promise<void>;
   addObjective(objective: Objective): void;
 
   /* Environmental API (browser-specific) */
@@ -134,6 +135,7 @@ export class XstateStore implements Store {
   readonly chain: Chain;
   private _eventEmitter = new EventEmitter<InternalEvents>();
   protected _channelLocks: Record<string, Guid | undefined> = {};
+  private objectives: Objective[] = [];
 
   constructor(chain?: Chain, backend?: DBBackend) {
     // TODO: We shouldn't default to a fake chain
@@ -185,7 +187,7 @@ export class XstateStore implements Store {
 
   get objectiveFeed(): Observable<Objective> {
     const newObjectives = fromEvent<Objective>(this._eventEmitter, 'newObjective');
-    const currentObjectives = from(this.backend.objectives()).pipe(concatAll());
+    const currentObjectives = of(this.objectives).pipe(concatAll());
 
     return merge(newObjectives, currentObjectives);
   }
@@ -212,8 +214,7 @@ export class XstateStore implements Store {
 
     const data: ChannelStoredData = {
       channelConstants: state,
-      stateVariables: [{...state, stateHash: hashState(state)}],
-      signatures: {},
+      stateVariables: [{...state, stateHash: hashState(state), signatures: []}],
       myIndex,
       funding: undefined,
       applicationSite
@@ -278,6 +279,14 @@ export class XstateStore implements Store {
     if (!ledgerId) throw new Error(`No ledger exists with peer ${peerId}`);
 
     return await this.getEntry(ledgerId);
+  }
+
+  public async setApplicationSite(channelId: string, applicationSite: string) {
+    const entry = await this.getEntry(channelId);
+
+    if (typeof entry.applicationSite === 'string') throw new Error(Errors.siteExistsOnChannel);
+
+    await this.backend.setChannel(channelId, {...entry.data(), applicationSite});
   }
 
   public async setLedger(ledgerId: string) {
@@ -375,12 +384,12 @@ export class XstateStore implements Store {
     this._eventEmitter.emit('addToOutbox', {signedStates: [signedState]});
   }
 
-  async addObjective(objective: Objective) {
-    const objectives = await this.backend.objectives();
+  async addObjective(objective: Objective, addToOutbox = true) {
+    const objectives = this.objectives;
     if (!_.includes(objectives, objective)) {
       // TODO: Should setObjective take a key??
-      this.backend.setObjective(objectives.length, objective);
-      this._eventEmitter.emit('addToOutbox', {objectives: [objective]});
+      this.objectives.push(objective);
+      addToOutbox && this._eventEmitter.emit('addToOutbox', {objectives: [objective]});
       this._eventEmitter.emit('newObjective', objective);
     }
   }
@@ -410,11 +419,7 @@ export class XstateStore implements Store {
       // todo: check the channel involves me
       await Promise.all(signedStates.map(signedState => this.addState(signedState)));
     }
-    if (objectives && objectives.length) {
-      (await this.backend.setReplaceObjectives(objectives)).forEach(objective =>
-        this._eventEmitter.emit('newObjective', objective)
-      );
-    }
+    objectives?.map(o => this.addObjective(o, false));
   }
 
   public async getEntry(channelId: string): Promise<ChannelStoreEntry> {
@@ -446,15 +451,12 @@ export class XstateStore implements Store {
 
   public async releaseFunds(assetHolderAddress: string, channelId: string) {
     const {applicationSite} = await this.getEntry(channelId);
-    if (!applicationSite) {
-      throw new Error(Errors.noSiteForChannel);
-    }
+    if (typeof applicationSite !== 'string') throw new Error(Errors.noSiteForChannel);
+
     return await this.budgetLock.acquire<SiteBudget>(applicationSite, async release => {
       const currentBudget = await this.getBudget(applicationSite);
       const assetBudget = currentBudget?.forAsset[assetHolderAddress];
-      if (!assetBudget) {
-        throw new Error(Errors.noBudget);
-      }
+      if (!assetBudget) throw new Error(Errors.noAssetBudget);
 
       const {outcome, participants} = (await this.getEntry(channelId)).supported;
       const playerAddress = await this.getAddress();
@@ -466,7 +468,7 @@ export class XstateStore implements Store {
         throw new Error(Errors.cannotFindDestination);
       }
       const channelBudget = assetBudget.channels[channelId];
-      if (!channelBudget) throw new Error(Errors.noBudget);
+      if (!channelBudget) throw new Error(Errors.channelNotInBudget);
       const sendAmount =
         currentAllocation.allocationItems.find(a => a.destination === playerDestination)?.amount ||
         0;
@@ -490,21 +492,17 @@ export class XstateStore implements Store {
   ): Promise<SiteBudget> {
     const entry = await this.getEntry(channelId);
     const site = entry.applicationSite;
-    if (!site) throw new Error(Errors.noBudget);
+    if (typeof site !== 'string') throw new Error(Errors.noSiteForChannel + ' ' + channelId);
 
     return await this.budgetLock
       .acquire<SiteBudget>(site, async release => {
         const currentBudget = await this.backend.getBudget(site);
 
-        // Create a new budget if one doesn't exist
-        if (!currentBudget) {
-          throw new Error(Errors.noBudget);
-        }
+        // TODO?: Create a new budget if one doesn't exist
+        if (!currentBudget) throw new Error(Errors.noBudget + site);
 
         const assetBudget = currentBudget?.forAsset[assetHolderAddress];
-        if (!assetBudget) {
-          throw new Error(Errors.noBudget);
-        }
+        if (!assetBudget) throw new Error(Errors.noAssetBudget);
 
         if (
           assetBudget.availableSendCapacity.lt(amount.send) ||

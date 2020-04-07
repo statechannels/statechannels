@@ -127,7 +127,8 @@ describe('ChannelClient with FakeChannelProvider', () => {
         participants,
         allocations,
         APP_DEFINITION,
-        APP_DATA
+        APP_DATA,
+        'Direct'
       );
       expect(clientAChannelState).toEqual(states['proposed']);
 
