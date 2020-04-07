@@ -56,4 +56,5 @@ You'll see a screen like this in your browser:
 
 ### Dev Notes
 
-Because of [this issue](https://github.com/webtorrent/webtorrent/issues/1757) we require `end-of-stream` to be fixed at `1.4.1`.
+- Because of [this issue](https://github.com/webtorrent/webtorrent/issues/1757) we require `end-of-stream` to be fixed at `1.4.1`.
+- To enable logging in the browser, run `localStorage.debug = "web3torrent:*"` from the browser's console.
