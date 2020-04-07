@@ -2,6 +2,7 @@
 import {Status, Torrent} from './types';
 import {ChannelState} from './clients/payment-channel-client';
 import {bigNumberify} from 'ethers/utils';
+import {parseEther, hexZeroPad} from 'ethers/utils';
 
 export const WEI_PER_BYTE = bigNumberify(1); // cost per byte
 export const BLOCK_LENGTH = 1 << 14; // Standard request length.
@@ -35,7 +36,6 @@ export const fireBaseConfig =
         storageBucket: '',
         messagingSenderId: '913007764573'
       };
-export const AUTO_FUND_LEDGER = process.env.REACT_APP_AUTO_FUND_LEDGER;
 
 const httpProtocol = process.env.REACT_APP_TRACKER_URL_HTTP_PROTOCOL;
 const url = process.env.REACT_APP_TRACKER_URL;
@@ -127,3 +127,5 @@ export {SINGLE_ASSET_PAYMENT_CONTRACT_ADDRESS};
 
 export const FUNDING_STRATEGY =
   process.env.REACT_APP_FUNDING_STRATEGY === 'Direct' ? 'Direct' : 'Virtual';
+
+export const INITIAL_BUDGET_AMOUNT = hexZeroPad(parseEther('10').toHexString(), 32);

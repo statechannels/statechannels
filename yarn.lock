@@ -6903,6 +6903,11 @@
   dependencies:
     "@types/webpack" "*"
 
+"@types/url-parse@1.4.3":
+  version "1.4.3"
+  resolved "https://registry.npmjs.org/@types/url-parse/-/url-parse-1.4.3.tgz#fba49d90f834951cb000a674efee3d6f20968329"
+  integrity sha512-4kHAkbV/OfW2kb5BLVUuUMoumB3CP8rHqlw48aHvFy5tf9ER0AfOonBlX29l/DD68G70DmyhRlSYfQPSYpC5Vw==
+
 "@types/wait-on@3.2.0":
   version "3.2.0"
   resolved "https://registry.npmjs.org/@types/wait-on/-/wait-on-3.2.0.tgz#87bfa57af081cb57399d741a963d532946fcdc92"
@@ -16792,11 +16797,6 @@ extract-comments@^1.1.0:
   dependencies:
     esprima-extract-comments "^1.1.0"
     parse-code-context "^1.0.0"
-
-extract-domain@2.2.1:
-  version "2.2.1"
-  resolved "https://registry.npmjs.org/extract-domain/-/extract-domain-2.2.1.tgz#1deeae633a5cbf05ae2fd7b3ff87cb98cbc4cb5b"
-  integrity sha512-lOq1adCJha0tFFBci4quxC4XLa6+Rs2WgAwTo9qbO9OsElvJmGgCvOzmHo/yg5CiqeP4+sHjkXYGkrCcIEprMg==
 
 extract-stack@^1.0.0:
   version "1.0.0"
@@ -33075,7 +33075,7 @@ url-parse-lax@^3.0.0:
   dependencies:
     prepend-http "^2.0.0"
 
-url-parse@^1.4.3:
+url-parse@1.4.7, url-parse@^1.4.3:
   version "1.4.7"
   resolved "https://registry.npmjs.org/url-parse/-/url-parse-1.4.7.tgz#a8a83535e8c00a316e403a5db4ac1b9b853ae278"
   integrity sha512-d3uaVyzDB9tQoSXFvuSUNFibTd9zxd2bkVrDRvF5TmvWWQwqE4lgYJ5m+x1DbecWkw+LK4RNl2CU1hHuOKPVlg==
