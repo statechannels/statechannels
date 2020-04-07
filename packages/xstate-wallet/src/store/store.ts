@@ -1,6 +1,23 @@
-import {Observable, fromEvent, merge, from, of} from 'rxjs';
+import {AddressZero} from 'ethers/constants';
 import {BigNumber, bigNumberify} from 'ethers/utils';
+import {EventEmitter} from 'eventemitter3';
+import {filter, map, concatAll} from 'rxjs/operators';
+import {Guid} from 'guid-typescript';
+import {Observable, fromEvent, merge, from, of} from 'rxjs';
+import {Wallet} from 'ethers';
+import * as _ from 'lodash';
+import AsyncLock from 'async-lock';
+
+import {Chain, FakeChain} from '../chain';
+import {NETWORK_ID, HUB} from '../constants';
+import {checkThat, isSimpleEthAllocation} from '../utils';
+
+import {calculateChannelId, hashState} from './state-utils';
+import {ChannelStoreEntry} from './channel-store-entry';
+import {MemoryBackend} from './memory-backend';
+import {Errors} from '.';
 import {
+  ChannelStoredData,
   DBBackend,
   Message,
   Objective,
@@ -8,26 +25,8 @@ import {
   SignedState,
   SiteBudget,
   State,
-  StateVariables,
-  ChannelStoredData
+  StateVariables
 } from './types';
-
-import {filter, map, concatAll} from 'rxjs/operators';
-import {EventEmitter} from 'eventemitter3';
-import * as _ from 'lodash';
-import {Wallet} from 'ethers';
-
-import {ChannelStoreEntry} from './channel-store-entry';
-import {AddressZero} from 'ethers/constants';
-import {Chain, FakeChain} from '../chain';
-import {NETWORK_ID, HUB} from '../constants';
-import {calculateChannelId, hashState} from './state-utils';
-
-import {Guid} from 'guid-typescript';
-import {MemoryBackend} from './memory-backend';
-import {Errors} from '.';
-import AsyncLock from 'async-lock';
-import {checkThat, isSimpleEthAllocation} from '../utils';
 
 interface DirectFunding {
   type: 'Direct';
