@@ -8,6 +8,8 @@ import CurrentGameService from '@statechannels/tic-tac-toe/services/current-game
 import ChallengeModel from '@statechannels/tic-tac-toe/models/challenge';
 import makeBlockie from 'ethereum-blockies-base64';
 
+const {parseEther} = ethers.utils;
+
 export default class GamesIndexController extends Controller {
   @service store!: DS.Store;
   @service user!: UserService;
@@ -33,7 +35,7 @@ export default class GamesIndexController extends Controller {
       address: this.user.userAddress,
       outcomeAddress: this.user.walletAddress,
       name: this.user.username,
-      stake: this.buyInAmount.toString(),
+      stake: parseEther(this.buyInAmount.toString()).toString(),
       createdAt: new Date().getTime(),
       isPublic: true,
       playerAName: 'unknown',

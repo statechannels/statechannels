@@ -16,7 +16,7 @@
         Game Buy In:
       </div>
       <div class="text-lg">
-        {{mult @game.stake 5}}
+        {{mult (format-ether @game.stake) 5}}
       </div>
       <div class="text-2xs">
         ETH
@@ -30,14 +30,18 @@
         Round Buy In:
       </div>
       <div class="text-lg">
-        {{@game.stake}}
+        {{format-ether @game.stake}}
       </div>
       <div class="text-2xs">
         ETH
       </div>
     </div>
   </div>
-  <button type="button" class="w-40 h-10 rounded-full bg-red-600 text-lg font-bold text-white">
+  <button
+    type="button"
+    class="w-40 h-10 rounded-full bg-red-600 text-lg font-bold text-white"
+    {{on 'click' (fn this.joinGame @game)}}
+  >
     Join
   </button>
 </div>
