@@ -13,6 +13,7 @@
     "ethers": "4.0.45",
     "firebase": "7.11.0",
     "pino": "5.16.0",
+    "rxfire": "^3.11.2",
     "rxjs": "6.5.4"
   },
   "devDependencies": {

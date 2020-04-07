@@ -8,9 +8,9 @@ if (process.env.RUNTIME_ENV) {
     environment: process.env.RUNTIME_ENV
   });
 }
-import {fbObservable, sendMessagesAndCleanup} from './message/firebase-relay';
+import {fbObservable, sendReplies, deleteIncomingMessage} from './message/firebase-relay';
 import {respondToMessage} from './wallet/respond-to-message';
-import {map, retry} from 'rxjs/operators';
+import {map, tap, retryWhen} from 'rxjs/operators';
 import {logger} from './logger';
 import {depositsToMake} from './wallet/deposit';
 import {Blockchain} from './blockchain/eth-asset-holder';
@@ -20,6 +20,7 @@ const log = logger();
 export async function startServer() {
   fbObservable()
     .pipe(
+      tap(({snapshotKey}) => deleteIncomingMessage(snapshotKey)),
       map(({snapshotKey, message}) => ({
         snapshotKey,
         messageToSend: respondToMessage(message)
@@ -29,7 +30,7 @@ export async function startServer() {
         messageToSend,
         depositsToMake: depositsToMake(messageToSend)
       })),
-      retry(3)
+      retryWhen(errors => errors.pipe(tap(error => log.error(error))))
     )
     .subscribe(
       async ({snapshotKey, messageToSend, depositsToMake}) => {
@@ -42,7 +43,7 @@ export async function startServer() {
             })
           );
           log.info('Deposited');
-          await sendMessagesAndCleanup(snapshotKey, messageToSend);
+          await sendReplies(snapshotKey, messageToSend);
           log.info('Messages sent');
         } catch (e) {
           log.error(e);

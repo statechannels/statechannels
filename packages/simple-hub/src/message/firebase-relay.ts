@@ -1,16 +1,13 @@
 import * as firebase from 'firebase';
+import {stateChanges, ListenEvent} from 'rxfire/database';
 
 import {cFirebasePrefix, cHubParticipantId} from '../constants';
 import {logger} from '../logger';
 import {Message as WireMessage} from '@statechannels/wire-format';
-import {fromEvent, Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {deserializeMessage, Message, serializeMessage} from '../wallet/xstate-wallet-internals';
 import * as _ from 'lodash/fp';
 import {notContainsHubParticipantId} from '../utils';
-
-type Snapshot = firebase.database.DataSnapshot;
-type FirebaseEvent = [Snapshot, string | null];
 
 const log = logger();
 
@@ -40,10 +37,11 @@ function fbSend(message: WireMessage) {
 export function fbObservable() {
   log.info('firebase-relay: listen');
   const hubRef = getMessagesRef().child(cHubParticipantId);
-  const childAddedObservable: Observable<FirebaseEvent> = fromEvent(hubRef, 'child_added');
-  return childAddedObservable.pipe(
-    map(childAdded => childAdded[0]),
-    map(snapshot => ({snapshotKey: snapshot.key, message: deserializeMessage(snapshot.val())}))
+  return stateChanges(hubRef, [ListenEvent.added]).pipe(
+    map(change => ({
+      snapshotKey: change.snapshot.key,
+      message: deserializeMessage(change.snapshot.val())
+    }))
   );
 }
 
@@ -60,8 +58,13 @@ export function messagesToSend(messageToSend: Message): WireMessage[] {
     );
 }
 
-export async function sendMessagesAndCleanup(snapshotKey: string, messageToSend: Message) {
+export async function sendReplies(snapshotKey: string, messageToSend: Message) {
   const hubRef = getMessagesRef().child(cHubParticipantId);
   await Promise.all(messagesToSend(messageToSend).map(fbSend));
+  await hubRef.child(snapshotKey).remove();
+}
+
+export async function deleteIncomingMessage(snapshotKey: string) {
+  const hubRef = getMessagesRef().child(cHubParticipantId);
   await hubRef.child(snapshotKey).remove();
 }

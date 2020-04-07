@@ -1,12 +1,11 @@
+import '../env';
+
 import * as firebase from 'firebase';
-import {configureEnvVariables} from '@statechannels/devtools';
 import {cFirebasePrefix} from '../src/constants';
 import {Message} from '@statechannels/wire-format';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const messages: Array<Message> = require('./message-sequence2.json');
-
-configureEnvVariables(true);
 
 const config = {
   apiKey: process.env.FIREBASE_API_KEY,
@@ -34,7 +33,9 @@ async function sendMessage(message: Message) {
 }
 
 async function readAndFeedMessages() {
-  await Promise.all(messages.map(sendMessage));
+  await Promise.all(messages.map(sendMessage)).catch(reason => {
+    throw reason;
+  });
   getFirebaseApp().delete();
 }
 
