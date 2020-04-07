@@ -29511,6 +29511,13 @@ rustbn.js@~0.2.0:
   resolved "https://registry.npmjs.org/rustbn.js/-/rustbn.js-0.2.0.tgz#8082cb886e707155fd1cb6f23bd591ab8d55d0ca"
   integrity sha512-4VlvkRUuCJvr2J6Y0ImW7NvTCriMi7ErOAqWk1y69vAdoNIzCF3yPmgeNzx+RQTLEDFq5sHfscn1MwHxP9hNfA==
 
+rxfire@^3.11.2:
+  version "3.11.2"
+  resolved "https://registry.npmjs.org/rxfire/-/rxfire-3.11.2.tgz#1974005b0eff0c486bb472c4378c322ca18610e8"
+  integrity sha512-hWVL1It7GloqXbuRNNGTmzXdc5+pCfe09Bq3Ojn9D6yd+KYdNDf8gwttmwkb9fGajhHRpaTGTNOSQRYE24n29Q==
+  dependencies:
+    tslib "1.11.1"
+
 rxjs@6.5.4, rxjs@^6.3.3, rxjs@^6.4.0, rxjs@^6.5.3, rxjs@^6.5.4:
   version "6.5.4"
   resolved "https://registry.npmjs.org/rxjs/-/rxjs-6.5.4.tgz#e0777fe0d184cec7872df147f303572d414e211c"
