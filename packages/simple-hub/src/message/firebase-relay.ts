@@ -64,14 +64,10 @@ export function messagesToSend(messageToSend: Message): WireMessage[] {
     );
 }
 
-export function sendRepliesCurried(snapshotKey: string) {
-  return async (messageToSend: Message) => {
-    log.info({messageToSend}, 'Responding with message');
-    const hubRef = getMessagesRef().child(cHubParticipantId);
-    await Promise.all(messagesToSend(messageToSend).map(fbSend));
-    await hubRef.child(snapshotKey).remove();
-    log.info('Messages sent');
-  };
+export async function sendReplies(messageToSend: Message) {
+  log.info({messageToSend}, 'Responding with message');
+  await Promise.all(messagesToSend(messageToSend).map(fbSend));
+  log.info('Messages sent');
 }
 
 export async function deleteIncomingMessage(snapshotKey: string) {

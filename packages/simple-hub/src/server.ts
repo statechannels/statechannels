@@ -8,7 +8,7 @@ if (process.env.RUNTIME_ENV) {
     environment: process.env.RUNTIME_ENV
   });
 }
-import {fbObservable, deleteIncomingMessage, sendRepliesCurried} from './message/firebase-relay';
+import {fbObservable, deleteIncomingMessage, sendReplies} from './message/firebase-relay';
 import {respondToMessage} from './wallet/respond-to-message';
 import {map} from 'rxjs/operators';
 import {logger} from './logger';
@@ -36,7 +36,7 @@ export async function startServer() {
         try {
           deleteIncomingMessage(snapshotKey);
           pipe(depositsToMake, fold(log.error, makeDeposits));
-          pipe(messageToSend, fold(log.error, sendRepliesCurried(snapshotKey)));
+          pipe(messageToSend, fold(log.error, sendReplies));
         } catch (e) {
           log.error(e);
         }
