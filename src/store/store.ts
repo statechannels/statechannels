@@ -147,8 +147,8 @@ export class XstateStore implements Store {
         const wallet = new Wallet(key);
         await this.backend.setPrivateKey(wallet.address, wallet.privateKey);
       });
-    } else {
-      // generate a new key
+    } else if (!(await this.getAddress())) {
+      // generate the first private key
       const wallet = Wallet.createRandom();
       await this.backend.setPrivateKey(wallet.address, wallet.privateKey);
     }
