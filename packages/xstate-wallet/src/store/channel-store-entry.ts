@@ -178,6 +178,11 @@ export class ChannelStoreEntry {
   }
 
   signAndAdd(stateVars: StateVariables, privateKey: string): SignedState {
+    const latestSignedByMe = this._latestSupportedByMe;
+    if (latestSignedByMe) {
+      if (this.statesEqual(stateVars, latestSignedByMe)) return latestSignedByMe;
+    }
+
     const state = {...stateVars, ...this.channelConstants};
 
     const signatureEntry = createSignatureEntry(state, privateKey);
