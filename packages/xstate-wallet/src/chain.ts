@@ -358,7 +358,7 @@ export class ChainWatcher implements Chain {
       // TODO: Type event correctly, use ethers-utils.js
       filter((event: Array<string | BigNumber>) => event[0] === channelId),
       // Actually ignores the event data and just polls the chain
-      flatMap(async () => this.getChainInfo.bind(channelId))
+      flatMap(async () => this.getChainInfo(channelId))
     );
 
     // @ts-ignore -- FIXME: ethers events do not have .off for some reason
