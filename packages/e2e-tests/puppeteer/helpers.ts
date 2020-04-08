@@ -106,7 +106,7 @@ export async function waitAndApproveBudget(page: Page): Promise<void> {
 
 interface Window {
   channelProvider: import('@statechannels/channel-provider').ChannelProviderInterface;
-  channelRunning: any;
+  channelRunning(): void;
 }
 declare let window: Window;
 
