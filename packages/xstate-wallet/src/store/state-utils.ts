@@ -59,7 +59,7 @@ export function fromNitroState(state: NitroState): State {
       signingAddress: x,
       // FIXME: Get real values
       participantId: x,
-      destination: x as Destination
+      destination: x.padStart(64, '0') as Destination
     }))
   };
 }
