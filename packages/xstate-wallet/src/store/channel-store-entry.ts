@@ -219,14 +219,15 @@ export class ChannelStoreEntry {
     // If we don't have a supported state we don't clean anything out
     if (this.isSupported) {
       // The support is returned in descending turn number so we need to grab the last element to find the earliest state
-      const {stateHash: firstSupportStateHash} = this._support[this._support.length - 1];
+      const firstSupport = this._support[this._support.length - 1];
 
-      // Find where the first support state is in our current state array
-      const supportIndex = this.stateVariables.findIndex(
-        sv => sv.stateHash === firstSupportStateHash
-      );
-      // Take everything after that
-      this.stateVariables = this.stateVariables.slice(supportIndex);
+      // Take every newer state
+      this.stateVariables = this.stateVariables.filter(s => s.turnNum.gte(firstSupport.turnNum));
+
+      // TODO: This would keep some stale states that are both
+      // - newer than the firstSupport state
+      // - not part of the support
+      // eg. if the support is [s4, s5, s6], and I have some s5', then this would keep s5' as well as s5
     }
   }
 
