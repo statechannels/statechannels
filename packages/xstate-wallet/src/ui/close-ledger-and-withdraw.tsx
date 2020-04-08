@@ -9,7 +9,7 @@ interface Props {
   send: (event: any, payload?: EventData | undefined) => WorkflowState;
 }
 
-export const CloseLegerWithdraw = (props: Props) => {
+export const CloseLedgerAndWithdraw = (props: Props) => {
   const current = props.current;
   const prompt = (
     <Flex alignItems="center" flexDirection="column">

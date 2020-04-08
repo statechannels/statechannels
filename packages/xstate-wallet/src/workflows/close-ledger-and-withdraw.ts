@@ -48,10 +48,12 @@ interface WorkflowServices extends Record<string, ServiceConfig<WorkflowContext>
 }
 
 export const config: StateNodeConfig<WorkflowContext, any, any> = {
+  id: 'close-and-withdraw',
   initial: 'waitForUserApproval',
   states: {
     waitForUserApproval: {
       entry: ['displayUi'],
+      exit: ['hideUi'],
       on: {
         USER_APPROVES_CLOSE: [
           {cond: 'doesChannelIdExist', target: 'closeLedger'},

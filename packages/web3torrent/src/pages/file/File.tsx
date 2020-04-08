@@ -60,8 +60,8 @@ const File: React.FC<RouteComponentProps & Props> = props => {
             budgetCache,
             mySigningAddress: me
           } = web3Torrent.paymentChannelClient;
-          // Only show budget when any channel exists.
-          const showBudget = !_.isEmpty(budgetCache) && Object.keys(channelCache).length > 0;
+
+          const showBudget = !_.isEmpty(budgetCache);
           return (
             <>
               <TorrentInfo torrent={torrent} channelCache={channelCache} mySigningAddress={me} />

@@ -4,6 +4,7 @@ import {ChannelState} from '../../clients/payment-channel-client';
 import {prettyPrintWei} from '../../utils/calculateWei';
 import {utils} from 'ethers';
 import './SiteBudgetTable.scss';
+import {Web3TorrentContext} from '../../clients/web3torrent-client';
 
 const bigNumberify = utils.bigNumberify;
 
@@ -35,32 +36,45 @@ class SiteBudgetTable extends React.Component<SiteBudgetTableProps> {
     const spendBudget = bigNumberify(budgetCache.budgets[0].availableSendCapacity);
 
     const receiveBudget = bigNumberify(budgetCache.budgets[0].availableReceiveCapacity);
-
     return (
-      <table className="site-budget-table">
-        <thead>
-          <tr className="budget-info">
-            <td className="budget-button">Wallet Action</td>
-            <td className="budget-number"> Spent / Budget </td>
-            <td className="budget-number"> Earned / Budget </td>
-          </tr>
-        </thead>
-        <tbody>
-          <tr className="budget-info">
-            <td className="budget-button">
-              <button disabled>Withdraw</button>
-            </td>
-            <td className="budget-number">
-              {' '}
-              {`${prettyPrintWei(spent)} / ${prettyPrintWei(spendBudget)}`}{' '}
-            </td>
-            <td className="budget-number">
-              {' '}
-              {`${prettyPrintWei(received)} / ${prettyPrintWei(receiveBudget)}`}{' '}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <Web3TorrentContext.Consumer>
+        {web3Torrent => {
+          return (
+            <>
+              <table className="site-budget-table">
+                <thead>
+                  <tr className="budget-info">
+                    <td className="budget-button">Wallet Action</td>
+                    <td className="budget-number"> Spent / Budget </td>
+                    <td className="budget-number"> Earned / Budget </td>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="budget-info">
+                    <td className="budget-button">
+                      <button
+                        onClick={async () => {
+                          web3Torrent.paymentChannelClient.closeAndWithdraw();
+                        }}
+                      >
+                        Withdraw
+                      </button>
+                    </td>
+                    <td className="budget-number">
+                      {' '}
+                      {`${prettyPrintWei(spent)} / ${prettyPrintWei(spendBudget)}`}{' '}
+                    </td>
+                    <td className="budget-number">
+                      {' '}
+                      {`${prettyPrintWei(received)} / ${prettyPrintWei(receiveBudget)}`}{' '}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </>
+          );
+        }}
+      </Web3TorrentContext.Consumer>
     );
   }
 }
