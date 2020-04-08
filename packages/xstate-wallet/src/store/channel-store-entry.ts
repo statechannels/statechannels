@@ -19,6 +19,7 @@ export interface SignatureEntry {
 }
 
 export type SignedStateVariables = StateVariables & {signatures: SignatureEntry[]};
+type MaybeHashedStateVars = StateVariables & {stateHash?: string};
 
 export class ChannelStoreEntry {
   public readonly channelConstants: ChannelConstants;
@@ -169,6 +170,13 @@ export class ChannelStoreEntry {
     return this.channelConstants.participants;
   }
 
+  private statesEqual(left: MaybeHashedStateVars, right: MaybeHashedStateVars) {
+    return (
+      (left?.stateHash ?? hashState({...this.channelConstants, ...left})) ===
+      (right?.stateHash ?? hashState({...this.channelConstants, ...right}))
+    );
+  }
+
   signAndAdd(stateVars: StateVariables, privateKey: string): SignedState {
     const state = {...stateVars, ...this.channelConstants};
 
@@ -193,7 +201,7 @@ export class ChannelStoreEntry {
     // check the signature
 
     const signerIndex = participants.findIndex(p => p.signingAddress === signatureEntry.signer);
-    let entry = this.stateVariables.find(s => s.stateHash === withHash.stateHash);
+    let entry = this.stateVariables.find(s => this.statesEqual(withHash, s));
 
     if (!entry) {
       entry = {...withHash, signatures: []};
