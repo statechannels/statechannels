@@ -95,6 +95,13 @@ export async function setUpBrowser(headless: boolean, slowMo?: number): Promise<
   return browser;
 }
 
+export async function waitAndApproveBudget(page: Page): Promise<void> {
+  const approveBudgetButton = '.approve-budget-button';
+
+  const walletIFrame = page.frames()[1];
+  await waitForAndClickButton(page, walletIFrame, approveBudgetButton);
+}
+
 export async function waitAndOpenChannel(page: Page): Promise<void> {
   const createChannelButton = 'div.application-workflow-prompt > div > button';
 
