@@ -14,6 +14,8 @@ import {map, tap, retryWhen} from 'rxjs/operators';
 import {logger} from './logger';
 import {depositsToMake} from './wallet/deposit';
 import {Blockchain} from './blockchain/eth-asset-holder';
+import {deserializeMessage} from './wallet/xstate-wallet-internals';
+import {validateMessage} from '@statechannels/wire-format';
 
 const log = logger();
 
@@ -21,6 +23,10 @@ export async function startServer() {
   fbObservable()
     .pipe(
       tap(({snapshotKey}) => deleteIncomingMessage(snapshotKey)),
+      map(({snapshotKey, messageObj}) => ({
+        snapshotKey,
+        message: deserializeMessage(validateMessage(messageObj))
+      })),
       map(({snapshotKey, message}) => ({
         snapshotKey,
         messageToSend: respondToMessage(message)

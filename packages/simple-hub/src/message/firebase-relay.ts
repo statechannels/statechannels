@@ -5,7 +5,7 @@ import {cFirebasePrefix, cHubParticipantId} from '../constants';
 import {logger} from '../logger';
 import {Message as WireMessage} from '@statechannels/wire-format';
 import {map} from 'rxjs/operators';
-import {deserializeMessage, Message, serializeMessage} from '../wallet/xstate-wallet-internals';
+import {Message, serializeMessage} from '../wallet/xstate-wallet-internals';
 import * as _ from 'lodash/fp';
 import {notContainsHubParticipantId} from '../utils';
 
@@ -40,7 +40,7 @@ export function fbObservable() {
   return stateChanges(hubRef, [ListenEvent.added]).pipe(
     map(change => ({
       snapshotKey: change.snapshot.key,
-      message: deserializeMessage(change.snapshot.val())
+      messageObj: change.snapshot.val()
     }))
   );
 }
