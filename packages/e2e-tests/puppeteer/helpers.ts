@@ -96,6 +96,8 @@ export async function setUpBrowser(headless: boolean, slowMo?: number): Promise<
 }
 
 export async function waitAndApproveBudget(page: Page): Promise<void> {
+  console.log('Approving budget');
+
   const approveBudgetButton = '.approve-budget-button';
 
   const walletIFrame = page.frames()[1];
