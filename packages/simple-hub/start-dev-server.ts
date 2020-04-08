@@ -15,12 +15,12 @@ async function setupGanacheAndContracts() {
 async function startLocalFirebaseServer() {
   const server = new FirebaseServer(5555, 'localhost');
 
-  const closeServer = () => server.close;
+  const closeServer = async () => await server.close();
 
   process.on('SIGINT', closeServer);
   process.on('SIGTERM', closeServer);
-  process.on('uncaughtException', e => {
-    closeServer();
+  process.on('uncaughtException', async e => {
+    await closeServer();
     throw e;
   });
   process.on('exit', closeServer);
