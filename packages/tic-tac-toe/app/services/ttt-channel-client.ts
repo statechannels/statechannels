@@ -9,7 +9,7 @@ import {AppData, encodeAppData, decodeAppData} from '../core/app-data';
 import {ChannelState} from '../core/channel-state';
 import ENV from '@statechannels/tic-tac-toe/config/environment';
 
-const {bigNumberify} = ethers.utils;
+const {bigNumberify, hexZeroPad} = ethers.utils;
 const {TTT_CONTRACT_ADDRESS} = ENV;
 
 const convertToChannelState = (channelResult: ChannelResult): ChannelState => {
@@ -59,8 +59,8 @@ const formatAllocations = (
     {
       token: '0x0',
       allocationItems: [
-        {destination: aAddress, amount: bigNumberify(aBal).toHexString()},
-        {destination: bAddress, amount: bigNumberify(bBal).toHexString()}
+        {destination: aAddress, amount: hexZeroPad(bigNumberify(aBal).toHexString(), 32)},
+        {destination: bAddress, amount: hexZeroPad(bigNumberify(bBal).toHexString(), 32)}
       ]
     }
   ];
