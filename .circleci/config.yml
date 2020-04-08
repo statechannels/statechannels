@@ -322,6 +322,7 @@ jobs:
       USE_GANACHE_DEPLOYMENT_CACHE: true
       GANACHE_CACHE_FOLDER: ../../.ganache-deployments
       GANACHE_PORT: 8547
+      FIREBASE_URL: ws://localhost:5555
       NODE_ENV: test
     steps:
       - checkout
