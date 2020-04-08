@@ -29,6 +29,7 @@ import {Message} from '@statechannels/client-api-schema';
 import {hexZeroPad} from 'ethers/utils';
 
 const bigNumberify = utils.bigNumberify;
+// To enable logs in the browser, run `localStorage.debug = "web3torrent:*"`
 const log = debug('web3torrent:library');
 
 export type TorrentCallback = (torrent: Torrent) => any;
