@@ -76,12 +76,14 @@ beforeEach(async () => {
   bStore = new TestStore(chain);
   await bStore.initialize([wallet2.privateKey]);
 
-  [aStore, bStore].forEach(async (store: TestStore) => {
-    await store.createEntry(allSignState(firstState(outcome, targetChannel)));
-    await store.setLedgerByEntry(
-      await store.createEntry(allSignState(firstState(outcome, ledgerChannel)))
-    );
-  });
+  await Promise.all(
+    [aStore, bStore].map(async (store: TestStore) => {
+      await store.createEntry(allSignState(firstState(outcome, targetChannel)));
+      await store.setLedgerByEntry(
+        await store.createEntry(allSignState(firstState(outcome, ledgerChannel)))
+      );
+    })
+  );
 
   subscribeToMessages({
     [participants[0].participantId]: aStore,
