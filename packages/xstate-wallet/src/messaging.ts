@@ -201,8 +201,7 @@ export class MessagingService implements MessagingServiceInterface {
         await this.sendResponse(requestId, {success: true});
         break;
       case 'GetBudget':
-        const site = request.params.hubAddress;
-        const siteBudget = await this.store.getBudget(site);
+        const siteBudget = await this.store.getBudget(fromDomain);
         await this.sendResponse(requestId, siteBudget ? serializeSiteBudget(siteBudget) : {});
         break;
       case 'GetState':

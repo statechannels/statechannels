@@ -252,7 +252,7 @@ jobs:
           command: (cd packages/xstate-wallet && yarn run wait-on ../../.ganache-deployments && yarn start)
           background: true
       - run:
-          command: (cd packages/web3torrent && yarn run wait-on ../../.ganache-deployments && yarn start)
+          command: (cd packages/web3torrent && yarn run wait-on ../../.ganache-deployments && REACT_APP_FUNDING_STRATEGY=Direct yarn start)
           background: true
       - run: (cd packages/e2e-tests && yarn test puppeteer/__tests__/web3torrent.test.ts)
       - upload_logs:
