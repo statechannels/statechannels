@@ -57,28 +57,22 @@ export interface Chain {
   getChainInfo: (channelId: string) => Promise<ChannelChainInfo>;
 }
 
-const UPDATED = 'updated';
-
-const CHALLENGE_REGISTERED = 'challengeRegistered';
-const CHALLENGE_CLEARED = 'challengeCleared';
-const CONCLUDED = 'concluded';
-
 type Updated = ChannelChainInfo & {channelId: string};
 
 type ChallengeRegistered = {channelId: string; challengeState: State; challengeExpiry: BigNumber};
-type ChallengeCleared = {channelId: string};
-type Concluded = {channelId: string};
+// type ChallengeCleared = {channelId: string};
+// type Concluded = {channelId: string};
 
 export class FakeChain implements Chain {
   private blockNumber: BigNumber = One;
   private channelStatus: Record<string, ChannelChainInfo> = {};
   private eventEmitter: EventEmitter<{
     // TODO: Remove?
-    [UPDATED]: [Updated];
+    updated: [Updated];
     // TODO: Add AssetHolder events
-    [CHALLENGE_REGISTERED]: [ChallengeRegistered];
-    [CHALLENGE_CLEARED]: [ChallengeCleared];
-    [CONCLUDED]: [Concluded];
+    challengeRegistered: [ChallengeRegistered];
+    // [CHALLENGE_CLEARED]: [ChallengeCleared];
+    // [CONCLUDED]: [Concluded];
   }> = new EventEmitter();
 
   private fakeSelectedAddress: string;
@@ -100,7 +94,7 @@ export class FakeChain implements Chain {
       } = this.channelStatus[channelId];
       if (finalizesAt.gt(0) && finalizesAt.lte(blockNumber)) {
         this.channelStatus[channelId] = {...this.channelStatus[channelId], finalized: true};
-        this.eventEmitter.emit(UPDATED, {channelId, ...this.channelStatus[channelId]});
+        this.eventEmitter.emit('updated', {channelId, ...this.channelStatus[channelId]});
       }
     }
   }
@@ -124,9 +118,9 @@ export class FakeChain implements Chain {
       finalized: challengeDuration.eq(0)
     };
 
-    this.eventEmitter.emit(UPDATED, {channelId, ...this.channelStatus[channelId]});
+    this.eventEmitter.emit('updated', {channelId, ...this.channelStatus[channelId]});
 
-    this.eventEmitter.emit(CHALLENGE_REGISTERED, {
+    this.eventEmitter.emit('challengeRegistered', {
       channelId,
       challengeState: support[support.length - 1],
       challengeExpiry: this.blockNumber.add(challengeDuration)
@@ -145,7 +139,7 @@ export class FakeChain implements Chain {
       blockNum: this.blockNumber
     };
 
-    this.eventEmitter.emit(UPDATED, {
+    this.eventEmitter.emit('updated', {
       ...this.channelStatus[channelId],
       channelId,
       blockNum: this.blockNumber
@@ -170,7 +164,7 @@ export class FakeChain implements Chain {
         ...this.channelStatus[channelId],
         amount: current.add(amount)
       };
-      this.eventEmitter.emit(UPDATED, {
+      this.eventEmitter.emit('updated', {
         ...this.channelStatus[channelId],
         channelId
       });
@@ -196,7 +190,7 @@ export class FakeChain implements Chain {
   public chainUpdatedFeed(channelId: string): Observable<ChannelChainInfo> {
     const first = from(this.getChainInfo(channelId));
 
-    const updates = fromEvent(this.eventEmitter, UPDATED).pipe(
+    const updates = fromEvent(this.eventEmitter, 'updated').pipe(
       filter((event: Updated) => event.channelId === channelId),
       map(({amount, channelStorage, finalized, blockNum}) => ({
         amount,
@@ -210,7 +204,7 @@ export class FakeChain implements Chain {
   }
 
   public challengeRegisteredFeed(channelId: string): Observable<ChallengeRegistered> {
-    const updates = fromEvent(this.eventEmitter, CHALLENGE_REGISTERED).pipe(
+    const updates = fromEvent(this.eventEmitter, 'challengeRegistered').pipe(
       filter((event: ChallengeRegistered) => event.channelId === channelId),
       map(({challengeState, challengeExpiry}) => ({channelId, challengeState, challengeExpiry}))
     );
