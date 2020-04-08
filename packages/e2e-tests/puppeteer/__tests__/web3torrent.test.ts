@@ -21,13 +21,17 @@ let tabs: [Page, Page];
 describe('Supports torrenting among peers with channels', () => {
   beforeAll(async () => {
     // 100ms sloMo avoids some undiagnosed race conditions
+    console.log('Opening browsers');
+
     browserA = await setUpBrowser(HEADLESS, 100);
     browserB = await setUpBrowser(HEADLESS, 100);
 
+    console.log('Waiting on pages');
     web3tTabA = (await browserA.pages())[0];
     web3tTabB = (await browserB.pages())[0];
     tabs = [web3tTabA, web3tTabB];
 
+    console.log('Loading dapps');
     await loadDapp(web3tTabA, 0, true);
     await loadDapp(web3tTabB, 0, true);
 
