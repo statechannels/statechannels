@@ -42,7 +42,11 @@ export const ApproveBudgetAndFund = (props: Props) => {
         You will need to deposit {formatEther(playerAmount)} ETH into a channel with a state channel
         hub.
       </Text>
-      <Button disabled={waiting} onClick={() => send('USER_APPROVES_BUDGET')}>
+      <Button
+        disabled={waiting}
+        onClick={() => send('USER_APPROVES_BUDGET')}
+        className="approve-budget-button"
+      >
         Approve budget
       </Button>
       <Button.Text onClick={() => send('USER_REJECTS_BUDGET')}>Cancel</Button.Text>
