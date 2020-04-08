@@ -19,7 +19,7 @@ import {MessagingServiceInterface} from '../messaging';
 import {serializeSiteBudget} from '../serde/app-messages/serialize';
 import {filter, map, first} from 'rxjs/operators';
 import {statesEqual} from '../store/state-utils';
-import {ChannelChainInfo} from 'src/chain';
+import {ChannelChainInfo} from '../chain';
 
 interface ChainEvent {
   type: 'CHAIN_EVENT';
