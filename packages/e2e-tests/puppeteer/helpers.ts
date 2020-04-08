@@ -104,18 +104,33 @@ export async function waitAndApproveBudget(page: Page): Promise<void> {
   await waitForAndClickButton(page, walletIFrame, approveBudgetButton);
 }
 
+interface Window {
+  channelProvider: import('@statechannels/channel-provider').ChannelProviderInterface;
+  channelRunning: any;
+}
+declare let window: Window;
+
 export const waitAndOpenChannel = (usingVirtualFunding: boolean) => async (
   page: Page
 ): Promise<void> => {
-  if (usingVirtualFunding) {
-    return new Promise(r => {
-      setTimeout(() => r(), 10000);
-    });
-  } else {
+  if (!usingVirtualFunding) {
+    console.log('Waiting for create channel button');
+
     const createChannelButton = 'div.application-workflow-prompt > div > button';
 
     const walletIFrame = page.frames()[1];
     await waitForAndClickButton(page, walletIFrame, createChannelButton);
+  } else {
+    return new Promise(resolve =>
+      page.exposeFunction('channelRunning', resolve).then(() =>
+        page.evaluate(() => {
+          window.channelProvider.on('ChannelUpdated', () => {
+            window.channelRunning();
+            window.channelProvider.off('ChannelUpdated');
+          });
+        })
+      )
+    );
   }
 };
 
