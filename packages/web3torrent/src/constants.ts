@@ -30,11 +30,7 @@ export const fireBaseConfig =
     ? undefined
     : {
         apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-        authDomain: `${process.env.REACT_APP_FIREBASE_PROJECT}.firebaseapp.com`,
-        databaseURL: `https://${process.env.REACT_APP_FIREBASE_PROJECT}.firebaseio.com`,
-        projectId: process.env.REACT_APP_FIREBASE_PROJECT,
-        storageBucket: '',
-        messagingSenderId: '913007764573'
+        databaseURL: `https://${process.env.REACT_APP_FIREBASE_PROJECT}.firebaseio.com`
       };
 
 const httpProtocol = process.env.REACT_APP_TRACKER_URL_HTTP_PROTOCOL;
