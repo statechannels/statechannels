@@ -2,6 +2,8 @@
 import {Page} from 'puppeteer';
 import * as fs from 'fs';
 
+import {waitAndApproveBudget} from '../helpers';
+
 function prepareUploadFile(path: string): void {
   const content = 'web3torrent\n'.repeat(100000);
   const buf = Buffer.from(content);
@@ -13,7 +15,7 @@ function prepareUploadFile(path: string): void {
   });
 }
 
-export async function uploadFile(page: Page): Promise<string> {
+export async function uploadFile(page: Page, handleBudgetPrompt: boolean): Promise<string> {
   await page.waitForSelector('input[type=file]');
 
   // Generate a /tmp file with deterministic data for upload testing
@@ -29,6 +31,10 @@ export async function uploadFile(page: Page): Promise<string> {
     upload.dispatchEvent(new Event('change', {bubbles: true}));
   });
 
+  if (handleBudgetPrompt) {
+    await waitAndApproveBudget(page);
+  }
+
   const downloadLinkSelector = '#download-link';
   await page.waitForSelector(downloadLinkSelector);
   const downloadLink = await page.$eval(downloadLinkSelector, a => a.getAttribute('href'));
@@ -36,11 +42,19 @@ export async function uploadFile(page: Page): Promise<string> {
   return downloadLink ? downloadLink : '';
 }
 
-export async function startDownload(page: Page, url: string): Promise<void> {
+export async function startDownload(
+  page: Page,
+  url: string,
+  handleBudgetPrompt: boolean
+): Promise<void> {
   await page.goto(url);
   const downloadButton = '#download-button:not([disabled])';
   await page.waitForSelector(downloadButton);
   await page.click(downloadButton);
+
+  if (handleBudgetPrompt) {
+    await waitAndApproveBudget(page);
+  }
 }
 
 export async function cancelDownload(page: Page): Promise<void> {

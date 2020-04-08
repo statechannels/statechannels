@@ -10,6 +10,7 @@ jest.setTimeout(200_000);
 
 configureEnvVariables();
 const HEADLESS = getEnvBool('HEADLESS');
+const HANDLE_BUDGET_PROMPT = process.env.REACT_APP_FUNDING_STRATEGY === 'Virtual';
 
 let browserA: Browser;
 let browserB: Browser;
@@ -44,10 +45,10 @@ describe('Supports torrenting among peers with channels', () => {
 
   it('allows peers to start torrenting', async () => {
     console.log('A uploads a file');
-    const url = await uploadFile(web3tTabA);
+    const url = await uploadFile(web3tTabA, HANDLE_BUDGET_PROMPT);
 
     console.log('B starts downloading...');
-    await startDownload(web3tTabB, url);
+    await startDownload(web3tTabB, url, HANDLE_BUDGET_PROMPT);
 
     console.log('Waiting for open channels');
     await Promise.all(tabs.map(waitAndOpenChannel));
