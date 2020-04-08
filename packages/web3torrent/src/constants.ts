@@ -30,7 +30,7 @@ export const fireBaseConfig =
     ? undefined
     : {
         apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-        databaseURL: `https://${process.env.REACT_APP_FIREBASE_PROJECT}.firebaseio.com`
+        databaseURL: process.env.REACT_APP_FIREBASE_URL
       };
 
 const httpProtocol = process.env.REACT_APP_TRACKER_URL_HTTP_PROTOCOL;
