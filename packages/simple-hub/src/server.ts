@@ -41,10 +41,8 @@ export async function startServer() {
           log.error(e);
         }
       },
-      error => log.error(error),
-      () => {
-        log.info('Completed listening to Firebase');
-      }
+      error => log.fatal(error),
+      () => log.fatal('Completed listening to Firebase')
     );
 
   log.info(`Listening on database ${process.env.FIREBASE_URL}`);

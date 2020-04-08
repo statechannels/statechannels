@@ -1,5 +1,5 @@
 import * as firebase from 'firebase';
-import {stateChanges, ListenEvent} from 'rxfire/database';
+import {stateChanges, ListenEvent, object} from 'rxfire/database';
 
 import {cFirebasePrefix, cHubParticipantId} from '../constants';
 import {logger} from '../logger';
@@ -22,6 +22,12 @@ function getFirebaseApp() {
     apiKey: process.env.FIREBASE_API_KEY,
     databaseURL: process.env.FIREBASE_URL
   });
+
+  const connectedRef = firebase.database().ref('.info/connected');
+  object(connectedRef)
+    .pipe(map(change => (change.snapshot.val() ? 'connected' : 'disconnected')))
+    .subscribe(status => log.info('FIREBASE', status));
+
   return firebaseApp;
 }
 
@@ -37,7 +43,6 @@ function fbSend(message: WireMessage) {
 }
 
 export function fbObservable() {
-  log.info('firebase-relay: listen');
   const hubRef = getMessagesRef().child(cHubParticipantId);
   return stateChanges(hubRef, [ListenEvent.added]).pipe(
     map(change => ({
