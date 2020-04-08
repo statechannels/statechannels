@@ -8,49 +8,35 @@ if (process.env.RUNTIME_ENV) {
     environment: process.env.RUNTIME_ENV
   });
 }
-import {fbObservable, sendReplies, deleteIncomingMessage} from './message/firebase-relay';
+import {fbObservable, deleteIncomingMessage, sendRepliesCurried} from './message/firebase-relay';
 import {respondToMessage} from './wallet/respond-to-message';
-import {map, tap, retryWhen} from 'rxjs/operators';
+import {map} from 'rxjs/operators';
 import {logger} from './logger';
 import {depositsToMake} from './wallet/deposit';
-import {Blockchain} from './blockchain/eth-asset-holder';
-import {deserializeMessage} from './wallet/xstate-wallet-internals';
-import {validateMessage} from '@statechannels/wire-format';
-
+import {makeDeposits} from './blockchain/eth-asset-holder';
+import {pipe} from 'fp-ts/lib/pipeable';
+import {map as fpMap, fold} from 'fp-ts/lib/Either';
 const log = logger();
 
 export async function startServer() {
   fbObservable()
     .pipe(
-      tap(({snapshotKey}) => deleteIncomingMessage(snapshotKey)),
-      map(({snapshotKey, messageObj}) => ({
-        snapshotKey,
-        message: deserializeMessage(validateMessage(messageObj))
-      })),
       map(({snapshotKey, message}) => ({
         snapshotKey,
-        messageToSend: respondToMessage(message)
+        messageToSend: pipe(message, fpMap(respondToMessage))
       })),
       map(({snapshotKey, messageToSend}) => ({
         snapshotKey,
         messageToSend,
-        depositsToMake: depositsToMake(messageToSend)
-      })),
-      retryWhen(errors => errors.pipe(tap(error => log.error(error))))
+        depositsToMake: pipe(messageToSend, fpMap(depositsToMake))
+      }))
     )
     .subscribe(
       async ({snapshotKey, messageToSend, depositsToMake}) => {
         try {
-          log.info({messageToSend}, 'Responding with message');
-          await Promise.all(
-            depositsToMake.map(depositToMake => {
-              log.info(`depositing ${depositToMake.amountToDeposit} to ${depositToMake.channelId}`);
-              return Blockchain.fund(depositToMake.channelId, depositToMake.amountToDeposit);
-            })
-          );
-          log.info('Deposited');
-          await sendReplies(snapshotKey, messageToSend);
-          log.info('Messages sent');
+          deleteIncomingMessage(snapshotKey);
+          pipe(depositsToMake, fold(log.error, makeDeposits));
+          pipe(messageToSend, fold(log.error, sendRepliesCurried(snapshotKey)));
         } catch (e) {
           log.error(e);
         }

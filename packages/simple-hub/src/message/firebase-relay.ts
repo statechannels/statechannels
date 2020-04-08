@@ -3,11 +3,13 @@ import {stateChanges, ListenEvent} from 'rxfire/database';
 
 import {cFirebasePrefix, cHubParticipantId} from '../constants';
 import {logger} from '../logger';
-import {Message as WireMessage} from '@statechannels/wire-format';
+import {Message as WireMessage, validateMessage} from '@statechannels/wire-format';
 import {map} from 'rxjs/operators';
-import {Message, serializeMessage} from '../wallet/xstate-wallet-internals';
+import {Message, serializeMessage, deserializeMessage} from '../wallet/xstate-wallet-internals';
 import * as _ from 'lodash/fp';
 import {notContainsHubParticipantId} from '../utils';
+import {tryCatch, chain, right, map as fpMap, toError} from 'fp-ts/lib/Either';
+import {pipe} from 'fp-ts/lib/pipeable';
 
 const log = logger();
 
@@ -40,9 +42,13 @@ export function fbObservable() {
   return stateChanges(hubRef, [ListenEvent.added]).pipe(
     map(change => ({
       snapshotKey: change.snapshot.key,
-      messageObj: change.snapshot.val()
+      message: pipe(right(change.snapshot.val()), chain(isValidMessage), fpMap(deserializeMessage))
     }))
   );
+}
+
+function isValidMessage(messageObj) {
+  return tryCatch(() => validateMessage(messageObj), toError);
 }
 
 // exported just for unit testing
@@ -58,10 +64,14 @@ export function messagesToSend(messageToSend: Message): WireMessage[] {
     );
 }
 
-export async function sendReplies(snapshotKey: string, messageToSend: Message) {
-  const hubRef = getMessagesRef().child(cHubParticipantId);
-  await Promise.all(messagesToSend(messageToSend).map(fbSend));
-  await hubRef.child(snapshotKey).remove();
+export function sendRepliesCurried(snapshotKey: string) {
+  return async (messageToSend: Message) => {
+    log.info({messageToSend}, 'Responding with message');
+    const hubRef = getMessagesRef().child(cHubParticipantId);
+    await Promise.all(messagesToSend(messageToSend).map(fbSend));
+    await hubRef.child(snapshotKey).remove();
+    log.info('Messages sent');
+  };
 }
 
 export async function deleteIncomingMessage(snapshotKey: string) {
